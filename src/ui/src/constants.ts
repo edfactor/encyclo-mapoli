@@ -7,7 +7,7 @@ export const MENU_LABELS = {
   DISTRIBUTIONS: "Distributions",
   RECONCILIATION: "Reconciliation",
   INQUIRIES: "Inquiries",
-  IT_SUPPORT: "IT Support",
+  IT_OPERATIONS: "IT OPERATIONS",
 } as const;
 
 export const ROUTES = {

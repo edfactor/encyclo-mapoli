@@ -1,7 +1,7 @@
 import { Typography } from "@mui/material";
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { useLazyGetHistoricalFrozenStateResponseQuery } from "reduxstore/api/FrozenApi";
+import { useLazyGetHistoricalFrozenStateResponseQuery } from "reduxstore/api/ItOperations";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, Pagination } from "smart-ui-library";
 import { GetFreezeColumns } from "./DemographicFreezeGridColumns";
@@ -16,19 +16,28 @@ const DemographicFreeze: React.FC<DemoFreezeSearchProps> = ({initialSearchLoaded
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
 
-  const { duplicateNamesAndBirthdays: freezeResults } = useSelector(
-    (state: RootState) => state.yearsEnd
+  const freezeResults = useSelector(
+    (state: RootState) => state.frozen.frozenStateCollectionData
   );
+
   const [triggerSearch] = useLazyGetHistoricalFrozenStateResponseQuery();
 
   const onSearch = useCallback(async () => {
-    await triggerSearch();
-  }, [triggerSearch]);
+    const request = {
+      skip: pageNumber * pageSize, 
+      take: pageSize, 
+      sortBy: "createdDateTime", 
+      isSortDescending: true
+    };
+
+    await triggerSearch(request, false);
+  }, [pageNumber, pageSize, triggerSearch]);
 
   // First useEffect to trigger the search on initial render
   useEffect(() => {
+    if (!hasToken) return;
     onSearch();
-  }, [onSearch]); // Only depends on onSearch, will execute once when component mounts
+  }, [onSearch, hasToken]); // Only depends on onSearch, will execute once when component mounts
 
   // Second useEffect to handle pagination changes
   useEffect(() => {
@@ -42,7 +51,7 @@ const DemographicFreeze: React.FC<DemoFreezeSearchProps> = ({initialSearchLoaded
 
   return (
     <>
-      {freezeResults?.response && (
+      {freezeResults && (
         <>
           <div style={{ padding: "0 24px 0 24px" }}>
             <Typography
@@ -55,13 +64,13 @@ const DemographicFreeze: React.FC<DemoFreezeSearchProps> = ({initialSearchLoaded
             preferenceKey={"FREEZE"}
             isLoading={false}
             providedOptions={{
-              rowData: freezeResults?.response.results,
+              rowData: freezeResults?.results,
               columnDefs: columnDefs
             }}
           />
         </>
       )}
-      {!!freezeResults && freezeResults.response.results.length > 0 && (
+      {!!freezeResults && freezeResults.results.length > 0 && (
         <Pagination
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
@@ -74,7 +83,7 @@ const DemographicFreeze: React.FC<DemoFreezeSearchProps> = ({initialSearchLoaded
             setPageNumber(1);
             setInitialSearchLoaded(true);
           }}
-          recordCount={freezeResults.response.total}
+          recordCount={freezeResults.total}
         />
       )}
     </>

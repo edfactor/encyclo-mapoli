@@ -1,5 +1,6 @@
 import { RouteCategory } from "smart-ui-library/dist/components/MenuBar/MenuBar";
 import { MENU_LABELS, ROUTES, CAPTIONS } from "./constants";
+import { ImpersonationRoles } from "./reduxstore/types";
 
 const fiscalClose: RouteCategory = {
   menuLabel: MENU_LABELS.FISCAL_CLOSE,
@@ -81,11 +82,14 @@ const inquiries: RouteCategory = {
   items: [{ caption: CAPTIONS.MASTER_INQUIRY, route: ROUTES.MASTER_INQUIRY }]
 };
 
-const it_support: RouteCategory = {
-  menuLabel: MENU_LABELS.IT_SUPPORT,
-  parentRoute: MENU_LABELS.IT_SUPPORT,
+const it_operations: RouteCategory = {
+  menuLabel: MENU_LABELS.IT_OPERATIONS,
+  parentRoute: MENU_LABELS.IT_OPERATIONS,
+  roles: [ImpersonationRoles.ItOperations],  // Only users with this role can see this menu item
   items: [{ caption: CAPTIONS.DEMOGRAOHIC_FREEZE, route: ROUTES.DEMO_FREEZE }]
 };
+
+const localStorageImpersonating: string | null = localStorage.getItem("impersonatingRole");
 
 const MenuData: RouteCategory[] = [
   inquiries,
@@ -94,7 +98,7 @@ const MenuData: RouteCategory[] = [
   reconciliation,
   decemberFlow,
   fiscalClose,
-  it_support
+  localStorageImpersonating == ImpersonationRoles.ItOperations ? it_operations : ""
 ];
 
 export default MenuData;

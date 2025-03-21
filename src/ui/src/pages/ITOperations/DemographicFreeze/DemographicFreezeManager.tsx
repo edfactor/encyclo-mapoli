@@ -2,11 +2,10 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, TextField, Box, Button } from "@mui/material";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
-import { useFreezeDemographicsMutation } from "reduxstore/api/FrozenApi";
+import { useFreezeDemographicsMutation } from "reduxstore/api/ItOperations";
 import * as yup from "yup";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
-import { format } from "date-fns";
 import Grid2 from "@mui/material/Grid2";
 
 // Update the interface to include new fields
@@ -58,13 +57,11 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
                                                                                 }) => {
   const [freezeDemographics, { isLoading }] = useFreezeDemographicsMutation();
   const profitYear = useDecemberFlowProfitYear();
-  const dispatch = useDispatch();
 
   const {
     control,
     handleSubmit,
-    formState: { errors, isValid },
-    reset
+    formState: { errors, isValid }
   } = useForm<DemographicFreezeSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
@@ -194,7 +191,7 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
             color="primary"
             disabled={isLoading || !isValid}
           >
-            {isLoading ? "Submitting..." : "Freeze Demographics"}
+            {isLoading ? "Submitting..." : "Create Freeze Point"}
           </Button>
         </Box>
       </Box>

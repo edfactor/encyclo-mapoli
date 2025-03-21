@@ -59,7 +59,7 @@ import ProfitShareUpdate from "../../pages/ProfitShareUpdate/ProfitShareUpdate";
 import YTDWages from "../../pages/YTDWagesExtract/YTDWages";
 import RouteSecurity from "./RouteSecurity";
 import MilitaryEntryAndModification from "pages/MilitaryEntryAndModification/MilitaryEntryAndModification";
-import DemographicFreeze from "../../pages/ITSupport/DemographicFreeze/DemographicFreeze";
+import DemographicFreeze from "../../pages/ITOperations/DemographicFreeze/DemographicFreeze";
 
 const Router = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";
@@ -90,7 +90,7 @@ const Router = () => {
                 ImpersonationRoles.DistributionsClerk,
                 ImpersonationRoles.HardshipAdministrator,
                 ImpersonationRoles.ProfitSharingAdministrator,
-                ImpersonationRoles.ItSupport
+                ImpersonationRoles.ItOperations
               ]}
               currentRoles={impersonating ? [impersonating] : []}
               setCurrentRoles={(value: string[]) => {
@@ -108,8 +108,8 @@ const Router = () => {
                   case ImpersonationRoles.ProfitSharingAdministrator:
                     dispatch(setImpersonating(ImpersonationRoles.ProfitSharingAdministrator));
                     break;
-                  case ImpersonationRoles.ItSupport:
-                    dispatch(setImpersonating(ImpersonationRoles.ItSupport));
+                  case ImpersonationRoles.ItOperations:
+                    dispatch(setImpersonating(ImpersonationRoles.ItOperations));
                     break;
                   default:
                     localStorage.removeItem("impersonatingRole");

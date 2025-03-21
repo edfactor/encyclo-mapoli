@@ -9,7 +9,7 @@ import {
 import { url } from "./api";
 import { Paged } from "smart-ui-library";
 
-export const FrozenApi = createApi({
+export const ItOperations = createApi({
     baseQuery: fetchBaseQuery({
         baseUrl: `${url}/api/`,
         prepareHeaders: (headers, { getState }) => {
@@ -32,7 +32,7 @@ export const FrozenApi = createApi({
     endpoints: (builder) => ({
         getFrozenStateResponse: builder.query<FrozenStateResponse, void>({
             query: () => ({
-                url: `demographics/frozen/active`,
+                url: `itoperations/frozen/active`,
                 method: "GET",
             }),
             async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -47,7 +47,7 @@ export const FrozenApi = createApi({
         }),
         getHistoricalFrozenStateResponse: builder.query<Paged<FrozenStateResponse>, SortedPaginationRequestDto>({
             query: (params) => ({
-                url: `demographics/frozen`,
+                url: `itoperations/frozen`,
                 method: "GET",
                 params: {
                     take: params.take,
@@ -69,7 +69,7 @@ export const FrozenApi = createApi({
         // New POST endpoint for freezing demographics
         freezeDemographics: builder.mutation<void, FreezeDemographicsRequest>({
             query: (request) => ({
-                url: 'demographics/freeze',
+                url: 'itoperations/freeze',
                 method: 'POST',
                 body: request
             })
@@ -81,4 +81,4 @@ export const {
     useLazyGetFrozenStateResponseQuery,
     useLazyGetHistoricalFrozenStateResponseQuery,
     useFreezeDemographicsMutation // Export the new mutation hook
-} = FrozenApi;
+} = ItOperations;

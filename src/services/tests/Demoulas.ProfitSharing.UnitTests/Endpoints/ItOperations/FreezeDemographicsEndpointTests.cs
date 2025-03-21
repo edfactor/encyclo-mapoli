@@ -1,10 +1,10 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Endpoints.Endpoints.Demographics;
+using Demoulas.ProfitSharing.Endpoints.Endpoints.ItOperations;
 using Moq;
 
-namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Demographics;
+namespace Demoulas.ProfitSharing.UnitTests.Endpoints.ItOperations;
 
 public class FreezeDemographicsEndpointTests
 {

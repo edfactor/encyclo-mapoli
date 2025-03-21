@@ -5,7 +5,7 @@ import yearsEndSlice from "./slices/yearsEndSlice";
 import { SecurityApi } from "./api/SecurityApi";
 import { YearsEndApi } from "./api/YearsEndApi";
 import frozenSlice from "./slices/frozenSlice";
-import { FrozenApi } from "./api/FrozenApi";
+import { ItOperations } from "./api/ItOperations";
 import { MilitaryApi } from "./api/MilitaryApi";
 import militarySlice from "./slices/militarySlice";
 import { InquiryApi } from "./api/InquiryApi";
@@ -22,7 +22,7 @@ export const store = configureStore({
 
     [SecurityApi.reducerPath]: SecurityApi.reducer,
     [YearsEndApi.reducerPath]: YearsEndApi.reducer,
-    [FrozenApi.reducerPath]: FrozenApi.reducer,
+    [ItOperations.reducerPath]: ItOperations.reducer,
     [MilitaryApi.reducerPath]: MilitaryApi.reducer,
     [InquiryApi.reducerPath]: InquiryApi.reducer
   },
@@ -31,7 +31,7 @@ export const store = configureStore({
     getDefaultMiddleware({ serializableCheck: false })
       .concat(SecurityApi.middleware)
       .concat(YearsEndApi.middleware)
-      .concat(FrozenApi.middleware)
+      .concat(ItOperations.middleware)
       .concat(MilitaryApi.middleware)
       .concat(InquiryApi.middleware)
 });

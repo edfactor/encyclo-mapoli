@@ -9,7 +9,7 @@ import {
   useLazyGetDistributionsByAgeQuery,
   useLazyGetForfeituresByAgeQuery
 } from "reduxstore/api/YearsEndApi";
-import { useLazyGetFrozenStateResponseQuery } from "reduxstore/api/FrozenApi";
+import { useLazyGetFrozenStateResponseQuery } from "reduxstore/api/ItOperations";
 import { FrozenReportsByAgeRequestType } from "reduxstore/types";
 import { FlexibleInfoCard } from "./FlexibleInfoCard";
 import { numberToCurrency } from "smart-ui-library";
