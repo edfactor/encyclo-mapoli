@@ -4,11 +4,19 @@ using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.Response.PostFrozen;
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services;
+using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
+using Demoulas.ProfitSharing.Services.Reports;
+using Demoulas.Util.Extensions;
+using Elastic.Clients.Elasticsearch.QueryDsl;
 using FluentAssertions;
 using MassTransit.Util;
 using Microsoft.EntityFrameworkCore;
@@ -33,9 +41,6 @@ public class ProfitShareUpdateTests
         _testOutputHelper = testOutputHelper;
     }
 
-    /*
-     * Currently this test requires that PAY_PROFIT rows for 2023 and PAY_PROFIT rows 2024 be clones of each other.
-     */
     [Fact]
     public async Task ReportWithUpdates()
     {
@@ -68,12 +73,19 @@ public class ProfitShareUpdateTests
                 AdjustEarningsSecondaryAmount = 0
             });
         sw.Stop();
-        _testOutputHelper.WriteLine($"{reportName} took {sw.Elapsed}");
+        _testOutputHelper.WriteLine($"Query took {sw.Elapsed}");
 
-        // We cant do a simple report to report comparrison because I believe that READYS sorting is random
+        // We cant do a simple report to report comparison because I believe that READYS sorting is random
         // when users have the same name.   To cope with this we extract lines with employee/bene information and compare lines.
 
         var expectedReport = LoadExpectedReport(reportName);
+
+#if false
+        // Ths sort order on READY is not great, this maybe tweaked soon.
+        string expected = HandleSortingOddness(LoadExpectedReport(reportName));
+        string actual = HandleSortingOddness(CollectLines(profitShareUpdateService.ReportLines));
+        AssertReportsAreEquivalent(expected, actual);
+#endif
 
         var employeeExpectedReportLines = expectedReport.Split("\n").Where(ex => extractBadge(ex) != (null, null)).ToList();
         var employeeActualReportLines = profitShareUpdateService.ReportLines.Where(ex => extractBadge(ex) != (null, null)).ToList();
@@ -83,6 +95,8 @@ public class ProfitShareUpdateTests
 
         var onlyReady = readyHash.Except(smartHash);
         var onlySmart = smartHash.Except(readyHash);
+
+        _testOutputHelper.WriteLine($"only READY count {onlyReady.Count()}, Only SMART count {onlySmart.Count()}");
 
         _testOutputHelper.WriteLine("Only Ready");
         foreach (string se in onlyReady)
@@ -96,11 +110,11 @@ public class ProfitShareUpdateTests
             _testOutputHelper.WriteLine(se);
         }
 
-        #if false
+#if false
         This is pending a resolution with https://demoulas.atlassian.net/browse/PS-899
         onlyReady.Should().BeEmpty();
         onlyReady.Should().BeEmpty();
-        #endif
+#endif
         true.Should().BeTrue();
     }
 

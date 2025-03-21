@@ -1,5 +1,64 @@
-import { RouteCategory } from "components/MenuBar/MenuBar";
+import { RouteCategory } from "smart-ui-library/dist/components/MenuBar/MenuBar";
 import { CAPTIONS, MENU_LABELS, ROUTES } from "./constants";
+import { ImpersonationRoles } from "./reduxstore/types";
+
+/*
+const fiscalClose: RouteCategory = {
+  menuLabel: MENU_LABELS.FISCAL_CLOSE,
+  parentRoute: ROUTES.FISCAL_CLOSE,
+  items: [
+    { caption: CAPTIONS.SUMMARY, route: ROUTES.FISCAL_CLOSE },
+    { caption: CAPTIONS.ELIGIBLE_EMPLOYEES, route: ROUTES.ELIGIBLE_EMPLOYEES },
+    { caption: CAPTIONS.DISTRIBUTIONS_BY_AGE, route: ROUTES.DISTRIBUTIONS_BY_AGE },
+    { caption: CAPTIONS.CONTRIBUTIONS_BY_AGE, route: ROUTES.CONTRIBUTIONS_BY_AGE },
+    { caption: CAPTIONS.FORFEITURES_BY_AGE, route: ROUTES.FORFEITURES_BY_AGE },
+    { caption: CAPTIONS.BALANCE_BY_AGE, route: ROUTES.BALANCE_BY_AGE },
+    { caption: CAPTIONS.BALANCE_BY_YEARS, route: ROUTES.BALANCE_BY_YEARS },
+    { caption: CAPTIONS.VESTED_AMOUNTS_BY_AGE, route: ROUTES.VESTED_AMOUNTS_BY_AGE },
+    { caption: CAPTIONS.YTD_WAGES_EXTRACT, route: ROUTES.YTD_WAGES_EXTRACT },
+    { caption: CAPTIONS.MILITARY_ENTRY_AND_MODIFICATION, route: ROUTES.MILITARY_ENTRY_AND_MODIFICATION },
+    { caption: CAPTIONS.PROFIT_SHARE_REPORT_EDIT_RUN, route: ROUTES.PROFIT_SHARE_REPORT_EDIT_RUN },
+    { caption: CAPTIONS.PROFIT_SHARE_REPORT_FINAL_RUN, route: ROUTES.PROFIT_SHARE_REPORT_FINAL_RUN },
+    { caption: CAPTIONS.PAYMASTER_UPDATE, route: ROUTES.PAYMASTER_UPDATE },
+    { caption: CAPTIONS.PROFIT_SHARE_BY_STORE, route: ROUTES.PROFIT_SHARE_BY_STORE },
+    { caption: CAPTIONS.PROFIT_SHARE_GROSS_REPORT, route: ROUTES.PROFIT_SHARE_GROSS_REPORT },
+    { caption: CAPTIONS.FORFEIT, route: ROUTES.FORFEIT },
+    { caption: CAPTIONS.PAY450_SUMMARY, route: ROUTES.PAY450_SUMMARY },
+    { caption: CAPTIONS.PROFALL, route: ROUTES.PROFALL },
+    { caption: CAPTIONS.PAY426_ACTIVE_18_20, route: ROUTES.PAY426_ACTIVE_18_20 },
+    { caption: CAPTIONS.PAY426_ACTIVE_21_PLUS, route: ROUTES.PAY426_ACTIVE_21_PLUS },
+    { caption: CAPTIONS.PAY426_ACTIVE_21_PLUS, route: ROUTES.PAY426_ACTIVE_21_PLUS },
+    { caption: CAPTIONS.PAY426_ACTIVE_UNDER_18, route: ROUTES.PAY426_ACTIVE_UNDER_18 },
+    { caption: CAPTIONS.PAY426_ACTIVE_PRIOR_SHARING, route: ROUTES.PAY426_ACTIVE_PRIOR_SHARING },
+    { caption: CAPTIONS.PAY426_ACTIVE_NO_PRIOR, route: ROUTES.PAY426_ACTIVE_NO_PRIOR },
+    { caption: CAPTIONS.PAY426_TERMINATED_1000_PLUS, route: ROUTES.PAY426_TERMINATED_1000_PLUS },
+    { caption: CAPTIONS.PAY426_TERMINATED_NO_PRIOR, route: ROUTES.PAY426_TERMINATED_NO_PRIOR },
+    { caption: CAPTIONS.PAY426_TERMINATED_PRIOR, route: ROUTES.PAY426_TERMINATED_PRIOR },
+    { caption: CAPTIONS.PAY426_SUMMARY, route: ROUTES.PAY426_SUMMARY },
+    { caption: CAPTIONS.PAY426_NON_EMPLOYEE, route: ROUTES.PAY426_NON_EMPLOYEE }
+  ]
+};
+
+const decemberFlow: RouteCategory = {
+  menuLabel: MENU_LABELS.DECEMBER_ACTIVITIES,
+  parentRoute: MENU_LABELS.DECEMBER_ACTIVITIES,
+  items: [
+    { caption: CAPTIONS.SUMMARY, route: ROUTES.DECEMBER_PROCESS_ACCORDION },
+    { caption: CAPTIONS.DEMOGRAPHIC_BADGES, route: ROUTES.DEMOGRAPHIC_BADGES },
+    { caption: CAPTIONS.DUPLICATE_SSNS, route: ROUTES.DUPLICATE_SSNS },
+    { caption: CAPTIONS.NEGATIVE_ETVA, route: ROUTES.NEGATIVE_ETVA },
+    { caption: CAPTIONS.DUPLICATE_NAMES, route: ROUTES.DUPLICATE_NAMES },
+    { caption: CAPTIONS.MISSING_COMMA, route: ROUTES.MISSING_COMMA },
+    { caption: CAPTIONS.EMPLOYEES_MILITARY, route: ROUTES.EMPLOYEES_MILITARY },
+    { caption: CAPTIONS.MILITARY_FORFEITURES, route: ROUTES.MILITARY_FORFEITURES },
+    { caption: CAPTIONS.TERMINATIONS, route: ROUTES.PROF_TERM },
+    { caption: CAPTIONS.DISTRIBUTIONS_AND_FORFEITURES, route: ROUTES.DISTRIBUTIONS_AND_FORFEITURES },
+    { caption: CAPTIONS.MANAGE_EXECUTIVE_HOURS, route: ROUTES.MANAGE_EXECUTIVE_HOURS },
+    { caption: CAPTIONS.PROFIT_SHARE_REPORT, route: ROUTES.PROFIT_SHARE_REPORT },
+    { caption: CAPTIONS.PROFIT_SHARE_UPDATE, route: ROUTES.PROFIT_SHARE_UPDATE }
+  ]
+};
+*/
 
 const beneficiaries: RouteCategory = {
   menuLabel: MENU_LABELS.BENEFICIARIES,
@@ -34,13 +93,23 @@ const drawer: RouteCategory = {
   ]
 };
 
-const it_support: RouteCategory = {
-  menuLabel: MENU_LABELS.IT_SUPPORT,
-  parentRoute: MENU_LABELS.IT_SUPPORT,
+const localStorageImpersonating: string | null = localStorage.getItem("impersonatingRole");
+
+const it_operations: RouteCategory = {
+  menuLabel: MENU_LABELS.IT_OPERATIONS,
+  parentRoute: MENU_LABELS.IT_OPERATIONS,
+  roles: [ImpersonationRoles.ItOperations], // Only users with this role can see this menu item
   items: [{ caption: CAPTIONS.DEMOGRAOHIC_FREEZE, route: ROUTES.DEMO_FREEZE }]
 };
 
-const MenuData: RouteCategory[] = [inquiries, beneficiaries, distributions, reconciliation, drawer, it_support];
+const MenuData: RouteCategory[] = [
+  inquiries,
+  beneficiaries,
+  distributions,
+  reconciliation,
+  drawer,
+  localStorageImpersonating == ImpersonationRoles.ItOperations ? it_operations : ""
+];
 
 interface MenuLevel {
   mainTitle: string;

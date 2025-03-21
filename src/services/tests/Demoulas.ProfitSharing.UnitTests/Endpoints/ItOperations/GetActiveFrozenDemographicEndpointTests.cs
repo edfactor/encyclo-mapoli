@@ -1,17 +1,15 @@
 ﻿using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
-using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.Endpoints.Endpoints.Demographics;
+using Demoulas.ProfitSharing.Endpoints.Endpoints.ItOperations;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using FastEndpoints;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using Moq;
 
-namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Demographics;
+namespace Demoulas.ProfitSharing.UnitTests.Endpoints.ItOperations;
 
 public class GetActiveFrozenDemographicEndpointTests : ApiTestBase<Program>
 {
@@ -21,7 +19,7 @@ public class GetActiveFrozenDemographicEndpointTests : ApiTestBase<Program>
        
         FrozenState frozenDemographics = await MockDbContextFactory.UseReadOnlyContext(c => c.FrozenStates.Where(f=> f.IsActive).FirstAsync());
 
-        ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
+        ApiClient.CreateAndAssignTokenForClient(Role.ITOPERATIONS);
         TestResult<FrozenStateResponse> response = await ApiClient.GETAsync<GetActiveFrozenDemographicEndpoint, FrozenStateResponse>();
         response.Should().NotBeNull();
 

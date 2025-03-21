@@ -5,7 +5,7 @@ export enum ImpersonationRoles {
   DistributionsClerk = "Distributions-Clerk",
   HardshipAdministrator = "Hardship-Administrator",
   ProfitSharingAdministrator = "Profit-Sharing-Administrator",
-  ItSupport = "IT-Support",
+  ItOperations = "IT-Operations",
 }
 
 export interface SortedPaginationRequestDto extends PaginationParams, ISortParams {}
@@ -670,7 +670,7 @@ export interface FrozenStateResponse {
   isActive: boolean;
 }
 
-interface FreezeDemographicsRequest {
+export interface FreezeDemographicsRequest {
   asOfDateTime: string;
   profitYear: number;
 }

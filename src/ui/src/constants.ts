@@ -10,8 +10,8 @@ export const MENU_LABELS = {
   DISTRIBUTIONS: "Distributions",
   RECONCILIATION: "Reconciliation",
   INQUIRIES: "Inquiries",
-  IT_SUPPORT: "IT Support",
-  YEAR_END: "Year End"
+  YEAR_END: "Year End",
+  IT_OPERATIONS: "IT OPERATIONS"
 } as const;
 
 export const ROUTES = {
@@ -117,7 +117,7 @@ export const CAPTIONS = {
   PROFIT_SHARE_REPORT_EDIT_RUN: "Profit Share Report Edit Run (PAY456)",
   PROFIT_SHARE_REPORT_FINAL_RUN: "Profit Share Report Final Run (PAY426)",
   PROFIT_SHARE_REPORT: "Profit Share Report (PAY426)",
-  PROFIT_SHARE_UPDATE: "Profit Share Update",
+  PROFIT_SHARE_UPDATE: "Profit Share Update (PAY444 PAY447 PAY460 PROFTLD)",
   PROFIT_SHARING_CONTROL_SHEET: "Profit Sharing Control Sheet",
   QPAY066_UNDER21: "QPAY066-UNDR21",
   QPAY066TA_UNDER21: "QPAY066TA-UNDR21",

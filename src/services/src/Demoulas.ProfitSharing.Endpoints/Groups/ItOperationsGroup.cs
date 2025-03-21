@@ -1,4 +1,5 @@
 ﻿using Demoulas.Common.Api.Groups;
+using Demoulas.ProfitSharing.Security;
 using FastEndpoints;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -6,12 +7,12 @@ using ProblemDetails = Microsoft.AspNetCore.Mvc.ProblemDetails;
 
 namespace Demoulas.ProfitSharing.Endpoints.Groups;
 
-public sealed class DemographicsGroup : GroupBase
+public sealed class ItOperationsGroup : GroupBase
 {
-    protected override string Route => "demographics";
-    protected override string RouteName => "Demographics";
+    protected override string Route => "itoperations";
+    protected override string RouteName => "ItOperations";
 
-    public DemographicsGroup()
+    public ItOperationsGroup()
     {
         Configure(Route.ToLowerInvariant(), ep =>
         {

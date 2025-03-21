@@ -39,8 +39,7 @@ public class ProfitShareUpdateEndpoint
         base.Configure();
     }
 
-    public override Task<ProfitShareUpdateResponse> GetResponse(ProfitShareUpdateRequest req,
-        CancellationToken ct)
+    public override Task<ProfitShareUpdateResponse> GetResponse(ProfitShareUpdateRequest req, CancellationToken ct)
     {
         return _profitShareUpdateService.ProfitShareUpdate(req, ct);
     }
