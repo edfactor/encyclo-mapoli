@@ -21,4 +21,21 @@ internal sealed record EmployeeFinancials
     public decimal SecondaryEarnings { get; set; }
     public decimal EarningsOnSecondaryEtva { get; set; }
     public byte? ZeroContributionReasonId { get; set; }
+    
+    // Transactions for this year. 
+    public decimal? DistributionsTotal { get; set; }
+    public decimal? ForfeitsTotal { get; set; }
+    public decimal? AllocationsTotal { get; set; }
+    public decimal? PaidAllocationsTotal { get; set; }
+    public decimal? MilitaryTotal { get; set; }
+    public decimal? ClassActionFundTotal { get; set; }
+
+    public bool HasTransactionAmounts()
+    {
+        if (DistributionsTotal == null)
+        {
+            return false;
+        }
+        return DistributionsTotal != 0 || ForfeitsTotal != 0 || AllocationsTotal != 0 || PaidAllocationsTotal != 0 || MilitaryTotal != 0 || ClassActionFundTotal != 0;
+    }
 }

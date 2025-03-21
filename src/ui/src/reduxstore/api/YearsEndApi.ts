@@ -578,7 +578,7 @@ export const YearsEndApi = createApi({
           const { data } = await queryFulfilled;
           dispatch(setProfitUpdate(data));
         } catch (err) {
-          console.log("Err: " + err);
+          console.log("Err", err);
           dispatch(clearProfitUpdate());
         }
       }
