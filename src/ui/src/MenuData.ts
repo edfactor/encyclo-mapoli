@@ -81,9 +81,9 @@ const inquiries: RouteCategory = {
   items: [{ caption: CAPTIONS.MASTER_INQUIRY, route: ROUTES.MASTER_INQUIRY }]
 };
 
-const it_support: RouteCategory = {
-  menuLabel: MENU_LABELS.IT_SUPPORT,
-  parentRoute: MENU_LABELS.IT_SUPPORT,
+const it_operations: RouteCategory = {
+  menuLabel: MENU_LABELS.IT_OPERATIONS,
+  parentRoute: MENU_LABELS.IT_OPERATIONS,
   items: [{ caption: CAPTIONS.DEMOGRAOHIC_FREEZE, route: ROUTES.DEMO_FREEZE }]
 };
 
@@ -94,7 +94,7 @@ const MenuData: RouteCategory[] = [
   reconciliation,
   decemberFlow,
   fiscalClose,
-  it_support
+  it_operations
 ];
 
 export default MenuData;

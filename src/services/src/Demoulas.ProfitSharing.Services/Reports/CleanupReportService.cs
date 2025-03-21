@@ -231,33 +231,26 @@ public class CleanupReportService : ICleanupReportService
                 else
                 {
                     string dupQuery =
-                        @"SELECT /*+ USE_NL(p1 p2) */ p1.FULL_NAME as FullName
-FROM DEMOGRAPHIC p1
-         JOIN DEMOGRAPHIC p2
+                        @"WITH FILTERED_DEMOGRAPHIC AS (SELECT /*+ MATERIALIZE */ ID, FULL_NAME, DATE_OF_BIRTH
+                              FROM DEMOGRAPHIC
+                              WHERE NOT EXISTS (SELECT /*+ INDEX(fs) */ 1
+                                                FROM FAKE_SSNS fs
+                                                WHERE fs.SSN = DEMOGRAPHIC.SSN))
+SELECT /*+ USE_HASH(p1 p2) */ p1.FULL_NAME as FullName
+FROM FILTERED_DEMOGRAPHIC p1
+         JOIN FILTERED_DEMOGRAPHIC p2
               ON p1.Id < p2.Id /* Avoid self-joins and duplicate pairs */
                   AND UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) < 3 /* Name similarity threshold */
                   AND SOUNDEX(p1.FULL_NAME) = SOUNDEX(p2.FULL_NAME) /* Phonetic similarity */
-                  AND (
-                     p1.DATE_OF_BIRTH = p2.DATE_OF_BIRTH /* Exact DOB match */
-                         OR ABS(TRUNC(p1.DATE_OF_BIRTH) - TRUNC(p2.DATE_OF_BIRTH)) <= 3 /* Allowable 3-day difference */
-                         OR EXTRACT(YEAR FROM p1.DATE_OF_BIRTH) = EXTRACT(YEAR FROM p2.DATE_OF_BIRTH) /* Same birth year */
-                     )
-WHERE NOT EXISTS (SELECT /*+ INDEX(fs) */ 1 FROM FAKE_SSNS fs WHERE fs.SSN = p1.SSN)
-  AND NOT EXISTS (SELECT /*+ INDEX(fs) */ 1 FROM FAKE_SSNS fs WHERE fs.SSN = p2.SSN)
+                  AND (ABS(TRUNC(p1.DATE_OF_BIRTH) - TRUNC(p2.DATE_OF_BIRTH)) <= 3 /* Allowable 3-day difference */ )
 UNION ALL
-SELECT /*+ USE_NL(p1 p2) */ p2.FULL_NAME as FullName
-FROM DEMOGRAPHIC p1
-         JOIN DEMOGRAPHIC p2
+SELECT /*+ USE_HASH(p1 p2) */ p2.FULL_NAME as FullName
+FROM FILTERED_DEMOGRAPHIC p1
+         JOIN FILTERED_DEMOGRAPHIC p2
               ON p1.Id < p2.Id /* Avoid self-joins and duplicate pairs */
                   AND UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) < 3 /* Name similarity threshold */
                   AND SOUNDEX(p1.FULL_NAME) = SOUNDEX(p2.FULL_NAME) /* Phonetic similarity */
-                  AND (
-                     p1.DATE_OF_BIRTH = p2.DATE_OF_BIRTH /* Exact DOB match */
-                         OR ABS(TRUNC(p1.DATE_OF_BIRTH) - TRUNC(p2.DATE_OF_BIRTH)) <= 3 /* Allowable 3-day difference */
-                         OR EXTRACT(YEAR FROM p1.DATE_OF_BIRTH) = EXTRACT(YEAR FROM p2.DATE_OF_BIRTH) /* Same birth year */
-                     )
-WHERE NOT EXISTS (SELECT /*+ INDEX(fs) */ 1 FROM FAKE_SSNS fs WHERE fs.SSN = p1.SSN)
-  AND NOT EXISTS (SELECT /*+ INDEX(fs) */ 1 FROM FAKE_SSNS fs WHERE fs.SSN = p2.SSN)";
+                  AND (ABS(TRUNC(p1.DATE_OF_BIRTH) - TRUNC(p2.DATE_OF_BIRTH)) <= 3 /* Allowable 3-day difference */ );";
 
                     dupNameSlashDateOfBirth = ctx.Database
                         .SqlQueryRaw<DemographicMatchDto>(dupQuery);
