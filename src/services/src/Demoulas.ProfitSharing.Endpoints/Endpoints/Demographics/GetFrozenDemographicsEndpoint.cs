@@ -43,7 +43,7 @@ public class GetFrozenDemographicsEndpoint : Endpoint<SortedPaginationRequestDto
                 }
             };
         });
-        Group<DemographicsGroup>();
+        Group<ItOperationsGroup>();
     }
 
     public override Task<PaginatedResponseDto<FrozenStateResponse>> ExecuteAsync(SortedPaginationRequestDto req, CancellationToken ct)

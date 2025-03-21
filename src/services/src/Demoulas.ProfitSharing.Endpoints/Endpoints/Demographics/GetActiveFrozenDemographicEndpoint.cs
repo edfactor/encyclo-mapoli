@@ -28,7 +28,7 @@ public class GetActiveFrozenDemographicEndpoint : EndpointWithoutRequest<FrozenS
                 }
             };
         });
-        Group<DemographicsGroup>();
+        Group<ItOperationsGroup>();
     }
 
     public override Task<FrozenStateResponse> ExecuteAsync(CancellationToken ct)

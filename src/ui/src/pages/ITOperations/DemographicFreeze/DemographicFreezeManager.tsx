@@ -2,7 +2,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, TextField, Box, Button } from "@mui/material";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
-import { useFreezeDemographicsMutation } from "reduxstore/api/FrozenApi";
+import { useFreezeDemographicsMutation } from "reduxstore/api/ItOperations";
 import * as yup from "yup";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
