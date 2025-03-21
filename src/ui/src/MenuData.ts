@@ -29,9 +29,8 @@ const drawer: RouteCategory = {
   menuLabel: MENU_LABELS.YEAR_END,
   parentRoute: MENU_LABELS.YEAR_END,
   items: [
-    { caption: CAPTIONS.DECEMBER, route: ROUTES.DECEMBER_PROCESS_ACCORDION },
-    { caption: CAPTIONS.FISCAL_CLOSE, route: ROUTES.FISCAL_CLOSE },
-    { caption: CAPTIONS.POST_FROZEN, route: ROUTES.FISCAL_CLOSE }
+    { caption: MENU_LABELS.DECEMBER_ACTIVITIES, route: ROUTES.DECEMBER_PROCESS_ACCORDION },
+    { caption: MENU_LABELS.FISCAL_CLOSE, route: ROUTES.FISCAL_CLOSE }
   ]
 };
 
