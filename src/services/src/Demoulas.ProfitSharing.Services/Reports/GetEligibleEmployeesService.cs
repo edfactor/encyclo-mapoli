@@ -31,12 +31,21 @@ public sealed class GetEligibleEmployeesService : IGetEligibleEmployeesService
         return await _dataContextFactory.UseReadOnlyContext(async c =>
         {
             // Currently using non-frozen data. Will be corrected in PS-896.
+<<<<<<< Updated upstream
             int numberReadOnFrozen = await c.PayProfits.Where(p => p.ProfitYear == request.ProfitYear)
                 .CountAsync(cancellationToken);
 
             var baseQuery = c.PayProfits
                 .Where(p => p.ProfitYear == request.ProfitYear);
 
+=======
+            var baseQuery = c.PayProfits
+                .Where(p => p.ProfitYear == request.ProfitYear);
+
+            int numberReadOnFrozen = await baseQuery
+                .CountAsync(cancellationToken);
+
+>>>>>>> Stashed changes
             int numberNotSelected = await baseQuery
                 .Where(p => p.Demographic!.DateOfBirth > birthDateOfExactly21YearsOld /*too young*/ ||
                             (p.CurrentHoursYear + p.HoursExecutive) < hoursWorkedRequirement || p.Demographic!.EmploymentStatusId ==
