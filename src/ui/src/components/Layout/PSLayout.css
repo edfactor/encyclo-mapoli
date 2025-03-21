@@ -1,0 +1,61 @@
+.app-banner {
+  display: flex;
+  align-items: center;
+
+  background: #f2f2f2;
+
+  box-shadow:
+    0px 2px 4px -1px rgba(0, 0, 0, 0.2),
+    0px 4px 5px 0px rgba(0, 0, 0, 0.14),
+    0px 1px 10px 0px rgba(0, 0, 0, 0.12);
+  margin: 0;
+  padding: 0 20px;
+  font-size: 27px;
+  font-weight: bold;
+  justify-content: space-between;
+
+  .buildInfo {
+    display: inline-flex;
+    margin-left: 15px;
+    font-size: 14px;
+    color: #db1532;
+    text-align: right;
+    font-family: Lato;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    text-transform: uppercase;
+    letter-spacing: 0.1px;
+  }
+
+  .text {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    font-family: "Lato", sans-serif;
+    text-transform: uppercase;
+
+    color: #db1532;
+    font-feature-settings:
+      "clig" off,
+      "liga" off;
+
+    font-family: Lato;
+    font-size: 32px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: normal;
+    letter-spacing: 6.4px;
+    text-transform: uppercase;
+  }
+}
+
+#welcome-user {
+  display: flex;
+  align-items: center;
+}
+
+.username {
+  font-family: Lato;
+  font-size: 16px;
+  font-weight: 400;
+}
