@@ -1,9 +1,6 @@
 import { ChevronLeft, ExpandLess, ExpandMore } from "@mui/icons-material";
 import {
-  AppBar,
   Box,
-  Button,
-  Chip,
   Collapse,
   Divider,
   Drawer,
@@ -12,16 +9,21 @@ import {
   ListItem,
   ListItemButton,
   ListItemText,
-  Menu,
-  MenuItem,
   SvgIcon,
   Toolbar,
   Typography
 } from "@mui/material";
 import React, { useState } from "react";
-import { Route, Routes, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { clearActiveSubMenu, closeDrawer, openDrawer, setActiveSubMenu } from "reduxstore/slices/generalSlice";
+import { menuLevels, drawerTitle } from "../../MenuData";
+import { drawerClosedWidth, drawerOpenWidth } from "../../constants";
 
-const SidebarIcon = (props: any) => (
+import { SvgIconProps } from "@mui/material";
+import { RootState } from "reduxstore/store";
+
+const SidebarIcon = (props: SvgIconProps) => (
   <SvgIcon
     {...props}
     viewBox="0 0 16 16"
@@ -31,92 +33,19 @@ const SidebarIcon = (props: any) => (
   </SvgIcon>
 );
 
-const drawerWidth = 320;
-
-interface MenuLevel {
-  title: string;
-  pages: {
-    title: string;
-    subPages: {
-      title: string;
-      page: string;
-    }[];
-  }[];
-}
-
-const menuLevels: MenuLevel[] = [
-  {
-    title: "December",
-    pages: [
-      {
-        title: "Clean Up Reports",
-        subPages: [{ title: "Clean Up Reports", page: "Clean Up Reports" }]
-      },
-      {
-        title: "Military and Rehire",
-        subPages: [{ title: "Military and Rehire", page: "Military and Rehire" }]
-      },
-      {
-        title: "Profit Share Loan Balance",
-        subPages: [{ title: "Profit Share Loan Balance", page: "Profit Share Loan Balance" }]
-      },
-      {
-        title: "Manage Executives",
-        subPages: [{ title: "Manage Executives", page: "Manage Executives" }]
-      },
-      {
-        title: "Terminations",
-        subPages: [{ title: "Terminations", page: "Terminations" }]
-      }
-    ]
-  },
-  {
-    title: "Fiscal Close",
-    pages: [
-      {
-        title: "Payprofit Extract",
-        subPages: [{ title: "Payprofit Extract", page: "Payprofit Extract" }]
-      },
-      {
-        title: "YTD Wages Extract",
-        subPages: [{ title: "YTD Wages Extract", page: "YTD Wages Extract" }]
-      },
-      {
-        title: "Manage Executive Hours",
-        subPages: [{ title: "Manage Executive Hours", page: "Manage Executive Hours" }]
-      }
-    ]
-  },
-  {
-    title: "Post Frozen",
-    pages: [
-      {
-        title: "Prof Share by Store",
-        subPages: [{ title: "Prof Share by Store", page: "Prof Share by Store" }]
-      },
-      {
-        title: "Print Profit Certs",
-        subPages: [{ title: "Print Profit Certs", page: "Print Profit Certs" }]
-      },
-      {
-        title: "Save Prof Paymastr",
-        subPages: [{ title: "Save Prof Paymastr", page: "Save Prof Paymastr" }]
-      }
-    ]
-  }
-];
-
 const PSDrawer = () => {
   const navigate = useNavigate();
-  const [open, setOpen] = useState(true);
+  const { drawerOpen, activeSubmenu } = useSelector((state: RootState) => state.general);
   const [expandedLevels, setExpandedLevels] = useState<{ [key: string]: boolean }>({});
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
-  const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
-  const menuOpen = Boolean(anchorEl);
+  const dispatch = useDispatch();
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
+  const hasThirdLevel = (level: string, secondLevel: string) => {
+    const hasSome = menuLevels.some(
+      (l) => l.mainTitle === level && l.topPage.some((y) => y.topTitle === secondLevel && y.subPages.length > 0)
+    );
+    return hasSome;
   };
 
   const handleClose = () => {
@@ -124,78 +53,60 @@ const PSDrawer = () => {
   };
 
   const handleDrawerToggle = () => {
-    setOpen(!open);
+    if (drawerOpen) {
+      dispatch(closeDrawer());
+    } else {
+      dispatch(openDrawer());
+    }
     // Close all levels and clear active submenu when drawer closes
-    if (open) {
+    if (drawerOpen) {
       setExpandedLevels({});
-      setActiveSubmenu(null);
+      dispatch(clearActiveSubMenu());
     }
   };
 
   const handleLevelClick = (level: string) => {
-    console.log("handleLevelClick", level);
-    setActiveSubmenu(level);
+    dispatch(setActiveSubMenu(level));
   };
 
   const handleBackToMain = () => {
-    setActiveSubmenu(null);
+    dispatch(clearActiveSubMenu());
     setExpandedLevels({});
     setSelectedLevel(null);
   };
 
-  const handleMenuItemClick = (level: string) => {
-    if (!open) {
-      setOpen(true);
-    }
-    console.log("handleMenuItemClick", level);
-    const newExpandedLevels = Object.keys(expandedLevels).reduce(
-      (acc, key) => {
-        acc[key] = false;
-        return acc;
-      },
-      {} as { [key: string]: boolean }
-    );
-
-    newExpandedLevels[level] = true;
-    setExpandedLevels(newExpandedLevels);
-    setSelectedLevel(level);
-    setActiveSubmenu(level);
-    handleClose();
+  const handlePageClick = (route: string) => {
+    navigate(`/${route}`);
+    console.log(`Top page Navigating to ${route}`);
   };
 
-  const handlePageClick = (page: string) => {
-    const slug = page.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-    navigate(`/${slug}`);
-    console.log(`Navigating to ${slug}`);
-  };
-
-  const handleSubPageClick = (subPage: { title: string; page: string }) => {
-    const slug = subPage.page.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-    navigate(`/${slug}`);
-    console.log(`Navigating to ${slug}`);
+  const handleSubPageClick = (subRoute: string) => {
+    navigate(`/${subRoute}`);
+    console.log(`Sub page Navigating to ${subRoute}`);
   };
 
   return (
     <>
       {/* Toggle Button */}
       <Box
+        key={"unique-key"}
         sx={{
           position: "fixed",
-          left: open ? "16px" : "12px",
+          left: drawerOpen ? "16px" : "12px",
           top: "179px",
           zIndex: (theme) => theme.zIndex.drawer + 1,
           display: "flex",
           alignItems: "center",
           gap: 1,
           justifyContent: "space-between",
-          width: open ? "300px" : "auto",
+          width: drawerOpen ? "300px" : "auto",
           transition: (theme) =>
             theme.transitions.create("left", {
               easing: theme.transitions.easing.sharp,
               duration: theme.transitions.duration.enteringScreen
             })
         }}>
-        {open && (
+        {drawerOpen && (
           <Typography
             variant="subtitle1"
             sx={{
@@ -203,7 +114,7 @@ const PSDrawer = () => {
               whiteSpace: "nowrap",
               fontWeight: "bold"
             }}>
-            Profit Sharing Activities
+            {drawerTitle}
           </Typography>
         )}
         <IconButton
@@ -221,11 +132,11 @@ const PSDrawer = () => {
       <Drawer
         variant="permanent"
         sx={{
-          width: open ? drawerWidth : 64,
+          width: drawerOpen ? drawerOpenWidth : drawerClosedWidth,
           flexShrink: 0,
 
           "& .MuiDrawer-paper": {
-            width: open ? drawerWidth : 64,
+            width: drawerOpen ? drawerOpenWidth : drawerClosedWidth,
             boxSizing: "border-box",
             overflowX: "hidden",
             "& > *": {
@@ -280,81 +191,101 @@ const PSDrawer = () => {
               </ListItemButton>
               <List>
                 {menuLevels
-                  .find((l) => l.title === activeSubmenu)
-                  ?.pages.map((page) => (
-                    <React.Fragment key={page.title}>
-                      <ListItemButton
-                        onClick={() => {
-                          const newExpandedLevels = { ...expandedLevels };
-                          newExpandedLevels[page.title] = !expandedLevels[page.title];
-                          setExpandedLevels(newExpandedLevels);
-                        }}
-                        sx={{
-                          pl: 2,
-                          display: "flex",
-                          justifyContent: "space-between",
-                          py: 0.5,
-                          minHeight: 0
-                        }}>
-                        <Box sx={{ display: "flex", alignItems: "center" }}>
-                          <ListItemText
-                            primary={page.title}
-                            sx={{
-                              margin: 0,
-                              "& .MuiTypography-root": {
-                                fontSize: "0.875rem"
-                              }
+                  .find((l) => l.mainTitle === activeSubmenu)
+                  ?.topPage.map((page, index) => (
+                    <React.Fragment key={page.topTitle + index}>
+                      {/* Need to decide if this is a link or set of menus */}
+
+                      {hasThirdLevel(activeSubmenu, page.topTitle) ? (
+                        <>
+                          <ListItemButton
+                            key={"" + index + page.topTitle}
+                            onClick={() => {
+                              const newExpandedLevels = { ...expandedLevels };
+                              newExpandedLevels[page.topTitle] = !expandedLevels[page.topTitle];
+                              setExpandedLevels(newExpandedLevels);
                             }}
-                          />
-                        </Box>
-                        {expandedLevels[page.title] ? <ExpandLess /> : <ExpandMore />}
-                      </ListItemButton>
-                      <Collapse
-                        in={expandedLevels[page.title]}
-                        timeout="auto"
-                        unmountOnExit>
-                        <List
-                          component="div"
-                          disablePadding>
-                          {page.subPages.map((subPage) => (
-                            <ListItemButton
-                              key={subPage.title}
-                              sx={{
-                                pl: 4,
-                                display: "flex",
-                                justifyContent: "space-between",
-                                py: 0.5,
-                                minHeight: 0
-                              }}
-                              onClick={() => handleSubPageClick(subPage)}>
-                              <Box sx={{ display: "flex", alignItems: "center" }}>
-                                <ListItemText
-                                  primary={subPage.title}
-                                  sx={{
-                                    margin: 0,
-                                    "& .MuiTypography-root": {
-                                      fontSize: "0.875rem"
-                                    }
-                                  }}
-                                />
-                              </Box>
-                              <Chip
-                                label="Started"
-                                size="small"
+                            sx={{
+                              pl: 2,
+                              display: "flex",
+                              justifyContent: "space-between",
+                              py: 0.5,
+                              minHeight: 0
+                            }}>
+                            <Box sx={{ display: "flex", alignItems: "center" }}>
+                              <ListItemText
+                                primary={page.topTitle}
                                 sx={{
-                                  height: "20px",
-                                  backgroundColor: (theme) => theme.palette.primary.main,
-                                  color: "white",
-                                  "& .MuiChip-label": {
-                                    px: 1,
-                                    fontSize: "0.75rem"
+                                  margin: 0,
+                                  "& .MuiTypography-root": {
+                                    fontSize: "0.875rem"
                                   }
                                 }}
                               />
-                            </ListItemButton>
-                          ))}
-                        </List>
-                      </Collapse>
+                            </Box>
+
+                            {expandedLevels[page.topTitle] ? <ExpandLess /> : <ExpandMore />}
+                          </ListItemButton>
+                          <Collapse
+                            in={expandedLevels[page.topTitle]}
+                            timeout="auto"
+                            unmountOnExit>
+                            <List
+                              component="div"
+                              disablePadding>
+                              {page.subPages.map((subPage) => (
+                                <ListItemButton
+                                  key={page.topTitle + subPage.subTitle}
+                                  sx={{
+                                    pl: 4,
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    py: 0.5,
+                                    minHeight: 0
+                                  }}
+                                  onClick={() => handleSubPageClick(subPage.subRoute ?? "")}>
+                                  <Box sx={{ display: "flex", alignItems: "center" }}>
+                                    <ListItemText
+                                      primary={subPage.subTitle}
+                                      sx={{
+                                        margin: 0,
+                                        "& .MuiTypography-root": {
+                                          fontSize: "0.875rem"
+                                        }
+                                      }}
+                                    />
+                                  </Box>
+                                </ListItemButton>
+                              ))}
+                            </List>
+                          </Collapse>
+                        </>
+                      ) : (
+                        <>
+                          <ListItemButton
+                            key={page.topTitle}
+                            onClick={() => handlePageClick(page.topRoute ?? "")}
+                            sx={{
+                              pl: 2,
+                              display: "flex",
+                              justifyContent: "space-between",
+                              py: 0.5,
+                              minHeight: 0
+                            }}>
+                            <Box sx={{ display: "flex", alignItems: "center" }}>
+                              <ListItemText
+                                primary={page.topTitle}
+                                sx={{
+                                  margin: 0,
+                                  "& .MuiTypography-root": {
+                                    fontSize: "0.875rem"
+                                  }
+                                }}
+                              />
+                            </Box>
+                          </ListItemButton>
+                        </>
+                      )}
                     </React.Fragment>
                   ))}
               </List>
@@ -364,34 +295,34 @@ const PSDrawer = () => {
               <Divider sx={{ mb: 1 }} />
               <List>
                 {menuLevels.map((level, index) => (
-                  <React.Fragment key={level.title}>
+                  <React.Fragment key={level.mainTitle + index}>
                     <ListItem disablePadding>
                       <ListItemButton
-                        onClick={() => handleLevelClick(level.title)}
+                        onClick={() => handleLevelClick(level.mainTitle)}
                         sx={{
-                          backgroundColor: expandedLevels[level.title]
+                          backgroundColor: expandedLevels[level.mainTitle]
                             ? (theme) => theme.palette.primary.main
                             : "transparent",
                           "&:hover": {
-                            backgroundColor: expandedLevels[level.title]
+                            backgroundColor: expandedLevels[level.mainTitle]
                               ? (theme) => theme.palette.primary.dark
                               : (theme) => theme.palette.action.hover
                           },
                           "& .MuiListItemText-primary": {
-                            color: expandedLevels[level.title] ? "white" : (theme) => theme.palette.text.primary
+                            color: expandedLevels[level.mainTitle] ? "white" : (theme) => theme.palette.text.primary
                           },
                           display: "flex",
                           justifyContent: "space-between",
                           alignItems: "center"
                         }}>
-                        {open && (
+                        {drawerOpen && (
                           <>
                             <ListItemText
-                              primary={level.title}
-                              secondary={`1 of ${level.pages.length} completed`}
+                              primary={level.mainTitle}
+                              secondary={`1 of ${level.topPage.length - 1} completed`}
                               secondaryTypographyProps={{
                                 sx: {
-                                  color: expandedLevels[level.title]
+                                  color: expandedLevels[level.mainTitle]
                                     ? "rgba(255, 255, 255, 0.7)"
                                     : (theme) => theme.palette.text.secondary,
                                   fontSize: "0.75rem"
@@ -414,22 +345,13 @@ const PSDrawer = () => {
         sx={{
           flexGrow: 1,
           p: 3,
-          width: `calc(100% - ${open ? drawerWidth : 64}px)`,
+          width: `calc(100% - ${drawerOpen ? drawerOpenWidth : drawerClosedWidth}px)`,
           transition: (theme) =>
             theme.transitions.create("width", {
               easing: theme.transitions.easing.sharp,
               duration: theme.transitions.duration.enteringScreen
             })
-        }}>
-        <Toolbar />
-        <Routes>
-          {/* Default Route */}
-          <Route
-            path="/"
-            element={<Typography paragraph>This is where the content.</Typography>}
-          />
-        </Routes>
-      </Box>
+        }}></Box>
     </>
   );
 };

@@ -1,4 +1,5 @@
 import { Box } from "@mui/material";
+import PSDrawer from "components/Drawer/PSDrawer";
 import DSMDynamicBreadcrumbs from "components/DSMDynamicBreadcrumbs/DSMDynamicBreadcrumbs";
 import CleanUpSummary from "pages/CleanUpSummary/CleanUpSummary";
 import DecemberProcessAccordion from "pages/DecemberActivities/DecemberProcess/DecemberProcessAccordion";
@@ -49,7 +50,8 @@ import { Route, useNavigate } from "react-router-dom";
 import { setImpersonating } from "reduxstore/slices/securitySlice";
 import { RootState } from "reduxstore/store";
 import { ImpersonationRoles } from "reduxstore/types";
-import { ImpersonationMultiSelect, MenuBar } from "smart-ui-library";
+import { ImpersonationMultiSelect } from "smart-ui-library";
+import { MenuBar } from "../MenuBar/MenuBar";
 import { ROUTES } from "../../constants";
 import MenuData from "../../MenuData";
 import DemographicFreeze from "../../pages/ITSupport/DemographicFreeze/DemographicFreeze";
@@ -60,8 +62,6 @@ import ForfeituresByAge from "../../pages/PROF130/ForfeituresByAge/ForfeituresBy
 import ProfitShareUpdate from "../../pages/ProfitShareUpdate/ProfitShareUpdate";
 import YTDWages from "../../pages/YTDWagesExtract/YTDWages";
 import RouteSecurity from "./RouteSecurity";
-import { blue, pink } from "@mui/material/colors";
-import PSDrawer from "components/Drawer/PSDrawer";
 
 const RouterSubAssembly: React.FC = () => {
   const navigate = useNavigate;
@@ -126,12 +126,11 @@ const RouterSubAssembly: React.FC = () => {
           )
         }
       />
-      <Box sx={{ backgroundColor: "#89CFF0" }}>
+      <Box>
         <PSDrawer />
         <Box sx={{ position: "relative", paddingTop: "32px" }}>
           <Box
             sx={{
-              backgroundColor: pink[50],
               position: "absolute",
               top: 0,
               left: 0,
@@ -160,10 +159,10 @@ const RouterSubAssembly: React.FC = () => {
             path={ROUTES.MISSING_COMMA}
             element={<MissingCommaInPyName />}></Route>
           <Route
-            path={ROUTES.EMPLOYEES_MILITARY}
+            path={ROUTES.MILITARY_LEAVE}
             element={<EmployeesOnMilitaryLeave />}></Route>
           <Route
-            path={ROUTES.MILITARY_FORFEITURES}
+            path={ROUTES.REHIRE_FORFEITURES}
             element={<MilitaryAndRehireForfeitures />}></Route>
           <Route
             path={ROUTES.DISTRIBUTIONS_AND_FORFEITURES}
