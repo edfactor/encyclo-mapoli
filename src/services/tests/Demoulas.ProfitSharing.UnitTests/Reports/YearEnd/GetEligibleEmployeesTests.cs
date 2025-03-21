@@ -63,7 +63,14 @@ public class GetEligibleEmployeesTests : ApiTestBase<Program>
             // Assert
             response.Result.ReportName.Should().Be($"Get Eligible Employees for Year {TestProfitYear}");
             var dto = response.Result.Response.Results.First(e => e.BadgeNumber == te.BadgeNumber);
-            dto.Should().BeEquivalentTo(new EligibleEmployee { OracleHcmId = te.OracleHcmId, BadgeNumber = te.BadgeNumber, FullName = te.FullName, DepartmentId = te.DepartmentId, Department = te.Department}
+            dto.Should().BeEquivalentTo(new EligibleEmployee
+                {
+                    OracleHcmId = te.OracleHcmId,
+                    BadgeNumber = te.BadgeNumber,
+                    FullName = te.FullName,
+                    DepartmentId = te.DepartmentId,
+                    Department = te.Department
+                }
             );
 
             return Task.CompletedTask;
@@ -88,14 +95,14 @@ public class GetEligibleEmployeesTests : ApiTestBase<Program>
             int numberNotSelected = await c.PayProfits
                 .Include(p => p.Demographic)
                 .Where(p => p.ProfitYear == TestProfitYear)
-                .Where(p => p.Demographic!.DateOfBirth > birthDateOfExactly21YearsOld /*too young*/ || p.CurrentHoursYear < 1000 ||
+                .Where(p => p.Demographic!.DateOfBirth > birthDateOfExactly21YearsOld /*too young*/ || (p.CurrentHoursYear + p.HoursExecutive) < 1000 ||
                             p.Demographic!.EmploymentStatusId == EmploymentStatus.Constants.Terminated)
                 .CountAsync(CancellationToken.None);
 
             int numberWritten = await c.PayProfits
                 .Include(p => p.Demographic)
                 .Where(p => p.ProfitYear == TestProfitYear)
-                .Where(p => p.Demographic!.DateOfBirth <= birthDateOfExactly21YearsOld /*over 21*/ && p.CurrentHoursYear >= 1000 &&
+                .Where(p => p.Demographic!.DateOfBirth <= birthDateOfExactly21YearsOld /*over 21*/ && (p.CurrentHoursYear + p.HoursExecutive) >= 1000 &&
                             p.Demographic!.EmploymentStatusId != EmploymentStatus.Constants.Terminated).CountAsync(CancellationToken.None);
 
             // Act
@@ -218,15 +225,16 @@ public class GetEligibleEmployeesTests : ApiTestBase<Program>
             .ThenInclude(demographic => demographic.ContactInfo) // Include ContactInfo
             .Include(payProfit => payProfit.Demographic!) // Re-include Demographic to enable another ThenInclude
             .ThenInclude(demographic => demographic.Department) // Include Department (child of Demographic)
-             .FirstAsync(CancellationToken.None);
+            .FirstAsync(CancellationToken.None);
         pp.ProfitYear = TestProfitYear;
         pp.DemographicId = testEmployee.Id;
         pp.CurrentHoursYear = testEmployee.HoursWorked;
+        pp.HoursExecutive = 0;
         var demo = pp.Demographic!;
         demo.OracleHcmId = testEmployee.OracleHcmId;
         demo.Id = testEmployee.Id;
         demo.DepartmentId = testEmployee.DepartmentId;
-            demo.Department = new Department {Id = Department.Constants.Grocery, Name = testEmployee.Department ?? nameof(Department.Constants.Grocery) };
+        demo.Department = new Department { Id = Department.Constants.Grocery, Name = testEmployee.Department ?? nameof(Department.Constants.Grocery) };
         demo.ContactInfo.FullName = testEmployee.FullName;
         demo.BadgeNumber = testEmployee.BadgeNumber;
         demo.DateOfBirth = convertAgeToBirthDate(TestProfitYear, testEmployee.Age);
