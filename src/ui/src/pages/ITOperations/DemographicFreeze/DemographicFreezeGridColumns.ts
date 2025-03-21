@@ -14,7 +14,7 @@ export const GetFreezeColumns = (): ColDef[] => {
       sort: "asc"
     },
     {
-      headerName: "As of Date/Time",
+      headerName: "Frozen Date/Time",
       field: "asOfDateTime",
       colId: "asOfDateTime",
       minWidth: 100,
