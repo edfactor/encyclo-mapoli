@@ -6,6 +6,14 @@ import NavButton from "./NavButton";
 import PopupMenu from "./PopupMenu";
 import { RouteCategory } from "smart-ui-library";
 
+export type RouteData = {
+  caption: string;
+  route: string;
+  divider?: boolean;
+  disabled?: boolean;
+  requiredPermission?: string;
+};
+
 export interface MenuBarProps extends ICommon {
   menuInfo: RouteCategory[];
   impersonationMultiSelect?: React.ReactNode;
