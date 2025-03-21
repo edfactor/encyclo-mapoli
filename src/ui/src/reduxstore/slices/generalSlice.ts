@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 
-export const DEFAULT_BANNER = "Blackhawk";
+export const DEFAULT_BANNER = "Profit Sharing";
 
 export interface GeneralState {
   appBanner: string;
@@ -9,6 +9,7 @@ export interface GeneralState {
   onDropdownBlur: { onBlur: boolean };
   onFlatDateBlur: { onBlur: boolean };
   loading: boolean;
+  drawerOpen?: boolean;
 }
 
 const initialState: GeneralState = {
@@ -16,13 +17,22 @@ const initialState: GeneralState = {
   error: "",
   onDropdownBlur: { onBlur: false },
   onFlatDateBlur: { onBlur: false },
-  loading: false
+  loading: false,
+  drawerOpen: false
 };
 
 export const generalSlice = createSlice({
   name: "general",
   initialState,
   reducers: {
+    openDrawer: (state) => {
+      console.log("In reducer opening drawer");
+      state.drawerOpen = true;
+    },
+    closeDrawer: (state) => {
+      console.log("In reducer closing drawer");
+      state.drawerOpen = false;
+    },
     setBanner: (state, action: PayloadAction<string>) => {
       state.appBanner = action.payload;
     },
@@ -64,5 +74,6 @@ export const generalSlice = createSlice({
   }
 });
 
-export const { setBanner, setError, setOnDropdownBlur, setOnFlatdateBlur, setLoading } = generalSlice.actions;
+export const { setBanner, setError, setOnDropdownBlur, setOnFlatdateBlur, setLoading, openDrawer, closeDrawer } =
+  generalSlice.actions;
 export default generalSlice.reducer;
