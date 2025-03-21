@@ -670,7 +670,7 @@ export interface FrozenStateResponse {
   isActive: boolean;
 }
 
-interface FreezeDemographicsRequest {
+export interface FreezeDemographicsRequest {
   asOfDateTime: string;
   profitYear: number;
 }

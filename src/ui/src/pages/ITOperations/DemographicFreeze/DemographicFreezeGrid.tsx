@@ -16,9 +16,10 @@ const DemographicFreeze: React.FC<DemoFreezeSearchProps> = ({initialSearchLoaded
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
 
-  const { duplicateNamesAndBirthdays: freezeResults } = useSelector(
-    (state: RootState) => state.yearsEnd
+  const freezeResults = useSelector(
+    (state: RootState) => state.frozen.frozenStateCollectionData
   );
+
   const [triggerSearch] = useLazyGetHistoricalFrozenStateResponseQuery();
 
   const onSearch = useCallback(async () => {
@@ -46,7 +47,7 @@ const DemographicFreeze: React.FC<DemoFreezeSearchProps> = ({initialSearchLoaded
 
   return (
     <>
-      {freezeResults?.response && (
+      {freezeResults && (
         <>
           <div style={{ padding: "0 24px 0 24px" }}>
             <Typography
@@ -59,13 +60,13 @@ const DemographicFreeze: React.FC<DemoFreezeSearchProps> = ({initialSearchLoaded
             preferenceKey={"FREEZE"}
             isLoading={false}
             providedOptions={{
-              rowData: freezeResults?.response.results,
+              rowData: freezeResults?.results,
               columnDefs: columnDefs
             }}
           />
         </>
       )}
-      {!!freezeResults && freezeResults.response.results.length > 0 && (
+      {!!freezeResults && freezeResults.results.length > 0 && (
         <Pagination
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
@@ -78,7 +79,7 @@ const DemographicFreeze: React.FC<DemoFreezeSearchProps> = ({initialSearchLoaded
             setPageNumber(1);
             setInitialSearchLoaded(true);
           }}
-          recordCount={freezeResults.response.total}
+          recordCount={freezeResults.total}
         />
       )}
     </>

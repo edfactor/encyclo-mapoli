@@ -1,6 +1,7 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { agGridNumberToCurrency, yyyyMMDDToMMDDYYYY } from "smart-ui-library";
 import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
+import { format, parseISO } from "date-fns";
 
 export const GetFreezeColumns = (): ColDef[] => {
   return [
@@ -22,7 +23,7 @@ export const GetFreezeColumns = (): ColDef[] => {
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
-      valueFormatter: (params) => (params.value ? yyyyMMDDToMMDDYYYY(params.value) : "")
+      valueFormatter: (params) => (params.value ? format(parseISO(params.value), "yyyy-MM-dd HH:mm:ss") : "")
     },
     {
       headerName: "IsActive Freeze",
@@ -49,7 +50,8 @@ export const GetFreezeColumns = (): ColDef[] => {
       minWidth: 150,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true
+      resizable: true,
+      valueFormatter: (params) => (params.value ? format(parseISO(params.value), "yyyy-MM-dd HH:mm:ss") : "")
     }
   ];
 };
