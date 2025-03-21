@@ -26,6 +26,7 @@ const schema = yup.object().shape({
     .required("Year is required"),
   asOfDate: yup
     .date()
+    .nullable()
     .required("As of Date is required")
     .test(
       "not-too-old",
@@ -45,7 +46,7 @@ const schema = yup.object().shape({
         return value <= new Date();
       }
     ),
-  asOfTime: yup.string().required("As of Time is required")
+  asOfTime: yup.string().nullable().required("As of Time is required")
 });
 
 interface DemographicFreezeSearchFilterProps {
@@ -63,7 +64,7 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
     handleSubmit,
     formState: { errors, isValid }
   } = useForm<DemographicFreezeSearch>({
-    resolver: yupResolver(schema),
+    resolver: yupResolver<DemographicFreezeSearch>(schema),
     defaultValues: {
       profitYear: profitYear || undefined,
       asOfDate: null,
