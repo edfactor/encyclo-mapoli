@@ -174,7 +174,6 @@ export const menuLevels: MenuLevel[] = [
         subPages: [
           { subTitle: CAPTIONS.PAY426_ACTIVE_18_20, subRoute: ROUTES.PAY426_ACTIVE_18_20 },
           { subTitle: CAPTIONS.PAY426_ACTIVE_21_PLUS, subRoute: ROUTES.PAY426_ACTIVE_21_PLUS },
-          { subTitle: CAPTIONS.PAY426_ACTIVE_21_PLUS, subRoute: ROUTES.PAY426_ACTIVE_21_PLUS },
           { subTitle: CAPTIONS.PAY426_ACTIVE_UNDER_18, subRoute: ROUTES.PAY426_ACTIVE_UNDER_18 },
           { subTitle: CAPTIONS.PAY426_ACTIVE_PRIOR_SHARING, subRoute: ROUTES.PAY426_ACTIVE_PRIOR_SHARING },
           { subTitle: CAPTIONS.PAY426_ACTIVE_NO_PRIOR, subRoute: ROUTES.PAY426_ACTIVE_NO_PRIOR },
@@ -190,7 +189,6 @@ export const menuLevels: MenuLevel[] = [
         topRoute: ROUTES.PROFIT_SHARE_REPORT_FINAL_RUN,
         subPages: [
           { subTitle: CAPTIONS.PAY426_ACTIVE_18_20, subRoute: ROUTES.PAY426_ACTIVE_18_20 },
-          { subTitle: CAPTIONS.PAY426_ACTIVE_21_PLUS, subRoute: ROUTES.PAY426_ACTIVE_21_PLUS },
           { subTitle: CAPTIONS.PAY426_ACTIVE_21_PLUS, subRoute: ROUTES.PAY426_ACTIVE_21_PLUS },
           { subTitle: CAPTIONS.PAY426_ACTIVE_UNDER_18, subRoute: ROUTES.PAY426_ACTIVE_UNDER_18 },
           { subTitle: CAPTIONS.PAY426_ACTIVE_PRIOR_SHARING, subRoute: ROUTES.PAY426_ACTIVE_PRIOR_SHARING },
