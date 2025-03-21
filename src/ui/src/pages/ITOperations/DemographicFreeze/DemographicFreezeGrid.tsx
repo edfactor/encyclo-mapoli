@@ -32,8 +32,9 @@ const DemographicFreeze: React.FC<DemoFreezeSearchProps> = ({initialSearchLoaded
 
   // First useEffect to trigger the search on initial render
   useEffect(() => {
+    if (!hasToken) return;
     onSearch();
-  }, [onSearch]); // Only depends on onSearch, will execute once when component mounts
+  }, [onSearch, hasToken]); // Only depends on onSearch, will execute once when component mounts
 
   // Second useEffect to handle pagination changes
   useEffect(() => {

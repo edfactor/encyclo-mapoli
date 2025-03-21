@@ -1,7 +1,5 @@
-import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { agGridNumberToCurrency, yyyyMMDDToMMDDYYYY } from "smart-ui-library";
-import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
-import { format, parseISO } from "date-fns";
+import { ColDef } from "ag-grid-community";
+import { mmDDYYYY_HHMMSS_Format } from "../../../utils/dateUtils";
 
 export const GetFreezeColumns = (): ColDef[] => {
   return [
@@ -10,8 +8,8 @@ export const GetFreezeColumns = (): ColDef[] => {
       field: "profitYear",
       colId: "profitYear",
       minWidth: 80,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      headerClass: "left-align",
+      cellClass: "left-align",
       resizable: true,
       sort: "asc"
     },
@@ -23,7 +21,7 @@ export const GetFreezeColumns = (): ColDef[] => {
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
-      valueFormatter: (params) => (params.value ? format(parseISO(params.value), "yyyy-MM-dd HH:mm:ss") : "")
+      valueFormatter: (params) => (params.value ? mmDDYYYY_HHMMSS_Format(params.value) : "")
     },
     {
       headerName: "IsActive Freeze",
@@ -51,7 +49,7 @@ export const GetFreezeColumns = (): ColDef[] => {
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
-      valueFormatter: (params) => (params.value ? format(parseISO(params.value), "yyyy-MM-dd HH:mm:ss") : "")
+      valueFormatter: (params) => (params.value ? mmDDYYYY_HHMMSS_Format(params.value) : "")
     }
   ];
 };

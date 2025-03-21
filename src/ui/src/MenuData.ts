@@ -89,6 +89,8 @@ const it_operations: RouteCategory = {
   items: [{ caption: CAPTIONS.DEMOGRAOHIC_FREEZE, route: ROUTES.DEMO_FREEZE }]
 };
 
+const localStorageImpersonating: string | null = localStorage.getItem("impersonatingRole");
+
 const MenuData: RouteCategory[] = [
   inquiries,
   beneficiaries,
@@ -96,7 +98,7 @@ const MenuData: RouteCategory[] = [
   reconciliation,
   decemberFlow,
   fiscalClose,
-  it_operations
+  localStorageImpersonating == ImpersonationRoles.ItOperations ? it_operations : ""
 ];
 
 export default MenuData;
