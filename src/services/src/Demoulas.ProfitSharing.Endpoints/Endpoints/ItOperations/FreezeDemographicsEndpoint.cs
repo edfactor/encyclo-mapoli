@@ -27,7 +27,6 @@ public class FreezeDemographicsEndpoint : Endpoint<SetFrozenStateRequest, Frozen
         });
         Policies(Security.Policy.CanFreezeDemographics);
         Group<ItOperationsGroup>();
-        Policies(Security.Policy.CanAccessItOperations);
     }
 
     public override Task<FrozenStateResponse> ExecuteAsync(SetFrozenStateRequest req, CancellationToken ct)
