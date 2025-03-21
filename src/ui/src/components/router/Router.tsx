@@ -59,7 +59,7 @@ import ProfitShareUpdate from "../../pages/ProfitShareUpdate/ProfitShareUpdate";
 import YTDWages from "../../pages/YTDWagesExtract/YTDWages";
 import RouteSecurity from "./RouteSecurity";
 import MilitaryEntryAndModification from "pages/MilitaryEntryAndModification/MilitaryEntryAndModification";
-import DemographicFreeze from "../../pages/ITSupport/DemographicFreeze/DemographicFreeze";
+import DemographicFreeze from "../../pages/ITOperations/DemographicFreeze/DemographicFreeze";
 
 const Router = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";

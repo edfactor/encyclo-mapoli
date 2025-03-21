@@ -250,7 +250,7 @@ FROM FILTERED_DEMOGRAPHIC p1
               ON p1.Id < p2.Id /* Avoid self-joins and duplicate pairs */
                   AND UTL_MATCH.EDIT_DISTANCE(p1.FULL_NAME, p2.FULL_NAME) < 3 /* Name similarity threshold */
                   AND SOUNDEX(p1.FULL_NAME) = SOUNDEX(p2.FULL_NAME) /* Phonetic similarity */
-                  AND (ABS(TRUNC(p1.DATE_OF_BIRTH) - TRUNC(p2.DATE_OF_BIRTH)) <= 3 /* Allowable 3-day difference */ );";
+                  AND (ABS(TRUNC(p1.DATE_OF_BIRTH) - TRUNC(p2.DATE_OF_BIRTH)) <= 3 /* Allowable 3-day difference */ )";
 
                     dupNameSlashDateOfBirth = ctx.Database
                         .SqlQueryRaw<DemographicMatchDto>(dupQuery);
