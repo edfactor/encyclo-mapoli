@@ -2,29 +2,27 @@
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
-using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.ProfitShareEdit;
 
 /// <summary>
 ///     Does the Year And application of Earnings and Contributions to all employees and beneficiaries.
 ///     Modeled very closely after Pay444
-///
-///     This class follows the name of the step in the Ready YE flow.    It could instead be named "View effect of YE update on members"
+///     This class follows the name of the step in the Ready YE flow.    It could instead be named "View effect of YE
+///     update on members"
 /// </summary>
 internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateService
 {
     private readonly ICalendarService _calendarService;
     private readonly IProfitSharingDataContextFactory _dbContextFactory;
-    private readonly ITotalService _totalService;
+    private readonly TotalService _totalService;
 
     public ProfitShareUpdateService(IProfitSharingDataContextFactory dbContextFactory,
-        ITotalService totalService,
+        TotalService totalService,
         ICalendarService calendarService)
     {
         _dbContextFactory = dbContextFactory;
@@ -67,7 +65,10 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
             Response = new PaginatedResponseDto<ProfitShareUpdateMemberResponse> { Results = members }
         };
     }
-
+    
+    /// <summary>
+    /// This is used by other services to access plan members with yearly contributions applied.
+    /// </summary>
     public async Task<ProfitShareUpdateResult> ProfitShareUpdateInternal(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
         (List<MemberFinancials> memberFinancials, _, bool employeeExceededMaxContribution) = await ProfitSharingUpdatePaginated(profitShareUpdateRequest, cancellationToken);
@@ -95,11 +96,12 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
             ZeroContributionReasonId = m.ZeroContributionReasonId
         }).ToList();
 
-        return new ProfitShareUpdateResult() { HasExceededMaximumContributions = employeeExceededMaxContribution, Members = members };
+        return new ProfitShareUpdateResult { HasExceededMaximumContributions = employeeExceededMaxContribution, Members = members };
     }
 
     /// <summary>
-    ///     Applies updates specified in request and returns members with updated Contributions/Earnings/IncomingForfeitures/SecondaryEarnings
+    ///     Applies updates specified in request and returns members with updated
+    ///     Contributions/Earnings/IncomingForfeitures/SecondaryEarnings
     /// </summary>
     public async Task<ProfitShareUpdateOutcome> ProfitSharingUpdatePaginated(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
@@ -112,8 +114,10 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
 
         // Go get the Bene's.  NOTE: May modify some employees if they are both bene and employee (that's why "members" is passed in - to lookup loaded employees and see if they are also Bene's)
         await BeneficiariesProcessingHelper.ProcessBeneficiaries(_dbContextFactory, members, profitShareUpdateRequest, cancellationToken);
+        
+        members = members.OrderBy(m=>m.Name).ToList();
 
         // Use the list of members to build up response for client.
-        return new(members, adjustmentReportData, employeeExceededMaxContribution);
+        return new ProfitShareUpdateOutcome(members, adjustmentReportData, employeeExceededMaxContribution);
     }
 }

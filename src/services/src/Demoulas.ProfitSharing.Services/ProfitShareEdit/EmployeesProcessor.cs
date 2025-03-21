@@ -1,4 +1,6 @@
 using System.Collections;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -13,22 +15,20 @@ namespace Demoulas.ProfitSharing.Services.ProfitShareEdit;
 internal static class EmployeeProcessorHelper
 {
     public static async Task<(List<MemberFinancials>, bool)> ProcessEmployees(IProfitSharingDataContextFactory dbContextFactory, ICalendarService calendarService,
-        ITotalService totalService, ProfitShareUpdateRequest profitShareUpdateRequest,
+        TotalService totalService, ProfitShareUpdateRequest profitShareUpdateRequest,
         AdjustmentReportData adjustmentReportData,
         CancellationToken cancellationToken)
     {
         bool employeeExceededMaxContribution = false;
-        short currentYear = profitShareUpdateRequest.ProfitYear;
+        short profitYear = profitShareUpdateRequest.ProfitYear;
         short priorYear = (short)(profitShareUpdateRequest.ProfitYear - 1);
 
         // We want everything up to the beginning of this currentYear year, so we use lastYear in this lookup.
         CalendarResponseDto fiscalDates = await calendarService.GetYearStartAndEndAccountingDatesAsync(priorYear, cancellationToken);
-        List<EmployeeFinancials> employeeFinancialsList = await dbContextFactory.UseReadOnlyContext(async ctx =>
+        var employeeFinancialsList = await dbContextFactory.UseReadOnlyContext(async ctx =>
         {
-            var employees = await ctx.PayProfits
-                .Include(pp => pp.Demographic) //Question - Should this be referring to frozen demographics
-                .Include(pp => pp.Demographic!.ContactInfo)
-                .Where(pp => pp.ProfitYear == currentYear)
+            var employees = ctx.PayProfits
+                .Where(pp => pp.ProfitYear == profitYear)
                 .Select(x => new
                 {
                     x.Demographic!.BadgeNumber,
@@ -39,57 +39,49 @@ internal static class EmployeeProcessorHelper
                     PointsEarned = (int)(x.PointsEarned ?? 0),
                     x.ZeroContributionReasonId,
                     x.Etva
-                }).ToListAsync(cancellationToken);
+                });
 
-            // Get employee SSNs
-            HashSet<int> ssns = employees.Select(e => e.Ssn).ToHashSet();
+            var employeeWithBalances =
+            (
+                from et in employees
+                join balTbl in totalService.TotalVestingBalance(ctx, profitYear, priorYear, fiscalDates.FiscalEndDate) on et.Ssn equals balTbl.Ssn into balTmp
+                from bal in balTmp.DefaultIfEmpty()
+                join thisYr in TotalService.GetProfitDetailTotalsForASingleYear(ctx, profitYear, cancellationToken) on et.Ssn equals thisYr.Ssn into txThsYrEnum
+                from txns in txThsYrEnum.DefaultIfEmpty()
+                select new EmployeeFinancials
+                {
+                    BadgeNumber = et.BadgeNumber,
+                    Ssn = et.Ssn,
+                    Name = et.Name,
+                    EnrolledId = et.EnrolledId,
+                    YearsInPlan = bal.YearsInPlan,
+                    CurrentAmount = bal.CurrentBalance,
+                    EmployeeTypeId = et.EmployeeTypeId,
+                    PointsEarned = et.PointsEarned,
+                    Etva = et.Etva,
+                    ZeroContributionReasonId = et.ZeroContributionReasonId,
 
-            // For each SSN, Get Transaction Summary (not every employee will have this.)
-            List<ParticipantTotalVestingBalanceDto> totalVestingBalances = await ((TotalService)totalService)
-                .TotalVestingBalance(ctx, currentYear, priorYear, fiscalDates.FiscalEndDate)
-                .Where(e => ssns.Contains(e.Ssn)).ToListAsync(cancellationToken);
+                    // Transactions for this year. 
+                    DistributionsTotal = txns.DistributionsTotal,
+                    ForfeitsTotal = txns.ForfeitsTotal,
+                    AllocationsTotal = txns.AllocationsTotal,
+                    PaidAllocationsTotal = txns.PaidAllocationsTotal,
+                    MilitaryTotal = txns.MilitaryTotal,
+                    ClassActionFundTotal = txns.ClassActionFundTotal
+                });
 
-            // Merge employees with Tranaction Totals
-            return
-                employees
-                    .GroupJoin(
-                        totalVestingBalances,
-                        e => e.Ssn,
-                        t => t.Ssn,
-                        (e, t_join) => new { Employee = e, Tvb = t_join.DefaultIfEmpty() }
-                    )
-                    .SelectMany(
-                        et => et.Tvb,
-                        (et, tvb) => new EmployeeFinancials
-                        {
-                            BadgeNumber = et.Employee.BadgeNumber,
-                            Ssn = et.Employee.Ssn,
-                            Name = et.Employee.Name,
-                            EnrolledId = et.Employee.EnrolledId,
-                            YearsInPlan = tvb == null ? (short)0 : tvb.YearsInPlan,
-                            CurrentAmount = tvb == null ? 0 : tvb.CurrentBalance,
-                            EmployeeTypeId = et.Employee.EmployeeTypeId,
-                            PointsEarned = et.Employee.PointsEarned,
-                            Etva = et.Employee.Etva,
-                            ZeroContributionReasonId = et.Employee.ZeroContributionReasonId
-                        }
-                    )
-                    .ToList();
+            return await employeeWithBalances.ToListAsync(cancellationToken);
         });
-
-        // Lookup all the transactions for this year. (not all employees will have them.)
-        Dictionary<int, ProfitDetailTotals> thisYearsTotalsBySSn =
-            await TotalService.GetProfitDetailTotalsForASingleYear(dbContextFactory, profitShareUpdateRequest.ProfitYear, [.. employeeFinancialsList.Select(ef => ef.Ssn)],
-                cancellationToken);
 
         List<MemberFinancials> members = new();
         foreach (EmployeeFinancials empl in employeeFinancialsList)
         {
-            if (empl.EnrolledId != Enrollment.Constants.NotEnrolled || empl.YearsInPlan != 0 || empl.EmployeeTypeId > 0 || thisYearsTotalsBySSn.ContainsKey(empl.Ssn))
+            if (empl.EnrolledId != Enrollment.Constants.NotEnrolled || empl.YearsInPlan != 0 || empl.EmployeeTypeId > 0 || empl.HasTransactionAmounts())
             {
-                (MemberFinancials memb, bool didEmployeeExceededMaxContribution) = ProcessEmployee(empl,
-                    thisYearsTotalsBySSn.GetValueOrDefault(empl.Ssn) ?? ProfitDetailTotals.Zero,
-                    profitShareUpdateRequest, adjustmentReportData);
+                var profitDetailTotals = new ProfitDetailTotals(empl.DistributionsTotal ?? 0, empl.ForfeitsTotal ?? 0,
+                    empl.AllocationsTotal ?? 0, empl.PaidAllocationsTotal ?? 0, empl.MilitaryTotal ?? 0, empl.ClassActionFundTotal ?? 0);
+
+                (MemberFinancials memb, bool didEmployeeExceededMaxContribution) = ProcessEmployee(empl, profitDetailTotals, profitShareUpdateRequest, adjustmentReportData);
                 members.Add(memb);
                 employeeExceededMaxContribution |= didEmployeeExceededMaxContribution;
             }
