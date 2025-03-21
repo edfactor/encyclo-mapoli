@@ -24,7 +24,10 @@ const DemographicFreeze: React.FC<DemoFreezeSearchProps> = ({initialSearchLoaded
 
   const onSearch = useCallback(async () => {
     const request = {
-      pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: "createdDateTime", isSortDescending: true }
+      skip: pageNumber * pageSize, 
+      take: pageSize, 
+      sortBy: "createdDateTime", 
+      isSortDescending: true
     };
 
     await triggerSearch(request, false);
