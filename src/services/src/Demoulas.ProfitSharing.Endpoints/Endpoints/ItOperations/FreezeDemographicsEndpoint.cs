@@ -4,7 +4,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
 
-namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Demographics;
+namespace Demoulas.ProfitSharing.Endpoints.Endpoints.ItOperations;
 
 public class FreezeDemographicsEndpoint : Endpoint<SetFrozenStateRequest, FrozenStateResponse>
 {
@@ -27,6 +27,7 @@ public class FreezeDemographicsEndpoint : Endpoint<SetFrozenStateRequest, Frozen
         });
         Policies(Security.Policy.CanFreezeDemographics);
         Group<ItOperationsGroup>();
+        Policies(Security.Policy.CanAccessItOperations);
     }
 
     public override Task<FrozenStateResponse> ExecuteAsync(SetFrozenStateRequest req, CancellationToken ct)

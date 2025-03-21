@@ -5,7 +5,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
 
-namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Demographics;
+namespace Demoulas.ProfitSharing.Endpoints.Endpoints.ItOperations;
 
 public class GetFrozenDemographicsEndpoint : Endpoint<SortedPaginationRequestDto, PaginatedResponseDto<FrozenStateResponse>>
 {
