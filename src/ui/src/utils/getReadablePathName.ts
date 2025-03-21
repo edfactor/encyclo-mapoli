@@ -27,7 +27,7 @@ const pathToReadableName: Record<string, string> = {
   "profit-share-report": "Profit Share Report",
   forfeit: "Forfeit",
   "fiscal-close": "Year End Flow",
-  "profit-share-update": "Profit Share Update",
+  "profit-share-update": "Profit Share Update (PAY444 PAY447 PAY460 PROFTLD)",
   "employees-on-military-leave": "Military Leave",
   "profit-share-report-edit-run": "Profit Share Report Edit Run",
   "profit-share-report-final-run": "Profit Share Report Final Run",

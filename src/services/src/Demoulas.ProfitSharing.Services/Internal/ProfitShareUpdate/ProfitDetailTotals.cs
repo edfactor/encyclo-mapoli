@@ -17,3 +17,4 @@ internal sealed record ProfitDetailTotals(
 {
     public static ProfitDetailTotals Zero { get; set; } = new ProfitDetailTotals(0m, 0m, 0m, 0m, 0m, 0m);
 }
+

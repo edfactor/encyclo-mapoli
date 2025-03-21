@@ -161,7 +161,7 @@ const FiscalFlow = () => {
 
         <Grid2 width="100%">
           <DSMCollapsedAccordion
-            title="Profit Share Updates (Pay444)"
+            title="Profit Share Updates (PAY444 PAY447 PAY460 PROFTLD)"
             expandable={false}
             actionButtonText="START"
             status={{

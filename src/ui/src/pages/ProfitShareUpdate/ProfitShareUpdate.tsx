@@ -6,7 +6,7 @@ import ProfitShareUpdateGrid from "./ProfitShareUpdateGrid";
 
 const ProfitShareUpdate = () => {
     return (
-        <Page label="Profit Share Update / Edit / Master">
+        <Page label="Profit Share Update / Edit / Master (PAY444 PAY447 PAY460 PROFTLD)">
             <Grid2
                 container
                 rowSpacing="24px">
