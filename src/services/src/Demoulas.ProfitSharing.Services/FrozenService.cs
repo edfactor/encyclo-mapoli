@@ -78,9 +78,10 @@ public class FrozenService: IFrozenService
     {
         var validator = new InlineValidator<short>();
 
+        var thisYear = DateTime.Today.Year;
         validator.RuleFor(r => r)
-            .InclusiveBetween((short)2020, (short)2100)
-            .WithMessage("ProfitYear must be between 2020 and 2100.");
+            .InclusiveBetween((short)(thisYear-1), (short)thisYear)
+            .WithMessage($"ProfitYear must be between {(thisYear - 1)} and {thisYear}.");
 
         await validator.ValidateAndThrowAsync(profitYear, cancellationToken);
 
@@ -88,7 +89,7 @@ public class FrozenService: IFrozenService
         return await _dataContextFactory.UseWritableContext(async ctx =>
         {
             //Inactivate any prior frozen states
-            await ctx.FrozenStates.Where(x => x.ProfitYear == profitYear && x.IsActive).ForEachAsync(x => x.IsActive = false, cancellationToken);
+            await ctx.FrozenStates.Where(x => x.IsActive).ForEachAsync(x => x.IsActive = false, cancellationToken);
 
             //Create new record
             var frozenState = new FrozenState { IsActive = true, ProfitYear = profitYear, AsOfDateTime = asOfDateTime, FrozenBy = _appUser.UserName ?? "Unknown"};
