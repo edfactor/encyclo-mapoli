@@ -25,7 +25,9 @@ export const MenuBar: FC<MenuBarProps> = ({ menuInfo, impersonationMultiSelect }
   const homeTabSelected = location.pathname === "/";
 
   return (
-    <div className="menubar">
+    <div
+      className="menubar"
+      style={{ position: "fixed", width: "100%" }}>
       <div className="navbuttons ml-2">
         <NavButton
           isUnderlined={homeTabSelected}

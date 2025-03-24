@@ -94,7 +94,7 @@ const PSDrawer = () => {
           position: "fixed",
           left: drawerOpen ? "16px" : "12px",
           top: "179px",
-          zIndex: (theme) => theme.zIndex.drawer + 1,
+          zIndex: (theme) => theme.zIndex.drawer + 100,
           display: "flex",
           alignItems: "center",
           gap: 1,

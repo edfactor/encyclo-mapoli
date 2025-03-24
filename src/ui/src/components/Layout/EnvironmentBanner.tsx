@@ -13,7 +13,7 @@ export const EnvironmentBanner: React.FC<IEnvironmentBannerProps> = ({ environme
   }
 
   let environmentName;
-  let alertSeverity;
+  let alertSeverity: "error" | "info" | "success" | "warning";
   let backgroundColor;
   let versionNumber = buildVersionNumber || "";
   switch (environmentMode) {
@@ -34,7 +34,7 @@ export const EnvironmentBanner: React.FC<IEnvironmentBannerProps> = ({ environme
       break;
     default:
       environmentName = `UNKNOWN: "${environmentMode}"`;
-      alertSeverity = "default";
+      alertSeverity = "error";
       backgroundColor = purple;
       versionNumber = "";
   }
@@ -44,6 +44,9 @@ export const EnvironmentBanner: React.FC<IEnvironmentBannerProps> = ({ environme
       severity={alertSeverity}
       icon={<InfoOutlined sx={{ color: "white" }} />}
       sx={{
+        position: "fixed",
+        width: "100%",
+        zIndex: 1000,
         backgroundColor,
         "& .MuiAlert-message": {
           // had to resort to this to override defaults that didn't match design

@@ -1,10 +1,9 @@
-import Grid from "@mui/material/Grid";
+import Grid2 from "@mui/material/Grid2";
 import React from "react";
-import "./PSLayout.css";
 import EnvironmentBanner, { IEnvironmentBannerProps } from "../Layout/EnvironmentBanner";
 import WelcomeDisplay, { WelcomeDisplayProps } from "../Layout/WelcomeDisplay";
-import { useSelector } from "react-redux";
-import { RootState } from "reduxstore/store";
+import "./PSLayout.css";
+import zIndex from "@mui/material/styles/zIndex";
 
 export interface DSMLayoutProps extends IEnvironmentBannerProps, WelcomeDisplayProps {
   children: React.ReactNode;
@@ -20,42 +19,53 @@ export const PSLayout: React.FC<DSMLayoutProps> = ({
   buildVersionNumber,
   ...welcomeDisplayProps
 }) => {
-  const { drawerOpen } = useSelector((state: RootState) => state.general);
+  //const { drawerOpen } = useSelector((state: RootState) => state.general);
 
   return (
     <div
       onClick={onClick}
+      /*
       style={{
         height: "100%",
         width: drawerOpen ? "calc(100% - 320px)" : "calc(100% - 64px)",
         marginLeft: drawerOpen ? 320 : 64
       }}>
-      <EnvironmentBanner
-        data-testid="environment-banner"
-        id="environment-banner"
-        environmentMode={environmentMode}
-        buildVersionNumber={buildVersionNumber}
-      />
-      <Grid
+        */
+    >
+      {/* THIS IS THE LIGHT BLUE BANNER AT VERY TOP */}
+      <div
+        style={{
+          position: "fixed",
+          width: "100%",
+          top: 0
+        }}>
+        <EnvironmentBanner
+          data-testid="environment-banner"
+          id="environment-banner"
+          environmentMode={environmentMode}
+          buildVersionNumber={buildVersionNumber}
+        />
+      </div>
+      <Grid2
         container
         style={{
-          height: "100%",
-          margin: 0,
-          width: "100%"
+          marginTop: "110px"
         }}>
-        <Grid xs={12}>
-          <div className="app-banner">
+        <Grid2
+          size={12}
+          style={{
+            position: "fixed"
+          }}>
+          <div
+            className="app-banner"
+            style={{ position: "fixed", top: "51px", backgroundColor: "white" }}>
             <div className="text">{appTitle}</div>
             <WelcomeDisplay {...welcomeDisplayProps} />
           </div>
-        </Grid>
+        </Grid2>
 
-        <Grid
-          xs={12}
-          style={{ height: "100%" }}>
-          {children}
-        </Grid>
-      </Grid>
+        <Grid2 size={12}>{children}</Grid2>
+      </Grid2>
     </div>
   );
 };
