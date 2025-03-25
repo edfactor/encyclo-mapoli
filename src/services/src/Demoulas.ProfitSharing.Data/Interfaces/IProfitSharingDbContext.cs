@@ -9,6 +9,7 @@ public interface IProfitSharingDbContext
     DbSet<Demographic> Demographics { get; set; }
     DbSet<DemographicHistory> DemographicHistories { get; set; }
     DbSet<EmploymentType> EmploymentTypes { get; set; }
+    DbSet<Department> Departments { get; set; }
     DbSet<FrozenState> FrozenStates { get; set; }
     DbSet<Country> Countries { get; set; }
     DbSet<Beneficiary> Beneficiaries { get; set; }

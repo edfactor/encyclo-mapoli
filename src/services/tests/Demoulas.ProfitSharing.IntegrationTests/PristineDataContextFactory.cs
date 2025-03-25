@@ -3,7 +3,12 @@ using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+
+// ReSharper disable ClassNeverInstantiated.Local
 
 namespace Demoulas.ProfitSharing.IntegrationTests;
 
@@ -13,41 +18,25 @@ namespace Demoulas.ProfitSharing.IntegrationTests;
  */
 internal sealed class PristineDataContextFactory : IProfitSharingDataContextFactory
 {
+    private readonly ProfitSharingDbContext _ctx;
     private readonly ProfitSharingReadOnlyDbContext _readOnlyCtx;
 
     public PristineDataContextFactory(string connectionString, bool debug = false)
     {
-        DbContextOptions<ProfitSharingReadOnlyDbContext> readOnlyOptions;
-        if (debug)
-        {
-            // Dumps sql
-            readOnlyOptions =
-                new DbContextOptionsBuilder<ProfitSharingReadOnlyDbContext>().UseOracle(connectionString)
-                    .EnableSensitiveDataLogging().LogTo(s => Debug.WriteLine(s)).Options;
-        }
-        else
-        {
-
-            readOnlyOptions =
-                new DbContextOptionsBuilder<ProfitSharingReadOnlyDbContext>().UseOracle(connectionString)
-                    .Options;
-        }
-        
-        ProfitSharingReadOnlyDbContext readOnlyCtx = new ProfitSharingReadOnlyDbContext(readOnlyOptions);
-
-        _readOnlyCtx = readOnlyCtx;
+        _readOnlyCtx = setUpReadOnlyCtx(connectionString, debug);
+        _ctx = setUpWriteCtx(connectionString, debug);
     }
 
     public Task UseWritableContext(Func<ProfitSharingDbContext, Task> func,
         CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return func(_ctx);
     }
 
     public Task<T> UseWritableContext<T>(Func<ProfitSharingDbContext, Task<T>> func,
         CancellationToken cancellationToken = new())
     {
-        throw new NotImplementedException();
+        return func(_ctx);
     }
 
     public Task<T> UseWritableContextAsync<T>(Func<ProfitSharingDbContext, IDbContextTransaction, Task<T>> action, CancellationToken cancellationToken)
@@ -63,5 +52,69 @@ internal sealed class PristineDataContextFactory : IProfitSharingDataContextFact
     public Task<T> UseStoreInfoContext<T>(Func<DemoulasCommonDataContext, Task<T>> func)
     {
         throw new NotImplementedException();
+    }
+
+    private static ProfitSharingDbContext setUpWriteCtx(string connectionString, bool debug)
+    {
+        DbContextOptionsBuilder<ProfitSharingDbContext> optionsBuilderWriter = new DbContextOptionsBuilder<ProfitSharingDbContext>().UseOracle(connectionString);
+        if (debug)
+        {
+            // Dumps sql
+            optionsBuilderWriter.EnableSensitiveDataLogging().LogTo(s => Debug.WriteLine(s));
+        }
+
+        optionsBuilderWriter.ReplaceService<IModelCustomizer, GlobalBoolToNumberModelCustomizer>();
+        ProfitSharingDbContext ctx = new(optionsBuilderWriter.Options);
+
+        return ctx;
+    }
+
+    private static ProfitSharingReadOnlyDbContext setUpReadOnlyCtx(string connectionString, bool debug)
+    {
+        DbContextOptionsBuilder<ProfitSharingReadOnlyDbContext> optionsBuilder = new DbContextOptionsBuilder<ProfitSharingReadOnlyDbContext>().UseOracle(connectionString);
+        if (debug)
+        {
+            optionsBuilder.EnableSensitiveDataLogging().LogTo(s => Debug.WriteLine(s));
+        }
+
+        optionsBuilder.ReplaceService<IModelCustomizer, GlobalBoolToNumberModelCustomizer>();
+
+        ProfitSharingReadOnlyDbContext readOnlyCtx = new(optionsBuilder.Options);
+
+        return readOnlyCtx;
+    }
+
+
+    // This number <--> bool must be happening somewhere in the commons code?   I could not find it. 
+    // This allows the Entity to have "bool isActive" and the database to use NUMBER(1,0) for the column.
+    // W/o this Oracle/EF generates "FALSE" which is no good and causes oracle runtime error.
+    private sealed class GlobalBoolToNumberModelCustomizer : RelationalModelCustomizer
+    {
+        public GlobalBoolToNumberModelCustomizer(ModelCustomizerDependencies dependencies) : base(dependencies)
+        {
+        }
+
+        public override void Customize(ModelBuilder modelBuilder, DbContext context)
+        {
+            base.Customize(modelBuilder, context);
+
+            ValueConverter<bool, int> boolConverter = new(
+                v => v ? 1 : 0, // Convert bool → int
+                v => v == 1 // Convert int → bool
+            );
+
+            // Apply to ALL bool properties across ALL entities
+            foreach (IMutableEntityType entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                foreach (IMutableProperty property in entityType.GetProperties())
+                {
+                    if (property.ClrType == typeof(bool) || property.ClrType == typeof(bool?))
+                    {
+                        property.SetValueConverter(boolConverter);
+                        property.SetColumnType("NUMBER(1,0)");
+                    }
+                }
+            }
+        }
     }
 }

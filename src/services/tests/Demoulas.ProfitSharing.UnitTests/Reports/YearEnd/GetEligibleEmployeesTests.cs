@@ -1,43 +1,49 @@
-﻿using System.Net;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Net;
+using System.Text.Json;
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Eligibility;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
-using Demoulas.ProfitSharing.UnitTests.Common.Fakes;
+using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
 using FastEndpoints;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Xunit.Abstractions;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
-internal sealed record TestEmployee
-{
-    public int Id { get; init; }
-    public int OracleHcmId { get; init; }
-    public int BadgeNumber { get; init; }
-    public byte DepartmentId { get; init; }
-    public string? Department { get; init; }
-    public required string FullName { get; init; }
-    public int Age { get; init; }
-    public int HoursWorked { get; init; }
-    public char EmploymentStatusId { get; init; }
-}
-
 public class GetEligibleEmployeesTests : ApiTestBase<Program>
 {
-    private const short TestProfitYear = 2023; // We use this year, so the mock calendar service will be happy
-    private readonly ProfitYearRequest _requestDto = new ProfitYearRequest() { ProfitYear = TestProfitYear };
+    // This test uses a single employee.   These references let us adjust the employee in each test.
+    private readonly Demographic _d;
+    private readonly DemographicHistory _dh;
+    private readonly PayProfit _pp;
+    
+    private readonly short _testProfitYear;
+    private readonly ProfitYearRequest _requestDto;
+    private readonly ScenarioFactory _scenarioFactory;
 
+    public GetEligibleEmployeesTests()
+    {
+        _scenarioFactory = new ScenarioFactory().EmployeeWithHistory(); // Sets up a single employee with demographic history
+        MockDbContextFactory = _scenarioFactory.BuildMocks();
+        _testProfitYear = _scenarioFactory.ThisYear;
+        _requestDto = new ProfitYearRequest { ProfitYear = _testProfitYear };
+        _d = _scenarioFactory.Demographics[0];
+        _pp = _scenarioFactory.PayProfits[0];
+        _dh = _scenarioFactory.DemographicHistories[0];
+    }
+    
     [Fact]
     public async Task Unauthorized()
     {
         // Act
-        var response =
+        TestResult<GetEligibleEmployeesResponse> response =
             await ApiClient
                 .GETAsync<GetEligibleEmployeesEndpoint, ProfitYearRequest, GetEligibleEmployeesResponse>(_requestDto);
 
@@ -51,25 +57,23 @@ public class GetEligibleEmployeesTests : ApiTestBase<Program>
         return MockDbContextFactory.UseWritableContext(async c =>
         {
             // Arrange
-            TestEmployee te = StockEmployee();
-            await save(te, c);
             ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
 
             // Act
-            var response =
+            TestResult<GetEligibleEmployeesResponse> response =
                 await ApiClient
                     .GETAsync<GetEligibleEmployeesEndpoint, ProfitYearRequest, GetEligibleEmployeesResponse>(_requestDto);
 
             // Assert
-            response.Result.ReportName.Should().Be($"Get Eligible Employees for Year {TestProfitYear}");
-            var dto = response.Result.Response.Results.First(e => e.BadgeNumber == te.BadgeNumber);
+            response.Result.ReportName.Should().Be($"Get Eligible Employees for Year {_testProfitYear}");
+            EligibleEmployee dto = response.Result.Response.Results.First(e => e.BadgeNumber == _dh.BadgeNumber);
             dto.Should().BeEquivalentTo(new EligibleEmployee
                 {
-                    OracleHcmId = te.OracleHcmId,
-                    BadgeNumber = te.BadgeNumber,
-                    FullName = te.FullName,
-                    DepartmentId = te.DepartmentId,
-                    Department = te.Department
+                    OracleHcmId = _d.OracleHcmId,
+                    BadgeNumber = _dh.BadgeNumber,
+                    FullName = _d.ContactInfo!.FullName!,
+                    DepartmentId = _dh.DepartmentId,
+                    Department = "Dairy"
                 }
             );
 
@@ -83,30 +87,29 @@ public class GetEligibleEmployeesTests : ApiTestBase<Program>
         return MockDbContextFactory.UseWritableContext(async c =>
         {
             // Arrange
-            TestEmployee te = StockEmployee();
-            await save(te, c);
             DownloadClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
 
-            var yearEndDate = new DateOnly(2023, 12, 31);
-            var birthDateOfExactly21YearsOld = yearEndDate.AddYears(-21);
+            DateOnly yearEndDate = new(_testProfitYear, 12, 31);
+            DateOnly birthDateOfExactly21YearsOld = yearEndDate.AddYears(-21);
 
-            int numberReadOnFrozen = await c.PayProfits.Where(p => p.ProfitYear == TestProfitYear).CountAsync(CancellationToken.None);
+            int expectedNumberReadOnFrozen = await c.PayProfits.Where(p => p.ProfitYear == _testProfitYear).CountAsync(CancellationToken.None);
 
-            int numberNotSelected = await c.PayProfits
+            int expectedNumberNotSelected = await c.PayProfits
                 .Include(p => p.Demographic)
-                .Where(p => p.ProfitYear == TestProfitYear)
-                .Where(p => p.Demographic!.DateOfBirth > birthDateOfExactly21YearsOld /*too young*/ || (p.CurrentHoursYear + p.HoursExecutive) < 1000 ||
+                .Where(p => p.ProfitYear == _testProfitYear)
+                .Where(p => p.Demographic!.DateOfBirth > birthDateOfExactly21YearsOld /*too young*/
+                            || p.CurrentHoursYear + p.HoursExecutive < 1000 ||
                             p.Demographic!.EmploymentStatusId == EmploymentStatus.Constants.Terminated)
                 .CountAsync(CancellationToken.None);
 
-            int numberWritten = await c.PayProfits
+            int expectedNumberWritten = await c.PayProfits
                 .Include(p => p.Demographic)
-                .Where(p => p.ProfitYear == TestProfitYear)
-                .Where(p => p.Demographic!.DateOfBirth <= birthDateOfExactly21YearsOld /*over 21*/ && (p.CurrentHoursYear + p.HoursExecutive) >= 1000 &&
+                .Where(p => p.ProfitYear == _testProfitYear)
+                .Where(p => p.Demographic!.DateOfBirth <= birthDateOfExactly21YearsOld /*over 21*/ && p.CurrentHoursYear + p.HoursExecutive >= 1000 &&
                             p.Demographic!.EmploymentStatusId != EmploymentStatus.Constants.Terminated).CountAsync(CancellationToken.None);
 
             // Act
-            var response =
+            TestResult<GetEligibleEmployeesResponse> response =
                 await DownloadClient
                     .GETAsync<GetEligibleEmployeesEndpoint, ProfitYearRequest, GetEligibleEmployeesResponse>(_requestDto);
 
@@ -118,15 +121,15 @@ public class GetEligibleEmployeesTests : ApiTestBase<Program>
             string[] lines = csvData.Split(["\r\n", "\n"], StringSplitOptions.None);
             // line 0 is today's date
             lines[0].Should().NotBeEmpty();
-            lines[1].Should().Be($"Get Eligible Employees for Year {TestProfitYear}");
+            lines[1].Should().Be($"Get Eligible Employees for Year {_testProfitYear}");
             lines[2].Should().BeEmpty(); // blank link
-            lines[3].Should().Be($"Number read on FROZEN,{numberReadOnFrozen}");
-            lines[4].Should().Be($"Number not selected,{numberNotSelected}");
-            lines[5].Should().Be($"Number written,{numberWritten}");
+            lines[3].Should().Be($"Number read on FROZEN,{expectedNumberReadOnFrozen}");
+            lines[4].Should().Be($"Number not selected,{expectedNumberNotSelected}");
+            lines[5].Should().Be($"Number written,{expectedNumberWritten}");
 
             lines[6].Should().Be("ASSIGNMENT_ID,BADGE_PSN,NAME");
 
-            lines.Skip(7).Should().Contain($"{te.DepartmentId},{te.BadgeNumber},\"{te.FullName}\"");
+            lines.Skip(7).Should().Contain($"{_dh.DepartmentId},{_dh.BadgeNumber},\"{_d.ContactInfo!.FullName!}\"");
 
             return Task.CompletedTask;
         });
@@ -138,19 +141,19 @@ public class GetEligibleEmployeesTests : ApiTestBase<Program>
         return MockDbContextFactory.UseWritableContext(async c =>
         {
             // Arrange
-            TestEmployee te = StockEmployee() with { Age = 20 };
-            await save(te, c);
             ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+            // Too young to be eligible
+            _dh.DateOfBirth = new DateOnly(_testProfitYear, 6, 1).AddYears(-15);
 
             // Act
-            var response =
+            TestResult<GetEligibleEmployeesResponse> response =
                 await ApiClient
                     .GETAsync<GetEligibleEmployeesEndpoint, ProfitYearRequest, GetEligibleEmployeesResponse>(_requestDto);
 
             // Assert
             response.Result.Response.Results
                 .Should()
-                .NotContain(e => e.BadgeNumber == te.BadgeNumber);
+                .NotContain(e => e.BadgeNumber == _dh.BadgeNumber);
 
             return Task.CompletedTask;
         });
@@ -162,19 +165,20 @@ public class GetEligibleEmployeesTests : ApiTestBase<Program>
         return MockDbContextFactory.UseWritableContext(async c =>
         {
             // Arrange
-            TestEmployee te = StockEmployee() with { HoursWorked = 999 };
-            await save(te, c);
             ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+            // Not enough hours worked
+            _pp.CurrentHoursYear = 999;
+            _pp.HoursExecutive = 0;
 
             // Act
-            var response =
+            TestResult<GetEligibleEmployeesResponse> response =
                 await ApiClient
                     .GETAsync<GetEligibleEmployeesEndpoint, ProfitYearRequest, GetEligibleEmployeesResponse>(_requestDto);
 
             // Assert
             response.Result.Response.Results
                 .Should()
-                .NotContain(e => e.BadgeNumber == te.BadgeNumber);
+                .NotContain(e => e.BadgeNumber == _dh.BadgeNumber);
 
             return Task.CompletedTask;
         });
@@ -186,73 +190,20 @@ public class GetEligibleEmployeesTests : ApiTestBase<Program>
         return MockDbContextFactory.UseWritableContext(async c =>
         {
             // Arrange
-            TestEmployee te = StockEmployee() with { EmploymentStatusId = EmploymentStatus.Constants.Terminated };
-            await save(te, c);
             ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+            _dh.EmploymentStatusId = EmploymentStatus.Constants.Terminated;
 
             // Act
-            var response =
+            TestResult<GetEligibleEmployeesResponse> response =
                 await ApiClient
                     .GETAsync<GetEligibleEmployeesEndpoint, ProfitYearRequest, GetEligibleEmployeesResponse>(_requestDto);
 
             // Assert
             response.Result.Response.Results
                 .Should()
-                .NotContain(e => e.BadgeNumber == te.BadgeNumber);
+                .NotContain(e => e.BadgeNumber == _dh.BadgeNumber);
 
             return Task.CompletedTask;
         });
-    }
-
-    private TestEmployee StockEmployee() => new TestEmployee
-    {
-        Id = 17,
-        OracleHcmId = 7,
-        BadgeNumber = 77,
-        FullName = "Smith, Joe K",
-        Age = 44,
-        HoursWorked = 1010,
-        EmploymentStatusId = EmploymentStatus.Constants.Active,
-        DepartmentId = Department.Constants.Grocery,
-        Department = nameof(Department.Constants.Grocery)
-    };
-
-
-    private static async Task save(TestEmployee testEmployee, ProfitSharingDbContext ctx)
-    {
-        var pp = await ctx.PayProfits
-            .Include(payProfit => payProfit.Demographic!) // Include Demographic
-            .ThenInclude(demographic => demographic.ContactInfo) // Include ContactInfo
-            .Include(payProfit => payProfit.Demographic!) // Re-include Demographic to enable another ThenInclude
-            .ThenInclude(demographic => demographic.Department) // Include Department (child of Demographic)
-            .FirstAsync(CancellationToken.None);
-        pp.ProfitYear = TestProfitYear;
-        pp.DemographicId = testEmployee.Id;
-        pp.CurrentHoursYear = testEmployee.HoursWorked;
-        pp.HoursExecutive = 0;
-        var demo = pp.Demographic!;
-        demo.OracleHcmId = testEmployee.OracleHcmId;
-        demo.Id = testEmployee.Id;
-        demo.DepartmentId = testEmployee.DepartmentId;
-        demo.Department = new Department { Id = Department.Constants.Grocery, Name = testEmployee.Department ?? nameof(Department.Constants.Grocery) };
-        demo.ContactInfo.FullName = testEmployee.FullName;
-        demo.BadgeNumber = testEmployee.BadgeNumber;
-        demo.DateOfBirth = convertAgeToBirthDate(TestProfitYear, testEmployee.Age);
-        demo.EmploymentStatusId = testEmployee.EmploymentStatusId;
-
-        var df = new DemographicFaker();
-        // The fake PayProfits entities share fake Demographic entities. (see demographicQueue in PayProfitFaker)
-        // PayProfit and Demographic are 1-1 in the database, to prevent errors - we assign the PayProfits sharing this
-        // Demographic new Demographics.
-        var otherPayProfitsUsingOurDemograhic = await ctx.PayProfits.Where(ppo => ppo != pp && ppo.Demographic == demo)
-            .ToListAsync(CancellationToken.None);
-        otherPayProfitsUsingOurDemograhic.ForEach(pp => pp.Demographic = df.Generate());
-
-        await ctx.SaveChangesAsync(CancellationToken.None);
-    }
-
-    private static DateOnly convertAgeToBirthDate(short profitSharYear, int age)
-    {
-        return new DateOnly(profitSharYear - age, 6, 1); // drop them in June to avoid any fiscal year end weirdness.
     }
 }
