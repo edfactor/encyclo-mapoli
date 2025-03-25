@@ -5,6 +5,7 @@ using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Department = Demoulas.ProfitSharing.Data.Entities.Department;
 
 namespace Demoulas.ProfitSharing.Data.Contexts;
 
@@ -41,6 +42,7 @@ public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>, I
 
     public virtual DbSet<DataImportRecord> DataImportRecords { get; set; }
     public virtual DbSet<FakeSsn> FakeSsns { get; set; }
+    public virtual DbSet<Department> Departments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

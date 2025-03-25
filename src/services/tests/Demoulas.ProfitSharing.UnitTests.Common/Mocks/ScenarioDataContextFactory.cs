@@ -11,7 +11,7 @@ public class ScenarioDataContextFactory : IProfitSharingDataContextFactory
 {
     public Mock<ProfitSharingDbContext> ProfitSharingDbContext { get; }
     public Mock<ProfitSharingReadOnlyDbContext> ProfitSharingReadOnlyDbContext { get; }
-    Mock<DemoulasCommonDataContext> StoreInfoDbContext { get; }
+    public Mock<DemoulasCommonDataContext> StoreInfoDbContext { get; }
 
 
     public ScenarioDataContextFactory()
