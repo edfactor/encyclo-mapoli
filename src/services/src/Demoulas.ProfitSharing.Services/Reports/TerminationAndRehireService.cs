@@ -22,18 +22,20 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly ICalendarService _calendarService;
     private readonly TotalService _totalService;
+    private readonly ILoggerFactory _factory;
     private readonly ILogger<TerminationAndRehireService> _logger;
 
     public TerminationAndRehireService(
         IProfitSharingDataContextFactory dataContextFactory,
         ICalendarService calendarService,
         TotalService totalService,
-        ILogger<TerminationAndRehireService> logger)
+        ILoggerFactory factory)
     {
         _dataContextFactory = dataContextFactory;
         _calendarService = calendarService;
         _totalService = totalService;
-        _logger = logger;
+        _factory = factory;
+        _logger = factory.CreateLogger<TerminationAndRehireService>();
     }
 
     /// <summary>
@@ -79,7 +81,7 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
     /// <returns>A task that represents the asynchronous operation. The task result contains a report response with the rehire profit sharing data.</returns>
     public async Task<ReportResponseBase<RehireForfeituresResponse>> FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYearsAsync(RehireForfeituresRequest req, CancellationToken cancellationToken)
     {
-        var validator = new RehireForfeituresRequestValidator(_calendarService, _logger);
+        var validator = new RehireForfeituresRequestValidator(_calendarService, _factory);
         await validator.ValidateAndThrowAsync(req, cancellationToken);
         _logger.LogInformation("Finding rehires with forfeitures for profit year {ProfitYear}", req.ProfitYear);
 
@@ -123,7 +125,7 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
 
     public async Task<ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>> GetMilitaryAndRehireProfitSummaryReportAsync(RehireForfeituresRequest req, CancellationToken cancellationToken)
     {
-        var validator = new RehireForfeituresRequestValidator(_calendarService, _logger);
+        var validator = new RehireForfeituresRequestValidator(_calendarService, _factory);
         await validator.ValidateAndThrowAsync(req, cancellationToken);
 
         _logger.LogInformation("Generating military and rehire profit summary report for profit year {ProfitYear}", req.ProfitYear);

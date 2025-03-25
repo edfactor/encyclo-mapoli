@@ -10,14 +10,14 @@ namespace Demoulas.ProfitSharing.Common.Validators;
 public class RehireForfeituresRequestValidator : PaginationValidatorBase<RehireForfeituresRequest>
 {
     private readonly ICalendarService _calendarService;
-    private readonly ILogger _logger;
+    private readonly ILogger<RehireForfeituresRequestValidator> _logger;
 
     public RehireForfeituresRequestValidator(
         ICalendarService calendarService,
-        ILogger logger)
+        ILoggerFactory factory)
     {
         _calendarService = calendarService;
-        _logger = logger;
+        _logger = factory.CreateLogger<RehireForfeituresRequestValidator>();
 
         RuleFor(x => x.ProfitYear).GreaterThan((short)0).WithMessage("Profit year must be greater than zero.");
 

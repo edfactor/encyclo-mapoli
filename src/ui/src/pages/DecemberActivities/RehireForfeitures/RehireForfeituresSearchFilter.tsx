@@ -22,8 +22,6 @@ interface RehireForfeituresSearch extends ProfitYearRequest {
   pagination: SortedPaginationRequestDto;
 }
 
-const digitsOnly: (value: string | undefined) => boolean = (value) => (value ? /^\d+$/.test(value) : false);
-
 const schema = yup.object().shape({
   profitYear: yup
     .number()
@@ -31,11 +29,7 @@ const schema = yup.object().shape({
     .integer("Profit Year must be an integer")
     .min(2020, "Year must be 2020 or later")
     .max(2100, "Profit Year must be 2100 or earlier")
-    .required("Profit Year is required"),
-  reportingYear: yup
-    .string()
-    .test("Digits only", "This field should have digits only", digitsOnly)
-    .required("Reporting Year is required")
+    .required("Profit Year is required")
 });
 
 interface MilitaryAndRehireForfeituresSearchFilterProps {
@@ -59,8 +53,9 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
     resolver: yupResolver(schema),
     defaultValues: {
       profitYear: profitYear || rehireForfeituresQueryParams?.profitYear || undefined,
-      beginningDate: rehireForfeituresQueryParams?.beginningDate || undefined,
-      endingDate: rehireForfeituresQueryParams?.endingDate || undefined,
+      beginningDate: rehireForfeituresQueryParams?.beginningDate ? new Date(rehireForfeituresQueryParams.beginningDate) : null,
+      endingDate: rehireForfeituresQueryParams?.endingDate ? new Date(rehireForfeituresQueryParams.endingDate) : null,
+
       pagination: { skip: 0, take: 25, sortBy: "profitYear", isSortDescending: true }
     }
   });
@@ -78,7 +73,8 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
       ).unwrap();
       dispatch(setMilitaryAndRehireForfeituresQueryParams({
         profitYear: profitYear,
-        reportingYear: data.endingDate
+        beginningDate : data.beginningDate,
+        endingDate: data.endingDate
       }));
     }
   });
@@ -107,10 +103,30 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
             render={({ field }) => (
               <DsmDatePicker
                 id="profitYear"
+                onChange={(value: Date | null) => field.onChange(value?.getFullYear() || undefined)}
+                value={field.value ? new Date(field.value, 0) : null}
+                required={true}
+                label="Profit Year"
+                disableFuture
+                views={["year"]}
+                error={errors.profitYear?.message}
+                disabled={true}
+              />
+            )}
+          />
+          {errors.profitYear && <FormHelperText error>{errors.profitYear.message}</FormHelperText>}
+        </Grid2>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+          <Controller
+            name="beginningDate"
+            control={control}
+            render={({ field }) => (
+              <DsmDatePicker
+                id="beginningDate"
                 onChange={(value: Date | null) => field.onChange(value?.getDate() || undefined)}
                 value={field.value ? new Date(field.value) : null}
                 required={true}
-                label="Beginning Date"
+                label="Rehire Begin Date"
                 disableFuture
                 error={errors.beginningDate?.message}                
               />
@@ -128,7 +144,7 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
                 onChange={(value: Date | null) => field.onChange(value?.getDate() || undefined)}
                 value={field.value ? new Date(field.value) : null}
                 required={true}
-                label="Ening Date"
+                label="Rehire Ening Date"
                 disableFuture
                 error={errors.endingDate?.message}
               />
