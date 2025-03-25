@@ -19,7 +19,7 @@ namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
 public class GetEligibleEmployeesTests : ApiTestBase<Program>
 {
-    // This test uses a single employee.   This references let us adjust that that employee
+    // This test uses a single employee.   These references let us adjust that that employee in each test.
     private readonly Demographic _d;
     private readonly DemographicHistory _dh;
     private readonly PayProfit _pp;
@@ -30,7 +30,7 @@ public class GetEligibleEmployeesTests : ApiTestBase<Program>
 
     public GetEligibleEmployeesTests()
     {
-        _scenarioFactory = new ScenarioFactory().EmployeeWithHistory();
+        _scenarioFactory = new ScenarioFactory().EmployeeWithHistory(); // Sets up a single employee with demographic history
         MockDbContextFactory = _scenarioFactory.BuildMocks();
         _testProfitYear = _scenarioFactory.ThisYear;
         _requestDto = new ProfitYearRequest { ProfitYear = _testProfitYear };

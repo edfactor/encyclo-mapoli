@@ -86,7 +86,8 @@ internal sealed class PristineDataContextFactory : IProfitSharingDataContextFact
 
 
     // This number <--> bool must be happening somewhere in the commons code?   I could not find it. 
-    // This allow the Entity to have "bool isActive
+    // This allows the Entity to have "bool isActive" and the database to use NUMBER(1,0) for the column.
+    // W/o this Oracle/EF generates "FALSE" which is no good and causes oracle runtime error.
     private sealed class GlobalBoolToNumberModelCustomizer : RelationalModelCustomizer
     {
         public GlobalBoolToNumberModelCustomizer(ModelCustomizerDependencies dependencies) : base(dependencies)

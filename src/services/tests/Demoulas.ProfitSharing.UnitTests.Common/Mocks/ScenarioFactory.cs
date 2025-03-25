@@ -1,6 +1,7 @@
+
+using System.Reflection;
 using Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping.Data;
 using Demoulas.Common.Data.Services.Entities.Entities;
-using System.Reflection;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.Util.Extensions;
@@ -9,6 +10,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using MockQueryable.Moq;
 using Moq;
+// Common also has a Department.cs file, so we need to specify the one we want to use
 using Department = Demoulas.ProfitSharing.Data.Entities.Department;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Mocks;

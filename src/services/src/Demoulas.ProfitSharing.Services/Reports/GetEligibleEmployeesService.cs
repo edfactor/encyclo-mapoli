@@ -32,7 +32,7 @@ public sealed class GetEligibleEmployeesService : IGetEligibleEmployeesService
 
         return await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            var baseQuery = ctx.PayProfits.AsNoTracking().Where(p => p.ProfitYear == request.ProfitYear)
+            var baseQuery = ctx.PayProfits.Where(p => p.ProfitYear == request.ProfitYear)
                 .Join(
                     FrozenService.GetDemographicSnapshot(ctx, request.ProfitYear),
                     pp => pp.DemographicId,
