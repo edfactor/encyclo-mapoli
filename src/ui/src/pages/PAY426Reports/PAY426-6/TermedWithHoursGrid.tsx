@@ -49,7 +49,7 @@ const TermedWithHoursGrid = () => {
         <Typography
           variant="h2"
           sx={{ color: "#0258A5" }}>
-          {`TERMED WITH 1000+ HOURS REPORT (${data?.response?.results?.length || 0})`}
+          {`TERMED WITH 1000+ HOURS REPORT (${data?.response?.results?.length || 0} records)`}
         </Typography>
       </div>
       <DSMGrid

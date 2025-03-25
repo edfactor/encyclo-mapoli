@@ -41,7 +41,7 @@ const MissingCommaInPyNameGrid: React.FC = () => {
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`(${missingCommaInPYName?.response.total || 0})`}
+              {`(${missingCommaInPYName?.response.total || 0} records)`}
             </Typography>
           </div>
           <DSMGrid

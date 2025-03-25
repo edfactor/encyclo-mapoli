@@ -57,7 +57,7 @@ const ProfitShareGrossReportGrid = () => {
         <Typography
           variant="h2"
           sx={{ color: "#0258A5" }}>
-          {`PROFIT SHARE GROSS REPORT (QPAY501) (${sampleData.length || 0})`}
+          {`PROFIT SHARE GROSS REPORT (QPAY501) (${sampleData.length || 0} ${sampleData.length === 1 ? 'Record' : 'Records'})`}
         </Typography>
       </div>
       <DSMGrid

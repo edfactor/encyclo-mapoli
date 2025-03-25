@@ -50,7 +50,7 @@ const TwentyOnePlusGrid = () => {
         <Typography
           variant="h2"
           sx={{ color: "#0258A5" }}>
-          {`ACTIVE/INACTIVE 21+ REPORT (${data?.response?.results?.length || 0})`}
+          {`ACTIVE/INACTIVE 21+ REPORT (${data?.response?.results?.length || 0} records)`}
         </Typography>
       </div>
       <DSMGrid

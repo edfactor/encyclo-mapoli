@@ -103,7 +103,7 @@ const Pay450Grid = () => {
         <Typography
           variant="h2"
           sx={{ color: "#0258A5" }}>
-          {`PROFIT-ELIGIBLE REPORT (${sampleProfitShareData.length || 0})`}
+          {`PROFIT-ELIGIBLE REPORT (${sampleProfitShareData.length || 0} records)`}
         </Typography>
       </div>
       <DSMGrid

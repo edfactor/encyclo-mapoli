@@ -49,7 +49,7 @@ const TermedNoPriorGrid = () => {
         <Typography
           variant="h2"
           sx={{ color: "#0258A5" }}>
-          {`TERMED NO PRIOR PS REPORT (${data?.response?.results?.length || 0})`}
+          {`TERMED NO PRIOR PS REPORT (${data?.response?.results?.length || 0} records)`}
         </Typography>
       </div>
       <DSMGrid
