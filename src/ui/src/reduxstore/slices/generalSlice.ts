@@ -34,11 +34,9 @@ export const generalSlice = createSlice({
       state.activeSubmenu = "";
     },
     openDrawer: (state) => {
-      console.log("In reducer opening drawer");
       state.isDrawerOpen = true;
     },
     closeDrawer: (state) => {
-      console.log("In reducer closing drawer");
       state.isDrawerOpen = false;
     },
     setBanner: (state, action: PayloadAction<string>) => {
