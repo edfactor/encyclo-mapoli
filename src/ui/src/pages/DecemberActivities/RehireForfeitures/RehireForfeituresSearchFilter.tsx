@@ -53,9 +53,8 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
     resolver: yupResolver(schema),
     defaultValues: {
       profitYear: profitYear || rehireForfeituresQueryParams?.profitYear || undefined,
-      beginningDate: rehireForfeituresQueryParams?.beginningDate ? new Date(rehireForfeituresQueryParams.beginningDate) : null,
-      endingDate: rehireForfeituresQueryParams?.endingDate ? new Date(rehireForfeituresQueryParams.endingDate) : null,
-
+      beginningDate: rehireForfeituresQueryParams?.beginningDate ? new Date(rehireForfeituresQueryParams.beginningDate) : undefined,
+      endingDate: rehireForfeituresQueryParams?.endingDate ? new Date(rehireForfeituresQueryParams.endingDate) : undefined,
       pagination: { skip: 0, take: 25, sortBy: "profitYear", isSortDescending: true }
     }
   });
