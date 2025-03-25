@@ -18,7 +18,7 @@ import ProfitShareReportFinalRun from "pages/FiscalFlow/ProfitShareReportFinalRu
 import Forfeit from "pages/Forfeit/Forfeit";
 import FrozenSummary from "pages/FrozenSummary/FrozenSummary";
 import MasterInquiry from "pages/MasterInquiry/MasterInquiry";
-import MilitaryAndRehireForfeitures from "pages/MilitaryAndRehireForfeitures/MilitaryAndRehireForfeitures";
+import RehireForfeitures from "pages/RehireForfeitures/RehireForfeitures";
 import MilitaryEntryAndModification from "pages/MilitaryEntryAndModification/MilitaryEntryAndModification";
 import EighteenToTwenty from "pages/PAY426Reports/PAY426-1/EighteenToTwenty";
 import Beneficiaries from "pages/PAY426Reports/PAY426-10/Beneficiaries";
@@ -179,7 +179,7 @@ const RouterSubAssembly: React.FC = () => {
                 element={<EmployeesOnMilitaryLeave />}></Route>
               <Route
                 path={ROUTES.REHIRE_FORFEITURES}
-                element={<MilitaryAndRehireForfeitures />}></Route>
+                element={<RehireForfeitures />}></Route>
               <Route
                 path={ROUTES.DISTRIBUTIONS_AND_FORFEITURES}
                 element={<DistributionsAndForfeitures />}></Route>
