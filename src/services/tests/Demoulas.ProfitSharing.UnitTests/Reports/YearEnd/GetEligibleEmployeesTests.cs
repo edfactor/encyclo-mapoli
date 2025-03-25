@@ -19,7 +19,7 @@ namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
 public class GetEligibleEmployeesTests : ApiTestBase<Program>
 {
-    // This test uses a single employee.   These references let us adjust that that employee in each test.
+    // This test uses a single employee.   These references let us adjust the employee in each test.
     private readonly Demographic _d;
     private readonly DemographicHistory _dh;
     private readonly PayProfit _pp;
