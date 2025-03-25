@@ -1,5 +1,8 @@
 export const HISTORY_KEY = "navigation_history" as const;
 
+export const drawerOpenWidth = 320;
+export const drawerClosedWidth = 64;
+
 export const MENU_LABELS = {
   FISCAL_CLOSE: "Fiscal Close",
   DECEMBER_ACTIVITIES: "December Activities",
@@ -7,7 +10,8 @@ export const MENU_LABELS = {
   DISTRIBUTIONS: "Distributions",
   RECONCILIATION: "Reconciliation",
   INQUIRIES: "Inquiries",
-  IT_OPERATIONS: "IT OPERATIONS",
+  YEAR_END: "Year End",
+  IT_OPERATIONS: "IT OPERATIONS"
 } as const;
 
 export const ROUTES = {
@@ -31,8 +35,8 @@ export const ROUTES = {
   NEGATIVE_ETVA: "negative-etva-for-ssns-on-payprofit",
   DUPLICATE_NAMES: "duplicate-names-and-birthdays",
   MISSING_COMMA: "missing-comma-in-py-name",
-  EMPLOYEES_MILITARY: "employees-on-military-leave",
-  REHIRE_FORFEITURES: "rehire-forfeitures",
+  MILITARY_LEAVE: "employees-on-military-leave",
+  REHIRE_FORFEITURES: "military-and-rehire-forfeitures",
   PROFIT_SHARE_REPORT: "profit-share-report",
   PROFIT_SHARE_REPORT_EDIT_RUN: "profit-share-report-edit-run",
   PROFIT_SHARE_REPORT_FINAL_RUN: "profit-share-report-final-run",
@@ -70,13 +74,17 @@ export const CAPTIONS = {
   BALANCE_BY_AGE: "Get Balance by Age (PROF 130B)",
   BALANCE_BY_YEARS: "Get Balance by Years (PROF 130Y)",
   CONTRIBUTIONS_BY_AGE: "Get Contributions by Age (PROF 130)",
+  CLEAN_UP_REPORTS: "Clean Up Reports",
   DEMOGRAPHIC_BADGES: "Demographic Badges Not In Payprofit",
+  DECEMBER: "December",
+  FISCAL_CLOSE: "Fiscal Close",
+  POST_FROZEN: "Post Frozen",
   DISTRIBUTIONS_AND_FORFEITURES: "Distributions and Forfeitures (QPAY129)",
   DISTRIBUTIONS_BY_AGE: "Get Distributions by Age (PROF 130)",
   DUPLICATE_NAMES: "Duplicate Names and Birthdays",
   DUPLICATE_SSNS: "Duplicate SSNs in Demographics",
   ELIGIBLE_EMPLOYEES: "Get Eligible Employees",
-  EMPLOYEES_MILITARY: "Military Leave (QPAY 511)",
+  MILITARY_LEAVE: "Military Leave (QPAY 511)",
   FORFEIT: "Forfeit",
   FORFEITURES_BY_AGE: "Get Forfeitures by Age (PROF 130)",
   MANAGE_EXECUTIVE_HOURS: "Manage Executive Hours and Dollars (TPR008-09)",
@@ -106,7 +114,7 @@ export const CAPTIONS = {
   PROFALL: "PROFALL Report",
   PROFIT_SHARE_BY_STORE: "Profit Share by Store",
   PROFIT_SHARE_GROSS_REPORT: "Profit Share Gross Report",
-  PROFIT_SHARE_REPORT_EDIT_RUN: "Profit Share Report Edit Run (PAY456)",
+  PROFIT_SHARE_REPORT_EDIT_RUN: "Profit Share Report Edit Run (PAY426)",
   PROFIT_SHARE_REPORT_FINAL_RUN: "Profit Share Report Final Run (PAY426)",
   PROFIT_SHARE_REPORT: "Profit Share Report (PAY426)",
   PROFIT_SHARE_UPDATE: "Profit Share Update (PAY444 PAY447 PAY460 PROFTLD)",
@@ -114,6 +122,7 @@ export const CAPTIONS = {
   QPAY066_UNDER21: "QPAY066-UNDR21",
   QPAY066TA_UNDER21: "QPAY066TA-UNDR21",
   QPAY066TA: "QPAY066TA",
+  REPORTS_BY_AGE: "Reports by Age",
   SUMMARY: "Summary",
   TERMINATIONS: "Terminations (QPAY066)",
   VESTED_AMOUNTS_BY_AGE: "Get Vested Amounts by Age (PROF 130V)",
