@@ -36,7 +36,7 @@ export const ROUTES = {
   DUPLICATE_NAMES: "duplicate-names-and-birthdays",
   MISSING_COMMA: "missing-comma-in-py-name",
   MILITARY_LEAVE: "employees-on-military-leave",
-  REHIRE_FORFEITURES: "military-and-rehire-forfeitures",
+  REHIRE_FORFEITURES: "rehire-forfeitures",
   PROFIT_SHARE_REPORT: "profit-share-report",
   PROFIT_SHARE_REPORT_EDIT_RUN: "profit-share-report-edit-run",
   PROFIT_SHARE_REPORT_FINAL_RUN: "profit-share-report-final-run",
