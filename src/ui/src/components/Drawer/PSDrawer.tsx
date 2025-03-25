@@ -103,7 +103,7 @@ const PSDrawer = () => {
         }}>
         {drawerOpen && (
           <Typography
-            variant="subtitle1"
+            variant="h6"
             sx={{
               color: (theme) => theme.palette.text.primary,
               whiteSpace: "nowrap",
@@ -177,7 +177,7 @@ const PSDrawer = () => {
                 }}>
                 <ChevronLeft />
                 <Typography
-                  variant="subtitle1"
+                  variant="body2"
                   sx={{ fontWeight: "bold" }}>
                   {activeSubmenu}
                 </Typography>
@@ -202,7 +202,7 @@ const PSDrawer = () => {
                               pl: 2,
                               display: "flex",
                               justifyContent: "space-between",
-                              py: 0.5,
+                              py: 1.75,
                               minHeight: 0
                             }}>
                             <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -233,18 +233,18 @@ const PSDrawer = () => {
                                     pl: 4,
                                     display: "flex",
                                     justifyContent: "space-between",
-                                    py: 0.5,
+                                    py: 1,
                                     minHeight: 0
                                   }}
                                   onClick={() => handleSubPageClick(subPage.subRoute ?? "")}>
                                   <Box sx={{ display: "flex", alignItems: "center" }}>
                                     <ListItemText
                                       primary={subPage.subTitle}
+                                      primaryTypographyProps={{
+                                        variant: "body2"
+                                      }}
                                       sx={{
-                                        margin: 0,
-                                        "& .MuiTypography-root": {
-                                          fontSize: "0.875rem"
-                                        }
+                                        margin: 0
                                       }}
                                     />
                                   </Box>
@@ -262,7 +262,7 @@ const PSDrawer = () => {
                               pl: 2,
                               display: "flex",
                               justifyContent: "space-between",
-                              py: 0.5,
+                              py: 1,
                               minHeight: 0
                             }}>
                             <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -313,8 +313,12 @@ const PSDrawer = () => {
                             <ListItemText
                               primary={level.mainTitle}
                               secondary={`1 of ${level.topPage.length - 1} completed`}
+                              primaryTypographyProps={{
+                                variant: "h6"
+                              }}
                               secondaryTypographyProps={{
                                 sx: {
+                                  variant: "body2",
                                   color: expandedLevels[level.mainTitle]
                                     ? "rgba(255, 255, 255, 0.7)"
                                     : (theme) => theme.palette.text.secondary,

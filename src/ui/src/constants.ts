@@ -1,6 +1,6 @@
 export const HISTORY_KEY = "navigation_history" as const;
 
-export const drawerOpenWidth = 320;
+export const drawerOpenWidth = 330;
 export const drawerClosedWidth = 64;
 
 export const MENU_LABELS = {

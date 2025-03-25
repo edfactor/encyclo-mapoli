@@ -2,7 +2,6 @@ import Grid2 from "@mui/material/Grid2";
 import React from "react";
 import EnvironmentBanner, { IEnvironmentBannerProps } from "../Layout/EnvironmentBanner";
 import WelcomeDisplay, { WelcomeDisplayProps } from "../Layout/WelcomeDisplay";
-import "./PSLayout.css";
 
 export interface DSMLayoutProps extends IEnvironmentBannerProps, WelcomeDisplayProps {
   children: React.ReactNode;
