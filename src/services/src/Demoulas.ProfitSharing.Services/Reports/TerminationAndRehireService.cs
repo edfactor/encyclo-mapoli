@@ -10,7 +10,6 @@ using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
-using Demoulas.ProfitSharing.Services.Validation;
 using Demoulas.Util.Extensions;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
@@ -51,7 +50,6 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
     public async Task<ReportResponseBase<EmployeesOnMilitaryLeaveResponse>> GetMilitaryAndRehireReportAsync(PaginationRequestDto req, CancellationToken cancellationToken)
     {
         await _paginationValidator.ValidateAndThrowAsync(req, cancellationToken);
-        _logger.LogInformation("Generating military and rehire report with page {Page} and page size {PageSize}", req.Page, req.PageSize);
 
         var militaryMembers = await _dataContextFactory.UseReadOnlyContext(async context =>
         {

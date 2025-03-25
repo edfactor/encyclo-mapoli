@@ -1,27 +1,56 @@
-﻿using FluentValidation;
-using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Interfaces;
+using FluentValidation;
+using Microsoft.Extensions.Logging;
 
-namespace Demoulas.ProfitSharing.Services.Validation;
+namespace Demoulas.ProfitSharing.Common.Validators;
 
 public class RehireForfeituresRequestValidator : AbstractValidator<RehireForfeituresRequest>
 {
-    public RehireForfeituresRequestValidator()
+    private readonly ICalendarService _calendarService;
+    private readonly ILogger<RehireForfeituresRequestValidator> _logger;
+
+    public RehireForfeituresRequestValidator(
+        ICalendarService calendarService,
+        ILogger<RehireForfeituresRequestValidator> logger)
     {
-        RuleFor(x => x.ProfitYear)
-            .GreaterThan((short)2000)
-            .LessThanOrEqualTo((short)(DateTime.Now.Year + 1))
-            .WithMessage("Profit year must be between 2000 and next year.");
+        _calendarService = calendarService;
+        _logger = logger;
+
+        RuleFor(x => x.ProfitYear).GreaterThan((short)0).WithMessage("Profit year must be greater than zero.");
 
         RuleFor(x => x.BeginningDate)
-            .NotEmpty()
-            .WithMessage("Beginning date is required.");
+            .NotEmpty().WithMessage("Beginning date is required.")
+            .MustAsync(BeWithinFiscalYear)
+            .WithMessage("Beginning date must be within the fiscal year range.");
 
         RuleFor(x => x.EndingDate)
-            .NotEmpty()
-            .WithMessage("Ending date is required.");
-
-        RuleFor(x => x.EndingDate)
+            .NotEmpty().WithMessage("Ending date is required.")
+            .MustAsync(BeWithinFiscalYear)
+            .WithMessage("Ending date must be within the fiscal year range.")
             .GreaterThanOrEqualTo(x => x.BeginningDate)
             .WithMessage("Ending date must be greater than or equal to beginning date.");
+    }
+
+    private async Task<bool> BeWithinFiscalYear(RehireForfeituresRequest request, DateOnly date, ValidationContext<RehireForfeituresRequest> context, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var bracket = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
+
+            if (date < bracket.FiscalBeginDate || date > bracket.FiscalEndDate)
+            {
+                _logger.LogWarning("Date {Date} is outside fiscal year {ProfitYear} boundaries ({Start} - {End})",
+                    date, request.ProfitYear, bracket.FiscalBeginDate, bracket.FiscalEndDate);
+                return false;
+            }
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error validating date against fiscal year boundaries");
+            return false;
+        }
     }
 }
