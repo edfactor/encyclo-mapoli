@@ -1,7 +1,7 @@
 import { Typography } from "@mui/material";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { useLazyGetMilitaryAndRehireForfeituresQuery } from "reduxstore/api/YearsEndApi";
+import { useLazyGetRehireForfeituresQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
@@ -27,7 +27,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
     (state: RootState) => state.yearsEnd
   );
 
-  const [triggerSearch, { isFetching }] = useLazyGetMilitaryAndRehireForfeituresQuery();
+  const [triggerSearch, { isFetching }] = useLazyGetRehireForfeituresQuery();
 
   const onSearch = useCallback(async () => {
     const request = {

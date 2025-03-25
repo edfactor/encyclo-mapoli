@@ -56,7 +56,7 @@ import {
   FrozenReportsByAgeRequest,
   FrozenReportsForfeituresAndPointsRequest,
   MilitaryAndRehireForfeiture,
-  MilitaryAndRehireForfeituresRequestDto,
+  RehireForfeituresRequest,
   MissingCommasInPYName,
   MissingCommasInPYNameRequestDto,
   NegativeEtvaForSSNsOnPayProfit,
@@ -214,9 +214,9 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getMilitaryAndRehireForfeitures: builder.query<
+    getRehireForfeitures: builder.query<
       PagedReportResponse<MilitaryAndRehireForfeiture>,
-      MilitaryAndRehireForfeituresRequestDto
+      RehireForfeituresRequest
     >({
       query: (params) => ({
         url: `yearend/rehire-forfeitures/${params.reportingYear}`,
@@ -676,7 +676,7 @@ export const {
   useLazyGetForfeituresByAgeQuery,
   useLazyGetMasterApplyQuery,
   useLazyGetMasterRevertQuery,
-  useLazyGetMilitaryAndRehireForfeituresQuery,
+  useLazyGetRehireForfeituresQuery,
   useLazyGetNamesMissingCommasQuery,
   useLazyGetNegativeEVTASSNQuery,
   useLazyGetProfitShareEditQuery,

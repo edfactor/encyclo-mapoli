@@ -24,12 +24,11 @@ import {
   MissingCommasInPYName,
   NegativeEtvaForSSNsOnPayProfit,
   PagedReportResponse,
-  ProfitAndReportingQueryParams,
   ProfitShareEditResponse,
   ProfitShareMasterResponse,
   ProfitShareUpdateResponse,
   ProfitSharingDistributionsByAge,
-  ProfitYearRequest,
+  ProfitYearRequest, RehireForfeituresRequest,
   TerminationResponse,
   VestedAmountsByAge,
   YearEndProfitSharingReportResponse
@@ -79,9 +78,9 @@ export interface YearsEndState {
   militaryAndRehire: PagedReportResponse<EmployeesOnMilitaryLeaveResponse> | null;
   militaryEntryAndModification: EmployeeDetails | null;
   rehireForfeitures: PagedReportResponse<MilitaryAndRehireForfeiture> | null;
-  rehireForfeituresQueryParams: ProfitAndReportingQueryParams | null;
-  rehireProfitSummaryQueryParams: ProfitAndReportingQueryParams | null;
-  militaryAndRehireQueryParams: ProfitAndReportingQueryParams | null;
+  rehireForfeituresQueryParams: RehireForfeituresRequest | null;
+  rehireProfitSummaryQueryParams: RehireForfeituresRequest | null;
+  militaryAndRehireQueryParams: RehireForfeituresRequest | null;
   missingCommaInPYName: PagedReportResponse<MissingCommasInPYName> | null;
   negativeEtvaForSSNsOnPayprofit: PagedReportResponse<NegativeEtvaForSSNsOnPayProfit> | null;
   negativeEtvaForSSNsOnPayprofitParams: ProfitYearRequest | null;

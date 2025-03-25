@@ -3,7 +3,7 @@ import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { useLazyGetMilitaryAndRehireForfeituresQuery } from "reduxstore/api/YearsEndApi";
+import { useLazyGetRehireForfeituresQuery } from "reduxstore/api/YearsEndApi";
 import {
   clearRehireForfeituresDetails,
   clearRehireForfeituresQueryParams,
@@ -43,7 +43,7 @@ interface MilitaryAndRehireForfeituresSearchFilterProps {
 const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearchFilterProps> = ({
   setInitialSearchLoaded
 }) => {
-  const [triggerSearch, { isFetching }] = useLazyGetMilitaryAndRehireForfeituresQuery();
+  const [triggerSearch, { isFetching }] = useLazyGetRehireForfeituresQuery();
   const { rehireForfeituresQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const profitYear = new Date(useDecemberFlowProfitYear(), 1, 1);
   const dispatch = useDispatch();
@@ -56,8 +56,9 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
   } = useForm<RehireForfeituresSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      beginningDate: new Date((profitYear || rehireForfeituresQueryParams?.profitYear), 01, 01)  || undefined,
-      reportingYear: rehireForfeituresQueryParams?.reportingYear || undefined
+      profitYear: profitYear || rehireForfeituresQueryParams?.profitYear || undefined,
+      beginningDate: rehireForfeituresQueryParams?.beginningDate || undefined,
+      endingDate: rehireForfeituresQueryParams?.endingDate || undefined
     }
   });
 
@@ -66,8 +67,9 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
       triggerSearch(
         {
           profitYear: profitYear,
-          reportingYear: data.beginningDate,
-          pagination: { skip: 0, take: 25 }
+          beginningDate: data.beginningDate,
+          endingDate : data.endingDate,
+          pagination: { skip: 0, take: 25, sortBy: "profitYear", isSortDescending: true },
         },
         false
       ).unwrap();
@@ -83,8 +85,9 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
     dispatch(clearRehireForfeituresQueryParams());
     dispatch(clearRehireForfeituresDetails());
     reset({
-      beginningDate: profitYear,
-      reportingYear: undefined
+      profitYear: profitYear,
+      beginningDate: undefined,
+      endingDate: undefined
     });
   };
 

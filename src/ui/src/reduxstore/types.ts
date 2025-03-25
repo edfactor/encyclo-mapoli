@@ -158,8 +158,9 @@ export interface EmployeesOnMilitaryLeaveResponse {
   terminationDate: string;
 }
 
-export interface MilitaryAndRehireForfeituresRequestDto extends ProfitYearRequest {
-  reportingYear: string;
+export interface RehireForfeituresRequest extends SortedPaginationRequestDto, ProfitYearRequest {
+  beginningDate: Date;
+  endingDate: Date;
   pagination: PaginationParams;
 }
 
@@ -246,9 +247,6 @@ export interface ForfeituresAndPointsQueryParams extends ProfitYearRequest {
   useFrozenData: boolean;
 }
 
-export interface ProfitAndReportingQueryParams extends ProfitYearRequest {
-  reportingYear: string;
-}
 export interface ExecutiveHoursAndDollarsQueryParams extends ProfitYearRequest {
   badgeNumber: number;
   socialSecurity: number;
