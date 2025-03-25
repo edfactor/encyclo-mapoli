@@ -15,7 +15,7 @@ import Forfeit from "pages/Forfeit/Forfeit";
 import FrozenSummary from "pages/FrozenSummary/FrozenSummary";
 import ManageExecutiveHoursAndDollars from "pages/DecemberActivities/ManageExecutiveHoursAndDollars/ManageExecutiveHoursAndDollars";
 import MasterInquiry from "pages/MasterInquiry/MasterInquiry";
-import MilitaryAndRehireForfeitures from "pages/MilitaryAndRehireForfeitures/MilitaryAndRehireForfeitures";
+import RehireForfeitures from "pages/RehireForfeitures/RehireForfeitures";
 import MissingCommaInPyName from "pages/DecemberActivities/MissingCommaInPyName/MissingCommaInPyName";
 import NegativeEtvaForSSNsOnPayprofit from "pages/DecemberActivities/NegativeEtvaForSSNsOnPayprofit/NegativeEtvaForSSNsOnPayprofit";
 import EighteenToTwenty from "pages/PAY426Reports/PAY426-1/EighteenToTwenty";
@@ -156,8 +156,8 @@ const Router = () => {
           path={ROUTES.EMPLOYEES_MILITARY}
           element={<EmployeesOnMilitaryLeave />}></Route>
         <Route
-          path={ROUTES.MILITARY_FORFEITURES}
-          element={<MilitaryAndRehireForfeitures />}></Route>
+          path={ROUTES.REHIRE_FORFEITURES}
+          element={<RehireForfeitures />}></Route>
         <Route
           path={ROUTES.DISTRIBUTIONS_AND_FORFEITURES}
           element={<DistributionsAndForfeitures />}></Route>

@@ -39,7 +39,7 @@ interface MilitaryAndRehireForfeituresSearchFilterProps {
   setInitialSearchLoaded: (include: boolean) => void;
 }
 
-const MilitaryAndRehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearchFilterProps> = ({
+const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearchFilterProps> = ({
   setInitialSearchLoaded
 }) => {
   const [triggerSearch, { isFetching }] = useLazyGetMilitaryAndRehireForfeituresQuery();
@@ -149,4 +149,4 @@ const MilitaryAndRehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfei
   );
 };
 
-export default MilitaryAndRehireForfeituresSearchFilter;
+export default RehireForfeituresSearchFilter;

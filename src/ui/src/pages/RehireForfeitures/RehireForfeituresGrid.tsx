@@ -5,14 +5,14 @@ import { useLazyGetMilitaryAndRehireForfeituresQuery } from "reduxstore/api/Year
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
-import { GetMilitaryAndRehireForfeituresColumns } from "./MilitaryAndRehireForfeituresGridColumns";
+import { GetMilitaryAndRehireForfeituresColumns } from "./RehireForfeituresGridColumns";
 
 interface MilitaryAndRehireForfeituresGridSearchProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
 }
 
-const MilitaryAndRehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProps> = ({
+const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProps> = ({
   initialSearchLoaded,
   setInitialSearchLoaded
 }) => {
@@ -62,7 +62,7 @@ const MilitaryAndRehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGri
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`${CAPTIONS.MILITARY_FORFEITURES} (${militaryAndRehireForfeitures?.response.total || 0})`}
+              {`${CAPTIONS.REHIRE_FORFEITURES} (${militaryAndRehireForfeitures?.response.total || 0})`}
             </Typography>
           </div>
           <DSMGrid
@@ -96,4 +96,4 @@ const MilitaryAndRehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGri
   );
 };
 
-export default MilitaryAndRehireForfeituresGrid;
+export default RehireForfeituresGrid;
