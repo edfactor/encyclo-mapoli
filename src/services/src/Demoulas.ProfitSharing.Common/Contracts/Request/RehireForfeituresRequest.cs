@@ -19,7 +19,7 @@ public sealed record RehireForfeituresRequest : ProfitYearRequest
             Take = 10,
             SortBy = "BadgeNumber",
             IsSortDescending = false,
-            ProfitYear = 2024
+            ProfitYear = (short)DateTime.Today.AddYears(-1).Year
         };
     }
 }

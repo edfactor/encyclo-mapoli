@@ -6,6 +6,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Validators;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -21,23 +22,17 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly ICalendarService _calendarService;
     private readonly TotalService _totalService;
-    private readonly IValidator<PaginationRequestDto> _paginationValidator;
-    private readonly IValidator<RehireForfeituresRequest> _rehireForfeituresValidator;
     private readonly ILogger<TerminationAndRehireService> _logger;
 
     public TerminationAndRehireService(
         IProfitSharingDataContextFactory dataContextFactory,
         ICalendarService calendarService,
         TotalService totalService,
-        IValidator<PaginationRequestDto> paginationValidator,
-        IValidator<RehireForfeituresRequest> rehireForfeituresValidator,
         ILogger<TerminationAndRehireService> logger)
     {
         _dataContextFactory = dataContextFactory;
         _calendarService = calendarService;
         _totalService = totalService;
-        _paginationValidator = paginationValidator;
-        _rehireForfeituresValidator = rehireForfeituresValidator;
         _logger = logger;
     }
 
@@ -49,8 +44,6 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
     /// <returns>A task that represents the asynchronous operation. The task result contains the report response with details of employees on military leave.</returns>
     public async Task<ReportResponseBase<EmployeesOnMilitaryLeaveResponse>> GetMilitaryAndRehireReportAsync(PaginationRequestDto req, CancellationToken cancellationToken)
     {
-        await _paginationValidator.ValidateAndThrowAsync(req, cancellationToken);
-
         var militaryMembers = await _dataContextFactory.UseReadOnlyContext(async context =>
         {
             var inactiveMilitaryMembers = await context.Demographics.Where(d => d.TerminationCodeId == TerminationCode.Constants.Military
@@ -86,7 +79,8 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
     /// <returns>A task that represents the asynchronous operation. The task result contains a report response with the rehire profit sharing data.</returns>
     public async Task<ReportResponseBase<RehireForfeituresResponse>> FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYearsAsync(RehireForfeituresRequest req, CancellationToken cancellationToken)
     {
-        await _rehireForfeituresValidator.ValidateAndThrowAsync(req, cancellationToken);
+        var validator = new RehireForfeituresRequestValidator(_calendarService, _logger);
+        await validator.ValidateAndThrowAsync(req, cancellationToken);
         _logger.LogInformation("Finding rehires with forfeitures for profit year {ProfitYear}", req.ProfitYear);
 
         var militaryMembers = await _dataContextFactory.UseReadOnlyContext(async context =>
@@ -129,7 +123,9 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
 
     public async Task<ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>> GetMilitaryAndRehireProfitSummaryReportAsync(RehireForfeituresRequest req, CancellationToken cancellationToken)
     {
-        await _rehireForfeituresValidator.ValidateAndThrowAsync(req, cancellationToken);
+        var validator = new RehireForfeituresRequestValidator(_calendarService, _logger);
+        await validator.ValidateAndThrowAsync(req, cancellationToken);
+
         _logger.LogInformation("Generating military and rehire profit summary report for profit year {ProfitYear}", req.ProfitYear);
 
         var bracket = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);

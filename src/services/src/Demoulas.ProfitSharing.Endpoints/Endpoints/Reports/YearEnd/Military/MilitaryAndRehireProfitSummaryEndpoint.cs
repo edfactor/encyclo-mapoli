@@ -12,7 +12,7 @@ using Demoulas.ProfitSharing.Security;
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Military;
 
 public class MilitaryAndRehireProfitSummaryEndpoint :
-    EndpointWithCsvBase<ProfitYearRequest, MilitaryAndRehireProfitSummaryResponse, MilitaryAndRehireProfitSummaryEndpoint.MilitaryRehireProfitSharingResponseMap>
+    EndpointWithCsvBase<RehireForfeituresRequest, MilitaryAndRehireProfitSummaryResponse, MilitaryAndRehireProfitSummaryEndpoint.MilitaryRehireProfitSharingResponseMap>
 {
     private readonly ITerminationAndRehireService _reportService;
 
@@ -23,14 +23,14 @@ public class MilitaryAndRehireProfitSummaryEndpoint :
 
     public override void Configure()
     {
-        Get("military-and-rehire-profit-summary/{reportingYear}");
+        Get("military-and-rehire-profit-summary");
         Summary(s =>
         {
             s.Summary = "Military and Rehire Profit Summary Data Report Endpoint";
             s.Description =
                 "The Military and Rehire Profit Sharing Data endpoint produces a comprehensive report on employees who are either currently on military leave or have been rehired, focusing on their eligibility for forfeiture adjustments in profit-sharing. The report contains employee information, such as badge number, rehire date, and current year-to-date hours, along with profit-sharing records, including profit year, forfeiture amounts, and comments. This report supports multiple executions and is primarily used to address forfeiture discrepancies before profit sharing is finalized.";
 
-            s.ExampleRequest = SimpleExampleRequest;
+            s.ExampleRequest = RehireForfeituresRequest.RequestExample();
             s.ResponseExamples = new Dictionary<int, object>
             {
                 {
@@ -54,7 +54,7 @@ public class MilitaryAndRehireProfitSummaryEndpoint :
 
     public override string ReportFileName => "MILITARY TERM-REHIRE";
 
-    public override Task<ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>> GetResponse(ProfitYearRequest req, CancellationToken ct)
+    public override Task<ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>> GetResponse(RehireForfeituresRequest req, CancellationToken ct)
     {
         return _reportService.GetMilitaryAndRehireProfitSummaryReportAsync(req, ct);
     }
@@ -84,4 +84,3 @@ public class MilitaryAndRehireProfitSummaryEndpoint :
         }
     }
 }
-    

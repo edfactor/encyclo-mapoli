@@ -1,18 +1,20 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.Common.Contracts.Contracts.Request;
+using Demoulas.Common.Contracts.Validators;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Common.Validators;
 
-public class RehireForfeituresRequestValidator : AbstractValidator<RehireForfeituresRequest>
+public class RehireForfeituresRequestValidator : PaginationValidatorBase<RehireForfeituresRequest>
 {
     private readonly ICalendarService _calendarService;
-    private readonly ILogger<RehireForfeituresRequestValidator> _logger;
+    private readonly ILogger _logger;
 
     public RehireForfeituresRequestValidator(
         ICalendarService calendarService,
-        ILogger<RehireForfeituresRequestValidator> logger)
+        ILogger logger)
     {
         _calendarService = calendarService;
         _logger = logger;
