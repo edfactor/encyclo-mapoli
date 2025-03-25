@@ -1,4 +1,5 @@
 import { ISortParams, Paged, PaginationParams } from "smart-ui-library";
+import { extendSxProp } from "@mui/system";
 
 export enum ImpersonationRoles {
   FinanceManager = "Finance-Manager",
@@ -158,10 +159,10 @@ export interface EmployeesOnMilitaryLeaveResponse {
   terminationDate: string;
 }
 
-export interface RehireForfeituresRequest extends SortedPaginationRequestDto, ProfitYearRequest {
+export interface RehireForfeituresRequest extends ProfitYearRequest {
   beginningDate: Date;
   endingDate: Date;
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface ForfeitureDetail extends ProfitYearRequest {

@@ -16,9 +16,10 @@ import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 import { ProfitYearRequest, SortedPaginationRequestDto } from "../../../reduxstore/types";
 
-interface RehireForfeituresSearch extends SortedPaginationRequestDto, ProfitYearRequest {
+interface RehireForfeituresSearch extends ProfitYearRequest {
   beginningDate: Date;
   endingDate: Date;
+  pagination: SortedPaginationRequestDto;
 }
 
 const digitsOnly: (value: string | undefined) => boolean = (value) => (value ? /^\d+$/.test(value) : false);
@@ -46,7 +47,7 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
 }) => {
   const [triggerSearch, { isFetching }] = useLazyGetRehireForfeituresQuery();
   const { rehireForfeituresQueryParams } = useSelector((state: RootState) => state.yearsEnd);
-  const profitYear = new Date(useDecemberFlowProfitYear(), 1, 1);
+  const profitYear = useDecemberFlowProfitYear();
   const dispatch = useDispatch();
   const {
     control,
@@ -59,7 +60,8 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
     defaultValues: {
       profitYear: profitYear || rehireForfeituresQueryParams?.profitYear || undefined,
       beginningDate: rehireForfeituresQueryParams?.beginningDate || undefined,
-      endingDate: rehireForfeituresQueryParams?.endingDate || undefined
+      endingDate: rehireForfeituresQueryParams?.endingDate || undefined,
+      pagination: { skip: 0, take: 25, sortBy: "profitYear", isSortDescending: true }
     }
   });
 
