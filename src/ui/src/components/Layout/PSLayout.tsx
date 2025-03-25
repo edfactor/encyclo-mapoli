@@ -18,19 +18,8 @@ export const PSLayout: React.FC<DSMLayoutProps> = ({
   buildVersionNumber,
   ...welcomeDisplayProps
 }) => {
-  //const { drawerOpen } = useSelector((state: RootState) => state.general);
-
   return (
-    <div
-      onClick={onClick}
-      /* NOT SURE WHAT THIS CODE DID
-      style={{
-        height: "100%",
-        width: drawerOpen ? "calc(100% - 320px)" : "calc(100% - 64px)",
-        marginLeft: drawerOpen ? 320 : 64
-      }}>
-        */
-    >
+    <div onClick={onClick}>
       {/* THIS IS THE LIGHT BLUE BANNER AT VERY TOP */}
       <div
         id="environment-banner"
