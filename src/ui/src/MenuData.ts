@@ -123,28 +123,6 @@ interface MenuLevel {
   }[];
 }
 
-/*
-const decemberFlow: RouteCategory = {
-  menuLabel: MENU_LABELS.DECEMBER_ACTIVITIES,
-  parentRoute: MENU_LABELS.DECEMBER_ACTIVITIES,
-  items: [
-    { caption: CAPTIONS.SUMMARY, route: ROUTES.DECEMBER_PROCESS_ACCORDION },
-    { caption: CAPTIONS.DEMOGRAPHIC_BADGES, route: ROUTES.DEMOGRAPHIC_BADGES },
-    { caption: CAPTIONS.DUPLICATE_SSNS, route: ROUTES.DUPLICATE_SSNS },
-    { caption: CAPTIONS.NEGATIVE_ETVA, route: ROUTES.NEGATIVE_ETVA },
-    { caption: CAPTIONS.DUPLICATE_NAMES, route: ROUTES.DUPLICATE_NAMES },
-    { caption: CAPTIONS.MISSING_COMMA, route: ROUTES.MISSING_COMMA },
-    { caption: CAPTIONS.MILITARY_LEAVE, route: ROUTES.MILITARY_LEAVE },
-    { caption: CAPTIONS.REHIRE_FORFEITURES, route: ROUTES.REHIRE_FORFEITURES },
-    { caption: CAPTIONS.TERMINATIONS, route: ROUTES.PROF_TERM },
-    { caption: CAPTIONS.DISTRIBUTIONS_AND_FORFEITURES, route: ROUTES.DISTRIBUTIONS_AND_FORFEITURES },
-    { caption: CAPTIONS.MANAGE_EXECUTIVE_HOURS, route: ROUTES.MANAGE_EXECUTIVE_HOURS },
-    { caption: CAPTIONS.PROFIT_SHARE_REPORT, route: ROUTES.PROFIT_SHARE_REPORT },
-    { caption: CAPTIONS.PROFIT_SHARE_UPDATE, route: ROUTES.PROFIT_SHARE_UPDATE }
-  ]
-};
-*/
-
 export const drawerTitle = "Profit Sharing Activities";
 
 export const menuLevels: MenuLevel[] = [
