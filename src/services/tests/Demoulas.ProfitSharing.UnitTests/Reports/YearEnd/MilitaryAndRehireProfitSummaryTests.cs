@@ -33,7 +33,7 @@ public class MilitaryAndRehireProfitSummaryTests : ApiTestBase<Api.Program>
 
     public MilitaryAndRehireProfitSummaryTests()
     {
-        IMilitaryAndRehireService mockService = ServiceProvider?.GetRequiredService<IMilitaryAndRehireService>()!;
+        ITerminationAndRehireService mockService = ServiceProvider?.GetRequiredService<ITerminationAndRehireService>()!;
         _endpoint = new MilitaryAndRehireProfitSummaryEndpoint(mockService);
     }
 

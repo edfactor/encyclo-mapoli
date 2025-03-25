@@ -219,7 +219,7 @@ export const YearsEndApi = createApi({
       MilitaryAndRehireForfeituresRequestDto
     >({
       query: (params) => ({
-        url: `yearend/military-and-rehire-forfeitures/${params.reportingYear}`,
+        url: `yearend/rehire-forfeitures/${params.reportingYear}`,
         method: "GET",
         params: {
           profitYear: params.profitYear,

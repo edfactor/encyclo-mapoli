@@ -12,37 +12,37 @@ using Demoulas.ProfitSharing.Security;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Military;
 
-public class MilitaryAndRehireForfeituresEndpoint :
-    EndpointWithCsvBase<ProfitYearRequest, MilitaryAndRehireForfeituresResponse, MilitaryAndRehireForfeituresEndpoint.MilitaryRehireProfitSharingResponseMap>
+public class RehireForfeituresEndpoint :
+    EndpointWithCsvBase<RehireForfeituresRequest, RehireForfeituresResponse, RehireForfeituresEndpoint.RehireProfitSharingResponseMap>
 {
-    private readonly IMilitaryAndRehireService _reportService;
+    private readonly ITerminationAndRehireService _reportService;
 
-    public MilitaryAndRehireForfeituresEndpoint(IMilitaryAndRehireService reportService)
+    public RehireForfeituresEndpoint(ITerminationAndRehireService reportService)
     {
         _reportService = reportService;
     }
 
     public override void Configure()
     {
-        Get("military-and-rehire-forfeitures/{reportingYear}");
+        Get("rehire-forfeitures");
         Summary(s =>
         {
-            s.Summary = "Military and Rehire Forfeitures Report Endpoint";
+            s.Summary = "Rehire Forfeitures Report Endpoint";
             s.Description =
-                "The Military and Rehire Profit Sharing Data endpoint produces a comprehensive report on employees who are either currently on military leave or have been rehired, focusing on their eligibility for forfeiture adjustments in profit-sharing. The report contains employee information, such as badge number, rehire date, and current year-to-date hours, along with profit-sharing records, including profit year, forfeiture amounts, and comments. This report supports multiple executions and is primarily used to address forfeiture discrepancies before profit sharing is finalized.";
+                "The Rehire Profit Sharing Data endpoint produces a comprehensive report on employees who are either currently on military leave or have been rehired, focusing on their eligibility for forfeiture adjustments in profit-sharing. The report contains employee information, such as badge number, rehire date, and current year-to-date hours, along with profit-sharing records, including profit year, forfeiture amounts, and comments. This report supports multiple executions and is primarily used to address forfeiture discrepancies before profit sharing is finalized.";
 
-            s.ExampleRequest = SimpleExampleRequest;
+            s.ExampleRequest = RehireForfeituresRequest.RequestExample();
             s.ResponseExamples = new Dictionary<int, object>
             {
                 {
                     200,
-                    new ReportResponseBase<MilitaryAndRehireForfeituresResponse>
+                    new ReportResponseBase<RehireForfeituresResponse>
                     {
                         ReportName = ReportFileName,
                         ReportDate = DateTimeOffset.Now,
-                        Response = new PaginatedResponseDto<MilitaryAndRehireForfeituresResponse>
+                        Response = new PaginatedResponseDto<RehireForfeituresResponse>
                         {
-                            Results = new List<MilitaryAndRehireForfeituresResponse> { MilitaryAndRehireForfeituresResponse.ResponseExample() }
+                            Results = new List<RehireForfeituresResponse> { RehireForfeituresResponse.ResponseExample() }
                         }
                     }
                 }
@@ -55,18 +55,18 @@ public class MilitaryAndRehireForfeituresEndpoint :
 
     public override string ReportFileName => "REHIRE'S PROFIT SHARING DATA";
 
-    public override Task<ReportResponseBase<MilitaryAndRehireForfeituresResponse>> GetResponse(ProfitYearRequest req, CancellationToken ct)
+    public override Task<ReportResponseBase<RehireForfeituresResponse>> GetResponse(RehireForfeituresRequest req, CancellationToken ct)
     {
         return _reportService.FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYearsAsync(req, ct);
     }
 
-    protected internal override async Task GenerateCsvContent(CsvWriter csvWriter, ReportResponseBase<MilitaryAndRehireForfeituresResponse> report, CancellationToken cancellationToken)
+    protected internal override async Task GenerateCsvContent(CsvWriter csvWriter, ReportResponseBase<RehireForfeituresResponse> report, CancellationToken cancellationToken)
     {
         // Register the class map for the main member data
-        csvWriter.Context.RegisterClassMap<MilitaryRehireProfitSharingResponseMap>();
+        csvWriter.Context.RegisterClassMap<RehireProfitSharingResponseMap>();
 
         // Write the headers using the registered class map
-        csvWriter.WriteHeader<MilitaryAndRehireForfeituresResponse>();
+        csvWriter.WriteHeader<RehireForfeituresResponse>();
 
         // Add additional headers for the details section (Profit Year, Forfeitures, Comment)
         await csvWriter.NextRecordAsync();
@@ -107,9 +107,9 @@ public class MilitaryAndRehireForfeituresEndpoint :
         }
     }
 
-    public sealed class MilitaryRehireProfitSharingResponseMap : ClassMap<MilitaryAndRehireForfeituresResponse>
+    public sealed class RehireProfitSharingResponseMap : ClassMap<RehireForfeituresResponse>
     {
-        public MilitaryRehireProfitSharingResponseMap()
+        public RehireProfitSharingResponseMap()
         {
             Map().Index(0).Convert(_ => string.Empty);
             Map().Index(1).Convert(_ => string.Empty);

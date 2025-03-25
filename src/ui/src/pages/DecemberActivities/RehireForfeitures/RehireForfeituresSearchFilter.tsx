@@ -45,7 +45,7 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
 }) => {
   const [triggerSearch, { isFetching }] = useLazyGetMilitaryAndRehireForfeituresQuery();
   const { rehireForfeituresQueryParams } = useSelector((state: RootState) => state.yearsEnd);
-  const profitYear = useDecemberFlowProfitYear();
+  const profitYear = new Date(useDecemberFlowProfitYear(), 1, 1);
   const dispatch = useDispatch();
   const {
     control,

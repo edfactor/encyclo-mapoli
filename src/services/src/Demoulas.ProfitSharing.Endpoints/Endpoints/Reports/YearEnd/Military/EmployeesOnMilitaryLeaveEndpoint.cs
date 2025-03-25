@@ -13,9 +13,9 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Military;
 
 public class EmployeesOnMilitaryLeaveEndpoint : EndpointWithCsvBase<SortedPaginationRequestDto, EmployeesOnMilitaryLeaveResponse, EmployeesOnMilitaryLeaveEndpoint.EmployeesOnMilitaryLeaveResponseMap>
 {
-    private readonly IMilitaryAndRehireService _reportService;
+    private readonly ITerminationAndRehireService _reportService;
 
-    public EmployeesOnMilitaryLeaveEndpoint(IMilitaryAndRehireService reportService)
+    public EmployeesOnMilitaryLeaveEndpoint(ITerminationAndRehireService reportService)
     {
         _reportService = reportService;
     }

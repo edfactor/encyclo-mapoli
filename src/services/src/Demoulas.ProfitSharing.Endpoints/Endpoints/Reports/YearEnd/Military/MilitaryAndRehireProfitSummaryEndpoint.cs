@@ -14,9 +14,9 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Military;
 public class MilitaryAndRehireProfitSummaryEndpoint :
     EndpointWithCsvBase<ProfitYearRequest, MilitaryAndRehireProfitSummaryResponse, MilitaryAndRehireProfitSummaryEndpoint.MilitaryRehireProfitSharingResponseMap>
 {
-    private readonly IMilitaryAndRehireService _reportService;
+    private readonly ITerminationAndRehireService _reportService;
 
-    public MilitaryAndRehireProfitSummaryEndpoint(IMilitaryAndRehireService reportService)
+    public MilitaryAndRehireProfitSummaryEndpoint(ITerminationAndRehireService reportService)
     {
         _reportService = reportService;
     }

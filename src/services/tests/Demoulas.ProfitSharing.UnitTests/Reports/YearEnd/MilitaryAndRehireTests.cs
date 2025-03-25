@@ -27,7 +27,7 @@ public class MilitaryAndRehireTests : ApiTestBase<Program>
 
     public MilitaryAndRehireTests()
     {
-        IMilitaryAndRehireService mockService = ServiceProvider?.GetRequiredService<IMilitaryAndRehireService>()!;
+        ITerminationAndRehireService mockService = ServiceProvider?.GetRequiredService<ITerminationAndRehireService>()!;
         _endpoint = new EmployeesOnMilitaryLeaveEndpoint(mockService);
     }
 

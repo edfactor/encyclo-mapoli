@@ -10,24 +10,36 @@ using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
+using Demoulas.ProfitSharing.Services.Validation;
 using Demoulas.Util.Extensions;
+using FluentValidation;
+using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
 
-public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
+public sealed class TerminationAndRehireService : ITerminationAndRehireService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly ICalendarService _calendarService;
     private readonly TotalService _totalService;
+    private readonly IValidator<PaginationRequestDto> _paginationValidator;
+    private readonly IValidator<RehireForfeituresRequest> _rehireForfeituresValidator;
+    private readonly ILogger<TerminationAndRehireService> _logger;
 
-    public MilitaryAndRehireService(
-        IProfitSharingDataContextFactory dataContextFactory, 
+    public TerminationAndRehireService(
+        IProfitSharingDataContextFactory dataContextFactory,
         ICalendarService calendarService,
-        TotalService totalService)
+        TotalService totalService,
+        IValidator<PaginationRequestDto> paginationValidator,
+        IValidator<RehireForfeituresRequest> rehireForfeituresValidator,
+        ILogger<TerminationAndRehireService> logger)
     {
         _dataContextFactory = dataContextFactory;
         _calendarService = calendarService;
         _totalService = totalService;
+        _paginationValidator = paginationValidator;
+        _rehireForfeituresValidator = rehireForfeituresValidator;
+        _logger = logger;
     }
 
     /// <summary>
@@ -38,6 +50,9 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
     /// <returns>A task that represents the asynchronous operation. The task result contains the report response with details of employees on military leave.</returns>
     public async Task<ReportResponseBase<EmployeesOnMilitaryLeaveResponse>> GetMilitaryAndRehireReportAsync(PaginationRequestDto req, CancellationToken cancellationToken)
     {
+        await _paginationValidator.ValidateAndThrowAsync(req, cancellationToken);
+        _logger.LogInformation("Generating military and rehire report with page {Page} and page size {PageSize}", req.Page, req.PageSize);
+
         var militaryMembers = await _dataContextFactory.UseReadOnlyContext(async context =>
         {
             var inactiveMilitaryMembers = await context.Demographics.Where(d => d.TerminationCodeId == TerminationCode.Constants.Military
@@ -71,11 +86,14 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
     /// <param name="req">The pagination request containing the necessary parameters for the search.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a report response with the rehire profit sharing data.</returns>
-    public async Task<ReportResponseBase<MilitaryAndRehireForfeituresResponse>> FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYearsAsync(ProfitYearRequest req, CancellationToken cancellationToken)
+    public async Task<ReportResponseBase<RehireForfeituresResponse>> FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYearsAsync(RehireForfeituresRequest req, CancellationToken cancellationToken)
     {
+        await _rehireForfeituresValidator.ValidateAndThrowAsync(req, cancellationToken);
+        _logger.LogInformation("Finding rehires with forfeitures for profit year {ProfitYear}", req.ProfitYear);
+
         var militaryMembers = await _dataContextFactory.UseReadOnlyContext(async context =>
         {
-            var query = await GetMilitaryAndRehireProfitQueryBase(context, req, cancellationToken);
+            var query = await GetRehireProfitQueryBase(context, req, cancellationToken);
             return await query.Where(pd => pd.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures)
                 .GroupBy(m => new
                 {
@@ -86,7 +104,7 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
                     m.CompanyContributionYears,
                     m.HoursCurrentYear
                 }).Select(group =>
-                    new MilitaryAndRehireForfeituresResponse
+                    new RehireForfeituresResponse
                     {
                         BadgeNumber = group.Key.BadgeNumber,
                         Ssn = group.Key.Ssn.MaskSsn(),
@@ -96,12 +114,14 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
                         CompanyContributionYears = group.Key.CompanyContributionYears,
                         Details = group.Select(pd => new MilitaryRehireProfitSharingDetailResponse
                         {
-                            Forfeiture = pd.Forfeiture, Remark = pd.Remark, ProfitYear = pd.ProfitYear
+                            Forfeiture = pd.Forfeiture,
+                            Remark = pd.Remark,
+                            ProfitYear = pd.ProfitYear
                         })
                     })
                 .ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
         });
-        return new ReportResponseBase<MilitaryAndRehireForfeituresResponse>
+        return new ReportResponseBase<RehireForfeituresResponse>
         {
             ReportName = "REHIRE'S PROFIT SHARING DATA",
             ReportDate = DateTimeOffset.Now,
@@ -109,16 +129,19 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
         };
     }
 
-    public async Task<ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>> GetMilitaryAndRehireProfitSummaryReportAsync(ProfitYearRequest req, CancellationToken cancellationToken)
+    public async Task<ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>> GetMilitaryAndRehireProfitSummaryReportAsync(RehireForfeituresRequest req, CancellationToken cancellationToken)
     {
+        await _rehireForfeituresValidator.ValidateAndThrowAsync(req, cancellationToken);
+        _logger.LogInformation("Generating military and rehire profit summary report for profit year {ProfitYear}", req.ProfitYear);
+
         var bracket = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
 
         var militaryMembers = await _dataContextFactory.UseReadOnlyContext(async context =>
         {
             short lastYear = (short)(req.ProfitYear - 1);
             var query = (
-                from b in await GetMilitaryAndRehireProfitQueryBase(context, req, cancellationToken)
-                join yipTbl in _totalService.GetYearsOfService(context, req.ProfitYear) on b.Ssn equals yipTbl.Ssn into yipTmp
+                from b in await GetRehireProfitQueryBase(context, req, cancellationToken)
+                join yipTbl in _totalService.GetYearsOfService(context, (short)req.EndingDate.Year) on b.Ssn equals yipTbl.Ssn into yipTmp
                 from yip in yipTmp.DefaultIfEmpty()
                 join lyBalTbl in _totalService.TotalVestingBalance(context, lastYear, bracket.FiscalEndDate) on b.Ssn equals lyBalTbl.Ssn into lyBalTmp
                 from lyBal in lyBalTmp.DefaultIfEmpty()
@@ -168,20 +191,23 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
 
         return new ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>
         {
-            ReportName = "MILITARY TERM-REHIRE",
+            ReportName = "TERM-REHIRE",
             ReportDate = DateTimeOffset.Now,
             Response = militaryMembers
         };
     }
 
-    private async Task<IQueryable<MilitaryAndRehireProfitSummaryQueryResponse>> GetMilitaryAndRehireProfitQueryBase(ProfitSharingReadOnlyDbContext context,
-        ProfitYearRequest req, CancellationToken cancellationToken)
+    private async Task<IQueryable<MilitaryAndRehireProfitSummaryQueryResponse>> GetRehireProfitQueryBase(ProfitSharingReadOnlyDbContext context,
+        RehireForfeituresRequest req, CancellationToken cancellationToken)
     {
         var bracket = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
 
+        var beginning = req.BeginningDate > bracket.FiscalBeginDate ? bracket.FiscalBeginDate : req.BeginningDate;
+        var ending = req.EndingDate > bracket.FiscalEndDate ? bracket.FiscalEndDate : req.EndingDate;
+
         var query = context.Demographics
             .Join(
-                context.PayProfits.Where(x=>x.ProfitYear == req.ProfitYear), // Table to join with (PayProfit)
+                context.PayProfits.Where(x => x.ProfitYear == req.ProfitYear), // Table to join with (PayProfit)
                 demographics => demographics.Id, // Primary key selector from Demographics
                 payProfit => payProfit.DemographicId, // Foreign key selector from PayProfit
                 (demographics, payProfit) => new // Result selector after joining
@@ -201,10 +227,10 @@ public sealed class MilitaryAndRehireService : IMilitaryAndRehireService
             .Where(m =>
                 m.EmploymentStatusId == EmploymentStatus.Constants.Active
                 && m.ReHireDate != null
-                && m.ReHireDate >= bracket.FiscalBeginDate
-                && m.ReHireDate <= bracket.FiscalEndDate)
+                && m.ReHireDate >= beginning
+                && m.ReHireDate <= ending)
             .Join(
-                context.ProfitDetails.Where(x=>x.ProfitYear == req.ProfitYear), // Table to join with (ProfitDetail)
+                context.ProfitDetails.Where(x => x.ProfitYear == req.ProfitYear), // Table to join with (ProfitDetail)
                 combined => combined.Ssn, // Key selector from the result of the first join
                 profitDetail => profitDetail.Ssn, // Foreign key selector from ProfitDetail
                 (member, profitDetail) => new // Result selector after joining ProfitDetail

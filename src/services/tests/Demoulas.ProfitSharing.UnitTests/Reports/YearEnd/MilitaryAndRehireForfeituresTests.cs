@@ -27,15 +27,15 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
-[TestSubject(typeof(MilitaryAndRehireForfeituresEndpoint))]
+[TestSubject(typeof(RehireForfeituresEndpoint))]
 public class MilitaryAndRehireForfeituresTests : ApiTestBase<Program>
 {
-    private readonly MilitaryAndRehireForfeituresEndpoint _endpoint;
+    private readonly RehireForfeituresEndpoint _endpoint;
 
     public MilitaryAndRehireForfeituresTests()
     {
-        IMilitaryAndRehireService mockService = ServiceProvider?.GetRequiredService<IMilitaryAndRehireService>()!;
-        _endpoint = new MilitaryAndRehireForfeituresEndpoint(mockService);
+        ITerminationAndRehireService mockService = ServiceProvider?.GetRequiredService<ITerminationAndRehireService>()!;
+        _endpoint = new RehireForfeituresEndpoint(mockService);
     }
 
 
@@ -46,20 +46,20 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Program>
         {
             var setup = await SetupTestEmployee(c);
 
-            var expectedResponse = new ReportResponseBase<MilitaryAndRehireForfeituresResponse>
+            var expectedResponse = new ReportResponseBase<RehireForfeituresResponse>
             {
                 ReportName = "REHIRE'S PROFIT SHARING DATA",
                 ReportDate = DateTimeOffset.Now,
-                Response = new PaginatedResponseDto<MilitaryAndRehireForfeituresResponse>
+                Response = new PaginatedResponseDto<RehireForfeituresResponse>
                 {
-                    Results = new List<MilitaryAndRehireForfeituresResponse> { setup.ExpectedResponse }
+                    Results = new List<RehireForfeituresResponse> { setup.ExpectedResponse }
                 }
             };
 
             // Act
             ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
             var response =
-                await ApiClient.GETAsync<MilitaryAndRehireForfeituresEndpoint, ProfitYearRequest, ReportResponseBase<MilitaryAndRehireForfeituresResponse>>(
+                await ApiClient.GETAsync<RehireForfeituresEndpoint, ProfitYearRequest, ReportResponseBase<RehireForfeituresResponse>>(
                     setup.Request);
 
             // Assert
@@ -85,7 +85,7 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Program>
 
             // Act
             DownloadClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-            var response = await DownloadClient.GETAsync<MilitaryAndRehireForfeituresEndpoint, ProfitYearRequest, StreamContent>(setup.Request);
+            var response = await DownloadClient.GETAsync<RehireForfeituresEndpoint, ProfitYearRequest, StreamContent>(setup.Request);
             response.Response.Content.Should().NotBeNull();
 
             string result = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
@@ -132,7 +132,7 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Program>
             var setup = await SetupTestEmployee(c);
 
             var response =
-                await ApiClient.GETAsync<MilitaryAndRehireForfeituresEndpoint, PaginationRequestDto, ReportResponseBase<MilitaryAndRehireForfeituresResponse>>(setup.Request);
+                await ApiClient.GETAsync<RehireForfeituresEndpoint, PaginationRequestDto, ReportResponseBase<RehireForfeituresResponse>>(setup.Request);
 
             response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
         });
@@ -144,11 +144,11 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Program>
         // Arrange
         var request = new ProfitYearRequest { Skip = 0, Take = 10, ProfitYear = 2024 };
         var cancellationToken = CancellationToken.None;
-        var expectedResponse = new ReportResponseBase<MilitaryAndRehireForfeituresResponse>
+        var expectedResponse = new ReportResponseBase<RehireForfeituresResponse>
         {
             ReportName = "REHIRE'S PROFIT SHARING DATA",
             ReportDate = DateTimeOffset.Now,
-            Response = new PaginatedResponseDto<MilitaryAndRehireForfeituresResponse> { Results = new List<MilitaryAndRehireForfeituresResponse>() }
+            Response = new PaginatedResponseDto<RehireForfeituresResponse> { Results = new List<RehireForfeituresResponse>() }
         };
 
         // Act
@@ -165,11 +165,11 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Program>
         // Arrange
         var request = new ProfitYearRequest { Skip = 0, Take = 10, ProfitYear = 2024 };
         var cancellationToken = CancellationToken.None;
-        var expectedResponse = new ReportResponseBase<MilitaryAndRehireForfeituresResponse>
+        var expectedResponse = new ReportResponseBase<RehireForfeituresResponse>
         {
             ReportName = "REHIRE'S PROFIT SHARING DATA",
             ReportDate = DateTimeOffset.Now,
-            Response = new PaginatedResponseDto<MilitaryAndRehireForfeituresResponse> { Results = [] }
+            Response = new PaginatedResponseDto<RehireForfeituresResponse> { Results = [] }
         };
 
         // Act
@@ -190,10 +190,10 @@ public class MilitaryAndRehireForfeituresTests : ApiTestBase<Program>
         reportFileName.Should().Be("REHIRE'S PROFIT SHARING DATA");
     }
 
-    private static async Task<(ProfitYearRequest Request, MilitaryAndRehireForfeituresResponse ExpectedResponse)> SetupTestEmployee(ProfitSharingDbContext c)
+    private static async Task<(ProfitYearRequest Request, RehireForfeituresResponse ExpectedResponse)> SetupTestEmployee(ProfitSharingDbContext c)
     {
         // Setup
-        MilitaryAndRehireForfeituresResponse example = MilitaryAndRehireForfeituresResponse.ResponseExample();
+        RehireForfeituresResponse example = RehireForfeituresResponse.ResponseExample();
 
         var demo = await c.Demographics.Include(demographic => demographic.ContactInfo).FirstAsync(CancellationToken.None);
         demo.EmploymentStatusId = EmploymentStatus.Constants.Active;
