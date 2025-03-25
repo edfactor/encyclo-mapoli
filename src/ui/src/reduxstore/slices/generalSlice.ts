@@ -1,6 +1,5 @@
-import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import { clear } from "console";
+import { createSlice } from "@reduxjs/toolkit";
 
 export const DEFAULT_BANNER = "Profit Sharing";
 
@@ -10,7 +9,7 @@ export interface GeneralState {
   onDropdownBlur: { onBlur: boolean };
   onFlatDateBlur: { onBlur: boolean };
   loading: boolean;
-  drawerOpen?: boolean;
+  isDrawerOpen?: boolean;
   activeSubmenu?: string;
 }
 
@@ -20,7 +19,7 @@ const initialState: GeneralState = {
   onDropdownBlur: { onBlur: false },
   onFlatDateBlur: { onBlur: false },
   loading: false,
-  drawerOpen: false,
+  isDrawerOpen: false,
   activeSubmenu: ""
 };
 
@@ -36,11 +35,11 @@ export const generalSlice = createSlice({
     },
     openDrawer: (state) => {
       console.log("In reducer opening drawer");
-      state.drawerOpen = true;
+      state.isDrawerOpen = true;
     },
     closeDrawer: (state) => {
       console.log("In reducer closing drawer");
-      state.drawerOpen = false;
+      state.isDrawerOpen = false;
     },
     setBanner: (state, action: PayloadAction<string>) => {
       state.appBanner = action.payload;
