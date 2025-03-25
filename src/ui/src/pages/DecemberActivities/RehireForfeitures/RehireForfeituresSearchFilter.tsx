@@ -1,5 +1,5 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FormHelperText, FormLabel, TextField } from "@mui/material";
+import { FormHelperText} from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
@@ -17,8 +17,8 @@ import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 import { ProfitYearRequest, SortedPaginationRequestDto } from "../../../reduxstore/types";
 
 interface RehireForfeituresSearch extends ProfitYearRequest {
-  beginningDate: Date;
-  endingDate: Date;
+  beginningDate: Date | null | undefined;
+  endingDate: Date | null | undefined;
   pagination: SortedPaginationRequestDto;
 }
 
@@ -53,8 +53,8 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
     resolver: yupResolver(schema),
     defaultValues: {
       profitYear: profitYear || rehireForfeituresQueryParams?.profitYear || undefined,
-      beginningDate: rehireForfeituresQueryParams?.beginningDate ? new Date(rehireForfeituresQueryParams.beginningDate) : undefined,
-      endingDate: rehireForfeituresQueryParams?.endingDate ? new Date(rehireForfeituresQueryParams.endingDate) : undefined,
+      beginningDate: rehireForfeituresQueryParams?.beginningDate ? rehireForfeituresQueryParams.beginningDate : undefined,
+      endingDate: rehireForfeituresQueryParams?.endingDate ? rehireForfeituresQueryParams.endingDate : undefined,
       pagination: { skip: 0, take: 25, sortBy: "profitYear", isSortDescending: true }
     }
   });
@@ -123,7 +123,7 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
               <DsmDatePicker
                 id="beginningDate"
                 onChange={(value: Date | null) => field.onChange(value || undefined)}
-                value={field.value ? field.value : null}
+                value={field.value ? new Date(field.value) : null}
                 required={true}
                 label="Rehire Begin Date"
                 disableFuture
@@ -141,7 +141,7 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
               <DsmDatePicker
                 id="endingDate"
                 onChange={(value: Date | null) => field.onChange(value || undefined)}
-                value={field.value ? field.value : null}
+                value={field.value ? new Date(field.value) : null}
                 required={true}
                 label="Rehire Ending Date"
                 disableFuture

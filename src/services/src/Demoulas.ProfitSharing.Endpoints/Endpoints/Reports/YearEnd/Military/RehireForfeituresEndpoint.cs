@@ -24,7 +24,7 @@ public class RehireForfeituresEndpoint :
 
     public override void Configure()
     {
-        Get("rehire-forfeitures");
+        Post("rehire-forfeitures");
         Summary(s =>
         {
             s.Summary = "Rehire Forfeitures Report Endpoint";

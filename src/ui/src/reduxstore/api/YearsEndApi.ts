@@ -219,12 +219,16 @@ export const YearsEndApi = createApi({
       RehireForfeituresRequest
     >({
       query: (params) => ({
-        url: `yearend/rehire-forfeitures/${params.reportingYear}`,
-        method: "GET",
+        url: `yearend/rehire-forfeitures/`,
+        method: "POST",
         params: {
           profitYear: params.profitYear,
+          beginningDate : params.beginningDate,
+          endingDate: params.endingDate,
           take: params.pagination.take,
-          skip: params.pagination.skip
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {

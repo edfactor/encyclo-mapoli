@@ -160,8 +160,8 @@ export interface EmployeesOnMilitaryLeaveResponse {
 }
 
 export interface RehireForfeituresRequest extends ProfitYearRequest {
-  beginningDate: Date;
-  endingDate: Date;
+  beginningDate: string;
+  endingDate: string;
   pagination: SortedPaginationRequestDto;
 }
 
