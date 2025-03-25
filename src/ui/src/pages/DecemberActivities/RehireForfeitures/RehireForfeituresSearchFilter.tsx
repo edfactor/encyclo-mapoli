@@ -123,7 +123,7 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
               <DsmDatePicker
                 id="beginningDate"
                 onChange={(value: Date | null) => field.onChange(value?.getDate() || undefined)}
-                value={field.value ? new Date(field.value) : null}
+                value={field.value ? field.value : null}
                 required={true}
                 label="Rehire Begin Date"
                 disableFuture
@@ -141,7 +141,7 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
               <DsmDatePicker
                 id="endingDate"
                 onChange={(value: Date | null) => field.onChange(value?.getDate() || undefined)}
-                value={field.value ? new Date(field.value) : null}
+                value={field.value ? field.value : null}
                 required={true}
                 label="Rehire Ening Date"
                 disableFuture
