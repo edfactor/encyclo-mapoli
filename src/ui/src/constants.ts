@@ -114,7 +114,7 @@ export const CAPTIONS = {
   PROFALL: "PROFALL Report",
   PROFIT_SHARE_BY_STORE: "Profit Share by Store",
   PROFIT_SHARE_GROSS_REPORT: "Profit Share Gross Report",
-  PROFIT_SHARE_REPORT_EDIT_RUN: "Profit Share Report Edit Run (PAY456)",
+  PROFIT_SHARE_REPORT_EDIT_RUN: "Profit Share Report Edit Run (PAY426)",
   PROFIT_SHARE_REPORT_FINAL_RUN: "Profit Share Report Final Run (PAY426)",
   PROFIT_SHARE_REPORT: "Profit Share Report (PAY426)",
   PROFIT_SHARE_UPDATE: "Profit Share Update (PAY444 PAY447 PAY460 PROFTLD)",
