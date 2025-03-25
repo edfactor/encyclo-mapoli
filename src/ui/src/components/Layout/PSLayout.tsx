@@ -3,7 +3,6 @@ import React from "react";
 import EnvironmentBanner, { IEnvironmentBannerProps } from "../Layout/EnvironmentBanner";
 import WelcomeDisplay, { WelcomeDisplayProps } from "../Layout/WelcomeDisplay";
 import "./PSLayout.css";
-import zIndex from "@mui/material/styles/zIndex";
 
 export interface DSMLayoutProps extends IEnvironmentBannerProps, WelcomeDisplayProps {
   children: React.ReactNode;
@@ -24,7 +23,7 @@ export const PSLayout: React.FC<DSMLayoutProps> = ({
   return (
     <div
       onClick={onClick}
-      /*
+      /* NOT SURE WHAT THIS CODE DID
       style={{
         height: "100%",
         width: drawerOpen ? "calc(100% - 320px)" : "calc(100% - 64px)",
@@ -34,10 +33,12 @@ export const PSLayout: React.FC<DSMLayoutProps> = ({
     >
       {/* THIS IS THE LIGHT BLUE BANNER AT VERY TOP */}
       <div
+        id="environment-banner"
         style={{
           position: "fixed",
           width: "100%",
-          top: 0
+          top: 0,
+          zIndex: 1000
         }}>
         <EnvironmentBanner
           data-testid="environment-banner"
@@ -47,24 +48,31 @@ export const PSLayout: React.FC<DSMLayoutProps> = ({
         />
       </div>
       <Grid2
+        id="top-level-all-contentbit-alert-container"
         container
         style={{
           marginTop: "110px"
         }}>
         <Grid2
+          id="app-banner-and-right-side-avatar-grid-container"
           size={12}
           style={{
-            position: "fixed"
+            position: "fixed",
+            zIndex: 1000
           }}>
           <div
             className="app-banner"
-            style={{ position: "fixed", top: "51px", backgroundColor: "white" }}>
+            style={{ width: "100%", position: "fixed", top: "52px", backgroundColor: "white" }}>
             <div className="text">{appTitle}</div>
             <WelcomeDisplay {...welcomeDisplayProps} />
           </div>
         </Grid2>
 
-        <Grid2 size={12}>{children}</Grid2>
+        <Grid2
+          size={12}
+          id="all-router-sub-assembly-ps-layout">
+          {children}
+        </Grid2>
       </Grid2>
     </div>
   );

@@ -46,7 +46,6 @@ export const EnvironmentBanner: React.FC<IEnvironmentBannerProps> = ({ environme
       sx={{
         position: "fixed",
         width: "100%",
-        zIndex: 1000,
         backgroundColor,
         "& .MuiAlert-message": {
           // had to resort to this to override defaults that didn't match design
@@ -61,7 +60,9 @@ export const EnvironmentBanner: React.FC<IEnvironmentBannerProps> = ({ environme
           width: "100%"
         }
       }}>
-      <div className="flex justify-between">
+      <div
+        className="flex justify-between"
+        id="alert-message-container">
         <div>WARNING! {environmentName} ENVIRONMENT. CHANGES WILL NOT BE REFLECTED IN PRODUCTION!</div>
         <div>v.{versionNumber}</div>
       </div>

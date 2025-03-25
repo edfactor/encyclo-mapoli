@@ -10,14 +10,13 @@ import {
   ListItemButton,
   ListItemText,
   SvgIcon,
-  Toolbar,
   Typography
 } from "@mui/material";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { clearActiveSubMenu, closeDrawer, openDrawer, setActiveSubMenu } from "reduxstore/slices/generalSlice";
-import { menuLevels, drawerTitle } from "../../MenuData";
+import { drawerTitle, menuLevels } from "../../MenuData";
 import { drawerClosedWidth, drawerOpenWidth } from "../../constants";
 
 import { SvgIconProps } from "@mui/material";
@@ -35,9 +34,8 @@ const SidebarIcon = (props: SvgIconProps) => (
 
 const PSDrawer = () => {
   const navigate = useNavigate();
-  const { drawerOpen, activeSubmenu } = useSelector((state: RootState) => state.general);
+  const { isDrawerOpen: drawerOpen, activeSubmenu } = useSelector((state: RootState) => state.general);
   const [expandedLevels, setExpandedLevels] = useState<{ [key: string]: boolean }>({});
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
   const dispatch = useDispatch();
 
@@ -46,10 +44,6 @@ const PSDrawer = () => {
       (l) => l.mainTitle === level && l.topPage.some((y) => y.topTitle === secondLevel && y.subPages.length > 0)
     );
     return hasSome;
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
   };
 
   const handleDrawerToggle = () => {
@@ -61,6 +55,7 @@ const PSDrawer = () => {
     // Close all levels and clear active submenu when drawer closes
     if (drawerOpen) {
       setExpandedLevels({});
+      setSelectedLevel(null);
       dispatch(clearActiveSubMenu());
     }
   };
@@ -89,7 +84,7 @@ const PSDrawer = () => {
     <>
       {/* Toggle Button */}
       <Box
-        key={"unique-key"}
+        key={"TitleBarAboveDrawer"}
         sx={{
           position: "fixed",
           left: drawerOpen ? "16px" : "12px",
@@ -128,31 +123,29 @@ const PSDrawer = () => {
           <SidebarIcon />
         </IconButton>
       </Box>
-
       <Drawer
         variant="permanent"
+        id="DrawerItself"
         sx={{
           width: drawerOpen ? drawerOpenWidth : drawerClosedWidth,
           flexShrink: 0,
 
+          // THIS IS WHAT STYLES THE AQUAMARINE COLORED SPACE
           "& .MuiDrawer-paper": {
             width: drawerOpen ? drawerOpenWidth : drawerClosedWidth,
+
             boxSizing: "border-box",
             overflowX: "hidden",
             "& > *": {
               overflowX: "hidden"
             },
-            transition: (theme) =>
-              theme.transitions.create("width", {
-                easing: theme.transitions.easing.sharp,
-                duration: theme.transitions.duration.enteringScreen
-              })
+            transition: "all 225ms"
           }
         }}>
-        <Toolbar />
         <Box
+          id="DrawerContent"
           sx={{
-            mt: "160px",
+            mt: "215px",
             overflowY: "hidden",
             "&:hover": {
               overflowY: "auto"
@@ -340,18 +333,6 @@ const PSDrawer = () => {
           )}
         </Box>
       </Drawer>
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          p: 3,
-          width: `calc(100% - ${drawerOpen ? drawerOpenWidth : drawerClosedWidth}px)`,
-          transition: (theme) =>
-            theme.transitions.create("width", {
-              easing: theme.transitions.easing.sharp,
-              duration: theme.transitions.duration.enteringScreen
-            })
-        }}></Box>
     </>
   );
 };
