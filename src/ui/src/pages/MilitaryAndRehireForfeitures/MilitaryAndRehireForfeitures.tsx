@@ -10,7 +10,7 @@ const MilitaryAndRehireForfeitures = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
 
   return (
-    <Page label={`${CAPTIONS.MILITARY_FORFEITURES}`}>
+    <Page label={`${CAPTIONS.REHIRE_FORFEITURES}`}>
       <Grid2
         container
         rowSpacing="24px">
