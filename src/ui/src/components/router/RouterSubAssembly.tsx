@@ -18,7 +18,7 @@ import ProfitShareReportFinalRun from "pages/FiscalFlow/ProfitShareReportFinalRu
 import Forfeit from "pages/Forfeit/Forfeit";
 import FrozenSummary from "pages/FrozenSummary/FrozenSummary";
 import MasterInquiry from "pages/MasterInquiry/MasterInquiry";
-import RehireForfeitures from "pages/RehireForfeitures/RehireForfeitures";
+import RehireForfeitures from "pages/DecemberActivities/RehireForfeitures/RehireForfeitures";
 import MilitaryEntryAndModification from "pages/MilitaryEntryAndModification/MilitaryEntryAndModification";
 import EighteenToTwenty from "pages/PAY426Reports/PAY426-1/EighteenToTwenty";
 import Beneficiaries from "pages/PAY426Reports/PAY426-10/Beneficiaries";

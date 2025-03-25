@@ -5,18 +5,19 @@ import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetMilitaryAndRehireForfeituresQuery } from "reduxstore/api/YearsEndApi";
 import {
-  clearMilitaryAndRehireForfeituresDetails,
-  clearMilitaryAndRehireForfeituresQueryParams,
+  clearRehireForfeituresDetails,
+  clearRehireForfeituresQueryParams,
   setMilitaryAndRehireForfeituresQueryParams
 } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
+import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 
-interface MilitaryAndRehireForfeituresSearch {
-  profitYear: number;
-  reportingYear: string;
+interface RehireForfeituresSearch {
+  beginningDate: Date;
+  endingDate: Date;
 }
 
 const digitsOnly: (value: string | undefined) => boolean = (value) => (value ? /^\d+$/.test(value) : false);
@@ -43,7 +44,7 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
   setInitialSearchLoaded
 }) => {
   const [triggerSearch, { isFetching }] = useLazyGetMilitaryAndRehireForfeituresQuery();
-  const { militaryAndRehireForfeituresQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const { rehireForfeituresQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const profitYear = useDecemberFlowProfitYear();
   const dispatch = useDispatch();
   const {
@@ -52,11 +53,11 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
     formState: { errors, isValid },
     reset,
     trigger
-  } = useForm<MilitaryAndRehireForfeituresSearch>({
+  } = useForm<RehireForfeituresSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: profitYear || militaryAndRehireForfeituresQueryParams?.profitYear || undefined,
-      reportingYear: militaryAndRehireForfeituresQueryParams?.reportingYear || undefined
+      beginningDate: profitYear || rehireForfeituresQueryParams?.profitYear || undefined,
+      reportingYear: rehireForfeituresQueryParams?.reportingYear || undefined
     }
   });
 
@@ -65,24 +66,24 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
       triggerSearch(
         {
           profitYear: profitYear,
-          reportingYear: data.reportingYear,
+          reportingYear: data.beginningDate,
           pagination: { skip: 0, take: 25 }
         },
         false
       ).unwrap();
       dispatch(setMilitaryAndRehireForfeituresQueryParams({
         profitYear: profitYear,
-        reportingYear: data.reportingYear
+        reportingYear: data.endingDate
       }));
     }
   });
 
   const handleReset = () => {
     setInitialSearchLoaded(false);
-    dispatch(clearMilitaryAndRehireForfeituresQueryParams());
-    dispatch(clearMilitaryAndRehireForfeituresDetails());
+    dispatch(clearRehireForfeituresQueryParams());
+    dispatch(clearRehireForfeituresDetails());
     reset({
-      profitYear: profitYear,
+      beginningDate: profitYear,
       reportingYear: undefined
     });
   };
@@ -94,41 +95,36 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
         paddingX="24px"
         gap="24px">
         <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-          <FormLabel>Profit Year</FormLabel>
           <Controller
             name="profitYear"
             control={control}
             render={({ field }) => (
-              <TextField
-                {...field}
-                fullWidth
-                variant="outlined"
-                type="number"
-                error={!!errors.profitYear}
-                onChange={(e) => {
-                  field.onChange(e);
-                }}
-                disabled={true}
+              <DsmDatePicker
+                id="profitYear"
+                onChange={(value: Date | null) => field.onChange(value?.getFullYear() || undefined)}
+                value={field.value ? new Date(field.value, 0) : null}
+                required={true}
+                label="Beginning Date"
+                disableFuture
+                error={errors.profitYear?.message}                
               />
             )}
           />
           {errors.profitYear && <FormHelperText error>{errors.profitYear.message}</FormHelperText>}
         </Grid2>
         <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-          <FormLabel>Reporting Year</FormLabel>
           <Controller
             name="reportingYear"
             control={control}
             render={({ field }) => (
-              <TextField
-                {...field}
-                fullWidth
-                variant="outlined"
-                error={!!errors.reportingYear}
-                onChange={(e) => {
-                  field.onChange(e);
-                }}
-                type="number"
+              <DsmDatePicker
+                id="reportingYear"
+                onChange={(value: Date | null) => field.onChange(value?.getFullYear() || undefined)}
+                value={field.value ? new Date(field.value, 0) : null}
+                required={true}
+                label="Ening Date"
+                disableFuture
+                error={errors.reportingYear?.message}
               />
             )}
           />

@@ -4,7 +4,7 @@ import { DSMAccordion, Page } from "smart-ui-library";
 import RehireForfeituresSearchFilter from "./RehireForfeituresSearchFilter";
 import RehireForfeituresGrid from "./RehireForfeituresGrid";
 import { useState } from "react";
-import { CAPTIONS } from "../../constants";
+import { CAPTIONS } from "../../../constants";
 
 const RehireForfeitures = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
