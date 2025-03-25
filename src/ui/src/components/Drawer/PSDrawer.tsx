@@ -1,6 +1,7 @@
 import { ChevronLeft, ExpandLess, ExpandMore } from "@mui/icons-material";
 import {
   Box,
+  Chip,
   Collapse,
   Divider,
   Drawer,
@@ -248,6 +249,14 @@ const PSDrawer = () => {
                                       }}
                                     />
                                   </Box>
+                                  <Box sx={{ display: "flex", alignItems: "right", gap: 1 }}>
+                                    <Chip
+                                      variant="outlined"
+                                      label={"Not Started"}
+                                      color={"primary"}
+                                      size="small"
+                                    />
+                                  </Box>
                                 </ListItemButton>
                               ))}
                             </List>
@@ -274,6 +283,14 @@ const PSDrawer = () => {
                                     fontSize: "0.875rem"
                                   }
                                 }}
+                              />
+                            </Box>
+                            <Box sx={{ display: "flex", alignItems: "right", gap: 1 }}>
+                              <Chip
+                                variant="outlined"
+                                label={"Not Started"}
+                                color={"primary"}
+                                size="small"
                               />
                             </Box>
                           </ListItemButton>
