@@ -14,8 +14,9 @@ import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
+import { ProfitYearRequest, SortedPaginationRequestDto } from "../../../reduxstore/types";
 
-interface RehireForfeituresSearch {
+interface RehireForfeituresSearch extends SortedPaginationRequestDto, ProfitYearRequest {
   beginningDate: Date;
   endingDate: Date;
 }
