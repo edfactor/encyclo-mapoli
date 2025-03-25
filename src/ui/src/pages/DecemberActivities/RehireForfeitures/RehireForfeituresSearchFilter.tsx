@@ -56,7 +56,7 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
   } = useForm<RehireForfeituresSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      beginningDate: profitYear || rehireForfeituresQueryParams?.profitYear || undefined,
+      beginningDate: new Date((profitYear || rehireForfeituresQueryParams?.profitYear), 01, 01)  || undefined,
       reportingYear: rehireForfeituresQueryParams?.reportingYear || undefined
     }
   });
@@ -101,34 +101,34 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
             render={({ field }) => (
               <DsmDatePicker
                 id="profitYear"
-                onChange={(value: Date | null) => field.onChange(value?.getFullYear() || undefined)}
-                value={field.value ? new Date(field.value, 0) : null}
+                onChange={(value: Date | null) => field.onChange(value?.getDate() || undefined)}
+                value={field.value ? new Date(field.value) : null}
                 required={true}
                 label="Beginning Date"
                 disableFuture
-                error={errors.profitYear?.message}                
+                error={errors.beginningDate?.message}                
               />
             )}
           />
-          {errors.profitYear && <FormHelperText error>{errors.profitYear.message}</FormHelperText>}
+          {errors.beginningDate && <FormHelperText error>{errors.beginningDate.message}</FormHelperText>}
         </Grid2>
         <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
           <Controller
-            name="reportingYear"
+            name="endingDate"
             control={control}
             render={({ field }) => (
               <DsmDatePicker
-                id="reportingYear"
-                onChange={(value: Date | null) => field.onChange(value?.getFullYear() || undefined)}
-                value={field.value ? new Date(field.value, 0) : null}
+                id="endingDate"
+                onChange={(value: Date | null) => field.onChange(value?.getDate() || undefined)}
+                value={field.value ? new Date(field.value) : null}
                 required={true}
                 label="Ening Date"
                 disableFuture
-                error={errors.reportingYear?.message}
+                error={errors.endingDate?.message}
               />
             )}
           />
-          {errors.reportingYear && <FormHelperText error>{errors.reportingYear.message}</FormHelperText>}
+          {errors.endingDate && <FormHelperText error>{errors.endingDate.message}</FormHelperText>}
         </Grid2>
       </Grid2>
       <Grid2
