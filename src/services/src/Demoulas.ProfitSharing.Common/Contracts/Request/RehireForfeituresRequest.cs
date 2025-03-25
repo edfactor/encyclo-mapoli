@@ -13,13 +13,13 @@ public sealed record RehireForfeituresRequest : ProfitYearRequest
     {
         return new RehireForfeituresRequest
         {
-            BeginningDate = DateTime.Today.AddYears(-2).ToDateOnly(),
-            EndingDate = DateTime.Today.AddYears(-1).ToDateOnly(),
+            BeginningDate = new DateOnly(2024, 03, 15),
+            EndingDate = new DateOnly(2024, 09, 15),
             Skip = 1,
             Take = 10,
             SortBy = "BadgeNumber",
             IsSortDescending = false,
-            ProfitYear = (short)DateTime.Today.AddYears(-1).Year
+            ProfitYear = 2024
         };
     }
 }
