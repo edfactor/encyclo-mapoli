@@ -13,8 +13,11 @@ public record WorkRelationshipAssignment(
     byte? JobCode,
     string? PositionCode,
     string? DepartmentName,
-    string? DepartmentId,
+    long? DepartmentId,
     string? FullPartTime,
+    long? AssignmentId,
+    string? AssignmentName,
+    string? AssignmentNumber,
     string? AssignmentCategory,
     string? AssignmentCategoryMeaning,
     char? Frequency
@@ -29,7 +32,8 @@ public record WorkRelationshipAssignment(
     /// <summary>The code representing the position of the assignment.</summary>
     public string? PositionCode { get; init; } = PositionCode;
     public string? DepartmentName { get; init; } = DepartmentName;
-    public string? DepartmentId { get; init; } = DepartmentId;
+    public long? DepartmentId { get; init; } = DepartmentId;
+    public long? AssignmentId { get; init; } = AssignmentId;
 
     /// <summary>Indicates whether the assignment is full-time or part-time.</summary>
     public string? FullPartTime { get; init; } = FullPartTime;
