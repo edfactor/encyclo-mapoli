@@ -26,7 +26,6 @@ const fiscalClose: RouteCategory = {
     { caption: CAPTIONS.PROFALL, route: ROUTES.PROFALL },
     { caption: CAPTIONS.PAY426_ACTIVE_18_20, route: ROUTES.PAY426_ACTIVE_18_20 },
     { caption: CAPTIONS.PAY426_ACTIVE_21_PLUS, route: ROUTES.PAY426_ACTIVE_21_PLUS },
-    { caption: CAPTIONS.PAY426_ACTIVE_21_PLUS, route: ROUTES.PAY426_ACTIVE_21_PLUS },
     { caption: CAPTIONS.PAY426_ACTIVE_UNDER_18, route: ROUTES.PAY426_ACTIVE_UNDER_18 },
     { caption: CAPTIONS.PAY426_ACTIVE_PRIOR_SHARING, route: ROUTES.PAY426_ACTIVE_PRIOR_SHARING },
     { caption: CAPTIONS.PAY426_ACTIVE_NO_PRIOR, route: ROUTES.PAY426_ACTIVE_NO_PRIOR },
@@ -49,11 +48,11 @@ const decemberFlow: RouteCategory = {
     { caption: CAPTIONS.DUPLICATE_NAMES, route: ROUTES.DUPLICATE_NAMES },
     { caption: CAPTIONS.MISSING_COMMA, route: ROUTES.MISSING_COMMA },
     { caption: CAPTIONS.EMPLOYEES_MILITARY, route: ROUTES.EMPLOYEES_MILITARY },
-    { caption: CAPTIONS.MILITARY_FORFEITURES, route: ROUTES.MILITARY_FORFEITURES },
+    { caption: CAPTIONS.REHIRE_FORFEITURES, route: ROUTES.REHIRE_FORFEITURES },
     { caption: CAPTIONS.TERMINATIONS, route: ROUTES.PROF_TERM },
     { caption: CAPTIONS.DISTRIBUTIONS_AND_FORFEITURES, route: ROUTES.DISTRIBUTIONS_AND_FORFEITURES },
     { caption: CAPTIONS.MANAGE_EXECUTIVE_HOURS, route: ROUTES.MANAGE_EXECUTIVE_HOURS },
-    { caption: CAPTIONS.PROFIT_SHARE_REPORT, route: ROUTES.PROFIT_SHARE_REPORT },
+    { caption: CAPTIONS.PROFIT_SHARE_TOTALS, route: ROUTES.PROFIT_SHARE_REPORT },
     { caption: CAPTIONS.PROFIT_SHARE_UPDATE, route: ROUTES.PROFIT_SHARE_UPDATE }
   ]
 };
@@ -91,6 +90,7 @@ const it_operations: RouteCategory = {
 
 const localStorageImpersonating: string | null = localStorage.getItem("impersonatingRole");
 
+// Filter the it_operations menu based on role
 const MenuData: RouteCategory[] = [
   inquiries,
   beneficiaries,
@@ -98,7 +98,7 @@ const MenuData: RouteCategory[] = [
   reconciliation,
   decemberFlow,
   fiscalClose,
-  localStorageImpersonating == ImpersonationRoles.ItOperations ? it_operations : ""
+  ...(localStorageImpersonating === ImpersonationRoles.ItOperations ? [it_operations] : [])
 ];
 
 export default MenuData;

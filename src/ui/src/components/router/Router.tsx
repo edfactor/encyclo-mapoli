@@ -39,6 +39,7 @@ import Under21Report from "pages/ProfitShareByStore/Under21Report";
 import Under21TA from "pages/ProfitShareByStore/Under21TA";
 import ProfitShareGrossReport from "pages/ProfitShareGrossReport/ProfitShareGrossReport";
 import ProfitShareReport from "pages/ProfitShareReport/ProfitShareReport";
+import ProfitShareTotals426 from "pages/ProfitShareTotals426/ProfitShareTotals426";
 import Termination from "pages/DecemberActivities/Termination/Termination";
 import VestedAmountsByAge from "pages/PROF130/VestedAmountsByAge/VestedAmountsByAge";
 import FiscalFlow from "pages/YearEndFlow/YearEndFlow";
@@ -156,7 +157,7 @@ const Router = () => {
           path={ROUTES.EMPLOYEES_MILITARY}
           element={<EmployeesOnMilitaryLeave />}></Route>
         <Route
-          path={ROUTES.MILITARY_FORFEITURES}
+          path={ROUTES.REHIRE_FORFEITURES}
           element={<MilitaryAndRehireForfeitures />}></Route>
         <Route
           path={ROUTES.DISTRIBUTIONS_AND_FORFEITURES}
@@ -210,14 +211,14 @@ const Router = () => {
           path={ROUTES.PROFIT_SHARE_REPORT}
           element={<ProfitShareReport />}></Route>
         <Route
+          path={ROUTES.PROFIT_SHARE_TOTALS}
+          element={<ProfitShareTotals426 />}></Route>
+        <Route
           path="forfeit/:badgeNumber?"
           element={<Forfeit />}></Route>
         <Route
           path={ROUTES.FISCAL_CLOSE}
           element={<FiscalFlow />}></Route>
-        <Route
-          path={ROUTES.PROFIT_SHARE_REPORT}
-          element={<ProfitShareReport />}></Route>
         <Route
           path={ROUTES.PROFIT_SHARE_REPORT_EDIT_RUN}
           element={<ProfitShareReportEditRun />}></Route>
