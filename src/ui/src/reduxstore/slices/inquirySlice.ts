@@ -1,58 +1,23 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-import {
-  BalanceByAge,
-  BalanceByYears,
-  ContributionsByAge,
-  DemographicBadgesNotInPayprofit,
-  DistributionsAndForfeitures,
-  DistributionsAndForfeituresQueryParams,
-  DuplicateNameAndBirthday,
-  DuplicateSSNDetail,
-  EligibleEmployeeResponseDto,
-  EmployeeDetails,
-  EmployeesOnMilitaryLeaveResponse,
-  EmployeeWagesForYear,
-  ExecutiveHoursAndDollars,
-  ExecutiveHoursAndDollarsGrid,
-  ExecutiveHoursAndDollarsQueryParams,
-  ForfeituresAndPoints,
-  ForfeituresAndPointsQueryParams,
-  ForfeituresByAge,
-  FrozenReportsByAgeRequestType,
-  MasterInquiryResponseType,
-  MasterInquirySearch,
-  MilitaryAndRehireForfeiture,
-  MilitaryAndRehireProfitSummary,
-  MissingCommasInPYName,
-  NegativeEtvaForSSNsOnPayProfit,
-  PagedReportResponse,
-  ProfitAndReportingQueryParams,
-  ProfitShareEditResponse,
-  ProfitShareMasterResponse,
-  ProfitShareUpdateResponse,
-  ProfitSharingDistributionsByAge, ProfitYearRequest,
-  TerminationResponse,
-  VestedAmountsByAge,
-  YearEndProfitSharingReportResponse
-} from "reduxstore/types";
+import { EmployeeDetails, MasterInquiryResponseType, MasterInquirySearch } from "reduxstore/types";
 
 export interface InquiryState {
   masterInquiryData: MasterInquiryResponseType | null;
   masterInquiryEmployeeDetails: EmployeeDetails | null;
-  masterInquiryRequestParams: MasterInquirySearch | null;  
+  masterInquiryRequestParams: MasterInquirySearch | null;
 }
 
 const initialState: InquiryState = {
   masterInquiryData: null,
   masterInquiryEmployeeDetails: null,
-  masterInquiryRequestParams: null 
+  masterInquiryRequestParams: null
 };
 
 export const inquirySlice = createSlice({
   name: "inquiry",
   initialState,
-  reducers: {    
+  reducers: {
     setMasterInquiryRequestParams: (state, action: PayloadAction<MasterInquirySearch>) => {
       state.masterInquiryRequestParams = action.payload;
     },
@@ -70,7 +35,7 @@ export const inquirySlice = createSlice({
     clearMasterInquiryData: (state) => {
       state.masterInquiryData = null;
       state.masterInquiryEmployeeDetails = null;
-    },   
+    }
   }
 });
 
@@ -78,6 +43,6 @@ export const {
   clearMasterInquiryData,
   clearMasterInquiryRequestParams,
   setMasterInquiryData,
-  setMasterInquiryRequestParams,  
+  setMasterInquiryRequestParams
 } = inquirySlice.actions;
 export default inquirySlice.reducer;
