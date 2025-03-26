@@ -84,26 +84,17 @@ const ProfitShareReportEditRunResults = () => {
       container
       width={"100%"}
       rowSpacing={"24px"}>
-      <Grid2 paddingX="24px">
-        <Typography
-          variant="h2"
-          sx={{
-            color: "#0258A5"
-          }}>
-          Profit Share Report - Edit Run (Pay 456)
-        </Typography>
-      </Grid2>
 
       <Grid2
         container
         spacing="24px"
         paddingLeft="24px"
         width="100%">
-        {profitShareCategories.map((category) => (
+        {profitShareCategories.map((category, index) => (
           <Grid2 size={{ xs: 12, md: 6, lg: 6 }} key={category.code} >
             <InfoCard
               buttonDisabled={false}
-              title={category.title}
+              title={`${index + 1}. ${category.title}`}
               handleClick={() => navigate(`/${category.destinationUrl}`)}
               data={category.data}
               valid={true}
