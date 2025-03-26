@@ -99,7 +99,7 @@ const it_operations: RouteCategory = {
   menuLabel: MENU_LABELS.IT_OPERATIONS,
   parentRoute: MENU_LABELS.IT_OPERATIONS,
   roles: [ImpersonationRoles.ItOperations], // Only users with this role can see this menu item
-  items: [{ caption: CAPTIONS.DEMOGRAOHIC_FREEZE, route: ROUTES.DEMO_FREEZE }]
+  items: [{ caption: CAPTIONS.DEMOGRAPHIC_FREEZE, route: ROUTES.DEMO_FREEZE }]
 };
 
 const MenuData: RouteCategory[] = [
@@ -256,12 +256,24 @@ export const menuLevels: MenuLevel[] = [
       {
         topTitle: CAPTIONS.PROFIT_SHARE_BY_STORE,
         topRoute: ROUTES.PROFIT_SHARE_BY_STORE,
-        subPages: []
+        subPages: [
+          { subTitle: CAPTIONS.QPAY066_UNDER21, subRoute: ROUTES.QPAY066_UNDER21 },
+          { subTitle: CAPTIONS.QPAY066TA_UNDER21, subRoute: ROUTES.QPAY066TA_UNDER21 },
+          { subTitle: CAPTIONS.QPAY066TA, subRoute: ROUTES.QPAY066TA },
+          { subTitle: CAPTIONS.PROFALL, subRoute: ROUTES.PROFALL },
+          { subTitle: CAPTIONS.NEW_PS_LABELS, subRoute: ROUTES.NEW_PS_LABELS },
+          { subTitle: CAPTIONS.PROFNEW, subRoute: ROUTES.PROFNEW }
+        ]
       },
 
       {
         topTitle: CAPTIONS.PROFIT_SHARE_GROSS_REPORT,
         topRoute: ROUTES.PROFIT_SHARE_GROSS_REPORT,
+        subPages: []
+      },
+      {
+        topTitle: CAPTIONS.PROFIT_SHARE_UPDATE,
+        topRoute: ROUTES.PROFIT_SHARE_UPDATE,
         subPages: []
       },
       {
@@ -276,8 +288,13 @@ export const menuLevels: MenuLevel[] = [
         subPages: []
       },
       {
-        topTitle: CAPTIONS.PROFALL,
-        topRoute: ROUTES.PROFALL,
+        topTitle: CAPTIONS.PRINT_PROFIT_CERTS,
+        topRoute: ROUTES.PRINT_PROFIT_CERTS,
+        subPages: []
+      },
+      {
+        topTitle: CAPTIONS.PAYMASTER_SAVE,
+        topRoute: ROUTES.PAYMASTER_SAVE,
         subPages: []
       }
     ]

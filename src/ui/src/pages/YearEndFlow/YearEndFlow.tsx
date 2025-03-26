@@ -1,18 +1,15 @@
-import {Divider, MenuItem, Select, SelectChangeEvent } from "@mui/material";
-import Grid2 from '@mui/material/Grid2';
+import { Divider, MenuItem, Select, SelectChangeEvent } from "@mui/material";
+import Grid2 from "@mui/material/Grid2";
 import DSMCollapsedAccordion from "components/DSMCollapsedAccordion";
-import { useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
+import { setSelectedProfitYearForFiscalClose } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import { Page } from "smart-ui-library";
-import { setSelectedProfitYearForFiscalClose } from "reduxstore/slices/yearsEndSlice";
-
 
 const FiscalFlow = () => {
   const { selectedProfitYearForFiscalClose } = useSelector((state: RootState) => state.yearsEnd);
   const dispatch = useDispatch();
-
 
   const navigate = useNavigate();
 
@@ -30,8 +27,7 @@ const FiscalFlow = () => {
           value={selectedProfitYearForFiscalClose.toString()}
           size="small"
           fullWidth
-          onChange={handleChange}
-        >
+          onChange={handleChange}>
           <MenuItem value={2024}>2024</MenuItem>
           <MenuItem value={2025}>2025</MenuItem>
           <MenuItem value={2026}>2026</MenuItem>
@@ -41,9 +37,13 @@ const FiscalFlow = () => {
   };
 
   return (
-    <Page label="Fiscal Flow" actionNode={<ProfitYearSelector />}>
+    <Page
+      label="Fiscal Flow"
+      actionNode={<ProfitYearSelector />}>
       <Grid2 container>
-        <Grid2 size={{ xs: 12 }} width={"100%"}>
+        <Grid2
+          size={{ xs: 12 }}
+          width={"100%"}>
           <Divider />
         </Grid2>
 
@@ -56,9 +56,8 @@ const FiscalFlow = () => {
               label: "Not Started",
               color: "default"
             }}
-            onActionClick={() => navigate('/payprofit-extract')}
-            isCollapsedOnRender={true}
-          >
+            onActionClick={() => navigate("/payprofit-extract")}
+            isCollapsedOnRender={true}>
             <></>
           </DSMCollapsedAccordion>
         </Grid2>
@@ -72,9 +71,8 @@ const FiscalFlow = () => {
               label: "Not Started",
               color: "default"
             }}
-            onActionClick={() => navigate('/ytd-wages-extract')}
-            isCollapsedOnRender={true}
-          >
+            onActionClick={() => navigate("/ytd-wages-extract")}
+            isCollapsedOnRender={true}>
             <></>
           </DSMCollapsedAccordion>
         </Grid2>
@@ -88,9 +86,8 @@ const FiscalFlow = () => {
               label: "Not Started",
               color: "default"
             }}
-            onActionClick={() => navigate('/manage-executive-hours-and-dollars')}
-            isCollapsedOnRender={true}
-          >
+            onActionClick={() => navigate("/manage-executive-hours-and-dollars")}
+            isCollapsedOnRender={true}>
             <></>
           </DSMCollapsedAccordion>
         </Grid2>
@@ -104,9 +101,8 @@ const FiscalFlow = () => {
               label: "Not Started",
               color: "default"
             }}
-            onActionClick={() => navigate('/profit-share-report-edit-run')}
-            isCollapsedOnRender={true}
-          >
+            onActionClick={() => navigate("/profit-share-report-edit-run")}
+            isCollapsedOnRender={true}>
             <></>
           </DSMCollapsedAccordion>
         </Grid2>
@@ -120,9 +116,8 @@ const FiscalFlow = () => {
               label: "Not Started",
               color: "default"
             }}
-            onActionClick={() => navigate('/profit-share-report-final-run')}
-            isCollapsedOnRender={true}
-          >
+            onActionClick={() => navigate("/profit-share-report-final-run")}
+            isCollapsedOnRender={true}>
             <></>
           </DSMCollapsedAccordion>
         </Grid2>
@@ -136,9 +131,8 @@ const FiscalFlow = () => {
               label: "Not Started",
               color: "default"
             }}
-            onActionClick={() => navigate('/eligible-employees')}
-            isCollapsedOnRender={true}
-          >
+            onActionClick={() => navigate("/eligible-employees")}
+            isCollapsedOnRender={true}>
             <></>
           </DSMCollapsedAccordion>
         </Grid2>
@@ -152,9 +146,8 @@ const FiscalFlow = () => {
               label: "Not Started",
               color: "default"
             }}
-            onActionClick={() => navigate('/forfeit')}
-            isCollapsedOnRender={true}
-          >
+            onActionClick={() => navigate("/forfeit")}
+            isCollapsedOnRender={true}>
             <></>
           </DSMCollapsedAccordion>
         </Grid2>
@@ -168,9 +161,8 @@ const FiscalFlow = () => {
               label: "Not Started",
               color: "default"
             }}
-            onActionClick={() => navigate('/profit-share-updates')}
-            isCollapsedOnRender={true}
-          >
+            onActionClick={() => navigate("/profit-share-updates")}
+            isCollapsedOnRender={true}>
             <></>
           </DSMCollapsedAccordion>
         </Grid2>
@@ -184,9 +176,8 @@ const FiscalFlow = () => {
               label: "Not Started",
               color: "default"
             }}
-            onActionClick={() => navigate('/profit-share-edit')}
-            isCollapsedOnRender={true}
-          >
+            onActionClick={() => navigate("/profit-share-edit")}
+            isCollapsedOnRender={true}>
             <></>
           </DSMCollapsedAccordion>
         </Grid2>
@@ -200,9 +191,8 @@ const FiscalFlow = () => {
               label: "Not Started",
               color: "default"
             }}
-            onActionClick={() => navigate('/profit-master-update')}
-            isCollapsedOnRender={true}
-          >
+            onActionClick={() => navigate("/profit-master-update")}
+            isCollapsedOnRender={true}>
             <></>
           </DSMCollapsedAccordion>
         </Grid2>
@@ -216,9 +206,8 @@ const FiscalFlow = () => {
               label: "Not Started",
               color: "default"
             }}
-            onActionClick={() => navigate('/paymaster-update')}
-            isCollapsedOnRender={true}
-          >
+            onActionClick={() => navigate("/paymaster-update")}
+            isCollapsedOnRender={true}>
             <></>
           </DSMCollapsedAccordion>
         </Grid2>
@@ -232,9 +221,8 @@ const FiscalFlow = () => {
               label: "Not Started",
               color: "default"
             }}
-            onActionClick={() => navigate('/profit-share-report-by-age')}
-            isCollapsedOnRender={true}
-          >
+            onActionClick={() => navigate("/profit-share-report-by-age")}
+            isCollapsedOnRender={true}>
             <></>
           </DSMCollapsedAccordion>
         </Grid2>
@@ -248,9 +236,8 @@ const FiscalFlow = () => {
               label: "Not Started",
               color: "default"
             }}
-            onActionClick={() => navigate('/prof-share-gross-report')}
-            isCollapsedOnRender={true}
-          >
+            onActionClick={() => navigate("/prof-share-gross-report")}
+            isCollapsedOnRender={true}>
             <></>
           </DSMCollapsedAccordion>
         </Grid2>
