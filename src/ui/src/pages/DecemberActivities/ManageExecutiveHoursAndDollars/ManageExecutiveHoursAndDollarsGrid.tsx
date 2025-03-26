@@ -269,7 +269,7 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
                 <Typography
                   variant="h2"
                   sx={{ color: "#0258A5" }}>
-                  {`Manage Executive Hours and Dollars (${mutableCopyOfGridData?.response.total || 0})`}
+                  {`Manage Executive Hours and Dollars (${mutableCopyOfGridData?.response.total || 0} records)`}
                 </Typography>
               </div>
               <div style={{ gap: "36px", display: "flex", justifyContent: "end", marginRight: 28 }}>

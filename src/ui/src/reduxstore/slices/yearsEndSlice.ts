@@ -95,7 +95,7 @@ export interface YearsEndState {
   terminationQueryParams: ProfitYearRequest | null;
   vestedAmountsByAge: VestedAmountsByAge | null;
   vestedAmountsByAgeQueryParams: ProfitYearRequest | null;
-  yearEndProfitSharingReport: PagedReportResponse<YearEndProfitSharingReportResponse> | null;
+  yearEndProfitSharingReport: YearEndProfitSharingReportResponse | null;
   yearEndProfitSharingReportQueryParams: ProfitYearRequest | null;
 }
 
@@ -615,7 +615,7 @@ export const yearsEndSlice = createSlice({
     },
     setYearEndProfitSharingReport: (
       state,
-      action: PayloadAction<PagedReportResponse<YearEndProfitSharingReportResponse>>
+      action: PayloadAction<YearEndProfitSharingReportResponse>
     ) => {
       state.yearEndProfitSharingReport = action.payload;
     },    

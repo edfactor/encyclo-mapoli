@@ -408,7 +408,7 @@ export interface ForfeituresAndPointsDetail {
   employeeName: string;
   ssn: string;
   forfeitures: number;
-  forfeiturePoints: number;
+  forfeitPoints: number;
   earningPoints: number;
   benefificaryPsn: number;
 }
@@ -674,23 +674,20 @@ export interface ProfitShareMasterResponse {
 }
 
 export interface YearEndProfitSharingReportResponse {
-  badgeNumber: number;
-  employeeName: string;
-  storeNumber: number;
-  employeeTypeCode: string;
-  employmentTypeName: string;
-  dateOfBirth: Date;
-  age: number;
-  ssn: string;
-  wages: number;
-  hours: number;
-  points: number;
-  isUnder21: boolean;
-  isNew: boolean;
-  employeeStatus: string;
-  balance: number;
-  yearsInPlan: number;
+  reportName: string;
+  reportDate: string;
+  response: Paged<YearEndProfitSharingEmployee>;
+  wagesTotal: number;
+  hoursTotal: number;
+  pointsTotal: number;
+  terminatedWagesTotal: number;
+  terminatedHoursTotal: number;
+  numberOfEmployees: number;
+  numberOfNewEmployees: number;
+  numberOfEmployeesUnder21: number;
+  numberOfEmployeesInPlan: number;
 }
+
 export interface FrozenStateResponse {
   id: number;
   profitYear: number;
@@ -721,10 +718,10 @@ export interface MilitaryContributionRequest extends ProfitYearRequest {
 
 export interface YearEndProfitSharingReportRequest {
   isYearEnd: boolean;
-  minimumAgeInclusive: number;
-  maximumAgeInclusive: number;
-  minimumHoursInclusive: number;
-  maximumHoursInclusive: number;
+  minimumAgeInclusive?: number;
+  maximumAgeInclusive?: number;
+  minimumHoursInclusive?: number;
+  maximumHoursInclusive?: number;
   includeActiveEmployees: boolean;
   includeInactiveEmployees: boolean;
   includeEmployeesTerminatedThisYear: boolean;
@@ -745,6 +742,8 @@ export interface MilitaryContribution {
   contributionDate: Date | null;
   contributionAmount: number | null;
 }
+
+
 export interface YearEndProfitSharingEmployee {
   badgeNumber: number;
   employeeName: string;

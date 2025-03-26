@@ -4,21 +4,14 @@ import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
 import ForfeitSearchFilter from "./ForfeitSearchFilter";
 import ForfeitGrid from "./ForfeitGrid";
+import { useState } from "react";
 
 const Forfeit = () => {
+  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
+
   return (
     <Page
-      label={CAPTIONS.FORFEIT}
-      actionNode={
-        <Button
-          variant="outlined"
-          disabled={true}
-          onClick={() => {
-            /* TODO: Implement download */
-          }}>
-          DOWNLOAD
-        </Button>
-      }>
+      label={CAPTIONS.FORFEIT}>
       <Grid2
         container
         rowSpacing="24px">
@@ -27,12 +20,15 @@ const Forfeit = () => {
         </Grid2>
         <Grid2 width={"100%"}>
           <DSMAccordion title="Filter">
-            <ForfeitSearchFilter />
+            <ForfeitSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
           </DSMAccordion>
         </Grid2>
 
         <Grid2 width="100%">
-          <ForfeitGrid />
+          <ForfeitGrid 
+            initialSearchLoaded={initialSearchLoaded}
+            setInitialSearchLoaded={setInitialSearchLoaded}
+          />
         </Grid2>
       </Grid2>
     </Page>

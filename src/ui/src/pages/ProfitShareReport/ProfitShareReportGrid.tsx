@@ -67,7 +67,7 @@ const ProfitShareReportGrid: React.FC<ProfitShareReportGridSearchProps> = ({
           <Typography
             variant="h2"
             sx={{ color: "#0258A5" }}>
-            {`${CAPTIONS.PROFIT_SHARE_REPORT} (${yearEndProfitSharingReport.response.total || 0})`}
+            {`${CAPTIONS.PROFIT_SHARE_REPORT} (${yearEndProfitSharingReport.response.total || 0} records)`}
           </Typography>
         </div>
       )}

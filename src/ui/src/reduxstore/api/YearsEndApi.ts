@@ -75,7 +75,8 @@ import {
   TerminationResponse,
   VestedAmountsByAge,
   YearEndProfitSharingEmployee,
-  YearEndProfitSharingReportRequest
+  YearEndProfitSharingReportRequest,
+  YearEndProfitSharingReportResponse
 } from "reduxstore/types";
 import { url } from "./api";
 import { format } from "date-fns";
@@ -660,7 +661,7 @@ export const YearsEndApi = createApi({
       }
     }),
     getYearEndProfitSharingReport: builder.query<
-      PagedReportResponse<YearEndProfitSharingEmployee>,
+      YearEndProfitSharingReportResponse,
       YearEndProfitSharingReportRequest
     >({
       query: (params) => ({

@@ -8,7 +8,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router";
 import { RootState } from "reduxstore/store";
 import { Page } from "smart-ui-library";
-import { MENU_LABELS, ROUTES } from "../../../constants";
+import { MENU_LABELS, CAPTIONS, ROUTES } from "../../../constants";
 import NegativeETVA from "./NegativeETVA";
 import { setSelectedProfitYearForDecemberActivities } from "reduxstore/slices/yearsEndSlice";
 
@@ -79,7 +79,7 @@ const DecemberProcessAccordion = () => {
                 <Typography
                   variant="h2"
                   sx={{ color: "#0258A5" }}>
-                  MISSING COMMA IN FULL NAME
+                  {CAPTIONS.MISSING_COMMA}
                 </Typography>
                 <Stack
                   sx={{ alignContent: "center" }}
@@ -94,7 +94,21 @@ const DecemberProcessAccordion = () => {
 
         <Grid2 width="100%">
           <DSMCollapsedAccordion
-            title="Military"
+            title={CAPTIONS.EMPLOYEES_MILITARY}
+            expandable={false}
+            status={{
+              label: "Not Started",
+              color: "secondary"
+            }}
+            onActionClick={() => navigate("/employees-on-military-leave")}
+            actionButtonText="START">
+            <></>
+          </DSMCollapsedAccordion>
+        </Grid2>
+
+        <Grid2 width="100%">
+          <DSMCollapsedAccordion
+            title={CAPTIONS.MILITARY_CONTRIBUTIONS}
             expandable={false}
             status={{
               label: "Not Started",
@@ -108,7 +122,7 @@ const DecemberProcessAccordion = () => {
 
         <Grid2 width="100%">
           <DSMCollapsedAccordion
-            title="Rehire"
+            title={CAPTIONS.REHIRE_FORFEITURES}
             expandable={false}
             status={{
               label: "Not Started",
@@ -122,7 +136,7 @@ const DecemberProcessAccordion = () => {
 
         <Grid2 width="100%">
           <DSMCollapsedAccordion
-            title="Terminations"
+            title={CAPTIONS.TERMINATIONS}
             expandable={false}
             status={{
               label: "Not Started",
@@ -137,7 +151,7 @@ const DecemberProcessAccordion = () => {
 
         <Grid2 width="100%">
           <DSMCollapsedAccordion
-            title="Distributions and Forfeitures (QPAY129)"
+            title={CAPTIONS.DISTRIBUTIONS_AND_FORFEITURES}
             expandable={false}
             status={{
               label: "Not Started",
@@ -152,7 +166,7 @@ const DecemberProcessAccordion = () => {
 
         <Grid2 width="100%">
           <DSMCollapsedAccordion
-            title="Manage Executives"
+            title={CAPTIONS.MANAGE_EXECUTIVE_HOURS}
             expandable={false}
             status={{
               label: "Not Started",
@@ -167,14 +181,15 @@ const DecemberProcessAccordion = () => {
 
         <Grid2 width="100%">
           <DSMCollapsedAccordion
-            title="Profit Share Totals Report (PAY426)"
+            title={CAPTIONS.PROFIT_SHARE_TOTALS}
             expandable={false}
             status={{
               label: "Not Started",
               color: "secondary"
             }}
-            onActionClick={() => navigate("/profit-share-report")}
-            actionButtonText="START">
+            onActionClick={() => navigate("/profit-share-totals")}
+            actionButtonText="VIEW TOTALS"
+            isCollapsedOnRender={true}>
             <></>
           </DSMCollapsedAccordion>
         </Grid2>

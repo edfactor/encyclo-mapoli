@@ -35,6 +35,15 @@ const pathToReadableName: Record<string, string> = {
   "profit-share-by-store": "Profit Share by Store",
   "profit-share-gross-report": "Profit Share Gross Report",
   "pay426-1": "Pay 426 Active 18-20",
+  "pay426-2": "Pay 426 Active 21 Plus",
+  "pay426-3": "Pay 426 Active Under 18",
+  "pay426-4": "Pay 426 Active Prior Sharing",
+  "pay426-5": "Pay 426 Active No Prior",
+  "pay426-6": "Pay 426 Terminated 1000 Plus",
+  "pay426-7": "Pay 426 Terminated No Prior",
+  "pay426-8": "Pay 426 Terminated Prior",
+  "pay426-9": "Pay 426 Summary",
+  "pay426-10": "Pay 426 Non Employee",
   "pay450-summary": "Pay 450 Summary",
   "prof-control-sheet": "Control Sheet",
   "under-21-report": "Under 21 Age Report",
@@ -42,8 +51,13 @@ const pathToReadableName: Record<string, string> = {
   "new-ps-labels": "New PS Labels",
   qpay066: "QPAY066 - Under 21 Age Report",
   qpay066ta: "QPAY066TA - Under 21 Term Active",
+  "qpay066-under21": "QPAY066 Under 21",
+  "qpay066ta-under21": "QPAY066TA Under 21",
   "new-ps-labels-report": "New PS Labels Report",
   demographic: "Demographic Freeze",
+  "ytd-wages-extract": "YTD Wages Extract",
+  "profall": "Profall",
+  "pay426-final-run": "Pay 426 Final Run"
 };
 
 export const getReadablePathName = (path: string): string => {

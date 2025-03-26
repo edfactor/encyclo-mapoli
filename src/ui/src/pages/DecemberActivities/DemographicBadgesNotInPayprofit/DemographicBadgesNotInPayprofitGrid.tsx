@@ -35,7 +35,7 @@ const DemographicBadgesNotInPayprofitGrid: React.FC = () => {
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`(${demographicBadges?.response.total || 0})`}
+              {`(${demographicBadges?.response.total || 0} records)`}
             </Typography>
           </div>
           <DSMGrid

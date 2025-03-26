@@ -41,7 +41,7 @@ const EmployeesOnMilitaryLeaveGrid: React.FC = () => {
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`(${employeesOnMilitaryLeave?.response.total || 0})`}
+              {`(${employeesOnMilitaryLeave?.response.total || 0} records)`}
             </Typography>
           </div>
           <DSMGrid

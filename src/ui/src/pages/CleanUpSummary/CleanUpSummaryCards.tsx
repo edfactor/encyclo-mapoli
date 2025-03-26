@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { TotalsRow } from "smart-ui-library";
 import { InfoCard } from "./InfoCard";
+import { CAPTIONS } from "../../constants";
 import {
   useLazyGetDemographicBadgesNotInPayprofitQuery,
   useLazyGetDuplicateNamesAndBirthdaysQuery,
@@ -72,7 +73,7 @@ const CleanUpSummaryCards: React.FC<CleanUpSummaryCardsProps> = ({ setSelectedTa
             <InfoCard
               buttonDisabled={disableButtons}
               handleClick={() => setSelectedTab(1)}
-              title="Negative ETVA for SSNs on Payprofit"
+              title={CAPTIONS.NEGATIVE_ETVA}
               valid={negativeEtvaForSSNsOnPayprofit.response.total == 0}
               data={{
                 "Negative ETVA:": negativeEtvaForSSNsOnPayprofit.response.total.toString()
@@ -84,7 +85,7 @@ const CleanUpSummaryCards: React.FC<CleanUpSummaryCardsProps> = ({ setSelectedTa
           {!!duplicateSSNsData && (
             <InfoCard
               buttonDisabled={disableButtons}
-              title="Duplicate SSNs in Demographics"
+              title={CAPTIONS.DUPLICATE_SSNS}
               handleClick={() => setSelectedTab(2)}
               valid={duplicateSSNsData.response.total == 0}
               data={{
@@ -97,7 +98,7 @@ const CleanUpSummaryCards: React.FC<CleanUpSummaryCardsProps> = ({ setSelectedTa
           {!!demographicBadges && (
             <InfoCard
               buttonDisabled={disableButtons}
-              title="Demographic Badges Not In Payprofit"
+              title={CAPTIONS.DEMOGRAPHIC_BADGES}
               handleClick={() => setSelectedTab(3)}
               valid={demographicBadges.response.total == 0}
               data={{
@@ -110,7 +111,7 @@ const CleanUpSummaryCards: React.FC<CleanUpSummaryCardsProps> = ({ setSelectedTa
           {!!duplicateNamesAndBirthdays && (
             <InfoCard
               buttonDisabled={disableButtons}
-              title="Duplicate Names and Birthdays"
+              title={CAPTIONS.DUPLICATE_NAMES}
               handleClick={() => setSelectedTab(4)}
               valid={duplicateNamesAndBirthdays.response.total == 0}
               data={{

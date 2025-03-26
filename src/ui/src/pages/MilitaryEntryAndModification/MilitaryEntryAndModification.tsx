@@ -18,7 +18,7 @@ import { useNavigate } from "react-router";
 
 const MilitaryEntryAndModification = () => {
   const [showContributions, setShowContributions] = useState(false);
-  const { masterInquiryEmployeeDetails } = useSelector((state: RootState) => state.yearsEnd);
+  const { masterInquiryEmployeeDetails } = useSelector((state: RootState) => state.inquiry);
   const [fetchContributions, { isFetching }] = useLazyGetMilitaryContributionsQuery();
   const [trigger] = useCreateMilitaryContributionMutation();
   const navigate = useNavigate();

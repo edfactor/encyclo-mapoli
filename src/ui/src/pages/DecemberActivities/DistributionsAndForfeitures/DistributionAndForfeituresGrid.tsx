@@ -69,7 +69,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`DISTRIBUTIONS AND FORFEITURES (${distributionsAndForfeitures?.response.total || 0})`}
+              {`DISTRIBUTIONS AND FORFEITURES (${distributionsAndForfeitures?.response.total || 0} ${distributionsAndForfeitures?.response.total === 1 ? 'Record' : 'Records'})`}
             </Typography>
           </div>
           <DSMGrid
@@ -78,8 +78,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
             handleSortChanged={sortEventHandler}
             providedOptions={{
               rowData: distributionsAndForfeitures?.response.results,
-              columnDefs: columnDefs,
-              pagination: true
+              columnDefs: columnDefs
             }}
           />
         </>

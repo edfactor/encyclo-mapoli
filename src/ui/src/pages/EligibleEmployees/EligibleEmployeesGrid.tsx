@@ -52,7 +52,7 @@ const EligibleEmployeesGrid: React.FC<EligibleEmployeesGridProps> = ({
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`PROFIT-ELIGIBLE REPORT (${eligibleEmployees?.response.total || 0})`}
+              {`PROFIT-ELIGIBLE REPORT (${eligibleEmployees?.response.total || 0} records)`}
             </Typography>
           </div>
           <DSMGrid

@@ -53,7 +53,7 @@ const DuplicateNamesAndBirthdaysGrid: React.FC<DuplicateNamesAndBirthdaysGridSea
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`DUPLICATE NAMES AND BIRTHDAYS (${duplicateNamesAndBirthdays?.response.total || 0})`}
+              {`DUPLICATE NAMES AND BIRTHDAYS (${duplicateNamesAndBirthdays?.response.total || 0} records)`}
             </Typography>
           </div>
           <DSMGrid

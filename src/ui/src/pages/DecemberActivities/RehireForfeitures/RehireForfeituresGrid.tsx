@@ -70,7 +70,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`${CAPTIONS.REHIRE_FORFEITURES} (${rehireForfeitures?.response.total || 0})`}
+              {`${CAPTIONS.REHIRE_FORFEITURES} (${rehireForfeitures?.response.total || 0} records)`}
             </Typography>
           </div>
           <DSMGrid
