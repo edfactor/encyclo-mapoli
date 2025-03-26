@@ -19,6 +19,10 @@ interface ForfeitSearchParams {
   useFrozenData: boolean;
 }
 
+interface ForfeitSearchParametersProps {
+  setInitialSearchLoaded: (loaded: boolean) => void;
+}
+
 const schema = yup.object().shape({
   profitYear: yup
     .number()
@@ -30,7 +34,7 @@ const schema = yup.object().shape({
   useFrozenData: yup.boolean().default(true).required()
 });
 
-const ForfeitSearchParameters = () => {
+const ForfeitSearchParameters: React.FC<ForfeitSearchParametersProps> = ({ setInitialSearchLoaded }) => {
   const [triggerSearch, { isFetching }] = useLazyGetForfeituresAndPointsQuery();
   const { forfeituresAndPointsQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
@@ -55,7 +59,7 @@ const ForfeitSearchParameters = () => {
         {
           profitYear: fiscalCloseProfitYear,
           useFrozenData: data.useFrozenData,
-          pagination: { skip: 0, take: 255 }
+          pagination: { skip: 0, take: 25 }
         },
         false
       ).unwrap();
@@ -63,6 +67,7 @@ const ForfeitSearchParameters = () => {
         profitYear: fiscalCloseProfitYear,
         useFrozenData: data.useFrozenData
       }));
+      setInitialSearchLoaded(true);
     }
   });
 
