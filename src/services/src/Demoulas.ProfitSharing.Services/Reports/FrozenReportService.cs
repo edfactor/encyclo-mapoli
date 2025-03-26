@@ -1004,7 +1004,8 @@ public class FrozenReportService : IFrozenReportService
                         Forfeitures = fBal_lj != null ? (fBal_lj.Total ?? 0) : 0,
                         Loans = lBal_lj != null ? (lBal_lj.Total ?? 0) : 0,
                         ProfitSharingAmount = (psBal.Total ?? 0m),
-                        GrossWages = lyPP.CurrentIncomeYear + pp.IncomeExecutive
+                        GrossWages = lyPP.CurrentIncomeYear + pp.IncomeExecutive,
+                        EnrollmentId = pp.EnrollmentId,
                     }).ToListAsync(cancellationToken: cancellationToken);
 
                 return reportDemographics;
@@ -1015,7 +1016,7 @@ public class FrozenReportService : IFrozenReportService
                 ReportDate = DateTimeOffset.Now,
                 ReportName = GrossWagesReportResponse.REPORT_NAME,
                 Response =
-                    new PaginatedResponseDto<GrossWagesReportDetail>(req) { Results = rslt, Total = rslt.Count },
+                    new PaginatedResponseDto<GrossWagesReportDetail>(req) { Results = rslt.Skip(req.Skip ?? 0).Take(req.Take ?? int.MaxValue), Total = rslt.Count },
                 TotalForfeitures = rslt.Sum(x => x.Forfeitures),
                 TotalGrossWages = rslt.Sum(x => x.GrossWages),
                 TotalLoans = rslt.Sum(x => x.Loans),
