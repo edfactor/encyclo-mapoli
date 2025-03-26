@@ -137,8 +137,6 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
             short lastYear = (short)(req.ProfitYear - 1);
             var query = (
                 from b in await GetRehireProfitQueryBase(context, req, cancellationToken)
-                join yipTbl in _totalService.GetYearsOfService(context, (short)req.EndingDate.Year) on b.Ssn equals yipTbl.Ssn into yipTmp
-                from yip in yipTmp.DefaultIfEmpty()
                 join lyBalTbl in _totalService.TotalVestingBalance(context, lastYear, bracket.FiscalEndDate) on b.Ssn equals lyBalTbl.Ssn into lyBalTmp
                 from lyBal in lyBalTmp.DefaultIfEmpty()
                 select new
@@ -150,7 +148,7 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
                     b.TerminationDate,
                     b.ReHiredDate,
                     b.StoreNumber,
-                    CompanyContributionYears = yip.Years,
+                    b.CompanyContributionYears,
                     b.EnrollmentId,
                     b.HoursCurrentYear,
                     NetBalanceLastYear = lyBal.VestedBalance,
@@ -194,12 +192,14 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
     }
 
     private async Task<IQueryable<MilitaryAndRehireProfitSummaryQueryResponse>> GetRehireProfitQueryBase(ProfitSharingReadOnlyDbContext context,
-        RehireForfeituresRequest req, CancellationToken cancellationToken)
+    RehireForfeituresRequest req, CancellationToken cancellationToken)
     {
         var bracket = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
 
         var beginning = req.BeginningDate.ToDateOnly(DateTimeKind.Local) > bracket.FiscalBeginDate ? bracket.FiscalBeginDate : req.BeginningDate.ToDateOnly(DateTimeKind.Local);
         var ending = req.EndingDate.ToDateOnly(DateTimeKind.Local) > bracket.FiscalEndDate ? bracket.FiscalEndDate : req.EndingDate.ToDateOnly(DateTimeKind.Local);
+
+        var yearsOfServiceQuery = _totalService.GetYearsOfService(context, (short)req.EndingDate.Year);
 
         var query = context.Demographics
             .Join(
@@ -247,28 +247,39 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
                     profitDetail.ProfitCodeId
                 }
             )
+            .GroupJoin(
+                yearsOfServiceQuery,
+                member => member.Ssn,
+                yip => yip.Ssn,
+                (member, yipGroup) => new { member, yipGroup }
+            )
+            .SelectMany(
+                temp => temp.yipGroup.DefaultIfEmpty(),
+                (temp, yip) => new MilitaryAndRehireProfitSummaryQueryResponse
+                {
+                    BadgeNumber = temp.member.BadgeNumber,
+                    FullName = temp.member.FullName,
+                    Ssn = temp.member.Ssn,
+                    HireDate = temp.member.HireDate,
+                    TerminationDate = temp.member.TerminationDate,
+                    ReHiredDate = temp.member.ReHireDate ?? SqlDateTime.MinValue.Value.ToDateOnly(DateTimeKind.Local),
+                    StoreNumber = temp.member.StoreNumber,
+                    CompanyContributionYears = yip!.Years ?? 0,
+                    EnrollmentId = temp.member.EnrollmentId,
+                    HoursCurrentYear = temp.member.CurrentHoursYear,
+                    NetBalanceLastYear = 0, //Filled out in detail report
+                    VestedBalanceLastYear = 0, //Filled out in detail report
+                    EmploymentStatusId = temp.member.EmploymentStatusId,
+                    Forfeiture = temp.member.Forfeiture,
+                    Remark = temp.member.Remark,
+                    ProfitYear = temp.member.ProfitYear,
+                    ProfitCodeId = temp.member.ProfitCodeId
+                }
+            )
             .OrderBy(m => m.BadgeNumber)
-            .ThenBy(m => m.FullName)
-            .Select(d => new MilitaryAndRehireProfitSummaryQueryResponse
-            {
-                BadgeNumber = d.BadgeNumber,
-                FullName = d.FullName,
-                Ssn = d.Ssn,
-                HireDate = d.HireDate,
-                TerminationDate = d.TerminationDate,
-                ReHiredDate = d.ReHireDate ?? SqlDateTime.MinValue.Value.ToDateOnly(DateTimeKind.Local),
-                StoreNumber = d.StoreNumber,
-                CompanyContributionYears = 0, //Filled out in detail report
-                EnrollmentId = d.EnrollmentId,
-                HoursCurrentYear = d.CurrentHoursYear,
-                NetBalanceLastYear = 0, //Filled out in detail report
-                VestedBalanceLastYear = 0, //Filled out in detail report
-                EmploymentStatusId = d.EmploymentStatusId,
-                Forfeiture = d.Forfeiture,
-                Remark = d.Remark,
-                ProfitYear = d.ProfitYear,
-                ProfitCodeId = d.ProfitCodeId
-            });
+            .ThenBy(m => m.FullName);
+
         return query;
     }
+
 }
