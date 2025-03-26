@@ -75,6 +75,7 @@ import {
   YearEndProfitSharingReportRequest
 } from "reduxstore/types";
 import { url } from "./api";
+import { format } from "date-fns";
 
 export const YearsEndApi = createApi({
   baseQuery: fetchBaseQuery({
@@ -221,10 +222,10 @@ export const YearsEndApi = createApi({
       query: (params) => ({
         url: `yearend/rehire-forfeitures/`,
         method: "POST",
-        params: {
+        body: {
           profitYear: params.profitYear,
-          beginningDate : params.beginningDate,
-          endingDate: params.endingDate,
+          beginningDate: params.beginningDate ? format(new Date(params.beginningDate), 'yyyy-MM-dd') : params.beginningDate,
+          endingDate: params.endingDate ? format(new Date(params.endingDate), 'yyyy-MM-dd') : params.endingDate,
           take: params.pagination.take,
           skip: params.pagination.skip,
           sortBy: params.pagination.sortBy,

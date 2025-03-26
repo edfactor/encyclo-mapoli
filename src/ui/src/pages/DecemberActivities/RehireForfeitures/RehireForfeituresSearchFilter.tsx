@@ -17,8 +17,8 @@ import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 import { ProfitYearRequest, SortedPaginationRequestDto } from "../../../reduxstore/types";
 
 interface RehireForfeituresSearch extends ProfitYearRequest {
-  beginningDate: Date | null | undefined;
-  endingDate: Date | null | undefined;
+  beginningDate: string;
+  endingDate: string;
   pagination: SortedPaginationRequestDto;
 }
 
@@ -29,7 +29,10 @@ const schema = yup.object().shape({
     .integer("Profit Year must be an integer")
     .min(2020, "Year must be 2020 or later")
     .max(2100, "Profit Year must be 2100 or earlier")
-    .required("Profit Year is required")
+    .required("Profit Year is required"),
+  beginningDate: yup.string().nullable(),
+  endingDate: yup.string().nullable(),
+  pagination: yup.object().nullable()
 });
 
 interface MilitaryAndRehireForfeituresSearchFilterProps {
@@ -50,12 +53,12 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
     reset,
     trigger
   } = useForm<RehireForfeituresSearch>({
-    resolver: yupResolver(schema),
+    resolver: yupResolver<RehireForfeituresSearch>(schema),
     defaultValues: {
       profitYear: profitYear || rehireForfeituresQueryParams?.profitYear || undefined,
       beginningDate: rehireForfeituresQueryParams?.beginningDate ? rehireForfeituresQueryParams.beginningDate : undefined,
       endingDate: rehireForfeituresQueryParams?.endingDate ? rehireForfeituresQueryParams.endingDate : undefined,
-      pagination: { skip: 0, take: 25, sortBy: "profitYear", isSortDescending: true }
+      pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }
     }
   });
 
@@ -66,7 +69,7 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
           profitYear: profitYear,
           beginningDate: data.beginningDate,
           endingDate : data.endingDate,
-          pagination: { skip: 0, take: 25, sortBy: "profitYear", isSortDescending: true },
+          pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true },
         },
         false
       ).unwrap();

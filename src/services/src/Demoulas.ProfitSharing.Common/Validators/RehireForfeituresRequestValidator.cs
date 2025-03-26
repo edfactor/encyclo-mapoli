@@ -34,13 +34,13 @@ public class RehireForfeituresRequestValidator : PaginationValidatorBase<RehireF
             .WithMessage("Ending date must be greater than or equal to beginning date.");
     }
 
-    private async Task<bool> BeWithinFiscalYear(RehireForfeituresRequest request, DateOnly date, ValidationContext<RehireForfeituresRequest> context, CancellationToken cancellationToken)
+    private async Task<bool> BeWithinFiscalYear(RehireForfeituresRequest request, DateTime date, ValidationContext<RehireForfeituresRequest> context, CancellationToken cancellationToken)
     {
         try
         {
             var bracket = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
 
-            if (date < bracket.FiscalBeginDate || date > bracket.FiscalEndDate)
+            if (date < bracket.FiscalBeginDate.ToDateTime(TimeOnly.MinValue) || date > bracket.FiscalEndDate.ToDateTime(TimeOnly.MinValue))
             {
                 _logger.LogWarning("Date {Date} is outside fiscal year {ProfitYear} boundaries ({Start} - {End})",
                     date, request.ProfitYear, bracket.FiscalBeginDate, bracket.FiscalEndDate);

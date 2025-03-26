@@ -198,8 +198,8 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
     {
         var bracket = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
 
-        var beginning = req.BeginningDate > bracket.FiscalBeginDate ? bracket.FiscalBeginDate : req.BeginningDate;
-        var ending = req.EndingDate > bracket.FiscalEndDate ? bracket.FiscalEndDate : req.EndingDate;
+        var beginning = req.BeginningDate.ToDateOnly(DateTimeKind.Local) > bracket.FiscalBeginDate ? bracket.FiscalBeginDate : req.BeginningDate.ToDateOnly(DateTimeKind.Local);
+        var ending = req.EndingDate.ToDateOnly(DateTimeKind.Local) > bracket.FiscalEndDate ? bracket.FiscalEndDate : req.EndingDate.ToDateOnly(DateTimeKind.Local);
 
         var query = context.Demographics
             .Join(

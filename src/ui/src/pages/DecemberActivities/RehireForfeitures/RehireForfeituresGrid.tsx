@@ -23,7 +23,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
     isSortDescending: false
   });
 
-  const { militaryAndRehireForfeitures, militaryAndRehireForfeituresQueryParams } = useSelector(
+  const { rehireForfeitures, rehireForfeituresQueryParams } = useSelector(
     (state: RootState) => state.yearsEnd
   );
 
@@ -31,18 +31,26 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
 
   const onSearch = useCallback(async () => {
     const request = {
-      profitYear: militaryAndRehireForfeituresQueryParams?.profitYear ?? 0,
-      reportingYear: militaryAndRehireForfeituresQueryParams?.reportingYear ?? "",
-      pagination: { skip: pageNumber * pageSize, take: pageSize }
+      profitYear: rehireForfeituresQueryParams?.profitYear ?? 0,
+      beginningDate: rehireForfeituresQueryParams?.beginningDate ?? "",
+      endingDate: rehireForfeituresQueryParams?.endingDate ?? "",
+      pagination: { 
+        skip: pageNumber * pageSize, 
+        take: pageSize,
+        sortBy: sortParams.sortBy,
+        isSortDescending: sortParams.isSortDescending
+      }
     };
 
     await triggerSearch(request, false);
   }, [
     pageNumber,
     pageSize,
+    sortParams,
     triggerSearch,
-    militaryAndRehireForfeituresQueryParams?.profitYear,
-    militaryAndRehireForfeituresQueryParams?.reportingYear
+    rehireForfeituresQueryParams?.profitYear,
+    rehireForfeituresQueryParams?.beginningDate,
+    rehireForfeituresQueryParams?.endingDate    
   ]);
 
   useEffect(() => {
@@ -56,13 +64,13 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
 
   return (
     <>
-      {militaryAndRehireForfeitures?.response && (
+      {rehireForfeitures?.response && (
         <>
           <div style={{ padding: "0 24px 0 24px" }}>
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`${CAPTIONS.REHIRE_FORFEITURES} (${militaryAndRehireForfeitures?.response.total || 0})`}
+              {`${CAPTIONS.REHIRE_FORFEITURES} (${rehireForfeitures?.response.total || 0})`}
             </Typography>
           </div>
           <DSMGrid
@@ -70,13 +78,13 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
             isLoading={false}
             handleSortChanged={sortEventHandler}
             providedOptions={{
-              rowData: militaryAndRehireForfeitures?.response.results,
+              rowData: rehireForfeitures?.response.results,
               columnDefs: columnDefs
             }}
           />
         </>
       )}
-      {!!militaryAndRehireForfeitures && militaryAndRehireForfeitures.response.results.length > 0 && (
+      {!!rehireForfeitures && rehireForfeitures.response.results.length > 0 && (
         <Pagination
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
@@ -89,7 +97,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
             setPageNumber(1);
             setInitialSearchLoaded(true);
           }}
-          recordCount={militaryAndRehireForfeitures.response.total}
+          recordCount={rehireForfeitures.response.total}
         />
       )}
     </>
