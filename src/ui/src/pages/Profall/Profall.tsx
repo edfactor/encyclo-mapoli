@@ -8,14 +8,6 @@ const Profall = () => {
     return (
         <Page 
             label={CAPTIONS.PROFALL}
-            actionNode={
-                <Button
-                    variant="outlined"
-                    onClick={() => {/* @TODO: Implement download */}}
-                >
-                    DOWNLOAD
-                </Button>
-            }
         >
             <Grid2
                 container
