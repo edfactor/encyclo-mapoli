@@ -24,13 +24,4 @@ public interface ITerminationAndRehireService
     /// <returns>A task that represents the asynchronous operation. The task result contains a report response with details of rehires and their potential entitlements.</returns>
     Task<ReportResponseBase<RehireForfeituresResponse>> FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYearsAsync(RehireForfeituresRequest req,
         CancellationToken cancellationToken);
-
-    /// <summary>
-    /// Generates a summary report of profit sharing for employees who are on military leave and have been rehired.
-    /// </summary>
-    /// <param name="req">The request details including pagination and reporting year.</param>
-    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    /// <returns>A task that represents the asynchronous operation. The task result contains the summary report response with profit sharing details for rehired military employees.</returns>
-    Task<ReportResponseBase<MilitaryAndRehireProfitSummaryResponse>> GetMilitaryAndRehireProfitSummaryReportAsync(RehireForfeituresRequest req,
-        CancellationToken cancellationToken);
 }
