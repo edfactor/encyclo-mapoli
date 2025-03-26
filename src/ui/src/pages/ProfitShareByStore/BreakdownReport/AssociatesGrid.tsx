@@ -1,114 +1,135 @@
 import { Typography } from "@mui/material";
 import { DSMGrid } from "smart-ui-library";
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import Grid2 from '@mui/material/Grid2';
+import { useLazyGetBreakdownByStoreQuery } from "reduxstore/api/YearsEndApi";
+import { useSelector } from "react-redux";
+import { RootState } from "reduxstore/store";
 
 interface AssociatesGridProps {
-  store: string; // everything hardcoded for now, will eventually pull from store based on store number
+  store: string;
 }
 
-const sampleData = [
-  {
-    badge: 47425,
-    employeeName: "BACHELDER, JAKE R",
-    beginningBalance: "$X,XXX.XX",
-    earnings: "$X,XXX.XX",
-    cont: "$X,XXX.XX",
-    forf: "$X,XXX.XX",
-    dist: "$X,XXX.XX",
-    endingBalance: "$X,XXX.XX",
-    endingBalance2: "$X,XXX.XX",
-    vestedAmount: "$X,XXX.XX"
-  },
-  {
-    badge: 82424,
-    employeeName: "BATISTA, STEVEN",
-    beginningBalance: "$X,XXX.XX",
-    earnings: "$X,XXX.XX",
-    cont: "$X,XXX.XX",
-    forf: "$X,XXX.XX",
-    dist: "$X,XXX.XX",
-    endingBalance: "$X,XXX.XX",
-    endingBalance2: "$X,XXX.XX",
-    vestedAmount: "$X,XXX.XX"
-  },
-  {
-    badge: 85744,
-    employeeName: "BRADLEY, ZACHARY",
-    beginningBalance: "$X,XXX.XX",
-    earnings: "$X,XXX.XX",
-    cont: "$X,XXX.XX",
-    forf: "$X,XXX.XX",
-    dist: "$X,XXX.XX",
-    endingBalance: "$X,XXX.XX",
-    endingBalance2: "$X,XXX.XX",
-    vestedAmount: "$X,XXX.XX"
-  },
-  {
-    badge: 94861,
-    employeeName: "COCHRAN, KYLE E",
-    beginningBalance: "$X,XXX.XX",
-    earnings: "$X,XXX.XX",
-    cont: "$X,XXX.XX",
-    forf: "$X,XXX.XX",
-    dist: "$X,XXX.XX",
-    endingBalance: "$X,XXX.XX",
-    endingBalance2: "$X,XXX.XX",
-    vestedAmount: "$X,XXX.XX"
-  }
-];
-
 const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store }) => {
+  const [fetchBreakdownByStore, { isLoading }] = useLazyGetBreakdownByStoreQuery();
+  const breakdownByStore = useSelector((state: RootState) => state.yearsEnd.breakdownByStore);
+  const queryParams = useSelector((state: RootState) => state.yearsEnd.breakdownByStoreQueryParams);
+
+  useEffect(() => {
+    if (queryParams) {
+      fetchBreakdownByStore(queryParams);
+    } else {
+      fetchBreakdownByStore({
+        profitYear: 2024,
+        storeNumber: store,
+        under21Only: true,
+        isSortDescending: true,
+        pagination: {
+          take: 255,
+          skip: 0
+        }
+      });
+    }
+  }, [fetchBreakdownByStore, store, queryParams]);
+
   const columnDefs = useMemo(() => [
     {
       headerName: "Badge",
-      field: "badge",
+      field: "badgeNumber",
       width: 100
     },
     {
       headerName: "Employee Name",
-      field: "employeeName",
+      field: "fullName",
       width: 200
     },
     {
       headerName: "Beginning Balance",
       field: "beginningBalance",
-      width: 150
+      width: 150,
+      valueFormatter: (params: any) => {
+        return new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: 'USD'
+        }).format(params.value);
+      }
     },
     {
       headerName: "Earnings",
       field: "earnings",
-      width: 120
+      width: 120,
+      valueFormatter: (params: any) => {
+        return new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: 'USD'
+        }).format(params.value);
+      }
     },
     {
       headerName: "Cont",
-      field: "cont",
-      width: 120
+      field: "contributions",
+      width: 120,
+      valueFormatter: (params: any) => {
+        return new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: 'USD'
+        }).format(params.value);
+      }
     },
     {
       headerName: "Forf",
-      field: "forf",
-      width: 120
+      field: "forfeiture",
+      width: 120,
+      valueFormatter: (params: any) => {
+        return new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: 'USD'
+        }).format(params.value);
+      }
     },
     {
       headerName: "Dist",
-      field: "dist",
-      width: 120
+      field: "distributions",
+      width: 120,
+      valueFormatter: (params: any) => {
+        return new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: 'USD'
+        }).format(params.value);
+      }
     },
     {
       headerName: "Ending Balance",
       field: "endingBalance",
-      width: 150
+      width: 150,
+      valueFormatter: (params: any) => {
+        return new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: 'USD'
+        }).format(params.value);
+      }
     },
     {
       headerName: "Ending Balance",
-      field: "endingBalance2",
-      width: 150
+      field: "endingBalance",
+      width: 150,
+      valueFormatter: (params: any) => {
+        return new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: 'USD'
+        }).format(params.value);
+      }
     },
     {
       headerName: "Vested Amount",
       field: "vestedAmount",
-      width: 150
+      width: 150,
+      valueFormatter: (params: any) => {
+        return new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: 'USD'
+        }).format(params.value);
+      }
     }
   ], []);
 
@@ -124,10 +145,10 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store }) => {
       <Grid2 width="100%">
         <DSMGrid
           preferenceKey={`BREAKDOWN_REPORT_ASSOCIATES_STORE_${store}`}
-          isLoading={false}
+          isLoading={isLoading}
           handleSortChanged={(_params) => {}}
           providedOptions={{
-            rowData: sampleData,
+            rowData: breakdownByStore?.response?.results || [],
             columnDefs: columnDefs
           }}
         />

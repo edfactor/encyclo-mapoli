@@ -7,6 +7,8 @@ import {
   setAdditionalExecutivesGrid,
   setBalanceByAge,
   setBalanceByYears,
+  setBreakdownByStore,
+  clearBreakdownByStore,
   setContributionsByAge,
   setDemographicBadgesNotInPayprofitData,
   setDistributionsAndForfeitures,
@@ -28,6 +30,12 @@ import {
   setProfitMasterRevert,
   setProfitUpdate,
   setTermination,
+  setUnder21BreakdownByStore,
+  clearUnder21BreakdownByStore,
+  setUnder21Inactive,
+  clearUnder21Inactive, 
+  setUnder21Totals,
+  clearUnder21Totals,
   setVestedAmountByAge,
   setYearEndProfitSharingReport
 } from "reduxstore/slices/yearsEndSlice";
@@ -73,10 +81,18 @@ import {
   ProfitYearRequest,
   TerminationRequest,
   TerminationResponse,
+  Under21BreakdownByStoreRequest,
+  Under21BreakdownByStoreResponse,
+  Under21InactiveRequest,
+  Under21InactiveResponse,
+  Under21TotalsRequest,
+  Under21TotalsResponse,
   VestedAmountsByAge,
   YearEndProfitSharingEmployee,
   YearEndProfitSharingReportRequest,
-  YearEndProfitSharingReportResponse
+  YearEndProfitSharingReportResponse,
+  BreakdownByStoreRequest,
+  BreakdownByStoreResponse
 } from "reduxstore/types";
 import { url } from "./api";
 
@@ -623,6 +639,99 @@ export const YearsEndApi = createApi({
         }
       }
     }),
+    getBreakdownByStore: builder.query<BreakdownByStoreResponse, BreakdownByStoreRequest>({
+      query: (params) => ({
+        url: "yearend/breakdown-by-store",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          storeNumber: params.storeNumber,
+          under21Only: params.under21Only,
+          isSortDescending: params.isSortDescending,
+          take: params.pagination.take,
+          skip: params.pagination.skip
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          dispatch(clearBreakdownByStore());
+          const { data } = await queryFulfilled;
+          dispatch(setBreakdownByStore(data));
+        } catch (err) {
+          console.log("Err: " + err);
+          dispatch(clearBreakdownByStore());
+        }
+      }
+    }),
+    getUnder21BreakdownByStore: builder.query<Under21BreakdownByStoreResponse, Under21BreakdownByStoreRequest>({
+      query: (params) => ({
+        url: "yearend/post-frozen/under-21-breakdown-by-store",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          isSortDescending: params.isSortDescending,
+          take: params.pagination.take,
+          skip: params.pagination.skip
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          dispatch(clearUnder21BreakdownByStore());
+          const { data } = await queryFulfilled;
+          dispatch(setUnder21BreakdownByStore(data));
+        } catch (err) {
+          console.log("Err: " + err);
+          dispatch(clearUnder21BreakdownByStore());
+        }
+      }
+    }),
+    
+    getUnder21Inactive: builder.query<Under21InactiveResponse, Under21InactiveRequest>({
+      query: (params) => ({
+        url: "yearend/post-frozen/under-21-inactive",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          isSortDescending: params.isSortDescending,
+          take: params.pagination.take,
+          skip: params.pagination.skip
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          dispatch(clearUnder21Inactive());
+          const { data } = await queryFulfilled;
+          dispatch(setUnder21Inactive(data));
+        } catch (err) {
+          console.log("Err: " + err);
+          dispatch(clearUnder21Inactive());
+        }
+      }
+    }),
+    
+    getUnder21Totals: builder.query<Under21TotalsResponse, Under21TotalsRequest>({
+      query: (params) => ({
+        url: "yearend/post-frozen/totals",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          isSortDescending: params.isSortDescending,
+          take: params.pagination.take,
+          skip: params.pagination.skip
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          dispatch(clearUnder21Totals());
+          const { data } = await queryFulfilled;
+          dispatch(setUnder21Totals(data));
+        } catch (err) {
+          console.log("Err: " + err);
+          dispatch(clearUnder21Totals());
+        }
+      }
+    }),
+
     getMasterApply: builder.query<ProfitShareMasterResponse, ProfitShareUpdateRequest>({
       query: (params) => ({
         url: "yearend/profit-master-update",
@@ -686,6 +795,7 @@ export const {
   useLazyGetAdditionalExecutivesQuery,
   useLazyGetBalanceByAgeQuery,
   useLazyGetBalanceByYearsQuery,
+  useLazyGetBreakdownByStoreQuery,
   useLazyGetContributionsByAgeQuery,
   useLazyGetDemographicBadgesNotInPayprofitQuery,
   useLazyGetDistributionsAndForfeituresQuery,
@@ -707,6 +817,9 @@ export const {
   useLazyGetProfitShareEditQuery,
   useLazyGetProfitShareUpdateQuery,
   useLazyGetTerminationReportQuery,
+  useLazyGetUnder21BreakdownByStoreQuery,
+  useLazyGetUnder21InactiveQuery,
+  useLazyGetUnder21TotalsQuery,
   useLazyGetVestingAmountByAgeQuery,
   useLazyGetYearEndProfitSharingReportQuery,
   useUpdateExecutiveHoursAndDollarsMutation,

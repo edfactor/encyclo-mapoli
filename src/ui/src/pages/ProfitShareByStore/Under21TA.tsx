@@ -1,63 +1,100 @@
-import { Divider, Typography } from "@mui/material";
-import Grid2 from '@mui/material/Grid2';
-import { DSMAccordion, Page, TotalsGrid } from "smart-ui-library";
-import Under21ReportSearchFilters from "./Under21SearchFilters";
+import { Divider, CircularProgress, Box } from "@mui/material";
+import Grid2 from "@mui/material/Grid2";
+import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
-import Under21ReportGrid from "./Under21ReportGrid";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "reduxstore/store";
+import { useLazyGetUnder21TotalsQuery, useLazyGetUnder21InactiveQuery } from "reduxstore/api/YearsEndApi";
+import Under21SearchFilters from "./Under21SearchFilters";
+import Under21Summary from "./Under21/Under21Summary";
+import Under21InactiveGrid from "./Under21/Under21InactiveGrid";
 
 const Under21TA = () => {
-    return (
-        <Page label={CAPTIONS.UNDER_21_TERM_ACTIVE}>
-            <Grid2
-                container
-                rowSpacing="24px">
-                <Grid2 width={"100%"}>
-                    <Divider />
-                </Grid2>
-                <Grid2 width={"100%"}>
-                    <DSMAccordion title="Filter">
-                        <Under21ReportSearchFilters />
-                    </DSMAccordion>
-                </Grid2>
+  const [fetchUnder21Totals, { isLoading: isTotalsLoading }] = useLazyGetUnder21TotalsQuery();
+  const [fetchUnder21Inactive, { isLoading: isInactiveLoading }] = useLazyGetUnder21InactiveQuery();
+  const under21Totals = useSelector((state: RootState) => state.yearsEnd.under21Totals);
+  const under21Inactive = useSelector((state: RootState) => state.yearsEnd.under21Inactive);
+  const [initialLoad, setInitialLoad] = useState(true);
 
-                <div className="flex sticky top-0 z-10 bg-white">
-                    <TotalsGrid
-                        displayData={[
-                            ['Under 21 100% Vested', '1'],
-                            ['Under 21 Partially Vested', '0'],
-                            ['Under 21 with 1-2 PS Years', '20']
-                        ]}
-                        leftColumnHeaders={[]}
-                        topRowHeaders={['', 'Active Employees']}
-                    />
+  const isLoading = isTotalsLoading || isInactiveLoading;
 
-                    <TotalsGrid
-                        displayData={[
-                            ['Under 21 100% Vested', '0'],
-                            ['Under 21 Partially Vested', '0'],
-                            ['Under 21 with 1-2 PS Years', '20']
-                        ]}
-                        leftColumnHeaders={[]}
-                        topRowHeaders={['', 'Terminated Employees']}
-                    />
+  const hasData = !!under21Totals && !!under21Inactive;
 
-                    <TotalsGrid
-                        displayData={[
-                            ['Under 21 100% Vested', '1'],
-                            ['Under 21 Partially Vested', '0'],
-                            ['Under 21 with 1-2 PS Years', '0']
-                        ]}
-                        leftColumnHeaders={[]}
-                        topRowHeaders={['', 'Inactive Employees']}
-                    />
-                </div>
+  useEffect(() => {
+    const fetchData = async () => {
+      const queryParams = {
+        profitYear: 2024,
+        isSortDescending: true,
+        pagination: {
+          take: 255,
+          skip: 0
+        }
+      };
+      
+      await Promise.all([
+        fetchUnder21Totals(queryParams),
+        fetchUnder21Inactive(queryParams)
+      ]);
+      
+      setInitialLoad(false);
+    };
+    
+    fetchData();
+  }, [fetchUnder21Totals, fetchUnder21Inactive]);
 
-                <Grid2 width="100%">
-                    <Under21ReportGrid />
-                </Grid2>
+  const handleSearch = (profitYear: number, isSortDescending: boolean) => {
+    const queryParams = {
+      profitYear,
+      isSortDescending,
+      pagination: {
+        take: 255,
+        skip: 0
+      }
+    };
+    
+    fetchUnder21Totals(queryParams);
+    fetchUnder21Inactive(queryParams);
+  };
+
+  return (
+    <Page label={CAPTIONS.QPAY066TA_UNDER21}>
+      <Grid2
+        container
+        rowSpacing="24px">
+        <Grid2 width={"100%"}>
+          <Divider />
+        </Grid2>
+        <Grid2 width={"100%"}>
+          <DSMAccordion title="Filter">
+            <Under21SearchFilters onSearch={handleSearch} isLoading={isLoading} />
+          </DSMAccordion>
+        </Grid2>
+
+        {initialLoad || isLoading ? (
+          <Grid2 width="100%">
+            <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
+              <CircularProgress />
+            </Box>
+          </Grid2>
+        ) : hasData && (
+          <>
+            <Grid2 width="100%" paddingX="24px">
+              <Under21Summary 
+                totals={under21Totals} 
+                isLoading={isTotalsLoading}
+                title="UNDER 21 INACTIVE (QPAY066TA-UNDR21)"
+              />
             </Grid2>
-        </Page>
-    );
+
+            <Grid2 width="100%">
+              <Under21InactiveGrid />
+            </Grid2>
+          </>
+        )}
+      </Grid2>
+    </Page>
+  );
 };
 
 export default Under21TA;
