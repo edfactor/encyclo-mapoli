@@ -19,6 +19,7 @@ import {
   setExecutiveHoursAndDollars,
   setForfeituresAndPoints,
   setForfeituresByAge,
+  setGrossWagesReport,
   setMilitaryAndRehireForfeituresDetails,
   setMissingCommaInPYName,
   setNegativeEtvaForSSNsOnPayprofit,
@@ -55,6 +56,8 @@ import {
   ForfeituresByAge,
   FrozenReportsByAgeRequest,
   FrozenReportsForfeituresAndPointsRequest,
+  GrossWagesReportDto,
+  GrossWagesReportResponse,
   MilitaryAndRehireForfeiture,
   RehireForfeituresRequest,
   MissingCommasInPYName,
@@ -210,6 +213,26 @@ export const YearsEndApi = createApi({
         try {
           const { data } = await queryFulfilled;
           dispatch(setEmployeesOnMilitaryLeaveDetails(data));
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
+    getGrossWagesReport: builder.query<GrossWagesReportResponse, GrossWagesReportDto>({
+      query: (params) => ({
+        url: "yearend/frozen/grosswages",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          take: params.pagination.take,
+          skip: params.pagination.skip,
+          minGrossAmount:params.minGrossAmount
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setGrossWagesReport(data));
         } catch (err) {
           console.log("Err: " + err);
         }
@@ -679,6 +702,7 @@ export const {
   useLazyGetExecutiveHoursAndDollarsQuery,
   useLazyGetForfeituresAndPointsQuery,
   useLazyGetForfeituresByAgeQuery,
+  useLazyGetGrossWagesReportQuery,
   useLazyGetMasterApplyQuery,
   useLazyGetMasterRevertQuery,
   useLazyGetRehireForfeituresQuery,
@@ -689,5 +713,5 @@ export const {
   useLazyGetTerminationReportQuery,
   useLazyGetVestingAmountByAgeQuery,
   useLazyGetYearEndProfitSharingReportQuery,
-  useUpdateExecutiveHoursAndDollarsMutation
+  useUpdateExecutiveHoursAndDollarsMutation,
 } = YearsEndApi;

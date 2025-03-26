@@ -99,7 +99,7 @@ const it_operations: RouteCategory = {
   menuLabel: MENU_LABELS.IT_OPERATIONS,
   parentRoute: MENU_LABELS.IT_OPERATIONS,
   roles: [ImpersonationRoles.ItOperations], // Only users with this role can see this menu item
-  items: [{ caption: CAPTIONS.DEMOGRAOHIC_FREEZE, route: ROUTES.DEMO_FREEZE }]
+  items: [{ caption: CAPTIONS.DEMOGRAPHIC_FREEZE, route: ROUTES.DEMO_FREEZE }]
 };
 
 const MenuData: RouteCategory[] = [
@@ -150,6 +150,11 @@ export const menuLevels: MenuLevel[] = [
         subPages: []
       },
       {
+        topTitle: CAPTIONS.MILITARY_ENTRY_AND_MODIFICATION,
+        topRoute: ROUTES.MILITARY_ENTRY_AND_MODIFICATION,
+        subPages: []
+      },
+      {
         topTitle: CAPTIONS.REHIRE_FORFEITURES,
         topRoute: ROUTES.REHIRE_FORFEITURES,
         subPages: []
@@ -190,8 +195,18 @@ export const menuLevels: MenuLevel[] = [
         subPages: []
       },
       {
-        topTitle: CAPTIONS.ELIGIBLE_EMPLOYEES,
-        topRoute: ROUTES.ELIGIBLE_EMPLOYEES,
+        topTitle: CAPTIONS.YTD_WAGES_EXTRACT,
+        topRoute: ROUTES.YTD_WAGES_EXTRACT,
+        subPages: []
+      },
+      {
+        topTitle: CAPTIONS.PROFIT_MASTER_UPDATE,
+        topRoute: ROUTES.PROFIT_MASTER_UPDATE,
+        subPages: []
+      },
+      {
+        topTitle: CAPTIONS.PAYMASTER_UPDATE,
+        topRoute: ROUTES.PAYMASTER_UPDATE,
         subPages: []
       },
       {
@@ -206,15 +221,23 @@ export const menuLevels: MenuLevel[] = [
         ]
       },
       {
-        topTitle: CAPTIONS.YTD_WAGES_EXTRACT,
-        topRoute: ROUTES.YTD_WAGES_EXTRACT,
+        topTitle: CAPTIONS.PROFIT_SHARE_GROSS_REPORT,
+        topRoute: ROUTES.PROFIT_SHARE_GROSS_REPORT,
         subPages: []
       },
       {
-        topTitle: CAPTIONS.MILITARY_ENTRY_AND_MODIFICATION,
-        topRoute: ROUTES.MILITARY_ENTRY_AND_MODIFICATION,
-        subPages: []
+        topTitle: CAPTIONS.PROFIT_SHARE_BY_STORE,
+        topRoute: ROUTES.PROFIT_SHARE_BY_STORE,
+        subPages: [
+          { subTitle: CAPTIONS.QPAY066_UNDER21, subRoute: ROUTES.QPAY066_UNDER21 },
+          { subTitle: CAPTIONS.QPAY066TA_UNDER21, subRoute: ROUTES.QPAY066TA_UNDER21 },
+          { subTitle: CAPTIONS.QPAY066TA, subRoute: ROUTES.QPAY066TA },
+          { subTitle: CAPTIONS.PROFALL, subRoute: ROUTES.PROFALL },
+          { subTitle: CAPTIONS.NEW_PS_LABELS, subRoute: ROUTES.NEW_PS_LABELS },
+          { subTitle: CAPTIONS.PROFNEW, subRoute: ROUTES.PROFNEW }
+        ]
       },
+
       {
         topTitle: CAPTIONS.PROFIT_SHARE_REPORT_EDIT_RUN,
         topRoute: ROUTES.PROFIT_SHARE_REPORT_EDIT_RUN,
@@ -248,20 +271,14 @@ export const menuLevels: MenuLevel[] = [
         ]
       },
       {
-        topTitle: CAPTIONS.PAYMASTER_UPDATE,
-        topRoute: ROUTES.PAYMASTER_UPDATE,
+        topTitle: CAPTIONS.ELIGIBLE_EMPLOYEES,
+        topRoute: ROUTES.ELIGIBLE_EMPLOYEES,
         subPages: []
       },
 
       {
-        topTitle: CAPTIONS.PROFIT_SHARE_BY_STORE,
-        topRoute: ROUTES.PROFIT_SHARE_BY_STORE,
-        subPages: []
-      },
-
-      {
-        topTitle: CAPTIONS.PROFIT_SHARE_GROSS_REPORT,
-        topRoute: ROUTES.PROFIT_SHARE_GROSS_REPORT,
+        topTitle: CAPTIONS.PROFIT_SHARE_UPDATE,
+        topRoute: ROUTES.PROFIT_SHARE_UPDATE,
         subPages: []
       },
       {
@@ -269,15 +286,14 @@ export const menuLevels: MenuLevel[] = [
         topRoute: ROUTES.FORFEIT,
         subPages: []
       },
-
       {
-        topTitle: CAPTIONS.PAY450_SUMMARY,
-        topRoute: ROUTES.PAY450_SUMMARY,
+        topTitle: CAPTIONS.PRINT_PROFIT_CERTS,
+        topRoute: ROUTES.PRINT_PROFIT_CERTS,
         subPages: []
       },
       {
-        topTitle: CAPTIONS.PROFALL,
-        topRoute: ROUTES.PROFALL,
+        topTitle: CAPTIONS.PAYMASTER_SAVE,
+        topRoute: ROUTES.PAYMASTER_SAVE,
         subPages: []
       }
     ]
