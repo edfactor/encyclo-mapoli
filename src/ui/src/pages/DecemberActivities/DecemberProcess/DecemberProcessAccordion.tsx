@@ -128,7 +128,7 @@ const DecemberProcessAccordion = () => {
               label: "Not Started",
               color: "secondary"
             }}
-            onActionClick={() => navigate("/rehire-forfeitures")}
+            onActionClick={() => navigate(`/${ROUTES.REHIRE_FORFEITURES}`)}
             actionButtonText="START">
             <></>
           </DSMCollapsedAccordion>

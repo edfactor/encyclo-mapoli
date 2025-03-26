@@ -1,5 +1,5 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
+import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
 import { agGridNumberToCurrency } from "smart-ui-library";
 
 export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {

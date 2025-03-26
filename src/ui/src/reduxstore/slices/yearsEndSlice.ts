@@ -27,12 +27,11 @@ import {
   MissingCommasInPYName,
   NegativeEtvaForSSNsOnPayProfit,
   PagedReportResponse,
-  ProfitAndReportingQueryParams,
   ProfitShareEditResponse,
   ProfitShareMasterResponse,
   ProfitShareUpdateResponse,
   ProfitSharingDistributionsByAge,
-  ProfitYearRequest,
+  ProfitYearRequest, RehireForfeituresRequest,
   TerminationResponse,
   VestedAmountsByAge,
   YearEndProfitSharingReportResponse
@@ -84,10 +83,10 @@ export interface YearsEndState {
   grossWagesReportQueryParams: GrossWagesReportRequest | null;
   militaryAndRehire: PagedReportResponse<EmployeesOnMilitaryLeaveResponse> | null;
   militaryEntryAndModification: EmployeeDetails | null;
-  militaryAndRehireForfeitures: PagedReportResponse<MilitaryAndRehireForfeiture> | null;
-  militaryAndRehireForfeituresQueryParams: ProfitAndReportingQueryParams | null;
-  militaryAndRehireProfitSummaryQueryParams: ProfitAndReportingQueryParams | null;
-  militaryAndRehireQueryParams: ProfitAndReportingQueryParams | null;
+  rehireForfeitures: PagedReportResponse<MilitaryAndRehireForfeiture> | null;
+  rehireForfeituresQueryParams: RehireForfeituresRequest | null;
+  rehireProfitSummaryQueryParams: RehireForfeituresRequest | null;
+  militaryAndRehireQueryParams: RehireForfeituresRequest | null;
   missingCommaInPYName: PagedReportResponse<MissingCommasInPYName> | null;
   negativeEtvaForSSNsOnPayprofit: PagedReportResponse<NegativeEtvaForSSNsOnPayProfit> | null;
   negativeEtvaForSSNsOnPayprofitParams: ProfitYearRequest | null;
@@ -146,9 +145,9 @@ const initialState: YearsEndState = {
   militaryAndRehire: null,
   militaryAndRehireQueryParams: null,
   militaryEntryAndModification: null,
-  militaryAndRehireForfeitures: null,
-  militaryAndRehireForfeituresQueryParams: null,
-  militaryAndRehireProfitSummaryQueryParams: null,
+  rehireForfeitures: null,
+  rehireForfeituresQueryParams: null,
+  rehireProfitSummaryQueryParams: null,
   missingCommaInPYName: null,
   negativeEtvaForSSNsOnPayprofit: null,
   negativeEtvaForSSNsOnPayprofitParams: null,
@@ -238,10 +237,10 @@ export const yearsEndSlice = createSlice({
       state.forfeituresAndPointsQueryParams = null;
     },
     setMilitaryAndRehireProfitSummaryQueryParams: (state, action: PayloadAction<ProfitAndReportingQueryParams>) => {
-      state.militaryAndRehireProfitSummaryQueryParams = action.payload;
+      state.rehireProfitSummaryQueryParams = action.payload;
     },
     clearMilitaryAndRehireProfitSummaryQueryParams: (state) => {
-      state.militaryAndRehireProfitSummaryQueryParams = null;
+      state.rehireProfitSummaryQueryParams = null;
     },
     setEmployeesOnMilitaryLeaveDetails: (
       state,
@@ -264,16 +263,16 @@ export const yearsEndSlice = createSlice({
       state,
       action: PayloadAction<PagedReportResponse<MilitaryAndRehireForfeiture>>
     ) => {
-      state.militaryAndRehireForfeitures = action.payload;
+      state.rehireForfeitures = action.payload;
     },
-    clearMilitaryAndRehireForfeituresDetails: (state) => {
-      state.militaryAndRehireForfeitures = null;
+    clearRehireForfeituresDetails: (state) => {
+      state.rehireForfeitures = null;
     },
     setMilitaryAndRehireForfeituresQueryParams: (state, action: PayloadAction<ProfitAndReportingQueryParams>) => {
-      state.militaryAndRehireForfeituresQueryParams = action.payload;
+      state.rehireForfeituresQueryParams = action.payload;
     },
-    clearMilitaryAndRehireForfeituresQueryParams: (state) => {
-      state.militaryAndRehireForfeituresQueryParams = null;
+    clearRehireForfeituresQueryParams: (state) => {
+      state.rehireForfeituresQueryParams = null;
     },
     setDistributionsAndForfeitures: (
       state,
@@ -660,9 +659,8 @@ export const {
   clearForfeituresAndPointsQueryParams,
   clearForfeituresByAge,
   clearForfeituresByAgeQueryParams,
-  clearMilitaryAndRehireForfeituresDetails,
-  clearMilitaryAndRehireForfeituresQueryParams,
-  clearMilitaryAndRehireProfitSummaryQueryParams,
+  clearRehireForfeituresDetails,
+  clearRehireForfeituresQueryParams,
   clearMissingCommaInPYName,
   clearNegativeEtvaForSSNsOnPayprofit,
   clearNegativeEtvaForSSNsOnPayprofitQueryParams,

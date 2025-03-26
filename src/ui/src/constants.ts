@@ -37,7 +37,7 @@ export const ROUTES = {
   NEGATIVE_ETVA: "negative-etva-for-ssns-on-payprofit",
   DUPLICATE_NAMES: "duplicate-names-and-birthdays",
   MISSING_COMMA: "missing-comma-in-py-name",
-  EMPLOYEES_MILITARY: "employees-on-military-leave",
+  MILITARY_LEAVE: "employees-on-military-leave",
   REHIRE_FORFEITURES: "rehire-forfeitures",
   PROFIT_SHARE_REPORT: "profit-share-report",
   PROFIT_SHARE_TOTALS: "profit-share-totals",

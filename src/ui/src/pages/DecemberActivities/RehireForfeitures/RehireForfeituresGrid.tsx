@@ -1,18 +1,18 @@
 import { Typography } from "@mui/material";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { useLazyGetMilitaryAndRehireForfeituresQuery } from "reduxstore/api/YearsEndApi";
+import { useLazyGetRehireForfeituresQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { CAPTIONS } from "../../constants";
-import { GetMilitaryAndRehireForfeituresColumns } from "./MilitaryAndRehireForfeituresGridColumns";
+import { CAPTIONS } from "../../../constants";
+import { GetMilitaryAndRehireForfeituresColumns } from "./RehireForfeituresGridColumns";
 
 interface MilitaryAndRehireForfeituresGridSearchProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
 }
 
-const MilitaryAndRehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProps> = ({
+const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProps> = ({
   initialSearchLoaded,
   setInitialSearchLoaded
 }) => {
@@ -23,26 +23,34 @@ const MilitaryAndRehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGri
     isSortDescending: false
   });
 
-  const { militaryAndRehireForfeitures, militaryAndRehireForfeituresQueryParams } = useSelector(
+  const { rehireForfeitures, rehireForfeituresQueryParams } = useSelector(
     (state: RootState) => state.yearsEnd
   );
 
-  const [triggerSearch, { isFetching }] = useLazyGetMilitaryAndRehireForfeituresQuery();
+  const [triggerSearch, { isFetching }] = useLazyGetRehireForfeituresQuery();
 
   const onSearch = useCallback(async () => {
     const request = {
-      profitYear: militaryAndRehireForfeituresQueryParams?.profitYear ?? 0,
-      reportingYear: militaryAndRehireForfeituresQueryParams?.reportingYear ?? "",
-      pagination: { skip: pageNumber * pageSize, take: pageSize }
+      profitYear: rehireForfeituresQueryParams?.profitYear ?? 0,
+      beginningDate: rehireForfeituresQueryParams?.beginningDate ?? "",
+      endingDate: rehireForfeituresQueryParams?.endingDate ?? "",
+      pagination: { 
+        skip: pageNumber * pageSize, 
+        take: pageSize,
+        sortBy: sortParams.sortBy,
+        isSortDescending: sortParams.isSortDescending
+      }
     };
 
     await triggerSearch(request, false);
   }, [
     pageNumber,
     pageSize,
+    sortParams,
     triggerSearch,
-    militaryAndRehireForfeituresQueryParams?.profitYear,
-    militaryAndRehireForfeituresQueryParams?.reportingYear
+    rehireForfeituresQueryParams?.profitYear,
+    rehireForfeituresQueryParams?.beginningDate,
+    rehireForfeituresQueryParams?.endingDate    
   ]);
 
   useEffect(() => {
@@ -56,13 +64,13 @@ const MilitaryAndRehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGri
 
   return (
     <>
-      {militaryAndRehireForfeitures?.response && (
+      {rehireForfeitures?.response && (
         <>
           <div style={{ padding: "0 24px 0 24px" }}>
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`${CAPTIONS.REHIRE_FORFEITURES} (${militaryAndRehireForfeitures?.response.total || 0} records)`}
+              {`${CAPTIONS.REHIRE_FORFEITURES} (${rehireForfeitures?.response.total || 0} records)`}
             </Typography>
           </div>
           <DSMGrid
@@ -70,13 +78,13 @@ const MilitaryAndRehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGri
             isLoading={false}
             handleSortChanged={sortEventHandler}
             providedOptions={{
-              rowData: militaryAndRehireForfeitures?.response.results,
+              rowData: rehireForfeitures?.response.results,
               columnDefs: columnDefs
             }}
           />
         </>
       )}
-      {!!militaryAndRehireForfeitures && militaryAndRehireForfeitures.response.results.length > 0 && (
+      {!!rehireForfeitures && rehireForfeitures.response.results.length > 0 && (
         <Pagination
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
@@ -89,11 +97,11 @@ const MilitaryAndRehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGri
             setPageNumber(1);
             setInitialSearchLoaded(true);
           }}
-          recordCount={militaryAndRehireForfeitures.response.total}
+          recordCount={rehireForfeitures.response.total}
         />
       )}
     </>
   );
 };
 
-export default MilitaryAndRehireForfeituresGrid;
+export default RehireForfeituresGrid;
