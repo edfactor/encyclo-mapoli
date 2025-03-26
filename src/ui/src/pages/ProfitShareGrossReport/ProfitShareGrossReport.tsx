@@ -1,4 +1,5 @@
 import { Divider } from "@mui/material";
+import { useState } from "react";
 import Grid2 from '@mui/material/Grid2';
 import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
@@ -6,6 +7,7 @@ import ProfitShareGrossReportGrid from "./ProfitShareGrossReportGrid";
 import ProfitShareGrossReportParameters from "./ProifitShareGrossReportParameters";
 
 const ProfitShareGrossReport = () => {
+    const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
     return (
         <Page label={CAPTIONS.PROFIT_SHARE_GROSS_REPORT}>
             <Grid2
@@ -22,7 +24,7 @@ const ProfitShareGrossReport = () => {
                 </Grid2>
 
                 <Grid2 width="100%">
-                    <ProfitShareGrossReportGrid />
+                    <ProfitShareGrossReportGrid initialSearchLoaded={initialSearchLoaded} setInitialSearchLoaded={setInitialSearchLoaded}/>
                 </Grid2>
             </Grid2>
         </Page>

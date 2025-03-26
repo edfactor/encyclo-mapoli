@@ -15,6 +15,7 @@ public sealed class GrossWagesReportDetail
     public required decimal ProfitSharingAmount { get; set; }
     public required decimal Loans { get; set; }
     public required decimal Forfeitures { get; set; }
+    public int EnrollmentId { get; set; }
 
     public static GrossWagesReportDetail ResponseExample()
     {

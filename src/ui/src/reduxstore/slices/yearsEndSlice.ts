@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { set } from "date-fns";
 
 import {
   BalanceByAge,
@@ -20,6 +21,8 @@ import {
   ForfeituresAndPointsQueryParams,
   ForfeituresByAge,
   FrozenReportsByAgeRequestType,
+  GrossWagesReportRequest,
+  GrossWagesReportResponse,
   MilitaryAndRehireForfeiture,
   MissingCommasInPYName,
   NegativeEtvaForSSNsOnPayProfit,
@@ -34,6 +37,7 @@ import {
   VestedAmountsByAge,
   YearEndProfitSharingReportResponse
 } from "reduxstore/types";
+import { c } from "vite/dist/node/moduleRunnerTransport.d-CXw_Ws6P";
 
 export interface YearsEndState {
   selectedProfitYearForDecemberActivities: number;
@@ -76,6 +80,8 @@ export interface YearsEndState {
   forfeituresByAgePartTime: ForfeituresByAge | null;
   forfeituresByAgeQueryParams: ProfitYearRequest | null;
   forfeituresByAgeTotal: ForfeituresByAge | null;
+  grossWagesReport: GrossWagesReportResponse | null;
+  grossWagesReportQueryParams: GrossWagesReportRequest | null;
   militaryAndRehire: PagedReportResponse<EmployeesOnMilitaryLeaveResponse> | null;
   militaryEntryAndModification: EmployeeDetails | null;
   militaryAndRehireForfeitures: PagedReportResponse<MilitaryAndRehireForfeiture> | null;
@@ -135,6 +141,8 @@ const initialState: YearsEndState = {
   forfeituresByAgeQueryParams: null,
   forfeituresAndPoints: null,
   forfeituresAndPointsQueryParams: null,
+  grossWagesReport: null,
+  grossWagesReportQueryParams: null,
   militaryAndRehire: null,
   militaryAndRehireQueryParams: null,
   militaryEntryAndModification: null,
@@ -594,12 +602,24 @@ export const yearsEndSlice = createSlice({
     setProfitMasterRevertLoading: (state) => {
       state.profitSharingUpdate = { isLoading: true, reportName: "Revert" };
     },
+    setGrossWagesReport: (state, action: PayloadAction<GrossWagesReportResponse>) => {
+      state.grossWagesReport = action.payload;
+    },
+    clearGrossWagesReport: (state) => {
+      state.grossWagesReport = null;
+    },
+    setGrossWagesReportQueryParams: (state, action: PayloadAction<GrossWagesReportRequest>) => {
+      state.grossWagesReportQueryParams = action.payload;
+    },
+    clearGrossWagesReportQueryParams: (state) => {  
+      state.grossWagesReportQueryParams = null;
+    },
     setYearEndProfitSharingReport: (
       state,
       action: PayloadAction<PagedReportResponse<YearEndProfitSharingReportResponse>>
     ) => {
       state.yearEndProfitSharingReport = action.payload;
-    },
+    },    
     clearYearEndProfitSharingReport: (state) => {
       state.yearEndProfitSharingReport = null;
     },
@@ -683,6 +703,10 @@ export const {
   setForfeituresAndPointsQueryParams,
   setForfeituresByAge,
   setForfeituresByAgeQueryParams,
+  setGrossWagesReport,
+  clearGrossWagesReport,
+  setGrossWagesReportQueryParams,
+  clearGrossWagesReportQueryParams,
   setMilitaryAndRehireForfeituresDetails,
   setMilitaryAndRehireForfeituresQueryParams,
   setMilitaryAndRehireProfitSummaryQueryParams,
