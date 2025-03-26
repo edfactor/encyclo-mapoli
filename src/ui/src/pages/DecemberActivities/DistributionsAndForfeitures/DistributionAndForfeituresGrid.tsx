@@ -78,8 +78,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
             handleSortChanged={sortEventHandler}
             providedOptions={{
               rowData: distributionsAndForfeitures?.response.results,
-              columnDefs: columnDefs,
-              pagination: true
+              columnDefs: columnDefs
             }}
           />
         </>
