@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Demoulas.Common.Data.Services.Service;
+﻿using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -37,6 +36,7 @@ public class GetEligibilityIntegrationTests
         _testOutputHelper.WriteLine("Not Selected: " + empls.NumberNotSelected);
         _testOutputHelper.WriteLine("Written: " + empls.NumberWritten);
         _testOutputHelper.WriteLine($"Got {empls.Response.Results.Count()} employees");
+        empls.Response.Results.Count().Should().BePositive();
         empls.NumberReadOnFrozen.Should().BePositive();
         empls.NumberNotSelected.Should().BePositive();
         empls.NumberWritten.Should().BePositive();
