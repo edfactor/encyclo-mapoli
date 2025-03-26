@@ -21,9 +21,9 @@ public class OracleHcmHealthCheck : IHealthCheck
         string url = string.Empty; // Declare the URL outside the try block
         try
         {
-            url = await BuildUrl(cancellationToken);
+            url = await BuildUrl(cancellationToken).ConfigureAwait(false);
             using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
-            using HttpResponseMessage response = await _httpClient.SendAsync(request, cancellationToken);
+            using HttpResponseMessage response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
             if (response.IsSuccessStatusCode)
             {
@@ -43,7 +43,7 @@ public class OracleHcmHealthCheck : IHealthCheck
     {
         Dictionary<string, string> initialQuery = new Dictionary<string, string> { { "limit", "1" }, { "totalResults", "false" }, { "onlyData", "true" } };
         UriBuilder initialUriBuilder = new UriBuilder(string.Concat(_oracleHcmConfig.BaseAddress, _oracleHcmConfig.DemographicUrl));
-        string initialQueryString = await new FormUrlEncodedContent(initialQuery).ReadAsStringAsync(cancellationToken);
+        string initialQueryString = await new FormUrlEncodedContent(initialQuery).ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
         initialUriBuilder.Query = initialQueryString;
         return initialUriBuilder.Uri.ToString();
     }

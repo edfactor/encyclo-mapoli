@@ -17,9 +17,12 @@ import {
   setProfitMasterRevertLoading,
   setProfitUpdateLoading
 } from "../../reduxstore/slices/yearsEndSlice";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 
 interface ProfitShareUpdateInputPanelProps {
-  startProfitYear?: Date | null;
+  Skip?: number | null;
+  Take?: number | null;
+  profitYear?: Date | null;
   contributionPercent?: number | null | undefined;
   earningsPercent?: number | null;
   incomingForfeiturePercent?: number | null;
@@ -83,7 +86,10 @@ const ProfitShareUpdateInputPanel = () => {
   const [previewEdit] = useLazyGetProfitShareEditQuery();
   const [masterApply] = useLazyGetMasterApplyQuery();
   const [masterRevert] = useLazyGetMasterRevertQuery();
+  const fiscalCloseProfitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
+
+  const fiscalCloseProfitYearAsDate = new Date(fiscalCloseProfitYear, 0, 1);
 
   const {
     control,
@@ -92,7 +98,7 @@ const ProfitShareUpdateInputPanel = () => {
   } = useForm<ProfitShareUpdateInputPanelProps>({
     resolver: yupResolver(schema),
     defaultValues: {
-      startProfitYear: new Date(),
+      profitYear: fiscalCloseProfitYearAsDate,
       contributionPercent: null,
       earningsPercent: null,
       incomingForfeiturePercent: null,
@@ -112,7 +118,9 @@ const ProfitShareUpdateInputPanel = () => {
   const validateAndView = handleSubmit((data, event?: React.BaseSyntheticEvent) => {
     if (isValid) {
       const viewParams: ProfitShareUpdateInputPanelProps = {
-        ...(!!data.startProfitYear && { profitYear: data.startProfitYear.getFullYear() - 1 }),
+        Skip: 0,
+        Take: 25,
+        profitYear: fiscalCloseProfitYear,
         ...(!!data.contributionPercent && { contributionPercent: data.contributionPercent }),
         ...(!!data.earningsPercent && { earningsPercent: data.earningsPercent }),
         ...(!!data.incomingForfeiturePercent && { incomingForfeitPercent: data.incomingForfeiturePercent }),
@@ -162,7 +170,7 @@ const ProfitShareUpdateInputPanel = () => {
           width="100%">
           <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
             <Controller
-              name="startProfitYear"
+              name="profitYear"
               control={control}
               render={({ field }) => (
                 <DsmDatePicker
@@ -173,11 +181,12 @@ const ProfitShareUpdateInputPanel = () => {
                   label="Profit Year"
                   disableFuture
                   views={["year"]}
-                  error={errors.startProfitYear?.message}
+                  error={errors.profitYear?.message}
+                  disabled={true}
                 />
               )}
             />
-            {errors.startProfitYear && <FormHelperText error>{errors.startProfitYear.message}</FormHelperText>}
+            {errors.profitYear && <FormHelperText error>{errors.profitYear.message}</FormHelperText>}
           </Grid2>
 
           <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>

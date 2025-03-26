@@ -1,10 +1,11 @@
-import { Button, CircularProgress, MenuItem, Select, SelectChangeEvent } from "@mui/material";
+import { Button, CircularProgress, MenuItem, Select, SelectChangeEvent, FormLabel } from "@mui/material";
 import Grid2 from '@mui/material/Grid2';
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetEmployeeWagesForYearQuery } from "reduxstore/api/YearsEndApi";
 import { setEmployeeWagesForYearQueryParams } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 
 interface YTDWagesSearch {
   profitYear: number;
@@ -13,11 +14,12 @@ interface YTDWagesSearch {
 const YTDWagesSearchFilter: React.FC = () => {
   const [triggerSearch, { isFetching }] = useLazyGetEmployeeWagesForYearQuery();
   const { employeeWagesForYearQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const fiscalCloseProfitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
 
   const { handleSubmit, setValue } = useForm<YTDWagesSearch>({
     defaultValues: {
-      profitYear: employeeWagesForYearQueryParams?.profitYear || undefined
+      profitYear: fiscalCloseProfitYear || employeeWagesForYearQueryParams?.profitYear || undefined
     }
   });
 
@@ -25,22 +27,15 @@ const YTDWagesSearchFilter: React.FC = () => {
     // Our one-select 'form' cannot be in an invalid state, so we can safely trigger the search
     triggerSearch(
       {
-        profitYear: data.profitYear,
+        profitYear: fiscalCloseProfitYear,
         pagination: { skip: 0, take: 25 },
         acceptHeader: "application/json"
       },
       false
     ).unwrap();
-    dispatch(setEmployeeWagesForYearQueryParams(data.profitYear));
+    dispatch(setEmployeeWagesForYearQueryParams(fiscalCloseProfitYear));
   });
-  const thisYear = new Date().getFullYear();
-  const lastYear = thisYear - 1;
-
-  const options = [
-    { value: lastYear, label: `${lastYear}` },
-    { value: thisYear, label: `${thisYear}` }
-  ];
-
+  
   return (
     <form onSubmit={doSearch}>
       <Grid2
@@ -48,21 +43,15 @@ const YTDWagesSearchFilter: React.FC = () => {
         paddingX="24px"
         gap="24px">
         <Grid2 size={{ xs: 12, sm: 6, md: 3 }} >
+          <FormLabel>Profit Year</FormLabel>
           <Select
             size="small"
-            defaultValue={employeeWagesForYearQueryParams?.profitYear || lastYear}
-            onChange={(e: SelectChangeEvent<number>) => {
-              e.preventDefault();
-              setValue("profitYear", Number(e.target.value));
-            }}
+            value={fiscalCloseProfitYear}
+            disabled={true}
             fullWidth>
-            {options.map((option) => (
-              <MenuItem
-                key={option.value}
-                value={option.value}>
-                {option.label}
-              </MenuItem>
-            ))}
+            <MenuItem value={fiscalCloseProfitYear}>
+              {fiscalCloseProfitYear}
+            </MenuItem>
           </Select>
         </Grid2>
       </Grid2>

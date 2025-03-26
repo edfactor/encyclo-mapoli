@@ -1,4 +1,7 @@
-﻿using Demoulas.Common.Contracts.Interfaces;
+﻿using Demoulas.Common.Contracts.Contracts.Request;
+using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Contracts.Interfaces;
+using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -31,11 +34,11 @@ public class FrozenService: IFrozenService
     /// <returns></returns>
     public static IQueryable<Demographic> GetDemographicSnapshot(IProfitSharingDbContext ctx, short profitYear)
     {
-
         return (
             from dh in ctx.DemographicHistories
             join d in ctx.Demographics.Include(x => x.ContactInfo).Include(x => x.Address) on dh.DemographicId equals d.Id
             from fs in ctx.FrozenStates.Where(x => x.ProfitYear == profitYear && x.IsActive)
+            join dpts in ctx.Departments on dh.DepartmentId equals dpts.Id
             where fs.AsOfDateTime >= dh.ValidFrom && fs.AsOfDateTime < dh.ValidTo
             select new Demographic()
             {
@@ -54,6 +57,7 @@ public class FrozenService: IFrozenService
                 ReHireDate = dh.ReHireDate,
                 TerminationDate = dh.TerminationDate,
                 DepartmentId = dh.DepartmentId,
+                Department = dpts,
                 EmploymentTypeId = dh.EmploymentTypeId,
                 GenderId = d.GenderId,
                 PayFrequencyId = dh.PayFrequencyId,
@@ -75,9 +79,10 @@ public class FrozenService: IFrozenService
     {
         var validator = new InlineValidator<short>();
 
+        var thisYear = DateTime.Today.Year;
         validator.RuleFor(r => r)
-            .InclusiveBetween((short)2020, (short)2100)
-            .WithMessage("ProfitYear must be between 2020 and 2100.");
+            .InclusiveBetween((short)(thisYear-1), (short)thisYear)
+            .WithMessage($"ProfitYear must be between {(thisYear - 1)} and {thisYear}.");
 
         await validator.ValidateAndThrowAsync(profitYear, cancellationToken);
 
@@ -85,7 +90,7 @@ public class FrozenService: IFrozenService
         return await _dataContextFactory.UseWritableContext(async ctx =>
         {
             //Inactivate any prior frozen states
-            await ctx.FrozenStates.Where(x => x.ProfitYear == profitYear && x.IsActive).ForEachAsync(x => x.IsActive = false, cancellationToken);
+            await ctx.FrozenStates.Where(x => x.IsActive).ForEachAsync(x => x.IsActive = false, cancellationToken);
 
             //Create new record
             var frozenState = new FrozenState { IsActive = true, ProfitYear = profitYear, AsOfDateTime = asOfDateTime, FrozenBy = _appUser.UserName ?? "Unknown"};
@@ -107,6 +112,7 @@ public class FrozenService: IFrozenService
     /// <summary>
     /// Retrieves a list of frozen demographic states.
     /// </summary>
+    /// <param name="request"></param>
     /// <param name="cancellationToken">
     /// A <see cref="CancellationToken"/> to observe while waiting for the task to complete.
     /// </param>
@@ -114,7 +120,7 @@ public class FrozenService: IFrozenService
     /// A task that represents the asynchronous operation. The task result contains a list of 
     /// <see cref="FrozenStateResponse"/> objects representing the frozen demographic states.
     /// </returns>
-    public Task<List<FrozenStateResponse>> GetFrozenDemographics(CancellationToken cancellationToken = default)
+    public Task<PaginatedResponseDto<FrozenStateResponse>> GetFrozenDemographics(SortedPaginationRequestDto request, CancellationToken cancellationToken = default)
     {
         return _dataContextFactory.UseReadOnlyContext(ctx =>
         {
@@ -125,8 +131,9 @@ public class FrozenService: IFrozenService
                 ProfitYear = f.ProfitYear,
                 FrozenBy = f.FrozenBy,
                 AsOfDateTime = f.AsOfDateTime,
-                IsActive = f.IsActive
-            }).ToListAsync(cancellationToken);
+                IsActive = f.IsActive,
+                CreatedDateTime = f.CreatedDateTime
+            }).ToPaginationResultsAsync(request, cancellationToken);
         });
     }
 
@@ -141,7 +148,8 @@ public class FrozenService: IFrozenService
                 ProfitYear = f.ProfitYear,
                 FrozenBy = f.FrozenBy,
                 AsOfDateTime = f.AsOfDateTime,
-                IsActive = f.IsActive
+                IsActive = f.IsActive,
+                CreatedDateTime = f.CreatedDateTime
             }).FirstOrDefaultAsync(cancellationToken);
             
             return frozen ?? new FrozenStateResponse { ProfitYear = (short)DateTime.Today.Year, AsOfDateTime = DateTime.Now, IsActive = false};

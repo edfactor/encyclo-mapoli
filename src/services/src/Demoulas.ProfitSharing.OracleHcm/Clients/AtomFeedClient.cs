@@ -61,10 +61,10 @@ internal class AtomFeedClient
             try
             {
 
-                HttpResponseMessage response = await _httpClient.GetAsync(url, cancellationToken);
+                HttpResponseMessage response = await _httpClient.GetAsync(url, cancellationToken).ConfigureAwait(false);
                 response.EnsureSuccessStatusCode();
 
-                feedRoot = await response.Content.ReadFromJsonAsync<AtomFeedResponse<TContextType>>(cancellationToken);
+                feedRoot = await response.Content.ReadFromJsonAsync<AtomFeedResponse<TContextType>>(cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

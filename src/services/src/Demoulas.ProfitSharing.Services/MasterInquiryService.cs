@@ -101,7 +101,7 @@ public class MasterInquiryService : IMasterInquiryService
                         x.ProfitDetail.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id &&
                         x.ProfitDetail.Forfeiture == req.PaymentAmount);
                 }
-                var results = await query
+                var formattedQuery = query
                 .Select(x => new MasterInquiryResponseDto
                 {
                     Id = x.ProfitDetail.Id,
@@ -131,9 +131,10 @@ public class MasterInquiryService : IMasterInquiryService
                     CommentRelatedPsnSuffix = x.ProfitDetail.CommentRelatedPsnSuffix,
                     CommentIsPartialTransaction = x.ProfitDetail.CommentIsPartialTransaction,
                     BadgeNumber = x.Demographics.BadgeNumber,
-                })
-                .OrderByDescending(x => x.ProfitYear)
-                .ToPaginationResultsAsync(req, forceSingleQuery: true, cancellationToken);
+                });
+                
+                var results = await formattedQuery
+                    .ToPaginationResultsAsync(req, cancellationToken);
 
                 ISet<int> uniqueSsns = await query.Select(q => q.Demographics.Ssn).ToHashSetAsync(cancellationToken: cancellationToken);
                 EmployeeDetails? employeeDetails = null;
@@ -141,11 +142,12 @@ public class MasterInquiryService : IMasterInquiryService
                 if (uniqueSsns.Count == 1)
                 {
                     int ssn = uniqueSsns.First();
-                    var maxProfitYear = req.EndProfitYear ?? short.MaxValue;
                     short currentYear = (short)DateTime.Today.Year;
                     short previousYear = (short)(currentYear - 1);
 
                     var demographicData = await ctx.Demographics
+                        .Include(d=> d.PayProfits)
+                        .ThenInclude(pp=> pp.Enrollment)
                         .Where(d => d.Ssn == ssn)
                         .Select(d => new
                         {
@@ -210,7 +212,8 @@ public class MasterInquiryService : IMasterInquiryService
                             StoreNumber = demographicData.StoreNumber,
                             PercentageVested = currentBalance?.VestingPercent ?? 0,
                             ContributionsLastYear = previousBalance is { CurrentBalance: > 0 },
-                            Enrolled = demographicData.CurrentPayProfit?.EnrollmentId != 0,
+                            EnrollmentId = demographicData.CurrentPayProfit?.EnrollmentId,
+                            Enrollment = demographicData.CurrentPayProfit?.Enrollment?.Name,
                             BadgeNumber = demographicData.BadgeNumber,
                             BeginPSAmount = (previousBalance?.CurrentBalance ?? 0),
                             CurrentPSAmount = (currentBalance?.CurrentBalance ?? 0),

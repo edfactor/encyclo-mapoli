@@ -12,6 +12,8 @@ import {
 import { RootState } from "reduxstore/store";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
+import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
+
 interface MilitaryAndRehireForfeituresSearch {
   profitYear: number;
   reportingYear: string;
@@ -42,6 +44,7 @@ const MilitaryAndRehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfei
 }) => {
   const [triggerSearch, { isFetching }] = useLazyGetMilitaryAndRehireForfeituresQuery();
   const { militaryAndRehireForfeituresQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const profitYear = useDecemberFlowProfitYear();
   const dispatch = useDispatch();
   const {
     control,
@@ -52,7 +55,7 @@ const MilitaryAndRehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfei
   } = useForm<MilitaryAndRehireForfeituresSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: militaryAndRehireForfeituresQueryParams?.profitYear || undefined,
+      profitYear: profitYear || militaryAndRehireForfeituresQueryParams?.profitYear || undefined,
       reportingYear: militaryAndRehireForfeituresQueryParams?.reportingYear || undefined
     }
   });
@@ -61,13 +64,16 @@ const MilitaryAndRehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfei
     if (isValid) {
       triggerSearch(
         {
-          profitYear: data.profitYear,
+          profitYear: profitYear,
           reportingYear: data.reportingYear,
           pagination: { skip: 0, take: 25 }
         },
         false
       ).unwrap();
-      dispatch(setMilitaryAndRehireForfeituresQueryParams(data));
+      dispatch(setMilitaryAndRehireForfeituresQueryParams({
+        profitYear: profitYear,
+        reportingYear: data.reportingYear
+      }));
     }
   });
 
@@ -76,7 +82,7 @@ const MilitaryAndRehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfei
     dispatch(clearMilitaryAndRehireForfeituresQueryParams());
     dispatch(clearMilitaryAndRehireForfeituresDetails());
     reset({
-      profitYear: undefined,
+      profitYear: profitYear,
       reportingYear: undefined
     });
   };
@@ -102,6 +108,7 @@ const MilitaryAndRehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfei
                 onChange={(e) => {
                   field.onChange(e);
                 }}
+                disabled={true}
               />
             )}
           />

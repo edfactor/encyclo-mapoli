@@ -82,7 +82,7 @@ internal class PayrollSyncService
                 $"{_oracleHcmConfig.PayrollUrl}/{item.ObjectActionId}/child/BalanceView/?onlyData=true&fields=BalanceTypeId,TotalValue1,TotalValue2,DefbalId1,DimensionName&finder=findByBalVar;pBalGroupUsageId1=null,pBalGroupUsageId2=-1,pLDGId={PLDGId},pLC={PLC},pBalTypeId={balanceTypeId}";
             try
             {
-                using HttpResponseMessage response = await _httpClient.GetAsync(url, cancellationToken);
+                using HttpResponseMessage response = await _httpClient.GetAsync(url, cancellationToken).ConfigureAwait(false);
 
                 if (Debugger.IsAttached)
                 {
@@ -91,7 +91,7 @@ internal class PayrollSyncService
 
                 if (response.IsSuccessStatusCode)
                 {
-                    BalanceRoot? balanceResults = await response.Content.ReadFromJsonAsync<BalanceRoot>(cancellationToken);
+                    BalanceRoot? balanceResults = await response.Content.ReadFromJsonAsync<BalanceRoot>(cancellationToken).ConfigureAwait(false);
 
                     decimal total = balanceResults!.Items.Where(i => string.CompareOrdinal(i.DimensionName, dimensionName) == 0)
                         .Sum(b => b.TotalValue1);
@@ -120,7 +120,7 @@ internal class PayrollSyncService
                     ex.Message);
             }
         }
-        await CalculateAndUpdatePayProfitRecord(item.PersonId, year, balanceTypeTotals, cancellationToken);
+        await CalculateAndUpdatePayProfitRecord(item.PersonId, year, balanceTypeTotals, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -149,7 +149,7 @@ internal class PayrollSyncService
             Demographic? demographic = await context.Demographics
                 .Include(d => d.PayProfits.Where(p => p.ProfitYear >= year))
                 .Include(demographic => demographic.ContactInfo)
-                .FirstOrDefaultAsync(d => d.OracleHcmId == oracleHcmId, cancellationToken);
+                .FirstOrDefaultAsync(d => d.OracleHcmId == oracleHcmId, cancellationToken).ConfigureAwait(false);
 
             if (demographic == null)
             {
@@ -187,7 +187,7 @@ internal class PayrollSyncService
 
             payProfit.LastUpdate = DateTime.Now;
 
-            int resultCount = await context.SaveChangesAsync(cancellationToken);
+            int resultCount = await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
             if (Debugger.IsAttached)
             {

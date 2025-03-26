@@ -9,7 +9,7 @@ using Demoulas.ProfitSharing.Security;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Eligibility;
 
-public class GetEligibleEmployeesEndpoint : EndpointWithCsvTotalsBase<ProfitYearRequest, GetEligibleEmployeesResponse, GetEligibleEmployeesResponseDto, GetEligibleEmployeesEndpoint.GetEligibleEmployeesResponseDtoMap>
+public class GetEligibleEmployeesEndpoint : EndpointWithCsvTotalsBase<ProfitYearRequest, GetEligibleEmployeesResponse, EligibleEmployee, GetEligibleEmployeesEndpoint.GetEligibleEmployeesResponseDtoMap>
 {
     private readonly IGetEligibleEmployeesService _getEligibleEmployeesService;
     public override string ReportFileName { get; } = "GetEligibleEmployeesReport.csv";
@@ -61,17 +61,17 @@ public class GetEligibleEmployeesEndpoint : EndpointWithCsvTotalsBase<ProfitYear
         await csvWriter.NextRecordAsync();
 
         // Write the headers
-        csvWriter.WriteHeader<GetEligibleEmployeesResponseDto>();
+        csvWriter.WriteHeader<EligibleEmployee>();
         await csvWriter.NextRecordAsync();
 
         await base.GenerateCsvContent(csvWriter, responseWithTotals, cancellationToken);
     }
 
-    public sealed class GetEligibleEmployeesResponseDtoMap : ClassMap<GetEligibleEmployeesResponseDto>
+    public sealed class GetEligibleEmployeesResponseDtoMap : ClassMap<EligibleEmployee>
     {
         public GetEligibleEmployeesResponseDtoMap()
         {
-            Map(m => m.OracleHcmId).Index(1).Name("ORACLE_HCM_ID");
+            Map(m => m.DepartmentId).Index(1).Name("ASSIGNMENT_ID");
             Map(m => m.BadgeNumber).Index(2).Name("BADGE_PSN");
             Map(m => m.FullName).Index(3).Name("NAME");
         }

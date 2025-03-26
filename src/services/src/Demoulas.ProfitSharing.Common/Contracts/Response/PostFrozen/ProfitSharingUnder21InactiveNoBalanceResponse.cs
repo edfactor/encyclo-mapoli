@@ -1,0 +1,36 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.PostFrozen
+{
+    public sealed record ProfitSharingUnder21InactiveNoBalanceResponse
+    {
+        public int BadgeNumber { get; set; }
+        public required string LastName { get; set; }
+        public required string FirstName { get; set; }
+        public DateOnly BirthDate { get; set; }
+        public DateOnly HireDate { get; set; }
+        public DateOnly? TerminationDate { get; set; }
+        public byte Age { get; set; }
+        public byte EnrollmentId { get; set; }
+
+        public const string REPORT_NAME = "INACT/TERM WEEKLYS AND TERM MONTHLYS - NO BALANCE";
+        public static ProfitSharingUnder21InactiveNoBalanceResponse SampleResponse()
+        {
+            return new ProfitSharingUnder21InactiveNoBalanceResponse()
+            {
+                BadgeNumber = 700312,
+                LastName = "Methers",
+                FirstName = "Patricia",
+                BirthDate = new DateOnly(2007, 4, 29),
+                HireDate = new DateOnly(2025, 5, 10),
+                TerminationDate = new DateOnly(2025, 7, 11),
+                Age = 19,
+                EnrollmentId = 1,
+            };
+        }
+    }
+}

@@ -24,7 +24,8 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     yearsInPlan,
     percentageVested,
     contributionsLastYear,
-    enrolled,
+    enrollmentId,
+    enrollment,
     badgeNumber,
     hireDate,
     terminationDate,
@@ -37,18 +38,33 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     currentEtva,
   } = details;
 
+  const getEnrolledStatus = (id: number): string => {
+    const enrolledIds = [1, 2];
+    return enrolledIds.includes(id) ? "Y" : "N";
+  };
+
+  const getForfeitedStatus = (id: number): string => {
+    const forfeitedIds = [3, 4];
+    return forfeitedIds.includes(id) ? "Y" : "N";
+  };
+
+  const enrolled = getEnrolledStatus(enrollmentId);
+  const forfeited = getForfeitedStatus(enrollmentId);
+  
   const infoSection = [
     { label: "", value: `${lastName}, ${firstName}` },
     { label: "", value: `${address}` },
     { label: "", value: `${addressCity}, ${addressState} ${addressZipCode}` },
-    { label: "Enrolled", value: enrolled ? "Yes" : "No" },
+    { label: "Enrolled", value: enrolled },
+    { label: "Forfeited", value: forfeited }
   ];
 
   const employeeSection = [
     { label: "Badge Number", value: badgeNumber },
     { label: "DOB", value: mmDDYYFormat(dateOfBirth) },
     { label: "SSN", value: `${ssn}` },
-    { label: "ETVA", value: currentEtva }
+    { label: "ETVA", value: currentEtva },
+    { label: "Enrollment", value: enrollment },
   ].filter(field => field.value !== 0);
   
   const planSection = [
@@ -60,9 +76,9 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
 
   const hireSection = [
     { label: "Hire", value: mmDDYYFormat(hireDate) },
-    { label: "Term", value: mmDDYYFormat(terminationDate) ?? 'N/A' },
+    { label: "Term", value: terminationDate ? mmDDYYFormat(terminationDate) : 'N/A' },
     { label: "Store", value: storeNumber },
-    { label: "Rehire", value: mmDDYYFormat(reHireDate) ?? 'N/A' },
+    { label: "Rehire", value: reHireDate ? mmDDYYFormat(reHireDate) : 'N/A' },
   ];
 
   const amountsSection = [

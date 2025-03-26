@@ -1,0 +1,269 @@
+using System.Collections;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.Internal.ProfitShareUpdate;
+using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
+using Microsoft.EntityFrameworkCore;
+
+namespace Demoulas.ProfitSharing.Services.ProfitShareEdit;
+
+internal static class EmployeeProcessorHelper
+{
+    public static async Task<(List<MemberFinancials>, bool)> ProcessEmployees(IProfitSharingDataContextFactory dbContextFactory, ICalendarService calendarService,
+        TotalService totalService, ProfitShareUpdateRequest profitShareUpdateRequest,
+        AdjustmentReportData adjustmentReportData,
+        CancellationToken cancellationToken)
+    {
+        bool employeeExceededMaxContribution = false;
+        short profitYear = profitShareUpdateRequest.ProfitYear;
+        short priorYear = (short)(profitShareUpdateRequest.ProfitYear - 1);
+
+        // We want everything up to the beginning of this currentYear year, so we use lastYear in this lookup.
+        CalendarResponseDto fiscalDates = await calendarService.GetYearStartAndEndAccountingDatesAsync(priorYear, cancellationToken);
+        var employeeFinancialsList = await dbContextFactory.UseReadOnlyContext(async ctx =>
+        {
+            var employees = ctx.PayProfits
+                .Where(pp => pp.ProfitYear == profitYear)
+                .Select(x => new
+                {
+                    x.Demographic!.BadgeNumber,
+                    x.Demographic.Ssn,
+                    Name = x.Demographic.ContactInfo!.FullName,
+                    EnrolledId = x.EnrollmentId,
+                    x.EmployeeTypeId,
+                    PointsEarned = (int)(x.PointsEarned ?? 0),
+                    x.ZeroContributionReasonId,
+                    x.Etva
+                });
+
+            var employeeWithBalances =
+            (
+                from et in employees
+                join balTbl in totalService.TotalVestingBalance(ctx, profitYear, priorYear, fiscalDates.FiscalEndDate) on et.Ssn equals balTbl.Ssn into balTmp
+                from bal in balTmp.DefaultIfEmpty()
+                join thisYr in TotalService.GetProfitDetailTotalsForASingleYear(ctx, profitYear, cancellationToken) on et.Ssn equals thisYr.Ssn into txThsYrEnum
+                from txns in txThsYrEnum.DefaultIfEmpty()
+                select new EmployeeFinancials
+                {
+                    BadgeNumber = et.BadgeNumber,
+                    Ssn = et.Ssn,
+                    Name = et.Name,
+                    EnrolledId = et.EnrolledId,
+                    YearsInPlan = bal.YearsInPlan,
+                    CurrentAmount = bal.CurrentBalance,
+                    EmployeeTypeId = et.EmployeeTypeId,
+                    PointsEarned = et.PointsEarned,
+                    Etva = et.Etva,
+                    ZeroContributionReasonId = et.ZeroContributionReasonId,
+
+                    // Transactions for this year. 
+                    DistributionsTotal = txns.DistributionsTotal,
+                    ForfeitsTotal = txns.ForfeitsTotal,
+                    AllocationsTotal = txns.AllocationsTotal,
+                    PaidAllocationsTotal = txns.PaidAllocationsTotal,
+                    MilitaryTotal = txns.MilitaryTotal,
+                    ClassActionFundTotal = txns.ClassActionFundTotal
+                });
+
+            return await employeeWithBalances.ToListAsync(cancellationToken);
+        });
+
+        List<MemberFinancials> members = new();
+        foreach (EmployeeFinancials empl in employeeFinancialsList)
+        {
+            if (empl.EnrolledId != Enrollment.Constants.NotEnrolled || empl.YearsInPlan != 0 || empl.EmployeeTypeId > 0 || empl.HasTransactionAmounts())
+            {
+                var profitDetailTotals = new ProfitDetailTotals(empl.DistributionsTotal ?? 0, empl.ForfeitsTotal ?? 0,
+                    empl.AllocationsTotal ?? 0, empl.PaidAllocationsTotal ?? 0, empl.MilitaryTotal ?? 0, empl.ClassActionFundTotal ?? 0);
+
+                (MemberFinancials memb, bool didEmployeeExceededMaxContribution) = ProcessEmployee(empl, profitDetailTotals, profitShareUpdateRequest, adjustmentReportData);
+                members.Add(memb);
+                employeeExceededMaxContribution |= didEmployeeExceededMaxContribution;
+            }
+        }
+
+        return (members, employeeExceededMaxContribution);
+    }
+
+    private static (MemberFinancials, bool) ProcessEmployee(EmployeeFinancials empl, ProfitDetailTotals profitDetailTotals, ProfitShareUpdateRequest profitShareUpdateRequest,
+        AdjustmentReportData adjustmentReportData)
+    {
+        // MemberTotals holds newly computed values, not old values
+        MemberTotals memberTotals = new();
+
+        memberTotals.ContributionAmount =
+            ComputeContribution(empl.PointsEarned, empl.BadgeNumber, profitShareUpdateRequest, adjustmentReportData);
+        memberTotals.IncomingForfeitureAmount =
+            ComputeForfeitures(empl.PointsEarned, empl.BadgeNumber, profitShareUpdateRequest, adjustmentReportData);
+
+        // This "EarningsBalance" is actually the new Current Balance.  Consider changing the name
+        // Note that CAF gets added here, but subtracted in the next line.   Odd.
+        memberTotals.NewCurrentAmount = profitDetailTotals.AllocationsTotal + profitDetailTotals.ClassActionFundTotal +
+                                        (empl.CurrentAmount - profitDetailTotals.ForfeitsTotal -
+                                         profitDetailTotals.PaidAllocationsTotal) -
+                                        profitDetailTotals.DistributionsTotal;
+        memberTotals.NewCurrentAmount -= profitDetailTotals.ClassActionFundTotal;
+
+
+        if (memberTotals.NewCurrentAmount > 0)
+        {
+            memberTotals.PointsDollars = Math.Round(
+                profitDetailTotals.AllocationsTotal
+                + (empl.CurrentAmount - profitDetailTotals.ForfeitsTotal - profitDetailTotals.PaidAllocationsTotal)
+                - profitDetailTotals.DistributionsTotal
+                , 2, MidpointRounding.AwayFromZero);
+            memberTotals.EarnPoints = (int)Math.Round(memberTotals.PointsDollars / 100, MidpointRounding.AwayFromZero);
+        }
+
+        ComputeEarningsEmployee(empl, memberTotals, profitShareUpdateRequest, adjustmentReportData, profitDetailTotals.ClassActionFundTotal);
+
+        MemberFinancials memberFinancials = new(empl, profitDetailTotals, memberTotals);
+
+        bool employeeExceededMaxContribution =
+            //  WARNING: may modify "memberFinancials"
+            IsEmployeeExceedingMaxContribution(profitShareUpdateRequest.MaxAllowedContributions, profitDetailTotals.MilitaryTotal, memberTotals, memberFinancials);
+
+        empl.Contributions = memberTotals.ContributionAmount;
+        empl.IncomeForfeiture = memberTotals.IncomingForfeitureAmount;
+        return (memberFinancials, employeeExceededMaxContribution);
+    }
+
+    private static bool IsEmployeeExceedingMaxContribution(decimal MaxAllowedContributions, decimal MilitaryTotal, MemberTotals memberTotals, MemberFinancials memberFinancials)
+    {
+        decimal memberTotalContribution = memberTotals.ContributionAmount + MilitaryTotal +
+                                          memberTotals.IncomingForfeitureAmount;
+
+        if (memberTotalContribution <= MaxAllowedContributions)
+        {
+            return false;
+        }
+
+        decimal overContribution = memberTotalContribution - MaxAllowedContributions;
+
+        if (overContribution < memberTotals.IncomingForfeitureAmount)
+        {
+            memberFinancials.IncomingForfeitures -= overContribution;
+        }
+        else
+        {
+            memberFinancials.IncomingForfeitures = 0;
+        }
+
+        memberFinancials.MaxOver = overContribution;
+        memberFinancials.MaxPoints = memberFinancials.ContributionPoints;
+        return true;
+    }
+
+    private static decimal ComputeContribution(long pointsEarned, long badge, ProfitShareUpdateRequest profitShareUpdateRequest,
+        AdjustmentReportData adjustmentReportData)
+    {
+        decimal contributionAmount = Math.Round(profitShareUpdateRequest.ContributionPercent * pointsEarned, 2,
+            MidpointRounding.AwayFromZero);
+
+        if (profitShareUpdateRequest.BadgeToAdjust > 0 && profitShareUpdateRequest.BadgeToAdjust == badge)
+        {
+            adjustmentReportData.ContributionAmountUnadjusted = contributionAmount;
+            contributionAmount += profitShareUpdateRequest.AdjustContributionAmount;
+            adjustmentReportData.ContributionAmountAdjusted = contributionAmount;
+        }
+
+        return contributionAmount;
+    }
+
+
+    private static decimal ComputeForfeitures(long pointsEarned, long badge, ProfitShareUpdateRequest profitShareUpdateRequest,
+        AdjustmentReportData adjustmentReportData)
+    {
+        decimal incomingForfeitureAmount = Math.Round(profitShareUpdateRequest.IncomingForfeitPercent * pointsEarned, 2, MidpointRounding.AwayFromZero);
+        if (profitShareUpdateRequest.BadgeToAdjust > 0 && profitShareUpdateRequest.BadgeToAdjust == badge)
+        {
+            adjustmentReportData.IncomingForfeitureAmountUnadjusted = incomingForfeitureAmount;
+            incomingForfeitureAmount += profitShareUpdateRequest.AdjustIncomingForfeitAmount;
+            adjustmentReportData.IncomingForfeitureAmountAdjusted = incomingForfeitureAmount;
+        }
+
+        return incomingForfeitureAmount;
+    }
+
+
+    private static void ComputeEarningsEmployee(EmployeeFinancials empl, MemberTotals memberTotals, ProfitShareUpdateRequest profitShareUpdateRequest,
+        AdjustmentReportData? adjustmentsApplied, decimal classActionFundTotal)
+    {
+        if (memberTotals.EarnPoints <= 0)
+        {
+            memberTotals.EarnPoints = 0;
+            empl.Earnings = 0;
+            empl.SecondaryEarnings = 0;
+        }
+
+        memberTotals.EarningsAmount = Math.Round(profitShareUpdateRequest.EarningsPercent * memberTotals.EarnPoints, 2,
+            MidpointRounding.AwayFromZero);
+        if (profitShareUpdateRequest.BadgeToAdjust > 0 && profitShareUpdateRequest.BadgeToAdjust == (empl?.BadgeNumber ?? 0))
+        {
+            adjustmentsApplied!.EarningsAmountUnadjusted = memberTotals.EarningsAmount;
+            memberTotals.EarningsAmount += profitShareUpdateRequest.AdjustEarningsAmount;
+            adjustmentsApplied.EarningsAmountAdjusted = memberTotals.EarningsAmount;
+        }
+
+        memberTotals.SecondaryEarningsAmount =
+            Math.Round(profitShareUpdateRequest.SecondaryEarningsPercent * memberTotals.EarnPoints, 2,
+                MidpointRounding.AwayFromZero);
+        if (profitShareUpdateRequest.BadgeToAdjust2 > 0 && profitShareUpdateRequest.BadgeToAdjust2 == (empl?.BadgeNumber ?? 0))
+        {
+            adjustmentsApplied!.SecondaryEarningsAmountUnadjusted = memberTotals.SecondaryEarningsAmount;
+            memberTotals.SecondaryEarningsAmount += profitShareUpdateRequest.AdjustEarningsSecondaryAmount;
+            adjustmentsApplied.SecondaryEarningsAmountAdjusted = memberTotals.SecondaryEarningsAmount;
+        }
+
+
+        decimal workingEtva = 0;
+        // When the CAF is present and the memeber is under 6 in YIP, we need to remove the CAF from the ETVA for earnings calculations.
+        // Need to subtract CAF out of PY-PS-ETVA (ETVA) for people not fully vested
+        // because we can't give earnings for 2021 on class action funds -
+        // they were added in 2021.  CAF was added to PY-PS-ETVA (ETVA) for
+        // PY-PS-YEARS < 6.
+        if (empl!.Etva > 0)
+        {
+            // This check for 6 years is only used here, so it is intentionally not pulled out.
+            // It is presumed that this 6 is specific to the 2021 adjustment.   It is assumed that the
+            // plan enrollment type is specifically not consulted (i.e. No OLD vs NEW plan)
+            if (empl.YearsInPlan < 6)
+            {
+                workingEtva = empl.Etva - classActionFundTotal;
+            }
+            else
+            {
+                empl.Etva = workingEtva;
+            }
+        }
+
+        if (workingEtva <= 0)
+        {
+            empl.Earnings = memberTotals.EarningsAmount; // set PY-PROF-EARN
+            empl.SecondaryEarnings = memberTotals.SecondaryEarningsAmount; // set PY-PROF-EARN2
+            empl.EarningsOnEtva = 0m;
+            empl.EarningsOnSecondaryEtva = 0m;
+            return;
+        }
+
+        if (memberTotals.PointsDollars <= 0)
+        {
+            return;
+        }
+
+        // Here we scale the Earned interest to report on what portion is in a 0 record (contribution), vs what goes in an 8 record (100% ETVA Earnings) 
+        decimal etvaScaled = workingEtva / memberTotals.PointsDollars;
+
+        // Sets Earn and ETVA amounts
+        empl!.Earnings = memberTotals.EarningsAmount;
+        empl.EarningsOnEtva = Math.Round(memberTotals.EarningsAmount * etvaScaled, 2, MidpointRounding.AwayFromZero);
+
+        empl.SecondaryEarnings = memberTotals.SecondaryEarningsAmount;
+        empl.EarningsOnSecondaryEtva = Math.Round(memberTotals.SecondaryEarningsAmount * etvaScaled, 2, MidpointRounding.AwayFromZero);
+    }
+}

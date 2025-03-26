@@ -1,13 +1,17 @@
+
+using System.Reflection;
 using Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping.Data;
 using Demoulas.Common.Data.Services.Entities.Entities;
-using System.Reflection;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using MockQueryable.Moq;
 using Moq;
+// Common also has a Department.cs file, so we need to specify the one we want to use
+using Department = Demoulas.ProfitSharing.Data.Entities.Department;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Mocks;
 
@@ -25,12 +29,21 @@ public sealed class ScenarioFactory
     public List<PayProfit> PayProfits { get; set; } = [];
     public List<Beneficiary> Beneficiaries { get; set; } = [];
     public List<ProfitDetail> ProfitDetails { get; set; } = [];
+    public List<FrozenState> FrozenStates { get; set; } = [];
+    public List<DemographicHistory> DemographicHistories { get; set; } = [];
 
-    // populate ProfitCode dictionary object
+    // populate ProfitCode dictionary object from the Constants
     public List<ProfitCode> ProfitCodes { get; set; } = typeof(ProfitCode.Constants)
         .GetProperties(BindingFlags.Public | BindingFlags.Static)
         .Select(p => p.GetValue(null))
         .OfType<ProfitCode>().ToList();
+
+    // populate the departments from Constants
+    public List<Department> Departments { get; set; } = typeof(Department.Constants)
+        .GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
+        .Where(f => f.FieldType == typeof(byte))
+        .Select(f => new Department { Id = (byte)f.GetValue(null)!, Name = f.Name })
+        .ToList();
 
     // collects ctx.ProfitDetail.AddRange() rows for inspection by test
     public List<ProfitDetail> addedProfitDetails = [];
@@ -78,6 +91,84 @@ public sealed class ScenarioFactory
                 Ssn = Beneficiaries[0].Contact!.Ssn,
                 ProfitYear = LastYear,
                 Contribution = 1000m
+            }
+        ];
+        return this;
+    }
+
+    public ScenarioFactory EmployeeWithHistory()
+    {
+        FrozenStates =
+        [
+            new FrozenState
+            {
+                AsOfDateTime = DateTime.Now,
+                CreatedDateTime = DateTime.Now,
+                FrozenBy = "a pal",
+                ProfitYear = ThisYear,
+                IsActive = true
+            }
+        ];
+        PayProfits =
+        [
+            new PayProfit
+            {
+                ProfitYear = ThisYear,
+                DemographicId = 21,
+                Etva = 0,
+                EarningsEtvaValue = 0,
+                CurrentHoursYear = 600,
+                HoursExecutive = 600
+            }
+        ];
+        Demographics =
+        [
+            new Demographic
+            {
+                Id = 21,
+                OracleHcmId = 44,
+                Ssn = 0,
+                BadgeNumber = 721,
+                StoreNumber = 0,
+                PayClassificationId = 0,
+                ContactInfo = new ContactInfo
+                {
+                    FullName = "Lasty, Firsty",
+                    LastName = "Lasty",
+                    FirstName = "Firsty",
+                    MiddleName = null,
+                    PhoneNumber = null,
+                    MobileNumber = null,
+                    EmailAddress = null
+                },
+                Address = new Address
+                {
+                    Street = "22 Main",
+                    Street2 = null,
+                    Street3 = null,
+                    Street4 = null,
+                    City = null,
+                    State = null,
+                    PostalCode = null,
+                    CountryIso = null
+                },
+                DateOfBirth = default,
+                HireDate = default,
+                DepartmentId = 2,
+                Department = new Department { Id = 2, Name = "Two Dept" },
+            }
+        ];
+        PayProfits[0].Demographic = Demographics[0];
+        DemographicHistories =
+        [
+            new DemographicHistory
+            {
+                BadgeNumber = 445,
+                DemographicId = 21,
+                OracleHcmId = 44,
+                DepartmentId = 5,
+                TerminationCodeId = 'a',
+                DateOfBirth = DateTime.Now.AddYears(-40).ToDateOnly()
             }
         ];
         return this;
@@ -137,6 +228,18 @@ public sealed class ScenarioFactory
         Mock<DbSet<ProfitCode>> mockProfitCodes = ProfitCodes.AsQueryable().BuildMockDbSet();
         _sdb.ProfitSharingDbContext.Setup(m => m.ProfitCodes).Returns(mockProfitCodes.Object);
         _sdb.ProfitSharingReadOnlyDbContext.Setup(m => m.ProfitCodes).Returns(mockProfitCodes.Object);
+
+        Mock<DbSet<Department>> mockDepartments = Departments.AsQueryable().BuildMockDbSet();
+        _sdb.ProfitSharingDbContext.Setup(m => m.Departments).Returns(mockDepartments.Object);
+        _sdb.ProfitSharingReadOnlyDbContext.Setup(m => m.Departments).Returns(mockDepartments.Object);
+
+        Mock<DbSet<FrozenState>> mockFrozenStates = FrozenStates.AsQueryable().BuildMockDbSet();
+        _sdb.ProfitSharingDbContext.Setup(m => m.FrozenStates).Returns(mockFrozenStates.Object);
+        _sdb.ProfitSharingReadOnlyDbContext.Setup(m => m.FrozenStates).Returns(mockFrozenStates.Object);
+
+        Mock<DbSet<DemographicHistory>> mockDemographicHistories = DemographicHistories.AsQueryable().BuildMockDbSet();
+        _sdb.ProfitSharingDbContext.Setup(m => m.DemographicHistories).Returns(mockDemographicHistories.Object);
+        _sdb.ProfitSharingReadOnlyDbContext.Setup(m => m.DemographicHistories).Returns(mockDemographicHistories.Object);
 
         return _sdb;
     }

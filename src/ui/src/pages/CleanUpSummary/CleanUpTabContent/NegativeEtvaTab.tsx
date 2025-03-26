@@ -1,7 +1,7 @@
 import { Divider } from "@mui/material";
 import Grid2 from '@mui/material/Grid2';
-import NegativeEtvaForSSNsOnPayprofitGrid from "pages/NegativeEtvaForSSNsOnPayprofit/NegativeEtvaForSSNsOnPayprofitGrid";
-import NegativeEtvaForSSNsOnPayprofitSearchFilter from "pages/NegativeEtvaForSSNsOnPayprofit/NegativeEtvaForSSNsOnPayprofitSearchFilter";
+import NegativeEtvaForSSNsOnPayprofitGrid from "pages/DecemberActivities/NegativeEtvaForSSNsOnPayprofit/NegativeEtvaForSSNsOnPayprofitGrid";
+import NegativeEtvaForSSNsOnPayprofitSearchFilter from "pages/DecemberActivities/NegativeEtvaForSSNsOnPayprofit/NegativeEtvaForSSNsOnPayprofitSearchFilter";
 import { useState } from "react";
 import { DSMAccordion } from "smart-ui-library";
 

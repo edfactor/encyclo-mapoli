@@ -11,7 +11,7 @@ internal sealed record MemberFinancials
     {
         IsEmployee = true;
         BadgeNumber = empl.BadgeNumber;
-        Psn = empl.BadgeNumber;
+        Psn = empl.BadgeNumber.ToString();
         Name = empl.Name;
         Ssn = empl.Ssn;
         AllEarnings = empl.Earnings;
@@ -59,7 +59,7 @@ internal sealed record MemberFinancials
 
     public bool IsEmployee { get; set; }
     public int BadgeNumber { get; set; }
-    public long Psn { get; set; }
+    public string? Psn { get; set; }
     public string? Name { get; set; }
     public int Ssn { get; set; }
     public decimal CurrentAmount { get; set; }
@@ -102,6 +102,12 @@ internal sealed record MemberFinancials
     public int MaxPoints { get; set; }
     public decimal Caf { get; set; }
     public byte? ZeroContributionReasonId { get; set; }
+
+    /// <summary>
+    /// Indicates that an employee is also a beneficiary and has an ETVA amount and no years on the plan,
+    /// this is set to indicate they are shown as a beneficiary
+    /// </summary>
+    public bool TreatAsBeneficiary { get; set; }
 
     public decimal EndingBalance =>
         CurrentAmount

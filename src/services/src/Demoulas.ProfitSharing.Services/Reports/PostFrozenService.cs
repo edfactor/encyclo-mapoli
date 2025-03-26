@@ -21,6 +21,29 @@ namespace Demoulas.ProfitSharing.Services.Reports
         private readonly TotalService _totalService;
         private readonly ICalendarService _calendarService;
 
+        private readonly List<int> earningsProfitCodes = new List<int>
+        {
+            ProfitCode.Constants.IncomingContributions.Id,
+            ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id,
+            ProfitCode.Constants.OutgoingForfeitures.Id,
+            ProfitCode.Constants.OutgoingDirectPayments.Id,
+            ProfitCode.Constants.Incoming100PercentVestedEarnings.Id,
+        };
+
+        private readonly List<int> contributionProfitCodes = new List<int>
+        {
+            ProfitCode.Constants.IncomingContributions.Id,
+            ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id,
+            ProfitCode.Constants.OutgoingForfeitures.Id,
+            ProfitCode.Constants.OutgoingDirectPayments.Id,
+        };
+        private readonly List<int> distributionProfitCodes = new List<int>
+        {
+            ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id,
+            ProfitCode.Constants.OutgoingForfeitures.Id,
+            ProfitCode.Constants.Outgoing100PercentVestedPayment.Id,
+        };
+
         public PostFrozenService(IProfitSharingDataContextFactory profitSharingDataContextFactory, TotalService totalService, ICalendarService calendarService)
         {
             _profitSharingDataContextFactory = profitSharingDataContextFactory;
@@ -139,29 +162,7 @@ namespace Demoulas.ProfitSharing.Services.Reports
             var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellation);
             var age21 = calInfo.FiscalEndDate.AddYears(-21);
             short lastYear = (short)(request.ProfitYear - 1);
-            var earningsProfitCodes = new List<int> 
-            { 
-                ProfitCode.Constants.IncomingContributions.Id,
-                ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id,
-                ProfitCode.Constants.OutgoingForfeitures.Id,
-                ProfitCode.Constants.OutgoingDirectPayments.Id,
-                ProfitCode.Constants.Incoming100PercentVestedEarnings.Id,
-            };
-            var contributionProfitCodes = new[]
-            {
-                ProfitCode.Constants.IncomingContributions.Id,
-                ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id,
-                ProfitCode.Constants.OutgoingForfeitures.Id,
-                ProfitCode.Constants.OutgoingDirectPayments.Id,
-            };
-            var distributionProfitCodes = new[]
-            {
-                ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id,
-                ProfitCode.Constants.OutgoingForfeitures.Id,
-                ProfitCode.Constants.Outgoing100PercentVestedPayment.Id,
-            };
-
-
+           
             var rslt = await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx => {
 
                 var qry = (
@@ -220,6 +221,226 @@ namespace Demoulas.ProfitSharing.Services.Reports
                 ReportName = ProfitSharingUnder21BreakdownByStoreResponse.REPORT_NAME,
                 Response = rslt
             };
+        }
+
+        public async Task<ReportResponseBase<ProfitSharingUnder21InactiveNoBalanceResponse>> ProfitSharingUnder21InactiveNoBalance(ProfitYearRequest request, CancellationToken cancellationToken)
+        {
+            var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
+            var age21 = calInfo.FiscalEndDate.AddYears(-21);
+            short lastYear = (short)(request.ProfitYear - 1);
+            var rslt = await _profitSharingDataContextFactory.UseReadOnlyContext(ctx =>
+            {
+                return (
+                    from d in FrozenService.GetDemographicSnapshot(ctx, request.ProfitYear).Where(x => x.DateOfBirth >= age21)
+                    join pp in ctx.PayProfits.Where(x=>x.ProfitYear == request.ProfitYear) on d.Id equals pp.DemographicId
+                    join balTbl in _totalService.TotalVestingBalance(ctx, request.ProfitYear, calInfo.FiscalEndDate)
+                        on d.Ssn equals balTbl.Ssn into balTmp
+                    from bal in balTmp.DefaultIfEmpty()
+                    where 
+                        d.TerminationCodeId != TerminationCode.Constants.Retired &&
+                        (
+                            d.EmploymentStatusId == EmploymentStatus.Constants.Inactive ||
+                            (
+                                d.EmploymentStatusId == EmploymentStatus.Constants.Terminated
+                            )
+                        )
+                        && (bal.VestedBalance > 0 || bal.YearsInPlan > 0)
+                        && (bal.CurrentBalance <= 0)
+                    orderby d.ContactInfo.LastName, d.ContactInfo.FirstName
+                    select new ProfitSharingUnder21InactiveNoBalanceResponse()
+                    {
+                        BadgeNumber = d.BadgeNumber,
+                        LastName = d.ContactInfo.LastName,
+                        FirstName = d.ContactInfo.FirstName,
+                        BirthDate = d.DateOfBirth,
+                        HireDate = d.HireDate,
+                        TerminationDate = d.TerminationDate,
+                        Age = 0,
+                        EnrollmentId = pp.EnrollmentId
+                    }
+                ).ToPaginationResultsAsync(request, cancellationToken);
+            });
+
+            var fiscalEndDateTime = calInfo.FiscalEndDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
+            foreach (var row in rslt.Results) {
+                row.Age = (byte)row.BirthDate.Age(fiscalEndDateTime);
+            }
+
+            return new ReportResponseBase<ProfitSharingUnder21InactiveNoBalanceResponse>() 
+            {
+                ReportDate = DateTime.UtcNow,
+                ReportName = ProfitSharingUnder21InactiveNoBalanceResponse.REPORT_NAME,
+                Response = rslt
+            };
+        }
+
+        public async Task<ProfitSharingUnder21TotalsResponse> GetUnder21Totals(ProfitYearRequest request, CancellationToken cancellationToken)
+        {
+            var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
+            var age21 = calInfo.FiscalEndDate.AddYears(-21);
+            short lastYear = (short)(request.ProfitYear - 1);
+            var rslt = new ProfitSharingUnder21TotalsResponse();
+
+            _ = await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
+            {
+                var rootQuery = from d in FrozenService.GetDemographicSnapshot(ctx, request.ProfitYear).Where(x => x.DateOfBirth >= age21)
+                                join pp in ctx.PayProfits.Where(x => x.ProfitYear == request.ProfitYear) on d.Id equals pp.DemographicId
+                                select new
+                                {
+                                    d,
+                                    pp
+                                };
+                var baseQuery = from r in rootQuery 
+                                join bal in _totalService.TotalVestingBalance(ctx, request.ProfitYear, calInfo.FiscalEndDate) on r.d.Ssn equals bal.Ssn
+                                where bal.YearsInPlan > 0 || bal.VestedBalance > 0
+                                select new 
+                                { 
+                                    r.d,
+                                    r.pp,
+                                    bal
+                                };
+                    
+                rslt.NumberOfEmployees = await baseQuery.CountAsync(cancellationToken);
+                rslt.NumberOfActiveUnder21With1to2Years = await baseQuery.CountAsync(x => 
+                    (
+                        x.d.EmploymentStatusId == EmploymentStatus.Constants.Active ||
+                        (x.d.EmploymentStatusId == EmploymentStatus.Constants.Terminated && x.d.TerminationDate > calInfo.FiscalEndDate)
+                    ) && 
+                    x.bal.YearsInPlan >= 1 && 
+                    x.bal.YearsInPlan <=2, 
+                    cancellationToken);
+                rslt.NumberOfActiveUnder21With20to80PctVested = await baseQuery.CountAsync(x =>
+                    (
+                        x.d.EmploymentStatusId == EmploymentStatus.Constants.Active ||
+                        (x.d.EmploymentStatusId == EmploymentStatus.Constants.Terminated && x.d.TerminationDate > calInfo.FiscalEndDate)
+                    ) &&
+                    x.bal.VestingPercent >= .2m && 
+                    x.bal.VestingPercent <= .8m,
+                    cancellationToken);
+                rslt.NumberOfActiveUnder21With100PctVested = await baseQuery.CountAsync(x =>
+                    (
+                        x.d.EmploymentStatusId == EmploymentStatus.Constants.Active ||
+                        (x.d.EmploymentStatusId == EmploymentStatus.Constants.Terminated && x.d.TerminationDate > calInfo.FiscalEndDate)
+                    ) &&
+                    x.bal.VestingPercent == 1,
+                    cancellationToken);
+
+                rslt.NumberOfInActiveUnder21With1to2Years = await baseQuery.CountAsync(x =>
+                    (
+                        x.d.EmploymentStatusId == EmploymentStatus.Constants.Inactive && 
+                        x.d.TerminationDate <= calInfo.FiscalEndDate
+                    ) &&
+                    x.bal.YearsInPlan >= 1 &&
+                    x.bal.YearsInPlan <= 2,
+                    cancellationToken);
+                rslt.NumberOfInActiveUnder21With20to80PctVested = await baseQuery.CountAsync(x =>
+                    (
+                        x.d.EmploymentStatusId == EmploymentStatus.Constants.Inactive &&
+                        x.d.TerminationDate <= calInfo.FiscalEndDate
+                    ) &&
+                    x.bal.VestingPercent >= .2m &&
+                    x.bal.VestingPercent <= .8m,
+                    cancellationToken);
+                rslt.NumberOfInActiveUnder21With100PctVested = await baseQuery.CountAsync(x =>
+                    (
+                        x.d.EmploymentStatusId == EmploymentStatus.Constants.Inactive &&
+                        x.d.TerminationDate <= calInfo.FiscalEndDate
+                    ) &&
+                    x.bal.VestingPercent == 1,
+                    cancellationToken);
+
+                rslt.NumberOfTerminatedUnder21With1to2Years = await baseQuery.CountAsync(x =>
+                    (
+                        x.d.EmploymentStatusId == EmploymentStatus.Constants.Terminated &&
+                        x.d.TerminationDate <= calInfo.FiscalEndDate
+                    ) &&
+                    x.bal.YearsInPlan >= 1 &&
+                    x.bal.YearsInPlan <= 2,
+                    cancellationToken);
+                rslt.NumberOfTerminatedUnder21With20to80PctVested = await baseQuery.CountAsync(x =>
+                    (
+                        x.d.EmploymentStatusId == EmploymentStatus.Constants.Terminated &&
+                        x.d.TerminationDate <= calInfo.FiscalEndDate
+                    ) &&
+                    x.bal.VestingPercent >= .2m &&
+                    x.bal.VestingPercent <= .8m,
+                    cancellationToken);
+                rslt.NumberOfTerminatedUnder21With100PctVested = await baseQuery.CountAsync(x =>
+                    (
+                        x.d.EmploymentStatusId == EmploymentStatus.Constants.Terminated &&
+                        x.d.TerminationDate <= calInfo.FiscalEndDate
+                    ) &&
+                    x.bal.VestingPercent == 1,
+                    cancellationToken);
+
+                rslt.TotalBeginningBalance = await (
+                                                       from b in rootQuery
+                                                       join bal in _totalService.GetTotalBalanceSet(ctx, lastYear) on b.d.Ssn equals bal.Ssn
+                                                       group bal by true into grp
+                                                       select grp.Sum(x=>x.Total)
+                                             ).FirstOrDefaultAsync(cancellationToken);
+                
+                rslt.TotalEarnings = await (
+                                                       from b in rootQuery
+                                                       join pd in ctx.ProfitDetails on b.d.Ssn equals pd.Ssn
+                                                       where earningsProfitCodes.Contains(pd.ProfitCodeId)
+                                                       group pd by true into grp
+                                                       select grp.Sum(x => x.Earnings)
+                                             ).FirstOrDefaultAsync(cancellationToken);
+
+                rslt.TotalContributions = await (
+                                                       from b in rootQuery
+                                                       join pd in ctx.ProfitDetails on b.d.Ssn equals pd.Ssn
+                                                       where contributionProfitCodes.Contains(pd.ProfitCodeId)
+                                                       group pd by true into grp
+                                                       select grp.Sum(x => x.Contribution)
+                                             ).FirstOrDefaultAsync(cancellationToken);
+
+                rslt.TotalForfeitures = await (
+                                                       from b in rootQuery
+                                                       join pd in ctx.ProfitDetails on b.d.Ssn equals pd.Ssn
+                                                       where pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id
+                                                       group pd by true into grp
+                                                       select grp.Sum(x => x.Forfeiture)
+                                             ).FirstOrDefaultAsync(cancellationToken);
+
+                rslt.TotalForfeitures -= await (
+                                                       from b in rootQuery
+                                                       join pd in ctx.ProfitDetails on b.d.Ssn equals pd.Ssn
+                                                       where pd.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id
+                                                       group pd by true into grp
+                                                       select grp.Sum(x => x.Forfeiture)
+                                             ).FirstOrDefaultAsync(cancellationToken);
+
+                rslt.TotalDisbursements = await (
+                                                       from b in rootQuery
+                                                       join pd in ctx.ProfitDetails on b.d.Ssn equals pd.Ssn
+                                                       where distributionProfitCodes.Contains(pd.ProfitCodeId)
+                                                       group pd by true into grp
+                                                       select grp.Sum(x => x.Forfeiture * -1)
+                                             ).FirstOrDefaultAsync(cancellationToken);
+
+
+                rslt.TotalEndingBalance = await (
+                                                       from b in rootQuery
+                                                       join bal in _totalService.GetTotalBalanceSet(ctx, request.ProfitYear) on b.d.Ssn equals bal.Ssn
+                                                       group bal by true into grp
+                                                       select grp.Sum(x => x.Total)
+                                             ).FirstOrDefaultAsync(cancellationToken);
+
+                rslt.TotalVestingBalance = await (
+                                                       from b in rootQuery
+                                                       join bal in _totalService.TotalVestingBalance(ctx, request.ProfitYear, calInfo.FiscalEndDate) on b.d.Ssn equals bal.Ssn
+                                                       group bal by true into grp
+                                                       select grp.Sum(x => x.VestedBalance)
+                                             ).FirstOrDefaultAsync(cancellationToken);
+
+
+
+                return true;
+            });
+
+            return rslt;
         }
 
         internal class Under21IntermediaryResult

@@ -16,7 +16,7 @@ const EligibleEmployeesGrid: React.FC<EligibleEmployeesGridProps> = ({
   setInitialSearchLoaded
 }) => {
   const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
+  const [pageSize, setPageSize] = useState(10);
   const [sortParams, setSortParams] = useState<ISortParams>({
     sortBy: "Badge",
     isSortDescending: false

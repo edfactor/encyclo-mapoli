@@ -28404,8 +28404,14 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("AsOfDateTime")
-                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnType("DATE")
                         .HasColumnName("AS_OF_DATETIME");
+
+                    b.Property<DateTime>("CreatedDateTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("DATE")
+                        .HasColumnName("CREATED_DATETIME")
+                        .HasDefaultValueSql("SYSDATE");
 
                     b.Property<string>("FrozenBy")
                         .IsRequired()

@@ -27,7 +27,6 @@ internal class DemographicsService : IDemographicsServiceInternal
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly DemographicMapper _mapper;
     private readonly ILogger<DemographicsService> _logger;
-    private readonly ConcurrentQueue<DemographicsRequest> _requests;
 
     public DemographicsService(IProfitSharingDataContextFactory dataContextFactory,
         DemographicMapper mapper,
@@ -36,7 +35,6 @@ internal class DemographicsService : IDemographicsServiceInternal
         _dataContextFactory = dataContextFactory;
         _mapper = mapper;
         _logger = logger;
-        _requests = new ConcurrentQueue<DemographicsRequest>();
     }
 
     /// <summary>
@@ -61,76 +59,14 @@ internal class DemographicsService : IDemographicsServiceInternal
     /// <exception cref="OperationCanceledException">
     /// Thrown if the operation is canceled via the provided <paramref name="cancellationToken"/>.
     /// </exception>
-    public async Task AddDemographicsStreamAsync(IAsyncEnumerable<DemographicsRequest> employees, byte batchSize = byte.MaxValue,
+    public Task AddDemographicsStreamAsync(DemographicsRequest[] employees, byte batchSize = byte.MaxValue,
         CancellationToken cancellationToken = default)
     {
-        const int throttleLimit = 5_000; // Max queue size for safety
-        Dictionary<long, DemographicsRequest> batch = new Dictionary<long, DemographicsRequest>();
-        bool batchProcessed = false;
-        await foreach (DemographicsRequest employee in employees.WithCancellation(cancellationToken))
-        {
-            // Throttle queue size
-            while (_requests.Count >= throttleLimit)
-            {
-                await Task.Delay(50, cancellationToken); // Wait to prevent unbounded growth
-            }
-
-            _requests.Enqueue(employee);
-
-            // Process batch when batchSize is reached during enqueue
-            if (_requests.Count >= batchSize)
-            {
-                while (_requests.TryDequeue(out DemographicsRequest? demoRequest))
-                {
-                    if (!batch.TryAdd(demoRequest.OracleHcmId, demoRequest))
-                    {
-                        _logger.LogError("Duplicate OracleHcmId: {OracleHcmId} found; skipping....", demoRequest.OracleHcmId);
-                    }
-
-                    if (batch.Count >= batchSize)
-                    {
-                        break;
-                    }
-                }
-
-                if (batch.Count > 0)
-                {
-                    batchProcessed = await ProcessBatch();
-                }
-            }
-        }
-
-        // Process any leftover requests in the batch
-        if (batch.Count > 0 && batchProcessed)
-        {
-            _ = await ProcessBatch();
-        }
-
-        async Task<bool> ProcessBatch()
-        {
-            await UpsertDemographicsAsync(batch.Values, cancellationToken);
-            batchProcessed = true;
-            batch.Clear(); // Clear batch after processing
-            return batchProcessed;
-        }
-    }
-
-    /// <summary>
-    /// Asynchronously inserts or updates a collection of demographic records in the database.
-    /// </summary>
-    /// <param name="demographicsRequests">A collection of <see cref="DemographicsRequest"/> objects representing the demographic data to be upserted.</param>
-    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete. This token can be used to cancel the operation.</param>
-    /// <returns>A <see cref="Task"/> representing the asynchronous upsert operation.</returns>
-    /// <remarks>
-    /// This method ensures that demographic records are either inserted as new entries or updated if they already exist in the database.
-    /// The operation is performed within a writable database context to maintain data integrity.
-    /// </remarks>
-    private Task UpsertDemographicsAsync(IEnumerable<DemographicsRequest> demographicsRequests, CancellationToken cancellationToken)
-    {
+        
         DateTime currentModificationDate = DateTime.Now;
 
         // Map incoming demographic requests to entity models
-        List<Demographic> demographicsEntities = _mapper.Map(demographicsRequests).ToList();
+        List<Demographic> demographicsEntities = _mapper.Map(employees).ToList();
 
         // Update LastModifiedDate for all entities
         demographicsEntities.ForEach(entity => entity.LastModifiedDate = currentModificationDate);
@@ -148,7 +84,7 @@ internal class DemographicsService : IDemographicsServiceInternal
             List<Demographic> existingEntities = await context.Demographics
                 .Where(dbEntity => demographicOracleHcmIdLookup.Keys.Contains(dbEntity.OracleHcmId) ||
                                    (ssnCollection.Contains(dbEntity.Ssn) && dobCollection.Contains(dbEntity.DateOfBirth)))
-                .ToListAsync(cancellationToken);
+                .ToListAsync(cancellationToken).ConfigureAwait(false);
 
             // Handle potential duplicates in the existing database (SSN duplicates)
             List<Demographic> duplicateSsnEntities = existingEntities.GroupBy(e => e.Ssn)
@@ -199,7 +135,7 @@ internal class DemographicsService : IDemographicsServiceInternal
                         _logger.LogCritical(e, "Failed to process Demographic/OracleHCM employee record for BadgeNumber {BadgeNumber}", entity.BadgeNumber);
                         try
                         {
-                            await context.SaveChangesAsync(cancellationToken);
+                            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                         }
                         catch (CannotInsertNullException exception)
                         {
@@ -254,7 +190,7 @@ internal class DemographicsService : IDemographicsServiceInternal
                             .Where(x => x.DemographicId == existingEntity.Id
                                         && DateTime.UtcNow >= x.ValidFrom
                                         && DateTime.UtcNow < x.ValidTo)
-                            .FirstAsync(cancellationToken: cancellationToken);
+                            .FirstAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 
                         oldHistoryRecord.ValidTo = DateTime.UtcNow;
                         newHistoryRecord.ValidFrom = oldHistoryRecord.ValidTo;
@@ -268,11 +204,11 @@ internal class DemographicsService : IDemographicsServiceInternal
             // Save all changes to the database
             try
             {
-                await context.SaveChangesAsync(cancellationToken);
+                await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {
-                _logger.LogCritical(e, "Failed to save batch: {DemographicsRequests}", demographicsRequests);
+                _logger.LogCritical(e, "Failed to save batch: {DemographicsRequests}", employees);
             }
 
         }, cancellationToken);

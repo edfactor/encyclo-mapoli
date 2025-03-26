@@ -1,6 +1,6 @@
 import { Divider } from "@mui/material";
 import Grid2 from '@mui/material/Grid2';
-import DuplicateSSNsOnDemographicsGrid from "pages/DuplicateSSNsOnDemographics/DuplicateSSNsOnDemographicsGrid";
+import DuplicateSSNsOnDemographicsGrid from "pages/DecemberActivities/DuplicateSSNsOnDemographics/DuplicateSSNsOnDemographicsGrid";
 
 export const DupeSsns = () => {
   return (

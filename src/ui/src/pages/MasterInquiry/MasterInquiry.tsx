@@ -9,7 +9,7 @@ import MasterInquiryEmployeeDetails from "./MasterInquiryEmployeeDetails";
 import { useState } from "react";
 
 const MasterInquiry = () => {
-  const { masterInquiryEmployeeDetails } = useSelector((state: RootState) => state.yearsEnd);
+  const { masterInquiryEmployeeDetails } = useSelector((state: RootState) => state.inquiry);
 
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
 

@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { useLazyGetMilitaryAndRehireForfeituresQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { CAPTIONS } from "../../constants";
 import { GetMilitaryAndRehireForfeituresColumns } from "./MilitaryAndRehireForfeituresGridColumns";
 
 interface MilitaryAndRehireForfeituresGridSearchProps {
@@ -61,7 +62,7 @@ const MilitaryAndRehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGri
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`Military and Rehire Forfeitures (${militaryAndRehireForfeitures?.response.total || 0})`}
+              {`${CAPTIONS.REHIRE_FORFEITURES} (${militaryAndRehireForfeitures?.response.total || 0})`}
             </Typography>
           </div>
           <DSMGrid

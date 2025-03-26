@@ -19,9 +19,8 @@ import {
   setExecutiveHoursAndDollars,
   setForfeituresAndPoints,
   setForfeituresByAge,
-  setMasterInquiryData,
+  setGrossWagesReport,
   setMilitaryAndRehireForfeituresDetails,
-  setMilitaryAndRehireProfitSummaryDetails,
   setMissingCommaInPYName,
   setNegativeEtvaForSSNsOnPayprofit,
   setProfitEdit,
@@ -57,12 +56,10 @@ import {
   ForfeituresByAge,
   FrozenReportsByAgeRequest,
   FrozenReportsForfeituresAndPointsRequest,
-  MasterInquiryRequest,
-  MasterInquiryResponseType,
+  GrossWagesReportDto,
+  GrossWagesReportResponse,
   MilitaryAndRehireForfeiture,
   MilitaryAndRehireForfeituresRequestDto,
-  MilitaryAndRehireProfitSummary,
-  MilitaryAndRehireProfitSummaryRequestDto,
   MissingCommasInPYName,
   MissingCommasInPYNameRequestDto,
   NegativeEtvaForSSNsOnPayProfit,
@@ -86,8 +83,9 @@ export const YearsEndApi = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: `${url}/api/`,
     prepareHeaders: (headers, { getState }) => {
-      const token = (getState() as RootState).security.token;
-      const impersonating = (getState() as RootState).security.impersonating;
+      const root = (getState() as RootState);
+      const token = root.security.token;
+      const impersonating = root.security.impersonating;
       if (token) {
         headers.set("authorization", `Bearer ${token}`);
       }
@@ -219,6 +217,26 @@ export const YearsEndApi = createApi({
         }
       }
     }),
+    getGrossWagesReport: builder.query<GrossWagesReportResponse, GrossWagesReportDto>({
+      query: (params) => ({
+        url: "yearend/frozen/grosswages",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          take: params.pagination.take,
+          skip: params.pagination.skip,
+          minGrossAmount:params.minGrossAmount
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setGrossWagesReport(data));
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
     getMilitaryAndRehireForfeitures: builder.query<
       PagedReportResponse<MilitaryAndRehireForfeiture>,
       MilitaryAndRehireForfeituresRequestDto
@@ -236,28 +254,6 @@ export const YearsEndApi = createApi({
         try {
           const { data } = await queryFulfilled;
           dispatch(setMilitaryAndRehireForfeituresDetails(data));
-        } catch (err) {
-          console.log("Err: " + err);
-        }
-      }
-    }),
-    getMilitaryAndRehireProfitSummary: builder.query<
-      PagedReportResponse<MilitaryAndRehireProfitSummary>,
-      MilitaryAndRehireProfitSummaryRequestDto
-    >({
-      query: (params) => ({
-        url: `yearend/military-and-rehire-profit-summary/${params.reportingYear}`,
-        method: "GET",
-        params: {
-          profitYear: params.profitYear,
-          take: params.pagination.take,
-          skip: params.pagination.skip
-        }
-      }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
-          dispatch(setMilitaryAndRehireProfitSummaryDetails(data));
         } catch (err) {
           console.log("Err: " + err);
         }
@@ -409,7 +405,7 @@ export const YearsEndApi = createApi({
           ssn: params.socialSecurity,
           fullNameContains: params.fullNameContains,
           hasExecutiveHoursAndDollars: params.hasExecutiveHoursAndDollars,
-          hasMonthlyPayments: params.hasMonthlyPayments
+          isMonthlyPayroll: params.isMonthlyPayroll
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -549,38 +545,6 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getProfitMasterInquiry: builder.query<MasterInquiryResponseType, MasterInquiryRequest>({
-      query: (params) => ({
-        url: "master/master-inquiry",
-        method: "GET",
-        params: {
-          badgeNumber: params.badgeNumber,
-          startProfitYear: params.startProfitYear,
-          endProfitYear: params.endProfitYear,
-          startProfitMonth: params.startProfitMonth,
-          endProfitMonth: params.endProfitMonth,
-          profitCode: params.profitCode,
-          contributionAmount: params.contributionAmount,
-          earningsAmount: params.earningsAmount,
-          forfeitureAmount: params.forfeitureAmount,
-          paymentAmount: params.paymentAmount,
-          socialSecurity: params.socialSecurity,
-          paymentType: params.paymentType,
-          memberType: params.memberType,
-          comment: params.comment,
-          take: params.pagination.take,
-          skip: params.pagination.skip
-        }
-      }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
-          dispatch(setMasterInquiryData(data));
-        } catch (err) {
-          console.log("Err: " + err);
-        }
-      }
-    }),
     getVestingAmountByAge: builder.query<VestedAmountsByAge, ProfitYearRequest & { acceptHeader: string }>({
       query: (params) => ({
         url: "yearend/frozen/vested-amounts-by-age",
@@ -637,7 +601,7 @@ export const YearsEndApi = createApi({
           const { data } = await queryFulfilled;
           dispatch(setProfitUpdate(data));
         } catch (err) {
-          console.log("Err: " + err);
+          console.log("Err", err);
           dispatch(clearProfitUpdate());
         }
       }
@@ -733,17 +697,16 @@ export const {
   useLazyGetExecutiveHoursAndDollarsQuery,
   useLazyGetForfeituresAndPointsQuery,
   useLazyGetForfeituresByAgeQuery,
+  useLazyGetGrossWagesReportQuery,
   useLazyGetMasterApplyQuery,
   useLazyGetMasterRevertQuery,
   useLazyGetMilitaryAndRehireForfeituresQuery,
-  useLazyGetMilitaryAndRehireProfitSummaryQuery,
   useLazyGetNamesMissingCommasQuery,
   useLazyGetNegativeEVTASSNQuery,
-  useLazyGetProfitMasterInquiryQuery,
   useLazyGetProfitShareEditQuery,
   useLazyGetProfitShareUpdateQuery,
   useLazyGetTerminationReportQuery,
   useLazyGetVestingAmountByAgeQuery,
   useLazyGetYearEndProfitSharingReportQuery,
-  useUpdateExecutiveHoursAndDollarsMutation
+  useUpdateExecutiveHoursAndDollarsMutation,
 } = YearsEndApi;

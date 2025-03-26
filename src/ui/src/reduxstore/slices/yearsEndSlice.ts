@@ -1,9 +1,9 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { set } from "date-fns";
 
 import {
   BalanceByAge,
   BalanceByYears,
-  BaseQueryParams,
   ContributionsByAge,
   DemographicBadgesNotInPayprofit,
   DistributionsAndForfeitures,
@@ -21,10 +21,9 @@ import {
   ForfeituresAndPointsQueryParams,
   ForfeituresByAge,
   FrozenReportsByAgeRequestType,
-  MasterInquiryResponseType,
-  MasterInquirySearch,
+  GrossWagesReportRequest,
+  GrossWagesReportResponse,
   MilitaryAndRehireForfeiture,
-  MilitaryAndRehireProfitSummary,
   MissingCommasInPYName,
   NegativeEtvaForSSNsOnPayProfit,
   PagedReportResponse,
@@ -33,40 +32,44 @@ import {
   ProfitShareMasterResponse,
   ProfitShareUpdateResponse,
   ProfitSharingDistributionsByAge,
+  ProfitYearRequest,
   TerminationResponse,
   VestedAmountsByAge,
   YearEndProfitSharingReportResponse
 } from "reduxstore/types";
+import { c } from "vite/dist/node/moduleRunnerTransport.d-CXw_Ws6P";
 
 export interface YearsEndState {
+  selectedProfitYearForDecemberActivities: number;
+  selectedProfitYearForFiscalClose: number;
   additionalExecutivesChosen: ExecutiveHoursAndDollars[] | null;
   additionalExecutivesGrid: PagedReportResponse<ExecutiveHoursAndDollars> | null;
   balanceByAgeFullTime: BalanceByAge | null;
   balanceByAgePartTime: BalanceByAge | null;
-  balanceByAgeQueryParams: BaseQueryParams | null;
+  balanceByAgeQueryParams: ProfitYearRequest | null;
   balanceByAgeTotal: BalanceByAge | null;
   balanceByYearsFullTime: BalanceByAge | null;
   balanceByYearsPartTime: BalanceByAge | null;
-  balanceByYearsQueryParams: BaseQueryParams | null;
+  balanceByYearsQueryParams: ProfitYearRequest | null;
   balanceByYearsTotal: BalanceByAge | null;
   contributionsByAgeFullTime: ContributionsByAge | null;
   contributionsByAgePartTime: ContributionsByAge | null;
-  contributionsByAgeQueryParams: BaseQueryParams | null;
+  contributionsByAgeQueryParams: ProfitYearRequest | null;
   contributionsByAgeTotal: ContributionsByAge | null;
   demographicBadges: PagedReportResponse<DemographicBadgesNotInPayprofit> | null;
   distributionsAndForfeitures: PagedReportResponse<DistributionsAndForfeitures> | null;
   distributionsAndForfeituresQueryParams: DistributionsAndForfeituresQueryParams | null;
   distributionsByAgeFullTime: ProfitSharingDistributionsByAge | null;
   distributionsByAgePartTime: ProfitSharingDistributionsByAge | null;
-  distributionsByAgeQueryParams: BaseQueryParams | null;
+  distributionsByAgeQueryParams: ProfitYearRequest | null;
   distributionsByAgeTotal: ProfitSharingDistributionsByAge | null;
   duplicateNamesAndBirthdays: PagedReportResponse<DuplicateNameAndBirthday> | null;
-  duplicateNamesAndBirthdaysQueryParams: BaseQueryParams | null;
+  duplicateNamesAndBirthdaysQueryParams: ProfitYearRequest | null;
   duplicateSSNsData: PagedReportResponse<DuplicateSSNDetail> | null;
   eligibleEmployees: EligibleEmployeeResponseDto | null;
-  eligibleEmployeesQueryParams: BaseQueryParams | null;
+  eligibleEmployeesQueryParams: ProfitYearRequest | null;
   employeeWagesForYear: PagedReportResponse<EmployeeWagesForYear> | null;
-  employeeWagesForYearQueryParams: BaseQueryParams | null;
+  employeeWagesForYearQueryParams: ProfitYearRequest | null;
   executiveHoursAndDollars: PagedReportResponse<ExecutiveHoursAndDollars> | null;
   executiveHoursAndDollarsGrid: ExecutiveHoursAndDollarsGrid | null;
   executiveHoursAndDollarsQueryParams: ExecutiveHoursAndDollarsQueryParams | null;
@@ -75,31 +78,31 @@ export interface YearsEndState {
   forfeituresAndPointsQueryParams: ForfeituresAndPointsQueryParams | null;
   forfeituresByAgeFullTime: ForfeituresByAge | null;
   forfeituresByAgePartTime: ForfeituresByAge | null;
-  forfeituresByAgeQueryParams: BaseQueryParams | null;
+  forfeituresByAgeQueryParams: ProfitYearRequest | null;
   forfeituresByAgeTotal: ForfeituresByAge | null;
-  masterInquiryData: MasterInquiryResponseType | null;
-  masterInquiryEmployeeDetails: EmployeeDetails | null;
-  masterInquiryRequestParams: MasterInquirySearch | null;
+  grossWagesReport: GrossWagesReportResponse | null;
+  grossWagesReportQueryParams: GrossWagesReportRequest | null;
   militaryAndRehire: PagedReportResponse<EmployeesOnMilitaryLeaveResponse> | null;
   militaryEntryAndModification: EmployeeDetails | null;
   militaryAndRehireForfeitures: PagedReportResponse<MilitaryAndRehireForfeiture> | null;
   militaryAndRehireForfeituresQueryParams: ProfitAndReportingQueryParams | null;
-  militaryAndRehireProfitSummary: PagedReportResponse<MilitaryAndRehireProfitSummary> | null;
   militaryAndRehireProfitSummaryQueryParams: ProfitAndReportingQueryParams | null;
   militaryAndRehireQueryParams: ProfitAndReportingQueryParams | null;
   missingCommaInPYName: PagedReportResponse<MissingCommasInPYName> | null;
   negativeEtvaForSSNsOnPayprofit: PagedReportResponse<NegativeEtvaForSSNsOnPayProfit> | null;
-  negativeEtvaForSSNsOnPayprofitParams: BaseQueryParams | null;
+  negativeEtvaForSSNsOnPayprofitParams: ProfitYearRequest | null;
   profitSharingUpdate: ProfitShareUpdateResponse | ProfitShareEditResponse | ProfitShareMasterResponse | null;
   termination: TerminationResponse | null;
-  terminationQueryParams: BaseQueryParams | null;
+  terminationQueryParams: ProfitYearRequest | null;
   vestedAmountsByAge: VestedAmountsByAge | null;
-  vestedAmountsByAgeQueryParams: BaseQueryParams | null;
+  vestedAmountsByAgeQueryParams: ProfitYearRequest | null;
   yearEndProfitSharingReport: PagedReportResponse<YearEndProfitSharingReportResponse> | null;
-  yearEndProfitSharingReportQueryParams: BaseQueryParams | null;
+  yearEndProfitSharingReportQueryParams: ProfitYearRequest | null;
 }
 
 const initialState: YearsEndState = {
+  selectedProfitYearForDecemberActivities: 2024,
+  selectedProfitYearForFiscalClose: 2024,
   additionalExecutivesChosen: null,
   additionalExecutivesGrid: null,
   balanceByAgeFullTime: null,
@@ -138,14 +141,12 @@ const initialState: YearsEndState = {
   forfeituresByAgeQueryParams: null,
   forfeituresAndPoints: null,
   forfeituresAndPointsQueryParams: null,
-  masterInquiryData: null,
-  masterInquiryEmployeeDetails: null,
-  masterInquiryRequestParams: null,
+  grossWagesReport: null,
+  grossWagesReportQueryParams: null,
   militaryAndRehire: null,
   militaryAndRehireQueryParams: null,
   militaryEntryAndModification: null,
   militaryAndRehireForfeitures: null,
-  militaryAndRehireProfitSummary: null,
   militaryAndRehireForfeituresQueryParams: null,
   militaryAndRehireProfitSummaryQueryParams: null,
   missingCommaInPYName: null,
@@ -164,6 +165,12 @@ export const yearsEndSlice = createSlice({
   name: "yearsEnd",
   initialState,
   reducers: {
+    setSelectedProfitYearForDecemberActivities: (state, action: PayloadAction<number>) => {
+      state.selectedProfitYearForDecemberActivities = action.payload;
+    },
+    setSelectedProfitYearForFiscalClose: (state, action: PayloadAction<number>) => {
+      state.selectedProfitYearForFiscalClose = action.payload;
+    },
     setBalanceByYearsQueryParams: (state, action: PayloadAction<number>) => {
       state.balanceByYearsQueryParams = { profitYear: action.payload };
     },
@@ -267,15 +274,6 @@ export const yearsEndSlice = createSlice({
     },
     clearMilitaryAndRehireForfeituresQueryParams: (state) => {
       state.militaryAndRehireForfeituresQueryParams = null;
-    },
-    setMilitaryAndRehireProfitSummaryDetails: (
-      state,
-      action: PayloadAction<PagedReportResponse<MilitaryAndRehireProfitSummary>>
-    ) => {
-      state.militaryAndRehireProfitSummary = action.payload;
-    },
-    clearMilitaryAndRehireProfitSummaryDetails: (state) => {
-      state.militaryAndRehireProfitSummary = null;
     },
     setDistributionsAndForfeitures: (
       state,
@@ -420,24 +418,6 @@ export const yearsEndSlice = createSlice({
     },
     clearEligibleEmployees: (state) => {
       state.eligibleEmployees = null;
-    },
-    setMasterInquiryRequestParams: (state, action: PayloadAction<MasterInquirySearch>) => {
-      state.masterInquiryRequestParams = action.payload;
-    },
-    clearMasterInquiryRequestParams: (state) => {
-      state.masterInquiryRequestParams = null;
-    },
-
-    setMasterInquiryData: (state, action: PayloadAction<MasterInquiryResponseType>) => {
-      state.masterInquiryData = action.payload;
-
-      if (action.payload.employeeDetails) {
-        state.masterInquiryEmployeeDetails = action.payload.employeeDetails;
-      }
-    },
-    clearMasterInquiryData: (state) => {
-      state.masterInquiryData = null;
-      state.masterInquiryEmployeeDetails = null;
     },
     setDistributionsByAge: (state, action: PayloadAction<ProfitSharingDistributionsByAge>) => {
       if (action.payload.reportType == FrozenReportsByAgeRequestType.Total) {
@@ -612,9 +592,6 @@ export const yearsEndSlice = createSlice({
     setProfitMasterApplyLoading: (state) => {
       state.profitSharingUpdate = { isLoading: true, reportName: "Apply" };
     },
-    clearProfitMasterApply: (state) => {
-      state.profitSharingUpdate = null;
-    },
 
     setProfitMasterRevert: (state, action: PayloadAction<ProfitShareMasterResponse>) => {
       state.profitSharingUpdate = {
@@ -625,19 +602,24 @@ export const yearsEndSlice = createSlice({
     setProfitMasterRevertLoading: (state) => {
       state.profitSharingUpdate = { isLoading: true, reportName: "Revert" };
     },
-    clearProfitMasterRevert: (state) => {
-      state.profitSharingUpdate = null;
+    setGrossWagesReport: (state, action: PayloadAction<GrossWagesReportResponse>) => {
+      state.grossWagesReport = action.payload;
     },
-
-    setMilitaryEntryAndModificationEmployeeDetails: (state, action: PayloadAction<EmployeeDetails>) => {
-      state.militaryEntryAndModification = action.payload;
+    clearGrossWagesReport: (state) => {
+      state.grossWagesReport = null;
+    },
+    setGrossWagesReportQueryParams: (state, action: PayloadAction<GrossWagesReportRequest>) => {
+      state.grossWagesReportQueryParams = action.payload;
+    },
+    clearGrossWagesReportQueryParams: (state) => {  
+      state.grossWagesReportQueryParams = null;
     },
     setYearEndProfitSharingReport: (
       state,
       action: PayloadAction<PagedReportResponse<YearEndProfitSharingReportResponse>>
     ) => {
       state.yearEndProfitSharingReport = action.payload;
-    },
+    },    
     clearYearEndProfitSharingReport: (state) => {
       state.yearEndProfitSharingReport = null;
     },
@@ -651,6 +633,8 @@ export const yearsEndSlice = createSlice({
 });
 
 export const {
+  setSelectedProfitYearForDecemberActivities,
+  setSelectedProfitYearForFiscalClose,
   addExecutiveHoursAndDollarsGridRow,
   clearAdditionalExecutivesChosen,
   clearAdditionalExecutivesGrid,
@@ -660,39 +644,29 @@ export const {
   clearBalanceByYearsQueryParams,
   clearContributionsByAge,
   clearContributionsByAgeQueryParams,
-  clearDemographicBadgesNotInPayprofitData,
   clearDistributionsAndForfeitures,
   clearDistributionsAndForfeituresQueryParams,
   clearDistributionsByAge,
   clearDistributionsByAgeQueryParams,
   clearDuplicateNamesAndBirthdays,
   clearDuplicateNamesAndBirthdaysQueryParams,
-  clearDuplicateSSNsData,
   clearEligibleEmployees,
   clearEligibleEmployeesQueryParams,
   clearEmployeesOnMilitaryLeaveDetails,
-  clearEmployeesOnMilitaryLeaveDetailsQueryParams,
-  clearEmployeeWagesForYearQueryParams,
   clearExecutiveHoursAndDollars,
   clearExecutiveHoursAndDollarsGridRows,
-  clearExecutiveHoursAndDollarsQueryParams,
   clearExecutiveRowsSelected,
   clearForfeituresAndPoints,
   clearForfeituresAndPointsQueryParams,
   clearForfeituresByAge,
   clearForfeituresByAgeQueryParams,
-  clearMasterInquiryData,
-  clearMasterInquiryRequestParams,
   clearMilitaryAndRehireForfeituresDetails,
   clearMilitaryAndRehireForfeituresQueryParams,
-  clearMilitaryAndRehireProfitSummaryDetails,
   clearMilitaryAndRehireProfitSummaryQueryParams,
   clearMissingCommaInPYName,
   clearNegativeEtvaForSSNsOnPayprofit,
   clearNegativeEtvaForSSNsOnPayprofitQueryParams,
   clearProfitEdit,
-  clearProfitMasterApply,
-  clearProfitMasterRevert,
   clearProfitUpdate,
   clearTermination,
   clearTerminationQueryParams,
@@ -719,7 +693,6 @@ export const {
   setEligibleEmployees,
   setEligibleEmployeesQueryParams,
   setEmployeesOnMilitaryLeaveDetails,
-  setEmployeesOnMilitaryLeaveDetailsQueryParams,
   setEmployeeWagesForYear,
   setEmployeeWagesForYearQueryParams,
   setExecutiveHoursAndDollars,
@@ -730,11 +703,12 @@ export const {
   setForfeituresAndPointsQueryParams,
   setForfeituresByAge,
   setForfeituresByAgeQueryParams,
-  setMasterInquiryData,
-  setMasterInquiryRequestParams,
+  setGrossWagesReport,
+  clearGrossWagesReport,
+  setGrossWagesReportQueryParams,
+  clearGrossWagesReportQueryParams,
   setMilitaryAndRehireForfeituresDetails,
   setMilitaryAndRehireForfeituresQueryParams,
-  setMilitaryAndRehireProfitSummaryDetails,
   setMilitaryAndRehireProfitSummaryQueryParams,
   setMissingCommaInPYName,
   setNegativeEtvaForSSNsOnPayprofit,

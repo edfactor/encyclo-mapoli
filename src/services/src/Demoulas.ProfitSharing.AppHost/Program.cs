@@ -1,6 +1,9 @@
 ﻿using System.Diagnostics;
 using Demoulas.ProfitSharing.AppHost;
 using Projects;
+using Microsoft.Extensions.Logging;
+var logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger("AppHost");
+
 
 IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(options: new DistributedApplicationOptions { AllowUnsecuredTransport = true });
 
@@ -14,23 +17,23 @@ try
 
     if (nodeProcesses.Length != 0)
     {
-        Console.WriteLine($"Found {nodeProcesses.Length} instance(s) of node.exe. Terminating...");
+        logger.LogInformation("Found {NodeProcesses} instance(s) of node.exe. Terminating...", nodeProcesses.Length);
 
         // Loop through each node process and kill it
         foreach (Process nodeProcess in nodeProcesses)
         {
-            Console.WriteLine($"Killing process ID: {nodeProcess.Id}");
+            logger.LogInformation("Killing process ID: {NodeProcess}", nodeProcess.Id);
             nodeProcess.Kill(); // Kills the process
             await nodeProcess.WaitForExitAsync(); // Ensures the process is completely terminated
-            Console.WriteLine($"Process ID {nodeProcess.Id} terminated.");
+            logger.LogInformation("Process ID {NodeProcess} terminated.", nodeProcess.Id);
         }
 
-        Console.WriteLine("All instances of node.exe have been terminated.");
+        logger.LogInformation("All instances of node.exe have been terminated.");
     }
 }
 catch (Exception ex)
 {
-    Console.WriteLine($"An error occurred: {ex.Message}");
+    logger.LogInformation(ex, "An error occurred: {Message}", ex.Message);
 }
 
 ExecuteCommandResult RunConsoleApp(string projectPath, string launchProfile)
@@ -57,10 +60,10 @@ ExecuteCommandResult RunConsoleApp(string projectPath, string launchProfile)
 
     process.WaitForExit();
     
-    Console.WriteLine(output);
+    logger.LogInformation(output);
 
     Console.ForegroundColor = ConsoleColor.Red;
-    Console.WriteLine(error);
+    logger.LogInformation(error);
     Console.ForegroundColor = ConsoleColor.DarkGray;
 
     if (string.IsNullOrWhiteSpace(error))
@@ -101,22 +104,22 @@ void RunNpmInstall(string projectPath)
 
         process.WaitForExit();
 
-        Console.WriteLine(output);
+        logger.LogInformation(output);
 
         if (!string.IsNullOrWhiteSpace(error))
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"npm install error: {error}");
+            logger.LogInformation("npm install error: {Error}", error);
             Console.ResetColor();
         }
         else
         {
-            Console.WriteLine("npm install completed successfully.");
+            logger.LogInformation("npm install completed successfully.");
         }
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"An error occurred while running npm install: {ex.Message}");
+        logger.LogInformation(ex, "An error occurred while running npm install: {Message}", ex.Message);
     }
 }
 

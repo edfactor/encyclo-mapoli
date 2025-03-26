@@ -4,7 +4,7 @@ using FluentValidation;
 
 namespace Demoulas.ProfitSharing.Common.Validators;
 
-public abstract class PaginationValidatorBase<TPagination> : Validator<TPagination> where TPagination : SortedPaginationRequestDto 
+public abstract class PaginationValidatorBase<TPagination> : Validator<TPagination> where TPagination : PaginationRequestDto
 {
     protected PaginationValidatorBase()
     {
@@ -13,7 +13,7 @@ public abstract class PaginationValidatorBase<TPagination> : Validator<TPaginati
             .WithMessage("Must contain a positive value");
 
         _ = RuleFor(x => x.Take)
-            .Must(i => i.GetValueOrDefault(0) >= 0)
+            .Must(i => i.GetValueOrDefault(0) > 0)
             .WithMessage("Must contain a positive value");
     }
 }

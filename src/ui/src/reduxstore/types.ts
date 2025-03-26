@@ -1,11 +1,14 @@
-import { Paged, PaginationParams } from "smart-ui-library";
+import { ISortParams, Paged, PaginationParams } from "smart-ui-library";
 
 export enum ImpersonationRoles {
   FinanceManager = "Finance-Manager",
   DistributionsClerk = "Distributions-Clerk",
   HardshipAdministrator = "Hardship-Administrator",
-  ProfitSharingAdministrator = "Profit-Sharing-Administrator"
+  ProfitSharingAdministrator = "Profit-Sharing-Administrator",
+  ItOperations = "IT-Operations",
 }
+
+export interface SortedPaginationRequestDto extends PaginationParams, ISortParams {}
 
 export interface ProfitYearRequest {
   profitYear: number;
@@ -110,6 +113,11 @@ export interface EmployeeWagesForYearRequestDto extends ProfitYearRequest {
   pagination: PaginationParams;
 }
 
+export interface GrossWagesReportDto extends ProfitYearRequest {
+  pagination: PaginationParams;
+  minGrossAmount?:number;
+}
+
 export interface DuplicateNameBirthdayAddress {
   street: string;
   street2: string | null;
@@ -175,36 +183,12 @@ export interface MilitaryAndRehireForfeiture {
   details: ForfeitureDetail[];
 }
 
-export interface MilitaryAndRehireProfitSummaryRequestDto extends ProfitYearRequest {
-  reportingYear: string;
-  pagination: PaginationParams;
-}
-
-export interface MilitaryAndRehireProfitSummary extends ProfitYearRequest {
-  badgeNumber: number;
-  fullName: string;
-  ssn: string;
-  storeNumber: number;
-  hireDate: string;
-  terminationDate: string;
-  reHiredDate: string;
-  companyContributionYears: number;
-  hoursCurrentYear: number;
-  forfeiture: number;
-  remark: string;
-  enrollmentId: number;
-  netBalanceLastYear: number;
-  vestedBalanceLastYear: number;
-  employmentStatusId: string;
-  profitCodeId: number;
-}
-
 export interface ExecutiveHoursAndDollarsRequestDto extends ProfitYearRequest {
   badgeNumber?: number;
   socialSecurity?: number;
   fullNameContains?: string;
   hasExecutiveHoursAndDollars: boolean;
-  hasMonthlyPayments: boolean;
+  isMonthlyPayroll: boolean;
   pagination: PaginationParams;
 }
 
@@ -250,6 +234,8 @@ export interface EligibleEmployee {
   oracleHcmId: number;
   badgeNumber: number;
   fullName: string;
+  departmentId: number;
+  department: string;
 }
 
 export interface EligibleEmployeeResponseDto {
@@ -261,26 +247,22 @@ export interface EligibleEmployeeResponseDto {
   response: Paged<EligibleEmployee>;
 }
 
-export interface BaseQueryParams {
-  profitYear: number;
-}
-
-export interface ForfeituresAndPointsQueryParams extends BaseQueryParams {
+export interface ForfeituresAndPointsQueryParams extends ProfitYearRequest {
   useFrozenData: boolean;
 }
 
-export interface ProfitAndReportingQueryParams extends BaseQueryParams {
+export interface ProfitAndReportingQueryParams extends ProfitYearRequest {
   reportingYear: string;
 }
-export interface ExecutiveHoursAndDollarsQueryParams extends BaseQueryParams {
+export interface ExecutiveHoursAndDollarsQueryParams extends ProfitYearRequest {
   badgeNumber: number;
   socialSecurity: number;
   fullNameContains: string;
   hasExecutiveHoursAndDollars: boolean;
-  hasMonthlyPayments: boolean;
+  isMonthlyPayroll: boolean;
 }
 
-export interface DistributionsAndForfeituresQueryParams extends BaseQueryParams {
+export interface DistributionsAndForfeituresQueryParams extends ProfitYearRequest {
   startMonth?: number;
   endMonth?: number;
   includeOutgoingForfeitures?: boolean;
@@ -306,6 +288,7 @@ export interface MasterInquirySearch {
   forfeiture?: number | null;
   payment?: number | null;
   voids: boolean;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface MasterInquiryDetail extends ProfitYearRequest {
@@ -350,10 +333,10 @@ export interface MasterInquiryRequest {
   socialSecurity?: number;
   name?: string;
   comment?: string;
-  pagination: PaginationParams;
   paymentType?: number;
   memberType?: number;
   badgeNumber?: number;
+  pagination: SortedPaginationRequestDto;
 }
 
 export enum FrozenReportsByAgeRequestType {
@@ -456,7 +439,8 @@ export interface EmployeeDetails {
   yearsInPlan: number;
   percentageVested: number;
   contributionsLastYear: boolean;
-  enrolled: boolean;
+  enrollmentId: number;
+  enrollment: string;
   badgeNumber: string;
   hireDate: string;
   terminationDate: string | null;
@@ -643,6 +627,32 @@ export interface ProfitShareEditDetail {
   enrollmentCode: number;
 }
 
+export interface GrossWagesReportRequest extends ProfitYearRequest {
+  minGrossAmount: number;
+}
+
+export interface GrossWagesReportDetail {
+  badgeNumber: number;
+  employeeName: string;
+  ssn: string;
+  dateOfBirth: string;
+  grossWages: number;
+  profitSharingAmount: number;
+  loans: number;
+  forfeitures: number;
+  enrollmentId: number;
+}
+
+export interface GrossWagesReportResponse {
+  reportName: string;
+  reportDate: string;
+  response: Paged<GrossWagesReportDetail[]>;
+  totalGrossWages: number;
+  totalProfitSharingAmount: number;
+  totalLoans: number;
+  totalForfeitures: number;
+}
+
 export interface ProfitShareEditResponse {
   isLoading: boolean; // this feels like a hack, it means display the table with the spinner.
 
@@ -687,7 +697,13 @@ export interface FrozenStateResponse {
   profitYear: number;
   frozenBy: string;
   asOfDateTime: string;
+  createdDateTime: string;
   isActive: boolean;
+}
+
+export interface FreezeDemographicsRequest {
+  asOfDateTime: string;
+  profitYear: number;
 }
 
 export interface ProfallData {

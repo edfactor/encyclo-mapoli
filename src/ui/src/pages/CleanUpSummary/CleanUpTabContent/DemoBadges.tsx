@@ -1,4 +1,4 @@
-import DemographicBadgesNotInPayprofitGrid from "pages/DemographicBadgesNotInPayprofit/DemographicBadgesNotInPayprofitGrid";
+import DemographicBadgesNotInPayprofitGrid from "pages/DecemberActivities/DemographicBadgesNotInPayprofit/DemographicBadgesNotInPayprofitGrid";
 
 import { Divider } from "@mui/material";
 import Grid2 from '@mui/material/Grid2';

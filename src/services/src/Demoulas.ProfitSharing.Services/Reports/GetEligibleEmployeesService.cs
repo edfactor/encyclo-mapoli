@@ -1,11 +1,12 @@
-﻿using Demoulas.Common.Data.Contexts.Extensions;
+﻿using System.Linq.Dynamic.Core;
+using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
-
 
 namespace Demoulas.ProfitSharing.Services.Reports;
 
@@ -14,59 +15,75 @@ public sealed class GetEligibleEmployeesService : IGetEligibleEmployeesService
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly ICalendarService _calendarService;
 
-    public GetEligibleEmployeesService(IProfitSharingDataContextFactory dataContextFactory, ICalendarService calendarService)
+    public GetEligibleEmployeesService(IProfitSharingDataContextFactory dataContextFactory,
+        ICalendarService calendarService)
     {
         _dataContextFactory = dataContextFactory;
         _calendarService = calendarService;
     }
 
-    public async Task<GetEligibleEmployeesResponse> GetEligibleEmployeesAsync(ProfitYearRequest request, CancellationToken cancellationToken)
+    public async Task<GetEligibleEmployeesResponse> GetEligibleEmployeesAsync(ProfitYearRequest request,
+        CancellationToken cancellationToken)
     {
-        var response = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
+        var response =
+            await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
         var birthDateOfExactly21YearsOld = response.FiscalEndDate.AddYears(-21);
         var hoursWorkedRequirement = ContributionService.MinimumHoursForContribution();
 
-        return  await _dataContextFactory.UseReadOnlyContext(async c =>
+        return await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            int numberReadOnFrozen = await c.PayProfits.Where(p => p.ProfitYear == request.ProfitYear).CountAsync(cancellationToken);
+            var baseQuery = ctx.PayProfits.Where(p => p.ProfitYear == request.ProfitYear)
+                .Join(
+                    FrozenService.GetDemographicSnapshot(ctx, request.ProfitYear),
+                    pp => pp.DemographicId,
+                    d => d.Id,
+                    (pp, d) => new
+                    {
+                        d.OracleHcmId,
+                        Hours = (pp.CurrentHoursYear + pp.HoursExecutive),
+                        d.DateOfBirth,
+                        d.EmploymentStatusId,
+                        d.BadgeNumber,
+                        d.ContactInfo.FullName,
+                        d.DepartmentId,
+                        DepartmentName = d.Department!.Name
+                    });
 
-            int numberNotSelected = await c.PayProfits
-            .Include(p => p.Demographic)
-            .Where(p => p.ProfitYear == request.ProfitYear)
-            .Where(p => p.Demographic!.DateOfBirth > birthDateOfExactly21YearsOld /*too young*/ || p.CurrentHoursYear < hoursWorkedRequirement || p.Demographic!.EmploymentStatusId == EmploymentStatus.Constants.Terminated)
-            .CountAsync(cancellationToken: cancellationToken);
+            var allRecords = await baseQuery.ToListAsync(cancellationToken);
 
-            var totalEligible = await c.PayProfits
-           .Include(p => p.Demographic)
-           .Where(p => p.ProfitYear == request.ProfitYear)
-           .Where(p => p.Demographic!.DateOfBirth <= birthDateOfExactly21YearsOld /*over 21*/  && p.CurrentHoursYear >= hoursWorkedRequirement && p.Demographic!.EmploymentStatusId != EmploymentStatus.Constants.Terminated).CountAsync(cancellationToken);
+            int numberReadOnFrozen = allRecords.Count;
 
-            var result = await c.PayProfits
-                .Include(p => p.Demographic)
-                .Where(p =>  p.ProfitYear == request.ProfitYear)
-                .Where(p => p.Demographic!.DateOfBirth <= birthDateOfExactly21YearsOld /*over 21*/  && p.CurrentHoursYear >= hoursWorkedRequirement && p.Demographic!.EmploymentStatusId != EmploymentStatus.Constants.Terminated)
-                .Select(p => new GetEligibleEmployeesResponseDto()
+            int numberNotSelected = allRecords
+                .Count(e =>
+                    e.DateOfBirth > birthDateOfExactly21YearsOld /*too young*/
+                    || e.Hours < hoursWorkedRequirement
+                    || e.EmploymentStatusId == EmploymentStatus.Constants.Terminated);
+
+            var result = allRecords
+                .Where(e => e.DateOfBirth <= birthDateOfExactly21YearsOld /*over 21*/ &&
+                            e.Hours >= hoursWorkedRequirement && e.EmploymentStatusId !=
+                            EmploymentStatus.Constants.Terminated)
+                .Select(e => new EligibleEmployee
                 {
-                    OracleHcmId = p.Demographic!.OracleHcmId,
-                    BadgeNumber = p.Demographic!.BadgeNumber,
-                    FullName = p.Demographic!.ContactInfo.FullName!,
+                    OracleHcmId = e.OracleHcmId,
+                    BadgeNumber = e.BadgeNumber,
+                    FullName = e.FullName!,
+                    DepartmentId = e.DepartmentId,
+                    Department = e.DepartmentName
                 })
-                .OrderBy(p => p.FullName)
-                .ToPaginationResultsAsync(request, cancellationToken);
+                .OrderBy(p => p.FullName);
+
+            var paginatedResults = new PaginatedResponseDto<EligibleEmployee>(request) { Results = result };
 
             return new GetEligibleEmployeesResponse
             {
                 ReportName = $"Get Eligible Employees for Year {request.ProfitYear}",
                 ReportDate = DateTimeOffset.Now,
-                Response = result,
+                Response = paginatedResults,
                 NumberReadOnFrozen = numberReadOnFrozen,
                 NumberNotSelected = numberNotSelected,
-                NumberWritten = totalEligible
+                NumberWritten = result.Count()
             };
-
         });
-
-
     }
-
 }

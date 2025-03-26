@@ -39,7 +39,7 @@ public class OracleHcmMessageConsumer : IConsumer<MessageRequest<OracleHcmJobReq
                                 && j.Started > DateTime.Now.AddHours(-8));
 
                 return runningJobs.AnyAsync(cancellationToken: cancellationToken);
-            });
+            }).ConfigureAwait(false);
 
             if (jobIsAlreadyRunning)
             {
@@ -48,7 +48,7 @@ public class OracleHcmMessageConsumer : IConsumer<MessageRequest<OracleHcmJobReq
             }
 
 
-            await _employeeSyncService.ExecuteFullSyncAsync(message.Body.RequestedBy, cancellationToken);
+            await _employeeSyncService.ExecuteFullSyncAsync(message.Body.RequestedBy, cancellationToken).ConfigureAwait(false);
         }
     }
 }

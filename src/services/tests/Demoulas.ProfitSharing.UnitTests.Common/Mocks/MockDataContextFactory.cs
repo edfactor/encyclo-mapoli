@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using MockQueryable.Moq;
 using Moq;
+using Department = Demoulas.ProfitSharing.Data.Entities.Department;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Mocks;
 
@@ -127,6 +128,17 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
 
                 return Task.FromResult(1); // Return some result for non-canceled token
             });
+
+        // create departments from Constants
+        List<Department> departments = typeof(Department.Constants)
+        .GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
+        .Where(f => f.FieldType == typeof(byte))
+        .Select(f => new Department { Id = (byte)f.GetValue(null)!, Name = f.Name })
+        .ToList();
+
+        Mock<DbSet<Department>> mockDepartments = departments.AsQueryable().BuildMockDbSet();
+        _profitSharingDbContext.Setup(m => m.Departments).Returns(mockDepartments.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.Departments).Returns(mockDepartments.Object);
     }
 
     public static IProfitSharingDataContextFactory InitializeForTesting()

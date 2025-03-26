@@ -3,7 +3,7 @@ import Link from "@mui/material/Link";
 
 // Some callers want a MUI Link, some want a Button with a react navigate function
 export const viewBadgeLinkRenderer = (badgeNumber: number, navigateFunction?: (path: string) => void) => {
-  if (!badgeNumber || badgeNumber < 99999 || badgeNumber > 9999999999) return "";
+  if (!badgeNumber || badgeNumber < 9999 || badgeNumber > 9999999999) return badgeNumber;
   const safeValue = badgeNumber.toString(); // Ens
 
   if (navigateFunction === undefined) {
