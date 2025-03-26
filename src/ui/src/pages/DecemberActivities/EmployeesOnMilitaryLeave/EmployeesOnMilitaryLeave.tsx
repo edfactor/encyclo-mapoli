@@ -6,7 +6,7 @@ import { CAPTIONS } from "../../../constants";
 
 const EmployeesOnMilitaryLeave = () => {
   return (
-    <Page label={`${CAPTIONS.EMPLOYEES_MILITARY}`}>
+    <Page label={`${CAPTIONS.MILITARY_LEAVE}`}>
       <Grid2
         container
         rowSpacing="24px">

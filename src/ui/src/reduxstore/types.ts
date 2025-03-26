@@ -113,6 +113,11 @@ export interface EmployeeWagesForYearRequestDto extends ProfitYearRequest {
   pagination: PaginationParams;
 }
 
+export interface GrossWagesReportDto extends ProfitYearRequest {
+  pagination: PaginationParams;
+  minGrossAmount?:number;
+}
+
 export interface DuplicateNameBirthdayAddress {
   street: string;
   street2: string | null;
@@ -620,6 +625,32 @@ export interface ProfitShareEditDetail {
   vestedPercent: number;
   age: number;
   enrollmentCode: number;
+}
+
+export interface GrossWagesReportRequest extends ProfitYearRequest {
+  minGrossAmount: number;
+}
+
+export interface GrossWagesReportDetail {
+  badgeNumber: number;
+  employeeName: string;
+  ssn: string;
+  dateOfBirth: string;
+  grossWages: number;
+  profitSharingAmount: number;
+  loans: number;
+  forfeitures: number;
+  enrollmentId: number;
+}
+
+export interface GrossWagesReportResponse {
+  reportName: string;
+  reportDate: string;
+  response: Paged<GrossWagesReportDetail[]>;
+  totalGrossWages: number;
+  totalProfitSharingAmount: number;
+  totalLoans: number;
+  totalForfeitures: number;
 }
 
 export interface ProfitShareEditResponse {

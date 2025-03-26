@@ -1,9 +1,9 @@
 import { Divider } from "@mui/material";
-import Grid2 from '@mui/material/Grid2';
-import { DSMAccordion, Page } from "smart-ui-library";
-import DemographicFreezeManager from "./DemographicFreezeManager";
-import DemographicFreezeGrid from "./DemographicFreezeGrid";
+import Grid2 from "@mui/material/Grid2";
 import { useState } from "react";
+import { Page } from "smart-ui-library";
+import DemographicFreezeGrid from "./DemographicFreezeGrid";
+import DemographicFreezeManager from "./DemographicFreezeManager";
 
 const DemographicFreeze = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
@@ -16,7 +16,7 @@ const DemographicFreeze = () => {
           <Divider />
         </Grid2>
         <Grid2 width={"100%"}>
-            <DemographicFreezeManager setInitialSearchLoaded={setInitialSearchLoaded} />          
+          <DemographicFreezeManager setInitialSearchLoaded={setInitialSearchLoaded} />
         </Grid2>
 
         <Grid2 width="100%">

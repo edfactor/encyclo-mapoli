@@ -1,4 +1,6 @@
-﻿using Demoulas.Common.Data.Contexts.Extensions;
+﻿using System.Linq.Dynamic.Core;
+using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -28,44 +30,59 @@ public sealed class GetEligibleEmployeesService : IGetEligibleEmployeesService
         var birthDateOfExactly21YearsOld = response.FiscalEndDate.AddYears(-21);
         var hoursWorkedRequirement = ContributionService.MinimumHoursForContribution();
 
-        return await _dataContextFactory.UseReadOnlyContext(async c =>
+        return await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            // Currently using non-frozen data. Will be corrected in PS-896.
-            var baseQuery = c.PayProfits
-                .Where(p => p.ProfitYear == request.ProfitYear);
+            var baseQuery = ctx.PayProfits.Where(p => p.ProfitYear == request.ProfitYear)
+                .Join(
+                    FrozenService.GetDemographicSnapshot(ctx, request.ProfitYear),
+                    pp => pp.DemographicId,
+                    d => d.Id,
+                    (pp, d) => new
+                    {
+                        d.OracleHcmId,
+                        Hours = (pp.CurrentHoursYear + pp.HoursExecutive),
+                        d.DateOfBirth,
+                        d.EmploymentStatusId,
+                        d.BadgeNumber,
+                        d.ContactInfo.FullName,
+                        d.DepartmentId,
+                        DepartmentName = d.Department!.Name
+                    });
 
-            int numberReadOnFrozen = await baseQuery
-                .CountAsync(cancellationToken);
+            var allRecords = await baseQuery.ToListAsync(cancellationToken);
 
-            int numberNotSelected = await baseQuery
-                .Where(p => p.Demographic!.DateOfBirth > birthDateOfExactly21YearsOld /*too young*/ ||
-                            (p.CurrentHoursYear + p.HoursExecutive) < hoursWorkedRequirement || p.Demographic!.EmploymentStatusId ==
+            int numberReadOnFrozen = allRecords.Count;
+
+            int numberNotSelected = allRecords
+                .Count(e =>
+                    e.DateOfBirth > birthDateOfExactly21YearsOld /*too young*/
+                    || e.Hours < hoursWorkedRequirement
+                    || e.EmploymentStatusId == EmploymentStatus.Constants.Terminated);
+
+            var result = allRecords
+                .Where(e => e.DateOfBirth <= birthDateOfExactly21YearsOld /*over 21*/ &&
+                            e.Hours >= hoursWorkedRequirement && e.EmploymentStatusId !=
                             EmploymentStatus.Constants.Terminated)
-                .CountAsync(cancellationToken: cancellationToken);
-
-            var result = await baseQuery
-                .Where(p => p.Demographic!.DateOfBirth <= birthDateOfExactly21YearsOld /*over 21*/ &&
-                            (p.CurrentHoursYear + p.HoursExecutive) >= hoursWorkedRequirement && p.Demographic!.EmploymentStatusId !=
-                            EmploymentStatus.Constants.Terminated)
-                .Select(p => new EligibleEmployee
+                .Select(e => new EligibleEmployee
                 {
-                    OracleHcmId = p.Demographic!.OracleHcmId,
-                    BadgeNumber = p.Demographic!.BadgeNumber,
-                    FullName = p.Demographic!.ContactInfo.FullName!,
-                    DepartmentId = p.Demographic.DepartmentId,
-                    Department = p.Demographic.Department != null ? p.Demographic.Department.Name : p.Demographic.DepartmentId.ToString()
+                    OracleHcmId = e.OracleHcmId,
+                    BadgeNumber = e.BadgeNumber,
+                    FullName = e.FullName!,
+                    DepartmentId = e.DepartmentId,
+                    Department = e.DepartmentName
                 })
-                .OrderBy(p => p.FullName)
-                .ToPaginationResultsAsync(request, cancellationToken);
+                .OrderBy(p => p.FullName);
+
+            var paginatedResults = new PaginatedResponseDto<EligibleEmployee>(request) { Results = result };
 
             return new GetEligibleEmployeesResponse
             {
                 ReportName = $"Get Eligible Employees for Year {request.ProfitYear}",
                 ReportDate = DateTimeOffset.Now,
-                Response = result,
+                Response = paginatedResults,
                 NumberReadOnFrozen = numberReadOnFrozen,
                 NumberNotSelected = numberNotSelected,
-                NumberWritten = result.Results.Count()
+                NumberWritten = result.Count()
             };
         });
     }

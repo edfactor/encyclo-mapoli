@@ -34,11 +34,11 @@ public class FrozenService: IFrozenService
     /// <returns></returns>
     public static IQueryable<Demographic> GetDemographicSnapshot(IProfitSharingDbContext ctx, short profitYear)
     {
-
         return (
             from dh in ctx.DemographicHistories
             join d in ctx.Demographics.Include(x => x.ContactInfo).Include(x => x.Address) on dh.DemographicId equals d.Id
             from fs in ctx.FrozenStates.Where(x => x.ProfitYear == profitYear && x.IsActive)
+            join dpts in ctx.Departments on dh.DepartmentId equals dpts.Id
             where fs.AsOfDateTime >= dh.ValidFrom && fs.AsOfDateTime < dh.ValidTo
             select new Demographic()
             {
@@ -57,6 +57,7 @@ public class FrozenService: IFrozenService
                 ReHireDate = dh.ReHireDate,
                 TerminationDate = dh.TerminationDate,
                 DepartmentId = dh.DepartmentId,
+                Department = dpts,
                 EmploymentTypeId = dh.EmploymentTypeId,
                 GenderId = d.GenderId,
                 PayFrequencyId = dh.PayFrequencyId,

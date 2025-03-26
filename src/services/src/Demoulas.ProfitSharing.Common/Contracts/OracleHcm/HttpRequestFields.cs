@@ -51,6 +51,9 @@ public static class HttpRequestFields
         "PositionCode", // Split on dash "-", Department will be the last value Example: "14-CASHIERS - PM-1" Department = 1
         "DepartmentName",
         "DepartmentId",
+        nameof(WorkRelationshipAssignment.AssignmentId),
+        nameof(WorkRelationshipAssignment.AssignmentName),
+        nameof(WorkRelationshipAssignment.AssignmentNumber),
         "AssignmentCategory",
         "AssignmentCategoryMeaning",
         "FullPartTime", // Might need to be mapped for EmploymentType

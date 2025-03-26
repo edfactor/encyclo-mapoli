@@ -20,7 +20,9 @@ import {
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 
 interface ProfitShareUpdateInputPanelProps {
-  startProfitYear?: Date | null;
+  Skip?: number | null;
+  Take?: number | null;
+  profitYear?: Date | null;
   contributionPercent?: number | null | undefined;
   earningsPercent?: number | null;
   incomingForfeiturePercent?: number | null;
@@ -96,7 +98,7 @@ const ProfitShareUpdateInputPanel = () => {
   } = useForm<ProfitShareUpdateInputPanelProps>({
     resolver: yupResolver(schema),
     defaultValues: {
-      startProfitYear: fiscalCloseProfitYearAsDate,
+      profitYear: fiscalCloseProfitYearAsDate,
       contributionPercent: null,
       earningsPercent: null,
       incomingForfeiturePercent: null,
@@ -116,6 +118,8 @@ const ProfitShareUpdateInputPanel = () => {
   const validateAndView = handleSubmit((data, event?: React.BaseSyntheticEvent) => {
     if (isValid) {
       const viewParams: ProfitShareUpdateInputPanelProps = {
+        Skip: 0,
+        Take: 25,
         profitYear: fiscalCloseProfitYear,
         ...(!!data.contributionPercent && { contributionPercent: data.contributionPercent }),
         ...(!!data.earningsPercent && { earningsPercent: data.earningsPercent }),
@@ -166,7 +170,7 @@ const ProfitShareUpdateInputPanel = () => {
           width="100%">
           <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
             <Controller
-              name="startProfitYear"
+              name="profitYear"
               control={control}
               render={({ field }) => (
                 <DsmDatePicker
@@ -177,12 +181,12 @@ const ProfitShareUpdateInputPanel = () => {
                   label="Profit Year"
                   disableFuture
                   views={["year"]}
-                  error={errors.startProfitYear?.message}
+                  error={errors.profitYear?.message}
                   disabled={true}
                 />
               )}
             />
-            {errors.startProfitYear && <FormHelperText error>{errors.startProfitYear.message}</FormHelperText>}
+            {errors.profitYear && <FormHelperText error>{errors.profitYear.message}</FormHelperText>}
           </Grid2>
 
           <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
