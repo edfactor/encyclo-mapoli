@@ -1,19 +1,50 @@
-import { useState } from "react";
-import { Button, Divider, Typography, Box } from "@mui/material";
+import { useState, useEffect } from "react";
+import { Button, Divider, Typography, Box, CircularProgress } from "@mui/material";
 import Grid2 from '@mui/material/Grid2';
 import { DSMAccordion, Page, TotalsGrid } from "smart-ui-library";
-import ProfitShareReportSearchFilter from "./ProfitShareReportSearchFilter";
-import ProfitShareReportGrid from "./ProfitShareReportGrid";
+import ProfitShareTotals426SearchFilter from "./ProfitShareTotals426SearchFilter";
 import StatusDropdown, { ProcessStatus } from "components/StatusDropdown";
 import { useNavigate } from "react-router";
 import { MENU_LABELS, CAPTIONS } from "../../constants";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
+import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
+import { YearEndProfitSharingReportRequest } from "reduxstore/types";
+import { useDispatch } from "react-redux";
+import { setYearEndProfitSharingReportQueryParams } from "reduxstore/slices/yearsEndSlice";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 
-const ProfitShareReport = () => {
+const ProfitShareTotals426 = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const navigate = useNavigate();
+  const hasToken = !!useSelector((state: RootState) => state.security.token);
+  const profitYear = useFiscalCloseProfitYear();
+  const dispatch = useDispatch();
+  const [triggerSearch, { isLoading }] = useLazyGetYearEndProfitSharingReportQuery();
   const { yearEndProfitSharingReport } = useSelector((state: RootState) => state.yearsEnd);
+
+  useEffect(() => {
+    if (hasToken && profitYear) {
+      const request: YearEndProfitSharingReportRequest = {
+        isYearEnd: false,
+        minimumAgeInclusive: 18,
+        maximumAgeInclusive: 98,
+        minimumHoursInclusive: 1000,
+        maximumHoursInclusive: 2000,
+        includeActiveEmployees: true,
+        includeInactiveEmployees: true,
+        includeEmployeesTerminatedThisYear: false,
+        includeTerminatedEmployees: true,
+        includeBeneficiaries: false,
+        includeEmployeesWithPriorProfitSharingAmounts: true,
+        includeEmployeesWithNoPriorProfitSharingAmounts: true,
+        profitYear: profitYear,
+        pagination: { skip: 0, take: 5 }
+      };
+      triggerSearch(request, false);
+      dispatch(setYearEndProfitSharingReportQueryParams(profitYear));
+    }
+  }, [hasToken, profitYear, triggerSearch, dispatch]);
 
   const handleStatusChange = async (newStatus: ProcessStatus) => {
     console.info("Logging new status: ", newStatus);
@@ -24,10 +55,10 @@ const ProfitShareReport = () => {
       <div className="flex items-center gap-2 h-10">
         <StatusDropdown onStatusChange={handleStatusChange} />
         <Button
-          onClick={() => navigate("/profit-share-report-edit-run")}
+          onClick={() => navigate("/profit-share-report")}
           variant="outlined"
           className="h-10 whitespace-nowrap min-w-fit">
-          {MENU_LABELS.GO_TO_PROFIT_SHARE_EDIT_RUN}
+          {MENU_LABELS.GO_TO_PROFIT_SHARE_REPORT}
         </Button>
       </div>
     );
@@ -55,7 +86,7 @@ const ProfitShareReport = () => {
 
   return (
     <Page
-      label={CAPTIONS.PROFIT_SHARE_REPORT}
+      label={CAPTIONS.PROFIT_SHARE_TOTALS}
       actionNode={renderActionNode()}>
       <Grid2
         container
@@ -65,7 +96,7 @@ const ProfitShareReport = () => {
         </Grid2>
         <Grid2 width={"100%"}>
           <DSMAccordion title="Filter">
-            <ProfitShareReportSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
+            <ProfitShareTotals426SearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
           </DSMAccordion>
         </Grid2>
 
@@ -79,7 +110,11 @@ const ProfitShareReport = () => {
               </Typography>
             </div>
 
-            {yearEndProfitSharingReport && (
+            {isLoading ? (
+              <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
+                <CircularProgress />
+              </Box>
+            ) : yearEndProfitSharingReport ? (
               <>
                 <TotalsGrid
                   displayData={totalsData.sectionTotal}
@@ -104,19 +139,13 @@ const ProfitShareReport = () => {
                   tablePadding="0px"
                 />
               </>
-            )}
+            ) : null}
           </Box>
         </Grid2>
 
-        <Grid2 width="100%">
-          <ProfitShareReportGrid
-            initialSearchLoaded={initialSearchLoaded}
-            setInitialSearchLoaded={setInitialSearchLoaded}
-          />
-        </Grid2>
       </Grid2>
     </Page>
   );
 };
 
-export default ProfitShareReport;
+export default ProfitShareTotals426; 

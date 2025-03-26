@@ -61,7 +61,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({ initialSearchLo
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`TERMINATIONS REPORT (${termination.response.total || 0})`}
+              {`TERMINATIONS REPORT (${termination.response.total || 0} ${termination.response.total === 1 ? 'Record' : 'Records'})`}
             </Typography>
           </div>
           <DSMGrid

@@ -49,7 +49,7 @@ const PriorHoursGrid = () => {
         <Typography
           variant="h2"
           sx={{ color: "#0258A5" }}>
-          {`ACTIVE/INACTIVE WITH PRIOR PS REPORT (${data?.response?.results?.length || 0})`}
+          {`ACTIVE/INACTIVE WITH PRIOR PS REPORT (${data?.response?.results?.length || 0} records)`}
         </Typography>
       </div>
       <DSMGrid

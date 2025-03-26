@@ -49,17 +49,18 @@ const YTDWages: React.FC = () => {
   };
   const renderActionNode = () => {
     return (
-      <div className="flex items-center gap-2 h-10">
-        <Button
-          onClick={() => {
-            handleDownloadCSV({ profitYear: employeeWagesForYearQueryParams?.profitYear || lastYear });
-          }}
-          variant="outlined"
-          startIcon={<Download color={"primary"} />}
-          className="h-10 whitespace-nowrap min-w-fit">
-          Download
-        </Button>
-      </div>
+      <></>
+      // <div className="flex items-center gap-2 h-10">
+      //   <Button
+      //     onClick={() => {
+      //       handleDownloadCSV({ profitYear: employeeWagesForYearQueryParams?.profitYear || lastYear });
+      //     }}
+      //     variant="outlined"
+      //     startIcon={<Download color={"primary"} />}
+      //     className="h-10 whitespace-nowrap min-w-fit">
+      //     Download
+      //   </Button>
+      // </div>
     );
   };
 

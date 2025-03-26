@@ -41,7 +41,7 @@ const DuplicateSSNsOnDemographicsGrid: React.FC = () => {
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`(${duplicateSSNsData?.response.total || 0})`}
+              {`(${duplicateSSNsData?.response.total || 0} records)`}
             </Typography>
           </div>
           <DSMGrid

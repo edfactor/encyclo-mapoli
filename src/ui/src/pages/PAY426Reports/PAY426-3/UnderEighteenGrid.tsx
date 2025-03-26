@@ -49,7 +49,7 @@ const UnderEighteenGrid = () => {
         <Typography
           variant="h2"
           sx={{ color: "#0258A5" }}>
-          {`UNDER 18 REPORT (${data?.response?.results?.length || 0})`}
+          {`UNDER 18 REPORT (${data?.response?.results?.length || 0} records)`}
         </Typography>
       </div>
       <DSMGrid

@@ -40,7 +40,7 @@ const Under21ReportGrid = () => {
         <Typography
           variant="h2"
           sx={{ color: "#0258A5" }}>
-          {`UNDER 21 AGE REPORT (${sampleData.length || 0})`}
+          {`UNDER 21 AGE REPORT (${sampleData.length || 0} ${sampleData.length === 1 ? 'Record' : 'Records'})`}
         </Typography>
       </div>
       <DSMGrid
