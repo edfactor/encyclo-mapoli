@@ -144,7 +144,7 @@ export const menuLevels: MenuLevel[] = [
         ]
       },
       {
-        topTitle: CAPTIONS.MILITARY_LEAVE,
+        topTitle: CAPTIONS.EMPLOYEES_MILITARY,
         topRoute: ROUTES.MILITARY_LEAVE,
         subPages: []
       },

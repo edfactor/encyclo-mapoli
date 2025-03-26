@@ -176,7 +176,7 @@ const RouterSubAssembly: React.FC = () => {
                 path={ROUTES.MISSING_COMMA}
                 element={<MissingCommaInPyName />}></Route>
               <Route
-                path={ROUTES.EMPLOYEES_MILITARY}
+                path={ROUTES.MILITARY_LEAVE}
                 element={<EmployeesOnMilitaryLeave />}></Route>
               <Route
                 path={ROUTES.REHIRE_FORFEITURES}
