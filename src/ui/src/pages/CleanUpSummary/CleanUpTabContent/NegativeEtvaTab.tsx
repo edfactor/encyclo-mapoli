@@ -15,15 +15,7 @@ export const NegativeEtvaTab = () => {
       <Grid2 width={"100%"}>
         <Divider />
       </Grid2>
-      <Grid2 width={"100%"}>
-        <DSMAccordion title="Filter">
-          <NegativeEtvaForSSNsOnPayprofitSearchFilter
-            setProfitYear={setProfitYear}
-            setInitialSearchLoaded={setInitialSearchLoaded}
-          />
-        </DSMAccordion>
-      </Grid2>
-
+      
       <Grid2 width="100%">
         <NegativeEtvaForSSNsOnPayprofitGrid
           profitYearCurrent={profitYear}
