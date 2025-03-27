@@ -1,27 +1,13 @@
 ﻿using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text;
-using System.Text.Json;
 using System.Text.RegularExpressions;
-using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
-using Demoulas.ProfitSharing.Common.Contracts.Response.PostFrozen;
-using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services;
-using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
-using Demoulas.ProfitSharing.Services.Reports;
-using Demoulas.Util.Extensions;
-using Elastic.Clients.Elasticsearch.QueryDsl;
 using FluentAssertions;
-using MassTransit.Util;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
 
@@ -78,7 +64,7 @@ public class ProfitShareUpdateTests
         // We cant do a simple report to report comparison because I believe that READYS sorting is random
         // when users have the same name.   To cope with this we extract lines with employee/bene information and compare lines.
 
-        var expectedReport = LoadExpectedReport(reportName);
+        string expectedReport = LoadExpectedReport(reportName);
 
 #if true
         // Ths sort order on READY is not great, this maybe tweaked soon.
@@ -164,14 +150,12 @@ public class ProfitShareUpdateTests
             flipped = false;
             for (int i = 0; i < lines.Count - 1; i++)
             {
-                var (badge1, person1) = extractBadge(lines[i]);
-                var (badge2, person2) = extractBadge(lines[i + 1]);
+                (string? badge1, string? person1) = extractBadge(lines[i]);
+                (string? badge2, string? person2) = extractBadge(lines[i + 1]);
                 if (person1 != null && person2 != null && person1 == person2 && badge1!.CompareTo(badge2) > 0)
                 {
                     flipped = true;
-                    var tmp = lines[i];
-                    lines[i] = lines[i + 1];
-                    lines[i + 1] = tmp;
+                    (lines[i], lines[i + 1]) = (lines[i + 1], lines[i]);
                 }
             }
         }
@@ -181,8 +165,8 @@ public class ProfitShareUpdateTests
 
     private static (string? badge, string? fullname) extractBadge(string line)
     {
-        var pattern = @"^ {0,4}(\d{7}|\d{11}) (.{1,23})";
-        var match = Regex.Match(line, pattern);
+        string pattern = @"^ {0,4}(\d{7}|\d{11}) (.{1,23})";
+        Match match = Regex.Match(line, pattern);
         if (match.Success)
         {
             string badge = match.Groups[1].Value;
@@ -206,7 +190,7 @@ public class ProfitShareUpdateTests
         {
             sb.Append(lines[i]);
             // Cobol is smart enough to not emit a Newline if the next character is a form feed.
-            var x = 4;
+            int x = 4;
             if (x > 9 && i < lines.Count - 2 && !lines[i + 1].StartsWith('\f'))
             {
                 sb.Append("\n");
@@ -218,7 +202,6 @@ public class ProfitShareUpdateTests
         sb.Append("\n");
         return sb.ToString();
     }
-
 #pragma warning disable xUnit1013
     public static void AssertReportsAreEquivalent(string expected, string actual)
     {
