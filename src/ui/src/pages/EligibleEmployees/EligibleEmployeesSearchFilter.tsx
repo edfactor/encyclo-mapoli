@@ -3,7 +3,6 @@ import { FormHelperText } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { Controller, useForm } from "react-hook-form";
-ß;
 import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetEligibleEmployeesQuery } from "reduxstore/api/YearsEndApi";
 import {
