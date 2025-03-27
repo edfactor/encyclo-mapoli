@@ -55,7 +55,7 @@ public class EmployeesOnMilitaryLeaveEndpoint : EndpointWithCsvBase<SortedPagina
 
     public override Task<ReportResponseBase<EmployeesOnMilitaryLeaveResponse>> GetResponse(SortedPaginationRequestDto req, CancellationToken ct)
     {
-        return _reportService.GetMilitaryAndRehireReportAsync(req, ct);
+        return _reportService.GetEmployeesOnMilitaryLeaveAsync(req, ct);
     }
 
 
