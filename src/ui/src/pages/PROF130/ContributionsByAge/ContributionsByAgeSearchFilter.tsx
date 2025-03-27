@@ -31,7 +31,11 @@ const schema = yup.object().shape({
     .required("Year is required")
 });
 
+interface ContributionsByAgeSearchFilterProps {
+  setInitialSearchLoaded: (include: boolean) => void;
+}
 
+const ContributionsByAgeSearchFilter: React.FC<ContributionsByAgeSearchFilterProps> = ({ setInitialSearchLoaded }) => {
   const [triggerSearch, { isFetching }] = useLazyGetContributionsByAgeQuery();
   const { contributionsByAgeQueryParams, contributionsByAgeFullTime } = useSelector(
     (state: RootState) => state.yearsEnd
