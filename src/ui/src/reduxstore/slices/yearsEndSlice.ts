@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { stat } from "fs";
 
 import {
   BalanceByAge,
@@ -169,6 +170,84 @@ export const yearsEndSlice = createSlice({
     setSelectedProfitYearForFiscalClose: (state, action: PayloadAction<number>) => {
       state.selectedProfitYearForFiscalClose = action.payload;
     },
+    checkDecemberParamsAndGridsProfitYears: (state, action: PayloadAction<number>) => {
+      // So now we need to update cached december activies data if it was based
+      // on another year
+
+      // Distributions And Forfeitures
+      if (
+        state.distributionsAndForfeituresQueryParams?.profitYear &&
+        state.distributionsAndForfeituresQueryParams?.profitYear !== action.payload
+      ) {
+        state.distributionsAndForfeituresQueryParams.profitYear = action.payload;
+        state.distributionsAndForfeitures = null;
+      }
+
+      // Duplicate Names And Birthdays
+      if (
+        state.duplicateNamesAndBirthdaysQueryParams?.profitYear &&
+        state.duplicateNamesAndBirthdaysQueryParams?.profitYear !== action.payload
+      ) {
+        state.duplicateNamesAndBirthdaysQueryParams.profitYear = action.payload;
+        state.duplicateNamesAndBirthdays = null;
+      }
+
+      // Negative ETVA For SSNs On Payprofit
+      if (
+        state.negativeEtvaForSSNsOnPayprofitParams?.profitYear &&
+        state.negativeEtvaForSSNsOnPayprofitParams?.profitYear !== action.payload
+      ) {
+        state.negativeEtvaForSSNsOnPayprofitParams.profitYear = action.payload;
+        state.negativeEtvaForSSNsOnPayprofit = null;
+      }
+
+      // Manage Executive Hours And Dollars
+      if (
+        state.executiveHoursAndDollarsQueryParams?.profitYear &&
+        state.executiveHoursAndDollarsQueryParams?.profitYear !== action.payload
+      ) {
+        state.executiveHoursAndDollarsQueryParams.profitYear = action.payload;
+        state.executiveHoursAndDollarsGrid = null;
+        state.executiveRowsSelected = null;
+        state.executiveHoursAndDollars = null;
+      }
+
+      // Military And Rehire Forfeitures
+      if (
+        state.rehireForfeituresQueryParams?.profitYear &&
+        state.rehireForfeituresQueryParams?.profitYear !== action.payload
+      ) {
+        state.rehireForfeituresQueryParams.profitYear = action.payload;
+        state.rehireForfeitures = null;
+      }
+
+      // Military and Rehire Profit Summary
+      if (
+        state.rehireProfitSummaryQueryParams?.profitYear &&
+        state.rehireProfitSummaryQueryParams?.profitYear !== action.payload
+      ) {
+        state.rehireProfitSummaryQueryParams.profitYear = action.payload;
+        state.militaryAndRehire = null;
+      }
+
+      // Year End Profit Sharing Report
+      if (
+        state.yearEndProfitSharingReportQueryParams?.profitYear &&
+        state.yearEndProfitSharingReportQueryParams?.profitYear !== action.payload
+      ) {
+        state.yearEndProfitSharingReportQueryParams.profitYear = action.payload;
+        state.yearEndProfitSharingReport = null;
+      }
+
+      // Termination
+      if (state.terminationQueryParams?.profitYear && state.terminationQueryParams?.profitYear !== action.payload) {
+        state.terminationQueryParams.profitYear = action.payload;
+        state.termination = null;
+      }
+    },
+
+    //
+
     checkFiscalCloseParamsAndGridsProfitYears: (state, action: PayloadAction<number>) => {
       // So now we need to update cached december activies data if it was based
       // on another year
@@ -816,6 +895,7 @@ export const {
   setYearEndProfitSharingReport,
   setYearEndProfitSharingReportQueryParams,
   updateExecutiveHoursAndDollarsGridRow,
-  checkFiscalCloseParamsAndGridsProfitYears
+  checkFiscalCloseParamsAndGridsProfitYears,
+  checkDecemberParamsAndGridsProfitYears
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;

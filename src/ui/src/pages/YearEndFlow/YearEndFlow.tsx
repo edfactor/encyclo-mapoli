@@ -9,13 +9,15 @@ import {
 } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import { Page } from "smart-ui-library";
-import { CAPTIONS, ROUTES } from "../../constants";
+import { CAPTIONS } from "../../constants";
 
 const FiscalFlow = () => {
   const { selectedProfitYearForFiscalClose } = useSelector((state: RootState) => state.yearsEnd);
   const dispatch = useDispatch();
 
   const navigate = useNavigate();
+
+  const thisYear = new Date().getFullYear();
 
   const ProfitYearSelector = () => {
     const handleChange = (event: SelectChangeEvent) => {
@@ -33,9 +35,9 @@ const FiscalFlow = () => {
           size="small"
           fullWidth
           onChange={handleChange}>
-          <MenuItem value={2024}>2024</MenuItem>
-          <MenuItem value={2025}>2025</MenuItem>
-          <MenuItem value={2026}>2026</MenuItem>
+          <MenuItem value={thisYear - 1}>{thisYear - 1}</MenuItem>
+          <MenuItem value={thisYear}>{thisYear}</MenuItem>
+          <MenuItem value={thisYear + 1}>{thisYear + 1}</MenuItem>
         </Select>
       </div>
     );
