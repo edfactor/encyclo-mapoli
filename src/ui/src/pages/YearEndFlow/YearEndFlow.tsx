@@ -1,18 +1,17 @@
-import {Divider, MenuItem, Select, SelectChangeEvent } from "@mui/material";
+import { Divider, MenuItem, Select, SelectChangeEvent } from "@mui/material";
 import Grid2 from '@mui/material/Grid2';
 import DSMCollapsedAccordion from "components/DSMCollapsedAccordion";
-import { useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
+import { setSelectedProfitYearForFiscalClose } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import { Page } from "smart-ui-library";
-import { setSelectedProfitYearForFiscalClose } from "reduxstore/slices/yearsEndSlice";
+import { CAPTIONS, ROUTES } from "../../constants";
 
 
 const FiscalFlow = () => {
   const { selectedProfitYearForFiscalClose } = useSelector((state: RootState) => state.yearsEnd);
   const dispatch = useDispatch();
-
 
   const navigate = useNavigate();
 
@@ -30,8 +29,7 @@ const FiscalFlow = () => {
           value={selectedProfitYearForFiscalClose.toString()}
           size="small"
           fullWidth
-          onChange={handleChange}
-        >
+          onChange={handleChange}>
           <MenuItem value={2024}>2024</MenuItem>
           <MenuItem value={2025}>2025</MenuItem>
           <MenuItem value={2026}>2026</MenuItem>
@@ -41,22 +39,57 @@ const FiscalFlow = () => {
   };
 
   return (
-    <Page label="Fiscal Flow" actionNode={<ProfitYearSelector />}>
+    <Page
+      label="Fiscal Flow"
+      actionNode={<ProfitYearSelector />}>
       <Grid2 container>
-        <Grid2 size={{ xs: 12 }} width={"100%"}>
+        <Grid2
+          size={{ xs: 12 }}
+          width={"100%"}>
           <Divider />
         </Grid2>
 
         <Grid2 width="100%">
           <DSMCollapsedAccordion
-            title="Payprofit Extract"
+            title={CAPTIONS.YTD_WAGES_EXTRACT}
             expandable={false}
             actionButtonText="START"
             status={{
               label: "Not Started",
               color: "default"
             }}
-            onActionClick={() => navigate('/payprofit-extract')}
+            onActionClick={() => navigate("/ytd-wages-extract")}
+            isCollapsedOnRender={true}>
+            <></>
+          </DSMCollapsedAccordion>
+        </Grid2>
+
+        <Grid2 width="100%">
+          <DSMCollapsedAccordion
+            title={CAPTIONS.MANAGE_EXECUTIVE_HOURS}
+            expandable={false}
+            actionButtonText="START"
+            status={{
+              label: "Not Started",
+              color: "default"
+            }}
+            onActionClick={() => navigate("/manage-executive-hours-and-dollars")}
+            isCollapsedOnRender={true}>
+            <></>
+          </DSMCollapsedAccordion>
+        </Grid2>
+
+
+        <Grid2 width="100%">
+          <DSMCollapsedAccordion
+            title={CAPTIONS.PROFIT_SHARE_REPORT}
+            expandable={false}
+            actionButtonText="START"
+            status={{
+              label: "Not Started",
+              color: "default"
+            }}
+            onActionClick={() => navigate('/profit-share-report')}
             isCollapsedOnRender={true}
           >
             <></>
@@ -65,192 +98,105 @@ const FiscalFlow = () => {
 
         <Grid2 width="100%">
           <DSMCollapsedAccordion
-            title="YTD Wages Extract (Prof Hours Dollars)"
+            title={CAPTIONS.PROFIT_SHARE_REPORT_EDIT_RUN}
             expandable={false}
             actionButtonText="START"
             status={{
               label: "Not Started",
               color: "default"
             }}
-            onActionClick={() => navigate('/ytd-wages-extract')}
-            isCollapsedOnRender={true}
-          >
+            onActionClick={() => navigate("/profit-share-report-edit-run")}
+            isCollapsedOnRender={true}>
             <></>
           </DSMCollapsedAccordion>
         </Grid2>
 
         <Grid2 width="100%">
           <DSMCollapsedAccordion
-            title="Manage Executive Hours"
+            title={CAPTIONS.ELIGIBLE_EMPLOYEES}
             expandable={false}
             actionButtonText="START"
             status={{
               label: "Not Started",
               color: "default"
             }}
-            onActionClick={() => navigate('/manage-executive-hours-and-dollars')}
-            isCollapsedOnRender={true}
-          >
+            onActionClick={() => navigate("/eligible-employees")}
+            isCollapsedOnRender={true}>
             <></>
           </DSMCollapsedAccordion>
         </Grid2>
 
         <Grid2 width="100%">
           <DSMCollapsedAccordion
-            title="Profit Share Report - Edit Run (Pay426)"
+            title={CAPTIONS.FORFEIT}
             expandable={false}
             actionButtonText="START"
             status={{
               label: "Not Started",
               color: "default"
             }}
-            onActionClick={() => navigate('/profit-share-report-edit-run')}
-            isCollapsedOnRender={true}
-          >
+            onActionClick={() => navigate("/forfeit")}
+            isCollapsedOnRender={true}>
             <></>
           </DSMCollapsedAccordion>
         </Grid2>
 
         <Grid2 width="100%">
           <DSMCollapsedAccordion
-            title="Profit Share Report - Final Run (Pay426)"
+            title={CAPTIONS.PROFIT_SHARE_UPDATE}
             expandable={false}
             actionButtonText="START"
             status={{
               label: "Not Started",
               color: "default"
             }}
-            onActionClick={() => navigate('/profit-share-report-final-run')}
-            isCollapsedOnRender={true}
-          >
+            onActionClick={() => navigate("/profit-share-updates")}
+            isCollapsedOnRender={true}>
             <></>
           </DSMCollapsedAccordion>
         </Grid2>
 
         <Grid2 width="100%">
           <DSMCollapsedAccordion
-            title="Get Eligible Employees"
+            title={CAPTIONS.PAYMASTER_UPDATE}
             expandable={false}
             actionButtonText="START"
             status={{
               label: "Not Started",
               color: "default"
             }}
-            onActionClick={() => navigate('/eligible-employees')}
-            isCollapsedOnRender={true}
-          >
+            onActionClick={() => navigate("/paymaster-update")}
+            isCollapsedOnRender={true}>
             <></>
           </DSMCollapsedAccordion>
         </Grid2>
 
         <Grid2 width="100%">
           <DSMCollapsedAccordion
-            title="Profit Share Forfeit (Pay443)"
+            title="Profit Share Report By Age (PROF130, PROF130B, PROF130V, PROF130Y)"
             expandable={false}
             actionButtonText="START"
             status={{
               label: "Not Started",
               color: "default"
             }}
-            onActionClick={() => navigate('/forfeit')}
-            isCollapsedOnRender={true}
-          >
+            onActionClick={() => navigate("/profit-share-report-by-age")}
+            isCollapsedOnRender={true}>
             <></>
           </DSMCollapsedAccordion>
         </Grid2>
 
         <Grid2 width="100%">
           <DSMCollapsedAccordion
-            title="Profit Share Updates (PAY444 PAY447 PAY460 PROFTLD)"
+            title={CAPTIONS.PROFIT_SHARE_GROSS_REPORT}
             expandable={false}
             actionButtonText="START"
             status={{
               label: "Not Started",
               color: "default"
             }}
-            onActionClick={() => navigate('/profit-share-updates')}
-            isCollapsedOnRender={true}
-          >
-            <></>
-          </DSMCollapsedAccordion>
-        </Grid2>
-
-        <Grid2 width="100%">
-          <DSMCollapsedAccordion
-            title="Profit Share Edit (Pay447)"
-            expandable={false}
-            actionButtonText="START"
-            status={{
-              label: "Not Started",
-              color: "default"
-            }}
-            onActionClick={() => navigate('/profit-share-edit')}
-            isCollapsedOnRender={true}
-          >
-            <></>
-          </DSMCollapsedAccordion>
-        </Grid2>
-
-        <Grid2 width="100%">
-          <DSMCollapsedAccordion
-            title="Profit Master Update"
-            expandable={false}
-            actionButtonText="START"
-            status={{
-              label: "Not Started",
-              color: "default"
-            }}
-            onActionClick={() => navigate('/profit-master-update')}
-            isCollapsedOnRender={true}
-          >
-            <></>
-          </DSMCollapsedAccordion>
-        </Grid2>
-
-        <Grid2 width="100%">
-          <DSMCollapsedAccordion
-            title="Prof Paymaster UPD"
-            expandable={false}
-            actionButtonText="START"
-            status={{
-              label: "Not Started",
-              color: "default"
-            }}
-            onActionClick={() => navigate('/paymaster-update')}
-            isCollapsedOnRender={true}
-          >
-            <></>
-          </DSMCollapsedAccordion>
-        </Grid2>
-
-        <Grid2 width="100%">
-          <DSMCollapsedAccordion
-            title="Profit Share Report By Age (prof130, prof 130b, prof130v, prof130y)"
-            expandable={false}
-            actionButtonText="START"
-            status={{
-              label: "Not Started",
-              color: "default"
-            }}
-            onActionClick={() => navigate('/profit-share-report-by-age')}
-            isCollapsedOnRender={true}
-          >
-            <></>
-          </DSMCollapsedAccordion>
-        </Grid2>
-
-        <Grid2 width="100%">
-          <DSMCollapsedAccordion
-            title="Prof Share Gross Report (Qpay501)"
-            expandable={false}
-            actionButtonText="START"
-            status={{
-              label: "Not Started",
-              color: "default"
-            }}
-            onActionClick={() => navigate('/prof-share-gross-report')}
-            isCollapsedOnRender={true}
-          >
+            onActionClick={() => navigate("/prof-share-gross-report")}
+            isCollapsedOnRender={true}>
             <></>
           </DSMCollapsedAccordion>
         </Grid2>

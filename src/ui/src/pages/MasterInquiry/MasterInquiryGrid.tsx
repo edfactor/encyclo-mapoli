@@ -101,7 +101,7 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoad
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`Master Inquiry (${masterInquiryData?.inquiryResults.total || 0})`}
+              {`Master Inquiry (${masterInquiryData?.inquiryResults.total || 0} ${masterInquiryData?.inquiryResults.total === 1 ? 'Record' : 'Records'})`}
             </Typography>
           </div>
           <DSMGrid

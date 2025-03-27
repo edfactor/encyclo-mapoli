@@ -6,14 +6,14 @@ export const GetProfitShareGrossReportColumns = (navFunction: (badgeNumber: stri
   return [
     {
       headerName: "Badge",
-      field: "badge",
-      colId: "badge",
+      field: "badgeNumber",
+      colId: "badgeNumber",
       minWidth: 80,
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
       sortable: true,
-      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badge, navFunction)
+      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber, navFunction)
     },
     {
       headerName: "Employee Name",
@@ -44,8 +44,8 @@ export const GetProfitShareGrossReportColumns = (navFunction: (badgeNumber: stri
     },
     {
       headerName: "P/S Wages",
-      field: "psWages",
-      colId: "psWages",
+      field: "grossWages",
+      colId: "grossWages",
       minWidth: 120,
       headerClass: "right-align",
       cellClass: "right-align",
@@ -54,8 +54,8 @@ export const GetProfitShareGrossReportColumns = (navFunction: (badgeNumber: stri
     },
     {
       headerName: "P/S Amount",
-      field: "psAmount",
-      colId: "psAmount",
+      field: "profitSharingAmount",
+      colId: "profitSharingAmount",
       minWidth: 120,
       headerClass: "right-align",
       cellClass: "right-align",
@@ -84,13 +84,12 @@ export const GetProfitShareGrossReportColumns = (navFunction: (badgeNumber: stri
     },
     {
       headerName: "EC",
-      field: "ec",
-      colId: "ec",
+      field: "enrollmentId",
+      colId: "enrollmentId",
       minWidth: 100,
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
-      valueFormatter: agGridNumberToCurrency
     }
   ];
 };

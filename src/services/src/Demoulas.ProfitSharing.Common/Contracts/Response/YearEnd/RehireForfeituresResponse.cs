@@ -2,7 +2,7 @@
 using Demoulas.Util.Extensions;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-public sealed record MilitaryAndRehireForfeituresResponse
+public sealed record RehireForfeituresResponse
 {
     public required int BadgeNumber { get; set; }
     public required string? FullName { get; set; }
@@ -13,9 +13,9 @@ public sealed record MilitaryAndRehireForfeituresResponse
     public required IEnumerable<MilitaryRehireProfitSharingDetailResponse> Details { get; set; }
 
 
-    public static MilitaryAndRehireForfeituresResponse ResponseExample()
+    public static RehireForfeituresResponse ResponseExample()
     {
-        return new MilitaryAndRehireForfeituresResponse
+        return new RehireForfeituresResponse
         {
             BadgeNumber = 123,
             Ssn = "XXX-XX-1234",

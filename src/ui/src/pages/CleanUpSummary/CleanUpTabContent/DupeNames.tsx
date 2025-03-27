@@ -14,11 +14,7 @@ export const DupeNames = () => {
       <Grid2 width={"100%"}>
         <Divider />
       </Grid2>
-      <Grid2 width={"100%"}>
-        <DSMAccordion title="Filter">
-          <DuplicateNamesAndBirthdaysSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
-        </DSMAccordion>
-      </Grid2>
+     
 
       <Grid2 width="100%">
         <DuplicateNamesAndBirthdaysGrid

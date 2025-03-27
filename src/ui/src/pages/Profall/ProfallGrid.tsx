@@ -66,7 +66,7 @@ const ProfallGrid = () => {
         <Typography
           variant="h2"
           sx={{ color: "#0258A5" }}>
-          {`PROFALL REPORT (${sampleProfallData.length || 0})`}
+          {`PROFALL REPORT (${sampleProfallData.length || 0} records)`}
         </Typography>
       </div>
       <DSMGrid

@@ -57,15 +57,17 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
             TreatAsBeneficiary = m.TreatAsBeneficiary
         }).ToList();
 
+        members = members.Skip(profitShareUpdateRequest.Skip ?? 0).Take(profitShareUpdateRequest.Take ?? 25).ToList();
+
         return new ProfitShareUpdateResponse
         {
             HasExceededMaximumContributions = employeeExceededMaxContribution,
             ReportName = "Profit Sharing Update",
             ReportDate = DateTimeOffset.Now,
-            Response = new PaginatedResponseDto<ProfitShareUpdateMemberResponse> { Results = members }
+            Response = new PaginatedResponseDto<ProfitShareUpdateMemberResponse>(profitShareUpdateRequest) { Results = members }
         };
     }
-    
+
     /// <summary>
     /// This is used by other services to access plan members with yearly contributions applied.
     /// </summary>
@@ -114,8 +116,8 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
 
         // Go get the Bene's.  NOTE: May modify some employees if they are both bene and employee (that's why "members" is passed in - to lookup loaded employees and see if they are also Bene's)
         await BeneficiariesProcessingHelper.ProcessBeneficiaries(_dbContextFactory, members, profitShareUpdateRequest, cancellationToken);
-        
-        members = members.OrderBy(m=>m.Name).ToList();
+
+        members = members.OrderBy(m => m.Name).ToList();
 
         // Use the list of members to build up response for client.
         return new ProfitShareUpdateOutcome(members, adjustmentReportData, employeeExceededMaxContribution);

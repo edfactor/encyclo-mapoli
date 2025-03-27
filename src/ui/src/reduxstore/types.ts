@@ -1,4 +1,5 @@
 import { ISortParams, Paged, PaginationParams } from "smart-ui-library";
+import { extendSxProp } from "@mui/system";
 
 export enum ImpersonationRoles {
   FinanceManager = "Finance-Manager",
@@ -113,6 +114,11 @@ export interface EmployeeWagesForYearRequestDto extends ProfitYearRequest {
   pagination: PaginationParams;
 }
 
+export interface GrossWagesReportDto extends ProfitYearRequest {
+  pagination: PaginationParams;
+  minGrossAmount?:number;
+}
+
 export interface DuplicateNameBirthdayAddress {
   street: string;
   street2: string | null;
@@ -158,9 +164,10 @@ export interface EmployeesOnMilitaryLeaveResponse {
   terminationDate: string;
 }
 
-export interface MilitaryAndRehireForfeituresRequestDto extends ProfitYearRequest {
-  reportingYear: string;
-  pagination: PaginationParams;
+export interface RehireForfeituresRequest extends ProfitYearRequest {
+  beginningDate: string;
+  endingDate: string;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface ForfeitureDetail extends ProfitYearRequest {
@@ -246,9 +253,6 @@ export interface ForfeituresAndPointsQueryParams extends ProfitYearRequest {
   useFrozenData: boolean;
 }
 
-export interface ProfitAndReportingQueryParams extends ProfitYearRequest {
-  reportingYear: string;
-}
 export interface ExecutiveHoursAndDollarsQueryParams extends ProfitYearRequest {
   badgeNumber: number;
   socialSecurity: number;
@@ -404,7 +408,7 @@ export interface ForfeituresAndPointsDetail {
   employeeName: string;
   ssn: string;
   forfeitures: number;
-  forfeiturePoints: number;
+  forfeitPoints: number;
   earningPoints: number;
   benefificaryPsn: number;
 }
@@ -622,6 +626,32 @@ export interface ProfitShareEditDetail {
   enrollmentCode: number;
 }
 
+export interface GrossWagesReportRequest extends ProfitYearRequest {
+  minGrossAmount: number;
+}
+
+export interface GrossWagesReportDetail {
+  badgeNumber: number;
+  employeeName: string;
+  ssn: string;
+  dateOfBirth: string;
+  grossWages: number;
+  profitSharingAmount: number;
+  loans: number;
+  forfeitures: number;
+  enrollmentId: number;
+}
+
+export interface GrossWagesReportResponse {
+  reportName: string;
+  reportDate: string;
+  response: Paged<GrossWagesReportDetail[]>;
+  totalGrossWages: number;
+  totalProfitSharingAmount: number;
+  totalLoans: number;
+  totalForfeitures: number;
+}
+
 export interface ProfitShareEditResponse {
   isLoading: boolean; // this feels like a hack, it means display the table with the spinner.
 
@@ -644,23 +674,20 @@ export interface ProfitShareMasterResponse {
 }
 
 export interface YearEndProfitSharingReportResponse {
-  badgeNumber: number;
-  employeeName: string;
-  storeNumber: number;
-  employeeTypeCode: string;
-  employmentTypeName: string;
-  dateOfBirth: Date;
-  age: number;
-  ssn: string;
-  wages: number;
-  hours: number;
-  points: number;
-  isUnder21: boolean;
-  isNew: boolean;
-  employeeStatus: string;
-  balance: number;
-  yearsInPlan: number;
+  reportName: string;
+  reportDate: string;
+  response: Paged<YearEndProfitSharingEmployee>;
+  wagesTotal: number;
+  hoursTotal: number;
+  pointsTotal: number;
+  terminatedWagesTotal: number;
+  terminatedHoursTotal: number;
+  numberOfEmployees: number;
+  numberOfNewEmployees: number;
+  numberOfEmployeesUnder21: number;
+  numberOfEmployeesInPlan: number;
 }
+
 export interface FrozenStateResponse {
   id: number;
   profitYear: number;
@@ -691,10 +718,10 @@ export interface MilitaryContributionRequest extends ProfitYearRequest {
 
 export interface YearEndProfitSharingReportRequest {
   isYearEnd: boolean;
-  minimumAgeInclusive: number;
-  maximumAgeInclusive: number;
-  minimumHoursInclusive: number;
-  maximumHoursInclusive: number;
+  minimumAgeInclusive?: number;
+  maximumAgeInclusive?: number;
+  minimumHoursInclusive?: number;
+  maximumHoursInclusive?: number;
   includeActiveEmployees: boolean;
   includeInactiveEmployees: boolean;
   includeEmployeesTerminatedThisYear: boolean;
@@ -715,6 +742,8 @@ export interface MilitaryContribution {
   contributionDate: Date | null;
   contributionAmount: number | null;
 }
+
+
 export interface YearEndProfitSharingEmployee {
   badgeNumber: number;
   employeeName: string;

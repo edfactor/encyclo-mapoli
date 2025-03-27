@@ -45,8 +45,8 @@ export const GetProfitShareForfeitColumns = (navFunction: (badgeNumber: string) 
     },
     {
       headerName: "Cont/Forfeit Points",
-      field: "contForfeitPoints",
-      colId: "contForfeitPoints",
+      field: "forfeitPoints",
+      colId: "forfeitPoints",
       minWidth: 150,
       headerClass: "right-align",
       cellClass: "right-align",

@@ -19,6 +19,7 @@ import {
   setExecutiveHoursAndDollars,
   setForfeituresAndPoints,
   setForfeituresByAge,
+  setGrossWagesReport,
   setMilitaryAndRehireForfeituresDetails,
   setMissingCommaInPYName,
   setNegativeEtvaForSSNsOnPayprofit,
@@ -55,8 +56,10 @@ import {
   ForfeituresByAge,
   FrozenReportsByAgeRequest,
   FrozenReportsForfeituresAndPointsRequest,
+  GrossWagesReportDto,
+  GrossWagesReportResponse,
   MilitaryAndRehireForfeiture,
-  MilitaryAndRehireForfeituresRequestDto,
+  RehireForfeituresRequest,
   MissingCommasInPYName,
   MissingCommasInPYNameRequestDto,
   NegativeEtvaForSSNsOnPayProfit,
@@ -72,9 +75,11 @@ import {
   TerminationResponse,
   VestedAmountsByAge,
   YearEndProfitSharingEmployee,
-  YearEndProfitSharingReportRequest
+  YearEndProfitSharingReportRequest,
+  YearEndProfitSharingReportResponse
 } from "reduxstore/types";
 import { url } from "./api";
+import { format } from "date-fns";
 
 export const YearsEndApi = createApi({
   baseQuery: fetchBaseQuery({
@@ -214,17 +219,41 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getMilitaryAndRehireForfeitures: builder.query<
-      PagedReportResponse<MilitaryAndRehireForfeiture>,
-      MilitaryAndRehireForfeituresRequestDto
-    >({
+    getGrossWagesReport: builder.query<GrossWagesReportResponse, GrossWagesReportDto>({
       query: (params) => ({
-        url: `yearend/military-and-rehire-forfeitures/${params.reportingYear}`,
+        url: "yearend/frozen/grosswages",
         method: "GET",
         params: {
           profitYear: params.profitYear,
           take: params.pagination.take,
-          skip: params.pagination.skip
+          skip: params.pagination.skip,
+          minGrossAmount:params.minGrossAmount
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setGrossWagesReport(data));
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
+    getRehireForfeitures: builder.query<
+      PagedReportResponse<MilitaryAndRehireForfeiture>,
+      RehireForfeituresRequest
+    >({
+      query: (params) => ({
+        url: `yearend/rehire-forfeitures/`,
+        method: "POST",
+        body: {
+          profitYear: params.profitYear,
+          beginningDate: params.beginningDate ? format(new Date(params.beginningDate), 'yyyy-MM-dd') : params.beginningDate,
+          endingDate: params.endingDate ? format(new Date(params.endingDate), 'yyyy-MM-dd') : params.endingDate,
+          take: params.pagination.take,
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -632,7 +661,7 @@ export const YearsEndApi = createApi({
       }
     }),
     getYearEndProfitSharingReport: builder.query<
-      PagedReportResponse<YearEndProfitSharingEmployee>,
+      YearEndProfitSharingReportResponse,
       YearEndProfitSharingReportRequest
     >({
       query: (params) => ({
@@ -674,9 +703,10 @@ export const {
   useLazyGetExecutiveHoursAndDollarsQuery,
   useLazyGetForfeituresAndPointsQuery,
   useLazyGetForfeituresByAgeQuery,
+  useLazyGetGrossWagesReportQuery,
   useLazyGetMasterApplyQuery,
   useLazyGetMasterRevertQuery,
-  useLazyGetMilitaryAndRehireForfeituresQuery,
+  useLazyGetRehireForfeituresQuery,
   useLazyGetNamesMissingCommasQuery,
   useLazyGetNegativeEVTASSNQuery,
   useLazyGetProfitShareEditQuery,
@@ -684,5 +714,5 @@ export const {
   useLazyGetTerminationReportQuery,
   useLazyGetVestingAmountByAgeQuery,
   useLazyGetYearEndProfitSharingReportQuery,
-  useUpdateExecutiveHoursAndDollarsMutation
+  useUpdateExecutiveHoursAndDollarsMutation,
 } = YearsEndApi;
