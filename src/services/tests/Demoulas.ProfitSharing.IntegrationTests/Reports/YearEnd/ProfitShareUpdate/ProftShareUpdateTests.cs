@@ -80,13 +80,12 @@ public class ProfitShareUpdateTests
 
         var expectedReport = LoadExpectedReport(reportName);
 
-#if false
+#if true
         // Ths sort order on READY is not great, this maybe tweaked soon.
         string expected = HandleSortingOddness(LoadExpectedReport(reportName));
         string actual = HandleSortingOddness(CollectLines(profitShareUpdateService.ReportLines));
         AssertReportsAreEquivalent(expected, actual);
-#endif
-
+#else
         var employeeExpectedReportLines = expectedReport.Split("\n").Where(ex => extractBadge(ex) != (null, null)).ToList();
         var employeeActualReportLines = profitShareUpdateService.ReportLines.Where(ex => extractBadge(ex) != (null, null)).ToList();
 
@@ -110,10 +109,8 @@ public class ProfitShareUpdateTests
             _testOutputHelper.WriteLine(se);
         }
 
-#if false
-        This is pending a resolution with https://demoulas.atlassian.net/browse/PS-899
         onlyReady.Should().BeEmpty();
-        onlyReady.Should().BeEmpty();
+        onlySmart.Should().BeEmpty();
 #endif
         true.Should().BeTrue();
     }
