@@ -1,13 +1,15 @@
 import { Divider, MenuItem, Select, SelectChangeEvent } from "@mui/material";
-import Grid2 from '@mui/material/Grid2';
+import Grid2 from "@mui/material/Grid2";
 import DSMCollapsedAccordion from "components/DSMCollapsedAccordion";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
-import { setSelectedProfitYearForFiscalClose } from "reduxstore/slices/yearsEndSlice";
+import {
+  checkFiscalCloseParamsAndGridsProfitYears,
+  setSelectedProfitYearForFiscalClose
+} from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import { Page } from "smart-ui-library";
 import { CAPTIONS, ROUTES } from "../../constants";
-
 
 const FiscalFlow = () => {
   const { selectedProfitYearForFiscalClose } = useSelector((state: RootState) => state.yearsEnd);
@@ -18,6 +20,7 @@ const FiscalFlow = () => {
   const ProfitYearSelector = () => {
     const handleChange = (event: SelectChangeEvent) => {
       dispatch(setSelectedProfitYearForFiscalClose(Number(event.target.value)));
+      dispatch(checkFiscalCloseParamsAndGridsProfitYears(Number(event.target.value)));
     };
 
     return (
@@ -79,7 +82,6 @@ const FiscalFlow = () => {
           </DSMCollapsedAccordion>
         </Grid2>
 
-
         <Grid2 width="100%">
           <DSMCollapsedAccordion
             title={CAPTIONS.PROFIT_SHARE_REPORT}
@@ -89,9 +91,8 @@ const FiscalFlow = () => {
               label: "Not Started",
               color: "default"
             }}
-            onActionClick={() => navigate('/profit-share-report')}
-            isCollapsedOnRender={true}
-          >
+            onActionClick={() => navigate("/profit-share-report")}
+            isCollapsedOnRender={true}>
             <></>
           </DSMCollapsedAccordion>
         </Grid2>

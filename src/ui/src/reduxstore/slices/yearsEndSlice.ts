@@ -1,5 +1,4 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { set } from "date-fns";
 
 import {
   BalanceByAge,
@@ -31,12 +30,12 @@ import {
   ProfitShareMasterResponse,
   ProfitShareUpdateResponse,
   ProfitSharingDistributionsByAge,
-  ProfitYearRequest, RehireForfeituresRequest,
+  ProfitYearRequest,
+  RehireForfeituresRequest,
   TerminationResponse,
   VestedAmountsByAge,
   YearEndProfitSharingReportResponse
 } from "reduxstore/types";
-import { c } from "vite/dist/node/moduleRunnerTransport.d-CXw_Ws6P";
 
 export interface YearsEndState {
   selectedProfitYearForDecemberActivities: number;
@@ -169,6 +168,100 @@ export const yearsEndSlice = createSlice({
     },
     setSelectedProfitYearForFiscalClose: (state, action: PayloadAction<number>) => {
       state.selectedProfitYearForFiscalClose = action.payload;
+    },
+    checkFiscalCloseParamsAndGridsProfitYears: (state, action: PayloadAction<number>) => {
+      // So now we need to update cached december activies data if it was based
+      // on another year
+
+      // Balance By Age
+      if (state.balanceByAgeQueryParams?.profitYear && state.balanceByAgeQueryParams?.profitYear !== action.payload) {
+        state.balanceByAgeQueryParams.profitYear = action.payload;
+        state.balanceByAgeFullTime = null;
+        state.balanceByAgePartTime = null;
+        state.balanceByAgeTotal = null;
+      }
+
+      // Balance By Years
+      if (
+        state.balanceByYearsQueryParams?.profitYear &&
+        state.balanceByYearsQueryParams?.profitYear !== action.payload
+      ) {
+        state.balanceByYearsQueryParams.profitYear = action.payload;
+        state.balanceByYearsFullTime = null;
+        state.balanceByYearsPartTime = null;
+        state.balanceByYearsTotal = null;
+      }
+
+      // Contributions By Age
+      if (
+        state.contributionsByAgeQueryParams?.profitYear &&
+        state.contributionsByAgeQueryParams?.profitYear !== action.payload
+      ) {
+        state.contributionsByAgeQueryParams.profitYear = action.payload;
+        state.contributionsByAgeFullTime = null;
+        state.contributionsByAgePartTime = null;
+        state.contributionsByAgeTotal = null;
+      }
+
+      // Distributions By Age
+      if (
+        state.distributionsByAgeQueryParams?.profitYear &&
+        state.distributionsByAgeQueryParams?.profitYear !== action.payload
+      ) {
+        state.distributionsByAgeQueryParams.profitYear = action.payload;
+        state.distributionsByAgeFullTime = null;
+        state.distributionsByAgePartTime = null;
+        state.distributionsByAgeTotal = null;
+      }
+
+      // Forfeitures By Age
+      if (
+        state.forfeituresByAgeQueryParams?.profitYear &&
+        state.forfeituresByAgeQueryParams?.profitYear !== action.payload
+      ) {
+        state.forfeituresByAgeQueryParams.profitYear = action.payload;
+        state.forfeituresByAgeFullTime = null;
+        state.forfeituresByAgePartTime = null;
+        state.forfeituresByAgeTotal = null;
+      }
+
+      // Vested Amounts By Age
+      if (
+        state.vestedAmountsByAgeQueryParams?.profitYear &&
+        state.vestedAmountsByAgeQueryParams?.profitYear !== action.payload
+      ) {
+        state.vestedAmountsByAgeQueryParams.profitYear = action.payload;
+        state.vestedAmountsByAge = null;
+      }
+
+      // Eligible Employees
+      if (
+        state.eligibleEmployeesQueryParams?.profitYear &&
+        state.eligibleEmployeesQueryParams?.profitYear !== action.payload
+      ) {
+        state.eligibleEmployeesQueryParams.profitYear = action.payload;
+        state.eligibleEmployees = null;
+      }
+
+      // Forfeitures And Points
+      if (
+        state.forfeituresAndPointsQueryParams?.profitYear &&
+        state.forfeituresAndPointsQueryParams?.profitYear !== action.payload
+      ) {
+        state.forfeituresAndPointsQueryParams.profitYear = action.payload;
+        state.forfeituresAndPoints = null;
+      }
+
+      // YTD Wages
+      if (
+        state.employeeWagesForYearQueryParams?.profitYear &&
+        state.employeeWagesForYearQueryParams?.profitYear !== action.payload
+      ) {
+        state.employeeWagesForYearQueryParams.profitYear = action.payload;
+        state.employeeWagesForYear = null;
+      }
+
+      state.balanceByAgeQueryParams = { profitYear: action.payload };
     },
     setBalanceByYearsQueryParams: (state, action: PayloadAction<number>) => {
       state.balanceByYearsQueryParams = { profitYear: action.payload };
@@ -610,15 +703,12 @@ export const yearsEndSlice = createSlice({
     setGrossWagesReportQueryParams: (state, action: PayloadAction<GrossWagesReportRequest>) => {
       state.grossWagesReportQueryParams = action.payload;
     },
-    clearGrossWagesReportQueryParams: (state) => {  
+    clearGrossWagesReportQueryParams: (state) => {
       state.grossWagesReportQueryParams = null;
     },
-    setYearEndProfitSharingReport: (
-      state,
-      action: PayloadAction<YearEndProfitSharingReportResponse>
-    ) => {
+    setYearEndProfitSharingReport: (state, action: PayloadAction<YearEndProfitSharingReportResponse>) => {
       state.yearEndProfitSharingReport = action.payload;
-    },    
+    },
     clearYearEndProfitSharingReport: (state) => {
       state.yearEndProfitSharingReport = null;
     },
@@ -725,6 +815,7 @@ export const {
   setVestedAmountsByAgeQueryParams,
   setYearEndProfitSharingReport,
   setYearEndProfitSharingReportQueryParams,
-  updateExecutiveHoursAndDollarsGridRow
+  updateExecutiveHoursAndDollarsGridRow,
+  checkFiscalCloseParamsAndGridsProfitYears
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;
