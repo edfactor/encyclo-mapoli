@@ -59,7 +59,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
             // Act
             ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
             var response =
-                await ApiClient.GETAsync<RehireForfeituresEndpoint, ProfitYearRequest, ReportResponseBase<RehireForfeituresResponse>>(
+                await ApiClient.POSTAsync<RehireForfeituresEndpoint, RehireForfeituresRequest, ReportResponseBase<RehireForfeituresResponse>>(
                     setup.Request);
 
             // Assert
@@ -85,7 +85,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
 
             // Act
             DownloadClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-            var response = await DownloadClient.GETAsync<RehireForfeituresEndpoint, ProfitYearRequest, StreamContent>(setup.Request);
+            var response = await DownloadClient.POSTAsync<RehireForfeituresEndpoint, RehireForfeituresRequest, StreamContent>(setup.Request);
             response.Response.Content.Should().NotBeNull();
 
             string result = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
@@ -132,7 +132,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
             var setup = await SetupTestEmployee(c);
 
             var response =
-                await ApiClient.GETAsync<RehireForfeituresEndpoint, PaginationRequestDto, ReportResponseBase<RehireForfeituresResponse>>(setup.Request);
+                await ApiClient.POSTAsync<RehireForfeituresEndpoint, RehireForfeituresRequest, ReportResponseBase<RehireForfeituresResponse>>(setup.Request);
 
             response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
         });
@@ -190,7 +190,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
         reportFileName.Should().Be("REHIRE'S PROFIT SHARING DATA");
     }
 
-    private static async Task<(ProfitYearRequest Request, RehireForfeituresResponse ExpectedResponse)> SetupTestEmployee(ProfitSharingDbContext c)
+    private static async Task<(RehireForfeituresRequest Request, RehireForfeituresResponse ExpectedResponse)> SetupTestEmployee(ProfitSharingDbContext c)
     {
         // Setup
         RehireForfeituresResponse example = RehireForfeituresResponse.ResponseExample();
@@ -230,6 +230,14 @@ public class RehireForfeituresTests : ApiTestBase<Program>
             .ToList();
 
 
-        return (new ProfitYearRequest { Skip = 0, Take = 10, ProfitYear = profitYear }, example);
+        return (
+            new RehireForfeituresRequest
+            {
+                Skip = 0,
+                Take = 10,
+                ProfitYear = profitYear,
+                BeginningDate = example.ReHiredDate.AddDays(-5).ToDateTime(TimeOnly.MinValue),
+                EndingDate = example.ReHiredDate.AddDays(5).ToDateTime(TimeOnly.MinValue)
+            }, example);
     }
 }
