@@ -1,15 +1,14 @@
-import { Button, Divider } from "@mui/material";
-import Grid2 from '@mui/material/Grid2';
-import { DSMAccordion, Page } from "smart-ui-library";
-import YTDWagesSearchFilter from "./YTDWagesSearchFilter";
-import YTDWagesGrid from "./YTDWagesGrid";
-import { CAPTIONS } from "../../constants";
-import { Download } from "@mui/icons-material";
-import { useLazyGetEmployeeWagesForYearQuery } from "reduxstore/api/YearsEndApi";
-import { downloadFileFromResponse } from "utils/fileDownload";
+import { Divider } from "@mui/material";
+import Grid2 from "@mui/material/Grid2";
 import { useRef, useState } from "react";
 import { useSelector } from "react-redux";
+import { useLazyGetEmployeeWagesForYearQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
+import { DSMAccordion, Page } from "smart-ui-library";
+import { downloadFileFromResponse } from "utils/fileDownload";
+import { CAPTIONS } from "../../constants";
+import YTDWagesGrid from "./YTDWagesGrid";
+import YTDWagesSearchFilter from "./YTDWagesSearchFilter";
 
 interface SearchData {
   profitYear: number;
@@ -17,6 +16,7 @@ interface SearchData {
 
 const YTDWages: React.FC = () => {
   const [triggerSearch] = useLazyGetEmployeeWagesForYearQuery();
+
   const { employeeWagesForYearQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const thisYear = new Date().getFullYear();
   const lastYear = thisYear - 1;
@@ -76,7 +76,7 @@ const YTDWages: React.FC = () => {
         </Grid2>
         <Grid2 width={"100%"}>
           <DSMAccordion title="Filter">
-            <YTDWagesSearchFilter />
+            <YTDWagesSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
           </DSMAccordion>
         </Grid2>
 

@@ -1,29 +1,69 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetDistributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, TotalsGrid } from "smart-ui-library";
 import { GetDistributionsByAgeColumns } from "./DistributionByAgeGridColumns";
-import Grid2 from '@mui/material/Grid2';
+import Grid2 from "@mui/material/Grid2";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
 import { numberToCurrency } from "smart-ui-library";
 
-const DistributionByAgeGrid = () => {
+interface DistributionByAgeGridProps {
+  initialSearchLoaded: boolean;
+}
+
+const DistributionByAgeGrid: React.FC<DistributionByAgeGridProps> = ({ initialSearchLoaded }) => {
   const [_discard0, setSortParams] = useState<ISortParams>({
     sortBy: "Badge",
     isSortDescending: false
   });
 
-  const { distributionsByAgeTotal, distributionsByAgeFullTime, distributionsByAgePartTime } = useSelector(
-    (state: RootState) => state.yearsEnd
-  );
-  const [_discard1, { isLoading }] = useLazyGetDistributionsByAgeQuery();
+  const {
+    distributionsByAgeTotal,
+    distributionsByAgeFullTime,
+    distributionsByAgePartTime,
+    distributionsByAgeQueryParams
+  } = useSelector((state: RootState) => state.yearsEnd);
+  const [triggerSearch, { isLoading }] = useLazyGetDistributionsByAgeQuery();
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
   const columnDefsTotal = GetDistributionsByAgeColumns(FrozenReportsByAgeRequestType.Total);
   const columnDefsFullTime = GetDistributionsByAgeColumns(FrozenReportsByAgeRequestType.FullTime);
   const columnDefsPartTime = GetDistributionsByAgeColumns(FrozenReportsByAgeRequestType.PartTime);
+
+  const onSearch = useCallback(async () => {
+    triggerSearch(
+      {
+        profitYear: distributionsByAgeQueryParams?.profitYear || 0,
+        reportType: FrozenReportsByAgeRequestType.Total,
+        pagination: { skip: 0, take: 255 }
+      },
+      false
+    ).unwrap();
+    triggerSearch(
+      {
+        profitYear: distributionsByAgeQueryParams?.profitYear || 0,
+        reportType: FrozenReportsByAgeRequestType.FullTime,
+        pagination: { skip: 0, take: 255 }
+      },
+      false
+    ).unwrap();
+    triggerSearch(
+      {
+        profitYear: distributionsByAgeQueryParams?.profitYear || 0,
+        reportType: FrozenReportsByAgeRequestType.PartTime,
+        pagination: { skip: 0, take: 255 }
+      },
+      false
+    ).unwrap();
+  }, [triggerSearch, distributionsByAgeQueryParams?.profitYear]);
+
+  useEffect(() => {
+    if (initialSearchLoaded) {
+      onSearch();
+    }
+  }, [initialSearchLoaded, onSearch]);
 
   return (
     <>
@@ -86,8 +126,10 @@ const DistributionByAgeGrid = () => {
               topRowHeaders={["PartTime", "EMPS", "Amount"]}></TotalsGrid>
           </div>
 
-          <Grid2 size={{ xs: 12 }} container >
-            <Grid2 size={{ xs: 4 }} >
+          <Grid2
+            size={{ xs: 12 }}
+            container>
+            <Grid2 size={{ xs: 4 }}>
               <DSMGrid
                 preferenceKey={"AGE_Total"}
                 isLoading={isLoading}
@@ -104,7 +146,7 @@ const DistributionByAgeGrid = () => {
                 }}
               />
             </Grid2>
-            <Grid2 size={{ xs: 4 }} >
+            <Grid2 size={{ xs: 4 }}>
               <DSMGrid
                 preferenceKey={"AGE_FullTime"}
                 isLoading={isLoading}
@@ -121,7 +163,7 @@ const DistributionByAgeGrid = () => {
                 }}
               />
             </Grid2>
-            <Grid2 size={{ xs: 4 }} >
+            <Grid2 size={{ xs: 4 }}>
               <DSMGrid
                 preferenceKey={"AGE_PartTime"}
                 isLoading={isLoading}

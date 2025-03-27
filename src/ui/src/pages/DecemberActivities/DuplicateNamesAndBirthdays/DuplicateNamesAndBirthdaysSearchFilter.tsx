@@ -37,7 +37,9 @@ const DuplicateNamesAndBirthdaysSearchFilter: React.FC<DuplicateNamesAndBirthday
   setInitialSearchLoaded
 }) => {
   const [triggerSearch, { isFetching }] = useLazyGetDuplicateNamesAndBirthdaysQuery();
-  const { duplicateNamesAndBirthdaysQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const { duplicateNamesAndBirthdaysQueryParams, duplicateNamesAndBirthdays } = useSelector(
+    (state: RootState) => state.yearsEnd
+  );
   const profitYear = useDecemberFlowProfitYear();
   const dispatch = useDispatch();
   const {
@@ -52,6 +54,12 @@ const DuplicateNamesAndBirthdaysSearchFilter: React.FC<DuplicateNamesAndBirthday
       profitYear: profitYear || duplicateNamesAndBirthdaysQueryParams?.profitYear || undefined
     }
   });
+
+  // If we do have a profit year set at the December level, and we had a cached
+  // grid from a previous visit, trigger a new search with that param
+  if (profitYear && !duplicateNamesAndBirthdays) {
+    setInitialSearchLoaded(true);
+  }
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
