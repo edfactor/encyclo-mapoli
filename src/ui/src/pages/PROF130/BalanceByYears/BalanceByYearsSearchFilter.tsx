@@ -1,6 +1,7 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FormHelperText, FormLabel, TextField } from "@mui/material";
+import { FormHelperText } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetBalanceByYearsQuery } from "reduxstore/api/YearsEndApi";
@@ -13,7 +14,6 @@ import { RootState } from "reduxstore/store";
 import { FrozenReportsByAgeRequestType } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
-import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 
 interface BalanceByYearsSearch {
@@ -31,9 +31,13 @@ const schema = yup.object().shape({
     .required("Year is required")
 });
 
-const BalanceByYearsSearchFilter = () => {
+interface BalanceByYearsSearchFilterProps {
+  setInitialSearchLoaded: (include: boolean) => void;
+}
+
+const BalanceByYearsSearchFilter: React.FC<BalanceByYearsSearchFilterProps> = ({ setInitialSearchLoaded }) => {
   const [triggerSearch, { isFetching }] = useLazyGetBalanceByYearsQuery();
-  const { balanceByYearsQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const { balanceByYearsQueryParams, balanceByYearsFullTime } = useSelector((state: RootState) => state.yearsEnd);
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
   const {
@@ -78,6 +82,10 @@ const BalanceByYearsSearchFilter = () => {
       dispatch(setBalanceByYearsQueryParams(fiscalCloseProfitYear));
     }
   });
+
+  if (fiscalCloseProfitYear && !balanceByYearsFullTime) {
+    setInitialSearchLoaded(true);
+  }
 
   const handleReset = () => {
     dispatch(clearBalanceByYearsQueryParams());

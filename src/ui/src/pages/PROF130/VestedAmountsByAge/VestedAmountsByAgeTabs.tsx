@@ -1,12 +1,12 @@
-import Box from "@mui/material/Box";
-import Tab from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
-import VestedAmountsByAgeGrid from "./VestedAmountsByAgeGrid";
+import Box from "@mui/material/Box";
+import Tab from "@mui/material/Tab";
 import { SyntheticEvent, useState } from "react";
+import VestedAmountsByAgeGrid from "./VestedAmountsByAgeGrid";
 
-export default function VestedAmountsByAgeTabs() {
+const VestedAmountByAgeTabs: React.FC = () => {
   const [value, setValue] = useState("1");
 
   const handleChange = (_event: SyntheticEvent, newValue: string) => {
@@ -94,4 +94,6 @@ export default function VestedAmountsByAgeTabs() {
       </TabContext>
     </Box>
   );
-}
+};
+
+export default VestedAmountByAgeTabs;
