@@ -1,6 +1,7 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FormHelperText, FormLabel, TextField } from "@mui/material";
+import { FormHelperText } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetContributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
@@ -13,7 +14,6 @@ import { RootState } from "reduxstore/store";
 import { FrozenReportsByAgeRequestType } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
-import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 
 interface ContributionsByAgeSearch {
@@ -31,9 +31,11 @@ const schema = yup.object().shape({
     .required("Year is required")
 });
 
-const ContributionsByAgeSearchFilter = () => {
+
   const [triggerSearch, { isFetching }] = useLazyGetContributionsByAgeQuery();
-  const { contributionsByAgeQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const { contributionsByAgeQueryParams, contributionsByAgeFullTime } = useSelector(
+    (state: RootState) => state.yearsEnd
+  );
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
   const {
@@ -48,6 +50,10 @@ const ContributionsByAgeSearchFilter = () => {
       reportType: undefined
     }
   });
+
+  if (fiscalCloseProfitYear && !contributionsByAgeFullTime) {
+    setInitialSearchLoaded(true);
+  }
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {

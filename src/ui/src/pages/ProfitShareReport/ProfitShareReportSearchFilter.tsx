@@ -36,7 +36,9 @@ interface ProfitShareReportSearchFilterProps {
 
 const ProfitShareReportSearchFilter: React.FC<ProfitShareReportSearchFilterProps> = ({ setInitialSearchLoaded }) => {
   const [triggerSearch, { isFetching }] = useLazyGetYearEndProfitSharingReportQuery();
-  const { yearEndProfitSharingReportQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const { yearEndProfitSharingReportQueryParams, yearEndProfitSharingReport } = useSelector(
+    (state: RootState) => state.yearsEnd
+  );
   const profitYear = useDecemberFlowProfitYear();
   const dispatch = useDispatch();
   const {
@@ -83,6 +85,10 @@ const ProfitShareReportSearchFilter: React.FC<ProfitShareReportSearchFilterProps
     });
     dispatch(clearYearEndProfitSharingReportQueryParams());
   };
+
+  if (profitYear && !yearEndProfitSharingReport) {
+    setInitialSearchLoaded(true);
+  }
 
   return (
     <form onSubmit={validateAndSearch}>
