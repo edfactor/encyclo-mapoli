@@ -339,8 +339,6 @@ export const yearsEndSlice = createSlice({
         state.employeeWagesForYearQueryParams.profitYear = action.payload;
         state.employeeWagesForYear = null;
       }
-
-      state.balanceByAgeQueryParams = { profitYear: action.payload };
     },
     setBalanceByYearsQueryParams: (state, action: PayloadAction<number>) => {
       state.balanceByYearsQueryParams = { profitYear: action.payload };
