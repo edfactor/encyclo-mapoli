@@ -1,13 +1,15 @@
 import { Divider, MenuItem, Select, SelectChangeEvent } from "@mui/material";
-import Grid2 from '@mui/material/Grid2';
+import Grid2 from "@mui/material/Grid2";
 import DSMCollapsedAccordion from "components/DSMCollapsedAccordion";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
-import { setSelectedProfitYearForFiscalClose } from "reduxstore/slices/yearsEndSlice";
+import {
+  checkFiscalCloseParamsAndGridsProfitYears,
+  setSelectedProfitYearForFiscalClose
+} from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import { Page } from "smart-ui-library";
-import { CAPTIONS, ROUTES } from "../../constants";
-
+import { CAPTIONS } from "../../constants";
 
 const FiscalFlow = () => {
   const { selectedProfitYearForFiscalClose } = useSelector((state: RootState) => state.yearsEnd);
@@ -15,9 +17,12 @@ const FiscalFlow = () => {
 
   const navigate = useNavigate();
 
+  const thisYear = new Date().getFullYear();
+
   const ProfitYearSelector = () => {
     const handleChange = (event: SelectChangeEvent) => {
       dispatch(setSelectedProfitYearForFiscalClose(Number(event.target.value)));
+      dispatch(checkFiscalCloseParamsAndGridsProfitYears(Number(event.target.value)));
     };
 
     return (
@@ -30,9 +35,9 @@ const FiscalFlow = () => {
           size="small"
           fullWidth
           onChange={handleChange}>
-          <MenuItem value={2024}>2024</MenuItem>
-          <MenuItem value={2025}>2025</MenuItem>
-          <MenuItem value={2026}>2026</MenuItem>
+          <MenuItem value={thisYear - 1}>{thisYear - 1}</MenuItem>
+          <MenuItem value={thisYear}>{thisYear}</MenuItem>
+          <MenuItem value={thisYear + 1}>{thisYear + 1}</MenuItem>
         </Select>
       </div>
     );
@@ -79,7 +84,6 @@ const FiscalFlow = () => {
           </DSMCollapsedAccordion>
         </Grid2>
 
-
         <Grid2 width="100%">
           <DSMCollapsedAccordion
             title={CAPTIONS.PROFIT_SHARE_REPORT}
@@ -89,9 +93,8 @@ const FiscalFlow = () => {
               label: "Not Started",
               color: "default"
             }}
-            onActionClick={() => navigate('/profit-share-report')}
-            isCollapsedOnRender={true}
-          >
+            onActionClick={() => navigate("/profit-share-report")}
+            isCollapsedOnRender={true}>
             <></>
           </DSMCollapsedAccordion>
         </Grid2>

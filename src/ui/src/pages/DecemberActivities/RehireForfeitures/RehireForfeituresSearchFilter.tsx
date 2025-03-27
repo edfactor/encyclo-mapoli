@@ -1,5 +1,5 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FormHelperText} from "@mui/material";
+import { FormHelperText } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
@@ -30,9 +30,16 @@ const schema = yup.object().shape({
     .min(2020, "Year must be 2020 or later")
     .max(2100, "Profit Year must be 2100 or earlier")
     .required("Profit Year is required"),
-  beginningDate: yup.string().nullable(),
-  endingDate: yup.string().nullable(),
-  pagination: yup.object().nullable()
+  beginningDate: yup.string().required("Beginning Date is required"),
+  endingDate: yup.string().required("Ending Date is required"),
+  pagination: yup
+    .object({
+      skip: yup.number().required(),
+      take: yup.number().required(),
+      sortBy: yup.string().required(),
+      isSortDescending: yup.boolean().required()
+    })
+    .required()
 });
 
 interface MilitaryAndRehireForfeituresSearchFilterProps {
@@ -56,7 +63,9 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
     resolver: yupResolver<RehireForfeituresSearch>(schema),
     defaultValues: {
       profitYear: profitYear || rehireForfeituresQueryParams?.profitYear || undefined,
-      beginningDate: rehireForfeituresQueryParams?.beginningDate ? rehireForfeituresQueryParams.beginningDate : undefined,
+      beginningDate: rehireForfeituresQueryParams?.beginningDate
+        ? rehireForfeituresQueryParams.beginningDate
+        : undefined,
       endingDate: rehireForfeituresQueryParams?.endingDate ? rehireForfeituresQueryParams.endingDate : undefined,
       pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }
     }
@@ -68,16 +77,18 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
         {
           profitYear: profitYear,
           beginningDate: data.beginningDate,
-          endingDate : data.endingDate,
-          pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true },
+          endingDate: data.endingDate,
+          pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }
         },
         false
       ).unwrap();
-      dispatch(setMilitaryAndRehireForfeituresQueryParams({
-        profitYear: profitYear,
-        beginningDate : data.beginningDate,
-        endingDate: data.endingDate
-      }));
+      dispatch(
+        setMilitaryAndRehireForfeituresQueryParams({
+          profitYear: profitYear,
+          beginningDate: data.beginningDate,
+          endingDate: data.endingDate
+        })
+      );
     }
   });
 
@@ -130,7 +141,7 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
                 required={true}
                 label="Rehire Begin Date"
                 disableFuture
-                error={errors.beginningDate?.message}                
+                error={errors.beginningDate?.message}
               />
             )}
           />

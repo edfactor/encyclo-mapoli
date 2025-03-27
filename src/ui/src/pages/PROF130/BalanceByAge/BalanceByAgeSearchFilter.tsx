@@ -1,6 +1,7 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FormHelperText, FormLabel, TextField } from "@mui/material";
+import { FormHelperText } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetBalanceByAgeQuery } from "reduxstore/api/YearsEndApi";
@@ -9,11 +10,10 @@ import {
   clearBalanceByAgeQueryParams,
   setBalanceByAgeQueryParams
 } from "reduxstore/slices/yearsEndSlice";
+import { RootState } from "reduxstore/store";
 import { FrozenReportsByAgeRequestType } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
-import { RootState } from "reduxstore/store";
-import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 
 interface BalanceByAgeSearch {
@@ -31,9 +31,13 @@ const schema = yup.object().shape({
     .required("Year is required")
 });
 
-const BalanceByAgeSearchFilter = () => {
+interface BalanceByAgeSearchFilterProps {
+  setInitialSearchLoaded: (include: boolean) => void;
+}
+
+const BalanceByAgeSearchFilter: React.FC<BalanceByAgeSearchFilterProps> = ({ setInitialSearchLoaded }) => {
   const [triggerSearch, { isFetching }] = useLazyGetBalanceByAgeQuery();
-  const { balanceByAgeQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const { balanceByAgeQueryParams, balanceByAgeFullTime } = useSelector((state: RootState) => state.yearsEnd);
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
 
@@ -79,6 +83,10 @@ const BalanceByAgeSearchFilter = () => {
       dispatch(setBalanceByAgeQueryParams(fiscalCloseProfitYear));
     }
   });
+
+  if (fiscalCloseProfitYear && !balanceByAgeFullTime) {
+    setInitialSearchLoaded(true);
+  }
 
   const handleReset = () => {
     dispatch(clearBalanceByAgeQueryParams());
