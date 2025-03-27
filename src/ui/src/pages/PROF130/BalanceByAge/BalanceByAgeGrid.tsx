@@ -1,29 +1,66 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetBalanceByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, TotalsGrid } from "smart-ui-library";
 import { GetBalanceByAgeColumns } from "./BalanceByAgeGridColumns";
-import Grid2 from '@mui/material/Grid2';
+import Grid2 from "@mui/material/Grid2";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
 import { numberToCurrency } from "smart-ui-library";
 
-const BalanceByAgeGrid = () => {
+interface BalanceByAgeGridProps {
+  initialSearchLoaded: boolean;
+}
+
+const BalanceByAgeGrid: React.FC<BalanceByAgeGridProps> = ({ initialSearchLoaded }) => {
   const [_discard0, setSortParams] = useState<ISortParams>({
     sortBy: "Badge",
     isSortDescending: false
   });
 
-  const { balanceByAgeTotal, balanceByAgeFullTime, balanceByAgePartTime } = useSelector(
+  const { balanceByAgeTotal, balanceByAgeFullTime, balanceByAgePartTime, balanceByAgeQueryParams } = useSelector(
     (state: RootState) => state.yearsEnd
   );
-  const [_discard1, { isLoading }] = useLazyGetBalanceByAgeQuery();
+  const [triggerSearch, { isLoading }] = useLazyGetBalanceByAgeQuery();
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
   const columnDefsTotal = GetBalanceByAgeColumns(FrozenReportsByAgeRequestType.Total);
   const columnDefsFullTime = GetBalanceByAgeColumns(FrozenReportsByAgeRequestType.FullTime);
   const columnDefsPartTime = GetBalanceByAgeColumns(FrozenReportsByAgeRequestType.PartTime);
+
+  const onSearch = useCallback(async () => {
+    triggerSearch(
+      {
+        profitYear: balanceByAgeQueryParams?.profitYear ?? 0,
+        reportType: FrozenReportsByAgeRequestType.Total,
+        pagination: { skip: 0, take: 255 }
+      },
+      false
+    ).unwrap();
+    triggerSearch(
+      {
+        profitYear: balanceByAgeQueryParams?.profitYear ?? 0,
+        reportType: FrozenReportsByAgeRequestType.FullTime,
+        pagination: { skip: 0, take: 255 }
+      },
+      false
+    ).unwrap();
+    triggerSearch(
+      {
+        profitYear: balanceByAgeQueryParams?.profitYear ?? 0,
+        reportType: FrozenReportsByAgeRequestType.PartTime,
+        pagination: { skip: 0, take: 255 }
+      },
+      false
+    ).unwrap();
+  }, [triggerSearch, balanceByAgeQueryParams?.profitYear]);
+
+  useEffect(() => {
+    if (initialSearchLoaded) {
+      onSearch();
+    }
+  }, [initialSearchLoaded, onSearch]);
 
   return (
     <>
@@ -94,8 +131,10 @@ const BalanceByAgeGrid = () => {
               leftColumnHeaders={["Beneficiaries", "Employees", "Total"]}
               topRowHeaders={["PartTime", "Count", "Balance", "Vested"]}></TotalsGrid>
           </div>
-          <Grid2 size={{ xs: 12 }} container >
-            <Grid2 size={{ xs: 4 }} >
+          <Grid2
+            size={{ xs: 12 }}
+            container>
+            <Grid2 size={{ xs: 4 }}>
               <DSMGrid
                 preferenceKey={"AGE_Total"}
                 isLoading={isLoading}
@@ -112,7 +151,7 @@ const BalanceByAgeGrid = () => {
                 }}
               />
             </Grid2>
-            <Grid2 size={{ xs: 4 }} >
+            <Grid2 size={{ xs: 4 }}>
               <DSMGrid
                 preferenceKey={"AGE_FullTime"}
                 isLoading={isLoading}
@@ -129,7 +168,7 @@ const BalanceByAgeGrid = () => {
                 }}
               />
             </Grid2>
-            <Grid2 size={{ xs: 4 }} >
+            <Grid2 size={{ xs: 4 }}>
               <DSMGrid
                 preferenceKey={"AGE_PartTime"}
                 isLoading={isLoading}

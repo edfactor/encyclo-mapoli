@@ -10,7 +10,7 @@ import { RefObject } from "react";
 import { useLazyGetEmployeeWagesForYearQuery } from "reduxstore/api/YearsEndApi";
 
 interface YTDWagesGridProps {
-  innerRef: RefObject<HTMLDivElement>;
+  innerRef: RefObject<HTMLDivElement | null>;
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
 }
