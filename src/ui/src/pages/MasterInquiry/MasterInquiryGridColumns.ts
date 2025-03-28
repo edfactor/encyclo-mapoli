@@ -64,8 +64,8 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
     },
     {
       headerName: "Profit Code",
-      field: "profitCodeName",
-      colId: "profitCodeName",
+      field: "profitCodeId",
+      colId: "profitCodeId",
       minWidth: 80,
       headerClass: "right-align",
       cellClass: "right-align",
@@ -74,7 +74,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
         const id = params.data.profitCodeId; // assuming 'status' is in the row data
         const name = params.data.profitCodeName; // assuming 'statusName' is in the row data
         //see if one is undefined or null then show other
-        return id && name? `${name} (${id})`: ``;
+        return `${name} (${id})`;
       }
     },
     {
@@ -139,19 +139,6 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       valueFormatter: (params) => {
         const id = params.data?.zeroContributionReasonId; // assuming 'status' is in the row data
         const name = params.data?.zeroContributionReasonName; // assuming 'statusName' is in the row data
-        // If both are null/undefined, just return an empty string
-        if (!id && !name) {
-          return '';
-        }
-        // If one of them is missing, show only the one that exists
-        if (!id) {
-          return `${name}`;
-        }
-        if (!name) {
-          return `${id}`;
-        }
-
-        // If both exist, format as "name (id)"
         return `${name} (${id})`;
       }
     },
@@ -185,20 +172,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       resizable: true,
       valueFormatter: (params) => {
         const id = params.data?.taxCodeId; // assuming 'status' is in the row data
-        const name = params.data?.taxCodeName; // assuming 'statusName' is in the row data
-        // If both are null/undefined, just return an empty string
-        if (!id && !name) {
-          return '';
-        }
-        // If one of them is missing, show only the one that exists
-        if (!id) {
-          return `${name}`;
-        }
-        if (!name) {
-          return `${id}`;
-        }
-
-        // If both exist, format as "name (id)"
+        const name = params.data?.taxCodeName; // assuming 'statusName' is in the row data        
         return `${name} (${id})`;
       }
     },

@@ -1,6 +1,6 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response;
 
-public sealed class MasterInquiryResponseDto
+public sealed record MasterInquiryResponseDto
 {
     public bool IsEmployee => PsnSuffix == 0;
     public int Id { get; set; }

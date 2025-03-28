@@ -15,8 +15,12 @@ public class MasterInquiryService : IMasterInquiryService
 {
     private sealed  class MasterInquiryItem
     {
-        public ProfitDetail ProfitDetail { get; init; } = null!;
-        public InquiryDemographics Member { get; init; } = null!;
+        public required ProfitDetail ProfitDetail { get; init; }
+        public required InquiryDemographics Member { get; init; }
+        public required ProfitCode ProfitCode { get; init; }
+        public required ZeroContributionReason? ZeroContributionReason { get; init; }
+        public required TaxCode? TaxCode { get; init; }
+        public required CommentType? CommentType { get; init; }
     }
 
     private sealed class InquiryDemographics
@@ -75,7 +79,7 @@ public class MasterInquiryService : IMasterInquiryService
                 ProfitYearIteration = x.ProfitDetail.ProfitYearIteration,
                 DistributionSequence = x.ProfitDetail.DistributionSequence,
                 ProfitCodeId = x.ProfitDetail.ProfitCodeId,
-                ProfitCodeName = x.ProfitDetail.ProfitCode.Name,
+                ProfitCodeName = x.ProfitCode.Name,
                 Contribution = x.ProfitDetail.Contribution,
                 Earnings = x.ProfitDetail.Earnings,
                 Forfeiture = x.ProfitDetail.Forfeiture,
@@ -84,16 +88,16 @@ public class MasterInquiryService : IMasterInquiryService
                 Remark = x.ProfitDetail.Remark,
                 ZeroContributionReasonId = x.ProfitDetail.ZeroContributionReasonId,
                 ZeroContributionReasonName =
-                    x.ProfitDetail.ZeroContributionReason != null
-                        ? x.ProfitDetail.ZeroContributionReason.Name
+                    x.ZeroContributionReason != null
+                        ? x.ZeroContributionReason.Name
                         : string.Empty,
                 FederalTaxes = x.ProfitDetail.FederalTaxes,
                 StateTaxes = x.ProfitDetail.StateTaxes,
                 TaxCodeId = x.ProfitDetail.TaxCodeId,
-                TaxCodeName = x.ProfitDetail.TaxCode != null ? x.ProfitDetail.TaxCode.Name : string.Empty,
+                TaxCodeName = x.TaxCode != null ? x.TaxCode.Name : string.Empty,
                 CommentTypeId = x.ProfitDetail.CommentTypeId,
                 CommentTypeName =
-                    x.ProfitDetail.CommentType != null ? x.ProfitDetail.CommentType.Name : string.Empty,
+                    x.CommentType != null ? x.CommentType.Name : string.Empty,
                 CommentRelatedCheckNumber = x.ProfitDetail.CommentRelatedCheckNumber,
                 CommentRelatedState = x.ProfitDetail.CommentRelatedState,
                 CommentRelatedOracleHcmId = x.ProfitDetail.CommentRelatedOracleHcmId,
@@ -136,6 +140,10 @@ public class MasterInquiryService : IMasterInquiryService
                 (pd, d) => new MasterInquiryItem
                 {
                     ProfitDetail = pd,
+                    ProfitCode = pd.ProfitCode,
+                    ZeroContributionReason = pd.ZeroContributionReason,
+                    TaxCode = pd.TaxCode,
+                    CommentType = pd.CommentType,
                     Member = new InquiryDemographics
                     {
                         BadgeNumber = d.BadgeNumber,
@@ -221,6 +229,10 @@ public class MasterInquiryService : IMasterInquiryService
                 (pd, d) => new MasterInquiryItem
                 {
                     ProfitDetail = pd,
+                    ProfitCode = pd.ProfitCode,
+                    ZeroContributionReason = pd.ZeroContributionReason,
+                    TaxCode = pd.TaxCode,
+                    CommentType = pd.CommentType,
                     Member = new InquiryDemographics
                     {
                         BadgeNumber = d.BadgeNumber, PayFrequencyId = PayFrequency.Constants.Weekly,PsnSuffix = d.PsnSuffix,
