@@ -1,14 +1,15 @@
 import { Divider, CircularProgress, Box } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import { DSMAccordion, Page } from "smart-ui-library";
-import { CAPTIONS } from "../../constants";
+import { CAPTIONS } from "../../../constants";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { useLazyGetUnder21TotalsQuery, useLazyGetUnder21InactiveQuery } from "reduxstore/api/YearsEndApi";
-import Under21SearchFilters from "./Under21SearchFilters";
-import Under21Summary from "./Under21/Under21Summary";
-import Under21InactiveGrid from "./Under21/Under21InactiveGrid";
+import Under21SearchFilters from "../Under21SearchFilters";
+import Under21Summary from "./Under21Summary";
+import Under21InactiveGrid from "./Under21InactiveGrid";
+import useFiscalCloseProfitYear from "../../../hooks/useFiscalCloseProfitYear";
 
 const Under21TA = () => {
   const [fetchUnder21Totals, { isLoading: isTotalsLoading }] = useLazyGetUnder21TotalsQuery();
@@ -16,6 +17,14 @@ const Under21TA = () => {
   const under21Totals = useSelector((state: RootState) => state.yearsEnd.under21Totals);
   const under21Inactive = useSelector((state: RootState) => state.yearsEnd.under21Inactive);
   const [initialLoad, setInitialLoad] = useState(true);
+  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
+  const [pageNumber, setPageNumber] = useState(0);
+  const [pageSize, setPageSize] = useState(25);
+  const [sortParams, setSortParams] = useState({
+    sortBy: "badgeNumber",
+    isSortDescending: false
+  });
+  const profitYear = useFiscalCloseProfitYear();
 
   const isLoading = isTotalsLoading || isInactiveLoading;
 
@@ -24,11 +33,11 @@ const Under21TA = () => {
   useEffect(() => {
     const fetchData = async () => {
       const queryParams = {
-        profitYear: 2024,
-        isSortDescending: true,
+        profitYear,
+        isSortDescending: sortParams.isSortDescending,
         pagination: {
-          take: 255,
-          skip: 0
+          take: pageSize,
+          skip: pageNumber * pageSize
         }
       };
       
@@ -41,15 +50,31 @@ const Under21TA = () => {
     };
     
     fetchData();
-  }, [fetchUnder21Totals, fetchUnder21Inactive]);
+  }, [fetchUnder21Totals, fetchUnder21Inactive, pageNumber, pageSize, sortParams, profitYear]);
+
+  useEffect(() => {
+    if (initialSearchLoaded) {
+      const queryParams = {
+        profitYear,
+        isSortDescending: sortParams.isSortDescending,
+        pagination: {
+          take: pageSize,
+          skip: pageNumber * pageSize
+        }
+      };
+      
+      fetchUnder21Totals(queryParams);
+      fetchUnder21Inactive(queryParams);
+    }
+  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, fetchUnder21Totals, fetchUnder21Inactive, profitYear]);
 
   const handleSearch = (profitYear: number, isSortDescending: boolean) => {
     const queryParams = {
       profitYear,
       isSortDescending,
       pagination: {
-        take: 255,
-        skip: 0
+        take: pageSize,
+        skip: pageNumber * pageSize
       }
     };
     
@@ -71,24 +96,36 @@ const Under21TA = () => {
           </DSMAccordion>
         </Grid2>
 
-        {initialLoad || isLoading ? (
+        {initialLoad ? (
           <Grid2 width="100%">
             <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
               <CircularProgress />
             </Box>
           </Grid2>
-        ) : hasData && (
+        ) : (
           <>
-            <Grid2 width="100%" paddingX="24px">
-              <Under21Summary 
-                totals={under21Totals} 
-                isLoading={isTotalsLoading}
-                title="UNDER 21 INACTIVE (QPAY066TA-UNDR21)"
-              />
-            </Grid2>
+            {hasData && !isLoading && (
+              <Grid2 width="100%" paddingX="24px">
+                <Under21Summary 
+                  totals={under21Totals} 
+                  isLoading={isTotalsLoading}
+                  title="UNDER 21 INACTIVE (QPAY066TA-UNDR21)"
+                />
+              </Grid2>
+            )}
 
             <Grid2 width="100%">
-              <Under21InactiveGrid />
+              <Under21InactiveGrid 
+                isLoading={isInactiveLoading}
+                initialSearchLoaded={initialSearchLoaded}
+                setInitialSearchLoaded={setInitialSearchLoaded}
+                pageNumber={pageNumber}
+                setPageNumber={setPageNumber}
+                pageSize={pageSize}
+                setPageSize={setPageSize}
+                sortParams={sortParams}
+                setSortParams={setSortParams}
+              />
             </Grid2>
           </>
         )}

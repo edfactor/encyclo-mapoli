@@ -1,16 +1,55 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Typography } from "@mui/material";
-import { DSMGrid } from "smart-ui-library";
+import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import Grid2 from '@mui/material/Grid2';
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { GetUnder21BreakdownColumnDefs } from './GetUnder21BreakdownColumnDefs';
+import { useNavigate } from 'react-router-dom';
 
-const Under21BreakdownGrid: React.FC = () => {
+interface Under21BreakdownGridProps {
+  isLoading?: boolean;
+  initialSearchLoaded: boolean;
+  setInitialSearchLoaded: (loaded: boolean) => void;
+  pageNumber: number;
+  setPageNumber: (value: number) => void;
+  pageSize: number;
+  setPageSize: (value: number) => void;
+  sortParams: ISortParams;
+  setSortParams: (value: ISortParams) => void;
+}
+
+const Under21BreakdownGrid: React.FC<Under21BreakdownGridProps> = ({ 
+  isLoading = false,
+  initialSearchLoaded,
+  setInitialSearchLoaded,
+  pageNumber,
+  setPageNumber,
+  pageSize,
+  setPageSize,
+  sortParams,
+  setSortParams
+}) => {
   const under21Breakdown = useSelector((state: RootState) => state.yearsEnd.under21BreakdownByStore);
-  const isLoading = !under21Breakdown;
+  const navigate = useNavigate();
 
-  const columnDefs = GetUnder21BreakdownColumnDefs();
+  // Handle navigation for badge clicks
+  const handleNavigation = (path: string) => {
+    navigate(path);
+  };
+
+  const sortEventHandler = (update: ISortParams) => {
+    if (update.sortBy === "") {
+      update.sortBy = "badgeNumber";
+      update.isSortDescending = false;
+    }
+    setSortParams(update);
+    setPageNumber(0);
+    setInitialSearchLoaded(true);
+  };
+
+  const columnDefs = useMemo(() => GetUnder21BreakdownColumnDefs(handleNavigation), [handleNavigation]);
+
   return (
     <Grid2 container direction="column" width="100%">
       <Grid2 paddingX="24px">
@@ -24,12 +63,28 @@ const Under21BreakdownGrid: React.FC = () => {
         <DSMGrid
           preferenceKey="UNDER_21_BREAKDOWN_REPORT"
           isLoading={isLoading}
-          handleSortChanged={(_params) => {}}
+          handleSortChanged={sortEventHandler}
           providedOptions={{
             rowData: under21Breakdown?.response?.results || [],
             columnDefs
           }}
         />
+        {under21Breakdown?.response?.results && under21Breakdown.response.results.length > 0 && (
+          <Pagination
+            pageNumber={pageNumber}
+            setPageNumber={(value: number) => {
+              setPageNumber(value - 1);
+              setInitialSearchLoaded(true);
+            }}
+            pageSize={pageSize}
+            setPageSize={(value: number) => {
+              setPageSize(value);
+              setPageNumber(1);
+              setInitialSearchLoaded(true);
+            }}
+            recordCount={under21Breakdown.response.total || 0}
+          />
+        )}
       </Grid2>
     </Grid2>
   );

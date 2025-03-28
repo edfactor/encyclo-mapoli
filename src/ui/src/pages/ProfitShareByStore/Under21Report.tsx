@@ -16,6 +16,13 @@ const Under21Report = () => {
   const under21Totals = useSelector((state: RootState) => state.yearsEnd.under21Totals);
   const under21Breakdown = useSelector((state: RootState) => state.yearsEnd.under21BreakdownByStore);
   const [initialLoad, setInitialLoad] = useState(true);
+  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
+  const [pageNumber, setPageNumber] = useState(0);
+  const [pageSize, setPageSize] = useState(25);
+  const [sortParams, setSortParams] = useState({
+    sortBy: "badgeNumber",
+    isSortDescending: false
+  });
 
   const isLoading = isTotalsLoading || isBreakdownLoading;
 
@@ -25,10 +32,10 @@ const Under21Report = () => {
     const fetchData = async () => {
       const queryParams = {
         profitYear: 2024,
-        isSortDescending: true,
+        isSortDescending: sortParams.isSortDescending,
         pagination: {
-          take: 255,
-          skip: 0
+          take: pageSize,
+          skip: pageNumber * pageSize
         }
       };
       
@@ -41,15 +48,31 @@ const Under21Report = () => {
     };
     
     fetchData();
-  }, [fetchUnder21Totals, fetchUnder21Breakdown]);
+  }, [fetchUnder21Totals, fetchUnder21Breakdown, pageNumber, pageSize, sortParams]);
+
+  useEffect(() => {
+    if (initialSearchLoaded) {
+      const queryParams = {
+        profitYear: 2024,
+        isSortDescending: sortParams.isSortDescending,
+        pagination: {
+          take: pageSize,
+          skip: pageNumber * pageSize
+        }
+      };
+      
+      fetchUnder21Totals(queryParams);
+      fetchUnder21Breakdown(queryParams);
+    }
+  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, fetchUnder21Totals, fetchUnder21Breakdown]);
 
   const handleSearch = (profitYear: number, isSortDescending: boolean) => {
     const queryParams = {
       profitYear,
       isSortDescending,
       pagination: {
-        take: 255,
-        skip: 0
+        take: pageSize,
+        skip: pageNumber * pageSize
       }
     };
     
@@ -71,24 +94,36 @@ const Under21Report = () => {
           </DSMAccordion>
         </Grid2>
 
-        {initialLoad || isLoading ? (
+        {initialLoad ? (
           <Grid2 width="100%">
             <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
               <CircularProgress />
             </Box>
           </Grid2>
-        ) : hasData && (
+        ) : (
           <>
-            <Grid2 width="100%" paddingX="24px">
-              <Under21Summary 
-                totals={under21Totals} 
-                isLoading={isTotalsLoading} 
-                title="UNDER 21 REPORT (QPAY066-UNDR21)"
-              />
-            </Grid2>
+            {hasData && !isLoading && (
+              <Grid2 width="100%" paddingX="24px">
+                <Under21Summary 
+                  totals={under21Totals} 
+                  isLoading={isTotalsLoading} 
+                  title="UNDER 21 REPORT (QPAY066-UNDR21)"
+                />
+              </Grid2>
+            )}
 
             <Grid2 width="100%">
-              <Under21BreakdownGrid />
+              <Under21BreakdownGrid 
+                isLoading={isBreakdownLoading}
+                initialSearchLoaded={initialSearchLoaded}
+                setInitialSearchLoaded={setInitialSearchLoaded}
+                pageNumber={pageNumber}
+                setPageNumber={setPageNumber}
+                pageSize={pageSize}
+                setPageSize={setPageSize}
+                sortParams={sortParams}
+                setSortParams={setSortParams}
+              />
             </Grid2>
           </>
         )}
