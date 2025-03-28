@@ -1,7 +1,7 @@
 import { Typography } from "@mui/material";
 import { DSMGrid, ISortParams, Pagination, agGridNumberToCurrency } from "smart-ui-library";
 import { useMemo, useEffect, useState, useCallback } from "react";
-import Grid2 from '@mui/material/Grid2';
+import Grid2 from "@mui/material/Grid2";
 import { useLazyGetBreakdownByStoreQuery } from "reduxstore/api/YearsEndApi";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
@@ -26,9 +26,12 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store }) => {
   const queryParams = useSelector((state: RootState) => state.yearsEnd.breakdownByStoreQueryParams);
   const navigate = useNavigate();
 
-  const handleNavigation = (path: string) => {
-    navigate(path);
-  };
+  const handleNavigation = useCallback(
+    (path: string) => {
+      navigate(path);
+    },
+    [navigate]
+  );
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
@@ -50,69 +53,75 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store }) => {
     fetchData();
   }, [fetchData]);
 
-  const columnDefs = useMemo(() => [
-    {
-      headerName: "Badge",
-      field: "badgeNumber",
-      width: 100,
-      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber, handleNavigation)
-    },
-    {
-      headerName: "Employee Name",
-      field: "fullName",
-      width: 200
-    },
-    {
-      headerName: "Position",
-      field: "position",
-      width: 120
-    },
-    {
-      headerName: "Beginning Balance",
-      field: "beginningBalance",
-      width: 150,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
-      headerName: "Earnings",
-      field: "earnings",
-      width: 120,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
-      headerName: "Cont",
-      field: "contributions",
-      width: 120,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
-      headerName: "Forf",
-      field: "forfeiture",
-      width: 120,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
-      headerName: "Dist",
-      field: "distributions",
-      width: 120,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
-      headerName: "Ending Balance",
-      field: "endingBalance",
-      width: 150,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
-      headerName: "Vested Amount",
-      field: "vestedAmount",
-      width: 150,
-      valueFormatter: agGridNumberToCurrency
-    }
-  ], [handleNavigation]);
+  const columnDefs = useMemo(
+    () => [
+      {
+        headerName: "Badge",
+        field: "badgeNumber",
+        width: 100,
+        cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber, handleNavigation)
+      },
+      {
+        headerName: "Employee Name",
+        field: "fullName",
+        width: 200
+      },
+      {
+        headerName: "Position",
+        field: "position",
+        width: 120
+      },
+      {
+        headerName: "Beginning Balance",
+        field: "beginningBalance",
+        width: 150,
+        valueFormatter: agGridNumberToCurrency
+      },
+      {
+        headerName: "Earnings",
+        field: "earnings",
+        width: 120,
+        valueFormatter: agGridNumberToCurrency
+      },
+      {
+        headerName: "Cont",
+        field: "contributions",
+        width: 120,
+        valueFormatter: agGridNumberToCurrency
+      },
+      {
+        headerName: "Forf",
+        field: "forfeiture",
+        width: 120,
+        valueFormatter: agGridNumberToCurrency
+      },
+      {
+        headerName: "Dist",
+        field: "distributions",
+        width: 120,
+        valueFormatter: agGridNumberToCurrency
+      },
+      {
+        headerName: "Ending Balance",
+        field: "endingBalance",
+        width: 150,
+        valueFormatter: agGridNumberToCurrency
+      },
+      {
+        headerName: "Vested Amount",
+        field: "vestedAmount",
+        width: 150,
+        valueFormatter: agGridNumberToCurrency
+      }
+    ],
+    [handleNavigation]
+  );
 
   return (
-    <Grid2 container direction="column" width="100%">
+    <Grid2
+      container
+      direction="column"
+      width="100%">
       <Grid2 paddingX="24px">
         <Typography
           variant="h6"
@@ -144,4 +153,4 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store }) => {
   );
 };
 
-export default AssociatesGrid; 
+export default AssociatesGrid;
