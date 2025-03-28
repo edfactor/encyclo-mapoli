@@ -1,12 +1,11 @@
 import { ISortParams, Paged, PaginationParams } from "smart-ui-library";
-import { extendSxProp } from "@mui/system";
 
 export enum ImpersonationRoles {
   FinanceManager = "Finance-Manager",
   DistributionsClerk = "Distributions-Clerk",
   HardshipAdministrator = "Hardship-Administrator",
   ProfitSharingAdministrator = "Profit-Sharing-Administrator",
-  ItOperations = "IT-Operations",
+  ItOperations = "IT-Operations"
 }
 
 export interface SortedPaginationRequestDto extends PaginationParams, ISortParams {}
@@ -116,7 +115,7 @@ export interface EmployeeWagesForYearRequestDto extends ProfitYearRequest {
 
 export interface GrossWagesReportDto extends ProfitYearRequest {
   pagination: PaginationParams;
-  minGrossAmount?:number;
+  minGrossAmount?: number;
 }
 
 export interface DuplicateNameBirthdayAddress {
@@ -742,7 +741,6 @@ export interface MilitaryContribution {
   contributionDate: Date | null;
   contributionAmount: number | null;
 }
-
 
 export interface YearEndProfitSharingEmployee {
   badgeNumber: number;

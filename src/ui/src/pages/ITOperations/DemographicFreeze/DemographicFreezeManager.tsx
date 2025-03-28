@@ -1,12 +1,11 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FormHelperText, TextField, Box, Button } from "@mui/material";
+import { Box, Button, FormHelperText, TextField } from "@mui/material";
+import Grid2 from "@mui/material/Grid2";
+import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import { Controller, useForm } from "react-hook-form";
-import { useDispatch } from "react-redux";
 import { useFreezeDemographicsMutation } from "reduxstore/api/ItOperations";
 import * as yup from "yup";
-import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
-import Grid2 from "@mui/material/Grid2";
 
 // Update the interface to include new fields
 interface DemographicFreezeSearch {
@@ -28,24 +27,16 @@ const schema = yup.object().shape({
     .date()
     .nullable()
     .required("As of Date is required")
-    .test(
-      "not-too-old",
-      "Date cannot be more than 1 year ago",
-      (value) => {
-        if (!value) return true; // Skip validation if empty (required handles this)
-        const oneYearAgo = new Date();
-        oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-        return value >= oneYearAgo;
-      }
-    )
-    .test(
-      "not-future",
-      "Date cannot be in the future",
-      (value) => {
-        if (!value) return true;
-        return value <= new Date();
-      }
-    ),
+    .test("not-too-old", "Date cannot be more than 1 year ago", (value) => {
+      if (!value) return true; // Skip validation if empty (required handles this)
+      const oneYearAgo = new Date();
+      oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+      return value >= oneYearAgo;
+    })
+    .test("not-future", "Date cannot be in the future", (value) => {
+      if (!value) return true;
+      return value <= new Date();
+    }),
   asOfTime: yup.string().nullable().required("As of Time is required")
 });
 
@@ -53,9 +44,7 @@ interface DemographicFreezeSearchFilterProps {
   setInitialSearchLoaded: (include: boolean) => void;
 }
 
-const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = ({
-                                                                                  setInitialSearchLoaded
-                                                                                }) => {
+const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = ({ setInitialSearchLoaded }) => {
   const [freezeDemographics, { isLoading }] = useFreezeDemographicsMutation();
   const profitYear = useDecemberFlowProfitYear();
 
@@ -81,13 +70,13 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
 
         // Create a date with combined date and time components
         if (dateObj && timeStr) {
-          const [hours, minutes] = timeStr.split(':').map(Number);
+          const [hours, minutes] = timeStr.split(":").map(Number);
           const combinedDate = new Date(dateObj);
           combinedDate.setHours(hours, minutes, 0, 0);
 
           // Format as ISO string with timezone offset
           // The format should match: "2025-03-19T00:00:00-04:00"
-          const asOfDateTime = combinedDate.toISOString().replace('Z', '-04:00');
+          const asOfDateTime = combinedDate.toISOString().replace("Z", "-04:00");
 
           await freezeDemographics({
             asOfDateTime,
@@ -106,22 +95,21 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
 
   // Style for making input fields smaller
   const fieldStyle = {
-    width: '250px',  // Fixed width for all fields to make them smaller
-    mr: 2,           // Add some right margin between fields
+    width: "250px", // Fixed width for all fields to make them smaller
+    mr: 2 // Add some right margin between fields
   };
 
   return (
     <form onSubmit={onSubmit}>
       <Box
         sx={{
-          display: 'flex',
-          flexDirection: 'row',
-          flexWrap: 'wrap',
-          alignItems: 'flex-end', // Align items at the bottom for consistent baseline
-          paddingX: '24px',
-          gap: '24px',
-        }}
-      >
+          display: "flex",
+          flexDirection: "row",
+          flexWrap: "wrap",
+          alignItems: "flex-end", // Align items at the bottom for consistent baseline
+          paddingX: "24px",
+          gap: "24px"
+        }}>
         {/* Profit Year */}
         <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
           <Controller
@@ -136,7 +124,7 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
                 label="Profit Year"
                 disableFuture
                 views={["year"]}
-                error={errors.profitYear?.message}                
+                error={errors.profitYear?.message}
               />
             )}
           />
@@ -179,9 +167,7 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
               />
             )}
           />
-          {errors.asOfTime && (
-            <FormHelperText error>{errors.asOfTime.message}</FormHelperText>
-          )}
+          {errors.asOfTime && <FormHelperText error>{errors.asOfTime.message}</FormHelperText>}
         </Box>
 
         {/* Submit Button */}
@@ -190,8 +176,7 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
             type="submit"
             variant="contained"
             color="primary"
-            disabled={isLoading || !isValid}
-          >
+            disabled={isLoading || !isValid}>
             {isLoading ? "Submitting..." : "Create Freeze Point"}
           </Button>
         </Box>
