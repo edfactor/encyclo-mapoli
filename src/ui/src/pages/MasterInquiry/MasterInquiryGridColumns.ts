@@ -13,6 +13,34 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       resizable: true
     },
     {
+      headerName: "Badge Number",
+      field: "badgeNumber",
+      colId: "badgeNumber",
+      minWidth: 120,
+      headerClass: "left-align",
+      cellClass: "left-align",
+      resizable: true
+    },
+    {
+      headerName: "PSN Suffix",
+      field: "psnSuffix",
+      colId: "psnSuffix",
+      minWidth: 120,
+      headerClass: "left-align",
+      cellClass: "left-align",
+      resizable: true,
+      valueFormatter: (params) => {
+        const badgeNumber = params.data?.badgeNumber; 
+        const psnSuffix = params.data?.psnSuffix; 
+        // If both are null/undefined, just return an empty string
+        if (!badgeNumber && !psnSuffix) {
+          return '';
+        }
+        // If both exist, format as "name (id)"
+        return `${badgeNumber}-${psnSuffix}`;
+      }
+    },
+    {
       headerName: "Profit Year",
       field: "profitYear",
       colId: "profitYear",
@@ -49,7 +77,8 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       valueFormatter: (params) => {
         const id = params.data.profitCodeId; // assuming 'status' is in the row data
         const name = params.data.profitCodeName; // assuming 'statusName' is in the row data
-        return `${name} (${id})`;
+        //see if one is undefined or null then show other
+        return id && name? `${name} (${id})`: ``;
       }
     },
     {

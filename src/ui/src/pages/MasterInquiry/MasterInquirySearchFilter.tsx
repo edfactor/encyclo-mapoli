@@ -500,11 +500,6 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
                       control={<Radio size="small" />}
                       label="Beneficiaries"
                     />
-                    <FormControlLabel
-                      value="none"
-                      control={<Radio size="small" />}
-                      label="None"
-                    />
                   </RadioGroup>
                 )}
               />
