@@ -1,21 +1,20 @@
-import React, { useEffect } from "react";
-import { Filter, FilterList, CheckCircle, RadioButtonUnchecked, Warning } from "@mui/icons-material";
-import { Box, Button, Divider, Stack, Typography, Chip } from "@mui/material";
-import Grid2 from '@mui/material/Grid2';
-import { DSMAccordion, Page } from "smart-ui-library";
-import { useSelector } from "react-redux";
+import { CheckCircle, RadioButtonUnchecked, Warning } from "@mui/icons-material";
+import { Chip, Divider, Stack, Typography } from "@mui/material";
+import Grid2 from "@mui/material/Grid2";
 import DuplicateSSNsOnDemographicsGrid from "pages/DecemberActivities/DuplicateSSNsOnDemographics/DuplicateSSNsOnDemographicsGrid";
+import NegativeEtvaForSSNsOnPayprofitGrid from "pages/DecemberActivities/NegativeEtvaForSSNsOnPayprofit/NegativeEtvaForSSNsOnPayprofitGrid";
 import MasterInquiryGrid from "pages/MasterInquiry/MasterInquiryGrid";
 import MasterInquirySearchFilter from "pages/MasterInquiry/MasterInquirySearchFilter";
-import NegativeETVA from "./NegativeETVA";
+import React, { useEffect } from "react";
+import { useSelector } from "react-redux";
 import {
-  useLazyGetNegativeEVTASSNQuery,
-  useLazyGetDuplicateSSNsQuery,
   useLazyGetDemographicBadgesNotInPayprofitQuery,
-  useLazyGetDuplicateNamesAndBirthdaysQuery
+  useLazyGetDuplicateNamesAndBirthdaysQuery,
+  useLazyGetDuplicateSSNsQuery,
+  useLazyGetNegativeEVTASSNQuery
 } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import NegativeEtvaForSSNsOnPayprofitGrid from "pages/DecemberActivities/NegativeEtvaForSSNsOnPayprofit/NegativeEtvaForSSNsOnPayprofitGrid";
+import { DSMAccordion, Page } from "smart-ui-library";
 
 /*
 
@@ -84,7 +83,6 @@ POST /api/process-state/{year}/initialize
 - This will init the process state for a new year with default values - starting fresh
 
 */
-
 
 const decemberProcessState: ProcessState = {
   year: 2024,
@@ -248,16 +246,17 @@ const DecemberProcessLocalApi: React.FC = () => {
     }
   }, [hasToken]);
   return (
-    <Page
-      label="2024 December">
+    <Page label="2024 December">
       <Grid2
         container
         rowSpacing="24px">
-        <Grid2 size={{ xs: 12 }} width="100%">
+        <Grid2
+          size={{ xs: 12 }}
+          width="100%">
           <Divider />
         </Grid2>
 
-        <Grid2 size={{ xs: 10 }} >
+        <Grid2 size={{ xs: 10 }}>
           <Stack
             direction="row"
             spacing={2}

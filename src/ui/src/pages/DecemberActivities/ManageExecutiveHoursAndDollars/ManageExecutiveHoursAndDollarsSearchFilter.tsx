@@ -66,7 +66,9 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
   isModal,
   setInitialSearchLoaded
 }) => {
-  const { executiveHoursAndDollarsQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const { executiveHoursAndDollarsQueryParams, executiveHoursAndDollars } = useSelector(
+    (state: RootState) => state.yearsEnd
+  );
   const profitYear = useDecemberFlowProfitYear();
 
   const [triggerSearch, { isFetching }] = useLazyGetExecutiveHoursAndDollarsQuery();
@@ -150,6 +152,10 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
       );
     }
   });
+
+  if (profitYear && !executiveHoursAndDollars) {
+    setInitialSearchLoaded(true);
+  }
 
   const handleReset = () => {
     // If we ever decide that the reset button should clear pending changes

@@ -10,6 +10,7 @@ import { RootState } from "reduxstore/store";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { clearVestedAmountsByAgeQueryParams, setVestedAmountsByAgeQueryParams } from "reduxstore/slices/yearsEndSlice";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
+import { useEffect } from "react";
 
 interface VestingAmountByAgeSearch {
   profitYear: number;
@@ -25,9 +26,9 @@ const schema = yup.object().shape({
     .required("Year is required")
 });
 
-const VestedAmountsByAgeSearchFilter = () => {
+const VestedAmountsByAgeSearchFilter: React.FC = () => {
   const [triggerSearch, { isFetching }] = useLazyGetVestingAmountByAgeQuery();
-  const { vestedAmountsByAgeQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const { vestedAmountsByAgeQueryParams, vestedAmountsByAge } = useSelector((state: RootState) => state.yearsEnd);
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
   const {
@@ -55,6 +56,18 @@ const VestedAmountsByAgeSearchFilter = () => {
     }
   });
 
+  useEffect(() => {
+    if (fiscalCloseProfitYear && !vestedAmountsByAge) {
+      triggerSearch(
+        {
+          profitYear: fiscalCloseProfitYear,
+          acceptHeader: "application/json"
+        },
+        false
+      ).unwrap();
+    }
+  }, [fiscalCloseProfitYear, triggerSearch, vestedAmountsByAge]);
+
   const handleReset = () => {
     dispatch(clearVestedAmountsByAgeQueryParams());
     reset({
@@ -68,7 +81,7 @@ const VestedAmountsByAgeSearchFilter = () => {
         container
         paddingX="24px"
         gap="24px">
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }} >
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
           <Controller
             name="profitYear"
             control={control}

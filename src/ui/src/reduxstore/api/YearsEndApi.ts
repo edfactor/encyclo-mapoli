@@ -67,7 +67,7 @@ import {
   GrossWagesReportDto,
   GrossWagesReportResponse,
   MilitaryAndRehireForfeiture,
-  MilitaryAndRehireForfeituresRequestDto,
+  RehireForfeituresRequest,
   MissingCommasInPYName,
   MissingCommasInPYNameRequestDto,
   NegativeEtvaForSSNsOnPayProfit,
@@ -95,6 +95,7 @@ import {
   BreakdownByStoreResponse
 } from "reduxstore/types";
 import { url } from "./api";
+import { format } from "date-fns";
 
 export const YearsEndApi = createApi({
   baseQuery: fetchBaseQuery({
@@ -254,17 +255,21 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getMilitaryAndRehireForfeitures: builder.query<
+    getRehireForfeitures: builder.query<
       PagedReportResponse<MilitaryAndRehireForfeiture>,
-      MilitaryAndRehireForfeituresRequestDto
+      RehireForfeituresRequest
     >({
       query: (params) => ({
-        url: `yearend/military-and-rehire-forfeitures/${params.reportingYear}`,
-        method: "GET",
-        params: {
+        url: `yearend/rehire-forfeitures/`,
+        method: "POST",
+        body: {
           profitYear: params.profitYear,
+          beginningDate: params.beginningDate ? format(new Date(params.beginningDate), 'yyyy-MM-dd') : params.beginningDate,
+          endingDate: params.endingDate ? format(new Date(params.endingDate), 'yyyy-MM-dd') : params.endingDate,
           take: params.pagination.take,
-          skip: params.pagination.skip
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -811,7 +816,7 @@ export const {
   useLazyGetGrossWagesReportQuery,
   useLazyGetMasterApplyQuery,
   useLazyGetMasterRevertQuery,
-  useLazyGetMilitaryAndRehireForfeituresQuery,
+  useLazyGetRehireForfeituresQuery,
   useLazyGetNamesMissingCommasQuery,
   useLazyGetNegativeEVTASSNQuery,
   useLazyGetProfitShareEditQuery,

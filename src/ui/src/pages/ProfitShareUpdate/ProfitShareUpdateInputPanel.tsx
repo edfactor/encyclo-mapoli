@@ -39,7 +39,7 @@ interface ProfitShareUpdateInputPanelProps {
 }
 
 const schema = yup.object().shape({
-  startProfitYear: yup
+  profitYear: yup
     .date()
     .min(new Date(2020, 0, 1), "Year must be 2020 or later")
     .max(new Date(2100, 11, 31), "Year must be 2100 or earlier")
@@ -51,6 +51,11 @@ const schema = yup.object().shape({
     .min(0, "Contribution must be positive")
     .nullable(),
   earningsPercent: yup.number().typeError("Earnings must be a number").min(0, "Earnings must be positive").nullable(),
+  secondaryEarningsPercent: yup
+    .number()
+    .typeError("Secondary Earnings must be a number")
+    .min(0, "Secondary Earnings must be positive")
+    .nullable(),
   incomingForfeiturePercent: yup
     .number()
     .typeError("Incoming Forfeiture must be a number")

@@ -47,7 +47,6 @@ const schema = yup.object().shape({
 });
 
 interface DistributionsAndForfeituresSearchFilterProps {
-  setProfitYear: (year: number) => void;
   setInitialSearchLoaded: (include: boolean) => void;
 }
 
@@ -56,7 +55,9 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
 }) => {
   const [triggerSearch, { isFetching }] = useLazyGetDistributionsAndForfeituresQuery();
   const dispatch = useDispatch();
-  const { distributionsAndForfeituresQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const { distributionsAndForfeituresQueryParams, distributionsAndForfeitures } = useSelector(
+    (state: RootState) => state.yearsEnd
+  );
   const profitYear = useDecemberFlowProfitYear();
   const {
     control,
@@ -86,14 +87,20 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
         },
         false
       ).unwrap();
-      dispatch(setDistributionsAndForfeituresQueryParams({
-        profitYear: data.profitYear,
-        startMonth: data.startMonth,
-        endMonth: data.endMonth || undefined,
-        includeOutgoingForfeitures: data.includeOutgoingForfeitures
-      }));
+      dispatch(
+        setDistributionsAndForfeituresQueryParams({
+          profitYear: data.profitYear,
+          startMonth: data.startMonth,
+          endMonth: data.endMonth || undefined,
+          includeOutgoingForfeitures: data.includeOutgoingForfeitures
+        })
+      );
     }
   });
+
+  if (profitYear && !distributionsAndForfeitures) {
+    setInitialSearchLoaded(true);
+  }
 
   const handleReset = () => {
     setInitialSearchLoaded(false);

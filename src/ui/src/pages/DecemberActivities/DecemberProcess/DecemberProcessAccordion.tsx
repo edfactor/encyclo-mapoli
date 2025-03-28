@@ -10,17 +10,22 @@ import { RootState } from "reduxstore/store";
 import { Page } from "smart-ui-library";
 import { MENU_LABELS, CAPTIONS, ROUTES } from "../../../constants";
 import NegativeETVA from "./NegativeETVA";
-import { setSelectedProfitYearForDecemberActivities } from "reduxstore/slices/yearsEndSlice";
+import {
+  checkDecemberParamsAndGridsProfitYears,
+  setSelectedProfitYearForDecemberActivities
+} from "reduxstore/slices/yearsEndSlice";
 
 const DecemberProcessAccordion = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { selectedProfitYearForDecemberActivities } = useSelector((state: RootState) => state.yearsEnd);
+  const thisYear = new Date().getFullYear();
 
   const ProfitYearSelector = () => {
     const handleChange = (event: SelectChangeEvent) => {
       dispatch(setSelectedProfitYearForDecemberActivities(Number(event.target.value)));
+      dispatch(checkDecemberParamsAndGridsProfitYears(Number(event.target.value)));
     };
 
     return (
@@ -32,18 +37,19 @@ const DecemberProcessAccordion = () => {
           value={selectedProfitYearForDecemberActivities.toString()}
           size="small"
           fullWidth
-          onChange={handleChange}
-        >
-          <MenuItem value={2024}>2024</MenuItem>
-          <MenuItem value={2025}>2025</MenuItem>
-          <MenuItem value={2026}>2026</MenuItem>
+          onChange={handleChange}>
+          <MenuItem value={thisYear - 1}>{thisYear - 1}</MenuItem>
+          <MenuItem value={thisYear}>{thisYear}</MenuItem>
+          <MenuItem value={thisYear + 1}>{thisYear + 1}</MenuItem>
         </Select>
-        </div>
+      </div>
     );
-  }
+  };
 
   return (
-    <Page label={MENU_LABELS.DECEMBER_ACTIVITIES} actionNode={<ProfitYearSelector />}>
+    <Page
+      label={MENU_LABELS.DECEMBER_ACTIVITIES}
+      actionNode={<ProfitYearSelector />}>
       <Grid2 container>
         <Grid2
           size={{ xs: 12 }}
@@ -128,7 +134,7 @@ const DecemberProcessAccordion = () => {
               label: "Not Started",
               color: "secondary"
             }}
-            onActionClick={() => navigate("/rehire-forfeitures")}
+            onActionClick={() => navigate(`/${ROUTES.REHIRE_FORFEITURES}`)}
             actionButtonText="START">
             <></>
           </DSMCollapsedAccordion>

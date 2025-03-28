@@ -47,6 +47,23 @@ const PSDrawer = () => {
     return hasSome;
   };
 
+  // The format of the captions is New Report Name (Legacy Name)
+  const getNewReportName = (caption: string): string => {
+    if (!caption.includes("(")) {
+      return caption;
+    }
+    return caption.split(" (")[0];
+  };
+
+  // The format of the captions is New Report Name (Legacy Name)
+  const getLegacyReportName = (caption: string): string => {
+    const legacyReportName = caption.split(/[()]/)[1];
+    if (legacyReportName === caption) {
+      return "";
+    }
+    return legacyReportName;
+  };
+
   const handleDrawerToggle = () => {
     if (drawerOpen) {
       dispatch(closeDrawer());
@@ -208,7 +225,14 @@ const PSDrawer = () => {
                             }}>
                             <Box sx={{ display: "flex", alignItems: "center" }}>
                               <ListItemText
-                                primary={page.topTitle}
+                                primary={getNewReportName(page.topTitle)}
+                                secondary={getLegacyReportName(page.topTitle)}
+                                secondaryTypographyProps={{
+                                  sx: {
+                                    fontSize: "0.75rem",
+                                    color: (theme) => theme.palette.text.secondary
+                                  }
+                                }}
                                 sx={{
                                   margin: 0,
                                   "& .MuiTypography-root": {
@@ -240,7 +264,14 @@ const PSDrawer = () => {
                                   onClick={() => handleSubPageClick(subPage.subRoute ?? "")}>
                                   <Box sx={{ display: "flex", alignItems: "center" }}>
                                     <ListItemText
-                                      primary={subPage.subTitle}
+                                      primary={getNewReportName(subPage.subTitle || "")}
+                                      secondary={getLegacyReportName(subPage.subTitle || "")}
+                                      secondaryTypographyProps={{
+                                        sx: {
+                                          fontSize: "0.75rem",
+                                          color: (theme) => theme.palette.text.secondary
+                                        }
+                                      }}
                                       primaryTypographyProps={{
                                         variant: "body2"
                                       }}
@@ -276,7 +307,14 @@ const PSDrawer = () => {
                             }}>
                             <Box sx={{ display: "flex", alignItems: "center" }}>
                               <ListItemText
-                                primary={page.topTitle}
+                                primary={getNewReportName(page.topTitle || "")}
+                                secondary={getLegacyReportName(page.topTitle || "")}
+                                secondaryTypographyProps={{
+                                  sx: {
+                                    fontSize: "0.75rem",
+                                    color: (theme) => theme.palette.text.secondary
+                                  }
+                                }}
                                 sx={{
                                   margin: 0,
                                   "& .MuiTypography-root": {

@@ -69,6 +69,7 @@ public class CleanupReportService : ICleanupReportService
 
             var rslts = await ctx.Demographics
                 .Where(dem => dupSsns.Contains(dem.Ssn))
+                .OrderBy(d => d.Ssn)
                 .Select(dem => new PayrollDuplicateSsnResponseDto
                 {
                     BadgeNumber = dem.BadgeNumber,

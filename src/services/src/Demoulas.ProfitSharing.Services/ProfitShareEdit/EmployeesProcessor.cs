@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -16,7 +17,7 @@ internal static class EmployeeProcessorHelper
 {
     public static async Task<(List<MemberFinancials>, bool)> ProcessEmployees(IProfitSharingDataContextFactory dbContextFactory, ICalendarService calendarService,
         TotalService totalService, ProfitShareUpdateRequest profitShareUpdateRequest,
-        AdjustmentReportData adjustmentReportData,
+        AdjustmentsSummaryDto adjustmentsSummaryDto,
         CancellationToken cancellationToken)
     {
         bool employeeExceededMaxContribution = false;
@@ -81,7 +82,7 @@ internal static class EmployeeProcessorHelper
                 var profitDetailTotals = new ProfitDetailTotals(empl.DistributionsTotal ?? 0, empl.ForfeitsTotal ?? 0,
                     empl.AllocationsTotal ?? 0, empl.PaidAllocationsTotal ?? 0, empl.MilitaryTotal ?? 0, empl.ClassActionFundTotal ?? 0);
 
-                (MemberFinancials memb, bool didEmployeeExceededMaxContribution) = ProcessEmployee(empl, profitDetailTotals, profitShareUpdateRequest, adjustmentReportData);
+                (MemberFinancials memb, bool didEmployeeExceededMaxContribution) = ProcessEmployee(empl, profitDetailTotals, profitShareUpdateRequest, adjustmentsSummaryDto);
                 members.Add(memb);
                 employeeExceededMaxContribution |= didEmployeeExceededMaxContribution;
             }
@@ -91,15 +92,15 @@ internal static class EmployeeProcessorHelper
     }
 
     private static (MemberFinancials, bool) ProcessEmployee(EmployeeFinancials empl, ProfitDetailTotals profitDetailTotals, ProfitShareUpdateRequest profitShareUpdateRequest,
-        AdjustmentReportData adjustmentReportData)
+        AdjustmentsSummaryDto adjustmentsSummaryData)
     {
         // MemberTotals holds newly computed values, not old values
         MemberTotals memberTotals = new();
 
         memberTotals.ContributionAmount =
-            ComputeContribution(empl.PointsEarned, empl.BadgeNumber, profitShareUpdateRequest, adjustmentReportData);
+            ComputeContribution(empl.PointsEarned, empl.BadgeNumber, profitShareUpdateRequest, adjustmentsSummaryData);
         memberTotals.IncomingForfeitureAmount =
-            ComputeForfeitures(empl.PointsEarned, empl.BadgeNumber, profitShareUpdateRequest, adjustmentReportData);
+            ComputeForfeitures(empl.PointsEarned, empl.BadgeNumber, profitShareUpdateRequest, adjustmentsSummaryData);
 
         // This "EarningsBalance" is actually the new Current Balance.  Consider changing the name
         // Note that CAF gets added here, but subtracted in the next line.   Odd.
@@ -120,7 +121,7 @@ internal static class EmployeeProcessorHelper
             memberTotals.EarnPoints = (int)Math.Round(memberTotals.PointsDollars / 100, MidpointRounding.AwayFromZero);
         }
 
-        ComputeEarningsEmployee(empl, memberTotals, profitShareUpdateRequest, adjustmentReportData, profitDetailTotals.ClassActionFundTotal);
+        ComputeEarningsEmployee(empl, memberTotals, profitShareUpdateRequest, adjustmentsSummaryData, profitDetailTotals.ClassActionFundTotal);
 
         MemberFinancials memberFinancials = new(empl, profitDetailTotals, memberTotals);
 
@@ -160,16 +161,16 @@ internal static class EmployeeProcessorHelper
     }
 
     private static decimal ComputeContribution(long pointsEarned, long badge, ProfitShareUpdateRequest profitShareUpdateRequest,
-        AdjustmentReportData adjustmentReportData)
+        AdjustmentsSummaryDto adjustmentsSummaryData)
     {
         decimal contributionAmount = Math.Round(profitShareUpdateRequest.ContributionPercent * pointsEarned, 2,
             MidpointRounding.AwayFromZero);
 
         if (profitShareUpdateRequest.BadgeToAdjust > 0 && profitShareUpdateRequest.BadgeToAdjust == badge)
         {
-            adjustmentReportData.ContributionAmountUnadjusted = contributionAmount;
+            adjustmentsSummaryData.ContributionAmountUnadjusted = contributionAmount;
             contributionAmount += profitShareUpdateRequest.AdjustContributionAmount;
-            adjustmentReportData.ContributionAmountAdjusted = contributionAmount;
+            adjustmentsSummaryData.ContributionAmountAdjusted = contributionAmount;
         }
 
         return contributionAmount;
@@ -177,14 +178,14 @@ internal static class EmployeeProcessorHelper
 
 
     private static decimal ComputeForfeitures(long pointsEarned, long badge, ProfitShareUpdateRequest profitShareUpdateRequest,
-        AdjustmentReportData adjustmentReportData)
+        AdjustmentsSummaryDto adjustmentsSummaryData)
     {
         decimal incomingForfeitureAmount = Math.Round(profitShareUpdateRequest.IncomingForfeitPercent * pointsEarned, 2, MidpointRounding.AwayFromZero);
         if (profitShareUpdateRequest.BadgeToAdjust > 0 && profitShareUpdateRequest.BadgeToAdjust == badge)
         {
-            adjustmentReportData.IncomingForfeitureAmountUnadjusted = incomingForfeitureAmount;
+            adjustmentsSummaryData.IncomingForfeitureAmountUnadjusted = incomingForfeitureAmount;
             incomingForfeitureAmount += profitShareUpdateRequest.AdjustIncomingForfeitAmount;
-            adjustmentReportData.IncomingForfeitureAmountAdjusted = incomingForfeitureAmount;
+            adjustmentsSummaryData.IncomingForfeitureAmountAdjusted = incomingForfeitureAmount;
         }
 
         return incomingForfeitureAmount;
@@ -192,7 +193,7 @@ internal static class EmployeeProcessorHelper
 
 
     private static void ComputeEarningsEmployee(EmployeeFinancials empl, MemberTotals memberTotals, ProfitShareUpdateRequest profitShareUpdateRequest,
-        AdjustmentReportData? adjustmentsApplied, decimal classActionFundTotal)
+        AdjustmentsSummaryDto adjustmentsApplied, decimal classActionFundTotal)
     {
         if (memberTotals.EarnPoints <= 0)
         {
@@ -205,7 +206,7 @@ internal static class EmployeeProcessorHelper
             MidpointRounding.AwayFromZero);
         if (profitShareUpdateRequest.BadgeToAdjust > 0 && profitShareUpdateRequest.BadgeToAdjust == (empl?.BadgeNumber ?? 0))
         {
-            adjustmentsApplied!.EarningsAmountUnadjusted = memberTotals.EarningsAmount;
+            adjustmentsApplied.EarningsAmountUnadjusted = memberTotals.EarningsAmount;
             memberTotals.EarningsAmount += profitShareUpdateRequest.AdjustEarningsAmount;
             adjustmentsApplied.EarningsAmountAdjusted = memberTotals.EarningsAmount;
         }
@@ -215,7 +216,7 @@ internal static class EmployeeProcessorHelper
                 MidpointRounding.AwayFromZero);
         if (profitShareUpdateRequest.BadgeToAdjust2 > 0 && profitShareUpdateRequest.BadgeToAdjust2 == (empl?.BadgeNumber ?? 0))
         {
-            adjustmentsApplied!.SecondaryEarningsAmountUnadjusted = memberTotals.SecondaryEarningsAmount;
+            adjustmentsApplied.SecondaryEarningsAmountUnadjusted = memberTotals.SecondaryEarningsAmount;
             memberTotals.SecondaryEarningsAmount += profitShareUpdateRequest.AdjustEarningsSecondaryAmount;
             adjustmentsApplied.SecondaryEarningsAmountAdjusted = memberTotals.SecondaryEarningsAmount;
         }
