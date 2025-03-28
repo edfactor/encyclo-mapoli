@@ -2,6 +2,7 @@
 
 public sealed class MasterInquiryResponseDto
 {
+    public bool IsEmployee => PsnSuffix == 0;
     public int Id { get; set; }
     public string Ssn { get; set; } = string.Empty;
     public short ProfitYear { get; set; }
@@ -15,8 +16,8 @@ public sealed class MasterInquiryResponseDto
     public short YearToDate { get; set; }
     public string? Remark { get; set; }
     public byte? ZeroContributionReasonId { get; set; }
-    public decimal FederalTaxes {get; set;}
-    public decimal StateTaxes { get; set;}
+    public decimal FederalTaxes { get; set; }
+    public decimal StateTaxes { get; set; }
     public char? TaxCodeId { get; set; }
     public int? CommentTypeId { get; set; }
     public string? CommentRelatedCheckNumber { get; set; }
@@ -35,7 +36,34 @@ public sealed class MasterInquiryResponseDto
     {
         return new MasterInquiryResponseDto
         {
-            Ssn = "XXX-XX-2345"
+            Id = 12345,
+            Ssn = "XXX-XX-2345",
+            ProfitYear = 2023,
+            ProfitYearIteration = 1,
+            DistributionSequence = 4,
+            ProfitCodeId = 2,
+            Contribution = 2500.00m,
+            Earnings = 175.50m,
+            Forfeiture = 0.00m,
+            MonthToDate = 6,
+            YearToDate = 2023,
+            Remark = "Annual profit distribution",
+            ZeroContributionReasonId = null,
+            FederalTaxes = 550.00m,
+            StateTaxes = 125.75m,
+            TaxCodeId = 'S',
+            CommentTypeId = 3,
+            CommentRelatedCheckNumber = "CHK123456",
+            CommentRelatedState = "MA",
+            CommentRelatedOracleHcmId = 987654321,
+            CommentRelatedPsnSuffix = 1,
+            CommentIsPartialTransaction = false,
+            BadgeNumber = 54321,
+            ProfitCodeName = "Standard Contribution",
+            ZeroContributionReasonName = null,
+            TaxCodeName = "Standard",
+            CommentTypeName = "Information",
+            PsnSuffix = 1
         };
     }
 }

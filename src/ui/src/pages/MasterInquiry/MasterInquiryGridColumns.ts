@@ -19,16 +19,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       minWidth: 120,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true
-    },
-    {
-      headerName: "PSN Suffix",
-      field: "psnSuffix",
-      colId: "psnSuffix",
-      minWidth: 120,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
+      resizable: true,    
       valueFormatter: (params) => {
         const badgeNumber = params.data?.badgeNumber; 
         const psnSuffix = params.data?.psnSuffix; 
@@ -36,8 +27,13 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
         if (!badgeNumber && !psnSuffix) {
           return '';
         }
-        // If both exist, format as "name (id)"
-        return `${badgeNumber}-${psnSuffix}`;
+        
+        if (psnSuffix > 0) {
+          // If both exist, format as "name (id)"
+          return `${badgeNumber}-${psnSuffix}`;
+        }
+        
+        return badgeNumber
       }
     },
     {
@@ -233,15 +229,6 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       minWidth: 60,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true
-    },
-    {
-      headerName: "PSN Suffix",
-      field: "commentRelatedPsnSuffix",
-      colId: "commentRelatedPsnSuffix",
-      minWidth: 100,
-      headerClass: "right-align",
-      cellClass: "right-align",
       resizable: true
     },
     {
