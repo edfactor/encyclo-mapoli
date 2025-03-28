@@ -244,7 +244,13 @@ const DecemberProcessLocalApi: React.FC = () => {
       triggerDemographicBadgesNotInPayprofit({ pagination: { take: 25, skip: 0 } });
       triggerDuplicateNamesAndBirthdays({ profitYear: 2024, pagination: { take: 25, skip: 0 } });
     }
-  }, [hasToken]);
+  }, [
+    hasToken,
+    triggerDemographicBadgesNotInPayprofit,
+    triggerDuplicateNamesAndBirthdays,
+    triggerETVASearch,
+    triggerPayrollDupeSsnsOnDemographics
+  ]);
   return (
     <Page label="2024 December">
       <Grid2

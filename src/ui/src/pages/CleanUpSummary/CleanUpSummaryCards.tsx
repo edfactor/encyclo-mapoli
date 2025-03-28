@@ -1,17 +1,16 @@
-import { Typography, CircularProgress } from "@mui/material";
-import Grid2 from '@mui/material/Grid2';
-import React, { useEffect, useMemo } from "react";
+import { CircularProgress, Typography } from "@mui/material";
+import Grid2 from "@mui/material/Grid2";
+import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
-import { RootState } from "reduxstore/store";
-import { TotalsRow } from "smart-ui-library";
-import { InfoCard } from "./InfoCard";
-import { CAPTIONS } from "../../constants";
 import {
   useLazyGetDemographicBadgesNotInPayprofitQuery,
   useLazyGetDuplicateNamesAndBirthdaysQuery,
   useLazyGetDuplicateSSNsQuery,
   useLazyGetNegativeEVTASSNQuery
 } from "reduxstore/api/YearsEndApi";
+import { RootState } from "reduxstore/store";
+import { CAPTIONS } from "../../constants";
+import { InfoCard } from "./InfoCard";
 
 interface CleanUpSummaryCardsProps {
   setSelectedTab: (value: number) => void;
@@ -42,11 +41,17 @@ const CleanUpSummaryCards: React.FC<CleanUpSummaryCardsProps> = ({ setSelectedTa
   useEffect(() => {
     if (hasToken) {
       triggerETVASearch({ profitYear: 2023, pagination: { take: 25, skip: 0 } });
-      triggerPayrollDupeSsnsOnDemographics({ profitYear: 2023, pagination: { take: 25, skip: 0 } });
+      triggerPayrollDupeSsnsOnDemographics({ pagination: { take: 25, skip: 0 } });
       triggerDemographicBadgesNotInPayprofit({ pagination: { take: 25, skip: 0 } });
       triggerDuplicateNamesAndBirthdays({ profitYear: 2023, pagination: { take: 25, skip: 0 } });
     }
-  }, [hasToken]);
+  }, [
+    hasToken,
+    triggerDemographicBadgesNotInPayprofit,
+    triggerDuplicateNamesAndBirthdays,
+    triggerETVASearch,
+    triggerPayrollDupeSsnsOnDemographics
+  ]);
 
   return (
     <Grid2
@@ -68,7 +73,7 @@ const CleanUpSummaryCards: React.FC<CleanUpSummaryCardsProps> = ({ setSelectedTa
         spacing={"24px"}
         paddingLeft={"24px"}
         width={"100%"}>
-        <Grid2 size={{ xs: 12, md: 6, lg: 6 }} >
+        <Grid2 size={{ xs: 12, md: 6, lg: 6 }}>
           {!!negativeEtvaForSSNsOnPayprofit && (
             <InfoCard
               buttonDisabled={disableButtons}
@@ -81,7 +86,7 @@ const CleanUpSummaryCards: React.FC<CleanUpSummaryCardsProps> = ({ setSelectedTa
             />
           )}
         </Grid2>
-        <Grid2 size={{ xs: 12, md: 6, lg: 6 }} >
+        <Grid2 size={{ xs: 12, md: 6, lg: 6 }}>
           {!!duplicateSSNsData && (
             <InfoCard
               buttonDisabled={disableButtons}
@@ -94,7 +99,7 @@ const CleanUpSummaryCards: React.FC<CleanUpSummaryCardsProps> = ({ setSelectedTa
             />
           )}
         </Grid2>
-        <Grid2 size={{ xs: 12, md: 6, lg: 6 }} >
+        <Grid2 size={{ xs: 12, md: 6, lg: 6 }}>
           {!!demographicBadges && (
             <InfoCard
               buttonDisabled={disableButtons}
@@ -107,7 +112,7 @@ const CleanUpSummaryCards: React.FC<CleanUpSummaryCardsProps> = ({ setSelectedTa
             />
           )}
         </Grid2>
-        <Grid2 size={{ xs: 12, md: 6, lg: 6 }} >
+        <Grid2 size={{ xs: 12, md: 6, lg: 6 }}>
           {!!duplicateNamesAndBirthdays && (
             <InfoCard
               buttonDisabled={disableButtons}
@@ -122,7 +127,10 @@ const CleanUpSummaryCards: React.FC<CleanUpSummaryCardsProps> = ({ setSelectedTa
         </Grid2>
       </Grid2>
       <div style={{ display: "grid", verticalAlign: "middle", height: "100%" }}>
-        <Grid2 size={{ xs: 2, md: 1, lg: 0.5 }} paddingY={"48px"} justifySelf={"center"}>
+        <Grid2
+          size={{ xs: 2, md: 1, lg: 0.5 }}
+          paddingY={"48px"}
+          justifySelf={"center"}>
           <CircularProgress size={"100%"} />
         </Grid2>
       </div>

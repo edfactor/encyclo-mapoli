@@ -1,8 +1,7 @@
-import Grid2 from '@mui/material/Grid2';
-import { Typography } from "@mui/material";
-import { InfoCard } from './InfoCard';
-import { useNavigate } from 'react-router-dom';
+import Grid2 from "@mui/material/Grid2";
+import { useNavigate } from "react-router-dom";
 import { CAPTIONS, ROUTES } from "../../../constants";
+import { InfoCard } from "./InfoCard";
 
 interface ProfitShareCategory {
   code: string;
@@ -10,7 +9,6 @@ interface ProfitShareCategory {
   data: { [key: string]: string };
   destinationUrl: string;
 }
-
 
 const profitShareCategories: ProfitShareCategory[] = [
   {
@@ -76,7 +74,6 @@ const profitShareCategories: ProfitShareCategory[] = [
 ];
 
 const ProfitShareReportEditRunResults = () => {
-
   const navigate = useNavigate();
 
   return (
@@ -84,14 +81,15 @@ const ProfitShareReportEditRunResults = () => {
       container
       width={"100%"}
       rowSpacing={"24px"}>
-
       <Grid2
         container
         spacing="24px"
         paddingLeft="24px"
         width="100%">
         {profitShareCategories.map((category, index) => (
-          <Grid2 size={{ xs: 12, md: 6, lg: 6 }} key={category.code} >
+          <Grid2
+            size={{ xs: 12, md: 6, lg: 6 }}
+            key={category.code}>
             <InfoCard
               buttonDisabled={false}
               title={`${index + 1}. ${category.title}`}
@@ -103,7 +101,7 @@ const ProfitShareReportEditRunResults = () => {
         ))}
       </Grid2>
     </Grid2>
-  )
+  );
 };
 
 export default ProfitShareReportEditRunResults;
