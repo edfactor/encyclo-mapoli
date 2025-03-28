@@ -40,7 +40,7 @@ import QPAY066TA from "pages/ProfitShareByStore/BreakdownReport/QPAY066TA";
 import NewPSLabels from "pages/ProfitShareByStore/NewPSLabels";
 import ProfitShareByStore from "pages/ProfitShareByStore/ProfitShareByStore";
 import Under21Report from "pages/ProfitShareByStore/Under21Report";
-import Under21TA from "pages/ProfitShareByStore/Under21TA";
+import Under21TA from "pages/ProfitShareByStore/Under21/Under21TA";
 import ProfitShareGrossReport from "pages/ProfitShareGrossReport/ProfitShareGrossReport";
 import ProfitShareReport from "pages/ProfitShareReport/ProfitShareReport";
 import ProfitShareTotals426 from "pages/ProfitShareTotals426/ProfitShareTotals426";

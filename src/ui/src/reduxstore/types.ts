@@ -762,3 +762,120 @@ export interface YearEndProfitSharingEmployee {
   balance: number;
   yearsInPlan: number;
 }
+
+export interface BreakdownByStoreRequest extends ProfitYearRequest {
+  storeNumber?: string;
+  under21Only?: boolean;
+  isSortDescending?: boolean;
+  pagination: PaginationParams;
+}
+
+export interface BreakdownByStoreEmployee {
+  storeNumber: number;
+  enrollmentId: number;
+  badgeNumber: number;
+  ssn: string;
+  fullName: string;
+  payFrequencyId: number;
+  departmentId: number;
+  payClassificationId: number;
+  beginningBalance: number;
+  earnings: number;
+  contributions: number;
+  forfeiture: number;
+  distributions: number;
+  endingBalance: number;
+  vestedAmount: number;
+  vestedPercentage: number;
+  employmentStatusId: string;
+  employeeCategory: string;
+  employeeSortRank: number;
+}
+
+export interface BreakdownByStoreResponse {
+  reportName: string;
+  reportDate: string;
+  response: Paged<BreakdownByStoreEmployee>;
+  totalBeginningBalance: number;
+  totalEarnings: number;
+  totalContribution: number;
+  totalForfeiture: number;
+  totalDistribution: number;
+  totalEndingBalance: number;
+  totalVestedAmount: number;
+}
+
+export interface Under21BreakdownByStoreRequest extends ProfitYearRequest {
+  isSortDescending?: boolean;
+  pagination: PaginationParams;
+}
+
+export interface Under21BreakdownByStoreEmployee {
+  storeNumber: number;
+  badgeNumber: number;
+  fullName: string;
+  beginningBalance: number;
+  earnings: number | null;
+  contributions: number | null;
+  forfeitures: number | null;
+  distributions: number | null;
+  endingBalance: number;
+  vestedAmount: number;
+  vestingPercentage: number;
+  dateOfBirth: string;
+  age: number;
+  enrollmentId: number;
+}
+
+export interface Under21BreakdownByStoreResponse {
+  reportName: string;
+  reportDate: string;
+  response: Paged<Under21BreakdownByStoreEmployee>;
+}
+
+export interface Under21InactiveRequest extends ProfitYearRequest {
+  isSortDescending?: boolean;
+  pagination: PaginationParams;
+}
+
+export interface Under21InactiveEmployee {
+  badgeNumber: number;
+  lastName: string;
+  firstName: string;
+  birthDate: string;
+  hireDate: string;
+  terminationDate: string;
+  age: number;
+  enrollmentId: number;
+}
+
+export interface Under21InactiveResponse {
+  reportName: string;
+  reportDate: string;
+  response: Paged<Under21InactiveEmployee>;
+}
+
+export interface Under21TotalsRequest extends ProfitYearRequest {
+  isSortDescending?: boolean;
+  pagination: PaginationParams;
+}
+
+export interface Under21TotalsResponse {
+  numberOfEmployees: number;
+  numberOfActiveUnder21With1to2Years: number;
+  numberOfActiveUnder21With20to80PctVested: number;
+  numberOfActiveUnder21With100PctVested: number;
+  numberOfInActiveUnder21With1to2Years: number;
+  numberOfInActiveUnder21With20to80PctVested: number;
+  numberOfInActiveUnder21With100PctVested: number;
+  numberOfTerminatedUnder21With1to2Years: number;
+  numberOfTerminatedUnder21With20to80PctVested: number;
+  numberOfTerminatedUnder21With100PctVested: number;
+  totalBeginningBalance: number | null;
+  totalEarnings: number;
+  totalContributions: number;
+  totalForfeitures: number;
+  totalDisbursements: number;
+  totalEndingBalance: number | null;
+  totalVestingBalance: number;
+}

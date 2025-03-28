@@ -35,7 +35,15 @@ import {
   RehireForfeituresRequest,
   TerminationResponse,
   VestedAmountsByAge,
-  YearEndProfitSharingReportResponse
+  YearEndProfitSharingReportResponse,
+  BreakdownByStoreResponse,
+  BreakdownByStoreRequest,
+  Under21BreakdownByStoreResponse,
+  Under21BreakdownByStoreRequest,
+  Under21InactiveResponse,
+  Under21InactiveRequest,
+  Under21TotalsResponse,
+  Under21TotalsRequest
 } from "reduxstore/types";
 
 export interface YearsEndState {
@@ -97,6 +105,14 @@ export interface YearsEndState {
   vestedAmountsByAgeQueryParams: ProfitYearRequest | null;
   yearEndProfitSharingReport: YearEndProfitSharingReportResponse | null;
   yearEndProfitSharingReportQueryParams: ProfitYearRequest | null;
+  breakdownByStore: BreakdownByStoreResponse | null;
+  breakdownByStoreQueryParams: BreakdownByStoreRequest | null;
+  under21BreakdownByStore: Under21BreakdownByStoreResponse | null;
+  under21BreakdownByStoreQueryParams: Under21BreakdownByStoreRequest | null;
+  under21Inactive: Under21InactiveResponse | null;
+  under21InactiveQueryParams: Under21InactiveRequest | null;
+  under21Totals: Under21TotalsResponse | null;
+  under21TotalsQueryParams: Under21TotalsRequest | null;
 }
 
 const initialState: YearsEndState = {
@@ -157,7 +173,15 @@ const initialState: YearsEndState = {
   vestedAmountsByAge: null,
   vestedAmountsByAgeQueryParams: null,
   yearEndProfitSharingReport: null,
-  yearEndProfitSharingReportQueryParams: null
+  yearEndProfitSharingReportQueryParams: null,
+  breakdownByStore: null,
+  breakdownByStoreQueryParams: null,
+  under21BreakdownByStore: null,
+  under21BreakdownByStoreQueryParams: null,
+  under21Inactive: null,
+  under21InactiveQueryParams: null,
+  under21Totals: null,
+  under21TotalsQueryParams: null
 };
 
 export const yearsEndSlice = createSlice({
@@ -794,6 +818,56 @@ export const yearsEndSlice = createSlice({
     },
     clearYearEndProfitSharingReportQueryParams: (state) => {
       state.yearEndProfitSharingReportQueryParams = null;
+    },
+    setBreakdownByStore: (state, action: PayloadAction<BreakdownByStoreResponse>) => {
+      state.breakdownByStore = action.payload;
+    },
+    clearBreakdownByStore: (state) => {
+      state.breakdownByStore = null;
+    },
+    setBreakdownByStoreQueryParams: (state, action: PayloadAction<BreakdownByStoreRequest>) => {
+      state.breakdownByStoreQueryParams = action.payload;
+    },
+    clearBreakdownByStoreQueryParams: (state) => {
+      state.breakdownByStoreQueryParams = null;
+    },
+    setUnder21BreakdownByStore: (state, action: PayloadAction<Under21BreakdownByStoreResponse>) => {
+      state.under21BreakdownByStore = action.payload;
+    },
+    clearUnder21BreakdownByStore: (state) => {
+      state.under21BreakdownByStore = null;
+    },
+    setUnder21BreakdownByStoreQueryParams: (state, action: PayloadAction<Under21BreakdownByStoreRequest>) => {
+      state.under21BreakdownByStoreQueryParams = action.payload;
+    },
+    clearUnder21BreakdownByStoreQueryParams: (state) => {
+      state.under21BreakdownByStoreQueryParams = null;
+    },
+    
+    setUnder21Inactive: (state, action: PayloadAction<Under21InactiveResponse>) => {
+      state.under21Inactive = action.payload;
+    },
+    clearUnder21Inactive: (state) => {
+      state.under21Inactive = null;
+    },
+    setUnder21InactiveQueryParams: (state, action: PayloadAction<Under21InactiveRequest>) => {
+      state.under21InactiveQueryParams = action.payload;
+    },
+    clearUnder21InactiveQueryParams: (state) => {
+      state.under21InactiveQueryParams = null;
+    },
+    
+    setUnder21Totals: (state, action: PayloadAction<Under21TotalsResponse>) => {
+      state.under21Totals = action.payload;
+    },
+    clearUnder21Totals: (state) => {
+      state.under21Totals = null;
+    },
+    setUnder21TotalsQueryParams: (state, action: PayloadAction<Under21TotalsRequest>) => {
+      state.under21TotalsQueryParams = action.payload;
+    },
+    clearUnder21TotalsQueryParams: (state) => {
+      state.under21TotalsQueryParams = null;
     }
   }
 });
@@ -893,6 +967,22 @@ export const {
   setYearEndProfitSharingReport,
   setYearEndProfitSharingReportQueryParams,
   updateExecutiveHoursAndDollarsGridRow,
+  setBreakdownByStore,
+  clearBreakdownByStore,
+  setBreakdownByStoreQueryParams,
+  clearBreakdownByStoreQueryParams,
+  setUnder21BreakdownByStore,
+  clearUnder21BreakdownByStore,
+  setUnder21BreakdownByStoreQueryParams,
+  clearUnder21BreakdownByStoreQueryParams,
+  setUnder21Inactive,
+  clearUnder21Inactive,
+  setUnder21InactiveQueryParams,
+  clearUnder21InactiveQueryParams,
+  setUnder21Totals,
+  clearUnder21Totals,
+  setUnder21TotalsQueryParams,
+  clearUnder21TotalsQueryParams,
   checkFiscalCloseParamsAndGridsProfitYears,
   checkDecemberParamsAndGridsProfitYears
 } = yearsEndSlice.actions;

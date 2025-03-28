@@ -1,116 +1,115 @@
 import { Typography } from "@mui/material";
-import { DSMGrid } from "smart-ui-library";
-import { useMemo } from "react";
+import { DSMGrid, ISortParams, Pagination, agGridNumberToCurrency } from "smart-ui-library";
+import { useMemo, useEffect, useState, useCallback } from "react";
 import Grid2 from '@mui/material/Grid2';
+import { useLazyGetBreakdownByStoreQuery } from "reduxstore/api/YearsEndApi";
+import { useSelector } from "react-redux";
+import { RootState } from "reduxstore/store";
+import { ICellRendererParams } from "ag-grid-community";
+import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
+import { useNavigate } from "react-router-dom";
 
 interface AssociatesGridProps {
-  store: string; // everything hardcoded for now, will eventually pull from store based on store number
+  store: string;
 }
 
-const sampleData = [
-  {
-    badge: 47425,
-    employeeName: "BACHELDER, JAKE R",
-    beginningBalance: "$X,XXX.XX",
-    earnings: "$X,XXX.XX",
-    cont: "$X,XXX.XX",
-    forf: "$X,XXX.XX",
-    dist: "$X,XXX.XX",
-    endingBalance: "$X,XXX.XX",
-    endingBalance2: "$X,XXX.XX",
-    vestedAmount: "$X,XXX.XX"
-  },
-  {
-    badge: 82424,
-    employeeName: "BATISTA, STEVEN",
-    beginningBalance: "$X,XXX.XX",
-    earnings: "$X,XXX.XX",
-    cont: "$X,XXX.XX",
-    forf: "$X,XXX.XX",
-    dist: "$X,XXX.XX",
-    endingBalance: "$X,XXX.XX",
-    endingBalance2: "$X,XXX.XX",
-    vestedAmount: "$X,XXX.XX"
-  },
-  {
-    badge: 85744,
-    employeeName: "BRADLEY, ZACHARY",
-    beginningBalance: "$X,XXX.XX",
-    earnings: "$X,XXX.XX",
-    cont: "$X,XXX.XX",
-    forf: "$X,XXX.XX",
-    dist: "$X,XXX.XX",
-    endingBalance: "$X,XXX.XX",
-    endingBalance2: "$X,XXX.XX",
-    vestedAmount: "$X,XXX.XX"
-  },
-  {
-    badge: 94861,
-    employeeName: "COCHRAN, KYLE E",
-    beginningBalance: "$X,XXX.XX",
-    earnings: "$X,XXX.XX",
-    cont: "$X,XXX.XX",
-    forf: "$X,XXX.XX",
-    dist: "$X,XXX.XX",
-    endingBalance: "$X,XXX.XX",
-    endingBalance2: "$X,XXX.XX",
-    vestedAmount: "$X,XXX.XX"
-  }
-];
-
 const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store }) => {
+  const [pageNumber, setPageNumber] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [sortParams, setSortParams] = useState<ISortParams>({
+    sortBy: "badgeNumber",
+    isSortDescending: false
+  });
+
+  const [fetchBreakdownByStore, { isLoading }] = useLazyGetBreakdownByStoreQuery();
+  const breakdownByStore = useSelector((state: RootState) => state.yearsEnd.breakdownByStore);
+  const queryParams = useSelector((state: RootState) => state.yearsEnd.breakdownByStoreQueryParams);
+  const navigate = useNavigate();
+
+  const handleNavigation = (path: string) => {
+    navigate(path);
+  };
+
+  const sortEventHandler = (update: ISortParams) => setSortParams(update);
+
+  const fetchData = useCallback(() => {
+    const params = {
+      profitYear: queryParams?.profitYear || 2024,
+      storeNumber: store,
+      under21Only: true,
+      isSortDescending: sortParams.isSortDescending,
+      pagination: {
+        take: pageSize,
+        skip: pageNumber * pageSize
+      }
+    };
+    fetchBreakdownByStore(params);
+  }, [fetchBreakdownByStore, pageNumber, pageSize, queryParams?.profitYear, sortParams.isSortDescending, store]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
   const columnDefs = useMemo(() => [
     {
       headerName: "Badge",
-      field: "badge",
-      width: 100
+      field: "badgeNumber",
+      width: 100,
+      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber, handleNavigation)
     },
     {
       headerName: "Employee Name",
-      field: "employeeName",
+      field: "fullName",
       width: 200
+    },
+    {
+      headerName: "Position",
+      field: "position",
+      width: 120
     },
     {
       headerName: "Beginning Balance",
       field: "beginningBalance",
-      width: 150
+      width: 150,
+      valueFormatter: agGridNumberToCurrency
     },
     {
       headerName: "Earnings",
       field: "earnings",
-      width: 120
+      width: 120,
+      valueFormatter: agGridNumberToCurrency
     },
     {
       headerName: "Cont",
-      field: "cont",
-      width: 120
+      field: "contributions",
+      width: 120,
+      valueFormatter: agGridNumberToCurrency
     },
     {
       headerName: "Forf",
-      field: "forf",
-      width: 120
+      field: "forfeiture",
+      width: 120,
+      valueFormatter: agGridNumberToCurrency
     },
     {
       headerName: "Dist",
-      field: "dist",
-      width: 120
+      field: "distributions",
+      width: 120,
+      valueFormatter: agGridNumberToCurrency
     },
     {
       headerName: "Ending Balance",
       field: "endingBalance",
-      width: 150
-    },
-    {
-      headerName: "Ending Balance",
-      field: "endingBalance2",
-      width: 150
+      width: 150,
+      valueFormatter: agGridNumberToCurrency
     },
     {
       headerName: "Vested Amount",
       field: "vestedAmount",
-      width: 150
+      width: 150,
+      valueFormatter: agGridNumberToCurrency
     }
-  ], []);
+  ], [handleNavigation]);
 
   return (
     <Grid2 container direction="column" width="100%">
@@ -124,13 +123,22 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store }) => {
       <Grid2 width="100%">
         <DSMGrid
           preferenceKey={`BREAKDOWN_REPORT_ASSOCIATES_STORE_${store}`}
-          isLoading={false}
-          handleSortChanged={(_params) => {}}
+          isLoading={isLoading}
+          handleSortChanged={sortEventHandler}
           providedOptions={{
-            rowData: sampleData,
+            rowData: breakdownByStore?.response?.results || [],
             columnDefs: columnDefs
           }}
         />
+        {breakdownByStore?.response?.results && breakdownByStore.response.results.length > 0 && (
+          <Pagination
+            pageNumber={pageNumber + 1}
+            setPageNumber={(value: number) => setPageNumber(value - 1)}
+            pageSize={pageSize}
+            setPageSize={setPageSize}
+            recordCount={breakdownByStore.response.total || 0}
+          />
+        )}
       </Grid2>
     </Grid2>
   );
