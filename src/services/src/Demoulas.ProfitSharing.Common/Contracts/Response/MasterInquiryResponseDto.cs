@@ -29,6 +29,7 @@ public sealed class MasterInquiryResponseDto
     public string? ZeroContributionReasonName { get; set; }
     public string? TaxCodeName { get; set; }
     public string? CommentTypeName { get; set; }
+    public short PsnSuffix { get; set; }
 
     public static MasterInquiryResponseDto ResponseExample()
     {

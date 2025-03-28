@@ -14,6 +14,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Logging;
 using static FastEndpoints.Ep;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Demoulas.ProfitSharing.Services;
 
@@ -23,21 +24,23 @@ public class MasterInquiryService : IMasterInquiryService
     private sealed  class MasterInquiryItem
     {
         public ProfitDetail ProfitDetail { get; set; } = null!;
-        public InquiryDemographics Demographics { get; set; } = null!;
+        public InquiryDemographics Member { get; set; } = null!;
     }
 
     private sealed class InquiryDemographics
     {
         public int BadgeNumber { get; set; }
         public byte PayFrequencyId { get; set; }
+        public short PsnSuffix { get; set; }
+        public int Ssn { get; set; }
     }
 
 
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
 #pragma warning disable S125
-    //private readonly ILogger _logger;
+    private readonly ILogger _logger;
 #pragma warning restore S125
-    //private readonly ITotalService _totalService;
+    private readonly ITotalService _totalService;
 
     public MasterInquiryService(
         IProfitSharingDataContextFactory dataContextFactory,
@@ -47,9 +50,9 @@ public class MasterInquiryService : IMasterInquiryService
     {
         _dataContextFactory = dataContextFactory;
 #pragma warning disable S125
-        //_totalService = totalService;
+        _totalService = totalService;
 #pragma warning restore S125
-        //_logger = loggerFactory.CreateLogger<MasterInquiryService>();
+        _logger = loggerFactory.CreateLogger<MasterInquiryService>();
     }
 
 
@@ -110,13 +113,105 @@ public class MasterInquiryService : IMasterInquiryService
                 CommentRelatedOracleHcmId = x.ProfitDetail.CommentRelatedOracleHcmId,
                 CommentRelatedPsnSuffix = x.ProfitDetail.CommentRelatedPsnSuffix,
                 CommentIsPartialTransaction = x.ProfitDetail.CommentIsPartialTransaction,
-                BadgeNumber = x.Demographics.BadgeNumber,
+                BadgeNumber = x.Member.BadgeNumber,
+                PsnSuffix =  x.Member.PsnSuffix
             });
+            var result = await formattedQuery.ToPaginationResultsAsync(req, cancellationToken);
+            ISet<int> uniqueSsns = await combinedQuery.Select(q => q.Member.Ssn).ToHashSetAsync(cancellationToken: cancellationToken);
+            EmployeeDetails? employeeDetails = null;
+
+            if (uniqueSsns.Count == 1)
+            {
+                int ssn = uniqueSsns.First();
+                short currentYear = (short)DateTime.Today.Year;
+                short previousYear = (short)(currentYear - 1);
+
+                var demographicData = await ctx.Demographics
+                    .Include(d => d.PayProfits)
+                    .ThenInclude(pp => pp.Enrollment)
+                    .Where(d => d.Ssn == ssn)
+                    .Select(d => new
+                    {
+                        d.ContactInfo.FirstName,
+                        d.ContactInfo.LastName,
+                        d.Address.City,
+                        d.Address.State,
+                        Address = d.Address.Street,
+                        d.Address.PostalCode,
+                        d.DateOfBirth,
+                        d.Ssn,
+                        d.BadgeNumber,
+                        d.ReHireDate,
+                        d.HireDate,
+                        d.TerminationDate,
+                        d.StoreNumber,
+                        DemographicId = d.Id,
+                        CurrentPayProfit = d.PayProfits
+                            .FirstOrDefault(x => x.ProfitYear == currentYear),
+                        PreviousPayProfit = d.PayProfits
+                            .FirstOrDefault(x => x.ProfitYear == currentYear)
+                    })
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                if (demographicData != null)
+                {
+                    BalanceEndpointResponse? currentBalance = null;
+                    BalanceEndpointResponse? previousBalance = null;
+                    try
+                    {
+                        Task<BalanceEndpointResponse?> previousBalanceTask =
+                            _totalService.GetVestingBalanceForSingleMemberAsync(
+                                SearchBy.Ssn, ssn, previousYear, cancellationToken);
+
+                        Task<BalanceEndpointResponse?> currentBalanceTask =
+                            _totalService.GetVestingBalanceForSingleMemberAsync(
+                                SearchBy.Ssn, ssn, currentYear, cancellationToken);
+
+                        await Task.WhenAll(previousBalanceTask, currentBalanceTask);
+
+                        currentBalance = await currentBalanceTask;
+                        previousBalance = await previousBalanceTask;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed to retrieve balances for SSN {SSN}", ssn);
+                    }
+
+                    employeeDetails = new EmployeeDetails
+                    {
+                        FirstName = demographicData.FirstName,
+                        LastName = demographicData.LastName,
+                        AddressCity = demographicData.City!,
+                        AddressState = demographicData.State!,
+                        Address = demographicData.Address,
+                        AddressZipCode = demographicData.PostalCode!,
+                        DateOfBirth = demographicData.DateOfBirth,
+                        Ssn = demographicData.Ssn.MaskSsn(),
+                        YearToDateProfitSharingHours = demographicData.CurrentPayProfit?.CurrentHoursYear ?? 0,
+                        YearsInPlan = currentBalance?.YearsInPlan ?? (short)0,
+                        HireDate = demographicData.HireDate,
+                        ReHireDate = demographicData.ReHireDate,
+                        TerminationDate = demographicData.TerminationDate,
+                        StoreNumber = demographicData.StoreNumber,
+                        PercentageVested = currentBalance?.VestingPercent ?? 0,
+                        ContributionsLastYear = previousBalance is { CurrentBalance: > 0 },
+                        EnrollmentId = demographicData.CurrentPayProfit?.EnrollmentId,
+                        Enrollment = demographicData.CurrentPayProfit?.Enrollment?.Name,
+                        BadgeNumber = demographicData.BadgeNumber,
+                        BeginPSAmount = (previousBalance?.CurrentBalance ?? 0),
+                        CurrentPSAmount = (currentBalance?.CurrentBalance ?? 0),
+                        BeginVestedAmount = (previousBalance?.VestedBalance ?? 0),
+                        CurrentVestedAmount = (currentBalance?.VestedBalance ?? 0),
+                        CurrentEtva = demographicData.CurrentPayProfit?.Etva ?? 0,
+                        PreviousEtva = demographicData.PreviousPayProfit?.Etva ?? 0,
+                    };
+                }
+            }
 #pragma warning restore CS1963
-            return await formattedQuery.ToPaginationResultsAsync(req, cancellationToken);
+            return new MasterInquiryWithDetailsResponseDto { InquiryResults = result, EmployeeDetails = employeeDetails };
         });
 
-        return new MasterInquiryWithDetailsResponseDto { InquiryResults = inquiryResults };
+        return inquiryResults;
 
 #pragma warning disable S125
         //if (req.MemberType.HasValue && req.MemberType == 0) //Member Type "ALL" is selected
@@ -383,17 +478,19 @@ public class MasterInquiryService : IMasterInquiryService
                 (pd, d) => new MasterInquiryItem
                 {
                     ProfitDetail = pd,
-                    Demographics = new InquiryDemographics
+                    Member = new InquiryDemographics
                     {
                         BadgeNumber = d.BadgeNumber,
-                        PayFrequencyId = d.PayFrequencyId
+                        PayFrequencyId = d.PayFrequencyId,
+                        Ssn = d.Ssn,
+                        PsnSuffix = 0
                     }
                 })
-            .Where(x => x.Demographics.PayFrequencyId == PayFrequency.Constants.Weekly);
+            .Where(x => x.Member.PayFrequencyId == PayFrequency.Constants.Weekly);
 
         if (req.BadgeNumber.HasValue)
         {
-            query = query.Where(x => x.Demographics.BadgeNumber == req.BadgeNumber);
+            query = query.Where(x => x.Member.BadgeNumber == req.BadgeNumber);
         }
 
         if (req.StartProfitYear.HasValue)
@@ -466,9 +563,10 @@ public class MasterInquiryService : IMasterInquiryService
                 (pd, d) => new MasterInquiryItem
                 {
                     ProfitDetail = pd,
-                    Demographics = new InquiryDemographics
+                    Member = new InquiryDemographics
                     {
-                        BadgeNumber = d.BadgeNumber, PayFrequencyId = PayFrequency.Constants.Weekly
+                        BadgeNumber = d.BadgeNumber, PayFrequencyId = PayFrequency.Constants.Weekly,PsnSuffix = d.PsnSuffix,
+                        Ssn = d.Contact!=null?d.Contact.Ssn: 0
                     }
                 });
 
@@ -529,7 +627,7 @@ public class MasterInquiryService : IMasterInquiryService
 
         if (req.BadgeNumber.HasValue)
         {
-            query = query.Where(x => x.Demographics.BadgeNumber == req.BadgeNumber);
+            query = query.Where(x => x.Member.BadgeNumber == req.BadgeNumber);
         }
 
         return query;
