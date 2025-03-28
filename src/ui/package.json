@@ -6,7 +6,7 @@
   "overrides": {
     "synckit": "0.10.3",
     "@babel/runtime": "7.27.0",
-    "pirates" : "4.0.6"
+    "pirates": "4.0.6"
   },
   "scripts": {
     "dev": "vite",
@@ -62,6 +62,9 @@
     "yup": "~1.4.0"
   },
   "devDependencies": {
+    "@eslint/compat": "^1.2.7",
+    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/js": "^9.23.0",
     "@types/react": "^19.0.12",
     "@types/react-dom": "^19.0.4",
     "@typescript-eslint/eslint-plugin": "^8.28.0",
@@ -74,6 +77,7 @@
     "eslint-plugin-prettier": "5.2.5",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.19",
+    "globals": "^16.0.0",
     "postcss": "^8.5.3",
     "prettier": "^3.5.3",
     "sass": "^1.86.0",
