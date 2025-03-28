@@ -1,6 +1,7 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FormHelperText, FormLabel, TextField } from "@mui/material";
+import { FormHelperText } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
+import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetDuplicateNamesAndBirthdaysQuery } from "reduxstore/api/YearsEndApi";
@@ -12,7 +13,6 @@ import {
 import { RootState } from "reduxstore/store";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
-import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 
 interface DuplicateNamesAndBirthdaysSearch {
@@ -37,7 +37,9 @@ const DuplicateNamesAndBirthdaysSearchFilter: React.FC<DuplicateNamesAndBirthday
   setInitialSearchLoaded
 }) => {
   const [triggerSearch, { isFetching }] = useLazyGetDuplicateNamesAndBirthdaysQuery();
-  const { duplicateNamesAndBirthdaysQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const { duplicateNamesAndBirthdaysQueryParams, duplicateNamesAndBirthdays } = useSelector(
+    (state: RootState) => state.yearsEnd
+  );
   const profitYear = useDecemberFlowProfitYear();
   const dispatch = useDispatch();
   const {
@@ -52,6 +54,12 @@ const DuplicateNamesAndBirthdaysSearchFilter: React.FC<DuplicateNamesAndBirthday
       profitYear: profitYear || duplicateNamesAndBirthdaysQueryParams?.profitYear || undefined
     }
   });
+
+  // If we do have a profit year set at the December level, and we had a cached
+  // grid from a previous visit, trigger a new search with that param
+  if (profitYear && !duplicateNamesAndBirthdays) {
+    setInitialSearchLoaded(true);
+  }
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {

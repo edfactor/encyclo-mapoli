@@ -1,11 +1,12 @@
 import { Divider } from "@mui/material";
-import Grid2 from '@mui/material/Grid2';
+import Grid2 from "@mui/material/Grid2";
 import { DSMAccordion, numberToCurrency, Page } from "smart-ui-library";
 import VestedAmountsByAgeSearchFilter from "./VestedAmountsByAgeSearchFilter";
 import VestedAmountsByAgeTabs from "./VestedAmountsByAgeTabs";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { TotalsGrid } from "./TotalsGrid";
+import { useState } from "react";
 
 const options: Intl.DateTimeFormatOptions = {
   month: "2-digit",
@@ -20,6 +21,7 @@ function toCapitalCase(str: string): string {
 }
 const VestedAmountsByAge = () => {
   const { vestedAmountsByAge } = useSelector((state: RootState) => state.yearsEnd);
+  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   return (
     <Page label="Vested Amounts by Age">
       <Grid2
@@ -81,7 +83,7 @@ const VestedAmountsByAge = () => {
               />
 
               <Grid2 width={"100%"}>
-                <VestedAmountsByAgeTabs />
+                <VestedAmountsByAgeTabs initialSearchLoaded={initialSearchLoaded} />
               </Grid2>
             </div>
           )}

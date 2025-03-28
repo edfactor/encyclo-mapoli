@@ -17,6 +17,7 @@ export const viewBadgeLinkRenderer = (badgeNumber: number, navigateFunction?: (p
   } else {
     return (
       <Button
+        href={`/master-inquiry/${safeValue.slice(0, 6)}`}
         variant="text"
         onClick={() => navigateFunction(`/master-inquiry/${safeValue.slice(0, 6)}`)}>
         {safeValue}

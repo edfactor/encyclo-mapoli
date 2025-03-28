@@ -1,20 +1,21 @@
 import { Divider, CircularProgress, Box } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import { DSMAccordion, Page } from "smart-ui-library";
-import { CAPTIONS } from "../../constants";
+import { CAPTIONS } from "../../../constants";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
-import { useLazyGetUnder21TotalsQuery, useLazyGetUnder21BreakdownByStoreQuery } from "reduxstore/api/YearsEndApi";
-import Under21SearchFilters from "./Under21SearchFilters";
-import Under21Summary from "./Under21/Under21Summary";
-import Under21BreakdownGrid from "./Under21/Under21BreakdownGrid";
+import { useLazyGetUnder21TotalsQuery, useLazyGetUnder21InactiveQuery } from "reduxstore/api/YearsEndApi";
+import Under21SearchFilters from "../Under21SearchFilters";
+import Under21Summary from "./Under21Summary";
+import Under21InactiveGrid from "./Under21InactiveGrid";
+import useFiscalCloseProfitYear from "../../../hooks/useFiscalCloseProfitYear";
 
-const Under21Report = () => {
+const Under21TA = () => {
   const [fetchUnder21Totals, { isLoading: isTotalsLoading }] = useLazyGetUnder21TotalsQuery();
-  const [fetchUnder21Breakdown, { isLoading: isBreakdownLoading }] = useLazyGetUnder21BreakdownByStoreQuery();
+  const [fetchUnder21Inactive, { isLoading: isInactiveLoading }] = useLazyGetUnder21InactiveQuery();
   const under21Totals = useSelector((state: RootState) => state.yearsEnd.under21Totals);
-  const under21Breakdown = useSelector((state: RootState) => state.yearsEnd.under21BreakdownByStore);
+  const under21Inactive = useSelector((state: RootState) => state.yearsEnd.under21Inactive);
   const [initialLoad, setInitialLoad] = useState(true);
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [pageNumber, setPageNumber] = useState(0);
@@ -23,15 +24,16 @@ const Under21Report = () => {
     sortBy: "badgeNumber",
     isSortDescending: false
   });
+  const profitYear = useFiscalCloseProfitYear();
 
-  const isLoading = isTotalsLoading || isBreakdownLoading;
+  const isLoading = isTotalsLoading || isInactiveLoading;
 
-  const hasData = !!under21Totals && !!under21Breakdown;
+  const hasData = !!under21Totals && !!under21Inactive;
 
   useEffect(() => {
     const fetchData = async () => {
       const queryParams = {
-        profitYear: 2024,
+        profitYear,
         isSortDescending: sortParams.isSortDescending,
         pagination: {
           take: pageSize,
@@ -41,19 +43,19 @@ const Under21Report = () => {
       
       await Promise.all([
         fetchUnder21Totals(queryParams),
-        fetchUnder21Breakdown(queryParams)
+        fetchUnder21Inactive(queryParams)
       ]);
       
       setInitialLoad(false);
     };
     
     fetchData();
-  }, [fetchUnder21Totals, fetchUnder21Breakdown, pageNumber, pageSize, sortParams]);
+  }, [fetchUnder21Totals, fetchUnder21Inactive, pageNumber, pageSize, sortParams, profitYear]);
 
   useEffect(() => {
     if (initialSearchLoaded) {
       const queryParams = {
-        profitYear: 2024,
+        profitYear,
         isSortDescending: sortParams.isSortDescending,
         pagination: {
           take: pageSize,
@@ -62,9 +64,9 @@ const Under21Report = () => {
       };
       
       fetchUnder21Totals(queryParams);
-      fetchUnder21Breakdown(queryParams);
+      fetchUnder21Inactive(queryParams);
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, fetchUnder21Totals, fetchUnder21Breakdown]);
+  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, fetchUnder21Totals, fetchUnder21Inactive, profitYear]);
 
   const handleSearch = (profitYear: number, isSortDescending: boolean) => {
     const queryParams = {
@@ -77,11 +79,11 @@ const Under21Report = () => {
     };
     
     fetchUnder21Totals(queryParams);
-    fetchUnder21Breakdown(queryParams);
+    fetchUnder21Inactive(queryParams);
   };
 
   return (
-    <Page label={CAPTIONS.QPAY066_UNDER21}>
+    <Page label={CAPTIONS.QPAY066TA_UNDER21}>
       <Grid2
         container
         rowSpacing="24px">
@@ -106,15 +108,15 @@ const Under21Report = () => {
               <Grid2 width="100%" paddingX="24px">
                 <Under21Summary 
                   totals={under21Totals} 
-                  isLoading={isTotalsLoading} 
-                  title="UNDER 21 REPORT (QPAY066-UNDR21)"
+                  isLoading={isTotalsLoading}
+                  title="UNDER 21 INACTIVE (QPAY066TA-UNDR21)"
                 />
               </Grid2>
             )}
 
             <Grid2 width="100%">
-              <Under21BreakdownGrid 
-                isLoading={isBreakdownLoading}
+              <Under21InactiveGrid 
+                isLoading={isInactiveLoading}
                 initialSearchLoaded={initialSearchLoaded}
                 setInitialSearchLoaded={setInitialSearchLoaded}
                 pageNumber={pageNumber}
@@ -132,4 +134,4 @@ const Under21Report = () => {
   );
 };
 
-export default Under21Report;
+export default Under21TA;

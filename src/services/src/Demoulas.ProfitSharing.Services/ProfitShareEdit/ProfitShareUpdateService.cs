@@ -1,6 +1,7 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
@@ -29,10 +30,10 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
         _totalService = totalService;
         _calendarService = calendarService;
     }
-
+    
     public async Task<ProfitShareUpdateResponse> ProfitShareUpdate(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
-        (List<MemberFinancials> memberFinancials, _, bool employeeExceededMaxContribution) = await ProfitSharingUpdatePaginated(profitShareUpdateRequest, cancellationToken);
+        (List<MemberFinancials> memberFinancials, AdjustmentsSummaryDto adjustmentReportData, TotalsDto totalsDto, bool employeeExceededMaxContribution) = await ProfitSharingUpdate(profitShareUpdateRequest, cancellationToken);
         List<ProfitShareUpdateMemberResponse> members = memberFinancials.Select(m => new ProfitShareUpdateMemberResponse
         {
             IsEmployee = m.IsEmployee,
@@ -62,18 +63,20 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
         return new ProfitShareUpdateResponse
         {
             HasExceededMaximumContributions = employeeExceededMaxContribution,
+            AdjustmentsSummary = adjustmentReportData,
+            Totals = totalsDto,
             ReportName = "Profit Sharing Update",
             ReportDate = DateTimeOffset.Now,
             Response = new PaginatedResponseDto<ProfitShareUpdateMemberResponse>(profitShareUpdateRequest) { Results = members }
         };
     }
-
+    
     /// <summary>
     /// This is used by other services to access plan members with yearly contributions applied.
     /// </summary>
     public async Task<ProfitShareUpdateResult> ProfitShareUpdateInternal(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
-        (List<MemberFinancials> memberFinancials, _, bool employeeExceededMaxContribution) = await ProfitSharingUpdatePaginated(profitShareUpdateRequest, cancellationToken);
+        (List<MemberFinancials> memberFinancials, _, _, bool employeeExceededMaxContribution) = await ProfitSharingUpdate(profitShareUpdateRequest, cancellationToken);
         List<ProfitShareUpdateMember> members = memberFinancials.Select(m => new ProfitShareUpdateMember
         {
             IsEmployee = m.IsEmployee,
@@ -100,26 +103,46 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
 
         return new ProfitShareUpdateResult { HasExceededMaximumContributions = employeeExceededMaxContribution, Members = members };
     }
-
+    
+    
     /// <summary>
     ///     Applies updates specified in request and returns members with updated
     ///     Contributions/Earnings/IncomingForfeitures/SecondaryEarnings
     /// </summary>
-    public async Task<ProfitShareUpdateOutcome> ProfitSharingUpdatePaginated(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
+    public async Task<ProfitShareUpdateOutcome> ProfitSharingUpdate(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
         // Values collected for an "Adjustment Report" that we do not yet generate (see https://demoulas.atlassian.net/browse/PS-900)
-        AdjustmentReportData adjustmentReportData = new();
+        AdjustmentsSummaryDto adjustmentsSummaryData = new();
 
         // Start off loading the employees.
         (List<MemberFinancials> members, bool employeeExceededMaxContribution) = await EmployeeProcessorHelper.ProcessEmployees(_dbContextFactory, _calendarService, _totalService,
-            profitShareUpdateRequest, adjustmentReportData, cancellationToken);
+            profitShareUpdateRequest, adjustmentsSummaryData, cancellationToken);
 
         // Go get the Bene's.  NOTE: May modify some employees if they are both bene and employee (that's why "members" is passed in - to lookup loaded employees and see if they are also Bene's)
         await BeneficiariesProcessingHelper.ProcessBeneficiaries(_dbContextFactory, members, profitShareUpdateRequest, cancellationToken);
 
         members = members.OrderBy(m => m.Name).ToList();
 
+        TotalsDto totalsDto = new ();
+        foreach(var memberFinancials in members){
+            totalsDto.BeginningBalance += memberFinancials.CurrentAmount;
+            totalsDto.Distributions += memberFinancials.Distributions;
+            totalsDto.TotalContribution += memberFinancials.Contributions;
+            totalsDto.Military += memberFinancials.Military;
+            totalsDto.Forfeiture += memberFinancials.IncomingForfeitures;
+            totalsDto.Earnings += memberFinancials.AllEarnings;
+            totalsDto.Earnings2 += memberFinancials.AllSecondaryEarnings;
+            totalsDto.EndingBalance += memberFinancials.EndingBalance;
+            totalsDto.Allocations += memberFinancials.Xfer;
+            totalsDto.PaidAllocations -= memberFinancials.Pxfer;
+            totalsDto.EarningPoints += memberFinancials.EarningPoints;
+            totalsDto.ContributionPoints += memberFinancials.ContributionPoints;
+            totalsDto.ClassActionFund += memberFinancials.Caf;
+            totalsDto.MaxOverTotal += memberFinancials.MaxOver;
+            totalsDto.MaxPointsTotal += memberFinancials.MaxPoints;
+        }
+
         // Use the list of members to build up response for client.
-        return new ProfitShareUpdateOutcome(members, adjustmentReportData, employeeExceededMaxContribution);
+        return new ProfitShareUpdateOutcome(members, adjustmentsSummaryData, totalsDto, employeeExceededMaxContribution);
     }
 }

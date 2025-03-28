@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { set } from "date-fns";
+import { stat } from "fs";
 
 import {
   BalanceByAge,
@@ -31,12 +31,20 @@ import {
   ProfitShareMasterResponse,
   ProfitShareUpdateResponse,
   ProfitSharingDistributionsByAge,
-  ProfitYearRequest, RehireForfeituresRequest,
+  ProfitYearRequest,
+  RehireForfeituresRequest,
   TerminationResponse,
   VestedAmountsByAge,
-  YearEndProfitSharingReportResponse
+  YearEndProfitSharingReportResponse,
+  BreakdownByStoreResponse,
+  BreakdownByStoreRequest,
+  Under21BreakdownByStoreResponse,
+  Under21BreakdownByStoreRequest,
+  Under21InactiveResponse,
+  Under21InactiveRequest,
+  Under21TotalsResponse,
+  Under21TotalsRequest
 } from "reduxstore/types";
-import { c } from "vite/dist/node/moduleRunnerTransport.d-CXw_Ws6P";
 
 export interface YearsEndState {
   selectedProfitYearForDecemberActivities: number;
@@ -97,6 +105,14 @@ export interface YearsEndState {
   vestedAmountsByAgeQueryParams: ProfitYearRequest | null;
   yearEndProfitSharingReport: YearEndProfitSharingReportResponse | null;
   yearEndProfitSharingReportQueryParams: ProfitYearRequest | null;
+  breakdownByStore: BreakdownByStoreResponse | null;
+  breakdownByStoreQueryParams: BreakdownByStoreRequest | null;
+  under21BreakdownByStore: Under21BreakdownByStoreResponse | null;
+  under21BreakdownByStoreQueryParams: Under21BreakdownByStoreRequest | null;
+  under21Inactive: Under21InactiveResponse | null;
+  under21InactiveQueryParams: Under21InactiveRequest | null;
+  under21Totals: Under21TotalsResponse | null;
+  under21TotalsQueryParams: Under21TotalsRequest | null;
 }
 
 const initialState: YearsEndState = {
@@ -157,7 +173,15 @@ const initialState: YearsEndState = {
   vestedAmountsByAge: null,
   vestedAmountsByAgeQueryParams: null,
   yearEndProfitSharingReport: null,
-  yearEndProfitSharingReportQueryParams: null
+  yearEndProfitSharingReportQueryParams: null,
+  breakdownByStore: null,
+  breakdownByStoreQueryParams: null,
+  under21BreakdownByStore: null,
+  under21BreakdownByStoreQueryParams: null,
+  under21Inactive: null,
+  under21InactiveQueryParams: null,
+  under21Totals: null,
+  under21TotalsQueryParams: null
 };
 
 export const yearsEndSlice = createSlice({
@@ -169,6 +193,176 @@ export const yearsEndSlice = createSlice({
     },
     setSelectedProfitYearForFiscalClose: (state, action: PayloadAction<number>) => {
       state.selectedProfitYearForFiscalClose = action.payload;
+    },
+    checkDecemberParamsAndGridsProfitYears: (state, action: PayloadAction<number>) => {
+      // So now we need to update cached december activies data if it was based
+      // on another year
+
+      // Distributions And Forfeitures
+      if (
+        state.distributionsAndForfeituresQueryParams?.profitYear &&
+        state.distributionsAndForfeituresQueryParams?.profitYear !== action.payload
+      ) {
+        state.distributionsAndForfeituresQueryParams.profitYear = action.payload;
+        state.distributionsAndForfeitures = null;
+      }
+
+      // Duplicate Names And Birthdays
+      if (
+        state.duplicateNamesAndBirthdaysQueryParams?.profitYear &&
+        state.duplicateNamesAndBirthdaysQueryParams?.profitYear !== action.payload
+      ) {
+        state.duplicateNamesAndBirthdaysQueryParams.profitYear = action.payload;
+        state.duplicateNamesAndBirthdays = null;
+      }
+
+      // Negative ETVA For SSNs On Payprofit
+      if (
+        state.negativeEtvaForSSNsOnPayprofitParams?.profitYear &&
+        state.negativeEtvaForSSNsOnPayprofitParams?.profitYear !== action.payload
+      ) {
+        state.negativeEtvaForSSNsOnPayprofitParams.profitYear = action.payload;
+        state.negativeEtvaForSSNsOnPayprofit = null;
+      }
+
+      // Manage Executive Hours And Dollars
+      if (
+        state.executiveHoursAndDollarsQueryParams?.profitYear &&
+        state.executiveHoursAndDollarsQueryParams?.profitYear !== action.payload
+      ) {
+        state.executiveHoursAndDollarsQueryParams.profitYear = action.payload;
+        state.executiveHoursAndDollarsGrid = null;
+        state.executiveRowsSelected = null;
+        state.executiveHoursAndDollars = null;
+      }
+
+      // Military And Rehire Forfeitures
+      if (
+        state.rehireForfeituresQueryParams?.profitYear &&
+        state.rehireForfeituresQueryParams?.profitYear !== action.payload
+      ) {
+        state.rehireForfeituresQueryParams.profitYear = action.payload;
+        state.rehireForfeitures = null;
+      }
+
+      // Military and Rehire Profit Summary
+      if (
+        state.rehireProfitSummaryQueryParams?.profitYear &&
+        state.rehireProfitSummaryQueryParams?.profitYear !== action.payload
+      ) {
+        state.rehireProfitSummaryQueryParams.profitYear = action.payload;
+        state.militaryAndRehire = null;
+      }
+
+      // Year End Profit Sharing Report
+      if (
+        state.yearEndProfitSharingReportQueryParams?.profitYear &&
+        state.yearEndProfitSharingReportQueryParams?.profitYear !== action.payload
+      ) {
+        state.yearEndProfitSharingReportQueryParams.profitYear = action.payload;
+        state.yearEndProfitSharingReport = null;
+      }
+
+      // Termination
+      if (state.terminationQueryParams?.profitYear && state.terminationQueryParams?.profitYear !== action.payload) {
+        state.terminationQueryParams.profitYear = action.payload;
+        state.termination = null;
+      }
+    },
+
+    //
+
+    checkFiscalCloseParamsAndGridsProfitYears: (state, action: PayloadAction<number>) => {
+      // So now we need to update cached december activies data if it was based
+      // on another year
+
+      // Balance By Age
+      if (state.balanceByAgeQueryParams?.profitYear && state.balanceByAgeQueryParams?.profitYear !== action.payload) {
+        state.balanceByAgeQueryParams.profitYear = action.payload;
+        state.balanceByAgeFullTime = null;
+        state.balanceByAgePartTime = null;
+        state.balanceByAgeTotal = null;
+      }
+
+      // Balance By Years
+      if (
+        state.balanceByYearsQueryParams?.profitYear &&
+        state.balanceByYearsQueryParams?.profitYear !== action.payload
+      ) {
+        state.balanceByYearsQueryParams.profitYear = action.payload;
+        state.balanceByYearsFullTime = null;
+        state.balanceByYearsPartTime = null;
+        state.balanceByYearsTotal = null;
+      }
+
+      // Contributions By Age
+      if (
+        state.contributionsByAgeQueryParams?.profitYear &&
+        state.contributionsByAgeQueryParams?.profitYear !== action.payload
+      ) {
+        state.contributionsByAgeQueryParams.profitYear = action.payload;
+        state.contributionsByAgeFullTime = null;
+        state.contributionsByAgePartTime = null;
+        state.contributionsByAgeTotal = null;
+      }
+
+      // Distributions By Age
+      if (
+        state.distributionsByAgeQueryParams?.profitYear &&
+        state.distributionsByAgeQueryParams?.profitYear !== action.payload
+      ) {
+        state.distributionsByAgeQueryParams.profitYear = action.payload;
+        state.distributionsByAgeFullTime = null;
+        state.distributionsByAgePartTime = null;
+        state.distributionsByAgeTotal = null;
+      }
+
+      // Forfeitures By Age
+      if (
+        state.forfeituresByAgeQueryParams?.profitYear &&
+        state.forfeituresByAgeQueryParams?.profitYear !== action.payload
+      ) {
+        state.forfeituresByAgeQueryParams.profitYear = action.payload;
+        state.forfeituresByAgeFullTime = null;
+        state.forfeituresByAgePartTime = null;
+        state.forfeituresByAgeTotal = null;
+      }
+
+      // Vested Amounts By Age
+      if (
+        state.vestedAmountsByAgeQueryParams?.profitYear &&
+        state.vestedAmountsByAgeQueryParams?.profitYear !== action.payload
+      ) {
+        state.vestedAmountsByAgeQueryParams.profitYear = action.payload;
+        state.vestedAmountsByAge = null;
+      }
+
+      // Eligible Employees
+      if (
+        state.eligibleEmployeesQueryParams?.profitYear &&
+        state.eligibleEmployeesQueryParams?.profitYear !== action.payload
+      ) {
+        state.eligibleEmployeesQueryParams.profitYear = action.payload;
+        state.eligibleEmployees = null;
+      }
+
+      // Forfeitures And Points
+      if (
+        state.forfeituresAndPointsQueryParams?.profitYear &&
+        state.forfeituresAndPointsQueryParams?.profitYear !== action.payload
+      ) {
+        state.forfeituresAndPointsQueryParams.profitYear = action.payload;
+        state.forfeituresAndPoints = null;
+      }
+
+      // YTD Wages
+      if (
+        state.employeeWagesForYearQueryParams?.profitYear &&
+        state.employeeWagesForYearQueryParams?.profitYear !== action.payload
+      ) {
+        state.employeeWagesForYearQueryParams.profitYear = action.payload;
+        state.employeeWagesForYear = null;
+      }
     },
     setBalanceByYearsQueryParams: (state, action: PayloadAction<number>) => {
       state.balanceByYearsQueryParams = { profitYear: action.payload };
@@ -610,15 +804,12 @@ export const yearsEndSlice = createSlice({
     setGrossWagesReportQueryParams: (state, action: PayloadAction<GrossWagesReportRequest>) => {
       state.grossWagesReportQueryParams = action.payload;
     },
-    clearGrossWagesReportQueryParams: (state) => {  
+    clearGrossWagesReportQueryParams: (state) => {
       state.grossWagesReportQueryParams = null;
     },
-    setYearEndProfitSharingReport: (
-      state,
-      action: PayloadAction<YearEndProfitSharingReportResponse>
-    ) => {
+    setYearEndProfitSharingReport: (state, action: PayloadAction<YearEndProfitSharingReportResponse>) => {
       state.yearEndProfitSharingReport = action.payload;
-    },    
+    },
     clearYearEndProfitSharingReport: (state) => {
       state.yearEndProfitSharingReport = null;
     },
@@ -627,6 +818,56 @@ export const yearsEndSlice = createSlice({
     },
     clearYearEndProfitSharingReportQueryParams: (state) => {
       state.yearEndProfitSharingReportQueryParams = null;
+    },
+    setBreakdownByStore: (state, action: PayloadAction<BreakdownByStoreResponse>) => {
+      state.breakdownByStore = action.payload;
+    },
+    clearBreakdownByStore: (state) => {
+      state.breakdownByStore = null;
+    },
+    setBreakdownByStoreQueryParams: (state, action: PayloadAction<BreakdownByStoreRequest>) => {
+      state.breakdownByStoreQueryParams = action.payload;
+    },
+    clearBreakdownByStoreQueryParams: (state) => {
+      state.breakdownByStoreQueryParams = null;
+    },
+    setUnder21BreakdownByStore: (state, action: PayloadAction<Under21BreakdownByStoreResponse>) => {
+      state.under21BreakdownByStore = action.payload;
+    },
+    clearUnder21BreakdownByStore: (state) => {
+      state.under21BreakdownByStore = null;
+    },
+    setUnder21BreakdownByStoreQueryParams: (state, action: PayloadAction<Under21BreakdownByStoreRequest>) => {
+      state.under21BreakdownByStoreQueryParams = action.payload;
+    },
+    clearUnder21BreakdownByStoreQueryParams: (state) => {
+      state.under21BreakdownByStoreQueryParams = null;
+    },
+    
+    setUnder21Inactive: (state, action: PayloadAction<Under21InactiveResponse>) => {
+      state.under21Inactive = action.payload;
+    },
+    clearUnder21Inactive: (state) => {
+      state.under21Inactive = null;
+    },
+    setUnder21InactiveQueryParams: (state, action: PayloadAction<Under21InactiveRequest>) => {
+      state.under21InactiveQueryParams = action.payload;
+    },
+    clearUnder21InactiveQueryParams: (state) => {
+      state.under21InactiveQueryParams = null;
+    },
+    
+    setUnder21Totals: (state, action: PayloadAction<Under21TotalsResponse>) => {
+      state.under21Totals = action.payload;
+    },
+    clearUnder21Totals: (state) => {
+      state.under21Totals = null;
+    },
+    setUnder21TotalsQueryParams: (state, action: PayloadAction<Under21TotalsRequest>) => {
+      state.under21TotalsQueryParams = action.payload;
+    },
+    clearUnder21TotalsQueryParams: (state) => {
+      state.under21TotalsQueryParams = null;
     }
   }
 });
@@ -725,6 +966,24 @@ export const {
   setVestedAmountsByAgeQueryParams,
   setYearEndProfitSharingReport,
   setYearEndProfitSharingReportQueryParams,
-  updateExecutiveHoursAndDollarsGridRow
+  updateExecutiveHoursAndDollarsGridRow,
+  setBreakdownByStore,
+  clearBreakdownByStore,
+  setBreakdownByStoreQueryParams,
+  clearBreakdownByStoreQueryParams,
+  setUnder21BreakdownByStore,
+  clearUnder21BreakdownByStore,
+  setUnder21BreakdownByStoreQueryParams,
+  clearUnder21BreakdownByStoreQueryParams,
+  setUnder21Inactive,
+  clearUnder21Inactive,
+  setUnder21InactiveQueryParams,
+  clearUnder21InactiveQueryParams,
+  setUnder21Totals,
+  clearUnder21Totals,
+  setUnder21TotalsQueryParams,
+  clearUnder21TotalsQueryParams,
+  checkFiscalCloseParamsAndGridsProfitYears,
+  checkDecemberParamsAndGridsProfitYears
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;

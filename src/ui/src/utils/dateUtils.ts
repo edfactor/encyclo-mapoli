@@ -8,7 +8,7 @@ export const DATE_FORMAT_MMDDYYYY = "MM/dd/yyyy";
 export const DATE_TIME_FORMAT_MMDDYYYY_HHMMSS = "MM/dd/yyyy HH:mm:ss";
 export const DATE_FORMAT_YYYYMMDD = "yyyy-MM-dd";
 export const DATE_REGEX_MMDDYYYY = /^\d{1,2}\/\d{1,2}\/\d{4}$/;
-export const DATE_REGEX_YYYYMMDD = /^\d{4}\-\d{1,2}\-\d{1,2}$/;
+export const DATE_REGEX_YYYYMMDD = /^\d{4}-\d{1,2}-\d{1,2}$/;
 
 //This is the call for the API only
 export function dateYYYYMMDDhhmmss(date: string): string {
@@ -74,13 +74,13 @@ export const dateMMDDYYYY = (date: Date | undefined): string => {
 };
 
 //Takes in date and returns it in MM/dd/yyyy format if date exists.
-export const mmDDYYFormat = (date: any) => {
+export const mmDDYYFormat = (date: string | Date | undefined) => {
   const dateForm = "MM/dd/yyyy";
   date = date ? format(new Date(date), dateForm) : "";
   return date;
 };
 
-export const mmDDYYYY_HHMMSS_Format = (date: any) => {
+export const mmDDYYYY_HHMMSS_Format = (date: string | Date | undefined) => {
   return date ? format(new Date(date), DATE_TIME_FORMAT_MMDDYYYY_HHMMSS) : "";
 };
 

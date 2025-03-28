@@ -1,8 +1,8 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-import {  setMasterInquiryData} from "reduxstore/slices/inquirySlice";
+import { setMasterInquiryData } from "reduxstore/slices/inquirySlice";
 import { RootState } from "reduxstore/store";
-import {  MasterInquiryRequest,  MasterInquiryResponseType} from "reduxstore/types";
+import { MasterInquiryRequest, MasterInquiryResponseType } from "reduxstore/types";
 import { url } from "./api";
 
 export const InquiryApi = createApi({
@@ -18,7 +18,9 @@ export const InquiryApi = createApi({
         headers.set("impersonation", impersonating);
       } else {
         const localImpersonation = localStorage.getItem("impersonatingRole");
-        !!localImpersonation && headers.set("impersonation", localImpersonation);
+        if (localImpersonation) {
+          headers.set("impersonation", localImpersonation);
+        }
       }
       return headers;
     }
@@ -62,6 +64,4 @@ export const InquiryApi = createApi({
   })
 });
 
-export const {  
-  useLazyGetProfitMasterInquiryQuery,  
-} = InquiryApi;
+export const { useLazyGetProfitMasterInquiryQuery } = InquiryApi;

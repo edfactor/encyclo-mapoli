@@ -1,5 +1,6 @@
 import { ColDef, ICellRendererParams } from 'ag-grid-community';
 import { viewBadgeLinkRenderer } from 'utils/masterInquiryLink';
+import { agGridNumberToCurrency } from "smart-ui-library";
 
 export const GetTerminationColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   return [
@@ -33,7 +34,7 @@ export const GetTerminationColumns = (navFunction: (badgeNumber: string) => void
       cellClass: "right-align",
       resizable: true,
       sortable: true,
-      valueFormatter: (params) => params.value.toLocaleString("en-US", { style: "currency", currency: "USD" })
+      valueFormatter: agGridNumberToCurrency
     },
     {
       headerName: "Beneficiary Allocation",
@@ -44,7 +45,7 @@ export const GetTerminationColumns = (navFunction: (badgeNumber: string) => void
       cellClass: "right-align",
       resizable: true,
       sortable: true,
-      valueFormatter: (params) => params.value.toLocaleString("en-US", { style: "currency", currency: "USD" })
+      valueFormatter: agGridNumberToCurrency
     },
     {
       headerName: "Distribution Amount",
@@ -55,7 +56,7 @@ export const GetTerminationColumns = (navFunction: (badgeNumber: string) => void
       cellClass: "right-align",
       resizable: true,
       sortable: true,
-      valueFormatter: (params) => params.value.toLocaleString("en-US", { style: "currency", currency: "USD" })
+      valueFormatter: agGridNumberToCurrency
     },
     {
       headerName: "Forfeit",
@@ -66,7 +67,7 @@ export const GetTerminationColumns = (navFunction: (badgeNumber: string) => void
       cellClass: "right-align",
       resizable: true,
       sortable: true,
-      valueFormatter: (params) => params.value.toLocaleString("en-US", { style: "currency", currency: "USD" })
+      valueFormatter: agGridNumberToCurrency
     },
     {
       headerName: "Ending Balance",
@@ -77,7 +78,7 @@ export const GetTerminationColumns = (navFunction: (badgeNumber: string) => void
       cellClass: "right-align",
       resizable: true,
       sortable: true,
-      valueFormatter: (params) => params.value.toLocaleString("en-US", { style: "currency", currency: "USD" })
+      valueFormatter: agGridNumberToCurrency
     },
     {
       headerName: "Vested Balance",
@@ -88,7 +89,7 @@ export const GetTerminationColumns = (navFunction: (badgeNumber: string) => void
       cellClass: "right-align",
       resizable: true,
       sortable: true,
-      valueFormatter: (params) => params.value.toLocaleString("en-US", { style: "currency", currency: "USD" })
+      valueFormatter: agGridNumberToCurrency
     },
     {
       headerName: "Term Date",

@@ -6,14 +6,13 @@ import DuplicateSSNsOnDemographicsGrid from "pages/DecemberActivities/DuplicateS
 import EmployeesOnMilitaryLeave from "pages/DecemberActivities/EmployeesOnMilitaryLeave/EmployeesOnMilitaryLeave";
 import MasterInquiryGrid from "pages/MasterInquiry/MasterInquiryGrid";
 import MasterInquirySearchFilter from "pages/MasterInquiry/MasterInquirySearchFilter";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import {
   useLazyGetDemographicBadgesNotInPayprofitQuery,
   useLazyGetDuplicateNamesAndBirthdaysQuery,
-  useLazyGetDuplicateSSNsQuery,
-  useLazyGetNegativeEVTASSNQuery
+  useLazyGetDuplicateSSNsQuery
 } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMAccordion, Page } from "smart-ui-library";
@@ -21,7 +20,7 @@ import NegativeETVA from "./NegativeETVA";
 
 const DecemberProcess = () => {
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
-  const [triggerETVASearch, { isFetching: isFetchingETVA }] = useLazyGetNegativeEVTASSNQuery();
+  //const [triggerETVASearch, { isFetching: isFetchingETVA }] = useLazyGetNegativeEVTASSNQuery();
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [triggerPayrollDupeSsnsOnDemographics, { isFetching: isFetchingPayRollDupeSsns }] =
     useLazyGetDuplicateSSNsQuery();
@@ -30,12 +29,12 @@ const DecemberProcess = () => {
   const [triggerDuplicateNamesAndBirthdays, { isFetching: isFetchingDuplicateNames }] =
     useLazyGetDuplicateNamesAndBirthdaysQuery();
 
-  const { negativeEtvaForSSNsOnPayprofit, duplicateSSNsData, demographicBadges, duplicateNamesAndBirthdays } =
-    useSelector((state: RootState) => state.yearsEnd);
+  //const { negativeEtvaForSSNsOnPayprofit, duplicateSSNsData, demographicBadges, duplicateNamesAndBirthdays } =
+  //  useSelector((state: RootState) => state.yearsEnd);
 
   useEffect(() => {
     if (hasToken) {
-      triggerPayrollDupeSsnsOnDemographics({ profitYear: 2023, pagination: { take: 25, skip: 0 } });
+      triggerPayrollDupeSsnsOnDemographics({ pagination: { take: 25, skip: 0 } });
       triggerDemographicBadgesNotInPayprofit({ pagination: { take: 25, skip: 0 } });
       triggerDuplicateNamesAndBirthdays({ profitYear: 2023, pagination: { take: 25, skip: 0 } });
     }
@@ -116,11 +115,14 @@ const DecemberProcess = () => {
             Master Inquiry (008-10)
           </Typography>
           <DSMAccordion title="Search">
-            <MasterInquirySearchFilter />
+            <MasterInquirySearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
           </DSMAccordion>
         </Grid2>
         <Grid2 width="100%">
-          <MasterInquiryGrid />
+          <MasterInquiryGrid
+            initialSearchLoaded={initialSearchLoaded}
+            setInitialSearchLoaded={setInitialSearchLoaded}
+          />
         </Grid2>
       </Grid2>
     </Page>

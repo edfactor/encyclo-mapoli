@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button, Divider, Typography, Box, CircularProgress } from "@mui/material";
 import Grid2 from '@mui/material/Grid2';
-import { DSMAccordion, Page, TotalsGrid } from "smart-ui-library";
+import { DSMAccordion, Page, TotalsGrid, numberToCurrency } from "smart-ui-library";
 import ProfitShareTotals426SearchFilter from "./ProfitShareTotals426SearchFilter";
 import StatusDropdown, { ProcessStatus } from "components/StatusDropdown";
 import { useNavigate } from "react-router";
@@ -66,7 +66,7 @@ const ProfitShareTotals426 = () => {
 
   const totalsData = {
     sectionTotal: [[
-      yearEndProfitSharingReport?.wagesTotal?.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) || "$0.00",
+      numberToCurrency(yearEndProfitSharingReport?.wagesTotal || 0),
       yearEndProfitSharingReport?.hoursTotal?.toLocaleString() || "0",
       yearEndProfitSharingReport?.pointsTotal?.toLocaleString() || "0"
     ]],
@@ -77,7 +77,7 @@ const ProfitShareTotals426 = () => {
       yearEndProfitSharingReport?.numberOfEmployeesInPlan?.toString() || "0"
     ]],
     secondSectionTotal: [[
-      yearEndProfitSharingReport?.terminatedWagesTotal?.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) || "$0.00",
+      numberToCurrency(yearEndProfitSharingReport?.terminatedWagesTotal || 0),
       yearEndProfitSharingReport?.terminatedHoursTotal?.toLocaleString() || "0",
       "0",
       "0"

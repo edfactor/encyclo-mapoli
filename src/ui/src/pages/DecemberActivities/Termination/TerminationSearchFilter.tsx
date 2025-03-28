@@ -1,17 +1,19 @@
-import DsmDatePicker from 'components/DsmDatePicker/DsmDatePicker';
-import { Controller, useForm } from 'react-hook-form';
-import { useDispatch, useSelector } from 'react-redux';
-import { useLazyGetTerminationReportQuery } from 'reduxstore/api/YearsEndApi';
+import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
+import { Controller, useForm } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
+import { useLazyGetTerminationReportQuery } from "reduxstore/api/YearsEndApi";
 import {
-    clearTermination, clearTerminationQueryParams, setTerminationQueryParams
-} from 'reduxstore/slices/yearsEndSlice';
-import { RootState } from 'reduxstore/store';
-import { SearchAndReset } from 'smart-ui-library';
-import * as yup from 'yup';
-import useDecemberFlowProfitYear from 'hooks/useDecemberFlowProfitYear';
+  clearTermination,
+  clearTerminationQueryParams,
+  setTerminationQueryParams
+} from "reduxstore/slices/yearsEndSlice";
+import { RootState } from "reduxstore/store";
+import { SearchAndReset } from "smart-ui-library";
+import * as yup from "yup";
+import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 
-import { yupResolver } from '@hookform/resolvers/yup';
-import Grid2 from '@mui/material/Grid2';
+import { yupResolver } from "@hookform/resolvers/yup";
+import Grid2 from "@mui/material/Grid2";
 
 interface TerminationSearch {
   profitYear: Date;
@@ -31,17 +33,23 @@ interface TerminationSearchFilterProps {
 }
 
 const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({ setInitialSearchLoaded }) => {
-  const { terminationQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const { terminationQueryParams, termination } = useSelector((state: RootState) => state.yearsEnd);
   const [triggerSearch, { isFetching }] = useLazyGetTerminationReportQuery();
   const decemberProfitYear = useDecemberFlowProfitYear();
   const dispatch = useDispatch();
-  
+
   const decemberProfitYearAsDate = decemberProfitYear ? new Date(decemberProfitYear, 0, 1) : undefined;
   // May not be needed if no longer setting the query params using the filters
-  const terminationProfitYearAsDate = terminationQueryParams?.profitYear 
-    ? new Date(terminationQueryParams.profitYear, 0, 1) 
+  const terminationProfitYearAsDate = terminationQueryParams?.profitYear
+    ? new Date(terminationQueryParams.profitYear, 0, 1)
     : undefined;
-  
+
+  // If we do have a profit year set at the December level, and we had a cached
+  // grid from a previous visit, trigger a new search with that param
+  if (decemberProfitYearAsDate && !termination) {
+    setInitialSearchLoaded(true);
+  }
+
   const {
     control,
     handleSubmit,
@@ -82,7 +90,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({ setIn
         container
         paddingX="24px"
         gap="24px">
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }} >
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
           <Controller
             name="profitYear"
             control={control}

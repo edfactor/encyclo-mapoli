@@ -1,12 +1,18 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
+import { format } from "date-fns";
 import {
+  clearBreakdownByStore,
   clearProfitEdit,
   clearProfitUpdate,
+  clearUnder21BreakdownByStore,
+  clearUnder21Inactive,
+  clearUnder21Totals,
   clearYearEndProfitSharingReport,
   setAdditionalExecutivesGrid,
   setBalanceByAge,
   setBalanceByYears,
+  setBreakdownByStore,
   setContributionsByAge,
   setDemographicBadgesNotInPayprofitData,
   setDistributionsAndForfeitures,
@@ -28,6 +34,9 @@ import {
   setProfitMasterRevert,
   setProfitUpdate,
   setTermination,
+  setUnder21BreakdownByStore,
+  setUnder21Inactive,
+  setUnder21Totals,
   setVestedAmountByAge,
   setYearEndProfitSharingReport
 } from "reduxstore/slices/yearsEndSlice";
@@ -35,6 +44,8 @@ import { RootState } from "reduxstore/store";
 import {
   BalanceByAge,
   BalanceByYears,
+  BreakdownByStoreRequest,
+  BreakdownByStoreResponse,
   ContributionsByAge,
   DemographicBadgesNotInPayprofitRequestDto,
   DemographicBadgesNotInPayprofitResponse,
@@ -59,7 +70,6 @@ import {
   GrossWagesReportDto,
   GrossWagesReportResponse,
   MilitaryAndRehireForfeiture,
-  RehireForfeituresRequest,
   MissingCommasInPYName,
   MissingCommasInPYNameRequestDto,
   NegativeEtvaForSSNsOnPayProfit,
@@ -71,21 +81,26 @@ import {
   ProfitShareUpdateResponse,
   ProfitSharingDistributionsByAge,
   ProfitYearRequest,
+  RehireForfeituresRequest,
   TerminationRequest,
   TerminationResponse,
+  Under21BreakdownByStoreRequest,
+  Under21BreakdownByStoreResponse,
+  Under21InactiveRequest,
+  Under21InactiveResponse,
+  Under21TotalsRequest,
+  Under21TotalsResponse,
   VestedAmountsByAge,
-  YearEndProfitSharingEmployee,
   YearEndProfitSharingReportRequest,
   YearEndProfitSharingReportResponse
 } from "reduxstore/types";
 import { url } from "./api";
-import { format } from "date-fns";
 
 export const YearsEndApi = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: `${url}/api/`,
     prepareHeaders: (headers, { getState }) => {
-      const root = (getState() as RootState);
+      const root = getState() as RootState;
       const token = root.security.token;
       const impersonating = root.security.impersonating;
       if (token) {
@@ -95,7 +110,9 @@ export const YearsEndApi = createApi({
         headers.set("impersonation", impersonating);
       } else {
         const localImpersonation = localStorage.getItem("impersonatingRole");
-        !!localImpersonation && headers.set("impersonation", localImpersonation);
+        if (localImpersonation) {
+          headers.set("impersonation", localImpersonation);
+        }
       }
       return headers;
     }
@@ -227,7 +244,7 @@ export const YearsEndApi = createApi({
           profitYear: params.profitYear,
           take: params.pagination.take,
           skip: params.pagination.skip,
-          minGrossAmount:params.minGrossAmount
+          minGrossAmount: params.minGrossAmount
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -239,17 +256,16 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getRehireForfeitures: builder.query<
-      PagedReportResponse<MilitaryAndRehireForfeiture>,
-      RehireForfeituresRequest
-    >({
+    getRehireForfeitures: builder.query<PagedReportResponse<MilitaryAndRehireForfeiture>, RehireForfeituresRequest>({
       query: (params) => ({
         url: `yearend/rehire-forfeitures/`,
         method: "POST",
         body: {
           profitYear: params.profitYear,
-          beginningDate: params.beginningDate ? format(new Date(params.beginningDate), 'yyyy-MM-dd') : params.beginningDate,
-          endingDate: params.endingDate ? format(new Date(params.endingDate), 'yyyy-MM-dd') : params.endingDate,
+          beginningDate: params.beginningDate
+            ? format(new Date(params.beginningDate), "yyyy-MM-dd")
+            : params.beginningDate,
+          endingDate: params.endingDate ? format(new Date(params.endingDate), "yyyy-MM-dd") : params.endingDate,
           take: params.pagination.take,
           skip: params.pagination.skip,
           sortBy: params.pagination.sortBy,
@@ -628,6 +644,99 @@ export const YearsEndApi = createApi({
         }
       }
     }),
+    getBreakdownByStore: builder.query<BreakdownByStoreResponse, BreakdownByStoreRequest>({
+      query: (params) => ({
+        url: "yearend/breakdown-by-store",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          storeNumber: params.storeNumber,
+          under21Only: params.under21Only,
+          isSortDescending: params.isSortDescending,
+          take: params.pagination.take,
+          skip: params.pagination.skip
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          dispatch(clearBreakdownByStore());
+          const { data } = await queryFulfilled;
+          dispatch(setBreakdownByStore(data));
+        } catch (err) {
+          console.log("Err: " + err);
+          dispatch(clearBreakdownByStore());
+        }
+      }
+    }),
+    getUnder21BreakdownByStore: builder.query<Under21BreakdownByStoreResponse, Under21BreakdownByStoreRequest>({
+      query: (params) => ({
+        url: "yearend/post-frozen/under-21-breakdown-by-store",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          isSortDescending: params.isSortDescending,
+          take: params.pagination.take,
+          skip: params.pagination.skip
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          dispatch(clearUnder21BreakdownByStore());
+          const { data } = await queryFulfilled;
+          dispatch(setUnder21BreakdownByStore(data));
+        } catch (err) {
+          console.log("Err: " + err);
+          dispatch(clearUnder21BreakdownByStore());
+        }
+      }
+    }),
+
+    getUnder21Inactive: builder.query<Under21InactiveResponse, Under21InactiveRequest>({
+      query: (params) => ({
+        url: "yearend/post-frozen/under-21-inactive",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          isSortDescending: params.isSortDescending,
+          take: params.pagination.take,
+          skip: params.pagination.skip
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          dispatch(clearUnder21Inactive());
+          const { data } = await queryFulfilled;
+          dispatch(setUnder21Inactive(data));
+        } catch (err) {
+          console.log("Err: " + err);
+          dispatch(clearUnder21Inactive());
+        }
+      }
+    }),
+
+    getUnder21Totals: builder.query<Under21TotalsResponse, Under21TotalsRequest>({
+      query: (params) => ({
+        url: "yearend/post-frozen/totals",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          isSortDescending: params.isSortDescending,
+          take: params.pagination.take,
+          skip: params.pagination.skip
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          dispatch(clearUnder21Totals());
+          const { data } = await queryFulfilled;
+          dispatch(setUnder21Totals(data));
+        } catch (err) {
+          console.log("Err: " + err);
+          dispatch(clearUnder21Totals());
+        }
+      }
+    }),
+
     getMasterApply: builder.query<ProfitShareMasterResponse, ProfitShareUpdateRequest>({
       query: (params) => ({
         url: "yearend/profit-master-update",
@@ -660,30 +769,29 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getYearEndProfitSharingReport: builder.query<
-      YearEndProfitSharingReportResponse,
-      YearEndProfitSharingReportRequest
-    >({
-      query: (params) => ({
-        url: "yearend/yearend-profit-sharing-report",
-        method: "GET",
-        params: {
-          ...params,
-          take: params.pagination.take,
-          skip: params.pagination.skip
-        }
-      }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-        try {
-          dispatch(clearYearEndProfitSharingReport());
-          const { data } = await queryFulfilled;
-          dispatch(setYearEndProfitSharingReport(data));
-        } catch (err) {
-          console.log("Err: " + err);
-          dispatch(clearYearEndProfitSharingReport());
+    getYearEndProfitSharingReport: builder.query<YearEndProfitSharingReportResponse, YearEndProfitSharingReportRequest>(
+      {
+        query: (params) => ({
+          url: "yearend/yearend-profit-sharing-report",
+          method: "GET",
+          params: {
+            ...params,
+            take: params.pagination.take,
+            skip: params.pagination.skip
+          }
+        }),
+        async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+          try {
+            dispatch(clearYearEndProfitSharingReport());
+            const { data } = await queryFulfilled;
+            dispatch(setYearEndProfitSharingReport(data));
+          } catch (err) {
+            console.log("Err: " + err);
+            dispatch(clearYearEndProfitSharingReport());
+          }
         }
       }
-    })
+    )
   })
 });
 
@@ -691,6 +799,7 @@ export const {
   useLazyGetAdditionalExecutivesQuery,
   useLazyGetBalanceByAgeQuery,
   useLazyGetBalanceByYearsQuery,
+  useLazyGetBreakdownByStoreQuery,
   useLazyGetContributionsByAgeQuery,
   useLazyGetDemographicBadgesNotInPayprofitQuery,
   useLazyGetDistributionsAndForfeituresQuery,
@@ -712,7 +821,10 @@ export const {
   useLazyGetProfitShareEditQuery,
   useLazyGetProfitShareUpdateQuery,
   useLazyGetTerminationReportQuery,
+  useLazyGetUnder21BreakdownByStoreQuery,
+  useLazyGetUnder21InactiveQuery,
+  useLazyGetUnder21TotalsQuery,
   useLazyGetVestingAmountByAgeQuery,
   useLazyGetYearEndProfitSharingReportQuery,
-  useUpdateExecutiveHoursAndDollarsMutation,
+  useUpdateExecutiveHoursAndDollarsMutation
 } = YearsEndApi;

@@ -1,6 +1,7 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FormHelperText, FormLabel, TextField } from "@mui/material";
+import { FormHelperText } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetEligibleEmployeesQuery } from "reduxstore/api/YearsEndApi";
@@ -12,7 +13,6 @@ import {
 import { RootState } from "reduxstore/store";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
-import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import DsmDatePicker from "../../components/DsmDatePicker/DsmDatePicker";
 
 interface EligibleEmployeesSearch {
