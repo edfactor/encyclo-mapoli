@@ -128,7 +128,7 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
     if (initialSearchLoaded) {
       onSearch();
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, onSearch]);
+  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch]);
 
   // This function checks to see if we have a change for this badge number already pending for a save
   const isRowStagedToSave = (badge: number): boolean => {
