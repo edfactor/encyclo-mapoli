@@ -28,7 +28,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       resizable: true
     },
     {
-      headerName: "STR",
+      headerName: "Store",
       field: "storeNumber",
       colId: "storeNumber",
       minWidth: 120,
