@@ -6,19 +6,19 @@ import { ImpersonationRoles } from "./reduxstore/types";
 const beneficiaries: RouteCategory = {
   menuLabel: MENU_LABELS.BENEFICIARIES,
   parentRoute: MENU_LABELS.BENEFICIARIES,
-  items: [{ caption: CAPTIONS.SUMMARY, route: ROUTES.FROZEN_SUMMARY }]
+  items: [{ caption: CAPTIONS.SUMMARY, route: "" }]
 };
 
 const distributions: RouteCategory = {
   menuLabel: MENU_LABELS.DISTRIBUTIONS,
   parentRoute: MENU_LABELS.DISTRIBUTIONS,
-  items: [{ caption: CAPTIONS.SUMMARY, route: ROUTES.FROZEN_SUMMARY }]
+  items: [{ caption: CAPTIONS.SUMMARY, route: "" }]
 };
 
 const reconciliation: RouteCategory = {
   menuLabel: MENU_LABELS.RECONCILIATION,
   parentRoute: MENU_LABELS.RECONCILIATION,
-  items: [{ caption: CAPTIONS.SUMMARY, route: ROUTES.FROZEN_SUMMARY }]
+  items: [{ caption: CAPTIONS.SUMMARY, route: "" }]
 };
 
 const inquiries: RouteCategory = {
