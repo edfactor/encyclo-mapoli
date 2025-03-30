@@ -84,19 +84,19 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store }) => {
         valueFormatter: agGridNumberToCurrency
       },
       {
-        headerName: "Cont",
+        headerName: "Contributions",
         field: "contributions",
         width: 120,
         valueFormatter: agGridNumberToCurrency
       },
       {
-        headerName: "Forf",
+        headerName: "Forfeiture",
         field: "forfeiture",
         width: 120,
         valueFormatter: agGridNumberToCurrency
       },
       {
-        headerName: "Dist",
+        headerName: "Distributions",
         field: "distributions",
         width: 120,
         valueFormatter: agGridNumberToCurrency

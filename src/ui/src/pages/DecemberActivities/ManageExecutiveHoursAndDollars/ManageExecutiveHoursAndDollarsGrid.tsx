@@ -118,11 +118,11 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
       }),
       hasExecutiveHoursAndDollars: executiveHoursAndDollarsQueryParams.hasExecutiveHoursAndDollars ?? false,
       isMonthlyPayroll: executiveHoursAndDollarsQueryParams.isMonthlyPayroll ?? false,
-      pagination: { skip: pageNumber * pageSize, take: pageSize }
+      pagination: { skip: pageNumber * pageSize, take: pageSize, sort: sortParams.sortBy, isSortDescending: sortParams.isSortDescending },
     };
 
     await triggerSearch(request, false);
-  }, [executiveHoursAndDollarsQueryParams, pageNumber, pageSize, triggerSearch]);
+  }, [executiveHoursAndDollarsQueryParams, pageNumber, pageSize, _sortParams, triggerSearch]);
 
   useEffect(() => {
     if (initialSearchLoaded) {

@@ -18,29 +18,28 @@ interface YTDWagesGridProps {
 const YTDWagesGrid = ({ innerRef, initialSearchLoaded, setInitialSearchLoaded }: YTDWagesGridProps) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
+  const [sortParams, setSortParams] = useState<ISortParams>({
+    sortBy: "Badge",
+    isSortDescending: false
+  });
   const [triggerSearch, { isFetching }] = useLazyGetEmployeeWagesForYearQuery();
   const { employeeWagesForYearQueryParams } = useSelector((state: RootState) => state.yearsEnd);
 
   const onSearch = useCallback(async () => {
     const request = {
       profitYear: employeeWagesForYearQueryParams?.profitYear ?? 0,
-      pagination: { skip: pageNumber * pageSize, take: pageSize },
+      pagination: { skip: pageNumber * pageSize, take: pageSize, sort: sortParams.sortBy, isSortDescending: sortParams.isSortDescending },
       acceptHeader: "application/json"
     };
 
     await triggerSearch(request, false);
-  }, [pageNumber, pageSize, triggerSearch, employeeWagesForYearQueryParams?.profitYear]);
+  }, [pageNumber, pageSize, sortParams, triggerSearch, employeeWagesForYearQueryParams?.profitYear]);
 
   useEffect(() => {
     if (initialSearchLoaded) {
       onSearch();
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, onSearch]);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "Badge",
-    isSortDescending: false
-  });
+  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch]);
 
   const { employeeWagesForYear } = useSelector((state: RootState) => state.yearsEnd);
 

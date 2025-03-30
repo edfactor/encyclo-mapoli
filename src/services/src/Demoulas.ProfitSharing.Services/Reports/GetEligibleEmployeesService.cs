@@ -45,7 +45,8 @@ public sealed class GetEligibleEmployeesService : IGetEligibleEmployeesService
                         d.BadgeNumber,
                         d.ContactInfo.FullName,
                         d.DepartmentId,
-                        DepartmentName = d.Department!.Name
+                        DepartmentName = d.Department!.Name,
+                        d.StoreNumber
                     });
 
             int numberReadOnFrozen = await baseQuery.CountAsync(cancellationToken);
@@ -65,7 +66,8 @@ public sealed class GetEligibleEmployeesService : IGetEligibleEmployeesService
                     BadgeNumber = e.BadgeNumber,
                     FullName = e.FullName!,
                     DepartmentId = e.DepartmentId,
-                    Department = e.DepartmentName
+                    Department = e.DepartmentName,
+                    StoreNumber = e.StoreNumber
                 }).ToPaginationResultsAsync(request, cancellationToken);
 
             return new GetEligibleEmployeesResponse
