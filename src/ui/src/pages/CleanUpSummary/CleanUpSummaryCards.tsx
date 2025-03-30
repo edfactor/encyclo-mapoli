@@ -40,10 +40,10 @@ const CleanUpSummaryCards: React.FC<CleanUpSummaryCardsProps> = ({ setSelectedTa
 
   useEffect(() => {
     if (hasToken) {
-      triggerETVASearch({ profitYear: 2023, pagination: { take: 25, skip: 0 } });
-      triggerPayrollDupeSsnsOnDemographics({ pagination: { take: 25, skip: 0 } });
-      triggerDemographicBadgesNotInPayprofit({ pagination: { take: 25, skip: 0 } });
-      triggerDuplicateNamesAndBirthdays({ profitYear: 2023, pagination: { take: 25, skip: 0 } });
+      triggerETVASearch({ profitYear: 2023, pagination: { take: 25, skip: 0, sortBy: "badgeNumber", isSortDescending: true } });
+      triggerPayrollDupeSsnsOnDemographics({ pagination: { take: 25, skip: 0, sortBy: "badgeNumber", isSortDescending: true } });
+      triggerDemographicBadgesNotInPayprofit({ pagination: { take: 25, skip: 0, sortBy: "badgeNumber", isSortDescending: true } });
+      triggerDuplicateNamesAndBirthdays({ profitYear: 2023, pagination: { take: 25, skip: 0, sortBy: "badgeNumber", isSortDescending: true } });
     }
   }, [
     hasToken,

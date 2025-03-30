@@ -30,7 +30,7 @@ export interface DemographicBadgesNotInPayprofit {
 }
 
 export interface DemographicBadgesNotInPayprofitRequestDto {
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface PagedReportResponse<T> {
@@ -88,7 +88,7 @@ export interface DuplicateSSNDetail {
 }
 
 export interface DuplicateSSNsRequestDto {
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface MissingCommasInPYNameRequestDto {
@@ -491,10 +491,6 @@ export interface BalanceByAgeDetail extends BalanceByDetailBase {
 }
 
 export interface BalanceByAge extends BalanceByBase<BalanceByAgeDetail> {}
-
-export interface BalanceByYearsDetail extends BalanceByDetailBase {
-  age: number;
-}
 
 export interface BalanceByYears extends BalanceByBase<BalanceByAgeDetail> {}
 
