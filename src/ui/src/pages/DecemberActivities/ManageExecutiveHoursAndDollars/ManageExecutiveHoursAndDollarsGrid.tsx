@@ -88,8 +88,8 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
   const dispatch = useDispatch();
   const { executiveHoursAndDollarsQueryParams } = useSelector((state: RootState) => state.yearsEnd);
 
-  const [_sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "Badge",
+  const [sortParams, setSortParams] = useState<ISortParams>({
+    sortBy: "badgeNumber",
     isSortDescending: false
   });
 
@@ -118,11 +118,11 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
       }),
       hasExecutiveHoursAndDollars: executiveHoursAndDollarsQueryParams.hasExecutiveHoursAndDollars ?? false,
       isMonthlyPayroll: executiveHoursAndDollarsQueryParams.isMonthlyPayroll ?? false,
-      pagination: { skip: pageNumber * pageSize, take: pageSize }
+      pagination: { skip: pageNumber * pageSize, take: pageSize, sort: sortParams.sortBy, isSortDescending: sortParams.isSortDescending },
     };
 
     await triggerSearch(request, false);
-  }, [executiveHoursAndDollarsQueryParams, pageNumber, pageSize, triggerSearch]);
+  }, [executiveHoursAndDollarsQueryParams, pageNumber, pageSize, sortParams, triggerSearch]);
 
   useEffect(() => {
     if (initialSearchLoaded) {

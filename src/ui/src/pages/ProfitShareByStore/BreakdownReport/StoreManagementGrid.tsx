@@ -37,14 +37,10 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store }) => {
       profitYear: queryParams?.profitYear || 2024,
       storeNumber: store,
       under21Only: false,
-      isSortDescending: sortParams.isSortDescending,
-      pagination: {
-        take: pageSize,
-        skip: pageNumber * pageSize
-      }
+      pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: sortParams.sortBy, isSortDescending: sortParams.isSortDescending }
     };
     fetchStoreManagement(params);
-  }, [fetchStoreManagement, pageNumber, pageSize, queryParams?.profitYear, sortParams.isSortDescending, store]);
+  }, [fetchStoreManagement, pageNumber, pageSize, queryParams?.profitYear, sortParams, store]);
 
   useEffect(() => {
     fetchData();
@@ -81,19 +77,19 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store }) => {
         valueFormatter: agGridNumberToCurrency
       },
       {
-        headerName: "Cont",
+        headerName: "Contributions",
         field: "contributions",
         width: 120,
         valueFormatter: agGridNumberToCurrency
       },
       {
-        headerName: "Forf",
+        headerName: "Forfeiture",
         field: "forfeiture",
         width: 120,
         valueFormatter: agGridNumberToCurrency
       },
       {
-        headerName: "Dist",
+        headerName: "Distributions",
         field: "distributions",
         width: 120,
         valueFormatter: agGridNumberToCurrency

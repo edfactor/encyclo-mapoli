@@ -22,7 +22,6 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoad
   });
 
   const { masterInquiryData, masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [triggerSearch, { isFetching }] = useLazyGetProfitMasterInquiryQuery();
 
   const createMasterInquiryRequest = useCallback(

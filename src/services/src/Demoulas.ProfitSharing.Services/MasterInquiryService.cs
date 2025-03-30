@@ -93,8 +93,8 @@ public class MasterInquiryService : IMasterInquiryService
                         : string.Empty,
                 FederalTaxes = x.ProfitDetail.FederalTaxes,
                 StateTaxes = x.ProfitDetail.StateTaxes,
-                TaxCodeId = x.ProfitDetail.TaxCodeId,
-                TaxCodeName = x.TaxCode != null ? x.TaxCode.Name : string.Empty,
+                TaxCodeId = x.ProfitDetail.TaxCodeId != null ? x.ProfitDetail.TaxCodeId : TaxCode.Constants.Unknown.Id,
+                TaxCodeName = x.TaxCode != null ? x.TaxCode.Name : TaxCode.Constants.Unknown.Name,
                 CommentTypeId = x.ProfitDetail.CommentTypeId,
                 CommentTypeName =
                     x.CommentType != null ? x.CommentType.Name : string.Empty,
@@ -102,7 +102,7 @@ public class MasterInquiryService : IMasterInquiryService
                 CommentRelatedState = x.ProfitDetail.CommentRelatedState,
                 CommentRelatedOracleHcmId = x.ProfitDetail.CommentRelatedOracleHcmId,
                 CommentRelatedPsnSuffix = x.ProfitDetail.CommentRelatedPsnSuffix,
-                CommentIsPartialTransaction = x.ProfitDetail.CommentIsPartialTransaction,
+                CommentIsPartialTransaction = x.ProfitDetail.CommentIsPartialTransaction != null ? x.ProfitDetail.CommentIsPartialTransaction : false,
                 BadgeNumber = x.Member.BadgeNumber,
                 PsnSuffix =  x.Member.PsnSuffix
             });

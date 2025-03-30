@@ -1,5 +1,4 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { stat } from "fs";
 
 import {
   BalanceByAge,
@@ -373,17 +372,11 @@ export const yearsEndSlice = createSlice({
     setDuplicateSSNsData: (state, action: PayloadAction<PagedReportResponse<DuplicateSSNDetail>>) => {
       state.duplicateSSNsData = action.payload;
     },
-    clearDuplicateSSNsData: (state) => {
-      state.duplicateSSNsData = null;
-    },
     setDemographicBadgesNotInPayprofitData: (
       state,
       action: PayloadAction<PagedReportResponse<DemographicBadgesNotInPayprofit>>
     ) => {
       state.demographicBadges = action.payload;
-    },
-    clearDemographicBadgesNotInPayprofitData: (state) => {
-      state.demographicBadges = null;
     },
     setDuplicateNamesAndBirthdays: (state, action: PayloadAction<PagedReportResponse<DuplicateNameAndBirthday>>) => {
       state.duplicateNamesAndBirthdays = action.payload;
@@ -430,11 +423,8 @@ export const yearsEndSlice = createSlice({
     clearForfeituresAndPointsQueryParams: (state) => {
       state.forfeituresAndPointsQueryParams = null;
     },
-    setMilitaryAndRehireProfitSummaryQueryParams: (state, action: PayloadAction<ProfitAndReportingQueryParams>) => {
+    setMilitaryAndRehireProfitSummaryQueryParams: (state, action: PayloadAction<RehireForfeituresRequest>) => {
       state.rehireProfitSummaryQueryParams = action.payload;
-    },
-    clearMilitaryAndRehireProfitSummaryQueryParams: (state) => {
-      state.rehireProfitSummaryQueryParams = null;
     },
     setEmployeesOnMilitaryLeaveDetails: (
       state,
@@ -445,14 +435,6 @@ export const yearsEndSlice = createSlice({
     clearEmployeesOnMilitaryLeaveDetails: (state) => {
       state.militaryAndRehire = null;
     },
-    setEmployeesOnMilitaryLeaveDetailsQueryParams: (state, action: PayloadAction<number>) => {
-      if (state.militaryAndRehireQueryParams) {
-        state.militaryAndRehireQueryParams.profitYear = action.payload;
-      }
-    },
-    clearEmployeesOnMilitaryLeaveDetailsQueryParams: (state) => {
-      state.militaryAndRehireQueryParams = null;
-    },
     setMilitaryAndRehireForfeituresDetails: (
       state,
       action: PayloadAction<PagedReportResponse<MilitaryAndRehireForfeiture>>
@@ -462,7 +444,7 @@ export const yearsEndSlice = createSlice({
     clearRehireForfeituresDetails: (state) => {
       state.rehireForfeitures = null;
     },
-    setMilitaryAndRehireForfeituresQueryParams: (state, action: PayloadAction<ProfitAndReportingQueryParams>) => {
+    setMilitaryAndRehireForfeituresQueryParams: (state, action: PayloadAction<RehireForfeituresRequest>) => {
       state.rehireForfeituresQueryParams = action.payload;
     },
     clearRehireForfeituresQueryParams: (state) => {
@@ -513,9 +495,6 @@ export const yearsEndSlice = createSlice({
     },
     clearAdditionalExecutivesChosen: (state) => {
       state.additionalExecutivesChosen = null;
-    },
-    setExecutiveHoursAndDollarsGrid: (state, action: PayloadAction<ExecutiveHoursAndDollarsGrid>) => {
-      state.executiveHoursAndDollarsGrid = action.payload;
     },
     clearExecutiveHoursAndDollarsGridRows: (state) => {
       state.executiveHoursAndDollarsGrid = null;
@@ -587,9 +566,6 @@ export const yearsEndSlice = createSlice({
     },
     setExecutiveHoursAndDollarsQueryParams: (state, action: PayloadAction<ExecutiveHoursAndDollarsQueryParams>) => {
       state.executiveHoursAndDollarsQueryParams = action.payload;
-    },
-    clearExecutiveHoursAndDollarsQueryParams: (state) => {
-      state.executiveHoursAndDollarsQueryParams = null;
     },
     setEmployeeWagesForYear: (state, action: PayloadAction<PagedReportResponse<EmployeeWagesForYear>>) => {
       state.employeeWagesForYear = action.payload;
@@ -798,14 +774,8 @@ export const yearsEndSlice = createSlice({
     setGrossWagesReport: (state, action: PayloadAction<GrossWagesReportResponse>) => {
       state.grossWagesReport = action.payload;
     },
-    clearGrossWagesReport: (state) => {
-      state.grossWagesReport = null;
-    },
     setGrossWagesReportQueryParams: (state, action: PayloadAction<GrossWagesReportRequest>) => {
       state.grossWagesReportQueryParams = action.payload;
-    },
-    clearGrossWagesReportQueryParams: (state) => {
-      state.grossWagesReportQueryParams = null;
     },
     setYearEndProfitSharingReport: (state, action: PayloadAction<YearEndProfitSharingReportResponse>) => {
       state.yearEndProfitSharingReport = action.payload;
@@ -828,9 +798,6 @@ export const yearsEndSlice = createSlice({
     setBreakdownByStoreQueryParams: (state, action: PayloadAction<BreakdownByStoreRequest>) => {
       state.breakdownByStoreQueryParams = action.payload;
     },
-    clearBreakdownByStoreQueryParams: (state) => {
-      state.breakdownByStoreQueryParams = null;
-    },
     setUnder21BreakdownByStore: (state, action: PayloadAction<Under21BreakdownByStoreResponse>) => {
       state.under21BreakdownByStore = action.payload;
     },
@@ -839,9 +806,6 @@ export const yearsEndSlice = createSlice({
     },
     setUnder21BreakdownByStoreQueryParams: (state, action: PayloadAction<Under21BreakdownByStoreRequest>) => {
       state.under21BreakdownByStoreQueryParams = action.payload;
-    },
-    clearUnder21BreakdownByStoreQueryParams: (state) => {
-      state.under21BreakdownByStoreQueryParams = null;
     },
     
     setUnder21Inactive: (state, action: PayloadAction<Under21InactiveResponse>) => {
@@ -852,11 +816,7 @@ export const yearsEndSlice = createSlice({
     },
     setUnder21InactiveQueryParams: (state, action: PayloadAction<Under21InactiveRequest>) => {
       state.under21InactiveQueryParams = action.payload;
-    },
-    clearUnder21InactiveQueryParams: (state) => {
-      state.under21InactiveQueryParams = null;
-    },
-    
+    },    
     setUnder21Totals: (state, action: PayloadAction<Under21TotalsResponse>) => {
       state.under21Totals = action.payload;
     },
@@ -865,9 +825,6 @@ export const yearsEndSlice = createSlice({
     },
     setUnder21TotalsQueryParams: (state, action: PayloadAction<Under21TotalsRequest>) => {
       state.under21TotalsQueryParams = action.payload;
-    },
-    clearUnder21TotalsQueryParams: (state) => {
-      state.under21TotalsQueryParams = null;
     }
   }
 });
@@ -943,12 +900,9 @@ export const {
   setForfeituresByAge,
   setForfeituresByAgeQueryParams,
   setGrossWagesReport,
-  clearGrossWagesReport,
   setGrossWagesReportQueryParams,
-  clearGrossWagesReportQueryParams,
   setMilitaryAndRehireForfeituresDetails,
   setMilitaryAndRehireForfeituresQueryParams,
-  setMilitaryAndRehireProfitSummaryQueryParams,
   setMissingCommaInPYName,
   setNegativeEtvaForSSNsOnPayprofit,
   setNegativeEtvaForSSNsOnPayprofitQueryParams,
@@ -970,19 +924,15 @@ export const {
   setBreakdownByStore,
   clearBreakdownByStore,
   setBreakdownByStoreQueryParams,
-  clearBreakdownByStoreQueryParams,
   setUnder21BreakdownByStore,
   clearUnder21BreakdownByStore,
   setUnder21BreakdownByStoreQueryParams,
-  clearUnder21BreakdownByStoreQueryParams,
   setUnder21Inactive,
   clearUnder21Inactive,
   setUnder21InactiveQueryParams,
-  clearUnder21InactiveQueryParams,
   setUnder21Totals,
   clearUnder21Totals,
   setUnder21TotalsQueryParams,
-  clearUnder21TotalsQueryParams,
   checkFiscalCloseParamsAndGridsProfitYears,
   checkDecemberParamsAndGridsProfitYears
 } = yearsEndSlice.actions;

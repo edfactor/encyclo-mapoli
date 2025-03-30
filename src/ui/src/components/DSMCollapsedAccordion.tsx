@@ -91,52 +91,73 @@ const DSMCollapsedAccordion: React.FC<DSMCollapsedAccordionProps> = ({
                     }
                 }}
             >
-                <Box
-                    sx={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        width: '100%',
-                        pr: 2,
-                    }}
-                >
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Typography
-                            sx={{
-                                color: '#0258A5',
-                                fontSize: '1.25rem',
-                                fontWeight: 500,
-                            }}
-                            variant="h2"
-                        >
-                            {title}
-                        </Typography>
-                        {status && (
-                            <Chip
-                                variant="outlined"
-                                label={status.label}
-                                color={status.color}
-                                size="small"
-                            />
-                        )}
+
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  width: '100%',
+                  pr: 2,
+                }}
+              >
+                <Box sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
+                  flexWrap: 'nowrap'
+                }}>
+                  {actionButtonText && (
+                    <Box sx={{
+                      width: '120px', // Set a fixed width box container for the button
+                      flexShrink: 0, // Prevent shrinking
+                      display: 'flex',
+                      justifyContent: 'flex-start', // Align button to left within its container
+                    }}>
+                      <Button
+                        variant="outlined"
+                        color="secondary"
+                        size="medium"
+                        onClick={handleActionClick}
+                        disabled={disabled}
+                        sx={{
+                          textTransform: 'uppercase',
+                          fontWeight: 'medium',
+                          alignSelf: 'center',
+                          whiteSpace: 'nowrap', // Prevent text from wrapping
+                          flexShrink: 0
+                        }}
+                      >
+                        {actionButtonText}
+                      </Button>
                     </Box>
-                    {actionButtonText && (
-                        <Button
-                            variant="outlined"
-                            color="secondary"
-                            size="medium"
-                            onClick={handleActionClick}
-                            disabled={disabled}
-                            sx={{
-                                ml: 2,
-                                textTransform: 'uppercase',
-                                fontWeight: 'medium',
-                            }}
-                        >
-                            {actionButtonText}
-                        </Button>
-                    )}
+                  )}
+                  <Typography
+                    sx={{
+                      color: '#0258A5',
+                      fontSize: '1.25rem',
+                      fontWeight: 500,
+                      alignSelf: 'center',
+                    }}
+                    variant="h2"
+                  >
+                    {title}
+                  </Typography>
+                  {status && (
+                    <Chip
+                      variant="outlined"
+                      label={status.label}
+                      color={status.color}
+                      size="small"
+                      sx={{
+                        alignSelf: 'center',
+                        flexShrink: 0
+                      }}
+                    />
+                  )}
                 </Box>
+              </Box>
+
             </AccordionSummary>
             <AccordionDetails sx={{
                 backgroundColor: 'white',

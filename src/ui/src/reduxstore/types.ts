@@ -30,7 +30,7 @@ export interface DemographicBadgesNotInPayprofit {
 }
 
 export interface DemographicBadgesNotInPayprofitRequestDto {
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface PagedReportResponse<T> {
@@ -88,7 +88,7 @@ export interface DuplicateSSNDetail {
 }
 
 export interface DuplicateSSNsRequestDto {
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface MissingCommasInPYNameRequestDto {
@@ -96,25 +96,25 @@ export interface MissingCommasInPYNameRequestDto {
 }
 
 export interface MissingCommasInPYName {
-  exployeeBadge: number;
+  badgeNumber: number;
   ssn: number;
   employeeName: string;
 }
 
 export interface DuplicateNameAndBirthdayRequestDto extends ProfitYearRequest {
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface NegativeEtvaForSSNsOnPayprofitRequestDto extends ProfitYearRequest {
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface EmployeeWagesForYearRequestDto extends ProfitYearRequest {
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface GrossWagesReportDto extends ProfitYearRequest {
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
   minGrossAmount?: number;
 }
 
@@ -190,7 +190,7 @@ export interface ExecutiveHoursAndDollarsRequestDto extends ProfitYearRequest {
   fullNameContains?: string;
   hasExecutiveHoursAndDollars: boolean;
   isMonthlyPayroll: boolean;
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
 }
 
 // This is the state of an editable executive's hours and dollars
@@ -228,7 +228,7 @@ export interface EmployeeWagesForYear {
 }
 
 export interface EligibleEmployeesRequestDto extends ProfitYearRequest {
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface EligibleEmployee {
@@ -237,6 +237,7 @@ export interface EligibleEmployee {
   fullName: string;
   departmentId: number;
   department: string;
+  storeNumber: number;
 }
 
 export interface EligibleEmployeeResponseDto {
@@ -491,10 +492,6 @@ export interface BalanceByAgeDetail extends BalanceByDetailBase {
 
 export interface BalanceByAge extends BalanceByBase<BalanceByAgeDetail> {}
 
-export interface BalanceByYearsDetail extends BalanceByDetailBase {
-  age: number;
-}
-
 export interface BalanceByYears extends BalanceByBase<BalanceByAgeDetail> {}
 
 export interface VestedAmountsByAge {
@@ -536,7 +533,7 @@ export interface VestedAmountsByAgeDetail {
 
 export interface TerminationRequest {
   profitYear: number;
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface TerminationDetail {
@@ -764,8 +761,7 @@ export interface YearEndProfitSharingEmployee {
 export interface BreakdownByStoreRequest extends ProfitYearRequest {
   storeNumber?: string;
   under21Only?: boolean;
-  isSortDescending?: boolean;
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface BreakdownByStoreEmployee {
@@ -805,7 +801,7 @@ export interface BreakdownByStoreResponse {
 
 export interface Under21BreakdownByStoreRequest extends ProfitYearRequest {
   isSortDescending?: boolean;
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface Under21BreakdownByStoreEmployee {
@@ -833,7 +829,7 @@ export interface Under21BreakdownByStoreResponse {
 
 export interface Under21InactiveRequest extends ProfitYearRequest {
   isSortDescending?: boolean;
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface Under21InactiveEmployee {

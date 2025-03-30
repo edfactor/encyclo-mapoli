@@ -135,7 +135,9 @@ export const YearsEndApi = createApi({
         method: "GET",
         params: {
           take: params.pagination.take,
-          skip: params.pagination.skip
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -156,7 +158,9 @@ export const YearsEndApi = createApi({
         method: "GET",
         params: {
           take: params.pagination.take,
-          skip: params.pagination.skip
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -365,7 +369,9 @@ export const YearsEndApi = createApi({
         params: {
           profitYear: params.profitYear,
           take: params.pagination.take,
-          skip: params.pagination.skip
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
         },
         headers: {
           Accept: params.acceptHeader
@@ -396,6 +402,8 @@ export const YearsEndApi = createApi({
         params: {
           take: params.pagination.take,
           skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending,
           profitYear: params.profitYear,
           badgeNumber: params.badgeNumber,
           ssn: params.socialSecurity,
@@ -422,6 +430,8 @@ export const YearsEndApi = createApi({
         params: {
           take: params.pagination.take,
           skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending,
           profitYear: params.profitYear,
           badgeNumber: params.badgeNumber,
           ssn: params.socialSecurity,
@@ -446,7 +456,9 @@ export const YearsEndApi = createApi({
         params: {
           profitYear: params.profitYear,
           take: params.pagination.take,
-          skip: params.pagination.skip
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
         }
       }),
       async onQueryStarted(params: EligibleEmployeesRequestDto, { dispatch, queryFulfilled }) {
@@ -478,20 +490,34 @@ export const YearsEndApi = createApi({
       }
     }),
     getContributionsByAge: builder.query<ContributionsByAge, FrozenReportsByAgeRequest>({
-      query: (params) => ({
-        url: "yearend/frozen/contributions-by-age",
-        method: "GET",
-        params: {
-          profitYear: params.profitYear,
-          reportType: params.reportType
+      query: (arg) => {
+        // Validate profit year range
+        if (arg.profitYear < 2020 || arg.profitYear > 2100) {
+          console.error('Invalid profit year: Must be between 2020 and 2100');
+          // Return a dummy endpoint that won't be called
+          return { url: 'invalid-request', method: 'GET' };
         }
-      }),
+
+        return {
+          url: `yearend/frozen-report/contributions-by-age`,
+          method: 'POST',
+          body: arg
+        };
+      },
+      transformResponse: (response: ContributionsByAge) => {
+        return response;
+      },
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
+          // Don't proceed with API call if validation failed
+          if (arg.profitYear < 2020 || arg.profitYear > 2100) {
+            return;
+          }
+
           const { data } = await queryFulfilled;
           dispatch(setContributionsByAge(data));
-        } catch (err) {
-          console.log("Err: " + err);
+        } catch (error) {
+          console.error('Error fetching contributions by age:', error);
         }
       }
     }),
@@ -594,17 +620,33 @@ export const YearsEndApi = createApi({
       }
     }),
     getTerminationReport: builder.query<TerminationResponse, TerminationRequest>({
-      query: (params) => ({
-        url: "yearend/terminated-employee-and-beneficiary",
-        method: "GET",
-        params: {
-          profitYear: params.profitYear,
-          skip: params.pagination.skip,
-          take: params.pagination.take
+      query: (params) => {
+        // Validate profit year range
+        if (params.profitYear < 2020 || params.profitYear > 2100) {
+          console.error('Invalid profit year: Must be between 2020 and 2100');
+          // Return a dummy endpoint that won't be called
+          return { url: 'invalid-request', method: 'GET' };
         }
-      }),
+
+        return {
+          url: "yearend/terminated-employee-and-beneficiary",
+          method: "GET",
+          params: {
+            profitYear: params.profitYear,
+            skip: params.pagination.skip,
+            take: params.pagination.take,
+            sortBy: params.pagination.sortBy,
+            isSortDescending: params.pagination.isSortDescending
+          }
+        };
+      },
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
+          // Don't proceed with API call if validation failed
+          if (arg.profitYear < 2020 || arg.profitYear > 2100) {
+            return;
+          }
+
           const { data } = await queryFulfilled;
           dispatch(setTermination(data));
         } catch (err) {
@@ -652,9 +694,10 @@ export const YearsEndApi = createApi({
           profitYear: params.profitYear,
           storeNumber: params.storeNumber,
           under21Only: params.under21Only,
-          isSortDescending: params.isSortDescending,
           take: params.pagination.take,
-          skip: params.pagination.skip
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -674,9 +717,10 @@ export const YearsEndApi = createApi({
         method: "GET",
         params: {
           profitYear: params.profitYear,
-          isSortDescending: params.isSortDescending,
           take: params.pagination.take,
-          skip: params.pagination.skip
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -697,9 +741,10 @@ export const YearsEndApi = createApi({
         method: "GET",
         params: {
           profitYear: params.profitYear,
-          isSortDescending: params.isSortDescending,
           take: params.pagination.take,
-          skip: params.pagination.skip
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {

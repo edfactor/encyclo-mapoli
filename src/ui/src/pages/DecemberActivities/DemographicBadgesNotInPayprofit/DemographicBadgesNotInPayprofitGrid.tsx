@@ -9,21 +9,23 @@ import { GetDemographicBadgesNotInPayprofitColumns } from "./DemographicBadgesNo
 const DemographicBadgesNotInPayprofitGrid: React.FC = () => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
-
   const { demographicBadges } = useSelector((state: RootState) => state.yearsEnd);
   const [triggerSearch, { isLoading }] = useLazyGetDemographicBadgesNotInPayprofitQuery();
 
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const onSearch = useCallback(async () => {
     const request = {
-      pagination: { skip: pageNumber * pageSize, take: pageSize }
+      pagination: { skip: pageNumber * pageSize, take: pageSize, sort: "badgeNumber", isSortDescending: true }
     };
 
     await triggerSearch(request, false);
   }, [pageNumber, pageSize, triggerSearch]);
 
   useEffect(() => {
-    onSearch();
-  }, [pageNumber, pageSize, onSearch]);
+    if (hasToken) {
+      onSearch();
+    }
+  }, [hasToken, pageNumber, pageSize, onSearch]);
 
   const columnDefs = useMemo(() => GetDemographicBadgesNotInPayprofitColumns(), []);
 

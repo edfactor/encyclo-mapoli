@@ -17,7 +17,7 @@ interface TerminationGridSearchProps {
 const TerminationGrid: React.FC<TerminationGridSearchProps> = ({ initialSearchLoaded, setInitialSearchLoaded }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
-  const [setSortParams] = useState<ISortParams>({
+  const [sortParams, setSortParams] = useState<ISortParams>({
     sortBy: "Badge",
     isSortDescending: false
   });
@@ -29,17 +29,17 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({ initialSearchLo
   const onSearch = useCallback(async () => {
     const request = {
       profitYear: terminationQueryParams?.profitYear ?? 0,
-      pagination: { skip: pageNumber * pageSize, take: pageSize }
+      pagination: { skip: pageNumber * pageSize, take: pageSize, sort: sortParams.sortBy, isSortDescending: sortParams.isSortDescending },
     };
 
     await triggerSearch(request, false);
-  }, [pageNumber, pageSize, terminationQueryParams?.profitYear, triggerSearch]);
+  }, [pageNumber, pageSize, sortParams, terminationQueryParams?.profitYear, triggerSearch]);
 
   useEffect(() => {
     if (initialSearchLoaded) {
       onSearch();
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, onSearch]);
+  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch]);
 
   // Wrapper to pass react function to non-react class
   const handleNavigationForButton = useCallback(
