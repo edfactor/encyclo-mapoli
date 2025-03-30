@@ -11,7 +11,6 @@ export const GetDemographicBadgesNotInPayprofitColumns = (): ColDef[] => {
       cellClass: "right-align",
       resizable: true,
       sortable: true,
-      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber),
       valueFormatter: (params) => {
         const badgeNumber = params.value;
         return badgeNumber ? badgeNumber.toString().padStart(7, "0") : "";
