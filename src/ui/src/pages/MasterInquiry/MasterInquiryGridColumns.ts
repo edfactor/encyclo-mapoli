@@ -19,7 +19,9 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       minWidth: 120,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true,    
+      resizable: true,   
+      rowGroup: true,
+      showRowGroup: 'always',
       valueFormatter: (params) => {
         const badgeNumber = params.data?.badgeNumber; 
         const psnSuffix = params.data?.psnSuffix; 
@@ -51,17 +53,8 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
         const iter = params.data.profitYearIteration; // assuming 'statusName' is in the row data
         return `${year}.${iter}`;
       }
-    },    
-    {
-      headerName: "Distribution Sequence",
-      headerTooltip: "Distribution Sequence",
-      field: "distributionSequence",
-      colId: "distributionSequence",
-      minWidth: 100,
-      headerClass: "right-align",
-      cellClass: "right-align",
-      resizable: true
-    },
+    },   
+   
     {
       headerName: "Profit Code",
       field: "profitCodeId",
@@ -70,11 +63,14 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
+      tooltipValueGetter: (params) => {
+        return params.data?.profitCodeName;
+      },
       valueFormatter: (params) => {
         const id = params.data.profitCodeId; // assuming 'status' is in the row data
         const name = params.data.profitCodeName; // assuming 'statusName' is in the row data
         //see if one is undefined or null then show other
-        return `${name} (${id})`;
+        return `[${id}] ${name}`;
       }
     },
     {
@@ -108,40 +104,23 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       valueFormatter: agGridNumberToCurrency
     },
     {
-      headerName: "Month to Date",
+      headerName: "Month/Year",
       headerTooltip: "Month to Date",
       field: "monthToDate",
       colId: "monthToDate",
       minWidth: 100,
       headerClass: "right-align",
       cellClass: "right-align",
-      resizable: true
-    },
-    {
-      headerName: "Year To Date",
-      headerTooltip: "Year To Date",
-      field: "yearToDate",
-      colId: "yearToDate",
-      minWidth: 100,
-      headerClass: "right-align",
-      cellClass: "right-align",
-      resizable: true
-    },
-    {
-      headerName: "Zero Contribution Reason",
-      headerTooltip: "Zero Contribution Reason",
-      field: "zeroContributionReasonName",
-      colId: "zeroContributionReasonName",
-      minWidth: 150,
-      headerClass: "right-align",
-      cellClass: "right-align",
       resizable: true,
       valueFormatter: (params) => {
-        const id = params.data?.zeroContributionReasonId; // assuming 'status' is in the row data
-        const name = params.data?.zeroContributionReasonName; // assuming 'statusName' is in the row data
-        return `${name} (${id})`;
+        const month = params.data.monthToDate; // assuming 'status' is in the row data
+        const year = params.data.yearToDate; // assuming 'statusName' is in the row data
+        // Format month to always have two digits
+        const formattedMonth = month.toString().padStart(2, '0');
+
+        return `${formattedMonth}/${year}`;
       }
-    },
+    },      
     {
       headerName: "Federal Tax",
       field: "federalTaxes",
@@ -170,10 +149,13 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
+      tooltipValueGetter: (params) => {
+        return params.data?.taxCodeName;
+      },
       valueFormatter: (params) => {
         const id = params.data?.taxCodeId; // assuming 'status' is in the row data
         const name = params.data?.taxCodeName; // assuming 'statusName' is in the row data        
-        return `${name} (${id})`;
+        return `[${id}] ${name}`;
       }
     },
     {
@@ -212,7 +194,13 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       minWidth: 120,
       headerClass: "center-align",
       cellClass: "center-align",
-      resizable: true
+      resizable: true,
+      cellRenderer: 'agAnimateShowChangeCellRenderer', // Use text renderer instead of checkbox
+      valueFormatter: (params) => {
+        // Return "Yes" only if the value is explicitly true
+        // Return "No" for false, null, undefined, or any other falsy value
+        return params.value === true ? "Yes" : "No";
+      }
     }
   ];
 };
