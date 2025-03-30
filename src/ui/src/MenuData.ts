@@ -66,7 +66,7 @@ interface MenuLevel {
   }[];
 }
 
-export const drawerTitle = "Year End Activities";
+export const drawerTitle = MENU_LABELS.YEAR_END;
 
 export const menuLevels: MenuLevel[] = [
   {
