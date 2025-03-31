@@ -100,7 +100,7 @@ const terminatedPlaceholders: YearEndProfitSharingReportSummaryLineItem[] = [
 ];
 
 const ProfitSummary = () => {
-  const [trigger, { data, isLoading }] = useLazyGetYearEndProfitSharingSummaryReportQuery();
+  const [trigger, { data, isFetching }] = useLazyGetYearEndProfitSharingSummaryReportQuery();
 
   useEffect(() => {
     trigger({
@@ -190,16 +190,15 @@ const ProfitSummary = () => {
           Profit Sharing Summary Total Page
         </Typography>
       </div>
-
       <div>
         <Typography
-          variant="h5"
+          variant="h6"
           sx={{ color: "#0258A5", padding: "12px 24px", fontWeight: "bold" }}>
           Active and Inactive
         </Typography>
         <DSMGrid
           preferenceKey={"ACTIVE_INACTIVE_SUMMARY"}
-          isLoading={isLoading}
+          isLoading={isFetching}
           handleSortChanged={() => {}}
           providedOptions={{
             rowData: activeAndInactiveRowData,
@@ -211,13 +210,13 @@ const ProfitSummary = () => {
 
       <div>
         <Typography
-          variant="h5"
+          variant="h6"
           sx={{ color: "#0258A5", padding: "12px 24px", fontWeight: "bold" }}>
           Terminated
         </Typography>
         <DSMGrid
           preferenceKey={"TERMINATED_SUMMARY"}
-          isLoading={isLoading}
+          isLoading={isFetching}
           handleSortChanged={() => {}}
           providedOptions={{
             rowData: terminatedRowData,

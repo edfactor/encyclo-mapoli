@@ -1,13 +1,15 @@
 import { Typography } from "@mui/material";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { DSMGrid } from "smart-ui-library";
+import { DSMGrid, Pagination } from "smart-ui-library";
 import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
 import { Path } from "react-router-dom";
 import { GetBeneficiariesGridColumns } from "./BeneficiariesGridColumns";
 
 const BeneficiariesGrid = () => {
     const navigate = useNavigate();
+    const [pageNumber, setPageNumber] = useState(0);
+    const [pageSize, setPageSize] = useState(25);
     const [trigger, { data, isLoading, error }] = useLazyGetYearEndProfitSharingReportQuery();
 
     useEffect(() => {
@@ -26,24 +28,30 @@ const BeneficiariesGrid = () => {
             includeEmployeesWithNoPriorProfitSharingAmounts: false,
             profitYear: 2024,
             pagination: {
-                skip: 0,
-                take: 25
+                skip: pageNumber * pageSize,
+                take: pageSize
             }
         });
-    }, [trigger]);
+    }, [trigger, pageNumber, pageSize]);
 
     const getPinnedBottomRowData = useMemo(() => {
         if (!data) return [];
         
-        const beneficiaryCount = data.response?.results?.length || 0;
+        const beneficiaryCount = data.numberOfEmployees || 0;
         const wagesTotal = data.wagesTotal || 0;
+        
+        // @D - TODO - Temporary client side calculation, should this be coming from the API??
+        let balanceTotal = 0;
+        if (data.response?.results) {
+            balanceTotal = data.response.results.reduce((total, curr) => total + (curr.balance || 0), 0);
+        }
         
         return [
             {
                 employeeName: `Total Non-EMPs Beneficiaries`,
                 storeNumber: beneficiaryCount,
                 wages: wagesTotal,
-                balance: data.response?.results?.reduce((total, curr) => total + (curr.balance || 0), 0) || 0
+                balance: balanceTotal
             },
             {
                 employeeName: "No Wages",
@@ -85,6 +93,15 @@ const BeneficiariesGrid = () => {
                     columnDefs: columnDefs
                 }}
             />
+            {!!data && data.response.results.length > 0 && (
+                <Pagination
+                    pageNumber={pageNumber + 1}
+                    setPageNumber={(value: number) => setPageNumber(value - 1)}
+                    pageSize={pageSize}
+                    setPageSize={setPageSize}
+                    recordCount={data.response.total}
+                />
+            )}
         </>
     );
 };
