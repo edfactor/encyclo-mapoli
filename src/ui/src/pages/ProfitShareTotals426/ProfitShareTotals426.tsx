@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button, Divider, Typography, Box, CircularProgress } from "@mui/material";
 import Grid2 from '@mui/material/Grid2';
-import { DSMAccordion, Page, TotalsGrid, numberToCurrency } from "smart-ui-library";
+import { DSMAccordion, Page } from "smart-ui-library";
 import ProfitShareTotals426SearchFilter from "./ProfitShareTotals426SearchFilter";
 import StatusDropdown, { ProcessStatus } from "components/StatusDropdown";
 import { useNavigate } from "react-router";
@@ -13,6 +13,7 @@ import { YearEndProfitSharingReportRequest } from "reduxstore/types";
 import { useDispatch } from "react-redux";
 import { setYearEndProfitSharingReportQueryParams } from "reduxstore/slices/yearsEndSlice";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import ProfitShareTotalsDisplay from "components/ProfitShareTotalsDisplay";
 
 const ProfitShareTotals426 = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
@@ -64,26 +65,6 @@ const ProfitShareTotals426 = () => {
     );
   };
 
-  const totalsData = {
-    sectionTotal: [[
-      numberToCurrency(yearEndProfitSharingReport?.wagesTotal || 0),
-      yearEndProfitSharingReport?.hoursTotal?.toLocaleString() || "0",
-      yearEndProfitSharingReport?.pointsTotal?.toLocaleString() || "0"
-    ]],
-    employeeTotals: [[
-      yearEndProfitSharingReport?.numberOfEmployees?.toString() || "0",
-      yearEndProfitSharingReport?.numberOfNewEmployees?.toString() || "0",
-      yearEndProfitSharingReport?.numberOfEmployeesUnder21?.toString() || "0",
-      yearEndProfitSharingReport?.numberOfEmployeesInPlan?.toString() || "0"
-    ]],
-    secondSectionTotal: [[
-      numberToCurrency(yearEndProfitSharingReport?.terminatedWagesTotal || 0),
-      yearEndProfitSharingReport?.terminatedHoursTotal?.toLocaleString() || "0",
-      "0",
-      "0"
-    ]]
-  };
-
   return (
     <Page
       label={CAPTIONS.PROFIT_SHARE_TOTALS}
@@ -114,35 +95,13 @@ const ProfitShareTotals426 = () => {
               <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
                 <CircularProgress />
               </Box>
-            ) : yearEndProfitSharingReport ? (
-              <>
-                <TotalsGrid
-                  displayData={totalsData.sectionTotal}
-                  leftColumnHeaders={["Section Total"]}
-                  topRowHeaders={["", "Wages", "Hours", "Points"]}
-                  tablePadding="0px"
-                />
-
-                <Divider sx={{ my: 2 }} />
-
-                <TotalsGrid
-                  displayData={totalsData.employeeTotals}
-                  leftColumnHeaders={["Employee Totals"]}
-                  topRowHeaders={["", "All Employees", "New Employees", "Employees < 21", "In-Plan"]}
-                  tablePadding="0px"
-                />
-
-                <TotalsGrid
-                  displayData={totalsData.secondSectionTotal}
-                  leftColumnHeaders={["Section Total"]}
-                  topRowHeaders={["", "", "", "", ""]}
-                  tablePadding="0px"
-                />
-              </>
-            ) : null}
+            ) : (
+              <Box sx={{ px: 3, mt: 2 }}>
+                <ProfitShareTotalsDisplay data={yearEndProfitSharingReport} />
+              </Box>
+            )}
           </Box>
         </Grid2>
-
       </Grid2>
     </Page>
   );

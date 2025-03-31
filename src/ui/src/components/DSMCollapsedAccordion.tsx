@@ -67,7 +67,7 @@ const DSMCollapsedAccordion: React.FC<DSMCollapsedAccordionProps> = ({
             }}
         >
             <AccordionSummary
-                expandIcon={expandable && !!expanded ? <ExpandMoreIcon /> : null}
+                expandIcon={expandable ? <ExpandMoreIcon /> : null}
                 sx={{
                     borderBottom: '1px solid',
                     borderColor: 'divider',

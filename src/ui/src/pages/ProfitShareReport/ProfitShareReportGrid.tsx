@@ -63,15 +63,6 @@ const ProfitShareReportGrid: React.FC<ProfitShareReportGridSearchProps> = ({
   return (
     <>
       {!!yearEndProfitSharingReport && (
-        <div style={{ padding: "0 24px 0 24px" }}>
-          <Typography
-            variant="h2"
-            sx={{ color: "#0258A5" }}>
-            {`${CAPTIONS.PROFIT_SHARE_REPORT} (${yearEndProfitSharingReport.response.total || 0} records)`}
-          </Typography>
-        </div>
-      )}
-      {!!yearEndProfitSharingReport && (
         <DSMGrid
           preferenceKey={"ProfitShareReportGrid"}
           isLoading={isLoading}
