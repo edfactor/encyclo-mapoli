@@ -39,7 +39,8 @@ import {
   setUnder21Inactive,
   setUnder21Totals,
   setVestedAmountByAge,
-  setYearEndProfitSharingReport
+  setYearEndProfitSharingReport,
+  setUpdateSummary
 } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import {
@@ -95,7 +96,9 @@ import {
   YearEndProfitSharingReportRequest,
   YearEndProfitSharingReportResponse,
   YearEndProfitSharingReportSummaryResponse,
-  FrozenProfitYearRequest
+  FrozenProfitYearRequest,
+  UpdateSummaryRequest,
+  UpdateSummaryResponse
 } from "reduxstore/types";
 import { url } from "./api";
 
@@ -863,6 +866,27 @@ export const YearsEndApi = createApi({
           console.log("Err: " + err);
         }
       }
+    }),
+    getUpdateSummary: builder.query<UpdateSummaryResponse, UpdateSummaryRequest>({
+      query: (params) => ({
+        url: `yearend/frozen/updatesummary`,
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          take: params.take,
+          skip: params.skip,
+          sortBy: params.sortBy,
+          isSortDescending: params.isSortDescending
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setUpdateSummary(data));
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
     })
   })
 });
@@ -900,5 +924,7 @@ export const {
   useLazyGetYearEndProfitSharingReportQuery,
   useUpdateExecutiveHoursAndDollarsMutation,
   useGetYearEndProfitSharingSummaryReportQuery,
-  useLazyGetYearEndProfitSharingSummaryReportQuery
+  useLazyGetYearEndProfitSharingSummaryReportQuery,
+  useLazyGetProfitShareSummaryReportQuery,
+  useLazyGetUpdateSummaryQuery
 } = YearsEndApi;

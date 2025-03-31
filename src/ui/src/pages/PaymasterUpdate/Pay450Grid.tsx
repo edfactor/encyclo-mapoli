@@ -1,121 +1,190 @@
 import { Typography } from "@mui/material";
-import { useCallback, useMemo } from "react";
-import { Path, useNavigate } from "react-router";
-import { DSMGrid } from "smart-ui-library";
+import { useCallback, useMemo, useState, useEffect } from "react";
+import { useSelector } from "react-redux"; 
+import { Path } from "react-router";
+import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetPay450GridColumns } from "./Pay450GridColumns";
+import { YearsEndApi } from "reduxstore/api/YearsEndApi";
+import { RootState } from "reduxstore/store";
+import { UpdateSummaryResponse } from "reduxstore/types";
 
-const sampleProfitShareData = [
-  {
-    badge: 47425,
-    employeeName: "BAGGINS, FRODO",
-    store: 3,
-    psAmountOriginal: 15750.25,
-    psVestedOriginal: 12600.2,
-    yearsOriginal: 14,
-    enrollOriginal: 1,
-    psAmountUpdated: 16250.75,
-    psVestedUpdated: 13000.6,
-    yearsUpdated: 14,
-    enrollUpdated: 1
-  },
-  {
-    badge: 82424,
-    employeeName: "GAMGEE, SAMWISE",
-    store: 3,
-    psAmountOriginal: 18200.5,
-    psVestedOriginal: 14560.4,
-    yearsOriginal: 17,
-    enrollOriginal: 2,
-    psAmountUpdated: 19100.25,
-    psVestedUpdated: 15280.2,
-    yearsUpdated: 17,
-    enrollUpdated: 2
-  },
-  {
-    badge: 85744,
-    employeeName: "BRANDYBUCK, MERIADOC",
-    store: 3,
-    psAmountOriginal: 22450.75,
-    psVestedOriginal: 17960.6,
-    yearsOriginal: 27,
-    enrollOriginal: 2,
-    psAmountUpdated: 23575.5,
-    psVestedUpdated: 18860.4,
-    yearsUpdated: 27,
-    enrollUpdated: 2
-  },
-  {
-    badge: 94861,
-    employeeName: "TOOK, PEREGRIN",
-    store: 4,
-    psAmountOriginal: 25800.25,
-    psVestedOriginal: 20640.2,
-    yearsOriginal: 38,
-    enrollOriginal: 1,
-    psAmountUpdated: 27090.75,
-    psVestedUpdated: 21672.6,
-    yearsUpdated: 38,
-    enrollUpdated: 1
+interface Pay450GridProps {
+  initialSearchLoaded: boolean;
+  setInitialSearchLoaded: (loaded: boolean) => void;
+  profitYear: number;
+}
+
+// Sample data for demo purposes (to be removed when endpoint is fixed)
+const sampleData: UpdateSummaryResponse = {
+  "totalNumberOfEmployees": 0,
+  "totalNumberOfBeneficiaries": 1,
+  "totalBeforeProfitSharingAmount": 11500,
+  "totalBeforeVestedAmount": 6800,
+  "totalAfterProfitSharingAmount": 12500,
+  "totalAfterVestedAmount": 7400,
+  "reportName": "UPDATE SUMMARY FOR PROFIT SHARING",
+  "reportDate": "2025-03-31T08:08:35.9489273-04:00",
+  "response": {
+    "pageSize": 255,
+    "currentPage": 1,
+    "totalPages": 1,
+    "total": 1,
+    "results": [
+      {
+        "badgeNumber": 2002,
+        "storeNumber": 10,
+        "name": "Oscar Taylor",
+        "isEmployee": false,
+        "before": {
+          "profitSharingAmount": 100,
+          "vestedProfitSharingAmount": 80,
+          "yearsInPlan": 6,
+          "enrollmentId": 2
+        },
+        "after": {
+          "profitSharingAmount": 200,
+          "vestedProfitSharingAmount": 200,
+          "yearsInPlan": 7,
+          "enrollmentId": 2
+        }
+      }
+    ]
   }
-];
+};
 
-const Pay450Grid = () => {
-  const navigate = useNavigate();
+const Pay450Grid: React.FC<Pay450GridProps> = ({
+  initialSearchLoaded,
+  setInitialSearchLoaded,
+  profitYear
+}) => {
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
+  const [pageNumber, setPageNumber] = useState(0);
+  const [pageSize, setPageSize] = useState(25);
+  const [sortParams, setSortParams] = useState<ISortParams>({
+    sortBy: "name",
+    isSortDescending: false
+  });
+  
+  const [demoData, setDemoData] = useState<UpdateSummaryResponse | null>(null);
 
-  const getSummaryRow = (data: any[]) => {
-    const totals = data.reduce(
-      (acc, curr) => ({
-        psAmountOriginal: acc.psAmountOriginal + curr.psAmountOriginal,
-        psVestedOriginal: acc.psVestedOriginal + curr.psVestedOriginal,
-        psAmountUpdated: acc.psAmountUpdated + curr.psAmountUpdated,
-        psVestedUpdated: acc.psVestedUpdated + curr.psVestedUpdated
-      }),
-      {
-        psAmountOriginal: 0,
-        psVestedOriginal: 0,
-        psAmountUpdated: 0,
-        psVestedUpdated: 0
+  const { updateSummary } = useSelector((state: RootState) => state.yearsEnd);
+  const [triggerSearch, { isLoading }] = YearsEndApi.endpoints.getUpdateSummary.useLazyQuery();
+
+  useEffect(() => {
+    setDemoData(sampleData);
+  }, []);
+
+  const onSearch = useCallback(async () => {
+    try {
+
+      await triggerSearch({
+        profitYear,
+        pagination: {
+          skip: pageNumber * pageSize,
+          take: pageSize,
+          sortBy: sortParams.sortBy,
+          isSortDescending: sortParams.isSortDescending
+        }
+      });
+    } catch (error) {
+      console.error("API call failed:", error);
+      // Ensure demo data is set even if the API call fails
+      if (!demoData) {
+        setDemoData(sampleData);
       }
-    );
+    }
+  }, [pageNumber, pageSize, sortParams, triggerSearch, profitYear, demoData]);
 
-    return [
-      {
-        psAmountOriginal: totals.psAmountOriginal,
-        psVestedOriginal: totals.psVestedOriginal,
-        psAmountUpdated: totals.psAmountUpdated,
-        psVestedUpdated: totals.psVestedUpdated
-      }
-    ];
-  };
+  useEffect(() => {
+    if (initialSearchLoaded && hasToken) {
+      onSearch();
+    }
+  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch, hasToken]);
 
+  const sortEventHandler = (update: ISortParams) => setSortParams(update);
+  
+  // Mock function to handle navigation (needed for GetPay450GridColumns)
   const handleNavigationForButton = useCallback(
     (destination: string | Partial<Path>) => {
-      navigate(destination);
+      console.log("Navigation to", destination);
     },
-    [navigate]
+    []
   );
-
+  
   const columnDefs = useMemo(() => GetPay450GridColumns(handleNavigationForButton), [handleNavigationForButton]);
+
+  const displayData = demoData || updateSummary;
+
+  const getSummaryRow = useCallback(() => {
+    if (!displayData) return [];
+    
+    return [
+      {
+        psAmountOriginal: displayData.totalBeforeProfitSharingAmount,
+        psVestedOriginal: displayData.totalBeforeVestedAmount,
+        psAmountUpdated: displayData.totalAfterProfitSharingAmount,
+        psVestedUpdated: displayData.totalAfterVestedAmount
+      }
+    ];
+  }, [displayData]);
+
+  const gridData = useMemo(() => {
+    if (!displayData?.response?.results) return [];
+    
+    return displayData.response.results.map(employee => ({
+      badge: employee.badgeNumber,
+      employeeName: employee.name,
+      store: employee.storeNumber,
+      psAmountOriginal: employee.before.profitSharingAmount,
+      psVestedOriginal: employee.before.vestedProfitSharingAmount,
+      yearsOriginal: employee.before.yearsInPlan,
+      enrollOriginal: employee.before.enrollmentId,
+      psAmountUpdated: employee.after.profitSharingAmount,
+      psVestedUpdated: employee.after.vestedProfitSharingAmount,
+      yearsUpdated: employee.after.yearsInPlan,
+      enrollUpdated: employee.after.enrollmentId
+    }));
+  }, [displayData]);
 
   return (
     <>
-      <div style={{ padding: "0 24px 0 24px" }}>
-        <Typography
-          variant="h2"
-          sx={{ color: "#0258A5" }}>
-          {`PROFIT-ELIGIBLE REPORT (${sampleProfitShareData.length || 0} records)`}
-        </Typography>
-      </div>
-      <DSMGrid
-        preferenceKey={"ELIGIBLE_EMPLOYEES"}
-        isLoading={false}
-        handleSortChanged={(_params) => {}}
-        providedOptions={{
-          rowData: sampleProfitShareData,
-          pinnedBottomRowData: getSummaryRow(sampleProfitShareData),
-          columnDefs: columnDefs
-        }}
-      />
+      {displayData?.response && (
+        <>
+          <div style={{ padding: "0 24px 0 24px" }}>
+            <Typography
+              variant="h2"
+              sx={{ color: "#0258A5" }}>
+              {`PROFIT-ELIGIBLE REPORT (${displayData.response.total || 0} records)`}
+            </Typography>
+          </div>
+          <DSMGrid
+            preferenceKey={"ELIGIBLE_EMPLOYEES"}
+            isLoading={isLoading}
+            handleSortChanged={sortEventHandler}
+            providedOptions={{
+              rowData: gridData,
+              pinnedBottomRowData: getSummaryRow(),
+              columnDefs: columnDefs
+            }}
+          />
+        </>
+      )}
+      {!!displayData && displayData.response.results.length > 0 && (
+        <Pagination
+          pageNumber={pageNumber + 1}
+          setPageNumber={(value: number) => {
+            setPageNumber(value - 1);
+            setInitialSearchLoaded(true);
+          }}
+          pageSize={pageSize}
+          setPageSize={(value: number) => {
+            setPageSize(value);
+            setPageNumber(0);
+            setInitialSearchLoaded(true);
+          }}
+          recordCount={displayData.response.total}
+        />
+      )}
     </>
   );
 };

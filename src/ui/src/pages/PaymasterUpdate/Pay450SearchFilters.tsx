@@ -5,46 +5,41 @@ import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 
-interface DateRangeSearch {
-    startDate: Date;
-    endDate: Date;
+interface ProfitYearSearch {
+    profitYear: number;
 }
 
 const schema = yup.object().shape({
-    startDate: yup
-        .date()
-        .required("Start Date is required")
-        .typeError("Please enter a valid date"),
-    endDate: yup
-        .date()
-        .required("End Date is required")
-        .typeError("Please enter a valid date")
-        .min(
-            yup.ref('startDate'),
-            "End Date must be after Start Date"
-        )
+    profitYear: yup
+        .number()
+        .required("Profit Year is required")
+        .typeError("Please enter a valid year")
+        .min(2000, "Year must be 2000 or later")
+        .max(2100, "Year must be 2100 or earlier")
 });
 
-interface DateRangeSearchFilterProps {
-    onSearch?: (data: DateRangeSearch) => void;
+interface ProfitYearSearchFilterProps {
+    onSearch?: (data: ProfitYearSearch) => void;
     isFetching?: boolean;
 }
 
-const Pay450SearchFilters: React.FC<DateRangeSearchFilterProps> = ({
+const Pay450SearchFilters: React.FC<ProfitYearSearchFilterProps> = ({
     onSearch,
     isFetching = false
 }) => {
+    const fiscalCloseProfitYear = useFiscalCloseProfitYear();
+    
     const {
         control,
         handleSubmit,
         formState: { errors, isValid },
         reset
-    } = useForm<DateRangeSearch>({
+    } = useForm<ProfitYearSearch>({
         resolver: yupResolver(schema),
         defaultValues: {
-            startDate: undefined,
-            endDate: undefined
+            profitYear: fiscalCloseProfitYear
         }
     });
 
@@ -56,8 +51,7 @@ const Pay450SearchFilters: React.FC<DateRangeSearchFilterProps> = ({
 
     const handleReset = () => {
         reset({
-            startDate: undefined,
-            endDate: undefined
+            profitYear: fiscalCloseProfitYear
         });
     };
 
@@ -70,43 +64,24 @@ const Pay450SearchFilters: React.FC<DateRangeSearchFilterProps> = ({
                 gap="24px">
                 <Grid2 size={{ xs: 12, sm: 6, md: 3 }} >
                     <Controller
-                        name="startDate"
+                        name="profitYear"
                         control={control}
                         render={({ field }) => (
                             <DsmDatePicker
-                                id="startDate"
-                                onChange={(value: Date | null) => field.onChange(value)}
-                                value={field.value ?? null}
+                                id="profitYear"
+                                onChange={(value: Date | null) => field.onChange(value?.getFullYear() || null)}
+                                value={field.value ? new Date(field.value, 0) : null}
                                 required={true}
-                                label="Start Date"
+                                label="Profit Year"
                                 disableFuture
-                                error={errors.startDate?.message}
+                                views={["year"]}
+                                error={errors.profitYear?.message}
+                                disabled={true}
                             />
                         )}
                     />
-                    {errors.startDate && (
-                        <FormHelperText error>{errors.startDate.message}</FormHelperText>
-                    )}
-                </Grid2>
-
-                <Grid2 size={{ xs: 12, sm: 6, md: 3 }} >
-                    <Controller
-                        name="endDate"
-                        control={control}
-                        render={({ field }) => (
-                            <DsmDatePicker
-                                id="endDate"
-                                onChange={(value: Date | null) => field.onChange(value)}
-                                value={field.value ?? null}
-                                required={true}
-                                label="End Date"
-                                disableFuture
-                                error={errors.endDate?.message}
-                            />
-                        )}
-                    />
-                    {errors.endDate && (
-                        <FormHelperText error>{errors.endDate.message}</FormHelperText>
+                    {errors.profitYear && (
+                        <FormHelperText error>{errors.profitYear.message}</FormHelperText>
                     )}
                 </Grid2>
             </Grid2>
