@@ -156,7 +156,7 @@ const FiscalFlow = () => {
               label: "Not Started",
               color: "default"
             }}
-            onActionClick={() => navigate("/profit-share-updates")}
+            onActionClick={() => navigate("/profit-share-update")}
             isCollapsedOnRender={true}>
             <></>
           </DSMCollapsedAccordion>
