@@ -13,6 +13,8 @@ export const GetBeneficiariesGridColumns = (navFunction: (badgeNumber: string) =
       cellClass: "right-align",
       resizable: true,
       sortable: true,
+      // @D - Question: since beneficiaries don't have a badge number, do we want to show something else? should
+      // beneficiaries be able to searched via master inquiry somehow?
       cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber, navFunction)
     },
     {
@@ -106,7 +108,7 @@ export const GetBeneficiariesGridColumns = (navFunction: (badgeNumber: string) =
       headerClass: "center-align",
       cellClass: "center-align",
       resizable: true,
-      valueFormatter: (params) => (params.value ? "(-21)" : "")
+      valueFormatter: (params) => (params.value ? "(<21)" : "")
     },
     {
       headerName: "Term Date",
