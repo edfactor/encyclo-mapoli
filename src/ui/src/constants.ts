@@ -4,7 +4,7 @@ export const drawerOpenWidth = 330;
 export const drawerClosedWidth = 64;
 
 export const MENU_LABELS = {
-  FISCAL_CLOSE: "Fiscal Activities",
+  FISCAL_CLOSE: "Fiscal Close",
   DECEMBER_ACTIVITIES: "December Activities",
   BENEFICIARIES: "Beneficiaries",
   DISTRIBUTIONS: "Distributions",
