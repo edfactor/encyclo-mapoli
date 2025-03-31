@@ -57,10 +57,10 @@ const BalanceByAgeGrid: React.FC<BalanceByAgeGridProps> = ({ initialSearchLoaded
   }, [triggerSearch, balanceByAgeQueryParams?.profitYear]);
 
   useEffect(() => {
-    if (initialSearchLoaded) {
+    if (initialSearchLoaded && balanceByAgeQueryParams?.profitYear) {
       onSearch();
     }
-  }, [initialSearchLoaded, onSearch]);
+  }, [balanceByAgeQueryParams?.profitYear, initialSearchLoaded, onSearch]);
 
   return (
     <>

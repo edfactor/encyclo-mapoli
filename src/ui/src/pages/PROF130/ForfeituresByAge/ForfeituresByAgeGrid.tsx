@@ -56,10 +56,10 @@ const ForfeituresByAgeGrid: React.FC<ForfeituresByAgeGridProps> = ({ initialSear
   }, [triggerSearch, forfeituresByAgeQueryParams?.profitYear]);
 
   useEffect(() => {
-    if (initialSearchLoaded) {
+    if (initialSearchLoaded && forfeituresByAgeQueryParams?.profitYear) {
       onSearch();
     }
-  }, [initialSearchLoaded, onSearch]);
+  }, [forfeituresByAgeQueryParams?.profitYear, initialSearchLoaded, onSearch]);
 
   return (
     <>

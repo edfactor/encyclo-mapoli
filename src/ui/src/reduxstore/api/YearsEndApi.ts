@@ -500,15 +500,18 @@ export const YearsEndApi = createApi({
       query: (arg) => {
         // Validate profit year range
         if (arg.profitYear < 2020 || arg.profitYear > 2100) {
-          console.error('Invalid profit year: Must be between 2020 and 2100');
+          console.error("Invalid profit year: Must be between 2020 and 2100");
           // Return a dummy endpoint that won't be called
-          return { url: 'invalid-request', method: 'GET' };
+          return { url: "invalid-request", method: "GET" };
         }
 
         return {
-          url: `yearend/frozen-report/contributions-by-age`,
-          method: 'POST',
-          body: arg
+          url: `yearend/frozen/contributions-by-age`,
+          method: "GET",
+          params: {
+            profitYear: arg.profitYear,
+            reportType: arg.reportType
+          }
         };
       },
       transformResponse: (response: ContributionsByAge) => {
@@ -524,7 +527,7 @@ export const YearsEndApi = createApi({
           const { data } = await queryFulfilled;
           dispatch(setContributionsByAge(data));
         } catch (error) {
-          console.error('Error fetching contributions by age:', error);
+          console.error("Error fetching contributions by age:", error);
         }
       }
     }),
@@ -630,9 +633,9 @@ export const YearsEndApi = createApi({
       query: (params) => {
         // Validate profit year range
         if (params.profitYear < 2020 || params.profitYear > 2100) {
-          console.error('Invalid profit year: Must be between 2020 and 2100');
+          console.error("Invalid profit year: Must be between 2020 and 2100");
           // Return a dummy endpoint that won't be called
-          return { url: 'invalid-request', method: 'GET' };
+          return { url: "invalid-request", method: "GET" };
         }
 
         return {
@@ -844,7 +847,10 @@ export const YearsEndApi = createApi({
         }
       }
     ),
-    getYearEndProfitSharingSummaryReport: builder.query<YearEndProfitSharingReportSummaryResponse, FrozenProfitYearRequest>({
+    getYearEndProfitSharingSummaryReport: builder.query<
+      YearEndProfitSharingReportSummaryResponse,
+      FrozenProfitYearRequest
+    >({
       query: (params) => ({
         url: "yearend/yearend-profit-sharing-summary-report",
         method: "GET",
