@@ -83,6 +83,7 @@ public class MasterInquiryService : IMasterInquiryService
                 Contribution = x.ProfitDetail.Contribution,
                 Earnings = x.ProfitDetail.Earnings,
                 Forfeiture = x.ProfitDetail.Forfeiture,
+                Payment = x.ProfitCode.Id != ProfitCode.Constants.IncomingContributions.Id? x.ProfitDetail.Forfeiture: null ,
                 MonthToDate = x.ProfitDetail.MonthToDate,
                 YearToDate = x.ProfitDetail.YearToDate,
                 Remark = x.ProfitDetail.Remark,
