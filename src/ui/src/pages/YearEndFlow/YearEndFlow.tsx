@@ -24,6 +24,8 @@ const FiscalFlow = () => {
       dispatch(setSelectedProfitYearForFiscalClose(Number(event.target.value)));
       dispatch(checkFiscalCloseParamsAndGridsProfitYears(Number(event.target.value)));
     };
+    
+    
 
     return (
       <div className="flex items-center gap-2 h-10 min-w-[174px]">

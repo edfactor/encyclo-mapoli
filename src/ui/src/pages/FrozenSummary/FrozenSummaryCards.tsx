@@ -147,7 +147,7 @@ const FrozenSummaryCards: React.FC<FrozenSummaryCardsProps> = ({ setSelectedTab,
       );
       triggerForfeituresSearch(
         {
-          profitYear: 2023,
+          profitYear: profitYear,
           reportType: FrozenReportsByAgeRequestType.PartTime,
           pagination: { skip: 0, take: 255 }
         },

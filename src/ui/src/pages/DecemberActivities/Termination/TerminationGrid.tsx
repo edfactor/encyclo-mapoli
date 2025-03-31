@@ -29,7 +29,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({ initialSearchLo
   const onSearch = useCallback(async () => {
     const request = {
       profitYear: terminationQueryParams?.profitYear ?? 0,
-      pagination: { skip: pageNumber * pageSize, take: pageSize, sort: sortParams.sortBy, isSortDescending: sortParams.isSortDescending },
+      pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: sortParams.sortBy, isSortDescending: sortParams.isSortDescending },
     };
 
     await triggerSearch(request, false);
