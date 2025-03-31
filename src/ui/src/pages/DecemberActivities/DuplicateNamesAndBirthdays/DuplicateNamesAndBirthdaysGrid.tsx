@@ -15,10 +15,11 @@ const DuplicateNamesAndBirthdaysGrid: React.FC<DuplicateNamesAndBirthdaysGridSea
   initialSearchLoaded,
   setInitialSearchLoaded
 }) => {
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "Badge",
+    sortBy: "name",
     isSortDescending: false
   });
 
@@ -30,17 +31,17 @@ const DuplicateNamesAndBirthdaysGrid: React.FC<DuplicateNamesAndBirthdaysGridSea
   const onSearch = useCallback(async () => {
     const request = {
       profitYear: duplicateNamesAndBirthdaysQueryParams?.profitYear ?? 0,
-      pagination: { skip: pageNumber * pageSize, take: pageSize }
+      pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: sortParams.sortBy, isSortDescending: sortParams.isSortDescending },
     };
 
     await triggerSearch(request, false);
-  }, [duplicateNamesAndBirthdaysQueryParams?.profitYear, pageNumber, pageSize, triggerSearch]);
+  }, [duplicateNamesAndBirthdaysQueryParams?.profitYear, pageNumber, pageSize, sortParams, triggerSearch]);
 
   useEffect(() => {
-    if (initialSearchLoaded) {
+    if (initialSearchLoaded && hasToken) {
       onSearch();
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, onSearch]);
+  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch]);
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
   const columnDefs = useMemo(() => GetDuplicateNamesAndBirthdayColumns(), []);

@@ -14,6 +14,7 @@ import {
   checkDecemberParamsAndGridsProfitYears,
   setSelectedProfitYearForDecemberActivities
 } from "reduxstore/slices/yearsEndSlice";
+import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 
 const DecemberProcessAccordion = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
@@ -28,12 +29,14 @@ const DecemberProcessAccordion = () => {
       dispatch(checkDecemberParamsAndGridsProfitYears(Number(event.target.value)));
     };
 
+    const profitYear = useDecemberFlowProfitYear();
+    
     return (
       <div className="flex items-center gap-2 h-10 min-w-[174px]">
         <Select
           labelId="demo-simple-select-label"
           id="demo-simple-select"
-          defaultValue="2024"
+          defaultValue={profitYear?.toString()}
           value={selectedProfitYearForDecemberActivities.toString()}
           size="small"
           fullWidth

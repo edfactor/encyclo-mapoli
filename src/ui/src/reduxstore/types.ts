@@ -155,7 +155,7 @@ export interface NegativeEtvaForSSNsOnPayProfit {
 }
 
 export interface EmployeesOnMilitaryLeaveRequestDto {
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface EmployeesOnMilitaryLeaveResponse {

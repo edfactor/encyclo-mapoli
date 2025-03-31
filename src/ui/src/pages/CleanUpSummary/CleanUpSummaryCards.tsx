@@ -11,6 +11,7 @@ import {
 import { RootState } from "reduxstore/store";
 import { CAPTIONS } from "../../constants";
 import { InfoCard } from "./InfoCard";
+import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 
 interface CleanUpSummaryCardsProps {
   setSelectedTab: (value: number) => void;
@@ -38,12 +39,14 @@ const CleanUpSummaryCards: React.FC<CleanUpSummaryCardsProps> = ({ setSelectedTa
   const { negativeEtvaForSSNsOnPayprofit, duplicateSSNsData, demographicBadges, duplicateNamesAndBirthdays } =
     useSelector((state: RootState) => state.yearsEnd);
 
+  const profitYear = useDecemberFlowProfitYear();
+  
   useEffect(() => {
     if (hasToken) {
-      triggerETVASearch({ profitYear: 2023, pagination: { take: 25, skip: 0, sortBy: "badgeNumber", isSortDescending: true } });
+      triggerETVASearch({ profitYear: profitYear, pagination: { take: 25, skip: 0, sortBy: "badgeNumber", isSortDescending: true } });
       triggerPayrollDupeSsnsOnDemographics({ pagination: { take: 25, skip: 0, sortBy: "badgeNumber", isSortDescending: true } });
       triggerDemographicBadgesNotInPayprofit({ pagination: { take: 25, skip: 0, sortBy: "badgeNumber", isSortDescending: true } });
-      triggerDuplicateNamesAndBirthdays({ profitYear: 2023, pagination: { take: 25, skip: 0, sortBy: "badgeNumber", isSortDescending: true } });
+      triggerDuplicateNamesAndBirthdays({ profitYear: profitYear, pagination: { take: 25, skip: 0, sortBy: "badgeNumber", isSortDescending: true } });
     }
   }, [
     hasToken,

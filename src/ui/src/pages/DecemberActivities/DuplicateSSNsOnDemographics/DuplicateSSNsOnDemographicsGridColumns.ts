@@ -4,7 +4,7 @@ import { yyyyMMDDToMMDDYYYY } from "smart-ui-library";
 export const GetDuplicateSSNsOnDemographicsColumns = (): ColDef[] => {
   return [
     {
-      headerName: "Badge",
+      headerName: "Badge Number",
       field: "badgeNumber",
       colId: "badgeNumber",
       minWidth: 80,
@@ -84,7 +84,7 @@ export const GetDuplicateSSNsOnDemographicsColumns = (): ColDef[] => {
       valueFormatter: (params) => (params.value ? yyyyMMDDToMMDDYYYY(params.value) : "")
     },
     {
-      headerName: "St",
+      headerName: "Status",
       field: "status",
       colId: "status",
       minWidth: 60,
@@ -93,7 +93,7 @@ export const GetDuplicateSSNsOnDemographicsColumns = (): ColDef[] => {
       resizable: true
     },
     {
-      headerName: "Str",
+      headerName: "Store",
       field: "storeNumber",
       colId: "storeNumber",
       minWidth: 60,

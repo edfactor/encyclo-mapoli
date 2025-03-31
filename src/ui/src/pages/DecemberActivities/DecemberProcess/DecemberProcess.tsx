@@ -17,6 +17,7 @@ import {
 import { RootState } from "reduxstore/store";
 import { DSMAccordion, Page } from "smart-ui-library";
 import NegativeETVA from "./NegativeETVA";
+import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 
 const DecemberProcess = () => {
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
@@ -29,14 +30,13 @@ const DecemberProcess = () => {
   const [triggerDuplicateNamesAndBirthdays, { isFetching: isFetchingDuplicateNames }] =
     useLazyGetDuplicateNamesAndBirthdaysQuery();
 
-  //const { negativeEtvaForSSNsOnPayprofit, duplicateSSNsData, demographicBadges, duplicateNamesAndBirthdays } =
-  //  useSelector((state: RootState) => state.yearsEnd);
-
+  const profitYear = useDecemberFlowProfitYear();
+  
   useEffect(() => {
     if (hasToken) {
-      triggerPayrollDupeSsnsOnDemographics({ pagination: { take: 25, skip: 0 } });
-      triggerDemographicBadgesNotInPayprofit({ pagination: { take: 25, skip: 0 } });
-      triggerDuplicateNamesAndBirthdays({ profitYear: 2023, pagination: { take: 25, skip: 0 } });
+      triggerPayrollDupeSsnsOnDemographics({ pagination: { take: 25, skip: 0, sortBy: "ssn",  isSortDescending: false  } });
+      triggerDemographicBadgesNotInPayprofit({ pagination: { take: 25, skip: 0, sortBy: "badgeNumber",  isSortDescending: false  } });
+      triggerDuplicateNamesAndBirthdays({ profitYear: profitYear, pagination: { take: 25, skip: 0, sortBy: "name",  isSortDescending: false } });
     }
   }, [
     hasToken,

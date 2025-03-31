@@ -21,7 +21,7 @@ const MissingCommaInPyNameGrid: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       const request = {
-        pagination: { skip: pageNumber * pageSize, take: pageSize, sort: sortParams.sortBy, isSortDescending: sortParams.isSortDescending }
+        pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: sortParams.sortBy, isSortDescending: sortParams.isSortDescending }
       };
 
       await triggerSearch(request, false);
