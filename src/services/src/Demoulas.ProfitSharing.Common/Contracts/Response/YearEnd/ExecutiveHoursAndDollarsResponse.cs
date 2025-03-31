@@ -12,9 +12,11 @@ public sealed record  ExecutiveHoursAndDollarsResponse
     public required decimal CurrentIncomeYear { get; set; }
     public required byte PayFrequencyId { get; set; }
     public required char EmploymentStatusId { get; set; }
+    public required string PayFrequencyName { get; set; }
+    public required string EmploymentStatusName { get; set; }
 
 
-public static  ExecutiveHoursAndDollarsResponse ResponseExample()
+    public static  ExecutiveHoursAndDollarsResponse ResponseExample()
     {
         return new  ExecutiveHoursAndDollarsResponse
         {
@@ -27,7 +29,9 @@ public static  ExecutiveHoursAndDollarsResponse ResponseExample()
             CurrentHoursYear = 5,
             CurrentIncomeYear = 6,
             PayFrequencyId = 2,
-            EmploymentStatusId = 'a'
+            EmploymentStatusId = 'a',
+            PayFrequencyName = "Monthly",
+            EmploymentStatusName = "Terminated"
         };
     }
 }

@@ -222,7 +222,9 @@ export interface ExecutiveHoursAndDollars {
   currentHoursYear: number;
   currentIncomeYear: number;
   payFrequencyId: number;
+  payFrequencyName: string;
   employmentStatusId: string;
+  employmentStatusName: string;
 }
 
 export interface EmployeeWagesForYear {
