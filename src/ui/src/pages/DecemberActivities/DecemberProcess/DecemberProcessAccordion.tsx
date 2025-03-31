@@ -105,20 +105,6 @@ const DecemberProcessAccordion = () => {
 
         <Grid2 width="100%">
           <DSMCollapsedAccordion
-            title={CAPTIONS.EMPLOYEES_MILITARY}
-            expandable={false}
-            status={{
-              label: "Not Started",
-              color: "secondary"
-            }}
-            onActionClick={() => navigate("/employees-on-military-leave")}
-            actionButtonText="START">
-            <></>
-          </DSMCollapsedAccordion>
-        </Grid2>
-
-        <Grid2 width="100%">
-          <DSMCollapsedAccordion
             title={CAPTIONS.MILITARY_CONTRIBUTIONS}
             expandable={false}
             status={{
@@ -192,13 +178,13 @@ const DecemberProcessAccordion = () => {
 
         <Grid2 width="100%">
           <DSMCollapsedAccordion
-            title={CAPTIONS.PROFIT_SHARE_TOTALS}
+            title={CAPTIONS.PROFIT_SHARE_REPORT}
             expandable={false}
             status={{
               label: "Not Started",
               color: "secondary"
             }}
-            onActionClick={() => navigate("/profit-share-totals")}
+            onActionClick={() => navigate("/profit-share-report")}
             actionButtonText="VIEW TOTALS"
             isCollapsedOnRender={true}>
             <></>

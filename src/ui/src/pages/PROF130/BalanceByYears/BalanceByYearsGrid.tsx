@@ -14,7 +14,7 @@ interface BalanceByYearsGridProps {
 
 const BalanceByYearsGrid: React.FC<BalanceByYearsGridProps> = ({ initialSearchLoaded }) => {
   const [_discard0, setSortParams] = useState<ISortParams>({
-    sortBy: "Badge",
+    sortBy: "badgeNumber",
     isSortDescending: false
   });
 

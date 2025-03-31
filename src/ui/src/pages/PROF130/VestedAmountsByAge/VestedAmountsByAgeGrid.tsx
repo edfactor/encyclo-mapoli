@@ -21,7 +21,7 @@ const VestedAmountsByAgeGrid: React.FC<VestedAmountsByAgeGridProps> = ({
   totalCount
 }) => {
   const [_sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "Badge",
+    sortBy: "badgeNumber",
     isSortDescending: false
   });
 

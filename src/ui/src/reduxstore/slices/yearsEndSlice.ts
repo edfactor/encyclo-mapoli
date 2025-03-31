@@ -41,9 +41,10 @@ import {
   Under21BreakdownByStoreRequest,
   Under21InactiveResponse,
   Under21InactiveRequest,
-  Under21TotalsResponse,
   Under21TotalsRequest,
+  Under21TotalsResponse,
   YearEndProfitSharingReportSummaryResponse,
+  UpdateSummaryResponse,
   ReportsByAgeParams
 } from "reduxstore/types";
 
@@ -115,6 +116,7 @@ export interface YearsEndState {
   under21Totals: Under21TotalsResponse | null;
   under21TotalsQueryParams: Under21TotalsRequest | null;
   profitShareSummaryReport: YearEndProfitSharingReportSummaryResponse | null;
+  updateSummary: UpdateSummaryResponse | null;
 }
 
 const initialState: YearsEndState = {
@@ -184,7 +186,8 @@ const initialState: YearsEndState = {
   under21InactiveQueryParams: null,
   under21Totals: null,
   under21TotalsQueryParams: null,
-  profitShareSummaryReport: null
+  profitShareSummaryReport: null,
+  updateSummary: null
 };
 
 export const yearsEndSlice = createSlice({
@@ -838,6 +841,12 @@ export const yearsEndSlice = createSlice({
     },
     setProfitShareSummaryReport: (state, action: PayloadAction<YearEndProfitSharingReportSummaryResponse>) => {
       state.profitShareSummaryReport = action.payload;
+    },
+    setUpdateSummary: (state, action: PayloadAction<UpdateSummaryResponse>) => {
+      state.updateSummary = action.payload;
+    },
+    clearUpdateSummary: (state) => {
+      state.updateSummary = null;
     }
   }
 });
@@ -948,6 +957,8 @@ export const {
   setUnder21TotalsQueryParams,
   checkFiscalCloseParamsAndGridsProfitYears,
   checkDecemberParamsAndGridsProfitYears,
-  setProfitShareSummaryReport
+  setProfitShareSummaryReport,
+  setUpdateSummary,
+  clearUpdateSummary
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;

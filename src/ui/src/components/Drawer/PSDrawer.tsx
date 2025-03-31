@@ -284,7 +284,7 @@ const PSDrawer = () => {
                                     <Chip
                                       variant="outlined"
                                       label={"Not Started"}
-                                      color={"primary"}
+                                      className="text-gray-700 border-gray-700"
                                       size="small"
                                     />
                                   </Box>
@@ -327,7 +327,7 @@ const PSDrawer = () => {
                               <Chip
                                 variant="outlined"
                                 label={"Not Started"}
-                                color={"primary"}
+                                className="text-gray-700 border-gray-700"
                                 size="small"
                               />
                             </Box>
