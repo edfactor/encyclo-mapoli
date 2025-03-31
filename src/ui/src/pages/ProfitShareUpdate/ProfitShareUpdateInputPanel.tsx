@@ -360,7 +360,7 @@ const ProfitShareUpdateInputPanel = () => {
           </Grid2>
 
           <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-            <FormLabel>Adjust Incoming Forfeiture Amount</FormLabel>
+            <FormLabel>Adjust Forfeiture Amount</FormLabel>
             <Controller
               name="adjustmentIncomingForfeitureAmount"
               control={control}
