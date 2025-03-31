@@ -83,17 +83,11 @@ export const menuLevels: MenuLevel[] = [
           { subTitle: CAPTIONS.DEMOGRAPHIC_BADGES, subRoute: ROUTES.DEMOGRAPHIC_BADGES },
           { subTitle: CAPTIONS.DUPLICATE_SSNS, subRoute: ROUTES.DUPLICATE_SSNS },
           { subTitle: CAPTIONS.NEGATIVE_ETVA, subRoute: ROUTES.NEGATIVE_ETVA },
-          { subTitle: CAPTIONS.DUPLICATE_NAMES, subRoute: ROUTES.DUPLICATE_NAMES },
-          { subTitle: CAPTIONS.MISSING_COMMA, subRoute: ROUTES.MISSING_COMMA }
+          { subTitle: CAPTIONS.DUPLICATE_NAMES, subRoute: ROUTES.DUPLICATE_NAMES }
         ]
       },
       {
-        topTitle: CAPTIONS.EMPLOYEES_MILITARY,
-        topRoute: ROUTES.MILITARY_LEAVE,
-        subPages: []
-      },
-      {
-        topTitle: CAPTIONS.MILITARY_ENTRY_AND_MODIFICATION,
+        topTitle: CAPTIONS.MILITARY_CONTRIBUTIONS,
         topRoute: ROUTES.MILITARY_ENTRY_AND_MODIFICATION,
         subPages: []
       },
@@ -108,23 +102,18 @@ export const menuLevels: MenuLevel[] = [
         subPages: []
       },
       {
-        topTitle: CAPTIONS.TERMINATIONS,
-        topRoute: ROUTES.PROF_TERM,
-        subPages: []
-      },
-      {
         topTitle: CAPTIONS.DISTRIBUTIONS_AND_FORFEITURES,
         topRoute: ROUTES.DISTRIBUTIONS_AND_FORFEITURES,
         subPages: []
       },
       {
-        topTitle: CAPTIONS.PROFIT_SHARE_REPORT,
-        topRoute: ROUTES.PROFIT_SHARE_REPORT,
+        topTitle: CAPTIONS.TERMINATIONS,
+        topRoute: ROUTES.PROF_TERM,
         subPages: []
       },
       {
-        topTitle: CAPTIONS.PROFIT_SHARE_UPDATE,
-        topRoute: ROUTES.PROFIT_SHARE_UPDATE,
+        topTitle: CAPTIONS.PROFIT_SHARE_REPORT,
+        topRoute: ROUTES.PROFIT_SHARE_REPORT,
         subPages: []
       }
     ]

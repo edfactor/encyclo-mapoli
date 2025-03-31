@@ -14,7 +14,7 @@ interface ForfeituresByAgeGridProps {
 
 const ForfeituresByAgeGrid: React.FC<ForfeituresByAgeGridProps> = ({ initialSearchLoaded }) => {
   const [_discard0, setSortParams] = useState<ISortParams>({
-    sortBy: "Badge",
+    sortBy: "badgeNumber",
     isSortDescending: false
   });
 

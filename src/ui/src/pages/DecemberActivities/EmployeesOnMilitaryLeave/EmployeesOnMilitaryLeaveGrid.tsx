@@ -11,7 +11,7 @@ const EmployeesOnMilitaryLeaveGrid: React.FC = () => {
   const [pageSize, setPageSize] = useState(100);
   const { militaryAndRehireQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const [_, setSortParams] = useState<ISortParams>({
-    sortBy: "Badge",
+    sortBy: "badgeNumber",
     isSortDescending: false
   });
   const [triggerSearch, { isFetching }] = useLazyGetEmployeesOnMilitaryLeaveQuery();
