@@ -54,11 +54,22 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
         return `${year}.${iter}`;
       }
     },   
-   
     {
       headerName: "Profit Code",
       field: "profitCodeId",
       colId: "profitCodeId",
+      minWidth: 120,
+      headerClass: "right-align",
+      cellClass: "right-align",
+      resizable: true,
+      sortable: true,
+      unSortIcon: true
+    },   
+   
+    {
+      headerName: "Profit Code",
+      field: "profitCodeId",
+      colId: "profitCodeId1",
       minWidth: 80,
       headerClass: "right-align",
       cellClass: "right-align",
@@ -97,6 +108,16 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       headerName: "Forfeiture",
       field: "forfeiture",
       colId: "forfeiture",
+      minWidth: 120,
+      headerClass: "right-align",
+      cellClass: "right-align",
+      resizable: true,
+      valueFormatter: agGridNumberToCurrency
+    },
+    {
+      headerName: "Payment",
+      field: "payment",
+      colId: "payment",
       minWidth: 120,
       headerClass: "right-align",
       cellClass: "right-align",
