@@ -9,7 +9,6 @@ import { GetMilitaryAndRehireColumns } from "./EmployeesOnMilitaryLeaveGridColum
 const EmployeesOnMilitaryLeaveGrid: React.FC = () => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(100);
-  const { militaryAndRehireQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const [_, setSortParams] = useState<ISortParams>({
     sortBy: "badgeNumber",
     isSortDescending: false
@@ -19,7 +18,12 @@ const EmployeesOnMilitaryLeaveGrid: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       const request = {
-        pagination: { skip: pageNumber * pageSize, take: pageSize }
+        pagination: {
+          skip: pageNumber * pageSize,
+          take: pageSize,
+          sortBy: "Badge", // Default sortBy value
+          isSortDescending: false // Default sort order
+        }
       };
 
       await triggerSearch(request, false);

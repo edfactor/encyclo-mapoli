@@ -56,10 +56,10 @@ const BalanceByYearsGrid: React.FC<BalanceByYearsGridProps> = ({ initialSearchLo
   }, [triggerSearch, balanceByYearsQueryParams?.profitYear]);
 
   useEffect(() => {
-    if (initialSearchLoaded) {
+    if (initialSearchLoaded && balanceByYearsQueryParams?.profitYear) {
       onSearch();
     }
-  }, [initialSearchLoaded, onSearch]);
+  }, [balanceByYearsQueryParams?.profitYear, initialSearchLoaded, onSearch]);
 
   return (
     <>

@@ -60,10 +60,10 @@ const DistributionByAgeGrid: React.FC<DistributionByAgeGridProps> = ({ initialSe
   }, [triggerSearch, distributionsByAgeQueryParams?.profitYear]);
 
   useEffect(() => {
-    if (initialSearchLoaded) {
+    if (initialSearchLoaded && distributionsByAgeQueryParams?.profitYear) {
       onSearch();
     }
-  }, [initialSearchLoaded, onSearch]);
+  }, [distributionsByAgeQueryParams?.profitYear, initialSearchLoaded, onSearch]);
 
   return (
     <>

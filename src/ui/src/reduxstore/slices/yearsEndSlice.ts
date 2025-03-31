@@ -44,7 +44,8 @@ import {
   Under21TotalsRequest,
   Under21TotalsResponse,
   YearEndProfitSharingReportSummaryResponse,
-  UpdateSummaryResponse
+  UpdateSummaryResponse,
+  ReportsByAgeParams
 } from "reduxstore/types";
 
 export interface YearsEndState {
@@ -62,7 +63,7 @@ export interface YearsEndState {
   balanceByYearsTotal: BalanceByAge | null;
   contributionsByAgeFullTime: ContributionsByAge | null;
   contributionsByAgePartTime: ContributionsByAge | null;
-  contributionsByAgeQueryParams: ProfitYearRequest | null;
+  contributionsByAgeQueryParams: ReportsByAgeParams | null;
   contributionsByAgeTotal: ContributionsByAge | null;
   demographicBadges: PagedReportResponse<DemographicBadgesNotInPayprofit> | null;
   distributionsAndForfeitures: PagedReportResponse<DistributionsAndForfeitures> | null;
@@ -299,17 +300,20 @@ export const yearsEndSlice = createSlice({
         state.balanceByYearsPartTime = null;
         state.balanceByYearsTotal = null;
       }
-
       // Contributions By Age
-      if (
-        state.contributionsByAgeQueryParams?.profitYear &&
-        state.contributionsByAgeQueryParams?.profitYear !== action.payload
-      ) {
+
+      if (!state.contributionsByAgeQueryParams) {
+        state.contributionsByAgeQueryParams = {
+          profitYear: action.payload,
+          reportType: FrozenReportsByAgeRequestType.Total
+        };
+      } else {
         state.contributionsByAgeQueryParams.profitYear = action.payload;
-        state.contributionsByAgeFullTime = null;
-        state.contributionsByAgePartTime = null;
-        state.contributionsByAgeTotal = null;
       }
+
+      state.contributionsByAgeFullTime = null;
+      state.contributionsByAgePartTime = null;
+      state.contributionsByAgeTotal = null;
 
       // Distributions By Age
       if (
@@ -813,7 +817,7 @@ export const yearsEndSlice = createSlice({
     setUnder21BreakdownByStoreQueryParams: (state, action: PayloadAction<Under21BreakdownByStoreRequest>) => {
       state.under21BreakdownByStoreQueryParams = action.payload;
     },
-    
+
     setUnder21Inactive: (state, action: PayloadAction<Under21InactiveResponse>) => {
       state.under21Inactive = action.payload;
     },
@@ -822,7 +826,7 @@ export const yearsEndSlice = createSlice({
     },
     setUnder21InactiveQueryParams: (state, action: PayloadAction<Under21InactiveRequest>) => {
       state.under21InactiveQueryParams = action.payload;
-    },    
+    },
     setUnder21Totals: (state, action: PayloadAction<Under21TotalsResponse>) => {
       state.under21Totals = action.payload;
     },

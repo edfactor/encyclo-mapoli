@@ -10,7 +10,7 @@ import OktaLoginCallback from "components/MenuBar/OktaLoginCallback";
 const clientId = import.meta.env.VITE_REACT_APP_OKTA_CLIENT_ID;
 const issuer = import.meta.env.VITE_REACT_APP_OKTA_ISSUER;
 
-//@ts-ignore
+//@ts-expect-error we do not have types for this
 const RouteSecurity = ({ oktaEnabled, children }) => {
   const [oktaAuth, setOktaAuth] = useState<any>(null);
   const navigate = useNavigate();
@@ -19,17 +19,22 @@ const RouteSecurity = ({ oktaEnabled, children }) => {
     setOktaAuth(new OktaAuth(config.oidc));
   }, []);
 
-  // @ts-ignore
-  const restoreOriginalUri = useCallback(async (_oktaAuth, originalUri) => {
-    const storageName = "SMARTAPP_SignInRedirectUrl"; // Project setup: update to new key
-    let signInRedirectUrl = localStorage.getItem(storageName) || "";
-    if (originalUri) {
-      localStorage.setItem(storageName, originalUri || "");
-      signInRedirectUrl = originalUri;
-    }
+  const restoreOriginalUri = useCallback(
+    //@ts-expect-error we do not have types for this
+    async (_oktaAuth, originalUri) => {
+      const storageName = "SMARTAPP_SignInRedirectUrl"; // Project setup: update to new key
+      let signInRedirectUrl = localStorage.getItem(storageName) || "";
+      if (originalUri) {
+        localStorage.setItem(storageName, originalUri || "");
+        signInRedirectUrl = originalUri;
+      }
 
-    navigate && navigate(toRelativeUrl(signInRedirectUrl, window.location.origin));
-  }, []);
+      if (navigate) {
+        navigate(toRelativeUrl(signInRedirectUrl, window.location.origin));
+      }
+    },
+    [navigate]
+  );
 
   if (oktaAuth === null) {
     return null;
@@ -53,18 +58,18 @@ const RouteSecurity = ({ oktaEnabled, children }) => {
         </Routes>
       </Security>
     );
+  } else {
+    return (
+      <Security
+        oktaAuth={oktaAuth}
+        restoreOriginalUri={restoreOriginalUri}>
+        <Routes>
+          <Route path="/" />
+          {children}
+        </Routes>
+      </Security>
+    );
   }
-
-  return (
-    <Security
-      oktaAuth={oktaAuth}
-      restoreOriginalUri={restoreOriginalUri}>
-      <Routes>
-        <Route path="/" />
-        {children}
-      </Routes>
-    </Security>
-  );
 };
 
 export default RouteSecurity;

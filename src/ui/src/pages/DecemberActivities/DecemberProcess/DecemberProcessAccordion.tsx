@@ -1,4 +1,4 @@
-import { Button, Divider, MenuItem, Select, SelectChangeEvent, Stack, Typography } from "@mui/material";
+import { Divider, MenuItem, Select, SelectChangeEvent, Stack, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import DSMCollapsedAccordion from "components/DSMCollapsedAccordion";
 import DuplicateNamesAndBirthdaysGrid from "pages/DecemberActivities/DuplicateNamesAndBirthdays/DuplicateNamesAndBirthdaysGrid";
@@ -30,7 +30,7 @@ const DecemberProcessAccordion = () => {
     };
 
     const profitYear = useDecemberFlowProfitYear();
-    
+
     return (
       <div className="flex items-center gap-2 h-10 min-w-[174px]">
         <Select
@@ -94,7 +94,9 @@ const DecemberProcessAccordion = () => {
                   sx={{ alignContent: "center" }}
                   direction="row">
                   <Typography sx={{ margin: 0, padding: 0 }}>This has not been created yet. </Typography>
+                  {/* 
                   <Button>Create Report</Button>
+                    */}
                 </Stack>
               </Stack>
             </Grid2>

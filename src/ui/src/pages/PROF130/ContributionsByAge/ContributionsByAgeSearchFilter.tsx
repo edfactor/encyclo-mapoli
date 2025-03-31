@@ -15,6 +15,7 @@ import { FrozenReportsByAgeRequestType } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
+import { useEffect } from "react";
 
 interface ContributionsByAgeSearch {
   profitYear: number;
@@ -51,13 +52,15 @@ const ContributionsByAgeSearchFilter: React.FC<ContributionsByAgeSearchFilterPro
     resolver: yupResolver(schema),
     defaultValues: {
       profitYear: fiscalCloseProfitYear || contributionsByAgeQueryParams?.profitYear || undefined,
-      reportType: undefined
+      reportType: FrozenReportsByAgeRequestType.Total || undefined
     }
   });
 
-  if (fiscalCloseProfitYear && !contributionsByAgeFullTime) {
-    setInitialSearchLoaded(true);
-  }
+  useEffect(() => {
+    if (fiscalCloseProfitYear && !contributionsByAgeFullTime) {
+      setInitialSearchLoaded(true);
+    }
+  }, [fiscalCloseProfitYear, contributionsByAgeFullTime, setInitialSearchLoaded]);
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {

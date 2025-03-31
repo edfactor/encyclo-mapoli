@@ -18,6 +18,10 @@ export interface FrozenProfitYearRequest extends ProfitYearRequest {
   useFrozenData: boolean;
 }
 
+export interface ReportsByAgeParams extends ProfitYearRequest {
+  reportType: FrozenReportsByAgeRequestType;
+}
+
 export interface DemographicBadgesNotInPayprofitResponse {
   reportName: string;
   reportDate: string;
@@ -222,7 +226,9 @@ export interface ExecutiveHoursAndDollars {
   currentHoursYear: number;
   currentIncomeYear: number;
   payFrequencyId: number;
+  payFrequencyName: string;
   employmentStatusId: string;
+  employmentStatusName: string;
 }
 
 export interface EmployeeWagesForYear {

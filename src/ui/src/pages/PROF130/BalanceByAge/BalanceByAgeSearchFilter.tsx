@@ -15,6 +15,7 @@ import { FrozenReportsByAgeRequestType } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
+import { useEffect } from "react";
 
 interface BalanceByAgeSearch {
   profitYear: number;
@@ -83,10 +84,11 @@ const BalanceByAgeSearchFilter: React.FC<BalanceByAgeSearchFilterProps> = ({ set
       dispatch(setBalanceByAgeQueryParams(fiscalCloseProfitYear));
     }
   });
-
-  if (fiscalCloseProfitYear && !balanceByAgeFullTime) {
-    setInitialSearchLoaded(true);
-  }
+  useEffect(() => {
+    if (fiscalCloseProfitYear && !balanceByAgeFullTime) {
+      setInitialSearchLoaded(true);
+    }
+  }, [fiscalCloseProfitYear, balanceByAgeFullTime, setInitialSearchLoaded]);
 
   const handleReset = () => {
     dispatch(clearBalanceByAgeQueryParams());
