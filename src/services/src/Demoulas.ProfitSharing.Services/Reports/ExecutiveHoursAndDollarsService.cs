@@ -33,6 +33,9 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
             var query = c.PayProfits
                 .Where(p=> p.ProfitYear == request.ProfitYear)
                 .Include(p => p.Demographic)
+                .ThenInclude(d=> d!.PayFrequency)
+                .Include(p => p.Demographic)
+                .ThenInclude(d => d!.EmploymentStatus)
                 .AsQueryable();
             if (request.HasExecutiveHoursAndDollars.HasValue && request.HasExecutiveHoursAndDollars.Value)
             {
@@ -72,7 +75,9 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
                     CurrentHoursYear = p.CurrentHoursYear,
                     CurrentIncomeYear = p.CurrentIncomeYear,
                     PayFrequencyId = p.Demographic.PayFrequencyId,
-                    EmploymentStatusId = p.Demographic.EmploymentStatusId
+                    PayFrequencyName = p.Demographic.PayFrequency!.Name,
+                    EmploymentStatusId = p.Demographic.EmploymentStatusId,
+                    EmploymentStatusName = p.Demographic.EmploymentStatus!.Name
                 })
                 .OrderBy(p => p.StoreNumber)
                 .ThenBy(p => p.BadgeNumber)
