@@ -32,6 +32,7 @@ import {
   setProfitEdit,
   setProfitMasterApply,
   setProfitMasterRevert,
+  setProfitShareSummaryReport,
   setProfitUpdate,
   setTermination,
   setUnder21BreakdownByStore,
@@ -92,7 +93,9 @@ import {
   Under21TotalsResponse,
   VestedAmountsByAge,
   YearEndProfitSharingReportRequest,
-  YearEndProfitSharingReportResponse
+  YearEndProfitSharingReportResponse,
+  YearEndProfitSharingReportSummaryResponse,
+  FrozenProfitYearRequest
 } from "reduxstore/types";
 import { url } from "./api";
 
@@ -836,7 +839,27 @@ export const YearsEndApi = createApi({
           }
         }
       }
-    )
+    ),
+    getYearEndProfitSharingSummaryReport: builder.query<YearEndProfitSharingReportSummaryResponse, FrozenProfitYearRequest>({
+      query: (params) => ({
+        url: "yearend/yearend-profit-sharing-summary-report",
+        method: "GET",
+        params: {
+          useFrozenData: params.useFrozenData,
+          profitYear: params.profitYear,
+          skip: 0,
+          take: 255
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setProfitShareSummaryReport(data));
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    })
   })
 });
 
@@ -871,5 +894,7 @@ export const {
   useLazyGetUnder21TotalsQuery,
   useLazyGetVestingAmountByAgeQuery,
   useLazyGetYearEndProfitSharingReportQuery,
-  useUpdateExecutiveHoursAndDollarsMutation
+  useUpdateExecutiveHoursAndDollarsMutation,
+  useGetYearEndProfitSharingSummaryReportQuery,
+  useLazyGetYearEndProfitSharingSummaryReportQuery
 } = YearsEndApi;

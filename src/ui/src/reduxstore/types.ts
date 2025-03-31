@@ -14,6 +14,10 @@ export interface ProfitYearRequest {
   profitYear: number;
 }
 
+export interface FrozenProfitYearRequest extends ProfitYearRequest {
+  useFrozenData: boolean;
+}
+
 export interface DemographicBadgesNotInPayprofitResponse {
   reportName: string;
   reportDate: string;
@@ -872,4 +876,17 @@ export interface Under21TotalsResponse {
   totalDisbursements: number;
   totalEndingBalance: number | null;
   totalVestingBalance: number;
+}
+
+export interface YearEndProfitSharingReportSummaryLineItem {
+  subgroup: string;
+  lineItemPrefix: string;
+  lineItemTitle: string;
+  numberOfMembers: number;
+  totalWages: number;
+  totalBalance: number;
+}
+
+export interface YearEndProfitSharingReportSummaryResponse {
+  lineItems: YearEndProfitSharingReportSummaryLineItem[];
 }
