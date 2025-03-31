@@ -154,7 +154,7 @@ const Pay450Grid: React.FC<Pay450GridProps> = ({
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`PROFIT-ELIGIBLE REPORT (${displayData.response.total || 0} records)`}
+              {`UPDATE SUMMARY FOR PROFIT SHARING (${displayData.response.total || 0} records)`}
             </Typography>
           </div>
           <DSMGrid

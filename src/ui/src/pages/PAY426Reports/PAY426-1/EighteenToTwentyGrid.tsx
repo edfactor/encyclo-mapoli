@@ -4,6 +4,7 @@ import { DSMGrid } from "smart-ui-library";
 import { GetProfitSharingReportGridColumns } from "./EighteenToTwentyGridColumns";
 import { useNavigate, Path } from "react-router";
 import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
+import { CAPTIONS } from "../../../constants";
 interface EmployeeData {
   badge: number;
   employeeName: string;
@@ -83,7 +84,7 @@ const EighteenToTwentyGrid = () => {
         <Typography
           variant="h2"
           sx={{ color: "#0258A5" }}>
-          {`PROFIT-ELIGIBLE REPORT (${data?.response?.total || 0} records)`}
+          {`${CAPTIONS.PAY426_ACTIVE_18_20} (${data?.response?.total || 0} records)`}
         </Typography>
       </div>
       <DSMGrid
