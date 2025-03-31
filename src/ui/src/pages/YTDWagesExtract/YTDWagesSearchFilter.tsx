@@ -6,9 +6,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetEmployeeWagesForYearQuery } from "reduxstore/api/YearsEndApi";
 import { setEmployeeWagesForYearQueryParams } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
+import { SortedPaginationRequestDto } from "../../reduxstore/types";
 
 interface YTDWagesSearch {
   profitYear: number;
+  pagination: SortedPaginationRequestDto;
 }
 
 interface YTDWagesSearchFilterProps {
@@ -23,7 +25,8 @@ const YTDWagesSearchFilter: React.FC<YTDWagesSearchFilterProps> = ({ setInitialS
 
   const { handleSubmit, setValue } = useForm<YTDWagesSearch>({
     defaultValues: {
-      profitYear: fiscalCloseProfitYear || employeeWagesForYearQueryParams?.profitYear || undefined
+      profitYear: fiscalCloseProfitYear || employeeWagesForYearQueryParams?.profitYear || undefined,
+      pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }
     }
   });
 
@@ -32,7 +35,7 @@ const YTDWagesSearchFilter: React.FC<YTDWagesSearchFilterProps> = ({ setInitialS
     triggerSearch(
       {
         profitYear: fiscalCloseProfitYear,
-        pagination: { skip: 0, take: 25 },
+        pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true },
         acceptHeader: "application/json"
       },
       false

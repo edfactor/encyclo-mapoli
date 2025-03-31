@@ -11,7 +11,6 @@ export const GetDemographicBadgesNotInPayprofitColumns = (): ColDef[] => {
       cellClass: "right-align",
       resizable: true,
       sortable: true,
-      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber),
       valueFormatter: (params) => {
         const badgeNumber = params.value;
         return badgeNumber ? badgeNumber.toString().padStart(7, "0") : "";
@@ -55,7 +54,7 @@ export const GetDemographicBadgesNotInPayprofitColumns = (): ColDef[] => {
       valueFormatter: (params) => {
         const status = params.data.status; // assuming 'status' is in the row data
         const statusName = params.data.statusName; // assuming 'statusName' is in the row data
-        return `${statusName}(${status})`;
+        return `[${status}] ${statusName}`;
       }
     }
   ];

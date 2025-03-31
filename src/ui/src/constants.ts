@@ -4,7 +4,7 @@ export const drawerOpenWidth = 330;
 export const drawerClosedWidth = 64;
 
 export const MENU_LABELS = {
-  FISCAL_CLOSE: "Fiscal Close",
+  FISCAL_CLOSE: "Fiscal Activities",
   DECEMBER_ACTIVITIES: "December Activities",
   BENEFICIARIES: "Beneficiaries",
   DISTRIBUTIONS: "Distributions",
@@ -84,7 +84,7 @@ export const CAPTIONS = {
   CLEAN_UP_REPORTS: "Clean Up Reports",
   DEMOGRAPHIC_BADGES: "Demographic Badges Not In Payprofit",
   DECEMBER: "December",
-  FISCAL_CLOSE: "Fiscal Close",
+  FISCAL_CLOSE: MENU_LABELS.FISCAL_CLOSE,
   POST_FROZEN: "Post Frozen",
   DISTRIBUTIONS_AND_FORFEITURES: "Distributions and Forfeitures (QPAY129)",
   DISTRIBUTIONS_BY_AGE: "Get Distributions by Age (PROF130)",

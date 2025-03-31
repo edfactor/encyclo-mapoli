@@ -97,7 +97,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
         <Typography
           variant="h2"
           sx={{ color: "#0258A5" }}>
-          Employee Details
+          Member Details
         </Typography>
       </Grid2>
 

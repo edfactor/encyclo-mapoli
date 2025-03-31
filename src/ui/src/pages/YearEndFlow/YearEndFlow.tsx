@@ -9,7 +9,7 @@ import {
 } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import { Page } from "smart-ui-library";
-import { CAPTIONS } from "../../constants";
+import { CAPTIONS, MENU_LABELS } from "../../constants";
 
 const FiscalFlow = () => {
   const { selectedProfitYearForFiscalClose } = useSelector((state: RootState) => state.yearsEnd);
@@ -45,7 +45,7 @@ const FiscalFlow = () => {
 
   return (
     <Page
-      label="Fiscal Flow"
+      label={MENU_LABELS.FISCAL_CLOSE}
       actionNode={<ProfitYearSelector />}>
       <Grid2 container>
         <Grid2
@@ -59,6 +59,7 @@ const FiscalFlow = () => {
             title={CAPTIONS.YTD_WAGES_EXTRACT}
             expandable={false}
             actionButtonText="START"
+            
             status={{
               label: "Not Started",
               color: "default"

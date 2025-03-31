@@ -14,8 +14,8 @@ interface BreakdownSearchParams {
     badgeId?: string;
     employeeName?: string;
     under21Only?: boolean;
-    sortBy?: string;
-    isSortDescending?: boolean;
+    sortBy: string;
+    isSortDescending: boolean;
 }
 
 interface OptionItem {
@@ -97,10 +97,11 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
                 profitYear: 2024,
                 storeNumber: data.store,
                 under21Only: data.under21Only,
-                isSortDescending: data.isSortDescending,
                 pagination: {
                     take: 255,
-                    skip: 0
+                    skip: 0,
+                    sortBy: data.sortBy,
+                    isSortDescending: data.isSortDescending,
                 }
             }));
         }

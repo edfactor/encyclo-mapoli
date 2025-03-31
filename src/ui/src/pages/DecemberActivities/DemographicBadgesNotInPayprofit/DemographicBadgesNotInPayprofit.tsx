@@ -1,10 +1,11 @@
 import Grid2 from '@mui/material/Grid2';
 import { Page } from "smart-ui-library";
 import DemographicBadgesNotInPayprofitGrid from "./DemographicBadgesNotInPayprofitGrid";
+import { CAPTIONS } from "../../../constants";
 
 const DemographicBadgesNotInPayprofit = () => {
   return (
-    <Page label="Demographic Badges Not In Payprofit">
+    <Page label={CAPTIONS.DEMOGRAPHIC_BADGES}>
       <Grid2
         container
         rowSpacing="24px">
