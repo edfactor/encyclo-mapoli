@@ -194,7 +194,7 @@ const ProfitShareUpdateInputPanel = () => {
             {errors.profitYear && <FormHelperText error>{errors.profitYear.message}</FormHelperText>}
           </Grid2>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+          <Grid2 size={{ xs: 12, sm: 4, md: 2 }}>
             <FormLabel>Contribution %</FormLabel>
             <Controller
               name="contributionPercent"
@@ -233,7 +233,7 @@ const ProfitShareUpdateInputPanel = () => {
           </Grid2>
 
           <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-            <FormLabel>Incoming Forfeiture %</FormLabel>
+            <FormLabel>Forfeiture %</FormLabel>
             <Controller
               name="incomingForfeiturePercent"
               control={control}
@@ -406,7 +406,7 @@ const ProfitShareUpdateInputPanel = () => {
             )}
           </Grid2>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
             <FormLabel>Adjust Secondary Earnings Amount</FormLabel>
             <Controller
               name="adjustmentSecondaryEarningsAmount"
