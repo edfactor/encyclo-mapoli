@@ -33,7 +33,7 @@ public sealed class PayProfitUpdateService : IPayProfitUpdateService
     {
         using (_logger.BeginScope("Setting EnrollmentId for ProfitYear {0}", profitYear))
         {
-            _ = await _dataContextFactory.UseReadOnlyContext(async ctx => {
+            _ = await _dataContextFactory.UseWritableContext(async ctx => {
                 
                 //Update to 2 if there is an enrollment record for the year
                 await ctx.PayProfits.Include(x=>x.Demographic).Where(
@@ -57,7 +57,7 @@ public sealed class PayProfitUpdateService : IPayProfitUpdateService
                     )
                 ).ExecuteUpdateAsync(x => x.SetProperty(pp => pp.EnrollmentId, Enrollment.Constants.NewVestingPlanHasForfeitureRecords), ct);
                 return true;
-            });
+            }, ct);
         }
     }
 }
