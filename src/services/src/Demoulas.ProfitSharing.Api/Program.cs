@@ -8,6 +8,7 @@ using Demoulas.ProfitSharing.Api.Extensions;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Extensions;
+using Demoulas.ProfitSharing.Data.Interceptor;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Extensions;
 using Demoulas.ProfitSharing.Security;
@@ -15,6 +16,7 @@ using Demoulas.ProfitSharing.Services.Extensions;
 using Demoulas.Security;
 using Demoulas.Util.Extensions;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using NSwag.Generation.AspNetCore;
 using Scalar.AspNetCore;
 
@@ -68,8 +70,8 @@ builder.Services.AddCors(options =>
 
 List<ContextFactoryRequest> list =
 [
-    ContextFactoryRequest.Initialize<ProfitSharingDbContext>("ProfitSharing"),
-    ContextFactoryRequest.Initialize<ProfitSharingReadOnlyDbContext>("ProfitSharing"),
+    ContextFactoryRequest.Initialize<ProfitSharingDbContext>("ProfitSharing", interceptors: new List<IInterceptor> { new ForfeitureMaterializationInterceptor() }),
+    ContextFactoryRequest.Initialize<ProfitSharingReadOnlyDbContext>("ProfitSharing", interceptors: new List<IInterceptor> { new ForfeitureMaterializationInterceptor() }),
     ContextFactoryRequest.Initialize<DemoulasCommonDataContext>("StoreInfo")
 ];
 
