@@ -86,7 +86,7 @@ const schema = yup.object().shape({
   adjustmentSecondaryEarningsAmount: yup.number().typeError("Earnings must be a number").nullable()
 });
 
-const ProfitShareUpdateInputPanel = () => {
+const ProfitShareEditUpdateInputPanel = () => {
   const [previewUpdate] = useLazyGetProfitShareUpdateQuery();
   const [previewEdit] = useLazyGetProfitShareEditQuery();
   const [masterApply] = useLazyGetMasterApplyQuery();
@@ -466,4 +466,4 @@ const ProfitShareUpdateInputPanel = () => {
   );
 };
 
-export default ProfitShareUpdateInputPanel;
+export default ProfitShareEditUpdateInputPanel;

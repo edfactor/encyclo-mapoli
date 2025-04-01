@@ -2,10 +2,10 @@ import { useState, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams } from "smart-ui-library";
-import { ProfitShareUpdateGridColumns } from "./ProfitShareUpdateGridColumns";
-import { ProfitShareEditGridColumns } from "./ProfitShareEditGridColumns";
+import { ProfitShareUpdateGridColumns } from "./ProfitShareEditUpdateGridColumns";
+import { ProfitShareEditUpdateGridColumns } from "./ProfitShareEditGridColumns";
 
-const ProfitShareUpdateGrid = () => {
+const ProfitShareEditUpdateGrid = () => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
@@ -13,7 +13,7 @@ const ProfitShareUpdateGrid = () => {
     isSortDescending: false
   });
   const columnDefs = useMemo(() => ProfitShareUpdateGridColumns(), []);
-  const editColumnDefs = useMemo(() => ProfitShareEditGridColumns(), []);
+  const editColumnDefs = useMemo(() => ProfitShareEditUpdateGridColumns(), []);
   const { profitSharingUpdate } = useSelector((state: RootState) => state.yearsEnd);
 
   return (
@@ -59,4 +59,4 @@ const ProfitShareUpdateGrid = () => {
   );
 };
 
-export default ProfitShareUpdateGrid;
+export default ProfitShareEditUpdateGrid;
