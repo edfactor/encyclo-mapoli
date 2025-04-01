@@ -428,26 +428,13 @@ public sealed class TotalService : ITotalService
             .Select(g => new
             {
                 Ssn = g.Key,
-                TotalContributions = g.Sum(x => x.Contribution),
-                TotalEarnings = g.Sum(x => x.Earnings),
-                TotalForfeitures = g.Sum(x =>
-                    x.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id
-                        ? x.Forfeiture
-                        : (x.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id ? -x.Forfeiture : 0)),
-                TotalPayments = g.Sum(x => x.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0),
-                Distribution = g.Sum(x =>
-                    (x.ProfitCodeId == ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id ||
-                     x.ProfitCodeId == ProfitCode.Constants.OutgoingDirectPayments.Id ||
-                     x.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment.Id)
-                        ? -x.Forfeiture
-                        : 0),
-                BeneficiaryAllocation = g.Sum(x =>
-                    (x.ProfitCodeId == ProfitCode.Constants.OutgoingXferBeneficiary.Id) ? -x.Forfeiture :
-                    (x.ProfitCodeId == ProfitCode.Constants.IncomingQdroBeneficiary.Id) ? x.Contribution : 0),
-                CurrentBalance = g.Sum(x =>
-                    x.Contribution + x.Earnings +
-                    (x.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0) -
-                    (x.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0))
+                TotalContributions = g.Sum(x => x.CalculateAmounts().contribution),
+                TotalEarnings = g.Sum(x => x.CalculateAmounts().earnings),
+                TotalForfeitures = g.Sum(x => x.CalculateAmounts().forfeiture),
+                TotalPayments = g.Sum(x => x.CalculateAmounts().payment),
+                Distribution = g.Sum(x => x.CalculateAmounts().distribution),
+                BeneficiaryAllocation = g.Sum(x => x.CalculateAmounts().beneficiaryAllocation),
+                CurrentBalance = g.Sum(x => x.CalculateAmounts().currentBalance)
             })
             .Select(r => new InternalProfitDetailDto
             {
