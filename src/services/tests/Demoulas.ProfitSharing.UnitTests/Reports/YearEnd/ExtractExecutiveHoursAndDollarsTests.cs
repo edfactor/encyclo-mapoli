@@ -254,7 +254,10 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
         pp.CurrentIncomeYear = _example.CurrentIncomeYear;
         pp.CurrentHoursYear = _example.CurrentHoursYear;
         demo.PayFrequencyId = _example.PayFrequencyId;
+        demo.PayFrequency = new PayFrequency { Id = _example.PayFrequencyId, Name = _example.PayFrequencyName };
         demo.EmploymentStatusId = _example.EmploymentStatusId;
+        demo.EmploymentStatus =
+            new EmploymentStatus { Id = _example.EmploymentStatusId, Name = _example.EmploymentStatusName };
         pp.ProfitYear = ProfitShareTestYear;
         pp.Demographic = demo;
 
@@ -279,7 +282,10 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
         pp.CurrentIncomeYear = _example.CurrentIncomeYear;
         pp.CurrentHoursYear = _example.CurrentHoursYear;
         demo.PayFrequencyId = _example.PayFrequencyId;
+        demo.PayFrequency = new PayFrequency { Id = _example.PayFrequencyId, Name = _example.PayFrequencyName };
         demo.EmploymentStatusId = _example.EmploymentStatusId;
+        demo.EmploymentStatus =
+            new EmploymentStatus { Id = _example.EmploymentStatusId, Name = _example.EmploymentStatusName };
         pp.ProfitYear = ProfitShareTestYear;
         pp.Demographic = demo;
 
