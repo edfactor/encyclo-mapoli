@@ -41,16 +41,12 @@ public static class ProfitDetailExtensions
 
     internal static decimal CalculateForfeiture(this ProfitDetail detail)
     {
-        return detail.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id
-            ? detail.Forfeiture
-            : (detail.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id ? -detail.Forfeiture : 0);
+        return detail.Forfeiture;
     }
 
     internal static decimal CalculatePayment(this ProfitDetail detail)
     {
-        return detail.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id
-            ? detail.Forfeiture
-            : 0;
+        return detail.Payments + detail.Allocations;
     }
 
     internal static decimal CalculateDistribution(this ProfitDetail detail)
