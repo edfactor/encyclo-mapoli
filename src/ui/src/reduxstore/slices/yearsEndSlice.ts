@@ -645,7 +645,10 @@ export const yearsEndSlice = createSlice({
       state.contributionsByAgePartTime = null;
     },
     setContributionsByAgeQueryParams: (state, action: PayloadAction<number>) => {
-      state.contributionsByAgeQueryParams = { profitYear: action.payload };
+      state.contributionsByAgeQueryParams = {
+        profitYear: action.payload,
+        reportType: FrozenReportsByAgeRequestType.Total
+      };
     },
     clearContributionsByAgeQueryParams: (state) => {
       state.contributionsByAgeQueryParams = null;
@@ -722,8 +725,11 @@ export const yearsEndSlice = createSlice({
         state.balanceByYearsFullTime = action.payload;
       }
     },
-    setVestedAmountByAge: (state, action: PayloadAction<VestedAmountsByAge>) => {
+    setVestedAmountsByAge: (state, action: PayloadAction<VestedAmountsByAge>) => {
       state.vestedAmountsByAge = action.payload;
+    },
+    clearVestedAmountsByAge: (state) => {
+      state.vestedAmountsByAge = null;
     },
     setVestedAmountsByAgeQueryParams: (state, action: PayloadAction<number>) => {
       state.vestedAmountsByAgeQueryParams = { profitYear: action.payload };
@@ -938,7 +944,8 @@ export const {
   setProfitUpdateLoading,
   setTermination,
   setTerminationQueryParams,
-  setVestedAmountByAge,
+  setVestedAmountsByAge,
+  clearVestedAmountsByAge,
   setVestedAmountsByAgeQueryParams,
   setYearEndProfitSharingReport,
   setYearEndProfitSharingReportQueryParams,

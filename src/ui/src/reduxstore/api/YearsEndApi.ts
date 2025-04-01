@@ -38,7 +38,7 @@ import {
   setUnder21BreakdownByStore,
   setUnder21Inactive,
   setUnder21Totals,
-  setVestedAmountByAge,
+  setVestedAmountsByAge,
   setYearEndProfitSharingReport,
   setUpdateSummary
 } from "reduxstore/slices/yearsEndSlice";
@@ -626,7 +626,7 @@ export const YearsEndApi = createApi({
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          dispatch(setVestedAmountByAge(data));
+          dispatch(setVestedAmountsByAge(data));
         } catch (err) {
           console.log("Err: " + err);
         }
@@ -931,6 +931,5 @@ export const {
   useUpdateExecutiveHoursAndDollarsMutation,
   useGetYearEndProfitSharingSummaryReportQuery,
   useLazyGetYearEndProfitSharingSummaryReportQuery,
-  useLazyGetProfitShareSummaryReportQuery,
   useLazyGetUpdateSummaryQuery
 } = YearsEndApi;

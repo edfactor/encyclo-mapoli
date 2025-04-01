@@ -86,11 +86,12 @@ const schema = yup.object().shape({
   adjustmentSecondaryEarningsAmount: yup.number().typeError("Earnings must be a number").nullable()
 });
 
-const ProfitShareEditUpdateInputPanel = () => {
+const ProfitShareEditUpdateSearchFilter = () => {
   const [previewUpdate] = useLazyGetProfitShareUpdateQuery();
   const [previewEdit] = useLazyGetProfitShareEditQuery();
   const [masterApply] = useLazyGetMasterApplyQuery();
   const [masterRevert] = useLazyGetMasterRevertQuery();
+
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
 
@@ -145,7 +146,7 @@ const ProfitShareEditUpdateInputPanel = () => {
         })
       };
       // clears current table data - gives user feed back that thier search is in progress
-      const nativeEvent = event?.nativeEvent as SubmitEvent;
+      //const nativeEvent = event?.nativeEvent as SubmitEvent;
       console.log("Action: ", event?.target.value);
       const action = event?.target.value;
       if (action == "preview updates") {
@@ -466,4 +467,4 @@ const ProfitShareEditUpdateInputPanel = () => {
   );
 };
 
-export default ProfitShareEditUpdateInputPanel;
+export default ProfitShareEditUpdateSearchFilter;
