@@ -1,5 +1,6 @@
 import { agGridNumberToCurrency } from "smart-ui-library";
-import { ColDef } from "ag-grid-community";
+import {ColDef, ICellRendererParams} from "ag-grid-community";
+import {viewBadgeLinkRenderer} from "../../utils/masterInquiryLink";
 
 export const GetMasterInquiryGridColumns = (): ColDef[] => {
   return [
@@ -13,7 +14,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       resizable: true
     },
     {
-      headerName: "Badge Number",
+      headerName: "Badge/Psn",
       field: "badgeNumber",
       colId: "badgeNumber",
       minWidth: 120,
@@ -22,6 +23,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       resizable: true,   
       rowGroup: true,
       showRowGroup: 'always',
+      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber),
       valueFormatter: (params) => {
         const badgeNumber = params.data?.badgeNumber; 
         const psnSuffix = params.data?.psnSuffix; 
