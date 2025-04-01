@@ -54,7 +54,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
   }, [initialSearchLoaded, pageNumber, pageSize, onSearch]);
 
   const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "Badge",
+    sortBy: "badgeNumber",
     isSortDescending: false
   });
 

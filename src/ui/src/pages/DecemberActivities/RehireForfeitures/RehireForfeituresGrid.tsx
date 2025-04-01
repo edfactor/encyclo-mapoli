@@ -19,7 +19,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "Badge",
+    sortBy: "badgeNumber",
     isSortDescending: false
   });
 

@@ -12,6 +12,7 @@ using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using static FastEndpoints.Ep;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
 
@@ -1022,6 +1023,46 @@ public class FrozenReportService : IFrozenReportService
                 TotalLoans = rslt.Sum(x => x.Loans),
                 TotalProfitSharingAmount = rslt.Sum(x => x.ProfitSharingAmount)
             };
+        }
+
+    }
+
+    public async Task<ProfitControlSheetResponse> GetProfitControlSheet(ProfitYearRequest request, CancellationToken cancellationToken = default)
+    {
+        using (_logger.BeginScope("Request PROFIT CONTROL SHEET"))
+        {
+            var calInfo =
+                await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
+            var rslt = await _dataContextFactory.UseReadOnlyContext(async ctx =>
+            {
+                var rsp = new ProfitControlSheetResponse();
+
+                rsp.EmployeeContributionProfitSharingAmount = (await (
+                    from bal in _totalService.GetTotalBalanceSetEmployeePortion(ctx, request.ProfitYear)
+                    group bal by true into balGrp
+                    select new {Total = balGrp.Sum(x=>x.Total) ?? 0}
+                ).FirstOrDefaultAsync(cancellationToken))?.Total ?? 0;
+
+                rsp.NonEmployeeProfitSharingAmount = (await (
+                    from bc in ctx.BeneficiaryContacts
+                    join b in ctx.Beneficiaries on bc.Id equals b.BeneficiaryContactId
+                    where (!ctx.Demographics.Any(d=>d.Ssn == bc.Ssn))
+                    group b by true into bGrp
+                    select new {Total = bGrp.Sum(x=>x.Amount)}
+                ).FirstOrDefaultAsync(cancellationToken))?.Total ?? 0;
+
+                rsp.EmployeeBeneficiaryAmount = (await (
+                    from bc in ctx.BeneficiaryContacts
+                    join b in ctx.Beneficiaries on bc.Id equals b.BeneficiaryContactId
+                    where (ctx.Demographics.Any(d => d.Ssn == bc.Ssn))
+                    group b by true into bGrp
+                    select new { Total = bGrp.Sum(x => x.Amount) }
+                ).FirstOrDefaultAsync(cancellationToken))?.Total ?? 0;
+
+                return rsp;
+            });
+
+            return rslt;
         }
 
     }

@@ -83,17 +83,11 @@ export const menuLevels: MenuLevel[] = [
           { subTitle: CAPTIONS.DEMOGRAPHIC_BADGES, subRoute: ROUTES.DEMOGRAPHIC_BADGES },
           { subTitle: CAPTIONS.DUPLICATE_SSNS, subRoute: ROUTES.DUPLICATE_SSNS },
           { subTitle: CAPTIONS.NEGATIVE_ETVA, subRoute: ROUTES.NEGATIVE_ETVA },
-          { subTitle: CAPTIONS.DUPLICATE_NAMES, subRoute: ROUTES.DUPLICATE_NAMES },
-          { subTitle: CAPTIONS.MISSING_COMMA, subRoute: ROUTES.MISSING_COMMA }
+          { subTitle: CAPTIONS.DUPLICATE_NAMES, subRoute: ROUTES.DUPLICATE_NAMES }
         ]
       },
       {
-        topTitle: CAPTIONS.EMPLOYEES_MILITARY,
-        topRoute: ROUTES.MILITARY_LEAVE,
-        subPages: []
-      },
-      {
-        topTitle: CAPTIONS.MILITARY_ENTRY_AND_MODIFICATION,
+        topTitle: CAPTIONS.MILITARY_CONTRIBUTIONS,
         topRoute: ROUTES.MILITARY_ENTRY_AND_MODIFICATION,
         subPages: []
       },
@@ -103,8 +97,8 @@ export const menuLevels: MenuLevel[] = [
         subPages: []
       },
       {
-        topTitle: CAPTIONS.MANAGE_EXECUTIVE_HOURS,
-        topRoute: ROUTES.MANAGE_EXECUTIVE_HOURS,
+        topTitle: CAPTIONS.DISTRIBUTIONS_AND_FORFEITURES,
+        topRoute: ROUTES.DISTRIBUTIONS_AND_FORFEITURES,
         subPages: []
       },
       {
@@ -113,18 +107,8 @@ export const menuLevels: MenuLevel[] = [
         subPages: []
       },
       {
-        topTitle: CAPTIONS.DISTRIBUTIONS_AND_FORFEITURES,
-        topRoute: ROUTES.DISTRIBUTIONS_AND_FORFEITURES,
-        subPages: []
-      },
-      {
         topTitle: CAPTIONS.PROFIT_SHARE_REPORT,
         topRoute: ROUTES.PROFIT_SHARE_REPORT,
-        subPages: []
-      },
-      {
-        topTitle: CAPTIONS.PROFIT_SHARE_UPDATE,
-        topRoute: ROUTES.PROFIT_SHARE_UPDATE,
         subPages: []
       }
     ]
@@ -138,18 +122,52 @@ export const menuLevels: MenuLevel[] = [
         subPages: []
       },
       {
+        topTitle: CAPTIONS.MANAGE_EXECUTIVE_HOURS,
+        topRoute: ROUTES.MANAGE_EXECUTIVE_HOURS,
+        subPages: []
+      },
+      {
         topTitle: CAPTIONS.YTD_WAGES_EXTRACT,
         topRoute: ROUTES.YTD_WAGES_EXTRACT,
         subPages: []
       },
+      
+
+ 
       {
-        topTitle: CAPTIONS.PROFIT_MASTER_UPDATE,
-        topRoute: ROUTES.PROFIT_MASTER_UPDATE,
+        topTitle: CAPTIONS.PROFIT_SHARE_REPORT,
+        topRoute: ROUTES.PROFIT_SHARE_REPORT,
         subPages: []
       },
       {
-        topTitle: CAPTIONS.PAYMASTER_UPDATE,
-        topRoute: ROUTES.PAYMASTER_UPDATE,
+        topTitle: CAPTIONS.PROFIT_SHARE_REPORT_EDIT_RUN,
+        topRoute: ROUTES.PROFIT_SHARE_REPORT_EDIT_RUN,
+        subPages: [
+          { subTitle: CAPTIONS.PAY426_ACTIVE_18_20, subRoute: ROUTES.PAY426_ACTIVE_18_20 },
+          { subTitle: CAPTIONS.PAY426_ACTIVE_21_PLUS, subRoute: ROUTES.PAY426_ACTIVE_21_PLUS },
+          { subTitle: CAPTIONS.PAY426_ACTIVE_UNDER_18, subRoute: ROUTES.PAY426_ACTIVE_UNDER_18 },
+          { subTitle: CAPTIONS.PAY426_ACTIVE_PRIOR_SHARING, subRoute: ROUTES.PAY426_ACTIVE_PRIOR_SHARING },
+          { subTitle: CAPTIONS.PAY426_ACTIVE_NO_PRIOR, subRoute: ROUTES.PAY426_ACTIVE_NO_PRIOR },
+          { subTitle: CAPTIONS.PAY426_TERMINATED_1000_PLUS, subRoute: ROUTES.PAY426_TERMINATED_1000_PLUS },
+          { subTitle: CAPTIONS.PAY426_TERMINATED_NO_PRIOR, subRoute: ROUTES.PAY426_TERMINATED_NO_PRIOR },
+          { subTitle: CAPTIONS.PAY426_TERMINATED_PRIOR, subRoute: ROUTES.PAY426_TERMINATED_PRIOR },
+          { subTitle: CAPTIONS.PAY426_SUMMARY, subRoute: ROUTES.PAY426_SUMMARY },
+          { subTitle: CAPTIONS.PAY426_NON_EMPLOYEE, subRoute: ROUTES.PAY426_NON_EMPLOYEE }
+        ]
+      },
+      {
+        topTitle: CAPTIONS.ELIGIBLE_EMPLOYEES,
+        topRoute: ROUTES.ELIGIBLE_EMPLOYEES,
+        subPages: []
+      },
+      {
+        topTitle: CAPTIONS.FORFEIT,
+        topRoute: ROUTES.FORFEIT,
+        subPages: []
+      },
+      {
+        topTitle: CAPTIONS.PROFIT_SHARE_UPDATE,
+        topRoute: ROUTES.PROFIT_SHARE_UPDATE,
         subPages: []
       },
       {
@@ -179,55 +197,6 @@ export const menuLevels: MenuLevel[] = [
           { subTitle: CAPTIONS.NEW_PS_LABELS, subRoute: ROUTES.NEW_PS_LABELS },
           { subTitle: CAPTIONS.PROFNEW, subRoute: ROUTES.PROFNEW }
         ]
-      },
-
-      {
-        topTitle: CAPTIONS.PROFIT_SHARE_REPORT_EDIT_RUN,
-        topRoute: ROUTES.PROFIT_SHARE_REPORT_EDIT_RUN,
-        subPages: [
-          { subTitle: CAPTIONS.PAY426_ACTIVE_18_20, subRoute: ROUTES.PAY426_ACTIVE_18_20 },
-          { subTitle: CAPTIONS.PAY426_ACTIVE_21_PLUS, subRoute: ROUTES.PAY426_ACTIVE_21_PLUS },
-          { subTitle: CAPTIONS.PAY426_ACTIVE_UNDER_18, subRoute: ROUTES.PAY426_ACTIVE_UNDER_18 },
-          { subTitle: CAPTIONS.PAY426_ACTIVE_PRIOR_SHARING, subRoute: ROUTES.PAY426_ACTIVE_PRIOR_SHARING },
-          { subTitle: CAPTIONS.PAY426_ACTIVE_NO_PRIOR, subRoute: ROUTES.PAY426_ACTIVE_NO_PRIOR },
-          { subTitle: CAPTIONS.PAY426_TERMINATED_1000_PLUS, subRoute: ROUTES.PAY426_TERMINATED_1000_PLUS },
-          { subTitle: CAPTIONS.PAY426_TERMINATED_NO_PRIOR, subRoute: ROUTES.PAY426_TERMINATED_NO_PRIOR },
-          { subTitle: CAPTIONS.PAY426_TERMINATED_PRIOR, subRoute: ROUTES.PAY426_TERMINATED_PRIOR },
-          { subTitle: CAPTIONS.PAY426_SUMMARY, subRoute: ROUTES.PAY426_SUMMARY },
-          { subTitle: CAPTIONS.PAY426_NON_EMPLOYEE, subRoute: ROUTES.PAY426_NON_EMPLOYEE }
-        ]
-      },
-      {
-        topTitle: CAPTIONS.PROFIT_SHARE_REPORT_FINAL_RUN,
-        topRoute: ROUTES.PROFIT_SHARE_REPORT_FINAL_RUN,
-        subPages: [
-          { subTitle: CAPTIONS.PAY426_ACTIVE_18_20, subRoute: ROUTES.PAY426_ACTIVE_18_20 },
-          { subTitle: CAPTIONS.PAY426_ACTIVE_21_PLUS, subRoute: ROUTES.PAY426_ACTIVE_21_PLUS },
-          { subTitle: CAPTIONS.PAY426_ACTIVE_UNDER_18, subRoute: ROUTES.PAY426_ACTIVE_UNDER_18 },
-          { subTitle: CAPTIONS.PAY426_ACTIVE_PRIOR_SHARING, subRoute: ROUTES.PAY426_ACTIVE_PRIOR_SHARING },
-          { subTitle: CAPTIONS.PAY426_ACTIVE_NO_PRIOR, subRoute: ROUTES.PAY426_ACTIVE_NO_PRIOR },
-          { subTitle: CAPTIONS.PAY426_TERMINATED_1000_PLUS, subRoute: ROUTES.PAY426_TERMINATED_1000_PLUS },
-          { subTitle: CAPTIONS.PAY426_TERMINATED_NO_PRIOR, subRoute: ROUTES.PAY426_TERMINATED_NO_PRIOR },
-          { subTitle: CAPTIONS.PAY426_TERMINATED_PRIOR, subRoute: ROUTES.PAY426_TERMINATED_PRIOR },
-          { subTitle: CAPTIONS.PAY426_SUMMARY, subRoute: ROUTES.PAY426_SUMMARY },
-          { subTitle: CAPTIONS.PAY426_NON_EMPLOYEE, subRoute: ROUTES.PAY426_NON_EMPLOYEE }
-        ]
-      },
-      {
-        topTitle: CAPTIONS.ELIGIBLE_EMPLOYEES,
-        topRoute: ROUTES.ELIGIBLE_EMPLOYEES,
-        subPages: []
-      },
-
-      {
-        topTitle: CAPTIONS.PROFIT_SHARE_UPDATE,
-        topRoute: ROUTES.PROFIT_SHARE_UPDATE,
-        subPages: []
-      },
-      {
-        topTitle: CAPTIONS.FORFEIT,
-        topRoute: ROUTES.FORFEIT,
-        subPages: []
       },
       {
         topTitle: CAPTIONS.PRINT_PROFIT_CERTS,

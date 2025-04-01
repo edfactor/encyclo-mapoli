@@ -18,7 +18,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({ initialSearchLo
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "Badge",
+    sortBy: "badgeNumber",
     isSortDescending: false
   });
 

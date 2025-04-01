@@ -4,9 +4,18 @@ import { DSMAccordion, Page } from "smart-ui-library";
 import ProfitShareReportInputPanel from "./ProfitShareUpdateInputPanel";
 import ProfitShareUpdateGrid from "./ProfitShareUpdateGrid";
 
+const developmentNoteStyle = {
+    backgroundColor: '#FFFFE0', // Light yellow
+    padding: '10px',
+    margin: '10px'
+};
+
 const ProfitShareUpdate = () => {
     return (
         <Page label="Profit Share Update / Edit / Master (PAY444 PAY447 PAY460 PROFTLD)">
+            <div style={developmentNoteStyle}>
+                DevNote: This page is functional but incomplete; needs Totals block, needs Adjustment Details, and needs Paging. <a style={{color: "blue"}} href='https://demoulas.atlassian.net/browse/PS-945'>PS-945</a>
+            </div>
             <Grid2
                 container
                 rowSpacing="24px">

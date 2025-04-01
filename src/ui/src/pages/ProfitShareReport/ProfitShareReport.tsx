@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button, Divider, Typography, Box } from "@mui/material";
 import Grid2 from '@mui/material/Grid2';
-import { DSMAccordion, Page, TotalsGrid, numberToCurrency } from "smart-ui-library";
+import { DSMAccordion, Page } from "smart-ui-library";
 import ProfitShareReportSearchFilter from "./ProfitShareReportSearchFilter";
 import ProfitShareReportGrid from "./ProfitShareReportGrid";
 import StatusDropdown, { ProcessStatus } from "components/StatusDropdown";
@@ -9,11 +9,46 @@ import { useNavigate } from "react-router";
 import { MENU_LABELS, CAPTIONS } from "../../constants";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
+import ProfitShareTotalsDisplay from "components/ProfitShareTotalsDisplay";
+import DSMCollapsedAccordion from "components/DSMCollapsedAccordion";
+import { useDispatch } from "react-redux";
+import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
+import { YearEndProfitSharingReportRequest } from "reduxstore/types";
+import { setYearEndProfitSharingReportQueryParams } from "reduxstore/slices/yearsEndSlice";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 
 const ProfitShareReport = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const navigate = useNavigate();
   const { yearEndProfitSharingReport } = useSelector((state: RootState) => state.yearsEnd);
+  const hasToken = !!useSelector((state: RootState) => state.security.token);
+  const profitYear = useFiscalCloseProfitYear();
+  const dispatch = useDispatch();
+  const [triggerSearch, { isLoading }] = useLazyGetYearEndProfitSharingReportQuery();
+
+  useEffect(() => {
+    if (hasToken && profitYear && !initialSearchLoaded) {
+      const request: YearEndProfitSharingReportRequest = {
+        isYearEnd: false,
+        minimumAgeInclusive: 18,
+        maximumAgeInclusive: 98,
+        minimumHoursInclusive: 1000,
+        maximumHoursInclusive: 2000,
+        includeActiveEmployees: true,
+        includeInactiveEmployees: true,
+        includeEmployeesTerminatedThisYear: false,
+        includeTerminatedEmployees: true,
+        includeBeneficiaries: false,
+        includeEmployeesWithPriorProfitSharingAmounts: true,
+        includeEmployeesWithNoPriorProfitSharingAmounts: true,
+        profitYear: profitYear,
+        pagination: { skip: 0, take: 10 }
+      };
+      triggerSearch(request, false);
+      dispatch(setYearEndProfitSharingReportQueryParams(profitYear));
+      setInitialSearchLoaded(true);
+    }
+  }, [hasToken, profitYear, triggerSearch, dispatch, initialSearchLoaded]);
 
   const handleStatusChange = async (newStatus: ProcessStatus) => {
     console.info("Logging new status: ", newStatus);
@@ -31,26 +66,6 @@ const ProfitShareReport = () => {
         </Button>
       </div>
     );
-  };
-
-  const totalsData = {
-    sectionTotal: [[
-      numberToCurrency(yearEndProfitSharingReport?.wagesTotal || 0),
-      yearEndProfitSharingReport?.hoursTotal?.toLocaleString() || "0",
-      yearEndProfitSharingReport?.pointsTotal?.toLocaleString() || "0"
-    ]],
-    employeeTotals: [[
-      yearEndProfitSharingReport?.numberOfEmployees?.toString() || "0",
-      yearEndProfitSharingReport?.numberOfNewEmployees?.toString() || "0",
-      yearEndProfitSharingReport?.numberOfEmployeesUnder21?.toString() || "0",
-      yearEndProfitSharingReport?.numberOfEmployeesInPlan?.toString() || "0"
-    ]],
-    secondSectionTotal: [[
-      numberToCurrency(yearEndProfitSharingReport?.terminatedWagesTotal || 0),
-      yearEndProfitSharingReport?.terminatedHoursTotal?.toLocaleString() || "0",
-      "0",
-      "0"
-    ]]
   };
 
   return (
@@ -80,39 +95,20 @@ const ProfitShareReport = () => {
             </div>
 
             {yearEndProfitSharingReport && (
-              <>
-                <TotalsGrid
-                  displayData={totalsData.sectionTotal}
-                  leftColumnHeaders={["Section Total"]}
-                  topRowHeaders={["", "Wages", "Hours", "Points"]}
-                  tablePadding="0px"
-                />
-
-                <Divider sx={{ my: 2 }} />
-
-                <TotalsGrid
-                  displayData={totalsData.employeeTotals}
-                  leftColumnHeaders={["Employee Totals"]}
-                  topRowHeaders={["", "All Employees", "New Employees", "Employees < 21", "In-Plan"]}
-                  tablePadding="0px"
-                />
-
-                <TotalsGrid
-                  displayData={totalsData.secondSectionTotal}
-                  leftColumnHeaders={["Section Total"]}
-                  topRowHeaders={["", "", "", "", ""]}
-                  tablePadding="0px"
-                />
-              </>
+              <Box sx={{ px: 3, mt: 2 }}>
+                <ProfitShareTotalsDisplay data={yearEndProfitSharingReport} />
+              </Box>
             )}
           </Box>
         </Grid2>
 
         <Grid2 width="100%">
-          <ProfitShareReportGrid
-            initialSearchLoaded={initialSearchLoaded}
-            setInitialSearchLoaded={setInitialSearchLoaded}
-          />
+          <DSMCollapsedAccordion isCollapsedOnRender={true} expandable={true} title={`${CAPTIONS.PROFIT_SHARE_REPORT} (${yearEndProfitSharingReport?.response.total || 0} records)`}>
+            <ProfitShareReportGrid
+              initialSearchLoaded={initialSearchLoaded}
+              setInitialSearchLoaded={setInitialSearchLoaded}
+            />
+          </DSMCollapsedAccordion>
         </Grid2>
       </Grid2>
     </Page>
