@@ -268,22 +268,24 @@ public sealed class TotalService : ITotalService
 
         var demoInfo = (
             from d in ctx.Demographics
-            join pp in ctx.PayProfits on new { d.Id, ProfitYear = employeeYear } equals new
+            join ppTbl in ctx.PayProfits on new { d.Id, ProfitYear = employeeYear } equals new
             {
-                Id = pp.DemographicId, pp.ProfitYear
-            }
-            join cy in GetYearsOfService(ctx, employeeYear) on d.Ssn equals cy.Ssn
+                Id = ppTbl.DemographicId, ppTbl.ProfitYear
+            } into ppTmp
+            from pp in ppTmp.DefaultIfEmpty()
+            join cyTbl in GetYearsOfService(ctx, employeeYear) on d.Ssn equals cyTbl.Ssn into cyTmp
+            from cy in cyTmp.DefaultIfEmpty()
             select new
             {
                 d.Ssn,
-                pp.EnrollmentId,
+                EnrollmentId = pp != null ? (byte?)pp.EnrollmentId : 0,
                 d.TerminationCodeId,
                 d.TerminationDate,
-                pp.ZeroContributionReasonId,
+                ZeroContributionReasonId = pp != null ? pp.ZeroContributionReasonId : null,
                 d.DateOfBirth,
                 FromBeneficiary = (short)0,
-                cy.Years,
-                Hours = pp.CurrentHoursYear,
+                Years = cy != null ? cy.Years : 0,
+                Hours = (decimal?)pp.CurrentHoursYear,
             }
         );
 
@@ -294,14 +296,14 @@ public sealed class TotalService : ITotalService
             select new
             {
                 b.Contact!.Ssn,
-                EnrollmentId = (byte)0,
+                EnrollmentId = (byte?)0,
                 TerminationCodeId = (char?)null,
                 TerminationDate = (DateOnly?)null,
                 ZeroContributionReasonId = (byte?)null,
                 b.Contact.DateOfBirth,
                 FromBeneficiary = (short)1,
                 Years = (byte?)0,
-                Hours = (decimal)0
+                Hours = (decimal?)0
             }
         );
 
@@ -371,19 +373,23 @@ public sealed class TotalService : ITotalService
         short employeeYear, short profitYear, DateOnly asOfDate)
     {
         return (from b in GetTotalBalanceSet(ctx, profitYear)
-                join e in GetTotalComputedEtva(ctx, employeeYear) on b.Ssn equals e.Ssn
-                join d in GetTotalDistributions(ctx, profitYear) on b.Ssn equals d.Ssn
-                join v in GetVestingRatio(ctx, employeeYear, asOfDate) on e.Ssn equals v.Ssn
-                join y in GetYearsOfService(ctx, employeeYear) on b.Ssn equals y.Ssn
+                join etvaTbl in GetTotalComputedEtva(ctx, employeeYear) on b.Ssn equals etvaTbl.Ssn into etvaTmp
+                from e in etvaTmp.DefaultIfEmpty()
+                join distTbl in GetTotalDistributions(ctx, profitYear) on b.Ssn equals distTbl.Ssn into distTmp
+                from d in distTmp.DefaultIfEmpty()
+                join vestTbl in GetVestingRatio(ctx, employeeYear, asOfDate) on e.Ssn equals vestTbl.Ssn into vestTmp
+                from v in vestTmp.DefaultIfEmpty()
+                join yipTbl in GetYearsOfService(ctx, profitYear) on b.Ssn equals yipTbl.Ssn into yipTmp
+                from yip in yipTmp.DefaultIfEmpty()
                 select new ParticipantTotalVestingBalanceDto
                 {
-                    Ssn = e.Ssn,
+                    Ssn = b.Ssn,
                     CurrentBalance = b.Total ?? 0,
                     Etva = e.Total ?? 0,
                     TotalDistributions = d.Total ?? 0,
-                    VestingPercent = v.Ratio,
-                    YearsInPlan = y.Years ?? 0,
-                    VestedBalance = (((b.Total ?? 0) + (d.Total ?? 0) - (e.Total ?? 0)) * v.Ratio) + (e.Total ?? 0) - (d.Total ?? 0)
+                    VestingPercent = v.Ratio ?? 0,
+                    YearsInPlan = yip.Years ?? 0,
+                    VestedBalance = (((b.Total ?? 0) + (d.Total ?? 0) - (e.Total ?? 0)) * (v.Ratio ?? 0)) + (e.Total ?? 0) - (d.Total ?? 0)
                 }
             );
     }
@@ -423,12 +429,12 @@ public sealed class TotalService : ITotalService
                         {
                             Id = badgeNumberOrSsn,
                             Ssn = t.Ssn.MaskSsn(),
-                            CurrentBalance = t.CurrentBalance,
-                            Etva = t.Etva,
-                            TotalDistributions = t.TotalDistributions,
-                            VestedBalance = t.VestedBalance,
-                            VestingPercent = t.VestingPercent,
-                            YearsInPlan = t.YearsInPlan
+                            CurrentBalance = (t.CurrentBalance ?? 0),
+                            Etva = (t.Etva ?? 0),
+                            TotalDistributions = (t.TotalDistributions ?? 0),
+                            VestedBalance = (t.VestedBalance ?? 0),
+                            VestingPercent = (t.VestingPercent ?? 0),
+                            YearsInPlan = (t.YearsInPlan ?? 0)
                         }).FirstOrDefaultAsync(cancellationToken);
                     return rslt;
                 });
@@ -442,12 +448,12 @@ public sealed class TotalService : ITotalService
                         {
                             Id = badgeNumberOrSsn,
                             Ssn = t.Ssn.MaskSsn(),
-                            CurrentBalance = t.CurrentBalance,
-                            Etva = t.Etva,
-                            TotalDistributions = t.TotalDistributions,
-                            VestedBalance = t.VestedBalance,
-                            VestingPercent = t.VestingPercent,
-                            YearsInPlan = t.YearsInPlan
+                            CurrentBalance = (t.CurrentBalance ?? 0),
+                            Etva = (t.Etva ?? 0),
+                            TotalDistributions = (t.TotalDistributions ?? 0),
+                            VestedBalance = (t.VestedBalance ?? 0),
+                            VestingPercent = (t.VestingPercent ?? 0),
+                            YearsInPlan = (t.YearsInPlan ?? 0)
                         }).FirstOrDefaultAsync(cancellationToken);
                     return rslt;
                 });

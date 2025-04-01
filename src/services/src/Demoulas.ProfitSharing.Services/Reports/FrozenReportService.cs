@@ -517,6 +517,10 @@ public class FrozenReportService : IFrozenReportService
         {
             var query = _totalService.TotalVestingBalance(ctx, req.ProfitYear, startEnd.FiscalEndDate);
 
+#pragma warning disable AsyncFixer02 // Long-running or blocking operations inside an async method
+            var x = query.ToList();
+#pragma warning restore AsyncFixer02 // Long-running or blocking operations inside an async method
+
             var joinedQuery = from q in query
                 join d in ctx.Demographics on q.Ssn equals d.Ssn into demographics
                 from demographic in demographics.DefaultIfEmpty()
@@ -525,8 +529,8 @@ public class FrozenReportService : IFrozenReportService
                 where demographic != null || beneficiary != null
                 select new
                 {
-                    q.CurrentBalance,
-                    q.VestedBalance,
+                    CurrentBalance = (q.CurrentBalance ?? 0),
+                    VestedBalance = (q.VestedBalance ?? 0),
                     EmploymentType =
                         demographic != null && demographic.EmploymentTypeId == EmploymentType.Constants.PartTime
                             ? PT
@@ -563,10 +567,10 @@ public class FrozenReportService : IFrozenReportService
             .Select(group => new BalanceByAgeDetail
             {
                 Age = (byte)group.Age,
-                CurrentBalance = group.Entries.Sum(e => e.CurrentBalance),
+                CurrentBalance = group.Entries.Sum(e => e.CurrentBalance ),
                 CurrentBeneficiaryBalance = group.Entries.Sum(e => e.IsBeneficiary ? e.CurrentBalance : 0),
-                CurrentBeneficiaryVestedBalance = group.Entries.Sum(e => e.IsBeneficiary ? e.VestedBalance : 0),
-                VestedBalance = group.Entries.Sum(e => e.VestedBalance),
+                CurrentBeneficiaryVestedBalance = group.Entries.Sum(e => e.IsBeneficiary ? e.VestedBalance  : 0),
+                VestedBalance = group.Entries.Sum(e => e.VestedBalance ),
                 BeneficiaryCount = group.Entries.Count(e => e.IsBeneficiary),
                 EmployeeCount = group.Entries.Count(e => !e.IsBeneficiary),
                 FullTimeCount = group.Entries.Count(e => e.EmploymentType == FT),
@@ -670,36 +674,36 @@ public class FrozenReportService : IFrozenReportService
                     (short)group.Entries.Count(e => e.EmploymentType == FT && e.VestedBalance == e.CurrentBalance),
                 FullTime100PercentAmount =
                     group.Entries.Where(e => e.EmploymentType == FT && e.VestedBalance == e.CurrentBalance)
-                        .Sum(e => e.CurrentBalance),
+                        .Sum(e => (e.CurrentBalance ?? 0)),
                 FullTimePartialCount =
                     (short)group.Entries.Count(e =>
                         e.EmploymentType == FT && e.VestedBalance > 0 && e.VestedBalance < e.CurrentBalance),
                 FullTimePartialAmount =
                     group.Entries
                         .Where(e => e.EmploymentType == FT && e.VestedBalance > 0 && e.VestedBalance < e.CurrentBalance)
-                        .Sum(e => e.VestedBalance),
+                        .Sum(e => (e.VestedBalance ?? 0)),
                 FullTimeNotVestedCount =
                     (short)group.Entries.Count(e => e.EmploymentType == FT && e.VestedBalance == 0),
                 FullTimeNotVestedAmount =
-                    group.Entries.Where(e => e.EmploymentType == FT && e.VestedBalance == 0).Sum(e => e.CurrentBalance),
+                    group.Entries.Where(e => e.EmploymentType == FT && e.VestedBalance == 0).Sum(e => (e.CurrentBalance ?? 0)),
                 PartTime100PercentCount =
                     (short)group.Entries.Count(e => e.EmploymentType == PT && e.VestedBalance == e.CurrentBalance),
                 PartTime100PercentAmount =
                     group.Entries.Where(e => e.EmploymentType == PT && e.VestedBalance == e.CurrentBalance)
-                        .Sum(e => e.CurrentBalance),
+                        .Sum(e => (e.CurrentBalance ?? 0)),
                 PartTimePartialCount =
                     (short)group.Entries.Count(e =>
                         e.EmploymentType == PT && e.VestedBalance > 0 && e.VestedBalance < e.CurrentBalance),
                 PartTimePartialAmount =
                     group.Entries
                         .Where(e => e.EmploymentType == PT && e.VestedBalance > 0 && e.VestedBalance < e.CurrentBalance)
-                        .Sum(e => e.VestedBalance),
+                        .Sum(e => (e.VestedBalance ?? 0)),
                 PartTimeNotVestedCount =
                     (short)group.Entries.Count(e => e.EmploymentType == PT && e.VestedBalance == 0),
                 PartTimeNotVestedAmount =
-                    group.Entries.Where(e => e.EmploymentType == PT && e.VestedBalance == 0).Sum(e => e.CurrentBalance),
+                    group.Entries.Where(e => e.EmploymentType == PT && e.VestedBalance == 0).Sum(e => (e.CurrentBalance ?? 0)),
                 BeneficiaryCount = (short)group.Entries.Count(e => e.IsBeneficiary),
-                BeneficiaryAmount = group.Entries.Where(e => e.IsBeneficiary).Sum(e => e.CurrentBalance),
+                BeneficiaryAmount = group.Entries.Where(e => e.IsBeneficiary).Sum(e => (e.CurrentBalance ?? 0)),
             })
             .OrderBy(e => e.Age)
             .ToList();
@@ -793,10 +797,10 @@ public class FrozenReportService : IFrozenReportService
                 .Select(group => new BalanceByYearsDetail
                 {
                     Years = group.Key ?? 0,
-                    CurrentBalance = group.Sum(e => e.CurrentBalance),
-                    CurrentBeneficiaryBalance = group.Sum(e => e.IsBeneficiary ? e.CurrentBalance : 0),
-                    CurrentBeneficiaryVestedBalance = group.Sum(e => e.IsBeneficiary ? e.VestedBalance : 0),
-                    VestedBalance = group.Sum(e => e.VestedBalance),
+                    CurrentBalance = group.Sum(e => (e.CurrentBalance ?? 0)),
+                    CurrentBeneficiaryBalance = group.Sum(e => e.IsBeneficiary ? (e.CurrentBalance ?? 0) : 0),
+                    CurrentBeneficiaryVestedBalance = group.Sum(e => e.IsBeneficiary ? (e.VestedBalance ?? 0) : 0),
+                    VestedBalance = group.Sum(e => (e.VestedBalance ?? 0)),
                     BeneficiaryCount = group.Count(e => e.IsBeneficiary),
                     EmployeeCount = group.Count(e => !e.IsBeneficiary),
                     FullTimeCount = group.Count(e => e.EmploymentType == FT),
@@ -932,16 +936,16 @@ public class FrozenReportService : IFrozenReportService
                 IsEmployee = x.IsEmployee,
                 Before = new UpdateSummaryReportPointInTimeDetail()
                 {
-                    ProfitSharingAmount = x.BeforeProfitSharingAmount,
-                    VestedProfitSharingAmount = x.BeforeVestedProfitSharingAmount,
-                    YearsInPlan = x.BeforeYearsInPlan,
+                    ProfitSharingAmount = (x.BeforeProfitSharingAmount ?? 0),
+                    VestedProfitSharingAmount = (x.BeforeVestedProfitSharingAmount ?? 0),
+                    YearsInPlan = (x.BeforeYearsInPlan ?? 0),
                     EnrollmentId = (byte)x.BeforeEnrollmentId
                 },
                 After = new UpdateSummaryReportPointInTimeDetail()
                 {
-                    ProfitSharingAmount = x.AfterProfitSharingAmount,
-                    VestedProfitSharingAmount = x.AfterVestedProfitSharingAmount,
-                    YearsInPlan = x.AfterYearsInPlan,
+                    ProfitSharingAmount = (x.AfterProfitSharingAmount ?? 0),
+                    VestedProfitSharingAmount = (x.AfterVestedProfitSharingAmount ?? 0),
+                    YearsInPlan = (x.AfterYearsInPlan ?? 0),
                     EnrollmentId = (byte)x.AfterEnrollmentId
                 }
             }).Skip(req.Skip ?? 0).Take(req.Take ?? int.MaxValue);
@@ -955,10 +959,10 @@ public class FrozenReportService : IFrozenReportService
                     {
                         Results = resp, Total = baseQuery.Count
                     },
-                TotalAfterProfitSharingAmount = totals.TotalAfterProfitSharing,
-                TotalAfterVestedAmount = totals.TotalAfterVesting,
-                TotalBeforeProfitSharingAmount = totals.TotalBeforeProfitSharing,
-                TotalBeforeVestedAmount = totals.TotalBeforeVesting,
+                TotalAfterProfitSharingAmount = (totals.TotalAfterProfitSharing ?? 0),
+                TotalAfterVestedAmount = (totals.TotalAfterVesting ?? 0),
+                TotalBeforeProfitSharingAmount = (totals.TotalBeforeProfitSharing ?? 0),
+                TotalBeforeVestedAmount = (totals.TotalBeforeVesting ?? 0),
                 TotalNumberOfBeneficiaries = totals.TotalBeneficiaries,
                 TotalNumberOfEmployees = totals.TotalEmployees
             };
