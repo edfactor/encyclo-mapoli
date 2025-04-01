@@ -49,6 +49,8 @@ import {
 } from "reduxstore/types";
 
 export interface YearsEndState {
+  profitEditUpdateChangesAvailable: boolean;
+  profitEditUpdateRevertChangesAvailable: boolean;
   selectedProfitYearForDecemberActivities: number;
   selectedProfitYearForFiscalClose: number;
   additionalExecutivesChosen: ExecutiveHoursAndDollars[] | null;
@@ -120,6 +122,8 @@ export interface YearsEndState {
 }
 
 const initialState: YearsEndState = {
+  profitEditUpdateChangesAvailable: false,
+  profitEditUpdateRevertChangesAvailable: false,
   selectedProfitYearForDecemberActivities: 2024,
   selectedProfitYearForFiscalClose: 2024,
   additionalExecutivesChosen: null,
@@ -194,6 +198,12 @@ export const yearsEndSlice = createSlice({
   name: "yearsEnd",
   initialState,
   reducers: {
+    setProfitEditUpdateChangesAvailable: (state, action: PayloadAction<boolean>) => {
+      state.profitEditUpdateChangesAvailable = action.payload;
+    },
+    setProfitEditUpdateRevertChangesAvailable: (state, action: PayloadAction<boolean>) => {
+      state.profitEditUpdateRevertChangesAvailable = action.payload;
+    },
     setSelectedProfitYearForDecemberActivities: (state, action: PayloadAction<number>) => {
       state.selectedProfitYearForDecemberActivities = action.payload;
     },
@@ -966,6 +976,8 @@ export const {
   checkDecemberParamsAndGridsProfitYears,
   setProfitShareSummaryReport,
   setUpdateSummary,
-  clearUpdateSummary
+  clearUpdateSummary,
+  setProfitEditUpdateChangesAvailable,
+  setProfitEditUpdateRevertChangesAvailable
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;
