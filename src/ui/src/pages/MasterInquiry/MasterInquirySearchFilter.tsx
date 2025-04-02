@@ -131,7 +131,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
       badgeNumber: masterInquiryRequestParams?.badgeNumber || undefined,
       comment: masterInquiryRequestParams?.comment || undefined,
       paymentType: masterInquiryRequestParams?.paymentType ? masterInquiryRequestParams?.paymentType : "all",
-      memberType: masterInquiryRequestParams?.memberType ? masterInquiryRequestParams?.memberType : "all",
+      memberType: (badgeNumber && badgeNumber.length <= 6) ? "all" : (masterInquiryRequestParams?.memberType || "beneficiaries"),
       contribution: masterInquiryRequestParams?.contribution || undefined,
       earnings: masterInquiryRequestParams?.earnings || undefined,
       forfeiture: masterInquiryRequestParams?.forfeiture || undefined,
@@ -211,7 +211,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
       voids: false,
       pagination: {
         skip: 0,
-        take: 10,
+        take: 25,
         sortBy: "profitYear",
         isSortDescending: true
       }
