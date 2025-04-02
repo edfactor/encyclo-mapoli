@@ -30,10 +30,12 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
         _totalService = totalService;
         _calendarService = calendarService;
     }
-    
+
     public async Task<ProfitShareUpdateResponse> ProfitShareUpdate(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
-        (List<MemberFinancials> memberFinancials, AdjustmentsSummaryDto adjustmentReportData, TotalsDto totalsDto, bool employeeExceededMaxContribution) = await ProfitSharingUpdate(profitShareUpdateRequest, cancellationToken);
+        (List<MemberFinancials> memberFinancials, AdjustmentsSummaryDto adjustmentReportData, TotalsDto totalsDto, bool employeeExceededMaxContribution) =
+            await ProfitSharingUpdate(profitShareUpdateRequest, cancellationToken);
+
         List<ProfitShareUpdateMemberResponse> members = memberFinancials.Select(m => new ProfitShareUpdateMemberResponse
         {
             IsEmployee = m.IsEmployee,
@@ -58,7 +60,28 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
             TreatAsBeneficiary = m.TreatAsBeneficiary
         }).ToList();
 
+        // Since this service sometimes takes 40 seconds (sometimes 4 seconds) to run, a cache for paging and sorting would be nice. 
+
+#if false
+        // Russ, this throws, "The source 'IQueryable' doesn't implement 'IAsyncEnumerable<Demoulas.ProfitSh..."
+        // So I implemented in-memory sorting.  
+        var result = await members.AsQueryable().ToPaginationResultsAsync(profitShareUpdateRequest, cancellationToken)
+        // NOTE "members" has a series of in memory computations applied to it.
+#else
+        string sortBy = profitShareUpdateRequest.SortBy ?? "Name";
+        if (profitShareUpdateRequest.IsSortDescending ?? false)
+        {
+            members = members.OrderByDescending(m => m!.GetType()!.GetProperty(sortBy)?.GetValue(m, null)).ToList();
+        }
+        else
+        {
+            members = members.OrderBy(m => m.GetType().GetProperty(sortBy)?.GetValue(m, null)).ToList();
+        }
+
         members = members.Skip(profitShareUpdateRequest.Skip ?? 0).Take(profitShareUpdateRequest.Take ?? 25).ToList();
+
+        PaginatedResponseDto<ProfitShareUpdateMemberResponse> results = new(profitShareUpdateRequest) { Results = members };
+#endif
 
         return new ProfitShareUpdateResponse
         {
@@ -67,12 +90,12 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
             Totals = totalsDto,
             ReportName = "Profit Sharing Update",
             ReportDate = DateTimeOffset.Now,
-            Response = new PaginatedResponseDto<ProfitShareUpdateMemberResponse>(profitShareUpdateRequest) { Results = members }
+            Response = results
         };
     }
-    
+
     /// <summary>
-    /// This is used by other services to access plan members with yearly contributions applied.
+    ///     This is used by other services to access plan members with yearly contributions applied.
     /// </summary>
     public async Task<ProfitShareUpdateResult> ProfitShareUpdateInternal(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
@@ -103,8 +126,7 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
 
         return new ProfitShareUpdateResult { HasExceededMaximumContributions = employeeExceededMaxContribution, Members = members };
     }
-    
-    
+
     /// <summary>
     ///     Applies updates specified in request and returns members with updated
     ///     Contributions/Earnings/IncomingForfeitures/SecondaryEarnings
@@ -123,8 +145,9 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
 
         members = members.OrderBy(m => m.Name).ToList();
 
-        TotalsDto totalsDto = new ();
-        foreach(var memberFinancials in members){
+        TotalsDto totalsDto = new();
+        foreach (MemberFinancials memberFinancials in members)
+        {
             totalsDto.BeginningBalance += memberFinancials.CurrentAmount;
             totalsDto.Distributions += memberFinancials.Distributions;
             totalsDto.TotalContribution += memberFinancials.Contributions;

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -7,10 +8,14 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
 
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+
+[SuppressMessage("AsyncUsage", "AsyncFixer01:Unnecessary async/await usage")]
 public class ProfitShareUpdateTests
 {
     private readonly AccountingPeriodsService _aps = new();
@@ -36,7 +41,7 @@ public class ProfitShareUpdateTests
 
         string reportName = "psupdate-pay444-r2.txt";
         profitShareUpdateService.TodaysDateTime =
-            new DateTime(2025, 03, 14, 17, 38, 0, DateTimeKind.Local); // time report was generated
+            new DateTime(2025, 03, 28, 13, 15, 0, DateTimeKind.Local); // time report was generated
 
         Stopwatch sw = Stopwatch.StartNew();
         // Act
@@ -61,19 +66,23 @@ public class ProfitShareUpdateTests
         sw.Stop();
         _testOutputHelper.WriteLine($"Query took {sw.Elapsed}");
 
-        // We cant do a simple report to report comparison because I believe that READYS sorting is random
+        // We cant do a simple report to report comparison because I believe that READY's sorting random
         // when users have the same name.   To cope with this we extract lines with employee/bene information and compare lines.
 
         string expectedReport = LoadExpectedReport(reportName);
 
-#if true
+#if false
+        // Enabling this path enables the diff prograom to pop up the differences
+ 
         // Ths sort order on READY is not great, this maybe tweaked soon.
         string expected = HandleSortingOddness(LoadExpectedReport(reportName));
         string actual = HandleSortingOddness(CollectLines(profitShareUpdateService.ReportLines));
         AssertReportsAreEquivalent(expected, actual);
 #else
-        var employeeExpectedReportLines = expectedReport.Split("\n").Where(ex => extractBadge(ex) != (null, null)).ToList();
-        var employeeActualReportLines = profitShareUpdateService.ReportLines.Where(ex => extractBadge(ex) != (null, null)).ToList();
+        // This path compares individuals and provides a list of differences.
+
+        var employeeExpectedReportLines = expectedReport.Split("\n").Where(ex => extractBadge(ex) != (null, null)).Select(t => t.Trim()).ToList();
+        var employeeActualReportLines = profitShareUpdateService.ReportLines.Where(ex => extractBadge(ex) != (null, null)).Select(t => t.Trim()).ToList();
 
         var readyHash = employeeExpectedReportLines.ToHashSet();
         var smartHash = employeeActualReportLines.ToHashSet();
@@ -245,7 +254,7 @@ public class ProfitShareUpdateTests
                    .GetManifestResourceStream($"Demoulas.ProfitSharing.IntegrationTests.Resources.{resourceName}"))
         using (StreamReader reader = new(stream!))
         {
-            return reader.ReadToEnd().Replace("\r", "");
+            return reader.ReadToEnd().Replace("\f", "\n\n");
         }
     }
 }
