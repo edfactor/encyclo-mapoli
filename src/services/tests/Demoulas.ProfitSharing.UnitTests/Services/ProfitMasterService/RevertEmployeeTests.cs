@@ -40,7 +40,7 @@ public class RevertEmployeeTests : ApiTestBase<Program>
         _profitDetails[1].ProfitYear = (short)(_thisYear - 5);
 
         // Act
-        ProfitMasterResponse response = await _service.Revert(new ProfitYearRequest { ProfitYear = _thisYear }, CancellationToken.None);
+        ProfitMasterRevertResponse response = await _service.Revert(new ProfitYearRequest { ProfitYear = _thisYear }, CancellationToken.None);
 
         // Assert
         response.BeneficiariesEffected.Should().Be(0);
@@ -70,7 +70,7 @@ public class RevertEmployeeTests : ApiTestBase<Program>
         // _scenarioFactory.PayProfits[0].Etva = 700
 
         // Act
-        ProfitMasterResponse response = await _service.Revert(new ProfitYearRequest { ProfitYear = _thisYear }, CancellationToken.None);
+        ProfitMasterRevertResponse response = await _service.Revert(new ProfitYearRequest { ProfitYear = _thisYear }, CancellationToken.None);
 
         // Assert
         response.BeneficiariesEffected.Should().Be(0);

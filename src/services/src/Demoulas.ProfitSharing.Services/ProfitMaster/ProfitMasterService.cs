@@ -1,5 +1,6 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -33,7 +34,14 @@ public class ProfitMasterService : IProfitMasterService
         _dbFactory = dbFactory;
     }
 
-    public async Task<ProfitMasterResponse> Update(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
+    public Task<ProfitMasterUpdateResponse> Status(ProfitYearRequest profitShareUpdateRequest, CancellationToken cancellationToken)
+    {
+        // Ongoing work to implement this method.   This is being pushed out to allow
+        // UI work to continue in parallel and to visualize/code-to the swagger endpoints.
+        return Task.FromResult(ProfitMasterUpdateResponse.Example());
+    }
+
+    public async Task<ProfitMasterUpdateResponse> Update(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
         int etvasUpdated = 0;
         var records = await _profitShareEditService.ProfitShareEditRecords(profitShareUpdateRequest, cancellationToken);
@@ -69,7 +77,25 @@ public class ProfitMasterService : IProfitMasterService
             var employeesEffected = records.Where(m => m.IsEmployee).Select(m => m.Ssn).ToHashSet().Count;
             var beneficiariesEffected = records.Where(m => !m.IsEmployee).Select(m => m.Ssn).ToHashSet().Count;
 
-            return new ProfitMasterResponse { BeneficiariesEffected = beneficiariesEffected, EmployeesEffected = employeesEffected, EtvasEffected = etvasUpdated }!;
+            return new ProfitMasterUpdateResponse
+            {
+                BeneficiariesEffected = beneficiariesEffected,
+                EmployeesEffected = employeesEffected,
+                EtvasEffected = etvasUpdated,
+                UpdatedTime = DateTime.Now,
+                UpdatedBy = "Plan Admin",  // will use IAppUser
+                ContributionPercent = profitShareUpdateRequest.ContributionPercent,
+                IncomingForfeitPercent = profitShareUpdateRequest.IncomingForfeitPercent,
+                EarningsPercent = profitShareUpdateRequest.EarningsPercent,
+                SecondaryEarningsPercent = profitShareUpdateRequest.SecondaryEarningsPercent,
+                MaxAllowedContributions = profitShareUpdateRequest.MaxAllowedContributions,
+                BadgeAdjusted = profitShareUpdateRequest.BadgeToAdjust,
+                BadgeAdjusted2 = profitShareUpdateRequest.BadgeToAdjust2,
+                AdjustContributionAmount = profitShareUpdateRequest.AdjustContributionAmount,
+                AdjustEarningsAmount = profitShareUpdateRequest.AdjustEarningsAmount,
+                AdjustIncomingForfeitAmount = profitShareUpdateRequest.AdjustIncomingForfeitAmount,
+                AdjustEarningsSecondaryAmount = profitShareUpdateRequest.AdjustEarningsSecondaryAmount
+            }!;
         }, cancellationToken);
     }
 
@@ -93,7 +119,7 @@ public class ProfitMasterService : IProfitMasterService
     }
 
 #pragma warning disable AsyncFixer01
-    public async Task<ProfitMasterResponse> Revert(ProfitYearRequest profitYearRequest, CancellationToken cancellationToken)
+    public async Task<ProfitMasterRevertResponse> Revert(ProfitYearRequest profitYearRequest, CancellationToken cancellationToken)
     {
         return await _dbFactory.UseWritableContext(async ctx =>
         {
@@ -120,9 +146,13 @@ public class ProfitMasterService : IProfitMasterService
 
             ctx.ProfitDetails.RemoveRange(pds);
             await ctx.SaveChangesAsync(cancellationToken);
-            return new ProfitMasterResponse
+            return new ProfitMasterRevertResponse
             {
-                BeneficiariesEffected = memberSsns.Count - ssn2PayProfit.Count, EmployeesEffected = ssn2PayProfit.Count, EtvasEffected = etvaReset
+                BeneficiariesEffected = memberSsns.Count - ssn2PayProfit.Count,
+                EmployeesEffected = ssn2PayProfit.Count,
+                EtvasEffected = etvaReset,
+                UdpatedTime = DateTime.Now,
+                UpdatedBy = "Plan Admins", // will use IAppUser
             };
         }, cancellationToken);
     }

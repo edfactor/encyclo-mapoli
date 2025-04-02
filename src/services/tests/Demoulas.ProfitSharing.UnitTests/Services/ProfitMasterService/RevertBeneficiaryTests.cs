@@ -35,7 +35,7 @@ public class RevertBeneficiaryTests : ApiTestBase<Program>
         pd0.CommentTypeId = CommentType.Constants.OneHundredPercentEarnings.Id;
 
         // Act
-        ProfitMasterResponse response = await _service.Revert(new ProfitYearRequest { ProfitYear = _thisYear }, CancellationToken.None);
+        ProfitMasterRevertResponse response = await _service.Revert(new ProfitYearRequest { ProfitYear = _thisYear }, CancellationToken.None);
 
         // Assert
         response.BeneficiariesEffected.Should().Be(1);
