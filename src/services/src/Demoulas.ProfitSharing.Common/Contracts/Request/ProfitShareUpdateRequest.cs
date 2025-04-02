@@ -8,14 +8,14 @@ public sealed record ProfitShareUpdateRequest : ProfitYearRequest
     public decimal ContributionPercent { get; set; }
     public decimal IncomingForfeitPercent { get; set; }
     public decimal EarningsPercent { get; set; }
-    public decimal? SecondaryEarningsPercent { get; set; }
+    public decimal SecondaryEarningsPercent { get; set; }
     public long MaxAllowedContributions { get; set; }
-    public long? BadgeToAdjust { get; set; }
-    public long? BadgeToAdjust2 { get; set; }
-    public decimal? AdjustContributionAmount { get; set; }
-    public decimal? AdjustEarningsAmount { get; set; }
-    public decimal? AdjustIncomingForfeitAmount { get; set; }
-    public decimal? AdjustEarningsSecondaryAmount { get; set; }
+    public long BadgeToAdjust { get; set; }
+    public long BadgeToAdjust2 { get; set; }
+    public decimal AdjustContributionAmount { get; set; }
+    public decimal AdjustEarningsAmount { get; set; }
+    public decimal AdjustIncomingForfeitAmount { get; set; }
+    public decimal AdjustEarningsSecondaryAmount { get; set; }
 
     public static new ProfitShareUpdateRequest RequestExample()
     {
