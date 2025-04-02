@@ -249,8 +249,8 @@ public sealed class TotalService : ITotalService
     /// <param name="ctx">
     /// The database context used to access demographic, pay profit, and beneficiary data.
     /// </param>
-    /// <param name="employeeYear">
-    /// The employeeYear (aka selector of PayProfit) year for which the vesting ratio is being calculated.
+    /// <param name="profitYear">
+    /// The Profit year (aka selector of PayProfit) year for which the vesting ratio is being calculated.
     /// </param>
     /// <param name="asOfDate">
     /// The date as of which the vesting ratio is being determined.
@@ -259,7 +259,7 @@ public sealed class TotalService : ITotalService
     /// An <see cref="IQueryable{T}"/> of <see cref="ParticipantTotalRatioDto"/> containing the calculated vesting ratios
     /// for each participant.
     /// </returns>
-    internal IQueryable<ParticipantTotalRatioDto> GetVestingRatio(IProfitSharingDbContext ctx, short employeeYear,
+    internal IQueryable<ParticipantTotalRatioDto> GetVestingRatio(IProfitSharingDbContext ctx, short profitYear,
         DateOnly asOfDate)
     {
 
@@ -268,24 +268,13 @@ public sealed class TotalService : ITotalService
 
         var demoInfo = (
             from d in ctx.Demographics
-            join ppTbl in ctx.PayProfits on new { d.Id, ProfitYear = employeeYear } equals new
-            {
-                Id = ppTbl.DemographicId, ppTbl.ProfitYear
-            } into ppTmp
-            from pp in ppTmp.DefaultIfEmpty()
-            join cyTbl in GetYearsOfService(ctx, employeeYear) on d.Ssn equals cyTbl.Ssn into cyTmp
+            join cyTbl in GetYearsOfService(ctx, profitYear) on d.Ssn equals cyTbl.Ssn into cyTmp
             from cy in cyTmp.DefaultIfEmpty()
             select new
             {
                 d.Ssn,
-                EnrollmentId = pp != null ? (byte?)pp.EnrollmentId : 0,
-                d.TerminationCodeId,
-                d.TerminationDate,
-                ZeroContributionReasonId = pp != null ? pp.ZeroContributionReasonId : null,
                 d.DateOfBirth,
                 FromBeneficiary = (short)0,
-                Years = cy != null ? cy.Years : 0,
-                Hours = (decimal?)pp.CurrentHoursYear,
             }
         );
 
@@ -296,14 +285,8 @@ public sealed class TotalService : ITotalService
             select new
             {
                 b.Contact!.Ssn,
-                EnrollmentId = (byte?)0,
-                TerminationCodeId = (char?)null,
-                TerminationDate = (DateOnly?)null,
-                ZeroContributionReasonId = (byte?)null,
                 b.Contact.DateOfBirth,
                 FromBeneficiary = (short)1,
-                Years = (byte?)0,
-                Hours = (decimal?)0
             }
         );
 
@@ -311,32 +294,44 @@ public sealed class TotalService : ITotalService
         var hoursWorkedRequirement = ContributionService.MinimumHoursForContribution();
 
 #pragma warning disable S1244 // Floating point numbers should not be tested for equality
+#pragma warning disable S125 // Sections of code should not be commented out
         return (
             from db in demoOrBeneficiary
+            join dTbl in ctx.Demographics on db.Ssn equals dTbl.Ssn into dTmp
+            from d in dTmp.DefaultIfEmpty()
+            join ppTbl in ctx.PayProfits on new { Id = (d != null ? d.Id : 0), ProfitYear = profitYear } equals new
+            {
+                Id = ppTbl.DemographicId,
+                ppTbl.ProfitYear
+            } into ppTmp
+            from pp in ppTmp.DefaultIfEmpty()
+            join cyTbl in GetYearsOfService(ctx, profitYear) on db.Ssn equals cyTbl.Ssn into cyTmp
+            from cy in cyTmp.DefaultIfEmpty()
             select new ParticipantTotalRatioDto
             {
                 Ssn = db.Ssn,
                 Ratio = db.FromBeneficiary == 1 ? 1.0m :
                     db.DateOfBirth <= birthDate65 &&
-                    (db.TerminationDate == null || db.TerminationDate < beginningOfYear) ? 1m :
-                    db.EnrollmentId == 3 || db.EnrollmentId == 4 ? 1m :
-                    db.TerminationCodeId == TerminationCode.Constants.Deceased ? 1m :
-                    db.ZeroContributionReasonId == ZeroContributionReason.Constants
-                        .SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested ? 1m :
-                    (db.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions ? 1 : 0) +
-                    (db.Hours >= hoursWorkedRequirement ? 1 : 0) + db.Years < 3 ? 0m :
-                    (db.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions ? 1 : 0) +
-                    (db.Hours >= hoursWorkedRequirement ? 1 : 0) + db.Years == 3 ? .2m :
-                    (db.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions ? 1 : 0) +
-                    (db.Hours >= hoursWorkedRequirement ? 1 : 0) + db.Years == 4 ? .4m :
-                    (db.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions ? 1 : 0) +
-                    (db.Hours >= hoursWorkedRequirement ? 1 : 0) + db.Years == 5 ? .6m :
-                    (db.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions ? 1 : 0) +
-                    (db.Hours >= hoursWorkedRequirement ? 1 : 0) + db.Years == 6 ? .8m :
-                    (db.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions ? 1 : 0) +
-                    (db.Hours >= hoursWorkedRequirement ? 1 : 0) + db.Years > 6 ? 1m : 0
+                    ((d != null && d.TerminationDate == null) || (d!= null && d.TerminationDate < beginningOfYear)) ? 1m :
+                    (pp != null && pp.EnrollmentId == 3) || (pp != null && pp.EnrollmentId == 4) ? 1m :
+                    (d != null && d.TerminationCodeId == TerminationCode.Constants.Deceased) ? 1m :
+                    (pp != null && pp.ZeroContributionReasonId == ZeroContributionReason.Constants
+                        .SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested) ? 1m :
+                    ((pp != null && pp.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions) ? 1 : 0) +
+                    ((pp != null && pp.CurrentHoursYear>= hoursWorkedRequirement) ? 1 : 0) + (cy != null ? cy.Years : 0) < 3 ? 0m :
+                    ((pp != null && pp.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions) ? 1 : 0) +
+                    ((pp != null && pp.CurrentHoursYear >= hoursWorkedRequirement) ? 1 : 0) + (cy != null ? cy.Years : 0) == 3 ? .2m :
+                    ((pp != null && pp.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions) ? 1 : 0) +
+                    ((pp != null && pp.CurrentHoursYear >= hoursWorkedRequirement) ? 1 : 0) + (cy != null ? cy.Years : 0) == 4 ? .4m :
+                    ((pp != null && pp.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions) ? 1 : 0) +
+                    ((pp != null && pp.CurrentHoursYear >= hoursWorkedRequirement) ? 1 : 0) + (cy != null ? cy.Years : 0) == 5 ? .6m :
+                    ((pp != null && pp.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions) ? 1 : 0) +
+                    ((pp != null && pp.CurrentHoursYear >= hoursWorkedRequirement) ? 1 : 0) + (cy != null ? cy.Years : 0) == 6 ? .8m :
+                    ((pp != null && pp.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions) ? 1 : 0) +
+                    ((pp != null && pp.CurrentHoursYear >= hoursWorkedRequirement) ? 1 : 0) + (cy != null ? cy.Years : 0) > 6 ? 1m : 0
             }
         );
+#pragma warning restore S125 // Sections of code should not be commented out
 #pragma warning restore S1244 // Floating point numbers should not be tested for equality
     }
 

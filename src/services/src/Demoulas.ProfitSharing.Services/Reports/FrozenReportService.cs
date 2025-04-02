@@ -517,10 +517,6 @@ public class FrozenReportService : IFrozenReportService
         {
             var query = _totalService.TotalVestingBalance(ctx, req.ProfitYear, startEnd.FiscalEndDate);
 
-#pragma warning disable AsyncFixer02 // Long-running or blocking operations inside an async method
-            var x = query.ToList();
-#pragma warning restore AsyncFixer02 // Long-running or blocking operations inside an async method
-
             var joinedQuery = from q in query
                 join d in ctx.Demographics on q.Ssn equals d.Ssn into demographics
                 from demographic in demographics.DefaultIfEmpty()
@@ -860,21 +856,21 @@ public class FrozenReportService : IFrozenReportService
             var demoBase = FrozenService.GetDemographicSnapshot(ctx, req.ProfitYear).Select(x =>
                 new
                 {
-                    Ssn = x.Ssn,
-                    FirstName = x.ContactInfo.FirstName,
-                    LastName = x.ContactInfo.LastName,
-                    BadgeNumber = x.BadgeNumber,
+                    x.Ssn,
+                    x.ContactInfo.FirstName,
+                    x.ContactInfo.LastName,
+                    x.BadgeNumber,
                     DemographicId = x.Id,
                     IsEmployee = true,
-                    StoreNumber = x.StoreNumber
+                    x.StoreNumber
                 });
             var beneficiaryBase = ctx.BeneficiaryContacts
                 .Where(x => !ctx.Demographics.Any(d => d.Ssn == x.Ssn))
                 .Select(x => new
                 {
-                    Ssn = x.Ssn,
-                    FirstName = x.ContactInfo.FirstName,
-                    LastName = x.ContactInfo.LastName,
+                    x.Ssn,
+                    x.ContactInfo.FirstName,
+                    x.ContactInfo.LastName,
                     BadgeNumber = 0,
                     DemographicId = 0,
                     IsEmployee = false,
@@ -884,17 +880,16 @@ public class FrozenReportService : IFrozenReportService
                 members = demoBase.Union(
                     beneficiaryBase); //UnionBy throws an error, so beneficiaries that are also employees are filtered out, and the regular Union can be used since we've filtered out possible duplicates.
 
-
             var baseQuery = await (
                 from m in members
+                join bal in _totalService.TotalVestingBalance(ctx, req.ProfitYear, startEnd.FiscalBeginDate)
+                    on m.Ssn equals bal.Ssn
                 join lyBalTbl in _totalService.TotalVestingBalance(ctx, lastYear, lyStartEnd.FiscalBeginDate)
                     on m.Ssn equals lyBalTbl.Ssn into lyBalTmp
                 from lyBal in lyBalTmp.DefaultIfEmpty()
                 join lyPpTbl in ctx.PayProfits.Where(x => x.ProfitYear == lastYear)
                     on m.DemographicId equals lyPpTbl.DemographicId into lyPpTmp
                 from lyPp in lyPpTmp.DefaultIfEmpty()
-                join bal in _totalService.TotalVestingBalance(ctx, req.ProfitYear, startEnd.FiscalBeginDate)
-                    on m.Ssn equals bal.Ssn
                 join ppTbl in ctx.PayProfits.Where(x => x.ProfitYear == req.ProfitYear)
                     on m.DemographicId equals ppTbl.DemographicId into ppTmp
                 from pp in ppTmp.DefaultIfEmpty()
@@ -909,11 +904,11 @@ public class FrozenReportService : IFrozenReportService
                     BeforeEnrollmentId = lyPp != null ? lyPp.EnrollmentId : 0,
                     BeforeProfitSharingAmount = lyBal != null ? lyBal.CurrentBalance : 0,
                     BeforeVestedProfitSharingAmount = lyBal != null ? lyBal.VestedBalance : 0,
-                    BeforeYearsInPlan = lyPp != null ? lyBal.YearsInPlan : (byte)0,
+                    BeforeYearsInPlan = lyBal != null ? lyBal.YearsInPlan : (byte)0,
                     AfterEnrollmentId = pp != null ? pp.EnrollmentId : 0,
-                    AfterProfitSharingAmount = bal != null ? bal.CurrentBalance : 0,
-                    AfterVestedProfitSharingAmount = bal != null ? bal.VestedBalance : 0,
-                    AfterYearsInPlan = pp != null ? bal.YearsInPlan : (byte)0
+                    AfterProfitSharingAmount = bal.CurrentBalance,
+                    AfterVestedProfitSharingAmount = bal.VestedBalance,
+                    AfterYearsInPlan = bal.YearsInPlan
                 }
             ).ToListAsync(
                 cancellationToken); //Have to materialize. Something in this query seems to be unable to render as an expression with the current version of the oracle provider.
