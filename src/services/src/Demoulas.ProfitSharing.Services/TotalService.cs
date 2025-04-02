@@ -5,6 +5,7 @@ using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.Extensions;
 using Demoulas.ProfitSharing.Services.Internal.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Microsoft.EntityFrameworkCore;
@@ -46,7 +47,7 @@ public sealed class TotalService : ITotalService
     /// </returns>
     internal IQueryable<ParticipantTotalDto> GetTotalBalanceSetEmployeePortion(IProfitSharingDbContext ctx, short profitYear)
     {
-        byte[] sumAllFieldProfitCodeTypes = GetProfitCodesForBalanceCalc();
+        byte[] sumAllFieldProfitCodeTypes = ProfitDetailExtensions.GetProfitCodesForBalanceCalc();
 
         return (from pd in ctx.ProfitDetails
                 where pd.ProfitYear <= profitYear && pd.CommentRelatedOracleHcmId == null
@@ -75,7 +76,7 @@ public sealed class TotalService : ITotalService
     /// </returns>
     internal IQueryable<ParticipantTotalDto> GetTotalBalanceSet(IProfitSharingDbContext ctx, short profitYear)
     {
-        byte[] sumAllFieldProfitCodeTypes = GetProfitCodesForBalanceCalc();
+        byte[] sumAllFieldProfitCodeTypes = ProfitDetailExtensions.GetProfitCodesForBalanceCalc();
 
         return (from pd in ctx.ProfitDetails
                 where pd.ProfitYear <= profitYear
@@ -91,18 +92,6 @@ public sealed class TotalService : ITotalService
                 });
     }
 
-    private static byte[] GetProfitCodesForBalanceCalc()
-    {
-        var sumAllFieldProfitCodeTypes = new[]
-                {
-            /*1*/ ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id,
-            /*2*/ ProfitCode.Constants.OutgoingForfeitures.Id,
-            /*3*/ ProfitCode.Constants.OutgoingDirectPayments.Id,
-            /*5*/ ProfitCode.Constants.OutgoingXferBeneficiary.Id,
-            /*9*/ ProfitCode.Constants.Outgoing100PercentVestedPayment.Id
-        };
-        return sumAllFieldProfitCodeTypes;
-    }
 
     /// <summary>
     /// Retrieves the total profit-sharing amounts for participants up to a specified profit year.
@@ -463,13 +452,13 @@ public sealed class TotalService : ITotalService
             .Select(g => new
             {
                 Ssn = g.Key,
-                TotalContributions = g.Sum(x => x.CalculateAmounts().contribution),
-                TotalEarnings = g.Sum(x => x.CalculateAmounts().earnings),
-                TotalForfeitures = g.Sum(x => x.CalculateAmounts().forfeiture),
-                TotalPayments = g.Sum(x => x.CalculateAmounts().payment),
-                Distribution = g.Sum(x => x.CalculateAmounts().distribution),
-                BeneficiaryAllocation = g.Sum(x => x.CalculateAmounts().beneficiaryAllocation),
-                CurrentBalance = g.Sum(x => x.CalculateAmounts().currentBalance)
+                TotalContributions = g.Sum(x => x.CalculateContribution()),
+                TotalEarnings = g.Sum(x => x.CalculateEarnings()),
+                TotalForfeitures = g.Sum(x => x.CalculateForfeiture()),
+                TotalPayments = g.Sum(x => x.CalculatePayment()),
+                Distribution = g.Sum(x => x.CalculateDistribution()),
+                BeneficiaryAllocation = g.Sum(x => x.CalculateBeneficiaryAllocation()),
+                CurrentBalance = g.Sum(x => x.CalculateRowBalance())
             })
             .Select(r => new InternalProfitDetailDto
             {
