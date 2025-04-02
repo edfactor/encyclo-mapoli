@@ -268,8 +268,6 @@ public sealed class TotalService : ITotalService
 
         var demoInfo = (
             from d in ctx.Demographics
-            join cyTbl in GetYearsOfService(ctx, profitYear) on d.Ssn equals cyTbl.Ssn into cyTmp
-            from cy in cyTmp.DefaultIfEmpty()
             select new
             {
                 d.Ssn,
@@ -310,25 +308,51 @@ public sealed class TotalService : ITotalService
             select new ParticipantTotalRatioDto
             {
                 Ssn = db.Ssn,
-                Ratio = db.FromBeneficiary == 1 ? 1.0m :
+                Ratio = 
+                    //Beneficiaries are always 100% vested
+                    db.FromBeneficiary == 1 ? 1.0m :
+
+                    //Otherwise, If over 65, and not terminated this year, 100% vested
                     db.DateOfBirth <= birthDate65 &&
-                    ((d != null && d.TerminationDate == null) || (d!= null && d.TerminationDate < beginningOfYear)) ? 1m :
-                    (pp != null && pp.EnrollmentId == 3) || (pp != null && pp.EnrollmentId == 4) ? 1m :
+                        ((d != null && d.TerminationDate == null) || (d!= null && d.TerminationDate < beginningOfYear)) ? 1m :
+
+                    //Otherwise, If enrollment has forfeitures, 100%
+                    (pp != null && pp.EnrollmentId == 
+                        Enrollment.Constants.OldVestingPlanHasForfeitureRecords) || (pp != null && pp.EnrollmentId == Enrollment.Constants.NewVestingPlanHasForfeitureRecords) ? 1m :
+
+                    //Otherwise, If deceased, mark for 100% vested
                     (d != null && d.TerminationCodeId == TerminationCode.Constants.Deceased) ? 1m :
+
+                    //Otherwise, If zero contribution reason is as below, 100% vested 
                     (pp != null && pp.ZeroContributionReasonId == ZeroContributionReason.Constants
                         .SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested) ? 1m :
+
+                    //Otherwise, If total years (including the present one) is 0, 1, or 2, 0% Vested
                     ((pp != null && pp.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions) ? 1 : 0) +
-                    ((pp != null && pp.CurrentHoursYear>= hoursWorkedRequirement) ? 1 : 0) + (cy != null ? cy.Years : 0) < 3 ? 0m :
+                        ((pp != null && pp.CurrentHoursYear + pp.HoursExecutive>= hoursWorkedRequirement) ? 1 : 0) + (cy != null ? cy.Years : 0) < 3 ? 0m :
+
+                    //Otherwise, If total years (including the present one) is 3, 20% Vested
                     ((pp != null && pp.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions) ? 1 : 0) +
-                    ((pp != null && pp.CurrentHoursYear >= hoursWorkedRequirement) ? 1 : 0) + (cy != null ? cy.Years : 0) == 3 ? .2m :
+                        ((pp != null && pp.CurrentHoursYear + pp.HoursExecutive >= hoursWorkedRequirement) ? 1 : 0) + (cy != null ? cy.Years : 0) == 3 ? .2m :
+
+                    //Otherwise, If total years (including the present one) is 4, 40% Vested
                     ((pp != null && pp.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions) ? 1 : 0) +
-                    ((pp != null && pp.CurrentHoursYear >= hoursWorkedRequirement) ? 1 : 0) + (cy != null ? cy.Years : 0) == 4 ? .4m :
+                        ((pp != null && pp.CurrentHoursYear + pp.HoursExecutive >= hoursWorkedRequirement) ? 1 : 0) + (cy != null ? cy.Years : 0) == 4 ? .4m :
+
+                    //Otherwise, If total years (including the present one) is 5, 60% Vested
                     ((pp != null && pp.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions) ? 1 : 0) +
-                    ((pp != null && pp.CurrentHoursYear >= hoursWorkedRequirement) ? 1 : 0) + (cy != null ? cy.Years : 0) == 5 ? .6m :
+                        ((pp != null && pp.CurrentHoursYear + pp.HoursExecutive >= hoursWorkedRequirement) ? 1 : 0) + (cy != null ? cy.Years : 0) == 5 ? .6m :
+
+                    //Otherwise, If total years (including the present one) is 6, 80% Vested
                     ((pp != null && pp.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions) ? 1 : 0) +
-                    ((pp != null && pp.CurrentHoursYear >= hoursWorkedRequirement) ? 1 : 0) + (cy != null ? cy.Years : 0) == 6 ? .8m :
+                        ((pp != null && pp.CurrentHoursYear + pp.HoursExecutive >= hoursWorkedRequirement) ? 1 : 0) + (cy != null ? cy.Years : 0) == 6 ? .8m :
+
+                    //Otherwise, If total years (including the present one) is more than 6, 100% Vested
                     ((pp != null && pp.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions) ? 1 : 0) +
-                    ((pp != null && pp.CurrentHoursYear >= hoursWorkedRequirement) ? 1 : 0) + (cy != null ? cy.Years : 0) > 6 ? 1m : 0
+                        ((pp != null && pp.CurrentHoursYear + pp.HoursExecutive >= hoursWorkedRequirement) ? 1 : 0) + (cy != null ? cy.Years : 0) > 6 ? 1m : 
+
+                    //Otherwise, 0% vested
+                    0
             }
         );
 #pragma warning restore S125 // Sections of code should not be commented out
