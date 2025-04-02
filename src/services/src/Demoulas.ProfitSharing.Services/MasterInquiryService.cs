@@ -299,18 +299,12 @@ public class MasterInquiryService : IMasterInquiryService
 
         if (req.BadgeNumber.HasValue)
         {
-            int.TryParse(req.BadgeNumber.ToString()?[..5], out int badgeNumber);
-            int.TryParse(req.BadgeNumber.ToString()?[6..], out int psnSuffix);
+            query = query.Where(x => x.Member.BadgeNumber == req.BadgeNumber);
+        }
 
-            if (badgeNumber > 0)
-            {
-                query = query.Where(x => x.Member.BadgeNumber == badgeNumber);
-            }
-
-            if (psnSuffix > 0)
-            {
-                query = query.Where(x => x.Member.PsnSuffix == psnSuffix);
-            }
+        if (req.PsnSuffix is > 0)
+        {
+            query = query.Where(x => x.Member.PsnSuffix == req.PsnSuffix);
         }
 
         return query;

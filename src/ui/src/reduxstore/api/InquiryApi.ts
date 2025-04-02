@@ -32,7 +32,8 @@ export const InquiryApi = createApi({
         url: "master/master-inquiry",
         method: "POST",
         body: {
-          badgeNumber: params.badgeNumber,
+          badgeNumber: Number(params.badgeNumber?.toString().substring(0, 6)),
+          psnSuffix: Number(params.badgeNumber?.toString().substring(6)),
           startProfitYear: params.startProfitYear,
           endProfitYear: params.endProfitYear,
           startProfitMonth: params.startProfitMonth,

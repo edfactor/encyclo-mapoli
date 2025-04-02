@@ -345,6 +345,7 @@ export interface MasterInquiryRequest {
   paymentType?: number;
   memberType?: number;
   badgeNumber?: number;
+  psnSuffix?: number;
   pagination: SortedPaginationRequestDto;
 }
 
