@@ -18,8 +18,6 @@ public class ProfitDetail
     public decimal Contribution { get; set; }
     public decimal Earnings { get; set; }
     public decimal Forfeiture { get; set; }
-    public decimal Payments { get; set; }
-    public decimal Allocations { get; set; }
 
     public byte MonthToDate { get; set; }
     public short YearToDate { get; set; }

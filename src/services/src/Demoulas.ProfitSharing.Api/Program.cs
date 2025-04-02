@@ -8,7 +8,6 @@ using Demoulas.ProfitSharing.Api.Extensions;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Extensions;
-using Demoulas.ProfitSharing.Data.Interceptor;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Extensions;
 using Demoulas.ProfitSharing.Security;
@@ -70,8 +69,8 @@ builder.Services.AddCors(options =>
 
 List<ContextFactoryRequest> list =
 [
-    ContextFactoryRequest.Initialize<ProfitSharingDbContext>("ProfitSharing", interceptors: new List<IInterceptor> { new ForfeitureMaterializationInterceptor() }),
-    ContextFactoryRequest.Initialize<ProfitSharingReadOnlyDbContext>("ProfitSharing", interceptors: new List<IInterceptor> { new ForfeitureMaterializationInterceptor() }),
+    ContextFactoryRequest.Initialize<ProfitSharingDbContext>("ProfitSharing"),
+    ContextFactoryRequest.Initialize<ProfitSharingReadOnlyDbContext>("ProfitSharing"),
     ContextFactoryRequest.Initialize<DemoulasCommonDataContext>("StoreInfo")
 ];
 

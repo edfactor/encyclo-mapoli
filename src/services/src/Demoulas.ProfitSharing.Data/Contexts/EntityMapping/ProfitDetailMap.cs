@@ -21,8 +21,6 @@ internal sealed class ProfitDetailMap : IEntityTypeConfiguration<ProfitDetail>
         _ = builder.Property(x => x.Contribution).IsRequired().HasPrecision(9, 2).HasColumnName("CONTRIBUTION").HasComment("Contribution to plan from DMB");
         _ = builder.Property(x => x.Earnings).IsRequired().HasPrecision(9, 2).HasColumnName("EARNINGS");
         _ = builder.Property(x => x.Forfeiture).IsRequired().HasPrecision(9, 2).HasColumnName("FORFEITURE");
-        _ = builder.Ignore(x => x.Payments);
-        _ = builder.Ignore(x => x.Allocations);
         _ = builder.Property(x => x.Forfeiture).IsRequired().HasPrecision(9, 2).HasColumnName("FORFEITURE");
         _ = builder.Property(x => x.MonthToDate).IsRequired().HasPrecision(2, 0).HasColumnName("MONTH_TO_DATE");
         _ = builder.Property(x => x.YearToDate).IsRequired().HasPrecision(4, 0).HasColumnName("YEAR_TO_DATE");

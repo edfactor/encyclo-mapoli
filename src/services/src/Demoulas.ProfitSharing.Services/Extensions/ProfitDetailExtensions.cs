@@ -41,12 +41,21 @@ public static class ProfitDetailExtensions
 
     internal static decimal CalculateForfeiture(this ProfitDetail detail)
     {
+        if (GetProfitCodesForBalanceCalc().Contains(detail.ProfitCodeId))
+        {
+            return 0;
+        }
         return detail.Forfeiture;
     }
 
     internal static decimal CalculatePayment(this ProfitDetail detail)
     {
-        return detail.Payments + detail.Allocations;
+        if (GetProfitCodesForBalanceCalc().Contains(detail.ProfitCodeId))
+        {
+            return detail.Forfeiture;
+        }
+
+        return 0;
     }
 
     internal static decimal CalculateDistribution(this ProfitDetail detail)
