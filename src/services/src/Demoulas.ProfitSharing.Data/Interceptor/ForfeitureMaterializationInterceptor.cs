@@ -17,25 +17,12 @@ public class ForfeitureMaterializationInterceptor : IMaterializationInterceptor
             return entity;
         }
 
-        // Handle Forfeiture logic
-        if (detail.ProfitCodeId == /*2*/ ProfitCode.Constants.OutgoingForfeitures &&
-            (detail.CommentTypeId == /*6*/ CommentType.Constants.Forfeit ||
-             detail.CommentTypeId == /*7*/ CommentType.Constants.UnForfeit))
-        {
-            return entity;
-        }
-        detail.Forfeiture = 0;
 
         // Handle Payments logic
-        if ((detail.ProfitCodeId == ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal ||
-             detail.ProfitCodeId == ProfitCode.Constants.OutgoingDirectPayments) &&
-            (detail.CommentTypeId == CommentType.Constants.Voided ||
-             detail.CommentTypeId == CommentType.Constants.Hardship ||
-             detail.CommentTypeId == CommentType.Constants.Distribution ||
-             detail.CommentTypeId == CommentType.Constants.Payoff ||
-             detail.CommentTypeId == CommentType.Constants.Dirpay ||
-             detail.CommentTypeId == CommentType.Constants.Rollover ||
-             detail.CommentTypeId == CommentType.Constants.RothIra))
+        if (detail.ProfitCodeId == /*1*/ ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal ||
+             detail.ProfitCodeId == /*2*/ ProfitCode.Constants.OutgoingForfeitures ||
+             detail.ProfitCodeId == /*3*/ ProfitCode.Constants.OutgoingDirectPayments ||
+             detail.ProfitCodeId == /*5*/ ProfitCode.Constants.OutgoingXferBeneficiary)
         {
             detail.Payments = detail.Forfeiture;
             return entity;
