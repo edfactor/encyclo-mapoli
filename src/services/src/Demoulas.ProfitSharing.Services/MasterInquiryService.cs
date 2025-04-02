@@ -118,8 +118,20 @@ public class MasterInquiryService : IMasterInquiryService
                 short currentYear = req.EndProfitYear ?? (short)DateTime.Today.Year;
                 short previousYear = (short)(currentYear - 1);
 
-                employeeDetails = await GetDemographicDetails(ctx, ssn, currentYear, previousYear, cancellationToken) ??
-                                  await GetBeneficiaryDetails(ctx, ssn, currentYear, previousYear, cancellationToken);
+                if (req.MemberType == 1) // Employee only
+                {
+                    employeeDetails = await GetDemographicDetails(ctx, ssn, currentYear, previousYear, cancellationToken);
+                }
+                else if (req.MemberType == 2) // Beneficiary only
+                {
+                    employeeDetails = await GetBeneficiaryDetails(ctx, ssn, currentYear, previousYear, cancellationToken);
+                }
+                else // All or null
+                {
+                    employeeDetails = await GetDemographicDetails(ctx, ssn, currentYear, previousYear, cancellationToken) ??
+                                      await GetBeneficiaryDetails(ctx, ssn, currentYear, previousYear, cancellationToken);
+                }
+               
             }
 
             return new MasterInquiryWithDetailsResponseDto { InquiryResults = result, EmployeeDetails = employeeDetails };
