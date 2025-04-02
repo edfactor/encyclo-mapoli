@@ -46,7 +46,6 @@ internal sealed class ProfitShareUpdateReport
 
     public void m805PrintSequence(List<MemberFinancials> members, long maxAllowedContribution, TotalsDto totalsDto)
     {
-        WRITE("\fDJDE JDE=PAY426,JDL=PAYROL,END,;");
         Header1 header_1 = new();
         header_1.HDR1_YY = TodaysDateTime.Year - 2000;
         header_1.HDR1_MM = TodaysDateTime.Month;
@@ -61,7 +60,7 @@ internal sealed class ProfitShareUpdateReport
         {
             m810WriteReport(reportCounters, header_1, memberFinancials);
         }
-        
+
         m850PrintTotals(reportCounters, totalsDto, maxAllowedContribution);
     }
 
@@ -71,7 +70,7 @@ internal sealed class ProfitShareUpdateReport
     }
 
 
-    public void m810WriteReport(ReportCounters reportCounters, Header1 header1, MemberFinancials memberFinancials )
+    public void m810WriteReport(ReportCounters reportCounters, Header1 header1, MemberFinancials memberFinancials)
     {
         if (reportCounters.LineCounter > 60)
         {
@@ -157,11 +156,13 @@ internal sealed class ProfitShareUpdateReport
         }
     }
 
+    const string prefix = "\n\nDJDE JDE=PAY426,JDL=PAYROL,END,;\n\n";
+
     public void m830PrintHeader(ReportCounters reportCounters, Header1 header1)
     {
         reportCounters.PageCounter += 1;
         header1.HDR1_PAGE = reportCounters.PageCounter;
-        WRITE($"\f{header1}");
+        WRITE($"{((ReportLines.Count == 0) ? prefix : "")}\n{header1}");
         WRITE("");
         WRITE(new Header2());
         WRITE(new Header3());
@@ -187,7 +188,7 @@ internal sealed class ProfitShareUpdateReport
 
         client_tot.EARN2_TOT = wsClientTotalsDto.ClassActionFund;
         client_tot.END_BAL_TOT = wsClientTotalsDto.EndingBalance;
-        
+
         TotalHeader1 total_header_1 = new();
         total_header_1.TOT_HDR1_YEAR1 = _profitYear;
         total_header_1.TOT_HDR1_DD = TodaysDateTime.Day;

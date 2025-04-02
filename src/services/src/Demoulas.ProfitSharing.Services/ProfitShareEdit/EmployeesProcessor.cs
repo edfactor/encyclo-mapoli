@@ -29,17 +29,24 @@ internal static class EmployeeProcessorHelper
         var employeeFinancialsList = await dbContextFactory.UseReadOnlyContext(async ctx =>
         {
             var employees = ctx.PayProfits
-                .Where(pp => pp.ProfitYear == profitYear)
+                .Join(ctx.PayProfits,
+                    ppYE => ppYE.DemographicId,
+                    ppNow => ppNow.DemographicId,
+                    (ppYE, ppNow) => new { ppYE, ppNow })
+                .Where(x => x.ppYE.ProfitYear == profitYear && x.ppNow.ProfitYear == profitYear + 1)
                 .Select(x => new
                 {
-                    x.Demographic!.BadgeNumber,
-                    x.Demographic.Ssn,
-                    Name = x.Demographic.ContactInfo!.FullName,
-                    EnrolledId = x.EnrollmentId,
-                    x.EmployeeTypeId,
-                    PointsEarned = (int)(x.PointsEarned ?? 0),
-                    x.ZeroContributionReasonId,
-                    x.Etva
+                    x.ppYE.Demographic!.BadgeNumber,
+                    x.ppYE.Demographic.Ssn,
+                    Name = x.ppYE.Demographic.ContactInfo!.FullName,
+                    EnrolledId = x.ppYE.EnrollmentId,
+                    x.ppYE.EmployeeTypeId,
+                    PointsEarned = (int)(x.ppYE.PointsEarned ?? 0),
+                    x.ppYE.ZeroContributionReasonId,
+                    x.ppNow.Etva
+                    // We use the ppNow Etva here - For example, in the 2024 profit year, we use the ETVA on the 2025 row,
+                    // as that is where the current ETVA is.  The 2024 row is meaningless (or will be) populated with "Last Years" ETVA
+                    // when we complete the 2024 YE Run.
                 });
 
             var employeeWithBalances =
