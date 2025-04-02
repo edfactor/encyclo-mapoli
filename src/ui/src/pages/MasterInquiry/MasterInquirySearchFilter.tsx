@@ -134,7 +134,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
       badgeNumber: masterInquiryRequestParams?.badgeNumber || undefined,
       comment: masterInquiryRequestParams?.comment || undefined,
       paymentType: masterInquiryRequestParams?.paymentType ? masterInquiryRequestParams?.paymentType : "all",
-      memberType: determineCorrectMemberType(),
+      memberType: determineCorrectMemberType(badgeNumber),
       contribution: masterInquiryRequestParams?.contribution || undefined,
       earnings: masterInquiryRequestParams?.earnings || undefined,
       forfeiture: masterInquiryRequestParams?.forfeiture || undefined,
