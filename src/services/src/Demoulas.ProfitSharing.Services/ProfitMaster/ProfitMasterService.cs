@@ -52,6 +52,12 @@ public class ProfitMasterService : IProfitMasterService
                 .Where(pp => pp.ProfitYear == profitShareUpdateRequest.ProfitYear && employeeSsns.Contains(pp.Demographic!.Ssn))
                 .ToListAsync(cancellationToken);
             var ssn2PayProfit = payProfits.ToDictionary(pp => pp.Demographic!.Ssn, pp => pp);
+            // When the Profit Share Update is run, both the 2025 and 2024 ETVAs need to be updated.
+            // 2025 - because it is the hot "ETVA" which gets adjusted on demand.
+            // 2024 - because it is the new "Last Years" ETVA abount - the amount used in the (this) 2024 profit share run.
+            // I believe they should both hold identical values when this is completed.   Note that doing a revert
+            // will also need some work.   This effort is tracked in https://demoulas.atlassian.net/browse/PS-946
+            // The code below is adjusting the 2024 ETVA which is wrong
             foreach (var earningRecord in records.Where(r => r.Code == /*8*/ ProfitCode.Constants.Incoming100PercentVestedEarnings.Id && r.IsEmployee))
             {
                 var pp = ssn2PayProfit[earningRecord.Ssn];
