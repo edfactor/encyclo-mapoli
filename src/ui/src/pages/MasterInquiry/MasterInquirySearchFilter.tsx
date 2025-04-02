@@ -31,17 +31,25 @@ import { paymentTypeGetNumberMap, memberTypeGetNumberMap } from "./MasterInquiry
 
 const schema = yup.object().shape({
   startProfitYear: yup
-    .date()
-    .min(new Date(2015, 0, 1), "Year must be 2020 or later")
-    .max(new Date(2100, 11, 31), "Year must be 2100 or earlier")
+    .number()
+    .min(2020, "Year must be 2020 or later")
+    .max(2100, "Year must be 2100 or earlier")
     .typeError("Invalid date")
     .nullable(),
   endProfitYear: yup
-    .date()
-    .min(new Date(2015, 0, 1), "Year must be 2020 or later")
-    .max(new Date(2100, 11, 31), "Year must be 2100 or earlier")
+    .number()
+    .min(2020, "Year must be 2020 or later")
+    .max(2100, "Year must be 2100 or earlier")
     .typeError("Invalid date")
-    .min(yup.ref("startProfitYear"), "End year must be after start year")
+    .test(
+      'greater-than-start',
+      'End year must be after start year',
+      function(endYear) {
+        const startYear = this.parent.startProfitYear;
+        // Only validate if both values are present
+        return !startYear || !endYear || endYear >= startYear;
+      }
+    )
     .nullable(),
   startProfitMonth: yup
     .number()
@@ -152,6 +160,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
       triggerSearch(searchParams, false);
     }
   }, [badgeNumber, hasToken, reset, triggerSearch]);
+  
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {

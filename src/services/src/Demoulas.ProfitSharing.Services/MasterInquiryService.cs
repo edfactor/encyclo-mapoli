@@ -63,12 +63,12 @@ public class MasterInquiryService : IMasterInquiryService
             }
             else if (req.MemberType == 2) // Beneficiary only
             {
-                combinedQuery = GetMasterInquiryBeneficiaryAsync(ctx, req);
+                combinedQuery = GetMasterInquiryBeneficiary(ctx, req);
             }
             else // All or null
             {
                 var demographics = GetMasterInquiryDemographics(ctx, req);
-                var beneficiary = GetMasterInquiryBeneficiaryAsync(ctx, req);
+                var beneficiary = GetMasterInquiryBeneficiary(ctx, req);
                 combinedQuery = demographics.Union(beneficiary);
             }
 
@@ -128,7 +128,7 @@ public class MasterInquiryService : IMasterInquiryService
         return inquiryResults;
     }
 
-    private IQueryable<MasterInquiryItem> GetMasterInquiryDemographics(IProfitSharingDbContext ctx,
+    private static IQueryable<MasterInquiryItem> GetMasterInquiryDemographics(IProfitSharingDbContext ctx,
         MasterInquiryRequest req)
     {
         var query = ctx.ProfitDetails
@@ -218,7 +218,7 @@ public class MasterInquiryService : IMasterInquiryService
         return query;
     }
 
-    private IQueryable<MasterInquiryItem> GetMasterInquiryBeneficiaryAsync(IProfitSharingDbContext ctx, MasterInquiryRequest req)
+    private static IQueryable<MasterInquiryItem> GetMasterInquiryBeneficiary(IProfitSharingDbContext ctx, MasterInquiryRequest req)
     {
         var query = ctx.ProfitDetails
             .Include(pd => pd.ProfitCode)
@@ -299,7 +299,18 @@ public class MasterInquiryService : IMasterInquiryService
 
         if (req.BadgeNumber.HasValue)
         {
-            query = query.Where(x => x.Member.BadgeNumber == req.BadgeNumber);
+            int.TryParse(req.BadgeNumber.ToString()?[..5], out int badgeNumber);
+            int.TryParse(req.BadgeNumber.ToString()?[6..], out int psnSuffix);
+
+            if (badgeNumber > 0)
+            {
+                query = query.Where(x => x.Member.BadgeNumber == badgeNumber);
+            }
+
+            if (psnSuffix > 0)
+            {
+                query = query.Where(x => x.Member.PsnSuffix == psnSuffix);
+            }
         }
 
         return query;
