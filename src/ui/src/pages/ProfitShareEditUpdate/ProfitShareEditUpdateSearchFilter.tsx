@@ -125,23 +125,17 @@ const ProfitShareEditUpdateSearchFilter = () => {
           take: 25
         },
         profitYear: fiscalCloseProfitYear,
-        ...(data.contributionPercent !== undefined && { contributionPercent: data.contributionPercent }),
-        ...(data.earningsPercent !== undefined && { earningsPercent: data.earningsPercent }),
-        ...(data.incomingForfeitPercent !== undefined && { incomingForfeitPercent: data.incomingForfeitPercent }),
-        ...(data.secondaryEarningsPercent !== undefined && { secondaryEarningsPercent: data.secondaryEarningsPercent }),
-        ...(data.maxAllowedContributions !== undefined && { maxAllowedContributions: data.maxAllowedContributions }),
-
-        ...(data.badgeToAdjust !== undefined && { badgeToAdjust: data.badgeToAdjust }),
-        ...(data.adjustContributionAmount !== undefined && { adjustContributionAmount: data.adjustContributionAmount }),
-        ...(data.adjustEarningsAmount !== undefined && { adjustEarningsAmount: data.adjustEarningsAmount }),
-        ...(data.adjustIncomingForfeitAmount !== undefined && {
-          adjustIncomingForfeitAmount: data.adjustIncomingForfeitAmount
-        }),
-
-        ...(data.badgeToAdjust2 !== undefined && { badgeToAdjust2: data.badgeToAdjust2 }),
-        ...(data.adjustEarningsSecondaryAmount !== undefined && {
-          adjustEarningsSecondaryAmount: data.adjustEarningsSecondaryAmount
-        })
+        contributionPercent: data.contributionPercent ?? 0,
+        earningsPercent: data.earningsPercent ?? 0,
+        incomingForfeitPercent: data.incomingForfeitPercent ?? 0,
+        secondaryEarningsPercent: data.secondaryEarningsPercent ?? 0,
+        maxAllowedContributions: data.maxAllowedContributions ?? 0,
+        badgeToAdjust: data.badgeToAdjust ?? 0,
+        adjustContributionAmount: data.adjustContributionAmount ?? 0,
+        adjustEarningsAmount: data.adjustEarningsAmount ?? 0,
+        adjustIncomingForfeitAmount: data.adjustEarningsSecondaryAmount ?? 0,
+        badgeToAdjust2: data.badgeToAdjust2 ?? 0,
+        adjustEarningsSecondaryAmount: data.adjustEarningsSecondaryAmount ?? 0
       };
       // clears current table data - gives user feed back that thier search is in progress
       //const nativeEvent = event?.nativeEvent as SubmitEvent;
@@ -234,7 +228,7 @@ const ProfitShareEditUpdateSearchFilter = () => {
           <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Forfeiture %</FormLabel>
             <Controller
-              name="incomingForfeiturePercent"
+              name="incomingForfeitPercent"
               control={control}
               render={({ field }) => (
                 <TextField
@@ -243,12 +237,12 @@ const ProfitShareEditUpdateSearchFilter = () => {
                   size="small"
                   variant="outlined"
                   value={field.value ?? ""}
-                  error={!!errors.incomingForfeiturePercent}
+                  error={!!errors.incomingForfeitPercent}
                 />
               )}
             />
-            {errors.incomingForfeiturePercent && (
-              <FormHelperText error>{errors.incomingForfeiturePercent.message}</FormHelperText>
+            {errors.incomingForfeitPercent && (
+              <FormHelperText error>{errors.incomingForfeitPercent.message}</FormHelperText>
             )}
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
@@ -301,7 +295,7 @@ const ProfitShareEditUpdateSearchFilter = () => {
           <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Adjustment Badge</FormLabel>
             <Controller
-              name="adjustmentBadge"
+              name="badgeToAdjust"
               control={control}
               render={({ field }) => (
                 <TextField
@@ -310,16 +304,16 @@ const ProfitShareEditUpdateSearchFilter = () => {
                   size="small"
                   variant="outlined"
                   value={field.value ?? ""}
-                  error={!!errors.adjustmentBadge}
+                  error={!!errors.badgeToAdjust}
                 />
               )}
             />
-            {errors.adjustmentBadge && <FormHelperText error>{errors.adjustmentBadge.message}</FormHelperText>}
+            {errors.badgeToAdjust && <FormHelperText error>{errors.badgeToAdjust.message}</FormHelperText>}
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Adjust Contribution Amount</FormLabel>
             <Controller
-              name="adjustmentContributionAmount"
+              name="adjustContributionAmount"
               control={control}
               render={({ field }) => (
                 <TextField
@@ -328,19 +322,19 @@ const ProfitShareEditUpdateSearchFilter = () => {
                   size="small"
                   variant="outlined"
                   value={field.value ?? ""}
-                  error={!!errors.adjustmentContributionAmount}
+                  error={!!errors.adjustContributionAmount}
                 />
               )}
             />
-            {errors.adjustmentContributionAmount && (
-              <FormHelperText error>{errors.adjustmentContributionAmount.message}</FormHelperText>
+            {errors.adjustContributionAmount && (
+              <FormHelperText error>{errors.adjustContributionAmount.message}</FormHelperText>
             )}
           </Grid2>
 
           <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Adjust Earnings Amount</FormLabel>
             <Controller
-              name="adjustmentEarningsAmount"
+              name="adjustEarningsAmount"
               control={control}
               render={({ field }) => (
                 <TextField
@@ -349,19 +343,19 @@ const ProfitShareEditUpdateSearchFilter = () => {
                   size="small"
                   variant="outlined"
                   value={field.value ?? ""}
-                  error={!!errors.adjustmentEarningsAmount}
+                  error={!!errors.adjustEarningsAmount}
                 />
               )}
             />
-            {errors.adjustmentEarningsAmount && (
-              <FormHelperText error>{errors.adjustmentEarningsAmount.message}</FormHelperText>
+            {errors.adjustEarningsAmount && (
+              <FormHelperText error>{errors.adjustEarningsAmount.message}</FormHelperText>
             )}
           </Grid2>
 
           <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Adjust Forfeiture Amount</FormLabel>
             <Controller
-              name="adjustmentIncomingForfeitureAmount"
+              name="adjustIncomingForfeitAmount"
               control={control}
               render={({ field }) => (
                 <TextField
@@ -370,12 +364,12 @@ const ProfitShareEditUpdateSearchFilter = () => {
                   size="small"
                   variant="outlined"
                   value={field.value ?? ""}
-                  error={!!errors.adjustmentIncomingForfeitureAmount}
+                  error={!!errors.adjustIncomingForfeitAmount}
                 />
               )}
             />
-            {errors.adjustmentIncomingForfeitureAmount && (
-              <FormHelperText error>{errors.adjustmentIncomingForfeitureAmount.message}</FormHelperText>
+            {errors.adjustIncomingForfeitAmount && (
+              <FormHelperText error>{errors.adjustIncomingForfeitAmount.message}</FormHelperText>
             )}
           </Grid2>
         </Grid2>
@@ -387,7 +381,7 @@ const ProfitShareEditUpdateSearchFilter = () => {
           <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Adjust Secondary Badge</FormLabel>
             <Controller
-              name="adjustmentSecondaryBadge"
+              name="badgeToAdjust2"
               control={control}
               render={({ field }) => (
                 <TextField
@@ -396,19 +390,17 @@ const ProfitShareEditUpdateSearchFilter = () => {
                   size="small"
                   variant="outlined"
                   value={field.value ?? ""}
-                  error={!!errors.adjustmentSecondaryBadge}
+                  error={!!errors.badgeToAdjust2}
                 />
               )}
             />
-            {errors.adjustmentSecondaryBadge && (
-              <FormHelperText error>{errors.adjustmentSecondaryBadge.message}</FormHelperText>
-            )}
+            {errors.badgeToAdjust2 && <FormHelperText error>{errors.badgeToAdjust2.message}</FormHelperText>}
           </Grid2>
 
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
             <FormLabel>Adjust Secondary Earnings Amount</FormLabel>
             <Controller
-              name="adjustmentSecondaryEarningsAmount"
+              name="adjustEarningsSecondaryAmount"
               control={control}
               render={({ field }) => (
                 <TextField
@@ -417,12 +409,12 @@ const ProfitShareEditUpdateSearchFilter = () => {
                   size="small"
                   variant="outlined"
                   value={field.value ?? ""}
-                  error={!!errors.adjustmentSecondaryEarningsAmount}
+                  error={!!errors.adjustEarningsSecondaryAmount}
                 />
               )}
             />
-            {errors.adjustmentSecondaryEarningsAmount && (
-              <FormHelperText error>{errors.adjustmentSecondaryEarningsAmount.message}</FormHelperText>
+            {errors.adjustEarningsSecondaryAmount && (
+              <FormHelperText error>{errors.adjustEarningsSecondaryAmount.message}</FormHelperText>
             )}
           </Grid2>
         </Grid2>

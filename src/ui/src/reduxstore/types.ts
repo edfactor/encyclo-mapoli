@@ -580,14 +580,14 @@ export interface ProfitShareUpdateRequest {
   contributionPercent: number;
   earningsPercent: number;
   incomingForfeitPercent: number;
-  secondaryEarningsPercent?: number;
+  secondaryEarningsPercent: number;
   maxAllowedContributions: number;
-  badgeToAdjust?: number;
-  adjustContributionAmount?: number;
-  adjustEarningsAmount?: number;
-  adjustIncomingForfeitAmount?: number;
-  badgeToAdjust2?: number;
-  adjustEarningsSecondaryAmount?: number;
+  badgeToAdjust: number;
+  adjustContributionAmount: number;
+  adjustEarningsAmount: number;
+  adjustIncomingForfeitAmount: number;
+  badgeToAdjust2: number;
+  adjustEarningsSecondaryAmount: number;
   pagination: SortedPaginationRequestDto;
 }
 
