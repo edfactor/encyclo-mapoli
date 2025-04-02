@@ -6,6 +6,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -80,9 +81,10 @@ public class MasterInquiryService : IMasterInquiryService
                 DistributionSequence = x.ProfitDetail.DistributionSequence,
                 ProfitCodeId = x.ProfitDetail.ProfitCodeId,
                 ProfitCodeName = x.ProfitCode.Name,
-                Contribution = x.ProfitDetail.Contribution,
-                Earnings = x.ProfitDetail.Earnings,
-                Forfeiture = x.ProfitDetail.Forfeiture,
+                Contribution = x.ProfitDetail.CalculateContribution(),
+                Earnings = x.ProfitDetail.CalculateEarnings(),
+                Forfeiture = x.ProfitDetail.CalculateForfeiture(),
+                Payment = x.ProfitDetail.CalculatePayment(),
                 MonthToDate = x.ProfitDetail.MonthToDate,
                 YearToDate = x.ProfitDetail.YearToDate,
                 Remark = x.ProfitDetail.Remark,

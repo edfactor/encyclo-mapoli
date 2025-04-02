@@ -15,6 +15,7 @@ import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import { useEffect } from "react";
 
 interface DistributionByAgeSearch {
   profitYear: number;
@@ -56,9 +57,11 @@ const DistributionByAgeSearchFilter: React.FC<DistributionByAgeSearchFilterProps
     }
   });
 
-  if (fiscalCloseProfitYear && !distributionsByAgeFullTime) {
-    setInitialSearchLoaded(true);
-  }
+  useEffect(() => {
+    if (fiscalCloseProfitYear && !distributionsByAgeFullTime) {
+      setInitialSearchLoaded(true);
+    }
+  }, [fiscalCloseProfitYear, distributionsByAgeFullTime, setInitialSearchLoaded]);
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {

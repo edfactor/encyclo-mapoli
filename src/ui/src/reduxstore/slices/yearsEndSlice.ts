@@ -41,9 +41,11 @@ import {
   Under21BreakdownByStoreRequest,
   Under21InactiveResponse,
   Under21InactiveRequest,
-  Under21TotalsResponse,
   Under21TotalsRequest,
-  YearEndProfitSharingReportSummaryResponse
+  Under21TotalsResponse,
+  YearEndProfitSharingReportSummaryResponse,
+  UpdateSummaryResponse,
+  ReportsByAgeParams
 } from "reduxstore/types";
 
 export interface YearsEndState {
@@ -61,7 +63,7 @@ export interface YearsEndState {
   balanceByYearsTotal: BalanceByAge | null;
   contributionsByAgeFullTime: ContributionsByAge | null;
   contributionsByAgePartTime: ContributionsByAge | null;
-  contributionsByAgeQueryParams: ProfitYearRequest | null;
+  contributionsByAgeQueryParams: ReportsByAgeParams | null;
   contributionsByAgeTotal: ContributionsByAge | null;
   demographicBadges: PagedReportResponse<DemographicBadgesNotInPayprofit> | null;
   distributionsAndForfeitures: PagedReportResponse<DistributionsAndForfeitures> | null;
@@ -114,6 +116,7 @@ export interface YearsEndState {
   under21Totals: Under21TotalsResponse | null;
   under21TotalsQueryParams: Under21TotalsRequest | null;
   profitShareSummaryReport: YearEndProfitSharingReportSummaryResponse | null;
+  updateSummary: UpdateSummaryResponse | null;
 }
 
 const initialState: YearsEndState = {
@@ -183,7 +186,8 @@ const initialState: YearsEndState = {
   under21InactiveQueryParams: null,
   under21Totals: null,
   under21TotalsQueryParams: null,
-  profitShareSummaryReport: null
+  profitShareSummaryReport: null,
+  updateSummary: null
 };
 
 export const yearsEndSlice = createSlice({
@@ -296,17 +300,20 @@ export const yearsEndSlice = createSlice({
         state.balanceByYearsPartTime = null;
         state.balanceByYearsTotal = null;
       }
-
       // Contributions By Age
-      if (
-        state.contributionsByAgeQueryParams?.profitYear &&
-        state.contributionsByAgeQueryParams?.profitYear !== action.payload
-      ) {
+
+      if (!state.contributionsByAgeQueryParams) {
+        state.contributionsByAgeQueryParams = {
+          profitYear: action.payload,
+          reportType: FrozenReportsByAgeRequestType.Total
+        };
+      } else {
         state.contributionsByAgeQueryParams.profitYear = action.payload;
-        state.contributionsByAgeFullTime = null;
-        state.contributionsByAgePartTime = null;
-        state.contributionsByAgeTotal = null;
       }
+
+      state.contributionsByAgeFullTime = null;
+      state.contributionsByAgePartTime = null;
+      state.contributionsByAgeTotal = null;
 
       // Distributions By Age
       if (
@@ -810,7 +817,7 @@ export const yearsEndSlice = createSlice({
     setUnder21BreakdownByStoreQueryParams: (state, action: PayloadAction<Under21BreakdownByStoreRequest>) => {
       state.under21BreakdownByStoreQueryParams = action.payload;
     },
-    
+
     setUnder21Inactive: (state, action: PayloadAction<Under21InactiveResponse>) => {
       state.under21Inactive = action.payload;
     },
@@ -819,7 +826,7 @@ export const yearsEndSlice = createSlice({
     },
     setUnder21InactiveQueryParams: (state, action: PayloadAction<Under21InactiveRequest>) => {
       state.under21InactiveQueryParams = action.payload;
-    },    
+    },
     setUnder21Totals: (state, action: PayloadAction<Under21TotalsResponse>) => {
       state.under21Totals = action.payload;
     },
@@ -834,6 +841,12 @@ export const yearsEndSlice = createSlice({
     },
     setProfitShareSummaryReport: (state, action: PayloadAction<YearEndProfitSharingReportSummaryResponse>) => {
       state.profitShareSummaryReport = action.payload;
+    },
+    setUpdateSummary: (state, action: PayloadAction<UpdateSummaryResponse>) => {
+      state.updateSummary = action.payload;
+    },
+    clearUpdateSummary: (state) => {
+      state.updateSummary = null;
     }
   }
 });
@@ -944,6 +957,8 @@ export const {
   setUnder21TotalsQueryParams,
   checkFiscalCloseParamsAndGridsProfitYears,
   checkDecemberParamsAndGridsProfitYears,
-  setProfitShareSummaryReport
+  setProfitShareSummaryReport,
+  setUpdateSummary,
+  clearUpdateSummary
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;

@@ -58,22 +58,6 @@ const FiscalFlow = () => {
 
         <Grid2 width="100%">
           <DSMCollapsedAccordion
-            title={CAPTIONS.YTD_WAGES_EXTRACT}
-            expandable={false}
-            actionButtonText="START"
-            
-            status={{
-              label: "Not Started",
-              color: "default"
-            }}
-            onActionClick={() => navigate("/ytd-wages-extract")}
-            isCollapsedOnRender={true}>
-            <></>
-          </DSMCollapsedAccordion>
-        </Grid2>
-
-        <Grid2 width="100%">
-          <DSMCollapsedAccordion
             title={CAPTIONS.MANAGE_EXECUTIVE_HOURS}
             expandable={false}
             actionButtonText="START"
@@ -86,6 +70,23 @@ const FiscalFlow = () => {
             <></>
           </DSMCollapsedAccordion>
         </Grid2>
+
+        <Grid2 width="100%">
+          <DSMCollapsedAccordion
+            title={CAPTIONS.YTD_WAGES_EXTRACT}
+            expandable={false}
+            actionButtonText="START"
+            status={{
+              label: "Not Started",
+              color: "default"
+            }}
+            onActionClick={() => navigate("/ytd-wages-extract")}
+            isCollapsedOnRender={true}>
+            <></>
+          </DSMCollapsedAccordion>
+        </Grid2>
+
+        
 
         <Grid2 width="100%">
           <DSMCollapsedAccordion
@@ -156,37 +157,7 @@ const FiscalFlow = () => {
               label: "Not Started",
               color: "default"
             }}
-            onActionClick={() => navigate("/profit-share-updates")}
-            isCollapsedOnRender={true}>
-            <></>
-          </DSMCollapsedAccordion>
-        </Grid2>
-
-        <Grid2 width="100%">
-          <DSMCollapsedAccordion
-            title={CAPTIONS.PAYMASTER_UPDATE}
-            expandable={false}
-            actionButtonText="START"
-            status={{
-              label: "Not Started",
-              color: "default"
-            }}
-            onActionClick={() => navigate("/paymaster-update")}
-            isCollapsedOnRender={true}>
-            <></>
-          </DSMCollapsedAccordion>
-        </Grid2>
-
-        <Grid2 width="100%">
-          <DSMCollapsedAccordion
-            title="Profit Share Report By Age (PROF130, PROF130B, PROF130V, PROF130Y)"
-            expandable={false}
-            actionButtonText="START"
-            status={{
-              label: "Not Started",
-              color: "default"
-            }}
-            onActionClick={() => navigate("/profit-share-report-by-age")}
+            onActionClick={() => navigate("/profit-share-update")}
             isCollapsedOnRender={true}>
             <></>
           </DSMCollapsedAccordion>
@@ -202,6 +173,21 @@ const FiscalFlow = () => {
               color: "default"
             }}
             onActionClick={() => navigate("/prof-share-gross-report")}
+            isCollapsedOnRender={true}>
+            <></>
+          </DSMCollapsedAccordion>
+        </Grid2>
+
+        <Grid2 width="100%">
+          <DSMCollapsedAccordion
+            title={CAPTIONS.PROFIT_SHARE_BY_STORE}
+            expandable={false}
+            actionButtonText="START"
+            status={{
+              label: "Not Started",
+              color: "default"
+            }}
+            onActionClick={() => navigate("/profit-share-by-store")}
             isCollapsedOnRender={true}>
             <></>
           </DSMCollapsedAccordion>

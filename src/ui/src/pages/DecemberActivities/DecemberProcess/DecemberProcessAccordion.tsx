@@ -1,4 +1,4 @@
-import { Button, Divider, MenuItem, Select, SelectChangeEvent, Stack, Typography } from "@mui/material";
+import { Divider, MenuItem, Select, SelectChangeEvent, Stack, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import DSMCollapsedAccordion from "components/DSMCollapsedAccordion";
 import DuplicateNamesAndBirthdaysGrid from "pages/DecemberActivities/DuplicateNamesAndBirthdays/DuplicateNamesAndBirthdaysGrid";
@@ -30,7 +30,7 @@ const DecemberProcessAccordion = () => {
     };
 
     const profitYear = useDecemberFlowProfitYear();
-    
+
     return (
       <div className="flex items-center gap-2 h-10 min-w-[174px]">
         <Select
@@ -94,24 +94,12 @@ const DecemberProcessAccordion = () => {
                   sx={{ alignContent: "center" }}
                   direction="row">
                   <Typography sx={{ margin: 0, padding: 0 }}>This has not been created yet. </Typography>
+                  {/* 
                   <Button>Create Report</Button>
+                    */}
                 </Stack>
               </Stack>
             </Grid2>
-          </DSMCollapsedAccordion>
-        </Grid2>
-
-        <Grid2 width="100%">
-          <DSMCollapsedAccordion
-            title={CAPTIONS.EMPLOYEES_MILITARY}
-            expandable={false}
-            status={{
-              label: "Not Started",
-              color: "secondary"
-            }}
-            onActionClick={() => navigate("/employees-on-military-leave")}
-            actionButtonText="START">
-            <></>
           </DSMCollapsedAccordion>
         </Grid2>
 
@@ -190,13 +178,13 @@ const DecemberProcessAccordion = () => {
 
         <Grid2 width="100%">
           <DSMCollapsedAccordion
-            title={CAPTIONS.PROFIT_SHARE_TOTALS}
+            title={CAPTIONS.PROFIT_SHARE_REPORT}
             expandable={false}
             status={{
               label: "Not Started",
               color: "secondary"
             }}
-            onActionClick={() => navigate("/profit-share-totals")}
+            onActionClick={() => navigate("/profit-share-report")}
             actionButtonText="VIEW TOTALS"
             isCollapsedOnRender={true}>
             <></>

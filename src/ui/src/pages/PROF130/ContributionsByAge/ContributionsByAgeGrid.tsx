@@ -7,6 +7,7 @@ import { GetContributionsByAgeColumns } from "./ContributionsByAgeGridColumns";
 import Grid2 from "@mui/material/Grid2";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
 import { numberToCurrency } from "smart-ui-library";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 
 interface ContributionsByAgeGridProps {
   initialSearchLoaded: boolean;
@@ -14,7 +15,7 @@ interface ContributionsByAgeGridProps {
 
 const ContributionsByAgeGrid: React.FC<ContributionsByAgeGridProps> = ({ initialSearchLoaded }) => {
   const [_discard0, setSortParams] = useState<ISortParams>({
-    sortBy: "Badge",
+    sortBy: "badgeNumber",
     isSortDescending: false
   });
 
@@ -32,10 +33,12 @@ const ContributionsByAgeGrid: React.FC<ContributionsByAgeGridProps> = ({ initial
   const columnDefsFullTime = GetContributionsByAgeColumns(FrozenReportsByAgeRequestType.FullTime);
   const columnDefsPartTime = GetContributionsByAgeColumns(FrozenReportsByAgeRequestType.PartTime);
 
+  const fiscalCloseProfitYear = useFiscalCloseProfitYear();
+
   const onSearch = useCallback(async () => {
     triggerSearch(
       {
-        profitYear: contributionsByAgeQueryParams?.profitYear || 0,
+        profitYear: fiscalCloseProfitYear || contributionsByAgeQueryParams?.profitYear || 0,
         reportType: FrozenReportsByAgeRequestType.Total,
         pagination: { skip: 0, take: 255 }
       },
@@ -43,7 +46,7 @@ const ContributionsByAgeGrid: React.FC<ContributionsByAgeGridProps> = ({ initial
     ).unwrap();
     triggerSearch(
       {
-        profitYear: contributionsByAgeQueryParams?.profitYear || 0,
+        profitYear: fiscalCloseProfitYear || contributionsByAgeQueryParams?.profitYear || 0,
         reportType: FrozenReportsByAgeRequestType.FullTime,
         pagination: { skip: 0, take: 255 }
       },
@@ -51,19 +54,19 @@ const ContributionsByAgeGrid: React.FC<ContributionsByAgeGridProps> = ({ initial
     ).unwrap();
     triggerSearch(
       {
-        profitYear: contributionsByAgeQueryParams?.profitYear || 0,
+        profitYear: fiscalCloseProfitYear || contributionsByAgeQueryParams?.profitYear || 0,
         reportType: FrozenReportsByAgeRequestType.PartTime,
         pagination: { skip: 0, take: 255 }
       },
       false
     ).unwrap();
-  }, [triggerSearch, contributionsByAgeQueryParams?.profitYear]);
+  }, [contributionsByAgeQueryParams?.profitYear, triggerSearch, fiscalCloseProfitYear]);
 
   useEffect(() => {
-    if (initialSearchLoaded) {
+    if (initialSearchLoaded && contributionsByAgeQueryParams?.profitYear) {
       onSearch();
     }
-  }, [initialSearchLoaded, onSearch]);
+  }, [contributionsByAgeQueryParams?.profitYear, initialSearchLoaded, onSearch]);
 
   return (
     <>
@@ -125,7 +128,7 @@ const ContributionsByAgeGrid: React.FC<ContributionsByAgeGridProps> = ({ initial
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: contributionsByAgeFullTime?.response.results,
-
+                  theme: "legacy",
                   columnDefs: [
                     {
                       headerName: columnDefsFullTime.headerName,

@@ -15,6 +15,7 @@ import { FrozenReportsByAgeRequestType } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
+import { useEffect } from "react";
 
 interface ForfeituresByAgeSearch {
   profitYear: number;
@@ -53,9 +54,11 @@ const ForfeituresByAgeSearchFilter: React.FC<ForfeituresByAgeSearchFilterProps> 
     }
   });
 
-  if (fiscalCloseProfitYear && !forfeituresByAgeFullTime) {
-    setInitialSearchLoaded(true);
-  }
+  useEffect(() => {
+    if (fiscalCloseProfitYear && !forfeituresByAgeFullTime) {
+      setInitialSearchLoaded(true);
+    }
+  }, [fiscalCloseProfitYear, forfeituresByAgeFullTime, setInitialSearchLoaded]);
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {

@@ -14,7 +14,7 @@ interface BalanceByAgeGridProps {
 
 const BalanceByAgeGrid: React.FC<BalanceByAgeGridProps> = ({ initialSearchLoaded }) => {
   const [_discard0, setSortParams] = useState<ISortParams>({
-    sortBy: "Badge",
+    sortBy: "badgeNumber",
     isSortDescending: false
   });
 
@@ -57,10 +57,10 @@ const BalanceByAgeGrid: React.FC<BalanceByAgeGridProps> = ({ initialSearchLoaded
   }, [triggerSearch, balanceByAgeQueryParams?.profitYear]);
 
   useEffect(() => {
-    if (initialSearchLoaded) {
+    if (initialSearchLoaded && balanceByAgeQueryParams?.profitYear) {
       onSearch();
     }
-  }, [initialSearchLoaded, onSearch]);
+  }, [balanceByAgeQueryParams?.profitYear, initialSearchLoaded, onSearch]);
 
   return (
     <>

@@ -14,7 +14,7 @@ interface ForfeituresByAgeGridProps {
 
 const ForfeituresByAgeGrid: React.FC<ForfeituresByAgeGridProps> = ({ initialSearchLoaded }) => {
   const [_discard0, setSortParams] = useState<ISortParams>({
-    sortBy: "Badge",
+    sortBy: "badgeNumber",
     isSortDescending: false
   });
 
@@ -56,10 +56,10 @@ const ForfeituresByAgeGrid: React.FC<ForfeituresByAgeGridProps> = ({ initialSear
   }, [triggerSearch, forfeituresByAgeQueryParams?.profitYear]);
 
   useEffect(() => {
-    if (initialSearchLoaded) {
+    if (initialSearchLoaded && forfeituresByAgeQueryParams?.profitYear) {
       onSearch();
     }
-  }, [initialSearchLoaded, onSearch]);
+  }, [forfeituresByAgeQueryParams?.profitYear, initialSearchLoaded, onSearch]);
 
   return (
     <>

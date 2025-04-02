@@ -18,6 +18,10 @@ export interface FrozenProfitYearRequest extends ProfitYearRequest {
   useFrozenData: boolean;
 }
 
+export interface ReportsByAgeParams extends ProfitYearRequest {
+  reportType: FrozenReportsByAgeRequestType;
+}
+
 export interface DemographicBadgesNotInPayprofitResponse {
   reportName: string;
   reportDate: string;
@@ -222,7 +226,9 @@ export interface ExecutiveHoursAndDollars {
   currentHoursYear: number;
   currentIncomeYear: number;
   payFrequencyId: number;
+  payFrequencyName: string;
   employmentStatusId: string;
+  employmentStatusName: string;
 }
 
 export interface EmployeeWagesForYear {
@@ -889,4 +895,46 @@ export interface YearEndProfitSharingReportSummaryLineItem {
 
 export interface YearEndProfitSharingReportSummaryResponse {
   lineItems: YearEndProfitSharingReportSummaryLineItem[];
+}
+
+export interface UpdateSummaryRequest extends ProfitYearRequest {
+  isSortDescending?: boolean;
+  pagination: SortedPaginationRequestDto;
+}
+
+export interface UpdateSummaryEmployee {
+  badgeNumber: number;
+  storeNumber: number;
+  name: string;
+  isEmployee: boolean;
+  before: {
+    profitSharingAmount: number;
+    vestedProfitSharingAmount: number;
+    yearsInPlan: number;
+    enrollmentId: number;
+  };
+  after: {
+    profitSharingAmount: number;
+    vestedProfitSharingAmount: number;
+    yearsInPlan: number;
+    enrollmentId: number;
+  };
+}
+
+export interface UpdateSummaryResponse {
+  totalNumberOfEmployees: number;
+  totalNumberOfBeneficiaries: number;
+  totalBeforeProfitSharingAmount: number;
+  totalBeforeVestedAmount: number;
+  totalAfterProfitSharingAmount: number;
+  totalAfterVestedAmount: number;
+  reportName: string;
+  reportDate: string;
+  response: {
+    pageSize: number;
+    currentPage: number;
+    totalPages: number;
+    total: number;
+    results: UpdateSummaryEmployee[];
+  };
 }

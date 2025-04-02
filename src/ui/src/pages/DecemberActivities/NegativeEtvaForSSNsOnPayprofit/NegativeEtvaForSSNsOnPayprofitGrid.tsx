@@ -19,7 +19,7 @@ const NegativeEtvaForSSNsOnPayprofitGrid: React.FC<NegativeEtvaForSSNsOnPayprofi
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "Badge",
+    sortBy: "badgeNumber",
     isSortDescending: false
   });
 
@@ -68,7 +68,7 @@ const NegativeEtvaForSSNsOnPayprofitGrid: React.FC<NegativeEtvaForSSNsOnPayprofi
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`Negative ETVA For SSNs On Payprofit (${negativeEtvaForSSNsOnPayprofit?.response.total || 0} records)`}
+              {`(${negativeEtvaForSSNsOnPayprofit?.response.total || 0} records)`}
             </Typography>
           </div>
           <DSMGrid
