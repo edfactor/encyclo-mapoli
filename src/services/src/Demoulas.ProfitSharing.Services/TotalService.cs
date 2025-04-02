@@ -238,8 +238,8 @@ public sealed class TotalService : ITotalService
     /// <param name="ctx">
     /// The database context used to access demographic, pay profit, and beneficiary data.
     /// </param>
-    /// <param name="employeeYear">
-    /// The employeeYear (aka selector of PayProfit) year for which the vesting ratio is being calculated.
+    /// <param name="profitYear">
+    /// The Profit year (aka selector of PayProfit) year for which the vesting ratio is being calculated.
     /// </param>
     /// <param name="asOfDate">
     /// The date as of which the vesting ratio is being determined.
@@ -248,7 +248,7 @@ public sealed class TotalService : ITotalService
     /// An <see cref="IQueryable{T}"/> of <see cref="ParticipantTotalRatioDto"/> containing the calculated vesting ratios
     /// for each participant.
     /// </returns>
-    internal IQueryable<ParticipantTotalRatioDto> GetVestingRatio(IProfitSharingDbContext ctx, short employeeYear,
+    internal IQueryable<ParticipantTotalRatioDto> GetVestingRatio(IProfitSharingDbContext ctx, short profitYear,
         DateOnly asOfDate)
     {
 
@@ -257,22 +257,11 @@ public sealed class TotalService : ITotalService
 
         var demoInfo = (
             from d in ctx.Demographics
-            join pp in ctx.PayProfits on new { d.Id, ProfitYear = employeeYear } equals new
-            {
-                Id = pp.DemographicId, pp.ProfitYear
-            }
-            join cy in GetYearsOfService(ctx, employeeYear) on d.Ssn equals cy.Ssn
             select new
             {
                 d.Ssn,
-                pp.EnrollmentId,
-                d.TerminationCodeId,
-                d.TerminationDate,
-                pp.ZeroContributionReasonId,
                 d.DateOfBirth,
                 FromBeneficiary = (short)0,
-                cy.Years,
-                Hours = pp.CurrentHoursYear,
             }
         );
 
@@ -283,14 +272,8 @@ public sealed class TotalService : ITotalService
             select new
             {
                 b.Contact!.Ssn,
-                EnrollmentId = (byte)0,
-                TerminationCodeId = (char?)null,
-                TerminationDate = (DateOnly?)null,
-                ZeroContributionReasonId = (byte?)null,
                 b.Contact.DateOfBirth,
                 FromBeneficiary = (short)1,
-                Years = (byte?)0,
-                Hours = (decimal)0
             }
         );
 
@@ -300,28 +283,64 @@ public sealed class TotalService : ITotalService
 #pragma warning disable S1244 // Floating point numbers should not be tested for equality
         return (
             from db in demoOrBeneficiary
+            join dTbl in ctx.Demographics on db.Ssn equals dTbl.Ssn into dTmp
+            from d in dTmp.DefaultIfEmpty()
+            join ppTbl in ctx.PayProfits on new { Id = (d != null ? d.Id : 0), ProfitYear = profitYear } equals new
+            {
+                Id = ppTbl.DemographicId,
+                ppTbl.ProfitYear
+            } into ppTmp
+            from pp in ppTmp.DefaultIfEmpty()
+            join cyTbl in GetYearsOfService(ctx, profitYear) on db.Ssn equals cyTbl.Ssn into cyTmp
+            from cy in cyTmp.DefaultIfEmpty()
             select new ParticipantTotalRatioDto
             {
                 Ssn = db.Ssn,
-                Ratio = db.FromBeneficiary == 1 ? 1.0m :
+                Ratio = 
+                    //Beneficiaries are always 100% vested
+                    db.FromBeneficiary == 1 ? 1.0m :
+
+                    //Otherwise, If over 65, and not terminated this year, 100% vested
                     db.DateOfBirth <= birthDate65 &&
-                    (db.TerminationDate == null || db.TerminationDate < beginningOfYear) ? 1m :
-                    db.EnrollmentId == 3 || db.EnrollmentId == 4 ? 1m :
-                    db.TerminationCodeId == TerminationCode.Constants.Deceased ? 1m :
-                    db.ZeroContributionReasonId == ZeroContributionReason.Constants
-                        .SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested ? 1m :
-                    (db.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions ? 1 : 0) +
-                    (db.Hours >= hoursWorkedRequirement ? 1 : 0) + db.Years < 3 ? 0m :
-                    (db.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions ? 1 : 0) +
-                    (db.Hours >= hoursWorkedRequirement ? 1 : 0) + db.Years == 3 ? .2m :
-                    (db.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions ? 1 : 0) +
-                    (db.Hours >= hoursWorkedRequirement ? 1 : 0) + db.Years == 4 ? .4m :
-                    (db.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions ? 1 : 0) +
-                    (db.Hours >= hoursWorkedRequirement ? 1 : 0) + db.Years == 5 ? .6m :
-                    (db.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions ? 1 : 0) +
-                    (db.Hours >= hoursWorkedRequirement ? 1 : 0) + db.Years == 6 ? .8m :
-                    (db.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions ? 1 : 0) +
-                    (db.Hours >= hoursWorkedRequirement ? 1 : 0) + db.Years > 6 ? 1m : 0
+                        ((d != null && d.TerminationDate == null) || (d!= null && d.TerminationDate < beginningOfYear)) ? 1m :
+
+                    //Otherwise, If enrollment has forfeitures, 100%
+                    (pp != null && pp.EnrollmentId == 
+                        Enrollment.Constants.OldVestingPlanHasForfeitureRecords) || (pp != null && pp.EnrollmentId == Enrollment.Constants.NewVestingPlanHasForfeitureRecords) ? 1m :
+
+                    //Otherwise, If deceased, mark for 100% vested
+                    (d != null && d.TerminationCodeId == TerminationCode.Constants.Deceased) ? 1m :
+
+                    //Otherwise, If zero contribution reason is as below, 100% vested 
+                    (pp != null && pp.ZeroContributionReasonId == ZeroContributionReason.Constants
+                        .SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested) ? 1m :
+
+                    //Otherwise, If total years (including the present one) is 0, 1, or 2, 0% Vested
+                    ((pp != null && pp.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions) ? 1 : 0) +
+                        ((pp != null && pp.CurrentHoursYear + pp.HoursExecutive>= hoursWorkedRequirement) ? 1 : 0) + (cy != null ? cy.Years : 0) < 3 ? 0m :
+
+                    //Otherwise, If total years (including the present one) is 3, 20% Vested
+                    ((pp != null && pp.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions) ? 1 : 0) +
+                        ((pp != null && pp.CurrentHoursYear + pp.HoursExecutive >= hoursWorkedRequirement) ? 1 : 0) + (cy != null ? cy.Years : 0) == 3 ? .2m :
+
+                    //Otherwise, If total years (including the present one) is 4, 40% Vested
+                    ((pp != null && pp.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions) ? 1 : 0) +
+                        ((pp != null && pp.CurrentHoursYear + pp.HoursExecutive >= hoursWorkedRequirement) ? 1 : 0) + (cy != null ? cy.Years : 0) == 4 ? .4m :
+
+                    //Otherwise, If total years (including the present one) is 5, 60% Vested
+                    ((pp != null && pp.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions) ? 1 : 0) +
+                        ((pp != null && pp.CurrentHoursYear + pp.HoursExecutive >= hoursWorkedRequirement) ? 1 : 0) + (cy != null ? cy.Years : 0) == 5 ? .6m :
+
+                    //Otherwise, If total years (including the present one) is 6, 80% Vested
+                    ((pp != null && pp.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions) ? 1 : 0) +
+                        ((pp != null && pp.CurrentHoursYear + pp.HoursExecutive >= hoursWorkedRequirement) ? 1 : 0) + (cy != null ? cy.Years : 0) == 6 ? .8m :
+
+                    //Otherwise, If total years (including the present one) is more than 6, 100% Vested
+                    ((pp != null && pp.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions) ? 1 : 0) +
+                        ((pp != null && pp.CurrentHoursYear + pp.HoursExecutive >= hoursWorkedRequirement) ? 1 : 0) + (cy != null ? cy.Years : 0) > 6 ? 1m : 
+
+                    //Otherwise, 0% vested
+                    0
             }
         );
 #pragma warning restore S1244 // Floating point numbers should not be tested for equality
@@ -360,19 +379,23 @@ public sealed class TotalService : ITotalService
         short employeeYear, short profitYear, DateOnly asOfDate)
     {
         return (from b in GetTotalBalanceSet(ctx, profitYear)
-                join e in GetTotalComputedEtva(ctx, employeeYear) on b.Ssn equals e.Ssn
-                join d in GetTotalDistributions(ctx, profitYear) on b.Ssn equals d.Ssn
-                join v in GetVestingRatio(ctx, employeeYear, asOfDate) on e.Ssn equals v.Ssn
-                join y in GetYearsOfService(ctx, employeeYear) on b.Ssn equals y.Ssn
+                join etvaTbl in GetTotalComputedEtva(ctx, employeeYear) on b.Ssn equals etvaTbl.Ssn into etvaTmp
+                from e in etvaTmp.DefaultIfEmpty()
+                join distTbl in GetTotalDistributions(ctx, profitYear) on b.Ssn equals distTbl.Ssn into distTmp
+                from d in distTmp.DefaultIfEmpty()
+                join vestTbl in GetVestingRatio(ctx, employeeYear, asOfDate) on e.Ssn equals vestTbl.Ssn into vestTmp
+                from v in vestTmp.DefaultIfEmpty()
+                join yipTbl in GetYearsOfService(ctx, profitYear) on b.Ssn equals yipTbl.Ssn into yipTmp
+                from yip in yipTmp.DefaultIfEmpty()
                 select new ParticipantTotalVestingBalanceDto
                 {
-                    Ssn = e.Ssn,
+                    Ssn = b.Ssn,
                     CurrentBalance = b.Total ?? 0,
                     Etva = e.Total ?? 0,
                     TotalDistributions = d.Total ?? 0,
-                    VestingPercent = v.Ratio,
-                    YearsInPlan = y.Years ?? 0,
-                    VestedBalance = (((b.Total ?? 0) + (d.Total ?? 0) - (e.Total ?? 0)) * v.Ratio) + (e.Total ?? 0) - (d.Total ?? 0)
+                    VestingPercent = v.Ratio ?? 0,
+                    YearsInPlan = yip.Years ?? 0,
+                    VestedBalance = (((b.Total ?? 0) + (d.Total ?? 0) - (e.Total ?? 0)) * (v.Ratio ?? 0)) + (e.Total ?? 0) - (d.Total ?? 0)
                 }
             );
     }
@@ -412,12 +435,12 @@ public sealed class TotalService : ITotalService
                         {
                             Id = badgeNumberOrSsn,
                             Ssn = t.Ssn.MaskSsn(),
-                            CurrentBalance = t.CurrentBalance,
-                            Etva = t.Etva,
-                            TotalDistributions = t.TotalDistributions,
-                            VestedBalance = t.VestedBalance,
-                            VestingPercent = t.VestingPercent,
-                            YearsInPlan = t.YearsInPlan
+                            CurrentBalance = (t.CurrentBalance ?? 0),
+                            Etva = (t.Etva ?? 0),
+                            TotalDistributions = (t.TotalDistributions ?? 0),
+                            VestedBalance = (t.VestedBalance ?? 0),
+                            VestingPercent = (t.VestingPercent ?? 0),
+                            YearsInPlan = (t.YearsInPlan ?? 0)
                         }).FirstOrDefaultAsync(cancellationToken);
                     return rslt;
                 });
@@ -431,12 +454,12 @@ public sealed class TotalService : ITotalService
                         {
                             Id = badgeNumberOrSsn,
                             Ssn = t.Ssn.MaskSsn(),
-                            CurrentBalance = t.CurrentBalance,
-                            Etva = t.Etva,
-                            TotalDistributions = t.TotalDistributions,
-                            VestedBalance = t.VestedBalance,
-                            VestingPercent = t.VestingPercent,
-                            YearsInPlan = t.YearsInPlan
+                            CurrentBalance = (t.CurrentBalance ?? 0),
+                            Etva = (t.Etva ?? 0),
+                            TotalDistributions = (t.TotalDistributions ?? 0),
+                            VestedBalance = (t.VestedBalance ?? 0),
+                            VestingPercent = (t.VestingPercent ?? 0),
+                            YearsInPlan = (t.YearsInPlan ?? 0)
                         }).FirstOrDefaultAsync(cancellationToken);
                     return rslt;
                 });

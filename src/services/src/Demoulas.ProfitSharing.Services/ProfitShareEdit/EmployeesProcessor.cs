@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using Demoulas.Common.Contracts.Contracts.Response;
@@ -55,8 +55,8 @@ internal static class EmployeeProcessorHelper
                     Ssn = et.Ssn,
                     Name = et.Name,
                     EnrolledId = et.EnrolledId,
-                    YearsInPlan = bal.YearsInPlan,
-                    CurrentAmount = bal.CurrentBalance,
+                    YearsInPlan = (bal.YearsInPlan ?? 0),
+                    CurrentAmount = (bal.CurrentBalance ?? 0),
                     EmployeeTypeId = et.EmployeeTypeId,
                     PointsEarned = et.PointsEarned,
                     Etva = et.Etva,
