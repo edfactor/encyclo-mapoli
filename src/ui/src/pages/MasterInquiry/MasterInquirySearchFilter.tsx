@@ -157,8 +157,8 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
     if (isValid) {
       const searchParams: MasterInquiryRequest = {
         pagination: { skip: data.pagination.skip, take: data.pagination.take, sortBy: data.pagination.sortBy, isSortDescending: data.pagination.isSortDescending },
-        ...(!!data.startProfitYear && { startProfitYear: data.startProfitYear.getFullYear() }),
-        ...(!!data.endProfitYear && { endProfitYear: data.endProfitYear.getFullYear() }),
+        ...(!!data.startProfitYear && { startProfitYear: data.startProfitYear }),
+        ...(!!data.endProfitYear && { endProfitYear: data.endProfitYear }),
         ...(!!data.startProfitMonth && { startProfitMonth: data.startProfitMonth }),
         ...(!!data.endProfitMonth && { endProfitMonth: data.endProfitMonth }),
         ...(!!data.socialSecurity && { socialSecurity: data.socialSecurity }),
@@ -235,12 +235,8 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
               render={({ field }) => (
                 <DsmDatePicker
                   id="Beginning Year"
-                  onChange={(value: Date | null) => {
-                    if (value) {
-                      field.onChange(value);
-                    }
-                  }}
-                  value={field.value ?? null}
+                  onChange={(value: Date | null) => field.onChange(value?.getFullYear() || undefined)}
+                  value={field.value ? new Date(field.value, 0) : null}
                   required={true}
                   label="Profit Year"
                   disableFuture
@@ -260,17 +256,13 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
               render={({ field }) => (
                 <DsmDatePicker
                   id="End Year"
-                  onChange={(value: Date | null) => {
-                    if (value) {
-                      field.onChange(value);
-                    }
-                  }}
-                  value={field.value ?? null}
+                  onChange={(value: Date | null) => field.onChange(value?.getFullYear() || undefined)}
+                  value={field.value ? new Date(field.value, 0) : null}
                   required={true}
                   label="End Year"
                   disableFuture
                   views={["year"]}
-                  error={errors.startProfitYear?.message}
+                  error={errors.endProfitYear?.message}
                 />
               )}
             />
@@ -392,7 +384,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
 
           <Grid2
             size={{ xs: 12, sm: 6, md: 3 }}>
-            <FormLabel>Badge Number</FormLabel>
+            <FormLabel>Badge/PSN Number</FormLabel>
             <Controller
               name="badgeNumber"
               control={control}

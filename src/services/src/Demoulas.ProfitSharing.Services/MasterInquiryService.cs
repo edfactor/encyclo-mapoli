@@ -115,7 +115,7 @@ public class MasterInquiryService : IMasterInquiryService
             if (uniqueSsns.Count == 1)
             {
                 int ssn = uniqueSsns.First();
-                short currentYear = (short)DateTime.Today.Year;
+                short currentYear = req.EndProfitYear ?? (short)DateTime.Today.Year;
                 short previousYear = (short)(currentYear - 1);
 
                 employeeDetails = await GetDemographicDetails(ctx, ssn, currentYear, previousYear, cancellationToken) ??
