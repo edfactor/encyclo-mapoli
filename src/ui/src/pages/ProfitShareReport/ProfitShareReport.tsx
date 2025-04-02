@@ -42,7 +42,7 @@ const ProfitShareReport = () => {
         includeEmployeesWithPriorProfitSharingAmounts: true,
         includeEmployeesWithNoPriorProfitSharingAmounts: true,
         profitYear: profitYear,
-        pagination: { skip: 0, take: 10 }
+        pagination: { skip: 0, take: 10, sortBy: "badgeNumber", isSortDescending: true }
       };
       triggerSearch(request, false);
       dispatch(setYearEndProfitSharingReportQueryParams(profitYear));

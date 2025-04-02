@@ -70,7 +70,7 @@ const ProfitShareReportSearchFilter: React.FC<ProfitShareReportSearchFilterProps
         includeTerminatedEmployees: false,
         includeBeneficiaries: false,
         profitYear: data.profitYear,
-        pagination: { skip: 0, take: 25 }
+        pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }
       };
       triggerSearch(req, false).unwrap();
       dispatch(setYearEndProfitSharingReportQueryParams(data.profitYear));

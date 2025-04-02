@@ -76,7 +76,7 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
 
           // Format as ISO string with timezone offset
           // The format should match: "2025-03-19T00:00:00-04:00"
-          const asOfDateTime = combinedDate.toISOString().replace("Z", "-04:00");
+          const asOfDateTime = combinedDate.toISOString();
 
           await freezeDemographics({
             asOfDateTime,

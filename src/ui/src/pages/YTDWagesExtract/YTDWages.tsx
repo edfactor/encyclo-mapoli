@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetEmployeeWagesForYearQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMAccordion, Page } from "smart-ui-library";
+import { DSMAccordion, ISortParams, Page } from "smart-ui-library";
 import { downloadFileFromResponse } from "utils/fileDownload";
 import { CAPTIONS } from "../../constants";
 import YTDWagesGrid from "./YTDWagesGrid";
@@ -21,6 +21,10 @@ const YTDWages: React.FC = () => {
   const thisYear = new Date().getFullYear();
   const lastYear = thisYear - 1;
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
+  const [sortParams, setSortParams] = useState<ISortParams>({
+    sortBy: "badgeNumber",
+    isSortDescending: false
+  });
 
   const componentRef = useRef<HTMLDivElement>(null);
 
@@ -29,7 +33,7 @@ const YTDWages: React.FC = () => {
       const fetchCSVPromise = triggerSearch({
         profitYear: data.profitYear,
         acceptHeader: "text/csv",
-        pagination: { skip: 0, take: 20000 }
+        pagination: { skip: 0, take: 20000, sortBy : sortParams.sortBy, isSortDescending: sortParams.isSortDescending  }
       });
       await downloadFileFromResponse(
         fetchCSVPromise,
@@ -41,7 +45,7 @@ const YTDWages: React.FC = () => {
       triggerSearch({
         profitYear: data.profitYear,
         acceptHeader: "text/json",
-        pagination: { skip: 0, take: 255 }
+        pagination: { skip: 0, take: 255, sortBy : sortParams.sortBy, isSortDescending: sortParams.isSortDescending  }
       });
     } catch (error) {
       console.error("Error reloading grid data after download", error);
