@@ -26,7 +26,7 @@ const YTDWagesSearchFilter: React.FC<YTDWagesSearchFilterProps> = ({ setInitialS
   const { handleSubmit, setValue } = useForm<YTDWagesSearch>({
     defaultValues: {
       profitYear: fiscalCloseProfitYear || employeeWagesForYearQueryParams?.profitYear || undefined,
-      pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }
+      pagination: { skip: 0, take: 25, sortBy: "storeNumber", isSortDescending: false }
     }
   });
 
@@ -35,7 +35,7 @@ const YTDWagesSearchFilter: React.FC<YTDWagesSearchFilterProps> = ({ setInitialS
     triggerSearch(
       {
         profitYear: fiscalCloseProfitYear,
-        pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true },
+        pagination: { skip: 0, take: 25, sortBy: "storeNumber", isSortDescending: false },
         acceptHeader: "application/json"
       },
       false

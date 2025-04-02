@@ -51,7 +51,7 @@ export interface DistributionsAndForfeituresRequestDto extends ProfitYearRequest
   startMonth?: number;
   endMonth?: number;
   includeOutgoingForfeitures?: boolean;
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface DistributionsAndForfeitures {
@@ -100,7 +100,7 @@ export interface DuplicateSSNsRequestDto {
 }
 
 export interface MissingCommasInPYNameRequestDto {
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface MissingCommasInPYName {
@@ -736,7 +736,7 @@ export interface YearEndProfitSharingReportRequest {
   includeEmployeesWithPriorProfitSharingAmounts: boolean;
   includeEmployeesWithNoPriorProfitSharingAmounts: boolean;
   profitYear: number;
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface CreateMilitaryContributionRequest extends ProfitYearRequest {
@@ -860,8 +860,7 @@ export interface Under21InactiveResponse {
 }
 
 export interface Under21TotalsRequest extends ProfitYearRequest {
-  isSortDescending?: boolean;
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface Under21TotalsResponse {
@@ -898,7 +897,6 @@ export interface YearEndProfitSharingReportSummaryResponse {
 }
 
 export interface UpdateSummaryRequest extends ProfitYearRequest {
-  isSortDescending?: boolean;
   pagination: SortedPaginationRequestDto;
 }
 
