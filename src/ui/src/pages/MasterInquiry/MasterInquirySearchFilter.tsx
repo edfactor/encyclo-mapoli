@@ -28,6 +28,7 @@ import { useParams } from "react-router-dom";
 import { RootState } from "reduxstore/store";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import { paymentTypeGetNumberMap, memberTypeGetNumberMap } from "./MasterInquiryFunctions";
+import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 
 const schema = yup.object().shape({
   startProfitYear: yup
@@ -107,6 +108,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
   }>();
 
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
+  const profitYear = useDecemberFlowProfitYear();
 
   const {
     control,
@@ -121,7 +123,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
       startProfitYear: masterInquiryRequestParams?.startProfitYear
         ? masterInquiryRequestParams.startProfitYear
         : undefined,
-      endProfitYear: masterInquiryRequestParams?.endProfitYear ? masterInquiryRequestParams.endProfitYear : undefined,
+      endProfitYear: profitYear || masterInquiryRequestParams?.endProfitYear || undefined,
       startProfitMonth: masterInquiryRequestParams?.startProfitMonth || undefined,
       endProfitMonth: masterInquiryRequestParams?.endProfitMonth || undefined,
       socialSecurity: masterInquiryRequestParams?.socialSecurity || undefined,
