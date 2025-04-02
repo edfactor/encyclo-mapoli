@@ -7,32 +7,32 @@ import "../agGridConfig";
 import Router from "./components/router/Router";
 import { useEffect, useState } from "react";
 
-const defaultBuildInfo = {
-  BuildNumber: "Local",
-  BuildId: "Dev",
-  Branch: "Local Development",
-  CommitHash: ""
-};
+interface BuildInfo {
+  buildNumber?: string;
+  buildId?: string;
+  branch?: string;
+  commitHash?: string;
+}
 
 const App = () => {
-  const [buildInfo, setBuildInfo] = useState(defaultBuildInfo);
+  const [uiBuildInfo, setUiBuildInfo] = useState<BuildInfo | null>(null);
 
   useEffect(() => {
-    fetch('/.buildinfo.json')
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Could not load buildinfo.json');
+    if (!uiBuildInfo) {
+      fetch("/.buildinfo.json").then(async (response) => {
+        try {
+          const data = await response.json();
+          setUiBuildInfo(data);
+        } catch (e) {
+          console.warn("Error parsing buildinfo.json");
         }
-        return response.json();
-      })
-      .then(data => {
-        setBuildInfo(data);
-      })
-      .catch(error => {
-        console.warn("Error loading buildInfo:", error);
-        console.log("Using default buildInfo:", defaultBuildInfo);
       });
-  }, []);
+    }
+  }, [uiBuildInfo]);
+
+  const buildVersionNumber = uiBuildInfo 
+    ? `${uiBuildInfo.buildNumber ?? ""}.${uiBuildInfo.buildId ?? ""}`
+    : "Local.Dev";
 
   const onClick = (_e: React.MouseEvent<HTMLDivElement>) => {};
 
@@ -43,7 +43,7 @@ const App = () => {
         onClick={onClick}
         appTitle="Profit Sharing"
         logout={() => alert("Logout")}
-        buildVersionNumber={`${buildInfo.BuildNumber}.${buildInfo.BuildId}`}
+        buildVersionNumber={buildVersionNumber}
         userName={"TEST"}
         environmentMode={"development"}
         oktaEnabled={true}>
