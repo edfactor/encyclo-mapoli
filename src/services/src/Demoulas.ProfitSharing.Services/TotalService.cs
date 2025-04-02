@@ -281,7 +281,6 @@ public sealed class TotalService : ITotalService
         var hoursWorkedRequirement = ContributionService.MinimumHoursForContribution();
 
 #pragma warning disable S1244 // Floating point numbers should not be tested for equality
-#pragma warning disable S125 // Sections of code should not be commented out
         return (
             from db in demoOrBeneficiary
             join dTbl in ctx.Demographics on db.Ssn equals dTbl.Ssn into dTmp
@@ -344,7 +343,6 @@ public sealed class TotalService : ITotalService
                     0
             }
         );
-#pragma warning restore S125 // Sections of code should not be commented out
 #pragma warning restore S1244 // Floating point numbers should not be tested for equality
     }
 
