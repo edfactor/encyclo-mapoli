@@ -2,15 +2,13 @@ import { Button, Divider, Tooltip } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import { DSMAccordion, Page } from "smart-ui-library";
 import ProfitShareEditUpdateSearchFilter from "./ProfitShareEditUpdateSearchFilter";
-import ProfitShareEditUpdateGrid from "./ProfitShareEditUpdateGrid";
-import { SaveOutlined } from "@mui/icons-material";
+import { Replay, SaveOutlined } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
-
-const developmentNoteStyle = {
-  backgroundColor: "#FFFFE0", // Light yellow
-  padding: "10px",
-  margin: "10px"
-};
+import ProfitShareEditUpdateTabs from "./ProfitShareEditUpdateTabs";
+import { RootState } from "reduxstore/store";
+import { useLazyGetMasterApplyQuery, useLazyGetMasterRevertQuery } from "reduxstore/api/YearsEndApi";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import { clearProfitEdit, setProfitEditUpdateRevertChangesAvailable } from "reduxstore/slices/yearsEndSlice";
 
 const RenderSaveButton = () => {
   //const dispatch = useDispatch();
@@ -23,6 +21,12 @@ const RenderSaveButton = () => {
   //const { executiveHoursAndDollarsGrid } = useSelector((state: RootState) => state.yearsEnd);
 
   const pendingChanges = true;
+
+  const { profitEditUpdateChangesAvailable } = useSelector((state: RootState) => state.yearsEnd);
+  const [masterApply] = useLazyGetMasterApplyQuery();
+
+  // This is the condition to check if there are pending changes
+
   /*
     executiveHoursAndDollarsGrid !== undefined &&
     executiveHoursAndDollarsGrid?.executiveHoursAndDollars !== undefined &&
@@ -30,11 +34,11 @@ const RenderSaveButton = () => {
 */
   const saveButton = (
     <Button
-      disabled={!pendingChanges}
+      disabled={!profitEditUpdateChangesAvailable}
       variant="outlined"
       color="primary"
       size="medium"
-      startIcon={<SaveOutlined color={pendingChanges ? "primary" : "disabled"} />}
+      startIcon={<SaveOutlined color={profitEditUpdateChangesAvailable ? "primary" : "disabled"} />}
       onClick={async () => {
         // Note that clearing the rows will also disable the save button,
         // which will be notified that there are no pending rows to save,
@@ -51,11 +55,11 @@ const RenderSaveButton = () => {
     </Button>
   );
 
-  if (!pendingChanges) {
+  if (!profitEditUpdateChangesAvailable) {
     return (
       <Tooltip
         placement="top"
-        title="You must change hours or dollars to save.">
+        title="You must have previewed data to save.">
         <span>{saveButton}</span>
       </Tooltip>
     );
@@ -65,7 +69,11 @@ const RenderSaveButton = () => {
 };
 
 const RenderRevertButton = () => {
-  //const dispatch = useDispatch();
+  const { profitEditUpdateRevertChangesAvailable } = useSelector((state: RootState) => state.yearsEnd);
+  const fiscalCloseProfitYear = useFiscalCloseProfitYear();
+  const [masterRevert] = useLazyGetMasterRevertQuery();
+
+  const dispatch = useDispatch();
 
   // This next line the function that makes the HTTP PUT call to
   // update the hours and dollars on the back end
@@ -74,20 +82,26 @@ const RenderRevertButton = () => {
   // This Grid is the group of pending updates that are changed rows in the grid
   //const { executiveHoursAndDollarsGrid } = useSelector((state: RootState) => state.yearsEnd);
 
-  const pendingChanges = true;
   /*
     executiveHoursAndDollarsGrid !== undefined &&
     executiveHoursAndDollarsGrid?.executiveHoursAndDollars !== undefined &&
     executiveHoursAndDollarsGrid?.executiveHoursAndDollars.length != 0;
 */
-  const saveButton = (
+  const revertButton = (
     <Button
-      disabled={!pendingChanges}
+      disabled={!profitEditUpdateRevertChangesAvailable}
       variant="outlined"
       color="primary"
       size="medium"
-      //startIcon={<SaveOutlined color={pendingChanges ? "primary" : "disabled"} />}
+      startIcon={<Replay color={profitEditUpdateRevertChangesAvailable ? "primary" : "disabled"} />}
       onClick={async () => {
+        masterRevert({
+          profitYear: fiscalCloseProfitYear
+        })
+          .unwrap()
+          .then((payload) => console.log("Successfully reverted year end. ", payload))
+          .catch((error) => console.error("ERROR: Did not revert year end", error));
+        dispatch(setProfitEditUpdateRevertChangesAvailable(false));
         // Note that clearing the rows will also disable the save button,
         // which will be notified that there are no pending rows to save,
         // that happens when we do the clear call below
@@ -103,37 +117,29 @@ const RenderRevertButton = () => {
     </Button>
   );
 
-  if (!pendingChanges) {
+  if (!profitEditUpdateRevertChangesAvailable) {
     return (
       <Tooltip
         placement="top"
-        title="You must change hours or dollars to save.">
-        <span>{saveButton}</span>
+        title="You must have just saved data to revert.">
+        <span>{revertButton}</span>
       </Tooltip>
     );
   } else {
-    return saveButton;
+    return revertButton;
   }
 };
 
 const ProfitShareEditUpdate = () => {
   return (
     <Page
-      label="Profit Share Update/Edit/Master (PAY444/447/460 PROFTLD)"
+      label="Master Update (PAY444/PAY447/PROFTLD)"
       actionNode={
-        <div className="flex mr-2 justify-end gap-2">
-          {RenderSaveButton()}
+        <div className="flex  justify-end gap-2">
           {RenderRevertButton()}
+          {RenderSaveButton()}
         </div>
       }>
-      <div style={developmentNoteStyle}>
-        DevNote: This page is functional but incomplete; needs Totals block, needs Adjustment Details, and needs Paging.{" "}
-        <a
-          style={{ color: "blue" }}
-          href="https://demoulas.atlassian.net/browse/PS-945">
-          PS-945
-        </a>
-      </div>
       <Grid2
         container
         rowSpacing="24px">
@@ -146,7 +152,7 @@ const ProfitShareEditUpdate = () => {
           </DSMAccordion>
         </Grid2>
         <Grid2 width="100%">
-          <ProfitShareEditUpdateGrid />
+          <ProfitShareEditUpdateTabs />
         </Grid2>
       </Grid2>
     </Page>

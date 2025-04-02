@@ -500,8 +500,10 @@ export interface BalanceByAgeDetail extends BalanceByDetailBase {
   age: number;
 }
 
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 export interface BalanceByAge extends BalanceByBase<BalanceByAgeDetail> {}
 
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 export interface BalanceByYears extends BalanceByBase<BalanceByAgeDetail> {}
 
 export interface VestedAmountsByAge {
@@ -577,16 +579,16 @@ export interface ProfitShareUpdateRequest {
   profitYear: number;
   contributionPercent: number;
   earningsPercent: number;
-  incomingForfeiturePercent: number;
+  incomingForfeitPercent: number;
+  secondaryEarningsPercent?: number;
   maxAllowedContributions: number;
-
-  adjustmentBadge: number;
-  adjustmentContributionAmount: number;
-  adjustmentEarningsAmount: number;
-  adjustmentIncomingForfeitureAmount: number;
-
-  adjustmentSecondaryBadge: number;
-  adjustmentSecondaryEarningsAmount: number;
+  badgeToAdjust?: number;
+  adjustContributionAmount?: number;
+  adjustEarningsAmount?: number;
+  adjustIncomingForfeitAmount?: number;
+  badgeToAdjust2?: number;
+  adjustEarningsSecondaryAmount?: number;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface ProfitShareUpdateDetail {

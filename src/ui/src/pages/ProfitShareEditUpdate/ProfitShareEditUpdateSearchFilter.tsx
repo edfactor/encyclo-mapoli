@@ -18,33 +18,31 @@ import {
   setProfitUpdateLoading
 } from "../../reduxstore/slices/yearsEndSlice";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-
-interface ProfitShareUpdateInputPanelProps {
-  Skip?: number | null;
-  Take?: number | null;
-  profitYear?: Date | null;
-  contributionPercent?: number | null | undefined;
+import { ProfitShareUpdateRequest } from "reduxstore/types";
+interface ProfitShareUpdateSearch {
+  profitYear: Date;
+  contributionPercent?: number | null;
   earningsPercent?: number | null;
-  incomingForfeiturePercent?: number | null;
+  incomingForfeitPercent?: number | null;
   secondaryEarningsPercent?: number | null;
-  maxAllowedContributions: number | null | undefined;
+  maxAllowedContributions?: number | null;
 
-  adjustmentBadge?: number | null;
-  adjustmentContributionAmount?: number | null;
-  adjustmentEarningsAmount?: number | null;
-  adjustmentIncomingForfeitureAmount?: number | null;
+  badgeToAdjust?: number | null;
+  adjustContributionAmount?: number | null;
+  adjustEarningsAmount?: number | null;
+  adjustIncomingForfeitAmount?: number | null;
 
-  adjustmentSecondaryBadge?: number | null;
-  adjustmentSecondaryEarningsAmount?: number | null;
+  badgeToAdjust2?: number | null;
+  adjustEarningsSecondaryAmount?: number | null;
 }
 
 const schema = yup.object().shape({
   profitYear: yup
     .date()
+    .required("Profit Year is required")
     .min(new Date(2020, 0, 1), "Year must be 2020 or later")
     .max(new Date(2100, 11, 31), "Year must be 2100 or earlier")
-    .typeError("Invalid date")
-    .nullable(),
+    .typeError("Invalid date"),
   contributionPercent: yup
     .number()
     .typeError("Contribution must be a number")
@@ -56,7 +54,7 @@ const schema = yup.object().shape({
     .typeError("Secondary Earnings must be a number")
     .min(0, "Secondary Earnings must be positive")
     .nullable(),
-  incomingForfeiturePercent: yup
+  incomingForfeitPercent: yup
     .number()
     .typeError("Incoming Forfeiture must be a number")
     .min(0, "Forfeiture must be positive")
@@ -66,24 +64,20 @@ const schema = yup.object().shape({
     .typeError("Max Allowed Contributions must be a number")
     .min(0, "Max Allowed Contributions must be positive")
     .nullable(),
-  adjustmentBadge: yup.number().typeError("Badge must be a number").integer("Badge must be an integer").nullable(),
-  adjustmentContributionAmount: yup
+  badgeToAdjust: yup.number().typeError("Badge must be a number").integer("Badge must be an integer").nullable(),
+  adjustContributionAmount: yup
     .number()
     .typeError("Contribution must be a number")
     .min(0, "Contribution must be positive")
     .nullable(),
-  adjustmentEarningsAmount: yup.number().typeError("Earnings must be a number").nullable(),
-  adjustmentIncomingForfeitureAmount: yup
+  adjustEarningsAmount: yup.number().typeError("Earnings must be a number").nullable(),
+  adjustIncomingForfeitureAmount: yup
     .number()
     .typeError("Adjusted Incoming Forfeiture must be a number")
     .min(0, "Adjusted Incoming Forfeiture must be positive")
     .nullable(),
-  adjustmentSecondaryBadge: yup
-    .number()
-    .typeError("Badge must be a number")
-    .integer("Badge must be an integer")
-    .nullable(),
-  adjustmentSecondaryEarningsAmount: yup.number().typeError("Earnings must be a number").nullable()
+  badgeToAdjust2: yup.number().typeError("Badge must be a number").integer("Badge must be an integer").nullable(),
+  adjustEarningsSecondaryAmount: yup.number().typeError("Earnings must be a number").nullable()
 });
 
 const ProfitShareEditUpdateSearchFilter = () => {
@@ -101,48 +95,52 @@ const ProfitShareEditUpdateSearchFilter = () => {
     control,
     handleSubmit,
     formState: { errors, isValid }
-  } = useForm<ProfitShareUpdateInputPanelProps>({
+  } = useForm<ProfitShareUpdateSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
       profitYear: fiscalCloseProfitYearAsDate,
       contributionPercent: null,
       earningsPercent: null,
-      incomingForfeiturePercent: null,
+      incomingForfeitPercent: null,
       secondaryEarningsPercent: null,
       maxAllowedContributions: null,
 
-      adjustmentBadge: null,
-      adjustmentContributionAmount: null,
-      adjustmentEarningsAmount: null,
-      adjustmentIncomingForfeitureAmount: null,
+      badgeToAdjust: null,
+      adjustContributionAmount: null,
+      adjustEarningsAmount: null,
+      adjustIncomingForfeitAmount: null,
 
-      adjustmentSecondaryBadge: null,
-      adjustmentSecondaryEarningsAmount: null
+      badgeToAdjust2: null,
+      adjustEarningsSecondaryAmount: null
     }
   });
 
   const validateAndView = handleSubmit((data, event?: React.BaseSyntheticEvent) => {
     if (isValid) {
-      const viewParams: ProfitShareUpdateInputPanelProps = {
-        Skip: 0,
-        Take: 25,
+      const viewParams: ProfitShareUpdateRequest = {
+        pagination: {
+          sortBy: "contributionPercent",
+          isSortDescending: false,
+          skip: 0,
+          take: 25
+        },
         profitYear: fiscalCloseProfitYear,
-        ...(!!data.contributionPercent && { contributionPercent: data.contributionPercent }),
-        ...(!!data.earningsPercent && { earningsPercent: data.earningsPercent }),
-        ...(!!data.incomingForfeiturePercent && { incomingForfeitPercent: data.incomingForfeiturePercent }),
-        ...(!!data.secondaryEarningsPercent && { secondaryEarningsPercent: data.secondaryEarningsPercent }),
-        ...(!!data.maxAllowedContributions && { maxAllowedContributions: data.maxAllowedContributions }),
+        ...(data.contributionPercent !== undefined && { contributionPercent: data.contributionPercent }),
+        ...(data.earningsPercent !== undefined && { earningsPercent: data.earningsPercent }),
+        ...(data.incomingForfeitPercent !== undefined && { incomingForfeitPercent: data.incomingForfeitPercent }),
+        ...(data.secondaryEarningsPercent !== undefined && { secondaryEarningsPercent: data.secondaryEarningsPercent }),
+        ...(data.maxAllowedContributions !== undefined && { maxAllowedContributions: data.maxAllowedContributions }),
 
-        ...(!!data.adjustmentBadge && { badgeToAdjust: data.adjustmentBadge }),
-        ...(!!data.adjustmentContributionAmount && { adjustContributionAmount: data.adjustmentContributionAmount }),
-        ...(!!data.adjustmentEarningsAmount && { adjustEarningsAmount: data.adjustmentEarningsAmount }),
-        ...(!!data.adjustmentIncomingForfeitureAmount && {
-          adjustIncomingForfeitAmount: data.adjustmentIncomingForfeitureAmount
+        ...(data.badgeToAdjust !== undefined && { badgeToAdjust: data.badgeToAdjust }),
+        ...(data.adjustContributionAmount !== undefined && { adjustContributionAmount: data.adjustContributionAmount }),
+        ...(data.adjustEarningsAmount !== undefined && { adjustEarningsAmount: data.adjustEarningsAmount }),
+        ...(data.adjustIncomingForfeitAmount !== undefined && {
+          adjustIncomingForfeitAmount: data.adjustIncomingForfeitAmount
         }),
 
-        ...(!!data.adjustmentSecondaryBadge && { badgeToAdjust2: data.adjustmentSecondaryBadge }),
-        ...(!!data.adjustmentSecondaryEarningsAmount && {
-          adjustEarningsSecondaryAmount: data.adjustmentSecondaryEarningsAmount
+        ...(data.badgeToAdjust2 !== undefined && { badgeToAdjust2: data.badgeToAdjust2 }),
+        ...(data.adjustEarningsSecondaryAmount !== undefined && {
+          adjustEarningsSecondaryAmount: data.adjustEarningsSecondaryAmount
         })
       };
       // clears current table data - gives user feed back that thier search is in progress
@@ -437,7 +435,7 @@ const ProfitShareEditUpdateSearchFilter = () => {
               type="submit"
               value="preview updates"
               onClick={validateAndView}>
-              Preview Updates
+              Preview
             </Button>
             <Button
               variant="contained"
