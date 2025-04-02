@@ -191,7 +191,9 @@ export const YearsEndApi = createApi({
           startMonth: params.startMonth,
           endMonth: params.endMonth,
           take: params.pagination.take,
-          skip: params.pagination.skip
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -258,6 +260,8 @@ export const YearsEndApi = createApi({
           profitYear: params.profitYear,
           take: params.pagination.take,
           skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending,
           minGrossAmount: params.minGrossAmount
         }
       }),
@@ -301,7 +305,9 @@ export const YearsEndApi = createApi({
         method: "GET",
         params: {
           take: params.pagination.take,
-          skip: params.pagination.skip
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
         }
       }),
       async onQueryStarted({ queryFulfilled }) {
@@ -318,7 +324,9 @@ export const YearsEndApi = createApi({
         method: "GET",
         params: {
           take: params.pagination.take,
-          skip: params.pagination.skip
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -340,7 +348,9 @@ export const YearsEndApi = createApi({
         params: {
           profitYear: params.profitYear,
           take: params.pagination.take,
-          skip: params.pagination.skip
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -358,7 +368,9 @@ export const YearsEndApi = createApi({
         method: "GET",
         params: {
           take: params.pagination.take,
-          skip: params.pagination.skip
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
         }
       }),
       async onQueryStarted({ dispatch, queryFulfilled }) {
@@ -778,7 +790,8 @@ export const YearsEndApi = createApi({
         method: "GET",
         params: {
           profitYear: params.profitYear,
-          isSortDescending: params.isSortDescending,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending,
           take: params.pagination.take,
           skip: params.pagination.skip
         }
@@ -835,7 +848,9 @@ export const YearsEndApi = createApi({
           params: {
             ...params,
             take: params.pagination.take,
-            skip: params.pagination.skip
+            skip: params.pagination.skip,
+            sortBy: params.pagination.sortBy,
+            isSortDescending: params.pagination.isSortDescending
           }
         }),
         async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -879,10 +894,10 @@ export const YearsEndApi = createApi({
         method: "GET",
         params: {
           profitYear: params.profitYear,
-          take: params.take,
-          skip: params.skip,
-          sortBy: params.sortBy,
-          isSortDescending: params.isSortDescending
+          take: params.pagination.take,
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -929,7 +944,6 @@ export const {
   useLazyGetVestingAmountByAgeQuery,
   useLazyGetYearEndProfitSharingReportQuery,
   useUpdateExecutiveHoursAndDollarsMutation,
-  useGetYearEndProfitSharingSummaryReportQuery,
   useLazyGetYearEndProfitSharingSummaryReportQuery,
   useLazyGetUpdateSummaryQuery
 } = YearsEndApi;

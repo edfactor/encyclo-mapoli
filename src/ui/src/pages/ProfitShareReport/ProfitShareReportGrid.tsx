@@ -45,20 +45,20 @@ const ProfitShareReportGrid: React.FC<ProfitShareReportGridSearchProps> = ({
       includeEmployeesWithPriorProfitSharingAmounts: true,
       includeEmployeesWithNoPriorProfitSharingAmounts: true,
       profitYear: yearEndProfitSharingReportQueryParams?.profitYear ?? 0,
-      pagination: { skip: pageNumber * pageSize, take: pageSize },
+      pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: sortParams.sortBy, isSortDescending: sortParams.isSortDescending },
       includeEmployeesTerminatedThisYear: false,
       includeTerminatedEmployees: false,
       includeBeneficiaries: false
     };
 
     await triggerSearch(request, false);
-  }, [pageNumber, pageSize, triggerSearch, yearEndProfitSharingReportQueryParams?.profitYear]);
+  }, [pageNumber, pageSize, triggerSearch, sortParams, sortEventHandler, yearEndProfitSharingReportQueryParams?.profitYear]);
 
   useEffect(() => {
     if (initialSearchLoaded) {
       onSearch();
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, onSearch]);
+  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch]);
 
   return (
     <>

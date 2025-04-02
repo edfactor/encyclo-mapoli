@@ -75,6 +75,7 @@ definitions:
         - dist\**
       script:
         - dotnet tool update --global Demoulas.Common.Build.Cli
+        - dotnet tool update --global --all
         - Write-Host ${env:BITBUCKET_BUILD_NUMBER}
         - Write-Host ${env:BITBUCKET_BRANCH}
         - Write-Host ${env:BITBUCKET_COMMIT}
@@ -101,6 +102,9 @@ definitions:
         - Write-Host $(Get-Location)
         - Write-Host $(Get-ChildItem)
         - New-Item -ItemType Directory -Path "dist"
+        
+        - dotnet tool update --global Demoulas.Common.Build.Cli
+        - dotnet tool update --global --all
 
         - dotnet publish .\src\Services\src\Demoulas.ProfitSharing.EmployeeFull.Sync -c Release -p:RestoreAdditionalProjectSources=$env:NUGET_ORG -p:PublishProfile=FolderProfile -o .\publishOutput
         - Compress-Archive -Path .\publishOutput\* -DestinationPath .\dist\Demoulas.ProfitSharing.EmployeeFull.Sync.zip -Force
@@ -130,12 +134,16 @@ definitions:
             "@ | Out-File -FilePath .npmrc -Encoding ASCII
         - if (Test-Path -Path "node_modules") { Remove-Item -Recurse -Force "node_modules" }
         - if (Test-Path -Path "package-lock.json") { Remove-Item -Force "package-lock.json" }
-        - npm install;
-        - npm run build:${env:ENV}
+        
+        - dotnet tool update --global Demoulas.Common.Build.Cli
+        - dotnet tool update --global --all
         
         - Demoulas.Common.Build.Cli --buildid ${env:BITBUCKET_BUILD_NUMBER} --Branch ${env:BITBUCKET_BRANCH} --CommitHash ${env:BITBUCKET_COMMIT}
-        - Copy-Item -Path ".buildinfo.json" -Destination "..\..\src\UI\build"
+        - Copy-Item -Path ".buildinfo.json" -Destination ".\public" -Force
         
+        - npm install;
+        - npm run build:${env:ENV}
+
         - Copy-Item -Path ".\src\web.config" -Destination "..\..\src\UI\build"
         - New-Item -Path "..\..\dist" -ItemType Directory
         - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.${env:ENV}.zip" -Force        
@@ -169,11 +177,13 @@ definitions:
         # Install dependencies
         - npm install;
 
+        # Generate and copy buildInfo.json
+        - dotnet tool update --global Demoulas.Common.Build.Cli
+        - Demoulas.Common.Build.Cli --buildid ${env:BITBUCKET_BUILD_NUMBER} --Branch ${env:BITBUCKET_BRANCH} --CommitHash ${env:BITBUCKET_COMMIT}
+        - Copy-Item -Path ".buildinfo.json" -Destination ".\public" -Force
+
         # Run the build process for the specified environment
         - npm run build:${env:ENV}
-
-        - Demoulas.Common.Build.Cli --buildid ${env:BITBUCKET_BUILD_NUMBER} --Branch ${env:BITBUCKET_BRANCH} --CommitHash ${env:BITBUCKET_COMMIT}
-        - Copy-Item -Path ".buildinfo.json" -Destination "..\..\src\UI\build"
 
         # Copy the web.config file to the build directory
         - Copy-Item -Path ".\src\web.config" -Destination "..\..\src\UI\build" -Force
@@ -203,6 +213,12 @@ definitions:
         - if (Test-Path -Path "node_modules") { Remove-Item -Recurse -Force "node_modules" }
         - if (Test-Path -Path "package-lock.json") { Remove-Item -Force "package-lock.json" }
         - ${env:NPM} install;
+        
+        # Generate and copy buildInfo.json
+        - dotnet tool update --global Demoulas.Common.Build.Cli
+        - Demoulas.Common.Build.Cli --buildid ${env:BITBUCKET_BUILD_NUMBER} --Branch ${env:BITBUCKET_BRANCH} --CommitHash ${env:BITBUCKET_COMMIT}
+        - Copy-Item -Path ".buildinfo.json" -Destination ".\public" -Force
+        
         - ${env:NPM} run build:${env:ENV}
         - Compress-Archive -Path "..\..\src\UI\build\*" -DestinationPath "..\..\dist\Demoulas.ProfitSharing.UI.$env:ENV.zip" -Force
     

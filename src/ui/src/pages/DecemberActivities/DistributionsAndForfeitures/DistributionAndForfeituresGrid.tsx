@@ -17,6 +17,10 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
 }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
+  const [sortParams, setSortParams] = useState<ISortParams>({
+    sortBy: "badgeNumber",
+    isSortDescending: false
+  });
 
   const { distributionsAndForfeitures, distributionsAndForfeituresQueryParams } = useSelector(
     (state: RootState) => state.yearsEnd
@@ -33,7 +37,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
         endMonth: distributionsAndForfeituresQueryParams?.endMonth
       }),
       includeOutgoingForfeitures: distributionsAndForfeituresQueryParams?.includeOutgoingForfeitures ?? false,
-      pagination: { skip: pageNumber * pageSize, take: pageSize }
+      pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: sortParams.sortBy, isSortDescending: sortParams.isSortDescending }
     };
 
     await triggerSearch(request, false);
@@ -44,6 +48,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
     distributionsAndForfeituresQueryParams?.startMonth,
     pageNumber,
     pageSize,
+    sortParams,
     triggerSearch
   ]);
 
@@ -51,12 +56,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
     if (initialSearchLoaded) {
       onSearch();
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, onSearch]);
-
-  const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "badgeNumber",
-    isSortDescending: false
-  });
+  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch]);
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
   const columnDefs = useMemo(() => GetDistributionsAndForfeituresColumns(), []);

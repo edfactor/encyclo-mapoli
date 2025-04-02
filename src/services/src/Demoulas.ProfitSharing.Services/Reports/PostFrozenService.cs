@@ -68,7 +68,7 @@ namespace Demoulas.ProfitSharing.Services.Reports
                                       from bal in balTmp.DefaultIfEmpty()
                                       join lyBalTbl in _totalService.TotalVestingBalance(ctx, lastProfitYear, lastProfitYear, calInfo.FiscalEndDate) on d.Ssn equals lyBalTbl.Ssn into lyBalTmp
                                       from lyBal in lyBalTmp.DefaultIfEmpty()
-                                      select new Under21IntermediaryResult() { d=d, bal = bal ?? new ParticipantTotalVestingBalanceDto(), lyBal = lyBal ?? new Internal.ServiceDto.ParticipantTotalVestingBalanceDto() }
+                                      select new Under21IntermediaryResult() { d=d, bal = bal ?? new ParticipantTotalVestingBalanceDto(), lyBal = lyBal ?? new ParticipantTotalVestingBalanceDto() }
                                  ).ToListAsync(cancellationToken);
 
                 //Get Active under 21 counts
@@ -127,7 +127,7 @@ namespace Demoulas.ProfitSharing.Services.Reports
                         d.ContactInfo.FirstName,
                         d.ContactInfo.LastName,
                         d.Ssn.MaskSsn(),
-                        bal.YearsInPlan,
+                        (bal.YearsInPlan ?? 0),
                         d.EmploymentTypeId.ToString() == EmployeeType.Constants.NewLastYear.ToString(),
                         tyPp != null ? tyPp.CurrentHoursYear : 0,
                         lyPp != null ? lyPp.CurrentHoursYear : 0,
@@ -137,7 +137,7 @@ namespace Demoulas.ProfitSharing.Services.Reports
                         d.DateOfBirth,
                         d.DateOfBirth.Age(), //Current report uses today's date for calculating age
                         d.EmploymentStatusId,
-                        bal.CurrentBalance,
+                        (bal.CurrentBalance ?? 0),
                         tyPp.EnrollmentId
                     )).ToPaginationResultsAsync(request, cancellationToken: cancellationToken);
 
