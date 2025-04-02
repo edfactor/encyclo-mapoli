@@ -5,6 +5,7 @@ import React from "react";
 import { EmployeeDetails } from "reduxstore/types";
 import { mmDDYYFormat, numberToCurrency } from "smart-ui-library";
 import { formatPercentage } from "utils/formatPercentage";
+import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
 
 interface MasterInquiryEmployeeDetailsProps {
   details: EmployeeDetails;
@@ -60,7 +61,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
   ];
 
   const employeeSection = [
-    { label: "Badge Number", value: badgeNumber },
+    { label: "Badge Number", value: viewBadgeLinkRenderer(Number(badgeNumber)) },
     { label: "DOB", value: mmDDYYFormat(dateOfBirth) },
     { label: "SSN", value: `${ssn}` },
     { label: "ETVA", value: currentEtva },

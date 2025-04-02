@@ -56,6 +56,7 @@ export interface DistributionsAndForfeituresRequestDto extends ProfitYearRequest
 
 export interface DistributionsAndForfeitures {
   badgeNumber: number;
+  psnSuffix: number;
   employeeName: string;
   ssn: string;
   loanDate: string;

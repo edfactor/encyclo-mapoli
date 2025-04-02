@@ -458,7 +458,7 @@ public class MasterInquiryService : IMasterInquiryService
             AddressZipCode = memberData.PostalCode!,
             DateOfBirth = memberData.DateOfBirth,
             Ssn = memberData.Ssn.MaskSsn(),
-            YearsInPlan = currentBalance?.YearsInPlan ?? (short)0,
+            YearsInPlan = 0,
             PercentageVested = currentBalance?.VestingPercent ?? 0,
             ContributionsLastYear = previousBalance is { CurrentBalance: > 0 },
             BadgeNumber = memberData.BadgeNumber,
