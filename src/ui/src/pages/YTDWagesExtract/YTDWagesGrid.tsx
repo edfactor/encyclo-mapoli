@@ -16,10 +16,11 @@ interface YTDWagesGridProps {
 }
 
 const YTDWagesGrid = ({ innerRef, initialSearchLoaded, setInitialSearchLoaded }: YTDWagesGridProps) => {
+  const hasToken = !!useSelector((state: RootState) => state.security.token);
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "badgeNumber",
+    sortBy: "storeNumber",
     isSortDescending: false
   });
   const [triggerSearch, { isFetching }] = useLazyGetEmployeeWagesForYearQuery();
@@ -33,13 +34,13 @@ const YTDWagesGrid = ({ innerRef, initialSearchLoaded, setInitialSearchLoaded }:
     };
 
     await triggerSearch(request, false);
-  }, [pageNumber, pageSize, sortParams, triggerSearch, employeeWagesForYearQueryParams?.profitYear]);
+  }, [pageNumber, pageSize, sortParams, triggerSearch, hasToken, employeeWagesForYearQueryParams?.profitYear]);
 
   useEffect(() => {
-    if (initialSearchLoaded) {
+    if (initialSearchLoaded && hasToken) {
       onSearch();
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch]);
+  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch, hasToken]);
 
   const { employeeWagesForYear } = useSelector((state: RootState) => state.yearsEnd);
 
