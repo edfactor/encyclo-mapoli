@@ -139,7 +139,6 @@ definitions:
         - dotnet tool update --global --all
         
         - Demoulas.Common.Build.Cli --buildid ${env:BITBUCKET_BUILD_NUMBER} --Branch ${env:BITBUCKET_BRANCH} --CommitHash ${env:BITBUCKET_COMMIT}
-        - Copy-Item -Path ".buildinfo.json" -Destination "..\..\src\UI\build"
         - Copy-Item -Path ".buildinfo.json" -Destination ".\src"
         
         - npm install;
