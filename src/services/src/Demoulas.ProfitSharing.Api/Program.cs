@@ -15,6 +15,7 @@ using Demoulas.ProfitSharing.Services.Extensions;
 using Demoulas.Security;
 using Demoulas.Util.Extensions;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using NSwag.Generation.AspNetCore;
 using Scalar.AspNetCore;
 

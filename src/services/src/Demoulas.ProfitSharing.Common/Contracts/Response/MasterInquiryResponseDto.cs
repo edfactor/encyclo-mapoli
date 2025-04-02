@@ -1,4 +1,6 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response;
+﻿using System.Security.Cryptography;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.Response;
 
 public sealed record MasterInquiryResponseDto
 {
@@ -31,6 +33,7 @@ public sealed record MasterInquiryResponseDto
     public string? TaxCodeName { get; set; }
     public string? CommentTypeName { get; set; }
     public short PsnSuffix { get; set; }
+    public decimal? Payment { get; set; }
 
     public static MasterInquiryResponseDto ResponseExample()
     {
