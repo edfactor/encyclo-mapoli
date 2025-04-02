@@ -1,8 +1,8 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
 /// <summary>
-/// This response describes an update applied to a profit year.   It says who did it and when.   It says hoe many memebers were effcted, and what parameters were used.
-/// This gives the administrator context about the state of the YE contributions.  In particular lets us know if the adminstrator can revert and if so what they are
+/// This response describes an update applied to a profit year.   It says who did it and when.   It says how many members were effected, and what parameters were used.
+/// This gives the administrator context about the state of the YE contributions.  In particular lets us know if the admin can revert and if so what they are
 /// reverting.
 /// </summary>
 public sealed record ProfitMasterUpdateResponse
