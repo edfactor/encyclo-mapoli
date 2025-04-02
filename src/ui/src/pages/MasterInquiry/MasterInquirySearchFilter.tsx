@@ -155,13 +155,15 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
     if (badgeNumber && hasToken) {
       reset({
         ...schema.getDefault(),
+        memberType: determineCorrectMemberType(badgeNumber),
         badgeNumber: Number(badgeNumber)
       });
 
       // Trigger search automatically when badge number is present
       const searchParams: MasterInquiryRequest = {
         pagination: { skip: 0, take: 25, sortBy: "profitYear", isSortDescending: true },
-        badgeNumber: Number(badgeNumber)
+        badgeNumber: Number(badgeNumber),
+        memberType: memberTypeGetNumberMap[determineCorrectMemberType(badgeNumber)]
       };
 
       triggerSearch(searchParams, false);
