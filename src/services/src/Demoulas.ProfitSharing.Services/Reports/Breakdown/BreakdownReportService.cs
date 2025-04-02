@@ -1,4 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -69,7 +69,7 @@ public class BreakdownReportService : IBreakdownService
 
             HashSet<int> employeeSsns = employees.Select(pp => pp.Demographic!.Ssn).ToHashSet();
 
-            Dictionary<int, decimal> employeeVestingRatios = await _totalService
+            Dictionary<int, decimal?> employeeVestingRatios = await _totalService
                 .GetVestingRatio(ctx, breakdownByStoreRequest.ProfitYear, calInfo.FiscalEndDate)
                 .Where(vr => employeeSsns.Contains(vr.Ssn ?? 0))
                 .ToDictionaryAsync(vr => vr.Ssn ?? 0, vr => vr.Ratio, cancellationToken);
@@ -90,7 +90,7 @@ public class BreakdownReportService : IBreakdownService
             return employees
                 .Select(employee =>
                 {
-                    decimal vestingRatio = employeeVestingRatios.GetValueOrDefault(employee.Demographic!.Ssn);
+                    decimal vestingRatio = employeeVestingRatios.GetValueOrDefault(employee.Demographic!.Ssn) ?? 0;
                     decimal beginningBalance = endingBalanceLastYearBySsn.GetValueOrDefault(employee.Demographic!.Ssn);
                     Demographic d = employee.Demographic!;
                     InternalProfitDetailDto txns = txnsForProfitYear.GetValueOrDefault(employee.Demographic!.Ssn) ?? new InternalProfitDetailDto();
