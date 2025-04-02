@@ -56,6 +56,7 @@ export interface DistributionsAndForfeituresRequestDto extends ProfitYearRequest
 
 export interface DistributionsAndForfeitures {
   badgeNumber: number;
+  psnSuffix: number;
   employeeName: string;
   ssn: string;
   loanDate: string;
@@ -282,8 +283,8 @@ export interface BaseDateRangeParams {
   endDate: Date;
 }
 export interface MasterInquirySearch {
-  startProfitYear?: Date | null;
-  endProfitYear?: Date | null;
+  startProfitYear?: number | null;
+  endProfitYear?: number | null;
   startProfitMonth?: number | null;
   endProfitMonth?: number | null;
   socialSecurity?: number | null;
@@ -345,6 +346,7 @@ export interface MasterInquiryRequest {
   paymentType?: number;
   memberType?: number;
   badgeNumber?: number;
+  psnSuffix?: number;
   pagination: SortedPaginationRequestDto;
 }
 

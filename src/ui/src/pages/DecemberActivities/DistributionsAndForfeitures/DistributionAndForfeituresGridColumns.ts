@@ -14,7 +14,7 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       cellClass: "right-align",
       resizable: true,
       sort: "asc",
-      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data?.badgeNumber)
+      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data?.badgeNumber, params.data?.psnSuffix)
     },
     {
       headerName: "Name",

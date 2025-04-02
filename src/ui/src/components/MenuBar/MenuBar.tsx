@@ -41,7 +41,7 @@ export const MenuBar: FC<MenuBarProps> = ({ menuInfo, impersonationMultiSelect }
             <PopupMenu
               key={index}
               menuLabel={current.menuLabel}
-              items={current.items}
+              items={current.items}              
               parentRoute={current.parentRoute}
             />
           ) : (

@@ -66,7 +66,7 @@ const DuplicateNamesAndBirthdaysSearchFilter: React.FC<DuplicateNamesAndBirthday
       triggerSearch(
         {
           profitYear: data.profitYear,
-          pagination: { skip: 0, take: 25 }
+          pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: false }
         },
         false
       ).unwrap();

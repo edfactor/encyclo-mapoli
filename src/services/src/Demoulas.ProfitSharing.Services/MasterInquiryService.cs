@@ -63,12 +63,12 @@ public class MasterInquiryService : IMasterInquiryService
             }
             else if (req.MemberType == 2) // Beneficiary only
             {
-                combinedQuery = GetMasterInquiryBeneficiaryAsync(ctx, req);
+                combinedQuery = GetMasterInquiryBeneficiary(ctx, req);
             }
             else // All or null
             {
                 var demographics = GetMasterInquiryDemographics(ctx, req);
-                var beneficiary = GetMasterInquiryBeneficiaryAsync(ctx, req);
+                var beneficiary = GetMasterInquiryBeneficiary(ctx, req);
                 combinedQuery = demographics.Union(beneficiary);
             }
 
@@ -115,11 +115,23 @@ public class MasterInquiryService : IMasterInquiryService
             if (uniqueSsns.Count == 1)
             {
                 int ssn = uniqueSsns.First();
-                short currentYear = (short)DateTime.Today.Year;
+                short currentYear = req.EndProfitYear ?? (short)DateTime.Today.Year;
                 short previousYear = (short)(currentYear - 1);
 
-                employeeDetails = await GetDemographicDetails(ctx, ssn, currentYear, previousYear, cancellationToken) ??
-                                  await GetBeneficiaryDetails(ctx, ssn, currentYear, previousYear, cancellationToken);
+                if (req.MemberType == 1) // Employee only
+                {
+                    employeeDetails = await GetDemographicDetails(ctx, ssn, currentYear, previousYear, cancellationToken);
+                }
+                else if (req.MemberType == 2) // Beneficiary only
+                {
+                    employeeDetails = await GetBeneficiaryDetails(ctx, ssn, currentYear, previousYear, cancellationToken);
+                }
+                else // All or null
+                {
+                    employeeDetails = await GetDemographicDetails(ctx, ssn, currentYear, previousYear, cancellationToken) ??
+                                      await GetBeneficiaryDetails(ctx, ssn, currentYear, previousYear, cancellationToken);
+                }
+               
             }
 
             return new MasterInquiryWithDetailsResponseDto { InquiryResults = result, EmployeeDetails = employeeDetails };
@@ -128,7 +140,7 @@ public class MasterInquiryService : IMasterInquiryService
         return inquiryResults;
     }
 
-    private IQueryable<MasterInquiryItem> GetMasterInquiryDemographics(IProfitSharingDbContext ctx,
+    private static IQueryable<MasterInquiryItem> GetMasterInquiryDemographics(IProfitSharingDbContext ctx,
         MasterInquiryRequest req)
     {
         var query = ctx.ProfitDetails
@@ -218,7 +230,7 @@ public class MasterInquiryService : IMasterInquiryService
         return query;
     }
 
-    private IQueryable<MasterInquiryItem> GetMasterInquiryBeneficiaryAsync(IProfitSharingDbContext ctx, MasterInquiryRequest req)
+    private static IQueryable<MasterInquiryItem> GetMasterInquiryBeneficiary(IProfitSharingDbContext ctx, MasterInquiryRequest req)
     {
         var query = ctx.ProfitDetails
             .Include(pd => pd.ProfitCode)
@@ -300,6 +312,11 @@ public class MasterInquiryService : IMasterInquiryService
         if (req.BadgeNumber.HasValue)
         {
             query = query.Where(x => x.Member.BadgeNumber == req.BadgeNumber);
+        }
+
+        if (req.PsnSuffix is > 0)
+        {
+            query = query.Where(x => x.Member.PsnSuffix == req.PsnSuffix);
         }
 
         return query;
@@ -453,7 +470,7 @@ public class MasterInquiryService : IMasterInquiryService
             AddressZipCode = memberData.PostalCode!,
             DateOfBirth = memberData.DateOfBirth,
             Ssn = memberData.Ssn.MaskSsn(),
-            YearsInPlan = currentBalance?.YearsInPlan ?? (short)0,
+            YearsInPlan = 0,
             PercentageVested = currentBalance?.VestingPercent ?? 0,
             ContributionsLastYear = previousBalance is { CurrentBalance: > 0 },
             BadgeNumber = memberData.BadgeNumber,

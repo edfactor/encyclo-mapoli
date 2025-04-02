@@ -20,4 +20,5 @@ public record MasterInquiryRequest : SortedPaginationRequestDto
     public byte? PaymentType { get; set; }
     public byte? MemberType { get; set; }
     public int? BadgeNumber { get; set; }
+    public short? PsnSuffix { get; set; }
 }
