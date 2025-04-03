@@ -1,6 +1,7 @@
-import { Divider, MenuItem, Select, SelectChangeEvent, Stack, Typography } from "@mui/material";
+import { Divider, SelectChangeEvent, Stack, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import DSMCollapsedAccordion from "components/DSMCollapsedAccordion";
+import ProfitYearSelector from "components/ProfitYearSelector/ProfitYearSelector";
 import DuplicateNamesAndBirthdaysGrid from "pages/DecemberActivities/DuplicateNamesAndBirthdays/DuplicateNamesAndBirthdaysGrid";
 import DuplicateSSNsOnDemographicsGrid from "pages/DecemberActivities/DuplicateSSNsOnDemographics/DuplicateSSNsOnDemographicsGrid";
 import { useState } from "react";
@@ -21,38 +22,23 @@ const DecemberProcessAccordion = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { selectedProfitYearForDecemberActivities } = useSelector((state: RootState) => state.yearsEnd);
-  const thisYear = new Date().getFullYear();
+  const profitYear = useDecemberFlowProfitYear();
 
-  const ProfitYearSelector = () => {
-    const handleChange = (event: SelectChangeEvent) => {
-      dispatch(setSelectedProfitYearForDecemberActivities(Number(event.target.value)));
-      dispatch(checkDecemberParamsAndGridsProfitYears(Number(event.target.value)));
-    };
-
-    const profitYear = useDecemberFlowProfitYear();
-
-    return (
-      <div className="flex items-center gap-2 h-10 min-w-[174px]">
-        <Select
-          labelId="demo-simple-select-label"
-          id="demo-simple-select"
-          defaultValue={profitYear?.toString()}
-          value={selectedProfitYearForDecemberActivities.toString()}
-          size="small"
-          fullWidth
-          onChange={handleChange}>
-          <MenuItem value={thisYear - 1}>{thisYear - 1}</MenuItem>
-          <MenuItem value={thisYear}>{thisYear}</MenuItem>
-          <MenuItem value={thisYear + 1}>{thisYear + 1}</MenuItem>
-        </Select>
-      </div>
-    );
+  const handleProfitYearChange = (event: SelectChangeEvent) => {
+    dispatch(setSelectedProfitYearForDecemberActivities(Number(event.target.value)));
+    dispatch(checkDecemberParamsAndGridsProfitYears(Number(event.target.value)));
   };
 
   return (
     <Page
       label={MENU_LABELS.DECEMBER_ACTIVITIES}
-      actionNode={<ProfitYearSelector />}>
+      actionNode={
+        <ProfitYearSelector 
+          selectedProfitYear={selectedProfitYearForDecemberActivities}
+          handleChange={handleProfitYearChange}
+          defaultValue={profitYear?.toString()}
+        />
+      }>
       <Grid2 container>
         <Grid2
           size={{ xs: 12 }}
