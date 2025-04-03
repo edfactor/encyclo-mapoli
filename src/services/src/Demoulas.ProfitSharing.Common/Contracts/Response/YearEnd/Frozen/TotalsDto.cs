@@ -22,4 +22,7 @@ public record TotalsDto
 
     public decimal MaxOverTotal { get; set; }
     public long MaxPointsTotal { get; set; }
+    
+    public long TotalEmployees { get; set; }
+    public long TotalBeneficaries { get; set; }
 }

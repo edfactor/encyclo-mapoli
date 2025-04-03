@@ -163,6 +163,15 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
             totalsDto.ClassActionFund += memberFinancials.Caf;
             totalsDto.MaxOverTotal += memberFinancials.MaxOver;
             totalsDto.MaxPointsTotal += memberFinancials.MaxPoints;
+            // members can be both employees and beneficiaries, but I presume that the employee count is the one that matters.
+            if (memberFinancials.IsEmployee)
+            {
+                totalsDto.TotalEmployees++;
+            }
+            else
+            {
+                totalsDto.TotalBeneficaries++;
+            }
         }
 
         // Use the list of members to build up response for client.
