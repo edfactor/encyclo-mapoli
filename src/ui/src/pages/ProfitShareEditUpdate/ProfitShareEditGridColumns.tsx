@@ -5,6 +5,15 @@ export const ProfitShareEditUpdateGridColumns = (): ColDef[] => {
   return [
     {
       headerName: "Badge",
+      field: "badgeNumber",
+      colId: "badgeNumber",
+      minWidth: 100,
+      headerClass: "right-align",
+      cellClass: "right-align",
+      resizable: true
+    },
+    {
+      headerName: "PSN",
       field: "psn",
       colId: "psn",
       minWidth: 100,
@@ -33,7 +42,7 @@ export const ProfitShareEditUpdateGridColumns = (): ColDef[] => {
       valueFormatter: agGridNumberToCurrency
     },
     {
-      headerName: "Incoming Forfeiture",
+      headerName: "Forfeiture",
       field: "forfeitureAmount",
       colId: "forfeitureAmount",
       minWidth: 120,
@@ -43,27 +52,46 @@ export const ProfitShareEditUpdateGridColumns = (): ColDef[] => {
       valueFormatter: agGridNumberToCurrency
     },
     {
-      headerName: "Reason",
-      field: "recordChangeSummary",
-      colId: "recordChangeSummary",
+      headerName: "Remark",
+      field: "remark",
+      colId: "remark",
       minWidth: 100,
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true
     },
     {
-      headerName: "Code",
-      field: "code",
-      colId: "code",
+      headerName: "Comment Code",
+      field: "commentTypeId",
+      colId: "commentTypeId",
       minWidth: 120,
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true
     },
     {
-      headerName: "Name",
-      field: "name",
-      colId: "name",
+      headerName: "Record Change Summary",
+      field: "recordChangeSummary",
+      colId: "recordChangeSummary",
+
+      minWidth: 80,
+      headerClass: "left-align",
+      cellClass: "left-align",
+      resizable: true
+    },
+    {
+      headerName: "Zero Contribution Status",
+      field: "zeroContStatus",
+      colId: "zeroContStatus",
+      minWidth: 80,
+      headerClass: "left-align",
+      cellClass: "left-align",
+      resizable: true
+    },
+    {
+      headerName: "Year Extension",
+      field: "yearExtension",
+      colId: "yearExtension",
       minWidth: 80,
       headerClass: "left-align",
       cellClass: "left-align",

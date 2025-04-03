@@ -1,10 +1,9 @@
-import { useState, useMemo } from "react";
+import { Typography } from "@mui/material";
+import { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams } from "smart-ui-library";
-import { ProfitShareUpdateGridColumns } from "./ProfitShareEditUpdateGridColumns";
-import { ProfitShareEditUpdateGridColumns } from "./ProfitShareEditGridColumns";
-import { Typography } from "@mui/material";
+import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { ProfitShareUpdateGridColumns } from "./ProfitShareUpdateGridColumns";
 
 const ProfitShareEditUpdateGrid = () => {
   const [pageNumber, setPageNumber] = useState(0);
@@ -14,7 +13,6 @@ const ProfitShareEditUpdateGrid = () => {
     isSortDescending: false
   });
   const columnDefs = useMemo(() => ProfitShareUpdateGridColumns(), []);
-  const editColumnDefs = useMemo(() => ProfitShareEditUpdateGridColumns(), []);
   const { profitSharingUpdate } = useSelector((state: RootState) => state.yearsEnd);
 
   return (
@@ -27,14 +25,28 @@ const ProfitShareEditUpdateGrid = () => {
         </Typography>
       </div>
       {!!profitSharingUpdate && (
-        <DSMGrid
-          preferenceKey={"ProfitShareUpdateGrid"}
-          isLoading={false}
-          providedOptions={{
-            rowData: "response" in profitSharingUpdate ? profitSharingUpdate.response?.results : [],
-            columnDefs: columnDefs
-          }}
-        />
+        <>
+          <DSMGrid
+            preferenceKey={"ProfitShareUpdateGrid"}
+            isLoading={false}
+            providedOptions={{
+              rowData: "response" in profitSharingUpdate ? profitSharingUpdate.response?.results : [],
+              columnDefs: columnDefs
+            }}
+          />
+          <Pagination
+            pageNumber={pageNumber}
+            setPageNumber={(value: number) => {
+              setPageNumber(value - 1);
+            }}
+            pageSize={pageSize}
+            setPageSize={(value: number) => {
+              setPageSize(value);
+              setPageNumber(1);
+            }}
+            recordCount={profitSharingUpdate?.response.total ?? 0}
+          />
+        </>
       )}
     </>
   );

@@ -135,6 +135,7 @@ const ProfitShareEditUpdate = () => {
   const { profitSharingUpdateAdjustmentSummary, profitSharingUpdate } = useSelector(
     (state: RootState) => state.yearsEnd
   );
+  console.log("Total results: ", profitSharingUpdate?.response.results.length);
   return (
     <Page
       label="Master Update (PAY444/PAY447/PROFTLD)"
@@ -169,27 +170,27 @@ const ProfitShareEditUpdate = () => {
             <TotalsGrid
               displayData={[
                 [
+                  numberToCurrency(profitSharingUpdate.totals.beginningBalance || 0),
+                  numberToCurrency(profitSharingUpdate.totals.totalContribution || 0),
+                  numberToCurrency(profitSharingUpdate.totals.earnings || 0),
+                  numberToCurrency(profitSharingUpdate.totals.earnings2 || 0),
+                  numberToCurrency(profitSharingUpdate.totals.forfeiture || 0),
+                  numberToCurrency(profitSharingUpdate.totals.military || 0),
+                  numberToCurrency(profitSharingUpdate.totals.endingBalance || 0)
+                ],
+                [
+                  numberToCurrency(0),
+                  numberToCurrency(profitSharingUpdate.totals.allocations || 0),
                   numberToCurrency(0),
                   numberToCurrency(0),
-                  numberToCurrency(0),
-                  numberToCurrency(0),
-                  numberToCurrency(0),
-                  numberToCurrency(0),
+                  numberToCurrency(profitSharingUpdate.totals.maxPointsTotal || 0),
+                  numberToCurrency(profitSharingUpdate.totals.paidAllocations || 0),
                   numberToCurrency(0)
                 ],
                 [
                   numberToCurrency(0),
-                  numberToCurrency(0),
-                  numberToCurrency(0),
-                  numberToCurrency(0),
-                  numberToCurrency(0),
-                  numberToCurrency(0),
-                  numberToCurrency(0)
-                ],
-                [
-                  numberToCurrency(0),
-                  numberToCurrency(0),
-                  numberToCurrency(0),
+                  numberToCurrency(profitSharingUpdate.totals.contributionPoints || 0),
+                  numberToCurrency(profitSharingUpdate.totals.earningPoints || 0),
                   numberToCurrency(0),
                   numberToCurrency(0),
                   numberToCurrency(0),
@@ -208,24 +209,24 @@ const ProfitShareEditUpdate = () => {
                 "Ending Balance"
               ]}
             />
-            {/*{profitSharingUpdateAdjustmentSummary?.badgeNumber && (*/}
-            <>
-              <div className="px-[24px]">
-                <h2 className="text-dsm-secondary">Adjustments Entered</h2>
-              </div>
+            {profitSharingUpdateAdjustmentSummary?.badgeNumber && (
+              <>
+                <div className="px-[24px]">
+                  <h2 className="text-dsm-secondary">Adjustments Entered</h2>
+                </div>
 
-              <TotalsGrid
-                displayData={[
-                  [70191, numberToCurrency(0), numberToCurrency(0), numberToCurrency(0), numberToCurrency(0)],
-                  ["", numberToCurrency(0), numberToCurrency(0), numberToCurrency(0), numberToCurrency(0)],
-                  ["", numberToCurrency(0), numberToCurrency(0), numberToCurrency(0), numberToCurrency(0)]
-                ]}
-                leftColumnHeaders={["Initial", "Adjustment", "Totals"]}
-                topRowHeaders={["", "Badge", "Contributions", "Earnings", "Earnings2", "Forfeitures"]}
-                headerCellStyle={{}}
-              />
-            </>
-            {/* })} */}
+                <TotalsGrid
+                  displayData={[
+                    [70191, numberToCurrency(0), numberToCurrency(0), numberToCurrency(0), numberToCurrency(0)],
+                    ["", numberToCurrency(0), numberToCurrency(0), numberToCurrency(0), numberToCurrency(0)],
+                    ["", numberToCurrency(0), numberToCurrency(0), numberToCurrency(0), numberToCurrency(0)]
+                  ]}
+                  leftColumnHeaders={["Initial", "Adjustment", "Totals"]}
+                  topRowHeaders={["", "Badge", "Contributions", "Earnings", "Earnings2", "Forfeitures"]}
+                  headerCellStyle={{}}
+                />
+              </>
+            )}
             <Grid2 width="100%">
               <ProfitShareEditUpdateTabs />
             </Grid2>
