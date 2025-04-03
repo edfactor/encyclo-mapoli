@@ -31,6 +31,7 @@ import ProfitYearSelector from "components/ProfitYearSelector/ProfitYearSelector
 import { SvgIconProps } from "@mui/material";
 import { RootState } from "reduxstore/store";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 
 const SidebarIcon = (props: SvgIconProps) => (
   <SvgIcon
@@ -52,6 +53,7 @@ const PSDrawer = () => {
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
   const dispatch = useDispatch();
   const profitYear = useDecemberFlowProfitYear();
+  const fiscalFlowProfitYear = useFiscalCloseProfitYear();
 
   const hasThirdLevel = (level: string, secondLevel: string) => {
     const hasSome = menuLevels.some(
@@ -238,6 +240,7 @@ const PSDrawer = () => {
                   <ProfitYearSelector
                     selectedProfitYear={selectedProfitYearForFiscalClose}
                     handleChange={handleFiscalCloseProfitYearChange}
+                    defaultValue={fiscalFlowProfitYear?.toString()}
                   />
                 </div>
               )}
