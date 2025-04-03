@@ -6,6 +6,7 @@ import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, numberToCurrency, Pagination } from "smart-ui-library";
 import { TotalsGrid } from "../../../components/TotalsGrid/TotalsGrid";
 import { Typography } from "@mui/material";
+import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 
 import { GetTerminationColumns } from "./TerminationGridColumn";
 
@@ -22,13 +23,14 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({ initialSearchLo
     isSortDescending: false
   });
 
-  const { termination, terminationQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const { termination } = useSelector((state: RootState) => state.yearsEnd);
+  const profitYear = useDecemberFlowProfitYear();
   const [triggerSearch, { isFetching }] = useLazyGetTerminationReportQuery();
   const navigate = useNavigate();
 
   const onSearch = useCallback(async () => {
     const request = {
-      profitYear: terminationQueryParams?.profitYear ?? 0,
+      profitYear: profitYear || 0,
       pagination: {
         skip: pageNumber * pageSize,
         take: pageSize,
@@ -38,7 +40,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({ initialSearchLo
     };
 
     await triggerSearch(request, false);
-  }, [pageNumber, pageSize, sortParams, terminationQueryParams?.profitYear, triggerSearch]);
+  }, [pageNumber, pageSize, sortParams, profitYear, triggerSearch]);
 
   useEffect(() => {
     if (initialSearchLoaded) {
