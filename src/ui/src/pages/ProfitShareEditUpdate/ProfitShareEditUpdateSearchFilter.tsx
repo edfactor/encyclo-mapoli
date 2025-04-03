@@ -1,50 +1,35 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Button, FormHelperText, FormLabel, TextField } from "@mui/material";
+import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import { Controller, useForm } from "react-hook-form";
-import { useDispatch } from "react-redux";
-import {
-  useLazyGetMasterApplyQuery,
-  useLazyGetMasterRevertQuery,
-  useLazyGetProfitShareEditQuery,
-  useLazyGetProfitShareUpdateQuery
-} from "reduxstore/api/YearsEndApi";
+import { useDispatch, useSelector } from "react-redux";
+import { useLazyGetProfitShareEditQuery, useLazyGetProfitShareUpdateQuery } from "reduxstore/api/YearsEndApi";
 import * as yup from "yup";
-import {
-  setProfitEditLoading,
-  setProfitMasterApplyLoading,
-  setProfitMasterRevertLoading,
-  setProfitUpdateLoading
-} from "../../reduxstore/slices/yearsEndSlice";
+
+import SearchAndReset from "components/SearchAndReset/SearchAndReset";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-
-interface ProfitShareUpdateInputPanelProps {
-  Skip?: number | null;
-  Take?: number | null;
-  profitYear?: Date | null;
-  contributionPercent?: number | null | undefined;
-  earningsPercent?: number | null;
-  incomingForfeiturePercent?: number | null;
-  secondaryEarningsPercent?: number | null;
-  maxAllowedContributions: number | null | undefined;
-
-  adjustmentBadge?: number | null;
-  adjustmentContributionAmount?: number | null;
-  adjustmentEarningsAmount?: number | null;
-  adjustmentIncomingForfeitureAmount?: number | null;
-
-  adjustmentSecondaryBadge?: number | null;
-  adjustmentSecondaryEarningsAmount?: number | null;
-}
+import { useState } from "react";
+import {
+  addBadgeNumberToUpdateAdjustmentSummary,
+  clearProfitSharingEdit,
+  clearProfitSharingEditQueryParams,
+  clearProfitSharingUpdate,
+  clearProfitSharingUpdateQueryParams,
+  setProfitSharingEditQueryParams,
+  setProfitSharingUpdateQueryParams
+} from "reduxstore/slices/yearsEndSlice";
+import { RootState } from "reduxstore/store";
+import { ProfitShareEditUpdateQueryParams, ProfitShareUpdateRequest } from "reduxstore/types";
+import { ISortParams } from "smart-ui-library";
 
 const schema = yup.object().shape({
   profitYear: yup
     .date()
+    .required("Profit Year is required")
     .min(new Date(2020, 0, 1), "Year must be 2020 or later")
     .max(new Date(2100, 11, 31), "Year must be 2100 or earlier")
-    .typeError("Invalid date")
-    .nullable(),
+    .typeError("Invalid date"),
   contributionPercent: yup
     .number()
     .typeError("Contribution must be a number")
@@ -56,7 +41,7 @@ const schema = yup.object().shape({
     .typeError("Secondary Earnings must be a number")
     .min(0, "Secondary Earnings must be positive")
     .nullable(),
-  incomingForfeiturePercent: yup
+  incomingForfeitPercent: yup
     .number()
     .typeError("Incoming Forfeiture must be a number")
     .min(0, "Forfeiture must be positive")
@@ -66,31 +51,32 @@ const schema = yup.object().shape({
     .typeError("Max Allowed Contributions must be a number")
     .min(0, "Max Allowed Contributions must be positive")
     .nullable(),
-  adjustmentBadge: yup.number().typeError("Badge must be a number").integer("Badge must be an integer").nullable(),
-  adjustmentContributionAmount: yup
+  badgeToAdjust: yup.number().typeError("Badge must be a number").integer("Badge must be an integer").nullable(),
+  adjustContributionAmount: yup
     .number()
     .typeError("Contribution must be a number")
     .min(0, "Contribution must be positive")
     .nullable(),
-  adjustmentEarningsAmount: yup.number().typeError("Earnings must be a number").nullable(),
-  adjustmentIncomingForfeitureAmount: yup
+  adjustEarningsAmount: yup.number().typeError("Earnings must be a number").nullable(),
+  adjustIncomingForfeitureAmount: yup
     .number()
     .typeError("Adjusted Incoming Forfeiture must be a number")
     .min(0, "Adjusted Incoming Forfeiture must be positive")
     .nullable(),
-  adjustmentSecondaryBadge: yup
-    .number()
-    .typeError("Badge must be a number")
-    .integer("Badge must be an integer")
-    .nullable(),
-  adjustmentSecondaryEarningsAmount: yup.number().typeError("Earnings must be a number").nullable()
+  badgeToAdjust2: yup.number().typeError("Badge must be a number").integer("Badge must be an integer").nullable(),
+  adjustEarningsSecondaryAmount: yup.number().typeError("Earnings must be a number").nullable()
 });
 
-const ProfitShareUpdateInputPanel = () => {
-  const [previewUpdate] = useLazyGetProfitShareUpdateQuery();
-  const [previewEdit] = useLazyGetProfitShareEditQuery();
-  const [masterApply] = useLazyGetMasterApplyQuery();
-  const [masterRevert] = useLazyGetMasterRevertQuery();
+const ProfitShareEditUpdateSearchFilter = () => {
+  const [triggerSearchUpdate, { isFetching: isFetchingUpdate }] = useLazyGetProfitShareUpdateQuery();
+  const [triggerSearchEdit, { isFetching: isFetchingEdit }] = useLazyGetProfitShareEditQuery();
+  const [sortParams, setSortParams] = useState<ISortParams>({
+    sortBy: "contributionPercent",
+    isSortDescending: false
+  });
+
+  const { profitSharingUpdateAdjustmentSummary } = useSelector((state: RootState) => state.yearsEnd);
+
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
 
@@ -99,73 +85,96 @@ const ProfitShareUpdateInputPanel = () => {
   const {
     control,
     handleSubmit,
-    formState: { errors, isValid }
-  } = useForm<ProfitShareUpdateInputPanelProps>({
+    formState: { errors, isValid },
+    reset
+  } = useForm<ProfitShareEditUpdateQueryParams>({
     resolver: yupResolver(schema),
     defaultValues: {
       profitYear: fiscalCloseProfitYearAsDate,
       contributionPercent: null,
       earningsPercent: null,
-      incomingForfeiturePercent: null,
+      incomingForfeitPercent: null,
       secondaryEarningsPercent: null,
       maxAllowedContributions: null,
 
-      adjustmentBadge: null,
-      adjustmentContributionAmount: null,
-      adjustmentEarningsAmount: null,
-      adjustmentIncomingForfeitureAmount: null,
+      badgeToAdjust: null,
+      adjustContributionAmount: null,
+      adjustEarningsAmount: null,
+      adjustIncomingForfeitAmount: null,
 
-      adjustmentSecondaryBadge: null,
-      adjustmentSecondaryEarningsAmount: null
+      badgeToAdjust2: null,
+      adjustEarningsSecondaryAmount: null
     }
   });
 
-  const validateAndView = handleSubmit((data, event?: React.BaseSyntheticEvent) => {
+  const validateAndSearch = handleSubmit((data: ProfitShareEditUpdateQueryParams, event?: React.BaseSyntheticEvent) => {
     if (isValid) {
-      const viewParams: ProfitShareUpdateInputPanelProps = {
-        Skip: 0,
-        Take: 25,
+      const updateParams: ProfitShareUpdateRequest = {
+        pagination: {
+          sortBy: sortParams.sortBy,
+          isSortDescending: sortParams.isSortDescending,
+          skip: 0,
+          take: 25
+        },
         profitYear: fiscalCloseProfitYear,
-        ...(!!data.contributionPercent && { contributionPercent: data.contributionPercent }),
-        ...(!!data.earningsPercent && { earningsPercent: data.earningsPercent }),
-        ...(!!data.incomingForfeiturePercent && { incomingForfeitPercent: data.incomingForfeiturePercent }),
-        ...(!!data.secondaryEarningsPercent && { secondaryEarningsPercent: data.secondaryEarningsPercent }),
-        ...(!!data.maxAllowedContributions && { maxAllowedContributions: data.maxAllowedContributions }),
-
-        ...(!!data.adjustmentBadge && { badgeToAdjust: data.adjustmentBadge }),
-        ...(!!data.adjustmentContributionAmount && { adjustContributionAmount: data.adjustmentContributionAmount }),
-        ...(!!data.adjustmentEarningsAmount && { adjustEarningsAmount: data.adjustmentEarningsAmount }),
-        ...(!!data.adjustmentIncomingForfeitureAmount && {
-          adjustIncomingForfeitAmount: data.adjustmentIncomingForfeitureAmount
-        }),
-
-        ...(!!data.adjustmentSecondaryBadge && { badgeToAdjust2: data.adjustmentSecondaryBadge }),
-        ...(!!data.adjustmentSecondaryEarningsAmount && {
-          adjustEarningsSecondaryAmount: data.adjustmentSecondaryEarningsAmount
-        })
+        contributionPercent: data.contributionPercent ?? 0,
+        earningsPercent: data.earningsPercent ?? 0,
+        incomingForfeitPercent: data.incomingForfeitPercent ?? 0,
+        secondaryEarningsPercent: data.secondaryEarningsPercent ?? 0,
+        maxAllowedContributions: data.maxAllowedContributions ?? 0,
+        badgeToAdjust: data.badgeToAdjust ?? 0,
+        adjustContributionAmount: data.adjustContributionAmount ?? 0,
+        adjustEarningsAmount: data.adjustEarningsAmount ?? 0,
+        adjustIncomingForfeitAmount: data.adjustEarningsSecondaryAmount ?? 0,
+        badgeToAdjust2: data.badgeToAdjust2 ?? 0,
+        adjustEarningsSecondaryAmount: data.adjustEarningsSecondaryAmount ?? 0
       };
-      // clears current table data - gives user feed back that thier search is in progress
-      const nativeEvent = event?.nativeEvent as SubmitEvent;
-      console.log("Action: ", event?.target.value);
-      const action = event?.target.value;
-      if (action == "preview updates") {
-        dispatch(setProfitUpdateLoading());
-        previewUpdate(viewParams, false);
-      } else if (action == "preview details") {
-        dispatch(setProfitEditLoading());
-        previewEdit(viewParams, false);
-      } else if (action == "apply") {
-        dispatch(setProfitMasterApplyLoading());
-        masterApply(viewParams, false);
-      } else if (action == "revert") {
-        dispatch(setProfitMasterRevertLoading());
-        masterRevert(viewParams, false);
-      }
+
+      // First we have to do the update calls
+      triggerSearchUpdate(updateParams, false).unwrap();
+      dispatch(setProfitSharingUpdateQueryParams(data));
+      //console.log("Successfully did the update");
+
+      // Now if we have a badgeToAdjust, we want to save the
+      // adjustment summary so that panel shows up
+      //if (data.badgeToAdjust) {
+      //  dispatch(addBadgeNumberToUpdateAdjustmentSummary(data.badgeToAdjust));
+      //}
+
+      // Now we have to do the edit calls
+      triggerSearchEdit(updateParams, false).unwrap();
+      dispatch(setProfitSharingEditQueryParams(data));
+      //console.log("Successfully did the edit");
     }
   });
+
+  const handleReset = () => {
+    // We need to clear both grids and then both sets of query params
+    dispatch(clearProfitSharingEdit());
+    dispatch(clearProfitSharingUpdate());
+    dispatch(clearProfitSharingEditQueryParams());
+    dispatch(clearProfitSharingUpdateQueryParams());
+
+    reset({
+      profitYear: fiscalCloseProfitYearAsDate,
+      contributionPercent: null,
+      earningsPercent: null,
+      incomingForfeitPercent: null,
+      secondaryEarningsPercent: null,
+      maxAllowedContributions: null,
+
+      badgeToAdjust: null,
+      adjustContributionAmount: null,
+      adjustEarningsAmount: null,
+      adjustIncomingForfeitAmount: null,
+
+      badgeToAdjust2: null,
+      adjustEarningsSecondaryAmount: null
+    });
+  };
 
   return (
-    <form onSubmit={validateAndView}>
+    <form onSubmit={validateAndSearch}>
       <Grid2
         container
         paddingX="24px">
@@ -194,7 +203,7 @@ const ProfitShareUpdateInputPanel = () => {
             {errors.profitYear && <FormHelperText error>{errors.profitYear.message}</FormHelperText>}
           </Grid2>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+          <Grid2 size={{ xs: 12, sm: 4, md: 2 }}>
             <FormLabel>Contribution %</FormLabel>
             <Controller
               name="contributionPercent"
@@ -233,9 +242,9 @@ const ProfitShareUpdateInputPanel = () => {
           </Grid2>
 
           <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-            <FormLabel>Incoming Forfeiture %</FormLabel>
+            <FormLabel>Forfeiture %</FormLabel>
             <Controller
-              name="incomingForfeiturePercent"
+              name="incomingForfeitPercent"
               control={control}
               render={({ field }) => (
                 <TextField
@@ -244,12 +253,12 @@ const ProfitShareUpdateInputPanel = () => {
                   size="small"
                   variant="outlined"
                   value={field.value ?? ""}
-                  error={!!errors.incomingForfeiturePercent}
+                  error={!!errors.incomingForfeitPercent}
                 />
               )}
             />
-            {errors.incomingForfeiturePercent && (
-              <FormHelperText error>{errors.incomingForfeiturePercent.message}</FormHelperText>
+            {errors.incomingForfeitPercent && (
+              <FormHelperText error>{errors.incomingForfeitPercent.message}</FormHelperText>
             )}
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
@@ -302,7 +311,7 @@ const ProfitShareUpdateInputPanel = () => {
           <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Adjustment Badge</FormLabel>
             <Controller
-              name="adjustmentBadge"
+              name="badgeToAdjust"
               control={control}
               render={({ field }) => (
                 <TextField
@@ -311,16 +320,16 @@ const ProfitShareUpdateInputPanel = () => {
                   size="small"
                   variant="outlined"
                   value={field.value ?? ""}
-                  error={!!errors.adjustmentBadge}
+                  error={!!errors.badgeToAdjust}
                 />
               )}
             />
-            {errors.adjustmentBadge && <FormHelperText error>{errors.adjustmentBadge.message}</FormHelperText>}
+            {errors.badgeToAdjust && <FormHelperText error>{errors.badgeToAdjust.message}</FormHelperText>}
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Adjust Contribution Amount</FormLabel>
             <Controller
-              name="adjustmentContributionAmount"
+              name="adjustContributionAmount"
               control={control}
               render={({ field }) => (
                 <TextField
@@ -329,19 +338,19 @@ const ProfitShareUpdateInputPanel = () => {
                   size="small"
                   variant="outlined"
                   value={field.value ?? ""}
-                  error={!!errors.adjustmentContributionAmount}
+                  error={!!errors.adjustContributionAmount}
                 />
               )}
             />
-            {errors.adjustmentContributionAmount && (
-              <FormHelperText error>{errors.adjustmentContributionAmount.message}</FormHelperText>
+            {errors.adjustContributionAmount && (
+              <FormHelperText error>{errors.adjustContributionAmount.message}</FormHelperText>
             )}
           </Grid2>
 
           <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Adjust Earnings Amount</FormLabel>
             <Controller
-              name="adjustmentEarningsAmount"
+              name="adjustEarningsAmount"
               control={control}
               render={({ field }) => (
                 <TextField
@@ -350,19 +359,19 @@ const ProfitShareUpdateInputPanel = () => {
                   size="small"
                   variant="outlined"
                   value={field.value ?? ""}
-                  error={!!errors.adjustmentEarningsAmount}
+                  error={!!errors.adjustEarningsAmount}
                 />
               )}
             />
-            {errors.adjustmentEarningsAmount && (
-              <FormHelperText error>{errors.adjustmentEarningsAmount.message}</FormHelperText>
+            {errors.adjustEarningsAmount && (
+              <FormHelperText error>{errors.adjustEarningsAmount.message}</FormHelperText>
             )}
           </Grid2>
 
           <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-            <FormLabel>Adjust Incoming Forfeiture Amount</FormLabel>
+            <FormLabel>Adjust Forfeiture Amount</FormLabel>
             <Controller
-              name="adjustmentIncomingForfeitureAmount"
+              name="adjustIncomingForfeitAmount"
               control={control}
               render={({ field }) => (
                 <TextField
@@ -371,12 +380,12 @@ const ProfitShareUpdateInputPanel = () => {
                   size="small"
                   variant="outlined"
                   value={field.value ?? ""}
-                  error={!!errors.adjustmentIncomingForfeitureAmount}
+                  error={!!errors.adjustIncomingForfeitAmount}
                 />
               )}
             />
-            {errors.adjustmentIncomingForfeitureAmount && (
-              <FormHelperText error>{errors.adjustmentIncomingForfeitureAmount.message}</FormHelperText>
+            {errors.adjustIncomingForfeitAmount && (
+              <FormHelperText error>{errors.adjustIncomingForfeitAmount.message}</FormHelperText>
             )}
           </Grid2>
         </Grid2>
@@ -388,7 +397,7 @@ const ProfitShareUpdateInputPanel = () => {
           <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Adjust Secondary Badge</FormLabel>
             <Controller
-              name="adjustmentSecondaryBadge"
+              name="badgeToAdjust2"
               control={control}
               render={({ field }) => (
                 <TextField
@@ -397,19 +406,17 @@ const ProfitShareUpdateInputPanel = () => {
                   size="small"
                   variant="outlined"
                   value={field.value ?? ""}
-                  error={!!errors.adjustmentSecondaryBadge}
+                  error={!!errors.badgeToAdjust2}
                 />
               )}
             />
-            {errors.adjustmentSecondaryBadge && (
-              <FormHelperText error>{errors.adjustmentSecondaryBadge.message}</FormHelperText>
-            )}
+            {errors.badgeToAdjust2 && <FormHelperText error>{errors.badgeToAdjust2.message}</FormHelperText>}
           </Grid2>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
             <FormLabel>Adjust Secondary Earnings Amount</FormLabel>
             <Controller
-              name="adjustmentSecondaryEarningsAmount"
+              name="adjustEarningsSecondaryAmount"
               control={control}
               render={({ field }) => (
                 <TextField
@@ -418,52 +425,26 @@ const ProfitShareUpdateInputPanel = () => {
                   size="small"
                   variant="outlined"
                   value={field.value ?? ""}
-                  error={!!errors.adjustmentSecondaryEarningsAmount}
+                  error={!!errors.adjustEarningsSecondaryAmount}
                 />
               )}
             />
-            {errors.adjustmentSecondaryEarningsAmount && (
-              <FormHelperText error>{errors.adjustmentSecondaryEarningsAmount.message}</FormHelperText>
+            {errors.adjustEarningsSecondaryAmount && (
+              <FormHelperText error>{errors.adjustEarningsSecondaryAmount.message}</FormHelperText>
             )}
           </Grid2>
         </Grid2>
-        <Grid2
-          size={{ xs: 12, sm: 12, md: 12 }}
-          className="mt-4">
-          <div className="flex gap-4">
-            <Button
-              variant="contained"
-              type="submit"
-              value="preview updates"
-              onClick={validateAndView}>
-              Preview Updates
-            </Button>
-            <Button
-              variant="contained"
-              type="submit"
-              value="preview details"
-              onClick={validateAndView}>
-              Preview Details
-            </Button>
-            <Button
-              variant="contained"
-              type="submit"
-              value="apply"
-              onClick={validateAndView}>
-              Apply Updates
-            </Button>
-            <Button
-              variant="contained"
-              type="submit"
-              value="revert"
-              onClick={validateAndView}>
-              Revert Updates
-            </Button>
-          </div>
+        <Grid2 width="100%">
+          <SearchAndReset
+            handleReset={handleReset}
+            searchButtonText="Preview"
+            handleSearch={validateAndSearch}
+            isFetching={isFetchingUpdate || isFetchingEdit}
+          />
         </Grid2>
       </Grid2>
     </form>
   );
 };
 
-export default ProfitShareUpdateInputPanel;
+export default ProfitShareEditUpdateSearchFilter;

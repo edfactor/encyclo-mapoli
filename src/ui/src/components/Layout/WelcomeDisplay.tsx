@@ -5,7 +5,7 @@ import Divider from "@mui/material/Divider";
 import Grow from "@mui/material/Grow";
 import MenuItem from "@mui/material/MenuItem";
 import React, { useRef, useState } from "react";
-import { ICommon } from "./ICommon";
+import { ICommon } from "../ICommon";
 
 export type MenuItem = {
   icon?: React.ReactNode;

@@ -1,7 +1,7 @@
 import { FC } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./MenuBar.css";
-import { ICommon } from "../Layout/ICommon";
+import { ICommon } from "../ICommon";
 import NavButton from "./NavButton";
 import PopupMenu from "./PopupMenu";
 import { RouteCategory } from "smart-ui-library";
@@ -41,7 +41,7 @@ export const MenuBar: FC<MenuBarProps> = ({ menuInfo, impersonationMultiSelect }
             <PopupMenu
               key={index}
               menuLabel={current.menuLabel}
-              items={current.items}              
+              items={current.items}
               parentRoute={current.parentRoute}
             />
           ) : (

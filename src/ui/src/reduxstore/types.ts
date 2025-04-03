@@ -502,8 +502,10 @@ export interface BalanceByAgeDetail extends BalanceByDetailBase {
   age: number;
 }
 
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 export interface BalanceByAge extends BalanceByBase<BalanceByAgeDetail> {}
 
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 export interface BalanceByYears extends BalanceByBase<BalanceByAgeDetail> {}
 
 export interface VestedAmountsByAge {
@@ -579,36 +581,41 @@ export interface ProfitShareUpdateRequest {
   profitYear: number;
   contributionPercent: number;
   earningsPercent: number;
-  incomingForfeiturePercent: number;
+  incomingForfeitPercent: number;
+  secondaryEarningsPercent: number;
   maxAllowedContributions: number;
-
-  adjustmentBadge: number;
-  adjustmentContributionAmount: number;
-  adjustmentEarningsAmount: number;
-  adjustmentIncomingForfeitureAmount: number;
-
-  adjustmentSecondaryBadge: number;
-  adjustmentSecondaryEarningsAmount: number;
+  badgeToAdjust: number;
+  adjustContributionAmount: number;
+  adjustEarningsAmount: number;
+  adjustIncomingForfeitAmount: number;
+  badgeToAdjust2: number;
+  adjustEarningsSecondaryAmount: number;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface ProfitShareUpdateDetail {
-  badgePSn: string;
+  isEmployee: boolean;
+  badge: number;
+  psn: string;
   name: string;
-  beginningBalance: number;
-  beneficiaryAllocation: number;
-  distributionAmount: number;
-  forfeit: number;
+  beginningAmount: number;
+  distributions: number;
+  military: number;
+  xfer: number;
+  pxfer: number;
+  employeeTypeId: number;
+  contributions: number;
+  incomingForfeitures: number;
+  allEarnings: number;
+  allSecondaryEarnings: number;
   endingBalance: number;
-  vestedBalance: number;
-  dateTerm: string;
-  ytdPsHours: number;
-  vestedPercent: number;
-  age: number;
-  enrollmentCode: number;
+  zeroContributionReasonId: number;
+  etva: number;
+  etvaEarnings: number;
+  secondaryEtvaEarnings: number;
+  treatAsBeneficiary: boolean;
 }
-
 export interface ProfitShareUpdateResponse {
-  isLoading: boolean;
   totalVested: number;
   totalForfeit: number;
   totalEndingBalance: number;
@@ -616,22 +623,55 @@ export interface ProfitShareUpdateResponse {
   reportName: string;
   reportDate: string;
   response: Paged<ProfitShareUpdateDetail[]>;
+  hasExceededMaximumContributions: true;
+  adjustmentsSummary: ProfitShareAdjustmentSummary;
+  totals: ProfitShareUpdateTotals;
 }
 
-export interface ProfitShareEditDetail {
-  badgePSn: string;
-  name: string;
+export interface ProfitShareUpdateTotals {
   beginningBalance: number;
-  beneficiaryAllocation: number;
-  distributionAmount: number;
-  forfeit: number;
+  totalContribution: number;
+  earnings: number;
+  earnings2: number;
+  forfeiture: number;
+  distributions: number;
+  military: number;
   endingBalance: number;
-  vestedBalance: number;
-  dateTerm: string;
-  ytdPsHours: number;
-  vestedPercent: number;
-  age: number;
-  enrollmentCode: number;
+  allocations: number;
+  paidAllocations: number;
+  classActionFund: number;
+  contributionPoints: number;
+  earningPoints: number;
+  maxOverTotal: number;
+  maxPointsTotal: number;
+  totalEmployees: number;
+  totalBeneficiaries: number;
+}
+export interface ProfitShareAdjustmentSummary {
+  badgeNumber?: number;
+  incomingForfeitureAmountUnadjusted: number;
+  incomingForfeitureAmountAdjusted: number;
+  earningsAmountUnadjusted: number;
+  earningsAmountAdjusted: number;
+  secondaryEarningsAmountUnadjusted: number;
+  secondaryEarningsAmountAdjusted: number;
+  contributionAmountUnadjusted: number;
+  contributionAmountAdjusted: number;
+}
+export interface ProfitShareEditDetail {
+  isEmployee: boolean;
+  badgeNumber: number;
+  psn: string;
+  name: string;
+  code: number;
+  contributionAmount: number;
+  earningsAmount: number;
+  forfeitureAmount: number;
+  remark: string;
+  commentTypeId: number;
+  recordChangeSummary: string;
+  zeroContStatus: number;
+  yearExtension: number;
 }
 
 export interface GrossWagesReportRequest extends ProfitYearRequest {
@@ -661,8 +701,6 @@ export interface GrossWagesReportResponse {
 }
 
 export interface ProfitShareEditResponse {
-  isLoading: boolean; // this feels like a hack, it means display the table with the spinner.
-
   beginningBalance: number;
   contributionGrandTotal: number;
   incomingForfeitureGrandTotal: number;
@@ -674,11 +712,27 @@ export interface ProfitShareEditResponse {
 }
 
 export interface ProfitShareMasterResponse {
-  isLoading: boolean;
   reportName: string;
   beneficiariesEffected?: number;
   employeesEffected?: number;
   etvasEffected?: number;
+}
+
+export interface ProfitShareEditUpdateQueryParams {
+  profitYear: Date;
+  contributionPercent?: number | null;
+  earningsPercent?: number | null;
+  incomingForfeitPercent?: number | null;
+  secondaryEarningsPercent?: number | null;
+  maxAllowedContributions?: number | null;
+
+  badgeToAdjust?: number | null;
+  adjustContributionAmount?: number | null;
+  adjustEarningsAmount?: number | null;
+  adjustIncomingForfeitAmount?: number | null;
+
+  badgeToAdjust2?: number | null;
+  adjustEarningsSecondaryAmount?: number | null;
 }
 
 export interface YearEndProfitSharingReportResponse {

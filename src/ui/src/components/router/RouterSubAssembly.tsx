@@ -59,7 +59,7 @@ import BalanceByAge from "../../pages/PROF130/BalanceByAge/BalanceByAge";
 import ContributionsByAge from "../../pages/PROF130/ContributionsByAge/ContributionsByAge";
 import DistributionByAge from "../../pages/PROF130/DistributionByAge/DistributionByAge";
 import ForfeituresByAge from "../../pages/PROF130/ForfeituresByAge/ForfeituresByAge";
-import ProfitShareUpdate from "../../pages/ProfitShareUpdate/ProfitShareUpdate";
+import ProfitShareEditUpdate from "../../pages/ProfitShareEditUpdate/ProfitShareEditUpdate";
 import YTDWages from "../../pages/YTDWagesExtract/YTDWages";
 import RouteSecurity from "./RouteSecurity";
 
@@ -247,7 +247,7 @@ const RouterSubAssembly: React.FC = () => {
                 element={<ProfitShareReportFinalRun />}></Route>
               <Route
                 path={ROUTES.PROFIT_SHARE_UPDATE}
-                element={<ProfitShareUpdate />}></Route>
+                element={<ProfitShareEditUpdate />}></Route>
               <Route
                 path={ROUTES.PAY426_ACTIVE_18_20}
                 element={<EighteenToTwenty />}></Route>

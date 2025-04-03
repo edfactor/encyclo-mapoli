@@ -2,9 +2,12 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 import { format } from "date-fns";
 import {
+  addBadgeNumberToUpdateAdjustmentSummary,
   clearBreakdownByStore,
-  clearProfitEdit,
-  clearProfitUpdate,
+  clearProfitMasterApply,
+  clearProfitMasterRevert,
+  clearProfitSharingEdit,
+  clearProfitSharingUpdate,
   clearUnder21BreakdownByStore,
   clearUnder21Inactive,
   clearUnder21Totals,
@@ -29,18 +32,19 @@ import {
   setMilitaryAndRehireForfeituresDetails,
   setMissingCommaInPYName,
   setNegativeEtvaForSSNsOnPayprofit,
-  setProfitEdit,
   setProfitMasterApply,
   setProfitMasterRevert,
   setProfitShareSummaryReport,
-  setProfitUpdate,
+  setProfitSharingEdit,
+  setProfitSharingUpdate,
+  setProfitSharingUpdateAdjustmentSummary,
   setTermination,
   setUnder21BreakdownByStore,
   setUnder21Inactive,
   setUnder21Totals,
-  setVestedAmountByAge,
-  setYearEndProfitSharingReport,
-  setUpdateSummary
+  setUpdateSummary,
+  setVestedAmountsByAge,
+  setYearEndProfitSharingReport
 } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import {
@@ -67,6 +71,7 @@ import {
   ExecutiveHoursAndDollarsRequestDto,
   ForfeituresAndPoints,
   ForfeituresByAge,
+  FrozenProfitYearRequest,
   FrozenReportsByAgeRequest,
   FrozenReportsForfeituresAndPointsRequest,
   GrossWagesReportDto,
@@ -92,13 +97,12 @@ import {
   Under21InactiveResponse,
   Under21TotalsRequest,
   Under21TotalsResponse,
+  UpdateSummaryRequest,
+  UpdateSummaryResponse,
   VestedAmountsByAge,
   YearEndProfitSharingReportRequest,
   YearEndProfitSharingReportResponse,
-  YearEndProfitSharingReportSummaryResponse,
-  FrozenProfitYearRequest,
-  UpdateSummaryRequest,
-  UpdateSummaryResponse
+  YearEndProfitSharingReportSummaryResponse
 } from "reduxstore/types";
 import { url } from "./api";
 
@@ -638,7 +642,7 @@ export const YearsEndApi = createApi({
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          dispatch(setVestedAmountByAge(data));
+          dispatch(setVestedAmountsByAge(data));
         } catch (err) {
           console.log("Err: " + err);
         }
@@ -683,15 +687,37 @@ export const YearsEndApi = createApi({
       query: (params) => ({
         url: "yearend/profit-sharing-update",
         method: "GET",
-        params: params
+        params: {
+          profitYear: params.profitYear,
+          contributionPercent: params.contributionPercent,
+          earningsPercent: params.earningsPercent,
+          incomingForfeitPercent: params.incomingForfeitPercent,
+          secondaryEarningsPercent: params.secondaryEarningsPercent,
+          maxAllowedContributions: params.maxAllowedContributions,
+          badgeToAdjust: params.badgeToAdjust,
+          adjustContributionAmount: params.adjustContributionAmount,
+          adjustEarningsAmount: params.adjustEarningsAmount,
+          adjustIncomingForfeitAmount: params.adjustIncomingForfeitAmount,
+          badgeToAdjust2: params.badgeToAdjust2,
+          adjustEarningsSecondaryAmount: params.adjustEarningsSecondaryAmount,
+          take: params.pagination.take,
+          skip: params.pagination.skip
+        }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          dispatch(setProfitUpdate(data));
+          dispatch(setProfitSharingUpdate(data));
+          dispatch(setProfitSharingUpdateAdjustmentSummary(data.adjustmentsSummary));
+          if (arg.badgeToAdjust) {
+            console.log("Added badge: " + arg.badgeToAdjust);
+            dispatch(addBadgeNumberToUpdateAdjustmentSummary(arg.badgeToAdjust));
+          } else {
+            console.log("No badge to add to summmary");
+          }
         } catch (err) {
           console.log("Err", err);
-          dispatch(clearProfitUpdate());
+          dispatch(clearProfitSharingUpdate());
         }
       }
     }),
@@ -699,15 +725,30 @@ export const YearsEndApi = createApi({
       query: (params) => ({
         url: "yearend/profit-share-edit",
         method: "GET",
-        params: params
+        params: {
+          profitYear: params.profitYear,
+          contributionPercent: params.contributionPercent,
+          earningsPercent: params.earningsPercent,
+          incomingForfeitPercent: params.incomingForfeitPercent,
+          secondaryEarningsPercent: params.secondaryEarningsPercent,
+          maxAllowedContributions: params.maxAllowedContributions,
+          badgeToAdjust: params.badgeToAdjust,
+          adjustContributionAmount: params.adjustContributionAmount,
+          adjustEarningsAmount: params.adjustEarningsAmount,
+          adjustIncomingForfeitAmount: params.adjustIncomingForfeitAmount,
+          badgeToAdjust2: params.badgeToAdjust2,
+          adjustEarningsSecondaryAmount: params.adjustEarningsSecondaryAmount,
+          take: params.pagination.take,
+          skip: params.pagination.skip
+        }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          dispatch(setProfitEdit(data));
+          dispatch(setProfitSharingEdit(data));
         } catch (err) {
           console.log("Err: " + err);
-          dispatch(clearProfitEdit());
+          dispatch(clearProfitSharingEdit());
         }
       }
     }),
@@ -820,7 +861,7 @@ export const YearsEndApi = createApi({
           dispatch(setProfitMasterApply(data));
         } catch (err) {
           console.log("Err: " + err);
-          dispatch(clearProfitEdit());
+          dispatch(clearProfitMasterApply());
         }
       }
     }),
@@ -836,7 +877,7 @@ export const YearsEndApi = createApi({
           dispatch(setProfitMasterRevert(data));
         } catch (err) {
           console.log("Err: " + err);
-          dispatch(clearProfitEdit());
+          dispatch(clearProfitMasterRevert());
         }
       }
     }),
@@ -945,4 +986,5 @@ export const {
   useLazyGetYearEndProfitSharingReportQuery,
   useUpdateExecutiveHoursAndDollarsMutation,
   useLazyGetYearEndProfitSharingSummaryReportQuery,
+  useLazyGetUpdateSummaryQuery
 } = YearsEndApi;
