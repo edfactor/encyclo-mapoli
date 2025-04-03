@@ -11,6 +11,12 @@ import { setProfitEditUpdateRevertChangesAvailable } from "reduxstore/slices/yea
 import { RootState } from "reduxstore/store";
 import ProfitShareEditUpdateTabs from "./ProfitShareEditUpdateTabs";
 
+const developmentNoteStyle = {
+  backgroundColor: "#FFFFE0", // Light yellow
+  padding: "10px",
+  margin: "10px"
+};
+
 const RenderSaveButton = () => {
   //const dispatch = useDispatch();
 
@@ -145,6 +151,14 @@ const ProfitShareEditUpdate = () => {
           {RenderSaveButton()}
         </div>
       }>
+      <div style={developmentNoteStyle}>
+        Note: Much of this page works, but is incomplete. Needs apply update and revert.{" "}
+        <a
+          style={{ color: "blue" }}
+          href="https://demoulas.atlassian.net/browse/PS-945">
+          PS-945
+        </a>
+      </div>
       <Grid2
         container
         rowSpacing="24px">
@@ -163,7 +177,7 @@ const ProfitShareEditUpdate = () => {
               <Typography
                 fontWeight="bold"
                 variant="body2">
-                {"Employees XX,XXXX Beneficiaries XXX"}
+                {`Employees ${profitSharingUpdate.totals.TotalEmployees} Beneficiaries ${profitSharingUpdate.totals.TotalEmployees}`}
               </Typography>
             </div>
 
