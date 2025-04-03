@@ -594,23 +594,28 @@ export interface ProfitShareUpdateRequest {
 }
 
 export interface ProfitShareUpdateDetail {
-  badgePSn: string;
+  isEmployee: boolean;
+  badge: number;
+  psn: string;
   name: string;
-  beginningBalance: number;
-  beneficiaryAllocation: number;
-  distributionAmount: number;
-  forfeit: number;
+  beginningAmount: number;
+  distributions: number;
+  military: number;
+  xfer: number;
+  pxfer: number;
+  employeeTypeId: number;
+  contributions: number;
+  incomingForfeitures: number;
+  allEarnings: number;
+  allSecondaryEarnings: number;
   endingBalance: number;
-  vestedBalance: number;
-  dateTerm: string;
-  ytdPsHours: number;
-  vestedPercent: number;
-  age: number;
-  enrollmentCode: number;
+  zeroContributionReasonId: number;
+  etva: number;
+  etvaEarnings: number;
+  secondaryEtvaEarnings: number;
+  treatAsBeneficiary: boolean;
 }
-
 export interface ProfitShareUpdateResponse {
-  isLoading: boolean;
   totalVested: number;
   totalForfeit: number;
   totalEndingBalance: number;
@@ -618,8 +623,38 @@ export interface ProfitShareUpdateResponse {
   reportName: string;
   reportDate: string;
   response: Paged<ProfitShareUpdateDetail[]>;
+  hasExceededMaximumContributions: true;
+  adjustmentsSummary: ProfitShareAdjustmentSummary;
+  totals: ProfitShareUpdateTotals;
 }
 
+export interface ProfitShareUpdateTotals {
+  beginningBalance: number;
+  totalContribution: number;
+  earnings: number;
+  earnings2: number;
+  forfeiture: number;
+  distributions: number;
+  military: number;
+  endingBalance: number;
+  allocations: number;
+  paidAllocations: number;
+  classActionFund: number;
+  contributionPoints: number;
+  earningPoints: number;
+  maxOverTotal: number;
+  maxPointsTotal: number;
+}
+export interface ProfitShareAdjustmentSummary {
+  incomingForfeitureAmountUnadjusted: number;
+  incomingForfeitureAmountAdjusted: number;
+  earningsAmountUnadjusted: number;
+  earningsAmountAdjusted: number;
+  secondaryEarningsAmountUnadjusted: number;
+  secondaryEarningsAmountAdjusted: number;
+  contributionAmountUnadjusted: number;
+  contributionAmountAdjusted: number;
+}
 export interface ProfitShareEditDetail {
   badgePSn: string;
   name: string;
@@ -663,8 +698,6 @@ export interface GrossWagesReportResponse {
 }
 
 export interface ProfitShareEditResponse {
-  isLoading: boolean; // this feels like a hack, it means display the table with the spinner.
-
   beginningBalance: number;
   contributionGrandTotal: number;
   incomingForfeitureGrandTotal: number;
@@ -676,7 +709,6 @@ export interface ProfitShareEditResponse {
 }
 
 export interface ProfitShareMasterResponse {
-  isLoading: boolean;
   reportName: string;
   beneficiariesEffected?: number;
   employeesEffected?: number;

@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { clear } from "console";
 
 import {
   BalanceByAge,
@@ -102,7 +103,10 @@ export interface YearsEndState {
   missingCommaInPYName: PagedReportResponse<MissingCommasInPYName> | null;
   negativeEtvaForSSNsOnPayprofit: PagedReportResponse<NegativeEtvaForSSNsOnPayProfit> | null;
   negativeEtvaForSSNsOnPayprofitParams: ProfitYearRequest | null;
-  profitSharingUpdate: ProfitShareUpdateResponse | ProfitShareEditResponse | ProfitShareMasterResponse | null;
+  profitSharingUpdate: ProfitShareUpdateResponse | null;
+  profitSharingEdit: ProfitShareEditResponse | null;
+  profitSharingMaster: ProfitShareMasterResponse | null;
+  profitSharingRevert: ProfitShareMasterResponse | null;
   termination: TerminationResponse | null;
   terminationQueryParams: ProfitYearRequest | null;
   vestedAmountsByAge: VestedAmountsByAge | null;
@@ -176,6 +180,9 @@ const initialState: YearsEndState = {
   negativeEtvaForSSNsOnPayprofit: null,
   negativeEtvaForSSNsOnPayprofitParams: null,
   profitSharingUpdate: null,
+  profitSharingEdit: null,
+  profitSharingMaster: null,
+  profitSharingRevert: null,
   termination: null,
   terminationQueryParams: null,
   vestedAmountsByAge: null,
@@ -763,43 +770,29 @@ export const yearsEndSlice = createSlice({
     clearTerminationQueryParams: (state) => {
       state.terminationQueryParams = null;
     },
-    setProfitUpdate: (state, action: PayloadAction<ProfitShareUpdateResponse>) => {
+    setProfitSharingUpdate: (state, action: PayloadAction<ProfitShareUpdateResponse>) => {
       state.profitSharingUpdate = action.payload;
     },
-    setProfitUpdateLoading: (state) => {
-      state.profitSharingUpdate = { isLoading: true, reportName: "Profit Sharing Update" };
-    },
-    clearProfitUpdate: (state) => {
+    clearProfitSharingUpdate: (state) => {
       state.profitSharingUpdate = null;
     },
-    setProfitEdit: (state, action: PayloadAction<ProfitShareEditResponse>) => {
-      state.profitSharingUpdate = action.payload;
+    setProfitSharingEdit: (state, action: PayloadAction<ProfitShareEditResponse>) => {
+      state.profitSharingEdit = action.payload;
     },
-    setProfitEditLoading: (state) => {
-      state.profitSharingUpdate = { isLoading: true, reportName: "Profit Sharing Edit" };
+    clearProfitSharingEdit: (state) => {
+      state.profitSharingEdit = null;
     },
-    clearProfitEdit: (state) => {
-      state.profitSharingUpdate = null;
-    },
-
     setProfitMasterApply: (state, action: PayloadAction<ProfitShareMasterResponse>) => {
-      state.profitSharingUpdate = {
-        ...action.payload,
-        reportName: "Apply"
-      };
+      state.profitSharingMaster = action.payload;
     },
-    setProfitMasterApplyLoading: (state) => {
-      state.profitSharingUpdate = { isLoading: true, reportName: "Apply" };
+    clearProfitMasterApply: (state) => {
+      state.profitSharingMaster = null;
     },
-
     setProfitMasterRevert: (state, action: PayloadAction<ProfitShareMasterResponse>) => {
-      state.profitSharingUpdate = {
-        ...action.payload,
-        reportName: "Revert"
-      };
+      state.profitSharingRevert = action.payload;
     },
-    setProfitMasterRevertLoading: (state) => {
-      state.profitSharingUpdate = { isLoading: true, reportName: "Revert" };
+    clearProfitMasterRevert: (state) => {
+      state.profitSharingRevert = null;
     },
     setGrossWagesReport: (state, action: PayloadAction<GrossWagesReportResponse>) => {
       state.grossWagesReport = action.payload;
@@ -904,8 +897,6 @@ export const {
   clearMissingCommaInPYName,
   clearNegativeEtvaForSSNsOnPayprofit,
   clearNegativeEtvaForSSNsOnPayprofitQueryParams,
-  clearProfitEdit,
-  clearProfitUpdate,
   clearTermination,
   clearTerminationQueryParams,
   clearVestedAmountsByAgeQueryParams,
@@ -948,14 +939,8 @@ export const {
   setMissingCommaInPYName,
   setNegativeEtvaForSSNsOnPayprofit,
   setNegativeEtvaForSSNsOnPayprofitQueryParams,
-  setProfitEdit,
-  setProfitEditLoading,
   setProfitMasterApply,
-  setProfitMasterApplyLoading,
   setProfitMasterRevert,
-  setProfitMasterRevertLoading,
-  setProfitUpdate,
-  setProfitUpdateLoading,
   setTermination,
   setTerminationQueryParams,
   setVestedAmountsByAge,
@@ -982,6 +967,12 @@ export const {
   setUpdateSummary,
   clearUpdateSummary,
   setProfitEditUpdateChangesAvailable,
-  setProfitEditUpdateRevertChangesAvailable
+  setProfitEditUpdateRevertChangesAvailable,
+  setProfitSharingUpdate,
+  clearProfitSharingUpdate,
+  clearProfitMasterApply,
+  setProfitSharingEdit,
+  clearProfitSharingEdit,
+  clearProfitMasterRevert
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;

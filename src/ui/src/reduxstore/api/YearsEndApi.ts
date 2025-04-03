@@ -3,8 +3,10 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { format } from "date-fns";
 import {
   clearBreakdownByStore,
-  clearProfitEdit,
-  clearProfitUpdate,
+  clearProfitMasterApply,
+  clearProfitMasterRevert,
+  clearProfitSharingEdit,
+  clearProfitSharingUpdate,
   clearUnder21BreakdownByStore,
   clearUnder21Inactive,
   clearUnder21Totals,
@@ -29,18 +31,18 @@ import {
   setMilitaryAndRehireForfeituresDetails,
   setMissingCommaInPYName,
   setNegativeEtvaForSSNsOnPayprofit,
-  setProfitEdit,
   setProfitMasterApply,
   setProfitMasterRevert,
   setProfitShareSummaryReport,
-  setProfitUpdate,
+  setProfitSharingEdit,
+  setProfitSharingUpdate,
   setTermination,
   setUnder21BreakdownByStore,
   setUnder21Inactive,
   setUnder21Totals,
+  setUpdateSummary,
   setVestedAmountsByAge,
-  setYearEndProfitSharingReport,
-  setUpdateSummary
+  setYearEndProfitSharingReport
 } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import {
@@ -67,6 +69,7 @@ import {
   ExecutiveHoursAndDollarsRequestDto,
   ForfeituresAndPoints,
   ForfeituresByAge,
+  FrozenProfitYearRequest,
   FrozenReportsByAgeRequest,
   FrozenReportsForfeituresAndPointsRequest,
   GrossWagesReportDto,
@@ -92,13 +95,12 @@ import {
   Under21InactiveResponse,
   Under21TotalsRequest,
   Under21TotalsResponse,
+  UpdateSummaryRequest,
+  UpdateSummaryResponse,
   VestedAmountsByAge,
   YearEndProfitSharingReportRequest,
   YearEndProfitSharingReportResponse,
-  YearEndProfitSharingReportSummaryResponse,
-  FrozenProfitYearRequest,
-  UpdateSummaryRequest,
-  UpdateSummaryResponse
+  YearEndProfitSharingReportSummaryResponse
 } from "reduxstore/types";
 import { url } from "./api";
 
@@ -688,10 +690,10 @@ export const YearsEndApi = createApi({
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          dispatch(setProfitUpdate(data));
+          dispatch(setProfitSharingUpdate(data));
         } catch (err) {
           console.log("Err", err);
-          dispatch(clearProfitUpdate());
+          dispatch(clearProfitSharingUpdate());
         }
       }
     }),
@@ -704,10 +706,10 @@ export const YearsEndApi = createApi({
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          dispatch(setProfitEdit(data));
+          dispatch(setProfitSharingEdit(data));
         } catch (err) {
           console.log("Err: " + err);
-          dispatch(clearProfitEdit());
+          dispatch(clearProfitSharingEdit());
         }
       }
     }),
@@ -820,7 +822,7 @@ export const YearsEndApi = createApi({
           dispatch(setProfitMasterApply(data));
         } catch (err) {
           console.log("Err: " + err);
-          dispatch(clearProfitEdit());
+          dispatch(clearProfitMasterApply());
         }
       }
     }),
@@ -836,7 +838,7 @@ export const YearsEndApi = createApi({
           dispatch(setProfitMasterRevert(data));
         } catch (err) {
           console.log("Err: " + err);
-          dispatch(clearProfitEdit());
+          dispatch(clearProfitMasterRevert());
         }
       }
     }),
