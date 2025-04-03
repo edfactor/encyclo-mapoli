@@ -141,7 +141,7 @@ const ProfitShareEditUpdate = () => {
   const { profitSharingUpdateAdjustmentSummary, profitSharingUpdate } = useSelector(
     (state: RootState) => state.yearsEnd
   );
-  console.log("Total results: ", profitSharingUpdate?.response.results.length);
+  //console.log("Total results: ", profitSharingUpdate?.response.results.length);
   return (
     <Page
       label="Master Update (PAY444/PAY447/PROFTLD)"
@@ -152,7 +152,7 @@ const ProfitShareEditUpdate = () => {
         </div>
       }>
       <div style={developmentNoteStyle}>
-        Note: Much of this page works, but is incomplete. Needs apply update and revert.{" "}
+        Note: Much of this page works, but is incomplete. Needs adjustment summary panel, apply update, and revert.{" "}
         <a
           style={{ color: "blue" }}
           href="https://demoulas.atlassian.net/browse/PS-945">
@@ -177,7 +177,7 @@ const ProfitShareEditUpdate = () => {
               <Typography
                 fontWeight="bold"
                 variant="body2">
-                {`Employees ${profitSharingUpdate.totals.TotalEmployees} Beneficiaries ${profitSharingUpdate.totals.TotalEmployees}`}
+                {`Employees: ${profitSharingUpdate.totals.totalEmployees} | Beneficiaries: ${profitSharingUpdate.totals.totalBeneficiaries || 0}`}
               </Typography>
             </div>
 

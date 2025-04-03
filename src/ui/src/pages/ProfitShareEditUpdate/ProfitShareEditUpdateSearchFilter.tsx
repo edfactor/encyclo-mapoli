@@ -134,7 +134,7 @@ const ProfitShareEditUpdateSearchFilter = () => {
       // First we have to do the update calls
       triggerSearchUpdate(updateParams, false).unwrap();
       dispatch(setProfitSharingUpdateQueryParams(data));
-      console.log("Successfully did the update");
+      //console.log("Successfully did the update");
 
       // Now if we have a badgeToAdjust, we want to save the
       // adjustment summary so that panel shows up
@@ -145,7 +145,7 @@ const ProfitShareEditUpdateSearchFilter = () => {
       // Now we have to do the edit calls
       triggerSearchEdit(updateParams, false).unwrap();
       dispatch(setProfitSharingEditQueryParams(data));
-      console.log("Successfully did the edit");
+      //console.log("Successfully did the edit");
     }
   });
 
