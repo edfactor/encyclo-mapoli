@@ -13,6 +13,24 @@ export const ProfitShareEditUpdateGridColumns = (): ColDef[] => {
       resizable: true
     },
     {
+      headerName: "Name",
+      field: "name",
+      colId: "name",
+      minWidth: 120,
+      headerClass: "left-align",
+      cellClass: "left-align",
+      resizable: true
+    },
+    {
+      headerName: "Code",
+      field: "code",
+      colId: "code",
+      minWidth: 100,
+      headerClass: "right-align",
+      cellClass: "right-align",
+      resizable: true
+    },
+    {
       headerName: "PSN",
       field: "psn",
       colId: "psn",
@@ -64,7 +82,7 @@ export const ProfitShareEditUpdateGridColumns = (): ColDef[] => {
       headerName: "Comment Code",
       field: "commentTypeId",
       colId: "commentTypeId",
-      minWidth: 120,
+      minWidth: 80,
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true

@@ -657,19 +657,19 @@ export interface ProfitShareAdjustmentSummary {
   contributionAmountAdjusted: number;
 }
 export interface ProfitShareEditDetail {
-  badgePSn: string;
+  isEmployee: boolean;
+  badgeNumber: number;
+  psn: string;
   name: string;
-  beginningBalance: number;
-  beneficiaryAllocation: number;
-  distributionAmount: number;
-  forfeit: number;
-  endingBalance: number;
-  vestedBalance: number;
-  dateTerm: string;
-  ytdPsHours: number;
-  vestedPercent: number;
-  age: number;
-  enrollmentCode: number;
+  code: number;
+  contributionAmount: number;
+  earningsAmount: number;
+  forfeitureAmount: number;
+  remark: string;
+  commentTypeId: number;
+  recordChangeSummary: string;
+  zeroContStatus: number;
+  yearExtension: number;
 }
 
 export interface GrossWagesReportRequest extends ProfitYearRequest {

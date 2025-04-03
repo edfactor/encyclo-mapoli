@@ -685,7 +685,22 @@ export const YearsEndApi = createApi({
       query: (params) => ({
         url: "yearend/profit-sharing-update",
         method: "GET",
-        params: params
+        params: {
+          profitYear: params.profitYear,
+          contributionPercent: params.contributionPercent,
+          earningsPercent: params.earningsPercent,
+          incomingForfeitPercent: params.incomingForfeitPercent,
+          secondaryEarningsPercent: params.secondaryEarningsPercent,
+          maxAllowedContributions: params.maxAllowedContributions,
+          badgeToAdjust: params.badgeToAdjust,
+          adjustContributionAmount: params.adjustContributionAmount,
+          adjustEarningsAmount: params.adjustEarningsAmount,
+          adjustIncomingForfeitAmount: params.adjustIncomingForfeitAmount,
+          badgeToAdjust2: params.badgeToAdjust2,
+          adjustEarningsSecondaryAmount: params.adjustEarningsSecondaryAmount,
+          take: params.pagination.take,
+          skip: params.pagination.skip
+        }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
@@ -701,7 +716,22 @@ export const YearsEndApi = createApi({
       query: (params) => ({
         url: "yearend/profit-share-edit",
         method: "GET",
-        params: params
+        params: {
+          profitYear: params.profitYear,
+          contributionPercent: params.contributionPercent,
+          earningsPercent: params.earningsPercent,
+          incomingForfeitPercent: params.incomingForfeitPercent,
+          secondaryEarningsPercent: params.secondaryEarningsPercent,
+          maxAllowedContributions: params.maxAllowedContributions,
+          badgeToAdjust: params.badgeToAdjust,
+          adjustContributionAmount: params.adjustContributionAmount,
+          adjustEarningsAmount: params.adjustEarningsAmount,
+          adjustIncomingForfeitAmount: params.adjustIncomingForfeitAmount,
+          badgeToAdjust2: params.badgeToAdjust2,
+          adjustEarningsSecondaryAmount: params.adjustEarningsSecondaryAmount,
+          take: params.pagination.take,
+          skip: params.pagination.skip
+        }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
