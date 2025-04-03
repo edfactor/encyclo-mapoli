@@ -19,7 +19,7 @@ public sealed record EmployeeDetails
     public bool ContributionsLastYear { get; init; }
     public byte? EnrollmentId { get; init; }
     public string? Enrollment { get; init; }
-    public DateOnly HireDate { get; init; }
+    public DateOnly? HireDate { get; init; }
     public DateOnly? TerminationDate { get; init; } = null;
     public DateOnly? ReHireDate { get; init; } = null;
     public short StoreNumber { get; set; }

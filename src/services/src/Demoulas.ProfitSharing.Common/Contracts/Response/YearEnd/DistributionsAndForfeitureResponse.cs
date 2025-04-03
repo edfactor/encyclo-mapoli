@@ -2,6 +2,7 @@
 public sealed record DistributionsAndForfeitureResponse
 {
     public required int BadgeNumber { get; set; }
+    public required short PsnSuffix { get; set; }
     public required string EmployeeName { get; set; }
     public required string Ssn { get; set; }
     public DateOnly? LoanDate { get; set; }
@@ -19,6 +20,7 @@ public sealed record DistributionsAndForfeitureResponse
     {
         return new DistributionsAndForfeitureResponse() {
             BadgeNumber = 123,
+            PsnSuffix = 1,
             EmployeeName = "Doe, John",
             Ssn = "124",
             DistributionAmount = 1250.25m,

@@ -659,6 +659,10 @@ export const yearsEndSlice = createSlice({
         profitYear: action.payload,
         reportType: FrozenReportsByAgeRequestType.Total
       };
+      state.contributionsByAgeQueryParams = {
+        profitYear: action.payload,
+        reportType: FrozenReportsByAgeRequestType.Total
+      };
     },
     clearContributionsByAgeQueryParams: (state) => {
       state.contributionsByAgeQueryParams = null;

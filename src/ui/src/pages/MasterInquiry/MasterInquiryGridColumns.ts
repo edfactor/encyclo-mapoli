@@ -23,7 +23,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       resizable: true,   
       rowGroup: true,
       showRowGroup: 'always',
-      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber),
+      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber, params.data.psnSuffix),
       valueFormatter: (params) => {
         const badgeNumber = params.data?.badgeNumber; 
         const psnSuffix = params.data?.psnSuffix; 
