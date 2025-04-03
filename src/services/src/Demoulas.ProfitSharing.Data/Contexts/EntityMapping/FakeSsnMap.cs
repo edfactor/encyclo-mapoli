@@ -2,25 +2,24 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
 
-namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping
+namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
+
+public class FakeSsnMap : IEntityTypeConfiguration<FakeSsn>
 {
-    public class FakeSsnMap : IEntityTypeConfiguration<FakeSsn>
+    public void Configure(EntityTypeBuilder<FakeSsn> builder)
     {
-        public void Configure(EntityTypeBuilder<FakeSsn> builder)
-        {
-            // Map to the table "FakeSsns"
-            builder.ToTable("FAKE_SSNS");
+        // Map to the table "FakeSsns"
+        builder.ToTable("FAKE_SSNS");
 
-            // Define the primary key
-            builder.HasKey(f => f.Id);
+        // Define the primary key
+        builder.HasKey(f => f.Id);
 
-            // Configure the Ssn property as required and unique
-            builder.Property(f => f.Ssn).HasPrecision(9)
-                    .IsRequired()
-                    .ValueGeneratedNever()
-                    .HasColumnName("SSN");
+        // Configure the Ssn property as required and unique
+        builder.Property(f => f.Ssn).HasPrecision(9)
+            .IsRequired()
+            .ValueGeneratedNever()
+            .HasColumnName("SSN");
 
-            builder.HasIndex(x => x.Ssn, "IX_FAKE_SSN").IsUnique();
-        }
+        builder.HasIndex(x => x.Ssn, "IX_FAKE_SSN").IsUnique();
     }
 }

@@ -9,25 +9,24 @@ using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using FastEndpoints;
 using FluentAssertions;
 
-namespace Demoulas.ProfitSharing.UnitTests.Reports.PostFrozen
+namespace Demoulas.ProfitSharing.UnitTests.Reports.PostFrozen;
+
+public sealed class ProfitSharingUnder21TotalsTests:ApiTestBase<Program>
 {
-    public sealed class ProfitSharingUnder21TotalsTests:ApiTestBase<Program>
+    [Fact(DisplayName = "PS-759 - Profit Sharing under 21 Totals")]
+    public async Task CheckUnder21Totals()
     {
-        [Fact(DisplayName = "PS-759 - Profit Sharing under 21 Totals")]
-        public async Task CheckUnder21Totals()
-        {
-            var request = new ProfitYearRequest() { ProfitYear = 2024, Skip = 0, Take = 255 };
-            var response = await ApiClient.GETAsync<ProfitSharingUnder21TotalsEndpoint, ProfitYearRequest, ProfitSharingUnder21TotalsResponse>(request);
+        var request = new ProfitYearRequest() { ProfitYear = 2024, Skip = 0, Take = 255 };
+        var response = await ApiClient.GETAsync<ProfitSharingUnder21TotalsEndpoint, ProfitYearRequest, ProfitSharingUnder21TotalsResponse>(request);
 
-            response.Should().NotBeNull();
-            response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        response.Should().NotBeNull();
+        response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
 
-            ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
 
-            response = await ApiClient.GETAsync<ProfitSharingUnder21TotalsEndpoint, ProfitYearRequest, ProfitSharingUnder21TotalsResponse>(request);
-            response.Should().NotBeNull();
-            response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
-        }
-
+        response = await ApiClient.GETAsync<ProfitSharingUnder21TotalsEndpoint, ProfitYearRequest, ProfitSharingUnder21TotalsResponse>(request);
+        response.Should().NotBeNull();
+        response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
+
 }

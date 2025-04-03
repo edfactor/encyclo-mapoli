@@ -1,7 +1,6 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request;
+
+public record SimpleRequest<TType> where TType : struct
 {
-    public record SimpleRequest<TType> where TType : struct
-    {
-        public TType Id { get; init; }
-    }
+    public TType Id { get; init; }
 }
