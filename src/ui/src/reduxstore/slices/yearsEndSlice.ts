@@ -47,7 +47,8 @@ import {
   YearEndProfitSharingReportSummaryResponse,
   UpdateSummaryResponse,
   ReportsByAgeParams,
-  ProfitShareEditUpdateQueryParams
+  ProfitShareEditUpdateQueryParams,
+  ProfitShareAdjustmentSummary
 } from "reduxstore/types";
 
 export interface YearsEndState {
@@ -110,6 +111,7 @@ export interface YearsEndState {
   profitSharingEdit: ProfitShareEditResponse | null;
   profitSharingMaster: ProfitShareMasterResponse | null;
   profitSharingRevert: ProfitShareMasterResponse | null;
+  profitSharingUpdateAdjustmentSummary: ProfitShareAdjustmentSummary | null;
   termination: TerminationResponse | null;
   terminationQueryParams: ProfitYearRequest | null;
   vestedAmountsByAge: VestedAmountsByAge | null;
@@ -129,6 +131,7 @@ export interface YearsEndState {
 }
 
 const initialState: YearsEndState = {
+  profitSharingUpdateAdjustmentSummary: null,
   profitSharingEditQueryParams: null,
   profitSharingUpdateQueryParams: null,
   profitEditUpdateChangesAvailable: false,
@@ -210,6 +213,17 @@ export const yearsEndSlice = createSlice({
   name: "yearsEnd",
   initialState,
   reducers: {
+    setProfitSharingUpdateAdjustmentSummary: (state, action: PayloadAction<ProfitShareAdjustmentSummary>) => {
+      state.profitSharingUpdateAdjustmentSummary = action.payload;
+    },
+    addBadgeNumberToUpdateAdjustmentSummary: (state, action: PayloadAction<number>) => {
+      if (state.profitSharingUpdateAdjustmentSummary) {
+        state.profitSharingUpdateAdjustmentSummary.badgeNumber = action.payload;
+      }
+    },
+    clearProfitSharingUpdateAdjustmentSummary: (state) => {
+      state.profitSharingUpdateAdjustmentSummary = null;
+    },
     setProfitSharingEditQueryParams: (state, action: PayloadAction<ProfitShareEditUpdateQueryParams>) => {
       state.profitSharingEditQueryParams = action.payload;
     },
@@ -994,6 +1008,9 @@ export const {
   setProfitSharingUpdateQueryParams,
   clearProfitSharingUpdateQueryParams,
   setProfitSharingEditQueryParams,
-  clearProfitSharingEditQueryParams
+  clearProfitSharingEditQueryParams,
+  setProfitSharingUpdateAdjustmentSummary,
+  clearProfitSharingUpdateAdjustmentSummary,
+  addBadgeNumberToUpdateAdjustmentSummary
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;

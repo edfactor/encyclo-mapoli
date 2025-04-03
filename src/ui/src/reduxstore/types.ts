@@ -646,6 +646,7 @@ export interface ProfitShareUpdateTotals {
   maxPointsTotal: number;
 }
 export interface ProfitShareAdjustmentSummary {
+  badgeNumber?: number;
   incomingForfeitureAmountUnadjusted: number;
   incomingForfeitureAmountAdjusted: number;
   earningsAmountUnadjusted: number;

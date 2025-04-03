@@ -3,23 +3,26 @@ import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import { Controller, useForm } from "react-hook-form";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetProfitShareEditQuery, useLazyGetProfitShareUpdateQuery } from "reduxstore/api/YearsEndApi";
 import * as yup from "yup";
 
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useState } from "react";
 import {
+  addBadgeNumberToUpdateAdjustmentSummary,
   clearProfitSharingEdit,
   clearProfitSharingEditQueryParams,
   clearProfitSharingUpdate,
   clearProfitSharingUpdateQueryParams,
   setProfitSharingEditQueryParams,
+  setProfitSharingUpdateAdjustmentSummary,
   setProfitSharingUpdateQueryParams
 } from "reduxstore/slices/yearsEndSlice";
 import { ProfitShareEditUpdateQueryParams, ProfitShareUpdateRequest } from "reduxstore/types";
 import { ISortParams } from "smart-ui-library";
 import SearchAndReset from "components/SearchAndReset/SearchAndReset";
+import { RootState } from "reduxstore/store";
 
 const schema = yup.object().shape({
   profitYear: yup
@@ -72,6 +75,8 @@ const ProfitShareEditUpdateSearchFilter = () => {
     sortBy: "contributionPercent",
     isSortDescending: false
   });
+
+  const { profitSharingUpdateAdjustmentSummary } = useSelector((state: RootState) => state.yearsEnd);
 
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
@@ -130,6 +135,12 @@ const ProfitShareEditUpdateSearchFilter = () => {
       triggerSearchUpdate(updateParams, false).unwrap();
       dispatch(setProfitSharingUpdateQueryParams(data));
       console.log("Successfully did the update");
+
+      // Now if we have a badgeToAdjust, we want to save the
+      // adjustment summary so that panel shows up
+      if (data.badgeToAdjust) {
+        dispatch(addBadgeNumberToUpdateAdjustmentSummary(data.badgeToAdjust));
+      }
 
       // Now we have to do the edit calls
       triggerSearchEdit(updateParams, false).unwrap();

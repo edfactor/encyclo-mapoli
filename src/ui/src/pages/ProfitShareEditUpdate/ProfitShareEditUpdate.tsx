@@ -132,6 +132,9 @@ const RenderRevertButton = () => {
 };
 
 const ProfitShareEditUpdate = () => {
+  const { profitSharingUpdateAdjustmentSummary, profitSharingUpdate } = useSelector(
+    (state: RootState) => state.yearsEnd
+  );
   return (
     <Page
       label="Master Update (PAY444/PAY447/PROFTLD)"
@@ -152,108 +155,114 @@ const ProfitShareEditUpdate = () => {
             <ProfitShareEditUpdateSearchFilter />
           </DSMAccordion>
         </Grid2>
-        <div>
-          <div className="px-[24px]">
-            <h2 className="text-dsm-secondary">Summary</h2>
-            <Typography
-              fontWeight="bold"
-              variant="body2">
-              {"Employees XX,XXXX Beneficiaries XXX"}
-            </Typography>
-          </div>
+        {profitSharingUpdate && (
+          <div>
+            <div className="px-[24px]">
+              <h2 className="text-dsm-secondary">Summary</h2>
+              <Typography
+                fontWeight="bold"
+                variant="body2">
+                {"Employees XX,XXXX Beneficiaries XXX"}
+              </Typography>
+            </div>
 
-          <TotalsGrid
-            displayData={[
-              [
-                numberToCurrency(0),
-                numberToCurrency(0),
-                numberToCurrency(0),
-                numberToCurrency(0),
-                numberToCurrency(0),
-                numberToCurrency(0),
-                numberToCurrency(0)
-              ],
-              [
-                numberToCurrency(0),
-                numberToCurrency(0),
-                numberToCurrency(0),
-                numberToCurrency(0),
-                numberToCurrency(0),
-                numberToCurrency(0),
-                numberToCurrency(0)
-              ],
-              [
-                numberToCurrency(0),
-                numberToCurrency(0),
-                numberToCurrency(0),
-                numberToCurrency(0),
-                numberToCurrency(0),
-                numberToCurrency(0),
-                numberToCurrency(0)
-              ]
-            ]}
-            leftColumnHeaders={["Total", "Allocation", "Point"]}
-            topRowHeaders={[
-              "",
-              "Beginning Balance",
-              "Contributions",
-              "Earnings",
-              "Earnings2",
-              "Forfeitures",
-              "Distributions Military/Paid Allocation",
-              "Ending Balance"
-            ]}
-          />
-          <div className="px-[24px]">
-            <h2 className="text-dsm-secondary">Adjustment Report</h2>
-          </div>
+            <TotalsGrid
+              displayData={[
+                [
+                  numberToCurrency(0),
+                  numberToCurrency(0),
+                  numberToCurrency(0),
+                  numberToCurrency(0),
+                  numberToCurrency(0),
+                  numberToCurrency(0),
+                  numberToCurrency(0)
+                ],
+                [
+                  numberToCurrency(0),
+                  numberToCurrency(0),
+                  numberToCurrency(0),
+                  numberToCurrency(0),
+                  numberToCurrency(0),
+                  numberToCurrency(0),
+                  numberToCurrency(0)
+                ],
+                [
+                  numberToCurrency(0),
+                  numberToCurrency(0),
+                  numberToCurrency(0),
+                  numberToCurrency(0),
+                  numberToCurrency(0),
+                  numberToCurrency(0),
+                  numberToCurrency(0)
+                ]
+              ]}
+              leftColumnHeaders={["Total", "Allocation", "Point"]}
+              topRowHeaders={[
+                "",
+                "Beginning Balance",
+                "Contributions",
+                "Earnings",
+                "Earnings2",
+                "Forfeitures",
+                "Distributions Military/Paid Allocation",
+                "Ending Balance"
+              ]}
+            />
+            {profitSharingUpdateAdjustmentSummary?.badgeNumber && (
+              <>
+                <div className="px-[24px]">
+                  <h2 className="text-dsm-secondary">Adjustment Report</h2>
+                </div>
 
-          <TotalsGrid
-            displayData={[
-              [
-                numberToCurrency(0),
-                numberToCurrency(0),
-                numberToCurrency(0),
-                numberToCurrency(0),
-                numberToCurrency(0),
-                numberToCurrency(0),
-                numberToCurrency(0)
-              ],
-              [
-                numberToCurrency(0),
-                numberToCurrency(0),
-                numberToCurrency(0),
-                numberToCurrency(0),
-                numberToCurrency(0),
-                numberToCurrency(0),
-                numberToCurrency(0)
-              ],
-              [
-                numberToCurrency(0),
-                numberToCurrency(0),
-                numberToCurrency(0),
-                numberToCurrency(0),
-                numberToCurrency(0),
-                numberToCurrency(0),
-                numberToCurrency(0)
-              ]
-            ]}
-            leftColumnHeaders={["Total", "Allocation", "Point"]}
-            topRowHeaders={[
-              "",
-              "Beginning Balance",
-              "Contributions",
-              "Earnings",
-              "Earnings2",
-              "Forfeitures",
-              "Distributions Military/Paid Allocation",
-              "Ending Balance"
-            ]}
-          />
-          <Grid2 width="100%">
-            <ProfitShareEditUpdateTabs />
-          </Grid2>
-        </div>
+                <TotalsGrid
+                  displayData={[
+                    [
+                      numberToCurrency(0),
+                      numberToCurrency(0),
+                      numberToCurrency(0),
+                      numberToCurrency(0),
+                      numberToCurrency(0),
+                      numberToCurrency(0),
+                      numberToCurrency(0)
+                    ],
+                    [
+                      numberToCurrency(0),
+                      numberToCurrency(0),
+                      numberToCurrency(0),
+                      numberToCurrency(0),
+                      numberToCurrency(0),
+                      numberToCurrency(0),
+                      numberToCurrency(0)
+                    ],
+                    [
+                      numberToCurrency(0),
+                      numberToCurrency(0),
+                      numberToCurrency(0),
+                      numberToCurrency(0),
+                      numberToCurrency(0),
+                      numberToCurrency(0),
+                      numberToCurrency(0)
+                    ]
+                  ]}
+                  leftColumnHeaders={["Total", "Allocation", "Point"]}
+                  topRowHeaders={[
+                    "",
+                    "Beginning Balance",
+                    "Contributions",
+                    "Earnings",
+                    "Earnings2",
+                    "Forfeitures",
+                    "Distributions Military/Paid Allocation",
+                    "Ending Balance"
+                  ]}
+                />
+              </>
+            )}
+            <Grid2 width="100%">
+              <ProfitShareEditUpdateTabs />
+            </Grid2>
+          </div>
+        )}
       </Grid2>
     </Page>
   );
