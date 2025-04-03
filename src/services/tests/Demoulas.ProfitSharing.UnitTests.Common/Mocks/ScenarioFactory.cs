@@ -31,6 +31,7 @@ public sealed class ScenarioFactory
     public List<ProfitDetail> ProfitDetails { get; set; } = [];
     public List<FrozenState> FrozenStates { get; set; } = [];
     public List<DemographicHistory> DemographicHistories { get; set; } = [];
+    public List<YearEndUpdateStatus> YearEndUpdateStatuses { get; set; } = [];
 
     // populate ProfitCode dictionary object from the Constants
     public List<ProfitCode> ProfitCodes { get; set; } = typeof(ProfitCode.Constants)
@@ -240,7 +241,18 @@ public sealed class ScenarioFactory
         Mock<DbSet<DemographicHistory>> mockDemographicHistories = DemographicHistories.AsQueryable().BuildMockDbSet();
         _sdb.ProfitSharingDbContext.Setup(m => m.DemographicHistories).Returns(mockDemographicHistories.Object);
         _sdb.ProfitSharingReadOnlyDbContext.Setup(m => m.DemographicHistories).Returns(mockDemographicHistories.Object);
+        
+        Mock<DbSet<YearEndUpdateStatus>> mockYearEndUpdateStatuses = YearEndUpdateStatuses.AsQueryable().BuildMockDbSet();
+        _sdb.ProfitSharingDbContext.Setup(m => m.YearEndUpdateStatuses).Returns(mockYearEndUpdateStatuses.Object);
+        _sdb.ProfitSharingReadOnlyDbContext.Setup(m => m.YearEndUpdateStatuses).Returns(mockYearEndUpdateStatuses.Object);
+        
 
         return _sdb;
+    }
+
+    public ScenarioFactory WithYearEndStatuses()
+    {
+        YearEndUpdateStatuses = StockFactory.CreateYearEndUpdateStatuses(ThisYear);
+        return this;
     }
 }

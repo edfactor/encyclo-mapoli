@@ -1,4 +1,6 @@
-﻿using Demoulas.ProfitSharing.Api;
+﻿using System.Diagnostics;
+using Demoulas.Common.Contracts.Interfaces;
+using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -18,7 +20,7 @@ public class RevertBeneficiaryTests : ApiTestBase<Program>
 
     public RevertBeneficiaryTests()
     {
-        _scenarioFactory = new ScenarioFactory().CreateOneBeneWithProfitDetail();
+        _scenarioFactory = new ScenarioFactory().CreateOneBeneWithProfitDetail().WithYearEndStatuses();
         MockDbContextFactory = _scenarioFactory.BuildMocks();
         _thisYear = _scenarioFactory.ThisYear;
         _service = ServiceProvider?.GetRequiredService<IProfitMasterService>()!;

@@ -20,7 +20,7 @@ public class RevertEmployeeTests : ApiTestBase<Program>
     public RevertEmployeeTests()
     {
         // create mock database with just 1 employee with two profit detail rows in last year.
-        _scenarioFactory = new ScenarioFactory().CreateOneEmployeeWithProfitDetails();
+        _scenarioFactory = new ScenarioFactory().CreateOneEmployeeWithProfitDetails().WithYearEndStatuses();
         MockDbContextFactory = _scenarioFactory.BuildMocks();
         _profitDetails = _scenarioFactory.ProfitDetails;
         _thisYear = _scenarioFactory.ThisYear;
