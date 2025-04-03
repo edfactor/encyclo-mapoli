@@ -1,40 +1,25 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Button, FormHelperText, FormLabel, TextField } from "@mui/material";
+import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
-import {
-  useLazyGetMasterApplyQuery,
-  useLazyGetMasterRevertQuery,
-  useLazyGetProfitShareEditQuery,
-  useLazyGetProfitShareUpdateQuery
-} from "reduxstore/api/YearsEndApi";
+import { useLazyGetProfitShareEditQuery, useLazyGetProfitShareUpdateQuery } from "reduxstore/api/YearsEndApi";
 import * as yup from "yup";
-import {
-  setProfitEditLoading,
-  setProfitMasterApplyLoading,
-  setProfitMasterRevertLoading,
-  setProfitUpdateLoading
-} from "../../reduxstore/slices/yearsEndSlice";
+
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-import { ProfitShareUpdateRequest } from "reduxstore/types";
-interface ProfitShareUpdateSearch {
-  profitYear: Date;
-  contributionPercent?: number | null;
-  earningsPercent?: number | null;
-  incomingForfeitPercent?: number | null;
-  secondaryEarningsPercent?: number | null;
-  maxAllowedContributions?: number | null;
-
-  badgeToAdjust?: number | null;
-  adjustContributionAmount?: number | null;
-  adjustEarningsAmount?: number | null;
-  adjustIncomingForfeitAmount?: number | null;
-
-  badgeToAdjust2?: number | null;
-  adjustEarningsSecondaryAmount?: number | null;
-}
+import { useState } from "react";
+import {
+  clearProfitSharingEdit,
+  clearProfitSharingEditQueryParams,
+  clearProfitSharingUpdate,
+  clearProfitSharingUpdateQueryParams,
+  setProfitSharingEditQueryParams,
+  setProfitSharingUpdateQueryParams
+} from "reduxstore/slices/yearsEndSlice";
+import { ProfitShareEditUpdateQueryParams, ProfitShareUpdateRequest } from "reduxstore/types";
+import { ISortParams } from "smart-ui-library";
+import SearchAndReset from "components/SearchAndReset/SearchAndReset";
 
 const schema = yup.object().shape({
   profitYear: yup
@@ -81,10 +66,12 @@ const schema = yup.object().shape({
 });
 
 const ProfitShareEditUpdateSearchFilter = () => {
-  const [previewUpdate] = useLazyGetProfitShareUpdateQuery();
-  const [previewEdit] = useLazyGetProfitShareEditQuery();
-  const [masterApply] = useLazyGetMasterApplyQuery();
-  const [masterRevert] = useLazyGetMasterRevertQuery();
+  const [triggerSearchUpdate, { isFetching: isFetchingUpdate }] = useLazyGetProfitShareUpdateQuery();
+  const [triggerSearchEdit, { isFetching: isFetchingEdit }] = useLazyGetProfitShareEditQuery();
+  const [sortParams, setSortParams] = useState<ISortParams>({
+    sortBy: "contributionPercent",
+    isSortDescending: false
+  });
 
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
@@ -94,8 +81,9 @@ const ProfitShareEditUpdateSearchFilter = () => {
   const {
     control,
     handleSubmit,
-    formState: { errors, isValid }
-  } = useForm<ProfitShareUpdateSearch>({
+    formState: { errors, isValid },
+    reset
+  } = useForm<ProfitShareEditUpdateQueryParams>({
     resolver: yupResolver(schema),
     defaultValues: {
       profitYear: fiscalCloseProfitYearAsDate,
@@ -115,12 +103,12 @@ const ProfitShareEditUpdateSearchFilter = () => {
     }
   });
 
-  const validateAndView = handleSubmit((data, event?: React.BaseSyntheticEvent) => {
+  const validateAndSearch = handleSubmit((data: ProfitShareEditUpdateQueryParams, event?: React.BaseSyntheticEvent) => {
     if (isValid) {
-      const viewParams: ProfitShareUpdateRequest = {
+      const updateParams: ProfitShareUpdateRequest = {
         pagination: {
-          sortBy: "contributionPercent",
-          isSortDescending: false,
+          sortBy: sortParams.sortBy,
+          isSortDescending: sortParams.isSortDescending,
           skip: 0,
           take: 25
         },
@@ -137,28 +125,46 @@ const ProfitShareEditUpdateSearchFilter = () => {
         badgeToAdjust2: data.badgeToAdjust2 ?? 0,
         adjustEarningsSecondaryAmount: data.adjustEarningsSecondaryAmount ?? 0
       };
-      // clears current table data - gives user feed back that thier search is in progress
-      //const nativeEvent = event?.nativeEvent as SubmitEvent;
-      console.log("Action: ", event?.target.value);
-      const action = event?.target.value;
-      if (action == "preview updates") {
-        dispatch(setProfitUpdateLoading());
-        previewUpdate(viewParams, false);
-      } else if (action == "preview details") {
-        dispatch(setProfitEditLoading());
-        previewEdit(viewParams, false);
-      } else if (action == "apply") {
-        dispatch(setProfitMasterApplyLoading());
-        masterApply(viewParams, false);
-      } else if (action == "revert") {
-        dispatch(setProfitMasterRevertLoading());
-        masterRevert(viewParams, false);
-      }
+
+      // First we have to do the update calls
+      triggerSearchUpdate(updateParams, false).unwrap();
+      dispatch(setProfitSharingUpdateQueryParams(data));
+      console.log("Successfully did the update");
+
+      // Now we have to do the edit calls
+      triggerSearchEdit(updateParams, false).unwrap();
+      dispatch(setProfitSharingEditQueryParams(data));
+      console.log("Successfully did the edit");
     }
   });
 
+  const handleReset = () => {
+    // We need to clear both grids and then both sets of query params
+    dispatch(clearProfitSharingEdit());
+    dispatch(clearProfitSharingUpdate());
+    dispatch(clearProfitSharingEditQueryParams());
+    dispatch(clearProfitSharingUpdateQueryParams());
+
+    reset({
+      profitYear: fiscalCloseProfitYearAsDate,
+      contributionPercent: null,
+      earningsPercent: null,
+      incomingForfeitPercent: null,
+      secondaryEarningsPercent: null,
+      maxAllowedContributions: null,
+
+      badgeToAdjust: null,
+      adjustContributionAmount: null,
+      adjustEarningsAmount: null,
+      adjustIncomingForfeitAmount: null,
+
+      badgeToAdjust2: null,
+      adjustEarningsSecondaryAmount: null
+    });
+  };
+
   return (
-    <form onSubmit={validateAndView}>
+    <form onSubmit={validateAndSearch}>
       <Grid2
         container
         paddingX="24px">
@@ -418,25 +424,13 @@ const ProfitShareEditUpdateSearchFilter = () => {
             )}
           </Grid2>
         </Grid2>
-        <Grid2
-          size={{ xs: 12, sm: 12, md: 12 }}
-          className="mt-4">
-          <div className="flex gap-4">
-            <Button
-              variant="contained"
-              type="submit"
-              value="preview updates"
-              onClick={validateAndView}>
-              Preview
-            </Button>
-            <Button
-              variant="contained"
-              type="submit"
-              value="preview details"
-              onClick={validateAndView}>
-              Preview Details
-            </Button>
-          </div>
+        <Grid2 width="100%">
+          <SearchAndReset
+            handleReset={handleReset}
+            searchButtonText="Preview"
+            handleSearch={validateAndSearch}
+            isFetching={isFetchingUpdate || isFetchingEdit}
+          />
         </Grid2>
       </Grid2>
     </form>

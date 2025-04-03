@@ -22,7 +22,7 @@ const ProfitShareEditUpdateGrid = () => {
       {!!profitSharingUpdate && profitSharingUpdate?.reportName == "Profit Sharing Update" && (
         <DSMGrid
           preferenceKey={"ProfitShareUpdateGrid"}
-          isLoading={profitSharingUpdate?.isLoading}
+          isLoading={false}
           providedOptions={{
             rowData: "response" in profitSharingUpdate ? profitSharingUpdate.response?.results : [],
             columnDefs: columnDefs
@@ -32,29 +32,13 @@ const ProfitShareEditUpdateGrid = () => {
       {!!profitSharingUpdate && profitSharingUpdate?.reportName == "Profit Sharing Edit" && (
         <DSMGrid
           preferenceKey={"ProfitShareEditGrid"}
-          isLoading={profitSharingUpdate?.isLoading}
+          isLoading={false}
           providedOptions={{
             rowData: "response" in profitSharingUpdate ? profitSharingUpdate.response?.results : [],
             columnDefs: editColumnDefs
           }}
         />
       )}
-      {!!profitSharingUpdate &&
-        (profitSharingUpdate?.reportName == "Apply" || profitSharingUpdate?.reportName == "Revert") &&
-        profitSharingUpdate?.isLoading && <h2>Loading ...</h2>}
-      {!!profitSharingUpdate &&
-        (profitSharingUpdate?.reportName == "Apply" || profitSharingUpdate?.reportName == "Revert") &&
-        profitSharingUpdate?.isLoading != true && (
-          <div>
-            <br />
-            Beneficiaries Effected: {profitSharingUpdate.beneficiariesEffected}
-            <br />
-            Employees Effected: {profitSharingUpdate.employeesEffected}
-            <br />
-            Etvas Effected: {profitSharingUpdate.etvasEffected}
-            <br />
-          </div>
-        )}
     </>
   );
 };

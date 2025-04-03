@@ -152,7 +152,7 @@ const ProfitShareEditUpdate = () => {
             <ProfitShareEditUpdateSearchFilter />
           </DSMAccordion>
         </Grid2>
-        <div style={{ overflowX: "inherit" }}>
+        <div>
           <div className="px-[24px]">
             <h2 className="text-dsm-secondary">Summary</h2>
             <Typography
@@ -204,11 +204,6 @@ const ProfitShareEditUpdate = () => {
               "Ending Balance"
             ]}
           />
-          <Grid2 width="100%">
-            <ProfitShareEditUpdateTabs />
-          </Grid2>
-        </div>
-        <div style={{ overflowX: "inherit" }}>
           <div className="px-[24px]">
             <h2 className="text-dsm-secondary">Adjustment Report</h2>
           </div>
