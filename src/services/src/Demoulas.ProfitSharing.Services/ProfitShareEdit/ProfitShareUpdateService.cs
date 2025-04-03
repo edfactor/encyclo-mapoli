@@ -67,7 +67,11 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
             Totals = totalsDto,
             ReportName = "Profit Sharing Update",
             ReportDate = DateTimeOffset.Now,
-            Response = new PaginatedResponseDto<ProfitShareUpdateMemberResponse>(){ Results =  ProfitShareEditService.HandleInMemorySortAndPaging(profitShareUpdateRequest, members) }
+            Response = new PaginatedResponseDto<ProfitShareUpdateMemberResponse>(profitShareUpdateRequest)
+            {
+                Total = members.Count,
+                Results =  ProfitShareEditService.HandleInMemorySortAndPaging(profitShareUpdateRequest, members)
+            }
         };
     }
 

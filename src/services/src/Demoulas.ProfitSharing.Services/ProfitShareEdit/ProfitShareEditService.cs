@@ -55,7 +55,11 @@ public class ProfitShareEditService : IInternalProfitShareEditService
             ContributionGrandTotal = 2,
             IncomingForfeitureGrandTotal = 3,
             EarningsGrandTotal = 4,
-            Response = new PaginatedResponseDto<ProfitShareEditMemberRecordResponse>(){ Results =  HandleInMemorySortAndPaging(profitShareUpdateRequest, responseRecords) }
+            Response = new PaginatedResponseDto<ProfitShareEditMemberRecordResponse>(profitShareUpdateRequest)
+            {
+                Total = records.Count(),
+                Results =  HandleInMemorySortAndPaging(profitShareUpdateRequest, responseRecords)
+            }
         };
     }
 
