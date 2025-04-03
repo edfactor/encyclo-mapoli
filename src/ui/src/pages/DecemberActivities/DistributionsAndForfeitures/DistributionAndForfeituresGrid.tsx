@@ -5,6 +5,7 @@ import { useLazyGetDistributionsAndForfeituresQuery } from "reduxstore/api/Years
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetDistributionsAndForfeituresColumns } from "./DistributionAndForfeituresGridColumns";
+import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 
 interface DistributionsAndForfeituresGridSearchProps {
   initialSearchLoaded: boolean;
@@ -25,11 +26,12 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
   const { distributionsAndForfeitures, distributionsAndForfeituresQueryParams } = useSelector(
     (state: RootState) => state.yearsEnd
   );
+  const profitYear = useDecemberFlowProfitYear();
   const [triggerSearch, { isFetching }] = useLazyGetDistributionsAndForfeituresQuery();
 
   const onSearch = useCallback(async () => {
     const request = {
-      profitYear: distributionsAndForfeituresQueryParams?.profitYear ?? 0,
+      profitYear: profitYear || 0,
       ...(distributionsAndForfeituresQueryParams?.startMonth && {
         startMonth: distributionsAndForfeituresQueryParams?.startMonth
       }),
@@ -44,8 +46,8 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
   }, [
     distributionsAndForfeituresQueryParams?.endMonth,
     distributionsAndForfeituresQueryParams?.includeOutgoingForfeitures,
-    distributionsAndForfeituresQueryParams?.profitYear,
     distributionsAndForfeituresQueryParams?.startMonth,
+    profitYear,
     pageNumber,
     pageSize,
     sortParams,
