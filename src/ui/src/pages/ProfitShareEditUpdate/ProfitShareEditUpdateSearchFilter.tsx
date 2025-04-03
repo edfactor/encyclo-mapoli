@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetProfitShareEditQuery, useLazyGetProfitShareUpdateQuery } from "reduxstore/api/YearsEndApi";
 import * as yup from "yup";
 
+import SearchAndReset from "components/SearchAndReset/SearchAndReset";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useState } from "react";
 import {
@@ -16,13 +17,11 @@ import {
   clearProfitSharingUpdate,
   clearProfitSharingUpdateQueryParams,
   setProfitSharingEditQueryParams,
-  setProfitSharingUpdateAdjustmentSummary,
   setProfitSharingUpdateQueryParams
 } from "reduxstore/slices/yearsEndSlice";
+import { RootState } from "reduxstore/store";
 import { ProfitShareEditUpdateQueryParams, ProfitShareUpdateRequest } from "reduxstore/types";
 import { ISortParams } from "smart-ui-library";
-import SearchAndReset from "components/SearchAndReset/SearchAndReset";
-import { RootState } from "reduxstore/store";
 
 const schema = yup.object().shape({
   profitYear: yup
@@ -138,9 +137,9 @@ const ProfitShareEditUpdateSearchFilter = () => {
 
       // Now if we have a badgeToAdjust, we want to save the
       // adjustment summary so that panel shows up
-      if (data.badgeToAdjust) {
-        dispatch(addBadgeNumberToUpdateAdjustmentSummary(data.badgeToAdjust));
-      }
+      //if (data.badgeToAdjust) {
+      //  dispatch(addBadgeNumberToUpdateAdjustmentSummary(data.badgeToAdjust));
+      //}
 
       // Now we have to do the edit calls
       triggerSearchEdit(updateParams, false).unwrap();

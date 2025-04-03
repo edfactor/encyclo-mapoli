@@ -231,9 +231,27 @@ const ProfitShareEditUpdate = () => {
 
                 <TotalsGrid
                   displayData={[
-                    [70191, numberToCurrency(0), numberToCurrency(0), numberToCurrency(0), numberToCurrency(0)],
-                    ["", numberToCurrency(0), numberToCurrency(0), numberToCurrency(0), numberToCurrency(0)],
-                    ["", numberToCurrency(0), numberToCurrency(0), numberToCurrency(0), numberToCurrency(0)]
+                    [
+                      profitSharingUpdateAdjustmentSummary?.badgeNumber,
+                      numberToCurrency(profitSharingUpdateAdjustmentSummary?.contributionAmountUnadjusted || 0),
+                      numberToCurrency(profitSharingUpdateAdjustmentSummary?.earningsAmountUnadjusted || 0),
+                      numberToCurrency(profitSharingUpdateAdjustmentSummary?.secondaryEarningsAmountUnadjusted || 0),
+                      numberToCurrency(profitSharingUpdateAdjustmentSummary?.incomingForfeitureAmountUnadjusted || 0)
+                    ],
+                    [
+                      "",
+                      numberToCurrency(profitSharingUpdateAdjustmentSummary?.contributionAmountAdjusted || 0),
+                      numberToCurrency(profitSharingUpdateAdjustmentSummary?.earningsAmountAdjusted || 0),
+                      numberToCurrency(profitSharingUpdateAdjustmentSummary?.secondaryEarningsAmountAdjusted || 0),
+                      numberToCurrency(profitSharingUpdateAdjustmentSummary?.incomingForfeitureAmountAdjusted || 0)
+                    ],
+                    [
+                      "",
+                      numberToCurrency(profitSharingUpdateAdjustmentSummary?.contributionAmountAdjusted || 0),
+                      numberToCurrency(profitSharingUpdateAdjustmentSummary?.earningsAmountAdjusted || 0),
+                      numberToCurrency(profitSharingUpdateAdjustmentSummary?.secondaryEarningsAmountAdjusted || 0),
+                      numberToCurrency(profitSharingUpdateAdjustmentSummary?.incomingForfeitureAmountAdjusted || 0)
+                    ]
                   ]}
                   leftColumnHeaders={["Initial", "Adjustment", "Totals"]}
                   topRowHeaders={["", "Badge", "Contributions", "Earnings", "Earnings2", "Forfeitures"]}

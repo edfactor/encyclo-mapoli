@@ -2,6 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 import { format } from "date-fns";
 import {
+  addBadgeNumberToUpdateAdjustmentSummary,
   clearBreakdownByStore,
   clearProfitMasterApply,
   clearProfitMasterRevert,
@@ -36,6 +37,7 @@ import {
   setProfitShareSummaryReport,
   setProfitSharingEdit,
   setProfitSharingUpdate,
+  setProfitSharingUpdateAdjustmentSummary,
   setTermination,
   setUnder21BreakdownByStore,
   setUnder21Inactive,
@@ -706,6 +708,13 @@ export const YearsEndApi = createApi({
         try {
           const { data } = await queryFulfilled;
           dispatch(setProfitSharingUpdate(data));
+          dispatch(setProfitSharingUpdateAdjustmentSummary(data.adjustmentsSummary));
+          if (arg.badgeToAdjust) {
+            console.log("Added badge: " + arg.badgeToAdjust);
+            dispatch(addBadgeNumberToUpdateAdjustmentSummary(arg.badgeToAdjust));
+          } else {
+            console.log("No badge to add to summmary");
+          }
         } catch (err) {
           console.log("Err", err);
           dispatch(clearProfitSharingUpdate());
