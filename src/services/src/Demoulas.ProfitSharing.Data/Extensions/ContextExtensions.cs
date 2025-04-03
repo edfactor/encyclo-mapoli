@@ -53,7 +53,7 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new TaxCodeMap());
         modelBuilder.ApplyConfiguration(new TerminationCodeMap());
         modelBuilder.ApplyConfiguration(new ZeroContributionReasonMap());
-
+        modelBuilder.ApplyConfiguration(new YearEndUpdateStatusMapping());
 
         // Force table names to be upper case for consistency with all existing DSM projects
         foreach (var entity in modelBuilder.Model.GetEntityTypes())

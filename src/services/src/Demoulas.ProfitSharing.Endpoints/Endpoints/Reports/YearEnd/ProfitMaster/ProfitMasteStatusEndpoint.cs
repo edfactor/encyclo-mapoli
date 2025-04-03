@@ -30,6 +30,13 @@ public class ProfitMasterStatusEndpoint : Endpoint<ProfitYearRequest, ProfitMast
     public override async Task HandleAsync(ProfitYearRequest req, CancellationToken ct)
     {
         var response = await _profitMasterService.Status(req, ct);
-        await SendOkAsync(response, ct);
+        if (response == null)
+        {
+            await SendNoContentAsync(ct);
+        }
+        else
+        {
+            await SendOkAsync(response, ct);
+        }
     }
 }

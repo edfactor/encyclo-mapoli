@@ -1,20 +1,19 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.Common.Contracts.Interfaces;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.ProfitMaster;
 
 /// <summary>
-/// <para>
 /// Profit Master Update - inserts or deletes PROFIT_DETAIL rows based on values provided by the user.
-/// </para>
-/// <para>
+///
 /// Invokes the Profit Share Edit Service to compute and return the transactions (PROFIT_DETAIL rows) based on user input.
 /// The resulting records are inserted or deleted in the PROFIT_DETAILS database.
 ///
@@ -27,19 +26,51 @@ public class ProfitMasterService : IProfitMasterService
 {
     private readonly IInternalProfitShareEditService _profitShareEditService;
     private readonly IProfitSharingDataContextFactory _dbFactory;
+    private readonly IAppUser _appUser;
 
-    public ProfitMasterService(IInternalProfitShareEditService profitShareEditService, IProfitSharingDataContextFactory dbFactory)
+    public ProfitMasterService(IInternalProfitShareEditService profitShareEditService, IProfitSharingDataContextFactory dbFactory, IAppUser appUser)
     {
         _profitShareEditService = profitShareEditService;
         _dbFactory = dbFactory;
+        _appUser = appUser;
     }
 
-    public Task<ProfitMasterUpdateResponse> Status(ProfitYearRequest profitShareUpdateRequest, CancellationToken cancellationToken)
+// Not clear to me why I have to sprinkle this here
+#pragma warning disable AsyncFixer01
+
+    public async Task<ProfitMasterUpdateResponse?> Status(ProfitYearRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
-        // Ongoing work to implement this method.   This is being pushed out to allow
-        // UI work to continue in parallel and to visualize/code-to the swagger endpoints.
-        return Task.FromResult(ProfitMasterUpdateResponse.Example());
+        return await _dbFactory.UseReadOnlyContext(async ctx =>
+        {
+            var yearEndUpdateStatus = await ctx.YearEndUpdateStatuses.Where(status => status.ProfitYear == profitShareUpdateRequest.ProfitYear)
+                .FirstOrDefaultAsync(cancellationToken);
+            if (yearEndUpdateStatus == null)
+            {
+                return null;
+            }
+
+            return new ProfitMasterUpdateResponse
+            {
+                BeneficiariesEffected = yearEndUpdateStatus.BeneficiariesEffected,
+                EmployeesEffected = yearEndUpdateStatus.EmployeesEffected,
+                EtvasEffected = yearEndUpdateStatus.EtvasEffected,
+                UpdatedTime = yearEndUpdateStatus.UpdatedTime,
+                UpdatedBy = yearEndUpdateStatus.UpdatedBy,
+                ContributionPercent = yearEndUpdateStatus.ContributionPercent,
+                IncomingForfeitPercent = yearEndUpdateStatus.IncomingForfeitPercent,
+                EarningsPercent = yearEndUpdateStatus.EarningsPercent,
+                SecondaryEarningsPercent = yearEndUpdateStatus.SecondaryEarningsPercent,
+                MaxAllowedContributions = yearEndUpdateStatus.MaxAllowedContributions,
+                BadgeAdjusted = yearEndUpdateStatus.BadgeAdjusted,
+                BadgeAdjusted2 = yearEndUpdateStatus.BadgeAdjusted2,
+                AdjustContributionAmount = yearEndUpdateStatus.AdjustContributionAmount,
+                AdjustEarningsAmount = yearEndUpdateStatus.AdjustEarningsAmount,
+                AdjustIncomingForfeitAmount = yearEndUpdateStatus.AdjustIncomingForfeitAmount,
+                AdjustEarningsSecondaryAmount = yearEndUpdateStatus.AdjustEarningsSecondaryAmount
+            };
+        });
     }
+#pragma warning restore AsyncFixer01
 
     public async Task<ProfitMasterUpdateResponse> Update(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
@@ -48,6 +79,12 @@ public class ProfitMasterService : IProfitMasterService
 
         return await _dbFactory.UseWritableContext(async ctx =>
         {
+            var yearEndUpdateStatus = await ctx.YearEndUpdateStatuses.Where(yestatus => yestatus.ProfitYear == profitShareUpdateRequest.ProfitYear).FirstOrDefaultAsync(cancellationToken);
+            if (yearEndUpdateStatus != null)
+            {
+                throw new BadHttpRequestException($"Can not add new profit detail records for year {profitShareUpdateRequest.ProfitYear} until existing ones are removed.");
+            }
+
             var code2ProfitCode = await ctx.ProfitCodes.ToDictionaryAsync(pc => pc.Id, pc => pc, cancellationToken);
 
             // Create records and batch insert them.
@@ -73,9 +110,31 @@ public class ProfitMasterService : IProfitMasterService
                 etvasUpdated++;
             }
 
-            await ctx.SaveChangesAsync(cancellationToken);
             var employeesEffected = records.Where(m => m.IsEmployee).Select(m => m.Ssn).ToHashSet().Count;
             var beneficiariesEffected = records.Where(m => !m.IsEmployee).Select(m => m.Ssn).ToHashSet().Count;
+
+            ctx.YearEndUpdateStatuses.Add(new YearEndUpdateStatus
+            {
+                ProfitYear = profitShareUpdateRequest.ProfitYear,
+                UpdatedTime = DateTime.Now,
+                UpdatedBy = _appUser.UserName ?? "Unknown",
+                BeneficiariesEffected = beneficiariesEffected,
+                EmployeesEffected = employeesEffected,
+                EtvasEffected = etvasUpdated,
+                ContributionPercent = profitShareUpdateRequest.ContributionPercent,
+                IncomingForfeitPercent = profitShareUpdateRequest.IncomingForfeitPercent,
+                EarningsPercent = profitShareUpdateRequest.EarningsPercent,
+                SecondaryEarningsPercent = profitShareUpdateRequest.SecondaryEarningsPercent,
+                MaxAllowedContributions = profitShareUpdateRequest.MaxAllowedContributions,
+                BadgeAdjusted = profitShareUpdateRequest.BadgeToAdjust,
+                BadgeAdjusted2 = profitShareUpdateRequest.BadgeToAdjust2,
+                AdjustContributionAmount = profitShareUpdateRequest.AdjustContributionAmount,
+                AdjustEarningsAmount = profitShareUpdateRequest.AdjustEarningsAmount,
+                AdjustIncomingForfeitAmount = profitShareUpdateRequest.AdjustIncomingForfeitAmount,
+                AdjustEarningsSecondaryAmount = profitShareUpdateRequest.AdjustEarningsSecondaryAmount
+            });
+
+            await ctx.SaveChangesAsync(cancellationToken);
 
             return new ProfitMasterUpdateResponse
             {
@@ -83,7 +142,7 @@ public class ProfitMasterService : IProfitMasterService
                 EmployeesEffected = employeesEffected,
                 EtvasEffected = etvasUpdated,
                 UpdatedTime = DateTime.Now,
-                UpdatedBy = "Plan Admin",  // will use IAppUser
+                UpdatedBy = _appUser.UserName ?? "Unknown",
                 ContributionPercent = profitShareUpdateRequest.ContributionPercent,
                 IncomingForfeitPercent = profitShareUpdateRequest.IncomingForfeitPercent,
                 EarningsPercent = profitShareUpdateRequest.EarningsPercent,
@@ -123,16 +182,23 @@ public class ProfitMasterService : IProfitMasterService
     {
         return await _dbFactory.UseWritableContext(async ctx =>
         {
+            var yearEndUpdateStatus = await ctx.YearEndUpdateStatuses.Where(yestatus => yestatus.ProfitYear == profitYearRequest.ProfitYear).FirstOrDefaultAsync(cancellationToken);
+            if (yearEndUpdateStatus == null)
+            {
+                throw new BadHttpRequestException($"Can not Revert. There is no year end update for profit year {profitYearRequest.ProfitYear}");
+            }
+
             // read this year's contribution/vestingEarnings profit_detail rows
             var pds = await ctx.ProfitDetails
                 .Where(pd => pd.ProfitYear == profitYearRequest.ProfitYear &&
-                             ( (pd.ProfitCodeId == /*8*/ ProfitCode.Constants.Incoming100PercentVestedEarnings.Id &&
-                                pd.CommentTypeId == CommentType.Constants.OneHundredPercentEarnings.Id )
+                             ((pd.ProfitCodeId == /*8*/ ProfitCode.Constants.Incoming100PercentVestedEarnings.Id &&
+                               pd.CommentTypeId == CommentType.Constants.OneHundredPercentEarnings.Id)
                               || pd.ProfitCodeId == /*0*/ ProfitCode.Constants.IncomingContributions.Id))
                 .ToListAsync(cancellationToken);
 
             var memberSsns = pds.Select(p => p.Ssn).ToHashSet();
-            var ssn2PayProfit = await ctx.PayProfits.Include(pp=>pp.Demographic).Where(pp => pp.ProfitYear == profitYearRequest.ProfitYear && memberSsns.Contains(pp.Demographic!.Ssn))
+            var ssn2PayProfit = await ctx.PayProfits.Include(pp => pp.Demographic)
+                .Where(pp => pp.ProfitYear == profitYearRequest.ProfitYear && memberSsns.Contains(pp.Demographic!.Ssn))
                 .ToDictionaryAsync(pp => pp.Demographic!.Ssn, pp => pp, cancellationToken);
 
             var etvaReset = 0;
@@ -145,6 +211,8 @@ public class ProfitMasterService : IProfitMasterService
             }
 
             ctx.ProfitDetails.RemoveRange(pds);
+            ctx.YearEndUpdateStatuses.Remove(yearEndUpdateStatus);
+
             await ctx.SaveChangesAsync(cancellationToken);
             return new ProfitMasterRevertResponse
             {
