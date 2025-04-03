@@ -7,7 +7,7 @@ using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitMaster;
 
-public class ProfitMasterUpdateEndpoint : Endpoint<ProfitShareUpdateRequest, ProfitMasterResponse>
+public class ProfitMasterUpdateEndpoint : Endpoint<ProfitShareUpdateRequest, ProfitMasterUpdateResponse>
 {
     private readonly IProfitMasterService _profitMasterService;
 
@@ -24,7 +24,7 @@ public class ProfitMasterUpdateEndpoint : Endpoint<ProfitShareUpdateRequest, Pro
         {
             s.Summary = "Applies YE updates to members";
             s.ExampleRequest = ProfitShareUpdateRequest.RequestExample();
-            s.ResponseExamples = new Dictionary<int, object> { { 200, ProfitMasterResponse.Example() } };
+            s.ResponseExamples = new Dictionary<int, object> { { 200, ProfitMasterUpdateResponse.Example() } };
         });
         Group<YearEndGroup>();
     }
