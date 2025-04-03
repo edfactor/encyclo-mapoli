@@ -1,4 +1,5 @@
-﻿using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Request;
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -54,9 +55,28 @@ public class ProfitShareEditService : IInternalProfitShareEditService
             ContributionGrandTotal = 2,
             IncomingForfeitureGrandTotal = 3,
             EarningsGrandTotal = 4,
-            Response = new PaginatedResponseDto<ProfitShareEditMemberRecordResponse> { Results = responseRecords }
+            Response = new PaginatedResponseDto<ProfitShareEditMemberRecordResponse>(){ Results =  HandleInMemorySortAndPaging(profitShareUpdateRequest, responseRecords) }
         };
     }
+
+public static List<T> HandleInMemorySortAndPaging<T>(SortedPaginationRequestDto sortedPaginationRequest, List<T> rows)
+    {
+        string sortBy = sortedPaginationRequest.SortBy ?? "Name";
+        bool isDescending = sortedPaginationRequest.IsSortDescending ?? false;
+
+        var property = typeof(T).GetProperty(sortBy);
+        if (property == null)
+        {
+            throw new ArgumentException($"Property '{sortBy}' not found on type {typeof(T).Name}");
+        }
+
+        rows = isDescending
+            ? rows.OrderByDescending(m => property.GetValue(m, null)).ToList()
+            : rows.OrderBy(m => property.GetValue(m, null)).ToList();
+
+        return rows.Skip(sortedPaginationRequest.Skip ?? 0).Take(sortedPaginationRequest.Take ?? 25).ToList();
+    }
+
 
     public async Task<IEnumerable<ProfitShareEditMemberRecord>> ProfitShareEditRecords(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
@@ -74,6 +94,7 @@ public class ProfitShareEditService : IInternalProfitShareEditService
                 AddBeneficiaryRecords(records, member);
             }
         }
+
         return records;
     }
 
