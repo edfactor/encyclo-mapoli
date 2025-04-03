@@ -1,9 +1,10 @@
-import { Button, Divider, Tooltip } from "@mui/material";
+import { Button, Divider, Tooltip, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
-import { DSMAccordion, Page } from "smart-ui-library";
+import { DSMAccordion, numberToCurrency, Page, TotalsGrid } from "smart-ui-library";
 import ProfitShareEditUpdateSearchFilter from "./ProfitShareEditUpdateSearchFilter";
 import { Replay, SaveOutlined } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
+//import { TotalsGrid } from "../../components/TotalsGrid";
 import ProfitShareEditUpdateTabs from "./ProfitShareEditUpdateTabs";
 import { RootState } from "reduxstore/store";
 import { useLazyGetMasterApplyQuery, useLazyGetMasterRevertQuery } from "reduxstore/api/YearsEndApi";
@@ -151,9 +152,113 @@ const ProfitShareEditUpdate = () => {
             <ProfitShareEditUpdateSearchFilter />
           </DSMAccordion>
         </Grid2>
-        <Grid2 width="100%">
-          <ProfitShareEditUpdateTabs />
-        </Grid2>
+        <div style={{ overflowX: "inherit" }}>
+          <div className="px-[24px]">
+            <h2 className="text-dsm-secondary">Summary</h2>
+            <Typography
+              fontWeight="bold"
+              variant="body2">
+              {"Employees XX,XXXX Beneficiaries XXX"}
+            </Typography>
+          </div>
+
+          <TotalsGrid
+            displayData={[
+              [
+                numberToCurrency(0),
+                numberToCurrency(0),
+                numberToCurrency(0),
+                numberToCurrency(0),
+                numberToCurrency(0),
+                numberToCurrency(0),
+                numberToCurrency(0)
+              ],
+              [
+                numberToCurrency(0),
+                numberToCurrency(0),
+                numberToCurrency(0),
+                numberToCurrency(0),
+                numberToCurrency(0),
+                numberToCurrency(0),
+                numberToCurrency(0)
+              ],
+              [
+                numberToCurrency(0),
+                numberToCurrency(0),
+                numberToCurrency(0),
+                numberToCurrency(0),
+                numberToCurrency(0),
+                numberToCurrency(0),
+                numberToCurrency(0)
+              ]
+            ]}
+            leftColumnHeaders={["Total", "Allocation", "Point"]}
+            topRowHeaders={[
+              "",
+              "Beginning Balance",
+              "Contributions",
+              "Earnings",
+              "Earnings2",
+              "Forfeitures",
+              "Distributions Military/Paid Allocation",
+              "Ending Balance"
+            ]}
+          />
+          <Grid2 width="100%">
+            <ProfitShareEditUpdateTabs />
+          </Grid2>
+        </div>
+        <div style={{ overflowX: "inherit" }}>
+          <div className="px-[24px]">
+            <h2 className="text-dsm-secondary">Adjustment Report</h2>
+          </div>
+
+          <TotalsGrid
+            displayData={[
+              [
+                numberToCurrency(0),
+                numberToCurrency(0),
+                numberToCurrency(0),
+                numberToCurrency(0),
+                numberToCurrency(0),
+                numberToCurrency(0),
+                numberToCurrency(0)
+              ],
+              [
+                numberToCurrency(0),
+                numberToCurrency(0),
+                numberToCurrency(0),
+                numberToCurrency(0),
+                numberToCurrency(0),
+                numberToCurrency(0),
+                numberToCurrency(0)
+              ],
+              [
+                numberToCurrency(0),
+                numberToCurrency(0),
+                numberToCurrency(0),
+                numberToCurrency(0),
+                numberToCurrency(0),
+                numberToCurrency(0),
+                numberToCurrency(0)
+              ]
+            ]}
+            leftColumnHeaders={["Total", "Allocation", "Point"]}
+            topRowHeaders={[
+              "",
+              "Beginning Balance",
+              "Contributions",
+              "Earnings",
+              "Earnings2",
+              "Forfeitures",
+              "Distributions Military/Paid Allocation",
+              "Ending Balance"
+            ]}
+          />
+          <Grid2 width="100%">
+            <ProfitShareEditUpdateTabs />
+          </Grid2>
+        </div>
       </Grid2>
     </Page>
   );

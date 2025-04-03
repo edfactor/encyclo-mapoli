@@ -2,8 +2,8 @@ import { Divider } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
-import { DSMAccordion, numberToCurrency, Page } from "smart-ui-library";
-import { TotalsGrid } from "./TotalsGrid";
+import { DSMAccordion, numberToCurrency, Page, TotalsGrid } from "smart-ui-library";
+//import { TotalsGrid } from "../../../components/TotalsGrid";
 import VestedAmountsByAgeSearchFilter from "./VestedAmountsByAgeSearchFilter";
 import VestedAmountsByAgeTabs from "./VestedAmountsByAgeTabs";
 

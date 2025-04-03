@@ -436,20 +436,6 @@ const ProfitShareEditUpdateSearchFilter = () => {
               onClick={validateAndView}>
               Preview Details
             </Button>
-            <Button
-              variant="contained"
-              type="submit"
-              value="apply"
-              onClick={validateAndView}>
-              Apply Updates
-            </Button>
-            <Button
-              variant="contained"
-              type="submit"
-              value="revert"
-              onClick={validateAndView}>
-              Revert Updates
-            </Button>
           </div>
         </Grid2>
       </Grid2>
