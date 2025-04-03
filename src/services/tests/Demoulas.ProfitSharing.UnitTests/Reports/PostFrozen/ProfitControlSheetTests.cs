@@ -14,24 +14,23 @@ using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using FastEndpoints;
 using FluentAssertions;
 
-namespace Demoulas.ProfitSharing.UnitTests.Reports.PostFrozen
+namespace Demoulas.ProfitSharing.UnitTests.Reports.PostFrozen;
+
+public class ProfitControlSheetTests : ApiTestBase<Program>
 {
-    public class ProfitControlSheetTests : ApiTestBase<Program>
+    [Fact(DisplayName = "PS-897 - Control Sheet")]
+    public async Task CheckProfitControlSheets()
     {
-        [Fact(DisplayName = "PS-897 - Control Sheet")]
-        public async Task CheckProfitControlSheets()
-        {
-            var request = new ProfitYearRequest() { ProfitYear = 2024 };
-            var response = await ApiClient.GETAsync<ProfitControlSheetEndpoint, ProfitYearRequest, ProfitControlSheetResponse>(request);
-            response.Should().NotBeNull();
-            response.Response.StatusCode.Should().Be(System.Net.HttpStatusCode.Unauthorized);
+        var request = new ProfitYearRequest() { ProfitYear = 2024 };
+        var response = await ApiClient.GETAsync<ProfitControlSheetEndpoint, ProfitYearRequest, ProfitControlSheetResponse>(request);
+        response.Should().NotBeNull();
+        response.Response.StatusCode.Should().Be(System.Net.HttpStatusCode.Unauthorized);
 
-            ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
 
-            response = await ApiClient.GETAsync<ProfitControlSheetEndpoint, ProfitYearRequest, ProfitControlSheetResponse>(request);
+        response = await ApiClient.GETAsync<ProfitControlSheetEndpoint, ProfitYearRequest, ProfitControlSheetResponse>(request);
 
-            response.Should().NotBeNull();
-            response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
-        }
+        response.Should().NotBeNull();
+        response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 }
