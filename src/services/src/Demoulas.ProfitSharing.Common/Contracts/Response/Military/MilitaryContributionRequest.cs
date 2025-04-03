@@ -1,12 +1,11 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 
-namespace Demoulas.ProfitSharing.Common.Contracts.Response.Military
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.Military;
+
+public sealed record MilitaryContributionResponse : YearRequest
 {
-    public sealed record MilitaryContributionResponse : YearRequest
-    {
-        public int BadgeNumber { get; init; }
-        public decimal Amount { get; init; }
-        public byte CommentTypeId { get; init; }
-        public DateOnly ContributionDate { get; init; }
-    }
+    public int BadgeNumber { get; init; }
+    public decimal Amount { get; init; }
+    public byte CommentTypeId { get; init; }
+    public DateOnly ContributionDate { get; init; }
 }

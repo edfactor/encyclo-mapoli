@@ -98,6 +98,9 @@ builder.ConfigureDefaultEndpoints(meterNames: [],
     .AddSwaggerOpenApi(oktaSettingsAction: OktaSettingsAction, documentSettingsAction: OktaDocumentSettings)
     .AddSwaggerOpenApi(version: 2, oktaSettingsAction: OktaSettingsAction, documentSettingsAction: OktaDocumentSettings);
 
+builder.Services.AddHostedService<MetricLogger>();
+
+
 WebApplication app = builder.Build();
 
 app.UseCors();

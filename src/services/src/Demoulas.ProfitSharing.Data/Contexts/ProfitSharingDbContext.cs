@@ -37,12 +37,13 @@ public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>, I
 
     public virtual DbSet<Job> Jobs { get; set; }
     public virtual DbSet<DemographicSyncAudit> DemographicSyncAudit { get; set; }
-    
+
     public virtual DbSet<AccountingPeriod> AccountingPeriods { get; set; }
 
     public virtual DbSet<DataImportRecord> DataImportRecords { get; set; }
     public virtual DbSet<FakeSsn> FakeSsns { get; set; }
     public virtual DbSet<Department> Departments { get; set; }
+    public virtual DbSet<YearEndUpdateStatus> YearEndUpdateStatuses { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

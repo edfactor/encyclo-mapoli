@@ -1,7 +1,6 @@
-﻿namespace Demoulas.ProfitSharing.OracleHcm.Configuration
+﻿namespace Demoulas.ProfitSharing.OracleHcm.Configuration;
+
+internal static class Constants
 {
-    internal static class Constants
-    {
-        public const string SystemAccountName = "System";
-    }
+    public const string SystemAccountName = "System";
 }

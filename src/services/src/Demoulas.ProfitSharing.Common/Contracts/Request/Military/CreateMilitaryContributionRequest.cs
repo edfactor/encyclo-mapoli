@@ -1,20 +1,19 @@
 ﻿using Demoulas.Util.Extensions;
 
-namespace Demoulas.ProfitSharing.Common.Contracts.Request.Military
-{
-    public sealed record CreateMilitaryContributionRequest : YearRequest
-    {
-        public int BadgeNumber { get; init; }
-        public decimal ContributionAmount { get; init; }
+namespace Demoulas.ProfitSharing.Common.Contracts.Request.Military;
 
-        public static CreateMilitaryContributionRequest RequestExample()
+public sealed record CreateMilitaryContributionRequest : YearRequest
+{
+    public int BadgeNumber { get; init; }
+    public decimal ContributionAmount { get; init; }
+
+    public static CreateMilitaryContributionRequest RequestExample()
+    {
+        return new CreateMilitaryContributionRequest
         {
-            return new CreateMilitaryContributionRequest
-            {
-                BadgeNumber = 1234567,
-                ContributionAmount = (decimal)1234.56,
-                ProfitYear = (short)DateTime.Today.Year
-            };
-        }
+            BadgeNumber = 1234567,
+            ContributionAmount = (decimal)1234.56,
+            ProfitYear = (short)DateTime.Today.Year
+        };
     }
 }

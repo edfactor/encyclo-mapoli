@@ -6,31 +6,37 @@ using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitMaster;
 
-public class ProfitMasterRevertEndpoint : Endpoint<ProfitYearRequest, ProfitMasterRevertResponse>
+public class ProfitMasterStatusEndpoint : Endpoint<ProfitYearRequest, ProfitMasterUpdateResponse>
 {
     private readonly IProfitMasterService _profitMasterService;
 
-    public ProfitMasterRevertEndpoint(IProfitMasterService profitMasterService)
+    public ProfitMasterStatusEndpoint(IProfitMasterService profitMasterService)
     {
         _profitMasterService = profitMasterService;
     }
 
     public override void Configure()
     {
-        // If I use Post(), swagger shows no documentation :-(
-        Get("profit-master-revert");
+        Get("profit-master-status");
         Summary(s =>
         {
-            s.Summary = "Reverts YE updates to members";
+            s.Summary = "Shows a summary of the current profit share update status";
             s.ExampleRequest = ProfitYearRequest.RequestExample();
-            s.ResponseExamples = new Dictionary<int, object> { { 200, ProfitMasterRevertResponse.Example() } };
+            s.ResponseExamples = new Dictionary<int, object> { { 200, ProfitMasterUpdateResponse.Example() } };
         });
         Group<YearEndGroup>();
     }
 
     public override async Task HandleAsync(ProfitYearRequest req, CancellationToken ct)
     {
-        var response = await _profitMasterService.Revert(req, ct);
-        await SendOkAsync(response, ct);
+        var response = await _profitMasterService.Status(req, ct);
+        if (response == null)
+        {
+            await SendNoContentAsync(ct);
+        }
+        else
+        {
+            await SendOkAsync(response, ct);
+        }
     }
 }
