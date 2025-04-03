@@ -156,7 +156,9 @@ var api = builder.AddProject<Demoulas_ProfitSharing_Api>("ProfitSharing-Api")
 var ui = builder.AddNpmApp("ProfitSharing-Ui", "../../../ui/", "dev")
     .WithReference(api)
     .WaitFor(api)
-    .WithHttpEndpoint(port: uiPort, isProxied: false);
+    .WithParentRelationship(api)
+    .WithHttpEndpoint(port: uiPort, isProxied: false)
+    .WithOtlpExporter();
 RunNpmInstall(ui.Resource.WorkingDirectory);
 
 _ = builder.AddProject<Demoulas_ProfitSharing_EmployeeFull_Sync>(name: "ProfitSharing-EmployeeFull-Sync")
@@ -175,5 +177,7 @@ _ = builder.AddProject<Demoulas_ProfitSharing_EmployeeDelta_Sync>(name: "ProfitS
     .WithExplicitStart();
 
 
+
 await using DistributedApplication host = builder.Build();
+
 await host.RunAsync();
