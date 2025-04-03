@@ -1,13 +1,13 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { Path, useNavigate } from 'react-router';
-import { useLazyGetTerminationReportQuery } from 'reduxstore/api/YearsEndApi';
-import { RootState } from 'reduxstore/store';
-import { DSMGrid, ISortParams, Pagination } from 'smart-ui-library';
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
+import { Path, useNavigate } from "react-router";
+import { useLazyGetTerminationReportQuery } from "reduxstore/api/YearsEndApi";
+import { RootState } from "reduxstore/store";
+import { DSMGrid, ISortParams, numberToCurrency, Pagination } from "smart-ui-library";
+import { TotalsGrid } from "../../../components/TotalsGrid/TotalsGrid";
+import { Typography } from "@mui/material";
 
-import { Typography } from '@mui/material';
-
-import { GetTerminationColumns } from './TerminationGridColumn';
+import { GetTerminationColumns } from "./TerminationGridColumn";
 
 interface TerminationGridSearchProps {
   initialSearchLoaded: boolean;
@@ -29,7 +29,12 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({ initialSearchLo
   const onSearch = useCallback(async () => {
     const request = {
       profitYear: terminationQueryParams?.profitYear ?? 0,
-      pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: sortParams.sortBy, isSortDescending: sortParams.isSortDescending },
+      pagination: {
+        skip: pageNumber * pageSize,
+        take: pageSize,
+        sortBy: sortParams.sortBy,
+        isSortDescending: sortParams.isSortDescending
+      }
     };
 
     await triggerSearch(request, false);
@@ -57,11 +62,30 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({ initialSearchLo
     <>
       {termination?.response && (
         <>
+          <div className="flex sticky top-0 z-10 bg-white">
+            <TotalsGrid
+              displayData={[[numberToCurrency(termination.totalEndingBalance || 0)]]}
+              leftColumnHeaders={["Amount in Profit Sharing"]}
+              topRowHeaders={[]}></TotalsGrid>
+            <TotalsGrid
+              displayData={[[numberToCurrency(termination.totalVested || 0)]]}
+              leftColumnHeaders={["Vested Amount"]}
+              topRowHeaders={[]}></TotalsGrid>
+            <TotalsGrid
+              displayData={[[numberToCurrency(termination.totalForfeit || 0)]]}
+              leftColumnHeaders={["Total Forfeitures"]}
+              topRowHeaders={[]}></TotalsGrid>
+            <TotalsGrid
+              displayData={[[numberToCurrency(termination.totalBeneficiaryAllocation || 0)]]}
+              leftColumnHeaders={["Total Beneficiary Allocations"]}
+              topRowHeaders={[]}></TotalsGrid>
+          </div>
+
           <div style={{ padding: "0 24px 0 24px" }}>
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`TERMINATIONS REPORT (${termination.response.total || 0} ${termination.response.total === 1 ? 'Record' : 'Records'})`}
+              {`TERMINATIONS REPORT (${termination.response.total || 0} ${termination.response.total === 1 ? "Record" : "Records"})`}
             </Typography>
           </div>
           <DSMGrid
