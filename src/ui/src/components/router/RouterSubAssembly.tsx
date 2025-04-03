@@ -220,9 +220,7 @@ const RouterSubAssembly: React.FC = () => {
               <Route
                 path={ROUTES.VESTED_AMOUNTS_BY_AGE}
                 element={<VestedAmountsByAge />}></Route>
-              <Route
-                path={ROUTES.DECEMBER_PROCESS_ACCORDION}
-                element={<DecemberProcessAccordion />}></Route>
+             
               <Route
                 path={ROUTES.PROF_TERM}
                 element={<Termination />}></Route>
@@ -240,7 +238,7 @@ const RouterSubAssembly: React.FC = () => {
                 element={<Forfeit />}></Route>
               <Route
                 path={ROUTES.FISCAL_CLOSE}
-                element={<FiscalFlow />}></Route>
+                element={<></>}></Route>
               <Route
                 path={ROUTES.PROFIT_SHARE_REPORT_EDIT_RUN}
                 element={<ProfitShareReportEditRun />}></Route>
@@ -255,7 +253,7 @@ const RouterSubAssembly: React.FC = () => {
                 element={<EighteenToTwenty />}></Route>
               <Route
                 path=""
-                element={<DecemberProcessAccordion />}></Route>
+                element={<></>}></Route>
               <Route
                 path={ROUTES.PROFIT_SHARE_BY_STORE}
                 element={<ProfitShareByStore />}></Route>

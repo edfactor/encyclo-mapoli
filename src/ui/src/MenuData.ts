@@ -73,11 +73,6 @@ export const menuLevels: MenuLevel[] = [
     mainTitle: MENU_LABELS.DECEMBER_ACTIVITIES,
     topPage: [
       {
-        topTitle: CAPTIONS.SUMMARY,
-        topRoute: ROUTES.DECEMBER_PROCESS_ACCORDION,
-        subPages: []
-      },
-      {
         topTitle: CAPTIONS.CLEAN_UP_REPORTS,
         subPages: [
           { subTitle: CAPTIONS.DEMOGRAPHIC_BADGES, subRoute: ROUTES.DEMOGRAPHIC_BADGES },

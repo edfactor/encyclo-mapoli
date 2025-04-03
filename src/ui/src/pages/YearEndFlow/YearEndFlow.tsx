@@ -1,36 +1,17 @@
-import { Divider, SelectChangeEvent } from "@mui/material";
+import { Divider } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import DSMCollapsedAccordion from "components/DSMCollapsedAccordion";
-import ProfitYearSelector from "components/ProfitYearSelector/ProfitYearSelector";
-import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
-import {
-  checkFiscalCloseParamsAndGridsProfitYears,
-  setSelectedProfitYearForFiscalClose
-} from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import { Page } from "smart-ui-library";
 import { CAPTIONS, MENU_LABELS } from "../../constants";
 
 const FiscalFlow = () => {
-  const { selectedProfitYearForFiscalClose } = useSelector((state: RootState) => state.yearsEnd);
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-
-  const handleProfitYearChange = (event: SelectChangeEvent) => {
-    dispatch(setSelectedProfitYearForFiscalClose(Number(event.target.value)));
-    dispatch(checkFiscalCloseParamsAndGridsProfitYears(Number(event.target.value)));
-  };
 
   return (
     <Page
-      label={MENU_LABELS.FISCAL_CLOSE}
-      actionNode={
-        <ProfitYearSelector 
-          selectedProfitYear={selectedProfitYearForFiscalClose}
-          handleChange={handleProfitYearChange}
-        />
-      }>
+      label={MENU_LABELS.FISCAL_CLOSE}>
       <Grid2 container>
         <Grid2
           size={{ xs: 12 }}

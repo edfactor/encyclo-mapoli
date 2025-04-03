@@ -33,15 +33,12 @@ const ProfitYearSelector = ({
   showDates = true,
   disabled = false,
   disabledWhileLoading = true,
-  defaultValue,
-  displayYears
+  defaultValue
 }: ProfitYearSelectorProps) => {
   const frozenStateCollectionData = useSelector((state: RootState) => state.frozen.frozenStateCollectionData);
   const token = useSelector((state: RootState) => state.security.token);
   const [triggerFrozenStateSearch, { isLoading }] = useLazyGetHistoricalFrozenStateResponseQuery();
-  const currentYear = new Date().getFullYear();
-  
-  const effectiveDisplayYears = displayYears || [currentYear - 1, currentYear, currentYear + 1]; // TODO: This can be driven by the API response
+  const thisYear = new Date().getFullYear();
   
   useEffect(() => {
     if (showDates && token) {
@@ -52,35 +49,48 @@ const ProfitYearSelector = ({
         isSortDescending: true
       });
     }
-    // token in dependencies for issues where profit year selector is on first page mounted
   }, [showDates, triggerFrozenStateSearch, token]);
   
   const activeFrozenState = frozenStateCollectionData?.results?.find(state => state.isActive);
-  const activeProfitYear = activeFrozenState?.profitYear;
+  const hasFrozenData = frozenStateCollectionData?.results && frozenStateCollectionData.results.length > 0;
+  
+  const yearsToDisplay: number[] = [];
+  if (hasFrozenData && activeFrozenState?.profitYear) {
+    yearsToDisplay.push(activeFrozenState.profitYear);
+  }
+  
+  if (!yearsToDisplay.includes(thisYear)) {
+    yearsToDisplay.push(thisYear);
+  }
+  
   const formattedAsOfDate = activeFrozenState?.asOfDateTime 
     ? ` - ${mmDDYYFormat(activeFrozenState.asOfDateTime)}` 
     : '';
   
   const todayFormattedString = ` - ${mmDDYYFormat(new Date())}`;
-
-  // TODO: the above formatting could also be provided by the API response
+  
+  if (yearsToDisplay.length === 0) {
+    yearsToDisplay.push(thisYear);
+  }
   
   return (
     <div className="flex items-center gap-2 h-10 min-w-[174px]">
       <Select
+        labelId="profit-year-selector"
+        id="profit-year-selector"
         defaultValue={defaultValue || selectedProfitYear.toString()}
         value={selectedProfitYear.toString()}
         size="small"
         fullWidth
         disabled={disabled || (disabledWhileLoading && isLoading)}
         onChange={handleChange}>
-        {effectiveDisplayYears.map(year => (
+        {yearsToDisplay.map(year => (
           <MenuItem key={year} value={year}>
             {year}
             {showDates && (
               <>
-                {year === currentYear && todayFormattedString}
-                {year < currentYear && (activeProfitYear === year) && formattedAsOfDate}
+                {year === thisYear && todayFormattedString}
+                {year !== thisYear && (activeFrozenState?.profitYear === year) && formattedAsOfDate}
               </>
             )}
           </MenuItem>

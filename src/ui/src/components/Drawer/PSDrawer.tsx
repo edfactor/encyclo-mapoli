@@ -10,6 +10,7 @@ import {
   ListItem,
   ListItemButton,
   ListItemText,
+  SelectChangeEvent,
   SvgIcon,
   Typography
 } from "@mui/material";
@@ -17,11 +18,19 @@ import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { clearActiveSubMenu, closeDrawer, openDrawer, setActiveSubMenu } from "reduxstore/slices/generalSlice";
+import {
+  checkDecemberParamsAndGridsProfitYears,
+  checkFiscalCloseParamsAndGridsProfitYears,
+  setSelectedProfitYearForDecemberActivities,
+  setSelectedProfitYearForFiscalClose
+} from "reduxstore/slices/yearsEndSlice";
 import { drawerTitle, menuLevels } from "../../MenuData";
-import { drawerClosedWidth, drawerOpenWidth } from "../../constants";
+import { drawerClosedWidth, drawerOpenWidth, MENU_LABELS } from "../../constants";
+import ProfitYearSelector from "components/ProfitYearSelector/ProfitYearSelector";
 
 import { SvgIconProps } from "@mui/material";
 import { RootState } from "reduxstore/store";
+import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 
 const SidebarIcon = (props: SvgIconProps) => (
   <SvgIcon
@@ -36,9 +45,13 @@ const SidebarIcon = (props: SvgIconProps) => (
 const PSDrawer = () => {
   const navigate = useNavigate();
   const { isDrawerOpen: drawerOpen, activeSubmenu } = useSelector((state: RootState) => state.general);
+  const { selectedProfitYearForDecemberActivities, selectedProfitYearForFiscalClose } = useSelector(
+    (state: RootState) => state.yearsEnd
+  );
   const [expandedLevels, setExpandedLevels] = useState<{ [key: string]: boolean }>({});
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
   const dispatch = useDispatch();
+  const profitYear = useDecemberFlowProfitYear();
 
   const hasThirdLevel = (level: string, secondLevel: string) => {
     const hasSome = menuLevels.some(
@@ -96,6 +109,16 @@ const PSDrawer = () => {
   const handleSubPageClick = (subRoute: string) => {
     navigate(`/${subRoute}`);
     console.log(`Sub page Navigating to ${subRoute}`);
+  };
+
+  const handleDecemberProfitYearChange = (event: SelectChangeEvent) => {
+    dispatch(setSelectedProfitYearForDecemberActivities(Number(event.target.value)));
+    dispatch(checkDecemberParamsAndGridsProfitYears(Number(event.target.value)));
+  };
+
+  const handleFiscalCloseProfitYearChange = (event: SelectChangeEvent) => {
+    dispatch(setSelectedProfitYearForFiscalClose(Number(event.target.value)));
+    dispatch(checkFiscalCloseParamsAndGridsProfitYears(Number(event.target.value)));
   };
 
   return (
@@ -200,6 +223,24 @@ const PSDrawer = () => {
                   {activeSubmenu}
                 </Typography>
               </ListItemButton>
+              {activeSubmenu === MENU_LABELS.DECEMBER_ACTIVITIES && (
+                <div style={{ padding: '24px' }}>
+                  <ProfitYearSelector
+                    selectedProfitYear={selectedProfitYearForDecemberActivities}
+                    handleChange={handleDecemberProfitYearChange}
+                    defaultValue={profitYear?.toString()}
+                  />
+                </div>
+              )}
+              
+              {activeSubmenu === MENU_LABELS.FISCAL_CLOSE && (
+                <div style={{ padding: '24px' }}>
+                  <ProfitYearSelector
+                    selectedProfitYear={selectedProfitYearForFiscalClose}
+                    handleChange={handleFiscalCloseProfitYearChange}
+                  />
+                </div>
+              )}
               <List>
                 {menuLevels
                   .find((l) => l.mainTitle === activeSubmenu)
