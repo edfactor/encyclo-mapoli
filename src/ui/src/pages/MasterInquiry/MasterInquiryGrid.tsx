@@ -31,10 +31,10 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoad
       return {
         pagination: { skip, take: pageSize, sortBy, isSortDescending },
         ...(!!masterInquiryRequestParams.startProfitYear && {
-          startProfitYear: masterInquiryRequestParams.startProfitYear.getFullYear()
+          startProfitYear: masterInquiryRequestParams.startProfitYear
         }),
         ...(!!masterInquiryRequestParams.endProfitYear && {
-          endProfitYear: masterInquiryRequestParams.endProfitYear.getFullYear()
+          endProfitYear: masterInquiryRequestParams.endProfitYear
         }),
         ...(!!masterInquiryRequestParams.startProfitMonth && {
           startProfitMonth: masterInquiryRequestParams.startProfitMonth

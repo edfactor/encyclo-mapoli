@@ -51,11 +51,12 @@ export interface DistributionsAndForfeituresRequestDto extends ProfitYearRequest
   startMonth?: number;
   endMonth?: number;
   includeOutgoingForfeitures?: boolean;
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface DistributionsAndForfeitures {
   badgeNumber: number;
+  psnSuffix: number;
   employeeName: string;
   ssn: string;
   loanDate: string;
@@ -100,7 +101,7 @@ export interface DuplicateSSNsRequestDto {
 }
 
 export interface MissingCommasInPYNameRequestDto {
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface MissingCommasInPYName {
@@ -282,8 +283,8 @@ export interface BaseDateRangeParams {
   endDate: Date;
 }
 export interface MasterInquirySearch {
-  startProfitYear?: Date | null;
-  endProfitYear?: Date | null;
+  startProfitYear?: number | null;
+  endProfitYear?: number | null;
   startProfitMonth?: number | null;
   endProfitMonth?: number | null;
   socialSecurity?: number | null;
@@ -345,6 +346,7 @@ export interface MasterInquiryRequest {
   paymentType?: number;
   memberType?: number;
   badgeNumber?: number;
+  psnSuffix?: number;
   pagination: SortedPaginationRequestDto;
 }
 
@@ -736,7 +738,7 @@ export interface YearEndProfitSharingReportRequest {
   includeEmployeesWithPriorProfitSharingAmounts: boolean;
   includeEmployeesWithNoPriorProfitSharingAmounts: boolean;
   profitYear: number;
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface CreateMilitaryContributionRequest extends ProfitYearRequest {
@@ -860,8 +862,7 @@ export interface Under21InactiveResponse {
 }
 
 export interface Under21TotalsRequest extends ProfitYearRequest {
-  isSortDescending?: boolean;
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface Under21TotalsResponse {
@@ -898,7 +899,6 @@ export interface YearEndProfitSharingReportSummaryResponse {
 }
 
 export interface UpdateSummaryRequest extends ProfitYearRequest {
-  isSortDescending?: boolean;
   pagination: SortedPaginationRequestDto;
 }
 

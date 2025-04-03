@@ -19,7 +19,7 @@ public class MasterInquiryEndpoint : Endpoint<MasterInquiryRequest, MasterInquir
 
     public override void Configure()
     {
-        Get("master-inquiry");
+        Post("master-inquiry");
         Summary(s =>
         {
             s.Summary = "PS Master Inquiry (008-10)";

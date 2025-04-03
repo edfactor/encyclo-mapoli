@@ -30,9 +30,10 @@ export const InquiryApi = createApi({
     getProfitMasterInquiry: builder.query<MasterInquiryResponseType, MasterInquiryRequest>({
       query: (params) => ({
         url: "master/master-inquiry",
-        method: "GET",
-        params: {
-          badgeNumber: params.badgeNumber,
+        method: "POST",
+        body: {
+          badgeNumber: Number(params.badgeNumber?.toString().substring(0, 6)),
+          psnSuffix: Number(params.badgeNumber?.toString().substring(6)),
           startProfitYear: params.startProfitYear,
           endProfitYear: params.endProfitYear,
           startProfitMonth: params.startProfitMonth,

@@ -364,14 +364,16 @@ FROM FILTERED_DEMOGRAPHIC p1
                         x.ContactInfo.FirstName,
                         x.ContactInfo.LastName,
                         x.DateOfBirth,
-                        BadgeNumber = x.BadgeNumber
+                        x.BadgeNumber,
+                        PsnSuffix = (short)0
                     }).Union(ctx.Beneficiaries.Include(b => b.Contact).Select(x => new
                     {
                         x.Contact!.Ssn,
                         x.Contact.ContactInfo.FirstName,
                         x.Contact.ContactInfo.LastName,
                         x.Contact.DateOfBirth,
-                        BadgeNumber = 0
+                        x.BadgeNumber,
+                        x.PsnSuffix
                     }))
                     .GroupBy(x => x.Ssn)
                     .Select(x => new
@@ -380,7 +382,8 @@ FROM FILTERED_DEMOGRAPHIC p1
                         FirstName = x.Max(m => m.FirstName),
                         LastName = x.Max(m => m.LastName),
                         DateOfBirth = x.Max(m => m.DateOfBirth),
-                        BadgeNumber = x.Max(m => m.BadgeNumber)
+                        BadgeNumber = x.Max(m => m.BadgeNumber),
+                        PsnSuffix = x.Max(m => m.PsnSuffix)
                     });
 
                 var transferAndQdroCommentTypes = new List<int>() { CommentType.Constants.TransferIn.Id, CommentType.Constants.TransferOut.Id, CommentType.Constants.QdroIn.Id, CommentType.Constants.QdroOut.Id };
@@ -393,9 +396,10 @@ FROM FILTERED_DEMOGRAPHIC p1
                                   (req.StartMonth == 0 || pd.MonthToDate >= req.StartMonth) &&
                                   (req.EndMonth == 0 || pd.MonthToDate <= req.EndMonth)
                             orderby nameAndDob.LastName, nameAndDob.FirstName
-                            select new DistributionsAndForfeitureResponse()
+                            select new DistributionsAndForfeitureResponse
                             {
                                 BadgeNumber = nameAndDob.BadgeNumber,
+                                PsnSuffix = nameAndDob.PsnSuffix,
                                 Ssn = pd.Ssn.MaskSsn(),
                                 EmployeeName = $"{nameAndDob.LastName}, {nameAndDob.FirstName}",
                                 DistributionAmount = _distributionProfitCodes.Contains(pd.ProfitCodeId) ? pd.Forfeiture : 0,

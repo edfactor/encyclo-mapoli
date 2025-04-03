@@ -83,7 +83,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
           ...(data.startMonth && { startMonth: data.startMonth }),
           ...(data.endMonth && { endMonth: data.endMonth }),
           includeOutgoingForfeitures: data.includeOutgoingForfeitures ?? false,
-          pagination: { skip: 0, take: 25 }
+          pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: false }
         },
         false
       ).unwrap();
