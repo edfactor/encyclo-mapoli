@@ -46,7 +46,8 @@ import {
   Under21TotalsResponse,
   YearEndProfitSharingReportSummaryResponse,
   UpdateSummaryResponse,
-  ReportsByAgeParams
+  ReportsByAgeParams,
+  ProfitShareEditUpdateQueryParams
 } from "reduxstore/types";
 
 export interface YearsEndState {
@@ -104,6 +105,8 @@ export interface YearsEndState {
   negativeEtvaForSSNsOnPayprofit: PagedReportResponse<NegativeEtvaForSSNsOnPayProfit> | null;
   negativeEtvaForSSNsOnPayprofitParams: ProfitYearRequest | null;
   profitSharingUpdate: ProfitShareUpdateResponse | null;
+  profitSharingUpdateQueryParams: ProfitShareEditUpdateQueryParams | null;
+  profitSharingEditQueryParams: ProfitShareEditUpdateQueryParams | null;
   profitSharingEdit: ProfitShareEditResponse | null;
   profitSharingMaster: ProfitShareMasterResponse | null;
   profitSharingRevert: ProfitShareMasterResponse | null;
@@ -126,6 +129,8 @@ export interface YearsEndState {
 }
 
 const initialState: YearsEndState = {
+  profitSharingEditQueryParams: null,
+  profitSharingUpdateQueryParams: null,
   profitEditUpdateChangesAvailable: false,
   profitEditUpdateRevertChangesAvailable: false,
   selectedProfitYearForDecemberActivities: 2024,
@@ -205,6 +210,18 @@ export const yearsEndSlice = createSlice({
   name: "yearsEnd",
   initialState,
   reducers: {
+    setProfitSharingEditQueryParams: (state, action: PayloadAction<ProfitShareEditUpdateQueryParams>) => {
+      state.profitSharingEditQueryParams = action.payload;
+    },
+    clearProfitSharingEditQueryParams: (state) => {
+      state.profitSharingEditQueryParams = null;
+    },
+    setProfitSharingUpdateQueryParams: (state, action: PayloadAction<ProfitShareEditUpdateQueryParams>) => {
+      state.profitSharingUpdateQueryParams = action.payload;
+    },
+    clearProfitSharingUpdateQueryParams: (state) => {
+      state.profitSharingUpdateQueryParams = null;
+    },
     setProfitEditUpdateChangesAvailable: (state, action: PayloadAction<boolean>) => {
       state.profitEditUpdateChangesAvailable = action.payload;
     },
@@ -973,6 +990,10 @@ export const {
   clearProfitMasterApply,
   setProfitSharingEdit,
   clearProfitSharingEdit,
-  clearProfitMasterRevert
+  clearProfitMasterRevert,
+  setProfitSharingUpdateQueryParams,
+  clearProfitSharingUpdateQueryParams,
+  setProfitSharingEditQueryParams,
+  clearProfitSharingEditQueryParams
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;
