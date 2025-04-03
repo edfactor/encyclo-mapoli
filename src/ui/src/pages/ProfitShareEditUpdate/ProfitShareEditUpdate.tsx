@@ -2,9 +2,9 @@ import { Replay, SaveOutlined } from "@mui/icons-material";
 import { Button, Divider, Tooltip, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import { useDispatch, useSelector } from "react-redux";
-import { DSMAccordion, numberToCurrency, Page, TotalsGrid } from "smart-ui-library";
+import { DSMAccordion, numberToCurrency, Page } from "smart-ui-library";
 import ProfitShareEditUpdateSearchFilter from "./ProfitShareEditUpdateSearchFilter";
-//import { TotalsGrid } from "../../components/TotalsGrid";
+import { TotalsGrid } from "../../components/TotalsGrid";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useLazyGetMasterApplyQuery, useLazyGetMasterRevertQuery } from "reduxstore/api/YearsEndApi";
 import { setProfitEditUpdateRevertChangesAvailable } from "reduxstore/slices/yearsEndSlice";
@@ -208,56 +208,24 @@ const ProfitShareEditUpdate = () => {
                 "Ending Balance"
               ]}
             />
-            {profitSharingUpdateAdjustmentSummary?.badgeNumber && (
-              <>
-                <div className="px-[24px]">
-                  <h2 className="text-dsm-secondary">Adjustment Report</h2>
-                </div>
+            {/*{profitSharingUpdateAdjustmentSummary?.badgeNumber && (*/}
+            <>
+              <div className="px-[24px]">
+                <h2 className="text-dsm-secondary">Adjustments Entered</h2>
+              </div>
 
-                <TotalsGrid
-                  displayData={[
-                    [
-                      numberToCurrency(0),
-                      numberToCurrency(0),
-                      numberToCurrency(0),
-                      numberToCurrency(0),
-                      numberToCurrency(0),
-                      numberToCurrency(0),
-                      numberToCurrency(0)
-                    ],
-                    [
-                      numberToCurrency(0),
-                      numberToCurrency(0),
-                      numberToCurrency(0),
-                      numberToCurrency(0),
-                      numberToCurrency(0),
-                      numberToCurrency(0),
-                      numberToCurrency(0)
-                    ],
-                    [
-                      numberToCurrency(0),
-                      numberToCurrency(0),
-                      numberToCurrency(0),
-                      numberToCurrency(0),
-                      numberToCurrency(0),
-                      numberToCurrency(0),
-                      numberToCurrency(0)
-                    ]
-                  ]}
-                  leftColumnHeaders={["Total", "Allocation", "Point"]}
-                  topRowHeaders={[
-                    "",
-                    "Beginning Balance",
-                    "Contributions",
-                    "Earnings",
-                    "Earnings2",
-                    "Forfeitures",
-                    "Distributions Military/Paid Allocation",
-                    "Ending Balance"
-                  ]}
-                />
-              </>
-            )}
+              <TotalsGrid
+                displayData={[
+                  [70191, numberToCurrency(0), numberToCurrency(0), numberToCurrency(0), numberToCurrency(0)],
+                  ["", numberToCurrency(0), numberToCurrency(0), numberToCurrency(0), numberToCurrency(0)],
+                  ["", numberToCurrency(0), numberToCurrency(0), numberToCurrency(0), numberToCurrency(0)]
+                ]}
+                leftColumnHeaders={["Initial", "Adjustment", "Totals"]}
+                topRowHeaders={["", "Badge", "Contributions", "Earnings", "Earnings2", "Forfeitures"]}
+                headerCellStyle={{}}
+              />
+            </>
+            {/* })} */}
             <Grid2 width="100%">
               <ProfitShareEditUpdateTabs />
             </Grid2>

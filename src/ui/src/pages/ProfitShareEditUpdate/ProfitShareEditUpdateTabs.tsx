@@ -6,7 +6,8 @@ import Tab from "@mui/material/Tab";
 import { SyntheticEvent, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
-import ProfitShareEditUpdateGrid from "./ProfitShareEditUpdateGrid";
+import ProfitShareEditGrid from "./ProfitShareEditGrid";
+import ProfitShareUpdateGrid from "./ProfitShareUpdateGrid";
 
 const ProfitShareEditUpdateTabs: React.FC = () => {
   const [value, setValue] = useState("1");
@@ -36,10 +37,10 @@ const ProfitShareEditUpdateTabs: React.FC = () => {
               </TabList>
             </Box>
             <TabPanel value="1">
-              <ProfitShareEditUpdateGrid />
+              <ProfitShareUpdateGrid />
             </TabPanel>
             <TabPanel value="2">
-              <ProfitShareEditUpdateGrid />
+              <ProfitShareEditGrid />
             </TabPanel>
           </TabContext>
         </Box>

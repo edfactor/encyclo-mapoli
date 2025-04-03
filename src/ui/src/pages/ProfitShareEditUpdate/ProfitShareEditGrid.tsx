@@ -4,8 +4,9 @@ import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams } from "smart-ui-library";
 import { ProfitShareUpdateGridColumns } from "./ProfitShareEditUpdateGridColumns";
 import { ProfitShareEditUpdateGridColumns } from "./ProfitShareEditGridColumns";
+import { Typography } from "@mui/material";
 
-const ProfitShareEditUpdateGrid = () => {
+const ProfitShareEditGrid = () => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
@@ -18,18 +19,14 @@ const ProfitShareEditUpdateGrid = () => {
 
   return (
     <>
-      <h1>{profitSharingUpdate?.reportName}</h1>
-      {!!profitSharingUpdate && profitSharingUpdate?.reportName == "Profit Sharing Update" && (
-        <DSMGrid
-          preferenceKey={"ProfitShareUpdateGrid"}
-          isLoading={false}
-          providedOptions={{
-            rowData: "response" in profitSharingUpdate ? profitSharingUpdate.response?.results : [],
-            columnDefs: columnDefs
-          }}
-        />
-      )}
-      {!!profitSharingUpdate && profitSharingUpdate?.reportName == "Profit Sharing Edit" && (
+      <div className="px-[24px]">
+        <Typography
+          variant="h2"
+          sx={{ color: "#0258A5" }}>
+          {`Profit Share Edit (PAY444)`}
+        </Typography>
+      </div>
+      {!!profitSharingUpdate && (
         <DSMGrid
           preferenceKey={"ProfitShareEditGrid"}
           isLoading={false}
@@ -43,4 +40,4 @@ const ProfitShareEditUpdateGrid = () => {
   );
 };
 
-export default ProfitShareEditUpdateGrid;
+export default ProfitShareEditGrid;
