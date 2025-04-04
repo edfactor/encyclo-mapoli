@@ -37,7 +37,7 @@ const App = () => {
       try {
         // Option 1: Extract username from JWT token
         const tokenPayload = JSON.parse(atob(token.split(".")[1]));
-        var usernameFromToken =
+        let usernameFromToken =
           tokenPayload.username || tokenPayload.preferred_username || tokenPayload.sub || tokenPayload.email;
 
         // Format email-style usernames by extracting part before @
