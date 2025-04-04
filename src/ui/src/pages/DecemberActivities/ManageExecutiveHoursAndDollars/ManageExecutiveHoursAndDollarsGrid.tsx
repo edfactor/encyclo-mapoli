@@ -110,17 +110,22 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
       ...(executiveHoursAndDollarsQueryParams.badgeNumber && {
         badgeNumber: executiveHoursAndDollarsQueryParams.badgeNumber
       }),
-      ...(executiveHoursAndDollarsQueryParams.socialSecurity !== null && {
-        socialSecurity: executiveHoursAndDollarsQueryParams.socialSecurity
-      }),
+      ...(executiveHoursAndDollarsQueryParams.socialSecurity !== null &&
+        executiveHoursAndDollarsQueryParams.socialSecurity !== 0 && {
+          socialSecurity: executiveHoursAndDollarsQueryParams.socialSecurity
+        }),
       ...(executiveHoursAndDollarsQueryParams.fullNameContains && {
         fullNameContains: executiveHoursAndDollarsQueryParams.fullNameContains
       }),
       hasExecutiveHoursAndDollars: executiveHoursAndDollarsQueryParams.hasExecutiveHoursAndDollars ?? false,
       isMonthlyPayroll: executiveHoursAndDollarsQueryParams.isMonthlyPayroll ?? false,
-      pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: sortParams.sortBy, isSortDescending: sortParams.isSortDescending },
+      pagination: {
+        skip: pageNumber * pageSize,
+        take: pageSize,
+        sortBy: sortParams.sortBy,
+        isSortDescending: sortParams.isSortDescending
+      }
     };
-
     await triggerSearch(request, false);
   }, [executiveHoursAndDollarsQueryParams, pageNumber, pageSize, sortParams, triggerSearch]);
 
@@ -153,6 +158,28 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
 
   const processEditedRow = function (event: CellValueChangedEvent): void {
     const rowInQuestion: IRowNode = event.node;
+
+    // We need to make sure that the hours and dollars are not too large
+    // At this time, we are limiting hours to less than 4000 and dollars
+    // to be less than 20 million
+
+    if (rowInQuestion.data.hoursExecutive > 4000) {
+      // If the new value is invalid, we need to go through the executiveHoursAndDollars object,
+      // find the badgeNumber equal to rowInQuestion.data.badgeNumber, find the value of hoursExecutive
+      // in that object, and set it to the value of rowInQuestion.data.hoursExecutive
+      rowInQuestion.data.hoursExecutive = executiveHoursAndDollars?.response.results.find(
+        (obj) => obj.badgeNumber === rowInQuestion.data.badgeNumber
+      )?.hoursExecutive;
+      event.api.refreshCells({ force: true }); // Needed to refresh the grid cells to restore the old value
+      return;
+    }
+    if (rowInQuestion.data.incomeExecutive > 20000000) {
+      rowInQuestion.data.incomeExecutive = executiveHoursAndDollars?.response.results.find(
+        (obj) => obj.badgeNumber === rowInQuestion.data.badgeNumber
+      )?.incomeExecutive;
+      event.api.refreshCells({ force: true });
+      return;
+    }
 
     const rowRecord: ExecutiveHoursAndDollarsGrid = {
       executiveHoursAndDollars: [
