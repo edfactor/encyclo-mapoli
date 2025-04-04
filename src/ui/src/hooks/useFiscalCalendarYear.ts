@@ -1,15 +1,19 @@
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
+import { CalendarResponseDto } from "../reduxstore/types";
 
 /**
- * Hook to provide the selected profit year from the Fiscal Close flow
- * This centralized hook allows us to control the profit year consistently across all
- * Fiscal Close
+ * Custom hook to retrieve the fiscal calendar year data from the Redux store.
+ *
+ * This hook accesses the global Redux state and specifically extracts the `accountingYearData`
+ * from the `lookups` slice of the store.
+ *
+ * @returns {CalendarResponseDto | null} The fiscal calendar year data (accountingYearData).
  */
-const useFiscalCloseProfitYear = (): number => {
-  const { selectedProfitYearForFiscalClose } = useSelector((state: RootState) => state.yearsEnd);
+const useFiscalCalendarYear = (): CalendarResponseDto | null => {
+  const { accountingYearData } = useSelector((state: RootState) => state.lookups);
 
-  return selectedProfitYearForFiscalClose;
+  return accountingYearData;
 };
 
-export default useFiscalCloseProfitYear; 
+export default useFiscalCalendarYear; 

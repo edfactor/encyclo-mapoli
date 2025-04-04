@@ -15,6 +15,7 @@ import * as yup from "yup";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 import { ProfitYearRequest, SortedPaginationRequestDto } from "../../../reduxstore/types";
+import useFiscalCalendarYear from "../../../hooks/useFiscalCalendarYear";
 
 interface RehireForfeituresSearch extends ProfitYearRequest {
   beginningDate: string;
@@ -52,6 +53,7 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
   const [triggerSearch, { isFetching }] = useLazyGetRehireForfeituresQuery();
   const { rehireForfeituresQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const profitYear = useDecemberFlowProfitYear();
+  const fiscalCalendarYear = useFiscalCalendarYear();
   const dispatch = useDispatch();
   const {
     control,
@@ -63,9 +65,7 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
     resolver: yupResolver<RehireForfeituresSearch>(schema),
     defaultValues: {
       profitYear: profitYear || rehireForfeituresQueryParams?.profitYear || undefined,
-      beginningDate: rehireForfeituresQueryParams?.beginningDate
-        ? rehireForfeituresQueryParams.beginningDate
-        : undefined,
+      beginningDate: fiscalCalendarYear?.fiscalBeginDate.toLocaleDateString() || rehireForfeituresQueryParams?.beginningDate || undefined,
       endingDate: rehireForfeituresQueryParams?.endingDate ? rehireForfeituresQueryParams.endingDate : undefined,
       pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }
     }
@@ -86,7 +86,8 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
         setMilitaryAndRehireForfeituresQueryParams({
           profitYear: profitYear,
           beginningDate: data.beginningDate,
-          endingDate: data.endingDate
+          endingDate: data.endingDate,
+          pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }
         })
       );
     }
