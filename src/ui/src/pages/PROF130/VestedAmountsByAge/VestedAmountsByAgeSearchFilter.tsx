@@ -8,7 +8,11 @@ import * as yup from "yup";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-import { clearVestedAmountsByAgeQueryParams, setVestedAmountsByAgeQueryParams } from "reduxstore/slices/yearsEndSlice";
+import {
+  clearVestedAmountsByAge,
+  clearVestedAmountsByAgeQueryParams,
+  setVestedAmountsByAgeQueryParams
+} from "reduxstore/slices/yearsEndSlice";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 import { useEffect } from "react";
 
@@ -70,6 +74,7 @@ const VestedAmountsByAgeSearchFilter: React.FC = () => {
 
   const handleReset = () => {
     dispatch(clearVestedAmountsByAgeQueryParams());
+    dispatch(clearVestedAmountsByAge());
     reset({
       profitYear: fiscalCloseProfitYear
     });

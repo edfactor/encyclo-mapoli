@@ -59,7 +59,7 @@ import BalanceByAge from "../../pages/PROF130/BalanceByAge/BalanceByAge";
 import ContributionsByAge from "../../pages/PROF130/ContributionsByAge/ContributionsByAge";
 import DistributionByAge from "../../pages/PROF130/DistributionByAge/DistributionByAge";
 import ForfeituresByAge from "../../pages/PROF130/ForfeituresByAge/ForfeituresByAge";
-import ProfitShareUpdate from "../../pages/ProfitShareUpdate/ProfitShareUpdate";
+import ProfitShareEditUpdate from "../../pages/ProfitShareEditUpdate/ProfitShareEditUpdate";
 import YTDWages from "../../pages/YTDWagesExtract/YTDWages";
 import RouteSecurity from "./RouteSecurity";
 
@@ -220,9 +220,7 @@ const RouterSubAssembly: React.FC = () => {
               <Route
                 path={ROUTES.VESTED_AMOUNTS_BY_AGE}
                 element={<VestedAmountsByAge />}></Route>
-              <Route
-                path={ROUTES.DECEMBER_PROCESS_ACCORDION}
-                element={<DecemberProcessAccordion />}></Route>
+             
               <Route
                 path={ROUTES.PROF_TERM}
                 element={<Termination />}></Route>
@@ -240,7 +238,7 @@ const RouterSubAssembly: React.FC = () => {
                 element={<Forfeit />}></Route>
               <Route
                 path={ROUTES.FISCAL_CLOSE}
-                element={<FiscalFlow />}></Route>
+                element={<></>}></Route>
               <Route
                 path={ROUTES.PROFIT_SHARE_REPORT_EDIT_RUN}
                 element={<ProfitShareReportEditRun />}></Route>
@@ -249,13 +247,13 @@ const RouterSubAssembly: React.FC = () => {
                 element={<ProfitShareReportFinalRun />}></Route>
               <Route
                 path={ROUTES.PROFIT_SHARE_UPDATE}
-                element={<ProfitShareUpdate />}></Route>
+                element={<ProfitShareEditUpdate />}></Route>
               <Route
                 path={ROUTES.PAY426_ACTIVE_18_20}
                 element={<EighteenToTwenty />}></Route>
               <Route
                 path=""
-                element={<DecemberProcessAccordion />}></Route>
+                element={<></>}></Route>
               <Route
                 path={ROUTES.PROFIT_SHARE_BY_STORE}
                 element={<ProfitShareByStore />}></Route>

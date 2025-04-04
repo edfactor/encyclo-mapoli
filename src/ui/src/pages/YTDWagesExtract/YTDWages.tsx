@@ -30,22 +30,27 @@ const YTDWages: React.FC = () => {
 
   const handleDownloadCSV = async (data: SearchData) => {
     try {
-      const fetchCSVPromise = triggerSearch({
+      const fetchCSVResult = await triggerSearch({
         profitYear: data.profitYear,
         acceptHeader: "text/csv",
-        pagination: { skip: 0, take: 20000, sortBy : sortParams.sortBy, isSortDescending: sortParams.isSortDescending  }
+        pagination: { skip: 0, take: 20000, sortBy: sortParams.sortBy, isSortDescending: sortParams.isSortDescending }
       });
-      await downloadFileFromResponse(
-        fetchCSVPromise,
-        `ytd-employee-wage-extract-${employeeWagesForYearQueryParams?.profitYear || lastYear}.csv`
-      );
+
+      if (fetchCSVResult.data) {
+        await downloadFileFromResponse(
+          Promise.resolve({ data: fetchCSVResult.data instanceof Blob ? fetchCSVResult.data : new Blob() }),
+          `ytd-employee-wage-extract-${employeeWagesForYearQueryParams?.profitYear || lastYear}.csv`
+        );
+      } else {
+        console.error("Failed to fetch CSV data");
+      }
 
       // We need to restore the grid with the original JSON, not the CSV blob
       // that we just downloaded that displaced the json we had before
       triggerSearch({
         profitYear: data.profitYear,
         acceptHeader: "text/json",
-        pagination: { skip: 0, take: 255, sortBy : sortParams.sortBy, isSortDescending: sortParams.isSortDescending  }
+        pagination: { skip: 0, take: 255, sortBy: sortParams.sortBy, isSortDescending: sortParams.isSortDescending }
       });
     } catch (error) {
       console.error("Error reloading grid data after download", error);

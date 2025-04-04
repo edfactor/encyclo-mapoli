@@ -60,29 +60,6 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
             TreatAsBeneficiary = m.TreatAsBeneficiary
         }).ToList();
 
-        // Since this service sometimes takes 40 seconds (sometimes 4 seconds) to run, a cache for paging and sorting would be nice. 
-
-#if false
-        // Russ, this throws, "The source 'IQueryable' doesn't implement 'IAsyncEnumerable<Demoulas.ProfitSh..."
-        // So I implemented in-memory sorting.  
-        var result = await members.AsQueryable().ToPaginationResultsAsync(profitShareUpdateRequest, cancellationToken)
-        // NOTE "members" has a series of in memory computations applied to it.
-#else
-        string sortBy = profitShareUpdateRequest.SortBy ?? "Name";
-        if (profitShareUpdateRequest.IsSortDescending ?? false)
-        {
-            members = members.OrderByDescending(m => m!.GetType()!.GetProperty(sortBy)?.GetValue(m, null)).ToList();
-        }
-        else
-        {
-            members = members.OrderBy(m => m.GetType().GetProperty(sortBy)?.GetValue(m, null)).ToList();
-        }
-
-        members = members.Skip(profitShareUpdateRequest.Skip ?? 0).Take(profitShareUpdateRequest.Take ?? 25).ToList();
-
-        PaginatedResponseDto<ProfitShareUpdateMemberResponse> results = new(profitShareUpdateRequest) { Results = members };
-#endif
-
         return new ProfitShareUpdateResponse
         {
             HasExceededMaximumContributions = employeeExceededMaxContribution,
@@ -90,7 +67,11 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
             Totals = totalsDto,
             ReportName = "Profit Sharing Update",
             ReportDate = DateTimeOffset.Now,
-            Response = results
+            Response = new PaginatedResponseDto<ProfitShareUpdateMemberResponse>(profitShareUpdateRequest)
+            {
+                Total = members.Count,
+                Results =  ProfitShareEditService.HandleInMemorySortAndPaging(profitShareUpdateRequest, members)
+            }
         };
     }
 
@@ -163,6 +144,15 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
             totalsDto.ClassActionFund += memberFinancials.Caf;
             totalsDto.MaxOverTotal += memberFinancials.MaxOver;
             totalsDto.MaxPointsTotal += memberFinancials.MaxPoints;
+            // members can be both employees and beneficiaries, but I presume that the employee count is the one that matters.
+            if (memberFinancials.IsEmployee)
+            {
+                totalsDto.TotalEmployees++;
+            }
+            else
+            {
+                totalsDto.TotalBeneficaries++;
+            }
         }
 
         // Use the list of members to build up response for client.

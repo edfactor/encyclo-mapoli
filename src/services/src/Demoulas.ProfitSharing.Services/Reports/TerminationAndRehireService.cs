@@ -113,6 +113,8 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
                             ProfitYear = pd.ProfitYear
                         })
                     })
+                .OrderBy(x=> x.BadgeNumber)
+                .ThenByDescending(x=> x.ReHiredDate)
                 .ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
         });
         return new ReportResponseBase<RehireForfeituresResponse>
@@ -158,7 +160,7 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
                 && m.ReHireDate >= beginning
                 && m.ReHireDate <= ending)
             .Join(
-                context.ProfitDetails.Where(x => x.ProfitYear == req.ProfitYear), // Table to join with (ProfitDetail)
+                context.ProfitDetails, // Table to join with (ProfitDetail)
                 combined => combined.Ssn, // Key selector from the result of the first join
                 profitDetail => profitDetail.Ssn, // Foreign key selector from ProfitDetail
                 (member, profitDetail) => new // Result selector after joining ProfitDetail

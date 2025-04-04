@@ -154,4 +154,29 @@ public static class StockFactory
         ];
         return (demographic, payprofits);
     }
+
+    public static List<YearEndUpdateStatus> CreateYearEndUpdateStatuses(short profitYear)
+    {
+        return [ new YearEndUpdateStatus
+            {
+                ProfitYear = profitYear,
+                UpdatedTime = default,
+                UpdatedBy = "someone",
+                BeneficiariesEffected = 0,
+                EmployeesEffected = 0,
+                EtvasEffected = 0,
+                ContributionPercent = 0,
+                IncomingForfeitPercent = 0,
+                EarningsPercent = 0,
+                SecondaryEarningsPercent = 0,
+                MaxAllowedContributions = 0,
+                BadgeAdjusted = 0,
+                BadgeAdjusted2 = 0,
+                AdjustContributionAmount = 0,
+                AdjustEarningsAmount = 0,
+                AdjustIncomingForfeitAmount = 0,
+                AdjustEarningsSecondaryAmount = 0
+            }
+        ];
+    }
 }

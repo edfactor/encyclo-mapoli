@@ -4,7 +4,7 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import Grid2 from '@mui/material/Grid2';
+import Grid2 from "@mui/material/Grid2";
 import React from "react";
 
 export type totalsGridProps = {
@@ -36,13 +36,13 @@ export const TotalsGrid: React.FC<totalsGridProps> = ({
   });
   const dataCellStyleDefault: React.CSSProperties = {
     height: "32px",
-    padding: "0px 18px 0px 18px",
+    padding: "0px 12px 0px 18px",
     opacity: "0px",
     borderColor: "#DDE2EB",
     fontWeight: "400",
     fontSize: "14px",
     lineHeight: "143%",
-    textAlign: "right"
+    textAlign: "left"
   };
   const negativeDataCellStyle: React.CSSProperties = {
     ...dataCellStyleDefault,
@@ -55,7 +55,9 @@ export const TotalsGrid: React.FC<totalsGridProps> = ({
   };
 
   return (
-    <Grid2 size={{ xs: 12, md: 12, lg: 12, xl: 12 }} padding={tablePadding ?? "24px"}>
+    <Grid2
+      size={{ xs: 12, md: 12, lg: 12, xl: 12 }}
+      padding={tablePadding ?? "24px"}>
       <TableContainer>
         <Table size="small">
           <TableHead>
@@ -82,6 +84,7 @@ export const TotalsGrid: React.FC<totalsGridProps> = ({
                   <TableCell
                     component="th"
                     scope="row"
+                    size="small"
                     sx={appliedHeaderCellStyle}>
                     {row.name}
                   </TableCell>
