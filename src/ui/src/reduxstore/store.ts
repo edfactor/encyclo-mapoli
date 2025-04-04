@@ -12,6 +12,7 @@ import { InquiryApi } from "./api/InquiryApi";
 import inquirySlice from "./slices/inquirySlice";
 import { LookupsApi } from "./api/LookupsApi";
 import lookupsSlice from "./slices/lookupsSlice";
+import { rtkQueryErrorToastMiddleware } from "smart-ui-library";
 
 export const store = configureStore({
   reducer: {
@@ -33,6 +34,7 @@ export const store = configureStore({
 
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ serializableCheck: false })
+      .concat(rtkQueryErrorToastMiddleware(true))
       .concat(SecurityApi.middleware)
       .concat(YearsEndApi.middleware)
       .concat(ItOperations.middleware)

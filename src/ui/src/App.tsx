@@ -1,17 +1,16 @@
 import { createTheme, ThemeProvider } from "@mui/material";
-import { useEffect, useState, useCallback } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useCallback, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "./reduxstore/store";
 // Add this import for the appropriate action
 import { setUsername } from "./reduxstore/slices/securitySlice"; // Adjust path as needed
-
 // Components
 import AppErrorBoundary from "components/ErrorBoundary";
 import PSLayout from "components/Layout/PSLayout";
 import Router from "./components/router/Router";
 
 // Styles and config
-import { themeOptions } from "smart-ui-library";
+import { themeOptions, ToastServiceProvider } from "smart-ui-library";
 import "smart-ui-library/dist/smart-ui-library.css";
 import "../agGridConfig";
 
@@ -37,31 +36,27 @@ const App = () => {
     if (token) {
       try {
         // Option 1: Extract username from JWT token
-        const tokenPayload = JSON.parse(atob(token.split('.')[1]));
-        var usernameFromToken = tokenPayload.username ||
-          tokenPayload.preferred_username ||
-          tokenPayload.sub ||
-          tokenPayload.email;
+        const tokenPayload = JSON.parse(atob(token.split(".")[1]));
+        var usernameFromToken =
+          tokenPayload.username || tokenPayload.preferred_username || tokenPayload.sub || tokenPayload.email;
 
         // Format email-style usernames by extracting part before @
-        if (usernameFromToken && usernameFromToken.includes('@')) {
-          usernameFromToken = usernameFromToken.split('@')[0];
+        if (usernameFromToken && usernameFromToken.includes("@")) {
+          usernameFromToken = usernameFromToken.split("@")[0];
         }
 
         if (usernameFromToken && !stateUsername) {
           dispatch(setUsername(usernameFromToken));
         }
       } catch (error) {
-        console.warn('Could not parse token for username:', error);
+        console.warn("Could not parse token for username:", error);
       }
     }
   }, [token, stateUsername, dispatch]);
 
   // Derived values
   const isAuthenticated = !!token;
-  const username = isAuthenticated
-    ? (appUser?.userName || stateUsername || "Guest")
-    : "Not authenticated";
+  const username = isAuthenticated ? appUser?.userName || stateUsername || "Guest" : "Not authenticated";
 
   const buildVersionNumber = uiBuildInfo
     ? `${uiBuildInfo.buildNumber ?? ""}.${uiBuildInfo.buildId ?? ""}`
@@ -104,10 +99,13 @@ const App = () => {
         buildVersionNumber={buildVersionNumber}
         userName={username}
         environmentMode={"development"}
-        oktaEnabled={true}
-      >
+        oktaEnabled={true}>
         <AppErrorBoundary>
-          <Router />
+          <ToastServiceProvider
+            maxSnack={3}
+            anchorOrigin={{ horizontal: "left", vertical: "bottom" }}>
+            <Router />
+          </ToastServiceProvider>
         </AppErrorBoundary>
       </PSLayout>
     </ThemeProvider>
