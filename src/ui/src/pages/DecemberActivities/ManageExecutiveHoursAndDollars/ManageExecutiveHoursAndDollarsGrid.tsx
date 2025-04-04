@@ -126,8 +126,6 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
         isSortDescending: sortParams.isSortDescending
       }
     };
-    console.log("Request: ");
-    console.log(request);
     await triggerSearch(request, false);
   }, [executiveHoursAndDollarsQueryParams, pageNumber, pageSize, sortParams, triggerSearch]);
 
