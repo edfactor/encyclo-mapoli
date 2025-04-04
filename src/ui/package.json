@@ -27,7 +27,7 @@
     "@mui/lab": "^5.0.0-alpha.175",
     "@mui/material": "^6.4.7",
     "@mui/system": "^5.15.18",
-    "@mui/x-date-pickers": "7.28.2",
+    "@mui/x-date-pickers": "7.28.3",
     "@okta/okta-auth-js": "7.11.1",
     "@okta/okta-react": "6.9.0",
     "@reduxjs/toolkit": "^2.3.0",
@@ -58,7 +58,7 @@
     "react-router-dom": "^6.23.1",
     "redux": "^5.0.1",
     "smart-ui-library": "file:smart-ui/smart-ui-library-5.0.1.tgz",
-    "typescript": "^5.4.5",
+    "typescript": "^5.8.2",
     "web-vitals": "~4.0.1",
     "yup": "~1.4.0"
   },
