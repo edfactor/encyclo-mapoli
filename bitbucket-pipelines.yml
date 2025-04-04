@@ -377,7 +377,7 @@ pipelines:
             - windows
             - self.hosted
           script:
-            - pwsh -File ./scripts/Check-Health.ps1 -Url $env:QA_BASE_URL -EnvServerName $env:API_SERVER_QA
+            - pwsh -File ./scripts/Check-Health.ps1 -Url $env:QA_BASE_URL -envServerName $env:API_SERVER_QA
 
       - step: *create-frontend-artifact-uat
       - step:
@@ -433,7 +433,7 @@ pipelines:
             - windows
             - self.hosted
           script:
-            - pwsh -File ./scripts/Check-Health.ps1 -Url $env:UAT_BASE_URL
+            - pwsh -File ./scripts/Check-Health.ps1 -Url $env:UAT_BASE_URL -envServerName $env:API_SERVER_QA
 
 
     develop:
