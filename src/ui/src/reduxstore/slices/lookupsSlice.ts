@@ -1,48 +1,44 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-import { EmployeeDetails, MasterInquiryResponseType, MasterInquirySearch } from "reduxstore/types";
+import {
+  CalendarResponseDto,
+  ProfitYearRequest
+} from "reduxstore/types";
 
-export interface InquiryState {
-  masterInquiryData: MasterInquiryResponseType | null;
-  masterInquiryEmployeeDetails: EmployeeDetails | null;
-  masterInquiryRequestParams: MasterInquirySearch | null;
+export interface LookupState {
+  accountingYearData: CalendarResponseDto | null;
+  accountingYearRequestParams: ProfitYearRequest | null;
 }
 
-const initialState: InquiryState = {
-  masterInquiryData: null,
-  masterInquiryEmployeeDetails: null,
-  masterInquiryRequestParams: null
+const initialState: LookupState = {
+  accountingYearData: null,
+  accountingYearRequestParams: null
 };
 
-export const inquirySlice = createSlice({
-  name: "inquiry",
+export const lookupsSlice = createSlice({
+  name: "Lookup",
   initialState,
   reducers: {
-    setMasterInquiryRequestParams: (state, action: PayloadAction<MasterInquirySearch>) => {
-      state.masterInquiryRequestParams = action.payload;
+    setAccountingYearParams: (state, action: PayloadAction<ProfitYearRequest>) => {
+      state.accountingYearRequestParams = action.payload;
     },
-    clearMasterInquiryRequestParams: (state) => {
-      state.masterInquiryRequestParams = null;
+    clearAccountingYearRequestParams: (state) => {
+      state.accountingYearRequestParams = null;
     },
 
-    setMasterInquiryData: (state, action: PayloadAction<MasterInquiryResponseType>) => {
-      state.masterInquiryData = action.payload;
-
-      if (action.payload.employeeDetails) {
-        state.masterInquiryEmployeeDetails = action.payload.employeeDetails;
-      }
+    setAccountingYearData: (state, action: PayloadAction<CalendarResponseDto>) => {
+      state.accountingYearData = action.payload;     
     },
-    clearMasterInquiryData: (state) => {
-      state.masterInquiryData = null;
-      state.masterInquiryEmployeeDetails = null;
+    clearAccountingYearData: (state) => {
+      state.accountingYearData = null;
     }
   }
 });
 
 export const {
-  clearMasterInquiryData,
-  clearMasterInquiryRequestParams,
-  setMasterInquiryData,
-  setMasterInquiryRequestParams
-} = inquirySlice.actions;
-export default inquirySlice.reducer;
+  setAccountingYearParams,
+  clearAccountingYearRequestParams,
+  setAccountingYearData,
+  clearAccountingYearData
+} = lookupsSlice.actions;
+export default lookupsSlice.reducer;

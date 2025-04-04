@@ -1,11 +1,14 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-import { setMasterInquiryData } from "reduxstore/slices/inquirySlice";
+import { setAccountingYearData } from "reduxstore/slices/lookupsSlice";
 import { RootState } from "reduxstore/store";
-import { MasterInquiryRequest, MasterInquiryResponseType } from "reduxstore/types";
+import {
+  CalendarResponseDto,
+  ProfitYearRequest
+} from "reduxstore/types";
 import { url } from "./api";
 
-export const InquiryApi = createApi({
+export const LookupsApi = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: `${url}/api/`,
     prepareHeaders: (headers, { getState }) => {
@@ -25,38 +28,20 @@ export const InquiryApi = createApi({
       return headers;
     }
   }),
-  reducerPath: "inquiryApi",
+  reducerPath: "LookupsApi",
   endpoints: (builder) => ({
-    getProfitMasterInquiry: builder.query<MasterInquiryResponseType, MasterInquiryRequest>({
+    getAccountingYear: builder.query<CalendarResponseDto, ProfitYearRequest>({
       query: (params) => ({
-        url: "master/master-inquiry",
-        method: "POST",
-        body: {
-          badgeNumber: Number(params.badgeNumber?.toString().substring(0, 6)),
-          psnSuffix: Number(params.badgeNumber?.toString().substring(6)),
-          startProfitYear: params.startProfitYear,
-          endProfitYear: params.endProfitYear,
-          startProfitMonth: params.startProfitMonth,
-          endProfitMonth: params.endProfitMonth,
-          profitCode: params.profitCode,
-          contributionAmount: params.contributionAmount,
-          earningsAmount: params.earningsAmount,
-          forfeitureAmount: params.forfeitureAmount,
-          paymentAmount: params.paymentAmount,
-          socialSecurity: params.socialSecurity,
-          paymentType: params.paymentType,
-          memberType: params.memberType,
-          comment: params.comment,
-          take: params.pagination.take,
-          skip: params.pagination.skip,
-          sortBy: params.pagination.sortBy,
-          isSortDescending: params.pagination.isSortDescending
+        url: "calendar/accounting-year",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          dispatch(setMasterInquiryData(data));
+          dispatch(setAccountingYearData(data));
         } catch (err) {
           console.log("Err: " + err);
         }
@@ -65,4 +50,4 @@ export const InquiryApi = createApi({
   })
 });
 
-export const { useLazyGetProfitMasterInquiryQuery } = InquiryApi;
+export const { useLazyGetAccountingYearQuery } = LookupsApi;

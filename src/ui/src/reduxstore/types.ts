@@ -14,6 +14,11 @@ export interface ProfitYearRequest {
   profitYear: number;
 }
 
+export interface CalendarResponseDto {
+  fiscalBeginDate: Date;
+  fiscalEndDate: Date;
+}
+
 export interface FrozenProfitYearRequest extends ProfitYearRequest {
   useFrozenData: boolean;
 }
