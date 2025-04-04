@@ -40,10 +40,13 @@ const DuplicateNamesAndBirthdaysGrid: React.FC<DuplicateNamesAndBirthdaysGridSea
   }, [profitYear, pageNumber, pageSize, sortParams, triggerSearch]);
 
   useEffect(() => {
-    if (initialSearchLoaded && hasToken) {
+    if (hasToken && (!initialSearchLoaded || pageNumber || pageSize !== 25 || sortParams)) {
       onSearch();
+      if (!initialSearchLoaded) {
+        setInitialSearchLoaded(true);
+      }
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch, hasToken]);
+  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch, hasToken, setInitialSearchLoaded]);
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
   const columnDefs = useMemo(() => GetDuplicateNamesAndBirthdayColumns(), []);
