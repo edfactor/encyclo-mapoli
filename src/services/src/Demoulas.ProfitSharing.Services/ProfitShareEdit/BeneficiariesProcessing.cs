@@ -7,24 +7,32 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.ProfitShareEdit;
 
+[SuppressMessage("ReSharper", "MergeConditionalExpression")]
 internal static class BeneficiariesProcessingHelper
 {
-    internal static async Task ProcessBeneficiaries(IProfitSharingDataContextFactory dbContextFactory, List<MemberFinancials> members,
+    internal static async Task ProcessBeneficiaries(IProfitSharingDataContextFactory dbContextFactory, TotalService totalsService, List<MemberFinancials> members,
         ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
+        // The BeginningBalance is the total balance from the previous year
+        short profitYearPrior = (short)(profitShareUpdateRequest.ProfitYear - 1);
+
         List<BeneficiaryFinancials> benes = await dbContextFactory.UseReadOnlyContext(ctx =>
-            ctx.Beneficiaries
-                .Include(b => b.Contact)
-                .ThenInclude(c => c!.ContactInfo)
-                .OrderBy(b => b.Contact!.ContactInfo.FullName)
-                .ThenByDescending(b => b.BadgeNumber * 10000 + b.PsnSuffix).Select(b =>
-                    new BeneficiaryFinancials
-                    {
-                        Psn = b.Psn,
-                        Ssn = b.Contact!.Ssn,
-                        Name = b.Contact.ContactInfo.FullName,
-                        CurrentAmount = b.Amount // Should be computing this from the ProfitDetail via TotalService
-                    }).ToListAsync(cancellationToken)
+            {
+                return ctx.Beneficiaries
+                    .Include(b => b.Contact)
+                    .ThenInclude(c => c!.ContactInfo)
+                    .Join(totalsService.GetTotalBalanceSet(ctx, profitYearPrior), b => b.Contact!.Ssn, tbs => tbs.Ssn,
+                        (bene, tbs) => new { bene = bene, BeginningBalance = tbs.Total })
+                    .OrderBy(bt => bt.bene.Contact!.ContactInfo.FullName)
+                    .ThenByDescending(bt => bt.bene.BadgeNumber * 10000 + bt.bene.PsnSuffix).Select(bt =>
+                        new BeneficiaryFinancials
+                        {
+                            Psn = bt.bene.Psn,
+                            Ssn = bt.bene.Contact!.Ssn,
+                            Name = bt.bene.Contact.ContactInfo.FullName,
+                            BeginningBalance = (bt.BeginningBalance == null) ? 0 : bt.BeginningBalance.Value,
+                        }).ToListAsync(cancellationToken);
+            }
         );
 
         Dictionary<int, ProfitDetailTotals> thisYearsTotalsBySSn =
@@ -57,12 +65,14 @@ internal static class BeneficiariesProcessingHelper
     {
         MemberTotals memberTotals = new()
         {
-            // Yea, the next two lines - adding and removing ClassActionFundTotal - is strange
-            NewCurrentAmount = thisYearsTotals.AllocationsTotal + thisYearsTotals.ClassActionFundTotal +
-                               (bene.CurrentAmount - thisYearsTotals.ForfeitsTotal -
-                                thisYearsTotals.PaidAllocationsTotal) -
-                               thisYearsTotals.DistributionsTotal
+            NewCurrentAmount = bene.BeginningBalance 
+                               + thisYearsTotals.AllocationsTotal 
+                               + thisYearsTotals.ClassActionFundTotal 
+                               - thisYearsTotals.ForfeitsTotal 
+                               - thisYearsTotals.PaidAllocationsTotal
+                               - thisYearsTotals.DistributionsTotal
         };
+        // Yea, adding and removing ClassActionFundTotal - is strange
         memberTotals.NewCurrentAmount -= thisYearsTotals.ClassActionFundTotal;
 
         if (memberTotals.NewCurrentAmount > 0)
@@ -71,22 +81,14 @@ internal static class BeneficiariesProcessingHelper
             memberTotals.EarnPoints = (int)Math.Round(memberTotals.PointsDollars / 100, MidpointRounding.AwayFromZero);
         }
 
-        ComputeEarningsForBeneficiary(memberTotals, bene, profitShareUpdateRequest);
-
-        return new MemberFinancials(bene, thisYearsTotals, memberTotals);
-    }
-
-    private static void ComputeEarningsForBeneficiary(MemberTotals memberTotals, BeneficiaryFinancials bene, ProfitShareUpdateRequest profitShareUpdateRequest)
-    {
         memberTotals.EarningsAmount = Math.Round(profitShareUpdateRequest.EarningsPercent * memberTotals.EarnPoints, 2,
             MidpointRounding.AwayFromZero);
-
-        bene!.Earnings = memberTotals.EarningsAmount;
 
         memberTotals.SecondaryEarningsAmount =
             Math.Round(profitShareUpdateRequest.SecondaryEarningsPercent * memberTotals.EarnPoints, 2,
                 MidpointRounding.AwayFromZero);
 
-        bene.SecondaryEarnings = memberTotals.SecondaryEarningsAmount;
+        return new MemberFinancials(bene, thisYearsTotals, memberTotals);
     }
+    
 }

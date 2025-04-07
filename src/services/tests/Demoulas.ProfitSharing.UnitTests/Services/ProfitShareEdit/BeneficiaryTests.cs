@@ -5,6 +5,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
+using Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,16 +13,17 @@ namespace Demoulas.ProfitSharing.UnitTests.Services.ProfitShareEdit;
 
 public class BeneficiaryTests : ApiTestBase<Program>
 {
-    private readonly decimal _beneBalance = 777m;
     private readonly Beneficiary _beneficiary;
+    private readonly decimal _beneficiaryBalance = 1_000_000;
+    private readonly ProfitDetail _profitDetail;
     private readonly IProfitShareEditService _service;
 
     public BeneficiaryTests()
     {
         // create mock database with just 1 bene
         _beneficiary = StockFactory.CreateBeneficiary();
-        _beneficiary.Amount = _beneBalance;
-        MockDbContextFactory = new ScenarioFactory { Beneficiaries = [_beneficiary] }.BuildMocks();
+        _profitDetail = StockFactory.CreateAllocation(1901, _beneficiary.Contact!.Ssn, _beneficiaryBalance);
+        MockDbContextFactory = new ScenarioFactory { Beneficiaries = [_beneficiary], ProfitDetails = [_profitDetail]}.BuildMocks();
 
         _service = ServiceProvider?.GetRequiredService<IProfitShareEditService>()!;
     }
@@ -41,13 +43,12 @@ public class BeneficiaryTests : ApiTestBase<Program>
         var record = response.Response.Results.First();
 
         // compute expected 100 Earnings Amount
-        decimal pointsDollars = Math.Round(_beneBalance, 2, MidpointRounding.AwayFromZero);
-        int earnPoints = (int)Math.Round(pointsDollars / 100, MidpointRounding.AwayFromZero);
+        decimal expectedEarnings = ProfitShareEditServiceEndpointTests.ComputeBeneficiaryEarnings(_beneficiaryBalance, req.EarningsPercent);
         // validate record
         record.Code.Should().Be( /*8*/ ProfitCode.Constants.Incoming100PercentVestedEarnings);
         record.ContributionAmount.Should().Be(0);
         record.ForfeitureAmount.Should().Be(0);
-        record.EarningsAmount.Should().Be(earnPoints * req.EarningsPercent);
+        record.EarningsAmount.Should().Be(expectedEarnings);
         record.Remark.Should().Be(CommentType.Constants.OneHundredPercentEarnings.Name);
     }
 }

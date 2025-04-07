@@ -93,7 +93,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 FirstName = employee.Demographic.ContactInfo.FirstName,
                 MiddleInitial = employee.Demographic.ContactInfo.MiddleName,
                 LastName = employee.Demographic.ContactInfo.LastName,
-                YearsInPs = yip != null ? (yip.Years ?? 0): (byte)0,
+                YearsInPs = yip != null ? (yip.Years ?? 0) : (byte)0,
                 TerminationDate = employee.Demographic.TerminationDate,
                 IncomeRegAndExecCurrentYear = payProfit.CurrentIncomeYear + payProfit.IncomeExecutive,
                 TerminationCode = employee.Demographic.TerminationCodeId,
@@ -101,8 +101,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                     ? ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested
                     : payProfit.ZeroContributionReasonId ?? 0),
                 EnrollmentId = payProfit.EnrollmentId,
-                Etva = payProfit.EarningsEtvaValue,
-                BeneficiaryAllocation = 0
+                Etva = payProfit.Etva,
             };
 
         return query;
@@ -117,9 +116,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             .ThenInclude(c => c!.ContactInfo)
             .Include(b => b.Demographic)
             .ThenInclude(d => d!.PayProfits.Where(p => p.ProfitYear == request.ProfitYear))
-            .Where(b => b.Demographic != null)
-            .Select(b => new { Beneficiary = b, Demographic = b.Demographic, PayProfit = b.Demographic!.PayProfits.FirstOrDefault(p => p.ProfitYear == request.ProfitYear) })
-            .Where(x => x.PayProfit != null)
+            .Select(b => new { Beneficiary = b, b.Demographic, PayProfit = b.Demographic!.PayProfits.FirstOrDefault(p => p.ProfitYear == request.ProfitYear) })
             .Select(x => new MemberSlice
             {
                 PsnSuffix = x.Beneficiary.PsnSuffix,
@@ -133,7 +130,6 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                     : string.Empty,
                 LastName = x.Beneficiary.Contact.ContactInfo.LastName,
                 YearsInPs = 10, // Makes function IsInteresting() always return true for beneficiaries.  This is the same value/convention used in READY.
-                BeneficiaryAllocation = x.Beneficiary.Amount,
                 TerminationCode = (x.Beneficiary!.Contact!.Ssn == x.Demographic!.Ssn) ? x.Demographic.TerminationCodeId : null,
                 TerminationDate = (x.Beneficiary!.Contact!.Ssn == x.Demographic!.Ssn) ? x.Demographic.TerminationDate : null,
                 ZeroCont = /*6*/ ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested,
@@ -163,7 +159,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
     #endregion
 
     private async Task<TerminatedEmployeeAndBeneficiaryResponse> MergeAndCreateDataset(IProfitSharingDbContext ctx, ProfitYearRequest req,
-    List<MemberSlice> memberSliceUnion, CancellationToken cancellationToken)
+        List<MemberSlice> memberSliceUnion, CancellationToken cancellationToken)
     {
         decimal totalVested = 0;
         decimal totalForfeit = 0;
@@ -186,19 +182,20 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 TotalContributions = g.Sum(x => x.Contribution),
                 TotalEarnings = g.Sum(x => x.Earnings),
                 TotalForfeitures = g.Sum(x => x.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id
-                                                ? x.Forfeiture
-                                                : (x.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id ? -x.Forfeiture : 0)),
+                    ? x.Forfeiture
+                    : (x.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id ? -x.Forfeiture : 0)),
                 TotalPayments = g.Sum(x => x.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0),
                 Distribution = g.Sum(x => (x.ProfitCodeId == ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id ||
-                                            x.ProfitCodeId == ProfitCode.Constants.OutgoingDirectPayments.Id ||
-                                            x.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment.Id)
-                                            ? -x.Forfeiture : 0),
+                                           x.ProfitCodeId == ProfitCode.Constants.OutgoingDirectPayments.Id ||
+                                           x.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment.Id)
+                    ? -x.Forfeiture
+                    : 0),
                 BeneficiaryAllocation = g.Sum(x => x.ProfitCodeId == ProfitCode.Constants.OutgoingXferBeneficiary.Id
-                                                    ? -x.Forfeiture
-                                                    : (x.ProfitCodeId == ProfitCode.Constants.IncomingQdroBeneficiary.Id ? x.Contribution : 0)),
+                    ? -x.Forfeiture
+                    : (x.ProfitCodeId == ProfitCode.Constants.IncomingQdroBeneficiary.Id ? x.Contribution : 0)),
                 CurrentAmount = g.Sum(x => x.Contribution + x.Earnings +
-                                          (x.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0) -
-                                          (x.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0))
+                                           (x.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0) -
+                                           (x.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0))
             })
             .ToDictionaryAsync(x => x.Ssn, cancellationToken);
 
@@ -214,7 +211,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 
         var membersSummary = new List<TerminatedEmployeeAndBeneficiaryDataResponseDto>();
         var unions = memberSliceUnion.ToList();
-        
+
         // Refactored loop using bulk loaded dictionary lookup
         foreach (var memberSlice in unions)
         {
@@ -226,7 +223,8 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 
             // Lookup last year balance (BeginningAmount)
             decimal? beginningAmount = lastYearBalancesDict.TryGetValue(memberSlice.Ssn, out var lastYearBalance)
-                ? lastYearBalance.Total : 0m;
+                ? lastYearBalance.Total
+                : 0m;
 
             // Lookup vesting balance and vesting percent for current year.
             var thisYearBalance = thisYearBalancesDict.GetValueOrDefault(memberSlice.Ssn);
@@ -258,7 +256,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 DistributionAmount = transactionsThisYear.Distribution,
                 ForfeitAmount = transactionsThisYear.TotalForfeitures,
                 EndingBalance = (beginningAmount ?? 0)
-                                  + transactionsThisYear.TotalForfeitures + transactionsThisYear.Distribution + transactionsThisYear.BeneficiaryAllocation,
+                                + transactionsThisYear.TotalForfeitures + transactionsThisYear.Distribution + transactionsThisYear.BeneficiaryAllocation,
                 VestedBalance = vestedBalance
             };
 
@@ -287,6 +285,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             {
                 vestingPercent = 1; // = 100%
             }
+
             if (member.EndingBalance == 0 && vestedBalance == 0)
             {
                 vestingPercent = 0;
@@ -336,11 +335,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             TotalForfeit = totalForfeit,
             TotalEndingBalance = totalEndingBalance,
             TotalBeneficiaryAllocation = totalBeneficiaryAllocation,
-            Response = new PaginatedResponseDto<TerminatedEmployeeAndBeneficiaryDataResponseDto>(req)
-            {
-                Results = paginatedResults,
-                Total = totalCount
-            }
+            Response = new PaginatedResponseDto<TerminatedEmployeeAndBeneficiaryDataResponseDto>(req) { Results = paginatedResults, Total = totalCount }
         };
     }
 

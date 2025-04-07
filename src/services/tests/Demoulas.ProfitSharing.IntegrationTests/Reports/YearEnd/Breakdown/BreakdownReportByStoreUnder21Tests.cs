@@ -22,9 +22,7 @@ public class BreakdownReportByStoreUnder21Tests
 
     public BreakdownReportByStoreUnder21Tests()
     {
-        IConfigurationRoot configuration = new ConfigurationBuilder().AddUserSecrets<ProfitShareUpdateTests>().Build();
-        string connectionString = configuration["ConnectionStrings:ProfitSharing"]!;
-        _dataContextFactory = new PristineDataContextFactory(connectionString);
+        _dataContextFactory = new PristineDataContextFactory();
         _calendarService = new CalendarService(_dataContextFactory, _aps);
         _totalService = new TotalService(_dataContextFactory, _calendarService);
         _breakdownService = new BreakdownReportService(_dataContextFactory, _calendarService, _totalService);
