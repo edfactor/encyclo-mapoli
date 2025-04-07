@@ -34,7 +34,6 @@ public static class StockFactory
                 DateOfBirth = default,
                 CreatedDate = default
             },
-            Amount = 1000m,
             DemographicId = 0,
             BeneficiaryContactId = 0,
             Percent = 0
@@ -106,9 +105,6 @@ public static class StockFactory
                 ProfitYear = profitYear, //  Calendar Service: "The date must be between January 1, 2000, and 5 years from today's date."
                 CurrentHoursYear = 0,
                 CurrentIncomeYear = 0,
-                EarningsEtvaValue = 0,
-                SecondaryEarnings = null,
-                SecondaryEtvaEarnings = null,
                 WeeksWorkedYear = 0,
                 PsCertificateIssuedDate = null,
                 EnrollmentId = Enrollment.Constants.NewVestingPlanHasContributions,
@@ -129,12 +125,9 @@ public static class StockFactory
             {
                 DemographicId = demographic.Id,
                 Demographic = demographic,
-                ProfitYear = (short)(profitYear-1), //  Calendar Service: "The date must be between January 1, 2000, and 5 years from today's date."
+                ProfitYear = (short)(profitYear + 1),
                 CurrentHoursYear = 0,
                 CurrentIncomeYear = 0,
-                EarningsEtvaValue = 0,
-                SecondaryEarnings = null,
-                SecondaryEtvaEarnings = null,
                 WeeksWorkedYear = 0,
                 PsCertificateIssuedDate = null,
                 EnrollmentId = Enrollment.Constants.NewVestingPlanHasContributions,
@@ -157,7 +150,9 @@ public static class StockFactory
 
     public static List<YearEndUpdateStatus> CreateYearEndUpdateStatuses(short profitYear)
     {
-        return [ new YearEndUpdateStatus
+        return
+        [
+            new YearEndUpdateStatus
             {
                 ProfitYear = profitYear,
                 UpdatedTime = default,
@@ -178,5 +173,10 @@ public static class StockFactory
                 AdjustEarningsSecondaryAmount = 0
             }
         ];
+    }
+
+    public static ProfitDetail CreateAllocation(short profitYear, int ssn, decimal amount)
+    {
+        return new ProfitDetail { ProfitYear = profitYear, Ssn = ssn, ProfitCodeId = /*6*/ ProfitCode.Constants.IncomingQdroBeneficiary, Contribution = amount };
     }
 }

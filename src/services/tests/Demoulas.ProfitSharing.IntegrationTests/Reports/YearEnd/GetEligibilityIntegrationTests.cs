@@ -19,9 +19,7 @@ public class GetEligibilityIntegrationTests
 
     public GetEligibilityIntegrationTests(ITestOutputHelper testOutputHelper)
     {
-        IConfigurationRoot configuration = new ConfigurationBuilder().AddUserSecrets<ProfitShareUpdateTests>().Build();
-        string connectionString = configuration["ConnectionStrings:ProfitSharing"]!;
-        _dbFactory = new PristineDataContextFactory(connectionString, true);
+        _dbFactory = new PristineDataContextFactory();
         _calendarService = new CalendarService(_dbFactory, _aps);
         _testOutputHelper = testOutputHelper;
     }

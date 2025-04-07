@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
-using FluentAssertions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -51,7 +50,7 @@ public class ApiTestBase<TStartup> where TStartup : class
 
                 hostBuilder.ConfigureServices(services =>
                 {
-                    services.AddTransient((c)=> MockDbContextFactory);
+                    services.AddTransient((_)=> MockDbContextFactory);
 
                     ServiceProvider = services.BuildServiceProvider();
                 });
