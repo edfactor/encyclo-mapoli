@@ -130,13 +130,21 @@ export function toDisplayDateFull(date?: Date) {
   return `${month} ${day}, ${year} ${strTime}`;
 }
 
+export const tryddmmyyyyToDate = (date?: string | Date | null): Date | null => {
+  if (!date) return null;
+  if (date === "YYYY-MM-DD") return null;
 
-export const tryddmmyyyyToDate = (date?: string | null): Date | null => {
-  if (!date || date === "YYYY-MM-DD") return null;
+  // If date is already a Date object, just apply startOfDay
+  if (date instanceof Date) {
+    return startOfDay(date);
+  }
 
-  // Parse the ISO date string and ensure it's treated as local time
-  const parsedDate = parseISO(date);
-
-  // Create a date using local year, month, day components
-  return startOfDay(parsedDate);
+  // Parse the ISO date string
+  try {
+    const parsedDate = parseISO(date);
+    return startOfDay(parsedDate);
+  } catch (error) {
+    console.error('Error parsing date:', error);
+    return null;
+  }
 };

@@ -164,7 +164,7 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
             render={({ field }) => (
               <DsmDatePicker
                 id="beginningDate"
-                onChange={(value: Date | null) => field.onChange(value?.getFullYear() || undefined)}
+                onChange={(value: Date | null) => field.onChange(value || undefined)}
                 value={field.value ? tryddmmyyyyToDate(field.value) : null}
                 required={true}
                 label="Rehire Begin Date"
