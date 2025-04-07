@@ -23,7 +23,6 @@ internal sealed record MemberSlice
     internal byte? ZeroCont { get; init; }
     internal byte EnrollmentId { get; init; }
     internal decimal Etva { get; init; }
-    internal decimal BeneficiaryAllocation { get; init; }
     public bool IsBeneficiaryAndEmployee { get; set; }
     public bool IsOnlyBeneficiary { get; set; }
 }

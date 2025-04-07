@@ -32,7 +32,7 @@ public class GetEligibleEmployeesTests : ApiTestBase<Program>
     {
         _scenarioFactory = new ScenarioFactory().EmployeeWithHistory(); // Sets up a single employee with demographic history
         MockDbContextFactory = _scenarioFactory.BuildMocks();
-        _testProfitYear = _scenarioFactory.ThisYear;
+        _testProfitYear = _scenarioFactory.ProfitYear;
         _requestDto = new ProfitYearRequest { ProfitYear = _testProfitYear };
         _d = _scenarioFactory.Demographics[0];
         _pp = _scenarioFactory.PayProfits[0];

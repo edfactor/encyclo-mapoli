@@ -1047,7 +1047,7 @@ public class FrozenReportService : IFrozenReportService
                     join b in ctx.Beneficiaries on bc.Id equals b.BeneficiaryContactId
                     where (!ctx.Demographics.Any(d=>d.Ssn == bc.Ssn))
                     group b by true into bGrp
-                    select new {Total = bGrp.Sum(x=>x.Amount)}
+                    select new {Total = bGrp.Sum(x=>0)} // Needs to use profit detail rows to get the correct amount
                 ).FirstOrDefaultAsync(cancellationToken))?.Total ?? 0;
 
                 rsp.EmployeeBeneficiaryAmount = (await (
@@ -1055,7 +1055,7 @@ public class FrozenReportService : IFrozenReportService
                     join b in ctx.Beneficiaries on bc.Id equals b.BeneficiaryContactId
                     where (ctx.Demographics.Any(d => d.Ssn == bc.Ssn))
                     group b by true into bGrp
-                    select new { Total = bGrp.Sum(x => x.Amount) }
+                    select new { Total = bGrp.Sum(x => 0) } // Needs to use profit detail rows to get the correct amount
                 ).FirstOrDefaultAsync(cancellationToken))?.Total ?? 0;
 
                 return rsp;
