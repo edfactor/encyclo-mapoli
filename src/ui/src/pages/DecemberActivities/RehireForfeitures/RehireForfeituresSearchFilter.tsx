@@ -16,6 +16,8 @@ import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 import { ProfitYearRequest, SortedPaginationRequestDto } from "../../../reduxstore/types";
 import useFiscalCalendarYear from "../../../hooks/useFiscalCalendarYear";
+import { useEffect } from "react";
+import { dateYYYYMMDD, formatDateString } from "../../../utils/dateUtils";
 
 interface RehireForfeituresSearch extends ProfitYearRequest {
   beginningDate: string;
@@ -57,28 +59,44 @@ interface MilitaryAndRehireForfeituresSearchFilterProps {
 const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearchFilterProps> = ({
   setInitialSearchLoaded
 }) => {
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const [triggerSearch, { isFetching }] = useLazyGetRehireForfeituresQuery();
   const { rehireForfeituresQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const profitYear = useDecemberFlowProfitYear();
   const fiscalCalendarYear = useFiscalCalendarYear();
+  const today = new Date().toDateString().split('T')[0]; // Simple fallback date
   const dispatch = useDispatch();
   const {
     control,
     handleSubmit,
     formState: { errors, isValid },
-    reset
+    reset,
+    setValue,
+    getValues
   } = useForm<RehireForfeituresSearch>({
     resolver: yupResolver<RehireForfeituresSearch>(schema),
     defaultValues: {
       profitYear: profitYear || rehireForfeituresQueryParams?.profitYear || undefined,
-      beginningDate: fiscalCalendarYear?.fiscalBeginDate || rehireForfeituresQueryParams?.beginningDate || undefined,
-      endingDate: fiscalCalendarYear?.fiscalEndDate || rehireForfeituresQueryParams?.endingDate || undefined,
+      beginningDate: rehireForfeituresQueryParams?.beginningDate || today,
+      endingDate: rehireForfeituresQueryParams?.endingDate || today,
       pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }
     }
   });
 
+  // When setting the date in the form, ensure proper timezone handling
+  useEffect(() => {
+    if (fiscalCalendarYear?.fiscalBeginDate && !rehireForfeituresQueryParams?.beginningDate) {
+      // Keep the date as a string without conversion
+      setValue('beginningDate', fiscalCalendarYear.fiscalBeginDate);
+    }
+    if (fiscalCalendarYear?.fiscalEndDate && !rehireForfeituresQueryParams?.endingDate) {
+      // Keep the date as a string without conversion
+      setValue('endingDate', fiscalCalendarYear.fiscalEndDate);
+    }
+  }, [fiscalCalendarYear, setValue, rehireForfeituresQueryParams]);
+
   const validateAndSearch = handleSubmit((data) => {
-    if (isValid) {
+    if (isValid && hasToken) {
       triggerSearch(
         {
           profitYear: profitYear,
@@ -105,8 +123,9 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
     dispatch(clearRehireForfeituresDetails());
     reset({
       profitYear: profitYear,
-      beginningDate: undefined,
-      endingDate: undefined
+      beginningDate: fiscalCalendarYear?.fiscalBeginDate || undefined,
+      endingDate: fiscalCalendarYear?.fiscalEndDate || undefined,
+      pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }
     });
   };
 
@@ -143,7 +162,7 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
             render={({ field }) => (
               <DsmDatePicker
                 id="beginningDate"
-                onChange={(value: Date | null) => field.onChange(value || undefined)}
+                onChange={(value: Date | null) => field.onChange(value?.getFullYear() || undefined)}
                 value={field.value ? new Date(field.value) : null}
                 required={true}
                 label="Rehire Begin Date"
@@ -180,7 +199,7 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
           handleReset={handleReset}
           handleSearch={validateAndSearch}
           isFetching={isFetching}
-          disabled={!isValid}
+          disabled={!isValid || isFetching}
         />
       </Grid2>
     </form>
