@@ -64,7 +64,7 @@ export interface DistributionsAndForfeitures {
   psnSuffix: number;
   employeeName: string;
   ssn: string;
-  loanDate: string;
+  date: string;
   distributionAmount: number;
   stateTax: number;
   federalTax: number;

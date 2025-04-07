@@ -407,7 +407,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                                 StateTax = pd.StateTaxes,
                                 FederalTax = pd.FederalTaxes,
                                 ForfeitAmount = pd.ProfitCodeId == 2 ? pd.Forfeiture : 0,
-                                LoanDate = pd.MonthToDate > 0 ? new DateOnly(pd.YearToDate, pd.MonthToDate, 1) : null,
+                                Date = pd.MonthToDate > 0 ? new DateOnly(pd.YearToDate, pd.MonthToDate, 1) : null,
                                 Age = (byte)nameAndDob.DateOfBirth.Age(calInfo.FiscalEndDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc))
                             };
                 return await query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
