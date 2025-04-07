@@ -10,6 +10,8 @@ public sealed record RehireForfeituresResponse
     public required DateOnly ReHiredDate { get; set; }
     public required byte CompanyContributionYears { get; set; }
     public required decimal HoursCurrentYear { get; set; }
+    public required byte EnrollmentId  { get; set; }
+    public required string EnrollmentName { get; set; }
     public required IEnumerable<MilitaryRehireProfitSharingDetailResponse> Details { get; set; }
 
 
@@ -22,6 +24,8 @@ public sealed record RehireForfeituresResponse
             FullName = "Doe, John",
             HoursCurrentYear = (decimal)2345.6,
             CompanyContributionYears = 3,
+            EnrollmentId = 4,
+            EnrollmentName = "New vesting plan has Forfeiture records",
             ReHiredDate = DateTime.Today.AddYears(-2).ToDateOnly(),
             Details = new List<MilitaryRehireProfitSharingDetailResponse>
             {

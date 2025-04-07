@@ -74,6 +74,10 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
     }));
   };
 
+  // Get the main and detail columns
+  const mainColumns = useMemo(() => GetMilitaryAndRehireForfeituresColumns(), []);
+  const detailColumns = useMemo(() => GetDetailColumns(), []);
+
   // Create the grid data with expandable rows
   const gridData = useMemo(() => {
     if (!rehireForfeitures?.response?.results) return [];
@@ -93,11 +97,19 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
       // Add detail rows if expanded
       if (hasDetails && expandedRows[row.badgeNumber]) {
         for (const detail of row.details) {
-          rows.push({
+          // Create a base detail row with all parent properties to prevent undefined values
+          // and then override with detail properties
+          const detailRow = {
+            // Copy all parent row properties first
+            ...row,
+            // Then add detail properties, which will override any duplicate fields
             ...detail,
+            // Add special properties for UI handling
             isDetail: true,
             parentId: row.badgeNumber
-          });
+          };
+
+          rows.push(detailRow);
         }
       }
     }
@@ -107,38 +119,101 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
 
   // Create column definitions with expand/collapse functionality
   const columnDefs = useMemo(() => {
-    const mainColumns = GetMilitaryAndRehireForfeituresColumns();
-    const detailColumns = GetDetailColumns();
-
     // Add an expansion column as the first column
     const expansionColumn = {
       headerName: "",
       field: "isExpandable",
       width: 50,
       cellRenderer: (params: any) => {
-        if (!params.data.isExpandable) return "";
-        return params.data.isExpanded ? "▼" : "►";
+        if (!params.data.isDetail && params.data.isExpandable) {
+          return params.data.isExpanded ? "▼" : "►";
+        }
+        return "";
       },
       onCellClicked: (params: any) => {
-        if (params.data.isExpandable) {
+        if (!params.data.isDetail && params.data.isExpandable) {
           handleRowExpansion(params.data.badgeNumber);
         }
-      }
+      },
+      suppressSizeToFit: true,
+      suppressAutoSize: true,
+      lockVisible: true,
+      lockPosition: true,
+      pinned: "left"
     };
 
-    // Add a style column to handle indentation and styling
-    const styleColumn = {
+    // Add a style column to handle indentation
+    const indentationColumn = {
       headerName: "",
       field: "isDetail",
-      width: 20,
+      width: 30,
       cellRenderer: (params: any) => {
-        return params.data.isDetail ? "└" : "";
-      }
+        return params.data.isDetail ? "" : "";
+      },
+      suppressSizeToFit: true,
+      suppressAutoSize: true,
+      lockVisible: true,
+      lockPosition: true,
+      pinned: "left"
     };
 
+    // Determine which columns to display based on whether it's a detail row
+    const visibleColumns = mainColumns.map(column => {
+      return {
+        ...column,
+        cellRenderer: (params: any) => {
+          // For detail rows, either hide the column or show a specific value
+          if (params.data.isDetail) {
+            // Check if this main column should be hidden in detail rows
+            const hideInDetails = !detailColumns.some(detailCol => detailCol.field === column.field);
+
+            if (hideInDetails) {
+              return ""; // Hide this column's content for detail rows
+            }
+          }
+
+          // Use the default renderer for this column if available
+          if (column.cellRenderer) {
+            return column.cellRenderer(params);
+          }
+
+          // Otherwise just return the field value
+          return params.value;
+        }
+      };
+    });
+
+    // Add detail-specific columns that only appear for detail rows
+    const detailOnlyColumns = detailColumns
+      .filter(detailCol => !mainColumns.some(mainCol => mainCol.field === detailCol.field))
+      .map(column => {
+        return {
+          ...column,
+          cellRenderer: (params: any) => {
+            // Only show content for detail rows
+            if (!params.data.isDetail) {
+              return "";
+            }
+
+            // Use the default renderer for this column if available
+            if (column.cellRenderer) {
+              return column.cellRenderer(params);
+            }
+
+            // Otherwise just return the field value
+            return params.value;
+          }
+        };
+      });
+
     // Combine all columns
-    return [expansionColumn, styleColumn, ...mainColumns, ...detailColumns];
-  }, []);
+    return [
+      expansionColumn,
+      indentationColumn,
+      ...visibleColumns,
+      ...detailOnlyColumns
+    ];
+  }, [mainColumns, detailColumns]);
 
   // Custom CSS classes for rows
   const getRowClass = (params: any) => {
@@ -157,7 +232,6 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
         {`
           .detail-row {
             background-color: #f5f5f5;
-            font-style: italic;
           }
         `}
       </style>
@@ -174,6 +248,9 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
               getRowClass: getRowClass,
               suppressRowClickSelection: true,
               rowHeight: 40,
+              defaultColDef: {
+                resizable: true
+              }
             }}
           />
 

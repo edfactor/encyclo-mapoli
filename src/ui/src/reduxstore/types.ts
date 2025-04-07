@@ -194,6 +194,8 @@ export interface MilitaryAndRehireForfeiture {
   ssn: string;
   reHiredDate: string;
   companyContributionYears: number;
+  enrollmentId: number;
+  enrollmentName: string;
   hoursCurrentYear: number;
   details: ForfeitureDetail[];
 }
