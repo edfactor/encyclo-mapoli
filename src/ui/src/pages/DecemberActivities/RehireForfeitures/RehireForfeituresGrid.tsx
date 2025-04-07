@@ -48,6 +48,22 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
     }
   }, [initialSearchLoaded, pageNumber, pageSize, onSearch]);
 
+  // Initialize expandedRows when data is loaded
+  useEffect(() => {
+    if (rehireForfeitures?.response?.results) {
+      const initialExpandState: Record<string, boolean> = {};
+
+      // Set all rows with details to be expanded by default
+      rehireForfeitures.response.results.forEach(row => {
+        if (row.details && row.details.length > 0) {
+          initialExpandState[row.badgeNumber] = true;
+        }
+      });
+
+      setExpandedRows(initialExpandState);
+    }
+  }, [rehireForfeitures?.response?.results]);
+
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
   // Handle row expansion toggle
@@ -65,15 +81,17 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
     const rows = [];
 
     for (const row of rehireForfeitures.response.results) {
+      const hasDetails = row.details && row.details.length > 0;
+
       // Add main row
       rows.push({
         ...row,
-        isExpandable: row.details && row.details.length > 0,
-        isExpanded: Boolean(expandedRows[row.badgeNumber])
+        isExpandable: hasDetails,
+        isExpanded: hasDetails && Boolean(expandedRows[row.badgeNumber])
       });
 
       // Add detail rows if expanded
-      if (expandedRows[row.badgeNumber] && row.details && row.details.length > 0) {
+      if (hasDetails && expandedRows[row.badgeNumber]) {
         for (const detail of row.details) {
           rows.push({
             badgeNumber: row.badgeNumber,
@@ -156,8 +174,8 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
               rowData: gridData,
               columnDefs: columnDefs,
               getRowClass: getRowClass,
-              suppressRowClickSelection: true, // Prevent row selection when clicking expand/collapse
-              rowHeight: 40,              
+              suppressRowClickSelection: true,
+              rowHeight: 40,
             }}
           />
 
