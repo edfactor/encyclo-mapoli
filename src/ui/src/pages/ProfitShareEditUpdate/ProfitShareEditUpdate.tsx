@@ -144,7 +144,7 @@ const ProfitShareEditUpdate = () => {
   //console.log("Total results: ", profitSharingUpdate?.response.results.length);
   return (
     <Page
-      label="Master Update (PAY444/PAY447/PROFTLD)"
+      label="Master Update (PAY444/PAY447)"
       actionNode={
         <div className="flex  justify-end gap-2">
           {RenderRevertButton()}
