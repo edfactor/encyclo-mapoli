@@ -1,4 +1,4 @@
-import { format, isValid, parse } from "date-fns";
+import { format, isValid, parse , parseISO, startOfDay} from "date-fns";
 export const EPOCH_DATE = new Date(1970, 0, 1);
 export const NULL_DATE = "01/01/1970";
 export const DAY_OF_SUNDAY = 0;
@@ -130,3 +130,13 @@ export function toDisplayDateFull(date?: Date) {
   return `${month} ${day}, ${year} ${strTime}`;
 }
 
+
+export const tryddmmyyyyToDate = (date?: string | null): Date | null => {
+  if (!date || date === "YYYY-MM-DD") return null;
+
+  // Parse the ISO date string and ensure it's treated as local time
+  const parsedDate = parseISO(date);
+
+  // Create a date using local year, month, day components
+  return startOfDay(parsedDate);
+};

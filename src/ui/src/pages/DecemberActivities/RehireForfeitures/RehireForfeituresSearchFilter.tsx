@@ -17,7 +17,7 @@ import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 import { ProfitYearRequest, SortedPaginationRequestDto } from "../../../reduxstore/types";
 import useFiscalCalendarYear from "../../../hooks/useFiscalCalendarYear";
 import { useEffect } from "react";
-import { dateYYYYMMDD, formatDateString } from "../../../utils/dateUtils";
+import { tryddmmyyyyToDate } from "../../../utils/dateUtils";
 
 interface RehireForfeituresSearch extends ProfitYearRequest {
   beginningDate: string;
@@ -35,12 +35,7 @@ const schema = yup.object().shape({
     .required("Profit Year is required"),
   beginningDate: yup.string().required("Beginning Date is required"),
   endingDate: yup.string()
-    .typeError("Invalid date")
-    .test("greater-than-start", "End year must be after start year", function (endYear) {
-      const startYear = this.parent.beginningDate;
-      // Only validate if both values are present
-      return !startYear || !endYear || endYear >= startYear;
-    })
+    .typeError("Invalid date")   
     .required("Ending Date is required"),
   pagination: yup
     .object({
@@ -64,7 +59,6 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
   const { rehireForfeituresQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const profitYear = useDecemberFlowProfitYear();
   const fiscalCalendarYear = useFiscalCalendarYear();
-  const today = new Date().toDateString().split('T')[0]; // Simple fallback date
   const dispatch = useDispatch();
   const {
     control,
@@ -72,13 +66,13 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
     formState: { errors, isValid },
     reset,
     setValue,
-    getValues
+    trigger
   } = useForm<RehireForfeituresSearch>({
     resolver: yupResolver<RehireForfeituresSearch>(schema),
     defaultValues: {
       profitYear: profitYear || rehireForfeituresQueryParams?.profitYear || undefined,
-      beginningDate: rehireForfeituresQueryParams?.beginningDate || today,
-      endingDate: rehireForfeituresQueryParams?.endingDate || today,
+      beginningDate: rehireForfeituresQueryParams?.beginningDate || undefined,
+      endingDate: rehireForfeituresQueryParams?.endingDate || undefined,
       pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }
     }
   });
@@ -94,6 +88,14 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
       setValue('endingDate', fiscalCalendarYear.fiscalEndDate);
     }
   }, [fiscalCalendarYear, setValue, rehireForfeituresQueryParams]);
+
+  useEffect(() => {
+    if (fiscalCalendarYear?.fiscalBeginDate && fiscalCalendarYear?.fiscalEndDate) {
+      // Trigger validation for the entire form
+      trigger();
+    }
+  }, [fiscalCalendarYear, trigger]);
+
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid && hasToken) {
@@ -163,7 +165,7 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
               <DsmDatePicker
                 id="beginningDate"
                 onChange={(value: Date | null) => field.onChange(value?.getFullYear() || undefined)}
-                value={field.value ? new Date(field.value) : null}
+                value={field.value ? tryddmmyyyyToDate(field.value) : null}
                 required={true}
                 label="Rehire Begin Date"
                 disableFuture
@@ -181,7 +183,7 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
               <DsmDatePicker
                 id="endingDate"
                 onChange={(value: Date | null) => field.onChange(value || undefined)}
-                value={field.value ? new Date(field.value) : null}
+                value={field.value ? tryddmmyyyyToDate(field.value) : null}
                 required={true}
                 label="Rehire Ending Date"
                 disableFuture
