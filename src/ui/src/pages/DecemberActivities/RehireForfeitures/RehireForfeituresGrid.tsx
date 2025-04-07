@@ -94,8 +94,6 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
       if (hasDetails && expandedRows[row.badgeNumber]) {
         for (const detail of row.details) {
           rows.push({
-            badgeNumber: row.badgeNumber,
-            fullName: row.fullName,
             ...detail,
             isDetail: true,
             parentId: row.badgeNumber
