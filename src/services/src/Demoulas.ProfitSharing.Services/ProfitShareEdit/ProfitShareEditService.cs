@@ -29,7 +29,7 @@ public class ProfitShareEditService : IInternalProfitShareEditService
 
     public async Task<ProfitShareEditResponse> ProfitShareEdit(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
-        var records = await ProfitShareEditRecords(profitShareUpdateRequest, cancellationToken);
+        var (records, beginningBalanceTotal, contributionGrandTotal, incomingForfeitureGrandTotal, earningsGrandTotal) = await ProfitShareEditRecords(profitShareUpdateRequest, cancellationToken);
         var responseRecords = records.Select(m => new ProfitShareEditMemberRecordResponse
         {
             IsEmployee = false,
@@ -51,10 +51,10 @@ public class ProfitShareEditService : IInternalProfitShareEditService
         {
             ReportName = "Profit Sharing Edit",
             ReportDate = DateTimeOffset.Now,
-            BeginningBalance = 1,
-            ContributionGrandTotal = 2,
-            IncomingForfeitureGrandTotal = 3,
-            EarningsGrandTotal = 4,
+            BeginningBalanceTotal = beginningBalanceTotal,
+            ContributionGrandTotal = contributionGrandTotal,
+            IncomingForfeitureGrandTotal = incomingForfeitureGrandTotal,
+            EarningsGrandTotal = earningsGrandTotal,
             Response = new PaginatedResponseDto<ProfitShareEditMemberRecordResponse>(profitShareUpdateRequest)
             {
                 Total = records.Count(),
@@ -82,9 +82,14 @@ public static List<T> HandleInMemorySortAndPaging<T>(SortedPaginationRequestDto 
     }
 
 
-    public async Task<IEnumerable<ProfitShareEditMemberRecord>> ProfitShareEditRecords(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
+    public async Task<(IEnumerable<ProfitShareEditMemberRecord>, decimal BeginningBalanceTotal, decimal ContributionGrandTotal, decimal IncomingForfeitureGrandTotal, decimal EarningsGrandTotal)> ProfitShareEditRecords(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
         ProfitShareUpdateResult psur = await _profitShareUpdateService.ProfitShareUpdateInternal(profitShareUpdateRequest, cancellationToken);
+
+        var beginningBalanceTotal = 0m;
+        var contributionGrandTotal = 0m;
+        var incomingForfeitureGrandTotal = 0m;
+        var earningsGrandTotal = 0m;
 
         List<ProfitShareEditMemberRecord> records = new();
         foreach (var member in psur.Members)
@@ -97,9 +102,14 @@ public static List<T> HandleInMemorySortAndPaging<T>(SortedPaginationRequestDto 
             {
                 AddBeneficiaryRecords(records, member);
             }
+
+            beginningBalanceTotal += member.BeginningAmount;
+            contributionGrandTotal += member.Contributions;
+            incomingForfeitureGrandTotal += member.IncomingForfeitures;
+            earningsGrandTotal += member.AllEarnings;
         }
 
-        return records;
+        return (records, beginningBalanceTotal, contributionGrandTotal, incomingForfeitureGrandTotal, earningsGrandTotal);
     }
 
     private static void AddEmployeeRecords(List<ProfitShareEditMemberRecord> records, ProfitShareUpdateMember member)

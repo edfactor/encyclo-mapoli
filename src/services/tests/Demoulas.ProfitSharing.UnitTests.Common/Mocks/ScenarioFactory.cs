@@ -23,8 +23,8 @@ public sealed class ScenarioFactory
 {
     private readonly ScenarioDataContextFactory _sdb = new();
 
-    public short ThisYear { get; set; } = 2024;
-    public short LastYear => (short)(ThisYear - 1);
+    public short ProfitYear { get; set; } = 2024;
+    public short ProfitYearPriorYear => (short)(ProfitYear - 1);
     public List<Demographic> Demographics { get; set; } = [];
     public List<PayProfit> PayProfits { get; set; } = [];
     public List<Beneficiary> Beneficiaries { get; set; } = [];
@@ -54,7 +54,7 @@ public sealed class ScenarioFactory
 
     public ScenarioFactory CreateOneEmployeeWithProfitDetails()
     {
-        var (demographic, payprofits) = StockFactory.CreateEmployee(ThisYear);
+        var (demographic, payprofits) = StockFactory.CreateEmployee(ProfitYear);
         PayProfits = payprofits;
         Demographics = [demographic];
         ProfitDetails =
@@ -65,16 +65,16 @@ public sealed class ScenarioFactory
                 ProfitCode = /*0*/ ProfitCode.Constants.IncomingContributions,
                 ProfitCodeId = /*0*/ ProfitCode.Constants.IncomingContributions.Id,
                 Ssn = demographic.Ssn,
-                ProfitYear = LastYear,
+                ProfitYear = ProfitYearPriorYear,
                 Contribution = 1000m
             },
-            // This is a NOP record that tests can manipulate as approprate.  
+            // This is a NOP record that tests can manipulate as needed.  
             new ProfitDetail
             {
                 ProfitCode = /*8*/ ProfitCode.Constants.Incoming100PercentVestedEarnings,
                 ProfitCodeId = /*0*/ ProfitCode.Constants.Incoming100PercentVestedEarnings.Id,
                 Ssn = demographic.Ssn,
-                ProfitYear = LastYear
+                ProfitYear = ProfitYearPriorYear
             }
         ];
         return this;
@@ -90,7 +90,7 @@ public sealed class ScenarioFactory
                 ProfitCode = /*0*/ ProfitCode.Constants.IncomingContributions,
                 ProfitCodeId = /*0*/ ProfitCode.Constants.IncomingContributions.Id,
                 Ssn = Beneficiaries[0].Contact!.Ssn,
-                ProfitYear = LastYear,
+                ProfitYear = ProfitYearPriorYear,
                 Contribution = 1000m
             }
         ];
@@ -106,7 +106,7 @@ public sealed class ScenarioFactory
                 AsOfDateTime = DateTime.Now,
                 CreatedDateTime = DateTime.Now,
                 FrozenBy = "a pal",
-                ProfitYear = ThisYear,
+                ProfitYear = ProfitYear,
                 IsActive = true
             }
         ];
@@ -114,10 +114,9 @@ public sealed class ScenarioFactory
         [
             new PayProfit
             {
-                ProfitYear = ThisYear,
+                ProfitYear = ProfitYear,
                 DemographicId = 21,
                 Etva = 0,
-                EarningsEtvaValue = 0,
                 CurrentHoursYear = 600,
                 HoursExecutive = 600
             }
@@ -252,7 +251,7 @@ public sealed class ScenarioFactory
 
     public ScenarioFactory WithYearEndStatuses()
     {
-        YearEndUpdateStatuses = StockFactory.CreateYearEndUpdateStatuses(ThisYear);
+        YearEndUpdateStatuses = StockFactory.CreateYearEndUpdateStatuses(ProfitYear);
         return this;
     }
 }

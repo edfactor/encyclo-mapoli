@@ -35,9 +35,9 @@ internal sealed record MemberFinancials
         Name = bene.Name;
         Ssn = bene.Ssn;
         Psn = bene.Psn;
-        CurrentAmount = bene.CurrentAmount;
-        AllSecondaryEarnings = bene.SecondaryEarnings;
-        AllEarnings = bene.Earnings;
+        CurrentAmount = bene.BeginningBalance;
+        AllEarnings = memberTotals.EarningsAmount;
+        AllSecondaryEarnings = memberTotals.SecondaryEarningsAmount;
 
         Trace.Assert(memberTotals.IncomingForfeitureAmount == 0);
         Common(profitDetailTotals, memberTotals);

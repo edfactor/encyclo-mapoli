@@ -122,7 +122,7 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
             profitShareUpdateRequest, adjustmentsSummaryData, cancellationToken);
 
         // Go get the Bene's.  NOTE: May modify some employees if they are both bene and employee (that's why "members" is passed in - to lookup loaded employees and see if they are also Bene's)
-        await BeneficiariesProcessingHelper.ProcessBeneficiaries(_dbContextFactory, members, profitShareUpdateRequest, cancellationToken);
+        await BeneficiariesProcessingHelper.ProcessBeneficiaries(_dbContextFactory, _totalService, members, profitShareUpdateRequest, cancellationToken);
 
         members = members.OrderBy(m => m.Name).ToList();
 

@@ -5,12 +5,15 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Demoulas.ProfitSharing.Services.ProfitMaster;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
+using Moq;
 
-namespace Demoulas.ProfitSharing.UnitTests.Services.ProfitMasterService;
+namespace Demoulas.ProfitSharing.UnitTests.Services.ProfitMaster;
 
 public class RevertBeneficiaryTests : ApiTestBase<Program>
 {
@@ -22,8 +25,12 @@ public class RevertBeneficiaryTests : ApiTestBase<Program>
     {
         _scenarioFactory = new ScenarioFactory().CreateOneBeneWithProfitDetail().WithYearEndStatuses();
         MockDbContextFactory = _scenarioFactory.BuildMocks();
-        _thisYear = _scenarioFactory.ThisYear;
-        _service = ServiceProvider?.GetRequiredService<IProfitMasterService>()!;
+        _thisYear = _scenarioFactory.ProfitYear;
+        // Arrange for fake user
+        IAppUser appUser = new Mock<IAppUser>().Object; // Throws exception if we use the autowired one.
+        
+        IInternalProfitShareEditService internalProfitSharing = ServiceProvider?.GetRequiredService<IInternalProfitShareEditService>()!;
+        _service = new ProfitMasterService(internalProfitSharing, MockDbContextFactory, appUser);
     }
 
     [Fact]
