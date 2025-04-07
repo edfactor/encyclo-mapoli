@@ -7,7 +7,8 @@
     "synckit": "0.10.3",
     "@babel/runtime": "7.27.0",
     "pirates": "4.0.6",
-    "electron-to-chromium": "1.5.131"
+    "electron-to-chromium": "1.5.131",
+    "@pkgr/core": "0.2.0"
   },
   "scripts": {
     "dev": "vite",
