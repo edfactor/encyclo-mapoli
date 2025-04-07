@@ -140,12 +140,7 @@ const BalanceByYearsGrid: React.FC<BalanceByYearsGridProps> = ({ initialSearchLo
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: balanceByYearsTotal?.response.results,
-                  columnDefs: [
-                    {
-                      headerName: columnDefsTotal.headerName,
-                      children: columnDefsTotal.children
-                    }
-                  ]
+                  columnDefs: columnDefsTotal
                 }}
               />
             </Grid2>
@@ -156,12 +151,7 @@ const BalanceByYearsGrid: React.FC<BalanceByYearsGridProps> = ({ initialSearchLo
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: balanceByYearsFullTime?.response.results,
-                  columnDefs: [
-                    {
-                      headerName: columnDefsFullTime.headerName,
-                      children: columnDefsFullTime.children
-                    }
-                  ]
+                  columnDefs: columnDefsFullTime
                 }}
               />
             </Grid2>
@@ -172,12 +162,7 @@ const BalanceByYearsGrid: React.FC<BalanceByYearsGridProps> = ({ initialSearchLo
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: balanceByYearsPartTime?.response.results,
-                  columnDefs: [
-                    {
-                      headerName: columnDefsPartTime.headerName,
-                      children: columnDefsPartTime.children
-                    }
-                  ]
+                  columnDefs: columnDefsPartTime
                 }}
               />
             </Grid2>
