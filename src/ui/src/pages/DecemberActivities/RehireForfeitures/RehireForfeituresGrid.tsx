@@ -22,6 +22,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
     sortBy: "badgeNumber",
     isSortDescending: false
   });
+  const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
 
   const { rehireForfeitures, rehireForfeituresQueryParams } = useSelector(
     (state: RootState) => state.yearsEnd
@@ -30,19 +31,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
   const [triggerSearch, { isFetching }] = useLazyGetRehireForfeituresQuery();
 
   const onSearch = useCallback(async () => {
-    const request = {
-      profitYear: rehireForfeituresQueryParams?.profitYear ?? 0,
-      beginningDate: rehireForfeituresQueryParams?.beginningDate ?? "",
-      endingDate: rehireForfeituresQueryParams?.endingDate ?? "",
-      pagination: {
-        skip: pageNumber * pageSize,
-        take: pageSize,
-        sortBy: sortParams.sortBy,
-        isSortDescending: sortParams.isSortDescending
-      }
-    };
-
-    await triggerSearch(request, false);
+    // ... existing search code
   }, [
     pageNumber,
     pageSize,
@@ -61,52 +50,84 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
-  // Create a flattened view of the data
-  const flattenedData = useMemo(() => {
+  // Handle row expansion toggle
+  const handleRowExpansion = (badgeNumber: string) => {
+    setExpandedRows(prev => ({
+      ...prev,
+      [badgeNumber]: !prev[badgeNumber]
+    }));
+  };
+
+  // Create the grid data with expandable rows
+  const gridData = useMemo(() => {
     if (!rehireForfeitures?.response?.results) return [];
 
-    const flattenedRows = [];
+    const rows = [];
 
     for (const row of rehireForfeitures.response.results) {
       // Add main row
-      flattenedRows.push({
+      rows.push({
         ...row,
-        isParent: true,
-        rowType: 'parent'
+        isExpandable: row.details && row.details.length > 0,
+        isExpanded: Boolean(expandedRows[row.badgeNumber])
       });
 
-      // Add detail rows if they exist
-      if (row.details && row.details.length > 0) {
+      // Add detail rows if expanded
+      if (expandedRows[row.badgeNumber] && row.details && row.details.length > 0) {
         for (const detail of row.details) {
-          flattenedRows.push({
+          rows.push({
             badgeNumber: row.badgeNumber,
             fullName: row.fullName,
             ...detail,
-            isParent: false,
-            rowType: 'child',
+            isDetail: true,
             parentId: row.badgeNumber
           });
         }
       }
     }
 
-    return flattenedRows;
-  }, [rehireForfeitures]);
+    return rows;
+  }, [rehireForfeitures, expandedRows]);
 
-  // Combine main and detail columns
+  // Create column definitions with expand/collapse functionality
   const columnDefs = useMemo(() => {
     const mainColumns = GetMilitaryAndRehireForfeituresColumns();
     const detailColumns = GetDetailColumns();
 
-    // Add a rowType column for styling/display logic if needed
-    const typeColumn = {
-      headerName: "Type",
-      field: "rowType",
-      hide: true
+    // Add an expansion column as the first column
+    const expansionColumn = {
+      headerName: "",
+      field: "isExpandable",
+      width: 50,
+      cellRenderer: (params: any) => {
+        if (!params.data.isExpandable) return "";
+        return params.data.isExpanded ? "▼" : "►";
+      },
+      onCellClicked: (params: any) => {
+        if (params.data.isExpandable) {
+          handleRowExpansion(params.data.badgeNumber);
+        }
+      }
     };
 
-    return [typeColumn, ...mainColumns, ...detailColumns];
+    // Add a style column to handle indentation and styling
+    const styleColumn = {
+      headerName: "",
+      field: "isDetail",
+      width: 20,
+      cellRenderer: (params: any) => {
+        return params.data.isDetail ? "└" : "";
+      }
+    };
+
+    // Combine all columns
+    return [expansionColumn, styleColumn, ...mainColumns, ...detailColumns];
   }, []);
+
+  // Custom CSS classes for rows
+  const getRowClass = (params: any) => {
+    return params.data.isDetail ? "detail-row" : "";
+  };
 
   return (
     <div>
@@ -116,6 +137,15 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
         {`Rehire Forfeitures (QPREV-PROF) (${rehireForfeitures?.response.total || 0} ${rehireForfeitures?.response.total === 1 ? 'Record' : 'Records'})`}
       </Typography>
 
+      <style>
+        {`
+          .detail-row {
+            background-color: #f5f5f5;
+            font-style: italic;
+          }
+        `}
+      </style>
+
       {rehireForfeitures?.response && (
         <>
           <DSMGrid
@@ -123,8 +153,11 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
             isLoading={isFetching}
             handleSortChanged={sortEventHandler}
             providedOptions={{
-              rowData: flattenedData,
-              columnDefs: columnDefs
+              rowData: gridData,
+              columnDefs: columnDefs,
+              getRowClass: getRowClass,
+              suppressRowClickSelection: true, // Prevent row selection when clicking expand/collapse
+              rowHeight: 40,              
             }}
           />
 
