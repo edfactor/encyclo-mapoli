@@ -15,8 +15,8 @@ export interface ProfitYearRequest {
 }
 
 export interface CalendarResponseDto {
-  fiscalBeginDate: Date;
-  fiscalEndDate: Date;
+  fiscalBeginDate: string;
+  fiscalEndDate: string;
 }
 
 export interface FrozenProfitYearRequest extends ProfitYearRequest {

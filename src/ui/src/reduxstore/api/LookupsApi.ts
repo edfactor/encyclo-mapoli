@@ -10,7 +10,7 @@ import { url } from "./api";
 
 export const LookupsApi = createApi({
   baseQuery: fetchBaseQuery({
-    baseUrl: `${url}/api/`,
+    baseUrl: `${url}/api/lookup/`,
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as RootState).security.token;
       const impersonating = (getState() as RootState).security.impersonating;

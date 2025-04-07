@@ -32,7 +32,14 @@ const schema = yup.object().shape({
     .max(2100, "Profit Year must be 2100 or earlier")
     .required("Profit Year is required"),
   beginningDate: yup.string().required("Beginning Date is required"),
-  endingDate: yup.string().required("Ending Date is required"),
+  endingDate: yup.string()
+    .typeError("Invalid date")
+    .test("greater-than-start", "End year must be after start year", function (endYear) {
+      const startYear = this.parent.beginningDate;
+      // Only validate if both values are present
+      return !startYear || !endYear || endYear >= startYear;
+    })
+    .required("Ending Date is required"),
   pagination: yup
     .object({
       skip: yup.number().required(),
@@ -59,14 +66,13 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
     control,
     handleSubmit,
     formState: { errors, isValid },
-    reset,
-    trigger
+    reset
   } = useForm<RehireForfeituresSearch>({
     resolver: yupResolver<RehireForfeituresSearch>(schema),
     defaultValues: {
       profitYear: profitYear || rehireForfeituresQueryParams?.profitYear || undefined,
-      beginningDate: fiscalCalendarYear?.fiscalBeginDate.toLocaleDateString() || rehireForfeituresQueryParams?.beginningDate || undefined,
-      endingDate: rehireForfeituresQueryParams?.endingDate ? rehireForfeituresQueryParams.endingDate : undefined,
+      beginningDate: fiscalCalendarYear?.fiscalBeginDate || rehireForfeituresQueryParams?.beginningDate || undefined,
+      endingDate: fiscalCalendarYear?.fiscalEndDate || rehireForfeituresQueryParams?.endingDate || undefined,
       pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }
     }
   });
