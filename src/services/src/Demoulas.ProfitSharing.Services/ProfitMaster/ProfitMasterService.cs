@@ -92,8 +92,9 @@ public class ProfitMasterService : IProfitMasterService
             var profitDetailRecords = CreateProfitDetailRecords(code2ProfitCode, profitShareUpdateRequest.ProfitYear, records);
             ctx.ProfitDetails.AddRange(profitDetailRecords);
 
-            // You could say, why do we even ask for the profitYear parameter? - profitYear is essentially locked to be last year.
-            // TBD: will probably remove the profitYear parameter from the request soon.    
+            // === The following code is going to be altered in https://demoulas.atlassian.net/browse/PS-948 ===
+            // to be more flexible.  Right now, the profit year is year locked to the wall clock year -1.
+            // This has to do with getting the correct ETVA values for the employees.
             if (profitShareUpdateRequest.ProfitYear != DateTime.Now.Year - 1)
             {
                 throw new BadHttpRequestException($"The Profit year must be last year. {DateTime.Now.Year - 1}");
@@ -102,13 +103,13 @@ public class ProfitMasterService : IProfitMasterService
             // This code only runs when the system is "FROZEN" which means in the beginning of a new year, and processing
             // last year's profit sharing.   We currently grab most profit sharing data from PayProfit using the prior year (aka profit year), but
             // the hot ETVA is located in the PayProfit for the wall-clock year (aka profitYear+1) 
-            
+
             // Vocabulary;  "Now Year" or "wall clock year" or "profit year + 1" they are the same.  
             //              "Profit Year" is simply the profit year. 
-            
+
             // This selection of which columns are from "profit year" vs "now year" is could change. 
 
-            // This gist of why we care about two PAY_PROFIT rows, is that we need information from both,
+            // This gist of why we care about two PAY_PROFIT rows, is that we need information from both when the wall clock year is not the profit year.
             // EnrolledId               -> (either row?) which type of plan are they in 1,2 or are the out 3,4   (do we want now or at Fiscal Freeze?) 
             // PointsEarned             -> (profit year) set in PAY443/YearEndService.cs
             // ZeroContributionReasonId -> (profit year) set in PAY426/PayProfitUpdateService.cs
