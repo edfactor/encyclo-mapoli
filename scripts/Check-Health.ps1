@@ -19,13 +19,12 @@ Write-Host "Base url: $url"
 Write-Host "Checking health at: $fullUrl"
 
 # Send a request to the /health endpoint with certificate validation skipped
-# SkipCertificateCheck Requires Powershell 7 or higher
 try {
     $Session = New-PSSession $envServerName
     Invoke-Command -Session $Session -ScriptBlock {
         param ($fullUrl)
 
-        $response = Invoke-WebRequest -Uri $fullUrl -Method GET -SkipCertificateCheck -UseBasicParsing
+        $response = Invoke-WebRequest -Uri $fullUrl -Method GET -UseBasicParsing
         $content = $response.Content | ConvertFrom-Json
 
       if ($content.status -eq 'Healthy') {

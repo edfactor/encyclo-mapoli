@@ -105,6 +105,7 @@ import {
   YearEndProfitSharingReportSummaryResponse
 } from "reduxstore/types";
 import { url } from "./api";
+import { tryddmmyyyyToDate } from "../../utils/dateUtils";
 
 export const YearsEndApi = createApi({
   baseQuery: fetchBaseQuery({
@@ -285,9 +286,9 @@ export const YearsEndApi = createApi({
         body: {
           profitYear: params.profitYear,
           beginningDate: params.beginningDate
-            ? format(new Date(params.beginningDate), "yyyy-MM-dd")
+            ? tryddmmyyyyToDate(params.beginningDate)
             : params.beginningDate,
-          endingDate: params.endingDate ? format(new Date(params.endingDate), "yyyy-MM-dd") : params.endingDate,
+          endingDate: params.endingDate ? tryddmmyyyyToDate(params.endingDate) : params.endingDate,
           take: params.pagination.take,
           skip: params.pagination.skip,
           sortBy: params.pagination.sortBy,

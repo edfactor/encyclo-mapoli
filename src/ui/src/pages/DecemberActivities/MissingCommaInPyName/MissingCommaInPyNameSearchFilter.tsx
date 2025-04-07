@@ -18,7 +18,7 @@ const MissingCommaInPyNameSearchFilter: React.FC<MissingCommaInPyNameSearchFilte
   const search = () => {
     triggerSearch(
       {
-        pagination: { skip: 0, take: 25 }
+        pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: false }
       },
       false
     );

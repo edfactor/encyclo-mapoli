@@ -35,9 +35,9 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       resizable: true
     },
     {
-      headerName: "Loan Date",
-      field: "loanDate",
-      colId: "loanDate",
+      headerName: "Date",
+      field: "date",
+      colId: "date",
       minWidth: 100,
       headerClass: "left-align",
       cellClass: "left-align",

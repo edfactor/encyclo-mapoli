@@ -58,7 +58,7 @@
     <PackageVersion Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.0" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Include="NSwag.Core" Version="14.1.0" />
-    <PackageVersion Include="Okta.AspNetCore" Version="4.6.2" />
+    <PackageVersion Include="Okta.AspNetCore" Version="4.6.3" />
     <PackageVersion Include="OpenTelemetry.Api" Version="1.11.2" />
     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.9.0" />
     <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.9.0" />
@@ -66,13 +66,13 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.9.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Quartz" Version="1.11.0-beta.1" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.9.0" />
-    <PackageVersion Include="Oracle.EntityFrameworkCore" Version="9.23.60" />
-    <PackageVersion Include="Oracle.ManagedDataAccess.Core" Version="23.7.0" />
+    <PackageVersion Include="Oracle.EntityFrameworkCore" Version="9.23.80" />
+    <PackageVersion Include="Oracle.ManagedDataAccess.Core" Version="23.8.0" />
     <PackageVersion Include="Oracle.ManagedDataAccess.OpenTelemetry" Version="23.5.0" />
     <PackageVersion Include="Quartz" Version="3.14.0" />
     <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.14.0" />
     <PackageVersion Include="Riok.Mapperly" Version="4.2.0" />
-    <PackageVersion Include="Scalar.AspNetCore" Version="2.1.5" />
+    <PackageVersion Include="Scalar.AspNetCore" Version="2.1.6" />
     <PackageVersion Include="Serilog.AspNetCore" Version="8.0.2" />
     <PackageVersion Include="Serilog.Enrichers.Environment" Version="3.0.1" />
     <PackageVersion Include="Serilog.Enrichers.MassTransit" Version="2.0.4" />

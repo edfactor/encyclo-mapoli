@@ -24,12 +24,13 @@ public class RehireForfeituresRequestValidator : PaginationValidatorBase<RehireF
         RuleFor(x => x.BeginningDate)
             .NotEmpty().WithMessage("Beginning date is required.")
             .MustAsync(BeWithinFiscalYear)
-            .WithMessage("Beginning date must be within the fiscal year range.");
+            .WithMessage("Beginning date must be within the fiscal year range: {FiscalBegin} through {FiscalEnd}.");
+
 
         RuleFor(x => x.EndingDate)
             .NotEmpty().WithMessage("Ending date is required.")
             .MustAsync(BeWithinFiscalYear)
-            .WithMessage("Ending date must be within the fiscal year range.")
+            .WithMessage("Ending date must be within the fiscal year range: {FiscalBegin} through {FiscalEnd}.")
             .GreaterThanOrEqualTo(x => x.BeginningDate)
             .WithMessage("Ending date must be greater than or equal to beginning date.");
     }
@@ -39,14 +40,15 @@ public class RehireForfeituresRequestValidator : PaginationValidatorBase<RehireF
         try
         {
             var bracket = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
-
-            if (date < bracket.FiscalBeginDate.ToDateTime(TimeOnly.MinValue) || date > bracket.FiscalEndDate.ToDateTime(TimeOnly.MinValue))
+            var fiscalBegin = bracket.FiscalBeginDate.ToDateTime(TimeOnly.MinValue);
+            var fiscalEnd = bracket.FiscalEndDate.ToDateTime(TimeOnly.MinValue);
+            if (date < fiscalBegin || date > fiscalEnd)
             {
-                _logger.LogWarning("Date {Date} is outside fiscal year {ProfitYear} boundaries ({Start} - {End})",
-                    date, request.ProfitYear, bracket.FiscalBeginDate, bracket.FiscalEndDate);
+                // Add the fiscal year range to the message
+                context.MessageFormatter.AppendArgument("FiscalBegin", fiscalBegin.ToString("MMM-dd"));
+                context.MessageFormatter.AppendArgument("FiscalEnd", fiscalEnd.ToString("MMM-dd"));
                 return false;
             }
-
             return true;
         }
         catch (Exception ex)
@@ -55,4 +57,5 @@ public class RehireForfeituresRequestValidator : PaginationValidatorBase<RehireF
             return false;
         }
     }
+
 }

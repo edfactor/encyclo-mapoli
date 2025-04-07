@@ -14,6 +14,11 @@ export interface ProfitYearRequest {
   profitYear: number;
 }
 
+export interface CalendarResponseDto {
+  fiscalBeginDate: string;
+  fiscalEndDate: string;
+}
+
 export interface FrozenProfitYearRequest extends ProfitYearRequest {
   useFrozenData: boolean;
 }
@@ -59,7 +64,7 @@ export interface DistributionsAndForfeitures {
   psnSuffix: number;
   employeeName: string;
   ssn: string;
-  loanDate: string;
+  date: string;
   distributionAmount: number;
   stateTax: number;
   federalTax: number;

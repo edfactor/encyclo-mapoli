@@ -10,6 +10,9 @@ import { MilitaryApi } from "./api/MilitaryApi";
 import militarySlice from "./slices/militarySlice";
 import { InquiryApi } from "./api/InquiryApi";
 import inquirySlice from "./slices/inquirySlice";
+import { LookupsApi } from "./api/LookupsApi";
+import lookupsSlice from "./slices/lookupsSlice";
+import { rtkQueryErrorToastMiddleware } from "smart-ui-library";
 
 export const store = configureStore({
   reducer: {
@@ -19,21 +22,25 @@ export const store = configureStore({
     frozen: frozenSlice,
     military: militarySlice,
     inquiry: inquirySlice,
+    lookups: lookupsSlice,
 
     [SecurityApi.reducerPath]: SecurityApi.reducer,
     [YearsEndApi.reducerPath]: YearsEndApi.reducer,
     [ItOperations.reducerPath]: ItOperations.reducer,
     [MilitaryApi.reducerPath]: MilitaryApi.reducer,
-    [InquiryApi.reducerPath]: InquiryApi.reducer
+    [InquiryApi.reducerPath]: InquiryApi.reducer,
+    [LookupsApi.reducerPath]: LookupsApi.reducer
   },
 
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ serializableCheck: false })
+      .concat(rtkQueryErrorToastMiddleware(true))
       .concat(SecurityApi.middleware)
       .concat(YearsEndApi.middleware)
       .concat(ItOperations.middleware)
       .concat(MilitaryApi.middleware)
       .concat(InquiryApi.middleware)
+      .concat(LookupsApi.middleware)
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
