@@ -104,18 +104,16 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
           profitYear: profitYear,
           beginningDate: data.beginningDate,
           endingDate: data.endingDate,
-          pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }
+          pagination: {
+            skip: data.pagination.skip,
+            take: data.pagination.take,
+            sortBy: data.pagination.sortBy,
+            isSortDescending: data.pagination.isSortDescending
+          }
         },
         false
       ).unwrap();
-      dispatch(
-        setMilitaryAndRehireForfeituresQueryParams({
-          profitYear: profitYear,
-          beginningDate: data.beginningDate,
-          endingDate: data.endingDate,
-          pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }
-        })
-      );
+      dispatch(setMilitaryAndRehireForfeituresQueryParams(data));
     }
   });
 

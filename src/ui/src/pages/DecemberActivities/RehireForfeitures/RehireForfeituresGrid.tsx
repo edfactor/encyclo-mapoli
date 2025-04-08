@@ -6,6 +6,7 @@ import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
 import { GetMilitaryAndRehireForfeituresColumns, GetDetailColumns } from "./RehireForfeituresGridColumns";
+import { ICellRendererParams } from "ag-grid-community";
 
 interface MilitaryAndRehireForfeituresGridSearchProps {
   initialSearchLoaded: boolean;
@@ -124,13 +125,13 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
       headerName: "",
       field: "isExpandable",
       width: 50,
-      cellRenderer: (params: any) => {
+      cellRenderer: (params: ICellRendererParams) => {
         if (!params.data.isDetail && params.data.isExpandable) {
           return params.data.isExpanded ? "▼" : "►";
         }
         return "";
       },
-      onCellClicked: (params: any) => {
+      onCellClicked: (params: ICellRendererParams) => {
         if (!params.data.isDetail && params.data.isExpandable) {
           handleRowExpansion(params.data.badgeNumber);
         }
@@ -147,7 +148,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
       headerName: "",
       field: "isDetail",
       width: 30,
-      cellRenderer: (params: any) => {
+      cellRenderer: (params: ICellRendererParams) => {
         return params.data.isDetail ? "" : "";
       },
       suppressSizeToFit: true,
@@ -161,7 +162,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
     const visibleColumns = mainColumns.map(column => {
       return {
         ...column,
-        cellRenderer: (params: any) => {
+        cellRenderer: (params: ICellRendererParams) => {
           // For detail rows, either hide the column or show a specific value
           if (params.data.isDetail) {
             // Check if this main column should be hidden in detail rows
@@ -189,7 +190,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
       .map(column => {
         return {
           ...column,
-          cellRenderer: (params: any) => {
+          cellRenderer: (params: ICellRendererParams) => {
             // Only show content for detail rows
             if (!params.data.isDetail) {
               return "";
@@ -216,7 +217,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
   }, [mainColumns, detailColumns]);
 
   // Custom CSS classes for rows
-  const getRowClass = (params: any) => {
+  const getRowClass = (params: {data: {isDetail: boolean}}) => {
     return params.data.isDetail ? "detail-row" : "";
   };
 
@@ -239,7 +240,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
       {rehireForfeitures?.response && (
         <>
           <DSMGrid
-            preferenceKey={"REHIRE_FORFEITURES"}
+            preferenceKey={"QPREV-PROF"}
             isLoading={isFetching}
             handleSortChanged={sortEventHandler}
             providedOptions={{
@@ -248,15 +249,16 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
               getRowClass: getRowClass,
               suppressRowClickSelection: true,
               rowHeight: 40,
+              suppressMultiSort: true,
               defaultColDef: {
                 resizable: true
               }
             }}
           />
 
-          {rehireForfeitures.response.results.length > 0 && (
+          {!!rehireForfeitures && rehireForfeitures.response.results.length > 0 && (
             <Pagination
-              pageNumber={pageNumber + 1}
+              pageNumber={pageNumber}
               setPageNumber={(value: number) => {
                 setPageNumber(value - 1);
                 setInitialSearchLoaded(true);
@@ -264,7 +266,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
               pageSize={pageSize}
               setPageSize={(value: number) => {
                 setPageSize(value);
-                setPageNumber(0);
+                setPageNumber(1);
                 setInitialSearchLoaded(true);
               }}
               recordCount={rehireForfeitures.response.total || 0}
