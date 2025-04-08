@@ -13,6 +13,7 @@ using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Demoulas.Util.Extensions;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
@@ -96,7 +97,9 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
                     m.Ssn,
                     m.ReHiredDate,
                     m.CompanyContributionYears,
-                    m.HoursCurrentYear
+                    m.HoursCurrentYear,
+                    m.EnrollmentId,
+                    m.EnrollmentName
                 }).Select(group =>
                     new RehireForfeituresResponse
                     {
@@ -106,6 +109,8 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
                         HoursCurrentYear = group.Key.HoursCurrentYear,
                         ReHiredDate = group.Key.ReHiredDate,
                         CompanyContributionYears = group.Key.CompanyContributionYears,
+                        EnrollmentId = group.Key.EnrollmentId,
+                        EnrollmentName = group.Key.EnrollmentName,
                         Details = group.Select(pd => new MilitaryRehireProfitSharingDetailResponse
                         {
                             Forfeiture = pd.Forfeiture,
@@ -137,7 +142,8 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
 
         var query = context.Demographics
             .Join(
-                context.PayProfits.Where(x => x.ProfitYear == req.ProfitYear), // Table to join with (PayProfit)
+                context.PayProfits.Include(e=> e.Enrollment)
+                    .Where(x => x.ProfitYear == req.ProfitYear), // Table to join with (PayProfit)
                 demographics => demographics.Id, // Primary key selector from Demographics
                 payProfit => payProfit.DemographicId, // Foreign key selector from PayProfit
                 (demographics, payProfit) => new // Result selector after joining
@@ -150,6 +156,7 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
                     demographics.ReHireDate,
                     demographics.StoreNumber,
                     payProfit.EnrollmentId,
+                    payProfit.Enrollment,
                     payProfit.CurrentHoursYear,
                     demographics.EmploymentStatusId
                 }
@@ -178,7 +185,8 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
                     profitDetail.Forfeiture,
                     profitDetail.Remark,
                     profitDetail.ProfitYear,
-                    profitDetail.ProfitCodeId
+                    profitDetail.ProfitCodeId,
+                    member.Enrollment,
                 }
             )
             .GroupJoin(
@@ -200,6 +208,7 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
                     StoreNumber = temp.member.StoreNumber,
                     CompanyContributionYears = yip!.Years ?? 0,
                     EnrollmentId = temp.member.EnrollmentId,
+                    EnrollmentName = temp.member.Enrollment!.Name,
                     HoursCurrentYear = temp.member.CurrentHoursYear,
                     NetBalanceLastYear = 0, //Filled out in detail report
                     VestedBalanceLastYear = 0, //Filled out in detail report
