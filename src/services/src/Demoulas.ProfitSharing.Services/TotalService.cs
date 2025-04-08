@@ -291,21 +291,7 @@ public sealed class TotalService : ITotalService
             from db in demoOrBeneficiary
             join dTbl in ctx.Demographics on db.Ssn equals dTbl.Ssn into dTmp
             from d in dTmp.DefaultIfEmpty()
-            join minYearTbl in ( // Because don't create payprofit records for years prior to the import, we need to find the closest payprofit record and use that to get the enrollment_id
-                from ppMin in ctx.PayProfits.Include(x=>x.Demographic)
-                where ppMin.ProfitYear >= profitYear
-                group ppMin by ppMin.Demographic!.Ssn into ppMinGrp
-                select new {
-                    Ssn = ppMinGrp.Key,
-                    minYear = ppMinGrp.Min(x=>x.ProfitYear)
-                }
-            ) on db.Ssn equals minYearTbl.Ssn into minYearTmp
-            from minYear in minYearTmp.DefaultIfEmpty()
-            join ppTbl in ctx.PayProfits on new { Id = (d != null ? d.Id : 0), ProfitYear = (minYear != null ? minYear.minYear : (short)0) } equals new
-            {
-                Id = ppTbl.DemographicId,
-                ppTbl.ProfitYear
-            } into ppTmp
+            join ppTbl in ctx.PayProfits on new { Id = (d != null ? d.Id : 0), ProfitYear = profitYear } equals new { ppTbl.Demographic!.Id, ppTbl.ProfitYear} into ppTmp
             from pp in ppTmp.DefaultIfEmpty()
             join cyTbl in GetYearsOfService(ctx, profitYear) on db.Ssn equals cyTbl.Ssn into cyTmp
             from cy in cyTmp.DefaultIfEmpty()
