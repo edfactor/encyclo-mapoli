@@ -29,12 +29,17 @@ const YTDWagesGrid = ({ innerRef, initialSearchLoaded, setInitialSearchLoaded }:
   const onSearch = useCallback(async () => {
     const request = {
       profitYear: employeeWagesForYearQueryParams?.profitYear ?? 0,
-      pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: sortParams.sortBy, isSortDescending: sortParams.isSortDescending },
+      pagination: {
+        skip: pageNumber * pageSize,
+        take: pageSize,
+        sortBy: sortParams.sortBy,
+        isSortDescending: sortParams.isSortDescending
+      },
       acceptHeader: "application/json"
     };
 
     await triggerSearch(request, false);
-  }, [pageNumber, pageSize, sortParams, triggerSearch, hasToken, employeeWagesForYearQueryParams?.profitYear]);
+  }, [pageNumber, pageSize, sortParams, triggerSearch, employeeWagesForYearQueryParams?.profitYear]);
 
   useEffect(() => {
     if (initialSearchLoaded && hasToken) {
