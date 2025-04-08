@@ -4,11 +4,12 @@ import { useDispatch } from "react-redux";
 
 import { Outlet } from "react-router";
 import { setToken } from "reduxstore/slices/securitySlice";
+import EnvironmentUtils from "../../utils/environmentUtils";
 
 const Login = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED === "true";
   const { authState, oktaAuth } = useOktaAuth();
-  const postLogoutRedirectUri = "https://marketbasket.okta.com/login/default";
+  const postLogoutRedirectUri = EnvironmentUtils.postLogoutRedirectUri;
   const dispatch = useDispatch();
   const [skipRole, setSkipRole] = useState<boolean>(true);
   const [skipPermission, setSkipPermission] = useState<boolean>(true);

@@ -2,17 +2,15 @@ import { createTheme, ThemeProvider } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "./reduxstore/store";
-// Add this import for the appropriate action
-import { setUsername } from "./reduxstore/slices/securitySlice"; // Adjust path as needed
-// Components
+import { clearUserData, setUsername } from "./reduxstore/slices/securitySlice"; // Adjust path as needed
 import AppErrorBoundary from "components/ErrorBoundary";
 import PSLayout from "components/Layout/PSLayout";
 import Router from "./components/router/Router";
-
-// Styles and config
+import { useOktaAuth } from "@okta/okta-react";
 import { themeOptions, ToastServiceProvider } from "smart-ui-library";
 import "smart-ui-library/dist/smart-ui-library.css";
 import "../agGridConfig";
+import EnvironmentUtils from "./utils/environmentUtils";
 
 // Types
 interface BuildInfo {
@@ -24,8 +22,9 @@ interface BuildInfo {
 
 const App = () => {
   // State management
-  const [uiBuildInfo, setUiBuildInfo] = useState<BuildInfo | null>(null);
   const dispatch = useDispatch();
+  const okta = useOktaAuth();
+  const [uiBuildInfo, setUiBuildInfo] = useState<BuildInfo | null>(null);
 
   // Redux selectors
   //const state = useSelector((state: RootState) => state);
@@ -55,6 +54,7 @@ const App = () => {
   }, [token, stateUsername, dispatch]);
 
   // Derived values
+  const postLogoutRedirectUri = EnvironmentUtils.postLogoutRedirectUri;
   const isAuthenticated = !!token;
   const username = isAuthenticated ? appUser?.userName || stateUsername || "Guest" : "Not authenticated";
 
@@ -65,10 +65,12 @@ const App = () => {
   // Event handlers
   const handleClick = useCallback((_e: React.MouseEvent<HTMLDivElement>) => {}, []);
 
-  const handleLogout = useCallback(() => {
-    alert("Logout");
-    // Add actual logout logic here
-  }, []);
+  const handleLogout = () => {
+    if (okta?.oktaAuth) {
+      okta?.oktaAuth.signOut({ postLogoutRedirectUri });
+      dispatch(clearUserData());
+    }
+  };
 
   // Side effects
   useEffect(() => {
@@ -98,8 +100,8 @@ const App = () => {
         logout={handleLogout}
         buildVersionNumber={buildVersionNumber}
         userName={username}
-        environmentMode={"development"}
-        oktaEnabled={true}>
+        environmentMode={EnvironmentUtils.envMode}
+        oktaEnabled={EnvironmentUtils.isOktaEnabled}>
         <AppErrorBoundary>
           <ToastServiceProvider
             maxSnack={3}

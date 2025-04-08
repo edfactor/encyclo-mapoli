@@ -11,7 +11,7 @@
     "@pkgr/core": "0.2.0"
   },
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --port 3100",
     "build:prod": "tsc -b && vite build --mode production",
     "build:qa": "vite build --mode qa",
     "build:uat": "vite build --mode uat",
