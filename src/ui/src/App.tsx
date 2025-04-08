@@ -11,6 +11,7 @@ import { themeOptions, ToastServiceProvider } from "smart-ui-library";
 import "smart-ui-library/dist/smart-ui-library.css";
 import "../agGridConfig";
 import EnvironmentUtils from "./utils/environmentUtils";
+import { useGetAppVersionQuery } from "./reduxstore/api/CommonApi";
 
 // Types
 interface BuildInfo {
@@ -24,7 +25,11 @@ const App = () => {
   // State management
   const dispatch = useDispatch();
   const okta = useOktaAuth();
+
+  useGetAppVersionQuery();
   const [uiBuildInfo, setUiBuildInfo] = useState<BuildInfo | null>(null);
+  const [buildInfoText, setBuildInfoText] = useState("");
+  const { buildNumber } = useSelector((state: RootState) => state.common);
 
   // Redux selectors
   //const state = useSelector((state: RootState) => state);
@@ -58,10 +63,6 @@ const App = () => {
   const isAuthenticated = !!token;
   const username = isAuthenticated ? appUser?.userName || stateUsername || "Guest" : "Not authenticated";
 
-  const buildVersionNumber = uiBuildInfo
-    ? `${uiBuildInfo.buildNumber ?? ""}.${uiBuildInfo.buildId ?? ""}`
-    : "Local.Dev";
-
   // Event handlers
   const handleClick = useCallback((_e: React.MouseEvent<HTMLDivElement>) => {}, []);
 
@@ -89,6 +90,17 @@ const App = () => {
     }
   }, [uiBuildInfo]);
 
+  useEffect(() => {
+    const buildVersionNumber = uiBuildInfo
+      ? `${uiBuildInfo.buildNumber ?? ""}.${uiBuildInfo.buildId ?? ""}`
+      : "Local.Dev";
+    
+    if (buildNumber && buildVersionNumber) {     
+      const buildInfo = `${buildVersionNumber} | API Version: ${buildNumber}`;
+      setBuildInfoText(buildInfo);
+    }
+  }, [buildNumber, uiBuildInfo]);
+
   // Theme setup
   const theme = createTheme(themeOptions);
 
@@ -98,7 +110,7 @@ const App = () => {
         onClick={handleClick}
         appTitle="Profit Sharing"
         logout={handleLogout}
-        buildVersionNumber={buildVersionNumber}
+        buildVersionNumber={buildInfoText}
         userName={username}
         environmentMode={EnvironmentUtils.envMode}
         oktaEnabled={EnvironmentUtils.isOktaEnabled}>

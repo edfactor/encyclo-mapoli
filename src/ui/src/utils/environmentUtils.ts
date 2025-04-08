@@ -24,7 +24,7 @@ export default class EnvironmentUtils {
   }
 
   public static get isOktaEnabled(): boolean {
-    return import.meta.env.VITE_APP_OKTA_ENABLED === "true";
+    return import.meta.env.VITE_REACT_APP_OKTA_ENABLED === "true";
   }
 
   public static get envMode(): "development" | "qa" | "uat" | "production" {
