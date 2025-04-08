@@ -10,6 +10,7 @@ import { useLazyGetMasterApplyQuery, useLazyGetMasterRevertQuery } from "reduxst
 import { setProfitEditUpdateRevertChangesAvailable } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import ProfitShareEditUpdateTabs from "./ProfitShareEditUpdateTabs";
+import { useState } from "react";
 
 const developmentNoteStyle = {
   backgroundColor: "#FFFFE0", // Light yellow
@@ -138,6 +139,7 @@ const RenderRevertButton = () => {
 };
 
 const ProfitShareEditUpdate = () => {
+  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const { profitSharingUpdateAdjustmentSummary, profitSharingUpdate } = useSelector(
     (state: RootState) => state.yearsEnd
   );
@@ -167,7 +169,7 @@ const ProfitShareEditUpdate = () => {
         </Grid2>
         <Grid2 width={"100%"}>
           <DSMAccordion title="Parameters">
-            <ProfitShareEditUpdateSearchFilter />
+            <ProfitShareEditUpdateSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
           </DSMAccordion>
         </Grid2>
         {profitSharingUpdate && (
@@ -193,22 +195,24 @@ const ProfitShareEditUpdate = () => {
                   numberToCurrency(profitSharingUpdate.totals.endingBalance || 0)
                 ],
                 [
-                  numberToCurrency(0),
+                  "",
                   numberToCurrency(profitSharingUpdate.totals.allocations || 0),
-                  numberToCurrency(0),
-                  numberToCurrency(0),
+                  "",
+                  "",
                   numberToCurrency(profitSharingUpdate.totals.maxPointsTotal || 0),
                   numberToCurrency(profitSharingUpdate.totals.paidAllocations || 0),
-                  numberToCurrency(0)
+                  numberToCurrency(
+                    (profitSharingUpdate.totals.allocations || 0) + (profitSharingUpdate.totals.paidAllocations || 0)
+                  )
                 ],
                 [
-                  numberToCurrency(0),
+                  "",
                   numberToCurrency(profitSharingUpdate.totals.contributionPoints || 0),
                   numberToCurrency(profitSharingUpdate.totals.earningPoints || 0),
-                  numberToCurrency(0),
-                  numberToCurrency(0),
-                  numberToCurrency(0),
-                  numberToCurrency(0)
+                  "",
+                  "",
+                  "",
+                  ""
                 ]
               ]}
               leftColumnHeaders={["Total", "Allocation", "Point"]}
@@ -260,7 +264,10 @@ const ProfitShareEditUpdate = () => {
               </>
             )}
             <Grid2 width="100%">
-              <ProfitShareEditUpdateTabs />
+              <ProfitShareEditUpdateTabs
+                initialSearchLoaded={initialSearchLoaded}
+                setInitialSearchLoaded={setInitialSearchLoaded}
+              />
             </Grid2>
           </div>
         )}

@@ -67,20 +67,32 @@ const schema = yup.object().shape({
   adjustEarningsSecondaryAmount: yup.number().typeError("Earnings must be a number").nullable()
 });
 
-const ProfitShareEditUpdateSearchFilter = () => {
+interface ProfitShareEditUpdateSearchFilterProps {
+  setInitialSearchLoaded: (include: boolean) => void;
+}
+
+const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFilterProps> = ({
+  setInitialSearchLoaded
+}) => {
   const [triggerSearchUpdate, { isFetching: isFetchingUpdate }] = useLazyGetProfitShareUpdateQuery();
   const [triggerSearchEdit, { isFetching: isFetchingEdit }] = useLazyGetProfitShareEditQuery();
   const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "contributionPercent",
+    sortBy: "name",
     isSortDescending: false
   });
 
-  const { profitSharingUpdateAdjustmentSummary } = useSelector((state: RootState) => state.yearsEnd);
+  const { profitSharingUpdateAdjustmentSummary, profitSharingUpdate, profitSharingEdit } = useSelector(
+    (state: RootState) => state.yearsEnd
+  );
 
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
 
   const fiscalCloseProfitYearAsDate = new Date(fiscalCloseProfitYear, 0, 1);
+
+  if (fiscalCloseProfitYear && !profitSharingUpdate && !profitSharingEdit) {
+    setInitialSearchLoaded(true);
+  }
 
   const {
     control,
@@ -111,8 +123,8 @@ const ProfitShareEditUpdateSearchFilter = () => {
     if (isValid) {
       const updateParams: ProfitShareUpdateRequest = {
         pagination: {
-          sortBy: sortParams.sortBy,
-          isSortDescending: sortParams.isSortDescending,
+          sortBy: "name",
+          isSortDescending: false,
           skip: 0,
           take: 25
         },
@@ -137,9 +149,9 @@ const ProfitShareEditUpdateSearchFilter = () => {
 
       // Now if we have a badgeToAdjust, we want to save the
       // adjustment summary so that panel shows up
-      //if (data.badgeToAdjust) {
-      //  dispatch(addBadgeNumberToUpdateAdjustmentSummary(data.badgeToAdjust));
-      //}
+      if (data.badgeToAdjust) {
+        dispatch(addBadgeNumberToUpdateAdjustmentSummary(data.badgeToAdjust));
+      }
 
       // Now we have to do the edit calls
       triggerSearchEdit(updateParams, false).unwrap();
@@ -154,6 +166,7 @@ const ProfitShareEditUpdateSearchFilter = () => {
     dispatch(clearProfitSharingUpdate());
     dispatch(clearProfitSharingEditQueryParams());
     dispatch(clearProfitSharingUpdateQueryParams());
+    setInitialSearchLoaded(false);
 
     reset({
       profitYear: fiscalCloseProfitYearAsDate,

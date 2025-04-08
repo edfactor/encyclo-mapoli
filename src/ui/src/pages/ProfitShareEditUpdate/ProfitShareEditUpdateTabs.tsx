@@ -9,7 +9,12 @@ import { RootState } from "reduxstore/store";
 import ProfitShareEditGrid from "./ProfitShareEditGrid";
 import ProfitShareUpdateGrid from "./ProfitShareUpdateGrid";
 
-const ProfitShareEditUpdateTabs: React.FC = () => {
+interface ProfitShareEditUpdateTabsProps {
+  initialSearchLoaded: boolean;
+  setInitialSearchLoaded: (loaded: boolean) => void;
+}
+
+const ProfitShareEditUpdateTabs = ({ initialSearchLoaded, setInitialSearchLoaded }: ProfitShareEditUpdateTabsProps) => {
   const [value, setValue] = useState("1");
   const { profitSharingUpdate } = useSelector((state: RootState) => state.yearsEnd);
 
@@ -37,10 +42,16 @@ const ProfitShareEditUpdateTabs: React.FC = () => {
               </TabList>
             </Box>
             <TabPanel value="1">
-              <ProfitShareUpdateGrid />
+              <ProfitShareUpdateGrid
+                initialSearchLoaded={initialSearchLoaded}
+                setInitialSearchLoaded={setInitialSearchLoaded}
+              />
             </TabPanel>
             <TabPanel value="2">
-              <ProfitShareEditGrid />
+              <ProfitShareEditGrid
+                initialSearchLoaded={initialSearchLoaded}
+                setInitialSearchLoaded={setInitialSearchLoaded}
+              />
             </TabPanel>
           </TabContext>
         </Box>
