@@ -168,6 +168,8 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
                 label="Rehire Begin Date"
                 disableFuture
                 error={errors.beginningDate?.message}
+                minDate={tryddmmyyyyToDate(fiscalCalendarYear?.fiscalBeginDate)}
+                maxDate={tryddmmyyyyToDate(fiscalCalendarYear?.fiscalEndDate)}
               />
             )}
           />
@@ -186,6 +188,8 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
                 label="Rehire Ending Date"
                 disableFuture
                 error={errors.endingDate?.message}
+                minDate={tryddmmyyyyToDate(fiscalCalendarYear?.fiscalBeginDate)}
+                maxDate={tryddmmyyyyToDate(fiscalCalendarYear?.fiscalEndDate)}
               />
             )}
           />
