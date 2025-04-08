@@ -7,8 +7,7 @@ public static class ReadyActivityFactory
 {
     public static List<Activity> CreateActivities(string dataDirectory)
     {
-        var secretConfig = new ConfigurationBuilder()
-            .Build();
+        var secretConfig = new ConfigurationBuilder().AddUserSecrets<ReadyActivity>().Build();
         var username = secretConfig["YEMatchHost:Username"];
         var password = secretConfig["YEMatchHost:Password"];
         var host = "tduapp01";
@@ -16,11 +15,8 @@ public static class ReadyActivityFactory
 
         if (username == null || password == null)
         {
-#pragma warning disable S112
-            throw new Exception("Username and password are required");
-#pragma warning restore S112
+            throw new InvalidOperationException("Username and password are required");
         }
-
 
         var sshClient = new SshClient(host, username, password);
         sshClient.Connect();
