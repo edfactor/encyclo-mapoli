@@ -54,8 +54,8 @@ export const GetProfitShareForfeitColumns = (navFunction: (badgeNumber: string) 
     },
     {
       headerName: "Earnings Points",
-      field: "earningsPoints",
-      colId: "earningsPoints",
+      field: "earningPoints",
+      colId: "earningPoints",
       minWidth: 120,
       headerClass: "right-align",
       cellClass: "right-align",
@@ -63,8 +63,8 @@ export const GetProfitShareForfeitColumns = (navFunction: (badgeNumber: string) 
     },
     {
       headerName: "BEN #",
-      field: "benNumber",
-      colId: "benNumber",
+      field: "beneficiaryPsn",
+      colId: "beneficiaryPsn",
       minWidth: 100,
       headerClass: "right-align",
       cellClass: "right-align",
