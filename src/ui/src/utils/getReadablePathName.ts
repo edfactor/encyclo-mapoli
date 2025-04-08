@@ -27,7 +27,7 @@ const pathToReadableName: Record<string, string> = {
   "profit-share-report": "Profit Share Report",
   forfeit: "Forfeit",
   "fiscal-close": "Year End Flow",
-  "profit-share-update": "Profit Share Update (PAY444 PAY447 PAY460 PROFTLD)",
+  "profit-share-update": "Profit Share Update (PAY444 PAY447)",
   "employees-on-military-leave": "Military Leave",
   "profit-share-report-edit-run": "Profit Share Report Edit Run",
   "profit-share-report-final-run": "Profit Share Report Final Run",
@@ -56,7 +56,7 @@ const pathToReadableName: Record<string, string> = {
   "new-ps-labels-report": "New PS Labels Report",
   demographic: "Demographic Freeze",
   "ytd-wages-extract": "YTD Wages Extract",
-  "profall": "Profall",
+  profall: "Profall",
   "pay426-final-run": "Pay 426 Final Run"
 };
 

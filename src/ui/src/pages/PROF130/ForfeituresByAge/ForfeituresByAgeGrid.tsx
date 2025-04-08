@@ -104,12 +104,7 @@ const ForfeituresByAgeGrid: React.FC<ForfeituresByAgeGridProps> = ({ initialSear
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: forfeituresByAgeTotal?.response.results,
-                  columnDefs: [
-                    {
-                      headerName: columnDefsTotal.headerName,
-                      children: columnDefsTotal.children
-                    }
-                  ]
+                  columnDefs: columnDefsTotal
                 }}
               />
             </Grid2>
@@ -120,12 +115,7 @@ const ForfeituresByAgeGrid: React.FC<ForfeituresByAgeGridProps> = ({ initialSear
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: forfeituresByAgeFullTime?.response.results,
-                  columnDefs: [
-                    {
-                      headerName: columnDefsFullTime.headerName,
-                      children: columnDefsFullTime.children
-                    }
-                  ]
+                  columnDefs: columnDefsFullTime
                 }}
               />
             </Grid2>
@@ -136,12 +126,7 @@ const ForfeituresByAgeGrid: React.FC<ForfeituresByAgeGridProps> = ({ initialSear
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: forfeituresByAgePartTime?.response.results,
-                  columnDefs: [
-                    {
-                      headerName: columnDefsPartTime.headerName,
-                      children: columnDefsPartTime.children
-                    }
-                  ]
+                  columnDefs: columnDefsPartTime
                 }}
               />
             </Grid2>

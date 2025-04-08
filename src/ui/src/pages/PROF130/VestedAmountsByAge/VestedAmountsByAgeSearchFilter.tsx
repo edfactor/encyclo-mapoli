@@ -49,6 +49,8 @@ const VestedAmountsByAgeSearchFilter: React.FC = () => {
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
+      dispatch(clearVestedAmountsByAgeQueryParams());
+      dispatch(clearVestedAmountsByAge());
       triggerSearch(
         {
           profitYear: fiscalCloseProfitYear,

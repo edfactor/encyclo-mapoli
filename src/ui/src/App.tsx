@@ -28,8 +28,8 @@ const App = () => {
   const dispatch = useDispatch();
 
   // Redux selectors
-  const state = useSelector((state: RootState) => state);
-  const { token, appUser, username: stateUsername } = state.security;
+  //const state = useSelector((state: RootState) => state);
+  const { token, appUser, username: stateUsername } = useSelector((state: RootState) => state.security);
 
   // Add effect to update username when token changes
   useEffect(() => {

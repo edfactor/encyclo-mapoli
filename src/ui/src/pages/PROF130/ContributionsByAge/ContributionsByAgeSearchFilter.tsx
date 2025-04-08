@@ -38,16 +38,20 @@ interface ContributionsByAgeSearchFilterProps {
 
 const ContributionsByAgeSearchFilter: React.FC<ContributionsByAgeSearchFilterProps> = ({ setInitialSearchLoaded }) => {
   const [triggerSearch, { isFetching }] = useLazyGetContributionsByAgeQuery();
-  const { contributionsByAgeQueryParams, contributionsByAgeFullTime } = useSelector(
-    (state: RootState) => state.yearsEnd
-  );
+  const {
+    contributionsByAgeQueryParams,
+    contributionsByAgeFullTime,
+    contributionsByAgePartTime,
+    contributionsByAgeTotal
+  } = useSelector((state: RootState) => state.yearsEnd);
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
   const {
     control,
     handleSubmit,
     formState: { errors, isValid },
-    reset
+    reset,
+    trigger
   } = useForm<ContributionsByAgeSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
@@ -57,12 +61,28 @@ const ContributionsByAgeSearchFilter: React.FC<ContributionsByAgeSearchFilterPro
   });
 
   useEffect(() => {
-    if (fiscalCloseProfitYear && !contributionsByAgeFullTime) {
+    if (
+      fiscalCloseProfitYear &&
+      !contributionsByAgeFullTime &&
+      !contributionsByAgePartTime &&
+      !contributionsByAgeTotal
+    ) {
       setInitialSearchLoaded(true);
     }
-  }, [fiscalCloseProfitYear, contributionsByAgeFullTime, setInitialSearchLoaded]);
+  }, [
+    fiscalCloseProfitYear,
+    contributionsByAgeFullTime,
+    setInitialSearchLoaded,
+    contributionsByAgePartTime,
+    contributionsByAgeTotal
+  ]);
 
   const validateAndSearch = handleSubmit((data) => {
+    // It is necessary to clear for the case where the user clicks
+    // search a second time after getting one round of results
+    setInitialSearchLoaded(false);
+    dispatch(clearContributionsByAgeQueryParams());
+    dispatch(clearContributionsByAge());
     if (isValid) {
       triggerSearch(
         {
@@ -93,6 +113,7 @@ const ContributionsByAgeSearchFilter: React.FC<ContributionsByAgeSearchFilterPro
   });
 
   const handleReset = () => {
+    setInitialSearchLoaded(false);
     dispatch(clearContributionsByAgeQueryParams());
     dispatch(clearContributionsByAge());
     reset({
