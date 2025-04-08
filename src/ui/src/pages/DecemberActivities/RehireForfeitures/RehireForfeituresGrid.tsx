@@ -217,7 +217,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
   }, [mainColumns, detailColumns]);
 
   // Custom CSS classes for rows
-  const getRowClass = (params: {data: {isDetail: boolean}}) => {
+  const getRowClass = (params: { data: { isDetail: boolean } }) => {
     return params.data.isDetail ? "detail-row" : "";
   };
 
@@ -226,7 +226,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
       <Typography
         variant="h2"
         sx={{ color: "#0258A5" }}>
-        {`Rehire Forfeitures (QPREV-PROF) (${rehireForfeitures?.response.total || 0} ${rehireForfeitures?.response.total === 1 ? 'Record' : 'Records'})`}
+        {`${CAPTIONS.REHIRE_FORFEITURES} (${rehireForfeitures?.response.total || 0} ${rehireForfeitures?.response.total === 1 ? 'Record' : 'Records'})`}
       </Typography>
 
       <style>
