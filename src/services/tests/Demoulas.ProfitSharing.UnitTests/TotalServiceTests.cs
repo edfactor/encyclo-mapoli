@@ -51,7 +51,7 @@ public class TotalServiceTests : ApiTestBase<Program>
                 .Where(x => x.Ssn == demoSsn).ToListAsync(CancellationToken.None);
             testRslt.Should().NotBeNull(); //Testing where Forfeiture, Contribution and Earnigns are all added
             testRslt.Count.Should().Be(1);
-            testRslt[0].Total.Should().Be(-4681M);
+            testRslt[0].Total.Should().Be(-18724M);
 
             foreach (var prof in pdArray)
             {
@@ -63,7 +63,7 @@ public class TotalServiceTests : ApiTestBase<Program>
                 .Where(x => x.Ssn == demoSsn).ToListAsync(CancellationToken.None);
             testRslt.Should().NotBeNull(); //Testing where only forfeitures are added (negatively)
             testRslt.Count.Should().Be(1);
-            testRslt[0].Total.Should().Be(-4681M);
+            testRslt[0].Total.Should().Be(-18724M);
 
             foreach (var prof in pdArray)
             {

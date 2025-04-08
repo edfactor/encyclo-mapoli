@@ -138,7 +138,7 @@ public class PostFrozenService : IPostFrozenService
                     d.DateOfBirth.Age(), //Current report uses today's date for calculating age
                     d.EmploymentStatusId,
                     (bal.CurrentBalance ?? 0),
-                    tyPp.EnrollmentId
+                    tyPp != null ? tyPp.EnrollmentId : (byte)0
                 )).ToPaginationResultsAsync(request, cancellationToken: cancellationToken);
 
             var response = new ProfitSharingUnder21ReportResponse()
