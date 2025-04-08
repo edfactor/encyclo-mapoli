@@ -65,6 +65,11 @@ const DistributionByAgeSearchFilter: React.FC<DistributionByAgeSearchFilterProps
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
+      // It is necessary to clear for the case where the user clicks
+      // search a second time after getting one round of results
+      setInitialSearchLoaded(false);
+      dispatch(clearDistributionsByAge());
+      dispatch(clearDistributionsByAgeQueryParams());
       triggerSearch(
         {
           profitYear: fiscalCloseProfitYear,
@@ -94,6 +99,7 @@ const DistributionByAgeSearchFilter: React.FC<DistributionByAgeSearchFilterProps
   });
 
   const handleReset = () => {
+    setInitialSearchLoaded(false);
     dispatch(clearDistributionsByAge());
     dispatch(clearDistributionsByAgeQueryParams());
     reset({

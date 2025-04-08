@@ -128,7 +128,7 @@ export const CAPTIONS = {
   PROFIT_SHARE_REPORT_FINAL_RUN: "Profit Share Report Final Run (PAY426N)",
   PROFIT_SHARE_REPORT: "Profit Share Report (PAY426)",
   PROFIT_SHARE_TOTALS: "Profit Share Totals Report (PAY426)",
-  PROFIT_SHARE_UPDATE: "Profit Share Updates (PAY444 PAY447 PAY460 PROFTLD)",
+  PROFIT_SHARE_UPDATE: "Profit Share Updates (PAY444|PAY447)",
   PROFIT_SHARING_CONTROL_SHEET: "Profit Sharing Control Sheet",
   PRINT_PROFIT_CERTS: "Print Profit Certs (PAYCERT)",
   QPAY066_UNDER21: "QPAY066-UNDR21",

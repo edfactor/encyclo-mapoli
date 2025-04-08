@@ -142,12 +142,7 @@ const BalanceByAgeGrid: React.FC<BalanceByAgeGridProps> = ({ initialSearchLoaded
                 providedOptions={{
                   rowData: balanceByAgeTotal?.response.results,
 
-                  columnDefs: [
-                    {
-                      headerName: columnDefsTotal.headerName,
-                      children: columnDefsTotal.children
-                    }
-                  ]
+                  columnDefs: columnDefsTotal
                 }}
               />
             </Grid2>
@@ -159,12 +154,7 @@ const BalanceByAgeGrid: React.FC<BalanceByAgeGridProps> = ({ initialSearchLoaded
                 providedOptions={{
                   rowData: balanceByAgeFullTime?.response.results,
 
-                  columnDefs: [
-                    {
-                      headerName: columnDefsFullTime.headerName,
-                      children: columnDefsFullTime.children
-                    }
-                  ]
+                  columnDefs: columnDefsFullTime
                 }}
               />
             </Grid2>
@@ -175,13 +165,7 @@ const BalanceByAgeGrid: React.FC<BalanceByAgeGridProps> = ({ initialSearchLoaded
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: balanceByAgePartTime?.response.results,
-
-                  columnDefs: [
-                    {
-                      headerName: columnDefsPartTime.headerName,
-                      children: columnDefsPartTime.children
-                    }
-                  ]
+                  columnDefs: columnDefsPartTime
                 }}
               />
             </Grid2>

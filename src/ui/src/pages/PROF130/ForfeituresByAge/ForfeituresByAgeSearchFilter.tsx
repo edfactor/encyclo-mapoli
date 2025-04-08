@@ -62,6 +62,11 @@ const ForfeituresByAgeSearchFilter: React.FC<ForfeituresByAgeSearchFilterProps> 
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
+      // It is necessary to clear for the case where the user clicks
+      // search a second time after getting one round of results
+      setInitialSearchLoaded(false);
+      dispatch(clearForfeituresByAgeQueryParams());
+      dispatch(clearForfeituresByAge());
       triggerSearch(
         {
           profitYear: fiscalCloseProfitYear,
@@ -91,6 +96,7 @@ const ForfeituresByAgeSearchFilter: React.FC<ForfeituresByAgeSearchFilterProps> 
   });
 
   const handleReset = () => {
+    setInitialSearchLoaded(false);
     dispatch(clearForfeituresByAgeQueryParams());
     dispatch(clearForfeituresByAge());
     reset({

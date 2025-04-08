@@ -57,6 +57,11 @@ const BalanceByAgeSearchFilter: React.FC<BalanceByAgeSearchFilterProps> = ({ set
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
+      // It is necessary to clear for the case where the user clicks
+      // search a second time after getting one round of results
+      setInitialSearchLoaded(false);
+      dispatch(clearBalanceByAgeQueryParams());
+      dispatch(clearBalanceByAge());
       triggerSearch(
         {
           profitYear: fiscalCloseProfitYear,
@@ -91,6 +96,7 @@ const BalanceByAgeSearchFilter: React.FC<BalanceByAgeSearchFilterProps> = ({ set
   }, [fiscalCloseProfitYear, balanceByAgeFullTime, setInitialSearchLoaded]);
 
   const handleReset = () => {
+    setInitialSearchLoaded(false);
     dispatch(clearBalanceByAgeQueryParams());
     dispatch(clearBalanceByAge());
     reset({

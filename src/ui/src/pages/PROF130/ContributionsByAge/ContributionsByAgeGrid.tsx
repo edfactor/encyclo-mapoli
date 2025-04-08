@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetContributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
@@ -29,9 +29,9 @@ const ContributionsByAgeGrid: React.FC<ContributionsByAgeGridProps> = ({ initial
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
-  const columnDefsTotal = GetContributionsByAgeColumns(FrozenReportsByAgeRequestType.Total);
-  const columnDefsFullTime = GetContributionsByAgeColumns(FrozenReportsByAgeRequestType.FullTime);
-  const columnDefsPartTime = GetContributionsByAgeColumns(FrozenReportsByAgeRequestType.PartTime);
+  const columnDefsTotal = useMemo(() => GetContributionsByAgeColumns(FrozenReportsByAgeRequestType.Total), []);
+  const columnDefsFullTime = useMemo(() => GetContributionsByAgeColumns(FrozenReportsByAgeRequestType.FullTime), []);
+  const columnDefsPartTime = useMemo(() => GetContributionsByAgeColumns(FrozenReportsByAgeRequestType.PartTime), []);
 
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
 
@@ -43,7 +43,7 @@ const ContributionsByAgeGrid: React.FC<ContributionsByAgeGridProps> = ({ initial
         pagination: { skip: 0, take: 255 }
       },
       false
-    ).unwrap();
+    );
     triggerSearch(
       {
         profitYear: fiscalCloseProfitYear || contributionsByAgeQueryParams?.profitYear || 0,
@@ -51,7 +51,7 @@ const ContributionsByAgeGrid: React.FC<ContributionsByAgeGridProps> = ({ initial
         pagination: { skip: 0, take: 255 }
       },
       false
-    ).unwrap();
+    );
     triggerSearch(
       {
         profitYear: fiscalCloseProfitYear || contributionsByAgeQueryParams?.profitYear || 0,
@@ -59,7 +59,7 @@ const ContributionsByAgeGrid: React.FC<ContributionsByAgeGridProps> = ({ initial
         pagination: { skip: 0, take: 255 }
       },
       false
-    ).unwrap();
+    );
   }, [contributionsByAgeQueryParams?.profitYear, triggerSearch, fiscalCloseProfitYear]);
 
   useEffect(() => {
@@ -70,94 +70,79 @@ const ContributionsByAgeGrid: React.FC<ContributionsByAgeGridProps> = ({ initial
 
   return (
     <>
-      {contributionsByAgeTotal?.response && (
-        <>
-          <div className="px-[24px]">
-            <h2 className="text-dsm-secondary">Summary</h2>
-          </div>
-          <div className="flex sticky top-0 z-10 bg-white">
-            <TotalsGrid
-              displayData={[
-                [contributionsByAgeTotal?.totalEmployees || 0, numberToCurrency(contributionsByAgeTotal?.totalAmount)]
-              ]}
-              leftColumnHeaders={["All"]}
-              topRowHeaders={["", "EMPS", "Amount"]}></TotalsGrid>
-            <TotalsGrid
-              displayData={[
-                [
-                  contributionsByAgeFullTime?.totalEmployees || 0,
-                  numberToCurrency(contributionsByAgeFullTime?.totalAmount || 0)
-                ]
-              ]}
-              leftColumnHeaders={["FullTime"]}
-              topRowHeaders={["", "EMPS", "Amount"]}></TotalsGrid>
-            <TotalsGrid
-              displayData={[
-                [
-                  contributionsByAgePartTime?.totalEmployees || 0,
-                  numberToCurrency(contributionsByAgePartTime?.totalAmount || 0)
-                ]
-              ]}
-              leftColumnHeaders={["PartTime"]}
-              topRowHeaders={["", "EMPS", "Amount"]}></TotalsGrid>
-          </div>
-          <Grid2
-            size={{ xs: 12 }}
-            container>
-            <Grid2 size={{ xs: 4 }}>
-              <DSMGrid
-                preferenceKey={"AGE_Total"}
-                isLoading={isLoading}
-                handleSortChanged={sortEventHandler}
-                providedOptions={{
-                  rowData: contributionsByAgeTotal?.response.results,
-
-                  columnDefs: [
-                    {
-                      headerName: columnDefsTotal.headerName,
-                      children: columnDefsTotal.children
-                    }
+      {contributionsByAgeTotal?.response?.results &&
+        contributionsByAgeFullTime?.response?.results &&
+        contributionsByAgePartTime?.response?.results && (
+          <>
+            <div className="px-[24px]">
+              <h2 className="text-dsm-secondary">Summary</h2>
+            </div>
+            <div className="flex sticky top-0 z-10 bg-white">
+              <TotalsGrid
+                displayData={[
+                  [contributionsByAgeTotal?.totalEmployees || 0, numberToCurrency(contributionsByAgeTotal?.totalAmount)]
+                ]}
+                leftColumnHeaders={["All"]}
+                topRowHeaders={["", "EMPS", "Amount"]}></TotalsGrid>
+              <TotalsGrid
+                displayData={[
+                  [
+                    contributionsByAgeFullTime?.totalEmployees || 0,
+                    numberToCurrency(contributionsByAgeFullTime?.totalAmount || 0)
                   ]
-                }}
-              />
-            </Grid2>
-            <Grid2 size={{ xs: 4 }}>
-              <DSMGrid
-                preferenceKey={"AGE_FullTime"}
-                isLoading={isLoading}
-                handleSortChanged={sortEventHandler}
-                providedOptions={{
-                  rowData: contributionsByAgeFullTime?.response.results,
-                  theme: "legacy",
-                  columnDefs: [
-                    {
-                      headerName: columnDefsFullTime.headerName,
-                      children: columnDefsFullTime.children
-                    }
+                ]}
+                leftColumnHeaders={["FullTime"]}
+                topRowHeaders={["", "EMPS", "Amount"]}></TotalsGrid>
+              <TotalsGrid
+                displayData={[
+                  [
+                    contributionsByAgePartTime?.totalEmployees || 0,
+                    numberToCurrency(contributionsByAgePartTime?.totalAmount || 0)
                   ]
-                }}
-              />
+                ]}
+                leftColumnHeaders={["PartTime"]}
+                topRowHeaders={["", "EMPS", "Amount"]}></TotalsGrid>
+            </div>
+            <Grid2
+              size={{ xs: 12 }}
+              container>
+              <Grid2 size={{ xs: 4 }}>
+                <DSMGrid
+                  preferenceKey={"AGE_Total"}
+                  isLoading={isLoading}
+                  handleSortChanged={sortEventHandler}
+                  providedOptions={{
+                    rowData: contributionsByAgeTotal?.response.results,
+                    columnDefs: columnDefsTotal
+                  }}
+                />
+              </Grid2>
+              <Grid2 size={{ xs: 4 }}>
+                <DSMGrid
+                  preferenceKey={"AGE_FullTime"}
+                  isLoading={isLoading}
+                  handleSortChanged={sortEventHandler}
+                  providedOptions={{
+                    rowData: contributionsByAgeFullTime?.response.results,
+                    theme: "legacy",
+                    columnDefs: columnDefsFullTime
+                  }}
+                />
+              </Grid2>
+              <Grid2 size={{ xs: 4 }}>
+                <DSMGrid
+                  preferenceKey={"AGE_PartTime"}
+                  isLoading={isLoading}
+                  handleSortChanged={sortEventHandler}
+                  providedOptions={{
+                    rowData: contributionsByAgePartTime?.response.results,
+                    columnDefs: columnDefsPartTime
+                  }}
+                />
+              </Grid2>
             </Grid2>
-            <Grid2 size={{ xs: 4 }}>
-              <DSMGrid
-                preferenceKey={"AGE_PartTime"}
-                isLoading={isLoading}
-                handleSortChanged={sortEventHandler}
-                providedOptions={{
-                  rowData: contributionsByAgePartTime?.response.results,
-
-                  columnDefs: [
-                    {
-                      headerName: columnDefsPartTime.headerName,
-                      children: columnDefsPartTime.children
-                    }
-                  ]
-                }}
-              />
-            </Grid2>
-          </Grid2>
-        </>
-      )}
+          </>
+        )}
     </>
   );
 };
