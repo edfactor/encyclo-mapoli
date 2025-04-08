@@ -7,7 +7,7 @@ import { setToken } from "reduxstore/slices/securitySlice";
 import EnvironmentUtils from "../../utils/environmentUtils";
 
 const Login = () => {
-  const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED === "true";
+  const oktaEnabled = EnvironmentUtils.isOktaEnabled;
   const { authState, oktaAuth } = useOktaAuth();
   const postLogoutRedirectUri = EnvironmentUtils.postLogoutRedirectUri;
   const dispatch = useDispatch();
@@ -33,39 +33,7 @@ const Login = () => {
       }
     }
   }, [authState, dispatch, oktaAuth, oktaEnabled]);
-  /*
-  useEffect(() => {
-    const logout = async () => oktaAuth.signOut({ postLogoutRedirectUri });
-    if (performLogout) {
-      logout();
-      dispatch(setToken(""));
-      dispatch(setPerformLogout(false));
-    }
-  }, [performLogout]);
-
-  useEffect(() => {
-    if (userRoles) {
-      setSkipRole(true);
-      dispatch(setUserRoles(userRoles.roles));
-    }
-  }, [userRoles]);
-
-  useEffect(() => {
-    if (userPermissions) {
-      setSkipPermission(true);
-      dispatch(setUserPermissions(userPermissions.permissions));
-    }
-  }, [userPermissions]);
-
-  useEffect(() => {
-    if (user) {
-      setSkipUsername(true);
-      dispatch(setUsername(user.userName));
-    }
-  }, [user]);
-
-*/
-
+  
   return <Outlet></Outlet>;
 };
 
