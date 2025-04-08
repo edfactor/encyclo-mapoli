@@ -13,27 +13,6 @@ interface ForfeitGridProps {
   setInitialSearchLoaded: (loaded: boolean) => void;
 }
 
-const _sampleData = [
-  {
-    badgeNumber: 47425,
-    employeeName: "BACHELDER, JAKE R",
-    ssn: "***-**-7425",
-    forfeitures: 5000.0,
-    forfeitPoints: 565,
-    earningsPoints: 317,
-    benNumber: "12345"
-  },
-  {
-    badgeNumber: 82424,
-    employeeName: "BATISTA, STEVEN",
-    ssn: "***-**-2424",
-    forfeitures: 2500.0,
-    forfeitPoints: 23,
-    earningsPoints: 23,
-    benNumber: "12346"
-  }
-];
-
 const totalsRow = {
   forfeitures: "0.00",
   forfeitPoints: 0,
@@ -66,7 +45,7 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ initialSearchLoaded, setIniti
       {
         profitYear: fiscalCloseProfitYear,
         useFrozenData: true,
-        pagination: { skip: pageNumber * pageSize, take: pageSize }
+        pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: "badgeNumber", isSortDescending: true }
       },
       false
     ).unwrap();
@@ -94,12 +73,12 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ initialSearchLoaded, setIniti
             isLoading={false}
             handleSortChanged={(_params) => {}}
             providedOptions={{
-              rowData: _sampleData,
+              rowData: forfeituresAndPoints.response.results,
               pinnedBottomRowData: [totalsRow],
               columnDefs: columnDefs
             }}
           />
-          {(forfeituresAndPoints.response.results.length > 0 || !!_sampleData) && (
+          {(forfeituresAndPoints.response.results.length > 0) && (
             <Pagination
               pageNumber={pageNumber}
               setPageNumber={(value: number) => {
