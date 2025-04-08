@@ -1,4 +1,4 @@
-import { format, isValid, parse } from "date-fns";
+import { format, isValid, parse , parseISO, startOfDay} from "date-fns";
 export const EPOCH_DATE = new Date(1970, 0, 1);
 export const NULL_DATE = "01/01/1970";
 export const DAY_OF_SUNDAY = 0;
@@ -129,3 +129,22 @@ export function toDisplayDateFull(date?: Date) {
 
   return `${month} ${day}, ${year} ${strTime}`;
 }
+
+export const tryddmmyyyyToDate = (date?: string | Date | null): Date | null => {
+  if (!date) return null;
+  if (date === "YYYY-MM-DD") return null;
+
+  // If date is already a Date object, just apply startOfDay
+  if (date instanceof Date) {
+    return startOfDay(date);
+  }
+
+  // Parse the ISO date string
+  try {
+    const parsedDate = parseISO(date);
+    return startOfDay(parsedDate);
+  } catch (error) {
+    console.error('Error parsing date:', error);
+    return null;
+  }
+};

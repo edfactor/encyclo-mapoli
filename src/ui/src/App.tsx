@@ -1,17 +1,16 @@
 import { createTheme, ThemeProvider } from "@mui/material";
-import { useEffect, useState, useCallback } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useCallback, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "./reduxstore/store";
 // Add this import for the appropriate action
 import { setUsername } from "./reduxstore/slices/securitySlice"; // Adjust path as needed
-
 // Components
 import AppErrorBoundary from "components/ErrorBoundary";
 import PSLayout from "components/Layout/PSLayout";
 import Router from "./components/router/Router";
 
 // Styles and config
-import { themeOptions } from "smart-ui-library";
+import { themeOptions, ToastServiceProvider } from "smart-ui-library";
 import "smart-ui-library/dist/smart-ui-library.css";
 import "../agGridConfig";
 
@@ -102,7 +101,11 @@ const App = () => {
         environmentMode={"development"}
         oktaEnabled={true}>
         <AppErrorBoundary>
-          <Router />
+          <ToastServiceProvider
+            maxSnack={3}
+            anchorOrigin={{ horizontal: "left", vertical: "bottom" }}>
+            <Router />
+          </ToastServiceProvider>
         </AppErrorBoundary>
       </PSLayout>
     </ThemeProvider>

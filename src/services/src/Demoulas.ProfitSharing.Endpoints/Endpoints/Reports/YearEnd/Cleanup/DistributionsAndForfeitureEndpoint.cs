@@ -60,7 +60,7 @@ public class DistributionsAndForfeitureEndpoint: EndpointWithCsvBase<Distributio
             Map(m => m.BadgeNumber).Index(0).Name("BADGE #");
             Map(m => m.EmployeeName).Index(1).Name("NAME");
             Map(m => m.Ssn).Index(2).Name("SSN");
-            Map(m => m.LoanDate).Index(3).Name("DATE");
+            Map(m => m.Date).Index(3).Name("DATE");
             Map(m => m.DistributionAmount).Index(4).Name("DISTRIBUTION AMOUNT");
             Map(m => m.TaxCode).Index(5).Name("TC");
             Map(m => m.StateTax).Index(6).Name("STATE TAX");

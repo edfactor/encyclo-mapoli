@@ -250,7 +250,7 @@ export const yearsEndSlice = createSlice({
       localStorage.setItem("selectedProfitYearForFiscalClose", action.payload.toString());
     },
     checkDecemberParamsAndGridsProfitYears: (state, action: PayloadAction<number>) => {
-      // So now we need to update cached december activies data if it was based
+      // So now we need to update cached december actives data if it was based
       // on another year
 
       // Distributions And Forfeitures
