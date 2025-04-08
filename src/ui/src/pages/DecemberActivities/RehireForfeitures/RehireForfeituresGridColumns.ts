@@ -59,8 +59,8 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       field: "hoursCurrentYear",
       colId: "hoursCurrentYear",
       minWidth: 90,
-      headerClass: "left-align",
-      cellClass: "left-align",
+      headerClass: "right-align",
+      cellClass: "right-align",
       resizable: true,
       sortable: true
     },
