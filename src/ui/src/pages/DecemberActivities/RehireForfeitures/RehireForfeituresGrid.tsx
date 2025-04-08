@@ -7,6 +7,10 @@ import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
 import { GetMilitaryAndRehireForfeituresColumns, GetDetailColumns } from "./RehireForfeituresGridColumns";
 import { ICellRendererParams } from "ag-grid-community";
+import { MasterInquiryRequest, RehireForfeituresRequest } from "../../../reduxstore/types";
+import { memberTypeGetNumberMap, paymentTypeGetNumberMap } from "../../MasterInquiry/MasterInquiryFunctions";
+import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import useFiscalCalendarYear from "../../../hooks/useFiscalCalendarYear";
 
 interface MilitaryAndRehireForfeituresGridSearchProps {
   initialSearchLoaded: boolean;
@@ -24,30 +28,49 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
     isSortDescending: false
   });
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
-
+  const profitYear = useDecemberFlowProfitYear();
+  const fiscalCalendarYear = useFiscalCalendarYear();
   const { rehireForfeitures, rehireForfeituresQueryParams } = useSelector(
     (state: RootState) => state.yearsEnd
   );
 
+  const createRequest = useCallback(
+    (skip: number, sortBy: string, isSortDescending: boolean): RehireForfeituresRequest | null => {
+      if (!rehireForfeituresQueryParams) return null;
+
+      return {
+        beginningDate: rehireForfeituresQueryParams.beginningDate || fiscalCalendarYear?.fiscalBeginDate || '',
+        endingDate: rehireForfeituresQueryParams.endingDate || fiscalCalendarYear?.fiscalEndDate || '',
+        pagination: { skip, take: pageSize, sortBy, isSortDescending },
+        profitYear: rehireForfeituresQueryParams.profitYear || profitYear
+      };
+    },
+    [rehireForfeituresQueryParams, pageSize, pageNumber, sortParams]
+  );
+
   const [triggerSearch, { isFetching }] = useLazyGetRehireForfeituresQuery();
 
-  const onSearch = useCallback(async () => {
-    // ... existing search code
+  const onSearch = useCallback(async () => {  
+    if (rehireForfeituresQueryParams) {
+      const request = createRequest(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending);      
+      if (request) {
+        await triggerSearch(request, false);
+      }
+    }
   }, [
     pageNumber,
     pageSize,
     sortParams,
     triggerSearch,
-    rehireForfeituresQueryParams?.profitYear,
-    rehireForfeituresQueryParams?.beginningDate,
-    rehireForfeituresQueryParams?.endingDate
+    rehireForfeituresQueryParams,
+    createRequest
   ]);
 
   useEffect(() => {
     if (initialSearchLoaded) {
       onSearch();
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, onSearch]);
+  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch]);
 
   // Initialize expandedRows when data is loaded
   useEffect(() => {
