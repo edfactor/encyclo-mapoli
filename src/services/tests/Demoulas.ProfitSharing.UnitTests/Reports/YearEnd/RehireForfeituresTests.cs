@@ -202,8 +202,13 @@ public class RehireForfeituresTests : ApiTestBase<Program>
         var profitYear = (short)Math.Min(demo.ReHireDate!.Value.Year, 2024);
 
 
-        var payProfit = await c.PayProfits.FirstAsync(pp => pp.DemographicId == demo.Id);
+        var payProfit = await c.PayProfits.Include(p=> p.Enrollment).FirstAsync(pp => pp.DemographicId == demo.Id);
         payProfit.EnrollmentId = Enrollment.Constants.NewVestingPlanHasForfeitureRecords;
+        payProfit.Enrollment = new Enrollment
+        {
+            Id = Enrollment.Constants.NewVestingPlanHasForfeitureRecords,
+            Name = "New vesting plan has Forfeiture records"
+        };
         payProfit.CurrentHoursYear = 2358;
         payProfit.ProfitYear = profitYear;
 
