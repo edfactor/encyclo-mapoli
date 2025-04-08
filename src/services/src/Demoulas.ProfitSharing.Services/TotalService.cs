@@ -74,21 +74,27 @@ public sealed class TotalService : ITotalService
     /// <returns>
     /// An <see cref="IQueryable{T}"/> of <see cref="ParticipantTotalDto"/> containing the total balance data for participants.
     /// </returns>
-    internal IQueryable<ParticipantTotalDto> GetTotalBalanceSet(IProfitSharingDbContext ctx, short profitYear)
+    internal IQueryable<ParticipantTotalBalanceDto> GetTotalBalanceSet(IProfitSharingDbContext ctx, short profitYear)
     {
-        byte[] sumAllFieldProfitCodeTypes = ProfitDetailExtensions.GetProfitCodesForBalanceCalc();
-
+        
         return (from pd in ctx.ProfitDetails
                 where pd.ProfitYear <= profitYear
                 group pd by pd.Ssn
             into pd_g
-                select new ParticipantTotalDto
+                select new ParticipantTotalBalanceDto
                 {
                     Ssn = pd_g.Key,
-                    Total = pd_g.Sum(x =>
-                        sumAllFieldProfitCodeTypes.Contains(x.ProfitCodeId)
-                            ? (-x.Forfeiture + x.Contribution + x.Earnings)
-                            : (x.Contribution + x.Earnings + x.Forfeiture)) //Just add the columns
+                    Contributions = pd_g.Where(x=>x.ProfitCodeId == ProfitCode.Constants.IncomingContributions).Sum(x=>x.Contribution),
+                    Earnings = pd_g.Where(x=>x.ProfitCodeId == ProfitCode.Constants.IncomingContributions ||
+                                             x.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures).Sum(x=>x.Earnings),
+                    EtvaForfeitures = pd_g.Where(x=>x.ProfitCodeId == ProfitCode.Constants.IncomingContributions).Sum(x=>x.Forfeiture),
+                    Forfeitures = pd_g.Where(x=>x.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures).Sum(x=>x.Forfeiture * -1),
+                    Distributions = pd_g.Where(x=>x.ProfitCodeId == ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal ||
+                                                  x.ProfitCodeId == ProfitCode.Constants.OutgoingDirectPayments || 
+                                                  x.ProfitCodeId == ProfitCode.Constants.OutgoingXferBeneficiary).Sum(x=>x.Forfeiture * -1),
+                    VestedEarnings = pd_g.Where(x=>x.ProfitCodeId == ProfitCode.Constants.IncomingQdroBeneficiary).Sum(x=>x.Contribution) +
+                                     pd_g.Where(x=>x.ProfitCodeId == ProfitCode.Constants.Incoming100PercentVestedEarnings).Sum(x=>x.Earnings) +
+                                     pd_g.Where(x=>x.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment).Sum(x=>x.Forfeiture * -1)
                 });
     }
 
@@ -285,7 +291,17 @@ public sealed class TotalService : ITotalService
             from db in demoOrBeneficiary
             join dTbl in ctx.Demographics on db.Ssn equals dTbl.Ssn into dTmp
             from d in dTmp.DefaultIfEmpty()
-            join ppTbl in ctx.PayProfits on new { Id = (d != null ? d.Id : 0), ProfitYear = profitYear } equals new
+            join minYearTbl in ( // Because don't create payprofit records for years prior to the import, we need to find the closest payprofit record and use that to get the enrollment_id
+                from ppMin in ctx.PayProfits.Include(x=>x.Demographic)
+                where ppMin.ProfitYear >= profitYear
+                group ppMin by ppMin.Demographic!.Ssn into ppMinGrp
+                select new {
+                    Ssn = ppMinGrp.Key,
+                    minYear = ppMinGrp.Min(x=>x.ProfitYear)
+                }
+            ) on db.Ssn equals minYearTbl.Ssn into minYearTmp
+            from minYear in minYearTmp.DefaultIfEmpty()
+            join ppTbl in ctx.PayProfits on new { Id = (d != null ? d.Id : 0), ProfitYear = (minYear != null ? minYear.minYear : (short)0) } equals new
             {
                 Id = ppTbl.DemographicId,
                 ppTbl.ProfitYear
@@ -378,6 +394,15 @@ public sealed class TotalService : ITotalService
     internal IQueryable<ParticipantTotalVestingBalanceDto> TotalVestingBalance(IProfitSharingDbContext ctx,
         short employeeYear, short profitYear, DateOnly asOfDate)
     {
+        var forfeitureProfitCodes = new List<byte>()
+        {
+            ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id, //1
+            ProfitCode.Constants.OutgoingForfeitures.Id, //2
+            ProfitCode.Constants.OutgoingDirectPayments.Id, //3
+            ProfitCode.Constants.OutgoingXferBeneficiary.Id, //5
+
+        };
+
         return (from b in GetTotalBalanceSet(ctx, profitYear)
                 join etvaTbl in GetTotalComputedEtva(ctx, employeeYear) on b.Ssn equals etvaTbl.Ssn into etvaTmp
                 from e in etvaTmp.DefaultIfEmpty()
@@ -387,6 +412,20 @@ public sealed class TotalService : ITotalService
                 from v in vestTmp.DefaultIfEmpty()
                 join yipTbl in GetYearsOfService(ctx, profitYear) on b.Ssn equals yipTbl.Ssn into yipTmp
                 from yip in yipTmp.DefaultIfEmpty()
+                join pdWrapTbl in (
+                    from pd in ctx.ProfitDetails
+                    where pd.ProfitYear <= profitYear
+                    group pd by pd.Ssn into pdGrp
+                    select new
+                    {
+                        Ssn = pdGrp.Key,
+                        Forfeitures = (decimal?)pdGrp.Where(x => forfeitureProfitCodes.Contains(x.ProfitCodeId)).Sum(x => x.Forfeiture) ?? 0,
+                        ProfCode6Contrib = (decimal?)pdGrp.Where(x => x.ProfitCodeId == ProfitCode.Constants.IncomingQdroBeneficiary).Sum(x => x.Contribution) ?? 0,
+                        ProfCode8Earn = (decimal?)pdGrp.Where(x => x.ProfitCodeId == ProfitCode.Constants.Incoming100PercentVestedEarnings).Sum(x => x.Earnings) ?? 0,
+                        ProfCode9Forf = (decimal?)pdGrp.Where(x => x.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment).Sum(x => x.Forfeiture) ?? 0
+                    }
+                ) on b.Ssn equals pdWrapTbl.Ssn into pdWrapTmp
+                from pdWrap in pdWrapTmp.DefaultIfEmpty()
                 select new ParticipantTotalVestingBalanceDto
                 {
                     Ssn = b.Ssn,
@@ -395,7 +434,20 @@ public sealed class TotalService : ITotalService
                     TotalDistributions = d.Total ?? 0,
                     VestingPercent = v.Ratio ?? 0,
                     YearsInPlan = yip.Years ?? 0,
-                    VestedBalance = (((b.Total ?? 0) + (d.Total ?? 0) - (e.Total ?? 0)) * (v.Ratio ?? 0)) + (e.Total ?? 0) - (d.Total ?? 0)
+                    VestedBalance = b != null && pdWrap != null && v != null
+                                  ? ((((b.Total ?? 0) + (pdWrap.Forfeitures) - ((pdWrap.ProfCode6Contrib) + (pdWrap.ProfCode8Earn) - (pdWrap.ProfCode9Forf))) * (v.Ratio))
+                                      + ((pdWrap.ProfCode6Contrib) + (pdWrap.ProfCode8Earn) - (pdWrap.ProfCode9Forf)) - (pdWrap.Forfeitures)) > 0
+                                  //If less than zero, value is zero
+                                  ? ((((b.Total ?? 0) + (pdWrap.Forfeitures) - ((pdWrap.ProfCode6Contrib) + (pdWrap.ProfCode8Earn) - (pdWrap.ProfCode9Forf))) * (v.Ratio))
+                                      + ((pdWrap.ProfCode6Contrib) + (pdWrap.ProfCode8Earn) - (pdWrap.ProfCode9Forf)) - (pdWrap.Forfeitures))
+                                  : 0
+                                  : 0,
+                    Distributions = b.Distributions,
+                    Earnings = b.Earnings,
+                    EtvaForfeitures = b.EtvaForfeitures,
+                    Contributions = b.Contributions,
+                    Forfeitures = b.Forfeitures,
+                    VestedEarnings = b.VestedEarnings
                 }
             );
     }
