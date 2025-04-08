@@ -31,9 +31,9 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests
         // These are arguments to the program/rest endpoint
         // Plan admin may choose a range of dates (ie. Q2 ?)
         short profitSharingYear = 2024;
-        DateOnly startDate = new DateOnly(2024, 01, 01);
-        DateOnly endDate = new DateOnly(2024, 12, 31);
-        DateOnly effectiveDateOfTestData = new DateOnly(2024, 12, 31);
+        DateOnly startDate = new DateOnly(2024, 01, 6);
+        DateOnly endDate = new DateOnly(2024, 12, 28);
+        DateOnly effectiveDateOfTestData = new DateOnly(2024, 04, 08);
 
         // Throws exceptions at test run time
         // var calendarService = _fixture.Services.GetRequiredService<ICalendarService>()!

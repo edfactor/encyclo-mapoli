@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection.Metadata.Ecma335;
 using System.Text.RegularExpressions;
 using Renci.SshNet;
@@ -6,6 +7,7 @@ using Renci.SshNet.Sftp;
 
 namespace YEMatch;
 
+[SuppressMessage("Major Code Smell", "S6966:Awaitable method should be used")]
 public class ReadyActivity(SshClient client, SftpClient sftpClient, bool chatty, string AName, string ksh, string args, string dataDirectory) : Activity
 {
     public override string ActivityLetterNumber { get; set; } = AName;
@@ -66,7 +68,63 @@ public class ReadyActivity(SshClient client, SftpClient sftpClient, bool chatty,
             {
                 sftpClient.DownloadFile(logFilePath, fileStream);
             }
-            Console.WriteLine($"Log file copied to: {localPath}");
+
+            Console.WriteLine($"Log file copied to: file:///{localPath}");
+
+
+            // cp $DATA/PAYROLL/SYS/PVTSYSOUT/QPAY066-$$ $FILETRAN/OutBox/dctm-payroll
+
+            var matchTermReport = Regex.Match(result.Result.Trim(), @" JOB: YE-PROF-TERM \((\d+)\) COMPLETED");
+            if (matchTermReport.Success)
+            {
+                // Go grab prof term report.
+                string unixProcessId = matchTermReport.Groups[1].Value;
+                string qpay066Remote = "/dsmdev/data/PAYROLL/SYS/PVTSYSOUT/QPAY066-" + unixProcessId;
+                string qpay066Local = Path.Combine(dataDirectory, "READY-QPAY066.txt");
+                await using (var fileStream = File.OpenWrite(qpay066Local))
+                {
+                    sftpClient.DownloadFile(qpay066Remote, fileStream);
+                }
+
+                Console.WriteLine($"copied {qpay066Remote} to $qpay066Local");
+                
+                string testingFile2 = "/Users/robertherrmann/prj/smart-profit-sharing/src/services/tests/Demoulas.ProfitSharing.IntegrationTests/Resources/terminatedEmployeeAndBeneficiaryReport-correct.txt";
+                if (File.Exists(testingFile2))
+                {
+                    File.Copy(qpay066Local, testingFile2, overwrite: true);
+                    Console.WriteLine($"NOTE::: Updated {testingFile2}");
+                }
+                
+            }
+
+            // #######  LP WAS CALLED WITH ARGS :-d plaser5 /dsmdev/data/PAYROLL/SYS/PVTSYSOUT/PAY444A-25103 
+            var matches = Regex.Matches(result.Result, @"#######  LP WAS CALLED WITH ARGS :-d \w+ (/.+?-\d+)");
+            foreach (Match lpMatch in matches)
+            {
+                string reportName = lpMatch.Groups[1].Value;
+                string filenameLocal = Path.GetFileNameWithoutExtension(reportName).Split('-')[0];
+                string qpay066Local = Path.Combine(dataDirectory, $"{filenameLocal}.txt");
+                if (!sftpClient.Exists(reportName))
+                {
+                    Console.WriteLine($"Odd, but remote file does not exist: ${reportName}");
+                }
+                else
+                {
+                    Console.WriteLine($"copying {reportName} to file:///{qpay066Local}");
+                    await using (var fileStream = File.OpenWrite(qpay066Local))
+                    {
+                        sftpClient.DownloadFile(reportName, fileStream);
+                    }
+                }
+
+                string testingFile = "/Users/robertherrmann/prj/smart-profit-sharing/src/services/tests/Demoulas.ProfitSharing.IntegrationTests/Resources/psupdate-pay444-r2.txt";
+                if (filenameLocal == "PAY444L" && File.Exists(testingFile))
+                {
+                    File.Copy(qpay066Local, testingFile, overwrite: true);
+                    Console.WriteLine($"NOTE::: Updated {testingFile}");
+                }
+                
+            }
         }
         else
         {

@@ -6,27 +6,26 @@ See this page for a description of that effort;
 
 https://demoulas.atlassian.net/wiki/spaces/NGDS/pages/272007173/READY+SMART+Year+End+Exact+Match+Testing+YE+Match
 
+# Configuration
 
-Configuration
-
-Go to the checkout directory of the project and add your credetials for READY;
+Go to the checkout directory of the project and add your credentials for READY;
 
 $  dotnet user-secrets set "YEMatchHost:Username" myusernam
 $  dotnet user-secrets set "YEMatchHost:Password" 'mypasswd'
 
-Alter your local smart-profit-sharing application to use the test credentials
+You can configure the "log" directory that YE match uses;
 
-> git diff src/Demoulas.ProfitSharing.Api/Program.cs
+it defaults to /tmp/ye/<date>
 
-var rolePermissionService = new RolePermissionService();
-+#if false
-if (!builder.Environment.IsTestEnvironment())
-{
--    builder.Services.AddOktaSecurity(builder.Configuration, rolePermissionService);
- } else {
--    builder.Services.AddTestingSecurity(builder.Configuration, rolePermissionService);
- }
-+#endif
-+builder.Services.AddTestingSecurity(builder.Configuration, rolePermissionService);
+The READY program output is piled up there.
+
+# Running
+
+1. Run your local smart-profit-sharing application to use the test credentials, the launch configuration "API YE Match (Test Certs)".
+
+2. Run the Program.cs
+
+
+
 
 
