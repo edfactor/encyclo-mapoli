@@ -12,6 +12,8 @@ import "smart-ui-library/dist/smart-ui-library.css";
 import "../agGridConfig";
 import EnvironmentUtils from "./utils/environmentUtils";
 import { useGetAppVersionQuery } from "./reduxstore/api/CommonApi";
+import oktaConfig from "./Okta/config";
+import { OktaAuth } from "@okta/okta-auth-js";
 
 // Types
 interface BuildInfo {
@@ -24,12 +26,19 @@ interface BuildInfo {
 const App = () => {
   // State management
   const dispatch = useDispatch();
-  const okta = useOktaAuth();
+  const clientId = import.meta.env.VITE_REACT_APP_OKTA_CLIENT_ID;
+  const issuer = import.meta.env.VITE_REACT_APP_OKTA_ISSUER;
 
   useGetAppVersionQuery();
   const [uiBuildInfo, setUiBuildInfo] = useState<BuildInfo | null>(null);
   const [buildInfoText, setBuildInfoText] = useState("");
   const { buildNumber } = useSelector((state: RootState) => state.common);
+  const [oktaAuth, setOktaAuth] = useState<any>(null);
+
+  useEffect(() => {
+    const config = oktaConfig(clientId, issuer);
+    setOktaAuth(new OktaAuth(config.oidc));
+  }, []);
 
   // Redux selectors
   //const state = useSelector((state: RootState) => state);
@@ -67,8 +76,8 @@ const App = () => {
   const handleClick = useCallback((_e: React.MouseEvent<HTMLDivElement>) => {}, []);
 
   const handleLogout = () => {
-    if (okta?.oktaAuth) {
-      okta?.oktaAuth.signOut({ postLogoutRedirectUri });
+    if (oktaAuth) {
+      oktaAuth.signOut({ postLogoutRedirectUri });
       dispatch(clearUserData());
     }
   };
