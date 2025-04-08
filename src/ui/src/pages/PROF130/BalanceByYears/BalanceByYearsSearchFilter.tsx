@@ -56,6 +56,11 @@ const BalanceByYearsSearchFilter: React.FC<BalanceByYearsSearchFilterProps> = ({
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
+      // It is necessary to clear for the case where the user clicks
+      // search a second time after getting one round of results
+      dispatch(clearBalanceByYearsQueryParams());
+      dispatch(clearBalanceByYears());
+      setInitialSearchLoaded(false);
       triggerSearch(
         {
           profitYear: fiscalCloseProfitYear,
@@ -93,6 +98,7 @@ const BalanceByYearsSearchFilter: React.FC<BalanceByYearsSearchFilterProps> = ({
   const handleReset = () => {
     dispatch(clearBalanceByYearsQueryParams());
     dispatch(clearBalanceByYears());
+    setInitialSearchLoaded(false);
     reset({
       profitYear: fiscalCloseProfitYear,
       reportType: undefined

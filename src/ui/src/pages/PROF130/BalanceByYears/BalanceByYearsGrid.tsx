@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { useLazyGetBalanceByYearsQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, TotalsGrid } from "smart-ui-library";
-import { GetBalanceByYearsColumns } from "./BalanceByYearsGridColumns";
+import { GetBalanceByYearsGridColumns } from "./BalanceByYearsGridColumns";
 import Grid2 from "@mui/material/Grid2";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
 import { numberToCurrency } from "smart-ui-library";
@@ -24,9 +24,9 @@ const BalanceByYearsGrid: React.FC<BalanceByYearsGridProps> = ({ initialSearchLo
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
-  const columnDefsTotal = GetBalanceByYearsColumns(FrozenReportsByAgeRequestType.Total);
-  const columnDefsFullTime = GetBalanceByYearsColumns(FrozenReportsByAgeRequestType.FullTime);
-  const columnDefsPartTime = GetBalanceByYearsColumns(FrozenReportsByAgeRequestType.PartTime);
+  const columnDefsTotal = GetBalanceByYearsGridColumns(FrozenReportsByAgeRequestType.Total);
+  const columnDefsFullTime = GetBalanceByYearsGridColumns(FrozenReportsByAgeRequestType.FullTime);
+  const columnDefsPartTime = GetBalanceByYearsGridColumns(FrozenReportsByAgeRequestType.PartTime);
 
   const onSearch = useCallback(async () => {
     triggerSearch(
