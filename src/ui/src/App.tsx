@@ -29,39 +29,35 @@ const App = () => {
   const dispatch = useDispatch();
 
   // Redux selectors
-  const state = useSelector((state: RootState) => state);
-  const { token, appUser, username: stateUsername } = state.security;
+  //const state = useSelector((state: RootState) => state);
+  const { token, appUser, username: stateUsername } = useSelector((state: RootState) => state.security);
 
   // Add effect to update username when token changes
   useEffect(() => {
     if (token) {
       try {
         // Option 1: Extract username from JWT token
-        const tokenPayload = JSON.parse(atob(token.split('.')[1]));
-        var usernameFromToken = tokenPayload.username ||
-          tokenPayload.preferred_username ||
-          tokenPayload.sub ||
-          tokenPayload.email;
+        const tokenPayload = JSON.parse(atob(token.split(".")[1]));
+        let usernameFromToken =
+          tokenPayload.username || tokenPayload.preferred_username || tokenPayload.sub || tokenPayload.email;
 
         // Format email-style usernames by extracting part before @
-        if (usernameFromToken && usernameFromToken.includes('@')) {
-          usernameFromToken = usernameFromToken.split('@')[0];
+        if (usernameFromToken && usernameFromToken.includes("@")) {
+          usernameFromToken = usernameFromToken.split("@")[0];
         }
 
         if (usernameFromToken && !stateUsername) {
           dispatch(setUsername(usernameFromToken));
         }
       } catch (error) {
-        console.warn('Could not parse token for username:', error);
+        console.warn("Could not parse token for username:", error);
       }
     }
   }, [token, stateUsername, dispatch]);
 
   // Derived values
   const isAuthenticated = !!token;
-  const username = isAuthenticated
-    ? (appUser?.userName || stateUsername || "Guest")
-    : "Not authenticated";
+  const username = isAuthenticated ? appUser?.userName || stateUsername || "Guest" : "Not authenticated";
 
   const buildVersionNumber = uiBuildInfo
     ? `${uiBuildInfo.buildNumber ?? ""}.${uiBuildInfo.buildId ?? ""}`
@@ -104,8 +100,7 @@ const App = () => {
         buildVersionNumber={buildVersionNumber}
         userName={username}
         environmentMode={"development"}
-        oktaEnabled={true}
-      >
+        oktaEnabled={true}>
         <AppErrorBoundary>
           <Router />
         </AppErrorBoundary>
