@@ -16,7 +16,7 @@ import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 
 interface DistributionsAndForfeituresSearch {
   profitYear: number;
-  startMonth?: number | undefined;
+  startMonth?: number | null | undefined;
   endMonth?: number | null | undefined;
   includeOutgoingForfeitures: boolean;
 }
@@ -53,6 +53,7 @@ interface DistributionsAndForfeituresSearchFilterProps {
 const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeituresSearchFilterProps> = ({
   setInitialSearchLoaded
 }) => {
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const [triggerSearch, { isFetching }] = useLazyGetDistributionsAndForfeituresQuery();
   const dispatch = useDispatch();
   const { distributionsAndForfeituresQueryParams, distributionsAndForfeitures } = useSelector(
@@ -63,8 +64,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
     control,
     handleSubmit,
     formState: { errors, isValid },
-    reset,
-    trigger
+    reset
   } = useForm<DistributionsAndForfeituresSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
@@ -76,7 +76,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
   });
 
   const validateAndSearch = handleSubmit((data) => {
-    if (isValid) {
+    if (isValid && hasToken) {
       triggerSearch(
         {
           profitYear: data.profitYear,
@@ -98,17 +98,20 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
     }
   });
 
-  if (profitYear && !distributionsAndForfeitures) {
-    setInitialSearchLoaded(true);
-  }
-
   const handleReset = () => {
     setInitialSearchLoaded(false);
+
+    // Clear the form fields
+    reset({
+      profitYear: profitYear || undefined,
+      startMonth: undefined,  // Explicitly set to undefined
+      endMonth: undefined,    // Explicitly set to undefined
+      includeOutgoingForfeitures: false
+    });
+
+    // Clear the data in Redux store
     dispatch(clearDistributionsAndForfeitures());
     dispatch(clearDistributionsAndForfeituresQueryParams());
-    reset({
-      profitYear: undefined
-    });
   };
 
   return (
@@ -149,10 +152,14 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
                 fullWidth
                 variant="outlined"
                 error={!!errors.startMonth}
+                // Convert undefined to empty string for the TextField
+                value={field.value === undefined ? '' : field.value}
+                // Handle changes to ensure undefined is properly set instead of empty string
                 onChange={(e) => {
-                  const parsedValue = e.target.value === "" ? null : Number(e.target.value);
-                  field.onChange(parsedValue);
+                  const value = e.target.value;
+                  field.onChange(value === '' ? undefined : Number(value));
                 }}
+
                 type="number"
               />
             )}
@@ -170,10 +177,14 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
                 fullWidth
                 variant="outlined"
                 error={!!errors.endMonth}
+                // Convert undefined to empty string for the TextField
+                value={field.value === undefined ? '' : field.value}
+                // Handle changes to ensure undefined is properly set instead of empty string
                 onChange={(e) => {
-                  const parsedValue = e.target.value === "" ? null : Number(e.target.value);
-                  field.onChange(parsedValue);
+                  const value = e.target.value;
+                  field.onChange(value === '' ? undefined : Number(value));
                 }}
+
                 type="number"
               />
             )}

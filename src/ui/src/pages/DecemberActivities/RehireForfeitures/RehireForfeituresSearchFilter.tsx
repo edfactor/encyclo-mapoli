@@ -99,23 +99,16 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid && hasToken) {
-      triggerSearch(
-        {
-          profitYear: profitYear,
-          beginningDate: data.beginningDate,
-          endingDate: data.endingDate,
-          pagination: {
-            skip: data.pagination.skip,
-            take: data.pagination.take,
-            sortBy: data.pagination.sortBy,
-            isSortDescending: data.pagination.isSortDescending
-          }
-        },
-        false
-      ).unwrap();
-      dispatch(setMilitaryAndRehireForfeituresQueryParams(data));
+      // Ensure beginningDate is included in the dispatch
+      dispatch(setMilitaryAndRehireForfeituresQueryParams({
+        ...data,
+        beginningDate: data.beginningDate, // Explicitly include beginningDate
+        endingDate: data.endingDate, // Explicitly include endingDate
+      }));
+      triggerSearch(data);
     }
   });
+
 
   const handleReset = () => {
     setInitialSearchLoaded(false);
@@ -168,6 +161,8 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
                 label="Rehire Begin Date"
                 disableFuture
                 error={errors.beginningDate?.message}
+                minDate={tryddmmyyyyToDate(fiscalCalendarYear?.fiscalBeginDate)}
+                maxDate={tryddmmyyyyToDate(fiscalCalendarYear?.fiscalEndDate)}
               />
             )}
           />
@@ -186,6 +181,8 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
                 label="Rehire Ending Date"
                 disableFuture
                 error={errors.endingDate?.message}
+                minDate={tryddmmyyyyToDate(fiscalCalendarYear?.fiscalBeginDate)}
+                maxDate={tryddmmyyyyToDate(fiscalCalendarYear?.fiscalEndDate)}
               />
             )}
           />
