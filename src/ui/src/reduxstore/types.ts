@@ -368,7 +368,7 @@ export interface FrozenReportsByAgeRequest extends ProfitYearRequest {
   reportType: FrozenReportsByAgeRequestType;
 }
 export interface FrozenReportsForfeituresAndPointsRequest extends ProfitYearRequest {
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
   useFrozenData: boolean;
 }
 export interface ProfitSharingDistributionsByAge {
