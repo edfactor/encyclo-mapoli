@@ -1,20 +1,62 @@
 import { Typography } from "@mui/material";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { ProfitShareEditUpdateGridColumns } from "./ProfitShareEditGridColumns";
+import { useLazyGetProfitShareUpdateQuery } from "reduxstore/api/YearsEndApi";
+import { ProfitShareUpdateRequest } from "reduxstore/types";
 
-const ProfitShareEditGrid = () => {
+interface ProfitShareEditGridProps {
+  initialSearchLoaded: boolean;
+  setInitialSearchLoaded: (loaded: boolean) => void;
+}
+
+const ProfitShareEditGrid = ({ initialSearchLoaded, setInitialSearchLoaded }: ProfitShareEditGridProps) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
+  const hasToken = !!useSelector((state: RootState) => state.security.token);
   const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "Name",
+    sortBy: "name",
     isSortDescending: false
   });
 
   const editColumnDefs = useMemo(() => ProfitShareEditUpdateGridColumns(), []);
-  const { profitSharingEdit } = useSelector((state: RootState) => state.yearsEnd);
+  const { profitSharingEdit, profitSharingEditQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const [triggerSearchUpdate, { isFetching }] = useLazyGetProfitShareUpdateQuery();
+
+  const sortEventHandler = (update: ISortParams) => setSortParams(update);
+
+  const onSearch = useCallback(async () => {
+    const request: ProfitShareUpdateRequest = {
+      pagination: {
+        sortBy: sortParams.sortBy,
+        isSortDescending: sortParams.isSortDescending,
+        skip: pageNumber * pageSize,
+        take: pageSize
+      },
+      profitYear: profitSharingEditQueryParams?.profitYear.getFullYear() ?? 0,
+      contributionPercent: profitSharingEditQueryParams?.contributionPercent ?? 0,
+      earningsPercent: profitSharingEditQueryParams?.earningsPercent ?? 0,
+      incomingForfeitPercent: profitSharingEditQueryParams?.incomingForfeitPercent ?? 0,
+      secondaryEarningsPercent: profitSharingEditQueryParams?.secondaryEarningsPercent ?? 0,
+      maxAllowedContributions: profitSharingEditQueryParams?.maxAllowedContributions ?? 0,
+      badgeToAdjust: profitSharingEditQueryParams?.badgeToAdjust ?? 0,
+      adjustContributionAmount: profitSharingEditQueryParams?.adjustContributionAmount ?? 0,
+      adjustEarningsAmount: profitSharingEditQueryParams?.adjustEarningsAmount ?? 0,
+      adjustIncomingForfeitAmount: profitSharingEditQueryParams?.adjustEarningsSecondaryAmount ?? 0,
+      badgeToAdjust2: profitSharingEditQueryParams?.badgeToAdjust2 ?? 0,
+      adjustEarningsSecondaryAmount: profitSharingEditQueryParams?.adjustEarningsSecondaryAmount ?? 0
+    };
+
+    await triggerSearchUpdate(request, false);
+  }, [pageNumber, pageSize, sortParams, triggerSearchUpdate, profitSharingEditQueryParams]);
+
+  useEffect(() => {
+    if (initialSearchLoaded && hasToken) {
+      onSearch();
+    }
+  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch, hasToken]);
 
   return (
     <>
@@ -30,6 +72,7 @@ const ProfitShareEditGrid = () => {
           <DSMGrid
             preferenceKey={"ProfitShareEditGrid"}
             isLoading={false}
+            handleSortChanged={sortEventHandler}
             providedOptions={{
               rowData: "response" in profitSharingEdit ? profitSharingEdit.response?.results : [],
               columnDefs: editColumnDefs
@@ -39,11 +82,13 @@ const ProfitShareEditGrid = () => {
             pageNumber={pageNumber}
             setPageNumber={(value: number) => {
               setPageNumber(value - 1);
+              setInitialSearchLoaded(true);
             }}
             pageSize={pageSize}
             setPageSize={(value: number) => {
               setPageSize(value);
               setPageNumber(1);
+              setInitialSearchLoaded(true);
             }}
             recordCount={profitSharingEdit?.response.total ?? 0}
           />

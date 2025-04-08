@@ -285,9 +285,7 @@ export const YearsEndApi = createApi({
         method: "POST",
         body: {
           profitYear: params.profitYear,
-          beginningDate: params.beginningDate
-            ? tryddmmyyyyToDate(params.beginningDate)
-            : params.beginningDate,
+          beginningDate: params.beginningDate ? tryddmmyyyyToDate(params.beginningDate) : params.beginningDate,
           endingDate: params.endingDate ? tryddmmyyyyToDate(params.endingDate) : params.endingDate,
           take: params.pagination.take,
           skip: params.pagination.skip,
@@ -707,6 +705,8 @@ export const YearsEndApi = createApi({
           adjustEarningsSecondaryAmount: params.adjustEarningsSecondaryAmount,
           take: params.pagination.take,
           skip: params.pagination.skip
+          //sortBy: params.pagination.sortBy,
+          //isSortDescending: params.pagination.isSortDescending
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -745,6 +745,8 @@ export const YearsEndApi = createApi({
           adjustEarningsSecondaryAmount: params.adjustEarningsSecondaryAmount,
           take: params.pagination.take,
           skip: params.pagination.skip
+          //sortBy: params.pagination.sortBy,
+          //isSortDescending: params.pagination.isSortDescending
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {

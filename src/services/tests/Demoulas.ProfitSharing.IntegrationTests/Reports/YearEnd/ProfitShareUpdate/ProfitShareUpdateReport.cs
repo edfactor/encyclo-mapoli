@@ -156,7 +156,7 @@ internal sealed class ProfitShareUpdateReport
         }
     }
 
-    const string prefix = "\n\nDJDE JDE=PAY426,JDL=PAYROL,END,;\n\n";
+    const string prefix = "\n\nDJDE JDE=PAY426,JDL=PAYROL,END,;\n";
 
     public void m830PrintHeader(ReportCounters reportCounters, Header1 header1)
     {
