@@ -61,7 +61,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
   ];
 
   const employeeSection = [
-    { label: "Badge Number", value: viewBadgeLinkRenderer(Number(badgeNumber)) },
+    { label: "Badge", value: viewBadgeLinkRenderer(Number(badgeNumber)) },
     { label: "DOB", value: mmDDYYFormat(dateOfBirth) },
     { label: "SSN", value: `${ssn}` },
     { label: "ETVA", value: currentEtva },
