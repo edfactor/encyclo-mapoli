@@ -74,7 +74,7 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ initialSearchLoaded, setIniti
             handleSortChanged={(_params) => {}}
             providedOptions={{
               rowData: forfeituresAndPoints.response.results,
-              pinnedBottomRowData: [totalsRow],
+              pinnedTopRowData: [totalsRow],
               columnDefs: columnDefs
             }}
           />

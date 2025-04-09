@@ -83,7 +83,7 @@ const ProfitShareGrossReportGrid: React.FC<ProfitShareGrossReportGridProps> = ({
             handleSortChanged={(_params) => { }}
             providedOptions={{
               rowData: grossWagesReport?.response.results,
-              pinnedBottomRowData: [
+              pinnedTopRowData: [
                 {
                   grossWages: grossWagesReport?.totalGrossWages,
                   profitSharingAmount: grossWagesReport?.totalProfitSharingAmount,

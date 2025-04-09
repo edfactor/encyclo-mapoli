@@ -202,7 +202,7 @@ const ProfitSummary = () => {
           handleSortChanged={() => {}}
           providedOptions={{
             rowData: activeAndInactiveRowData,
-            pinnedBottomRowData: getActiveAndInactiveTotals,
+            pinnedTopRowData: getActiveAndInactiveTotals,
             columnDefs: columnDefs
           }}
         />
@@ -220,7 +220,7 @@ const ProfitSummary = () => {
           handleSortChanged={() => {}}
           providedOptions={{
             rowData: terminatedRowData,
-            pinnedBottomRowData: getTerminatedTotals,
+            pinnedTopRowData: getTerminatedTotals,
             columnDefs: columnDefs
           }}
         />

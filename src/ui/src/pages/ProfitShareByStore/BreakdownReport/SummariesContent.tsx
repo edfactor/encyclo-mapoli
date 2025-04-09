@@ -229,7 +229,7 @@ const SummariesContent: React.FC<SummariesContentProps> = ({ store }) => {
             rowData: allEmployeesSampleData,
             columnDefs: allEmployeesColumnDefs,
             domLayout: "autoHeight",
-            pinnedBottomRowData: [allEmployeesGrandTotal],
+            pinnedTopRowData: [allEmployeesGrandTotal],
             ...gridOptions
           }}
         />
@@ -253,7 +253,7 @@ const SummariesContent: React.FC<SummariesContentProps> = ({ store }) => {
             rowData: under21EmployeesSampleData,
             columnDefs: under21EmployeesColumnDefs,
             domLayout: "autoHeight",
-            pinnedBottomRowData: [under21EmployeesGrandTotal],
+            pinnedTopRowData: [under21EmployeesGrandTotal],
             ...gridOptions
           }}
         />
