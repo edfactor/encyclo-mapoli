@@ -15,7 +15,7 @@ export const GetProfallGridColumns = (navFunction: (badgeNumber: string) => void
       cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badge, navFunction)
     },
     {
-      headerName: "Employee Name",
+      headerName: "Name",
       field: "employeeName",
       colId: "employeeName",
       minWidth: 150,

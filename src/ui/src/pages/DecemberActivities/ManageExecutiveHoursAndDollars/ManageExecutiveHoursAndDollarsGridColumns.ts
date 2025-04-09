@@ -19,7 +19,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber)
     },
     {
-      headerName: "Employee Name",
+      headerName: "Name",
       field: "fullName",
       colId: "fullName",
       minWidth: 120,

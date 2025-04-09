@@ -18,7 +18,7 @@ export const GetBeneficiariesGridColumns = (navFunction: (badgeNumber: string) =
       cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber, navFunction)
     },
     {
-      headerName: "Employee Name",
+      headerName: "Name",
       field: "employeeName",
       colId: "employeeName",
       minWidth: 180,
