@@ -1,10 +1,8 @@
-﻿using System.Linq.Dynamic.Core;
-using Demoulas.Common.Data.Services.Service;
+﻿using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Oracle.ManagedDataAccess.Client;
 
 namespace Demoulas.ProfitSharing.IntegrationTests;
@@ -133,7 +131,7 @@ public class TotalServiceIntegrationTests
         return await _dataContextFactory.UseReadOnlyContext(ctx =>
             _totalService.TotalVestingBalance(ctx, _employeeYear, (_employeeYear), /*asOfDate*/ new DateOnly(_employeeYear, 1, 4))
                 .ToDictionaryAsync(
-                    keySelector: p => p.Ssn,
+                    keySelector: p => p.Ssn!.Value,
                     elementSelector: p => p)
         );
     }

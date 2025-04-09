@@ -202,13 +202,13 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 
         // Bulk load last year balances as a dictionary keyed by SSN.
         var lastYearBalancesDict = await _totalService.GetTotalBalanceSet(ctx, lastYear)
-            .Where(x => ssns.Contains(x.Ssn))
-            .ToDictionaryAsync(x => x.Ssn, cancellationToken);
+            .Where(x => ssns.Contains(x.Ssn!.Value))
+            .ToDictionaryAsync(x => x.Ssn!.Value, cancellationToken);
 
         // Bulk load current year vesting balances as a dictionary keyed by SSN.
         var thisYearBalancesDict = await _totalService.TotalVestingBalance(ctx, req.ProfitYear, req.ProfitYear, today)
-            .Where(x => ssns.Contains(x.Ssn))
-            .ToDictionaryAsync(x => x.Ssn, cancellationToken);
+            .Where(x => ssns.Contains(x.Ssn!.Value))
+            .ToDictionaryAsync(x => x.Ssn!.Value, cancellationToken);
 
         var membersSummary = new List<TerminatedEmployeeAndBeneficiaryDataResponseDto>();
         var unions = memberSliceUnion.ToList();

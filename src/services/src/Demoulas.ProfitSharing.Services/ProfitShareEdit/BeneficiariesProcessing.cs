@@ -40,9 +40,9 @@ internal static class BeneficiariesProcessingHelper
 
             // Go grab the Balances for these Benes (some may have no records last year, so this may not have an entry for them) 
             var beneBalances = (await totalsService.GetTotalBalanceSet(ctx, profitYearPrior)
-                    .Where(ts => beneSsns.Contains(ts.Ssn))
+                    .Where(ts => beneSsns.Contains(ts.Ssn!.Value))
                     .ToListAsync(cancellationToken))
-                .ToDictionary(tbs => tbs.Ssn, tbs => tbs.Total ?? 0m);
+                .ToDictionary(tbs => tbs.Ssn!.Value, tbs => tbs.Total ?? 0m);
 
             // Merge the two results
             return benes
