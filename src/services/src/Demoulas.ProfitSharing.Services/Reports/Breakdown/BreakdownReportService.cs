@@ -161,7 +161,7 @@ public class BreakdownReportService : IBreakdownService
         return "STORE MANAGEMENT";
     }
 
-    public readonly static short ASSOCIATE_SORT_RANK_1999 = 1999;
+    public static readonly short ASSOCIATE_SORT_RANK_1999 = 1999;
 
     private static short EmployeeSortRank(short? requestedStoreNumber, byte departmentId, byte payClassificationId)
     {
