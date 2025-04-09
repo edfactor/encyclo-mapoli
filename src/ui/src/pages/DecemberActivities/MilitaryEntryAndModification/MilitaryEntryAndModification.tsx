@@ -12,7 +12,7 @@ import {
 import MilitaryAndRehireEntryAndModificationSearchFilter from "./MilitaryEntryAndModificationSearchFilter";
 import MilitaryContributionForm from "./MilitaryContributionForm";
 import { MilitaryContribution } from "reduxstore/types";
-import { CAPTIONS, MENU_LABELS } from "../../constants";
+import { CAPTIONS, MENU_LABELS } from "../../../constants";
 import StatusDropdown from "components/StatusDropdown";
 import { useNavigate } from "react-router";
 
