@@ -21,6 +21,7 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoad
     isSortDescending: true
   });
 
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const { masterInquiryData, masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
   const [triggerSearch, { isFetching }] = useLazyGetProfitMasterInquiryQuery();
 
