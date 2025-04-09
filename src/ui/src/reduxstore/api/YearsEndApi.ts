@@ -892,8 +892,8 @@ export const YearsEndApi = createApi({
       {
         query: (params) => ({
           url: "yearend/yearend-profit-sharing-report",
-          method: "GET",
-          params: {
+          method: "POST",
+          body: {
             ...params,
             take: params.pagination.take,
             skip: params.pagination.skip,

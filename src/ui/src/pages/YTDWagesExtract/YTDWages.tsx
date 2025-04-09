@@ -3,7 +3,6 @@ import Grid2 from "@mui/material/Grid2";
 import { useRef, useState } from "react";
 import { useLazyGetEmployeeWagesForYearQuery } from "reduxstore/api/YearsEndApi";
 import { DSMAccordion, ISortParams, Page } from "smart-ui-library";
-import { CAPTIONS } from "../../constants";
 import YTDWagesGrid from "./YTDWagesGrid";
 import YTDWagesSearchFilter from "./YTDWagesSearchFilter";
 
@@ -15,8 +14,7 @@ const YTDWages: React.FC = () => {
   const componentRef = useRef<HTMLDivElement>(null);
 
   return (
-    <Page
-      label={CAPTIONS.YTD_WAGES_EXTRACT}>
+    <Page>
       <Grid2
         container
         rowSpacing="24px">
