@@ -35,7 +35,9 @@ const Under21Report = () => {
         isSortDescending: sortParams.isSortDescending,
         pagination: {
           take: pageSize,
-          skip: pageNumber * pageSize
+          skip: pageNumber * pageSize,
+          sortBy: sortParams.sortBy,
+          isSortDescending: sortParams.isSortDescending
         }
       };
       
@@ -57,7 +59,9 @@ const Under21Report = () => {
         isSortDescending: sortParams.isSortDescending,
         pagination: {
           take: pageSize,
-          skip: pageNumber * pageSize
+          skip: pageNumber * pageSize,
+          sortBy: sortParams.sortBy,
+          isSortDescending: sortParams.isSortDescending
         }
       };
       
@@ -72,7 +76,9 @@ const Under21Report = () => {
       isSortDescending,
       pagination: {
         take: pageSize,
-        skip: pageNumber * pageSize
+        skip: pageNumber * pageSize,
+        sortBy: sortParams.sortBy,
+        isSortDescending
       }
     };
     
@@ -87,11 +93,6 @@ const Under21Report = () => {
         rowSpacing="24px">
         <Grid2 width={"100%"}>
           <Divider />
-        </Grid2>
-        <Grid2 width={"100%"}>
-          <DSMAccordion title="Filter">
-            <Under21SearchFilters onSearch={handleSearch} isLoading={isLoading} />
-          </DSMAccordion>
         </Grid2>
 
         {initialLoad ? (
