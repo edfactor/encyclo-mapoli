@@ -5,7 +5,7 @@ import {viewBadgeLinkRenderer} from "../../../utils/masterInquiryLink";
 export const GetDuplicateSSNsOnDemographicsColumns = (): ColDef[] => {
   return [
     {
-      headerName: "Badge Number",
+      headerName: "Badge",
       field: "badgeNumber",
       colId: "badgeNumber",
       minWidth: 80,

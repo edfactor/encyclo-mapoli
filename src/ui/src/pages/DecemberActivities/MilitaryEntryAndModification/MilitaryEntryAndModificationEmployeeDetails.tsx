@@ -36,7 +36,7 @@ const MilitaryEntryAndModificationEmployeeDetails: React.FC<MilitaryEntryAndModi
   ];
 
   const planSection = [
-    { label: "Badge Number", value: badgeNumber },
+    { label: "Badge", value: badgeNumber },
     { label: "SSN", value: `${ssn}` },
     { label: "DOB", value: mmDDYYFormat(dateOfBirth) }
   ];

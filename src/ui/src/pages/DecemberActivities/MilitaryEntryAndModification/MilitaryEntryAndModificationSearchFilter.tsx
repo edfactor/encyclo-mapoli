@@ -59,6 +59,7 @@ const MilitaryEntryAndModificationSearchFilter = () => {
           <FormLabel>SSN</FormLabel>
           <TextField
             fullWidth
+            required={true}
             variant="outlined"
             {...register("socialSecurity")}
             error={!!errors.socialSecurity}
@@ -70,6 +71,7 @@ const MilitaryEntryAndModificationSearchFilter = () => {
           <TextField
             fullWidth
             variant="outlined"
+            required={true}
             {...register("badgeNumber")}
             error={!!errors.badgeNumber}
             helperText={errors.badgeNumber?.message}
