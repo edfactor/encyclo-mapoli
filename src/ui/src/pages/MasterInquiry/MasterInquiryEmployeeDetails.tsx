@@ -40,7 +40,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
   } = details;
 
   const getEnrolledStatus = (id: number): string => {
-    const enrolledIds = [1, 2];
+    const enrolledIds = [1, 2, 3, 4];
     return enrolledIds.includes(id) ? "Y" : "N";
   };
 
