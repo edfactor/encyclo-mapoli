@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -472,7 +471,7 @@ public sealed class TotalService : ITotalService
                         select new BalanceEndpointResponse
                         {
                             Id = badgeNumberOrSsn,
-                            Ssn = t.Ssn.MaskSsn(),
+                            Ssn = t.Ssn!.Value.MaskSsn(),
                             CurrentBalance = (t.CurrentBalance ?? 0),
                             Etva = (t.Etva ?? 0),
                             TotalDistributions = (t.TotalDistributions ?? 0),
@@ -491,7 +490,7 @@ public sealed class TotalService : ITotalService
                         select new BalanceEndpointResponse
                         {
                             Id = badgeNumberOrSsn,
-                            Ssn = t.Ssn.MaskSsn(),
+                            Ssn = t.Ssn!.Value.MaskSsn(),
                             CurrentBalance = (t.CurrentBalance ?? 0),
                             Etva = (t.Etva ?? 0),
                             TotalDistributions = (t.TotalDistributions ?? 0),
