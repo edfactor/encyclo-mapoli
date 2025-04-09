@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { useLazyGetUnder21TotalsQuery, useLazyGetUnder21InactiveQuery } from "reduxstore/api/YearsEndApi";
-import Under21SearchFilters from "../Under21SearchFilters";
 import Under21Summary from "./Under21Summary";
 import Under21InactiveGrid from "./Under21InactiveGrid";
 import useFiscalCloseProfitYear from "../../../hooks/useFiscalCloseProfitYear";
@@ -37,7 +36,9 @@ const Under21TA = () => {
         isSortDescending: sortParams.isSortDescending,
         pagination: {
           take: pageSize,
-          skip: pageNumber * pageSize
+          skip: pageNumber * pageSize,
+          sortBy: sortParams.sortBy,
+          isSortDescending: sortParams.isSortDescending
         }
       };
       
@@ -59,7 +60,9 @@ const Under21TA = () => {
         isSortDescending: sortParams.isSortDescending,
         pagination: {
           take: pageSize,
-          skip: pageNumber * pageSize
+          skip: pageNumber * pageSize,
+          sortBy: sortParams.sortBy,
+          isSortDescending: sortParams.isSortDescending
         }
       };
       
@@ -74,7 +77,9 @@ const Under21TA = () => {
       isSortDescending,
       pagination: {
         take: pageSize,
-        skip: pageNumber * pageSize
+        skip: pageNumber * pageSize,
+        sortBy: sortParams.sortBy,
+        isSortDescending
       }
     };
     
@@ -89,11 +94,6 @@ const Under21TA = () => {
         rowSpacing="24px">
         <Grid2 width={"100%"}>
           <Divider />
-        </Grid2>
-        <Grid2 width={"100%"}>
-          <DSMAccordion title="Filter">
-            <Under21SearchFilters onSearch={handleSearch} isLoading={isLoading} />
-          </DSMAccordion>
         </Grid2>
 
         {initialLoad ? (

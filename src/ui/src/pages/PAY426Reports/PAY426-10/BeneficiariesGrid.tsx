@@ -29,12 +29,14 @@ const BeneficiariesGrid = () => {
             profitYear: 2024,
             pagination: {
                 skip: pageNumber * pageSize,
-                take: pageSize
+                take: pageSize,
+                sortBy: "badgeNumber",
+                isSortDescending: true
             }
         });
     }, [trigger, pageNumber, pageSize]);
 
-    const getPinnedBottomRowData = useMemo(() => {
+    const getPinnedTopRowData = useMemo(() => {
         if (!data) return [];
         
         const beneficiaryCount = data.numberOfEmployees || 0;
@@ -89,7 +91,7 @@ const BeneficiariesGrid = () => {
                 handleSortChanged={(_params) => {}}
                 providedOptions={{
                     rowData: data?.response?.results || [],
-                    pinnedBottomRowData: getPinnedBottomRowData,
+                    pinnedTopRowData: getPinnedTopRowData,
                     columnDefs: columnDefs
                 }}
             />

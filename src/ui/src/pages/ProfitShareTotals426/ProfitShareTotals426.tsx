@@ -17,6 +17,7 @@ import ProfitShareTotalsDisplay from "components/ProfitShareTotalsDisplay";
 
 const ProfitShareTotals426 = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
+  const [hasInitialSearchRun, setHasInitialSearchRun] = useState(false);
   const navigate = useNavigate();
   const hasToken = !!useSelector((state: RootState) => state.security.token);
   const profitYear = useFiscalCloseProfitYear();
@@ -25,7 +26,9 @@ const ProfitShareTotals426 = () => {
   const { yearEndProfitSharingReport } = useSelector((state: RootState) => state.yearsEnd);
 
   useEffect(() => {
-    if (hasToken && profitYear) {
+    if (hasToken && profitYear && !hasInitialSearchRun) {
+      setHasInitialSearchRun(true);
+      
       const request: YearEndProfitSharingReportRequest = {
         isYearEnd: false,
         minimumAgeInclusive: 18,
@@ -40,12 +43,21 @@ const ProfitShareTotals426 = () => {
         includeEmployeesWithPriorProfitSharingAmounts: true,
         includeEmployeesWithNoPriorProfitSharingAmounts: true,
         profitYear: profitYear,
-        pagination: { skip: 0, take: 5 }
+        pagination: { skip: 0, take: 5, sortBy: "badgeNumber", isSortDescending: true }
       };
-      triggerSearch(request, false);
-      dispatch(setYearEndProfitSharingReportQueryParams(profitYear));
+      
+      triggerSearch(request, false)
+        .then(result => {
+          if (result.data) {
+            dispatch(setYearEndProfitSharingReportQueryParams(profitYear));
+            setInitialSearchLoaded(true);
+          }
+        })
+        .catch(error => {
+          console.error("Initial search failed:", error);
+        });
     }
-  }, [hasToken, profitYear, triggerSearch, dispatch]);
+  }, [hasToken, profitYear, hasInitialSearchRun, triggerSearch, dispatch]);
 
   const handleStatusChange = async (newStatus: ProcessStatus) => {
     console.info("Logging new status: ", newStatus);
@@ -74,11 +86,6 @@ const ProfitShareTotals426 = () => {
         rowSpacing="24px">
         <Grid2 width={"100%"}>
           <Divider />
-        </Grid2>
-        <Grid2 width={"100%"}>
-          <DSMAccordion title="Filter">
-            <ProfitShareTotals426SearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
-          </DSMAccordion>
         </Grid2>
 
         <Grid2 width="100%">
