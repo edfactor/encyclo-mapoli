@@ -3,7 +3,6 @@ import Grid2 from "@mui/material/Grid2";
 import { DSMAccordion, Page, TotalsGrid } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
 import Under21ReportGrid from "./Under21ReportGrid";
-import Under21ReportSearchFilters from "./Under21SearchFilters";
 
 const NewPSLabels = () => {
   return (
@@ -14,12 +13,6 @@ const NewPSLabels = () => {
         <Grid2 width={"100%"}>
           <Divider />
         </Grid2>
-        <Grid2 width={"100%"}>
-          <DSMAccordion title="Filter">
-            <Under21ReportSearchFilters />
-          </DSMAccordion>
-        </Grid2>
-
         <div className="flex sticky top-0 z-10 bg-white">
           <TotalsGrid
             displayData={[
