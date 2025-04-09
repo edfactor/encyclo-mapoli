@@ -4,15 +4,7 @@ import "./MenuBar.css";
 import { ICommon } from "../ICommon";
 import NavButton from "./NavButton";
 import PopupMenu from "./PopupMenu";
-import { RouteCategory } from "smart-ui-library";
-
-export type RouteData = {
-  caption: string;
-  route: string;
-  divider?: boolean;
-  disabled?: boolean;
-  requiredPermission?: string;
-};
+import { RouteCategory } from "../../types/MenuTypes";
 
 export interface MenuBarProps extends ICommon {
   menuInfo: RouteCategory[];
@@ -43,6 +35,7 @@ export const MenuBar: FC<MenuBarProps> = ({ menuInfo, impersonationMultiSelect }
               menuLabel={current.menuLabel}
               items={current.items}
               parentRoute={current.parentRoute}
+              disabled={current.disabled}
             />
           ) : (
             <NavButton
@@ -52,6 +45,7 @@ export const MenuBar: FC<MenuBarProps> = ({ menuInfo, impersonationMultiSelect }
                 navigate(current.parentRoute);
               }}
               label={current.menuLabel}
+              disabled={current.disabled}
             />
           );
         })}

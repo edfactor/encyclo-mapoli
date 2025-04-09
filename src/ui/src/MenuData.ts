@@ -1,4 +1,4 @@
-import { RouteCategory } from "smart-ui-library/dist/components/MenuBar/MenuBar";
+import { RouteCategory } from "./types/MenuTypes";
 import { CAPTIONS, MENU_LABELS, ROUTES } from "./constants";
 import { ImpersonationRoles } from "./reduxstore/types";
 
@@ -6,19 +6,22 @@ import { ImpersonationRoles } from "./reduxstore/types";
 const beneficiaries: RouteCategory = {
   menuLabel: MENU_LABELS.BENEFICIARIES,
   parentRoute: MENU_LABELS.BENEFICIARIES,
-  items: [{ caption: CAPTIONS.SUMMARY, route: "" }]
+  items: [{ caption: CAPTIONS.SUMMARY, route: "" }],
+  disabled: true
 };
 
 const distributions: RouteCategory = {
   menuLabel: MENU_LABELS.DISTRIBUTIONS,
   parentRoute: MENU_LABELS.DISTRIBUTIONS,
-  items: [{ caption: CAPTIONS.SUMMARY, route: "" }]
+  items: [{ caption: CAPTIONS.SUMMARY, route: "" }],
+  disabled: true
 };
 
 const reconciliation: RouteCategory = {
   menuLabel: MENU_LABELS.RECONCILIATION,
   parentRoute: MENU_LABELS.RECONCILIATION,
-  items: [{ caption: CAPTIONS.SUMMARY, route: "" }]
+  items: [{ caption: CAPTIONS.SUMMARY, route: "" }],
+  disabled: true
 };
 
 const inquiries: RouteCategory = {
@@ -51,7 +54,7 @@ const MenuData: RouteCategory[] = [
   distributions,
   reconciliation,
   drawer,
-  localStorageImpersonating == ImpersonationRoles.ItOperations ? it_operations : ""
+  ...(localStorageImpersonating == ImpersonationRoles.ItOperations ? [it_operations] : [])
 ];
 
 interface MenuLevel {
