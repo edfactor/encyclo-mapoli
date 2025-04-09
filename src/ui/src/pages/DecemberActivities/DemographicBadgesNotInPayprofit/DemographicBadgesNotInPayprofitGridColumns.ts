@@ -6,9 +6,10 @@ export const GetDemographicBadgesNotInPayprofitColumns = (): ColDef[] => {
       headerName: "Badge",
       field: "badgeNumber",
       colId: "badgeNumber",
-      minWidth: 80,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      minWidth: 50,
+      maxWidth: 200,
+      headerClass: "left-align",
+      cellClass: "left-align",
       resizable: true,
       sortable: true,
       valueFormatter: (params) => {
@@ -21,6 +22,7 @@ export const GetDemographicBadgesNotInPayprofitColumns = (): ColDef[] => {
       field: "ssn",
       colId: "ssn",
       minWidth: 120,
+      maxWidth: 250,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true
@@ -30,6 +32,7 @@ export const GetDemographicBadgesNotInPayprofitColumns = (): ColDef[] => {
       field: "employeeName",
       colId: "employeeName",
       minWidth: 150,
+      maxWidth: 300,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true
@@ -38,9 +41,10 @@ export const GetDemographicBadgesNotInPayprofitColumns = (): ColDef[] => {
       headerName: "Store",
       field: "store",
       colId: "store",
-      minWidth: 80,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      minWidth: 50,
+      maxWidth: 170,
+      headerClass: "left-align",
+      cellClass: "left-align",
       resizable: true
     },
     {
@@ -48,8 +52,9 @@ export const GetDemographicBadgesNotInPayprofitColumns = (): ColDef[] => {
       field: "status",
       colId: "status",
       minWidth: 80,
-      headerClass: "center-align",
-      cellClass: "center-align",
+      maxWidth: 250,
+      headerClass: "right-align",
+      cellClass: "right-align",
       resizable: true,
       valueFormatter: (params) => {
         const status = params.data.status; // assuming 'status' is in the row data
