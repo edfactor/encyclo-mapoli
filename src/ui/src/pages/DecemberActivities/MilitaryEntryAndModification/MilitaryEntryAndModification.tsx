@@ -26,13 +26,7 @@ const MilitaryEntryAndModification = () => {
   const renderActionNode = () => {
     return (
       <div className="flex items-center gap-2 h-10">
-        <StatusDropdown onStatusChange={() => {}} />
-        <Button
-          onClick={() => navigate("/december-process-accordion")}
-          variant="outlined"
-          className="h-10 whitespace-nowrap min-w-fit">
-          {MENU_LABELS.DECEMBER_ACTIVITIES}
-        </Button>
+        <StatusDropdown onStatusChange={() => {}} />       
       </div>
     );
   };
