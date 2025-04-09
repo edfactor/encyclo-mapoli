@@ -11,7 +11,7 @@
     "@pkgr/core": "0.2.0"
   },
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --port 3100",
     "build:prod": "tsc -b && vite build --mode production",
     "build:qa": "vite build --mode qa",
     "build:uat": "vite build --mode uat",
@@ -29,7 +29,7 @@
     "@mui/material": "^6.4.7",
     "@mui/system": "^5.15.18",
     "@mui/x-date-pickers": "7.28.3",
-    "@okta/okta-auth-js": "7.11.1",
+    "@okta/okta-auth-js": "7.12.1",
     "@okta/okta-react": "6.9.0",
     "@reduxjs/toolkit": "^2.3.0",
     "@testing-library/jest-dom": "^6.4.5",

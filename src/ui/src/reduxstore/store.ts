@@ -13,6 +13,8 @@ import inquirySlice from "./slices/inquirySlice";
 import { LookupsApi } from "./api/LookupsApi";
 import lookupsSlice from "./slices/lookupsSlice";
 import { rtkQueryErrorToastMiddleware } from "smart-ui-library";
+import { CommonApi } from "./api/CommonApi";
+import commonSlice from "./slices/commonSlice";
 
 export const store = configureStore({
   reducer: {
@@ -23,13 +25,15 @@ export const store = configureStore({
     military: militarySlice,
     inquiry: inquirySlice,
     lookups: lookupsSlice,
+    common: commonSlice,
 
     [SecurityApi.reducerPath]: SecurityApi.reducer,
     [YearsEndApi.reducerPath]: YearsEndApi.reducer,
     [ItOperations.reducerPath]: ItOperations.reducer,
     [MilitaryApi.reducerPath]: MilitaryApi.reducer,
     [InquiryApi.reducerPath]: InquiryApi.reducer,
-    [LookupsApi.reducerPath]: LookupsApi.reducer
+    [LookupsApi.reducerPath]: LookupsApi.reducer,
+    [CommonApi.reducerPath]: CommonApi.reducer
   },
 
   middleware: (getDefaultMiddleware) =>
@@ -41,6 +45,7 @@ export const store = configureStore({
       .concat(MilitaryApi.middleware)
       .concat(InquiryApi.middleware)
       .concat(LookupsApi.middleware)
+      .concat(CommonApi.middleware)
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
