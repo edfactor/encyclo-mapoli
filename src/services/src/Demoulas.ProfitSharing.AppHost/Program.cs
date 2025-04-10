@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Demoulas.ProfitSharing.AppHost;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Projects;
 using Microsoft.Extensions.Logging;
 var logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger("AppHost");
@@ -128,21 +129,24 @@ Demoulas_ProfitSharing_Data_Cli cli = new Demoulas_ProfitSharing_Data_Cli();
 var projectPath = new FileInfo(cli.ProjectPath).Directory?.FullName;
 
 var cliRunner = builder.AddExecutable("Database-Cli",
-    "dotnet",
-    projectPath!,
-    "run", "--no-build", "--launch-profile", "upgrade-db")
+        "dotnet",
+        projectPath!,
+        "run", "--no-build", "--launch-profile", "upgrade-db")
     .WithCommand(
         name: "upgrade-db",
         displayName: "Upgrade database",
-        executeCommand: (c) => Task.FromResult(RunConsoleApp(projectPath!, "upgrade-db")))
+        executeCommand: (c) => Task.FromResult(RunConsoleApp(projectPath!, "upgrade-db")),
+        commandOptions: new CommandOptions { IconName = "Database", IconVariant = IconVariant.Filled })
     .WithCommand(
         name: "drop-recreate-db",
         displayName: "Drop and recreate database",
-        executeCommand: (c) => Task.FromResult(RunConsoleApp(projectPath!, "drop-recreate-db")))
+        executeCommand: (c) => Task.FromResult(RunConsoleApp(projectPath!, "drop-recreate-db")),
+        commandOptions: new CommandOptions { IconName = "Database", IconVariant = IconVariant.Filled })
     .WithCommand(
         name: "import-from-ready",
         displayName: "Import from READY",
-        executeCommand: (c) => Task.FromResult(RunConsoleApp(projectPath!, "import-from-ready")));
+        executeCommand: (c) => Task.FromResult(RunConsoleApp(projectPath!, "import-from-ready")),
+        commandOptions: new CommandOptions { IconName = "Database", IconVariant = IconVariant.Filled });
 
 
 var api = builder.AddProject<Demoulas_ProfitSharing_Api>("ProfitSharing-Api")
