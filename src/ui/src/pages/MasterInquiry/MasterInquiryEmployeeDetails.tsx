@@ -6,6 +6,7 @@ import { EmployeeDetails } from "reduxstore/types";
 import { mmDDYYFormat, numberToCurrency } from "smart-ui-library";
 import { formatPercentage } from "utils/formatPercentage";
 import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
+import { tryddmmyyyyToDate } from "../../utils/dateUtils";
 
 interface MasterInquiryEmployeeDetailsProps {
   details: EmployeeDetails;
@@ -62,7 +63,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
 
   const employeeSection = [
     { label: "Badge", value: viewBadgeLinkRenderer(Number(badgeNumber)) },
-    { label: "DOB", value: mmDDYYFormat(dateOfBirth) },
+    { label: "DOB", value: mmDDYYFormat(tryddmmyyyyToDate(dateOfBirth)) },
     { label: "SSN", value: `${ssn}` },
     { label: "ETVA", value: currentEtva },
     { label: "Enrollment", value: enrollment },
@@ -76,10 +77,10 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
   ];
 
   const hireSection = [
-    { label: "Hire", value: mmDDYYFormat(hireDate) },
-    { label: "Term", value: terminationDate ? mmDDYYFormat(terminationDate) : 'N/A' },
+    { label: "Hire", value: mmDDYYFormat(tryddmmyyyyToDate(hireDate)) },
+    { label: "Term", value: terminationDate ? mmDDYYFormat(tryddmmyyyyToDate(terminationDate)) : 'N/A' },
     { label: "Store", value: storeNumber },
-    { label: "Rehire", value: reHireDate ? mmDDYYFormat(reHireDate) : 'N/A' },
+    { label: "Rehire", value: reHireDate ? mmDDYYFormat(tryddmmyyyyToDate(reHireDate)) : 'N/A' },
   ];
 
   const amountsSection = [
