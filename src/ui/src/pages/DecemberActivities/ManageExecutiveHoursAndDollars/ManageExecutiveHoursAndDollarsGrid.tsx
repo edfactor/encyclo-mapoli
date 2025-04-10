@@ -245,7 +245,13 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
       return mainGridStructureCopy;
     }
 
-    mainGridStructureCopy.response.results.unshift(...additionalResultsCopy);
+    // We should only add people to the main grid if they are not already there
+    const existingBadgeNumbers = new Set(mainGridStructureCopy.response.results.map((item) => item.badgeNumber));
+    const filteredAdditionalResults = additionalResultsCopy.filter(
+      (item) => !existingBadgeNumbers.has(item.badgeNumber)
+    );
+    // Now we can add the filtered additional results to the main grid structure
+    mainGridStructureCopy.response.results = mainGridStructureCopy.response.results.concat(filteredAdditionalResults);
 
     return mainGridStructureCopy;
   };
@@ -373,7 +379,10 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
       <SmartModal
         open={openModal}
         onClose={() => setOpenModal(false)}>
-        <SearchAndAddExecutive />
+        <SearchAndAddExecutive
+          initialSearchLoaded={initialSearchLoaded}
+          setInitialSearchLoaded={setInitialSearchLoaded}
+        />
       </SmartModal>
     </>
   );
