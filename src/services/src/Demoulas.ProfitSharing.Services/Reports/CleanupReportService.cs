@@ -262,7 +262,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                     .Select(d=> d.FullName)
                     .ToHashSetAsync(cancellationToken);
 
-                var query = from dem in ctx.Demographics
+                var query = from dem in ctx.Demographics.Include(d=> d.EmploymentStatus)
                             join ppLj in ctx.PayProfits on new { DemographicId = dem.Id, req.ProfitYear } equals new { ppLj.DemographicId, ppLj.ProfitYear } into tmpPayProfit
                             from pp in tmpPayProfit.DefaultIfEmpty()
                             join pdLj in ctx.ProfitDetails on new { dem.Ssn, req.ProfitYear } equals new { pdLj.Ssn, pdLj.ProfitYear } into tmpProfitDetails
@@ -282,6 +282,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                                 dem.HireDate,
                                 dem.TerminationDate,
                                 dem.EmploymentStatusId,
+                                dem.EmploymentStatus!.Name,
                                 dem.StoreNumber,
                                 PdSsn = pd != null ? pd.Ssn : 0,
                                 CurrentHoursYear = pp != null ? pp.CurrentHoursYear : 0,
@@ -306,6 +307,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                                 HireDate = g.Key.HireDate,
                                 TerminationDate = g.Key.TerminationDate,
                                 Status = g.Key.EmploymentStatusId,
+                                EmploymentStatusName = g.Key.Name,
                                 StoreNumber = g.Key.StoreNumber,
                                 Count = g.Count(),
                                 HoursCurrentYear = g.Key.CurrentHoursYear,
