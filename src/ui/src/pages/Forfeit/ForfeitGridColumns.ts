@@ -5,18 +5,18 @@ import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
 export const GetProfitShareForfeitColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   return [
     {
-      headerName: "Badge #",
+      headerName: "Badge",
       field: "badgeNumber",
       colId: "badgeNumber",
       minWidth: 80,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      headerClass: "left-align",
+      cellClass: "left-align",
       resizable: true,
       sortable: true,
       cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber, navFunction)
     },
     {
-      headerName: "Employee Name",
+      headerName: "Name",
       field: "employeeName",
       colId: "employeeName",
       minWidth: 150,
