@@ -5,6 +5,7 @@ import { useLazyGetDuplicateSSNsQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetDuplicateSSNsOnDemographicsColumns } from "./DuplicateSSNsOnDemographicsGridColumns";
+import { CAPTIONS } from "../../../constants";
 
 const DuplicateSSNsOnDemographicsGrid: React.FC = () => {
   const [pageNumber, setPageNumber] = useState(0);
@@ -47,7 +48,7 @@ const DuplicateSSNsOnDemographicsGrid: React.FC = () => {
             </Typography>
           </div>
           <DSMGrid
-            preferenceKey={"DUPE_SSNS"}
+            preferenceKey={CAPTIONS.DUPLICATE_SSNS}
             isLoading={false}
             handleSortChanged={sortEventHandler}
             providedOptions={{

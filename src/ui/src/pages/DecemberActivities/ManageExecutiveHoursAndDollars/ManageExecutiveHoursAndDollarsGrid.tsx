@@ -22,6 +22,7 @@ import {
 import { AddOutlined } from "@mui/icons-material";
 import SearchAndAddExecutive from "./SearchAndAddExecutive";
 import { useLazyGetExecutiveHoursAndDollarsQuery } from "reduxstore/api/YearsEndApi";
+import { CAPTIONS } from "../../../constants";
 
 interface RenderAddExecutiveButtonProps {
   reportReponse: PagedReportResponse<ExecutiveHoursAndDollars> | null;
@@ -320,7 +321,7 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
             </>
           )}
           <DSMGrid
-            preferenceKey={"DUPE_SSNS"}
+            preferenceKey={CAPTIONS.MANAGE_EXECUTIVE_HOURS}
             isLoading={false}
             handleSortChanged={sortEventHandler}
             providedOptions={{
