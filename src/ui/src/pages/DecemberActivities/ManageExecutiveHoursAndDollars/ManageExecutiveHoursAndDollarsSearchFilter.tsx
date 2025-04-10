@@ -11,7 +11,6 @@ import {
 } from "reduxstore/api/YearsEndApi";
 import {
   clearAdditionalExecutivesChosen,
-  clearEligibleEmployeesQueryParams,
   clearExecutiveHoursAndDollars,
   clearExecutiveHoursAndDollarsQueryParams,
   setExecutiveHoursAndDollarsGridYear,
@@ -137,7 +136,6 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
       );
 
       dispatch(setExecutiveHoursAndDollarsGridYear(profitYear));
-
       dispatch(clearAdditionalExecutivesChosen());
     }
 
