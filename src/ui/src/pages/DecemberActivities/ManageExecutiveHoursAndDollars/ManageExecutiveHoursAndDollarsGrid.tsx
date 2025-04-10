@@ -269,10 +269,15 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
     if (isModal) {
       return (
         mutableCopyOfAdditionalExecutivesGrid?.response != null &&
-        mutableCopyOfAdditionalExecutivesGrid?.response != undefined
+        mutableCopyOfAdditionalExecutivesGrid?.response != undefined &&
+        executiveHoursAndDollars?.response?.results != null
       );
     } else {
-      return mutableCopyOfGridData?.response != null && mutableCopyOfGridData?.response != undefined;
+      return (
+        mutableCopyOfGridData?.response != null &&
+        mutableCopyOfGridData?.response != undefined &&
+        executiveHoursAndDollars?.response?.results != null
+      );
     }
   };
 
