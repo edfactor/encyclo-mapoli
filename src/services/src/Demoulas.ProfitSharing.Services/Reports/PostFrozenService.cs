@@ -11,10 +11,8 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Demoulas.Util.Extensions;
-using Microsoft.AspNetCore.SignalR.Protocol;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using static FastEndpoints.Ep;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
 
@@ -546,6 +544,90 @@ public class PostFrozenService : IPostFrozenService
         }
     }
 
+    public async Task<List<string>> GetProfitSharingLabelsExport(ProfitYearRequest request, CancellationToken ct)
+    {
+        var rawData = await GetProfitSharingLabels(request, ct);
+        var rslt = rawData.Results.Select(x=>$"{x.EmployeeName};{x.Address1};{x.City};{x.State};{x.PostalCode};{x.FirstName};{x.StoreNumber};{x.DepartmentId};{x.PayClassificationId};{x.BadgeNumber}").ToList();
+
+        return rslt;
+    }
+    public async Task<PaginatedResponseDto<ProfitSharingLabelResponse>> GetProfitSharingLabels(ProfitYearRequest request, CancellationToken ct)
+    {
+        using (_logger.BeginScope("Request PROFIT SHARING EMPLOYEE LABEL REPORT"))
+        {
+            return await (_profitSharingDataContextFactory.UseReadOnlyContext(ctx =>
+            {
+                var demoInfo = (
+                    from d in FrozenService.GetDemographicSnapshot(ctx, request.ProfitYear)
+                    join pc in ctx.PayClassifications on d.PayClassificationId equals pc.Id
+                    join dp in ctx.Departments on d.DepartmentId equals dp.Id
+                    select new
+                    {
+                        d.Ssn,
+                        d.StoreNumber,
+                        d.PayClassificationId,
+                        PayClassificationName = pc.Name,
+                        d.DepartmentId,
+                        DepartmentName = dp.Name,
+                        d.BadgeNumber,
+                        d.ContactInfo.FirstName,
+                        d.ContactInfo.LastName,
+                        Address1 = d.Address.Street,
+                        d.Address.City,
+                        State = d.Address.Street,
+                        d.Address.PostalCode
+                    }
+                );
+
+                var beneInfo = (
+                    from bc in ctx.BeneficiaryContacts
+                    join b in ctx.Beneficiaries on bc.Id equals b.BeneficiaryContactId
+                    where !ctx.Demographics.Any(d=>d.Ssn == bc.Ssn)
+                    select new
+                    {
+                        bc.Ssn,
+                        StoreNumber = (short)0,
+                        PayClassificationId = (byte)0,
+                        PayClassificationName = "",
+                        DepartmentId = (byte)0,
+                        DepartmentName = "",
+                        b.BadgeNumber,
+                        bc.ContactInfo.FirstName,
+                        bc.ContactInfo.LastName,
+                        Address1 = bc.Address.Street,
+                        bc.Address.City,
+                        bc.Address.State,
+                        bc.Address.PostalCode,
+                    }
+                );
+
+                var demoAndBeneficiaries = demoInfo.Union(beneInfo);
+
+                return (
+                    from pd in ctx.ProfitDetails.Where(x => x.ProfitYear == request.ProfitYear).Select(x=>x.Ssn).Distinct()
+                    join d in demoAndBeneficiaries on pd equals d.Ssn
+                    join pc in ctx.PayClassifications on d.PayClassificationId equals pc.Id
+                    join dp in ctx.Departments on d.DepartmentId equals dp.Id
+                    orderby d.StoreNumber, d.LastName, d.FirstName
+                    select new ProfitSharingLabelResponse()
+                    {
+                        StoreNumber = d.StoreNumber,
+                        PayClassificationId = d.PayClassificationId,
+                        PayClassificationName = pc.Name,
+                        DepartmentId = d.DepartmentId,
+                        DepartmentName = dp.Name,
+                        BadgeNumber = d.BadgeNumber,
+                        EmployeeName = d.FirstName + " " + d.LastName,
+                        FirstName = d.FirstName,
+                        Address1 = d.Address1,
+                        City = d.City,
+                        State = d.State,
+                        PostalCode = d.PostalCode
+                    }
+                ).ToPaginationResultsAsync(request, ct);
+            }));
+        }
+    }
 
     internal class Under21IntermediaryResult
     {

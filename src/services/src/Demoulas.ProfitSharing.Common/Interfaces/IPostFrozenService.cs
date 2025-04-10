@@ -12,4 +12,6 @@ public interface IPostFrozenService
     Task<ProfitSharingUnder21TotalsResponse> GetUnder21Totals(ProfitYearRequest request, CancellationToken cancellationToken);
     Task<PaginatedResponseDto<NewProfitSharingLabelResponse>> GetNewProfitSharingLabels(ProfitYearRequest request, CancellationToken cancellationToken);
     Task<List<string>> GetNewProfitSharingLabelsForMailMerge(ProfitYearRequest request, CancellationToken ct);
+    Task<PaginatedResponseDto<ProfitSharingLabelResponse>> GetProfitSharingLabels(ProfitYearRequest request, CancellationToken ct);
+    Task<List<string>> GetProfitSharingLabelsExport(ProfitYearRequest request, CancellationToken ct);
 }

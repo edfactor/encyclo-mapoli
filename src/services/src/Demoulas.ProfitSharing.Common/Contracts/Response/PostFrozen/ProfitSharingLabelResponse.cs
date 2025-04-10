@@ -14,6 +14,7 @@ public record ProfitSharingLabelResponse
     public string? DepartmentName { get; set; }
     public int BadgeNumber { get; set; }
     public required string EmployeeName { get; set; }
+    public string? FirstName { get; set; }
     public string? Address1 { get; set; }
     public string? City { get; set; }
     public string? State { get; set; }
