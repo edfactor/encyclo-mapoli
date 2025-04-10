@@ -16,6 +16,7 @@ import {
   clearProfitSharingEditQueryParams,
   clearProfitSharingUpdate,
   clearProfitSharingUpdateQueryParams,
+  setProfitEditUpdateChangesAvailable,
   setProfitSharingEditQueryParams,
   setProfitSharingUpdateQueryParams
 } from "reduxstore/slices/yearsEndSlice";
@@ -145,7 +146,8 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
       // First we have to do the update calls
       triggerSearchUpdate(updateParams, false).unwrap();
       dispatch(setProfitSharingUpdateQueryParams(data));
-      //console.log("Successfully did the update");
+
+      dispatch(setProfitEditUpdateChangesAvailable(true));
 
       // Now if we have a badgeToAdjust, we want to save the
       // adjustment summary so that panel shows up
@@ -167,6 +169,7 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
     dispatch(clearProfitSharingEditQueryParams());
     dispatch(clearProfitSharingUpdateQueryParams());
     setInitialSearchLoaded(false);
+    dispatch(setProfitEditUpdateChangesAvailable(false));
 
     reset({
       profitYear: fiscalCloseProfitYearAsDate,
