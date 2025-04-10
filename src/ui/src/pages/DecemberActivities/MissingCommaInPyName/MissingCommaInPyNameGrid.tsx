@@ -45,7 +45,7 @@ const MissingCommaInPyNameGrid: React.FC = () => {
             </Typography>
           </div>
           <DSMGrid
-            preferenceKey={"DUPE_SSNS"}
+            preferenceKey={CAPTIONS.MISSING_COMMA_IN_PY_NAME}
             isLoading={false}
             handleSortChanged={sortEventHandler}
             providedOptions={{

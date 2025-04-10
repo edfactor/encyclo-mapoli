@@ -7,6 +7,7 @@ import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetNegativeEtvaForSSNsOnPayProfitColumns } from "./NegativeEtvaForSSNsOnPayprofitGridColumn";
 import { Path, useNavigate } from "react-router";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
+import { CAPTIONS } from "../../../constants";
 
 interface NegativeEtvaForSSNsOnPayprofitGridProps {
   initialSearchLoaded: boolean;
@@ -80,7 +81,7 @@ const NegativeEtvaForSSNsOnPayprofitGrid: React.FC<NegativeEtvaForSSNsOnPayprofi
             </Typography>
           </div>
           <DSMGrid
-            preferenceKey={"DUPE_SSNS"}
+            preferenceKey={CAPTIONS.NEGATIVE_ETVA}
             isLoading={false}
             handleSortChanged={sortEventHandler}
             providedOptions={{
