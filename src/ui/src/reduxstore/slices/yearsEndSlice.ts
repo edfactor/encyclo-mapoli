@@ -631,6 +631,9 @@ export const yearsEndSlice = createSlice({
     setExecutiveHoursAndDollarsQueryParams: (state, action: PayloadAction<ExecutiveHoursAndDollarsQueryParams>) => {
       state.executiveHoursAndDollarsQueryParams = action.payload;
     },
+    clearExecutiveHoursAndDollarsQueryParams: (state) => {
+      state.executiveHoursAndDollarsQueryParams = null;
+    },
     setEmployeeWagesForYear: (state, action: PayloadAction<PagedReportResponse<EmployeeWagesForYear>>) => {
       state.employeeWagesForYear = action.payload;
     },
@@ -1017,6 +1020,7 @@ export const {
   clearProfitSharingEditQueryParams,
   setProfitSharingUpdateAdjustmentSummary,
   clearProfitSharingUpdateAdjustmentSummary,
-  addBadgeNumberToUpdateAdjustmentSummary
+  addBadgeNumberToUpdateAdjustmentSummary,
+  clearExecutiveHoursAndDollarsQueryParams
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;

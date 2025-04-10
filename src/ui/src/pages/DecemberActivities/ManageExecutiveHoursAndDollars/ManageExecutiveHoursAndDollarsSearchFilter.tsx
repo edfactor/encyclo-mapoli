@@ -13,6 +13,7 @@ import {
   clearAdditionalExecutivesChosen,
   clearEligibleEmployeesQueryParams,
   clearExecutiveHoursAndDollars,
+  clearExecutiveHoursAndDollarsQueryParams,
   setExecutiveHoursAndDollarsGridYear,
   setExecutiveHoursAndDollarsQueryParams
 } from "reduxstore/slices/yearsEndSlice";
@@ -21,7 +22,7 @@ import { ISortParams, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 
 interface ExecutiveHoursAndDollarsSearch {
-  profitYear: number;
+  profitYear?: number;
   badgeNumber?: number | null;
   socialSecurity?: number | null;
   fullNameContains?: string | null;
@@ -35,8 +36,7 @@ const schema = yup.object().shape({
     .typeError("Year must be a number")
     .integer("Year must be an integer")
     .min(2020, "Year must be 2020 or later")
-    .max(2100, "Year must be 2100 or earlier")
-    .required("Year is required"),
+    .max(2100, "Year must be 2100 or earlier"),
   badgeNumber: yup
     .number()
     .typeError("Badge Number must be a number")
@@ -116,7 +116,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
       triggerSearch(
         {
           pagination: { skip: 0, take: 25, sortBy: sortParams.sortBy, isSortDescending: sortParams.isSortDescending },
-          profitYear: data.profitYear,
+          profitYear: data.profitYear ?? (profitYear || 0),
           ...(!!data.socialSecurity && { socialSecurity: data.socialSecurity }),
           ...(!!data.badgeNumber && { badgeNumber: data.badgeNumber }),
           hasExecutiveHoursAndDollars: data.hasExecutiveHoursAndDollars ?? false,
@@ -127,7 +127,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
       ).unwrap();
       dispatch(
         setExecutiveHoursAndDollarsQueryParams({
-          ...data,
+          profitYear: profitYear || 0,
           badgeNumber: data.badgeNumber ?? 0,
           socialSecurity: data.socialSecurity ?? 0,
           fullNameContains: data.fullNameContains ?? "",
@@ -136,7 +136,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
         })
       );
 
-      dispatch(setExecutiveHoursAndDollarsGridYear(data.profitYear));
+      dispatch(setExecutiveHoursAndDollarsGridYear(profitYear));
 
       dispatch(clearAdditionalExecutivesChosen());
     }
@@ -147,7 +147,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
       triggerModalSearch(
         {
           pagination: { skip: 0, take: 25, sortBy: sortParams.sortBy, isSortDescending: sortParams.isSortDescending },
-          profitYear: data.profitYear,
+          profitYear: data.profitYear || 0,
           ...(!!data.socialSecurity && { socialSecurity: data.socialSecurity }),
           ...(!!data.badgeNumber && { badgeNumber: data.badgeNumber }),
           hasExecutiveHoursAndDollars: false,
@@ -169,9 +169,10 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
     // dispatch(clearExecutiveHoursAndDollarsGridRows());
     // ... and then import clearExecutiveHoursAndDollarsGridRows
     // from reduxstore/slices/yearsEndSlice
-    setInitialSearchLoaded(false);
+    setInitialSearchLoaded(true);
     dispatch(clearExecutiveHoursAndDollars());
-    dispatch(clearEligibleEmployeesQueryParams());
+    dispatch(clearAdditionalExecutivesChosen());
+    dispatch(clearExecutiveHoursAndDollarsQueryParams());
     reset({
       profitYear: undefined,
       badgeNumber: undefined,
