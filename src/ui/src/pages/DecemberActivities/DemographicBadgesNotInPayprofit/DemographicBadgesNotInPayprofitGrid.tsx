@@ -3,29 +3,49 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetDemographicBadgesNotInPayprofitQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, Pagination } from "smart-ui-library";
+import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetDemographicBadgesNotInPayprofitColumns } from "./DemographicBadgesNotInPayprofitGridColumns";
 
 const DemographicBadgesNotInPayprofitGrid: React.FC = () => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
+  const [_sortParams, setSortParams] = useState<ISortParams>({
+    sortBy: "badgeNumber",
+    isSortDescending: true
+  });
   const { demographicBadges } = useSelector((state: RootState) => state.yearsEnd);
   const [triggerSearch, { isLoading }] = useLazyGetDemographicBadgesNotInPayprofitQuery();
 
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const onSearch = useCallback(async () => {
     const request = {
-      pagination: { skip: pageNumber * pageSize, take: pageSize, sort: "badgeNumber", isSortDescending: true }
+      pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: _sortParams.sortBy, isSortDescending: _sortParams.isSortDescending }
     };
 
     await triggerSearch(request, false);
-  }, [pageNumber, pageSize, triggerSearch]);
+  }, [pageNumber, pageSize, _sortParams, triggerSearch]);
 
+  const sortEventHandler = (update: ISortParams) => {
+
+    if (update.sortBy === "") {
+      update.sortBy = "badgeNumber";
+      update.isSortDescending = true;
+    }
+    
+    const request = {
+      pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: update.sortBy, isSortDescending: update.isSortDescending }
+    };
+    setSortParams(update);
+    setPageNumber(0);
+
+    triggerSearch(request, false);
+  };
+  
   useEffect(() => {
     if (hasToken) {
       onSearch();
     }
-  }, [hasToken, pageNumber, pageSize, onSearch]);
+  }, [hasToken, pageNumber, pageSize, _sortParams, onSearch]);
 
   const columnDefs = useMemo(() => GetDemographicBadgesNotInPayprofitColumns(), []);
 
@@ -43,6 +63,7 @@ const DemographicBadgesNotInPayprofitGrid: React.FC = () => {
           <DSMGrid
             preferenceKey={"DEMO_BADGES"}
             isLoading={false}
+            handleSortChanged={sortEventHandler}
             providedOptions={{
               rowData: demographicBadges?.response.results,
               columnDefs: columnDefs

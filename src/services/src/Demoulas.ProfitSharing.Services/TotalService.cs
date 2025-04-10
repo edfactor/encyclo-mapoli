@@ -532,6 +532,52 @@ public sealed class TotalService : ITotalService
                 BeneficiaryAllocation = r.BeneficiaryAllocation
             });
     }
+
+    /// <summary>
+    ///  Retrieves the transactions by SSN for a specific profit year.   The ORACLE driver likes the long winded version of the query (not mixing in any C# methods)
+    /// </summary>
+    public static IQueryable<InternalProfitDetailDto> GetTransactionsBySsnForProfitYearForOracle(IProfitSharingDbContext ctx, short profitYear)
+    {
+        return ctx.ProfitDetails
+            .Where(pd => pd.ProfitYear == profitYear)
+            .GroupBy(details => details.Ssn)
+            .Select(g => new
+            {
+                Ssn = g.Key,
+                TotalContributions = g.Sum(x => x.Contribution),
+                TotalEarnings = g.Sum(x => x.Earnings),
+                TotalForfeitures = g.Sum(x =>
+                    x.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id
+                        ? x.Forfeiture
+                        : (x.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id ? -x.Forfeiture : 0)),
+                TotalPayments = g.Sum(x => x.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0),
+                Distribution = g.Sum(x =>
+                    (x.ProfitCodeId == ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id ||
+                     x.ProfitCodeId == ProfitCode.Constants.OutgoingDirectPayments.Id ||
+                     x.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment.Id)
+                        ? -x.Forfeiture
+                        : 0),
+                BeneficiaryAllocation = g.Sum(x =>
+                    (x.ProfitCodeId == ProfitCode.Constants.OutgoingXferBeneficiary.Id) ? -x.Forfeiture :
+                    (x.ProfitCodeId == ProfitCode.Constants.IncomingQdroBeneficiary.Id) ? x.Contribution : 0),
+                CurrentBalance = g.Sum(x =>
+                    x.Contribution + x.Earnings +
+                    (x.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0) -
+                    (x.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0))
+            })
+            .Select(r => new InternalProfitDetailDto
+            {
+                Ssn = r.Ssn,
+                TotalContributions = r.TotalContributions,
+                TotalEarnings = r.TotalEarnings,
+                TotalForfeitures = r.TotalForfeitures,
+                TotalPayments = r.TotalPayments,
+                CurrentAmount = r.CurrentBalance,
+                Distribution = r.Distribution,
+                BeneficiaryAllocation = r.BeneficiaryAllocation
+            });
+    }
+
     
     /// <summary>
     /// Extracts a single year of profit_detail transactions.

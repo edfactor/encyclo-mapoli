@@ -5,7 +5,7 @@ import { agGridNumberToCurrency } from "smart-ui-library";
 export const GetYTDWagesColumns = (): ColDef[] => {
   const columns: ColDef[] = [
     {
-      headerName: "Badge Number",
+      headerName: "Badge",
       field: "badgeNumber",
       colId: "badgeNumber",
       minWidth: 80,
