@@ -453,98 +453,99 @@ public class PostFrozenService : IPostFrozenService
             return rslt;
         }
 
-        public async Task<List<string>> GetNewProfitSharingLabelsForMailMerge(ProfitYearRequest request, CancellationToken ct)
+    public async Task<List<string>> GetNewProfitSharingLabelsForMailMerge(ProfitYearRequest request, CancellationToken ct)
+    {
+        var people = await GetNewProfitSharingLabels(request, ct);
+        var rslt = new List<string>();
+        foreach (var person in people.Results)
         {
-            var people = await GetNewProfitSharingLabels(request, ct);
-            var rslt = new List<string>();
-            foreach (var person in people.Results)
-            {
-                rslt.Add($"{person.StoreNumber.ToString("000")}-{person.DepartmentId.ToString("0")}-{person.PayClassificationId.ToString("0")}-{person.BadgeNumber}");
-                rslt.Add(person.EmployeeName);
-                rslt.Add(person.Address1 ?? string.Empty);
-                rslt.Add($"{person.City ?? string.Empty}, {person.State ?? string.Empty}, {person.PostalCode ?? string.Empty}");
-            }
+            rslt.Add($"{person.StoreNumber.ToString("000")}-{person.DepartmentId.ToString("0")}-{person.PayClassificationId.ToString("0")}-{person.BadgeNumber}");
+            rslt.Add(person.EmployeeName);
+            rslt.Add(person.Address1 ?? string.Empty);
+            rslt.Add($"{person.City ?? string.Empty}, {person.State ?? string.Empty}, {person.PostalCode ?? string.Empty}");
+        }
+
+        return rslt;
+    }
+
+    public async Task<PaginatedResponseDto<NewProfitSharingLabelResponse>> GetNewProfitSharingLabels (ProfitYearRequest request, CancellationToken cancellationToken)
+    {
+        using (_logger.BeginScope("Request NEW PROFIT SHARING EMPLOYEE LABEL REPORT"))
+        {
+            var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
+            var age21 = calInfo.FiscalEndDate.AddYears(-21);
+            var rslt = await (_profitSharingDataContextFactory.UseReadOnlyContext(async ctx => {
+                var qry = (
+                    from pp in ctx.PayProfits
+                        .Include(x => x.Demographic)
+                        .Include(x => x.Demographic!.Address)
+                        .Include(x => x.Demographic!.PayClassification)
+                        .Include(x => x.Demographic!.Department)
+                        .Include(x => x.Demographic!.EmploymentType)
+                        
+                    where pp.Demographic!.DateOfBirth > age21 || pp.EmployeeTypeId == EmployeeType.Constants.NewLastYear
+                    orderby pp.Demographic!.StoreNumber, pp.Demographic!.ContactInfo.LastName, pp.Demographic!.ContactInfo.FirstName
+                    select new 
+                    {
+                        pp.Demographic!.StoreNumber,
+                        pp.Demographic.PayClassificationId,
+                        PayClassificationName = pp.Demographic.PayClassification!.Name,
+                        pp.Demographic.DepartmentId,
+                        DepartmentName = pp.Demographic.Department!.Name,
+                        pp.Demographic.BadgeNumber,
+                        pp.Demographic.Ssn,
+                        EmployeeName = pp.Demographic.ContactInfo.FirstName + " " + pp.Demographic.ContactInfo.LastName,
+                        EmployeeTypeId = pp.Demographic.EmploymentTypeId,
+                        EmployeeTypeName = pp.Demographic.EmploymentType!.Name,
+                        Hours = pp.CurrentHoursYear,
+                        pp.Demographic.Address.Street,
+                        pp.Demographic.Address.City,
+                        pp.Demographic.Address.State,
+                        pp.Demographic.Address.PostalCode,
+                    }
+                );
+
+                var rawData =  await qry.ToPaginationResultsAsync(request, cancellationToken);
+                var ssns = rawData.Results.Select(x=>x.Ssn).ToList();
+
+                var balanceInfo = await _totalService.TotalVestingBalance(ctx, request.ProfitYear, calInfo.FiscalEndDate).Where(x => ssns.Contains(x.Ssn ?? 0)).ToListAsync(cancellationToken);
+
+
+                return new PaginatedResponseDto<NewProfitSharingLabelResponse>(request)
+                {
+                    Total = rawData.Total,
+                    Results = (
+                        from r in rawData.Results
+                        join bTbl in balanceInfo on r.Ssn equals bTbl.Ssn into bTmp
+                        from b in bTmp.DefaultIfEmpty()
+                        select new NewProfitSharingLabelResponse()
+                        {
+                            StoreNumber = r.StoreNumber,
+                            PayClassificationId = r.PayClassificationId,
+                            PayClassificationName = r.PayClassificationName,
+                            DepartmentId = r.DepartmentId,
+                            DepartmentName = r.DepartmentName,
+                            BadgeNumber = r.BadgeNumber,
+                            Ssn = r.Ssn.MaskSsn(),
+                            EmployeeName = r.EmployeeName,
+                            EmployeeTypeId = r.EmployeeTypeId,
+                            EmployeeTypeName = r.EmployeeTypeName,
+                            Hours = r.Hours,
+                            Balance = b != null && b.CurrentBalance != null ? b.CurrentBalance : 0,
+                            Years = b != null && b.YearsInPlan != null ? b.YearsInPlan : 0,
+                            Address1 = r.Street,
+                            City = r.City,
+                            State = r.State,
+                            PostalCode = r.PostalCode
+                        }
+                    )
+                };
+            }));
 
             return rslt;
         }
+    }
 
-        public async Task<PaginatedResponseDto<NewProfitSharingLabelResponse>> GetNewProfitSharingLabels (ProfitYearRequest request, CancellationToken cancellationToken)
-        {
-            using (_logger.BeginScope("Request NEW PROFIT SHARING EMPLOYEE LABEL REPORT"))
-            {
-                var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
-                var age21 = calInfo.FiscalEndDate.AddYears(-21);
-                var rslt = await (_profitSharingDataContextFactory.UseReadOnlyContext(async ctx => {
-                    var qry = (
-                        from pp in ctx.PayProfits
-                            .Include(x => x.Demographic)
-                            .Include(x => x.Demographic!.Address)
-                            .Include(x => x.Demographic!.PayClassification)
-                            .Include(x => x.Demographic!.Department)
-                            .Include(x => x.Demographic!.EmploymentType)
-                        
-                        where pp.Demographic!.DateOfBirth > age21 || pp.EmployeeTypeId == EmployeeType.Constants.NewLastYear
-                        orderby pp.Demographic!.StoreNumber, pp.Demographic!.ContactInfo.LastName, pp.Demographic!.ContactInfo.FirstName
-                        select new 
-                        {
-                            pp.Demographic!.StoreNumber,
-                            pp.Demographic.PayClassificationId,
-                            PayClassificationName = pp.Demographic.PayClassification!.Name,
-                            pp.Demographic.DepartmentId,
-                            DepartmentName = pp.Demographic.Department!.Name,
-                            pp.Demographic.BadgeNumber,
-                            pp.Demographic.Ssn,
-                            EmployeeName = pp.Demographic.ContactInfo.FirstName + " " + pp.Demographic.ContactInfo.LastName,
-                            EmployeeTypeId = pp.Demographic.EmploymentTypeId,
-                            EmployeeTypeName = pp.Demographic.EmploymentType!.Name,
-                            Hours = pp.CurrentHoursYear,
-                            pp.Demographic.Address.Street,
-                            pp.Demographic.Address.City,
-                            pp.Demographic.Address.State,
-                            pp.Demographic.Address.PostalCode,
-                        }
-                    );
-
-                    var rawData =  await qry.ToPaginationResultsAsync(request, cancellationToken);
-                    var ssns = rawData.Results.Select(x=>x.Ssn).ToList();
-
-                    var balanceInfo = await _totalService.TotalVestingBalance(ctx, request.ProfitYear, calInfo.FiscalEndDate).Where(x => ssns.Contains(x.Ssn ?? 0)).ToListAsync(cancellationToken);
-
-
-                    return new PaginatedResponseDto<NewProfitSharingLabelResponse>(request)
-                    {
-                        Total = rawData.Total,
-                        Results = (
-                            from r in rawData.Results
-                            join bTbl in balanceInfo on r.Ssn equals bTbl.Ssn into bTmp
-                            from b in bTmp.DefaultIfEmpty()
-                            select new NewProfitSharingLabelResponse()
-                            {
-                                StoreNumber = r.StoreNumber,
-                                PayClassificationId = r.PayClassificationId,
-                                PayClassificationName = r.PayClassificationName,
-                                DepartmentId = r.DepartmentId,
-                                DepartmentName = r.DepartmentName,
-                                BadgeNumber = r.BadgeNumber,
-                                Ssn = r.Ssn.MaskSsn(),
-                                EmployeeName = r.EmployeeName,
-                                EmployeeTypeId = r.EmployeeTypeId,
-                                EmployeeTypeName = r.EmployeeTypeName,
-                                Hours = r.Hours,
-                                Balance = b != null && b.CurrentBalance != null ? b.CurrentBalance : 0,
-                                Years = b != null && b.YearsInPlan != null ? b.YearsInPlan : 0,
-                                Address1 = r.Street,
-                                City = r.City,
-                                State = r.State,
-                                PostalCode = r.PostalCode
-                            }
-                        )
-                    };
-                }));
-
-                return rslt;
-            }
-        }
 
     internal class Under21IntermediaryResult
     {

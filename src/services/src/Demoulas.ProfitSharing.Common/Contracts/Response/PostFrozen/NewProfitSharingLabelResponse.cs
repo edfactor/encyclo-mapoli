@@ -6,27 +6,16 @@ using System.Threading.Tasks;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.PostFrozen
 {
-    public sealed record NewProfitSharingLabelResponse
+    public sealed record NewProfitSharingLabelResponse : ProfitSharingLabelResponse
     {
-        public short StoreNumber { get; set; }
-        public byte PayClassificationId { get; set; }
-        public string? PayClassificationName { get; set; }
-        public byte DepartmentId { get; set; }
-        public string? DepartmentName { get; set; }
-        public int BadgeNumber { get; set; }
         public required string Ssn { get; set; }
-        public required string EmployeeName { get; set; }
         public char EmployeeTypeId { get; set; }
         public required string EmployeeTypeName { get; set; }
         public decimal Hours { get; set; }
         public decimal? Balance { get; set; }
         public byte? Years { get; set; }
-        public string? Address1 { get; set; }
-        public string? City { get; set; }
-        public string? State { get; set; }
-        public string? PostalCode { get; set; }
 
-        public static NewProfitSharingLabelResponse SampleResponse()
+        public static new NewProfitSharingLabelResponse SampleResponse()
         {
             return new NewProfitSharingLabelResponse()
             {
