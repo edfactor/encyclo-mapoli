@@ -15,4 +15,5 @@ public sealed record DuplicateNamesAndBirthdaysResponse
     public decimal NetBalance { get; set; }
     public required decimal? HoursCurrentYear { get; set; }
     public required decimal? IncomeCurrentYear { get; set; }
+    public required string EmploymentStatusName { get; set; }
 }

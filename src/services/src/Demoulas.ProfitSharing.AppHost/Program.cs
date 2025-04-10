@@ -150,7 +150,6 @@ var cliRunner = builder.AddExecutable("Database-Cli",
 
 
 var api = builder.AddProject<Demoulas_ProfitSharing_Api>("ProfitSharing-Api")
-    .WithHttpHealthCheck("/health")
     .WithHttpsHealthCheck("/health")
     .WithSwaggerUi()
     .WithRedoc()
@@ -167,19 +166,16 @@ RunNpmInstall(ui.Resource.WorkingDirectory);
 
 _ = builder.AddProject<Demoulas_ProfitSharing_EmployeeFull_Sync>(name: "ProfitSharing-EmployeeFull-Sync")
     .WaitFor(api)
-    .WaitFor(ui)
     .WithParentRelationship(api)
     .WithExplicitStart();
 
 _ = builder.AddProject<Demoulas_ProfitSharing_EmployeePayroll_Sync>(name: "ProfitSharing-EmployeePayroll-Sync")
     .WaitFor(api)
-    .WaitFor(ui)
     .WithParentRelationship(api)
     .WithExplicitStart();
 
 _ = builder.AddProject<Demoulas_ProfitSharing_EmployeeDelta_Sync>(name: "ProfitSharing-EmployeeDelta-Sync")
     .WaitFor(api)
-    .WaitFor(ui)
     .WithParentRelationship(api)
     .WithExplicitStart();
 
