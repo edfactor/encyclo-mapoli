@@ -174,6 +174,9 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
     dispatch(clearEligibleEmployeesQueryParams());
     reset({
       profitYear: undefined,
+      badgeNumber: undefined,
+      socialSecurity: undefined,
+      fullNameContains: undefined,
       hasExecutiveHoursAndDollars: true,
       isMonthlyPayroll: false
     });
