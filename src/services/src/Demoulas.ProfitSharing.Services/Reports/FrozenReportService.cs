@@ -64,7 +64,7 @@ public class FrozenReportService : IFrozenReportService
                     {
                         BadgeNumber = d.BadgeNumber,
                         EmployeeName = d.ContactInfo.FullName,
-                        Ssn = d.Ssn.ToString(),
+                        Ssn = d.Ssn.MaskSsn(),
                         Forfeitures = 0,
                         ForfeitPoints = 0,
                         EarningPoints = 0
@@ -155,12 +155,12 @@ public class FrozenReportService : IFrozenReportService
                     }
                 }
 
-                var rowsWithData = query.Where(x => x.EarningPoints != 0 || x.ForfeitPoints != 0 || x.Forfeitures != 0);
+                var rowsWithData = query.Where(x => x.EarningPoints != 0 || x.ForfeitPoints != 0 || x.Forfeitures != 0).ToList();
 
                 return new PaginatedResponseDto<ForfeituresAndPointsForYearResponse>(req)
                 {
                     Results = rowsWithData.Skip(req.Skip ?? 0).Take(req.Take ?? int.MaxValue),
-                    Total = rowsWithData.Count()
+                    Total = rowsWithData.Count
                 };
             });
 

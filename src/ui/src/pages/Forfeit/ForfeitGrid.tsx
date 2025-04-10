@@ -7,6 +7,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { useLazyGetForfeituresAndPointsQuery } from "reduxstore/api/YearsEndApi";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import { CAPTIONS } from "../../constants";
 
 interface ForfeitGridProps {
   initialSearchLoaded: boolean;
@@ -65,11 +66,11 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ initialSearchLoaded, setIniti
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`PROFIT SHARE FORFEIT [PAY443] (${forfeituresAndPoints?.response.total || 2} records)`}
+              {`${CAPTIONS.FORFEIT} (${forfeituresAndPoints?.response.total || 2} records)`}
             </Typography>
           </div>
           <DSMGrid
-            preferenceKey={"PROFIT_SHARE_FORFEIT"}
+            preferenceKey={CAPTIONS.FORFEIT}
             isLoading={false}
             handleSortChanged={(_params) => {}}
             providedOptions={{
