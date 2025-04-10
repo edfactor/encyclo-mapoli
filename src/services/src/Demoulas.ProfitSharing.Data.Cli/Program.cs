@@ -6,6 +6,7 @@ using Demoulas.ProfitSharing.Data.Cli.DiagramServices;
 using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Oracle.ManagedDataAccess.Client;
 
 namespace Demoulas.ProfitSharing.Data.Cli;
 
@@ -57,6 +58,15 @@ public sealed class Program
                     context.AccountingPeriods.AddRange(newRecords);
                     await context.SaveChangesAsync();
                 }
+
+                OracleConnectionStringBuilder sb = new OracleConnectionStringBuilder(context.Database.GetConnectionString());
+
+                string gatherStats = $@"BEGIN
+   DBMS_STATS.GATHER_SCHEMA_STATS('{sb.UserID}');
+    END;";
+
+                await context.Database.ExecuteSqlRawAsync(gatherStats);
+                Console.WriteLine("Gathered schema stats");
 
             });
         });
