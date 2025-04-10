@@ -9,7 +9,7 @@ import Paper from "@mui/material/Paper";
 import Popper from "@mui/material/Popper";
 import { FC, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { RouteData } from "./MenuBar";
+import { RouteData } from "../../types/MenuTypes";
 import { useDispatch } from "react-redux";
 import { openDrawer, setActiveSubMenu } from "reduxstore/slices/generalSlice";
 import { menuLevels } from "../../MenuData";
@@ -18,8 +18,9 @@ type myProps = {
   menuLabel: string;
   items: RouteData[];
   parentRoute: string;
+  disabled?: boolean;
 };
-const PopupMenu: FC<myProps> = ({ menuLabel, items, parentRoute }) => {
+const PopupMenu: FC<myProps> = ({ menuLabel, items, parentRoute, disabled }) => {
   const location = useLocation();
   const elemRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
@@ -46,6 +47,7 @@ const PopupMenu: FC<myProps> = ({ menuLabel, items, parentRoute }) => {
   }, [location.pathname]);
 
   const handleToggle = () => {
+    if (disabled) return;
     setOpen((prevOpen) => !prevOpen);
   };
 
@@ -53,8 +55,8 @@ const PopupMenu: FC<myProps> = ({ menuLabel, items, parentRoute }) => {
     return menuLevels.some((level) => level.mainTitle === caption);
   };
 
-  const handleClose = (event: { target: EventTarget & HTMLElement }, route?: string, caption?: string) => {
-    if (elemRef.current && elemRef.current.contains(event.target)) {
+  const handleClose = (event: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement> | MouseEvent, route?: string, caption?: string) => {
+    if (elemRef.current && elemRef.current.contains(event.target as Node)) {
       return;
     }
 
@@ -91,7 +93,9 @@ const PopupMenu: FC<myProps> = ({ menuLabel, items, parentRoute }) => {
           ref={elemRef}
           aria-controls={open ? "menu-list-grow" : undefined}
           aria-haspopup="true"
-          onClick={handleToggle}>
+          onClick={disabled ? undefined : handleToggle}
+          disableRipple={disabled}
+          sx={{ color: 'inherit', cursor: disabled ? 'default' : 'pointer', opacity: disabled ? 0.75 : 1 }}>
           {menuLabel}
         </Button>
       </span>
@@ -109,7 +113,7 @@ const PopupMenu: FC<myProps> = ({ menuLabel, items, parentRoute }) => {
               transformOrigin: placement === "bottom" ? "center top" : "center bottom"
             }}>
             <Paper>
-              <ClickAwayListener onClickAway={(e) => handleClose(e)}>
+              <ClickAwayListener onClickAway={(e: any) => handleClose(e)}>
                 <MenuList
                   autoFocusItem={open}
                   id="menu-list-grow"

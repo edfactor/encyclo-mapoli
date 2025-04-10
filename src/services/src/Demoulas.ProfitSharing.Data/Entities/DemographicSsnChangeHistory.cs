@@ -1,19 +1,18 @@
-﻿namespace Demoulas.ProfitSharing.Data.Entities
-{
-    public sealed class DemographicSsnChangeHistory : SsnChangeHistory
-    {
-        public int DemographicId { get; set; }
-        public Demographic Demographic { get; set; } = null!;
+﻿namespace Demoulas.ProfitSharing.Data.Entities;
 
-        public static DemographicSsnChangeHistory FromDemographic(Demographic source, int newSsn)
+public sealed class DemographicSsnChangeHistory : SsnChangeHistory
+{
+    public int DemographicId { get; set; }
+    public Demographic Demographic { get; set; } = null!;
+
+    public static DemographicSsnChangeHistory FromDemographic(Demographic source, int newSsn)
+    {
+        var h = new DemographicSsnChangeHistory()
         {
-            var h = new DemographicSsnChangeHistory()
-            {
-                DemographicId = source.Id,
-                NewSsn = newSsn,
-                OldSsn = source.Ssn
-            };
-            return h;
-        }
+            DemographicId = source.Id,
+            NewSsn = newSsn,
+            OldSsn = source.Ssn
+        };
+        return h;
     }
 }

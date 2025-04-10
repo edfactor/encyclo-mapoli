@@ -1,29 +1,65 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetBalanceByYearsQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, TotalsGrid } from "smart-ui-library";
-import { GetBalanceByYearsColumns } from "./BalanceByYearsGridColumns";
-import Grid2 from '@mui/material/Grid2';
+import { GetBalanceByYearsGridColumns } from "./BalanceByYearsGridColumns";
+import Grid2 from "@mui/material/Grid2";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
 import { numberToCurrency } from "smart-ui-library";
 
-const BalanceByYearsGrid = () => {
+interface BalanceByYearsGridProps {
+  initialSearchLoaded: boolean;
+}
+
+const BalanceByYearsGrid: React.FC<BalanceByYearsGridProps> = ({ initialSearchLoaded }) => {
   const [_discard0, setSortParams] = useState<ISortParams>({
-    sortBy: "Badge",
+    sortBy: "badgeNumber",
     isSortDescending: false
   });
 
-  const { balanceByYearsTotal, balanceByYearsFullTime, balanceByYearsPartTime } = useSelector(
-    (state: RootState) => state.yearsEnd
-  );
-  const [_discard1, { isLoading }] = useLazyGetBalanceByYearsQuery();
+  const { balanceByYearsTotal, balanceByYearsFullTime, balanceByYearsPartTime, balanceByYearsQueryParams } =
+    useSelector((state: RootState) => state.yearsEnd);
+  const [triggerSearch, { isLoading }] = useLazyGetBalanceByYearsQuery();
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
-  const columnDefsTotal = GetBalanceByYearsColumns(FrozenReportsByAgeRequestType.Total);
-  const columnDefsFullTime = GetBalanceByYearsColumns(FrozenReportsByAgeRequestType.FullTime);
-  const columnDefsPartTime = GetBalanceByYearsColumns(FrozenReportsByAgeRequestType.PartTime);
+  const columnDefsTotal = GetBalanceByYearsGridColumns(FrozenReportsByAgeRequestType.Total);
+  const columnDefsFullTime = GetBalanceByYearsGridColumns(FrozenReportsByAgeRequestType.FullTime);
+  const columnDefsPartTime = GetBalanceByYearsGridColumns(FrozenReportsByAgeRequestType.PartTime);
+
+  const onSearch = useCallback(async () => {
+    triggerSearch(
+      {
+        profitYear: balanceByYearsQueryParams?.profitYear ?? 0,
+        reportType: FrozenReportsByAgeRequestType.Total,
+        pagination: { skip: 0, take: 255 }
+      },
+      false
+    ).unwrap();
+    triggerSearch(
+      {
+        profitYear: balanceByYearsQueryParams?.profitYear ?? 0,
+        reportType: FrozenReportsByAgeRequestType.FullTime,
+        pagination: { skip: 0, take: 255 }
+      },
+      false
+    ).unwrap();
+    triggerSearch(
+      {
+        profitYear: balanceByYearsQueryParams?.profitYear ?? 0,
+        reportType: FrozenReportsByAgeRequestType.PartTime,
+        pagination: { skip: 0, take: 255 }
+      },
+      false
+    ).unwrap();
+  }, [triggerSearch, balanceByYearsQueryParams?.profitYear]);
+
+  useEffect(() => {
+    if (initialSearchLoaded && balanceByYearsQueryParams?.profitYear) {
+      onSearch();
+    }
+  }, [balanceByYearsQueryParams?.profitYear, initialSearchLoaded, onSearch]);
 
   return (
     <>
@@ -94,52 +130,39 @@ const BalanceByYearsGrid = () => {
               leftColumnHeaders={["Beneficiaries", "Employees", "Total"]}
               topRowHeaders={["PartTime", "Count", "Balance", "Vested"]}></TotalsGrid>
           </div>
-          <Grid2 size={{ xs: 12 }} container >
-            <Grid2 size={{ xs: 4 }} >
+          <Grid2
+            size={{ xs: 12 }}
+            container>
+            <Grid2 size={{ xs: 4 }}>
               <DSMGrid
                 preferenceKey={"AGE_Total"}
                 isLoading={isLoading}
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: balanceByYearsTotal?.response.results,
-                  columnDefs: [
-                    {
-                      headerName: columnDefsTotal.headerName,
-                      children: columnDefsTotal.children
-                    }
-                  ]
+                  columnDefs: columnDefsTotal
                 }}
               />
             </Grid2>
-            <Grid2 size={{ xs: 4 }} >
+            <Grid2 size={{ xs: 4 }}>
               <DSMGrid
                 preferenceKey={"AGE_FullTime"}
                 isLoading={isLoading}
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: balanceByYearsFullTime?.response.results,
-                  columnDefs: [
-                    {
-                      headerName: columnDefsFullTime.headerName,
-                      children: columnDefsFullTime.children
-                    }
-                  ]
+                  columnDefs: columnDefsFullTime
                 }}
               />
             </Grid2>
-            <Grid2 size={{ xs: 4 }} >
+            <Grid2 size={{ xs: 4 }}>
               <DSMGrid
                 preferenceKey={"AGE_PartTime"}
                 isLoading={isLoading}
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: balanceByYearsPartTime?.response.results,
-                  columnDefs: [
-                    {
-                      headerName: columnDefsPartTime.headerName,
-                      children: columnDefsPartTime.children
-                    }
-                  ]
+                  columnDefs: columnDefsPartTime
                 }}
               />
             </Grid2>

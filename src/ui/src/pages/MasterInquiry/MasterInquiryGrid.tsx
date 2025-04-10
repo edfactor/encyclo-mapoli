@@ -10,7 +10,7 @@ import { paymentTypeGetNumberMap, memberTypeGetNumberMap } from "./MasterInquiry
 interface MasterInquiryGridProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
-  handleSortChanged: (sort: ISortParams) => void;
+  //handleSortChanged: (sort: ISortParams) => void;
 }
 
 const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoaded, setInitialSearchLoaded }) => {
@@ -21,8 +21,8 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoad
     isSortDescending: true
   });
 
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const { masterInquiryData, masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [triggerSearch, { isFetching }] = useLazyGetProfitMasterInquiryQuery();
 
   const createMasterInquiryRequest = useCallback(
@@ -32,10 +32,10 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoad
       return {
         pagination: { skip, take: pageSize, sortBy, isSortDescending },
         ...(!!masterInquiryRequestParams.startProfitYear && {
-          startProfitYear: masterInquiryRequestParams.startProfitYear.getFullYear()
+          startProfitYear: masterInquiryRequestParams.startProfitYear
         }),
         ...(!!masterInquiryRequestParams.endProfitYear && {
-          endProfitYear: masterInquiryRequestParams.endProfitYear.getFullYear()
+          endProfitYear: masterInquiryRequestParams.endProfitYear
         }),
         ...(!!masterInquiryRequestParams.startProfitMonth && {
           startProfitMonth: masterInquiryRequestParams.startProfitMonth
@@ -101,7 +101,7 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoad
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`Master Inquiry (${masterInquiryData?.inquiryResults.total || 0})`}
+              {`Master Inquiry (${masterInquiryData?.inquiryResults.total || 0} ${masterInquiryData?.inquiryResults.total === 1 ? "Record" : "Records"})`}
             </Typography>
           </div>
           <DSMGrid

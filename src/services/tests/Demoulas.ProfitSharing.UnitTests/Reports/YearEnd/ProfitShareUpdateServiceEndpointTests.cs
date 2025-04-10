@@ -2,6 +2,7 @@
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -99,7 +100,7 @@ public class ProfitShareUpdateServiceEndpointTests : ApiTestBase<Program>
     }
 
 #pragma warning disable AsyncFixer01
-  
+
     [Fact]
     public async Task Verify_bene_gets_earnings()
     {
@@ -107,13 +108,8 @@ public class ProfitShareUpdateServiceEndpointTests : ApiTestBase<Program>
         const decimal currentBalance = 10_000m;
         await SetupBeneficiary(currentBalance);
 
-        ProfitShareUpdateRequest req = new()
-        {
-            ProfitYear = ProfitYear,
-            ContributionPercent = 0,
-            IncomingForfeitPercent = 0,
-            EarningsPercent = 6.7m
-        };
+        ProfitShareUpdateRequest req = new() { ProfitYear = ProfitYear, ContributionPercent = 0, IncomingForfeitPercent = 0, EarningsPercent = 6.7m };
+        decimal earningsExpected = ProfitShareEditServiceEndpointTests.ComputeBeneficiaryEarnings(currentBalance, req.EarningsPercent);
 
         // ACT
         ProfitShareUpdateResponse response = await _endpoint.GetResponse(req, CancellationToken.None);
@@ -123,7 +119,7 @@ public class ProfitShareUpdateServiceEndpointTests : ApiTestBase<Program>
         memberCount.Should().Be(1); // should be just 1 bene
         ProfitShareUpdateMemberResponse profitShareUpdateMember = response.Response.Results.First();
         profitShareUpdateMember.Contributions.Should().Be(0);
-        profitShareUpdateMember.AllEarnings.Should().Be(currentBalance*0.067m);
+        profitShareUpdateMember.AllEarnings.Should().Be(earningsExpected);
         profitShareUpdateMember.IncomingForfeitures.Should().Be(0);
     }
 
@@ -141,6 +137,7 @@ public class ProfitShareUpdateServiceEndpointTests : ApiTestBase<Program>
             foreach (PayProfit ppi in ppr)
             {
                 ppi.ProfitYear = 3000;
+                ppi.Demographic!.Ssn = 4;
                 ppi.EnrollmentId = Enrollment.Constants.NotEnrolled; /*0*/
             }
 
@@ -148,52 +145,25 @@ public class ProfitShareUpdateServiceEndpointTests : ApiTestBase<Program>
             foreach (var pdx in ctx.ProfitDetails)
             {
                 pdx.ProfitYear = 3000;
+                pdx.Ssn = 4;
                 pdx.YearsOfServiceCredit = 0;
-            }
-
-            // This knocks out all the bene's.   Why does this not have async nonsense?
-            foreach (var bb in ctx.Beneficiaries)
-            {
-                bb.Amount = 0;
             }
 
             // Now we move 1 bene back in.
             Beneficiary b = await ctx.Beneficiaries.Include(b => b.Contact).FirstAsync(CancellationToken.None);
-            b.Amount = currentBalance; // NOTE:::: This should not be used.
             b.Contact!.Ssn = 7;
 
-            // NOTE::: This should be how the bene gets initial amount
-            #if false
             var pd = await ctx.ProfitDetails.FirstAsync(CancellationToken.None);
             pd.Ssn = 7;
             pd.ProfitYear = 2000;
-            pd.ProfitYearIteration = 0;
-            pd.DistributionSequence = 0;
-            pd.ProfitCode = ProfitCode.Constants.IncomingContributions;
+            pd.ProfitCode = ProfitCode.Constants.IncomingQdroBeneficiary;
             pd.ProfitCodeId = 6;
             pd.Contribution = currentBalance;
             pd.Earnings = 0;
             pd.Forfeiture = 0;
-            pd.MonthToDate = 1; // Drop this
-            pd.YearToDate = 2000; // Drop this
-            pd.Remark = null;
-            pd.ZeroContributionReasonId = null;
-            pd.ZeroContributionReason = null;
-            pd.FederalTaxes = 0m;
-            pd.StateTaxes = 0m;
-            pd.TaxCode = null;
-            pd.TaxCodeId = null;
-            pd.CommentTypeId = null;
-            pd.CommentType = null;
-            pd.CommentRelatedCheckNumber = null;
-            pd.CommentRelatedState = null;
-            pd.CommentRelatedOracleHcmId = null;
-            pd.CommentRelatedPsnSuffix = null;
-            pd.CommentIsPartialTransaction = null;
-            #endif
+            pd.CommentRelatedOracleHcmId = 0;
 
             await ctx.SaveChangesAsync(CancellationToken.None);
-
         });
     }
 }

@@ -11,39 +11,36 @@ using Demoulas.ProfitSharing.Security;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 
-namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.PostFrozen
+namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.PostFrozen;
+
+public class ProfitSharingUnder21TotalsEndpoint: Endpoint<ProfitYearRequest, ProfitSharingUnder21TotalsResponse>
 {
-    public class ProfitSharingUnder21TotalsEndpoint: Endpoint<ProfitYearRequest, ProfitSharingUnder21TotalsResponse>
+    private readonly IPostFrozenService _postFrozenService;
+
+    public ProfitSharingUnder21TotalsEndpoint(IPostFrozenService postFrozenService): base()
     {
-        private readonly IPostFrozenService _postFrozenService;
+        _postFrozenService = postFrozenService;
+    }
 
-        public ProfitSharingUnder21TotalsEndpoint(IPostFrozenService postFrozenService): base()
+    public override void Configure()
+    {
+        Get("post-frozen/totals");
+        Summary(s =>
         {
-            _postFrozenService = postFrozenService;
-        }
-
-        public override void Configure()
-        {
-            Get("post-frozen/totals");
-            Summary(s =>
+            s.Summary = "Totals lines for under 21 reports";
+            s.Description = "Produces a series of totals related to participants under 21";
+            s.ExampleRequest = ProfitYearRequest.RequestExample();
+            s.ResponseExamples = new Dictionary<int, object>
             {
-                s.Summary = "Totals lines for under 21 reports";
-                s.Description = "Produces a series of totals related to participants under 21";
-                s.ExampleRequest = ProfitYearRequest.RequestExample();
-                s.ResponseExamples = new Dictionary<int, object>
-                {
-                    {200,  ProfitSharingUnder21TotalsResponse.SampleResponse()}
-                };
-                s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
-            });
-            Group<YearEndGroup>();
-        }
+                {200,  ProfitSharingUnder21TotalsResponse.SampleResponse()}
+            };
+            s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
+        });
+        Group<YearEndGroup>();
+    }
 
-        public async override Task<ProfitSharingUnder21TotalsResponse> ExecuteAsync(ProfitYearRequest req, CancellationToken ct)
-        {
-            var response = await _postFrozenService.GetUnder21Totals(req, ct);
-
-            return response;
-        }
+    public override Task<ProfitSharingUnder21TotalsResponse> ExecuteAsync(ProfitYearRequest req, CancellationToken ct)
+    {
+        return _postFrozenService.GetUnder21Totals(req, ct);
     }
 }

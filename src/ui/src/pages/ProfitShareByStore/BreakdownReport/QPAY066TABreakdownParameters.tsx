@@ -1,16 +1,21 @@
-import { MenuItem, Select, TextField, FormLabel } from "@mui/material";
+import { MenuItem, Select, TextField, FormLabel, Checkbox, FormControlLabel } from "@mui/material";
 import Grid2 from '@mui/material/Grid2';
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, useWatch } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { setBreakdownByStoreQueryParams } from "reduxstore/slices/yearsEndSlice";
 
 interface BreakdownSearchParams {
     store?: string;
     employeeStatus?: string;
     badgeId?: string;
     employeeName?: string;
+    under21Only?: boolean;
+    sortBy: string;
+    isSortDescending: boolean;
 }
 
 interface OptionItem {
@@ -22,7 +27,10 @@ const schema = yup.object().shape({
     store: yup.string(),
     employeeStatus: yup.string(),
     badgeId: yup.string(),
-    employeeName: yup.string()
+    employeeName: yup.string(),
+    under21Only: yup.boolean(),
+    sortBy: yup.string(),
+    isSortDescending: yup.boolean()
 });
 
 interface QPAY066TABreakdownParametersProps {
@@ -34,14 +42,7 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
     activeTab,
     onStoreChange
 }) => {
-    const [stores] = useState<OptionItem[]>([
-        { id: '3', label: '3 - [City, State]' },
-        { id: '4', label: '4 - [City, State]' },
-        { id: '5', label: '5 - [City, State]' },
-        { id: '6', label: '6 - [City, State]' },
-        { id: '7', label: '7 - [City, State]' },
-        { id: '8', label: '8 - [City, State]' }
-    ]);
+    const dispatch = useDispatch();
     
     const [employeeStatuses] = useState<OptionItem[]>([
         { id: '700', label: '700 - Retired - Drawing Pension' },
@@ -56,31 +57,65 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
         control,
         handleSubmit,
         formState: { isValid },
-        reset
+        reset,
+        setValue,
+        watch
     } = useForm<BreakdownSearchParams>({
         resolver: yupResolver(schema),
         defaultValues: {
-            store: '',
+            store: '700',
             employeeStatus: '',
             badgeId: '',
-            employeeName: ''
+            employeeName: '',
+            under21Only: false,
+            sortBy: 'badgeNumber',
+            isSortDescending: true
         }
     });
+
+    const employeeStatus = useWatch({
+        control,
+        name: "employeeStatus"
+    });
+
+    useEffect(() => {
+        if (employeeStatus && employeeStatus !== '') {
+            setValue('store', employeeStatus);
+            if (onStoreChange) {
+                onStoreChange(employeeStatus);
+            }
+        }
+    }, [employeeStatus, setValue, onStoreChange]);
 
     const validateAndSubmit = handleSubmit((data) => {
         if (isValid) {
             if (onStoreChange && data.store) {
                 onStoreChange(data.store);
             }
+            
+            dispatch(setBreakdownByStoreQueryParams({
+                profitYear: 2024,
+                storeNumber: data.store,
+                under21Only: data.under21Only,
+                pagination: {
+                    take: 255,
+                    skip: 0,
+                    sortBy: data.sortBy,
+                    isSortDescending: data.isSortDescending,
+                }
+            }));
         }
     });
 
     const handleReset = () => {
         reset({
-            store: '3',
-            employeeStatus: '700',
+            store: '700',
+            employeeStatus: '',
             badgeId: '',
-            employeeName: ''
+            employeeName: '',
+            under21Only: false,
+            sortBy: 'badgeNumber',
+            isSortDescending: true
         });
     };
 
@@ -105,27 +140,21 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
                         control={control}
                         render={({ field }) => (
                             <>
-                                <FormLabel htmlFor="store-select" sx={{ display: 'block', marginBottom: '8px' }}>
+                                <FormLabel htmlFor="store-input" sx={{ display: 'block', marginBottom: '8px' }}>
                                     Store
                                 </FormLabel>
-                                <Select
-                                    id="store-select"
+                                <TextField
+                                    id="store-input"
                                     {...field}
                                     size="small"
                                     fullWidth
                                     onChange={(e) => {
                                         field.onChange(e);
                                         if (onStoreChange) {
-                                            onStoreChange(e.target.value as string);
+                                            onStoreChange(e.target.value);
                                         }
                                     }}
-                                >
-                                    {stores.map((store) => (
-                                        <MenuItem key={store.id} value={store.id}>
-                                            {store.label}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
+                                />
                             </>
                         )}
                     />
@@ -198,6 +227,24 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
                                             fullWidth
                                         />
                                     </>
+                                )}
+                            />
+                        </Grid2>
+                        
+                        <Grid2 size={getGridSizes()}>
+                            <Controller
+                                name="under21Only"
+                                control={control}
+                                render={({ field }) => (
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                {...field}
+                                                checked={field.value}
+                                            />
+                                        }
+                                        label="Under 21 Only"
+                                    />
                                 )}
                             />
                         </Grid2>

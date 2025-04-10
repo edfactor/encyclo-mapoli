@@ -18,9 +18,11 @@ type MyProps = {
   ref?: React.ForwardedRef<unknown>;
   views?: Array<"year" | "month" | "day">;
   disabled?: boolean;
+  minDate?: Date | null;
+  maxDate?: Date | null;
 };
 
-const DsmDatePicker: FC<MyProps> = ({ error, views, onChange, value, disableFuture, required, label, ref, id, disabled }) => {
+const DsmDatePicker: FC<MyProps> = ({ error, views, onChange, value, disableFuture, required, label, ref, id, disabled, minDate, maxDate }) => {
   const isInvalid = error ? error?.length > 0 : false;
   const isYearOnly = views?.length === 1 && views[0] === "year";
 
@@ -100,6 +102,8 @@ const DsmDatePicker: FC<MyProps> = ({ error, views, onChange, value, disableFutu
           disableFuture={disableFuture}
           value={value}
           disabled={disabled}
+          minDate={minDate || undefined}
+          maxDate={maxDate || undefined}
         />
       </LocalizationProvider>
       {!!error && <FormHelperText error>{error}</FormHelperText>}

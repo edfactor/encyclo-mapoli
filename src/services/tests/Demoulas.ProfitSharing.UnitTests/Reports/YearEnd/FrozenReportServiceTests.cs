@@ -124,9 +124,28 @@ public class FrozenReportServiceTests : ApiTestBase<Program>
     [Fact(DisplayName = "Update Summary Report - PS-394")]
     public async Task UpdateSummaryReportTests()
     {
+        //Setup data
+        int demoSsn = 0;
+        int demoBadgeNumber = 0;
+
+        _ = MockDbContextFactory.UseWritableContext(async ctx =>
+        {
+            var demoTest = await ctx.Demographics.FirstAsync(CancellationToken.None);
+            demoSsn = demoTest.Ssn;
+            demoBadgeNumber = demoTest.BadgeNumber;
+            var pdArray = await ctx.ProfitDetails.Where(x => x.Ssn == demoTest.Ssn).ToArrayAsync(CancellationToken.None);
+
+            foreach (var pd in pdArray) {
+                pd.Contribution = 2500;
+                pd.Earnings = 120;
+                pd.Forfeiture = 0;
+                pd.YearsOfServiceCredit = 1;
+            }
+        });
+
         //Check unauthorized
         var request = new ProfitYearRequest() { ProfitYear = 2023, Skip = 0, Take = 255 };
-        var response = await ApiClient.GETAsync<UpdateSummaryReportEndpoint, ProfitYearRequest, UpdateSummaryReportResponse>(request);
+    var response = await ApiClient.GETAsync<UpdateSummaryReportEndpoint, ProfitYearRequest, UpdateSummaryReportResponse>(request);
 
         response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
 
@@ -134,6 +153,6 @@ public class FrozenReportServiceTests : ApiTestBase<Program>
         response = await ApiClient.GETAsync<UpdateSummaryReportEndpoint, ProfitYearRequest, UpdateSummaryReportResponse>(request);
         response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
         response.Result.Should().NotBeNull();
-        response.Result.TotalAfterProfitSharingAmount.Should().Be(10849.41m);
+        response.Result.TotalAfterProfitSharingAmount.Should().Be(5240m);
     }
 }

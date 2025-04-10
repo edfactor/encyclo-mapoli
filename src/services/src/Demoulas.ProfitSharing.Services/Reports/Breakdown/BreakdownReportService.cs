@@ -1,4 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -69,7 +69,7 @@ public class BreakdownReportService : IBreakdownService
 
             HashSet<int> employeeSsns = employees.Select(pp => pp.Demographic!.Ssn).ToHashSet();
 
-            Dictionary<int, decimal> employeeVestingRatios = await _totalService
+            Dictionary<int, decimal?> employeeVestingRatios = await _totalService
                 .GetVestingRatio(ctx, breakdownByStoreRequest.ProfitYear, calInfo.FiscalEndDate)
                 .Where(vr => employeeSsns.Contains(vr.Ssn ?? 0))
                 .ToDictionaryAsync(vr => vr.Ssn ?? 0, vr => vr.Ratio, cancellationToken);
@@ -80,17 +80,17 @@ public class BreakdownReportService : IBreakdownService
             }
 
             Dictionary<int, decimal> endingBalanceLastYearBySsn = await _totalService.GetTotalBalanceSet(ctx, priorYear)
-                .Where(tbs => employeeSsns.Contains(tbs.Ssn))
-                .ToDictionaryAsync(tbs => tbs.Ssn, tbs => tbs.Total ?? 0, cancellationToken);
+                .Where(tbs => employeeSsns.Contains(tbs.Ssn!.Value))
+                .ToDictionaryAsync(tbs => tbs.Ssn!.Value, tbs => tbs.Total ?? 0, cancellationToken);
 
-            Dictionary<int, InternalProfitDetailDto> txnsForProfitYear = await TotalService.GetTransactionsBySsnForProfitYear(ctx, breakdownByStoreRequest.ProfitYear)
+            Dictionary<int, InternalProfitDetailDto> txnsForProfitYear = await TotalService.GetTransactionsBySsnForProfitYearForOracle(ctx, breakdownByStoreRequest.ProfitYear)
                 .Where(txns => employeeSsns.Contains(txns.Ssn))
                 .ToDictionaryAsync(txns => txns.Ssn, txns => txns, cancellationToken);
 
             return employees
                 .Select(employee =>
                 {
-                    decimal vestingRatio = employeeVestingRatios.GetValueOrDefault(employee.Demographic!.Ssn);
+                    decimal vestingRatio = employeeVestingRatios.GetValueOrDefault(employee.Demographic!.Ssn) ?? 0;
                     decimal beginningBalance = endingBalanceLastYearBySsn.GetValueOrDefault(employee.Demographic!.Ssn);
                     Demographic d = employee.Demographic!;
                     InternalProfitDetailDto txns = txnsForProfitYear.GetValueOrDefault(employee.Demographic!.Ssn) ?? new InternalProfitDetailDto();
@@ -161,7 +161,7 @@ public class BreakdownReportService : IBreakdownService
         return "STORE MANAGEMENT";
     }
 
-    public readonly static short ASSOCIATE_SORT_RANK_1999 = 1999;
+    public static readonly short ASSOCIATE_SORT_RANK_1999 = 1999;
 
     private static short EmployeeSortRank(short? requestedStoreNumber, byte departmentId, byte payClassificationId)
     {

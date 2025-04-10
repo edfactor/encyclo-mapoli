@@ -51,4 +51,9 @@ public sealed class YearEndService: IYearEndService
             _ = await ctx.SaveChangesAsync(ct);
         }, ct);
     }
+
+    public Task UpdateEnrollmentId(short profitYear, CancellationToken ct)
+    {
+        return _payProfitUpdateService.SetEnrollmentId(profitYear, ct);
+    }
 }

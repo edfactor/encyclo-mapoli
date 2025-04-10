@@ -25,8 +25,8 @@ export const GetEligibleEmployeesColumns = (): ColDef[] => {
     },
     {
       headerName: "Assignment ID",
-      field: "oracleHcmId",
-      colId: "oracleHcmId",
+      field: "departmentId",
+      colId: "departmentId",
       minWidth: 150,
       headerClass: "left-align",
       cellClass: "left-align",
@@ -34,8 +34,17 @@ export const GetEligibleEmployeesColumns = (): ColDef[] => {
       valueFormatter: (params) => {
         const name = params.data.department; // assuming 'statusName' is in the row data
         const id = params.data.departmentId; // assuming 'status' is in the row data
-        return `${name} (${id})`;
+        return `[${id}] ${name}`;
       }
+    },
+    {
+      headerName: "Store",
+      field: "storeNumber",
+      colId: "storeNumber",
+      minWidth: 150,
+      headerClass: "left-align",
+      cellClass: "left-align",
+      resizable: true
     }
   ];
 };

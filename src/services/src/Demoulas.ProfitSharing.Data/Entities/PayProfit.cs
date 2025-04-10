@@ -38,21 +38,6 @@ public sealed class PayProfit
     public required decimal Etva { get; set; }
 
     /// <summary>
-    /// earnings on the ETVA value 
-    /// </summary>
-    public required decimal EarningsEtvaValue { get; set; }
-
-    /// <summary>
-    /// secondary earnings
-    /// </summary>
-    public decimal? SecondaryEarnings { get; set; }
-
-    /// <summary>
-    /// secondary ETVA earnings 
-    /// </summary>
-    public decimal? SecondaryEtvaEarnings { get; set; }
-
-    /// <summary>
     /// Number of weeks worked in the current year
     /// </summary>
     public byte WeeksWorkedYear { get; set; }
@@ -102,7 +87,6 @@ public sealed class PayProfit
     /// Points Earned (for the ProfitYear).
     /// </summary>
     public decimal? PointsEarned { get; set; }
-
-
+    
     public Demographic? Demographic { get; set; }
 }

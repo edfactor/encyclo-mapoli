@@ -20,7 +20,7 @@ const ProfitShareReportGrid: React.FC<ProfitShareReportGridSearchProps> = ({
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "Badge",
+    sortBy: "badgeNumber",
     isSortDescending: false
   });
 
@@ -45,32 +45,23 @@ const ProfitShareReportGrid: React.FC<ProfitShareReportGridSearchProps> = ({
       includeEmployeesWithPriorProfitSharingAmounts: true,
       includeEmployeesWithNoPriorProfitSharingAmounts: true,
       profitYear: yearEndProfitSharingReportQueryParams?.profitYear ?? 0,
-      pagination: { skip: pageNumber * pageSize, take: pageSize },
+      pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: sortParams.sortBy, isSortDescending: sortParams.isSortDescending },
       includeEmployeesTerminatedThisYear: false,
       includeTerminatedEmployees: false,
       includeBeneficiaries: false
     };
 
     await triggerSearch(request, false);
-  }, [pageNumber, pageSize, triggerSearch, yearEndProfitSharingReportQueryParams?.profitYear]);
+  }, [pageNumber, pageSize, triggerSearch, sortParams, sortEventHandler, yearEndProfitSharingReportQueryParams?.profitYear]);
 
   useEffect(() => {
     if (initialSearchLoaded) {
       onSearch();
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, onSearch]);
+  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch]);
 
   return (
     <>
-      {!!yearEndProfitSharingReport && (
-        <div style={{ padding: "0 24px 0 24px" }}>
-          <Typography
-            variant="h2"
-            sx={{ color: "#0258A5" }}>
-            {`${CAPTIONS.PROFIT_SHARE_REPORT} (${yearEndProfitSharingReport.response.total || 0})`}
-          </Typography>
-        </div>
-      )}
       {!!yearEndProfitSharingReport && (
         <DSMGrid
           preferenceKey={"ProfitShareReportGrid"}

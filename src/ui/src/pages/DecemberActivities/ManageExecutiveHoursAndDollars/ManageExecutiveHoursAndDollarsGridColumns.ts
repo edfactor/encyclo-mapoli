@@ -19,7 +19,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber)
     },
     {
-      headerName: "Employee Name",
+      headerName: "Name",
       field: "fullName",
       colId: "fullName",
       minWidth: 120,
@@ -28,7 +28,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       resizable: true
     },
     {
-      headerName: "STR",
+      headerName: "Store",
       field: "storeNumber",
       colId: "storeNumber",
       minWidth: 120,
@@ -67,7 +67,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       valueFormatter: agGridNumberToCurrency
     },
     {
-      headerName: "ORA HRS LAST",
+      headerName: "Oracle Hours",
       field: "currentHoursYear",
       colId: "currentHoursYear",
       minWidth: 150,
@@ -76,7 +76,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       resizable: true
     },
     {
-      headerName: "ORA DOLS LAST",
+      headerName: "Oracle Dollars",
       field: "currentIncomeYear",
       colId: "currentIncomeYear",
       minWidth: 150,
@@ -86,16 +86,21 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       valueFormatter: agGridNumberToCurrency
     },
     {
-      headerName: "FREQ",
+      headerName: "Pay Frequency",
       field: "payFrequencyId",
       colId: "payFrequencyId",
       minWidth: 150,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true
+      resizable: true,
+      valueFormatter: (params) => {
+        const id = params.data?.payFrequencyId; // assuming 'status' is in the row data
+        const name = params.data?.payFrequencyName; // assuming 'statusName' is in the row data        
+        return `[${id}] ${name}`;
+      }
     },
     {
-      headerName: "STATUS",
+      headerName: "Employment Status",
       field: "employmentStatusId",
       colId: "employmentStatusId",
       minWidth: 150,
@@ -103,28 +108,9 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       cellClass: "left-align",
       resizable: true,
       valueFormatter: (params) => {
-        switch (params.value) {
-          case "i": {
-            //statements;
-            return "Inactive";
-          }
-          case "a": {
-            //statements;
-            return "Active";
-          }
-          case "t": {
-            //statements;
-            return "Terminated";
-          }
-          case "d": {
-            //statements;
-            return "Delete";
-          }
-          default: {
-            //statements;
-            return "N/A";
-          }
-        }
+        const id = params.data?.employmentStatusId; // assuming 'status' is in the row data
+        const name = params.data?.employmentStatusName; // assuming 'statusName' is in the row data        
+        return `[${id}] ${name}`;
       }
     }
   ];

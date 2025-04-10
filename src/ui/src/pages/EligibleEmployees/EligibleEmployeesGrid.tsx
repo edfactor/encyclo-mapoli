@@ -16,9 +16,9 @@ const EligibleEmployeesGrid: React.FC<EligibleEmployeesGridProps> = ({
   setInitialSearchLoaded
 }) => {
   const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "Badge",
+    sortBy: "badgeNumber",
     isSortDescending: false
   });
 
@@ -52,7 +52,7 @@ const EligibleEmployeesGrid: React.FC<EligibleEmployeesGridProps> = ({
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`PROFIT-ELIGIBLE REPORT (${eligibleEmployees?.response.total || 0})`}
+              {`PROFIT-ELIGIBLE REPORT (${eligibleEmployees?.response.total || 0} records)`}
             </Typography>
           </div>
           <DSMGrid

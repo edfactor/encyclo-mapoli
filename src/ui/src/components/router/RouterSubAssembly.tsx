@@ -18,8 +18,8 @@ import ProfitShareReportFinalRun from "pages/FiscalFlow/ProfitShareReportFinalRu
 import Forfeit from "pages/Forfeit/Forfeit";
 import FrozenSummary from "pages/FrozenSummary/FrozenSummary";
 import MasterInquiry from "pages/MasterInquiry/MasterInquiry";
-import MilitaryAndRehireForfeitures from "pages/MilitaryAndRehireForfeitures/MilitaryAndRehireForfeitures";
-import MilitaryEntryAndModification from "pages/MilitaryEntryAndModification/MilitaryEntryAndModification";
+import RehireForfeitures from "pages/DecemberActivities/RehireForfeitures/RehireForfeitures";
+import MilitaryEntryAndModification from "pages/DecemberActivities/MilitaryEntryAndModification/MilitaryEntryAndModification";
 import EighteenToTwenty from "pages/PAY426Reports/PAY426-1/EighteenToTwenty";
 import Beneficiaries from "pages/PAY426Reports/PAY426-10/Beneficiaries";
 import TwentyOnePlus from "pages/PAY426Reports/PAY426-2/TwentyOnePlus";
@@ -40,9 +40,10 @@ import QPAY066TA from "pages/ProfitShareByStore/BreakdownReport/QPAY066TA";
 import NewPSLabels from "pages/ProfitShareByStore/NewPSLabels";
 import ProfitShareByStore from "pages/ProfitShareByStore/ProfitShareByStore";
 import Under21Report from "pages/ProfitShareByStore/Under21Report";
-import Under21TA from "pages/ProfitShareByStore/Under21TA";
+import Under21TA from "pages/ProfitShareByStore/Under21/Under21TA";
 import ProfitShareGrossReport from "pages/ProfitShareGrossReport/ProfitShareGrossReport";
 import ProfitShareReport from "pages/ProfitShareReport/ProfitShareReport";
+import ProfitShareTotals426 from "pages/ProfitShareTotals426/ProfitShareTotals426";
 import FiscalFlow from "pages/YearEndFlow/YearEndFlow";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -58,7 +59,7 @@ import BalanceByAge from "../../pages/PROF130/BalanceByAge/BalanceByAge";
 import ContributionsByAge from "../../pages/PROF130/ContributionsByAge/ContributionsByAge";
 import DistributionByAge from "../../pages/PROF130/DistributionByAge/DistributionByAge";
 import ForfeituresByAge from "../../pages/PROF130/ForfeituresByAge/ForfeituresByAge";
-import ProfitShareUpdate from "../../pages/ProfitShareUpdate/ProfitShareUpdate";
+import ProfitShareEditUpdate from "../../pages/ProfitShareEditUpdate/ProfitShareEditUpdate";
 import YTDWages from "../../pages/YTDWagesExtract/YTDWages";
 import RouteSecurity from "./RouteSecurity";
 
@@ -179,7 +180,7 @@ const RouterSubAssembly: React.FC = () => {
                 element={<EmployeesOnMilitaryLeave />}></Route>
               <Route
                 path={ROUTES.REHIRE_FORFEITURES}
-                element={<MilitaryAndRehireForfeitures />}></Route>
+                element={<RehireForfeitures />}></Route>
               <Route
                 path={ROUTES.DISTRIBUTIONS_AND_FORFEITURES}
                 element={<DistributionsAndForfeitures />}></Route>
@@ -219,9 +220,7 @@ const RouterSubAssembly: React.FC = () => {
               <Route
                 path={ROUTES.VESTED_AMOUNTS_BY_AGE}
                 element={<VestedAmountsByAge />}></Route>
-              <Route
-                path={ROUTES.DECEMBER_PROCESS_ACCORDION}
-                element={<DecemberProcessAccordion />}></Route>
+             
               <Route
                 path={ROUTES.PROF_TERM}
                 element={<Termination />}></Route>
@@ -232,14 +231,14 @@ const RouterSubAssembly: React.FC = () => {
                 path={ROUTES.PROFIT_SHARE_REPORT}
                 element={<ProfitShareReport />}></Route>
               <Route
+                path={ROUTES.PROFIT_SHARE_TOTALS}
+                element={<ProfitShareTotals426 />}></Route>
+              <Route
                 path="forfeit/:badgeNumber?"
                 element={<Forfeit />}></Route>
               <Route
                 path={ROUTES.FISCAL_CLOSE}
-                element={<FiscalFlow />}></Route>
-              <Route
-                path={ROUTES.PROFIT_SHARE_REPORT}
-                element={<ProfitShareReport />}></Route>
+                element={<></>}></Route>
               <Route
                 path={ROUTES.PROFIT_SHARE_REPORT_EDIT_RUN}
                 element={<ProfitShareReportEditRun />}></Route>
@@ -248,13 +247,13 @@ const RouterSubAssembly: React.FC = () => {
                 element={<ProfitShareReportFinalRun />}></Route>
               <Route
                 path={ROUTES.PROFIT_SHARE_UPDATE}
-                element={<ProfitShareUpdate />}></Route>
+                element={<ProfitShareEditUpdate />}></Route>
               <Route
                 path={ROUTES.PAY426_ACTIVE_18_20}
                 element={<EighteenToTwenty />}></Route>
               <Route
                 path=""
-                element={<DecemberProcessAccordion />}></Route>
+                element={<></>}></Route>
               <Route
                 path={ROUTES.PROFIT_SHARE_BY_STORE}
                 element={<ProfitShareByStore />}></Route>

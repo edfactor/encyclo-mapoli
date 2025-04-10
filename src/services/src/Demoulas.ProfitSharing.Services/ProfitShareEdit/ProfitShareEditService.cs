@@ -1,4 +1,5 @@
-﻿using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Request;
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -28,7 +29,7 @@ public class ProfitShareEditService : IInternalProfitShareEditService
 
     public async Task<ProfitShareEditResponse> ProfitShareEdit(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
-        var records = await ProfitShareEditRecords(profitShareUpdateRequest, cancellationToken);
+        var (records, beginningBalanceTotal, contributionGrandTotal, incomingForfeitureGrandTotal, earningsGrandTotal) = await ProfitShareEditRecords(profitShareUpdateRequest, cancellationToken);
         var responseRecords = records.Select(m => new ProfitShareEditMemberRecordResponse
         {
             IsEmployee = false,
@@ -50,17 +51,45 @@ public class ProfitShareEditService : IInternalProfitShareEditService
         {
             ReportName = "Profit Sharing Edit",
             ReportDate = DateTimeOffset.Now,
-            BeginningBalance = 1,
-            ContributionGrandTotal = 2,
-            IncomingForfeitureGrandTotal = 3,
-            EarningsGrandTotal = 4,
-            Response = new PaginatedResponseDto<ProfitShareEditMemberRecordResponse> { Results = responseRecords }
+            BeginningBalanceTotal = beginningBalanceTotal,
+            ContributionGrandTotal = contributionGrandTotal,
+            IncomingForfeitureGrandTotal = incomingForfeitureGrandTotal,
+            EarningsGrandTotal = earningsGrandTotal,
+            Response = new PaginatedResponseDto<ProfitShareEditMemberRecordResponse>(profitShareUpdateRequest)
+            {
+                Total = records.Count(),
+                Results =  HandleInMemorySortAndPaging(profitShareUpdateRequest, responseRecords)
+            }
         };
     }
 
-    public async Task<IEnumerable<ProfitShareEditMemberRecord>> ProfitShareEditRecords(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
+public static List<T> HandleInMemorySortAndPaging<T>(SortedPaginationRequestDto sortedPaginationRequest, List<T> rows)
+    {
+        string sortBy = sortedPaginationRequest.SortBy ?? "Name";
+        bool isDescending = sortedPaginationRequest.IsSortDescending ?? false;
+
+        var property = typeof(T).GetProperty(sortBy);
+        if (property == null)
+        {
+            throw new ArgumentException($"Property '{sortBy}' not found on type {typeof(T).Name}");
+        }
+
+        rows = isDescending
+            ? rows.OrderByDescending(m => property.GetValue(m, null)).ToList()
+            : rows.OrderBy(m => property.GetValue(m, null)).ToList();
+
+        return rows.Skip(sortedPaginationRequest.Skip ?? 0).Take(sortedPaginationRequest.Take ?? 25).ToList();
+    }
+
+
+    public async Task<(IEnumerable<ProfitShareEditMemberRecord>, decimal BeginningBalanceTotal, decimal ContributionGrandTotal, decimal IncomingForfeitureGrandTotal, decimal EarningsGrandTotal)> ProfitShareEditRecords(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
         ProfitShareUpdateResult psur = await _profitShareUpdateService.ProfitShareUpdateInternal(profitShareUpdateRequest, cancellationToken);
+
+        var beginningBalanceTotal = 0m;
+        var contributionGrandTotal = 0m;
+        var incomingForfeitureGrandTotal = 0m;
+        var earningsGrandTotal = 0m;
 
         List<ProfitShareEditMemberRecord> records = new();
         foreach (var member in psur.Members)
@@ -73,8 +102,14 @@ public class ProfitShareEditService : IInternalProfitShareEditService
             {
                 AddBeneficiaryRecords(records, member);
             }
+
+            beginningBalanceTotal += member.BeginningAmount;
+            contributionGrandTotal += member.Contributions;
+            incomingForfeitureGrandTotal += member.IncomingForfeitures;
+            earningsGrandTotal += member.AllEarnings;
         }
-        return records;
+
+        return (records, beginningBalanceTotal, contributionGrandTotal, incomingForfeitureGrandTotal, earningsGrandTotal);
     }
 
     private static void AddEmployeeRecords(List<ProfitShareEditMemberRecord> records, ProfitShareUpdateMember member)

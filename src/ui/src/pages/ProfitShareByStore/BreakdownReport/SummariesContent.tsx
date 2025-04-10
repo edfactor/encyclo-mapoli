@@ -1,7 +1,6 @@
 import { Typography } from "@mui/material";
+import Grid2 from "@mui/material/Grid2";
 import { DSMGrid } from "smart-ui-library";
-import { useMemo } from "react";
-import Grid2 from '@mui/material/Grid2';
 
 interface SummariesContentProps {
   store: string;
@@ -148,8 +147,7 @@ const SummariesContent: React.FC<SummariesContentProps> = ({ store }) => {
     {
       headerName: "Total",
       field: "total",
-      width:
-      70
+      width: 70
     }
   ];
 
@@ -204,14 +202,17 @@ const SummariesContent: React.FC<SummariesContentProps> = ({ store }) => {
   const gridOptions = {
     getRowStyle: (params: any) => {
       if (params.node.rowPinned) {
-        return { background: '#f0f0f0', fontWeight: 'bold' };
+        return { background: "#f0f0f0", fontWeight: "bold" };
       }
       return undefined;
     }
   };
 
   return (
-    <Grid2 container direction="column" width="100%">
+    <Grid2
+      container
+      direction="column"
+      width="100%">
       <Grid2 paddingX="24px">
         <Typography
           variant="h2"
@@ -227,14 +228,16 @@ const SummariesContent: React.FC<SummariesContentProps> = ({ store }) => {
           providedOptions={{
             rowData: allEmployeesSampleData,
             columnDefs: allEmployeesColumnDefs,
-            domLayout: 'autoHeight',
-            pinnedBottomRowData: [allEmployeesGrandTotal],
+            domLayout: "autoHeight",
+            pinnedTopRowData: [allEmployeesGrandTotal],
             ...gridOptions
           }}
         />
       </Grid2>
 
-      <Grid2 style={{ marginTop: "32px" }} paddingX="24px">
+      <Grid2
+        style={{ marginTop: "32px" }}
+        paddingX="24px">
         <Typography
           variant="h2"
           sx={{ color: "#0258A5", marginBottom: "16px" }}>
@@ -249,8 +252,8 @@ const SummariesContent: React.FC<SummariesContentProps> = ({ store }) => {
           providedOptions={{
             rowData: under21EmployeesSampleData,
             columnDefs: under21EmployeesColumnDefs,
-            domLayout: 'autoHeight',
-            pinnedBottomRowData: [under21EmployeesGrandTotal],
+            domLayout: "autoHeight",
+            pinnedTopRowData: [under21EmployeesGrandTotal],
             ...gridOptions
           }}
         />
@@ -259,4 +262,4 @@ const SummariesContent: React.FC<SummariesContentProps> = ({ store }) => {
   );
 };
 
-export default SummariesContent; 
+export default SummariesContent;

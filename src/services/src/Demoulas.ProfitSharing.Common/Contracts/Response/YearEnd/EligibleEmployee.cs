@@ -7,6 +7,7 @@ public sealed record  EligibleEmployee {
     public required string FullName { get; set; }
     public byte DepartmentId { get; set; }
     public string? Department { get; set; }
+    public short StoreNumber { get; set; }
 
     public static EligibleEmployee Example()
     {

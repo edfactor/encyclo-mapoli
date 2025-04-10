@@ -1,5 +1,6 @@
 param (
-    [string]$url
+    [string]$url,
+    [string]$envServerName
 )
 
 if (-not $url) {
@@ -18,19 +19,23 @@ Write-Host "Base url: $url"
 Write-Host "Checking health at: $fullUrl"
 
 # Send a request to the /health endpoint with certificate validation skipped
-# SkipCertificateCheck Requires Powershell 7 or higher
 try {
-    $response = Invoke-WebRequest -Uri $fullUrl -Method GET -SkipCertificateCheck -UseBasicParsing
-    $content = $response.Content | ConvertFrom-Json
+    $Session = New-PSSession $envServerName
+    Invoke-Command -Session $Session -ScriptBlock {
+        param ($fullUrl)
 
-    if ($content.status -eq 'healthy') {
-        Write-Host "API is healthy."
-        exit 0
-    } else {
-        Write-Host "API health check failed: Unexpected status value."
-        exit 1
-    }
-} catch {
-    Write-Host "API health check failed: $_"
-    exit 1
-}
+        $response = Invoke-WebRequest -Uri $fullUrl -Method GET -UseBasicParsing
+        $content = $response.Content | ConvertFrom-Json
+
+      if ($content.status -eq 'Healthy') {
+          Write-Host "API is Healthy."
+          exit 0
+      } else {
+          Write-Host "API health check failed: Unexpected status value."
+          exit 1
+      }
+    } -ArgumentList $fullUrl
+  } catch {
+      Write-Host "API health check failed: $_"
+      exit 1
+  }

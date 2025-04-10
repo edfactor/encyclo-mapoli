@@ -10,6 +10,7 @@ import {
   ListItem,
   ListItemButton,
   ListItemText,
+  SelectChangeEvent,
   SvgIcon,
   Typography
 } from "@mui/material";
@@ -17,11 +18,20 @@ import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { clearActiveSubMenu, closeDrawer, openDrawer, setActiveSubMenu } from "reduxstore/slices/generalSlice";
+import {
+  checkDecemberParamsAndGridsProfitYears,
+  checkFiscalCloseParamsAndGridsProfitYears,
+  setSelectedProfitYearForDecemberActivities,
+  setSelectedProfitYearForFiscalClose
+} from "reduxstore/slices/yearsEndSlice";
 import { drawerTitle, menuLevels } from "../../MenuData";
-import { drawerClosedWidth, drawerOpenWidth } from "../../constants";
+import { drawerClosedWidth, drawerOpenWidth, MENU_LABELS } from "../../constants";
+import ProfitYearSelector from "components/ProfitYearSelector/ProfitYearSelector";
 
 import { SvgIconProps } from "@mui/material";
 import { RootState } from "reduxstore/store";
+import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 
 const SidebarIcon = (props: SvgIconProps) => (
   <SvgIcon
@@ -36,15 +46,37 @@ const SidebarIcon = (props: SvgIconProps) => (
 const PSDrawer = () => {
   const navigate = useNavigate();
   const { isDrawerOpen: drawerOpen, activeSubmenu } = useSelector((state: RootState) => state.general);
+  const { selectedProfitYearForDecemberActivities, selectedProfitYearForFiscalClose } = useSelector(
+    (state: RootState) => state.yearsEnd
+  );
   const [expandedLevels, setExpandedLevels] = useState<{ [key: string]: boolean }>({});
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
   const dispatch = useDispatch();
+  const profitYear = useDecemberFlowProfitYear();
+  const fiscalFlowProfitYear = useFiscalCloseProfitYear();
 
   const hasThirdLevel = (level: string, secondLevel: string) => {
     const hasSome = menuLevels.some(
       (l) => l.mainTitle === level && l.topPage.some((y) => y.topTitle === secondLevel && y.subPages.length > 0)
     );
     return hasSome;
+  };
+
+  // The format of the captions is New Report Name (Legacy Name)
+  const getNewReportName = (caption: string): string => {
+    if (!caption.includes("(")) {
+      return caption;
+    }
+    return caption.split(" (")[0];
+  };
+
+  // The format of the captions is New Report Name (Legacy Name)
+  const getLegacyReportName = (caption: string): string => {
+    const legacyReportName = caption.split(/[()]/)[1];
+    if (legacyReportName === caption) {
+      return "";
+    }
+    return legacyReportName;
   };
 
   const handleDrawerToggle = () => {
@@ -79,6 +111,16 @@ const PSDrawer = () => {
   const handleSubPageClick = (subRoute: string) => {
     navigate(`/${subRoute}`);
     console.log(`Sub page Navigating to ${subRoute}`);
+  };
+
+  const handleDecemberProfitYearChange = (event: SelectChangeEvent) => {
+    dispatch(setSelectedProfitYearForDecemberActivities(Number(event.target.value)));
+    dispatch(checkDecemberParamsAndGridsProfitYears(Number(event.target.value)));
+  };
+
+  const handleFiscalCloseProfitYearChange = (event: SelectChangeEvent) => {
+    dispatch(setSelectedProfitYearForFiscalClose(Number(event.target.value)));
+    dispatch(checkFiscalCloseParamsAndGridsProfitYears(Number(event.target.value)));
   };
 
   return (
@@ -183,6 +225,25 @@ const PSDrawer = () => {
                   {activeSubmenu}
                 </Typography>
               </ListItemButton>
+              {activeSubmenu === MENU_LABELS.DECEMBER_ACTIVITIES && (
+                <div style={{ padding: '24px' }}>
+                  <ProfitYearSelector
+                    selectedProfitYear={selectedProfitYearForDecemberActivities}
+                    handleChange={handleDecemberProfitYearChange}
+                    defaultValue={profitYear?.toString()}
+                  />
+                </div>
+              )}
+              
+              {activeSubmenu === MENU_LABELS.FISCAL_CLOSE && (
+                <div style={{ padding: '24px' }}>
+                  <ProfitYearSelector
+                    selectedProfitYear={selectedProfitYearForFiscalClose}
+                    handleChange={handleFiscalCloseProfitYearChange}
+                    defaultValue={fiscalFlowProfitYear?.toString()}
+                  />
+                </div>
+              )}
               <List>
                 {menuLevels
                   .find((l) => l.mainTitle === activeSubmenu)
@@ -208,7 +269,14 @@ const PSDrawer = () => {
                             }}>
                             <Box sx={{ display: "flex", alignItems: "center" }}>
                               <ListItemText
-                                primary={page.topTitle}
+                                primary={getNewReportName(page.topTitle)}
+                                secondary={getLegacyReportName(page.topTitle)}
+                                secondaryTypographyProps={{
+                                  sx: {
+                                    fontSize: "0.75rem",
+                                    color: (theme) => theme.palette.text.secondary
+                                  }
+                                }}
                                 sx={{
                                   margin: 0,
                                   "& .MuiTypography-root": {
@@ -240,7 +308,14 @@ const PSDrawer = () => {
                                   onClick={() => handleSubPageClick(subPage.subRoute ?? "")}>
                                   <Box sx={{ display: "flex", alignItems: "center" }}>
                                     <ListItemText
-                                      primary={subPage.subTitle}
+                                      primary={getNewReportName(subPage.subTitle || "")}
+                                      secondary={getLegacyReportName(subPage.subTitle || "")}
+                                      secondaryTypographyProps={{
+                                        sx: {
+                                          fontSize: "0.75rem",
+                                          color: (theme) => theme.palette.text.secondary
+                                        }
+                                      }}
                                       primaryTypographyProps={{
                                         variant: "body2"
                                       }}
@@ -253,7 +328,7 @@ const PSDrawer = () => {
                                     <Chip
                                       variant="outlined"
                                       label={"Not Started"}
-                                      color={"primary"}
+                                      className="text-gray-700 border-gray-700"
                                       size="small"
                                     />
                                   </Box>
@@ -276,7 +351,14 @@ const PSDrawer = () => {
                             }}>
                             <Box sx={{ display: "flex", alignItems: "center" }}>
                               <ListItemText
-                                primary={page.topTitle}
+                                primary={getNewReportName(page.topTitle || "")}
+                                secondary={getLegacyReportName(page.topTitle || "")}
+                                secondaryTypographyProps={{
+                                  sx: {
+                                    fontSize: "0.75rem",
+                                    color: (theme) => theme.palette.text.secondary
+                                  }
+                                }}
                                 sx={{
                                   margin: 0,
                                   "& .MuiTypography-root": {
@@ -289,7 +371,7 @@ const PSDrawer = () => {
                               <Chip
                                 variant="outlined"
                                 label={"Not Started"}
-                                color={"primary"}
+                                className="text-gray-700 border-gray-700"
                                 size="small"
                               />
                             </Box>

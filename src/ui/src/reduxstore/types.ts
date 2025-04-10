@@ -5,13 +5,26 @@ export enum ImpersonationRoles {
   DistributionsClerk = "Distributions-Clerk",
   HardshipAdministrator = "Hardship-Administrator",
   ProfitSharingAdministrator = "Profit-Sharing-Administrator",
-  ItOperations = "IT-Operations",
+  ItOperations = "IT-Operations"
 }
 
 export interface SortedPaginationRequestDto extends PaginationParams, ISortParams {}
 
 export interface ProfitYearRequest {
   profitYear: number;
+}
+
+export interface CalendarResponseDto {
+  fiscalBeginDate: string;
+  fiscalEndDate: string;
+}
+
+export interface FrozenProfitYearRequest extends ProfitYearRequest {
+  useFrozenData: boolean;
+}
+
+export interface ReportsByAgeParams extends ProfitYearRequest {
+  reportType: FrozenReportsByAgeRequestType;
 }
 
 export interface DemographicBadgesNotInPayprofitResponse {
@@ -30,7 +43,7 @@ export interface DemographicBadgesNotInPayprofit {
 }
 
 export interface DemographicBadgesNotInPayprofitRequestDto {
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface PagedReportResponse<T> {
@@ -43,14 +56,15 @@ export interface DistributionsAndForfeituresRequestDto extends ProfitYearRequest
   startMonth?: number;
   endMonth?: number;
   includeOutgoingForfeitures?: boolean;
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface DistributionsAndForfeitures {
   badgeNumber: number;
+  psnSuffix: number;
   employeeName: string;
   ssn: string;
-  loanDate: string;
+  date: string;
   distributionAmount: number;
   stateTax: number;
   federalTax: number;
@@ -88,34 +102,34 @@ export interface DuplicateSSNDetail {
 }
 
 export interface DuplicateSSNsRequestDto {
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface MissingCommasInPYNameRequestDto {
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface MissingCommasInPYName {
-  exployeeBadge: number;
+  badgeNumber: number;
   ssn: number;
   employeeName: string;
 }
 
 export interface DuplicateNameAndBirthdayRequestDto extends ProfitYearRequest {
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface NegativeEtvaForSSNsOnPayprofitRequestDto extends ProfitYearRequest {
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface EmployeeWagesForYearRequestDto extends ProfitYearRequest {
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface GrossWagesReportDto extends ProfitYearRequest {
-  pagination: PaginationParams;
-  minGrossAmount?:number;
+  pagination: SortedPaginationRequestDto;
+  minGrossAmount?: number;
 }
 
 export interface DuplicateNameBirthdayAddress {
@@ -151,7 +165,7 @@ export interface NegativeEtvaForSSNsOnPayProfit {
 }
 
 export interface EmployeesOnMilitaryLeaveRequestDto {
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface EmployeesOnMilitaryLeaveResponse {
@@ -163,9 +177,10 @@ export interface EmployeesOnMilitaryLeaveResponse {
   terminationDate: string;
 }
 
-export interface MilitaryAndRehireForfeituresRequestDto extends ProfitYearRequest {
-  reportingYear: string;
-  pagination: PaginationParams;
+export interface RehireForfeituresRequest extends ProfitYearRequest {
+  beginningDate: string;
+  endingDate: string;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface ForfeitureDetail extends ProfitYearRequest {
@@ -179,6 +194,8 @@ export interface MilitaryAndRehireForfeiture {
   ssn: string;
   reHiredDate: string;
   companyContributionYears: number;
+  enrollmentId: number;
+  enrollmentName: string;
   hoursCurrentYear: number;
   details: ForfeitureDetail[];
 }
@@ -189,7 +206,7 @@ export interface ExecutiveHoursAndDollarsRequestDto extends ProfitYearRequest {
   fullNameContains?: string;
   hasExecutiveHoursAndDollars: boolean;
   isMonthlyPayroll: boolean;
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
 }
 
 // This is the state of an editable executive's hours and dollars
@@ -217,7 +234,9 @@ export interface ExecutiveHoursAndDollars {
   currentHoursYear: number;
   currentIncomeYear: number;
   payFrequencyId: number;
+  payFrequencyName: string;
   employmentStatusId: string;
+  employmentStatusName: string;
 }
 
 export interface EmployeeWagesForYear {
@@ -227,7 +246,7 @@ export interface EmployeeWagesForYear {
 }
 
 export interface EligibleEmployeesRequestDto extends ProfitYearRequest {
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface EligibleEmployee {
@@ -236,6 +255,7 @@ export interface EligibleEmployee {
   fullName: string;
   departmentId: number;
   department: string;
+  storeNumber: number;
 }
 
 export interface EligibleEmployeeResponseDto {
@@ -251,9 +271,6 @@ export interface ForfeituresAndPointsQueryParams extends ProfitYearRequest {
   useFrozenData: boolean;
 }
 
-export interface ProfitAndReportingQueryParams extends ProfitYearRequest {
-  reportingYear: string;
-}
 export interface ExecutiveHoursAndDollarsQueryParams extends ProfitYearRequest {
   badgeNumber: number;
   socialSecurity: number;
@@ -273,8 +290,8 @@ export interface BaseDateRangeParams {
   endDate: Date;
 }
 export interface MasterInquirySearch {
-  startProfitYear?: Date | null;
-  endProfitYear?: Date | null;
+  startProfitYear?: number | null;
+  endProfitYear?: number | null;
   startProfitMonth?: number | null;
   endProfitMonth?: number | null;
   socialSecurity?: number | null;
@@ -336,6 +353,7 @@ export interface MasterInquiryRequest {
   paymentType?: number;
   memberType?: number;
   badgeNumber?: number;
+  psnSuffix?: number;
   pagination: SortedPaginationRequestDto;
 }
 
@@ -350,7 +368,7 @@ export interface FrozenReportsByAgeRequest extends ProfitYearRequest {
   reportType: FrozenReportsByAgeRequestType;
 }
 export interface FrozenReportsForfeituresAndPointsRequest extends ProfitYearRequest {
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
   useFrozenData: boolean;
 }
 export interface ProfitSharingDistributionsByAge {
@@ -409,7 +427,7 @@ export interface ForfeituresAndPointsDetail {
   employeeName: string;
   ssn: string;
   forfeitures: number;
-  forfeiturePoints: number;
+  forfeitPoints: number;
   earningPoints: number;
   benefificaryPsn: number;
 }
@@ -491,12 +509,10 @@ export interface BalanceByAgeDetail extends BalanceByDetailBase {
   age: number;
 }
 
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 export interface BalanceByAge extends BalanceByBase<BalanceByAgeDetail> {}
 
-export interface BalanceByYearsDetail extends BalanceByDetailBase {
-  age: number;
-}
-
+/* eslint-disable @typescript-eslint/no-empty-object-type */
 export interface BalanceByYears extends BalanceByBase<BalanceByAgeDetail> {}
 
 export interface VestedAmountsByAge {
@@ -538,7 +554,7 @@ export interface VestedAmountsByAgeDetail {
 
 export interface TerminationRequest {
   profitYear: number;
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface TerminationDetail {
@@ -572,36 +588,41 @@ export interface ProfitShareUpdateRequest {
   profitYear: number;
   contributionPercent: number;
   earningsPercent: number;
-  incomingForfeiturePercent: number;
+  incomingForfeitPercent: number;
+  secondaryEarningsPercent: number;
   maxAllowedContributions: number;
-
-  adjustmentBadge: number;
-  adjustmentContributionAmount: number;
-  adjustmentEarningsAmount: number;
-  adjustmentIncomingForfeitureAmount: number;
-
-  adjustmentSecondaryBadge: number;
-  adjustmentSecondaryEarningsAmount: number;
+  badgeToAdjust: number;
+  adjustContributionAmount: number;
+  adjustEarningsAmount: number;
+  adjustIncomingForfeitAmount: number;
+  badgeToAdjust2: number;
+  adjustEarningsSecondaryAmount: number;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface ProfitShareUpdateDetail {
-  badgePSn: string;
+  isEmployee: boolean;
+  badge: number;
+  psn: string;
   name: string;
-  beginningBalance: number;
-  beneficiaryAllocation: number;
-  distributionAmount: number;
-  forfeit: number;
+  beginningAmount: number;
+  distributions: number;
+  military: number;
+  xfer: number;
+  pxfer: number;
+  employeeTypeId: number;
+  contributions: number;
+  incomingForfeitures: number;
+  allEarnings: number;
+  allSecondaryEarnings: number;
   endingBalance: number;
-  vestedBalance: number;
-  dateTerm: string;
-  ytdPsHours: number;
-  vestedPercent: number;
-  age: number;
-  enrollmentCode: number;
+  zeroContributionReasonId: number;
+  etva: number;
+  etvaEarnings: number;
+  secondaryEtvaEarnings: number;
+  treatAsBeneficiary: boolean;
 }
-
 export interface ProfitShareUpdateResponse {
-  isLoading: boolean;
   totalVested: number;
   totalForfeit: number;
   totalEndingBalance: number;
@@ -609,22 +630,55 @@ export interface ProfitShareUpdateResponse {
   reportName: string;
   reportDate: string;
   response: Paged<ProfitShareUpdateDetail[]>;
+  hasExceededMaximumContributions: true;
+  adjustmentsSummary: ProfitShareAdjustmentSummary;
+  totals: ProfitShareUpdateTotals;
 }
 
-export interface ProfitShareEditDetail {
-  badgePSn: string;
-  name: string;
+export interface ProfitShareUpdateTotals {
   beginningBalance: number;
-  beneficiaryAllocation: number;
-  distributionAmount: number;
-  forfeit: number;
+  totalContribution: number;
+  earnings: number;
+  earnings2: number;
+  forfeiture: number;
+  distributions: number;
+  military: number;
   endingBalance: number;
-  vestedBalance: number;
-  dateTerm: string;
-  ytdPsHours: number;
-  vestedPercent: number;
-  age: number;
-  enrollmentCode: number;
+  allocations: number;
+  paidAllocations: number;
+  classActionFund: number;
+  contributionPoints: number;
+  earningPoints: number;
+  maxOverTotal: number;
+  maxPointsTotal: number;
+  totalEmployees: number;
+  totalBeneficiaries: number;
+}
+export interface ProfitShareAdjustmentSummary {
+  badgeNumber?: number;
+  incomingForfeitureAmountUnadjusted: number;
+  incomingForfeitureAmountAdjusted: number;
+  earningsAmountUnadjusted: number;
+  earningsAmountAdjusted: number;
+  secondaryEarningsAmountUnadjusted: number;
+  secondaryEarningsAmountAdjusted: number;
+  contributionAmountUnadjusted: number;
+  contributionAmountAdjusted: number;
+}
+export interface ProfitShareEditDetail {
+  isEmployee: boolean;
+  badgeNumber: number;
+  psn: string;
+  name: string;
+  code: number;
+  contributionAmount: number;
+  earningsAmount: number;
+  forfeitureAmount: number;
+  remark: string;
+  commentTypeId: number;
+  recordChangeSummary: string;
+  zeroContStatus: number;
+  yearExtension: number;
 }
 
 export interface GrossWagesReportRequest extends ProfitYearRequest {
@@ -654,8 +708,6 @@ export interface GrossWagesReportResponse {
 }
 
 export interface ProfitShareEditResponse {
-  isLoading: boolean; // this feels like a hack, it means display the table with the spinner.
-
   beginningBalance: number;
   contributionGrandTotal: number;
   incomingForfeitureGrandTotal: number;
@@ -667,31 +719,44 @@ export interface ProfitShareEditResponse {
 }
 
 export interface ProfitShareMasterResponse {
-  isLoading: boolean;
   reportName: string;
   beneficiariesEffected?: number;
   employeesEffected?: number;
   etvasEffected?: number;
 }
 
-export interface YearEndProfitSharingReportResponse {
-  badgeNumber: number;
-  employeeName: string;
-  storeNumber: number;
-  employeeTypeCode: string;
-  employmentTypeName: string;
-  dateOfBirth: Date;
-  age: number;
-  ssn: string;
-  wages: number;
-  hours: number;
-  points: number;
-  isUnder21: boolean;
-  isNew: boolean;
-  employeeStatus: string;
-  balance: number;
-  yearsInPlan: number;
+export interface ProfitShareEditUpdateQueryParams {
+  profitYear: Date;
+  contributionPercent?: number | null;
+  earningsPercent?: number | null;
+  incomingForfeitPercent?: number | null;
+  secondaryEarningsPercent?: number | null;
+  maxAllowedContributions?: number | null;
+
+  badgeToAdjust?: number | null;
+  adjustContributionAmount?: number | null;
+  adjustEarningsAmount?: number | null;
+  adjustIncomingForfeitAmount?: number | null;
+
+  badgeToAdjust2?: number | null;
+  adjustEarningsSecondaryAmount?: number | null;
 }
+
+export interface YearEndProfitSharingReportResponse {
+  reportName: string;
+  reportDate: string;
+  response: Paged<YearEndProfitSharingEmployee>;
+  wagesTotal: number;
+  hoursTotal: number;
+  pointsTotal: number;
+  terminatedWagesTotal: number;
+  terminatedHoursTotal: number;
+  numberOfEmployees: number;
+  numberOfNewEmployees: number;
+  numberOfEmployeesUnder21: number;
+  numberOfEmployeesInPlan: number;
+}
+
 export interface FrozenStateResponse {
   id: number;
   profitYear: number;
@@ -722,10 +787,10 @@ export interface MilitaryContributionRequest extends ProfitYearRequest {
 
 export interface YearEndProfitSharingReportRequest {
   isYearEnd: boolean;
-  minimumAgeInclusive: number;
-  maximumAgeInclusive: number;
-  minimumHoursInclusive: number;
-  maximumHoursInclusive: number;
+  minimumAgeInclusive?: number;
+  maximumAgeInclusive?: number;
+  minimumHoursInclusive?: number;
+  maximumHoursInclusive?: number;
   includeActiveEmployees: boolean;
   includeInactiveEmployees: boolean;
   includeEmployeesTerminatedThisYear: boolean;
@@ -734,7 +799,7 @@ export interface YearEndProfitSharingReportRequest {
   includeEmployeesWithPriorProfitSharingAmounts: boolean;
   includeEmployeesWithNoPriorProfitSharingAmounts: boolean;
   profitYear: number;
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface CreateMilitaryContributionRequest extends ProfitYearRequest {
@@ -746,6 +811,7 @@ export interface MilitaryContribution {
   contributionDate: Date | null;
   contributionAmount: number | null;
 }
+
 export interface YearEndProfitSharingEmployee {
   badgeNumber: number;
   employeeName: string;
@@ -763,4 +829,173 @@ export interface YearEndProfitSharingEmployee {
   employeeStatus: string;
   balance: number;
   yearsInPlan: number;
+}
+
+export interface BreakdownByStoreRequest extends ProfitYearRequest {
+  storeNumber?: string;
+  under21Only?: boolean;
+  pagination: SortedPaginationRequestDto;
+}
+
+export interface BreakdownByStoreEmployee {
+  storeNumber: number;
+  enrollmentId: number;
+  badgeNumber: number;
+  ssn: string;
+  fullName: string;
+  payFrequencyId: number;
+  departmentId: number;
+  payClassificationId: number;
+  beginningBalance: number;
+  earnings: number;
+  contributions: number;
+  forfeiture: number;
+  distributions: number;
+  endingBalance: number;
+  vestedAmount: number;
+  vestedPercentage: number;
+  employmentStatusId: string;
+  employeeCategory: string;
+  employeeSortRank: number;
+}
+
+export interface BreakdownByStoreResponse {
+  reportName: string;
+  reportDate: string;
+  response: Paged<BreakdownByStoreEmployee>;
+  totalBeginningBalance: number;
+  totalEarnings: number;
+  totalContribution: number;
+  totalForfeiture: number;
+  totalDistribution: number;
+  totalEndingBalance: number;
+  totalVestedAmount: number;
+}
+
+export interface Under21BreakdownByStoreRequest extends ProfitYearRequest {
+  isSortDescending?: boolean;
+  pagination: SortedPaginationRequestDto;
+}
+
+export interface Under21BreakdownByStoreEmployee {
+  storeNumber: number;
+  badgeNumber: number;
+  fullName: string;
+  beginningBalance: number;
+  earnings: number | null;
+  contributions: number | null;
+  forfeitures: number | null;
+  distributions: number | null;
+  endingBalance: number;
+  vestedAmount: number;
+  vestingPercentage: number;
+  dateOfBirth: string;
+  age: number;
+  enrollmentId: number;
+}
+
+export interface Under21BreakdownByStoreResponse {
+  reportName: string;
+  reportDate: string;
+  response: Paged<Under21BreakdownByStoreEmployee>;
+}
+
+export interface Under21InactiveRequest extends ProfitYearRequest {
+  isSortDescending?: boolean;
+  pagination: SortedPaginationRequestDto;
+}
+
+export interface Under21InactiveEmployee {
+  badgeNumber: number;
+  lastName: string;
+  firstName: string;
+  birthDate: string;
+  hireDate: string;
+  terminationDate: string;
+  age: number;
+  enrollmentId: number;
+}
+
+export interface Under21InactiveResponse {
+  reportName: string;
+  reportDate: string;
+  response: Paged<Under21InactiveEmployee>;
+}
+
+export interface Under21TotalsRequest extends ProfitYearRequest {
+  pagination: SortedPaginationRequestDto;
+}
+
+export interface Under21TotalsResponse {
+  numberOfEmployees: number;
+  numberOfActiveUnder21With1to2Years: number;
+  numberOfActiveUnder21With20to80PctVested: number;
+  numberOfActiveUnder21With100PctVested: number;
+  numberOfInActiveUnder21With1to2Years: number;
+  numberOfInActiveUnder21With20to80PctVested: number;
+  numberOfInActiveUnder21With100PctVested: number;
+  numberOfTerminatedUnder21With1to2Years: number;
+  numberOfTerminatedUnder21With20to80PctVested: number;
+  numberOfTerminatedUnder21With100PctVested: number;
+  totalBeginningBalance: number | null;
+  totalEarnings: number;
+  totalContributions: number;
+  totalForfeitures: number;
+  totalDisbursements: number;
+  totalEndingBalance: number | null;
+  totalVestingBalance: number;
+}
+
+export interface YearEndProfitSharingReportSummaryLineItem {
+  subgroup: string;
+  lineItemPrefix: string;
+  lineItemTitle: string;
+  numberOfMembers: number;
+  totalWages: number;
+  totalBalance: number;
+}
+
+export interface YearEndProfitSharingReportSummaryResponse {
+  lineItems: YearEndProfitSharingReportSummaryLineItem[];
+}
+
+export interface UpdateSummaryRequest extends ProfitYearRequest {
+  pagination: SortedPaginationRequestDto;
+}
+
+export interface UpdateSummaryEmployee {
+  badgeNumber: number;
+  storeNumber: number;
+  name: string;
+  isEmployee: boolean;
+  before: {
+    profitSharingAmount: number;
+    vestedProfitSharingAmount: number;
+    yearsInPlan: number;
+    enrollmentId: number;
+  };
+  after: {
+    profitSharingAmount: number;
+    vestedProfitSharingAmount: number;
+    yearsInPlan: number;
+    enrollmentId: number;
+  };
+}
+
+export interface UpdateSummaryResponse {
+  totalNumberOfEmployees: number;
+  totalNumberOfBeneficiaries: number;
+  totalBeforeProfitSharingAmount: number;
+  totalBeforeVestedAmount: number;
+  totalAfterProfitSharingAmount: number;
+  totalAfterVestedAmount: number;
+  reportName: string;
+  reportDate: string;
+  response: {
+    pageSize: number;
+    currentPage: number;
+    totalPages: number;
+    total: number;
+    results: UpdateSummaryEmployee[];
+  };
 }

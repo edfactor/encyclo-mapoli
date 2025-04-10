@@ -5,6 +5,7 @@ import { useLazyGetDuplicateNamesAndBirthdaysQuery } from "reduxstore/api/YearsE
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetDuplicateNamesAndBirthdayColumns } from "./DuplicateNamesAndBirthdaysGridColumns";
+import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 
 interface DuplicateNamesAndBirthdaysGridSearchProps {
   initialSearchLoaded: boolean;
@@ -15,32 +16,37 @@ const DuplicateNamesAndBirthdaysGrid: React.FC<DuplicateNamesAndBirthdaysGridSea
   initialSearchLoaded,
   setInitialSearchLoaded
 }) => {
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "Badge",
+    sortBy: "name",
     isSortDescending: false
   });
 
-  const { duplicateNamesAndBirthdays, duplicateNamesAndBirthdaysQueryParams } = useSelector(
+  const { duplicateNamesAndBirthdays } = useSelector(
     (state: RootState) => state.yearsEnd
   );
+  const profitYear = useDecemberFlowProfitYear();
   const [triggerSearch, { isLoading }] = useLazyGetDuplicateNamesAndBirthdaysQuery();
 
   const onSearch = useCallback(async () => {
     const request = {
-      profitYear: duplicateNamesAndBirthdaysQueryParams?.profitYear ?? 0,
-      pagination: { skip: pageNumber * pageSize, take: pageSize }
+      profitYear: profitYear || 0,
+      pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: sortParams.sortBy, isSortDescending: sortParams.isSortDescending },
     };
 
     await triggerSearch(request, false);
-  }, [duplicateNamesAndBirthdaysQueryParams?.profitYear, pageNumber, pageSize, triggerSearch]);
+  }, [profitYear, pageNumber, pageSize, sortParams, triggerSearch]);
 
   useEffect(() => {
-    if (initialSearchLoaded) {
+    if (hasToken && (!initialSearchLoaded || pageNumber || pageSize !== 25 || sortParams)) {
       onSearch();
+      if (!initialSearchLoaded) {
+        setInitialSearchLoaded(true);
+      }
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, onSearch]);
+  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch, hasToken, setInitialSearchLoaded]);
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
   const columnDefs = useMemo(() => GetDuplicateNamesAndBirthdayColumns(), []);
@@ -53,7 +59,7 @@ const DuplicateNamesAndBirthdaysGrid: React.FC<DuplicateNamesAndBirthdaysGridSea
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`DUPLICATE NAMES AND BIRTHDAYS (${duplicateNamesAndBirthdays?.response.total || 0})`}
+              {`DUPLICATE NAMES AND BIRTHDAYS (${duplicateNamesAndBirthdays?.response.total || 0} records)`}
             </Typography>
           </div>
           <DSMGrid

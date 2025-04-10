@@ -1,16 +1,17 @@
-import { Typography, CircularProgress } from "@mui/material";
-import Grid2 from '@mui/material/Grid2';
-import React, { useEffect, useMemo } from "react";
+import { CircularProgress, Typography } from "@mui/material";
+import Grid2 from "@mui/material/Grid2";
+import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
-import { RootState } from "reduxstore/store";
-import { TotalsRow } from "smart-ui-library";
-import { InfoCard } from "./InfoCard";
 import {
   useLazyGetDemographicBadgesNotInPayprofitQuery,
   useLazyGetDuplicateNamesAndBirthdaysQuery,
   useLazyGetDuplicateSSNsQuery,
   useLazyGetNegativeEVTASSNQuery
 } from "reduxstore/api/YearsEndApi";
+import { RootState } from "reduxstore/store";
+import { CAPTIONS } from "../../constants";
+import { InfoCard } from "./InfoCard";
+import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 
 interface CleanUpSummaryCardsProps {
   setSelectedTab: (value: number) => void;
@@ -38,14 +39,22 @@ const CleanUpSummaryCards: React.FC<CleanUpSummaryCardsProps> = ({ setSelectedTa
   const { negativeEtvaForSSNsOnPayprofit, duplicateSSNsData, demographicBadges, duplicateNamesAndBirthdays } =
     useSelector((state: RootState) => state.yearsEnd);
 
+  const profitYear = useDecemberFlowProfitYear();
+  
   useEffect(() => {
     if (hasToken) {
-      triggerETVASearch({ profitYear: 2023, pagination: { take: 25, skip: 0 } });
-      triggerPayrollDupeSsnsOnDemographics({ profitYear: 2023, pagination: { take: 25, skip: 0 } });
-      triggerDemographicBadgesNotInPayprofit({ pagination: { take: 25, skip: 0 } });
-      triggerDuplicateNamesAndBirthdays({ profitYear: 2023, pagination: { take: 25, skip: 0 } });
+      triggerETVASearch({ profitYear: profitYear, pagination: { take: 25, skip: 0, sortBy: "badgeNumber", isSortDescending: true } });
+      triggerPayrollDupeSsnsOnDemographics({ pagination: { take: 25, skip: 0, sortBy: "badgeNumber", isSortDescending: true } });
+      triggerDemographicBadgesNotInPayprofit({ pagination: { take: 25, skip: 0, sortBy: "badgeNumber", isSortDescending: true } });
+      triggerDuplicateNamesAndBirthdays({ profitYear: profitYear, pagination: { take: 25, skip: 0, sortBy: "badgeNumber", isSortDescending: true } });
     }
-  }, [hasToken]);
+  }, [
+    hasToken,
+    triggerDemographicBadgesNotInPayprofit,
+    triggerDuplicateNamesAndBirthdays,
+    triggerETVASearch,
+    triggerPayrollDupeSsnsOnDemographics
+  ]);
 
   return (
     <Grid2
@@ -67,12 +76,12 @@ const CleanUpSummaryCards: React.FC<CleanUpSummaryCardsProps> = ({ setSelectedTa
         spacing={"24px"}
         paddingLeft={"24px"}
         width={"100%"}>
-        <Grid2 size={{ xs: 12, md: 6, lg: 6 }} >
+        <Grid2 size={{ xs: 12, md: 6, lg: 6 }}>
           {!!negativeEtvaForSSNsOnPayprofit && (
             <InfoCard
               buttonDisabled={disableButtons}
               handleClick={() => setSelectedTab(1)}
-              title="Negative ETVA for SSNs on Payprofit"
+              title={CAPTIONS.NEGATIVE_ETVA}
               valid={negativeEtvaForSSNsOnPayprofit.response.total == 0}
               data={{
                 "Negative ETVA:": negativeEtvaForSSNsOnPayprofit.response.total.toString()
@@ -80,11 +89,11 @@ const CleanUpSummaryCards: React.FC<CleanUpSummaryCardsProps> = ({ setSelectedTa
             />
           )}
         </Grid2>
-        <Grid2 size={{ xs: 12, md: 6, lg: 6 }} >
+        <Grid2 size={{ xs: 12, md: 6, lg: 6 }}>
           {!!duplicateSSNsData && (
             <InfoCard
               buttonDisabled={disableButtons}
-              title="Duplicate SSNs in Demographics"
+              title={CAPTIONS.DUPLICATE_SSNS}
               handleClick={() => setSelectedTab(2)}
               valid={duplicateSSNsData.response.total == 0}
               data={{
@@ -93,11 +102,11 @@ const CleanUpSummaryCards: React.FC<CleanUpSummaryCardsProps> = ({ setSelectedTa
             />
           )}
         </Grid2>
-        <Grid2 size={{ xs: 12, md: 6, lg: 6 }} >
+        <Grid2 size={{ xs: 12, md: 6, lg: 6 }}>
           {!!demographicBadges && (
             <InfoCard
               buttonDisabled={disableButtons}
-              title="Demographic Badges Not In Payprofit"
+              title={CAPTIONS.DEMOGRAPHIC_BADGES}
               handleClick={() => setSelectedTab(3)}
               valid={demographicBadges.response.total == 0}
               data={{
@@ -106,11 +115,11 @@ const CleanUpSummaryCards: React.FC<CleanUpSummaryCardsProps> = ({ setSelectedTa
             />
           )}
         </Grid2>
-        <Grid2 size={{ xs: 12, md: 6, lg: 6 }} >
+        <Grid2 size={{ xs: 12, md: 6, lg: 6 }}>
           {!!duplicateNamesAndBirthdays && (
             <InfoCard
               buttonDisabled={disableButtons}
-              title="Duplicate Names and Birthdays"
+              title={CAPTIONS.DUPLICATE_NAMES}
               handleClick={() => setSelectedTab(4)}
               valid={duplicateNamesAndBirthdays.response.total == 0}
               data={{
@@ -121,7 +130,10 @@ const CleanUpSummaryCards: React.FC<CleanUpSummaryCardsProps> = ({ setSelectedTa
         </Grid2>
       </Grid2>
       <div style={{ display: "grid", verticalAlign: "middle", height: "100%" }}>
-        <Grid2 size={{ xs: 2, md: 1, lg: 0.5 }} paddingY={"48px"} justifySelf={"center"}>
+        <Grid2
+          size={{ xs: 2, md: 1, lg: 0.5 }}
+          paddingY={"48px"}
+          justifySelf={"center"}>
           <CircularProgress size={"100%"} />
         </Grid2>
       </div>

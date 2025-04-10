@@ -5,6 +5,7 @@ import { useLazyGetDistributionsAndForfeituresQuery } from "reduxstore/api/Years
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetDistributionsAndForfeituresColumns } from "./DistributionAndForfeituresGridColumns";
+import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 
 interface DistributionsAndForfeituresGridSearchProps {
   initialSearchLoaded: boolean;
@@ -17,15 +18,20 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
 }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
+  const [sortParams, setSortParams] = useState<ISortParams>({
+    sortBy: "badgeNumber",
+    isSortDescending: false
+  });
 
   const { distributionsAndForfeitures, distributionsAndForfeituresQueryParams } = useSelector(
     (state: RootState) => state.yearsEnd
   );
+  const profitYear = useDecemberFlowProfitYear();
   const [triggerSearch, { isFetching }] = useLazyGetDistributionsAndForfeituresQuery();
 
   const onSearch = useCallback(async () => {
     const request = {
-      profitYear: distributionsAndForfeituresQueryParams?.profitYear ?? 0,
+      profitYear: profitYear || 0,
       ...(distributionsAndForfeituresQueryParams?.startMonth && {
         startMonth: distributionsAndForfeituresQueryParams?.startMonth
       }),
@@ -33,17 +39,18 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
         endMonth: distributionsAndForfeituresQueryParams?.endMonth
       }),
       includeOutgoingForfeitures: distributionsAndForfeituresQueryParams?.includeOutgoingForfeitures ?? false,
-      pagination: { skip: pageNumber * pageSize, take: pageSize }
+      pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: sortParams.sortBy, isSortDescending: sortParams.isSortDescending }
     };
 
     await triggerSearch(request, false);
   }, [
     distributionsAndForfeituresQueryParams?.endMonth,
     distributionsAndForfeituresQueryParams?.includeOutgoingForfeitures,
-    distributionsAndForfeituresQueryParams?.profitYear,
     distributionsAndForfeituresQueryParams?.startMonth,
+    profitYear,
     pageNumber,
     pageSize,
+    sortParams,
     triggerSearch
   ]);
 
@@ -51,12 +58,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
     if (initialSearchLoaded) {
       onSearch();
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, onSearch]);
-
-  const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "Badge",
-    isSortDescending: false
-  });
+  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch]);
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
   const columnDefs = useMemo(() => GetDistributionsAndForfeituresColumns(), []);
@@ -69,7 +71,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`DISTRIBUTIONS AND FORFEITURES (${distributionsAndForfeitures?.response.total || 0})`}
+              {`DISTRIBUTIONS AND FORFEITURES (${distributionsAndForfeitures?.response.total || 0} ${distributionsAndForfeitures?.response.total === 1 ? 'Record' : 'Records'})`}
             </Typography>
           </div>
           <DSMGrid
@@ -78,8 +80,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
             handleSortChanged={sortEventHandler}
             providedOptions={{
               rowData: distributionsAndForfeitures?.response.results,
-              columnDefs: columnDefs,
-              pagination: true
+              columnDefs: columnDefs
             }}
           />
         </>

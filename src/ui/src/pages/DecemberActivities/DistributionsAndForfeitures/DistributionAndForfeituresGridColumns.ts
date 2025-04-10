@@ -14,7 +14,7 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       cellClass: "right-align",
       resizable: true,
       sort: "asc",
-      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data?.badgeNumber)
+      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data?.badgeNumber, params.data?.psnSuffix)
     },
     {
       headerName: "Name",
@@ -27,17 +27,17 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
     },
     {
       headerName: "SSN",
-      field: "employeeSsn",
-      colId: "employeeSsn",
+      field: "ssn",
+      colId: "ssn",
       minWidth: 100,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true
     },
     {
-      headerName: "Loan Date",
-      field: "loanDate",
-      colId: "loanDate",
+      headerName: "Date",
+      field: "date",
+      colId: "date",
       minWidth: 100,
       headerClass: "left-align",
       cellClass: "left-align",

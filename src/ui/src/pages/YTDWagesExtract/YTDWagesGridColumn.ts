@@ -33,6 +33,15 @@ export const GetYTDWagesColumns = (): ColDef[] => {
       cellClass: "left-align",
       resizable: true,
       valueFormatter: agGridNumberToCurrency
+    },
+    {
+      headerName: "Store",
+      field: "storeNumber",
+      colId: "storeNumber",
+      minWidth: 150,
+      headerClass: "left-align",
+      cellClass: "left-align",
+      resizable: true
     }
   ];
   return columns;

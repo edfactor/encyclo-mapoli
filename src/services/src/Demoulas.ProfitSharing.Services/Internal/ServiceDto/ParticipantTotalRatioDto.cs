@@ -2,5 +2,5 @@
 internal sealed class ParticipantTotalRatioDto
 {
     internal int? Ssn { get; set; }
-    internal required decimal Ratio { get; set; }
+    internal decimal? Ratio { get; set; }
 }

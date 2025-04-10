@@ -5,18 +5,18 @@ import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
 export const GetProfitShareForfeitColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   return [
     {
-      headerName: "Badge #",
+      headerName: "Badge",
       field: "badgeNumber",
       colId: "badgeNumber",
       minWidth: 80,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      headerClass: "left-align",
+      cellClass: "left-align",
       resizable: true,
       sortable: true,
       cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber, navFunction)
     },
     {
-      headerName: "Employee Name",
+      headerName: "Name",
       field: "employeeName",
       colId: "employeeName",
       minWidth: 150,
@@ -45,8 +45,8 @@ export const GetProfitShareForfeitColumns = (navFunction: (badgeNumber: string) 
     },
     {
       headerName: "Cont/Forfeit Points",
-      field: "contForfeitPoints",
-      colId: "contForfeitPoints",
+      field: "forfeitPoints",
+      colId: "forfeitPoints",
       minWidth: 150,
       headerClass: "right-align",
       cellClass: "right-align",
@@ -54,8 +54,8 @@ export const GetProfitShareForfeitColumns = (navFunction: (badgeNumber: string) 
     },
     {
       headerName: "Earnings Points",
-      field: "earningsPoints",
-      colId: "earningsPoints",
+      field: "earningPoints",
+      colId: "earningPoints",
       minWidth: 120,
       headerClass: "right-align",
       cellClass: "right-align",
@@ -63,8 +63,8 @@ export const GetProfitShareForfeitColumns = (navFunction: (badgeNumber: string) 
     },
     {
       headerName: "BEN #",
-      field: "benNumber",
-      colId: "benNumber",
+      field: "beneficiaryPsn",
+      colId: "beneficiaryPsn",
       minWidth: 100,
       headerClass: "right-align",
       cellClass: "right-align",

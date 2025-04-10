@@ -10,25 +10,27 @@ const DuplicateSSNsOnDemographicsGrid: React.FC = () => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "Badge",
+    sortBy: "badgeNumber",
     isSortDescending: false
   });
 
   const { duplicateSSNsData } = useSelector((state: RootState) => state.yearsEnd);
-
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const [triggerSearch, { isFetching }] = useLazyGetDuplicateSSNsQuery();
 
   const onSearch = useCallback(async () => {
     const request = {
-      pagination: { skip: pageNumber * pageSize, take: pageSize }
+      pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: sortParams.sortBy, isSortDescending: sortParams.isSortDescending },
     };
 
     await triggerSearch(request, false);
-  }, [pageNumber, pageSize, triggerSearch]);
+  }, [pageNumber, pageSize, sortParams, triggerSearch]);
 
   useEffect(() => {
-    onSearch();
-  }, [pageNumber, pageSize, onSearch]);
+    if ( hasToken) {
+      onSearch();
+    }
+  }, [pageNumber, pageSize, sortParams, onSearch]);
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
   const columnDefs = useMemo(() => GetDuplicateSSNsOnDemographicsColumns(), []);
@@ -41,7 +43,7 @@ const DuplicateSSNsOnDemographicsGrid: React.FC = () => {
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`(${duplicateSSNsData?.response.total || 0})`}
+              {`(${duplicateSSNsData?.response.total || 0} records)`}
             </Typography>
           </div>
           <DSMGrid

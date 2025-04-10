@@ -3,29 +3,26 @@ using System.Reflection;
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.IntegrationTests.Fixtures;
 using Demoulas.ProfitSharing.IntegrationTests.Helpers;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 using FluentAssertions;
+using Microsoft.Extensions.Configuration;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports;
 
-public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : TestClassBase
+public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests
 {
+    private readonly IProfitSharingDataContextFactory _dbFactory;
     private readonly ITestOutputHelper _testOutputHelper;
-    // ReSharper disable once NotAccessedField.Local
-#pragma warning disable S4487
-#pragma warning disable IDE0052
-    private readonly IntegrationTestsFixture _fixture;
-#pragma warning restore IDE0052
-#pragma warning restore S4487
 
-    public TerminatedEmployeeAndBeneficiaryReportIntegrationTests(ITestOutputHelper testOutputHelper, IntegrationTestsFixture fixture) : base(fixture)
+    public TerminatedEmployeeAndBeneficiaryReportIntegrationTests(ITestOutputHelper testOutputHelper)
     {
+        _dbFactory = new PristineDataContextFactory();
         _testOutputHelper = testOutputHelper;
-        _fixture = fixture;
     }
 
     [Fact]
@@ -34,25 +31,25 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : TestClassB
         // These are arguments to the program/rest endpoint
         // Plan admin may choose a range of dates (ie. Q2 ?)
         short profitSharingYear = 2024;
-        DateOnly startDate = new DateOnly(2024, 01, 01);
-        DateOnly endDate = new DateOnly(2024, 12, 31);
-        DateOnly effectiveDateOfTestData = new DateOnly(2024, 12, 31);
+        DateOnly startDate = new DateOnly(2024, 01, 6);
+        DateOnly endDate = new DateOnly(2024, 12, 28);
+        DateOnly effectiveDateOfTestData = new DateOnly(2024, 04, 08);
 
         // Throws exceptions at test run time
         // var calendarService = _fixture.Services.GetRequiredService<ICalendarService>()!
         // var totalService = _fixture.Services.GetRequiredService<TotalService>()!
-        var calendarService = new CalendarService(ProfitSharingDataContextFactory, new AccountingPeriodsService());
-        var totalService = new TotalService(ProfitSharingDataContextFactory, calendarService);
+        var calendarService = new CalendarService(_dbFactory, new AccountingPeriodsService());
+        var totalService = new TotalService(_dbFactory, calendarService);
         TerminatedEmployeeAndBeneficiaryReportService mockService =
-            new TerminatedEmployeeAndBeneficiaryReportService(ProfitSharingDataContextFactory, calendarService, totalService);
+            new TerminatedEmployeeAndBeneficiaryReportService(_dbFactory, calendarService, totalService);
 
         Stopwatch stopwatch = Stopwatch.StartNew();
         stopwatch.Start();
-        var data = await mockService.GetReportAsync(new ProfitYearRequest { ProfitYear = profitSharingYear }, TestContext.Current.CancellationToken);
+        var data = await mockService.GetReportAsync(new ProfitYearRequest { ProfitYear = profitSharingYear, Take = int.MaxValue}, TestContext.Current.CancellationToken);
 
         string actualText = CreateTextReport(effectiveDateOfTestData, startDate, endDate, profitSharingYear, data);
         stopwatch.Stop();
-        _testOutputHelper.WriteLine($"Took: {stopwatch.ElapsedMilliseconds}");
+        _testOutputHelper.WriteLine($"Took: {stopwatch.ElapsedMilliseconds} Rows: {data.Response.Results.Count()}");
 
         actualText.Should().NotBeNullOrEmpty();
 

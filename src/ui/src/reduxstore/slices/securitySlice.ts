@@ -1,7 +1,7 @@
-import { PayloadAction, createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { ImpersonationRoles } from "reduxstore/types";
 
-export interface SeucrityState {
+export interface SecurityState {
   token: string | null;
   userRoles: string[];
   userPermissions: string[];
@@ -20,7 +20,7 @@ export type AppUser = {
   impersonatibleRoles: string[];
 };
 
-const initialState: SeucrityState = {
+const initialState: SecurityState = {
   token: null,
   userRoles: [],
   userPermissions: [],
@@ -55,8 +55,25 @@ export const securitySlice = createSlice({
     setImpersonating: (state, action: PayloadAction<ImpersonationRoles | null>) => {
       state.impersonating = action.payload;
     },
+    clearUserData: (state) => {
+      state.token = "";
+      state.appUser = null;
+      state.username = "";
+      state.userRoles = [];
+      state.userPermissions = [];
+      state.performLogout = false;
+      state.impersonating = null;
+    }
   }
 });
 
-export const { setToken, setUserPermissions, setUserRoles, setUsername, setPerformLogout, setImpersonating } = securitySlice.actions;
+export const {
+  setToken,
+  setUserPermissions,
+  setUserRoles,
+  setUsername,
+  setPerformLogout,
+  setImpersonating,
+  clearUserData
+} = securitySlice.actions;
 export default securitySlice.reducer;

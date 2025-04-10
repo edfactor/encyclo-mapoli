@@ -8,9 +8,9 @@ import { GetMissingCommaInPyNameColumns } from "./MissingCommaInPyNameGridColumn
 
 const MissingCommaInPyNameGrid: React.FC = () => {
   const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(100);
+  const [pageSize, setPageSize] = useState(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "Badge",
+    sortBy: "badgeNumber",
     isSortDescending: false
   });
 
@@ -21,14 +21,14 @@ const MissingCommaInPyNameGrid: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       const request = {
-        pagination: { skip: pageNumber * pageSize, take: pageSize }
+        pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: sortParams.sortBy, isSortDescending: sortParams.isSortDescending }
       };
 
       await triggerSearch(request, false);
     };
 
     fetchData();
-  }, [pageNumber, pageSize, triggerSearch]);
+  }, [pageNumber, pageSize, sortParams, triggerSearch]);
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
   const columnDefs = useMemo(() => GetMissingCommaInPyNameColumns(), []);
@@ -41,7 +41,7 @@ const MissingCommaInPyNameGrid: React.FC = () => {
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`(${missingCommaInPYName?.response.total || 0})`}
+              {`(${missingCommaInPYName?.response.total || 0} records)`}
             </Typography>
           </div>
           <DSMGrid

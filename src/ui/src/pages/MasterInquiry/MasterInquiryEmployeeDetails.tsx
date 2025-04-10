@@ -5,6 +5,7 @@ import React from "react";
 import { EmployeeDetails } from "reduxstore/types";
 import { mmDDYYFormat, numberToCurrency } from "smart-ui-library";
 import { formatPercentage } from "utils/formatPercentage";
+import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
 
 interface MasterInquiryEmployeeDetailsProps {
   details: EmployeeDetails;
@@ -39,7 +40,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
   } = details;
 
   const getEnrolledStatus = (id: number): string => {
-    const enrolledIds = [1, 2];
+    const enrolledIds = [1, 2, 3, 4];
     return enrolledIds.includes(id) ? "Y" : "N";
   };
 
@@ -60,7 +61,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
   ];
 
   const employeeSection = [
-    { label: "Badge Number", value: badgeNumber },
+    { label: "Badge", value: viewBadgeLinkRenderer(Number(badgeNumber)) },
     { label: "DOB", value: mmDDYYFormat(dateOfBirth) },
     { label: "SSN", value: `${ssn}` },
     { label: "ETVA", value: currentEtva },
@@ -97,7 +98,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
         <Typography
           variant="h2"
           sx={{ color: "#0258A5" }}>
-          Employee Details
+          Member Details
         </Typography>
       </Grid2>
 

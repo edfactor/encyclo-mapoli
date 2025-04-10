@@ -1,0 +1,304 @@
+import { Typography } from "@mui/material";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
+import { useLazyGetRehireForfeituresQuery } from "reduxstore/api/YearsEndApi";
+import { RootState } from "reduxstore/store";
+import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { CAPTIONS } from "../../../constants";
+import { GetMilitaryAndRehireForfeituresColumns, GetDetailColumns } from "./RehireForfeituresGridColumns";
+import { ICellRendererParams } from "ag-grid-community";
+import { MasterInquiryRequest, RehireForfeituresRequest } from "../../../reduxstore/types";
+import { memberTypeGetNumberMap, paymentTypeGetNumberMap } from "../../MasterInquiry/MasterInquiryFunctions";
+import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import useFiscalCalendarYear from "../../../hooks/useFiscalCalendarYear";
+
+interface MilitaryAndRehireForfeituresGridSearchProps {
+  initialSearchLoaded: boolean;
+  setInitialSearchLoaded: (loaded: boolean) => void;
+}
+
+const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProps> = ({
+                                                                                        initialSearchLoaded,
+                                                                                        setInitialSearchLoaded
+                                                                                      }) => {
+  const [pageNumber, setPageNumber] = useState(0);
+  const [pageSize, setPageSize] = useState(25);
+  const [sortParams, setSortParams] = useState<ISortParams>({
+    sortBy: "badgeNumber",
+    isSortDescending: false
+  });
+  const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
+  const profitYear = useDecemberFlowProfitYear();
+  const fiscalCalendarYear = useFiscalCalendarYear();
+  const { rehireForfeitures, rehireForfeituresQueryParams } = useSelector(
+    (state: RootState) => state.yearsEnd
+  );
+
+  const createRequest = useCallback(
+    (skip: number, sortBy: string, isSortDescending: boolean): RehireForfeituresRequest | null => {
+      if (!rehireForfeituresQueryParams) return null;
+
+      return {
+        beginningDate: rehireForfeituresQueryParams.beginningDate || fiscalCalendarYear?.fiscalBeginDate || '',
+        endingDate: rehireForfeituresQueryParams.endingDate || fiscalCalendarYear?.fiscalEndDate || '',
+        pagination: { skip, take: pageSize, sortBy, isSortDescending },
+        profitYear: rehireForfeituresQueryParams.profitYear || profitYear
+      };
+    },
+    [rehireForfeituresQueryParams, pageSize, pageNumber, sortParams]
+  );
+
+  const [triggerSearch, { isFetching }] = useLazyGetRehireForfeituresQuery();
+
+  const onSearch = useCallback(async () => {  
+    if (rehireForfeituresQueryParams) {
+      const request = createRequest(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending);      
+      if (request) {
+        await triggerSearch(request, false);
+      }
+    }
+  }, [
+    pageNumber,
+    pageSize,
+    sortParams,
+    triggerSearch,
+    rehireForfeituresQueryParams,
+    createRequest
+  ]);
+
+  useEffect(() => {
+    if (initialSearchLoaded) {
+      onSearch();
+    }
+  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch]);
+
+  // Initialize expandedRows when data is loaded
+  useEffect(() => {
+    if (rehireForfeitures?.response?.results) {
+      const initialExpandState: Record<string, boolean> = {};
+
+      // Set all rows with details to be expanded by default
+      rehireForfeitures.response.results.forEach(row => {
+        if (row.details && row.details.length > 0) {
+          initialExpandState[row.badgeNumber] = true;
+        }
+      });
+
+      setExpandedRows(initialExpandState);
+    }
+  }, [rehireForfeitures?.response?.results]);
+
+  const sortEventHandler = (update: ISortParams) => setSortParams(update);
+
+  // Handle row expansion toggle
+  const handleRowExpansion = (badgeNumber: string) => {
+    setExpandedRows(prev => ({
+      ...prev,
+      [badgeNumber]: !prev[badgeNumber]
+    }));
+  };
+
+  // Get the main and detail columns
+  const mainColumns = useMemo(() => GetMilitaryAndRehireForfeituresColumns(), []);
+  const detailColumns = useMemo(() => GetDetailColumns(), []);
+
+  // Create the grid data with expandable rows
+  const gridData = useMemo(() => {
+    if (!rehireForfeitures?.response?.results) return [];
+
+    const rows = [];
+
+    for (const row of rehireForfeitures.response.results) {
+      const hasDetails = row.details && row.details.length > 0;
+
+      // Add main row
+      rows.push({
+        ...row,
+        isExpandable: hasDetails,
+        isExpanded: hasDetails && Boolean(expandedRows[row.badgeNumber])
+      });
+
+      // Add detail rows if expanded
+      if (hasDetails && expandedRows[row.badgeNumber]) {
+        for (const detail of row.details) {
+          // Create a base detail row with all parent properties to prevent undefined values
+          // and then override with detail properties
+          const detailRow = {
+            // Copy all parent row properties first
+            ...row,
+            // Then add detail properties, which will override any duplicate fields
+            ...detail,
+            // Add special properties for UI handling
+            isDetail: true,
+            parentId: row.badgeNumber
+          };
+
+          rows.push(detailRow);
+        }
+      }
+    }
+
+    return rows;
+  }, [rehireForfeitures, expandedRows]);
+
+  // Create column definitions with expand/collapse functionality
+  const columnDefs = useMemo(() => {
+    // Add an expansion column as the first column
+    const expansionColumn = {
+      headerName: "",
+      field: "isExpandable",
+      width: 50,
+      cellRenderer: (params: ICellRendererParams) => {
+        if (!params.data.isDetail && params.data.isExpandable) {
+          return params.data.isExpanded ? "▼" : "►";
+        }
+        return "";
+      },
+      onCellClicked: (params: ICellRendererParams) => {
+        if (!params.data.isDetail && params.data.isExpandable) {
+          handleRowExpansion(params.data.badgeNumber);
+        }
+      },
+      suppressSizeToFit: true,
+      suppressAutoSize: true,
+      lockVisible: true,
+      lockPosition: true,
+      pinned: "left"
+    };
+
+    // Add a style column to handle indentation
+    const indentationColumn = {
+      headerName: "",
+      field: "isDetail",
+      width: 30,
+      cellRenderer: (params: ICellRendererParams) => {
+        return params.data.isDetail ? "" : "";
+      },
+      suppressSizeToFit: true,
+      suppressAutoSize: true,
+      lockVisible: true,
+      lockPosition: true,
+      pinned: "left"
+    };
+
+    // Determine which columns to display based on whether it's a detail row
+    const visibleColumns = mainColumns.map(column => {
+      return {
+        ...column,
+        cellRenderer: (params: ICellRendererParams) => {
+          // For detail rows, either hide the column or show a specific value
+          if (params.data.isDetail) {
+            // Check if this main column should be hidden in detail rows
+            const hideInDetails = !detailColumns.some(detailCol => detailCol.field === column.field);
+
+            if (hideInDetails) {
+              return ""; // Hide this column's content for detail rows
+            }
+          }
+
+          // Use the default renderer for this column if available
+          if (column.cellRenderer) {
+            return column.cellRenderer(params);
+          }
+
+          // Otherwise just return the field value
+          return params.value;
+        }
+      };
+    });
+
+    // Add detail-specific columns that only appear for detail rows
+    const detailOnlyColumns = detailColumns
+      .filter(detailCol => !mainColumns.some(mainCol => mainCol.field === detailCol.field))
+      .map(column => {
+        return {
+          ...column,
+          cellRenderer: (params: ICellRendererParams) => {
+            // Only show content for detail rows
+            if (!params.data.isDetail) {
+              return "";
+            }
+
+            // Use the default renderer for this column if available
+            if (column.cellRenderer) {
+              return column.cellRenderer(params);
+            }
+
+            // Otherwise just return the field value
+            return params.value;
+          }
+        };
+      });
+
+    // Combine all columns
+    return [
+      expansionColumn,
+      indentationColumn,
+      ...visibleColumns,
+      ...detailOnlyColumns
+    ];
+  }, [mainColumns, detailColumns]);
+
+  // Custom CSS classes for rows
+  const getRowClass = (params: { data: { isDetail: boolean } }) => {
+    return params.data.isDetail ? "detail-row" : "";
+  };
+
+  return (
+    <div>
+      <Typography
+        variant="h2"
+        sx={{ color: "#0258A5" }}>
+        {`${CAPTIONS.REHIRE_FORFEITURES} (${rehireForfeitures?.response.total || 0} ${rehireForfeitures?.response.total === 1 ? 'Record' : 'Records'})`}
+      </Typography>
+
+      <style>
+        {`
+          .detail-row {
+            background-color: #f5f5f5;
+          }
+        `}
+      </style>
+
+      {rehireForfeitures?.response && (
+        <>
+          <DSMGrid
+            preferenceKey={"QPREV-PROF"}
+            isLoading={isFetching}
+            handleSortChanged={sortEventHandler}
+            providedOptions={{
+              rowData: gridData,
+              columnDefs: columnDefs,
+              getRowClass: getRowClass,
+              suppressRowClickSelection: true,
+              rowHeight: 40,
+              suppressMultiSort: true,
+              defaultColDef: {
+                resizable: true
+              }
+            }}
+          />
+
+          {!!rehireForfeitures && rehireForfeitures.response.results.length > 0 && (
+            <Pagination
+              pageNumber={pageNumber}
+              setPageNumber={(value: number) => {
+                setPageNumber(value - 1);
+                setInitialSearchLoaded(true);
+              }}
+              pageSize={pageSize}
+              setPageSize={(value: number) => {
+                setPageSize(value);
+                setPageNumber(1);
+                setInitialSearchLoaded(true);
+              }}
+              recordCount={rehireForfeitures.response.total || 0}
+            />
+          )}
+        </>
+      )}
+    </div>
+  );
+};
+
+export default RehireForfeituresGrid;

@@ -27,15 +27,15 @@ const ProfitShareGrossReportGrid: React.FC<ProfitShareGrossReportGridProps> = ({
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "Badge",
+    sortBy: "badgeNumber",
     isSortDescending: false
   });
 
   const { grossWagesReport, grossWagesReportQueryParams } = useSelector(
-      (state: RootState) => state.yearsEnd
-    );
+    (state: RootState) => state.yearsEnd
+  );
 
-  const [triggerSearch, { isLoading }] = useLazyGetGrossWagesReportQuery();  
+  const [triggerSearch, { isLoading }] = useLazyGetGrossWagesReportQuery();
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
   const navigate = useNavigate();
 
@@ -65,42 +65,51 @@ const ProfitShareGrossReportGrid: React.FC<ProfitShareGrossReportGridProps> = ({
       onSearch();
     }
   }, [initialSearchLoaded, pageNumber, pageSize, onSearch]);
-  
+
   return (
     <>
       {!!grossWagesReport && (
-        <DSMGrid
-          preferenceKey={"PROFIT_SHARE_GROSS_REPORT"}
-          isLoading={false}
-          handleSortChanged={(_params) => {}}
-          providedOptions={{
-            rowData: grossWagesReport?.response.results,
-            pinnedBottomRowData: [
-              {
-                grossWages:grossWagesReport?.totalGrossWages,
-                profitSharingAmount:grossWagesReport?.totalProfitSharingAmount,
-                loans:grossWagesReport?.totalLoans,
-                forfeitures:grossWagesReport?.totalForfeitures,
-              }],
-            columnDefs: columnDefs
-          }}
-        />
+        <>
+          <div style={{ padding: "0 24px 0 24px" }}>
+            <Typography
+              variant="h2"
+              sx={{ color: "#0258A5" }}>
+              {`PROFIT SHARE GROSS REPORT (QPAY501) (${grossWagesReport?.response.results.length || 0} ${grossWagesReport?.response.results.length === 1 ? 'Record' : 'Records'})`}
+            </Typography>
+          </div>
+          <DSMGrid
+            preferenceKey={"PROFIT_SHARE_GROSS_REPORT"}
+            isLoading={false}
+            handleSortChanged={(_params) => { }}
+            providedOptions={{
+              rowData: grossWagesReport?.response.results,
+              pinnedTopRowData: [
+                {
+                  grossWages: grossWagesReport?.totalGrossWages,
+                  profitSharingAmount: grossWagesReport?.totalProfitSharingAmount,
+                  loans: grossWagesReport?.totalLoans,
+                  forfeitures: grossWagesReport?.totalForfeitures,
+                }],
+              columnDefs: columnDefs
+            }}
+          />
+        </>
       )}
       {!!grossWagesReport && grossWagesReport.response.results.length && (
         <Pagination
-        pageNumber={pageNumber}
-        setPageNumber={(value: number) => {
-          setPageNumber(value - 1);
-          setInitialSearchLoaded(true);
-        }}
-        pageSize={pageSize}
-        setPageSize={(value: number) => {
-          setPageSize(value);
-          setPageNumber(1);
-          setInitialSearchLoaded(true);
-        }}
-        recordCount={grossWagesReport.response.total}
-      />
+          pageNumber={pageNumber}
+          setPageNumber={(value: number) => {
+            setPageNumber(value - 1);
+            setInitialSearchLoaded(true);
+          }}
+          pageSize={pageSize}
+          setPageSize={(value: number) => {
+            setPageSize(value);
+            setPageNumber(1);
+            setInitialSearchLoaded(true);
+          }}
+          recordCount={grossWagesReport.response.total}
+        />
       )}
     </>
   );

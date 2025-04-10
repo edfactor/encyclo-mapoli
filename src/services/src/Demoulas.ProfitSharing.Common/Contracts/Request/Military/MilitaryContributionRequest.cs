@@ -1,7 +1,6 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request.Military
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request.Military;
+
+public sealed record MilitaryContributionRequest : ProfitYearRequest
 {
-    public sealed record MilitaryContributionRequest : ProfitYearRequest
-    {
-        public int BadgeNumber { get; init; }
-    }
+    public int BadgeNumber { get; init; }
 }

@@ -1,5 +1,6 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 
 namespace Demoulas.ProfitSharing.Common.Interfaces;
 
@@ -8,7 +9,9 @@ namespace Demoulas.ProfitSharing.Common.Interfaces;
 /// </summary>
 public interface IProfitMasterService
 {
-    public Task<ProfitMasterResponse> Update(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken);
+    Task<ProfitMasterUpdateResponse?> Status(ProfitYearRequest profitShareUpdateRequest, CancellationToken cancellationToken);
 
-    public Task<ProfitMasterResponse> Revert(ProfitYearRequest profitYearRequest, CancellationToken cancellationToken);
+    Task<ProfitMasterUpdateResponse> Update(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken);
+
+    Task<ProfitMasterRevertResponse> Revert(ProfitYearRequest profitYearRequest, CancellationToken cancellationToken);
 }

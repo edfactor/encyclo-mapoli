@@ -4,6 +4,7 @@ public sealed record WagesCurrentYearResponse
     public required int BadgeNumber { get; set; }
     public decimal IncomeCurrentYear { get; set; }
     public decimal HoursCurrentYear { get; set; }
+    public short StoreNumber { get; set; }
 
     public static WagesCurrentYearResponse ResponseExample()
     {

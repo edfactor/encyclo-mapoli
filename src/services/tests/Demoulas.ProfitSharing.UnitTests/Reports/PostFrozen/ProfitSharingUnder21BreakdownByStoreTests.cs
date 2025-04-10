@@ -15,25 +15,24 @@ using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using FastEndpoints;
 using FluentAssertions;
 
-namespace Demoulas.ProfitSharing.UnitTests.Reports.PostFrozen
+namespace Demoulas.ProfitSharing.UnitTests.Reports.PostFrozen;
+
+public class ProfitSharingUnder21BreakdownByStoreTests : ApiTestBase<Program>
 {
-    public class ProfitSharingUnder21BreakdownByStoreTests : ApiTestBase<Program>
+    [Fact(DisplayName ="PS-759 - Profit Sharing under 21 Breakdown by Store")]
+    public async Task CheckUnder21BreakdownByStoreReport()
     {
-        [Fact(DisplayName ="PS-759 - Profit Sharing under 21 Breakdown by Store")]
-        public async Task CheckUnder21BreakdownByStoreReport()
-        {
-            var request = new ProfitYearRequest() { ProfitYear = 2024, Skip = 0, Take = 255 };
-            var response = await ApiClient.GETAsync<ProfitSharingUnder21BreakdownByStoreEndpoint, ProfitYearRequest, PaginatedResponseDto<ProfitSharingUnder21BreakdownByStoreResponse>>(request);
+        var request = new ProfitYearRequest() { ProfitYear = 2024, Skip = 0, Take = 255 };
+        var response = await ApiClient.GETAsync<ProfitSharingUnder21BreakdownByStoreEndpoint, ProfitYearRequest, PaginatedResponseDto<ProfitSharingUnder21BreakdownByStoreResponse>>(request);
 
-            response.Should().NotBeNull();
-            response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        response.Should().NotBeNull();
+        response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
 
-            ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-            response = await ApiClient.GETAsync<ProfitSharingUnder21BreakdownByStoreEndpoint, ProfitYearRequest, PaginatedResponseDto<ProfitSharingUnder21BreakdownByStoreResponse>>(request);
+        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+        response = await ApiClient.GETAsync<ProfitSharingUnder21BreakdownByStoreEndpoint, ProfitYearRequest, PaginatedResponseDto<ProfitSharingUnder21BreakdownByStoreResponse>>(request);
 
-            response.Should().NotBeNull();
-            response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Should().NotBeNull();
+        response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        }
     }
 }

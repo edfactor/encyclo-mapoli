@@ -4,66 +4,44 @@ import { DSMGrid } from "smart-ui-library";
 import { GetProfitSharingReportGridColumns } from "./EighteenToTwentyGridColumns";
 import { useNavigate, Path } from "react-router";
 import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
-interface EmployeeData {
-  badge: number;
-  employeeName: string;
-  store: number;
-  type: string;
-  dateOfBirth: string;
-  age: number;
-  ssn: string;
-  wages: number;
-  hours: number;
-  points: number;
-  new: string;
-  termDate: string | null;
-  currentBalance: number;
-  svc: number;
-}
+import { CAPTIONS } from "../../../constants";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../reduxstore/store";
+import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 
 const EighteenToTwentyGrid = () => {
   const navigate = useNavigate();
+  const [trigger, { data, isLoading }] = useLazyGetYearEndProfitSharingReportQuery();
 
-  const [trigger, { data, isLoading, error }] = useLazyGetYearEndProfitSharingReportQuery();
+  const hasToken = useSelector((state: RootState) => !!state.security.token);
+  const profitYear = useDecemberFlowProfitYear();
 
   useEffect(() => {
-    trigger({
-      isYearEnd: true,
-      minimumAgeInclusive: 17,
-      maximumAgeInclusive: 20,
-      minimumHoursInclusive: 999.9,
-      maximumHoursInclusive: 4000,
-      includeActiveEmployees: true,
-      includeInactiveEmployees: true,
-      includeEmployeesTerminatedThisYear: false,
-      includeTerminatedEmployees: false,
-      includeBeneficiaries: false,
-      includeEmployeesWithPriorProfitSharingAmounts: true,
-      includeEmployeesWithNoPriorProfitSharingAmounts: true,
-      profitYear: 2024,
-      pagination: {
-        skip: 0,
-        take: 25
-      }
-    });
-  }, [trigger]);
+    if (hasToken) {
+      trigger({
+        isYearEnd: true,
+        minimumAgeInclusive: 17,
+        maximumAgeInclusive: 20,
+        minimumHoursInclusive: 999.9,
+        maximumHoursInclusive: 4000,
+        includeActiveEmployees: true,
+        includeInactiveEmployees: true,
+        includeEmployeesTerminatedThisYear: false,
+        includeTerminatedEmployees: false,
+        includeBeneficiaries: false,
+        includeEmployeesWithPriorProfitSharingAmounts: true,
+        includeEmployeesWithNoPriorProfitSharingAmounts: true,
+        profitYear: profitYear,
+        pagination: {
+          skip: 0,
+          take: 25,
+          sortBy: "badgeNumber",
+          isSortDescending: true
+        }
+      });
+    }
+  }, [trigger, hasToken, profitYear]);
 
-  const getPinnedBottomRowData = (data: any[]) => {
-    return [
-      {
-        employeeName: "Total EMPS",
-        store: 1,
-        wages: 100.0,
-        currentBalance: 0
-      },
-      {
-        employeeName: "No Wages",
-        store: 0,
-        wages: 0,
-        currentBalance: 0
-      }
-    ];
-  };
   // Wrapper to pass react function to non-react class
   const handleNavigationForButton = useCallback(
     (destination: string | Partial<Path>) => {
@@ -83,7 +61,7 @@ const EighteenToTwentyGrid = () => {
         <Typography
           variant="h2"
           sx={{ color: "#0258A5" }}>
-          {`PROFIT-ELIGIBLE REPORT (${data?.response?.total || 0})`}
+          {`${CAPTIONS.PAY426_ACTIVE_18_20} (${data?.response?.total || 0} records)`}
         </Typography>
       </div>
       <DSMGrid

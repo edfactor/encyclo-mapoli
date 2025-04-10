@@ -1,4 +1,6 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate.Formatters;
@@ -35,16 +37,15 @@ internal sealed class ProfitShareUpdateReport
         ProfitShareUpdateService psu = new(_dbFactory, totalService, _calendarService);
         _profitYear = profitShareUpdateRequest.ProfitYear;
 
-        (List<MemberFinancials> members, AdjustmentReportData adjustmentsApplied, bool _) =
-            await psu.ProfitSharingUpdatePaginated(profitShareUpdateRequest, TestContext.Current.CancellationToken);
+        (List<MemberFinancials> members, AdjustmentsSummaryDto adjustmentsApplied, TotalsDto totalsDto, bool _) =
+            await psu.ProfitSharingUpdate(profitShareUpdateRequest, TestContext.Current.CancellationToken);
 
-        m805PrintSequence(members, profitShareUpdateRequest.MaxAllowedContributions);
+        m805PrintSequence(members, profitShareUpdateRequest.MaxAllowedContributions, totalsDto);
         m1000AdjustmentReport(profitShareUpdateRequest, adjustmentsApplied);
     }
 
-    public void m805PrintSequence(List<MemberFinancials> members, long maxAllowedContribution)
+    public void m805PrintSequence(List<MemberFinancials> members, long maxAllowedContribution, TotalsDto totalsDto)
     {
-        WRITE("\fDJDE JDE=PAY426,JDL=PAYROL,END,;");
         Header1 header_1 = new();
         header_1.HDR1_YY = TodaysDateTime.Year - 2000;
         header_1.HDR1_MM = TodaysDateTime.Month;
@@ -54,14 +55,13 @@ internal sealed class ProfitShareUpdateReport
         header_1.HDR1_MN = TodaysDateTime.Minute;
 
         ReportCounters reportCounters = new();
-        CollectTotals collectTotals = new();
 
         foreach (MemberFinancials memberFinancials in members)
         {
-            m810WriteReport(reportCounters, header_1, memberFinancials, collectTotals);
+            m810WriteReport(reportCounters, header_1, memberFinancials);
         }
 
-        m850PrintTotals(reportCounters, collectTotals, maxAllowedContribution);
+        m850PrintTotals(reportCounters, totalsDto, maxAllowedContribution);
     }
 
     private void WRITE(object obj)
@@ -70,8 +70,7 @@ internal sealed class ProfitShareUpdateReport
     }
 
 
-    public void m810WriteReport(ReportCounters reportCounters, Header1 header1, MemberFinancials memberFinancials,
-        CollectTotals collectTotals)
+    public void m810WriteReport(ReportCounters reportCounters, Header1 header1, MemberFinancials memberFinancials)
     {
         if (reportCounters.LineCounter > 60)
         {
@@ -131,22 +130,6 @@ internal sealed class ProfitShareUpdateReport
             beneReportLine.PR2_END_BAL = memberFinancials.EndingBalance;
         }
 
-        collectTotals.WS_TOT_BEGBAL += memberFinancials.CurrentAmount;
-        collectTotals.WS_TOT_DIST1 += memberFinancials.Distributions;
-        collectTotals.WS_TOT_CONT += memberFinancials.Contributions;
-        collectTotals.WS_TOT_MIL += memberFinancials.Military;
-        collectTotals.WS_TOT_FORF += memberFinancials.IncomingForfeitures;
-        collectTotals.WS_TOT_EARN += memberFinancials.AllEarnings;
-        collectTotals.WS_TOT_EARN2 += memberFinancials.AllSecondaryEarnings;
-        collectTotals.WS_TOT_ENDBAL += memberFinancials.EndingBalance;
-        collectTotals.WS_TOT_XFER += memberFinancials.Xfer;
-        collectTotals.WS_TOT_PXFER -= memberFinancials.Pxfer;
-        collectTotals.WS_EARN_PTS_TOTAL += memberFinancials.EarningPoints;
-        collectTotals.WS_PROF_PTS_TOTAL += memberFinancials.ContributionPoints;
-        collectTotals.WS_TOT_CAF += memberFinancials.Caf;
-        collectTotals.MaxOverTotal += memberFinancials.MaxOver;
-        collectTotals.MaxPointsTotal += memberFinancials.MaxPoints;
-
         if (memberFinancials.CurrentAmount != 0m
             || memberFinancials.Distributions != 0m
             || memberFinancials.Contributions != 0m
@@ -173,11 +156,13 @@ internal sealed class ProfitShareUpdateReport
         }
     }
 
+    const string prefix = "\n\nDJDE JDE=PAY426,JDL=PAYROL,END,;\n";
+
     public void m830PrintHeader(ReportCounters reportCounters, Header1 header1)
     {
         reportCounters.PageCounter += 1;
         header1.HDR1_PAGE = reportCounters.PageCounter;
-        WRITE($"\f{header1}");
+        WRITE($"{((ReportLines.Count == 0) ? prefix : "")}\n{header1}");
         WRITE("");
         WRITE(new Header2());
         WRITE(new Header3());
@@ -185,25 +170,24 @@ internal sealed class ProfitShareUpdateReport
     }
 
 
-    public void m850PrintTotals(ReportCounters reportCounters, CollectTotals wsClientTotals,
+    public void m850PrintTotals(ReportCounters reportCounters, TotalsDto wsClientTotalsDto,
         long maxAllowedContribution)
     {
         ClientTot client_tot = new();
-        client_tot.BEG_BAL_TOT = wsClientTotals.WS_TOT_BEGBAL;
-        client_tot.DIST1_TOT = wsClientTotals.WS_TOT_DIST1;
-        client_tot.MIL_TOT = wsClientTotals.WS_TOT_MIL;
-        client_tot.CONT_TOT = wsClientTotals.WS_TOT_CONT;
-        client_tot.FORF_TOT = wsClientTotals.WS_TOT_FORF;
-        client_tot.EARN_TOT = wsClientTotals.WS_TOT_EARN;
-        client_tot.EARN2_TOT = wsClientTotals.WS_TOT_EARN2;
-        if (wsClientTotals.WS_TOT_EARN2 != 0)
+        client_tot.BEG_BAL_TOT = wsClientTotalsDto.BeginningBalance;
+        client_tot.DIST1_TOT = wsClientTotalsDto.Distributions;
+        client_tot.MIL_TOT = wsClientTotalsDto.Military;
+        client_tot.CONT_TOT = wsClientTotalsDto.TotalContribution;
+        client_tot.FORF_TOT = wsClientTotalsDto.Forfeiture;
+        client_tot.EARN_TOT = wsClientTotalsDto.Earnings;
+        client_tot.EARN2_TOT = wsClientTotalsDto.Earnings2;
+        if (wsClientTotalsDto.Earnings2 != 0)
         {
-            Console.WriteLine($"WS_TOT_EARN2 NOT 0 {wsClientTotals.WS_TOT_EARN2}");
+            Console.WriteLine($"Earnings2 NOT 0 {wsClientTotalsDto.Earnings2}");
         }
 
-        client_tot.EARN2_TOT = wsClientTotals.WS_TOT_CAF;
-        client_tot.END_BAL_TOT = wsClientTotals.WS_TOT_ENDBAL;
-
+        client_tot.EARN2_TOT = wsClientTotalsDto.ClassActionFund;
+        client_tot.END_BAL_TOT = wsClientTotalsDto.EndingBalance;
 
         TotalHeader1 total_header_1 = new();
         total_header_1.TOT_HDR1_YEAR1 = _profitYear;
@@ -220,32 +204,16 @@ internal sealed class ProfitShareUpdateReport
         WRITE("");
         WRITE(client_tot);
 
-        client_tot.BEG_BAL_TOT = 0m;
-        client_tot.DIST1_TOT = 0m;
-        client_tot.CONT_TOT = 0m;
-        client_tot.MIL_TOT = 0m;
-        client_tot.FORF_TOT = 0m;
-        client_tot.EARN_TOT = 0m;
-        client_tot.END_BAL_TOT = 0m;
-        client_tot.EARN2_TOT = 0m;
-
-        client_tot.CONT_TOT = wsClientTotals.WS_TOT_XFER;
-        client_tot.MIL_TOT = wsClientTotals.WS_TOT_PXFER;
-        client_tot.END_BAL_TOT = wsClientTotals.WS_TOT_PXFER + wsClientTotals.WS_TOT_XFER;
+        client_tot = new();
+        client_tot.CONT_TOT = wsClientTotalsDto.Allocations;
+        client_tot.MIL_TOT = wsClientTotalsDto.PaidAllocations;
+        client_tot.END_BAL_TOT = wsClientTotalsDto.PaidAllocations + wsClientTotalsDto.Allocations;
         client_tot.TOT_FILLER = "ALLOC   ";
         WRITE(client_tot);
 
-        client_tot.BEG_BAL_TOT = 0m;
-        client_tot.DIST1_TOT = 0m;
-        client_tot.CONT_TOT = 0m;
-        client_tot.MIL_TOT = 0m;
-        client_tot.FORF_TOT = 0m;
-        client_tot.EARN_TOT = 0m;
-        client_tot.END_BAL_TOT = 0m;
-        client_tot.EARN2_TOT = 0m;
-
-        client_tot.CONT_TOT = wsClientTotals.WS_PROF_PTS_TOTAL;
-        client_tot.EARN_TOT = wsClientTotals.WS_EARN_PTS_TOTAL;
+        client_tot = new();
+        client_tot.CONT_TOT = wsClientTotalsDto.ContributionPoints;
+        client_tot.EARN_TOT = wsClientTotalsDto.EarningPoints;
         client_tot.useRedefineFormatting = true;
         client_tot.TOT_FILLER = "POINT";
         WRITE("");
@@ -261,8 +229,8 @@ internal sealed class ProfitShareUpdateReport
         WRITE(beneficiaryCountTotPayben);
 
         RerunTotals rerunTotals = new();
-        rerunTotals.RERUN_OVER = wsClientTotals.MaxOverTotal;
-        rerunTotals.RERUN_POINTS = wsClientTotals.MaxPointsTotal;
+        rerunTotals.RERUN_OVER = wsClientTotalsDto.MaxOverTotal;
+        rerunTotals.RERUN_POINTS = wsClientTotalsDto.MaxPointsTotal;
         rerunTotals.RERUN_MAX = maxAllowedContribution;
 
         ReportLines.Add("\n\n\n\n\n\n\n\n\n");
@@ -271,7 +239,7 @@ internal sealed class ProfitShareUpdateReport
 
 
     public void m1000AdjustmentReport(ProfitShareUpdateRequest profitShareUpdateRequest,
-        AdjustmentReportData adjustmentsApplied)
+        AdjustmentsSummaryDto adjustmentsApplied)
     {
         if (profitShareUpdateRequest.BadgeToAdjust == 0)
         {

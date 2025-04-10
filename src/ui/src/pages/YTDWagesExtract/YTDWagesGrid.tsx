@@ -8,39 +8,46 @@ import { GetYTDWagesColumns } from "./YTDWagesGridColumn";
 
 import { RefObject } from "react";
 import { useLazyGetEmployeeWagesForYearQuery } from "reduxstore/api/YearsEndApi";
+import useFiscalCloseProfitYear from "../../hooks/useFiscalCloseProfitYear";
 
 interface YTDWagesGridProps {
-  innerRef: RefObject<HTMLDivElement>;
+  innerRef: RefObject<HTMLDivElement | null>;
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
 }
 
 const YTDWagesGrid = ({ innerRef, initialSearchLoaded, setInitialSearchLoaded }: YTDWagesGridProps) => {
+  const hasToken = !!useSelector((state: RootState) => state.security.token);
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
+  const [sortParams, setSortParams] = useState<ISortParams>({
+    sortBy: "storeNumber",
+    isSortDescending: false
+  });
+  const fiscalCloseProfitYear = useFiscalCloseProfitYear();
   const [triggerSearch, { isFetching }] = useLazyGetEmployeeWagesForYearQuery();
   const { employeeWagesForYearQueryParams } = useSelector((state: RootState) => state.yearsEnd);
 
   const onSearch = useCallback(async () => {
     const request = {
-      profitYear: employeeWagesForYearQueryParams?.profitYear ?? 0,
-      pagination: { skip: pageNumber * pageSize, take: pageSize },
+      profitYear: employeeWagesForYearQueryParams?.profitYear ?? fiscalCloseProfitYear,
+      pagination: {
+        skip: pageNumber * pageSize,
+        take: pageSize,
+        sortBy: sortParams.sortBy,
+        isSortDescending: sortParams.isSortDescending
+      },
       acceptHeader: "application/json"
     };
 
     await triggerSearch(request, false);
-  }, [pageNumber, pageSize, triggerSearch, employeeWagesForYearQueryParams?.profitYear]);
+  }, [pageNumber, pageSize, sortParams, triggerSearch, employeeWagesForYearQueryParams?.profitYear]);
 
   useEffect(() => {
-    if (initialSearchLoaded) {
+    if (initialSearchLoaded && hasToken) {
       onSearch();
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, onSearch]);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "Badge",
-    isSortDescending: false
-  });
+  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch, hasToken]);
 
   const { employeeWagesForYear } = useSelector((state: RootState) => state.yearsEnd);
 
@@ -55,7 +62,7 @@ const YTDWagesGrid = ({ innerRef, initialSearchLoaded, setInitialSearchLoaded }:
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`${CAPTIONS.YTD_WAGES_EXTRACT} (${employeeWagesForYear.response.total || 0})`}
+              {`${CAPTIONS.YTD_WAGES_EXTRACT} (${employeeWagesForYear.response.total || 0} records)`}
             </Typography>
           </div>
           <DSMGrid

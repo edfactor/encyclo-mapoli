@@ -1,8 +1,8 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-import {  setMasterInquiryData} from "reduxstore/slices/inquirySlice";
+import { setMasterInquiryData } from "reduxstore/slices/inquirySlice";
 import { RootState } from "reduxstore/store";
-import {  MasterInquiryRequest,  MasterInquiryResponseType} from "reduxstore/types";
+import { MasterInquiryRequest, MasterInquiryResponseType } from "reduxstore/types";
 import { url } from "./api";
 
 export const InquiryApi = createApi({
@@ -18,7 +18,9 @@ export const InquiryApi = createApi({
         headers.set("impersonation", impersonating);
       } else {
         const localImpersonation = localStorage.getItem("impersonatingRole");
-        !!localImpersonation && headers.set("impersonation", localImpersonation);
+        if (localImpersonation) {
+          headers.set("impersonation", localImpersonation);
+        }
       }
       return headers;
     }
@@ -28,9 +30,10 @@ export const InquiryApi = createApi({
     getProfitMasterInquiry: builder.query<MasterInquiryResponseType, MasterInquiryRequest>({
       query: (params) => ({
         url: "master/master-inquiry",
-        method: "GET",
-        params: {
-          badgeNumber: params.badgeNumber,
+        method: "POST",
+        body: {
+          badgeNumber: Number(params.badgeNumber?.toString().substring(0, 6)),
+          psnSuffix: Number(params.badgeNumber?.toString().substring(6)),
           startProfitYear: params.startProfitYear,
           endProfitYear: params.endProfitYear,
           startProfitMonth: params.startProfitMonth,
@@ -62,6 +65,4 @@ export const InquiryApi = createApi({
   })
 });
 
-export const {  
-  useLazyGetProfitMasterInquiryQuery,  
-} = InquiryApi;
+export const { useLazyGetProfitMasterInquiryQuery } = InquiryApi;

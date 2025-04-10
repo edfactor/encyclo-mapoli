@@ -1,29 +1,65 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetForfeituresByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, TotalsGrid } from "smart-ui-library";
 import { GetForfeituresByAgeColumns } from "./ForfeituresByAgeGridColumns";
-import Grid2 from '@mui/material/Grid2';
+import Grid2 from "@mui/material/Grid2";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
 import { numberToCurrency } from "smart-ui-library";
 
-const ForfeituresByAgeGrid = () => {
+interface ForfeituresByAgeGridProps {
+  initialSearchLoaded: boolean;
+}
+
+const ForfeituresByAgeGrid: React.FC<ForfeituresByAgeGridProps> = ({ initialSearchLoaded }) => {
   const [_discard0, setSortParams] = useState<ISortParams>({
-    sortBy: "Badge",
+    sortBy: "badgeNumber",
     isSortDescending: false
   });
 
-  const { forfeituresByAgeTotal, forfeituresByAgeFullTime, forfeituresByAgePartTime } = useSelector(
-    (state: RootState) => state.yearsEnd
-  );
-  const [_discard1, { isLoading }] = useLazyGetForfeituresByAgeQuery();
+  const { forfeituresByAgeTotal, forfeituresByAgeFullTime, forfeituresByAgePartTime, forfeituresByAgeQueryParams } =
+    useSelector((state: RootState) => state.yearsEnd);
+  const [triggerSearch, { isLoading }] = useLazyGetForfeituresByAgeQuery();
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
   const columnDefsTotal = GetForfeituresByAgeColumns(FrozenReportsByAgeRequestType.Total);
   const columnDefsFullTime = GetForfeituresByAgeColumns(FrozenReportsByAgeRequestType.FullTime);
   const columnDefsPartTime = GetForfeituresByAgeColumns(FrozenReportsByAgeRequestType.PartTime);
+
+  const onSearch = useCallback(async () => {
+    triggerSearch(
+      {
+        profitYear: forfeituresByAgeQueryParams?.profitYear || 0,
+        reportType: FrozenReportsByAgeRequestType.Total,
+        pagination: { skip: 0, take: 255 }
+      },
+      false
+    ).unwrap();
+    triggerSearch(
+      {
+        profitYear: forfeituresByAgeQueryParams?.profitYear || 0,
+        reportType: FrozenReportsByAgeRequestType.FullTime,
+        pagination: { skip: 0, take: 255 }
+      },
+      false
+    ).unwrap();
+    triggerSearch(
+      {
+        profitYear: forfeituresByAgeQueryParams?.profitYear || 0,
+        reportType: FrozenReportsByAgeRequestType.PartTime,
+        pagination: { skip: 0, take: 255 }
+      },
+      false
+    ).unwrap();
+  }, [triggerSearch, forfeituresByAgeQueryParams?.profitYear]);
+
+  useEffect(() => {
+    if (initialSearchLoaded && forfeituresByAgeQueryParams?.profitYear) {
+      onSearch();
+    }
+  }, [forfeituresByAgeQueryParams?.profitYear, initialSearchLoaded, onSearch]);
 
   return (
     <>
@@ -58,52 +94,39 @@ const ForfeituresByAgeGrid = () => {
               leftColumnHeaders={["PartTime"]}
               topRowHeaders={["", "EMPS", "Amount"]}></TotalsGrid>
           </div>
-          <Grid2 size={{ xs: 12 }} container >
-            <Grid2 size={{ xs: 4 }} >
+          <Grid2
+            size={{ xs: 12 }}
+            container>
+            <Grid2 size={{ xs: 4 }}>
               <DSMGrid
                 preferenceKey={"AGE_Total"}
                 isLoading={isLoading}
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: forfeituresByAgeTotal?.response.results,
-                  columnDefs: [
-                    {
-                      headerName: columnDefsTotal.headerName,
-                      children: columnDefsTotal.children
-                    }
-                  ]
+                  columnDefs: columnDefsTotal
                 }}
               />
             </Grid2>
-            <Grid2 size={{ xs: 4 }} >
+            <Grid2 size={{ xs: 4 }}>
               <DSMGrid
                 preferenceKey={"AGE_FullTime"}
                 isLoading={isLoading}
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: forfeituresByAgeFullTime?.response.results,
-                  columnDefs: [
-                    {
-                      headerName: columnDefsFullTime.headerName,
-                      children: columnDefsFullTime.children
-                    }
-                  ]
+                  columnDefs: columnDefsFullTime
                 }}
               />
             </Grid2>
-            <Grid2 size={{ xs: 4 }} >
+            <Grid2 size={{ xs: 4 }}>
               <DSMGrid
                 preferenceKey={"AGE_PartTime"}
                 isLoading={isLoading}
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: forfeituresByAgePartTime?.response.results,
-                  columnDefs: [
-                    {
-                      headerName: columnDefsPartTime.headerName,
-                      children: columnDefsPartTime.children
-                    }
-                  ]
+                  columnDefs: columnDefsPartTime
                 }}
               />
             </Grid2>

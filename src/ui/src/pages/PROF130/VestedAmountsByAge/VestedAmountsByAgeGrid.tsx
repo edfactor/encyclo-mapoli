@@ -4,8 +4,8 @@ import { useSelector } from "react-redux";
 import { useLazyGetVestingAmountByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams } from "smart-ui-library";
-import { GetVestedAmountsByAgeColumns } from "./VestedAmountsByAgeGridColumns";
 import { VestedAmountsByAge } from "../../../reduxstore/types";
+import { GetVestedAmountsByAgeColumns } from "./VestedAmountsByAgeGridColumns";
 
 interface VestedAmountsByAgeGridProps {
   gridTitle: string;
@@ -21,12 +21,12 @@ const VestedAmountsByAgeGrid: React.FC<VestedAmountsByAgeGridProps> = ({
   totalCount
 }) => {
   const [_sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "Badge",
+    sortBy: "badgeNumber",
     isSortDescending: false
   });
 
   const { vestedAmountsByAge } = useSelector((state: RootState) => state.yearsEnd);
-  const [_trigger, { isLoading }] = useLazyGetVestingAmountByAgeQuery();
+  const [_triggerSearch, { isLoading }] = useLazyGetVestingAmountByAgeQuery();
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 

@@ -1,7 +1,7 @@
 import { InfoOutlined } from "@mui/icons-material";
 import Alert from "@mui/material/Alert";
 import { purple } from "@mui/material/colors";
-import { ICommon } from "./ICommon";
+import { ICommon } from "../ICommon";
 
 export interface IEnvironmentBannerProps extends ICommon {
   environmentMode: "development" | "qa" | "uat" | "production";

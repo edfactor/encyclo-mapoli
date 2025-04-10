@@ -1,0 +1,42 @@
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Endpoints.Groups;
+using FastEndpoints;
+
+namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitMaster;
+
+public class ProfitMasterStatusEndpoint : Endpoint<ProfitYearRequest, ProfitMasterUpdateResponse>
+{
+    private readonly IProfitMasterService _profitMasterService;
+
+    public ProfitMasterStatusEndpoint(IProfitMasterService profitMasterService)
+    {
+        _profitMasterService = profitMasterService;
+    }
+
+    public override void Configure()
+    {
+        Get("profit-master-status");
+        Summary(s =>
+        {
+            s.Summary = "Shows a summary of the current profit share update status";
+            s.ExampleRequest = ProfitYearRequest.RequestExample();
+            s.ResponseExamples = new Dictionary<int, object> { { 200, ProfitMasterUpdateResponse.Example() } };
+        });
+        Group<YearEndGroup>();
+    }
+
+    public override async Task HandleAsync(ProfitYearRequest req, CancellationToken ct)
+    {
+        var response = await _profitMasterService.Status(req, ct);
+        if (response == null)
+        {
+            await SendNoContentAsync(ct);
+        }
+        else
+        {
+            await SendOkAsync(response, ct);
+        }
+    }
+}

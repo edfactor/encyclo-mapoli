@@ -15,6 +15,7 @@ using Demoulas.ProfitSharing.Services.Extensions;
 using Demoulas.Security;
 using Demoulas.Util.Extensions;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using NSwag.Generation.AspNetCore;
 using Scalar.AspNetCore;
 
@@ -96,6 +97,9 @@ builder.ConfigureDefaultEndpoints(meterNames: [],
         activitySourceNames: [OracleHcmActivitySource.Instance.Name])
     .AddSwaggerOpenApi(oktaSettingsAction: OktaSettingsAction, documentSettingsAction: OktaDocumentSettings)
     .AddSwaggerOpenApi(version: 2, oktaSettingsAction: OktaSettingsAction, documentSettingsAction: OktaDocumentSettings);
+
+builder.Services.AddHostedService<MetricLogger>();
+
 
 WebApplication app = builder.Build();
 

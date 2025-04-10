@@ -25469,11 +25469,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<decimal>("Amount")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("AMOUNT");
-
                     b.Property<int>("BadgeNumber")
                         .HasPrecision(7)
                         .HasColumnType("NUMBER(7)")
@@ -25487,16 +25482,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasPrecision(9)
                         .HasColumnType("NUMBER(9)")
                         .HasColumnName("DEMOGRAPHIC_ID");
-
-                    b.Property<decimal>("Distribution")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("DISTRIBUTION");
-
-                    b.Property<decimal>("Earnings")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("EARNINGS");
 
                     b.Property<string>("KindId")
                         .HasColumnType("NVARCHAR2(1)")
@@ -25516,11 +25501,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("NVARCHAR2(10)")
                         .HasColumnName("RELATIONSHIP");
-
-                    b.Property<decimal>("SecondaryEarnings")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("SECONDARY_EARNINGS");
 
                     b.HasKey("Id")
                         .HasName("PK_BENEFICIARY");
@@ -29177,11 +29157,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("DECIMAL(9,2)")
                         .HasColumnName("CURRENT_INCOME_YEAR");
 
-                    b.Property<decimal>("EarningsEtvaValue")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("EARNINGS_ETVA_VALUE");
-
                     b.Property<byte>("EmployeeTypeId")
                         .HasColumnType("NUMBER(3)")
                         .HasColumnName("EMPLOYEE_TYPE_ID");
@@ -29219,16 +29194,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<DateTime?>("PsCertificateIssuedDate")
                         .HasColumnType("DATE")
                         .HasColumnName("PS_CERTIFICATE_ISSUED_DATE");
-
-                    b.Property<decimal?>("SecondaryEarnings")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("SECONDARY_EARNINGS");
-
-                    b.Property<decimal?>("SecondaryEtvaEarnings")
-                        .HasPrecision(9, 2)
-                        .HasColumnType("DECIMAL(9,2)")
-                        .HasColumnName("SECONDARY_ETVA_EARNINGS");
 
                     b.Property<byte>("WeeksWorkedYear")
                         .HasPrecision(2)
@@ -29889,6 +29854,111 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             Id = "Z",
                             Name = "IsDeceased"
                         });
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.YearEndUpdateStatus", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(9)
+                        .HasColumnType("NUMBER(9)")
+                        .HasColumnName("ID");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("AdjustContributionAmount")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("DECIMAL(5,2)")
+                        .HasColumnName("ADJUST_CONTRIBUTION_AMOUNT");
+
+                    b.Property<decimal>("AdjustEarningsAmount")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("DECIMAL(5,2)")
+                        .HasColumnName("ADJUST_EARNINGS_AMOUNT");
+
+                    b.Property<decimal>("AdjustEarningsSecondaryAmount")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("DECIMAL(5,2)")
+                        .HasColumnName("ADJUST_EARNINGS_SECONDARY_AMOUNT");
+
+                    b.Property<decimal>("AdjustIncomingForfeitAmount")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("DECIMAL(5,2)")
+                        .HasColumnName("ADJUST_INCOMING_FORFEIT_AMOUNT");
+
+                    b.Property<long>("BadgeAdjusted")
+                        .HasPrecision(7)
+                        .HasColumnType("NUMBER(7)")
+                        .HasColumnName("BADGE_ADJUSTED");
+
+                    b.Property<long>("BadgeAdjusted2")
+                        .HasPrecision(7)
+                        .HasColumnType("NUMBER(7)")
+                        .HasColumnName("BADGE_ADJUSTED2");
+
+                    b.Property<int>("BeneficiariesEffected")
+                        .HasPrecision(6)
+                        .HasColumnType("NUMBER(6)")
+                        .HasColumnName("BENEFICIARIES_EFFECTED");
+
+                    b.Property<decimal>("ContributionPercent")
+                        .HasPrecision(9, 6)
+                        .HasColumnType("DECIMAL(9,6)")
+                        .HasColumnName("CONTRIBUTION_PERCENT");
+
+                    b.Property<decimal>("EarningsPercent")
+                        .HasPrecision(9, 6)
+                        .HasColumnType("DECIMAL(9,6)")
+                        .HasColumnName("EARNINGS_PERCENT");
+
+                    b.Property<int>("EmployeesEffected")
+                        .HasPrecision(6)
+                        .HasColumnType("NUMBER(6)")
+                        .HasColumnName("EMPLOYEES_EFFECTED");
+
+                    b.Property<int>("EtvasEffected")
+                        .HasPrecision(6)
+                        .HasColumnType("NUMBER(6)")
+                        .HasColumnName("ETVAS_EFFECTED");
+
+                    b.Property<decimal>("IncomingForfeitPercent")
+                        .HasPrecision(9, 6)
+                        .HasColumnType("DECIMAL(9,6)")
+                        .HasColumnName("INCOMING_FORFEIT_PERCENT");
+
+                    b.Property<long>("MaxAllowedContributions")
+                        .HasPrecision(6)
+                        .HasColumnType("NUMBER(6)")
+                        .HasColumnName("MAX_ALLOWED_CONTRIBUTIONS");
+
+                    b.Property<short>("ProfitYear")
+                        .HasPrecision(4)
+                        .HasColumnType("NUMBER(4)")
+                        .HasColumnName("PROFIT_YEAR");
+
+                    b.Property<decimal>("SecondaryEarningsPercent")
+                        .HasPrecision(9, 6)
+                        .HasColumnType("DECIMAL(9,6)")
+                        .HasColumnName("SECONDARY_EARNINGS_PERCENT");
+
+                    b.Property<string>("UpdatedBy")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("NVARCHAR2(64)")
+                        .HasColumnName("UPDATED_BY");
+
+                    b.Property<DateTime>("UpdatedTime")
+                        .HasColumnType("DATE")
+                        .HasColumnName("UPDATED_DATE");
+
+                    b.HasKey("Id")
+                        .HasName("PK_YE_UPDATE_STATUS");
+
+                    b.HasIndex(new[] { "ProfitYear" }, "IX_YE_UPDATE_STATUS_PROFIT_YEAR")
+                        .IsUnique()
+                        .HasDatabaseName("IX_YE_UPDATE_STATUS_PROFIT_YEAR");
+
+                    b.ToTable("YE_UPDATE_STATUS", (string)null);
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.ZeroContributionReason", b =>

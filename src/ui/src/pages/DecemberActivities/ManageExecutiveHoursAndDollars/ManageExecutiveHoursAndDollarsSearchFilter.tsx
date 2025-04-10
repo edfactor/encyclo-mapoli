@@ -1,15 +1,14 @@
+import { yupResolver } from "@hookform/resolvers/yup";
 import { Checkbox, FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
-import { useForm, Controller } from "react-hook-form";
-import {
-  useLazyGetExecutiveHoursAndDollarsQuery,
-  useLazyGetAdditionalExecutivesQuery
-} from "reduxstore/api/YearsEndApi";
-import { SearchAndReset } from "smart-ui-library";
+import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
+import { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
-import { RootState } from "reduxstore/store";
+import {
+  useLazyGetAdditionalExecutivesQuery,
+  useLazyGetExecutiveHoursAndDollarsQuery
+} from "reduxstore/api/YearsEndApi";
 import {
   clearAdditionalExecutivesChosen,
   clearEligibleEmployeesQueryParams,
@@ -17,7 +16,9 @@ import {
   setExecutiveHoursAndDollarsGridYear,
   setExecutiveHoursAndDollarsQueryParams
 } from "reduxstore/slices/yearsEndSlice";
-import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
+import { RootState } from "reduxstore/store";
+import { ISortParams, SearchAndReset } from "smart-ui-library";
+import * as yup from "yup";
 
 interface ExecutiveHoursAndDollarsSearch {
   profitYear: number;
@@ -66,11 +67,18 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
   isModal,
   setInitialSearchLoaded
 }) => {
-  const { executiveHoursAndDollarsQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const { executiveHoursAndDollarsQueryParams, executiveHoursAndDollars } = useSelector(
+    (state: RootState) => state.yearsEnd
+  );
   const profitYear = useDecemberFlowProfitYear();
 
   const [triggerSearch, { isFetching }] = useLazyGetExecutiveHoursAndDollarsQuery();
   const [triggerModalSearch, { isFetching: isModalFetching }] = useLazyGetAdditionalExecutivesQuery();
+
+  const [sortParams, setSortParams] = useState<ISortParams>({
+    sortBy: "badgeNumber",
+    isSortDescending: false
+  });
 
   const dispatch = useDispatch();
 
@@ -107,7 +115,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
     if (isValid && !isModal) {
       triggerSearch(
         {
-          pagination: { skip: 0, take: 25 },
+          pagination: { skip: 0, take: 25, sortBy: sortParams.sortBy, isSortDescending: sortParams.isSortDescending },
           profitYear: data.profitYear,
           ...(!!data.socialSecurity && { socialSecurity: data.socialSecurity }),
           ...(!!data.badgeNumber && { badgeNumber: data.badgeNumber }),
@@ -138,7 +146,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
     if (isValid && isModal) {
       triggerModalSearch(
         {
-          pagination: { skip: 0, take: 25 },
+          pagination: { skip: 0, take: 25, sortBy: sortParams.sortBy, isSortDescending: sortParams.isSortDescending },
           profitYear: data.profitYear,
           ...(!!data.socialSecurity && { socialSecurity: data.socialSecurity }),
           ...(!!data.badgeNumber && { badgeNumber: data.badgeNumber }),
@@ -150,6 +158,10 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
       );
     }
   });
+
+  if (profitYear && !executiveHoursAndDollars) {
+    setInitialSearchLoaded(true);
+  }
 
   const handleReset = () => {
     // If we ever decide that the reset button should clear pending changes
