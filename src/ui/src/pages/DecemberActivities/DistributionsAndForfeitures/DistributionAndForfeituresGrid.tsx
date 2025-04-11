@@ -3,10 +3,11 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetDistributionsAndForfeituresQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { DSMGrid, ISortParams, numberToCurrency, Pagination } from "smart-ui-library";
 import { GetDistributionsAndForfeituresColumns } from "./DistributionAndForfeituresGridColumns";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import { CAPTIONS } from "../../../constants";
+import { TotalsGrid } from "../../../components/TotalsGrid/TotalsGrid";
 
 interface DistributionsAndForfeituresGridSearchProps {
   initialSearchLoaded: boolean;
@@ -68,6 +69,26 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
     <>
       {distributionsAndForfeitures?.response && (
         <>
+
+          <div className="flex sticky top-0 z-10 bg-white">
+            <TotalsGrid
+              displayData={[[numberToCurrency(distributionsAndForfeitures.distributionTotal || 0)]]}
+              leftColumnHeaders={["Distributions"]}
+              topRowHeaders={[]}></TotalsGrid>
+            <TotalsGrid
+              displayData={[[numberToCurrency(distributionsAndForfeitures.stateTaxTotal || 0)]]}
+              leftColumnHeaders={["StateTaxs"]}
+              topRowHeaders={[]}></TotalsGrid>
+            <TotalsGrid
+              displayData={[[numberToCurrency(distributionsAndForfeitures.federalTaxTotal || 0)]]}
+              leftColumnHeaders={["FederalTaxs"]}
+              topRowHeaders={[]}></TotalsGrid>
+            <TotalsGrid
+              displayData={[[numberToCurrency(distributionsAndForfeitures.forfeitureTotal || 0)]]}
+              leftColumnHeaders={["Forfeitures"]}
+              topRowHeaders={[]}></TotalsGrid>
+          </div>
+          
           <div style={{ padding: "0 24px 0 24px" }}>
             <Typography
               variant="h2"

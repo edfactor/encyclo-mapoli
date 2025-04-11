@@ -9,7 +9,10 @@ using Demoulas.ProfitSharing.Endpoints.Groups;
 using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup.DistributionsAndForfeitureEndpoint;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
-public class DistributionsAndForfeitureEndpoint: EndpointWithCsvBase<DistributionsAndForfeituresRequest, DistributionsAndForfeitureResponse, DistributionsAndForfeitureResponseMap>
+public class DistributionsAndForfeitureEndpoint: EndpointWithCsvTotalsBase<DistributionsAndForfeituresRequest, 
+    DistributionsAndForfeitureTotalsResponse, 
+    DistributionsAndForfeitureResponse, 
+    DistributionsAndForfeitureResponseMap>
 {
     private readonly ICleanupReportService _cleanupReportService;
 
@@ -48,7 +51,7 @@ public class DistributionsAndForfeitureEndpoint: EndpointWithCsvBase<Distributio
 
     public override string ReportFileName => "DistributionsAndForfeitures";
 
-    public override Task<ReportResponseBase<DistributionsAndForfeitureResponse>> GetResponse(DistributionsAndForfeituresRequest req, CancellationToken ct)
+    public override Task<DistributionsAndForfeitureTotalsResponse> GetResponse(DistributionsAndForfeituresRequest req, CancellationToken ct)
     {
         return _cleanupReportService.GetDistributionsAndForfeitureAsync(req, ct);
     }

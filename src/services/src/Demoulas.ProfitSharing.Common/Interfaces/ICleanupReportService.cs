@@ -13,6 +13,6 @@ public interface ICleanupReportService
     Task<YearEndProfitSharingReportResponse> GetYearEndProfitSharingReportAsync(YearEndProfitSharingReportRequest req, CancellationToken cancellationToken = default);
     Task<ReportResponseBase<DuplicateNamesAndBirthdaysResponse>> GetDuplicateNamesAndBirthdaysAsync(ProfitYearRequest req, CancellationToken cancellationToken = default);
     Task<ReportResponseBase<DemographicBadgesNotInPayProfitResponse>> GetDemographicBadgesNotInPayProfitAsync(SortedPaginationRequestDto req,CancellationToken cancellationToken = default);
-    Task<ReportResponseBase<DistributionsAndForfeitureResponse>> GetDistributionsAndForfeitureAsync(DistributionsAndForfeituresRequest req, CancellationToken cancellationToken = default);
+    Task<DistributionsAndForfeitureTotalsResponse> GetDistributionsAndForfeitureAsync(DistributionsAndForfeituresRequest req, CancellationToken cancellationToken = default);
     Task<YearEndProfitSharingReportSummaryResponse> GetYearEndProfitSharingSummaryReportAsync(FrozenProfitYearRequest req, CancellationToken cancellationToken = default);
 }
