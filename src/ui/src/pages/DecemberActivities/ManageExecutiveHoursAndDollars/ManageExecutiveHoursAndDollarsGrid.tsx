@@ -85,6 +85,24 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
 }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
+
+  // These are for the modal window
+  const [pageAddNumber, setPageAddNumber] = useState(0);
+  const [pageAddSize, setPageAddSize] = useState(25);
+
+  let properPageNumber = pageNumber;
+  let properPageSize = pageSize;
+
+  let setProperPageNumber = setPageNumber;
+  let setProperPageSize = setPageSize;
+
+  if (isModal) {
+    properPageNumber = pageAddNumber;
+    properPageSize = pageAddSize;
+    setProperPageNumber = setPageAddNumber;
+    setProperPageSize = setPageAddSize;
+  }
+
   const [openModal, setOpenModal] = useState<boolean>(false);
   const dispatch = useDispatch();
   const { executiveHoursAndDollarsQueryParams } = useSelector((state: RootState) => state.yearsEnd);
@@ -121,20 +139,20 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
       hasExecutiveHoursAndDollars: executiveHoursAndDollarsQueryParams.hasExecutiveHoursAndDollars ?? false,
       isMonthlyPayroll: executiveHoursAndDollarsQueryParams.isMonthlyPayroll ?? false,
       pagination: {
-        skip: pageNumber * pageSize,
-        take: pageSize,
+        skip: properPageNumber * properPageSize,
+        take: properPageSize,
         sortBy: sortParams.sortBy,
         isSortDescending: sortParams.isSortDescending
       }
     };
     await triggerSearch(request, false);
-  }, [executiveHoursAndDollarsQueryParams, pageNumber, pageSize, sortParams, triggerSearch]);
+  }, [executiveHoursAndDollarsQueryParams, properPageNumber, properPageSize, sortParams, triggerSearch]);
 
   useEffect(() => {
     if (initialSearchLoaded) {
       onSearch();
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch]);
+  }, [initialSearchLoaded, properPageNumber, properPageSize, sortParams, onSearch]);
 
   // This function checks to see if we have a change for this badge number already pending for a save
   const isRowStagedToSave = (badge: number): boolean => {
@@ -353,18 +371,20 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
       )}
       {isPaginationNeeded(isModal) && (
         <Pagination
-          pageNumber={pageNumber}
+          pageNumber={properPageNumber}
           setPageNumber={(value: number) => {
-            setPageNumber(value - 1);
+            setProperPageNumber(value - 1);
             setInitialSearchLoaded(true);
           }}
-          pageSize={pageSize}
+          pageSize={properPageSize}
           setPageSize={(value: number) => {
-            setPageSize(value);
-            setPageNumber(1);
+            setProperPageSize(value);
+            setProperPageNumber(1);
             setInitialSearchLoaded(true);
           }}
-          recordCount={mutableCopyOfGridData?.response.total ?? 0}
+          recordCount={
+            isModal ? (additionalExecutivesGrid?.response.total ?? 0) : (mutableCopyOfGridData?.response.total ?? 0)
+          }
         />
       )}
       <SmartModal
