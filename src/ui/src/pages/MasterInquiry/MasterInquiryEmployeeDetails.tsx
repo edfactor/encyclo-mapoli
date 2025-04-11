@@ -7,6 +7,7 @@ import { mmDDYYFormat, numberToCurrency } from "smart-ui-library";
 import { formatPercentage } from "utils/formatPercentage";
 import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
 import { tryddmmyyyyToDate } from "../../utils/dateUtils";
+import { getEnrolledStatus, getForfeitedStatus } from "../../utils/enrollmentUtil";
 
 interface MasterInquiryEmployeeDetailsProps {
   details: EmployeeDetails;
@@ -39,16 +40,6 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     currentVestedAmount,
     currentEtva,
   } = details;
-
-  const getEnrolledStatus = (id: number): string => {
-    const enrolledIds = [1, 2, 3, 4];
-    return enrolledIds.includes(id) ? "Y" : "N";
-  };
-
-  const getForfeitedStatus = (id: number): string => {
-    const forfeitedIds = [3, 4];
-    return forfeitedIds.includes(id) ? "Y" : "N";
-  };
 
   const enrolled = getEnrolledStatus(enrollmentId);
   const forfeited = getForfeitedStatus(enrollmentId);

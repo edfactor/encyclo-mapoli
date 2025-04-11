@@ -215,7 +215,7 @@ public class PostFrozenService : IPostFrozenService
                 }
             );
             var pagedResults = await qry.ToPaginationResultsAsync(request, cancellation);
-            var fiscalEndDateTime = calInfo.FiscalEndDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
+            var fiscalEndDateTime = calInfo.FiscalEndDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Local);
             foreach (var row in pagedResults.Results)
             {
                 row.Age = (byte)row.DateOfBirth.Age(fiscalEndDateTime);
@@ -269,7 +269,7 @@ public class PostFrozenService : IPostFrozenService
             ).ToPaginationResultsAsync(request, cancellationToken);
         });
 
-        var fiscalEndDateTime = calInfo.FiscalEndDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
+        var fiscalEndDateTime = calInfo.FiscalEndDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Local);
         foreach (var row in rslt.Results) {
             row.Age = (byte)row.BirthDate.Age(fiscalEndDateTime);
         }

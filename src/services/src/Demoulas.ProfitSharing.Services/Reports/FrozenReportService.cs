@@ -1112,13 +1112,13 @@ public class FrozenReportService : IFrozenReportService
         DateTime asOfDate;
         if (req.AsOfDate.HasValue)
         {
-            asOfDate = req.AsOfDate.Value.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
+            asOfDate = req.AsOfDate.Value.ToDateTime(TimeOnly.MinValue, DateTimeKind.Local);
         }
         else
         {
             var calInfo =
                 await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
-            asOfDate = calInfo.FiscalEndDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
+            asOfDate = calInfo.FiscalEndDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Local);
         }
 
         return asOfDate;

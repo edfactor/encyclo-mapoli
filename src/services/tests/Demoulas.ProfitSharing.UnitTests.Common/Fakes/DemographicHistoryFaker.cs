@@ -12,10 +12,10 @@ internal sealed class DemographicHistoryFaker : Faker<DemographicHistory>
         var demographicQueue = new Queue<Demographic>(demographicFakes.Skip(1));
         Demographic? currentDemographic = demographicFakes[0];
         FinishWith((f, u) => { currentDemographic = demographicQueue.Peek(); })
-            .RuleFor(dh => dh.Id, (f, o) => { return _demographicHistoryid++; })
+            .RuleFor(dh => dh.Id, (f, o) => _demographicHistoryid++)
             .RuleFor(dh => dh.DemographicId, (f, o) => currentDemographic.Id)
-            .RuleFor(dh => dh.ValidFrom, f => new DateTime(1917, 1, 1, 0, 0, 0, DateTimeKind.Utc))
-            .RuleFor(dh => dh.ValidTo, f => new DateTime(2100, 12, 31, 0, 0, 0, DateTimeKind.Utc))
+            .RuleFor(dh => dh.ValidFrom, f => new DateTime(1917, 1, 1, 0, 0, 0, DateTimeKind.Local))
+            .RuleFor(dh => dh.ValidTo, f => new DateTime(2100, 12, 31, 0, 0, 0, DateTimeKind.Local))
             .RuleFor(dh => dh.OracleHcmId, f => currentDemographic.OracleHcmId)
             .RuleFor(dh => dh.BadgeNumber, f => currentDemographic.BadgeNumber)
             .RuleFor(dh => dh.StoreNumber, f => currentDemographic.StoreNumber)

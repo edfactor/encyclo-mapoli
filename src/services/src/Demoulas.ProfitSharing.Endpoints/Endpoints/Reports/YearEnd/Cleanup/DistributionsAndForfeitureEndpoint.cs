@@ -24,7 +24,7 @@ public class DistributionsAndForfeitureEndpoint: EndpointWithCsvBase<Distributio
         Summary(s =>
         {
             s.Summary = "Lists distributions and forfeitures for a given year";
-            s.ExampleRequest = new DistributionsAndForfeituresRequest() { ProfitYear = 2023, Skip = SimpleExampleRequest.Skip, Take = SimpleExampleRequest.Take };
+            s.ExampleRequest = new DistributionsAndForfeituresRequest() { ProfitYear = 2025, Skip = SimpleExampleRequest.Skip, Take = SimpleExampleRequest.Take };
             s.ResponseExamples = new Dictionary<int, object>
             {
                 {
@@ -69,7 +69,7 @@ public class DistributionsAndForfeitureEndpoint: EndpointWithCsvBase<Distributio
             Map(m => m.Age).Index(9).Name("AGE");
             Map(m => m.OtherName).Index(10).Name("OTHER NAME");
             Map(m => m.OtherSsn).Index(11).Name("OTHER SSN");
-            Map(m => m.Enrolled).Index(12).Name("EC");
+            Map(m => m.EnrolledId).Index(12).Name("EC");
         }
     }
 }
