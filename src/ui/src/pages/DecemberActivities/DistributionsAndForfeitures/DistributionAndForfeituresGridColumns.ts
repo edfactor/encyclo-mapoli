@@ -98,21 +98,21 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       headerName: "Tax Code",
       field: "taxCode",
       colId: "taxCode",
-      minWidth: 100,
-      headerClass: "left-align",
-      cellClass: "left-align",
+      minWidth: 80,
+      headerClass: "right-align",
+      cellClass: "right-align",
       resizable: true
     },
     {
       headerName: "Enrolled",
-      field: "enrolled",
-      colId: "enrolled",
+      field: "enrolledId",
+      colId: "enrolledId",
       minWidth: 90,
       headerClass: "center-align",
       cellClass: "center-align",
       resizable: true,
       valueFormatter: (params) => {
-        return getEnrolledStatus(params.value.enrolled);
+        return getEnrolledStatus(params.value);
       }
     }
   ];

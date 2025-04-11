@@ -371,7 +371,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                 var calInfo =
                     await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
                 var nameAndDobQuery = ctx.Demographics
-                    .Include(d => d.PayProfits.FirstOrDefault(p=> p.ProfitYear == req.ProfitYear))
+                    .Include(d => d.PayProfits.Where(p=> p.ProfitYear == req.ProfitYear))
                     .Select(x => new
                     {
                         x.Ssn,
@@ -436,7 +436,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                         Date = pd.MonthToDate > 0 ? new DateOnly(pd.YearToDate, pd.MonthToDate, 1) : null,
                         Age = (byte)nameAndDob.DateOfBirth.Age(
                             calInfo.FiscalEndDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Local)),
-                        EnrolledId = 
+                        EnrolledId = nameAndDob.EnrolledId,
                     };
                 return await query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
             });

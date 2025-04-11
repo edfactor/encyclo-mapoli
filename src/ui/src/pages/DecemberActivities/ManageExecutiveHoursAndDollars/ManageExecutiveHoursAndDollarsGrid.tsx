@@ -340,6 +340,7 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
                 ? mutableCopyOfAdditionalExecutivesGrid?.response.results
                 : mutableCopyOfGridData?.response.results,
               columnDefs: columnDefs,
+              suppressMultiSort: true,
               rowSelection: isModal ? "multiple" : undefined,
               onSelectionChanged: (event: SelectionChangedEvent) => {
                 if (isModal) {

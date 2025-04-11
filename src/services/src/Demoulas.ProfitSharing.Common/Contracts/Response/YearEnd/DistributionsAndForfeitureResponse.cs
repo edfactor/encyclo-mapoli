@@ -15,7 +15,6 @@ public sealed record DistributionsAndForfeitureResponse
     public string? OtherName { get; set; }
     public string? OtherSsn { get; set; }
     public required byte EnrolledId { get; set; }
-    public required string EnrolledName { get; set; }
 
     public static DistributionsAndForfeitureResponse ResponseExample()
     {
@@ -30,8 +29,7 @@ public sealed record DistributionsAndForfeitureResponse
             ForfeitAmount = 0m,
             Age = 33,
             TaxCode = '9',
-            EnrolledId = 1,
-            EnrolledName = "New plan"
+            EnrolledId = 1
         };
     }
 }
