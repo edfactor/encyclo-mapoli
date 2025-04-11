@@ -87,6 +87,7 @@ export interface YearsEndState {
   executiveHoursAndDollars: PagedReportResponse<ExecutiveHoursAndDollars> | null;
   executiveHoursAndDollarsGrid: ExecutiveHoursAndDollarsGrid | null;
   executiveHoursAndDollarsQueryParams: ExecutiveHoursAndDollarsQueryParams | null;
+  executiveHoursAndDollarsAddQueryParams: ExecutiveHoursAndDollarsQueryParams | null;
   executiveRowsSelected: ExecutiveHoursAndDollars[] | null;
   forfeituresAndPoints: ForfeituresAndPoints | null;
   forfeituresAndPointsQueryParams: ForfeituresAndPointsQueryParams | null;
@@ -169,6 +170,7 @@ const initialState: YearsEndState = {
   executiveHoursAndDollarsGrid: null,
   executiveRowsSelected: null,
   executiveHoursAndDollarsQueryParams: null,
+  executiveHoursAndDollarsAddQueryParams: null,
   forfeituresByAgeFullTime: null,
   forfeituresByAgePartTime: null,
   forfeituresByAgeTotal: null,
@@ -217,6 +219,12 @@ export const yearsEndSlice = createSlice({
   name: "yearsEnd",
   initialState,
   reducers: {
+    setExecutiveHoursAndDollarsAddQueryParams: (state, action: PayloadAction<ExecutiveHoursAndDollarsQueryParams>) => {
+      state.executiveHoursAndDollarsAddQueryParams = action.payload;
+    },
+    clearExecutiveHoursAndDollarsAddQueryParams: (state) => {
+      state.executiveHoursAndDollarsAddQueryParams = null;
+    },
     setProfitSharingUpdateAdjustmentSummary: (state, action: PayloadAction<ProfitShareAdjustmentSummary>) => {
       state.profitSharingUpdateAdjustmentSummary = action.payload;
     },
@@ -1021,6 +1029,7 @@ export const {
   setProfitSharingUpdateAdjustmentSummary,
   clearProfitSharingUpdateAdjustmentSummary,
   addBadgeNumberToUpdateAdjustmentSummary,
-  clearExecutiveHoursAndDollarsQueryParams
+  clearExecutiveHoursAndDollarsAddQueryParams,
+  setExecutiveHoursAndDollarsAddQueryParams
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;
