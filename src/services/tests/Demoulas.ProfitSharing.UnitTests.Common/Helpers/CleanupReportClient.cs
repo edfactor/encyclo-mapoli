@@ -11,7 +11,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.UnitTests.Common.Common;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Helpers;
-public sealed class CleanupReportClient : ClientBase
+public sealed class CleanupReportClient : ClientBase, ICleanupReportService
 {
     private const string BaseApiPath = "api/yearend";
 
@@ -44,6 +44,18 @@ public sealed class CleanupReportClient : ClientBase
         return CallReportEndpoint<DemographicBadgesNotInPayProfitResponse, SortedPaginationRequestDto>(req, "demographic-badges-not-in-payprofit", cancellationToken);
     }
 
+    public Task<DistributionsAndForfeitureTotalsResponse> GetDistributionsAndForfeitureAsync(DistributionsAndForfeituresRequest req,
+        CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<YearEndProfitSharingReportSummaryResponse> GetYearEndProfitSharingSummaryReportAsync(FrozenProfitYearRequest req,
+        CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
     public Task<Stream> DownloadDemographicBadgesNotInPayProfit(CancellationToken ct = default)
     {
         return DownloadCsvReport(0, "demographic-badges-not-in-payprofit", ct);
@@ -67,6 +79,12 @@ public sealed class CleanupReportClient : ClientBase
     public Task<ReportResponseBase<NamesMissingCommaResponse>> GetNamesMissingCommaAsync(SortedPaginationRequestDto req, CancellationToken cancellationToken = default)
     {
         return CallReportEndpoint<NamesMissingCommaResponse, SortedPaginationRequestDto>(req, "names-missing-commas", cancellationToken);
+    }
+
+    public Task<YearEndProfitSharingReportResponse> GetYearEndProfitSharingReportAsync(YearEndProfitSharingReportRequest req,
+        CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
     }
 
     public Task<Stream> DownloadNamesMissingComma(CancellationToken cancellationToken = default)
@@ -150,10 +168,5 @@ public sealed class CleanupReportClient : ClientBase
             Query = query.ToString()
         };
         return uriBuilder;
-    }
-
-    public Task<YearEndProfitSharingReportSummaryResponse> GetYearEndProfitSharingSummaryReportAsync(FrozenProfitYearRequest req, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
     }
 }
