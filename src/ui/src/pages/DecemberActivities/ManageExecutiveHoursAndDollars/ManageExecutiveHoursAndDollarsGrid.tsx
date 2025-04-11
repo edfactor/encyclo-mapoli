@@ -1,16 +1,9 @@
-import { Typography, Button, Tooltip } from "@mui/material";
+import { AddOutlined } from "@mui/icons-material";
+import { Button, Tooltip, Typography } from "@mui/material";
 import { CellValueChangedEvent, IRowNode, SelectionChangedEvent } from "ag-grid-community";
-import { useState, useMemo, useCallback, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, Pagination, SmartModal } from "smart-ui-library";
-import { GetManageExecutiveHoursAndDollarsColumns } from "./ManageExecutiveHoursAndDollarsGridColumns";
-import {
-  ExecutiveHoursAndDollars,
-  ExecutiveHoursAndDollarsGrid,
-  ExecutiveHoursAndDollarsRow,
-  PagedReportResponse
-} from "reduxstore/types";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useLazyGetExecutiveHoursAndDollarsQuery } from "reduxstore/api/YearsEndApi";
 import {
   addExecutiveHoursAndDollarsGridRow,
   clearAdditionalExecutivesGrid,
@@ -19,10 +12,17 @@ import {
   setExecutiveRowsSelected,
   updateExecutiveHoursAndDollarsGridRow
 } from "reduxstore/slices/yearsEndSlice";
-import { AddOutlined } from "@mui/icons-material";
-import SearchAndAddExecutive from "./SearchAndAddExecutive";
-import { useLazyGetExecutiveHoursAndDollarsQuery } from "reduxstore/api/YearsEndApi";
+import { RootState } from "reduxstore/store";
+import {
+  ExecutiveHoursAndDollars,
+  ExecutiveHoursAndDollarsGrid,
+  ExecutiveHoursAndDollarsRow,
+  PagedReportResponse
+} from "reduxstore/types";
+import { DSMGrid, ISortParams, Pagination, SmartModal } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
+import { GetManageExecutiveHoursAndDollarsColumns } from "./ManageExecutiveHoursAndDollarsGridColumns";
+import SearchAndAddExecutive from "./SearchAndAddExecutive";
 
 interface RenderAddExecutiveButtonProps {
   reportReponse: PagedReportResponse<ExecutiveHoursAndDollars> | null;
@@ -36,6 +36,7 @@ const RenderAddExecutiveButton: React.FC<RenderAddExecutiveButtonProps> = ({
   setOpenModal
 }) => {
   const dispatch = useDispatch();
+
   // We cannot add an employee if there is no result set there
   const gridAvailable: boolean = reportReponse?.response != null && reportReponse?.response != undefined;
 
@@ -85,6 +86,24 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
 }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
+
+  // These are for the modal window
+  const [pageAddNumber, setPageAddNumber] = useState(0);
+  const [pageAddSize, setPageAddSize] = useState(25);
+
+  let properPageNumber = pageNumber;
+  let properPageSize = pageSize;
+
+  let setProperPageNumber = setPageNumber;
+  let setProperPageSize = setPageSize;
+
+  if (isModal) {
+    properPageNumber = pageAddNumber;
+    properPageSize = pageAddSize;
+    setProperPageNumber = setPageAddNumber;
+    setProperPageSize = setPageAddSize;
+  }
+
   const [openModal, setOpenModal] = useState<boolean>(false);
   const dispatch = useDispatch();
   const { executiveHoursAndDollarsQueryParams } = useSelector((state: RootState) => state.yearsEnd);
@@ -121,20 +140,20 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
       hasExecutiveHoursAndDollars: executiveHoursAndDollarsQueryParams.hasExecutiveHoursAndDollars ?? false,
       isMonthlyPayroll: executiveHoursAndDollarsQueryParams.isMonthlyPayroll ?? false,
       pagination: {
-        skip: pageNumber * pageSize,
-        take: pageSize,
+        skip: properPageNumber * properPageSize,
+        take: properPageSize,
         sortBy: sortParams.sortBy,
         isSortDescending: sortParams.isSortDescending
       }
     };
     await triggerSearch(request, false);
-  }, [executiveHoursAndDollarsQueryParams, pageNumber, pageSize, sortParams, triggerSearch]);
+  }, [executiveHoursAndDollarsQueryParams, properPageNumber, properPageSize, sortParams, triggerSearch]);
 
   useEffect(() => {
     if (initialSearchLoaded) {
       onSearch();
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch]);
+  }, [initialSearchLoaded, properPageNumber, properPageSize, sortParams, onSearch]);
 
   // This function checks to see if we have a change for this badge number already pending for a save
   const isRowStagedToSave = (badge: number): boolean => {
@@ -266,16 +285,11 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
     [executiveHoursAndDollars, additionalExecutivesChosen]
   );
 
-  const mutableCopyOfAdditionalExecutivesGrid = useMemo(
-    () => structuredClone(additionalExecutivesGrid),
-    [additionalExecutivesGrid]
-  );
-
   const isRowDataThere = (isModal: boolean | undefined): boolean => {
     if (isModal) {
       return (
-        mutableCopyOfAdditionalExecutivesGrid?.response != null &&
-        mutableCopyOfAdditionalExecutivesGrid?.response != undefined &&
+        additionalExecutivesGrid?.response != null &&
+        additionalExecutivesGrid?.response != undefined &&
         executiveHoursAndDollars?.response?.results != null
       );
     } else {
@@ -290,9 +304,7 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
   // This function checks for the need to have pagination for modal and non modal grids
   const isPaginationNeeded = (isModal: boolean | undefined): boolean => {
     if (isModal) {
-      return (
-        !!mutableCopyOfAdditionalExecutivesGrid && mutableCopyOfAdditionalExecutivesGrid?.response?.results.length > 0
-      );
+      return !!additionalExecutivesGrid && additionalExecutivesGrid?.response?.results.length > 0;
     } else {
       return !!mutableCopyOfGridData && mutableCopyOfGridData.response.results.length > 0;
     }
@@ -336,9 +348,7 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
             isLoading={false}
             handleSortChanged={sortEventHandler}
             providedOptions={{
-              rowData: isModal
-                ? mutableCopyOfAdditionalExecutivesGrid?.response.results
-                : mutableCopyOfGridData?.response.results,
+              rowData: isModal ? additionalExecutivesGrid?.response.results : mutableCopyOfGridData?.response.results,
               columnDefs: columnDefs,
               rowSelection: isModal ? "multiple" : undefined,
               onSelectionChanged: (event: SelectionChangedEvent) => {
@@ -362,18 +372,20 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
       )}
       {isPaginationNeeded(isModal) && (
         <Pagination
-          pageNumber={pageNumber}
+          pageNumber={properPageNumber}
           setPageNumber={(value: number) => {
-            setPageNumber(value - 1);
+            setProperPageNumber(value - 1);
             setInitialSearchLoaded(true);
           }}
-          pageSize={pageSize}
+          pageSize={properPageSize}
           setPageSize={(value: number) => {
-            setPageSize(value);
-            setPageNumber(1);
+            setProperPageSize(value);
+            setProperPageNumber(1);
             setInitialSearchLoaded(true);
           }}
-          recordCount={mutableCopyOfGridData?.response.total ?? 0}
+          recordCount={
+            isModal ? (additionalExecutivesGrid?.response.total ?? 0) : (mutableCopyOfGridData?.response.total ?? 0)
+          }
         />
       )}
       <SmartModal
