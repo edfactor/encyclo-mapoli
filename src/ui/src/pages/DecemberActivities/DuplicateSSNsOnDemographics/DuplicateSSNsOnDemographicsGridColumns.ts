@@ -9,8 +9,8 @@ export const GetDuplicateSSNsOnDemographicsColumns = (): ColDef[] => {
       field: "badgeNumber",
       colId: "badgeNumber",
       minWidth: 80,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      headerClass: "left-align",
+      cellClass: "left-align",
       resizable: true,
       cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber)
     },
@@ -84,24 +84,30 @@ export const GetDuplicateSSNsOnDemographicsColumns = (): ColDef[] => {
       cellClass: "left-align",
       resizable: true,
       valueFormatter: (params) => (params.value ? yyyyMMDDToMMDDYYYY(params.value) : "")
+    },   
+    {
+      headerName: "Store",
+      field: "storeNumber",
+      colId: "storeNumber",
+      minWidth: 50,
+      headerClass: "right-align",
+      cellClass: "right-align",
+      resizable: true
     },
     {
       headerName: "Status",
       field: "status",
       colId: "status",
       minWidth: 60,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true
+      headerClass: "left-align",
+      cellClass: "left-align",
+      resizable: true,
+      valueFormatter: (params) => {
+        const id = params.data.status; // assuming 'status' is in the row data
+        const name = params.data.employmentStatusName; // assuming 'statusName' is in the row data
+        //see if one is undefined or null then show other
+        return `[${id}] ${name}`;
+      }
     },
-    {
-      headerName: "Store",
-      field: "storeNumber",
-      colId: "storeNumber",
-      minWidth: 60,
-      headerClass: "right-align",
-      cellClass: "right-align",
-      resizable: true
-    }
   ];
 };

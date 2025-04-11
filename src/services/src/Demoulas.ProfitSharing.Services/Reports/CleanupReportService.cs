@@ -71,6 +71,7 @@ public class CleanupReportService : ICleanupReportService
                 .ToHashSetAsync(ct);
 
             var rslts = await ctx.Demographics
+                .Include(x => x.EmploymentStatus)
                 .Where(dem => dupSsns.Contains(dem.Ssn))
                 .OrderBy(d => d.Ssn)
                 .Select(dem => new PayrollDuplicateSsnResponseDto
@@ -90,6 +91,7 @@ public class CleanupReportService : ICleanupReportService
                     TerminationDate = dem.TerminationDate,
                     RehireDate = dem.ReHireDate,
                     Status = dem.EmploymentStatusId,
+                    EmploymentStatusName = dem.EmploymentStatus!.Name,
                     StoreNumber = dem.StoreNumber,
                     ProfitSharingRecords = dem.PayProfits.Count(pp => pp.ProfitYear >= cutoffYear),
                     PayProfits = dem.PayProfits
@@ -110,7 +112,7 @@ public class CleanupReportService : ICleanupReportService
 
             return new ReportResponseBase<PayrollDuplicateSsnResponseDto>
             {
-                ReportDate = DateTimeOffset.Now, ReportName = "Duplicate SSNs", Response = rslts
+                ReportName = "Duplicate SSNs on Demographics", Response = rslts
             };
         });
     }

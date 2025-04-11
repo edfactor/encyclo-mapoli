@@ -36,7 +36,7 @@ export interface DemographicBadgesNotInPayprofitResponse {
 export interface DemographicBadgesNotInPayprofit {
   badgeNumber: number;
   ssn: number;
-  empoyeeName: string;
+  employeeName: string;
   store: number;
   status: string;
   statusName: string;
@@ -94,6 +94,7 @@ export interface DuplicateSSNDetail {
   terminationDate: string | null;
   rehireDate: string | null;
   status: string;
+  employmentStatusName: string;
   storeNumber: number;
   profitSharingRecords: number;
   hoursCurrentYear: number;
