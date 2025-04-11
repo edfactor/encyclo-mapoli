@@ -1,6 +1,7 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Checkbox, FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
+import { set } from "date-fns";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -70,7 +71,26 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
   const { executiveHoursAndDollarsQueryParams, executiveHoursAndDollarsAddQueryParams, executiveHoursAndDollars } =
     useSelector((state: RootState) => state.yearsEnd);
 
+  const [oneAddSearchFilterEntered, setOneAddSearchFilterEntered] = useState<boolean>(false);
+
   let properQueryParams = isModal ? executiveHoursAndDollarsAddQueryParams : executiveHoursAndDollarsQueryParams;
+
+  let socialSecurityChosen = false;
+  let badgeNumberChosen = false;
+  let fullNameChosen = false;
+
+  const toggleSearchFieldEntered = (value: boolean, fieldType: string) => {
+    if (fieldType === "socialSecurity") {
+      socialSecurityChosen = value;
+    }
+    if (fieldType === "badgeNumber") {
+      badgeNumberChosen = value;
+    }
+    if (fieldType === "fullName") {
+      fullNameChosen = value;
+    }
+    setOneAddSearchFilterEntered(socialSecurityChosen || badgeNumberChosen || fullNameChosen);
+  };
 
   const profitYear = useDecemberFlowProfitYear();
 
@@ -190,6 +210,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
       dispatch(clearExecutiveHoursAndDollars());
     } else {
       dispatch(clearAdditionalExecutivesGrid());
+      setOneAddSearchFilterEntered(false);
     }
     dispatch(clearExecutiveHoursAndDollarsAddQueryParams());
     dispatch(clearAdditionalExecutivesChosen());
@@ -250,6 +271,11 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
                   error={!!errors.fullNameContains}
                   onChange={(e) => {
                     field.onChange(e);
+                    if (e.target.value !== "") {
+                      toggleSearchFieldEntered(true, "fullName");
+                    } else {
+                      toggleSearchFieldEntered(false, "fullName");
+                    }
                   }}
                 />
               )}
@@ -273,6 +299,11 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
                     if (!isNaN(Number(e.target.value))) {
                       const parsedValue = e.target.value === "" ? null : Number(e.target.value);
                       field.onChange(parsedValue);
+                      if (e.target.value !== "") {
+                        toggleSearchFieldEntered(true, "socialSecurity");
+                      } else {
+                        toggleSearchFieldEntered(false, "socialSecurity");
+                      }
                     }
                   }}
                 />
@@ -296,6 +327,11 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
                     if (!isNaN(Number(e.target.value))) {
                       const parsedValue = e.target.value === "" ? null : Number(e.target.value);
                       field.onChange(parsedValue);
+                      if (e.target.value !== "") {
+                        toggleSearchFieldEntered(true, "badgeNumber");
+                      } else {
+                        toggleSearchFieldEntered(false, "badgeNumber");
+                      }
                     }
                   }}
                   type="number"
@@ -361,6 +397,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
         )}
         {isModal && (
           <SearchAndReset
+            disabled={!oneAddSearchFilterEntered}
             handleReset={handleReset}
             handleSearch={validateAndSearch}
             isFetching={isModalFetching}
