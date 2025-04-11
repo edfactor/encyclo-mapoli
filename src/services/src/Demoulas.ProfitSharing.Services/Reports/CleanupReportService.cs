@@ -71,6 +71,7 @@ public class CleanupReportService : ICleanupReportService
                 .ToHashSetAsync(ct);
 
             var rslts = await ctx.Demographics
+                .Include(x => x.EmploymentStatus)
                 .Where(dem => dupSsns.Contains(dem.Ssn))
                 .OrderBy(d => d.Ssn)
                 .Select(dem => new PayrollDuplicateSsnResponseDto
@@ -90,6 +91,7 @@ public class CleanupReportService : ICleanupReportService
                     TerminationDate = dem.TerminationDate,
                     RehireDate = dem.ReHireDate,
                     Status = dem.EmploymentStatusId,
+                    EmploymentStatusName = dem.EmploymentStatus!.Name,
                     StoreNumber = dem.StoreNumber,
                     ProfitSharingRecords = dem.PayProfits.Count(pp => pp.ProfitYear >= cutoffYear),
                     PayProfits = dem.PayProfits
@@ -110,7 +112,7 @@ public class CleanupReportService : ICleanupReportService
 
             return new ReportResponseBase<PayrollDuplicateSsnResponseDto>
             {
-                ReportDate = DateTimeOffset.Now, ReportName = "Duplicate SSNs", Response = rslts
+                ReportName = "Duplicate SSNs on Demographics", Response = rslts
             };
         });
     }
@@ -358,7 +360,7 @@ FROM FILTERED_DEMOGRAPHIC p1
         }
     }
 
-    public async Task<ReportResponseBase<DistributionsAndForfeitureResponse>> GetDistributionsAndForfeitureAsync(
+    public async Task<DistributionsAndForfeitureTotalsResponse> GetDistributionsAndForfeitureAsync(
         DistributionsAndForfeituresRequest req,
         CancellationToken cancellationToken = default)
     {
@@ -369,33 +371,35 @@ FROM FILTERED_DEMOGRAPHIC p1
                 var calInfo =
                     await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
                 var nameAndDobQuery = ctx.Demographics
-                    .Include(d => d.ContactInfo)
+                    .Include(d => d.PayProfits.Where(p => p.ProfitYear == req.ProfitYear))
                     .Select(x => new
                     {
                         x.Ssn,
-                        x.ContactInfo.FirstName,
-                        x.ContactInfo.LastName,
+                        x.ContactInfo.FullName,
                         x.DateOfBirth,
                         x.BadgeNumber,
-                        PsnSuffix = (short)0
+                        PsnSuffix = (short)0,
+                        EnrollmentId = x.PayProfits.FirstOrDefault() != null
+                            ? x.PayProfits.FirstOrDefault()!.EnrollmentId
+                            : Enrollment.Constants.Import_Status_Unknown,
                     }).Union(ctx.Beneficiaries.Include(b => b.Contact).Select(x => new
                     {
                         x.Contact!.Ssn,
-                        x.Contact.ContactInfo.FirstName,
-                        x.Contact.ContactInfo.LastName,
+                        x.Contact.ContactInfo.FullName,
                         x.Contact.DateOfBirth,
                         x.BadgeNumber,
-                        x.PsnSuffix
+                        x.PsnSuffix,
+                        EnrollmentId = Enrollment.Constants.Import_Status_Unknown
                     }))
                     .GroupBy(x => x.Ssn)
                     .Select(x => new
                     {
                         Ssn = x.Key,
-                        FirstName = x.Max(m => m.FirstName),
-                        LastName = x.Max(m => m.LastName),
+                        FullName = x.Max(m => m.FullName),
                         DateOfBirth = x.Max(m => m.DateOfBirth),
                         BadgeNumber = x.Max(m => m.BadgeNumber),
-                        PsnSuffix = x.Max(m => m.PsnSuffix)
+                        PsnSuffix = x.Max(m => m.PsnSuffix),
+                        EnrolledId = x.Max(m => m.EnrollmentId)
                     });
 
                 var transferAndQdroCommentTypes = new List<int>()
@@ -416,13 +420,13 @@ FROM FILTERED_DEMOGRAPHIC p1
                              !transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value)))) &&
                           (req.StartMonth == 0 || pd.MonthToDate >= req.StartMonth) &&
                           (req.EndMonth == 0 || pd.MonthToDate <= req.EndMonth)
-                    orderby nameAndDob.LastName, nameAndDob.FirstName
+                    orderby nameAndDob.FullName
                     select new DistributionsAndForfeitureResponse
                     {
                         BadgeNumber = nameAndDob.BadgeNumber,
                         PsnSuffix = nameAndDob.PsnSuffix,
                         Ssn = pd.Ssn.MaskSsn(),
-                        EmployeeName = $"{nameAndDob.LastName}, {nameAndDob.FirstName}",
+                        EmployeeName = nameAndDob.FullName,
                         DistributionAmount = _distributionProfitCodes.Contains(pd.ProfitCodeId) ? pd.Forfeiture : 0,
                         TaxCode = pd.TaxCodeId,
                         StateTax = pd.StateTaxes,
@@ -430,16 +434,23 @@ FROM FILTERED_DEMOGRAPHIC p1
                         ForfeitAmount = pd.ProfitCodeId == 2 ? pd.Forfeiture : 0,
                         Date = pd.MonthToDate > 0 ? new DateOnly(pd.YearToDate, pd.MonthToDate, 1) : null,
                         Age = (byte)nameAndDob.DateOfBirth.Age(
-                            calInfo.FiscalEndDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc))
+                            calInfo.FiscalEndDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Local)),
+                        EnrolledId = nameAndDob.EnrolledId,
                     };
                 return await query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
             });
 
             _logger.LogInformation("Returned {Results} records", results.Results.Count());
 
-            return new ReportResponseBase<DistributionsAndForfeitureResponse>()
+            return new DistributionsAndForfeitureTotalsResponse()
             {
-                ReportDate = DateTimeOffset.Now, ReportName = "DISTRIBUTIONS AND FORFEITURES", Response = results
+                ReportName = "Distributions and Forfeitures",
+                ReportDate = DateTimeOffset.Now,
+                DistributionTotal = results.Results.Sum(x => x.DistributionAmount),
+                StateTaxTotal = results.Results.Sum(x => x.StateTax),
+                FederalTaxTotal = results.Results.Sum(x => x.FederalTax),
+                ForfeitureTotal = results.Results.Sum(x => x.ForfeitAmount),
+                Response = results
             };
         }
     }

@@ -15,6 +15,7 @@ public sealed record PayrollDuplicateSsnResponseDto
     public required short StoreNumber { get; set; }
     public int ProfitSharingRecords { get; set; }
     public IEnumerable<PayProfitResponseDto> PayProfits { get; set; } = [];
+    public required string EmploymentStatusName { get; set; }
 
     public static PayrollDuplicateSsnResponseDto ResponseExample()
     {
@@ -27,6 +28,7 @@ public sealed record PayrollDuplicateSsnResponseDto
             HireDate = SqlDateTime.MinValue.Value.ToDateOnly(),
             TerminationDate = DateTime.Today.ToDateOnly(),
             Status = 't',
+            EmploymentStatusName = "Terminated",
             StoreNumber = 6,
             ProfitSharingRecords = 17
         };
