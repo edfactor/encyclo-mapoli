@@ -11,7 +11,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.UnitTests.Common.Common;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Helpers;
-public sealed class CleanupReportClient : ClientBase, ICleanupReportService
+public sealed class CleanupReportClient : ClientBase
 {
     private const string BaseApiPath = "api/yearend";
 
@@ -82,16 +82,6 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
     public Task<Stream> DownloadDuplicateNamesAndBirthdays(short profitYear, CancellationToken cancellationToken = default)
     {
         return DownloadCsvReport(profitYear, "duplicate-names-and-birthdays", cancellationToken);
-    }
-
-    public Task<ReportResponseBase<DistributionsAndForfeitureResponse>> GetDistributionsAndForfeitureAsync(DistributionsAndForfeituresRequest req, CancellationToken cancellationToken = default)
-    {
-        return CallReportEndpoint<DistributionsAndForfeitureResponse, DistributionsAndForfeituresRequest>(req, "distributions-and-forfeitures", cancellationToken);
-    }
-
-    public Task<YearEndProfitSharingReportResponse> GetYearEndProfitSharingReportAsync(YearEndProfitSharingReportRequest req, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
     }
 
     private async Task<ReportResponseBase<TResponseDto>> CallReportEndpoint<TResponseDto, TPaginatedRequest>(TPaginatedRequest req, string endpointRoute, CancellationToken cancellationToken) where TResponseDto : class where TPaginatedRequest : SortedPaginationRequestDto 
