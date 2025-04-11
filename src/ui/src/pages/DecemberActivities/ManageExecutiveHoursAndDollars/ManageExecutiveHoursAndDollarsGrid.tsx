@@ -1,16 +1,9 @@
-import { Typography, Button, Tooltip } from "@mui/material";
+import { AddOutlined } from "@mui/icons-material";
+import { Button, Tooltip, Typography } from "@mui/material";
 import { CellValueChangedEvent, IRowNode, SelectionChangedEvent } from "ag-grid-community";
-import { useState, useMemo, useCallback, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, Pagination, SmartModal } from "smart-ui-library";
-import { GetManageExecutiveHoursAndDollarsColumns } from "./ManageExecutiveHoursAndDollarsGridColumns";
-import {
-  ExecutiveHoursAndDollars,
-  ExecutiveHoursAndDollarsGrid,
-  ExecutiveHoursAndDollarsRow,
-  PagedReportResponse
-} from "reduxstore/types";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useLazyGetExecutiveHoursAndDollarsQuery } from "reduxstore/api/YearsEndApi";
 import {
   addExecutiveHoursAndDollarsGridRow,
   clearAdditionalExecutivesGrid,
@@ -19,10 +12,17 @@ import {
   setExecutiveRowsSelected,
   updateExecutiveHoursAndDollarsGridRow
 } from "reduxstore/slices/yearsEndSlice";
-import { AddOutlined } from "@mui/icons-material";
-import SearchAndAddExecutive from "./SearchAndAddExecutive";
-import { useLazyGetExecutiveHoursAndDollarsQuery } from "reduxstore/api/YearsEndApi";
+import { RootState } from "reduxstore/store";
+import {
+  ExecutiveHoursAndDollars,
+  ExecutiveHoursAndDollarsGrid,
+  ExecutiveHoursAndDollarsRow,
+  PagedReportResponse
+} from "reduxstore/types";
+import { DSMGrid, ISortParams, Pagination, SmartModal } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
+import { GetManageExecutiveHoursAndDollarsColumns } from "./ManageExecutiveHoursAndDollarsGridColumns";
+import SearchAndAddExecutive from "./SearchAndAddExecutive";
 
 interface RenderAddExecutiveButtonProps {
   reportReponse: PagedReportResponse<ExecutiveHoursAndDollars> | null;
@@ -36,6 +36,7 @@ const RenderAddExecutiveButton: React.FC<RenderAddExecutiveButtonProps> = ({
   setOpenModal
 }) => {
   const dispatch = useDispatch();
+
   // We cannot add an employee if there is no result set there
   const gridAvailable: boolean = reportReponse?.response != null && reportReponse?.response != undefined;
 

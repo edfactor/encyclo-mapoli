@@ -68,6 +68,9 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
   isModal,
   setInitialSearchLoaded
 }) => {
+  const dispatch = useDispatch();
+  dispatch(clearExecutiveHoursAndDollarsAddQueryParams());
+
   const { executiveHoursAndDollarsQueryParams, executiveHoursAndDollarsAddQueryParams, executiveHoursAndDollars } =
     useSelector((state: RootState) => state.yearsEnd);
 
@@ -101,8 +104,6 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
     sortBy: "badgeNumber",
     isSortDescending: false
   });
-
-  const dispatch = useDispatch();
 
   const {
     control,
