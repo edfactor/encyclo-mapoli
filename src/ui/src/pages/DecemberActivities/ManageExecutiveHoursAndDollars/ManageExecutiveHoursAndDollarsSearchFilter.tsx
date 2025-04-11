@@ -11,8 +11,10 @@ import {
 } from "reduxstore/api/YearsEndApi";
 import {
   clearAdditionalExecutivesChosen,
+  clearAdditionalExecutivesGrid,
   clearExecutiveHoursAndDollars,
-  clearExecutiveHoursAndDollarsQueryParams,
+  clearExecutiveHoursAndDollarsAddQueryParams,
+  setExecutiveHoursAndDollarsAddQueryParams,
   setExecutiveHoursAndDollarsGridYear,
   setExecutiveHoursAndDollarsQueryParams
 } from "reduxstore/slices/yearsEndSlice";
@@ -21,9 +23,9 @@ import { ISortParams, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 
 interface ExecutiveHoursAndDollarsSearch {
-  profitYear?: number;
-  badgeNumber?: number | null;
-  socialSecurity?: number | null;
+  profitYear: number; // Made required
+  badgeNumber: number | null | undefined;
+  socialSecurity: number;
   fullNameContains?: string | null;
   hasExecutiveHoursAndDollars: NonNullable<boolean>;
   isMonthlyPayroll: NonNullable<boolean>;
@@ -48,8 +50,7 @@ const schema = yup.object().shape({
     .typeError("SSN must be a number")
     .integer("SSN must be an integer")
     .min(0, "SSN must be positive")
-    .max(999999999, "SSN must be 9 digits or less")
-    .nullable(),
+    .max(999999999, "SSN must be 9 digits or less"),
   fullNameContains: yup.string().typeError("Full Name must be a string").nullable(),
   hasExecutiveHoursAndDollars: yup.boolean().default(true).required(),
   isMonthlyPayroll: yup.boolean().default(false).required()
@@ -66,9 +67,11 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
   isModal,
   setInitialSearchLoaded
 }) => {
-  const { executiveHoursAndDollarsQueryParams, executiveHoursAndDollars } = useSelector(
-    (state: RootState) => state.yearsEnd
-  );
+  const { executiveHoursAndDollarsQueryParams, executiveHoursAndDollarsAddQueryParams, executiveHoursAndDollars } =
+    useSelector((state: RootState) => state.yearsEnd);
+
+  let properQueryParams = isModal ? executiveHoursAndDollarsAddQueryParams : executiveHoursAndDollarsQueryParams;
+
   const profitYear = useDecemberFlowProfitYear();
 
   const [triggerSearch, { isFetching }] = useLazyGetExecutiveHoursAndDollarsQuery();
@@ -91,18 +94,18 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
   } = useForm<ExecutiveHoursAndDollarsSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: profitYear || (executiveHoursAndDollarsQueryParams?.profitYear ?? undefined),
+      profitYear: profitYear || (properQueryParams?.profitYear ?? undefined),
       badgeNumber:
-        executiveHoursAndDollarsQueryParams?.badgeNumber && executiveHoursAndDollarsQueryParams.badgeNumber !== 0
-          ? executiveHoursAndDollarsQueryParams.badgeNumber
+        properQueryParams?.badgeNumber && properQueryParams.badgeNumber !== 0
+          ? properQueryParams.badgeNumber
           : undefined,
       socialSecurity:
-        executiveHoursAndDollarsQueryParams?.socialSecurity && executiveHoursAndDollarsQueryParams.socialSecurity !== 0
-          ? executiveHoursAndDollarsQueryParams.socialSecurity
+        properQueryParams?.socialSecurity && properQueryParams.socialSecurity !== 0
+          ? properQueryParams.socialSecurity
           : undefined,
-      fullNameContains: executiveHoursAndDollarsQueryParams?.fullNameContains ?? undefined,
-      hasExecutiveHoursAndDollars: executiveHoursAndDollarsQueryParams?.hasExecutiveHoursAndDollars ?? true,
-      isMonthlyPayroll: executiveHoursAndDollarsQueryParams?.isMonthlyPayroll ?? false
+      fullNameContains: properQueryParams?.fullNameContains ?? undefined,
+      hasExecutiveHoursAndDollars: properQueryParams?.hasExecutiveHoursAndDollars ?? true,
+      isMonthlyPayroll: properQueryParams?.isMonthlyPayroll ?? false
     }
   });
 
@@ -153,6 +156,16 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
           ...(!!data.fullNameContains && { fullNameContains: data.fullNameContains })
         },
         false
+      ).unwrap();
+      dispatch(
+        setExecutiveHoursAndDollarsAddQueryParams({
+          profitYear: profitYear || 0,
+          badgeNumber: data.badgeNumber ?? 0,
+          socialSecurity: data.socialSecurity ?? 0,
+          fullNameContains: data.fullNameContains ?? "",
+          hasExecutiveHoursAndDollars: data.hasExecutiveHoursAndDollars ?? false,
+          isMonthlyPayroll: data.isMonthlyPayroll ?? false
+        })
       );
     }
   });
@@ -167,15 +180,26 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
     // dispatch(clearExecutiveHoursAndDollarsGridRows());
     // ... and then import clearExecutiveHoursAndDollarsGridRows
     // from reduxstore/slices/yearsEndSlice
-    setInitialSearchLoaded(true);
-    dispatch(clearExecutiveHoursAndDollars());
+
+    // Are we in modal
+
+    if (!isModal) {
+      // If we are in modal, we want to clear the additional executives
+      // and reset the query params
+      setInitialSearchLoaded(true);
+      dispatch(clearExecutiveHoursAndDollars());
+    } else {
+      dispatch(clearAdditionalExecutivesGrid());
+    }
+    dispatch(clearExecutiveHoursAndDollarsAddQueryParams());
     dispatch(clearAdditionalExecutivesChosen());
-    dispatch(clearExecutiveHoursAndDollarsQueryParams());
+    properQueryParams = null;
+
     reset({
-      profitYear: undefined,
+      profitYear: profitYear,
       badgeNumber: undefined,
       socialSecurity: undefined,
-      fullNameContains: undefined,
+      fullNameContains: "",
       hasExecutiveHoursAndDollars: true,
       isMonthlyPayroll: false
     });

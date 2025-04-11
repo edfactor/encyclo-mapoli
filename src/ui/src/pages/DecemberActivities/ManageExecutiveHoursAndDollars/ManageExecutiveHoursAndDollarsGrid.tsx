@@ -266,16 +266,11 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
     [executiveHoursAndDollars, additionalExecutivesChosen]
   );
 
-  const mutableCopyOfAdditionalExecutivesGrid = useMemo(
-    () => structuredClone(additionalExecutivesGrid),
-    [additionalExecutivesGrid]
-  );
-
   const isRowDataThere = (isModal: boolean | undefined): boolean => {
     if (isModal) {
       return (
-        mutableCopyOfAdditionalExecutivesGrid?.response != null &&
-        mutableCopyOfAdditionalExecutivesGrid?.response != undefined &&
+        additionalExecutivesGrid?.response != null &&
+        additionalExecutivesGrid?.response != undefined &&
         executiveHoursAndDollars?.response?.results != null
       );
     } else {
@@ -290,9 +285,7 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
   // This function checks for the need to have pagination for modal and non modal grids
   const isPaginationNeeded = (isModal: boolean | undefined): boolean => {
     if (isModal) {
-      return (
-        !!mutableCopyOfAdditionalExecutivesGrid && mutableCopyOfAdditionalExecutivesGrid?.response?.results.length > 0
-      );
+      return !!additionalExecutivesGrid && additionalExecutivesGrid?.response?.results.length > 0;
     } else {
       return !!mutableCopyOfGridData && mutableCopyOfGridData.response.results.length > 0;
     }
@@ -336,9 +329,7 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
             isLoading={false}
             handleSortChanged={sortEventHandler}
             providedOptions={{
-              rowData: isModal
-                ? mutableCopyOfAdditionalExecutivesGrid?.response.results
-                : mutableCopyOfGridData?.response.results,
+              rowData: isModal ? additionalExecutivesGrid?.response.results : mutableCopyOfGridData?.response.results,
               columnDefs: columnDefs,
               rowSelection: isModal ? "multiple" : undefined,
               onSelectionChanged: (event: SelectionChangedEvent) => {
