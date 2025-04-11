@@ -156,6 +156,7 @@ export interface DuplicateNameAndBirthday {
   netBalance: number;
   hoursCurrentYear: number;
   incomeCurrentYear: number;
+  employmentStatusName: string;
 }
 
 export interface NegativeEtvaForSSNsOnPayProfit {

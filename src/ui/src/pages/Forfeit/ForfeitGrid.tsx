@@ -1,12 +1,13 @@
 import { Typography } from "@mui/material";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Path, useNavigate } from "react-router";
-import { DSMGrid, Pagination } from "smart-ui-library";
+import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetProfitShareForfeitColumns } from "./ForfeitGridColumns";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { useLazyGetForfeituresAndPointsQuery } from "reduxstore/api/YearsEndApi";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import { CAPTIONS } from "../../constants";
 
 interface ForfeitGridProps {
   initialSearchLoaded: boolean;
@@ -23,6 +24,10 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ initialSearchLoaded, setIniti
   const navigate = useNavigate();
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
+  const [sortParams, setSortParams] = useState<ISortParams>({
+    sortBy: "badgeNumber",
+    isSortDescending: false
+  });
   const { forfeituresAndPoints } = useSelector((state: RootState) => state.yearsEnd);
   const [triggerSearch] = useLazyGetForfeituresAndPointsQuery();
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
@@ -45,11 +50,11 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ initialSearchLoaded, setIniti
       {
         profitYear: fiscalCloseProfitYear,
         useFrozenData: true,
-        pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: "badgeNumber", isSortDescending: true }
+        pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: sortParams.sortBy, isSortDescending: sortParams.isSortDescending }
       },
       false
     ).unwrap();
-  }, [pageNumber, pageSize, triggerSearch, fiscalCloseProfitYear]);
+  }, [pageNumber, pageSize, sortParams, triggerSearch, fiscalCloseProfitYear]);
 
   useEffect(() => {
     if (initialSearchLoaded) {
@@ -57,6 +62,8 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ initialSearchLoaded, setIniti
     }
   }, [initialSearchLoaded, pageNumber, pageSize, onSearch]);
 
+  const sortEventHandler = (update: ISortParams) => setSortParams(update);
+  
   return (
     <>
       {forfeituresAndPoints?.response && (
@@ -65,13 +72,13 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ initialSearchLoaded, setIniti
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`PROFIT SHARE FORFEIT [PAY443] (${forfeituresAndPoints?.response.total || 2} records)`}
+              {`${CAPTIONS.FORFEIT} (${forfeituresAndPoints?.response.total || 2} records)`}
             </Typography>
           </div>
           <DSMGrid
-            preferenceKey={"PROFIT_SHARE_FORFEIT"}
+            preferenceKey={CAPTIONS.FORFEIT}
             isLoading={false}
-            handleSortChanged={(_params) => {}}
+            handleSortChanged={sortEventHandler}
             providedOptions={{
               rowData: forfeituresAndPoints.response.results,
               pinnedTopRowData: [totalsRow],

@@ -149,7 +149,7 @@ export const formatFullDateString = (dateString: string, outputFormat: string = 
   }
 };
 
-export const tryddmmyyyyToDate = (date?: string | Date | null): Date | null => {
+export const tryddmmyyyyToDate = (date?: string | Date | null): any | null => {
   if (!date) return null;
   if (date === DATE_FORMAT_YYYYMMDD) return null;
 

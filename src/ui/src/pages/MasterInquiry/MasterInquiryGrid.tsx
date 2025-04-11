@@ -61,7 +61,7 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoad
         ...(!!masterInquiryRequestParams.payment && { payment: masterInquiryRequestParams.payment })
       };
     },
-    [masterInquiryRequestParams, pageSize]
+    [masterInquiryRequestParams, pageSize, _sortParams]
   );
 
   const sortEventHandler = (update: ISortParams) => {

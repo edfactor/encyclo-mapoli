@@ -6,6 +6,7 @@ import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetDistributionsAndForfeituresColumns } from "./DistributionAndForfeituresGridColumns";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
+import { CAPTIONS } from "../../../constants";
 
 interface DistributionsAndForfeituresGridSearchProps {
   initialSearchLoaded: boolean;
@@ -75,7 +76,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
             </Typography>
           </div>
           <DSMGrid
-            preferenceKey={"DUPE_SSNS"}
+            preferenceKey={CAPTIONS.DISTRIBUTIONS_AND_FORFEITURES}
             isLoading={false}
             handleSortChanged={sortEventHandler}
             providedOptions={{

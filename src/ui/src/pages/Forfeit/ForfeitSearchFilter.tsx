@@ -59,7 +59,7 @@ const ForfeitSearchParameters: React.FC<ForfeitSearchParametersProps> = ({ setIn
         {
           profitYear: fiscalCloseProfitYear,
           useFrozenData: data.useFrozenData,
-          pagination: { skip: 0, take: 25 }
+          pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }
         },
         false
       ).unwrap();
