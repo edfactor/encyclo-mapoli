@@ -10,11 +10,12 @@ public sealed record DistributionsAndForfeitureResponse
     public required decimal StateTax { get; set; }
     public required decimal FederalTax { get; set; }
     public required decimal ForfeitAmount { get; set; }
-    public byte? Age { get; set; }
-    public char? TaxCode { get; set; }
+    public required byte? Age { get; set; }
+    public required char? TaxCode { get; set; }
     public string? OtherName { get; set; }
     public string? OtherSsn { get; set; }
-    public byte? Enrolled { get; set; }
+    public required byte EnrolledId { get; set; }
+    public required string EnrolledName { get; set; }
 
     public static DistributionsAndForfeitureResponse ResponseExample()
     {
@@ -29,7 +30,8 @@ public sealed record DistributionsAndForfeitureResponse
             ForfeitAmount = 0m,
             Age = 33,
             TaxCode = '9',
-            Enrolled = 1,
+            EnrolledId = 1,
+            EnrolledName = "New plan"
         };
     }
 }
