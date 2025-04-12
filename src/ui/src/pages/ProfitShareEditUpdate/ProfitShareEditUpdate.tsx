@@ -11,10 +11,19 @@ import {
 } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import { ProfitShareMasterApplyRequest } from "reduxstore/types";
-import { ApiMessageAlert, DSMAccordion, MessageUpdate, numberToCurrency, Page, setMessage } from "smart-ui-library";
+import {
+  ApiMessageAlert,
+  DSMAccordion,
+  MessageUpdate,
+  numberToCurrency,
+  Page,
+  setMessage,
+  SmartModal
+} from "smart-ui-library";
 import { TotalsGrid } from "../../components/TotalsGrid";
 import ProfitShareEditUpdateSearchFilter from "./ProfitShareEditUpdateSearchFilter";
 import ProfitShareEditUpdateTabs from "./ProfitShareEditUpdateTabs";
+import ProfitShareEditConfirmation from "./ProfitShareEditConfirmation";
 
 enum MessageKeys {
   ProfitShareEditUpdate = "ProfitShareEditUpdate"
@@ -59,63 +68,59 @@ class Messages {
   };
 }
 
-const RenderSaveButton = () => {
-  //const dispatch = useDispatch();
-
-  // This next line the function that makes the HTTP PUT call to
-  // update the hours and dollars on the back end
-  //const [updateHoursAndDollars] = useUpdateExecutiveHoursAndDollarsMutation();
-
-  // This Grid is the group of pending updates that are changed rows in the grid
-  //const { executiveHoursAndDollarsGrid } = useSelector((state: RootState) => state.yearsEnd);
-
-  const pendingChanges = true;
-
-  const { profitEditUpdateChangesAvailable, profitSharingEditQueryParams } = useSelector(
-    (state: RootState) => state.yearsEnd
-  );
-  const [trigger, { isFetching }] = useLazyGetMasterApplyQuery();
+const useSaveAction = () => {
+  const { profitSharingEditQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const [trigger] = useLazyGetMasterApplyQuery();
   const dispatch = useDispatch();
+
+  const saveAction = async (): Promise<void> => {
+    const params: ProfitShareMasterApplyRequest = {
+      profitYear: profitSharingEditQueryParams?.profitYear.getFullYear() ?? 0,
+      contributionPercent: profitSharingEditQueryParams?.contributionPercent ?? 0,
+      earningsPercent: profitSharingEditQueryParams?.earningsPercent ?? 0,
+      incomingForfeitPercent: profitSharingEditQueryParams?.incomingForfeitPercent ?? 0,
+      secondaryEarningsPercent: profitSharingEditQueryParams?.secondaryEarningsPercent ?? 0,
+      maxAllowedContributions: profitSharingEditQueryParams?.maxAllowedContributions ?? 0,
+      badgeToAdjust: profitSharingEditQueryParams?.badgeToAdjust ?? 0,
+      adjustContributionAmount: profitSharingEditQueryParams?.adjustContributionAmount ?? 0,
+      adjustEarningsAmount: profitSharingEditQueryParams?.adjustEarningsAmount ?? 0,
+      adjustIncomingForfeitAmount: profitSharingEditQueryParams?.adjustEarningsSecondaryAmount ?? 0,
+      badgeToAdjust2: profitSharingEditQueryParams?.badgeToAdjust2 ?? 0,
+      adjustEarningsSecondaryAmount: profitSharingEditQueryParams?.adjustEarningsSecondaryAmount ?? 0
+    };
+
+    console.log("Applying changes to year end: ", params);
+    console.log(params);
+
+    await trigger(params)
+      .unwrap()
+      .then((payload) => {
+        employeesAffected = payload?.employeesAffected || 0;
+        beneficiariesAffected = payload?.beneficiariesAffected || 0;
+        etvasAffected = payload?.etvasAffected || 0;
+        dispatch(setMessage(Messages.ProfitShareApplySuccess));
+        console.log("Successfully applied changes to year end: ", payload);
+        dispatch(setProfitEditUpdateRevertChangesAvailable(true));
+      })
+      .catch((error) => {
+        console.error("ERROR: Did not apply changes to year end", error);
+        dispatch(setMessage(Messages.ProfitShareApplyFail));
+      });
+  };
+
+  return saveAction;
+};
+
+const RenderSaveButton = (setOpenSaveModal: (open: boolean) => void) => {
+  const { profitEditUpdateChangesAvailable } = useSelector((state: RootState) => state.yearsEnd);
   const saveButton = (
     <Button
       disabled={!profitEditUpdateChangesAvailable}
       variant="outlined"
       color="primary"
       size="medium"
-      startIcon={<SaveOutlined color={profitEditUpdateChangesAvailable ? "primary" : "disabled"} />}
       onClick={async () => {
-        const params: ProfitShareMasterApplyRequest = {
-          profitYear: profitSharingEditQueryParams?.profitYear.getFullYear() ?? 0,
-          contributionPercent: profitSharingEditQueryParams?.contributionPercent ?? 0,
-          earningsPercent: profitSharingEditQueryParams?.earningsPercent ?? 0,
-          incomingForfeitPercent: profitSharingEditQueryParams?.incomingForfeitPercent ?? 0,
-          secondaryEarningsPercent: profitSharingEditQueryParams?.secondaryEarningsPercent ?? 0,
-          maxAllowedContributions: profitSharingEditQueryParams?.maxAllowedContributions ?? 0,
-          badgeToAdjust: profitSharingEditQueryParams?.badgeToAdjust ?? 0,
-          adjustContributionAmount: profitSharingEditQueryParams?.adjustContributionAmount ?? 0,
-          adjustEarningsAmount: profitSharingEditQueryParams?.adjustEarningsAmount ?? 0,
-          adjustIncomingForfeitAmount: profitSharingEditQueryParams?.adjustEarningsSecondaryAmount ?? 0,
-          badgeToAdjust2: profitSharingEditQueryParams?.badgeToAdjust2 ?? 0,
-          adjustEarningsSecondaryAmount: profitSharingEditQueryParams?.adjustEarningsSecondaryAmount ?? 0
-        };
-
-        console.log("Applying changes to year end: ", params);
-        console.log(params);
-
-        await trigger(params)
-          .unwrap()
-          .then((payload) => {
-            employeesAffected = payload?.employeesAffected || 0;
-            beneficiariesAffected = payload?.beneficiariesAffected || 0;
-            etvasAffected = payload?.etvasAffected || 0;
-            dispatch(setMessage(Messages.ProfitShareApplySuccess));
-            console.log("Successfully applied changes to year end: ", payload);
-            dispatch(setProfitEditUpdateRevertChangesAvailable(true));
-          })
-          .catch((error) => {
-            console.error("ERROR: Did not apply changes to year end", error);
-            dispatch(setMessage(Messages.ProfitShareApplyFail));
-          });
+        setOpenSaveModal(true);
       }}>
       Save Updates
     </Button>
@@ -185,6 +190,8 @@ const ProfitShareEditUpdate = () => {
   const { profitSharingUpdateAdjustmentSummary, profitSharingUpdate } = useSelector(
     (state: RootState) => state.yearsEnd
   );
+  const [openSaveModal, setOpenSaveModal] = useState<boolean>(false);
+  const [openRevertModal, setOpenRevertModal] = useState<boolean>(false);
   const dispatch = useDispatch();
   //console.log("Total results: ", profitSharingUpdate?.response.results.length);
   return (
@@ -193,7 +200,7 @@ const ProfitShareEditUpdate = () => {
       actionNode={
         <div className="flex  justify-end gap-2">
           {RenderRevertButton()}
-          {RenderSaveButton()}
+          {RenderSaveButton(setOpenSaveModal)}
         </div>
       }>
       <div>
@@ -312,6 +319,40 @@ const ProfitShareEditUpdate = () => {
           </div>
         )}
       </Grid2>
+      <SmartModal
+        open={openSaveModal}
+        onClose={() => setOpenSaveModal(false)}>
+        <ProfitShareEditConfirmation
+          performLabel="YES, SAVE"
+          closeLabel="NO, CANCEL"
+          setOpenModal={setOpenSaveModal}
+          actionFunction={() => {
+            // Call the apply function here
+            console.log("Apply changes");
+          }}
+          messageType="info"
+          messageHeadline="You are about to apply the following changes:"
+          messageBody="This will apply all changes made to the Profit Share Year End."
+          lastWarning="Ready to save? It may take a few minutes to process."
+        />
+      </SmartModal>
+      <SmartModal
+        open={openRevertModal}
+        onClose={() => setOpenRevertModal(false)}>
+        <ProfitShareEditConfirmation
+          performLabel="YES, REVERT"
+          closeLabel="NO, CANCEL"
+          setOpenModal={setOpenRevertModal}
+          actionFunction={() => {
+            // Call the apply function here
+            console.log("Revert changes");
+          }}
+          messageType="warning"
+          messageHeadline="Reverting to the last update will modify the following:"
+          messageBody="This will revert all changes made to the Profit Share Year End."
+          lastWarning="Do you still wish to revert?"
+        />
+      </SmartModal>
     </Page>
   );
 };
