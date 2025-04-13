@@ -1,16 +1,15 @@
-import { Replay, SaveOutlined } from "@mui/icons-material";
+import { Replay } from "@mui/icons-material";
 import { Button, Divider, Tooltip, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
-import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useLazyGetMasterRevertQuery, useLazyGetMasterApplyQuery } from "reduxstore/api/YearsEndApi";
+import { useLazyGetMasterApplyQuery, useLazyGetMasterRevertQuery } from "reduxstore/api/YearsEndApi";
 import {
   setProfitEditUpdateChangesAvailable,
   setProfitEditUpdateRevertChangesAvailable
 } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
-import { ProfitShareMasterApplyRequest } from "reduxstore/types";
+import { ProfitShareEditUpdateQueryParams, ProfitShareMasterApplyRequest, ProfitYearRequest } from "reduxstore/types";
 import {
   ApiMessageAlert,
   DSMAccordion,
@@ -21,9 +20,9 @@ import {
   SmartModal
 } from "smart-ui-library";
 import { TotalsGrid } from "../../components/TotalsGrid";
+import ProfitShareEditConfirmation from "./ProfitShareEditConfirmation";
 import ProfitShareEditUpdateSearchFilter from "./ProfitShareEditUpdateSearchFilter";
 import ProfitShareEditUpdateTabs from "./ProfitShareEditUpdateTabs";
-import ProfitShareEditConfirmation from "./ProfitShareEditConfirmation";
 
 enum MessageKeys {
   ProfitShareEditUpdate = "ProfitShareEditUpdate"
@@ -68,6 +67,38 @@ class Messages {
   };
 }
 
+const useRevertAction = () => {
+  const { profitSharingEditQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const [trigger] = useLazyGetMasterRevertQuery();
+  const dispatch = useDispatch();
+
+  const revertAction = async (): Promise<void> => {
+    const params: ProfitYearRequest = {
+      profitYear: profitSharingEditQueryParams?.profitYear.getFullYear() ?? 0
+    };
+
+    console.log("reverting cahnges to year end: ", params);
+    console.log(params);
+
+    await trigger(params, false)
+      .unwrap()
+      .then((payload) => {
+        employeesAffected = payload?.employeesAffected || 0;
+        beneficiariesAffected = payload?.beneficiariesAffected || 0;
+        etvasAffected = payload?.etvasAffected || 0;
+        dispatch(setMessage(Messages.ProfitShareRevertSuccess));
+        console.log("Successfully reverted changes for year end: ", payload);
+        dispatch(setProfitEditUpdateChangesAvailable(false));
+        dispatch(setProfitEditUpdateRevertChangesAvailable(false));
+      })
+      .catch((error) => {
+        console.error("ERROR: Did not revert changes to year end", error);
+        dispatch(setMessage(Messages.ProfitShareRevertFail));
+      });
+  };
+  return revertAction;
+};
+
 const useSaveAction = () => {
   const { profitSharingEditQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const [trigger] = useLazyGetMasterApplyQuery();
@@ -111,8 +142,21 @@ const useSaveAction = () => {
   return saveAction;
 };
 
-const RenderSaveButton = (setOpenSaveModal: (open: boolean) => void) => {
-  const { profitEditUpdateChangesAvailable } = useSelector((state: RootState) => state.yearsEnd);
+const wasFormUsed = (profitSharingEditQueryParams: ProfitShareEditUpdateQueryParams) => {
+  return (
+    (profitSharingEditQueryParams?.contributionPercent ?? 0) > 0 ||
+    (profitSharingEditQueryParams?.earningsPercent ?? 0) > 0 ||
+    (profitSharingEditQueryParams?.incomingForfeitPercent ?? 0) > 0 ||
+    (profitSharingEditQueryParams?.maxAllowedContributions ?? 0) > 0
+  );
+};
+
+// This really just opens the modal. The modal for this has the function to call
+// the back end
+const RenderSaveButton = (setOpenSaveModal: (open: boolean) => void, setOpenEmptyModal: (open: boolean) => void) => {
+  const { profitEditUpdateChangesAvailable, profitSharingEditQueryParams } = useSelector(
+    (state: RootState) => state.yearsEnd
+  );
   const saveButton = (
     <Button
       disabled={!profitEditUpdateChangesAvailable}
@@ -120,7 +164,11 @@ const RenderSaveButton = (setOpenSaveModal: (open: boolean) => void) => {
       color="primary"
       size="medium"
       onClick={async () => {
-        setOpenSaveModal(true);
+        if (profitSharingEditQueryParams && wasFormUsed(profitSharingEditQueryParams)) {
+          setOpenSaveModal(true);
+        } else {
+          setOpenEmptyModal(true);
+        }
       }}>
       Save Updates
     </Button>
@@ -139,12 +187,11 @@ const RenderSaveButton = (setOpenSaveModal: (open: boolean) => void) => {
   }
 };
 
-const RenderRevertButton = () => {
+// This really just opens the modal. The modal for this has the function to call
+// the back end
+const RenderRevertButton = (setOpenRevertModal: (open: boolean) => void) => {
   const { profitEditUpdateRevertChangesAvailable } = useSelector((state: RootState) => state.yearsEnd);
-  const fiscalCloseProfitYear = useFiscalCloseProfitYear();
-  const [trigger, { isFetching }] = useLazyGetMasterRevertQuery();
 
-  const dispatch = useDispatch();
   const revertButton = (
     <Button
       disabled={!profitEditUpdateRevertChangesAvailable}
@@ -153,20 +200,7 @@ const RenderRevertButton = () => {
       size="medium"
       startIcon={<Replay color={profitEditUpdateRevertChangesAvailable ? "primary" : "disabled"} />}
       onClick={async () => {
-        await trigger({ profitYear: fiscalCloseProfitYear }, false)
-          .unwrap()
-          .then((payload) => {
-            employeesAffected = payload?.employeesAffected || 0;
-            beneficiariesAffected = payload?.beneficiariesAffected || 0;
-            etvasAffected = payload?.etvasAffected || 0;
-            dispatch(setMessage(Messages.ProfitShareRevertSuccess));
-            console.log("Successfully reverted changes for year end: ", payload);
-            dispatch(setProfitEditUpdateChangesAvailable(false));
-          })
-          .catch((error) => {
-            console.error("ERROR: Did not revert changes to year end", error);
-            dispatch(setMessage(Messages.ProfitShareRevertFail));
-          });
+        setOpenRevertModal(true);
       }}>
       Revert
     </Button>
@@ -176,7 +210,7 @@ const RenderRevertButton = () => {
     return (
       <Tooltip
         placement="top"
-        title="You must have just saved data to revert.">
+        title="You must have applied data to revert.">
         <span>{revertButton}</span>
       </Tooltip>
     );
@@ -186,21 +220,24 @@ const RenderRevertButton = () => {
 };
 
 const ProfitShareEditUpdate = () => {
+  const revertAction = useRevertAction();
+  const saveAction = useSaveAction();
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
-  const { profitSharingUpdateAdjustmentSummary, profitSharingUpdate } = useSelector(
+  const { profitSharingUpdateAdjustmentSummary, profitSharingUpdate, profitSharingEditQueryParams } = useSelector(
     (state: RootState) => state.yearsEnd
   );
   const [openSaveModal, setOpenSaveModal] = useState<boolean>(false);
   const [openRevertModal, setOpenRevertModal] = useState<boolean>(false);
+  const [openEmptyModal, setOpenEmptyModal] = useState<boolean>(false);
   const dispatch = useDispatch();
-  //console.log("Total results: ", profitSharingUpdate?.response.results.length);
+
   return (
     <Page
       label="Master Update (PAY444/PAY447)"
       actionNode={
         <div className="flex  justify-end gap-2">
-          {RenderRevertButton()}
-          {RenderSaveButton(setOpenSaveModal)}
+          {RenderRevertButton(setOpenRevertModal)}
+          {RenderSaveButton(setOpenSaveModal, setOpenEmptyModal)}
         </div>
       }>
       <div>
@@ -320,6 +357,7 @@ const ProfitShareEditUpdate = () => {
         )}
       </Grid2>
       <SmartModal
+        maxWidth="sm"
         open={openSaveModal}
         onClose={() => setOpenSaveModal(false)}>
         <ProfitShareEditConfirmation
@@ -327,30 +365,46 @@ const ProfitShareEditUpdate = () => {
           closeLabel="NO, CANCEL"
           setOpenModal={setOpenSaveModal}
           actionFunction={() => {
-            // Call the apply function here
-            console.log("Apply changes");
+            saveAction();
+            setOpenSaveModal(false);
           }}
-          messageType="info"
+          messageType="confirmation"
           messageHeadline="You are about to apply the following changes:"
-          messageBody="This will apply all changes made to the Profit Share Year End."
+          params={profitSharingEditQueryParams}
           lastWarning="Ready to save? It may take a few minutes to process."
         />
+        <SmartModal
+          maxWidth="sm"
+          open={openRevertModal}
+          onClose={() => setOpenRevertModal(false)}>
+          <ProfitShareEditConfirmation
+            performLabel="YES, REVERT"
+            closeLabel="NO, CANCEL"
+            setOpenModal={setOpenRevertModal}
+            actionFunction={() => {
+              revertAction();
+              setOpenRevertModal(false);
+            }}
+            messageType="warning"
+            messageHeadline="Reverting to the last update will modify the following:"
+            params={profitSharingEditQueryParams}
+            lastWarning="Do you still wish to revert?"
+          />
+        </SmartModal>
       </SmartModal>
       <SmartModal
-        open={openRevertModal}
-        onClose={() => setOpenRevertModal(false)}>
+        open={openEmptyModal}
+        maxWidth="sm"
+        onClose={() => setOpenEmptyModal(false)}>
         <ProfitShareEditConfirmation
-          performLabel="YES, REVERT"
-          closeLabel="NO, CANCEL"
-          setOpenModal={setOpenRevertModal}
-          actionFunction={() => {
-            // Call the apply function here
-            console.log("Revert changes");
-          }}
-          messageType="warning"
-          messageHeadline="Reverting to the last update will modify the following:"
-          messageBody="This will revert all changes made to the Profit Share Year End."
-          lastWarning="Do you still wish to revert?"
+          performLabel="OK"
+          closeLabel=""
+          setOpenModal={setOpenEmptyModal}
+          actionFunction={() => {}}
+          messageType="info"
+          messageHeadline="You must fill out  at least one of these: contribution, earnings, or forfeiture."
+          params={profitSharingEditQueryParams}
+          lastWarning=""
         />
       </SmartModal>
     </Page>
