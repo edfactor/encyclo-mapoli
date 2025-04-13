@@ -7,6 +7,7 @@ import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetMasterInquiryGridColumns } from "./MasterInquiryGridColumns";
 import { MasterInquiryRequest } from "reduxstore/types";
 import { paymentTypeGetNumberMap, memberTypeGetNumberMap } from "./MasterInquiryFunctions";
+import { CAPTIONS } from "../../constants";
 interface MasterInquiryGridProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
@@ -105,7 +106,7 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoad
             </Typography>
           </div>
           <DSMGrid
-            preferenceKey={"ProfitYear"}
+            preferenceKey={CAPTIONS.MASTER_INQUIRY}
             isLoading={isFetching}
             handleSortChanged={sortEventHandler}
             providedOptions={{
