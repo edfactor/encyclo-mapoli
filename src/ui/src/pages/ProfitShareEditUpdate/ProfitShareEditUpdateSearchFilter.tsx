@@ -132,19 +132,19 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
     resolver: yupResolver(schema),
     defaultValues: {
       profitYear: fiscalCloseProfitYearAsDate,
-      contributionPercent: 0,
-      earningsPercent: 0,
-      incomingForfeitPercent: 0,
-      secondaryEarningsPercent: 0,
-      maxAllowedContributions: 0,
+      contributionPercent: null,
+      earningsPercent: null,
+      incomingForfeitPercent: null,
+      secondaryEarningsPercent: null,
+      maxAllowedContributions: null,
 
-      badgeToAdjust: 0,
-      adjustContributionAmount: 0,
-      adjustEarningsAmount: 0,
-      adjustIncomingForfeitAmount: 0,
+      badgeToAdjust: null,
+      adjustContributionAmount: null,
+      adjustEarningsAmount: null,
+      adjustIncomingForfeitAmount: null,
 
-      badgeToAdjust2: 0,
-      adjustEarningsSecondaryAmount: 0
+      badgeToAdjust2: null,
+      adjustEarningsSecondaryAmount: null
     }
   });
 
