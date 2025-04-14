@@ -4,7 +4,7 @@ import { DSMAccordion, Page } from "smart-ui-library";
 import { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
-import MilitaryAndRehireEntryAndModificationEmployeeDetails from "./MilitaryEntryAndModificationEmployeeDetails";
+import MasterInquiryEmployeeDetails from "../../MasterInquiry/MasterInquiryEmployeeDetails";
 import {
   useCreateMilitaryContributionMutation,
   useLazyGetMilitaryContributionsQuery
@@ -78,7 +78,7 @@ const MilitaryEntryAndModification = () => {
         {masterInquiryEmployeeDetails && (
           <>
             <Grid2 width="100%">
-              <MilitaryAndRehireEntryAndModificationEmployeeDetails details={masterInquiryEmployeeDetails} />
+              <MasterInquiryEmployeeDetails details={masterInquiryEmployeeDetails} />
             </Grid2>
 
             {showContributions && (
