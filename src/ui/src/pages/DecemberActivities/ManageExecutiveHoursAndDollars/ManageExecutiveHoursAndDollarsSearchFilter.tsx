@@ -2,7 +2,8 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { Checkbox, FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
-import { useState } from "react";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import { useState, useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -70,7 +71,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
   const { executiveHoursAndDollarsQueryParams, executiveHoursAndDollars } = useSelector(
     (state: RootState) => state.yearsEnd
   );
-  const profitYear = useDecemberFlowProfitYear();
+  const profitYear = useFiscalCloseProfitYear();
 
   const [triggerSearch, { isFetching }] = useLazyGetExecutiveHoursAndDollarsQuery();
   const [triggerModalSearch, { isFetching: isModalFetching }] = useLazyGetAdditionalExecutivesQuery();
@@ -106,6 +107,29 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
       isMonthlyPayroll: executiveHoursAndDollarsQueryParams?.isMonthlyPayroll ?? false
     }
   });
+
+  useEffect(() => {
+    if (profitYear) {
+      dispatch(clearExecutiveHoursAndDollars());
+      dispatch(clearAdditionalExecutivesChosen());
+      
+      reset(prevValues => ({
+        ...prevValues,
+        profitYear
+      }));
+      
+      if (executiveHoursAndDollarsQueryParams) {
+        dispatch(
+          setExecutiveHoursAndDollarsQueryParams({
+            ...executiveHoursAndDollarsQueryParams,
+            profitYear
+          })
+        );
+      }
+      
+      setInitialSearchLoaded(false);
+    }
+  }, [profitYear]);
 
   const validateAndSearch = handleSubmit((data) => {
     // If there are any stored additional executives, we
