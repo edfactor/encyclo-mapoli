@@ -56,7 +56,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const [triggerSearch, { isFetching }] = useLazyGetDistributionsAndForfeituresQuery();
   const dispatch = useDispatch();
-  const { distributionsAndForfeituresQueryParams, distributionsAndForfeitures } = useSelector(
+  const { distributionsAndForfeituresQueryParams } = useSelector(
     (state: RootState) => state.yearsEnd
   );
   const profitYear = useDecemberFlowProfitYear();
@@ -83,7 +83,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
           ...(data.startMonth && { startMonth: data.startMonth }),
           ...(data.endMonth && { endMonth: data.endMonth }),
           includeOutgoingForfeitures: data.includeOutgoingForfeitures ?? false,
-          pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: false }
+          pagination: { skip: 0, take: 25, sortBy: "employeeName", isSortDescending: false }
         },
         false
       ).unwrap();
