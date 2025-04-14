@@ -83,6 +83,7 @@ public class BreakdownReportService : IBreakdownService
                 .Where(tbs => employeeSsns.Contains(tbs.Ssn!.Value))
                 .ToDictionaryAsync(tbs => tbs.Ssn!.Value, tbs => tbs.Total ?? 0, cancellationToken);
 
+
             Dictionary<int, InternalProfitDetailDto> txnsForProfitYear = await TotalService.GetTransactionsBySsnForProfitYearForOracle(ctx, breakdownByStoreRequest.ProfitYear)
                 .Where(txns => employeeSsns.Contains(txns.Ssn))
                 .ToDictionaryAsync(txns => txns.Ssn, txns => txns, cancellationToken);

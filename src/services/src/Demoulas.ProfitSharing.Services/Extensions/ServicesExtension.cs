@@ -30,6 +30,7 @@ public static class ServicesExtension
     {
         _ = builder.Services.AddScoped<IPayClassificationService, PayClassificationService>();
         _ = builder.Services.AddScoped<ICleanupReportService, CleanupReportService>();
+        _ = builder.Services.AddScoped<IEmbeddedSqlService, EmbeddedSqlService>();
         _ = builder.Services.AddScoped<IFrozenReportService, FrozenReportService>();
         _ = builder.Services.AddScoped<IMasterInquiryService, MasterInquiryService>();
         _ = builder.Services.AddScoped<IExecutiveHoursAndDollarsService, ExecutiveHoursAndDollarsService>();
@@ -41,8 +42,8 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IMilitaryService, MilitaryService>();
         _ = builder.Services.AddScoped<IFakeSsnService, FakeSsnService>();
 
-        _ = builder.Services.AddScoped<TotalService>();
         _ = builder.Services.AddScoped<ContributionService>();
+        _ = builder.Services.AddScoped<TotalService>();
 
         _ = builder.Services.AddScoped<ITerminatedEmployeeAndBeneficiaryReportService, TerminatedEmployeeAndBeneficiaryReportService>();
 

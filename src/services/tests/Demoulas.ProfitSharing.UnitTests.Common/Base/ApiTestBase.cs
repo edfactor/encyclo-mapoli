@@ -1,10 +1,14 @@
 ﻿using System.Diagnostics;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Moq;
+using Demoulas.ProfitSharing.UnitTests.Common.Common;
+using Demoulas.ProfitSharing.UnitTests.Common.Helpers;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Base;
 
@@ -51,6 +55,15 @@ public class ApiTestBase<TStartup> where TStartup : class
                 hostBuilder.ConfigureServices(services =>
                 {
                     services.AddTransient((_)=> MockDbContextFactory);
+
+                    services.AddTransient((_) =>
+                    {
+                        var mock = new Mock<IEmbeddedSqlService>();
+                        mock.Setup(m => m.GetTotalBalanceAlt(It.IsAny<IProfitSharingDbContext>(), It.IsAny<short>()))
+                            .Returns((IProfitSharingDbContext x, short y) => Constants.FakeParticipantTotals.AsAsyncQueryable());
+
+                        return mock.Object;
+                    });
 
                     ServiceProvider = services.BuildServiceProvider();
                 });

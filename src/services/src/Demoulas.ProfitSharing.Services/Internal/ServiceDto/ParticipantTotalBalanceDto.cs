@@ -14,7 +14,6 @@ internal class ParticipantTotalBalanceDto
     internal decimal? Contributions { get; set; }
     internal decimal? Forfeitures { get; set; }
     internal decimal? VestedEarnings { get; set; }
-
     internal decimal? Total
     {
         get
@@ -22,5 +21,4 @@ internal class ParticipantTotalBalanceDto
             return Contributions + Earnings + EtvaForfeitures + Distributions + Forfeitures + VestedEarnings;
         }
     }
-
 }
