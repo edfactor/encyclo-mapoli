@@ -3,6 +3,7 @@ using Demoulas.Common.Data.Services.Entities.Entities;
 using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.MassTransit;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -43,6 +44,10 @@ public class ProfitSharingReadOnlyDbContext : ReadOnlyOracleDbContext<ProfitShar
     public virtual DbSet<YearEndUpdateStatus> YearEndUpdateStatuses { get; set; }
 
     public virtual DbSet<AccountingPeriod> AccountingPeriods { get; set; }
+    public virtual DbSet<Navigation> Navigations { get; set; }
+    public virtual DbSet<NavigationRole> NavigationRoles { get; set; }
+    public virtual DbSet<NavigationStatus> NavigationStatuses { get; set; }
+    public virtual DbSet<NavigationTracking> NavigationTrackings { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
