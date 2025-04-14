@@ -9,19 +9,33 @@ import * as yup from "yup";
 
 import SearchAndReset from "components/SearchAndReset/SearchAndReset";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-import { useState } from "react";
 import {
   addBadgeNumberToUpdateAdjustmentSummary,
   clearProfitSharingEdit,
   clearProfitSharingEditQueryParams,
   clearProfitSharingUpdate,
   clearProfitSharingUpdateQueryParams,
+  setProfitEditUpdateChangesAvailable,
   setProfitSharingEditQueryParams,
   setProfitSharingUpdateQueryParams
 } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
-import { ProfitShareEditUpdateQueryParams, ProfitShareUpdateRequest } from "reduxstore/types";
-import { ISortParams } from "smart-ui-library";
+import { ProfitShareUpdateRequest } from "reduxstore/types";
+
+interface ProfitShareEditUpdateSearch {
+  profitYear: Date;
+  contributionPercent?: number | null | undefined;
+  earningsPercent?: number | null | undefined;
+  secondaryEarningsPercent?: number | null | undefined;
+  incomingForfeitPercent?: number | null | undefined;
+  maxAllowedContributions?: number | null | undefined;
+  badgeToAdjust?: number | null | undefined;
+  adjustContributionAmount?: number | null | undefined;
+  adjustEarningsAmount?: number | null | undefined;
+  adjustIncomingForfeitAmount?: number | null | undefined;
+  badgeToAdjust2?: number | null | undefined;
+  adjustEarningsSecondaryAmount?: number | null | undefined;
+}
 
 const schema = yup.object().shape({
   profitYear: yup
@@ -34,60 +48,87 @@ const schema = yup.object().shape({
     .number()
     .typeError("Contribution must be a number")
     .min(0, "Contribution must be positive")
-    .nullable(),
-  earningsPercent: yup.number().typeError("Earnings must be a number").min(0, "Earnings must be positive").nullable(),
+    .nullable()
+    .optional(),
+  earningsPercent: yup
+    .number()
+    .typeError("Earnings must be a number")
+    .min(0, "Earnings must be positive")
+    .nullable()
+    .optional(),
   secondaryEarningsPercent: yup
     .number()
     .typeError("Secondary Earnings must be a number")
     .min(0, "Secondary Earnings must be positive")
-    .nullable(),
+    .nullable()
+    .optional(),
   incomingForfeitPercent: yup
     .number()
     .typeError("Incoming Forfeiture must be a number")
     .min(0, "Forfeiture must be positive")
-    .nullable(),
+    .nullable()
+    .optional(),
   maxAllowedContributions: yup
     .number()
     .typeError("Max Allowed Contributions must be a number")
     .min(0, "Max Allowed Contributions must be positive")
-    .nullable(),
-  badgeToAdjust: yup.number().typeError("Badge must be a number").integer("Badge must be an integer").nullable(),
+    .nullable()
+    .optional(),
+  badgeToAdjust: yup
+    .number()
+    .typeError("Badge must be a number")
+    .integer("Badge must be an integer")
+    .nullable()
+    .optional(),
   adjustContributionAmount: yup
     .number()
     .typeError("Contribution must be a number")
     .min(0, "Contribution must be positive")
-    .nullable(),
-  adjustEarningsAmount: yup.number().typeError("Earnings must be a number").nullable(),
-  adjustIncomingForfeitureAmount: yup
+    .nullable()
+    .optional(),
+  adjustEarningsAmount: yup.number().typeError("Earnings must be a number").nullable().optional(),
+  adjustIncomingForfeitAmount: yup
     .number()
     .typeError("Adjusted Incoming Forfeiture must be a number")
     .min(0, "Adjusted Incoming Forfeiture must be positive")
-    .nullable(),
-  badgeToAdjust2: yup.number().typeError("Badge must be a number").integer("Badge must be an integer").nullable(),
-  adjustEarningsSecondaryAmount: yup.number().typeError("Earnings must be a number").nullable()
+    .nullable()
+    .optional(),
+  badgeToAdjust2: yup
+    .number()
+    .typeError("Badge must be a number")
+    .integer("Badge must be an integer")
+    .nullable()
+    .optional(),
+  adjustEarningsSecondaryAmount: yup.number().typeError("Earnings must be a number").nullable().optional()
 });
 
-const ProfitShareEditUpdateSearchFilter = () => {
+interface ProfitShareEditUpdateSearchFilterProps {
+  setInitialSearchLoaded: (include: boolean) => void;
+}
+
+const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFilterProps> = ({
+  setInitialSearchLoaded
+}) => {
   const [triggerSearchUpdate, { isFetching: isFetchingUpdate }] = useLazyGetProfitShareUpdateQuery();
   const [triggerSearchEdit, { isFetching: isFetchingEdit }] = useLazyGetProfitShareEditQuery();
-  const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "contributionPercent",
-    isSortDescending: false
-  });
 
-  const { profitSharingUpdateAdjustmentSummary } = useSelector((state: RootState) => state.yearsEnd);
+  const { profitSharingUpdate, profitSharingEdit } = useSelector((state: RootState) => state.yearsEnd);
 
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
 
   const fiscalCloseProfitYearAsDate = new Date(fiscalCloseProfitYear, 0, 1);
 
+  if (fiscalCloseProfitYear && !profitSharingUpdate && !profitSharingEdit) {
+    setInitialSearchLoaded(true);
+  }
+
   const {
     control,
     handleSubmit,
     formState: { errors, isValid },
     reset
-  } = useForm<ProfitShareEditUpdateQueryParams>({
+  } = useForm<ProfitShareEditUpdateSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
       profitYear: fiscalCloseProfitYearAsDate,
@@ -107,12 +148,12 @@ const ProfitShareEditUpdateSearchFilter = () => {
     }
   });
 
-  const validateAndSearch = handleSubmit((data: ProfitShareEditUpdateQueryParams, event?: React.BaseSyntheticEvent) => {
+  const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
       const updateParams: ProfitShareUpdateRequest = {
         pagination: {
-          sortBy: sortParams.sortBy,
-          isSortDescending: sortParams.isSortDescending,
+          sortBy: "name",
+          isSortDescending: false,
           skip: 0,
           take: 25
         },
@@ -132,19 +173,19 @@ const ProfitShareEditUpdateSearchFilter = () => {
 
       // First we have to do the update calls
       triggerSearchUpdate(updateParams, false).unwrap();
-      dispatch(setProfitSharingUpdateQueryParams(data));
-      //console.log("Successfully did the update");
+      dispatch(setProfitSharingUpdateQueryParams({ ...data, profitYear: fiscalCloseProfitYearAsDate }));
+
+      dispatch(setProfitEditUpdateChangesAvailable(true));
 
       // Now if we have a badgeToAdjust, we want to save the
       // adjustment summary so that panel shows up
-      //if (data.badgeToAdjust) {
-      //  dispatch(addBadgeNumberToUpdateAdjustmentSummary(data.badgeToAdjust));
-      //}
+      if (data.badgeToAdjust) {
+        dispatch(addBadgeNumberToUpdateAdjustmentSummary(data.badgeToAdjust));
+      }
 
       // Now we have to do the edit calls
       triggerSearchEdit(updateParams, false).unwrap();
-      dispatch(setProfitSharingEditQueryParams(data));
-      //console.log("Successfully did the edit");
+      dispatch(setProfitSharingEditQueryParams({ ...data, profitYear: fiscalCloseProfitYearAsDate }));
     }
   });
 
@@ -154,6 +195,8 @@ const ProfitShareEditUpdateSearchFilter = () => {
     dispatch(clearProfitSharingUpdate());
     dispatch(clearProfitSharingEditQueryParams());
     dispatch(clearProfitSharingUpdateQueryParams());
+    setInitialSearchLoaded(false);
+    dispatch(setProfitEditUpdateChangesAvailable(false));
 
     reset({
       profitYear: fiscalCloseProfitYearAsDate,

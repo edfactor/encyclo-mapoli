@@ -12,6 +12,7 @@ export const GetEligibleEmployeesColumns = (): ColDef[] => {
       cellClass: "left-align",
       resizable: true,
       sortable: true,
+      unSortIcon: true,
       cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber)
     },
     {
@@ -24,7 +25,7 @@ export const GetEligibleEmployeesColumns = (): ColDef[] => {
       resizable: true
     },
     {
-      headerName: "Assignment ID",
+      headerName: "Assignment",
       field: "departmentId",
       colId: "departmentId",
       minWidth: 150,

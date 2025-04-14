@@ -39,10 +39,8 @@ public class ProfitSharingUnder21TotalsEndpoint: Endpoint<ProfitYearRequest, Pro
         Group<YearEndGroup>();
     }
 
-    public async override Task<ProfitSharingUnder21TotalsResponse> ExecuteAsync(ProfitYearRequest req, CancellationToken ct)
+    public override Task<ProfitSharingUnder21TotalsResponse> ExecuteAsync(ProfitYearRequest req, CancellationToken ct)
     {
-        var response = await _postFrozenService.GetUnder21Totals(req, ct);
-
-        return response;
+        return _postFrozenService.GetUnder21Totals(req, ct);
     }
 }

@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import { Button, Divider, Typography, Box, CircularProgress } from "@mui/material";
 import Grid2 from '@mui/material/Grid2';
-import { DSMAccordion, Page } from "smart-ui-library";
-import ProfitShareTotals426SearchFilter from "./ProfitShareTotals426SearchFilter";
-import StatusDropdown, { ProcessStatus } from "components/StatusDropdown";
+import { Page } from "smart-ui-library";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { useNavigate } from "react-router";
 import { MENU_LABELS, CAPTIONS } from "../../constants";
 import { useSelector } from "react-redux";
@@ -17,6 +16,7 @@ import ProfitShareTotalsDisplay from "components/ProfitShareTotalsDisplay";
 
 const ProfitShareTotals426 = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
+  const [hasInitialSearchRun, setHasInitialSearchRun] = useState(false);
   const navigate = useNavigate();
   const hasToken = !!useSelector((state: RootState) => state.security.token);
   const profitYear = useFiscalCloseProfitYear();
@@ -25,7 +25,9 @@ const ProfitShareTotals426 = () => {
   const { yearEndProfitSharingReport } = useSelector((state: RootState) => state.yearsEnd);
 
   useEffect(() => {
-    if (hasToken && profitYear) {
+    if (hasToken && profitYear && !hasInitialSearchRun) {
+      setHasInitialSearchRun(true);
+      
       const request: YearEndProfitSharingReportRequest = {
         isYearEnd: false,
         minimumAgeInclusive: 18,
@@ -40,21 +42,26 @@ const ProfitShareTotals426 = () => {
         includeEmployeesWithPriorProfitSharingAmounts: true,
         includeEmployeesWithNoPriorProfitSharingAmounts: true,
         profitYear: profitYear,
-        pagination: { skip: 0, take: 5 }
+        pagination: { skip: 0, take: 5, sortBy: "badgeNumber", isSortDescending: true }
       };
-      triggerSearch(request, false);
-      dispatch(setYearEndProfitSharingReportQueryParams(profitYear));
+      
+      triggerSearch(request, false)
+        .then(result => {
+          if (result.data) {
+            dispatch(setYearEndProfitSharingReportQueryParams(profitYear));
+            setInitialSearchLoaded(true);
+          }
+        })
+        .catch(error => {
+          console.error("Initial search failed:", error);
+        });
     }
-  }, [hasToken, profitYear, triggerSearch, dispatch]);
-
-  const handleStatusChange = async (newStatus: ProcessStatus) => {
-    console.info("Logging new status: ", newStatus);
-  };
+  }, [hasToken, profitYear, hasInitialSearchRun, triggerSearch, dispatch]);
 
   const renderActionNode = () => {
     return (
       <div className="flex items-center gap-2 h-10">
-        <StatusDropdown onStatusChange={handleStatusChange} />
+        <StatusDropdownActionNode />
         <Button
           onClick={() => navigate("/profit-share-report")}
           variant="outlined"
@@ -74,11 +81,6 @@ const ProfitShareTotals426 = () => {
         rowSpacing="24px">
         <Grid2 width={"100%"}>
           <Divider />
-        </Grid2>
-        <Grid2 width={"100%"}>
-          <DSMAccordion title="Filter">
-            <ProfitShareTotals426SearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
-          </DSMAccordion>
         </Grid2>
 
         <Grid2 width="100%">

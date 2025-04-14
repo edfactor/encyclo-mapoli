@@ -1,4 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -16,24 +16,40 @@ internal static class BeneficiariesProcessingHelper
         // The BeginningBalance is the total balance from the previous year
         short profitYearPrior = (short)(profitShareUpdateRequest.ProfitYear - 1);
 
-        List<BeneficiaryFinancials> benes = await dbContextFactory.UseReadOnlyContext(ctx =>
-            {
-                return ctx.Beneficiaries
-                    .Include(b => b.Contact)
-                    .ThenInclude(c => c!.ContactInfo)
-                    .Join(totalsService.GetTotalBalanceSet(ctx, profitYearPrior), b => b.Contact!.Ssn, tbs => tbs.Ssn,
-                        (bene, tbs) => new { bene = bene, BeginningBalance = tbs.Total })
-                    .OrderBy(bt => bt.bene.Contact!.ContactInfo.FullName)
-                    .ThenByDescending(bt => bt.bene.BadgeNumber * 10000 + bt.bene.PsnSuffix).Select(bt =>
-                        new BeneficiaryFinancials
-                        {
-                            Psn = bt.bene.Psn,
-                            Ssn = bt.bene.Contact!.Ssn,
-                            Name = bt.bene.Contact.ContactInfo.FullName,
-                            BeginningBalance = (bt.BeginningBalance == null) ? 0 : bt.BeginningBalance.Value,
-                        }).ToListAsync(cancellationToken);
-            }
-        );
+        var benes = await dbContextFactory.UseReadOnlyContext(async ctx =>
+        {
+            // Left Outer Joins are a challenge in EF
+            
+            // Do the base query to get the Bene's
+            var benes = await ctx.Beneficiaries
+                .Include(b => b.Contact)
+                .ThenInclude(c => c!.ContactInfo)
+                .OrderBy(b => b.Contact!.ContactInfo.FullName)
+                .ThenByDescending(b => (b.BadgeNumber * 10_000) + b.PsnSuffix)
+                .Select(b => new BeneficiaryFinancials
+                {
+                    Psn = b.Psn,
+                    Ssn = b.Contact!.Ssn,
+                    Name = b.Contact.ContactInfo.FullName,
+                    BeginningBalance = 0
+                })
+                .ToListAsync(cancellationToken);
+
+            // get the bene SSN's to restrain the Balances search
+            var beneSsns = benes.Select(b => b.Ssn).ToList();
+
+            // Go grab the Balances for these Benes (some may have no records last year, so this may not have an entry for them) 
+            var beneBalances = (await totalsService.GetTotalBalanceSet(ctx, profitYearPrior)
+                                        .Where(ts => beneSsns.Contains(ts.Ssn!.Value))
+                                        .ToListAsync(cancellationToken))
+                                    .ToDictionary(tbs => tbs.Ssn!.Value, tbs => tbs.Total ?? 0m);
+
+            // Merge the two results
+            return benes
+                .Select(b => b with { BeginningBalance = beneBalances.GetValueOrDefault(b.Ssn, 0m) })
+                .ToList();
+        });
+
 
         Dictionary<int, ProfitDetailTotals> thisYearsTotalsBySSn =
             await TotalService.GetProfitDetailTotalsForASingleYear(dbContextFactory, profitShareUpdateRequest.ProfitYear, [.. benes.Select(ef => ef.Ssn)], cancellationToken);
@@ -65,10 +81,10 @@ internal static class BeneficiariesProcessingHelper
     {
         MemberTotals memberTotals = new()
         {
-            NewCurrentAmount = bene.BeginningBalance 
-                               + thisYearsTotals.AllocationsTotal 
-                               + thisYearsTotals.ClassActionFundTotal 
-                               - thisYearsTotals.ForfeitsTotal 
+            NewCurrentAmount = bene.BeginningBalance
+                               + thisYearsTotals.AllocationsTotal
+                               + thisYearsTotals.ClassActionFundTotal
+                               - thisYearsTotals.ForfeitsTotal
                                - thisYearsTotals.PaidAllocationsTotal
                                - thisYearsTotals.DistributionsTotal
         };
@@ -90,5 +106,4 @@ internal static class BeneficiariesProcessingHelper
 
         return new MemberFinancials(bene, thisYearsTotals, memberTotals);
     }
-    
 }

@@ -44,6 +44,18 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
         return CallReportEndpoint<DemographicBadgesNotInPayProfitResponse, SortedPaginationRequestDto>(req, "demographic-badges-not-in-payprofit", cancellationToken);
     }
 
+    public Task<DistributionsAndForfeitureTotalsResponse> GetDistributionsAndForfeitureAsync(DistributionsAndForfeituresRequest req,
+        CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<YearEndProfitSharingReportSummaryResponse> GetYearEndProfitSharingSummaryReportAsync(FrozenProfitYearRequest req,
+        CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
     public Task<Stream> DownloadDemographicBadgesNotInPayProfit(CancellationToken ct = default)
     {
         return DownloadCsvReport(0, "demographic-badges-not-in-payprofit", ct);
@@ -69,6 +81,12 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
         return CallReportEndpoint<NamesMissingCommaResponse, SortedPaginationRequestDto>(req, "names-missing-commas", cancellationToken);
     }
 
+    public Task<YearEndProfitSharingReportResponse> GetYearEndProfitSharingReportAsync(YearEndProfitSharingReportRequest req,
+        CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
     public Task<Stream> DownloadNamesMissingComma(CancellationToken cancellationToken = default)
     {
         return DownloadCsvReport(0, "names-missing-commas", cancellationToken);
@@ -82,16 +100,6 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
     public Task<Stream> DownloadDuplicateNamesAndBirthdays(short profitYear, CancellationToken cancellationToken = default)
     {
         return DownloadCsvReport(profitYear, "duplicate-names-and-birthdays", cancellationToken);
-    }
-
-    public Task<ReportResponseBase<DistributionsAndForfeitureResponse>> GetDistributionsAndForfeitureAsync(DistributionsAndForfeituresRequest req, CancellationToken cancellationToken = default)
-    {
-        return CallReportEndpoint<DistributionsAndForfeitureResponse, DistributionsAndForfeituresRequest>(req, "distributions-and-forfeitures", cancellationToken);
-    }
-
-    public Task<YearEndProfitSharingReportResponse> GetYearEndProfitSharingReportAsync(YearEndProfitSharingReportRequest req, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
     }
 
     private async Task<ReportResponseBase<TResponseDto>> CallReportEndpoint<TResponseDto, TPaginatedRequest>(TPaginatedRequest req, string endpointRoute, CancellationToken cancellationToken) where TResponseDto : class where TPaginatedRequest : SortedPaginationRequestDto 
@@ -160,10 +168,5 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
             Query = query.ToString()
         };
         return uriBuilder;
-    }
-
-    public Task<YearEndProfitSharingReportSummaryResponse> GetYearEndProfitSharingSummaryReportAsync(FrozenProfitYearRequest req, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
     }
 }

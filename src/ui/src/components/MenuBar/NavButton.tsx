@@ -5,8 +5,9 @@ type MyProps = {
   isUnderlined: boolean;
   label: string;
   onClick: () => void;
+  disabled?: boolean;
 };
-const NavButton: FC<MyProps> = ({ isUnderlined, label, onClick }) => {
+const NavButton: FC<MyProps> = ({ isUnderlined, label, onClick, disabled }) => {
   return (
     <span
       className={`${
@@ -17,7 +18,9 @@ const NavButton: FC<MyProps> = ({ isUnderlined, label, onClick }) => {
       <Button
         className="h-full"
         aria-haspopup="true"
-        onClick={onClick}>
+        onClick={disabled ? undefined : onClick}
+        disableRipple={disabled}
+        sx={{ color: 'inherit', cursor: disabled ? 'default' : 'pointer', opacity: disabled ? 0.6 : 1 }}>
         {label}
       </Button>
     </span>

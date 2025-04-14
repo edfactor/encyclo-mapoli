@@ -62,7 +62,7 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store }) => {
         cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber, handleNavigation)
       },
       {
-        headerName: "Employee Name",
+        headerName: "Name",
         field: "fullName",
         width: 200
       },

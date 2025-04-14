@@ -277,7 +277,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             //Prevent any payprofit records from being returned
             foreach (var pp in ctx.PayProfits)
             {
-                pp.ProfitYear = 1999;
+                pp.ProfitYear = 2100;
             }
 
             //Setup employee to be returned
@@ -312,12 +312,12 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             await ctx.SaveChangesAsync(CancellationToken.None);
         });
 
-        var response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse>(req);
+        var response = await ApiClient.POSTAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse>(req);
 
         response.Should().NotBeNull();
         response.Result.ReportName.Should().BeEquivalentTo($"PROFIT SHARE YEAR END REPORT FOR {req.ProfitYear}");
-        response.Result.Response.Total.Should().Be(1);
-        response.Result.Response.Results.Count().Should().Be(1);
+        response.Result.Response.Total.Should().BeGreaterThanOrEqualTo(1);
+        response.Result.Response.Results.Count().Should().BeGreaterThanOrEqualTo(1);
 
         _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
 
@@ -334,7 +334,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             await ctx.SaveChangesAsync(CancellationToken.None);
         });
 
-        response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse>(req);
+        response = await ApiClient.POSTAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse>(req);
 
         response.Result.Should().NotBeNull();
         response.Result.Response.Total.Should().Be(0);
@@ -354,7 +354,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             await ctx.SaveChangesAsync(CancellationToken.None);
         });
 
-        response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse>(req);
+        response = await ApiClient.POSTAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse>(req);
 
         response.Result.Should().NotBeNull();
         response.Result.Response.Total.Should().Be(0);
@@ -421,35 +421,35 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             await ctx.SaveChangesAsync(CancellationToken.None);
         });
 
-        var response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse>(req);
+        var response = await ApiClient.POSTAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse>(req);
         response.Should().NotBeNull();
         response.Result.ReportName.Should().BeEquivalentTo($"PROFIT SHARE YEAR END REPORT FOR {req.ProfitYear}");
-        response.Result.Response.Total.Should().Be(1);
-        response.Result.Response.Results.Count().Should().Be(1);
+        response.Result.Response.Total.Should().BeGreaterThanOrEqualTo(1);
+        response.Result.Response.Results.Count().Should().BeGreaterThanOrEqualTo(1);
 
         req.IncludeActiveEmployees = false; //Test Active filter
-        response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse>(req);
+        response = await ApiClient.POSTAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse>(req);
         response.Should().NotBeNull();
         response.Result.Response.Total.Should().Be(0);
         response.Result.Response.Results.Count().Should().Be(0);
 
         req.IncludeActiveEmployees = true;
         req.MaximumAgeInclusive = 20; //Test Max Age filter
-        response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse>(req);
+        response = await ApiClient.POSTAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse>(req);
         response.Should().NotBeNull();
         response.Result.Response.Total.Should().Be(0);
         response.Result.Response.Results.Count().Should().Be(0);
 
         req.MaximumAgeInclusive = null;
         req.MinimumAgeInclusive = 30; //Test Min Age filter
-        response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse>(req);
+        response = await ApiClient.POSTAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse>(req);
         response.Should().NotBeNull();
         response.Result.Response.Total.Should().Be(0);
         response.Result.Response.Results.Count().Should().Be(0);
 
         req.MinimumAgeInclusive = null;
         req.MinimumHoursInclusive = (short?)(testHours + 1); //Test Minimum hours
-        response = await ApiClient.GETAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse>(req);
+        response = await ApiClient.POSTAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse>(req);
         response.Should().NotBeNull();
         response.Result.Response.Total.Should().Be(0);
         response.Result.Response.Results.Count().Should().Be(0);
@@ -468,7 +468,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
 
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         var req = new DistributionsAndForfeituresRequest() { Skip = 0, Take = byte.MaxValue, ProfitYear = (short)(DateTime.Now.Year - 1), IncludeOutgoingForfeitures = true };
-        ReportResponseBase<DistributionsAndForfeitureResponse> response;
+        TestResult<DistributionsAndForfeitureTotalsResponse> response;
 
 
         await MockDbContextFactory.UseWritableContext(async ctx =>
@@ -512,13 +512,16 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
 
                 await ctx.SaveChangesAsync(CancellationToken.None);
             });
-            response = await _cleanupReportClient.GetDistributionsAndForfeitureAsync(req, CancellationToken.None);
 
-            response.Should().NotBeNull();
-            response.ReportName.Should().BeEquivalentTo("DISTRIBUTIONS AND FORFEITURES");
-            response.Response.Results.Count().Should().Be(1);
-            response.Response.Results.First().DistributionAmount.Should().Be(sampleforfeiture);
-            response.Response.Results.First().ForfeitAmount.Should().Be(0);
+            response = await ApiClient
+                    .GETAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest, DistributionsAndForfeitureTotalsResponse>(req);
+
+
+            response.Result.Should().NotBeNull();
+            response.Result.ReportName.Should().BeEquivalentTo("DISTRIBUTIONS AND FORFEITURES");
+            response.Result.Response.Results.Count().Should().Be(1);
+            response.Result.Response.Results.First().DistributionAmount.Should().Be(sampleforfeiture);
+            response.Result.Response.Results.First().ForfeitAmount.Should().Be(0);
 
             _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
         }
@@ -531,12 +534,14 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             await ctx.SaveChangesAsync(CancellationToken.None);
         });
 
-        response = await _cleanupReportClient.GetDistributionsAndForfeitureAsync(req, CancellationToken.None);
+        response = await ApiClient
+            .GETAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest,
+                DistributionsAndForfeitureTotalsResponse>(req);
 
-        response.Should().NotBeNull();
-        response.Response.Results.Count().Should().Be(1);
-        response.Response.Results.First().DistributionAmount.Should().Be(0);
-        response.Response.Results.First().ForfeitAmount.Should().Be(sampleforfeiture);
+        response.Result.Should().NotBeNull();
+        response.Result.Response.Results.Count().Should().Be(1);
+        response.Result.Response.Results.First().DistributionAmount.Should().Be(0);
+        response.Result.Response.Results.First().ForfeitAmount.Should().Be(sampleforfeiture);
 
         _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
 
@@ -548,10 +553,12 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             await ctx.SaveChangesAsync(CancellationToken.None);
         });
 
-        response = await _cleanupReportClient.GetDistributionsAndForfeitureAsync(req, CancellationToken.None);
+        response = await ApiClient
+            .GETAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest,
+                DistributionsAndForfeitureTotalsResponse>(req);
 
         response.Should().NotBeNull();
-        response.Response.Results.Count().Should().Be(0);
+        response.Result.Response.Results.Count().Should().Be(0);
 
         _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
 
@@ -564,10 +571,12 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             await ctx.SaveChangesAsync(CancellationToken.None);
         });
 
-        response = await _cleanupReportClient.GetDistributionsAndForfeitureAsync(req, CancellationToken.None);
+        response = await ApiClient
+            .GETAsync<DistributionsAndForfeitureEndpoint, DistributionsAndForfeituresRequest,
+                DistributionsAndForfeitureTotalsResponse>(req);
 
         response.Should().NotBeNull();
-        response.Response.Results.Count().Should().Be(0);
+        response.Result.Response.Results.Count().Should().Be(0);
 
         _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
     }

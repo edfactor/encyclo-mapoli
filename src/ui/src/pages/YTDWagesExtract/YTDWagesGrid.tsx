@@ -8,6 +8,7 @@ import { GetYTDWagesColumns } from "./YTDWagesGridColumn";
 
 import { RefObject } from "react";
 import { useLazyGetEmployeeWagesForYearQuery } from "reduxstore/api/YearsEndApi";
+import useFiscalCloseProfitYear from "../../hooks/useFiscalCloseProfitYear";
 
 interface YTDWagesGridProps {
   innerRef: RefObject<HTMLDivElement | null>;
@@ -23,18 +24,24 @@ const YTDWagesGrid = ({ innerRef, initialSearchLoaded, setInitialSearchLoaded }:
     sortBy: "storeNumber",
     isSortDescending: false
   });
+  const fiscalCloseProfitYear = useFiscalCloseProfitYear();
   const [triggerSearch, { isFetching }] = useLazyGetEmployeeWagesForYearQuery();
   const { employeeWagesForYearQueryParams } = useSelector((state: RootState) => state.yearsEnd);
 
   const onSearch = useCallback(async () => {
     const request = {
-      profitYear: employeeWagesForYearQueryParams?.profitYear ?? 0,
-      pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: sortParams.sortBy, isSortDescending: sortParams.isSortDescending },
+      profitYear: employeeWagesForYearQueryParams?.profitYear ?? fiscalCloseProfitYear,
+      pagination: {
+        skip: pageNumber * pageSize,
+        take: pageSize,
+        sortBy: sortParams.sortBy,
+        isSortDescending: sortParams.isSortDescending
+      },
       acceptHeader: "application/json"
     };
 
     await triggerSearch(request, false);
-  }, [pageNumber, pageSize, sortParams, triggerSearch, hasToken, employeeWagesForYearQueryParams?.profitYear]);
+  }, [pageNumber, pageSize, sortParams, triggerSearch, employeeWagesForYearQueryParams?.profitYear]);
 
   useEffect(() => {
     if (initialSearchLoaded && hasToken) {

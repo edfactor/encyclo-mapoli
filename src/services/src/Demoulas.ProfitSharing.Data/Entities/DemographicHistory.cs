@@ -4,8 +4,8 @@ public class DemographicHistory
 {
     public long Id { get; set; }
     public int DemographicId { get; set; }
-    public DateTime ValidFrom { get; set; } = new DateTime(1917, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-    public DateTime ValidTo { get; set; } = new DateTime(2100, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+    public DateTime ValidFrom { get; set; } = new DateTime(1917, 1, 1, 0, 0, 0, DateTimeKind.Local);
+    public DateTime ValidTo { get; set; } = new DateTime(2100, 1, 1, 0, 0, 0, DateTimeKind.Local);
 
     public required long OracleHcmId { get; set; }
     public int BadgeNumber { get; set; }

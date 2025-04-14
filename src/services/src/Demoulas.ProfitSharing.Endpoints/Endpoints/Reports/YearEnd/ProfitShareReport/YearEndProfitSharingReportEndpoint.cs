@@ -20,12 +20,12 @@ public class YearEndProfitSharingReportEndpoint: EndpointWithCsvTotalsBase<YearE
 
     public override void Configure()
     {
-        Get("yearend-profit-sharing-report");
+        Post("yearend-profit-sharing-report");
         Summary(s =>
         {
-            s.Summary = "Yearend profit sharing report";
+            s.Summary = "Year end profit sharing report";
             s.Description = "Returns a list of employees who will participate in the profit sharing this year, as well as their qualifying attributes.";
-            s.ExampleRequest = new YearEndProfitSharingReportRequest() { IsYearEnd = true, ProfitYear = 2023, Skip = SimpleExampleRequest.Skip, Take =SimpleExampleRequest.Take};
+            s.ExampleRequest = new YearEndProfitSharingReportRequest() { IsYearEnd = true, ProfitYear = 2025, Skip = SimpleExampleRequest.Skip, Take =SimpleExampleRequest.Take};
             s.ResponseExamples = new Dictionary<int, object>
             {
                 {

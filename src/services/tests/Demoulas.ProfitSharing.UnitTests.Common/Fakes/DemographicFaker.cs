@@ -19,6 +19,8 @@ public sealed class DemographicFaker : Faker<Demographic>
         AddressFaker addressFaker = new AddressFaker();
         PayClassificationFaker payClassificationFaker = new PayClassificationFaker();
         EmploymentStatusFaker employmentStatusFaker = new EmploymentStatusFaker();
+        EmployeeTypeFaker employeeTypeFaker = new EmployeeTypeFaker();
+        DepartmentFaker departmentFaker = new DepartmentFaker();
 
         RuleFor(d => d.BadgeNumber, f => _badgeNumberCounter++)
             .RuleFor(d => d.Id, f => _idCounter++)
@@ -26,6 +28,7 @@ public sealed class DemographicFaker : Faker<Demographic>
             .RuleFor(d => d.OracleHcmId, f => _oracleHcmIdCounter++)
             .RuleFor(d => d.StoreNumber, f => f.Random.Short(1, 99))
             .RuleFor(d => d.DepartmentId, f => f.PickRandom<byte>(Department.Constants.Grocery, Department.Constants.Bakery, Department.Constants.BeerAndWine, Department.Constants.Dairy, Department.Constants.Deli, Department.Constants.Meat, Department.Constants.Produce))
+            .RuleFor(d => d.Department, f => departmentFaker.Generate())
             .RuleFor(d => d.PayClassification, f => payClassificationFaker.Generate())
             .RuleFor(d => d.PayClassificationId, f => f.Random.Byte(1, 98))
             .RuleFor(d => d.ContactInfo, f => contactInfoFaker.Generate())
@@ -37,6 +40,7 @@ public sealed class DemographicFaker : Faker<Demographic>
             .RuleFor(d => d.TerminationCodeId, f => f.PickRandom('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'))
             .RuleFor(d => d.TerminationDate, f => f.Date.Past(5, new DateTime(2024, 12, 01, 01, 01, 01, DateTimeKind.Local)).ToDateOnly())
             .RuleFor(d => d.EmploymentTypeId, f => f.PickRandom<char>('P', 'H', 'G', 'F'))
+            .RuleFor(d => d.EmploymentType, f=> employeeTypeFaker.Generate())
             .RuleFor(d => d.PayFrequencyId, f => f.PickRandom<byte>(1, 2))
             .RuleFor(d => d.GenderId, f => f.PickRandom<char>('M', 'F', 'X'))
             .RuleFor(tc => tc.EmploymentStatus, f => employmentStatusFaker.Generate())

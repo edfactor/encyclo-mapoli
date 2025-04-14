@@ -1,9 +1,11 @@
 import { Typography } from "@mui/material";
 import { useEffect, useMemo } from "react";
-import { DSMGrid } from "smart-ui-library";
+import { DSMGrid, Page } from "smart-ui-library";
 import { useLazyGetYearEndProfitSharingSummaryReportQuery } from "reduxstore/api/YearsEndApi";
 import { GetProfitSummaryGridColumns } from "./ProfitSummaryGridColumns";
 import { YearEndProfitSharingReportSummaryLineItem } from "reduxstore/types";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
+import { CAPTIONS } from "../../../constants";
 
 /**
  * Default rows for "Active and Inactive" section - these will display with zero values
@@ -109,6 +111,12 @@ const ProfitSummary = () => {
     });
   }, [trigger]);
 
+  const renderActionNode = () => {
+    return (
+        <StatusDropdownActionNode />
+    );
+};
+
   const columnDefs = useMemo(() => GetProfitSummaryGridColumns(), []);
 
   // Here we combine the API data with placeholders for "Active and Inactive" and "terminated" section
@@ -182,14 +190,8 @@ const ProfitSummary = () => {
   }, [terminatedRowData]);
 
   return (
-    <>
-      <div>
-        <Typography
-          variant="h2"
-          sx={{ color: "#0258A5", padding: "0 24px" }}>
-          Profit Sharing Summary Total Page
-        </Typography>
-      </div>
+    <Page label={CAPTIONS.PAY426_SUMMARY} actionNode={renderActionNode()}>
+      
       <div>
         <Typography
           variant="h6"
@@ -202,7 +204,7 @@ const ProfitSummary = () => {
           handleSortChanged={() => {}}
           providedOptions={{
             rowData: activeAndInactiveRowData,
-            pinnedBottomRowData: getActiveAndInactiveTotals,
+            pinnedTopRowData: getActiveAndInactiveTotals,
             columnDefs: columnDefs
           }}
         />
@@ -220,12 +222,12 @@ const ProfitSummary = () => {
           handleSortChanged={() => {}}
           providedOptions={{
             rowData: terminatedRowData,
-            pinnedBottomRowData: getTerminatedTotals,
+            pinnedTopRowData: getTerminatedTotals,
             columnDefs: columnDefs
           }}
         />
       </div>
-    </>
+    </Page>
   );
 };
 

@@ -83,6 +83,7 @@ import {
   NegativeEtvaForSSNsOnPayprofitRequestDto,
   PagedReportResponse,
   ProfitShareEditResponse,
+  ProfitShareMasterApplyRequest,
   ProfitShareMasterResponse,
   ProfitShareUpdateRequest,
   ProfitShareUpdateResponse,
@@ -285,9 +286,7 @@ export const YearsEndApi = createApi({
         method: "POST",
         body: {
           profitYear: params.profitYear,
-          beginningDate: params.beginningDate
-            ? tryddmmyyyyToDate(params.beginningDate)
-            : params.beginningDate,
+          beginningDate: params.beginningDate ? tryddmmyyyyToDate(params.beginningDate) : params.beginningDate,
           endingDate: params.endingDate ? tryddmmyyyyToDate(params.endingDate) : params.endingDate,
           take: params.pagination.take,
           skip: params.pagination.skip,
@@ -575,7 +574,11 @@ export const YearsEndApi = createApi({
         method: "GET",
         params: {
           profitYear: params.profitYear,
-          useFrozenData: params.useFrozenData
+          useFrozenData: params.useFrozenData,
+          take: params.pagination.take,
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -703,6 +706,8 @@ export const YearsEndApi = createApi({
           adjustEarningsSecondaryAmount: params.adjustEarningsSecondaryAmount,
           take: params.pagination.take,
           skip: params.pagination.skip
+          //sortBy: params.pagination.sortBy,
+          //isSortDescending: params.pagination.isSortDescending
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -711,10 +716,8 @@ export const YearsEndApi = createApi({
           dispatch(setProfitSharingUpdate(data));
           dispatch(setProfitSharingUpdateAdjustmentSummary(data.adjustmentsSummary));
           if (arg.badgeToAdjust) {
-            console.log("Added badge: " + arg.badgeToAdjust);
+            //console.log("Added badge: " + arg.badgeToAdjust);
             dispatch(addBadgeNumberToUpdateAdjustmentSummary(arg.badgeToAdjust));
-          } else {
-            console.log("No badge to add to summmary");
           }
         } catch (err) {
           console.log("Err", err);
@@ -741,6 +744,8 @@ export const YearsEndApi = createApi({
           adjustEarningsSecondaryAmount: params.adjustEarningsSecondaryAmount,
           take: params.pagination.take,
           skip: params.pagination.skip
+          //sortBy: params.pagination.sortBy,
+          //isSortDescending: params.pagination.isSortDescending
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -850,7 +855,7 @@ export const YearsEndApi = createApi({
       }
     }),
 
-    getMasterApply: builder.query<ProfitShareMasterResponse, ProfitShareUpdateRequest>({
+    getMasterApply: builder.query<ProfitShareMasterResponse, ProfitShareMasterApplyRequest>({
       query: (params) => ({
         url: "yearend/profit-master-update",
         method: "GET",
@@ -886,8 +891,8 @@ export const YearsEndApi = createApi({
       {
         query: (params) => ({
           url: "yearend/yearend-profit-sharing-report",
-          method: "GET",
-          params: {
+          method: "POST",
+          body: {
             ...params,
             take: params.pagination.take,
             skip: params.pagination.skip,
@@ -972,8 +977,6 @@ export const {
   useLazyGetForfeituresAndPointsQuery,
   useLazyGetForfeituresByAgeQuery,
   useLazyGetGrossWagesReportQuery,
-  useLazyGetMasterApplyQuery,
-  useLazyGetMasterRevertQuery,
   useLazyGetRehireForfeituresQuery,
   useLazyGetNamesMissingCommasQuery,
   useLazyGetNegativeEVTASSNQuery,
@@ -987,5 +990,7 @@ export const {
   useLazyGetYearEndProfitSharingReportQuery,
   useUpdateExecutiveHoursAndDollarsMutation,
   useLazyGetYearEndProfitSharingSummaryReportQuery,
-  useLazyGetUpdateSummaryQuery
+  useLazyGetUpdateSummaryQuery,
+  useLazyGetMasterApplyQuery,
+  useLazyGetMasterRevertQuery
 } = YearsEndApi;

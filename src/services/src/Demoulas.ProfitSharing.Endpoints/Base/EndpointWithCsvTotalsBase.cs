@@ -39,7 +39,13 @@ public abstract class EndpointWithCsvTotalsBase<ReqType, RespType, ItemType, Map
             b.Produces<RespType>(200, "application/json", "text/csv"));
     }
 
-    protected PaginationRequestDto SimpleExampleRequest => new PaginationRequestDto { Skip = 0, Take = byte.MaxValue };
+    protected SortedPaginationRequestDto SimpleExampleRequest => new SortedPaginationRequestDto
+    {
+        Skip = 0,
+        Take = byte.MaxValue,
+        SortBy = "columnName",
+        IsSortDescending = true
+    };
 
     public abstract Task<RespType> GetResponse(ReqType req, CancellationToken ct);
 

@@ -39,7 +39,10 @@ public abstract class EndpointWithCsvBase<ReqType, RespType, MapType> : FastEndp
     /// <summary>
     /// Use to provide a simple example request when no more complex than a simple Pagination Request is needed
     /// </summary>
-    protected PaginationRequestDto SimpleExampleRequest => new PaginationRequestDto { Skip = 0, Take = byte.MaxValue };
+    protected SortedPaginationRequestDto SimpleExampleRequest => new SortedPaginationRequestDto
+    {
+        Skip = 0, Take = byte.MaxValue, SortBy = "columnName", IsSortDescending = true
+    };
 
     /// <summary>
     /// Asynchronously retrieves a response for the given request.

@@ -12,9 +12,9 @@ import {
 import MilitaryAndRehireEntryAndModificationSearchFilter from "./MilitaryEntryAndModificationSearchFilter";
 import MilitaryContributionForm from "./MilitaryContributionForm";
 import { MilitaryContribution } from "reduxstore/types";
-import { CAPTIONS, MENU_LABELS } from "../../constants";
-import StatusDropdown from "components/StatusDropdown";
+import { CAPTIONS, MENU_LABELS } from "../../../constants";
 import { useNavigate } from "react-router";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 
 const MilitaryEntryAndModification = () => {
   const [showContributions, setShowContributions] = useState(false);
@@ -25,16 +25,8 @@ const MilitaryEntryAndModification = () => {
 
   const renderActionNode = () => {
     return (
-      <div className="flex items-center gap-2 h-10">
-        <StatusDropdown onStatusChange={() => {}} />
-        <Button
-          onClick={() => navigate("/december-process-accordion")}
-          variant="outlined"
-          className="h-10 whitespace-nowrap min-w-fit">
-          {MENU_LABELS.DECEMBER_ACTIVITIES}
-        </Button>
-      </div>
-    );
+        <StatusDropdownActionNode />
+      );
   };
 
   const handleFetchContributions = useCallback(() => {

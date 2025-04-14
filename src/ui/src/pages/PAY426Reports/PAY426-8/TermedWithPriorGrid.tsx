@@ -4,13 +4,20 @@ import { DSMGrid } from "smart-ui-library";
 import { Path, useNavigate } from "react-router";
 import { GetProfitSharingReportGridColumns } from "../PAY426-1/EighteenToTwentyGridColumns";
 import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
+import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../reduxstore/store";
 
 const TermedWithPriorGrid = () => {
   const navigate = useNavigate();
   const [trigger, { data, isLoading }] = useLazyGetYearEndProfitSharingReportQuery();
 
+  const hasToken = useSelector((state: RootState) => !!state.security.token);
+  const profitYear = useDecemberFlowProfitYear();
+
   useEffect(() => {
-    trigger({
+    if (hasToken) {
+      trigger({
       isYearEnd: true,
       minimumAgeInclusive: 18,
       maximumAgeInclusive: 200,
@@ -23,13 +30,16 @@ const TermedWithPriorGrid = () => {
       includeBeneficiaries: false,
       includeEmployeesWithPriorProfitSharingAmounts: true,
       includeEmployeesWithNoPriorProfitSharingAmounts: false,
-      profitYear: 2024,
+      profitYear: profitYear,
       pagination: {
         skip: 0,
-        take: 25
+        take: 25,
+        sortBy: "badgeNumber",
+        isSortDescending: true
       }
     });
-  }, [trigger]);
+  }
+}, [trigger, hasToken, profitYear]);
 
   const handleNavigationForButton = useCallback(
     (destination: string | Partial<Path>) => {

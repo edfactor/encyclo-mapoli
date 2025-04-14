@@ -16,7 +16,7 @@ const EligibleEmployeesGrid: React.FC<EligibleEmployeesGridProps> = ({
   setInitialSearchLoaded
 }) => {
   const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
     sortBy: "badgeNumber",
     isSortDescending: false
@@ -32,7 +32,7 @@ const EligibleEmployeesGrid: React.FC<EligibleEmployeesGridProps> = ({
   const onSearch = useCallback(async () => {
     const request = {
       profitYear: eligibleEmployeesQueryParams?.profitYear ?? 0,
-      pagination: { skip: pageNumber * pageSize, take: pageSize }
+      pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: sortParams.sortBy, isSortDescending: sortParams.isSortDescending }
     };
 
     await triggerSearch(request, false);
@@ -42,7 +42,7 @@ const EligibleEmployeesGrid: React.FC<EligibleEmployeesGridProps> = ({
     if (initialSearchLoaded) {
       onSearch();
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, onSearch]);
+  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch]);
 
   return (
     <>
@@ -61,7 +61,8 @@ const EligibleEmployeesGrid: React.FC<EligibleEmployeesGridProps> = ({
             handleSortChanged={sortEventHandler}
             providedOptions={{
               rowData: eligibleEmployees?.response.results,
-              columnDefs: columnDefs
+              columnDefs: columnDefs,
+              suppressMultiSort: true,
             }}
           />
         </>

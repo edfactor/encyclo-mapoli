@@ -28,7 +28,7 @@ internal static class Program
 
         string dataDirectory = Path.Combine(baseDir, $"{DateTime.Now:dd-MMM-HH-mm}");
         Directory.CreateDirectory(dataDirectory);
-        Console.WriteLine($"Directory created: {dataDirectory}");
+        Console.WriteLine($"Directory created: file:///{dataDirectory}");
 
         var wholeRunStopWatch = new Stopwatch();
         wholeRunStopWatch.Start();
@@ -42,9 +42,7 @@ internal static class Program
 
         if (readyActivities.Count != smartActivities.Count)
         {
-#pragma warning disable S112
-            throw new Exception("READY and SMART activities are different length");
-#pragma warning restore S112
+            throw new InvalidOperationException("READY and SMART activities are different length");
         }
 
         for (var i = 0; i < readyActivities.Count; i++)
@@ -52,21 +50,20 @@ internal static class Program
             if (smartActivities[i].ActivityLetterNumber != readyActivities[i].ActivityLetterNumber)
                 // We always expect Ready short name to be the same as Smart short name (ie.  A7 and A7 should match.)
             {
-#pragma warning disable S112
-                throw new Exception(
+                throw new InvalidOperationException(
                     $"READY and SMART activities are different at index {i}  s={smartActivities[i].ActivityLetterNumber} r={readyActivities[i].ActivityLetterNumber}");
-#pragma warning restore S112
             }
         }
 
         // This block lets you skip steps when doing specific testing
         var skipBoth = 0;
-#pragma warning disable S125
-        var startOnStep = "A15"; // step to start with, ie. "A10";
-        var stopOnStep = "A21"; // step to start with, ie. "A10";
-#pragma warning restore S125
+
+        var startOnStep = ""; // step to start with, ie. "A10"
+        var stopOnStep = ""; // step to start with, ie. "A10"
+
         var stopOnSmartSide = true;
 
+        // TBD, should stop by name not index - so we can stop on either side (if running only 1 side)
         for (var i = 0; i < readyActivities.Count; i++)
         {
             if (smartActivities[i].ActivityLetterNumber == startOnStep)
@@ -80,10 +77,8 @@ internal static class Program
 
         // Only do two steps, A0 and A21
 
-#pragma warning disable S125
-        // readyActivities = readyActivities.Where(a => a.ActivityLetterNumber is "A0" or "A21").ToList();
-        // smartActivities = smartActivities.Where(a => a.ActivityLetterNumber is "A0" or "A21").ToList();
-#pragma warning restore S125
+        readyActivities = readyActivities.Where(a => a.ActivityLetterNumber is "A0" or "A3").ToList();
+        smartActivities = smartActivities.Where(a => a.ActivityLetterNumber is "A0" or "A3").ToList();
 
         var bothReadyAndSmartActivities = readyActivities.Zip(smartActivities, (a, b) => new[] { a, b })
             .SelectMany(x => x)
@@ -117,7 +112,8 @@ internal static class Program
 
         var wholeRunElapsed = wholeRunStopWatch.Elapsed;
 
-        var filePath = $"../../../outcomes-{DateTime.Now:yyyyMMdd-HHmmss}.json";
+        // This could go into the log directory, but I like seeing in the ide... so for now I'm gonna leave it at the project root
+        string filePath = $"../../../outcomes-{DateTime.Now:yyyyMMdd-HHmmss}.json";
         await File.WriteAllTextAsync(filePath, JsonSerializer.Serialize(outcomes));
         Console.WriteLine("Saved outcomes to file.");
 

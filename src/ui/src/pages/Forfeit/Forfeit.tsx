@@ -5,12 +5,19 @@ import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
 import ForfeitGrid from "./ForfeitGrid";
 import ForfeitSearchFilter from "./ForfeitSearchFilter";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 
 const Forfeit = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
 
+  const renderActionNode = () => {
+    return (
+      <StatusDropdownActionNode />
+    );
+  };
+
   return (
-    <Page label={CAPTIONS.FORFEIT}>
+    <Page label={CAPTIONS.FORFEIT} actionNode={renderActionNode()}>
       <Grid2
         container
         rowSpacing="24px">

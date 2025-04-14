@@ -1,11 +1,14 @@
 import { Divider } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "reduxstore/store";
-import { DSMAccordion, numberToCurrency, Page, TotalsGrid } from "smart-ui-library";
-//import { TotalsGrid } from "../../../components/TotalsGrid";
-import VestedAmountsByAgeSearchFilter from "./VestedAmountsByAgeSearchFilter";
+import { numberToCurrency, Page, TotalsGrid } from "smart-ui-library";
 import VestedAmountsByAgeTabs from "./VestedAmountsByAgeTabs";
+import { useState, useEffect } from "react";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import { useLazyGetVestingAmountByAgeQuery } from "reduxstore/api/YearsEndApi";
+import { setVestedAmountsByAgeQueryParams } from "reduxstore/slices/yearsEndSlice";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 
 const options: Intl.DateTimeFormatOptions = {
   month: "2-digit",
@@ -18,21 +21,50 @@ function toCapitalCase(str: string): string {
     return match.toUpperCase();
   });
 }
+
 const VestedAmountsByAge = () => {
+  const [hasInitialSearchRun, setHasInitialSearchRun] = useState(false);
+  const hasToken = !!useSelector((state: RootState) => state.security.token);
+  const profitYear = useFiscalCloseProfitYear();
+  const dispatch = useDispatch();
+  const [triggerSearch] = useLazyGetVestingAmountByAgeQuery();
   const { vestedAmountsByAge } = useSelector((state: RootState) => state.yearsEnd);
 
+  useEffect(() => {
+    if (hasToken && profitYear && !hasInitialSearchRun) {
+      setHasInitialSearchRun(true);
+      
+      triggerSearch(
+        {
+          profitYear: profitYear,
+          acceptHeader: "application/json"
+        },
+        false
+      )
+        .then((result: any) => {
+          if (result.data) {
+            dispatch(setVestedAmountsByAgeQueryParams(profitYear));
+          }
+        })
+        .catch((error: any) => {
+          console.error("Initial vested amounts by age search failed:", error);
+        });
+    }
+  }, [hasToken, profitYear, hasInitialSearchRun, triggerSearch, dispatch]);
+
+  const renderActionNode = () => {
+    return (
+        <StatusDropdownActionNode />
+    );
+};
+
   return (
-    <Page label="Vested Amounts by Age">
+    <Page label="Vested Amounts by Age" actionNode={renderActionNode()}>
       <Grid2
         container
         rowSpacing="24px">
         <Grid2 width={"100%"}>
           <Divider />
-        </Grid2>
-        <Grid2 width={"100%"}>
-          <DSMAccordion title="Filter">
-            <VestedAmountsByAgeSearchFilter />
-          </DSMAccordion>
         </Grid2>
 
         <Grid2

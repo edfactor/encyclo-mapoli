@@ -9,7 +9,10 @@ using Demoulas.ProfitSharing.Endpoints.Groups;
 using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup.DistributionsAndForfeitureEndpoint;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
-public class DistributionsAndForfeitureEndpoint: EndpointWithCsvBase<DistributionsAndForfeituresRequest, DistributionsAndForfeitureResponse, DistributionsAndForfeitureResponseMap>
+public class DistributionsAndForfeitureEndpoint: EndpointWithCsvTotalsBase<DistributionsAndForfeituresRequest, 
+    DistributionsAndForfeitureTotalsResponse, 
+    DistributionsAndForfeitureResponse, 
+    DistributionsAndForfeitureResponseMap>
 {
     private readonly ICleanupReportService _cleanupReportService;
 
@@ -24,7 +27,7 @@ public class DistributionsAndForfeitureEndpoint: EndpointWithCsvBase<Distributio
         Summary(s =>
         {
             s.Summary = "Lists distributions and forfeitures for a given year";
-            s.ExampleRequest = new DistributionsAndForfeituresRequest() { ProfitYear = 2023, Skip = SimpleExampleRequest.Skip, Take = SimpleExampleRequest.Take };
+            s.ExampleRequest = new DistributionsAndForfeituresRequest() { ProfitYear = 2025, Skip = SimpleExampleRequest.Skip, Take = SimpleExampleRequest.Take };
             s.ResponseExamples = new Dictionary<int, object>
             {
                 {
@@ -48,7 +51,7 @@ public class DistributionsAndForfeitureEndpoint: EndpointWithCsvBase<Distributio
 
     public override string ReportFileName => "DistributionsAndForfeitures";
 
-    public override Task<ReportResponseBase<DistributionsAndForfeitureResponse>> GetResponse(DistributionsAndForfeituresRequest req, CancellationToken ct)
+    public override Task<DistributionsAndForfeitureTotalsResponse> GetResponse(DistributionsAndForfeituresRequest req, CancellationToken ct)
     {
         return _cleanupReportService.GetDistributionsAndForfeitureAsync(req, ct);
     }
@@ -69,7 +72,7 @@ public class DistributionsAndForfeitureEndpoint: EndpointWithCsvBase<Distributio
             Map(m => m.Age).Index(9).Name("AGE");
             Map(m => m.OtherName).Index(10).Name("OTHER NAME");
             Map(m => m.OtherSsn).Index(11).Name("OTHER SSN");
-            Map(m => m.Enrolled).Index(12).Name("EC");
+            Map(m => m.EnrolledId).Index(12).Name("EC");
         }
     }
 }

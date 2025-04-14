@@ -163,7 +163,7 @@ const Pay450Grid: React.FC<Pay450GridProps> = ({
             handleSortChanged={sortEventHandler}
             providedOptions={{
               rowData: gridData,
-              pinnedBottomRowData: getSummaryRow(),
+              pinnedTopRowData: getSummaryRow(),
               columnDefs: columnDefs
             }}
           />

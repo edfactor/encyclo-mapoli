@@ -36,7 +36,7 @@ export interface DemographicBadgesNotInPayprofitResponse {
 export interface DemographicBadgesNotInPayprofit {
   badgeNumber: number;
   ssn: number;
-  empoyeeName: string;
+  employeeName: string;
   store: number;
   status: string;
   statusName: string;
@@ -94,6 +94,7 @@ export interface DuplicateSSNDetail {
   terminationDate: string | null;
   rehireDate: string | null;
   status: string;
+  employmentStatusName: string;
   storeNumber: number;
   profitSharingRecords: number;
   hoursCurrentYear: number;
@@ -156,6 +157,7 @@ export interface DuplicateNameAndBirthday {
   netBalance: number;
   hoursCurrentYear: number;
   incomeCurrentYear: number;
+  employmentStatusName: string;
 }
 
 export interface NegativeEtvaForSSNsOnPayProfit {
@@ -194,6 +196,8 @@ export interface MilitaryAndRehireForfeiture {
   ssn: string;
   reHiredDate: string;
   companyContributionYears: number;
+  enrollmentId: number;
+  enrollmentName: string;
   hoursCurrentYear: number;
   details: ForfeitureDetail[];
 }
@@ -366,7 +370,7 @@ export interface FrozenReportsByAgeRequest extends ProfitYearRequest {
   reportType: FrozenReportsByAgeRequestType;
 }
 export interface FrozenReportsForfeituresAndPointsRequest extends ProfitYearRequest {
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
   useFrozenData: boolean;
 }
 export interface ProfitSharingDistributionsByAge {
@@ -598,6 +602,21 @@ export interface ProfitShareUpdateRequest {
   pagination: SortedPaginationRequestDto;
 }
 
+export interface ProfitShareMasterApplyRequest {
+  profitYear: number;
+  contributionPercent: number;
+  earningsPercent: number;
+  incomingForfeitPercent: number;
+  secondaryEarningsPercent: number;
+  maxAllowedContributions: number;
+  badgeToAdjust: number;
+  adjustContributionAmount: number;
+  adjustEarningsAmount: number;
+  adjustIncomingForfeitAmount: number;
+  badgeToAdjust2: number;
+  adjustEarningsSecondaryAmount: number;
+}
+
 export interface ProfitShareUpdateDetail {
   isEmployee: boolean;
   badge: number;
@@ -718,9 +737,9 @@ export interface ProfitShareEditResponse {
 
 export interface ProfitShareMasterResponse {
   reportName: string;
-  beneficiariesEffected?: number;
-  employeesEffected?: number;
-  etvasEffected?: number;
+  beneficiariesAffected?: number;
+  employeesAffected?: number;
+  etvasAffected?: number;
 }
 
 export interface ProfitShareEditUpdateQueryParams {

@@ -2,17 +2,18 @@ import { createTheme, ThemeProvider } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "./reduxstore/store";
-// Add this import for the appropriate action
-import { setUsername } from "./reduxstore/slices/securitySlice"; // Adjust path as needed
-// Components
+import { clearUserData, setUsername } from "./reduxstore/slices/securitySlice"; // Adjust path as needed
 import AppErrorBoundary from "components/ErrorBoundary";
 import PSLayout from "components/Layout/PSLayout";
 import Router from "./components/router/Router";
-
-// Styles and config
+import { useOktaAuth } from "@okta/okta-react";
 import { themeOptions, ToastServiceProvider } from "smart-ui-library";
 import "smart-ui-library/dist/smart-ui-library.css";
 import "../agGridConfig";
+import EnvironmentUtils from "./utils/environmentUtils";
+import { useGetAppVersionQuery } from "./reduxstore/api/CommonApi";
+import oktaConfig from "./Okta/config";
+import { OktaAuth } from "@okta/okta-auth-js";
 
 // Types
 interface BuildInfo {
@@ -24,12 +25,24 @@ interface BuildInfo {
 
 const App = () => {
   // State management
-  const [uiBuildInfo, setUiBuildInfo] = useState<BuildInfo | null>(null);
   const dispatch = useDispatch();
+  const clientId = import.meta.env.VITE_REACT_APP_OKTA_CLIENT_ID;
+  const issuer = import.meta.env.VITE_REACT_APP_OKTA_ISSUER;
+
+  useGetAppVersionQuery();
+  const [uiBuildInfo, setUiBuildInfo] = useState<BuildInfo | null>(null);
+  const [buildInfoText, setBuildInfoText] = useState("");
+  const { buildNumber } = useSelector((state: RootState) => state.common);
+  const [oktaAuth, setOktaAuth] = useState<any>(null);
+
+  useEffect(() => {
+    const config = oktaConfig(clientId, issuer);
+    setOktaAuth(new OktaAuth(config.oidc));
+  }, []);
 
   // Redux selectors
-  const state = useSelector((state: RootState) => state);
-  const { token, appUser, username: stateUsername } = state.security;
+  //const state = useSelector((state: RootState) => state);
+  const { token, appUser, username: stateUsername } = useSelector((state: RootState) => state.security);
 
   // Add effect to update username when token changes
   useEffect(() => {
@@ -55,20 +68,19 @@ const App = () => {
   }, [token, stateUsername, dispatch]);
 
   // Derived values
+  const postLogoutRedirectUri = EnvironmentUtils.postLogoutRedirectUri;
   const isAuthenticated = !!token;
   const username = isAuthenticated ? appUser?.userName || stateUsername || "Guest" : "Not authenticated";
-
-  const buildVersionNumber = uiBuildInfo
-    ? `${uiBuildInfo.buildNumber ?? ""}.${uiBuildInfo.buildId ?? ""}`
-    : "Local.Dev";
 
   // Event handlers
   const handleClick = useCallback((_e: React.MouseEvent<HTMLDivElement>) => {}, []);
 
-  const handleLogout = useCallback(() => {
-    alert("Logout");
-    // Add actual logout logic here
-  }, []);
+  const handleLogout = () => {
+    if (oktaAuth) {
+      oktaAuth.signOut({ postLogoutRedirectUri });
+      dispatch(clearUserData());
+    }
+  };
 
   // Side effects
   useEffect(() => {
@@ -87,6 +99,17 @@ const App = () => {
     }
   }, [uiBuildInfo]);
 
+  useEffect(() => {
+    const buildVersionNumber = uiBuildInfo
+      ? `${uiBuildInfo.buildNumber ?? ""}.${uiBuildInfo.buildId ?? ""}`
+      : "Local.Dev";
+    
+    if (buildNumber && buildVersionNumber) {     
+      const buildInfo = `${buildVersionNumber} | API Version: ${buildNumber}`;
+      setBuildInfoText(buildInfo);
+    }
+  }, [buildNumber, uiBuildInfo]);
+
   // Theme setup
   const theme = createTheme(themeOptions);
 
@@ -96,10 +119,10 @@ const App = () => {
         onClick={handleClick}
         appTitle="Profit Sharing"
         logout={handleLogout}
-        buildVersionNumber={buildVersionNumber}
+        buildVersionNumber={buildInfoText}
         userName={username}
-        environmentMode={"development"}
-        oktaEnabled={true}>
+        environmentMode={EnvironmentUtils.envMode}
+        oktaEnabled={EnvironmentUtils.isOktaEnabled}>
         <AppErrorBoundary>
           <ToastServiceProvider
             maxSnack={3}

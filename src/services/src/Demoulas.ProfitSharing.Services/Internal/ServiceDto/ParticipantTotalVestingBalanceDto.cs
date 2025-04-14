@@ -1,7 +1,6 @@
 ﻿namespace Demoulas.ProfitSharing.Services.Internal.ServiceDto;
-internal sealed class ParticipantTotalVestingBalanceDto
+internal sealed class ParticipantTotalVestingBalanceDto : ParticipantTotalBalanceDto
 {
-    internal int Ssn { get; set; }
     internal decimal? VestedBalance { get; set; }
     internal decimal? TotalDistributions { get; set; }
     internal decimal? Etva { get; set; }

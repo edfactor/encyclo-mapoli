@@ -80,10 +80,11 @@ public class BreakdownReportService : IBreakdownService
             }
 
             Dictionary<int, decimal> endingBalanceLastYearBySsn = await _totalService.GetTotalBalanceSet(ctx, priorYear)
-                .Where(tbs => employeeSsns.Contains(tbs.Ssn))
-                .ToDictionaryAsync(tbs => tbs.Ssn, tbs => tbs.Total ?? 0, cancellationToken);
+                .Where(tbs => employeeSsns.Contains(tbs.Ssn!.Value))
+                .ToDictionaryAsync(tbs => tbs.Ssn!.Value, tbs => tbs.Total ?? 0, cancellationToken);
 
-            Dictionary<int, InternalProfitDetailDto> txnsForProfitYear = await TotalService.GetTransactionsBySsnForProfitYear(ctx, breakdownByStoreRequest.ProfitYear)
+
+            Dictionary<int, InternalProfitDetailDto> txnsForProfitYear = await TotalService.GetTransactionsBySsnForProfitYearForOracle(ctx, breakdownByStoreRequest.ProfitYear)
                 .Where(txns => employeeSsns.Contains(txns.Ssn))
                 .ToDictionaryAsync(txns => txns.Ssn, txns => txns, cancellationToken);
 
@@ -161,7 +162,7 @@ public class BreakdownReportService : IBreakdownService
         return "STORE MANAGEMENT";
     }
 
-    public readonly static short ASSOCIATE_SORT_RANK_1999 = 1999;
+    public static readonly short ASSOCIATE_SORT_RANK_1999 = 1999;
 
     private static short EmployeeSortRank(short? requestedStoreNumber, byte departmentId, byte payClassificationId)
     {

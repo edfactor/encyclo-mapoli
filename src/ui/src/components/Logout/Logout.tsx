@@ -1,27 +1,48 @@
-import { Button } from "@mui/material";
+import React from "react";
 import { useDispatch } from "react-redux";
+import { useOktaAuth } from "@okta/okta-react";
+import { setToken, clearUserData } from "reduxstore/slices/securitySlice";
 
-const Logout: React.FC = () => {
-  const oktaEnabled = process.env.REACT_APP_OKTA_ENABLED === "true";
+interface LogoutButtonProps {
+  redirectUri?: string;
+  children?: React.ReactNode;
+}
+
+const LogoutButton: React.FC<LogoutButtonProps> = ({ redirectUri, children }) => {
   const dispatch = useDispatch();
+  const { oktaAuth } = useOktaAuth();
+
+  const postLogoutRedirectUri = redirectUri || window.location.origin;
 
   const handleLogout = () => {
-    // TODO
+    if (oktaAuth) {
+      dispatch(setToken(""));
+      dispatch(clearUserData());
+      oktaAuth.signOut({ postLogoutRedirectUri });
+    }
   };
 
   return (
-    <div>
-      {oktaEnabled && (
-        <Button
-          aria-haspopup="true"
-          onClick={handleLogout}
-          style={{ color: "#000000", fontSize: "18px", height: "22px" }}>
-          {" "}
-          Logout{" "}
-        </Button>
-      )}
-    </div>
+    <button onClick={handleLogout}>
+      {children || "Logout"}
+    </button>
   );
 };
 
-export default Logout;
+export default LogoutButton;
+
+// Also create a utility function for programmatic logout
+export const performLogout = (options: {
+  dispatch: any;
+  oktaAuth: any;
+  redirectUri?: string
+}) => {
+  const { dispatch, oktaAuth, redirectUri } = options;
+  const postLogoutRedirectUri = redirectUri || window.location.origin;
+
+  if (oktaAuth) {
+    dispatch(setToken(""));
+    dispatch(clearUserData());
+    oktaAuth.signOut({ postLogoutRedirectUri });
+  }
+};

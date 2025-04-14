@@ -39,7 +39,7 @@ public class ProfitShareUpdateTests
 
         string reportName = "psupdate-pay444-r2.txt";
         profitShareUpdateService.TodaysDateTime =
-            new DateTime(2025, 03, 28, 13, 15, 0, DateTimeKind.Local); // time report was generated
+            new DateTime(2025, 04, 07, 17, 02, 0, DateTimeKind.Local); // time report was generated
 
         Stopwatch sw = Stopwatch.StartNew();
         // Act
@@ -70,7 +70,7 @@ public class ProfitShareUpdateTests
         string expectedReport = LoadExpectedReport(reportName);
 
 #if false
-        // Enabling this path enables the diff prograom to pop up the differences
+        // Enabling this path enables the diff program to pop up the differences
  
         // Ths sort order on READY is not great, this maybe tweaked soon.
         string expected = HandleSortingOddness(LoadExpectedReport(reportName));
@@ -79,8 +79,8 @@ public class ProfitShareUpdateTests
 #else
         // This path compares individuals and provides a list of differences.
 
-        var employeeExpectedReportLines = expectedReport.Split("\n").Where(ex => extractBadge(ex) != (null, null)).Select(t => t.Trim()).ToList();
-        var employeeActualReportLines = profitShareUpdateService.ReportLines.Where(ex => extractBadge(ex) != (null, null)).Select(t => t.Trim()).ToList();
+        var employeeExpectedReportLines = expectedReport.Split("\n").Where(ex => extractBadge(ex) != (null, null)).Select(t => t.TrimEnd()).ToList();
+        var employeeActualReportLines = profitShareUpdateService.ReportLines.Where(ex => extractBadge(ex) != (null, null)).Select(t => t.TrimEnd()).ToList();
 
         var readyHash = employeeExpectedReportLines.ToHashSet();
         var smartHash = employeeActualReportLines.ToHashSet();
