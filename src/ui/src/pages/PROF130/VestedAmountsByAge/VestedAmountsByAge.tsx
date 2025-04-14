@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useLazyGetVestingAmountByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { setVestedAmountsByAgeQueryParams } from "reduxstore/slices/yearsEndSlice";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 
 const options: Intl.DateTimeFormatOptions = {
   month: "2-digit",
@@ -51,8 +52,14 @@ const VestedAmountsByAge = () => {
     }
   }, [hasToken, profitYear, hasInitialSearchRun, triggerSearch, dispatch]);
 
+  const renderActionNode = () => {
+    return (
+        <StatusDropdownActionNode />
+    );
+};
+
   return (
-    <Page label="Vested Amounts by Age">
+    <Page label="Vested Amounts by Age" actionNode={renderActionNode()}>
       <Grid2
         container
         rowSpacing="24px">

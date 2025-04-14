@@ -25,7 +25,7 @@ public class YearEndProfitSharingReportEndpoint: EndpointWithCsvTotalsBase<YearE
         {
             s.Summary = "Year end profit sharing report";
             s.Description = "Returns a list of employees who will participate in the profit sharing this year, as well as their qualifying attributes.";
-            s.ExampleRequest = new YearEndProfitSharingReportRequest() { IsYearEnd = true, ProfitYear = 2023, Skip = SimpleExampleRequest.Skip, Take =SimpleExampleRequest.Take};
+            s.ExampleRequest = new YearEndProfitSharingReportRequest() { IsYearEnd = true, ProfitYear = 2025, Skip = SimpleExampleRequest.Skip, Take =SimpleExampleRequest.Take};
             s.ResponseExamples = new Dictionary<int, object>
             {
                 {

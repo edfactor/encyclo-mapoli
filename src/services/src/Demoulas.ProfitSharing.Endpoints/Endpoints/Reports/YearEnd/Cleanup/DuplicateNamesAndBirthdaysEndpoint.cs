@@ -58,6 +58,7 @@ public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<ProfitYear
                                     NetBalance = 52500,
                                     Ssn = "XXX-XX-1234",
                                     Status = 'A',
+                                    EmploymentStatusName = "Active",
                                     StoreNumber = 22,
                                     Years = 3
                                 }

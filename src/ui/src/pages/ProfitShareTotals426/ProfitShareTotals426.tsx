@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import { Button, Divider, Typography, Box, CircularProgress } from "@mui/material";
 import Grid2 from '@mui/material/Grid2';
-import { DSMAccordion, Page } from "smart-ui-library";
-import ProfitShareTotals426SearchFilter from "./ProfitShareTotals426SearchFilter";
-import StatusDropdown, { ProcessStatus } from "components/StatusDropdown";
+import { Page } from "smart-ui-library";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { useNavigate } from "react-router";
 import { MENU_LABELS, CAPTIONS } from "../../constants";
 import { useSelector } from "react-redux";
@@ -59,14 +58,10 @@ const ProfitShareTotals426 = () => {
     }
   }, [hasToken, profitYear, hasInitialSearchRun, triggerSearch, dispatch]);
 
-  const handleStatusChange = async (newStatus: ProcessStatus) => {
-    console.info("Logging new status: ", newStatus);
-  };
-
   const renderActionNode = () => {
     return (
       <div className="flex items-center gap-2 h-10">
-        <StatusDropdown onStatusChange={handleStatusChange} />
+        <StatusDropdownActionNode />
         <Button
           onClick={() => navigate("/profit-share-report")}
           variant="outlined"

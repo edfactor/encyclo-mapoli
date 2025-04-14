@@ -3,11 +3,13 @@ using Demoulas.Common.Contracts.Validators;
 using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Common.Validators;
 using Demoulas.ProfitSharing.Services.Caching.Extensions;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Mappers;
 using Demoulas.ProfitSharing.Services.Military;
+using Demoulas.ProfitSharing.Services.Navigations;
 using Demoulas.ProfitSharing.Services.ProfitMaster;
 using Demoulas.ProfitSharing.Services.ProfitShareEdit;
 using Demoulas.ProfitSharing.Services.Reports;
@@ -59,6 +61,7 @@ public static class ServicesExtension
 
         _ = builder.Services.AddScoped<IPayProfitUpdateService, PayProfitUpdateService>();
         _ = builder.Services.AddScoped<IBreakdownService, BreakdownReportService>();
+        _ = builder.Services.AddScoped<INavigationService, NavigationService>();
 
 
         #region Mappers

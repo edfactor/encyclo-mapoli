@@ -83,6 +83,7 @@ import {
   NegativeEtvaForSSNsOnPayprofitRequestDto,
   PagedReportResponse,
   ProfitShareEditResponse,
+  ProfitShareMasterApplyRequest,
   ProfitShareMasterResponse,
   ProfitShareUpdateRequest,
   ProfitShareUpdateResponse,
@@ -715,10 +716,8 @@ export const YearsEndApi = createApi({
           dispatch(setProfitSharingUpdate(data));
           dispatch(setProfitSharingUpdateAdjustmentSummary(data.adjustmentsSummary));
           if (arg.badgeToAdjust) {
-            console.log("Added badge: " + arg.badgeToAdjust);
+            //console.log("Added badge: " + arg.badgeToAdjust);
             dispatch(addBadgeNumberToUpdateAdjustmentSummary(arg.badgeToAdjust));
-          } else {
-            console.log("No badge to add to summmary");
           }
         } catch (err) {
           console.log("Err", err);
@@ -856,7 +855,7 @@ export const YearsEndApi = createApi({
       }
     }),
 
-    getMasterApply: builder.query<ProfitShareMasterResponse, ProfitShareUpdateRequest>({
+    getMasterApply: builder.query<ProfitShareMasterResponse, ProfitShareMasterApplyRequest>({
       query: (params) => ({
         url: "yearend/profit-master-update",
         method: "GET",
@@ -978,8 +977,6 @@ export const {
   useLazyGetForfeituresAndPointsQuery,
   useLazyGetForfeituresByAgeQuery,
   useLazyGetGrossWagesReportQuery,
-  useLazyGetMasterApplyQuery,
-  useLazyGetMasterRevertQuery,
   useLazyGetRehireForfeituresQuery,
   useLazyGetNamesMissingCommasQuery,
   useLazyGetNegativeEVTASSNQuery,
@@ -993,5 +990,7 @@ export const {
   useLazyGetYearEndProfitSharingReportQuery,
   useUpdateExecutiveHoursAndDollarsMutation,
   useLazyGetYearEndProfitSharingSummaryReportQuery,
-  useLazyGetUpdateSummaryQuery
+  useLazyGetUpdateSummaryQuery,
+  useLazyGetMasterApplyQuery,
+  useLazyGetMasterRevertQuery
 } = YearsEndApi;

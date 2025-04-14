@@ -6,6 +6,8 @@ import { EmployeeDetails } from "reduxstore/types";
 import { mmDDYYFormat, numberToCurrency } from "smart-ui-library";
 import { formatPercentage } from "utils/formatPercentage";
 import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
+import { tryddmmyyyyToDate } from "../../utils/dateUtils";
+import { getEnrolledStatus, getForfeitedStatus } from "../../utils/enrollmentUtil";
 
 interface MasterInquiryEmployeeDetailsProps {
   details: EmployeeDetails;
@@ -39,16 +41,6 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     currentEtva,
   } = details;
 
-  const getEnrolledStatus = (id: number): string => {
-    const enrolledIds = [1, 2, 3, 4];
-    return enrolledIds.includes(id) ? "Y" : "N";
-  };
-
-  const getForfeitedStatus = (id: number): string => {
-    const forfeitedIds = [3, 4];
-    return forfeitedIds.includes(id) ? "Y" : "N";
-  };
-
   const enrolled = getEnrolledStatus(enrollmentId);
   const forfeited = getForfeitedStatus(enrollmentId);
   
@@ -62,7 +54,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
 
   const employeeSection = [
     { label: "Badge", value: viewBadgeLinkRenderer(Number(badgeNumber)) },
-    { label: "DOB", value: mmDDYYFormat(dateOfBirth) },
+    { label: "DOB", value: dateOfBirth },
     { label: "SSN", value: `${ssn}` },
     { label: "ETVA", value: currentEtva },
     { label: "Enrollment", value: enrollment },
@@ -76,10 +68,10 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
   ];
 
   const hireSection = [
-    { label: "Hire", value: mmDDYYFormat(hireDate) },
-    { label: "Term", value: terminationDate ? mmDDYYFormat(terminationDate) : 'N/A' },
+    { label: "Hire", value: mmDDYYFormat(tryddmmyyyyToDate(hireDate)) },
+    { label: "Term", value: terminationDate ? mmDDYYFormat(tryddmmyyyyToDate(terminationDate)) : 'N/A' },
     { label: "Store", value: storeNumber },
-    { label: "Rehire", value: reHireDate ? mmDDYYFormat(reHireDate) : 'N/A' },
+    { label: "Rehire", value: reHireDate ? mmDDYYFormat(tryddmmyyyyToDate(reHireDate)) : 'N/A' },
   ];
 
   const amountsSection = [

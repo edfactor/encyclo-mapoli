@@ -9,6 +9,7 @@ import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useLazyGetBalanceByYearsQuery } from "reduxstore/api/YearsEndApi";
 import { setBalanceByYearsQueryParams } from "reduxstore/slices/yearsEndSlice";
 import { FrozenReportsByAgeRequestType } from "reduxstore/types";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 
 const BalanceByYears = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
@@ -50,8 +51,14 @@ const BalanceByYears = () => {
     }
   }, [hasToken, profitYear, hasInitialSearchRun, triggerSearch, dispatch]);
 
+  const renderActionNode = () => {
+    return (
+        <StatusDropdownActionNode />
+    );
+};
+
   return (
-    <Page label="Balance By Years">
+    <Page label="Balance By Years" actionNode={renderActionNode()}>
       <Grid2
         container
         rowSpacing="24px">

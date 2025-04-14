@@ -5,7 +5,7 @@ import { Page } from "smart-ui-library";
 import CleanUpSummaryCards from "./CleanUpSummaryCards";
 import CleanUpSummaryGrids from "./CleanUpSummaryGrids";
 import { useNavigate } from "react-router";
-import StatusDropdown, { ProcessStatus } from "components/StatusDropdown";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { MENU_LABELS } from "../../constants";
 
 const CleanUpSummary = () => {
@@ -24,23 +24,10 @@ const CleanUpSummary = () => {
   };
   const navigate = useNavigate();
 
-  const handleStatusChange = async (newStatus: ProcessStatus) => {
-    console.info("Logging new status: ", newStatus);
-  };
-
   const renderActionNode = () => {
     if (selectedTab === 0) {
       return (
-        <div className="flex items-center gap-2 h-10">
-          <StatusDropdown onStatusChange={handleStatusChange} />
-          <Button
-            onClick={() => navigate("/december-process-accordion")}
-            variant="outlined"
-            className="h-10 whitespace-nowrap min-w-fit"
-          >
-            {MENU_LABELS.DECEMBER_ACTIVITIES}
-          </Button>
-        </div>
+        <StatusDropdownActionNode />
       );
     }
     return null;

@@ -9,6 +9,7 @@ import { RootState } from "reduxstore/store";
 import { clearExecutiveHoursAndDollarsGridRows } from "reduxstore/slices/yearsEndSlice";
 import { useUpdateExecutiveHoursAndDollarsMutation } from "reduxstore/api/YearsEndApi";
 import { useState } from "react";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 
 const RenderSaveButton = () => {
   const dispatch = useDispatch();
@@ -58,12 +59,20 @@ const RenderSaveButton = () => {
     return saveButton;
   }
 };
+
 const ManageExecutiveHoursAndDollars = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
+
+  const renderActionNode = () => {
+    return (
+      <StatusDropdownActionNode />
+    );
+  };
+
   return (
     <Page
       label="Manage Executive Hours And Dollars"
-      actionNode={<div className="flex mr-2 justify-end gap-24">{RenderSaveButton()}</div>}>
+      actionNode={renderActionNode()}>
       <Grid2
         container
         rowSpacing="24px">

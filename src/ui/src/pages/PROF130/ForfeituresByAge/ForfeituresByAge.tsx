@@ -9,7 +9,7 @@ import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useLazyGetForfeituresByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { setForfeituresByAgeQueryParams } from "reduxstore/slices/yearsEndSlice";
 import { FrozenReportsByAgeRequestType } from "reduxstore/types";
-
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 const ForfeituresByAge = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [hasInitialSearchRun, setHasInitialSearchRun] = useState(false);
@@ -50,8 +50,14 @@ const ForfeituresByAge = () => {
     }
   }, [hasToken, profitYear, hasInitialSearchRun, triggerSearch, dispatch]);
 
+  const renderActionNode = () => {
+    return (
+        <StatusDropdownActionNode />
+    );
+};
+
   return (
-    <Page label="Forfeitures By Age">
+    <Page label="Forfeitures By Age" actionNode={renderActionNode()}>
       <Grid2
         container
         rowSpacing="24px">

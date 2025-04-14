@@ -115,11 +115,6 @@ export const menuLevels: MenuLevel[] = [
     mainTitle: MENU_LABELS.FISCAL_CLOSE,
     topPage: [
       {
-        topTitle: CAPTIONS.SUMMARY,
-        topRoute: ROUTES.FISCAL_CLOSE,
-        subPages: []
-      },
-      {
         topTitle: CAPTIONS.MANAGE_EXECUTIVE_HOURS,
         topRoute: ROUTES.MANAGE_EXECUTIVE_HOURS,
         subPages: []
@@ -200,12 +195,7 @@ export const menuLevels: MenuLevel[] = [
         topTitle: CAPTIONS.PRINT_PROFIT_CERTS,
         topRoute: ROUTES.PRINT_PROFIT_CERTS,
         subPages: []
-      },
-      {
-        topTitle: CAPTIONS.PAYMASTER_SAVE,
-        topRoute: ROUTES.PAYMASTER_SAVE,
-        subPages: []
-      }
+      }     
     ]
   }
 ];

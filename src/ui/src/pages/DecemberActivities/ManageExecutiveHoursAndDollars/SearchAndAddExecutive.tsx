@@ -1,5 +1,5 @@
 import { Tooltip, Divider, Button } from "@mui/material";
-import Grid2 from '@mui/material/Grid2';
+import Grid2 from "@mui/material/Grid2";
 import { DSMAccordion, Page } from "smart-ui-library";
 import ManageExecutiveHoursAndDollarsSearchFilter from "./ManageExecutiveHoursAndDollarsSearchFilter";
 import ManageExecutiveHoursAndDollarsGrid from "./ManageExecutiveHoursAndDollarsGrid";
@@ -45,7 +45,12 @@ const RenderAddButton = () => {
     return addButton;
   }
 };
-const SearchAndAddExecutive = () => {
+interface SearchAndAddExecutiveProps {
+  initialSearchLoaded: boolean;
+  setInitialSearchLoaded: (loaded: boolean) => void;
+}
+
+const SearchAndAddExecutive = ({ initialSearchLoaded, setInitialSearchLoaded }: SearchAndAddExecutiveProps) => {
   return (
     <Page
       label="Add New Executive"
@@ -58,11 +63,18 @@ const SearchAndAddExecutive = () => {
         </Grid2>
         <Grid2 width={"100%"}>
           <DSMAccordion title="Filter">
-            <ManageExecutiveHoursAndDollarsSearchFilter isModal={true} />
+            <ManageExecutiveHoursAndDollarsSearchFilter
+              setInitialSearchLoaded={setInitialSearchLoaded}
+              isModal={true}
+            />
           </DSMAccordion>
         </Grid2>
         <Grid2 width="100%">
-          <ManageExecutiveHoursAndDollarsGrid isModal={true} />
+          <ManageExecutiveHoursAndDollarsGrid
+            setInitialSearchLoaded={setInitialSearchLoaded}
+            initialSearchLoaded={initialSearchLoaded}
+            isModal={true}
+          />
         </Grid2>
       </Grid2>
     </Page>

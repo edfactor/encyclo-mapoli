@@ -6,6 +6,7 @@ import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetDuplicateNamesAndBirthdayColumns } from "./DuplicateNamesAndBirthdaysGridColumns";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
+import { CAPTIONS } from "../../../constants";
 
 interface DuplicateNamesAndBirthdaysGridSearchProps {
   initialSearchLoaded: boolean;
@@ -63,7 +64,7 @@ const DuplicateNamesAndBirthdaysGrid: React.FC<DuplicateNamesAndBirthdaysGridSea
             </Typography>
           </div>
           <DSMGrid
-            preferenceKey={"DUPE_SSNS"}
+            preferenceKey={CAPTIONS.DUPLICATE_NAMES}
             isLoading={false}
             handleSortChanged={sortEventHandler}
             providedOptions={{

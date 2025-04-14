@@ -44,8 +44,7 @@ export const ROUTES = {
   PROFIT_SHARE_REPORT_EDIT_RUN: "profit-share-report-edit-run",
   PROFIT_SHARE_REPORT_FINAL_RUN: "profit-share-report-final-run",
   PROFIT_SHARE_UPDATE: "profit-share-update",
-  PROFNEW: "/",
-  PAYMASTER_SAVE: "/",
+  PROFNEW: "/",  
 
   FROZEN_SUMMARY: "frozen-summary",
   MASTER_INQUIRY: "master-inquiry",
@@ -118,7 +117,6 @@ export const CAPTIONS = {
   PAY450: "PAY450",
   PAYMASTER_UPDATE: "Profit Master Update (PAY460)",
   PROFIT_MASTER_UPDATE: "Pay Master Update (PAY460)",
-  PAYMASTER_SAVE: "Save Prof Pay Master",
   PROF_CTRLSHEET: "Prof-CTRL-SHEET",
   PROFALL: "PROFALL Report",
   PROFNEW: "PROFNEW",

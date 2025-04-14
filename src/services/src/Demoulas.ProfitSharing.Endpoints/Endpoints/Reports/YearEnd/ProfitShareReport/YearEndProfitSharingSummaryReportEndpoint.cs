@@ -22,7 +22,7 @@ public sealed class YearEndProfitSharingSummaryReportEndpoint : Endpoint<FrozenP
         {
             s.Summary = "Yearend profit sharing summary report";
             s.Description = "Returns a breakdown of member counts/sum by various descriminators";
-            s.ExampleRequest = new FrozenProfitYearRequest() { UseFrozenData = true, ProfitYear = 2023 };
+            s.ExampleRequest = new FrozenProfitYearRequest() { UseFrozenData = true, ProfitYear = 2025 };
             s.ResponseExamples = new Dictionary<int, object>
             {
                 {
