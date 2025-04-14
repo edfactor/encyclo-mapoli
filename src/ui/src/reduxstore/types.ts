@@ -602,6 +602,21 @@ export interface ProfitShareUpdateRequest {
   pagination: SortedPaginationRequestDto;
 }
 
+export interface ProfitShareMasterApplyRequest {
+  profitYear: number;
+  contributionPercent: number;
+  earningsPercent: number;
+  incomingForfeitPercent: number;
+  secondaryEarningsPercent: number;
+  maxAllowedContributions: number;
+  badgeToAdjust: number;
+  adjustContributionAmount: number;
+  adjustEarningsAmount: number;
+  adjustIncomingForfeitAmount: number;
+  badgeToAdjust2: number;
+  adjustEarningsSecondaryAmount: number;
+}
+
 export interface ProfitShareUpdateDetail {
   isEmployee: boolean;
   badge: number;
@@ -722,9 +737,9 @@ export interface ProfitShareEditResponse {
 
 export interface ProfitShareMasterResponse {
   reportName: string;
-  beneficiariesEffected?: number;
-  employeesEffected?: number;
-  etvasEffected?: number;
+  beneficiariesAffected?: number;
+  employeesAffected?: number;
+  etvasAffected?: number;
 }
 
 export interface ProfitShareEditUpdateQueryParams {

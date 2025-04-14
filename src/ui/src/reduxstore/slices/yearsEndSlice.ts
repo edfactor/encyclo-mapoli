@@ -250,10 +250,14 @@ export const yearsEndSlice = createSlice({
     },
     setProfitEditUpdateChangesAvailable: (state, action: PayloadAction<boolean>) => {
       state.profitEditUpdateChangesAvailable = action.payload;
+      state.profitEditUpdateRevertChangesAvailable = false;
     },
+
     setProfitEditUpdateRevertChangesAvailable: (state, action: PayloadAction<boolean>) => {
       state.profitEditUpdateRevertChangesAvailable = action.payload;
+      state.profitEditUpdateChangesAvailable = false;
     },
+
     setSelectedProfitYearForDecemberActivities: (state, action: PayloadAction<number>) => {
       state.selectedProfitYearForDecemberActivities = action.payload;
       localStorage.setItem("selectedProfitYearForDecemberActivities", action.payload.toString());
