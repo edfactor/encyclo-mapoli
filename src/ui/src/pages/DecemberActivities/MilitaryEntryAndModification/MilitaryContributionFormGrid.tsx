@@ -9,6 +9,7 @@ import { Typography, Button } from "@mui/material";
 import MasterInquiryEmployeeDetails from "../../MasterInquiry/MasterInquiryEmployeeDetails";
 import { GetMilitaryContributionColumns } from "./MilitaryContributionFormGridColumns";
 import { CAPTIONS } from "../../../constants";
+import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 
 interface MilitaryContributionGridProps {
   initialSearchLoaded: boolean;
@@ -27,7 +28,7 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
     sortBy: "badgeNumber",
     isSortDescending: false
   });
-
+  const profitYear = useDecemberFlowProfitYear();
   const { masterInquiryEmployeeDetails } = useSelector((state: RootState) => state.inquiry);
   const [fetchContributions, { data: contributionsData, isFetching }] = useLazyGetMilitaryContributionsQuery();
   const navigate = useNavigate();
@@ -36,7 +37,7 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
     if (masterInquiryEmployeeDetails) {
       await fetchContributions({
         badgeNumber: Number(masterInquiryEmployeeDetails.badgeNumber),
-        profitYear: 2024,
+        profitYear: profitYear,
         pagination: {
           skip: pageNumber * pageSize,
           take: pageSize,
