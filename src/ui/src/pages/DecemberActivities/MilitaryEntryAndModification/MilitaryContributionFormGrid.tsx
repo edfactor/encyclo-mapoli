@@ -90,7 +90,7 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
             }}
           />
 
-          {contributionsData?.response?.results?.length > 0 && (
+          {!!contributionsData && contributionsData.response.results.length > 0 && (          
             <Pagination
               pageNumber={pageNumber}
               setPageNumber={(value: number) => {
