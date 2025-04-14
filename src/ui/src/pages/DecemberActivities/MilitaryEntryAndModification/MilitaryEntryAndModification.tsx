@@ -10,7 +10,6 @@ import MilitaryContributionForm from "./MilitaryContributionForm";
 import MilitaryContributionGrid from "./MilitaryContributionFormGrid";
 import { RootState } from "reduxstore/store";
 import {
-  useCreateMilitaryContributionMutation,
   useLazyGetMilitaryContributionsQuery
 } from "../../../reduxstore/api/MilitaryApi";
 import { useSelector } from "react-redux";
@@ -21,8 +20,7 @@ const MilitaryEntryAndModification = () => {
   const [showContributions, setShowContributions] = useState(false);
   const { masterInquiryEmployeeDetails } = useSelector((state: RootState) => state.inquiry);
   const [fetchContributions, { isFetching }] = useLazyGetMilitaryContributionsQuery();
-  const [trigger] = useCreateMilitaryContributionMutation();
-
+  
   const renderActionNode = () => {
     return <StatusDropdownActionNode />;
   };
@@ -64,7 +62,7 @@ const MilitaryEntryAndModification = () => {
           </Grid2>
           <Grid2 width={"100%"}>
             <DSMAccordion title="Filter">
-              <MilitaryAndRehireEntryAndModificationSearchFilter />
+              <MilitaryAndRehireEntryAndModificationSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
             </DSMAccordion>
           </Grid2>
 
