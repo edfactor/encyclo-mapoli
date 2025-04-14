@@ -8,6 +8,7 @@ import { RootState } from "reduxstore/store";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useLazyGetEligibleEmployeesQuery } from "reduxstore/api/YearsEndApi";
 import { setEligibleEmployeesQueryParams } from "reduxstore/slices/yearsEndSlice";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 
 const EligibleEmployees = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
@@ -20,12 +21,12 @@ const EligibleEmployees = () => {
   useEffect(() => {
     if (hasToken && profitYear && !hasInitialSearchRun) {
       setHasInitialSearchRun(true);
-      
+
       const request = {
         profitYear: profitYear,
         pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: false }
       };
-      
+
       triggerSearch(request, false)
         .then(result => {
           if (result.data) {
@@ -39,8 +40,14 @@ const EligibleEmployees = () => {
     }
   }, [hasToken, profitYear, hasInitialSearchRun, triggerSearch, dispatch]);
 
+  const renderActionNode = () => {
+    return (
+      <StatusDropdownActionNode />
+    );
+  };
+
   return (
-    <Page label="Get Eligible Employees">
+    <Page label="Get Eligible Employees" actionNode={renderActionNode()}>
       <Grid2
         container
         rowSpacing="24px">

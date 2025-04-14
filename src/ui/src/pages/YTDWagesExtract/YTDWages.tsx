@@ -9,6 +9,7 @@ import { downloadFileFromResponse } from "utils/fileDownload";
 import { CAPTIONS } from "../../constants";
 import YTDWagesGrid from "./YTDWagesGrid";
 import YTDWagesSearchFilter from "./YTDWagesSearchFilter";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 
 interface SearchData {
   profitYear: number;
@@ -56,20 +57,27 @@ const YTDWages: React.FC = () => {
       console.error("Error reloading grid data after download", error);
     }
   };
+  
+  // const renderActionNode = () => {
+  //  return (
+  //   <></>
+  // <div className="flex items-center gap-2 h-10">
+  //   <Button
+  //     onClick={() => {
+  //       handleDownloadCSV({ profitYear: employeeWagesForYearQueryParams?.profitYear || lastYear });
+  //     }}
+  //     variant="outlined"
+  //     startIcon={<Download color={"primary"} />}
+  //     className="h-10 whitespace-nowrap min-w-fit">
+  //     Download
+  //   </Button>
+  // </div>
+  //  );
+  // };
+
   const renderActionNode = () => {
     return (
-      <></>
-      // <div className="flex items-center gap-2 h-10">
-      //   <Button
-      //     onClick={() => {
-      //       handleDownloadCSV({ profitYear: employeeWagesForYearQueryParams?.profitYear || lastYear });
-      //     }}
-      //     variant="outlined"
-      //     startIcon={<Download color={"primary"} />}
-      //     className="h-10 whitespace-nowrap min-w-fit">
-      //     Download
-      //   </Button>
-      // </div>
+      <StatusDropdownActionNode />
     );
   };
 

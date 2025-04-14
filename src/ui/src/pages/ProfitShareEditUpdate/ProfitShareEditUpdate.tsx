@@ -11,6 +11,7 @@ import { setProfitEditUpdateRevertChangesAvailable } from "reduxstore/slices/yea
 import { RootState } from "reduxstore/store";
 import ProfitShareEditUpdateTabs from "./ProfitShareEditUpdateTabs";
 import { useState } from "react";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 
 const developmentNoteStyle = {
   backgroundColor: "#FFFFE0", // Light yellow
@@ -144,15 +145,21 @@ const ProfitShareEditUpdate = () => {
     (state: RootState) => state.yearsEnd
   );
   //console.log("Total results: ", profitSharingUpdate?.response.results.length);
+
+  const renderActionNode = () => {
+    return (
+      <div className="flex  justify-end gap-2">
+        {RenderRevertButton()}
+        <StatusDropdownActionNode />
+      </div>
+
+    );
+  };
+
   return (
     <Page
       label="Master Update (PAY444/PAY447)"
-      actionNode={
-        <div className="flex  justify-end gap-2">
-          {RenderRevertButton()}
-          {RenderSaveButton()}
-        </div>
-      }>
+      actionNode={renderActionNode()}>
       <div style={developmentNoteStyle}>
         Note: Much of this page works, but is incomplete. Needs adjustment summary panel, apply update, and revert.{" "}
         <a

@@ -4,10 +4,19 @@ import { Divider } from "@mui/material";
 import Grid2 from '@mui/material/Grid2';
 import EighteenToTwentySearchFilter from "../PAY426-1/EigteenToTwentySearchFilters";
 import BeneficiariesGrid from "./BeneficiariesGrid";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
+
+const renderActionNode = () => {
+    return (
+        <StatusDropdownActionNode />
+    );
+};
 
 const Beneficiaries = () => {
     return (
-        <Page label={CAPTIONS.PAY426_NON_EMPLOYEE}>
+        <Page 
+            label={CAPTIONS.PAY426_NON_EMPLOYEE}
+            actionNode={renderActionNode()}>
             <Grid2 container rowSpacing="24px">
                 <Grid2 width={"100%"}>
                     <Divider />
