@@ -96,10 +96,14 @@ public static class ApiDocumentationResourceBuilderExtensions
                     return Task.FromResult(new ExecuteCommandResult { Success = false, ErrorMessage = e.ToString() });
                 }
             },
-            updateState: context =>
-                context.ResourceSnapshot.HealthStatus == HealthStatus.Healthy ? ResourceCommandState.Enabled : ResourceCommandState.Disabled,
-            iconName: "Document",
-            iconVariant: IconVariant.Filled);
+            commandOptions: new CommandOptions
+            {
+                UpdateState = context =>
+                    context.ResourceSnapshot.HealthStatus == HealthStatus.Healthy ? ResourceCommandState.Enabled : ResourceCommandState.Disabled,
+                IconName = "Document",
+                IconVariant = IconVariant.Filled
+            });
+            
     }
 
 }

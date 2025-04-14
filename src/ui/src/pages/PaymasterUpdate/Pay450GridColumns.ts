@@ -9,14 +9,14 @@ export const GetPay450GridColumns = (navFunction: (badgeNumber: string) => void)
       field: "badge",
       colId: "badge",
       minWidth: 100,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      headerClass: "left-align",
+      cellClass: "left-align",
       resizable: true,
       sortable: true,
       cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badge, navFunction)
     },
     {
-      headerName: "Employee Name",
+      headerName: "Name",
       field: "employeeName",
       colId: "employeeName",
       minWidth: 180,

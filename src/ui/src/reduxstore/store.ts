@@ -15,6 +15,7 @@ import lookupsSlice from "./slices/lookupsSlice";
 import { rtkQueryErrorToastMiddleware } from "smart-ui-library";
 import { CommonApi } from "./api/CommonApi";
 import commonSlice from "./slices/commonSlice";
+import { messageSlice } from "./slices/messageSlice";
 
 export const store = configureStore({
   reducer: {
@@ -26,6 +27,7 @@ export const store = configureStore({
     inquiry: inquirySlice,
     lookups: lookupsSlice,
     common: commonSlice,
+    messages: messageSlice,
 
     [SecurityApi.reducerPath]: SecurityApi.reducer,
     [YearsEndApi.reducerPath]: YearsEndApi.reducer,

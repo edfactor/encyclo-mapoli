@@ -11,7 +11,7 @@ export const GetUnder21BreakdownColumnDefs = (navFunction?: (path: string) => vo
     cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber, navFunction)
   },
   {
-    headerName: "Employee Name",
+    headerName: "Name",
     field: "fullName",
     width: 200
   },
@@ -88,7 +88,7 @@ export const under21InactiveColumnDefs = (navFunction?: (path: string) => void) 
     cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber, navFunction)
   },
   {
-    headerName: "Employee Name",
+    headerName: "Name",
     field: "fullName",
     width: 200
   },

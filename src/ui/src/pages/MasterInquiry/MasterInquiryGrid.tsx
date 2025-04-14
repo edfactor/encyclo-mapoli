@@ -7,6 +7,7 @@ import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetMasterInquiryGridColumns } from "./MasterInquiryGridColumns";
 import { MasterInquiryRequest } from "reduxstore/types";
 import { paymentTypeGetNumberMap, memberTypeGetNumberMap } from "./MasterInquiryFunctions";
+import { CAPTIONS } from "../../constants";
 interface MasterInquiryGridProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
@@ -21,6 +22,7 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoad
     isSortDescending: true
   });
 
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const { masterInquiryData, masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
   const [triggerSearch, { isFetching }] = useLazyGetProfitMasterInquiryQuery();
 
@@ -60,7 +62,7 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoad
         ...(!!masterInquiryRequestParams.payment && { payment: masterInquiryRequestParams.payment })
       };
     },
-    [masterInquiryRequestParams, pageSize]
+    [masterInquiryRequestParams, pageSize, _sortParams]
   );
 
   const sortEventHandler = (update: ISortParams) => {
@@ -104,7 +106,7 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoad
             </Typography>
           </div>
           <DSMGrid
-            preferenceKey={"ProfitYear"}
+            preferenceKey={CAPTIONS.MASTER_INQUIRY}
             isLoading={isFetching}
             handleSortChanged={sortEventHandler}
             providedOptions={{

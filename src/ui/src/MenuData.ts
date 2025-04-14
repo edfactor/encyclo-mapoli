@@ -195,12 +195,7 @@ export const menuLevels: MenuLevel[] = [
         topTitle: CAPTIONS.PRINT_PROFIT_CERTS,
         topRoute: ROUTES.PRINT_PROFIT_CERTS,
         subPages: []
-      },
-      {
-        topTitle: CAPTIONS.PAYMASTER_SAVE,
-        topRoute: ROUTES.PAYMASTER_SAVE,
-        subPages: []
-      }
+      }     
     ]
   }
 ];

@@ -7,6 +7,7 @@ import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetNegativeEtvaForSSNsOnPayProfitColumns } from "./NegativeEtvaForSSNsOnPayprofitGridColumn";
 import { Path, useNavigate } from "react-router";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
+import { CAPTIONS } from "../../../constants";
 
 interface NegativeEtvaForSSNsOnPayprofitGridProps {
   initialSearchLoaded: boolean;
@@ -27,7 +28,8 @@ const NegativeEtvaForSSNsOnPayprofitGrid: React.FC<NegativeEtvaForSSNsOnPayprofi
   const { negativeEtvaForSSNsOnPayprofit } = useSelector(
     (state: RootState) => state.yearsEnd
   );
-  
+
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const profitYear = useDecemberFlowProfitYear();
   const [triggerSearch, { isFetching }] = useLazyGetNegativeEVTASSNQuery();
 
@@ -43,13 +45,13 @@ const NegativeEtvaForSSNsOnPayprofitGrid: React.FC<NegativeEtvaForSSNsOnPayprofi
     };
 
     await triggerSearch(request, false);
-  }, [pageNumber, pageSize, triggerSearch, profitYear, sortParams]);
+  }, [pageNumber, pageSize, triggerSearch, profitYear, sortParams, hasToken]);
 
   useEffect(() => {
-    if (initialSearchLoaded) {
+    if (initialSearchLoaded && hasToken && profitYear) {
       onSearch();
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, onSearch]);
+  }, [initialSearchLoaded, pageNumber, pageSize, onSearch, hasToken, profitYear]);
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
@@ -79,7 +81,7 @@ const NegativeEtvaForSSNsOnPayprofitGrid: React.FC<NegativeEtvaForSSNsOnPayprofi
             </Typography>
           </div>
           <DSMGrid
-            preferenceKey={"DUPE_SSNS"}
+            preferenceKey={CAPTIONS.NEGATIVE_ETVA}
             isLoading={false}
             handleSortChanged={sortEventHandler}
             providedOptions={{

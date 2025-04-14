@@ -12,8 +12,8 @@ import {
 import MilitaryAndRehireEntryAndModificationSearchFilter from "./MilitaryEntryAndModificationSearchFilter";
 import MilitaryContributionForm from "./MilitaryContributionForm";
 import { MilitaryContribution } from "reduxstore/types";
-import { CAPTIONS, MENU_LABELS } from "../../constants";
-import StatusDropdownActionNode from "components/StatusDropdownActionNode";
+import { CAPTIONS, MENU_LABELS } from "../../../constants";
+import StatusDropdown from "components/StatusDropdown";
 import { useNavigate } from "react-router";
 
 const MilitaryEntryAndModification = () => {
@@ -22,6 +22,14 @@ const MilitaryEntryAndModification = () => {
   const [fetchContributions, { isFetching }] = useLazyGetMilitaryContributionsQuery();
   const [trigger] = useCreateMilitaryContributionMutation();
   const navigate = useNavigate();
+
+  const renderActionNode = () => {
+    return (
+      <div className="flex items-center gap-2 h-10">
+        <StatusDropdown onStatusChange={() => {}} />       
+      </div>
+    );
+  };
 
   const handleFetchContributions = useCallback(() => {
     if (masterInquiryEmployeeDetails) {

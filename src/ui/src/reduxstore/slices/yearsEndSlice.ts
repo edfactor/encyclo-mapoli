@@ -87,6 +87,7 @@ export interface YearsEndState {
   executiveHoursAndDollars: PagedReportResponse<ExecutiveHoursAndDollars> | null;
   executiveHoursAndDollarsGrid: ExecutiveHoursAndDollarsGrid | null;
   executiveHoursAndDollarsQueryParams: ExecutiveHoursAndDollarsQueryParams | null;
+  executiveHoursAndDollarsAddQueryParams: ExecutiveHoursAndDollarsQueryParams | null;
   executiveRowsSelected: ExecutiveHoursAndDollars[] | null;
   forfeituresAndPoints: ForfeituresAndPoints | null;
   forfeituresAndPointsQueryParams: ForfeituresAndPointsQueryParams | null;
@@ -169,6 +170,7 @@ const initialState: YearsEndState = {
   executiveHoursAndDollarsGrid: null,
   executiveRowsSelected: null,
   executiveHoursAndDollarsQueryParams: null,
+  executiveHoursAndDollarsAddQueryParams: null,
   forfeituresByAgeFullTime: null,
   forfeituresByAgePartTime: null,
   forfeituresByAgeTotal: null,
@@ -187,9 +189,14 @@ const initialState: YearsEndState = {
   negativeEtvaForSSNsOnPayprofit: null,
   negativeEtvaForSSNsOnPayprofitParams: null,
   profitSharingUpdate: null,
+  profitSharingUpdateQueryParams: null,
+  profitSharingEditQueryParams: null,
   profitSharingEdit: null,
   profitSharingMaster: null,
   profitSharingRevert: null,
+  profitSharingUpdateAdjustmentSummary: null,
+  profitEditUpdateChangesAvailable: false,
+  profitEditUpdateRevertChangesAvailable: false,
   termination: null,
   terminationQueryParams: null,
   vestedAmountsByAge: null,
@@ -212,6 +219,12 @@ export const yearsEndSlice = createSlice({
   name: "yearsEnd",
   initialState,
   reducers: {
+    setExecutiveHoursAndDollarsAddQueryParams: (state, action: PayloadAction<ExecutiveHoursAndDollarsQueryParams>) => {
+      state.executiveHoursAndDollarsAddQueryParams = action.payload;
+    },
+    clearExecutiveHoursAndDollarsAddQueryParams: (state) => {
+      state.executiveHoursAndDollarsAddQueryParams = null;
+    },
     setProfitSharingUpdateAdjustmentSummary: (state, action: PayloadAction<ProfitShareAdjustmentSummary>) => {
       state.profitSharingUpdateAdjustmentSummary = action.payload;
     },
@@ -237,10 +250,14 @@ export const yearsEndSlice = createSlice({
     },
     setProfitEditUpdateChangesAvailable: (state, action: PayloadAction<boolean>) => {
       state.profitEditUpdateChangesAvailable = action.payload;
+      state.profitEditUpdateRevertChangesAvailable = false;
     },
+
     setProfitEditUpdateRevertChangesAvailable: (state, action: PayloadAction<boolean>) => {
       state.profitEditUpdateRevertChangesAvailable = action.payload;
+      state.profitEditUpdateChangesAvailable = false;
     },
+
     setSelectedProfitYearForDecemberActivities: (state, action: PayloadAction<number>) => {
       state.selectedProfitYearForDecemberActivities = action.payload;
       localStorage.setItem("selectedProfitYearForDecemberActivities", action.payload.toString());
@@ -625,6 +642,9 @@ export const yearsEndSlice = createSlice({
     },
     setExecutiveHoursAndDollarsQueryParams: (state, action: PayloadAction<ExecutiveHoursAndDollarsQueryParams>) => {
       state.executiveHoursAndDollarsQueryParams = action.payload;
+    },
+    clearExecutiveHoursAndDollarsQueryParams: (state) => {
+      state.executiveHoursAndDollarsQueryParams = null;
     },
     setEmployeeWagesForYear: (state, action: PayloadAction<PagedReportResponse<EmployeeWagesForYear>>) => {
       state.employeeWagesForYear = action.payload;
@@ -1012,6 +1032,8 @@ export const {
   clearProfitSharingEditQueryParams,
   setProfitSharingUpdateAdjustmentSummary,
   clearProfitSharingUpdateAdjustmentSummary,
-  addBadgeNumberToUpdateAdjustmentSummary
+  addBadgeNumberToUpdateAdjustmentSummary,
+  clearExecutiveHoursAndDollarsAddQueryParams,
+  setExecutiveHoursAndDollarsAddQueryParams
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;

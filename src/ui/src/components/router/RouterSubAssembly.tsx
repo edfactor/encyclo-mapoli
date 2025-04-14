@@ -19,7 +19,7 @@ import Forfeit from "pages/Forfeit/Forfeit";
 import FrozenSummary from "pages/FrozenSummary/FrozenSummary";
 import MasterInquiry from "pages/MasterInquiry/MasterInquiry";
 import RehireForfeitures from "pages/DecemberActivities/RehireForfeitures/RehireForfeitures";
-import MilitaryEntryAndModification from "pages/MilitaryEntryAndModification/MilitaryEntryAndModification";
+import MilitaryEntryAndModification from "pages/DecemberActivities/MilitaryEntryAndModification/MilitaryEntryAndModification";
 import EighteenToTwenty from "pages/PAY426Reports/PAY426-1/EighteenToTwenty";
 import Beneficiaries from "pages/PAY426Reports/PAY426-10/Beneficiaries";
 import TwentyOnePlus from "pages/PAY426Reports/PAY426-2/TwentyOnePlus";
