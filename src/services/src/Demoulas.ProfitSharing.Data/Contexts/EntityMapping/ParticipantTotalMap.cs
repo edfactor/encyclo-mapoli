@@ -1,0 +1,26 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Demoulas.ProfitSharing.Data.Entities;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
+internal sealed class ParticipantTotalMap : IEntityTypeConfiguration<ParticipantTotal>
+{
+    //This table is virtual in nature.  It uses the FromSql method to access data.
+    public void Configure(EntityTypeBuilder<ParticipantTotal> builder)
+    {
+        builder.Metadata.SetIsTableExcludedFromMigrations(true);
+        
+        builder.HasKey(x => x.Ssn);
+        builder.Property(x => x.Ssn)
+            .HasColumnName("SSN")
+            .IsRequired();
+
+        builder.Property(x => x.Total)
+            .HasColumnName("TOTAL");
+    }
+}
