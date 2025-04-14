@@ -9,10 +9,10 @@ using Demoulas.ProfitSharing.Data.Entities;
 namespace Demoulas.ProfitSharing.UnitTests.Common.Fakes;
 public sealed class ParticipantTotalFaker : Faker<ParticipantTotal>
 {
-    public ParticipantTotalFaker(IList<Demographic> demographicFakes, IList<BeneficiaryContact> beneficiaryContactFakes)
+    public ParticipantTotalFaker(IList<Demographic> demographicFakes, IList<Beneficiary> beneficiaryFakes)
     {
         var demoSsns = demographicFakes.Select(x=>x.Ssn).ToList();
-        var beneSsns = beneficiaryContactFakes.Where(z=>!demoSsns.Contains(z.Ssn)).Select(x => x.Ssn).ToList();
+        var beneSsns = beneficiaryFakes.Where(z=>!demoSsns.Contains(z.Contact!.Ssn)).Select(x => x.Contact!.Ssn).ToList();
         var ssnQueue = new Queue<int>(demoSsns.Union(beneSsns));
 
         RuleFor(x => x.Ssn, (f, o) =>

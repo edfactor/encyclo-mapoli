@@ -25,15 +25,15 @@ public sealed class TotalService : ITotalService
 {
     private readonly IProfitSharingDataContextFactory _profitSharingDataContextFactory;
     private readonly ICalendarService _calendarService;
-    private readonly ILogger _logger;
+    private readonly IEmbeddedSqlService _embeddedSqlService;
 
     public TotalService(IProfitSharingDataContextFactory profitSharingDataContextFactory,
         ICalendarService calendarService,
-        ILoggerFactory loggerFactory)
+        IEmbeddedSqlService embeddedSqlService)
     {
         _profitSharingDataContextFactory = profitSharingDataContextFactory;
         _calendarService = calendarService;
-        _logger = loggerFactory.CreateLogger<TotalService>();
+        _embeddedSqlService = embeddedSqlService;
     }
 
     /// <summary>
@@ -77,37 +77,32 @@ public sealed class TotalService : ITotalService
     /// <returns>
     /// An <see cref="IQueryable{T}"/> of <see cref="ParticipantTotalDto"/> containing the total balance data for participants.
     /// </returns>
-    internal IQueryable<ParticipantTotal> GetTotalBalanceSet(IProfitSharingDbContext ctx, short profitYear)
+    internal IQueryable<ParticipantTotalBalanceDto> GetTotalBalanceSet(IProfitSharingDbContext ctx, short profitYear)
     {
-        using (_logger.BeginScope("Request Total Balance"))
-        {
-            FormattableString query = @$"
-SELECT
-	pd.SSN as Ssn,
-	--Contributions + Earnings + EtvaForfeitures + Distributions + Forfeitures + VestedEarnings
-	--Contributions:
-    SUM(CASE WHEN pd.PROFIT_CODE_ID = 0 THEN pd.CONTRIBUTION ELSE 0 END)
-    --Earnings:
-  + SUM(CASE WHEN pd.PROFIT_CODE_ID IN (0,2) THEN pd.EARNINGS ELSE 0 END)
-    --EtvaForfeitures
-  + SUM(CASE WHEN pd.PROFIT_CODE_ID = 0 THEN pd.FORFEITURE ELSE 0 END)
-    --Distributions
-  + SUM(CASE WHEN pd.PROFIT_CODE_ID  IN (1,3,5) THEN pd.FORFEITURE * -1 ELSE 0 END)
-    --Forfeitures
-  + SUM(CASE WHEN pd.PROFIT_CODE_ID = 2 THEN pd.FORFEITURE * -1 ELSE 0 END)
-   --VestedEarnings
-  + (
-  	  SUM(CASE WHEN pd.PROFIT_CODE_ID = 6 THEN pd.CONTRIBUTION ELSE 0 END) +
-  	  SUM(CASE WHEN pd.PROFIT_CODE_ID  = 8 THEN pd.EARNINGS  ELSE 0 END) + 
-  	  SUM(CASE WHEN pd.PROFIT_CODE_ID = 9 THEN pd.FORFEITURE * -1 ELSE 0 END)
-  	) AS Total
-  FROM PROFIT_DETAIL pd
- WHERE pd.PROFIT_YEAR  <= {profitYear}
- GROUP BY pd.SSN
-";
+        return (from pd in ctx.ProfitDetails
+                where pd.ProfitYear <= profitYear
+                group pd by pd.Ssn
+            into pd_g
+                select new ParticipantTotalBalanceDto
+                {
+                    Ssn = pd_g.Key,
+                    Contributions = pd_g.Where(x => x.ProfitCodeId == ProfitCode.Constants.IncomingContributions).Sum(x => x.Contribution),
+                    Earnings = pd_g.Where(x => x.ProfitCodeId == ProfitCode.Constants.IncomingContributions ||
+                                             x.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures).Sum(x => x.Earnings),
+                    EtvaForfeitures = pd_g.Where(x => x.ProfitCodeId == ProfitCode.Constants.IncomingContributions).Sum(x => x.Forfeiture),
+                    Forfeitures = pd_g.Where(x => x.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures).Sum(x => x.Forfeiture * -1),
+                    Distributions = pd_g.Where(x => x.ProfitCodeId == ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal ||
+                                                  x.ProfitCodeId == ProfitCode.Constants.OutgoingDirectPayments ||
+                                                  x.ProfitCodeId == ProfitCode.Constants.OutgoingXferBeneficiary).Sum(x => x.Forfeiture * -1),
+                    VestedEarnings = pd_g.Where(x => x.ProfitCodeId == ProfitCode.Constants.IncomingQdroBeneficiary).Sum(x => x.Contribution) +
+                                     pd_g.Where(x => x.ProfitCodeId == ProfitCode.Constants.Incoming100PercentVestedEarnings).Sum(x => x.Earnings) +
+                                     pd_g.Where(x => x.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment).Sum(x => x.Forfeiture * -1)
+                });
+    }
 
-            return ctx.ParticipantTotals.FromSql(query);
-        }
+    internal IQueryable<ParticipantTotal> GetTotalBalanceAlt(IProfitSharingDbContext ctx, short profitYear)
+    {
+        return _embeddedSqlService.GetTotalBalanceAlt(ctx, profitYear);
     }
 
 
