@@ -24,9 +24,9 @@ import { ISortParams, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 
 interface ExecutiveHoursAndDollarsSearch {
-  profitYear: number; // Made required
-  badgeNumber: number | null | undefined;
-  socialSecurity: number;
+  profitYear: number;
+  badgeNumber?: number | null | undefined;
+  socialSecurity?: number | undefined;
   fullNameContains?: string | null;
   hasExecutiveHoursAndDollars: NonNullable<boolean>;
   isMonthlyPayroll: NonNullable<boolean>;
@@ -38,7 +38,8 @@ const schema = yup.object().shape({
     .typeError("Year must be a number")
     .integer("Year must be an integer")
     .min(2020, "Year must be 2020 or later")
-    .max(2100, "Year must be 2100 or earlier"),
+    .max(2100, "Year must be 2100 or earlier")
+    .required("Year is required"),
   badgeNumber: yup
     .number()
     .typeError("Badge Number must be a number")
@@ -95,7 +96,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
     setOneAddSearchFilterEntered(socialSecurityChosen || badgeNumberChosen || fullNameChosen);
   };
 
-  const profitYear = useDecemberFlowProfitYear();
+  const profitYear = useFiscalCloseProfitYear();
 
   const [triggerSearch, { isFetching }] = useLazyGetExecutiveHoursAndDollarsQuery();
   const [triggerModalSearch, { isFetching: isModalFetching }] = useLazyGetAdditionalExecutivesQuery();
@@ -115,7 +116,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
   } = useForm<ExecutiveHoursAndDollarsSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: profitYear || (properQueryParams?.profitYear ?? undefined),
+      profitYear: profitYear || (properQueryParams?.profitYear ?? new Date().getFullYear()),
       badgeNumber:
         properQueryParams?.badgeNumber && properQueryParams.badgeNumber !== 0
           ? properQueryParams.badgeNumber
