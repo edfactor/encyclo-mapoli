@@ -19,12 +19,14 @@ public class BreakdownReportByStoreTests
     private readonly CalendarService _calendarService;
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly TotalService _totalService;
+    private readonly IEmbeddedSqlService _embeddedSqlService;
 
     public BreakdownReportByStoreTests()
     {
         _dataContextFactory = new PristineDataContextFactory();
         _calendarService = new CalendarService(_dataContextFactory, _aps);
-        _totalService = new TotalService(_dataContextFactory, _calendarService);
+        _embeddedSqlService = new EmbeddedSqlService();
+        _totalService = new TotalService(_dataContextFactory, _calendarService, _embeddedSqlService);
         _breakdownService = new BreakdownReportService(_dataContextFactory, _calendarService, _totalService);
     }
 

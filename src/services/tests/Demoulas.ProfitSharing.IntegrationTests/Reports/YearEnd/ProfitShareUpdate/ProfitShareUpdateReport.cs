@@ -17,6 +17,7 @@ internal sealed class ProfitShareUpdateReport
 {
     private readonly IProfitSharingDataContextFactory _dbFactory;
     private readonly CalendarService _calendarService;
+    private readonly EmbeddedSqlService _embeddedSqlService;
     private short _profitYear;
 
     /// <summary>
@@ -26,6 +27,7 @@ internal sealed class ProfitShareUpdateReport
     {
         _dbFactory = dbFactory;
         _calendarService = calendarService;
+        _embeddedSqlService = new EmbeddedSqlService();
     }
 
     public DateTime TodaysDateTime { get; set; }
@@ -33,7 +35,7 @@ internal sealed class ProfitShareUpdateReport
 
     public async Task ProfitSharingUpdatePaginated(ProfitShareUpdateRequest profitShareUpdateRequest)
     {
-        TotalService totalService = new TotalService(_dbFactory, _calendarService);
+        TotalService totalService = new TotalService(_dbFactory, _calendarService, _embeddedSqlService);
         ProfitShareUpdateService psu = new(_dbFactory, totalService, _calendarService);
         _profitYear = profitShareUpdateRequest.ProfitYear;
 
