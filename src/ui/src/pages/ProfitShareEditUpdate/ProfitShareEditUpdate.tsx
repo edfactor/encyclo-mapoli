@@ -242,7 +242,6 @@ const ProfitShareEditUpdate = () => {
       <div>
         <ApiMessageAlert commonKey={MessageKeys.ProfitShareEditUpdate} />
         <div className="h-4"></div>
-        <Button onClick={() => dispatch(setMessage(Messages.ProfitShareRevertSuccess))}>Show Success</Button>
       </div>
       <Grid2
         container
@@ -329,7 +328,7 @@ const ProfitShareEditUpdate = () => {
               <div style={{ marginTop: "20px" }}>
                 <TotalsGrid
                   tablePadding="8px"
-                  displayData={[[numberToCurrency(profitSharingEdit.beginningBalance || 0), "", ""]]}
+                  displayData={[[numberToCurrency(profitSharingEdit.beginningBalanceTotal || 0), "", ""]]}
                   leftColumnHeaders={["Beginning Balance"]}
                   topRowHeaders={["", ""]}
                   headerCellStyle={{}}
@@ -383,10 +382,12 @@ const ProfitShareEditUpdate = () => {
         )}
       </Grid2>
       <SmartModal
+        key={"saveModal"}
         maxWidth="sm"
         open={openSaveModal}
         onClose={() => setOpenSaveModal(false)}>
         <ProfitShareEditConfirmation
+          key={"saveConfirmation"}
           performLabel="YES, SAVE"
           closeLabel="NO, CANCEL"
           setOpenModal={setOpenSaveModal}
@@ -399,30 +400,35 @@ const ProfitShareEditUpdate = () => {
           params={profitSharingEditQueryParams}
           lastWarning="Ready to save? It may take a few minutes to process."
         />
-        <SmartModal
-          maxWidth="sm"
-          open={openRevertModal}
-          onClose={() => setOpenRevertModal(false)}>
-          <ProfitShareEditConfirmation
-            performLabel="YES, REVERT"
-            closeLabel="NO, CANCEL"
-            setOpenModal={setOpenRevertModal}
-            actionFunction={() => {
-              revertAction();
-              setOpenRevertModal(false);
-            }}
-            messageType="warning"
-            messageHeadline="Reverting to the last update will modify the following:"
-            params={profitSharingEditQueryParams}
-            lastWarning="Do you still wish to revert?"
-          />
-        </SmartModal>
       </SmartModal>
       <SmartModal
+        key={"revertModal"}
+        maxWidth="sm"
+        open={openRevertModal}
+        onClose={() => setOpenRevertModal(false)}>
+        <ProfitShareEditConfirmation
+          key={"revertConfirmation"}
+          performLabel="YES, REVERT"
+          closeLabel="NO, CANCEL"
+          setOpenModal={setOpenRevertModal}
+          actionFunction={() => {
+            revertAction();
+            setOpenRevertModal(false);
+          }}
+          messageType="warning"
+          messageHeadline="Reverting to the last update will modify the following:"
+          params={profitSharingEditQueryParams}
+          lastWarning="Do you still wish to revert?"
+        />
+      </SmartModal>
+
+      <SmartModal
+        key={"emptyModal"}
         open={openEmptyModal}
         maxWidth="sm"
         onClose={() => setOpenEmptyModal(false)}>
         <ProfitShareEditConfirmation
+          key={"emptyConfirmation"}
           performLabel="OK"
           closeLabel=""
           setOpenModal={setOpenEmptyModal}
