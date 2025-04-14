@@ -21,7 +21,7 @@ import {
 } from "reduxstore/types";
 import { DSMGrid, ISortParams, Pagination, SmartModal } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
-import { GetManageExecutiveHoursAndDollarsColumns } from "./ManageExecutiveHoursAndDollarsGridColumns";
+import { GetMilitaryContributionColumns } from "./MilitaryContributionFormGridColumns";
 import SearchAndAddExecutive from "./SearchAndAddExecutive";
 
 interface RenderAddExecutiveButtonProps {
@@ -79,7 +79,7 @@ interface ManageExecutiveHoursAndDollarsGridSearchProps {
   setInitialSearchLoaded: (loaded: boolean) => void;
 }
 
-const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollarsGridSearchProps> = ({
+const MilitaryContributionFormGrid: React.FC<ManageExecutiveHoursAndDollarsGridSearchProps> = ({
   isModal,
   initialSearchLoaded,
   setInitialSearchLoaded
@@ -247,7 +247,7 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
   };
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
-  const columnDefs = useMemo(() => GetManageExecutiveHoursAndDollarsColumns(isModal), [isModal]);
+  const columnDefs = useMemo(() => GetMilitaryContributionColumns(isModal), [isModal]);
 
   const combineGridWithAddedExecs = (
     mainList: PagedReportResponse<ExecutiveHoursAndDollars> | null,
@@ -401,4 +401,4 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
   );
 };
 
-export default ManageExecutiveHoursAndDollarsGrid;
+export default MilitaryContributionFormGrid;
