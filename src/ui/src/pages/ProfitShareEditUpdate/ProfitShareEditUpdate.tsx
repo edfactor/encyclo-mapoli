@@ -223,9 +223,8 @@ const ProfitShareEditUpdate = () => {
   const revertAction = useRevertAction();
   const saveAction = useSaveAction();
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
-  const { profitSharingUpdateAdjustmentSummary, profitSharingUpdate, profitSharingEditQueryParams } = useSelector(
-    (state: RootState) => state.yearsEnd
-  );
+  const { profitSharingUpdateAdjustmentSummary, profitSharingUpdate, profitSharingEdit, profitSharingEditQueryParams } =
+    useSelector((state: RootState) => state.yearsEnd);
   const [openSaveModal, setOpenSaveModal] = useState<boolean>(false);
   const [openRevertModal, setOpenRevertModal] = useState<boolean>(false);
   const [openEmptyModal, setOpenEmptyModal] = useState<boolean>(false);
@@ -233,7 +232,7 @@ const ProfitShareEditUpdate = () => {
 
   return (
     <Page
-      label="Master Update (PAY444/PAY447)"
+      label="Master Update (PAY444|PAY447)"
       actionNode={
         <div className="flex  justify-end gap-2">
           {RenderRevertButton(setOpenRevertModal)}
@@ -256,7 +255,7 @@ const ProfitShareEditUpdate = () => {
             <ProfitShareEditUpdateSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
           </DSMAccordion>
         </Grid2>
-        {profitSharingUpdate && (
+        {profitSharingUpdate && profitSharingEdit && (
           <div>
             <div className="px-[24px]">
               <h2 className="text-dsm-secondary">Summary</h2>
@@ -310,7 +309,34 @@ const ProfitShareEditUpdate = () => {
                 "Distributions Military/Paid Allocation",
                 "Ending Balance"
               ]}
+              tablePadding="12px"
             />
+            <div style={{ display: "flex", gap: "8px" }}>
+              <TotalsGrid
+                breakPoints={{ xs: 5, sm: 5, md: 5, lg: 5, xl: 5 }}
+                tablePadding="4px"
+                displayData={[
+                  [
+                    numberToCurrency(profitSharingEdit.contributionGrandTotal || 0),
+                    numberToCurrency(profitSharingEdit.earningsGrandTotal || 0),
+                    numberToCurrency(profitSharingEdit.incomingForfeitureGrandTotal || 0)
+                  ]
+                ]}
+                leftColumnHeaders={["Grand Totals"]}
+                topRowHeaders={["", "Contributions", "Earnings", "Forfeit"]}
+                headerCellStyle={{}}
+              />
+              <div style={{ marginTop: "20px" }}>
+                <TotalsGrid
+                  tablePadding="8px"
+                  displayData={[[numberToCurrency(profitSharingEdit.beginningBalance || 0), "", ""]]}
+                  leftColumnHeaders={["Beginning Balance"]}
+                  topRowHeaders={["", ""]}
+                  headerCellStyle={{}}
+                />
+              </div>
+            </div>
+
             {profitSharingUpdateAdjustmentSummary?.badgeNumber && (
               <>
                 <div className="px-[24px]">
