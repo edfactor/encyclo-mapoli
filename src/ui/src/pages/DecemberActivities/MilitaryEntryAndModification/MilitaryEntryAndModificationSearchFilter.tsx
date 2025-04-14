@@ -17,7 +17,6 @@ interface SearchFilterProps {
   setInitialSearchLoaded: (loaded: boolean) => void;
 }
 
-
 const validationSchema = yup
   .object()
   .shape({
@@ -28,10 +27,7 @@ const validationSchema = yup
     Boolean(values.socialSecurity || values.badgeNumber)
   );
 
-const MilitaryEntryAndModificationSearchFilter: React.FC<SearchFilterProps> = ({
-                                                                                 setInitialSearchLoaded
-                                                                               }) =>
-{
+const MilitaryEntryAndModificationSearchFilter: React.FC<SearchFilterProps> = ({ setInitialSearchLoaded }) => {
   const [triggerSearch, { isFetching }] = useLazyGetProfitMasterInquiryQuery();
   const {
     register,
