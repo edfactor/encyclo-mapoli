@@ -115,11 +115,6 @@ export const menuLevels: MenuLevel[] = [
     mainTitle: MENU_LABELS.FISCAL_CLOSE,
     topPage: [
       {
-        topTitle: CAPTIONS.SUMMARY,
-        topRoute: ROUTES.FISCAL_CLOSE,
-        subPages: []
-      },
-      {
         topTitle: CAPTIONS.MANAGE_EXECUTIVE_HOURS,
         topRoute: ROUTES.MANAGE_EXECUTIVE_HOURS,
         subPages: []

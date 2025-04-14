@@ -5,10 +5,19 @@ import Grid2 from '@mui/material/Grid2';
 import EighteenToTwentyGrid from "../PAY426-1/EighteenToTwentyGrid";
 import TwentyOnePlusGrid from "./TwentyOnePlusGrid";
 import EighteenToTwentySearchFilter from "../PAY426-1/EigteenToTwentySearchFilters";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
+
+const renderActionNode = () => {
+    return (
+        <StatusDropdownActionNode />
+    );
+};
 
 const TwentyOnePlus = () => {
     return (
-        <Page label={CAPTIONS.PAY426_ACTIVE_21_PLUS}>
+        <Page 
+            label={CAPTIONS.PAY426_ACTIVE_21_PLUS}
+            actionNode={renderActionNode()}>
             <Grid2 container rowSpacing="24px">
                 <Grid2 width={"100%"}>
                     <Divider />

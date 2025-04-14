@@ -9,6 +9,7 @@ import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useLazyGetContributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { setContributionsByAgeQueryParams } from "reduxstore/slices/yearsEndSlice";
 import { FrozenReportsByAgeRequestType } from "reduxstore/types";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 
 const ContributionsByAge = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
@@ -50,8 +51,14 @@ const ContributionsByAge = () => {
     }
   }, [hasToken, profitYear, hasInitialSearchRun, triggerSearch, dispatch]);
 
+  const renderActionNode = () => {
+    return (
+        <StatusDropdownActionNode />
+    );
+};
+
   return (
-    <Page label="Contributions By Age">
+    <Page label="Contributions By Age" actionNode={renderActionNode()}>
       <Grid2
         container
         rowSpacing="24px">

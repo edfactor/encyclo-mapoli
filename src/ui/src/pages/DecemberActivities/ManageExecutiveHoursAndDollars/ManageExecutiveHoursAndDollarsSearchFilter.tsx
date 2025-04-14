@@ -2,7 +2,8 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { Checkbox, FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
-import { useState } from "react";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import { useState, useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -23,9 +24,9 @@ import { ISortParams, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 
 interface ExecutiveHoursAndDollarsSearch {
-  profitYear: number; // Made required
-  badgeNumber: number | null | undefined;
-  socialSecurity: number;
+  profitYear: number;
+  badgeNumber?: number | null | undefined;
+  socialSecurity?: number | undefined;
   fullNameContains?: string | null;
   hasExecutiveHoursAndDollars: NonNullable<boolean>;
   isMonthlyPayroll: NonNullable<boolean>;
@@ -37,7 +38,8 @@ const schema = yup.object().shape({
     .typeError("Year must be a number")
     .integer("Year must be an integer")
     .min(2020, "Year must be 2020 or later")
-    .max(2100, "Year must be 2100 or earlier"),
+    .max(2100, "Year must be 2100 or earlier")
+    .required("Year is required"),
   badgeNumber: yup
     .number()
     .typeError("Badge Number must be a number")
@@ -94,7 +96,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
     setOneAddSearchFilterEntered(socialSecurityChosen || badgeNumberChosen || fullNameChosen);
   };
 
-  const profitYear = useDecemberFlowProfitYear();
+  const profitYear = useFiscalCloseProfitYear();
 
   const [triggerSearch, { isFetching }] = useLazyGetExecutiveHoursAndDollarsQuery();
   const [triggerModalSearch, { isFetching: isModalFetching }] = useLazyGetAdditionalExecutivesQuery();
@@ -114,7 +116,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
   } = useForm<ExecutiveHoursAndDollarsSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: profitYear || (properQueryParams?.profitYear ?? undefined),
+      profitYear: profitYear || (properQueryParams?.profitYear ?? new Date().getFullYear()),
       badgeNumber:
         properQueryParams?.badgeNumber && properQueryParams.badgeNumber !== 0
           ? properQueryParams.badgeNumber
@@ -128,6 +130,29 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
       isMonthlyPayroll: properQueryParams?.isMonthlyPayroll ?? false
     }
   });
+
+  useEffect(() => {
+    if (profitYear) {
+      dispatch(clearExecutiveHoursAndDollars());
+      dispatch(clearAdditionalExecutivesChosen());
+      
+      reset(prevValues => ({
+        ...prevValues,
+        profitYear
+      }));
+      
+      if (executiveHoursAndDollarsQueryParams) {
+        dispatch(
+          setExecutiveHoursAndDollarsQueryParams({
+            ...executiveHoursAndDollarsQueryParams,
+            profitYear
+          })
+        );
+      }
+      
+      setInitialSearchLoaded(false);
+    }
+  }, [profitYear]);
 
   const validateAndSearch = handleSubmit((data) => {
     // If there are any stored additional executives, we

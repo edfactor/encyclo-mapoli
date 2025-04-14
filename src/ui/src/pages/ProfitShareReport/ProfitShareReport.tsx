@@ -4,7 +4,7 @@ import Grid2 from '@mui/material/Grid2';
 import { DSMAccordion, Page } from "smart-ui-library";
 import ProfitShareReportSearchFilter from "./ProfitShareReportSearchFilter";
 import ProfitShareReportGrid from "./ProfitShareReportGrid";
-import StatusDropdown, { ProcessStatus } from "components/StatusDropdown";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { useNavigate } from "react-router";
 import { MENU_LABELS, CAPTIONS, ROUTES } from "../../constants";
 import { useSelector } from "react-redux";
@@ -59,16 +59,12 @@ const ProfitShareReport = () => {
           console.error("Initial search failed:", error);
         });
     }
-  }, [hasToken, profitYear, triggerSearch, dispatch, initialSearchLoaded, hasInitialSearchRun]);
-
-  const handleStatusChange = async (newStatus: ProcessStatus) => {
-    console.info("Logging new status: ", newStatus);
-  };
+  }, [hasToken, profitYear, initialSearchLoaded, hasInitialSearchRun]);
 
   const renderActionNode = () => {
     return (
       <div className="flex items-center gap-2 h-10">
-        <StatusDropdown onStatusChange={handleStatusChange} />
+        <StatusDropdownActionNode />
         <Button
           onClick={() => navigate(`/${ROUTES.PROFIT_SHARE_REPORT_EDIT_RUN}`)}
           variant="outlined"

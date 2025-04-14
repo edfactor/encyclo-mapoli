@@ -33,33 +33,6 @@ const ProfitShareReportGrid: React.FC<ProfitShareReportGridSearchProps> = ({
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
   const columnDefs = useMemo(() => GetProfitShareReportColumns(), []);
 
-  const onSearch = useCallback(async () => {
-    const request: YearEndProfitSharingReportRequest = {
-      isYearEnd: false,
-      minimumAgeInclusive: 18,
-      maximumAgeInclusive: 98,
-      minimumHoursInclusive: 1000,
-      maximumHoursInclusive: 2000,
-      includeActiveEmployees: true,
-      includeInactiveEmployees: true,
-      includeEmployeesWithPriorProfitSharingAmounts: true,
-      includeEmployeesWithNoPriorProfitSharingAmounts: true,
-      profitYear: yearEndProfitSharingReportQueryParams?.profitYear ?? 0,
-      pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: sortParams.sortBy, isSortDescending: sortParams.isSortDescending },
-      includeEmployeesTerminatedThisYear: false,
-      includeTerminatedEmployees: false,
-      includeBeneficiaries: false
-    };
-
-    await triggerSearch(request, false);
-  }, [pageNumber, pageSize, triggerSearch, sortParams, sortEventHandler, yearEndProfitSharingReportQueryParams?.profitYear]);
-
-  useEffect(() => {
-    if (initialSearchLoaded) {
-      onSearch();
-    }
-  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch]);
-
   return (
     <>
       {!!yearEndProfitSharingReport && (
