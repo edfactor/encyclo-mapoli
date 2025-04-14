@@ -97,10 +97,10 @@ public class FrozenReportServiceTests : ApiTestBase<Program>
             }
             ppArray[0].ProfitYear = 2023;
             ppArray[0].IncomeExecutive = 25;
-            ppArray[0].CurrentIncomeYear = 0;
+            ppArray[0].CurrentIncomeYear = 49995;
             ppArray[1].ProfitYear = 2022;
             ppArray[1].IncomeExecutive = 0;
-            ppArray[1].CurrentIncomeYear = 49995;
+            ppArray[1].CurrentIncomeYear = 0;
 
             await ctx.SaveChangesAsync(CancellationToken.None);
         });
