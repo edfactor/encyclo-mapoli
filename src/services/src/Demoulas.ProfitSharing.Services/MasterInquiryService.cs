@@ -61,7 +61,7 @@ public class MasterInquiryService : IMasterInquiryService
             {
                 combinedQuery = GetMasterInquiryDemographics(ctx, req);
             }
-            else if (req.MemberType == 2) // Beneficiary only
+            else if (req.MemberType == 2 || (req.BadgeNumber.HasValue && (req.PsnSuffix ?? 0) > 0))// Beneficiary only
             {
                 combinedQuery = GetMasterInquiryBeneficiary(ctx, req);
             }

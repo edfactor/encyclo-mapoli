@@ -28,7 +28,8 @@ public class TotalServiceIntegrationTests
 
         AccountingPeriodsService aps = new();
         CalendarService calsvc = new(_dataContextFactory, aps);
-        _totalService = new TotalService(_dataContextFactory, calsvc);
+        IEmbeddedSqlService embeddedSqlService = new EmbeddedSqlService();
+        _totalService = new TotalService(_dataContextFactory, calsvc, embeddedSqlService);
 
         // For accessing PROFITSHARE.* tables
         _connection = new OracleConnection(_dataContextFactory.ConnectionString);
