@@ -109,7 +109,7 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
   const { executiveHoursAndDollarsQueryParams } = useSelector((state: RootState) => state.yearsEnd);
 
   const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "badgeNumber",
+    sortBy: "storeNumber",
     isSortDescending: false
   });
 
