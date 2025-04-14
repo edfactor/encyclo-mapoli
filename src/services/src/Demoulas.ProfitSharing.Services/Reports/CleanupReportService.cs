@@ -574,19 +574,20 @@ FROM FILTERED_DEMOGRAPHIC p1
             }
 
             var joinedQry = from pp in qry
-                        join totTbl in _totalService.GetTotalBalanceSet(ctx, req.ProfitYear) on pp.Ssn equals totTbl.Ssn into totTmp
-                        from tot in totTmp.DefaultIfEmpty()
-                        select new { pp, tot };
-
+                            join totTbl in _totalService.GetTotalBalanceSet(ctx, req.ProfitYear) on pp.Ssn equals totTbl.Ssn into totTmp
+                            from tot in totTmp.DefaultIfEmpty()
+                            select new { pp, total = tot != null ? tot.Total : 0m };
 
             if (req is { IncludeEmployeesWithNoPriorProfitSharingAmounts: false, IncludeEmployeesWithPriorProfitSharingAmounts: true })
             {
-                joinedQry = joinedQry.Where(jq => jq.tot.Total > 0);
+                joinedQry = joinedQry.Where(jq => jq.total > 0);
             }
             if (req is { IncludeEmployeesWithNoPriorProfitSharingAmounts: true, IncludeEmployeesWithPriorProfitSharingAmounts: false })
             {
-                joinedQry = joinedQry.Where(jq => jq.tot.Total == 0);
+                joinedQry = joinedQry.Where(jq => jq.total == 0);
             }
+
+            var x = await joinedQry.ToListAsync(cancellationToken);
 
             var firstContributionSubquery = from pd in ctx.ProfitDetails
                                             where pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id
@@ -603,7 +604,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                                           select new
                                           {
                                               j.pp,
-                                              j.tot,
+                                              j.total,
                                               fc.FirstContributionYear
                                           };
 
@@ -663,7 +664,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                               IsNew = (x.FirstContributionYear == null && x.pp.HoursExecutive + x.pp.CurrentHoursYear > ReferenceData.MinimumHoursForContribution()),
                               IsUnder21 = false, //Filled out below after materialization
                               EmployeeStatus = x.pp.EmploymentStatusId,
-                              Balance = x.tot.Total ?? 0,
+                              Balance = x.total ?? 0,
                               YearsInPlan = x.pp.Years ?? 0
                           })
                           .ToPaginationResultsAsync(req, cancellationToken);
