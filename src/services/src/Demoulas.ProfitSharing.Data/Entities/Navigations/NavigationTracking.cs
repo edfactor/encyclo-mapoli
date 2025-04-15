@@ -10,7 +10,7 @@ public class NavigationTracking
 {
     public int Id { get; set; }
     public int NavigationId { get; set; }
-    public int? StatusId { get; set; }
+    public byte? StatusId { get; set; }
     public string? Username { get; set; }
     public DateTime? LastModified { get; set; }
 

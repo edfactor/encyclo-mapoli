@@ -28628,11 +28628,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NVARCHAR2(200)")
                         .HasColumnName("ICON");
 
-                    b.Property<string>("NavigationRoleJSON")
-                        .HasMaxLength(300)
-                        .HasColumnType("NVARCHAR2(300)")
-                        .HasColumnName("NAVIGATION_ROLE_JSON");
-
                     b.Property<byte>("OrderNumber")
                         .HasColumnType("NUMBER(3)")
                         .HasColumnName("ORDER_NUMBER");
@@ -28641,8 +28636,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(10)")
                         .HasColumnName("PARENT_ID");
 
-                    b.Property<int?>("StatusId")
-                        .HasColumnType("NUMBER(10)")
+                    b.Property<byte?>("StatusId")
+                        .HasColumnType("NUMBER(3)")
                         .HasColumnName("STATUS_ID");
 
                     b.Property<string>("SubTitle")
@@ -28674,19 +28669,34 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.ToTable("NAVIGATION", (string)null);
                 });
 
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Navigations.NavigationStatus", b =>
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Navigations.NavigationRole", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(10)")
+                    b.Property<byte>("Id")
+                        .HasColumnType("NUMBER(3)")
                         .HasColumnName("ID");
-
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("NVARCHAR2(50)")
+                        .HasMaxLength(200)
+                        .HasColumnType("NVARCHAR2(200)")
+                        .HasColumnName("URL");
+
+                    b.HasKey("Id")
+                        .HasName("PK_NAVIGATION_ROLE");
+
+                    b.ToTable("NAVIGATION_ROLE", (string)null);
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Navigations.NavigationStatus", b =>
+                {
+                    b.Property<byte>("Id")
+                        .HasColumnType("NUMBER(3)")
+                        .HasColumnName("ID");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("NVARCHAR2(64)")
                         .HasColumnName("NAME");
 
                     b.HasKey("Id")
@@ -28697,22 +28707,22 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = 1,
+                            Id = (byte)1,
                             Name = "Not Started"
                         },
                         new
                         {
-                            Id = 2,
+                            Id = (byte)2,
                             Name = "In Progress"
                         },
                         new
                         {
-                            Id = 3,
+                            Id = (byte)3,
                             Name = "Blocked"
                         },
                         new
                         {
-                            Id = 4,
+                            Id = (byte)4,
                             Name = "Successful"
                         });
                 });
@@ -28728,15 +28738,15 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.Property<DateTime?>("LastModified")
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("TIMESTAMP(7)")
+                        .HasColumnType("DATE")
                         .HasColumnName("LAST_MODIFIED");
 
                     b.Property<int>("NavigationId")
                         .HasColumnType("NUMBER(10)")
                         .HasColumnName("NAVIGATION_ID");
 
-                    b.Property<int?>("StatusId")
-                        .HasColumnType("NUMBER(10)")
+                    b.Property<byte?>("StatusId")
+                        .HasColumnType("NUMBER(3)")
                         .HasColumnName("STATUS_ID");
 
                     b.Property<string>("Username")
@@ -30190,6 +30200,25 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("NavigationNavigationRole", b =>
+                {
+                    b.Property<int>("NavigationId")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("NAVIGATIONID");
+
+                    b.Property<byte>("RequiredRolesId")
+                        .HasColumnType("NUMBER(3)")
+                        .HasColumnName("REQUIREDROLESID");
+
+                    b.HasKey("NavigationId", "RequiredRolesId")
+                        .HasName("PK_NAVIGATIONNAVIGATIONROLE");
+
+                    b.HasIndex("RequiredRolesId")
+                        .HasDatabaseName("IX_NAVIGATIONNAVIGATIONROLE_REQUIREDROLESID");
+
+                    b.ToTable("NAVIGATIONNAVIGATIONROLE", (string)null);
+                });
+
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Beneficiary", b =>
                 {
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.BeneficiaryContact", "Contact")
@@ -30873,7 +30902,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Navigations.Navigation", b =>
                 {
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.Navigations.Navigation", "Parent")
-                        .WithMany("Children")
+                        .WithMany("Items")
                         .HasForeignKey("ParentId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .HasConstraintName("FK_NAVIGATION_NAVIGATION_PARENTID");
@@ -31011,6 +31040,23 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Navigation("TaxCode");
                 });
 
+            modelBuilder.Entity("NavigationNavigationRole", b =>
+                {
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Navigations.Navigation", null)
+                        .WithMany()
+                        .HasForeignKey("NavigationId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_NAVIGATIONNAVIGATIONROLE_NAVIGATION_NAVIGATIONID");
+
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Navigations.NavigationRole", null)
+                        .WithMany()
+                        .HasForeignKey("RequiredRolesId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_NAVIGATIONNAVIGATIONROLE_NAVIGATIONROLES_REQUIREDROLESID");
+                });
+
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Beneficiary", b =>
                 {
                     b.Navigation("BeneficiarySsnChangeHistories");
@@ -31086,7 +31132,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Navigations.Navigation", b =>
                 {
-                    b.Navigation("Children");
+                    b.Navigation("Items");
 
                     b.Navigation("NavigationTrackings");
                 });

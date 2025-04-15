@@ -23,7 +23,6 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
         _ = builder.Property(x => x.OrderNumber).HasColumnName("ORDER_NUMBER");
         _ = builder.Property(x => x.StatusId).HasColumnName("STATUS_ID");
         _ = builder.Property(x => x.ParentId).HasColumnName("PARENT_ID");
-        _ = builder.Property(x => x.NavigationRoleJSON).HasColumnName("NAVIGATION_ROLE_JSON").HasMaxLength(300);
 
 
 
@@ -33,7 +32,10 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
             .HasForeignKey(x => x.StatusId);
 
         builder.HasOne(m => m.Parent)
-            .WithMany(x=>x.Children)
+            .WithMany(x=>x.Items)
             .HasForeignKey(x => x.ParentId);
+
+        builder.HasMany(x => x.RequiredRoles)
+            .WithMany();
     }
 }

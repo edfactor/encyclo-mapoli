@@ -15,22 +15,13 @@ public sealed class Navigation
     public required string Title { get; set; }
     public string? SubTitle { get; set; }
     public required string Url { get; set; }
-    public int? StatusId { get; set; }
+    public byte? StatusId { get; set; }
     public byte OrderNumber { get; set; }
     public string? Icon { get; set; }
-    public string? NavigationRoleJSON { get; set; }
-    [NotMapped]
-    public List<NavigationRole>? NavigationRole 
-    {
-        get => string.IsNullOrEmpty(NavigationRoleJSON) 
-            ? null 
-            : JsonSerializer.Deserialize<List<NavigationRole>>(NavigationRoleJSON); 
-        set=>NavigationRoleJSON = JsonSerializer.Serialize(value);
-    } //Will be added as JSON
 
-
+    public List<NavigationRole>? RequiredRoles { get; set; } = [];
     public NavigationStatus? NavigationStatus { get; set; }
-    public List<Navigation>? Children { get; set; }
+    public List<Navigation>? Items { get; set; }    
     public Navigation? Parent { get; set; }
     public List<NavigationTracking>? NavigationTrackings { get; set; }
 }
