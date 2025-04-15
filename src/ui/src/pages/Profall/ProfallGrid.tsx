@@ -5,7 +5,7 @@ import { useLazyGetProfitSharingLabelsQuery } from "reduxstore/api/YearsEndApi";
 import { useSelector } from "react-redux";
 
 import { RootState } from "reduxstore/store";
-import { DSMGrid, Pagination } from "smart-ui-library";
+import { DSMGrid, Pagination, ISortParams } from "smart-ui-library";
 import { GetProfallGridColumns } from "./ProfallGridColumns";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 
@@ -13,8 +13,10 @@ const ProfallGrid = () => {
   const navigate = useNavigate();
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
-  const [getSortBy, setSortBy] = useState<string | undefined>("badgeNumber");
-  const [getIsSortDescending, setIsSortDescending] = useState<boolean>(false);
+  const [sortParams, setSortParams] = useState<ISortParams>({
+    sortBy: "badgeNumber",
+    isSortDescending: false
+  });
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const profitSharingLabels = useSelector((state: RootState) => state.yearsEnd.profitSharingLabels);
@@ -26,7 +28,7 @@ const ProfallGrid = () => {
     if (profitYear) {
       fetchData();
     }
-  }, [profitYear, pageNumber, pageSize, getSortBy, getIsSortDescending]);
+  }, [profitYear, pageNumber, pageSize, sortParams]);
 
   const fetchData = useCallback(() => {
     setIsLoading(true);
@@ -37,8 +39,8 @@ const ProfallGrid = () => {
       pagination: {
         take: pageSize,
         skip: skip,
-        sortBy: getSortBy || "badgeNumber",
-        isSortDescending: getIsSortDescending
+        sortBy: sortParams.sortBy || "badgeNumber",
+        isSortDescending: sortParams.isSortDescending
       }
     }).then(() => {
       setIsLoading(false);
@@ -46,20 +48,9 @@ const ProfallGrid = () => {
       .catch(() => {
         setIsLoading(false);
       });
-  }, [profitYear, pageNumber, pageSize, getSortBy, getIsSortDescending, getProfitSharingLabels]);
+  }, [profitYear, pageNumber, pageSize, sortParams, getProfitSharingLabels]);
 
-  const handleSortChanged = useCallback((params: any) => {
-    if (params.sortModel.length > 0) {
-      const sort = params.sortModel[0];
-      setSortBy(sort.colId);
-      setIsSortDescending(sort.sort === "desc");
-      setPageNumber(0);
-    } else {
-      setSortBy("badgeNumber");
-      setIsSortDescending(false);
-      setPageNumber(0);
-    }
-  }, []);
+  const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
   const handleNavigationForButton = useCallback(
     (destination: string | Partial<Path>) => {
@@ -88,7 +79,7 @@ const ProfallGrid = () => {
       <DSMGrid
         preferenceKey={"PROFALL_REPORT"}
         isLoading={isLoading}
-        handleSortChanged={handleSortChanged}
+        handleSortChanged={sortEventHandler}
         providedOptions={{
           rowData: rowData,
           columnDefs: columnDefs
