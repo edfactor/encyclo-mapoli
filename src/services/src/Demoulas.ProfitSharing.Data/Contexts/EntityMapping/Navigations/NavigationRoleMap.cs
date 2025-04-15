@@ -18,7 +18,13 @@ internal sealed class NavigationRoleMap : IEntityTypeConfiguration<NavigationRol
         _ = builder.Property(x => x.Name).HasColumnName("URL").HasMaxLength(65).IsRequired();
 
 
-        //Need to assign values here!
-
+        builder.HasData(
+            new NavigationRole() { Id = NavigationRole.Contants.Administrator, Name = "Profit-Sharing-Administrator" },
+            new NavigationRole() { Id = NavigationRole.Contants.FinanceManager, Name = "Finance-Manager" },
+            new NavigationRole() { Id = NavigationRole.Contants.DistributionClerk, Name = "Distributions-Clerk" },
+            new NavigationRole() { Id = NavigationRole.Contants.HardshipAdministrator, Name = "Hardship-Administrator" },
+            new NavigationRole() { Id = NavigationRole.Contants.Impersonation, Name = "Impersonation" },
+            new NavigationRole() { Id = NavigationRole.Contants.ITOperations, Name = "IT-Operations" }
+            );
     }
 }

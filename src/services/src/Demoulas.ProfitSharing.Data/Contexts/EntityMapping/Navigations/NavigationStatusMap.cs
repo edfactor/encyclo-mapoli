@@ -28,10 +28,10 @@ internal sealed class NavigationStatusMap : IEntityTypeConfiguration<NavigationS
 
 
         builder.HasData(
-            new NavigationStatus() {Id =1, Name = "Not Started"},
-            new NavigationStatus() {Id =2, Name = "In Progress"},
-            new NavigationStatus() {Id =3, Name = "Blocked"},
-            new NavigationStatus() {Id =4, Name = "Successful"}
+            new NavigationStatus() {Id =NavigationStatus.Constants.NotStarted, Name = "Not Started"},
+            new NavigationStatus() {Id =NavigationStatus.Constants.InProgress, Name = "In Progress"},
+            new NavigationStatus() {Id =NavigationStatus.Constants.Blocked, Name = "Blocked"},
+            new NavigationStatus() {Id =NavigationStatus.Constants.Successful, Name = "Successful"}
         );
     }
 }
