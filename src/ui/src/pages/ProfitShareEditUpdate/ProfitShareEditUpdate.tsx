@@ -1,15 +1,24 @@
 import { Replay } from "@mui/icons-material";
 import { Button, Divider, Tooltip, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
-import { useState } from "react";
+import { SetStateAction, useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useLazyGetMasterApplyQuery, useLazyGetMasterRevertQuery } from "reduxstore/api/YearsEndApi";
+import {
+  useLazyGetMasterApplyQuery,
+  useLazyGetMasterRevertQuery,
+  useLazyGetProfitMasterStatusQuery
+} from "reduxstore/api/YearsEndApi";
 import {
   setProfitEditUpdateChangesAvailable,
   setProfitEditUpdateRevertChangesAvailable
 } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
-import { ProfitShareEditUpdateQueryParams, ProfitShareMasterApplyRequest, ProfitYearRequest } from "reduxstore/types";
+import {
+  ProfitMasterStatus,
+  ProfitShareEditUpdateQueryParams,
+  ProfitShareMasterApplyRequest,
+  ProfitYearRequest
+} from "reduxstore/types";
 import {
   ApiMessageAlert,
   DSMAccordion,
@@ -23,58 +32,27 @@ import { TotalsGrid } from "../../components/TotalsGrid";
 import ProfitShareEditConfirmation from "./ProfitShareEditConfirmation";
 import ProfitShareEditUpdateSearchFilter from "./ProfitShareEditUpdateSearchFilter";
 import ProfitShareEditUpdateTabs from "./ProfitShareEditUpdateTabs";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 
 enum MessageKeys {
   ProfitShareEditUpdate = "ProfitShareEditUpdate"
 }
 
-let beneficiariesAffected = 0;
-let employeesAffected = 0;
-let etvasAffected = 0;
-
-class Messages {
-  static readonly ProfitShareApplySuccess: MessageUpdate = {
-    key: MessageKeys.ProfitShareEditUpdate,
-    message: {
-      type: "success",
-      title: "Changes Applied",
-      message: `Employees affected: ${employeesAffected} | Beneficiaries: ${beneficiariesAffected}, | ETVAs: ${etvasAffected} `
-    }
-  };
-  static readonly ProfitShareApplyFail: MessageUpdate = {
-    key: MessageKeys.ProfitShareEditUpdate,
-    message: {
-      type: "error",
-      title: "Changes Were Not Applied",
-      message: `Employees affected: 0 | Beneficiaries: 0, | ETVAs: 0 `
-    }
-  };
-  static readonly ProfitShareRevertSuccess: MessageUpdate = {
-    key: MessageKeys.ProfitShareEditUpdate,
-    message: {
-      type: "success",
-      title: "Changes Reverted",
-      message: `Employees affected: ${employeesAffected} | Beneficiaries: ${beneficiariesAffected}, | ETVAs: ${etvasAffected} `
-    }
-  };
-  static readonly ProfitShareRevertFail: MessageUpdate = {
-    key: MessageKeys.ProfitShareEditUpdate,
-    message: {
-      type: "error",
-      title: "Changes Were Not Reverted",
-      message: `Employees affected: 0 | Beneficiaries: 0, | ETVAs: 0 `
-    }
-  };
-}
-
-const useRevertAction = () => {
+const useRevertAction = (
+  successMessage: MessageUpdate,
+  failMessage: MessageUpdate,
+  setEmployeesAffected: { (value: SetStateAction<number>): void; (arg0: number): void },
+  setBeneficiariesAffected: { (value: SetStateAction<number>): void; (arg0: number): void },
+  setEtvasAffected: { (value: SetStateAction<number>): void; (arg0: number): void }
+) => {
   const { profitSharingEditQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const [trigger] = useLazyGetMasterRevertQuery();
   const dispatch = useDispatch();
+  const profitYear = useFiscalCloseProfitYear();
 
   const revertAction = async (): Promise<void> => {
     const params: ProfitYearRequest = {
-      profitYear: profitSharingEditQueryParams?.profitYear.getFullYear() ?? 0
+      profitYear: profitYear ?? 0
     };
 
     console.log("reverting cahnges to year end: ", params);
@@ -83,17 +61,17 @@ const useRevertAction = () => {
     await trigger(params, false)
       .unwrap()
       .then((payload) => {
-        employeesAffected = payload?.employeesAffected || 0;
-        beneficiariesAffected = payload?.beneficiariesAffected || 0;
-        etvasAffected = payload?.etvasAffected || 0;
-        dispatch(setMessage(Messages.ProfitShareRevertSuccess));
+        setEmployeesAffected(payload?.employeesAffected || 0);
+        setBeneficiariesAffected(payload?.beneficiariesAffected || 0);
+        setEtvasAffected(payload?.etvasAffected || 0);
+        dispatch(setMessage(successMessage));
         console.log("Successfully reverted changes for year end: ", payload);
         dispatch(setProfitEditUpdateChangesAvailable(false));
         dispatch(setProfitEditUpdateRevertChangesAvailable(false));
       })
       .catch((error) => {
         console.error("ERROR: Did not revert changes to year end", error);
-        dispatch(setMessage(Messages.ProfitShareRevertFail));
+        dispatch(setMessage(failMessage));
       });
   };
   return revertAction;
@@ -103,10 +81,11 @@ const useSaveAction = () => {
   const { profitSharingEditQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const [trigger] = useLazyGetMasterApplyQuery();
   const dispatch = useDispatch();
+  const profitYear = useFiscalCloseProfitYear();
 
   const saveAction = async (): Promise<void> => {
     const params: ProfitShareMasterApplyRequest = {
-      profitYear: profitSharingEditQueryParams?.profitYear.getFullYear() ?? 0,
+      profitYear: profitYear ?? 0,
       contributionPercent: profitSharingEditQueryParams?.contributionPercent ?? 0,
       earningsPercent: profitSharingEditQueryParams?.earningsPercent ?? 0,
       incomingForfeitPercent: profitSharingEditQueryParams?.incomingForfeitPercent ?? 0,
@@ -126,16 +105,13 @@ const useSaveAction = () => {
     await trigger(params)
       .unwrap()
       .then((payload) => {
-        employeesAffected = payload?.employeesAffected || 0;
-        beneficiariesAffected = payload?.beneficiariesAffected || 0;
-        etvasAffected = payload?.etvasAffected || 0;
-        dispatch(setMessage(Messages.ProfitShareApplySuccess));
+        //dispatch(setMessage(Messages.ProfitShareApplySuccess));
         console.log("Successfully applied changes to year end: ", payload);
         dispatch(setProfitEditUpdateRevertChangesAvailable(true));
       })
       .catch((error) => {
         console.error("ERROR: Did not apply changes to year end", error);
-        dispatch(setMessage(Messages.ProfitShareApplyFail));
+        //dispatch(setMessage(Messages.ProfitShareApplyFail));
       });
   };
 
@@ -153,13 +129,18 @@ const wasFormUsed = (profitSharingEditQueryParams: ProfitShareEditUpdateQueryPar
 
 // This really just opens the modal. The modal for this has the function to call
 // the back end
-const RenderSaveButton = (setOpenSaveModal: (open: boolean) => void, setOpenEmptyModal: (open: boolean) => void) => {
+const RenderSaveButton = (
+  setOpenSaveModal: (open: boolean) => void,
+  setOpenEmptyModal: (open: boolean) => void,
+  status: ProfitMasterStatus | null
+) => {
+  // The incoming status field is about whether or not changes have already been applied
   const { profitEditUpdateChangesAvailable, profitSharingEditQueryParams } = useSelector(
     (state: RootState) => state.yearsEnd
   );
   const saveButton = (
     <Button
-      disabled={!profitEditUpdateChangesAvailable}
+      disabled={!profitEditUpdateChangesAvailable && status?.updatedTime !== null}
       variant="outlined"
       color="primary"
       size="medium"
@@ -189,16 +170,21 @@ const RenderSaveButton = (setOpenSaveModal: (open: boolean) => void, setOpenEmpt
 
 // This really just opens the modal. The modal for this has the function to call
 // the back end
-const RenderRevertButton = (setOpenRevertModal: (open: boolean) => void) => {
+const RenderRevertButton = (setOpenRevertModal: (open: boolean) => void, status: ProfitMasterStatus | null) => {
+  // The incoming status field is about whether or not changes have already been applied
   const { profitEditUpdateRevertChangesAvailable } = useSelector((state: RootState) => state.yearsEnd);
 
   const revertButton = (
     <Button
-      disabled={!profitEditUpdateRevertChangesAvailable}
+      disabled={!profitEditUpdateRevertChangesAvailable || status?.updatedTime === null}
       variant="outlined"
       color="primary"
       size="medium"
-      startIcon={<Replay color={profitEditUpdateRevertChangesAvailable ? "primary" : "disabled"} />}
+      startIcon={
+        <Replay
+          color={profitEditUpdateRevertChangesAvailable || status?.updatedTime !== null ? "primary" : "disabled"}
+        />
+      }
       onClick={async () => {
         setOpenRevertModal(true);
       }}>
@@ -206,7 +192,7 @@ const RenderRevertButton = (setOpenRevertModal: (open: boolean) => void) => {
     </Button>
   );
 
-  if (!profitEditUpdateRevertChangesAvailable) {
+  if (!profitEditUpdateRevertChangesAvailable || status?.updatedTime === null) {
     return (
       <Tooltip
         placement="top"
@@ -220,28 +206,145 @@ const RenderRevertButton = (setOpenRevertModal: (open: boolean) => void) => {
 };
 
 const ProfitShareEditUpdate = () => {
-  const revertAction = useRevertAction();
+  const [beneficiariesAffected, setBeneficiariesAffected] = useState(0);
+  const [employeesAffected, setEmployeesAffected] = useState(0);
+  const [etvasAffected, setEtvasAffected] = useState(0);
+  const [updatedBy, setUpdatedBy] = useState<string | null>(null);
+  const [updatedTime, setUpdatedTime] = useState<string | null>(null);
+  class Messages {
+    static readonly ProfitShareApplySuccess: MessageUpdate = {
+      key: MessageKeys.ProfitShareEditUpdate,
+      message: {
+        type: "success",
+        title: "Changes Applied",
+        message: `Employees affected: ${employeesAffected} | Beneficiaries: ${beneficiariesAffected}, | ETVAs: ${etvasAffected} `
+      }
+    };
+    static readonly ProfitShareApplyFail: MessageUpdate = {
+      key: MessageKeys.ProfitShareEditUpdate,
+      message: {
+        type: "error",
+        title: "Changes Were Not Applied",
+        message: `Employees affected: 0 | Beneficiaries: 0, | ETVAs: 0 `
+      }
+    };
+    static readonly ProfitShareRevertSuccess: MessageUpdate = {
+      key: MessageKeys.ProfitShareEditUpdate,
+      message: {
+        type: "success",
+        title: "Changes Reverted",
+        message: `Employees affected: ${employeesAffected} | Beneficiaries: ${beneficiariesAffected}, | ETVAs: ${etvasAffected} `
+      }
+    };
+    static readonly ProfitShareRevertFail: MessageUpdate = {
+      key: MessageKeys.ProfitShareEditUpdate,
+      message: {
+        type: "error",
+        title: "Changes Were Not Reverted",
+        message: `Employees affected: 0 | Beneficiaries: 0, | ETVAs: 0 `
+      }
+    };
+    static readonly ProfitShareMasterUpdated: MessageUpdate = {
+      key: MessageKeys.ProfitShareEditUpdate,
+      message: {
+        type: "success",
+        title: "Changes Already Applied",
+        message: `Updated By: ${updatedBy} | Date: ${updatedTime} `
+      }
+    };
+  }
+  const revertAction = useRevertAction(
+    Messages.ProfitShareRevertSuccess,
+    Messages.ProfitShareRevertFail,
+    setEmployeesAffected,
+    setBeneficiariesAffected,
+    setEtvasAffected
+  );
   const saveAction = useSaveAction();
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
-  const { profitSharingUpdateAdjustmentSummary, profitSharingUpdate, profitSharingEdit, profitSharingEditQueryParams } =
-    useSelector((state: RootState) => state.yearsEnd);
+  const hasToken = !!useSelector((state: RootState) => state.security.token);
+  const {
+    profitSharingUpdateAdjustmentSummary,
+    profitSharingUpdate,
+    profitSharingEdit,
+    profitSharingEditQueryParams,
+    profitMasterStatus
+  } = useSelector((state: RootState) => state.yearsEnd);
   const [openSaveModal, setOpenSaveModal] = useState<boolean>(false);
   const [openRevertModal, setOpenRevertModal] = useState<boolean>(false);
   const [openEmptyModal, setOpenEmptyModal] = useState<boolean>(false);
+
+  const [triggerStatusUpdate, { isFetching: isLoading }] = useLazyGetProfitMasterStatusQuery();
+  const profitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
+
+  const onStatusSearch = useCallback(async () => {
+    const request: ProfitYearRequest = {
+      profitYear: profitYear ?? 0
+    };
+
+    console.log("Getting status...");
+
+    await triggerStatusUpdate(request, false)
+      .unwrap()
+      .then((payload) => {
+        if (payload?.updatedBy) {
+          console.log("Status updated by: ", payload?.updatedBy);
+          setUpdatedBy(payload.updatedBy);
+        }
+
+        if (payload?.updatedTime) {
+          console.log("Status updated time: ", payload?.updatedTime);
+
+          setUpdatedTime(
+            new Date(payload.updatedTime).toLocaleString("en-US", {
+              month: "long",
+              day: "numeric",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit"
+            })
+          );
+        } else {
+          console.log("We did not get a status");
+          dispatch(setProfitEditUpdateRevertChangesAvailable(false));
+        }
+      })
+      .catch((error) => {
+        console.error("ERROR: Did not revert changes to year end", error);
+      });
+  }, [profitYear, triggerStatusUpdate, dispatch]);
+
+  useEffect(() => {
+    if (hasToken) {
+      onStatusSearch();
+      if (updatedTime) {
+        dispatch(
+          setMessage({
+            ...Messages.ProfitShareMasterUpdated,
+            message: {
+              ...Messages.ProfitShareMasterUpdated.message,
+              message: `Updated By: ${updatedBy} | Date: ${updatedTime} `
+            }
+          })
+        );
+        dispatch(setProfitEditUpdateChangesAvailable(false));
+        dispatch(setProfitEditUpdateRevertChangesAvailable(true));
+      }
+    }
+  }, [onStatusSearch, hasToken, updatedTime, updatedBy]);
 
   return (
     <Page
       label="Master Update (PAY444|PAY447)"
       actionNode={
         <div className="flex  justify-end gap-2">
-          {RenderRevertButton(setOpenRevertModal)}
-          {RenderSaveButton(setOpenSaveModal, setOpenEmptyModal)}
+          {RenderRevertButton(setOpenRevertModal, profitMasterStatus)}
+          {RenderSaveButton(setOpenSaveModal, setOpenEmptyModal, profitMasterStatus)}
         </div>
       }>
       <div>
         <ApiMessageAlert commonKey={MessageKeys.ProfitShareEditUpdate} />
-        <div className="h-4"></div>
       </div>
       <Grid2
         container
@@ -417,7 +520,7 @@ const ProfitShareEditUpdate = () => {
           }}
           messageType="warning"
           messageHeadline="Reverting to the last update will modify the following:"
-          params={profitSharingEditQueryParams}
+          params={profitSharingEditQueryParams || profitMasterStatus}
           lastWarning="Do you still wish to revert?"
         />
       </SmartModal>
