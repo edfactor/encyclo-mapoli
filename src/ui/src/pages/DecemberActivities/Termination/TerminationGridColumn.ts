@@ -1,6 +1,7 @@
 import { ColDef, ICellRendererParams } from 'ag-grid-community';
 import { viewBadgeLinkRenderer } from 'utils/masterInquiryLink';
 import { agGridNumberToCurrency } from "smart-ui-library";
+import { getEnrolledStatus } from "../../../utils/enrollmentUtil";
 
 export const GetTerminationColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   return [
@@ -133,14 +134,15 @@ export const GetTerminationColumns = (navFunction: (badgeNumber: string) => void
       sortable: true
     },
     {
-      headerName: "Enrollment Code",
+      headerName: "Enrollment",
       field: "enrollmentCode",
       colId: "enrollmentCode",
       minWidth: 120,
       headerClass: "center-align",
       cellClass: "center-align",
       resizable: true,
-      sortable: true
+      sortable: true,
+      valueFormatter: (params) => getEnrolledStatus(params.value)
     }
   ];
 };
