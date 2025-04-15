@@ -77,7 +77,7 @@ public class ProfitMasterService : IProfitMasterService
 
     public async Task<ProfitMasterUpdateResponse> Update(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
-        (IEnumerable<ProfitShareEditMemberRecord> records, _, _, _, _) = await _profitShareEditService.ProfitShareEditRecords(profitShareUpdateRequest, cancellationToken);
+        (List<ProfitShareEditMemberRecord> records, _, _, _, _) = await _profitShareEditService.ProfitShareEditRecords(profitShareUpdateRequest, cancellationToken);
 
         return await _dbFactory.UseWritableContext(async ctx =>
         {
@@ -136,7 +136,7 @@ public class ProfitMasterService : IProfitMasterService
 
             // Bump the ETVA by the amount of the earnings for the 100% vested earnings records.
             // if you got $100 in interest on your "fully owned" part of profit sharing, then your ETVA goes up by 100.
-            var sqlAdjustEtva = @$"
+            FormattableString sqlAdjustEtva = @$"
                 MERGE INTO pay_profit pp
                 USING (
                   -- find all the employees who got an altered ETVA, via the new 8 records.
@@ -151,10 +151,10 @@ public class ProfitMasterService : IProfitMasterService
                 WHEN MATCHED THEN
                   -- bump UP the ETVA by the amount of 100% earnings. 
                   UPDATE SET pp.etva = pp.etva + oq.earnings";
-            int etvasEffected = await ctx.Database.ExecuteSqlRawAsync(sqlAdjustEtva, cancellationToken);
+            int etvasEffected = await ctx.Database.ExecuteSqlInterpolatedAsync(sqlAdjustEtva, cancellationToken);
 
             // set last years ETVA to the value we just wrote into the now year.
-            var sqlAdjustProfitYearEtva = @$"
+            FormattableString sqlAdjustProfitYearEtva = @$"
                 MERGE INTO pay_profit pp
                 USING (
                   -- find all the employees who got an altered ETVA, via the new 8 records.
@@ -171,7 +171,7 @@ public class ProfitMasterService : IProfitMasterService
                 WHEN MATCHED THEN
                   -- copy now to last year 
                   UPDATE SET pp.etva = oq.etva";
-            etvasEffected += await ctx.Database.ExecuteSqlRawAsync(sqlAdjustProfitYearEtva, cancellationToken);
+            etvasEffected += await ctx.Database.ExecuteSqlInterpolatedAsync(sqlAdjustProfitYearEtva, cancellationToken);
 
             int employeesEffected = records.Where(m => m.IsEmployee).Select(m => m.Ssn).ToHashSet().Count;
             int beneficiariesEffected = records.Where(m => !m.IsEmployee).Select(m => m.Ssn).ToHashSet().Count;
@@ -218,7 +218,7 @@ public class ProfitMasterService : IProfitMasterService
                 AdjustEarningsAmount = profitShareUpdateRequest.AdjustEarningsAmount,
                 AdjustIncomingForfeitAmount = profitShareUpdateRequest.AdjustIncomingForfeitAmount,
                 AdjustEarningsSecondaryAmount = profitShareUpdateRequest.AdjustEarningsSecondaryAmount
-            }!;
+            };
         }, cancellationToken);
     }
 
@@ -322,7 +322,8 @@ public class ProfitMasterService : IProfitMasterService
         //
         OracleConnection connection = (OracleConnection)ctx.Database.GetDbConnection();
 
-        using var bulkCopy = new OracleBulkCopy(connection) { DestinationTableName = "PROFIT_DETAIL" };
+        using var bulkCopy = new OracleBulkCopy(connection);
+        bulkCopy.DestinationTableName = "PROFIT_DETAIL";
 
         // Define column mappings (exclude ID since it's auto-generated)
         var columns = new[]
@@ -339,7 +340,7 @@ public class ProfitMasterService : IProfitMasterService
             bulkCopy.ColumnMappings.Add(col, col);
         }
 
-        var table = new DataTable();
+        using var table = new DataTable(bulkCopy.DestinationTableName);
         table.Columns.Add("SSN", typeof(long));
         table.Columns.Add("PROFIT_YEAR", typeof(short));
         table.Columns.Add("PROFIT_YEAR_ITERATION", typeof(byte));

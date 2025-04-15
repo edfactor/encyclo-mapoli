@@ -1,14 +1,8 @@
-﻿using System.Data;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
-using System.Text;
-using System.Text.RegularExpressions;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.ProfitMaster;
 using Demoulas.ProfitSharing.Services.ProfitShareEdit;
@@ -16,12 +10,9 @@ using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Oracle.ManagedDataAccess.Client;
-using Match = System.Text.RegularExpressions.Match;
 
+namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitMaster;
 
-namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
-
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 
 public static class StopwatchExtensions
 {
@@ -31,7 +22,6 @@ public static class StopwatchExtensions
     }
 }
 
-[SuppressMessage("AsyncUsage", "AsyncFixer01:Unnecessary async/await usage")]
 public class ProfitMasterTests
 {
     private readonly AccountingPeriodsService _aps = new();
