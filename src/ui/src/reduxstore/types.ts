@@ -669,7 +669,7 @@ export interface ProfitShareUpdateTotals {
   maxOverTotal: number;
   maxPointsTotal: number;
   totalEmployees: number;
-  totalBeneficiaries: number;
+  totalBeneficaries: number;
 }
 export interface ProfitShareAdjustmentSummary {
   badgeNumber?: number;

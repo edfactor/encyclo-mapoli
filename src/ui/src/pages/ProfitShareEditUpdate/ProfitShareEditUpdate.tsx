@@ -1,7 +1,8 @@
 import { Replay } from "@mui/icons-material";
-import { Button, Divider, Tooltip, Typography } from "@mui/material";
+import { Button, CircularProgress, Divider, Tooltip, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
-import { SetStateAction, useCallback, useEffect, useRef, useState } from "react";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   useLazyGetMasterApplyQuery,
@@ -33,8 +34,6 @@ import { TotalsGrid } from "../../components/TotalsGrid";
 import ProfitShareEditConfirmation from "./ProfitShareEditConfirmation";
 import ProfitShareEditUpdateSearchFilter from "./ProfitShareEditUpdateSearchFilter";
 import ProfitShareEditUpdateTabs from "./ProfitShareEditUpdateTabs";
-import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-import { set } from "date-fns";
 
 enum MessageKeys {
   ProfitShareEditUpdate = "ProfitShareEditUpdate"
@@ -217,25 +216,41 @@ const RenderSaveButton = (
 
 // This really just opens the modal. The modal for this has the function to call
 // the back end
-const RenderRevertButton = (setOpenRevertModal: (open: boolean) => void, status: ProfitMasterStatus | null) => {
+const RenderRevertButton = (
+  setOpenRevertModal: (open: boolean) => void,
+  status: ProfitMasterStatus | null,
+  isLoading: boolean
+) => {
   // The incoming status field is about whether or not changes have already been applied
   const { profitEditUpdateRevertChangesAvailable } = useSelector((state: RootState) => state.yearsEnd);
 
   const revertButton = (
     <Button
-      disabled={!profitEditUpdateRevertChangesAvailable || status?.updatedTime === null}
+      disabled={!profitEditUpdateRevertChangesAvailable || status?.updatedTime === null || isLoading}
       variant="outlined"
       color="primary"
       size="medium"
       startIcon={
-        <Replay
-          color={profitEditUpdateRevertChangesAvailable || status?.updatedTime === null ? "primary" : "disabled"}
-        />
+        isLoading ? null : (
+          <Replay
+            color={profitEditUpdateRevertChangesAvailable || status?.updatedTime === null ? "primary" : "disabled"}
+          />
+        )
       }
       onClick={async () => {
         setOpenRevertModal(true);
       }}>
-      Revert
+      {isLoading ? (
+        //Prevent loading spinner from shrinking button
+        <div className="spinner">
+          <CircularProgress
+            color="inherit"
+            size="20px"
+          />
+        </div>
+      ) : (
+        "Revert"
+      )}
     </Button>
   );
 
@@ -353,7 +368,7 @@ const ProfitShareEditUpdate = () => {
       label="Master Update (PAY444|PAY447)"
       actionNode={
         <div className="flex  justify-end gap-2">
-          {RenderRevertButton(setOpenRevertModal, profitMasterStatus)}
+          {RenderRevertButton(setOpenRevertModal, profitMasterStatus, isLoading)}
           {RenderSaveButton(setOpenSaveModal, setOpenEmptyModal, profitMasterStatus)}
         </div>
       }>
@@ -378,7 +393,7 @@ const ProfitShareEditUpdate = () => {
               <Typography
                 fontWeight="bold"
                 variant="body2">
-                {`Employees: ${profitSharingUpdate.totals.totalEmployees} | Beneficiaries: ${profitSharingUpdate.totals.totalBeneficiaries}`}
+                {`Employees: ${profitSharingUpdate.totals.totalEmployees} | Beneficiaries: ${profitSharingUpdate.totals.totalBeneficaries}`}
               </Typography>
             </div>
 
