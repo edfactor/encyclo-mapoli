@@ -1,55 +1,56 @@
 import { Typography } from "@mui/material";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Path, useNavigate } from "react-router";
-import { ProfallData } from "reduxstore/types";
-import { DSMGrid } from "smart-ui-library";
-import { GetProfallGridColumns } from "./ProfallGridColumns";
+import { useLazyGetProfitSharingLabelsQuery } from "reduxstore/api/YearsEndApi";
+import { useSelector } from "react-redux";
 
-const sampleProfallData: ProfallData[] = [
-  {
-    badge: 47425,
-    employeeName: "SKYWALKER, LUKE",
-    address: "1234 Moisture Farm Lane",
-    city: "Mos Eisley",
-    state: "TS",
-    zipCode: "12345"
-  },
-  {
-    badge: 82424,
-    employeeName: "SOLO, HAN",
-    address: "5678 Millennium Way",
-    city: "Coronet City",
-    state: "CR",
-    zipCode: "67890"
-  },
-  {
-    badge: 85744,
-    employeeName: "ORGANA, LEIA",
-    address: "9012 Royal Palace Road",
-    city: "Aldera",
-    state: "AL",
-    zipCode: "34567"
-  },
-  {
-    badge: 91532,
-    employeeName: "KENOBI, OBI-WAN",
-    address: "3456 High Ground Circle",
-    city: "Mos Espa",
-    state: "TS",
-    zipCode: "89012"
-  },
-  {
-    badge: 77889,
-    employeeName: "CALRISSIAN, LANDO",
-    address: "7890 Cloud City Drive",
-    city: "Bespin",
-    state: "BS",
-    zipCode: "45678"
-  }
-];
+import { RootState } from "reduxstore/store";
+import { DSMGrid, Pagination, ISortParams } from "smart-ui-library";
+import { GetProfallGridColumns } from "./ProfallGridColumns";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 
 const ProfallGrid = () => {
   const navigate = useNavigate();
+  const [pageNumber, setPageNumber] = useState(0);
+  const [pageSize, setPageSize] = useState(25);
+  const [sortParams, setSortParams] = useState<ISortParams>({
+    sortBy: "badgeNumber",
+    isSortDescending: false
+  });
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const profitSharingLabels = useSelector((state: RootState) => state.yearsEnd.profitSharingLabels);
+  const [getProfitSharingLabels] = useLazyGetProfitSharingLabelsQuery();
+
+  const profitYear = useFiscalCloseProfitYear();
+
+  useEffect(() => {
+    if (profitYear) {
+      fetchData();
+    }
+  }, [profitYear, pageNumber, pageSize, sortParams]);
+
+  const fetchData = useCallback(() => {
+    setIsLoading(true);
+    const yearToUse = profitYear || new Date().getFullYear();
+    const skip = pageNumber * pageSize;
+    getProfitSharingLabels({
+      profitYear: yearToUse,
+      pagination: {
+        take: pageSize,
+        skip: skip,
+        sortBy: sortParams.sortBy || "badgeNumber",
+        isSortDescending: sortParams.isSortDescending
+      }
+    }).then(() => {
+      setIsLoading(false);
+    })
+      .catch(() => {
+        setIsLoading(false);
+      });
+  }, [profitYear, pageNumber, pageSize, sortParams, getProfitSharingLabels]);
+
+  const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
   const handleNavigationForButton = useCallback(
     (destination: string | Partial<Path>) => {
@@ -59,6 +60,12 @@ const ProfallGrid = () => {
   );
 
   const columnDefs = useMemo(() => GetProfallGridColumns(handleNavigationForButton), [handleNavigationForButton]);
+  
+  const rowData = useMemo(() => {
+    return profitSharingLabels?.results || [];
+  }, [profitSharingLabels]);
+
+  const recordCount = profitSharingLabels?.total || 0;
 
   return (
     <>
@@ -66,18 +73,32 @@ const ProfallGrid = () => {
         <Typography
           variant="h2"
           sx={{ color: "#0258A5" }}>
-          {`PROFALL REPORT (${sampleProfallData.length || 0} records)`}
+          {`PROFALL REPORT (${recordCount} records)`}
         </Typography>
       </div>
       <DSMGrid
         preferenceKey={"PROFALL_REPORT"}
-        isLoading={false}
-        handleSortChanged={(_params) => {}}
+        isLoading={isLoading}
+        handleSortChanged={sortEventHandler}
         providedOptions={{
-          rowData: sampleProfallData,
+          rowData: rowData,
           columnDefs: columnDefs
         }}
       />
+      {recordCount > 0 && (
+        <Pagination
+          pageNumber={pageNumber}
+          setPageNumber={(value: number) => {
+            setPageNumber(value - 1);
+          }}
+          pageSize={pageSize}
+          setPageSize={(value: number) => {
+            setPageSize(value);
+            setPageNumber(0);
+          }}
+          recordCount={recordCount}
+        />
+      )}
     </>
   );
 };

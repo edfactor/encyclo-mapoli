@@ -802,7 +802,7 @@ export interface ProfallData {
 
 export interface MilitaryContributionRequest extends ProfitYearRequest {
   badgeNumber: number;
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface YearEndProfitSharingReportRequest {
@@ -964,6 +964,25 @@ export interface Under21TotalsResponse {
   totalDisbursements: number;
   totalEndingBalance: number | null;
   totalVestingBalance: number;
+}
+
+export interface ProfitSharingLabelsRequest extends ProfitYearRequest {
+  pagination: SortedPaginationRequestDto;
+}
+
+export interface ProfitSharingLabel {
+  storeNumber: number;
+  payClassificationId: number;
+  payClassificationName: string;
+  departmentId: number;
+  departmentName: string;
+  badgeNumber: number;
+  employeeName: string;
+  firstName: string;
+  address1: string;
+  city: string;
+  state: string;
+  postalCode: string;
 }
 
 export interface YearEndProfitSharingReportSummaryLineItem {
