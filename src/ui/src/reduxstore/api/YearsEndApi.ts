@@ -7,6 +7,7 @@ import {
   clearProfitMasterApply,
   clearProfitMasterRevert,
   clearProfitSharingEdit,
+  clearProfitSharingLabels,
   clearProfitSharingUpdate,
   clearUnder21BreakdownByStore,
   clearUnder21Inactive,
@@ -36,6 +37,7 @@ import {
   setProfitMasterRevert,
   setProfitShareSummaryReport,
   setProfitSharingEdit,
+  setProfitSharingLabels,
   setProfitSharingUpdate,
   setProfitSharingUpdateAdjustmentSummary,
   setTermination,
@@ -88,6 +90,8 @@ import {
   ProfitShareUpdateRequest,
   ProfitShareUpdateResponse,
   ProfitSharingDistributionsByAge,
+  ProfitSharingLabel,
+  ProfitSharingLabelsRequest,
   ProfitYearRequest,
   RehireForfeituresRequest,
   TerminationRequest,
@@ -107,6 +111,7 @@ import {
 } from "reduxstore/types";
 import { url } from "./api";
 import { tryddmmyyyyToDate } from "../../utils/dateUtils";
+import { Paged } from "smart-ui-library";
 
 export const YearsEndApi = createApi({
   baseQuery: fetchBaseQuery({
@@ -887,6 +892,28 @@ export const YearsEndApi = createApi({
         }
       }
     }),
+    getProfitSharingLabels: builder.query<Paged<ProfitSharingLabel>, ProfitSharingLabelsRequest>({
+      query: (params) => ({
+        url: "yearend/post-frozen/profit-sharing-labels",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          take: params.pagination.take,
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setProfitSharingLabels(data));
+        } catch (err) {
+          console.log("Err: " + err);
+          dispatch(clearProfitSharingLabels());
+        }
+      }
+    }),
     getYearEndProfitSharingReport: builder.query<YearEndProfitSharingReportResponse, YearEndProfitSharingReportRequest>(
       {
         query: (params) => ({
@@ -992,5 +1019,6 @@ export const {
   useLazyGetYearEndProfitSharingSummaryReportQuery,
   useLazyGetUpdateSummaryQuery,
   useLazyGetMasterApplyQuery,
-  useLazyGetMasterRevertQuery
+  useLazyGetMasterRevertQuery,
+  useLazyGetProfitSharingLabelsQuery
 } = YearsEndApi;
