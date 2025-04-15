@@ -1,4 +1,4 @@
-import { Button, TextField } from "@mui/material";
+import { Button, TextField, FormLabel } from "@mui/material";
 import Grid2 from '@mui/material/Grid2';
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import { useEffect } from "react";
@@ -88,68 +88,61 @@ const MilitaryContributionForm = ({
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)}>
       <Grid2 container spacing={3}>
-        <Grid2 container spacing={2}>
-          <Grid2 size={{ xs: 6 }} >
-            <Controller
-              name="contributionDate"
-              control={control}
-              rules={{ required: "Date is required" }}
-              render={({ field, fieldState: { error } }) => (
-                <DsmDatePicker
-                  id="contributionDate"
-                  label="Contribution Date"
-                  onChange={(value: Date | null) => field.onChange(value)}
-                  value={field.value ?? null}
-                  error={error?.message}
-                  required={true}
-                  disableFuture={true}
-                  minDate={new Date(profitYear-2, 0, 1)}
-                  views={["year", "month"]}
-                />
-              )}
-            />
-          </Grid2>
-          <Grid2 size={{ xs: 6 }} >
-            <Controller
-              name="contributionAmount"
-              control={control}
-              rules={{ required: "Amount is required" }}
-              render={({ field, fieldState: { error } }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  label="Contribution Amount"
-                  type="number"
-                  variant="outlined"
-                  error={!!error}
-                  helperText={error?.message}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    field.onChange(value === "" ? null : Number(value));
-                  }}
-                  value={field.value ?? ""}
-                  required
-                />
-              )}
-            />
-          </Grid2>
+        <Grid2 xs={6}>
+          <Controller
+            name="contributionDate"
+            control={control}
+            rules={{ required: "Date is required" }}
+            render={({ field, fieldState: { error } }) => (
+              <DsmDatePicker
+                id="contributionDate"
+                label="Contribution Date"
+                onChange={(value: Date | null) => field.onChange(value)}
+                value={field.value ?? null}
+                error={error?.message}
+                required={true}
+                disableFuture={true}
+                minDate={new Date(profitYear-1, 0, 1)}
+                views={["year", "month"]}
+              />
+            )}
+          />
         </Grid2>
 
+        <Grid2 xs={6} sx={{ padding: 2 }}>
+        <FormLabel>Contribution Amount</FormLabel>
+          <Controller
+            name="contributionAmount"
+            control={control}
+            rules={{ required: "Amount is required" }}
+            render={({ field, fieldState: { error } }) => (
+              <TextField
+                {...field}
+                id="contributionAmount"
+                type="number"
+                error={!!error}
+                helperText={error?.message}
+                required
+                fullWidth
+              />
+            )}
+          />
+        </Grid2>
+
+        {/* Form buttons */}
         <Grid2 size={{ xs: 12 }} container spacing={2} paddingTop='8px'>
           <Grid2>
-            <Button
-              variant="contained"
-              type="submit"
-              disabled={isLoading || isSubmitting}>
-              Save
+            <Button onClick={onCancel} variant="outlined">
+              Cancel
             </Button>
           </Grid2>
           <Grid2>
             <Button
-              variant="outlined"
-              onClick={onCancel}
-              disabled={isLoading || isSubmitting}>
-              Cancel
+              type="submit"
+              variant="contained"
+              disabled={isLoading || isSubmitting}
+            >
+              Submit
             </Button>
           </Grid2>
         </Grid2>
