@@ -3,10 +3,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { DSMAccordion, Page } from "smart-ui-library";
 
-import { Button, Divider } from "@mui/material";
+import { Divider } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 
-import { CAPTIONS, MENU_LABELS } from "../../../constants";
+import { CAPTIONS } from "../../../constants";
 import TerminationGrid from "./TerminationGrid";
 import TerminationSearchFilter from "./TerminationSearchFilter";
 
@@ -16,9 +16,7 @@ const Termination = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
 
   const renderActionNode = () => {
-    return (
-      <StatusDropdownActionNode />
-    );
+    return <StatusDropdownActionNode />;
   };
 
   return (

@@ -1,12 +1,11 @@
-import { Divider, Tabs, Tab, Button } from "@mui/material";
-import Grid2 from '@mui/material/Grid2';
+import { Divider, Tab, Tabs } from "@mui/material";
+import Grid2 from "@mui/material/Grid2";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { useState } from "react";
+import { useNavigate } from "react-router";
 import { Page } from "smart-ui-library";
 import CleanUpSummaryCards from "./CleanUpSummaryCards";
 import CleanUpSummaryGrids from "./CleanUpSummaryGrids";
-import { useNavigate } from "react-router";
-import StatusDropdownActionNode from "components/StatusDropdownActionNode";
-import { MENU_LABELS } from "../../constants";
 
 const CleanUpSummary = () => {
   const [selectedTab, setSelectedTab] = useState(0);
@@ -26,9 +25,7 @@ const CleanUpSummary = () => {
 
   const renderActionNode = () => {
     if (selectedTab === 0) {
-      return (
-        <StatusDropdownActionNode />
-      );
+      return <StatusDropdownActionNode />;
     }
     return null;
   };

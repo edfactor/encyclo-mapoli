@@ -1,20 +1,20 @@
-import { Button, Divider } from "@mui/material";
+import { Divider } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
-import { DSMAccordion, Page } from "smart-ui-library";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { RootState } from "reduxstore/store";
-import MilitaryAndRehireEntryAndModificationEmployeeDetails from "./MilitaryEntryAndModificationEmployeeDetails";
+import { useNavigate } from "react-router";
 import {
   useCreateMilitaryContributionMutation,
   useLazyGetMilitaryContributionsQuery
 } from "reduxstore/api/MilitaryApi";
-import MilitaryAndRehireEntryAndModificationSearchFilter from "./MilitaryEntryAndModificationSearchFilter";
-import MilitaryContributionForm from "./MilitaryContributionForm";
+import { RootState } from "reduxstore/store";
 import { MilitaryContribution } from "reduxstore/types";
-import { CAPTIONS, MENU_LABELS } from "../../../constants";
-import { useNavigate } from "react-router";
-import StatusDropdownActionNode from "components/StatusDropdownActionNode";
+import { DSMAccordion, Page } from "smart-ui-library";
+import { CAPTIONS } from "../../../constants";
+import MilitaryContributionForm from "./MilitaryContributionForm";
+import MilitaryAndRehireEntryAndModificationEmployeeDetails from "./MilitaryEntryAndModificationEmployeeDetails";
+import MilitaryAndRehireEntryAndModificationSearchFilter from "./MilitaryEntryAndModificationSearchFilter";
 
 const MilitaryEntryAndModification = () => {
   const [showContributions, setShowContributions] = useState(false);
@@ -24,9 +24,7 @@ const MilitaryEntryAndModification = () => {
   const navigate = useNavigate();
 
   const renderActionNode = () => {
-    return (
-        <StatusDropdownActionNode />
-      );
+    return <StatusDropdownActionNode />;
   };
 
   const handleFetchContributions = useCallback(() => {
