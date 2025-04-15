@@ -1,7 +1,7 @@
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import { Button, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
-import { ProfitShareEditUpdateQueryParams } from "reduxstore/types";
+import { ProfitMasterStatus, ProfitShareEditUpdateQueryParams } from "reduxstore/types";
 
 const RenderYesButton = (buttonLabel: string, actionFunction: () => void, setOpenModal: (isOpen: boolean) => void) => {
   const doButton = (
@@ -43,7 +43,7 @@ interface ProfitShareEditConfirmationProps {
   actionFunction: () => void;
   messageType: string;
   messageHeadline?: string;
-  params?: ProfitShareEditUpdateQueryParams | null;
+  params?: ProfitShareEditUpdateQueryParams | ProfitMasterStatus | null;
   lastWarning?: string;
 }
 
@@ -131,12 +131,20 @@ const ProfitShareEditConfirmation: React.FC<ProfitShareEditConfirmationProps> = 
                 <strong>{params?.maxAllowedContributions}</strong>
               </li>
             )}
-            {params && params?.badgeToAdjust != null && params?.badgeToAdjust != 0 && (
-              <li style={{ marginBottom: "6px" }}>
-                {`Badge To Adjust: `}
-                <strong>{params?.badgeToAdjust}</strong>
-              </li>
-            )}
+            {params &&
+              ((params as ProfitShareEditUpdateQueryParams)?.badgeToAdjust != null &&
+              (params as ProfitShareEditUpdateQueryParams)?.badgeToAdjust != 0 ? (
+                <li style={{ marginBottom: "6px" }}>
+                  {`Badge To Adjust: `}
+                  <strong>{(params as ProfitShareEditUpdateQueryParams)?.badgeToAdjust}</strong>
+                </li>
+              ) : (params as ProfitMasterStatus)?.badgeAdjusted != null &&
+                (params as ProfitMasterStatus)?.badgeAdjusted != 0 ? (
+                <li style={{ marginBottom: "6px" }}>
+                  {`Badge Adjusted: `}
+                  <strong>{(params as ProfitMasterStatus)?.badgeAdjusted}</strong>
+                </li>
+              ) : null)}
             {params && params?.adjustContributionAmount != null && params?.adjustContributionAmount != 0 && (
               <li style={{ marginBottom: "6px" }}>
                 {`Adjust Contribution Amount: `}
@@ -158,12 +166,20 @@ const ProfitShareEditConfirmation: React.FC<ProfitShareEditConfirmationProps> = 
                 <strong>{params?.adjustIncomingForfeitAmount}</strong>
               </li>
             )}
-            {params && params?.badgeToAdjust2 != null && params?.badgeToAdjust2 != 0 && (
-              <li style={{ marginBottom: "6px" }}>
-                {`Second Badge to Adjust: `}
-                <strong>{params?.badgeToAdjust2}</strong>
-              </li>
-            )}
+            {params &&
+              ((params as ProfitShareEditUpdateQueryParams)?.badgeToAdjust2 != null &&
+              (params as ProfitShareEditUpdateQueryParams)?.badgeToAdjust2 != 0 ? (
+                <li style={{ marginBottom: "6px" }}>
+                  {`Second Badge to Adjust: `}
+                  <strong>{(params as ProfitShareEditUpdateQueryParams)?.badgeToAdjust2}</strong>
+                </li>
+              ) : (params as ProfitMasterStatus)?.badgeAdjusted2 != null &&
+                (params as ProfitMasterStatus)?.badgeAdjusted2 != 0 ? (
+                <li style={{ marginBottom: "6px" }}>
+                  {`Second Badge Adjusted: `}
+                  <strong>{(params as ProfitMasterStatus)?.badgeAdjusted2}</strong>
+                </li>
+              ) : null)}
             {params && params?.adjustEarningsSecondaryAmount != null && params?.adjustEarningsSecondaryAmount != 0 && (
               <li
                 style={{
