@@ -223,9 +223,8 @@ const ProfitShareEditUpdate = () => {
   const revertAction = useRevertAction();
   const saveAction = useSaveAction();
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
-  const { profitSharingUpdateAdjustmentSummary, profitSharingUpdate, profitSharingEditQueryParams } = useSelector(
-    (state: RootState) => state.yearsEnd
-  );
+  const { profitSharingUpdateAdjustmentSummary, profitSharingUpdate, profitSharingEdit, profitSharingEditQueryParams } =
+    useSelector((state: RootState) => state.yearsEnd);
   const [openSaveModal, setOpenSaveModal] = useState<boolean>(false);
   const [openRevertModal, setOpenRevertModal] = useState<boolean>(false);
   const [openEmptyModal, setOpenEmptyModal] = useState<boolean>(false);
@@ -233,7 +232,7 @@ const ProfitShareEditUpdate = () => {
 
   return (
     <Page
-      label="Master Update (PAY444/PAY447)"
+      label="Master Update (PAY444|PAY447)"
       actionNode={
         <div className="flex  justify-end gap-2">
           {RenderRevertButton(setOpenRevertModal)}
@@ -243,7 +242,6 @@ const ProfitShareEditUpdate = () => {
       <div>
         <ApiMessageAlert commonKey={MessageKeys.ProfitShareEditUpdate} />
         <div className="h-4"></div>
-        <Button onClick={() => dispatch(setMessage(Messages.ProfitShareRevertSuccess))}>Show Success</Button>
       </div>
       <Grid2
         container
@@ -256,7 +254,7 @@ const ProfitShareEditUpdate = () => {
             <ProfitShareEditUpdateSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
           </DSMAccordion>
         </Grid2>
-        {profitSharingUpdate && (
+        {profitSharingUpdate && profitSharingEdit && (
           <div>
             <div className="px-[24px]">
               <h2 className="text-dsm-secondary">Summary</h2>
@@ -310,7 +308,34 @@ const ProfitShareEditUpdate = () => {
                 "Distributions Military/Paid Allocation",
                 "Ending Balance"
               ]}
+              tablePadding="12px"
             />
+            <div style={{ display: "flex", gap: "8px" }}>
+              <TotalsGrid
+                breakPoints={{ xs: 5, sm: 5, md: 5, lg: 5, xl: 5 }}
+                tablePadding="4px"
+                displayData={[
+                  [
+                    numberToCurrency(profitSharingEdit.contributionGrandTotal || 0),
+                    numberToCurrency(profitSharingEdit.earningsGrandTotal || 0),
+                    numberToCurrency(profitSharingEdit.incomingForfeitureGrandTotal || 0)
+                  ]
+                ]}
+                leftColumnHeaders={["Grand Totals"]}
+                topRowHeaders={["", "Contributions", "Earnings", "Forfeit"]}
+                headerCellStyle={{}}
+              />
+              <div style={{ marginTop: "20px" }}>
+                <TotalsGrid
+                  tablePadding="8px"
+                  displayData={[[numberToCurrency(profitSharingEdit.beginningBalanceTotal || 0), "", ""]]}
+                  leftColumnHeaders={["Beginning Balance"]}
+                  topRowHeaders={["", ""]}
+                  headerCellStyle={{}}
+                />
+              </div>
+            </div>
+
             {profitSharingUpdateAdjustmentSummary?.badgeNumber && (
               <>
                 <div className="px-[24px]">
@@ -357,10 +382,12 @@ const ProfitShareEditUpdate = () => {
         )}
       </Grid2>
       <SmartModal
+        key={"saveModal"}
         maxWidth="sm"
         open={openSaveModal}
         onClose={() => setOpenSaveModal(false)}>
         <ProfitShareEditConfirmation
+          key={"saveConfirmation"}
           performLabel="YES, SAVE"
           closeLabel="NO, CANCEL"
           setOpenModal={setOpenSaveModal}
@@ -373,30 +400,35 @@ const ProfitShareEditUpdate = () => {
           params={profitSharingEditQueryParams}
           lastWarning="Ready to save? It may take a few minutes to process."
         />
-        <SmartModal
-          maxWidth="sm"
-          open={openRevertModal}
-          onClose={() => setOpenRevertModal(false)}>
-          <ProfitShareEditConfirmation
-            performLabel="YES, REVERT"
-            closeLabel="NO, CANCEL"
-            setOpenModal={setOpenRevertModal}
-            actionFunction={() => {
-              revertAction();
-              setOpenRevertModal(false);
-            }}
-            messageType="warning"
-            messageHeadline="Reverting to the last update will modify the following:"
-            params={profitSharingEditQueryParams}
-            lastWarning="Do you still wish to revert?"
-          />
-        </SmartModal>
       </SmartModal>
       <SmartModal
+        key={"revertModal"}
+        maxWidth="sm"
+        open={openRevertModal}
+        onClose={() => setOpenRevertModal(false)}>
+        <ProfitShareEditConfirmation
+          key={"revertConfirmation"}
+          performLabel="YES, REVERT"
+          closeLabel="NO, CANCEL"
+          setOpenModal={setOpenRevertModal}
+          actionFunction={() => {
+            revertAction();
+            setOpenRevertModal(false);
+          }}
+          messageType="warning"
+          messageHeadline="Reverting to the last update will modify the following:"
+          params={profitSharingEditQueryParams}
+          lastWarning="Do you still wish to revert?"
+        />
+      </SmartModal>
+
+      <SmartModal
+        key={"emptyModal"}
         open={openEmptyModal}
         maxWidth="sm"
         onClose={() => setOpenEmptyModal(false)}>
         <ProfitShareEditConfirmation
+          key={"emptyConfirmation"}
           performLabel="OK"
           closeLabel=""
           setOpenModal={setOpenEmptyModal}
