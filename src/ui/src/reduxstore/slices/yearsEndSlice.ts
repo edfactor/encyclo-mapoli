@@ -48,8 +48,10 @@ import {
   UpdateSummaryResponse,
   ReportsByAgeParams,
   ProfitShareEditUpdateQueryParams,
-  ProfitShareAdjustmentSummary
+  ProfitShareAdjustmentSummary,
+  ProfitSharingLabel
 } from "reduxstore/types";
+import { Paged } from "smart-ui-library";
 
 export interface YearsEndState {
   profitEditUpdateChangesAvailable: boolean;
@@ -129,6 +131,7 @@ export interface YearsEndState {
   under21TotalsQueryParams: Under21TotalsRequest | null;
   profitShareSummaryReport: YearEndProfitSharingReportSummaryResponse | null;
   updateSummary: UpdateSummaryResponse | null;
+  profitSharingLabels: Paged<ProfitSharingLabel> | null;
 }
 
 const initialState: YearsEndState = {
@@ -212,7 +215,8 @@ const initialState: YearsEndState = {
   under21Totals: null,
   under21TotalsQueryParams: null,
   profitShareSummaryReport: null,
-  updateSummary: null
+  updateSummary: null,
+  profitSharingLabels: null
 };
 
 export const yearsEndSlice = createSlice({
@@ -912,6 +916,12 @@ export const yearsEndSlice = createSlice({
     },
     clearUpdateSummary: (state) => {
       state.updateSummary = null;
+    },
+    setProfitSharingLabels: (state, action: PayloadAction<Paged<ProfitSharingLabel>>) => {
+      state.profitSharingLabels = action.payload;
+    },
+    clearProfitSharingLabels: (state) => {
+      state.profitSharingLabels = null;
     }
   }
 });
@@ -1034,6 +1044,8 @@ export const {
   clearProfitSharingUpdateAdjustmentSummary,
   addBadgeNumberToUpdateAdjustmentSummary,
   clearExecutiveHoursAndDollarsAddQueryParams,
-  setExecutiveHoursAndDollarsAddQueryParams
+  setExecutiveHoursAndDollarsAddQueryParams,
+  setProfitSharingLabels,
+  clearProfitSharingLabels
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;
