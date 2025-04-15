@@ -1,11 +1,11 @@
 import { Typography } from "@mui/material";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
+import { useLazyGetProfitShareUpdateQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
+import { ProfitShareUpdateRequest } from "reduxstore/types";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { ProfitShareUpdateGridColumns } from "./ProfitShareUpdateGridColumns";
-import { useLazyGetProfitShareUpdateQuery } from "reduxstore/api/YearsEndApi";
-import { ProfitShareUpdateRequest } from "reduxstore/types";
 
 interface ProfitShareEditUpdateGridProps {
   initialSearchLoaded: boolean;
@@ -23,9 +23,7 @@ const ProfitShareEditUpdateGrid = ({ initialSearchLoaded, setInitialSearchLoaded
   const columnDefs = useMemo(() => ProfitShareUpdateGridColumns(), []);
   const { profitSharingUpdate, profitSharingUpdateQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const [triggerSearchUpdate, { isFetching }] = useLazyGetProfitShareUpdateQuery();
-
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
-
   const onSearch = useCallback(async () => {
     const request: ProfitShareUpdateRequest = {
       pagination: {

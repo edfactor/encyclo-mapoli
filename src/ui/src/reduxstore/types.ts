@@ -746,22 +746,22 @@ export interface ProfitShareMasterResponse {
 }
 
 export interface ProfitMasterStatus {
-  updatedTime?: string;
-  updatedBy?: string;
-  beneficiariesEffected?: number;
-  employeesEffected?: number;
-  etvasEffected?: number;
-  contributionPercent?: number;
-  incomingForfeitPercent?: number;
-  earningsPercent?: number;
-  secondaryEarningsPercent?: number;
-  maxAllowedContributions?: number;
-  badgeAdjusted?: number;
-  badgeAdjusted2?: number;
-  adjustContributionAmount?: number;
-  adjustEarningsAmount?: number;
-  adjustIncomingForfeitAmount?: number;
-  adjustEarningsSecondaryAmount?: number;
+  updatedTime: string;
+  updatedBy?: string | null;
+  beneficiariesEffected?: number | null;
+  employeesEffected?: number | null;
+  etvasEffected?: number | null;
+  contributionPercent?: number | null;
+  incomingForfeitPercent?: number | null;
+  earningsPercent?: number | null;
+  secondaryEarningsPercent?: number | null;
+  maxAllowedContributions?: number | null;
+  badgeAdjusted?: number | null;
+  badgeAdjusted2?: number | null;
+  adjustContributionAmount?: number | null;
+  adjustEarningsAmount?: number | null;
+  adjustIncomingForfeitAmount?: number | null;
+  adjustEarningsSecondaryAmount?: number | null;
 }
 
 export interface ProfitShareEditUpdateQueryParams {
