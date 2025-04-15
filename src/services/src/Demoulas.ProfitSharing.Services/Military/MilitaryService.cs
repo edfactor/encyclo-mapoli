@@ -9,6 +9,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using FluentValidation;
+using Demoulas.ProfitSharing.Common.Contracts.Response.Military;
 
 namespace Demoulas.ProfitSharing.Services.Military;
 
@@ -21,7 +22,7 @@ public class MilitaryService : IMilitaryService
         _dataContextFactory = dataContextFactory;
     }
 
-    public Task<Result<MasterInquiryResponseDto>> CreateMilitaryServiceRecordAsync(
+    public Task<Result<MilitaryContributionResponse>> CreateMilitaryServiceRecordAsync(
         CreateMilitaryContributionRequest req, CancellationToken cancellationToken = default)
     {
         #region Validation
@@ -49,7 +50,7 @@ public class MilitaryService : IMilitaryService
                 .GroupBy(e => e.PropertyName)
                 .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray());
 
-            return Task.FromResult(Result<MasterInquiryResponseDto>.ValidationFailure(errors));
+            return Task.FromResult(Result<MilitaryContributionResponse>.ValidationFailure(errors));
         }
         #endregion
         return _dataContextFactory.UseWritableContext(async c =>
@@ -59,7 +60,7 @@ public class MilitaryService : IMilitaryService
 
             if (d == null)
             {
-                return Result<MasterInquiryResponseDto>.Failure(Error.EmployeeNotFound);
+                return Result<MilitaryContributionResponse>.Failure(Error.EmployeeNotFound);
             }
 
             var pd = new ProfitDetail
@@ -70,28 +71,26 @@ public class MilitaryService : IMilitaryService
                 CommentTypeId = /* 19 */CommentType.Constants.Military.Id,
                 Contribution = req.ContributionAmount,
                 Ssn = d.Ssn,
-                YearsOfServiceCredit = 1
+                YearsOfServiceCredit = 1,
+                MonthToDate = (byte)req.ContributionDate.Month,
+                YearToDate = (short)req.ContributionDate.Year,
             };
             c.ProfitDetails.Add(pd);
 
             await c.SaveChangesAsync(cancellationToken);
 
-            return Result<MasterInquiryResponseDto>.Success(new MasterInquiryResponseDto
+            return Result<MilitaryContributionResponse>.Success(new MilitaryContributionResponse
             {
-                Id = pd.Id,
-                DistributionSequence = pd.DistributionSequence,
-                ProfitCodeId = pd.ProfitCodeId,
                 BadgeNumber = req.BadgeNumber,
-                Contribution = pd.Contribution,
                 CommentTypeId = /* 19 */CommentType.Constants.Military,
                 ProfitYear = req.ProfitYear,
-                ProfitYearIteration = pd.ProfitYearIteration,
-                Ssn = pd.Ssn.MaskSsn()
+                ContributionDate = new DateOnly(pd.YearToDate, pd.MonthToDate, 01),
+                Amount = pd.Contribution,
             });
         }, cancellationToken);
     }
 
-    public async Task<Result<PaginatedResponseDto<MasterInquiryResponseDto>>> GetMilitaryServiceRecordAsync(MilitaryContributionRequest req, CancellationToken cancellationToken = default)
+    public async Task<Result<PaginatedResponseDto<MilitaryContributionResponse>>> GetMilitaryServiceRecordAsync(MilitaryContributionRequest req, CancellationToken cancellationToken = default)
     {
         #region Validation
 
@@ -115,7 +114,7 @@ public class MilitaryService : IMilitaryService
                 .GroupBy(e => e.PropertyName)
                 .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray());
 
-            return Result<PaginatedResponseDto<MasterInquiryResponseDto>>.ValidationFailure(errors);
+            return Result<PaginatedResponseDto<MilitaryContributionResponse>>.ValidationFailure(errors);
         }
 
         #endregion
@@ -124,7 +123,7 @@ public class MilitaryService : IMilitaryService
         {
             return c.ProfitDetails
                 .Include(pd=> pd.CommentType)
-                .Join(c.Demographics,   
+                .Join(c.Demographics,
                     c => c.Ssn,
                     cm => cm.Ssn,
                     (pd, d) => new { pd , d})
@@ -132,28 +131,17 @@ public class MilitaryService : IMilitaryService
                             && x.pd.ProfitYear == req.ProfitYear && x.pd.CommentTypeId == CommentType.Constants.Military.Id)
                 .OrderByDescending(x => x.pd.ProfitYear)
                 .ThenByDescending(x=> x.pd.CreatedUtc)
-                .Select(x => new MasterInquiryResponseDto
+                .Select(x => new MilitaryContributionResponse
                 {
-                    Id = x.pd.Id,
-                    Ssn = x.pd.Ssn.MaskSsn(),
+                    BadgeNumber = x.d.BadgeNumber,
                     ProfitYear = x.pd.ProfitYear,
-                    ProfitYearIteration = x.pd.ProfitYearIteration,
-                    DistributionSequence = x.pd.DistributionSequence,
-                    ProfitCodeId = x.pd.ProfitCodeId,
-                    ProfitCodeName = x.pd.ProfitCode.Name,
-                    Contribution = x.pd.Contribution,
-                    Earnings = x.pd.Earnings,
-                    Forfeiture = x.pd.Forfeiture,
-                    Remark = x.pd.Remark,
                     CommentTypeId = x.pd.CommentTypeId,
-                    CommentTypeName = x.pd.CommentType!.Name,
-                    CommentRelatedCheckNumber = x.pd.CommentRelatedCheckNumber,
-                    CommentRelatedState = x.pd.CommentRelatedState,
-                    CommentRelatedOracleHcmId = x.pd.CommentRelatedOracleHcmId
+                    ContributionDate = new DateOnly(x.pd.YearToDate == 0 ? req.ProfitYear : x.pd.YearToDate, x.pd.MonthToDate == 0 ? 1 : x.pd.MonthToDate, 01),
+                    Amount = x.pd.Contribution
                 })
                 .ToPaginationResultsAsync(req, cancellationToken);
         });
 
-        return Result<PaginatedResponseDto<MasterInquiryResponseDto>>.Success(result);
+        return Result<PaginatedResponseDto<MilitaryContributionResponse>>.Success(result);
     }
 }

@@ -8,7 +8,7 @@ export enum ImpersonationRoles {
   ItOperations = "IT-Operations"
 }
 
-export interface SortedPaginationRequestDto extends PaginationParams, ISortParams {}
+export interface SortedPaginationRequestDto extends PaginationParams, ISortParams { }
 
 export interface ProfitYearRequest {
   profitYear: number;
@@ -437,6 +437,9 @@ export interface ForfeituresAndPoints {
   reportName: string;
   reportDate: string;
   useFrozenData: boolean;
+  totalEarningPoints: number;
+  totalForfeitPoints: number;
+  totalForfeitures: number;
   response: Paged<ForfeituresAndPointsDetail>;
 }
 
@@ -512,10 +515,10 @@ export interface BalanceByAgeDetail extends BalanceByDetailBase {
 }
 
 /* eslint-disable @typescript-eslint/no-empty-object-type */
-export interface BalanceByAge extends BalanceByBase<BalanceByAgeDetail> {}
+export interface BalanceByAge extends BalanceByBase<BalanceByAgeDetail> { }
 
 /* eslint-disable @typescript-eslint/no-empty-object-type */
-export interface BalanceByYears extends BalanceByBase<BalanceByAgeDetail> {}
+export interface BalanceByYears extends BalanceByBase<BalanceByAgeDetail> { }
 
 export interface VestedAmountsByAge {
   totalFullTime100PercentAmount: number;
@@ -799,7 +802,7 @@ export interface ProfallData {
 
 export interface MilitaryContributionRequest extends ProfitYearRequest {
   badgeNumber: number;
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface YearEndProfitSharingReportRequest {
@@ -961,6 +964,25 @@ export interface Under21TotalsResponse {
   totalDisbursements: number;
   totalEndingBalance: number | null;
   totalVestingBalance: number;
+}
+
+export interface ProfitSharingLabelsRequest extends ProfitYearRequest {
+  pagination: SortedPaginationRequestDto;
+}
+
+export interface ProfitSharingLabel {
+  storeNumber: number;
+  payClassificationId: number;
+  payClassificationName: string;
+  departmentId: number;
+  departmentName: string;
+  badgeNumber: number;
+  employeeName: string;
+  firstName: string;
+  address1: string;
+  city: string;
+  state: string;
+  postalCode: string;
 }
 
 export interface YearEndProfitSharingReportSummaryLineItem {

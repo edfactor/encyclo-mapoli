@@ -4,15 +4,25 @@ import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
 export const GetProfallGridColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   return [
     {
+      headerName: "Store",
+      field: "storeNumber",
+      colId: "storeNumber",
+      minWidth: 80,
+      headerClass: "right-align",
+      cellClass: "right-align",
+      resizable: true,
+      sortable: true
+    },
+    {
       headerName: "Badge",
-      field: "badge",
-      colId: "badge",
+      field: "badgeNumber",
+      colId: "badgeNumber",
       minWidth: 80,
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
       sortable: true,
-      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badge, navFunction)
+      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber, navFunction)
     },
     {
       headerName: "Name",
@@ -21,16 +31,38 @@ export const GetProfallGridColumns = (navFunction: (badgeNumber: string) => void
       minWidth: 150,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true
+      resizable: true,
+      sortable: true
+    },
+    {
+      headerName: "Department",
+      field: "departmentName",
+      colId: "departmentName",
+      minWidth: 120,
+      headerClass: "left-align",
+      cellClass: "left-align",
+      resizable: true,
+      sortable: true
+    },
+    {
+      headerName: "Classification",
+      field: "payClassificationName",
+      colId: "payClassificationName",
+      minWidth: 150,
+      headerClass: "left-align",
+      cellClass: "left-align",
+      resizable: true,
+      sortable: true
     },
     {
       headerName: "Address",
-      field: "address",
-      colId: "address",
+      field: "address1",
+      colId: "address1",
       minWidth: 200,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true
+      resizable: true,
+      sortable: true
     },
     {
       headerName: "City",
@@ -39,7 +71,8 @@ export const GetProfallGridColumns = (navFunction: (badgeNumber: string) => void
       minWidth: 120,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true
+      resizable: true,
+      sortable: true
     },
     {
       headerName: "State",
@@ -48,16 +81,18 @@ export const GetProfallGridColumns = (navFunction: (badgeNumber: string) => void
       minWidth: 80,
       headerClass: "center-align",
       cellClass: "center-align",
-      resizable: true
+      resizable: true,
+      sortable: true
     },
     {
       headerName: "Zip Code",
-      field: "zipCode",
-      colId: "zipCode",
+      field: "postalCode",
+      colId: "postalCode",
       minWidth: 100,
       headerClass: "center-align",
       cellClass: "center-align",
-      resizable: true
+      resizable: true,
+      sortable: true
     }
   ];
 };

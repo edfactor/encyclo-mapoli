@@ -6,6 +6,6 @@ public sealed record MilitaryContributionResponse : YearRequest
 {
     public int BadgeNumber { get; init; }
     public decimal Amount { get; init; }
-    public byte CommentTypeId { get; init; }
+    public byte? CommentTypeId { get; init; }
     public DateOnly ContributionDate { get; init; }
 }
