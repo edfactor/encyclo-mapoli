@@ -6,6 +6,9 @@ import { GetProfitSummaryGridColumns } from "./ProfitSummaryGridColumns";
 import { YearEndProfitSharingReportSummaryLineItem } from "reduxstore/types";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { CAPTIONS } from "../../../constants";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../reduxstore/store";
+import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 
 /**
  * Default rows for "Active and Inactive" section - these will display with zero values
@@ -104,12 +107,17 @@ const terminatedPlaceholders: YearEndProfitSharingReportSummaryLineItem[] = [
 const ProfitSummary = () => {
   const [trigger, { data, isFetching }] = useLazyGetYearEndProfitSharingSummaryReportQuery();
 
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
+  const profitYear = useDecemberFlowProfitYear();
+  
   useEffect(() => {
-    trigger({
-      useFrozenData: true,
-      profitYear: 2024
-    });
-  }, [trigger]);
+    if ( hasToken) {
+      trigger({
+        useFrozenData: true,
+        profitYear: profitYear
+      });
+    }
+  }, [trigger, profitYear, hasToken]);
 
   const renderActionNode = () => {
     return (
