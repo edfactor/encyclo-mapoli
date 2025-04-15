@@ -49,7 +49,8 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
     if (initialSearchLoaded && masterInquiryEmployeeDetails) {
       onSearch();
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch, masterInquiryEmployeeDetails]);
+  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, masterInquiryEmployeeDetails]);
+
 
  
   const columnDefs = useMemo(() => GetMilitaryContributionColumns(), []);
@@ -68,14 +69,13 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`MILITARY CONTRIBUTIONS (${contributionsData?.response?.total || 0} ${(contributionsData?.response?.total || 0) === 1 ? "Record" : "Records"})`}
+              {`MILITARY CONTRIBUTIONS (${contributionsData?.total || 0} ${(contributionsData?.total || 0) === 1 ? "Record" : "Records"})`}
             </Typography>
 
             <Button
               variant="contained"
               color="primary"
-              onClick={onAddContribution}
-            >
+              onClick={onAddContribution}>
               Add Military Contribution
             </Button>
           </div>
@@ -85,12 +85,12 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
             isLoading={isFetching}
             handleSortChanged={sortEventHandler}
             providedOptions={{
-              rowData: contributionsData?.response?.results,
+              rowData: contributionsData?.results,
               columnDefs: columnDefs
             }}
           />
 
-          {!!contributionsData && contributionsData.response.results.length > 0 && (          
+          {!!contributionsData && contributionsData?.results?.length > 0 && (          
             <Pagination
               pageNumber={pageNumber}
               setPageNumber={(value: number) => {
@@ -103,7 +103,7 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
                 setPageNumber(1);
                 setInitialSearchLoaded(true);
               }}
-              recordCount={contributionsData.response.total}
+              recordCount={contributionsData?.total}
             />
           )}
         </>
