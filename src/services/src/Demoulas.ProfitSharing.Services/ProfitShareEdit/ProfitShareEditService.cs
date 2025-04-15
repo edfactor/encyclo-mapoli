@@ -57,7 +57,7 @@ public class ProfitShareEditService : IInternalProfitShareEditService
             EarningsGrandTotal = earningsGrandTotal,
             Response = new PaginatedResponseDto<ProfitShareEditMemberRecordResponse>(profitShareUpdateRequest)
             {
-                Total = records.Count(),
+                Total = records.Count,
                 Results =  HandleInMemorySortAndPaging(profitShareUpdateRequest, responseRecords)
             }
         };
@@ -82,7 +82,7 @@ public static List<T> HandleInMemorySortAndPaging<T>(SortedPaginationRequestDto 
     }
 
 
-    public async Task<(IEnumerable<ProfitShareEditMemberRecord>, decimal BeginningBalanceTotal, decimal ContributionGrandTotal, decimal IncomingForfeitureGrandTotal, decimal EarningsGrandTotal)> ProfitShareEditRecords(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
+    public async Task<(List<ProfitShareEditMemberRecord>, decimal BeginningBalanceTotal, decimal ContributionGrandTotal, decimal IncomingForfeitureGrandTotal, decimal EarningsGrandTotal)> ProfitShareEditRecords(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
         ProfitShareUpdateResult psur = await _profitShareUpdateService.ProfitShareUpdateInternal(profitShareUpdateRequest, cancellationToken);
 
@@ -247,7 +247,7 @@ public static List<T> HandleInMemorySortAndPaging<T>(SortedPaginationRequestDto 
 
     private static void AddRecord(List<ProfitShareEditMemberRecord> records, ProfitShareEditMemberRecord rec)
     {
-        if (rec.ContributionAmount == 0 && rec.EarningAmount == 0 && rec.ForfeitureAmount == 0 && rec.Remark == null)
+        if (rec is { ContributionAmount: 0, EarningAmount: 0, ForfeitureAmount: 0, Remark: null })
         {
             return;
         }

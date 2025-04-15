@@ -25,6 +25,7 @@ public sealed record ProfitMasterUpdateResponse
     public required decimal AdjustEarningsAmount { get; set; }
     public required decimal AdjustIncomingForfeitAmount { get; set; }
     public required decimal AdjustEarningsSecondaryAmount { get; set; }
+    public int TransactionsCreated { get; set; }
 
 
     public static ProfitMasterUpdateResponse Example()
