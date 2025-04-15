@@ -1,30 +1,34 @@
-import { Divider } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { useCallback, useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import { useNavigate } from "react-router";
-import {
-  useCreateMilitaryContributionMutation,
-  useLazyGetMilitaryContributionsQuery
-} from "reduxstore/api/MilitaryApi";
-import { RootState } from "reduxstore/store";
-import { MilitaryContribution } from "reduxstore/types";
 import { DSMAccordion, Page } from "smart-ui-library";
+import { Button, Divider } from "@mui/material";
+import Grid2 from "@mui/material/Grid2";
+import { Dialog, DialogContent, DialogTitle } from "@mui/material";
 import { CAPTIONS } from "../../../constants";
-import MilitaryContributionForm from "./MilitaryContributionForm";
-import MilitaryAndRehireEntryAndModificationEmployeeDetails from "./MilitaryEntryAndModificationEmployeeDetails";
 import MilitaryAndRehireEntryAndModificationSearchFilter from "./MilitaryEntryAndModificationSearchFilter";
+import MilitaryContributionForm from "./MilitaryContributionForm";
+import MilitaryContributionGrid from "./MilitaryContributionFormGrid";
+import { RootState } from "reduxstore/store";
+import { useLazyGetMilitaryContributionsQuery } from "../../../reduxstore/api/MilitaryApi";
+import { useSelector } from "react-redux";
 
 const MilitaryEntryAndModification = () => {
+  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [showContributions, setShowContributions] = useState(false);
   const { masterInquiryEmployeeDetails } = useSelector((state: RootState) => state.inquiry);
   const [fetchContributions, { isFetching }] = useLazyGetMilitaryContributionsQuery();
-  const [trigger] = useCreateMilitaryContributionMutation();
-  const navigate = useNavigate();
 
   const renderActionNode = () => {
     return <StatusDropdownActionNode />;
+  };
+
+  const handleOpenForm = () => {
+    setIsDialogOpen(true);
+  };
+
+  const handleCloseForm = () => {
+    setIsDialogOpen(false);
   };
 
   const handleFetchContributions = useCallback(() => {
@@ -42,20 +46,7 @@ const MilitaryEntryAndModification = () => {
     if (masterInquiryEmployeeDetails) {
       handleFetchContributions();
     }
-  }, [handleFetchContributions, masterInquiryEmployeeDetails]);
-
-  const handleSubmitForRows = (rows: MilitaryContribution[]) => {
-    if (!masterInquiryEmployeeDetails) return;
-    rows.forEach((row) => {
-      if (row.contributionAmount !== null) {
-        trigger({
-          badgeNumber: Number(masterInquiryEmployeeDetails.badgeNumber),
-          profitYear: 2024,
-          contributionAmount: row.contributionAmount
-        });
-      }
-    });
-  };
+  }, [masterInquiryEmployeeDetails]);
 
   return (
     <Page
@@ -69,33 +60,38 @@ const MilitaryEntryAndModification = () => {
         </Grid2>
         <Grid2 width={"100%"}>
           <DSMAccordion title="Filter">
-            <MilitaryAndRehireEntryAndModificationSearchFilter />
+            <MilitaryAndRehireEntryAndModificationSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
           </DSMAccordion>
         </Grid2>
 
-        {masterInquiryEmployeeDetails && (
-          <>
-            <Grid2 width="100%">
-              <MilitaryAndRehireEntryAndModificationEmployeeDetails details={masterInquiryEmployeeDetails} />
-            </Grid2>
-
-            {showContributions && (
-              <Grid2
-                size={{ xs: 6 }}
-                paddingX="24px">
-                <MilitaryContributionForm
-                  onSubmit={handleSubmitForRows}
-                  onCancel={function (): void {
-                    throw new Error("Function not implemented.");
-                  }}
-                />
-              </Grid2>
-            )}
-          </>
-        )}
+        <Grid2 width="100%">
+          <MilitaryContributionGrid
+            setInitialSearchLoaded={setInitialSearchLoaded}
+            initialSearchLoaded={initialSearchLoaded}
+            onAddContribution={handleOpenForm}
+          />
+        </Grid2>
       </Grid2>
+
+      {/* Military Contribution Form Dialog */}
+      <Dialog
+        open={isDialogOpen}
+        onClose={handleCloseForm}
+        maxWidth="md"
+        fullWidth>
+        <DialogTitle>Add Military Contribution</DialogTitle>
+        <DialogContent>
+          <MilitaryContributionForm
+            onSubmit={(rows) => {
+              // Handle submit logic
+              handleCloseForm();
+              setInitialSearchLoaded(true); // Trigger a refresh
+            }}
+            onCancel={handleCloseForm}
+          />
+        </DialogContent>
+      </Dialog>
     </Page>
   );
 };
-
 export default MilitaryEntryAndModification;

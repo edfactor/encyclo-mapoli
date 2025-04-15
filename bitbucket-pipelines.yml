@@ -16,8 +16,7 @@ definitions:
         # Set environment variables
         - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests"
         - $env:REPORTS_PATH = "../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}"
-        - $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
-
+        
         # Ensure the REPORTS_PATH directory exists
         - mkdir -Force -Path $env:REPORTS_PATH
 
@@ -49,7 +48,7 @@ definitions:
           
 
         # Run tests and generate JUnit reports
-        - dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --configuration Release --test-adapter-path:. --logger:"junit;LogFilePath={$env:REPORTS_PATH}/junit.xml" -p:RestoreAdditionalProjectSources=$env:NUGET_ORG
+        - dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --configuration Release --test-adapter-path:. --logger:"junit;LogFilePath={$env:REPORTS_PATH}/junit.xml"
 
       artifacts:
         - test-reports/**

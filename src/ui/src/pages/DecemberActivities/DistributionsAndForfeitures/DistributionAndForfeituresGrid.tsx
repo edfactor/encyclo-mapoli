@@ -21,7 +21,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "badgeNumber",
+    sortBy: "employeeName",
     isSortDescending: false
   });
 
