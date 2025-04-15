@@ -1,16 +1,15 @@
+import { Dialog, DialogContent, DialogTitle, Divider } from "@mui/material";
+import Grid2 from "@mui/material/Grid2";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { useCallback, useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "reduxstore/store";
 import { DSMAccordion, Page } from "smart-ui-library";
-import { Button, Divider } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
-import { Dialog, DialogContent, DialogTitle } from "@mui/material";
 import { CAPTIONS } from "../../../constants";
-import MilitaryAndRehireEntryAndModificationSearchFilter from "./MilitaryEntryAndModificationSearchFilter";
+import { useLazyGetMilitaryContributionsQuery } from "../../../reduxstore/api/MilitaryApi";
 import MilitaryContributionForm from "./MilitaryContributionForm";
 import MilitaryContributionGrid from "./MilitaryContributionFormGrid";
-import { RootState } from "reduxstore/store";
-import { useLazyGetMilitaryContributionsQuery } from "../../../reduxstore/api/MilitaryApi";
-import { useSelector } from "react-redux";
+import MilitaryAndRehireEntryAndModificationSearchFilter from "./MilitaryEntryAndModificationSearchFilter";
 
 const MilitaryEntryAndModification = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
@@ -46,7 +45,7 @@ const MilitaryEntryAndModification = () => {
     if (masterInquiryEmployeeDetails) {
       handleFetchContributions();
     }
-  }, [masterInquiryEmployeeDetails]);
+  }, [handleFetchContributions, masterInquiryEmployeeDetails]);
 
   return (
     <Page
