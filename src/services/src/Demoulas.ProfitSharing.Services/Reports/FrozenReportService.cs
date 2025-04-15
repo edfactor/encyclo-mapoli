@@ -1053,7 +1053,7 @@ public class FrozenReportService : IFrozenReportService
                     {
                         Id = pp.DemographicId, Year = pp.ProfitYear
                     }
-                    join psBal in _totalService.GetTotalBalanceAlt(ctx, req.ProfitYear) on d.Ssn equals psBal.Ssn
+                    join psBal in _totalService.GetTotalBalanceSet(ctx, req.ProfitYear) on d.Ssn equals psBal.Ssn
                     join fBal in _totalService.GetForfeitures(ctx, req.ProfitYear) on d.Ssn equals fBal.Ssn into
                         fBal_tmp
                     from fBal_lj in fBal_tmp.DefaultIfEmpty()

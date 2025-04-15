@@ -80,8 +80,8 @@ public class BreakdownReportService : IBreakdownService
             }
 
             Dictionary<int, decimal> endingBalanceLastYearBySsn = await _totalService.GetTotalBalanceSet(ctx, priorYear)
-                .Where(tbs => employeeSsns.Contains(tbs.Ssn!.Value))
-                .ToDictionaryAsync(tbs => tbs.Ssn!.Value, tbs => tbs.Total ?? 0, cancellationToken);
+                .Where(tbs => employeeSsns.Contains(tbs.Ssn))
+                .ToDictionaryAsync(tbs => tbs.Ssn, tbs => tbs.Total ?? 0, cancellationToken);
 
 
             Dictionary<int, InternalProfitDetailDto> txnsForProfitYear = await TotalService.GetTransactionsBySsnForProfitYearForOracle(ctx, breakdownByStoreRequest.ProfitYear)
