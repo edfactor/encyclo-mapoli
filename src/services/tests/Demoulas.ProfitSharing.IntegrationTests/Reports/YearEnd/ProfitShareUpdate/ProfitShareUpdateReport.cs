@@ -33,7 +33,7 @@ internal sealed class ProfitShareUpdateReport
 
     public async Task ProfitSharingUpdatePaginated(ProfitShareUpdateRequest profitShareUpdateRequest)
     {
-        TotalService totalService = new TotalService(_dbFactory, _calendarService);
+        TotalService totalService = new TotalService(_dbFactory, _calendarService, new EmbeddedSqlService());
         ProfitShareUpdateService psu = new(_dbFactory, totalService, _calendarService);
         _profitYear = profitShareUpdateRequest.ProfitYear;
 

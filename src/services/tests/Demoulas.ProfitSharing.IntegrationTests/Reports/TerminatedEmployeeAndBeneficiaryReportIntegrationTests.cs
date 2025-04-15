@@ -39,7 +39,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests
         // var calendarService = _fixture.Services.GetRequiredService<ICalendarService>()!
         // var totalService = _fixture.Services.GetRequiredService<TotalService>()!
         var calendarService = new CalendarService(_dbFactory, new AccountingPeriodsService());
-        var totalService = new TotalService(_dbFactory, calendarService);
+        var totalService = new TotalService(_dbFactory, calendarService, new EmbeddedSqlService());
         TerminatedEmployeeAndBeneficiaryReportService mockService =
             new TerminatedEmployeeAndBeneficiaryReportService(_dbFactory, calendarService, totalService);
 

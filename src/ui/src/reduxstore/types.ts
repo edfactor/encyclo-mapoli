@@ -728,7 +728,7 @@ export interface GrossWagesReportResponse {
 }
 
 export interface ProfitShareEditResponse {
-  beginningBalance: number;
+  beginningBalanceTotal: number;
   contributionGrandTotal: number;
   incomingForfeitureGrandTotal: number;
   earningsGrandTotal: number;

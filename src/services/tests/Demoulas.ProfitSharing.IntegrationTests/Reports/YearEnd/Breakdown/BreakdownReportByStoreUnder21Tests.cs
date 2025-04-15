@@ -17,6 +17,7 @@ public class BreakdownReportByStoreUnder21Tests
     private readonly AccountingPeriodsService _aps = new();
     private readonly IBreakdownService _breakdownService;
     private readonly CalendarService _calendarService;
+    private readonly EmbeddedSqlService _embeddedSqlService;
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly TotalService _totalService;
 
@@ -24,7 +25,8 @@ public class BreakdownReportByStoreUnder21Tests
     {
         _dataContextFactory = new PristineDataContextFactory();
         _calendarService = new CalendarService(_dataContextFactory, _aps);
-        _totalService = new TotalService(_dataContextFactory, _calendarService);
+        _embeddedSqlService = new EmbeddedSqlService();
+        _totalService = new TotalService(_dataContextFactory, _calendarService, _embeddedSqlService);
         _breakdownService = new BreakdownReportService(_dataContextFactory, _calendarService, _totalService);
     }
 
