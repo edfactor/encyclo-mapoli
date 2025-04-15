@@ -61,7 +61,7 @@ const ProfitShareEditUpdateGrid = ({ initialSearchLoaded, setInitialSearchLoaded
         <Typography
           variant="h2"
           sx={{ color: "#0258A5" }}>
-          {`Profit Share Update (PAY447)`}
+          {`Profit Share Update (PAY444)`}
         </Typography>
       </div>
       {!!profitSharingUpdate && (
