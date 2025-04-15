@@ -57,6 +57,7 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new ZeroContributionReasonMap());
         modelBuilder.ApplyConfiguration(new YearEndUpdateStatusMapping());
         modelBuilder.ApplyConfiguration(new NavigationMap());
+        modelBuilder.ApplyConfiguration(new NavigationStatusMap());
         modelBuilder.ApplyConfiguration(new NavigationTrackingMap());
 
         // Force table names to be upper case for consistency with all existing DSM projects

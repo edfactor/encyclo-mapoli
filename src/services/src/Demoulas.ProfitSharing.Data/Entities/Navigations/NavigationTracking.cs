@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 namespace Demoulas.ProfitSharing.Data.Entities.Navigations;
 public class NavigationTracking
 {
-    [Key]
     public int Id { get; set; }
     public int NavigationId { get; set; }
     public int? StatusId { get; set; }

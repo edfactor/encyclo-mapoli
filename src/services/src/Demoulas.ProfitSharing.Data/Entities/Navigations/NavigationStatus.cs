@@ -8,9 +8,7 @@ using System.Threading.Tasks;
 namespace Demoulas.ProfitSharing.Data.Entities.Navigations;
 public class NavigationStatus
 {
-    [Key]
     public int Id { get; set; }
-    [Required]
     public required string Name { get; set; }
 
     public List<Navigation>? Navigations { get; set; }

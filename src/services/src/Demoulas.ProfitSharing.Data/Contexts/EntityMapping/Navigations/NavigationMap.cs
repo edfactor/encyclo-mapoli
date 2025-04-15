@@ -13,14 +13,24 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
 {
     public void Configure(EntityTypeBuilder<Navigation> builder)
     {
+        _ = builder.ToTable("NAVIGATION");
+        _ = builder.Property(x => x.Id).HasColumnName("ID").ValueGeneratedOnAdd();
+        _ = builder.Property(x => x.Url).HasColumnName("URL").HasMaxLength(200);
+        _ = builder.Property(x => x.Title).HasColumnName("TITLE").HasMaxLength(100);
+        _ = builder.Property(x => x.SubTitle).HasColumnName("SUB_TITLE").HasMaxLength(70);
+        _ = builder.Property(x => x.Icon).HasColumnName("ICON").HasMaxLength(200);
+        _ = builder.Property(x => x.OrderNumber).HasColumnName("ORDER_NUMBER");
+        _ = builder.Property(x => x.StatusId).HasColumnName("STATUS_ID");
+        _ = builder.Property(x => x.ParentId).HasColumnName("PARENT_ID");
+        _ = builder.Property(x => x.NavigationRoleJSON).HasColumnName("NAVIGATION_ROLE_JSON").HasMaxLength(300);
+
+
+
+
         builder.HasOne(m => m.NavigationStatus)
             .WithMany(x => x.Navigations)
             .HasForeignKey(x => x.StatusId);
 
-        builder.HasOne(m => m.NavigationRole)
-            .WithMany(m => m.Navigations)
-            .HasForeignKey(m => m.NavigationRoleId);
-        
         builder.HasOne(m => m.Parent)
             .WithMany(x=>x.Children)
             .HasForeignKey(x => x.ParentId);

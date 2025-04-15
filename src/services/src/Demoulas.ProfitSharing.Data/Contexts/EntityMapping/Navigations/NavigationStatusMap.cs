@@ -12,6 +12,12 @@ internal sealed class NavigationStatusMap : IEntityTypeConfiguration<NavigationS
 {
     public void Configure(EntityTypeBuilder<NavigationStatus> builder)
     {
+        _ = builder.ToTable("NAVIGATION_STATUS");
+        _ = builder.Property(m => m.Id).HasColumnName("ID").ValueGeneratedOnAdd();
+        _ = builder.Property(m => m.Name).HasColumnName("NAME").HasMaxLength(50);
+
+
+
         builder.HasData(new List<NavigationStatus>() 
         { 
             new NavigationStatus() {Id =1, Name = "Not Started"},
