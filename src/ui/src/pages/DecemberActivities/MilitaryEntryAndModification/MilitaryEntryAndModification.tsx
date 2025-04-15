@@ -48,7 +48,7 @@ const MilitaryEntryAndModification = () => {
           isSortDescending: false}});
       setShowContributions(true);
     }
-  }, [masterInquiryEmployeeDetails, fetchContributions]);
+  }, [fetchContributions, masterInquiryEmployeeDetails, profitYear]);
 
   useEffect(() => {
     if (masterInquiryEmployeeDetails) {
