@@ -20,7 +20,7 @@ public class FrozenReportServiceTests : ApiTestBase<Program>
     {
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         var request = new ProfitYearRequest() { ProfitYear = 2023, Skip = 0, Take = 255 };
-        var response = await ApiClient.GETAsync<ForfeituresAndPointsForYearEndpoint, ProfitYearRequest, ReportResponseBase< ForfeituresAndPointsForYearResponse>> (request);
+        var response = await ApiClient.GETAsync<ForfeituresAndPointsForYearEndpoint, ProfitYearRequest, ForfeituresAndPointsForYearResponseWithTotals>(request);
         response.Should().NotBeNull();
     }
 
@@ -28,7 +28,7 @@ public class FrozenReportServiceTests : ApiTestBase<Program>
     public async Task Unauthorized()
     {
         var response =
-            await ApiClient.GETAsync<ForfeituresAndPointsForYearEndpoint, ProfitYearRequest, ReportResponseBase<ForfeituresAndPointsForYearResponse>>(new ProfitYearRequest());
+            await ApiClient.GETAsync<ForfeituresAndPointsForYearEndpoint, ProfitYearRequest, ForfeituresAndPointsForYearResponseWithTotals>(new ProfitYearRequest());
 
         response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
 
