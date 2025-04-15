@@ -1,6 +1,5 @@
 import { CAPTIONS } from "../../../constants";
 import { DSMAccordion, Page } from "smart-ui-library";
-import EighteenToTwentySearchFilter from "./EigteenToTwentySearchFilters";
 import EighteenToTwentyGrid from "./EighteenToTwentyGrid";
 import { Divider } from "@mui/material";
 import Grid2 from '@mui/material/Grid2';
@@ -22,13 +21,6 @@ const EighteenToTwenty = () => {
             <Grid2 width={"100%"}>
                 <Divider />
             </Grid2>
-            <Grid2
-                width={"100%"}>
-                <DSMAccordion title="Filter">
-                    <EighteenToTwentySearchFilter />
-                </DSMAccordion>
-            </Grid2>
-
             <Grid2 width="100%">
                 <EighteenToTwentyGrid />
             </Grid2>
