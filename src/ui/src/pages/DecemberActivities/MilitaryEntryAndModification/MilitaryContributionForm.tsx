@@ -102,6 +102,8 @@ const MilitaryContributionForm = ({
                   value={field.value ?? null}
                   error={error?.message}
                   required={true}
+                  disableFuture={true}
+                  minDate={new Date(profitYear-2, 0, 1)}
                   views={["year", "month"]}
                 />
               )}

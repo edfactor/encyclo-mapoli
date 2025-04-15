@@ -33,7 +33,8 @@ const MilitaryEntryAndModification = () => {
 
   const handleCloseForm = () => {
     setIsDialogOpen(false);
-    setInitialSearchLoaded(true);
+    handleFetchContributions();
+    setInitialSearchLoaded(true); // This will trigger the grid to refresh
   };
 
   const handleFetchContributions = useCallback(() => {
@@ -89,8 +90,7 @@ const MilitaryEntryAndModification = () => {
           <DialogContent>
             <MilitaryContributionForm
               onSubmit={(rows) => {
-                handleCloseForm();
-                setInitialSearchLoaded(true); // Trigger a refresh                
+                handleCloseForm();         
               }}
               onCancel={handleCloseForm}
               badgeNumber={Number(masterInquiryEmployeeDetails?.badgeNumber)}

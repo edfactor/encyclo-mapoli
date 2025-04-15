@@ -23,7 +23,7 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "badgeNumber",
+    sortBy: "contributionDate",
     isSortDescending: false
   });
   const profitYear = useDecemberFlowProfitYear();
@@ -54,7 +54,8 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
   }, [initialSearchLoaded, pageNumber, pageSize, sortParams, masterInquiryEmployeeDetails]);
 
 
- 
+
+
   const columnDefs = useMemo(() => GetMilitaryContributionColumns(), []);
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
