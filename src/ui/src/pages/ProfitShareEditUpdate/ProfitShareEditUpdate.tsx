@@ -45,7 +45,6 @@ const useRevertAction = (
   setBeneficiariesAffected: { (value: SetStateAction<number>): void; (arg0: number): void },
   setEtvasAffected: { (value: SetStateAction<number>): void; (arg0: number): void }
 ) => {
-  const { profitSharingEditQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const [trigger] = useLazyGetMasterRevertQuery();
   const dispatch = useDispatch();
   const profitYear = useFiscalCloseProfitYear();
@@ -182,7 +181,7 @@ const RenderRevertButton = (setOpenRevertModal: (open: boolean) => void, status:
       size="medium"
       startIcon={
         <Replay
-          color={profitEditUpdateRevertChangesAvailable || status?.updatedTime !== null ? "primary" : "disabled"}
+          color={profitEditUpdateRevertChangesAvailable || status?.updatedTime === null ? "primary" : "disabled"}
         />
       }
       onClick={async () => {
