@@ -17,6 +17,7 @@ import {
   ProfitMasterStatus,
   ProfitShareEditUpdateQueryParams,
   ProfitShareMasterApplyRequest,
+  ProfitShareMasterResponse,
   ProfitYearRequest
 } from "reduxstore/types";
 import {
@@ -33,21 +34,62 @@ import ProfitShareEditConfirmation from "./ProfitShareEditConfirmation";
 import ProfitShareEditUpdateSearchFilter from "./ProfitShareEditUpdateSearchFilter";
 import ProfitShareEditUpdateTabs from "./ProfitShareEditUpdateTabs";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import { set } from "date-fns";
 
 enum MessageKeys {
   ProfitShareEditUpdate = "ProfitShareEditUpdate"
 }
 
-const useRevertAction = (
-  successMessage: MessageUpdate,
-  failMessage: MessageUpdate,
-  setEmployeesAffected: { (value: SetStateAction<number>): void; (arg0: number): void },
-  setBeneficiariesAffected: { (value: SetStateAction<number>): void; (arg0: number): void },
-  setEtvasAffected: { (value: SetStateAction<number>): void; (arg0: number): void }
-) => {
+export class Messages {
+  static readonly ProfitShareApplySuccess: MessageUpdate = {
+    key: MessageKeys.ProfitShareEditUpdate,
+    message: {
+      type: "success",
+      title: "Changes Applied",
+      message: `Employees affected: x | Beneficiaries: x, | ETVAs: x `
+    }
+  };
+  static readonly ProfitShareApplyFail: MessageUpdate = {
+    key: MessageKeys.ProfitShareEditUpdate,
+    message: {
+      type: "error",
+      title: "Changes Were Not Applied",
+      message: `Employees affected: 0 | Beneficiaries: 0, | ETVAs: 0 `
+    }
+  };
+  static readonly ProfitShareRevertSuccess: MessageUpdate = {
+    key: MessageKeys.ProfitShareEditUpdate,
+    message: {
+      type: "success",
+      title: "Changes Reverted",
+      message: `Employees affected: x | Beneficiaries: x, | ETVAs: x `
+    }
+  };
+  static readonly ProfitShareRevertFail: MessageUpdate = {
+    key: MessageKeys.ProfitShareEditUpdate,
+    message: {
+      type: "error",
+      title: "Changes Were Not Reverted",
+      message: `Employees affected: 0 | Beneficiaries: 0, | ETVAs: 0 `
+    }
+  };
+  static readonly ProfitShareMasterUpdated: MessageUpdate = {
+    key: MessageKeys.ProfitShareEditUpdate,
+    message: {
+      type: "success",
+      title: "Changes Already Applied",
+      message: `Updated By: x | Date: x `
+    }
+  };
+}
+
+const useRevertAction = () => {
   const [trigger] = useLazyGetMasterRevertQuery();
   const dispatch = useDispatch();
   const profitYear = useFiscalCloseProfitYear();
+  const [beneficiariesAffected, setBeneficiariesAffected] = useState(0);
+  const [employeesAffected, setEmployeesAffected] = useState(0);
+  const [etvasAffected, setEtvasAffected] = useState(0);
 
   const revertAction = async (): Promise<void> => {
     const params: ProfitYearRequest = {
@@ -63,26 +105,20 @@ const useRevertAction = (
         setEmployeesAffected(payload?.employeesAffected || 0);
         setBeneficiariesAffected(payload?.beneficiariesAffected || 0);
         setEtvasAffected(payload?.etvasAffected || 0);
-        dispatch(setMessage(successMessage));
+        //dispatch(setMessage(successMessage));
         console.log("Successfully reverted changes for year end: ", payload);
         dispatch(setProfitEditUpdateChangesAvailable(false));
         dispatch(setProfitEditUpdateRevertChangesAvailable(false));
       })
       .catch((error) => {
         console.error("ERROR: Did not revert changes to year end", error);
-        dispatch(setMessage(failMessage));
+        //dispatch(setMessage(failMessage));
       });
   };
   return revertAction;
 };
 
-const useSaveAction = (
-  successMessage: MessageUpdate,
-  failMessage: MessageUpdate,
-  setEmployeesAffected: { (value: SetStateAction<number>): void; (arg0: number): void },
-  setBeneficiariesAffected: { (value: SetStateAction<number>): void; (arg0: number): void },
-  setEtvasAffected: { (value: SetStateAction<number>): void; (arg0: number): void }
-) => {
+const useSaveAction = (setEmployeesAffected: (count: number) => void) => {
   const { profitSharingEditQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const [trigger] = useLazyGetMasterApplyQuery();
   const dispatch = useDispatch();
@@ -109,18 +145,20 @@ const useSaveAction = (
 
     await trigger(params)
       .unwrap()
-      .then((payload) => {
-        setEmployeesAffected(payload?.employeesAffected || 0);
-        setBeneficiariesAffected(payload?.beneficiariesAffected || 0);
-        setEtvasAffected(payload?.etvasAffected || 0);
+      .then((payload: ProfitShareMasterResponse) => {
+        //const eF: number = payload?.employeesAffected || 0;
+
+        //setBeneficiariesAffected(payload?.beneficiariesAffected || 0);
+        //setEtvasAffected(payload?.etvasAffected || 0);
         dispatch(setProfitEditUpdateChangesAvailable(false));
-        dispatch(setMessage(successMessage));
-        console.log("Successfully applied changes to year end: ", payload);
         dispatch(setProfitEditUpdateRevertChangesAvailable(true));
+        console.log("Successfully applied changes to year end: ", payload);
+        console.log("Employees affected: ", payload?.employeesAffected);
+        setEmployeesAffected(payload?.employeesAffected ?? 0);
       })
       .catch((error) => {
         console.error("ERROR: Did not apply changes to year end", error);
-        dispatch(setMessage(failMessage));
+        //dispatch(setMessage(failMessage));
       });
   };
 
@@ -220,62 +258,9 @@ const ProfitShareEditUpdate = () => {
   const [etvasAffected, setEtvasAffected] = useState(0);
   const [updatedBy, setUpdatedBy] = useState<string | null>(null);
   const [updatedTime, setUpdatedTime] = useState<string | null>(null);
-  class Messages {
-    static readonly ProfitShareApplySuccess: MessageUpdate = {
-      key: MessageKeys.ProfitShareEditUpdate,
-      message: {
-        type: "success",
-        title: "Changes Applied",
-        message: `Employees affected: ${employeesAffected} | Beneficiaries: ${beneficiariesAffected}, | ETVAs: ${etvasAffected} `
-      }
-    };
-    static readonly ProfitShareApplyFail: MessageUpdate = {
-      key: MessageKeys.ProfitShareEditUpdate,
-      message: {
-        type: "error",
-        title: "Changes Were Not Applied",
-        message: `Employees affected: 0 | Beneficiaries: 0, | ETVAs: 0 `
-      }
-    };
-    static readonly ProfitShareRevertSuccess: MessageUpdate = {
-      key: MessageKeys.ProfitShareEditUpdate,
-      message: {
-        type: "success",
-        title: "Changes Reverted",
-        message: `Employees affected: ${employeesAffected} | Beneficiaries: ${beneficiariesAffected}, | ETVAs: ${etvasAffected} `
-      }
-    };
-    static readonly ProfitShareRevertFail: MessageUpdate = {
-      key: MessageKeys.ProfitShareEditUpdate,
-      message: {
-        type: "error",
-        title: "Changes Were Not Reverted",
-        message: `Employees affected: 0 | Beneficiaries: 0, | ETVAs: 0 `
-      }
-    };
-    static readonly ProfitShareMasterUpdated: MessageUpdate = {
-      key: MessageKeys.ProfitShareEditUpdate,
-      message: {
-        type: "success",
-        title: "Changes Already Applied",
-        message: `Updated By: ${updatedBy} | Date: ${updatedTime} `
-      }
-    };
-  }
-  const revertAction = useRevertAction(
-    Messages.ProfitShareRevertSuccess,
-    Messages.ProfitShareRevertFail,
-    setEmployeesAffected,
-    setBeneficiariesAffected,
-    setEtvasAffected
-  );
-  const saveAction = useSaveAction(
-    Messages.ProfitShareApplySuccess,
-    Messages.ProfitShareApplyFail,
-    setEmployeesAffected,
-    setBeneficiariesAffected,
-    setEtvasAffected
-  );
+
+  const revertAction = useRevertAction();
+  const saveAction = useSaveAction(setEmployeesAffected);
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const hasToken = !!useSelector((state: RootState) => state.security.token);
   const {
@@ -329,6 +314,20 @@ const ProfitShareEditUpdate = () => {
         console.error("ERROR: Did not revert changes to year end", error);
       });
   }, [profitYear, triggerStatusUpdate, dispatch]);
+
+  useEffect(() => {
+    if (employeesAffected) {
+      dispatch(
+        setMessage({
+          ...Messages.ProfitShareApplySuccess,
+          message: {
+            ...Messages.ProfitShareApplySuccess.message,
+            message: `Employees affected: ${employeesAffected} | Beneficiaries: ${beneficiariesAffected}, | ETVAs: ${etvasAffected} `
+          }
+        })
+      );
+    }
+  }, [beneficiariesAffected, employeesAffected, etvasAffected]);
 
   useEffect(() => {
     if (hasToken) {
