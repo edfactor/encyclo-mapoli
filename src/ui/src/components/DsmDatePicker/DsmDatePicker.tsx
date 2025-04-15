@@ -1,9 +1,9 @@
-import { FormHelperText, FormLabel, TextField } from "@mui/material";
+import { FormHelperText, FormLabel } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { parseISO } from "date-fns";
 import { FC, KeyboardEvent } from "react";
+import { parseISO } from "date-fns";
 
 type MyProps = {
   id: string;
@@ -14,15 +14,30 @@ type MyProps = {
   setError?: (error: string) => void;
   required: boolean;
   label: string;
-  onKeyDown?: (event: KeyboardEvent<HTMLInputElement>) => void;
+  onKeyDown?: (event: KeyboardEvent<HTMLElement>) => void;
   ref?: React.ForwardedRef<unknown>;
   views?: Array<"year" | "month" | "day">;
   disabled?: boolean;
-  minDate?: Date | null;
-  maxDate?: Date | null;
+  minDate?: Date;
+  maxDate?: Date;
 };
 
-const DsmDatePicker: FC<MyProps> = ({ error, views, onChange, value, disableFuture, required, label, ref, id, disabled, minDate, maxDate }) => {
+const DsmDatePicker: FC<MyProps> = ({
+  error,
+  views,
+  onChange,
+  value,
+  disableFuture,
+  setError,
+  required,
+  label,
+  onKeyDown,
+  ref,
+  id,
+  disabled,
+  minDate,
+  maxDate
+}) => {
   const isInvalid = error ? error?.length > 0 : false;
   const isYearOnly = views?.length === 1 && views[0] === "year";
 
@@ -36,10 +51,12 @@ const DsmDatePicker: FC<MyProps> = ({ error, views, onChange, value, disableFutu
       }
     } else {
       const parts = value.split("/");
-      const swapped = [parts[2], parts[0], parts[1]];
-      const yyyymmdd = swapped.join("-");
-      const v = tryddmmyyyyToDate(yyyymmdd);
-      onChange(v);
+      if (parts.length === 3) { 
+        const swapped = [parts[2], parts[0], parts[1]];
+        const yyyymmdd = swapped.join("-");
+        const v = tryddmmyyyyToDate(yyyymmdd);
+        onChange(v);
+      }
     }
   };
 
@@ -48,65 +65,41 @@ const DsmDatePicker: FC<MyProps> = ({ error, views, onChange, value, disableFutu
     return parseISO(date);
   };
 
-  const CustomTextField = (params: any) => (
-    <TextField
-      {...params}
-      inputRef={ref}
-      id={id}
-      data-your-attrib={id}
-      fullWidth
-      error={isInvalid}
-      onError={(_err) => {}}
-      disabled={disabled}
-      onKeyUp={(e: React.KeyboardEvent<HTMLDivElement>) => {
-        // This wild code is meant to enable the search button without leaving the
-        // field with a blur event.
-        const numberValue = parseInt((e.target as HTMLInputElement).value);
-
-        if (numberValue > 1950 && numberValue < 2100) {
-          const simulatedFocusEvent = {
-            ...e,
-            target: e.target as HTMLInputElement,
-            relatedTarget: null
-          } as unknown as React.FocusEvent<HTMLInputElement>;
-          // The function below will let the search button be enabled if
-          // we get a reasonable year
-          handleTextFieldBlur(simulatedFocusEvent);
-        }
-      }}
-      onBlur={handleTextFieldBlur}
-    />
-  );
-
   return (
-    <div className="dsm-date-picker">
+    <div>
+      <FormLabel
+        required={required}
+        error={isInvalid}
+        style={{ display: 'block', marginBottom: '8px' }}
+      >
+        {label}
+      </FormLabel>
+      
       <LocalizationProvider dateAdapter={AdapterDateFns}>
-        <div className="date-picker-label-wrapper">
-          <FormLabel
-            className={isInvalid ? "" : "date-picker-label"}
-            required={required ?? false}
-            error={isInvalid}>
-            {label}
-          </FormLabel>
-        </div>
         <DatePicker
-          sx={{ width: "100%" }}
-          slots={{
-            textField: CustomTextField
-          }}
-          onAccept={(e) => {
-            onChange(e);
+          value={value}
+          onChange={onChange}
+          slotProps={{
+            textField: {
+              id,
+              fullWidth: true,
+              error: isInvalid,
+              onBlur: handleTextFieldBlur,
+              onKeyDown: (e) => onKeyDown?.(e),
+              inputRef: ref,
+              size: "small",
+              variant: "outlined",
+            }
           }}
           views={views}
           openTo={views?.[0]}
           disableFuture={disableFuture}
-          value={value}
           disabled={disabled}
           minDate={minDate || undefined}
           maxDate={maxDate || undefined}
         />
       </LocalizationProvider>
-      {!!error && <FormHelperText error>{error}</FormHelperText>}
+      
     </div>
   );
 };
