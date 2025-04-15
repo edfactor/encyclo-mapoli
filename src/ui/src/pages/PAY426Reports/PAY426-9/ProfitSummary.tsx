@@ -207,7 +207,7 @@ const ProfitSummary = () => {
           Active and Inactive
         </Typography>
         <DSMGrid
-          preferenceKey={"ACTIVE_INACTIVE_SUMMARY"}
+          preferenceKey={CAPTIONS.PAY426_SUMMARY}
           isLoading={isFetching}
           handleSortChanged={() => {}}
           providedOptions={{

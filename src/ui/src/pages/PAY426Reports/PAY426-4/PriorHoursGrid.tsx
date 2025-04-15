@@ -1,17 +1,24 @@
 import { Typography } from "@mui/material";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Path, useNavigate } from "react-router";
 import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
-import { DSMGrid } from "smart-ui-library";
+import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetProfitSharingReportGridColumns } from "../PAY426-1/EighteenToTwentyGridColumns";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../reduxstore/store";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import { CAPTIONS } from "../../../constants";
 
 const PriorHoursGrid = () => {
   const navigate = useNavigate();
   const [trigger, { data, isLoading }] = useLazyGetYearEndProfitSharingReportQuery();
 
+  const [pageNumber, setPageNumber] = useState(0);
+  const [pageSize, setPageSize] = useState(25);
+  const [sortParams, setSortParams] = useState<ISortParams>({
+    sortBy: "badgeNumber",
+    isSortDescending: false
+  });
   const hasToken = useSelector((state: RootState) => !!state.security.token);
   const profitYear = useDecemberFlowProfitYear();
 
@@ -31,15 +38,14 @@ const PriorHoursGrid = () => {
       includeEmployeesWithPriorProfitSharingAmounts: true,
       includeEmployeesWithNoPriorProfitSharingAmounts: false,
       profitYear: profitYear,
-      pagination: {
-        skip: 0,
-        take: 25,
-        sortBy: "badgeNumber",
-        isSortDescending: true
-      }
-    });
-  }
-}, [trigger, hasToken, profitYear]);
+        pagination: {
+          skip: pageNumber * pageSize,
+          take: pageSize,
+          sortBy: sortParams.sortBy,
+          isSortDescending: sortParams.isSortDescending
+        }});
+    }
+  }, [trigger, hasToken, profitYear, pageNumber, pageSize, sortParams]);
 
   const handleNavigationForButton = useCallback(
     (destination: string | Partial<Path>) => {
@@ -59,11 +65,11 @@ const PriorHoursGrid = () => {
         <Typography
           variant="h2"
           sx={{ color: "#0258A5" }}>
-          {`ACTIVE/INACTIVE WITH PRIOR PS REPORT (${data?.response?.results?.length || 0} records)`}
+          {`ACTIVE/INACTIVE WITH PRIOR PS REPORT (${data?.response?.total || 0} records)`}
         </Typography>
       </div>
       <DSMGrid
-        preferenceKey={"PRIOR_HOURS_EMPLOYEES"}
+        preferenceKey={CAPTIONS.PAY426_ACTIVE_PRIOR_SHARING}
         isLoading={isLoading}
         handleSortChanged={(_params) => {}}
         providedOptions={{
@@ -71,6 +77,15 @@ const PriorHoursGrid = () => {
           columnDefs: columnDefs
         }}
       />
+      {!!data && data.response.results.length > 0 && (
+        <Pagination
+          pageNumber={pageNumber}
+          setPageNumber={(value: number) => setPageNumber(value - 1)}
+          pageSize={pageSize}
+          setPageSize={setPageSize}
+          recordCount={data.response.total}
+        />
+      )}
     </>
   );
 };
