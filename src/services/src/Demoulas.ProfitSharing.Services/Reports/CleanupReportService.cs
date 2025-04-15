@@ -437,20 +437,35 @@ FROM FILTERED_DEMOGRAPHIC p1
                             calInfo.FiscalEndDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Local)),
                         EnrolledId = nameAndDob.EnrolledId,
                     };
-                return await query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
+                return query;
             });
 
-            _logger.LogInformation("Returned {Results} records", results.Results.Count());
+            var totals = await results.GroupBy(_ => true)
+                .Select(g => new
+                {
+                    DistributionTotal = g.Sum(x => x.DistributionAmount),
+                    StateTaxTotal = g.Sum(x => x.StateTax),
+                    FederalTaxTotal = g.Sum(x => x.FederalTax),
+                    ForfeitureTotal = g.Sum(x => x.ForfeitAmount)
+                })
+                .FirstOrDefaultAsync(cancellationToken: cancellationToken) ?? new
+            {
+                DistributionTotal = 0m,
+                StateTaxTotal = 0m,
+                FederalTaxTotal = 0m,
+                ForfeitureTotal = 0m
+            };
+            
 
             return new DistributionsAndForfeitureTotalsResponse()
             {
                 ReportName = "Distributions and Forfeitures",
                 ReportDate = DateTimeOffset.Now,
-                DistributionTotal = results.Results.Sum(x => x.DistributionAmount),
-                StateTaxTotal = results.Results.Sum(x => x.StateTax),
-                FederalTaxTotal = results.Results.Sum(x => x.FederalTax),
-                ForfeitureTotal = results.Results.Sum(x => x.ForfeitAmount),
-                Response = results
+                DistributionTotal = totals.DistributionTotal,
+                StateTaxTotal = totals.StateTaxTotal,
+                FederalTaxTotal = totals.FederalTaxTotal,
+                ForfeitureTotal = totals.ForfeitureTotal,
+                Response = await results.ToPaginationResultsAsync(req, cancellationToken)
             };
         }
     }

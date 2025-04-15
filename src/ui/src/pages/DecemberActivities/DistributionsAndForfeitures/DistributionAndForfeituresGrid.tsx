@@ -57,7 +57,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
   ]);
 
   useEffect(() => {
-    if (initialSearchLoaded) {
+    if (initialSearchLoaded || sortParams) {
       onSearch();
     }
   }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch]);
