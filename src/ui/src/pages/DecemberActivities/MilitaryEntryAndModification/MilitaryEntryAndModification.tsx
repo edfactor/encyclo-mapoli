@@ -13,6 +13,7 @@ import {
   useLazyGetMilitaryContributionsQuery
 } from "../../../reduxstore/api/MilitaryApi";
 import { useSelector } from "react-redux";
+import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 
 const MilitaryEntryAndModification = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
@@ -20,6 +21,7 @@ const MilitaryEntryAndModification = () => {
   const [showContributions, setShowContributions] = useState(false);
   const { masterInquiryEmployeeDetails } = useSelector((state: RootState) => state.inquiry);
   const [fetchContributions, { isFetching }] = useLazyGetMilitaryContributionsQuery();
+  const profitYear = useDecemberFlowProfitYear();
   
   const renderActionNode = () => {
     return <StatusDropdownActionNode />;
@@ -37,8 +39,8 @@ const MilitaryEntryAndModification = () => {
     if (masterInquiryEmployeeDetails) {
       fetchContributions({
         badgeNumber: Number(masterInquiryEmployeeDetails.badgeNumber),
-        profitYear: 2024,
-        pagination: { skip: 0, take: 25 }
+        profitYear: profitYear,
+        pagination: { skip: 0, take: 25, sortBy: "contributionDate", isSortDescending: false }
       });
       setShowContributions(true);
     }
@@ -88,9 +90,11 @@ const MilitaryEntryAndModification = () => {
               onSubmit={(rows) => {
                 // Handle submit logic
                 handleCloseForm();
-                setInitialSearchLoaded(true); // Trigger a refresh
+                setInitialSearchLoaded(true); // Trigger a refresh                
               }}
               onCancel={handleCloseForm}
+              badgeNumber={Number(masterInquiryEmployeeDetails?.badgeNumber)}
+              profitYear={profitYear}
             />
           </DialogContent>
         </Dialog>
