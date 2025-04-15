@@ -13,6 +13,7 @@ internal sealed class NavigationTrackingMap : IEntityTypeConfiguration<Navigatio
     public void Configure(EntityTypeBuilder<NavigationTracking> builder)
     {
         _ = builder.ToTable("NAVIGATION_TRACKING");
+        _ = builder.HasKey(t => t.Id);
         _ = builder.Property(x => x.Id).HasColumnName("ID").ValueGeneratedOnAdd();
         _ = builder.Property(x => x.StatusId).HasColumnName("STATUS_ID");
         _ = builder.Property(x => x.NavigationId).HasColumnName("NAVIGATION_ID");

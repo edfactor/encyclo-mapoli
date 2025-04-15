@@ -14,6 +14,7 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
     public void Configure(EntityTypeBuilder<Navigation> builder)
     {
         _ = builder.ToTable("NAVIGATION");
+        _ = builder.HasKey(t => t.Id);
         _ = builder.Property(x => x.Id).HasColumnName("ID").ValueGeneratedOnAdd();
         _ = builder.Property(x => x.Url).HasColumnName("URL").HasMaxLength(200);
         _ = builder.Property(x => x.Title).HasColumnName("TITLE").HasMaxLength(100);
