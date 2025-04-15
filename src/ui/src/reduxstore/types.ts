@@ -8,7 +8,7 @@ export enum ImpersonationRoles {
   ItOperations = "IT-Operations"
 }
 
-export interface SortedPaginationRequestDto extends PaginationParams, ISortParams { }
+export interface SortedPaginationRequestDto extends PaginationParams, ISortParams {}
 
 export interface ProfitYearRequest {
   profitYear: number;
@@ -515,10 +515,10 @@ export interface BalanceByAgeDetail extends BalanceByDetailBase {
 }
 
 /* eslint-disable @typescript-eslint/no-empty-object-type */
-export interface BalanceByAge extends BalanceByBase<BalanceByAgeDetail> { }
+export interface BalanceByAge extends BalanceByBase<BalanceByAgeDetail> {}
 
 /* eslint-disable @typescript-eslint/no-empty-object-type */
-export interface BalanceByYears extends BalanceByBase<BalanceByAgeDetail> { }
+export interface BalanceByYears extends BalanceByBase<BalanceByAgeDetail> {}
 
 export interface VestedAmountsByAge {
   totalFullTime100PercentAmount: number;
@@ -740,9 +740,9 @@ export interface ProfitShareEditResponse {
 
 export interface ProfitShareMasterResponse {
   reportName: string;
-  beneficiariesAffected?: number;
-  employeesAffected?: number;
-  etvasAffected?: number;
+  beneficiariesEffected?: number;
+  employeesEffected?: number;
+  etvasEffected?: number;
 }
 
 export interface ProfitMasterStatus {
