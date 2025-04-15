@@ -6,99 +6,89 @@ import { useForm, Controller } from "react-hook-form";
 import { MilitaryContribution } from "reduxstore/types";
 
 interface FormData {
-  rows: MilitaryContribution[];
+  contributionDate: Date | null;
+  contributionAmount: number | null;
 }
 
 interface MilitaryContributionFormProps {
-  onSubmit: (rows: MilitaryContribution[]) => void;
+  onSubmit: (contribution: MilitaryContribution) => void;
   onCancel: () => void;
-  initialData?: MilitaryContribution[];
+  initialData?: MilitaryContribution;
   isLoading?: boolean;
 }
 
 const MilitaryContributionForm = ({
-  onSubmit,
-  onCancel,
-  initialData,
-  isLoading = false
-}: MilitaryContributionFormProps) => {
+                                    onSubmit,
+                                    onCancel,
+                                    initialData,
+                                    isLoading = false
+                                  }: MilitaryContributionFormProps) => {
   const { control, handleSubmit, reset } = useForm<FormData>({
     defaultValues: {
-      rows: Array(5).fill({ contributionDate: null, contributionAmount: null })
+      contributionDate: null,
+      contributionAmount: null
     }
   });
 
   useEffect(() => {
     if (initialData) {
-      const sortedData = [...initialData]
-        .sort((a, b) => {
-          if (!a.contributionDate || !b.contributionDate) return 0;
-          return b.contributionDate.getTime() - a.contributionDate.getTime();
-        })
-        .slice(0, 5);
-
-      const paddedData = [
-        ...sortedData,
-        ...Array(5 - sortedData.length).fill({ contributionDate: null, contributionAmount: null })
-      ];
-
-      reset({ rows: paddedData });
+      reset({
+        contributionDate: initialData.contributionDate,
+        contributionAmount: initialData.contributionAmount
+      });
     }
   }, [initialData, reset]);
 
   const handleFormSubmit = (data: FormData) => {
-    const validContributions = data.rows.filter(
-      row => row.contributionDate && row.contributionAmount !== null
-    );
-    onSubmit(validContributions);
+    if (data.contributionDate && data.contributionAmount !== null) {
+      onSubmit(data);
+    }
   };
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)}>
       <Grid2 container spacing={3}>
-        {Array.from({ length: 5 }).map((_, index) => (
-          <Grid2 container key={index} spacing={2}>
-            <Grid2 size={{ xs: 6 }} >
-              <Controller
-                name={`rows.${index}.contributionDate`}
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <DsmDatePicker
-                    id={`contributionDate-${index}`}
-                    label="Contribution Date"
-                    onChange={(value: Date | null) => field.onChange(value)}
-                    value={field.value ?? null}
-                    error={error?.message}
-                    required={false}
-                    views={["year", "month"]}
-                  />
-                )}
-              />
-            </Grid2>
-            <Grid2 size={{ xs: 6 }} >
-              <FormLabel>Contribution Amount</FormLabel>
-              <Controller
-                name={`rows.${index}.contributionAmount`}
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    type="number"
-                    variant="outlined"
-                    error={!!error}
-                    helperText={error?.message}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      field.onChange(value === "" ? null : Number(value));
-                    }}
-                    value={field.value ?? ""}
-                  />
-                )}
-              />
-            </Grid2>
+        <Grid2 container spacing={2}>
+          <Grid2 size={{ xs: 6 }} >
+            <Controller
+              name="contributionDate"
+              control={control}
+              render={({ field, fieldState: { error } }) => (
+                <DsmDatePicker
+                  id="contributionDate"
+                  label="Contribution Date"
+                  onChange={(value: Date | null) => field.onChange(value)}
+                  value={field.value ?? null}
+                  error={error?.message}
+                  required={true}
+                  views={["year", "month"]}
+                />
+              )}
+            />
           </Grid2>
-        ))}
+          <Grid2 size={{ xs: 6 }} >
+            <FormLabel>Contribution Amount</FormLabel>
+            <Controller
+              name="contributionAmount"
+              control={control}
+              render={({ field, fieldState: { error } }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  type="number"
+                  variant="outlined"
+                  error={!!error}
+                  helperText={error?.message}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    field.onChange(value === "" ? null : Number(value));
+                  }}
+                  value={field.value ?? ""}
+                />
+              )}
+            />
+          </Grid2>
+        </Grid2>
 
         <Grid2 size={{ xs: 12 }} container spacing={2} paddingTop='8px'>
           <Grid2>
