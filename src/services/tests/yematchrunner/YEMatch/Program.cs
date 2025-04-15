@@ -1,10 +1,13 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 using YEMatch.YEMatch;
 
 namespace YEMatch;
 
+[SuppressMessage("Major Code Smell", "S125:Sections of code should not be commented out")]
+[SuppressMessage("Major Code Smell", "S1854:Unused assignments should be removed")]
 internal static class Program
 {
     private static readonly HashSet<string> activitiesWithUpdates = ["A6", "A7", "A12", "A13A", "A13B", "A18", "A20", "A23", "A24"];
@@ -55,13 +58,19 @@ internal static class Program
             }
         }
 
+        // -------------------------------------------------
+
         // This block lets you skip steps when doing specific testing
         var skipBoth = 0;
 
-        var startOnStep = ""; // step to start with, ie. "A10"
-        var stopOnStep = ""; // step to start with, ie. "A10"
+        var startOnStep = "A18"; // step to start with, ie. "A10"
+        var stopOnStep = "A23"; // step to start with, ie. "A10"
 
-        var stopOnSmartSide = true;
+        startOnStep = "A0"; // step to start with, ie. "A10"
+        stopOnStep = "A0"; // step to start with, ie. "A10"
+
+
+        // ------------------- Start of selection of steps zone
 
         // TBD, should stop by name not index - so we can stop on either side (if running only 1 side)
         for (var i = 0; i < readyActivities.Count; i++)
@@ -76,16 +85,27 @@ internal static class Program
         smartActivities = smartActivities.Skip(skipBoth).Take(999).ToList();
 
         // Only do two steps, A0 and A21
-
-        readyActivities = readyActivities.Where(a => a.ActivityLetterNumber is "A0" or "A3").ToList();
-        smartActivities = smartActivities.Where(a => a.ActivityLetterNumber is "A0" or "A3").ToList();
+        // readyActivities = readyActivities.Where(a => a.ActivityLetterNumber is "A0" or "A3").ToList();
+        // smartActivities = smartActivities.Where(a => a.ActivityLetterNumber is "A0" or "A3").ToList();
 
         var bothReadyAndSmartActivities = readyActivities.Zip(smartActivities, (a, b) => new[] { a, b })
             .SelectMany(x => x)
             .ToList();
 
+        // Adjust this select ready/smart jobs
+        var activitiesToRun = readyActivities;
+
+        // Test PROFTLB on the smart side 
+        activitiesToRun = Specify(bothReadyAndSmartActivities, ["R0", "R18", "R20", "R21", "R22", "R22", "R2S", "R23", "S23"]);
+
+
+        // ------------------- End of selection of steps zone
+
+        // ensure we stop if a stop is requested on either side
+        bool stopOnSmartSide = activitiesToRun.Any(a => a is SmartActivity);
+
         List<Outcome> outcomes = [];
-        foreach (var activity in bothReadyAndSmartActivities)
+        foreach (var activity in activitiesToRun)
         {
             var outcome = await activity.execute();
             outcomes.Add(outcome);
@@ -121,6 +141,36 @@ internal static class Program
 
         Console.WriteLine($"\n---- Completed in Took:  {wholeRunElapsed.Hours}h {wholeRunElapsed.Minutes}m {wholeRunElapsed.Seconds}s");
     }
+
+    private static List<Activity> Specify(List<Activity> bothReadyAndSmartActivities, List<string> activityNames)
+    {
+        var activitiesToRun = new List<Activity>();
+
+        foreach (var descriptor in activityNames)
+        {
+            if (descriptor.Length < 2 || (descriptor[0] != 'R' && descriptor[0] != 'S'))
+            {
+                throw new ArgumentException($"Invalid activity descriptor: {descriptor}");
+            }
+
+            bool isReady = descriptor[0] == 'R';
+            string key = descriptor.Substring(1);
+
+            var match = bothReadyAndSmartActivities.FirstOrDefault(a =>
+                a.ActivityLetterNumber.Substring(1) == key &&
+                ((isReady && a is ReadyActivity) || (!isReady && a is SmartActivity)));
+
+            if (match == null)
+            {
+                throw new ArgumentException($"I don't know how to: {descriptor}");
+            }
+
+            activitiesToRun.Add(match);
+        }
+
+        return activitiesToRun;
+    }
+
 
     public static string ModChar(Activity activity)
     {

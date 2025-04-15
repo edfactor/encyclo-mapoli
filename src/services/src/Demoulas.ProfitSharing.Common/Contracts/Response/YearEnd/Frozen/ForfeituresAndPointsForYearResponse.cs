@@ -22,3 +22,26 @@ public sealed record ForfeituresAndPointsForYearResponse
         };
     }
 }
+
+public sealed record ForfeituresAndPointsForYearResponseWithTotals : ReportResponseBase<ForfeituresAndPointsForYearResponse>
+{
+    public decimal TotalForfeitures { get; set; }
+    public int TotalForfeitPoints { get; set; }
+    public int TotalEarningPoints { get; set; }
+
+    public static ForfeituresAndPointsForYearResponseWithTotals ResponseExample()
+    {
+        return new ForfeituresAndPointsForYearResponseWithTotals
+        {
+            ReportName = "Forfeitures and Points for Year",
+            ReportDate = DateTimeOffset.Now,
+            TotalForfeitures = 1234.56m,
+            TotalForfeitPoints = 15000,
+            TotalEarningPoints = 85000,
+            Response = new Demoulas.Common.Contracts.Contracts.Response.PaginatedResponseDto<ForfeituresAndPointsForYearResponse>
+            {
+                Results = new List<ForfeituresAndPointsForYearResponse> { ForfeituresAndPointsForYearResponse.ResponseExample() }
+            }
+        };
+    }
+}
