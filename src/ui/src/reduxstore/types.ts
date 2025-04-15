@@ -963,6 +963,25 @@ export interface Under21TotalsResponse {
   totalVestingBalance: number;
 }
 
+export interface ProfitSharingLabelsRequest extends ProfitYearRequest {
+  pagination: SortedPaginationRequestDto;
+}
+
+export interface ProfitSharingLabel {
+  storeNumber: number;
+  payClassificationId: number;
+  payClassificationName: string;
+  departmentId: number;
+  departmentName: string;
+  badgeNumber: number;
+  employeeName: string;
+  firstName: string;
+  address1: string;
+  city: string;
+  state: string;
+  postalCode: string;
+}
+
 export interface YearEndProfitSharingReportSummaryLineItem {
   subgroup: string;
   lineItemPrefix: string;
