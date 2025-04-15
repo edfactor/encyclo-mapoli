@@ -1,21 +1,19 @@
-import { useState, useEffect } from "react";
-import { Button, Divider, Typography, Box } from "@mui/material";
-import Grid2 from '@mui/material/Grid2';
-import { DSMAccordion, Page } from "smart-ui-library";
-import ProfitShareReportSearchFilter from "./ProfitShareReportSearchFilter";
-import ProfitShareReportGrid from "./ProfitShareReportGrid";
-import StatusDropdownActionNode from "components/StatusDropdownActionNode";
-import { useNavigate } from "react-router";
-import { MENU_LABELS, CAPTIONS, ROUTES } from "../../constants";
-import { useSelector } from "react-redux";
-import { RootState } from "reduxstore/store";
-import ProfitShareTotalsDisplay from "components/ProfitShareTotalsDisplay";
+import { Box, Button, Divider, Typography } from "@mui/material";
+import Grid2 from "@mui/material/Grid2";
 import DSMCollapsedAccordion from "components/DSMCollapsedAccordion";
-import { useDispatch } from "react-redux";
-import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
-import { YearEndProfitSharingReportRequest } from "reduxstore/types";
-import { setYearEndProfitSharingReportQueryParams } from "reduxstore/slices/yearsEndSlice";
+import ProfitShareTotalsDisplay from "components/ProfitShareTotalsDisplay";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router";
+import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
+import { setYearEndProfitSharingReportQueryParams } from "reduxstore/slices/yearsEndSlice";
+import { RootState } from "reduxstore/store";
+import { YearEndProfitSharingReportRequest } from "reduxstore/types";
+import { Page } from "smart-ui-library";
+import { CAPTIONS, MENU_LABELS, ROUTES } from "../../constants";
+import ProfitShareReportGrid from "./ProfitShareReportGrid";
 
 const ProfitShareReport = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
@@ -30,7 +28,7 @@ const ProfitShareReport = () => {
   useEffect(() => {
     if (hasToken && profitYear && !initialSearchLoaded && !hasInitialSearchRun) {
       setHasInitialSearchRun(true);
-      
+
       const request: YearEndProfitSharingReportRequest = {
         isYearEnd: false,
         minimumAgeInclusive: 18,
@@ -47,19 +45,19 @@ const ProfitShareReport = () => {
         profitYear: profitYear,
         pagination: { skip: 0, take: 10, sortBy: "badgeNumber", isSortDescending: true }
       };
-      
+
       triggerSearch(request, false)
-        .then(result => {
+        .then((result) => {
           if (result.data) {
             dispatch(setYearEndProfitSharingReportQueryParams(profitYear));
             setInitialSearchLoaded(true);
           }
         })
-        .catch(error => {
+        .catch((error) => {
           console.error("Initial search failed:", error);
         });
     }
-  }, [hasToken, profitYear, initialSearchLoaded, hasInitialSearchRun]);
+  }, [hasToken, profitYear, initialSearchLoaded, hasInitialSearchRun, triggerSearch, dispatch]);
 
   const renderActionNode = () => {
     return (
@@ -104,7 +102,10 @@ const ProfitShareReport = () => {
         </Grid2>
 
         <Grid2 width="100%">
-          <DSMCollapsedAccordion isCollapsedOnRender={true} expandable={true} title={`${CAPTIONS.PROFIT_SHARE_REPORT} (${yearEndProfitSharingReport?.response.total || 0} records)`}>
+          <DSMCollapsedAccordion
+            isCollapsedOnRender={true}
+            expandable={true}
+            title={`${CAPTIONS.PROFIT_SHARE_REPORT} (${yearEndProfitSharingReport?.response.total || 0} records)`}>
             <ProfitShareReportGrid
               initialSearchLoaded={initialSearchLoaded}
               setInitialSearchLoaded={setInitialSearchLoaded}

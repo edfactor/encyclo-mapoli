@@ -1,11 +1,12 @@
+import { Dialog, DialogContent, DialogTitle, Divider } from "@mui/material";
+import Grid2 from "@mui/material/Grid2";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { useCallback, useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "reduxstore/store";
 import { DSMAccordion, Page } from "smart-ui-library";
-import { Button, Divider } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
-import { Dialog, DialogContent, DialogTitle } from "@mui/material";
 import { CAPTIONS } from "../../../constants";
-import MilitaryAndRehireEntryAndModificationSearchFilter from "./MilitaryEntryAndModificationSearchFilter";
+import { useLazyGetMilitaryContributionsQuery } from "../../../reduxstore/api/MilitaryApi";
 import MilitaryContributionForm from "./MilitaryContributionForm";
 import MilitaryContributionGrid from "./MilitaryContributionFormGrid";
 import { RootState } from "reduxstore/store";
@@ -52,32 +53,32 @@ const MilitaryEntryAndModification = () => {
     if (masterInquiryEmployeeDetails) {
       handleFetchContributions();
     }
-  }, [masterInquiryEmployeeDetails]);
+  }, [handleFetchContributions, masterInquiryEmployeeDetails]);
 
-    return (
-      <Page
-        label={CAPTIONS.MILITARY_CONTRIBUTIONS}
-        actionNode={renderActionNode()}>
-        <Grid2
-          container
-          rowSpacing="24px">
-          <Grid2 width={"100%"}>
-            <Divider />
-          </Grid2>
-          <Grid2 width={"100%"}>
-            <DSMAccordion title="Filter">
-              <MilitaryAndRehireEntryAndModificationSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
-            </DSMAccordion>
-          </Grid2>
-
-          <Grid2 width="100%">
-            <MilitaryContributionGrid
-              setInitialSearchLoaded={setInitialSearchLoaded}
-              initialSearchLoaded={initialSearchLoaded}
-              onAddContribution={handleOpenForm}
-            />
-          </Grid2>
+  return (
+    <Page
+      label={CAPTIONS.MILITARY_CONTRIBUTIONS}
+      actionNode={renderActionNode()}>
+      <Grid2
+        container
+        rowSpacing="24px">
+        <Grid2 width={"100%"}>
+          <Divider />
         </Grid2>
+        <Grid2 width={"100%"}>
+          <DSMAccordion title="Filter">
+            <MilitaryAndRehireEntryAndModificationSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
+          </DSMAccordion>
+        </Grid2>
+
+        <Grid2 width="100%">
+          <MilitaryContributionGrid
+            setInitialSearchLoaded={setInitialSearchLoaded}
+            initialSearchLoaded={initialSearchLoaded}
+            onAddContribution={handleOpenForm}
+          />
+        </Grid2>
+      </Grid2>
 
         {/* Military Contribution Form Dialog */}
         <Dialog
