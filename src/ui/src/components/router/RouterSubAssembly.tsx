@@ -1,24 +1,22 @@
 import { Box } from "@mui/material";
 import PSDrawer from "components/Drawer/PSDrawer";
 import DSMDynamicBreadcrumbs from "components/DSMDynamicBreadcrumbs/DSMDynamicBreadcrumbs";
-import CleanUpSummary from "pages/CleanUpSummary/CleanUpSummary";
 import DemographicBadgesNotInPayprofit from "pages/DecemberActivities/DemographicBadgesNotInPayprofit/DemographicBadgesNotInPayprofit";
 import DistributionsAndForfeitures from "pages/DecemberActivities/DistributionsAndForfeitures/DistributionAndForfeitures";
 import DuplicateNamesAndBirthdays from "pages/DecemberActivities/DuplicateNamesAndBirthdays/DuplicateNamesAndBirthdays";
 import DuplicateSSNsOnDemographics from "pages/DecemberActivities/DuplicateSSNsOnDemographics/DuplicateSSNsOnDemographics";
 import EmployeesOnMilitaryLeave from "pages/DecemberActivities/EmployeesOnMilitaryLeave/EmployeesOnMilitaryLeave";
-import ManageExecutiveHoursAndDollars from "pages/DecemberActivities/ManageExecutiveHoursAndDollars/ManageExecutiveHoursAndDollars";
+import ManageExecutiveHoursAndDollars from "pages/FiscalClose/ManageExecutiveHoursAndDollars/ManageExecutiveHoursAndDollars";
 import MissingCommaInPyName from "pages/DecemberActivities/MissingCommaInPyName/MissingCommaInPyName";
 import NegativeEtvaForSSNsOnPayprofit from "pages/DecemberActivities/NegativeEtvaForSSNsOnPayprofit/NegativeEtvaForSSNsOnPayprofit";
 import Termination from "pages/DecemberActivities/Termination/Termination";
-import EligibleEmployees from "pages/EligibleEmployees/EligibleEmployees";
+import EligibleEmployees from "pages/FiscalClose/EligibleEmployees/EligibleEmployees";
 import ProfitShareReportEditRun from "pages/FiscalFlow/ProfitShareReportEditRun/ProfitShareReportEditRun";
 import ProfitShareReportFinalRun from "pages/FiscalFlow/ProfitShareReportFinalRun/ProfitShareReportFinalRun";
 import Forfeit from "pages/Forfeit/Forfeit";
 import FrozenSummary from "pages/FrozenSummary/FrozenSummary";
 import MasterInquiry from "pages/MasterInquiry/MasterInquiry";
 import RehireForfeitures from "pages/DecemberActivities/RehireForfeitures/RehireForfeitures";
-import MilitaryEntryAndModification from "pages/DecemberActivities/MilitaryEntryAndModification/MilitaryEntryAndModification";
 import EighteenToTwenty from "pages/PAY426Reports/PAY426-1/EighteenToTwenty";
 import Beneficiaries from "pages/PAY426Reports/PAY426-10/Beneficiaries";
 import TwentyOnePlus from "pages/PAY426Reports/PAY426-2/TwentyOnePlus";
@@ -62,6 +60,8 @@ import YTDWages from "../../pages/YTDWagesExtract/YTDWages";
 import RouteSecurity from "./RouteSecurity";
 
 import { MenuBar } from "components/MenuBar/MenuBar";
+import MilitaryEntryAndModification
+  from "../../pages/DecemberActivities/MilitaryEntryAndModification/MilitaryEntryAndModification";
 
 const RouterSubAssembly: React.FC = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";
@@ -206,9 +206,6 @@ const RouterSubAssembly: React.FC = () => {
               <Route
                 path={ROUTES.BALANCE_BY_AGE}
                 element={<BalanceByAge />}></Route>
-              <Route
-                path="clean-up-summary"
-                element={<CleanUpSummary />}></Route>
               <Route
                 path={ROUTES.FROZEN_SUMMARY}
                 element={<FrozenSummary />}></Route>

@@ -54,7 +54,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
 
   const employeeSection = [
     { label: "Badge", value: viewBadgeLinkRenderer(Number(badgeNumber)) },
-    { label: "DOB", value: dateOfBirth },
+    { label: "DOB", value: mmDDYYFormat(tryddmmyyyyToDate(dateOfBirth)) },
     { label: "SSN", value: `${ssn}` },
     { label: "ETVA", value: currentEtva },
     { label: "Enrollment", value: enrollment },

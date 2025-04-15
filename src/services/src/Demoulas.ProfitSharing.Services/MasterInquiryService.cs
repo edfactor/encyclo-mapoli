@@ -72,6 +72,8 @@ public class MasterInquiryService : IMasterInquiryService
                 combinedQuery = demographics.Union(beneficiary);
             }
 
+            combinedQuery = FilterPaymentType(req, combinedQuery);
+
             var formattedQuery = combinedQuery.Select(x => new MasterInquiryResponseDto
             {
                 Id = x.ProfitDetail.Id,
@@ -480,5 +482,29 @@ public class MasterInquiryService : IMasterInquiryService
             BeginVestedAmount = (previousBalance?.VestedBalance ?? 0),
             CurrentVestedAmount = (currentBalance?.VestedBalance ?? 0)
         };
+    }
+
+    private static IQueryable<MasterInquiryItem> FilterPaymentType(MasterInquiryRequest req, IQueryable<MasterInquiryItem> query)
+    {
+        if (req.PaymentType.HasValue)
+        {
+            switch (req.PaymentType)
+            {
+                case 1: // Hardship/Distribution
+                    List<byte?> array = [CommentType.Constants.Hardship.Id, CommentType.Constants.Distribution.Id];
+                    query = query.Where(x => array.Contains(x.ProfitDetail.CommentTypeId));
+                    break;
+                case 2: // payoffs
+                    array = [CommentType.Constants.Payoff.Id, CommentType.Constants.Forfeit.Id];
+                    query = query.Where(x => array.Contains(x.ProfitDetail.CommentTypeId));
+                    break;
+                case 3: // rollovers
+                    array = [CommentType.Constants.Rollover.Id, CommentType.Constants.RothIra.Id];
+                    query = query.Where(x => array.Contains(x.ProfitDetail.CommentTypeId));
+                    break;
+            }
+        }
+
+        return query;
     }
 }
