@@ -45,7 +45,7 @@ const MilitaryEntryAndModification = () => {
     if (masterInquiryEmployeeDetails) {
       handleFetchContributions();
     }
-  }, [masterInquiryEmployeeDetails]);
+  }, [handleFetchContributions, masterInquiryEmployeeDetails]);
 
   return (
     <Page
