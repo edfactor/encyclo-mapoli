@@ -33,6 +33,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Demoulas.ProfitSharing.Data\Demoulas.ProfitSharing.Data.csproj" />
     <ProjectReference Include="..\..\src\Demoulas.ProfitSharing.Security\Demoulas.ProfitSharing.Security.csproj" />
+    <ProjectReference Include="..\..\src\Demoulas.ProfitSharing.Services\Demoulas.ProfitSharing.Services.csproj" />
   </ItemGroup>
 
   <ItemGroup>

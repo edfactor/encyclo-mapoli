@@ -20,7 +20,7 @@ public class FrozenReportServiceTests : ApiTestBase<Program>
     {
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         var request = new ProfitYearRequest() { ProfitYear = 2023, Skip = 0, Take = 255 };
-        var response = await ApiClient.GETAsync<ForfeituresAndPointsForYearEndpoint, ProfitYearRequest, ReportResponseBase< ForfeituresAndPointsForYearResponse>> (request);
+        var response = await ApiClient.GETAsync<ForfeituresAndPointsForYearEndpoint, ProfitYearRequest, ForfeituresAndPointsForYearResponseWithTotals>(request);
         response.Should().NotBeNull();
     }
 
@@ -28,7 +28,7 @@ public class FrozenReportServiceTests : ApiTestBase<Program>
     public async Task Unauthorized()
     {
         var response =
-            await ApiClient.GETAsync<ForfeituresAndPointsForYearEndpoint, ProfitYearRequest, ReportResponseBase<ForfeituresAndPointsForYearResponse>>(new ProfitYearRequest());
+            await ApiClient.GETAsync<ForfeituresAndPointsForYearEndpoint, ProfitYearRequest, ForfeituresAndPointsForYearResponseWithTotals>(new ProfitYearRequest());
 
         response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
 
@@ -97,10 +97,10 @@ public class FrozenReportServiceTests : ApiTestBase<Program>
             }
             ppArray[0].ProfitYear = 2023;
             ppArray[0].IncomeExecutive = 25;
-            ppArray[0].CurrentIncomeYear = 0;
+            ppArray[0].CurrentIncomeYear = 49995;
             ppArray[1].ProfitYear = 2022;
             ppArray[1].IncomeExecutive = 0;
-            ppArray[1].CurrentIncomeYear = 49995;
+            ppArray[1].CurrentIncomeYear = 0;
 
             await ctx.SaveChangesAsync(CancellationToken.None);
         });

@@ -15,6 +15,13 @@ export type totalsGridProps = {
   tablePadding?: string;
   dataCellStyle?: React.CSSProperties;
   headerCellStyle?: React.CSSProperties;
+  breakPoints?: {
+    xs?: number;
+    sm?: number;
+    md?: number;
+    lg?: number;
+    xl?: number;
+  };
 };
 
 export type totalsRow = {
@@ -29,7 +36,8 @@ export const TotalsGrid: React.FC<totalsGridProps> = ({
   makeNegativesRed = true,
   tablePadding,
   dataCellStyle,
-  headerCellStyle
+  headerCellStyle,
+  breakPoints
 }) => {
   const rows: totalsRow[] = displayData.map((row, index) => {
     return { name: leftColumnHeaders[index], data: row };
@@ -56,7 +64,7 @@ export const TotalsGrid: React.FC<totalsGridProps> = ({
 
   return (
     <Grid2
-      size={{ xs: 12, md: 12, lg: 12, xl: 12 }}
+      size={breakPoints ?? { xs: 12, md: 12, lg: 12, xl: 12 }}
       padding={tablePadding ?? "24px"}>
       <TableContainer>
         <Table size="small">

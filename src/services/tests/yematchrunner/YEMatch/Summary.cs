@@ -32,6 +32,24 @@ public static class Summary
         var outcomes = JsonSerializer.Deserialize<List<Outcome>>(json);
         
 
+        if (outcomes == null || outcomes.Count == 0) {
+            Console.WriteLine("No outcomes found in the file.");
+            return;
+        }
+
+        if (outcomes.Count == 1)
+        {
+            if (outcomes[0].isSmart)
+            {
+                summarizeOneSide(outcomes!);
+            }
+            else
+            {
+                summarizeReadyAndSmart(outcomes!);
+            }
+
+            return;
+        }
         // Outcomes are only 1 side.
         if (outcomes?[0].isSmart == outcomes?[1].isSmart)
         {
@@ -69,17 +87,26 @@ public static class Summary
         Console.WriteLine($" {"Name".PadRight(nameWidth)},     {"READY",8}, {"SMART",8}");
         var readyTime = TimeSpan.Zero;
         var smartTime = TimeSpan.Zero;
-        foreach (var outcomePair in outcomes.Chunk(2))
-        {
-            var readyOutcome = outcomePair[0];
-            var smartOutcome = outcomePair[1];
-            var ksh = readyOutcome.Name.Split(" ")[0];
-            ksh = ksh.StartsWith('!') ? ksh.Substring(1) : ksh;
-            Console.WriteLine(
-                $"{Program.ModChar(readyOutcome)}{(readyOutcome.ActivityLetterNumber.PadRight(4) + " " + ksh).PadRight(nameWidth)},     {Summarize(readyOutcome),8},    {Summarize(smartOutcome)}");
 
-            readyTime = readyTime.Add(readyOutcome.took ?? TimeSpan.Zero);
-            smartTime = smartTime.Add(smartOutcome.took ?? TimeSpan.Zero);
+        if (outcomes?.Count == 1)
+        {
+            Console.WriteLine($"Only 1 outcome.");
+            Console.WriteLine($"{Summarize(outcomes[0])}");
+        }
+        else
+        {
+            foreach (var outcomePair in outcomes!.Chunk(2))
+            {
+                var readyOutcome = outcomePair[0];
+                var smartOutcome = outcomePair[1];
+                var ksh = readyOutcome.Name.Split(" ")[0];
+                ksh = ksh.StartsWith('!') ? ksh.Substring(1) : ksh;
+                Console.WriteLine(
+                    $"{Program.ModChar(readyOutcome)}{(readyOutcome.ActivityLetterNumber.PadRight(4) + " " + ksh).PadRight(nameWidth)},     {Summarize(readyOutcome),8},    {Summarize(smartOutcome)}");
+
+                readyTime = readyTime.Add(readyOutcome.took ?? TimeSpan.Zero);
+                smartTime = smartTime.Add(smartOutcome.took ?? TimeSpan.Zero);
+            }
         }
 
         Console.WriteLine($"\n{"---- Total Time".PadRight(nameWidth)} ,     {timeFmt(readyTime),8},{timeFmt(smartTime),8}\n");

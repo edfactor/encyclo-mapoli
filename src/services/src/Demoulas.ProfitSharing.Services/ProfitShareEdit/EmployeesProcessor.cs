@@ -36,8 +36,8 @@ internal static class EmployeeProcessorHelper
                 .Where(x => x.ppYE.ProfitYear == profitYear && x.ppNow.ProfitYear == profitYear + 1)
                 .Select(x => new
                 {
-                    x.ppYE.Demographic!.BadgeNumber,  // SHOULD BE FROM Frozen
-                    x.ppYE.Demographic.Ssn,          
+                    x.ppYE.Demographic!.BadgeNumber, // SHOULD BE FROM Frozen
+                    x.ppYE.Demographic.Ssn,
                     Name = x.ppYE.Demographic.ContactInfo!.FullName,
                     EnrolledId = x.ppYE.EnrollmentId,
                     x.ppYE.EmployeeTypeId,

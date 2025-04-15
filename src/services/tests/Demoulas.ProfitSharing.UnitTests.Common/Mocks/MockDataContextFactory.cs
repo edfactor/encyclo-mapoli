@@ -5,6 +5,7 @@ using Demoulas.Common.Data.Services.Entities.Entities;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.UnitTests.Common.Common;
 using Demoulas.ProfitSharing.UnitTests.Common.Fakes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -88,6 +89,9 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         {
             demographics.Find(d => d.Id == payProfit.DemographicId)?.PayProfits.Add(payProfit);
         }
+
+        List<ParticipantTotal> participantTotals = new ParticipantTotalFaker(demographics,beneficiaries).Generate(demographics.Count + beneficiaries.Count);
+        Constants.FakeParticipantTotals = [.. participantTotals];
 
         List<FrozenState>? frozenStates = new FrozenStateFaker().Generate(1);
 
