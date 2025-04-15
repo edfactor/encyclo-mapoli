@@ -827,6 +827,7 @@ export interface YearEndProfitSharingReportRequest {
 export interface CreateMilitaryContributionRequest extends ProfitYearRequest {
   badgeNumber: number;
   contributionAmount: number;
+  contributionDate: Date;
 }
 
 export interface MilitaryContribution {

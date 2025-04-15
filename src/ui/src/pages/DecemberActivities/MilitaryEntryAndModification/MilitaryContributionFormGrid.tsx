@@ -35,6 +35,8 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
       await fetchContributions({
         badgeNumber: Number(masterInquiryEmployeeDetails.badgeNumber),
         profitYear: profitYear,
+        contributionAmount: 0,
+        contributionDate: "",
         pagination: {
           skip: pageNumber * pageSize,
           take: pageSize,
@@ -43,7 +45,7 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
         }
       });
     }
-  }, [pageNumber, pageSize, sortParams, masterInquiryEmployeeDetails, fetchContributions]);
+  }, [pageNumber, pageSize, sortParams, masterInquiryEmployeeDetails, fetchContributions, profitYear]);
 
   useEffect(() => {
     if (initialSearchLoaded && masterInquiryEmployeeDetails) {

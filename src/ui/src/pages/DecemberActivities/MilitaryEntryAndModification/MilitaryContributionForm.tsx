@@ -1,9 +1,10 @@
-import { Button, FormLabel, TextField } from "@mui/material";
+import { Button, TextField } from "@mui/material";
 import Grid2 from '@mui/material/Grid2';
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import { useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { MilitaryContribution } from "reduxstore/types";
+import { useCreateMilitaryContributionMutation } from "reduxstore/api/MilitaryApi";
+import { CreateMilitaryContributionRequest, MilitaryContribution } from "reduxstore/types";
 
 interface FormData {
   contributionDate: Date | null;
@@ -15,15 +16,21 @@ interface MilitaryContributionFormProps {
   onCancel: () => void;
   initialData?: MilitaryContribution;
   isLoading?: boolean;
+  badgeNumber: number;
+  profitYear: number;
 }
 
 const MilitaryContributionForm = ({
                                     onSubmit,
                                     onCancel,
                                     initialData,
-                                    isLoading = false
+                                    isLoading = false,
+                                    badgeNumber,
+                                    profitYear
                                   }: MilitaryContributionFormProps) => {
-  const { control, handleSubmit, reset } = useForm<FormData>({
+  const [createMilitaryContribution, { isLoading: isSubmitting }] = useCreateMilitaryContributionMutation();
+
+  const { control, handleSubmit, reset, formState } = useForm<FormData>({
     defaultValues: {
       contributionDate: null,
       contributionAmount: null
@@ -39,11 +46,44 @@ const MilitaryContributionForm = ({
     }
   }, [initialData, reset]);
 
-  const handleFormSubmit = (data: FormData) => {
+  const handleFormSubmit = async (data: FormData) => {
+    console.log("Form submitted with data:", data);
+
     if (data.contributionDate && data.contributionAmount !== null) {
-      onSubmit(data);
+      console.log("Data validation passed");
+
+      const contribution: MilitaryContribution = {
+        contributionDate: data.contributionDate,
+        contributionAmount: data.contributionAmount
+      };
+
+      try {
+        console.log("Creating request with:", { badgeNumber, profitYear, contribution });
+
+        const request: CreateMilitaryContributionRequest = {
+          badgeNumber,
+          profitYear,
+          contributionDate: data.contributionDate,
+          contributionAmount: data.contributionAmount
+        };
+
+        console.log("Calling API with request:", request);
+        const result = await createMilitaryContribution(request).unwrap();
+        console.log("API call successful, result:", result);
+
+        onSubmit(contribution);
+      } catch (error) {
+        console.error("Failed to create military contribution:", error);
+      }
+    } else {
+      console.warn("Form validation failed:", {
+        date: data.contributionDate,
+        amount: data.contributionAmount
+      });
     }
   };
+
+  console.log("Form state:", formState);
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)}>
@@ -53,6 +93,7 @@ const MilitaryContributionForm = ({
             <Controller
               name="contributionDate"
               control={control}
+              rules={{ required: "Date is required" }}
               render={({ field, fieldState: { error } }) => (
                 <DsmDatePicker
                   id="contributionDate"
@@ -67,14 +108,15 @@ const MilitaryContributionForm = ({
             />
           </Grid2>
           <Grid2 size={{ xs: 6 }} >
-            <FormLabel>Contribution Amount</FormLabel>
             <Controller
               name="contributionAmount"
               control={control}
+              rules={{ required: "Amount is required" }}
               render={({ field, fieldState: { error } }) => (
                 <TextField
                   {...field}
                   fullWidth
+                  label="Contribution Amount"
                   type="number"
                   variant="outlined"
                   error={!!error}
@@ -84,6 +126,7 @@ const MilitaryContributionForm = ({
                     field.onChange(value === "" ? null : Number(value));
                   }}
                   value={field.value ?? ""}
+                  required
                 />
               )}
             />
@@ -95,7 +138,7 @@ const MilitaryContributionForm = ({
             <Button
               variant="contained"
               type="submit"
-              disabled={isLoading}>
+              disabled={isLoading || isSubmitting}>
               Save
             </Button>
           </Grid2>
@@ -103,7 +146,7 @@ const MilitaryContributionForm = ({
             <Button
               variant="outlined"
               onClick={onCancel}
-              disabled={isLoading}>
+              disabled={isLoading || isSubmitting}>
               Cancel
             </Button>
           </Grid2>
