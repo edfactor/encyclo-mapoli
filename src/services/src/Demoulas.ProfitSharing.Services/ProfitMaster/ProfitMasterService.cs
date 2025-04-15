@@ -1,32 +1,39 @@
-﻿using Demoulas.Common.Contracts.Interfaces;
+﻿using System.Data;
+using System.Data.Common;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Oracle.ManagedDataAccess.Client;
 
 namespace Demoulas.ProfitSharing.Services.ProfitMaster;
 
+#pragma warning disable AsyncFixer01
+
 /// <summary>
-/// Profit Master Update - inserts or deletes PROFIT_DETAIL rows based on values provided by the user.
-///
-/// Invokes the Profit Share Edit Service to compute and return the transactions (PROFIT_DETAIL rows) based on user input.
-/// The resulting records are inserted or deleted in the PROFIT_DETAILS database.
-///
-/// The employees ETVA field will be adjusted when inserting and records with an "100% Earnings" (profit_code=8) records.
-/// The ETVA field will be decremented when performing deletes.
-///
-/// The class name follows the name of the step in the Ready YE flow.
+///     Profit Master Update - inserts or deletes PROFIT_DETAIL rows based on values provided by the user.
+///     Invokes the Profit Share Edit Service to compute and return the transactions (PROFIT_DETAIL rows) based on user
+///     input.
+///     The resulting records are inserted or deleted in the PROFIT_DETAILS database.
+///     The employees ETVA field will be adjusted when inserting and records with an "100% Earnings" (profit_code=8)
+///     records.
+///     The ETVA field will be decremented when performing deletes.
+///     The class name follows the name of the step in the Ready YE flow.
 /// </summary>
 public class ProfitMasterService : IProfitMasterService
 {
-    private readonly IInternalProfitShareEditService _profitShareEditService;
-    private readonly IProfitSharingDataContextFactory _dbFactory;
     private readonly IAppUser _appUser;
+    private readonly IProfitSharingDataContextFactory _dbFactory;
+    private readonly IInternalProfitShareEditService _profitShareEditService;
 
     public ProfitMasterService(IInternalProfitShareEditService profitShareEditService, IProfitSharingDataContextFactory dbFactory, IAppUser appUser)
     {
@@ -35,14 +42,11 @@ public class ProfitMasterService : IProfitMasterService
         _appUser = appUser;
     }
 
-// Not clear to me why I have to sprinkle this here
-#pragma warning disable AsyncFixer01
-
     public async Task<ProfitMasterUpdateResponse?> Status(ProfitYearRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
         return await _dbFactory.UseReadOnlyContext(async ctx =>
         {
-            var yearEndUpdateStatus = await ctx.YearEndUpdateStatuses.Where(status => status.ProfitYear == profitShareUpdateRequest.ProfitYear)
+            YearEndUpdateStatus? yearEndUpdateStatus = await ctx.YearEndUpdateStatuses.Where(status => status.ProfitYear == profitShareUpdateRequest.ProfitYear)
                 .FirstOrDefaultAsync(cancellationToken);
             if (yearEndUpdateStatus == null)
             {
@@ -70,27 +74,19 @@ public class ProfitMasterService : IProfitMasterService
             };
         });
     }
-#pragma warning restore AsyncFixer01
 
     public async Task<ProfitMasterUpdateResponse> Update(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
-        int etvasUpdated = 0;
-        var (records, _, _, _, _) = await _profitShareEditService.ProfitShareEditRecords(profitShareUpdateRequest, cancellationToken);
+        (IEnumerable<ProfitShareEditMemberRecord> records, _, _, _, _) = await _profitShareEditService.ProfitShareEditRecords(profitShareUpdateRequest, cancellationToken);
 
         return await _dbFactory.UseWritableContext(async ctx =>
         {
-            var yearEndUpdateStatus = await ctx.YearEndUpdateStatuses.Where(yeStatus => yeStatus.ProfitYear == profitShareUpdateRequest.ProfitYear)
+            YearEndUpdateStatus? yearEndUpdateStatus = await ctx.YearEndUpdateStatuses.Where(yeStatus => yeStatus.ProfitYear == profitShareUpdateRequest.ProfitYear)
                 .FirstOrDefaultAsync(cancellationToken);
             if (yearEndUpdateStatus != null)
             {
                 throw new BadHttpRequestException($"Can not add new profit detail records for year {profitShareUpdateRequest.ProfitYear} until existing ones are removed.");
             }
-
-            var code2ProfitCode = await ctx.ProfitCodes.ToDictionaryAsync(pc => pc.Id, pc => pc, cancellationToken);
-
-            // Create records and batch insert them.
-            var profitDetailRecords = CreateProfitDetailRecords(code2ProfitCode, profitShareUpdateRequest.ProfitYear, records);
-            ctx.ProfitDetails.AddRange(profitDetailRecords);
 
             // === The following code is going to be altered in https://demoulas.atlassian.net/browse/PS-948 ===
             // to be more flexible.  Right now, the profit year is year locked to the wall clock year -1.
@@ -99,6 +95,17 @@ public class ProfitMasterService : IProfitMasterService
             {
                 throw new BadHttpRequestException($"The Profit year must be last year. {DateTime.Now.Year - 1}");
             }
+
+            Dictionary<byte, ProfitCode> code2ProfitCode = await ctx.ProfitCodes.ToDictionaryAsync(pc => pc.Id, pc => pc, cancellationToken);
+
+            // Get the records to be created
+            List<ProfitDetail> profitDetailRecords = CreateProfitDetailRecords(code2ProfitCode, profitShareUpdateRequest.ProfitYear, records);
+
+            // Insert them in bulk.
+            // ctx.ProfitDetails.AddRange(profitDetailRecords); <--- 7 minutes for obfuscated database
+            BulkInsertProfitDetails(ctx, profitDetailRecords);
+
+            // To Do: At the moment, if the following ETVA adjustment fails, then we are in the lurch, as the Bulk insert should be undone.
 
             // This code only runs when the system is "FROZEN" which means in the beginning of a new year, and processing
             // last year's profit sharing.   We currently grab most profit sharing data from PayProfit using the prior year (aka profit year), but
@@ -122,30 +129,52 @@ public class ProfitMasterService : IProfitMasterService
             // I believe they should both hold identical values when this is completed.   Note that doing a revert will restore the profitYear+1 ETVA to the value it had before the update.
             // and will zero out the ETVA for the profitYear.
 
-            var nowYear = DateTime.Now.Year;
-            var profitYear = profitShareUpdateRequest.ProfitYear;
+            int nowYear = DateTime.Now.Year;
+            short profitYear = profitShareUpdateRequest.ProfitYear;
 
-            var employeeSsns = records.Select(r => r.Ssn).ToHashSet();
-            var payProfits = await ctx.PayProfits.Include(pp => pp.Demographic)
-                .Where(pp => (pp.ProfitYear == profitYear || pp.ProfitYear == nowYear) && employeeSsns.Contains(pp.Demographic!.Ssn))
-                .ToListAsync(cancellationToken);
+            await ctx.SaveChangesAsync(cancellationToken);
 
-            var ssnByPayProfitNow = payProfits.Where(pp => pp.ProfitYear == nowYear).ToDictionary(pp => pp.Demographic!.Ssn, pp => pp);
-            var ssnByPayProfitYearEnd = payProfits.Where(pp => pp.ProfitYear == profitYear).ToDictionary(pp => pp.Demographic!.Ssn, pp => pp);
+            // Bump the ETVA by the amount of the earnings for the 100% vested earnings records.
+            // if you got $100 in interest on your "fully owned" part of profit sharing, then your ETVA goes up by 100.
+            var sqlAdjustEtva = @$"
+                MERGE INTO pay_profit pp
+                USING (
+                  -- find all the employees who got an altered ETVA, via the new 8 records.
+                  SELECT d.id AS demographic_id, pd.earnings
+                  FROM profit_detail pd
+                  JOIN demographic d ON pd.ssn = d.ssn
+                  WHERE pd.profit_code_id = /*8*/ {ProfitCode.Constants.Incoming100PercentVestedEarnings.Id} 
+                    AND pd.profit_year = {profitYear}
+                    AND pd.comment_type_id = /* 23 '100% Earnings' */{CommentType.Constants.OneHundredPercentEarnings.Id} 
+                ) oq    
+                ON (pp.demographic_id = oq.demographic_id AND pp.profit_year = {nowYear})
+                WHEN MATCHED THEN
+                  -- bump UP the ETVA by the amount of 100% earnings. 
+                  UPDATE SET pp.etva = pp.etva + oq.earnings";
+            int etvasEffected = await ctx.Database.ExecuteSqlRawAsync(sqlAdjustEtva, cancellationToken);
 
-            foreach (var earningRecord in records.Where(r => r.Code == /*8*/ ProfitCode.Constants.Incoming100PercentVestedEarnings.Id && r.IsEmployee))
-            {
-                PayProfit ppNow = ssnByPayProfitNow[earningRecord.Ssn];
-                ppNow.Etva += earningRecord.EarningAmount; // we add "100% interest amount" to the ETVA
+            // set last years ETVA to the value we just wrote into the now year.
+            var sqlAdjustProfitYearEtva = @$"
+                MERGE INTO pay_profit pp
+                USING (
+                  -- find all the employees who got an altered ETVA, via the new 8 records.
+                  SELECT d.id AS demographic_id, pp2.Etva
+                  FROM profit_detail pd
+                  JOIN demographic d ON pd.ssn = d.ssn
+                  JOIN pay_profit pp2 ON d.id = pp2.demographic_id
+                  WHERE pd.profit_code_id = /*8*/ {ProfitCode.Constants.Incoming100PercentVestedEarnings.Id} 
+                    AND pd.profit_year = {profitYear}
+                    AND pd.comment_type_id = /* 23 '100% Earnings' */{CommentType.Constants.OneHundredPercentEarnings.Id} 
+                    AND pp2.profit_year = {nowYear}
+                ) oq    
+                ON (pp.demographic_id = oq.demographic_id AND pp.profit_year = {profitYear})
+                WHEN MATCHED THEN
+                  -- copy now to last year 
+                  UPDATE SET pp.etva = oq.etva";
+            etvasEffected += await ctx.Database.ExecuteSqlRawAsync(sqlAdjustProfitYearEtva, cancellationToken);
 
-                PayProfit ppProfitYear = ssnByPayProfitYearEnd[earningRecord.Ssn];
-                ppProfitYear.Etva = ppNow.Etva; // At this moment, both "Now" and the "Profit Year" ETVAs are identical.
-
-                etvasUpdated++;
-            }
-
-            var employeesEffected = records.Where(m => m.IsEmployee).Select(m => m.Ssn).ToHashSet().Count;
-            var beneficiariesEffected = records.Where(m => !m.IsEmployee).Select(m => m.Ssn).ToHashSet().Count;
+            int employeesEffected = records.Where(m => m.IsEmployee).Select(m => m.Ssn).ToHashSet().Count;
+            int beneficiariesEffected = records.Where(m => !m.IsEmployee).Select(m => m.Ssn).ToHashSet().Count;
 
             ctx.YearEndUpdateStatuses.Add(new YearEndUpdateStatus
             {
@@ -154,7 +183,7 @@ public class ProfitMasterService : IProfitMasterService
                 UpdatedBy = _appUser.UserName ?? "Unknown",
                 BeneficiariesEffected = beneficiariesEffected,
                 EmployeesEffected = employeesEffected,
-                EtvasEffected = etvasUpdated,
+                EtvasEffected = etvasEffected,
                 ContributionPercent = profitShareUpdateRequest.ContributionPercent,
                 IncomingForfeitPercent = profitShareUpdateRequest.IncomingForfeitPercent,
                 EarningsPercent = profitShareUpdateRequest.EarningsPercent,
@@ -174,7 +203,8 @@ public class ProfitMasterService : IProfitMasterService
             {
                 BeneficiariesEffected = beneficiariesEffected,
                 EmployeesEffected = employeesEffected,
-                EtvasEffected = etvasUpdated,
+                EtvasEffected = etvasEffected,
+                TransactionsCreated = profitDetailRecords.Count,
                 UpdatedTime = DateTime.Now,
                 UpdatedBy = _appUser.UserName ?? "Unknown",
                 ContributionPercent = profitShareUpdateRequest.ContributionPercent,
@@ -207,78 +237,164 @@ public class ProfitMasterService : IProfitMasterService
             Forfeiture = r.ForfeitureAmount,
             Remark = r.Remark,
             ZeroContributionReasonId = r.ZeroContStatus,
-            CommentTypeId = r.CommentTypeId,
+            CommentTypeId = r.CommentTypeId
         }).ToList();
     }
 
-#pragma warning disable AsyncFixer01
     public async Task<ProfitMasterRevertResponse> Revert(ProfitYearRequest profitYearRequest, CancellationToken cancellationToken)
     {
+        int nowYear = DateTime.Now.Year;
+        short profitYear = profitYearRequest.ProfitYear;
+
         return await _dbFactory.UseWritableContext(async ctx =>
         {
-            // See the longer explaination above in the "Update" method for why we lock this parameter
+            // See the longer explanation above in the "Update" method for why we lock this parameter
             // TBD: the "profit Year" parameter will likely be removed in the future
-            if (profitYearRequest.ProfitYear != DateTime.Now.Year - 1)
+            if (profitYearRequest.ProfitYear != nowYear - 1)
             {
-                throw new BadHttpRequestException($"The Profit year must be last year. {DateTime.Now.Year - 1}");
+                throw new BadHttpRequestException($"The Profit year must be last year. {nowYear - 1}");
             }
 
-            var yearEndUpdateStatus = await ctx.YearEndUpdateStatuses.Where(yeStatus => yeStatus.ProfitYear == profitYearRequest.ProfitYear).FirstOrDefaultAsync(cancellationToken);
+            YearEndUpdateStatus? yearEndUpdateStatus =
+                await ctx.YearEndUpdateStatuses.Where(yeStatus => yeStatus.ProfitYear == profitYearRequest.ProfitYear).FirstOrDefaultAsync(cancellationToken);
             if (yearEndUpdateStatus == null)
             {
+                Debug.WriteLine($"Can not Revert. There is no year end update for profit year {profitYearRequest.ProfitYear}");
                 throw new BadHttpRequestException($"Can not Revert. There is no year end update for profit year {profitYearRequest.ProfitYear}");
             }
 
-            // read this year's contribution/vestingEarnings profit_detail rows
-            var pds = await ctx.ProfitDetails
-                .Where(pd => pd.ProfitYear == profitYearRequest.ProfitYear &&
-                             ((pd.ProfitCodeId == /*8*/ ProfitCode.Constants.Incoming100PercentVestedEarnings.Id &&
-                               pd.CommentTypeId == CommentType.Constants.OneHundredPercentEarnings.Id)
-                              || pd.ProfitCodeId == /*0*/ ProfitCode.Constants.IncomingContributions.Id))
-                .ToListAsync(cancellationToken);
-
             // --- Adjust ETVA
 
-            // When the revert is run, both the profitYear and profitYear+1 ETVAs need to be updated.
-            // profitYear + 1 ---> because it is the hot "ETVA" which gets adjusted on demand, and we need to subtract our adjustment
-            // profitYear ---> because it is about to become the new "Last Years" ETVA amount - we no longer have a valid value for last years ETVA.
-            // so PayProfit[profitYear].ETVA will be set it to 0.  last years ETVA is in limbo util the YE is completed.
+            // Rollback the effect of the transactions
+            var sqlAdjustEtvaSql = $@"
+                MERGE INTO pay_profit pp
+                USING (
+                  -- find the employees and the amount of earnings 
+                  SELECT d.id AS demographic_id, pd.earnings
+                  FROM profit_detail pd
+                  JOIN demographic d ON pd.ssn = d.ssn
+                  JOIN pay_profit pp2 ON d.id = pp2.demographic_id
+                  WHERE pd.profit_code_id = {ProfitCode.Constants.Incoming100PercentVestedEarnings.Id}
+                    AND pd.profit_year = {profitYear}
+                    AND pd.comment_type_id = {CommentType.Constants.OneHundredPercentEarnings.Id}
+                    AND pp2.profit_year = {nowYear}
+                ) oq
+                ON (pp.demographic_id = oq.demographic_id AND pp.profit_year = {nowYear})
+                WHEN MATCHED THEN
+                  -- bump DOWN the ETVA by the amount of 100% earnings. 
+                  UPDATE SET pp.etva = pp.etva - oq.earnings";
+            int etvasEffected = await ctx.Database.ExecuteSqlRawAsync(sqlAdjustEtvaSql, cancellationToken);
 
-            var nowYear = DateTime.Now.Year;
-            var profitYear = profitYearRequest.ProfitYear;
 
-            var memberSsns = pds.Select(p => p.Ssn).ToHashSet();
-            var payProfitsBothYears = await ctx.PayProfits.Include(pp => pp.Demographic)
-                .Where(pp => (pp.ProfitYear == nowYear || pp.ProfitYear == profitYear) && memberSsns.Contains(pp.Demographic!.Ssn))
-                .ToListAsync(cancellationToken);
+            // Now get rid of the transactions.
+            var deleteTransactionsSql =
+                $@"DELETE FROM profit_detail WHERE 
+                PROFIT_YEAR = 2024 AND
+                (PROFIT_CODE_id = /*0*/ {ProfitCode.Constants.IncomingContributions.Id} AND comment_type_id is null) 
+                OR
+                (PROFIT_CODE_id = /*8*/  {ProfitCode.Constants.Incoming100PercentVestedEarnings.Id} AND comment_type_id = /*23*/ {CommentType.Constants.OneHundredPercentEarnings.Id})";
 
-            var ssnByPayProfitNow = payProfitsBothYears.Where(pp => pp.ProfitYear == nowYear).ToDictionary(pp => pp.Demographic!.Ssn, pp => pp);
-            var ssnByPayProfitYearEnd = payProfitsBothYears.Where(pp => pp.ProfitYear == profitYear).ToDictionary(pp => pp.Demographic!.Ssn, pp => pp);
+            var transactionsDeleted = await ctx.Database.ExecuteSqlRawAsync(deleteTransactionsSql, cancellationToken);
 
-            var etvasReverted = 0;
-            foreach (var etvaReccords in pds
-                         .Where(pd => pd.ProfitCodeId == /*8*/ ProfitCode.Constants.Incoming100PercentVestedEarnings.Id && ssnByPayProfitYearEnd.ContainsKey(pd.Ssn))
-                         .Select(pd => new { pd, ppNow = ssnByPayProfitNow[pd.Ssn], ppProfitYear = ssnByPayProfitYearEnd[pd.Ssn] }))
+            if (yearEndUpdateStatus != null)
             {
-                // Here we back out the change to the now ETVA (as we are reverting the transaction.)
-                etvaReccords.ppNow.Etva -= etvaReccords.pd.Earnings;
-                // We cant unwind this because we stomped on it during the Update.  It will get corrected when YE completes.  At this moment it is in limbo.
-                etvaReccords.ppProfitYear.Etva = 0;
-                etvasReverted++;
+                ctx.YearEndUpdateStatuses.Remove(yearEndUpdateStatus);
             }
 
-            ctx.ProfitDetails.RemoveRange(pds);
-            ctx.YearEndUpdateStatuses.Remove(yearEndUpdateStatus);
-
             await ctx.SaveChangesAsync(cancellationToken);
+
             return new ProfitMasterRevertResponse
             {
-                BeneficiariesEffected = memberSsns.Count - ssnByPayProfitNow.Count,
-                EmployeesEffected = ssnByPayProfitNow.Count,
-                EtvasEffected = etvasReverted,
-                UdpatedTime = DateTime.Now,
+                BeneficiariesEffected = yearEndUpdateStatus?.BeneficiariesEffected ?? 0,
+                EmployeesEffected = yearEndUpdateStatus?.EmployeesEffected ?? 0,
+                TransactionsRemoved = transactionsDeleted,
+                EtvasEffected = etvasEffected,
+                UpdatedTime = DateTime.Now,
                 UpdatedBy = _appUser.UserName ?? "Unknown",
             };
         }, cancellationToken);
+    }
+
+    private static void /*async Task*/ BulkInsertProfitDetails(ProfitSharingDbContext ctx, IEnumerable<ProfitDetail> details)
+    {
+        //
+        // Consider looking into; Demoulas.Common.Data.Contexts.Extensions.DbContextExtensions
+        //
+
+        // There is not an obvious way to participate in the ongoing EF transaction, so this happens on the side - which is annoying.
+        OracleConnection connection = (OracleConnection)ctx.Database.GetDbConnection();
+
+        using var bulkCopy = new OracleBulkCopy(connection) { DestinationTableName = "PROFIT_DETAIL" };
+
+        // Define column mappings (exclude ID since it's auto-generated)
+        var columns = new[]
+        {
+            "SSN", "PROFIT_YEAR", "PROFIT_YEAR_ITERATION", "DISTRIBUTION_SEQUENCE", "PROFIT_CODE_ID", "CONTRIBUTION", "EARNINGS", "FORFEITURE", "MONTH_TO_DATE", "YEAR_TO_DATE",
+            "REMARK", "ZERO_CONTRIBUTION_REASON_ID", "FEDERAL_TAXES", "STATE_TAXES", "TAX_CODE_ID", "COMMENT_TYPE_ID", "COMMENT_RELATED_CHECK_NUMBER", "COMMENT_RELATED_STATE",
+            "COMMENT_RELATED_ORACLE_HCM_ID", "COMMENT_RELATED_PSN_SUFFIX", "COMMENT_IS_PARTIAL_TRANSACTION", "CREATED_UTC", "YEARS_OF_SERVICE_CREDIT"
+        };
+
+        // This seems nutty, to simply map the column names 1-1, but take this out and Oracle tries to add the parameters to the
+        // SQL in it's own secret order - not the order of the column definitions in the table.
+        foreach (var col in columns)
+        {
+            bulkCopy.ColumnMappings.Add(col, col);
+        }
+
+        var table = new DataTable();
+        table.Columns.Add("SSN", typeof(long));
+        table.Columns.Add("PROFIT_YEAR", typeof(short));
+        table.Columns.Add("PROFIT_YEAR_ITERATION", typeof(byte));
+        table.Columns.Add("DISTRIBUTION_SEQUENCE", typeof(int));
+        table.Columns.Add("PROFIT_CODE_ID", typeof(byte));
+        table.Columns.Add("CONTRIBUTION", typeof(decimal));
+        table.Columns.Add("EARNINGS", typeof(decimal));
+        table.Columns.Add("FORFEITURE", typeof(decimal));
+        table.Columns.Add("MONTH_TO_DATE", typeof(byte));
+        table.Columns.Add("YEAR_TO_DATE", typeof(short));
+        table.Columns.Add("REMARK", typeof(string));
+        table.Columns.Add("ZERO_CONTRIBUTION_REASON_ID", typeof(int));
+        table.Columns.Add("FEDERAL_TAXES", typeof(decimal));
+        table.Columns.Add("STATE_TAXES", typeof(decimal));
+        table.Columns.Add("TAX_CODE_ID", typeof(string));
+        table.Columns.Add("COMMENT_TYPE_ID", typeof(byte));
+        table.Columns.Add("COMMENT_RELATED_CHECK_NUMBER", typeof(string));
+        table.Columns.Add("COMMENT_RELATED_STATE", typeof(string));
+        table.Columns.Add("COMMENT_RELATED_ORACLE_HCM_ID", typeof(long));
+        table.Columns.Add("COMMENT_RELATED_PSN_SUFFIX", typeof(int));
+        table.Columns.Add("COMMENT_IS_PARTIAL_TRANSACTION", typeof(int));
+        table.Columns.Add("CREATED_UTC", typeof(DateTimeOffset)); // Explicitly define type here
+        table.Columns.Add("YEARS_OF_SERVICE_CREDIT", typeof(int));
+
+        foreach (var pd in details)
+        {
+            table.Rows.Add(
+                pd.Ssn,
+                pd.ProfitYear,
+                pd.ProfitYearIteration,
+                pd.DistributionSequence,
+                pd.ProfitCodeId,
+                pd.Contribution,
+                pd.Earnings,
+                pd.Forfeiture,
+                pd.MonthToDate,
+                pd.YearToDate,
+                pd.Remark,
+                pd.ZeroContributionReasonId,
+                pd.FederalTaxes,
+                pd.StateTaxes,
+                pd.TaxCodeId,
+                pd.CommentTypeId,
+                pd.CommentRelatedCheckNumber,
+                pd.CommentRelatedState,
+                pd.CommentRelatedOracleHcmId,
+                pd.CommentRelatedPsnSuffix,
+                pd.CommentIsPartialTransaction,
+                pd.CreatedUtc,
+                pd.YearsOfServiceCredit
+            );
+        }
+
+        bulkCopy.WriteToServer(table);
     }
 }

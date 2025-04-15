@@ -1,0 +1,131 @@
+﻿using System.Data;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+using System.Text;
+using System.Text.RegularExpressions;
+using Demoulas.Common.Contracts.Interfaces;
+using Demoulas.Common.Data.Services.Service;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services;
+using Demoulas.ProfitSharing.Services.ProfitMaster;
+using Demoulas.ProfitSharing.Services.ProfitShareEdit;
+using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
+using Moq;
+using Oracle.ManagedDataAccess.Client;
+using Match = System.Text.RegularExpressions.Match;
+
+
+namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
+
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+
+public static class StopwatchExtensions
+{
+    public static string Took(this Stopwatch sw)
+    {
+        return $"took {sw.Elapsed.Minutes} min {sw.Elapsed.Seconds} secs";
+    }
+}
+
+[SuppressMessage("AsyncUsage", "AsyncFixer01:Unnecessary async/await usage")]
+public class ProfitMasterTests
+{
+    private readonly AccountingPeriodsService _aps = new();
+    private readonly CalendarService _calendarService;
+    private readonly TotalService _totalService;
+    private readonly PristineDataContextFactory _dbFactory;
+    private readonly ITestOutputHelper _testOutputHelper;
+
+    public ProfitMasterTests(ITestOutputHelper testOutputHelper)
+    {
+        _dbFactory = new PristineDataContextFactory();
+        _calendarService = new CalendarService(_dbFactory, _aps);
+        _totalService = new TotalService(_dbFactory, _calendarService, new EmbeddedSqlService());
+        _testOutputHelper = testOutputHelper;
+    }
+
+    [Fact]
+    public async Task UpdateTest()
+    {
+        // Arrange
+        short profitYear = 2024;
+        IAppUser iAppUser = new Mock<IAppUser>().Object;
+        ProfitShareUpdateService psus = new ProfitShareUpdateService(_dbFactory, _totalService, _calendarService);
+        ProfitShareEditService pses = new ProfitShareEditService(psus);
+        ProfitMasterService pms = new ProfitMasterService(pses, _dbFactory, iAppUser);
+
+        Stopwatch sw = Stopwatch.StartNew();
+        try
+        {
+            var prs = await pms.Revert(
+                new ProfitYearRequest() { Skip = null, Take = null, ProfitYear = profitYear, }, CancellationToken.None);
+            _testOutputHelper.WriteLine($"Revert {sw.Took()}, for transactionsRemoved:{prs.TransactionsRemoved}  etvasEffected:{prs.EtvasEffected}");
+        }
+        catch (Exception e)
+        {
+            _testOutputHelper.WriteLine($"Revert failed: {e.Message}");
+        }
+
+        sw = Stopwatch.StartNew();
+
+        // Forces a connection, so the Bulk operations can access an open connection
+        await _dbFactory.UseWritableContext(async ctx =>
+        {
+            var c = ctx.Database.GetDbConnection();
+            if (c is OracleConnection oracleConnection)
+            {
+                await oracleConnection.OpenAsync();
+            }
+
+            return 7;
+        });
+
+        // Act
+        var psur = await pms.Update(
+            new ProfitShareUpdateRequest
+            {
+                Skip = null,
+                Take = null,
+                ProfitYear = profitYear,
+                ContributionPercent = 15,
+                IncomingForfeitPercent = 4,
+                EarningsPercent = 5,
+                SecondaryEarningsPercent = 0,
+                MaxAllowedContributions = 76_500,
+                BadgeToAdjust = 0,
+                BadgeToAdjust2 = 0,
+                AdjustContributionAmount = 0,
+                AdjustEarningsAmount = 0,
+                AdjustIncomingForfeitAmount = 0,
+                AdjustEarningsSecondaryAmount = 0
+            }, CancellationToken.None);
+
+        sw.Stop();
+        _testOutputHelper.WriteLine($"Update {sw.Took()} for transactions:{psur.TransactionsCreated} etvasEffected:{psur.EtvasEffected}");
+        true.Should().Be(true);
+    }
+
+    [Fact]
+    public async Task RevertTest()
+    {
+        // Arrange
+        short profitYear = 2024;
+        IAppUser iAppUser = new Mock<IAppUser>().Object;
+        ProfitShareUpdateService psus = new ProfitShareUpdateService(_dbFactory, _totalService, _calendarService);
+        ProfitShareEditService pses = new ProfitShareEditService(psus);
+        ProfitMasterService pms = new ProfitMasterService(pses, _dbFactory, iAppUser);
+
+        Stopwatch sw = Stopwatch.StartNew();
+        // Act
+        var prs = await pms.Revert(
+            new ProfitYearRequest() { Skip = null, Take = null, ProfitYear = profitYear, }, CancellationToken.None);
+
+        sw.Stop();
+        _testOutputHelper.WriteLine($"Revert took {sw.Took()}; for TransactionsRemoved:{prs.TransactionsRemoved} etvasEffected:{prs.EtvasEffected}");
+        true.Should().Be(true);
+    }
+}
