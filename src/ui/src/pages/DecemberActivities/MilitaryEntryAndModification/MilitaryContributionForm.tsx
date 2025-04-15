@@ -70,6 +70,7 @@ const MilitaryContributionForm = ({
                     value={field.value ?? null}
                     error={error?.message}
                     required={false}
+                    views={["year", "month"]}
                   />
                 )}
               />

@@ -802,6 +802,8 @@ export interface ProfallData {
 
 export interface MilitaryContributionRequest extends ProfitYearRequest {
   badgeNumber: number;
+  contributionAmount: number;
+  contributionDate: string;
   pagination: SortedPaginationRequestDto;
 }
 
