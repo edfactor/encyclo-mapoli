@@ -320,8 +320,6 @@ public class ProfitMasterService : IProfitMasterService
         //
         // Consider looking into; Demoulas.Common.Data.Contexts.Extensions.DbContextExtensions
         //
-
-        // There is not an obvious way to participate in the ongoing EF transaction, so this happens on the side - which is annoying.
         OracleConnection connection = (OracleConnection)ctx.Database.GetDbConnection();
 
         using var bulkCopy = new OracleBulkCopy(connection) { DestinationTableName = "PROFIT_DETAIL" };
