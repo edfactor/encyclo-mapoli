@@ -13,6 +13,10 @@ interface SearchFormData {
   badgeNumber?: string;
 }
 
+interface SearchFilterProps {
+  setInitialSearchLoaded: (loaded: boolean) => void;
+}
+
 const validationSchema = yup
   .object()
   .shape({
@@ -23,7 +27,7 @@ const validationSchema = yup
     Boolean(values.socialSecurity || values.badgeNumber)
   );
 
-const MilitaryEntryAndModificationSearchFilter = () => {
+const MilitaryEntryAndModificationSearchFilter: React.FC<SearchFilterProps> = ({ setInitialSearchLoaded }) => {
   const [triggerSearch, { isFetching }] = useLazyGetProfitMasterInquiryQuery();
   const {
     register,
@@ -42,8 +46,11 @@ const MilitaryEntryAndModificationSearchFilter = () => {
         ...(!!data.badgeNumber && { badgeNumber: Number(data.badgeNumber) })
       },
       false
-    );
+    ).then(() => {
+      setInitialSearchLoaded(true); // Set to true after successful search
+    });
   };
+
   const handleReset = () => {
     reset();
     dispatch(clearMasterInquiryData());

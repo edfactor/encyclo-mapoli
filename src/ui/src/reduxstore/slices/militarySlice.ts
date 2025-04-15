@@ -1,8 +1,9 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { MasterInquiryDetail, PagedReportResponse } from "reduxstore/types";
+import { Paged } from "smart-ui-library";
 
 export interface MilitaryState {
-  militaryContributionsData: PagedReportResponse<MasterInquiryDetail> | null;
+  militaryContributionsData: Paged<MasterInquiryDetail> | null;
   error: string | null;
 }
 
@@ -15,7 +16,7 @@ export const militarySlice = createSlice({
   name: "military",
   initialState,
   reducers: {
-    setMilitaryContributions: (state, action: PayloadAction<PagedReportResponse<MasterInquiryDetail> | null>) => {
+    setMilitaryContributions: (state, action: PayloadAction<Paged<MasterInquiryDetail> | null>) => {
       if (action.payload) {
         state.militaryContributionsData = action.payload;
         state.error = null;

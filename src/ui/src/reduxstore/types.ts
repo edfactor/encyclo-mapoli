@@ -802,7 +802,7 @@ export interface ProfallData {
 
 export interface MilitaryContributionRequest extends ProfitYearRequest {
   badgeNumber: number;
-  pagination: PaginationParams;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface YearEndProfitSharingReportRequest {
