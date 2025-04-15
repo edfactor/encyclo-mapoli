@@ -1,4 +1,5 @@
 ﻿using CsvHelper.Configuration;
+using CsvHelper;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -9,7 +10,7 @@ using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
-public class ForfeituresAndPointsForYearEndpoint:EndpointWithCsvBase<FrozenProfitYearRequest, ForfeituresAndPointsForYearResponse, ForfeituresAndPointsForYearEndpoint.ForfeituresAndPointsForYearEndpointMapper>
+public class ForfeituresAndPointsForYearEndpoint : EndpointWithCsvTotalsBase<FrozenProfitYearRequest, ForfeituresAndPointsForYearResponseWithTotals, ForfeituresAndPointsForYearResponse, ForfeituresAndPointsForYearEndpoint.ForfeituresAndPointsForYearEndpointMapper>
 {
     private readonly IFrozenReportService _frozenReportService;
 
@@ -33,15 +34,7 @@ public class ForfeituresAndPointsForYearEndpoint:EndpointWithCsvBase<FrozenProfi
             {
                 {
                     200,
-                    new ReportResponseBase<ForfeituresAndPointsForYearResponse>
-                    {
-                        ReportName = ReportFileName,
-                        ReportDate = DateTimeOffset.Now,
-                        Response = new PaginatedResponseDto<ForfeituresAndPointsForYearResponse>
-                        {
-                            Results = new List<ForfeituresAndPointsForYearResponse> { ForfeituresAndPointsForYearResponse.ResponseExample() }
-                        }
-                    }
+                    ForfeituresAndPointsForYearResponseWithTotals.ResponseExample()
                 }
             };
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
@@ -50,12 +43,32 @@ public class ForfeituresAndPointsForYearEndpoint:EndpointWithCsvBase<FrozenProfi
         base.Configure();
     }
 
-    public override Task<ReportResponseBase<ForfeituresAndPointsForYearResponse>> GetResponse(FrozenProfitYearRequest req, CancellationToken ct)
+    public override Task<ForfeituresAndPointsForYearResponseWithTotals> GetResponse(FrozenProfitYearRequest req, CancellationToken ct)
     {
         return _frozenReportService.GetForfeituresAndPointsForYearAsync(req, ct);
     }
 
-    public class ForfeituresAndPointsForYearEndpointMapper:ClassMap<ForfeituresAndPointsForYearResponse>
+    protected internal override async Task GenerateCsvContent(CsvWriter csvWriter, ForfeituresAndPointsForYearResponseWithTotals report, CancellationToken cancellationToken)
+    {
+        csvWriter.WriteField("Total Forfeitures:");
+        csvWriter.WriteField(report.TotalForfeitures);
+        await csvWriter.NextRecordAsync();
+        
+        csvWriter.WriteField("Total Forfeit Points:");
+        csvWriter.WriteField(report.TotalForfeitPoints);
+        await csvWriter.NextRecordAsync();
+        
+        csvWriter.WriteField("Total Earning Points:");
+        csvWriter.WriteField(report.TotalEarningPoints);
+        await csvWriter.NextRecordAsync();
+        
+        await csvWriter.NextRecordAsync();
+
+        csvWriter.Context.RegisterClassMap<ForfeituresAndPointsForYearEndpointMapper>();
+        await csvWriter.WriteRecordsAsync(report.Response.Results, cancellationToken);
+    }
+
+    public class ForfeituresAndPointsForYearEndpointMapper : ClassMap<ForfeituresAndPointsForYearResponse>
     {
         public ForfeituresAndPointsForYearEndpointMapper()
         {
