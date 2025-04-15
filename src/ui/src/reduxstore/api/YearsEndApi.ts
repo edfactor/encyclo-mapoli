@@ -5,6 +5,7 @@ import {
   clearBreakdownByStore,
   clearProfitMasterApply,
   clearProfitMasterRevert,
+  clearProfitMasterStatus,
   clearProfitSharingEdit,
   clearProfitSharingUpdate,
   clearUnder21BreakdownByStore,
@@ -33,6 +34,7 @@ import {
   setNegativeEtvaForSSNsOnPayprofit,
   setProfitMasterApply,
   setProfitMasterRevert,
+  setProfitMasterStatus,
   setProfitShareSummaryReport,
   setProfitSharingEdit,
   setProfitSharingUpdate,
@@ -81,6 +83,7 @@ import {
   NegativeEtvaForSSNsOnPayProfit,
   NegativeEtvaForSSNsOnPayprofitRequestDto,
   PagedReportResponse,
+  ProfitMasterStatus,
   ProfitShareEditResponse,
   ProfitShareMasterApplyRequest,
   ProfitShareMasterResponse,
@@ -757,6 +760,24 @@ export const YearsEndApi = createApi({
         }
       }
     }),
+    getProfitMasterStatus: builder.query<ProfitMasterStatus, ProfitYearRequest>({
+      query: (params) => ({
+        url: "yearend/profit-master-status",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setProfitMasterStatus(data));
+        } catch (err) {
+          console.log("Err: " + err);
+          dispatch(clearProfitMasterStatus());
+        }
+      }
+    }),
     getBreakdownByStore: builder.query<BreakdownByStoreResponse, BreakdownByStoreRequest>({
       query: (params) => ({
         url: "yearend/breakdown-by-store",
@@ -991,5 +1012,6 @@ export const {
   useLazyGetYearEndProfitSharingSummaryReportQuery,
   useLazyGetUpdateSummaryQuery,
   useLazyGetMasterApplyQuery,
-  useLazyGetMasterRevertQuery
+  useLazyGetMasterRevertQuery,
+  useLazyGetProfitMasterStatusQuery
 } = YearsEndApi;
