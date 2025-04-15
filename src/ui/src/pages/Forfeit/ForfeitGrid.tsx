@@ -63,6 +63,16 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ initialSearchLoaded, setIniti
   }, [initialSearchLoaded, pageNumber, pageSize, onSearch]);
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
+
+  const totalForfeitures = forfeituresAndPoints?.totalForfeitures ?? 0;
+  const totalForfeitPoints = forfeituresAndPoints?.totalForfeitPoints ?? 0;
+  const totalEarningPoints = forfeituresAndPoints?.totalEarningPoints ?? 0;
+
+  const totalsRow = {
+    forfeitures: totalForfeitures.toFixed(2) ?? "0.00",
+    forfeitPoints: totalForfeitPoints ?? 0,
+    earningPoints: totalEarningPoints ?? 0
+  };
   
   return (
     <>
