@@ -33,6 +33,7 @@ const MilitaryEntryAndModification = () => {
 
   const handleCloseForm = () => {
     setIsDialogOpen(false);
+    setInitialSearchLoaded(true);
   };
 
   const handleFetchContributions = useCallback(() => {
@@ -88,7 +89,6 @@ const MilitaryEntryAndModification = () => {
           <DialogContent>
             <MilitaryContributionForm
               onSubmit={(rows) => {
-                // Handle submit logic
                 handleCloseForm();
                 setInitialSearchLoaded(true); // Trigger a refresh                
               }}
