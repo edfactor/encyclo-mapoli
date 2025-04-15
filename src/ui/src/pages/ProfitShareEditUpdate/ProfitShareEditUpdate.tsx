@@ -76,7 +76,13 @@ const useRevertAction = (
   return revertAction;
 };
 
-const useSaveAction = () => {
+const useSaveAction = (
+  successMessage: MessageUpdate,
+  failMessage: MessageUpdate,
+  setEmployeesAffected: { (value: SetStateAction<number>): void; (arg0: number): void },
+  setBeneficiariesAffected: { (value: SetStateAction<number>): void; (arg0: number): void },
+  setEtvasAffected: { (value: SetStateAction<number>): void; (arg0: number): void }
+) => {
   const { profitSharingEditQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const [trigger] = useLazyGetMasterApplyQuery();
   const dispatch = useDispatch();
@@ -104,13 +110,17 @@ const useSaveAction = () => {
     await trigger(params)
       .unwrap()
       .then((payload) => {
-        //dispatch(setMessage(Messages.ProfitShareApplySuccess));
+        setEmployeesAffected(payload?.employeesAffected || 0);
+        setBeneficiariesAffected(payload?.beneficiariesAffected || 0);
+        setEtvasAffected(payload?.etvasAffected || 0);
+        dispatch(setProfitEditUpdateChangesAvailable(false));
+        dispatch(setMessage(successMessage));
         console.log("Successfully applied changes to year end: ", payload);
         dispatch(setProfitEditUpdateRevertChangesAvailable(true));
       })
       .catch((error) => {
         console.error("ERROR: Did not apply changes to year end", error);
-        //dispatch(setMessage(Messages.ProfitShareApplyFail));
+        dispatch(setMessage(failMessage));
       });
   };
 
@@ -259,7 +269,13 @@ const ProfitShareEditUpdate = () => {
     setBeneficiariesAffected,
     setEtvasAffected
   );
-  const saveAction = useSaveAction();
+  const saveAction = useSaveAction(
+    Messages.ProfitShareApplySuccess,
+    Messages.ProfitShareApplyFail,
+    setEmployeesAffected,
+    setBeneficiariesAffected,
+    setEtvasAffected
+  );
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const hasToken = !!useSelector((state: RootState) => state.security.token);
   const {
