@@ -25,9 +25,7 @@ const NegativeEtvaForSSNsOnPayprofitGrid: React.FC<NegativeEtvaForSSNsOnPayprofi
     isSortDescending: false
   });
 
-  const { negativeEtvaForSSNsOnPayprofit } = useSelector(
-    (state: RootState) => state.yearsEnd
-  );
+  const { negativeEtvaForSSNsOnPayprofit } = useSelector((state: RootState) => state.yearsEnd);
 
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const profitYear = useDecemberFlowProfitYear();
@@ -36,8 +34,8 @@ const NegativeEtvaForSSNsOnPayprofitGrid: React.FC<NegativeEtvaForSSNsOnPayprofi
   const onSearch = useCallback(async () => {
     const request = {
       profitYear: profitYear || 0,
-      pagination: { 
-        skip: pageNumber * pageSize, 
+      pagination: {
+        skip: pageNumber * pageSize,
         take: pageSize,
         sortBy: sortParams.sortBy,
         isSortDescending: sortParams.isSortDescending
@@ -45,7 +43,7 @@ const NegativeEtvaForSSNsOnPayprofitGrid: React.FC<NegativeEtvaForSSNsOnPayprofi
     };
 
     await triggerSearch(request, false);
-  }, [pageNumber, pageSize, triggerSearch, profitYear, sortParams, hasToken]);
+  }, [pageNumber, pageSize, triggerSearch, profitYear, sortParams]);
 
   useEffect(() => {
     if (initialSearchLoaded && hasToken && profitYear) {

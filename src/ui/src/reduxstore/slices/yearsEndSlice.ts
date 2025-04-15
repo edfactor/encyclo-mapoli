@@ -1,9 +1,10 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { clear } from "console";
 
 import {
   BalanceByAge,
   BalanceByYears,
+  BreakdownByStoreRequest,
+  BreakdownByStoreResponse,
   ContributionsByAge,
   DemographicBadgesNotInPayprofit,
   DistributionsAndForfeitures,
@@ -27,33 +28,33 @@ import {
   MissingCommasInPYName,
   NegativeEtvaForSSNsOnPayProfit,
   PagedReportResponse,
+  ProfitMasterStatus,
+  ProfitShareAdjustmentSummary,
   ProfitShareEditResponse,
+  ProfitShareEditUpdateQueryParams,
   ProfitShareMasterResponse,
   ProfitShareUpdateResponse,
   ProfitSharingDistributionsByAge,
   ProfitYearRequest,
   RehireForfeituresRequest,
+  ReportsByAgeParams,
   TerminationResponse,
-  VestedAmountsByAge,
-  YearEndProfitSharingReportResponse,
-  BreakdownByStoreResponse,
-  BreakdownByStoreRequest,
-  Under21BreakdownByStoreResponse,
   Under21BreakdownByStoreRequest,
-  Under21InactiveResponse,
+  Under21BreakdownByStoreResponse,
   Under21InactiveRequest,
+  Under21InactiveResponse,
   Under21TotalsRequest,
   Under21TotalsResponse,
-  YearEndProfitSharingReportSummaryResponse,
   UpdateSummaryResponse,
-  ReportsByAgeParams,
-  ProfitShareEditUpdateQueryParams,
-  ProfitShareAdjustmentSummary,
-  ProfitSharingLabel
+  ProfitSharingLabel,
+  YearEndProfitSharingReportResponse,
+  VestedAmountsByAge,
+  YearEndProfitSharingReportSummaryResponse
 } from "reduxstore/types";
 import { Paged } from "smart-ui-library";
 
 export interface YearsEndState {
+  profitMasterStatus: ProfitMasterStatus | null;
   profitEditUpdateChangesAvailable: boolean;
   profitEditUpdateRevertChangesAvailable: boolean;
   selectedProfitYearForDecemberActivities: number;
@@ -141,6 +142,7 @@ const initialState: YearsEndState = {
   selectedProfitYearForFiscalClose: localStorage.getItem("selectedProfitYearForFiscalClose")
     ? Number(localStorage.getItem("selectedProfitYearForFiscalClose"))
     : 2024,
+  profitMasterStatus: null,
   additionalExecutivesChosen: null,
   additionalExecutivesGrid: null,
   balanceByAgeFullTime: null,
@@ -223,6 +225,12 @@ export const yearsEndSlice = createSlice({
   name: "yearsEnd",
   initialState,
   reducers: {
+    setProfitMasterStatus: (state, action: PayloadAction<ProfitMasterStatus>) => {
+      state.profitMasterStatus = action.payload;
+    },
+    clearProfitMasterStatus: (state) => {
+      state.profitMasterStatus = null;
+    },
     setExecutiveHoursAndDollarsAddQueryParams: (state, action: PayloadAction<ExecutiveHoursAndDollarsQueryParams>) => {
       state.executiveHoursAndDollarsAddQueryParams = action.payload;
     },
@@ -1046,6 +1054,8 @@ export const {
   clearExecutiveHoursAndDollarsAddQueryParams,
   setExecutiveHoursAndDollarsAddQueryParams,
   setProfitSharingLabels,
-  clearProfitSharingLabels
+  clearProfitSharingLabels,
+  setProfitMasterStatus,
+  clearProfitMasterStatus
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;

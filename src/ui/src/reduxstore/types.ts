@@ -745,6 +745,25 @@ export interface ProfitShareMasterResponse {
   etvasAffected?: number;
 }
 
+export interface ProfitMasterStatus {
+  updatedTime?: string;
+  updatedBy?: string;
+  beneficiariesEffected?: number;
+  employeesEffected?: number;
+  etvasEffected?: number;
+  contributionPercent?: number;
+  incomingForfeitPercent?: number;
+  earningsPercent?: number;
+  secondaryEarningsPercent?: number;
+  maxAllowedContributions?: number;
+  badgeAdjusted?: number;
+  badgeAdjusted2?: number;
+  adjustContributionAmount?: number;
+  adjustEarningsAmount?: number;
+  adjustIncomingForfeitAmount?: number;
+  adjustEarningsSecondaryAmount?: number;
+}
+
 export interface ProfitShareEditUpdateQueryParams {
   profitYear: Date;
   contributionPercent?: number | null;
