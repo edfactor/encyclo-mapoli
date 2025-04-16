@@ -167,6 +167,11 @@ export const menuLevels: MenuLevel[] = [
         subPages: []
       },
       {
+        topTitle: CAPTIONS.PAY450_SUMMARY,
+        topRoute: ROUTES.PAY450_SUMMARY,
+        subPages: []
+      },
+      {
         topTitle: CAPTIONS.REPORTS_BY_AGE,
         subPages: [
           { subTitle: CAPTIONS.CONTRIBUTIONS_BY_AGE, subRoute: ROUTES.CONTRIBUTIONS_BY_AGE },

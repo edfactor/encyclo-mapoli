@@ -1,6 +1,6 @@
 import { Divider } from "@mui/material";
 import Grid2 from '@mui/material/Grid2';
-import { Page, DSMAccordion } from "smart-ui-library";
+import { Page, DSMAccordion, numberToCurrency } from "smart-ui-library";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { CAPTIONS } from "../../constants";
@@ -14,36 +14,39 @@ interface ProfitYearSearch {
     profitYear: number;
 }
 
-// Sample data for demo purposes (to be removed when endpoint is fixed)
-const sampleData = {
-    totalNumberOfEmployees: 0,
-    totalNumberOfBeneficiaries: 1
-};
-
 const Pay450Summary = () => {
     const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
     const fiscalCloseProfitYear = useFiscalCloseProfitYear();
     const { updateSummary } = useSelector((state: RootState) => state.yearsEnd);
-    const [demoMode, setDemoMode] = useState(true);
 
-    // Set initialSearchLoaded to true on mount to trigger the API call
     useEffect(() => {
         setInitialSearchLoaded(true);
     }, []);
 
-    // Dynamic data for the summary section
     const updateSummarySection = [
         { 
             label: "Employees Updated", 
-            // Use demo data if in demo mode, otherwise use real data
-            value: demoMode ? sampleData.totalNumberOfEmployees.toString() 
-                : (updateSummary ? updateSummary.totalNumberOfEmployees.toString() : "-")
+            value: updateSummary ? updateSummary.totalNumberOfEmployees.toString() : "-"
         },
         { 
             label: "Beneficiaries Updated", 
-            // Use demo data if in demo mode, otherwise use real data
-            value: demoMode ? sampleData.totalNumberOfBeneficiaries.toString()
-                : (updateSummary ? updateSummary.totalNumberOfBeneficiaries.toString() : "-")
+            value: updateSummary ? updateSummary.totalNumberOfBeneficiaries.toString() : "-"
+        },
+        { 
+            label: "Before Profit Sharing Amount", 
+            value: updateSummary ? numberToCurrency(updateSummary.totalBeforeProfitSharingAmount) : "-"
+        },
+        { 
+            label: "Before Vested Amount", 
+            value: updateSummary ? numberToCurrency(updateSummary.totalBeforeVestedAmount) : "-"
+        },
+        { 
+            label: "After Profit Sharing Amount", 
+            value: updateSummary ? numberToCurrency(updateSummary.totalAfterProfitSharingAmount) : "-"
+        },
+        { 
+            label: "After Vested Amount", 
+            value: updateSummary ? numberToCurrency(updateSummary.totalAfterVestedAmount) : "-"
         }
     ];
 
@@ -66,7 +69,7 @@ const Pay450Summary = () => {
                     </DSMAccordion>
                 </Grid2>
 
-                <Grid2 size={{ xs: 2 }} paddingX="24px" >
+                <Grid2 size={{ xs: 12 }} paddingX="24px" >
                     <LabelValueSection
                         data={updateSummarySection}
                     />
