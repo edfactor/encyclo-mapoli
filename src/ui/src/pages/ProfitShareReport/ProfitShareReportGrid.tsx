@@ -1,61 +1,54 @@
-import { useMemo, useState } from "react";
-import { useSelector } from "react-redux";
-import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
-import { RootState } from "reduxstore/store";
+import { useMemo } from "react";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetProfitShareReportColumns } from "./ProfitShareReportGridColumn";
 
-interface ProfitShareReportGridSearchProps {
-  initialSearchLoaded: boolean;
-  setInitialSearchLoaded: (loaded: boolean) => void;
+interface ProfitShareReportGridProps {
+  data: any[];
+  isLoading: boolean;
+  pageNumber: number;
+  pageSize: number;
+  sortParams: ISortParams;
+  recordCount: number;
+  onPageChange: (value: number) => void;
+  onPageSizeChange: (value: number) => void;
+  onSortChange: (update: ISortParams) => void;
 }
 
-const ProfitShareReportGrid: React.FC<ProfitShareReportGridSearchProps> = ({
-  initialSearchLoaded,
-  setInitialSearchLoaded
+const ProfitShareReportGrid: React.FC<ProfitShareReportGridProps> = ({
+  data,
+  isLoading,
+  pageNumber,
+  pageSize,
+  sortParams,
+  recordCount,
+  onPageChange,
+  onPageSizeChange,
+  onSortChange
 }) => {
-  const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
-  const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "badgeNumber",
-    isSortDescending: false
-  });
-
-  const { yearEndProfitSharingReport, yearEndProfitSharingReportQueryParams } = useSelector(
-    (state: RootState) => state.yearsEnd
-  );
-
-  const [triggerSearch, { isLoading }] = useLazyGetYearEndProfitSharingReportQuery();
-
-  const sortEventHandler = (update: ISortParams) => setSortParams(update);
   const columnDefs = useMemo(() => GetProfitShareReportColumns(), []);
 
   return (
     <>
-      {!!yearEndProfitSharingReport && (
-        <DSMGrid
-          preferenceKey={"ProfitShareReportGrid"}
-          isLoading={isLoading}
-          providedOptions={{
-            rowData: yearEndProfitSharingReport?.response.results,
-            columnDefs: columnDefs
-          }}
-        />
-      )}
-      {!!yearEndProfitSharingReport && yearEndProfitSharingReport.response.results.length > 0 && (
+      <DSMGrid
+        preferenceKey={"ProfitShareReportGrid"}
+        isLoading={isLoading}
+        handleSortChanged={onSortChange}
+        providedOptions={{
+          rowData: data,
+          columnDefs: columnDefs
+        }}
+      />
+      {data.length > 0 && (
         <Pagination
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
-            setPageNumber(value - 1);
-            setInitialSearchLoaded(true);
+            onPageChange(value);
           }}
           pageSize={pageSize}
           setPageSize={(value: number) => {
-            setPageSize(value);
-            setPageNumber(1);
-            setInitialSearchLoaded(true);
+            onPageSizeChange(value);
           }}
-          recordCount={yearEndProfitSharingReport.response.total}
+          recordCount={recordCount}
         />
       )}
     </>
