@@ -1,4 +1,5 @@
 ﻿using Demoulas.Common.Data.Services.Service;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using FluentAssertions;
@@ -127,12 +128,12 @@ public class TotalServiceIntegrationTests
         });
     }
 
-    private async Task<Dictionary<int, ParticipantTotalVestingBalanceDto>> GetSmartAmounts()
+    private async Task<Dictionary<int, ParticipantTotalVestingBalance>> GetSmartAmounts()
     {
         return await _dataContextFactory.UseReadOnlyContext(ctx =>
             _totalService.TotalVestingBalance(ctx, _employeeYear, (_employeeYear), /*asOfDate*/ new DateOnly(_employeeYear, 1, 4))
                 .ToDictionaryAsync(
-                    keySelector: p => p.Ssn!.Value,
+                    keySelector: p => p.Ssn,
                     elementSelector: p => p)
         );
     }
