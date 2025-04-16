@@ -69,8 +69,8 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
     resolver: yupResolver(schema),
     defaultValues: {
       profitYear: profitYear || distributionsAndForfeituresQueryParams?.profitYear || undefined,
-      startMonth: distributionsAndForfeituresQueryParams?.startMonth || undefined,
-      endMonth: distributionsAndForfeituresQueryParams?.endMonth || undefined,
+      startMonth: distributionsAndForfeituresQueryParams?.startMonth || 1,
+      endMonth: distributionsAndForfeituresQueryParams?.endMonth || 12,
       includeOutgoingForfeitures: distributionsAndForfeituresQueryParams?.includeOutgoingForfeitures || false
     }
   });
@@ -104,8 +104,8 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
     // Clear the form fields
     reset({
       profitYear: profitYear || undefined,
-      startMonth: undefined,  // Explicitly set to undefined
-      endMonth: undefined,    // Explicitly set to undefined
+      startMonth: 1,  
+      endMonth: 12,
       includeOutgoingForfeitures: false
     });
 

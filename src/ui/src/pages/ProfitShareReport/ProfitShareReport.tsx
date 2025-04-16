@@ -62,13 +62,7 @@ const ProfitShareReport = () => {
   const renderActionNode = () => {
     return (
       <div className="flex items-center gap-2 h-10">
-        <StatusDropdownActionNode />
-        <Button
-          onClick={() => navigate(`/${ROUTES.PROFIT_SHARE_REPORT_EDIT_RUN}`)}
-          variant="outlined"
-          className="h-10 whitespace-nowrap min-w-fit">
-          {MENU_LABELS.GO_TO_PROFIT_SHARE_EDIT_RUN}
-        </Button>
+        <StatusDropdownActionNode />      
       </div>
     );
   };
