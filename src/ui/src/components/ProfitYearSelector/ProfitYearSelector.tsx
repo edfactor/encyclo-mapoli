@@ -71,6 +71,19 @@ const ProfitYearSelector = ({
     yearsToDisplay.push(thisYear);
   }
 
+  // Add useEffect to auto-select the only value if there's just one option
+  useEffect(() => {
+    if (yearsToDisplay.length === 1 && selectedProfitYear !== yearsToDisplay[0]) {
+      // Create a synthetic event to mimic the Select's change event
+      const syntheticEvent = {
+        target: { value: yearsToDisplay[0].toString() }
+      } as SelectChangeEvent;
+
+      handleChange(syntheticEvent);
+    }
+  }, [yearsToDisplay, selectedProfitYear, handleChange]);
+
+
   return (
     <div className="flex items-center gap-2 h-10 min-w-[174px]">
       <FormControl
