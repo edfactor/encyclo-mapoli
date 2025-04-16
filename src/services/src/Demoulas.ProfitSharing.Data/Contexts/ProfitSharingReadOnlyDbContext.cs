@@ -44,6 +44,9 @@ public class ProfitSharingReadOnlyDbContext : ReadOnlyOracleDbContext<ProfitShar
 
     public virtual DbSet<AccountingPeriod> AccountingPeriods { get; set; }
     public virtual DbSet<ParticipantTotal> ParticipantTotals { get; set; }
+    public virtual DbSet<ParticipantTotalRatio> ParticipantTotalRatios { get; set; }
+    public virtual DbSet<ParticipantTotalYear> ParticipantTotalYears { get; set; }
+    public virtual DbSet<ParticipantTotalVestingBalance> ParticipantTotalVestingBalances { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

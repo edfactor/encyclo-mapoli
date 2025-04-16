@@ -28,6 +28,12 @@ internal static class EmployeeProcessorHelper
         CalendarResponseDto fiscalDates = await calendarService.GetYearStartAndEndAccountingDatesAsync(priorYear, cancellationToken);
         var employeeFinancialsList = await dbContextFactory.UseReadOnlyContext(async ctx =>
         {
+            var t = await ctx.PayProfits
+                .Join(ctx.PayProfits,
+                    ppYE => ppYE.DemographicId,
+                    ppNow => ppNow.DemographicId,
+                    (ppYE, ppNow) => new { ppYE, ppNow })
+                .Where(x => x.ppYE.ProfitYear == profitYear && x.ppNow.ProfitYear == profitYear + 1).ToListAsync();
             var employees = ctx.PayProfits
                 .Join(ctx.PayProfits,
                     ppYE => ppYE.DemographicId,

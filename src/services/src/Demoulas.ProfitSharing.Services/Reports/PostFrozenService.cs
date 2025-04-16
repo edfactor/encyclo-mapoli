@@ -76,7 +76,7 @@ public class PostFrozenService : IPostFrozenService
                     from bal in balTmp.DefaultIfEmpty()
                     join lyBalTbl in _totalService.TotalVestingBalance(ctx, lastProfitYear, lastProfitYear, calInfo.FiscalEndDate) on d.Ssn equals lyBalTbl.Ssn into lyBalTmp
                     from lyBal in lyBalTmp.DefaultIfEmpty()
-                    select new Under21IntermediaryResult() { d=d, bal = bal ?? new ParticipantTotalVestingBalanceDto(), lyBal = lyBal ?? new ParticipantTotalVestingBalanceDto() }
+                    select new Under21IntermediaryResult() { d=d, bal = bal ?? new ParticipantTotalVestingBalance(), lyBal = lyBal ?? new ParticipantTotalVestingBalance() }
                 ).ToListAsync(cancellationToken);
 
             //Get Active under 21 counts
@@ -506,7 +506,7 @@ public class PostFrozenService : IPostFrozenService
                 var rawData =  await qry.ToPaginationResultsAsync(request, cancellationToken);
                 var ssns = rawData.Results.Select(x=>x.Ssn).ToList();
 
-                var balanceInfo = await _totalService.TotalVestingBalance(ctx, request.ProfitYear, calInfo.FiscalEndDate).Where(x => ssns.Contains(x.Ssn ?? 0)).ToListAsync(cancellationToken);
+                var balanceInfo = await _totalService.TotalVestingBalance(ctx, request.ProfitYear, calInfo.FiscalEndDate).Where(x => ssns.Contains(x.Ssn)).ToListAsync(cancellationToken);
 
 
                 return new PaginatedResponseDto<NewProfitSharingLabelResponse>(request)
@@ -632,7 +632,7 @@ public class PostFrozenService : IPostFrozenService
     internal class Under21IntermediaryResult
     {
         internal required Demographic d { get; set; }
-        internal required ParticipantTotalVestingBalanceDto bal { get; set; }
-        internal required ParticipantTotalVestingBalanceDto lyBal { get; set; }
+        internal required ParticipantTotalVestingBalance bal { get; set; }
+        internal required ParticipantTotalVestingBalance lyBal { get; set; }
     }
 }

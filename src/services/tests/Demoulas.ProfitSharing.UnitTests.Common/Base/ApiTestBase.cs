@@ -56,14 +56,7 @@ public class ApiTestBase<TStartup> where TStartup : class
                 {
                     services.AddTransient((_)=> MockDbContextFactory);
 
-                    services.AddTransient((_) =>
-                    {
-                        var mock = new Mock<IEmbeddedSqlService>();
-                        mock.Setup(m => m.GetTotalBalanceAlt(It.IsAny<IProfitSharingDbContext>(), It.IsAny<short>()))
-                            .Returns((IProfitSharingDbContext x, short y) => Constants.FakeParticipantTotals.AsAsyncQueryable());
-
-                        return mock.Object;
-                    });
+                    services.AddTransient((_) => MockEmbeddedSqlService.Initialize());
 
                     ServiceProvider = services.BuildServiceProvider();
                 });
