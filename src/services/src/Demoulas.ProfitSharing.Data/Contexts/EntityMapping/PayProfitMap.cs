@@ -12,12 +12,14 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
 
         _ = builder.HasKey(e => new { e.DemographicId, e.ProfitYear});
 
+        _ = builder.HasIndex(e => e.EnrollmentId, "IX_EnrollmentId");
+        _ = builder.HasIndex(e => e.ProfitYear, "IX_ProfitYear");
+
         _ = builder.Property(e => e.DemographicId)
             .HasPrecision(9)
             .ValueGeneratedNever()
             .HasColumnName("DEMOGRAPHIC_ID");
 
-        _ = builder.HasIndex(e => e.ProfitYear, "IX_ProfitYear");
         _ = builder.Property(e => e.ProfitYear)
             .HasPrecision(4)
             .ValueGeneratedNever()
@@ -66,7 +68,7 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
         _ = builder.Property(e => e.ZeroContributionReasonId)
             .HasColumnName("ZERO_CONTRIBUTION_REASON_ID");
 
-        _ = builder.HasIndex(e => e.EnrollmentId, "IX_EnrollmentId");
+        
         _ = builder.Property(e => e.EnrollmentId)
             .HasColumnName("ENROLLMENT_ID");
 
