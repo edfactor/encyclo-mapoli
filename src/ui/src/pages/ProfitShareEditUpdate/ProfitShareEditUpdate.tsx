@@ -96,7 +96,7 @@ const useRevertAction = (
       profitYear: profitYear ?? 0
     };
 
-    console.log("reverting cahnges to year end: ", params);
+    console.log("reverting changes to year end: ", params);
     console.log(params);
 
     await trigger(params, false)
@@ -430,7 +430,7 @@ const ProfitShareEditUpdate = () => {
         {profitSharingUpdate && profitSharingEdit && (
           <div>
             <div className="px-[24px]">
-              <h2 className="text-dsm-secondary">Summary</h2>
+              <h2 className="text-dsm-secondary">Summary PAY444</h2>
               <Typography
                 fontWeight="bold"
                 variant="body2">
@@ -483,7 +483,14 @@ const ProfitShareEditUpdate = () => {
               ]}
               tablePadding="12px"
             />
-            <div style={{ display: "flex", gap: "8px" }}>
+              <div className="px-[24px]">
+                   <div>Total forfeitures: {profitSharingUpdate.totals.maxOverTotal}, total points exceeding max contribution: {profitSharingUpdate.totals.maxPointsTotal}</div>
+                  <br />
+              </div>
+              <div className="px-[24px]">
+              <h2 className="text-dsm-secondary">Summary PAY447</h2>
+              </div>
+              <div style={{ display: "flex", gap: "8px" }}>
               <TotalsGrid
                 breakPoints={{ xs: 5, sm: 5, md: 5, lg: 5, xl: 5 }}
                 tablePadding="4px"
@@ -526,10 +533,10 @@ const ProfitShareEditUpdate = () => {
                     ],
                     [
                       "",
-                      numberToCurrency(profitSharingUpdateAdjustmentSummary?.contributionAmountAdjusted || 0),
-                      numberToCurrency(profitSharingUpdateAdjustmentSummary?.earningsAmountAdjusted || 0),
-                      numberToCurrency(profitSharingUpdateAdjustmentSummary?.secondaryEarningsAmountAdjusted || 0),
-                      numberToCurrency(profitSharingUpdateAdjustmentSummary?.incomingForfeitureAmountAdjusted || 0)
+                      "", // need the requested contribution adjustment (from the request)
+                      "", // need the requested earnings adjustment amount
+                      "", // need the requested secondary earnings
+                      "", // need the requested incoming forfeiture adjustment 
                     ],
                     [
                       "",
