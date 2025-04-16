@@ -445,7 +445,6 @@ const PSDrawer = () => {
                                     "& .MuiTypography-root": {
                                       fontSize: "0.875rem",
                                       fontWeight: isTopPageActive ? 'bold' : 'normal',
-                                      color: isTopPageActive ? HIGHLIGHT_COLOR : 'inherit'
                                     }
                                   }}
                                 />

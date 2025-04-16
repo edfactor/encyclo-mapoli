@@ -57,7 +57,7 @@ const EligibleEmployeesGrid: React.FC<EligibleEmployeesGridProps> = ({
           </div>
           <DSMGrid
             preferenceKey={"ELIGIBLE_EMPLOYEES"}
-            isLoading={false}
+            isLoading={isFetching}
             handleSortChanged={sortEventHandler}
             providedOptions={{
               rowData: eligibleEmployees?.response.results,

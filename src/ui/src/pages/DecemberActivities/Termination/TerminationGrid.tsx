@@ -92,7 +92,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({ initialSearchLo
           </div>
           <DSMGrid
             preferenceKey={"TERM"}
-            isLoading={false}
+            isLoading={isFetching}
             handleSortChanged={sortEventHandler}
             providedOptions={{
               rowData: termination?.response.results,
