@@ -1,4 +1,3 @@
-
 import { ChevronLeft, ExpandLess, ExpandMore } from "@mui/icons-material";
 import {
   Box,
@@ -33,6 +32,9 @@ import { SvgIconProps } from "@mui/material";
 import { RootState } from "reduxstore/store";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+
+// Define the highlight color as a constant
+const HIGHLIGHT_COLOR = "#0258A5";
 
 const SidebarIcon = (props: SvgIconProps) => (
   <SvgIcon
@@ -307,12 +309,12 @@ const PSDrawer = () => {
                                 py: 1.75,
                                 minHeight: 0,
                                 backgroundColor: hasActiveSubPage ?
-                                  (theme) => `${theme.palette.primary.light}20` : 'transparent',
+                                  `${HIGHLIGHT_COLOR}15` : 'transparent',
                                 borderLeft: hasActiveSubPage ?
-                                  (theme) => `4px solid ${theme.palette.primary.main}` : '4px solid transparent',
+                                  `4px solid ${HIGHLIGHT_COLOR}` : '4px solid transparent',
                                 '&:hover': {
-                                  backgroundColor: (theme) => hasActiveSubPage ?
-                                    `${theme.palette.primary.light}30` : theme.palette.action.hover,
+                                  backgroundColor: hasActiveSubPage ?
+                                    `${HIGHLIGHT_COLOR}25` : (theme) => theme.palette.action.hover,
                                 }
                               }}>
                               <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -329,7 +331,8 @@ const PSDrawer = () => {
                                     margin: 0,
                                     "& .MuiTypography-root": {
                                       fontSize: "0.875rem",
-                                      fontWeight: hasActiveSubPage ? 'bold' : 'normal'
+                                      fontWeight: hasActiveSubPage ? 'bold' : 'normal',
+                                      color: hasActiveSubPage ? HIGHLIGHT_COLOR : 'inherit'
                                     }
                                   }}
                                 />
@@ -359,12 +362,12 @@ const PSDrawer = () => {
                                           py: 1,
                                           minHeight: 0,
                                           backgroundColor: isSubPageActive ?
-                                            (theme) => `${theme.palette.primary.light}20` : 'transparent',
+                                            `${HIGHLIGHT_COLOR}15` : 'transparent',
                                           borderLeft: isSubPageActive ?
-                                            (theme) => `4px solid ${theme.palette.primary.main}` : '4px solid transparent',
+                                            `4px solid ${HIGHLIGHT_COLOR}` : '4px solid transparent',
                                           '&:hover': {
-                                            backgroundColor: (theme) => isSubPageActive ?
-                                              `${theme.palette.primary.light}30` : theme.palette.action.hover,
+                                            backgroundColor: isSubPageActive ?
+                                              `${HIGHLIGHT_COLOR}25` : (theme) => theme.palette.action.hover,
                                           }
                                         }}
                                         onClick={() => handleSubPageClick(subPage.subRoute ?? "")}>
@@ -381,7 +384,8 @@ const PSDrawer = () => {
                                             primaryTypographyProps={{
                                               variant: "body2",
                                               sx: {
-                                                fontWeight: isSubPageActive ? 'bold' : 'normal'
+                                                fontWeight: isSubPageActive ? 'bold' : 'normal',
+                                                color: isSubPageActive ? HIGHLIGHT_COLOR : 'inherit'
                                               }
                                             }}
                                             sx={{
@@ -415,12 +419,12 @@ const PSDrawer = () => {
                                 py: 1,
                                 minHeight: 0,
                                 backgroundColor: isTopPageActive ?
-                                  (theme) => `${theme.palette.primary.light}20` : 'transparent',
+                                  `${HIGHLIGHT_COLOR}15` : 'transparent',
                                 borderLeft: isTopPageActive ?
-                                  (theme) => `4px solid ${theme.palette.primary.main}` : '4px solid transparent',
+                                  `4px solid ${HIGHLIGHT_COLOR}` : '4px solid transparent',
                                 '&:hover': {
-                                  backgroundColor: (theme) => isTopPageActive ?
-                                    `${theme.palette.primary.light}30` : theme.palette.action.hover,
+                                  backgroundColor: isTopPageActive ?
+                                    `${HIGHLIGHT_COLOR}25` : (theme) => theme.palette.action.hover,
                                 }
                               }}>
                               <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -437,7 +441,8 @@ const PSDrawer = () => {
                                     margin: 0,
                                     "& .MuiTypography-root": {
                                       fontSize: "0.875rem",
-                                      fontWeight: isTopPageActive ? 'bold' : 'normal'
+                                      fontWeight: isTopPageActive ? 'bold' : 'normal',
+                                      color: isTopPageActive ? HIGHLIGHT_COLOR : 'inherit'
                                     }
                                   }}
                                 />
@@ -476,14 +481,14 @@ const PSDrawer = () => {
                           onClick={() => handleLevelClick(level.mainTitle)}
                           sx={{
                             backgroundColor: hasActiveRoute
-                              ? (theme) => `${theme.palette.primary.main}`
+                              ? HIGHLIGHT_COLOR
                               : "transparent",
                             borderLeft: hasActiveRoute
-                              ? (theme) => `4px solid ${theme.palette.primary.dark}`
+                              ? `4px solid ${HIGHLIGHT_COLOR}`
                               : '4px solid transparent',
                             "&:hover": {
                               backgroundColor: hasActiveRoute
-                                ? (theme) => theme.palette.primary.dark
+                                ? `${HIGHLIGHT_COLOR}E6` // Slightly darker on hover (90% opacity)
                                 : (theme) => theme.palette.action.hover
                             },
                             "& .MuiListItemText-primary": {
