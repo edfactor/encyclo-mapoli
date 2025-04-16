@@ -3,6 +3,7 @@ import { ImpersonationRoles } from "reduxstore/types";
 
 export interface SecurityState {
   token: string | null;
+  userGroups: string[];
   userRoles: string[];
   userPermissions: string[];
   username: string;
@@ -24,6 +25,7 @@ const initialState: SecurityState = {
   token: null,
   userRoles: [],
   userPermissions: [],
+  userGroups: [],
   username: "",
   performLogout: false,
   appUser: null,
@@ -55,9 +57,13 @@ export const securitySlice = createSlice({
     setImpersonating: (state, action: PayloadAction<ImpersonationRoles | null>) => {
       state.impersonating = action.payload;
     },
+    setUserGroups: (state, action: PayloadAction<string[]>) => {
+      state.userGroups = action.payload;
+    },
     clearUserData: (state) => {
       state.token = "";
       state.appUser = null;
+      state.userGroups = [];
       state.username = "";
       state.userRoles = [];
       state.userPermissions = [];
@@ -74,6 +80,7 @@ export const {
   setUsername,
   setPerformLogout,
   setImpersonating,
+  setUserGroups,
   clearUserData
 } = securitySlice.actions;
 export default securitySlice.reducer;

@@ -142,3 +142,5 @@ export const CAPTIONS = {
 } as const;
 
 export const VIEW = "View";
+
+export const SMART_PS_QA_IMPERSONATION = "SMART-PS-QA-Impersonation";
