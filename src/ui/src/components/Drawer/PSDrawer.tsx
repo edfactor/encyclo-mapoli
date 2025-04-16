@@ -14,7 +14,7 @@ import {
   SvgIcon,
   Typography
 } from "@mui/material";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { clearActiveSubMenu, closeDrawer, openDrawer, setActiveSubMenu } from "reduxstore/slices/generalSlice";
@@ -55,15 +55,12 @@ const PSDrawer = () => {
   );
   const [expandedLevels, setExpandedLevels] = useState<{ [key: string]: boolean }>({});
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
-  const [currentPath, setCurrentPath] = useState<string>("");
+  const currentPath = location.pathname; // Directly use location.pathname instead of state
+  const pathRef = useRef(currentPath); // Use ref to track previous path
   const dispatch = useDispatch();
   const profitYear = useDecemberFlowProfitYear();
   const fiscalFlowProfitYear = useFiscalCloseProfitYear();
-
-  // Update current path when location changes
-  useEffect(() => {
-    setCurrentPath(location.pathname);
-  }, [location]);
+  const expandedOnceRef = useRef<{[key: string]: boolean}>({});
 
   const hasThirdLevel = (level: string, secondLevel: string) => {
     const hasSome = menuLevels.some(
@@ -139,20 +136,26 @@ const PSDrawer = () => {
     return currentPath === `/${route}`;
   };
 
-  // Auto-expand menu containing active route
+  // Auto-expand menu containing active route only when path changes
   useEffect(() => {
-    if (activeSubmenu) {
-      const menuLevel = menuLevels.find(l => l.mainTitle === activeSubmenu);
-      if (menuLevel) {
-        // Find top-level page containing the current route
-        const activePage = menuLevel.topPage.find(page =>
-          page.topRoute && isRouteActive(page.topRoute) ||
-          page.subPages.some(subPage => subPage.subRoute && isRouteActive(subPage.subRoute))
-        );
+    // Only run this effect if the path has changed
+    if (pathRef.current !== currentPath) {
+      pathRef.current = currentPath; // Update ref to current path
 
-        if (activePage) {
-          // Expand the section containing the active route
-          setExpandedLevels(prev => ({ ...prev, [activePage.topTitle]: true }));
+      if (activeSubmenu) {
+        const menuLevel = menuLevels.find(l => l.mainTitle === activeSubmenu);
+        if (menuLevel) {
+          // Find top-level page containing the current route
+          const activePage = menuLevel.topPage.find(page =>
+            (page.topRoute && isRouteActive(page.topRoute)) ||
+            page.subPages.some(subPage => subPage.subRoute && isRouteActive(subPage.subRoute))
+          );
+
+          if (activePage && !expandedOnceRef.current[activePage.topTitle]) {
+            // Only expand if we haven't expanded this section before
+            setExpandedLevels(prev => ({ ...prev, [activePage.topTitle]: true }));
+            expandedOnceRef.current[activePage.topTitle] = true;
+          }
         }
       }
     }
