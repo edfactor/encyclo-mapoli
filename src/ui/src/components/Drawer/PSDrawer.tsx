@@ -156,7 +156,7 @@ const PSDrawer = () => {
         }
       }
     }
-  }, [currentPath, activeSubmenu, isRouteActive]);
+  }, [currentPath, activeSubmenu]);
 
   return (
     <>
