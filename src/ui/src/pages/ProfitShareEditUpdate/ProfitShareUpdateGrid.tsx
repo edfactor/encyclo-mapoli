@@ -68,7 +68,7 @@ const ProfitShareEditUpdateGrid = ({ initialSearchLoaded, setInitialSearchLoaded
         <>
           <DSMGrid
             preferenceKey={"ProfitShareUpdateGrid"}
-            isLoading={false}
+            isLoading={isFetching}
             handleSortChanged={sortEventHandler}
             providedOptions={{
               rowData: "response" in profitSharingUpdate ? profitSharingUpdate.response?.results : [],

@@ -29,7 +29,7 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ initialSearchLoaded, setIniti
     isSortDescending: false
   });
   const { forfeituresAndPoints } = useSelector((state: RootState) => state.yearsEnd);
-  const [triggerSearch] = useLazyGetForfeituresAndPointsQuery();
+  const [triggerSearch, { isFetching }] = useLazyGetForfeituresAndPointsQuery();
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
 
   // Wrapper to pass react function to non-react class
@@ -87,7 +87,7 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ initialSearchLoaded, setIniti
           </div>
           <DSMGrid
             preferenceKey={CAPTIONS.FORFEIT}
-            isLoading={false}
+            isLoading={isFetching}
             handleSortChanged={sortEventHandler}
             providedOptions={{
               rowData: forfeituresAndPoints.response.results,

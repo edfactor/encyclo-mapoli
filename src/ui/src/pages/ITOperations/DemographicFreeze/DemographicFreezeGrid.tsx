@@ -20,7 +20,7 @@ const DemographicFreeze: React.FC<DemoFreezeSearchProps> = ({initialSearchLoaded
     (state: RootState) => state.frozen.frozenStateCollectionData
   );
 
-  const [triggerSearch] = useLazyGetHistoricalFrozenStateResponseQuery();
+  const [triggerSearch, { isFetching }] = useLazyGetHistoricalFrozenStateResponseQuery();
 
   const onSearch = useCallback(async () => {
     const request = {
@@ -62,7 +62,7 @@ const DemographicFreeze: React.FC<DemoFreezeSearchProps> = ({initialSearchLoaded
           </div>
           <DSMGrid
             preferenceKey={"FREEZE"}
-            isLoading={false}
+            isLoading={isFetching}
             providedOptions={{
               rowData: freezeResults?.results,
               columnDefs: columnDefs

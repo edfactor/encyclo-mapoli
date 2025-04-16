@@ -67,7 +67,7 @@ const YTDWagesGrid = ({ innerRef, initialSearchLoaded, setInitialSearchLoaded }:
           </div>
           <DSMGrid
             preferenceKey={"TERM"}
-            isLoading={false}
+            isLoading={isFetching}
             handleSortChanged={sortEventHandler}
             providedOptions={{
               rowData: employeeWagesForYear?.response.results,

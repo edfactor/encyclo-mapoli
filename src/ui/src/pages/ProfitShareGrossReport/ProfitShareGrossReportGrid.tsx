@@ -35,7 +35,7 @@ const ProfitShareGrossReportGrid: React.FC<ProfitShareGrossReportGridProps> = ({
     (state: RootState) => state.yearsEnd
   );
 
-  const [triggerSearch, { isLoading }] = useLazyGetGrossWagesReportQuery();
+  const [triggerSearch, { isFetching }] = useLazyGetGrossWagesReportQuery();
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
   const navigate = useNavigate();
 
@@ -79,7 +79,7 @@ const ProfitShareGrossReportGrid: React.FC<ProfitShareGrossReportGridProps> = ({
           </div>
           <DSMGrid
             preferenceKey={"PROFIT_SHARE_GROSS_REPORT"}
-            isLoading={false}
+            isLoading={isFetching}
             handleSortChanged={(_params) => { }}
             providedOptions={{
               rowData: grossWagesReport?.response.results,

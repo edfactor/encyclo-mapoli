@@ -234,7 +234,7 @@ const PSDrawer = () => {
                   />
                 </div>
               )}
-              
+
               {activeSubmenu === MENU_LABELS.FISCAL_CLOSE && (
                 <div style={{ padding: '24px' }}>
                   <ProfitYearSelector
@@ -298,47 +298,48 @@ const PSDrawer = () => {
                             <List
                               component="div"
                               disablePadding>
-                              {page.subPages
-                                .filter(page => !page.disabled)
-                                .map((subPage) => (
-                                <ListItemButton
-                                  key={page.topTitle + subPage.subTitle}
-                                  sx={{
-                                    pl: 4,
-                                    display: "flex",
-                                    justifyContent: "space-between",
-                                    py: 1,
-                                    minHeight: 0
-                                  }}
-                                  onClick={() => handleSubPageClick(subPage.subRoute ?? "")}>
-                                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                                    <ListItemText
-                                      primary={getNewReportName(subPage.subTitle || "")}
-                                      secondary={getLegacyReportName(subPage.subTitle || "")}
-                                      secondaryTypographyProps={{
-                                        sx: {
-                                          fontSize: "0.75rem",
-                                          color: (theme) => theme.palette.text.secondary
-                                        }
-                                      }}
-                                      primaryTypographyProps={{
-                                        variant: "body2"
-                                      }}
-                                      sx={{
-                                        margin: 0
-                                      }}
-                                    />
-                                  </Box>
-                                  <Box sx={{ display: "flex", alignItems: "right", gap: 1 }}>
-                                    <Chip
-                                      variant="outlined"
-                                      label={"Not Started"}
-                                      className="text-gray-700 border-gray-700"
-                                      size="small"
-                                    />
-                                  </Box>
-                                </ListItemButton>
-                              ))}
+                              {page.subPages.map((subPage) => {
+                                if (subPage.disabled) return null;
+                                return (
+                                  <ListItemButton
+                                    key={page.topTitle + subPage.subTitle}
+                                    sx={{
+                                      pl: 4,
+                                      display: "flex",
+                                      justifyContent: "space-between",
+                                      py: 1,
+                                      minHeight: 0
+                                    }}
+                                    onClick={() => handleSubPageClick(subPage.subRoute ?? "")}>
+                                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                                      <ListItemText
+                                        primary={getNewReportName(subPage.subTitle || "")}
+                                        secondary={getLegacyReportName(subPage.subTitle || "")}
+                                        secondaryTypographyProps={{
+                                          sx: {
+                                            fontSize: "0.75rem",
+                                            color: (theme) => theme.palette.text.secondary
+                                          }
+                                        }}
+                                        primaryTypographyProps={{
+                                          variant: "body2"
+                                        }}
+                                        sx={{
+                                          margin: 0
+                                        }}
+                                      />
+                                    </Box>
+                                    <Box sx={{ display: "flex", alignItems: "right", gap: 1 }}>
+                                      <Chip
+                                        variant="outlined"
+                                        label={"Not Started"}
+                                        className="text-gray-700 border-gray-700"
+                                        size="small"
+                                      />
+                                    </Box>
+                                  </ListItemButton>
+                                );
+                              })}
                             </List>
                           </Collapse>
                         </>

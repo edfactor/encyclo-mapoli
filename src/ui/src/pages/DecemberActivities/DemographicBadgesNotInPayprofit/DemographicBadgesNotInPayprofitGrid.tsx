@@ -14,7 +14,7 @@ const DemographicBadgesNotInPayprofitGrid: React.FC = () => {
     isSortDescending: true
   });
   const { demographicBadges } = useSelector((state: RootState) => state.yearsEnd);
-  const [triggerSearch, { isLoading }] = useLazyGetDemographicBadgesNotInPayprofitQuery();
+  const [triggerSearch, { isFetching }] = useLazyGetDemographicBadgesNotInPayprofitQuery();
 
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const onSearch = useCallback(async () => {
@@ -62,7 +62,7 @@ const DemographicBadgesNotInPayprofitGrid: React.FC = () => {
           </div>
           <DSMGrid
             preferenceKey={"DEMO_BADGES"}
-            isLoading={false}
+            isLoading={isFetching}
             handleSortChanged={sortEventHandler}
             providedOptions={{
               rowData: demographicBadges?.response.results,

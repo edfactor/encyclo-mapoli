@@ -51,7 +51,7 @@ const EmployeesOnMilitaryLeaveGrid: React.FC = () => {
           </div>
           <DSMGrid
             preferenceKey={CAPTIONS.EMPLOYEES_MILITARY}
-            isLoading={false}
+            isLoading={isFetching}
             handleSortChanged={sortEventHandler}
             providedOptions={{
               rowData: employeesOnMilitaryLeave?.response.results,
