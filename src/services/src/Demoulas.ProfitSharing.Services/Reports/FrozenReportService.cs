@@ -609,14 +609,13 @@ public class FrozenReportService : IFrozenReportService
                 _ => joinedQuery
             };
 
-            return joinedQuery
-                .Where(detail => (detail.CurrentBalance > 0 || detail.VestedBalance > 0))
-                .ToListAsync(cancellationToken);
+            return joinedQuery.ToListAsync(cancellationToken);
         });
 
         // Client-side processing for grouping and filtering
         var asOfDate = await GetAsOfDate(req, cancellationToken);
         var groupedResult = rawResult
+            .Where(detail => (detail.CurrentBalance > 0 || detail.VestedBalance > 0))
             .GroupBy(item => item.DateOfBirth.Age(asOfDate))
             .Select(g => new { Age = g.Key, Entries = g.ToList() })
             .ToList();
@@ -819,7 +818,7 @@ public class FrozenReportService : IFrozenReportService
 
         var startEnd = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
 
-        var details = await _dataContextFactory.UseReadOnlyContext(ctx =>
+        var detailList = await _dataContextFactory.UseReadOnlyContext(ctx =>
         {
             var query = _totalService.TotalVestingBalance(ctx, req.ProfitYear, startEnd.FiscalEndDate);
             var yearsInPlanQuery = _totalService.GetYearsOfService(ctx, req.ProfitYear);
@@ -852,24 +851,27 @@ public class FrozenReportService : IFrozenReportService
                 _ => joinedQuery
             };
 
-            return joinedQuery
-                .Where(detail => (detail.CurrentBalance > 0 || detail.VestedBalance > 0))
-                .GroupBy(item => item.YearsInPlan)
-                .Select(group => new BalanceByYearsDetail
-                {
-                    Years = group.Key ?? 0,
-                    CurrentBalance = group.Sum(e => (e.CurrentBalance ?? 0)),
-                    CurrentBeneficiaryBalance = group.Sum(e => e.IsBeneficiary ? (e.CurrentBalance ?? 0) : 0),
-                    CurrentBeneficiaryVestedBalance = group.Sum(e => e.IsBeneficiary ? (e.VestedBalance ?? 0) : 0),
-                    VestedBalance = group.Sum(e => (e.VestedBalance ?? 0)),
-                    BeneficiaryCount = group.Count(e => e.IsBeneficiary),
-                    EmployeeCount = group.Count(e => !e.IsBeneficiary),
-                    FullTimeCount = group.Count(e => e.EmploymentType == FT),
-                    PartTimeCount = group.Count(e => e.EmploymentType == PT)
-                })
-                .OrderByDescending(e => e.Years)
-                .ToListAsync(cancellationToken);
+            return joinedQuery.ToListAsync(cancellationToken);
+               
         });
+
+        var details = detailList
+            .Where(detail => (detail.CurrentBalance > 0 || detail.VestedBalance > 0))
+            .GroupBy(item => item.YearsInPlan)
+            .Select(group => new BalanceByYearsDetail
+            {
+                Years = group.Key ?? 0,
+                CurrentBalance = group.Sum(e => (e.CurrentBalance ?? 0)),
+                CurrentBeneficiaryBalance = group.Sum(e => e.IsBeneficiary ? (e.CurrentBalance ?? 0) : 0),
+                CurrentBeneficiaryVestedBalance = group.Sum(e => e.IsBeneficiary ? (e.VestedBalance ?? 0) : 0),
+                VestedBalance = group.Sum(e => (e.VestedBalance ?? 0)),
+                BeneficiaryCount = group.Count(e => e.IsBeneficiary),
+                EmployeeCount = group.Count(e => !e.IsBeneficiary),
+                FullTimeCount = group.Count(e => e.EmploymentType == FT),
+                PartTimeCount = group.Count(e => e.EmploymentType == PT)
+            })
+            .OrderByDescending(e => e.Years)
+            .ToList();
 
         if (req.ReportType != FrozenReportsByAgeRequest.Report.Total)
         {
