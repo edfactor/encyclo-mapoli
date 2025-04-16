@@ -1,6 +1,7 @@
 import { RouteCategory } from "./types/MenuTypes";
 import { CAPTIONS, MENU_LABELS, ROUTES } from "./constants";
 import { ImpersonationRoles } from "./reduxstore/types";
+import EnvironmentUtils from "./utils/environmentUtils";
 
 
 const beneficiaries: RouteCategory = {
@@ -62,9 +63,11 @@ interface MenuLevel {
   topPage: {
     topTitle: string;
     topRoute?: string;
+    disabled?: boolean;
     subPages: {
       subTitle?: string;
       subRoute?: string;
+      disabled?: boolean;
     }[];
   }[];
 }
@@ -187,13 +190,14 @@ export const menuLevels: MenuLevel[] = [
           { subTitle: CAPTIONS.QPAY066TA_UNDER21, subRoute: ROUTES.QPAY066TA_UNDER21 },
           { subTitle: CAPTIONS.QPAY066TA, subRoute: ROUTES.QPAY066TA },
           { subTitle: CAPTIONS.PROFALL, subRoute: ROUTES.PROFALL },
-          { subTitle: CAPTIONS.NEW_PS_LABELS, subRoute: ROUTES.NEW_PS_LABELS },
-          { subTitle: CAPTIONS.PROFNEW, subRoute: ROUTES.PROFNEW }
+          { subTitle: CAPTIONS.NEW_PS_LABELS, subRoute: ROUTES.NEW_PS_LABELS, disabled: !EnvironmentUtils.isDevelopment, },
+          { subTitle: CAPTIONS.PROFNEW, subRoute: ROUTES.PROFNEW, disabled: !EnvironmentUtils.isDevelopment, }
         ]
-      },
+      },      
       {
         topTitle: CAPTIONS.PRINT_PROFIT_CERTS,
         topRoute: ROUTES.PRINT_PROFIT_CERTS,
+        disabled: !EnvironmentUtils.isDevelopment,
         subPages: []
       }     
     ]
