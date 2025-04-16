@@ -12,7 +12,6 @@ export const MENU_LABELS = {
   INQUIRIES: "Inquiries",
   IT_OPERATIONS: "IT OPERATIONS",
   GO_TO_PROFIT_SHARE_REPORT: "View Profit Share Report (PAY426) Details",
-  GO_TO_PROFIT_SHARE_EDIT_RUN: "View Profit Share Report - Edit Run (PAY426N) Details",
   YEAR_END: "Year End"
 } as const;
 
@@ -128,7 +127,7 @@ export const CAPTIONS = {
   PROFIT_SHARE_TOTALS: "Profit Share Totals Report (PAY426)",
   PROFIT_SHARE_UPDATE: "Profit Share Updates (PAY444|PAY447)",
   PROFIT_SHARING_CONTROL_SHEET: "Profit Sharing Control Sheet",
-  PRINT_PROFIT_CERTS: "Print Profit Certs (PAYCERT)",
+  PRINT_PROFIT_CERTS:  "Print Profit Certs (PAYCERT)",
   QPAY066_UNDER21: "QPAY066-UNDR21",
   QPAY066TA_UNDER21: "QPAY066TA-UNDR21",
   QPAY066TA: "QPAY066TA",
@@ -142,3 +141,5 @@ export const CAPTIONS = {
 } as const;
 
 export const VIEW = "View";
+
+export const SMART_PS_QA_IMPERSONATION = "SMART-PS-QA-Impersonation";

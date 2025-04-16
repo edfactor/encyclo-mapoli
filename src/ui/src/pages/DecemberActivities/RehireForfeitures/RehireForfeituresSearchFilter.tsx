@@ -1,5 +1,4 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FormHelperText } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
@@ -81,7 +80,6 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
     handleSubmit,
     formState: { errors, isValid },
     reset,
-    setValue,
     trigger
   } = useForm<RehireForfeituresSearch>({
     resolver: yupResolver<RehireForfeituresSearch>(schema),

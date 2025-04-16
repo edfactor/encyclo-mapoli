@@ -25,6 +25,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
     isSortDescending: false
   });
 
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const { distributionsAndForfeitures, distributionsAndForfeituresQueryParams } = useSelector(
     (state: RootState) => state.yearsEnd
   );
@@ -57,10 +58,10 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
   ]);
 
   useEffect(() => {
-    if (initialSearchLoaded) {
+    if (hasToken && (initialSearchLoaded || sortParams)) {
       onSearch();
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch]);
+  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch, hasToken, setInitialSearchLoaded]);
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
   const columnDefs = useMemo(() => GetDistributionsAndForfeituresColumns(), []);

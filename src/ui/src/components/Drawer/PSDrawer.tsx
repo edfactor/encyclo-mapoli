@@ -247,9 +247,12 @@ const PSDrawer = () => {
               <List>
                 {menuLevels
                   .find((l) => l.mainTitle === activeSubmenu)
-                  ?.topPage.map((page, index) => (
+                  ?.topPage
+                  .filter(page => !page.disabled)
+                  .map((page, index) => (
                     <React.Fragment key={page.topTitle + index}>
                       {/* Need to decide if this is a link or set of menus */}
+
 
                       {hasThirdLevel(activeSubmenu, page.topTitle) ? (
                         <>
@@ -295,7 +298,9 @@ const PSDrawer = () => {
                             <List
                               component="div"
                               disablePadding>
-                              {page.subPages.map((subPage) => (
+                              {page.subPages
+                                .filter(page => !page.disabled)
+                                .map((subPage) => (
                                 <ListItemButton
                                   key={page.topTitle + subPage.subTitle}
                                   sx={{

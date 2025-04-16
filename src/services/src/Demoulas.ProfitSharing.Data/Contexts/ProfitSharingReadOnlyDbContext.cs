@@ -45,6 +45,9 @@ public class ProfitSharingReadOnlyDbContext : ReadOnlyOracleDbContext<ProfitShar
 
     public virtual DbSet<AccountingPeriod> AccountingPeriods { get; set; }
     public virtual DbSet<ParticipantTotal> ParticipantTotals { get; set; }
+    public virtual DbSet<ParticipantTotalRatio> ParticipantTotalRatios { get; set; }
+    public virtual DbSet<ParticipantTotalYear> ParticipantTotalYears { get; set; }
+    public virtual DbSet<ParticipantTotalVestingBalance> ParticipantTotalVestingBalances { get; set; }
     public virtual DbSet<Navigation> Navigations { get; set; }
     public virtual DbSet<NavigationStatus> NavigationStatuses { get; set; }
     public virtual DbSet<NavigationTracking> NavigationTrackings { get; set; }

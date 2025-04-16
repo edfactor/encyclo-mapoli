@@ -74,7 +74,7 @@ const ProfitShareGrossReportGrid: React.FC<ProfitShareGrossReportGridProps> = ({
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`PROFIT SHARE GROSS REPORT (QPAY501) (${grossWagesReport?.response.results.length || 0} ${grossWagesReport?.response.results.length === 1 ? 'Record' : 'Records'})`}
+              {`PROFIT SHARE GROSS REPORT (QPAY501) (${grossWagesReport?.response.total || 0} ${grossWagesReport?.response.total === 1 ? 'Record' : 'Records'})`}
             </Typography>
           </div>
           <DSMGrid

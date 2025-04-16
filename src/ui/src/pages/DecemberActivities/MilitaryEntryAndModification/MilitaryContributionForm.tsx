@@ -1,119 +1,148 @@
-import { Button, FormLabel, TextField } from "@mui/material";
+import { Button, TextField, FormLabel } from "@mui/material";
 import Grid2 from '@mui/material/Grid2';
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import { useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { MilitaryContribution } from "reduxstore/types";
+import { useCreateMilitaryContributionMutation } from "reduxstore/api/MilitaryApi";
+import { CreateMilitaryContributionRequest, MilitaryContribution } from "reduxstore/types";
 
 interface FormData {
-  rows: MilitaryContribution[];
+  contributionDate: Date | null;
+  contributionAmount: number | null;
 }
 
 interface MilitaryContributionFormProps {
-  onSubmit: (rows: MilitaryContribution[]) => void;
+  onSubmit: (contribution: MilitaryContribution) => void;
   onCancel: () => void;
-  initialData?: MilitaryContribution[];
+  initialData?: MilitaryContribution;
   isLoading?: boolean;
+  badgeNumber: number;
+  profitYear: number;
 }
 
 const MilitaryContributionForm = ({
-  onSubmit,
-  onCancel,
-  initialData,
-  isLoading = false
-}: MilitaryContributionFormProps) => {
-  const { control, handleSubmit, reset } = useForm<FormData>({
+                                    onSubmit,
+                                    onCancel,
+                                    initialData,
+                                    isLoading = false,
+                                    badgeNumber,
+                                    profitYear
+                                  }: MilitaryContributionFormProps) => {
+  const [createMilitaryContribution, { isLoading: isSubmitting }] = useCreateMilitaryContributionMutation();
+
+  const { control, handleSubmit, reset, formState } = useForm<FormData>({
     defaultValues: {
-      rows: Array(5).fill({ contributionDate: null, contributionAmount: null })
+      contributionDate: null,
+      contributionAmount: null
     }
   });
 
   useEffect(() => {
     if (initialData) {
-      const sortedData = [...initialData]
-        .sort((a, b) => {
-          if (!a.contributionDate || !b.contributionDate) return 0;
-          return b.contributionDate.getTime() - a.contributionDate.getTime();
-        })
-        .slice(0, 5);
-
-      const paddedData = [
-        ...sortedData,
-        ...Array(5 - sortedData.length).fill({ contributionDate: null, contributionAmount: null })
-      ];
-
-      reset({ rows: paddedData });
+      reset({
+        contributionDate: initialData.contributionDate,
+        contributionAmount: initialData.contributionAmount
+      });
     }
   }, [initialData, reset]);
 
-  const handleFormSubmit = (data: FormData) => {
-    const validContributions = data.rows.filter(
-      row => row.contributionDate && row.contributionAmount !== null
-    );
-    onSubmit(validContributions);
+  const handleFormSubmit = async (data: FormData) => {
+    console.log("Form submitted with data:", data);
+
+    if (data.contributionDate && data.contributionAmount !== null) {
+      console.log("Data validation passed");
+
+      const contribution: MilitaryContribution = {
+        contributionDate: data.contributionDate,
+        contributionAmount: data.contributionAmount
+      };
+
+      try {
+        console.log("Creating request with:", { badgeNumber, profitYear, contribution });
+
+        const request: CreateMilitaryContributionRequest = {
+          badgeNumber,
+          profitYear,
+          contributionDate: data.contributionDate,
+          contributionAmount: data.contributionAmount
+        };
+
+        console.log("Calling API with request:", request);
+        const result = await createMilitaryContribution(request).unwrap();
+        console.log("API call successful, result:", result);
+
+        onSubmit(contribution);
+      } catch (error) {
+        console.error("Failed to create military contribution:", error);
+      }
+    } else {
+      console.warn("Form validation failed:", {
+        date: data.contributionDate,
+        amount: data.contributionAmount
+      });
+    }
   };
+
+  console.log("Form state:", formState);
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)}>
       <Grid2 container spacing={3}>
-        {Array.from({ length: 5 }).map((_, index) => (
-          <Grid2 container key={index} spacing={2}>
-            <Grid2 size={{ xs: 6 }} >
-              <Controller
-                name={`rows.${index}.contributionDate`}
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <DsmDatePicker
-                    id={`contributionDate-${index}`}
-                    label="Contribution Date"
-                    onChange={(value: Date | null) => field.onChange(value)}
-                    value={field.value ?? null}
-                    error={error?.message}
-                    required={false}
-                  />
-                )}
+        <Grid2 xs={6}>
+          <Controller
+            name="contributionDate"
+            control={control}
+            rules={{ required: "Date is required" }}
+            render={({ field, fieldState: { error } }) => (
+              <DsmDatePicker
+                id="contributionDate"
+                label="Contribution Date"
+                onChange={(value: Date | null) => field.onChange(value)}
+                value={field.value ?? null}
+                error={error?.message}
+                required={true}
+                disableFuture={true}
+                minDate={new Date(profitYear-1, 0, 1)}
+                views={["year", "month"]}
               />
-            </Grid2>
-            <Grid2 size={{ xs: 6 }} >
-              <FormLabel>Contribution Amount</FormLabel>
-              <Controller
-                name={`rows.${index}.contributionAmount`}
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    type="number"
-                    variant="outlined"
-                    error={!!error}
-                    helperText={error?.message}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      field.onChange(value === "" ? null : Number(value));
-                    }}
-                    value={field.value ?? ""}
-                  />
-                )}
-              />
-            </Grid2>
-          </Grid2>
-        ))}
+            )}
+          />
+        </Grid2>
 
+        <Grid2 xs={6} sx={{ padding: 2 }}>
+        <FormLabel>Contribution Amount</FormLabel>
+          <Controller
+            name="contributionAmount"
+            control={control}
+            rules={{ required: "Amount is required" }}
+            render={({ field, fieldState: { error } }) => (
+              <TextField
+                {...field}
+                id="contributionAmount"
+                type="number"
+                error={!!error}
+                helperText={error?.message}
+                required
+                fullWidth
+              />
+            )}
+          />
+        </Grid2>
+
+        {/* Form buttons */}
         <Grid2 size={{ xs: 12 }} container spacing={2} paddingTop='8px'>
           <Grid2>
-            <Button
-              variant="contained"
-              type="submit"
-              disabled={isLoading}>
-              Save
+            <Button onClick={onCancel} variant="outlined">
+              Cancel
             </Button>
           </Grid2>
           <Grid2>
             <Button
-              variant="outlined"
-              onClick={onCancel}
-              disabled={isLoading}>
-              Cancel
+              type="submit"
+              variant="contained"
+              disabled={isLoading || isSubmitting}
+            >
+              Submit
             </Button>
           </Grid2>
         </Grid2>

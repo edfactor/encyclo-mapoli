@@ -26,7 +26,7 @@ const ProfitShareGrossReport = () => {
                 </Grid2>
                 <Grid2
                     width={"100%"}>
-                    <DSMAccordion title="Create">
+                    <DSMAccordion title="Filter">
                         <ProfitShareGrossReportParameters />
                     </DSMAccordion>
                 </Grid2>

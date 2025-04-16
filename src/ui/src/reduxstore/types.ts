@@ -8,7 +8,7 @@ export enum ImpersonationRoles {
   ItOperations = "IT-Operations"
 }
 
-export interface SortedPaginationRequestDto extends PaginationParams, ISortParams { }
+export interface SortedPaginationRequestDto extends PaginationParams, ISortParams {}
 
 export interface ProfitYearRequest {
   profitYear: number;
@@ -515,10 +515,10 @@ export interface BalanceByAgeDetail extends BalanceByDetailBase {
 }
 
 /* eslint-disable @typescript-eslint/no-empty-object-type */
-export interface BalanceByAge extends BalanceByBase<BalanceByAgeDetail> { }
+export interface BalanceByAge extends BalanceByBase<BalanceByAgeDetail> {}
 
 /* eslint-disable @typescript-eslint/no-empty-object-type */
-export interface BalanceByYears extends BalanceByBase<BalanceByAgeDetail> { }
+export interface BalanceByYears extends BalanceByBase<BalanceByAgeDetail> {}
 
 export interface VestedAmountsByAge {
   totalFullTime100PercentAmount: number;
@@ -672,7 +672,7 @@ export interface ProfitShareUpdateTotals {
   maxOverTotal: number;
   maxPointsTotal: number;
   totalEmployees: number;
-  totalBeneficiaries: number;
+  totalBeneficaries: number;
 }
 export interface ProfitShareAdjustmentSummary {
   badgeNumber?: number;
@@ -740,9 +740,28 @@ export interface ProfitShareEditResponse {
 
 export interface ProfitShareMasterResponse {
   reportName: string;
-  beneficiariesAffected?: number;
-  employeesAffected?: number;
-  etvasAffected?: number;
+  beneficiariesEffected?: number;
+  employeesEffected?: number;
+  etvasEffected?: number;
+}
+
+export interface ProfitMasterStatus {
+  updatedTime: string;
+  updatedBy?: string | null;
+  beneficiariesEffected?: number | null;
+  employeesEffected?: number | null;
+  etvasEffected?: number | null;
+  contributionPercent?: number | null;
+  incomingForfeitPercent?: number | null;
+  earningsPercent?: number | null;
+  secondaryEarningsPercent?: number | null;
+  maxAllowedContributions?: number | null;
+  badgeAdjusted?: number | null;
+  badgeAdjusted2?: number | null;
+  adjustContributionAmount?: number | null;
+  adjustEarningsAmount?: number | null;
+  adjustIncomingForfeitAmount?: number | null;
+  adjustEarningsSecondaryAmount?: number | null;
 }
 
 export interface ProfitShareEditUpdateQueryParams {
@@ -802,6 +821,8 @@ export interface ProfallData {
 
 export interface MilitaryContributionRequest extends ProfitYearRequest {
   badgeNumber: number;
+  contributionAmount: number;
+  contributionDate: string;
   pagination: SortedPaginationRequestDto;
 }
 
@@ -825,6 +846,7 @@ export interface YearEndProfitSharingReportRequest {
 export interface CreateMilitaryContributionRequest extends ProfitYearRequest {
   badgeNumber: number;
   contributionAmount: number;
+  contributionDate: Date;
 }
 
 export interface MilitaryContribution {

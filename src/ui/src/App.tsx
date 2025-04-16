@@ -1,19 +1,18 @@
 import { createTheme, ThemeProvider } from "@mui/material";
-import { useCallback, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "./reduxstore/store";
-import { clearUserData, setUsername } from "./reduxstore/slices/securitySlice"; // Adjust path as needed
+import { OktaAuth } from "@okta/okta-auth-js";
 import AppErrorBoundary from "components/ErrorBoundary";
 import PSLayout from "components/Layout/PSLayout";
-import Router from "./components/router/Router";
-import { useOktaAuth } from "@okta/okta-react";
+import { useCallback, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { themeOptions, ToastServiceProvider } from "smart-ui-library";
 import "smart-ui-library/dist/smart-ui-library.css";
 import "../agGridConfig";
-import EnvironmentUtils from "./utils/environmentUtils";
-import { useGetAppVersionQuery } from "./reduxstore/api/CommonApi";
+import Router from "./components/router/Router";
 import oktaConfig from "./Okta/config";
-import { OktaAuth } from "@okta/okta-auth-js";
+import { useGetAppVersionQuery } from "./reduxstore/api/CommonApi";
+import { clearUserData, setUserGroups, setUsername } from "./reduxstore/slices/securitySlice"; // Adjust path as needed
+import { RootState } from "./reduxstore/store";
+import EnvironmentUtils from "./utils/environmentUtils";
 
 // Types
 interface BuildInfo {
@@ -61,6 +60,9 @@ const App = () => {
         if (usernameFromToken && !stateUsername) {
           dispatch(setUsername(usernameFromToken));
         }
+
+        const userGroups = tokenPayload.groups || [];
+        dispatch(setUserGroups(userGroups));
       } catch (error) {
         console.warn("Could not parse token for username:", error);
       }
@@ -103,8 +105,8 @@ const App = () => {
     const buildVersionNumber = uiBuildInfo
       ? `${uiBuildInfo.buildNumber ?? ""}.${uiBuildInfo.buildId ?? ""}`
       : "Local.Dev";
-    
-    if (buildNumber && buildVersionNumber) {     
+
+    if (buildNumber && buildVersionNumber) {
       const buildInfo = `${buildVersionNumber} | API Version: ${buildNumber}`;
       setBuildInfoText(buildInfo);
     }

@@ -41,7 +41,7 @@ const MilitaryEntryAndModificationSearchFilter: React.FC<SearchFilterProps> = ({
   const onSubmit = (data: SearchFormData) => {
     triggerSearch(
       {
-        pagination: { skip: 0, take: 25, sortBy: "profitYear", isSortDescending: false },
+        pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: false },
         ...(!!data.socialSecurity && { socialSecurity: Number(data.socialSecurity) }),
         ...(!!data.badgeNumber && { badgeNumber: Number(data.badgeNumber) })
       },

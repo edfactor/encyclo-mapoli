@@ -1,11 +1,11 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-import { format } from "date-fns";
 import {
   addBadgeNumberToUpdateAdjustmentSummary,
   clearBreakdownByStore,
   clearProfitMasterApply,
   clearProfitMasterRevert,
+  clearProfitMasterStatus,
   clearProfitSharingEdit,
   clearProfitSharingLabels,
   clearProfitSharingUpdate,
@@ -35,6 +35,7 @@ import {
   setNegativeEtvaForSSNsOnPayprofit,
   setProfitMasterApply,
   setProfitMasterRevert,
+  setProfitMasterStatus,
   setProfitShareSummaryReport,
   setProfitSharingEdit,
   setProfitSharingLabels,
@@ -84,6 +85,7 @@ import {
   NegativeEtvaForSSNsOnPayProfit,
   NegativeEtvaForSSNsOnPayprofitRequestDto,
   PagedReportResponse,
+  ProfitMasterStatus,
   ProfitShareEditResponse,
   ProfitShareMasterApplyRequest,
   ProfitShareMasterResponse,
@@ -109,9 +111,9 @@ import {
   YearEndProfitSharingReportResponse,
   YearEndProfitSharingReportSummaryResponse
 } from "reduxstore/types";
-import { url } from "./api";
 import { tryddmmyyyyToDate } from "../../utils/dateUtils";
 import { Paged } from "smart-ui-library";
+import { url } from "./api";
 
 export const YearsEndApi = createApi({
   baseQuery: fetchBaseQuery({
@@ -763,6 +765,24 @@ export const YearsEndApi = createApi({
         }
       }
     }),
+    getProfitMasterStatus: builder.query<ProfitMasterStatus, ProfitYearRequest>({
+      query: (params) => ({
+        url: "yearend/profit-master-status",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setProfitMasterStatus(data));
+        } catch (err) {
+          console.log("Err: " + err);
+          dispatch(clearProfitMasterStatus());
+        }
+      }
+    }),
     getBreakdownByStore: builder.query<BreakdownByStoreResponse, BreakdownByStoreRequest>({
       query: (params) => ({
         url: "yearend/breakdown-by-store",
@@ -1020,5 +1040,6 @@ export const {
   useLazyGetUpdateSummaryQuery,
   useLazyGetMasterApplyQuery,
   useLazyGetMasterRevertQuery,
-  useLazyGetProfitSharingLabelsQuery
+  useLazyGetProfitSharingLabelsQuery,
+  useLazyGetProfitMasterStatusQuery
 } = YearsEndApi;

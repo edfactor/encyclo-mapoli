@@ -7,6 +7,7 @@ import { GetBeneficiariesGridColumns } from "./BeneficiariesGridColumns";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../reduxstore/store";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import { CAPTIONS } from "../../../constants";
 
 const BeneficiariesGrid = () => {
   const navigate = useNavigate();
@@ -90,7 +91,7 @@ const BeneficiariesGrid = () => {
         </Typography>
       </div>
       <DSMGrid
-        preferenceKey={"BENEFICIARIES"}
+        preferenceKey={CAPTIONS.PAY426_NON_EMPLOYEE}
         isLoading={isLoading}
         handleSortChanged={(_params) => {}}
         providedOptions={{
@@ -101,7 +102,7 @@ const BeneficiariesGrid = () => {
       />
       {!!data && data.response.results.length > 0 && (
         <Pagination
-          pageNumber={pageNumber + 1}
+          pageNumber={pageNumber}
           setPageNumber={(value: number) => setPageNumber(value - 1)}
           pageSize={pageSize}
           setPageSize={setPageSize}

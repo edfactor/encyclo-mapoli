@@ -146,8 +146,8 @@ export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
       field: "employmentStatusName",
       colId: "employmentStatusName",
       minWidth: 60,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      headerClass: "left-align",
+      cellClass: "left-align",
       resizable: true,
       valueFormatter: (params) => {
         const id = params.data.status; // assuming 'status' is in the row data

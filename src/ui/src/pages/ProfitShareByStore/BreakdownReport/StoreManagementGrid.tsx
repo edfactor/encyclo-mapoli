@@ -26,9 +26,12 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store }) => {
   const queryParams = useSelector((state: RootState) => state.yearsEnd.breakdownByStoreQueryParams);
   const navigate = useNavigate();
 
-  const handleNavigation = (path: string) => {
-    navigate(path);
-  };
+  const handleNavigation = useCallback(
+    (path: string) => {
+      navigate(path);
+    },
+    [navigate]
+  );
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
@@ -37,7 +40,12 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store }) => {
       profitYear: queryParams?.profitYear || 2024,
       storeNumber: store,
       under21Only: false,
-      pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: sortParams.sortBy, isSortDescending: sortParams.isSortDescending }
+      pagination: {
+        skip: pageNumber * pageSize,
+        take: pageSize,
+        sortBy: sortParams.sortBy,
+        isSortDescending: sortParams.isSortDescending
+      }
     };
     fetchStoreManagement(params);
   }, [fetchStoreManagement, pageNumber, pageSize, queryParams?.profitYear, sortParams, store]);

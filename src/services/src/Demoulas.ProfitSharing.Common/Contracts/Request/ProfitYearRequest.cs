@@ -12,7 +12,7 @@ public record ProfitYearRequest : SortedPaginationRequestDto
     {
         return new ProfitYearRequest
         {
-            ProfitYear = 2023,
+            ProfitYear = 2024,
             Skip = 0,
             Take = 25
         };
