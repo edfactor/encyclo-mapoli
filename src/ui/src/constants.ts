@@ -72,7 +72,8 @@ export const ROUTES = {
   QPAY066TA: "qpay066ta",
   NEW_PS_LABELS: "new-ps-labels",
   PROFALL: "profall",
-  DEMO_FREEZE: "demographic-freeze"
+  DEMO_FREEZE: "demographic-freeze",
+  DEV_DEBUG: "dev-debug"
 } as const;
 
 export const CAPTIONS = {
@@ -137,7 +138,8 @@ export const CAPTIONS = {
   VESTED_AMOUNTS_BY_AGE: "Get Vested Amounts by Age (PROF130V)",
   YTD_WAGES_EXTRACT: "YTD Wages Extract (PROF-DOLLAR-EXTRACT)",
   BREAKDOWN_REPORT: "Breakdown Report (QPAY066TA)",
-  DEMOGRAPHIC_FREEZE: "Demographic Freeze"
+  DEMOGRAPHIC_FREEZE: "Demographic Freeze",
+  DEV_DEBUG: "Dev Debug"
 } as const;
 
 export const VIEW = "View";

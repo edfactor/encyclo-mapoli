@@ -62,6 +62,7 @@ import RouteSecurity from "./RouteSecurity";
 import { MenuBar } from "components/MenuBar/MenuBar";
 import MilitaryEntryAndModification
   from "../../pages/DecemberActivities/MilitaryEntryAndModification/MilitaryEntryAndModification";
+import DevDebug from "../../pages/Dev/DevDebug";
 
 const RouterSubAssembly: React.FC = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";
@@ -343,6 +344,10 @@ const RouterSubAssembly: React.FC = () => {
               <Route
                 path={ROUTES.DEMO_FREEZE}
                 element={<DemographicFreeze />}
+              />
+              <Route
+                path={ROUTES.DEV_DEBUG}
+                element={<DevDebug />}
               />
             </RouteSecurity>
           </Box>

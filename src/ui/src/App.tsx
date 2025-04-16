@@ -13,6 +13,7 @@ import { useGetAppVersionQuery } from "./reduxstore/api/CommonApi";
 import { clearUserData, setUserGroups, setUsername } from "./reduxstore/slices/securitySlice"; // Adjust path as needed
 import { RootState } from "./reduxstore/store";
 import EnvironmentUtils from "./utils/environmentUtils";
+import { Settings } from "@mui/icons-material";
 
 // Types
 interface BuildInfo {
@@ -120,6 +121,15 @@ const App = () => {
       <PSLayout
         onClick={handleClick}
         appTitle="Profit Sharing"
+        items={[
+          {
+            title: "Debug Page",
+            icon: <Settings />,
+            onClick: () => {
+              window.location.href = "/dev-debug";
+            }
+          }
+        ]}
         logout={handleLogout}
         buildVersionNumber={buildInfoText}
         userName={username}
