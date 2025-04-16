@@ -22,7 +22,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({ initialSearchLo
     sortBy: "badgeNumber",
     isSortDescending: false
   });
-
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const { termination } = useSelector((state: RootState) => state.yearsEnd);
   const profitYear = useDecemberFlowProfitYear();
   const [triggerSearch, { isFetching }] = useLazyGetTerminationReportQuery();
@@ -43,10 +43,10 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({ initialSearchLo
   }, [pageNumber, pageSize, sortParams, profitYear, triggerSearch]);
 
   useEffect(() => {
-    if (initialSearchLoaded) {
+    if (initialSearchLoaded && hasToken) {
       onSearch();
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch]);
+  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch, hasToken]);
 
   // Wrapper to pass react function to non-react class
   const handleNavigationForButton = useCallback(
