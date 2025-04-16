@@ -311,16 +311,16 @@ const PSDrawer = () => {
                                 justifyContent: "space-between",
                                 py: 1.75,
                                 minHeight: 0,
-                                backgroundColor: hasActiveSubPage ?
+                                backgroundColor: isTopPageActive ? // Only check direct match
                                   `${HIGHLIGHT_COLOR}15` : 'transparent',
-                                borderLeft: hasActiveSubPage ?
+                                borderLeft: isTopPageActive ? // Only check direct match
                                   `4px solid ${HIGHLIGHT_COLOR}` : '4px solid transparent',
                                 '&:hover': {
-                                  backgroundColor: hasActiveSubPage ?
+                                  backgroundColor: isTopPageActive ?
                                     `${HIGHLIGHT_COLOR}25` : (theme) => theme.palette.action.hover,
                                 }
                               }}>
-                              <Box sx={{ display: "flex", alignItems: "center" }}>
+                            <Box sx={{ display: "flex", alignItems: "center" }}>
                                 <ListItemText
                                   primary={getNewReportName(page.topTitle)}
                                   secondary={getLegacyReportName(page.topTitle)}
@@ -482,26 +482,20 @@ const PSDrawer = () => {
                         <ListItemButton
                           onClick={() => handleLevelClick(level.mainTitle)}
                           sx={{
-                            backgroundColor: hasActiveRoute
-                              ? HIGHLIGHT_COLOR
-                              : "transparent",
-                            borderLeft: hasActiveRoute
-                              ? `4px solid ${HIGHLIGHT_COLOR}`
-                              : '4px solid transparent',
+                            backgroundColor: "transparent", // No highlighting based on children
+                            borderLeft: '4px solid transparent',
                             "&:hover": {
-                              backgroundColor: hasActiveRoute
-                                ? `${HIGHLIGHT_COLOR}E6` // Slightly darker on hover (90% opacity)
-                                : (theme) => theme.palette.action.hover
+                              backgroundColor: (theme) => theme.palette.action.hover
                             },
                             "& .MuiListItemText-primary": {
-                              color: hasActiveRoute ? "white" : (theme) => theme.palette.text.primary,
-                              fontWeight: hasActiveRoute ? 'bold' : 'normal'
+                              color: (theme) => theme.palette.text.primary,
+                              fontWeight: 'normal'
                             },
                             display: "flex",
                             justifyContent: "space-between",
                             alignItems: "center"
                           }}>
-                          {drawerOpen && (
+                        {drawerOpen && (
                             <>
                               <ListItemText
                                 primary={level.mainTitle}
@@ -513,7 +507,7 @@ const PSDrawer = () => {
                                   sx: {
                                     variant: "body2",
                                     color: hasActiveRoute
-                                      ? "rgba(255, 255, 255, 0.7)"
+                                      ? (theme) => theme.palette.text.secondary
                                       : (theme) => theme.palette.text.secondary,
                                     fontSize: "0.75rem"
                                   }

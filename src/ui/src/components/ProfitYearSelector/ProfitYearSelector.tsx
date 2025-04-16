@@ -1,5 +1,5 @@
 import { FormControl, MenuItem, Select, SelectChangeEvent } from "@mui/material";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetHistoricalFrozenStateResponseQuery } from "reduxstore/api/ItOperations";
 import { RootState } from "reduxstore/store";
@@ -71,17 +71,34 @@ const ProfitYearSelector = ({
     yearsToDisplay.push(thisYear);
   }
 
-  // Add useEffect to auto-select the only value if there's just one option
+  const initialSelectionMadeRef = useRef(false);
+
+// Add useEffect to auto-select the only value if there's just one option
   useEffect(() => {
-    if (yearsToDisplay.length === 1 && selectedProfitYear !== yearsToDisplay[0]) {
+    // Only run auto-selection once, when API has completed and no defaultValue is provided
+    if (!isLoading &&
+      yearsToDisplay.length === 1 &&
+      selectedProfitYear !== yearsToDisplay[0] &&
+      !defaultValue &&
+      !initialSelectionMadeRef.current) {
+
       // Create a synthetic event to mimic the Select's change event
       const syntheticEvent = {
         target: { value: yearsToDisplay[0].toString() }
       } as SelectChangeEvent;
 
+      // Mark that we've done the initial selection
+      initialSelectionMadeRef.current = true;
       handleChange(syntheticEvent);
     }
-  }, [yearsToDisplay, selectedProfitYear, handleChange]);
+  }, [yearsToDisplay, selectedProfitYear, handleChange, isLoading, defaultValue]);
+
+// Reset the ref when the component unmounts
+  useEffect(() => {
+    return () => {
+      initialSelectionMadeRef.current = false;
+    };
+  }, []);
 
 
   return (
