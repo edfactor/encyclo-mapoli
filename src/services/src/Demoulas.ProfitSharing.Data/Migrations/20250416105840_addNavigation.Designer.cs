@@ -12,8 +12,8 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    [Migration("20250415182754_AddNavigationTables")]
-    partial class AddNavigationTables
+    [Migration("20250416105840_addNavigation")]
+    partial class addNavigation
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -28680,14 +28680,46 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("NVARCHAR2(200)")
+                        .HasMaxLength(65)
+                        .HasColumnType("NVARCHAR2(65)")
                         .HasColumnName("URL");
 
                     b.HasKey("Id")
                         .HasName("PK_NAVIGATION_ROLE");
 
                     b.ToTable("NAVIGATION_ROLE", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = (byte)1,
+                            Name = "Profit-Sharing-Administrator"
+                        },
+                        new
+                        {
+                            Id = (byte)2,
+                            Name = "Finance-Manager"
+                        },
+                        new
+                        {
+                            Id = (byte)3,
+                            Name = "Distributions-Clerk"
+                        },
+                        new
+                        {
+                            Id = (byte)4,
+                            Name = "Hardship-Administrator"
+                        },
+                        new
+                        {
+                            Id = (byte)5,
+                            Name = "Impersonation"
+                        },
+                        new
+                        {
+                            Id = (byte)6,
+                            Name = "IT-Operations"
+                        });
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Navigations.NavigationStatus", b =>
