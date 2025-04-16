@@ -10,7 +10,7 @@ import "../agGridConfig";
 import Router from "./components/router/Router";
 import oktaConfig from "./Okta/config";
 import { useGetAppVersionQuery } from "./reduxstore/api/CommonApi";
-import { clearUserData, setUsername } from "./reduxstore/slices/securitySlice"; // Adjust path as needed
+import { clearUserData, setUserGroups, setUsername } from "./reduxstore/slices/securitySlice"; // Adjust path as needed
 import { RootState } from "./reduxstore/store";
 import EnvironmentUtils from "./utils/environmentUtils";
 
