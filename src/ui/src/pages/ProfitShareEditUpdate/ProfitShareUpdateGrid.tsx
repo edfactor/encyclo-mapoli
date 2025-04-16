@@ -41,7 +41,7 @@ const ProfitShareEditUpdateGrid = ({ initialSearchLoaded, setInitialSearchLoaded
       badgeToAdjust: profitSharingUpdateQueryParams?.badgeToAdjust ?? 0,
       adjustContributionAmount: profitSharingUpdateQueryParams?.adjustContributionAmount ?? 0,
       adjustEarningsAmount: profitSharingUpdateQueryParams?.adjustEarningsAmount ?? 0,
-      adjustIncomingForfeitAmount: profitSharingUpdateQueryParams?.adjustEarningsSecondaryAmount ?? 0,
+      adjustIncomingForfeitAmount: profitSharingUpdateQueryParams?.adjustIncomingForfeitAmount ?? 0,
       badgeToAdjust2: profitSharingUpdateQueryParams?.badgeToAdjust2 ?? 0,
       adjustEarningsSecondaryAmount: profitSharingUpdateQueryParams?.adjustEarningsSecondaryAmount ?? 0
     };

@@ -14,9 +14,9 @@ import {
   SvgIcon,
   Typography
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { clearActiveSubMenu, closeDrawer, openDrawer, setActiveSubMenu } from "reduxstore/slices/generalSlice";
 import {
   checkDecemberParamsAndGridsProfitYears,
@@ -33,6 +33,9 @@ import { RootState } from "reduxstore/store";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 
+// Define the highlight color as a constant
+const HIGHLIGHT_COLOR = "#0258A5";
+
 const SidebarIcon = (props: SvgIconProps) => (
   <SvgIcon
     {...props}
@@ -45,15 +48,19 @@ const SidebarIcon = (props: SvgIconProps) => (
 
 const PSDrawer = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isDrawerOpen: drawerOpen, activeSubmenu } = useSelector((state: RootState) => state.general);
   const { selectedProfitYearForDecemberActivities, selectedProfitYearForFiscalClose } = useSelector(
     (state: RootState) => state.yearsEnd
   );
   const [expandedLevels, setExpandedLevels] = useState<{ [key: string]: boolean }>({});
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
+  const currentPath = location.pathname; // Directly use location.pathname instead of state
+  const pathRef = useRef(currentPath); // Use ref to track previous path
   const dispatch = useDispatch();
   const profitYear = useDecemberFlowProfitYear();
   const fiscalFlowProfitYear = useFiscalCloseProfitYear();
+  const expandedOnceRef = useRef<{[key: string]: boolean}>({});
 
   const hasThirdLevel = (level: string, secondLevel: string) => {
     const hasSome = menuLevels.some(
@@ -122,6 +129,37 @@ const PSDrawer = () => {
     dispatch(setSelectedProfitYearForFiscalClose(Number(event.target.value)));
     dispatch(checkFiscalCloseParamsAndGridsProfitYears(Number(event.target.value)));
   };
+
+  // Check if route is active
+  const isRouteActive = (route: string): boolean => {
+    if (!route) return false;
+    return currentPath === `/${route}`;
+  };
+
+  // Auto-expand menu containing active route only when path changes
+  useEffect(() => {
+    // Only run this effect if the path has changed
+    if (pathRef.current !== currentPath) {
+      pathRef.current = currentPath; // Update ref to current path
+
+      if (activeSubmenu) {
+        const menuLevel = menuLevels.find(l => l.mainTitle === activeSubmenu);
+        if (menuLevel) {
+          // Find top-level page containing the current route
+          const activePage = menuLevel.topPage.find(page =>
+            (page.topRoute && isRouteActive(page.topRoute)) ||
+            page.subPages.some(subPage => subPage.subRoute && isRouteActive(subPage.subRoute))
+          );
+
+          if (activePage && !expandedOnceRef.current[activePage.topTitle]) {
+            // Only expand if we haven't expanded this section before
+            setExpandedLevels(prev => ({ ...prev, [activePage.topTitle]: true }));
+            expandedOnceRef.current[activePage.topTitle] = true;
+          }
+        }
+      }
+    }
+  }, [currentPath, activeSubmenu]);
 
   return (
     <>
@@ -249,194 +287,246 @@ const PSDrawer = () => {
                   .find((l) => l.mainTitle === activeSubmenu)
                   ?.topPage
                   .filter(page => !page.disabled)
-                  .map((page, index) => (
-                    <React.Fragment key={page.topTitle + index}>
-                      {/* Need to decide if this is a link or set of menus */}
+                  .map((page, index) => {
+                    const isTopPageActive = page.topRoute && isRouteActive(page.topRoute);
+                    const hasActiveSubPage = page.subPages.some(subPage =>
+                      subPage.subRoute && isRouteActive(subPage.subRoute)
+                    );
 
+                    return (
+                      <React.Fragment key={page.topTitle + index}>
+                        {/* Need to decide if this is a link or set of menus */}
+                        {hasThirdLevel(activeSubmenu, page.topTitle) ? (
+                          <>
+                            <ListItemButton
+                              key={"" + index + page.topTitle}
+                              onClick={() => {
+                                const newExpandedLevels = { ...expandedLevels };
+                                newExpandedLevels[page.topTitle] = !expandedLevels[page.topTitle];
+                                setExpandedLevels(newExpandedLevels);
+                              }}
+                              sx={{
+                                pl: 2,
+                                display: "flex",
+                                justifyContent: "space-between",
+                                py: 1.75,
+                                minHeight: 0,
+                                backgroundColor: hasActiveSubPage ?
+                                  `${HIGHLIGHT_COLOR}15` : 'transparent',
+                                borderLeft: hasActiveSubPage ?
+                                  `4px solid ${HIGHLIGHT_COLOR}` : '4px solid transparent',
+                                '&:hover': {
+                                  backgroundColor: hasActiveSubPage ?
+                                    `${HIGHLIGHT_COLOR}25` : (theme) => theme.palette.action.hover,
+                                }
+                              }}>
+                              <Box sx={{ display: "flex", alignItems: "center" }}>
+                                <ListItemText
+                                  primary={getNewReportName(page.topTitle)}
+                                  secondary={getLegacyReportName(page.topTitle)}
+                                  secondaryTypographyProps={{
+                                    sx: {
+                                      fontSize: "0.75rem",
+                                      color: (theme) => theme.palette.text.secondary
+                                    }
+                                  }}
+                                  sx={{
+                                    margin: 0,
+                                    "& .MuiTypography-root": {
+                                      fontSize: "0.875rem",
+                                      fontWeight: hasActiveSubPage ? 'bold' : 'normal',
+                                      color: hasActiveSubPage ? HIGHLIGHT_COLOR : 'inherit'
+                                    }
+                                  }}
+                                />
+                              </Box>
 
-                      {hasThirdLevel(activeSubmenu, page.topTitle) ? (
-                        <>
-                          <ListItemButton
-                            key={"" + index + page.topTitle}
-                            onClick={() => {
-                              const newExpandedLevels = { ...expandedLevels };
-                              newExpandedLevels[page.topTitle] = !expandedLevels[page.topTitle];
-                              setExpandedLevels(newExpandedLevels);
-                            }}
-                            sx={{
-                              pl: 2,
-                              display: "flex",
-                              justifyContent: "space-between",
-                              py: 1.75,
-                              minHeight: 0
-                            }}>
-                            <Box sx={{ display: "flex", alignItems: "center" }}>
-                              <ListItemText
-                                primary={getNewReportName(page.topTitle)}
-                                secondary={getLegacyReportName(page.topTitle)}
-                                secondaryTypographyProps={{
-                                  sx: {
-                                    fontSize: "0.75rem",
-                                    color: (theme) => theme.palette.text.secondary
-                                  }
-                                }}
-                                sx={{
-                                  margin: 0,
-                                  "& .MuiTypography-root": {
-                                    fontSize: "0.875rem"
-                                  }
-                                }}
-                              />
-                            </Box>
+                              {expandedLevels[page.topTitle] ? <ExpandLess /> : <ExpandMore />}
+                            </ListItemButton>
+                            <Collapse
+                              in={expandedLevels[page.topTitle]}
+                              timeout="auto"
+                              unmountOnExit>
+                              <List
+                                component="div"
+                                disablePadding>
+                                {page.subPages
+                                  .filter(page => !page.disabled)
+                                  .map((subPage) => {
+                                    const isSubPageActive = subPage.subRoute && isRouteActive(subPage.subRoute);
 
-                            {expandedLevels[page.topTitle] ? <ExpandLess /> : <ExpandMore />}
-                          </ListItemButton>
-                          <Collapse
-                            in={expandedLevels[page.topTitle]}
-                            timeout="auto"
-                            unmountOnExit>
-                            <List
-                              component="div"
-                              disablePadding>
-                              {page.subPages.map((subPage) => {
-                                if (subPage.disabled) return null;
-                                return (
-                                  <ListItemButton
-                                    key={page.topTitle + subPage.subTitle}
-                                    sx={{
-                                      pl: 4,
-                                      display: "flex",
-                                      justifyContent: "space-between",
-                                      py: 1,
-                                      minHeight: 0
-                                    }}
-                                    onClick={() => handleSubPageClick(subPage.subRoute ?? "")}>
-                                    <Box sx={{ display: "flex", alignItems: "center" }}>
-                                      <ListItemText
-                                        primary={getNewReportName(subPage.subTitle || "")}
-                                        secondary={getLegacyReportName(subPage.subTitle || "")}
-                                        secondaryTypographyProps={{
-                                          sx: {
-                                            fontSize: "0.75rem",
-                                            color: (theme) => theme.palette.text.secondary
+                                    return (
+                                      <ListItemButton
+                                        key={page.topTitle + subPage.subTitle}
+                                        sx={{
+                                          pl: 4,
+                                          display: "flex",
+                                          justifyContent: "space-between",
+                                          py: 1,
+                                          minHeight: 0,
+                                          backgroundColor: isSubPageActive ?
+                                            `${HIGHLIGHT_COLOR}15` : 'transparent',
+                                          borderLeft: isSubPageActive ?
+                                            `4px solid ${HIGHLIGHT_COLOR}` : '4px solid transparent',
+                                          '&:hover': {
+                                            backgroundColor: isSubPageActive ?
+                                              `${HIGHLIGHT_COLOR}25` : (theme) => theme.palette.action.hover,
                                           }
                                         }}
-                                        primaryTypographyProps={{
-                                          variant: "body2"
-                                        }}
-                                        sx={{
-                                          margin: 0
-                                        }}
-                                      />
-                                    </Box>
-                                    <Box sx={{ display: "flex", alignItems: "right", gap: 1 }}>
-                                      <Chip
-                                        variant="outlined"
-                                        label={"Not Started"}
-                                        className="text-gray-700 border-gray-700"
-                                        size="small"
-                                      />
-                                    </Box>
-                                  </ListItemButton>
-                                );
-                              })}
-                            </List>
-                          </Collapse>
-                        </>
-                      ) : (
-                        <>
-                          <ListItemButton
-                            key={page.topTitle}
-                            onClick={() => handlePageClick(page.topRoute ?? "")}
-                            sx={{
-                              pl: 2,
-                              display: "flex",
-                              justifyContent: "space-between",
-                              py: 1,
-                              minHeight: 0
-                            }}>
-                            <Box sx={{ display: "flex", alignItems: "center" }}>
-                              <ListItemText
-                                primary={getNewReportName(page.topTitle || "")}
-                                secondary={getLegacyReportName(page.topTitle || "")}
-                                secondaryTypographyProps={{
-                                  sx: {
-                                    fontSize: "0.75rem",
-                                    color: (theme) => theme.palette.text.secondary
-                                  }
-                                }}
-                                sx={{
-                                  margin: 0,
-                                  "& .MuiTypography-root": {
-                                    fontSize: "0.875rem"
-                                  }
-                                }}
-                              />
-                            </Box>
-                            <Box sx={{ display: "flex", alignItems: "right", gap: 1 }}>
-                              <Chip
-                                variant="outlined"
-                                label={"Not Started"}
-                                className="text-gray-700 border-gray-700"
-                                size="small"
-                              />
-                            </Box>
-                          </ListItemButton>
-                        </>
-                      )}
-                    </React.Fragment>
-                  ))}
+                                        onClick={() => handleSubPageClick(subPage.subRoute ?? "")}>
+                                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                                          <ListItemText
+                                            primary={getNewReportName(subPage.subTitle || "")}
+                                            secondary={getLegacyReportName(subPage.subTitle || "")}
+                                            secondaryTypographyProps={{
+                                              sx: {
+                                                fontSize: "0.75rem",
+                                                color: (theme) => theme.palette.text.secondary
+                                              }
+                                            }}
+                                            primaryTypographyProps={{
+                                              variant: "body2",
+                                              sx: {
+                                                fontWeight: isSubPageActive ? 'bold' : 'normal',
+                                                color: isSubPageActive ? HIGHLIGHT_COLOR : 'inherit'
+                                              }
+                                            }}
+                                            sx={{
+                                              margin: 0
+                                            }}
+                                          />
+                                        </Box>
+                                        <Box sx={{ display: "flex", alignItems: "right", gap: 1 }}>
+                                          <Chip
+                                            variant="outlined"
+                                            label={"Not Started"}
+                                            className="text-gray-700 border-gray-700"
+                                            size="small"
+                                          />
+                                        </Box>
+                                      </ListItemButton>
+                                    )
+                                  })}
+                              </List>
+                            </Collapse>
+                          </>
+                        ) : (
+                          <>
+                            <ListItemButton
+                              key={page.topTitle}
+                              onClick={() => handlePageClick(page.topRoute ?? "")}
+                              sx={{
+                                pl: 2,
+                                display: "flex",
+                                justifyContent: "space-between",
+                                py: 1,
+                                minHeight: 0,
+                                backgroundColor: isTopPageActive ?
+                                  `${HIGHLIGHT_COLOR}15` : 'transparent',
+                                borderLeft: isTopPageActive ?
+                                  `4px solid ${HIGHLIGHT_COLOR}` : '4px solid transparent',
+                                '&:hover': {
+                                  backgroundColor: isTopPageActive ?
+                                    `${HIGHLIGHT_COLOR}25` : (theme) => theme.palette.action.hover,
+                                }
+                              }}>
+                              <Box sx={{ display: "flex", alignItems: "center" }}>
+                                <ListItemText
+                                  primary={getNewReportName(page.topTitle || "")}
+                                  secondary={getLegacyReportName(page.topTitle || "")}
+                                  secondaryTypographyProps={{
+                                    sx: {
+                                      fontSize: "0.75rem",
+                                      color: (theme) => theme.palette.text.secondary
+                                    }
+                                  }}
+                                  sx={{
+                                    margin: 0,
+                                    "& .MuiTypography-root": {
+                                      fontSize: "0.875rem",
+                                      fontWeight: isTopPageActive ? 'bold' : 'normal',
+                                      color: isTopPageActive ? HIGHLIGHT_COLOR : 'inherit'
+                                    }
+                                  }}
+                                />
+                              </Box>
+                              <Box sx={{ display: "flex", alignItems: "right", gap: 1 }}>
+                                <Chip
+                                  variant="outlined"
+                                  label={"Not Started"}
+                                  className="text-gray-700 border-gray-700"
+                                  size="small"
+                                />
+                              </Box>
+                            </ListItemButton>
+                          </>
+                        )}
+                      </React.Fragment>
+                    );
+                  })}
               </List>
             </>
           ) : (
             <>
               <Divider sx={{ mb: 1 }} />
               <List>
-                {menuLevels.map((level, index) => (
-                  <React.Fragment key={level.mainTitle + index}>
-                    <ListItem disablePadding>
-                      <ListItemButton
-                        onClick={() => handleLevelClick(level.mainTitle)}
-                        sx={{
-                          backgroundColor: expandedLevels[level.mainTitle]
-                            ? (theme) => theme.palette.primary.main
-                            : "transparent",
-                          "&:hover": {
-                            backgroundColor: expandedLevels[level.mainTitle]
-                              ? (theme) => theme.palette.primary.dark
-                              : (theme) => theme.palette.action.hover
-                          },
-                          "& .MuiListItemText-primary": {
-                            color: expandedLevels[level.mainTitle] ? "white" : (theme) => theme.palette.text.primary
-                          },
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center"
-                        }}>
-                        {drawerOpen && (
-                          <>
-                            <ListItemText
-                              primary={level.mainTitle}
-                              secondary={`1 of ${level.topPage.length - 1} completed`}
-                              primaryTypographyProps={{
-                                variant: "h6"
-                              }}
-                              secondaryTypographyProps={{
-                                sx: {
-                                  variant: "body2",
-                                  color: expandedLevels[level.mainTitle]
-                                    ? "rgba(255, 255, 255, 0.7)"
-                                    : (theme) => theme.palette.text.secondary,
-                                  fontSize: "0.75rem"
-                                }
-                              }}
-                            />
-                          </>
-                        )}
-                      </ListItemButton>
-                    </ListItem>
-                  </React.Fragment>
-                ))}
+                {menuLevels.map((level, index) => {
+                  // Check if this top-level menu contains the active route
+                  const hasActiveRoute = level.topPage.some(page =>
+                    (page.topRoute && isRouteActive(page.topRoute)) ||
+                    page.subPages.some(subPage => subPage.subRoute && isRouteActive(subPage.subRoute))
+                  );
+
+                  return (
+                    <React.Fragment key={level.mainTitle + index}>
+                      <ListItem disablePadding>
+                        <ListItemButton
+                          onClick={() => handleLevelClick(level.mainTitle)}
+                          sx={{
+                            backgroundColor: hasActiveRoute
+                              ? HIGHLIGHT_COLOR
+                              : "transparent",
+                            borderLeft: hasActiveRoute
+                              ? `4px solid ${HIGHLIGHT_COLOR}`
+                              : '4px solid transparent',
+                            "&:hover": {
+                              backgroundColor: hasActiveRoute
+                                ? `${HIGHLIGHT_COLOR}E6` // Slightly darker on hover (90% opacity)
+                                : (theme) => theme.palette.action.hover
+                            },
+                            "& .MuiListItemText-primary": {
+                              color: hasActiveRoute ? "white" : (theme) => theme.palette.text.primary,
+                              fontWeight: hasActiveRoute ? 'bold' : 'normal'
+                            },
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center"
+                          }}>
+                          {drawerOpen && (
+                            <>
+                              <ListItemText
+                                primary={level.mainTitle}
+                                secondary={`1 of ${level.topPage.length - 1} completed`}
+                                primaryTypographyProps={{
+                                  variant: "h6"
+                                }}
+                                secondaryTypographyProps={{
+                                  sx: {
+                                    variant: "body2",
+                                    color: hasActiveRoute
+                                      ? "rgba(255, 255, 255, 0.7)"
+                                      : (theme) => theme.palette.text.secondary,
+                                    fontSize: "0.75rem"
+                                  }
+                                }}
+                              />
+                            </>
+                          )}
+                        </ListItemButton>
+                      </ListItem>
+                    </React.Fragment>
+                  );
+                })}
               </List>
             </>
           )}
