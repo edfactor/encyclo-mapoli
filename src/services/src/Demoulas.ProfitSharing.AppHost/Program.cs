@@ -25,7 +25,6 @@ try
         {
             logger.LogInformation("Killing process ID: {NodeProcess}", nodeProcess.Id);
             nodeProcess.Kill(); // Kills the process
-            await nodeProcess.WaitForExitAsync(); // Ensures the process is completely terminated
             logger.LogInformation("Process ID {NodeProcess} terminated.", nodeProcess.Id);
         }
 

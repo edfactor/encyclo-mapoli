@@ -421,7 +421,7 @@ public sealed class TotalService : ITotalService
                 from pdWrap in pdWrapTmp.DefaultIfEmpty()
                 select new ParticipantTotalVestingBalanceDto
                 {
-                    Ssn = b.Ssn,
+                    Ssn = b.Ssn!,
                     CurrentBalance = b.Total ?? 0,
                     Etva = e.Total ?? 0,
                     TotalDistributions = d.Total ?? 0,
