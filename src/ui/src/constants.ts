@@ -12,7 +12,6 @@ export const MENU_LABELS = {
   INQUIRIES: "Inquiries",
   IT_OPERATIONS: "IT OPERATIONS",
   GO_TO_PROFIT_SHARE_REPORT: "View Profit Share Report (PAY426) Details",
-  GO_TO_PROFIT_SHARE_EDIT_RUN: "View Profit Share Report - Edit Run (PAY426N) Details",
   YEAR_END: "Year End"
 } as const;
 
