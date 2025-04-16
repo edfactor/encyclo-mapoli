@@ -48,7 +48,7 @@ import { setImpersonating } from "reduxstore/slices/securitySlice";
 import { RootState } from "reduxstore/store";
 import { ImpersonationRoles } from "reduxstore/types";
 import { ImpersonationMultiSelect } from "smart-ui-library";
-import { drawerClosedWidth, drawerOpenWidth, ROUTES } from "../../constants";
+import { drawerClosedWidth, drawerOpenWidth, ROUTES, SMART_PS_QA_IMPERSONATION } from "../../constants";
 import MenuData from "../../MenuData";
 import DemographicFreeze from "../../pages/ITOperations/DemographicFreeze/DemographicFreeze";
 import BalanceByAge from "../../pages/PROF130/BalanceByAge/BalanceByAge";
@@ -66,7 +66,8 @@ import MilitaryEntryAndModification
 const RouterSubAssembly: React.FC = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";
   const isProduction = false;
-  const hasImpersonationRole = true;
+  const userGroups = useSelector((state: RootState) => state.security.userGroups);
+  const hasImpersonationRole = userGroups.includes(SMART_PS_QA_IMPERSONATION);
   const showImpersonation = hasImpersonationRole && !isProduction;
 
   const { impersonating } = useSelector((state: RootState) => state.security);

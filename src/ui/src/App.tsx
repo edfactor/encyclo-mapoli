@@ -60,6 +60,9 @@ const App = () => {
         if (usernameFromToken && !stateUsername) {
           dispatch(setUsername(usernameFromToken));
         }
+
+        const userGroups = tokenPayload.groups || [];
+        dispatch(setUserGroups(userGroups));
       } catch (error) {
         console.warn("Could not parse token for username:", error);
       }
