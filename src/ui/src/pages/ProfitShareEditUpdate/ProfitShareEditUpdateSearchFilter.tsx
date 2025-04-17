@@ -17,10 +17,12 @@ import {
   clearProfitSharingUpdateQueryParams,
   setProfitEditUpdateChangesAvailable,
   setProfitSharingEditQueryParams,
-  setProfitSharingUpdateQueryParams
+  setProfitSharingUpdateQueryParams,
+  setResetYearEndPage
 } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import { ProfitShareUpdateRequest } from "reduxstore/types";
+import { useEffect } from "react";
 
 interface ProfitShareEditUpdateSearch {
   profitYear: Date;
@@ -112,7 +114,9 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
   const [triggerSearchUpdate, { isFetching: isFetchingUpdate }] = useLazyGetProfitShareUpdateQuery();
   const [triggerSearchEdit, { isFetching: isFetchingEdit }] = useLazyGetProfitShareEditQuery();
 
-  const { profitSharingUpdate, profitSharingEdit } = useSelector((state: RootState) => state.yearsEnd);
+  const { profitSharingUpdate, profitSharingEdit, resetYearEndPage } = useSelector(
+    (state: RootState) => state.yearsEnd
+  );
 
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
@@ -189,6 +193,14 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
     }
   });
 
+  // I would like handleReset() to be called whenever resetYearEndPage is true
+
+  useEffect(() => {
+    if (resetYearEndPage) {
+      handleReset();
+    }
+  }, [resetYearEndPage]);
+
   const handleReset = () => {
     // We need to clear both grids and then both sets of query params
     dispatch(clearProfitSharingEdit());
@@ -197,6 +209,7 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
     dispatch(clearProfitSharingUpdateQueryParams());
     setInitialSearchLoaded(false);
     dispatch(setProfitEditUpdateChangesAvailable(false));
+    dispatch(setResetYearEndPage(false));
 
     reset({
       profitYear: fiscalCloseProfitYearAsDate,
