@@ -6,8 +6,8 @@ import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetProfitSharingReportGridColumns } from "../PAY426-1/EighteenToTwentyGridColumns";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../reduxstore/store";
-import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { CAPTIONS } from "../../../constants";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 
 const UnderEighteenGrid = () => {
   const navigate = useNavigate();
@@ -20,7 +20,7 @@ const UnderEighteenGrid = () => {
     isSortDescending: false
   });
   const hasToken = useSelector((state: RootState) => !!state.security.token);
-  const profitYear = useDecemberFlowProfitYear();
+  const profitYear = useFiscalCloseProfitYear();
 
   useEffect(() => {
     if (hasToken) {
