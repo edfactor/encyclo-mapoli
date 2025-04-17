@@ -8,6 +8,7 @@ using Demoulas.ProfitSharing.Api.Extensions;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Extensions;
+using Demoulas.ProfitSharing.Endpoints.HealthCheck;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Extensions;
 using Demoulas.ProfitSharing.Security;
@@ -99,6 +100,7 @@ builder.ConfigureDefaultEndpoints(meterNames: [],
     .AddSwaggerOpenApi(version: 2, oktaSettingsAction: OktaSettingsAction, documentSettingsAction: OktaDocumentSettings);
 
 builder.Services.AddHostedService<MetricLogger>();
+builder.Services.AddHealthChecks().AddCheck<EnvironmentHealthCheck>("Environment");
 
 
 WebApplication app = builder.Build();

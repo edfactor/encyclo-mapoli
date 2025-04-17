@@ -5,8 +5,6 @@ import {
   BalanceByYears,
   BreakdownByStoreRequest,
   BreakdownByStoreResponse,
-  BreakdownByStoreRequest,
-  BreakdownByStoreResponse,
   ContributionsByAge,
   DemographicBadgesNotInPayprofit,
   DistributionsAndForfeitures,
@@ -32,10 +30,7 @@ import {
   PagedReportResponse,
   ProfitMasterStatus,
   ProfitShareAdjustmentSummary,
-  ProfitMasterStatus,
-  ProfitShareAdjustmentSummary,
   ProfitShareEditResponse,
-  ProfitShareEditUpdateQueryParams,
   ProfitShareEditUpdateQueryParams,
   ProfitShareMasterResponse,
   ProfitShareUpdateResponse,
@@ -43,13 +38,10 @@ import {
   ProfitYearRequest,
   RehireForfeituresRequest,
   ReportsByAgeParams,
-  ReportsByAgeParams,
   TerminationResponse,
   Under21BreakdownByStoreRequest,
   Under21BreakdownByStoreResponse,
-  Under21BreakdownByStoreResponse,
   Under21InactiveRequest,
-  Under21InactiveResponse,
   Under21InactiveResponse,
   Under21TotalsRequest,
   Under21TotalsResponse,
@@ -151,7 +143,6 @@ const initialState: YearsEndState = {
     ? Number(localStorage.getItem("selectedProfitYearForFiscalClose"))
     : 2024,
   profitMasterStatus: null,
-  profitMasterStatus: null,
   additionalExecutivesChosen: null,
   additionalExecutivesGrid: null,
   balanceByAgeFullTime: null,
@@ -234,12 +225,6 @@ export const yearsEndSlice = createSlice({
   name: "yearsEnd",
   initialState,
   reducers: {
-    setProfitMasterStatus: (state, action: PayloadAction<ProfitMasterStatus>) => {
-      state.profitMasterStatus = action.payload;
-    },
-    clearProfitMasterStatus: (state) => {
-      state.profitMasterStatus = null;
-    },
     setProfitMasterStatus: (state, action: PayloadAction<ProfitMasterStatus>) => {
       state.profitMasterStatus = action.payload;
     },
