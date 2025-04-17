@@ -430,7 +430,7 @@ const ProfitShareEditUpdate = () => {
         {profitSharingUpdate && profitSharingEdit && (
           <div>
             <div className="px-[24px]">
-              <h2 className="text-dsm-secondary">Summary PAY444</h2>
+              <h2 className="text-dsm-secondary">Summary (PAY444)</h2>
               <Typography
                 fontWeight="bold"
                 variant="body2">
@@ -483,14 +483,27 @@ const ProfitShareEditUpdate = () => {
               ]}
               tablePadding="12px"
             />
-              <div className="px-[24px]">
-                   <div>Total forfeitures: {profitSharingUpdate.totals.maxOverTotal}, total points exceeding max contribution: {profitSharingUpdate.totals.maxPointsTotal}</div>
-                  <br />
+            <div className="px-[24px]">
+              <div style={{ display: "flex", gap: "50px" }}>
+                <span>
+                  <strong>Total forfeitures</strong>:{" "}
+                  {numberToCurrency(profitSharingUpdate.totals.maxOverTotal || 0) + "      "}{" "}
+                </span>
+                <span>
+                  <strong>Total Points</strong>:{" "}
+                  {numberToCurrency(profitSharingUpdate.totals.maxPointsTotal || 0) + " "}{" "}
+                </span>
+                <span>
+                  <strong>For Employees Exceeding Max Contribution</strong> :{" "}
+                  {numberToCurrency(profitSharingEditQueryParams?.maxAllowedContributions || 0)}
+                </span>
               </div>
-              <div className="px-[24px]">
-              <h2 className="text-dsm-secondary">Summary PAY447</h2>
-              </div>
-              <div style={{ display: "flex", gap: "8px" }}>
+            </div>
+            <div style={{ height: "20px" }}></div>
+            <div className="px-[24px]">
+              <h2 className="text-dsm-secondary">Summary (PAY447)</h2>
+            </div>
+            <div style={{ display: "flex", gap: "8px" }}>
               <TotalsGrid
                 breakPoints={{ xs: 5, sm: 5, md: 5, lg: 5, xl: 5 }}
                 tablePadding="4px"
@@ -536,7 +549,7 @@ const ProfitShareEditUpdate = () => {
                       "", // need the requested contribution adjustment (from the request)
                       "", // need the requested earnings adjustment amount
                       "", // need the requested secondary earnings
-                      "", // need the requested incoming forfeiture adjustment 
+                      "" // need the requested incoming forfeiture adjustment
                     ],
                     [
                       "",
