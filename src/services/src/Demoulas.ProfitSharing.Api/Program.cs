@@ -12,11 +12,10 @@ using Demoulas.ProfitSharing.Endpoints.HealthCheck;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Extensions;
 using Demoulas.ProfitSharing.Security;
+using Demoulas.ProfitSharing.Security.Extensions;
 using Demoulas.ProfitSharing.Services.Extensions;
 using Demoulas.Security;
 using Demoulas.Util.Extensions;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using NSwag.Generation.AspNetCore;
 using Scalar.AspNetCore;
 
@@ -43,7 +42,7 @@ builder.Configuration.Bind("Logging:FileSystem", fileSystemLog);
 
 await builder.SetDefaultLoggerConfigurationAsync(smartConfig, fileSystemLog);
 
-_ = builder.Services.AddTransient<IClaimsTransformation, ImpersonationAndEnvironmentAwareClaimsTransformation>();
+_ = builder.AddSecurityServices();
 
 var rolePermissionService = new RolePermissionService();
 if (!builder.Environment.IsTestEnvironment() && Environment.GetEnvironmentVariable("YEMATCH_USE_TEST_CERTS") == null)

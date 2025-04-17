@@ -11,12 +11,12 @@ public class EnvironmentHealthCheck : IHealthCheck
 {
     private readonly IWebHostEnvironment _env;
     private readonly AppVersionInfo _appVersion;
-    private readonly IConfiguration _config;
+    private readonly OktaConfiguration _config;
     private static readonly DateTime _startupTime = DateTime.UtcNow;
 
     public EnvironmentHealthCheck(IWebHostEnvironment env,
         AppVersionInfo appVersion,
-        IConfiguration config)
+        OktaConfiguration config)
     {
         _env = env;
         _appVersion = appVersion;
@@ -25,14 +25,7 @@ public class EnvironmentHealthCheck : IHealthCheck
 
     public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
     {
-        OktaConfiguration settings = new OktaConfiguration
-        {
-            OktaDomain = string.Empty,
-            AuthorizationServerId = string.Empty,
-            Audience = string.Empty,
-            RolePrefix = string.Empty
-        };
-        _config.Bind("Okta", settings);
+       
 
         var data = new Dictionary<string, object>
         {
@@ -45,10 +38,10 @@ public class EnvironmentHealthCheck : IHealthCheck
             { "CurrentDirectory", Environment.CurrentDirectory },
             { "Uptime", (DateTime.UtcNow - _startupTime).ToString(@"dd\.hh\:mm\:ss") },
             { "UtcNow", DateTimeOffset.UtcNow.ToString("o") },
-            { "OktaEnvironmentName", settings.EnvironmentName ?? string.Empty },
-            { "OktaRolePrefix", settings.RolePrefix },
-            { "OktaAuthorizationServerId", settings.AuthorizationServerId },
-            { "OktaAudience", settings.Audience }
+            { "OktaEnvironmentName", _config.EnvironmentName ?? string.Empty },
+            { "OktaRolePrefix", _config.RolePrefix },
+            { "OktaAuthorizationServerId", _config.AuthorizationServerId },
+            { "OktaAudience", _config.Audience }
         };
 
         return Task.FromResult(HealthCheckResult.Healthy("Environment check", data));
