@@ -24,13 +24,15 @@ import { RootState } from "reduxstore/store";
 import { ProfitShareUpdateRequest } from "reduxstore/types";
 import { useEffect } from "react";
 
+const maxContributionsDefault: number = 76000;
+
 interface ProfitShareEditUpdateSearch {
   profitYear: Date;
   contributionPercent?: number | null | undefined;
   earningsPercent?: number | null | undefined;
   secondaryEarningsPercent?: number | null | undefined;
   incomingForfeitPercent?: number | null | undefined;
-  maxAllowedContributions?: number | null | undefined;
+  maxAllowedContributions: number | null | undefined;
   badgeToAdjust?: number | null | undefined;
   adjustContributionAmount?: number | null | undefined;
   adjustEarningsAmount?: number | null | undefined;
@@ -72,10 +74,10 @@ const schema = yup.object().shape({
     .optional(),
   maxAllowedContributions: yup
     .number()
+    .default(maxContributionsDefault)
     .typeError("Max Allowed Contributions must be a number")
     .min(0, "Max Allowed Contributions must be positive")
-    .nullable()
-    .optional(),
+    .required("Max Contributions is required"),
   badgeToAdjust: yup
     .number()
     .typeError("Badge must be a number")
@@ -140,7 +142,7 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
       earningsPercent: null,
       incomingForfeitPercent: null,
       secondaryEarningsPercent: null,
-      maxAllowedContributions: null,
+      maxAllowedContributions: maxContributionsDefault,
 
       badgeToAdjust: null,
       adjustContributionAmount: null,
@@ -166,7 +168,7 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
         earningsPercent: data.earningsPercent ?? 0,
         incomingForfeitPercent: data.incomingForfeitPercent ?? 0,
         secondaryEarningsPercent: data.secondaryEarningsPercent ?? 0,
-        maxAllowedContributions: data.maxAllowedContributions ?? 0,
+        maxAllowedContributions: data.maxAllowedContributions ?? maxContributionsDefault,
         badgeToAdjust: data.badgeToAdjust ?? 0,
         adjustContributionAmount: data.adjustContributionAmount ?? 0,
         adjustEarningsAmount: data.adjustEarningsAmount ?? 0,
@@ -217,7 +219,7 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
       earningsPercent: null,
       incomingForfeitPercent: null,
       secondaryEarningsPercent: null,
-      maxAllowedContributions: null,
+      maxAllowedContributions: maxContributionsDefault,
 
       badgeToAdjust: null,
       adjustContributionAmount: null,
