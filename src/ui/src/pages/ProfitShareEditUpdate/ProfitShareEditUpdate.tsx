@@ -10,8 +10,11 @@ import {
   useLazyGetProfitMasterStatusQuery
 } from "reduxstore/api/YearsEndApi";
 import {
+  clearProfitSharingEditQueryParams,
   setProfitEditUpdateChangesAvailable,
-  setProfitEditUpdateRevertChangesAvailable
+  setProfitEditUpdateRevertChangesAvailable,
+  setProfitShareApplyOrRevertLoading,
+  setResetYearEndPage
 } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import {
@@ -90,6 +93,7 @@ const useRevertAction = (
   const [trigger] = useLazyGetMasterRevertQuery();
   const dispatch = useDispatch();
   const profitYear = useFiscalCloseProfitYear();
+  //const { profitSharingEdit, profitSharingUpdate } = useSelector((state: RootState) => state.yearsEnd);
 
   const revertAction = async (): Promise<void> => {
     const params: ProfitYearRequest = {
@@ -109,6 +113,7 @@ const useRevertAction = (
         console.log("Successfully reverted changes for year end: ", payload);
         dispatch(setProfitEditUpdateChangesAvailable(false));
         dispatch(setProfitEditUpdateRevertChangesAvailable(false));
+        dispatch(clearProfitSharingEditQueryParams());
         dispatch(
           setMessage({
             ...Messages.ProfitShareRevertSuccess,
@@ -118,6 +123,8 @@ const useRevertAction = (
             }
           })
         );
+        // Clear form and grids (we need to call reset on the search filter page)
+        dispatch(setResetYearEndPage(true));
       })
       .catch((error) => {
         console.error("ERROR: Did not revert changes to year end", error);
@@ -168,11 +175,13 @@ const useSaveAction = (
     console.log("Applying changes to year end: ", params);
     console.log(params);
 
+    dispatch(setProfitShareApplyOrRevertLoading(true));
+
     await trigger(params)
       .unwrap()
       .then((payload: ProfitShareMasterResponse) => {
         dispatch(setProfitEditUpdateChangesAvailable(false));
-        dispatch(setProfitEditUpdateRevertChangesAvailable(true));
+
         console.log("Successfully applied changes to year end: ", payload);
         console.log("Employees affected: ", payload?.employeesEffected);
         setEmployeesReverted(payload?.employeesEffected ?? 0);
@@ -187,6 +196,8 @@ const useSaveAction = (
             }
           })
         );
+        dispatch(setResetYearEndPage(true));
+        dispatch(setProfitEditUpdateRevertChangesAvailable(true));
       })
       .catch((error) => {
         console.error("ERROR: Did not apply changes to year end", error);
@@ -200,6 +211,7 @@ const useSaveAction = (
           })
         );
       });
+    dispatch(setProfitShareApplyOrRevertLoading(false));
   };
 
   return saveAction;
@@ -223,9 +235,8 @@ const RenderSaveButton = (
   isLoading: boolean
 ) => {
   // The incoming status field is about whether or not changes have already been applied
-  const { profitEditUpdateChangesAvailable, profitSharingEditQueryParams } = useSelector(
-    (state: RootState) => state.yearsEnd
-  );
+  const { profitEditUpdateChangesAvailable, profitSharingEditQueryParams, profitShareApplyOrRevertLoading } =
+    useSelector((state: RootState) => state.yearsEnd);
   const saveButton = (
     <Button
       disabled={(!profitEditUpdateChangesAvailable && status?.updatedTime !== null) || isLoading}
@@ -239,7 +250,7 @@ const RenderSaveButton = (
           setOpenEmptyModal(true);
         }
       }}>
-      {isLoading ? (
+      {isLoading || profitShareApplyOrRevertLoading ? (
         //Prevent loading spinner from shrinking button
         <div className="spinner">
           <CircularProgress
@@ -268,31 +279,23 @@ const RenderSaveButton = (
 
 // This really just opens the modal. The modal for this has the function to call
 // the back end
-const RenderRevertButton = (
-  setOpenRevertModal: (open: boolean) => void,
-  status: ProfitMasterStatus | null,
-  isLoading: boolean
-) => {
+const RenderRevertButton = (setOpenRevertModal: (open: boolean) => void, isLoading: boolean) => {
   // The incoming status field is about whether or not changes have already been applied
-  const { profitEditUpdateRevertChangesAvailable } = useSelector((state: RootState) => state.yearsEnd);
+  const { profitEditUpdateRevertChangesAvailable, profitShareApplyOrRevertLoading } = useSelector(
+    (state: RootState) => state.yearsEnd
+  );
 
   const revertButton = (
     <Button
-      disabled={!profitEditUpdateRevertChangesAvailable || status?.updatedTime === null || isLoading}
+      disabled={!profitEditUpdateRevertChangesAvailable || isLoading}
       variant="outlined"
       color="primary"
       size="medium"
-      startIcon={
-        isLoading ? null : (
-          <Replay
-            color={profitEditUpdateRevertChangesAvailable || status?.updatedTime === null ? "primary" : "disabled"}
-          />
-        )
-      }
+      startIcon={isLoading ? null : <Replay color={profitEditUpdateRevertChangesAvailable ? "primary" : "disabled"} />}
       onClick={async () => {
         setOpenRevertModal(true);
       }}>
-      {isLoading ? (
+      {isLoading || profitShareApplyOrRevertLoading ? (
         //Prevent loading spinner from shrinking button
         <div className="spinner">
           <CircularProgress
@@ -306,7 +309,7 @@ const RenderRevertButton = (
     </Button>
   );
 
-  if (!profitEditUpdateRevertChangesAvailable || status?.updatedTime === null) {
+  if (!profitEditUpdateRevertChangesAvailable) {
     return (
       <Tooltip
         placement="top"
@@ -361,6 +364,9 @@ const ProfitShareEditUpdate = () => {
         if (payload?.updatedBy) {
           console.log("Status updated by: ", payload?.updatedBy);
           setUpdatedBy(payload.updatedBy);
+
+          // Since we have something to revert, set this to button appears
+          dispatch(setProfitEditUpdateRevertChangesAvailable(true));
         }
 
         if (payload?.updatedTime) {
@@ -409,7 +415,7 @@ const ProfitShareEditUpdate = () => {
       label="Master Update (PAY444|PAY447)"
       actionNode={
         <div className="flex  justify-end gap-2">
-          {RenderRevertButton(setOpenRevertModal, profitMasterStatus, isLoading)}
+          {RenderRevertButton(setOpenRevertModal, isLoading)}
           {RenderSaveButton(setOpenSaveModal, setOpenEmptyModal, profitMasterStatus, isLoading)}
         </div>
       }>
@@ -486,7 +492,7 @@ const ProfitShareEditUpdate = () => {
             <div className="px-[24px]">
               <div style={{ display: "flex", gap: "50px" }}>
                 <span>
-                  <strong>Total forfeitures</strong>:{" "}
+                  <strong>Total Forfeitures</strong>:{" "}
                   {numberToCurrency(profitSharingUpdate.totals.maxOverTotal || 0) + "      "}{" "}
                 </span>
                 <span>

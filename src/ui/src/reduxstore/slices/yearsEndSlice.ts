@@ -35,6 +35,7 @@ import {
   ProfitShareMasterResponse,
   ProfitShareUpdateResponse,
   ProfitSharingDistributionsByAge,
+  ProfitSharingLabel,
   ProfitYearRequest,
   RehireForfeituresRequest,
   ReportsByAgeParams,
@@ -46,14 +47,15 @@ import {
   Under21TotalsRequest,
   Under21TotalsResponse,
   UpdateSummaryResponse,
-  ProfitSharingLabel,
-  YearEndProfitSharingReportResponse,
   VestedAmountsByAge,
+  YearEndProfitSharingReportResponse,
   YearEndProfitSharingReportSummaryResponse
 } from "reduxstore/types";
 import { Paged } from "smart-ui-library";
 
 export interface YearsEndState {
+  resetYearEndPage: boolean;
+  profitShareApplyOrRevertLoading: boolean;
   profitMasterStatus: ProfitMasterStatus | null;
   profitEditUpdateChangesAvailable: boolean;
   profitEditUpdateRevertChangesAvailable: boolean;
@@ -142,6 +144,8 @@ const initialState: YearsEndState = {
   selectedProfitYearForFiscalClose: localStorage.getItem("selectedProfitYearForFiscalClose")
     ? Number(localStorage.getItem("selectedProfitYearForFiscalClose"))
     : 2024,
+  profitShareApplyOrRevertLoading: false,
+  resetYearEndPage: false,
   profitMasterStatus: null,
   additionalExecutivesChosen: null,
   additionalExecutivesGrid: null,
@@ -225,6 +229,12 @@ export const yearsEndSlice = createSlice({
   name: "yearsEnd",
   initialState,
   reducers: {
+    setProfitShareApplyOrRevertLoading: (state, action: PayloadAction<boolean>) => {
+      state.profitShareApplyOrRevertLoading = action.payload;
+    },
+    setResetYearEndPage: (state, action: PayloadAction<boolean>) => {
+      state.resetYearEndPage = action.payload;
+    },
     setProfitMasterStatus: (state, action: PayloadAction<ProfitMasterStatus>) => {
       state.profitMasterStatus = action.payload;
     },
@@ -1056,6 +1066,8 @@ export const {
   setProfitSharingLabels,
   clearProfitSharingLabels,
   setProfitMasterStatus,
-  clearProfitMasterStatus
+  clearProfitMasterStatus,
+  setResetYearEndPage,
+  setProfitShareApplyOrRevertLoading
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;
