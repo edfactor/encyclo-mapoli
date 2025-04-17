@@ -7,7 +7,7 @@ import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsE
 import { CAPTIONS } from "../../../constants";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../reduxstore/store";
-import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 
 const EighteenToTwentyGrid = () => {
   const navigate = useNavigate();
@@ -20,7 +20,7 @@ const EighteenToTwentyGrid = () => {
     isSortDescending: false
   });
   const hasToken = useSelector((state: RootState) => !!state.security.token);
-  const profitYear = useDecemberFlowProfitYear();
+  const profitYear = useFiscalCloseProfitYear();
 
   useEffect(() => {
     if (hasToken) {

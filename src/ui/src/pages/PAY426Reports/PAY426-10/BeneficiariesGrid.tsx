@@ -6,8 +6,8 @@ import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsE
 import { GetBeneficiariesGridColumns } from "./BeneficiariesGridColumns";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../reduxstore/store";
-import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { CAPTIONS } from "../../../constants";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 
 const BeneficiariesGrid = () => {
   const navigate = useNavigate();
@@ -16,7 +16,7 @@ const BeneficiariesGrid = () => {
   const [trigger, { data, isLoading, error }] = useLazyGetYearEndProfitSharingReportQuery();
 
   const hasToken = useSelector((state: RootState) => !!state.security.token);
-  const profitYear = useDecemberFlowProfitYear();
+  const profitYear = useFiscalCloseProfitYear();
 
   useEffect(() => {
     if (hasToken) {

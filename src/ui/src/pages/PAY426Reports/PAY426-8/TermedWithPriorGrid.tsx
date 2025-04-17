@@ -4,10 +4,10 @@ import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { Path, useNavigate } from "react-router";
 import { GetProfitSharingReportGridColumns } from "../PAY426-1/EighteenToTwentyGridColumns";
 import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
-import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../reduxstore/store";
 import { CAPTIONS } from "../../../constants";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 
 const TermedWithPriorGrid = () => {
   const navigate = useNavigate();
@@ -20,7 +20,7 @@ const TermedWithPriorGrid = () => {
     isSortDescending: false
   });
   const hasToken = useSelector((state: RootState) => !!state.security.token);
-  const profitYear = useDecemberFlowProfitYear();
+  const profitYear = useFiscalCloseProfitYear();
 
   useEffect(() => {
     if (hasToken) {
