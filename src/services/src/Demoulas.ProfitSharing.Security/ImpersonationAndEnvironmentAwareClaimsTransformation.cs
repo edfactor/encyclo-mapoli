@@ -3,7 +3,6 @@ using System.Text.RegularExpressions;
 using Demoulas.Common.Contracts.Configuration;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
 
 namespace Demoulas.ProfitSharing.Security;
 
@@ -14,9 +13,9 @@ public sealed class ImpersonationAndEnvironmentAwareClaimsTransformation : IClai
 
     private const string oktaRoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role";
 
-    public ImpersonationAndEnvironmentAwareClaimsTransformation(IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
+    public ImpersonationAndEnvironmentAwareClaimsTransformation(OktaConfiguration oktaConfiguration, IHttpContextAccessor httpContextAccessor)
     {
-        _oktaConfiguration = OktaConfiguration.Get(configuration);
+        _oktaConfiguration = oktaConfiguration;
         _httpContextAccessor = httpContextAccessor;
     }
     public Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
