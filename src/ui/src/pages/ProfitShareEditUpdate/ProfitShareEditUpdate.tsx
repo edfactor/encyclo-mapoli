@@ -439,7 +439,8 @@ const ProfitShareEditUpdate = () => {
       </div>
       <Grid2
         container
-        rowSpacing="24px">
+        rowSpacing="24px"
+        width={"100%"}>
         <Grid2 width={"100%"}>
           <Divider />
         </Grid2>
@@ -473,7 +474,7 @@ const ProfitShareEditUpdate = () => {
           </>
         )}
         {profitSharingUpdate && profitSharingEdit && (
-          <div>
+          <Grid2 width={"100%"}>
             <div className="px-[24px]">
               <h2 className="text-dsm-secondary">Summary (PAY444)</h2>
               <Typography
@@ -529,7 +530,7 @@ const ProfitShareEditUpdate = () => {
               tablePadding="12px"
             />
             <div className="px-[24px]">
-              <div style={{ display: "flex", gap: "50px" }}>
+              <div style={{ display: "flex", gap: "75px" }}>
                 <span>
                   <strong>Total Forfeitures</strong>:{" "}
                   {numberToCurrency(profitSharingUpdate.totals.maxOverTotal || 0) + "      "}{" "}
@@ -616,7 +617,7 @@ const ProfitShareEditUpdate = () => {
                 setInitialSearchLoaded={setInitialSearchLoaded}
               />
             </Grid2>
-          </div>
+          </Grid2>
         )}
       </Grid2>
       <SmartModal
