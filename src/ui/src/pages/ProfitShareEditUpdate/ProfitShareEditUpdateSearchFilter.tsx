@@ -18,7 +18,8 @@ import {
   setProfitEditUpdateChangesAvailable,
   setProfitSharingEditQueryParams,
   setProfitSharingUpdateQueryParams,
-  setResetYearEndPage
+  setResetYearEndPage,
+  setTotalForfeituresGreaterThanZero
 } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import { ProfitShareUpdateRequest } from "reduxstore/types";
@@ -178,7 +179,16 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
       };
 
       // First we have to do the update calls
-      triggerSearchUpdate(updateParams, false).unwrap();
+      triggerSearchUpdate(updateParams, false)
+        .unwrap()
+        .then((response) => {
+          if (response.totals.maxOverTotal > 0) {
+            dispatch(setTotalForfeituresGreaterThanZero(true));
+          } else {
+            dispatch(setTotalForfeituresGreaterThanZero(false));
+          }
+        });
+
       dispatch(setProfitSharingUpdateQueryParams({ ...data, profitYear: fiscalCloseProfitYearAsDate }));
 
       dispatch(setProfitEditUpdateChangesAvailable(true));
@@ -212,6 +222,7 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
     setInitialSearchLoaded(false);
     dispatch(setProfitEditUpdateChangesAvailable(false));
     dispatch(setResetYearEndPage(false));
+    dispatch(setTotalForfeituresGreaterThanZero(false));
 
     reset({
       profitYear: fiscalCloseProfitYearAsDate,

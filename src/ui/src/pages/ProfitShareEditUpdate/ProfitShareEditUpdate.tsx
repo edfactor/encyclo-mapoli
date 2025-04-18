@@ -40,6 +40,7 @@ import { TotalsGrid } from "../../components/TotalsGrid";
 import ProfitShareEditConfirmation from "./ProfitShareEditConfirmation";
 import ProfitShareEditUpdateSearchFilter from "./ProfitShareEditUpdateSearchFilter";
 import ProfitShareEditUpdateTabs from "./ProfitShareEditUpdateTabs";
+import ChangesList from "./ChangesList";
 
 enum MessageKeys {
   ProfitShareEditUpdate = "ProfitShareEditUpdate"
@@ -245,11 +246,19 @@ const RenderSaveButton = (
   isLoading: boolean
 ) => {
   // The incoming status field is about whether or not changes have already been applied
-  const { profitEditUpdateChangesAvailable, profitSharingEditQueryParams, profitShareApplyOrRevertLoading } =
-    useSelector((state: RootState) => state.yearsEnd);
+  const {
+    profitEditUpdateChangesAvailable,
+    profitSharingEditQueryParams,
+    profitShareApplyOrRevertLoading,
+    totalForfeituresGreaterThanZero
+  } = useSelector((state: RootState) => state.yearsEnd);
   const saveButton = (
     <Button
-      disabled={(!profitEditUpdateChangesAvailable && status?.updatedTime !== null) || isLoading}
+      disabled={
+        (!profitEditUpdateChangesAvailable && status?.updatedTime !== null) ||
+        isLoading ||
+        totalForfeituresGreaterThanZero
+      }
       variant="outlined"
       color="primary"
       size="medium"
@@ -278,7 +287,11 @@ const RenderSaveButton = (
     return (
       <Tooltip
         placement="top"
-        title="You must have previewed data to save.">
+        title={
+          totalForfeituresGreaterThanZero == false
+            ? "You must have previewed data to save."
+            : "Total forfeitures is greater than zero."
+        }>
         <span>{saveButton}</span>
       </Tooltip>
     );
@@ -352,7 +365,8 @@ const ProfitShareEditUpdate = () => {
     profitSharingEditQueryParams,
     profitMasterStatus,
     profitShareEditUpdateShowSearch,
-    profitEditUpdateRevertChangesAvailable
+    profitEditUpdateRevertChangesAvailable,
+    totalForfeituresGreaterThanZero
   } = useSelector((state: RootState) => state.yearsEnd);
   const [openSaveModal, setOpenSaveModal] = useState<boolean>(false);
   const [openRevertModal, setOpenRevertModal] = useState<boolean>(false);
@@ -438,7 +452,8 @@ const ProfitShareEditUpdate = () => {
       </div>
       <Grid2
         container
-        rowSpacing="24px">
+        rowSpacing="24px"
+        width={"100%"}>
         <Grid2 width={"100%"}>
           <Divider />
         </Grid2>
@@ -464,218 +479,15 @@ const ProfitShareEditUpdate = () => {
             <Grid2
               width={"100%"}
               sx={{ marginLeft: "50px" }}>
-              <Typography
-                component={"span"}
-                variant="body2"
-                sx={{}}>
-                {profitSharingEditQueryParams && (
-                  <ul style={{ listStyleType: "none", padding: 0 }}>
-                    {profitSharingEditQueryParams &&
-                      profitSharingEditQueryParams.contributionPercent != null &&
-                      profitSharingEditQueryParams.contributionPercent != 0 && (
-                        <li
-                          style={{
-                            marginBottom: "6px"
-                          }}>
-                          {`Contribution Percent: `}
-                          <strong>{profitSharingEditQueryParams.contributionPercent}</strong>
-                        </li>
-                      )}
-                    {profitSharingEditQueryParams &&
-                      profitSharingEditQueryParams.earningsPercent != null &&
-                      profitSharingEditQueryParams.earningsPercent != 0 && (
-                        <li style={{ marginBottom: "6px" }}>
-                          {`Earnings Percent: `}
-                          <strong>{profitSharingEditQueryParams.earningsPercent}</strong>
-                        </li>
-                      )}
-                    {profitSharingEditQueryParams &&
-                      profitSharingEditQueryParams.incomingForfeitPercent != null &&
-                      profitSharingEditQueryParams.incomingForfeitPercent != 0 && (
-                        <li style={{ marginBottom: "6px" }}>
-                          {`Incoming Forfeit Percent: `}
-                          <strong>{profitSharingEditQueryParams.incomingForfeitPercent}</strong>
-                        </li>
-                      )}
-                    {profitSharingEditQueryParams &&
-                      profitSharingEditQueryParams?.secondaryEarningsPercent != null &&
-                      profitSharingEditQueryParams?.secondaryEarningsPercent != 0 && (
-                        <li style={{ marginBottom: "6px" }}>
-                          {`Secondary Earnings Percent: `}
-                          <strong>{profitSharingEditQueryParams?.secondaryEarningsPercent}</strong>
-                        </li>
-                      )}
-                    {profitSharingEditQueryParams &&
-                      profitSharingEditQueryParams?.maxAllowedContributions != null &&
-                      profitSharingEditQueryParams?.maxAllowedContributions != 0 && (
-                        <li style={{ marginBottom: "6px" }}>
-                          {`Max Allowed Contributions: `}
-                          <strong>{profitSharingEditQueryParams?.maxAllowedContributions}</strong>
-                        </li>
-                      )}
-                    {profitSharingEditQueryParams &&
-                      profitSharingEditQueryParams?.badgeToAdjust != null &&
-                      profitSharingEditQueryParams?.badgeToAdjust != 0 && (
-                        <li style={{ marginBottom: "6px" }}>
-                          {`Badge Adjusted: `}
-                          <strong>{profitSharingEditQueryParams?.badgeToAdjust}</strong>
-                        </li>
-                      )}
-                    {profitSharingEditQueryParams &&
-                      profitSharingEditQueryParams?.adjustContributionAmount != null &&
-                      profitSharingEditQueryParams?.adjustContributionAmount != 0 && (
-                        <li style={{ marginBottom: "6px" }}>
-                          {`Adjust Contribution Amount: `}
-                          <strong>{profitSharingEditQueryParams?.adjustContributionAmount}</strong>
-                        </li>
-                      )}
-                    {profitSharingEditQueryParams &&
-                      profitSharingEditQueryParams?.adjustEarningsAmount != null &&
-                      profitSharingEditQueryParams?.adjustEarningsAmount != 0 && (
-                        <li style={{ marginBottom: "6px" }}>
-                          {`Adjust Earnings Amount: `}
-                          <strong>{profitSharingEditQueryParams?.adjustEarningsAmount}</strong>
-                        </li>
-                      )}
-                    {profitSharingEditQueryParams &&
-                      profitSharingEditQueryParams?.adjustIncomingForfeitAmount != null &&
-                      profitSharingEditQueryParams?.adjustIncomingForfeitAmount != 0 && (
-                        <li
-                          style={{
-                            marginBottom: "6px"
-                          }}>
-                          {`Adjust Incoming Forfeit Amount: `}
-                          <strong>{profitSharingEditQueryParams?.adjustIncomingForfeitAmount}</strong>
-                        </li>
-                      )}
-                    {profitSharingEditQueryParams &&
-                      profitSharingEditQueryParams?.badgeToAdjust2 != null &&
-                      profitSharingEditQueryParams?.badgeToAdjust2 != 0 && (
-                        <li style={{ marginBottom: "6px" }}>
-                          {`Second Badge Adjusted: `}
-                          <strong>{profitSharingEditQueryParams?.badgeToAdjust2}</strong>
-                        </li>
-                      )}
-                    {profitSharingEditQueryParams &&
-                      profitSharingEditQueryParams?.adjustEarningsSecondaryAmount != null &&
-                      profitSharingEditQueryParams?.adjustEarningsSecondaryAmount != 0 && (
-                        <li
-                          style={{
-                            marginBottom: "6px"
-                          }}>
-                          {`Adjust Secondary Earnings Amount: `}
-                          <strong>{profitSharingEditQueryParams?.adjustEarningsSecondaryAmount}</strong>
-                        </li>
-                      )}
-                  </ul>
-                )}
-                {profitMasterStatus && (
-                  <ul style={{ listStyleType: "none", padding: 0 }}>
-                    {profitMasterStatus &&
-                      profitMasterStatus.contributionPercent != null &&
-                      profitMasterStatus.contributionPercent != 0 && (
-                        <li
-                          style={{
-                            marginBottom: "6px"
-                          }}>
-                          {`Contribution Percent: `}
-                          <strong>{profitMasterStatus.contributionPercent}</strong>
-                        </li>
-                      )}
-                    {profitMasterStatus &&
-                      profitMasterStatus.earningsPercent != null &&
-                      profitMasterStatus.earningsPercent != 0 && (
-                        <li style={{ marginBottom: "6px" }}>
-                          {`Earnings Percent: `}
-                          <strong>{profitMasterStatus.earningsPercent}</strong>
-                        </li>
-                      )}
-                    {profitMasterStatus &&
-                      profitMasterStatus.incomingForfeitPercent != null &&
-                      profitMasterStatus.incomingForfeitPercent != 0 && (
-                        <li style={{ marginBottom: "6px" }}>
-                          {`Incoming Forfeit Percent: `}
-                          <strong>{profitMasterStatus.incomingForfeitPercent}</strong>
-                        </li>
-                      )}
-                    {profitMasterStatus &&
-                      profitMasterStatus?.secondaryEarningsPercent != null &&
-                      profitMasterStatus?.secondaryEarningsPercent != 0 && (
-                        <li style={{ marginBottom: "6px" }}>
-                          {`Secondary Earnings Percent: `}
-                          <strong>{profitMasterStatus?.secondaryEarningsPercent}</strong>
-                        </li>
-                      )}
-                    {profitMasterStatus &&
-                      profitMasterStatus?.maxAllowedContributions != null &&
-                      profitMasterStatus?.maxAllowedContributions != 0 && (
-                        <li style={{ marginBottom: "6px" }}>
-                          {`Max Allowed Contributions: `}
-                          <strong>{profitMasterStatus?.maxAllowedContributions}</strong>
-                        </li>
-                      )}
-                    {profitMasterStatus &&
-                      profitMasterStatus?.badgeAdjusted != null &&
-                      profitMasterStatus?.badgeAdjusted != 0 && (
-                        <li style={{ marginBottom: "6px" }}>
-                          {`Badge Adjusted: `}
-                          <strong>{profitMasterStatus?.badgeAdjusted}</strong>
-                        </li>
-                      )}
-                    {profitMasterStatus &&
-                      profitMasterStatus?.adjustContributionAmount != null &&
-                      profitMasterStatus?.adjustContributionAmount != 0 && (
-                        <li style={{ marginBottom: "6px" }}>
-                          {`Adjust Contribution Amount: `}
-                          <strong>{profitMasterStatus?.adjustContributionAmount}</strong>
-                        </li>
-                      )}
-                    {profitMasterStatus &&
-                      profitMasterStatus?.adjustEarningsAmount != null &&
-                      profitMasterStatus?.adjustEarningsAmount != 0 && (
-                        <li style={{ marginBottom: "6px" }}>
-                          {`Adjust Earnings Amount: `}
-                          <strong>{profitMasterStatus?.adjustEarningsAmount}</strong>
-                        </li>
-                      )}
-                    {profitMasterStatus &&
-                      profitMasterStatus?.adjustIncomingForfeitAmount != null &&
-                      profitMasterStatus?.adjustIncomingForfeitAmount != 0 && (
-                        <li
-                          style={{
-                            marginBottom: "6px"
-                          }}>
-                          {`Adjust Incoming Forfeit Amount: `}
-                          <strong>{profitMasterStatus?.adjustIncomingForfeitAmount}</strong>
-                        </li>
-                      )}
-                    {profitMasterStatus &&
-                      profitMasterStatus?.badgeAdjusted2 != null &&
-                      profitMasterStatus?.badgeAdjusted2 != 0 && (
-                        <li style={{ marginBottom: "6px" }}>
-                          {`Second Badge Adjusted: `}
-                          <strong>{profitMasterStatus?.badgeAdjusted2}</strong>
-                        </li>
-                      )}
-                    {profitMasterStatus &&
-                      profitMasterStatus?.adjustEarningsSecondaryAmount != null &&
-                      profitMasterStatus?.adjustEarningsSecondaryAmount != 0 && (
-                        <li
-                          style={{
-                            marginBottom: "6px"
-                          }}>
-                          {`Adjust Secondary Earnings Amount: `}
-                          <strong>{profitMasterStatus?.adjustEarningsSecondaryAmount}</strong>
-                        </li>
-                      )}
-                  </ul>
-                )}
-              </Typography>
+              {profitSharingEditQueryParams && !profitMasterStatus && (
+                <ChangesList params={profitSharingEditQueryParams} />
+              )}
+              {profitMasterStatus && !profitSharingEditQueryParams && <ChangesList params={profitMasterStatus} />}
             </Grid2>
           </>
         )}
         {profitSharingUpdate && profitSharingEdit && (
-          <div>
+          <Grid2 width={"100%"}>
             <div className="px-[24px]">
               <h2 className="text-dsm-secondary">Summary (PAY444)</h2>
               <Typography
@@ -731,8 +543,8 @@ const ProfitShareEditUpdate = () => {
               tablePadding="12px"
             />
             <div className="px-[24px]">
-              <div style={{ display: "flex", gap: "50px" }}>
-                <span>
+              <div style={{ display: "flex", gap: "75px" }}>
+                <span style={{ color: totalForfeituresGreaterThanZero == true ? "red" : "inherit" }}>
                   <strong>Total Forfeitures</strong>:{" "}
                   {numberToCurrency(profitSharingUpdate.totals.maxOverTotal || 0) + "      "}{" "}
                 </span>
@@ -818,7 +630,7 @@ const ProfitShareEditUpdate = () => {
                 setInitialSearchLoaded={setInitialSearchLoaded}
               />
             </Grid2>
-          </div>
+          </Grid2>
         )}
       </Grid2>
       <SmartModal
