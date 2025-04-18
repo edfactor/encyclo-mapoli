@@ -193,16 +193,16 @@ export const menuLevels: MenuLevel[] = [
         subPages: [
           { subTitle: CAPTIONS.QPAY066_UNDER21, subRoute: ROUTES.QPAY066_UNDER21 },
           { subTitle: CAPTIONS.QPAY066TA_UNDER21, subRoute: ROUTES.QPAY066TA_UNDER21 },
-          { subTitle: CAPTIONS.QPAY066TA, subRoute: ROUTES.QPAY066TA, disabled: !EnvironmentUtils.isDevelopment },
+          { subTitle: CAPTIONS.QPAY066TA, subRoute: ROUTES.QPAY066TA, disabled: !EnvironmentUtils.isDevelopmentOrQA },
           { subTitle: CAPTIONS.PROFALL, subRoute: ROUTES.PROFALL },
-          { subTitle: CAPTIONS.NEW_PS_LABELS, subRoute: ROUTES.NEW_PS_LABELS, disabled: !EnvironmentUtils.isDevelopment, },
-          { subTitle: CAPTIONS.PROFNEW, subRoute: ROUTES.PROFNEW, disabled: !EnvironmentUtils.isDevelopment, }
+          { subTitle: CAPTIONS.NEW_PS_LABELS, subRoute: ROUTES.NEW_PS_LABELS, disabled: !EnvironmentUtils.isDevelopmentOrQA, },
+          { subTitle: CAPTIONS.PROFNEW, subRoute: ROUTES.PROFNEW, disabled: !EnvironmentUtils.isDevelopmentOrQA, }
         ]
       },      
       {
         topTitle: CAPTIONS.PRINT_PROFIT_CERTS,
         topRoute: ROUTES.PRINT_PROFIT_CERTS,
-        disabled: !EnvironmentUtils.isDevelopment,
+        disabled: !EnvironmentUtils.isDevelopmentOrQA,
         subPages: []
       }     
     ]
