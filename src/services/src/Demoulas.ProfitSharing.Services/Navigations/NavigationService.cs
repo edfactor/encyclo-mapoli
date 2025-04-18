@@ -26,6 +26,7 @@ public class NavigationService : INavigationService
         var flatList = await _dataContextFactory.UseReadOnlyContext(context =>
             context.Navigations
                 .AsNoTracking()
+                .Include(m=>m.Items)
                 .OrderBy(x => x.OrderNumber)
                 .ToListAsync()
         );
