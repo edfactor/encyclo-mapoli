@@ -10,8 +10,15 @@ import {
   useLazyGetProfitMasterStatusQuery
 } from "reduxstore/api/YearsEndApi";
 import {
+  clearProfitSharingEdit,
+  clearProfitSharingEditQueryParams,
+  clearProfitSharingUpdate,
+  setInvalidProfitShareEditYear,
   setProfitEditUpdateChangesAvailable,
-  setProfitEditUpdateRevertChangesAvailable
+  setProfitEditUpdateRevertChangesAvailable,
+  setProfitShareApplyOrRevertLoading,
+  setProfitShareEditUpdateShowSearch,
+  setResetYearEndPage
 } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import {
@@ -34,6 +41,7 @@ import { TotalsGrid } from "../../components/TotalsGrid";
 import ProfitShareEditConfirmation from "./ProfitShareEditConfirmation";
 import ProfitShareEditUpdateSearchFilter from "./ProfitShareEditUpdateSearchFilter";
 import ProfitShareEditUpdateTabs from "./ProfitShareEditUpdateTabs";
+import ChangesList from "./ChangesList";
 
 enum MessageKeys {
   ProfitShareEditUpdate = "ProfitShareEditUpdate"
@@ -90,13 +98,14 @@ const useRevertAction = (
   const [trigger] = useLazyGetMasterRevertQuery();
   const dispatch = useDispatch();
   const profitYear = useFiscalCloseProfitYear();
+  //const { profitSharingEdit, profitSharingUpdate } = useSelector((state: RootState) => state.yearsEnd);
 
   const revertAction = async (): Promise<void> => {
     const params: ProfitYearRequest = {
       profitYear: profitYear ?? 0
     };
 
-    console.log("reverting cahnges to year end: ", params);
+    console.log("reverting changes to year end: ", params);
     console.log(params);
 
     await trigger(params, false)
@@ -109,6 +118,7 @@ const useRevertAction = (
         console.log("Successfully reverted changes for year end: ", payload);
         dispatch(setProfitEditUpdateChangesAvailable(false));
         dispatch(setProfitEditUpdateRevertChangesAvailable(false));
+        dispatch(clearProfitSharingEditQueryParams());
         dispatch(
           setMessage({
             ...Messages.ProfitShareRevertSuccess,
@@ -118,6 +128,12 @@ const useRevertAction = (
             }
           })
         );
+        // Clear form and grids (we need to call reset on the search filter page)
+        dispatch(setResetYearEndPage(true));
+        // Bring search filters back
+        dispatch(setProfitShareEditUpdateShowSearch(true));
+        dispatch(clearProfitSharingEdit());
+        dispatch(clearProfitSharingUpdate());
       })
       .catch((error) => {
         console.error("ERROR: Did not revert changes to year end", error);
@@ -168,11 +184,13 @@ const useSaveAction = (
     console.log("Applying changes to year end: ", params);
     console.log(params);
 
+    dispatch(setProfitShareApplyOrRevertLoading(true));
+
     await trigger(params)
       .unwrap()
       .then((payload: ProfitShareMasterResponse) => {
         dispatch(setProfitEditUpdateChangesAvailable(false));
-        dispatch(setProfitEditUpdateRevertChangesAvailable(true));
+
         console.log("Successfully applied changes to year end: ", payload);
         console.log("Employees affected: ", payload?.employeesEffected);
         setEmployeesReverted(payload?.employeesEffected ?? 0);
@@ -187,6 +205,11 @@ const useSaveAction = (
             }
           })
         );
+        dispatch(setResetYearEndPage(true));
+        dispatch(setProfitEditUpdateRevertChangesAvailable(true));
+        dispatch(setProfitShareEditUpdateShowSearch(false));
+        // Clear the grids
+        dispatch(clearProfitSharingUpdate());
       })
       .catch((error) => {
         console.error("ERROR: Did not apply changes to year end", error);
@@ -200,6 +223,7 @@ const useSaveAction = (
           })
         );
       });
+    dispatch(setProfitShareApplyOrRevertLoading(false));
   };
 
   return saveAction;
@@ -223,12 +247,21 @@ const RenderSaveButton = (
   isLoading: boolean
 ) => {
   // The incoming status field is about whether or not changes have already been applied
-  const { profitEditUpdateChangesAvailable, profitSharingEditQueryParams } = useSelector(
-    (state: RootState) => state.yearsEnd
-  );
+  const {
+    profitEditUpdateChangesAvailable,
+    profitSharingEditQueryParams,
+    profitShareApplyOrRevertLoading,
+    totalForfeituresGreaterThanZero,
+    invalidProfitShareEditYear
+  } = useSelector((state: RootState) => state.yearsEnd);
   const saveButton = (
     <Button
-      disabled={(!profitEditUpdateChangesAvailable && status?.updatedTime !== null) || isLoading}
+      disabled={
+        (!profitEditUpdateChangesAvailable && status?.updatedTime !== null) ||
+        isLoading ||
+        totalForfeituresGreaterThanZero ||
+        invalidProfitShareEditYear
+      }
       variant="outlined"
       color="primary"
       size="medium"
@@ -239,7 +272,7 @@ const RenderSaveButton = (
           setOpenEmptyModal(true);
         }
       }}>
-      {isLoading ? (
+      {isLoading || profitShareApplyOrRevertLoading ? (
         //Prevent loading spinner from shrinking button
         <div className="spinner">
           <CircularProgress
@@ -253,11 +286,17 @@ const RenderSaveButton = (
     </Button>
   );
 
-  if (!profitEditUpdateChangesAvailable) {
+  if (!profitEditUpdateChangesAvailable || invalidProfitShareEditYear || totalForfeituresGreaterThanZero) {
     return (
       <Tooltip
         placement="top"
-        title="You must have previewed data to save.">
+        title={
+          invalidProfitShareEditYear
+            ? "Invalid year for saving changes"
+            : totalForfeituresGreaterThanZero == false
+              ? "You must have previewed data to save."
+              : "Total forfeitures is greater than zero."
+        }>
         <span>{saveButton}</span>
       </Tooltip>
     );
@@ -268,31 +307,23 @@ const RenderSaveButton = (
 
 // This really just opens the modal. The modal for this has the function to call
 // the back end
-const RenderRevertButton = (
-  setOpenRevertModal: (open: boolean) => void,
-  status: ProfitMasterStatus | null,
-  isLoading: boolean
-) => {
+const RenderRevertButton = (setOpenRevertModal: (open: boolean) => void, isLoading: boolean) => {
   // The incoming status field is about whether or not changes have already been applied
-  const { profitEditUpdateRevertChangesAvailable } = useSelector((state: RootState) => state.yearsEnd);
+  const { profitEditUpdateRevertChangesAvailable, profitShareApplyOrRevertLoading } = useSelector(
+    (state: RootState) => state.yearsEnd
+  );
 
   const revertButton = (
     <Button
-      disabled={!profitEditUpdateRevertChangesAvailable || status?.updatedTime === null || isLoading}
+      disabled={!profitEditUpdateRevertChangesAvailable || isLoading}
       variant="outlined"
       color="primary"
       size="medium"
-      startIcon={
-        isLoading ? null : (
-          <Replay
-            color={profitEditUpdateRevertChangesAvailable || status?.updatedTime === null ? "primary" : "disabled"}
-          />
-        )
-      }
+      startIcon={isLoading ? null : <Replay color={profitEditUpdateRevertChangesAvailable ? "primary" : "disabled"} />}
       onClick={async () => {
         setOpenRevertModal(true);
       }}>
-      {isLoading ? (
+      {isLoading || profitShareApplyOrRevertLoading ? (
         //Prevent loading spinner from shrinking button
         <div className="spinner">
           <CircularProgress
@@ -306,7 +337,7 @@ const RenderRevertButton = (
     </Button>
   );
 
-  if (!profitEditUpdateRevertChangesAvailable || status?.updatedTime === null) {
+  if (!profitEditUpdateRevertChangesAvailable) {
     return (
       <Tooltip
         placement="top"
@@ -337,7 +368,10 @@ const ProfitShareEditUpdate = () => {
     profitSharingUpdate,
     profitSharingEdit,
     profitSharingEditQueryParams,
-    profitMasterStatus
+    profitMasterStatus,
+    profitShareEditUpdateShowSearch,
+    profitEditUpdateRevertChangesAvailable,
+    totalForfeituresGreaterThanZero
   } = useSelector((state: RootState) => state.yearsEnd);
   const [openSaveModal, setOpenSaveModal] = useState<boolean>(false);
   const [openRevertModal, setOpenRevertModal] = useState<boolean>(false);
@@ -348,24 +382,43 @@ const ProfitShareEditUpdate = () => {
   const profitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
 
+  useEffect(() => {
+    const currentYear = new Date().getFullYear();
+    if (profitYear !== currentYear - 1) {
+      dispatch(setInvalidProfitShareEditYear(true));
+      dispatch(
+        setMessage({
+          key: MessageKeys.ProfitShareEditUpdate,
+          message: {
+            type: "warning",
+            title: "Invalid Year Selected",
+            message: `Please select a ${currentYear - 1} date in the drawer menu to proceed.`
+          }
+        })
+      );
+    } else {
+      dispatch(setInvalidProfitShareEditYear(false));
+    }
+  }, [profitYear, dispatch]);
+
   const onStatusSearch = useCallback(async () => {
     const request: ProfitYearRequest = {
       profitYear: profitYear ?? 0
     };
 
-    console.log("Getting status...");
-
     await triggerStatusUpdate(request, false)
       .unwrap()
       .then((payload) => {
         if (payload?.updatedBy) {
-          console.log("Status updated by: ", payload?.updatedBy);
           setUpdatedBy(payload.updatedBy);
+
+          // Since we have something to revert, set this to button appears
+          dispatch(setProfitEditUpdateRevertChangesAvailable(true));
+          // Hide the search filters
+          dispatch(setProfitShareEditUpdateShowSearch(false));
         }
 
         if (payload?.updatedTime) {
-          console.log("Status updated time: ", payload?.updatedTime);
-
           setUpdatedTime(
             new Date(payload.updatedTime).toLocaleString("en-US", {
               month: "long",
@@ -409,7 +462,7 @@ const ProfitShareEditUpdate = () => {
       label="Master Update (PAY444|PAY447)"
       actionNode={
         <div className="flex  justify-end gap-2">
-          {RenderRevertButton(setOpenRevertModal, profitMasterStatus, isLoading)}
+          {RenderRevertButton(setOpenRevertModal, isLoading)}
           {RenderSaveButton(setOpenSaveModal, setOpenEmptyModal, profitMasterStatus, isLoading)}
         </div>
       }>
@@ -418,19 +471,44 @@ const ProfitShareEditUpdate = () => {
       </div>
       <Grid2
         container
-        rowSpacing="24px">
+        rowSpacing="24px"
+        width={"100%"}>
         <Grid2 width={"100%"}>
           <Divider />
         </Grid2>
-        <Grid2 width={"100%"}>
-          <DSMAccordion title="Parameters">
-            <ProfitShareEditUpdateSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
-          </DSMAccordion>
-        </Grid2>
+        {profitShareEditUpdateShowSearch && (
+          <Grid2 width={"100%"}>
+            <DSMAccordion title="Parameters">
+              <ProfitShareEditUpdateSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
+            </DSMAccordion>
+          </Grid2>
+        )}
+        {(profitEditUpdateRevertChangesAvailable || profitMasterStatus) && profitEditUpdateRevertChangesAvailable && (
+          <>
+            <Grid2
+              width={"100%"}
+              sx={{ marginLeft: "50px" }}>
+              <Typography
+                component={"span"}
+                variant="h6"
+                sx={{ fontWeight: "bold" }}>
+                {`These changes have already been applied: `}
+              </Typography>
+            </Grid2>
+            <Grid2
+              width={"100%"}
+              sx={{ marginLeft: "50px" }}>
+              {profitSharingEditQueryParams && !profitMasterStatus && (
+                <ChangesList params={profitSharingEditQueryParams} />
+              )}
+              {profitMasterStatus && !profitSharingEditQueryParams && <ChangesList params={profitMasterStatus} />}
+            </Grid2>
+          </>
+        )}
         {profitSharingUpdate && profitSharingEdit && (
-          <div>
+          <Grid2 width={"100%"}>
             <div className="px-[24px]">
-              <h2 className="text-dsm-secondary">Summary</h2>
+              <h2 className="text-dsm-secondary">Summary (PAY444)</h2>
               <Typography
                 fontWeight="bold"
                 variant="body2">
@@ -483,6 +561,26 @@ const ProfitShareEditUpdate = () => {
               ]}
               tablePadding="12px"
             />
+            <div className="px-[24px]">
+              <div style={{ display: "flex", gap: "75px" }}>
+                <span style={{ color: totalForfeituresGreaterThanZero == true ? "red" : "inherit" }}>
+                  <strong>Total Forfeitures</strong>:{" "}
+                  {numberToCurrency(profitSharingUpdate.totals.maxOverTotal || 0) + "      "}{" "}
+                </span>
+                <span>
+                  <strong>Total Points</strong>:{" "}
+                  {numberToCurrency(profitSharingUpdate.totals.maxPointsTotal || 0) + " "}{" "}
+                </span>
+                <span>
+                  <strong>For Employees Exceeding Max Contribution</strong> :{" "}
+                  {numberToCurrency(profitSharingEditQueryParams?.maxAllowedContributions || 0)}
+                </span>
+              </div>
+            </div>
+            <div style={{ height: "20px" }}></div>
+            <div className="px-[24px]">
+              <h2 className="text-dsm-secondary">Summary (PAY447)</h2>
+            </div>
             <div style={{ display: "flex", gap: "8px" }}>
               <TotalsGrid
                 breakPoints={{ xs: 5, sm: 5, md: 5, lg: 5, xl: 5 }}
@@ -526,10 +624,10 @@ const ProfitShareEditUpdate = () => {
                     ],
                     [
                       "",
-                      numberToCurrency(profitSharingUpdateAdjustmentSummary?.contributionAmountAdjusted || 0),
-                      numberToCurrency(profitSharingUpdateAdjustmentSummary?.earningsAmountAdjusted || 0),
-                      numberToCurrency(profitSharingUpdateAdjustmentSummary?.secondaryEarningsAmountAdjusted || 0),
-                      numberToCurrency(profitSharingUpdateAdjustmentSummary?.incomingForfeitureAmountAdjusted || 0)
+                      "", // need the requested contribution adjustment (from the request)
+                      "", // need the requested earnings adjustment amount
+                      "", // need the requested secondary earnings
+                      "" // need the requested incoming forfeiture adjustment
                     ],
                     [
                       "",
@@ -551,7 +649,7 @@ const ProfitShareEditUpdate = () => {
                 setInitialSearchLoaded={setInitialSearchLoaded}
               />
             </Grid2>
-          </div>
+          </Grid2>
         )}
       </Grid2>
       <SmartModal

@@ -5,8 +5,6 @@ import {
   BalanceByYears,
   BreakdownByStoreRequest,
   BreakdownByStoreResponse,
-  BreakdownByStoreRequest,
-  BreakdownByStoreResponse,
   ContributionsByAge,
   DemographicBadgesNotInPayprofit,
   DistributionsAndForfeitures,
@@ -32,36 +30,35 @@ import {
   PagedReportResponse,
   ProfitMasterStatus,
   ProfitShareAdjustmentSummary,
-  ProfitMasterStatus,
-  ProfitShareAdjustmentSummary,
   ProfitShareEditResponse,
-  ProfitShareEditUpdateQueryParams,
   ProfitShareEditUpdateQueryParams,
   ProfitShareMasterResponse,
   ProfitShareUpdateResponse,
   ProfitSharingDistributionsByAge,
+  ProfitSharingLabel,
   ProfitYearRequest,
   RehireForfeituresRequest,
-  ReportsByAgeParams,
   ReportsByAgeParams,
   TerminationResponse,
   Under21BreakdownByStoreRequest,
   Under21BreakdownByStoreResponse,
-  Under21BreakdownByStoreResponse,
   Under21InactiveRequest,
-  Under21InactiveResponse,
   Under21InactiveResponse,
   Under21TotalsRequest,
   Under21TotalsResponse,
   UpdateSummaryResponse,
-  ProfitSharingLabel,
-  YearEndProfitSharingReportResponse,
   VestedAmountsByAge,
+  YearEndProfitSharingReportResponse,
   YearEndProfitSharingReportSummaryResponse
 } from "reduxstore/types";
 import { Paged } from "smart-ui-library";
 
 export interface YearsEndState {
+  invalidProfitShareEditYear: boolean;
+  totalForfeituresGreaterThanZero: boolean;
+  profitShareEditUpdateShowSearch: boolean;
+  resetYearEndPage: boolean;
+  profitShareApplyOrRevertLoading: boolean;
   profitMasterStatus: ProfitMasterStatus | null;
   profitEditUpdateChangesAvailable: boolean;
   profitEditUpdateRevertChangesAvailable: boolean;
@@ -150,7 +147,11 @@ const initialState: YearsEndState = {
   selectedProfitYearForFiscalClose: localStorage.getItem("selectedProfitYearForFiscalClose")
     ? Number(localStorage.getItem("selectedProfitYearForFiscalClose"))
     : 2024,
-  profitMasterStatus: null,
+  invalidProfitShareEditYear: false,
+  totalForfeituresGreaterThanZero: false,
+  profitShareEditUpdateShowSearch: true,
+  profitShareApplyOrRevertLoading: false,
+  resetYearEndPage: false,
   profitMasterStatus: null,
   additionalExecutivesChosen: null,
   additionalExecutivesGrid: null,
@@ -234,11 +235,20 @@ export const yearsEndSlice = createSlice({
   name: "yearsEnd",
   initialState,
   reducers: {
-    setProfitMasterStatus: (state, action: PayloadAction<ProfitMasterStatus>) => {
-      state.profitMasterStatus = action.payload;
+    setInvalidProfitShareEditYear: (state, action: PayloadAction<boolean>) => {
+      state.invalidProfitShareEditYear = action.payload;
     },
-    clearProfitMasterStatus: (state) => {
-      state.profitMasterStatus = null;
+    setTotalForfeituresGreaterThanZero: (state, action: PayloadAction<boolean>) => {
+      state.totalForfeituresGreaterThanZero = action.payload;
+    },
+    setProfitShareEditUpdateShowSearch: (state, action: PayloadAction<boolean>) => {
+      state.profitShareEditUpdateShowSearch = action.payload;
+    },
+    setProfitShareApplyOrRevertLoading: (state, action: PayloadAction<boolean>) => {
+      state.profitShareApplyOrRevertLoading = action.payload;
+    },
+    setResetYearEndPage: (state, action: PayloadAction<boolean>) => {
+      state.resetYearEndPage = action.payload;
     },
     setProfitMasterStatus: (state, action: PayloadAction<ProfitMasterStatus>) => {
       state.profitMasterStatus = action.payload;
@@ -1071,6 +1081,11 @@ export const {
   setProfitSharingLabels,
   clearProfitSharingLabels,
   setProfitMasterStatus,
-  clearProfitMasterStatus
+  clearProfitMasterStatus,
+  setResetYearEndPage,
+  setProfitShareApplyOrRevertLoading,
+  setProfitShareEditUpdateShowSearch,
+  setTotalForfeituresGreaterThanZero,
+  setInvalidProfitShareEditYear
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;

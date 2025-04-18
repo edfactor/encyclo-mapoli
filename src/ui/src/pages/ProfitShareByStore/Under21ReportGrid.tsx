@@ -3,6 +3,7 @@ import { DSMGrid } from "smart-ui-library";
 import { Path, useNavigate } from "react-router";
 import { useCallback, useMemo } from "react";
 import { GetUnder21ReportColumns } from "./Under21ReportColumns";
+import { useLazyGetUnder21BreakdownByStoreQuery, useLazyGetUnder21TotalsQuery } from "reduxstore/api/YearsEndApi";
 
 const sampleData = [
   {
@@ -34,6 +35,11 @@ const Under21ReportGrid = () => {
 
   const columnDefs = useMemo(() => GetUnder21ReportColumns(handleNavigationForButton), [handleNavigationForButton]);
 
+  const [__, { isFetching: isTotalsFetching }] = useLazyGetUnder21TotalsQuery();
+  const [___, { isFetching: isBreakdownFetching }] = useLazyGetUnder21BreakdownByStoreQuery();
+
+  const isFetching = isTotalsFetching || isBreakdownFetching;
+
   return (
     <>
       <div style={{ padding: "0 24px 0 24px" }}>
@@ -45,7 +51,7 @@ const Under21ReportGrid = () => {
       </div>
       <DSMGrid
         preferenceKey={"UNDER_21_REPORT"}
-        isLoading={false}
+        isLoading={isFetching}
         handleSortChanged={(_params) => {}}
         providedOptions={{
           rowData: sampleData,

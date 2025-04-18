@@ -80,7 +80,7 @@ const NegativeEtvaForSSNsOnPayprofitGrid: React.FC<NegativeEtvaForSSNsOnPayprofi
           </div>
           <DSMGrid
             preferenceKey={CAPTIONS.NEGATIVE_ETVA}
-            isLoading={false}
+            isLoading={isFetching}
             handleSortChanged={sortEventHandler}
             providedOptions={{
               rowData: negativeEtvaForSSNsOnPayprofit.response.results,

@@ -29,7 +29,7 @@ const DuplicateNamesAndBirthdaysGrid: React.FC<DuplicateNamesAndBirthdaysGridSea
     (state: RootState) => state.yearsEnd
   );
   const profitYear = useDecemberFlowProfitYear();
-  const [triggerSearch, { isLoading }] = useLazyGetDuplicateNamesAndBirthdaysQuery();
+  const [triggerSearch, { isFetching }] = useLazyGetDuplicateNamesAndBirthdaysQuery();
 
   const onSearch = useCallback(async () => {
     const request = {
@@ -65,7 +65,7 @@ const DuplicateNamesAndBirthdaysGrid: React.FC<DuplicateNamesAndBirthdaysGridSea
           </div>
           <DSMGrid
             preferenceKey={CAPTIONS.DUPLICATE_NAMES}
-            isLoading={false}
+            isLoading={isFetching}
             handleSortChanged={sortEventHandler}
             providedOptions={{
               rowData: duplicateNamesAndBirthdays?.response.results,

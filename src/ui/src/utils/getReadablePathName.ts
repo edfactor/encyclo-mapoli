@@ -57,7 +57,8 @@ const pathToReadableName: Record<string, string> = {
   demographic: "Demographic Freeze",
   "ytd-wages-extract": "YTD Wages Extract",
   profall: "Profall",
-  "pay426-final-run": "Pay 426 Final Run"
+  "pay426-final-run": "Pay 426 Final Run",
+  "dev-debug": "Dev Debug"
 };
 
 export const getReadablePathName = (path: string): string => {

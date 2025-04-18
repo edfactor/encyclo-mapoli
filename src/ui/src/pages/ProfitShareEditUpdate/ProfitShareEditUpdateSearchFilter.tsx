@@ -17,10 +17,15 @@ import {
   clearProfitSharingUpdateQueryParams,
   setProfitEditUpdateChangesAvailable,
   setProfitSharingEditQueryParams,
-  setProfitSharingUpdateQueryParams
+  setProfitSharingUpdateQueryParams,
+  setResetYearEndPage,
+  setTotalForfeituresGreaterThanZero
 } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import { ProfitShareUpdateRequest } from "reduxstore/types";
+import { useEffect } from "react";
+
+const maxContributionsDefault: number = 76000;
 
 interface ProfitShareEditUpdateSearch {
   profitYear: Date;
@@ -28,7 +33,7 @@ interface ProfitShareEditUpdateSearch {
   earningsPercent?: number | null | undefined;
   secondaryEarningsPercent?: number | null | undefined;
   incomingForfeitPercent?: number | null | undefined;
-  maxAllowedContributions?: number | null | undefined;
+  maxAllowedContributions: number | null | undefined;
   badgeToAdjust?: number | null | undefined;
   adjustContributionAmount?: number | null | undefined;
   adjustEarningsAmount?: number | null | undefined;
@@ -70,10 +75,10 @@ const schema = yup.object().shape({
     .optional(),
   maxAllowedContributions: yup
     .number()
+    .default(maxContributionsDefault)
     .typeError("Max Allowed Contributions must be a number")
     .min(0, "Max Allowed Contributions must be positive")
-    .nullable()
-    .optional(),
+    .required("Max Contributions is required"),
   badgeToAdjust: yup
     .number()
     .typeError("Badge must be a number")
@@ -112,7 +117,9 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
   const [triggerSearchUpdate, { isFetching: isFetchingUpdate }] = useLazyGetProfitShareUpdateQuery();
   const [triggerSearchEdit, { isFetching: isFetchingEdit }] = useLazyGetProfitShareEditQuery();
 
-  const { profitSharingUpdate, profitSharingEdit } = useSelector((state: RootState) => state.yearsEnd);
+  const { profitSharingUpdate, profitSharingEdit, resetYearEndPage } = useSelector(
+    (state: RootState) => state.yearsEnd
+  );
 
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
@@ -136,7 +143,7 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
       earningsPercent: null,
       incomingForfeitPercent: null,
       secondaryEarningsPercent: null,
-      maxAllowedContributions: null,
+      maxAllowedContributions: maxContributionsDefault,
 
       badgeToAdjust: null,
       adjustContributionAmount: null,
@@ -162,7 +169,7 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
         earningsPercent: data.earningsPercent ?? 0,
         incomingForfeitPercent: data.incomingForfeitPercent ?? 0,
         secondaryEarningsPercent: data.secondaryEarningsPercent ?? 0,
-        maxAllowedContributions: data.maxAllowedContributions ?? 0,
+        maxAllowedContributions: data.maxAllowedContributions ?? maxContributionsDefault,
         badgeToAdjust: data.badgeToAdjust ?? 0,
         adjustContributionAmount: data.adjustContributionAmount ?? 0,
         adjustEarningsAmount: data.adjustEarningsAmount ?? 0,
@@ -172,7 +179,16 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
       };
 
       // First we have to do the update calls
-      triggerSearchUpdate(updateParams, false).unwrap();
+      triggerSearchUpdate(updateParams, false)
+        .unwrap()
+        .then((response) => {
+          if (response.totals.maxOverTotal > 0) {
+            dispatch(setTotalForfeituresGreaterThanZero(true));
+          } else {
+            dispatch(setTotalForfeituresGreaterThanZero(false));
+          }
+        });
+
       dispatch(setProfitSharingUpdateQueryParams({ ...data, profitYear: fiscalCloseProfitYearAsDate }));
 
       dispatch(setProfitEditUpdateChangesAvailable(true));
@@ -189,6 +205,14 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
     }
   });
 
+  // I would like handleReset() to be called whenever resetYearEndPage is true
+
+  useEffect(() => {
+    if (resetYearEndPage) {
+      handleReset();
+    }
+  }, [resetYearEndPage]);
+
   const handleReset = () => {
     // We need to clear both grids and then both sets of query params
     dispatch(clearProfitSharingEdit());
@@ -197,6 +221,8 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
     dispatch(clearProfitSharingUpdateQueryParams());
     setInitialSearchLoaded(false);
     dispatch(setProfitEditUpdateChangesAvailable(false));
+    dispatch(setResetYearEndPage(false));
+    dispatch(setTotalForfeituresGreaterThanZero(false));
 
     reset({
       profitYear: fiscalCloseProfitYearAsDate,
@@ -204,7 +230,7 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
       earningsPercent: null,
       incomingForfeitPercent: null,
       secondaryEarningsPercent: null,
-      maxAllowedContributions: null,
+      maxAllowedContributions: maxContributionsDefault,
 
       badgeToAdjust: null,
       adjustContributionAmount: null,

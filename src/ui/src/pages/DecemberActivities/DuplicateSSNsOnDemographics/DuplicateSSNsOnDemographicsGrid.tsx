@@ -49,7 +49,7 @@ const DuplicateSSNsOnDemographicsGrid: React.FC = () => {
           </div>
           <DSMGrid
             preferenceKey={CAPTIONS.DUPLICATE_SSNS}
-            isLoading={false}
+            isLoading={isFetching}
             handleSortChanged={sortEventHandler}
             providedOptions={{
               rowData: duplicateSSNsData?.response.results,

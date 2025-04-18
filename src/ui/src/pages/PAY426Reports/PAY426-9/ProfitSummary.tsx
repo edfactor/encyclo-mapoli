@@ -8,7 +8,7 @@ import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { CAPTIONS } from "../../../constants";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../reduxstore/store";
-import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 
 /**
  * Default rows for "Active and Inactive" section - these will display with zero values
@@ -108,7 +108,7 @@ const ProfitSummary = () => {
   const [trigger, { data, isFetching }] = useLazyGetYearEndProfitSharingSummaryReportQuery();
 
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
-  const profitYear = useDecemberFlowProfitYear();
+  const profitYear = useFiscalCloseProfitYear();
   
   useEffect(() => {
     if ( hasToken) {

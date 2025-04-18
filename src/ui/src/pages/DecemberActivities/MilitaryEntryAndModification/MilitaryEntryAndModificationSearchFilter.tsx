@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { useLazyGetProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
 import { clearMasterInquiryData } from "reduxstore/slices/inquirySlice";
+import { clearMilitaryContributions } from "reduxstore/slices/militarySlice";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 
@@ -54,6 +55,7 @@ const MilitaryEntryAndModificationSearchFilter: React.FC<SearchFilterProps> = ({
   const handleReset = () => {
     reset();
     dispatch(clearMasterInquiryData());
+    dispatch(clearMilitaryContributions());
   };
 
   return (

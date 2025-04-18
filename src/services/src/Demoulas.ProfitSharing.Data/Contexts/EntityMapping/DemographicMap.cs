@@ -18,6 +18,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
 
         _ = builder.HasIndex(e => e.Ssn, "IX_SSN");
         _ = builder.HasIndex(e => e.DateOfBirth, "IX_DOB");
+        _ = builder.HasIndex(e => e.TerminationDate, "IX_TERMINATION_DATE");
         _ = builder.HasIndex(e => new {e.Ssn, e.OracleHcmId}, "IX_SSN_ORACLE_HCM_ID");
         _ = builder.HasIndex(e => new { e.Ssn, e.BadgeNumber }, "IX_SSN_BADGE_NUMBER");
         

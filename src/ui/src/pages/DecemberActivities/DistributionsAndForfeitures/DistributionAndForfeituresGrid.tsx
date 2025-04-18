@@ -99,7 +99,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
           </div>
           <DSMGrid
             preferenceKey={CAPTIONS.DISTRIBUTIONS_AND_FORFEITURES}
-            isLoading={false}
+            isLoading={isFetching}
             handleSortChanged={sortEventHandler}
             providedOptions={{
               rowData: distributionsAndForfeitures?.response.results,

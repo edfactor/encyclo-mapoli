@@ -28,7 +28,8 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
   });
   const profitYear = useDecemberFlowProfitYear();
   const { masterInquiryEmployeeDetails } = useSelector((state: RootState) => state.inquiry);
-  const [fetchContributions, { data: contributionsData, isFetching }] = useLazyGetMilitaryContributionsQuery();
+  const { militaryContributionsData } = useSelector((state: RootState) => state.military);
+  const [fetchContributions, { isFetching }] = useLazyGetMilitaryContributionsQuery();
   
   const onSearch = useCallback(async () => {
     if (masterInquiryEmployeeDetails) {
@@ -66,13 +67,13 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
         <MasterInquiryEmployeeDetails details={masterInquiryEmployeeDetails} />
       )}
 
-      {contributionsData && (
+      {militaryContributionsData && (
         <>
           <div style={{ padding: "0 24px 24px 24px", display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`MILITARY CONTRIBUTIONS (${contributionsData?.total || 0} ${(contributionsData?.total || 0) === 1 ? "Record" : "Records"})`}
+              {`MILITARY CONTRIBUTIONS (${militaryContributionsData?.total || 0} ${(militaryContributionsData?.total || 0) === 1 ? "Record" : "Records"})`}
             </Typography>
 
             <Button
@@ -88,12 +89,12 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
             isLoading={isFetching}
             handleSortChanged={sortEventHandler}
             providedOptions={{
-              rowData: contributionsData?.results,
+              rowData: militaryContributionsData?.results,
               columnDefs: columnDefs
             }}
           />
 
-          {!!contributionsData && contributionsData?.results?.length > 0 && (          
+          {!!militaryContributionsData && militaryContributionsData?.results?.length > 0 && (          
             <Pagination
               pageNumber={pageNumber}
               setPageNumber={(value: number) => {
@@ -106,7 +107,7 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
                 setPageNumber(1);
                 setInitialSearchLoaded(true);
               }}
-              recordCount={contributionsData?.total}
+              recordCount={militaryContributionsData?.total}
             />
           )}
         </>

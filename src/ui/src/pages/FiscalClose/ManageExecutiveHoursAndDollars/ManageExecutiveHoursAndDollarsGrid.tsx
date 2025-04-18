@@ -345,7 +345,7 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
           )}
           <DSMGrid
             preferenceKey={CAPTIONS.MANAGE_EXECUTIVE_HOURS}
-            isLoading={false}
+            isLoading={isFetching}
             handleSortChanged={sortEventHandler}
             providedOptions={{
               rowData: isModal ? additionalExecutivesGrid?.response.results : mutableCopyOfGridData?.response.results,
