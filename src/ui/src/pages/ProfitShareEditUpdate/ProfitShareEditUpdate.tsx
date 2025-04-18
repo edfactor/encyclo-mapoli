@@ -246,11 +246,19 @@ const RenderSaveButton = (
   isLoading: boolean
 ) => {
   // The incoming status field is about whether or not changes have already been applied
-  const { profitEditUpdateChangesAvailable, profitSharingEditQueryParams, profitShareApplyOrRevertLoading } =
-    useSelector((state: RootState) => state.yearsEnd);
+  const {
+    profitEditUpdateChangesAvailable,
+    profitSharingEditQueryParams,
+    profitShareApplyOrRevertLoading,
+    totalForfeituresGreaterThanZero
+  } = useSelector((state: RootState) => state.yearsEnd);
   const saveButton = (
     <Button
-      disabled={(!profitEditUpdateChangesAvailable && status?.updatedTime !== null) || isLoading}
+      disabled={
+        (!profitEditUpdateChangesAvailable && status?.updatedTime !== null) ||
+        isLoading ||
+        totalForfeituresGreaterThanZero
+      }
       variant="outlined"
       color="primary"
       size="medium"
@@ -279,7 +287,11 @@ const RenderSaveButton = (
     return (
       <Tooltip
         placement="top"
-        title="You must have previewed data to save.">
+        title={
+          totalForfeituresGreaterThanZero == false
+            ? "You must have previewed data to save."
+            : "Total forfeitures is greater than zero."
+        }>
         <span>{saveButton}</span>
       </Tooltip>
     );
@@ -353,7 +365,8 @@ const ProfitShareEditUpdate = () => {
     profitSharingEditQueryParams,
     profitMasterStatus,
     profitShareEditUpdateShowSearch,
-    profitEditUpdateRevertChangesAvailable
+    profitEditUpdateRevertChangesAvailable,
+    totalForfeituresGreaterThanZero
   } = useSelector((state: RootState) => state.yearsEnd);
   const [openSaveModal, setOpenSaveModal] = useState<boolean>(false);
   const [openRevertModal, setOpenRevertModal] = useState<boolean>(false);
@@ -531,7 +544,7 @@ const ProfitShareEditUpdate = () => {
             />
             <div className="px-[24px]">
               <div style={{ display: "flex", gap: "75px" }}>
-                <span>
+                <span style={{ color: totalForfeituresGreaterThanZero == true ? "red" : "inherit" }}>
                   <strong>Total Forfeitures</strong>:{" "}
                   {numberToCurrency(profitSharingUpdate.totals.maxOverTotal || 0) + "      "}{" "}
                 </span>
