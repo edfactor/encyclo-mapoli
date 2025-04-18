@@ -474,7 +474,6 @@ FROM FILTERED_DEMOGRAPHIC p1
         YearEndProfitSharingReportRequest req, CancellationToken cancellationToken = default)
     {
         var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
-        var over18BirthDate = calInfo.FiscalEndDate.AddYears(-18);
         var birthDate21 = calInfo.FiscalEndDate.AddYears(-21);
 
         var response = new YearEndProfitSharingReportResponse
@@ -692,21 +691,21 @@ FROM FILTERED_DEMOGRAPHIC p1
                         HoursTotal = qGrp.Sum(x => x.pp.HoursExecutive + x.pp.CurrentHoursYear),
                         PointsTotal = qGrp.Sum(x => x.pp.PointsEarned),
                         TerminatedWagesTotal =
-                            qGrp.Where(x =>
-                                    x.pp.EmploymentStatusId == EmploymentStatus.Constants.Terminated &&
-                                    x.pp.TerminationDate < calInfo.FiscalEndDate)
-                                .Sum(x => x.pp.IncomeExecutive + x.pp.CurrentIncomeYear),
+                            qGrp.Where(y =>
+                                    y.pp.EmploymentStatusId == EmploymentStatus.Constants.Terminated &&
+                                    y.pp.TerminationDate < calInfo.FiscalEndDate)
+                                .Sum(y => y.pp.IncomeExecutive + y.pp.CurrentIncomeYear),
                         TerminatedHoursTotal =
-                            qGrp.Where(x =>
-                                    x.pp.EmploymentStatusId == EmploymentStatus.Constants.Terminated &&
-                                    x.pp.TerminationDate < calInfo.FiscalEndDate)
-                                .Sum(x => x.pp.HoursExecutive + x.pp.CurrentHoursYear),
+                            qGrp.Where(y =>
+                                    y.pp.EmploymentStatusId == EmploymentStatus.Constants.Terminated &&
+                                    y.pp.TerminationDate < calInfo.FiscalEndDate)
+                                .Sum(y => y.pp.HoursExecutive + y.pp.CurrentHoursYear),
                         NumberOfEmployees = qGrp.Count(),
                         NumberOfNewEmployees =
-                            qGrp.Count(x =>
-                                x.FirstContributionYear == null && (x.pp.HoursExecutive + x.pp.CurrentHoursYear) >
+                            qGrp.Count(y =>
+                                y.FirstContributionYear == null && (y.pp.HoursExecutive + y.pp.CurrentHoursYear) >
                                 ReferenceData.MinimumHoursForContribution()),
-                        NumberOfEmployeesUnder21 = qGrp.Count(x => x.pp.DateOfBirth > birthDate21),
+                        NumberOfEmployeesUnder21 = qGrp.Count(y => y.pp.DateOfBirth > birthDate21),
                     };
 
                 var totals = await totalsQry.FirstOrDefaultAsync(cancellationToken);
