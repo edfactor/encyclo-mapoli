@@ -745,40 +745,32 @@ export interface ProfitShareMasterResponse {
   etvasEffected?: number;
 }
 
-export interface ProfitMasterStatus {
-  updatedTime: string;
-  updatedBy?: string | null;
-  beneficiariesEffected?: number | null;
-  employeesEffected?: number | null;
-  etvasEffected?: number | null;
+export interface ProfitMasterParams {
+  adjustContributionAmount?: number | null;
+  adjustEarningsAmount?: number | null;
+  adjustEarningsSecondaryAmount?: number | null;
+  adjustIncomingForfeitAmount?: number | null;
   contributionPercent?: number | null;
-  incomingForfeitPercent?: number | null;
   earningsPercent?: number | null;
-  secondaryEarningsPercent?: number | null;
+  incomingForfeitPercent?: number | null;
   maxAllowedContributions?: number | null;
+  secondaryEarningsPercent?: number | null;
+}
+export interface ProfitMasterStatus extends ProfitMasterParams {
   badgeAdjusted?: number | null;
   badgeAdjusted2?: number | null;
-  adjustContributionAmount?: number | null;
-  adjustEarningsAmount?: number | null;
-  adjustIncomingForfeitAmount?: number | null;
-  adjustEarningsSecondaryAmount?: number | null;
-}
-
-export interface ProfitShareEditUpdateQueryParams {
-  profitYear: Date;
+  beneficiariesEffected?: number | null;
   contributionPercent?: number | null;
   earningsPercent?: number | null;
-  incomingForfeitPercent?: number | null;
-  secondaryEarningsPercent?: number | null;
-  maxAllowedContributions?: number | null;
-
+  employeesEffected?: number | null;
+  etvasEffected?: number | null;
+  updatedBy?: string | null;
+  updatedTime: string;
+}
+export interface ProfitShareEditUpdateQueryParams extends ProfitMasterParams {
+  profitYear: Date;
   badgeToAdjust?: number | null;
-  adjustContributionAmount?: number | null;
-  adjustEarningsAmount?: number | null;
-  adjustIncomingForfeitAmount?: number | null;
-
   badgeToAdjust2?: number | null;
-  adjustEarningsSecondaryAmount?: number | null;
 }
 
 export interface YearEndProfitSharingReportResponse {
