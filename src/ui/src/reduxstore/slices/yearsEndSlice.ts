@@ -54,6 +54,7 @@ import {
 import { Paged } from "smart-ui-library";
 
 export interface YearsEndState {
+  invalidProfitShareEditYear: boolean;
   totalForfeituresGreaterThanZero: boolean;
   profitShareEditUpdateShowSearch: boolean;
   resetYearEndPage: boolean;
@@ -146,6 +147,7 @@ const initialState: YearsEndState = {
   selectedProfitYearForFiscalClose: localStorage.getItem("selectedProfitYearForFiscalClose")
     ? Number(localStorage.getItem("selectedProfitYearForFiscalClose"))
     : 2024,
+  invalidProfitShareEditYear: false,
   totalForfeituresGreaterThanZero: false,
   profitShareEditUpdateShowSearch: true,
   profitShareApplyOrRevertLoading: false,
@@ -233,6 +235,9 @@ export const yearsEndSlice = createSlice({
   name: "yearsEnd",
   initialState,
   reducers: {
+    setInvalidProfitShareEditYear: (state, action: PayloadAction<boolean>) => {
+      state.invalidProfitShareEditYear = action.payload;
+    },
     setTotalForfeituresGreaterThanZero: (state, action: PayloadAction<boolean>) => {
       state.totalForfeituresGreaterThanZero = action.payload;
     },
@@ -1080,6 +1085,7 @@ export const {
   setResetYearEndPage,
   setProfitShareApplyOrRevertLoading,
   setProfitShareEditUpdateShowSearch,
-  setTotalForfeituresGreaterThanZero
+  setTotalForfeituresGreaterThanZero,
+  setInvalidProfitShareEditYear
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;
