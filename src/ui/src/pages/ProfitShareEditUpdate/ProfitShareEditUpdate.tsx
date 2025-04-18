@@ -13,6 +13,7 @@ import {
   clearProfitSharingEdit,
   clearProfitSharingEditQueryParams,
   clearProfitSharingUpdate,
+  setInvalidProfitShareEditYear,
   setProfitEditUpdateChangesAvailable,
   setProfitEditUpdateRevertChangesAvailable,
   setProfitShareApplyOrRevertLoading,
@@ -250,14 +251,16 @@ const RenderSaveButton = (
     profitEditUpdateChangesAvailable,
     profitSharingEditQueryParams,
     profitShareApplyOrRevertLoading,
-    totalForfeituresGreaterThanZero
+    totalForfeituresGreaterThanZero,
+    invalidProfitShareEditYear
   } = useSelector((state: RootState) => state.yearsEnd);
   const saveButton = (
     <Button
       disabled={
         (!profitEditUpdateChangesAvailable && status?.updatedTime !== null) ||
         isLoading ||
-        totalForfeituresGreaterThanZero
+        totalForfeituresGreaterThanZero ||
+        invalidProfitShareEditYear
       }
       variant="outlined"
       color="primary"
@@ -283,14 +286,16 @@ const RenderSaveButton = (
     </Button>
   );
 
-  if (!profitEditUpdateChangesAvailable) {
+  if (!profitEditUpdateChangesAvailable || invalidProfitShareEditYear || totalForfeituresGreaterThanZero) {
     return (
       <Tooltip
         placement="top"
         title={
-          totalForfeituresGreaterThanZero == false
-            ? "You must have previewed data to save."
-            : "Total forfeitures is greater than zero."
+          invalidProfitShareEditYear
+            ? "Invalid year for saving changes"
+            : totalForfeituresGreaterThanZero == false
+              ? "You must have previewed data to save."
+              : "Total forfeitures is greater than zero."
         }>
         <span>{saveButton}</span>
       </Tooltip>
@@ -377,18 +382,34 @@ const ProfitShareEditUpdate = () => {
   const profitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
 
+  useEffect(() => {
+    const currentYear = new Date().getFullYear();
+    if (profitYear !== currentYear - 1) {
+      dispatch(setInvalidProfitShareEditYear(true));
+      dispatch(
+        setMessage({
+          key: MessageKeys.ProfitShareEditUpdate,
+          message: {
+            type: "warning",
+            title: "Invalid Year Selected",
+            message: `Please select a ${currentYear - 1} date in the drawer menu to proceed.`
+          }
+        })
+      );
+    } else {
+      dispatch(setInvalidProfitShareEditYear(false));
+    }
+  }, [profitYear, dispatch]);
+
   const onStatusSearch = useCallback(async () => {
     const request: ProfitYearRequest = {
       profitYear: profitYear ?? 0
     };
 
-    console.log("Getting status...");
-
     await triggerStatusUpdate(request, false)
       .unwrap()
       .then((payload) => {
         if (payload?.updatedBy) {
-          console.log("Status updated by: ", payload?.updatedBy);
           setUpdatedBy(payload.updatedBy);
 
           // Since we have something to revert, set this to button appears
@@ -398,8 +419,6 @@ const ProfitShareEditUpdate = () => {
         }
 
         if (payload?.updatedTime) {
-          console.log("Status updated time: ", payload?.updatedTime);
-
           setUpdatedTime(
             new Date(payload.updatedTime).toLocaleString("en-US", {
               month: "long",
