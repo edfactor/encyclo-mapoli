@@ -1,53 +1,61 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Navigations;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
+using Demoulas.ProfitSharing.Data.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.Navigations;
 public class NavigationService : INavigationService
 {
-    public readonly List<Navigation> _navigations;
+    public readonly IProfitSharingDataContextFactory _dataContextFactory;
 
-
-    public NavigationService()
+    public NavigationService(IProfitSharingDataContextFactory dataContextFactory)
     {
-        this._navigations = new List<Navigation>()
+        this._dataContextFactory = dataContextFactory;
+    }
+
+    
+    public async Task<List<NavigationDto>> GetNavigation()
+    {
+        var flatList = await _dataContextFactory.UseReadOnlyContext(context =>
+            context.Navigations
+                .AsNoTracking()
+                .OrderBy(x => x.OrderNumber)
+                .ToListAsync()
+        );
+
+        var lookup = flatList.ToLookup(x => x.ParentId);
+
+        List<NavigationDto> BuildTree(int? parentId)
         {
-            //Populating navigation object.
-            new Navigation()
-            { Id = 1, Title="December Activities", Url = "", OrderNumber = 1, Status = NavigationStatus.NotStarted
-                , Children = new List<Navigation>()
+            return lookup[parentId]
+                .Select(x => new NavigationDto
                 {
-                    new Navigation()
-                    {Id = 1, ParentId =1, Title ="Clean Up Reports", Url ="", OrderNumber =1, Status = NavigationStatus.NotStarted,
-                        Children = new List<Navigation>(){
-                            new Navigation() { Id = 1, ParentId = 1, OrderNumber = 1, Title = "Demographic Badges Not In PayProfit", Url = "demographic-badges-not-in-payprofit", Status = NavigationStatus.NotStarted } ,
-                            new Navigation() { Id = 2, ParentId = 1, OrderNumber = 2, Title = "Duplicate SSNs in Demographics", Url = "duplicate-ssns-demographics", Status = NavigationStatus.NotStarted } ,
-                            new Navigation() { Id = 3, ParentId = 1, OrderNumber = 3, Title = "Negative ETVA", Url = "negative-etva-for-ssns-on-payprofit", Status = NavigationStatus.NotStarted } ,
-                            new Navigation() { Id = 4, ParentId = 1, OrderNumber = 4, Title = "Demographic Badges Not In PayProfit", Url = "demographic-badges-not-in-payprofit", Status = NavigationStatus.NotStarted } ,
-                            new Navigation() { Id = 5, ParentId = 1, OrderNumber = 5, Title = "Duplicate Names and Birthdays", Url = "duplicate-names-and-birthdays", Status = NavigationStatus.NotStarted }
-                        },
-                    },
-                    new Navigation(){Id = 2, ParentId =1, Title ="Military Contributions", SubTitle = "TPR008-13", Url ="military-entry-and-modification", OrderNumber =2, Status = NavigationStatus.NotStarted},
-                    new Navigation(){Id = 3, ParentId =1, Title ="Rehire Forfeitures", SubTitle = "QPREV-PROF", Url ="rehire-forfeitures", OrderNumber =3, Status = NavigationStatus.NotStarted},
-                    new Navigation(){Id = 4, ParentId =1, Title ="Distributions and Forfeitures", SubTitle = "QPAY129", Url ="distributions-and-forfeitures", OrderNumber =4, Status = NavigationStatus.NotStarted},
-                    new Navigation(){Id = 5, ParentId =1, Title ="Terminations", SubTitle = "QPAY066", Url ="prof-term", OrderNumber =4, Status = NavigationStatus.NotStarted},
-                    new Navigation(){Id = 6, ParentId =1, Title ="Profit Share Report", SubTitle = "PAY426", Url ="profit-share-report", OrderNumber =5, Status = NavigationStatus.NotStarted}
-                }
-            }
-        };
-    }
-    public List<Navigation> GetNavigation()
-    {
-        return this._navigations;
+                    Id = x.Id,
+                    Icon = x.Icon,
+                    OrderNumber = x.OrderNumber,
+                    ParentId = x.ParentId,
+                    StatusId = x.StatusId,
+                    Title = x.Title,
+                    Url = x.Url,
+                    SubTitle = x.SubTitle,
+                    Items = BuildTree(x.Id)
+                })
+                .ToList();
+        }
+
+        return BuildTree(null); // root level
     }
 
-    public Navigation GetNavigation(int navigationId)
+
+    public NavigationDto GetNavigation(int navigationId)
     {
-        return this._navigations.First(m => m.Id == navigationId);
+        throw new NotImplementedException();
     }
 }

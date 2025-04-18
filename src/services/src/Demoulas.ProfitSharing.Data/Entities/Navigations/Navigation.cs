@@ -14,7 +14,7 @@ public sealed class Navigation
     public int? ParentId { get; set; }
     public required string Title { get; set; }
     public string? SubTitle { get; set; }
-    public required string Url { get; set; }
+    public string? Url { get; set; }
     public byte? StatusId { get; set; }
     public byte OrderNumber { get; set; }
     public string? Icon { get; set; }

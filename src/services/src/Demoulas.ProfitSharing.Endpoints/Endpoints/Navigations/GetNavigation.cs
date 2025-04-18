@@ -33,11 +33,11 @@ public class GetNavigation: Endpoint<NavigationRequestDto,NavigationResponseDto>
         Group<NavigationGroup>();
     }
 
-    public override Task<NavigationResponseDto> ExecuteAsync(NavigationRequestDto req, CancellationToken ct)
+    public override async Task<NavigationResponseDto> ExecuteAsync(NavigationRequestDto req, CancellationToken ct)
     {
-        var navigationList = this._navigationService.GetNavigation();
+        var navigationList = await  this._navigationService.GetNavigation();
         var response = new NavigationResponseDto { Navigation = navigationList };
-        return Task.FromResult(response);
+        return response;
     }
 
 }
