@@ -382,13 +382,10 @@ const ProfitShareEditUpdate = () => {
       profitYear: profitYear ?? 0
     };
 
-    console.log("Getting status...");
-
     await triggerStatusUpdate(request, false)
       .unwrap()
       .then((payload) => {
         if (payload?.updatedBy) {
-          console.log("Status updated by: ", payload?.updatedBy);
           setUpdatedBy(payload.updatedBy);
 
           // Since we have something to revert, set this to button appears
@@ -398,8 +395,6 @@ const ProfitShareEditUpdate = () => {
         }
 
         if (payload?.updatedTime) {
-          console.log("Status updated time: ", payload?.updatedTime);
-
           setUpdatedTime(
             new Date(payload.updatedTime).toLocaleString("en-US", {
               month: "long",
