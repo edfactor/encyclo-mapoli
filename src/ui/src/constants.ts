@@ -47,6 +47,7 @@ export const ROUTES = {
 
   FROZEN_SUMMARY: "frozen-summary",
   MASTER_INQUIRY: "master-inquiry",
+  FORFEITURES_ADJUSTMENT: "forfeitures-adjustment",
 
   PAY426_ACTIVE_18_20: "pay426-1",
   PAY426_ACTIVE_21_PLUS: "pay426-2",
@@ -93,6 +94,7 @@ export const CAPTIONS = {
   EMPLOYEES_MILITARY: "Employees on Military Leave (QPAY511)",
   FORFEIT: "Forfeit (PAY443)",
   FORFEITURES_BY_AGE: "Get Forfeitures by Age (PROF130)",
+  FORFEITURES_ADJUSTMENT: "Forfeiture Adjustments (008-12)",
   MANAGE_EXECUTIVE_HOURS: "Manage Executive Hours and Dollars (TPR008-09)",
   MASTER_INQUIRY: "Master Inquiry",
   MILITARY_ENTRY_AND_MODIFICATION: "Military Entry and Modification",
