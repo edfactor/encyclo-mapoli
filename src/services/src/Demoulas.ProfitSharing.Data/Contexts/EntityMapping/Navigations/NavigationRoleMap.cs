@@ -15,7 +15,7 @@ internal sealed class NavigationRoleMap : IEntityTypeConfiguration<NavigationRol
         _ = builder.ToTable("NAVIGATION_ROLE");
         _ = builder.HasKey(m => m.Id);
         _ = builder.Property(m => m.Id).ValueGeneratedNever().HasColumnName("ID").IsRequired();
-        _ = builder.Property(x => x.Name).HasColumnName("URL").HasMaxLength(65).IsRequired();
+        _ = builder.Property(x => x.Name).HasColumnName("NAME").HasMaxLength(65).IsRequired();
 
 
         builder.HasData(

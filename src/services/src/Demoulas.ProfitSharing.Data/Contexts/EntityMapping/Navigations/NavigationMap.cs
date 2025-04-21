@@ -36,6 +36,7 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
             .HasForeignKey(x => x.ParentId);
 
         builder.HasMany(x => x.RequiredRoles)
-            .WithMany();
+            .WithMany()
+            .UsingEntity(x=>x.ToTable(name:"NAVIGATION_ASSIGNED_ROLES"));
     }
 }
