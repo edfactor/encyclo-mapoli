@@ -26,7 +26,14 @@ public class GetTableMetadataEndpoint : EndpointWithoutRequest<List<RowCountResu
             {
                 {
                     200,
-                    new FrozenStateResponse { Id = 2, ProfitYear = Convert.ToInt16(DateTime.Now.Year), IsActive = true }
+                    new List<RowCountResult>
+                    {
+                        new RowCountResult
+                        {
+                            TableName = "TABLE_NAME",
+                            RowCount = byte.MaxValue
+                        }
+                    }
                 }
             };
         });
