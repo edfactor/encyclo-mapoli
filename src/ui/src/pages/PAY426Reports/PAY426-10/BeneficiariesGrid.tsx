@@ -42,7 +42,7 @@ const BeneficiariesGrid = () => {
         }
       });
     }
-  }, [trigger, pageNumber, pageSize, profitYear]);
+  }, [trigger, pageNumber, pageSize, profitYear, hasToken]);
 
   const getPinnedTopRowData = useMemo(() => {
     if (!data) return [];
