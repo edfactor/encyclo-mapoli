@@ -63,6 +63,7 @@ import { MenuBar } from "components/MenuBar/MenuBar";
 import MilitaryEntryAndModification
   from "../../pages/DecemberActivities/MilitaryEntryAndModification/MilitaryEntryAndModification";
 import DevDebug from "../../pages/Dev/DevDebug";
+import ForfeituresAdjustment from "../../pages/ForfeituresAdjustment/ForfeituresAdjustment";
 
 const RouterSubAssembly: React.FC = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";
@@ -233,6 +234,9 @@ const RouterSubAssembly: React.FC = () => {
               <Route
                 path="forfeit/:badgeNumber?"
                 element={<Forfeit />}></Route>
+              <Route
+                path={ROUTES.FORFEITURES_ADJUSTMENT}
+                element={<ForfeituresAdjustment />}></Route>
               <Route
                 path={ROUTES.FISCAL_CLOSE}
                 element={<></>}></Route>
