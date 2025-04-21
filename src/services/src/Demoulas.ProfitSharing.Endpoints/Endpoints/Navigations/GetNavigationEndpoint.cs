@@ -10,12 +10,12 @@ using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Navigations;
-public class GetNavigation: Endpoint<NavigationRequestDto,NavigationResponseDto>
+public class GetNavigationEndpoint: Endpoint<NavigationRequestDto,NavigationResponseDto>
 {
 
     private readonly INavigationService _navigationService;
 
-    public GetNavigation(INavigationService navigationService)
+    public GetNavigationEndpoint(INavigationService navigationService)
     {
         _navigationService = navigationService;
     }
