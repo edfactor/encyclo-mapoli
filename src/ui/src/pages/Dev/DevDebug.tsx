@@ -73,7 +73,7 @@ const DevDebug = () => {
         
         {/* Database Metadata in an accordion */}
         <div style={{ marginTop: "24px" }}>
-          <DSMAccordion title="Database Metadata">
+          <DSMCollapsedAccordion title="Database Metadata">
             {metadataLoading ? (
               <p>Loading metadata...</p>
             ) : (
@@ -101,7 +101,7 @@ const DevDebug = () => {
                 )}
               </div>
             )}
-          </DSMAccordion>
+          </DSMCollapsedAccordion>
         </div>
       </div>
     </Page>
