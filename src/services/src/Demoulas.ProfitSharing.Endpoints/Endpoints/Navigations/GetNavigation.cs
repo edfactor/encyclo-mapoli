@@ -35,7 +35,7 @@ public class GetNavigation: Endpoint<NavigationRequestDto,NavigationResponseDto>
 
     public override async Task<NavigationResponseDto> ExecuteAsync(NavigationRequestDto req, CancellationToken ct)
     {
-        var navigationList = await  this._navigationService.GetNavigation(ct);
+        var navigationList = await  this._navigationService.GetNavigation(cancellationToken: ct);
         var response = new NavigationResponseDto { Navigation = navigationList };
         return response;
     }
