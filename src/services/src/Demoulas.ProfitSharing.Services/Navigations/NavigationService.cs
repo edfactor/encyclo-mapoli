@@ -21,14 +21,13 @@ public class NavigationService : INavigationService
     }
 
     
-    public async Task<List<NavigationDto>> GetNavigation()
+    public async Task<List<NavigationDto>> GetNavigation(CancellationToken ct)
     {
         var flatList = await _dataContextFactory.UseReadOnlyContext(context =>
             context.Navigations
-                .AsNoTracking()
                 .Include(m=>m.Items)
                 .OrderBy(x => x.OrderNumber)
-                .ToListAsync()
+                .ToListAsync(cancellationToken: ct)
         );
 
         var lookup = flatList.ToLookup(x => x.ParentId);

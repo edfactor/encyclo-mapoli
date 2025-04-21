@@ -14,7 +14,6 @@
   </Folder>
   <Folder Name="/Database/Obfuscation/" Id="64c6b0c5-6452-8afb-bf76-7a20f5b2eb96" />
   <Folder Name="/Database/Obfuscation/scripts/" Id="e5f55d26-f93e-35f8-b497-cce051b21704">
-    <File Path="../database/obfuscation/scripts/add-navigation-data.sql" />
     <File Path="../database/obfuscation/scripts/CHANGELOG.txt" />
     <File Path="../database/obfuscation/scripts/check_psn_orphans.sql" />
     <File Path="../database/obfuscation/scripts/create_employee_obf_table.sql" />
@@ -71,6 +70,9 @@
     <File Path="../database/ready_import/Readme.txt" />
     <File Path="../database/ready_import/SQL copy all from ready to smart ps.sql" />
     <File Path="../database/ready_import/SQL counts smart vs ready.sql" />
+  </Folder>
+  <Folder Name="/Database/ready import/Navigations/" Id="02ea681e-c7d8-13c7-8484-4ac65e1b71e8">
+    <File Path="../database/ready_import/Navigation/add-navigation-data.sql" />
   </Folder>
   <Folder Name="/Database/SQL calculations view/" Id="ea803e27-1926-874e-7e63-a2a241a2e100">
     <File Path="../database/SQL calculations view/SQL READY Profit Sharing view creation for calculations includes bene and zeroc-check.sql" />
