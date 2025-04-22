@@ -1,6 +1,6 @@
 import { Divider, CircularProgress, Box } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
-import { DSMAccordion, Page } from "smart-ui-library";
+import { Page } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -8,6 +8,7 @@ import { RootState } from "reduxstore/store";
 import { useLazyGetUnder21TotalsQuery, useLazyGetUnder21BreakdownByStoreQuery } from "reduxstore/api/YearsEndApi";
 import Under21Summary from "./Under21/Under21Summary";
 import Under21BreakdownGrid from "./Under21/Under21BreakdownGrid";
+import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 
 const Under21Report = () => {
   const [fetchUnder21Totals, { isLoading: isTotalsLoading }] = useLazyGetUnder21TotalsQuery();
@@ -23,14 +24,14 @@ const Under21Report = () => {
     isSortDescending: false
   });
 
+  const profitYear = useDecemberFlowProfitYear();
   const isLoading = isTotalsLoading || isBreakdownLoading;
-
   const hasData = !!under21Totals && !!under21Breakdown;
 
   useEffect(() => {
     const fetchData = async () => {
       const queryParams = {
-        profitYear: 2024,
+        profitYear: profitYear,
         isSortDescending: sortParams.isSortDescending,
         pagination: {
           take: pageSize,
@@ -54,7 +55,7 @@ const Under21Report = () => {
   useEffect(() => {
     if (initialSearchLoaded) {
       const queryParams = {
-        profitYear: 2024,
+        profitYear: profitYear,
         isSortDescending: sortParams.isSortDescending,
         pagination: {
           take: pageSize,
