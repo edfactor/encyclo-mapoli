@@ -1,75 +1,26 @@
-﻿using System.Text.Json;
-using Demoulas.Common.Contracts.Contracts.Response;
-using Demoulas.ProfitSharing.Api;
-using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Contracts.Request.Naviations;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Navigations;
-using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
-using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
-using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.Endpoints.Endpoints.Master;
-using Demoulas.ProfitSharing.Endpoints.Endpoints.Navigations;
-using Demoulas.ProfitSharing.Security;
-using Demoulas.ProfitSharing.Services;
-using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
-using Demoulas.ProfitSharing.Services.Navigations;
-using Demoulas.ProfitSharing.UnitTests.Common.Base;
-using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
-using FastEndpoints;
-using FluentAssertions;
-using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json.Linq;
 
-namespace Demoulas.ProfitSharing.UnitTests.Endpoints;
-
-public class NavigationServiceTests : ApiTestBase<Program>
+namespace Demoulas.ProfitSharing.UnitTests.Common.Fakes;
+public class NavigationFaker
 {
-    private readonly INavigationService _navigationService;
     private readonly string navigationJson;
 
-    public NavigationServiceTests()
+    public NavigationFaker()
     {
-        this._navigationService = ServiceProvider?.GetRequiredService<INavigationService>()!;
         this.navigationJson = "[{\"Id\":1,\"ParentId\":54,\"Title\":\"DecemberActivities\",\"SubTitle\":null,\"Url\":null,\"StatusId\":1,\"OrderNumber\":1,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":2,\"ParentId\":1,\"Title\":\"CleanupReports\",\"SubTitle\":null,\"Url\":null,\"StatusId\":1,\"OrderNumber\":1,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":3,\"ParentId\":2,\"Title\":\"DemographicBadgesNotInPayProfit\",\"SubTitle\":null,\"Url\":\"demographic-badges-not-in-payprofit\",\"StatusId\":1,\"OrderNumber\":1,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":15,\"ParentId\":14,\"Title\":\"ManageExecutiveHoursandDollars\",\"SubTitle\":\"TPR008-09\",\"Url\":\"manage-executive-hours-and-dollars\",\"StatusId\":1,\"OrderNumber\":1,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":19,\"ParentId\":18,\"Title\":\"Active/inactiveemployeesage18-20with1000hoursormore\",\"SubTitle\":null,\"Url\":\"pay426-1\",\"StatusId\":1,\"OrderNumber\":1,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":34,\"ParentId\":33,\"Title\":\"GetContributionsbyAge\",\"SubTitle\":\"PROF130\",\"Url\":\"contributions-by-age\",\"StatusId\":1,\"OrderNumber\":1,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":42,\"ParentId\":41,\"Title\":\"QPAY066-UNDR21\",\"SubTitle\":null,\"Url\":\"qpay066-under21\",\"StatusId\":1,\"OrderNumber\":1,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":50,\"ParentId\":49,\"Title\":\"MASTERINQUIRY\",\"SubTitle\":null,\"Url\":\"master-inquiry\",\"StatusId\":1,\"OrderNumber\":1,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":4,\"ParentId\":2,\"Title\":\"DuplicateSSNsinDemographics\",\"SubTitle\":null,\"Url\":\"duplicate-ssns-demographics\",\"StatusId\":1,\"OrderNumber\":2,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":7,\"ParentId\":1,\"Title\":\"MilitaryContributions\",\"SubTitle\":\"TPR008-13\",\"Url\":\"military-entry-and-modification\",\"StatusId\":1,\"OrderNumber\":2,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":14,\"ParentId\":54,\"Title\":\"FiscalClose\",\"SubTitle\":null,\"Url\":null,\"StatusId\":1,\"OrderNumber\":2,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":16,\"ParentId\":14,\"Title\":\"YTDWagesExtract\",\"SubTitle\":\"PROF-DOLLAR-EXTRACT\",\"Url\":\"ytd-wages-extract\",\"StatusId\":1,\"OrderNumber\":2,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":21,\"ParentId\":18,\"Title\":\"Active/inactiveemployeesage21\\u0026with1000hoursormore\",\"SubTitle\":null,\"Url\":\"pay426-2\",\"StatusId\":1,\"OrderNumber\":2,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":35,\"ParentId\":33,\"Title\":\"GetDistributionsbyAge\",\"SubTitle\":\"PROF130\",\"Url\":\"distributions-by-age\",\"StatusId\":1,\"OrderNumber\":2,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":43,\"ParentId\":41,\"Title\":\"QPAY066TA-UNDR21\",\"SubTitle\":null,\"Url\":\"qpay066ta-under21\",\"StatusId\":1,\"OrderNumber\":2,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":51,\"ParentId\":null,\"Title\":\"BENEFICIARIES\",\"SubTitle\":null,\"Url\":null,\"StatusId\":1,\"OrderNumber\":2,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":5,\"ParentId\":2,\"Title\":\"NegativeETVA\",\"SubTitle\":null,\"Url\":\"negative-etva-for-ssns-on-payprofit\",\"StatusId\":1,\"OrderNumber\":3,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":8,\"ParentId\":1,\"Title\":\"RehireForfeitures\",\"SubTitle\":\"QPREV-PROF\",\"Url\":\"rehire-forfeitures\",\"StatusId\":1,\"OrderNumber\":3,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":17,\"ParentId\":14,\"Title\":\"ProfitShareReport\",\"SubTitle\":\"PAY426\",\"Url\":\"profit-share-report\",\"StatusId\":1,\"OrderNumber\":3,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":22,\"ParentId\":18,\"Title\":\"Active/inactiveemployeesunder18\",\"SubTitle\":null,\"Url\":\"pay426-3\",\"StatusId\":1,\"OrderNumber\":3,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":36,\"ParentId\":33,\"Title\":\"GetForfeiturebyAge\",\"SubTitle\":\"PROF130\",\"Url\":\"forfeitures-by-age\",\"StatusId\":1,\"OrderNumber\":3,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":44,\"ParentId\":41,\"Title\":\"QPAY066TA\",\"SubTitle\":null,\"Url\":\"qpay066ta\",\"StatusId\":1,\"OrderNumber\":3,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":52,\"ParentId\":null,\"Title\":\"DISTRIBUTIONS\",\"SubTitle\":null,\"Url\":null,\"StatusId\":1,\"OrderNumber\":3,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":6,\"ParentId\":2,\"Title\":\"DuplicateNamesandBirthdays\",\"SubTitle\":null,\"Url\":\"duplicate-names-and-birthdays\",\"StatusId\":1,\"OrderNumber\":4,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":9,\"ParentId\":1,\"Title\":\"RehireForfeitures\",\"SubTitle\":\"QPREV-PROF\",\"Url\":\"rehire-forfeitures\",\"StatusId\":1,\"OrderNumber\":4,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":18,\"ParentId\":14,\"Title\":\"ProfitShareReportEditRun\",\"SubTitle\":\"PAY426N\",\"Url\":null,\"StatusId\":1,\"OrderNumber\":4,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":23,\"ParentId\":18,\"Title\":\"Active/inactiveemployees18andolderwithpriorprofitsharingamountsand\\u003C1000hours\",\"SubTitle\":null,\"Url\":\"pay426-4\",\"StatusId\":1,\"OrderNumber\":4,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":37,\"ParentId\":33,\"Title\":\"GetBalancebyAge\",\"SubTitle\":\"PROF130B\",\"Url\":\"balance-by-age\",\"StatusId\":1,\"OrderNumber\":4,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":45,\"ParentId\":41,\"Title\":\"PROFALLReport\",\"SubTitle\":null,\"Url\":\"profall\",\"StatusId\":1,\"OrderNumber\":4,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":53,\"ParentId\":null,\"Title\":\"REECONCILIATION\",\"SubTitle\":null,\"Url\":null,\"StatusId\":1,\"OrderNumber\":4,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":24,\"ParentId\":18,\"Title\":\"Active/inactiveemployees18andolderwithnopriorprofitsharingamountsand\\u003C1000hours\",\"SubTitle\":null,\"Url\":\"pay426-5\",\"StatusId\":1,\"OrderNumber\":5,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":30,\"ParentId\":14,\"Title\":\"GetEligibleEmployees\",\"SubTitle\":\"GET-ELIGIBLE-EMPS\",\"Url\":\"eligible-employees\",\"StatusId\":1,\"OrderNumber\":5,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":38,\"ParentId\":33,\"Title\":\"GetVestedAmountsbyAge\",\"SubTitle\":\"PROF130V\",\"Url\":\"vested-amounts-by-age\",\"StatusId\":1,\"OrderNumber\":5,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":46,\"ParentId\":41,\"Title\":\"NewLabels\",\"SubTitle\":\"QNEWPROFLBL\",\"Url\":\"new-ps-labels\",\"StatusId\":1,\"OrderNumber\":5,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":54,\"ParentId\":null,\"Title\":\"YEAREND\",\"SubTitle\":null,\"Url\":null,\"StatusId\":1,\"OrderNumber\":5,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":10,\"ParentId\":1,\"Title\":\"DistributionsandForfeitures\",\"SubTitle\":\"QPAY129\",\"Url\":\"distributions-and-forfeitures\",\"StatusId\":1,\"OrderNumber\":6,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":25,\"ParentId\":18,\"Title\":\"Terminatedemployees18andolderwith1000hoursormore\",\"SubTitle\":null,\"Url\":\"pay426-6\",\"StatusId\":1,\"OrderNumber\":6,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":31,\"ParentId\":14,\"Title\":\"Forfeit\",\"SubTitle\":\"PAY443\",\"Url\":\"forfeit\",\"StatusId\":1,\"OrderNumber\":6,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":39,\"ParentId\":33,\"Title\":\"GetBalancebyYears\",\"SubTitle\":\"PROF130Y\",\"Url\":\"balance-by-years\",\"StatusId\":1,\"OrderNumber\":6,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":47,\"ParentId\":41,\"Title\":\"PROFNEW\",\"SubTitle\":null,\"Url\":null,\"StatusId\":1,\"OrderNumber\":6,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":11,\"ParentId\":1,\"Title\":\"DistributionsandForfeitures\",\"SubTitle\":\"QPAY129\",\"Url\":\"distributions-and-forfeitures\",\"StatusId\":1,\"OrderNumber\":7,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":26,\"ParentId\":18,\"Title\":\"Terminatedemployees18andolderwithnopriorprofitsharingamountsand\\u003C1000hours\",\"SubTitle\":null,\"Url\":\"pay426-7\",\"StatusId\":1,\"OrderNumber\":7,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":32,\"ParentId\":14,\"Title\":\"ProfitShareUpdates\",\"SubTitle\":\"PAY444|PAY447\",\"Url\":\"profit-share-update\",\"StatusId\":1,\"OrderNumber\":7,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":12,\"ParentId\":1,\"Title\":\"Terminations\",\"SubTitle\":\"QPAY066\",\"Url\":\"prof-term\",\"StatusId\":1,\"OrderNumber\":8,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":27,\"ParentId\":18,\"Title\":\"Terminatedemployees18andolderwithpriorprofitsharingamountsand\\u003C1000hours\",\"SubTitle\":null,\"Url\":\"pay426-8\",\"StatusId\":1,\"OrderNumber\":8,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":33,\"ParentId\":14,\"Title\":\"ReportsbyAge\",\"SubTitle\":null,\"Url\":null,\"StatusId\":1,\"OrderNumber\":8,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":13,\"ParentId\":1,\"Title\":\"ProfitShareReport\",\"SubTitle\":\"PAY426\",\"Url\":\"profit-share-report\",\"StatusId\":1,\"OrderNumber\":9,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":28,\"ParentId\":18,\"Title\":\"Profitsharingsummarypage\",\"SubTitle\":null,\"Url\":\"pay426-9\",\"StatusId\":1,\"OrderNumber\":9,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":40,\"ParentId\":14,\"Title\":\"ProfitShareGrossReport\",\"SubTitle\":\"QPAY501\",\"Url\":\"profit-share-gross-report\",\"StatusId\":1,\"OrderNumber\":9,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":41,\"ParentId\":14,\"Title\":\"ProfitSharebyStore\",\"SubTitle\":\"QPAY066TA\",\"Url\":null,\"StatusId\":1,\"OrderNumber\":9,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":29,\"ParentId\":18,\"Title\":\"Allnon-employeebeneficiaries\",\"SubTitle\":null,\"Url\":\"pay426-10\",\"StatusId\":1,\"OrderNumber\":10,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":48,\"ParentId\":14,\"Title\":\"PrintProfitCerts\",\"SubTitle\":\"PAYCERT\",\"Url\":null,\"StatusId\":1,\"OrderNumber\":10,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null},{\"Id\":49,\"ParentId\":null,\"Title\":\"INQUIRIES\",\"SubTitle\":null,\"Url\":null,\"StatusId\":1,\"OrderNumber\":10,\"Icon\":null,\"RequiredRoles\":null,\"Items\":null}]";
     }
-    [Fact(DisplayName = "PS-1009: Navigation")]
-    public async Task GetNavigations()
+    public List<Navigation> DummyNavigationData()
     {
-        var navigation = await _navigationService.GetNavigation(CancellationToken.None);
-        Assert.NotNull(navigation);
-        navigation.Should().BeEquivalentTo(DummyNavigationData());
-    }
-
-    //Dummy Data
-    private List<NavigationDto> DummyNavigationData()
-    {
-        List<Navigation>? result = JsonSerializer.Deserialize<List<Navigation>>(navigationJson);
-        if (result == null) { return new List<NavigationDto>(); }
-        var lookup = result.ToLookup(x => x.ParentId);
-        List<NavigationDto> BuildTree(int? parentId)
-        {
-            return lookup[parentId]
-                .Select(x => new NavigationDto
-                {
-                    Id = x.Id,
-                    Icon = x.Icon,
-                    OrderNumber = x.OrderNumber,
-                    ParentId = x.ParentId,
-                    StatusId = x.StatusId,
-                    Title = x.Title,
-                    Url = x.Url,
-                    SubTitle = x.SubTitle,
-                    Items = BuildTree(x.Id)
-                })
-                .ToList();
-        }
-
-        return BuildTree(null); // root level
+        var result = JsonSerializer.Deserialize<List<Navigation>>(navigationJson);
         
+        return result??new List<Navigation>();
     }
 }
-
-
-
-
