@@ -98,14 +98,14 @@ public class GetEligibleEmployeesTests : ApiTestBase<Program>
                 .Include(p => p.Demographic)
                 .Where(p => p.ProfitYear == _testProfitYear)
                 .Where(p => p.Demographic!.DateOfBirth > birthDateOfExactly21YearsOld /*too young*/
-                            || p.CurrentHoursYear + p.HoursExecutive < 1000 ||
+                            || p.CurrentHoursYear  < 1000 ||
                             p.Demographic!.EmploymentStatusId == EmploymentStatus.Constants.Terminated)
                 .CountAsync(CancellationToken.None);
 
             int expectedNumberWritten = await c.PayProfits
                 .Include(p => p.Demographic)
                 .Where(p => p.ProfitYear == _testProfitYear)
-                .Where(p => p.Demographic!.DateOfBirth <= birthDateOfExactly21YearsOld /*over 21*/ && p.CurrentHoursYear + p.HoursExecutive >= 1000 &&
+                .Where(p => p.Demographic!.DateOfBirth <= birthDateOfExactly21YearsOld /*over 21*/ && p.CurrentHoursYear >= 1000 &&
                             p.Demographic!.EmploymentStatusId != EmploymentStatus.Constants.Terminated).CountAsync(CancellationToken.None);
 
             // Act
