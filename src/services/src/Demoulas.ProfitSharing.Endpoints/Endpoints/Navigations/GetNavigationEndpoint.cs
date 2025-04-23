@@ -10,12 +10,12 @@ using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Navigations;
-public class GetNavigation: Endpoint<NavigationRequestDto,NavigationResponseDto>
+public class GetNavigationEndpoint: Endpoint<NavigationRequestDto,NavigationResponseDto>
 {
 
     private readonly INavigationService _navigationService;
 
-    public GetNavigation(INavigationService navigationService)
+    public GetNavigationEndpoint(INavigationService navigationService)
     {
         _navigationService = navigationService;
     }
@@ -33,11 +33,11 @@ public class GetNavigation: Endpoint<NavigationRequestDto,NavigationResponseDto>
         Group<NavigationGroup>();
     }
 
-    public override Task<NavigationResponseDto> ExecuteAsync(NavigationRequestDto req, CancellationToken ct)
+    public override async Task<NavigationResponseDto> ExecuteAsync(NavigationRequestDto req, CancellationToken ct)
     {
-        var navigationList = this._navigationService.GetNavigation();
+        var navigationList = await  this._navigationService.GetNavigation(cancellationToken: ct);
         var response = new NavigationResponseDto { Navigation = navigationList };
-        return Task.FromResult(response);
+        return response;
     }
 
 }
