@@ -393,6 +393,7 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
         open={openModal}
         onClose={() => setOpenModal(false)}>
         <SearchAndAddExecutive
+          setOpenModal={setOpenModal}
           initialSearchLoaded={initialSearchLoaded}
           setInitialSearchLoaded={setInitialSearchLoaded}
         />
