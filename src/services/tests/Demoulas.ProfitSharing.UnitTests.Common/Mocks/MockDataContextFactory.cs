@@ -4,6 +4,7 @@ using Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping.Data;
 using Demoulas.Common.Data.Services.Entities.Entities;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.UnitTests.Common.Common;
 using Demoulas.ProfitSharing.UnitTests.Common.Fakes;
@@ -47,6 +48,11 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         Mock<DbSet<Country>> mockCountry = countries.AsQueryable().BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.Countries).Returns(mockCountry.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.Countries).Returns(mockCountry.Object);
+
+        List<Navigation>? navigations = new NavigationFaker().DummyNavigationData();
+        Mock<DbSet<Navigation>> mockNavigation = navigations.AsQueryable().BuildMockDbSet();
+        _profitSharingDbContext.Setup(m => m.Navigations).Returns(mockNavigation.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.Navigations).Returns(mockNavigation.Object);
 
         List<PayClassification>? payClassifications = new PayClassificationFaker().Generate(500);
         Mock<DbSet<PayClassification>> mockPayClassifications = payClassifications.AsQueryable().BuildMockDbSet();
