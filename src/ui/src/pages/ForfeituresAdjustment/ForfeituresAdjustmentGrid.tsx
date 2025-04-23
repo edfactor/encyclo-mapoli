@@ -1,9 +1,11 @@
 import { Typography } from "@mui/material";
 import { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { DSMGrid, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
 import { GetForfeituresAdjustmentColumns } from "./ForfeituresAdjustmentGridColumns";
+import { RootState } from "reduxstore/store";
 
 interface ISortParams {
   sortBy: string;
@@ -14,24 +16,6 @@ interface ForfeituresAdjustmentGridProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
 }
-
-const mockData = [
-  {
-    clientNumber: "XXX",
-    employeeNumber: "XXXXX",
-    startingBalance: 50000.00,
-    forfeitureAmount: 10000.00,
-    netBalance: 40000.00,
-    netVested: 40000.00
-  }
-];
-
-const totalsRow = {
-  startingBalance: 50000.00,
-  forfeitureAmount: 10000.00,
-  netBalance: 40000.00,
-  netVested: 40000.00
-};
 
 const ForfeituresAdjustmentGrid: React.FC<ForfeituresAdjustmentGridProps> = ({ 
   initialSearchLoaded, 
@@ -44,6 +28,15 @@ const ForfeituresAdjustmentGrid: React.FC<ForfeituresAdjustmentGridProps> = ({
     sortBy: "clientNumber",
     isSortDescending: false
   });
+
+  const { forfeitureAdjustmentData } = useSelector((state: RootState) => state.forfeituresAdjustment);
+  const results = forfeitureAdjustmentData?.response?.results || [];
+  const totalRecords = forfeitureAdjustmentData?.response?.total || 0;
+  
+  const totalsRow = forfeitureAdjustmentData ? {
+    netBalance: forfeitureAdjustmentData.totatNetBalance,
+    netVested: forfeitureAdjustmentData.totatNetVested
+  } : null;
 
   // Wrapper to pass react function to non-react class
   const handleNavigationForButton = useCallback(
@@ -68,7 +61,7 @@ const ForfeituresAdjustmentGrid: React.FC<ForfeituresAdjustmentGridProps> = ({
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`Forfeiture Adjustments (${mockData.length} records)`}
+              {`${forfeitureAdjustmentData?.reportName || "Forfeiture Adjustments"} (${totalRecords} records)`}
             </Typography>
           </div>
           <DSMGrid
@@ -76,8 +69,8 @@ const ForfeituresAdjustmentGrid: React.FC<ForfeituresAdjustmentGridProps> = ({
             isLoading={false}
             handleSortChanged={sortEventHandler}
             providedOptions={{
-              rowData: mockData,
-              pinnedTopRowData: [totalsRow],
+              rowData: results,
+              pinnedTopRowData: totalsRow ? [totalsRow] : [],
               columnDefs: columnDefs
             }}
           />
@@ -93,7 +86,7 @@ const ForfeituresAdjustmentGrid: React.FC<ForfeituresAdjustmentGridProps> = ({
               setPageNumber(1);
               setInitialSearchLoaded(true);
             }}
-            recordCount={mockData.length}
+            recordCount={totalRecords}
           />
         </>
       )}

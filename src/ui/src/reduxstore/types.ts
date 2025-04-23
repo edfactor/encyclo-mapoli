@@ -1052,3 +1052,36 @@ export interface UpdateSummaryResponse {
     results: UpdateSummaryEmployee[];
   };
 }
+
+export interface ForfeitureAdjustmentRequest {
+  ssn?: string;
+  badge?: string;
+  profitYear: number;
+  skip?: number;
+  take?: number;
+  sortBy?: string;
+  isSortDescending?: boolean;
+}
+
+export interface ForfeitureAdjustmentDetail {
+  clientNumber: number;
+  badgeNumber: number;
+  startingBalance: number;
+  forfeitureAmount: number;
+  netBalance: number;
+  netVested: number;
+}
+
+export interface ForfeitureAdjustmentResponse {
+  totatNetBalance: number;
+  totatNetVested: number;
+  reportName: string;
+  reportDate: string;
+  response: {
+    pageSize: number | null;
+    currentPage: number | null;
+    totalPages: number | null;
+    total: number;
+    results: ForfeitureAdjustmentDetail[];
+  };
+}

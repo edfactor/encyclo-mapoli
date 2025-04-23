@@ -4,8 +4,12 @@ import Grid2 from "@mui/material/Grid2";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { Controller, useForm } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
+import { useLazyGetForfeitureAdjustmentsQuery } from "reduxstore/api/YearsEndApi";
+import { setForfeitureAdjustmentQueryParams, clearForfeitureAdjustmentData, clearForfeitureAdjustmentQueryParams } from "reduxstore/slices/forfeituresAdjustmentSlice";
+import { RootState } from "reduxstore/store";
 
 interface ForfeituresAdjustmentSearchParams {
   ssn?: string;
@@ -35,7 +39,9 @@ const schema = yup.object().shape({
 const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearchParametersProps> = ({
   setInitialSearchLoaded
 }) => {
-
+  const dispatch = useDispatch();
+  const [triggerSearch, { isFetching }] = useLazyGetForfeitureAdjustmentsQuery();
+  const { forfeitureAdjustmentQueryParams } = useSelector((state: RootState) => state.forfeituresAdjustment);
   const profitYear = useFiscalCloseProfitYear();
 
   const {
@@ -46,15 +52,38 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
   } = useForm<ForfeituresAdjustmentSearchParams>({
     resolver: yupResolver(schema),
     defaultValues: {
-      ssn: "",
-      badge: "",
-      year: profitYear,
+      ssn: forfeitureAdjustmentQueryParams?.ssn || "",
+      badge: forfeitureAdjustmentQueryParams?.badge || "",
+      year: forfeitureAdjustmentQueryParams?.profitYear || profitYear,
       client: ""
     }
   });
 
   const validateAndSearch = handleSubmit((data) => {
-    setInitialSearchLoaded(true);
+    if (!data.ssn && !data.badge) {
+      return;
+    }
+
+    const searchParams = {
+      ssn: data.ssn,
+      badge: data.badge,
+      profitYear: data.year || profitYear,
+      skip: 0,
+      take: 255,
+      sortBy: "badgeNumber",
+      isSortDescending: false
+    };
+
+    dispatch(setForfeitureAdjustmentQueryParams(searchParams));
+    
+    triggerSearch(searchParams)
+      .unwrap()
+      .then(() => {
+        setInitialSearchLoaded(true);
+      })
+      .catch((error) => {
+        console.error("Error fetching forfeiture adjustments:", error);
+      });
   });
 
   const handleReset = () => {
@@ -64,6 +93,8 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
       year: profitYear,
       client: ""
     });
+    dispatch(clearForfeitureAdjustmentData());
+    dispatch(clearForfeitureAdjustmentQueryParams());
     setInitialSearchLoaded(false);
   };
 
@@ -159,7 +190,7 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
         <SearchAndReset
           handleReset={handleReset}
           handleSearch={validateAndSearch}
-          isFetching={false}
+          isFetching={isFetching}
         />
       </Grid2>
     </form>

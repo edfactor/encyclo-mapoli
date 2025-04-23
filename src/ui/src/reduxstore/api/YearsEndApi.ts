@@ -109,11 +109,18 @@ import {
   VestedAmountsByAge,
   YearEndProfitSharingReportRequest,
   YearEndProfitSharingReportResponse,
-  YearEndProfitSharingReportSummaryResponse
+  YearEndProfitSharingReportSummaryResponse,
+  ForfeitureAdjustmentRequest,
+  ForfeitureAdjustmentResponse
 } from "reduxstore/types";
 import { tryddmmyyyyToDate } from "../../utils/dateUtils";
 import { Paged } from "smart-ui-library";
 import { url } from "./api";
+
+import {
+  setForfeitureAdjustmentData,
+  clearForfeitureAdjustmentData
+} from "reduxstore/slices/forfeituresAdjustmentSlice";
 
 export const YearsEndApi = createApi({
   baseQuery: fetchBaseQuery({
@@ -1002,6 +1009,30 @@ export const YearsEndApi = createApi({
           console.log("Err: " + err);
         }
       }
+    }),
+    getForfeitureAdjustments: builder.query<ForfeitureAdjustmentResponse, ForfeitureAdjustmentRequest>({
+      query: (params) => ({
+        url: "yearend/forfeiture-adjustments",
+        method: "GET",
+        params: {
+          ssn: params.ssn,
+          badge: params.badge,
+          profitYear: params.profitYear,
+          skip: params.skip || 0,
+          take: params.take || 255,
+          sortBy: params.sortBy,
+          isSortDescending: params.isSortDescending
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setForfeitureAdjustmentData(data));
+        } catch (err) {
+          console.log("Err: " + err);
+          dispatch(clearForfeitureAdjustmentData());
+        }
+      }
     })
   })
 });
@@ -1041,5 +1072,7 @@ export const {
   useLazyGetMasterApplyQuery,
   useLazyGetMasterRevertQuery,
   useLazyGetProfitSharingLabelsQuery,
-  useLazyGetProfitMasterStatusQuery
+  useLazyGetProfitMasterStatusQuery,
+  useGetForfeitureAdjustmentsQuery,
+  useLazyGetForfeitureAdjustmentsQuery
 } = YearsEndApi;

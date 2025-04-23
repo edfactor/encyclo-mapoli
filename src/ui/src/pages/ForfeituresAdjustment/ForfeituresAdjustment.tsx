@@ -1,6 +1,7 @@
 import { Divider } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
 import ForfeituresAdjustmentGrid from "./ForfeituresAdjustmentGrid";
@@ -8,12 +9,14 @@ import ForfeituresAdjustmentSearchParameters from "./ForfeituresAdjustmentSearch
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import MasterInquiryEmployeeDetails from "pages/MasterInquiry/MasterInquiryEmployeeDetails";
 import { EmployeeDetails } from "reduxstore/types";
+import { RootState } from "reduxstore/store";
 
 const ForfeituresAdjustment = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [showEmployeeDetails, setShowEmployeeDetails] = useState(false);
+  const { forfeitureAdjustmentData } = useSelector((state: RootState) => state.forfeituresAdjustment);
 
-  // Dummy data for employee details - will be replaced with real stuff later
+  // Default dummy data for employee details - will be replaced with real API data later
   const dummyEmployeeDetails: EmployeeDetails = {
     firstName: "First",
     lastName: "LastName",
@@ -52,6 +55,15 @@ const ForfeituresAdjustment = () => {
     setInitialSearchLoaded(loaded);
     setShowEmployeeDetails(loaded);
   };
+
+  // Reset employee details visibility when search results change
+  useEffect(() => {
+    if (forfeitureAdjustmentData) {
+      setShowEmployeeDetails(true);
+    } else {
+      setShowEmployeeDetails(false);
+    }
+  }, [forfeitureAdjustmentData]);
 
   return (
     <Page label={CAPTIONS.FORFEITURES_ADJUSTMENT} actionNode={renderActionNode()}>
