@@ -1,45 +1,49 @@
 import { Typography } from "@mui/material";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Path, useNavigate } from "react-router-dom";
-import { DSMGrid, Pagination } from "smart-ui-library";
+import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
 import { GetBeneficiariesGridColumns } from "./BeneficiariesGridColumns";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../reduxstore/store";
 import { CAPTIONS } from "../../../constants";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import pay426Utils from "../Pay427Utils";
 
 const BeneficiariesGrid = () => {
   const navigate = useNavigate();
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
+  const [sortParams, setSortParams] = useState<ISortParams>({
+    sortBy: "badgeNumber",
+    isSortDescending: false
+  });
   const [trigger, { data, isLoading, error }] = useLazyGetYearEndProfitSharingReportQuery();
 
   const hasToken = useSelector((state: RootState) => !!state.security.token);
   const profitYear = useFiscalCloseProfitYear();
+  const baseParams = {
+    isYearEnd: true,
+    includeActiveEmployees: false,
+    includeInactiveEmployees: false,
+    includeEmployeesTerminatedThisYear: false,
+    includeTerminatedEmployees: false,
+    includeBeneficiaries: true,
+    includeEmployeesWithPriorProfitSharingAmounts: false,
+    includeEmployeesWithNoPriorProfitSharingAmounts: false,
+  }
 
   useEffect(() => {
     if (hasToken) {
       trigger({
-        isYearEnd: true,
-        minimumAgeInclusive: 0,
-        maximumAgeInclusive: 200,
-        minimumHoursInclusive: 0,
-        maximumHoursInclusive: 4000,
-        includeActiveEmployees: false,
-        includeInactiveEmployees: false,
-        includeEmployeesTerminatedThisYear: false,
-        includeTerminatedEmployees: false,
-        includeBeneficiaries: true,
-        includeEmployeesWithPriorProfitSharingAmounts: false,
-        includeEmployeesWithNoPriorProfitSharingAmounts: false,
         profitYear: profitYear,
         pagination: {
           skip: pageNumber * pageSize,
           take: pageSize,
           sortBy: "badgeNumber",
           isSortDescending: true
-        }
+        },
+        ...baseParams
       });
     }
   }, [trigger, pageNumber, pageSize, profitYear, hasToken]);
@@ -79,6 +83,30 @@ const BeneficiariesGrid = () => {
     [navigate]
   );
 
+  const sortEventHandler = (update: ISortParams) => {
+      const t = () => { 
+          trigger({
+            profitYear: profitYear,
+            pagination: {
+              skip: 0,
+              take: pageSize,
+              sortBy: update.sortBy,
+              isSortDescending: update.isSortDescending
+            },
+            ...baseParams
+          }
+        );
+      }
+  
+      pay426Utils.sortEventHandler(
+        update,
+        sortParams,
+        setSortParams,
+        setPageNumber,
+        t
+      );
+    }
+
   const columnDefs = useMemo(() => GetBeneficiariesGridColumns(handleNavigationForButton), [handleNavigationForButton]);
 
   return (
@@ -93,7 +121,7 @@ const BeneficiariesGrid = () => {
       <DSMGrid
         preferenceKey={CAPTIONS.PAY426_NON_EMPLOYEE}
         isLoading={isLoading}
-        handleSortChanged={(_params) => {}}
+        handleSortChanged={sortEventHandler}
         providedOptions={{
           rowData: data?.response?.results || [],
           pinnedTopRowData: getPinnedTopRowData,
