@@ -98,7 +98,7 @@ const NoPriorHoursGrid = () => {
       </div>
       <DSMGrid
         preferenceKey={CAPTIONS.PAY426_ACTIVE_NO_PRIOR}
-        isLoading={isLoading}
+        isLoading={isFetching}
         handleSortChanged={sortEventHandler}
         providedOptions={{
           rowData: data?.response?.results || [],

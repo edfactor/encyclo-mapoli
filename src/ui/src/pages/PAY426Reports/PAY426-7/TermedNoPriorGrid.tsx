@@ -97,7 +97,7 @@ const TermedNoPriorGrid = () => {
       </div>
       <DSMGrid
         preferenceKey={CAPTIONS.PAY426_TERMINATED_NO_PRIOR}
-        isLoading={isLoading}
+        isLoading={isFetching}
         handleSortChanged={sortEventHandler}
         providedOptions={{
           rowData: data?.response?.results || [],
