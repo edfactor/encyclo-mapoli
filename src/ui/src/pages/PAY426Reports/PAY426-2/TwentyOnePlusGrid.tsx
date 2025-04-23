@@ -17,34 +17,37 @@ const TwentyOnePlusGrid = () => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "badgeNumber",
+    sortBy: "lastName",
     isSortDescending: false
   });
   const hasToken = useSelector((state: RootState) => !!state.security.token);
   const profitYear = useFiscalCloseProfitYear();
 
+  const baseParams = {
+    isYearEnd: true,
+    minimumAgeInclusive: 21,
+    minimumHoursInclusive: 1000,
+    includeActiveEmployees: true,
+    includeInactiveEmployees: true,
+    includeEmployeesTerminatedThisYear: false,
+    includeTerminatedEmployees: false,
+    includeBeneficiaries: false,
+    includeEmployeesWithPriorProfitSharingAmounts: true,
+    includeEmployeesWithNoPriorProfitSharingAmounts: true,
+  }
+
   useEffect(() => {
     if (hasToken) {
       trigger({
-        isYearEnd: true,
-        minimumAgeInclusive: 21,
-        maximumAgeInclusive: 200,
-        minimumHoursInclusive: 999.9,
-        maximumHoursInclusive: 4000,
-        includeActiveEmployees: true,
-        includeInactiveEmployees: true,
-        includeEmployeesTerminatedThisYear: false,
-        includeTerminatedEmployees: false,
-        includeBeneficiaries: false,
-        includeEmployeesWithPriorProfitSharingAmounts: true,
-        includeEmployeesWithNoPriorProfitSharingAmounts: true,
         profitYear: profitYear,
         pagination: {
           skip: pageNumber * pageSize,
           take: pageSize,
           sortBy: sortParams.sortBy,
           isSortDescending: sortParams.isSortDescending
-        }});
+        },
+        ...baseParams
+      });
     }
   }, [trigger, hasToken, profitYear, pageNumber, pageSize, sortParams]);
 
@@ -60,6 +63,34 @@ const TwentyOnePlusGrid = () => {
     [handleNavigationForButton]
   );
 
+  const sortEventHandler = (update: ISortParams) => {
+    if (update.sortBy === "employeeName") {
+      if (sortParams.sortBy === "lastName") {
+        update.isSortDescending = !sortParams.isSortDescending;
+      }
+      update.sortBy = "lastName";
+    }
+
+    if (update.sortBy === "") { 
+      update.sortBy = "lastName";
+      update.isSortDescending = false;
+    } 
+
+    setSortParams(update);
+    setPageNumber(0);
+
+    trigger({
+      profitYear: profitYear,
+      pagination: {
+        skip: 0,
+        take: pageSize,
+        sortBy: update.sortBy,
+        isSortDescending: update.isSortDescending
+      },
+      ...baseParams
+    });
+  }
+
   return (
     <>
       <div style={{ padding: "0 24px 0 24px" }}>
@@ -72,7 +103,7 @@ const TwentyOnePlusGrid = () => {
       <DSMGrid
         preferenceKey={CAPTIONS.PAY426_ACTIVE_21_PLUS}
         isLoading={isLoading}
-        handleSortChanged={(_params) => {}}
+        handleSortChanged={sortEventHandler}
         providedOptions={{
           rowData: data?.response?.results || [],
           columnDefs: columnDefs
