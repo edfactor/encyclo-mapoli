@@ -5,6 +5,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.ItOperations;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
@@ -39,7 +40,7 @@ public sealed class GetEligibleEmployeesService : IGetEligibleEmployeesService
                     (pp, d) => new
                     {
                         d.OracleHcmId,
-                        Hours = pp.CurrentHoursYear + pp.HoursExecutive,
+                        Hours = pp.CurrentHoursYear /*+ pp.HoursExecutive -- not including executive hours per PS-786*/,
                         d.DateOfBirth,
                         d.EmploymentStatusId,
                         d.BadgeNumber,

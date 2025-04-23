@@ -153,14 +153,10 @@ FROM (
     private static string GetYearsOfServiceQuery(short profitYear)
     {
         var query = @$"
-SELECT max_for_year.SSN, SUM(max_for_year.YOS_CREDIT ) YEARS
-		FROM (
-			SELECT pd.SSN, pd.PROFIT_YEAR, MAX(pd.YEARS_OF_SERVICE_CREDIT) YOS_CREDIT
+SELECT pd.SSN, SUM(pd.YEARS_OF_SERVICE_CREDIT) YEARS
 			FROM PROFIT_DETAIL pd 
 			WHERE pd.PROFIT_YEAR  <= {profitYear}
-			GROUP BY pd.SSN, pd.PROFIT_YEAR
-		) max_for_year
-		GROUP BY max_for_year.SSN
+			GROUP BY pd.SSN
 
 ";
         return query;

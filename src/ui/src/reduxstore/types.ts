@@ -1052,3 +1052,18 @@ export interface UpdateSummaryResponse {
     results: UpdateSummaryEmployee[];
   };
 }
+
+export interface RowCountResult {
+  tableName: string;
+  rowCount: number;
+}
+
+export interface CurrentUserResponseDto {
+  userName?: string;
+  email?: string;
+  storeId?: number;
+  isHQUser: boolean;
+  claims: string[];
+  permissions: string[];
+}
+

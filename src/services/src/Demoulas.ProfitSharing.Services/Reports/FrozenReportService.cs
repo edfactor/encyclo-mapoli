@@ -1,6 +1,4 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Response;
-using Demoulas.Common.Data.Contexts.Extensions;
-using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
@@ -8,12 +6,11 @@ using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
+using Demoulas.ProfitSharing.Services.ItOperations;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using static FastEndpoints.Ep;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
 
