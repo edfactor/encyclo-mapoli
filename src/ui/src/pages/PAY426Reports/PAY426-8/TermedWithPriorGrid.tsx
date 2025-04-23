@@ -11,7 +11,7 @@ import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 
 const TermedWithPriorGrid = () => {
   const navigate = useNavigate();
-  const [trigger, { data, isLoading }] = useLazyGetYearEndProfitSharingReportQuery();
+  const [trigger, { data, isFetching }] = useLazyGetYearEndProfitSharingReportQuery();
 
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
@@ -71,7 +71,7 @@ const TermedWithPriorGrid = () => {
       </div>
       <DSMGrid
         preferenceKey={CAPTIONS.PAY426_TERMINATED_PRIOR}
-        isLoading={isLoading}
+        isLoading={isFetching}
         handleSortChanged={(_params) => {}}
         providedOptions={{
           rowData: data?.response?.results || [],

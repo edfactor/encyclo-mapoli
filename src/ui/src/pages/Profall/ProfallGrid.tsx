@@ -17,10 +17,9 @@ const ProfallGrid = () => {
     sortBy: "badgeNumber",
     isSortDescending: false
   });
-  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const profitSharingLabels = useSelector((state: RootState) => state.yearsEnd.profitSharingLabels);
-  const [getProfitSharingLabels] = useLazyGetProfitSharingLabelsQuery();
+  const [getProfitSharingLabels, { isFetching }] = useLazyGetProfitSharingLabelsQuery();
 
   const profitYear = useFiscalCloseProfitYear();
 
@@ -78,7 +77,7 @@ const ProfallGrid = () => {
       </div>
       <DSMGrid
         preferenceKey={"PROFALL_REPORT"}
-        isLoading={isLoading}
+        isLoading={isFetching}
         handleSortChanged={sortEventHandler}
         providedOptions={{
           rowData: rowData,

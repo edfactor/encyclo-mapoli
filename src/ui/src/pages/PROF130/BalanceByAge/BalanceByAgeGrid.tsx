@@ -21,7 +21,7 @@ const BalanceByAgeGrid: React.FC<BalanceByAgeGridProps> = ({ initialSearchLoaded
   const { balanceByAgeTotal, balanceByAgeFullTime, balanceByAgePartTime, balanceByAgeQueryParams } = useSelector(
     (state: RootState) => state.yearsEnd
   );
-  const [triggerSearch, { isLoading }] = useLazyGetBalanceByAgeQuery();
+  const [triggerSearch, { isFetching }] = useLazyGetBalanceByAgeQuery();
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
@@ -137,7 +137,7 @@ const BalanceByAgeGrid: React.FC<BalanceByAgeGridProps> = ({ initialSearchLoaded
             <Grid2 size={{ xs: 4 }}>
               <DSMGrid
                 preferenceKey={"AGE_Total"}
-                isLoading={isLoading}
+                isLoading={isFetching}
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: balanceByAgeTotal?.response.results,
@@ -149,7 +149,7 @@ const BalanceByAgeGrid: React.FC<BalanceByAgeGridProps> = ({ initialSearchLoaded
             <Grid2 size={{ xs: 4 }}>
               <DSMGrid
                 preferenceKey={"AGE_FullTime"}
-                isLoading={isLoading}
+                isLoading={isFetching}
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: balanceByAgeFullTime?.response.results,
@@ -161,7 +161,7 @@ const BalanceByAgeGrid: React.FC<BalanceByAgeGridProps> = ({ initialSearchLoaded
             <Grid2 size={{ xs: 4 }}>
               <DSMGrid
                 preferenceKey={"AGE_PartTime"}
-                isLoading={isLoading}
+                isLoading={isFetching}
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: balanceByAgePartTime?.response.results,

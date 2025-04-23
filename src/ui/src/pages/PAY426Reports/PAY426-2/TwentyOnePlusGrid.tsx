@@ -12,7 +12,7 @@ import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 const TwentyOnePlusGrid = () => {
   const navigate = useNavigate();
 
-  const [trigger, { data, isLoading }] = useLazyGetYearEndProfitSharingReportQuery();
+  const [trigger, { data, isFetching }] = useLazyGetYearEndProfitSharingReportQuery();
 
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
@@ -71,7 +71,7 @@ const TwentyOnePlusGrid = () => {
       </div>
       <DSMGrid
         preferenceKey={CAPTIONS.PAY426_ACTIVE_21_PLUS}
-        isLoading={isLoading}
+        isLoading={isFetching}
         handleSortChanged={(_params) => {}}
         providedOptions={{
           rowData: data?.response?.results || [],

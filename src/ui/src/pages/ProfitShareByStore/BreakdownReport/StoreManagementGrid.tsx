@@ -21,7 +21,7 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store }) => {
     isSortDescending: false
   });
 
-  const [fetchStoreManagement, { isLoading }] = useLazyGetBreakdownByStoreQuery();
+  const [fetchStoreManagement, { isFetching }] = useLazyGetBreakdownByStoreQuery();
   const storeManagement = useSelector((state: RootState) => state.yearsEnd.breakdownByStore);
   const queryParams = useSelector((state: RootState) => state.yearsEnd.breakdownByStoreQueryParams);
   const navigate = useNavigate();
@@ -133,7 +133,7 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store }) => {
       <Grid2 width="100%">
         <DSMGrid
           preferenceKey={`STORE_MANAGEMENT_STORE_${store}`}
-          isLoading={isLoading}
+          isLoading={isFetching}
           handleSortChanged={sortEventHandler}
           providedOptions={{
             rowData: storeManagement?.response?.results || [],

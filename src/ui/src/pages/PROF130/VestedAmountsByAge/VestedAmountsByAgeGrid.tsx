@@ -26,7 +26,7 @@ const VestedAmountsByAgeGrid: React.FC<VestedAmountsByAgeGridProps> = ({
   });
 
   const { vestedAmountsByAge } = useSelector((state: RootState) => state.yearsEnd);
-  const [_triggerSearch, { isLoading }] = useLazyGetVestingAmountByAgeQuery();
+  const [_triggerSearch, { isFetching }] = useLazyGetVestingAmountByAgeQuery();
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
@@ -45,7 +45,7 @@ const VestedAmountsByAgeGrid: React.FC<VestedAmountsByAgeGridProps> = ({
           </div>
           <DSMGrid
             preferenceKey={gridTitle}
-            isLoading={isLoading}
+            isLoading={isFetching}
             handleSortChanged={sortEventHandler}
             providedOptions={{
               rowData: vestedAmountsByAge?.response.results,

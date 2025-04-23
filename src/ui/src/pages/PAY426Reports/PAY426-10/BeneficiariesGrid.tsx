@@ -13,7 +13,7 @@ const BeneficiariesGrid = () => {
   const navigate = useNavigate();
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
-  const [trigger, { data, isLoading, error }] = useLazyGetYearEndProfitSharingReportQuery();
+  const [trigger, { data, isFetching, error }] = useLazyGetYearEndProfitSharingReportQuery();
 
   const hasToken = useSelector((state: RootState) => !!state.security.token);
   const profitYear = useFiscalCloseProfitYear();
@@ -92,7 +92,7 @@ const BeneficiariesGrid = () => {
       </div>
       <DSMGrid
         preferenceKey={CAPTIONS.PAY426_NON_EMPLOYEE}
-        isLoading={isLoading}
+        isLoading={isFetching}
         handleSortChanged={(_params) => {}}
         providedOptions={{
           rowData: data?.response?.results || [],

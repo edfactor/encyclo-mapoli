@@ -11,7 +11,7 @@ import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 
 const UnderEighteenGrid = () => {
   const navigate = useNavigate();
-  const [trigger, { data, isLoading }] = useLazyGetYearEndProfitSharingReportQuery();
+  const [trigger, { data, isFetching }] = useLazyGetYearEndProfitSharingReportQuery();
 
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
@@ -70,7 +70,7 @@ const UnderEighteenGrid = () => {
       </div>
       <DSMGrid
         preferenceKey={CAPTIONS.PAY426_ACTIVE_UNDER_18}
-        isLoading={isLoading}
+        isLoading={isFetching}
         handleSortChanged={(_params) => {}}
         providedOptions={{
           rowData: data?.response?.results || [],
