@@ -102,7 +102,7 @@ const TwentyOnePlusGrid = () => {
       </div>
       <DSMGrid
         preferenceKey={CAPTIONS.PAY426_ACTIVE_21_PLUS}
-        isLoading={isLoading}
+        isLoading={isFetching}
         handleSortChanged={sortEventHandler}
         providedOptions={{
           rowData: data?.response?.results || [],
