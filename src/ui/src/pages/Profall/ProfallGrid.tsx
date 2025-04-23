@@ -30,7 +30,6 @@ const ProfallGrid = () => {
   }, [profitYear, pageNumber, pageSize, sortParams]);
 
   const fetchData = useCallback(() => {
-    setIsLoading(true);
     const yearToUse = profitYear || new Date().getFullYear();
     const skip = pageNumber * pageSize;
     getProfitSharingLabels({
@@ -41,12 +40,7 @@ const ProfallGrid = () => {
         sortBy: sortParams.sortBy || "badgeNumber",
         isSortDescending: sortParams.isSortDescending
       }
-    }).then(() => {
-      setIsLoading(false);
     })
-      .catch(() => {
-        setIsLoading(false);
-      });
   }, [profitYear, pageNumber, pageSize, sortParams, getProfitSharingLabels]);
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
