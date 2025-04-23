@@ -54,6 +54,8 @@ public sealed record YearEndProfitSharingReportDetail
     public char? EmployeeStatus { get; set; }
     public required decimal Balance { get; set; }
     public required short YearsInPlan { get; set; }
+    public required string FirstName { get; set; }
+    public required string LastName { get; set; }
 
     public static YearEndProfitSharingReportDetail ResponseExample()
     {
@@ -74,7 +76,9 @@ public sealed record YearEndProfitSharingReportDetail
             IsNew = false,
             EmployeeStatus = ' ',
             Balance = 51351.55m,
-            YearsInPlan = 1
+            YearsInPlan = 1,
+            FirstName = "John",
+            LastName = "Doe"
         };
     }
 }
