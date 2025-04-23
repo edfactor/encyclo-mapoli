@@ -8,6 +8,8 @@ import { CAPTIONS } from "../../../constants";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../reduxstore/store";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import pay426Utils from "../Pay427Utils";
+import { set } from "date-fns";
 
 const EighteenToTwentyGrid = () => {
   const navigate = useNavigate();
@@ -60,32 +62,28 @@ const EighteenToTwentyGrid = () => {
   );
 
   const sortEventHandler = (update: ISortParams) => {
-      if (update.sortBy === "employeeName") {
-        if (sortParams.sortBy === "lastName") {
-          update.isSortDescending = !sortParams.isSortDescending;
+    const t = () => { 
+        trigger({
+          profitYear: profitYear,
+          pagination: {
+            skip: 0,
+            take: pageSize,
+            sortBy: update.sortBy,
+            isSortDescending: update.isSortDescending
+          },
+          ...baseParams
         }
-        update.sortBy = "lastName";
-      }
-  
-      if (update.sortBy === "") { 
-        update.sortBy = "lastName";
-        update.isSortDescending = false;
-      } 
-  
-      setSortParams(update);
-      setPageNumber(0);
-  
-      trigger({
-        profitYear: profitYear,
-        pagination: {
-          skip: 0,
-          take: pageSize,
-          sortBy: update.sortBy,
-          isSortDescending: update.isSortDescending
-        },
-        ...baseParams
-      });
+      );
     }
+
+    pay426Utils.sortEventHandler(
+      update,
+      sortParams,
+      setSortParams,
+      setPageNumber,
+      t
+    );
+  }
 
   const columnDefs = useMemo(
     () => GetProfitSharingReportGridColumns(handleNavigationForButton),
