@@ -8,7 +8,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { setAdditionalExecutivesChosen } from "reduxstore/slices/yearsEndSlice";
 
-const RenderAddButton = () => {
+interface RenderAddButtonProps {
+  setOpenModal: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const RenderAddButton = ({ setOpenModal }: RenderAddButtonProps) => {
   const dispatch = useDispatch();
   const { executiveRowsSelected } = useSelector((state: RootState) => state.yearsEnd);
 
@@ -27,6 +31,7 @@ const RenderAddButton = () => {
         // pick them up upon re-render
         if (executiveRowsSelected) {
           dispatch(setAdditionalExecutivesChosen(executiveRowsSelected));
+          setOpenModal(false);
         }
       }}>
       Add to Main Grid
@@ -48,13 +53,18 @@ const RenderAddButton = () => {
 interface SearchAndAddExecutiveProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
+  setOpenModal: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const SearchAndAddExecutive = ({ initialSearchLoaded, setInitialSearchLoaded }: SearchAndAddExecutiveProps) => {
+const SearchAndAddExecutive = ({
+  initialSearchLoaded,
+  setInitialSearchLoaded,
+  setOpenModal
+}: SearchAndAddExecutiveProps) => {
   return (
     <Page
       label="Add New Executive"
-      actionNode={<div className="flex mr-2 justify-end gap-24">{RenderAddButton()}</div>}>
+      actionNode={<div className="flex mr-2 justify-end gap-24">{RenderAddButton({ setOpenModal })}</div>}>
       <Grid2
         container
         rowSpacing="24px">
