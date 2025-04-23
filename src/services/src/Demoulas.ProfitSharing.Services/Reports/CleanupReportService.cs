@@ -10,6 +10,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
+using Demoulas.ProfitSharing.Services.ItOperations;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
@@ -736,6 +737,8 @@ FROM FILTERED_DEMOGRAPHIC p1
                           {
                               BadgeNumber = x.pp.BadgeNumber,
                               EmployeeName = $"{x.pp.LastName}, {x.pp.FirstName}",
+                              FirstName = x.pp.FirstName,
+                              LastName = x.pp.LastName,
                               StoreNumber = x.pp.StoreNumber,
                               EmployeeTypeCode = x.pp.EmploymentTypeId[0],
                               EmployeeTypeName = x.pp.EmploymentTypeName,

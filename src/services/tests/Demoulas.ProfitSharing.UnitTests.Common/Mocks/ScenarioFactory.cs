@@ -1,4 +1,4 @@
-
+﻿
 using System.Reflection;
 using Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping.Data;
 using Demoulas.Common.Data.Services.Entities.Entities;
@@ -117,8 +117,8 @@ public sealed class ScenarioFactory
                 ProfitYear = ProfitYear,
                 DemographicId = 21,
                 Etva = 0,
-                CurrentHoursYear = 600,
-                HoursExecutive = 600
+                CurrentHoursYear = 1200,
+                HoursExecutive = 0
             }
         ];
         Demographics =

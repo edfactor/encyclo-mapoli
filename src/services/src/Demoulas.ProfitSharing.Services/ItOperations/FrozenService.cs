@@ -10,7 +10,7 @@ using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.EntityFrameworkCore;
 
-namespace Demoulas.ProfitSharing.Services;
+namespace Demoulas.ProfitSharing.Services.ItOperations;
 
 /// <summary>
 /// This service contains logic related to getting temporal data for tables with ValidFrom and ValidTo.
@@ -34,7 +34,7 @@ public class FrozenService: IFrozenService
     /// <returns></returns>
     public static IQueryable<Demographic> GetDemographicSnapshot(IProfitSharingDbContext ctx, short profitYear)
     {
-        return (
+        return 
             from dh in ctx.DemographicHistories
             join d in ctx.Demographics.Include(x => x.ContactInfo).Include(x => x.Address) on dh.DemographicId equals d.Id
             from fs in ctx.FrozenStates.Where(x => x.ProfitYear == profitYear && x.IsActive)
@@ -65,7 +65,7 @@ public class FrozenService: IFrozenService
                 EmploymentStatusId = dh.EmploymentStatusId,
             }
 
-        );
+        ;
     }
 
     /// <summary>
@@ -82,7 +82,7 @@ public class FrozenService: IFrozenService
         var thisYear = DateTime.Today.Year;
         validator.RuleFor(r => r)
             .InclusiveBetween((short)(thisYear-1), (short)thisYear)
-            .WithMessage($"ProfitYear must be between {(thisYear - 1)} and {thisYear}.");
+            .WithMessage($"ProfitYear must be between {thisYear - 1} and {thisYear}.");
 
         await validator.ValidateAndThrowAsync(profitYear, cancellationToken);
 

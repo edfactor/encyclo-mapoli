@@ -8,6 +8,6 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.Navigations;
 namespace Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 public interface INavigationService
 {
-    List<Navigation> GetNavigation();
-    Navigation GetNavigation(int navigationId);
+    Task<List<NavigationDto>> GetNavigation(CancellationToken cancellationToken);
+    NavigationDto GetNavigation(int navigationId);
 }

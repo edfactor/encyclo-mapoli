@@ -8,6 +8,7 @@ import { RootState } from "reduxstore/store";
 import { ICellRendererParams } from "ag-grid-community";
 import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
 import { useNavigate } from "react-router-dom";
+import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 
 interface AssociatesGridProps {
   store: string;
@@ -25,6 +26,7 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store }) => {
   const breakdownByStore = useSelector((state: RootState) => state.yearsEnd.breakdownByStore);
   const queryParams = useSelector((state: RootState) => state.yearsEnd.breakdownByStoreQueryParams);
   const navigate = useNavigate();
+  const profitYear = useDecemberFlowProfitYear();
 
   const handleNavigation = useCallback(
     (path: string) => {
@@ -37,7 +39,7 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store }) => {
 
   const fetchData = useCallback(() => {
     const params = {
-      profitYear: queryParams?.profitYear || 2024,
+      profitYear: queryParams?.profitYear || profitYear,
       storeNumber: store,
       under21Only: true,
       isSortDescending: sortParams.isSortDescending,

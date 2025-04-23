@@ -71,6 +71,9 @@
     <File Path="../database/ready_import/SQL copy all from ready to smart ps.sql" />
     <File Path="../database/ready_import/SQL counts smart vs ready.sql" />
   </Folder>
+  <Folder Name="/Database/ready import/Navigations/" Id="02ea681e-c7d8-13c7-8484-4ac65e1b71e8">
+    <File Path="../database/ready_import/Navigations/add-navigation-data.sql" />
+  </Folder>
   <Folder Name="/Database/SQL calculations view/" Id="ea803e27-1926-874e-7e63-a2a241a2e100">
     <File Path="../database/SQL calculations view/SQL READY Profit Sharing view creation for calculations includes bene and zeroc-check.sql" />
     <File Path="../database/SQL calculations view/SQL SMART Profit Sharing view creation for calculations includes bene and zeroc-check.sql" />

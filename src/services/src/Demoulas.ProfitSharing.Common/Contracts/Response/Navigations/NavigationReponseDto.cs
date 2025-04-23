@@ -7,6 +7,6 @@ using System.Threading.Tasks;
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.Navigations;
 public class NavigationResponseDto
 {
-    public List<Navigation>? Navigation { get; set; }
+    public List<NavigationDto>? Navigation { get; set; }
 
 }
