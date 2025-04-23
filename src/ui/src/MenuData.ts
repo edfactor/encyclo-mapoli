@@ -162,6 +162,11 @@ export const menuLevels: MenuLevel[] = [
         subPages: []
       },
       {
+        topTitle: CAPTIONS.FORFEITURES_ADJUSTMENT,
+        topRoute: ROUTES.FORFEITURES_ADJUSTMENT,
+        subPages: []
+      },
+      {
         topTitle: CAPTIONS.PROFIT_SHARE_UPDATE,
         topRoute: ROUTES.PROFIT_SHARE_UPDATE,
         subPages: []
