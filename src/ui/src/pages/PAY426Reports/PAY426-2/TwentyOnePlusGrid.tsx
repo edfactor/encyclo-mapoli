@@ -8,6 +8,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../reduxstore/store";
 import { CAPTIONS } from "../../../constants";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import pay426Utils from "../Pay427Utils";
 
 const TwentyOnePlusGrid = () => {
   const navigate = useNavigate();
@@ -64,31 +65,27 @@ const TwentyOnePlusGrid = () => {
   );
 
   const sortEventHandler = (update: ISortParams) => {
-    if (update.sortBy === "employeeName") {
-      if (sortParams.sortBy === "lastName") {
-        update.isSortDescending = !sortParams.isSortDescending;
-      }
-      update.sortBy = "lastName";
+    const t = () => { 
+        trigger({
+          profitYear: profitYear,
+          pagination: {
+            skip: 0,
+            take: pageSize,
+            sortBy: update.sortBy,
+            isSortDescending: update.isSortDescending
+          },
+          ...baseParams
+        }
+      );
     }
 
-    if (update.sortBy === "") { 
-      update.sortBy = "lastName";
-      update.isSortDescending = false;
-    } 
-
-    setSortParams(update);
-    setPageNumber(0);
-
-    trigger({
-      profitYear: profitYear,
-      pagination: {
-        skip: 0,
-        take: pageSize,
-        sortBy: update.sortBy,
-        isSortDescending: update.isSortDescending
-      },
-      ...baseParams
-    });
+    pay426Utils.sortEventHandler(
+      update,
+      sortParams,
+      setSortParams,
+      setPageNumber,
+      t
+    );
   }
 
   return (

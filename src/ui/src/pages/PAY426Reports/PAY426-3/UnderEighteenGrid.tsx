@@ -8,6 +8,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../reduxstore/store";
 import { CAPTIONS } from "../../../constants";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import pay426Utils from "../Pay427Utils";
 
 const UnderEighteenGrid = () => {
   const navigate = useNavigate();
@@ -21,29 +22,30 @@ const UnderEighteenGrid = () => {
   });
   const hasToken = useSelector((state: RootState) => !!state.security.token);
   const profitYear = useFiscalCloseProfitYear();
+  const baseParams = {
+    isYearEnd: true,
+    maximumAgeInclusive: 17,
+    includeActiveEmployees: true,
+    includeInactiveEmployees: true,
+    includeEmployeesTerminatedThisYear: false,
+    includeTerminatedEmployees: false,
+    includeBeneficiaries: false,
+    includeEmployeesWithPriorProfitSharingAmounts: true,
+    includeEmployeesWithNoPriorProfitSharingAmounts: true,
+  };
 
   useEffect(() => {
     if (hasToken) {
       trigger({
-      isYearEnd: true,
-      minimumAgeInclusive: 0,
-      maximumAgeInclusive: 17,
-      minimumHoursInclusive: 0,
-      maximumHoursInclusive: 4000,
-      includeActiveEmployees: true,
-      includeInactiveEmployees: true,
-      includeEmployeesTerminatedThisYear: false,
-      includeTerminatedEmployees: false,
-      includeBeneficiaries: false,
-      includeEmployeesWithPriorProfitSharingAmounts: true,
-      includeEmployeesWithNoPriorProfitSharingAmounts: true,
-      profitYear: profitYear,
+        profitYear: profitYear,
         pagination: {
           skip: pageNumber * pageSize,
           take: pageSize,
           sortBy: sortParams.sortBy,
           isSortDescending: sortParams.isSortDescending
-        }});
+        },
+        ...baseParams
+      });
     }
   }, [trigger, hasToken, profitYear, pageNumber, pageSize, sortParams]);
 
@@ -53,6 +55,30 @@ const UnderEighteenGrid = () => {
     },
     [navigate]
   );
+
+  const sortEventHandler = (update: ISortParams) => {
+      const t = () => { 
+          trigger({
+            profitYear: profitYear,
+            pagination: {
+              skip: 0,
+              take: pageSize,
+              sortBy: update.sortBy,
+              isSortDescending: update.isSortDescending
+            },
+            ...baseParams
+          }
+        );
+      }
+  
+      pay426Utils.sortEventHandler(
+        update,
+        sortParams,
+        setSortParams,
+        setPageNumber,
+        t
+      );
+    }
 
   const columnDefs = useMemo(
     () => GetProfitSharingReportGridColumns(handleNavigationForButton),
@@ -71,7 +97,7 @@ const UnderEighteenGrid = () => {
       <DSMGrid
         preferenceKey={CAPTIONS.PAY426_ACTIVE_UNDER_18}
         isLoading={isLoading}
-        handleSortChanged={(_params) => {}}
+        handleSortChanged={sortEventHandler}
         providedOptions={{
           rowData: data?.response?.results || [],
           columnDefs: columnDefs
