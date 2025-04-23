@@ -24,7 +24,7 @@ const DistributionByAgeGrid: React.FC<DistributionByAgeGridProps> = ({ initialSe
     distributionsByAgePartTime,
     distributionsByAgeQueryParams
   } = useSelector((state: RootState) => state.yearsEnd);
-  const [triggerSearch, { isLoading }] = useLazyGetDistributionsByAgeQuery();
+  const [triggerSearch, { isFetching }] = useLazyGetDistributionsByAgeQuery();
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
@@ -132,7 +132,7 @@ const DistributionByAgeGrid: React.FC<DistributionByAgeGridProps> = ({ initialSe
             <Grid2 size={{ xs: 4 }}>
               <DSMGrid
                 preferenceKey={"AGE_Total"}
-                isLoading={isLoading}
+                isLoading={isFetching}
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: distributionsByAgeTotal?.response.results,
@@ -144,7 +144,7 @@ const DistributionByAgeGrid: React.FC<DistributionByAgeGridProps> = ({ initialSe
             <Grid2 size={{ xs: 4 }}>
               <DSMGrid
                 preferenceKey={"AGE_FullTime"}
-                isLoading={isLoading}
+                isLoading={isFetching}
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: distributionsByAgeFullTime?.response.results,
@@ -156,7 +156,7 @@ const DistributionByAgeGrid: React.FC<DistributionByAgeGridProps> = ({ initialSe
             <Grid2 size={{ xs: 4 }}>
               <DSMGrid
                 preferenceKey={"AGE_PartTime"}
-                isLoading={isLoading}
+                isLoading={isFetching}
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: distributionsByAgePartTime?.response.results,

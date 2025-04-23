@@ -12,7 +12,7 @@ import pay426Utils from "../Pay427Utils";
 
 const PriorHoursGrid = () => {
   const navigate = useNavigate();
-  const [trigger, { data, isLoading }] = useLazyGetYearEndProfitSharingReportQuery();
+  const [trigger, { data, isFetching }] = useLazyGetYearEndProfitSharingReportQuery();
 
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
@@ -98,7 +98,7 @@ const PriorHoursGrid = () => {
       </div>
       <DSMGrid
         preferenceKey={CAPTIONS.PAY426_ACTIVE_PRIOR_SHARING}
-        isLoading={isLoading}
+        isLoading={isFetching}
         handleSortChanged={sortEventHandler}
         providedOptions={{
           rowData: data?.response?.results || [],

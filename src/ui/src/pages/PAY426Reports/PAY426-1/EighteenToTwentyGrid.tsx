@@ -13,7 +13,7 @@ import { set } from "date-fns";
 
 const EighteenToTwentyGrid = () => {
   const navigate = useNavigate();
-  const [trigger, { data, isLoading }] = useLazyGetYearEndProfitSharingReportQuery();
+  const [trigger, { data, isFetching }] = useLazyGetYearEndProfitSharingReportQuery();
 
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
@@ -101,7 +101,7 @@ const EighteenToTwentyGrid = () => {
       </div>
       <DSMGrid
         preferenceKey={CAPTIONS.PAY426_ACTIVE_18_20}
-        isLoading={isLoading}
+        isLoading={isFetching}
         handleSortChanged={sortEventHandler}
         providedOptions={{
           rowData: data?.response?.results || [],

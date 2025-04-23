@@ -18,7 +18,7 @@ const BeneficiariesGrid = () => {
     sortBy: "badgeNumber",
     isSortDescending: false
   });
-  const [trigger, { data, isLoading, error }] = useLazyGetYearEndProfitSharingReportQuery();
+  const [trigger, { data, isFetching, error }] = useLazyGetYearEndProfitSharingReportQuery();
 
   const hasToken = useSelector((state: RootState) => !!state.security.token);
   const profitYear = useFiscalCloseProfitYear();
@@ -120,7 +120,7 @@ const BeneficiariesGrid = () => {
       </div>
       <DSMGrid
         preferenceKey={CAPTIONS.PAY426_NON_EMPLOYEE}
-        isLoading={isLoading}
+        isLoading={isFetching}
         handleSortChanged={sortEventHandler}
         providedOptions={{
           rowData: data?.response?.results || [],

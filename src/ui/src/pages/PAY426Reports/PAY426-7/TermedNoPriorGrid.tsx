@@ -12,7 +12,7 @@ import pay426Utils from "../Pay427Utils";
 
 const TermedNoPriorGrid = () => {
   const navigate = useNavigate();
-  const [trigger, { data, isLoading }] = useLazyGetYearEndProfitSharingReportQuery();
+  const [trigger, { data, isFetching }] = useLazyGetYearEndProfitSharingReportQuery();
 
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
@@ -97,7 +97,7 @@ const TermedNoPriorGrid = () => {
       </div>
       <DSMGrid
         preferenceKey={CAPTIONS.PAY426_TERMINATED_NO_PRIOR}
-        isLoading={isLoading}
+        isLoading={isFetching}
         handleSortChanged={sortEventHandler}
         providedOptions={{
           rowData: data?.response?.results || [],

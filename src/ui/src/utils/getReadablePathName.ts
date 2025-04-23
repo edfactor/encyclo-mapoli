@@ -26,6 +26,7 @@ const pathToReadableName: Record<string, string> = {
   "military-entry-and-modification": "Military Contributions",
   "profit-share-report": "Profit Share Report",
   forfeit: "Forfeit",
+  "forfeitures-adjustment": "Forfeiture Adjustments",
   "fiscal-close": "Year End Flow",
   "profit-share-update": "Profit Share Update (PAY444 PAY447)",
   "employees-on-military-leave": "Military Leave",

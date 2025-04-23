@@ -27,7 +27,7 @@ const Pay450Grid: React.FC<Pay450GridProps> = ({
   });
   
   const { updateSummary } = useSelector((state: RootState) => state.yearsEnd);
-  const [triggerSearch, { isLoading }] = YearsEndApi.endpoints.getUpdateSummary.useLazyQuery();
+  const [triggerSearch, { isFetching }] = YearsEndApi.endpoints.getUpdateSummary.useLazyQuery();
 
   const onSearch = useCallback(async () => {
     try {
@@ -107,7 +107,7 @@ const Pay450Grid: React.FC<Pay450GridProps> = ({
           </div>
           <DSMGrid
             preferenceKey={"ELIGIBLE_EMPLOYEES"}
-            isLoading={isLoading}
+            isLoading={isFetching}
             handleSortChanged={sortEventHandler}
             providedOptions={{
               rowData: gridData,
@@ -119,7 +119,7 @@ const Pay450Grid: React.FC<Pay450GridProps> = ({
       )}
       {!!updateSummary && updateSummary.response.results.length > 0 && (
         <Pagination
-          pageNumber={pageNumber + 1}
+          pageNumber={pageNumber}
           setPageNumber={(value: number) => {
             setPageNumber(value - 1);
             setInitialSearchLoaded(true);

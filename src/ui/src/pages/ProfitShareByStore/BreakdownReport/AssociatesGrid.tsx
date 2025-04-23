@@ -22,7 +22,7 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store }) => {
     isSortDescending: false
   });
 
-  const [fetchBreakdownByStore, { isLoading }] = useLazyGetBreakdownByStoreQuery();
+  const [fetchBreakdownByStore, { isFetching }] = useLazyGetBreakdownByStoreQuery();
   const breakdownByStore = useSelector((state: RootState) => state.yearsEnd.breakdownByStore);
   const queryParams = useSelector((state: RootState) => state.yearsEnd.breakdownByStoreQueryParams);
   const navigate = useNavigate();
@@ -134,7 +134,7 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store }) => {
       <Grid2 width="100%">
         <DSMGrid
           preferenceKey={`BREAKDOWN_REPORT_ASSOCIATES_STORE_${store}`}
-          isLoading={isLoading}
+          isLoading={isFetching}
           handleSortChanged={sortEventHandler}
           providedOptions={{
             rowData: breakdownByStore?.response?.results || [],
