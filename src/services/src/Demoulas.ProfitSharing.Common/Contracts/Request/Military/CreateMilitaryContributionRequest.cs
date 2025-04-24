@@ -6,6 +6,7 @@ public sealed record CreateMilitaryContributionRequest : YearRequest
 {
     public int BadgeNumber { get; init; }
     public decimal ContributionAmount { get; init; }
+    public DateTime ContributionDate { get; init; } = DateTime.Now;
 
     public static CreateMilitaryContributionRequest RequestExample()
     {

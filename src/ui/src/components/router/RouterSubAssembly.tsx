@@ -1,25 +1,22 @@
 import { Box } from "@mui/material";
 import PSDrawer from "components/Drawer/PSDrawer";
 import DSMDynamicBreadcrumbs from "components/DSMDynamicBreadcrumbs/DSMDynamicBreadcrumbs";
-import CleanUpSummary from "pages/CleanUpSummary/CleanUpSummary";
-import DecemberProcessAccordion from "pages/DecemberActivities/DecemberProcess/DecemberProcessAccordion";
 import DemographicBadgesNotInPayprofit from "pages/DecemberActivities/DemographicBadgesNotInPayprofit/DemographicBadgesNotInPayprofit";
 import DistributionsAndForfeitures from "pages/DecemberActivities/DistributionsAndForfeitures/DistributionAndForfeitures";
 import DuplicateNamesAndBirthdays from "pages/DecemberActivities/DuplicateNamesAndBirthdays/DuplicateNamesAndBirthdays";
 import DuplicateSSNsOnDemographics from "pages/DecemberActivities/DuplicateSSNsOnDemographics/DuplicateSSNsOnDemographics";
 import EmployeesOnMilitaryLeave from "pages/DecemberActivities/EmployeesOnMilitaryLeave/EmployeesOnMilitaryLeave";
-import ManageExecutiveHoursAndDollars from "pages/DecemberActivities/ManageExecutiveHoursAndDollars/ManageExecutiveHoursAndDollars";
+import ManageExecutiveHoursAndDollars from "pages/FiscalClose/ManageExecutiveHoursAndDollars/ManageExecutiveHoursAndDollars";
 import MissingCommaInPyName from "pages/DecemberActivities/MissingCommaInPyName/MissingCommaInPyName";
 import NegativeEtvaForSSNsOnPayprofit from "pages/DecemberActivities/NegativeEtvaForSSNsOnPayprofit/NegativeEtvaForSSNsOnPayprofit";
 import Termination from "pages/DecemberActivities/Termination/Termination";
-import EligibleEmployees from "pages/EligibleEmployees/EligibleEmployees";
+import EligibleEmployees from "pages/FiscalClose/EligibleEmployees/EligibleEmployees";
 import ProfitShareReportEditRun from "pages/FiscalFlow/ProfitShareReportEditRun/ProfitShareReportEditRun";
 import ProfitShareReportFinalRun from "pages/FiscalFlow/ProfitShareReportFinalRun/ProfitShareReportFinalRun";
 import Forfeit from "pages/Forfeit/Forfeit";
 import FrozenSummary from "pages/FrozenSummary/FrozenSummary";
 import MasterInquiry from "pages/MasterInquiry/MasterInquiry";
 import RehireForfeitures from "pages/DecemberActivities/RehireForfeitures/RehireForfeitures";
-import MilitaryEntryAndModification from "pages/DecemberActivities/MilitaryEntryAndModification/MilitaryEntryAndModification";
 import EighteenToTwenty from "pages/PAY426Reports/PAY426-1/EighteenToTwenty";
 import Beneficiaries from "pages/PAY426Reports/PAY426-10/Beneficiaries";
 import TwentyOnePlus from "pages/PAY426Reports/PAY426-2/TwentyOnePlus";
@@ -44,7 +41,6 @@ import Under21TA from "pages/ProfitShareByStore/Under21/Under21TA";
 import ProfitShareGrossReport from "pages/ProfitShareGrossReport/ProfitShareGrossReport";
 import ProfitShareReport from "pages/ProfitShareReport/ProfitShareReport";
 import ProfitShareTotals426 from "pages/ProfitShareTotals426/ProfitShareTotals426";
-import FiscalFlow from "pages/YearEndFlow/YearEndFlow";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Route } from "react-router-dom";
@@ -52,7 +48,7 @@ import { setImpersonating } from "reduxstore/slices/securitySlice";
 import { RootState } from "reduxstore/store";
 import { ImpersonationRoles } from "reduxstore/types";
 import { ImpersonationMultiSelect } from "smart-ui-library";
-import { drawerClosedWidth, drawerOpenWidth, ROUTES } from "../../constants";
+import { drawerClosedWidth, drawerOpenWidth, ROUTES, SMART_PS_QA_IMPERSONATION } from "../../constants";
 import MenuData from "../../MenuData";
 import DemographicFreeze from "../../pages/ITOperations/DemographicFreeze/DemographicFreeze";
 import BalanceByAge from "../../pages/PROF130/BalanceByAge/BalanceByAge";
@@ -64,11 +60,16 @@ import YTDWages from "../../pages/YTDWagesExtract/YTDWages";
 import RouteSecurity from "./RouteSecurity";
 
 import { MenuBar } from "components/MenuBar/MenuBar";
+import MilitaryEntryAndModification
+  from "../../pages/DecemberActivities/MilitaryEntryAndModification/MilitaryEntryAndModification";
+import DevDebug from "../../pages/Dev/DevDebug";
+import ForfeituresAdjustment from "../../pages/ForfeituresAdjustment/ForfeituresAdjustment";
 
 const RouterSubAssembly: React.FC = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";
   const isProduction = false;
-  const hasImpersonationRole = true;
+  const userGroups = useSelector((state: RootState) => state.security.userGroups);
+  const hasImpersonationRole = userGroups.includes(SMART_PS_QA_IMPERSONATION);
   const showImpersonation = hasImpersonationRole && !isProduction;
 
   const { impersonating } = useSelector((state: RootState) => state.security);
@@ -209,9 +210,6 @@ const RouterSubAssembly: React.FC = () => {
                 path={ROUTES.BALANCE_BY_AGE}
                 element={<BalanceByAge />}></Route>
               <Route
-                path="clean-up-summary"
-                element={<CleanUpSummary />}></Route>
-              <Route
                 path={ROUTES.FROZEN_SUMMARY}
                 element={<FrozenSummary />}></Route>
               <Route
@@ -236,6 +234,9 @@ const RouterSubAssembly: React.FC = () => {
               <Route
                 path="forfeit/:badgeNumber?"
                 element={<Forfeit />}></Route>
+              <Route
+                path={ROUTES.FORFEITURES_ADJUSTMENT}
+                element={<ForfeituresAdjustment />}></Route>
               <Route
                 path={ROUTES.FISCAL_CLOSE}
                 element={<></>}></Route>
@@ -347,6 +348,10 @@ const RouterSubAssembly: React.FC = () => {
               <Route
                 path={ROUTES.DEMO_FREEZE}
                 element={<DemographicFreeze />}
+              />
+              <Route
+                path={ROUTES.DEV_DEBUG}
+                element={<DevDebug />}
               />
             </RouteSecurity>
           </Box>

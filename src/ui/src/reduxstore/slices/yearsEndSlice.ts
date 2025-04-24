@@ -1,9 +1,10 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { clear } from "console";
 
 import {
   BalanceByAge,
   BalanceByYears,
+  BreakdownByStoreRequest,
+  BreakdownByStoreResponse,
   ContributionsByAge,
   DemographicBadgesNotInPayprofit,
   DistributionsAndForfeitures,
@@ -27,31 +28,38 @@ import {
   MissingCommasInPYName,
   NegativeEtvaForSSNsOnPayProfit,
   PagedReportResponse,
+  ProfitMasterStatus,
+  ProfitShareAdjustmentSummary,
   ProfitShareEditResponse,
+  ProfitShareEditUpdateQueryParams,
   ProfitShareMasterResponse,
   ProfitShareUpdateResponse,
   ProfitSharingDistributionsByAge,
+  ProfitSharingLabel,
   ProfitYearRequest,
   RehireForfeituresRequest,
+  ReportsByAgeParams,
   TerminationResponse,
-  VestedAmountsByAge,
-  YearEndProfitSharingReportResponse,
-  BreakdownByStoreResponse,
-  BreakdownByStoreRequest,
-  Under21BreakdownByStoreResponse,
   Under21BreakdownByStoreRequest,
-  Under21InactiveResponse,
+  Under21BreakdownByStoreResponse,
   Under21InactiveRequest,
+  Under21InactiveResponse,
   Under21TotalsRequest,
   Under21TotalsResponse,
-  YearEndProfitSharingReportSummaryResponse,
   UpdateSummaryResponse,
-  ReportsByAgeParams,
-  ProfitShareEditUpdateQueryParams,
-  ProfitShareAdjustmentSummary
+  VestedAmountsByAge,
+  YearEndProfitSharingReportResponse,
+  YearEndProfitSharingReportSummaryResponse
 } from "reduxstore/types";
+import { Paged } from "smart-ui-library";
 
 export interface YearsEndState {
+  invalidProfitShareEditYear: boolean;
+  totalForfeituresGreaterThanZero: boolean;
+  profitShareEditUpdateShowSearch: boolean;
+  resetYearEndPage: boolean;
+  profitShareApplyOrRevertLoading: boolean;
+  profitMasterStatus: ProfitMasterStatus | null;
   profitEditUpdateChangesAvailable: boolean;
   profitEditUpdateRevertChangesAvailable: boolean;
   selectedProfitYearForDecemberActivities: number;
@@ -87,6 +95,7 @@ export interface YearsEndState {
   executiveHoursAndDollars: PagedReportResponse<ExecutiveHoursAndDollars> | null;
   executiveHoursAndDollarsGrid: ExecutiveHoursAndDollarsGrid | null;
   executiveHoursAndDollarsQueryParams: ExecutiveHoursAndDollarsQueryParams | null;
+  executiveHoursAndDollarsAddQueryParams: ExecutiveHoursAndDollarsQueryParams | null;
   executiveRowsSelected: ExecutiveHoursAndDollars[] | null;
   forfeituresAndPoints: ForfeituresAndPoints | null;
   forfeituresAndPointsQueryParams: ForfeituresAndPointsQueryParams | null;
@@ -128,6 +137,7 @@ export interface YearsEndState {
   under21TotalsQueryParams: Under21TotalsRequest | null;
   profitShareSummaryReport: YearEndProfitSharingReportSummaryResponse | null;
   updateSummary: UpdateSummaryResponse | null;
+  profitSharingLabels: Paged<ProfitSharingLabel> | null;
 }
 
 const initialState: YearsEndState = {
@@ -137,6 +147,12 @@ const initialState: YearsEndState = {
   selectedProfitYearForFiscalClose: localStorage.getItem("selectedProfitYearForFiscalClose")
     ? Number(localStorage.getItem("selectedProfitYearForFiscalClose"))
     : 2024,
+  invalidProfitShareEditYear: false,
+  totalForfeituresGreaterThanZero: false,
+  profitShareEditUpdateShowSearch: true,
+  profitShareApplyOrRevertLoading: false,
+  resetYearEndPage: false,
+  profitMasterStatus: null,
   additionalExecutivesChosen: null,
   additionalExecutivesGrid: null,
   balanceByAgeFullTime: null,
@@ -169,6 +185,7 @@ const initialState: YearsEndState = {
   executiveHoursAndDollarsGrid: null,
   executiveRowsSelected: null,
   executiveHoursAndDollarsQueryParams: null,
+  executiveHoursAndDollarsAddQueryParams: null,
   forfeituresByAgeFullTime: null,
   forfeituresByAgePartTime: null,
   forfeituresByAgeTotal: null,
@@ -210,13 +227,41 @@ const initialState: YearsEndState = {
   under21Totals: null,
   under21TotalsQueryParams: null,
   profitShareSummaryReport: null,
-  updateSummary: null
+  updateSummary: null,
+  profitSharingLabels: null
 };
 
 export const yearsEndSlice = createSlice({
   name: "yearsEnd",
   initialState,
   reducers: {
+    setInvalidProfitShareEditYear: (state, action: PayloadAction<boolean>) => {
+      state.invalidProfitShareEditYear = action.payload;
+    },
+    setTotalForfeituresGreaterThanZero: (state, action: PayloadAction<boolean>) => {
+      state.totalForfeituresGreaterThanZero = action.payload;
+    },
+    setProfitShareEditUpdateShowSearch: (state, action: PayloadAction<boolean>) => {
+      state.profitShareEditUpdateShowSearch = action.payload;
+    },
+    setProfitShareApplyOrRevertLoading: (state, action: PayloadAction<boolean>) => {
+      state.profitShareApplyOrRevertLoading = action.payload;
+    },
+    setResetYearEndPage: (state, action: PayloadAction<boolean>) => {
+      state.resetYearEndPage = action.payload;
+    },
+    setProfitMasterStatus: (state, action: PayloadAction<ProfitMasterStatus>) => {
+      state.profitMasterStatus = action.payload;
+    },
+    clearProfitMasterStatus: (state) => {
+      state.profitMasterStatus = null;
+    },
+    setExecutiveHoursAndDollarsAddQueryParams: (state, action: PayloadAction<ExecutiveHoursAndDollarsQueryParams>) => {
+      state.executiveHoursAndDollarsAddQueryParams = action.payload;
+    },
+    clearExecutiveHoursAndDollarsAddQueryParams: (state) => {
+      state.executiveHoursAndDollarsAddQueryParams = null;
+    },
     setProfitSharingUpdateAdjustmentSummary: (state, action: PayloadAction<ProfitShareAdjustmentSummary>) => {
       state.profitSharingUpdateAdjustmentSummary = action.payload;
     },
@@ -242,10 +287,14 @@ export const yearsEndSlice = createSlice({
     },
     setProfitEditUpdateChangesAvailable: (state, action: PayloadAction<boolean>) => {
       state.profitEditUpdateChangesAvailable = action.payload;
+      state.profitEditUpdateRevertChangesAvailable = false;
     },
+
     setProfitEditUpdateRevertChangesAvailable: (state, action: PayloadAction<boolean>) => {
       state.profitEditUpdateRevertChangesAvailable = action.payload;
+      state.profitEditUpdateChangesAvailable = false;
     },
+
     setSelectedProfitYearForDecemberActivities: (state, action: PayloadAction<number>) => {
       state.selectedProfitYearForDecemberActivities = action.payload;
       localStorage.setItem("selectedProfitYearForDecemberActivities", action.payload.toString());
@@ -631,6 +680,9 @@ export const yearsEndSlice = createSlice({
     setExecutiveHoursAndDollarsQueryParams: (state, action: PayloadAction<ExecutiveHoursAndDollarsQueryParams>) => {
       state.executiveHoursAndDollarsQueryParams = action.payload;
     },
+    clearExecutiveHoursAndDollarsQueryParams: (state) => {
+      state.executiveHoursAndDollarsQueryParams = null;
+    },
     setEmployeeWagesForYear: (state, action: PayloadAction<PagedReportResponse<EmployeeWagesForYear>>) => {
       state.employeeWagesForYear = action.payload;
     },
@@ -897,6 +949,12 @@ export const yearsEndSlice = createSlice({
     },
     clearUpdateSummary: (state) => {
       state.updateSummary = null;
+    },
+    setProfitSharingLabels: (state, action: PayloadAction<Paged<ProfitSharingLabel>>) => {
+      state.profitSharingLabels = action.payload;
+    },
+    clearProfitSharingLabels: (state) => {
+      state.profitSharingLabels = null;
     }
   }
 });
@@ -1017,6 +1075,17 @@ export const {
   clearProfitSharingEditQueryParams,
   setProfitSharingUpdateAdjustmentSummary,
   clearProfitSharingUpdateAdjustmentSummary,
-  addBadgeNumberToUpdateAdjustmentSummary
+  addBadgeNumberToUpdateAdjustmentSummary,
+  clearExecutiveHoursAndDollarsAddQueryParams,
+  setExecutiveHoursAndDollarsAddQueryParams,
+  setProfitSharingLabels,
+  clearProfitSharingLabels,
+  setProfitMasterStatus,
+  clearProfitMasterStatus,
+  setResetYearEndPage,
+  setProfitShareApplyOrRevertLoading,
+  setProfitShareEditUpdateShowSearch,
+  setTotalForfeituresGreaterThanZero,
+  setInvalidProfitShareEditYear
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;

@@ -1,12 +1,13 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-import { format } from "date-fns";
 import {
   addBadgeNumberToUpdateAdjustmentSummary,
   clearBreakdownByStore,
   clearProfitMasterApply,
   clearProfitMasterRevert,
+  clearProfitMasterStatus,
   clearProfitSharingEdit,
+  clearProfitSharingLabels,
   clearProfitSharingUpdate,
   clearUnder21BreakdownByStore,
   clearUnder21Inactive,
@@ -34,8 +35,10 @@ import {
   setNegativeEtvaForSSNsOnPayprofit,
   setProfitMasterApply,
   setProfitMasterRevert,
+  setProfitMasterStatus,
   setProfitShareSummaryReport,
   setProfitSharingEdit,
+  setProfitSharingLabels,
   setProfitSharingUpdate,
   setProfitSharingUpdateAdjustmentSummary,
   setTermination,
@@ -82,11 +85,15 @@ import {
   NegativeEtvaForSSNsOnPayProfit,
   NegativeEtvaForSSNsOnPayprofitRequestDto,
   PagedReportResponse,
+  ProfitMasterStatus,
   ProfitShareEditResponse,
+  ProfitShareMasterApplyRequest,
   ProfitShareMasterResponse,
   ProfitShareUpdateRequest,
   ProfitShareUpdateResponse,
   ProfitSharingDistributionsByAge,
+  ProfitSharingLabel,
+  ProfitSharingLabelsRequest,
   ProfitYearRequest,
   RehireForfeituresRequest,
   TerminationRequest,
@@ -102,10 +109,18 @@ import {
   VestedAmountsByAge,
   YearEndProfitSharingReportRequest,
   YearEndProfitSharingReportResponse,
-  YearEndProfitSharingReportSummaryResponse
+  YearEndProfitSharingReportSummaryResponse,
+  ForfeitureAdjustmentRequest,
+  ForfeitureAdjustmentResponse
 } from "reduxstore/types";
-import { url } from "./api";
 import { tryddmmyyyyToDate } from "../../utils/dateUtils";
+import { Paged } from "smart-ui-library";
+import { url } from "./api";
+
+import {
+  setForfeitureAdjustmentData,
+  clearForfeitureAdjustmentData
+} from "reduxstore/slices/forfeituresAdjustmentSlice";
 
 export const YearsEndApi = createApi({
   baseQuery: fetchBaseQuery({
@@ -715,10 +730,8 @@ export const YearsEndApi = createApi({
           dispatch(setProfitSharingUpdate(data));
           dispatch(setProfitSharingUpdateAdjustmentSummary(data.adjustmentsSummary));
           if (arg.badgeToAdjust) {
-            console.log("Added badge: " + arg.badgeToAdjust);
+            //console.log("Added badge: " + arg.badgeToAdjust);
             dispatch(addBadgeNumberToUpdateAdjustmentSummary(arg.badgeToAdjust));
-          } else {
-            console.log("No badge to add to summmary");
           }
         } catch (err) {
           console.log("Err", err);
@@ -756,6 +769,24 @@ export const YearsEndApi = createApi({
         } catch (err) {
           console.log("Err: " + err);
           dispatch(clearProfitSharingEdit());
+        }
+      }
+    }),
+    getProfitMasterStatus: builder.query<ProfitMasterStatus, ProfitYearRequest>({
+      query: (params) => ({
+        url: "yearend/profit-master-status",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setProfitMasterStatus(data));
+        } catch (err) {
+          console.log("Err: " + err);
+          dispatch(clearProfitMasterStatus());
         }
       }
     }),
@@ -856,7 +887,7 @@ export const YearsEndApi = createApi({
       }
     }),
 
-    getMasterApply: builder.query<ProfitShareMasterResponse, ProfitShareUpdateRequest>({
+    getMasterApply: builder.query<ProfitShareMasterResponse, ProfitShareMasterApplyRequest>({
       query: (params) => ({
         url: "yearend/profit-master-update",
         method: "GET",
@@ -885,6 +916,28 @@ export const YearsEndApi = createApi({
         } catch (err) {
           console.log("Err: " + err);
           dispatch(clearProfitMasterRevert());
+        }
+      }
+    }),
+    getProfitSharingLabels: builder.query<Paged<ProfitSharingLabel>, ProfitSharingLabelsRequest>({
+      query: (params) => ({
+        url: "yearend/post-frozen/profit-sharing-labels",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          take: params.pagination.take,
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setProfitSharingLabels(data));
+        } catch (err) {
+          console.log("Err: " + err);
+          dispatch(clearProfitSharingLabels());
         }
       }
     }),
@@ -956,6 +1009,30 @@ export const YearsEndApi = createApi({
           console.log("Err: " + err);
         }
       }
+    }),
+    getForfeitureAdjustments: builder.query<ForfeitureAdjustmentResponse, ForfeitureAdjustmentRequest>({
+      query: (params) => ({
+        url: "yearend/forfeiture-adjustments",
+        method: "GET",
+        params: {
+          ssn: params.ssn,
+          badge: params.badge,
+          profitYear: params.profitYear,
+          skip: params.skip || 0,
+          take: params.take || 255,
+          sortBy: params.sortBy,
+          isSortDescending: params.isSortDescending
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setForfeitureAdjustmentData(data));
+        } catch (err) {
+          console.log("Err: " + err);
+          dispatch(clearForfeitureAdjustmentData());
+        }
+      }
     })
   })
 });
@@ -978,8 +1055,6 @@ export const {
   useLazyGetForfeituresAndPointsQuery,
   useLazyGetForfeituresByAgeQuery,
   useLazyGetGrossWagesReportQuery,
-  useLazyGetMasterApplyQuery,
-  useLazyGetMasterRevertQuery,
   useLazyGetRehireForfeituresQuery,
   useLazyGetNamesMissingCommasQuery,
   useLazyGetNegativeEVTASSNQuery,
@@ -993,5 +1068,11 @@ export const {
   useLazyGetYearEndProfitSharingReportQuery,
   useUpdateExecutiveHoursAndDollarsMutation,
   useLazyGetYearEndProfitSharingSummaryReportQuery,
-  useLazyGetUpdateSummaryQuery
+  useLazyGetUpdateSummaryQuery,
+  useLazyGetMasterApplyQuery,
+  useLazyGetMasterRevertQuery,
+  useLazyGetProfitSharingLabelsQuery,
+  useLazyGetProfitMasterStatusQuery,
+  useGetForfeitureAdjustmentsQuery,
+  useLazyGetForfeitureAdjustmentsQuery
 } = YearsEndApi;

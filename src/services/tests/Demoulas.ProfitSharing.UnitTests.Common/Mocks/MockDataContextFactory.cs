@@ -4,7 +4,9 @@ using Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping.Data;
 using Demoulas.Common.Data.Services.Entities.Entities;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.UnitTests.Common.Common;
 using Demoulas.ProfitSharing.UnitTests.Common.Fakes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -47,6 +49,11 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingDbContext.Setup(m => m.Countries).Returns(mockCountry.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.Countries).Returns(mockCountry.Object);
 
+        List<Navigation>? navigations = new NavigationFaker().DummyNavigationData();
+        Mock<DbSet<Navigation>> mockNavigation = navigations.AsQueryable().BuildMockDbSet();
+        _profitSharingDbContext.Setup(m => m.Navigations).Returns(mockNavigation.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.Navigations).Returns(mockNavigation.Object);
+
         List<PayClassification>? payClassifications = new PayClassificationFaker().Generate(500);
         Mock<DbSet<PayClassification>> mockPayClassifications = payClassifications.AsQueryable().BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.PayClassifications).Returns(mockPayClassifications.Object);
@@ -88,6 +95,12 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         {
             demographics.Find(d => d.Id == payProfit.DemographicId)?.PayProfits.Add(payProfit);
         }
+
+        List<ParticipantTotal> participantTotals = new ParticipantTotalFaker(demographics,beneficiaries).Generate(demographics.Count + beneficiaries.Count);
+        Constants.FakeParticipantTotals = [.. participantTotals];
+
+        List<ParticipantTotalVestingBalance> participantTotalVestingBalances = new ParticipantTotalVestingBalanceFaker(demographics, beneficiaries).Generate(demographics.Count + beneficiaries.Count);
+        Constants.FakeParticipantTotalVestingBalances = [.. participantTotalVestingBalances];
 
         List<FrozenState>? frozenStates = new FrozenStateFaker().Generate(1);
 

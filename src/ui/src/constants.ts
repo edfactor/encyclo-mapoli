@@ -12,7 +12,6 @@ export const MENU_LABELS = {
   INQUIRIES: "Inquiries",
   IT_OPERATIONS: "IT OPERATIONS",
   GO_TO_PROFIT_SHARE_REPORT: "View Profit Share Report (PAY426) Details",
-  GO_TO_PROFIT_SHARE_EDIT_RUN: "View Profit Share Report - Edit Run (PAY426N) Details",
   YEAR_END: "Year End"
 } as const;
 
@@ -48,6 +47,7 @@ export const ROUTES = {
 
   FROZEN_SUMMARY: "frozen-summary",
   MASTER_INQUIRY: "master-inquiry",
+  FORFEITURES_ADJUSTMENT: "forfeitures-adjustment",
 
   PAY426_ACTIVE_18_20: "pay426-1",
   PAY426_ACTIVE_21_PLUS: "pay426-2",
@@ -73,7 +73,8 @@ export const ROUTES = {
   QPAY066TA: "qpay066ta",
   NEW_PS_LABELS: "new-ps-labels",
   PROFALL: "profall",
-  DEMO_FREEZE: "demographic-freeze"
+  DEMO_FREEZE: "demographic-freeze",
+  DEV_DEBUG: "dev-debug"
 } as const;
 
 export const CAPTIONS = {
@@ -93,6 +94,7 @@ export const CAPTIONS = {
   EMPLOYEES_MILITARY: "Employees on Military Leave (QPAY511)",
   FORFEIT: "Forfeit (PAY443)",
   FORFEITURES_BY_AGE: "Get Forfeitures by Age (PROF130)",
+  FORFEITURES_ADJUSTMENT: "Forfeiture Adjustments (008-12)",
   MANAGE_EXECUTIVE_HOURS: "Manage Executive Hours and Dollars (TPR008-09)",
   MASTER_INQUIRY: "Master Inquiry",
   MILITARY_ENTRY_AND_MODIFICATION: "Military Entry and Modification",
@@ -128,7 +130,7 @@ export const CAPTIONS = {
   PROFIT_SHARE_TOTALS: "Profit Share Totals Report (PAY426)",
   PROFIT_SHARE_UPDATE: "Profit Share Updates (PAY444|PAY447)",
   PROFIT_SHARING_CONTROL_SHEET: "Profit Sharing Control Sheet",
-  PRINT_PROFIT_CERTS: "Print Profit Certs (PAYCERT)",
+  PRINT_PROFIT_CERTS:  "Print Profit Certs (PAYCERT)",
   QPAY066_UNDER21: "QPAY066-UNDR21",
   QPAY066TA_UNDER21: "QPAY066TA-UNDR21",
   QPAY066TA: "QPAY066TA",
@@ -138,7 +140,10 @@ export const CAPTIONS = {
   VESTED_AMOUNTS_BY_AGE: "Get Vested Amounts by Age (PROF130V)",
   YTD_WAGES_EXTRACT: "YTD Wages Extract (PROF-DOLLAR-EXTRACT)",
   BREAKDOWN_REPORT: "Breakdown Report (QPAY066TA)",
-  DEMOGRAPHIC_FREEZE: "Demographic Freeze"
+  DEMOGRAPHIC_FREEZE: "Demographic Freeze",
+  DEV_DEBUG: "Dev Debug"
 } as const;
 
 export const VIEW = "View";
+
+export const SMART_PS_QA_IMPERSONATION = "SMART-PS-QA-Impersonation";

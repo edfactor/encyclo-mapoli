@@ -5,6 +5,7 @@ import { useLazyGetNamesMissingCommasQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetMissingCommaInPyNameColumns } from "./MissingCommaInPyNameGridColumns";
+import { CAPTIONS } from "../../../constants";
 
 const MissingCommaInPyNameGrid: React.FC = () => {
   const [pageNumber, setPageNumber] = useState(0);
@@ -45,8 +46,8 @@ const MissingCommaInPyNameGrid: React.FC = () => {
             </Typography>
           </div>
           <DSMGrid
-            preferenceKey={"DUPE_SSNS"}
-            isLoading={false}
+            preferenceKey={CAPTIONS.MISSING_COMMA}
+            isLoading={isFetching}
             handleSortChanged={sortEventHandler}
             providedOptions={{
               rowData: missingCommaInPYName?.response.results,

@@ -1,4 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -16,38 +16,22 @@ internal static class BeneficiariesProcessingHelper
         // The BeginningBalance is the total balance from the previous year
         short profitYearPrior = (short)(profitShareUpdateRequest.ProfitYear - 1);
 
-        var benes = await dbContextFactory.UseReadOnlyContext(async ctx =>
+        var benes = await dbContextFactory.UseReadOnlyContext(ctx =>
         {
-            // Left Outer Joins are a challenge in EF
-            
-            // Do the base query to get the Bene's
-            var benes = await ctx.Beneficiaries
-                .Include(b => b.Contact)
-                .ThenInclude(c => c!.ContactInfo)
-                .OrderBy(b => b.Contact!.ContactInfo.FullName)
-                .ThenByDescending(b => (b.BadgeNumber * 10_000) + b.PsnSuffix)
-                .Select(b => new BeneficiaryFinancials
-                {
-                    Psn = b.Psn,
-                    Ssn = b.Contact!.Ssn,
-                    Name = b.Contact.ContactInfo.FullName,
-                    BeginningBalance = 0
-                })
-                .ToListAsync(cancellationToken);
+            // Get the Bene's
+            var benes = (from b in ctx.Beneficiaries.Include(b => b.Contact).ThenInclude(c => c!.ContactInfo)
+                         join balTbl in totalsService.GetTotalBalanceSet(ctx, profitYearPrior) on b.Contact!.Ssn equals balTbl.Ssn into balTmp
+                         from bal in balTmp.DefaultIfEmpty()
+                         orderby b.Contact!.ContactInfo.FullName
+                         select new BeneficiaryFinancials()
+                         {
+                             Psn = b.Psn,
+                             Ssn = b.Contact!.Ssn,
+                             Name = b.Contact.ContactInfo.FullName,
+                             BeginningBalance = (bal != null ? bal.Total : 0) ?? 0
+                         }).ToListAsync(cancellationToken);
 
-            // get the bene SSN's to restrain the Balances search
-            var beneSsns = benes.Select(b => b.Ssn).ToList();
-
-            // Go grab the Balances for these Benes (some may have no records last year, so this may not have an entry for them) 
-            var beneBalances = (await totalsService.GetTotalBalanceSet(ctx, profitYearPrior)
-                    .Where(ts => beneSsns.Contains(ts.Ssn!.Value))
-                    .ToListAsync(cancellationToken))
-                .ToDictionary(tbs => tbs.Ssn!.Value, tbs => tbs.Total ?? 0m);
-
-            // Merge the two results
-            return benes
-                .Select(b => b with { BeginningBalance = beneBalances.GetValueOrDefault(b.Ssn, 0m) })
-                .ToList();
+            return benes;
         });
 
 

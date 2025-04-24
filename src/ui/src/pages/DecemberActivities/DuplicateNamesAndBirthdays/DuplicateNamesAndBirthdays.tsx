@@ -1,9 +1,8 @@
 import { Divider } from "@mui/material";
-import Grid2 from '@mui/material/Grid2';
-import { DSMAccordion, Page } from "smart-ui-library";
-import DuplicateNamesAndBirthdaysSearchFilter from "./DuplicateNamesAndBirthdaysSearchFilter";
-import DuplicateNamesAndBirthdaysGrid from "./DuplicateNamesAndBirthdaysGrid";
+import Grid2 from "@mui/material/Grid2";
 import { useState } from "react";
+import { Page } from "smart-ui-library";
+import DuplicateNamesAndBirthdaysGrid from "./DuplicateNamesAndBirthdaysGrid";
 
 const DuplicateNamesAndBirthdays = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);

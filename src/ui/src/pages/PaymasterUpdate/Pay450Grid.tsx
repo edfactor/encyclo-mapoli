@@ -6,51 +6,12 @@ import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetPay450GridColumns } from "./Pay450GridColumns";
 import { YearsEndApi } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { UpdateSummaryResponse } from "reduxstore/types";
 
 interface Pay450GridProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
   profitYear: number;
 }
-
-// Sample data for demo purposes (to be removed when endpoint is fixed)
-const sampleData: UpdateSummaryResponse = {
-  "totalNumberOfEmployees": 0,
-  "totalNumberOfBeneficiaries": 1,
-  "totalBeforeProfitSharingAmount": 11500,
-  "totalBeforeVestedAmount": 6800,
-  "totalAfterProfitSharingAmount": 12500,
-  "totalAfterVestedAmount": 7400,
-  "reportName": "UPDATE SUMMARY FOR PROFIT SHARING",
-  "reportDate": "2025-03-31T08:08:35.9489273-04:00",
-  "response": {
-    "pageSize": 255,
-    "currentPage": 1,
-    "totalPages": 1,
-    "total": 1,
-    "results": [
-      {
-        "badgeNumber": 2002,
-        "storeNumber": 10,
-        "name": "Oscar Taylor",
-        "isEmployee": false,
-        "before": {
-          "profitSharingAmount": 100,
-          "vestedProfitSharingAmount": 80,
-          "yearsInPlan": 6,
-          "enrollmentId": 2
-        },
-        "after": {
-          "profitSharingAmount": 200,
-          "vestedProfitSharingAmount": 200,
-          "yearsInPlan": 7,
-          "enrollmentId": 2
-        }
-      }
-    ]
-  }
-};
 
 const Pay450Grid: React.FC<Pay450GridProps> = ({
   initialSearchLoaded,
@@ -65,18 +26,11 @@ const Pay450Grid: React.FC<Pay450GridProps> = ({
     isSortDescending: false
   });
   
-  const [demoData, setDemoData] = useState<UpdateSummaryResponse | null>(null);
-
   const { updateSummary } = useSelector((state: RootState) => state.yearsEnd);
-  const [triggerSearch, { isLoading }] = YearsEndApi.endpoints.getUpdateSummary.useLazyQuery();
-
-  useEffect(() => {
-    setDemoData(sampleData);
-  }, []);
+  const [triggerSearch, { isFetching }] = YearsEndApi.endpoints.getUpdateSummary.useLazyQuery();
 
   const onSearch = useCallback(async () => {
     try {
-
       await triggerSearch({
         profitYear,
         pagination: {
@@ -88,12 +42,8 @@ const Pay450Grid: React.FC<Pay450GridProps> = ({
       });
     } catch (error) {
       console.error("API call failed:", error);
-      // Ensure demo data is set even if the API call fails
-      if (!demoData) {
-        setDemoData(sampleData);
-      }
     }
-  }, [pageNumber, pageSize, sortParams, triggerSearch, profitYear, demoData]);
+  }, [pageNumber, pageSize, sortParams, triggerSearch, profitYear]);
 
   useEffect(() => {
     if (initialSearchLoaded && hasToken) {
@@ -113,25 +63,23 @@ const Pay450Grid: React.FC<Pay450GridProps> = ({
   
   const columnDefs = useMemo(() => GetPay450GridColumns(handleNavigationForButton), [handleNavigationForButton]);
 
-  const displayData = demoData || updateSummary;
-
   const getSummaryRow = useCallback(() => {
-    if (!displayData) return [];
+    if (!updateSummary) return [];
     
     return [
       {
-        psAmountOriginal: displayData.totalBeforeProfitSharingAmount,
-        psVestedOriginal: displayData.totalBeforeVestedAmount,
-        psAmountUpdated: displayData.totalAfterProfitSharingAmount,
-        psVestedUpdated: displayData.totalAfterVestedAmount
+        psAmountOriginal: updateSummary.totalBeforeProfitSharingAmount,
+        psVestedOriginal: updateSummary.totalBeforeVestedAmount,
+        psAmountUpdated: updateSummary.totalAfterProfitSharingAmount,
+        psVestedUpdated: updateSummary.totalAfterVestedAmount
       }
     ];
-  }, [displayData]);
+  }, [updateSummary]);
 
   const gridData = useMemo(() => {
-    if (!displayData?.response?.results) return [];
+    if (!updateSummary?.response?.results) return [];
     
-    return displayData.response.results.map(employee => ({
+    return updateSummary.response.results.map(employee => ({
       badge: employee.badgeNumber,
       employeeName: employee.name,
       store: employee.storeNumber,
@@ -144,22 +92,22 @@ const Pay450Grid: React.FC<Pay450GridProps> = ({
       yearsUpdated: employee.after.yearsInPlan,
       enrollUpdated: employee.after.enrollmentId
     }));
-  }, [displayData]);
+  }, [updateSummary]);
 
   return (
     <>
-      {displayData?.response && (
+      {updateSummary?.response && (
         <>
           <div style={{ padding: "0 24px 0 24px" }}>
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`UPDATE SUMMARY FOR PROFIT SHARING (${displayData.response.total || 0} records)`}
+              {`UPDATE SUMMARY FOR PROFIT SHARING (${updateSummary.response.total || 0} records)`}
             </Typography>
           </div>
           <DSMGrid
             preferenceKey={"ELIGIBLE_EMPLOYEES"}
-            isLoading={isLoading}
+            isLoading={isFetching}
             handleSortChanged={sortEventHandler}
             providedOptions={{
               rowData: gridData,
@@ -169,9 +117,9 @@ const Pay450Grid: React.FC<Pay450GridProps> = ({
           />
         </>
       )}
-      {!!displayData && displayData.response.results.length > 0 && (
+      {!!updateSummary && updateSummary.response.results.length > 0 && (
         <Pagination
-          pageNumber={pageNumber + 1}
+          pageNumber={pageNumber}
           setPageNumber={(value: number) => {
             setPageNumber(value - 1);
             setInitialSearchLoaded(true);
@@ -182,7 +130,7 @@ const Pay450Grid: React.FC<Pay450GridProps> = ({
             setPageNumber(0);
             setInitialSearchLoaded(true);
           }}
-          recordCount={displayData.response.total}
+          recordCount={updateSummary.response.total}
         />
       )}
     </>

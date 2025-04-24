@@ -9,6 +9,7 @@ import {
 } from "reduxstore/types";
 import { url } from "./api";
 import { setMilitaryContributions, setMilitaryError } from "reduxstore/slices/militarySlice";
+import { Paged } from "smart-ui-library";
 
 export const MilitaryApi = createApi({
   baseQuery: fetchBaseQuery({
@@ -32,7 +33,7 @@ export const MilitaryApi = createApi({
   }),
   reducerPath: "militaryApi",
   endpoints: (builder) => ({
-    getMilitaryContributions: builder.query<PagedReportResponse<MasterInquiryDetail>, MilitaryContributionRequest>({
+    getMilitaryContributions: builder.query<Paged<MasterInquiryDetail>, MilitaryContributionRequest>({
       query: (request) => ({
         url: `military`,
         method: "GET",

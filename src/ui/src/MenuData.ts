@@ -1,6 +1,7 @@
 import { RouteCategory } from "./types/MenuTypes";
 import { CAPTIONS, MENU_LABELS, ROUTES } from "./constants";
 import { ImpersonationRoles } from "./reduxstore/types";
+import EnvironmentUtils from "./utils/environmentUtils";
 
 
 const beneficiaries: RouteCategory = {
@@ -62,9 +63,11 @@ interface MenuLevel {
   topPage: {
     topTitle: string;
     topRoute?: string;
+    disabled?: boolean;
     subPages: {
       subTitle?: string;
       subRoute?: string;
+      disabled?: boolean;
     }[];
   }[];
 }
@@ -115,11 +118,6 @@ export const menuLevels: MenuLevel[] = [
     mainTitle: MENU_LABELS.FISCAL_CLOSE,
     topPage: [
       {
-        topTitle: CAPTIONS.SUMMARY,
-        topRoute: ROUTES.FISCAL_CLOSE,
-        subPages: []
-      },
-      {
         topTitle: CAPTIONS.MANAGE_EXECUTIVE_HOURS,
         topRoute: ROUTES.MANAGE_EXECUTIVE_HOURS,
         subPages: []
@@ -164,8 +162,18 @@ export const menuLevels: MenuLevel[] = [
         subPages: []
       },
       {
+        topTitle: CAPTIONS.FORFEITURES_ADJUSTMENT,
+        topRoute: ROUTES.FORFEITURES_ADJUSTMENT,
+        subPages: []
+      },
+      {
         topTitle: CAPTIONS.PROFIT_SHARE_UPDATE,
         topRoute: ROUTES.PROFIT_SHARE_UPDATE,
+        subPages: []
+      },
+      {
+        topTitle: CAPTIONS.PAY450_SUMMARY,
+        topRoute: ROUTES.PAY450_SUMMARY,
         subPages: []
       },
       {
@@ -190,15 +198,16 @@ export const menuLevels: MenuLevel[] = [
         subPages: [
           { subTitle: CAPTIONS.QPAY066_UNDER21, subRoute: ROUTES.QPAY066_UNDER21 },
           { subTitle: CAPTIONS.QPAY066TA_UNDER21, subRoute: ROUTES.QPAY066TA_UNDER21 },
-          { subTitle: CAPTIONS.QPAY066TA, subRoute: ROUTES.QPAY066TA },
+          { subTitle: CAPTIONS.QPAY066TA, subRoute: ROUTES.QPAY066TA, disabled: !EnvironmentUtils.isDevelopmentOrQA },
           { subTitle: CAPTIONS.PROFALL, subRoute: ROUTES.PROFALL },
-          { subTitle: CAPTIONS.NEW_PS_LABELS, subRoute: ROUTES.NEW_PS_LABELS },
-          { subTitle: CAPTIONS.PROFNEW, subRoute: ROUTES.PROFNEW }
+          { subTitle: CAPTIONS.NEW_PS_LABELS, subRoute: ROUTES.NEW_PS_LABELS, disabled: !EnvironmentUtils.isDevelopmentOrQA, },
+          { subTitle: CAPTIONS.PROFNEW, subRoute: ROUTES.PROFNEW, disabled: !EnvironmentUtils.isDevelopmentOrQA, }
         ]
-      },
+      },      
       {
         topTitle: CAPTIONS.PRINT_PROFIT_CERTS,
         topRoute: ROUTES.PRINT_PROFIT_CERTS,
+        disabled: !EnvironmentUtils.isDevelopmentOrQA,
         subPages: []
       }     
     ]

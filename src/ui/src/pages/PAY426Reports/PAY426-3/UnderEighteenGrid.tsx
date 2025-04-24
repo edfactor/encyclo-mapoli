@@ -1,45 +1,53 @@
 import { Typography } from "@mui/material";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Path, useNavigate } from "react-router";
 import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
-import { DSMGrid } from "smart-ui-library";
+import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetProfitSharingReportGridColumns } from "../PAY426-1/EighteenToTwentyGridColumns";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../reduxstore/store";
-import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import { CAPTIONS } from "../../../constants";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import pay426Utils from "../Pay427Utils";
 
 const UnderEighteenGrid = () => {
   const navigate = useNavigate();
-  const [trigger, { data, isLoading }] = useLazyGetYearEndProfitSharingReportQuery();
+  const [trigger, { data, isFetching }] = useLazyGetYearEndProfitSharingReportQuery();
 
+  const [pageNumber, setPageNumber] = useState(0);
+  const [pageSize, setPageSize] = useState(25);
+  const [sortParams, setSortParams] = useState<ISortParams>({
+    sortBy: "badgeNumber",
+    isSortDescending: false
+  });
   const hasToken = useSelector((state: RootState) => !!state.security.token);
-  const profitYear = useDecemberFlowProfitYear();
+  const profitYear = useFiscalCloseProfitYear();
+  const baseParams = {
+    isYearEnd: true,
+    maximumAgeInclusive: 17,
+    includeActiveEmployees: true,
+    includeInactiveEmployees: true,
+    includeEmployeesTerminatedThisYear: false,
+    includeTerminatedEmployees: false,
+    includeBeneficiaries: false,
+    includeEmployeesWithPriorProfitSharingAmounts: true,
+    includeEmployeesWithNoPriorProfitSharingAmounts: true,
+  };
 
   useEffect(() => {
     if (hasToken) {
       trigger({
-      isYearEnd: true,
-      minimumAgeInclusive: 0,
-      maximumAgeInclusive: 17,
-      minimumHoursInclusive: 0,
-      maximumHoursInclusive: 4000,
-      includeActiveEmployees: true,
-      includeInactiveEmployees: true,
-      includeEmployeesTerminatedThisYear: false,
-      includeTerminatedEmployees: false,
-      includeBeneficiaries: false,
-      includeEmployeesWithPriorProfitSharingAmounts: true,
-      includeEmployeesWithNoPriorProfitSharingAmounts: true,
-      profitYear: profitYear,
-      pagination: {
-        skip: 0,
-        take: 25,
-        sortBy: "badgeNumber",
-        isSortDescending: true
-      }
-    });
-  }
-}, [trigger, hasToken, profitYear]);
+        profitYear: profitYear,
+        pagination: {
+          skip: pageNumber * pageSize,
+          take: pageSize,
+          sortBy: sortParams.sortBy,
+          isSortDescending: sortParams.isSortDescending
+        },
+        ...baseParams
+      });
+    }
+  }, [trigger, hasToken, profitYear, pageNumber, pageSize, sortParams]);
 
   const handleNavigationForButton = useCallback(
     (destination: string | Partial<Path>) => {
@@ -47,6 +55,30 @@ const UnderEighteenGrid = () => {
     },
     [navigate]
   );
+
+  const sortEventHandler = (update: ISortParams) => {
+      const t = () => { 
+          trigger({
+            profitYear: profitYear,
+            pagination: {
+              skip: 0,
+              take: pageSize,
+              sortBy: update.sortBy,
+              isSortDescending: update.isSortDescending
+            },
+            ...baseParams
+          }
+        );
+      }
+  
+      pay426Utils.sortEventHandler(
+        update,
+        sortParams,
+        setSortParams,
+        setPageNumber,
+        t
+      );
+    }
 
   const columnDefs = useMemo(
     () => GetProfitSharingReportGridColumns(handleNavigationForButton),
@@ -59,18 +91,27 @@ const UnderEighteenGrid = () => {
         <Typography
           variant="h2"
           sx={{ color: "#0258A5" }}>
-          {`UNDER 18 REPORT (${data?.response?.results?.length || 0} records)`}
+          {`UNDER 18 REPORT (${data?.response?.total || 0} records)`}
         </Typography>
       </div>
       <DSMGrid
-        preferenceKey={"UNDER_EIGHTEEN_EMPLOYEES"}
-        isLoading={isLoading}
-        handleSortChanged={(_params) => {}}
+        preferenceKey={CAPTIONS.PAY426_ACTIVE_UNDER_18}
+        isLoading={isFetching}
+        handleSortChanged={sortEventHandler}
         providedOptions={{
           rowData: data?.response?.results || [],
           columnDefs: columnDefs
         }}
       />
+      {!!data && data.response.results.length > 0 && (
+        <Pagination
+          pageNumber={pageNumber}
+          setPageNumber={(value: number) => setPageNumber(value - 1)}
+          pageSize={pageSize}
+          setPageSize={setPageSize}
+          recordCount={data.response.total}
+        />
+      )}
     </>
   );
 };

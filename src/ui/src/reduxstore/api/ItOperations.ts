@@ -1,7 +1,13 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 import { RootState } from "reduxstore/store";
-import { FrozenStateResponse, SortedPaginationRequestDto, FreezeDemographicsRequest } from "reduxstore/types";
+import {
+  FrozenStateResponse,
+  SortedPaginationRequestDto,
+  FreezeDemographicsRequest,
+  RowCountResult,
+  CurrentUserResponseDto
+} from "reduxstore/types";
 import { setFrozenStateResponse, setFrozenStateCollectionResponse } from "reduxstore/slices/frozenSlice";
 import { url } from "./api";
 import { Paged } from "smart-ui-library";
@@ -65,19 +71,32 @@ export const ItOperations = createApi({
         }
       }
     }),
-    // New POST endpoint for freezing demographics
     freezeDemographics: builder.mutation<void, FreezeDemographicsRequest>({
       query: (request) => ({
         url: "itoperations/freeze",
         method: "POST",
         body: request
       })
-    })
+    }),
+    getMetadata: builder.query<RowCountResult[], void>({
+      query: () => ({
+        url: `itoperations/metadata`,
+        method: "GET"
+      })
+    }),
+    getCurrentUser: builder.query<CurrentUserResponseDto, void>({
+      query: () => ({
+        url: `common/current-user`,
+        method: "GET"
+      })
+    }),
   })
 });
 
 export const {
   useLazyGetFrozenStateResponseQuery,
   useLazyGetHistoricalFrozenStateResponseQuery,
-  useFreezeDemographicsMutation // Export the new mutation hook
+  useFreezeDemographicsMutation,
+  useLazyGetMetadataQuery,
+  useLazyGetCurrentUserQuery
 } = ItOperations;

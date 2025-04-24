@@ -36,7 +36,7 @@ export interface DemographicBadgesNotInPayprofitResponse {
 export interface DemographicBadgesNotInPayprofit {
   badgeNumber: number;
   ssn: number;
-  empoyeeName: string;
+  employeeName: string;
   store: number;
   status: string;
   statusName: string;
@@ -94,6 +94,7 @@ export interface DuplicateSSNDetail {
   terminationDate: string | null;
   rehireDate: string | null;
   status: string;
+  employmentStatusName: string;
   storeNumber: number;
   profitSharingRecords: number;
   hoursCurrentYear: number;
@@ -156,6 +157,7 @@ export interface DuplicateNameAndBirthday {
   netBalance: number;
   hoursCurrentYear: number;
   incomeCurrentYear: number;
+  employmentStatusName: string;
 }
 
 export interface NegativeEtvaForSSNsOnPayProfit {
@@ -435,6 +437,9 @@ export interface ForfeituresAndPoints {
   reportName: string;
   reportDate: string;
   useFrozenData: boolean;
+  totalEarningPoints: number;
+  totalForfeitPoints: number;
+  totalForfeitures: number;
   response: Paged<ForfeituresAndPointsDetail>;
 }
 
@@ -600,6 +605,21 @@ export interface ProfitShareUpdateRequest {
   pagination: SortedPaginationRequestDto;
 }
 
+export interface ProfitShareMasterApplyRequest {
+  profitYear: number;
+  contributionPercent: number;
+  earningsPercent: number;
+  incomingForfeitPercent: number;
+  secondaryEarningsPercent: number;
+  maxAllowedContributions: number;
+  badgeToAdjust: number;
+  adjustContributionAmount: number;
+  adjustEarningsAmount: number;
+  adjustIncomingForfeitAmount: number;
+  badgeToAdjust2: number;
+  adjustEarningsSecondaryAmount: number;
+}
+
 export interface ProfitShareUpdateDetail {
   isEmployee: boolean;
   badge: number;
@@ -652,7 +672,7 @@ export interface ProfitShareUpdateTotals {
   maxOverTotal: number;
   maxPointsTotal: number;
   totalEmployees: number;
-  totalBeneficiaries: number;
+  totalBeneficaries: number;
 }
 export interface ProfitShareAdjustmentSummary {
   badgeNumber?: number;
@@ -708,7 +728,7 @@ export interface GrossWagesReportResponse {
 }
 
 export interface ProfitShareEditResponse {
-  beginningBalance: number;
+  beginningBalanceTotal: number;
   contributionGrandTotal: number;
   incomingForfeitureGrandTotal: number;
   earningsGrandTotal: number;
@@ -725,21 +745,32 @@ export interface ProfitShareMasterResponse {
   etvasEffected?: number;
 }
 
-export interface ProfitShareEditUpdateQueryParams {
-  profitYear: Date;
+export interface ProfitMasterParams {
+  adjustContributionAmount?: number | null;
+  adjustEarningsAmount?: number | null;
+  adjustEarningsSecondaryAmount?: number | null;
+  adjustIncomingForfeitAmount?: number | null;
   contributionPercent?: number | null;
   earningsPercent?: number | null;
   incomingForfeitPercent?: number | null;
-  secondaryEarningsPercent?: number | null;
   maxAllowedContributions?: number | null;
-
+  secondaryEarningsPercent?: number | null;
+}
+export interface ProfitMasterStatus extends ProfitMasterParams {
+  badgeAdjusted?: number | null;
+  badgeAdjusted2?: number | null;
+  beneficiariesEffected?: number | null;
+  contributionPercent?: number | null;
+  earningsPercent?: number | null;
+  employeesEffected?: number | null;
+  etvasEffected?: number | null;
+  updatedBy?: string | null;
+  updatedTime: string;
+}
+export interface ProfitShareEditUpdateQueryParams extends ProfitMasterParams {
+  profitYear: Date;
   badgeToAdjust?: number | null;
-  adjustContributionAmount?: number | null;
-  adjustEarningsAmount?: number | null;
-  adjustIncomingForfeitAmount?: number | null;
-
   badgeToAdjust2?: number | null;
-  adjustEarningsSecondaryAmount?: number | null;
 }
 
 export interface YearEndProfitSharingReportResponse {
@@ -782,7 +813,9 @@ export interface ProfallData {
 
 export interface MilitaryContributionRequest extends ProfitYearRequest {
   badgeNumber: number;
-  pagination: PaginationParams;
+  contributionAmount: number;
+  contributionDate: string;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface YearEndProfitSharingReportRequest {
@@ -805,6 +838,7 @@ export interface YearEndProfitSharingReportRequest {
 export interface CreateMilitaryContributionRequest extends ProfitYearRequest {
   badgeNumber: number;
   contributionAmount: number;
+  contributionDate: Date;
 }
 
 export interface MilitaryContribution {
@@ -946,6 +980,25 @@ export interface Under21TotalsResponse {
   totalVestingBalance: number;
 }
 
+export interface ProfitSharingLabelsRequest extends ProfitYearRequest {
+  pagination: SortedPaginationRequestDto;
+}
+
+export interface ProfitSharingLabel {
+  storeNumber: number;
+  payClassificationId: number;
+  payClassificationName: string;
+  departmentId: number;
+  departmentName: string;
+  badgeNumber: number;
+  employeeName: string;
+  firstName: string;
+  address1: string;
+  city: string;
+  state: string;
+  postalCode: string;
+}
+
 export interface YearEndProfitSharingReportSummaryLineItem {
   subgroup: string;
   lineItemPrefix: string;
@@ -999,3 +1052,50 @@ export interface UpdateSummaryResponse {
     results: UpdateSummaryEmployee[];
   };
 }
+
+export interface ForfeitureAdjustmentRequest {
+  ssn?: string;
+  badge?: string;
+  profitYear: number;
+  skip?: number;
+  take?: number;
+  sortBy?: string;
+  isSortDescending?: boolean;
+}
+
+export interface ForfeitureAdjustmentDetail {
+  clientNumber: number;
+  badgeNumber: number;
+  startingBalance: number;
+  forfeitureAmount: number;
+  netBalance: number;
+  netVested: number;
+}
+
+export interface ForfeitureAdjustmentResponse {
+  totatNetBalance: number;
+  totatNetVested: number;
+  reportName: string;
+  reportDate: string;
+  response: {
+    pageSize: number | null;
+    currentPage: number | null;
+    totalPages: number | null;
+    total: number;
+    results: ForfeitureAdjustmentDetail[];
+  };
+}
+export interface RowCountResult {
+  tableName: string;
+  rowCount: number;
+}
+
+export interface CurrentUserResponseDto {
+  userName?: string;
+  email?: string;
+  storeId?: number;
+  isHQUser: boolean;
+  claims: string[];
+  permissions: string[];
+}
+

@@ -9,19 +9,38 @@ import * as yup from "yup";
 
 import SearchAndReset from "components/SearchAndReset/SearchAndReset";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-import { useState } from "react";
 import {
   addBadgeNumberToUpdateAdjustmentSummary,
   clearProfitSharingEdit,
   clearProfitSharingEditQueryParams,
   clearProfitSharingUpdate,
   clearProfitSharingUpdateQueryParams,
+  setProfitEditUpdateChangesAvailable,
   setProfitSharingEditQueryParams,
-  setProfitSharingUpdateQueryParams
+  setProfitSharingUpdateQueryParams,
+  setResetYearEndPage,
+  setTotalForfeituresGreaterThanZero
 } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
-import { ProfitShareEditUpdateQueryParams, ProfitShareUpdateRequest } from "reduxstore/types";
-import { ISortParams } from "smart-ui-library";
+import { ProfitShareUpdateRequest } from "reduxstore/types";
+import { useEffect } from "react";
+
+const maxContributionsDefault: number = 76000;
+
+interface ProfitShareEditUpdateSearch {
+  profitYear: Date;
+  contributionPercent?: number | null | undefined;
+  earningsPercent?: number | null | undefined;
+  secondaryEarningsPercent?: number | null | undefined;
+  incomingForfeitPercent?: number | null | undefined;
+  maxAllowedContributions: number | null | undefined;
+  badgeToAdjust?: number | null | undefined;
+  adjustContributionAmount?: number | null | undefined;
+  adjustEarningsAmount?: number | null | undefined;
+  adjustIncomingForfeitAmount?: number | null | undefined;
+  badgeToAdjust2?: number | null | undefined;
+  adjustEarningsSecondaryAmount?: number | null | undefined;
+}
 
 const schema = yup.object().shape({
   profitYear: yup
@@ -34,37 +53,58 @@ const schema = yup.object().shape({
     .number()
     .typeError("Contribution must be a number")
     .min(0, "Contribution must be positive")
-    .nullable(),
-  earningsPercent: yup.number().typeError("Earnings must be a number").min(0, "Earnings must be positive").nullable(),
+    .nullable()
+    .optional(),
+  earningsPercent: yup
+    .number()
+    .typeError("Earnings must be a number")
+    .min(0, "Earnings must be positive")
+    .nullable()
+    .optional(),
   secondaryEarningsPercent: yup
     .number()
     .typeError("Secondary Earnings must be a number")
     .min(0, "Secondary Earnings must be positive")
-    .nullable(),
+    .nullable()
+    .optional(),
   incomingForfeitPercent: yup
     .number()
     .typeError("Incoming Forfeiture must be a number")
     .min(0, "Forfeiture must be positive")
-    .nullable(),
+    .nullable()
+    .optional(),
   maxAllowedContributions: yup
     .number()
+    .default(maxContributionsDefault)
     .typeError("Max Allowed Contributions must be a number")
     .min(0, "Max Allowed Contributions must be positive")
-    .nullable(),
-  badgeToAdjust: yup.number().typeError("Badge must be a number").integer("Badge must be an integer").nullable(),
+    .required("Max Contributions is required"),
+  badgeToAdjust: yup
+    .number()
+    .typeError("Badge must be a number")
+    .integer("Badge must be an integer")
+    .nullable()
+    .optional(),
   adjustContributionAmount: yup
     .number()
     .typeError("Contribution must be a number")
     .min(0, "Contribution must be positive")
-    .nullable(),
-  adjustEarningsAmount: yup.number().typeError("Earnings must be a number").nullable(),
-  adjustIncomingForfeitureAmount: yup
+    .nullable()
+    .optional(),
+  adjustEarningsAmount: yup.number().typeError("Earnings must be a number").nullable().optional(),
+  adjustIncomingForfeitAmount: yup
     .number()
     .typeError("Adjusted Incoming Forfeiture must be a number")
     .min(0, "Adjusted Incoming Forfeiture must be positive")
-    .nullable(),
-  badgeToAdjust2: yup.number().typeError("Badge must be a number").integer("Badge must be an integer").nullable(),
-  adjustEarningsSecondaryAmount: yup.number().typeError("Earnings must be a number").nullable()
+    .nullable()
+    .optional(),
+  badgeToAdjust2: yup
+    .number()
+    .typeError("Badge must be a number")
+    .integer("Badge must be an integer")
+    .nullable()
+    .optional(),
+  adjustEarningsSecondaryAmount: yup.number().typeError("Earnings must be a number").nullable().optional()
 });
 
 interface ProfitShareEditUpdateSearchFilterProps {
@@ -76,12 +116,8 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
 }) => {
   const [triggerSearchUpdate, { isFetching: isFetchingUpdate }] = useLazyGetProfitShareUpdateQuery();
   const [triggerSearchEdit, { isFetching: isFetchingEdit }] = useLazyGetProfitShareEditQuery();
-  const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "name",
-    isSortDescending: false
-  });
 
-  const { profitSharingUpdateAdjustmentSummary, profitSharingUpdate, profitSharingEdit } = useSelector(
+  const { profitSharingUpdate, profitSharingEdit, resetYearEndPage } = useSelector(
     (state: RootState) => state.yearsEnd
   );
 
@@ -90,16 +126,18 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
 
   const fiscalCloseProfitYearAsDate = new Date(fiscalCloseProfitYear, 0, 1);
 
-  if (fiscalCloseProfitYear && !profitSharingUpdate && !profitSharingEdit) {
-    setInitialSearchLoaded(true);
-  }
+  useEffect(() => {
+    if (fiscalCloseProfitYear && !profitSharingUpdate && !profitSharingEdit) {
+      setInitialSearchLoaded(true);
+    }
+  }, [fiscalCloseProfitYear, profitSharingUpdate, profitSharingEdit]);
 
   const {
     control,
     handleSubmit,
     formState: { errors, isValid },
     reset
-  } = useForm<ProfitShareEditUpdateQueryParams>({
+  } = useForm<ProfitShareEditUpdateSearch>({
     resolver: yupResolver(schema),
     defaultValues: {
       profitYear: fiscalCloseProfitYearAsDate,
@@ -107,7 +145,7 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
       earningsPercent: null,
       incomingForfeitPercent: null,
       secondaryEarningsPercent: null,
-      maxAllowedContributions: null,
+      maxAllowedContributions: maxContributionsDefault,
 
       badgeToAdjust: null,
       adjustContributionAmount: null,
@@ -119,7 +157,7 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
     }
   });
 
-  const validateAndSearch = handleSubmit((data: ProfitShareEditUpdateQueryParams, event?: React.BaseSyntheticEvent) => {
+  const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
       const updateParams: ProfitShareUpdateRequest = {
         pagination: {
@@ -133,7 +171,7 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
         earningsPercent: data.earningsPercent ?? 0,
         incomingForfeitPercent: data.incomingForfeitPercent ?? 0,
         secondaryEarningsPercent: data.secondaryEarningsPercent ?? 0,
-        maxAllowedContributions: data.maxAllowedContributions ?? 0,
+        maxAllowedContributions: data.maxAllowedContributions ?? maxContributionsDefault,
         badgeToAdjust: data.badgeToAdjust ?? 0,
         adjustContributionAmount: data.adjustContributionAmount ?? 0,
         adjustEarningsAmount: data.adjustEarningsAmount ?? 0,
@@ -143,9 +181,19 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
       };
 
       // First we have to do the update calls
-      triggerSearchUpdate(updateParams, false).unwrap();
-      dispatch(setProfitSharingUpdateQueryParams(data));
-      //console.log("Successfully did the update");
+      triggerSearchUpdate(updateParams, false)
+        .unwrap()
+        .then((response) => {
+          if (response.totals.maxOverTotal > 0) {
+            dispatch(setTotalForfeituresGreaterThanZero(true));
+          } else {
+            dispatch(setTotalForfeituresGreaterThanZero(false));
+          }
+        });
+
+      dispatch(setProfitSharingUpdateQueryParams({ ...data, profitYear: fiscalCloseProfitYearAsDate }));
+
+      dispatch(setProfitEditUpdateChangesAvailable(true));
 
       // Now if we have a badgeToAdjust, we want to save the
       // adjustment summary so that panel shows up
@@ -155,10 +203,17 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
 
       // Now we have to do the edit calls
       triggerSearchEdit(updateParams, false).unwrap();
-      dispatch(setProfitSharingEditQueryParams(data));
-      //console.log("Successfully did the edit");
+      dispatch(setProfitSharingEditQueryParams({ ...data, profitYear: fiscalCloseProfitYearAsDate }));
     }
   });
+
+  // I would like handleReset() to be called whenever resetYearEndPage is true
+
+  useEffect(() => {
+    if (resetYearEndPage) {
+      handleReset();
+    }
+  }, [resetYearEndPage]);
 
   const handleReset = () => {
     // We need to clear both grids and then both sets of query params
@@ -167,6 +222,9 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
     dispatch(clearProfitSharingEditQueryParams());
     dispatch(clearProfitSharingUpdateQueryParams());
     setInitialSearchLoaded(false);
+    dispatch(setProfitEditUpdateChangesAvailable(false));
+    dispatch(setResetYearEndPage(false));
+    dispatch(setTotalForfeituresGreaterThanZero(false));
 
     reset({
       profitYear: fiscalCloseProfitYearAsDate,
@@ -174,7 +232,7 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
       earningsPercent: null,
       incomingForfeitPercent: null,
       secondaryEarningsPercent: null,
-      maxAllowedContributions: null,
+      maxAllowedContributions: maxContributionsDefault,
 
       badgeToAdjust: null,
       adjustContributionAmount: null,

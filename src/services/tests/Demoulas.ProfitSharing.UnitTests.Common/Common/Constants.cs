@@ -1,7 +1,8 @@
 ﻿using System.Text.Json;
+using Demoulas.ProfitSharing.Data.Entities;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Common;
-internal static class Constants
+public static class Constants
 {
     public static class Http
     {
@@ -14,6 +15,9 @@ internal static class Constants
     {
         internal const string ReportNotFound = "Report not found";
     }
+
+    public static List<ParticipantTotal> FakeParticipantTotals { get; set; } = new List<ParticipantTotal>();
+    public static List<ParticipantTotalVestingBalance> FakeParticipantTotalVestingBalances { get; set; } = new List<ParticipantTotalVestingBalance>();
 
     internal static JsonSerializerOptions GetJsonSerializerOptions()
     {

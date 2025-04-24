@@ -1,91 +1,54 @@
-import { Typography } from "@mui/material";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useSelector } from "react-redux";
-import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
-import { RootState } from "reduxstore/store";
-import { YearEndProfitSharingReportRequest } from "reduxstore/types";
+import { useMemo } from "react";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetProfitShareReportColumns } from "./ProfitShareReportGridColumn";
-import { CAPTIONS } from "../../constants";
 
-interface ProfitShareReportGridSearchProps {
-  initialSearchLoaded: boolean;
-  setInitialSearchLoaded: (loaded: boolean) => void;
+interface ProfitShareReportGridProps {
+  data: any[];
+  isLoading: boolean;
+  pageNumber: number;
+  pageSize: number;
+  sortParams: ISortParams;
+  recordCount: number;
+  onPageChange: (value: number) => void;
+  onPageSizeChange: (value: number) => void;
+  onSortChange: (update: ISortParams) => void;
 }
 
-const ProfitShareReportGrid: React.FC<ProfitShareReportGridSearchProps> = ({
-  initialSearchLoaded,
-  setInitialSearchLoaded
+const ProfitShareReportGrid: React.FC<ProfitShareReportGridProps> = ({
+  data,
+  isLoading,
+  pageNumber,
+  pageSize,
+  sortParams,
+  recordCount,
+  onPageChange,
+  onPageSizeChange,
+  onSortChange
 }) => {
-  const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
-  const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "badgeNumber",
-    isSortDescending: false
-  });
-
-  const { yearEndProfitSharingReport, yearEndProfitSharingReportQueryParams } = useSelector(
-    (state: RootState) => state.yearsEnd
-  );
-
-  const [triggerSearch, { isLoading }] = useLazyGetYearEndProfitSharingReportQuery();
-
-  const sortEventHandler = (update: ISortParams) => setSortParams(update);
   const columnDefs = useMemo(() => GetProfitShareReportColumns(), []);
-
-  const onSearch = useCallback(async () => {
-    const request: YearEndProfitSharingReportRequest = {
-      isYearEnd: false,
-      minimumAgeInclusive: 18,
-      maximumAgeInclusive: 98,
-      minimumHoursInclusive: 1000,
-      maximumHoursInclusive: 2000,
-      includeActiveEmployees: true,
-      includeInactiveEmployees: true,
-      includeEmployeesWithPriorProfitSharingAmounts: true,
-      includeEmployeesWithNoPriorProfitSharingAmounts: true,
-      profitYear: yearEndProfitSharingReportQueryParams?.profitYear ?? 0,
-      pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: sortParams.sortBy, isSortDescending: sortParams.isSortDescending },
-      includeEmployeesTerminatedThisYear: false,
-      includeTerminatedEmployees: false,
-      includeBeneficiaries: false
-    };
-
-    await triggerSearch(request, false);
-  }, [pageNumber, pageSize, triggerSearch, sortParams, sortEventHandler, yearEndProfitSharingReportQueryParams?.profitYear]);
-
-  useEffect(() => {
-    if (initialSearchLoaded) {
-      onSearch();
-    }
-  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch]);
 
   return (
     <>
-      {!!yearEndProfitSharingReport && (
-        <DSMGrid
-          preferenceKey={"ProfitShareReportGrid"}
-          isLoading={isLoading}
-          providedOptions={{
-            rowData: yearEndProfitSharingReport?.response.results,
-            columnDefs: columnDefs
-          }}
-        />
-      )}
-      {!!yearEndProfitSharingReport && yearEndProfitSharingReport.response.results.length > 0 && (
+      <DSMGrid
+        preferenceKey={"ProfitShareReportGrid"}
+        isLoading={isLoading}
+        handleSortChanged={onSortChange}
+        providedOptions={{
+          rowData: data,
+          columnDefs: columnDefs
+        }}
+      />
+      {data.length > 0 && (
         <Pagination
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
-            setPageNumber(value - 1);
-            setInitialSearchLoaded(true);
+            onPageChange(value);
           }}
           pageSize={pageSize}
           setPageSize={(value: number) => {
-            setPageSize(value);
-            setPageNumber(1);
-            setInitialSearchLoaded(true);
+            onPageSizeChange(value);
           }}
-          recordCount={yearEndProfitSharingReport.response.total}
+          recordCount={recordCount}
         />
       )}
     </>

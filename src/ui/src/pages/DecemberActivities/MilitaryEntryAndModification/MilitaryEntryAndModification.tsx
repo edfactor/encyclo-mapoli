@@ -1,65 +1,60 @@
-import { Button, Divider } from "@mui/material";
+import { Dialog, DialogContent, DialogTitle, Divider } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
-import { DSMAccordion, Page } from "smart-ui-library";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { useCallback, useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import { RootState } from "reduxstore/store";
-import MilitaryAndRehireEntryAndModificationEmployeeDetails from "./MilitaryEntryAndModificationEmployeeDetails";
-import {
-  useCreateMilitaryContributionMutation,
-  useLazyGetMilitaryContributionsQuery
-} from "reduxstore/api/MilitaryApi";
-import MilitaryAndRehireEntryAndModificationSearchFilter from "./MilitaryEntryAndModificationSearchFilter";
+import { DSMAccordion, ISortParams, Page } from "smart-ui-library";
+import { CAPTIONS } from "../../../constants";
 import MilitaryContributionForm from "./MilitaryContributionForm";
-import { MilitaryContribution } from "reduxstore/types";
-import { CAPTIONS, MENU_LABELS } from "../../../constants";
-import StatusDropdown from "components/StatusDropdown";
-import { useNavigate } from "react-router";
+import MilitaryContributionGrid from "./MilitaryContributionFormGrid";
+import { RootState } from "reduxstore/store";
+import { useLazyGetMilitaryContributionsQuery} from "../../../reduxstore/api/MilitaryApi";
+import { useSelector } from "react-redux";
+import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import MilitaryEntryAndModificationSearchFilter from "./MilitaryEntryAndModificationSearchFilter";
 
 const MilitaryEntryAndModification = () => {
-  const [showContributions, setShowContributions] = useState(false);
+  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [showContributions, setShowContributions] = useState(false);  
   const { masterInquiryEmployeeDetails } = useSelector((state: RootState) => state.inquiry);
   const [fetchContributions, { isFetching }] = useLazyGetMilitaryContributionsQuery();
-  const [trigger] = useCreateMilitaryContributionMutation();
-  const navigate = useNavigate();
-
+  const profitYear = useDecemberFlowProfitYear();
+  
   const renderActionNode = () => {
-    return (
-      <div className="flex items-center gap-2 h-10">
-        <StatusDropdown onStatusChange={() => {}} />       
-      </div>
-    );
+    return <StatusDropdownActionNode />;
+  };
+
+  const handleOpenForm = () => {
+    setIsDialogOpen(true);
+  };
+
+  const handleCloseForm = () => {
+    setIsDialogOpen(false);
+    handleFetchContributions();
+    setInitialSearchLoaded(true); // This will trigger the grid to refresh
   };
 
   const handleFetchContributions = useCallback(() => {
     if (masterInquiryEmployeeDetails) {
       fetchContributions({
         badgeNumber: Number(masterInquiryEmployeeDetails.badgeNumber),
-        profitYear: 2024,
-        pagination: { skip: 0, take: 25 }
-      });
+        profitYear: profitYear,
+        contributionAmount: 0,
+        contributionDate: "",
+        pagination: {
+          skip: 0,
+          take: 25,
+          sortBy: "contributionDate",
+          isSortDescending: false}});
       setShowContributions(true);
     }
-  }, [masterInquiryEmployeeDetails, fetchContributions]);
+  }, [fetchContributions, masterInquiryEmployeeDetails, profitYear]);
 
   useEffect(() => {
     if (masterInquiryEmployeeDetails) {
       handleFetchContributions();
     }
   }, [handleFetchContributions, masterInquiryEmployeeDetails]);
-
-  const handleSubmitForRows = (rows: MilitaryContribution[]) => {
-    if (!masterInquiryEmployeeDetails) return;
-    rows.forEach((row) => {
-      if (row.contributionAmount !== null) {
-        trigger({
-          badgeNumber: Number(masterInquiryEmployeeDetails.badgeNumber),
-          profitYear: 2024,
-          contributionAmount: row.contributionAmount
-        });
-      }
-    });
-  };
 
   return (
     <Page
@@ -73,33 +68,39 @@ const MilitaryEntryAndModification = () => {
         </Grid2>
         <Grid2 width={"100%"}>
           <DSMAccordion title="Filter">
-            <MilitaryAndRehireEntryAndModificationSearchFilter />
+            <MilitaryEntryAndModificationSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
           </DSMAccordion>
         </Grid2>
 
-        {masterInquiryEmployeeDetails && (
-          <>
-            <Grid2 width="100%">
-              <MilitaryAndRehireEntryAndModificationEmployeeDetails details={masterInquiryEmployeeDetails} />
-            </Grid2>
-
-            {showContributions && (
-              <Grid2
-                size={{ xs: 6 }}
-                paddingX="24px">
-                <MilitaryContributionForm
-                  onSubmit={handleSubmitForRows}
-                  onCancel={function (): void {
-                    throw new Error("Function not implemented.");
-                  }}
-                />
-              </Grid2>
-            )}
-          </>
-        )}
+        <Grid2 width="100%">
+          <MilitaryContributionGrid
+            setInitialSearchLoaded={setInitialSearchLoaded}
+            initialSearchLoaded={initialSearchLoaded}
+            onAddContribution={handleOpenForm}
+          />
+        </Grid2>
       </Grid2>
-    </Page>
-  );
-};
 
+        {/* Military Contribution Form Dialog */}
+        <Dialog
+          open={isDialogOpen}
+          onClose={handleCloseForm}
+          maxWidth="md"
+          fullWidth
+        >
+          <DialogTitle>Add Military Contribution</DialogTitle>
+          <DialogContent>
+            <MilitaryContributionForm
+              onSubmit={(rows) => {
+                handleCloseForm();         
+              }}
+              onCancel={handleCloseForm}
+              badgeNumber={Number(masterInquiryEmployeeDetails?.badgeNumber)}
+              profitYear={profitYear}
+            />
+          </DialogContent>
+        </Dialog>
+      </Page>
+    );
+  };
 export default MilitaryEntryAndModification;

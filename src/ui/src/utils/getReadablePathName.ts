@@ -26,6 +26,7 @@ const pathToReadableName: Record<string, string> = {
   "military-entry-and-modification": "Military Contributions",
   "profit-share-report": "Profit Share Report",
   forfeit: "Forfeit",
+  "forfeitures-adjustment": "Forfeiture Adjustments",
   "fiscal-close": "Year End Flow",
   "profit-share-update": "Profit Share Update (PAY444 PAY447)",
   "employees-on-military-leave": "Military Leave",
@@ -57,7 +58,8 @@ const pathToReadableName: Record<string, string> = {
   demographic: "Demographic Freeze",
   "ytd-wages-extract": "YTD Wages Extract",
   profall: "Profall",
-  "pay426-final-run": "Pay 426 Final Run"
+  "pay426-final-run": "Pay 426 Final Run",
+  "dev-debug": "Dev Debug"
 };
 
 export const getReadablePathName = (path: string): string => {

@@ -1,0 +1,24 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Demoulas.ProfitSharing.Common.Interfaces;
+
+namespace Demoulas.ProfitSharing.Data.Entities.Navigations;
+public class NavigationRole:ILookupTable<byte>
+{
+    public static class Contants
+    {
+        public const byte Administrator = 1;
+        public const byte FinanceManager = 2;
+        public const byte DistributionClerk = 3;
+        public const byte HardshipAdministrator = 4;
+        public const byte Impersonation = 5;
+        public const byte ITOperations = 6;
+    }
+
+    public byte Id { get; set; }
+    public required string Name { get; set; }
+}

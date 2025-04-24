@@ -3,9 +3,11 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetDistributionsAndForfeituresQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { DSMGrid, ISortParams, numberToCurrency, Pagination } from "smart-ui-library";
 import { GetDistributionsAndForfeituresColumns } from "./DistributionAndForfeituresGridColumns";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
+import { CAPTIONS } from "../../../constants";
+import { TotalsGrid } from "../../../components/TotalsGrid/TotalsGrid";
 
 interface DistributionsAndForfeituresGridSearchProps {
   initialSearchLoaded: boolean;
@@ -19,10 +21,11 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "badgeNumber",
+    sortBy: "employeeName",
     isSortDescending: false
   });
 
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const { distributionsAndForfeitures, distributionsAndForfeituresQueryParams } = useSelector(
     (state: RootState) => state.yearsEnd
   );
@@ -55,10 +58,10 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
   ]);
 
   useEffect(() => {
-    if (initialSearchLoaded) {
+    if (hasToken && (initialSearchLoaded || sortParams)) {
       onSearch();
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch]);
+  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch, hasToken, setInitialSearchLoaded]);
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
   const columnDefs = useMemo(() => GetDistributionsAndForfeituresColumns(), []);
@@ -67,6 +70,26 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
     <>
       {distributionsAndForfeitures?.response && (
         <>
+
+          <div className="flex sticky top-0 z-10 bg-white">
+            <TotalsGrid
+              displayData={[[numberToCurrency(distributionsAndForfeitures.distributionTotal || 0)]]}
+              leftColumnHeaders={["Distributions"]}
+              topRowHeaders={[]}></TotalsGrid>
+            <TotalsGrid
+              displayData={[[numberToCurrency(distributionsAndForfeitures.stateTaxTotal || 0)]]}
+              leftColumnHeaders={["StateTaxs"]}
+              topRowHeaders={[]}></TotalsGrid>
+            <TotalsGrid
+              displayData={[[numberToCurrency(distributionsAndForfeitures.federalTaxTotal || 0)]]}
+              leftColumnHeaders={["FederalTaxs"]}
+              topRowHeaders={[]}></TotalsGrid>
+            <TotalsGrid
+              displayData={[[numberToCurrency(distributionsAndForfeitures.forfeitureTotal || 0)]]}
+              leftColumnHeaders={["Forfeitures"]}
+              topRowHeaders={[]}></TotalsGrid>
+          </div>
+          
           <div style={{ padding: "0 24px 0 24px" }}>
             <Typography
               variant="h2"
@@ -75,12 +98,13 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
             </Typography>
           </div>
           <DSMGrid
-            preferenceKey={"DUPE_SSNS"}
-            isLoading={false}
+            preferenceKey={CAPTIONS.DISTRIBUTIONS_AND_FORFEITURES}
+            isLoading={isFetching}
             handleSortChanged={sortEventHandler}
             providedOptions={{
               rowData: distributionsAndForfeitures?.response.results,
-              columnDefs: columnDefs
+              columnDefs: columnDefs,
+              suppressMultiSort: true
             }}
           />
         </>

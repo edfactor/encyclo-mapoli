@@ -5,6 +5,7 @@ import { useLazyGetEmployeesOnMilitaryLeaveQuery } from "reduxstore/api/YearsEnd
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetMilitaryAndRehireColumns } from "./EmployeesOnMilitaryLeaveGridColumns";
+import { CAPTIONS } from "../../../constants";
 
 const EmployeesOnMilitaryLeaveGrid: React.FC = () => {
   const [pageNumber, setPageNumber] = useState(0);
@@ -49,8 +50,8 @@ const EmployeesOnMilitaryLeaveGrid: React.FC = () => {
             </Typography>
           </div>
           <DSMGrid
-            preferenceKey={"DUPE_SSNS"}
-            isLoading={false}
+            preferenceKey={CAPTIONS.EMPLOYEES_MILITARY}
+            isLoading={isFetching}
             handleSortChanged={sortEventHandler}
             providedOptions={{
               rowData: employeesOnMilitaryLeave?.response.results,

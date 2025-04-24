@@ -1,11 +1,11 @@
 import { Typography } from "@mui/material";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
+import { useLazyGetProfitShareEditQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
+import { ProfitShareUpdateRequest } from "reduxstore/types";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { ProfitShareEditUpdateGridColumns } from "./ProfitShareEditGridColumns";
-import { useLazyGetProfitShareUpdateQuery } from "reduxstore/api/YearsEndApi";
-import { ProfitShareUpdateRequest } from "reduxstore/types";
 
 interface ProfitShareEditGridProps {
   initialSearchLoaded: boolean;
@@ -23,7 +23,7 @@ const ProfitShareEditGrid = ({ initialSearchLoaded, setInitialSearchLoaded }: Pr
 
   const editColumnDefs = useMemo(() => ProfitShareEditUpdateGridColumns(), []);
   const { profitSharingEdit, profitSharingEditQueryParams } = useSelector((state: RootState) => state.yearsEnd);
-  const [triggerSearchUpdate, { isFetching }] = useLazyGetProfitShareUpdateQuery();
+  const [triggerSearchUpdate, { isFetching }] = useLazyGetProfitShareEditQuery();
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
@@ -64,14 +64,14 @@ const ProfitShareEditGrid = ({ initialSearchLoaded, setInitialSearchLoaded }: Pr
         <Typography
           variant="h2"
           sx={{ color: "#0258A5" }}>
-          {`Profit Share Edit (PAY444)`}
+          {`Profit Share Edit (PAY447)`}
         </Typography>
       </div>
       {!!profitSharingEdit && (
         <>
           <DSMGrid
             preferenceKey={"ProfitShareEditGrid"}
-            isLoading={false}
+            isLoading={isFetching}
             handleSortChanged={sortEventHandler}
             providedOptions={{
               rowData: "response" in profitSharingEdit ? profitSharingEdit.response?.results : [],

@@ -9,8 +9,8 @@ export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
       field: "badgeNumber",
       colId: "badgeNumber",
       minWidth: 80,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      headerClass: "left-align",
+      cellClass: "left-align",
       resizable: true,
       sort: "asc",
       cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber)
@@ -75,15 +75,6 @@ export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
       resizable: true
     },
     {
-      headerName: "Years",
-      field: "years",
-      colId: "years",
-      minWidth: 60,
-      headerClass: "right-align",
-      cellClass: "right-align",
-      resizable: true
-    },
-    {
       headerName: "Hire",
       field: "hireDate",
       colId: "hireDate",
@@ -92,6 +83,25 @@ export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
       cellClass: "left-align",
       resizable: true,
       valueFormatter: (params) => (params.value ? yyyyMMDDToMMDDYYYY(params.value) : "")
+    },
+    {
+      headerName: "Termination",
+      field: "terminationDate",
+      colId: "terminationDate",
+      minWidth: 100,
+      headerClass: "left-align",
+      cellClass: "left-align",
+      resizable: true,
+      valueFormatter: (params) => (params.value ? yyyyMMDDToMMDDYYYY(params.value) : "")
+    },
+    {
+      headerName: "Years",
+      field: "years",
+      colId: "years",
+      minWidth: 60,
+      headerClass: "right-align",
+      cellClass: "right-align",
+      resizable: true
     },
     {
       headerName: "Store #",
@@ -130,6 +140,21 @@ export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
       cellClass: "right-align",
       resizable: true,
       valueFormatter: agGridNumberToCurrency
+    },
+    {
+      headerName: "Employment Status",
+      field: "employmentStatusName",
+      colId: "employmentStatusName",
+      minWidth: 60,
+      headerClass: "left-align",
+      cellClass: "left-align",
+      resizable: true,
+      valueFormatter: (params) => {
+        const id = params.data.status; // assuming 'status' is in the row data
+        const name = params.data.employmentStatusName; // assuming 'statusName' is in the row data
+        //see if one is undefined or null then show other
+        return `[${id}] ${name}`;
+      }
     }
   ];
 };

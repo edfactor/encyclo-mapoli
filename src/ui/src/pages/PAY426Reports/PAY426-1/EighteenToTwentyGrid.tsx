@@ -1,46 +1,57 @@
 import { Typography } from "@mui/material";
-import { useCallback, useEffect, useMemo } from "react";
-import { DSMGrid } from "smart-ui-library";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetProfitSharingReportGridColumns } from "./EighteenToTwentyGridColumns";
 import { useNavigate, Path } from "react-router";
 import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
 import { CAPTIONS } from "../../../constants";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../reduxstore/store";
-import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import pay426Utils from "../Pay427Utils";
+import { set } from "date-fns";
 
 const EighteenToTwentyGrid = () => {
   const navigate = useNavigate();
-  const [trigger, { data, isLoading }] = useLazyGetYearEndProfitSharingReportQuery();
+  const [trigger, { data, isFetching }] = useLazyGetYearEndProfitSharingReportQuery();
 
+  const [pageNumber, setPageNumber] = useState(0);
+  const [pageSize, setPageSize] = useState(25);
+  const [sortParams, setSortParams] = useState<ISortParams>({
+    sortBy: "lastName",
+    isSortDescending: false
+  });
   const hasToken = useSelector((state: RootState) => !!state.security.token);
-  const profitYear = useDecemberFlowProfitYear();
+  const profitYear = useFiscalCloseProfitYear();
+  const baseParams = {
+    isYearEnd: true,
+    minimumAgeInclusive: 18,
+    maximumAgeInclusive: 20,
+    minimumHoursInclusive: 1000,
+    includeActiveEmployees: true,
+    includeInactiveEmployees: true,
+    includeEmployeesTerminatedThisYear: false,
+    includeTerminatedEmployees: false,
+    includeBeneficiaries: false,
+    includeEmployeesWithPriorProfitSharingAmounts: true,
+    includeEmployeesWithNoPriorProfitSharingAmounts: true,
+  };
 
   useEffect(() => {
     if (hasToken) {
       trigger({
-        isYearEnd: true,
-        minimumAgeInclusive: 17,
-        maximumAgeInclusive: 20,
-        minimumHoursInclusive: 999.9,
-        maximumHoursInclusive: 4000,
-        includeActiveEmployees: true,
-        includeInactiveEmployees: true,
-        includeEmployeesTerminatedThisYear: false,
-        includeTerminatedEmployees: false,
-        includeBeneficiaries: false,
-        includeEmployeesWithPriorProfitSharingAmounts: true,
-        includeEmployeesWithNoPriorProfitSharingAmounts: true,
+        
         profitYear: profitYear,
         pagination: {
-          skip: 0,
-          take: 25,
-          sortBy: "badgeNumber",
-          isSortDescending: true
-        }
+          skip: pageNumber * pageSize,
+          take: pageSize,
+          sortBy: sortParams.sortBy,
+          isSortDescending: sortParams.isSortDescending
+        },
+        ...baseParams
       });
     }
-  }, [trigger, hasToken, profitYear]);
+  }, [trigger, hasToken, profitYear, pageNumber, pageSize, sortParams]);
 
   // Wrapper to pass react function to non-react class
   const handleNavigationForButton = useCallback(
@@ -49,6 +60,30 @@ const EighteenToTwentyGrid = () => {
     },
     [navigate]
   );
+
+  const sortEventHandler = (update: ISortParams) => {
+    const t = () => { 
+        trigger({
+          profitYear: profitYear,
+          pagination: {
+            skip: 0,
+            take: pageSize,
+            sortBy: update.sortBy,
+            isSortDescending: update.isSortDescending
+          },
+          ...baseParams
+        }
+      );
+    }
+
+    pay426Utils.sortEventHandler(
+      update,
+      sortParams,
+      setSortParams,
+      setPageNumber,
+      t
+    );
+  }
 
   const columnDefs = useMemo(
     () => GetProfitSharingReportGridColumns(handleNavigationForButton),
@@ -65,14 +100,23 @@ const EighteenToTwentyGrid = () => {
         </Typography>
       </div>
       <DSMGrid
-        preferenceKey={"ELIGIBLE_EMPLOYEES"}
-        isLoading={isLoading}
-        handleSortChanged={(_params) => {}}
+        preferenceKey={CAPTIONS.PAY426_ACTIVE_18_20}
+        isLoading={isFetching}
+        handleSortChanged={sortEventHandler}
         providedOptions={{
           rowData: data?.response?.results || [],
           columnDefs: columnDefs
         }}
       />
+      {!!data && data.response.results.length > 0 && (
+        <Pagination
+          pageNumber={pageNumber}
+          setPageNumber={(value: number) => setPageNumber(value - 1)}
+          pageSize={pageSize}
+          setPageSize={setPageSize}
+          recordCount={data.response.total}
+        />
+      )}
     </>
   );
 };

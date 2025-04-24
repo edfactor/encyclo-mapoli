@@ -6,6 +6,7 @@ import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetDuplicateNamesAndBirthdayColumns } from "./DuplicateNamesAndBirthdaysGridColumns";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
+import { CAPTIONS } from "../../../constants";
 
 interface DuplicateNamesAndBirthdaysGridSearchProps {
   initialSearchLoaded: boolean;
@@ -28,7 +29,7 @@ const DuplicateNamesAndBirthdaysGrid: React.FC<DuplicateNamesAndBirthdaysGridSea
     (state: RootState) => state.yearsEnd
   );
   const profitYear = useDecemberFlowProfitYear();
-  const [triggerSearch, { isLoading }] = useLazyGetDuplicateNamesAndBirthdaysQuery();
+  const [triggerSearch, { isFetching }] = useLazyGetDuplicateNamesAndBirthdaysQuery();
 
   const onSearch = useCallback(async () => {
     const request = {
@@ -63,8 +64,8 @@ const DuplicateNamesAndBirthdaysGrid: React.FC<DuplicateNamesAndBirthdaysGridSea
             </Typography>
           </div>
           <DSMGrid
-            preferenceKey={"DUPE_SSNS"}
-            isLoading={false}
+            preferenceKey={CAPTIONS.DUPLICATE_NAMES}
+            isLoading={isFetching}
             handleSortChanged={sortEventHandler}
             providedOptions={{
               rowData: duplicateNamesAndBirthdays?.response.results,

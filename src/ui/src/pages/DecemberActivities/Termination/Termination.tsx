@@ -1,37 +1,28 @@
-import StatusDropdown, { ProcessStatus } from "components/StatusDropdown";
-import { useState } from "react";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { DSMAccordion, Page } from "smart-ui-library";
+import { Page } from "smart-ui-library";
 
-import { Button, Divider } from "@mui/material";
+import { Divider } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 
-import { CAPTIONS, MENU_LABELS } from "../../../constants";
+import { CAPTIONS } from "../../../constants";
 import TerminationGrid from "./TerminationGrid";
-import TerminationSearchFilter from "./TerminationSearchFilter";
 
 const Termination = () => {
   const navigate = useNavigate();
 
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
 
-  const handleStatusChange = async (newStatus: ProcessStatus) => {
-    console.info("Logging new status: ", newStatus);
+  const renderActionNode = () => {
+    return <StatusDropdownActionNode />;
   };
 
-  const renderActionNode = () => {
-    return (
-      <div className="flex items-center gap-2 h-10">
-        <StatusDropdown onStatusChange={handleStatusChange} />
-        <Button
-          onClick={() => navigate("/december-process-accordion")}
-          variant="outlined"
-          className="h-10 whitespace-nowrap min-w-fit">
-          {MENU_LABELS.DECEMBER_ACTIVITIES}
-        </Button>
-      </div>
-    );
-  };
+  // Set initialSearchLoaded to true when component mounts
+  useEffect(() => {
+    setInitialSearchLoaded(true);
+  }, []);
+
 
   return (
     <Page
@@ -43,12 +34,6 @@ const Termination = () => {
         <Grid2 width={"100%"}>
           <Divider />
         </Grid2>
-        <Grid2 width={"100%"}>
-          <DSMAccordion title="Filter">
-            <TerminationSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
-          </DSMAccordion>
-        </Grid2>
-
         <Grid2 width="100%">
           <TerminationGrid
             setInitialSearchLoaded={setInitialSearchLoaded}

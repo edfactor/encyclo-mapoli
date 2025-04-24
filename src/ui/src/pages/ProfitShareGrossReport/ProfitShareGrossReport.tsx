@@ -5,11 +5,19 @@ import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
 import ProfitShareGrossReportGrid from "./ProfitShareGrossReportGrid";
 import ProfitShareGrossReportParameters from "./ProifitShareGrossReportParameters";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 
 const ProfitShareGrossReport = () => {
     const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
+
+    const renderActionNode = () => {
+        return (
+            <StatusDropdownActionNode />
+        );
+    };
+    
     return (
-        <Page label={CAPTIONS.PROFIT_SHARE_GROSS_REPORT}>
+        <Page label={CAPTIONS.PROFIT_SHARE_GROSS_REPORT} actionNode={renderActionNode()}>
             <Grid2
                 container
                 rowSpacing="24px">
@@ -18,7 +26,7 @@ const ProfitShareGrossReport = () => {
                 </Grid2>
                 <Grid2
                     width={"100%"}>
-                    <DSMAccordion title="Create">
+                    <DSMAccordion title="Filter">
                         <ProfitShareGrossReportParameters />
                     </DSMAccordion>
                 </Grid2>

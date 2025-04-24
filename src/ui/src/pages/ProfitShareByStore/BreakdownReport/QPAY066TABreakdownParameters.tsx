@@ -7,6 +7,7 @@ import * as yup from "yup";
 import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { setBreakdownByStoreQueryParams } from "reduxstore/slices/yearsEndSlice";
+import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 
 interface BreakdownSearchParams {
     store?: string;
@@ -43,7 +44,8 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
     onStoreChange
 }) => {
     const dispatch = useDispatch();
-    
+  const profitYear = useDecemberFlowProfitYear();
+  
     const [employeeStatuses] = useState<OptionItem[]>([
         { id: '700', label: '700 - Retired - Drawing Pension' },
         { id: '701', label: '701 - Active - Drawing Pension' },
@@ -94,7 +96,7 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
             }
             
             dispatch(setBreakdownByStoreQueryParams({
-                profitYear: 2024,
+                profitYear: profitYear,
                 storeNumber: data.store,
                 under21Only: data.under21Only,
                 pagination: {

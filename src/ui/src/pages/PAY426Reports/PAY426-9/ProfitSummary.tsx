@@ -1,9 +1,14 @@
 import { Typography } from "@mui/material";
 import { useEffect, useMemo } from "react";
-import { DSMGrid } from "smart-ui-library";
+import { DSMGrid, Page } from "smart-ui-library";
 import { useLazyGetYearEndProfitSharingSummaryReportQuery } from "reduxstore/api/YearsEndApi";
 import { GetProfitSummaryGridColumns } from "./ProfitSummaryGridColumns";
 import { YearEndProfitSharingReportSummaryLineItem } from "reduxstore/types";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
+import { CAPTIONS } from "../../../constants";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../reduxstore/store";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 
 /**
  * Default rows for "Active and Inactive" section - these will display with zero values
@@ -102,12 +107,23 @@ const terminatedPlaceholders: YearEndProfitSharingReportSummaryLineItem[] = [
 const ProfitSummary = () => {
   const [trigger, { data, isFetching }] = useLazyGetYearEndProfitSharingSummaryReportQuery();
 
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
+  const profitYear = useFiscalCloseProfitYear();
+  
   useEffect(() => {
-    trigger({
-      useFrozenData: true,
-      profitYear: 2024
-    });
-  }, [trigger]);
+    if ( hasToken) {
+      trigger({
+        useFrozenData: true,
+        profitYear: profitYear
+      });
+    }
+  }, [trigger, profitYear, hasToken]);
+
+  const renderActionNode = () => {
+    return (
+        <StatusDropdownActionNode />
+    );
+};
 
   const columnDefs = useMemo(() => GetProfitSummaryGridColumns(), []);
 
@@ -182,14 +198,8 @@ const ProfitSummary = () => {
   }, [terminatedRowData]);
 
   return (
-    <>
-      <div>
-        <Typography
-          variant="h2"
-          sx={{ color: "#0258A5", padding: "0 24px" }}>
-          Profit Sharing Summary Total Page
-        </Typography>
-      </div>
+    <Page label={CAPTIONS.PAY426_SUMMARY} actionNode={renderActionNode()}>
+      
       <div>
         <Typography
           variant="h6"
@@ -197,7 +207,7 @@ const ProfitSummary = () => {
           Active and Inactive
         </Typography>
         <DSMGrid
-          preferenceKey={"ACTIVE_INACTIVE_SUMMARY"}
+          preferenceKey={CAPTIONS.PAY426_SUMMARY}
           isLoading={isFetching}
           handleSortChanged={() => {}}
           providedOptions={{
@@ -225,7 +235,7 @@ const ProfitSummary = () => {
           }}
         />
       </div>
-    </>
+    </Page>
   );
 };
 

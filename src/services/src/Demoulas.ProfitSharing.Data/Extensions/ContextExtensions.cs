@@ -1,6 +1,7 @@
 ﻿using Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.MassTransit;
+using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Navigations;
 using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -42,6 +43,10 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new JobMap());
         modelBuilder.ApplyConfiguration(new JobStatusMap());
         modelBuilder.ApplyConfiguration(new JobTypeMap());
+        modelBuilder.ApplyConfiguration(new ParticipantTotalMap());
+        modelBuilder.ApplyConfiguration(new ParticipantTotalRatioMap());
+        modelBuilder.ApplyConfiguration(new ParticipantTotalVestingBalanceMap());
+        modelBuilder.ApplyConfiguration(new ParticipantTotalYearMap());
         modelBuilder.ApplyConfiguration(new PayClassificationMap());
         modelBuilder.ApplyConfiguration(new PayFrequencyMap());
         modelBuilder.ApplyConfiguration(new PayProfitMap());
@@ -54,6 +59,10 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new TerminationCodeMap());
         modelBuilder.ApplyConfiguration(new ZeroContributionReasonMap());
         modelBuilder.ApplyConfiguration(new YearEndUpdateStatusMapping());
+        modelBuilder.ApplyConfiguration(new NavigationMap());
+        modelBuilder.ApplyConfiguration(new NavigationStatusMap());
+        modelBuilder.ApplyConfiguration(new NavigationTrackingMap());
+        modelBuilder.ApplyConfiguration(new NavigationRoleMap());
 
         // Force table names to be upper case for consistency with all existing DSM projects
         foreach (var entity in modelBuilder.Model.GetEntityTypes())

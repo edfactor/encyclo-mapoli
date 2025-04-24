@@ -20,7 +20,7 @@ const ForfeituresByAgeGrid: React.FC<ForfeituresByAgeGridProps> = ({ initialSear
 
   const { forfeituresByAgeTotal, forfeituresByAgeFullTime, forfeituresByAgePartTime, forfeituresByAgeQueryParams } =
     useSelector((state: RootState) => state.yearsEnd);
-  const [triggerSearch, { isLoading }] = useLazyGetForfeituresByAgeQuery();
+  const [triggerSearch, { isFetching }] = useLazyGetForfeituresByAgeQuery();
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
@@ -100,7 +100,7 @@ const ForfeituresByAgeGrid: React.FC<ForfeituresByAgeGridProps> = ({ initialSear
             <Grid2 size={{ xs: 4 }}>
               <DSMGrid
                 preferenceKey={"AGE_Total"}
-                isLoading={isLoading}
+                isLoading={isFetching}
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: forfeituresByAgeTotal?.response.results,
@@ -111,7 +111,7 @@ const ForfeituresByAgeGrid: React.FC<ForfeituresByAgeGridProps> = ({ initialSear
             <Grid2 size={{ xs: 4 }}>
               <DSMGrid
                 preferenceKey={"AGE_FullTime"}
-                isLoading={isLoading}
+                isLoading={isFetching}
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: forfeituresByAgeFullTime?.response.results,
@@ -122,7 +122,7 @@ const ForfeituresByAgeGrid: React.FC<ForfeituresByAgeGridProps> = ({ initialSear
             <Grid2 size={{ xs: 4 }}>
               <DSMGrid
                 preferenceKey={"AGE_PartTime"}
-                isLoading={isLoading}
+                isLoading={isFetching}
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
                   rowData: forfeituresByAgePartTime?.response.results,

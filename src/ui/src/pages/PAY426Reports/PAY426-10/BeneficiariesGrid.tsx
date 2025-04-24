@@ -1,47 +1,52 @@
 import { Typography } from "@mui/material";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Path, useNavigate } from "react-router-dom";
-import { DSMGrid, Pagination } from "smart-ui-library";
+import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
 import { GetBeneficiariesGridColumns } from "./BeneficiariesGridColumns";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../reduxstore/store";
-import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import { CAPTIONS } from "../../../constants";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import pay426Utils from "../Pay427Utils";
 
 const BeneficiariesGrid = () => {
   const navigate = useNavigate();
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
-  const [trigger, { data, isLoading, error }] = useLazyGetYearEndProfitSharingReportQuery();
+  const [sortParams, setSortParams] = useState<ISortParams>({
+    sortBy: "badgeNumber",
+    isSortDescending: false
+  });
+  const [trigger, { data, isFetching, error }] = useLazyGetYearEndProfitSharingReportQuery();
 
   const hasToken = useSelector((state: RootState) => !!state.security.token);
-  const profitYear = useDecemberFlowProfitYear();
+  const profitYear = useFiscalCloseProfitYear();
+  const baseParams = {
+    isYearEnd: true,
+    includeActiveEmployees: false,
+    includeInactiveEmployees: false,
+    includeEmployeesTerminatedThisYear: false,
+    includeTerminatedEmployees: false,
+    includeBeneficiaries: true,
+    includeEmployeesWithPriorProfitSharingAmounts: false,
+    includeEmployeesWithNoPriorProfitSharingAmounts: false,
+  }
 
   useEffect(() => {
     if (hasToken) {
       trigger({
-        isYearEnd: true,
-        minimumAgeInclusive: 0,
-        maximumAgeInclusive: 200,
-        minimumHoursInclusive: 0,
-        maximumHoursInclusive: 4000,
-        includeActiveEmployees: false,
-        includeInactiveEmployees: false,
-        includeEmployeesTerminatedThisYear: false,
-        includeTerminatedEmployees: false,
-        includeBeneficiaries: true,
-        includeEmployeesWithPriorProfitSharingAmounts: false,
-        includeEmployeesWithNoPriorProfitSharingAmounts: false,
         profitYear: profitYear,
         pagination: {
           skip: pageNumber * pageSize,
           take: pageSize,
           sortBy: "badgeNumber",
           isSortDescending: true
-        }
+        },
+        ...baseParams
       });
     }
-  }, [trigger, pageNumber, pageSize, profitYear]);
+  }, [trigger, pageNumber, pageSize, profitYear, hasToken]);
 
   const getPinnedTopRowData = useMemo(() => {
     if (!data) return [];
@@ -78,6 +83,30 @@ const BeneficiariesGrid = () => {
     [navigate]
   );
 
+  const sortEventHandler = (update: ISortParams) => {
+      const t = () => { 
+          trigger({
+            profitYear: profitYear,
+            pagination: {
+              skip: 0,
+              take: pageSize,
+              sortBy: update.sortBy,
+              isSortDescending: update.isSortDescending
+            },
+            ...baseParams
+          }
+        );
+      }
+  
+      pay426Utils.sortEventHandler(
+        update,
+        sortParams,
+        setSortParams,
+        setPageNumber,
+        t
+      );
+    }
+
   const columnDefs = useMemo(() => GetBeneficiariesGridColumns(handleNavigationForButton), [handleNavigationForButton]);
 
   return (
@@ -90,9 +119,9 @@ const BeneficiariesGrid = () => {
         </Typography>
       </div>
       <DSMGrid
-        preferenceKey={"BENEFICIARIES"}
-        isLoading={isLoading}
-        handleSortChanged={(_params) => {}}
+        preferenceKey={CAPTIONS.PAY426_NON_EMPLOYEE}
+        isLoading={isFetching}
+        handleSortChanged={sortEventHandler}
         providedOptions={{
           rowData: data?.response?.results || [],
           pinnedTopRowData: getPinnedTopRowData,
@@ -101,7 +130,7 @@ const BeneficiariesGrid = () => {
       />
       {!!data && data.response.results.length > 0 && (
         <Pagination
-          pageNumber={pageNumber + 1}
+          pageNumber={pageNumber}
           setPageNumber={(value: number) => setPageNumber(value - 1)}
           pageSize={pageSize}
           setPageSize={setPageSize}

@@ -2,6 +2,7 @@ import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { yyyyMMDDToMMDDYYYY } from "smart-ui-library";
 import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
 import { agGridNumberToCurrency } from "smart-ui-library";
+import { getEnrolledStatus } from "../../../utils/enrollmentUtil";
 
 export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
   return [
@@ -10,10 +11,9 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       field: "badgeNumber",
       colId: "badgeNumber",
       minWidth: 80,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      headerClass: "left-align",
+      cellClass: "left-align",
       resizable: true,
-      sort: "asc",
       cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data?.badgeNumber, params.data?.psnSuffix)
     },
     {
@@ -97,37 +97,22 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       headerName: "Tax Code",
       field: "taxCode",
       colId: "taxCode",
-      minWidth: 100,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
-    {
-      headerName: "Other Name",
-      field: "otherName",
-      colId: "otherName",
-      minWidth: 150,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
-    {
-      headerName: "Other SSN",
-      field: "otherSsn",
-      colId: "otherSsn",
-      minWidth: 100,
-      headerClass: "left-align",
-      cellClass: "left-align",
+      minWidth: 80,
+      headerClass: "right-align",
+      cellClass: "right-align",
       resizable: true
     },
     {
       headerName: "Enrolled",
-      field: "enrolled",
-      colId: "enrolled",
+      field: "enrolledId",
+      colId: "enrolledId",
       minWidth: 90,
       headerClass: "center-align",
       cellClass: "center-align",
-      resizable: true
+      resizable: true,
+      valueFormatter: (params) => {
+        return getEnrolledStatus(params.value);
+      }
     }
   ];
 };

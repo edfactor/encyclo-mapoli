@@ -165,7 +165,9 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       },
       valueFormatter: (params) => {
         const id = params.data?.taxCodeId; // assuming 'status' is in the row data
-        const name = params.data?.taxCodeName; // assuming 'statusName' is in the row data        
+        const name = params.data?.taxCodeName; // assuming 'statusName' is in the row data      
+        
+        if (id == 0) return "";        
         return `[${id}] ${name}`;
       }
     },

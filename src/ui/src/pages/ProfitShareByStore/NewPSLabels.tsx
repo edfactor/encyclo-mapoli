@@ -1,6 +1,6 @@
 import { Divider } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
-import { DSMAccordion, Page, TotalsGrid } from "smart-ui-library";
+import { Page, TotalsGrid } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
 import Under21ReportGrid from "./Under21ReportGrid";
 
