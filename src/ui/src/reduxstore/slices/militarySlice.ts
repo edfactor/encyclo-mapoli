@@ -21,7 +21,7 @@ export const militarySlice = createSlice({
         state.militaryContributionsData = action.payload;
         state.error = null;
       } else {
-        state.error = "Failed to fetch military contributions";
+        state.error = "Failed to fetch  contmilitaryributions";
       }
     },
     clearMilitaryContributions: (state) => {

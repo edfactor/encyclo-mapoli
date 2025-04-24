@@ -1099,3 +1099,24 @@ export interface CurrentUserResponseDto {
   permissions: string[];
 }
 
+export interface NavigationRequestDto {
+  navigationId?: number;
+}
+
+export interface NavigationResponseDto {
+  navigation: NavigationDto[];
+}
+
+export interface NavigationDto {
+  id: number;
+  parentId: number;
+  title: string;
+  subTitle: string;
+  url: string;
+  StatusId: string;
+  orderNumber: string;
+  icon:string;
+  requiredRoles: string[];
+  items: NavigationDto[];
+}
+
