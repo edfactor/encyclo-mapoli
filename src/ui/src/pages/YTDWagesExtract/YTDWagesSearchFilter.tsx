@@ -7,6 +7,7 @@ import { useLazyGetEmployeeWagesForYearQuery } from "reduxstore/api/YearsEndApi"
 import { setEmployeeWagesForYearQueryParams } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import { SortedPaginationRequestDto } from "../../reduxstore/types";
+import { useEffect } from "react";
 
 interface YTDWagesSearch {
   profitYear: number;
@@ -43,9 +44,11 @@ const YTDWagesSearchFilter: React.FC<YTDWagesSearchFilterProps> = ({ setInitialS
     dispatch(setEmployeeWagesForYearQueryParams(fiscalCloseProfitYear));
   });
 
-  if (fiscalCloseProfitYear && !employeeWagesForYear) {
-    setInitialSearchLoaded(true);
-  }
+  useEffect(() => {
+    if (fiscalCloseProfitYear && !employeeWagesForYear) {
+      setInitialSearchLoaded(true);
+    }
+  }, [fiscalCloseProfitYear, employeeWagesForYear, setInitialSearchLoaded]);
 
   return (
     <form onSubmit={doSearch}>

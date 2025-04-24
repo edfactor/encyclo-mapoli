@@ -126,9 +126,11 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
 
   const fiscalCloseProfitYearAsDate = new Date(fiscalCloseProfitYear, 0, 1);
 
-  if (fiscalCloseProfitYear && !profitSharingUpdate && !profitSharingEdit) {
-    setInitialSearchLoaded(true);
-  }
+  useEffect(() => {
+    if (fiscalCloseProfitYear && !profitSharingUpdate && !profitSharingEdit) {
+      setInitialSearchLoaded(true);
+    }
+  }, [fiscalCloseProfitYear, profitSharingUpdate, profitSharingEdit]);
 
   const {
     control,
