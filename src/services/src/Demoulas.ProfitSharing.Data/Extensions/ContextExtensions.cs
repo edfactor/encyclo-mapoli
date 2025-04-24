@@ -1,15 +1,17 @@
 ﻿using Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
+using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Audit;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.MassTransit;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Navigations;
-using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Data.Extensions;
 internal static class ContextExtensions
 {
     public static ModelBuilder ApplyModelConfiguration(this ModelBuilder modelBuilder)
-    {   
+    {
+        modelBuilder.ApplyConfiguration(new AuditEventMap());
+        modelBuilder.ApplyConfiguration(new AuditChangeMap());
         modelBuilder.ApplyConfiguration(new FakeSsnMap());
         modelBuilder.ApplyConfiguration(new DataImportRecordMap());
         modelBuilder.ApplyConfiguration(new BeneficiaryContactMap());

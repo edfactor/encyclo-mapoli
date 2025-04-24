@@ -26,6 +26,7 @@
     <PackageReference Include="OpenTelemetry.Api" />
     <PackageReference Include="Oracle.EntityFrameworkCore" />
     <PackageReference Include="Oracle.ManagedDataAccess.Core" />
+    <PackageReference Include="MassTransit" />
   </ItemGroup>
 
   <ItemGroup>
@@ -61,6 +62,10 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Messaging\" />
   </ItemGroup>
 
 </Project>
