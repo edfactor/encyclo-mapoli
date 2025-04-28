@@ -662,8 +662,6 @@ FROM FILTERED_DEMOGRAPHIC p1
                 joinedQry = joinedQry.Where(jq => jq.total == 0);
             }
 
-            var x = await joinedQry.ToListAsync(cancellationToken);
-
             var firstContributionSubquery = from pd in ctx.ProfitDetails
                 where pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id
                 group pd by pd.Ssn
