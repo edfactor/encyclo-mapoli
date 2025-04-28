@@ -1,7 +1,13 @@
 import { RouteCategory } from "./types/MenuTypes";
 import { CAPTIONS, MENU_LABELS, ROUTES } from "./constants";
-import { ImpersonationRoles } from "./reduxstore/types";
+import { ImpersonationRoles, NavigationDto, NavigationResponseDto } from "./reduxstore/types";
 import EnvironmentUtils from "./utils/environmentUtils";
+import { Dataset, DateRangeTwoTone } from "@mui/icons-material";
+import { responsiveFontSizes } from "@mui/material";
+import { RouteData } from "smart-ui-library";
+import zIndex from "@mui/material/styles/zIndex";
+import { Z_ASCII } from "zlib";
+
 
 
 const beneficiaries: RouteCategory = {
@@ -49,14 +55,51 @@ const it_operations: RouteCategory = {
   items: [{ caption: CAPTIONS.DEMOGRAPHIC_FREEZE, route: ROUTES.DEMO_FREEZE }]
 };
 
-const MenuData: RouteCategory[] = [
-  inquiries,
-  beneficiaries,
-  distributions,
-  reconciliation,
-  drawer,
-  ...(localStorageImpersonating == ImpersonationRoles.ItOperations ? [it_operations] : [])
-];
+// const MenuData: RouteCategory[] = [
+//   inquiries,
+//   beneficiaries,
+//   distributions,
+//   reconciliation,
+//   drawer,
+//   ...(localStorageImpersonating == ImpersonationRoles.ItOperations ? [it_operations] : [])
+// ];
+
+export const MenuData = (data:NavigationResponseDto | undefined): RouteCategory[] => {
+  let finalData: RouteCategory[] = [];
+  data?.navigation.filter(m=>m.parentId ==null).sort((a, b) => b.orderNumber - a.orderNumber).map((values:NavigationDto,index) => {
+    finalData.push({
+      menuLabel: values.title, 
+      parentRoute: values.title.toLocaleLowerCase(),
+      disabled: false, 
+      underlined: false, 
+      roles: values.requiredRoles, 
+      items: values.items && values.items.length>0 ? getRouteData(values.items): undefined
+    });
+  });
+  if(localStorageImpersonating == ImpersonationRoles.ItOperations) {
+  finalData.push(it_operations);
+  }
+  return finalData;
+}
+const getRouteData = (data: NavigationDto[]):RouteData[] =>{
+  const response: RouteData[] = [];
+  data.map((value, index)  => {
+    let obj: RouteData = { // Initialize with an empty object or default values
+      caption: "",
+      route: "", 
+      disabled: undefined,
+      divider: undefined,
+      requiredPermission: ""
+    };
+    obj.caption = value.title;
+    obj.disabled  = false;
+    obj.divider  = false;
+    obj.requiredPermission = "";
+    obj.route = value.url
+    response.push(obj);
+  });
+  return response;
+}
 
 interface MenuLevel {
   mainTitle: string;
