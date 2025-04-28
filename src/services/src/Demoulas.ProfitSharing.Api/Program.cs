@@ -8,6 +8,7 @@ using Demoulas.ProfitSharing.Api.Extensions;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Extensions;
+using Demoulas.ProfitSharing.Data.Interceptors;
 using Demoulas.ProfitSharing.Endpoints.HealthCheck;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Extensions;
@@ -67,20 +68,22 @@ builder.Services.AddCors(options =>
     });
 });
 
-List<ContextFactoryRequest> list =
-[
-    ContextFactoryRequest.Initialize<ProfitSharingDbContext>("ProfitSharing"),
-    ContextFactoryRequest.Initialize<ProfitSharingReadOnlyDbContext>("ProfitSharing"),
-    ContextFactoryRequest.Initialize<DemoulasCommonDataContext>("StoreInfo")
-];
-
-builder.AddDatabaseServices(list);
-builder.AddProjectServices();
-
 OracleHcmConfig oracleHcmConfig = builder.Configuration.GetSection("OracleHcm").Get<OracleHcmConfig>()
                                   ?? new OracleHcmConfig { BaseAddress = string.Empty, DemographicUrl = string.Empty };
 
 builder.AddOracleHcmSynchronization(oracleHcmConfig);
+
+builder.AddDatabaseServices((services, factoryRequests) =>
+{
+    // Register contexts without immediately resolving the interceptor
+    factoryRequests.Add(ContextFactoryRequest.Initialize<ProfitSharingDbContext>("ProfitSharing",
+        interceptorFactory: sp => [sp.GetRequiredService<AuditSaveChangesInterceptor>()]));
+    factoryRequests.Add(ContextFactoryRequest.Initialize<ProfitSharingReadOnlyDbContext>("ProfitSharing"));
+    factoryRequests.Add(ContextFactoryRequest.Initialize<DemoulasCommonDataContext>("ProfitSharing"));
+});
+builder.AddProjectServices();
+
+
 
 
 void OktaSettingsAction(OktaSwaggerConfiguration settings)
@@ -119,14 +122,6 @@ app.MapScalarApiReference(options =>
 {
     options.OpenApiRoutePattern = "/swagger/Release 1.0/swagger.json";
     options.Theme = ScalarTheme.DeepSpace;
-    options.Authentication = new ScalarAuthenticationOptions
-    {
-        OAuth2 = new OAuth2Options
-        {
-            ClientId = oktaSwaggerConfiguration.ClientId,
-            Scopes = oktaSwaggerConfiguration.Scopes
-        }
-    };
 });
 
 await app.RunAsync();
