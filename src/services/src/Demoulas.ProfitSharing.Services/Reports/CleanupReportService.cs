@@ -1,4 +1,5 @@
-﻿using Demoulas.Common.Contracts.Contracts.Request;
+﻿using System.Globalization;
+using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common;
@@ -434,8 +435,10 @@ FROM FILTERED_DEMOGRAPHIC p1
                         FederalTax = pd.FederalTaxes,
                         ForfeitAmount = pd.ProfitCodeId == 2 ? pd.Forfeiture : 0,
                         Date = pd.MonthToDate > 0 ? new DateOnly(pd.YearToDate, pd.MonthToDate, 1) : null,
-                        Age = (byte)nameAndDob.DateOfBirth.Age(
-                            calInfo.FiscalEndDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Local)),
+                        Age = (byte)(pd.MonthToDate > 0 && pd.MonthToDate < 13
+                            ? nameAndDob.DateOfBirth.Age(new DateOnly(pd.YearToDate, pd.MonthToDate, 1).ToDateTime(TimeOnly.MinValue))
+                            : nameAndDob.DateOfBirth.Age(
+                                calInfo.FiscalEndDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Local))),
                         EnrolledId = nameAndDob.EnrolledId,
                     };
                 return query;
