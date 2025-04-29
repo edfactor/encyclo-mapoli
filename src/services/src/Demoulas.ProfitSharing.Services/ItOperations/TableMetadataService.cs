@@ -25,9 +25,13 @@ public sealed class TableMetadataService : ITableMetadataService
             var results = new List<RowCountResult>();
             var designTimeModel = context.GetService<IDesignTimeModel>().Model;
 
+
             var entityTypes = designTimeModel.GetEntityTypes()
-                .Where(t => !t.IsOwned() && !t.IsTableExcludedFromMigrations())
+                .Where(t => !t.IsOwned() 
+                            && !t.IsTableExcludedFromMigrations()
+                            && t.ClrType != typeof(Dictionary<string, object>))
                 .ToList();
+
 
             foreach (var entityType in entityTypes)
             {
