@@ -19,6 +19,7 @@ public interface IProfitSharingDbContext
     DbSet<ProfitDetail> ProfitDetails { get; set; }
     DbSet<Distribution> Distributions { get; set; }
     DbSet<FakeSsn> FakeSsns { get; set; }
+    DbSet<Missive> Missives { get; set; }
     DbSet<ParticipantTotal> ParticipantTotals { get; set; }
     DbSet<ParticipantTotalRatio> ParticipantTotalRatios { get; set; }
     DbSet<ParticipantTotalYear> ParticipantTotalYears { get; set; }
