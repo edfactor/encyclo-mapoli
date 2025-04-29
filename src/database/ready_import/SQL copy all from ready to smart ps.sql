@@ -961,9 +961,20 @@ BEGIN
 -- > 64 - 3 Year Vested
 -- >64 & >5 100%
 -- Military
+-- https://demoulas.atlassian.net/browse/PS-1147
     UPDATE PROFIT_DETAIL pd
-       SET pd.YEARS_OF_SERVICE_CREDIT = CASE WHEN pd.Contribution > 0 OR pd.COMMENT_TYPE_ID IN (5, 16, 17, 18, 19) THEN 1 ELSE 0 END
+       SET pd.YEARS_OF_SERVICE_CREDIT = CASE WHEN (pd.Contribution > 0 OR pd.COMMENT_TYPE_ID IN (5, 16, 17, 18, 19)) AND MONTH_TO_DATE != 20 THEN 1 ELSE 0 END
      WHERE EXISTS (SELECT SSN FROM DEMOGRAPHIC d WHERE d.SSN = pd.SSN);
+
+
+-- Approimate the creation date to aid in correct sorting of the transactions
+UPDATE PROFIT_DETAIL
+SET CREATED_UTC = TO_TIMESTAMP(
+        YEAR_TO_DATE || '-' ||
+        LPAD(MONTH_TO_DATE, 2, '0') || '-01 00:00:00',
+        'YYYY-MM-DD HH24:MI:SS'
+                     ) AT TIME ZONE 'UTC'
+WHERE YEAR_TO_DATE > 1900 AND MONTH_TO_DATE BETWEEN 1 AND 12;
 
 END;
 COMMIT ;

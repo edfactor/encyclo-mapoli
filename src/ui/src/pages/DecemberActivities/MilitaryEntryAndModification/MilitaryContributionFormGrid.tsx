@@ -52,7 +52,7 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
     if (initialSearchLoaded && masterInquiryEmployeeDetails) {
       onSearch();
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, masterInquiryEmployeeDetails]);
+  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, masterInquiryEmployeeDetails, onSearch]);
 
 
 
