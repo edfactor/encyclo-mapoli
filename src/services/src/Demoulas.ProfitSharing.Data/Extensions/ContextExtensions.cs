@@ -45,6 +45,7 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new JobMap());
         modelBuilder.ApplyConfiguration(new JobStatusMap());
         modelBuilder.ApplyConfiguration(new JobTypeMap());
+        modelBuilder.ApplyConfiguration(new MissiveMap());
         modelBuilder.ApplyConfiguration(new ParticipantTotalMap());
         modelBuilder.ApplyConfiguration(new ParticipantTotalRatioMap());
         modelBuilder.ApplyConfiguration(new ParticipantTotalVestingBalanceMap());
