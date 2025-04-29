@@ -15,7 +15,7 @@ import { Paged } from "smart-ui-library";
 
 export const NavigationApi = createApi({
   baseQuery: fetchBaseQuery({
-    baseUrl: `${url}/api/`,
+    baseUrl: `${url}/api/navigation`,
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as RootState).security.token;
       const impersonating = (getState() as RootState).security.impersonating;
@@ -38,10 +38,7 @@ export const NavigationApi = createApi({
     getNavigation: builder.query<NavigationResponseDto, NavigationRequestDto>({
       query: (request) => ({
         url: `list`,
-        method: "GET",
-        params: {
-            navigationId: null
-        }
+        method: "GET"
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {

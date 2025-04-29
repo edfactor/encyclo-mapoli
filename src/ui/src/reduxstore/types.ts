@@ -1121,9 +1121,10 @@ export interface NavigationDto {
   subTitle: string;
   url: string;
   StatusId: string;
-  orderNumber: string;
+  orderNumber: number;
   icon:string;
   requiredRoles: string[];
+  disabled: boolean;
   items: NavigationDto[];
 }
 
