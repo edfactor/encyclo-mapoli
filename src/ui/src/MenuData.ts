@@ -85,17 +85,12 @@ const getRouteData = (data: NavigationDto[]):RouteData[] =>{
   const response: RouteData[] = [];
   data.map((value, index)  => {
     const obj: RouteData = { // Initialize with an empty object or default values
-      caption: "",
-      route: "", 
-      disabled: undefined,
-      divider: undefined,
+      caption: value.title,
+      route: value.url, 
+      disabled: false,
+      divider: false,
       requiredPermission: ""
     };
-    obj.caption = value.title;
-    obj.disabled  = false;
-    obj.divider  = false;
-    obj.requiredPermission = "";
-    obj.route = value.url
     response.push(obj);
   });
   return response;
