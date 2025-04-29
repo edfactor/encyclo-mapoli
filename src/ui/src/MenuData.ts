@@ -131,13 +131,13 @@ interface SubPages {
 export const drawerTitle = MENU_LABELS.YEAR_END;
 
 const addSubTitle = (subTitle?:string):string =>{
-  return subTitle? ` (${sub})` : "";
+  return subTitle? ` (${subTitle})` : "";
 }
 
 export const menuLevels =(data: NavigationResponseDto | undefined): MenuLevel[] =>{
-  let yearEndList = data?.navigation.filter(m=>m.id == 54); //Id 54 is for Year End. It will have the list of December Activities & Fiscal Close. 
+  let yearEndList = data?.navigation.filter(m=>m.id == 54)[0]; //Id 54 is for Year End. It will have the list of December Activities & Fiscal Close. 
   let menuLevel: MenuLevel[] = [];
-  yearEndList?.map((value) => {
+  yearEndList?.items?.map((value) => {
     menuLevel.push(
       {
         mainTitle: value.title + addSubTitle(value.subTitle),

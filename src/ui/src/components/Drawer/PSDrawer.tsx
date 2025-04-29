@@ -14,7 +14,7 @@ import {
   SvgIcon,
   Typography
 } from "@mui/material";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, FC } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { clearActiveSubMenu, closeDrawer, openDrawer, setActiveSubMenu } from "reduxstore/slices/generalSlice";
@@ -32,6 +32,8 @@ import { SvgIconProps } from "@mui/material";
 import { RootState } from "reduxstore/store";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import { ICommon } from "smart-ui-library";
+import { NavigationResponseDto } from "reduxstore/types";
 
 // Define the highlight color as a constant
 const HIGHLIGHT_COLOR = "#0258A5";
@@ -46,7 +48,11 @@ const SidebarIcon = (props: SvgIconProps) => (
   </SvgIcon>
 );
 
-const PSDrawer = () => {
+export interface PSDrawerProps extends ICommon {
+  navigationData?: NavigationResponseDto
+}
+
+const PSDrawer: FC<PSDrawerProps> = ({navigationData}) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isDrawerOpen: drawerOpen, activeSubmenu } = useSelector((state: RootState) => state.general);
@@ -63,7 +69,7 @@ const PSDrawer = () => {
   const expandedOnceRef = useRef<{[key: string]: boolean}>({});
 
   const hasThirdLevel = (level: string, secondLevel: string) => {
-    const hasSome = menuLevels.some(
+    const hasSome = menuLevels(navigationData).some(
       (l) => l.mainTitle === level && l.topPage.some((y) => y.topTitle === secondLevel && y.subPages.length > 0)
     );
     return hasSome;
@@ -143,7 +149,7 @@ const PSDrawer = () => {
       pathRef.current = currentPath; // Update ref to current path
 
       if (activeSubmenu) {
-        const menuLevel = menuLevels.find(l => l.mainTitle === activeSubmenu);
+        const menuLevel = menuLevels(navigationData).find(l => l.mainTitle === activeSubmenu);
         if (menuLevel) {
           // Find top-level page containing the current route
           const activePage = menuLevel.topPage.find(page =>
@@ -283,7 +289,7 @@ const PSDrawer = () => {
                 </div>
               )}
               <List>
-                {menuLevels
+                {menuLevels(navigationData)
                   .find((l) => l.mainTitle === activeSubmenu)
                   ?.topPage
                   .filter(page => !page.disabled)
@@ -469,7 +475,7 @@ const PSDrawer = () => {
             <>
               <Divider sx={{ mb: 1 }} />
               <List>
-                {menuLevels.map((level, index) => {
+                {menuLevels(navigationData).map((level, index) => {
                   // Check if this top-level menu contains the active route
                   const hasActiveRoute = level.topPage.some(page =>
                     (page.topRoute && isRouteActive(page.topRoute)) ||
