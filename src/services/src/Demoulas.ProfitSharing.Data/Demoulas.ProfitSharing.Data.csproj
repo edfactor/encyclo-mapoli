@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Messaging\**" />
+    <EmbeddedResource Remove="Messaging\**" />
+    <None Remove="Messaging\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Remove="C:\Users\russh\.nuget\packages\demoulas.common.data.services\3.0.0\contentFiles\any\net8.0\readme.md" />
   </ItemGroup>
  
@@ -62,10 +68,6 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Messaging\" />
   </ItemGroup>
 
 </Project>

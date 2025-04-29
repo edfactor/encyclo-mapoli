@@ -2,7 +2,7 @@ import { Typography } from "@mui/material";
 import Grid2 from '@mui/material/Grid2';
 import LabelValueSection from "components/LabelValueSection";
 import React from "react";
-import { EmployeeDetails } from "reduxstore/types";
+import { EmployeeDetails, MissiveResponse } from "reduxstore/types";
 import { mmDDYYFormat, numberToCurrency } from "smart-ui-library";
 import { formatPercentage } from "utils/formatPercentage";
 import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
@@ -11,9 +11,10 @@ import { getEnrolledStatus, getForfeitedStatus } from "../../utils/enrollmentUti
 
 interface MasterInquiryEmployeeDetailsProps {
   details: EmployeeDetails;
+  missives: MissiveResponse[]  | null;
 }
 
-const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> = ({ details }) => {
+const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> = ({ details, missives }) => {
   const {
     firstName,
     lastName,
@@ -81,6 +82,12 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     { label: "Current Vested Amount", value: numberToCurrency(currentVestedAmount) },
   ];
 
+  const translatedMissives = missives && details && details.missives?.length ? details.missives.map(m=>missives.find(x=>x.id == m)?.message) : []
+
+  const translatedMissivesSection = translatedMissives.map((missive, idx) => (
+    <Typography key={idx} variant="body1" sx={{ marginBottom: "8px" }}> {missive}</Typography>
+  ));
+
   return (
     <Grid2
     container
@@ -125,6 +132,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
           </Grid2>
         </Grid2>
       </Grid2>
+      {/* {translatedMissivesSection} */}
     </Grid2>
   );
 };

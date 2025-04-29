@@ -1,10 +1,18 @@
 ﻿using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
+using Demoulas.ProfitSharing.Data.Configuration;
 
 namespace Demoulas.ProfitSharing.Data.Interceptors;
 public class AuditSaveChangesInterceptor : SaveChangesInterceptor
 {
+    private readonly DataConfig _config;
+
+    public AuditSaveChangesInterceptor(DataConfig config)
+    {
+        _config = config;
+    }
+
     public override ValueTask<InterceptionResult<int>> SavingChangesAsync(DbContextEventData eventData,
         InterceptionResult<int> result, CancellationToken cancellationToken = default)
     {
@@ -15,6 +23,11 @@ public class AuditSaveChangesInterceptor : SaveChangesInterceptor
     private void Audit(DbContext? context)
     {
         if (context == null)
+        {
+            return;
+        }
+
+        if (!_config.EnableAudit)
         {
             return;
         }

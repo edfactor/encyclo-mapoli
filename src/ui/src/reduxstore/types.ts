@@ -475,6 +475,7 @@ export interface EmployeeDetails {
   currentVestedAmount: number;
   currentEtva: number;
   previousEtva: number;
+  missives: number[] | null;
 }
 
 export interface MasterInquiryResponseType {
@@ -1085,6 +1086,12 @@ export interface ForfeitureAdjustmentResponse {
     results: ForfeitureAdjustmentDetail[];
   };
 }
+
+export interface MissiveResponse {
+  id:number;
+  message: string;
+}
+
 export interface RowCountResult {
   tableName: string;
   rowCount: number;
