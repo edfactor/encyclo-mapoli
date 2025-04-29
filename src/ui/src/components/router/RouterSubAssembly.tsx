@@ -50,6 +50,7 @@ import { ImpersonationRoles } from "reduxstore/types";
 import { ImpersonationMultiSelect } from "smart-ui-library";
 import { drawerClosedWidth, drawerOpenWidth, ROUTES, SMART_PS_QA_IMPERSONATION } from "../../constants";
 import MenuData from "../../MenuData";
+import { useGetNavigationQuery } from 'reduxstore/api/NavigationApi';
 import DemographicFreeze from "../../pages/ITOperations/DemographicFreeze/DemographicFreeze";
 import BalanceByAge from "../../pages/PROF130/BalanceByAge/BalanceByAge";
 import ContributionsByAge from "../../pages/PROF130/ContributionsByAge/ContributionsByAge";
@@ -75,19 +76,19 @@ const RouterSubAssembly: React.FC = () => {
   const { impersonating } = useSelector((state: RootState) => state.security);
   const dispatch = useDispatch();
   const { isDrawerOpen } = useSelector((state: RootState) => state.general);
+  const { data, isSuccess}  = useGetNavigationQuery({navigationId: undefined});
 
   const localStorageImpersonating: string | null = localStorage.getItem("impersonatingRole");
 
-  useEffect(() => {
-    if (!!localStorageImpersonating && !impersonating) {
-      dispatch(setImpersonating(localStorageImpersonating as ImpersonationRoles));
-    }
-  }, [dispatch, impersonating, localStorageImpersonating]);
+  // if(isSuccess){
+  //   MenuDataRedux(data);
+  // }
 
-  return (
+  const renderMenu = ()=>{
+    return isSuccess? 
     <>
       <MenuBar
-        menuInfo={MenuData}
+        menuInfo={MenuData(data)}
         impersonationMultiSelect={
           showImpersonation ? (
             <ImpersonationMultiSelect
@@ -357,8 +358,17 @@ const RouterSubAssembly: React.FC = () => {
           </Box>
         </Box>
       </Box>
-    </>
-  );
+    </> : <></>
+    
+  }
+
+  useEffect(() => {
+    if (!!localStorageImpersonating && !impersonating) {
+      dispatch(setImpersonating(localStorageImpersonating as ImpersonationRoles));
+    }
+  }, [dispatch, impersonating, localStorageImpersonating]);
+
+  return renderMenu();
 };
 
 export default RouterSubAssembly;

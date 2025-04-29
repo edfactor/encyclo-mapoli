@@ -18,6 +18,7 @@ import commonSlice from "./slices/commonSlice";
 import { messageSlice } from "./slices/messageSlice";
 import forfeituresAdjustmentSlice from "./slices/forfeituresAdjustmentSlice";
 import { NavigationApi } from "./api/NavigationApi";
+import navigationSlice  from "./slices/navigationSlice";
 
 export const store = configureStore({
   reducer: {
@@ -30,6 +31,7 @@ export const store = configureStore({
     lookups: lookupsSlice,
     common: commonSlice,
     messages: messageSlice,
+    navigation: navigationSlice,
     forfeituresAdjustment: forfeituresAdjustmentSlice,
 
     [SecurityApi.reducerPath]: SecurityApi.reducer,

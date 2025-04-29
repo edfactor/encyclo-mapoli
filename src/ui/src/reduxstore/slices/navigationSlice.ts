@@ -27,7 +27,7 @@ export const navigationSlice = createSlice({
         setNavigationError: (state, action: PayloadAction<string>) => {
             state.error = action.payload;
             state.navigationData = null;
-          }
+        }
     }
 });
 

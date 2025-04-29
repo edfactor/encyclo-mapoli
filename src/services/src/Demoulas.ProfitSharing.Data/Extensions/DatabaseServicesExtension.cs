@@ -1,5 +1,6 @@
 ﻿using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.ProfitSharing.Data.Factories;
+using Demoulas.ProfitSharing.Data.Interceptors;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -23,15 +24,22 @@ public static class DatabaseServicesExtension
     /// <exception cref="InvalidOperationException">
     /// Thrown if a service of type <see cref="IProfitSharingDataContextFactory"/> is already registered in the service collection.
     /// </exception>
-    public static IHostApplicationBuilder AddDatabaseServices(this IHostApplicationBuilder builder, IEnumerable<ContextFactoryRequest> contextFactoryRequests)
+    public static IHostApplicationBuilder AddDatabaseServices(this IHostApplicationBuilder builder, Action<IServiceCollection,
+        List<ContextFactoryRequest>>? contextFactoryRequests)
     {
         if (builder.Services.Any(s => s.ServiceType == typeof(IProfitSharingDataContextFactory)))
         {
             throw new InvalidOperationException($"Service type {typeof(IProfitSharingDataContextFactory).FullName} is already registered.");
         }
 
-        List<ContextFactoryRequest> factoryRequests = contextFactoryRequests.ToList();
-        IProfitSharingDataContextFactory factory = DataContextFactory.Initialize(builder, contextFactoryRequests: factoryRequests);
+        _ = builder.Services.AddSingleton<AuditSaveChangesInterceptor>();
+        _ = builder.Services.AddHttpContextAccessor();
+
+
+        List<ContextFactoryRequest> factoryRequests = new();
+        contextFactoryRequests?.Invoke(builder.Services, factoryRequests);
+        IProfitSharingDataContextFactory factory = DataContextFactory.Initialize(builder, factoryRequests);
+
         _ = builder.Services.AddSingleton(factory);
 
         return builder;
