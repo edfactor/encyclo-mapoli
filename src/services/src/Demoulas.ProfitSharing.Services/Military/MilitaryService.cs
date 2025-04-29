@@ -3,8 +3,6 @@ using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Military;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
-using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -86,6 +84,7 @@ public class MilitaryService : IMilitaryService
                 ProfitYear = req.ProfitYear,
                 ContributionDate = new DateOnly(pd.YearToDate, pd.MonthToDate, 01),
                 Amount = pd.Contribution,
+                IncrementsContributionYears = pd.YearsOfServiceCredit == 1
             });
         }, cancellationToken);
     }
@@ -137,7 +136,8 @@ public class MilitaryService : IMilitaryService
                     ProfitYear = x.pd.ProfitYear,
                     CommentTypeId = x.pd.CommentTypeId,
                     ContributionDate = new DateOnly(x.pd.YearToDate == 0 ? req.ProfitYear : x.pd.YearToDate, x.pd.MonthToDate == 0 ? 1 : x.pd.MonthToDate, 01),
-                    Amount = x.pd.Contribution
+                    Amount = x.pd.Contribution,
+                    IncrementsContributionYears = x.pd.YearsOfServiceCredit == 1
                 })
                 .ToPaginationResultsAsync(req, cancellationToken);
         });
