@@ -1,7 +1,9 @@
 ﻿using Demoulas.Common.Data.Contexts.DTOs.Context;
+using Demoulas.ProfitSharing.Data.Configuration;
 using Demoulas.ProfitSharing.Data.Factories;
 using Demoulas.ProfitSharing.Data.Interceptors;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -32,6 +34,13 @@ public static class DatabaseServicesExtension
             throw new InvalidOperationException($"Service type {typeof(IProfitSharingDataContextFactory).FullName} is already registered.");
         }
 
+        _ = builder.Services.AddSingleton<DataConfig>(s=>
+        {
+            var config = s.GetRequiredService<IConfiguration>();
+            DataConfig dataConfig = new DataConfig();
+            config.Bind("DataConfig",  dataConfig);
+            return dataConfig;
+        });
         _ = builder.Services.AddSingleton<AuditSaveChangesInterceptor>();
         _ = builder.Services.AddHttpContextAccessor();
 
