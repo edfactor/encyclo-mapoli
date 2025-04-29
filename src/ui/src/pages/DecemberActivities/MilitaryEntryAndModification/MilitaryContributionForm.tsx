@@ -9,6 +9,7 @@ import { CreateMilitaryContributionRequest, MilitaryContribution } from "reduxst
 interface FormData {
   contributionDate: Date | null;
   contributionAmount: number | null;
+  addContributionYear: boolean | null;
 }
 
 interface MilitaryContributionFormProps {
@@ -33,7 +34,8 @@ const MilitaryContributionForm = ({
   const { control, handleSubmit, reset, formState } = useForm<FormData>({
     defaultValues: {
       contributionDate: null,
-      contributionAmount: null
+      contributionAmount: null,
+      addContributionYear: false
     }
   });
 
@@ -41,7 +43,8 @@ const MilitaryContributionForm = ({
     if (initialData) {
       reset({
         contributionDate: initialData.contributionDate,
-        contributionAmount: initialData.contributionAmount
+        contributionAmount: initialData.contributionAmount,
+        addContributionYear: false
       });
     }
   }, [initialData, reset]);
@@ -54,7 +57,8 @@ const MilitaryContributionForm = ({
 
       const contribution: MilitaryContribution = {
         contributionDate: data.contributionDate,
-        contributionAmount: data.contributionAmount
+        contributionAmount: data.contributionAmount,
+        addContributionYear: data.addContributionYear || false,
       };
 
       try {
@@ -64,7 +68,8 @@ const MilitaryContributionForm = ({
           badgeNumber,
           profitYear,
           contributionDate: data.contributionDate,
-          contributionAmount: data.contributionAmount
+          contributionAmount: data.contributionAmount,
+          addContributionYear: data.addContributionYear || false,
         };
 
         console.log("Calling API with request:", request);
@@ -78,7 +83,8 @@ const MilitaryContributionForm = ({
     } else {
       console.warn("Form validation failed:", {
         date: data.contributionDate,
-        amount: data.contributionAmount
+        amount: data.contributionAmount,
+        addContributionYear: data.addContributionYear
       });
     }
   };

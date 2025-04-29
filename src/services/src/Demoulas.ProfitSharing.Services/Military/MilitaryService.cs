@@ -33,8 +33,8 @@ public class MilitaryService : IMilitaryService
             .WithMessage($"The {nameof(CreateMilitaryContributionRequest.ContributionAmount)} must be greater than zero.");
 
         validator.RuleFor(r => r.ProfitYear)
-            .GreaterThanOrEqualTo((short)2000)
-            .WithMessage($"{nameof(MilitaryContributionRequest.ProfitYear)} must not less than 2000.")
+            .GreaterThanOrEqualTo((short)2020)
+            .WithMessage($"{nameof(MilitaryContributionRequest.ProfitYear)} must not less than 2020.")
             .LessThanOrEqualTo((short)DateTime.Today.Year)
             .WithMessage($"{nameof(MilitaryContributionRequest.ProfitYear)} must not be greater than this year.");
 
@@ -71,7 +71,7 @@ public class MilitaryService : IMilitaryService
                 CommentTypeId = /* 19 */CommentType.Constants.Military.Id,
                 Contribution = req.ContributionAmount,
                 Ssn = d.Ssn,
-                YearsOfServiceCredit = 1,
+                YearsOfServiceCredit = (byte)(req.AddContributionYear ? 1 : 0),
                 MonthToDate = (byte)req.ContributionDate.Month,
                 YearToDate = (short)req.ContributionDate.Year,
             };
