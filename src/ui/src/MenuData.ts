@@ -84,7 +84,7 @@ export const MenuData = (data:NavigationResponseDto | undefined): RouteCategory[
 const getRouteData = (data: NavigationDto[]):RouteData[] =>{
   const response: RouteData[] = [];
   data.map((value, index)  => {
-    let obj: RouteData = { // Initialize with an empty object or default values
+    const obj: RouteData = { // Initialize with an empty object or default values
       caption: "",
       route: "", 
       disabled: undefined,
