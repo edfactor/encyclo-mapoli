@@ -1,10 +1,15 @@
 ---THIS SCRIPT WILL LOAD ALL SMART PROFIT SHARING TABLES
 ---TO "YOUR CURRENT SCHEMA" FROM - {SOURCE_PROFITSHARE_SCHEMA}
 -------------------------------------------------------------------------------------
-DECLARE
-    this_year NUMBER := 2025; -- Set this to the current year
-    last_year NUMBER := 2024; -- Set this to the previous year
 BEGIN
+    -- Disable foreign key constraints first
+    FOR c IN (SELECT table_name, constraint_name
+                FROM user_constraints
+                WHERE constraint_type = 'R'
+                AND owner = USER) LOOP
+            EXECUTE IMMEDIATE 'ALTER TABLE ' || c.table_name ||
+                                ' DISABLE CONSTRAINT ' || c.constraint_name;
+        END LOOP;
 
     -- FIRST EMPTY OUT THE TABLES
     EXECUTE IMMEDIATE 'TRUNCATE TABLE JOB';
@@ -19,20 +24,35 @@ BEGIN
     EXECUTE IMMEDIATE 'TRUNCATE TABLE DISTRIBUTION_THIRDPARTY_PAYEE';
     EXECUTE IMMEDIATE 'TRUNCATE TABLE DISTRIBUTION_PAYEE';
     EXECUTE IMMEDIATE 'TRUNCATE TABLE DISTRIBUTION_REQUEST';
-    EXECUTE IMMEDIATE 'TRUNCATE TABLE FAKE_SSNS';
-    EXECUTE IMMEDIATE 'TRUNCATE TABLE DEMOGRAPHIC_SSN_CHANGE_HISTORY';
     EXECUTE IMMEDIATE 'TRUNCATE TABLE DEMOGRAPHIC_HISTORY';
     EXECUTE IMMEDIATE 'TRUNCATE TABLE DEMOGRAPHIC';
+    EXECUTE IMMEDIATE 'TRUNCATE TABLE FAKE_SSNS';
+    EXECUTE IMMEDIATE 'TRUNCATE TABLE DEMOGRAPHIC_SSN_CHANGE_HISTORY';
     EXECUTE IMMEDIATE 'TRUNCATE TABLE AUDIT_CHANGE';
     EXECUTE IMMEDIATE 'TRUNCATE TABLE AUDIT_CHANGE__AUDIT_EVENT';
     EXECUTE IMMEDIATE 'TRUNCATE TABLE AUDIT_EVENT';
-    
+
     -- Reset sequence
     EXECUTE IMMEDIATE 'ALTER SEQUENCE FAKE_SSN_SEQ RESTART START WITH 1';
 
---LOAD DEMOGRAPHIC TABLE TO - "YOUR CURRENT SCHEMA" FROM - {SOURCE_PROFITSHARE_SCHEMA}
+    -- Re-enable foreign key constraints
+    FOR c IN (SELECT table_name, constraint_name
+                FROM user_constraints
+                WHERE constraint_type = 'R'
+                AND owner = USER) LOOP
+            EXECUTE IMMEDIATE 'ALTER TABLE ' || c.table_name ||
+                                ' ENABLE CONSTRAINT ' || c.constraint_name;
+        END LOOP;  
+
+END;
 
 
+DECLARE
+    this_year NUMBER := 2025; -- Set this to the current year
+    last_year NUMBER := 2024; -- Set this to the previous year
+BEGIN
+
+    
     INSERT INTO DEMOGRAPHIC
     (ORACLE_HCM_ID,
      SSN,
@@ -543,7 +563,10 @@ BEGIN
             END as ptcode,
         PR_DET_S_SEC_NUMBER,
         PROFIT_DET_PR_DET_S_SEQNUM,
-        PROFIT_MDTE,
+        CASE
+            WHEN PROFIT_MDTE > 12 THEN 1
+            ELSE PROFIT_MDTE
+            END as PROFIT_MDTE,
         CASE
             WHEN TRIM(PROFIT_CMNT) = '' THEN NULL
             ELSE TRIM(PROFIT_CMNT)
@@ -594,7 +617,10 @@ BEGIN
             END as ptcode,
         PR_SS_D_S_SEC_NUMBER,
         PROFIT_SS_DET_PR_SS_D_S_SEQNUM,
-        PROFIT_SS_MDTE,
+        CASE
+            WHEN PROFIT_SS_MDTE > 12 THEN 1
+            ELSE PROFIT_SS_MDTE
+            END as PROFIT_SS_MDTE,
         CASE
             WHEN TRIM(PROFIT_SS_CMNT) = '' THEN NULL
             ELSE TRIM(PROFIT_SS_CMNT)
