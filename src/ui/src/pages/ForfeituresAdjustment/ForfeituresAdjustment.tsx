@@ -8,42 +8,19 @@ import ForfeituresAdjustmentGrid from "./ForfeituresAdjustmentGrid";
 import ForfeituresAdjustmentSearchParameters from "./ForfeituresAdjustmentSearchParameters";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import MasterInquiryEmployeeDetails from "pages/MasterInquiry/MasterInquiryEmployeeDetails";
-import { EmployeeDetails } from "reduxstore/types";
 import { RootState } from "reduxstore/store";
+import AddForfeitureModal from "./AddForfeitureModal";
+import { useLazyGetForfeitureAdjustmentsQuery } from "reduxstore/api/YearsEndApi";
+import { useLazyGetProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
 
 const ForfeituresAdjustment = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [showEmployeeDetails, setShowEmployeeDetails] = useState(false);
-  const { forfeitureAdjustmentData } = useSelector((state: RootState) => state.forfeituresAdjustment);
-
-  // Default dummy data for employee details - will be replaced with real API data later
-  const dummyEmployeeDetails: EmployeeDetails = {
-    firstName: "First",
-    lastName: "LastName",
-    address: "123 Main Street",
-    addressCity: "City Name",
-    addressState: "MA",
-    addressZipCode: "02134",
-    dateOfBirth: "1990-01-01",
-    ssn: "***-**-1234",
-    yearToDateProfitSharingHours: 0,
-    yearsInPlan: 0,
-    percentageVested: 0,
-    contributionsLastYear: false,
-    enrollmentId: 1,
-    enrollment: "Yes",
-    badgeNumber: "12345",
-    hireDate: "2018-01-01",
-    terminationDate: null,
-    reHireDate: null,
-    storeNumber: 0,
-    beginPSAmount: 0,
-    currentPSAmount: 0,
-    beginVestedAmount: 0,
-    currentVestedAmount: 0,
-    currentEtva: 0,
-    previousEtva: 0
-  };
+  const [isAddForfeitureModalOpen, setIsAddForfeitureModalOpen] = useState(false);
+  const { forfeitureAdjustmentData, forfeitureAdjustmentQueryParams } = useSelector((state: RootState) => state.forfeituresAdjustment);
+  const { masterInquiryEmployeeDetails } = useSelector((state: RootState) => state.inquiry);
+  const [triggerSearch] = useLazyGetForfeitureAdjustmentsQuery();
+  const [triggerMasterInquiry] = useLazyGetProfitMasterInquiryQuery();
 
   const renderActionNode = () => {
     return (
@@ -54,12 +31,59 @@ const ForfeituresAdjustment = () => {
   const handleSearchComplete = (loaded: boolean) => {
     setInitialSearchLoaded(loaded);
     setShowEmployeeDetails(loaded);
+    
+    // If we have results, get employee details
+    if (loaded && forfeitureAdjustmentData?.response?.results && forfeitureAdjustmentData.response.results.length > 0) {
+      const badgeNumber = forfeitureAdjustmentData.response.results[0].badgeNumber;
+      fetchEmployeeDetails(badgeNumber);
+    }
+  };
+
+  const fetchEmployeeDetails = (badgeNumber: number) => {
+    // Call Master Inquiry API
+    triggerMasterInquiry({
+      badgeNumber,
+      pagination: {
+        take: 10,
+        skip: 0,
+        sortBy: "profitYear",
+        isSortDescending: true
+      }
+    });
+  };
+
+  const handleOpenAddForfeitureModal = () => {
+    setIsAddForfeitureModalOpen(true);
+  };
+
+  const handleCloseAddForfeitureModal = () => {
+    setIsAddForfeitureModalOpen(false);
+  };
+
+  const handleSaveForfeiture = () => {
+    // Refresh grid data after saving a new forfeiture
+    if (forfeitureAdjustmentQueryParams) {
+      triggerSearch(forfeitureAdjustmentQueryParams)
+        .unwrap()
+        .then(() => {
+          setInitialSearchLoaded(true);
+        })
+        .catch((error: unknown) => {
+          console.error("Error refreshing forfeiture adjustments:", error);
+        });
+    }
   };
 
   // Reset employee details visibility when search results change
   useEffect(() => {
     if (forfeitureAdjustmentData) {
       setShowEmployeeDetails(true);
+      
+      // If we have results, get employee details
+      if (forfeitureAdjustmentData.response?.results && forfeitureAdjustmentData.response.results.length > 0) {
+        const badgeNumber = forfeitureAdjustmentData.response.results[0].badgeNumber;
+        fetchEmployeeDetails(badgeNumber);
+      }
     } else {
       setShowEmployeeDetails(false);
     }
@@ -79,15 +103,25 @@ const ForfeituresAdjustment = () => {
           </DSMAccordion>
         </Grid2>
 
-        {showEmployeeDetails && <MasterInquiryEmployeeDetails details={dummyEmployeeDetails} />}
+        {showEmployeeDetails && masterInquiryEmployeeDetails && (
+          <MasterInquiryEmployeeDetails details={masterInquiryEmployeeDetails} />
+        )}
 
         <Grid2 width="100%">
           <ForfeituresAdjustmentGrid
             initialSearchLoaded={initialSearchLoaded}
             setInitialSearchLoaded={setInitialSearchLoaded}
+            onAddForfeiture={handleOpenAddForfeitureModal}
           />
         </Grid2>
       </Grid2>
+
+      <AddForfeitureModal
+        open={isAddForfeitureModalOpen}
+        onClose={handleCloseAddForfeitureModal}
+        onSave={handleSaveForfeiture}
+        employeeDetails={masterInquiryEmployeeDetails}
+      />
     </Page>
   );
 };

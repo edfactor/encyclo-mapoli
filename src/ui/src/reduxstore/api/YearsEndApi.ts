@@ -111,7 +111,10 @@ import {
   YearEndProfitSharingReportResponse,
   YearEndProfitSharingReportSummaryResponse,
   ForfeitureAdjustmentRequest,
-  ForfeitureAdjustmentResponse
+  ForfeitureAdjustmentResponse,
+  CreateForfeitureAdjustmentRequest,
+  ForfeitureAdjustmentUpdateRequest,
+  ForfeitureAdjustmentDetail
 } from "reduxstore/types";
 import { tryddmmyyyyToDate } from "../../utils/dateUtils";
 import { Paged } from "smart-ui-library";
@@ -1033,6 +1036,20 @@ export const YearsEndApi = createApi({
           dispatch(clearForfeitureAdjustmentData());
         }
       }
+    }),
+    createForfeitureAdjustment: builder.mutation<ForfeitureAdjustmentDetail, CreateForfeitureAdjustmentRequest>({
+      query: (params) => ({
+        url: "yearend/forfeiture-adjustments/create",
+        method: "POST",
+        body: params
+      })
+    }),
+    updateForfeitureAdjustment: builder.mutation<ForfeitureAdjustmentDetail, ForfeitureAdjustmentUpdateRequest>({
+      query: (params) => ({
+        url: "yearend/forfeiture-adjustments/update",
+        method: "PUT",
+        body: params
+      })
     })
   })
 });
@@ -1074,5 +1091,7 @@ export const {
   useLazyGetProfitSharingLabelsQuery,
   useLazyGetProfitMasterStatusQuery,
   useGetForfeitureAdjustmentsQuery,
-  useLazyGetForfeitureAdjustmentsQuery
+  useLazyGetForfeitureAdjustmentsQuery,
+  useCreateForfeitureAdjustmentMutation,
+  useUpdateForfeitureAdjustmentMutation
 } = YearsEndApi;
