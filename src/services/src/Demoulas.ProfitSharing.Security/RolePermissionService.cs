@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
-using Demoulas.Security;
+using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Contracts.Interfaces;
 
 namespace Demoulas.ProfitSharing.Security;
 public sealed class RolePermissionService : IRolePermissionService
