@@ -12,7 +12,7 @@ import { setFrozenStateResponse, setFrozenStateCollectionResponse } from "reduxs
 import { url } from "./api";
 import { Paged } from "smart-ui-library";
 
-export const ItOperations = createApi({
+export const ItOperationsApi = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: `${url}/api/`,
     prepareHeaders: (headers, { getState }) => {
@@ -33,7 +33,7 @@ export const ItOperations = createApi({
       return headers;
     }
   }),
-  reducerPath: "frozenApi",
+  reducerPath: "itOperationsApi",
   endpoints: (builder) => ({
     getFrozenStateResponse: builder.query<FrozenStateResponse, void>({
       query: () => ({
@@ -99,4 +99,4 @@ export const {
   useFreezeDemographicsMutation,
   useLazyGetMetadataQuery,
   useLazyGetCurrentUserQuery
-} = ItOperations;
+} = ItOperationsApi;

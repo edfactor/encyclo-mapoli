@@ -8,9 +8,7 @@ export const SecurityApi = createApi({
     credentials: "include",
     prepareHeaders
   }),
-
   reducerPath: "securityApi",
-
   endpoints: (builder) => ({
     getUserRoles: builder.query({
       query: () => ({
