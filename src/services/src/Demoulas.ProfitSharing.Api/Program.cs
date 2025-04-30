@@ -16,6 +16,7 @@ using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Security.Extensions;
 using Demoulas.ProfitSharing.Services.Extensions;
 using Demoulas.Security;
+using Demoulas.Security.Extensions;
 using Demoulas.Util.Extensions;
 using NSwag.Generation.AspNetCore;
 using Scalar.AspNetCore;

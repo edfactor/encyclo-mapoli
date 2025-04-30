@@ -86,6 +86,7 @@ public class FrozenService: IFrozenService
 
         await validator.ValidateAndThrowAsync(profitYear, cancellationToken);
 
+        string userName = _appUser.UserName ?? "Unknown";
 
         return await _dataContextFactory.UseWritableContext(async ctx =>
         {
@@ -93,7 +94,7 @@ public class FrozenService: IFrozenService
             await ctx.FrozenStates.Where(x => x.IsActive).ForEachAsync(x => x.IsActive = false, cancellationToken);
 
             //Create new record
-            var frozenState = new FrozenState { IsActive = true, ProfitYear = profitYear, AsOfDateTime = asOfDateTime, FrozenBy = _appUser.UserName ?? "Unknown"};
+            var frozenState = new FrozenState { IsActive = true, ProfitYear = profitYear, AsOfDateTime = asOfDateTime, FrozenBy = userName };
             ctx.FrozenStates.Add(frozenState);
 
             await ctx.SaveChangesAsync(cancellationToken);
