@@ -967,6 +967,11 @@ BEGIN
      WHERE EXISTS (SELECT SSN FROM DEMOGRAPHIC d WHERE d.SSN = pd.SSN);
 
 
+-- https://demoulas.atlassian.net/browse/PS-1147
+Update PROFIT_DETAIL pd
+    SET MONTH_TO_DATE = 1 
+        WHERE MONTH_TO_DATE = 20;
+
 -- Approimate the creation date to aid in correct sorting of the transactions
 UPDATE PROFIT_DETAIL
 SET CREATED_UTC = TO_TIMESTAMP(
