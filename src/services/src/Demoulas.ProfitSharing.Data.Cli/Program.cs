@@ -208,6 +208,8 @@ public sealed class Program
         rootCommand.AddCommand(generateMarkdownCommand);
         rootCommand.AddCommand(GenerateScriptHelper.CreateGenerateUpgradeScriptCommand(configuration, args, commonOptions));
         rootCommand.AddCommand(validateImportCommand);
+        rootCommand.AddCommand(runSqlCommandForNavigation);
+        
 
         return rootCommand.InvokeAsync(args);
     }

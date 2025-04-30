@@ -475,6 +475,7 @@ export interface EmployeeDetails {
   currentVestedAmount: number;
   currentEtva: number;
   previousEtva: number;
+  missives: number[] | null;
 }
 
 export interface MasterInquiryResponseType {
@@ -839,11 +840,13 @@ export interface CreateMilitaryContributionRequest extends ProfitYearRequest {
   badgeNumber: number;
   contributionAmount: number;
   contributionDate: Date;
+  addContributionYear: boolean;
 }
 
 export interface MilitaryContribution {
   contributionDate: Date | null;
   contributionAmount: number | null;
+  addContributionYear: boolean | false;
 }
 
 export interface YearEndProfitSharingEmployee {
@@ -1103,6 +1106,12 @@ export interface ForfeitureAdjustmentResponse {
     results: ForfeitureAdjustmentDetail[];
   };
 }
+
+export interface MissiveResponse {
+  id:number;
+  message: string;
+}
+
 export interface RowCountResult {
   tableName: string;
   rowCount: number;

@@ -12,6 +12,7 @@ const MasterInquiry = () => {
   const { masterInquiryEmployeeDetails } = useSelector((state: RootState) => state.inquiry);
 
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
+  const { missives } = useSelector((state: RootState) => state.lookups);
 
   return (
     <Page label="MASTER INQUIRY (008-10)">
@@ -27,7 +28,7 @@ const MasterInquiry = () => {
           </DSMAccordion>
         </Grid2>
 
-        {masterInquiryEmployeeDetails && <MasterInquiryEmployeeDetails details={masterInquiryEmployeeDetails} />}
+        {masterInquiryEmployeeDetails && <MasterInquiryEmployeeDetails details={masterInquiryEmployeeDetails} missives={missives}/>}
 
         <Grid2 size={{ xs: 12 }} width="100%">
           <MasterInquiryGrid

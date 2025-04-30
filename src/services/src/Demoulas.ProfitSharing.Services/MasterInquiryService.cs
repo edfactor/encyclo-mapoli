@@ -36,15 +36,18 @@ public class MasterInquiryService : IMasterInquiryService
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly ILogger _logger;
     private readonly ITotalService _totalService;
+    private readonly IMissiveService _missiveService;
 
     public MasterInquiryService(
         IProfitSharingDataContextFactory dataContextFactory,
         ITotalService totalService,
-        ILoggerFactory loggerFactory
+        ILoggerFactory loggerFactory,
+        IMissiveService missiveService
     )
     {
         _dataContextFactory = dataContextFactory;
         _totalService = totalService;
+        _missiveService = missiveService;
         _logger = loggerFactory.CreateLogger<MasterInquiryService>();
     }
 
@@ -381,6 +384,8 @@ public class MasterInquiryService : IMasterInquiryService
             _logger.LogWarning(ex, "Failed to retrieve balances for SSN {SSN}", ssn);
         }
 
+        var missives = await _missiveService.DetermineMissivesForSsn(ssn, currentYear, cancellationToken);
+
         return new EmployeeDetails
         {
             IsEmployee = true,
@@ -409,6 +414,7 @@ public class MasterInquiryService : IMasterInquiryService
             CurrentVestedAmount = (currentBalance?.VestedBalance ?? 0),
             CurrentEtva = memberData.CurrentPayProfit?.Etva ?? 0,
             PreviousEtva = memberData.PreviousPayProfit?.Etva ?? 0,
+            Missives = missives
         };
     }
 

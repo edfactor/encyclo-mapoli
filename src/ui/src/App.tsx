@@ -14,6 +14,7 @@ import { clearUserData, setUserGroups, setUsername } from "./reduxstore/slices/s
 import { RootState } from "./reduxstore/store";
 import EnvironmentUtils from "./utils/environmentUtils";
 import { Settings } from "@mui/icons-material";
+import { useLazyGetMissivesQuery } from "reduxstore/api/LookupsApi";
 
 // Types
 interface BuildInfo {
@@ -34,6 +35,7 @@ const App = () => {
   const [buildInfoText, setBuildInfoText] = useState("");
   const { buildNumber } = useSelector((state: RootState) => state.common);
   const [oktaAuth, setOktaAuth] = useState<any>(null);
+  const [loadMissives, { isFetching }] = useLazyGetMissivesQuery();
 
   useEffect(() => {
     const config = oktaConfig(clientId, issuer);
@@ -64,6 +66,9 @@ const App = () => {
 
         const userGroups = tokenPayload.groups || [];
         dispatch(setUserGroups(userGroups));
+
+        // Load lookup data
+        loadMissives();
       } catch (error) {
         console.warn("Could not parse token for username:", error);
       }

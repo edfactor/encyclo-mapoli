@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
-using Demoulas.Security;
+using Demoulas.Common.Contracts.Contracts.Response;
+
 
 namespace Demoulas.ProfitSharing.Security;
 public static class RolePermissionList
