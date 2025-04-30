@@ -33,7 +33,6 @@ export const ItOperations = createApi({
       return headers;
     }
   }),
-  reducerPath: "frozenApi",
   endpoints: (builder) => ({
     getFrozenStateResponse: builder.query<FrozenStateResponse, void>({
       query: () => ({
