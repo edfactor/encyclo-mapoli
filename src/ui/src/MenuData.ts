@@ -1,52 +1,52 @@
 import { RouteCategory } from "./types/MenuTypes";
 import { CAPTIONS, MENU_LABELS, ROUTES } from "./constants";
 import { ImpersonationRoles, NavigationDto, NavigationResponseDto } from "./reduxstore/types";
-import EnvironmentUtils from "./utils/environmentUtils";
-import { subtle } from "crypto";
-import { sub } from "date-fns";
-import { Dataset, DateRangeTwoTone } from "@mui/icons-material";
-import { responsiveFontSizes } from "@mui/material";
+// import EnvironmentUtils from "./utils/environmentUtils";
+// import { subtle } from "crypto";
+// import { sub } from "date-fns";
+// import { Dataset, DateRangeTwoTone } from "@mui/icons-material";
+// import { responsiveFontSizes } from "@mui/material";
 import { RouteData } from "smart-ui-library";
-import zIndex from "@mui/material/styles/zIndex";
-import { Z_ASCII } from "zlib";
+// import zIndex from "@mui/material/styles/zIndex";
+// import { Z_ASCII } from "zlib";
 
 
 
-const beneficiaries: RouteCategory = {
-  menuLabel: MENU_LABELS.BENEFICIARIES,
-  parentRoute: MENU_LABELS.BENEFICIARIES,
-  items: [{ caption: CAPTIONS.SUMMARY, route: "" }],
-  disabled: true
-};
+// const beneficiaries: RouteCategory = {
+//   menuLabel: MENU_LABELS.BENEFICIARIES,
+//   parentRoute: MENU_LABELS.BENEFICIARIES,
+//   items: [{ caption: CAPTIONS.SUMMARY, route: "" }],
+//   disabled: true
+// };
 
-const distributions: RouteCategory = {
-  menuLabel: MENU_LABELS.DISTRIBUTIONS,
-  parentRoute: MENU_LABELS.DISTRIBUTIONS,
-  items: [{ caption: CAPTIONS.SUMMARY, route: "" }],
-  disabled: true
-};
+// const distributions: RouteCategory = {
+//   menuLabel: MENU_LABELS.DISTRIBUTIONS,
+//   parentRoute: MENU_LABELS.DISTRIBUTIONS,
+//   items: [{ caption: CAPTIONS.SUMMARY, route: "" }],
+//   disabled: true
+// };
 
-const reconciliation: RouteCategory = {
-  menuLabel: MENU_LABELS.RECONCILIATION,
-  parentRoute: MENU_LABELS.RECONCILIATION,
-  items: [{ caption: CAPTIONS.SUMMARY, route: "" }],
-  disabled: true
-};
+// const reconciliation: RouteCategory = {
+//   menuLabel: MENU_LABELS.RECONCILIATION,
+//   parentRoute: MENU_LABELS.RECONCILIATION,
+//   items: [{ caption: CAPTIONS.SUMMARY, route: "" }],
+//   disabled: true
+// };
 
-const inquiries: RouteCategory = {
-  menuLabel: MENU_LABELS.INQUIRIES,
-  parentRoute: MENU_LABELS.INQUIRIES,
-  items: [{ caption: CAPTIONS.MASTER_INQUIRY, route: ROUTES.MASTER_INQUIRY }]
-};
+// const inquiries: RouteCategory = {
+//   menuLabel: MENU_LABELS.INQUIRIES,
+//   parentRoute: MENU_LABELS.INQUIRIES,
+//   items: [{ caption: CAPTIONS.MASTER_INQUIRY, route: ROUTES.MASTER_INQUIRY }]
+// };
 
-const drawer: RouteCategory = {
-  menuLabel: MENU_LABELS.YEAR_END,
-  parentRoute: MENU_LABELS.YEAR_END,
-  items: [
-    { caption: MENU_LABELS.DECEMBER_ACTIVITIES, route: ROUTES.DECEMBER_PROCESS_ACCORDION },
-    { caption: MENU_LABELS.FISCAL_CLOSE, route: ROUTES.FISCAL_CLOSE }
-  ]
-};
+// const drawer: RouteCategory = {
+//   menuLabel: MENU_LABELS.YEAR_END,
+//   parentRoute: MENU_LABELS.YEAR_END,
+//   items: [
+//     { caption: MENU_LABELS.DECEMBER_ACTIVITIES, route: ROUTES.DECEMBER_PROCESS_ACCORDION },
+//     { caption: MENU_LABELS.FISCAL_CLOSE, route: ROUTES.FISCAL_CLOSE }
+//   ]
+// };
 
 const localStorageImpersonating: string | null = localStorage.getItem("impersonatingRole");
 
@@ -67,8 +67,8 @@ const it_operations: RouteCategory = {
 // ];
 
 export const MenuData = (data:NavigationResponseDto | undefined): RouteCategory[] => {
-  let finalData: RouteCategory[] = [];
-  data?.navigation.filter(m=>m.parentId ==null).sort((a, b) => b.orderNumber - a.orderNumber).map((values:NavigationDto,index) => {
+  const finalData: RouteCategory[] = [];
+  data?.navigation.filter(m=>m.parentId ==null).sort((a, b) => b.orderNumber - a.orderNumber).map((values:NavigationDto) => {
     finalData.push({
       menuLabel: values.title, 
       parentRoute: values.title.toLocaleLowerCase(),
@@ -85,7 +85,7 @@ export const MenuData = (data:NavigationResponseDto | undefined): RouteCategory[
 }
 const getRouteData = (data: NavigationDto[]):RouteData[] =>{
   const response: RouteData[] = [];
-  data.map((value, index)  => {
+  data.map((value)  => {
     const obj: RouteData = { // Initialize with an empty object or default values
       caption: value.title,
       route: value.url, 
@@ -135,8 +135,8 @@ const addSubTitle = (subTitle?:string):string =>{
 }
 
 export const menuLevels =(data: NavigationResponseDto | undefined): MenuLevel[] =>{
-  let yearEndList = data?.navigation.filter(m=>m.id == 54)[0]; //Id 54 is for Year End. It will have the list of December Activities & Fiscal Close. 
-  let menuLevel: MenuLevel[] = [];
+  const yearEndList = data?.navigation.filter(m=>m.id == 54)[0]; //Id 54 is for Year End. It will have the list of December Activities & Fiscal Close. 
+  const menuLevel: MenuLevel[] = [];
   yearEndList?.items?.map((value) => {
     menuLevel.push(
       {
@@ -148,7 +148,7 @@ export const menuLevels =(data: NavigationResponseDto | undefined): MenuLevel[] 
   return menuLevel;
 }
 const poplulateTopPage = (data: NavigationDto[]):TopPage[] =>{
-  let topPage:TopPage[] = [];
+  const topPage:TopPage[] = [];
   data.map((value) => {
     topPage.push(
       {
@@ -162,7 +162,7 @@ const poplulateTopPage = (data: NavigationDto[]):TopPage[] =>{
   return topPage;
 }
 const populateSubPages = (data: NavigationDto[]):SubPages[] =>{
-  let subPages:SubPages[] = [];
+  const subPages:SubPages[] = [];
   data.map((value) => {
     subPages.push(
       {
