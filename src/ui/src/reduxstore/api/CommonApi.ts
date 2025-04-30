@@ -14,9 +14,7 @@ export const CommonApi = createApi({
     mode: "cors",
     prepareHeaders
   }),
-
   reducerPath: "commonApi",
-
   endpoints: (builder) => ({
     getAppVersion: builder.query<AppVersionInfo, void>({
       query: () => ({

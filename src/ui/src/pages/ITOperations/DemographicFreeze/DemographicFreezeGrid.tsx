@@ -1,7 +1,7 @@
 import { Typography } from "@mui/material";
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { useLazyGetHistoricalFrozenStateResponseQuery } from "reduxstore/api/ItOperations";
+import { useLazyGetHistoricalFrozenStateResponseQuery } from "reduxstore/api/ItOperationsApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, Pagination } from "smart-ui-library";
 import { GetFreezeColumns } from "./DemographicFreezeGridColumns";
