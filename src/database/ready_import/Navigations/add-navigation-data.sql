@@ -19,7 +19,7 @@ INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUM
 VALUES(54,null, 'YEAR END', '','', 1, 5, '');
 --December Activities
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON) 
-VALUES(1,54, 'December Activities', '','', 1, 1, '');
+VALUES(1,54, 'December Activities', '','December Activities', 1, 1, '');
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON) 
 VALUES(2,1, 'Clean up Reports', '','', 1, 1, '');
 --sub values for Clean up Reports
@@ -48,7 +48,7 @@ INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUM
 VALUES(13,1, 'Profit Share Report', 'PAY426','profit-share-report', 1, 9, '');
 --Fiscal Close
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON) 
-VALUES(14,54, 'Fiscal Close', '','', 1, 2, '');
+VALUES(14,54, 'Fiscal Close', '','Fiscal Close', 1, 2, '');
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON) 
 VALUES(15,14, 'Manage Executive Hours and Dollars', 'TPR008-09','manage-executive-hours-and-dollars', 1, 1, '');
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON) 

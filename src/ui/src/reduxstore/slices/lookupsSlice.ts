@@ -2,17 +2,20 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 import {
   CalendarResponseDto,
+  MissiveResponse,
   ProfitYearRequest
 } from "reduxstore/types";
 
 export interface LookupState {
   accountingYearData: CalendarResponseDto | null;
   accountingYearRequestParams: ProfitYearRequest | null;
+  missives: MissiveResponse[] | null;
 }
 
 const initialState: LookupState = {
   accountingYearData: null,
-  accountingYearRequestParams: null
+  accountingYearRequestParams: null,
+  missives: null
 };
 
 export const lookupsSlice = createSlice({
@@ -31,7 +34,12 @@ export const lookupsSlice = createSlice({
     },
     clearAccountingYearData: (state) => {
       state.accountingYearData = null;
-    }
+    },
+
+    setMissivesData: (state, action: PayloadAction<MissiveResponse[]>) => {
+      state.missives = action.payload;
+    },
+
   }
 });
 
@@ -39,6 +47,7 @@ export const {
   setAccountingYearParams,
   clearAccountingYearRequestParams,
   setAccountingYearData,
-  clearAccountingYearData
+  clearAccountingYearData,
+  setMissivesData,
 } = lookupsSlice.actions;
 export default lookupsSlice.reducer;

@@ -89,6 +89,7 @@ const RouterSubAssembly: React.FC = () => {
     <>
       <MenuBar
         menuInfo={MenuData(data)}
+        navigationData={data}
         impersonationMultiSelect={
           showImpersonation ? (
             <ImpersonationMultiSelect
@@ -160,7 +161,7 @@ const RouterSubAssembly: React.FC = () => {
               }}>
               <DSMDynamicBreadcrumbs />
             </Box>
-            <PSDrawer />
+            <PSDrawer navigationData={data} />
             <RouteSecurity oktaEnabled={oktaEnabled}>
               <Route
                 path={ROUTES.DEMOGRAPHIC_BADGES}
