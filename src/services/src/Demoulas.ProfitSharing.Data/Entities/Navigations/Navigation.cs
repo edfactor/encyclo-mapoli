@@ -17,6 +17,7 @@ public sealed class Navigation
     public string? Url { get; set; }
     public byte? StatusId { get; set; }
     public byte OrderNumber { get; set; }
+    public bool? Disabled { get; set; }
     public string? Icon { get; set; }
 
     public List<NavigationRole>? RequiredRoles { get; set; } = [];

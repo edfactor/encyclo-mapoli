@@ -47,7 +47,8 @@ public class NavigationService : INavigationService
                     Title = x.Title,
                     Url = x.Url,
                     SubTitle = x.SubTitle,
-                    Items = BuildTree(x.Id)
+                    Items = BuildTree(x.Id),
+                    Disabled = x.Disabled
                 })
                 .ToList();
         }

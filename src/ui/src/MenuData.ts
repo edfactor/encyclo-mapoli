@@ -18,7 +18,7 @@ export const MenuData = (data:NavigationResponseDto | undefined): RouteCategory[
     finalData.push({
       menuLabel: values.title, 
       parentRoute: values.title.toLocaleLowerCase(),
-      disabled: false, 
+      disabled: values.disabled, 
       underlined: false, 
       roles: values.requiredRoles, 
       items: values.items && values.items.length>0 ? getRouteData(values.items): undefined
@@ -85,7 +85,7 @@ const poplulateTopPage = (data: NavigationDto[]):TopPage[] =>{
     topPage.push(
       {
          topTitle: value.title + addSubTitle(value.subTitle),
-         disabled: false,
+         disabled: value.disabled,
          topRoute: value.url,
          subPages: value.items && value.items.length>0 ? populateSubPages(value.items): []
       }
@@ -99,7 +99,7 @@ const populateSubPages = (data: NavigationDto[]):SubPages[] =>{
     subPages.push(
       {
         subTitle: value.title + addSubTitle(value.subTitle),
-        disabled: false, 
+        disabled: value.disabled, 
         subRoute: value.url
       }
     )
