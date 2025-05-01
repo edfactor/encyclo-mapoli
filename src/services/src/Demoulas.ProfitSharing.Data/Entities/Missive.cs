@@ -11,6 +11,7 @@ public class Missive
     public static class Constants 
     {
         public const int VestingIncreasedOnCurrentBalance = 1;
+        public const int VestingIsNow100Percent = 2;
     }
 
     public int Id { get; set; }
