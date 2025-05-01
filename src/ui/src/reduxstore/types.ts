@@ -1066,16 +1066,6 @@ export interface ForfeitureAdjustmentRequest {
   isSortDescending?: boolean;
 }
 
-export interface CreateForfeitureAdjustmentRequest {
-  clientNumber: number;
-  badgeNumber: number;
-  startingBalance: number;
-  forfeitureAmount: number;
-  netBalance: number;
-  netVested: number;
-  profitYear: number;
-}
-
 export interface ForfeitureAdjustmentUpdateRequest {
   clientNumber: number;
   badgeNumber: number;

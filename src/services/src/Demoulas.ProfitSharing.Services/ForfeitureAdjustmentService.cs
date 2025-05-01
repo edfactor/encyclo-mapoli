@@ -241,28 +241,57 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                 {
                     // For forfeit: Set PY_PS_ETVA to 0 and increment enrollment by 2
                     payProfit.Etva = 0;  // PY_PS_ETVA
+
+                    // Update EnrollmentId using ExecuteUpdateAsync - read-only resource constraints otherwise
+                    byte newEnrollmentId;
                     if (payProfit.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions)
                     {
-                        payProfit.EnrollmentId = Enrollment.Constants.NewVestingPlanHasForfeitureRecords;
+                        newEnrollmentId = Enrollment.Constants.NewVestingPlanHasForfeitureRecords;
                     }
                     else if (payProfit.EnrollmentId == Enrollment.Constants.OldVestingPlanHasContributions)
                     {
-                        payProfit.EnrollmentId = Enrollment.Constants.OldVestingPlanHasForfeitureRecords;
+                        newEnrollmentId = Enrollment.Constants.OldVestingPlanHasForfeitureRecords;
                     }
                     else
                     {
-                        payProfit.EnrollmentId = Enrollment.Constants.NotEnrolled;
+                        newEnrollmentId = Enrollment.Constants.NotEnrolled;
                     }
+
+                    await context.PayProfits
+                        .Where(pp => pp.DemographicId == employeeData.Id && pp.ProfitYear == req.ProfitYear)
+                        .ExecuteUpdateAsync(p => p
+                            .SetProperty(pp => pp.EnrollmentId, newEnrollmentId)
+                            .SetProperty(pp => pp.LastUpdate, DateTime.Now), 
+                            cancellationToken);
                 }
                 else
                 {
                     // For un-forfeit: Recalculate PY_PS_ETVA and decrement enrollment by 2
                     // @Russ/Phil - any insights to recalculate ETVA?
-                    payProfit.EnrollmentId = (byte)(payProfit.EnrollmentId - 2);  // PY_PS_ENROLLED mapped to EnrollmentId
-                }
+                    byte newEnrollmentId;
+                    
+                    // Enrollment ID math based on known constants to prevent magic numbers
+                    if (payProfit.EnrollmentId == Enrollment.Constants.NewVestingPlanHasForfeitureRecords)
+                    {
+                        newEnrollmentId = Enrollment.Constants.NewVestingPlanHasContributions;
+                    }
+                    else if (payProfit.EnrollmentId == Enrollment.Constants.OldVestingPlanHasForfeitureRecords)
+                    {
+                        newEnrollmentId = Enrollment.Constants.OldVestingPlanHasContributions;
+                    }
+                    else
+                    {
+                        // Keep same if not a known constant with a -/+2 option.
+                        newEnrollmentId = payProfit.EnrollmentId;
+                    }
 
-                // all times should be local, not utc
-                payProfit.LastUpdate = DateTime.Now;
+                    await context.PayProfits
+                        .Where(pp => pp.DemographicId == employeeData.Id && pp.ProfitYear == req.ProfitYear)
+                        .ExecuteUpdateAsync(p => p
+                            .SetProperty(pp => pp.EnrollmentId, newEnrollmentId)
+                            .SetProperty(pp => pp.LastUpdate, DateTime.Now), 
+                            cancellationToken);
+                }
             }
 
             await context.SaveChangesAsync(cancellationToken);
@@ -295,97 +324,6 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                 NetVested = netVested
             };
         }, cancellationToken);
-
-        return result ?? new ForfeitureAdjustmentReportDetail
-        {
-            ClientNumber = 0,
-            BadgeNumber = 0,
-            StartingBalance = 0,
-            ForfeitureAmount = 0,
-            NetBalance = 0,
-            NetVested = 0
-        };
-    }
-
-    public async Task<ForfeitureAdjustmentReportDetail> CreateForfeitureAdjustmentAsync(CreateForfeitureAdjustmentRequest req, CancellationToken cancellationToken = default)
-    {
-        if (req.ForfeitureAmount == 0)
-        {
-            throw new ArgumentException("Forfeiture amount cannot be zero");
-        }
-
-        if (req.ProfitYear <= 0)
-        {
-            throw new ArgumentException("Profit year must be provided");
-        }
-
-        ForfeitureAdjustmentReportDetail? result = null;
-
-        try
-        {
-            await _dbContextFactory.UseWritableContext(async context =>
-            {
-                var employeeData = await context.Demographics
-                .Where(d => d.BadgeNumber == req.BadgeNumber)
-                .Select(d => new
-                {
-                    d.Id,
-                    d.Ssn,
-                    d.BadgeNumber,
-                    d.StoreNumber,
-                    PayProfit = context.PayProfits
-                        .FirstOrDefault(pp => pp.DemographicId == d.Id && pp.ProfitYear == req.ProfitYear)
-                })
-                .FirstOrDefaultAsync(cancellationToken);
-
-                if (employeeData == null)
-                {
-                    throw new ArgumentException($"Employee with badge number {req.BadgeNumber} not found");
-                }
-
-                var payProfit = await context.PayProfits
-                    .FirstOrDefaultAsync(pp => pp.DemographicId == employeeData.Id && pp.ProfitYear == req.ProfitYear, cancellationToken);
-
-                if (payProfit == null)
-                {
-                    throw new ArgumentException($"No profit sharing data found for employee with badge number {req.BadgeNumber} for year {req.ProfitYear}");
-                }
-
-                bool isForfeit = req.ForfeitureAmount > 0;
-                string remarkText = isForfeit ? "FORFEIT" : "UN-FORFEIT";
-
-                var profitDetail = new ProfitDetail
-                {
-                    Ssn = employeeData.Ssn,
-                    ProfitYear = (short)req.ProfitYear,
-                    ProfitYearIteration = 0,
-                    ProfitCodeId = ProfitCode.Constants.OutgoingForfeitures.Id, // Code 2 for forfeitures
-                    Remark = remarkText,
-                    Forfeiture = Math.Abs(req.ForfeitureAmount) * (isForfeit ? -1 : 1), // Negative for forfeit, positive for un-forfeit
-                    MonthToDate = (byte)DateTime.UtcNow.Month,
-                    YearToDate = (short)DateTime.UtcNow.Year,
-                    CreatedUtc = DateTimeOffset.UtcNow
-                };
-
-                context.ProfitDetails.Add(profitDetail);
-
-                await context.SaveChangesAsync(cancellationToken);
-
-                result = new ForfeitureAdjustmentReportDetail
-                {
-                    ClientNumber = employeeData.StoreNumber > 0 ? employeeData.StoreNumber : 0,
-                    BadgeNumber = employeeData.BadgeNumber,
-                    StartingBalance = req.StartingBalance,
-                    ForfeitureAmount = req.ForfeitureAmount,
-                    NetBalance = req.NetBalance,
-                    NetVested = req.NetVested
-                };
-            }, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            throw new ArgumentException($"Error creating forfeiture adjustment: {ex.Message}", ex);
-        }
 
         return result ?? new ForfeitureAdjustmentReportDetail
         {

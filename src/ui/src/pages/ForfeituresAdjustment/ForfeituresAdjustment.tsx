@@ -7,11 +7,11 @@ import { CAPTIONS } from "../../constants";
 import ForfeituresAdjustmentGrid from "./ForfeituresAdjustmentGrid";
 import ForfeituresAdjustmentSearchParameters from "./ForfeituresAdjustmentSearchParameters";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
-import MasterInquiryEmployeeDetails from "pages/MasterInquiry/MasterInquiryEmployeeDetails";
 import { RootState } from "reduxstore/store";
 import AddForfeitureModal from "./AddForfeitureModal";
 import { useLazyGetForfeitureAdjustmentsQuery } from "reduxstore/api/YearsEndApi";
 import { useLazyGetProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
+import ForfeitureAdjustmentEmployeeDetails from "./ForfeitureAdjustmentEmployeeDetails";
 
 const ForfeituresAdjustment = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
@@ -31,7 +31,7 @@ const ForfeituresAdjustment = () => {
   const handleSearchComplete = (loaded: boolean) => {
     setInitialSearchLoaded(loaded);
     setShowEmployeeDetails(loaded);
-    
+
     // If we have results, get employee details
     if (loaded && forfeitureAdjustmentData?.response?.results && forfeitureAdjustmentData.response.results.length > 0) {
       const badgeNumber = forfeitureAdjustmentData.response.results[0].badgeNumber;
@@ -74,11 +74,24 @@ const ForfeituresAdjustment = () => {
     }
   };
 
+  useEffect(() => {
+    if (forfeitureAdjustmentQueryParams && (!forfeitureAdjustmentData || !initialSearchLoaded)) {
+      triggerSearch(forfeitureAdjustmentQueryParams)
+        .unwrap()
+        .then(() => {
+          setInitialSearchLoaded(true);
+        })
+        .catch((error: unknown) => {
+          console.error("Error refreshing forfeiture adjustments:", error);
+        });
+    }
+  }, []);
+
   // Reset employee details visibility when search results change
   useEffect(() => {
     if (forfeitureAdjustmentData) {
       setShowEmployeeDetails(true);
-      
+
       // If we have results, get employee details
       if (forfeitureAdjustmentData.response?.results && forfeitureAdjustmentData.response.results.length > 0) {
         const badgeNumber = forfeitureAdjustmentData.response.results[0].badgeNumber;
@@ -104,7 +117,7 @@ const ForfeituresAdjustment = () => {
         </Grid2>
 
         {showEmployeeDetails && masterInquiryEmployeeDetails && (
-          <MasterInquiryEmployeeDetails details={masterInquiryEmployeeDetails} />
+          <ForfeitureAdjustmentEmployeeDetails details={masterInquiryEmployeeDetails} />
         )}
 
         <Grid2 width="100%">

@@ -112,7 +112,6 @@ import {
   YearEndProfitSharingReportSummaryResponse,
   ForfeitureAdjustmentRequest,
   ForfeitureAdjustmentResponse,
-  CreateForfeitureAdjustmentRequest,
   ForfeitureAdjustmentUpdateRequest,
   ForfeitureAdjustmentDetail
 } from "reduxstore/types";
@@ -1037,13 +1036,6 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    createForfeitureAdjustment: builder.mutation<ForfeitureAdjustmentDetail, CreateForfeitureAdjustmentRequest>({
-      query: (params) => ({
-        url: "yearend/forfeiture-adjustments/create",
-        method: "POST",
-        body: params
-      })
-    }),
     updateForfeitureAdjustment: builder.mutation<ForfeitureAdjustmentDetail, ForfeitureAdjustmentUpdateRequest>({
       query: (params) => ({
         url: "yearend/forfeiture-adjustments/update",
@@ -1092,6 +1084,5 @@ export const {
   useLazyGetProfitMasterStatusQuery,
   useGetForfeitureAdjustmentsQuery,
   useLazyGetForfeitureAdjustmentsQuery,
-  useCreateForfeitureAdjustmentMutation,
   useUpdateForfeitureAdjustmentMutation
 } = YearsEndApi;

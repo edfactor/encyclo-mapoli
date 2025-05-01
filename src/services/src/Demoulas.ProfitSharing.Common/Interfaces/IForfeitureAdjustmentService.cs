@@ -7,5 +7,4 @@ public interface IForfeitureAdjustmentService
 {
     public Task<ForfeitureAdjustmentReportResponse> GetForfeitureAdjustmentReportAsync(ForfeitureAdjustmentRequest req, CancellationToken cancellationToken = default);
     public Task<ForfeitureAdjustmentReportDetail> UpdateForfeitureAdjustmentAsync(ForfeitureAdjustmentUpdateRequest req, CancellationToken cancellationToken = default);
-    public Task<ForfeitureAdjustmentReportDetail> CreateForfeitureAdjustmentAsync(CreateForfeitureAdjustmentRequest req, CancellationToken cancellationToken = default);
 }
