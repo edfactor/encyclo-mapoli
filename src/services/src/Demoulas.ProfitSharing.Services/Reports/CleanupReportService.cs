@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using Demoulas.Common.Contracts.Contracts.Request;
+﻿using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common;
@@ -368,10 +367,8 @@ FROM FILTERED_DEMOGRAPHIC p1
     {
         using (_logger.BeginScope("Request BEGIN DISTRIBUTIONS AND FORFEITURES"))
         {
-            var results = await _dataContextFactory.UseReadOnlyContext(async ctx =>
+            var results = _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
-                var calInfo =
-                    await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
                 var nameAndDobQuery = ctx.Demographics
                     .Include(d => d.PayProfits.Where(p => p.ProfitYear == req.ProfitYear))
                     .Select(x => new
@@ -422,8 +419,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                              !transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value)))) &&
                           (req.StartMonth == 0 || pd.MonthToDate >= req.StartMonth) &&
                           (req.EndMonth == 0 || pd.MonthToDate <= req.EndMonth)
-                    orderby nameAndDob.FullName
-                    select new DistributionsAndForfeitureResponse
+                    select new
                     {
                         BadgeNumber = nameAndDob.BadgeNumber,
                         PsnSuffix = nameAndDob.PsnSuffix,
@@ -434,43 +430,68 @@ FROM FILTERED_DEMOGRAPHIC p1
                         StateTax = pd.StateTaxes,
                         FederalTax = pd.FederalTaxes,
                         ForfeitAmount = pd.ProfitCodeId == 2 ? pd.Forfeiture : 0,
-                        Date = pd.MonthToDate > 0 ? new DateOnly(pd.YearToDate, pd.MonthToDate, 1) : null,
-                        Age = (byte)(pd.MonthToDate > 0 && pd.MonthToDate < 13
-                            ? nameAndDob.DateOfBirth.Age(new DateOnly(pd.YearToDate, pd.MonthToDate, 1).ToDateTime(TimeOnly.MinValue))
-                            : nameAndDob.DateOfBirth.Age(
-                                calInfo.FiscalEndDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Local))),
+                        pd.YearToDate,
+                        pd.MonthToDate,
+                        Date = pd.CreatedUtc,
+                        nameAndDob.DateOfBirth,
                         EnrolledId = nameAndDob.EnrolledId,
                     };
-                return query;
-            });
+                
 
-            var totals = await results.GroupBy(_ => true)
-                .Select(g => new
+                var totals = await query.GroupBy(_ => true)
+                    .Select(g => new
+                    {
+                        DistributionTotal = g.Sum(x => x.DistributionAmount),
+                        StateTaxTotal = g.Sum(x => x.StateTax),
+                        FederalTaxTotal = g.Sum(x => x.FederalTax),
+                        ForfeitureTotal = g.Sum(x => x.ForfeitAmount)
+                    })
+                    .FirstOrDefaultAsync(cancellationToken: cancellationToken) ?? new
                 {
-                    DistributionTotal = g.Sum(x => x.DistributionAmount),
-                    StateTaxTotal = g.Sum(x => x.StateTax),
-                    FederalTaxTotal = g.Sum(x => x.FederalTax),
-                    ForfeitureTotal = g.Sum(x => x.ForfeitAmount)
-                })
-                .FirstOrDefaultAsync(cancellationToken: cancellationToken) ?? new
-            {
-                DistributionTotal = 0m,
-                StateTaxTotal = 0m,
-                FederalTaxTotal = 0m,
-                ForfeitureTotal = 0m
-            };
-            
+                    DistributionTotal = 0m, StateTaxTotal = 0m, FederalTaxTotal = 0m, ForfeitureTotal = 0m
+                };
 
-            return new DistributionsAndForfeitureTotalsResponse()
-            {
-                ReportName = "Distributions and Forfeitures",
-                ReportDate = DateTimeOffset.Now,
-                DistributionTotal = totals.DistributionTotal,
-                StateTaxTotal = totals.StateTaxTotal,
-                FederalTaxTotal = totals.FederalTaxTotal,
-                ForfeitureTotal = totals.ForfeitureTotal,
-                Response = await results.ToPaginationResultsAsync(req, cancellationToken)
-            };
+                var paginated = await query.ToPaginationResultsAsync(req, cancellationToken);
+
+                var calInfo =
+                    await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
+                var apiResponse = paginated.Results.Select(pd => new DistributionsAndForfeitureResponse
+                {
+                    BadgeNumber = pd.BadgeNumber,
+                    PsnSuffix = pd.PsnSuffix,
+                    Ssn = pd.Ssn,
+                    EmployeeName = pd.EmployeeName,
+                    DistributionAmount = pd.DistributionAmount,
+                    TaxCode = pd.TaxCode,
+                    StateTax = pd.StateTax,
+                    FederalTax = pd.FederalTax,
+                    ForfeitAmount = pd.ForfeitAmount,
+                    Date = pd.MonthToDate is > 0 and <= 12 ? new DateOnly(pd.YearToDate, pd.MonthToDate, 1) : pd.Date.ToDateOnly(),
+                    Age = (byte)(pd.MonthToDate is > 0 and < 13
+                        ? pd.DateOfBirth.Age(
+                            new DateOnly(pd.YearToDate, pd.MonthToDate, 1).ToDateTime(TimeOnly.MinValue))
+                        : pd.DateOfBirth.Age(
+                            calInfo.FiscalEndDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Local))),
+                    EnrolledId = pd.EnrolledId
+                });
+
+
+                return new DistributionsAndForfeitureTotalsResponse()
+                {
+                    ReportName = "Distributions and Forfeitures",
+                    ReportDate = DateTimeOffset.Now,
+                    DistributionTotal = totals.DistributionTotal,
+                    StateTaxTotal = totals.StateTaxTotal,
+                    FederalTaxTotal = totals.FederalTaxTotal,
+                    ForfeitureTotal = totals.ForfeitureTotal,
+                    Response = new PaginatedResponseDto<DistributionsAndForfeitureResponse>(req)
+                    {
+                        Results = apiResponse.ToList(), Total = paginated.Total
+                    }
+                };
+            });
+            
+            return await results;
         }
     }
 

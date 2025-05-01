@@ -4,8 +4,7 @@ import { RootState } from "reduxstore/store";
 import {
   CreateMilitaryContributionRequest,
   MasterInquiryDetail,
-  MilitaryContributionRequest,
-  PagedReportResponse
+  MilitaryContributionRequest
 } from "reduxstore/types";
 import { url } from "./api";
 import { setMilitaryContributions, setMilitaryError } from "reduxstore/slices/militarySlice";

@@ -3,7 +3,7 @@ import { Box, Button, FormHelperText, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import { Controller, useForm } from "react-hook-form";
-import { useFreezeDemographicsMutation } from "reduxstore/api/ItOperations";
+import { useFreezeDemographicsMutation } from "reduxstore/api/ItOperationsApi";
 import * as yup from "yup";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 

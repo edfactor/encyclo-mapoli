@@ -1,7 +1,7 @@
 import { FormControl, MenuItem, Select, SelectChangeEvent } from "@mui/material";
 import { useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
-import { useLazyGetHistoricalFrozenStateResponseQuery } from "reduxstore/api/ItOperations";
+import { useLazyGetHistoricalFrozenStateResponseQuery } from "reduxstore/api/ItOperationsApi";
 import { RootState } from "reduxstore/store";
 import { mmDDYYFormat } from "../../utils/dateUtils";
 import InputLabel from "@mui/material/InputLabel";

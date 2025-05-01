@@ -840,11 +840,13 @@ export interface CreateMilitaryContributionRequest extends ProfitYearRequest {
   badgeNumber: number;
   contributionAmount: number;
   contributionDate: Date;
+  addContributionYear: boolean;
 }
 
 export interface MilitaryContribution {
   contributionDate: Date | null;
   contributionAmount: number | null;
+  addContributionYear: boolean | false;
 }
 
 export interface YearEndProfitSharingEmployee {
@@ -1062,6 +1064,14 @@ export interface ForfeitureAdjustmentRequest {
   take?: number;
   sortBy?: string;
   isSortDescending?: boolean;
+}
+
+export interface ForfeitureAdjustmentUpdateRequest {
+  clientNumber: number;
+  badgeNumber: number;
+  forfeitureAmount: number;
+  reason?: string;
+  profitYear: number;
 }
 
 export interface ForfeitureAdjustmentDetail {

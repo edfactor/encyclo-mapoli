@@ -35,6 +35,15 @@ export const GetMilitaryContributionColumns = (): ColDef[] => {
       cellClass: "left-align",
       resizable: true,
       valueFormatter: agGridNumberToCurrency
+    },
+    {
+      headerName: "Increments Contribution Years",
+      field: "incrementsContributionYears",
+      colId: "incrementsContributionYears",
+      minWidth: 120,
+      headerClass: "left-align",
+      cellClass: "left-align",
+      resizable: true
     }]
   return columns;
 };

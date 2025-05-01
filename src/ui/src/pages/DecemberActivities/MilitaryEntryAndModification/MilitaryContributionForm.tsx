@@ -1,14 +1,15 @@
-import { Button, TextField, FormLabel } from "@mui/material";
-import Grid2 from '@mui/material/Grid2';
+import { Button, Checkbox, FormControl, FormControlLabel, FormHelperText, FormLabel, TextField } from "@mui/material";
+import Grid2 from "@mui/material/Grid2";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import { useEffect } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { useCreateMilitaryContributionMutation } from "reduxstore/api/MilitaryApi";
 import { CreateMilitaryContributionRequest, MilitaryContribution } from "reduxstore/types";
 
 interface FormData {
   contributionDate: Date | null;
   contributionAmount: number | null;
+  addContributionYear: boolean | null;
 }
 
 interface MilitaryContributionFormProps {
@@ -21,19 +22,20 @@ interface MilitaryContributionFormProps {
 }
 
 const MilitaryContributionForm = ({
-                                    onSubmit,
-                                    onCancel,
-                                    initialData,
-                                    isLoading = false,
-                                    badgeNumber,
-                                    profitYear
-                                  }: MilitaryContributionFormProps) => {
+  onSubmit,
+  onCancel,
+  initialData,
+  isLoading = false,
+  badgeNumber,
+  profitYear
+}: MilitaryContributionFormProps) => {
   const [createMilitaryContribution, { isLoading: isSubmitting }] = useCreateMilitaryContributionMutation();
 
   const { control, handleSubmit, reset, formState } = useForm<FormData>({
     defaultValues: {
       contributionDate: null,
-      contributionAmount: null
+      contributionAmount: null,
+      addContributionYear: false
     }
   });
 
@@ -41,7 +43,8 @@ const MilitaryContributionForm = ({
     if (initialData) {
       reset({
         contributionDate: initialData.contributionDate,
-        contributionAmount: initialData.contributionAmount
+        contributionAmount: initialData.contributionAmount,
+        addContributionYear: false
       });
     }
   }, [initialData, reset]);
@@ -54,7 +57,8 @@ const MilitaryContributionForm = ({
 
       const contribution: MilitaryContribution = {
         contributionDate: data.contributionDate,
-        contributionAmount: data.contributionAmount
+        contributionAmount: data.contributionAmount,
+        addContributionYear: data.addContributionYear || false
       };
 
       try {
@@ -64,7 +68,8 @@ const MilitaryContributionForm = ({
           badgeNumber,
           profitYear,
           contributionDate: data.contributionDate,
-          contributionAmount: data.contributionAmount
+          contributionAmount: data.contributionAmount,
+          addContributionYear: data.addContributionYear || false
         };
 
         console.log("Calling API with request:", request);
@@ -78,7 +83,8 @@ const MilitaryContributionForm = ({
     } else {
       console.warn("Form validation failed:", {
         date: data.contributionDate,
-        amount: data.contributionAmount
+        amount: data.contributionAmount,
+        addContributionYear: data.addContributionYear
       });
     }
   };
@@ -87,7 +93,9 @@ const MilitaryContributionForm = ({
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)}>
-      <Grid2 container spacing={3}>
+      <Grid2
+        container
+        spacing={3}>
         <Grid2 xs={6}>
           <Controller
             name="contributionDate"
@@ -102,15 +110,17 @@ const MilitaryContributionForm = ({
                 error={error?.message}
                 required={true}
                 disableFuture={true}
-                minDate={new Date(profitYear-1, 0, 1)}
+                minDate={new Date(profitYear - 3, 0, 1)}
                 views={["year", "month"]}
               />
             )}
           />
         </Grid2>
 
-        <Grid2 xs={6} sx={{ padding: 2 }}>
-        <FormLabel>Contribution Amount</FormLabel>
+        <Grid2
+          xs={6}
+          sx={{ padding: 2 }}>
+          <FormLabel>Contribution Amount</FormLabel>
           <Controller
             name="contributionAmount"
             control={control}
@@ -129,10 +139,43 @@ const MilitaryContributionForm = ({
           />
         </Grid2>
 
+        <Grid2
+          xs={6}
+          sx={{ padding: 2 }}>
+          <Controller
+            name="addContributionYear"
+            control={control}
+            rules={{ required: "Add Contribution Year is required" }}
+            render={({ field, fieldState: { error } }) => (
+              <FormControl error={!!error}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={!!field.value}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      inputRef={field.ref}
+                      aria-describedby={error ? "add-contribution-year-error" : undefined}
+                    />
+                  }
+                  label="Add Contribution Year"
+                />
+                {error && <FormHelperText id="add-contribution-year-error">{error.message}</FormHelperText>}
+              </FormControl>
+            )}
+          />
+        </Grid2>
+
         {/* Form buttons */}
-        <Grid2 size={{ xs: 12 }} container spacing={2} paddingTop='8px'>
+        <Grid2
+          size={{ xs: 12 }}
+          container
+          spacing={2}
+          paddingTop="8px">
           <Grid2>
-            <Button onClick={onCancel} variant="outlined">
+            <Button
+              onClick={onCancel}
+              variant="outlined">
               Cancel
             </Button>
           </Grid2>
@@ -140,8 +183,7 @@ const MilitaryContributionForm = ({
             <Button
               type="submit"
               variant="contained"
-              disabled={isLoading || isSubmitting}
-            >
+              disabled={isLoading || isSubmitting}>
               Submit
             </Button>
           </Grid2>

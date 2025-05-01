@@ -29,7 +29,7 @@ export const LookupsApi = createApi({
       return headers;
     }
   }),
-  reducerPath: "LookupsApi",
+  reducerPath: "lookupsApi",
   endpoints: (builder) => ({
     getAccountingYear: builder.query<CalendarResponseDto, ProfitYearRequest>({
       query: (params) => ({

@@ -5,7 +5,7 @@ import yearsEndSlice from "./slices/yearsEndSlice";
 import { SecurityApi } from "./api/SecurityApi";
 import { YearsEndApi } from "./api/YearsEndApi";
 import frozenSlice from "./slices/frozenSlice";
-import { ItOperations } from "./api/ItOperations";
+import { ItOperationsApi } from "./api/ItOperationsApi";
 import { MilitaryApi } from "./api/MilitaryApi";
 import militarySlice from "./slices/militarySlice";
 import { InquiryApi } from "./api/InquiryApi";
@@ -17,6 +17,7 @@ import { CommonApi } from "./api/CommonApi";
 import commonSlice from "./slices/commonSlice";
 import { messageSlice } from "./slices/messageSlice";
 import forfeituresAdjustmentSlice from "./slices/forfeituresAdjustmentSlice";
+import { apiLoggerMiddleware } from "../middleware/apiLoggerMiddleware";
 import { NavigationApi } from "./api/NavigationApi";
 import navigationSlice  from "./slices/navigationSlice";
 
@@ -36,7 +37,7 @@ export const store = configureStore({
 
     [SecurityApi.reducerPath]: SecurityApi.reducer,
     [YearsEndApi.reducerPath]: YearsEndApi.reducer,
-    [ItOperations.reducerPath]: ItOperations.reducer,
+    [ItOperationsApi.reducerPath]: ItOperationsApi.reducer,
     [MilitaryApi.reducerPath]: MilitaryApi.reducer,
     [InquiryApi.reducerPath]: InquiryApi.reducer,
     [LookupsApi.reducerPath]: LookupsApi.reducer,
@@ -47,9 +48,10 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ serializableCheck: false })
       .concat(rtkQueryErrorToastMiddleware(true))
+      .concat(apiLoggerMiddleware)
       .concat(SecurityApi.middleware)
       .concat(YearsEndApi.middleware)
-      .concat(ItOperations.middleware)
+      .concat(ItOperationsApi.middleware)
       .concat(MilitaryApi.middleware)
       .concat(InquiryApi.middleware)
       .concat(LookupsApi.middleware)
