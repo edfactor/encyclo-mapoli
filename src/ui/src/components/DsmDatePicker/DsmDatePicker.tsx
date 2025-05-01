@@ -70,7 +70,7 @@ const DsmDatePicker: FC<MyProps> = ({
       <FormLabel
         required={required}
         error={isInvalid}
-        style={{ display: 'block', marginBottom: '8px' }}
+        style={{ display: 'block' }}
       >
         {label}
       </FormLabel>

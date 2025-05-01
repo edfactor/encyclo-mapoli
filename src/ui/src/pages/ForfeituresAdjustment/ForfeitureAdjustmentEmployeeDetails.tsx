@@ -44,7 +44,6 @@ const ForfeitureAdjustmentEmployeeDetails: React.FC<ForfeitureAdjustmentEmployee
 
   const enrollmentSection = [
     { label: "Enrolled", value: enrollmentId ? "Yes" : "No" },
-    { label: "Emp", value: badgeNumber },
     { label: "Badge", value: badgeNumber }
   ];
 
