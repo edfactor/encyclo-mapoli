@@ -14,19 +14,33 @@ const it_operations: RouteCategory = {
 
 export const MenuData = (data:NavigationResponseDto | undefined): RouteCategory[] => {
   const finalData: RouteCategory[] = [];
-  data?.navigation.filter(m=>m.parentId ==null).sort((a, b) => b.orderNumber - a.orderNumber).map((values:NavigationDto) => {
-    finalData.push({
-      menuLabel: values.title, 
-      parentRoute: values.title.toLocaleLowerCase(),
-      disabled: values.disabled, 
-      underlined: false, 
-      roles: values.requiredRoles, 
-      items: values.items && values.items.length>0 ? getRouteData(values.items): undefined
-    });
+  data?.navigation.filter(m=>m.parentId ==null).sort((a, b) => a.orderNumber - b.orderNumber).map((values:NavigationDto) => {
+    if(values.requiredRoles.length>0 && values.requiredRoles.filter(m=>m == localStorageImpersonating).length>0)
+    {
+      finalData.push({
+        menuLabel: values.title, 
+        parentRoute: values.title.toLocaleLowerCase(),
+        disabled: values.disabled, 
+        underlined: false, 
+        roles: values.requiredRoles, 
+        items: values.items && values.items.length>0 ? getRouteData(values.items): undefined
+      });
+
+    }
+    else if(values.requiredRoles.length ==0) {
+      finalData.push({
+        menuLabel: values.title, 
+        parentRoute: values.title.toLocaleLowerCase(),
+        disabled: values.disabled, 
+        underlined: false, 
+        roles: values.requiredRoles, 
+        items: values.items && values.items.length>0 ? getRouteData(values.items): undefined
+      });
+    }
   });
-  if(localStorageImpersonating == ImpersonationRoles.ItOperations) {
-  finalData.push(it_operations);
-  }
+  // if(localStorageImpersonating == ImpersonationRoles.ItOperations) {
+  // finalData.push(it_operations);
+  // }
   return finalData;
 }
 const getRouteData = (data: NavigationDto[]):RouteData[] =>{
