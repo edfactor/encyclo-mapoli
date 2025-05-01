@@ -22,7 +22,8 @@ public class MissiveMap : IEntityTypeConfiguration<Missive>
             .HasColumnName("MESSAGE");
 
         builder.HasData(
-            new Missive() { Id = 1, Message= "** VESTING INCREASED ON   CURRENT BALANCE ( > 1000 HRS) **" }
+            new Missive() { Id = Missive.Constants.VestingIncreasedOnCurrentBalance, Message= "** VESTING INCREASED ON   CURRENT BALANCE ( > 1000 HRS) **" },
+            new Missive() { Id = Missive.Constants.VestingIsNow100Percent, Message = "VEST IS NOW 100%, 65+/5 YRS" }
         );
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
 using Demoulas.ProfitSharing.Common.Extensions;
@@ -18,22 +19,27 @@ internal sealed class MissiveService : IMissiveService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly ITotalService _totalService;
+    private readonly ICalendarService _calendarService;
     private readonly ILogger<MissiveService> _logger;
 
     public MissiveService(
         IProfitSharingDataContextFactory dataContextFactory,
         ITotalService totalService,
-        ILoggerFactory loggerFactory
+        ILoggerFactory loggerFactory,
+        ICalendarService calendarService
     ) 
     {
         _dataContextFactory = dataContextFactory;
         _totalService = totalService;
+        _calendarService = calendarService;
         _logger = loggerFactory.CreateLogger<MissiveService>();
     }
     public async Task<List<int>> DetermineMissivesForSsn(int ssn, short profitYear, CancellationToken cancellation)
     {
         using (_logger.BeginScope("Searching for missives for ssn {0}", ssn.MaskSsn()))
         {
+            var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(profitYear, cancellation);
+
             var rslt = new List<int>();
             _ = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
@@ -41,6 +47,11 @@ internal sealed class MissiveService : IMissiveService
                 if (await HasNewVestingPlanHasContributions(ctx, ssn, profitYear, cancellation))
                 {
                     rslt.Add(Missive.Constants.VestingIncreasedOnCurrentBalance);
+                }
+
+                if (await VestingIsNow100Percent(ctx, ssn, calInfo, cancellation))
+                {
+                    rslt.Add(Missive.Constants.VestingIsNow100Percent);
                 }
 
                 return Task.FromResult(true);
@@ -76,5 +87,16 @@ internal sealed class MissiveService : IMissiveService
         }
 
         return false;
+    }
+
+    private static Task<bool> VestingIsNow100Percent(ProfitSharingReadOnlyDbContext ctx, int ssn, CalendarResponseDto calInfo, CancellationToken cancellation)
+    {
+        var sixtyFiveBirthDate = DateOnly.FromDateTime(DateTime.Today).AddYears(-65);
+        return (from d in ctx.Demographics
+                where d.Ssn == ssn && 
+                      d.DateOfBirth <= sixtyFiveBirthDate && 
+                      (!d.TerminationDate.HasValue || d.TerminationDate > calInfo.FiscalEndDate) &&
+                      d.TerminationCodeId != TerminationCode.Constants.Deceased
+                select d.Id).AnyAsync(cancellation);
     }
 }
