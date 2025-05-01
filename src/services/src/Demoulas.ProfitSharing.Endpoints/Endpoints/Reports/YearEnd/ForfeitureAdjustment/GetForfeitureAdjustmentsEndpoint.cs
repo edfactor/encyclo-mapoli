@@ -34,7 +34,7 @@ public class GetForfeitureAdjustmentsEndpoint : EndpointWithCsvTotalsBase<Forfei
             s.Summary = "Get forfeiture adjustments for a given year and badge number/ssn.";
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
             s.Description = "This endpoint returns a list of forfeiture adjustments for a given year and badge number/ssn.";
-            s.ExampleRequest = new ForfeitureAdjustmentRequest() { ProfitYear = 2024, Badge = "1234567890" };
+            s.ExampleRequest = new ForfeitureAdjustmentRequest() { ProfitYear = 2024, Badge = 1234567890 };
             s.ResponseExamples = new Dictionary<int, object>
             {
                 {

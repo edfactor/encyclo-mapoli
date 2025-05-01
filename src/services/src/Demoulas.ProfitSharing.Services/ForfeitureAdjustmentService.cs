@@ -21,11 +21,13 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
 {
     private readonly IProfitSharingDataContextFactory _dbContextFactory;
     private readonly ITotalService _totalService;
+    private readonly IEmbeddedSqlService _embeddedSqlService;
 
-    public ForfeitureAdjustmentService(IProfitSharingDataContextFactory dbContextFactory, ITotalService totalService)
+    public ForfeitureAdjustmentService(IProfitSharingDataContextFactory dbContextFactory, ITotalService totalService, IEmbeddedSqlService embeddedSqlService)
     {
         _dbContextFactory = dbContextFactory;
         _totalService = totalService;
+        _embeddedSqlService = embeddedSqlService;
     }
 
     private sealed class EmployeeInfo
@@ -34,14 +36,14 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
         public int BadgeNumber { get; set; }
         public int StoreNumber { get; set; }
     }
-    
+
     public Task<ForfeitureAdjustmentReportResponse> GetForfeitureAdjustmentReportAsync(ForfeitureAdjustmentRequest req, CancellationToken cancellationToken = default)
     {
         // Default to return if any need to short circuit
         var response = new ForfeitureAdjustmentReportResponse
         {
             ReportName = ForfeitureAdjustmentReportResponse.REPORT_NAME,
-            ReportDate = DateTime.UtcNow,
+            ReportDate = DateTime.Now,
             TotatNetBalance = 0,
             TotatNetVested = 0,
             Response = new PaginatedResponseDto<ForfeitureAdjustmentReportDetail>
@@ -54,7 +56,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
         return _dbContextFactory.UseReadOnlyContext(async context =>
         {
             var employeeData = await FindEmployeeAsync(context, req, cancellationToken);
-            
+
             if (employeeData == null)
             {
                 return response;
@@ -73,12 +75,18 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
 
             // Using current balance from the vesting balance - docs say should be PAYPROFT.PY_PS.AMT but not seeing that in the EF mapping.
             // @Russ/Phil - any insights?
-            decimal startingBalance = vestingBalance.CurrentBalance;
-            
+
+            // CurrentBalance comes from TotalsService.GetTotalBalanceSet. Starting balance uses the same method, but with profitYear - 1.
+            int priorProfitYear = req.ProfitYear - 1;
+            decimal startingBalance = await _embeddedSqlService.GetTotalBalanceAlt(context, (short)priorProfitYear)
+                .Where(x => x.Ssn == employeeData.Ssn)
+                .Select(x => x.Total)
+                .FirstOrDefaultAsync(cancellationToken) ?? 0;
+
             // From doc: Forfeiture Amount - when PROFIT_DETAIL.PROFIT_CODE = 2
             // then accumulate PROFIT_FORT values then multiply by -1
             var forfeitureAmount = await context.ProfitDetails
-                .Where(pd => 
+                .Where(pd =>
                     pd.Ssn == employeeData.Ssn &&
                     pd.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id) // Code 2 for forfeitures
                 .SumAsync(pd => pd.Forfeiture, cancellationToken) * -1; // Multiply by -1 to get positive value
@@ -86,10 +94,10 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
             // From doc: See current balance in calculation document.  That value minus starting balance
             // Gonna need help since PAYPROFT.PY_PS.AMT is not in the EF mapping and starting balance is based on current balance
             decimal netBalance = startingBalance - forfeitureAmount;
-            
+
             // From doc: See current vested balance in calculation document.
             decimal netVested = vestingBalance.VestedBalance;
-           
+
             var detail = new ForfeitureAdjustmentReportDetail
             {
                 ClientNumber = employeeData.StoreNumber > 0 ? employeeData.StoreNumber : 0,
@@ -104,8 +112,8 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
             // From docs:
             // 15.	Same as #13.   The calculation to change is obsolete.
             // 16.	Same as #14.   The calculation to change is obsolete.
-            response.TotatNetBalance = (int)detail.NetBalance;
-            response.TotatNetVested = (int)detail.NetVested;
+            response.TotatNetBalance = (int)Math.Round(detail.NetBalance, MidpointRounding.AwayFromZero);
+            response.TotatNetVested = (int)Math.Round(detail.NetVested, MidpointRounding.AwayFromZero);
 
             response.Response = new PaginatedResponseDto<ForfeitureAdjustmentReportDetail>
             {
@@ -117,15 +125,15 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
         });
     }
 
-    
-    private static async Task<EmployeeInfo?> FindEmployeeAsync(IProfitSharingDbContext context, 
+
+    private static async Task<EmployeeInfo?> FindEmployeeAsync(IProfitSharingDbContext context,
         ForfeitureAdjustmentRequest req, CancellationToken cancellationToken)
     {
         // If SSN is provided, use that for lookup
-        if (!string.IsNullOrEmpty(req.SSN) && int.TryParse(req.SSN, out int ssn))
+        if (req.SSN.HasValue)
         {
             return await context.Demographics
-                .Where(d => d.Ssn == ssn)
+                .Where(d => d.Ssn == req.SSN.Value)
                 .Where(d => context.PayProfits.Any(pp => pp.DemographicId == d.Id && pp.ProfitYear == req.ProfitYear))
                 .Select(d => new EmployeeInfo
                 {
@@ -136,10 +144,10 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                 .FirstOrDefaultAsync(cancellationToken);
         }
         // Otherwise, if Badge is provided, use that for lookup
-        else if (!string.IsNullOrEmpty(req.Badge) && int.TryParse(req.Badge, out int badgeNumber))
+        else if (req.Badge.HasValue)
         {
             return await context.Demographics
-                .Where(d => d.BadgeNumber == badgeNumber)
+                .Where(d => d.BadgeNumber == req.Badge.Value)
                 .Where(d => context.PayProfits.Any(pp => pp.DemographicId == d.Id && pp.ProfitYear == req.ProfitYear))
                 .Select(d => new EmployeeInfo
                 {
@@ -149,23 +157,26 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                 })
                 .FirstOrDefaultAsync(cancellationToken);
         }
-        
+
         return null;
     }
 
     public async Task<ForfeitureAdjustmentReportDetail> UpdateForfeitureAdjustmentAsync(ForfeitureAdjustmentUpdateRequest req, CancellationToken cancellationToken = default)
     {
-        // Validate the request
         if (req.ForfeitureAmount == 0)
         {
             throw new ArgumentException("Forfeiture amount cannot be zero");
+        }
+
+        if (req.ProfitYear <= 0)
+        {
+            throw new ArgumentException("Profit year must be provided");
         }
 
         ForfeitureAdjustmentReportDetail? result = null;
 
         await _dbContextFactory.UseWritableContext(async context =>
         {
-            // Find the employee data with efficient projection
             var employeeData = await context.Demographics
                 .Where(d => d.BadgeNumber == req.BadgeNumber)
                 .Select(d => new
@@ -204,7 +215,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
 
             // Determine if this is a forfeit or un-forfeit operation
             bool isForfeit = req.ForfeitureAmount > 0;
-            
+
             // From docs: "From the screen in figure 2, if you enter the value in #17 to box #12 and hit enter, you will create a PROFIT_DETAIL record.
             // When the value is negative the record has UN-FORFEIT in the PROFIT_CMNT field and when the value is positive the PROFIT_CMNT field is FORFEIT."
             string remarkText = isForfeit ? "FORFEIT" : "UN-FORFEIT";
@@ -218,9 +229,9 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                 ProfitCodeId = ProfitCode.Constants.OutgoingForfeitures.Id, // Code 2 for forfeitures
                 Remark = remarkText,
                 Forfeiture = Math.Abs(req.ForfeitureAmount) * (isForfeit ? -1 : 1), // Negative for forfeit, positive for un-forfeit, we'll need to double check this logic
-                MonthToDate = (byte)DateTime.UtcNow.Month,
-                YearToDate = (short)DateTime.UtcNow.Year,
-                CreatedUtc = DateTimeOffset.UtcNow
+                MonthToDate = (byte)DateTime.Now.Month,
+                YearToDate = (short)DateTime.Now.Year,
+                CreatedUtc = DateTimeOffset.Now
             };
 
             context.ProfitDetails.Add(profitDetail);
@@ -238,26 +249,67 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                 {
                     // For forfeit: Set PY_PS_ETVA to 0 and increment enrollment by 2
                     payProfit.Etva = 0;  // PY_PS_ETVA
-                    payProfit.EnrollmentId = (byte)(payProfit.EnrollmentId + 2);  // PY_PS_ENROLLED?
+
+                    // Update EnrollmentId using ExecuteUpdateAsync - read-only resource constraints otherwise
+                    byte newEnrollmentId;
+                    if (payProfit.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions)
+                    {
+                        newEnrollmentId = Enrollment.Constants.NewVestingPlanHasForfeitureRecords;
+                    }
+                    else if (payProfit.EnrollmentId == Enrollment.Constants.OldVestingPlanHasContributions)
+                    {
+                        newEnrollmentId = Enrollment.Constants.OldVestingPlanHasForfeitureRecords;
+                    }
+                    else
+                    {
+                        newEnrollmentId = Enrollment.Constants.NotEnrolled;
+                    }
+
+                    await context.PayProfits
+                        .Where(pp => pp.DemographicId == employeeData.Id && pp.ProfitYear == req.ProfitYear)
+                        .ExecuteUpdateAsync(p => p
+                            .SetProperty(pp => pp.EnrollmentId, newEnrollmentId)
+                            .SetProperty(pp => pp.LastUpdate, DateTime.Now), 
+                            cancellationToken);
                 }
                 else
                 {
                     // For un-forfeit: Recalculate PY_PS_ETVA and decrement enrollment by 2
                     // @Russ/Phil - any insights to recalculate ETVA?
-                    payProfit.EnrollmentId = (byte)(payProfit.EnrollmentId - 2);  // PY_PS_ENROLLED mapped to EnrollmentId
-                }
+                    byte newEnrollmentId;
+                    
+                    // Enrollment ID math based on known constants to prevent magic numbers
+                    if (payProfit.EnrollmentId == Enrollment.Constants.NewVestingPlanHasForfeitureRecords)
+                    {
+                        newEnrollmentId = Enrollment.Constants.NewVestingPlanHasContributions;
+                    }
+                    else if (payProfit.EnrollmentId == Enrollment.Constants.OldVestingPlanHasForfeitureRecords)
+                    {
+                        newEnrollmentId = Enrollment.Constants.OldVestingPlanHasContributions;
+                    }
+                    else
+                    {
+                        // Keep same if not a known constant with a -/+2 option.
+                        newEnrollmentId = payProfit.EnrollmentId;
+                    }
 
-                payProfit.LastUpdate = DateTime.UtcNow;
+                    await context.PayProfits
+                        .Where(pp => pp.DemographicId == employeeData.Id && pp.ProfitYear == req.ProfitYear)
+                        .ExecuteUpdateAsync(p => p
+                            .SetProperty(pp => pp.EnrollmentId, newEnrollmentId)
+                            .SetProperty(pp => pp.LastUpdate, DateTime.Now), 
+                            cancellationToken);
+                }
             }
-            
+
             await context.SaveChangesAsync(cancellationToken);
-            
+
             // Return the updated entity to the frontend to update grid
             decimal startingBalance = vestingBalance.CurrentBalance;
             decimal forfeitureAmount = req.ForfeitureAmount;
             decimal netBalance = startingBalance - forfeitureAmount;
             decimal netVested = vestingBalance.VestedBalance;
-            
+
             if (forfeitureAmount > 0)
             {
                 // If there are forfeitures, adjust the vested balance accordingly
@@ -294,4 +346,3 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
 }
 
 
-    

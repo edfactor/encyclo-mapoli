@@ -1066,6 +1066,14 @@ export interface ForfeitureAdjustmentRequest {
   isSortDescending?: boolean;
 }
 
+export interface ForfeitureAdjustmentUpdateRequest {
+  clientNumber: number;
+  badgeNumber: number;
+  forfeitureAmount: number;
+  reason?: string;
+  profitYear: number;
+}
+
 export interface ForfeitureAdjustmentDetail {
   clientNumber: number;
   badgeNumber: number;
