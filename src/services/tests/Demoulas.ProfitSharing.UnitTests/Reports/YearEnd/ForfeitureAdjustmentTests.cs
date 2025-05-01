@@ -21,7 +21,7 @@ public class ForfeitureAdjustmentTests : ApiTestBase<Program>
 
     private readonly int testBadge = 700310;
     private readonly short testYear = 2024;
-    private readonly string testSSN = "700000351";
+    private readonly int testSSN = 700000351;
 
     [Fact(DisplayName = "Get Forfeiture Adjustments - Success")]
     public async Task GetForfeitureAdjustmentsSuccessTest()
@@ -30,7 +30,7 @@ public class ForfeitureAdjustmentTests : ApiTestBase<Program>
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
         var request = new ForfeitureAdjustmentRequest
         {
-            Badge = testBadge.ToString(),
+            Badge = testBadge,
             ProfitYear = testYear
         };
 
@@ -72,7 +72,7 @@ public class ForfeitureAdjustmentTests : ApiTestBase<Program>
         // Arrange
         var request = new ForfeitureAdjustmentRequest
         {
-            Badge = testBadge.ToString(),
+            Badge = testBadge,
             ProfitYear = testYear
         };
 

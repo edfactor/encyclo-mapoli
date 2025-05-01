@@ -21,11 +21,13 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
 {
     private readonly IProfitSharingDataContextFactory _dbContextFactory;
     private readonly ITotalService _totalService;
+    private readonly IEmbeddedSqlService _embeddedSqlService;
 
-    public ForfeitureAdjustmentService(IProfitSharingDataContextFactory dbContextFactory, ITotalService totalService)
+    public ForfeitureAdjustmentService(IProfitSharingDataContextFactory dbContextFactory, ITotalService totalService, IEmbeddedSqlService embeddedSqlService)
     {
         _dbContextFactory = dbContextFactory;
         _totalService = totalService;
+        _embeddedSqlService = embeddedSqlService;
     }
 
     private sealed class EmployeeInfo
@@ -41,7 +43,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
         var response = new ForfeitureAdjustmentReportResponse
         {
             ReportName = ForfeitureAdjustmentReportResponse.REPORT_NAME,
-            ReportDate = DateTime.UtcNow,
+            ReportDate = DateTime.Now,
             TotatNetBalance = 0,
             TotatNetVested = 0,
             Response = new PaginatedResponseDto<ForfeitureAdjustmentReportDetail>
@@ -73,7 +75,13 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
 
             // Using current balance from the vesting balance - docs say should be PAYPROFT.PY_PS.AMT but not seeing that in the EF mapping.
             // @Russ/Phil - any insights?
-            decimal startingBalance = vestingBalance.CurrentBalance;
+
+            // CurrentBalance comes from TotalsService.GetTotalBalanceSet. Starting balance uses the same method, but with profitYear - 1.
+            int priorProfitYear = req.ProfitYear - 1;
+            decimal startingBalance = await _embeddedSqlService.GetTotalBalanceAlt(context, (short)priorProfitYear)
+                .Where(x => x.Ssn == employeeData.Ssn)
+                .Select(x => x.Total)
+                .FirstOrDefaultAsync(cancellationToken) ?? 0;
 
             // From doc: Forfeiture Amount - when PROFIT_DETAIL.PROFIT_CODE = 2
             // then accumulate PROFIT_FORT values then multiply by -1
@@ -104,8 +112,8 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
             // From docs:
             // 15.	Same as #13.   The calculation to change is obsolete.
             // 16.	Same as #14.   The calculation to change is obsolete.
-            response.TotatNetBalance = (int)detail.NetBalance;
-            response.TotatNetVested = (int)detail.NetVested;
+            response.TotatNetBalance = (int)Math.Round(detail.NetBalance, MidpointRounding.AwayFromZero);
+            response.TotatNetVested = (int)Math.Round(detail.NetVested, MidpointRounding.AwayFromZero);
 
             response.Response = new PaginatedResponseDto<ForfeitureAdjustmentReportDetail>
             {
@@ -122,10 +130,10 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
         ForfeitureAdjustmentRequest req, CancellationToken cancellationToken)
     {
         // If SSN is provided, use that for lookup
-        if (!string.IsNullOrEmpty(req.SSN) && int.TryParse(req.SSN, out int ssn))
+        if (req.SSN.HasValue)
         {
             return await context.Demographics
-                .Where(d => d.Ssn == ssn)
+                .Where(d => d.Ssn == req.SSN.Value)
                 .Where(d => context.PayProfits.Any(pp => pp.DemographicId == d.Id && pp.ProfitYear == req.ProfitYear))
                 .Select(d => new EmployeeInfo
                 {
@@ -136,10 +144,10 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                 .FirstOrDefaultAsync(cancellationToken);
         }
         // Otherwise, if Badge is provided, use that for lookup
-        else if (!string.IsNullOrEmpty(req.Badge) && int.TryParse(req.Badge, out int badgeNumber))
+        else if (req.Badge.HasValue)
         {
             return await context.Demographics
-                .Where(d => d.BadgeNumber == badgeNumber)
+                .Where(d => d.BadgeNumber == req.Badge.Value)
                 .Where(d => context.PayProfits.Any(pp => pp.DemographicId == d.Id && pp.ProfitYear == req.ProfitYear))
                 .Select(d => new EmployeeInfo
                 {
@@ -221,9 +229,9 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                 ProfitCodeId = ProfitCode.Constants.OutgoingForfeitures.Id, // Code 2 for forfeitures
                 Remark = remarkText,
                 Forfeiture = Math.Abs(req.ForfeitureAmount) * (isForfeit ? -1 : 1), // Negative for forfeit, positive for un-forfeit, we'll need to double check this logic
-                MonthToDate = (byte)DateTime.UtcNow.Month,
-                YearToDate = (short)DateTime.UtcNow.Year,
-                CreatedUtc = DateTimeOffset.UtcNow
+                MonthToDate = (byte)DateTime.Now.Month,
+                YearToDate = (short)DateTime.Now.Year,
+                CreatedUtc = DateTimeOffset.Now
             };
 
             context.ProfitDetails.Add(profitDetail);
