@@ -23,7 +23,7 @@ public class GetNavigationEndpoint: Endpoint<NavigationRequestDto,NavigationResp
     public override void Configure()
     {
         AllowAnonymous();
-        Get($"/navigation/list");
+        Get($"/list");
         Summary(m =>
         {
             m.Summary = "Get all navigation";

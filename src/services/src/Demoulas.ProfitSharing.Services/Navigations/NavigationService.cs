@@ -29,6 +29,7 @@ public class NavigationService : INavigationService
         var flatList = await _dataContextFactory.UseReadOnlyContext(context =>
             context.Navigations
                 .Include(m=>m.Items)
+                .Include(m=>m.RequiredRoles)
                 .OrderBy(x => x.OrderNumber)
                 .ToListAsync(cancellationToken)
         );
@@ -47,7 +48,9 @@ public class NavigationService : INavigationService
                     Title = x.Title,
                     Url = x.Url,
                     SubTitle = x.SubTitle,
-                    Items = BuildTree(x.Id)
+                    Items = BuildTree(x.Id),
+                    Disabled = x.Disabled,
+                    RequiredRoles = x.RequiredRoles?.Select(m=>m.Name).ToList()
                 })
                 .ToList();
         }

@@ -18,6 +18,8 @@ import commonSlice from "./slices/commonSlice";
 import { messageSlice } from "./slices/messageSlice";
 import forfeituresAdjustmentSlice from "./slices/forfeituresAdjustmentSlice";
 import { apiLoggerMiddleware } from "../middleware/apiLoggerMiddleware";
+import { NavigationApi } from "./api/NavigationApi";
+import navigationSlice  from "./slices/navigationSlice";
 
 export const store = configureStore({
   reducer: {
@@ -30,6 +32,7 @@ export const store = configureStore({
     lookups: lookupsSlice,
     common: commonSlice,
     messages: messageSlice,
+    navigation: navigationSlice,
     forfeituresAdjustment: forfeituresAdjustmentSlice,
 
     [SecurityApi.reducerPath]: SecurityApi.reducer,
@@ -38,7 +41,8 @@ export const store = configureStore({
     [MilitaryApi.reducerPath]: MilitaryApi.reducer,
     [InquiryApi.reducerPath]: InquiryApi.reducer,
     [LookupsApi.reducerPath]: LookupsApi.reducer,
-    [CommonApi.reducerPath]: CommonApi.reducer
+    [CommonApi.reducerPath]: CommonApi.reducer,
+    [NavigationApi.reducerPath]: NavigationApi.reducer
   },
 
   middleware: (getDefaultMiddleware) =>
@@ -52,7 +56,7 @@ export const store = configureStore({
       .concat(InquiryApi.middleware)
       .concat(LookupsApi.middleware)
       .concat(CommonApi.middleware)
-      
+      .concat(NavigationApi.middleware)
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself

@@ -1116,3 +1116,25 @@ export interface CurrentUserResponseDto {
   permissions: string[];
 }
 
+export interface NavigationRequestDto {
+  navigationId?: number;
+}
+
+export interface NavigationResponseDto {
+  navigation: NavigationDto[];
+}
+
+export interface NavigationDto {
+  id: number;
+  parentId: number;
+  title: string;
+  subTitle: string;
+  url: string;
+  StatusId: string;
+  orderNumber: number;
+  icon:string;
+  requiredRoles: string[];
+  disabled: boolean;
+  items: NavigationDto[];
+}
+

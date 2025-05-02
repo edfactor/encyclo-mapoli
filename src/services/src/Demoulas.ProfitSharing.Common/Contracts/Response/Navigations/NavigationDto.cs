@@ -16,5 +16,6 @@ public record NavigationDto
     public byte OrderNumber { get; set; }
     public string? Icon { get; set; }
     public List<string>? RequiredRoles { get; set; }
+    public bool? Disabled { get; set; }
     public List<NavigationDto>? Items { get; set; }
 }

@@ -5,13 +5,15 @@ import { ICommon } from "../ICommon";
 import NavButton from "./NavButton";
 import PopupMenu from "./PopupMenu";
 import { RouteCategory } from "../../types/MenuTypes";
+import { NavigationResponseDto } from "reduxstore/types";
 
 export interface MenuBarProps extends ICommon {
   menuInfo: RouteCategory[];
   impersonationMultiSelect?: React.ReactNode;
+  navigationData?: NavigationResponseDto;
 }
 
-export const MenuBar: FC<MenuBarProps> = ({ menuInfo, impersonationMultiSelect }) => {
+export const MenuBar: FC<MenuBarProps> = ({ menuInfo, impersonationMultiSelect, navigationData }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const homeTabSelected = location.pathname === "/";
@@ -31,6 +33,7 @@ export const MenuBar: FC<MenuBarProps> = ({ menuInfo, impersonationMultiSelect }
         {menuInfo.map((current: RouteCategory, index: number) => {
           return current.items ? (
             <PopupMenu
+              navigationData={navigationData}
               key={index}
               menuLabel={current.menuLabel}
               items={current.items}
