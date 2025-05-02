@@ -34,6 +34,15 @@ public sealed record MasterInquiryResponseDto
     public string? CommentTypeName { get; set; }
     public short PsnSuffix { get; set; }
     public decimal? Payment { get; set; }
+    public decimal? VestedBalance { get; set; }
+    public decimal? VestingPercent { get; set; }
+    public decimal? CurrentBalance { get; set; }
+    public byte PayFrequencyId { get; set; }
+    public DateTimeOffset TransactionDate { get; set; }
+    public decimal CurrentIncomeYear { get; set; }
+    public decimal CurrentHoursYear { get; set; }
+    public char EmploymentStatusId { get; set; }
+    public string? EmploymentStatus { get; set; }
 
     public static MasterInquiryResponseDto ResponseExample()
     {

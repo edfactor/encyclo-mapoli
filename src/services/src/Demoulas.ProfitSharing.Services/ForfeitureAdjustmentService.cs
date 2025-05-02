@@ -1,20 +1,10 @@
-using Demoulas.ProfitSharing.Common;
-using Demoulas.ProfitSharing.Data.Entities;
+﻿using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Microsoft.EntityFrameworkCore;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-using System.Threading;
-using System.Threading.Tasks;
-using System;
 using Demoulas.Common.Contracts.Contracts.Response;
-using System.Collections.Generic;
-using System.Linq;
-using Demoulas.Util.Extensions;
-using Demoulas.ProfitSharing.Services.Extensions;
-using Demoulas.ProfitSharing.Data;
 
 namespace Demoulas.ProfitSharing.Services;
 public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
@@ -32,9 +22,9 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
 
     private sealed class EmployeeInfo
     {
-        public int Ssn { get; set; }
-        public int BadgeNumber { get; set; }
-        public int StoreNumber { get; set; }
+        public int Ssn { get; init; }
+        public int BadgeNumber { get; init; }
+        public int StoreNumber { get; init; }
     }
 
     public Task<ForfeitureAdjustmentReportResponse> GetForfeitureAdjustmentReportAsync(ForfeitureAdjustmentRequest req, CancellationToken cancellationToken = default)
