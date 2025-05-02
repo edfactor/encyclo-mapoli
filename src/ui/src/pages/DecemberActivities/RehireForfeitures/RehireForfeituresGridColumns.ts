@@ -13,6 +13,7 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       cellClass: "left-align",
       resizable: true,
       sortable: true,
+      unSortIcon: true,
       cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber)
     },
     {

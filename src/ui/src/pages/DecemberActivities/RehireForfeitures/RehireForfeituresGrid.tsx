@@ -17,9 +17,9 @@ interface MilitaryAndRehireForfeituresGridSearchProps {
 }
 
 const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProps> = ({
-  initialSearchLoaded,
-  setInitialSearchLoaded
-}) => {
+                                                                                        initialSearchLoaded,
+                                                                                        setInitialSearchLoaded
+                                                                                      }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
@@ -31,6 +31,9 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
   const fiscalCalendarYear = useFiscalCalendarYear();
   const { rehireForfeitures, rehireForfeituresQueryParams } = useSelector((state: RootState) => state.yearsEnd);
 
+  const [triggerSearch, { isFetching }] = useLazyGetRehireForfeituresQuery();
+
+  // Create a request object based on current parameters
   const createRequest = useCallback(
     (skip: number, sortBy: string, isSortDescending: boolean): RehireForfeituresRequest | null => {
       if (!rehireForfeituresQueryParams) return null;
@@ -42,25 +45,27 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
         profitYear: rehireForfeituresQueryParams.profitYear || profitYear
       };
     },
-    [rehireForfeituresQueryParams, pageSize, pageNumber, sortParams]
+    [rehireForfeituresQueryParams, fiscalCalendarYear?.fiscalBeginDate, fiscalCalendarYear?.fiscalEndDate, pageSize, profitYear]
   );
 
-  const [triggerSearch, { isFetching }] = useLazyGetRehireForfeituresQuery();
-
-  const onSearch = useCallback(async () => {
-    if (rehireForfeituresQueryParams) {
-      const request = createRequest(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending);
-      if (request) {
-        await triggerSearch(request, false);
+  const performSearch = useCallback(
+    async (skip: number, sortBy: string, isSortDescending: boolean) => {
+      if (rehireForfeituresQueryParams) {
+        const request = createRequest(skip, sortBy, isSortDescending);
+        if (request) {
+          await triggerSearch(request, false);
+        }
       }
-    }
-  }, [pageNumber, pageSize, sortParams, triggerSearch, rehireForfeituresQueryParams, createRequest]);
+    },
+    [createRequest, rehireForfeituresQueryParams, triggerSearch]
+  );
 
+  // Effect to handle initial load and pagination changes
   useEffect(() => {
     if (initialSearchLoaded) {
-      onSearch();
+      performSearch(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending);
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch]);
+  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, performSearch]);
 
   // Initialize expandedRows when data is loaded
   useEffect(() => {
@@ -78,7 +83,14 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
     }
   }, [rehireForfeitures?.response?.results]);
 
-  const sortEventHandler = (update: ISortParams) => setSortParams(update);
+  // Sort handler that immediately triggers a search with the new sort parameters
+  const sortEventHandler = (update: ISortParams) => {
+    setSortParams(update); // Update state for future reference
+    setPageNumber(0); // Reset to first page when sorting
+
+    // Immediately perform search with the new sort params
+    performSearch(0, update.sortBy, update.isSortDescending);
+  };
 
   // Handle row expansion toggle
   const handleRowExpansion = (badgeNumber: string) => {
@@ -274,7 +286,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
               pageSize={pageSize}
               setPageSize={(value: number) => {
                 setPageSize(value);
-                setPageNumber(1);
+                setPageNumber(0);
                 setInitialSearchLoaded(true);
               }}
               recordCount={rehireForfeitures.response.total || 0}
