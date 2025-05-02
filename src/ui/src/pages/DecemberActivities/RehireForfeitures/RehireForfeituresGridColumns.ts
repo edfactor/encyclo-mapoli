@@ -92,7 +92,7 @@ export const GetDetailColumns = (): ColDef[] => {
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
-      sortable: true
+      sortable: false
     },
     {
       headerName: "Forfeiture",
@@ -102,6 +102,7 @@ export const GetDetailColumns = (): ColDef[] => {
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
+      sortable: false,
       valueFormatter: agGridNumberToCurrency
     },
     {
@@ -111,7 +112,8 @@ export const GetDetailColumns = (): ColDef[] => {
       minWidth: 150,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true
+      resizable: true,
+      sortable: false,
     }
   ];
 };
