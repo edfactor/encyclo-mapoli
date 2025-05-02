@@ -291,6 +291,7 @@ export interface BaseDateRangeParams {
   startDate: Date;
   endDate: Date;
 }
+
 export interface MasterInquirySearch {
   startProfitYear?: number | null;
   endProfitYear?: number | null;
@@ -337,6 +338,11 @@ export interface MasterInquiryDetail extends ProfitYearRequest {
   zeroContributionReasonName?: string;
   taxCodeName?: string;
   commentTypeName?: string;
+  payFrequencyId?: number;
+  transactionDate?: Date;
+  currentIncomeYear?: number;
+  currentHoursYear?: number;
+  employmentStatus?: string;
 }
 
 export interface MasterInquiryRequest {
@@ -369,10 +375,12 @@ export interface FrozenReportsByAgeRequest extends ProfitYearRequest {
   pagination: PaginationParams;
   reportType: FrozenReportsByAgeRequestType;
 }
+
 export interface FrozenReportsForfeituresAndPointsRequest extends ProfitYearRequest {
   pagination: SortedPaginationRequestDto;
   useFrozenData: boolean;
 }
+
 export interface ProfitSharingDistributionsByAge {
   reportName: string;
   reportDate: string;
@@ -433,6 +441,7 @@ export interface ForfeituresAndPointsDetail {
   earningPoints: number;
   benefificaryPsn: number;
 }
+
 export interface ForfeituresAndPoints {
   reportName: string;
   reportDate: string;
@@ -482,6 +491,7 @@ export interface MasterInquiryResponseType {
   employeeDetails: EmployeeDetails | null;
   inquiryResults: Paged<MasterInquiryDetail>;
 }
+
 export interface BalanceByDetailBase {
   employeeCount: number;
   currentBalance: number;
@@ -537,6 +547,7 @@ export interface VestedAmountsByAge {
   reportDate: string;
   response: Paged<VestedAmountsByAgeDetail>;
 }
+
 export interface VestedAmountsByAgeDetail {
   age: number;
   fullTime100PercentCount: number;
@@ -643,6 +654,7 @@ export interface ProfitShareUpdateDetail {
   secondaryEtvaEarnings: number;
   treatAsBeneficiary: boolean;
 }
+
 export interface ProfitShareUpdateResponse {
   totalVested: number;
   totalForfeit: number;
@@ -675,6 +687,7 @@ export interface ProfitShareUpdateTotals {
   totalEmployees: number;
   totalBeneficaries: number;
 }
+
 export interface ProfitShareAdjustmentSummary {
   badgeNumber?: number;
   incomingForfeitureAmountUnadjusted: number;
@@ -686,6 +699,7 @@ export interface ProfitShareAdjustmentSummary {
   contributionAmountUnadjusted: number;
   contributionAmountAdjusted: number;
 }
+
 export interface ProfitShareEditDetail {
   isEmployee: boolean;
   badgeNumber: number;
@@ -757,6 +771,7 @@ export interface ProfitMasterParams {
   maxAllowedContributions?: number | null;
   secondaryEarningsPercent?: number | null;
 }
+
 export interface ProfitMasterStatus extends ProfitMasterParams {
   badgeAdjusted?: number | null;
   badgeAdjusted2?: number | null;
@@ -768,6 +783,7 @@ export interface ProfitMasterStatus extends ProfitMasterParams {
   updatedBy?: string | null;
   updatedTime: string;
 }
+
 export interface ProfitShareEditUpdateQueryParams extends ProfitMasterParams {
   profitYear: Date;
   badgeToAdjust?: number | null;
@@ -1098,7 +1114,7 @@ export interface ForfeitureAdjustmentResponse {
 }
 
 export interface MissiveResponse {
-  id:number;
+  id: number;
   message: string;
 }
 
@@ -1132,9 +1148,8 @@ export interface NavigationDto {
   url: string;
   StatusId: string;
   orderNumber: number;
-  icon:string;
+  icon: string;
   requiredRoles: string[];
   disabled: boolean;
   items: NavigationDto[];
 }
-

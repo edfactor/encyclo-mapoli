@@ -16,7 +16,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Demoulas.ProfitSharing.Services.Navigations;
 public class NavigationService : INavigationService
 {
-    public readonly IProfitSharingDataContextFactory _dataContextFactory;
+    private readonly IProfitSharingDataContextFactory _dataContextFactory;
 
     public NavigationService(IProfitSharingDataContextFactory dataContextFactory)
     {

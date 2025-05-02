@@ -1,6 +1,6 @@
 import { agGridNumberToCurrency } from "smart-ui-library";
-import {ColDef, ICellRendererParams} from "ag-grid-community";
-import {viewBadgeLinkRenderer} from "../../utils/masterInquiryLink";
+import { ColDef, ICellRendererParams } from "ag-grid-community";
+import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
 
 export const GetMasterInquiryGridColumns = (): ColDef[] => {
   return [
@@ -20,24 +20,25 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       minWidth: 120,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true,   
+      resizable: true,
       rowGroup: true,
-      showRowGroup: 'always',
-      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber, params.data.psnSuffix),
+      showRowGroup: "always",
+      cellRenderer: (params: ICellRendererParams) =>
+        viewBadgeLinkRenderer(params.data.badgeNumber, params.data.psnSuffix),
       valueFormatter: (params) => {
-        const badgeNumber = params.data?.badgeNumber; 
-        const psnSuffix = params.data?.psnSuffix; 
+        const badgeNumber = params.data?.badgeNumber;
+        const psnSuffix = params.data?.psnSuffix;
         // If both are null/undefined, just return an empty string
         if (!badgeNumber && !psnSuffix) {
-          return '';
+          return "";
         }
-        
+
         if (psnSuffix > 0) {
           // If both exist, format as "name (id)"
           return `${badgeNumber}-${psnSuffix}`;
         }
-        
-        return badgeNumber
+
+        return badgeNumber;
       }
     },
     {
@@ -55,7 +56,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
         const iter = params.data.profitYearIteration; // assuming 'statusName' is in the row data
         return `${year}.${iter}`;
       }
-    },  
+    },
     {
       headerName: "Profit Code",
       field: "profitCodeId",
@@ -122,16 +123,44 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       minWidth: 100,
       headerClass: "right-align",
       cellClass: "right-align",
+      sortable: false,
       resizable: true,
       valueFormatter: (params) => {
         const month = params.data.monthToDate; // assuming 'status' is in the row data
         const year = params.data.yearToDate; // assuming 'statusName' is in the row data
         // Format month to always have two digits
-        const formattedMonth = month.toString().padStart(2, '0');
+        const formattedMonth = month.toString().padStart(2, "0");
 
         return `${formattedMonth}/${year}`;
       }
-    },      
+    },
+    {
+      headerName: "Hours",
+      field: "currentHoursYear",
+      colId: "currentHoursYear",
+      minWidth: 120,
+      headerClass: "right-align",
+      cellClass: "right-align",
+      resizable: true,
+      sortable: false,
+      valueFormatter: (params) => {
+        if (params.value === null || params.value === undefined) {
+          return "";
+        }
+        return params.value.toLocaleString("en-US");
+      }
+    },
+    {
+      headerName: "Income",
+      field: "currentIncomeYear",
+      colId: "currentIncomeYear",
+      minWidth: 120,
+      headerClass: "right-align",
+      cellClass: "right-align",
+      resizable: true,
+      sortable: false,
+      valueFormatter: agGridNumberToCurrency
+    },
     {
       headerName: "Federal Tax",
       field: "federalTaxes",
@@ -165,9 +194,9 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       },
       valueFormatter: (params) => {
         const id = params.data?.taxCodeId; // assuming 'status' is in the row data
-        const name = params.data?.taxCodeName; // assuming 'statusName' is in the row data      
-        
-        if (id == 0) return "";        
+        const name = params.data?.taxCodeName; // assuming 'statusName' is in the row data
+
+        if (id == 0) return "";
         return `[${id}] ${name}`;
       }
     },
@@ -189,7 +218,8 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       minWidth: 120,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true
+      resizable: true,
+      sortable: false
     },
     {
       headerName: "State",
@@ -208,12 +238,22 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       headerClass: "center-align",
       cellClass: "center-align",
       resizable: true,
-      cellRenderer: 'agAnimateShowChangeCellRenderer', // Use text renderer instead of checkbox
+      cellRenderer: "agAnimateShowChangeCellRenderer", // Use text renderer instead of checkbox
       valueFormatter: (params) => {
         // Return "Yes" only if the value is explicitly true
         // Return "No" for false, null, undefined, or any other falsy value
         return params.value === true ? "Yes" : "No";
       }
-    }
+    },
+    {
+      headerName: "Status",
+      field: "employmentStatus",
+      colId: "employmentStatus",
+      minWidth: 60,
+      headerClass: "right-align",
+      cellClass: "right-align",
+      resizable: true,
+      sortable: false
+    },
   ];
 };
