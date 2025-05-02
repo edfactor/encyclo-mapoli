@@ -8,7 +8,7 @@ public record ProfitShareEditMemberRecordResponse
 {
     public bool IsEmployee { get; init; }
     public int BadgeNumber { get; set; }
-    public string? Psn { get; set; }
+    public long Psn { get; set; }
     public string? Name { get; set; }
     public byte Code { get; set; }
     public decimal ContributionAmount { get; set; }
@@ -17,8 +17,7 @@ public record ProfitShareEditMemberRecordResponse
     public string? Remark { get; set; }
     public byte? CommentTypeId { get; set; }
     public string? RecordChangeSummary { get; set; }
-
-    public byte ZeroContStatus { get; set; }
+    public byte? DisplayedZeroContStatus { get; set; }
     public byte YearExtension { get; set; }
     
     public static ProfitShareEditMemberRecordResponse ResponseExample()
@@ -26,7 +25,7 @@ public record ProfitShareEditMemberRecordResponse
         return new ProfitShareEditMemberRecordResponse()
         {
             BadgeNumber = 123,
-            Psn = "",
+            Psn = 123,
             Name = "VILLANUEVA, ISAAC",
             ContributionAmount = 4350m,
             EarningsAmount = 50,

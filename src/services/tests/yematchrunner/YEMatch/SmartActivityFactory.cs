@@ -1,8 +1,10 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Net.Http.Headers;
 using System.Text;
 using YEMatch.YEMatch;
 using HttpMethod = System.Net.Http.HttpMethod;
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 
 namespace YEMatch;
 
@@ -10,11 +12,17 @@ public static class SmartActivityFactory
 {
     private static readonly short profitYear = 2024;
 
+    // This task takes the READY database and imports it directly to SMART.  Handy for isolating smart activities.
+    public static Activity? readyToSmartInit;
+    public static ApiClient? client;
+    
     public static List<Activity> CreateActivities(string dataDirectory)
     {
         var httpClient = new HttpClient { Timeout = TimeSpan.FromHours(2) };
         TestToken.CreateAndAssignTokenForClient(httpClient, "Finance-Manager");
-        var client = new ApiClient(httpClient);
+        client = new ApiClient(httpClient);
+
+        readyToSmartInit = new SmartActivity(Ready_to_Smart_Initialize_Database, client, "R2S", "Initialize Database with READY data");
 
         return
         [
@@ -62,6 +70,19 @@ public static class SmartActivityFactory
         // Consider using CLI tool for reset the smart schema to stock 
 
         var res = ScriptRunner.Run("import-bh"); // Good enough and fast
+        if (res != 0)
+        {
+            return new Outcome(aname, name, "", OutcomeStatus.Error, "Problem setting up database\n", null, true);
+        }
+
+        return new Outcome(aname, name, "", OutcomeStatus.Ok, "Database setup complete.\n", null, true);
+    }
+
+    private static async Task<Outcome> Ready_to_Smart_Initialize_Database(ApiClient apiClient, string aname, string name)
+    {
+        // Consider using CLI tool for reset the smart schema to stock 
+
+        var res = ScriptRunner.Run("import-bh-from-ready"); // Good enough and fast
         if (res != 0)
         {
             return new Outcome(aname, name, "", OutcomeStatus.Error, "Problem setting up database\n", null, true);

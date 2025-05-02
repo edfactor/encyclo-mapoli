@@ -104,7 +104,7 @@ internal sealed class ProfitShareUpdateReport
 
             employeeReportLine.PR_CONT = memberFinancials.Contributions + memberFinancials.Xfer;
             employeeReportLine.PR_MIL = memberFinancials.Military - memberFinancials.Pxfer;
-            employeeReportLine.PR_FORF = memberFinancials.IncomingForfeitures;
+            employeeReportLine.PR_FORF = memberFinancials.IncomingForfeitures - memberFinancials.Forfeits;
             employeeReportLine.PR_EARN = memberFinancials.AllEarnings;
             employeeReportLine.PR_EARN2 = memberFinancials.AllSecondaryEarnings;
             employeeReportLine.PR_EARN2 = memberFinancials.Caf;
@@ -122,7 +122,7 @@ internal sealed class ProfitShareUpdateReport
             beneReportLine.PR2_NEWEMP = "BEN";
             beneReportLine.PR2_CONT = memberFinancials.Contributions + memberFinancials.Xfer;
             beneReportLine.PR2_MIL = memberFinancials.Military;
-            beneReportLine.PR2_FORF = memberFinancials.IncomingForfeitures;
+            beneReportLine.PR2_FORF = memberFinancials.IncomingForfeitures - memberFinancials.Forfeits;
             beneReportLine.PR2_EARN = memberFinancials.AllEarnings;
             beneReportLine.PR2_EARN2 = memberFinancials.AllSecondaryEarnings;
             beneReportLine.PR2_EARN2 = memberFinancials.Caf;
@@ -136,7 +136,7 @@ internal sealed class ProfitShareUpdateReport
             || memberFinancials.Xfer != 0m
             || memberFinancials.Pxfer != 0m
             || memberFinancials.Military != 0m
-            || memberFinancials.IncomingForfeitures != 0m
+            || memberFinancials.Forfeits != 0m
             || memberFinancials.AllEarnings != 0m
             || memberFinancials.AllSecondaryEarnings != 0m)
         {

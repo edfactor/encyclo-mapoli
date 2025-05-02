@@ -35,7 +35,7 @@ public class ProfitShareUpdateTests
     {
         // Arrange
         short profitYear = 2024;
-        ProfitShareUpdateReport profitShareUpdateService = createProfitShareUpdateService();
+        ProfitShareUpdateReport profitShareUpdateService = CreateProfitShareUpdateService();
 
         string reportName = "psupdate-pay444-r2.txt";
         profitShareUpdateService.TodaysDateTime =
@@ -64,7 +64,7 @@ public class ProfitShareUpdateTests
         sw.Stop();
         _testOutputHelper.WriteLine($"Query took {sw.Elapsed}");
 
-        // We cant do a simple report to report comparison because I believe that READY's sorting random
+        // We can not do a simple report to report comparison because I believe that READY's sorting random
         // when users have the same name.   To cope with this we extract lines with employee/bene information and compare lines.
 
         string expectedReport = LoadExpectedReport(reportName);
@@ -72,7 +72,7 @@ public class ProfitShareUpdateTests
 #if false
         // Enabling this path enables the diff program to pop up the differences
  
-        // Ths sort order on READY is not great, this maybe tweaked soon.
+        // The sort order on READY is not great, this maybe tweaked soon.
         string expected = HandleSortingOddness(LoadExpectedReport(reportName));
         string actual = HandleSortingOddness(CollectLines(profitShareUpdateService.ReportLines));
         AssertReportsAreEquivalent(expected, actual);
@@ -114,7 +114,7 @@ public class ProfitShareUpdateTests
     {
         // Arrange
         short profitYear = 2024;
-        ProfitShareUpdateReport profitShareUpdateService = createProfitShareUpdateService();
+        ProfitShareUpdateReport profitShareUpdateService = CreateProfitShareUpdateService();
         string reportName = "psupdate-pay444-r3.txt";
         profitShareUpdateService.TodaysDateTime =
             new DateTime(2024, 11, 19, 19, 18, 0, DateTimeKind.Local); // time report was generated
@@ -185,7 +185,7 @@ public class ProfitShareUpdateTests
     }
 
 
-    private ProfitShareUpdateReport createProfitShareUpdateService()
+    private ProfitShareUpdateReport CreateProfitShareUpdateService()
     {
         return new ProfitShareUpdateReport(_dbFactory, _calendarService);
     }

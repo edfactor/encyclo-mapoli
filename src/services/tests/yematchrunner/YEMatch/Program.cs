@@ -11,6 +11,17 @@ namespace YEMatch;
 internal static class Program
 {
     private static readonly HashSet<string> activitiesWithUpdates = ["A6", "A7", "A12", "A13A", "A13B", "A18", "A20", "A23", "A24"];
+    
+    // Steps which modify the database
+    // A6 - Clear exec hours and dollars (only on ready)
+    // A7 - Enter executive hours and dollars
+    // A12 - Year end create DEMO_PROFSHARE / Frozen
+    // A13A - PAY PROFIT SHIFT (only on ready)
+    // A13B - PAY PROFIT SHIFT (only on ready)
+    // A18 - Profit Share Report  <----------------------- Pay426 updates the Earned Points, ZeroContributionReason 
+    // A20 - PAY443 - Profit Share Forfeit   
+    // A23 - ......
+    // A24 - Updates enrollement_id 
 
     private static async Task Main(string[] args)
     {
@@ -59,6 +70,15 @@ internal static class Program
         }
 
         // -------------------------------------------------
+        // Activities are run in a varietity of ways depending on the demands of the moment.    
+        // The current way of specifyng what gets run is "lack luster" 
+        // Some variations are;
+        //  - Only SMART
+        //  - Only Ready
+        //  - only some of SMART and READY (like first 5 jobs)
+        //  - run some of ready, then migrate ready 2 smart, then stop.
+        // 
+        // These variations should be codified in a clear structure, but they are ad-hoc at the moment
 
         // This block lets you skip steps when doing specific testing
         var skipBoth = 0;
@@ -95,14 +115,24 @@ internal static class Program
         // Adjust this select ready/smart jobs
         var activitiesToRun = readyActivities;
 
-        // Test PROFTLB on the smart side 
-        activitiesToRun = Specify(bothReadyAndSmartActivities, ["R0", "R18", "R20", "R21", "R22", "R22", "R2S", "R23", "S23"]);
+        // Specfiy selects out a specific set of activities to run.   The "RX" ones are ready activities, and the "SX" ones are smart activities.
+        // Test ProfitMaster/PROFTLB on the smart side 
+        // THE "R2S" is a special case, it is an activity which clones the READY database into SMART
+        activitiesToRun = Specify(bothReadyAndSmartActivities, ["R0", "R18", "R20", "R21", "R22", "R2S" /* "R23", "S23"*/]);
+        // activitiesToRun = Specify(bothReadyAndSmartActivities, ["R23"]);
 
 
         // ------------------- End of selection of steps zone
 
         // ensure we stop if a stop is requested on either side
         bool stopOnSmartSide = activitiesToRun.Any(a => a is SmartActivity);
+        
+        if(activitiesToRun.Any(a=> a is SmartActivity && a != SmartActivityFactory.readyToSmartInit )){
+            // Quick authentication sanity check
+            var r = await SmartActivityFactory.client!.DemoulasCommonApiEndpointsAppVersionInfoEndpointAsync(null);
+            // Might be nice to also include the database version. What database is used.  Wall clock time.
+            Console.WriteLine($"{SmartActivity.smartPrefix}Connected to SMART build:" + r.BuildNumber + " git-hash:" + r.ShortGitHash);
+        }
 
         List<Outcome> outcomes = [];
         foreach (var activity in activitiesToRun)
@@ -162,7 +192,14 @@ internal static class Program
 
             if (match == null)
             {
-                throw new ArgumentException($"I don't know how to: {descriptor}");
+                if (isReady && key == "2S")
+                {
+                    match = SmartActivityFactory.readyToSmartInit!;
+                }
+                else
+                {
+                    throw new ArgumentException($"I don't know how to: {descriptor}");
+                }
             }
 
             activitiesToRun.Add(match);

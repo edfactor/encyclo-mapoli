@@ -12,6 +12,7 @@ namespace Demoulas.ProfitSharing.IntegrationTests;
 
 // ReSharper disable once NotAccessedField.Local
 #pragma warning disable S4487
+#pragma warning disable AsyncFixer01
 
 public class TotalServiceIntegrationTests
 {
@@ -35,7 +36,6 @@ public class TotalServiceIntegrationTests
         // For accessing PROFITSHARE.* tables
         _connection = new OracleConnection(_dataContextFactory.ConnectionString);
     }
-
 
     [Fact]
     public async Task Verify_that_NetBalanceLastYear_and_CompanyContributionYears_match_PAYPROFIT()
