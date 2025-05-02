@@ -1,9 +1,7 @@
-﻿using System.Diagnostics;
-using Demoulas.Common.Contracts.Contracts.Request;
+﻿using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
@@ -132,6 +130,7 @@ public class ProfitShareEditService : IInternalProfitShareEditService
                 AddRecord(records, rec);
                 return;
             }
+            // is both a Bene and "18,19,20 > 1000", so we treat them as both. - they earn interest - and get a year of service
             rec.EarningAmount = member.AllEarnings;
             rec.Remark = null;
             rec.CommentTypeId = null;

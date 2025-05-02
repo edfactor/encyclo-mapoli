@@ -10,30 +10,23 @@ using Microsoft.Extensions.Configuration;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 
-public class GetEligibilityIntegrationTests
+public class GetEligibilityIntegrationTests : PristineBaseTest
 {
-    private readonly AccountingPeriodsService _aps = new();
-    private readonly CalendarService _calendarService;
-    private readonly IProfitSharingDataContextFactory _dbFactory;
-    private readonly ITestOutputHelper _testOutputHelper;
-
-    public GetEligibilityIntegrationTests(ITestOutputHelper testOutputHelper)
+    public GetEligibilityIntegrationTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
     {
-        _dbFactory = new PristineDataContextFactory();
-        _calendarService = new CalendarService(_dbFactory, _aps);
-        _testOutputHelper = testOutputHelper;
     }
+    
 
     [Fact]
     public async Task BasicTest()
     {
-        GetEligibleEmployeesService es = new(_dbFactory, _calendarService);
+        GetEligibleEmployeesService es = new(DbFactory, CalendarService);
         GetEligibleEmployeesResponse empls = await es.GetEligibleEmployeesAsync(new ProfitYearRequest { ProfitYear = 2024, Take = int.MaxValue }, CancellationToken.None);
 
-        _testOutputHelper.WriteLine("On Frozen: " + empls.NumberReadOnFrozen);
-        _testOutputHelper.WriteLine("Not Selected: " + empls.NumberNotSelected);
-        _testOutputHelper.WriteLine("Written: " + empls.NumberWritten);
-        _testOutputHelper.WriteLine($"Got {empls.Response.Results.Count()} employees");
+        TestOutputHelper.WriteLine("On Frozen: " + empls.NumberReadOnFrozen);
+        TestOutputHelper.WriteLine("Not Selected: " + empls.NumberNotSelected);
+        TestOutputHelper.WriteLine("Written: " + empls.NumberWritten);
+        TestOutputHelper.WriteLine($"Got {empls.Response.Results.Count()} employees");
         empls.Response.Results.Count().Should().BePositive();
         empls.NumberReadOnFrozen.Should().BePositive();
         empls.NumberNotSelected.Should().BePositive();
