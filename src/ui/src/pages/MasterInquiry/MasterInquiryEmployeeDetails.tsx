@@ -40,6 +40,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     beginVestedAmount,
     currentVestedAmount,
     currentEtva,
+    employmentStatus,
   } = details;
 
   const enrolled = getEnrolledStatus(enrollmentId);
@@ -58,6 +59,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     { label: "DOB", value: mmDDYYFormat(tryddmmyyyyToDate(dateOfBirth)) },
     { label: "SSN", value: `${ssn}` },
     { label: "ETVA", value: currentEtva },
+    { label: "Status", value: employmentStatus },   
     { label: "Enrollment", value: enrollment },
   ].filter(field => field.value !== 0);
   

@@ -341,8 +341,7 @@ export interface MasterInquiryDetail extends ProfitYearRequest {
   payFrequencyId?: number;
   transactionDate?: Date;
   currentIncomeYear?: number;
-  currentHoursYear?: number;
-  employmentStatus?: string;
+  currentHoursYear?: number;  
 }
 
 export interface MasterInquiryRequest {
@@ -484,6 +483,7 @@ export interface EmployeeDetails {
   currentVestedAmount: number;
   currentEtva: number;
   previousEtva: number;
+  employmentStatus?: string;
   missives: number[] | null;
 }
 
