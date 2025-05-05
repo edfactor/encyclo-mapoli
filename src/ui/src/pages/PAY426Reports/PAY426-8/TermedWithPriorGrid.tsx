@@ -86,6 +86,26 @@ const TermedWithPriorGrid = () => {
     [handleNavigationForButton]
   );
 
+  const pinnedTopRowData = useMemo(() => {
+    if (!data) return [];
+    
+    return [
+      {
+        employeeName: `TOTAL EMPS: ${data.numberOfEmployeesInPlan || 0}`,
+        wages: data.wagesTotal || 0,
+        hours: data.hoursTotal || 0,
+        points: data.pointsTotal || 0,
+        isNew: data.numberOfNewEmployees || 0,
+      },
+      {
+        employeeName: "No Wages",
+        wages: 0,
+        hours: 0,
+        points: 0
+      }
+    ];
+  }, [data]);
+
   return (
     <>
       <div style={{ padding: "0 24px 0 24px" }}>
@@ -101,7 +121,8 @@ const TermedWithPriorGrid = () => {
         handleSortChanged={sortEventHandler}
         providedOptions={{
           rowData: data?.response?.results || [],
-          columnDefs: columnDefs
+          columnDefs: columnDefs,
+          pinnedTopRowData: pinnedTopRowData
         }}
       />
       {!!data && data.response.results.length > 0 && (
