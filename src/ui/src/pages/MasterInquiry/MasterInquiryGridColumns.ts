@@ -244,16 +244,6 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
         // Return "No" for false, null, undefined, or any other falsy value
         return params.value === true ? "Yes" : "No";
       }
-    },
-    {
-      headerName: "Status",
-      field: "employmentStatus",
-      colId: "employmentStatus",
-      minWidth: 60,
-      headerClass: "right-align",
-      cellClass: "right-align",
-      resizable: true,
-      sortable: false
-    },
+    }
   ];
 };

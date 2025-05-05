@@ -31,10 +31,8 @@ public class MasterInquiryService : IMasterInquiryService
         public byte PayFrequencyId { get; init; }
         public short PsnSuffix { get; init; }
         public int Ssn { get; init; }
-        public decimal CurrentIncomeYear { get; set; }
-        public decimal CurrentHoursYear { get; set; }
-        public char EmploymentStatusId { get; set; }
-        public string? EmploymentStatus { get; set; }
+        public decimal CurrentIncomeYear { get; init; }
+        public decimal CurrentHoursYear { get; init; }
     }
 
 
@@ -120,9 +118,7 @@ public class MasterInquiryService : IMasterInquiryService
                 PayFrequencyId = x.Member.PayFrequencyId,
                 TransactionDate = x.TransactionDate,
                 CurrentIncomeYear = x.Member.CurrentIncomeYear,
-                CurrentHoursYear = x.Member.CurrentHoursYear,
-                EmploymentStatusId = x.Member.EmploymentStatusId,
-                EmploymentStatus = x.Member.EmploymentStatus
+                CurrentHoursYear = x.Member.CurrentHoursYear
             });
             var result = await formattedQuery.ToPaginationResultsAsync(req, cancellationToken);
             ISet<int> uniqueSsns = await combinedQuery.Select(q => q.Member.Ssn).ToHashSetAsync(cancellationToken: cancellationToken);
@@ -186,9 +182,7 @@ public class MasterInquiryService : IMasterInquiryService
                             .FirstOrDefault(),
                         CurrentHoursYear = d.PayProfits.Where(x => x.ProfitYear == pd.ProfitYear)
                             .Select(x => x.CurrentHoursYear)
-                            .FirstOrDefault(),
-                        EmploymentStatusId = d.EmploymentStatusId,
-                        EmploymentStatus = d.EmploymentStatus!.Name,
+                            .FirstOrDefault()
                     }
                 })
             .Where(x => x.Member.PayFrequencyId == PayFrequency.Constants.Weekly);
@@ -221,9 +215,7 @@ public class MasterInquiryService : IMasterInquiryService
                         PsnSuffix = d.PsnSuffix,
                         Ssn = d.Contact!=null?d.Contact.Ssn: 0,
                         CurrentIncomeYear = 0,
-                        CurrentHoursYear = 0,
-                        EmploymentStatusId = EmploymentStatus.Constants.Inactive,
-                        EmploymentStatus = "N/A",
+                        CurrentHoursYear = 0
                     }
                 });
 
@@ -253,6 +245,8 @@ public class MasterInquiryService : IMasterInquiryService
                 d.TerminationDate,
                 d.StoreNumber,
                 DemographicId = d.Id,
+                EmploymentStatusId = d.EmploymentStatusId,
+                EmploymentStatus = d.EmploymentStatus,
                 CurrentPayProfit = d.PayProfits
                     .FirstOrDefault(x => x.ProfitYear == currentYear),
                 PreviousPayProfit = d.PayProfits
@@ -317,6 +311,7 @@ public class MasterInquiryService : IMasterInquiryService
             CurrentVestedAmount = (currentBalance?.VestedBalance ?? 0),
             CurrentEtva = memberData.CurrentPayProfit?.Etva ?? 0,
             PreviousEtva = memberData.PreviousPayProfit?.Etva ?? 0,
+            EmploymentStatus = memberData.EmploymentStatus?.Name,
             Missives = missives
         };
     }

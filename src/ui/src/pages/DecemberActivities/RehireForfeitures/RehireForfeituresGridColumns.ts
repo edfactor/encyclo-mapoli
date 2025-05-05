@@ -36,6 +36,16 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       resizable: true
     },
     {
+      headerName: "Status",
+      field: "employmentStatus",
+      colId: "employmentStatus",
+      minWidth: 90,
+      headerClass: "left-align",
+      cellClass: "left-align",
+      resizable: true,
+      sortable: true
+    },
+    {
       headerName: "Rehired Date",
       field: "reHiredDate",
       colId: "reHiredDate",
