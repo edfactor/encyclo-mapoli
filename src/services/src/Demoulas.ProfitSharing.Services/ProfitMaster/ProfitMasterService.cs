@@ -227,11 +227,11 @@ public class ProfitMasterService : IProfitMasterService
     {
         return rec.Select(r => new ProfitDetail
         {
-            ProfitCode = id2ProfitCode[r.Code],
+            ProfitCode = id2ProfitCode[r.ProfitCode],
             Ssn = r.Ssn,
             ProfitYear = profitYear,
             ProfitYearIteration = r.YearExtension,
-            ProfitCodeId = r.Code,
+            ProfitCodeId = r.ProfitCode,
             Contribution = r.ContributionAmount,
             Earnings = r.EarningAmount,
             Forfeiture = r.ForfeitureAmount,

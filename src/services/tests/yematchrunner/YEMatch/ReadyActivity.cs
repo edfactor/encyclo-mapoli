@@ -11,6 +11,7 @@ namespace YEMatch;
 public class ReadyActivity(SshClient client, SftpClient sftpClient, bool chatty, string AName, string ksh, string args, string dataDirectory) : Activity
 {
     public override string ActivityLetterNumber { get; set; } = AName;
+    private const string OptionalLocalResourceBase = "/Users/robertherrmann/prj/smart-profit-sharing/src/services/tests/Demoulas.ProfitSharing.IntegrationTests/Resources/";
 
     public override async Task<Outcome> execute()
     {
@@ -71,9 +72,6 @@ public class ReadyActivity(SshClient client, SftpClient sftpClient, bool chatty,
 
             Console.WriteLine($"Log file copied to: file:///{localPath}");
 
-
-            // cp $DATA/PAYROLL/SYS/PVTSYSOUT/QPAY066-$$ $FILETRAN/OutBox/dctm-payroll
-
             var matchTermReport = Regex.Match(result.Result.Trim(), @" JOB: YE-PROF-TERM \((\d+)\) COMPLETED");
             if (matchTermReport.Success)
             {
@@ -87,14 +85,34 @@ public class ReadyActivity(SshClient client, SftpClient sftpClient, bool chatty,
                 }
 
                 Console.WriteLine($"copied {qpay066Remote} to $qpay066Local");
-                
-                string testingFile2 = "/Users/robertherrmann/prj/smart-profit-sharing/src/services/tests/Demoulas.ProfitSharing.IntegrationTests/Resources/terminatedEmployeeAndBeneficiaryReport-correct.txt";
-                if (File.Exists(testingFile2))
+                string testingFile2 = OptionalLocalResourceBase+"terminatedEmployeeAndBeneficiaryReport-correct.txt";
+                if (HasDirectory(testingFile2))
                 {
                     File.Copy(qpay066Local, testingFile2, overwrite: true);
                     Console.WriteLine($"NOTE::: Updated {testingFile2}");
                 }
-                
+            }
+
+            var matchTermReport2 = Regex.Match(result.Result.Trim(), @" JOB: YE-PROF-EDIT \((\d+)\) COMPLETED");
+            if (matchTermReport2.Success)
+            {
+                // Go grab prof term report.
+                string unixProcessId = matchTermReport2.Groups[1].Value;
+                string remote = "/dsmdev/data/PAYROLL/SYS/PVTSYSOUT/PAY447-" + unixProcessId;
+                string local = Path.Combine(dataDirectory, "READY-PAY447.txt");
+                await using (var fileStream = File.OpenWrite(local))
+                {
+                    sftpClient.DownloadFile(remote, fileStream);
+                }
+
+                Console.WriteLine($"copied {remote} to {local}");
+
+                string testingFile3 = OptionalLocalResourceBase + "pay447.txt";
+                if (HasDirectory(testingFile3))
+                {
+                    File.Copy(local, testingFile3, overwrite: true);
+                    Console.WriteLine($"NOTE::: Updated {testingFile3}");
+                }
             }
 
             // #######  LP WAS CALLED WITH ARGS :-d plaser5 /dsmdev/data/PAYROLL/SYS/PVTSYSOUT/PAY444A-25103 
@@ -106,7 +124,7 @@ public class ReadyActivity(SshClient client, SftpClient sftpClient, bool chatty,
                 string qpay066Local = Path.Combine(dataDirectory, $"{filenameLocal}.txt");
                 if (!sftpClient.Exists(reportName))
                 {
-                    Console.WriteLine($"Odd, but remote file does not exist: ${reportName}");
+                    Console.WriteLine($"Odd, but remote file does not exist: {reportName}");
                 }
                 else
                 {
@@ -117,13 +135,12 @@ public class ReadyActivity(SshClient client, SftpClient sftpClient, bool chatty,
                     }
                 }
 
-                string testingFile = "/Users/robertherrmann/prj/smart-profit-sharing/src/services/tests/Demoulas.ProfitSharing.IntegrationTests/Resources/psupdate-pay444-r2.txt";
-                if (filenameLocal == "PAY444L" && File.Exists(testingFile))
+                string testingFile = OptionalLocalResourceBase + "psupdate-pay444-r2.txt";
+                if (HasDirectory(testingFile) && filenameLocal == "PAY444L" && File.Exists(testingFile))
                 {
                     File.Copy(qpay066Local, testingFile, overwrite: true);
                     Console.WriteLine($"NOTE::: Updated {testingFile}");
                 }
-                
             }
         }
         else
@@ -145,5 +162,11 @@ public class ReadyActivity(SshClient client, SftpClient sftpClient, bool chatty,
         }
 
         return new Outcome(ActivityLetterNumber, ksh, $"{ksh} {args}", OutcomeStatus.Ok, lines[^1], took, false, result.Result, result.Error);
+    }
+
+    private static bool HasDirectory(string testingFile2)
+    {
+        string directory = Path.GetDirectoryName(testingFile2)!;
+        return Directory.Exists(directory);
     }
 }

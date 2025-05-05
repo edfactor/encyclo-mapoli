@@ -1,5 +1,6 @@
 ﻿using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using FluentAssertions;
@@ -12,29 +13,18 @@ namespace Demoulas.ProfitSharing.IntegrationTests;
 
 // ReSharper disable once NotAccessedField.Local
 #pragma warning disable S4487
+#pragma warning disable AsyncFixer01
 
-public class TotalServiceIntegrationTests
+public class TotalServiceIntegrationTests : PristineBaseTest
 {
-    private readonly ITestOutputHelper _output;
-    private readonly TotalService _totalService;
-    private readonly OracleConnection _connection;
-    private readonly PristineDataContextFactory _dataContextFactory;
-    private readonly short _employeeYear = 2025;
-
-    public TotalServiceIntegrationTests(ITestOutputHelper output)
+    public TotalServiceIntegrationTests(ITestOutputHelper TestOutputHelper) : base(TestOutputHelper)
     {
-        _output = output;
-        _output.WriteLine("test start");
-        _dataContextFactory = new PristineDataContextFactory();
-
-        AccountingPeriodsService aps = new();
-        CalendarService calsvc = new(_dataContextFactory, aps);
-        IEmbeddedSqlService embeddedSqlService = new EmbeddedSqlService();
-        _totalService = new TotalService(_dataContextFactory, calsvc, embeddedSqlService);
-
         // For accessing PROFITSHARE.* tables
-        _connection = new OracleConnection(_dataContextFactory.ConnectionString);
+        _connection = new OracleConnection(DbFactory.ConnectionString);
     }
+    
+    private readonly OracleConnection _connection;
+    private readonly short _employeeYear = 2025;
 
 
     [Fact]
@@ -57,7 +47,7 @@ public class TotalServiceIntegrationTests
             {
                 if (entry.Value.Years != 0)
                 {
-                    _output.WriteLine($"ERROR!: badge ={entry.Key} missing in SMART/GYOS");
+                    TestOutputHelper.WriteLine($"ERROR!: badge ={entry.Key} missing in SMART/GYOS");
                 }
             }
             else
@@ -87,9 +77,9 @@ public class TotalServiceIntegrationTests
             }
         }
 
-        _output.WriteLine($"YIS Disagree count {yisDisagree}   Agree count {yisAgree}");
-        _output.WriteLine($"Amt Disagree count {netBalDisagree}   Agree count {netBalAgree}");
-        _output.WriteLine($"Etva Disagree count {etvaDisagree}   Agree count {etvaAgree}");
+        TestOutputHelper.WriteLine($"YIS Disagree count {yisDisagree}   Agree count {yisAgree}");
+        TestOutputHelper.WriteLine($"Amt Disagree count {netBalDisagree}   Agree count {netBalAgree}");
+        TestOutputHelper.WriteLine($"Etva Disagree count {etvaDisagree}   Agree count {etvaAgree}");
 //        yisDisagree.Should().Be(0);
 //        netBalDisagree.Should().Be(0);
 //        etvaDisagree.Should().Be(0)
@@ -100,13 +90,13 @@ public class TotalServiceIntegrationTests
 #pragma warning disable AsyncFixer01
     private async Task<Dictionary<int, int>> GetSmartPayProfitData()
     {
-        return await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        return await DbFactory.UseReadOnlyContext(async ctx =>
         {
             var ddata = await ctx.PayProfits
                 .Include(p => p.Demographic)
                 .Where(p => p.ProfitYear == _employeeYear)
                 .GroupJoin(
-                    _totalService.GetYearsOfService(ctx, _employeeYear),
+                    TotalService.GetYearsOfService(ctx, _employeeYear),
                     p => p.Demographic!.Ssn,
                     tot => tot.Ssn,
                     (p, tots) => new { p, tots }
@@ -123,15 +113,15 @@ public class TotalServiceIntegrationTests
                     p => p.Years
                 );
 
-            _output.WriteLine($"SMART data count {ddata.Count}");
+            TestOutputHelper.WriteLine($"SMART data count {ddata.Count}");
             return ddata;
         });
     }
 
     private async Task<Dictionary<int, ParticipantTotalVestingBalance>> GetSmartAmounts()
     {
-        return await _dataContextFactory.UseReadOnlyContext(ctx =>
-            _totalService.TotalVestingBalance(ctx, _employeeYear, (_employeeYear), /*asOfDate*/ new DateOnly(_employeeYear, 1, 4))
+        return await DbFactory.UseReadOnlyContext(ctx =>
+            TotalService.TotalVestingBalance(ctx, _employeeYear, (_employeeYear), /*asOfDate*/ new DateOnly(_employeeYear, 1, 4))
                 .ToDictionaryAsync(
                     keySelector: p => p.Ssn,
                     elementSelector: p => p)
@@ -140,7 +130,7 @@ public class TotalServiceIntegrationTests
 
     private async Task<Dictionary<int, decimal>> GetSmartEtvaAmounts()
     {
-        return await _dataContextFactory.UseReadOnlyContext(ctx =>
+        return await DbFactory.UseReadOnlyContext(ctx =>
             ctx.PayProfits.Include(pp => pp.Demographic).Where(p => p.ProfitYear == _employeeYear)
                 .ToDictionaryAsync(pp => pp.Demographic!.Ssn, pp => pp.Etva)
         );
@@ -176,7 +166,7 @@ public class TotalServiceIntegrationTests
             data.Add(badge, pp);
         }
 
-        _output.WriteLine($"READY data count {data.Count}");
+        TestOutputHelper.WriteLine($"READY data count {data.Count}");
 
         return data;
     }

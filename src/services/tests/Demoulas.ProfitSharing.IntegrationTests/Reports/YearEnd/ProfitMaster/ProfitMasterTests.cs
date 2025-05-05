@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
@@ -13,7 +12,6 @@ using Oracle.ManagedDataAccess.Client;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitMaster;
 
-
 public static class StopwatchExtensions
 {
     public static string Took(this Stopwatch sw)
@@ -22,20 +20,10 @@ public static class StopwatchExtensions
     }
 }
 
-public class ProfitMasterTests
+public class ProfitMasterTests : PristineBaseTest
 {
-    private readonly AccountingPeriodsService _aps = new();
-    private readonly CalendarService _calendarService;
-    private readonly TotalService _totalService;
-    private readonly PristineDataContextFactory _dbFactory;
-    private readonly ITestOutputHelper _testOutputHelper;
-
-    public ProfitMasterTests(ITestOutputHelper testOutputHelper)
+    public ProfitMasterTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
     {
-        _dbFactory = new PristineDataContextFactory();
-        _calendarService = new CalendarService(_dbFactory, _aps);
-        _totalService = new TotalService(_dbFactory, _calendarService, new EmbeddedSqlService());
-        _testOutputHelper = testOutputHelper;
     }
 
     [Fact]
@@ -44,26 +32,26 @@ public class ProfitMasterTests
         // Arrange
         short profitYear = 2024;
         IAppUser iAppUser = new Mock<IAppUser>().Object;
-        ProfitShareUpdateService psus = new ProfitShareUpdateService(_dbFactory, _totalService, _calendarService);
+        ProfitShareUpdateService psus = new ProfitShareUpdateService(DbFactory, TotalService, CalendarService);
         ProfitShareEditService pses = new ProfitShareEditService(psus);
-        ProfitMasterService pms = new ProfitMasterService(pses, _dbFactory, iAppUser);
+        ProfitMasterService pms = new ProfitMasterService(pses, DbFactory, iAppUser);
 
         Stopwatch sw = Stopwatch.StartNew();
         try
         {
             var prs = await pms.Revert(
                 new ProfitYearRequest() { Skip = null, Take = null, ProfitYear = profitYear, }, CancellationToken.None);
-            _testOutputHelper.WriteLine($"Revert {sw.Took()}, for transactionsRemoved:{prs.TransactionsRemoved}  etvasEffected:{prs.EtvasEffected}");
+            TestOutputHelper.WriteLine($"Revert {sw.Took()}, for transactionsRemoved:{prs.TransactionsRemoved}  etvasEffected:{prs.EtvasEffected}");
         }
         catch (Exception e)
         {
-            _testOutputHelper.WriteLine($"Revert failed: {e.Message}");
+            TestOutputHelper.WriteLine($"Revert failed: {e.Message}");
         }
 
         sw = Stopwatch.StartNew();
 
         // Forces a connection, so the Bulk operations can access an open connection
-        await _dbFactory.UseWritableContext(async ctx =>
+        await DbFactory.UseWritableContext(async ctx =>
         {
             var c = ctx.Database.GetDbConnection();
             if (c is OracleConnection oracleConnection)
@@ -95,7 +83,7 @@ public class ProfitMasterTests
             }, CancellationToken.None);
 
         sw.Stop();
-        _testOutputHelper.WriteLine($"Update {sw.Took()} for transactions:{psur.TransactionsCreated} etvasEffected:{psur.EtvasEffected}");
+        TestOutputHelper.WriteLine($"Update {sw.Took()} for transactions:{psur.TransactionsCreated} etvasEffected:{psur.EtvasEffected}");
         true.Should().Be(true);
     }
 
@@ -105,9 +93,9 @@ public class ProfitMasterTests
         // Arrange
         short profitYear = 2024;
         IAppUser iAppUser = new Mock<IAppUser>().Object;
-        ProfitShareUpdateService psus = new ProfitShareUpdateService(_dbFactory, _totalService, _calendarService);
+        ProfitShareUpdateService psus = new ProfitShareUpdateService(DbFactory, TotalService, CalendarService);
         ProfitShareEditService pses = new ProfitShareEditService(psus);
-        ProfitMasterService pms = new ProfitMasterService(pses, _dbFactory, iAppUser);
+        ProfitMasterService pms = new ProfitMasterService(pses, DbFactory, iAppUser);
 
         Stopwatch sw = Stopwatch.StartNew();
         // Act
@@ -115,7 +103,7 @@ public class ProfitMasterTests
             new ProfitYearRequest() { Skip = null, Take = null, ProfitYear = profitYear, }, CancellationToken.None);
 
         sw.Stop();
-        _testOutputHelper.WriteLine($"Revert took {sw.Took()}; for TransactionsRemoved:{prs.TransactionsRemoved} etvasEffected:{prs.EtvasEffected}");
+        TestOutputHelper.WriteLine($"Revert took {sw.Took()}; for TransactionsRemoved:{prs.TransactionsRemoved} etvasEffected:{prs.EtvasEffected}");
         true.Should().Be(true);
     }
 }

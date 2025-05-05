@@ -50,11 +50,12 @@ internal sealed record MemberFinancials
         Caf = profitDetailTotals.ClassActionFundTotal > 0 ? profitDetailTotals.ClassActionFundTotal : 0;
         Xfer = profitDetailTotals.AllocationsTotal;
         Pxfer = profitDetailTotals.PaidAllocationsTotal;
+        Forfeits = profitDetailTotals.ForfeitsTotal;
 
         Contributions = memberTotals.ContributionAmount;
         AllEarnings = memberTotals.EarningsAmount;
         EarningPoints = memberTotals.EarnPoints;
-        IncomingForfeitures = memberTotals.IncomingForfeitureAmount - profitDetailTotals.ForfeitsTotal;
+        IncomingForfeitures = memberTotals.IncomingForfeitureAmount;
     }
 
     public bool IsEmployee { get; set; }
@@ -62,16 +63,23 @@ internal sealed record MemberFinancials
     public string? Psn { get; set; }
     public string? Name { get; set; }
     public int Ssn { get; set; }
+    public byte EmployeeTypeId { get; set; }
+
+    // Aggregate Historical values
     public decimal CurrentAmount { get; set; }
     public decimal Distributions { get; set; }
     public decimal Military { get; set; }
     public decimal Xfer { get; set; }
     public decimal Pxfer { get; set; }
-    public byte EmployeeTypeId { get; set; }
+    public decimal Forfeits { get; set; } // Money returned to the pool by member
+    public decimal Caf { get; set; } // Class Action Fund
+
+    // This Years Values
     public int ContributionPoints { get; set; }
     public int EarningPoints { get; set; }
+
     public decimal Contributions { get; set; }
-    public decimal IncomingForfeitures { get; set; }
+    public decimal IncomingForfeitures { get; set; } // Money coming to memeber from the pool
 
     /// <summary>
     /// Includes earnings on all of the members money. (ie. non-vested, vested and ETVA)
@@ -98,9 +106,10 @@ internal sealed record MemberFinancials
     /// </summary>
     public decimal SecondaryEtvaEarnings { get; set; } // PY_PROF_ETVA2
 
+    // Did this user bust over the yearly Max Contribution amount?
     public decimal MaxOver { get; set; }
     public int MaxPoints { get; set; }
-    public decimal Caf { get; set; }
+
     public byte? ZeroContributionReasonId { get; set; }
 
     /// <summary>
@@ -119,7 +128,8 @@ internal sealed record MemberFinancials
         + IncomingForfeitures
         + Military
         + Caf
-        - Distributions;
+        - Distributions
+        - Forfeits;
 
     public bool IsAllZeros() => CurrentAmount == 0m &&
                                 Distributions == 0m &&
@@ -130,5 +140,6 @@ internal sealed record MemberFinancials
                                 IncomingForfeitures == 0m &&
                                 AllEarnings == 0m &&
                                 AllSecondaryEarnings == 0m &&
+                                Forfeits == 0m &&
                                 EndingBalance == 0m;
 }
