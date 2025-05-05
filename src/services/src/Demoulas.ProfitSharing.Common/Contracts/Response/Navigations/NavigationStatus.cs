@@ -12,3 +12,9 @@ public static class NavigationStatus
     public const byte Blocked = 2;
     public const byte Successful = 3;
 }
+
+public class NavigationStatusDto
+{
+    public byte Id { get; set; }
+    public string? Name { get; set; }
+}

@@ -63,4 +63,23 @@ public class NavigationService : INavigationService
     {
         throw new NotImplementedException();
     }
+
+    public async Task<List<NavigationStatusDto>> GetNavigationStatus(CancellationToken cancellationToken)
+    {
+        var navigationStatusList = await _dataContextFactory.UseReadOnlyContext(context =>
+            context.NavigationStatuses.ToListAsync(cancellationToken)
+        );
+        return navigationStatusList.Select(x => new NavigationStatusDto { Id = x.Id, Name = x.Name }).ToList();
+    }
+
+
+    public async Task<bool> UpdateNavigation(int navigationId,byte statusId, CancellationToken cancellationToken)
+    {
+        var success = await _dataContextFactory.UseWritableContext(context =>
+        context.Navigations.Where(x => x.Id == navigationId)
+        .ExecuteUpdateAsync(x => x.SetProperty(p => p.StatusId, statusId)), cancellationToken
+        );
+        return success ==1;
+    }
+
 }
