@@ -30,19 +30,7 @@ public class YearEndProfitSharingReportEndpoint: EndpointWithCsvTotalsBase<YearE
             {
                 {
                     200,
-                    new ReportResponseBase<YearEndProfitSharingReportResponse>
-                    {
-                        ReportName = ReportFileName,
-                        ReportDate = DateTimeOffset.Now,
-                        Response = new PaginatedResponseDto<YearEndProfitSharingReportResponse>(new Demoulas.Common.Contracts.Contracts.Request.PaginationRequestDto(){Skip = 0 , Take=255})
-                        {
-                            Results =
-                            [
-                               YearEndProfitSharingReportResponse.ResponseExample()
-                            ],
-                            Total = 1,
-                        }
-                    }
+                    YearEndProfitSharingReportResponse.ResponseExample()
                 }
             };
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
