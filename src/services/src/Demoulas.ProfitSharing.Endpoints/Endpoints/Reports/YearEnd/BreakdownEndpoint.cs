@@ -1,4 +1,4 @@
-using CsvHelper.Configuration;
+﻿using CsvHelper.Configuration;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -42,22 +42,17 @@ public class BreakdownEndpoint : EndpointWithCsvBase<BreakdownByStoreRequest, Me
         public BreakdownEndpointMap()
         {
             Map(m => m.StoreNumber).Index(0).Name("StoreNumber");
-            Map(m => m.EnrollmentId).Index(1).Name("EnrollmentId");
             Map(m => m.BadgeNumber).Index(2).Name("BadgeNumber");
-            Map(m => m.Ssn).Index(3).Name("Ssn");
             Map(m => m.FullName).Index(4).Name("FullName");
-            Map(m => m.PayFrequencyId).Index(5).Name("PayFrequencyId");
-            Map(m => m.DepartmentId).Index(6).Name("DepartmentId");
             Map(m => m.PayClassificationId).Index(7).Name("PayClassificationId");
             Map(m => m.BeginningBalance).Index(8).Name("BeginningBalance");
             Map(m => m.Earnings).Index(9).Name("Earnings");
             Map(m => m.Contributions).Index(10).Name("Contributions");
-            Map(m => m.Forfeiture).Index(11).Name("Forfeiture");
             Map(m => m.Distributions).Index(12).Name("Distributions");
             Map(m => m.EndingBalance).Index(13).Name("EndingBalance");
             Map(m => m.VestedAmount).Index(14).Name("VestedAmount");
-            Map(m => m.VestedPercentage).Index(15).Name("VestedPercentage");
-            Map(m => m.EmploymentStatusId).Index(16).Name("EmploymentStatusId");
+            Map(m => m.VestedPercent).Index(15).Name("VestedPercentage");
+            Map(m => m.PayClassificationName).Index(16).Name("PayClassificationName");
         }
     }
 }
