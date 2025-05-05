@@ -198,6 +198,7 @@ export interface MilitaryAndRehireForfeiture {
   companyContributionYears: number;
   enrollmentId: number;
   enrollmentName: string;
+  employmentStatus: string;
   hoursCurrentYear: number;
   details: ForfeitureDetail[];
 }

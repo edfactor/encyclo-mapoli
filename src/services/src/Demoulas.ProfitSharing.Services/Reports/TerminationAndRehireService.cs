@@ -99,7 +99,8 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
                     m.CompanyContributionYears,
                     m.HoursCurrentYear,
                     m.EnrollmentId,
-                    m.EnrollmentName
+                    m.EnrollmentName,
+                    m.EmploymentStatus
                 }).Select(group =>
                     new RehireForfeituresResponse
                     {
@@ -111,6 +112,7 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
                         CompanyContributionYears = group.Key.CompanyContributionYears,
                         EnrollmentId = group.Key.EnrollmentId,
                         EnrollmentName = group.Key.EnrollmentName,
+                        EmploymentStatus = group.Key.EmploymentStatus,
                         Details = group.Select(pd => new MilitaryRehireProfitSharingDetailResponse
                         {
                             Forfeiture = pd.Forfeiture,
@@ -158,7 +160,8 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
                     payProfit.EnrollmentId,
                     payProfit.Enrollment,
                     payProfit.CurrentHoursYear,
-                    demographics.EmploymentStatusId
+                    demographics.EmploymentStatusId,
+                    EmploymentStatus = demographics.EmploymentStatus!.Name
                 }
             )
             .Where(m =>
@@ -181,12 +184,13 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
                     member.StoreNumber,
                     member.EnrollmentId,
                     member.CurrentHoursYear,
-                    member.EmploymentStatusId,
                     profitDetail.Forfeiture,
                     profitDetail.Remark,
                     profitDetail.ProfitYear,
                     profitDetail.ProfitCodeId,
                     member.Enrollment,
+                    member.EmploymentStatusId,
+                    member.EmploymentStatus
                 }
             )
             .GroupJoin(
@@ -213,6 +217,7 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
                     NetBalanceLastYear = 0, //Filled out in detail report
                     VestedBalanceLastYear = 0, //Filled out in detail report
                     EmploymentStatusId = temp.member.EmploymentStatusId,
+                    EmploymentStatus = temp.member.EmploymentStatus,
                     Forfeiture = temp.member.Forfeiture,
                     Remark = temp.member.Remark,
                     ProfitYear = temp.member.ProfitYear,

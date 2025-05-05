@@ -13,6 +13,7 @@ public sealed record RehireForfeituresResponse
     public required byte EnrollmentId  { get; set; }
     public required string EnrollmentName { get; set; }
     public required IEnumerable<MilitaryRehireProfitSharingDetailResponse> Details { get; set; }
+    public required string? EmploymentStatus { get; set; }
 
 
     public static RehireForfeituresResponse ResponseExample()
@@ -26,6 +27,7 @@ public sealed record RehireForfeituresResponse
             CompanyContributionYears = 3,
             EnrollmentId = 4,
             EnrollmentName = "New vesting plan has Forfeiture records",
+            EmploymentStatus = "Terminated",
             ReHiredDate = DateTime.Today.AddYears(-2).ToDateOnly(),
             Details = new List<MilitaryRehireProfitSharingDetailResponse>
             {
