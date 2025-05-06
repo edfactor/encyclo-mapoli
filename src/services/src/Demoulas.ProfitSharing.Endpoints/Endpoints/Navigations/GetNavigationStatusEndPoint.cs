@@ -24,7 +24,7 @@ public class GetNavigationStatusEndpoint : Endpoint<GetNavigationStatusRequestDt
     public override void Configure()
     {
         AllowAnonymous();
-        Get($"/status/list");
+        Get("/status");
         Summary(m =>
         {
             m.Summary = "Get all navigation status";

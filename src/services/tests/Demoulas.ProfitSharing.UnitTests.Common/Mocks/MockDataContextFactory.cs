@@ -54,6 +54,11 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingDbContext.Setup(m => m.Navigations).Returns(mockNavigation.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.Navigations).Returns(mockNavigation.Object);
 
+        List<NavigationStatus>? navigationStatus = new NavigationStatusFaker().DummyNavigationStatus();
+        Mock<DbSet<NavigationStatus>> mockNavigationStatus = navigationStatus.AsQueryable().BuildMockDbSet();
+        _profitSharingDbContext.Setup(m => m.NavigationStatuses).Returns(mockNavigationStatus.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.NavigationStatuses).Returns(mockNavigationStatus.Object);
+
         List<PayClassification>? payClassifications = new PayClassificationFaker().Generate(500);
         Mock<DbSet<PayClassification>> mockPayClassifications = payClassifications.AsQueryable().BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.PayClassifications).Returns(mockPayClassifications.Object);

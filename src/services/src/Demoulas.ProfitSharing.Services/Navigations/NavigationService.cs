@@ -23,13 +23,13 @@ public class NavigationService : INavigationService
         this._dataContextFactory = dataContextFactory;
     }
 
-    
+
     public async Task<List<NavigationDto>> GetNavigation(CancellationToken cancellationToken)
     {
         var flatList = await _dataContextFactory.UseReadOnlyContext(context =>
             context.Navigations
-                .Include(m=>m.Items)
-                .Include(m=>m.RequiredRoles)
+                .Include(m => m.Items)
+                .Include(m => m.RequiredRoles)
                 .OrderBy(x => x.OrderNumber)
                 .ToListAsync(cancellationToken)
         );
@@ -50,7 +50,7 @@ public class NavigationService : INavigationService
                     SubTitle = x.SubTitle,
                     Items = BuildTree(x.Id),
                     Disabled = x.Disabled,
-                    RequiredRoles = x.RequiredRoles?.Select(m=>m.Name).ToList()
+                    RequiredRoles = x.RequiredRoles?.Select(m => m.Name).ToList()
                 })
                 .ToList();
         }
@@ -67,19 +67,25 @@ public class NavigationService : INavigationService
     public async Task<List<NavigationStatusDto>> GetNavigationStatus(CancellationToken cancellationToken)
     {
         var navigationStatusList = await _dataContextFactory.UseReadOnlyContext(context =>
-            context.NavigationStatuses.ToListAsync(cancellationToken)
+            context.NavigationStatuses.Select(x => new NavigationStatusDto { Id = x.Id, Name = x.Name }).ToListAsync(cancellationToken)
         );
-        return navigationStatusList.Select(x => new NavigationStatusDto { Id = x.Id, Name = x.Name }).ToList();
+        return navigationStatusList;
     }
 
 
-    public async Task<bool> UpdateNavigation(int navigationId,byte statusId, CancellationToken cancellationToken)
+    public async Task<bool> UpdateNavigation(int navigationId, byte statusId, CancellationToken cancellationToken)
     {
-        var success = await _dataContextFactory.UseWritableContext(context =>
-        context.Navigations.Where(x => x.Id == navigationId)
-        .ExecuteUpdateAsync(x => x.SetProperty(p => p.StatusId, statusId)), cancellationToken
-        );
-        return success ==1;
+        var success = await _dataContextFactory.UseWritableContext(async context =>
+        {
+            var nav = await context.Navigations.FirstOrDefaultAsync(x => x.Id == navigationId, cancellationToken);
+            if(nav == null)
+            {
+                return 0;
+            }
+            nav.StatusId = statusId;
+            return await context.SaveChangesAsync(cancellationToken);
+        },cancellationToken);
+        return success > 0;
     }
 
 }

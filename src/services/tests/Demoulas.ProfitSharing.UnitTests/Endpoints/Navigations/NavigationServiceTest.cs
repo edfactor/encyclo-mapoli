@@ -27,6 +27,7 @@ public class NavigationServiceTests : ApiTestBase<Program>
 {
     private readonly INavigationService _navigationService;
     private readonly List<Navigation> navigationListObj;
+    private readonly List<NavigationStatusDto> navigationStatusList;
 
     public NavigationServiceTests()
     {
@@ -87,6 +88,15 @@ public class NavigationServiceTests : ApiTestBase<Program>
             new Navigation { Id = 8, ParentId = 1, Title = "Rehire Forfeitures", SubTitle = "QPREV-PROF", Url = "rehire-forfeitures", StatusId = 1, OrderNumber = 3, Icon = "", Disabled = false },
             new Navigation { Id = 10, ParentId = 1, Title = "Distributions and Forfeitures", SubTitle = "QPAY129", Url = "distributions-and-forfeitures", StatusId = 1, OrderNumber = 6, Icon = "", Disabled = false },
         };
+
+
+        this.navigationStatusList = new List<NavigationStatusDto>()
+        {
+            new NavigationStatusDto() { Id = NavigationStatusConstant.NotStarted, Name = "Not Started" },
+            new NavigationStatusDto() { Id = NavigationStatusConstant.InProgress, Name = "In Progress" },
+            new NavigationStatusDto() { Id = NavigationStatusConstant.Blocked, Name = "Blocked" },
+            new NavigationStatusDto() { Id = NavigationStatusConstant.Successful, Name = "Successful" }
+        };
     }
     [Fact(DisplayName = "PS-1009: Navigation")]
     public async Task GetNavigations()
@@ -123,6 +133,24 @@ public class NavigationServiceTests : ApiTestBase<Program>
         return BuildTree(null); // root level
         
     }
+
+    [Fact(DisplayName = "PS-1059: GetNavigationStatus")]
+    public async Task GetNavigationStatus()
+    {
+        var navigationStatus = await _navigationService.GetNavigationStatus(CancellationToken.None);
+        Assert.NotNull(navigationStatus);
+        navigationStatus.Should().BeEquivalentTo(this.navigationStatusList);
+    }
+
+    [Fact(DisplayName = "PS-1059: Update navigation status")]
+    public async Task UpdateNavigationStatus()
+    {
+        var success = await _navigationService.UpdateNavigation(navigationId: 3, statusId: 1, CancellationToken.None);
+        Assert.True(success);
+    }
+
+
+
 }
 
 

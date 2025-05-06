@@ -24,11 +24,11 @@ public class UpdateNavigationStatusEndpoint : Endpoint<UpdateNavigationRequestDt
     public override void Configure()
     {
         AllowAnonymous();
-        Get($"/update");
+        Put("");
         Summary(m =>
         {
-            m.Summary = "Get all navigation status";
-            m.Description = "Fetch List of navigation status objects.";
+            m.Summary = "Update navigation Status";
+            m.Description = "Get the navigationId and statusId and update navigation status.";
             m.ResponseExamples = new Dictionary<int, object> { { 200, new UpdateNavigationStatusResponseDto() } };
         });
         Group<NavigationGroup>();
