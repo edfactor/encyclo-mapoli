@@ -7,7 +7,6 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
-using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.Reports.Breakdown;
@@ -117,10 +116,91 @@ public class BreakdownReportService : IBreakdownService
         );
     }
 
-    public Task<BreakdownByStoreTotals> GetTotalsByStore(BreakdownByStoreRequest breakdownByStoreRequest, CancellationToken cancellationToken)
+    public Task<BreakdownByStoreTotals> GetTotalsByStore(
+    BreakdownByStoreRequest request,
+    CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        return _dataContextFactory.UseReadOnlyContext(async ctx =>
+        {
+            if (request.StoreNumber <= 0)
+            {
+                throw new InvalidOperationException(
+                    $"Invalid {nameof(request.StoreNumber)} {request.StoreNumber}.");
+            }
+
+            var employeesBase = GetStoreQueryBase(ctx);
+            employeesBase = employeesBase.Where(e => e.StoreNumber == request.StoreNumber);
+
+            var employeeSsns = await employeesBase
+                .Select(e => e!.Ssn)
+                .ToHashSetAsync(cancellationToken);
+
+            if (employeeSsns.Contains(0))
+            {
+                throw new InvalidOperationException("Unexpected 0 SSN encountered.");
+            }
+
+            var calInfo = await _calendarService
+                .GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
+            var priorYear = (short)(request.ProfitYear - 1);
+
+            var vestingBySsn = await _totalService
+                .GetVestingRatio(ctx, request.ProfitYear, calInfo.FiscalEndDate)
+                .Where(vr => employeeSsns.Contains(vr.Ssn ?? 0))
+                .ToDictionaryAsync(vr => vr.Ssn ?? 0, vr => vr.Ratio, cancellationToken);
+
+            var balanceBySsnLastYear = await _totalService
+                .GetTotalBalanceSet(ctx, priorYear)
+                .Where(tbs => employeeSsns.Contains(tbs.Ssn))
+                .ToDictionaryAsync(tbs => tbs.Ssn, tbs => tbs.Total ?? 0, cancellationToken);
+
+            var txnsBySsn = await TotalService
+                .GetTransactionsBySsnForProfitYearForOracle(ctx, request.ProfitYear)
+                .Where(txn => employeeSsns.Contains(txn.Ssn))
+                .ToDictionaryAsync(txn => txn.Ssn, txn => txn, cancellationToken);
+
+            var employeeSnapshots = await employeesBase
+                .Select(e => new
+                {
+                    e.Ssn,
+                    BeginningBalance = balanceBySsnLastYear.GetValueOrDefault(e.Ssn),
+                    Txn = txnsBySsn.GetValueOrDefault(e.Ssn) ?? new InternalProfitDetailDto(),
+                    VestingRatio = vestingBySsn.GetValueOrDefault(e.Ssn) ?? 0
+                })
+                .ToListAsync(cancellationToken);
+
+            var totals = new BreakdownByStoreTotals
+            {
+                TotalNumberEmployees = (short)employeeSnapshots.Count,
+                TotalBeginningBalances = employeeSnapshots.Sum(x => x.BeginningBalance),
+                TotalEarnings = employeeSnapshots.Sum(x => x.Txn.TotalEarnings),
+                TotalContributions = employeeSnapshots.Sum(x => x.Txn.TotalContributions),
+                TotalForfeitures = employeeSnapshots.Sum(x => x.Txn.TotalForfeitures),
+                TotalDisbursements = employeeSnapshots.Sum(x => x.Txn.Distribution),
+            };
+
+            totals.TotalEndBalances = totals.TotalBeginningBalances
+                                    + totals.TotalEarnings
+                                    + totals.TotalContributions
+                                    + totals.TotalForfeitures
+                                    + totals.TotalDisbursements
+                                    + employeeSnapshots.Sum(x => x.Txn.BeneficiaryAllocation);
+
+            totals.TotalVestedBalance = employeeSnapshots.Sum(x =>
+            {
+                var endBal = x.BeginningBalance
+                           + x.Txn.TotalEarnings
+                           + x.Txn.TotalContributions
+                           + x.Txn.TotalForfeitures
+                           + x.Txn.Distribution
+                           + x.Txn.BeneficiaryAllocation;
+                return endBal * x.VestingRatio;
+            });
+
+            return totals;
+        });
     }
+
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetActiveMembersByStore(BreakdownByStoreRequest breakdownByStoreRequest, CancellationToken cancellationToken)
     {
