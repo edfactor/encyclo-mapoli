@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 import {
   addBadgeNumberToUpdateAdjustmentSummary,
-  clearBreakdownByStore,
+  clearBreakdownByStore, clearBreakdownByStoreTotals,
   clearProfitMasterApply,
   clearProfitMasterRevert,
   clearProfitMasterStatus,
@@ -16,7 +16,7 @@ import {
   setAdditionalExecutivesGrid,
   setBalanceByAge,
   setBalanceByYears,
-  setBreakdownByStore,
+  setBreakdownByStore, setBreakdownByStoreTotals,
   setContributionsByAge,
   setDemographicBadgesNotInPayprofitData,
   setDistributionsAndForfeitures,
@@ -113,7 +113,7 @@ import {
   ForfeitureAdjustmentRequest,
   ForfeitureAdjustmentResponse,
   ForfeitureAdjustmentUpdateRequest,
-  ForfeitureAdjustmentDetail
+  ForfeitureAdjustmentDetail, BreakdownByStoreTotals
 } from "reduxstore/types";
 import { tryddmmyyyyToDate } from "../../utils/dateUtils";
 import { Paged } from "smart-ui-library";
@@ -817,6 +817,29 @@ export const YearsEndApi = createApi({
         }
       }
     }),
+    getBreakdownByStoreTotals: builder.query<BreakdownByStoreTotals, BreakdownByStoreRequest>({
+      query: (params) => ({
+        url: `yearend/breakdown-by-store/${params.storeNumber}/totals`,
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          take: params.pagination.take,
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          dispatch(clearBreakdownByStoreTotals());
+          const { data } = await queryFulfilled;
+          dispatch(setBreakdownByStoreTotals(data));
+        } catch (err) {
+          console.log("Err: " + err);
+          dispatch(clearBreakdownByStoreTotals());
+        }
+      }
+    }),
     getUnder21BreakdownByStore: builder.query<Under21BreakdownByStoreResponse, Under21BreakdownByStoreRequest>({
       query: (params) => ({
         url: "yearend/post-frozen/under-21-breakdown-by-store",
@@ -1051,6 +1074,7 @@ export const {
   useLazyGetBalanceByAgeQuery,
   useLazyGetBalanceByYearsQuery,
   useLazyGetBreakdownByStoreQuery,
+  useLazyGetBreakdownByStoreTotalsQuery,
   useLazyGetContributionsByAgeQuery,
   useLazyGetDemographicBadgesNotInPayprofitQuery,
   useLazyGetDistributionsAndForfeituresQuery,
@@ -1077,7 +1101,6 @@ export const {
   useLazyGetYearEndProfitSharingReportQuery,
   useUpdateExecutiveHoursAndDollarsMutation,
   useLazyGetYearEndProfitSharingSummaryReportQuery,
-  useLazyGetUpdateSummaryQuery,
   useLazyGetMasterApplyQuery,
   useLazyGetMasterRevertQuery,
   useLazyGetProfitSharingLabelsQuery,

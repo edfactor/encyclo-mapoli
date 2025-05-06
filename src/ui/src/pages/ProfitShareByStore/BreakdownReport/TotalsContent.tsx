@@ -1,21 +1,74 @@
 import { Typography } from "@mui/material";
 import LabelValueSection from "../../../components/LabelValueSection";
 import Grid2 from '@mui/material/Grid2';
+import { useEffect } from "react";
+import { useLazyGetBreakdownByStoreTotalsQuery } from "reduxstore/api/YearsEndApi";;
+import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import { numberToCurrency } from "smart-ui-library";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../reduxstore/store";
 
 interface TotalsContentProps {
-  store: string;
+  store: number;
 }
 
 const TotalsContent: React.FC<TotalsContentProps> = ({ store }) => {
+  const { breakdownByStoreTotals } = useSelector((state: RootState) => state.yearsEnd);
+  const profitYear = useDecemberFlowProfitYear()
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
+  // Use the API hook to fetch data
+  const [getBreakdownByStoreTotals] = useLazyGetBreakdownByStoreTotalsQuery();
+
+  useEffect(() => {
+    if (hasToken) {
+      // Refetch when store changes
+      getBreakdownByStoreTotals({
+        profitYear: profitYear,
+        storeNumber: store,
+        pagination: {
+          take: 10,
+          skip: 0,
+          sortBy: "",
+          isSortDescending: false
+        }
+      });
+    }
+  }, [store, profitYear, getBreakdownByStoreTotals, hasToken]);
+
+  // Prepare data for display, using actual values when available
   const data = [
-    { label: "Total Number of Employees:", value: "999,999" },
-    { label: "Total Beginning Balances:", value: "1,111,111,111.11" },
-    { label: "Total Earnings:", value: "222,222,222.22" },
-    { label: "Total Contributions:", value: "333,333,333.33" },
-    { label: "Total Forfeitures:", value: "0.00" },
-    { label: "Total Disbursements:", value: "444,444,444.44" },
-    { label: "Total End Balances:", value: "5,555,555,555.55" },
-    { label: "Total Vested Balance:", value: "999,999,999.99" }
+    {
+      label: "Total Number of Employees:",
+      value: breakdownByStoreTotals ? numberToCurrency(breakdownByStoreTotals.totalNumberEmployees) : "0"
+    },
+    {
+      label: "Total Beginning Balances:",
+      value: breakdownByStoreTotals ? numberToCurrency(breakdownByStoreTotals.totalBeginningBalances, 2) : "0.00"
+    },
+    {
+      label: "Total Earnings:",
+      value: breakdownByStoreTotals ? numberToCurrency(breakdownByStoreTotals.totalEarnings, 2) : "0.00"
+    },
+    {
+      label: "Total Contributions:",
+      value: breakdownByStoreTotals ? numberToCurrency(breakdownByStoreTotals.totalContributions, 2) : "0.00"
+    },
+    {
+      label: "Total Forfeitures:",
+      value: breakdownByStoreTotals ? numberToCurrency(breakdownByStoreTotals.totalForfeitures, 2) : "0.00"
+    },
+    {
+      label: "Total Disbursements:",
+      value: breakdownByStoreTotals ? numberToCurrency(breakdownByStoreTotals.totalDisbursements, 2) : "0.00"
+    },
+    {
+      label: "Total End Balances:",
+      value: breakdownByStoreTotals ? numberToCurrency(breakdownByStoreTotals.totalEndBalances, 2) : "0.00"
+    },
+    {
+      label: "Total Vested Balance:",
+      value: breakdownByStoreTotals ? numberToCurrency(breakdownByStoreTotals.totalVestedBalance, 2) : "0.00"
+    }
   ];
 
   return (
@@ -34,4 +87,4 @@ const TotalsContent: React.FC<TotalsContentProps> = ({ store }) => {
   );
 };
 
-export default TotalsContent; 
+export default TotalsContent;

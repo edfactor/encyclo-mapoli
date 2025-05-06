@@ -27,6 +27,7 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store }) => {
   const queryParams = useSelector((state: RootState) => state.yearsEnd.breakdownByStoreQueryParams);
   const navigate = useNavigate();
   const profitYear = useDecemberFlowProfitYear();
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
 
   const handleNavigation = useCallback(
     (path: string) => {
@@ -49,8 +50,11 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store }) => {
         isSortDescending: sortParams.isSortDescending
       }
     };
+    if (hasToken)
+    {
     fetchBreakdownByStore(params);
-  }, [fetchBreakdownByStore, pageNumber, pageSize, profitYear, queryParams?.profitYear, sortParams.isSortDescending, sortParams.sortBy, store]);
+    }
+  }, [fetchBreakdownByStore, hasToken, pageNumber, pageSize, profitYear, queryParams?.profitYear, sortParams.isSortDescending, sortParams.sortBy, store]);
 
   useEffect(() => {
     fetchData();

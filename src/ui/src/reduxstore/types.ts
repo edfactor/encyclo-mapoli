@@ -909,6 +909,19 @@ export interface BreakdownByStoreEmployee {
   payClassificationName: string;
 }
 
+export interface BreakdownByStoreTotals {
+  totalNumberEmployees: number;
+  totalBeginningBalances: number;
+  totalEarnings: number;
+  totalContributions: number;
+  totalForfeitures: number;
+  totalDisbursements: number;
+  totalEndBalances: number;
+  totalVestedBalance: number;
+}
+
+
+
 export interface BreakdownByStoreResponse {
   reportName: string;
   reportDate: string;

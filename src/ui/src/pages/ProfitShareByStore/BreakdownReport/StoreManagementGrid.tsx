@@ -26,6 +26,7 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store }) => {
   const storeManagement = useSelector((state: RootState) => state.yearsEnd.storeManagementBreakdown);
   const queryParams = useSelector((state: RootState) => state.yearsEnd.breakdownByStoreQueryParams);
   const navigate = useNavigate();
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
 
   const handleNavigation = useCallback(
     (path: string) => {
@@ -49,8 +50,11 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store }) => {
         isSortDescending: sortParams.isSortDescending
       }
     };
+    if ( hasToken)
+    {
     fetchStoreManagement(params);
-  }, [fetchStoreManagement, pageNumber, pageSize, profitYear, queryParams?.profitYear, sortParams.isSortDescending, sortParams.sortBy, store]);
+    }
+  }, [fetchStoreManagement, hasToken, pageNumber, pageSize, profitYear, queryParams?.profitYear, sortParams.isSortDescending, sortParams.sortBy, store]);
 
   useEffect(() => {
     fetchData();
