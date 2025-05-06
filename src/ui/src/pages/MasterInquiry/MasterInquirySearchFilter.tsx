@@ -242,7 +242,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
           spacing={3}
           width="100%">
          
-          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
             <Controller
               name="endProfitYear"
               control={control}
@@ -262,7 +262,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
             {errors.endProfitYear && <FormHelperText error>{errors.endProfitYear.message}</FormHelperText>}
           </Grid2>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
             <FormLabel>Beginning Month</FormLabel>
             <Controller
               name="startProfitMonth"
@@ -294,7 +294,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
             {errors.startProfitMonth && <FormHelperText error>{errors.startProfitMonth.message}</FormHelperText>}
           </Grid2>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
             <FormLabel>Ending Month</FormLabel>
             <Controller
               name="endProfitMonth"
@@ -326,7 +326,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
             {errors.endProfitMonth && <FormHelperText error>{errors.endProfitMonth.message}</FormHelperText>}
           </Grid2>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
             <FormLabel>Social Security Number</FormLabel>
             <Controller
               name="socialSecurity"
@@ -349,7 +349,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
             {errors.socialSecurity && <FormHelperText error>{errors.socialSecurity.message}</FormHelperText>}
           </Grid2>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
             <FormLabel>Name</FormLabel>
             <Controller
               name="name"
@@ -371,7 +371,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
             {errors.name && <FormHelperText error>{errors.name.message}</FormHelperText>}
           </Grid2>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
             <FormLabel>Badge/PSN Number</FormLabel>
             <Controller
               name="badgeNumber"

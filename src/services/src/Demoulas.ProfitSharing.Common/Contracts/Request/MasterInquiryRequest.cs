@@ -4,8 +4,6 @@ using Demoulas.Common.Contracts.Contracts.Request;
 namespace Demoulas.ProfitSharing.Common.Contracts.Request;
 public record MasterInquiryRequest : SortedPaginationRequestDto 
 {
-    [DefaultValue(2023)]
-    public short? StartProfitYear { get; set; }
     [DefaultValue(2024)]
     public short? EndProfitYear { get; set; }
     public byte? StartProfitMonth { get; set; }

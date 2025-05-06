@@ -398,11 +398,6 @@ public class MasterInquiryService : IMasterInquiryService
             query = query.Where(x => x.Member.BadgeNumber == req.BadgeNumber);
         }
 
-        if (req.StartProfitYear.HasValue)
-        {
-            query = query.Where(x => x.ProfitDetail.ProfitYear >= req.StartProfitYear);
-        }
-
         if (req.EndProfitYear.HasValue)
         {
             query = query.Where(x => x.ProfitDetail.ProfitYear <= req.EndProfitYear);
