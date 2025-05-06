@@ -4,7 +4,7 @@ import StoreManagementGrid from "./StoreManagementGrid";
 import AssociatesGrid from "./AssociatesGrid";
 
 interface StoreContentProps {
-  store: string;
+  store: number;
 }
 
 const StoreContent: React.FC<StoreContentProps> = ({ store }) => {

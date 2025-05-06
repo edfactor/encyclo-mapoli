@@ -1,15 +1,13 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Demoulas.Util.Extensions;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.Reports.Breakdown;
@@ -35,43 +33,21 @@ public class BreakdownReportService : IBreakdownService
         public short StoreNumber { get; init; }
         public string? FullName { get; init; } = string.Empty;
         public int Ssn { get; init; }
-        public string DepartmentName { get; set; } = string.Empty;
+        public string DepartmentName { get; init; } = string.Empty;
         public string PayClassificationName { get; init; } = string.Empty;
         public byte PayClassificationId { get; init; }
         public DateOnly DateOfBirth { get; init; }
+        public char EmploymentStatusId { get; init; }
+        public byte DepartmentId { get; init; }
+        public byte PayFrequencyId { get; init; }
     }
 
-    private IQueryable<ActiveMemberDto> GetStoreManagers(IProfitSharingDbContext context)
+    private IQueryable<ActiveMemberDto> GetStoreQueryBase(IProfitSharingDbContext context)
     {
-        return context.Demographics.Include(d => d.PayClassification)
-            .Where(d =>
-                ((d.EmploymentStatusId == EmploymentStatus.Constants.Active &&
-                  d.PayFrequencyId != PayFrequency.Constants.Monthly)
-                 || /* … plus the Indian Ridge edge case that the COBOL treats as active */
-                 (d.EmploymentStatusId == EmploymentStatus.Constants.Inactive && d.StoreNumber == 986))
-                &&
-                (d.DepartmentId == Department.Constants.Grocery && new[]
-                {
-                    PayClassification.Constants.Manager, PayClassification.Constants.AssistantManager,
-                    PayClassification.Constants.FrontEndManager, PayClassification.Constants.Merchandiser,
-                    PayClassification.Constants.GroceryManager
-                }.Contains(d.PayClassificationId)) ||
-                (d.DepartmentId == Department.Constants.Meat && new[]
-                {
-                    PayClassification.Constants.Manager, PayClassification.Constants.AssistantManager
-                }.Contains(d.PayClassificationId)) ||
-                (d.DepartmentId == Department.Constants.Produce &&
-                 d.PayClassificationId == PayClassification.Constants.Manager) ||
-                (d.DepartmentId == Department.Constants.Deli &&
-                 d.PayClassificationId == PayClassification.Constants.Manager) ||
-                (d.DepartmentId == Department.Constants.Dairy &&
-                 d.PayClassificationId == PayClassification.Constants.Manager) ||
-                (d.DepartmentId == Department.Constants.BeerAndWine &&
-                 d.PayClassificationId == PayClassification.Constants.Manager) ||
-                (d.DepartmentId == Department.Constants.Bakery &&
-                 d.PayClassificationId == PayClassification.Constants.Manager)
-
-            ).Select(d => new ActiveMemberDto
+        return context.Demographics
+            .Include(d => d.PayClassification)
+            .Include(d=> d.Department)
+            .Select(d => new ActiveMemberDto
             {
                 BadgeNumber = d.BadgeNumber,
                 StoreNumber = d.StoreNumber,
@@ -79,23 +55,82 @@ public class BreakdownReportService : IBreakdownService
                 Ssn = d.Ssn,
                 DateOfBirth = d.DateOfBirth,
                 PayClassificationId = d.PayClassificationId,
+                EmploymentStatusId = d.EmploymentStatusId,
+                DepartmentId = d.DepartmentId,
+                PayFrequencyId = d.PayFrequencyId,
                 DepartmentName = d.Department!.Name,
                 PayClassificationName = d.PayClassification!.Name,
             });
     }
 
-    public async Task<ReportResponseBase<MemberYearSummaryDto>> GetActiveMembersByStore(BreakdownByStoreRequest breakdownByStoreRequest, CancellationToken cancellationToken)
+    private static IQueryable<ActiveMemberDto> FilterForStoreManagement(IQueryable<ActiveMemberDto> queryable)
     {
-        List<MemberYearSummaryDto> employees = await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        return queryable.Where(d =>
+            ((d.EmploymentStatusId == EmploymentStatus.Constants.Active &&
+              d.PayFrequencyId != PayFrequency.Constants.Monthly) ||
+             (d.EmploymentStatusId == EmploymentStatus.Constants.Inactive && d.StoreNumber == 986)) &&
+            (
+                (d.DepartmentId == Department.Constants.Grocery && new[]
+                {
+                PayClassification.Constants.Manager, PayClassification.Constants.AssistantManager,
+                PayClassification.Constants.FrontEndManager, PayClassification.Constants.Merchandiser,
+                PayClassification.Constants.GroceryManager
+                }.Contains(d.PayClassificationId)) ||
+                (d.DepartmentId == Department.Constants.Meat && new[]
+                {
+                PayClassification.Constants.Manager, PayClassification.Constants.AssistantManager
+                }.Contains(d.PayClassificationId)) ||
+                (d.DepartmentId == Department.Constants.Produce && d.PayClassificationId == PayClassification.Constants.Manager) ||
+                (d.DepartmentId == Department.Constants.Deli && d.PayClassificationId == PayClassification.Constants.Manager) ||
+                (d.DepartmentId == Department.Constants.Dairy && d.PayClassificationId == PayClassification.Constants.Manager) ||
+                (d.DepartmentId == Department.Constants.BeerAndWine && d.PayClassificationId == PayClassification.Constants.Manager) ||
+                (d.DepartmentId == Department.Constants.Bakery && d.PayClassificationId == PayClassification.Constants.Manager)
+            )
+        );
+    }
+
+    private static IQueryable<ActiveMemberDto> FilterForNonStoreManagement(IQueryable<ActiveMemberDto> queryable)
+    {
+        return queryable.Where(d =>
+            !(
+                ((d.EmploymentStatusId == EmploymentStatus.Constants.Active &&
+                  d.PayFrequencyId != PayFrequency.Constants.Monthly) ||
+                 (d.EmploymentStatusId == EmploymentStatus.Constants.Inactive && d.StoreNumber == 986)) &&
+                (
+                    (d.DepartmentId == Department.Constants.Grocery && new[]
+                    {
+                    PayClassification.Constants.Manager, PayClassification.Constants.AssistantManager,
+                    PayClassification.Constants.FrontEndManager, PayClassification.Constants.Merchandiser,
+                    PayClassification.Constants.GroceryManager
+                    }.Contains(d.PayClassificationId)) ||
+                    (d.DepartmentId == Department.Constants.Meat && new[]
+                    {
+                    PayClassification.Constants.Manager, PayClassification.Constants.AssistantManager
+                    }.Contains(d.PayClassificationId)) ||
+                    (d.DepartmentId == Department.Constants.Produce && d.PayClassificationId == PayClassification.Constants.Manager) ||
+                    (d.DepartmentId == Department.Constants.Deli && d.PayClassificationId == PayClassification.Constants.Manager) ||
+                    (d.DepartmentId == Department.Constants.Dairy && d.PayClassificationId == PayClassification.Constants.Manager) ||
+                    (d.DepartmentId == Department.Constants.BeerAndWine && d.PayClassificationId == PayClassification.Constants.Manager) ||
+                    (d.DepartmentId == Department.Constants.Bakery && d.PayClassificationId == PayClassification.Constants.Manager)
+                )
+            )
+        );
+    }
+
+
+
+    public Task<ReportResponseBase<MemberYearSummaryDto>> GetActiveMembersByStore(BreakdownByStoreRequest breakdownByStoreRequest, CancellationToken cancellationToken)
+    {
+       return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            var employeesBase = GetStoreManagers(ctx).Where(d=> d.StoreNumber == 1);
+            var employeesBase = GetStoreQueryBase(ctx);
 
-            if (!breakdownByStoreRequest.Under21Only)
+            employeesBase = breakdownByStoreRequest.StoreManagement ? FilterForStoreManagement(employeesBase) : FilterForNonStoreManagement(employeesBase);
+
+            if (breakdownByStoreRequest.StoreNumber.HasValue)
             {
-                var under21 = DateTime.Today.AddYears(-21).ToDateOnly();
-                employeesBase = employeesBase.Where(e => e.DateOfBirth > under21);
+                employeesBase = employeesBase.Where(d => d.StoreNumber == breakdownByStoreRequest.StoreNumber);
             }
-
 
             HashSet<int> employeeSsns = await employeesBase.Select(pp => pp!.Ssn).ToHashSetAsync(cancellationToken);
 
@@ -119,7 +154,10 @@ public class BreakdownReportService : IBreakdownService
                 .Where(txns => employeeSsns.Contains(txns.Ssn))
                 .ToDictionaryAsync(txns => txns.Ssn, txns => txns, cancellationToken);
 
-            return (await employeesBase.ToListAsync(cancellationToken))
+
+            var paginatedResults = await employeesBase.ToPaginationResultsAsync(breakdownByStoreRequest, cancellationToken);
+
+            var combined = paginatedResults.Results
                 .Select(d =>
                 {
                     decimal vestingRatio = employeeVestingRatios.GetValueOrDefault(d.Ssn) ?? 0;
@@ -148,16 +186,16 @@ public class BreakdownReportService : IBreakdownService
                 .OrderBy(s => s.StoreNumber)
                 .ThenBy(s => s.FullName, StringComparer.Ordinal)
                 .ToList();
+
+            PaginatedResponseDto<MemberYearSummaryDto> paginatedResponseDto = new() { Results = combined, Total = paginatedResults.Total };
+
+            return new ReportResponseBase<MemberYearSummaryDto>
+            {
+                ReportDate = DateTimeOffset.Now,
+                ReportName = $"Breakdown Report for {breakdownByStoreRequest.ProfitYear}",
+                Response = paginatedResponseDto
+            };
         });
-
-        PaginatedResponseDto<MemberYearSummaryDto> paginatedResponseDto = new() { Results = employees, Total = employees.Count };
-
-        return new ReportResponseBase<MemberYearSummaryDto>
-        {
-            ReportDate = DateTimeOffset.Now,
-            ReportName = $"Breakdown Report for {breakdownByStoreRequest.ProfitYear}",
-            Response = paginatedResponseDto
-        };
     }
 }
 

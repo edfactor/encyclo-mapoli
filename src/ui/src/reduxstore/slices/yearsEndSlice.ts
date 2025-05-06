@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { YearsEndApi } from "reduxstore/api/YearsEndApi";
 
 import {
   BalanceByAge,
@@ -128,6 +129,7 @@ export interface YearsEndState {
   yearEndProfitSharingReport: YearEndProfitSharingReportResponse | null;
   yearEndProfitSharingReportQueryParams: ProfitYearRequest | null;
   breakdownByStore: BreakdownByStoreResponse | null;
+  storeManagementBreakdown: BreakdownByStoreResponse | null;
   breakdownByStoreQueryParams: BreakdownByStoreRequest | null;
   under21BreakdownByStore: Under21BreakdownByStoreResponse | null;
   under21BreakdownByStoreQueryParams: Under21BreakdownByStoreRequest | null;
@@ -219,6 +221,7 @@ const initialState: YearsEndState = {
   yearEndProfitSharingReport: null,
   yearEndProfitSharingReportQueryParams: null,
   breakdownByStore: null,
+  storeManagementBreakdown: null,
   breakdownByStoreQueryParams: null,
   under21BreakdownByStore: null,
   under21BreakdownByStoreQueryParams: null,
@@ -956,6 +959,23 @@ export const yearsEndSlice = createSlice({
     clearProfitSharingLabels: (state) => {
       state.profitSharingLabels = null;
     }
+  },
+  // In yearsEndSlice.ts - find the extraReducers section
+  extraReducers: (builder) => {
+    // Your existing matchers
+
+    // Add this new matcher for the getBreakdownByStore endpoint
+    builder.addMatcher(
+      YearsEndApi.endpoints.getBreakdownByStore.matchFulfilled,
+      (state, action) => {
+        // Store data in different state variables based on storeManagement parameter
+        if (action.meta.arg.originalArgs.storeManagement) {
+          state.storeManagementBreakdown = action.payload;
+        } else {
+          state.breakdownByStore = action.payload;
+        }
+      }
+    );
   }
 });
 
@@ -965,38 +985,18 @@ export const {
   addExecutiveHoursAndDollarsGridRow,
   clearAdditionalExecutivesChosen,
   clearAdditionalExecutivesGrid,
-  clearBalanceByAge,
-  clearBalanceByAgeQueryParams,
-  clearBalanceByYears,
-  clearBalanceByYearsQueryParams,
-  clearContributionsByAge,
-  clearContributionsByAgeQueryParams,
   clearDistributionsAndForfeitures,
   clearDistributionsAndForfeituresQueryParams,
-  clearDistributionsByAge,
-  clearDistributionsByAgeQueryParams,
   clearDuplicateNamesAndBirthdays,
   clearDuplicateNamesAndBirthdaysQueryParams,
-  clearEligibleEmployees,
-  clearEligibleEmployeesQueryParams,
-  clearEmployeesOnMilitaryLeaveDetails,
   clearExecutiveHoursAndDollars,
   clearExecutiveHoursAndDollarsGridRows,
   clearExecutiveRowsSelected,
   clearForfeituresAndPoints,
   clearForfeituresAndPointsQueryParams,
-  clearForfeituresByAge,
-  clearForfeituresByAgeQueryParams,
   clearRehireForfeituresDetails,
   clearRehireForfeituresQueryParams,
-  clearMissingCommaInPYName,
-  clearNegativeEtvaForSSNsOnPayprofit,
-  clearNegativeEtvaForSSNsOnPayprofitQueryParams,
-  clearTermination,
-  clearTerminationQueryParams,
-  clearVestedAmountsByAgeQueryParams,
   clearYearEndProfitSharingReport,
-  clearYearEndProfitSharingReportQueryParams,
   removeExecutiveHoursAndDollarsGridRow,
   setAdditionalExecutivesChosen,
   setAdditionalExecutivesGrid,
@@ -1033,13 +1033,10 @@ export const {
   setMilitaryAndRehireForfeituresQueryParams,
   setMissingCommaInPYName,
   setNegativeEtvaForSSNsOnPayprofit,
-  setNegativeEtvaForSSNsOnPayprofitQueryParams,
   setProfitMasterApply,
   setProfitMasterRevert,
   setTermination,
-  setTerminationQueryParams,
   setVestedAmountsByAge,
-  clearVestedAmountsByAge,
   setVestedAmountsByAgeQueryParams,
   setYearEndProfitSharingReport,
   setYearEndProfitSharingReportQueryParams,
@@ -1049,18 +1046,14 @@ export const {
   setBreakdownByStoreQueryParams,
   setUnder21BreakdownByStore,
   clearUnder21BreakdownByStore,
-  setUnder21BreakdownByStoreQueryParams,
   setUnder21Inactive,
   clearUnder21Inactive,
-  setUnder21InactiveQueryParams,
   setUnder21Totals,
   clearUnder21Totals,
-  setUnder21TotalsQueryParams,
   checkFiscalCloseParamsAndGridsProfitYears,
   checkDecemberParamsAndGridsProfitYears,
   setProfitShareSummaryReport,
   setUpdateSummary,
-  clearUpdateSummary,
   setProfitEditUpdateChangesAvailable,
   setProfitEditUpdateRevertChangesAvailable,
   setProfitSharingUpdate,
@@ -1074,7 +1067,6 @@ export const {
   setProfitSharingEditQueryParams,
   clearProfitSharingEditQueryParams,
   setProfitSharingUpdateAdjustmentSummary,
-  clearProfitSharingUpdateAdjustmentSummary,
   addBadgeNumberToUpdateAdjustmentSummary,
   clearExecutiveHoursAndDollarsAddQueryParams,
   setExecutiveHoursAndDollarsAddQueryParams,

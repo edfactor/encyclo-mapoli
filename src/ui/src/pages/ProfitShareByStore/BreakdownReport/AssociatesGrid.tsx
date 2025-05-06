@@ -11,7 +11,7 @@ import { useNavigate } from "react-router-dom";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 
 interface AssociatesGridProps {
-  store: string;
+  store: number;
 }
 
 const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store }) => {
@@ -36,20 +36,21 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store }) => {
   );
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
-
+  
   const fetchData = useCallback(() => {
     const params = {
       profitYear: queryParams?.profitYear || profitYear,
       storeNumber: store,
-      under21Only: true,
-      isSortDescending: sortParams.isSortDescending,
+      storeManagement: false,
       pagination: {
+        skip: pageNumber * pageSize,
         take: pageSize,
-        skip: pageNumber * pageSize
+        sortBy: sortParams.sortBy,
+        isSortDescending: sortParams.isSortDescending
       }
     };
     fetchBreakdownByStore(params);
-  }, [fetchBreakdownByStore, pageNumber, pageSize, queryParams?.profitYear, sortParams.isSortDescending, store]);
+  }, [fetchBreakdownByStore, pageNumber, pageSize, profitYear, queryParams?.profitYear, sortParams.isSortDescending, sortParams.sortBy, store]);
 
   useEffect(() => {
     fetchData();
@@ -70,7 +71,7 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store }) => {
       },
       {
         headerName: "Position",
-        field: "position",
+        field: "payClassificationName",
         width: 120
       },
       {
@@ -93,7 +94,7 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store }) => {
       },
       {
         headerName: "Forfeiture",
-        field: "forfeiture",
+        field: "forfeitures",
         width: 120,
         valueFormatter: agGridNumberToCurrency
       },

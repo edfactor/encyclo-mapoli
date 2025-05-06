@@ -799,7 +799,7 @@ export const YearsEndApi = createApi({
         params: {
           profitYear: params.profitYear,
           storeNumber: params.storeNumber,
-          under21Only: params.under21Only,
+          storeManagement: params.storeManagement,
           take: params.pagination.take,
           skip: params.pagination.skip,
           sortBy: params.pagination.sortBy,

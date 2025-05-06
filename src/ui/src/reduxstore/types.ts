@@ -886,8 +886,8 @@ export interface YearEndProfitSharingEmployee {
 }
 
 export interface BreakdownByStoreRequest extends ProfitYearRequest {
-  storeNumber?: string;
-  under21Only?: boolean;
+  storeNumber?: number;
+  storeManagement?: boolean;
   pagination: SortedPaginationRequestDto;
 }
 
@@ -903,14 +903,13 @@ export interface BreakdownByStoreEmployee {
   beginningBalance: number;
   earnings: number;
   contributions: number;
-  forfeiture: number;
+  forfeitures: number;
   distributions: number;
   endingBalance: number;
   vestedAmount: number;
   vestedPercentage: number;
   employmentStatusId: string;
-  employeeCategory: string;
-  employeeSortRank: number;
+  payClassificationName: string;
 }
 
 export interface BreakdownByStoreResponse {

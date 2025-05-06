@@ -2,7 +2,6 @@
 
 public record BreakdownByStoreRequest : ProfitYearRequest
 {
-    public bool Under21Only { get; set; }
-
+    public bool StoreManagement { get; set; }
     public short? StoreNumber { get; set; }
 }

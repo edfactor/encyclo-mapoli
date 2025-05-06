@@ -8,9 +8,10 @@ import { useLazyGetBreakdownByStoreQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination, agGridNumberToCurrency } from "smart-ui-library";
 import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
+import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 
 interface StoreManagementGridProps {
-  store: string;
+  store: number;
 }
 
 const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store }) => {
@@ -22,7 +23,7 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store }) => {
   });
 
   const [fetchStoreManagement, { isFetching }] = useLazyGetBreakdownByStoreQuery();
-  const storeManagement = useSelector((state: RootState) => state.yearsEnd.breakdownByStore);
+  const storeManagement = useSelector((state: RootState) => state.yearsEnd.storeManagementBreakdown);
   const queryParams = useSelector((state: RootState) => state.yearsEnd.breakdownByStoreQueryParams);
   const navigate = useNavigate();
 
@@ -34,12 +35,13 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store }) => {
   );
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
-
+  const profitYear = useDecemberFlowProfitYear();
+  
   const fetchData = useCallback(() => {
     const params = {
-      profitYear: queryParams?.profitYear || 2024,
+      profitYear: queryParams?.profitYear || profitYear,
       storeNumber: store,
-      under21Only: false,
+      storeManagement: true,
       pagination: {
         skip: pageNumber * pageSize,
         take: pageSize,
@@ -48,7 +50,7 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store }) => {
       }
     };
     fetchStoreManagement(params);
-  }, [fetchStoreManagement, pageNumber, pageSize, queryParams?.profitYear, sortParams, store]);
+  }, [fetchStoreManagement, pageNumber, pageSize, profitYear, queryParams?.profitYear, sortParams.isSortDescending, sortParams.sortBy, store]);
 
   useEffect(() => {
     fetchData();
@@ -69,7 +71,7 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store }) => {
       },
       {
         headerName: "Position",
-        field: "position",
+        field: "payClassificationName",
         width: 120
       },
       {
@@ -92,7 +94,7 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store }) => {
       },
       {
         headerName: "Forfeiture",
-        field: "forfeiture",
+        field: "forfeitures",
         width: 120,
         valueFormatter: agGridNumberToCurrency
       },
