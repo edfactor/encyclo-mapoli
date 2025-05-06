@@ -37,5 +37,5 @@ public class ProfitDetail
     public bool? CommentIsPartialTransaction { get; set; }
     public byte YearsOfServiceCredit { get; set; }
 
-    public DateTimeOffset CreatedUtc { get; set; }
+    public DateTimeOffset TransactionDate { get; set; }
 }

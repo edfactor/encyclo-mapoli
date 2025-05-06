@@ -1,30 +1,22 @@
-namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
 public record MemberYearSummaryDto
 {
-    public short StoreNumber { get; init; }
-    public int EnrollmentId { get; set; }
-    public int BadgeNumber { get; set; }
-    public string? Ssn { get; init; }
-    public string? FullName { get; set; }
-    public byte PayFrequencyId { get; init; }
-    public byte DepartmentId { get; set; }
-    public byte PayClassificationId { get; set; }
-    public decimal BeginningBalance { get; set; }
-    public decimal Earnings { get; set; }
+    public required short StoreNumber { get; init; }
+    public required int BadgeNumber { get; init; }
+    public required string FullName { get; init; } = string.Empty;
 
-    public decimal Contributions { get; set; }
-    public decimal Forfeiture { get; set; }
-    public decimal Distributions { get; set; }
+    public required byte PayClassificationId { get; init; }
+    public required string PayClassificationName { get; init; } = string.Empty;
 
-    public decimal EndingBalance { get; set; }
+    public decimal BeginningBalance { get; init; }
+    public decimal Earnings { get; init; }
+    public decimal Contributions { get; init; }
+    public decimal Forfeitures { get; init; }
+    public decimal Distributions { get; init; }
+    public decimal EndingBalance { get; init; }
+    public decimal VestedAmount { get; init; }
+    public byte VestedPercent { get; init; }
 
-    public decimal VestedAmount { get; set; }
-
-    public decimal VestedPercentage { get; set; }
-    public char EmploymentStatusId { get; set; }
-    public string? EmployeeCategory { get; set; }
-    public short EmployeeSortRank { get; set; }
-    
 }
 

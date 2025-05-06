@@ -81,7 +81,7 @@ public sealed class PayProfit
     /// </summary>
     public decimal IncomeExecutive { get; set; }
     
-    public DateTime LastUpdate { get; set; }
+    public DateTimeOffset LastUpdate { get; set; }
 
     /// <summary>
     /// Points Earned (for the ProfitYear).

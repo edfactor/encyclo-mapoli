@@ -9,6 +9,6 @@ public sealed class Job
     public required string RequestedBy { get; set; }
     public JobStatus? JobStatus { get; set; }
     public required byte JobStatusId { get; set; }
-    public DateTime Started { get; set; }
-    public DateTime? Completed { get; set; }
+    public DateTimeOffset Started { get; set; }
+    public DateTimeOffset? Completed { get; set; }
 }

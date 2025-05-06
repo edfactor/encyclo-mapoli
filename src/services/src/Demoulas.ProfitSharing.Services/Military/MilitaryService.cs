@@ -129,7 +129,7 @@ public class MilitaryService : IMilitaryService
                 .Where(x => x.d.BadgeNumber == req.BadgeNumber
                             && x.pd.ProfitYear == req.ProfitYear && x.pd.CommentTypeId == CommentType.Constants.Military.Id)
                 .OrderByDescending(x => x.pd.ProfitYear)
-                .ThenByDescending(x=> x.pd.CreatedUtc)
+                .ThenByDescending(x=> x.pd.TransactionDate)
                 .Select(x => new MilitaryContributionResponse
                 {
                     BadgeNumber = x.d.BadgeNumber,

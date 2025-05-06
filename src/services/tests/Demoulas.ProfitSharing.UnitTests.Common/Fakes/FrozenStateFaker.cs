@@ -9,8 +9,8 @@ internal sealed class FrozenStateFaker : Faker<FrozenState>
     {
         RuleFor(x => x.Id, (f, o) => 1)
             .RuleFor(x => x.IsActive, (f, o) => true)
-            .RuleFor(x => x.ProfitYear, (f, o) => (short)2023)
-            .RuleFor(x => x.AsOfDateTime, (f, o) => DateTime.UtcNow)
+            .RuleFor(x => x.ProfitYear, (f, o) => (short)2024)
+            .RuleFor(x => x.AsOfDateTime, (f, o) => DateTimeOffset.UtcNow)
             .RuleFor(x=> x.FrozenBy, (f, o) => f.Internet.UserName())
             .UseSeed(100);
     }

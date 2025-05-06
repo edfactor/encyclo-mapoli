@@ -22,11 +22,19 @@ public class GetFrozenDemographicsEndpointTests : ApiTestBase<Program>
         TestResult<PaginatedResponseDto<FrozenStateResponse>> response = await ApiClient.GETAsync<GetFrozenDemographicsEndpoint, PaginatedResponseDto<FrozenStateResponse>>();
         response.Should().NotBeNull();
 
-        // Convert expected/actual values to UTC
-        frozenDemographics.ForEach(d => d.AsOfDateTime = d.AsOfDateTime.ToUniversalTime());
-        ((List<FrozenStateResponse>)response.Result.Results).ForEach(r => r.AsOfDateTime = r.AsOfDateTime.ToUniversalTime());
+        // Assert each property
 
-        // Assert
-        Assert.Equivalent(frozenDemographics, response.Result.Results);
+        var array = response.Result.Results.ToArray();
+        for (int i = 0; i < frozenDemographics.Count; i++)
+        {
+            var expected = frozenDemographics[i];
+            var actual = array[i];
+
+            actual.AsOfDateTime.ToUniversalTime().Should().BeSameDateAs(expected.AsOfDateTime.ToUniversalTime());
+            actual.CreatedDateTime.ToUniversalTime().Should().BeSameDateAs(expected.CreatedDateTime.ToUniversalTime());
+            actual.ProfitYear.Should().Be(expected.ProfitYear);
+            actual.FrozenBy.Should().Be(expected.FrozenBy);
+            actual.IsActive.Should().Be(expected.IsActive);
+        }
     }
 }

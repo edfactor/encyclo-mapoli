@@ -163,7 +163,7 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
 
 
         _ = builder.Property(e => e.LastModifiedDate)
-            .HasColumnType("DATE")
+            .HasColumnType("TIMESTAMP WITH TIME ZONE")
             .HasColumnName("LAST_MODIFIED_DATE")
             .HasDefaultValueSql("SYSDATE");
 

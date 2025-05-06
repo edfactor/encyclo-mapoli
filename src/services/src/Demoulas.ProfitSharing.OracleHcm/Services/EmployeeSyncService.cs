@@ -112,8 +112,8 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         bool success = true;
         try
         {
-            DateTime maxDate = DateTime.Now;
-            DateTime minDate = await _profitSharingDataContextFactory.UseReadOnlyContext(c =>
+            DateTimeOffset maxDate = DateTimeOffset.Now;
+            DateTimeOffset minDate = await _profitSharingDataContextFactory.UseReadOnlyContext(c =>
             {
                 return c.Demographics.MinAsync(d => d.LastModifiedDate - TimeSpan.FromDays(7), cancellationToken: cancellationToken);
             }).ConfigureAwait(false);

@@ -7,6 +7,6 @@ public sealed class FrozenState
     public short ProfitYear { get; set; }
     public bool IsActive { get; set; }
     public string? FrozenBy { get; set; }
-    public DateTime AsOfDateTime { get; set; }
-    public DateTime CreatedDateTime { get; set; }
+    public DateTimeOffset AsOfDateTime { get; set; }
+    public DateTimeOffset CreatedDateTime { get; set; }
 }

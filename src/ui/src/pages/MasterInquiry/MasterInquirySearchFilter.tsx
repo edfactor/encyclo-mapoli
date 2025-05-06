@@ -123,16 +123,12 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
   } = useForm<MasterInquirySearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      startProfitYear: masterInquiryRequestParams?.startProfitYear
-        ? masterInquiryRequestParams.startProfitYear
-        : undefined,
       endProfitYear: profitYear || masterInquiryRequestParams?.endProfitYear || undefined,
       startProfitMonth: masterInquiryRequestParams?.startProfitMonth || undefined,
       endProfitMonth: masterInquiryRequestParams?.endProfitMonth || undefined,
       socialSecurity: masterInquiryRequestParams?.socialSecurity || undefined,
       name: masterInquiryRequestParams?.name || undefined,
       badgeNumber: masterInquiryRequestParams?.badgeNumber || undefined,
-      comment: masterInquiryRequestParams?.comment || undefined,
       paymentType: masterInquiryRequestParams?.paymentType ? masterInquiryRequestParams?.paymentType : "all",
       memberType: determineCorrectMemberType(badgeNumber),
       contribution: masterInquiryRequestParams?.contribution || undefined,
@@ -179,14 +175,12 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
           sortBy: data.pagination.sortBy,
           isSortDescending: data.pagination.isSortDescending
         },
-        ...(!!data.startProfitYear && { startProfitYear: data.startProfitYear }),
         ...(!!data.endProfitYear && { endProfitYear: data.endProfitYear }),
         ...(!!data.startProfitMonth && { startProfitMonth: data.startProfitMonth }),
         ...(!!data.endProfitMonth && { endProfitMonth: data.endProfitMonth }),
         ...(!!data.socialSecurity && { socialSecurity: data.socialSecurity }),
         ...(!!data.name && { name: data.name }),
         ...(!!data.badgeNumber && { badgeNumber: data.badgeNumber }),
-        ...(!!data.comment && { comment: data.comment }),
         ...(!!data.paymentType && { paymentType: paymentTypeGetNumberMap[data.paymentType] }),
         ...(!!data.memberType && { memberType: memberTypeGetNumberMap[data.memberType] }),
         ...(!!data.contribution && { contribution: data.contribution }),
@@ -205,14 +199,12 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
     dispatch(clearMasterInquiryRequestParams());
     dispatch(clearMasterInquiryData());
     reset({
-      startProfitYear: undefined,
       endProfitYear: undefined,
       startProfitMonth: undefined,
       endProfitMonth: undefined,
       socialSecurity: undefined,
       name: undefined,
       badgeNumber: undefined,
-      comment: undefined,
       paymentType: "all",
       memberType: "all",
       contribution: undefined,
@@ -249,37 +241,18 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
           container
           spacing={3}
           width="100%">
-          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-            <Controller
-              name="startProfitYear"
-              control={control}
-              render={({ field }) => (
-                <DsmDatePicker
-                  id="Beginning Year"
-                  onChange={(value: Date | null) => field.onChange(value?.getFullYear() || undefined)}
-                  value={field.value ? new Date(field.value, 0) : null}
-                  required={true}
-                  label="Profit Year"
-                  disableFuture
-                  views={["year"]}
-                  error={errors.startProfitYear?.message}
-                />
-              )}
-            />
-            {errors.startProfitYear && <FormHelperText error>{errors.startProfitYear.message}</FormHelperText>}
-          </Grid2>
-
-          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+         
+          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
             <Controller
               name="endProfitYear"
               control={control}
               render={({ field }) => (
                 <DsmDatePicker
-                  id="End Year"
+                  id="Profit Year"
                   onChange={(value: Date | null) => field.onChange(value?.getFullYear() || undefined)}
                   value={field.value ? new Date(field.value, 0) : null}
                   required={true}
-                  label="End Year"
+                  label="Profit Year"
                   disableFuture
                   views={["year"]}
                   error={errors.endProfitYear?.message}
@@ -289,7 +262,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
             {errors.endProfitYear && <FormHelperText error>{errors.endProfitYear.message}</FormHelperText>}
           </Grid2>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
             <FormLabel>Beginning Month</FormLabel>
             <Controller
               name="startProfitMonth"
@@ -321,7 +294,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
             {errors.startProfitMonth && <FormHelperText error>{errors.startProfitMonth.message}</FormHelperText>}
           </Grid2>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
             <FormLabel>Ending Month</FormLabel>
             <Controller
               name="endProfitMonth"
@@ -353,7 +326,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
             {errors.endProfitMonth && <FormHelperText error>{errors.endProfitMonth.message}</FormHelperText>}
           </Grid2>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
             <FormLabel>Social Security Number</FormLabel>
             <Controller
               name="socialSecurity"
@@ -376,7 +349,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
             {errors.socialSecurity && <FormHelperText error>{errors.socialSecurity.message}</FormHelperText>}
           </Grid2>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
             <FormLabel>Name</FormLabel>
             <Controller
               name="name"
@@ -398,7 +371,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
             {errors.name && <FormHelperText error>{errors.name.message}</FormHelperText>}
           </Grid2>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
             <FormLabel>Badge/PSN Number</FormLabel>
             <Controller
               name="badgeNumber"
@@ -419,28 +392,6 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
               )}
             />
             {errors.badgeNumber && <FormHelperText error>{errors.badgeNumber.message}</FormHelperText>}
-          </Grid2>
-
-          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-            <FormLabel>Comment</FormLabel>
-            <Controller
-              name="comment"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  value={field.value ?? ""}
-                  error={!!errors.comment}
-                  onChange={(e) => {
-                    field.onChange(e.target.value);
-                  }}
-                />
-              )}
-            />
-            {errors.comment && <FormHelperText error>{errors.comment.message}</FormHelperText>}
           </Grid2>
 
           <Grid2 size={{ xs: 12, sm: 6, md: 6 }}>

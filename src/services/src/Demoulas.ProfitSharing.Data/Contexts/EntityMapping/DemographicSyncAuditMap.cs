@@ -42,7 +42,7 @@ internal sealed class DemographicSyncAuditMap : IEntityTypeConfiguration<Demogra
             .HasMaxLength(96);
 
         _ = builder.Property(e => e.Created)
-            .HasColumnType("DATE")
+            .HasColumnType("TIMESTAMP WITH TIME ZONE")
             .HasColumnName("CREATED")
             .ValueGeneratedOnAdd();
     }

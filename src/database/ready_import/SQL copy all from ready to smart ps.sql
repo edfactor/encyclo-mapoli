@@ -6,6 +6,15 @@ DECLARE
     last_year NUMBER := 2024; -- Set this to the previous year
 BEGIN
 
+ -- First disable all foreign key constraints
+    FOR fk IN (SELECT constraint_name, table_name 
+               FROM user_constraints 
+               WHERE constraint_type = 'R')
+    LOOP
+        EXECUTE IMMEDIATE 'ALTER TABLE ' || fk.table_name || 
+                         ' DISABLE CONSTRAINT ' || fk.constraint_name;
+    END LOOP;
+
     -- FIRST EMPTY OUT THE TABLES
     EXECUTE IMMEDIATE 'TRUNCATE TABLE JOB';
     EXECUTE IMMEDIATE 'TRUNCATE TABLE DEMOGRAPHIC_SYNC_AUDIT';
@@ -29,7 +38,16 @@ BEGIN
     EXECUTE IMMEDIATE 'TRUNCATE TABLE AUDIT_EVENT';
     
     -- Reset sequence
-    EXECUTE IMMEDIATE 'ALTER SEQUENCE FAKE_SSN_SEQ RESTART START WITH 1';
+    EXECUTE IMMEDIATE 'ALTER SEQUENCE FAKE_SSN_SEQ RESTART START WITH 666000000';
+
+     -- Re-enable foreign key constraints at the end
+    FOR fk IN (SELECT constraint_name, table_name 
+               FROM user_constraints 
+               WHERE constraint_type = 'R')
+    LOOP
+        EXECUTE IMMEDIATE 'ALTER TABLE ' || fk.table_name || 
+                         ' ENABLE CONSTRAINT ' || fk.constraint_name;
+    END LOOP;
 
 --LOAD DEMOGRAPHIC TABLE TO - "YOUR CURRENT SCHEMA" FROM - {SOURCE_PROFITSHARE_SCHEMA}
 

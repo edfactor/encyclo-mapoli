@@ -60,10 +60,10 @@ ExecuteCommandResult RunConsoleApp(string projectPath, string launchProfile)
 
     process.WaitForExit();
     
-    logger.LogInformation(output);
+    logger.LogError(output);
 
     Console.ForegroundColor = ConsoleColor.Red;
-    logger.LogInformation(error);
+    logger.LogError(error);
     Console.ForegroundColor = ConsoleColor.DarkGray;
 
     if (string.IsNullOrWhiteSpace(error))

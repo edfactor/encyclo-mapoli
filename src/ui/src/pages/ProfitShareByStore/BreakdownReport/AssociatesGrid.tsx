@@ -11,7 +11,7 @@ import { useNavigate } from "react-router-dom";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 
 interface AssociatesGridProps {
-  store: string;
+  store: number;
 }
 
 const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store }) => {
@@ -27,6 +27,7 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store }) => {
   const queryParams = useSelector((state: RootState) => state.yearsEnd.breakdownByStoreQueryParams);
   const navigate = useNavigate();
   const profitYear = useDecemberFlowProfitYear();
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
 
   const handleNavigation = useCallback(
     (path: string) => {
@@ -36,20 +37,24 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store }) => {
   );
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
-
+  
   const fetchData = useCallback(() => {
     const params = {
       profitYear: queryParams?.profitYear || profitYear,
       storeNumber: store,
-      under21Only: true,
-      isSortDescending: sortParams.isSortDescending,
+      storeManagement: false,
       pagination: {
+        skip: pageNumber * pageSize,
         take: pageSize,
-        skip: pageNumber * pageSize
+        sortBy: sortParams.sortBy,
+        isSortDescending: sortParams.isSortDescending
       }
     };
+    if (hasToken)
+    {
     fetchBreakdownByStore(params);
-  }, [fetchBreakdownByStore, pageNumber, pageSize, queryParams?.profitYear, sortParams.isSortDescending, store]);
+    }
+  }, [fetchBreakdownByStore, hasToken, pageNumber, pageSize, profitYear, queryParams?.profitYear, sortParams.isSortDescending, sortParams.sortBy, store]);
 
   useEffect(() => {
     fetchData();
@@ -70,7 +75,7 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store }) => {
       },
       {
         headerName: "Position",
-        field: "position",
+        field: "payClassificationName",
         width: 120
       },
       {
@@ -93,7 +98,7 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store }) => {
       },
       {
         headerName: "Forfeiture",
-        field: "forfeiture",
+        field: "forfeitures",
         width: 120,
         valueFormatter: agGridNumberToCurrency
       },
@@ -143,7 +148,7 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store }) => {
         />
         {breakdownByStore?.response?.results && breakdownByStore.response.results.length > 0 && (
           <Pagination
-            pageNumber={pageNumber + 1}
+            pageNumber={pageNumber}
             setPageNumber={(value: number) => setPageNumber(value - 1)}
             pageSize={pageSize}
             setPageSize={setPageSize}

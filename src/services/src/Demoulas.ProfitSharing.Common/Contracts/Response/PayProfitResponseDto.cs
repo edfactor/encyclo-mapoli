@@ -31,7 +31,7 @@ public sealed record PayProfitResponseDto
     /// </summary>
     public byte WeeksWorkedYear { get; set; }
 
-    public DateTime LastUpdate { get; set; }
+    public DateTimeOffset LastUpdate { get; set; }
 
     /// <summary>
     /// Points Earned (for the ProfitYear).

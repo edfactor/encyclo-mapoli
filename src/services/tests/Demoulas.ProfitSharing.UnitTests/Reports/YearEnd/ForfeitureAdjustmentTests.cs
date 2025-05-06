@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -41,7 +41,7 @@ public class ForfeitureAdjustmentTests : ApiTestBase<Program>
         // Assert
         response.Should().NotBeNull();
         response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
-        response.Result.ReportName.Should().Be("FORFEITURE ADJUSTMENT REPORT");
+        response.Result.ReportName.Should().Be("FORFEITURES REPORT");
         response.Result.Response.Should().NotBeNull();
     }
 

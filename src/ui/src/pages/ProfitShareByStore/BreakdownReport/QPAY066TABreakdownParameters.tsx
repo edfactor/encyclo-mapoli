@@ -231,25 +231,8 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
                                     </>
                                 )}
                             />
-                        </Grid2>
-                        
-                        <Grid2 size={getGridSizes()}>
-                            <Controller
-                                name="under21Only"
-                                control={control}
-                                render={({ field }) => (
-                                    <FormControlLabel
-                                        control={
-                                            <Checkbox
-                                                {...field}
-                                                checked={field.value}
-                                            />
-                                        }
-                                        label="Under 21 Only"
-                                    />
-                                )}
-                            />
-                        </Grid2>
+                        </Grid2>                      
+                       
                     </>
                 )}
             </Grid2>

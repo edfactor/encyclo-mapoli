@@ -432,7 +432,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                         ForfeitAmount = pd.ProfitCodeId == 2 ? pd.Forfeiture : 0,
                         pd.YearToDate,
                         pd.MonthToDate,
-                        Date = pd.CreatedUtc,
+                        Date = pd.TransactionDate,
                         nameAndDob.DateOfBirth,
                         EnrolledId = nameAndDob.EnrolledId,
                     };

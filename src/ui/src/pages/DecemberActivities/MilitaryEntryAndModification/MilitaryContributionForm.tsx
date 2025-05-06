@@ -145,7 +145,6 @@ const MilitaryContributionForm = ({
           <Controller
             name="addContributionYear"
             control={control}
-            rules={{ required: "Add Contribution Year is required" }}
             render={({ field, fieldState: { error } }) => (
               <FormControl error={!!error}>
                 <FormControlLabel
@@ -155,12 +154,10 @@ const MilitaryContributionForm = ({
                       onChange={field.onChange}
                       onBlur={field.onBlur}
                       inputRef={field.ref}
-                      aria-describedby={error ? "add-contribution-year-error" : undefined}
                     />
                   }
                   label="Add Contribution Year"
-                />
-                {error && <FormHelperText id="add-contribution-year-error">{error.message}</FormHelperText>}
+                />                
               </FormControl>
             )}
           />

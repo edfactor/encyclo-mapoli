@@ -8,9 +8,10 @@ import { useLazyGetBreakdownByStoreQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination, agGridNumberToCurrency } from "smart-ui-library";
 import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
+import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 
 interface StoreManagementGridProps {
-  store: string;
+  store: number;
 }
 
 const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store }) => {
@@ -22,9 +23,10 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store }) => {
   });
 
   const [fetchStoreManagement, { isFetching }] = useLazyGetBreakdownByStoreQuery();
-  const storeManagement = useSelector((state: RootState) => state.yearsEnd.breakdownByStore);
+  const storeManagement = useSelector((state: RootState) => state.yearsEnd.storeManagementBreakdown);
   const queryParams = useSelector((state: RootState) => state.yearsEnd.breakdownByStoreQueryParams);
   const navigate = useNavigate();
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
 
   const handleNavigation = useCallback(
     (path: string) => {
@@ -34,12 +36,13 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store }) => {
   );
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
-
+  const profitYear = useDecemberFlowProfitYear();
+  
   const fetchData = useCallback(() => {
     const params = {
-      profitYear: queryParams?.profitYear || 2024,
+      profitYear: queryParams?.profitYear || profitYear,
       storeNumber: store,
-      under21Only: false,
+      storeManagement: true,
       pagination: {
         skip: pageNumber * pageSize,
         take: pageSize,
@@ -47,8 +50,11 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store }) => {
         isSortDescending: sortParams.isSortDescending
       }
     };
+    if ( hasToken)
+    {
     fetchStoreManagement(params);
-  }, [fetchStoreManagement, pageNumber, pageSize, queryParams?.profitYear, sortParams, store]);
+    }
+  }, [fetchStoreManagement, hasToken, pageNumber, pageSize, profitYear, queryParams?.profitYear, sortParams.isSortDescending, sortParams.sortBy, store]);
 
   useEffect(() => {
     fetchData();
@@ -69,7 +75,7 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store }) => {
       },
       {
         headerName: "Position",
-        field: "position",
+        field: "payClassificationName",
         width: 120
       },
       {
@@ -92,7 +98,7 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store }) => {
       },
       {
         headerName: "Forfeiture",
-        field: "forfeiture",
+        field: "forfeitures",
         width: 120,
         valueFormatter: agGridNumberToCurrency
       },
@@ -142,7 +148,7 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store }) => {
         />
         {storeManagement?.response?.results && storeManagement.response.results.length > 0 && (
           <Pagination
-            pageNumber={pageNumber + 1}
+            pageNumber={pageNumber}
             setPageNumber={(value: number) => setPageNumber(value - 1)}
             pageSize={pageSize}
             setPageSize={setPageSize}
