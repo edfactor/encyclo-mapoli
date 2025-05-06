@@ -188,11 +188,11 @@ internal class DemographicsService : IDemographicsServiceInternal
                         DemographicHistory newHistoryRecord = DemographicHistory.FromDemographic(incomingEntity, existingEntity.Id);
                         DemographicHistory oldHistoryRecord = await context.DemographicHistories
                             .Where(x => x.DemographicId == existingEntity.Id
-                                        && DateTime.UtcNow >= x.ValidFrom
-                                        && DateTime.UtcNow < x.ValidTo)
+                                        && DateTimeOffset.UtcNow >= x.ValidFrom
+                                        && DateTimeOffset.UtcNow < x.ValidTo)
                             .FirstAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
 
-                        oldHistoryRecord.ValidTo = DateTime.UtcNow;
+                        oldHistoryRecord.ValidTo = DateTimeOffset.UtcNow;
                         newHistoryRecord.ValidFrom = oldHistoryRecord.ValidTo;
                         context.DemographicHistories.Add(newHistoryRecord);
                     }
