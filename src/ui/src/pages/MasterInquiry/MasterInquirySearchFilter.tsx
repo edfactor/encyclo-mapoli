@@ -132,7 +132,6 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
       socialSecurity: masterInquiryRequestParams?.socialSecurity || undefined,
       name: masterInquiryRequestParams?.name || undefined,
       badgeNumber: masterInquiryRequestParams?.badgeNumber || undefined,
-      comment: masterInquiryRequestParams?.comment || undefined,
       paymentType: masterInquiryRequestParams?.paymentType ? masterInquiryRequestParams?.paymentType : "all",
       memberType: determineCorrectMemberType(badgeNumber),
       contribution: masterInquiryRequestParams?.contribution || undefined,
@@ -186,7 +185,6 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
         ...(!!data.socialSecurity && { socialSecurity: data.socialSecurity }),
         ...(!!data.name && { name: data.name }),
         ...(!!data.badgeNumber && { badgeNumber: data.badgeNumber }),
-        ...(!!data.comment && { comment: data.comment }),
         ...(!!data.paymentType && { paymentType: paymentTypeGetNumberMap[data.paymentType] }),
         ...(!!data.memberType && { memberType: memberTypeGetNumberMap[data.memberType] }),
         ...(!!data.contribution && { contribution: data.contribution }),
@@ -212,7 +210,6 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
       socialSecurity: undefined,
       name: undefined,
       badgeNumber: undefined,
-      comment: undefined,
       paymentType: "all",
       memberType: "all",
       contribution: undefined,
@@ -419,28 +416,6 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
               )}
             />
             {errors.badgeNumber && <FormHelperText error>{errors.badgeNumber.message}</FormHelperText>}
-          </Grid2>
-
-          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-            <FormLabel>Comment</FormLabel>
-            <Controller
-              name="comment"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  value={field.value ?? ""}
-                  error={!!errors.comment}
-                  onChange={(e) => {
-                    field.onChange(e.target.value);
-                  }}
-                />
-              )}
-            />
-            {errors.comment && <FormHelperText error>{errors.comment.message}</FormHelperText>}
           </Grid2>
 
           <Grid2 size={{ xs: 12, sm: 6, md: 6 }}>

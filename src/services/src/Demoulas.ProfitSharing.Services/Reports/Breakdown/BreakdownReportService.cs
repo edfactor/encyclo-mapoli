@@ -11,13 +11,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.Reports.Breakdown;
 
-public class BreakdownReportService : IBreakdownService
+public sealed class BreakdownReportService : IBreakdownService
 {
     private readonly ICalendarService _calendarService;
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly TotalService _totalService;
 
-    public BreakdownReportService(IProfitSharingDataContextFactory dataContextFactory,
+    public BreakdownReportService(
+        IProfitSharingDataContextFactory dataContextFactory,
         ICalendarService calendarService,
         TotalService totalService)
     {
@@ -26,11 +27,13 @@ public class BreakdownReportService : IBreakdownService
         _totalService = totalService;
     }
 
-    private sealed class ActiveMemberDto
+    #region ── Helper DTOs ────────────────────────────────────────────────────────────────
+
+    private sealed record ActiveMemberDto
     {
         public int BadgeNumber { get; init; }
         public short StoreNumber { get; init; }
-        public string? FullName { get; init; } = string.Empty;
+        public string FullName { get; init; } = string.Empty;
         public int Ssn { get; init; }
         public string DepartmentName { get; init; } = string.Empty;
         public string PayClassificationName { get; init; } = string.Empty;
@@ -41,156 +44,54 @@ public class BreakdownReportService : IBreakdownService
         public byte PayFrequencyId { get; init; }
     }
 
-    private IQueryable<ActiveMemberDto> GetStoreQueryBase(IProfitSharingDbContext context)
-    {
-        return context.Demographics
-            .Include(d => d.PayClassification)
-            .Include(d=> d.Department)
-            .Select(d => new ActiveMemberDto
-            {
-                BadgeNumber = d.BadgeNumber,
-                StoreNumber = d.StoreNumber,
-                FullName = d.ContactInfo.FullName,
-                Ssn = d.Ssn,
-                DateOfBirth = d.DateOfBirth,
-                PayClassificationId = d.PayClassificationId,
-                EmploymentStatusId = d.EmploymentStatusId,
-                DepartmentId = d.DepartmentId,
-                PayFrequencyId = d.PayFrequencyId,
-                DepartmentName = d.Department!.Name,
-                PayClassificationName = d.PayClassification!.Name,
-            });
-    }
+    private sealed record EmployeeFinancialSnapshot(
+        int Ssn,
+        decimal BeginningBalance,
+        InternalProfitDetailDto Txn,
+        decimal VestingRatio);
 
-    private static IQueryable<ActiveMemberDto> FilterForStoreManagement(IQueryable<ActiveMemberDto> queryable)
-    {
-        return queryable.Where(d =>
-            ((d.EmploymentStatusId == EmploymentStatus.Constants.Active &&
-              d.PayFrequencyId != PayFrequency.Constants.Monthly) ||
-             (d.EmploymentStatusId == EmploymentStatus.Constants.Inactive && d.StoreNumber == 986)) &&
-            (
-                (d.DepartmentId == Department.Constants.Grocery && new[]
-                {
-                PayClassification.Constants.Manager, PayClassification.Constants.AssistantManager,
-                PayClassification.Constants.FrontEndManager, PayClassification.Constants.Merchandiser,
-                PayClassification.Constants.GroceryManager
-                }.Contains(d.PayClassificationId)) ||
-                (d.DepartmentId == Department.Constants.Meat && new[]
-                {
-                PayClassification.Constants.Manager, PayClassification.Constants.AssistantManager
-                }.Contains(d.PayClassificationId)) ||
-                (d.DepartmentId == Department.Constants.Produce && d.PayClassificationId == PayClassification.Constants.Manager) ||
-                (d.DepartmentId == Department.Constants.Deli && d.PayClassificationId == PayClassification.Constants.Manager) ||
-                (d.DepartmentId == Department.Constants.Dairy && d.PayClassificationId == PayClassification.Constants.Manager) ||
-                (d.DepartmentId == Department.Constants.BeerAndWine && d.PayClassificationId == PayClassification.Constants.Manager) ||
-                (d.DepartmentId == Department.Constants.Bakery && d.PayClassificationId == PayClassification.Constants.Manager)
-            )
-        );
-    }
-
-    private static IQueryable<ActiveMemberDto> FilterForNonStoreManagement(IQueryable<ActiveMemberDto> queryable)
-    {
-        return queryable.Where(d =>
-            !(
-                ((d.EmploymentStatusId == EmploymentStatus.Constants.Active &&
-                  d.PayFrequencyId != PayFrequency.Constants.Monthly) ||
-                 (d.EmploymentStatusId == EmploymentStatus.Constants.Inactive && d.StoreNumber == 986)) &&
-                (
-                    (d.DepartmentId == Department.Constants.Grocery && new[]
-                    {
-                    PayClassification.Constants.Manager, PayClassification.Constants.AssistantManager,
-                    PayClassification.Constants.FrontEndManager, PayClassification.Constants.Merchandiser,
-                    PayClassification.Constants.GroceryManager
-                    }.Contains(d.PayClassificationId)) ||
-                    (d.DepartmentId == Department.Constants.Meat && new[]
-                    {
-                    PayClassification.Constants.Manager, PayClassification.Constants.AssistantManager
-                    }.Contains(d.PayClassificationId)) ||
-                    (d.DepartmentId == Department.Constants.Produce && d.PayClassificationId == PayClassification.Constants.Manager) ||
-                    (d.DepartmentId == Department.Constants.Deli && d.PayClassificationId == PayClassification.Constants.Manager) ||
-                    (d.DepartmentId == Department.Constants.Dairy && d.PayClassificationId == PayClassification.Constants.Manager) ||
-                    (d.DepartmentId == Department.Constants.BeerAndWine && d.PayClassificationId == PayClassification.Constants.Manager) ||
-                    (d.DepartmentId == Department.Constants.Bakery && d.PayClassificationId == PayClassification.Constants.Manager)
-                )
-            )
-        );
-    }
+    #endregion
 
     public Task<BreakdownByStoreTotals> GetTotalsByStore(
-    BreakdownByStoreRequest request,
-    CancellationToken cancellationToken)
+        BreakdownByStoreRequest request,
+        CancellationToken cancellationToken)
     {
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            if (request.StoreNumber <= 0)
-            {
-                throw new InvalidOperationException(
-                    $"Invalid {nameof(request.StoreNumber)} {request.StoreNumber}.");
-            }
+            ValidateStoreNumber(request);
 
-            var employeesBase = GetStoreQueryBase(ctx);
-            employeesBase = employeesBase.Where(e => e.StoreNumber == request.StoreNumber);
+            // ── Query ------------------------------------------------------------------
+            var employeesBase = BuildEmployeesBaseQuery(ctx, request);
+            var employeeSsns = await employeesBase.Select(e => e.Ssn).ToHashSetAsync(cancellationToken);
 
-            var employeeSsns = await employeesBase
-                .Select(e => e!.Ssn)
-                .ToHashSetAsync(cancellationToken);
+            ThrowIfInvalidSsns(employeeSsns);
 
-            if (employeeSsns.Contains(0))
-            {
-                throw new InvalidOperationException("Unexpected 0 SSN encountered.");
-            }
+            var snapshots = await GetEmployeeFinancialSnapshotsAsync(
+                ctx, request.ProfitYear, employeeSsns, cancellationToken);
 
-            var calInfo = await _calendarService
-                .GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
-            var priorYear = (short)(request.ProfitYear - 1);
-
-            var vestingBySsn = await _totalService
-                .GetVestingRatio(ctx, request.ProfitYear, calInfo.FiscalEndDate)
-                .Where(vr => employeeSsns.Contains(vr.Ssn ?? 0))
-                .ToDictionaryAsync(vr => vr.Ssn ?? 0, vr => vr.Ratio, cancellationToken);
-
-            var balanceBySsnLastYear = await _totalService
-                .GetTotalBalanceSet(ctx, priorYear)
-                .Where(tbs => employeeSsns.Contains(tbs.Ssn))
-                .ToDictionaryAsync(tbs => tbs.Ssn, tbs => tbs.Total ?? 0, cancellationToken);
-
-            var txnsBySsn = await TotalService
-                .GetTransactionsBySsnForProfitYearForOracle(ctx, request.ProfitYear)
-                .Where(txn => employeeSsns.Contains(txn.Ssn))
-                .ToDictionaryAsync(txn => txn.Ssn, txn => txn, cancellationToken);
-
-            var employeeSnapshots = await employeesBase
-                .Select(e => new
-                {
-                    e.Ssn,
-                    BeginningBalance = balanceBySsnLastYear.GetValueOrDefault(e.Ssn),
-                    Txn = txnsBySsn.GetValueOrDefault(e.Ssn) ?? new InternalProfitDetailDto(),
-                    VestingRatio = vestingBySsn.GetValueOrDefault(e.Ssn) ?? 0
-                })
-                .ToListAsync(cancellationToken);
-
+            // ── Aggregate --------------------------------------------------------------
             var totals = new BreakdownByStoreTotals
             {
-                TotalNumberEmployees = (short)employeeSnapshots.Count,
-                TotalBeginningBalances = employeeSnapshots.Sum(x => x.BeginningBalance),
-                TotalEarnings = employeeSnapshots.Sum(x => x.Txn.TotalEarnings),
-                TotalContributions = employeeSnapshots.Sum(x => x.Txn.TotalContributions),
-                TotalForfeitures = employeeSnapshots.Sum(x => x.Txn.TotalForfeitures),
-                TotalDisbursements = employeeSnapshots.Sum(x => x.Txn.Distribution),
+                TotalNumberEmployees = (short)snapshots.Count,
+                TotalBeginningBalances = snapshots.Sum(x => x.BeginningBalance),
+                TotalEarnings = snapshots.Sum(x => x.Txn.TotalEarnings),
+                TotalContributions = snapshots.Sum(x => x.Txn.TotalContributions),
+                TotalForfeitures = snapshots.Sum(x => x.Txn.TotalForfeitures),
+                TotalDisbursements = snapshots.Sum(x => x.Txn.Distribution)
             };
 
             totals.TotalEndBalances = totals.TotalBeginningBalances
-                                    + totals.TotalEarnings
-                                    + totals.TotalContributions
-                                    + totals.TotalForfeitures
-                                    + totals.TotalDisbursements
-                                    + employeeSnapshots.Sum(x => x.Txn.BeneficiaryAllocation);
+                                     + totals.TotalEarnings
+                                     + totals.TotalContributions
+                                     + totals.TotalForfeitures
+                                     + totals.TotalDisbursements
+                                     + snapshots.Sum(x => x.Txn.BeneficiaryAllocation);
 
-            totals.TotalVestedBalance = employeeSnapshots.Sum(x =>
+            totals.TotalVestedBalance = snapshots.Sum(x =>
             {
                 var endBal = x.BeginningBalance
-                           + x.Txn.TotalEarnings
                            + x.Txn.TotalContributions
+                           + x.Txn.TotalEarnings
                            + x.Txn.TotalForfeitures
                            + x.Txn.Distribution
                            + x.Txn.BeneficiaryAllocation;
@@ -201,85 +102,185 @@ public class BreakdownReportService : IBreakdownService
         });
     }
 
-
-    public Task<ReportResponseBase<MemberYearSummaryDto>> GetActiveMembersByStore(BreakdownByStoreRequest breakdownByStoreRequest, CancellationToken cancellationToken)
+    public Task<ReportResponseBase<MemberYearSummaryDto>> GetActiveMembersByStore(
+        BreakdownByStoreRequest request,
+        CancellationToken cancellationToken)
     {
-       return _dataContextFactory.UseReadOnlyContext(async ctx =>
+        return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            if (breakdownByStoreRequest.StoreNumber <= 0)
-            {
-                throw new InvalidOperationException($"Invalid {nameof(breakdownByStoreRequest.StoreNumber)} {breakdownByStoreRequest.StoreNumber}.");
-            }
+            ValidateStoreNumber(request);
 
-            var employeesBase = GetStoreQueryBase(ctx);
+            var employeesBase = BuildEmployeesBaseQuery(ctx, request);
+            var paginated = await employeesBase.ToPaginationResultsAsync(request, cancellationToken);
+            var employeeSsns = paginated.Results.Select(r => r.Ssn).ToHashSet();
 
-            employeesBase = breakdownByStoreRequest.StoreManagement ? FilterForStoreManagement(employeesBase) : FilterForNonStoreManagement(employeesBase);
-            employeesBase = employeesBase.Where(d => d.StoreNumber == breakdownByStoreRequest.StoreNumber);
+            ThrowIfInvalidSsns(employeeSsns);
 
-            HashSet<int> employeeSsns = await employeesBase.Select(pp => pp!.Ssn).ToHashSetAsync(cancellationToken);
+            var snapshots = await GetEmployeeFinancialSnapshotsAsync(
+                ctx, request.ProfitYear, employeeSsns, cancellationToken);
+            var snapshotBySsn = snapshots.ToDictionary(s => s.Ssn);
 
-            if (employeeSsns.Contains(0))
-            {
-                throw new InvalidOperationException("Unexpected 0 SSN encountered.");
-            }
-
-            CalendarResponseDto calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(breakdownByStoreRequest.ProfitYear, cancellationToken);
-            short priorYear = (short)(breakdownByStoreRequest.ProfitYear - 1);
-            Dictionary<int, decimal?> employeeVestingRatios = await _totalService
-                .GetVestingRatio(ctx, breakdownByStoreRequest.ProfitYear, calInfo.FiscalEndDate)
-                .Where(vr => employeeSsns.Contains(vr.Ssn ?? 0))
-                .ToDictionaryAsync(vr => vr.Ssn ?? 0, vr => vr.Ratio, cancellationToken);
-
-            Dictionary<int, decimal> endingBalanceLastYearBySsn = await _totalService.GetTotalBalanceSet(ctx, priorYear)
-                .Where(tbs => employeeSsns.Contains(tbs.Ssn))
-                .ToDictionaryAsync(tbs => tbs.Ssn, tbs => tbs.Total ?? 0, cancellationToken);
-
-            Dictionary<int, InternalProfitDetailDto> txnsForProfitYear = await TotalService.GetTransactionsBySsnForProfitYearForOracle(ctx, breakdownByStoreRequest.ProfitYear)
-                .Where(txns => employeeSsns.Contains(txns.Ssn))
-                .ToDictionaryAsync(txns => txns.Ssn, txns => txns, cancellationToken);
-
-
-            var paginatedResults = await employeesBase.ToPaginationResultsAsync(breakdownByStoreRequest, cancellationToken);
-
-            var combined = paginatedResults.Results
-                .Select(d =>
-                {
-                    decimal vestingRatio = employeeVestingRatios.GetValueOrDefault(d.Ssn) ?? 0;
-                    decimal beginningBalance = endingBalanceLastYearBySsn.GetValueOrDefault(d.Ssn);
-                    InternalProfitDetailDto txns = txnsForProfitYear.GetValueOrDefault(d.Ssn) ?? new InternalProfitDetailDto();
-
-                    return new MemberYearSummaryDto
-                    {
-                        BadgeNumber = d.BadgeNumber,
-                        FullName = d.FullName!,
-                        StoreNumber = d.StoreNumber,
-                        BeginningBalance = beginningBalance,
-                        Earnings = txns.TotalEarnings,
-                        Contributions = txns.TotalContributions,
-                        Distributions = txns.Distribution,
-                        Forfeitures = txns.TotalForfeitures,
-                        EndingBalance = beginningBalance + txns.TotalContributions + txns.TotalEarnings + txns.TotalForfeitures +
-                                        txns.Distribution + txns.BeneficiaryAllocation,
-                        VestedAmount = (beginningBalance + txns.TotalContributions + txns.TotalEarnings + txns.TotalForfeitures +
-                                        txns.Distribution + txns.BeneficiaryAllocation) * vestingRatio,
-                        VestedPercent = (byte)(vestingRatio * 100),
-                        PayClassificationId = d.PayClassificationId,
-                        PayClassificationName = d.PayClassificationName
-                    };
-                })
-                .OrderBy(s => s.StoreNumber)
-                .ThenBy(s => s.FullName, StringComparer.Ordinal)
+            var members = paginated.Results
+                .Select(d => BuildMemberYearSummary(d, snapshotBySsn.GetValueOrDefault(d.Ssn)))
+                .OrderBy(m => m.StoreNumber)
+                .ThenBy(m => m.FullName, StringComparer.Ordinal)
                 .ToList();
-
-            PaginatedResponseDto<MemberYearSummaryDto> paginatedResponseDto = new() { Results = combined, Total = paginatedResults.Total };
 
             return new ReportResponseBase<MemberYearSummaryDto>
             {
                 ReportDate = DateTimeOffset.Now,
-                ReportName = $"Breakdown Report for {breakdownByStoreRequest.ProfitYear}",
-                Response = paginatedResponseDto
+                ReportName = $"Breakdown Report for {request.ProfitYear}",
+                Response = new PaginatedResponseDto<MemberYearSummaryDto>
+                {
+                    Results = members,
+                    Total = paginated.Total
+                }
             };
         });
     }
-}
 
+    #region ── Private: common building blocks ───────────────────────────────────────────
+
+    private static void ValidateStoreNumber(BreakdownByStoreRequest request)
+    {
+        if (request.StoreNumber <= 0)
+        {
+            throw new InvalidOperationException(
+                $"Invalid {nameof(request.StoreNumber)} {request.StoreNumber}.");
+        }
+    }
+
+    private static void ThrowIfInvalidSsns(ISet<int> ssns)
+    {
+        if (ssns.Contains(0))
+        {
+            throw new InvalidOperationException("Unexpected 0 SSN encountered.");
+        }
+    }
+
+    private IQueryable<ActiveMemberDto> BuildEmployeesBaseQuery(
+        IProfitSharingDbContext ctx,
+        BreakdownByStoreRequest request)
+    {
+        var query = ctx.Demographics
+            .Include(d => d.PayClassification)
+            .Include(d => d.Department)
+            .Select(d => new ActiveMemberDto
+            {
+                BadgeNumber = d.BadgeNumber,
+                StoreNumber = d.StoreNumber,
+                FullName = d.ContactInfo.FullName!,
+                Ssn = d.Ssn,
+                DateOfBirth = d.DateOfBirth,
+                PayClassificationId = d.PayClassificationId,
+                EmploymentStatusId = d.EmploymentStatusId,
+                DepartmentId = d.DepartmentId,
+                PayFrequencyId = d.PayFrequencyId,
+                DepartmentName = d.Department!.Name,
+                PayClassificationName = d.PayClassification!.Name,
+            });
+
+        // Store‑level + management filter
+        query = request.StoreManagement ? ApplyStoreManagementFilter(query)
+                                        : ApplyNonStoreManagementFilter(query);
+
+        return query.Where(e => e.StoreNumber == request.StoreNumber);
+    }
+
+    private async Task<List<EmployeeFinancialSnapshot>> GetEmployeeFinancialSnapshotsAsync(
+        IProfitSharingDbContext ctx,
+        short profitYear,
+        HashSet<int> employeeSsns,
+        CancellationToken ct)
+    {
+        // Calendar & prior year --------------------------------------------------------
+        var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(profitYear, ct);
+        var priorYear = (short)(profitYear - 1);
+
+        // Dictionaries ----------------------------------------------------------------
+        var vestingBySsn = await _totalService
+            .GetVestingRatio(ctx, profitYear, calInfo.FiscalEndDate)
+            .Where(vr => employeeSsns.Contains(vr.Ssn ?? 0))
+            .ToDictionaryAsync(vr => vr.Ssn ?? 0, vr => vr.Ratio, ct);
+
+        var balanceBySsnLastYear = await _totalService
+            .GetTotalBalanceSet(ctx, priorYear)
+            .Where(tbs => employeeSsns.Contains(tbs.Ssn))
+            .ToDictionaryAsync(tbs => tbs.Ssn, tbs => tbs.Total ?? 0, ct);
+
+        var txnsBySsn = await TotalService
+            .GetTransactionsBySsnForProfitYearForOracle(ctx, profitYear)
+            .Where(txn => employeeSsns.Contains(txn.Ssn))
+            .ToDictionaryAsync(txn => txn.Ssn, txn => txn, ct);
+
+        // Snapshots -------------------------------------------------------------------
+        return employeeSsns.Select(ssn => new EmployeeFinancialSnapshot(
+            ssn,
+            balanceBySsnLastYear.GetValueOrDefault(ssn),
+            txnsBySsn.GetValueOrDefault(ssn) ?? new InternalProfitDetailDto(),
+            vestingBySsn.GetValueOrDefault(ssn) ?? 0)).ToList();
+    }
+
+    private static IQueryable<ActiveMemberDto> ApplyStoreManagementFilter(IQueryable<ActiveMemberDto> q) =>
+        q.Where(d =>
+            ((d.EmploymentStatusId == EmploymentStatus.Constants.Active &&
+              d.PayFrequencyId != PayFrequency.Constants.Monthly) ||
+             (d.EmploymentStatusId == EmploymentStatus.Constants.Inactive && d.StoreNumber == 986)) &&
+            (
+                (d.DepartmentId == Department.Constants.Grocery && new[]
+                {
+                    PayClassification.Constants.Manager,
+                    PayClassification.Constants.AssistantManager,
+                    PayClassification.Constants.FrontEndManager,
+                    PayClassification.Constants.Merchandiser,
+                    PayClassification.Constants.GroceryManager
+                }.Contains(d.PayClassificationId)) ||
+                (d.DepartmentId == Department.Constants.Meat && new[]
+                {
+                    PayClassification.Constants.Manager,
+                    PayClassification.Constants.AssistantManager
+                }.Contains(d.PayClassificationId)) ||
+                (d.DepartmentId == Department.Constants.Produce && d.PayClassificationId == PayClassification.Constants.Manager) ||
+                (d.DepartmentId == Department.Constants.Deli && d.PayClassificationId == PayClassification.Constants.Manager) ||
+                (d.DepartmentId == Department.Constants.Dairy && d.PayClassificationId == PayClassification.Constants.Manager) ||
+                (d.DepartmentId == Department.Constants.BeerAndWine && d.PayClassificationId == PayClassification.Constants.Manager) ||
+                (d.DepartmentId == Department.Constants.Bakery && d.PayClassificationId == PayClassification.Constants.Manager)
+            ));
+
+    private static IQueryable<ActiveMemberDto> ApplyNonStoreManagementFilter(IQueryable<ActiveMemberDto> q) =>
+        q.Where(d => !ApplyStoreManagementFilter(q).Select(x => x.Ssn).Contains(d.Ssn));
+
+    private static MemberYearSummaryDto BuildMemberYearSummary(
+        ActiveMemberDto member,
+        EmployeeFinancialSnapshot? snap)
+    {
+        // Fallback for missing snapshot (should not happen if dictionaries are aligned)
+        snap ??= new EmployeeFinancialSnapshot(member.Ssn, 0, new InternalProfitDetailDto(), 0);
+
+        var endBal = snap.BeginningBalance
+                   + snap.Txn.TotalContributions
+                   + snap.Txn.TotalEarnings
+                   + snap.Txn.TotalForfeitures
+                   + snap.Txn.Distribution
+                   + snap.Txn.BeneficiaryAllocation;
+
+        return new MemberYearSummaryDto
+        {
+            BadgeNumber = member.BadgeNumber,
+            FullName = member.FullName,
+            StoreNumber = member.StoreNumber,
+            BeginningBalance = snap.BeginningBalance,
+            Earnings = snap.Txn.TotalEarnings,
+            Contributions = snap.Txn.TotalContributions,
+            Distributions = snap.Txn.Distribution,
+            Forfeitures = snap.Txn.TotalForfeitures,
+            EndingBalance = endBal,
+            VestedAmount = endBal * snap.VestingRatio,
+            VestedPercent = (byte)(snap.VestingRatio * 100),
+            PayClassificationId = member.PayClassificationId,
+            PayClassificationName = member.PayClassificationName
+        };
+    }
+
+    #endregion
+}

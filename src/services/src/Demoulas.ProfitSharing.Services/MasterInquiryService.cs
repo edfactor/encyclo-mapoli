@@ -28,6 +28,7 @@ public class MasterInquiryService : IMasterInquiryService
     private sealed class InquiryDemographics
     {
         public int BadgeNumber { get; init; }
+        public required string FullName { get; init; }
         public byte PayFrequencyId { get; init; }
         public short PsnSuffix { get; init; }
         public int Ssn { get; init; }
@@ -174,6 +175,7 @@ public class MasterInquiryService : IMasterInquiryService
                     Member = new InquiryDemographics
                     {
                         BadgeNumber = d.BadgeNumber,
+                        FullName = d.ContactInfo.FullName != null ? d.ContactInfo.FullName : d.ContactInfo.LastName,
                         PayFrequencyId = d.PayFrequencyId,
                         Ssn = d.Ssn,
                         PsnSuffix = 0,
@@ -210,7 +212,8 @@ public class MasterInquiryService : IMasterInquiryService
                     TransactionDate = pd.TransactionDate,
                     Member = new InquiryDemographics
                     {
-                        BadgeNumber = d.BadgeNumber, 
+                        BadgeNumber = d.BadgeNumber,
+                        FullName = d.Contact!.ContactInfo.FullName != null ? d.Contact.ContactInfo.FullName : d.Contact.ContactInfo.LastName,
                         PayFrequencyId = PayFrequency.Constants.Weekly,
                         PsnSuffix = d.PsnSuffix,
                         Ssn = d.Contact!=null?d.Contact.Ssn: 0,
@@ -452,6 +455,12 @@ public class MasterInquiryService : IMasterInquiryService
         if (req.PsnSuffix is > 0)
         {
             query = query.Where(x => x.Member.PsnSuffix == req.PsnSuffix);
+        }
+
+        if (!string.IsNullOrWhiteSpace(req.Name))
+        {
+            var pattern = $"%{req.Name.ToUpperInvariant()}%";
+            query = query.Where(x => EF.Functions.Like(x.Member.FullName.ToUpper(), pattern));
         }
 
         if (req.PaymentType.HasValue)

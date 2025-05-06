@@ -16,7 +16,7 @@ public record MasterInquiryRequest : SortedPaginationRequestDto
     public decimal? ForfeitureAmount { get; set; }
     public decimal? PaymentAmount { get; set; }
     public int? SocialSecurity { get; set; }
-    public string? Comment { get; set; }
+    public string? Name { get; set; }
     public byte? PaymentType { get; set; }
     public byte? MemberType { get; set; }
     public int? BadgeNumber { get; set; }

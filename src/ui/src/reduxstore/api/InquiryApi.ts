@@ -46,7 +46,7 @@ export const InquiryApi = createApi({
           socialSecurity: params.socialSecurity,
           paymentType: params.paymentType,
           memberType: params.memberType,
-          comment: params.comment,
+          name: params.name,
           take: params.pagination.take,
           skip: params.pagination.skip,
           sortBy: params.pagination.sortBy,

@@ -357,7 +357,6 @@ export interface MasterInquiryRequest {
   paymentAmount?: number;
   socialSecurity?: number;
   name?: string;
-  comment?: string;
   paymentType?: number;
   memberType?: number;
   badgeNumber?: number;
