@@ -222,33 +222,59 @@ public sealed class BreakdownReportService : IBreakdownService
     }
 
     private static IQueryable<ActiveMemberDto> ApplyStoreManagementFilter(IQueryable<ActiveMemberDto> q) =>
+     q.Where(d =>
+         ((d.EmploymentStatusId == EmploymentStatus.Constants.Active &&
+           d.PayFrequencyId != PayFrequency.Constants.Monthly) ||
+          (d.EmploymentStatusId == EmploymentStatus.Constants.Inactive && d.StoreNumber == 986)) &&
+         (
+             (d.DepartmentId == Department.Constants.Grocery && new[]
+             {
+                PayClassification.Constants.Manager,
+                PayClassification.Constants.AssistantManager,
+                PayClassification.Constants.FrontEndManager,
+                PayClassification.Constants.Merchandiser,
+                PayClassification.Constants.GroceryManager
+             }.Contains(d.PayClassificationId)) ||
+             (d.DepartmentId == Department.Constants.Meat && new[]
+             {
+                PayClassification.Constants.Manager,
+                PayClassification.Constants.AssistantManager
+             }.Contains(d.PayClassificationId)) ||
+             (d.DepartmentId == Department.Constants.Produce && d.PayClassificationId == PayClassification.Constants.Manager) ||
+             (d.DepartmentId == Department.Constants.Deli && d.PayClassificationId == PayClassification.Constants.Manager) ||
+             (d.DepartmentId == Department.Constants.Dairy && d.PayClassificationId == PayClassification.Constants.Manager) ||
+             (d.DepartmentId == Department.Constants.BeerAndWine && d.PayClassificationId == PayClassification.Constants.Manager) ||
+             (d.DepartmentId == Department.Constants.Bakery && d.PayClassificationId == PayClassification.Constants.Manager)
+         ));
+
+    private static IQueryable<ActiveMemberDto> ApplyNonStoreManagementFilter(IQueryable<ActiveMemberDto> q) =>
         q.Where(d =>
-            ((d.EmploymentStatusId == EmploymentStatus.Constants.Active &&
-              d.PayFrequencyId != PayFrequency.Constants.Monthly) ||
-             (d.EmploymentStatusId == EmploymentStatus.Constants.Inactive && d.StoreNumber == 986)) &&
-            (
-                (d.DepartmentId == Department.Constants.Grocery && new[]
-                {
+            !(
+                ((d.EmploymentStatusId == EmploymentStatus.Constants.Active &&
+                  d.PayFrequencyId != PayFrequency.Constants.Monthly) ||
+                 (d.EmploymentStatusId == EmploymentStatus.Constants.Inactive && d.StoreNumber == 986)) &&
+                (
+                    (d.DepartmentId == Department.Constants.Grocery && new[]
+                    {
                     PayClassification.Constants.Manager,
                     PayClassification.Constants.AssistantManager,
                     PayClassification.Constants.FrontEndManager,
                     PayClassification.Constants.Merchandiser,
                     PayClassification.Constants.GroceryManager
-                }.Contains(d.PayClassificationId)) ||
-                (d.DepartmentId == Department.Constants.Meat && new[]
-                {
+                    }.Contains(d.PayClassificationId)) ||
+                    (d.DepartmentId == Department.Constants.Meat && new[]
+                    {
                     PayClassification.Constants.Manager,
                     PayClassification.Constants.AssistantManager
-                }.Contains(d.PayClassificationId)) ||
-                (d.DepartmentId == Department.Constants.Produce && d.PayClassificationId == PayClassification.Constants.Manager) ||
-                (d.DepartmentId == Department.Constants.Deli && d.PayClassificationId == PayClassification.Constants.Manager) ||
-                (d.DepartmentId == Department.Constants.Dairy && d.PayClassificationId == PayClassification.Constants.Manager) ||
-                (d.DepartmentId == Department.Constants.BeerAndWine && d.PayClassificationId == PayClassification.Constants.Manager) ||
-                (d.DepartmentId == Department.Constants.Bakery && d.PayClassificationId == PayClassification.Constants.Manager)
+                    }.Contains(d.PayClassificationId)) ||
+                    (d.DepartmentId == Department.Constants.Produce && d.PayClassificationId == PayClassification.Constants.Manager) ||
+                    (d.DepartmentId == Department.Constants.Deli && d.PayClassificationId == PayClassification.Constants.Manager) ||
+                    (d.DepartmentId == Department.Constants.Dairy && d.PayClassificationId == PayClassification.Constants.Manager) ||
+                    (d.DepartmentId == Department.Constants.BeerAndWine && d.PayClassificationId == PayClassification.Constants.Manager) ||
+                    (d.DepartmentId == Department.Constants.Bakery && d.PayClassificationId == PayClassification.Constants.Manager)
+                )
             ));
 
-    private static IQueryable<ActiveMemberDto> ApplyNonStoreManagementFilter(IQueryable<ActiveMemberDto> q) =>
-        q.Where(d => !ApplyStoreManagementFilter(q).Select(x => x.Ssn).Contains(d.Ssn));
 
     private static MemberYearSummaryDto BuildMemberYearSummary(
         ActiveMemberDto member,

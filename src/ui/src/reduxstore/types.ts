@@ -294,7 +294,6 @@ export interface BaseDateRangeParams {
 }
 
 export interface MasterInquirySearch {
-  startProfitYear?: number | null;
   endProfitYear?: number | null;
   startProfitMonth?: number | null;
   endProfitMonth?: number | null;
@@ -346,7 +345,6 @@ export interface MasterInquiryDetail extends ProfitYearRequest {
 }
 
 export interface MasterInquiryRequest {
-  startProfitYear?: number;
   endProfitYear?: number;
   startProfitMonth?: number;
   endProfitMonth?: number;

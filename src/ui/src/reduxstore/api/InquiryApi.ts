@@ -34,7 +34,6 @@ export const InquiryApi = createApi({
         body: {
           badgeNumber: Number(params.badgeNumber?.toString().substring(0, 6)),
           psnSuffix: Number(params.badgeNumber?.toString().substring(6)),
-          startProfitYear: params.startProfitYear,
           endProfitYear: params.endProfitYear,
           startProfitMonth: params.startProfitMonth,
           endProfitMonth: params.endProfitMonth,

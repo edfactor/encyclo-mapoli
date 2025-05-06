@@ -123,9 +123,6 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
   } = useForm<MasterInquirySearch>({
     resolver: yupResolver(schema),
     defaultValues: {
-      startProfitYear: masterInquiryRequestParams?.startProfitYear
-        ? masterInquiryRequestParams.startProfitYear
-        : undefined,
       endProfitYear: profitYear || masterInquiryRequestParams?.endProfitYear || undefined,
       startProfitMonth: masterInquiryRequestParams?.startProfitMonth || undefined,
       endProfitMonth: masterInquiryRequestParams?.endProfitMonth || undefined,
@@ -178,7 +175,6 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
           sortBy: data.pagination.sortBy,
           isSortDescending: data.pagination.isSortDescending
         },
-        ...(!!data.startProfitYear && { startProfitYear: data.startProfitYear }),
         ...(!!data.endProfitYear && { endProfitYear: data.endProfitYear }),
         ...(!!data.startProfitMonth && { startProfitMonth: data.startProfitMonth }),
         ...(!!data.endProfitMonth && { endProfitMonth: data.endProfitMonth }),
@@ -203,7 +199,6 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
     dispatch(clearMasterInquiryRequestParams());
     dispatch(clearMasterInquiryData());
     reset({
-      startProfitYear: undefined,
       endProfitYear: undefined,
       startProfitMonth: undefined,
       endProfitMonth: undefined,
@@ -246,37 +241,18 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
           container
           spacing={3}
           width="100%">
-          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-            <Controller
-              name="startProfitYear"
-              control={control}
-              render={({ field }) => (
-                <DsmDatePicker
-                  id="Beginning Year"
-                  onChange={(value: Date | null) => field.onChange(value?.getFullYear() || undefined)}
-                  value={field.value ? new Date(field.value, 0) : null}
-                  required={true}
-                  label="Profit Year"
-                  disableFuture
-                  views={["year"]}
-                  error={errors.startProfitYear?.message}
-                />
-              )}
-            />
-            {errors.startProfitYear && <FormHelperText error>{errors.startProfitYear.message}</FormHelperText>}
-          </Grid2>
-
+         
           <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
             <Controller
               name="endProfitYear"
               control={control}
               render={({ field }) => (
                 <DsmDatePicker
-                  id="End Year"
+                  id="Profit Year"
                   onChange={(value: Date | null) => field.onChange(value?.getFullYear() || undefined)}
                   value={field.value ? new Date(field.value, 0) : null}
                   required={true}
-                  label="End Year"
+                  label="Profit Year"
                   disableFuture
                   views={["year"]}
                   error={errors.endProfitYear?.message}
