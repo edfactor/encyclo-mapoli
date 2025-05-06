@@ -1147,10 +1147,24 @@ export interface NavigationDto {
   title: string;
   subTitle: string;
   url: string;
-  StatusId: string;
+  statusId?: number;
+  statusName?: string;
   orderNumber: number;
   icon: string;
   requiredRoles: string[];
   disabled: boolean;
   items: NavigationDto[];
+}
+
+export interface NavigationStatusDto {
+  id: number;
+  name?: string;
+}
+
+export interface GetNavigationStatusRequestDto {
+  id?: number;
+}
+
+export interface GetNavigationStatusResponseDto {
+  navigationStatusList?: NavigationStatusDto[]
 }

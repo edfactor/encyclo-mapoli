@@ -2,18 +2,14 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 import { RootState } from "reduxstore/store";
 import {
-  CreateMilitaryContributionRequest,
-  MasterInquiryDetail,
-  MilitaryContributionRequest,
-  NavigationRequestDto,
-  NavigationResponseDto,
-  PagedReportResponse
+  GetNavigationStatusRequestDto,
+  GetNavigationStatusResponseDto,
 } from "reduxstore/types";
 import { url } from "./api";
-import { setNavigation, setNavigationError } from "reduxstore/slices/navigationSlice";
+import { setNavigationStatus, setNavigationStatusError } from "reduxstore/slices/NavigationStatusSlice";
 import { Paged } from "smart-ui-library";
 
-export const NavigationApi = createApi({
+export const NavigationStatusApi = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: `${url}/api/navigation`,
     prepareHeaders: (headers, { getState }) => {
@@ -33,24 +29,24 @@ export const NavigationApi = createApi({
       return headers;
     }
   }),
-  reducerPath: "navigationApi",
+  reducerPath: "navigationStatusApi",
   endpoints: (builder) => ({
-    getNavigation: builder.query<NavigationResponseDto, NavigationRequestDto>({
+    getNavigationStatus: builder.query<GetNavigationStatusResponseDto, GetNavigationStatusRequestDto>({
       query: (request) => ({
-        url: ``,
+        url: `status`,
         method: "GET"
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          dispatch(setNavigation(data));
+          dispatch(setNavigationStatus(data));
         } catch (err) {
-          console.error("Failed to fetch navigation:", err);
-          dispatch(setNavigationError("Failed to fetch military contributions"));
+          console.error("Failed to fetch navigation status:", err);
+          dispatch(setNavigationStatusError("Failed to fetch navigation status"));
         }
       }
     })
   })
 });
 
-export const { useGetNavigationQuery, useLazyGetNavigationQuery } = NavigationApi;
+export const { useGetNavigationStatusQuery, useLazyGetNavigationStatusQuery } = NavigationStatusApi;

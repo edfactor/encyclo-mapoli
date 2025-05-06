@@ -30,6 +30,7 @@ public class NavigationService : INavigationService
             context.Navigations
                 .Include(m => m.Items)
                 .Include(m => m.RequiredRoles)
+                .Include(m => m.NavigationStatus)
                 .OrderBy(x => x.OrderNumber)
                 .ToListAsync(cancellationToken)
         );
@@ -45,6 +46,7 @@ public class NavigationService : INavigationService
                     OrderNumber = x.OrderNumber,
                     ParentId = x.ParentId,
                     StatusId = x.StatusId,
+                    StatusName = x.NavigationStatus?.Name,
                     Title = x.Title,
                     Url = x.Url,
                     SubTitle = x.SubTitle,

@@ -19,7 +19,9 @@ import { messageSlice } from "./slices/messageSlice";
 import forfeituresAdjustmentSlice from "./slices/forfeituresAdjustmentSlice";
 import { apiLoggerMiddleware } from "../middleware/apiLoggerMiddleware";
 import { NavigationApi } from "./api/NavigationApi";
+import { NavigationStatusApi } from "./api/NavigationStatusApi";
 import navigationSlice  from "./slices/navigationSlice";
+import  navigationStatusSlice  from "./slices/NavigationStatusSlice";
 
 export const store = configureStore({
   reducer: {
@@ -33,6 +35,7 @@ export const store = configureStore({
     common: commonSlice,
     messages: messageSlice,
     navigation: navigationSlice,
+    navigationStatus: navigationStatusSlice,
     forfeituresAdjustment: forfeituresAdjustmentSlice,
 
     [SecurityApi.reducerPath]: SecurityApi.reducer,
@@ -42,7 +45,8 @@ export const store = configureStore({
     [InquiryApi.reducerPath]: InquiryApi.reducer,
     [LookupsApi.reducerPath]: LookupsApi.reducer,
     [CommonApi.reducerPath]: CommonApi.reducer,
-    [NavigationApi.reducerPath]: NavigationApi.reducer
+    [NavigationApi.reducerPath]: NavigationApi.reducer,
+    [NavigationStatusApi.reducerPath]: NavigationStatusApi.reducer
   },
 
   middleware: (getDefaultMiddleware) =>
@@ -57,6 +61,7 @@ export const store = configureStore({
       .concat(LookupsApi.middleware)
       .concat(CommonApi.middleware)
       .concat(NavigationApi.middleware)
+      .concat(NavigationStatusApi.middleware)
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself

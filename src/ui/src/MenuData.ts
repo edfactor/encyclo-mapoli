@@ -60,17 +60,25 @@ const getRouteData = (data: NavigationDto[]):RouteData[] =>{
 
 interface MenuLevel {
   mainTitle: string;
+  statusId? : number;
+  statusName?: string;
   topPage: TopPage[]
+
+
 }
 interface TopPage {
   topTitle: string;
-    topRoute?: string;
-    disabled?: boolean;
-    subPages: SubPages[]
+  topRoute?: string;
+  statusId?: number;
+  statusName?: string;
+  disabled?: boolean;
+  subPages: SubPages[]
 }
 interface SubPages {
   subTitle?: string;
   subRoute?: string;
+  statusId?:number;
+  statusName?: string;
   disabled?: boolean;
 }
 
@@ -87,6 +95,8 @@ export const menuLevels =(data: NavigationResponseDto | undefined): MenuLevel[] 
     menuLevel.push(
       {
         mainTitle: value.title + addSubTitle(value.subTitle),
+        statusId: value.statusId,
+        statusName: value.statusName,
         topPage: value.items && value.items.length>0? poplulateTopPage(value.items): []
       }
     )
@@ -99,6 +109,8 @@ const poplulateTopPage = (data: NavigationDto[]):TopPage[] =>{
     topPage.push(
       {
          topTitle: value.title + addSubTitle(value.subTitle),
+         statusId: value.statusId,
+         statusName: value.statusName,
          disabled: value.disabled,
          topRoute: value.url,
          subPages: value.items && value.items.length>0 ? populateSubPages(value.items): []
@@ -113,6 +125,8 @@ const populateSubPages = (data: NavigationDto[]):SubPages[] =>{
     subPages.push(
       {
         subTitle: value.title + addSubTitle(value.subTitle),
+        statusId: value.statusId,
+        statusName: value.statusName,
         disabled: value.disabled, 
         subRoute: value.url
       }

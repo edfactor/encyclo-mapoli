@@ -1,17 +1,26 @@
-import StatusDropdown, { ProcessStatus } from "./StatusDropdown";
+import { useEffect } from "react";
+import StatusDropdown from "./StatusDropdown";
+import { useGetNavigationStatusQuery } from "reduxstore/api/NavigationStatusApi";
 
 interface StatusDropdownActionNodeProps {
-  initialStatus?: ProcessStatus;
+  initialStatus?: string;
 }
 
 const StatusDropdownActionNode: React.FC<StatusDropdownActionNodeProps> = ({ initialStatus }) => {
-  const handleStatusChange = async (newStatus: ProcessStatus) => {
+
+  const { isSuccess, data}  = useGetNavigationStatusQuery({});
+  const handleStatusChange = async (newStatus: string) => {
     console.info("Logging new status: ", newStatus);
   };
+  if(isSuccess){
+    console.log(data);
+  }
+
+
 
   return (
     <div className="flex items-center gap-2 h-10">
-      <StatusDropdown onStatusChange={handleStatusChange} initialStatus={initialStatus} />
+      {isSuccess?<StatusDropdown navigationStatusList={data.navigationStatusList} onStatusChange={handleStatusChange} initialStatus={initialStatus} />:<></>}
     </div>
   );
 };
