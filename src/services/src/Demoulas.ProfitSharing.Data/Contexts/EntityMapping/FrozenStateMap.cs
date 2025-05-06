@@ -32,7 +32,8 @@ internal sealed class FrozenStateMap : IEntityTypeConfiguration<FrozenState>
         _ = builder.Property(x => x.CreatedDateTime)
             .HasColumnName("CREATED_DATETIME")
             .HasColumnType("TIMESTAMP WITH TIME ZONE")
-            .HasDefaultValueSql("SYSDATE");
+            .HasDefaultValueSql("SYSTIMESTAMP")
+            .ValueGeneratedOnAdd();
 
         _ = builder.Property(x => x.IsActive)
             .HasColumnName("IS_ACTIVE");
