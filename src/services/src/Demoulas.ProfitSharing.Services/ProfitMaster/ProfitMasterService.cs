@@ -389,7 +389,7 @@ public class ProfitMasterService : IProfitMasterService
                 pd.CommentRelatedOracleHcmId,
                 pd.CommentRelatedPsnSuffix,
                 pd.CommentIsPartialTransaction,
-                pd.CreatedUtc,
+                pd.TransactionDate,
                 pd.YearsOfServiceCredit
             );
         }

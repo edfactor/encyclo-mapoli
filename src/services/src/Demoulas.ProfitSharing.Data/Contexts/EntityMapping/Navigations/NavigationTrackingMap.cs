@@ -18,7 +18,9 @@ internal sealed class NavigationTrackingMap : IEntityTypeConfiguration<Navigatio
         _ = builder.Property(x => x.StatusId).HasColumnName("STATUS_ID");
         _ = builder.Property(x => x.NavigationId).HasColumnName("NAVIGATION_ID");
         _ = builder.Property(x => x.Username).HasColumnName("USERNAME").HasMaxLength(60);
-        _ = builder.Property(x => x.LastModified).HasColumnName("LAST_MODIFIED").HasColumnType("DATE").ValueGeneratedOnAddOrUpdate();
+        _ = builder.Property(x => x.LastModified).HasColumnName("LAST_MODIFIED")
+            .HasColumnType("TIMESTAMP WITH TIME ZONE")
+            .ValueGeneratedOnAddOrUpdate();
 
         builder.HasOne(m => m.Navigation)
             .WithMany(m => m.NavigationTrackings)

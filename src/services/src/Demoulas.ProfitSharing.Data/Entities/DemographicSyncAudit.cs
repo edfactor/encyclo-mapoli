@@ -8,5 +8,5 @@ public sealed class DemographicSyncAudit
     public string? UserName { get; set; }
     public string? PropertyName { get; set; }
     public required string Message { get; set; }
-    public DateTime Created { get; set; } = DateTime.Now;
+    public DateTimeOffset Created { get; set; } = DateTimeOffset.UtcNow;
 }

@@ -170,7 +170,7 @@ public class MasterInquiryService : IMasterInquiryService
                     ZeroContributionReason = pd.ZeroContributionReason,
                     TaxCode = pd.TaxCode,
                     CommentType = pd.CommentType,
-                    TransactionDate = pd.CreatedUtc,
+                    TransactionDate = pd.TransactionDate,
                     Member = new InquiryDemographics
                     {
                         BadgeNumber = d.BadgeNumber,
@@ -207,7 +207,7 @@ public class MasterInquiryService : IMasterInquiryService
                     ZeroContributionReason = pd.ZeroContributionReason,
                     TaxCode = pd.TaxCode,
                     CommentType = pd.CommentType,
-                    TransactionDate = pd.CreatedUtc,
+                    TransactionDate = pd.TransactionDate,
                     Member = new InquiryDemographics
                     {
                         BadgeNumber = d.BadgeNumber, 

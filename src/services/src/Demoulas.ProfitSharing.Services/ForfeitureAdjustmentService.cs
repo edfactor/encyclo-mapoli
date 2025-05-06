@@ -221,7 +221,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                 Forfeiture = Math.Abs(req.ForfeitureAmount) * (isForfeit ? -1 : 1), // Negative for forfeit, positive for un-forfeit, we'll need to double check this logic
                 MonthToDate = (byte)DateTime.Now.Month,
                 YearToDate = (short)DateTime.Now.Year,
-                CreatedUtc = DateTimeOffset.Now
+                TransactionDate = DateTimeOffset.Now
             };
 
             context.ProfitDetails.Add(profitDetail);
