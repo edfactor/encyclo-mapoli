@@ -117,20 +117,24 @@ public class BreakdownReportService : IBreakdownService
         );
     }
 
-
+    public Task<BreakdownByStoreTotals> GetTotalsByStore(BreakdownByStoreRequest breakdownByStoreRequest, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetActiveMembersByStore(BreakdownByStoreRequest breakdownByStoreRequest, CancellationToken cancellationToken)
     {
        return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
+            if (breakdownByStoreRequest.StoreNumber <= 0)
+            {
+                throw new InvalidOperationException($"Invalid {nameof(breakdownByStoreRequest.StoreNumber)} {breakdownByStoreRequest.StoreNumber}.");
+            }
+
             var employeesBase = GetStoreQueryBase(ctx);
 
             employeesBase = breakdownByStoreRequest.StoreManagement ? FilterForStoreManagement(employeesBase) : FilterForNonStoreManagement(employeesBase);
-
-            if (breakdownByStoreRequest.StoreNumber.HasValue)
-            {
-                employeesBase = employeesBase.Where(d => d.StoreNumber == breakdownByStoreRequest.StoreNumber);
-            }
+            employeesBase = employeesBase.Where(d => d.StoreNumber == breakdownByStoreRequest.StoreNumber);
 
             HashSet<int> employeeSsns = await employeesBase.Select(pp => pp!.Ssn).ToHashSetAsync(cancellationToken);
 

@@ -3,5 +3,5 @@
 public record BreakdownByStoreRequest : ProfitYearRequest
 {
     public bool StoreManagement { get; set; }
-    public short? StoreNumber { get; set; }
+    public short StoreNumber { get; set; }
 }
