@@ -153,7 +153,9 @@ public class FrozenService: IFrozenService
                 CreatedDateTime = f.CreatedDateTime
             }).FirstOrDefaultAsync(cancellationToken);
             
-            return frozen ?? new FrozenStateResponse { ProfitYear = (short)DateTime.Today.Year, AsOfDateTime = DateTime.Now, IsActive = false};
+            return frozen ?? new FrozenStateResponse { ProfitYear = (short)DateTime.Today.Year, 
+                CreatedDateTime = DateTimeOffset.MinValue,
+                AsOfDateTime = DateTimeOffset.UtcNow, IsActive = false};
         });
     }
 
