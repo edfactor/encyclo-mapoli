@@ -91,7 +91,7 @@ public class MasterServiceTests : ApiTestBase<Program>
     public async Task GetMasterInquiryWithSocialSecurityWithAll()
     {
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
-        var request = new MasterInquiryRequest()
+        var request = new MasterInquiryRequest
         {
             StartProfitMonth = 1,
             EndProfitMonth = 12,

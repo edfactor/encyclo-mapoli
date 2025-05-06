@@ -40,18 +40,20 @@ VALUES(6,2, 'Duplicate Names and Birthdays', '','duplicate-names-and-birthdays',
 --sub values for December Activities
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
 VALUES(7,1, 'Military Contributions', 'TPR008-13','military-entry-and-modification', 1, 2, '', 0);
+
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(8,1, 'Rehire Forfeitures', 'QPREV-PROF','rehire-forfeitures', 1, 3, '', 0);
+VALUES(8,1, 'UnForfeit', 'QPREV-PROF','rehire-forfeitures', 1, 3, '', 0);
+
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(9,1, 'Forfeiture Adjustments', 'TPR008-12','forfeitures-adjustment', 1, 4, '', 0);
---INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
---VALUES(9,1, 'Rehire Forfeitures', 'QPREV-PROF','rehire-forfeitures', 1, 4, '', 0);
+VALUES(9,1, 'Terminations', 'QPAY066','prof-term', 1, 4, '', 0);
+
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(10,1, 'Distributions and Forfeitures', 'QPAY129','distributions-and-forfeitures', 1, 6, '', 0);
---INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
---VALUES(11,1, 'Distributions and Forfeitures', 'QPAY129','distributions-and-forfeitures', 1, 7, '', 0);
+VALUES(10,1, 'Forfeiture Adjustments', 'TPR008-12','forfeitures-adjustment', 1, 5, '', 0);
+
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(12,1, 'Terminations', 'QPAY066','prof-term', 1, 8, '', 0);
+VALUES(11,1, 'Distributions and Forfeitures', 'QPAY129','distributions-and-forfeitures', 1, 6, '', 0);
+
+
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
 VALUES(13,1, 'Profit Share Report', 'PAY426','profit-share-report', 1, 9, '', 0);
 --Fiscal Close

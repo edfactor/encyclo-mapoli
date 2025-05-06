@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.Util.Extensions;
 using FastEndpoints;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Navigations;
 public class GetNavigationEndpoint: Endpoint<NavigationRequestDto,NavigationResponseDto>
@@ -34,7 +36,7 @@ public class GetNavigationEndpoint: Endpoint<NavigationRequestDto,NavigationResp
         });
         Group<NavigationGroup>();
 
-        if (!Env.IsTestEnvironment())
+        if (!(Env.IsTestEnvironment() || Debugger.IsAttached))
         {
             // Specify caching duration and store it in metadata
             TimeSpan cacheDuration = TimeSpan.FromMinutes(15);

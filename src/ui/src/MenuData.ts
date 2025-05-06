@@ -5,13 +5,6 @@ import { RouteData } from "smart-ui-library";
 
 const localStorageImpersonating: string | null = localStorage.getItem("impersonatingRole");
 
-const it_operations: RouteCategory = {
-  menuLabel: MENU_LABELS.IT_OPERATIONS,
-  parentRoute: MENU_LABELS.IT_OPERATIONS,
-  roles: [ImpersonationRoles.ItOperations], // Only users with this role can see this menu item
-  items: [{ caption: CAPTIONS.DEMOGRAPHIC_FREEZE, route: ROUTES.DEMO_FREEZE }]
-};
-
 export const MenuData = (data:NavigationResponseDto | undefined): RouteCategory[] => {
   const finalData: RouteCategory[] = [];
   data?.navigation.filter(m=>m.parentId ==null).sort((a, b) => a.orderNumber - b.orderNumber).map((values:NavigationDto) => {
