@@ -48,7 +48,7 @@ INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUM
 VALUES(9,1, 'Terminations', 'QPAY066','prof-term', 1, 4, '', 0);
 
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(10,1, 'Forfeiture Adjustments', 'TPR008-12','forfeitures-adjustment', 1, 5, '', 0);
+VALUES(10,1, 'Forfeitures', 'TPR008-12','forfeitures-adjustment', 1, 5, '', 0);
 
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
 VALUES(11,1, 'Distributions and Forfeitures', 'QPAY129','distributions-and-forfeitures', 1, 6, '', 0);
