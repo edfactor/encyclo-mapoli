@@ -144,7 +144,7 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store }) => {
         />
         {breakdownByStore?.response?.results && breakdownByStore.response.results.length > 0 && (
           <Pagination
-            pageNumber={pageNumber + 1}
+            pageNumber={pageNumber}
             setPageNumber={(value: number) => setPageNumber(value - 1)}
             pageSize={pageSize}
             setPageSize={setPageSize}

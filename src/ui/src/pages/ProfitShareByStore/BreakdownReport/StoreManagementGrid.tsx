@@ -144,7 +144,7 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store }) => {
         />
         {storeManagement?.response?.results && storeManagement.response.results.length > 0 && (
           <Pagination
-            pageNumber={pageNumber + 1}
+            pageNumber={pageNumber}
             setPageNumber={(value: number) => setPageNumber(value - 1)}
             pageSize={pageSize}
             setPageSize={setPageSize}
