@@ -129,6 +129,7 @@ export interface YearsEndState {
   yearEndProfitSharingReport: YearEndProfitSharingReportResponse | null;
   yearEndProfitSharingReportQueryParams: ProfitYearRequest | null;
   breakdownByStore: BreakdownByStoreResponse | null;
+  breakdownByStoreMangement: BreakdownByStoreResponse | null;
   breakdownByStoreTotals: BreakdownByStoreTotals | null;
   storeManagementBreakdown: BreakdownByStoreResponse | null;
   breakdownByStoreQueryParams: BreakdownByStoreRequest | null;
@@ -222,6 +223,7 @@ const initialState: YearsEndState = {
   yearEndProfitSharingReport: null,
   yearEndProfitSharingReportQueryParams: null,
   breakdownByStore: null,
+  breakdownByStoreMangement: null,
   breakdownByStoreTotals: null,
   storeManagementBreakdown: null,
   breakdownByStoreQueryParams: null,
@@ -912,6 +914,12 @@ export const yearsEndSlice = createSlice({
     clearBreakdownByStore: (state) => {
       state.breakdownByStore = null;
     },
+    setBreakdownByStoreMangement: (state, action: PayloadAction<BreakdownByStoreResponse>) => {
+      state.breakdownByStoreMangement = action.payload;
+    },
+    clearBreakdownByStoreMangement: (state) => {
+      state.breakdownByStoreMangement = null;
+    },
     setBreakdownByStoreTotals: (state, action: PayloadAction<BreakdownByStoreTotals>) => {
       state.breakdownByStoreTotals = action.payload;
     },
@@ -1051,6 +1059,8 @@ export const {
   updateExecutiveHoursAndDollarsGridRow,
   setBreakdownByStore,
   clearBreakdownByStore,
+  setBreakdownByStoreMangement,
+  clearBreakdownByStoreMangement,
   setBreakdownByStoreTotals,
   clearBreakdownByStoreTotals,
   setBreakdownByStoreQueryParams,

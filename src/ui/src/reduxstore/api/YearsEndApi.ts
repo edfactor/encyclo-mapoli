@@ -808,15 +808,19 @@ export const YearsEndApi = createApi({
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
-          dispatch(clearBreakdownByStore());
           const { data } = await queryFulfilled;
-          dispatch(setBreakdownByStore(data));
+
+          // Use the storeManagement flag to determine where to store the data
+          if (arg.storeManagement) {
+            dispatch(setBreakdownByStoreMangement(data));
+          } else {
+            dispatch(setBreakdownByStore(data));
+          }
         } catch (err) {
           console.log("Err: " + err);
-          dispatch(clearBreakdownByStore());
         }
       }
-    }),
+    })    ,
     getBreakdownByStoreTotals: builder.query<BreakdownByStoreTotals, BreakdownByStoreRequest>({
       query: (params) => ({
         url: `yearend/breakdown-by-store/${params.storeNumber}/totals`,
