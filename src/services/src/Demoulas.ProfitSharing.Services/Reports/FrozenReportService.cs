@@ -1079,7 +1079,7 @@ public class FrozenReportService : IFrozenReportService
 
             return new GrossWagesReportResponse()
             {
-                ReportDate = DateTimeOffset.Now,
+                ReportDate = DateTimeOffset.UtcNow,
                 ReportName = GrossWagesReportResponse.REPORT_NAME,
                 Response =
                     new PaginatedResponseDto<GrossWagesReportDetail>(req) { Results = rslt.Skip(req.Skip ?? 0).Take(req.Take ?? int.MaxValue), Total = rslt.Count },
@@ -1096,8 +1096,6 @@ public class FrozenReportService : IFrozenReportService
     {
         using (_logger.BeginScope("Request PROFIT CONTROL SHEET"))
         {
-            var calInfo =
-                await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
             var rslt = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
                 var rsp = new ProfitControlSheetResponse();

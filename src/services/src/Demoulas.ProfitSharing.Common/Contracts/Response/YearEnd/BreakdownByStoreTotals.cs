@@ -1,7 +1,18 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
-public record BreakdownByStoreTotals : ReportResponseBase<MemberYearSummaryDto>
+public record BreakdownByStoreTotals
 {
-   
+    public short TotalNumberEmployees { get; set; }
+    public decimal TotalBeginningBalances { get; set; }
+    public decimal TotalEarnings { get; set; }
+    public decimal TotalContributions { get; set; }
+
+    public decimal TotalForfeitures { get; set; }
+
+    public decimal TotalDisbursements { get; set; }
+
+    public decimal TotalEndBalances { get; set; }
+
+    public decimal TotalVestedBalance { get; set; }
 }
 
