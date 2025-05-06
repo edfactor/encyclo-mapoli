@@ -67,6 +67,12 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new NavigationTrackingMap());
         modelBuilder.ApplyConfiguration(new NavigationRoleMap());
 
+        modelBuilder.HasSequence<int>("FAKE_SSN_SEQ").StartsAt(666000000)
+            .IncrementsBy(1)
+            .HasMin(666000000)
+            .HasMax(666999999)
+            .IsCyclic(false);
+
         // Force table names to be upper case for consistency with all existing DSM projects
         foreach (var entity in modelBuilder.Model.GetEntityTypes())
         {

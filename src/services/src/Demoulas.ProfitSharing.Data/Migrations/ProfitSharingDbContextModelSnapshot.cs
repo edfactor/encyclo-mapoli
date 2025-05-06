@@ -23,6 +23,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             OracleModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.HasSequence<int>("FAKE_SSN_SEQ")
+                .StartsAt(666000000L)
+                .HasMin(666000000L)
+                .HasMax(666999999L);
+
             modelBuilder.Entity("AuditChangeAuditEvent", b =>
                 {
                     b.Property<long>("AuditEventId")

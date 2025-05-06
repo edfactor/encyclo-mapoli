@@ -7,7 +7,7 @@
 /// </summary>
 public sealed record ProfitMasterUpdateResponse
 {
-    public required DateTime UpdatedTime { get; set; }
+    public required DateTimeOffset UpdatedTime { get; set; }
     public required string UpdatedBy { get; set; }
 
     public required int BeneficiariesEffected { get; set; }
