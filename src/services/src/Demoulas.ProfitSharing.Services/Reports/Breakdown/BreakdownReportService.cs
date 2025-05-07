@@ -111,6 +111,11 @@ public sealed class BreakdownReportService : IBreakdownService
             ValidateStoreNumber(request);
 
             var employeesBase = BuildEmployeesBaseQuery(ctx, request);
+
+            // Store‑level + management filter
+            employeesBase = request.StoreManagement ? ApplyStoreManagementFilter(employeesBase)
+                : ApplyNonStoreManagementFilter(employeesBase);
+
             var paginated = await employeesBase.ToPaginationResultsAsync(request, cancellationToken);
             var employeeSsns = paginated.Results.Select(r => r.Ssn).ToHashSet();
 
@@ -179,10 +184,6 @@ public sealed class BreakdownReportService : IBreakdownService
                 DepartmentName = d.Department!.Name,
                 PayClassificationName = d.PayClassification!.Name,
             });
-
-        // Store‑level + management filter
-        query = request.StoreManagement ? ApplyStoreManagementFilter(query)
-                                        : ApplyNonStoreManagementFilter(query);
 
         return query.Where(e => e.StoreNumber == request.StoreNumber);
     }
