@@ -13,7 +13,7 @@ namespace YEMatch;
 internal static class Program
 {
     private static readonly HashSet<string> activitiesWithUpdates = ["A6", "A7", "A12", "A13A", "A13B", "A18", "A20", "A21", "A22", "A23", "A24"];
-    
+
     // Steps which modify the database (or input to next job which does) on READY 
     // A6 - Clear exec hours and dollars (only on ready)
     // A7 - Enter executive hours and dollars
@@ -125,13 +125,9 @@ internal static class Program
         //activitiesToRun = Specify(bothReadyAndSmartActivities, ["R0", "R2S",  "R18", "S18" ]); // "R20", "R21", "R22", "R23"]);
 
         // activitiesToRun = Specify(bothReadyAndSmartActivities, ["", "S18"]); // "S23"]);
-        
+
         // activitiesToRun = Specify(bothReadyAndSmartActivities, ["R0", "R18", "R20", "R21", "R22", "R2S"]);
-        activitiesToRun = Specify(bothReadyAndSmartActivities, [ "R23"]);
-//        activitiesToRun = Specify(bothReadyAndSmartActivities, [ "S23" ]);
-//        activitiesToRun = Specify(bothReadyAndSmartActivities, [ "R23" ]);
-//        activitiesToRun = Specify(bothReadyAndSmartActivities, [ "R2S" ]);
-        // activitiesToRun = Specify(bothReadyAndSmartActivities, ["R0", "R27"]);
+        activitiesToRun = Specify(bothReadyAndSmartActivities, ["R23"]);
         // activitiesToRun = Specify(bothReadyAndSmartActivities, ["R23"]);
 
 
@@ -139,8 +135,9 @@ internal static class Program
 
         // ensure we stop if a stop is requested on either side
         bool stopOnSmartSide = activitiesToRun.Any(a => a is SmartActivity);
-        
-        if(activitiesToRun.Any(a=> a is SmartActivity && a != SmartActivityFactory.ReadyToSmartInit )){
+
+        if (activitiesToRun.Any(a => a is SmartActivity && a != SmartActivityFactory.ReadyToSmartInit))
+        {
             // Quick authentication sanity check
             var r = await SmartActivityFactory.Client!.DemoulasCommonApiEndpointsAppVersionInfoEndpointAsync(null);
             // Might be nice to also include the database version. What database is used.  Wall clock time.

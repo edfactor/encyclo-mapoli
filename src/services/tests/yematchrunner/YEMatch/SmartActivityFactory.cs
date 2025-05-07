@@ -253,12 +253,11 @@ public static class SmartActivityFactory
         var r = await apiClient.ItOperationsGetActiveFrozenDemographicEndpointAsync(null, req);
         return new Outcome(aname, name, "OK", $"Frozen at {r.AsOfDateTime} by {r.FrozenBy} isActive:{r.IsActive}", "");
 #endif
-/*        example
-
+/*        example from swagger
         curl -X 'POST' \
         'https://ps.qa.demoulas.net:8443/api/itoperations/freeze' \
         -H 'accept: application/json' \
-        -H 'Authorization: Bearer eyJraWQiOiI5U1FaZzhqQl9XSFJnZkl6d1ktUmRQRk1ackM1TnNEejFvZVcteEwzWXNvIiwiYWxnIjoiUlMyNTYifQ.eyJ2ZXIiOjEsImp0aSI6IkFULkEtWVdFXzRCQ0o4aEI2dmZxaTIyV29rNWFkYjJFaGl3MWw1Mmh4V0k5MW8iLCJpc3MiOiJodHRwczovL21hcmtldGJhc2tldC5va3RhLmNvbS9vYXV0aDIvYXVzMTEzZWhjNWtrcVRlWEIxdDgiLCJhdWQiOiJhcGk6Ly9zbWFydC1wcyIsImlhdCI6MTc0NDY2MTM4NiwiZXhwIjoxNzQ0NjY0OTg2LCJjaWQiOiIwb2ExMTNlYWpqNEpUMWlrSjF0OCIsInVpZCI6IjAwdXd3dG1vcjhTdDNRbFlxMXQ3Iiwic2NwIjpbIm9wZW5pZCJdLCJhdXRoX3RpbWUiOjE3NDQ2NjEyNzYsInN1YiI6ImJoZXJybWFubkBNYWlub2ZmaWNlLkRlbW91bGFzLkNvcnAiLCJncm91cHMiOlsiU01BUlQtUFMtUUEtSW1wZXJzb25hdGlvbiJdfQ.VkMhL64vEnz17RwoG5uWfdNKfB7r-UuXX4-lTAYwi4qVwa32YorCkRqVrO-LK3PtrUMvnAAk3J4J1Nx3Iugocg2DCoN55GSlKvOcCmVYDMibKC16ysEiPgUX4rSdPE4KuYgINtE6DYPMB4-CMZr0a6oEDV0H6Nb3GLGGawiXCLslWbpvSW_3hEYoIVrO1q4Nuq9D8anr44mneFhj9uU_Sqe63le94LikjjQB9T4BsjoeDcs0DAk351sdJrf0lWNweKvohzWLNiayPx8AZ4nbQAA3ljc1BiX8spVMEDWhPXR6AeMxbqLb034bzvau4sZXIZQW5OFx9jJ2TSxJkxeNxQ' \
+        -H 'Authorization: ...\
         -H 'Content-Type: application/json' \
         -d '{
         "asOfDateTime": "2025-05-06T00:00:00-04:00",
