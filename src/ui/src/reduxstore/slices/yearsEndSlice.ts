@@ -50,7 +50,8 @@ import {
   UpdateSummaryResponse,
   VestedAmountsByAge,
   YearEndProfitSharingReportResponse,
-  YearEndProfitSharingReportSummaryResponse
+  YearEndProfitSharingReportSummaryResponse,
+  ControlSheetResponse
 } from "reduxstore/types";
 import { Paged } from "smart-ui-library";
 
@@ -142,6 +143,7 @@ export interface YearsEndState {
   profitShareSummaryReport: YearEndProfitSharingReportSummaryResponse | null;
   updateSummary: UpdateSummaryResponse | null;
   profitSharingLabels: Paged<ProfitSharingLabel> | null;
+  controlSheet: ControlSheetResponse | null;
 }
 
 const initialState: YearsEndState = {
@@ -235,7 +237,8 @@ const initialState: YearsEndState = {
   under21TotalsQueryParams: null,
   profitShareSummaryReport: null,
   updateSummary: null,
-  profitSharingLabels: null
+  profitSharingLabels: null,
+  controlSheet: null,
 };
 
 export const yearsEndSlice = createSlice({
@@ -974,6 +977,12 @@ export const yearsEndSlice = createSlice({
     },
     clearProfitSharingLabels: (state) => {
       state.profitSharingLabels = null;
+    },
+    setControlSheet: (state, action: PayloadAction<ControlSheetResponse>) => {
+      state.controlSheet = action.payload;
+    },
+    clearControlSheet: (state) => {
+      state.controlSheet = null;
     }
   },
   // In yearsEndSlice.ts - find the extraReducers section
@@ -1098,6 +1107,8 @@ export const {
   setProfitShareApplyOrRevertLoading,
   setProfitShareEditUpdateShowSearch,
   setTotalForfeituresGreaterThanZero,
-  setInvalidProfitShareEditYear
+  setInvalidProfitShareEditYear,
+  setControlSheet,
+  clearControlSheet
 } = yearsEndSlice.actions;
 export default yearsEndSlice.reducer;

@@ -59,10 +59,28 @@ definitions:
         - windows
         - self.hosted
         - volta
+      artifacts:
+        - dist\**
       script:
         - $env:NPM = "npm"
-      artifacts:
-        - build/**
+        - ${env:ENV} = "qa"
+        - cd .\src\UI
+        - |
+            @"
+            registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
+            //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=$env:JFROG_WORKSPACE_VARIABLE
+            "@ | Out-File -FilePath .npmrc -Encoding ASCII
+        - if (Test-Path -Path "node_modules") { Remove-Item -Recurse -Force "node_modules" }
+        - if (Test-Path -Path "package-lock.json") { Remove-Item -Force "package-lock.json" }
+        
+        - dotnet tool update --global Demoulas.Common.Build.Cli
+        - dotnet tool update --global --all
+        
+        - Demoulas.Common.Build.Cli --buildid ${env:BITBUCKET_BUILD_NUMBER} --Branch ${env:BITBUCKET_BRANCH} --CommitHash ${env:BITBUCKET_COMMIT}
+        - Copy-Item -Path ".buildinfo.json" -Destination ".\public" -Force
+        
+        - npm install;
+        - npm run build:${env:ENV}
    
     
     create-api-artifacts: &create-api-artifacts

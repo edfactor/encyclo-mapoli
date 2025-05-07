@@ -13,9 +13,9 @@ using Demoulas.Common.Contracts.Contracts.Request;
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
 public class GetDuplicateSsNsEndpoint : EndpointWithCsvBase<SortedPaginationRequestDto, PayrollDuplicateSsnResponseDto, GetDuplicateSsNsEndpoint.GetDuplicateSsNsResponseMap>
 {
-    private readonly ICleanupReportService _cleanupReportService;
+    private readonly IPayrollDuplicateSsnReportService _cleanupReportService;
 
-    public GetDuplicateSsNsEndpoint(ICleanupReportService cleanupReportService)
+    public GetDuplicateSsNsEndpoint(IPayrollDuplicateSsnReportService cleanupReportService)
     {
         _cleanupReportService = cleanupReportService;
     }

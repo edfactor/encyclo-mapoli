@@ -28497,7 +28497,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
                         .HasColumnName("CREATED_DATETIME")
-                        .HasDefaultValueSql("SYSDATE");
+                        .HasDefaultValueSql("SYSTIMESTAMP");
 
                     b.Property<string>("FrozenBy")
                         .IsRequired()
@@ -28729,10 +28729,23 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("NVARCHAR2(250)")
+                        .HasColumnName("DESCRIPTION");
+
                     b.Property<string>("Message")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasMaxLength(60)
+                        .HasColumnType("NVARCHAR2(60)")
                         .HasColumnName("MESSAGE");
+
+                    b.Property<string>("Severity")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("NVARCHAR2(16)")
+                        .HasColumnName("SEVERITY");
 
                     b.HasKey("Id")
                         .HasName("PK_MISSIVES");
@@ -28743,12 +28756,51 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         new
                         {
                             Id = 1,
-                            Message = "** VESTING INCREASED ON   CURRENT BALANCE ( > 1000 HRS) **"
+                            Description = "The employee has between 2 and 7 years in Profit Sharing, has 1000+ plus hours towards Profit Sharing in the fiscal year, and has company contribution records under the new vesting schedule.",
+                            Message = "** VESTING INCREASED ON   CURRENT BALANCE ( > 1000 HRS) **",
+                            Severity = "Information"
                         },
                         new
                         {
                             Id = 2,
-                            Message = "VEST IS NOW 100%, 65+/5 YRS"
+                            Description = "The Employee's Zero Contribution Flag is set at 6",
+                            Message = "VEST IS NOW 100%, 65+/5 YRS",
+                            Severity = "Information"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Description = "Employee is a beneficiary of another employee",
+                            Message = "Employee is also a Beneficiary",
+                            Severity = "Information"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Description = "The PSN you have entered was not found.  Re-enter using a valid PSN",
+                            Message = "Beneficiary not on file",
+                            Severity = "Error"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Description = "The Employee Badge Number you have entered is not found.  Re-enter using a valid badge number",
+                            Message = "Employee badge not on file",
+                            Severity = "Error"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Description = "The Employee SSN you have entered is not on file or you don't have access.  Re-enter using a valid SSN",
+                            Message = "Employee SSN not on file",
+                            Severity = "Error"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Description = "The Employee's Zero Contribution Flag is set at 7",
+                            Message = "*** EMPLOYEE MAY BE 100% - CHECK DATES ***",
+                            Severity = "Information"
                         });
                 });
 

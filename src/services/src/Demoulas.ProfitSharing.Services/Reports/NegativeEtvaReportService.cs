@@ -1,0 +1,59 @@
+﻿using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+using Demoulas.ProfitSharing.Common.Extensions;
+using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+
+namespace Demoulas.ProfitSharing.Services.Reports;
+
+public class NegativeEtvaReportService : INegativeEtvaReportService
+{
+    private readonly IProfitSharingDataContextFactory _dataContextFactory;
+    private readonly ILogger<NegativeEtvaReportService> _logger;
+
+    public NegativeEtvaReportService(IProfitSharingDataContextFactory dataContextFactory,
+        ILoggerFactory loggerFactory)
+    {
+        _dataContextFactory = dataContextFactory;
+        _logger = loggerFactory.CreateLogger<NegativeEtvaReportService>();
+    }
+
+    public async Task<ReportResponseBase<NegativeEtvaForSsNsOnPayProfitResponse>> GetNegativeETVAForSsNsOnPayProfitResponseAsync(ProfitYearRequest req, CancellationToken cancellationToken = default)
+    {
+        using (_logger.BeginScope("Request NEGATIVE ETVA FOR SSNs ON PAYPROFIT"))
+        {
+            var results = await _dataContextFactory.UseReadOnlyContext(c =>
+            {
+                var ssnUnion = c.Demographics.Select(d => d.Ssn)
+                    .Union(c.Beneficiaries.Include(b => b.Contact).Select(b => b.Contact!.Ssn));
+
+                return c.PayProfits
+                    .Include(p => p.Demographic)
+                    .Where(p => p.ProfitYear == req.ProfitYear
+                                && ssnUnion.Contains(p.Demographic!.Ssn)
+                                && p.Etva < 0)
+                    .Select(p => new NegativeEtvaForSsNsOnPayProfitResponse
+                    {
+                        BadgeNumber = p.Demographic!.BadgeNumber,
+                        Ssn = p.Demographic.Ssn.MaskSsn(),
+                        EtvaValue = p.Etva
+                    })
+                    .OrderBy(p => p.BadgeNumber)
+                    .ToPaginationResultsAsync(req, cancellationToken);
+            });
+
+            _logger.LogWarning("Returned {Results} records", results.Results.Count());
+
+            return new ReportResponseBase<NegativeEtvaForSsNsOnPayProfitResponse>
+            {
+                ReportName = "NEGATIVE ETVA FOR SSNs ON PAYPROFIT",
+                ReportDate = DateTimeOffset.Now,
+                Response = results
+            };
+        }
+    }
+}

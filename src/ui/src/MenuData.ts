@@ -1,66 +1,83 @@
 import { RouteCategory } from "./types/MenuTypes";
-import { CAPTIONS, MENU_LABELS, ROUTES } from "./constants";
-import { ImpersonationRoles, NavigationDto, NavigationResponseDto } from "./reduxstore/types";
+import { MENU_LABELS } from "./constants";
+import { NavigationDto, NavigationResponseDto } from "./reduxstore/types";
 import { RouteData } from "smart-ui-library";
 
 const localStorageImpersonating: string | null = localStorage.getItem("impersonatingRole");
 
-export const MenuData = (data:NavigationResponseDto | undefined): RouteCategory[] => {
-  const finalData: RouteCategory[] = [];
-  data?.navigation.filter(m=>m.parentId ==null).sort((a, b) => a.orderNumber - b.orderNumber).map((values:NavigationDto) => {
-    if(values.requiredRoles.length>0 && values.requiredRoles.filter(m=>m == localStorageImpersonating).length>0)
-    {
-      finalData.push({
-        menuLabel: values.title, 
-        parentRoute: values.title.toLocaleLowerCase(),
-        disabled: values.disabled, 
-        underlined: false, 
-        roles: values.requiredRoles, 
-        items: values.items && values.items.length>0 ? getRouteData(values.items): undefined
-      });
+// Navigation menu ID constants
+const YEAR_END_MENU_ID = 55;
 
-    }
-    else if(values.requiredRoles.length ==0) {
-      finalData.push({
-        menuLabel: values.title, 
-        parentRoute: values.title.toLocaleLowerCase(),
-        disabled: values.disabled, 
-        underlined: false, 
-        roles: values.requiredRoles, 
-        items: values.items && values.items.length>0 ? getRouteData(values.items): undefined
-      });
+export const MenuData = (data: NavigationResponseDto | undefined): RouteCategory[] => {
+  if (!data || !data.navigation) {
+    return [];
+  }
+
+  const finalData: RouteCategory[] = [];
+
+  // Get top-level navigation items (parentId is null)
+  const topLevelItems = data.navigation
+    .filter((m) => m.parentId === null)
+    .sort((a, b) => a.orderNumber - b.orderNumber);
+
+  // Process each top-level item
+  topLevelItems.forEach((values: NavigationDto) => {
+    // Create menu item if:
+    // 1. User has the required role OR
+    // 2. No roles required for this menu item
+    const hasRequiredRole = values.requiredRoles.length > 0 &&
+      values.requiredRoles.some(role => role === localStorageImpersonating);
+    const noRolesRequired = values.requiredRoles.length === 0;
+
+    if (hasRequiredRole || noRolesRequired) {
+      finalData.push(createRouteCategory(values));
     }
   });
-  // if(localStorageImpersonating == ImpersonationRoles.ItOperations) {
-  // finalData.push(it_operations);
+
+  // Commented out special case for IT Operations role
+  // if(localStorageImpersonating === ImpersonationRoles.ItOperations) {
+  //   finalData.push(it_operations);
   // }
+
   return finalData;
-}
-const getRouteData = (data: NavigationDto[]):RouteData[] =>{
-  const response: RouteData[] = [];
-  data.map((value)  => {
-    const obj: RouteData = { // Initialize with an empty object or default values
-      caption: value.title,
-      route: value.url, 
-      disabled: false,
-      divider: false,
-      requiredPermission: ""
-    };
-    response.push(obj);
-  });
-  return response;
-}
+};
+
+// Helper function to create a RouteCategory from NavigationDto
+const createRouteCategory = (navigationItem: NavigationDto): RouteCategory => {
+  return {
+    menuLabel: navigationItem.title,
+    parentRoute: navigationItem.title.toLowerCase(),
+    disabled: navigationItem.disabled,
+    underlined: false,
+    roles: navigationItem.requiredRoles,
+    items: navigationItem.items && navigationItem.items.length > 0
+      ? getRouteData(navigationItem.items)
+      : undefined
+  };
+};
+
+const getRouteData = (data: NavigationDto[]): RouteData[] => {
+  return data.map((value) => ({
+    caption: value.title,
+    route: value.url,
+    disabled: false,
+    divider: false,
+    requiredPermission: ""
+  }));
+};
 
 interface MenuLevel {
   mainTitle: string;
-  topPage: TopPage[]
+  topPage: TopPage[];
 }
+
 interface TopPage {
   topTitle: string;
-    topRoute?: string;
-    disabled?: boolean;
-    subPages: SubPages[]
+  topRoute?: string;
+  disabled?: boolean;
+  subPages: SubPages[];
 }
+
 interface SubPages {
   subTitle?: string;
   subRoute?: string;
@@ -69,49 +86,42 @@ interface SubPages {
 
 export const drawerTitle = MENU_LABELS.YEAR_END;
 
-const addSubTitle = (subTitle?:string):string =>{
-  return subTitle? ` (${subTitle})` : "";
-}
+const addSubTitle = (subTitle?: string): string => {
+  return subTitle ? ` (${subTitle})` : "";
+};
 
-export const menuLevels =(data: NavigationResponseDto | undefined): MenuLevel[] =>{
-  const yearEndList = data?.navigation.filter(m=>m.id == 54)[0]; //Id 54 is for Year End. It will have the list of December Activities & Fiscal Close. 
-  const menuLevel: MenuLevel[] = [];
-  yearEndList?.items?.map((value) => {
-    menuLevel.push(
-      {
-        mainTitle: value.title + addSubTitle(value.subTitle),
-        topPage: value.items && value.items.length>0? poplulateTopPage(value.items): []
-      }
-    )
-  });
-  return menuLevel;
-}
-const poplulateTopPage = (data: NavigationDto[]):TopPage[] =>{
-  const topPage:TopPage[] = [];
-  data.map((value) => {
-    topPage.push(
-      {
-         topTitle: value.title + addSubTitle(value.subTitle),
-         disabled: value.disabled,
-         topRoute: value.url,
-         subPages: value.items && value.items.length>0 ? populateSubPages(value.items): []
-      }
-    )
-  });
-  return topPage;
-}
-const populateSubPages = (data: NavigationDto[]):SubPages[] =>{
-  const subPages:SubPages[] = [];
-  data.map((value) => {
-    subPages.push(
-      {
-        subTitle: value.title + addSubTitle(value.subTitle),
-        disabled: value.disabled, 
-        subRoute: value.url
-      }
-    )
-  });
-  return subPages;
-}
+export const menuLevels = (data: NavigationResponseDto | undefined): MenuLevel[] => {
+  if (!data || !data.navigation) {
+    return [];
+  }
+
+  // Find the Year End navigation item (ID 54)
+  const yearEndList = data.navigation.find((m) => m.id === YEAR_END_MENU_ID);
+  if (!yearEndList || !yearEndList.items) {
+    return [];
+  }
+
+  return yearEndList.items.map((value) => ({
+    mainTitle: value.title + addSubTitle(value.subTitle),
+    topPage: value.items && value.items.length > 0 ? populateTopPage(value.items) : []
+  }));
+};
+
+const populateTopPage = (data: NavigationDto[]): TopPage[] => {
+  return data.map((value) => ({
+    topTitle: value.title + addSubTitle(value.subTitle),
+    disabled: value.disabled,
+    topRoute: value.url,
+    subPages: value.items && value.items.length > 0 ? populateSubPages(value.items) : []
+  }));
+};
+
+const populateSubPages = (data: NavigationDto[]): SubPages[] => {
+  return data.map((value) => ({
+    subTitle: value.title + addSubTitle(value.subTitle),
+    disabled: value.disabled,
+    subRoute: value.url
+  }));
+};
 
 export default MenuData;
