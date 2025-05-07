@@ -8,7 +8,7 @@ export enum ImpersonationRoles {
   ItOperations = "IT-Operations"
 }
 
-export interface SortedPaginationRequestDto extends PaginationParams, ISortParams {}
+export interface SortedPaginationRequestDto extends PaginationParams, ISortParams { }
 
 export interface ProfitYearRequest {
   profitYear: number;
@@ -341,7 +341,7 @@ export interface MasterInquiryDetail extends ProfitYearRequest {
   payFrequencyId?: number;
   transactionDate?: Date;
   currentIncomeYear?: number;
-  currentHoursYear?: number;  
+  currentHoursYear?: number;
 }
 
 export interface MasterInquiryRequest {
@@ -524,10 +524,10 @@ export interface BalanceByAgeDetail extends BalanceByDetailBase {
 }
 
 /* eslint-disable @typescript-eslint/no-empty-object-type */
-export interface BalanceByAge extends BalanceByBase<BalanceByAgeDetail> {}
+export interface BalanceByAge extends BalanceByBase<BalanceByAgeDetail> { }
 
 /* eslint-disable @typescript-eslint/no-empty-object-type */
-export interface BalanceByYears extends BalanceByBase<BalanceByAgeDetail> {}
+export interface BalanceByYears extends BalanceByBase<BalanceByAgeDetail> { }
 
 export interface VestedAmountsByAge {
   totalFullTime100PercentAmount: number;
@@ -1162,6 +1162,45 @@ export interface NavigationDto {
   requiredRoles: string[];
   disabled: boolean;
   items: NavigationDto[];
+}
+
+export interface FilterParams {
+  isYearEnd: boolean;
+  minimumAgeInclusive?: number;
+  maximumAgeInclusive?: number;
+  minimumHoursInclusive?: number;
+  maximumHoursInclusive?: number;
+  includeActiveEmployees: boolean;
+  includeInactiveEmployees: boolean;
+  includeEmployeesTerminatedThisYear: boolean;
+  includeTerminatedEmployees: boolean;
+  includeBeneficiaries: boolean;
+  includeEmployeesWithPriorProfitSharingAmounts: boolean;
+  includeEmployeesWithNoPriorProfitSharingAmounts: boolean;
+}
+
+export interface ReportPreset {
+  id: string;
+  name: string;
+  description: string;
+  params: FilterParams;
+}
+
+export interface ReportQueryParams {
+  profitYear: number;
+  pagination: PaginationParams;
+  isYearEnd: boolean;
+  minimumAgeInclusive?: number;
+  maximumAgeInclusive?: number;
+  minimumHoursInclusive?: number;
+  maximumHoursInclusive?: number;
+  includeActiveEmployees: boolean;
+  includeInactiveEmployees: boolean;
+  includeEmployeesTerminatedThisYear: boolean;
+  includeTerminatedEmployees: boolean;
+  includeBeneficiaries: boolean;
+  includeEmployeesWithPriorProfitSharingAmounts: boolean;
+  includeEmployeesWithNoPriorProfitSharingAmounts: boolean;
 }
 
 export interface ControlSheetRequest extends ProfitYearRequest {
