@@ -27,7 +27,6 @@ export interface Environment {
   description: string;
   duration:    string;
   status:      string;
-  tags:        any[];
 }
 
 export interface EnvironmentData {
@@ -40,10 +39,7 @@ export interface EnvironmentData {
   CurrentDirectory:          string;
   Uptime:                    string;
   UtcNow:                    Date;
-  OktaEnvironmentName:       string;
-  OktaRolePrefix:            string;
-  OktaAuthorizationServerId: string;
-  OktaAudience:              string;
+  OktaEnvironmentName:       string;   
 }
 
 export interface MasstransitBus {
