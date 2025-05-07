@@ -4,12 +4,11 @@ import Alert from "@mui/material/Alert";
 import { purple } from "@mui/material/colors";
 import { ICommon } from "../ICommon";
 import Tooltip from "@mui/material/Tooltip";
-import CircleIcon from "@mui/icons-material/Circle";
 
 export interface IEnvironmentBannerProps extends ICommon {
   environmentMode: "development" | "qa" | "uat" | "production";
   buildVersionNumber?: string;
-  apiStatus?: "Healthy" | "Degraded" | "Unhealthy";
+  apiStatus?: "Healthy" | "Degraded" | "Unhealthy" | undefined;
   apiStatusMessage? : string;
 }
 export const EnvironmentBanner: React.FC<IEnvironmentBannerProps> = ({ environmentMode, buildVersionNumber, apiStatus, apiStatusMessage }) => {
