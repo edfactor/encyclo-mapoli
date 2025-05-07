@@ -920,8 +920,6 @@ export interface BreakdownByStoreTotals {
   totalVestedBalance: number;
 }
 
-
-
 export interface BreakdownByStoreResponse {
   reportName: string;
   reportDate: string;
@@ -1162,4 +1160,15 @@ export interface NavigationDto {
   requiredRoles: string[];
   disabled: boolean;
   items: NavigationDto[];
+}
+
+export interface ControlSheetRequest extends ProfitYearRequest {
+  pagination: SortedPaginationRequestDto;
+}
+
+export interface ControlSheetResponse {
+  employeeContributionProfitSharingAmount: number;
+  nonEmployeeProfitSharingAmount: number;
+  employeeBeneficiaryAmount: number;
+  profitSharingAmount: number;
 }
