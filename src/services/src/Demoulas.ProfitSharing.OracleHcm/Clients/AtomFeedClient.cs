@@ -44,8 +44,8 @@ internal class AtomFeedClient
     /// </remarks>
     internal async IAsyncEnumerable<TContextType> GetFeedDataAsync<TContextType>(
         string feedType,
-        DateTime minDate,
-        DateTime maxDate,
+        DateTimeOffset minDate,
+        DateTimeOffset maxDate,
         [EnumeratorCancellation] CancellationToken cancellationToken
     ) where TContextType : DeltaContextBase
     {

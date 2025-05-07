@@ -44,6 +44,7 @@ public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>, I
     public virtual DbSet<DataImportRecord> DataImportRecords { get; set; }
     public virtual DbSet<FakeSsn> FakeSsns { get; set; }
     public virtual DbSet<Department> Departments { get; set; }
+    public virtual DbSet<Missive> Missives {  get; set; }
     public virtual DbSet<YearEndUpdateStatus> YearEndUpdateStatuses { get; set; }
     public virtual DbSet<ParticipantTotal> ParticipantTotals { get; set; }
     public virtual DbSet<ParticipantTotalRatio> ParticipantTotalRatios { get; set; }

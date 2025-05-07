@@ -13,14 +13,16 @@ import { RouteData } from "../../types/MenuTypes";
 import { useDispatch } from "react-redux";
 import { openDrawer, setActiveSubMenu } from "reduxstore/slices/generalSlice";
 import { menuLevels } from "../../MenuData";
+import { NavigationResponseDto } from "reduxstore/types";
 
 type myProps = {
   menuLabel: string;
   items: RouteData[];
   parentRoute: string;
   disabled?: boolean;
+  navigationData?: NavigationResponseDto;
 };
-const PopupMenu: FC<myProps> = ({ menuLabel, items, parentRoute, disabled }) => {
+const PopupMenu: FC<myProps> = ({ menuLabel, items, parentRoute, disabled, navigationData }) => {
   const location = useLocation();
   const elemRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
@@ -52,7 +54,7 @@ const PopupMenu: FC<myProps> = ({ menuLabel, items, parentRoute, disabled }) => 
   };
 
   const isTitleInMainMenuLevels = (caption: string) => {
-    return menuLevels.some((level) => level.mainTitle === caption);
+    return menuLevels(navigationData).some((level) => level.mainTitle === caption);
   };
 
   const handleClose = (event: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement> | MouseEvent, route?: string, caption?: string) => {

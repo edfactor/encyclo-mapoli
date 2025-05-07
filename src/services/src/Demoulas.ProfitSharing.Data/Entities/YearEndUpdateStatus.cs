@@ -10,7 +10,7 @@ public class YearEndUpdateStatus
     public int Id { get; set; }
     public required short ProfitYear { get; set; }
     
-    public required DateTime UpdatedTime { get; set; }
+    public required DateTimeOffset UpdatedTime { get; set; }
     public required string UpdatedBy { get; set; }
 
     public required int BeneficiariesEffected { get; set; }

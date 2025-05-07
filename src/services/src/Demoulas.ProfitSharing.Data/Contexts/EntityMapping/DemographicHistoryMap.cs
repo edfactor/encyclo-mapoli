@@ -26,10 +26,12 @@ internal sealed class DemographicHistoryMap : IEntityTypeConfiguration<Demograph
 
         _ = builder.Property(x => x.ValidFrom)
             .HasColumnName("VALID_FROM")
+            .HasColumnType("TIMESTAMP WITH TIME ZONE")
             .IsRequired();
 
         _ = builder.Property(x => x.ValidTo)
             .HasColumnName("VALID_TO")
+            .HasColumnType("TIMESTAMP WITH TIME ZONE")
             .IsRequired();
 
         _ = builder.HasIndex(e => e.BadgeNumber, "IX_BadgeNumber");

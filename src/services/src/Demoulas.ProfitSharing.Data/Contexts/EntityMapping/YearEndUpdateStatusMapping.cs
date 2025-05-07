@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Data.Entities;
+﻿using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -27,7 +27,7 @@ internal sealed class YearEndUpdateStatusMapping : IEntityTypeConfiguration<Year
 
         _ = builder.Property(e => e.UpdatedTime)
             .HasColumnName("UPDATED_DATE")
-            .HasColumnType("DATE");
+            .HasColumnType("TIMESTAMP WITH TIME ZONE");
 
         _ = builder.Property(e => e.UpdatedBy)
             .HasColumnName("UPDATED_BY")

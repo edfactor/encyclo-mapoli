@@ -197,6 +197,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
 
         var demo = await c.Demographics.Include(demographic => demographic.ContactInfo).FirstAsync(CancellationToken.None);
         demo.EmploymentStatusId = EmploymentStatus.Constants.Active;
+        demo.EmploymentStatus = new EmploymentStatus { Id = EmploymentStatus.Constants.Active, Name = "Active" };
         demo.ReHireDate = new DateTime(2024, 12, 01, 01, 01, 01, DateTimeKind.Local).ToDateOnly();
 
         var profitYear = (short)Math.Min(demo.ReHireDate!.Value.Year, 2024);
@@ -231,6 +232,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
         example.CompanyContributionYears = 0;
         example.HoursCurrentYear = payProfit.CurrentHoursYear;
         example.ReHiredDate = demo.ReHireDate ?? SqlDateTime.MinValue.Value.ToDateOnly();
+        example.EmploymentStatus = demo.EmploymentStatus.Name;
         example.Details = details.Select(pd => new MilitaryRehireProfitSharingDetailResponse { Forfeiture = pd.Forfeiture, Remark = pd.Remark, ProfitYear = pd.ProfitYear })
             .ToList();
 

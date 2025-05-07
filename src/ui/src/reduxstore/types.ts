@@ -198,6 +198,7 @@ export interface MilitaryAndRehireForfeiture {
   companyContributionYears: number;
   enrollmentId: number;
   enrollmentName: string;
+  employmentStatus: string;
   hoursCurrentYear: number;
   details: ForfeitureDetail[];
 }
@@ -291,8 +292,8 @@ export interface BaseDateRangeParams {
   startDate: Date;
   endDate: Date;
 }
+
 export interface MasterInquirySearch {
-  startProfitYear?: number | null;
   endProfitYear?: number | null;
   startProfitMonth?: number | null;
   endProfitMonth?: number | null;
@@ -337,10 +338,13 @@ export interface MasterInquiryDetail extends ProfitYearRequest {
   zeroContributionReasonName?: string;
   taxCodeName?: string;
   commentTypeName?: string;
+  payFrequencyId?: number;
+  transactionDate?: Date;
+  currentIncomeYear?: number;
+  currentHoursYear?: number;  
 }
 
 export interface MasterInquiryRequest {
-  startProfitYear?: number;
   endProfitYear?: number;
   startProfitMonth?: number;
   endProfitMonth?: number;
@@ -351,7 +355,6 @@ export interface MasterInquiryRequest {
   paymentAmount?: number;
   socialSecurity?: number;
   name?: string;
-  comment?: string;
   paymentType?: number;
   memberType?: number;
   badgeNumber?: number;
@@ -369,10 +372,12 @@ export interface FrozenReportsByAgeRequest extends ProfitYearRequest {
   pagination: PaginationParams;
   reportType: FrozenReportsByAgeRequestType;
 }
+
 export interface FrozenReportsForfeituresAndPointsRequest extends ProfitYearRequest {
   pagination: SortedPaginationRequestDto;
   useFrozenData: boolean;
 }
+
 export interface ProfitSharingDistributionsByAge {
   reportName: string;
   reportDate: string;
@@ -433,6 +438,7 @@ export interface ForfeituresAndPointsDetail {
   earningPoints: number;
   benefificaryPsn: number;
 }
+
 export interface ForfeituresAndPoints {
   reportName: string;
   reportDate: string;
@@ -475,12 +481,15 @@ export interface EmployeeDetails {
   currentVestedAmount: number;
   currentEtva: number;
   previousEtva: number;
+  employmentStatus?: string;
+  missives: number[] | null;
 }
 
 export interface MasterInquiryResponseType {
   employeeDetails: EmployeeDetails | null;
   inquiryResults: Paged<MasterInquiryDetail>;
 }
+
 export interface BalanceByDetailBase {
   employeeCount: number;
   currentBalance: number;
@@ -536,6 +545,7 @@ export interface VestedAmountsByAge {
   reportDate: string;
   response: Paged<VestedAmountsByAgeDetail>;
 }
+
 export interface VestedAmountsByAgeDetail {
   age: number;
   fullTime100PercentCount: number;
@@ -642,6 +652,7 @@ export interface ProfitShareUpdateDetail {
   secondaryEtvaEarnings: number;
   treatAsBeneficiary: boolean;
 }
+
 export interface ProfitShareUpdateResponse {
   totalVested: number;
   totalForfeit: number;
@@ -674,6 +685,7 @@ export interface ProfitShareUpdateTotals {
   totalEmployees: number;
   totalBeneficaries: number;
 }
+
 export interface ProfitShareAdjustmentSummary {
   badgeNumber?: number;
   incomingForfeitureAmountUnadjusted: number;
@@ -685,6 +697,7 @@ export interface ProfitShareAdjustmentSummary {
   contributionAmountUnadjusted: number;
   contributionAmountAdjusted: number;
 }
+
 export interface ProfitShareEditDetail {
   isEmployee: boolean;
   badgeNumber: number;
@@ -756,6 +769,7 @@ export interface ProfitMasterParams {
   maxAllowedContributions?: number | null;
   secondaryEarningsPercent?: number | null;
 }
+
 export interface ProfitMasterStatus extends ProfitMasterParams {
   badgeAdjusted?: number | null;
   badgeAdjusted2?: number | null;
@@ -767,6 +781,7 @@ export interface ProfitMasterStatus extends ProfitMasterParams {
   updatedBy?: string | null;
   updatedTime: string;
 }
+
 export interface ProfitShareEditUpdateQueryParams extends ProfitMasterParams {
   profitYear: Date;
   badgeToAdjust?: number | null;
@@ -839,11 +854,13 @@ export interface CreateMilitaryContributionRequest extends ProfitYearRequest {
   badgeNumber: number;
   contributionAmount: number;
   contributionDate: Date;
+  addContributionYear: boolean;
 }
 
 export interface MilitaryContribution {
   contributionDate: Date | null;
   contributionAmount: number | null;
+  addContributionYear: boolean | false;
 }
 
 export interface YearEndProfitSharingEmployee {
@@ -866,8 +883,8 @@ export interface YearEndProfitSharingEmployee {
 }
 
 export interface BreakdownByStoreRequest extends ProfitYearRequest {
-  storeNumber?: string;
-  under21Only?: boolean;
+  storeNumber?: number;
+  storeManagement?: boolean;
   pagination: SortedPaginationRequestDto;
 }
 
@@ -883,15 +900,27 @@ export interface BreakdownByStoreEmployee {
   beginningBalance: number;
   earnings: number;
   contributions: number;
-  forfeiture: number;
+  forfeitures: number;
   distributions: number;
   endingBalance: number;
   vestedAmount: number;
   vestedPercentage: number;
   employmentStatusId: string;
-  employeeCategory: string;
-  employeeSortRank: number;
+  payClassificationName: string;
 }
+
+export interface BreakdownByStoreTotals {
+  totalNumberEmployees: number;
+  totalBeginningBalances: number;
+  totalEarnings: number;
+  totalContributions: number;
+  totalForfeitures: number;
+  totalDisbursements: number;
+  totalEndBalances: number;
+  totalVestedBalance: number;
+}
+
+
 
 export interface BreakdownByStoreResponse {
   reportName: string;
@@ -1063,6 +1092,14 @@ export interface ForfeitureAdjustmentRequest {
   isSortDescending?: boolean;
 }
 
+export interface ForfeitureAdjustmentUpdateRequest {
+  clientNumber: number;
+  badgeNumber: number;
+  forfeitureAmount: number;
+  reason?: string;
+  profitYear: number;
+}
+
 export interface ForfeitureAdjustmentDetail {
   clientNumber: number;
   badgeNumber: number;
@@ -1085,6 +1122,12 @@ export interface ForfeitureAdjustmentResponse {
     results: ForfeitureAdjustmentDetail[];
   };
 }
+
+export interface MissiveResponse {
+  id: number;
+  message: string;
+}
+
 export interface RowCountResult {
   tableName: string;
   rowCount: number;
@@ -1099,3 +1142,24 @@ export interface CurrentUserResponseDto {
   permissions: string[];
 }
 
+export interface NavigationRequestDto {
+  navigationId?: number;
+}
+
+export interface NavigationResponseDto {
+  navigation: NavigationDto[];
+}
+
+export interface NavigationDto {
+  id: number;
+  parentId: number;
+  title: string;
+  subTitle: string;
+  url: string;
+  StatusId: string;
+  orderNumber: number;
+  icon: string;
+  requiredRoles: string[];
+  disabled: boolean;
+  items: NavigationDto[];
+}

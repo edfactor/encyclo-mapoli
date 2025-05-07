@@ -1,9 +1,10 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-import { setAccountingYearData } from "reduxstore/slices/lookupsSlice";
+import { setAccountingYearData, setMissivesData } from "reduxstore/slices/lookupsSlice";
 import { RootState } from "reduxstore/store";
 import {
   CalendarResponseDto,
+  MissiveResponse,
   ProfitYearRequest
 } from "reduxstore/types";
 import { url } from "./api";
@@ -28,7 +29,7 @@ export const LookupsApi = createApi({
       return headers;
     }
   }),
-  reducerPath: "LookupsApi",
+  reducerPath: "lookupsApi",
   endpoints: (builder) => ({
     getAccountingYear: builder.query<CalendarResponseDto, ProfitYearRequest>({
       query: (params) => ({
@@ -46,8 +47,22 @@ export const LookupsApi = createApi({
           console.log("Err: " + err);
         }
       }
+    }),
+    getMissives: builder.query<MissiveResponse[],void>({
+      query: (params) => ({
+        url: "missives",
+        method: "GET",
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setMissivesData(data));
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
     })
   })
 });
 
-export const { useLazyGetAccountingYearQuery } = LookupsApi;
+export const { useLazyGetAccountingYearQuery, useLazyGetMissivesQuery } = LookupsApi;

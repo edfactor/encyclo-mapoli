@@ -90,7 +90,8 @@ internal static class EmployeeProcessorHelper
         List<MemberFinancials> members = new();
         foreach (EmployeeFinancials empl in employeeFinancialsList)
         {
-            if (empl.EnrolledId != Enrollment.Constants.NotEnrolled || empl.YearsInPlan != 0 || empl.EmployeeTypeId > 0 || empl.HasTransactionAmounts())
+            if (empl.EnrolledId != /*0*/ Enrollment.Constants.NotEnrolled || empl.YearsInPlan != 0 || empl.EmployeeTypeId == /*1*/ EmployeeType.Constants.NewLastYear || empl.HasTransactionAmounts() ||
+                empl.ZeroContributionReasonId != /*0*/ ZeroContributionReason.Constants.Normal )
             {
                 var profitDetailTotals = new ProfitDetailTotals(empl.DistributionsTotal ?? 0, empl.ForfeitsTotal ?? 0,
                     empl.AllocationsTotal ?? 0, empl.PaidAllocationsTotal ?? 0, empl.MilitaryTotal ?? 0, empl.ClassActionFundTotal ?? 0);
@@ -149,16 +150,13 @@ internal static class EmployeeProcessorHelper
 
     private static bool IsEmployeeExceedingMaxContribution(decimal MaxAllowedContributions, decimal MilitaryTotal, MemberTotals memberTotals, MemberFinancials memberFinancials)
     {
-        decimal memberTotalContribution = memberTotals.ContributionAmount + MilitaryTotal +
-                                          memberTotals.IncomingForfeitureAmount;
-
+        decimal memberTotalContribution = memberTotals.ContributionAmount + MilitaryTotal + memberFinancials.IncomingForfeitures;
         if (memberTotalContribution <= MaxAllowedContributions)
         {
             return false;
         }
 
         decimal overContribution = memberTotalContribution - MaxAllowedContributions;
-
         if (overContribution < memberTotals.IncomingForfeitureAmount)
         {
             memberFinancials.IncomingForfeitures -= overContribution;
@@ -234,17 +232,14 @@ internal static class EmployeeProcessorHelper
             adjustmentsApplied.SecondaryEarningsAmountAdjusted = memberTotals.SecondaryEarningsAmount;
         }
 
-
         decimal workingEtva = 0;
-        // When the CAF is present and the memeber is under 6 in YIP, we need to remove the CAF from the ETVA for earnings calculations.
-        // Need to subtract CAF out of PY-PS-ETVA (ETVA) for people not fully vested
-        // because we can't give earnings for 2021 on class action funds -
-        // they were added in 2021.  CAF was added to PY-PS-ETVA (ETVA) for
-        // PY-PS-YEARS < 6.
+        // When the CAF (Class Action Fund) is present and the member is under 6 in YIP (Years in Service/Plan),
+        // Need to subtract CAF out of PY-PS-ETVA (ETVA) for people not fully vested because we can't give earnings for 2021 on class action funds -
+        // they were added in 2021.  CAF was added to PY-PS-ETVA (ETVA) for PY-PS-YEARS < 6.
         if (empl!.Etva > 0)
         {
             // This check for 6 years is only used here, so it is intentionally not pulled out.
-            // It is presumed that this 6 is specific to the 2021 adjustment.   It is assumed that the
+            // It is presumed that this 6 is specific to the 2021 adjustment.  It is assumed that the
             // plan enrollment type is specifically not consulted (i.e. No OLD vs NEW plan)
             if (empl.YearsInPlan < 6)
             {
@@ -252,7 +247,7 @@ internal static class EmployeeProcessorHelper
             }
             else
             {
-                empl.Etva = workingEtva;
+                workingEtva = empl.Etva;
             }
         }
 
@@ -272,6 +267,8 @@ internal static class EmployeeProcessorHelper
 
         // Here we scale the Earned interest to report on what portion is in a 0 record (contribution), vs what goes in an 8 record (100% ETVA Earnings) 
         decimal etvaScaled = workingEtva / memberTotals.PointsDollars;
+        // The Cobol truncates (and not rounds) to 6 places, so we do the same here. 
+        etvaScaled = Math.Truncate(etvaScaled * 1_000_000) / 1_000_000;
 
         // Sets Earn and ETVA amounts
         empl!.Earnings = memberTotals.EarningsAmount;

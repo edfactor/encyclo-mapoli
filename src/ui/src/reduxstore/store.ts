@@ -5,7 +5,7 @@ import yearsEndSlice from "./slices/yearsEndSlice";
 import { SecurityApi } from "./api/SecurityApi";
 import { YearsEndApi } from "./api/YearsEndApi";
 import frozenSlice from "./slices/frozenSlice";
-import { ItOperations } from "./api/ItOperations";
+import { ItOperationsApi } from "./api/ItOperationsApi";
 import { MilitaryApi } from "./api/MilitaryApi";
 import militarySlice from "./slices/militarySlice";
 import { InquiryApi } from "./api/InquiryApi";
@@ -17,6 +17,9 @@ import { CommonApi } from "./api/CommonApi";
 import commonSlice from "./slices/commonSlice";
 import { messageSlice } from "./slices/messageSlice";
 import forfeituresAdjustmentSlice from "./slices/forfeituresAdjustmentSlice";
+import { apiLoggerMiddleware } from "../middleware/apiLoggerMiddleware";
+import { NavigationApi } from "./api/NavigationApi";
+import navigationSlice  from "./slices/navigationSlice";
 
 export const store = configureStore({
   reducer: {
@@ -29,27 +32,31 @@ export const store = configureStore({
     lookups: lookupsSlice,
     common: commonSlice,
     messages: messageSlice,
+    navigation: navigationSlice,
     forfeituresAdjustment: forfeituresAdjustmentSlice,
 
     [SecurityApi.reducerPath]: SecurityApi.reducer,
     [YearsEndApi.reducerPath]: YearsEndApi.reducer,
-    [ItOperations.reducerPath]: ItOperations.reducer,
+    [ItOperationsApi.reducerPath]: ItOperationsApi.reducer,
     [MilitaryApi.reducerPath]: MilitaryApi.reducer,
     [InquiryApi.reducerPath]: InquiryApi.reducer,
     [LookupsApi.reducerPath]: LookupsApi.reducer,
-    [CommonApi.reducerPath]: CommonApi.reducer
+    [CommonApi.reducerPath]: CommonApi.reducer,
+    [NavigationApi.reducerPath]: NavigationApi.reducer
   },
 
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ serializableCheck: false })
       .concat(rtkQueryErrorToastMiddleware(true))
+      .concat(apiLoggerMiddleware)
       .concat(SecurityApi.middleware)
       .concat(YearsEndApi.middleware)
-      .concat(ItOperations.middleware)
+      .concat(ItOperationsApi.middleware)
       .concat(MilitaryApi.middleware)
       .concat(InquiryApi.middleware)
       .concat(LookupsApi.middleware)
       .concat(CommonApi.middleware)
+      .concat(NavigationApi.middleware)
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself

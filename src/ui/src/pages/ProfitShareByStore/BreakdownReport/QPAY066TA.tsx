@@ -10,7 +10,7 @@ import TotalsContent from "./TotalsContent";
 
 const QPAY066TA = () => {
   const [tabValue, setTabValue] = useState(0);
-  const [store, setStore] = useState("700");
+  const [store, setStore] = useState(700);
 
   const tabs = ["ALL", "STORES", "SUMMARIES", "TOTALS"];
 

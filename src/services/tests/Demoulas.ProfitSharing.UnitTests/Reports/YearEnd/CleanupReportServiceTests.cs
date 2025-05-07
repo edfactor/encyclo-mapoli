@@ -247,7 +247,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
     public async Task GetYearEndProfitSharingReport()
     {
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
-        var profitYear = (short)(2023);
+        var profitYear = (short)(2024);
         var req = new YearEndProfitSharingReportRequest()
         {
             Skip = 0,
@@ -367,7 +367,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
     public async Task GetYearEndProfitSharingReportWithFilters()
     {
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
-        var profitYear = (short)Math.Min(DateTime.Now.Year - 1, 2023);
+        var profitYear = (short)Math.Min(DateTime.Now.Year - 1, 2024);
         var req = new YearEndProfitSharingReportRequest() { Skip = 0, Take = byte.MaxValue, ProfitYear = profitYear, IsYearEnd = true, IncludeTotals = false };
         var testHours = 1001;
         await MockDbContextFactory.UseWritableContext(async ctx =>

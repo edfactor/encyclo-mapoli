@@ -5,6 +5,7 @@ using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.Common.Logging.Extensions;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Extensions;
+using Demoulas.ProfitSharing.Data.Interceptors;
 using Demoulas.ProfitSharing.OracleHcm.Extensions;
 using Demoulas.Util.Extensions;
 
@@ -23,14 +24,14 @@ else
         .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
 }
 
-List<ContextFactoryRequest> list =
-[
-    ContextFactoryRequest.Initialize<ProfitSharingDbContext>("ProfitSharing"),
-    ContextFactoryRequest.Initialize<ProfitSharingReadOnlyDbContext>("ProfitSharing"),
-    ContextFactoryRequest.Initialize<DemoulasCommonDataContext>("StoreInfo")
-];
-
-builder.AddDatabaseServices(list);
+builder.AddDatabaseServices((services, factoryRequests) =>
+{
+    // Register contexts without immediately resolving the interceptor
+    factoryRequests.Add(ContextFactoryRequest.Initialize<ProfitSharingDbContext>("ProfitSharing",
+        interceptorFactory: sp => [sp.GetRequiredService<AuditSaveChangesInterceptor>()]));
+    factoryRequests.Add(ContextFactoryRequest.Initialize<ProfitSharingReadOnlyDbContext>("ProfitSharing"));
+    factoryRequests.Add(ContextFactoryRequest.Initialize<DemoulasCommonDataContext>("ProfitSharing"));
+});
 
 builder.AddServiceDefaults(null, null);
 

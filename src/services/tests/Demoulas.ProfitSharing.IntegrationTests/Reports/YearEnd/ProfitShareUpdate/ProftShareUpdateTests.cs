@@ -16,18 +16,10 @@ namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpd
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 
 [SuppressMessage("AsyncUsage", "AsyncFixer01:Unnecessary async/await usage")]
-public class ProfitShareUpdateTests
+public class ProfitShareUpdateTests : PristineBaseTest
 {
-    private readonly AccountingPeriodsService _aps = new();
-    private readonly CalendarService _calendarService;
-    private readonly IProfitSharingDataContextFactory _dbFactory;
-    private readonly ITestOutputHelper _testOutputHelper;
-
-    public ProfitShareUpdateTests(ITestOutputHelper testOutputHelper)
+    public ProfitShareUpdateTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
     {
-        _dbFactory = new PristineDataContextFactory();
-        _calendarService = new CalendarService(_dbFactory, _aps);
-        _testOutputHelper = testOutputHelper;
     }
 
     [Fact]
@@ -35,7 +27,7 @@ public class ProfitShareUpdateTests
     {
         // Arrange
         short profitYear = 2024;
-        ProfitShareUpdateReport profitShareUpdateService = createProfitShareUpdateService();
+        ProfitShareUpdateReport profitShareUpdateService = CreateProfitShareUpdateService();
 
         string reportName = "psupdate-pay444-r2.txt";
         profitShareUpdateService.TodaysDateTime =
@@ -62,9 +54,9 @@ public class ProfitShareUpdateTests
                 AdjustEarningsSecondaryAmount = 0
             });
         sw.Stop();
-        _testOutputHelper.WriteLine($"Query took {sw.Elapsed}");
+        TestOutputHelper.WriteLine($"Query took {sw.Elapsed}");
 
-        // We cant do a simple report to report comparison because I believe that READY's sorting random
+        // We can not do a simple report to report comparison because I believe that READY's sorting random
         // when users have the same name.   To cope with this we extract lines with employee/bene information and compare lines.
 
         string expectedReport = LoadExpectedReport(reportName);
@@ -72,7 +64,7 @@ public class ProfitShareUpdateTests
 #if false
         // Enabling this path enables the diff program to pop up the differences
  
-        // Ths sort order on READY is not great, this maybe tweaked soon.
+        // The sort order on READY is not great, this maybe tweaked soon.
         string expected = HandleSortingOddness(LoadExpectedReport(reportName));
         string actual = HandleSortingOddness(CollectLines(profitShareUpdateService.ReportLines));
         AssertReportsAreEquivalent(expected, actual);
@@ -88,18 +80,18 @@ public class ProfitShareUpdateTests
         var onlyReady = readyHash.Except(smartHash);
         var onlySmart = smartHash.Except(readyHash);
 
-        _testOutputHelper.WriteLine($"only READY count {onlyReady.Count()}, Only SMART count {onlySmart.Count()}");
+        TestOutputHelper.WriteLine($"only READY count {onlyReady.Count()}, Only SMART count {onlySmart.Count()}");
 
-        _testOutputHelper.WriteLine("Only Ready");
+        TestOutputHelper.WriteLine("Only Ready");
         foreach (string se in onlyReady)
         {
-            _testOutputHelper.WriteLine(se);
+            TestOutputHelper.WriteLine(se);
         }
 
-        _testOutputHelper.WriteLine("Only Smart");
+        TestOutputHelper.WriteLine("Only Smart");
         foreach (string se in onlySmart)
         {
-            _testOutputHelper.WriteLine(se);
+            TestOutputHelper.WriteLine(se);
         }
 
         onlyReady.Count().Should().BeLessThan(5);
@@ -114,7 +106,7 @@ public class ProfitShareUpdateTests
     {
         // Arrange
         short profitYear = 2024;
-        ProfitShareUpdateReport profitShareUpdateService = createProfitShareUpdateService();
+        ProfitShareUpdateReport profitShareUpdateService = CreateProfitShareUpdateService();
         string reportName = "psupdate-pay444-r3.txt";
         profitShareUpdateService.TodaysDateTime =
             new DateTime(2024, 11, 19, 19, 18, 0, DateTimeKind.Local); // time report was generated
@@ -185,9 +177,9 @@ public class ProfitShareUpdateTests
     }
 
 
-    private ProfitShareUpdateReport createProfitShareUpdateService()
+    private ProfitShareUpdateReport CreateProfitShareUpdateService()
     {
-        return new ProfitShareUpdateReport(_dbFactory, _calendarService);
+        return new ProfitShareUpdateReport(DbFactory, CalendarService);
     }
 
     private static string CollectLines(List<string> lines)

@@ -95,10 +95,10 @@ public class FrozenReportServiceTests : ApiTestBase<Program>
             {
                 pp.ProfitYear = 10000;
             }
-            ppArray[0].ProfitYear = 2023;
+            ppArray[0].ProfitYear = 2024;
             ppArray[0].IncomeExecutive = 25;
             ppArray[0].CurrentIncomeYear = 49995;
-            ppArray[1].ProfitYear = 2022;
+            ppArray[1].ProfitYear = 2023;
             ppArray[1].IncomeExecutive = 0;
             ppArray[1].CurrentIncomeYear = 0;
 
@@ -108,7 +108,7 @@ public class FrozenReportServiceTests : ApiTestBase<Program>
         var request = new GrossWagesReportRequest()
         {
             MinGrossAmount = 50000,
-            ProfitYear = 2023,
+            ProfitYear = 2024,
             Skip = 0,
             Take = 1000
         };

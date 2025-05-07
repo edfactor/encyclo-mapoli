@@ -29,4 +29,6 @@ public sealed record EmployeeDetails
     public decimal CurrentVestedAmount { get; set;}
     public decimal CurrentEtva { get; set; }
     public decimal PreviousEtva { get; set; }
+    public List<int> Missives { get; set; } = new List<int>();
+    public string? EmploymentStatus { get; set; }
 }

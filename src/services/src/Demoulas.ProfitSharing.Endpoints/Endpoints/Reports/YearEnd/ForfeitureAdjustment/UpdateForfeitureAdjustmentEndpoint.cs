@@ -39,7 +39,6 @@ public class UpdateForfeitureAdjustmentEndpoint : Endpoint<ForfeitureAdjustmentU
             s.Responses[404] = "Badge number not found";
         });
         Group<YearEndGroup>();
-        Roles(Role.ADMINISTRATOR, Role.FINANCEMANAGER);
     }
 
     public override async Task HandleAsync(ForfeitureAdjustmentUpdateRequest req, CancellationToken ct)

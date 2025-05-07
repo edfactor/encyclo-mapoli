@@ -6,6 +6,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.IntegrationTests.Fixtures;
 using Demoulas.ProfitSharing.IntegrationTests.Helpers;
+using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
@@ -14,15 +15,10 @@ using Microsoft.Extensions.Configuration;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports;
 
-public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests
+public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBaseTest
 {
-    private readonly IProfitSharingDataContextFactory _dbFactory;
-    private readonly ITestOutputHelper _testOutputHelper;
-
-    public TerminatedEmployeeAndBeneficiaryReportIntegrationTests(ITestOutputHelper testOutputHelper)
+    public TerminatedEmployeeAndBeneficiaryReportIntegrationTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
     {
-        _dbFactory = new PristineDataContextFactory();
-        _testOutputHelper = testOutputHelper;
     }
 
     [Fact]
@@ -38,10 +34,10 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests
         // Throws exceptions at test run time
         // var calendarService = _fixture.Services.GetRequiredService<ICalendarService>()!
         // var totalService = _fixture.Services.GetRequiredService<TotalService>()!
-        var calendarService = new CalendarService(_dbFactory, new AccountingPeriodsService());
-        var totalService = new TotalService(_dbFactory, calendarService, new EmbeddedSqlService());
+        var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService());
+        var totalService = new TotalService(DbFactory, calendarService, new EmbeddedSqlService());
         TerminatedEmployeeAndBeneficiaryReportService mockService =
-            new TerminatedEmployeeAndBeneficiaryReportService(_dbFactory, calendarService, totalService);
+            new TerminatedEmployeeAndBeneficiaryReportService(DbFactory, calendarService, totalService);
 
         Stopwatch stopwatch = Stopwatch.StartNew();
         stopwatch.Start();
@@ -49,7 +45,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests
 
         string actualText = CreateTextReport(effectiveDateOfTestData, startDate, endDate, profitSharingYear, data);
         stopwatch.Stop();
-        _testOutputHelper.WriteLine($"Took: {stopwatch.ElapsedMilliseconds} Rows: {data.Response.Results.Count()}");
+        TestOutputHelper.WriteLine($"Took: {stopwatch.ElapsedMilliseconds} Rows: {data.Response.Results.Count()}");
 
         actualText.Should().NotBeNullOrEmpty();
 

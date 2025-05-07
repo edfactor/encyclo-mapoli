@@ -6,9 +6,17 @@ internal sealed class EmploymentStatusFaker : Faker<EmploymentStatus>
 {
     internal EmploymentStatusFaker()
     {
-        RuleFor(tc => tc.Id,
-            fake => fake.PickRandom(EmploymentStatus.Constants.Active, EmploymentStatus.Constants.Delete, EmploymentStatus.Constants.Inactive,
-                EmploymentStatus.Constants.Terminated))
-            .RuleFor(tc => tc.Name, fake => fake.Name.JobType()).UseSeed(100);
+        var employmentStatuses = new[]
+        {
+            new { Id = EmploymentStatus.Constants.Active, Name = "Active" },
+            new { Id = EmploymentStatus.Constants.Inactive, Name = "Inactive" },
+            new { Id = EmploymentStatus.Constants.Terminated, Name = "Terminated" },
+            new { Id = EmploymentStatus.Constants.Delete, Name = "Delete" }
+        };
+
+        RuleFor(tc => tc.Id, fake => fake.PickRandom(employmentStatuses).Id)
+            .RuleFor(tc => tc.Name, fake => fake.PickRandom(employmentStatuses).Name)
+            .UseSeed(100);
+
     }
 }

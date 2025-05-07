@@ -1,216 +1,117 @@
 import { RouteCategory } from "./types/MenuTypes";
 import { CAPTIONS, MENU_LABELS, ROUTES } from "./constants";
-import { ImpersonationRoles } from "./reduxstore/types";
-import EnvironmentUtils from "./utils/environmentUtils";
-
-
-const beneficiaries: RouteCategory = {
-  menuLabel: MENU_LABELS.BENEFICIARIES,
-  parentRoute: MENU_LABELS.BENEFICIARIES,
-  items: [{ caption: CAPTIONS.SUMMARY, route: "" }],
-  disabled: true
-};
-
-const distributions: RouteCategory = {
-  menuLabel: MENU_LABELS.DISTRIBUTIONS,
-  parentRoute: MENU_LABELS.DISTRIBUTIONS,
-  items: [{ caption: CAPTIONS.SUMMARY, route: "" }],
-  disabled: true
-};
-
-const reconciliation: RouteCategory = {
-  menuLabel: MENU_LABELS.RECONCILIATION,
-  parentRoute: MENU_LABELS.RECONCILIATION,
-  items: [{ caption: CAPTIONS.SUMMARY, route: "" }],
-  disabled: true
-};
-
-const inquiries: RouteCategory = {
-  menuLabel: MENU_LABELS.INQUIRIES,
-  parentRoute: MENU_LABELS.INQUIRIES,
-  items: [{ caption: CAPTIONS.MASTER_INQUIRY, route: ROUTES.MASTER_INQUIRY }]
-};
-
-const drawer: RouteCategory = {
-  menuLabel: MENU_LABELS.YEAR_END,
-  parentRoute: MENU_LABELS.YEAR_END,
-  items: [
-    { caption: MENU_LABELS.DECEMBER_ACTIVITIES, route: ROUTES.DECEMBER_PROCESS_ACCORDION },
-    { caption: MENU_LABELS.FISCAL_CLOSE, route: ROUTES.FISCAL_CLOSE }
-  ]
-};
+import { ImpersonationRoles, NavigationDto, NavigationResponseDto } from "./reduxstore/types";
+import { RouteData } from "smart-ui-library";
 
 const localStorageImpersonating: string | null = localStorage.getItem("impersonatingRole");
 
-const it_operations: RouteCategory = {
-  menuLabel: MENU_LABELS.IT_OPERATIONS,
-  parentRoute: MENU_LABELS.IT_OPERATIONS,
-  roles: [ImpersonationRoles.ItOperations], // Only users with this role can see this menu item
-  items: [{ caption: CAPTIONS.DEMOGRAPHIC_FREEZE, route: ROUTES.DEMO_FREEZE }]
-};
+export const MenuData = (data:NavigationResponseDto | undefined): RouteCategory[] => {
+  const finalData: RouteCategory[] = [];
+  data?.navigation.filter(m=>m.parentId ==null).sort((a, b) => a.orderNumber - b.orderNumber).map((values:NavigationDto) => {
+    if(values.requiredRoles.length>0 && values.requiredRoles.filter(m=>m == localStorageImpersonating).length>0)
+    {
+      finalData.push({
+        menuLabel: values.title, 
+        parentRoute: values.title.toLocaleLowerCase(),
+        disabled: values.disabled, 
+        underlined: false, 
+        roles: values.requiredRoles, 
+        items: values.items && values.items.length>0 ? getRouteData(values.items): undefined
+      });
 
-const MenuData: RouteCategory[] = [
-  inquiries,
-  beneficiaries,
-  distributions,
-  reconciliation,
-  drawer,
-  ...(localStorageImpersonating == ImpersonationRoles.ItOperations ? [it_operations] : [])
-];
+    }
+    else if(values.requiredRoles.length ==0) {
+      finalData.push({
+        menuLabel: values.title, 
+        parentRoute: values.title.toLocaleLowerCase(),
+        disabled: values.disabled, 
+        underlined: false, 
+        roles: values.requiredRoles, 
+        items: values.items && values.items.length>0 ? getRouteData(values.items): undefined
+      });
+    }
+  });
+  // if(localStorageImpersonating == ImpersonationRoles.ItOperations) {
+  // finalData.push(it_operations);
+  // }
+  return finalData;
+}
+const getRouteData = (data: NavigationDto[]):RouteData[] =>{
+  const response: RouteData[] = [];
+  data.map((value)  => {
+    const obj: RouteData = { // Initialize with an empty object or default values
+      caption: value.title,
+      route: value.url, 
+      disabled: false,
+      divider: false,
+      requiredPermission: ""
+    };
+    response.push(obj);
+  });
+  return response;
+}
 
 interface MenuLevel {
   mainTitle: string;
-  topPage: {
-    topTitle: string;
+  topPage: TopPage[]
+}
+interface TopPage {
+  topTitle: string;
     topRoute?: string;
     disabled?: boolean;
-    subPages: {
-      subTitle?: string;
-      subRoute?: string;
-      disabled?: boolean;
-    }[];
-  }[];
+    subPages: SubPages[]
+}
+interface SubPages {
+  subTitle?: string;
+  subRoute?: string;
+  disabled?: boolean;
 }
 
 export const drawerTitle = MENU_LABELS.YEAR_END;
 
-export const menuLevels: MenuLevel[] = [
-  {
-    mainTitle: MENU_LABELS.DECEMBER_ACTIVITIES,
-    topPage: [
-      {
-        topTitle: CAPTIONS.CLEAN_UP_REPORTS,
-        subPages: [
-          { subTitle: CAPTIONS.DEMOGRAPHIC_BADGES, subRoute: ROUTES.DEMOGRAPHIC_BADGES },
-          { subTitle: CAPTIONS.DUPLICATE_SSNS, subRoute: ROUTES.DUPLICATE_SSNS },
-          { subTitle: CAPTIONS.NEGATIVE_ETVA, subRoute: ROUTES.NEGATIVE_ETVA },
-          { subTitle: CAPTIONS.DUPLICATE_NAMES, subRoute: ROUTES.DUPLICATE_NAMES }
-        ]
-      },
-      {
-        topTitle: CAPTIONS.MILITARY_CONTRIBUTIONS,
-        topRoute: ROUTES.MILITARY_ENTRY_AND_MODIFICATION,
-        subPages: []
-      },
-      {
-        topTitle: CAPTIONS.REHIRE_FORFEITURES,
-        topRoute: ROUTES.REHIRE_FORFEITURES,
-        subPages: []
-      },
-      {
-        topTitle: CAPTIONS.DISTRIBUTIONS_AND_FORFEITURES,
-        topRoute: ROUTES.DISTRIBUTIONS_AND_FORFEITURES,
-        subPages: []
-      },
-      {
-        topTitle: CAPTIONS.TERMINATIONS,
-        topRoute: ROUTES.PROF_TERM,
-        subPages: []
-      },
-      {
-        topTitle: CAPTIONS.PROFIT_SHARE_REPORT,
-        topRoute: ROUTES.PROFIT_SHARE_REPORT,
-        subPages: []
-      }
-    ]
-  },
-  {
-    mainTitle: MENU_LABELS.FISCAL_CLOSE,
-    topPage: [
-      {
-        topTitle: CAPTIONS.MANAGE_EXECUTIVE_HOURS,
-        topRoute: ROUTES.MANAGE_EXECUTIVE_HOURS,
-        subPages: []
-      },
-      {
-        topTitle: CAPTIONS.YTD_WAGES_EXTRACT,
-        topRoute: ROUTES.YTD_WAGES_EXTRACT,
-        subPages: []
-      },
-      
+const addSubTitle = (subTitle?:string):string =>{
+  return subTitle? ` (${subTitle})` : "";
+}
 
- 
+export const menuLevels =(data: NavigationResponseDto | undefined): MenuLevel[] =>{
+  const yearEndList = data?.navigation.filter(m=>m.id == 54)[0]; //Id 54 is for Year End. It will have the list of December Activities & Fiscal Close. 
+  const menuLevel: MenuLevel[] = [];
+  yearEndList?.items?.map((value) => {
+    menuLevel.push(
       {
-        topTitle: CAPTIONS.PROFIT_SHARE_REPORT,
-        topRoute: ROUTES.PROFIT_SHARE_REPORT,
-        subPages: []
-      },
+        mainTitle: value.title + addSubTitle(value.subTitle),
+        topPage: value.items && value.items.length>0? poplulateTopPage(value.items): []
+      }
+    )
+  });
+  return menuLevel;
+}
+const poplulateTopPage = (data: NavigationDto[]):TopPage[] =>{
+  const topPage:TopPage[] = [];
+  data.map((value) => {
+    topPage.push(
       {
-        topTitle: CAPTIONS.PROFIT_SHARE_REPORT_EDIT_RUN,
-        topRoute: ROUTES.PROFIT_SHARE_REPORT_EDIT_RUN,
-        subPages: [
-          { subTitle: CAPTIONS.PAY426_ACTIVE_18_20, subRoute: ROUTES.PAY426_ACTIVE_18_20 },
-          { subTitle: CAPTIONS.PAY426_ACTIVE_21_PLUS, subRoute: ROUTES.PAY426_ACTIVE_21_PLUS },
-          { subTitle: CAPTIONS.PAY426_ACTIVE_UNDER_18, subRoute: ROUTES.PAY426_ACTIVE_UNDER_18 },
-          { subTitle: CAPTIONS.PAY426_ACTIVE_PRIOR_SHARING, subRoute: ROUTES.PAY426_ACTIVE_PRIOR_SHARING },
-          { subTitle: CAPTIONS.PAY426_ACTIVE_NO_PRIOR, subRoute: ROUTES.PAY426_ACTIVE_NO_PRIOR },
-          { subTitle: CAPTIONS.PAY426_TERMINATED_1000_PLUS, subRoute: ROUTES.PAY426_TERMINATED_1000_PLUS },
-          { subTitle: CAPTIONS.PAY426_TERMINATED_NO_PRIOR, subRoute: ROUTES.PAY426_TERMINATED_NO_PRIOR },
-          { subTitle: CAPTIONS.PAY426_TERMINATED_PRIOR, subRoute: ROUTES.PAY426_TERMINATED_PRIOR },
-          { subTitle: CAPTIONS.PAY426_SUMMARY, subRoute: ROUTES.PAY426_SUMMARY },
-          { subTitle: CAPTIONS.PAY426_NON_EMPLOYEE, subRoute: ROUTES.PAY426_NON_EMPLOYEE }
-        ]
-      },
+         topTitle: value.title + addSubTitle(value.subTitle),
+         disabled: value.disabled,
+         topRoute: value.url,
+         subPages: value.items && value.items.length>0 ? populateSubPages(value.items): []
+      }
+    )
+  });
+  return topPage;
+}
+const populateSubPages = (data: NavigationDto[]):SubPages[] =>{
+  const subPages:SubPages[] = [];
+  data.map((value) => {
+    subPages.push(
       {
-        topTitle: CAPTIONS.ELIGIBLE_EMPLOYEES,
-        topRoute: ROUTES.ELIGIBLE_EMPLOYEES,
-        subPages: []
-      },
-      {
-        topTitle: CAPTIONS.FORFEIT,
-        topRoute: ROUTES.FORFEIT,
-        subPages: []
-      },
-      {
-        topTitle: CAPTIONS.FORFEITURES_ADJUSTMENT,
-        topRoute: ROUTES.FORFEITURES_ADJUSTMENT,
-        subPages: []
-      },
-      {
-        topTitle: CAPTIONS.PROFIT_SHARE_UPDATE,
-        topRoute: ROUTES.PROFIT_SHARE_UPDATE,
-        subPages: []
-      },
-      {
-        topTitle: CAPTIONS.PAY450_SUMMARY,
-        topRoute: ROUTES.PAY450_SUMMARY,
-        subPages: []
-      },
-      {
-        topTitle: CAPTIONS.REPORTS_BY_AGE,
-        subPages: [
-          { subTitle: CAPTIONS.CONTRIBUTIONS_BY_AGE, subRoute: ROUTES.CONTRIBUTIONS_BY_AGE },
-          { subTitle: CAPTIONS.DISTRIBUTIONS_BY_AGE, subRoute: ROUTES.DISTRIBUTIONS_BY_AGE },
-          { subTitle: CAPTIONS.FORFEITURES_BY_AGE, subRoute: ROUTES.FORFEITURES_BY_AGE },
-          { subTitle: CAPTIONS.BALANCE_BY_AGE, subRoute: ROUTES.BALANCE_BY_AGE },
-          { subTitle: CAPTIONS.VESTED_AMOUNTS_BY_AGE, subRoute: ROUTES.VESTED_AMOUNTS_BY_AGE },
-          { subTitle: CAPTIONS.BALANCE_BY_YEARS, subRoute: ROUTES.BALANCE_BY_YEARS }
-        ]
-      },
-      {
-        topTitle: CAPTIONS.PROFIT_SHARE_GROSS_REPORT,
-        topRoute: ROUTES.PROFIT_SHARE_GROSS_REPORT,
-        subPages: []
-      },
-      {
-        topTitle: CAPTIONS.PROFIT_SHARE_BY_STORE,
-        topRoute: ROUTES.PROFIT_SHARE_BY_STORE,
-        subPages: [
-          { subTitle: CAPTIONS.QPAY066_UNDER21, subRoute: ROUTES.QPAY066_UNDER21 },
-          { subTitle: CAPTIONS.QPAY066TA_UNDER21, subRoute: ROUTES.QPAY066TA_UNDER21 },
-          { subTitle: CAPTIONS.QPAY066TA, subRoute: ROUTES.QPAY066TA, disabled: !EnvironmentUtils.isDevelopmentOrQA },
-          { subTitle: CAPTIONS.PROFALL, subRoute: ROUTES.PROFALL },
-          { subTitle: CAPTIONS.NEW_PS_LABELS, subRoute: ROUTES.NEW_PS_LABELS, disabled: !EnvironmentUtils.isDevelopmentOrQA, },
-          { subTitle: CAPTIONS.PROFNEW, subRoute: ROUTES.PROFNEW, disabled: !EnvironmentUtils.isDevelopmentOrQA, }
-        ]
-      },      
-      {
-        topTitle: CAPTIONS.PRINT_PROFIT_CERTS,
-        topRoute: ROUTES.PRINT_PROFIT_CERTS,
-        disabled: !EnvironmentUtils.isDevelopmentOrQA,
-        subPages: []
-      }     
-    ]
-  }
-];
+        subTitle: value.title + addSubTitle(value.subTitle),
+        disabled: value.disabled, 
+        subRoute: value.url
+      }
+    )
+  });
+  return subPages;
+}
+
 export default MenuData;

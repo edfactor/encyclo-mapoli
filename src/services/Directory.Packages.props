@@ -3,10 +3,10 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="Aspire.Hosting.AppHost" Version="9.2.0" />
-    <PackageVersion Include="Aspire.Hosting.NodeJs" Version="9.2.0" />
+    <PackageVersion Include="Aspire.Hosting.AppHost" Version="9.2.1" />
+    <PackageVersion Include="Aspire.Hosting.NodeJs" Version="9.2.1" />
     <PackageVersion Include="Aspire.Hosting.Testing" Version="9.0.0" />
-    <PackageVersion Include="Aspire.Oracle.EntityFrameworkCore" Version="9.2.0" />
+    <PackageVersion Include="Aspire.Oracle.EntityFrameworkCore" Version="9.2.1" />
     <PackageVersion Include="AspNetCore.HealthChecks.System" Version="9.0.0" />
     <PackageVersion Include="Demoulas.Common.Logging" Version="1.0.1" />
     <PackageVersion Include="ErikEJ.EntityFrameworkCore.DgmlBuilder" Version="6.0.0" />
@@ -22,12 +22,12 @@
     <PackageVersion Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.4" />
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="8.2.0" />
     <PackageVersion Include="CsvHelper" Version="33.0.1" />
-    <PackageVersion Include="Demoulas.Common.Api" Version="1.4.9" />
-    <PackageVersion Include="Demoulas.Common.Data.Contexts" Version="2.4.4" />
+    <PackageVersion Include="Demoulas.Common.Api" Version="1.4.10" />
+    <PackageVersion Include="Demoulas.Common.Data.Contexts" Version="2.5.1" />
     <PackageVersion Include="Demoulas.Common.Data.Services" Version="3.5.4" />
-    <PackageVersion Include="Demoulas.Common.Contracts" Version="2.4.4" />
+    <PackageVersion Include="Demoulas.Common.Contracts" Version="2.4.6" />
     <PackageVersion Include="Demoulas.Common.Caching" Version="2.1.2" />
-    <PackageVersion Include="Demoulas.Security" Version="3.4.2" />
+    <PackageVersion Include="Demoulas.Security" Version="3.5.0" />
     <PackageVersion Include="EFCore.NamingConventions" Version="9.0.0" />
     <PackageVersion Include="FastEndpoints.Security" Version="5.31.0" />
     <PackageVersion Include="MassTransit" Version="8.4.0" />
@@ -59,7 +59,7 @@
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Include="NSwag.Core" Version="14.1.0" />
     <PackageVersion Include="Okta.AspNetCore" Version="4.6.3" />
-    <PackageVersion Include="OpenTelemetry.Api" Version="1.11.2" />
+    <PackageVersion Include="OpenTelemetry.Api" Version="1.12.0" />
     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.9.0" />
     <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.9.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.9.0" />
@@ -71,8 +71,8 @@
     <PackageVersion Include="Oracle.ManagedDataAccess.OpenTelemetry" Version="23.5.0" />
     <PackageVersion Include="Quartz" Version="3.14.0" />
     <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.14.0" />
-    <PackageVersion Include="Riok.Mapperly" Version="4.2.0" />
-    <PackageVersion Include="Scalar.AspNetCore" Version="2.1.16" />
+    <PackageVersion Include="Riok.Mapperly" Version="4.2.1" />
+    <PackageVersion Include="Scalar.AspNetCore" Version="2.2.3" />
     <PackageVersion Include="Serilog.AspNetCore" Version="8.0.2" />
     <PackageVersion Include="Serilog.Enrichers.Environment" Version="3.0.1" />
     <PackageVersion Include="Serilog.Enrichers.MassTransit" Version="2.0.4" />
@@ -89,7 +89,7 @@
     <PackageVersion Include="EntityFramework.Serilog" Version="1.0.15" />
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
     <PackageVersion Include="MockQueryable.Moq" Version="7.0.3" />
-    <PackageVersion Include="SSH.NET" Version="2024.2.0" />
+    <PackageVersion Include="SSH.NET" Version="2025.0.0" />
     <PackageVersion Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
     <PackageVersion Include="System.Configuration.ConfigurationManager" Version="9.0.4" />
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.6.0" />

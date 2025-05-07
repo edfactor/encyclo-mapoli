@@ -59,6 +59,12 @@ public sealed class FakeSsnService : IFakeSsnService
     private static async Task<int[]> GetNextSequenceSsnBatchAsync(ProfitSharingDbContext context,
         int batchSize, CancellationToken cancellationToken)
     {
+
+        if ( batchSize == 0)
+        {
+            return [];
+        }
+
         await using var command = context.Database.GetDbConnection().CreateCommand();
         command.CommandText = @"SELECT FAKE_SSN_SEQ.NEXTVAL 
         FROM dual 

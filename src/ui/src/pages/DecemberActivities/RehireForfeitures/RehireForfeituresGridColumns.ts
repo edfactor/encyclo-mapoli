@@ -13,6 +13,7 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       cellClass: "left-align",
       resizable: true,
       sortable: true,
+      unSortIcon: true,
       cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber)
     },
     {
@@ -33,6 +34,16 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true
+    },
+    {
+      headerName: "Status",
+      field: "employmentStatus",
+      colId: "employmentStatus",
+      minWidth: 90,
+      headerClass: "left-align",
+      cellClass: "left-align",
+      resizable: true,
+      sortable: true
     },
     {
       headerName: "Rehired Date",
@@ -91,7 +102,7 @@ export const GetDetailColumns = (): ColDef[] => {
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
-      sortable: true
+      sortable: false
     },
     {
       headerName: "Forfeiture",
@@ -101,6 +112,7 @@ export const GetDetailColumns = (): ColDef[] => {
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
+      sortable: false,
       valueFormatter: agGridNumberToCurrency
     },
     {
@@ -110,7 +122,8 @@ export const GetDetailColumns = (): ColDef[] => {
       minWidth: 150,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true
+      resizable: true,
+      sortable: false,
     }
   ];
 };

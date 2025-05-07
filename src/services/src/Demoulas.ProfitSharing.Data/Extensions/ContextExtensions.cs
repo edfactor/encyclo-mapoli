@@ -1,15 +1,17 @@
 ﻿using Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
+using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Audit;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.MassTransit;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Navigations;
-using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Data.Extensions;
 internal static class ContextExtensions
 {
     public static ModelBuilder ApplyModelConfiguration(this ModelBuilder modelBuilder)
-    {   
+    {
+        modelBuilder.ApplyConfiguration(new AuditEventMap());
+        modelBuilder.ApplyConfiguration(new AuditChangeMap());
         modelBuilder.ApplyConfiguration(new FakeSsnMap());
         modelBuilder.ApplyConfiguration(new DataImportRecordMap());
         modelBuilder.ApplyConfiguration(new BeneficiaryContactMap());
@@ -43,6 +45,7 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new JobMap());
         modelBuilder.ApplyConfiguration(new JobStatusMap());
         modelBuilder.ApplyConfiguration(new JobTypeMap());
+        modelBuilder.ApplyConfiguration(new MissiveMap());
         modelBuilder.ApplyConfiguration(new ParticipantTotalMap());
         modelBuilder.ApplyConfiguration(new ParticipantTotalRatioMap());
         modelBuilder.ApplyConfiguration(new ParticipantTotalVestingBalanceMap());
@@ -63,6 +66,12 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new NavigationStatusMap());
         modelBuilder.ApplyConfiguration(new NavigationTrackingMap());
         modelBuilder.ApplyConfiguration(new NavigationRoleMap());
+
+        modelBuilder.HasSequence<int>("FAKE_SSN_SEQ").StartsAt(666000000)
+            .IncrementsBy(1)
+            .HasMin(666000000)
+            .HasMax(666999999)
+            .IsCyclic(false);
 
         // Force table names to be upper case for consistency with all existing DSM projects
         foreach (var entity in modelBuilder.Model.GetEntityTypes())

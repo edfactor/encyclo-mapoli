@@ -43,7 +43,7 @@ internal sealed class ProfitDetailMap : IEntityTypeConfiguration<ProfitDetail>
         _ = builder.Property(x => x.CommentIsPartialTransaction).HasColumnName("COMMENT_IS_PARTIAL_TRANSACTION");
         _ = builder.Property(x => x.YearsOfServiceCredit).HasColumnName("YEARS_OF_SERVICE_CREDIT").HasDefaultValue(0).IsRequired();
 
-        _ = builder.Property(e => e.CreatedUtc)
+        _ = builder.Property(e => e.TransactionDate)
             .HasColumnType("TIMESTAMP WITH TIME ZONE")
             .HasDefaultValueSql("SYSTIMESTAMP")
             .HasColumnName("CREATED_UTC");

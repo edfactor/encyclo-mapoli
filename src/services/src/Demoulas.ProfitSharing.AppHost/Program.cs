@@ -60,10 +60,10 @@ ExecuteCommandResult RunConsoleApp(string projectPath, string launchProfile)
 
     process.WaitForExit();
     
-    logger.LogInformation(output);
+    logger.LogError(output);
 
     Console.ForegroundColor = ConsoleColor.Red;
-    logger.LogInformation(error);
+    logger.LogError(error);
     Console.ForegroundColor = ConsoleColor.DarkGray;
 
     if (string.IsNullOrWhiteSpace(error))
@@ -145,6 +145,11 @@ var cliRunner = builder.AddExecutable("Database-Cli",
         name: "import-from-ready",
         displayName: "Import from READY",
         executeCommand: (c) => Task.FromResult(RunConsoleApp(projectPath!, "import-from-ready")),
+        commandOptions: new CommandOptions { IconName = "Database", IconVariant = IconVariant.Filled })
+.WithCommand(
+        name: "import-from-navigation",
+        displayName: "Import from navigation",
+        executeCommand: (c) => Task.FromResult(RunConsoleApp(projectPath!, "import-from-navigation")),
         commandOptions: new CommandOptions { IconName = "Database", IconVariant = IconVariant.Filled });
 
 

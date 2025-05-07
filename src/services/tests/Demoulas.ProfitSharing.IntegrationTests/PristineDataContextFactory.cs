@@ -18,7 +18,7 @@ namespace Demoulas.ProfitSharing.IntegrationTests;
  * Used to connect to the live/qa/testing database context.  Ideally one that is kept in a pristine condition, so integration tests
  * can find a reliable place to start from.
  */
-internal sealed class PristineDataContextFactory : IProfitSharingDataContextFactory
+public sealed class PristineDataContextFactory : IProfitSharingDataContextFactory
 {
     private readonly ProfitSharingDbContext _ctx;
     private readonly ProfitSharingReadOnlyDbContext _readOnlyCtx;

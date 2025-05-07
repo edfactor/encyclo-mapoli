@@ -3,8 +3,6 @@ using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Military;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
-using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -33,8 +31,8 @@ public class MilitaryService : IMilitaryService
             .WithMessage($"The {nameof(CreateMilitaryContributionRequest.ContributionAmount)} must be greater than zero.");
 
         validator.RuleFor(r => r.ProfitYear)
-            .GreaterThanOrEqualTo((short)2000)
-            .WithMessage($"{nameof(MilitaryContributionRequest.ProfitYear)} must not less than 2000.")
+            .GreaterThanOrEqualTo((short)2020)
+            .WithMessage($"{nameof(MilitaryContributionRequest.ProfitYear)} must not less than 2020.")
             .LessThanOrEqualTo((short)DateTime.Today.Year)
             .WithMessage($"{nameof(MilitaryContributionRequest.ProfitYear)} must not be greater than this year.");
 
@@ -71,7 +69,7 @@ public class MilitaryService : IMilitaryService
                 CommentTypeId = /* 19 */CommentType.Constants.Military.Id,
                 Contribution = req.ContributionAmount,
                 Ssn = d.Ssn,
-                YearsOfServiceCredit = 1,
+                YearsOfServiceCredit = (byte)(req.AddContributionYear ? 1 : 0),
                 MonthToDate = (byte)req.ContributionDate.Month,
                 YearToDate = (short)req.ContributionDate.Year,
             };
@@ -86,6 +84,7 @@ public class MilitaryService : IMilitaryService
                 ProfitYear = req.ProfitYear,
                 ContributionDate = new DateOnly(pd.YearToDate, pd.MonthToDate, 01),
                 Amount = pd.Contribution,
+                IncrementsContributionYears = pd.YearsOfServiceCredit == 1
             });
         }, cancellationToken);
     }
@@ -130,14 +129,15 @@ public class MilitaryService : IMilitaryService
                 .Where(x => x.d.BadgeNumber == req.BadgeNumber
                             && x.pd.ProfitYear == req.ProfitYear && x.pd.CommentTypeId == CommentType.Constants.Military.Id)
                 .OrderByDescending(x => x.pd.ProfitYear)
-                .ThenByDescending(x=> x.pd.CreatedUtc)
+                .ThenByDescending(x=> x.pd.TransactionDate)
                 .Select(x => new MilitaryContributionResponse
                 {
                     BadgeNumber = x.d.BadgeNumber,
                     ProfitYear = x.pd.ProfitYear,
                     CommentTypeId = x.pd.CommentTypeId,
                     ContributionDate = new DateOnly(x.pd.YearToDate == 0 ? req.ProfitYear : x.pd.YearToDate, x.pd.MonthToDate == 0 ? 1 : x.pd.MonthToDate, 01),
-                    Amount = x.pd.Contribution
+                    Amount = x.pd.Contribution,
+                    IncrementsContributionYears = x.pd.YearsOfServiceCredit == 1
                 })
                 .ToPaginationResultsAsync(req, cancellationToken);
         });

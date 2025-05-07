@@ -22,29 +22,36 @@ public class MasterInquiryService : IMasterInquiryService
         public required ZeroContributionReason? ZeroContributionReason { get; init; }
         public required TaxCode? TaxCode { get; init; }
         public required CommentType? CommentType { get; init; }
+        public DateTimeOffset TransactionDate { get; init; }
     }
 
     private sealed class InquiryDemographics
     {
         public int BadgeNumber { get; init; }
+        public required string FullName { get; init; }
         public byte PayFrequencyId { get; init; }
         public short PsnSuffix { get; init; }
         public int Ssn { get; init; }
+        public decimal CurrentIncomeYear { get; init; }
+        public decimal CurrentHoursYear { get; init; }
     }
 
 
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly ILogger _logger;
     private readonly ITotalService _totalService;
+    private readonly IMissiveService _missiveService;
 
     public MasterInquiryService(
         IProfitSharingDataContextFactory dataContextFactory,
         ITotalService totalService,
-        ILoggerFactory loggerFactory
+        ILoggerFactory loggerFactory,
+        IMissiveService missiveService
     )
     {
         _dataContextFactory = dataContextFactory;
         _totalService = totalService;
+        _missiveService = missiveService;
         _logger = loggerFactory.CreateLogger<MasterInquiryService>();
     }
 
@@ -59,16 +66,16 @@ public class MasterInquiryService : IMasterInquiryService
 
             if (req.MemberType == 1) // Employee only
             {
-                combinedQuery = GetMasterInquiryDemographics(ctx, req);
+                combinedQuery = GetMasterInquiryDemographics(ctx);
             }
             else if (req.MemberType == 2 || (req.BadgeNumber.HasValue && (req.PsnSuffix ?? 0) > 0))// Beneficiary only
             {
-                combinedQuery = GetMasterInquiryBeneficiary(ctx, req);
+                combinedQuery = GetMasterInquiryBeneficiary(ctx);
             }
             else // All or null
             {
-                var demographics = GetMasterInquiryDemographics(ctx, req);
-                var beneficiary = GetMasterInquiryBeneficiary(ctx, req);
+                var demographics = GetMasterInquiryDemographics(ctx);
+                var beneficiary = GetMasterInquiryBeneficiary(ctx);
                 combinedQuery = demographics.Union(beneficiary);
             }
 
@@ -108,7 +115,11 @@ public class MasterInquiryService : IMasterInquiryService
                 CommentRelatedPsnSuffix = x.ProfitDetail.CommentRelatedPsnSuffix,
                 CommentIsPartialTransaction = x.ProfitDetail.CommentIsPartialTransaction != null ? x.ProfitDetail.CommentIsPartialTransaction : false,
                 BadgeNumber = x.Member.BadgeNumber,
-                PsnSuffix =  x.Member.PsnSuffix
+                PsnSuffix =  x.Member.PsnSuffix,
+                PayFrequencyId = x.Member.PayFrequencyId,
+                TransactionDate = x.TransactionDate,
+                CurrentIncomeYear = x.Member.CurrentIncomeYear,
+                CurrentHoursYear = x.Member.CurrentHoursYear
             });
             var result = await formattedQuery.ToPaginationResultsAsync(req, cancellationToken);
             ISet<int> uniqueSsns = await combinedQuery.Select(q => q.Member.Ssn).ToHashSetAsync(cancellationToken: cancellationToken);
@@ -142,15 +153,15 @@ public class MasterInquiryService : IMasterInquiryService
         return inquiryResults;
     }
 
-    private static IQueryable<MasterInquiryItem> GetMasterInquiryDemographics(IProfitSharingDbContext ctx,
-        MasterInquiryRequest req)
+    private static IQueryable<MasterInquiryItem> GetMasterInquiryDemographics(IProfitSharingDbContext ctx)
     {
         var query = ctx.ProfitDetails
             .Include(pd => pd.ProfitCode)
             .Include(pd => pd.ZeroContributionReason)
             .Include(pd => pd.TaxCode)
             .Include(pd => pd.CommentType)
-            .Join(ctx.Demographics,
+            .Join(ctx.Demographics
+                    .Include(d=> d.PayProfits),
                 pd => pd.Ssn,
                 d => d.Ssn,
                 (pd, d) => new MasterInquiryItem
@@ -160,79 +171,28 @@ public class MasterInquiryService : IMasterInquiryService
                     ZeroContributionReason = pd.ZeroContributionReason,
                     TaxCode = pd.TaxCode,
                     CommentType = pd.CommentType,
+                    TransactionDate = pd.TransactionDate,
                     Member = new InquiryDemographics
                     {
                         BadgeNumber = d.BadgeNumber,
+                        FullName = d.ContactInfo.FullName != null ? d.ContactInfo.FullName : d.ContactInfo.LastName,
                         PayFrequencyId = d.PayFrequencyId,
                         Ssn = d.Ssn,
-                        PsnSuffix = 0
+                        PsnSuffix = 0,
+                        CurrentIncomeYear = d.PayProfits.Where(x=> x.ProfitYear == pd.ProfitYear)
+                            .Select(x => x.CurrentIncomeYear)
+                            .FirstOrDefault(),
+                        CurrentHoursYear = d.PayProfits.Where(x => x.ProfitYear == pd.ProfitYear)
+                            .Select(x => x.CurrentHoursYear)
+                            .FirstOrDefault()
                     }
                 })
             .Where(x => x.Member.PayFrequencyId == PayFrequency.Constants.Weekly);
 
-        if (req.BadgeNumber.HasValue)
-        {
-            query = query.Where(x => x.Member.BadgeNumber == req.BadgeNumber);
-        }
-
-        if (req.StartProfitYear.HasValue)
-        {
-            query = query.Where(x => x.ProfitDetail.ProfitYear >= req.StartProfitYear);
-        }
-
-        if (req.EndProfitYear.HasValue)
-        {
-            query = query.Where(x => x.ProfitDetail.ProfitYear <= req.EndProfitYear);
-        }
-
-        if (req.StartProfitMonth.HasValue)
-        {
-            query = query.Where(x => x.ProfitDetail.MonthToDate >= req.StartProfitMonth);
-        }
-
-        if (req.EndProfitMonth.HasValue)
-        {
-            query = query.Where(x => x.ProfitDetail.MonthToDate <= req.EndProfitMonth);
-        }
-
-        if (req.ProfitCode.HasValue)
-        {
-            query = query.Where(x => x.ProfitDetail.ProfitCodeId == req.ProfitCode);
-        }
-
-        if (req.ContributionAmount.HasValue)
-        {
-            query = query.Where(x => x.ProfitDetail.Contribution == req.ContributionAmount);
-        }
-
-        if (req.EarningsAmount.HasValue)
-        {
-            query = query.Where(x => x.ProfitDetail.Earnings == req.EarningsAmount);
-        }
-
-        if (req.SocialSecurity != null)
-        {
-            query = query.Where(x => x.ProfitDetail.Ssn == req.SocialSecurity);
-        }
-
-        if (req.ForfeitureAmount.HasValue)
-        {
-            query = query.Where(x =>
-                x.ProfitDetail.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id &&
-                x.ProfitDetail.Forfeiture == req.ForfeitureAmount);
-        }
-
-        if (req.PaymentAmount.HasValue)
-        {
-            query = query.Where(x =>
-                x.ProfitDetail.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id &&
-                x.ProfitDetail.Forfeiture == req.PaymentAmount);
-        }
-
         return query;
     }
 
-    private static IQueryable<MasterInquiryItem> GetMasterInquiryBeneficiary(IProfitSharingDbContext ctx, MasterInquiryRequest req)
+    private static IQueryable<MasterInquiryItem> GetMasterInquiryBeneficiary(IProfitSharingDbContext ctx)
     {
         var query = ctx.ProfitDetails
             .Include(pd => pd.ProfitCode)
@@ -249,77 +209,18 @@ public class MasterInquiryService : IMasterInquiryService
                     ZeroContributionReason = pd.ZeroContributionReason,
                     TaxCode = pd.TaxCode,
                     CommentType = pd.CommentType,
+                    TransactionDate = pd.TransactionDate,
                     Member = new InquiryDemographics
                     {
-                        BadgeNumber = d.BadgeNumber, PayFrequencyId = PayFrequency.Constants.Weekly,PsnSuffix = d.PsnSuffix,
-                        Ssn = d.Contact!=null?d.Contact.Ssn: 0
+                        BadgeNumber = d.BadgeNumber,
+                        FullName = d.Contact!.ContactInfo.FullName != null ? d.Contact.ContactInfo.FullName : d.Contact.ContactInfo.LastName,
+                        PayFrequencyId = PayFrequency.Constants.Weekly,
+                        PsnSuffix = d.PsnSuffix,
+                        Ssn = d.Contact!=null?d.Contact.Ssn: 0,
+                        CurrentIncomeYear = 0,
+                        CurrentHoursYear = 0
                     }
                 });
-
-        // Apply filters
-        if (req.StartProfitYear.HasValue)
-        {
-            query = query.Where(x => x.ProfitDetail.ProfitYear >= req.StartProfitYear);
-        }
-
-        if (req.EndProfitYear.HasValue)
-        {
-            query = query.Where(x => x.ProfitDetail.ProfitYear <= req.EndProfitYear);
-        }
-
-        if (req.StartProfitMonth.HasValue)
-        {
-            query = query.Where(x => x.ProfitDetail.MonthToDate >= req.StartProfitMonth);
-        }
-
-        if (req.EndProfitMonth.HasValue)
-        {
-            query = query.Where(x => x.ProfitDetail.MonthToDate <= req.EndProfitMonth);
-        }
-
-        if (req.ProfitCode.HasValue)
-        {
-            query = query.Where(x => x.ProfitDetail.ProfitCodeId == req.ProfitCode);
-        }
-
-        if (req.ContributionAmount.HasValue)
-        {
-            query = query.Where(x => x.ProfitDetail.Contribution == req.ContributionAmount);
-        }
-
-        if (req.EarningsAmount.HasValue)
-        {
-            query = query.Where(x => x.ProfitDetail.Earnings == req.EarningsAmount);
-        }
-
-        if (req.SocialSecurity != null)
-        {
-            query = query.Where(x => x.ProfitDetail.Ssn == req.SocialSecurity);
-        }
-
-        if (req.ForfeitureAmount.HasValue)
-        {
-            query = query.Where(x =>
-                x.ProfitDetail.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id &&
-                x.ProfitDetail.Forfeiture == req.ForfeitureAmount);
-        }
-
-        if (req.PaymentAmount.HasValue)
-        {
-            query = query.Where(x =>
-                x.ProfitDetail.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id &&
-                x.ProfitDetail.Forfeiture == req.PaymentAmount);
-        }
-
-        if (req.BadgeNumber.HasValue)
-        {
-            query = query.Where(x => x.Member.BadgeNumber == req.BadgeNumber);
-        }
-
-        if (req.PsnSuffix is > 0)
-        {
-            query = query.Where(x => x.Member.PsnSuffix == req.PsnSuffix);
-        }
 
         return query;
     }
@@ -347,6 +248,8 @@ public class MasterInquiryService : IMasterInquiryService
                 d.TerminationDate,
                 d.StoreNumber,
                 DemographicId = d.Id,
+                EmploymentStatusId = d.EmploymentStatusId,
+                EmploymentStatus = d.EmploymentStatus,
                 CurrentPayProfit = d.PayProfits
                     .FirstOrDefault(x => x.ProfitYear == currentYear),
                 PreviousPayProfit = d.PayProfits
@@ -381,6 +284,8 @@ public class MasterInquiryService : IMasterInquiryService
             _logger.LogWarning(ex, "Failed to retrieve balances for SSN {SSN}", ssn);
         }
 
+        var missives = await _missiveService.DetermineMissivesForSsn(ssn, currentYear, cancellationToken);
+
         return new EmployeeDetails
         {
             IsEmployee = true,
@@ -409,6 +314,8 @@ public class MasterInquiryService : IMasterInquiryService
             CurrentVestedAmount = (currentBalance?.VestedBalance ?? 0),
             CurrentEtva = memberData.CurrentPayProfit?.Etva ?? 0,
             PreviousEtva = memberData.PreviousPayProfit?.Etva ?? 0,
+            EmploymentStatus = memberData.EmploymentStatus?.Name,
+            Missives = missives
         };
     }
 
@@ -486,6 +393,71 @@ public class MasterInquiryService : IMasterInquiryService
 
     private static IQueryable<MasterInquiryItem> FilterPaymentType(MasterInquiryRequest req, IQueryable<MasterInquiryItem> query)
     {
+        if (req.BadgeNumber.HasValue)
+        {
+            query = query.Where(x => x.Member.BadgeNumber == req.BadgeNumber);
+        }
+
+        if (req.EndProfitYear.HasValue)
+        {
+            query = query.Where(x => x.ProfitDetail.ProfitYear <= req.EndProfitYear);
+        }
+
+        if (req.StartProfitMonth.HasValue)
+        {
+            query = query.Where(x => x.ProfitDetail.MonthToDate >= req.StartProfitMonth);
+        }
+
+        if (req.EndProfitMonth.HasValue)
+        {
+            query = query.Where(x => x.ProfitDetail.MonthToDate <= req.EndProfitMonth);
+        }
+
+        if (req.ProfitCode.HasValue)
+        {
+            query = query.Where(x => x.ProfitDetail.ProfitCodeId == req.ProfitCode);
+        }
+
+        if (req.ContributionAmount.HasValue)
+        {
+            query = query.Where(x => x.ProfitDetail.Contribution == req.ContributionAmount);
+        }
+
+        if (req.EarningsAmount.HasValue)
+        {
+            query = query.Where(x => x.ProfitDetail.Earnings == req.EarningsAmount);
+        }
+
+        if (req.SocialSecurity != null)
+        {
+            query = query.Where(x => x.ProfitDetail.Ssn == req.SocialSecurity);
+        }
+
+        if (req.ForfeitureAmount.HasValue)
+        {
+            query = query.Where(x =>
+                x.ProfitDetail.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id &&
+                x.ProfitDetail.Forfeiture == req.ForfeitureAmount);
+        }
+
+        if (req.PaymentAmount.HasValue)
+        {
+            query = query.Where(x =>
+                x.ProfitDetail.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id &&
+                x.ProfitDetail.Forfeiture == req.PaymentAmount);
+        }
+
+        if (req.PsnSuffix is > 0)
+        {
+            query = query.Where(x => x.Member.PsnSuffix == req.PsnSuffix);
+        }
+
+        if (!string.IsNullOrWhiteSpace(req.Name))
+        {
+            var pattern = $"%{req.Name.ToUpperInvariant()}%";
+            query = query.Where(x => EF.Functions.Like(x.Member.FullName.ToUpper(), pattern));
+        }
+
         if (req.PaymentType.HasValue)
         {
             switch (req.PaymentType)

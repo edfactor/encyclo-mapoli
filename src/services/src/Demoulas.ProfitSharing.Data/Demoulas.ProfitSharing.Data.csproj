@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Messaging\**" />
+    <EmbeddedResource Remove="Messaging\**" />
+    <None Remove="Messaging\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Remove="C:\Users\russh\.nuget\packages\demoulas.common.data.services\3.0.0\contentFiles\any\net8.0\readme.md" />
   </ItemGroup>
  
@@ -26,6 +32,7 @@
     <PackageReference Include="OpenTelemetry.Api" />
     <PackageReference Include="Oracle.EntityFrameworkCore" />
     <PackageReference Include="Oracle.ManagedDataAccess.Core" />
+    <PackageReference Include="MassTransit" />
   </ItemGroup>
 
   <ItemGroup>

@@ -103,8 +103,8 @@ public sealed class ScenarioFactory
         [
             new FrozenState
             {
-                AsOfDateTime = DateTime.Now,
-                CreatedDateTime = DateTime.Now,
+                AsOfDateTime = DateTimeOffset.UtcNow,
+                CreatedDateTime = DateTimeOffset.UtcNow,
                 FrozenBy = "a pal",
                 ProfitYear = ProfitYear,
                 IsActive = true

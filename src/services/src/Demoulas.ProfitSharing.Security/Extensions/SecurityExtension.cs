@@ -1,5 +1,5 @@
 ﻿using Demoulas.Common.Contracts.Configuration;
-using Demoulas.Security;
+using Demoulas.Common.Contracts.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
