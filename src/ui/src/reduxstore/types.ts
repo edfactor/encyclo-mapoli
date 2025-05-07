@@ -1124,6 +1124,8 @@ export interface ForfeitureAdjustmentResponse {
 export interface MissiveResponse {
   id: number;
   message: string;
+  description: string;
+  severity: string;
 }
 
 export interface RowCountResult {
