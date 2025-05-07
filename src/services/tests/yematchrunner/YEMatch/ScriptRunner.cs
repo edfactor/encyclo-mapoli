@@ -8,16 +8,16 @@ public static class ScriptRunner
 {
     public static int Run(string scriptName)
     {
-        var homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-        var scriptExtension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".bat" : "";
-        var scriptPath = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+        string homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        string scriptExtension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".bat" : "";
+        string scriptPath = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
             ? $@"{homeDirectory}\bin\{scriptName}{scriptExtension}"
             : $@"{homeDirectory}/bin/{scriptName}{scriptExtension}";
 
-        var shell = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "cmd.exe" : "/bin/bash";
-        var arguments = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? $"/c \"{scriptPath}\"" : $"\"{scriptPath}\"";
+        string shell = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "cmd.exe" : "/bin/bash";
+        string arguments = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? $"/c \"{scriptPath}\"" : $"\"{scriptPath}\"";
 
-        var process = new Process
+        Process process = new()
         {
             StartInfo = new ProcessStartInfo
             {
@@ -31,17 +31,17 @@ public static class ScriptRunner
         };
 
         process.Start();
-        var error = process.StandardError.ReadToEnd();
+        string error = process.StandardError.ReadToEnd();
         process.WaitForExit();
 
         if (!string.IsNullOrEmpty(error))
         {
             Console.WriteLine($"<ERROR-OUTPUT>: {error}</ERROR-OUTPUT>");
         }
-        
-        var stdout = process.StandardOutput.ReadToEnd();
+
+        string stdout = process.StandardOutput.ReadToEnd();
         Console.WriteLine($"<STANDARD-OUT>{stdout}</STANDARD-OUT>");
-        
+
         if (stdout.Contains("error", StringComparison.CurrentCultureIgnoreCase))
         {
             throw new EvaluateException($"Error running script: {scriptName}");

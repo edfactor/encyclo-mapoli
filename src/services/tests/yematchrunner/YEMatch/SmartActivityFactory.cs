@@ -1,6 +1,4 @@
-﻿
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Net.Http.Headers;
 using System.Text;
 using YEMatch.YEMatch;
@@ -15,7 +13,6 @@ using HttpMethod = System.Net.Http.HttpMethod;
 
 namespace YEMatch;
 
-
 public static class SmartActivityFactory
 {
     private static readonly short _profitYear = 2024;
@@ -26,7 +23,7 @@ public static class SmartActivityFactory
 
     public static List<Activity> CreateActivities(string dataDirectory)
     {
-        var httpClient = new HttpClient { Timeout = TimeSpan.FromHours(2) };
+        HttpClient httpClient = new() { Timeout = TimeSpan.FromHours(2) };
         TestToken.CreateAndAssignTokenForClient(httpClient, "Finance-Manager");
         Client = new ApiClient(httpClient);
 
@@ -71,13 +68,13 @@ public static class SmartActivityFactory
     private static async Task<Outcome> A0_Initialize_Database_with_Obfuscated_data(ApiClient apiClient, string aname, string name)
     {
         // Quick authentication sanity check
-        var r = await apiClient.DemoulasCommonApiEndpointsAppVersionInfoEndpointAsync(null);
+        AppVersionInfo? r = await apiClient.DemoulasCommonApiEndpointsAppVersionInfoEndpointAsync(null);
         // Might be nice to also include the database version. What database is used.  Wall clock time.
         Console.WriteLine($"{SmartActivity.smartPrefix}Connected to SMART build:" + r.BuildNumber + " git-hash:" + r.ShortGitHash);
 
         // Consider using CLI tool for reset the smart schema to stock 
 
-        var res = ScriptRunner.Run("import-bh"); // Good enough and fast
+        int res = ScriptRunner.Run("import-bh"); // Good enough and fast
         if (res != 0)
         {
             return new Outcome(aname, name, "", OutcomeStatus.Error, "Problem setting up database\n", null, true);
@@ -90,7 +87,7 @@ public static class SmartActivityFactory
     {
         // Consider using CLI tool for reset the smart schema to stock 
 
-        var res = ScriptRunner.Run("import-bh-from-ready"); // Good enough and fast
+        int res = ScriptRunner.Run("import-bh-from-ready"); // Good enough and fast
         if (res != 0)
         {
             return new Outcome(aname, name, "", OutcomeStatus.Error, "Problem setting up database\n", null, true);
@@ -101,51 +98,46 @@ public static class SmartActivityFactory
 
     private static async Task<Outcome> A1_Profit_Sharing_Clean_up_Reports(ApiClient apiClient, string aname, string name)
     {
-        var sb = new StringBuilder();
+        StringBuilder sb = new();
 
-        var r6 = await apiClient.ReportsYearEndCleanupNegativeEtvaForSsNsOnPayProfitEndPointAsync(_profitYear, null, null, 0, int.MaxValue, null);
+        ReportResponseBaseOfNegativeEtvaForSsNsOnPayProfitResponse? r6 =
+            await apiClient.ReportsYearEndCleanupNegativeEtvaForSsNsOnPayProfitEndPointAsync(_profitYear, null, null, 0, int.MaxValue, null);
         sb.Append($"Negative Etva for Ssns  - records loaded: {r6.Response.Results.Count}\n");
 
-        var r4 =
+        ReportResponseBaseOfPayrollDuplicateSsnResponseDto? r4 =
             await apiClient.ReportsYearEndCleanupGetDuplicateSsNsEndpointAsync(null, null, _profitYear, int.MaxValue, null);
         sb.Append($"Duplicate Ssns  - records loaded: {r4.Response.Results.Count}\n");
 
-        var r = await apiClient
+        ReportResponseBaseOfDemographicBadgesNotInPayProfitResponse? r = await apiClient
             .ReportsYearEndCleanupDemographicBadgesNotInPayProfitEndpointAsync(null, null, 0, int.MaxValue, null);
         sb.Append($"Badges Not In PayProfit - records loaded: {r.Response.Results.Count}\n");
 
-        var r3 = await apiClient
+        ReportResponseBaseOfDuplicateNamesAndBirthdaysResponse? r3 = await apiClient
             .ReportsYearEndCleanupDuplicateNamesAndBirthdaysEndpointAsync(_profitYear, null, null, 0, int.MaxValue, null);
         sb.Append($"Duplicate Names And Birthdays - records loaded: {r3.Response.Results.Count}\n");
 
-        var r5 = await apiClient
+        ReportResponseBaseOfNamesMissingCommaResponse? r5 = await apiClient
             .ReportsYearEndCleanupNamesMissingCommasEndpointAsync(null, null, 0, int.MaxValue, null);
         sb.Append($"Missing Commas - records loaded: {r5.Response.Results.Count}\n");
 
         return new Outcome(aname, name, "", OutcomeStatus.Ok, sb.ToString(), null, true);
     }
 
-    // NSwagger doesnt handle POST requests well.  Its defition of the Request is missing the "profitYear" share parameter
-    public class ExtendedRehireForfeituresRequest : RehireForfeituresRequest
-    {
-        public int ProfitYear { get; set; }
-    }
-
 
     private static async Task<Outcome> A2_Military_and_Rehire(ApiClient apiClient, string aname, string name)
     {
-        var sb = new StringBuilder();
+        StringBuilder sb = new();
 
-        var result = await apiClient
+        ReportResponseBaseOfEmployeesOnMilitaryLeaveResponse? result = await apiClient
             .ReportsYearEndMilitaryEmployeesOnMilitaryLeaveEndpointAsync(null, null, 0, int.MaxValue, null);
         sb.Append($"Employees On Military Leave - records loaded: {result.Response.Results.Count}\n");
 
-        var rehireForfeituresRequest = new ExtendedRehireForfeituresRequest();
+        ExtendedRehireForfeituresRequest rehireForfeituresRequest = new();
         rehireForfeituresRequest.ProfitYear = _profitYear;
         rehireForfeituresRequest.BeginningDate = DateTimeOffset.Parse("2024-01-07", CultureInfo.InvariantCulture);
         rehireForfeituresRequest.EndingDate = DateTimeOffset.Parse("2024-12-28", CultureInfo.InvariantCulture);
 
-        var r2 = await apiClient.ReportsYearEndMilitaryRehireForfeituresEndpointAsync(null, rehireForfeituresRequest);
+        ReportResponseBaseOfRehireForfeituresResponse? r2 = await apiClient.ReportsYearEndMilitaryRehireForfeituresEndpointAsync(null, rehireForfeituresRequest);
         sb.Append($"Military And Rehire Forfeitures - records loaded: {r2.Response.Results.Count}\n");
 
         return Ok(aname, name, sb);
@@ -160,10 +152,16 @@ public static class SmartActivityFactory
     {
         return new Outcome(aname, name, "", OutcomeStatus.Ok, str, null, true);
     }
+
+    // NSwagger doesnt handle POST requests well.  Its defition of the Request is missing the "profitYear" share parameter
+    public class ExtendedRehireForfeituresRequest : RehireForfeituresRequest
+    {
+        public int ProfitYear { get; set; }
+    }
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     private static async Task<Outcome> A3_Prof_Termination(ApiClient apiClient, string aname, string name)
     {
-        var result = await apiClient
+        TerminatedEmployeeAndBeneficiaryResponse? result = await apiClient
             .ReportsYearEndTerminatedEmployeeAndBeneficiaryTerminatedEmployeeAndBeneficiaryDataEndpointAsync(_profitYear, null,
                 null, 0, int.MaxValue, null);
 
@@ -172,9 +170,9 @@ public static class SmartActivityFactory
 
     private static async Task<Outcome> A4_Prof_Share_Loan_Balance_QPAY129(ApiClient apiClient, string aname, string name)
     {
-        var sb = new StringBuilder();
+        StringBuilder sb = new();
 
-        var r2 = await apiClient
+        ReportResponseBaseOfDistributionsAndForfeitureResponse? r2 = await apiClient
             .ReportsYearEndCleanupDistributionsAndForfeitureEndpointAsync(1, 12, true, _profitYear, null, null, 0, int.MaxValue, null);
         sb.Append($"Records Loaded {r2.Response.Results.Count}\n");
 
@@ -183,7 +181,7 @@ public static class SmartActivityFactory
 
     private static async Task<Outcome> A5_Extract_Excutive_Hours_and_Dollars(ApiClient apiClient, string aname, string name)
     {
-        var r2 = await apiClient
+        ReportResponseBaseOfExecutiveHoursAndDollarsResponse? r2 = await apiClient
             .ReportsYearEndExecutiveHoursAndDollarsExecutiveHoursAndDollarsEndpointAsync(null, null, "", true, false, _profitYear, null, null, 0, int.MaxValue, null);
         return Ok(aname, name, $"Records Loaded = {r2.Response.Results.Count}\n");
     }
@@ -241,7 +239,7 @@ public static class SmartActivityFactory
 
     private static async Task<Outcome> A11_Profit_Sharing_YTD_Wages_Extract(ApiClient apiClient, string aname, string name)
     {
-        var r = await apiClient.ReportsYearEndWagesCurrentYearWagesEndpointAsync(_profitYear, null, null, 0, int.MaxValue, null);
+        ReportResponseBaseOfWagesCurrentYearResponse? r = await apiClient.ReportsYearEndWagesCurrentYearWagesEndpointAsync(_profitYear, null, null, 0, int.MaxValue, null);
         return Ok(aname, name, $"Record Count: {r.Response.Results.Count}");
     }
 
@@ -260,19 +258,19 @@ public static class SmartActivityFactory
         //     "asOfDateTime": "2025-05-06T00:00:00-04:00",
         //     "profitYear": 2025
         // }'
-        var httpClient = new HttpClient { Timeout = TimeSpan.FromHours(2) };
+        HttpClient httpClient = new() { Timeout = TimeSpan.FromHours(2) };
         TestToken.CreateAndAssignTokenForClient(httpClient, "IT-Operations");
-        var request = new HttpRequestMessage(HttpMethod.Post, "http://localhost:5298/api/itoperations/freeze")
+        HttpRequestMessage request = new(HttpMethod.Post, "http://localhost:5298/api/itoperations/freeze")
         {
             Content = new StringContent("{ \"ProfitYear\" : " + _profitYear + ", \"asOfDateTime\": \"2025-05-06T00:00:00-04:00\"}"
                 , Encoding.UTF8, "application/json")
         };
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("*/*"));
 
-        using var response = await httpClient.SendAsync(request);
+        using HttpResponseMessage response = await httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
 
-        var responseBody = await response.Content.ReadAsStringAsync();
+        string responseBody = await response.Content.ReadAsStringAsync();
         Console.WriteLine(responseBody);
 
         return Ok(aname, name, "");
@@ -305,11 +303,11 @@ public static class SmartActivityFactory
 
     private static async Task<Outcome> A17_Profit_Share_Report_edit_run(ApiClient apiClient, string aname, string name)
     {
-        var sb = new StringBuilder();
-        foreach (var kvp in Pay426NCriteria._reportCriteria.OrderBy(kvp => kvp.Key))
+        StringBuilder sb = new();
+        foreach (KeyValuePair<string, Pay426NCriteria> kvp in Pay426NCriteria._reportCriteria.OrderBy(kvp => kvp.Key))
         {
-            var criteria = kvp.Value;
-            var response = await apiClient.ReportsYearEndProfitShareReportYearEndProfitSharingReportEndpointAsync(
+            Pay426NCriteria criteria = kvp.Value;
+            YearEndProfitSharingReportResponse? response = await apiClient.ReportsYearEndProfitShareReportYearEndProfitSharingReportEndpointAsync(
                 criteria.IsYearEnd,
                 criteria.MinimumAgeInclusive,
                 criteria.MaximumAgeInclusive,
@@ -345,18 +343,18 @@ public static class SmartActivityFactory
     {
         // Translated from the swagger curl example
 
-        var httpClient = new HttpClient { Timeout = TimeSpan.FromHours(2) };
+        HttpClient httpClient = new() { Timeout = TimeSpan.FromHours(2) };
         TestToken.CreateAndAssignTokenForClient(httpClient, "Finance-Manager");
-        var request = new HttpRequestMessage(HttpMethod.Post, "http://localhost:5298/api/yearend/final")
+        HttpRequestMessage request = new(HttpMethod.Post, "http://localhost:5298/api/yearend/final")
         {
             Content = new StringContent("{ \"ProfitYear\" : " + _profitYear + "}", Encoding.UTF8, "application/json")
         };
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("*/*"));
 
-        using var response = await httpClient.SendAsync(request);
+        using HttpResponseMessage response = await httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
 
-        var responseBody = await response.Content.ReadAsStringAsync();
+        string responseBody = await response.Content.ReadAsStringAsync();
         Console.WriteLine(responseBody);
 
         return Ok(aname, name, "");
@@ -364,26 +362,28 @@ public static class SmartActivityFactory
 
     private static async Task<Outcome> A19_Get_Eligible_Employees(ApiClient apiClient, string aname, string name)
     {
-        var r = await apiClient.ReportsYearEndEligibilityGetEligibleEmployeesEndpointAsync(_profitYear, null, null, 0, int.MaxValue, null);
+        GetEligibleEmployeesResponse? r = await apiClient.ReportsYearEndEligibilityGetEligibleEmployeesEndpointAsync(_profitYear, null, null, 0, int.MaxValue, null);
         return Ok(aname, name, $"Records Loaded = {r.Response.Results.Count}");
     }
 
     private static async Task<Outcome> A20_Profit_Forfeit_PAY443(ApiClient apiClient, string aname, string name)
     {
-        var r = await apiClient.ReportsYearEndFrozenForfeituresAndPointsForYearEndpointAsync(true, _profitYear, null, null, 0, int.MaxValue, null);
+        ReportResponseBaseOfForfeituresAndPointsForYearResponse? r =
+            await apiClient.ReportsYearEndFrozenForfeituresAndPointsForYearEndpointAsync(true, _profitYear, null, null, 0, int.MaxValue, null);
         return Ok(aname, name, $"Records Loaded = {r.Response.Results.Count}");
     }
 
     private static async Task<Outcome> A21_Profit_Share_Update_PAY444(ApiClient apiClient, string aname, string name)
     {
-        var r = await apiClient.ReportsYearEndProfitShareUpdateProfitShareUpdateEndpointAsync(15, 4, 5, 0, 76_500, 0, 0, 0, 0, 0, 0, _profitYear, null, null, 0, int.MaxValue,
+        ProfitShareUpdateResponse? r = await apiClient.ReportsYearEndProfitShareUpdateProfitShareUpdateEndpointAsync(15, 4, 5, 0, 76_500, 0, 0, 0, 0, 0, 0, _profitYear, null, null,
+            0, int.MaxValue,
             null);
         return Ok(aname, name, $"Records Loaded = {r.Response.Results.Count}");
     }
 
     private static async Task<Outcome> A22_Profit_Share_Edit_PAY477(ApiClient apiClient, string aname, string name)
     {
-        var r = await apiClient.ReportsYearEndProfitShareEditEndpointAsync(15, 4, 5, 0,
+        ProfitShareEditResponse? r = await apiClient.ReportsYearEndProfitShareEditEndpointAsync(15, 4, 5, 0,
             76_500, 0, 0, 0, 0, 0, 0, _profitYear, null, null, 0, int.MaxValue, null);
         return Ok(aname, name, $"Records Loaded = {r.Response.Results.Count}");
     }
@@ -391,7 +391,7 @@ public static class SmartActivityFactory
     private static async Task<Outcome> A23_Profit_Master_Update(ApiClient apiClient, string aname, string name)
     {
         // Awards profit sharing.    
-        var r = await apiClient.ReportsYearEndProfitMasterProfitMasterUpdateEndpointAsync(15, 4, 5, 0,
+        ProfitMasterUpdateResponse? r = await apiClient.ReportsYearEndProfitMasterProfitMasterUpdateEndpointAsync(15, 4, 5, 0,
             76_500, 0, 0, 0, 0, 0, 0, _profitYear, null, null, 0, int.MaxValue, null);
         return Ok(aname, name, $"BeneficiariesEffected: {r.BeneficiariesEffected}, EmployeesEffected: {r.EmployeesEffected}");
     }
@@ -413,7 +413,7 @@ public static class SmartActivityFactory
 
     private static async Task<Outcome> A27_Prof_Share_by_Store(ApiClient apiClient, string aname, string name)
     {
-        var r = await apiClient.ReportsYearEndBreakdownEndpointAsync(false, null, _profitYear, null, null, 0, int.MaxValue, null);
+        ReportResponseBaseOfMemberYearSummaryDto? r = await apiClient.ReportsYearEndBreakdownEndpointAsync(false, null, _profitYear, null, null, 0, int.MaxValue, null);
         return Ok(aname, name, $"records returned = {r.Response.Results.Count}");
     }
 
