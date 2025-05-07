@@ -51,8 +51,7 @@ public class CleanupReportService : ICleanupReportService
         public char EmploymentStatusId { get; init; }
         public DateOnly? TerminationDate { get; init; }
         public int Ssn { get; init; }
-        public string LastName { get; init; } = null!;
-        public string FirstName { get; init; } = null!;
+        public string? FullName { get; init; } = null!;
         public short StoreNumber { get; init; }
         public string EmploymentTypeId { get; init; } = null!;
         public string EmploymentTypeName { get; init; } = null!;
@@ -608,8 +607,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                     EmploymentStatusId = pp.Demographic!.EmploymentStatusId,
                     TerminationDate = pp.Demographic!.TerminationDate,
                     Ssn = pp.Demographic!.Ssn,
-                    LastName = pp.Demographic!.ContactInfo.LastName,
-                    FirstName = pp.Demographic!.ContactInfo.FirstName,
+                    FullName = pp.Demographic!.ContactInfo.FullName,
                     StoreNumber = pp.Demographic!.StoreNumber,
                     EmploymentTypeId = pp.Demographic!.EmploymentTypeId.ToString(),
                     EmploymentTypeName = et.Name,
@@ -631,8 +629,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                         EmploymentStatusId = ' ',
                         TerminationDate = null,
                         Ssn = b.Contact!.Ssn,
-                        LastName = b.Contact!.ContactInfo.LastName,
-                        FirstName = b.Contact!.ContactInfo.FirstName,
+                        FullName = b.Contact!.ContactInfo.FullName,
                         StoreNumber = 0,
                         EmploymentTypeId = " ",
                         EmploymentTypeName = "",
@@ -736,17 +733,11 @@ FROM FILTERED_DEMOGRAPHIC p1
             // ──────────────────────────────────────────────────────────────────────────
             if (req.IncludeDetails)
             {
-                var ordered = employeeWithBalanceQry
-                    .OrderBy(x => x.Employee.LastName)
-                    .ThenBy(x => x.Employee.FirstName);
-
-                response.Response = await ordered
+               response.Response = await employeeWithBalanceQry
                     .Select(x => new YearEndProfitSharingReportDetail
                     {
                         BadgeNumber = x.Employee.BadgeNumber,
-                        EmployeeName = $"{x.Employee.LastName}, {x.Employee.FirstName}",
-                        FirstName = x.Employee.FirstName,
-                        LastName = x.Employee.LastName,
+                        EmployeeName = x.Employee.FullName!,
                         StoreNumber = x.Employee.StoreNumber,
                         EmployeeTypeCode = x.Employee.EmploymentTypeId[0],
                         EmployeeTypeName = x.Employee.EmploymentTypeName,
