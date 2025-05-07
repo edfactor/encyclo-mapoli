@@ -1,6 +1,4 @@
-﻿using Demoulas.Util.Extensions;
-
-namespace Demoulas.ProfitSharing.Common.Contracts.Request.Military;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request.Military;
 
 public sealed record CreateMilitaryContributionRequest : YearRequest
 {

@@ -8,9 +8,9 @@ using FastEndpoints;
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitShareReport;
 public sealed class YearEndProfitSharingSummaryReportEndpoint : Endpoint<FrozenProfitYearRequest, YearEndProfitSharingReportSummaryResponse>
 {
-    private readonly ICleanupReportService _cleanupReportService;
+    private readonly IProfitSharingSummaryReportService _cleanupReportService;
 
-    public YearEndProfitSharingSummaryReportEndpoint(ICleanupReportService cleanupReportService)
+    public YearEndProfitSharingSummaryReportEndpoint(IProfitSharingSummaryReportService cleanupReportService)
     {
         _cleanupReportService = cleanupReportService;
     }

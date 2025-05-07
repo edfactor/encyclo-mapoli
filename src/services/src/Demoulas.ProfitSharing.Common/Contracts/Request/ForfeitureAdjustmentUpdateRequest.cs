@@ -1,6 +1,4 @@
-using System;
-
-namespace Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request;
 
 /// <summary>
 /// Request to update forfeiture adjustments for a given badge number and profit year.

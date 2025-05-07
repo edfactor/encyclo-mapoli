@@ -11,9 +11,9 @@ using Demoulas.ProfitSharing.Security;
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitShareReport;
 public class YearEndProfitSharingReportEndpoint: EndpointWithCsvTotalsBase<YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse,YearEndProfitSharingReportDetail, YearEndProfitSharingReportEndpoint.YearEndProfitSharingReportClassMap>
 {
-    private readonly ICleanupReportService _cleanupReportService;
+    private readonly IProfitSharingSummaryReportService _cleanupReportService;
 
-    public YearEndProfitSharingReportEndpoint(ICleanupReportService cleanupReportService)
+    public YearEndProfitSharingReportEndpoint(IProfitSharingSummaryReportService cleanupReportService)
     {
         _cleanupReportService = cleanupReportService;
     }
