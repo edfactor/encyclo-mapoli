@@ -8,7 +8,7 @@ export enum ImpersonationRoles {
   ItOperations = "IT-Operations"
 }
 
-export interface SortedPaginationRequestDto extends PaginationParams, ISortParams {}
+export interface SortedPaginationRequestDto extends PaginationParams, ISortParams { }
 
 export interface ProfitYearRequest {
   profitYear: number;
@@ -341,7 +341,7 @@ export interface MasterInquiryDetail extends ProfitYearRequest {
   payFrequencyId?: number;
   transactionDate?: Date;
   currentIncomeYear?: number;
-  currentHoursYear?: number;  
+  currentHoursYear?: number;
 }
 
 export interface MasterInquiryRequest {
@@ -524,10 +524,10 @@ export interface BalanceByAgeDetail extends BalanceByDetailBase {
 }
 
 /* eslint-disable @typescript-eslint/no-empty-object-type */
-export interface BalanceByAge extends BalanceByBase<BalanceByAgeDetail> {}
+export interface BalanceByAge extends BalanceByBase<BalanceByAgeDetail> { }
 
 /* eslint-disable @typescript-eslint/no-empty-object-type */
-export interface BalanceByYears extends BalanceByBase<BalanceByAgeDetail> {}
+export interface BalanceByYears extends BalanceByBase<BalanceByAgeDetail> { }
 
 export interface VestedAmountsByAge {
   totalFullTime100PercentAmount: number;
@@ -920,8 +920,6 @@ export interface BreakdownByStoreTotals {
   totalVestedBalance: number;
 }
 
-
-
 export interface BreakdownByStoreResponse {
   reportName: string;
   reportDate: string;
@@ -1201,4 +1199,15 @@ export interface ReportQueryParams {
   includeBeneficiaries: boolean;
   includeEmployeesWithPriorProfitSharingAmounts: boolean;
   includeEmployeesWithNoPriorProfitSharingAmounts: boolean;
-} 
+}
+
+export interface ControlSheetRequest extends ProfitYearRequest {
+  pagination: SortedPaginationRequestDto;
+}
+
+export interface ControlSheetResponse {
+  employeeContributionProfitSharingAmount: number;
+  nonEmployeeProfitSharingAmount: number;
+  employeeBeneficiaryAmount: number;
+  profitSharingAmount: number;
+}

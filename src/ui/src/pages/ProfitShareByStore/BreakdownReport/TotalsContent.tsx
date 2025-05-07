@@ -39,7 +39,7 @@ const TotalsContent: React.FC<TotalsContentProps> = ({ store }) => {
   const data = [
     {
       label: "Total Number of Employees:",
-      value: breakdownByStoreTotals ? numberToCurrency(breakdownByStoreTotals.totalNumberEmployees) : "0"
+      value: breakdownByStoreTotals ? breakdownByStoreTotals.totalNumberEmployees : "0"
     },
     {
       label: "Total Beginning Balances:",
