@@ -45,6 +45,7 @@ const pathToReadableName: Record<string, string> = {
   "pay426-8": "Pay 426 Terminated Prior",
   "pay426-9": "Pay 426 Summary",
   "pay426-10": "Pay 426 Non Employee",
+  "pay426n": "Profit Sharing Report (PAY426N)",
   "pay450-summary": "Pay 450 Summary",
   "prof-control-sheet": "Control Sheet",
   "under-21-report": "Under 21 Age Report",

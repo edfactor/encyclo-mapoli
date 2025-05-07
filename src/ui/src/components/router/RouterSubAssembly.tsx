@@ -41,6 +41,7 @@ import Under21TA from "pages/ProfitShareByStore/Under21/Under21TA";
 import ProfitShareGrossReport from "pages/ProfitShareGrossReport/ProfitShareGrossReport";
 import ProfitShareReport from "pages/ProfitShareReport/ProfitShareReport";
 import ProfitShareTotals426 from "pages/ProfitShareTotals426/ProfitShareTotals426";
+
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Route } from "react-router-dom";
@@ -65,6 +66,7 @@ import MilitaryEntryAndModification
   from "../../pages/DecemberActivities/MilitaryEntryAndModification/MilitaryEntryAndModification";
 import DevDebug from "../../pages/Dev/DevDebug";
 import ForfeituresAdjustment from "../../pages/ForfeituresAdjustment/ForfeituresAdjustment";
+import PAY426N from "pages/PAY426Reports/PAY426N/PAY426N";
 
 const RouterSubAssembly: React.FC = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";
@@ -354,6 +356,10 @@ const RouterSubAssembly: React.FC = () => {
               <Route
                 path={ROUTES.DEV_DEBUG}
                 element={<DevDebug />}
+              />
+              <Route
+                path={ROUTES.PAY426N}
+                element={<PAY426N />}
               />
             </RouteSecurity>
           </Box>
