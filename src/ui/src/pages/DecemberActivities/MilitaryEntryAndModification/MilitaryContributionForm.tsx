@@ -96,6 +96,7 @@ const MilitaryContributionForm = ({
       <Grid2
         container
         spacing={3}>
+
         <Grid2 xs={6}>
           <Controller
             name="contributionDate"
@@ -117,9 +118,7 @@ const MilitaryContributionForm = ({
           />
         </Grid2>
 
-        <Grid2
-          xs={6}
-          sx={{ padding: 2 }}>
+        <Grid2 xs={6}>
           <FormLabel>Contribution Amount</FormLabel>
           <Controller
             name="contributionAmount"
@@ -140,8 +139,9 @@ const MilitaryContributionForm = ({
         </Grid2>
 
         <Grid2
-          xs={6}
-          sx={{ padding: 2 }}>
+          size={{ xs: 12 }}
+          container
+          spacing={2}>
           <Controller
             name="addContributionYear"
             control={control}
