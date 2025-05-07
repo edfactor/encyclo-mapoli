@@ -112,7 +112,7 @@ public class BreakdownReportByStoreTests
     {
         pap.insertHeader();
 
-        foreach (IGrouping<string?, MemberYearSummaryDto> grouping in employees.GroupBy(e => e.EmployeeCategory))
+        foreach (IGrouping<string?, MemberYearSummaryDto> grouping in employees.GroupBy(e => e.PayClassificationName))
         {
             pap.newLine();
             pap.line(grouping.Key ?? "");
@@ -128,7 +128,9 @@ public class BreakdownReportByStoreTests
 
     public static string PrintEmployee(MemberYearSummaryDto member)
     {
-        string ecStr = member.EnrollmentId == 1 || member.EnrollmentId == 3 || member.EnrollmentId == 4 ? " " + member.EnrollmentId : "";
+#pragma warning disable S125
+        string ecStr = string.Empty; //member.EnrollmentId == 1 || member.EnrollmentId == 3 || member.EnrollmentId == 4 ? " " + member.EnrollmentId : "";
+#pragma warning restore S125
 
         string formattedLine =
             $"     {member.BadgeNumber,-5} {member.FullName,-24} " +
