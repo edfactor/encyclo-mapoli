@@ -39,7 +39,7 @@ INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUM
 VALUES(6,2, 'Duplicate Names and Birthdays', '','duplicate-names-and-birthdays', 1, 4, '', 0);
 --sub values for December Activities
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(7,1, 'Military Contributions', 'TPR008-13','military-entry-and-modification', 1, 2, '', 0);
+VALUES(7,1, 'Military Contributions', '008-13','military-entry-and-modification', 1, 2, '', 0);
 
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
 VALUES(8,1, 'UnForfeit', 'QPREV-PROF','rehire-forfeitures', 1, 3, '', 0);
@@ -48,7 +48,7 @@ INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUM
 VALUES(9,1, 'Terminations', 'QPAY066','prof-term', 1, 4, '', 0);
 
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(10,1, 'Forfeitures', 'TPR008-12','forfeitures-adjustment', 1, 5, '', 0);
+VALUES(10,1, 'Forfeitures', '008-12','forfeitures-adjustment', 1, 5, '', 0);
 
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
 VALUES(11,1, 'Distributions and Forfeitures', 'QPAY129','distributions-and-forfeitures', 1, 6, '', 0);
@@ -60,7 +60,7 @@ VALUES(13,1, 'Profit Share Report', 'PAY426','profit-share-report', 1, 9, '', 0)
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
 VALUES(14,54, 'Fiscal Close', '','fiscal-close', 1, 2, '', 0);
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(15,14, 'Manage Executive Hours and Dollars', 'TPR008-09','manage-executive-hours-and-dollars', 1, 1, '', 0);
+VALUES(15,14, 'Manage Executive Hours and Dollars', '008-09','manage-executive-hours-and-dollars', 1, 1, '', 0);
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
 VALUES(16,14, 'YTD Wages Extract', 'PROF-DOLLAR-EXTRACT','ytd-wages-extract', 1, 2, '', 0);
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
