@@ -13,7 +13,7 @@ internal sealed class ProfitDetailFaker : Faker<ProfitDetail>
 
         Demographic currentDemographic = demographicQueue.Dequeue();
         var taxCodeFaker = new TaxCodeFaker();
-
+        var profitCodeFaker = new ProfitCodeFaker();
         RuleFor(d => d.Id, f => _profitDetailCounter++);
 
         RuleFor(d => d.Ssn, (f, o) =>
@@ -45,6 +45,7 @@ internal sealed class ProfitDetailFaker : Faker<ProfitDetail>
                 ProfitCode.Constants.IncomingQdroBeneficiary.Id,
                 ProfitCode.Constants.Incoming100PercentVestedEarnings.Id,
                 ProfitCode.Constants.Outgoing100PercentVestedPayment.Id))
+            .RuleFor(pd => pd.ProfitCode, fake => profitCodeFaker.Generate())
             .RuleFor(pd => pd.Contribution, fake => fake.Finance.Amount(0, 10000))
             .RuleFor(pd => pd.Earnings, fake => fake.Finance.Amount(-5000, 10000))
             .RuleFor(pd => pd.Forfeiture, fake => fake.Finance.Amount(0, short.MaxValue))
