@@ -247,23 +247,19 @@ public static class SmartActivityFactory
 
     private static async Task<Outcome> A12_PROF_LOAD_YREND_DEMO_PROFITSHARE(ApiClient apiClient, string aname, string name)
     {
-#if false
-        var req = new SetFrozenStateRequest();
-        req.AsOfDateTime = DateTimeOffset.Now;
-        var r = await apiClient.ItOperationsGetActiveFrozenDemographicEndpointAsync(null, req);
-        return new Outcome(aname, name, "OK", $"Frozen at {r.AsOfDateTime} by {r.FrozenBy} isActive:{r.IsActive}", "");
-#endif
-/*        example from swagger
-        curl -X 'POST' \
-        'https://ps.qa.demoulas.net:8443/api/itoperations/freeze' \
-        -H 'accept: application/json' \
-        -H 'Authorization: ...\
-        -H 'Content-Type: application/json' \
-        -d '{
-        "asOfDateTime": "2025-05-06T00:00:00-04:00",
-        "profitYear": 2025
-    }'
-*/
+        // Swagger seems to not document POST calls correctly.  The entities dont have the required fields.
+        // So the generated code also doesnt fit the bill.
+        // The work around is to use the "curL" suggested by swagger, which does have the correct arguments in the post. 
+        //     example from swagger
+        //     curl -X 'POST' \
+        //     'https://ps.qa.demoulas.net:8443/api/itoperations/freeze' \
+        //     -H 'accept: application/json' \
+        //     -H 'Authorization: ...\
+        //     -H 'Content-Type: application/json' \
+        //     -d '{
+        //     "asOfDateTime": "2025-05-06T00:00:00-04:00",
+        //     "profitYear": 2025
+        // }'
         var httpClient = new HttpClient { Timeout = TimeSpan.FromHours(2) };
         TestToken.CreateAndAssignTokenForClient(httpClient, "IT-Operations");
         var request = new HttpRequestMessage(HttpMethod.Post, "http://localhost:5298/api/itoperations/freeze")
@@ -280,7 +276,6 @@ public static class SmartActivityFactory
         Console.WriteLine(responseBody);
 
         return Ok(aname, name, "");
-        //return TBD(aname, name)
     }
 
     private static async Task<Outcome> A13A_PAYPROFIT_SHIFT(ApiClient apiClient, string aname, string name)
