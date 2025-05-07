@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Data;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace YEMatch;
@@ -35,7 +36,15 @@ public static class ScriptRunner
 
         if (!string.IsNullOrEmpty(error))
         {
-            Console.WriteLine($"Error: {error}");
+            Console.WriteLine($"<ERROR-OUTPUT>: {error}</ERROR-OUTPUT>");
+        }
+        
+        var stdout = process.StandardOutput.ReadToEnd();
+        Console.WriteLine($"<STANDARD-OUT>{stdout}</STANDARD-OUT>");
+        
+        if (stdout.Contains("error", StringComparison.CurrentCultureIgnoreCase))
+        {
+            throw new EvaluateException($"Error running script: {scriptName}");
         }
 
         return process.ExitCode;

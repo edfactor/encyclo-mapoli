@@ -6,13 +6,15 @@ using YEMatch.YEMatch;
 
 namespace YEMatch;
 
+#pragma warning disable S1144
+
 [SuppressMessage("Major Code Smell", "S125:Sections of code should not be commented out")]
 [SuppressMessage("Major Code Smell", "S1854:Unused assignments should be removed")]
 internal static class Program
 {
-    private static readonly HashSet<string> activitiesWithUpdates = ["A6", "A7", "A12", "A13A", "A13B", "A18", "A20", "A23", "A24"];
+    private static readonly HashSet<string> activitiesWithUpdates = ["A6", "A7", "A12", "A13A", "A13B", "A18", "A20", "A21", "A22", "A23", "A24"];
     
-    // Steps which modify the database
+    // Steps which modify the database (or input to next job which does) on READY 
     // A6 - Clear exec hours and dollars (only on ready)
     // A7 - Enter executive hours and dollars
     // A12 - Year end create DEMO_PROFSHARE / Frozen
@@ -20,7 +22,9 @@ internal static class Program
     // A13B - PAY PROFIT SHIFT (only on ready)
     // A18 - Profit Share Report  <----------------------- Pay426 updates the Earned Points, ZeroContributionReason 
     // A20 - PAY443 - Profit Share Forfeit   
-    // A23 - ......
+    // A21 - Profit Share Update (updates PAYPROFIT shared values)
+    // A22 - Profit Share Edit (writes file used by A23)
+    // A23 - Profit Master Update
     // A24 - Updates enrollement_id 
 
     private static async Task Main(string[] args)
@@ -70,8 +74,8 @@ internal static class Program
         }
 
         // -------------------------------------------------
-        // Activities are run in a varietity of ways depending on the demands of the moment.    
-        // The current way of specifyng what gets run is "lack luster" 
+        // Activities are run in a myriad of ways depending on the demands of the moment.    
+        // The current way of specifying what gets run is "lack luster" 
         // Some variations are;
         //  - Only SMART
         //  - Only Ready
@@ -86,8 +90,8 @@ internal static class Program
         var startOnStep = "A18"; // step to start with, ie. "A10"
         var stopOnStep = "A23"; // step to start with, ie. "A10"
 
-        startOnStep = "A0"; // step to start with, ie. "A10"
-        stopOnStep = "A0"; // step to start with, ie. "A10"
+        startOnStep = ""; // step to start with, ie. "A10"
+        stopOnStep = ""; // step to start with, ie. "A10"
 
 
         // ------------------- Start of selection of steps zone
@@ -115,10 +119,19 @@ internal static class Program
         // Adjust this select ready/smart jobs
         var activitiesToRun = readyActivities;
 
-        // Specfiy selects out a specific set of activities to run.   The "RX" ones are ready activities, and the "SX" ones are smart activities.
+        // Specify selects out a specific set of activities to run.   The "RX" ones are ready activities, and the "SX" ones are smart activities.
         // Test ProfitMaster/PROFTLB on the smart side 
         // THE "R2S" is a special case, it is an activity which clones the READY database into SMART
-        activitiesToRun = Specify(bothReadyAndSmartActivities, ["R0", "R18", "R20", "R21", "R22", "R2S" /* "R23", "S23"*/]);
+        //activitiesToRun = Specify(bothReadyAndSmartActivities, ["R0", "R2S",  "R18", "S18" ]); // "R20", "R21", "R22", "R23"]);
+
+        // activitiesToRun = Specify(bothReadyAndSmartActivities, ["", "S18"]); // "S23"]);
+        
+        // activitiesToRun = Specify(bothReadyAndSmartActivities, ["R0", "R18", "R20", "R21", "R22", "R2S"]);
+        activitiesToRun = Specify(bothReadyAndSmartActivities, [ "R23"]);
+//        activitiesToRun = Specify(bothReadyAndSmartActivities, [ "S23" ]);
+//        activitiesToRun = Specify(bothReadyAndSmartActivities, [ "R23" ]);
+//        activitiesToRun = Specify(bothReadyAndSmartActivities, [ "R2S" ]);
+        // activitiesToRun = Specify(bothReadyAndSmartActivities, ["R0", "R27"]);
         // activitiesToRun = Specify(bothReadyAndSmartActivities, ["R23"]);
 
 
@@ -127,9 +140,9 @@ internal static class Program
         // ensure we stop if a stop is requested on either side
         bool stopOnSmartSide = activitiesToRun.Any(a => a is SmartActivity);
         
-        if(activitiesToRun.Any(a=> a is SmartActivity && a != SmartActivityFactory.readyToSmartInit )){
+        if(activitiesToRun.Any(a=> a is SmartActivity && a != SmartActivityFactory.ReadyToSmartInit )){
             // Quick authentication sanity check
-            var r = await SmartActivityFactory.client!.DemoulasCommonApiEndpointsAppVersionInfoEndpointAsync(null);
+            var r = await SmartActivityFactory.Client!.DemoulasCommonApiEndpointsAppVersionInfoEndpointAsync(null);
             // Might be nice to also include the database version. What database is used.  Wall clock time.
             Console.WriteLine($"{SmartActivity.smartPrefix}Connected to SMART build:" + r.BuildNumber + " git-hash:" + r.ShortGitHash);
         }
@@ -194,7 +207,7 @@ internal static class Program
             {
                 if (isReady && key == "2S")
                 {
-                    match = SmartActivityFactory.readyToSmartInit!;
+                    match = SmartActivityFactory.ReadyToSmartInit!;
                 }
                 else
                 {

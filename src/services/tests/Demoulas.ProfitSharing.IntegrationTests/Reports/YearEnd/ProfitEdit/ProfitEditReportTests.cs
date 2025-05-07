@@ -23,9 +23,9 @@ public record Pay477Entry(
     string Name
 );
 
-public class ProfitEditTests : PristineBaseTest
+public class ProfitEditReportTests : PristineBaseTest
 {
-    public ProfitEditTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+    public ProfitEditReportTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
     {
     }
 

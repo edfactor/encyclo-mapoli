@@ -1,4 +1,4 @@
-DJDE JDE=PAY426,JDL=PAYROL,END,;PAY447                                                                                                   05/02/25  14:42     PAGE   1
+DJDE JDE=PAY426,JDL=PAYROL,END,;PAY447                                                                                                   05/07/25  15:13     PAGE   1
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0700000       3,330.00            .00           888.00                                          0  TRUONG, ERICA
@@ -57,7 +57,7 @@
  0700100            .00         115.00              .00                                          0  NIXON, ETHEL
  0700101            .00       1,115.00              .00           >64 & >5 100%                  6  HOLLAND, WARREN
  0700102       9,870.00         940.00         2,632.00                                          0  MARTIN, CHARLOTTE
- 0700108       7,365.00         290.00         1,964.00                                          0  PARK, GRACEPAY447                                                                                                   05/02/25  14:42     PAGE   2
+ 0700108       7,365.00         290.00         1,964.00                                          0  PARK, GRACEPAY447                                                                                                   05/07/25  15:13     PAGE   2
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0700109            .00          30.00              .00           100% EARNINGS                  6  DOUGHTY, ELLIE
@@ -116,7 +116,7 @@
  0700211            .00          50.00              .00           100% EARNINGS                  0  HOOVER, MADELYN
  0700213            .00            .00              .00           TERM > 1000 HRS                2  PETERSEN, HEATHER
  0700216       3,375.00         170.00           900.00                                          0  BARTLETT, WESTON
- 0700218            .00       1,940.00              .00           >64 & >5 100%                  6  BLACKBURN, BREEPAY447                                                                                                   05/02/25  14:42     PAGE   3
+ 0700218            .00       1,940.00              .00           >64 & >5 100%                  6  BLACKBURN, BREEPAY447                                                                                                   05/07/25  15:13     PAGE   3
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0700219            .00          30.00              .00           100% EARNINGS                  0  HARRIS, IRIS
@@ -175,7 +175,7 @@
  0700335      13,020.00       5,640.00         3,472.00                                          0  CHANG, HENRY
  0700336            .00       2,895.00              .00           >64 & >5 100%                  6  SUTTON, EZEKIEL
  0700337            .00          30.00              .00           100% EARNINGS                  0  HERRING, KINSLEY
- 0700339            .00         740.00              .00           >64 & >5 100%                  6  BANKS, CLARAPAY447                                                                                                   05/02/25  14:42     PAGE   4
+ 0700339            .00         740.00              .00           >64 & >5 100%                  6  BANKS, CLARAPAY447                                                                                                   05/07/25  15:13     PAGE   4
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0700340            .00          15.00              .00           100% EARNINGS                  0  PINEDA, OLIVIA
@@ -234,7 +234,7 @@
  0700447            .00       1,910.00              .00                                          0  BYRD, LUCAS
  0700449            .00          40.00              .00           100% EARNINGS                  0  CLINTON, WESTON
  0700451      10,290.00         825.00         2,744.00                                          0  POWERS, MUHAMMAD
- 0700453            .00       8,600.00              .00           >64 & >5 100%                  6  WILKINS, BREEPAY447                                                                                                   05/02/25  14:42     PAGE   5
+ 0700453            .00       8,600.00              .00           >64 & >5 100%                  6  WILKINS, BREEPAY447                                                                                                   05/07/25  15:13     PAGE   5
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0700457            .00         395.00              .00           TERM > 1000 HRS                2  FINN, LILIANA
@@ -293,7 +293,7 @@
  0700561            .00         770.00              .00                                          0  DOUGHERTY, ETHEL
  0700565      14,100.00       1,110.00         3,760.00                                          0  TREVINO, ETHAN
  0700567            .00       2,795.00              .00           >64 & >5 100%                  6  PINEDA, NOLAN
- 0700569            .00         195.00              .00                                          0  FOWLER, BROOKLYNPAY447                                                                                                   05/02/25  14:42     PAGE   6
+ 0700569            .00         195.00              .00                                          0  FOWLER, BROOKLYNPAY447                                                                                                   05/07/25  15:13     PAGE   6
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0700571            .00            .00              .00           18,19,20 > 1000                1  FRAZIER, OLIVIA
@@ -352,7 +352,7 @@
  0700657       2,625.00            .00           700.00                                          0  BLACKBURN, JOSHUA
  0700661            .00          35.00              .00           100% EARNINGS                  0  PARK, WESTON
  0700664            .00          11.69              .00           100% EARNINGS                  7  FRY, NOVA
- 0700664       2,565.00         313.31           684.00                                          0  FRY, NOVAPAY447                                                                                                   05/02/25  14:42     PAGE   7
+ 0700664       2,565.00         313.31           684.00                                          0  FRY, NOVAPAY447                                                                                                   05/07/25  15:13     PAGE   7
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0700665            .00           1.13              .00           100% EARNINGS                  0  FRIEDMAN, SAM
@@ -411,7 +411,7 @@
  0700774            .00          35.00              .00           100% EARNINGS                  0  BENTLEY, WYATT
  0700776            .00         266.04              .00           100% EARNINGS                  6  LANG, ETHAN
  0700776            .00          13.96              .00           >64 & >5 100%                  6  LANG, ETHAN
- 0700777            .00          50.00              .00           100% EARNINGS                  6  BIFF, PATRICKPAY447                                                                                                   05/02/25  14:42     PAGE   8
+ 0700777            .00          50.00              .00           100% EARNINGS                  6  BIFF, PATRICKPAY447                                                                                                   05/07/25  15:13     PAGE   8
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0700778            .00         540.00              .00                                          0  MOSES, XAVIER
@@ -470,7 +470,7 @@
  0700867      11,625.00      18,585.00         3,100.00                                          0  MASTERS, BENJAMIN
  0700868            .00           1.18              .00           100% EARNINGS                  0  HALL, IRIS
  0700868       8,655.00       1,653.82         2,308.00                                          0  HALL, IRIS
- 0700870            .00            .52              .00           100% EARNINGS                  0  BOYLE, ABIGAILPAY447                                                                                                   05/02/25  14:42     PAGE   9
+ 0700870            .00            .52              .00           100% EARNINGS                  0  BOYLE, ABIGAILPAY447                                                                                                   05/07/25  15:13     PAGE   9
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0700870       2,415.00         119.48           644.00                                          0  BOYLE, ABIGAIL
@@ -529,7 +529,7 @@
  0700924       3,645.00       7,845.00           972.00                                          0  FIELDS, LUCY
  0700925      10,245.00      13,895.00         2,732.00                                          0  VALENZUELA, CAMILA
  0700927            .00           1.10              .00           100% EARNINGS                  0  WASHINGTON, OLIVIA
- 0700927       2,790.00         763.90           744.00                                          0  WASHINGTON, OLIVIAPAY447                                                                                                   05/02/25  14:42     PAGE  10
+ 0700927       2,790.00         763.90           744.00                                          0  WASHINGTON, OLIVIAPAY447                                                                                                   05/07/25  15:13     PAGE  10
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0700928       9,045.00         715.00         2,412.00                                          0  BENTON, JACOB
@@ -588,7 +588,7 @@
  0700984       8,670.00         390.00         2,312.00                                          0  FLOWERS, ANDREW
  0700985            .00            .00              .00           18,19,20 > 1000                1  KELLER, ELIZABETH
  0700987            .00            .22              .00           100% EARNINGS                  0  VILLARREAL, CHARLIE
- 0700987       3,375.00         484.78           900.00                                          0  VILLARREAL, CHARLIEPAY447                                                                                                   05/02/25  14:42     PAGE  11
+ 0700987       3,375.00         484.78           900.00                                          0  VILLARREAL, CHARLIEPAY447                                                                                                   05/07/25  15:13     PAGE  11
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0700988            .00           2.25              .00           100% EARNINGS                  0  MERCADO, LEO
@@ -647,7 +647,7 @@
  0701053      17,685.00      17,515.00         4,716.00                                          0  CASE, LILLIAN
  0701054       9,270.00      16,850.00         2,472.00                                          0  FARLEY, GARRETT
  0701055      15,180.00      10,855.00         4,048.00                                          0  GOULD, DREW
- 0701056            .00            .88              .00           100% EARNINGS                  0  MOLINA, BROOKLYNPAY447                                                                                                   05/02/25  14:42     PAGE  12
+ 0701056            .00            .88              .00           100% EARNINGS                  0  MOLINA, BROOKLYNPAY447                                                                                                   05/07/25  15:13     PAGE  12
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0701056            .00         144.12              .00                                          0  MOLINA, BROOKLYN
@@ -706,7 +706,7 @@
  0701118      12,750.00       1,615.00         3,400.00                                          0  MAGANA, MUHAMMAD
  0701119            .00         530.00              .00           >64 & >5 100%                  6  PETERSEN, BEAU
  0701120            .00       2,550.00              .00           >64 & >5 100%                  6  RIVERA, BREE
- 0701122      10,005.00            .00         2,668.00                                          0  AYERS, EDENPAY447                                                                                                   05/02/25  14:42     PAGE  13
+ 0701122      10,005.00            .00         2,668.00                                          0  AYERS, EDENPAY447                                                                                                   05/07/25  15:13     PAGE  13
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0701123      11,745.00       7,245.00         3,132.00                                          0  BRYANT, COLTON
@@ -765,7 +765,7 @@
  0701181       3,540.00       1,190.32           944.00                                          0  TREVINO, CARTER
  0701182      10,560.00       1,265.00         2,816.00                                          0  BEST, GIANNA
  0701183      23,790.00      37,035.00         6,344.00                                          0  McKENZIE, CAMERON
- 0701184            .00           6.70              .00           100% EARNINGS                  0  STOKES, OMARPAY447                                                                                                   05/02/25  14:42     PAGE  14
+ 0701184            .00           6.70              .00           100% EARNINGS                  0  STOKES, OMARPAY447                                                                                                   05/07/25  15:13     PAGE  14
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0701184      14,295.00       3,683.30         3,812.00                                          0  STOKES, OMAR
@@ -824,7 +824,7 @@
  0701243       7,500.00         944.04         2,000.00           >64 & >5 100%                  6  ROBINSON, DAISY
  0701244            .00            .00              .00           TERM > 1000 HRS                2  WALKER, ELIZABETH
  0701245       3,645.00         345.00           972.00                                          0  BOYLE, AYLA
- 0701246            .00            .00              .00           TERM > 1000 HRS                2  RAMOS, BENJAMINPAY447                                                                                                   05/02/25  14:42     PAGE  15
+ 0701246            .00            .00              .00           TERM > 1000 HRS                2  RAMOS, BENJAMINPAY447                                                                                                   05/07/25  15:13     PAGE  15
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0701249            .00      29,370.00              .00           >64 & >5 100%                  6  NELSON, NICOLE
@@ -883,7 +883,7 @@
  0701310      11,250.00       2,355.00         3,000.00                                          0  SHEPHERD, MELODY
  0701311            .00           5.62              .00           100% EARNINGS                  0  VAUGHAN, EZRA
  0701311       5,520.00       2,094.38         1,472.00                                          0  VAUGHAN, EZRA
- 0701312       3,480.00       3,500.00           928.00                                          0  NGUYEN, SAMUELPAY447                                                                                                   05/02/25  14:42     PAGE  16
+ 0701312       3,480.00       3,500.00           928.00                                          0  NGUYEN, SAMUELPAY447                                                                                                   05/07/25  15:13     PAGE  16
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0701313       2,520.00            .00           672.00                                          0  TRUONG, CHARLIE
@@ -942,7 +942,7 @@
  0701364      11,190.00       7,260.00         2,984.00                                          0  LAMBERT, JOHN
  0701365       8,370.00       1,780.00         2,232.00                                          0  DOUGHTY, AARON
  0701366       2,565.00            .00           684.00                                          0  NAVARRO, RUBY
- 0701367      18,240.00      12,025.00         4,864.00                                          0  CAMPOS, CHERPAY447                                                                                                   05/02/25  14:42     PAGE  17
+ 0701367      18,240.00      12,025.00         4,864.00                                          0  CAMPOS, CHERPAY447                                                                                                   05/07/25  15:13     PAGE  17
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0701370      13,590.00      11,040.00         3,624.00                                          0  SAMPSON, CHRISTIAN
@@ -1001,7 +1001,7 @@
  0701426      14,340.00       2,164.05         3,824.00                                          0  PACHECO, MADISON
  0701427            .00           1.48              .00           100% EARNINGS                  0  VAUGHAN, EMILIA
  0701427       3,945.00         833.52         1,052.00                                          0  VAUGHAN, EMILIA
- 0701428       8,610.00       4,375.00         2,296.00                                          0  BERNAL, EMMAPAY447                                                                                                   05/02/25  14:42     PAGE  18
+ 0701428       8,610.00       4,375.00         2,296.00                                          0  BERNAL, EMMAPAY447                                                                                                   05/07/25  15:13     PAGE  18
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0701429            .00            .28              .00           100% EARNINGS                  0  VALENZUELA, HARPER
@@ -1060,7 +1060,7 @@
  0701486            .00         445.00              .00           100% EARNINGS                  0  BREWER, HUDSON
  0701488       4,290.00         675.00         1,144.00                                          0  CRAIG, PARKER
  0701489      12,720.00      12,275.00         3,392.00                                          0  FINN, BLAKE
- 0701490      10,080.00       3,300.00         2,688.00                                          0  JONES, KARENPAY447                                                                                                   05/02/25  14:42     PAGE  19
+ 0701490      10,080.00       3,300.00         2,688.00                                          0  JONES, KARENPAY447                                                                                                   05/07/25  15:13     PAGE  19
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0701491      30,390.00      46,425.00         8,104.00                                          0  SMITH, MAVERICK
@@ -1119,7 +1119,7 @@
  0701540       2,715.00         130.00           724.00                                          0  MARQUEZ, ADRIAN
  0701541      14,745.00      20,945.00         3,932.00                                          0  BENDER, GARRETT
  0701542            .00           1.10              .00           100% EARNINGS                  0  FLOWERS, ANGEL
- 0701542       4,515.00         893.90         1,204.00                                          0  FLOWERS, ANGELPAY447                                                                                                   05/02/25  14:42     PAGE  20
+ 0701542       4,515.00         893.90         1,204.00                                          0  FLOWERS, ANGELPAY447                                                                                                   05/07/25  15:13     PAGE  20
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0701544            .00           1.28              .00           100% EARNINGS                  0  BLEVINS, HEATHER
@@ -1178,7 +1178,7 @@
  0701592            .00         504.50              .00           >64 & >5 100%                  6  DOUGLAS, ALICIA
  0701593            .00         260.00              .00           100% EARNINGS                  0  FINN, ABIGAIL
  0701594      20,190.00      16,610.00         5,384.00                                          0  LEWIS, ANGEL
- 0701595       3,120.00         545.00           832.00                                          0  HALEY, MIAPAY447                                                                                                   05/02/25  14:42     PAGE  21
+ 0701595       3,120.00         545.00           832.00                                          0  HALEY, MIAPAY447                                                                                                   05/07/25  15:13     PAGE  21
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0701596      13,200.00       6,735.00         3,520.00                                          0  WILSON, SAMUEL
@@ -1237,7 +1237,7 @@
  0701654       8,850.00         805.00         2,360.00                                          0  MACDONALD, ADDISON
  0701655            .00           2.45              .00           100% EARNINGS                  0  ROBERTS, KATHERINE
  0701655       4,500.00       1,297.55         1,200.00                                          0  ROBERTS, KATHERINE
- 0701656      11,145.00       1,650.00         2,972.00                                          0  EVERETT, DAVIDPAY447                                                                                                   05/02/25  14:42     PAGE  22
+ 0701656      11,145.00       1,650.00         2,972.00                                          0  EVERETT, DAVIDPAY447                                                                                                   05/07/25  15:13     PAGE  22
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0701658            .00            .30              .00           100% EARNINGS                  0  MASTERS, DIEGO
@@ -1296,7 +1296,7 @@
  0701715            .00         490.00              .00           100% EARNINGS                  0  PETERSEN, CHRISTOPHER
  0701716            .00            .40              .00           100% EARNINGS                  0  McMILLAN, CARTER
  0701716      13,080.00       1,904.60         3,488.00                                          0  McMILLAN, CARTER
- 0701717       3,480.00         415.00           928.00                                          0  MIYAZAKI, LILLIANPAY447                                                                                                   05/02/25  14:42     PAGE  23
+ 0701717       3,480.00         415.00           928.00                                          0  MIYAZAKI, LILLIANPAY447                                                                                                   05/07/25  15:13     PAGE  23
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0701719      10,170.00       1,330.00         2,712.00                                          0  YANG, SAMUEL
@@ -1355,7 +1355,7 @@
  0701769            .00         640.00              .00           >64 & >5 100%                  6  HANNA, RUBY
  0701771       4,770.00         125.00         1,272.00                                          0  LUCERO, ENZO
  0701772            .00           6.97              .00           100% EARNINGS                  0  PACHECO, ADRIAN
- 0701772       8,565.00       2,768.03         2,284.00                                          0  PACHECO, ADRIANPAY447                                                                                                   05/02/25  14:42     PAGE  24
+ 0701772       8,565.00       2,768.03         2,284.00                                          0  PACHECO, ADRIANPAY447                                                                                                   05/07/25  15:13     PAGE  24
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0701773       5,700.00         720.00         1,520.00                                          0  AYERS, CAMILA
@@ -1414,7 +1414,7 @@
  0701826            .00       6,583.53              .00           100% EARNINGS                  0  MICHAELS, NORA
  0701826      12,600.00       4,141.47         3,360.00                                          0  MICHAELS, NORA
  0701827            .00         120.00              .00           100% EARNINGS                  0  JOHNSON, ISAAC
- 0701828            .00            .41              .00           100% EARNINGS                  0  HOLLOWAY, MADELYNPAY447                                                                                                   05/02/25  14:42     PAGE  25
+ 0701828            .00            .41              .00           100% EARNINGS                  0  HOLLOWAY, MADELYNPAY447                                                                                                   05/07/25  15:13     PAGE  25
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0701828       2,775.00         499.59           740.00                                          0  HOLLOWAY, MADELYN
@@ -1473,7 +1473,7 @@
  0701882      12,900.00       1,225.00         3,440.00                                          0  RIVERA, CHRISTINE
  0701883            .00         475.00              .00           >64 & >5 100%                  6  DUFFY, JASPER
  0701885       4,215.00         570.00         1,124.00                                          0  WASHINGTON, RAYMOND
- 0701887            .00           9.03              .00           100% EARNINGS                  0  BARTLETT, MIAPAY447                                                                                                   05/02/25  14:42     PAGE  26
+ 0701887            .00           9.03              .00           100% EARNINGS                  0  BARTLETT, MIAPAY447                                                                                                   05/07/25  15:13     PAGE  26
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0701887      15,420.00       4,165.97         4,112.00                                          0  BARTLETT, MIA
@@ -1532,7 +1532,7 @@
  0701945       7,185.00       2,455.00         1,916.00                                          0  BANKS, OLIVER
  0701947      13,905.00       5,285.00         3,708.00                                          0  CRANE, BLAKE
  0701949       8,700.00       9,465.00         2,320.00                                          0  ACOSTA, KINSLEY
- 0701950       9,480.00       1,325.00         2,528.00                                          0  STANLEY, RAYMONDPAY447                                                                                                   05/02/25  14:42     PAGE  27
+ 0701950       9,480.00       1,325.00         2,528.00                                          0  STANLEY, RAYMONDPAY447                                                                                                   05/07/25  15:13     PAGE  27
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0701951      13,905.00       3,270.00         3,708.00                                          0  POTTS, CHRISTINE
@@ -1591,7 +1591,7 @@
  0702004            .00           2.42              .00           100% EARNINGS                  0  AYALA, LEAH
  0702004       7,635.00       1,822.58         2,036.00                                          0  AYALA, LEAH
  0702005       7,560.00            .00         2,016.00                                          0  BLEVINS, AMELIA
- 0702006            .00           3.56              .00           100% EARNINGS                  0  BIFF, EMMAPAY447                                                                                                   05/02/25  14:42     PAGE  28
+ 0702006            .00           3.56              .00           100% EARNINGS                  0  BIFF, EMMAPAY447                                                                                                   05/07/25  15:13     PAGE  28
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0702006      10,230.00       2,321.44         2,728.00                                          0  BIFF, EMMA
@@ -1650,7 +1650,7 @@
  0702068       8,760.00       6,645.00         2,336.00                                          0  MAGANA, OMAR
  0702069            .00         680.00              .00                                          0  ESPINOSA, ADELINE
  0702071      20,640.00      21,195.00         5,504.00                                          0  BARTLETT, OLIVIA
- 0702072      13,470.00       4,375.00         3,592.00                                          0  BRIGGS, COOPERPAY447                                                                                                   05/02/25  14:42     PAGE  29
+ 0702072      13,470.00       4,375.00         3,592.00                                          0  BRIGGS, COOPERPAY447                                                                                                   05/07/25  15:13     PAGE  29
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0702073            .00           3.45              .00           100% EARNINGS                  0  BEST, AMARA
@@ -1709,7 +1709,7 @@
  0702130            .00           2.88              .00           100% EARNINGS                  0  NIXON, HENRY
  0702130      13,155.00       2,817.12         3,508.00                                          0  NIXON, HENRY
  0702131       3,525.00         405.00           940.00                                          0  MURPHY, MARCO
- 0702132            .00            .27              .00           100% EARNINGS                  0  WADE, JAXONPAY447                                                                                                   05/02/25  14:42     PAGE  30
+ 0702132            .00            .27              .00           100% EARNINGS                  0  WADE, JAXONPAY447                                                                                                   05/07/25  15:13     PAGE  30
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0702132       2,565.00         439.73           684.00                                          0  WADE, JAXON
@@ -1768,7 +1768,7 @@
  0702180      10,770.00            .00         2,872.00                                          0  PORTILLO, EMMA
  0702182      34,740.00      41,180.00         9,264.00                                          0  MARTIN, LIAM
  0702183       4,965.00       2,460.00         1,324.00           >64 & >5 100%                  6  RAMOS, CAMERON
- 0702185            .00            .67              .00           100% EARNINGS                  0  SANTANA, ADAMPAY447                                                                                                   05/02/25  14:42     PAGE  31
+ 0702185            .00            .67              .00           100% EARNINGS                  0  SANTANA, ADAMPAY447                                                                                                   05/07/25  15:13     PAGE  31
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0702185      11,310.00       1,494.33         3,016.00                                          0  SANTANA, ADAM
@@ -1827,7 +1827,7 @@
  0702247      11,655.00       4,595.00         3,108.00                                          0  VENTURA, BROOKLYN
  0702248       7,215.00         895.00         1,924.00                                          0  CARTER, GRACE
  0702249       8,310.00       5,750.00         2,216.00                                          0  MACIAS, AMIRA
- 0702250            .00           2.66              .00           100% EARNINGS                  0  TRUONG, LUCAPAY447                                                                                                   05/02/25  14:42     PAGE  32
+ 0702250            .00           2.66              .00           100% EARNINGS                  0  TRUONG, LUCAPAY447                                                                                                   05/07/25  15:13     PAGE  32
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0702250       7,785.00       1,522.34         2,076.00                                          0  TRUONG, LUCA
@@ -1886,7 +1886,7 @@
  0702301       7,290.00         804.65         1,944.00                                          0  BATES, KAREN
  0702302       8,880.00      10,235.00         2,368.00                                          0  MERCADO, ELI
  0702303            .00           1.07              .00           100% EARNINGS                  0  KING, ISAIAH
- 0702303      10,170.00       1,768.93         2,712.00                                          0  KING, ISAIAHPAY447                                                                                                   05/02/25  14:42     PAGE  33
+ 0702303      10,170.00       1,768.93         2,712.00                                          0  KING, ISAIAHPAY447                                                                                                   05/07/25  15:13     PAGE  33
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0702304      18,270.00       8,575.00         4,872.00                                          0  NIXON, SEAN
@@ -1945,7 +1945,7 @@
  0702364      13,665.00       3,195.00         3,644.00                                          0  BEST, ZION
  0702366            .00            .29              .00           100% EARNINGS                  6  DUFFY, HERALDO
  0702366       3,465.00         394.71           924.00           >64 & >5 100%                  6  DUFFY, HERALDO
- 0702367      15,225.00       8,985.00         4,060.00                                          0  MASTERS, GABRIELLAPAY447                                                                                                   05/02/25  14:42     PAGE  34
+ 0702367      15,225.00       8,985.00         4,060.00                                          0  MASTERS, GABRIELLAPAY447                                                                                                   05/07/25  15:13     PAGE  34
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0702368      10,140.00       7,715.00         2,704.00                                          0  LANG, MAUREEN
@@ -2004,7 +2004,7 @@
  0702421      18,345.00      11,905.00         4,892.00                                          0  NGUYEN, EVELYN
  0702422       4,815.00       4,785.00         1,284.00           >64 & >5 100%                  6  DOUGHTY, ROSE
  0702423       9,315.00         700.00         2,484.00                                          0  CRANEY, ABIGAIL
- 0702425            .00      15,725.00              .00           >64 & >5 100%                  6  VENTURA, SERENITYPAY447                                                                                                   05/02/25  14:42     PAGE  35
+ 0702425            .00      15,725.00              .00           >64 & >5 100%                  6  VENTURA, SERENITYPAY447                                                                                                   05/07/25  15:13     PAGE  35
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0702426            .00            .00              .00           18,19,20 > 1000                1  DAVIDSON, CHRISTINE
@@ -2063,7 +2063,7 @@
  0702482      11,235.00       6,890.00         2,996.00                                          0  CAMPOS, CHARLOTTE
  0702483      10,890.00      14,400.00         2,904.00                                          0  PETERSEN, MARCUS
  0702485       8,280.00       4,170.00         2,208.00                                          0  JONES, KAREN
- 0702486            .00         395.00              .00           100% EARNINGS                  0  TORRES, KAYDENPAY447                                                                                                   05/02/25  14:42     PAGE  36
+ 0702486            .00         395.00              .00           100% EARNINGS                  0  TORRES, KAYDENPAY447                                                                                                   05/07/25  15:13     PAGE  36
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0702487       9,495.00       1,495.00         2,532.00                                          0  BROCK, XAVIER
@@ -2122,7 +2122,7 @@
  0702537            .00          95.00              .00           100% EARNINGS                  0  HARRIS, ADRIAN
  0702538      35,115.00      56,005.00         9,364.00                                          0  LOWE, KAYDEN
  0702540       6,870.00       5,375.00         1,832.00                                          0  LOPEZ, DAVID
- 0702541            .00            .34              .00           100% EARNINGS                  0  SANTANA, ZIONPAY447                                                                                                   05/02/25  14:42     PAGE  37
+ 0702541            .00            .34              .00           100% EARNINGS                  0  SANTANA, ZIONPAY447                                                                                                   05/07/25  15:13     PAGE  37
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0702541       5,115.00         604.66         1,364.00                                          0  SANTANA, ZION
@@ -2181,7 +2181,7 @@
  0702599       9,390.00       6,930.00         2,504.00                                          0  PACE, CHARLIE
  0702601            .00           1.16              .00           100% EARNINGS                  6  JUAREZ, DAISY
  0702601            .00         118.84              .00           >64 & >5 100%                  6  JUAREZ, DAISY
- 0702602      10,545.00       3,945.00         2,812.00                                          0  PARK, MELODYPAY447                                                                                                   05/02/25  14:42     PAGE  38
+ 0702602      10,545.00       3,945.00         2,812.00                                          0  PARK, MELODYPAY447                                                                                                   05/07/25  15:13     PAGE  38
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0702603            .00          30.00              .00           100% EARNINGS                  0  SCHNEIDER, EMERY
@@ -2240,7 +2240,7 @@
  0702656      10,575.00         190.00         2,820.00                                          0  MILLER, GREYSON
  0702658       2,985.00         150.00           796.00                                          0  BENDER, KAYLA
  0702660       5,220.00       3,160.00         1,392.00                                          0  CLEMENTS, EVERLY
- 0702661            .00         415.00              .00                                          0  LAMB, JONATHANPAY447                                                                                                   05/02/25  14:42     PAGE  39
+ 0702661            .00         415.00              .00                                          0  LAMB, JONATHANPAY447                                                                                                   05/07/25  15:13     PAGE  39
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0702662       8,520.00         555.00         2,272.00                                          0  DOUGHERTY, ANTHONY
@@ -2299,7 +2299,7 @@
  0702721      16,740.00      20,660.00         4,464.00                                          0  BEIL, ALICE
  0702722      10,320.00       1,245.00         2,752.00                                          0  PACE, ADDISON
  0702724            .00           2.62              .00           100% EARNINGS                  0  HALEY, ZOE
- 0702724       4,755.00       1,522.38         1,268.00                                          0  HALEY, ZOEPAY447                                                                                                   05/02/25  14:42     PAGE  40
+ 0702724       4,755.00       1,522.38         1,268.00                                          0  HALEY, ZOEPAY447                                                                                                   05/07/25  15:13     PAGE  40
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0702727            .00           1.24              .00           100% EARNINGS                  0  COCHRAN, ERICA
@@ -2358,7 +2358,7 @@
  0702779            .00            .43              .00           100% EARNINGS                  0  BERNARD, NOAH
  0702779      12,105.00       1,884.57         3,228.00                                          0  BERNARD, NOAH
  0702780      13,290.00       6,825.00         3,544.00                                          0  COCHRAN, KRYSTAL
- 0702781            .00         290.00              .00           100% EARNINGS                  0  THOMPSON, EVAPAY447                                                                                                   05/02/25  14:42     PAGE  41
+ 0702781            .00         290.00              .00           100% EARNINGS                  0  THOMPSON, EVAPAY447                                                                                                   05/07/25  15:13     PAGE  41
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0702782      19,365.00       8,860.00         5,164.00                                          0  HARDING, LUCA
@@ -2417,7 +2417,7 @@
  0702836       9,945.00       1,015.00         2,652.00                                          0  SUTTON, CHRISTIAN
  0702837      13,530.00       3,860.00         3,608.00                                          0  SCOTT, BRIANNA
  0702838       4,500.00         555.00         1,200.00                                          0  BENTON, JASPER
- 0702839      31,065.00      42,360.00         8,284.00                                          0  McCONNELL, CHARLIEPAY447                                                                                                   05/02/25  14:42     PAGE  42
+ 0702839      31,065.00      42,360.00         8,284.00                                          0  McCONNELL, CHARLIEPAY447                                                                                                   05/07/25  15:13     PAGE  42
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0702841            .00           6.22              .00           100% EARNINGS                  6  DANIELS, LOGAN
@@ -2476,7 +2476,7 @@
  0702899       6,945.00         948.98         1,852.00                                          0  LUCERO, MIA
  0702900       5,835.00       2,205.00         1,556.00                                          0  HOOVER, COLTON
  0702902      14,730.00      12,810.00         3,928.00                                          0  LEWIS, KRYTSAL
- 0702905       4,920.00       1,220.00         1,312.00                                          0  SANTANA, ATHENAPAY447                                                                                                   05/02/25  14:42     PAGE  43
+ 0702905       4,920.00       1,220.00         1,312.00                                          0  SANTANA, ATHENAPAY447                                                                                                   05/07/25  15:13     PAGE  43
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0702906       9,525.00      34,840.00         2,540.00                                          0  SHAH, THOMAS
@@ -2535,7 +2535,7 @@
  0702967      17,490.00       5,745.00         4,664.00                                          0  JOHANNS, EVERLY
  0702968       9,375.00       3,325.00         2,500.00                                          0  MACIAS, MYLES
  0702969       6,720.00       1,340.00         1,792.00                                          0  LEE, RUBY
- 0702970            .00       1,488.51              .00           100% EARNINGS                  0  BARRERA, GIANNAPAY447                                                                                                   05/02/25  14:42     PAGE  44
+ 0702970            .00       1,488.51              .00           100% EARNINGS                  0  BARRERA, GIANNAPAY447                                                                                                   05/07/25  15:13     PAGE  44
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0702970       2,805.00         456.49           748.00                                          0  BARRERA, GIANNA
@@ -2594,7 +2594,7 @@
  0703030            .00           3.55              .00           100% EARNINGS                  0  BIFF, PARKER
  0703030       6,990.00       1,536.45         1,864.00                                          0  BIFF, PARKER
  0703031            .00           1.10              .00           100% EARNINGS                  0  ZAMORA, DOMINIC
- 0703031       5,040.00         898.90         1,344.00                                          0  ZAMORA, DOMINICPAY447                                                                                                   05/02/25  14:42     PAGE  45
+ 0703031       5,040.00         898.90         1,344.00                                          0  ZAMORA, DOMINICPAY447                                                                                                   05/07/25  15:13     PAGE  45
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0703032            .00         135.00              .00           100% EARNINGS                  0  BENTON, NOVA
@@ -2653,7 +2653,7 @@
  0703082            .00            .00              .00           18,19,20 > 1000                1  MURPHY, CAMILA
  0703083      11,190.00      17,605.00         2,984.00           >64 & >5 100%                  6  BANKS, GREYSON
  0703084       7,755.00       7,100.00         2,068.00                                          0  PACE, AMIR
- 0703085            .00         135.00              .00           100% EARNINGS                  0  THOMPSON, BRENDAPAY447                                                                                                   05/02/25  14:42     PAGE  46
+ 0703085            .00         135.00              .00           100% EARNINGS                  0  THOMPSON, BRENDAPAY447                                                                                                   05/07/25  15:13     PAGE  46
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0703086      14,910.00      11,150.00         3,976.00                                          0  HARDING, CHRISTIAN
@@ -2712,7 +2712,7 @@
  0703140            .00            .00              .00           18,19,20 > 1000                1  SHEPHERD, AUSTIN
  0703141            .00            .00              .00           18,19,20 > 1000                1  SANCHEZ, CLARA
  0703142      22,485.00      29,565.00         5,996.00           >64 & >5 100%                  6  BALLARD, LILLIAN
- 0703143      10,575.00       1,310.00         2,820.00                                          0  ACOSTA, ELLIANAPAY447                                                                                                   05/02/25  14:42     PAGE  47
+ 0703143      10,575.00       1,310.00         2,820.00                                          0  ACOSTA, ELLIANAPAY447                                                                                                   05/07/25  15:13     PAGE  47
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0703144      14,580.00      28,655.00         3,888.00                                          0  VILLARREAL, SEBASTIAN
@@ -2771,7 +2771,7 @@
  0703199      11,700.00       1,619.46         3,120.00                                          0  ASHLEY, JONATHAN
  0703200       7,485.00            .00         1,996.00                                          0  STOKES, HEATHER
  0703201       8,940.00         690.00         2,384.00                                          0  BRIGGS, EVA
- 0703202            .00         280.00              .00                                          0  DRAKE, ZIONPAY447                                                                                                   05/02/25  14:42     PAGE  48
+ 0703202            .00         280.00              .00                                          0  DRAKE, ZIONPAY447                                                                                                   05/07/25  15:13     PAGE  48
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0703203      15,735.00      12,305.00         4,196.00                                          0  FLORES, AALIYAH
@@ -2830,7 +2830,7 @@
  0703262       9,900.00       2,196.80         2,640.00                                          0  FIELDS, LEVI
  0703263       7,335.00       2,860.00         1,956.00                                          0  FOWLER, BELLA
  0703264       9,075.00       3,180.00         2,420.00                                          0  MERCADO, AURORA
- 0703265       9,090.00      13,325.00         2,424.00                                          0  MACDONALD, SADIEPAY447                                                                                                   05/02/25  14:42     PAGE  49
+ 0703265       9,090.00      13,325.00         2,424.00                                          0  MACDONALD, SADIEPAY447                                                                                                   05/07/25  15:13     PAGE  49
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0703266       4,395.00            .00         1,172.00                                          0  VILLARREAL, WYATT
@@ -2889,7 +2889,7 @@
  0703316      10,260.00       9,955.00         2,736.00                                          0  SCOTT, WESTON
  0703317       8,685.00       7,805.00         2,316.00                                          0  VILLARREAL, PEETA
  0703318      13,890.00      14,280.00         3,704.00                                          0  TORRES, AVA
- 0703319       8,400.00       8,025.00         2,240.00                                          0  RIVERA, WARRENPAY447                                                                                                   05/02/25  14:42     PAGE  50
+ 0703319       8,400.00       8,025.00         2,240.00                                          0  RIVERA, WARRENPAY447                                                                                                   05/07/25  15:13     PAGE  50
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0703320       4,380.00       7,670.00         1,168.00                                          0  PADILLA, CAMERON
@@ -2948,7 +2948,7 @@
  0703372      18,465.00       9,005.00         4,924.00                                          0  EVANS, WESTON
  0703373            .00           3.08              .00           100% EARNINGS                  0  FRIEDMAN, MELODY
  0703373       7,050.00       1,876.92         1,880.00                                          0  FRIEDMAN, MELODY
- 0703374       2,295.00         130.00           612.00           >64 & >5 100%                  6  CONNORS, BROOKLYNPAY447                                                                                                   05/02/25  14:42     PAGE  51
+ 0703374       2,295.00         130.00           612.00           >64 & >5 100%                  6  CONNORS, BROOKLYNPAY447                                                                                                   05/07/25  15:13     PAGE  51
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0703375            .00            .00              .00           18,19,20 > 1000                1  RAMOS, WESLEY
@@ -3007,7 +3007,7 @@
  0703428      13,605.00       8,160.00         3,628.00                                          0  JONES, AUSTIN
  0703429       9,660.00       2,190.00         2,576.00                                          0  MORA, EMMA
  0703430       2,520.00         130.00           672.00                                          0  PACHECO, LAYLA
- 0703431            .00           4.44              .00           100% EARNINGS                  0  JONES, ALICEPAY447                                                                                                   05/02/25  14:42     PAGE  52
+ 0703431            .00           4.44              .00           100% EARNINGS                  0  JONES, ALICEPAY447                                                                                                   05/07/25  15:13     PAGE  52
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0703431      10,080.00       2,470.56         2,688.00                                          0  JONES, ALICE
@@ -3066,7 +3066,7 @@
  0703481            .00          30.00              .00           100% EARNINGS                  0  SCHNEIDER, ETHAN
  0703482      10,050.00       2,740.00         2,680.00                                          0  SCHNEIDER, GREYSON
  0703484       7,050.00         480.00         1,880.00                                          0  TEDESCHI, SOFIA
- 0703485            .00           2.36              .00           100% EARNINGS                  0  CURTIS, CHRISTOPHERPAY447                                                                                                   05/02/25  14:42     PAGE  53
+ 0703485            .00           2.36              .00           100% EARNINGS                  0  CURTIS, CHRISTOPHERPAY447                                                                                                   05/07/25  15:13     PAGE  53
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0703485       9,180.00       1,882.64         2,448.00                                          0  CURTIS, CHRISTOPHER
@@ -3125,7 +3125,7 @@
  0703544            .00         310.00              .00           100% EARNINGS                  0  WATTS, HONDO
  0703545       3,240.00         745.00           864.00                                          0  HESS, RAYMOND
  0703547            .00            .28              .00           100% EARNINGS                  0  GOULD, SEAN
- 0703547       3,300.00         594.72           880.00                                          0  GOULD, SEANPAY447                                                                                                   05/02/25  14:42     PAGE  54
+ 0703547       3,300.00         594.72           880.00                                          0  GOULD, SEANPAY447                                                                                                   05/07/25  15:13     PAGE  54
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0703548      10,965.00       9,685.00         2,924.00                                          0  SCHNEIDER, CINDY
@@ -3184,7 +3184,7 @@
  0703599            .00         350.00              .00                                          0  MILLER, JENNIFER
  0703600            .00         385.00              .00           100% EARNINGS                  0  PEARSON, SAMUEL
  0703602      17,865.00       4,695.00         4,764.00                                          0  MOLINA, DAISY
- 0703603            .00           3.49              .00           100% EARNINGS                  0  BARTLETT, ISAIAHPAY447                                                                                                   05/02/25  14:42     PAGE  55
+ 0703603            .00           3.49              .00           100% EARNINGS                  0  BARTLETT, ISAIAHPAY447                                                                                                   05/07/25  15:13     PAGE  55
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0703603       7,395.00       2,186.51         1,972.00                                          0  BARTLETT, ISAIAH
@@ -3243,7 +3243,7 @@
  0703657       2,490.00         140.00           664.00                                          0  MEDRANO, AMELIA
  0703658      12,810.00       4,700.00         3,416.00                                          0  TRUONG, ENZO
  0703660            .00            .00              .00           18,19,20 > 1000                1  HURLEY, ANGEL
- 0703663            .00           4.79              .00           100% EARNINGS                  0  RHODES, LILYPAY447                                                                                                   05/02/25  14:42     PAGE  56
+ 0703663            .00           4.79              .00           100% EARNINGS                  0  RHODES, LILYPAY447                                                                                                   05/07/25  15:13     PAGE  56
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0703663      18,060.00       4,005.21         4,816.00                                          0  RHODES, LILY
@@ -3302,7 +3302,7 @@
  0703716       7,860.00       1,563.61         2,096.00                                          0  FOWLER, SOFIA
  0703717       3,960.00       2,090.00         1,056.00                                          0  CONNORS, JEREMIAH
  0703718            .00            .00              .00           18,19,20 > 1000                1  LAMBERT, RYAN
- 0703719       8,385.00      12,865.00         2,236.00                                          0  DUNLAP, HERALDOPAY447                                                                                                   05/02/25  14:42     PAGE  57
+ 0703719       8,385.00      12,865.00         2,236.00                                          0  DUNLAP, HERALDOPAY447                                                                                                   05/07/25  15:13     PAGE  57
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0703720            .00            .00              .00           18,19,20 > 1000                1  FARLEY, JENNIFER
@@ -3361,7 +3361,7 @@
  0703772            .00         460.00              .00           TERM > 1000 HRS                2  CLARK, LINCOLN
  0703774            .00           5.13              .00           100% EARNINGS                  0  NELSON, RYAN
  0703774       3,180.00         864.87           848.00                                          0  NELSON, RYAN
- 0703775      10,095.00       8,485.00         2,692.00                                          0  FIGUEROA, JADEPAY447                                                                                                   05/02/25  14:42     PAGE  58
+ 0703775      10,095.00       8,485.00         2,692.00                                          0  FIGUEROA, JADEPAY447                                                                                                   05/07/25  15:13     PAGE  58
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0703776       9,795.00       2,645.00         2,612.00                                          0  FRY, JEREMIAH
@@ -3420,7 +3420,7 @@
  0703836       5,745.00       1,290.00         1,532.00                                          0  BERNAL, JOSIE
  0703837       2,490.00         400.00           664.00                                          0  DOUGHERTY, SOPHIE
  0703838      20,190.00      21,030.00         5,384.00                                          0  SHELTON, OLIVER
- 0703839            .00         820.00              .00           >64 & >5 100%                  6  HOLLOWAY, FREYAPAY447                                                                                                   05/02/25  14:42     PAGE  59
+ 0703839            .00         820.00              .00           >64 & >5 100%                  6  HOLLOWAY, FREYAPAY447                                                                                                   05/07/25  15:13     PAGE  59
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0703840            .00           4.29              .00           100% EARNINGS                  0  CARRILLO, HUDSON
@@ -3479,7 +3479,7 @@
  0703885            .00         450.00              .00                                          0  FOWLER, DELILAH
  0703886      12,315.00       1,220.00         3,284.00                                          0  LUCERO, RAYMOND
  0703887       3,045.00         305.00           812.00                                          0  FRIEDMAN, SOFIA
- 0703888      12,570.00       7,445.00         3,352.00           >64 & >5 100%                  6  BARRETT, AMELIAPAY447                                                                                                   05/02/25  14:42     PAGE  60
+ 0703888      12,570.00       7,445.00         3,352.00           >64 & >5 100%                  6  BARRETT, AMELIAPAY447                                                                                                   05/07/25  15:13     PAGE  60
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0703889            .00         130.00              .00           100% EARNINGS                  0  BRYAN, AUSTIN
@@ -3538,7 +3538,7 @@
  0703947       8,625.00      24,425.00         2,300.00                                          0  FELIX, DOMINIC
  0703949       3,585.00       1,695.00           956.00                                          0  FEATHERS, RICHARD
  0703950      16,770.00      23,055.00         4,472.00                                          0  MICHAELS, ADRIAN
- 0703951            .00            .35              .00           100% EARNINGS                  0  GORE, GARRETTPAY447                                                                                                   05/02/25  14:42     PAGE  61
+ 0703951            .00            .35              .00           100% EARNINGS                  0  GORE, GARRETTPAY447                                                                                                   05/07/25  15:13     PAGE  61
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0703951       8,475.00       1,214.65         2,260.00                                          0  GORE, GARRETT
@@ -3597,7 +3597,7 @@
  0704013       7,155.00       1,104.59         1,908.00                                          0  LITTLE, BRENDAN
  0704014      12,000.00       2,275.00         3,200.00                                          0  MITCHELL, AMIRA
  0704017       7,230.00       3,990.00         1,928.00                                          0  KING, HERALDO
- 0704018            .00         770.00              .00           100% EARNINGS                  0  BAUTISTA, SAWYERPAY447                                                                                                   05/02/25  14:42     PAGE  62
+ 0704018            .00         770.00              .00           100% EARNINGS                  0  BAUTISTA, SAWYERPAY447                                                                                                   05/07/25  15:13     PAGE  62
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0704019            .00           6.28              .00           100% EARNINGS                  0  RICKY, CHRISTIAN
@@ -3656,7 +3656,7 @@
  0704069            .00         585.00              .00           100% EARNINGS                  0  LANDRY, ATHENA
  0704071            .00           1.95              .00           100% EARNINGS                  6  BRIGGS, MOSES
  0704071       3,300.00         803.05           880.00           >64 & >5 100%                  6  BRIGGS, MOSES
- 0704072       9,195.00      14,540.00         2,452.00                                          0  DELAROSA, CRUZPAY447                                                                                                   05/02/25  14:42     PAGE  63
+ 0704072       9,195.00      14,540.00         2,452.00                                          0  DELAROSA, CRUZPAY447                                                                                                   05/07/25  15:13     PAGE  63
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0704073            .00            .29              .00           100% EARNINGS                  0  SCHULTZ, HARPER
@@ -3715,7 +3715,7 @@
  0704124            .00           1.87              .00           100% EARNINGS                  0  JUAREZ, LYLA
  0704124       2,640.00         698.13           704.00                                          0  JUAREZ, LYLA
  0704125            .00         605.00              .00                                          0  FRY, KAREN
- 0704126            .00            .87              .00           100% EARNINGS                  0  VILLANUEVA, BROOKLYNPAY447                                                                                                   05/02/25  14:42     PAGE  64
+ 0704126            .00            .87              .00           100% EARNINGS                  0  VILLANUEVA, BROOKLYNPAY447                                                                                                   05/07/25  15:13     PAGE  64
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0704126       3,180.00         749.13           848.00                                          0  VILLANUEVA, BROOKLYN
@@ -3774,7 +3774,7 @@
  0704180            .00       2,130.00              .00           >64 & >5 100%                  6  LOZANO, JEREMIAH
  0704183       3,630.00         380.00           968.00                                          0  STOKES, ANTHONY
  0704184            .00           6.03              .00           100% EARNINGS                  0  DUNLAP, BROOKLYN
- 0704184      11,085.00       2,813.97         2,956.00                                          0  DUNLAP, BROOKLYNPAY447                                                                                                   05/02/25  14:42     PAGE  65
+ 0704184      11,085.00       2,813.97         2,956.00                                          0  DUNLAP, BROOKLYNPAY447                                                                                                   05/07/25  15:13     PAGE  65
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0704185      16,440.00       7,710.00         4,384.00                                          0  LEONARD, ANTHONY
@@ -3833,7 +3833,7 @@
  0704244      18,750.00      20,055.00         5,000.00                                          0  GOULD, ALICE
  0704247       8,415.00       1,090.00         2,244.00                                          0  TAYLOR, ABIGAIL
  0704248      13,530.00       8,890.00         3,608.00                                          0  TORRES, MARCO
- 0704249       7,710.00       1,600.00         2,056.00                                          0  BROCK, KRYTSALPAY447                                                                                                   05/02/25  14:42     PAGE  66
+ 0704249       7,710.00       1,600.00         2,056.00                                          0  BROCK, KRYTSALPAY447                                                                                                   05/07/25  15:13     PAGE  66
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0704251      26,940.00      25,360.00         7,184.00                                          0  SANCHEZ, CARTER
@@ -3892,7 +3892,7 @@
  0704309       7,905.00         145.00         2,108.00                                          0  LUNA, COOPER
  0704310       3,075.00       3,090.00           820.00           >64 & >5 100%                  6  KELLER, JAXON
  0704311            .00            .00              .00           18,19,20 > 1000                1  BERNAL, SARAH
- 0704312            .00            .94              .00           100% EARNINGS                  0  PRATT, WILLIAMPAY447                                                                                                   05/02/25  14:42     PAGE  67
+ 0704312            .00            .94              .00           100% EARNINGS                  0  PRATT, WILLIAMPAY447                                                                                                   05/07/25  15:13     PAGE  67
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0704312       3,540.00         819.06           944.00                                          0  PRATT, WILLIAM
@@ -3951,7 +3951,7 @@
  0704368            .00       1,085.00              .00           100% EARNINGS                  0  SHEPARD, DELILAH
  0704369       8,115.00         935.00         2,164.00                                          0  McMILLAN, SAWYER
  0704370      18,675.00      10,060.00         4,980.00                                          0  ROBINSON, LILIANA
- 0704371            .00          60.00              .00           100% EARNINGS                  0  WATTS, MIAPAY447                                                                                                   05/02/25  14:42     PAGE  68
+ 0704371            .00          60.00              .00           100% EARNINGS                  0  WATTS, MIAPAY447                                                                                                   05/07/25  15:13     PAGE  68
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0704372      16,395.00      24,440.00         4,372.00                                          0  SMITH, LINCOLN
@@ -4010,7 +4010,7 @@
  0704426       4,740.00       5,225.00         1,264.00           >64 & >5 100%                  6  JOHANNS, EMERY
  0704427            .00         725.00              .00           100% EARNINGS                  0  NASH, OMAR
  0704428       5,730.00         885.00         1,528.00                                          0  LUNA, OLIVIA
- 0704429      13,815.00      10,245.00         3,684.00                                          0  AVILA, ROSEPAY447                                                                                                   05/02/25  14:42     PAGE  69
+ 0704429      13,815.00      10,245.00         3,684.00                                          0  AVILA, ROSEPAY447                                                                                                   05/07/25  15:13     PAGE  69
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0704431      12,615.00       1,320.00         3,364.00                                          0  THOMPSON, PAISLEY
@@ -4069,7 +4069,7 @@
  0704486       7,905.00       2,960.00         2,108.00                                          0  RHODES, ADRIAN
  0704487            .00          60.00              .00           100% EARNINGS                  0  JONES, ALICIA
  0704488            .00            .43              .00           100% EARNINGS                  0  BOWMAN, JASPER
- 0704488       3,555.00         839.57           948.00                                          0  BOWMAN, JASPERPAY447                                                                                                   05/02/25  14:42     PAGE  70
+ 0704488       3,555.00         839.57           948.00                                          0  BOWMAN, JASPERPAY447                                                                                                   05/07/25  15:13     PAGE  70
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0704489      11,340.00       5,090.00         3,024.00                                          0  BYRD, EMMA
@@ -4128,7 +4128,7 @@
  0704536            .00            .43              .00           100% EARNINGS                  0  SCOTT, ARIA
  0704536       8,805.00       1,379.57         2,348.00                                          0  SCOTT, ARIA
  0704538       8,085.00       6,280.00         2,156.00                                          0  NIXON, NICOLE
- 0704539       8,490.00       2,410.00         2,264.00                                          0  BOYLE, OLIVIAPAY447                                                                                                   05/02/25  14:42     PAGE  71
+ 0704539       8,490.00       2,410.00         2,264.00                                          0  BOYLE, OLIVIAPAY447                                                                                                   05/07/25  15:13     PAGE  71
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0704540      19,965.00      22,500.00         5,324.00                                          0  PUGH, MAUREEN
@@ -4187,7 +4187,7 @@
  0704600      10,455.00       2,885.00         2,788.00                                          0  CRAIG, EVERLY
  0704601      10,245.00            .00         2,732.00                                          0  RICKY, DENNIS
  0704602      13,140.00       3,815.00         3,504.00                                          0  ALI, AXEL
- 0704603            .00           3.18              .00           100% EARNINGS                  0  BROCK, JENNIFERPAY447                                                                                                   05/02/25  14:42     PAGE  72
+ 0704603            .00           3.18              .00           100% EARNINGS                  0  BROCK, JENNIFERPAY447                                                                                                   05/07/25  15:13     PAGE  72
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0704603       9,660.00       2,021.82         2,576.00                                          0  BROCK, JENNIFER
@@ -4246,7 +4246,7 @@
  0704657       9,240.00       4,535.00         2,464.00                                          0  VILLALOBOS, EZEKIEL
  0704658            .00       1,805.00              .00                                          0  PATRICK, LUCY
  0704659            .00            .44              .00           100% EARNINGS                  0  TOMASO, VICTORIA
- 0704659       8,340.00       1,234.56         2,224.00                                          0  TOMASO, VICTORIAPAY447                                                                                                   05/02/25  14:42     PAGE  73
+ 0704659       8,340.00       1,234.56         2,224.00                                          0  TOMASO, VICTORIAPAY447                                                                                                   05/07/25  15:13     PAGE  73
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0704660            .00          40.00              .00           100% EARNINGS                  0  TOMASO, WESTON
@@ -4305,7 +4305,7 @@
  0704716      12,555.00       9,690.00         3,348.00                                          0  ASHLEY, MYLES
  0704717      17,235.00      28,705.00         4,596.00                                          0  DAY, WESTON
  0704718            .00            .28              .00           100% EARNINGS                  0  SANTANA, NOLAN
- 0704718       2,925.00         584.72           780.00                                          0  SANTANA, NOLANPAY447                                                                                                   05/02/25  14:42     PAGE  74
+ 0704718       2,925.00         584.72           780.00                                          0  SANTANA, NOLANPAY447                                                                                                   05/07/25  15:13     PAGE  74
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0704719            .00         165.00              .00           100% EARNINGS                  0  BELL, HUDSON
@@ -4364,7 +4364,7 @@
  0704778       4,320.00         620.00         1,152.00                                          0  CLINTON, FREYA
  0704781      17,415.00       9,185.00         4,644.00                                          0  FRY, DAISY
  0704782            .00            .00              .00           18,19,20 > 1000                1  HERRING, ELIZABETH
- 0704784      12,765.00       2,135.00         3,404.00                                          0  CHARLES, ROWANPAY447                                                                                                   05/02/25  14:42     PAGE  75
+ 0704784      12,765.00       2,135.00         3,404.00                                          0  CHARLES, ROWANPAY447                                                                                                   05/07/25  15:13     PAGE  75
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0704785       6,705.00       5,505.00         1,788.00           >64 & >5 100%                  6  BROCK, AUBREY
@@ -4423,7 +4423,7 @@
  0704837       7,005.00         618.39         1,868.00                                          0  CLINTON, RICARDO
  0704838      12,750.00       7,800.00         3,400.00                                          0  PADILLA, NOLAN
  0704839            .00         240.00              .00                                          0  SAMPSON, WARREN
- 0704841            .00         225.00              .00           100% EARNINGS                  0  HOLLAND, LILYPAY447                                                                                                   05/02/25  14:42     PAGE  76
+ 0704841            .00         225.00              .00           100% EARNINGS                  0  HOLLAND, LILYPAY447                                                                                                   05/07/25  15:13     PAGE  76
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0704842      14,685.00      15,210.00         3,916.00                                          0  TRUONG, EVA
@@ -4482,7 +4482,7 @@
  0704895       4,920.00       1,463.23         1,312.00                                          0  WHITE, DENNIS
  0704896       6,960.00       1,735.00         1,856.00                                          0  DUFFY, ATLAS
  0704897            .00           5.00              .00           >64 & >5 100%                  6  TOMASO, ROWAN
- 0704898            .00           2.62              .00           100% EARNINGS                  0  DRAKE, NORAPAY447                                                                                                   05/02/25  14:42     PAGE  77
+ 0704898            .00           2.62              .00           100% EARNINGS                  0  DRAKE, NORAPAY447                                                                                                   05/07/25  15:13     PAGE  77
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0704898      13,125.00       2,362.38         3,500.00                                          0  DRAKE, NORA
@@ -4541,7 +4541,7 @@
  0704952       8,610.00         680.00         2,296.00                                          0  HANNA, ENZO
  0704953       9,315.00       1,835.00         2,484.00                                          0  HALL, ATLAS
  0704954       9,585.00       1,120.00         2,556.00                                          0  HURLEY, MAVERICK
- 0704956            .00           4.16              .00           100% EARNINGS                  0  LOURDES, MIAPAY447                                                                                                   05/02/25  14:42     PAGE  78
+ 0704956            .00           4.16              .00           100% EARNINGS                  0  LOURDES, MIAPAY447                                                                                                   05/07/25  15:13     PAGE  78
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0704956      12,720.00       2,780.84         3,392.00                                          0  LOURDES, MIA
@@ -4600,7 +4600,7 @@
  0705012            .00           6.04              .00           100% EARNINGS                  0  FIGUEROA, AMELIA
  0705012      13,740.00       3,423.96         3,664.00                                          0  FIGUEROA, AMELIA
  0705014       8,820.00       3,730.00         2,352.00                                          0  PEARSON, WYATT
- 0705015      12,285.00       2,620.00         3,276.00           >64 & >5 100%                  6  CONNORS, AURORAPAY447                                                                                                   05/02/25  14:42     PAGE  79
+ 0705015      12,285.00       2,620.00         3,276.00           >64 & >5 100%                  6  CONNORS, AURORAPAY447                                                                                                   05/07/25  15:13     PAGE  79
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0705017            .00           2.12              .00           100% EARNINGS                  0  WRIGHT, ASHER
@@ -4659,7 +4659,7 @@
  0705067            .00       3,825.00              .00                                          0  SAMPSON, DREW
  0705069       9,765.00       1,215.00         2,604.00                                          0  BENDER, LILIANA
  0705070       8,610.00      12,475.00         2,296.00           >64 & >5 100%                  6  JUAREZ, AVA
- 0705071            .00            .00              .00           TERM > 1000 HRS                2  SANCHEZ, CINDYPAY447                                                                                                   05/02/25  14:42     PAGE  80
+ 0705071            .00            .00              .00           TERM > 1000 HRS                2  SANCHEZ, CINDYPAY447                                                                                                   05/07/25  15:13     PAGE  80
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0705072       2,835.00         240.00           756.00                                          0  FLOWERS, KINSLEY
@@ -4718,7 +4718,7 @@
  0705129       7,215.00       1,885.00         1,924.00           >64 & >5 100%                  6  BOYLE, ROSE
  0705130            .00            .43              .00           100% EARNINGS                  6  BRYANT, ELLIANA
  0705130       3,795.00         854.57         1,012.00           >64 & >5 100%                  6  BRYANT, ELLIANA
- 0705131       8,715.00       3,920.00         2,324.00                                          0  HARDING, MOSESPAY447                                                                                                   05/02/25  14:42     PAGE  81
+ 0705131       8,715.00       3,920.00         2,324.00                                          0  HARDING, MOSESPAY447                                                                                                   05/07/25  15:13     PAGE  81
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0705133       3,660.00       4,180.00           976.00                                          0  LOURDES, JACOB
@@ -4777,7 +4777,7 @@
  0705189      16,860.00      12,000.00         4,496.00                                          0  RICKY, ELLIANA
  0705192            .00       2,290.00              .00                                          0  HOPKINS, NATHAN
  0705193      14,010.00      13,325.00         3,736.00                                          0  McCONNELL, ISAIAH
- 0705194            .00           1.49              .00           100% EARNINGS                  0  PINEDA, CARTERPAY447                                                                                                   05/02/25  14:42     PAGE  82
+ 0705194            .00           1.49              .00           100% EARNINGS                  0  PINEDA, CARTERPAY447                                                                                                   05/07/25  15:13     PAGE  82
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0705194       9,540.00       1,713.51         2,544.00                                          0  PINEDA, CARTER
@@ -4836,7 +4836,7 @@
  0705250            .00            .96              .00           100% EARNINGS                  0  MURPHY, JASON
  0705250       8,070.00         879.04         2,152.00                                          0  MURPHY, JASON
  0705251            .00            .82              .00           100% EARNINGS                  0  CLEMENTS, ALFONZO
- 0705251      12,960.00       1,809.18         3,456.00                                          0  CLEMENTS, ALFONZOPAY447                                                                                                   05/02/25  14:42     PAGE  83
+ 0705251      12,960.00       1,809.18         3,456.00                                          0  CLEMENTS, ALFONZOPAY447                                                                                                   05/07/25  15:13     PAGE  83
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0705253       2,745.00         290.00           732.00                                          0  SHORT, THEODORE
@@ -4895,7 +4895,7 @@
  0705314            .00         195.00              .00           100% EARNINGS                  0  PACE, BEAU
  0705315            .00            .45              .00           100% EARNINGS                  0  HAHN, THOMAS
  0705315       7,620.00       1,279.55         2,032.00                                          0  HAHN, THOMAS
- 0705316       3,000.00         275.00           800.00                                          0  FARLEY, AMIRAPAY447                                                                                                   05/02/25  14:42     PAGE  84
+ 0705316       3,000.00         275.00           800.00                                          0  FARLEY, AMIRAPAY447                                                                                                   05/07/25  15:13     PAGE  84
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0705317       8,580.00       1,140.00         2,288.00                                          0  BAUTISTA, EVELYN
@@ -4954,7 +4954,7 @@
  0705370       2,910.00       2,990.00           776.00                                          0  ACOSTA, ELIZABETH
  0705371            .00            .26              .00           100% EARNINGS                  0  CARRILLO, MARCUS
  0705371       3,000.00         549.74           800.00                                          0  CARRILLO, MARCUS
- 0705372            .00           6.12              .00           100% EARNINGS                  0  McMAHON, MAYAPAY447                                                                                                   05/02/25  14:42     PAGE  85
+ 0705372            .00           6.12              .00           100% EARNINGS                  0  McMAHON, MAYAPAY447                                                                                                   05/07/25  15:13     PAGE  85
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0705372      14,280.00       3,203.88         3,808.00                                          0  McMAHON, MAYA
@@ -5013,7 +5013,7 @@
  0705425      18,420.00       7,380.00         4,912.00                                          0  RIVERA, MARIA
  0705426      12,960.00       4,720.00         3,456.00                                          0  BERNAL, ISAIAH
  0705431       8,910.00      18,870.00         2,376.00                                          0  SMITH, WESTON
- 0705432            .00          29.69              .00           100% EARNINGS                  0  BROCK, AMIRAPAY447                                                                                                   05/02/25  14:42     PAGE  86
+ 0705432            .00          29.69              .00           100% EARNINGS                  0  BROCK, AMIRAPAY447                                                                                                   05/07/25  15:13     PAGE  86
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0705432      14,955.00       3,335.31         3,988.00                                          0  BROCK, AMIRA
@@ -5072,7 +5072,7 @@
  0705487            .00           8.21              .00           100% EARNINGS                  0  CURTIS, CHRISTOPHER
  0705487      17,145.00       3,996.79         4,572.00                                          0  CURTIS, CHRISTOPHER
  0705488       8,370.00       1,275.00         2,232.00                                          0  JENNINGS, CATHY
- 0705489      13,110.00      10,900.00         3,496.00                                          0  CLINTON, HEATHERPAY447                                                                                                   05/02/25  14:42     PAGE  87
+ 0705489      13,110.00      10,900.00         3,496.00                                          0  CLINTON, HEATHERPAY447                                                                                                   05/07/25  15:13     PAGE  87
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0705490      11,520.00       1,520.00         3,072.00                                          0  BEIL, CRUZ
@@ -5131,7 +5131,7 @@
  0705547            .00           3.58              .00           100% EARNINGS                  6  PETERSEN, MORGAN
  0705547            .00         781.42              .00           >64 & >5 100%                  6  PETERSEN, MORGAN
  0705549            .00            .84              .00           100% EARNINGS                  0  WORTHINGTON, ELIZABETH
- 0705549      11,235.00       1,764.16         2,996.00                                          0  WORTHINGTON, ELIZABETHPAY447                                                                                                   05/02/25  14:42     PAGE  88
+ 0705549      11,235.00       1,764.16         2,996.00                                          0  WORTHINGTON, ELIZABETHPAY447                                                                                                   05/07/25  15:13     PAGE  88
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0705550      15,480.00       4,635.00         4,128.00                                          0  MEJIA, ISAIAH
@@ -5190,7 +5190,7 @@
  0705605      12,750.00       5,315.00         3,400.00                                          0  DUFFY, EMILY
  0705606            .00       7,365.00              .00           >64 & >5 100%                  6  DAY, JOSEPH
  0705607            .00         515.00              .00           100% EARNINGS                  0  HOLLOWAY, WILLIAM
- 0705608       4,620.00       1,575.00         1,232.00                                          0  LEONARD, BRENDANPAY447                                                                                                   05/02/25  14:42     PAGE  89
+ 0705608       4,620.00       1,575.00         1,232.00                                          0  LEONARD, BRENDANPAY447                                                                                                   05/07/25  15:13     PAGE  89
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0705609       8,940.00       1,340.00         2,384.00                                          0  GEORGE, XAVIER
@@ -5249,7 +5249,7 @@
  0705672       3,000.00         614.68           800.00                                          0  HERRING, EDEN
  0705675      15,900.00      18,730.00         4,240.00                                          0  MEJIA, ISABELLA
  0705676      15,510.00      22,340.00         4,136.00                                          0  LUCERO, DENNIS
- 0705678       8,040.00       3,825.00         2,144.00                                          0  McMAHON, SAMPAY447                                                                                                   05/02/25  14:42     PAGE  90
+ 0705678       8,040.00       3,825.00         2,144.00                                          0  McMAHON, SAMPAY447                                                                                                   05/07/25  15:13     PAGE  90
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0705679      18,900.00      26,135.00         5,040.00                                          0  MASTERS, DARCY
@@ -5308,7 +5308,7 @@
  0705733            .00       1,428.75              .00           TERM > 1000 HRS                2  BERNAL, AMELIA
  0705734            .00           5.89              .00           100% EARNINGS                  0  PINEDA, JASMINE
  0705734      13,140.00       2,719.11         3,504.00                                          0  PINEDA, JASMINE
- 0705735            .00            .96              .00           100% EARNINGS                  0  RIVERA, EVERLYPAY447                                                                                                   05/02/25  14:42     PAGE  91
+ 0705735            .00            .96              .00           100% EARNINGS                  0  RIVERA, EVERLYPAY447                                                                                                   05/07/25  15:13     PAGE  91
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0705735      10,905.00       2,069.04         2,908.00                                          0  RIVERA, EVERLY
@@ -5367,7 +5367,7 @@
  0705786       9,975.00       4,535.00         2,660.00                                          0  LEONARD, BRENDAN
  0705787      11,835.00       3,525.00         3,156.00                                          0  HILL, RAYMOND
  0705788      12,990.00       3,540.00         3,464.00                                          0  JOHNS, LEVI
- 0705789            .00         145.00              .00           100% EARNINGS                  0  RICHARDS, SEBASTIANPAY447                                                                                                   05/02/25  14:42     PAGE  92
+ 0705789            .00         145.00              .00           100% EARNINGS                  0  RICHARDS, SEBASTIANPAY447                                                                                                   05/07/25  15:13     PAGE  92
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0705790            .00            .55              .00           100% EARNINGS                  7  BENTON, SADIE
@@ -5426,7 +5426,7 @@
  0705844            .00            .00              .00           18,19,20 > 1000                1  DOUGLAS, LUNA
  0705847            .00           2.19              .00           100% EARNINGS                  0  PORTILLO, BROOKLYN
  0705847       3,645.00       1,092.81           972.00                                          0  PORTILLO, BROOKLYN
- 0705851      13,080.00       4,670.00         3,488.00                                          0  JONES, GEORGEPAY447                                                                                                   05/02/25  14:42     PAGE  93
+ 0705851      13,080.00       4,670.00         3,488.00                                          0  JONES, GEORGEPAY447                                                                                                   05/07/25  15:13     PAGE  93
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0705852      12,285.00         540.00         3,276.00                                          0  BREWER, AYLA
@@ -5485,7 +5485,7 @@
  0705912            .00          65.00              .00           100% EARNINGS                  0  HOLLAND, BRANDON
  0705913            .00            .00              .00           18,19,20 > 1000                1  PACE, MADISON
  0705914      15,465.00       7,410.00         4,124.00                                          0  PETERSEN, JASON
- 0705915      11,055.00       7,935.00         2,948.00                                          0  FELIX, JOSEPHPAY447                                                                                                   05/02/25  14:42     PAGE  94
+ 0705915      11,055.00       7,935.00         2,948.00                                          0  FELIX, JOSEPHPAY447                                                                                                   05/07/25  15:13     PAGE  94
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0705916      17,760.00       7,350.00         4,736.00                                          0  HAHN, BEAU
@@ -5544,7 +5544,7 @@
  0705966            .00         120.00              .00           100% EARNINGS                  7  ALLEN, SEAN
  0705968      11,415.00       3,185.00         3,044.00                                          0  CAIN, GIANNA
  0705969            .00         215.00              .00           100% EARNINGS                  0  ROBINSON, NOLAN
- 0705970       9,390.00      11,020.00         2,504.00                                          0  PINEDA, ELLIEPAY447                                                                                                   05/02/25  14:42     PAGE  95
+ 0705970       9,390.00      11,020.00         2,504.00                                          0  PINEDA, ELLIEPAY447                                                                                                   05/07/25  15:13     PAGE  95
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0705971            .00          75.00              .00           100% EARNINGS                  0  HILL, HARPER
@@ -5603,7 +5603,7 @@
  0706025       2,400.00         370.00           640.00                                          0  WATTS, BLAKE
  0706026      10,200.00      10,155.00         2,720.00                                          0  VILLALOBOS, CHER
  0706027      21,315.00      20,025.00         5,684.00                                          0  CALDWELL, LUNA
- 0706028      10,815.00       8,865.00         2,884.00           >64 & >5 100%                  6  CLARK, MARCUSPAY447                                                                                                   05/02/25  14:42     PAGE  96
+ 0706028      10,815.00       8,865.00         2,884.00           >64 & >5 100%                  6  CLARK, MARCUSPAY447                                                                                                   05/07/25  15:13     PAGE  96
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0706029       6,375.00       8,800.00         1,700.00                                          0  JENNINGS, ENZO
@@ -5662,7 +5662,7 @@
  0706085      10,215.00       4,040.00         2,724.00                                          0  MURPHY, RAYMOND
  0706086       9,600.00       1,580.00         2,560.00                                          0  LEE, JEREMIAH
  0706087       8,400.00      11,125.00         2,240.00                                          0  LITTLE, ZOE
- 0706088       3,195.00         375.00           852.00                                          0  McMAHON, GREYSONPAY447                                                                                                   05/02/25  14:42     PAGE  97
+ 0706088       3,195.00         375.00           852.00                                          0  McMAHON, GREYSONPAY447                                                                                                   05/07/25  15:13     PAGE  97
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0706089      11,805.00       1,050.00         3,148.00                                          0  ROBERTS, AMIRA
@@ -5721,7 +5721,7 @@
  0706161       9,075.00       1,820.00         2,420.00                                          0  BERNAL, ABIGAIL
  0706162            .00         415.00              .00                                          0  PEREZ, LUKA
  0706164       4,860.00         480.00         1,296.00                                          0  AYERS, THEO
- 0706165      34,665.00      57,915.00         9,244.00                                          0  CRANE, RYANPAY447                                                                                                   05/02/25  14:42     PAGE  98
+ 0706165      34,665.00      57,915.00         9,244.00                                          0  CRANE, RYANPAY447                                                                                                   05/07/25  15:13     PAGE  98
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0706166            .00         235.00              .00           100% EARNINGS                  0  SCHWARTZ, LEO
@@ -5780,7 +5780,7 @@
  0706226       9,240.00            .00         2,464.00                                          0  PEREZ, KRYTSAL
  0706227      20,715.00      31,140.00         5,524.00           >64 & >5 100%                  6  MACDONALD, LEO
  0706229            .00            .00              .00           18,19,20 > 1000                1  FIGUEROA, ADDISON
- 0706230      16,305.00      24,835.00         4,348.00                                          0  HALEY, SOPHIEPAY447                                                                                                   05/02/25  14:42     PAGE  99
+ 0706230      16,305.00      24,835.00         4,348.00                                          0  HALEY, SOPHIEPAY447                                                                                                   05/07/25  15:13     PAGE  99
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0706231      10,365.00       5,420.00         2,764.00                                          0  NICHOLSON, PARKER
@@ -5839,7 +5839,7 @@
  0706285      14,340.00       3,351.86         3,824.00                                          0  BANKS, AUTUMN
  0706286            .00            .89              .00           100% EARNINGS                  0  LEONARD, PARKER
  0706286       9,075.00       1,379.11         2,420.00                                          0  LEONARD, PARKER
- 0706287       7,335.00       2,730.00         1,956.00                                          0  EVANS, ISAIAHPAY447                                                                                                   05/02/25  14:42     PAGE 100
+ 0706287       7,335.00       2,730.00         1,956.00                                          0  EVANS, ISAIAHPAY447                                                                                                   05/07/25  15:13     PAGE 100
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0706288       4,965.00       2,940.00         1,324.00                                          0  NICHOLSON, CHRISTOPHER
@@ -5898,7 +5898,7 @@
  0706340       9,975.00       1,793.26         2,660.00                                          0  BARRETT, ADDISON
  0706341      15,000.00      11,065.00         4,000.00                                          0  ROBERTS, EDEN
  0706342       9,360.00       1,310.00         2,496.00                                          0  VALENZUELA, KAYDEN
- 0706344      15,285.00      13,270.00         4,076.00                                          0  HOOVER, KRYSTALPAY447                                                                                                   05/02/25  14:42     PAGE 101
+ 0706344      15,285.00      13,270.00         4,076.00                                          0  HOOVER, KRYSTALPAY447                                                                                                   05/07/25  15:13     PAGE 101
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0706345      13,020.00       3,835.00         3,472.00                                          0  PARKER, ROMAN
@@ -5957,7 +5957,7 @@
  0706400            .00         315.00              .00                                          0  McKENZIE, ANGEL
  0706401            .00           3.26              .00           100% EARNINGS                  6  TREVINO, RORY
  0706401            .00       1,061.74              .00           >64 & >5 100%                  6  TREVINO, RORY
- 0706402            .00            .63              .00           100% EARNINGS                  0  TOMASO, ZOEPAY447                                                                                                   05/02/25  14:42     PAGE 102
+ 0706402            .00            .63              .00           100% EARNINGS                  0  TOMASO, ZOEPAY447                                                                                                   05/07/25  15:13     PAGE 102
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0706402      13,380.00       2,054.37         3,568.00                                          0  TOMASO, ZOE
@@ -6016,7 +6016,7 @@
  0706455      12,945.00       4,110.00         3,452.00                                          0  PEREZ, BENJAMIN
  0706456      16,575.00      12,955.00         4,420.00                                          0  HANNA, OLIVER
  0706458      14,160.00      10,065.00         3,776.00                                          0  WILSON, RORY
- 0706459      11,700.00       4,035.00         3,120.00                                          0  PETERSEN, ISABELLAPAY447                                                                                                   05/02/25  14:42     PAGE 103
+ 0706459      11,700.00       4,035.00         3,120.00                                          0  PETERSEN, ISABELLAPAY447                                                                                                   05/07/25  15:13     PAGE 103
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0706460      15,990.00       7,900.00         4,264.00                                          0  HALEY, ETHAN
@@ -6075,7 +6075,7 @@
  0706511      12,510.00       1,994.41         3,336.00                                          0  BYRD, STELLA
  0706513      14,940.00      14,095.00         3,984.00                                          0  PETERSEN, MORGAN
  0706514       9,420.00       6,050.00         2,512.00                                          0  STOKES, ISABELLA
- 0706515      37,740.00      67,655.00        10,064.00                                          0  SHEPARD, NATHANPAY447                                                                                                   05/02/25  14:42     PAGE 104
+ 0706515      37,740.00      67,655.00        10,064.00                                          0  SHEPARD, NATHANPAY447                                                                                                   05/07/25  15:13     PAGE 104
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0706516      11,685.00       2,510.00         3,116.00                                          0  WRIGHT, ROWAN
@@ -6134,7 +6134,7 @@
  0706576            .00         910.00              .00           100% EARNINGS                  0  FELIX, AVA
  0706577            .00           4.75              .00           100% EARNINGS                  0  PEARSON, CRUZ
  0706577      11,940.00       2,620.25         3,184.00                                          0  PEARSON, CRUZ
- 0706578       7,290.00       4,340.00         1,944.00                                          0  CARTER, JAYDENPAY447                                                                                                   05/02/25  14:42     PAGE 105
+ 0706578       7,290.00       4,340.00         1,944.00                                          0  CARTER, JAYDENPAY447                                                                                                   05/07/25  15:13     PAGE 105
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0706579      13,155.00       3,345.00         3,508.00                                          0  LANG, JENNIFER
@@ -6193,7 +6193,7 @@
  0706637            .00         250.00              .00                                          0  McMILLAN, CHRISTOPHER
  0706638      10,245.00       1,015.00         2,732.00                                          0  LEONARD, WARREN
  0706639       9,690.00       3,095.00         2,584.00                                          0  WHITE, AMIRA
- 0706640            .00         250.00              .00                                          0  TREVINO, HENRYPAY447                                                                                                   05/02/25  14:42     PAGE 106
+ 0706640            .00         250.00              .00                                          0  TREVINO, HENRYPAY447                                                                                                   05/07/25  15:13     PAGE 106
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0706645      13,755.00       6,120.00         3,668.00                                          0  BEIL, EMILIA
@@ -6252,7 +6252,7 @@
  0706699       8,835.00         425.00         2,356.00                                          0  SHELTON, VARGAS
  0706700            .00           2.21              .00           100% EARNINGS                  0  MERCADO, JAY
  0706700       8,490.00       1,902.79         2,264.00                                          0  MERCADO, JAY
- 0706701            .00         245.00              .00                                          0  SANTANA, GEORGEPAY447                                                                                                   05/02/25  14:42     PAGE 107
+ 0706701            .00         245.00              .00                                          0  SANTANA, GEORGEPAY447                                                                                                   05/07/25  15:13     PAGE 107
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0706702       5,145.00            .00         1,372.00                                          0  HALL, DIEGO
@@ -6311,7 +6311,7 @@
  0706756            .00         290.00              .00           100% EARNINGS                  0  HARRIS, JENNIFER
  0706757      15,735.00      34,495.00         4,196.00                                          0  HARDING, RICHARD
  0706758       6,405.00         960.00         1,708.00                                          0  BERNAL, PEETA
- 0706759       7,665.00       2,950.00         2,044.00                                          0  MAGANA, NAOMIPAY447                                                                                                   05/02/25  14:42     PAGE 108
+ 0706759       7,665.00       2,950.00         2,044.00                                          0  MAGANA, NAOMIPAY447                                                                                                   05/07/25  15:13     PAGE 108
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0706760      20,790.00      19,680.00         5,544.00                                          0  HURLEY, AMIR
@@ -6370,7 +6370,7 @@
  0706835            .00         190.00              .00                                          0  TORRES, NICOLE
  0706836       9,285.00         370.00         2,476.00                                          0  MERCADO, MILA
  0706838       3,975.00         410.00         1,060.00                                          0  HALL, DELILAH
- 0706839       8,220.00         735.00         2,192.00                                          0  BERNARD, COLTONPAY447                                                                                                   05/02/25  14:42     PAGE 109
+ 0706839       8,220.00         735.00         2,192.00                                          0  BERNARD, COLTONPAY447                                                                                                   05/07/25  15:13     PAGE 109
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0706842       3,030.00         320.00           808.00                                          0  DUNLAP, HUDSON
@@ -6429,7 +6429,7 @@
  0706910            .00          35.00              .00           100% EARNINGS                  0  FINN, THEO
  0706911            .00          55.00              .00           100% EARNINGS                  0  CHARLES, CAMERON
  0706913            .00          65.00              .00           100% EARNINGS                  0  FARLEY, MILA
- 0706914            .00            .00              .00           18,19,20 > 1000                1  BRYANT, MARCUSPAY447                                                                                                   05/02/25  14:42     PAGE 110
+ 0706914            .00            .00              .00           18,19,20 > 1000                1  BRYANT, MARCUSPAY447                                                                                                   05/07/25  15:13     PAGE 110
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0706916       7,260.00         310.00         1,936.00                                          0  PEARSON, LAYLA
@@ -6488,7 +6488,7 @@
  0706995       8,205.00         285.00         2,188.00                                          0  FLORES, JASMINE
  0706999       4,380.00            .00         1,168.00                                          0  CORREA, SADIE
  0707000       2,610.00         350.00           696.00                                          0  MICHAELS, COLTON
- 0707003       6,285.00            .00         1,676.00                                          0  ARIAS, ATHENAPAY447                                                                                                   05/02/25  14:42     PAGE 111
+ 0707003       6,285.00            .00         1,676.00                                          0  ARIAS, ATHENAPAY447                                                                                                   05/07/25  15:13     PAGE 111
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0707004      11,325.00       1,105.00         3,020.00                                          0  NEAL, GABRIELLA
@@ -6547,7 +6547,7 @@
  0707108      12,120.00         440.00         3,232.00                                          0  HANNA, AUBREY
  0707109       3,240.00         265.00           864.00                                          0  BATES, ZION
  0707110       4,065.00         450.00         1,084.00                                          0  MERCADO, MADELYN
- 0707112      10,065.00         835.00         2,684.00                                          0  LANG, MELODYPAY447                                                                                                   05/02/25  14:42     PAGE 112
+ 0707112      10,065.00         835.00         2,684.00                                          0  LANG, MELODYPAY447                                                                                                   05/07/25  15:13     PAGE 112
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0707113            .00            .00              .00           18,19,20 > 1000                1  BOYLE, ATHENA
@@ -6606,7 +6606,7 @@
  0707197       6,360.00         740.00         1,696.00                                          0  RHODES, JAXON
  0707198       6,525.00         315.00         1,740.00                                          0  BARRERA, ANTHONY
  0707199       9,645.00         670.00         2,572.00                                          0  FRY, LEILANI
- 0707200       6,900.00         620.00         1,840.00                                          0  CASE, GARRETTPAY447                                                                                                   05/02/25  14:42     PAGE 113
+ 0707200       6,900.00         620.00         1,840.00                                          0  CASE, GARRETTPAY447                                                                                                   05/07/25  15:13     PAGE 113
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0707201       3,585.00         280.00           956.00                                          0  CURTIS, WILLIAM
@@ -6665,7 +6665,7 @@
  0707283       2,490.00         260.00           664.00                                          0  CLEMENTS, CHRISTINE
  0707284            .00         205.00              .00           TERM > 1000 HRS                2  PORTILLO, VALENTINA
  0707286            .00         105.00              .00           100% EARNINGS                  0  ARIAS, ROWAN
- 0707288            .00            .00              .00           18,19,20 > 1000                1  BAUTISTA, AMIRAPAY447                                                                                                   05/02/25  14:42     PAGE 114
+ 0707288            .00            .00              .00           18,19,20 > 1000                1  BAUTISTA, AMIRAPAY447                                                                                                   05/07/25  15:13     PAGE 114
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0707289      10,515.00       1,070.00         2,804.00                                          0  NAVARRO, LYLA
@@ -6724,7 +6724,7 @@
  0707366       5,175.00         520.00         1,380.00                                          0  WILKINS, OLIVIA
  0707369       6,975.00         660.00         1,860.00                                          0  DUNLAP, BRIANNA
  0707370            .00          60.00              .00           100% EARNINGS                  0  WRIGHT, SKYLAR
- 0707372            .00            .00              .00           18,19,20 > 1000                1  DOUGHERTY, DREWPAY447                                                                                                   05/02/25  14:42     PAGE 115
+ 0707372            .00            .00              .00           18,19,20 > 1000                1  DOUGHERTY, DREWPAY447                                                                                                   05/07/25  15:13     PAGE 115
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0707373            .00         840.00              .00           TERM > 1000 HRS                2  SCHWARTZ, DIEGO
@@ -6783,7 +6783,7 @@
  0707445       9,135.00         615.00         2,436.00                                          0  CASE, NOLAN
  0707446       8,265.00         785.00         2,204.00                                          0  PECK, LANDON
  0707447      10,095.00         735.00         2,692.00                                          0  WHITE, AMARA
- 0707449            .00         205.00              .00                                          0  MAGANA, MICAHPAY447                                                                                                   05/02/25  14:42     PAGE 116
+ 0707449            .00         205.00              .00                                          0  MAGANA, MICAHPAY447                                                                                                   05/07/25  15:13     PAGE 116
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0707452            .00       1,110.00              .00           TERM > 1000 HRS                2  LOPEZ, KAYLA
@@ -6842,7 +6842,7 @@
  0707530      10,305.00         900.00         2,748.00                                          0  McMAHON, DIEGO
  0707531       4,080.00         320.00         1,088.00                                          0  LANG, BRIANNA
  0707532       6,735.00         565.00         1,796.00                                          0  LANG, JASMINE
- 0707535       6,975.00         735.00         1,860.00                                          0  CRAIG, ASHERPAY447                                                                                                   05/02/25  14:42     PAGE 117
+ 0707535       6,975.00         735.00         1,860.00                                          0  CRAIG, ASHERPAY447                                                                                                   05/07/25  15:13     PAGE 117
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0707537       2,685.00         340.00           716.00                                          0  ASHLEY, MICAH
@@ -6901,7 +6901,7 @@
  0707621            .00          60.00              .00           100% EARNINGS                  0  CURTIS, ZOE
  0707624       8,565.00         805.00         2,284.00                                          0  MURPHY, BROOKLYN
  0707625      14,970.00       1,370.00         3,992.00                                          0  DAY, KINSLEY
- 0707626       3,570.00         135.00           952.00                                          0  LUNA, NAOMIPAY447                                                                                                   05/02/25  14:42     PAGE 118
+ 0707626       3,570.00         135.00           952.00                                          0  LUNA, NAOMIPAY447                                                                                                   05/07/25  15:13     PAGE 118
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0707627       2,775.00            .00           740.00                                          0  CLINTON, ADELINE
@@ -6960,7 +6960,7 @@
  0707701       9,705.00         845.00         2,588.00                                          0  ORTIZ, OLIVIA
  0707702       8,475.00         755.00         2,260.00                                          0  HOLLAND, PATRICK
  0707703       4,635.00         165.00         1,236.00                                          0  NEAL, EZRA
- 0707705            .00            .00              .00           18,19,20 > 1000                1  BROCK, LEAHPAY447                                                                                                   05/02/25  14:42     PAGE 119
+ 0707705            .00            .00              .00           18,19,20 > 1000                1  BROCK, LEAHPAY447                                                                                                   05/07/25  15:13     PAGE 119
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0707707       9,615.00         755.00         2,564.00                                          0  CARRILLO, LEAH
@@ -7019,7 +7019,7 @@
  0707782       7,380.00         535.00         1,968.00                                          0  CRAIG, CARTER
  0707784            .00            .00              .00           18,19,20 > 1000                1  CARTER, AMIR
  0707785            .00         590.00              .00                                          0  BANKS, JOSEPH
- 0707786       8,850.00         545.00         2,360.00                                          0  FOWLER, CINDYPAY447                                                                                                   05/02/25  14:42     PAGE 120
+ 0707786       8,850.00         545.00         2,360.00                                          0  FOWLER, CINDYPAY447                                                                                                   05/07/25  15:13     PAGE 120
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0707787       9,390.00         775.00         2,504.00                                          0  MERCADO, RILEY
@@ -7078,7 +7078,7 @@
  0707854       2,640.00         155.00           704.00                                          0  DUFFY, MOSES
  0707856       5,355.00         255.00         1,428.00                                          0  LANDRY, RICARDO
  0707858       3,135.00            .00           836.00                                          0  PRATT, LILY
- 0707859       7,920.00         735.00         2,112.00                                          0  LEWIS, ISAACPAY447                                                                                                   05/02/25  14:42     PAGE 121
+ 0707859       7,920.00         735.00         2,112.00                                          0  LEWIS, ISAACPAY447                                                                                                   05/07/25  15:13     PAGE 121
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0707860            .00         765.00              .00           TERM > 1000 HRS                2  RAMOS, SANDRA
@@ -7137,7 +7137,7 @@
  0707917       3,270.00         135.00           872.00                                          0  LOURDES, GREYSON
  0707919       8,205.00         675.00         2,188.00                                          0  ESPINOSA, PAMELA
  0707920       2,685.00            .00           716.00                                          0  CONNORS, CINDY
- 0707922       3,210.00            .00           856.00                                          0  RICHARDS, AUTUMNPAY447                                                                                                   05/02/25  14:42     PAGE 122
+ 0707922       3,210.00            .00           856.00                                          0  RICHARDS, AUTUMNPAY447                                                                                                   05/07/25  15:13     PAGE 122
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0707923       2,445.00         125.00           652.00                                          0  BUCKLEY, ALICE
@@ -7196,7 +7196,7 @@
  0707989       8,130.00         195.00         2,168.00                                          0  CHANG, LILY
  0707990            .00            .00              .00           18,19,20 > 1000                1  FRAZIER, BELLA
  0707991       6,060.00         465.00         1,616.00                                          0  PECK, AUSTIN
- 0707992       3,285.00         195.00           876.00                                          0  TEDESCHI, SAWYERPAY447                                                                                                   05/02/25  14:42     PAGE 123
+ 0707992       3,285.00         195.00           876.00                                          0  TEDESCHI, SAWYERPAY447                                                                                                   05/07/25  15:13     PAGE 123
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0707993       2,715.00            .00           724.00                                          0  NORRIS, RYAN
@@ -7255,7 +7255,7 @@
  0708058       6,720.00         325.00         1,792.00                                          0  PECK, SARAH
  0708059       6,540.00            .00         1,744.00                                          0  McKENZIE, ELIZABETH
  0708060            .00          45.00              .00           100% EARNINGS                  0  JOHANNS, RICHARD
- 0708062       4,530.00         275.00         1,208.00                                          0  WILKINS, COLTONPAY447                                                                                                   05/02/25  14:42     PAGE 124
+ 0708062       4,530.00         275.00         1,208.00                                          0  WILKINS, COLTONPAY447                                                                                                   05/07/25  15:13     PAGE 124
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0708064       4,665.00         225.00         1,244.00                                          0  HOLLAND, ZOE
@@ -7314,7 +7314,7 @@
  0708129       4,455.00         430.00         1,188.00                                          0  TEDESCHI, KATHERINE
  0708130       4,035.00         220.00         1,076.00                                          0  SHEPARD, DENNIS
  0708131      12,765.00         785.00         3,404.00                                          0  ORTIZ, LANDON
- 0708134       8,025.00         405.00         2,140.00                                          0  BENTLEY, LILIANAPAY447                                                                                                   05/02/25  14:42     PAGE 125
+ 0708134       8,025.00         405.00         2,140.00                                          0  BENTLEY, LILIANAPAY447                                                                                                   05/07/25  15:13     PAGE 125
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0708135       2,640.00         150.00           704.00                                          0  RICKY, ANTHONY
@@ -7373,7 +7373,7 @@
  0708194       8,235.00         450.00         2,196.00                                          0  GORE, SOFIA
  0708195       7,605.00         360.00         2,028.00                                          0  JOHNS, LANDON
  0708197            .00            .00              .00           18,19,20 > 1000                1  NASH, ALICE
- 0708198       3,570.00         170.00           952.00                                          0  HALEY, DAISYPAY447                                                                                                   05/02/25  14:42     PAGE 126
+ 0708198       3,570.00         170.00           952.00                                          0  HALEY, DAISYPAY447                                                                                                   05/07/25  15:13     PAGE 126
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0708199       3,060.00         500.00           816.00                                          0  HOLLOWAY, ELI
@@ -7432,7 +7432,7 @@
  0708254            .00         230.00              .00           TERM > 1000 HRS                2  BENTLEY, JENNIFER
  0708255       2,715.00         180.00           724.00                                          0  JOHNS, BRIANNA
  0708256       3,345.00         145.00           892.00                                          0  ROBERTS, OLIVIA
- 0708257       7,905.00         370.00         2,108.00                                          0  HOLLOWAY, ASHERPAY447                                                                                                   05/02/25  14:42     PAGE 127
+ 0708257       7,905.00         370.00         2,108.00                                          0  HOLLOWAY, ASHERPAY447                                                                                                   05/07/25  15:13     PAGE 127
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0708258       7,485.00         380.00         1,996.00                                          0  SMALL, STELLA
@@ -7491,7 +7491,7 @@
  0708318            .00            .00              .00           18,19,20 > 1000                1  ARIAS, JOSEPH
  0708319       3,570.00         215.00           952.00                                          0  WILLIAMS, LILIANA
  0708320       8,205.00         365.00         2,188.00                                          0  DRAKE, JASPER
- 0708321            .00            .00              .00           TERM > 1000 HRS                2  KELLER, KRYTSALPAY447                                                                                                   05/02/25  14:42     PAGE 128
+ 0708321            .00            .00              .00           TERM > 1000 HRS                2  KELLER, KRYTSALPAY447                                                                                                   05/07/25  15:13     PAGE 128
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0708322       3,540.00         180.00           944.00                                          0  RIVERS, LEO
@@ -7550,7 +7550,7 @@
  0708379            .00            .00              .00           18,19,20 > 1000                1  PEARSON, MUHAMMAD
  0708380       2,355.00         175.00           628.00                                          0  FRY, MILLIE
  0708381       2,520.00            .00           672.00                                          0  PHILLIPS, JOHN
- 0708382            .00            .00              .00           18,19,20 > 1000                1  SCHULTZ, JAYPAY447                                                                                                   05/02/25  14:42     PAGE 129
+ 0708382            .00            .00              .00           18,19,20 > 1000                1  SCHULTZ, JAYPAY447                                                                                                   05/07/25  15:13     PAGE 129
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0708383       3,030.00         140.00           808.00                                          0  WHITE, RORY
@@ -7609,7 +7609,7 @@
  0708440       4,950.00         235.00         1,320.00                                          0  DAY, NOLAN
  0708441            .00            .00              .00           18,19,20 > 1000                1  ARIAS, MARIA
  0708443       4,125.00         195.00         1,100.00                                          0  BARRERA, DREW
- 0708444       2,745.00            .00           732.00                                          0  VILLARREAL, OLIVERPAY447                                                                                                   05/02/25  14:42     PAGE 130
+ 0708444       2,745.00            .00           732.00                                          0  VILLARREAL, OLIVERPAY447                                                                                                   05/07/25  15:13     PAGE 130
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0708445            .00            .00              .00           18,19,20 > 1000                1  MACDONALD, CALEB
@@ -7668,7 +7668,7 @@
  0708506       7,320.00         245.00         1,952.00                                          0  YOUNG, KRYSTAL
  0708507       7,725.00         250.00         2,060.00                                          0  DOUGHERTY, ENZO
  0708508       7,800.00         215.00         2,080.00                                          0  CAIN, LANDON
- 0708509       7,605.00         145.00         2,028.00                                          0  AVERY, BLAKEPAY447                                                                                                   05/02/25  14:42     PAGE 131
+ 0708509       7,605.00         145.00         2,028.00                                          0  AVERY, BLAKEPAY447                                                                                                   05/07/25  15:13     PAGE 131
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0708510       2,700.00            .00           720.00                                          0  DAVIDSON, SKYLAR
@@ -7727,7 +7727,7 @@
  0708570            .00         175.00              .00           TERM > 1000 HRS                2  MACIAS, CALEB
  0708571       3,495.00            .00           932.00                                          0  BENDER, DAVID
  0708572       3,300.00         150.00           880.00                                          0  PINEDA, JAXON
- 0708573       8,670.00         385.00         2,312.00                                          0  WALKER, SALLYPAY447                                                                                                   05/02/25  14:42     PAGE 132
+ 0708573       8,670.00         385.00         2,312.00                                          0  WALKER, SALLYPAY447                                                                                                   05/07/25  15:13     PAGE 132
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0708574            .00            .00              .00           18,19,20 > 1000                1  JENNINGS, GREGORY
@@ -7786,7 +7786,7 @@
  0708632       5,460.00         225.00         1,456.00                                          0  NICHOLSON, ADELINE
  0708633       2,595.00            .00           692.00                                          0  TRUONG, ALICE
  0708634       9,135.00         410.00         2,436.00                                          0  MURPHY, THEO
- 0708635       3,360.00         200.00           896.00                                          0  LANG, AUBREYPAY447                                                                                                   05/02/25  14:42     PAGE 133
+ 0708635       3,360.00         200.00           896.00                                          0  LANG, AUBREYPAY447                                                                                                   05/07/25  15:13     PAGE 133
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0708636       8,175.00         455.00         2,180.00                                          0  ESPINOSA, OWEN
@@ -7845,7 +7845,7 @@
  0708696            .00            .00              .00           18,19,20 > 1000                1  SHEPHERD, AMARI
  0708697            .00            .00              .00           18,19,20 > 1000                1  SMALL, ALFONZO
  0708698       7,950.00         340.00         2,120.00                                          0  NICHOLSON, LEO
- 0708699       9,660.00         275.00         2,576.00                                          0  TOMASO, HERALDOPAY447                                                                                                   05/02/25  14:42     PAGE 134
+ 0708699       9,660.00         275.00         2,576.00                                          0  TOMASO, HERALDOPAY447                                                                                                   05/07/25  15:13     PAGE 134
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0708700       7,140.00         215.00         1,904.00                                          0  STANLEY, LIAM
@@ -7904,7 +7904,7 @@
  0708759       7,065.00         350.00         1,884.00                                          0  JONES, ARIA
  0708760       6,645.00         340.00         1,772.00                                          0  FERGUSON, JOSEPH
  0708761       8,280.00         440.00         2,208.00                                          0  ROBINSON, ZOEY
- 0708762       2,400.00         170.00           640.00                                          0  BELL, WARRENPAY447                                                                                                   05/02/25  14:42     PAGE 135
+ 0708762       2,400.00         170.00           640.00                                          0  BELL, WARRENPAY447                                                                                                   05/07/25  15:13     PAGE 135
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0708763       5,175.00         240.00         1,380.00                                          0  JOSEPH, ISABELLA
@@ -7963,7 +7963,7 @@
  0708819       3,735.00         145.00           996.00                                          0  MAY, SEAN
  0708820       5,115.00         155.00         1,364.00                                          0  JOSEPH, MICAH
  0708821       2,145.00            .00           572.00                                          0  MOLINA, CINDY
- 0708822       9,420.00         215.00         2,512.00                                          0  BENDER, ANGELPAY447                                                                                                   05/02/25  14:42     PAGE 136
+ 0708822       9,420.00         215.00         2,512.00                                          0  BENDER, ANGELPAY447                                                                                                   05/07/25  15:13     PAGE 136
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0708823       6,030.00         320.00         1,608.00                                          0  CRAIG, HARPER
@@ -8022,7 +8022,7 @@
  0708880       4,455.00         190.00         1,188.00                                          0  VILLALOBOS, OLIVIA
  0708881       8,610.00         425.00         2,296.00                                          0  NGUYEN, JASON
  0708882       5,955.00         220.00         1,588.00                                          0  SAMPSON, JOHN
- 0708883            .00         120.00              .00           TERM > 1000 HRS                2  NEWMAN, GARRETTPAY447                                                                                                   05/02/25  14:42     PAGE 137
+ 0708883            .00         120.00              .00           TERM > 1000 HRS                2  NEWMAN, GARRETTPAY447                                                                                                   05/07/25  15:13     PAGE 137
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0708884            .00            .00              .00           18,19,20 > 1000                1  SEIKO, DAISY
@@ -8081,7 +8081,7 @@
  0708939       7,515.00         185.00         2,004.00                                          0  JOHNS, AYLA
  0708940       6,465.00            .00         1,724.00                                          0  HARRIS, HERALDO
  0708941       2,445.00            .00           652.00                                          0  BUCKLEY, JASMINE
- 0708942       2,325.00            .00           620.00                                          0  SCOTT, OMARPAY447                                                                                                   05/02/25  14:42     PAGE 138
+ 0708942       2,325.00            .00           620.00                                          0  SCOTT, OMARPAY447                                                                                                   05/07/25  15:13     PAGE 138
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0708943       8,325.00         310.00         2,220.00                                          0  NASH, EMMA
@@ -8140,7 +8140,7 @@
  0709003            .00            .00              .00           18,19,20 > 1000                1  PRATT, JAXON
  0709004       2,205.00            .00           588.00                                          0  MICHAELS, GIANNA
  0709005       2,340.00            .00           624.00                                          0  EVANS, SUMMER
- 0709006       6,030.00         325.00         1,608.00                                          0  HANNA, JOSIEPAY447                                                                                                   05/02/25  14:42     PAGE 139
+ 0709006       6,030.00         325.00         1,608.00                                          0  HANNA, JOSIEPAY447                                                                                                   05/07/25  15:13     PAGE 139
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0709008       4,245.00         155.00         1,132.00                                          0  CRAIG, RUBY
@@ -8199,7 +8199,7 @@
  0709064       3,660.00         135.00           976.00                                          0  STOKES, BRENDA
  0709065       7,680.00         215.00         2,048.00                                          0  SHEPHERD, LILIANA
  0709066       8,340.00         130.00         2,224.00                                          0  NEWMAN, ANNA
- 0709067       3,990.00         135.00         1,064.00                                          0  RIVERS, ELLIANAPAY447                                                                                                   05/02/25  14:42     PAGE 140
+ 0709067       3,990.00         135.00         1,064.00                                          0  RIVERS, ELLIANAPAY447                                                                                                   05/07/25  15:13     PAGE 140
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0709069            .00            .00              .00           18,19,20 > 1000                1  MIYAZAKI, ALICIA
@@ -8258,7 +8258,7 @@
  0709123       8,070.00         265.00         2,152.00                                          0  CLINTON, THEODORE
  0709124            .00            .00              .00           18,19,20 > 1000                1  DUFFY, SADIE
  0709125       4,725.00         260.00         1,260.00                                          0  WATTS, LINCOLN
- 0709126       4,905.00         285.00         1,308.00                                          0  WILSON, PAMELAPAY447                                                                                                   05/02/25  14:42     PAGE 141
+ 0709126       4,905.00         285.00         1,308.00                                          0  WILSON, PAMELAPAY447                                                                                                   05/07/25  15:13     PAGE 141
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0709127            .00            .00              .00           18,19,20 > 1000                1  FLEMING, CARTER
@@ -8317,7 +8317,7 @@
  0709184       2,625.00            .00           700.00                                          0  LUCERO, KAI
  0709185            .00            .00              .00           18,19,20 > 1000                1  JOHNS, AUBREY
  0709186            .00            .00              .00           18,19,20 > 1000                1  MEJIA, KATHERINE
- 0709187       4,425.00         150.00         1,180.00                                          0  HANNA, CHRISTIANPAY447                                                                                                   05/02/25  14:42     PAGE 142
+ 0709187       4,425.00         150.00         1,180.00                                          0  HANNA, CHRISTIANPAY447                                                                                                   05/07/25  15:13     PAGE 142
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0709189      12,660.00            .00         3,376.00                                          0  NAVA, JAY
@@ -8376,7 +8376,7 @@
  0709243       3,270.00            .00           872.00                                          0  LOWE, MARCO
  0709244       3,735.00            .00           996.00                                          0  CARTER, SETH
  0709245       2,805.00            .00           748.00                                          0  FRY, NOAH
- 0709246       4,065.00            .00         1,084.00                                          0  BROCK, ZOEYPAY447                                                                                                   05/02/25  14:42     PAGE 143
+ 0709246       4,065.00            .00         1,084.00                                          0  BROCK, ZOEYPAY447                                                                                                   05/07/25  15:13     PAGE 143
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0709247            .00            .00              .00           18,19,20 > 1000                1  HOLLAND, OLIVER
@@ -8435,7 +8435,7 @@
  0709303       7,530.00            .00         2,008.00                                          0  SCHWARTZ, MATTHEW
  0709304            .00            .00              .00           18,19,20 > 1000                1  SANCHEZ, ANDREW
  0709305       4,020.00            .00         1,072.00                                          0  MITCHELL, MARIA
- 0709306       8,130.00            .00         2,168.00                                          0  BOWMAN, JAXONPAY447                                                                                                   05/02/25  14:42     PAGE 144
+ 0709306       8,130.00            .00         2,168.00                                          0  BOWMAN, JAXONPAY447                                                                                                   05/07/25  15:13     PAGE 144
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0709307            .00            .00              .00           18,19,20 > 1000                1  SUTTON, AMIRA
@@ -8494,7 +8494,7 @@
  0709362       5,325.00            .00         1,420.00                                          0  McCONNELL, LOGAN
  0709363       8,940.00         190.00         2,384.00                                          0  FARLEY, KAYLA
  0709364       2,205.00            .00           588.00                                          0  ACOSTA, NATHAN
- 0709365       2,385.00            .00           636.00                                          0  NICHOLSON, BLAKEPAY447                                                                                                   05/02/25  14:42     PAGE 145
+ 0709365       2,385.00            .00           636.00                                          0  NICHOLSON, BLAKEPAY447                                                                                                   05/07/25  15:13     PAGE 145
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0709366       3,615.00            .00           964.00                                          0  CALDWELL, BELLA
@@ -8553,7 +8553,7 @@
  0709424       5,625.00         150.00         1,500.00                                          0  STOKES, JADE
  0709425            .00            .00              .00           TERM > 1000 HRS                2  SHORT, AMELIA
  0709426       8,535.00            .00         2,276.00                                          0  MURPHY, AYLA
- 0709427       5,025.00            .00         1,340.00                                          0  CARTER, LANDONPAY447                                                                                                   05/02/25  14:42     PAGE 146
+ 0709427       5,025.00            .00         1,340.00                                          0  CARTER, LANDONPAY447                                                                                                   05/07/25  15:13     PAGE 146
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0709428            .00            .00              .00           18,19,20 > 1000                1  SANCHEZ, MAUREEN
@@ -8612,7 +8612,7 @@
  0709482            .00            .00              .00           TERM > 1000 HRS                2  MURPHY, LINCOLN
  0709483       8,670.00            .00         2,312.00                                          0  SHEPARD, SEBASTIAN
  0709484       8,280.00            .00         2,208.00                                          0  CRANEY, MICAH
- 0709485       2,460.00            .00           656.00                                          0  CAIN, EMMANUELPAY447                                                                                                   05/02/25  14:42     PAGE 147
+ 0709485       2,460.00            .00           656.00                                          0  CAIN, EMMANUELPAY447                                                                                                   05/07/25  15:13     PAGE 147
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0709486       7,710.00            .00         2,056.00                                          0  SANCHEZ, GREYSON
@@ -8671,7 +8671,7 @@
  0709540       8,655.00            .00         2,308.00                                          0  MARTIN, ENZO
  0709541       2,370.00            .00           632.00                                          0  FELIX, NEVAEH
  0709542       8,055.00            .00         2,148.00                                          0  AYALA, SAVANNAH
- 0709543       5,085.00            .00         1,356.00                                          0  ROTH, ENZOPAY447                                                                                                   05/02/25  14:42     PAGE 148
+ 0709543       5,085.00            .00         1,356.00                                          0  ROTH, ENZOPAY447                                                                                                   05/07/25  15:13     PAGE 148
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0709544       9,510.00            .00         2,536.00                                          0  BYRD, SAVANNAH
@@ -8730,7 +8730,7 @@
  0709597       4,515.00            .00         1,204.00                                          0  CLARK, MAYA
  0709598       3,450.00            .00           920.00                                          0  HALL, SETH
  0709599       8,805.00            .00         2,348.00                                          0  CARRILLO, JOSIE
- 0709600       6,045.00            .00         1,612.00                                          0  HERRING, ANTHONYPAY447                                                                                                   05/02/25  14:42     PAGE 149
+ 0709600       6,045.00            .00         1,612.00                                          0  HERRING, ANTHONYPAY447                                                                                                   05/07/25  15:13     PAGE 149
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0709601            .00            .00              .00           18,19,20 > 1000                1  BERNARD, LUCA
@@ -8789,7 +8789,7 @@
  0709655       5,340.00            .00         1,424.00                                          0  BARRETT, MATEO
  0709656            .00            .00              .00           TERM > 1000 HRS                2  BRYAN, MORGAN
  0709657       4,830.00            .00         1,288.00                                          0  LOURDES, JONATHAN
- 0709658       5,565.00            .00         1,484.00                                          0  GOMEZ, LILIANAPAY447                                                                                                   05/02/25  14:42     PAGE 150
+ 0709658       5,565.00            .00         1,484.00                                          0  GOMEZ, LILIANAPAY447                                                                                                   05/07/25  15:13     PAGE 150
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0709659       2,610.00            .00           696.00                                          0  CLARK, ALICIA
@@ -8848,7 +8848,7 @@
  0709715       2,655.00            .00           708.00                                          0  CONNORS, RICHARD
  0709716       3,120.00            .00           832.00                                          0  PECK, LUCY
  0709717            .00            .00              .00           18,19,20 > 1000                1  SCOTT, LEILANI
- 0709718       8,115.00            .00         2,164.00                                          0  BYRD, ALFONZOPAY447                                                                                                   05/02/25  14:42     PAGE 151
+ 0709718       8,115.00            .00         2,164.00                                          0  BYRD, ALFONZOPAY447                                                                                                   05/07/25  15:13     PAGE 151
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0709719       6,375.00            .00         1,700.00                                          0  AVILA, JOSHUA
@@ -8907,7 +8907,7 @@
  0709774       3,660.00            .00           976.00                                          0  CLEMENTS, NOAH
  0709775       4,575.00            .00         1,220.00                                          0  AYERS, FREYA
  0709776       3,120.00            .00           832.00                                          0  NEWMAN, CHRISTOPHER
- 0709777       2,580.00            .00           688.00                                          0  LEE, MARCOPAY447                                                                                                   05/02/25  14:42     PAGE 152
+ 0709777       2,580.00            .00           688.00                                          0  LEE, MARCOPAY447                                                                                                   05/07/25  15:13     PAGE 152
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0709778       5,550.00            .00         1,480.00                                          0  CALDWELL, THEODORE
@@ -8966,7 +8966,7 @@
  0709833       8,490.00            .00         2,264.00                                          0  POWERS, ABIGAIL
  0709834       3,450.00            .00           920.00                                          0  McKAY, SUMMER
  0709835       7,530.00            .00         2,008.00                                          0  TREVINO, JOSHUA
- 0709836       7,860.00            .00         2,096.00                                          0  SONY, SETHPAY447                                                                                                   05/02/25  14:42     PAGE 153
+ 0709836       7,860.00            .00         2,096.00                                          0  SONY, SETHPAY447                                                                                                   05/07/25  15:13     PAGE 153
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0709837       2,475.00            .00           660.00                                          0  CONNORS, CAMERON
@@ -9025,7 +9025,7 @@
  0709891       2,715.00            .00           724.00                                          0  ROBERTS, CHRISTOPHER
  0709892       7,785.00         145.00         2,076.00                                          0  CRAIG, SUMMER
  0709893            .00         110.00              .00           TERM > 1000 HRS                2  EVERETT, KATHERINE
- 0709894       5,100.00         140.00         1,360.00                                          0  MIYAZAKI, EVAPAY447                                                                                                   05/02/25  14:42     PAGE 154
+ 0709894       5,100.00         140.00         1,360.00                                          0  MIYAZAKI, EVAPAY447                                                                                                   05/07/25  15:13     PAGE 154
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0709895       5,565.00            .00         1,484.00                                          0  CLEMENTS, DIEGO
@@ -9084,7 +9084,7 @@
  0709948       4,695.00            .00         1,252.00                                          0  BAUTISTA, GEORGE
  0709949            .00            .00              .00           TERM > 1000 HRS                2  RAMOS, CINDY
  0709950       8,235.00         155.00         2,196.00                                          0  MILLS, SALLY
- 0709951       6,990.00            .00         1,864.00                                          0  MILLER, NOAHPAY447                                                                                                   05/02/25  14:42     PAGE 155
+ 0709951       6,990.00            .00         1,864.00                                          0  MILLER, NOAHPAY447                                                                                                   05/07/25  15:13     PAGE 155
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0709952       8,760.00            .00         2,336.00                                          0  NAVA, JOHN
@@ -9143,7 +9143,7 @@
  0710006       3,495.00            .00           932.00                                          0  WILSON, BRIANNA
  0710007       7,950.00            .00         2,120.00                                          0  SMITH, EVELYN
  0710008       2,715.00            .00           724.00                                          0  MORTON, ISLA
- 0710009       8,445.00         195.00         2,252.00                                          0  NELSON, EMILYPAY447                                                                                                   05/02/25  14:42     PAGE 156
+ 0710009       8,445.00         195.00         2,252.00                                          0  NELSON, EMILYPAY447                                                                                                   05/07/25  15:13     PAGE 156
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0710010       2,460.00            .00           656.00                                          0  HALL, RICARDO
@@ -9202,7 +9202,7 @@
  0710064       6,165.00            .00         1,644.00                                          0  HURLEY, FIONA
  0710065       2,340.00            .00           624.00                                          0  MORTON, DREW
  0710066       2,145.00            .00           572.00                                          0  McMAHON, JACOB
- 0710067       4,695.00            .00         1,252.00                                          0  WASHINGTON, CAMERONPAY447                                                                                                   05/02/25  14:42     PAGE 157
+ 0710067       4,695.00            .00         1,252.00                                          0  WASHINGTON, CAMERONPAY447                                                                                                   05/07/25  15:13     PAGE 157
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0710068       3,285.00            .00           876.00                                          0  LEONARD, ISLA
@@ -9261,7 +9261,7 @@
  0710121       3,150.00            .00           840.00                                          0  MACDONALD, HARPER
  0710122       2,190.00            .00           584.00                                          0  FRY, BELLA
  0710123       4,605.00            .00         1,228.00                                          0  MURPHY, EZEKIEL
- 0710124       3,270.00            .00           872.00                                          0  MILLS, JULIANPAY447                                                                                                   05/02/25  14:42     PAGE 158
+ 0710124       3,270.00            .00           872.00                                          0  MILLS, JULIANPAY447                                                                                                   05/07/25  15:13     PAGE 158
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0710125            .00            .00              .00           18,19,20 > 1000                1  JOSEPH, ROMAN
@@ -9320,7 +9320,7 @@
  0710179       2,130.00            .00           568.00                                          0  WASHINGTON, SAVANNAH
  0710180       3,405.00            .00           908.00                                          0  LITTLE, AUBREY
  0710181       3,390.00            .00           904.00                                          0  MAGANA, SERENITY
- 0710182       2,820.00            .00           752.00                                          0  TRUONG, ROSEPAY447                                                                                                   05/02/25  14:42     PAGE 159
+ 0710182       2,820.00            .00           752.00                                          0  TRUONG, ROSEPAY447                                                                                                   05/07/25  15:13     PAGE 159
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0710183       3,330.00            .00           888.00                                          0  PARK, HEATHER
@@ -9379,7 +9379,7 @@
  0710236       2,715.00            .00           724.00                                          0  SONY, PAMELA
  0710237            .00            .00              .00           18,19,20 > 1000                1  PECK, IRIS
  0710238       2,445.00            .00           652.00                                          0  MACDONALD, RYAN
- 0710239       2,475.00            .00           660.00                                          0  HURLEY, JOHNPAY447                                                                                                   05/02/25  14:42     PAGE 160
+ 0710239       2,475.00            .00           660.00                                          0  HURLEY, JOHNPAY447                                                                                                   05/07/25  15:13     PAGE 160
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0710240       3,330.00            .00           888.00                                          0  ASHLEY, DENNIS
@@ -9438,7 +9438,7 @@
  0710295       4,395.00            .00         1,172.00                                          0  PHILLIPS, LUKE
  0710296            .00            .00              .00           TERM > 1000 HRS                2  AVERY, ADDISON
  0710297       4,860.00            .00         1,296.00                                          0  THOMPSON, NOAH
- 0710298       2,295.00            .00           612.00                                          0  DUFFY, BENJAMINPAY447                                                                                                   05/02/25  14:42     PAGE 161
+ 0710298       2,295.00            .00           612.00                                          0  DUFFY, BENJAMINPAY447                                                                                                   05/07/25  15:13     PAGE 161
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0710299       4,620.00            .00         1,232.00                                          0  CORTEZ, MILES
@@ -9497,7 +9497,7 @@
  0710353       3,165.00            .00           844.00                                          0  BAUTISTA, SUMMER
  0710354       3,105.00            .00           828.00                                          0  DOUGHTY, MAVERICK
  0710355       3,765.00            .00         1,004.00                                          0  MITCHELL, LYLA
- 0710356       2,760.00            .00           736.00                                          0  PRATT, BRIANNAPAY447                                                                                                   05/02/25  14:42     PAGE 162
+ 0710356       2,760.00            .00           736.00                                          0  PRATT, BRIANNAPAY447                                                                                                   05/07/25  15:13     PAGE 162
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0710357       2,910.00            .00           776.00                                          0  MACDONALD, MOSES
@@ -9556,7 +9556,7 @@
  0710411       2,610.00            .00           696.00                                          0  BOYLE, ASHER
  0710412       4,365.00            .00         1,164.00                                          0  COSTA, WAYLON
  0710413       3,330.00            .00           888.00                                          0  COCHRAN, LUCA
- 0710414       2,460.00            .00           656.00                                          0  RIVERA, JOSHUAPAY447                                                                                                   05/02/25  14:42     PAGE 163
+ 0710414       2,460.00            .00           656.00                                          0  RIVERA, JOSHUAPAY447                                                                                                   05/07/25  15:13     PAGE 163
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0710415       2,505.00            .00           668.00                                          0  KELLER, MUHAMMAD
@@ -9615,7 +9615,7 @@
  0710468       2,760.00            .00           736.00                                          0  RIVERA, ALFONZO
  0710469       2,190.00            .00           584.00                                          0  RICKY, BREE
  0710470       4,230.00            .00         1,128.00                                          0  POWERS, ETHAN
- 0710471            .00            .00              .00           TERM > 1000 HRS                2  MACDONALD, JOSIEPAY447                                                                                                   05/02/25  14:42     PAGE 164
+ 0710471            .00            .00              .00           TERM > 1000 HRS                2  MACDONALD, JOSIEPAY447                                                                                                   05/07/25  15:13     PAGE 164
 
   BADGE    CONT           EARN            FORFEIT              REASON                       CODE     NAME
  0710472       3,285.00            .00           876.00                                          0  BERNARD, PATRICK

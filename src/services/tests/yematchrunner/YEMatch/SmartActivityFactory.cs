@@ -1,62 +1,70 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Net.Http.Headers;
 using System.Text;
 using YEMatch.YEMatch;
 using HttpMethod = System.Net.Http.HttpMethod;
+
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+#pragma warning disable S125
+#pragma warning disable S1075
+#pragma warning disable CA2211
+#pragma warning disable S2223
+#pragma warning disable S1104
 
 namespace YEMatch;
 
+
 public static class SmartActivityFactory
 {
-    private static readonly short profitYear = 2024;
+    private static readonly short _profitYear = 2024;
 
     // This task takes the READY database and imports it directly to SMART.  Handy for isolating smart activities.
-    public static Activity? readyToSmartInit;
-    public static ApiClient? client;
-    
+    public static Activity? ReadyToSmartInit;
+    public static ApiClient? Client;
+
     public static List<Activity> CreateActivities(string dataDirectory)
     {
         var httpClient = new HttpClient { Timeout = TimeSpan.FromHours(2) };
         TestToken.CreateAndAssignTokenForClient(httpClient, "Finance-Manager");
-        client = new ApiClient(httpClient);
+        Client = new ApiClient(httpClient);
 
-        readyToSmartInit = new SmartActivity(Ready_to_Smart_Initialize_Database, client, "R2S", "Initialize Database with READY data");
+        ReadyToSmartInit = new SmartActivity(Ready_to_Smart_Initialize_Database, Client, "R2S", "Initialize Database with READY data");
 
         return
         [
-            new SmartActivity(A0_Initialize_Database_with_Obfuscated_data, client, "A0", "Initialize Database with Obfuscated data"),
-            new SmartActivity(A1_Profit_Sharing_Clean_up_Reports, client, "A1", "Profit Sharing Clean Up Reports"),
-            new SmartActivity(A2_Military_and_Rehire, client, "A2", "Military and Rehire"),
-            new SmartActivity(A3_Prof_Termination, client, "A3", "Prof Termination"),
-            new SmartActivity(A4_Prof_Share_Loan_Balance_QPAY129, client, "A4", "Prof Share Loan Balance (Distributions and Forfeitures QPAY129)"),
-            new SmartActivity(A5_Extract_Excutive_Hours_and_Dollars, client, "A5", "Extract Executive Hours and Dollars"),
-            new SmartActivity(A6_Clear_Executive_Hours_and_Dollars, client, "A6", "Clear Executive Hours and Dollars"),
-            new SmartActivity(A7_Ready_Screen_008_09, client, "A7", "Ready Screen 008-09 (Enter exec hours)"),
-            new SmartActivity(A8_PROFIT_SHARE_REPORT_PAY426, client, "A8", "Profit Share Report (duplicated in frozen section) (pay426)"),
-            new SmartActivity(A9_YE_ORACLE_HCM_Payroll_Processing, client, "A9", "YE Oracle HCM Payroll Processing"),
-            new SmartActivity(A10_Load_Orcle_PAYRPROFIT, client, "A10", "Load Oracle PAYPROFT (weekly job)"),
-            new SmartActivity(A11_Profit_Sharing_YTD_Wages_Extract, client, "A11", "Profit sharing YTD Wages Extract"),
-            new SmartActivity(A12_PROF_LOAD_YREND_DEMO_PROFITSHARE, client, "A12", "PROF LOAD YREND DEMO PROFSHARE"),
-            new SmartActivity(A13A_PAYPROFIT_SHIFT, client, "A13A", "PAYPROFIT SHIFT (shift three columns)"),
-            new SmartActivity(A13B_PAYPROFIT_SHIFT, client, "A13B", "PAYPROFIT SHIFT (shift three columns)"),
-            new SmartActivity(A14_ZERO_PY_PD_PAYPROFIT, client, "A14", "ZERO-PY-PD-PAYPROFIT (zero three columns)"),
-            new SmartActivity(A15_Profit_sharing_YTD_Wages_Extract, client, "A15", "Profit sharing YTD Wages Extract"),
-            new SmartActivity(A16_READY_screen_008_09, client, "A16", "READY screen 008-09"),
-            new SmartActivity(A17_Profit_Share_Report_edit_run, client, "A17", "Profit Share Report (Edit Run)"),
-            new SmartActivity(A18_Profit_Share_Report_final_run, client, "A18", "Profit Share Report (Final Run)"),
-            new SmartActivity(A19_Get_Eligible_Employees, client, "A19", "Get Eligible Employees"),
-            new SmartActivity(A20_Profit_Forfeit_PAY443, client, "A20", "Profit Share Forfeit (pay443)"),
-            new SmartActivity(A21_Profit_Share_Update_PAY444, client, "A21", "Profit Share Update (pay444)"),
-            new SmartActivity(A22_Profit_Share_Edit_PAY477, client, "A22", "Profit Share Edit (pay447)"),
-            new SmartActivity(A23_Profit_Master_Update, client, "A23", "Profit Master Update"),
-            new SmartActivity(A24_PROF_PAYMASTER_UPD, client, "A24", "PROF PAYMASTER UPD"),
-            new SmartActivity(A25_Prof_Share_Report_By_Age, client, "A25", "Prof Share Report By Age (prof130 prof130b prof130v prof130y)"),
-            new SmartActivity(A26_Prof_Share_Gross_Rpt_QPAY501, client, "A26", "Prof Share Gross Rpt (qpay501)"),
-            new SmartActivity(A27_Prof_Share_by_Store, client, "A27", "Prof Share by Store (qpay066-undr21 qpay066ta-undr21 qpay066ta \"newlabels report\" labels labelsnew)"),
-            new SmartActivity(A28_Print_Profit_Certs, client, "A28", "Print Profit Certs (paycert)"),
-            new SmartActivity(A29_Save_Prof_Paymstr, client, "A29", "Save Prof Paymstr final job to backup tables to tape")
+            new SmartActivity(A0_Initialize_Database_with_Obfuscated_data, Client, "A0", "Initialize Database with Obfuscated data"),
+            new SmartActivity(A1_Profit_Sharing_Clean_up_Reports, Client, "A1", "Profit Sharing Clean Up Reports"),
+            new SmartActivity(A2_Military_and_Rehire, Client, "A2", "Military and Rehire"),
+            new SmartActivity(A3_Prof_Termination, Client, "A3", "Prof Termination"),
+            new SmartActivity(A4_Prof_Share_Loan_Balance_QPAY129, Client, "A4", "Prof Share Loan Balance (Distributions and Forfeitures QPAY129)"),
+            new SmartActivity(A5_Extract_Excutive_Hours_and_Dollars, Client, "A5", "Extract Executive Hours and Dollars"),
+            new SmartActivity(A6_Clear_Executive_Hours_and_Dollars, Client, "A6", "Clear Executive Hours and Dollars"),
+            new SmartActivity(A7_Ready_Screen_008_09, Client, "A7", "Ready Screen 008-09 (Enter exec hours)"),
+            new SmartActivity(A8_PROFIT_SHARE_REPORT_PAY426, Client, "A8", "Profit Share Report (duplicated in frozen section) (pay426)"),
+            new SmartActivity(A9_YE_ORACLE_HCM_Payroll_Processing, Client, "A9", "YE Oracle HCM Payroll Processing"),
+            new SmartActivity(A10_Load_Orcle_PAYRPROFIT, Client, "A10", "Load Oracle PAYPROFT (weekly job)"),
+            new SmartActivity(A11_Profit_Sharing_YTD_Wages_Extract, Client, "A11", "Profit sharing YTD Wages Extract"),
+            new SmartActivity(A12_PROF_LOAD_YREND_DEMO_PROFITSHARE, Client, "A12", "PROF LOAD YREND DEMO PROFSHARE"),
+            new SmartActivity(A13A_PAYPROFIT_SHIFT, Client, "A13A", "PAYPROFIT SHIFT (shift three columns)"),
+            new SmartActivity(A13B_PAYPROFIT_SHIFT, Client, "A13B", "PAYPROFIT SHIFT (shift three columns)"),
+            new SmartActivity(A14_ZERO_PY_PD_PAYPROFIT, Client, "A14", "ZERO-PY-PD-PAYPROFIT (zero three columns)"),
+            new SmartActivity(A15_Profit_sharing_YTD_Wages_Extract, Client, "A15", "Profit sharing YTD Wages Extract"),
+            new SmartActivity(A16_READY_screen_008_09, Client, "A16", "READY screen 008-09"),
+            new SmartActivity(A17_Profit_Share_Report_edit_run, Client, "A17", "Profit Share Report (Edit Run)"),
+            new SmartActivity(A18_Profit_Share_Report_final_run, Client, "A18", "Profit Share Report (Final Run)"),
+            new SmartActivity(A19_Get_Eligible_Employees, Client, "A19", "Get Eligible Employees"),
+            new SmartActivity(A20_Profit_Forfeit_PAY443, Client, "A20", "Profit Share Forfeit (pay443)"),
+            new SmartActivity(A21_Profit_Share_Update_PAY444, Client, "A21", "Profit Share Update (pay444)"),
+            new SmartActivity(A22_Profit_Share_Edit_PAY477, Client, "A22", "Profit Share Edit (pay447)"),
+            new SmartActivity(A23_Profit_Master_Update, Client, "A23", "Profit Master Update"),
+            new SmartActivity(A24_PROF_PAYMASTER_UPD, Client, "A24", "PROF PAYMASTER UPD"),
+            new SmartActivity(A25_Prof_Share_Report_By_Age, Client, "A25", "Prof Share Report By Age (prof130 prof130b prof130v prof130y)"),
+            new SmartActivity(A26_Prof_Share_Gross_Rpt_QPAY501, Client, "A26", "Prof Share Gross Rpt (qpay501)"),
+            new SmartActivity(A27_Prof_Share_by_Store, Client, "A27", "Prof Share by Store (qpay066-undr21 qpay066ta-undr21 qpay066ta \"newlabels report\" labels labelsnew)"),
+            new SmartActivity(A28_Print_Profit_Certs, Client, "A28", "Print Profit Certs (paycert)"),
+            new SmartActivity(A29_Save_Prof_Paymstr, Client, "A29", "Save Prof Paymstr final job to backup tables to tape")
         ];
     }
 
@@ -95,11 +103,11 @@ public static class SmartActivityFactory
     {
         var sb = new StringBuilder();
 
-        var r6 = await apiClient.ReportsYearEndCleanupNegativeEtvaForSsNsOnPayProfitEndPointAsync(profitYear, null, null, 0, int.MaxValue, null);
+        var r6 = await apiClient.ReportsYearEndCleanupNegativeEtvaForSsNsOnPayProfitEndPointAsync(_profitYear, null, null, 0, int.MaxValue, null);
         sb.Append($"Negative Etva for Ssns  - records loaded: {r6.Response.Results.Count}\n");
 
         var r4 =
-            await apiClient.ReportsYearEndCleanupGetDuplicateSsNsEndpointAsync(null, null, profitYear, int.MaxValue, null);
+            await apiClient.ReportsYearEndCleanupGetDuplicateSsNsEndpointAsync(null, null, _profitYear, int.MaxValue, null);
         sb.Append($"Duplicate Ssns  - records loaded: {r4.Response.Results.Count}\n");
 
         var r = await apiClient
@@ -107,7 +115,7 @@ public static class SmartActivityFactory
         sb.Append($"Badges Not In PayProfit - records loaded: {r.Response.Results.Count}\n");
 
         var r3 = await apiClient
-            .ReportsYearEndCleanupDuplicateNamesAndBirthdaysEndpointAsync(profitYear, null, null, 0, int.MaxValue, null);
+            .ReportsYearEndCleanupDuplicateNamesAndBirthdaysEndpointAsync(_profitYear, null, null, 0, int.MaxValue, null);
         sb.Append($"Duplicate Names And Birthdays - records loaded: {r3.Response.Results.Count}\n");
 
         var r5 = await apiClient
@@ -133,7 +141,7 @@ public static class SmartActivityFactory
         sb.Append($"Employees On Military Leave - records loaded: {result.Response.Results.Count}\n");
 
         var rehireForfeituresRequest = new ExtendedRehireForfeituresRequest();
-        rehireForfeituresRequest.ProfitYear = profitYear;
+        rehireForfeituresRequest.ProfitYear = _profitYear;
         rehireForfeituresRequest.BeginningDate = DateTimeOffset.Parse("2024-01-07", CultureInfo.InvariantCulture);
         rehireForfeituresRequest.EndingDate = DateTimeOffset.Parse("2024-12-28", CultureInfo.InvariantCulture);
 
@@ -156,7 +164,7 @@ public static class SmartActivityFactory
     private static async Task<Outcome> A3_Prof_Termination(ApiClient apiClient, string aname, string name)
     {
         var result = await apiClient
-            .ReportsYearEndTerminatedEmployeeAndBeneficiaryTerminatedEmployeeAndBeneficiaryDataEndpointAsync(profitYear, null,
+            .ReportsYearEndTerminatedEmployeeAndBeneficiaryTerminatedEmployeeAndBeneficiaryDataEndpointAsync(_profitYear, null,
                 null, 0, int.MaxValue, null);
 
         return Ok(aname, name, $"Records Loaded {result.Response.Results.Count}");
@@ -167,7 +175,7 @@ public static class SmartActivityFactory
         var sb = new StringBuilder();
 
         var r2 = await apiClient
-            .ReportsYearEndCleanupDistributionsAndForfeitureEndpointAsync(1, 12, true, profitYear, null, null, 0, int.MaxValue, null);
+            .ReportsYearEndCleanupDistributionsAndForfeitureEndpointAsync(1, 12, true, _profitYear, null, null, 0, int.MaxValue, null);
         sb.Append($"Records Loaded {r2.Response.Results.Count}\n");
 
         return Ok(aname, name, sb);
@@ -176,7 +184,7 @@ public static class SmartActivityFactory
     private static async Task<Outcome> A5_Extract_Excutive_Hours_and_Dollars(ApiClient apiClient, string aname, string name)
     {
         var r2 = await apiClient
-            .ReportsYearEndExecutiveHoursAndDollarsExecutiveHoursAndDollarsEndpointAsync(null, null, "", true, false, profitYear, null, null, 0, int.MaxValue, null);
+            .ReportsYearEndExecutiveHoursAndDollarsExecutiveHoursAndDollarsEndpointAsync(null, null, "", true, false, _profitYear, null, null, 0, int.MaxValue, null);
         return Ok(aname, name, $"Records Loaded = {r2.Response.Results.Count}\n");
     }
 
@@ -233,7 +241,7 @@ public static class SmartActivityFactory
 
     private static async Task<Outcome> A11_Profit_Sharing_YTD_Wages_Extract(ApiClient apiClient, string aname, string name)
     {
-        var r = await apiClient.ReportsYearEndWagesCurrentYearWagesEndpointAsync(profitYear, null, null, 0, int.MaxValue, null);
+        var r = await apiClient.ReportsYearEndWagesCurrentYearWagesEndpointAsync(_profitYear, null, null, 0, int.MaxValue, null);
         return Ok(aname, name, $"Record Count: {r.Response.Results.Count}");
     }
 
@@ -242,10 +250,38 @@ public static class SmartActivityFactory
 #if false
         var req = new SetFrozenStateRequest();
         req.AsOfDateTime = DateTimeOffset.Now;
-        var r = await apiClient.DemographicsFreezeDemographicsEndpointAsync(null, req);
+        var r = await apiClient.ItOperationsGetActiveFrozenDemographicEndpointAsync(null, req);
         return new Outcome(aname, name, "OK", $"Frozen at {r.AsOfDateTime} by {r.FrozenBy} isActive:{r.IsActive}", "");
 #endif
-        return TBD(aname, name);
+/*        example
+
+        curl -X 'POST' \
+        'https://ps.qa.demoulas.net:8443/api/itoperations/freeze' \
+        -H 'accept: application/json' \
+        -H 'Authorization: Bearer eyJraWQiOiI5U1FaZzhqQl9XSFJnZkl6d1ktUmRQRk1ackM1TnNEejFvZVcteEwzWXNvIiwiYWxnIjoiUlMyNTYifQ.eyJ2ZXIiOjEsImp0aSI6IkFULkEtWVdFXzRCQ0o4aEI2dmZxaTIyV29rNWFkYjJFaGl3MWw1Mmh4V0k5MW8iLCJpc3MiOiJodHRwczovL21hcmtldGJhc2tldC5va3RhLmNvbS9vYXV0aDIvYXVzMTEzZWhjNWtrcVRlWEIxdDgiLCJhdWQiOiJhcGk6Ly9zbWFydC1wcyIsImlhdCI6MTc0NDY2MTM4NiwiZXhwIjoxNzQ0NjY0OTg2LCJjaWQiOiIwb2ExMTNlYWpqNEpUMWlrSjF0OCIsInVpZCI6IjAwdXd3dG1vcjhTdDNRbFlxMXQ3Iiwic2NwIjpbIm9wZW5pZCJdLCJhdXRoX3RpbWUiOjE3NDQ2NjEyNzYsInN1YiI6ImJoZXJybWFubkBNYWlub2ZmaWNlLkRlbW91bGFzLkNvcnAiLCJncm91cHMiOlsiU01BUlQtUFMtUUEtSW1wZXJzb25hdGlvbiJdfQ.VkMhL64vEnz17RwoG5uWfdNKfB7r-UuXX4-lTAYwi4qVwa32YorCkRqVrO-LK3PtrUMvnAAk3J4J1Nx3Iugocg2DCoN55GSlKvOcCmVYDMibKC16ysEiPgUX4rSdPE4KuYgINtE6DYPMB4-CMZr0a6oEDV0H6Nb3GLGGawiXCLslWbpvSW_3hEYoIVrO1q4Nuq9D8anr44mneFhj9uU_Sqe63le94LikjjQB9T4BsjoeDcs0DAk351sdJrf0lWNweKvohzWLNiayPx8AZ4nbQAA3ljc1BiX8spVMEDWhPXR6AeMxbqLb034bzvau4sZXIZQW5OFx9jJ2TSxJkxeNxQ' \
+        -H 'Content-Type: application/json' \
+        -d '{
+        "asOfDateTime": "2025-05-06T00:00:00-04:00",
+        "profitYear": 2025
+    }'
+*/
+        var httpClient = new HttpClient { Timeout = TimeSpan.FromHours(2) };
+        TestToken.CreateAndAssignTokenForClient(httpClient, "IT-Operations");
+        var request = new HttpRequestMessage(HttpMethod.Post, "http://localhost:5298/api/itoperations/freeze")
+        {
+            Content = new StringContent("{ \"ProfitYear\" : " + _profitYear + ", \"asOfDateTime\": \"2025-05-06T00:00:00-04:00\"}"
+                , Encoding.UTF8, "application/json")
+        };
+        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("*/*"));
+
+        using var response = await httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+
+        var responseBody = await response.Content.ReadAsStringAsync();
+        Console.WriteLine(responseBody);
+
+        return Ok(aname, name, "");
+        //return TBD(aname, name)
     }
 
     private static async Task<Outcome> A13A_PAYPROFIT_SHIFT(ApiClient apiClient, string aname, string name)
@@ -317,11 +353,9 @@ public static class SmartActivityFactory
 
         var httpClient = new HttpClient { Timeout = TimeSpan.FromHours(2) };
         TestToken.CreateAndAssignTokenForClient(httpClient, "Finance-Manager");
-#pragma warning disable S1075
         var request = new HttpRequestMessage(HttpMethod.Post, "http://localhost:5298/api/yearend/final")
-#pragma warning restore S1075
         {
-            Content = new StringContent("{ \"ProfitYear\" : " + profitYear + "}", Encoding.UTF8, "application/json")
+            Content = new StringContent("{ \"ProfitYear\" : " + _profitYear + "}", Encoding.UTF8, "application/json")
         };
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("*/*"));
 
@@ -336,19 +370,19 @@ public static class SmartActivityFactory
 
     private static async Task<Outcome> A19_Get_Eligible_Employees(ApiClient apiClient, string aname, string name)
     {
-        var r = await apiClient.ReportsYearEndEligibilityGetEligibleEmployeesEndpointAsync(profitYear, null, null, 0, int.MaxValue, null);
+        var r = await apiClient.ReportsYearEndEligibilityGetEligibleEmployeesEndpointAsync(_profitYear, null, null, 0, int.MaxValue, null);
         return Ok(aname, name, $"Records Loaded = {r.Response.Results.Count}");
     }
 
     private static async Task<Outcome> A20_Profit_Forfeit_PAY443(ApiClient apiClient, string aname, string name)
     {
-        var r = await apiClient.ReportsYearEndFrozenForfeituresAndPointsForYearEndpointAsync(true, profitYear, null, null, 0, int.MaxValue, null);
+        var r = await apiClient.ReportsYearEndFrozenForfeituresAndPointsForYearEndpointAsync(true, _profitYear, null, null, 0, int.MaxValue, null);
         return Ok(aname, name, $"Records Loaded = {r.Response.Results.Count}");
     }
 
     private static async Task<Outcome> A21_Profit_Share_Update_PAY444(ApiClient apiClient, string aname, string name)
     {
-        var r = await apiClient.ReportsYearEndProfitShareUpdateProfitShareUpdateEndpointAsync(15, 4, 5, 0, 30_000, 0, 0, 0, 0, 0, 0, profitYear, null, null, 0, int.MaxValue,
+        var r = await apiClient.ReportsYearEndProfitShareUpdateProfitShareUpdateEndpointAsync(15, 4, 5, 0, 76_500, 0, 0, 0, 0, 0, 0, _profitYear, null, null, 0, int.MaxValue,
             null);
         return Ok(aname, name, $"Records Loaded = {r.Response.Results.Count}");
     }
@@ -356,7 +390,7 @@ public static class SmartActivityFactory
     private static async Task<Outcome> A22_Profit_Share_Edit_PAY477(ApiClient apiClient, string aname, string name)
     {
         var r = await apiClient.ReportsYearEndProfitShareEditEndpointAsync(15, 4, 5, 0,
-            30_000, 0, 0, 0, 0, 0, 0, profitYear, null, null, 0, int.MaxValue, null);
+            76_500, 0, 0, 0, 0, 0, 0, _profitYear, null, null, 0, int.MaxValue, null);
         return Ok(aname, name, $"Records Loaded = {r.Response.Results.Count}");
     }
 
@@ -364,7 +398,7 @@ public static class SmartActivityFactory
     {
         // Awards profit sharing.    
         var r = await apiClient.ReportsYearEndProfitMasterProfitMasterUpdateEndpointAsync(15, 4, 5, 0,
-            30_000, 0, 0, 0, 0, 0, 0, profitYear, null, null, 0, int.MaxValue, null);
+            76_500, 0, 0, 0, 0, 0, 0, _profitYear, null, null, 0, int.MaxValue, null);
         return Ok(aname, name, $"BeneficiariesEffected: {r.BeneficiariesEffected}, EmployeesEffected: {r.EmployeesEffected}");
     }
 
@@ -385,7 +419,7 @@ public static class SmartActivityFactory
 
     private static async Task<Outcome> A27_Prof_Share_by_Store(ApiClient apiClient, string aname, string name)
     {
-        var r = await apiClient.ReportsYearEndBreakdownEndpointAsync(false, null, profitYear, null, null, 0, int.MaxValue, null);
+        var r = await apiClient.ReportsYearEndBreakdownEndpointAsync(false, null, _profitYear, null, null, 0, int.MaxValue, null);
         return Ok(aname, name, $"records returned = {r.Response.Results.Count}");
     }
 
