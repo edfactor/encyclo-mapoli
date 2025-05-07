@@ -1163,3 +1163,42 @@ export interface NavigationDto {
   disabled: boolean;
   items: NavigationDto[];
 }
+
+export interface FilterParams {
+  isYearEnd: boolean;
+  minimumAgeInclusive?: number;
+  maximumAgeInclusive?: number;
+  minimumHoursInclusive?: number;
+  maximumHoursInclusive?: number;
+  includeActiveEmployees: boolean;
+  includeInactiveEmployees: boolean;
+  includeEmployeesTerminatedThisYear: boolean;
+  includeTerminatedEmployees: boolean;
+  includeBeneficiaries: boolean;
+  includeEmployeesWithPriorProfitSharingAmounts: boolean;
+  includeEmployeesWithNoPriorProfitSharingAmounts: boolean;
+}
+
+export interface ReportPreset {
+  id: string;
+  name: string;
+  description: string;
+  params: FilterParams;
+}
+
+export interface ReportQueryParams {
+  profitYear: number;
+  pagination: PaginationParams;
+  isYearEnd: boolean;
+  minimumAgeInclusive?: number;
+  maximumAgeInclusive?: number;
+  minimumHoursInclusive?: number;
+  maximumHoursInclusive?: number;
+  includeActiveEmployees: boolean;
+  includeInactiveEmployees: boolean;
+  includeEmployeesTerminatedThisYear: boolean;
+  includeTerminatedEmployees: boolean;
+  includeBeneficiaries: boolean;
+  includeEmployeesWithPriorProfitSharingAmounts: boolean;
+  includeEmployeesWithNoPriorProfitSharingAmounts: boolean;
+} 
