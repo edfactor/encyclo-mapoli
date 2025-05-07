@@ -34,7 +34,7 @@ public class BreakdownReportByStoreTests
     public async Task RunReport()
     {
         ReportResponseBase<MemberYearSummaryDto> results =
-            await _breakdownService.GetActiveMembersByStore(new BreakdownByStoreRequest { ProfitYear = 2024, Under21Only = false, Take = int.MaxValue }, CancellationToken.None);
+            await _breakdownService.GetActiveMembersByStore(new BreakdownByStoreRequest { ProfitYear = 2024, Take = int.MaxValue }, CancellationToken.None);
 
         List<(short Key, List<MemberYearSummaryDto>)> groupedEmployees =
         [
@@ -53,7 +53,7 @@ public class BreakdownReportByStoreTests
     public async Task RunReport700()
     {
         ReportResponseBase<MemberYearSummaryDto> results =
-            await _breakdownService.GetActiveMembersByStore(new BreakdownByStoreRequest { StoreNumber = 700, ProfitYear = 2024, Under21Only = false, Take = int.MaxValue },
+            await _breakdownService.GetActiveMembersByStore(new BreakdownByStoreRequest { StoreNumber = 700, ProfitYear = 2024,  Take = int.MaxValue },
                 CancellationToken.None);
 
         List<(short Key, List<MemberYearSummaryDto>)> groupedEmployees =
@@ -112,7 +112,7 @@ public class BreakdownReportByStoreTests
     {
         pap.insertHeader();
 
-        foreach (IGrouping<string?, MemberYearSummaryDto> grouping in employees.GroupBy(e => e.EmployeeCategory))
+        foreach (IGrouping<string?, MemberYearSummaryDto> grouping in employees.GroupBy(e => e.PayClassificationName))
         {
             pap.newLine();
             pap.line(grouping.Key ?? "");
@@ -128,18 +128,20 @@ public class BreakdownReportByStoreTests
 
     public static string PrintEmployee(MemberYearSummaryDto member)
     {
-        string ecStr = member.EnrollmentId == 1 || member.EnrollmentId == 3 || member.EnrollmentId == 4 ? " " + member.EnrollmentId : "";
+#pragma warning disable S125
+        string ecStr = string.Empty; //member.EnrollmentId == 1 || member.EnrollmentId == 3 || member.EnrollmentId == 4 ? " " + member.EnrollmentId : "";
+#pragma warning restore S125
 
         string formattedLine =
             $"     {member.BadgeNumber,-5} {member.FullName,-24} " +
             $"{(member.BeginningBalance != 0 ? FormatTrailingNegative(member.BeginningBalance) : ""),12} " +
             $"{(member.Earnings != 0 ? FormatTrailingNegative(member.Earnings) : ""),12} " +
             $"{(member.Contributions != 0 ? FormatTrailingNegative(member.Contributions) : ""),12} " +
-            $"{(member.Forfeiture != 0 ? FormatTrailingNegative(member.Forfeiture) : ""),12} " +
+            $"{(member.Forfeitures != 0 ? FormatTrailingNegative(member.Forfeitures) : ""),12} " +
             $"{(member.Distributions != 0 ? FormatTrailingNegative(member.Distributions) : ""),12} " +
             $"{(member.EndingBalance != 0 ? FormatTrailingNegative(member.EndingBalance) : ""),12} " +
             $"{(member.VestedAmount != 0 ? FormatTrailingNegative(member.VestedAmount) : ""),12}" +
-            $"{(member.VestedPercentage != 0 ? member.VestedPercentage.ToString("N0") : ""),3}{ecStr}";
+            $"{(member.VestedPercent != 0 ? member.VestedPercent.ToString("N0") : ""),3}{ecStr}";
 
         return formattedLine.TrimEnd();
     }

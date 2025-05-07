@@ -1,37 +1,22 @@
-﻿using System.Text.Json;
-using Demoulas.Common.Contracts.Contracts.Response;
-using Demoulas.ProfitSharing.Api;
-using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Contracts.Request.Naviations;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
+﻿using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Navigations;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
-using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
-using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.Endpoints.Endpoints.Master;
-using Demoulas.ProfitSharing.Endpoints.Endpoints.Navigations;
-using Demoulas.ProfitSharing.Security;
-using Demoulas.ProfitSharing.Services;
-using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
-using Demoulas.ProfitSharing.Services.Navigations;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
-using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
-using FastEndpoints;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Demoulas.ProfitSharing.UnitTests.Endpoints;
+namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Navigations;
 
 public class NavigationServiceTests : ApiTestBase<Program>
 {
     private readonly INavigationService _navigationService;
-    private readonly List<Navigation> navigationListObj;
+    private readonly List<Navigation> _navigationListObj;
 
     public NavigationServiceTests()
     {
         this._navigationService = ServiceProvider?.GetRequiredService<INavigationService>()!;
-        this.navigationListObj = new List<Navigation>()
+        this._navigationListObj = new List<Navigation>()
         {
             new Navigation { Id = 12, ParentId = 1, Title = "Terminations", SubTitle = "QPAY066", Url = "prof-term", StatusId = 1, OrderNumber = 8, Icon = "", Disabled = false },
             new Navigation { Id = 13, ParentId = 1, Title = "Profit Share Report", SubTitle = "PAY426", Url = "profit-share-report", StatusId = 1, OrderNumber = 9, Icon = "", Disabled = false },
@@ -99,7 +84,7 @@ public class NavigationServiceTests : ApiTestBase<Program>
     //Dummy Data
     private List<NavigationDto> DummyNavigationData()
     {
-        var lookup = navigationListObj.ToLookup(x => x.ParentId);
+        var lookup = _navigationListObj.ToLookup(x => x.ParentId);
         List<NavigationDto> BuildTree(int? parentId)
         {
             return lookup[parentId]
