@@ -34,7 +34,7 @@ public class BreakdownReportByStoreUnder21Tests
     public async Task RunReportUnder21()
     {
         ReportResponseBase<MemberYearSummaryDto> results =
-            await _breakdownService.GetActiveMembersByStore(new BreakdownByStoreRequest { ProfitYear = 2024, Under21Only = true, Take = int.MaxValue }, CancellationToken.None);
+            await _breakdownService.GetActiveMembersByStore(new BreakdownByStoreRequest { ProfitYear = 2024, Take = int.MaxValue }, CancellationToken.None);
 
         List<(short Key, List<MemberYearSummaryDto>)> groupedEmployees = results.Response.Results
             .GroupBy(m => m.StoreNumber)
@@ -136,11 +136,11 @@ public class BreakdownReportByStoreUnder21Tests
             $"{(member.BeginningBalance != 0 ? FormatTrailingNegative(member.BeginningBalance) : ""),12} " +
             $"{(member.Earnings != 0 ? FormatTrailingNegative(member.Earnings) : ""),12} " +
             $"{(member.Contributions != 0 ? FormatTrailingNegative(member.Contributions) : ""),12} " +
-            $"{(member.Forfeiture != 0 ? FormatTrailingNegative(member.Forfeiture) : ""),12} " +
+            $"{(member.Forfeitures != 0 ? FormatTrailingNegative(member.Forfeitures) : ""),12} " +
             $"{(member.Distributions != 0 ? FormatTrailingNegative(member.Distributions) : ""),11} " +
             $"{(member.EndingBalance != 0 ? FormatTrailingNegative(member.EndingBalance) : ""),12} " +
             $"{(member.VestedAmount != 0 ? FormatTrailingNegative(member.VestedAmount) : ""),12}" +
-            $"{(member.VestedPercentage != 0 ? member.VestedPercentage.ToString("N0") : ""),3}{ecStr}";
+            $"{(member.VestedPercent != 0 ? member.VestedPercent.ToString("N0") : ""),3}{ecStr}";
 
         return formattedLine.TrimEnd() + "\n";
     }
