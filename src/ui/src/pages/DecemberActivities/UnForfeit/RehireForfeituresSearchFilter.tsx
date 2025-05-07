@@ -1,7 +1,9 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import Grid2 from "@mui/material/Grid2";
+import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
+import { useLazyGetAccountingYearQuery } from "reduxstore/api/LookupsApi";
 import { useLazyGetRehireForfeituresQuery } from "reduxstore/api/YearsEndApi";
 import {
   clearRehireForfeituresDetails,
@@ -32,7 +34,7 @@ const schema = yup.object().shape({
     .required("Profit Year is required"),
   beginningDate: yup.string().required("Beginning Date is required"),
   endingDate: yup.string()
-    .typeError("Invalid date")   
+    .typeError("Invalid date")
     .required("Ending Date is required"),
   pagination: yup
     .object({
@@ -50,46 +52,79 @@ interface MilitaryAndRehireForfeituresSearchFilterProps {
 }
 
 const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearchFilterProps> = ({
-  setInitialSearchLoaded,
-  fiscalData
-}) => {
+                                                                                                  setInitialSearchLoaded,
+                                                                                                  fiscalData
+                                                                                                }) => {
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const [triggerSearch, { isFetching }] = useLazyGetRehireForfeituresQuery();
+  const [fetchAccountingYear, { isLoading: isLoadingFiscalData }] = useLazyGetAccountingYearQuery();
   const { rehireForfeituresQueryParams } = useSelector((state: RootState) => state.yearsEnd);
-  const profitYear = useDecemberFlowProfitYear();
+  const defaultProfitYear = useDecemberFlowProfitYear();
   const dispatch = useDispatch();
-  
+
   const validateAndSubmit = (data: RehireForfeituresSearch) => {
     if (isValid && hasToken) {
       const beginDate = data.beginningDate || fiscalData.fiscalBeginDate || '';
       const endDate = data.endingDate || fiscalData.fiscalEndDate || '';
-      
+
       const updatedData = {
         ...data,
-        beginningDate: beginDate, 
+        beginningDate: beginDate,
         endingDate: endDate,
       };
-      
+
       dispatch(setMilitaryAndRehireForfeituresQueryParams(updatedData));
       triggerSearch(updatedData);
     }
   };
-  
+
   const {
     control,
     handleSubmit,
     formState: { errors, isValid },
     reset,
-    trigger
+    trigger,
+    setValue,
+    getValues,
+    watch
   } = useForm<RehireForfeituresSearch>({
     resolver: yupResolver<RehireForfeituresSearch>(schema),
     defaultValues: {
-      profitYear: profitYear || rehireForfeituresQueryParams?.profitYear || undefined,
+      profitYear: defaultProfitYear || rehireForfeituresQueryParams?.profitYear || undefined,
       beginningDate: rehireForfeituresQueryParams?.beginningDate || fiscalData.fiscalBeginDate || undefined,
       endingDate: rehireForfeituresQueryParams?.endingDate || fiscalData.fiscalEndDate || undefined,
       pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }
     }
   });
+
+  // Watch for changes to the profitYear field
+  const watchProfitYear = watch("profitYear");
+
+  // Effect to fetch fiscal data when profit year changes
+  useEffect(() => {
+    const fetchFiscalDataForYear = async (year: number) => {
+      if (year && hasToken) {
+        try {
+          const result = await fetchAccountingYear({ profitYear: year }).unwrap();
+          if (result) {
+            // Update the beginning and ending dates with the new fiscal dates
+            setValue("beginningDate", result.fiscalBeginDate);
+            setValue("endingDate", result.fiscalEndDate);
+
+            // Trigger validation for updated fields
+            trigger(["beginningDate", "endingDate"]);
+          }
+        } catch (error) {
+          console.error("Failed to fetch accounting year data:", error);
+        }
+      }
+    };
+
+    // Only fetch if the profit year has changed from the default
+    if (watchProfitYear && watchProfitYear !== defaultProfitYear) {
+      fetchFiscalDataForYear(watchProfitYear);
+    }
+  }, [watchProfitYear, hasToken, fetchAccountingYear, setValue, trigger, defaultProfitYear]);
 
   const validateAndSearch = handleSubmit(validateAndSubmit);
 
@@ -97,14 +132,14 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
     setInitialSearchLoaded(false);
     dispatch(clearRehireForfeituresQueryParams());
     dispatch(clearRehireForfeituresDetails());
-    
+
     reset({
-      profitYear: profitYear,
+      profitYear: defaultProfitYear,
       beginningDate: fiscalData.fiscalBeginDate,
       endingDate: fiscalData.fiscalEndDate,
       pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }
     });
-    
+
     trigger();
   };
 
@@ -128,7 +163,8 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
                 disableFuture
                 views={["year"]}
                 error={errors.profitYear?.message}
-                disabled={true}
+                minDate={new Date(defaultProfitYear - 5, 0, 1)}
+                disabled={isLoadingFiscalData}
               />
             )}
           />
@@ -151,6 +187,7 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
                 error={errors.beginningDate?.message}
                 minDate={tryddmmyyyyToDate(fiscalData.fiscalBeginDate)}
                 maxDate={tryddmmyyyyToDate(fiscalData.fiscalEndDate)}
+                disabled={isLoadingFiscalData}
               />
             )}
           />
@@ -173,6 +210,7 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
                 error={errors.endingDate?.message}
                 minDate={tryddmmyyyyToDate(fiscalData.fiscalBeginDate)}
                 maxDate={tryddmmyyyyToDate(fiscalData.fiscalEndDate)}
+                disabled={isLoadingFiscalData}
               />
             )}
           />
@@ -184,8 +222,8 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
         <SearchAndReset
           handleReset={handleReset}
           handleSearch={validateAndSearch}
-          isFetching={isFetching}
-          disabled={!isValid || isFetching}
+          isFetching={isFetching || isLoadingFiscalData}
+          disabled={!isValid || isFetching || isLoadingFiscalData}
         />
       </Grid2>
     </form>
