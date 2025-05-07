@@ -1,13 +1,18 @@
+
 import { InfoOutlined } from "@mui/icons-material";
 import Alert from "@mui/material/Alert";
 import { purple } from "@mui/material/colors";
 import { ICommon } from "../ICommon";
+import Tooltip from "@mui/material/Tooltip";
+import CircleIcon from "@mui/icons-material/Circle";
 
 export interface IEnvironmentBannerProps extends ICommon {
   environmentMode: "development" | "qa" | "uat" | "production";
   buildVersionNumber?: string;
+  apiStatus?: "Healthy" | "Degraded" | "Unhealthy";
+  apiStatusMessage? : string;
 }
-export const EnvironmentBanner: React.FC<IEnvironmentBannerProps> = ({ environmentMode, buildVersionNumber }) => {
+export const EnvironmentBanner: React.FC<IEnvironmentBannerProps> = ({ environmentMode, buildVersionNumber, apiStatus, apiStatusMessage }) => {
   if (!environmentMode || environmentMode === "production") {
     return null; // No banner for production
   }
@@ -39,6 +44,40 @@ export const EnvironmentBanner: React.FC<IEnvironmentBannerProps> = ({ environme
       versionNumber = "";
   }
 
+  // API Status Icon renderer
+  const renderApiStatusIcon = () => {
+    if (!apiStatus || !["Healthy", "Degraded", "Unhealthy"].includes(apiStatus)) {
+      return null; // Hide icon for unknown status
+    }
+
+    let textColor = "";
+    switch (apiStatus) {
+      case "Healthy":
+        textColor = "#4caf50"; // Green
+        break;
+      case "Degraded":
+        textColor = "#ffeb3b"; // Yellow
+        break;
+      case "Unhealthy":
+        textColor = "#f44336"; // Red
+        break;
+    }
+    return (
+      <Tooltip title={apiStatusMessage || ""} arrow>
+        <span
+          style={{
+            color: textColor,
+            fontWeight: "bold",
+            marginLeft: "4px"
+          }}
+        >
+          {apiStatus}
+        </span>
+      </Tooltip>
+    );
+  };
+
+
   return (
     <Alert
       severity={alertSeverity}
@@ -63,7 +102,11 @@ export const EnvironmentBanner: React.FC<IEnvironmentBannerProps> = ({ environme
       <div
         className="flex justify-between"
         id="alert-message-container">
-        <div>WARNING! {environmentName} ENVIRONMENT. CHANGES WILL NOT BE REFLECTED IN PRODUCTION!</div>
+        <div className="flex items-center">
+          WARNING! {environmentName} ENVIRONMENT. CHANGES WILL NOT BE REFLECTED IN PRODUCTION!        
+        </div>
+        <div></div>
+        <div>API Status: {renderApiStatusIcon()}</div>     
         <div>v.{versionNumber}</div>
       </div>
     </Alert>

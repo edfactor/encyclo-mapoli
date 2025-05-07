@@ -139,6 +139,7 @@ const App = () => {
         buildVersionNumber={buildInfoText}
         userName={username}
         environmentMode={EnvironmentUtils.envMode}
+        apiStatus={"Healthy"}
         oktaEnabled={EnvironmentUtils.isOktaEnabled}>
         <AppErrorBoundary>
           <ToastServiceProvider
