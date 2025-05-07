@@ -9,6 +9,7 @@ import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
 import { tryddmmyyyyToDate } from "../../utils/dateUtils";
 import { getEnrolledStatus, getForfeitedStatus } from "../../utils/enrollmentUtil";
 
+
 interface MasterInquiryEmployeeDetailsProps {
   details: EmployeeDetails;
   missives: MissiveResponse[]  | null;
@@ -84,11 +85,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     { label: "Current Vested Amount", value: numberToCurrency(currentVestedAmount) },
   ];
 
-  const translatedMissives = missives && details && details.missives?.length ? details.missives.map(m=>missives.find(x=>x.id == m)?.message) : []
-
-  const translatedMissivesSection = translatedMissives.map((missive, idx) => (
-    <Typography key={idx} variant="body1" sx={{ marginBottom: "8px" }}> {missive}</Typography>
-  ));
+  
 
   return (
     <Grid2

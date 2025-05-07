@@ -1126,6 +1126,13 @@ export interface ForfeitureAdjustmentResponse {
 export interface MissiveResponse {
   id: number;
   message: string;
+  severity?: "error" | "warning" | "info" | "success";
+}
+
+export interface MissiveAlert {
+  severity: "error" | "warning" | "info" | "success" | undefined;
+  message: string | undefined;
+  title: string| undefined;
 }
 
 export interface RowCountResult {
