@@ -285,13 +285,8 @@ export interface ExecutiveHoursAndDollarsQueryParams extends ProfitYearRequest {
 export interface DistributionsAndForfeituresQueryParams extends ProfitYearRequest {
   startMonth?: number;
   endMonth?: number;
-  includeOutgoingForfeitures?: boolean;
 }
 
-export interface BaseDateRangeParams {
-  startDate: Date;
-  endDate: Date;
-}
 
 export interface MasterInquirySearch {
   endProfitYear?: number | null;

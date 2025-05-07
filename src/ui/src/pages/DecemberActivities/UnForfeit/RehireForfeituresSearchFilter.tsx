@@ -29,7 +29,7 @@ const schema = yup.object().shape({
     .number()
     .typeError("Profit Year must be a number")
     .integer("Profit Year must be an integer")
-    .min(2020, "Year must be 2020 or later")
+    .min(2019, "Year must be 2020 or later")
     .max(2100, "Profit Year must be 2100 or earlier")
     .required("Profit Year is required"),
   beginningDate: yup.string().required("Beginning Date is required"),
