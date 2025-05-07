@@ -16,6 +16,7 @@ import EnvironmentUtils from "./utils/environmentUtils";
 import { Settings } from "@mui/icons-material";
 import { useLazyGetMissivesQuery } from "reduxstore/api/LookupsApi";
 import { useGetHealthQuery } from "./reduxstore/api/AppSupportApi";
+import { getHealthStatusDescription } from "./utils/appSupportUtil";
 
 // Types
 interface BuildInfo {
@@ -145,6 +146,7 @@ const App = () => {
         userName={username}
         environmentMode={EnvironmentUtils.envMode}
         apiStatus={health?.status}
+        apiStatusMessage={health ? getHealthStatusDescription(health) : undefined}
         oktaEnabled={EnvironmentUtils.isOktaEnabled}>
         <AppErrorBoundary>
           <ToastServiceProvider
