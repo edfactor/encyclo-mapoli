@@ -25,7 +25,7 @@ VALUES(57,56, 'Demographic Freeze', '','demographic-freeze', 1, 1, '', 0);
 
 --December Activities
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(1,54, 'December Activities', '','december-process-accordion', 1, 1, '', 0);
+VALUES(1,55, 'December Activities', '','december-process-accordion', 1, 1, '', 0);
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
 VALUES(2,1, 'Clean up Reports', '','', 1, 1, '', 0);
 --sub values for Clean up Reports
@@ -58,7 +58,7 @@ INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUM
 VALUES(13,1, 'Profit Share Report', 'PAY426','profit-share-report', 1, 9, '', 0);
 --Fiscal Close
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(14,54, 'Fiscal Close', '','fiscal-close', 1, 2, '', 0);
+VALUES(14,55, 'Fiscal Close', '','fiscal-close', 1, 2, '', 0);
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
 VALUES(15,14, 'Manage Executive Hours and Dollars', '008-09','manage-executive-hours-and-dollars', 1, 1, '', 0);
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
