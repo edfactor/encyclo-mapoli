@@ -214,7 +214,6 @@ export const YearsEndApi = createApi({
         method: "GET",
         params: {
           profitYear: params.profitYear,
-          includeOutgoingForfeitures: params.includeOutgoingForfeitures,
           startMonth: params.startMonth,
           endMonth: params.endMonth,
           take: params.pagination.take,

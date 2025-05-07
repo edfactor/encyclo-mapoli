@@ -55,7 +55,6 @@ export interface PagedReportResponse<T> {
 export interface DistributionsAndForfeituresRequestDto extends ProfitYearRequest {
   startMonth?: number;
   endMonth?: number;
-  includeOutgoingForfeitures?: boolean;
   pagination: SortedPaginationRequestDto;
 }
 
