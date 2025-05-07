@@ -1,10 +1,35 @@
-import { Divider, Typography } from "@mui/material";
+import { Divider, Typography, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
-import { DSMAccordion, Page, TotalsGrid } from "smart-ui-library";
+import { Page, TotalsGrid } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
-import ProfCtrlSheetSearchFilters from "./ProfCtrlSheetSearchFilters";
+import { useEffect } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "reduxstore/store";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import { useLazyGetControlSheetQuery } from "reduxstore/api/YearsEndApi";
 
 const ProfCtrlSheet = () => {
+  const profitYear = useFiscalCloseProfitYear();
+  const [triggerFetch, { isFetching }] = useLazyGetControlSheetQuery();
+  const controlSheet = useSelector((state: RootState) => state.yearsEnd.controlSheet);
+
+  useEffect(() => {
+    triggerFetch({
+      profitYear,
+      pagination: {
+        skip: 0,
+        take: 255,
+        isSortDescending: true,
+        sortBy: "type"
+      }
+    });
+  }, [triggerFetch, profitYear]);
+
+  const formatCurrency = (amount: number | undefined) => {
+    if (amount === undefined) return "$XX,XXX,XXX.XX";
+    return `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
+
   return (
     <Page label={CAPTIONS.PROF_CTRLSHEET}>
       <Grid2
@@ -13,12 +38,6 @@ const ProfCtrlSheet = () => {
         <Grid2 width={"100%"}>
           <Divider />
         </Grid2>
-        <Grid2 width={"100%"}>
-          <DSMAccordion title="Filter">
-            <ProfCtrlSheetSearchFilters />
-          </DSMAccordion>
-        </Grid2>
-
         <Grid2 width="100%">
           <>
             <div style={{ padding: "0 24px 0 24px" }}>
@@ -29,10 +48,10 @@ const ProfCtrlSheet = () => {
               </Typography>
               <TotalsGrid
                 displayData={[
-                  ["Payprofit", "P/S Total", "$XX,XXX,XXX.XX"],
-                  ["PayBen Non-Emp", "P/S Total", "$XXX,XXX.XX"],
-                  ["PayBen-Emp", "P/S Total", "$0.00"],
-                  ["Profit Sharing", "Total", "$XX,XXX,XXX.XX"]
+                  ["Payprofit", "P/S Total", formatCurrency(controlSheet?.employeeContributionProfitSharingAmount)],
+                  ["PayBen Non-Emp", "P/S Total", formatCurrency(controlSheet?.nonEmployeeProfitSharingAmount)],
+                  ["PayBen-Emp", "P/S Total", formatCurrency(controlSheet?.employeeBeneficiaryAmount)],
+                  ["Profit Sharing", "Total", formatCurrency(controlSheet?.profitSharingAmount)]
                 ]}
                 leftColumnHeaders={[]}
                 topRowHeaders={[]}
