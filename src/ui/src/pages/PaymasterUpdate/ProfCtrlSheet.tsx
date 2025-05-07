@@ -7,13 +7,15 @@ import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useLazyGetControlSheetQuery } from "reduxstore/api/YearsEndApi";
-
 const ProfCtrlSheet = () => {
   const profitYear = useFiscalCloseProfitYear();
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const [triggerFetch, { isFetching }] = useLazyGetControlSheetQuery();
   const controlSheet = useSelector((state: RootState) => state.yearsEnd.controlSheet);
 
   useEffect(() => {
+    if (!hasToken) return;
+
     triggerFetch({
       profitYear,
       pagination: {
@@ -23,7 +25,7 @@ const ProfCtrlSheet = () => {
         sortBy: "type"
       }
     });
-  }, [triggerFetch, profitYear]);
+  }, [triggerFetch, profitYear, hasToken]);
 
   const formatCurrency = (amount: number | undefined) => {
     if (amount === undefined) return "$XX,XXX,XXX.XX";
