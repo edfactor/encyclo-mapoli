@@ -12,9 +12,9 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
 
 public class NegativeEtvaForSsNsOnPayProfitEndPoint : EndpointWithCsvBase<ProfitYearRequest, NegativeEtvaForSsNsOnPayProfitResponse, NegativeEtvaForSsNsOnPayProfitEndPoint.NegativeEtvaForSsNsOnPayProfitResponseMap>
 {
-    private readonly ICleanupReportService _reportService;
+    private readonly INegativeEtvaReportService _reportService;
 
-    public NegativeEtvaForSsNsOnPayProfitEndPoint(ICleanupReportService reportService)
+    public NegativeEtvaForSsNsOnPayProfitEndPoint(INegativeEtvaReportService reportService)
     {
         _reportService = reportService;
     }
@@ -53,7 +53,7 @@ public class NegativeEtvaForSsNsOnPayProfitEndPoint : EndpointWithCsvBase<Profit
 
     public override Task<ReportResponseBase<NegativeEtvaForSsNsOnPayProfitResponse>> GetResponse(ProfitYearRequest req, CancellationToken ct)
     {
-        return _reportService.GetNegativeETVAForSSNsOnPayProfitResponseAsync(req, ct);
+        return _reportService.GetNegativeETVAForSsNsOnPayProfitResponseAsync(req, ct);
     }
 
     public override string ReportFileName => "ETVA-LESS-THAN-ZERO";

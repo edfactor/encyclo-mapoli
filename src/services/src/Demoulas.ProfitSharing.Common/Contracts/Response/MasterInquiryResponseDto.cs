@@ -1,6 +1,4 @@
-﻿using System.Security.Cryptography;
-
-namespace Demoulas.ProfitSharing.Common.Contracts.Response;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response;
 
 public sealed record MasterInquiryResponseDto
 {
