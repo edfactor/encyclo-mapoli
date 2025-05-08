@@ -1,12 +1,12 @@
 import { Typography } from "@mui/material";
-import LabelValueSection from "../../../components/LabelValueSection";
+import LabelValueSection from "../../../../components/LabelValueSection";
 import Grid2 from '@mui/material/Grid2';
 import { useEffect } from "react";
 import { useLazyGetBreakdownByStoreTotalsQuery } from "reduxstore/api/YearsEndApi";;
-import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
 import { numberToCurrency } from "smart-ui-library";
 import { useSelector } from "react-redux";
-import { RootState } from "../../../reduxstore/store";
+import { RootState } from "../../../../reduxstore/store";
 
 interface TotalsContentProps {
   store: number;

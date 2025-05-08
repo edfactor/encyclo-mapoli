@@ -6,9 +6,9 @@ import { useLazyGetBreakdownByStoreQuery } from "reduxstore/api/YearsEndApi";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { ICellRendererParams } from "ag-grid-community";
-import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
+import { viewBadgeLinkRenderer } from "../../../../utils/masterInquiryLink";
 import { useNavigate } from "react-router-dom";
-import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
 
 interface AssociatesGridProps {
   store: number;

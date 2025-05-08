@@ -7,8 +7,8 @@ import { useNavigate } from "react-router-dom";
 import { useLazyGetBreakdownByStoreQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination, agGridNumberToCurrency } from "smart-ui-library";
-import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
-import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import { viewBadgeLinkRenderer } from "../../../../utils/masterInquiryLink";
+import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
 
 interface StoreManagementGridProps {
   store: number;
