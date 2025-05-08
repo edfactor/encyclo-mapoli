@@ -328,7 +328,7 @@ public sealed class BreakdownReportService : IBreakdownService
             Monthly payroll (900) is simply anyone with FREQ = 2.
          */
 
-
+        return member.StoreNumber;
 
     }
 
