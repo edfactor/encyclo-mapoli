@@ -1,61 +1,62 @@
 import { Divider } from "@mui/material";
-import Grid2 from '@mui/material/Grid2';
-import { DSMAccordion, Page } from "smart-ui-library";
-import MasterInquirySearchFilter from "./MasterInquirySearchFilter";
-import MasterInquiryGrid from "./MasterInquiryGrid";
-import { useSelector } from "react-redux";
-import { RootState } from "reduxstore/store";
-import MasterInquiryEmployeeDetails from "./MasterInquiryEmployeeDetails";
-import { useCallback, useEffect, useState } from "react";
 import Alert from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
-import { MissiveResponse, MissiveAlert } from "reduxstore/types";
+import Grid2 from '@mui/material/Grid2';
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "reduxstore/store";
+import { MissiveResponse } from "reduxstore/types";
+import { DSMAccordion, Page } from "smart-ui-library";
+import MasterInquiryEmployeeDetails from "./MasterInquiryEmployeeDetails";
+import MasterInquiryGrid from "./MasterInquiryGrid";
+import MasterInquirySearchFilter from "./MasterInquirySearchFilter";
 
 
 const MasterInquiry = () => {
   const { masterInquiryEmployeeDetails } = useSelector((state: RootState) => state.inquiry);
 
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
-  const [missiveAlerts, setMissiveAlerts] = useState<MissiveAlert[] | null>(null);
+  const [missiveAlerts, setMissiveAlerts] = useState<MissiveResponse[] | null>(null);
 
   // This is the front-end cache of back end missives messages
   const { missives } = useSelector((state: RootState) => state.lookups);
 
-  console.log("Missives", missives);
+  const getAlertColorForSeverity = (severity: string) => {
 
- 
-  const getMissiveReponseForId = useCallback((id: number): MissiveResponse | undefined => {
-    let missive;
-    if (missives && missives.length !== 0) {
-      missive = missives.find((missive: MissiveResponse) => missive.id === id);
+    switch (severity) {
+      case "Error":
+        return "error";
+      case "Warning":
+      case "Information":
+        return "warning";
+      case "Success":
+        return "success";
+      default:
+        return "info";  
     }
-    
-    return missive;
-  }, [missives]);
+  };
 
+  const removeLeadingAndTrailingChars = (str: string) => {
+    return str.replace(/^\*+|\*+$/g, "").trim();
+  };
 
   useEffect(() => {
-    if (masterInquiryEmployeeDetails && masterInquiryEmployeeDetails.missives) {
-
+    if (missives && masterInquiryEmployeeDetails && masterInquiryEmployeeDetails.missives) {
+    
+    // There could be more than one missive
     if (masterInquiryEmployeeDetails.missives.length > 0) {
       const alerts = masterInquiryEmployeeDetails.missives.map((id: number) => {
-      const missiveResponse = getMissiveReponseForId(id);
-      if (missiveResponse && missiveResponse.severity) {
-        return {
-        severity: missiveResponse.severity,
-        title: missiveResponse.severity.charAt(0).toUpperCase() + missiveResponse.severity.slice(1),
-        message: missiveResponse.message
-        };
-      }
-      return null;
-      }).filter((alert) => alert !== null) as MissiveAlert[];
+      const missiveResponse =  missives.find((missive: MissiveResponse) => missive.id === id);
+      return missiveResponse;
+      }).filter((alert) => alert !== null) as MissiveResponse[];
 
+      // This will send the list to the screen
       setMissiveAlerts(alerts);
     } else {
-      console.log("No missives found");
+      console.log("No missives found to display.");
     }
   }
-  }, [getMissiveReponseForId, masterInquiryEmployeeDetails, missiveAlerts]);
+  }, [masterInquiryEmployeeDetails, missives]);
 
 
   return (
@@ -68,9 +69,9 @@ const MasterInquiry = () => {
         </Grid2>
         {missiveAlerts && missiveAlerts.map((alert, index) => (
           <Grid2 key={index} size={{ xs: 12 }} width={"100%"}>
-            <Alert severity={alert.severity}>
-              <AlertTitle>{alert.title}</AlertTitle>
-              {alert.message}
+            <Alert severity={getAlertColorForSeverity(alert.severity)}>
+              <AlertTitle>{removeLeadingAndTrailingChars(alert.message)}</AlertTitle>
+              {alert.description}
             </Alert>
           </Grid2>
         ))}

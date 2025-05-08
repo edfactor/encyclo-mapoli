@@ -85,8 +85,6 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     { label: "Current Vested Amount", value: numberToCurrency(currentVestedAmount) },
   ];
 
-  
-
   return (
     <Grid2
     container
@@ -131,7 +129,6 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
           </Grid2>
         </Grid2>
       </Grid2>
-      {/* {translatedMissivesSection} */}
     </Grid2>
   );
 };

@@ -37,12 +37,7 @@ export const lookupsSlice = createSlice({
     },
 
     setMissivesData: (state, action: PayloadAction<MissiveResponse[]>) => {
-      // Note that the setting of warning is temporary until the backend
-      // is updated to return the severity
-      state.missives = action.payload.map((missive: MissiveResponse) => ({
-        ...missive,
-        severity: missive.severity ?? "warning",
-      }));
+      state.missives = action.payload;
     },
 
   }
