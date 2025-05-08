@@ -4,10 +4,13 @@ import { RootState } from "reduxstore/store";
 import {
   GetNavigationStatusRequestDto,
   GetNavigationStatusResponseDto,
+  UpdateNavigationRequestDto,
+  UpdateNavigationResponseDto,
 } from "reduxstore/types";
 import { url } from "./api";
 import { setNavigationStatus, setNavigationStatusError } from "reduxstore/slices/NavigationStatusSlice";
 import { Paged } from "smart-ui-library";
+import { NavigationApi } from "./NavigationApi";
 
 export const NavigationStatusApi = createApi({
   baseQuery: fetchBaseQuery({
@@ -45,8 +48,29 @@ export const NavigationStatusApi = createApi({
           dispatch(setNavigationStatusError("Failed to fetch navigation status"));
         }
       }
-    })
+    }),
+    updateNavigationStatus: builder.query<UpdateNavigationResponseDto, UpdateNavigationRequestDto>({
+        query: (request) => ({
+          url: ``,
+          method: "PUT",
+          body: request
+        }),
+        async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+          try {
+            const { data } = await queryFulfilled;
+            if(data.isSuccessful)
+            {
+                dispatch(
+                    NavigationApi.endpoints.getNavigation.initiate({navigationId: undefined})
+                );
+            }
+          } catch (err) {
+            console.error("Failed to fetch navigation status:", err);
+            dispatch(setNavigationStatusError("Failed to fetch navigation status"));
+          }
+        }
+      })
   })
 });
 
-export const { useGetNavigationStatusQuery, useLazyGetNavigationStatusQuery } = NavigationStatusApi;
+export const { useGetNavigationStatusQuery, useLazyGetNavigationStatusQuery, useLazyUpdateNavigationStatusQuery, useUpdateNavigationStatusQuery } = NavigationStatusApi;

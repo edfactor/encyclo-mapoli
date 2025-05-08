@@ -59,6 +59,7 @@ const getRouteData = (data: NavigationDto[]):RouteData[] =>{
 }
 
 interface MenuLevel {
+  navigationId?: number;
   mainTitle: string;
   statusId? : number;
   statusName?: string;
@@ -67,6 +68,7 @@ interface MenuLevel {
 
 }
 interface TopPage {
+  navigationId?: number;
   topTitle: string;
   topRoute?: string;
   statusId?: number;
@@ -75,6 +77,7 @@ interface TopPage {
   subPages: SubPages[]
 }
 interface SubPages {
+  navigationId?: number;
   subTitle?: string;
   subRoute?: string;
   statusId?:number;
@@ -94,6 +97,7 @@ export const menuLevels =(data: NavigationResponseDto | undefined): MenuLevel[] 
   yearEndList?.items?.map((value) => {
     menuLevel.push(
       {
+        navigationId: value.id,
         mainTitle: value.title + addSubTitle(value.subTitle),
         statusId: value.statusId,
         statusName: value.statusName,
@@ -108,6 +112,7 @@ const poplulateTopPage = (data: NavigationDto[]):TopPage[] =>{
   data.map((value) => {
     topPage.push(
       {
+        navigationId: value.id,
          topTitle: value.title + addSubTitle(value.subTitle),
          statusId: value.statusId,
          statusName: value.statusName,
@@ -124,6 +129,7 @@ const populateSubPages = (data: NavigationDto[]):SubPages[] =>{
   data.map((value) => {
     subPages.push(
       {
+        navigationId: value.id,
         subTitle: value.title + addSubTitle(value.subTitle),
         statusId: value.statusId,
         statusName: value.statusName,

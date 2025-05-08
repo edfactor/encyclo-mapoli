@@ -14,14 +14,13 @@ const StatusDropdown = ({ initialStatus = "1",navigationStatusList, onStatusChan
 
     const handleChange = (event: SelectChangeEvent<string>) => {
         const newStatus = event.target.value;
-        setStatus(newStatus);
         onStatusChange(newStatus);
     };
 
     return (
         <Select
             size="small"
-            value={status}
+            value={initialStatus}
             onChange={handleChange}
             fullWidth
         >

@@ -1168,3 +1168,18 @@ export interface GetNavigationStatusRequestDto {
 export interface GetNavigationStatusResponseDto {
   navigationStatusList?: NavigationStatusDto[]
 }
+
+export interface UpdateNavigationRequestDto {
+ navigationId?: number;
+ statusId?: number; 
+}
+
+export interface UpdateNavigationResponseDto {
+  isSuccessful?: boolean;
+ }
+
+ export interface CurrentNavigation {
+  navigationId?: number; 
+  statusId? : number;
+  statusName?: string;
+ }
