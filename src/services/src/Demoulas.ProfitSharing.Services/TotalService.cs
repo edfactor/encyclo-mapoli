@@ -335,12 +335,6 @@ public sealed class TotalService : ITotalService
 #pragma warning restore S1244 // Floating point numbers should not be tested for equality
     }
 
-    internal IQueryable<ParticipantTotalRatio> GetVestingRatioAlt(IProfitSharingDbContext ctx, short profitYear,
-        DateOnly asOfDate)
-    {
-        return _embeddedSqlService.GetVestingRatioAlt(ctx, profitYear, asOfDate);
-    }
-
     /// <summary>
     /// Retrieves the total vesting balance for participants based on the provided profit year and date.
     /// </summary>
@@ -438,35 +432,6 @@ public sealed class TotalService : ITotalService
                 });
 
         }
-    }
-
-    public static IQueryable<InternalProfitDetailDto> GetTransactionsBySsnForProfitYear(IProfitSharingDbContext ctx, short profitYear)
-    {
-        return ctx.ProfitDetails
-            .Where(pd => pd.ProfitYear == profitYear)
-            .GroupBy(details => details.Ssn)
-            .Select(g => new
-            {
-                Ssn = g.Key,
-                TotalContributions = g.Sum(x => x.CalculateContribution()),
-                TotalEarnings = g.Sum(x => x.CalculateEarnings()),
-                TotalForfeitures = g.Sum(x => x.CalculateForfeiture()),
-                TotalPayments = g.Sum(x => x.CalculatePayment()),
-                Distribution = g.Sum(x => x.CalculateDistribution()),
-                BeneficiaryAllocation = g.Sum(x => x.CalculateBeneficiaryAllocation()),
-                CurrentBalance = g.Sum(x => x.CalculateRowBalance())
-            })
-            .Select(r => new InternalProfitDetailDto
-            {
-                Ssn = r.Ssn,
-                TotalContributions = r.TotalContributions,
-                TotalEarnings = r.TotalEarnings,
-                TotalForfeitures = r.TotalForfeitures,
-                TotalPayments = r.TotalPayments,
-                CurrentAmount = r.CurrentBalance,
-                Distribution = r.Distribution,
-                BeneficiaryAllocation = r.BeneficiaryAllocation
-            });
     }
 
     /// <summary>

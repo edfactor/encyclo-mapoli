@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
+using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.Reports.Breakdown;
@@ -42,6 +43,10 @@ public sealed class BreakdownReportService : IBreakdownService
         public char EmploymentStatusId { get; init; }
         public byte DepartmentId { get; init; }
         public byte PayFrequencyId { get; init; }
+        public char? TerminationCodeId { get; init; }
+        public decimal? CurrentBalance { get; set; }
+        public decimal? VestedBalance { get; set; }
+        public decimal? EtvaBalance { get; set; }
     }
 
     private sealed record EmployeeFinancialSnapshot(
@@ -167,13 +172,30 @@ public sealed class BreakdownReportService : IBreakdownService
         IProfitSharingDbContext ctx,
         BreakdownByStoreRequest request)
     {
-        var query = ctx.Demographics
-            .Include(d => d.PayClassification)
-            .Include(d => d.Department)
-            .Select(d => new ActiveMemberDto
+
+        // 1️⃣  Parameterised sub-queries (still IQueryable, so EF composes them)
+        var balances = _totalService.TotalVestingBalance(ctx,
+            request.ProfitYear, DateTime.UtcNow.ToDateOnly());
+
+        var etvaBalances = _totalService.GetTotalComputedEtva(ctx,
+            request.ProfitYear);          // IQueryable<EtvaDto>
+
+        // 2️⃣  One LINQ query ⇒ one SQL statement
+        var activeMembers =
+            from d in ctx.Demographics
+
+            /* --- profit-sharing totals ------------------------------------ */
+            join b in balances on d.Ssn equals b.Ssn into balGrp
+            from bal in balGrp.DefaultIfEmpty()              // LEFT JOIN
+
+            /* --- ETVA totals ---------------------------------------------- */
+            join e in etvaBalances on d.Ssn equals e.Ssn into etvaGrp
+            from etva in etvaGrp.DefaultIfEmpty()            // LEFT JOIN
+
+            select new ActiveMemberDto
             {
                 BadgeNumber = d.BadgeNumber,
-                StoreNumber = d.StoreNumber,
+                StoreNumber = IdentifyVirtualStoreNumber(d),   // must be SQL-translatable
                 FullName = d.ContactInfo.FullName!,
                 Ssn = d.Ssn,
                 DateOfBirth = d.DateOfBirth,
@@ -181,11 +203,19 @@ public sealed class BreakdownReportService : IBreakdownService
                 EmploymentStatusId = d.EmploymentStatusId,
                 DepartmentId = d.DepartmentId,
                 PayFrequencyId = d.PayFrequencyId,
+                TerminationCodeId = d.TerminationCodeId,
+
                 DepartmentName = d.Department!.Name,
                 PayClassificationName = d.PayClassification!.Name,
-            });
 
-        return query.Where(e => e.StoreNumber == request.StoreNumber);
+                CurrentBalance = bal == null ? 0 : bal.CurrentBalance,
+                VestedBalance = bal == null ? 0 : bal.VestedBalance,
+                EtvaBalance = etva == null ? 0 : etva.Total
+            };
+
+
+
+        return activeMembers.Where(e => e.StoreNumber == request.StoreNumber);
     }
 
     private async Task<List<EmployeeFinancialSnapshot>> GetEmployeeFinancialSnapshotsAsync(
@@ -310,9 +340,11 @@ public sealed class BreakdownReportService : IBreakdownService
     }
 
     private static short IdentifyVirtualStoreNumber(
-        ActiveMemberDto member)
+        Demographic member)
     {
         /*
+         LEGACY COBOL - https://bitbucket.org/demoulas/hpux/raw/37d043c297e04f3a5a557e0163239177087c2163/iqs-source/QPAY066TA.pco
+
          *| Report store                                        | When the COBOL assigns it                                                                                | Key tests in the code                                                                                                                                  |
            | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
            | **700 – “Retired – Drawing Pension”**               | `B-TERM = "W"` (“W” is the retirement term-code).                                                        | `COMPUTE W-ST = WS-STR-VAL-PS-PENSION-RETIRED + 1000`                                                                                                  |
@@ -321,13 +353,80 @@ public sealed class BreakdownReportService : IBreakdownService
            | **801 – “Terminated w/ zero balance”**              | Same as 800 **but** profit-sharing balance is zero (or becomes zero after disbursements)                 | Immediately after the 800 test:<br>`IF (B-PS-AMT <= 0 OR ((B-PS-AMT + B-PROF-DISBURSE5) <= 0 …)) … COMPUTE W-ST = WS-STR-VAL-PS-TERM-EMPL-ZERO + 1000` |
            | **802 – “Terminated w/ balance but no vesting”**    | Balance > 0 **and** fully un-vested (`PS-VAMT = 0` and `PS-ETVA = 0`) and the status code is terminated. | `IF (B-PS-AMT > 0 AND (B-PS-VAMT = 0 AND B-PS-ETVA = 0) AND B-ST-CD = "T") … COMPUTE W-ST = WS-STR-VAL-PS-TERM-EMPL-NOVEST + 1000`                     |
            | **900 – “Monthly Payroll”**                         | Active or inactive employees who are still on the **monthly** payroll.                                   | Wherever the code finds `B-FREQ = 2` it sets 900:<br>`COMPUTE W-ST = WS-STR-VAL-PS-MONTHLY-EMPL + 1000`                                                |
-           
+
         In short
             Retiree vs. active-pensioner is keyed off the termination code (“W”) or an explicit SSN list.
             Terminated buckets (800–802) depend on pay-frequency plus the size/vesting of the participant’s profit-sharing balance.
             Monthly payroll (900) is simply anyone with FREQ = 2.
          */
 
+        /* ‣ 700  – retired (termination code “W”) */
+        if (member.TerminationCodeId == TerminationCode.Constants.Retired)
+        {
+            return 700;
+        }
+
+        /* ‣ 701 – still on payroll but already receiving a pension
+              (hard-coded SSN list copied from COBOL)                 */
+        int[] ssnList =
+        [
+            023202688, 016201949, 023228733, 025329422, 001301944, 033324971, 020283297, 018260600, 017169396,
+            026786919, 029321863, 016269940, 018306437, 126264073, 012242916, 028280107, 031260942, 024243451
+        ];
+
+        if (ssnList.Contains(member.Ssn))
+        {
+            return 701;
+        }
+
+        /* ‣ 900 – monthly payroll (frequency 2) that is NOT retired   */
+        if (member.PayFrequencyId == PayFrequency.Constants.Monthly &&
+            (member.EmploymentStatusId == EmploymentStatus.Constants.Active ||
+             member.EmploymentStatusId == EmploymentStatus.Constants.Inactive))
+        {
+            return 900;
+        }
+
+        /* ‣ 801 – terminated/inactive and the net balance is ≤ 0      */
+        if ((member.EmploymentStatusId == EmploymentStatus.Constants.Terminated ||
+             member.EmploymentStatusId == EmploymentStatus.Constants.Inactive) && member.C)
+        {
+            return 801;
+        }
+
+
+        /* ‣ 802 – terminated, has a balance, but **no** vesting       */
+        if (member.EmploymentStatusId == EmploymentStatus.Constants.Terminated )
+        {
+            /*
+             *  WHEN f.pay_freq IN(1,2)
+                     AND f.ps_balance > 0
+                     AND NVL(f.vested_balance ,0)         = 0
+                     AND NVL(f.etva_balance  ,0)          = 0
+                     THEN 802
+             */
+            return 802;
+        }
+
+
+
+
+        /* ‣ 800 – everybody else who is weekly/monthly and not active */
+        if ((member.PayFrequencyId == PayFrequency.Constants.Weekly ||
+             member.PayFrequencyId == PayFrequency.Constants.Monthly)
+            && member.EmploymentStatusId != EmploymentStatus.Constants.Active)
+        {
+            /*
+             *  WHEN f.pay_freq IN(1,2)
+                     AND f.ps_balance > 0
+                     AND NVL(f.vested_balance ,0)         = 0
+                     AND NVL(f.etva_balance  ,0)          = 0
+                     THEN 802
+             */
+            return 802;
+        }
+
+        /* Anything else keeps its original store value.*/
         return member.StoreNumber;
 
     }
