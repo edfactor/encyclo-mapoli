@@ -60,7 +60,7 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
 
         _ = builder.Property(e => e.LastUpdate)
             .HasColumnName("LAST_UPDATE")
-            .HasColumnType("TIMESTAMP")
+            .HasColumnType("TIMESTAMP WITH TIME ZONE")
             .HasDefaultValueSql("CURRENT_TIMESTAMP")
             .ValueGeneratedOnAddOrUpdate();
 

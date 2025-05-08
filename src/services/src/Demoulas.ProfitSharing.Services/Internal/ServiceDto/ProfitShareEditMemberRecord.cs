@@ -1,6 +1,4 @@
-﻿using Demoulas.ProfitSharing.Data.Entities;
-
-namespace Demoulas.ProfitSharing.Services.Internal.ServiceDto;
+﻿namespace Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 
 /// <summary>
 /// Represents a year end Transaction (aka row in PROFIT_DETAIL) as shown to the user

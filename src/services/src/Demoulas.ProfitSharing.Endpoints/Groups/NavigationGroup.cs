@@ -21,7 +21,6 @@ public sealed class NavigationGroup : GroupBase
                 .ProducesProblemFE<ProblemDetails>(StatusCodes.Status401Unauthorized)
                 .ProducesProblemFE<ProblemDetails>(StatusCodes.Status403Forbidden)
                 .ProducesProblemFE<ProblemDetails>(StatusCodes.Status500InternalServerError)
-                .WithRequestTimeout(TimeSpan.FromMinutes(1))
                 .WithTags(RouteName));
         });
     }

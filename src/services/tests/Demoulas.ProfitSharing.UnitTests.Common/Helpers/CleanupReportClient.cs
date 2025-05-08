@@ -50,12 +50,6 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
         throw new NotImplementedException();
     }
 
-    public Task<YearEndProfitSharingReportSummaryResponse> GetYearEndProfitSharingSummaryReportAsync(FrozenProfitYearRequest req,
-        CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
-
     public Task<Stream> DownloadDemographicBadgesNotInPayProfit(CancellationToken ct = default)
     {
         return DownloadCsvReport(0, "demographic-badges-not-in-payprofit", ct);
@@ -79,12 +73,6 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
     public Task<ReportResponseBase<NamesMissingCommaResponse>> GetNamesMissingCommaAsync(SortedPaginationRequestDto req, CancellationToken cancellationToken = default)
     {
         return CallReportEndpoint<NamesMissingCommaResponse, SortedPaginationRequestDto>(req, "names-missing-commas", cancellationToken);
-    }
-
-    public Task<YearEndProfitSharingReportResponse> GetYearEndProfitSharingReportAsync(YearEndProfitSharingReportRequest req,
-        CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
     }
 
     public Task<Stream> DownloadNamesMissingComma(CancellationToken cancellationToken = default)
@@ -156,10 +144,6 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
             if (dafr.EndMonth.HasValue)
             {
                 query[nameof(DistributionsAndForfeituresRequest.EndMonth)] = dafr.EndMonth.ToString();
-            }
-            if (dafr.IncludeOutgoingForfeitures.HasValue)
-            {
-                query[nameof(DistributionsAndForfeituresRequest.IncludeOutgoingForfeitures)] = dafr.IncludeOutgoingForfeitures.ToString();
             }
         }
 

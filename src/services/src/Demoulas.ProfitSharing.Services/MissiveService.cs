@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
 using Demoulas.ProfitSharing.Common.Extensions;
@@ -54,6 +49,16 @@ internal sealed class MissiveService : IMissiveService
                     rslt.Add(Missive.Constants.VestingIsNow100Percent);
                 }
 
+                if (await EmployeeIsAlsoABeneficiary(ctx, ssn, cancellation))
+                {
+                    rslt.Add(Missive.Constants.EmployeeIsAlsoABeneficiary);
+                }
+
+                if (await EmployeeMayBe100Percent(ctx, ssn, profitYear, cancellation))
+                {
+                    rslt.Add(Missive.Constants.EmployeeMayBe100Percent);
+                }
+
                 return Task.FromResult(true);
             }).Unwrap();
 
@@ -65,7 +70,7 @@ internal sealed class MissiveService : IMissiveService
     {
         return _dataContextFactory.UseReadOnlyContext(ctx =>
         {
-            return ctx.Missives.Select(x => new MissiveResponse() { Id = x.Id, Message = x.Message }).ToListAsync(token);
+            return ctx.Missives.Select(x => new MissiveResponse() { Id = x.Id, Message = x.Message, Description = x.Description, Severity = x.Severity}).ToListAsync(token);
         });
     }
 
@@ -98,5 +103,19 @@ internal sealed class MissiveService : IMissiveService
                       (!d.TerminationDate.HasValue || d.TerminationDate > calInfo.FiscalEndDate) &&
                       d.TerminationCodeId != TerminationCode.Constants.Deceased
                 select d.Id).AnyAsync(cancellation);
+    }
+
+    private static Task<bool> EmployeeIsAlsoABeneficiary(ProfitSharingReadOnlyDbContext ctx, int ssn, CancellationToken token)
+    {
+        return (from bc in ctx.BeneficiaryContacts where bc.Ssn == ssn select bc.Id).AnyAsync(token);
+    }
+
+    private static Task<bool> EmployeeMayBe100Percent(ProfitSharingReadOnlyDbContext ctx, int ssn, short profitYear, CancellationToken token) 
+    {
+        return (from pp in ctx.PayProfits.Where(x => x.ProfitYear == profitYear)
+                join d in ctx.Demographics on pp.DemographicId equals d.Id
+                where pp.ZeroContributionReasonId == ZeroContributionReason.Constants.SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay
+                    && d.Ssn == ssn
+                select d.Id).AnyAsync(token);
     }
 }

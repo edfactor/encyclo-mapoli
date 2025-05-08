@@ -1,62 +1,70 @@
 import { RouteCategory } from "./types/MenuTypes";
-import { CAPTIONS, MENU_LABELS, ROUTES } from "./constants";
-import { ImpersonationRoles, NavigationDto, NavigationResponseDto } from "./reduxstore/types";
+import { MENU_LABELS } from "./constants";
+import { NavigationDto, NavigationResponseDto } from "./reduxstore/types";
 import { RouteData } from "smart-ui-library";
 
 const localStorageImpersonating: string | null = localStorage.getItem("impersonatingRole");
 
-const it_operations: RouteCategory = {
-  menuLabel: MENU_LABELS.IT_OPERATIONS,
-  parentRoute: MENU_LABELS.IT_OPERATIONS,
-  roles: [ImpersonationRoles.ItOperations], // Only users with this role can see this menu item
-  items: [{ caption: CAPTIONS.DEMOGRAPHIC_FREEZE, route: ROUTES.DEMO_FREEZE }]
+// Navigation menu ID constants
+const YEAR_END_MENU_ID = 55;
+
+export const MenuData = (data: NavigationResponseDto | undefined): RouteCategory[] => {
+  if (!data || !data.navigation) {
+    return [];
+  }
+
+  const finalData: RouteCategory[] = [];
+
+  // Get top-level navigation items (parentId is null)
+  const topLevelItems = data.navigation
+    .filter((m) => m.parentId === null)
+    .sort((a, b) => a.orderNumber - b.orderNumber);
+
+  // Process each top-level item
+  topLevelItems.forEach((values: NavigationDto) => {
+    // Create menu item if:
+    // 1. User has the required role OR
+    // 2. No roles required for this menu item
+    const hasRequiredRole = values.requiredRoles.length > 0 &&
+      values.requiredRoles.some(role => role === localStorageImpersonating);
+    const noRolesRequired = values.requiredRoles.length === 0;
+
+    if (hasRequiredRole || noRolesRequired) {
+      finalData.push(createRouteCategory(values));
+    }
+  });
+
+  // Commented out special case for IT Operations role
+  // if(localStorageImpersonating === ImpersonationRoles.ItOperations) {
+  //   finalData.push(it_operations);
+  // }
+
+  return finalData;
 };
 
-export const MenuData = (data:NavigationResponseDto | undefined): RouteCategory[] => {
-  const finalData: RouteCategory[] = [];
-  data?.navigation.filter(m=>m.parentId ==null).sort((a, b) => a.orderNumber - b.orderNumber).map((values:NavigationDto) => {
-    if(values.requiredRoles.length>0 && values.requiredRoles.filter(m=>m == localStorageImpersonating).length>0)
-    {
-      finalData.push({
-        menuLabel: values.title, 
-        parentRoute: values.title.toLocaleLowerCase(),
-        disabled: values.disabled, 
-        underlined: false, 
-        roles: values.requiredRoles, 
-        items: values.items && values.items.length>0 ? getRouteData(values.items): undefined
-      });
+// Helper function to create a RouteCategory from NavigationDto
+const createRouteCategory = (navigationItem: NavigationDto): RouteCategory => {
+  return {
+    menuLabel: navigationItem.title,
+    parentRoute: navigationItem.title.toLowerCase(),
+    disabled: navigationItem.disabled,
+    underlined: false,
+    roles: navigationItem.requiredRoles,
+    items: navigationItem.items && navigationItem.items.length > 0
+      ? getRouteData(navigationItem.items)
+      : undefined
+  };
+};
 
-    }
-    else if(values.requiredRoles.length ==0) {
-      finalData.push({
-        menuLabel: values.title, 
-        parentRoute: values.title.toLocaleLowerCase(),
-        disabled: values.disabled, 
-        underlined: false, 
-        roles: values.requiredRoles, 
-        items: values.items && values.items.length>0 ? getRouteData(values.items): undefined
-      });
-    }
-  });
-  // if(localStorageImpersonating == ImpersonationRoles.ItOperations) {
-  // finalData.push(it_operations);
-  // }
-  return finalData;
-}
-const getRouteData = (data: NavigationDto[]):RouteData[] =>{
-  const response: RouteData[] = [];
-  data.map((value)  => {
-    const obj: RouteData = { // Initialize with an empty object or default values
-      caption: value.title,
-      route: value.url, 
-      disabled: false,
-      divider: false,
-      requiredPermission: ""
-    };
-    response.push(obj);
-  });
-  return response;
-}
+const getRouteData = (data: NavigationDto[]): RouteData[] => {
+  return data.map((value) => ({
+    caption: value.title,
+    route: value.url,
+    disabled: false,
+    divider: false,
+    requiredPermission: ""
+  }));
+};
 
 interface MenuLevel {
   navigationId?: number;
@@ -67,6 +75,7 @@ interface MenuLevel {
 
 
 }
+
 interface TopPage {
   navigationId?: number;
   topTitle: string;
@@ -76,6 +85,7 @@ interface TopPage {
   disabled?: boolean;
   subPages: SubPages[]
 }
+
 interface SubPages {
   navigationId?: number;
   subTitle?: string;
@@ -87,9 +97,20 @@ interface SubPages {
 
 export const drawerTitle = MENU_LABELS.YEAR_END;
 
-const addSubTitle = (subTitle?:string):string =>{
-  return subTitle? ` (${subTitle})` : "";
-}
+const addSubTitle = (subTitle?: string): string => {
+  return subTitle ? ` (${subTitle})` : "";
+};
+
+export const menuLevels = (data: NavigationResponseDto | undefined): MenuLevel[] => {
+  if (!data || !data.navigation) {
+    return [];
+  }
+
+  // Find the Year End navigation item (ID 54)
+  const yearEndList = data.navigation.find((m) => m.id === YEAR_END_MENU_ID);
+  if (!yearEndList || !yearEndList.items) {
+    return [];
+  }
 
 export const menuLevels =(data: NavigationResponseDto | undefined): MenuLevel[] =>{
   const yearEndList = data?.navigation.filter(m=>m.id == 54)[0]; //Id 54 is for Year End. It will have the list of December Activities & Fiscal Close. 

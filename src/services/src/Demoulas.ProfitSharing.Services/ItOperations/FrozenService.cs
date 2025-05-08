@@ -7,7 +7,6 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using FluentValidation;
-using FluentValidation.Results;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.ItOperations;
@@ -153,7 +152,9 @@ public class FrozenService: IFrozenService
                 CreatedDateTime = f.CreatedDateTime
             }).FirstOrDefaultAsync(cancellationToken);
             
-            return frozen ?? new FrozenStateResponse { ProfitYear = (short)DateTime.Today.Year, AsOfDateTime = DateTime.Now, IsActive = false};
+            return frozen ?? new FrozenStateResponse { ProfitYear = (short)DateTime.Today.Year, 
+                CreatedDateTime = DateTimeOffset.MinValue,
+                AsOfDateTime = DateTimeOffset.UtcNow, IsActive = false};
         });
     }
 

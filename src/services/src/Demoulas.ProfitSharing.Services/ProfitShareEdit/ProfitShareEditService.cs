@@ -132,8 +132,6 @@ public class ProfitShareEditService : IInternalProfitShareEditService
             }
             // is both a Bene and "18,19,20 > 1000", so we treat them as both. - they earn interest - and get a year of service
             rec.EarningAmount = member.AllEarnings;
-            rec.Remark = null;
-            rec.CommentTypeId = null;
             AddRecord(records, rec);
             return;
         }

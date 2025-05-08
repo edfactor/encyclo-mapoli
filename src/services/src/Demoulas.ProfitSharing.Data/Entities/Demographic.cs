@@ -108,7 +108,7 @@ public sealed class Demographic : Member
     /// <value>
     /// A <see cref="DateTime"/> representing the last modification timestamp of the demographic entity.
     /// </value>
-    public DateTime LastModifiedDate { get; set; }
+    public DateTimeOffset LastModifiedDate { get; set; }
 
     /// <summary>
     /// Compares two <see cref="Demographic"/> objects to determine if their historical data is equivalent.

@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.ProfitSharing.Data.Entities;
+﻿using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services;
@@ -54,9 +48,9 @@ public sealed class EmbeddedSqlService : IEmbeddedSqlService
 
         var query = $@"
 SELECT bal.Ssn, 
-	   CASE WHEN ((bal.total + pdWrap.FORFEITURES - (pdWrap.PROF_6_CONTRIB + pdWrap.PROF_8_EARNINGS - pdWrap.PROF_9_FORFEIT)) * vr.RATIO) 
+       CASE WHEN ((bal.total + pdWrap.FORFEITURES - (pdWrap.PROF_6_CONTRIB + pdWrap.PROF_8_EARNINGS - pdWrap.PROF_9_FORFEIT)) * vr.RATIO) 
                     + ((pdWrap.PROF_6_CONTRIB + pdWrap.PROF_8_EARNINGS - pdWrap.PROF_9_FORFEIT)-pdWrap.FORFEITURES) > 0 THEN 
-				 ((bal.total + pdWrap.FORFEITURES - (pdWrap.PROF_6_CONTRIB + pdWrap.PROF_8_EARNINGS - pdWrap.PROF_9_FORFEIT)) * vr.RATIO) 
+                 ((bal.total + pdWrap.FORFEITURES - (pdWrap.PROF_6_CONTRIB + pdWrap.PROF_8_EARNINGS - pdWrap.PROF_9_FORFEIT)) * vr.RATIO) 
                     + ((pdWrap.PROF_6_CONTRIB + pdWrap.PROF_8_EARNINGS - pdWrap.PROF_9_FORFEIT)-pdWrap.FORFEITURES) ELSE 0 END AS VESTEDBALANCE,
           bal.TOTAL AS CURRENTBALANCE,
           yip.YEARS,
@@ -71,14 +65,14 @@ LEFT JOIN (
 {yearsOfServiceQuery}
 ) yip ON bal.SSN  = yip.SSN
 LEFT JOIN (
-	SELECT pd.SSN,
-		   Sum(CASE WHEN pd.PROFIT_CODE_ID IN (1,2,3,5) THEN pd.FORFEITURE ELSE 0 END) AS FORFEITURES,
-		   SUM(CASE WHEN pd.PROFIT_CODE_ID = 6 THEN pd.CONTRIBUTION ELSE 0 END) AS PROF_6_CONTRIB,
-		   SUM(CASE WHEN pd.PROFIT_CODE_ID = 8 THEN pd.EARNINGS ELSE 0 END) AS PROF_8_EARNINGS,
-		   SUM(CASE WHEN pd.PROFIT_CODE_ID = 9 THEN pd.FORFEITURE ELSE 0 END) AS PROF_9_FORFEIT
-	FROM PROFIT_DETAIL pd 
-	WHERE pd.PROFIT_YEAR  <= {profitYear}
-	GROUP BY pd.SSN
+    SELECT pd.SSN,
+           Sum(CASE WHEN pd.PROFIT_CODE_ID IN (1,2,3,5) THEN pd.FORFEITURE ELSE 0 END) AS FORFEITURES,
+           SUM(CASE WHEN pd.PROFIT_CODE_ID = 6 THEN pd.CONTRIBUTION ELSE 0 END) AS PROF_6_CONTRIB,
+           SUM(CASE WHEN pd.PROFIT_CODE_ID = 8 THEN pd.EARNINGS ELSE 0 END) AS PROF_8_EARNINGS,
+           SUM(CASE WHEN pd.PROFIT_CODE_ID = 9 THEN pd.FORFEITURE ELSE 0 END) AS PROF_9_FORFEIT
+    FROM PROFIT_DETAIL pd 
+    WHERE pd.PROFIT_YEAR  <= {profitYear}
+    GROUP BY pd.SSN
 ) pdWrap ON bal.SSN = pdWrap.SSN
 ";
 
@@ -89,9 +83,9 @@ LEFT JOIN (
     {
         var query = @$"
 SELECT
-	pd.SSN as Ssn,
-	--Contributions + Earnings + EtvaForfeitures + Distributions + Forfeitures + VestedEarnings
-	--Contributions:
+    pd.SSN as Ssn,
+    --Contributions + Earnings + EtvaForfeitures + Distributions + Forfeitures + VestedEarnings
+    --Contributions:
     SUM(CASE WHEN pd.PROFIT_CODE_ID = 0 THEN pd.CONTRIBUTION ELSE 0 END)
     --Earnings:
   + SUM(CASE WHEN pd.PROFIT_CODE_ID IN (0,2) THEN pd.EARNINGS ELSE 0 END)
@@ -103,10 +97,10 @@ SELECT
   + SUM(CASE WHEN pd.PROFIT_CODE_ID = 2 THEN pd.FORFEITURE * -1 ELSE 0 END)
    --VestedEarnings
   + (
-  	  SUM(CASE WHEN pd.PROFIT_CODE_ID = 6 THEN pd.CONTRIBUTION ELSE 0 END) +
-  	  SUM(CASE WHEN pd.PROFIT_CODE_ID  = 8 THEN pd.EARNINGS  ELSE 0 END) + 
-  	  SUM(CASE WHEN pd.PROFIT_CODE_ID = 9 THEN pd.FORFEITURE * -1 ELSE 0 END)
-  	) AS Total
+      SUM(CASE WHEN pd.PROFIT_CODE_ID = 6 THEN pd.CONTRIBUTION ELSE 0 END) +
+      SUM(CASE WHEN pd.PROFIT_CODE_ID  = 8 THEN pd.EARNINGS  ELSE 0 END) + 
+      SUM(CASE WHEN pd.PROFIT_CODE_ID = 9 THEN pd.FORFEITURE * -1 ELSE 0 END)
+    ) AS Total
   FROM PROFIT_DETAIL pd
  WHERE pd.PROFIT_YEAR  <= {profitYear}
  GROUP BY pd.SSN
@@ -134,18 +128,18 @@ SELECT m.SSN,
   CASE WHEN m.YEARS_OF_SERVICE > 6 THEN 1 ELSE --Otherwise, If total years (including the present one) is more than 6, 100% Vested
   0 END END END END END END END END END END END AS RATIO
 FROM (
-	SELECT d.SSN, d.DATE_OF_BIRTH, 1 AS IS_EMPLOYEE, d.TERMINATION_DATE, pp.ENROLLMENT_ID, d.TERMINATION_CODE_ID, pp.ZERO_CONTRIBUTION_REASON_ID, yos.YEARS + CASE WHEN pp.ENROLLMENT_ID = 2 THEN 1 ELSE 0 END + CASE WHEN pp.CURRENT_HOURS_YEAR  + pp.HOURS_EXECUTIVE  > 1000 THEN 1 ELSE 0 END AS YEARS_OF_SERVICE
-	FROM DEMOGRAPHIC d
-	LEFT JOIN PAY_PROFIT pp ON d.ID = pp.DEMOGRAPHIC_ID AND pp.PROFIT_YEAR  = {profitYear}
-	LEFT JOIN (
-		{yearsOfCreditQuery}
-	) yos ON d.SSN = yos.SSN
-	
-	UNION ALL
-	
-	SELECT bc.SSN, bc.DATE_OF_BIRTH, 0 AS IS_EMPLOYEE, NULL AS TERMINATION_DATE, NULL AS ENROLLMENT_ID, NULL AS TERMINATION_CODE_ID, NULL AS ZERO_CONTRIBUTION_REASON_ID, 0 AS YEARS_OF_SERVICE
-	FROM BENEFICIARY_CONTACT bc
-	WHERE bc.SSN NOT IN (SELECT SSN FROM DEMOGRAPHIC)
+    SELECT d.SSN, d.DATE_OF_BIRTH, 1 AS IS_EMPLOYEE, d.TERMINATION_DATE, pp.ENROLLMENT_ID, d.TERMINATION_CODE_ID, pp.ZERO_CONTRIBUTION_REASON_ID, yos.YEARS + CASE WHEN pp.ENROLLMENT_ID = 2 THEN 1 ELSE 0 END + CASE WHEN pp.CURRENT_HOURS_YEAR  + pp.HOURS_EXECUTIVE  > 1000 THEN 1 ELSE 0 END AS YEARS_OF_SERVICE
+    FROM DEMOGRAPHIC d
+    LEFT JOIN PAY_PROFIT pp ON d.ID = pp.DEMOGRAPHIC_ID AND pp.PROFIT_YEAR  = {profitYear}
+    LEFT JOIN (
+        {yearsOfCreditQuery}
+    ) yos ON d.SSN = yos.SSN
+    
+    UNION ALL
+    
+    SELECT bc.SSN, bc.DATE_OF_BIRTH, 0 AS IS_EMPLOYEE, NULL AS TERMINATION_DATE, NULL AS ENROLLMENT_ID, NULL AS TERMINATION_CODE_ID, NULL AS ZERO_CONTRIBUTION_REASON_ID, 0 AS YEARS_OF_SERVICE
+    FROM BENEFICIARY_CONTACT bc
+    WHERE bc.SSN NOT IN (SELECT SSN FROM DEMOGRAPHIC)
 ) m
 ";
         return query;
@@ -154,9 +148,9 @@ FROM (
     {
         var query = @$"
 SELECT pd.SSN, SUM(pd.YEARS_OF_SERVICE_CREDIT) YEARS
-			FROM PROFIT_DETAIL pd 
-			WHERE pd.PROFIT_YEAR  <= {profitYear}
-			GROUP BY pd.SSN
+            FROM PROFIT_DETAIL pd 
+            WHERE pd.PROFIT_YEAR  <= {profitYear}
+            GROUP BY pd.SSN
 
 ";
         return query;

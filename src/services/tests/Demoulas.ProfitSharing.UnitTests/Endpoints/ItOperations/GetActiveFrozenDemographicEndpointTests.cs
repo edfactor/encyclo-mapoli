@@ -23,11 +23,11 @@ public class GetActiveFrozenDemographicEndpointTests : ApiTestBase<Program>
         TestResult<FrozenStateResponse> response = await ApiClient.GETAsync<GetActiveFrozenDemographicEndpoint, FrozenStateResponse>();
         response.Should().NotBeNull();
 
-        
-        frozenDemographics.AsOfDateTime = frozenDemographics.AsOfDateTime.ToUniversalTime();
-        response.Result.AsOfDateTime = frozenDemographics.AsOfDateTime.ToUniversalTime();
 
-        // Assert
-        frozenDemographics.Should().BeEquivalentTo(response.Result);
+        response.Result.AsOfDateTime.ToUniversalTime().Should().BeSameDateAs(frozenDemographics.AsOfDateTime.ToUniversalTime());
+        response.Result.CreatedDateTime.ToUniversalTime().Should().BeSameDateAs(frozenDemographics.CreatedDateTime.ToUniversalTime());
+        response.Result.ProfitYear.Should().Be(frozenDemographics.ProfitYear);
+        response.Result.FrozenBy.Should().Be(frozenDemographics.FrozenBy);
+        response.Result.IsActive.Should().Be(frozenDemographics.IsActive);
     }
 }

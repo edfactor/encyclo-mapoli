@@ -15,8 +15,8 @@ internal sealed class JobMap : IEntityTypeConfiguration<Job>
         builder.Property(b => b.JobTypeId).IsRequired().HasPrecision(3);
         builder.Property(b => b.JobStatusId).IsRequired().HasPrecision(3);
         builder.Property(b => b.StartMethodId).IsRequired().HasPrecision(3);
-        builder.Property(b => b.Started).IsRequired().HasColumnType("DATE");
-        builder.Property(b => b.Completed).HasColumnType("DATE");
+        builder.Property(b => b.Started).IsRequired().HasColumnType("TIMESTAMP WITH TIME ZONE");
+        builder.Property(b => b.Completed).HasColumnType("TIMESTAMP WITH TIME ZONE");
 
         builder.HasOne(b => b.JobStatus).WithMany(j => j.Jobs).HasForeignKey(j => j.JobStatusId);
         builder.HasOne(b => b.StartMethod).WithMany(j => j.Jobs).HasForeignKey(j => j.StartMethodId);

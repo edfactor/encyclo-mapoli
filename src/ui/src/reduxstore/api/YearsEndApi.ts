@@ -2,7 +2,8 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 import {
   addBadgeNumberToUpdateAdjustmentSummary,
-  clearBreakdownByStore,
+  clearBreakdownByStore, clearBreakdownByStoreTotals,
+  clearControlSheet,
   clearProfitMasterApply,
   clearProfitMasterRevert,
   clearProfitMasterStatus,
@@ -16,8 +17,9 @@ import {
   setAdditionalExecutivesGrid,
   setBalanceByAge,
   setBalanceByYears,
-  setBreakdownByStore,
+  setBreakdownByStore, setBreakdownByStoreTotals,
   setContributionsByAge,
+  setControlSheet,
   setDemographicBadgesNotInPayprofitData,
   setDistributionsAndForfeitures,
   setDistributionsByAge,
@@ -55,7 +57,10 @@ import {
   BalanceByYears,
   BreakdownByStoreRequest,
   BreakdownByStoreResponse,
+  BreakdownByStoreTotals,
   ContributionsByAge,
+  ControlSheetRequest,
+  ControlSheetResponse,
   DemographicBadgesNotInPayprofitRequestDto,
   DemographicBadgesNotInPayprofitResponse,
   DistributionsAndForfeitures,
@@ -209,7 +214,6 @@ export const YearsEndApi = createApi({
         method: "GET",
         params: {
           profitYear: params.profitYear,
-          includeOutgoingForfeitures: params.includeOutgoingForfeitures,
           startMonth: params.startMonth,
           endMonth: params.endMonth,
           take: params.pagination.take,
@@ -799,7 +803,7 @@ export const YearsEndApi = createApi({
         params: {
           profitYear: params.profitYear,
           storeNumber: params.storeNumber,
-          under21Only: params.under21Only,
+          storeManagement: params.storeManagement,
           take: params.pagination.take,
           skip: params.pagination.skip,
           sortBy: params.pagination.sortBy,
@@ -808,12 +812,39 @@ export const YearsEndApi = createApi({
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
-          dispatch(clearBreakdownByStore());
           const { data } = await queryFulfilled;
-          dispatch(setBreakdownByStore(data));
+
+          // Use the storeManagement flag to determine where to store the data
+          if (arg.storeManagement) {
+            dispatch(setBreakdownByStoreMangement(data));
+          } else {
+            dispatch(setBreakdownByStore(data));
+          }
         } catch (err) {
           console.log("Err: " + err);
-          dispatch(clearBreakdownByStore());
+        }
+      }
+    }),
+    getBreakdownByStoreTotals: builder.query<BreakdownByStoreTotals, BreakdownByStoreRequest>({
+      query: (params) => ({
+        url: `yearend/breakdown-by-store/${params.storeNumber}/totals`,
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          take: params.pagination.take,
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          dispatch(clearBreakdownByStoreTotals());
+          const { data } = await queryFulfilled;
+          dispatch(setBreakdownByStoreTotals(data));
+        } catch (err) {
+          console.log("Err: " + err);
+          dispatch(clearBreakdownByStoreTotals());
         }
       }
     }),
@@ -1012,6 +1043,27 @@ export const YearsEndApi = createApi({
         }
       }
     }),
+    getControlSheet: builder.query<ControlSheetResponse, ControlSheetRequest>({
+      query: (params) => ({
+        url: `yearend/post-frozen/control-sheet`,
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          skip: params.pagination.skip,
+          take: params.pagination.take,
+          isSortDescending: params.pagination.isSortDescending,
+          sortBy: params.pagination.sortBy
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setControlSheet(data));
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
     getForfeitureAdjustments: builder.query<ForfeitureAdjustmentResponse, ForfeitureAdjustmentRequest>({
       query: (params) => ({
         url: "yearend/forfeiture-adjustments",
@@ -1051,7 +1103,9 @@ export const {
   useLazyGetBalanceByAgeQuery,
   useLazyGetBalanceByYearsQuery,
   useLazyGetBreakdownByStoreQuery,
+  useLazyGetBreakdownByStoreTotalsQuery,
   useLazyGetContributionsByAgeQuery,
+  useLazyGetControlSheetQuery,
   useLazyGetDemographicBadgesNotInPayprofitQuery,
   useLazyGetDistributionsAndForfeituresQuery,
   useLazyGetDistributionsByAgeQuery,
@@ -1077,7 +1131,6 @@ export const {
   useLazyGetYearEndProfitSharingReportQuery,
   useUpdateExecutiveHoursAndDollarsMutation,
   useLazyGetYearEndProfitSharingSummaryReportQuery,
-  useLazyGetUpdateSummaryQuery,
   useLazyGetMasterApplyQuery,
   useLazyGetMasterRevertQuery,
   useLazyGetProfitSharingLabelsQuery,

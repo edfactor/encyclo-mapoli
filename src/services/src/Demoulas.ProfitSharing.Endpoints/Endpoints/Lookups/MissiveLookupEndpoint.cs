@@ -30,7 +30,7 @@ public sealed class MissiveLookupEndpoint : EndpointWithoutRequest<List<MissiveR
             {
                 200, new List<MissiveResponse>
                 {
-                    new MissiveResponse {Id = Missive.Constants.VestingIncreasedOnCurrentBalance, Message = "***Vesting Increased***" }
+                    new MissiveResponse {Id = Missive.Constants.VestingIncreasedOnCurrentBalance, Message = "***Vesting Increased***", Description="More descriptive text explaining the warning", Severity = "Error" }
                 }
             } };
         });

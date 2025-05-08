@@ -23,6 +23,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             OracleModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.HasSequence<int>("FAKE_SSN_SEQ")
+                .StartsAt(666000000L)
+                .HasMin(666000000L)
+                .HasMax(666999999L);
+
             modelBuilder.Entity("AuditChangeAuditEvent", b =>
                 {
                     b.Property<long>("AuditEventId")
@@ -27295,7 +27300,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTimeOffset>("ImportDateTimeUtc")
-                        .HasColumnType("TIMESTAMP(7) WITH TIME ZONE")
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
                         .HasColumnName("IMPORT_DATE_TIME_UTC");
 
                     b.Property<string>("SourceSchema")
@@ -27365,9 +27370,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("HIRE_DATE")
                         .HasComment("HireDate");
 
-                    b.Property<DateTime>("LastModifiedDate")
+                    b.Property<DateTimeOffset>("LastModifiedDate")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("DATE")
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
                         .HasColumnName("LAST_MODIFIED_DATE")
                         .HasDefaultValueSql("SYSDATE");
 
@@ -27480,8 +27485,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(7)")
                         .HasColumnName("BADGE_NUMBER");
 
-                    b.Property<DateTime>("CreatedDateTime")
-                        .HasColumnType("TIMESTAMP(7)")
+                    b.Property<DateTimeOffset>("CreatedDateTime")
+                        .HasColumnType("TIMESTAMP(7) WITH TIME ZONE")
                         .HasColumnName("CREATED_DATETIME");
 
                     b.Property<DateTime>("DateOfBirth")
@@ -27556,12 +27561,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("TERMINATION_DATE")
                         .HasComment("TerminationDate");
 
-                    b.Property<DateTime>("ValidFrom")
-                        .HasColumnType("TIMESTAMP(7)")
+                    b.Property<DateTimeOffset>("ValidFrom")
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
                         .HasColumnName("VALID_FROM");
 
-                    b.Property<DateTime>("ValidTo")
-                        .HasColumnType("TIMESTAMP(7)")
+                    b.Property<DateTimeOffset>("ValidTo")
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
                         .HasColumnName("VALID_TO");
 
                     b.HasKey("Id")
@@ -27630,9 +27635,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(7)")
                         .HasColumnName("BADGE_NUMBER");
 
-                    b.Property<DateTime>("Created")
+                    b.Property<DateTimeOffset>("Created")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("DATE")
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
                         .HasColumnName("CREATED");
 
                     b.Property<string>("InvalidValue")
@@ -28484,15 +28489,15 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("AsOfDateTime")
-                        .HasColumnType("DATE")
+                    b.Property<DateTimeOffset>("AsOfDateTime")
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
                         .HasColumnName("AS_OF_DATETIME");
 
-                    b.Property<DateTime>("CreatedDateTime")
+                    b.Property<DateTimeOffset>("CreatedDateTime")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("DATE")
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
                         .HasColumnName("CREATED_DATETIME")
-                        .HasDefaultValueSql("SYSDATE");
+                        .HasDefaultValueSql("SYSTIMESTAMP");
 
                     b.Property<string>("FrozenBy")
                         .IsRequired()
@@ -28563,8 +28568,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime?>("Completed")
-                        .HasColumnType("DATE")
+                    b.Property<DateTimeOffset?>("Completed")
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
                         .HasColumnName("COMPLETED");
 
                     b.Property<byte>("JobStatusId")
@@ -28588,8 +28593,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(3)")
                         .HasColumnName("STARTMETHODID");
 
-                    b.Property<DateTime>("Started")
-                        .HasColumnType("DATE")
+                    b.Property<DateTimeOffset>("Started")
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
                         .HasColumnName("STARTED");
 
                     b.HasKey("Id")
@@ -28724,10 +28729,23 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("NVARCHAR2(250)")
+                        .HasColumnName("DESCRIPTION");
+
                     b.Property<string>("Message")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasMaxLength(60)
+                        .HasColumnType("NVARCHAR2(60)")
                         .HasColumnName("MESSAGE");
+
+                    b.Property<string>("Severity")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("NVARCHAR2(16)")
+                        .HasColumnName("SEVERITY");
 
                     b.HasKey("Id")
                         .HasName("PK_MISSIVES");
@@ -28738,12 +28756,51 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         new
                         {
                             Id = 1,
-                            Message = "** VESTING INCREASED ON   CURRENT BALANCE ( > 1000 HRS) **"
+                            Description = "The employee has between 2 and 7 years in Profit Sharing, has 1000+ plus hours towards Profit Sharing in the fiscal year, and has company contribution records under the new vesting schedule.",
+                            Message = "** VESTING INCREASED ON   CURRENT BALANCE ( > 1000 HRS) **",
+                            Severity = "Information"
                         },
                         new
                         {
                             Id = 2,
-                            Message = "VEST IS NOW 100%, 65+/5 YRS"
+                            Description = "The Employee's Zero Contribution Flag is set at 6",
+                            Message = "VEST IS NOW 100%, 65+/5 YRS",
+                            Severity = "Information"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Description = "Employee is a beneficiary of another employee",
+                            Message = "Employee is also a Beneficiary",
+                            Severity = "Information"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Description = "The PSN you have entered was not found.  Re-enter using a valid PSN",
+                            Message = "Beneficiary not on file",
+                            Severity = "Error"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Description = "The Employee Badge Number you have entered is not found.  Re-enter using a valid badge number",
+                            Message = "Employee badge not on file",
+                            Severity = "Error"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Description = "The Employee SSN you have entered is not on file or you don't have access.  Re-enter using a valid SSN",
+                            Message = "Employee SSN not on file",
+                            Severity = "Error"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Description = "The Employee's Zero Contribution Flag is set at 7",
+                            Message = "*** EMPLOYEE MAY BE 100% - CHECK DATES ***",
+                            Severity = "Information"
                         });
                 });
 
@@ -28904,9 +28961,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime?>("LastModified")
+                    b.Property<DateTimeOffset?>("LastModified")
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("DATE")
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
                         .HasColumnName("LAST_MODIFIED");
 
                     b.Property<int>("NavigationId")
@@ -29600,9 +29657,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("DECIMAL(9,2)")
                         .HasColumnName("INCOME_EXECUTIVE");
 
-                    b.Property<DateTime>("LastUpdate")
+                    b.Property<DateTimeOffset>("LastUpdate")
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("TIMESTAMP")
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
                         .HasColumnName("LAST_UPDATE")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
@@ -29760,12 +29817,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("CONTRIBUTION")
                         .HasComment("Contribution to plan from DMB");
 
-                    b.Property<DateTimeOffset>("CreatedUtc")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
-                        .HasColumnName("CREATED_UTC")
-                        .HasDefaultValueSql("SYSTIMESTAMP");
-
                     b.Property<int>("DistributionSequence")
                         .HasColumnType("NUMBER(10)")
                         .HasColumnName("DISTRIBUTION_SEQUENCE");
@@ -29820,6 +29871,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<string>("TaxCodeId")
                         .HasColumnType("NVARCHAR2(1)")
                         .HasColumnName("TAX_CODE_ID");
+
+                    b.Property<DateTimeOffset>("TransactionDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("CREATED_UTC")
+                        .HasDefaultValueSql("SYSTIMESTAMP");
 
                     b.Property<short>("YearToDate")
                         .HasPrecision(4)
@@ -30376,8 +30433,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NVARCHAR2(64)")
                         .HasColumnName("UPDATED_BY");
 
-                    b.Property<DateTime>("UpdatedTime")
-                        .HasColumnType("DATE")
+                    b.Property<DateTimeOffset>("UpdatedTime")
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
                         .HasColumnName("UPDATED_DATE");
 
                     b.HasKey("Id")

@@ -96,6 +96,7 @@ const MilitaryContributionForm = ({
       <Grid2
         container
         spacing={3}>
+
         <Grid2 xs={6}>
           <Controller
             name="contributionDate"
@@ -110,16 +111,14 @@ const MilitaryContributionForm = ({
                 error={error?.message}
                 required={true}
                 disableFuture={true}
-                minDate={new Date(profitYear - 3, 0, 1)}
+                minDate={new Date(profitYear - 5, 0, 1)}
                 views={["year", "month"]}
               />
             )}
           />
         </Grid2>
 
-        <Grid2
-          xs={6}
-          sx={{ padding: 2 }}>
+        <Grid2 xs={6}>
           <FormLabel>Contribution Amount</FormLabel>
           <Controller
             name="contributionAmount"
@@ -140,12 +139,12 @@ const MilitaryContributionForm = ({
         </Grid2>
 
         <Grid2
-          xs={6}
-          sx={{ padding: 2 }}>
+          size={{ xs: 12 }}
+          container
+          spacing={2}>
           <Controller
             name="addContributionYear"
             control={control}
-            rules={{ required: "Add Contribution Year is required" }}
             render={({ field, fieldState: { error } }) => (
               <FormControl error={!!error}>
                 <FormControlLabel
@@ -155,12 +154,10 @@ const MilitaryContributionForm = ({
                       onChange={field.onChange}
                       onBlur={field.onBlur}
                       inputRef={field.ref}
-                      aria-describedby={error ? "add-contribution-year-error" : undefined}
                     />
                   }
                   label="Add Contribution Year"
-                />
-                {error && <FormHelperText id="add-contribution-year-error">{error.message}</FormHelperText>}
+                />                
               </FormControl>
             )}
           />

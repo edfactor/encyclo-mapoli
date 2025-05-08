@@ -15,6 +15,8 @@ import { RootState } from "./reduxstore/store";
 import EnvironmentUtils from "./utils/environmentUtils";
 import { Settings } from "@mui/icons-material";
 import { useLazyGetMissivesQuery } from "reduxstore/api/LookupsApi";
+import { useGetHealthQuery } from "./reduxstore/api/AppSupportApi";
+import { getHealthStatusDescription } from "./utils/appSupportUtil";
 
 // Types
 interface BuildInfo {
@@ -36,6 +38,10 @@ const App = () => {
   const { buildNumber } = useSelector((state: RootState) => state.common);
   const [oktaAuth, setOktaAuth] = useState<any>(null);
   const [loadMissives, { isFetching }] = useLazyGetMissivesQuery();
+  const { data: healthData, isLoading } = useGetHealthQuery();
+
+  const health = useSelector((state: RootState) => state.support.health);
+
 
   useEffect(() => {
     const config = oktaConfig(clientId, issuer);
@@ -139,6 +145,8 @@ const App = () => {
         buildVersionNumber={buildInfoText}
         userName={username}
         environmentMode={EnvironmentUtils.envMode}
+        apiStatus={health?.status}
+        apiStatusMessage={health ? getHealthStatusDescription(health) : undefined}
         oktaEnabled={EnvironmentUtils.isOktaEnabled}>
         <AppErrorBoundary>
           <ToastServiceProvider

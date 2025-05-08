@@ -4,8 +4,8 @@ public class DemographicHistory
 {
     public long Id { get; set; }
     public int DemographicId { get; set; }
-    public DateTime ValidFrom { get; set; } = new DateTime(1917, 1, 1, 0, 0, 0, DateTimeKind.Local);
-    public DateTime ValidTo { get; set; } = new DateTime(2100, 1, 1, 0, 0, 0, DateTimeKind.Local);
+    public DateTimeOffset ValidFrom { get; set; } = new DateTime(1917, 1, 1, 0, 0, 0, DateTimeKind.Local);
+    public DateTimeOffset ValidTo { get; set; } = new DateTime(2100, 1, 1, 0, 0, 0, DateTimeKind.Local);
 
     public required long OracleHcmId { get; set; }
     public int BadgeNumber { get; set; }
@@ -21,7 +21,7 @@ public class DemographicHistory
     public char? TerminationCodeId { get; set; }
     public char EmploymentStatusId { get; set; }
 
-    public DateTime CreatedDateTime { get; set; } = DateTime.UtcNow;
+    public DateTimeOffset CreatedDateTime { get; set; } = DateTimeOffset.UtcNow;
 
     public static DemographicHistory FromDemographic(Demographic source, int demographicId)
     {

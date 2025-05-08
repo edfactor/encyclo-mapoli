@@ -8,7 +8,7 @@ export enum ImpersonationRoles {
   ItOperations = "IT-Operations"
 }
 
-export interface SortedPaginationRequestDto extends PaginationParams, ISortParams {}
+export interface SortedPaginationRequestDto extends PaginationParams, ISortParams { }
 
 export interface ProfitYearRequest {
   profitYear: number;
@@ -55,7 +55,6 @@ export interface PagedReportResponse<T> {
 export interface DistributionsAndForfeituresRequestDto extends ProfitYearRequest {
   startMonth?: number;
   endMonth?: number;
-  includeOutgoingForfeitures?: boolean;
   pagination: SortedPaginationRequestDto;
 }
 
@@ -285,16 +284,10 @@ export interface ExecutiveHoursAndDollarsQueryParams extends ProfitYearRequest {
 export interface DistributionsAndForfeituresQueryParams extends ProfitYearRequest {
   startMonth?: number;
   endMonth?: number;
-  includeOutgoingForfeitures?: boolean;
 }
 
-export interface BaseDateRangeParams {
-  startDate: Date;
-  endDate: Date;
-}
 
 export interface MasterInquirySearch {
-  startProfitYear?: number | null;
   endProfitYear?: number | null;
   startProfitMonth?: number | null;
   endProfitMonth?: number | null;
@@ -342,11 +335,10 @@ export interface MasterInquiryDetail extends ProfitYearRequest {
   payFrequencyId?: number;
   transactionDate?: Date;
   currentIncomeYear?: number;
-  currentHoursYear?: number;  
+  currentHoursYear?: number;
 }
 
 export interface MasterInquiryRequest {
-  startProfitYear?: number;
   endProfitYear?: number;
   startProfitMonth?: number;
   endProfitMonth?: number;
@@ -357,7 +349,6 @@ export interface MasterInquiryRequest {
   paymentAmount?: number;
   socialSecurity?: number;
   name?: string;
-  comment?: string;
   paymentType?: number;
   memberType?: number;
   badgeNumber?: number;
@@ -527,10 +518,10 @@ export interface BalanceByAgeDetail extends BalanceByDetailBase {
 }
 
 /* eslint-disable @typescript-eslint/no-empty-object-type */
-export interface BalanceByAge extends BalanceByBase<BalanceByAgeDetail> {}
+export interface BalanceByAge extends BalanceByBase<BalanceByAgeDetail> { }
 
 /* eslint-disable @typescript-eslint/no-empty-object-type */
-export interface BalanceByYears extends BalanceByBase<BalanceByAgeDetail> {}
+export interface BalanceByYears extends BalanceByBase<BalanceByAgeDetail> { }
 
 export interface VestedAmountsByAge {
   totalFullTime100PercentAmount: number;
@@ -886,8 +877,8 @@ export interface YearEndProfitSharingEmployee {
 }
 
 export interface BreakdownByStoreRequest extends ProfitYearRequest {
-  storeNumber?: string;
-  under21Only?: boolean;
+  storeNumber?: number;
+  storeManagement?: boolean;
   pagination: SortedPaginationRequestDto;
 }
 
@@ -903,14 +894,24 @@ export interface BreakdownByStoreEmployee {
   beginningBalance: number;
   earnings: number;
   contributions: number;
-  forfeiture: number;
+  forfeitures: number;
   distributions: number;
   endingBalance: number;
   vestedAmount: number;
   vestedPercentage: number;
   employmentStatusId: string;
-  employeeCategory: string;
-  employeeSortRank: number;
+  payClassificationName: string;
+}
+
+export interface BreakdownByStoreTotals {
+  totalNumberEmployees: number;
+  totalBeginningBalances: number;
+  totalEarnings: number;
+  totalContributions: number;
+  totalForfeitures: number;
+  totalDisbursements: number;
+  totalEndBalances: number;
+  totalVestedBalance: number;
 }
 
 export interface BreakdownByStoreResponse {
@@ -1117,6 +1118,8 @@ export interface ForfeitureAdjustmentResponse {
 export interface MissiveResponse {
   id: number;
   message: string;
+  description: string;
+  severity: string;
 }
 
 export interface RowCountResult {
@@ -1154,6 +1157,56 @@ export interface NavigationDto {
   requiredRoles: string[];
   disabled: boolean;
   items: NavigationDto[];
+}
+
+export interface FilterParams {
+  isYearEnd: boolean;
+  minimumAgeInclusive?: number;
+  maximumAgeInclusive?: number;
+  minimumHoursInclusive?: number;
+  maximumHoursInclusive?: number;
+  includeActiveEmployees: boolean;
+  includeInactiveEmployees: boolean;
+  includeEmployeesTerminatedThisYear: boolean;
+  includeTerminatedEmployees: boolean;
+  includeBeneficiaries: boolean;
+  includeEmployeesWithPriorProfitSharingAmounts: boolean;
+  includeEmployeesWithNoPriorProfitSharingAmounts: boolean;
+}
+
+export interface ReportPreset {
+  id: string;
+  name: string;
+  description: string;
+  params: FilterParams;
+}
+
+export interface ReportQueryParams {
+  profitYear: number;
+  pagination: PaginationParams;
+  isYearEnd: boolean;
+  minimumAgeInclusive?: number;
+  maximumAgeInclusive?: number;
+  minimumHoursInclusive?: number;
+  maximumHoursInclusive?: number;
+  includeActiveEmployees: boolean;
+  includeInactiveEmployees: boolean;
+  includeEmployeesTerminatedThisYear: boolean;
+  includeTerminatedEmployees: boolean;
+  includeBeneficiaries: boolean;
+  includeEmployeesWithPriorProfitSharingAmounts: boolean;
+  includeEmployeesWithNoPriorProfitSharingAmounts: boolean;
+}
+
+export interface ControlSheetRequest extends ProfitYearRequest {
+  pagination: SortedPaginationRequestDto;
+}
+
+export interface ControlSheetResponse {
+  employeeContributionProfitSharingAmount: number;
+  nonEmployeeProfitSharingAmount: number;
+  employeeBeneficiaryAmount: number;
+  profitSharingAmount: number;
 }
 
 export interface NavigationStatusDto {

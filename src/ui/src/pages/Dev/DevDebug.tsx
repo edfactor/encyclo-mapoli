@@ -5,10 +5,14 @@ import { SecurityState } from "reduxstore/slices/securitySlice";
 import React, { useEffect } from "react";
 import { useLazyGetCurrentUserQuery, useLazyGetMetadataQuery } from "reduxstore/api/ItOperationsApi";
 import DSMCollapsedAccordion from "../../components/DSMCollapsedAccordion";
+import { useGetHealthQuery } from "reduxstore/api/AppSupportApi";
+import { getHealthStatusDescription } from "utils/appSupportUtil";
 
 const DevDebug = () => {
   const securityState = useSelector<RootState, SecurityState>((state) => state.security);
   const hasToken: boolean = !!useSelector((state: RootState) => securityState.token);
+  const { data: healthData, isLoading: healthLoading } = useGetHealthQuery();
+  const healthStatus = useSelector((state: RootState) => state.support.health);
 
   // Initialize the lazy queries
   const [getCurrentUser, { data: currentUserData, isLoading: currentUserLoading }] = useLazyGetCurrentUserQuery();
@@ -25,6 +29,7 @@ const DevDebug = () => {
   return (
     <Page label="Dev Debug">
       <div style={{ padding: "24px" }}>
+        {/* Health Status Section */}
         <div style={{ display: "flex", marginTop: "24px", gap: "24px" }}>
           {/* Security State on the left */}
           <div style={{ flex: 1 }}>
@@ -58,18 +63,153 @@ const DevDebug = () => {
           </div>
         </div>
 
-        <DSMCollapsedAccordion title="Access Token">
-          <pre
-            style={{
-              maxWidth: "50%",
-              overflowWrap: "break-word",
-              wordBreak: "break-all",
-              whiteSpace: "pre-wrap"
-            }}>
-            {securityState.token || "No token available"}
-          </pre>
-        </DSMCollapsedAccordion>
+        <div style={{ marginTop: "24px" }}>
+          <DSMCollapsedAccordion
+            title={`API Health Status: ${healthData?.status || "Unknown"}`}
+            initiallyExpanded={healthData?.status !== "Healthy"}>
+            <div>
+              {healthLoading ? (
+                <p>Loading health data...</p>
+              ) : healthData ? (
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", marginBottom: "16px" }}>
+                    <div
+                      style={{
+                        width: "20px",
+                        height: "20px",
+                        borderRadius: "50%",
+                        backgroundColor:
+                          healthData.status === "Healthy"
+                            ? "green"
+                            : healthData.status === "Degraded"
+                              ? "orange"
+                              : "red",
+                        marginRight: "8px"
+                      }}></div>
+                    <span
+                      style={{
+                        fontWeight: "bold",
+                        color:
+                          healthData.status === "Healthy"
+                            ? "green"
+                            : healthData.status === "Degraded"
+                              ? "orange"
+                              : "red"
+                      }}>
+                      {healthData.status}
+                    </span>
+                    {healthData.status !== "Healthy" && (
+                      <span style={{ marginLeft: "16px" }}>{getHealthStatusDescription(healthData)}</span>
+                    )}
+                  </div>
 
+                  <h4>Environment Information</h4>
+                  {healthData.entries?.Environment ? (
+                    <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                      <thead>
+                        <tr>
+                          <th style={{ border: "1px solid #ddd", padding: "8px", textAlign: "left" }}>Property</th>
+                          <th style={{ border: "1px solid #ddd", padding: "8px", textAlign: "left" }}>Value</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {Object.entries(healthData.entries.Environment.data).map(([key, value]) => (
+                          <tr key={key}>
+                            <td style={{ border: "1px solid #ddd", padding: "8px", fontWeight: "bold" }}>{key}</td>
+                            <td style={{ border: "1px solid #ddd", padding: "8px" }}>{String(value)}</td>
+                          </tr>
+                        ))}
+                        <tr>
+                          <td style={{ border: "1px solid #ddd", padding: "8px", fontWeight: "bold" }}>Status</td>
+                          <td
+                            style={{
+                              border: "1px solid #ddd",
+                              padding: "8px"
+                            }}>
+                            {healthData.entries.Environment.status}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style={{ border: "1px solid #ddd", padding: "8px", fontWeight: "bold" }}>Description</td>
+                          <td
+                            style={{
+                              border: "1px solid #ddd",
+                              padding: "8px"
+                            }}>
+                            {healthData.entries.Environment.description}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style={{ border: "1px solid #ddd", padding: "8px", fontWeight: "bold" }}>Duration</td>
+                          <td
+                            style={{
+                              border: "1px solid #ddd",
+                              padding: "8px"
+                            }}>
+                            {healthData.entries.Environment.duration}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  ) : (
+                    <p>No Environment data available</p>
+                  )}
+
+                  <h4>All Health Entries</h4>
+                  <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "16px" }}>
+                    <thead>
+                      <tr>
+                        <th style={{ border: "1px solid #ddd", padding: "8px", textAlign: "left" }}>Service</th>
+                        <th style={{ border: "1px solid #ddd", padding: "8px", textAlign: "left" }}>Status</th>
+                        <th style={{ border: "1px solid #ddd", padding: "8px", textAlign: "left" }}>Description</th>
+                        <th style={{ border: "1px solid #ddd", padding: "8px", textAlign: "left" }}>Duration</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {Object.entries(healthData.entries).map(([key, entry]) => (
+                        <tr key={key}>
+                          <td style={{ border: "1px solid #ddd", padding: "8px" }}>{key}</td>
+                          <td
+                            style={{
+                              border: "1px solid #ddd",
+                              padding: "8px",
+                              color:
+                                entry.status === "Healthy" ? "green" : entry.status === "Degraded" ? "orange" : "red"
+                            }}>
+                            {entry.status}
+                          </td>
+                          <td style={{ border: "1px solid #ddd", padding: "8px" }}>{entry.description || "-"}</td>
+                          <td style={{ border: "1px solid #ddd", padding: "8px" }}>{entry.duration}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+
+                  <div style={{ marginTop: "16px" }}>
+                    <p>
+                      <strong>Total Duration:</strong> {healthData.totalDuration}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <p>No health data available</p>
+              )}
+            </div>
+          </DSMCollapsedAccordion>
+        </div>
+        <div style={{ marginTop: "24px" }}>
+          <DSMCollapsedAccordion title="Access Token">
+            <pre
+              style={{
+                maxWidth: "50%",
+                overflowWrap: "break-word",
+                wordBreak: "break-all",
+                whiteSpace: "pre-wrap"
+              }}>
+              {securityState.token || "No token available"}
+            </pre>
+          </DSMCollapsedAccordion>
+        </div>
         {/* Database Metadata in an accordion */}
         <div style={{ marginTop: "24px" }}>
           <DSMCollapsedAccordion title="Database Metadata">
@@ -169,20 +309,22 @@ const DevDebug = () => {
             <DSMCollapsedAccordion title="API Request History">
               <div>
                 <h4>Recent API Requests (Last 50 Calls)</h4>
-                <p>This section shows the last 50 API calls made during the current session, even if made on other pages.</p>
+                <p>
+                  This section shows the last 50 API calls made during the current session, even if made on other pages.
+                </p>
 
                 {(() => {
                   // Define a React state to store the history
                   const [apiHistory, setApiHistory] = React.useState(() => {
                     // Try to get history from session storage using the utility function
-                    return JSON.parse(sessionStorage.getItem('api_request_history') || '[]');
+                    return JSON.parse(sessionStorage.getItem("api_request_history") || "[]");
                   });
 
                   // Check for updates in session storage
                   React.useEffect(() => {
                     // Function to handle storage changes
                     const handleStorageChange = () => {
-                      const storedHistory = sessionStorage.getItem('api_request_history');
+                      const storedHistory = sessionStorage.getItem("api_request_history");
                       if (storedHistory) {
                         setApiHistory(JSON.parse(storedHistory));
                       }
@@ -212,38 +354,40 @@ const DevDebug = () => {
                   return (
                     <table style={{ width: "100%", borderCollapse: "collapse" }}>
                       <thead>
-                      <tr>
-                        <th style={{ border: "1px solid #ddd", padding: "8px", textAlign: "left" }}>Time</th>
-                        <th style={{ border: "1px solid #ddd", padding: "8px", textAlign: "left" }}>Method</th>
-                        <th style={{ border: "1px solid #ddd", padding: "8px", textAlign: "left" }}>URL</th>
-                        <th style={{ border: "1px solid #ddd", padding: "8px", textAlign: "left" }}>Status</th>
-                        <th style={{ border: "1px solid #ddd", padding: "8px", textAlign: "left" }}>Duration</th>
-                      </tr>
+                        <tr>
+                          <th style={{ border: "1px solid #ddd", padding: "8px", textAlign: "left" }}>Time</th>
+                          <th style={{ border: "1px solid #ddd", padding: "8px", textAlign: "left" }}>Method</th>
+                          <th style={{ border: "1px solid #ddd", padding: "8px", textAlign: "left" }}>URL</th>
+                          <th style={{ border: "1px solid #ddd", padding: "8px", textAlign: "left" }}>Status</th>
+                          <th style={{ border: "1px solid #ddd", padding: "8px", textAlign: "left" }}>Duration</th>
+                        </tr>
                       </thead>
                       <tbody>
-                      {apiHistory.map((request, index) => (
-                        <tr key={index}>
-                          <td style={{ border: "1px solid #ddd", padding: "8px" }}>
-                            {typeof request.time === 'string'
-                              ? new Date(request.time).toLocaleTimeString()
-                              : new Date(request.time).toLocaleTimeString()}
-                          </td>
-                          <td style={{ border: "1px solid #ddd", padding: "8px" }}>{request.method}</td>
-                          <td style={{ border: "1px solid #ddd", padding: "8px" }}>{request.url}</td>
-                          <td style={{
-                            border: "1px solid #ddd",
-                            padding: "8px",
-                            color: request.status >= 400
-                              ? "red"
-                              : request.status >= 200 && request.status < 300
-                                ? "green"
-                                : "orange"
-                          }}>
-                            {request.status}
-                          </td>
-                          <td style={{ border: "1px solid #ddd", padding: "8px" }}>{request.duration}ms</td>
-                        </tr>
-                      ))}
+                        {apiHistory.map((request, index) => (
+                          <tr key={index}>
+                            <td style={{ border: "1px solid #ddd", padding: "8px" }}>
+                              {typeof request.time === "string"
+                                ? new Date(request.time).toLocaleTimeString()
+                                : new Date(request.time).toLocaleTimeString()}
+                            </td>
+                            <td style={{ border: "1px solid #ddd", padding: "8px" }}>{request.method}</td>
+                            <td style={{ border: "1px solid #ddd", padding: "8px" }}>{request.url}</td>
+                            <td
+                              style={{
+                                border: "1px solid #ddd",
+                                padding: "8px",
+                                color:
+                                  request.status >= 400
+                                    ? "red"
+                                    : request.status >= 200 && request.status < 300
+                                      ? "green"
+                                      : "orange"
+                              }}>
+                              {request.status}
+                            </td>
+                            <td style={{ border: "1px solid #ddd", padding: "8px" }}>{request.duration}ms</td>
+                          </tr>
+                        ))}
                       </tbody>
                     </table>
                   );
@@ -253,7 +397,7 @@ const DevDebug = () => {
                 <div style={{ marginTop: "16px", display: "flex", gap: "8px" }}>
                   <button
                     onClick={() => {
-                      sessionStorage.removeItem('api_request_history');
+                      sessionStorage.removeItem("api_request_history");
                       // Force a re-render
                       window.location.reload();
                     }}
@@ -263,8 +407,7 @@ const DevDebug = () => {
                       color: "white",
                       border: "none",
                       borderRadius: "4px"
-                    }}
-                  >
+                    }}>
                     Clear History
                   </button>
 
@@ -279,15 +422,14 @@ const DevDebug = () => {
                       color: "white",
                       border: "none",
                       borderRadius: "4px"
-                    }}
-                  >
+                    }}>
                     Refresh History
                   </button>
                 </div>
               </div>
             </DSMCollapsedAccordion>
           </div>
-        </div>        
+        </div>
       </div>
     </Page>
   );

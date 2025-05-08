@@ -19,8 +19,10 @@ import { messageSlice } from "./slices/messageSlice";
 import forfeituresAdjustmentSlice from "./slices/forfeituresAdjustmentSlice";
 import { apiLoggerMiddleware } from "../middleware/apiLoggerMiddleware";
 import { NavigationApi } from "./api/NavigationApi";
+import navigationSlice from "./slices/navigationSlice";
+import { AppSupportApi } from "./api/AppSupportApi";
+import AppSupportSlice from "./slices/appSupportSlice";
 import { NavigationStatusApi } from "./api/NavigationStatusApi";
-import navigationSlice  from "./slices/navigationSlice";
 import  navigationStatusSlice  from "./slices/NavigationStatusSlice";
 
 export const store = configureStore({
@@ -33,6 +35,7 @@ export const store = configureStore({
     inquiry: inquirySlice,
     lookups: lookupsSlice,
     common: commonSlice,
+    support: AppSupportSlice,
     messages: messageSlice,
     navigation: navigationSlice,
     navigationStatus: navigationStatusSlice,
@@ -46,6 +49,7 @@ export const store = configureStore({
     [LookupsApi.reducerPath]: LookupsApi.reducer,
     [CommonApi.reducerPath]: CommonApi.reducer,
     [NavigationApi.reducerPath]: NavigationApi.reducer,
+    [AppSupportApi.reducerPath]: AppSupportApi.reducer,
     [NavigationStatusApi.reducerPath]: NavigationStatusApi.reducer
   },
 
@@ -61,6 +65,7 @@ export const store = configureStore({
       .concat(LookupsApi.middleware)
       .concat(CommonApi.middleware)
       .concat(NavigationApi.middleware)
+      .concat(AppSupportApi.middleware)
       .concat(NavigationStatusApi.middleware)
 });
 

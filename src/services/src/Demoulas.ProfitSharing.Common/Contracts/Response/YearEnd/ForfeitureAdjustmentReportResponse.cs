@@ -1,16 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Demoulas.Common.Contracts.Contracts;
-
-namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
 public sealed record ForfeitureAdjustmentReportResponse:ReportResponseBase<ForfeitureAdjustmentReportDetail>
 {
-    public static readonly string REPORT_NAME = "FORFEITURE ADJUSTMENT REPORT";
+    public static readonly string REPORT_NAME = "FORFEITURES REPORT";
     public ForfeitureAdjustmentReportResponse()
     {
         this.ReportName = REPORT_NAME;
