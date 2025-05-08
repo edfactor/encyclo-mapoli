@@ -15,6 +15,8 @@ export const PSLayout: React.FC<DSMLayoutProps> = ({
   onClick,
   environmentMode,
   buildVersionNumber,
+  apiStatus,
+  apiStatusMessage,
   ...welcomeDisplayProps
 }) => {
   return (
@@ -33,6 +35,8 @@ export const PSLayout: React.FC<DSMLayoutProps> = ({
           id="environment-banner"
           environmentMode={environmentMode}
           buildVersionNumber={buildVersionNumber}
+          apiStatus={apiStatus}
+          apiStatusMessage={apiStatusMessage}
         />
       </div>
       <Grid2

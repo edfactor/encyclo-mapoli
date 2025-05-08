@@ -41,14 +41,12 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
       ...(distributionsAndForfeituresQueryParams?.endMonth && {
         endMonth: distributionsAndForfeituresQueryParams?.endMonth
       }),
-      includeOutgoingForfeitures: distributionsAndForfeituresQueryParams?.includeOutgoingForfeitures ?? false,
       pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: sortParams.sortBy, isSortDescending: sortParams.isSortDescending }
     };
 
     await triggerSearch(request, false);
   }, [
     distributionsAndForfeituresQueryParams?.endMonth,
-    distributionsAndForfeituresQueryParams?.includeOutgoingForfeitures,
     distributionsAndForfeituresQueryParams?.startMonth,
     profitYear,
     pageNumber,

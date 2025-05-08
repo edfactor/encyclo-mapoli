@@ -1,11 +1,9 @@
 ﻿using Demoulas.Common.Api.Utilities;
 using Demoulas.Common.Contracts.Configuration;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Demoulas.ProfitSharing.Endpoints.HealthCheck;
 
-using System.Reflection;
 using Microsoft.AspNetCore.Hosting;
 public class EnvironmentHealthCheck : IHealthCheck
 {
@@ -39,9 +37,7 @@ public class EnvironmentHealthCheck : IHealthCheck
             { "Uptime", (DateTime.UtcNow - _startupTime).ToString(@"dd\.hh\:mm\:ss") },
             { "UtcNow", DateTimeOffset.UtcNow.ToString("o") },
             { "OktaEnvironmentName", _config.EnvironmentName ?? string.Empty },
-            { "OktaRolePrefix", _config.RolePrefix },
-            { "OktaAuthorizationServerId", _config.AuthorizationServerId },
-            { "OktaAudience", _config.Audience }
+            { "OktaRolePrefix", _config.RolePrefix }
         };
 
         return Task.FromResult(HealthCheckResult.Healthy("Environment check", data));
