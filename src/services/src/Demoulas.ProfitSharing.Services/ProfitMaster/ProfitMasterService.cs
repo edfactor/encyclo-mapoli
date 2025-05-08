@@ -1,7 +1,5 @@
 ﻿using System.Data;
-using System.Data.Common;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -262,10 +260,17 @@ public class ProfitMasterService : IProfitMasterService
                 Debug.WriteLine($"Can not Revert. There is no year end update for profit year {profitYearRequest.ProfitYear}");
                 throw new BadHttpRequestException($"Can not Revert. There is no year end update for profit year {profitYearRequest.ProfitYear}");
             }
-
+            
+            // Consider adding additional checking to ensure that:
+            // - the ETVA selection (how many EVTA rows will be altered)
+            // - the employee count
+            // - the bene count
+            // if any of these counts do not match, the revert should halt - and return the expected and actual numbers.
+            // or perhaps the counts should be "number of profit count 0 records" and "number of profit count 8 records"
+    
             // --- Adjust ETVA
 
-            // Rollback the effect of the transactions
+            // Rollback the effect of the transactions on the "NOW" ETVA.
             var sqlAdjustEtvaSql = $@"
                 MERGE INTO pay_profit pp
                 USING (
@@ -285,15 +290,19 @@ public class ProfitMasterService : IProfitMasterService
                   UPDATE SET pp.etva = pp.etva - oq.earnings";
             int etvasEffected = await ctx.Database.ExecuteSqlRawAsync(sqlAdjustEtvaSql, cancellationToken);
 
-
             // Now get rid of the transactions.
             var deleteTransactionsSql =
                 $@"DELETE FROM profit_detail WHERE 
-                PROFIT_YEAR = 2024 AND
-                (PROFIT_CODE_id = /*0*/ {ProfitCode.Constants.IncomingContributions.Id} AND comment_type_id is null) 
+                PROFIT_YEAR = {profitYear} AND (                
+                   PROFIT_CODE_id = /*0*/ {ProfitCode.Constants.IncomingContributions.Id} AND (
+                    -- Mostly this is to avoid changes to MILITARY rows
+                    comment_type_id is null OR 
+                    comment_type_id = /*23*/ {CommentType.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested.Id} OR
+                    comment_type_id = /*5*/ {CommentType.Constants.VOnly.Id} OR
+                    comment_type_id = /*23*/ {CommentType.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested.Id} 
+                    )                 
                 OR
-                (PROFIT_CODE_id = /*8*/  {ProfitCode.Constants.Incoming100PercentVestedEarnings.Id} AND comment_type_id = /*23*/ {CommentType.Constants.OneHundredPercentEarnings.Id})";
-
+               (PROFIT_CODE_id = /*8*/  {ProfitCode.Constants.Incoming100PercentVestedEarnings.Id} AND comment_type_id = /*23*/ {CommentType.Constants.OneHundredPercentEarnings.Id}))";
             var transactionsDeleted = await ctx.Database.ExecuteSqlRawAsync(deleteTransactionsSql, cancellationToken);
 
             if (yearEndUpdateStatus != null)

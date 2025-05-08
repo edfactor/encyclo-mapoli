@@ -7,20 +7,20 @@ public static class ReadyActivityFactory
 {
     public static List<Activity> CreateActivities(string dataDirectory)
     {
-        var secretConfig = new ConfigurationBuilder().AddUserSecrets<ReadyActivity>().Build();
-        var username = secretConfig["YEMatchHost:Username"];
-        var password = secretConfig["YEMatchHost:Password"];
-        var host = "tduapp01";
-        var chatty = true;
+        IConfigurationRoot secretConfig = new ConfigurationBuilder().AddUserSecrets<ReadyActivity>().Build();
+        string? username = secretConfig["YEMatchHost:Username"];
+        string? password = secretConfig["YEMatchHost:Password"];
+        string host = "tduapp01";
+        bool chatty = true;
 
         if (username == null || password == null)
         {
             throw new InvalidOperationException("Username and password are required");
         }
 
-        var sshClient = new SshClient(host, username, password);
+        SshClient sshClient = new(host, username, password);
         sshClient.Connect();
-        var sftpClient = new SftpClient(host, username, password);
+        SftpClient sftpClient = new(host, username, password);
         sftpClient.Connect();
 
         List<Activity> activities =

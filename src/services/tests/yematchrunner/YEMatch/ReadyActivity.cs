@@ -1,17 +1,15 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Reflection.Metadata.Ecma335;
 using System.Text.RegularExpressions;
 using Renci.SshNet;
-using Renci.SshNet.Sftp;
 
 namespace YEMatch;
 
 [SuppressMessage("Major Code Smell", "S6966:Awaitable method should be used")]
 public class ReadyActivity(SshClient client, SftpClient sftpClient, bool chatty, string AName, string ksh, string args, string dataDirectory) : Activity
 {
-    public override string ActivityLetterNumber { get; set; } = AName;
     private const string OptionalLocalResourceBase = "/Users/robertherrmann/prj/smart-profit-sharing/src/services/tests/Demoulas.ProfitSharing.IntegrationTests/Resources/";
+    public override string ActivityLetterNumber { get; set; } = AName;
 
     public override async Task<Outcome> execute()
     {
@@ -24,7 +22,7 @@ public class ReadyActivity(SshClient client, SftpClient sftpClient, bool chatty,
 
         Console.WriteLine($"$ EJR {ksh} {args}");
 
-        var stopwatch = Stopwatch.StartNew();
+        Stopwatch stopwatch = Stopwatch.StartNew();
         SshCommand? result = null;
         try
         {
@@ -38,12 +36,12 @@ public class ReadyActivity(SshClient client, SftpClient sftpClient, bool chatty,
 
         stopwatch.Stop();
 
-        var took = stopwatch.Elapsed;
+        TimeSpan took = stopwatch.Elapsed;
 
-        var lines = result.Result.Trim().Split('\n');
+        string[] lines = result.Result.Trim().Split('\n');
         if (chatty)
         {
-            foreach (var line in lines)
+            foreach (string line in lines)
                 // Printing this line stops the JRider console cold.  Probably a special character in the line?
             {
                 if (!line.StartsWith("runb param ="))
@@ -54,7 +52,7 @@ public class ReadyActivity(SshClient client, SftpClient sftpClient, bool chatty,
         }
 
         // Find log file in output
-        var match = Regex.Match(result.Result.Trim(), @"LogFile:\s*(\S+)");
+        Match match = Regex.Match(result.Result.Trim(), @"LogFile:\s*(\S+)");
         if (match.Success)
         {
             string logFilePath = match.Groups[1].Value;
@@ -65,42 +63,42 @@ public class ReadyActivity(SshClient client, SftpClient sftpClient, bool chatty,
             Console.WriteLine("Log File Name: " + logFileName);
 
             // download the log file from READY
-            await using (var fileStream = File.OpenWrite(localPath))
+            await using (FileStream fileStream = File.OpenWrite(localPath))
             {
                 sftpClient.DownloadFile(logFilePath, fileStream);
             }
 
             Console.WriteLine($"Log file copied to: file:///{localPath}");
 
-            var matchTermReport = Regex.Match(result.Result.Trim(), @" JOB: YE-PROF-TERM \((\d+)\) COMPLETED");
+            Match matchTermReport = Regex.Match(result.Result.Trim(), @" JOB: YE-PROF-TERM \((\d+)\) COMPLETED");
             if (matchTermReport.Success)
             {
                 // Go grab prof term report.
                 string unixProcessId = matchTermReport.Groups[1].Value;
                 string qpay066Remote = "/dsmdev/data/PAYROLL/SYS/PVTSYSOUT/QPAY066-" + unixProcessId;
                 string qpay066Local = Path.Combine(dataDirectory, "READY-QPAY066.txt");
-                await using (var fileStream = File.OpenWrite(qpay066Local))
+                await using (FileStream fileStream = File.OpenWrite(qpay066Local))
                 {
                     sftpClient.DownloadFile(qpay066Remote, fileStream);
                 }
 
                 Console.WriteLine($"copied {qpay066Remote} to $qpay066Local");
-                string testingFile2 = OptionalLocalResourceBase+"terminatedEmployeeAndBeneficiaryReport-correct.txt";
+                string testingFile2 = OptionalLocalResourceBase + "terminatedEmployeeAndBeneficiaryReport-correct.txt";
                 if (HasDirectory(testingFile2))
                 {
-                    File.Copy(qpay066Local, testingFile2, overwrite: true);
+                    File.Copy(qpay066Local, testingFile2, true);
                     Console.WriteLine($"NOTE::: Updated {testingFile2}");
                 }
             }
 
-            var matchTermReport2 = Regex.Match(result.Result.Trim(), @" JOB: YE-PROF-EDIT \((\d+)\) COMPLETED");
+            Match matchTermReport2 = Regex.Match(result.Result.Trim(), @" JOB: YE-PROF-EDIT \((\d+)\) COMPLETED");
             if (matchTermReport2.Success)
             {
                 // Go grab prof term report.
                 string unixProcessId = matchTermReport2.Groups[1].Value;
                 string remote = "/dsmdev/data/PAYROLL/SYS/PVTSYSOUT/PAY447-" + unixProcessId;
                 string local = Path.Combine(dataDirectory, "READY-PAY447.txt");
-                await using (var fileStream = File.OpenWrite(local))
+                await using (FileStream fileStream = File.OpenWrite(local))
                 {
                     sftpClient.DownloadFile(remote, fileStream);
                 }
@@ -110,13 +108,13 @@ public class ReadyActivity(SshClient client, SftpClient sftpClient, bool chatty,
                 string testingFile3 = OptionalLocalResourceBase + "pay447.txt";
                 if (HasDirectory(testingFile3))
                 {
-                    File.Copy(local, testingFile3, overwrite: true);
+                    File.Copy(local, testingFile3, true);
                     Console.WriteLine($"NOTE::: Updated {testingFile3}");
                 }
             }
 
             // #######  LP WAS CALLED WITH ARGS :-d plaser5 /dsmdev/data/PAYROLL/SYS/PVTSYSOUT/PAY444A-25103 
-            var matches = Regex.Matches(result.Result, @"#######  LP WAS CALLED WITH ARGS :-d \w+ (/.+?-\d+)");
+            MatchCollection matches = Regex.Matches(result.Result, @"#######  LP WAS CALLED WITH ARGS :-d \w+ (/.+?-\d+)");
             foreach (Match lpMatch in matches)
             {
                 string reportName = lpMatch.Groups[1].Value;
@@ -129,7 +127,7 @@ public class ReadyActivity(SshClient client, SftpClient sftpClient, bool chatty,
                 else
                 {
                     Console.WriteLine($"copying {reportName} to file:///{qpay066Local}");
-                    await using (var fileStream = File.OpenWrite(qpay066Local))
+                    await using (FileStream fileStream = File.OpenWrite(qpay066Local))
                     {
                         sftpClient.DownloadFile(reportName, fileStream);
                     }
@@ -138,7 +136,7 @@ public class ReadyActivity(SshClient client, SftpClient sftpClient, bool chatty,
                 string testingFile = OptionalLocalResourceBase + "psupdate-pay444-r2.txt";
                 if (HasDirectory(testingFile) && filenameLocal == "PAY444L" && File.Exists(testingFile))
                 {
-                    File.Copy(qpay066Local, testingFile, overwrite: true);
+                    File.Copy(qpay066Local, testingFile, true);
                     Console.WriteLine($"NOTE::: Updated {testingFile}");
                 }
             }

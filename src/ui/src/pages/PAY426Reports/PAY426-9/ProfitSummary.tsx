@@ -198,8 +198,7 @@ const ProfitSummary = () => {
   }, [terminatedRowData]);
 
   return (
-    <Page label={CAPTIONS.PAY426_SUMMARY} actionNode={renderActionNode()}>
-      
+    <>
       <div>
         <Typography
           variant="h6"
@@ -235,7 +234,7 @@ const ProfitSummary = () => {
           }}
         />
       </div>
-    </Page>
+    </>
   );
 };
 

@@ -20,8 +20,9 @@ public class MasterServiceTests : ApiTestBase<Program>
     {
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
         var request = new MasterInquiryRequest() { EndProfitYear = 2023, Skip = 0, Take = 25 };
-        var response = await ApiClient.GETAsync<MasterInquiryEndpoint, MasterInquiryRequest, PaginatedResponseDto<MasterInquiryResponseDto>>(request);
+        var response = await ApiClient.POSTAsync<MasterInquiryEndpoint, MasterInquiryRequest, PaginatedResponseDto<MasterInquiryResponseDto>>(request);
         response.Should().NotBeNull();
+        response.Response.EnsureSuccessStatusCode();
     }
 
     [Fact(DisplayName = "PS-433: Profit Master Inquiry - Start Profit Month")]
@@ -29,8 +30,9 @@ public class MasterServiceTests : ApiTestBase<Program>
     {
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
         var request = new MasterInquiryRequest() { StartProfitMonth = 1, Skip = 0, Take = 25 };
-        var response = await ApiClient.GETAsync<MasterInquiryEndpoint, MasterInquiryRequest, PaginatedResponseDto<MasterInquiryResponseDto>>(request);
+        var response = await ApiClient.POSTAsync<MasterInquiryEndpoint, MasterInquiryRequest, PaginatedResponseDto<MasterInquiryResponseDto>>(request);
         response.Should().NotBeNull();
+        response.Response.EnsureSuccessStatusCode();
     }
 
     [Fact(DisplayName = "PS-433: Profit Master Inquiry - End Profit Month")]
@@ -38,8 +40,9 @@ public class MasterServiceTests : ApiTestBase<Program>
     {
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
         var request = new MasterInquiryRequest() { EndProfitMonth = 12, Skip = 0, Take = 25 };
-        var response = await ApiClient.GETAsync<MasterInquiryEndpoint, MasterInquiryRequest, PaginatedResponseDto<MasterInquiryResponseDto>>(request);
+        var response = await ApiClient.POSTAsync<MasterInquiryEndpoint, MasterInquiryRequest, PaginatedResponseDto<MasterInquiryResponseDto>>(request);
         response.Should().NotBeNull();
+        response.Response.EnsureSuccessStatusCode();
     }
 
     [Fact(DisplayName = "PS-433: Profit Master Inquiry - Profit Code")]
@@ -47,8 +50,9 @@ public class MasterServiceTests : ApiTestBase<Program>
     {
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
         var request = new MasterInquiryRequest() { ProfitCode = ProfitCode.Constants.IncomingContributions.Id, Skip = 0, Take = 25 };
-        var response = await ApiClient.GETAsync<MasterInquiryEndpoint, MasterInquiryRequest, PaginatedResponseDto<MasterInquiryResponseDto>>(request);
+        var response = await ApiClient.POSTAsync<MasterInquiryEndpoint, MasterInquiryRequest, PaginatedResponseDto<MasterInquiryResponseDto>>(request);
         response.Should().NotBeNull();
+        response.Response.EnsureSuccessStatusCode();
     }
 
     [Fact(DisplayName = "PS-433: Profit Master Inquiry - Contribution Amount")]
@@ -56,8 +60,9 @@ public class MasterServiceTests : ApiTestBase<Program>
     {
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
         var request = new MasterInquiryRequest() { ContributionAmount = (decimal?)100.0, Skip = 0, Take = 25 };
-        var response = await ApiClient.GETAsync<MasterInquiryEndpoint, MasterInquiryRequest, PaginatedResponseDto<MasterInquiryResponseDto>>(request);
+        var response = await ApiClient.POSTAsync<MasterInquiryEndpoint, MasterInquiryRequest, PaginatedResponseDto<MasterInquiryResponseDto>>(request);
         response.Should().NotBeNull();
+        response.Response.EnsureSuccessStatusCode();
     }
 
     [Fact(DisplayName = "PS-433: Profit Master Inquiry - Earnings Amount")]
@@ -65,8 +70,9 @@ public class MasterServiceTests : ApiTestBase<Program>
     {
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
         var request = new MasterInquiryRequest() { EarningsAmount = (decimal?)0.0, Skip = 0, Take = 25 };
-        var response = await ApiClient.GETAsync<MasterInquiryEndpoint, MasterInquiryRequest, PaginatedResponseDto<MasterInquiryResponseDto>>(request);
+        var response = await ApiClient.POSTAsync<MasterInquiryEndpoint, MasterInquiryRequest, PaginatedResponseDto<MasterInquiryResponseDto>>(request);
         response.Should().NotBeNull();
+        response.Response.EnsureSuccessStatusCode();
     }
 
     [Fact(DisplayName = "PS-433: Profit Master Inquiry - Payment Amount")]
@@ -74,8 +80,9 @@ public class MasterServiceTests : ApiTestBase<Program>
     {
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
         var request = new MasterInquiryRequest() { PaymentAmount = 0, Skip = 0, Take = 25 };
-        var response = await ApiClient.GETAsync<MasterInquiryEndpoint, MasterInquiryRequest, PaginatedResponseDto<MasterInquiryResponseDto>>(request);
+        var response = await ApiClient.POSTAsync<MasterInquiryEndpoint, MasterInquiryRequest, PaginatedResponseDto<MasterInquiryResponseDto>>(request);
         response.Should().NotBeNull();
+        response.Response.EnsureSuccessStatusCode();
     }
 
     [Fact(DisplayName = "PS-433: Profit Master Inquiry - Social Security")]
@@ -83,8 +90,9 @@ public class MasterServiceTests : ApiTestBase<Program>
     {
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
         var request = new MasterInquiryRequest() { SocialSecurity = 000000000, Skip = 0, Take = 25 };
-        var response = await ApiClient.GETAsync<MasterInquiryEndpoint, MasterInquiryRequest, PaginatedResponseDto<MasterInquiryResponseDto>>(request);
+        var response = await ApiClient.POSTAsync<MasterInquiryEndpoint, MasterInquiryRequest, PaginatedResponseDto<MasterInquiryResponseDto>>(request);
         response.Should().NotBeNull();
+        response.Response.EnsureSuccessStatusCode();
     }
 
     [Fact(DisplayName = "PS-433: Profit Master Inquiry - All")]
@@ -105,7 +113,8 @@ public class MasterServiceTests : ApiTestBase<Program>
             Skip = 0,
             Take = 25
         };
-        var response = await ApiClient.GETAsync<MasterInquiryEndpoint, MasterInquiryRequest, PaginatedResponseDto<MasterInquiryResponseDto>>(request);
+        var response = await ApiClient.POSTAsync<MasterInquiryEndpoint, MasterInquiryRequest, PaginatedResponseDto<MasterInquiryResponseDto>>(request);
         response.Should().NotBeNull();
+        response.Response.EnsureSuccessStatusCode();
     }
 }

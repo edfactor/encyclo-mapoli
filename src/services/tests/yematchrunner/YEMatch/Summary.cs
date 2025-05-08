@@ -8,13 +8,13 @@ public static class Summary
 
     public static void print(string filename)
     {
-        var directory = "../../.."; // Change this if needed
-        var searchPattern = "outcomes-*.json";
+        string directory = "../../.."; // Change this if needed
+        string searchPattern = "outcomes-*.json";
 
         if (filename == "latest")
         {
 // Get the latest file based on name (timestamps are part of filenames)
-            var latestFile = new DirectoryInfo(directory)
+            FileInfo? latestFile = new DirectoryInfo(directory)
                 .GetFiles(searchPattern)
                 .OrderByDescending(f => f.Name) // Sorting by name since format is yyyyMMdd-HHmmss
                 .FirstOrDefault();
@@ -28,11 +28,12 @@ public static class Summary
             filename = latestFile.FullName;
         }
 
-        var json = File.ReadAllText(filename);
-        var outcomes = JsonSerializer.Deserialize<List<Outcome>>(json);
-        
+        string json = File.ReadAllText(filename);
+        List<Outcome>? outcomes = JsonSerializer.Deserialize<List<Outcome>>(json);
 
-        if (outcomes == null || outcomes.Count == 0) {
+
+        if (outcomes == null || outcomes.Count == 0)
+        {
             Console.WriteLine("No outcomes found in the file.");
             return;
         }
@@ -50,6 +51,7 @@ public static class Summary
 
             return;
         }
+
         // Outcomes are only 1 side.
         if (outcomes?[0].isSmart == outcomes?[1].isSmart)
         {
@@ -64,11 +66,11 @@ public static class Summary
     private static void summarizeOneSide(List<Outcome> outcomes)
     {
         Console.WriteLine($" {"Name".PadRight(nameWidth)}, {"READY",8}, {"SMART",8}");
-        var sideTook = TimeSpan.Zero;
-        foreach (var outcome in outcomes)
+        TimeSpan sideTook = TimeSpan.Zero;
+        foreach (Outcome outcome in outcomes)
         {
-            var readyTook = outcome.isSmart ? "" : Summarize(outcome);
-            var smartSummary = outcome.isSmart ? Summarize(outcome) : "";
+            string readyTook = outcome.isSmart ? "" : Summarize(outcome);
+            string smartSummary = outcome.isSmart ? Summarize(outcome) : "";
 
             Console.WriteLine(
                 $"{Program.ModChar(outcome)}{TruncateAndPad(outcome.ActivityLetterNumber.PadRight(4) + " " + outcome.Name)}, {readyTook,8}, {smartSummary}");
@@ -85,21 +87,21 @@ public static class Summary
     private static void summarizeReadyAndSmart(List<Outcome> outcomes)
     {
         Console.WriteLine($" {"Name".PadRight(nameWidth)},     {"READY",8}, {"SMART",8}");
-        var readyTime = TimeSpan.Zero;
-        var smartTime = TimeSpan.Zero;
+        TimeSpan readyTime = TimeSpan.Zero;
+        TimeSpan smartTime = TimeSpan.Zero;
 
         if (outcomes?.Count == 1)
         {
-            Console.WriteLine($"Only 1 outcome.");
+            Console.WriteLine("Only 1 outcome.");
             Console.WriteLine($"{Summarize(outcomes[0])}");
         }
         else
         {
-            foreach (var outcomePair in outcomes!.Chunk(2))
+            foreach (Outcome[] outcomePair in outcomes!.Chunk(2))
             {
-                var readyOutcome = outcomePair[0];
-                var smartOutcome = outcomePair[1];
-                var ksh = readyOutcome.Name.Split(" ")[0];
+                Outcome readyOutcome = outcomePair[0];
+                Outcome smartOutcome = outcomePair[1];
+                string ksh = readyOutcome.Name.Split(" ")[0];
                 ksh = ksh.StartsWith('!') ? ksh.Substring(1) : ksh;
                 Console.WriteLine(
                     $"{Program.ModChar(readyOutcome)}{(readyOutcome.ActivityLetterNumber.PadRight(4) + " " + ksh).PadRight(nameWidth)},     {Summarize(readyOutcome),8},    {Summarize(smartOutcome)}");
@@ -124,11 +126,11 @@ public static class Summary
     {
         if (outcome.Status == OutcomeStatus.Ok)
         {
-            var outMsg = "";
+            string outMsg = "";
             if (outcome.isSmart)
             {
                 outMsg = " " + outcome.Message.Replace("\n", ", ").Trim();
-                var lineLimit = 180;
+                int lineLimit = 180;
                 if (outMsg.Length > lineLimit)
                 {
                     outMsg = outMsg.Substring(0, lineLimit) + "...";
@@ -165,13 +167,13 @@ public static class Summary
 
     private static string TruncateAndPad(string input)
     {
-        var paranDex = input.IndexOf("(");
+        int paranDex = input.IndexOf("(");
         if (paranDex > 0)
         {
             input = input.Substring(0, paranDex);
         }
 
-        var truncated = input.Length > 35 ? input.Substring(0, 35) : input;
+        string truncated = input.Length > 35 ? input.Substring(0, 35) : input;
         return truncated.PadRight(35);
     }
 }

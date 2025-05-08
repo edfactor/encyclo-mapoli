@@ -1,5 +1,4 @@
-﻿using Demoulas.Common.Contracts.Contracts.Request;
-using Demoulas.Common.Contracts.Validators;
+﻿using Demoulas.Common.Contracts.Validators;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using FluentValidation;
