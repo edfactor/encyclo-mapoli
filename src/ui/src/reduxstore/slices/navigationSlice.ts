@@ -1,14 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import {CurrentNavigation, NavigationResponseDto} from '../types';
+import {NavigationResponseDto} from '../types';
 
 export interface NavigationState {
   navigationData: NavigationResponseDto | null;
-  currentNavigation?: CurrentNavigation;
   error: string | null;
 }
 const initialState: NavigationState = {
   navigationData: null,
-  currentNavigation: undefined,
   error: null
 };
 
@@ -26,11 +24,6 @@ export const navigationSlice = createSlice({
                 state.error = "Failed to fetch  navigations"
             }
         },
-        setCurrentNavigationId: (state, action: PayloadAction<CurrentNavigation | undefined>)=>{
-            if(action?.payload){
-                state.currentNavigation = action.payload;
-            }
-        },
         setNavigationError: (state, action: PayloadAction<string>) => {
             state.error = action.payload;
             state.navigationData = null;
@@ -38,6 +31,6 @@ export const navigationSlice = createSlice({
     }
 });
 
-export const { setNavigation,setCurrentNavigationId, setNavigationError} = navigationSlice.actions;
+export const { setNavigation, setNavigationError} = navigationSlice.actions;
 
 export default navigationSlice.reducer;

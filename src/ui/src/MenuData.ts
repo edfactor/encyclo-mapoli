@@ -112,54 +112,36 @@ export const menuLevels = (data: NavigationResponseDto | undefined): MenuLevel[]
     return [];
   }
 
-export const menuLevels =(data: NavigationResponseDto | undefined): MenuLevel[] =>{
-  const yearEndList = data?.navigation.filter(m=>m.id == 54)[0]; //Id 54 is for Year End. It will have the list of December Activities & Fiscal Close. 
-  const menuLevel: MenuLevel[] = [];
-  yearEndList?.items?.map((value) => {
-    menuLevel.push(
-      {
-        navigationId: value.id,
-        mainTitle: value.title + addSubTitle(value.subTitle),
-        statusId: value.statusId,
-        statusName: value.statusName,
-        topPage: value.items && value.items.length>0? poplulateTopPage(value.items): []
-      }
-    )
-  });
-  return menuLevel;
-}
-const poplulateTopPage = (data: NavigationDto[]):TopPage[] =>{
-  const topPage:TopPage[] = [];
-  data.map((value) => {
-    topPage.push(
-      {
-        navigationId: value.id,
-         topTitle: value.title + addSubTitle(value.subTitle),
-         statusId: value.statusId,
-         statusName: value.statusName,
-         disabled: value.disabled,
-         topRoute: value.url,
-         subPages: value.items && value.items.length>0 ? populateSubPages(value.items): []
-      }
-    )
-  });
-  return topPage;
-}
-const populateSubPages = (data: NavigationDto[]):SubPages[] =>{
-  const subPages:SubPages[] = [];
-  data.map((value) => {
-    subPages.push(
-      {
-        navigationId: value.id,
-        subTitle: value.title + addSubTitle(value.subTitle),
-        statusId: value.statusId,
-        statusName: value.statusName,
-        disabled: value.disabled, 
-        subRoute: value.url
-      }
-    )
-  });
-  return subPages;
-}
+  return yearEndList.items.map((value) => ({
+    navigationId: value.id,
+    statusId: value.statusId,
+    statusName: value.statusName,
+    mainTitle: value.title + addSubTitle(value.subTitle),
+    topPage: value.items && value.items.length > 0 ? populateTopPage(value.items) : []
+  }));
+};
+
+const populateTopPage = (data: NavigationDto[]): TopPage[] => {
+  return data.map((value) => ({
+    navigationId: value.id,
+    statusId: value.statusId,
+    statusName: value.statusName,
+    topTitle: value.title + addSubTitle(value.subTitle),
+    disabled: value.disabled,
+    topRoute: value.url,
+    subPages: value.items && value.items.length > 0 ? populateSubPages(value.items) : []
+  }));
+};
+
+const populateSubPages = (data: NavigationDto[]): SubPages[] => {
+  return data.map((value) => ({
+    navigationId: value.id,
+    statusId: value.statusId,
+    statusName: value.statusName,
+    subTitle: value.title + addSubTitle(value.subTitle),
+    disabled: value.disabled,
+    subRoute: value.url
+  }));
+};
 
 export default MenuData;

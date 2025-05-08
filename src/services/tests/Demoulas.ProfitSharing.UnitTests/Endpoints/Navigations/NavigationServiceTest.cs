@@ -11,7 +11,7 @@ namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Navigations;
 public class NavigationServiceTests : ApiTestBase<Program>
 {
     private readonly INavigationService _navigationService;
-    private readonly List<Navigation> navigationListObj;
+    private readonly List<Navigation> _navigationListObj;
     private readonly List<NavigationStatusDto> navigationStatusList;
 
     public NavigationServiceTests()
