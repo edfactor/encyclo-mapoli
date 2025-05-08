@@ -145,10 +145,6 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
             {
                 query[nameof(DistributionsAndForfeituresRequest.EndMonth)] = dafr.EndMonth.ToString();
             }
-            if (dafr.IncludeOutgoingForfeitures.HasValue)
-            {
-                query[nameof(DistributionsAndForfeituresRequest.IncludeOutgoingForfeitures)] = dafr.IncludeOutgoingForfeitures.ToString();
-            }
         }
 
         var uriBuilder = new UriBuilder($"{_httpClient.BaseAddress}{BaseApiPath}/{endpointRoute}/")

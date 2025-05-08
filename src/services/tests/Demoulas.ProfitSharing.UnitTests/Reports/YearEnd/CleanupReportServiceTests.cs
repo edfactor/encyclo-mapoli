@@ -467,7 +467,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         decimal sampleforfeiture = 5150m;
 
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-        var req = new DistributionsAndForfeituresRequest() { Skip = 0, Take = byte.MaxValue, ProfitYear = (short)(DateTime.Now.Year - 1), IncludeOutgoingForfeitures = true };
+        var req = new DistributionsAndForfeituresRequest() { Skip = 0, Take = byte.MaxValue, ProfitYear = (short)(DateTime.Now.Year - 1) };
         TestResult<DistributionsAndForfeitureTotalsResponse> response;
 
 
