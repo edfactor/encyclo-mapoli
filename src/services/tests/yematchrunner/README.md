@@ -1,5 +1,3 @@
-
-
 This is code for running the YE Match testing.
 
 See this page for a description of that effort;
@@ -21,12 +19,12 @@ The READY program output is piled up there.
 
 ## Configuration on READY
 
-setup the "setyematch" script.  Sets credentials for READY to use.
-
+setup the "setyematch" script. Sets credentials for READY to use.
 
 # Running
 
-1. Run your local smart-profit-sharing application to use the test credentials, the launch configuration "API YE Match (Test Certs)".
+1. Run your local smart-profit-sharing application to use the test credentials, the launch configuration "API YE Match (
+   Test Certs)".
 
 2. Run the Program.cs
 

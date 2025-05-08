@@ -25,9 +25,9 @@ public class SmartActivity : Activity
     public override async Task<Outcome> execute()
     {
         Console.WriteLine($"{prefix}{ActivityLetterNumber} {Command}  - start at: {DateTime.Now}");
-        var stopwatch = new Stopwatch();
+        Stopwatch stopwatch = new();
         stopwatch.Start();
-        var outcome = await _func(_client, ActivityLetterNumber, Command);
+        Outcome outcome = await _func(_client, ActivityLetterNumber, Command);
         stopwatch.Stop();
         if (outcome.took == null && outcome.Status == OutcomeStatus.Ok)
         {

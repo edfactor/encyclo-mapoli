@@ -12,16 +12,16 @@ public static class TestToken
     public static void CreateAndAssignTokenForClient(HttpClient client, params string[] roles)
     {
         // Use test certs.  
-        var securityKey = new SymmetricSecurityKey("abcdefghijklmnopqrstuvwxyz123456"u8.ToArray());
-        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-        var claims = new List<Claim> { new(ClaimTypes.Name, "Unit Test User"), new(ClaimTypes.Email, "testuser@demoulasmarketbasket.com") };
+        SymmetricSecurityKey securityKey = new("abcdefghijklmnopqrstuvwxyz123456"u8.ToArray());
+        SigningCredentials credentials = new(securityKey, SecurityAlgorithms.HmacSha256);
+        List<Claim> claims = new() { new Claim(ClaimTypes.Name, "Unit Test User"), new Claim(ClaimTypes.Email, "testuser@demoulasmarketbasket.com") };
 
-        foreach (var role in roles)
+        foreach (string role in roles)
         {
             claims.Add(new Claim("groups", $"SMART-PS-QA-{role}"));
         }
 
-        var token = new JwtSecurityToken(
+        JwtSecurityToken token = new(
             "Unit Test Issuer",
             "Unit Test Audience",
             claims,
@@ -29,8 +29,8 @@ public static class TestToken
             signingCredentials: credentials
         );
 
-        var handler = new JwtSecurityTokenHandler();
-        var accessToken = handler.WriteToken(token);
+        JwtSecurityTokenHandler handler = new();
+        string? accessToken = handler.WriteToken(token);
 
         client.DefaultRequestHeaders.Add("Impersonation", "Finance-Manager");
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
