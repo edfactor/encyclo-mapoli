@@ -17,8 +17,7 @@ import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 interface DistributionsAndForfeituresSearch {
   profitYear: number;
   startMonth?: number | null | undefined;
-  endMonth?: number | null | undefined;
-  includeOutgoingForfeitures: boolean;
+  endMonth?: number | null | undefined;  
 }
 
 const schema = yup.object().shape({
@@ -42,8 +41,7 @@ const schema = yup.object().shape({
     .integer("End Month must be an integer")
     .min(1, "End Month must be 1 or higher")
     .max(12, "End Month must be 12 or lower")
-    .nullable(),
-  includeOutgoingForfeitures: yup.boolean().default(false).required()
+    .nullable()
 });
 
 interface DistributionsAndForfeituresSearchFilterProps {
@@ -70,8 +68,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
     defaultValues: {
       profitYear: profitYear || distributionsAndForfeituresQueryParams?.profitYear || undefined,
       startMonth: distributionsAndForfeituresQueryParams?.startMonth || 1,
-      endMonth: distributionsAndForfeituresQueryParams?.endMonth || 12,
-      includeOutgoingForfeitures: distributionsAndForfeituresQueryParams?.includeOutgoingForfeitures || false
+      endMonth: distributionsAndForfeituresQueryParams?.endMonth || 12
     }
   });
 
@@ -82,7 +79,6 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
           profitYear: data.profitYear,
           ...(data.startMonth && { startMonth: data.startMonth }),
           ...(data.endMonth && { endMonth: data.endMonth }),
-          includeOutgoingForfeitures: data.includeOutgoingForfeitures ?? false,
           pagination: { skip: 0, take: 25, sortBy: "employeeName, date", isSortDescending: false }
         },
         false
@@ -91,8 +87,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
         setDistributionsAndForfeituresQueryParams({
           profitYear: data.profitYear,
           startMonth: data.startMonth,
-          endMonth: data.endMonth || undefined,
-          includeOutgoingForfeitures: data.includeOutgoingForfeitures
+          endMonth: data.endMonth || undefined
         })
       );
     }
@@ -105,8 +100,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
     reset({
       profitYear: profitYear || undefined,
       startMonth: 1,  
-      endMonth: 12,
-      includeOutgoingForfeitures: false
+      endMonth: 12
     });
 
     // Clear the data in Redux store
@@ -190,25 +184,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
             )}
           />
           {errors.endMonth && <FormHelperText error>{errors.endMonth.message}</FormHelperText>}
-        </Grid2>
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-          <FormLabel>Include Outgoing Forfeitures</FormLabel>
-          <Controller
-            name="includeOutgoingForfeitures"
-            control={control}
-            render={({ field }) => (
-              <Checkbox
-                checked={field.value}
-                onChange={(e) => {
-                  field.onChange(e.target.checked);
-                }}
-              />
-            )}
-          />
-          {errors.includeOutgoingForfeitures && (
-            <FormHelperText error>{errors.includeOutgoingForfeitures.message}</FormHelperText>
-          )}
-        </Grid2>
+        </Grid2>       
       </Grid2>
       <Grid2
         width="100%"

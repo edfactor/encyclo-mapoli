@@ -55,7 +55,6 @@ export interface PagedReportResponse<T> {
 export interface DistributionsAndForfeituresRequestDto extends ProfitYearRequest {
   startMonth?: number;
   endMonth?: number;
-  includeOutgoingForfeitures?: boolean;
   pagination: SortedPaginationRequestDto;
 }
 
@@ -285,13 +284,8 @@ export interface ExecutiveHoursAndDollarsQueryParams extends ProfitYearRequest {
 export interface DistributionsAndForfeituresQueryParams extends ProfitYearRequest {
   startMonth?: number;
   endMonth?: number;
-  includeOutgoingForfeitures?: boolean;
 }
 
-export interface BaseDateRangeParams {
-  startDate: Date;
-  endDate: Date;
-}
 
 export interface MasterInquirySearch {
   endProfitYear?: number | null;
