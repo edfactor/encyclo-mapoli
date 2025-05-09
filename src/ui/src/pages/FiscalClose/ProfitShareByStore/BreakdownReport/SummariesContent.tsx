@@ -105,54 +105,6 @@ const SummariesContent: React.FC<SummariesContentProps> = ({ store }) => {
     }
   ];
 
-  const under21EmployeesColumnDefs = [
-    {
-      headerName: "Category",
-      field: "category",
-      width: 150
-    },
-    {
-      headerName: "STE 1-140",
-      field: "ste1",
-      width: 100
-    },
-    {
-      headerName: "700",
-      field: "700",
-      width: 70
-    },
-    {
-      headerName: "701",
-      field: "701",
-      width: 70
-    },
-    {
-      headerName: "800",
-      field: "800",
-      width: 70
-    },
-    {
-      headerName: "801",
-      field: "801",
-      width: 70
-    },
-    {
-      headerName: "802",
-      field: "802",
-      width: 70
-    },
-    {
-      headerName: "900",
-      field: "900",
-      width: 70
-    },
-    {
-      headerName: "Total",
-      field: "total",
-      width: 70
-    }
-  ];
-
   const gridOptions = {
     getRowStyle: (params: any) => {
       if (params.node.rowPinned) {

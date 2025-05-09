@@ -17,7 +17,7 @@ import {
   setAdditionalExecutivesGrid,
   setBalanceByAge,
   setBalanceByYears,
-  setBreakdownByStore, setBreakdownByStoreTotals,
+  setBreakdownByStore, setBreakdownByStoreMangement, setBreakdownByStoreTotals,
   setContributionsByAge,
   setControlSheet,
   setDemographicBadgesNotInPayprofitData,

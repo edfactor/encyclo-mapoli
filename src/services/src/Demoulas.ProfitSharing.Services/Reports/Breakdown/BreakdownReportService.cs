@@ -9,7 +9,7 @@ using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+
 
 namespace Demoulas.ProfitSharing.Services.Reports.Breakdown;
 
@@ -48,6 +48,7 @@ public sealed class BreakdownReportService : IBreakdownService
         public decimal? CurrentBalance { get; set; }
         public decimal? VestedBalance { get; set; }
         public decimal? EtvaBalance { get; set; }
+        public decimal? VestedPercent { get; set; }
     }
 
     private sealed record EmployeeFinancialSnapshot(
@@ -56,55 +57,101 @@ public sealed class BreakdownReportService : IBreakdownService
         InternalProfitDetailDto Txn,
         decimal VestingRatio);
 
+    private sealed record CombinedTotals(
+        short StoreNumber,
+        decimal VestingRatio,
+        decimal EndBalance);
+
     #endregion
 
-    public Task<BreakdownByStoreTotals> GetGrandTotals(
-       YearRequest request,
-       CancellationToken cancellationToken)
+    public Task<GrandTotalsByStoreResponseDto> GetGrandTotals(
+     YearRequest request,
+     CancellationToken cancellationToken)
     {
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            // ── Query ------------------------------------------------------------------
-            var employeesBase = BuildEmployeesBaseQuery(ctx, request.ProfitYear);
-            var employeeSsns = await employeesBase.Select(e => e.Ssn).ToHashSetAsync(cancellationToken);
+            // 1️⃣ Fetch each member’s SSN & StoreNumber
+            var memberStores = await BuildEmployeesBaseQuery(ctx, request.ProfitYear)
+                .Select(m => new { m.Ssn, m.StoreNumber })
+                .ToListAsync(cancellationToken);
 
-            ThrowIfInvalidSsns(employeeSsns);
+            var ssns = memberStores.Select(x => x.Ssn).ToHashSet();
+            ThrowIfInvalidSsns(ssns);
 
+            // 2️⃣ Pull all the financial snapshot data
             var snapshots = await GetEmployeeFinancialSnapshotsAsync(
-                ctx, request.ProfitYear, employeeSsns, cancellationToken);
+                ctx, request.ProfitYear, ssns, cancellationToken);
 
-            // ── Aggregate --------------------------------------------------------------
-            var totals = new BreakdownByStoreTotals
+            // 3️⃣ Join store + vest info + compute end balance
+            var combined = memberStores
+                .Join(
+                    snapshots,
+                    m => m.Ssn,
+                    s => s.Ssn,
+                    (m, s) => new CombinedTotals(
+                        m.StoreNumber,
+                        VestingRatio: s.VestingRatio,
+                        EndBalance: s.BeginningBalance
+                                     + s.Txn.TotalEarnings
+                                     + s.Txn.TotalContributions
+                                     + s.Txn.TotalForfeitures
+                                     + s.Txn.Distribution
+                                     + s.Txn.BeneficiaryAllocation))
+                .ToList(); // bring into memory once
+
+            // 4️⃣ Define stores & categories
+            HashSet<int> storeKeys = [700, 701, 800, 801, 802, 900];
+            var categories = new[]
             {
-                TotalNumberEmployees = (short)snapshots.Count,
-                TotalBeginningBalances = snapshots.Sum(x => x.BeginningBalance),
-                TotalEarnings = snapshots.Sum(x => x.Txn.TotalEarnings),
-                TotalContributions = snapshots.Sum(x => x.Txn.TotalContributions),
-                TotalForfeitures = snapshots.Sum(x => x.Txn.TotalForfeitures),
-                TotalDisbursements = snapshots.Sum(x => x.Txn.Distribution)
-            };
+            ("Grand Total",         (Func<CombinedTotals,bool>)(x => true)),
+            ("100% Vested",         x => x.VestingRatio == 1m),
+            ("Partially Vested",    x => x.VestingRatio is > 0m and < 1m),
+            ("Not vested",          x => x.VestingRatio == 0m)
+        };
 
-            totals.TotalEndBalances = totals.TotalBeginningBalances
-                                     + totals.TotalEarnings
-                                     + totals.TotalContributions
-                                     + totals.TotalForfeitures
-                                     + totals.TotalDisbursements
-                                     + snapshots.Sum(x => x.Txn.BeneficiaryAllocation);
+            var rows = new List<GrandTotalsByStoreRowDto>();
 
-            totals.TotalVestedBalance = snapshots.Sum(x =>
+            // 5️⃣ Build each row
+            foreach (var (label, predicate) in categories)
             {
-                var endBal = x.BeginningBalance
-                           + x.Txn.TotalContributions
-                           + x.Txn.TotalEarnings
-                           + x.Txn.TotalForfeitures
-                           + x.Txn.Distribution
-                           + x.Txn.BeneficiaryAllocation;
-                return endBal * x.VestingRatio;
-            });
+                var subset = combined.Where(predicate);
 
-            return totals;
+                decimal SumFor(short store) =>
+                    subset.Where(x => x.StoreNumber == store).Sum(x => x.EndBalance);
+
+                var row = new GrandTotalsByStoreRowDto
+                {
+                    Category = label,
+                    Store700 = SumFor(700),
+                    Store701 = SumFor(701),
+                    Store800 = SumFor(800),
+                    Store801 = SumFor(801),
+                    Store802 = SumFor(802),
+                    Store900 = SumFor(900),
+                    StoreOther = subset
+                                    .Where(x => !storeKeys.Contains(x.StoreNumber))
+                                    .Sum(x => x.EndBalance)
+                };
+
+                // compute the total across all columns
+                row = row with
+                {
+                    RowTotal = row.Store700
+                             + row.Store701
+                             + row.Store800
+                             + row.Store801
+                             + row.Store802
+                             + row.Store900
+                             + row.StoreOther
+                };
+
+                rows.Add(row);
+            }
+
+            return new GrandTotalsByStoreResponseDto { Rows = rows };
         });
     }
+
 
     public Task<BreakdownByStoreTotals> GetTotalsByStore(
         BreakdownByStoreRequest request,
@@ -333,6 +380,7 @@ public sealed class BreakdownReportService : IBreakdownService
                 PayClassificationName = d.PayClassification!.Name,
                 CurrentBalance = bal == null ? 0 : bal.CurrentBalance,
                 VestedBalance = bal == null ? 0 : bal.VestedBalance,
+                VestedPercent = bal == null ? 0 : bal.VestingPercent,
                 EtvaBalance = etva == null ? 0 : etva.Total
             };
 
