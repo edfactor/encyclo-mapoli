@@ -4,5 +4,5 @@ public sealed record ProfitShareUpdateResponse : ReportResponseBase<ProfitShareU
 {
     public required bool HasExceededMaximumContributions { get; set; }
     public required AdjustmentsSummaryDto AdjustmentsSummary { get; set; }
-    public required TotalsDto Totals { get; set; }
+    public required ProfitShareUpdateTotals ProfitShareUpdateTotals { get; set; }
 }

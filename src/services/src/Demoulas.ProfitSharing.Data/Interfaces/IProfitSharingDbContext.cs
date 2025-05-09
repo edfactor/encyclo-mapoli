@@ -26,5 +26,7 @@ public interface IProfitSharingDbContext
     DbSet<ParticipantTotalRatio> ParticipantTotalRatios { get; set; }
     DbSet<ParticipantTotalYear> ParticipantTotalYears { get; set; }
     DbSet<ParticipantTotalVestingBalance> ParticipantTotalVestingBalances { get; set; }
+
+    DbSet<ProfitShareTotals> ProfitShareTotals { get; set; }
     DatabaseFacade Database { get; }
 }

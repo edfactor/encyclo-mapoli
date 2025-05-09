@@ -7,11 +7,11 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
 
-namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
-internal sealed class ParticipantTotalRatioMap : IEntityTypeConfiguration<ParticipantTotalRatio>
+namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping.VirtualTables;
+internal sealed class ParticipantTotalVestingBalanceMap : IEntityTypeConfiguration<ParticipantTotalVestingBalance>
 {
     //This table is virtual in nature.  It uses the FromSql method to access data.
-    public void Configure(EntityTypeBuilder<ParticipantTotalRatio> builder)
+    public void Configure(EntityTypeBuilder<ParticipantTotalVestingBalance> builder)
     {
         builder.Metadata.SetIsTableExcludedFromMigrations(true);
 
@@ -20,7 +20,14 @@ internal sealed class ParticipantTotalRatioMap : IEntityTypeConfiguration<Partic
             .HasColumnName("SSN")
             .IsRequired();
 
-        builder.Property(x => x.Ratio)
+        builder.Property(x => x.VestedBalance)
+            .HasColumnName("VESTEDBALANCE");
+        builder.Property(x => x.CurrentBalance)
+            .HasColumnName("CURRENTBALANCE");
+        builder.Property(x => x.VestingPercent)
             .HasColumnName("RATIO");
+
+        builder.Property(x => x.YearsInPlan)
+            .HasColumnName("YEARS");
     }
 }

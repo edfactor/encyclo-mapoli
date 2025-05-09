@@ -33,7 +33,7 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
 
     public async Task<ProfitShareUpdateResponse> ProfitShareUpdate(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
-        (List<MemberFinancials> memberFinancials, AdjustmentsSummaryDto adjustmentReportData, TotalsDto totalsDto, bool employeeExceededMaxContribution) =
+        (List<MemberFinancials> memberFinancials, AdjustmentsSummaryDto adjustmentReportData, ProfitShareUpdateTotals totalsDto, bool employeeExceededMaxContribution) =
             await ProfitSharingUpdate(profitShareUpdateRequest, cancellationToken);
 
         List<ProfitShareUpdateMemberResponse> members = memberFinancials.Select(m => new ProfitShareUpdateMemberResponse
@@ -64,7 +64,7 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
         {
             HasExceededMaximumContributions = employeeExceededMaxContribution,
             AdjustmentsSummary = adjustmentReportData,
-            Totals = totalsDto,
+            ProfitShareUpdateTotals = totalsDto,
             ReportName = "Profit Sharing Update",
             ReportDate = DateTimeOffset.Now,
             Response = new PaginatedResponseDto<ProfitShareUpdateMemberResponse>(profitShareUpdateRequest)
@@ -126,36 +126,36 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
 
         members = members.OrderBy(m => m.Name).ToList();
 
-        TotalsDto totalsDto = new();
+        ProfitShareUpdateTotals profitShareUpdateTotals = new();
         foreach (MemberFinancials memberFinancials in members)
         {
-            totalsDto.BeginningBalance += memberFinancials.CurrentAmount;
-            totalsDto.Distributions += memberFinancials.Distributions;
-            totalsDto.TotalContribution += memberFinancials.Contributions;
-            totalsDto.Military += memberFinancials.Military;
-            totalsDto.Forfeiture += memberFinancials.IncomingForfeitures;
-            totalsDto.Earnings += memberFinancials.AllEarnings;
-            totalsDto.Earnings2 += memberFinancials.AllSecondaryEarnings;
-            totalsDto.EndingBalance += memberFinancials.EndingBalance;
-            totalsDto.Allocations += memberFinancials.Xfer;
-            totalsDto.PaidAllocations -= memberFinancials.Pxfer;
-            totalsDto.EarningPoints += memberFinancials.EarningPoints;
-            totalsDto.ContributionPoints += memberFinancials.ContributionPoints;
-            totalsDto.ClassActionFund += memberFinancials.Caf;
-            totalsDto.MaxOverTotal += memberFinancials.MaxOver;
-            totalsDto.MaxPointsTotal += memberFinancials.MaxPoints;
+            profitShareUpdateTotals.BeginningBalance += memberFinancials.CurrentAmount;
+            profitShareUpdateTotals.Distributions += memberFinancials.Distributions;
+            profitShareUpdateTotals.TotalContribution += memberFinancials.Contributions;
+            profitShareUpdateTotals.Military += memberFinancials.Military;
+            profitShareUpdateTotals.Forfeiture += memberFinancials.IncomingForfeitures;
+            profitShareUpdateTotals.Earnings += memberFinancials.AllEarnings;
+            profitShareUpdateTotals.Earnings2 += memberFinancials.AllSecondaryEarnings;
+            profitShareUpdateTotals.EndingBalance += memberFinancials.EndingBalance;
+            profitShareUpdateTotals.Allocations += memberFinancials.Xfer;
+            profitShareUpdateTotals.PaidAllocations -= memberFinancials.Pxfer;
+            profitShareUpdateTotals.EarningPoints += memberFinancials.EarningPoints;
+            profitShareUpdateTotals.ContributionPoints += memberFinancials.ContributionPoints;
+            profitShareUpdateTotals.ClassActionFund += memberFinancials.Caf;
+            profitShareUpdateTotals.MaxOverTotal += memberFinancials.MaxOver;
+            profitShareUpdateTotals.MaxPointsTotal += memberFinancials.MaxPoints;
             // members can be both employees and beneficiaries, but I presume that the employee count is the one that matters.
             if (memberFinancials.IsEmployee)
             {
-                totalsDto.TotalEmployees++;
+                profitShareUpdateTotals.TotalEmployees++;
             }
             else
             {
-                totalsDto.TotalBeneficaries++;
+                profitShareUpdateTotals.TotalBeneficaries++;
             }
         }
 
         // Use the list of members to build up response for client.
-        return new ProfitShareUpdateOutcome(members, adjustmentsSummaryData, totalsDto, employeeExceededMaxContribution);
+        return new ProfitShareUpdateOutcome(members, adjustmentsSummaryData, profitShareUpdateTotals, employeeExceededMaxContribution);
     }
 }
