@@ -1150,7 +1150,8 @@ export interface NavigationDto {
   title: string;
   subTitle: string;
   url: string;
-  StatusId: string;
+  statusId?: number;
+  statusName?: string;
   orderNumber: number;
   icon: string;
   requiredRoles: string[];
@@ -1207,3 +1208,31 @@ export interface ControlSheetResponse {
   employeeBeneficiaryAmount: number;
   profitSharingAmount: number;
 }
+
+export interface NavigationStatusDto {
+  id: number;
+  name?: string;
+}
+
+export interface GetNavigationStatusRequestDto {
+  id?: number;
+}
+
+export interface GetNavigationStatusResponseDto {
+  navigationStatusList?: NavigationStatusDto[]
+}
+
+export interface UpdateNavigationRequestDto {
+ navigationId?: number;
+ statusId?: number; 
+}
+
+export interface UpdateNavigationResponseDto {
+  isSuccessful?: boolean;
+ }
+
+ export interface CurrentNavigation {
+  navigationId?: number; 
+  statusId? : number;
+  statusName?: string;
+ }

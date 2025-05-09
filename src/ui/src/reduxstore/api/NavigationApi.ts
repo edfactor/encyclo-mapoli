@@ -37,7 +37,7 @@ export const NavigationApi = createApi({
   endpoints: (builder) => ({
     getNavigation: builder.query<NavigationResponseDto, NavigationRequestDto>({
       query: (request) => ({
-        url: `list`,
+        url: ``,
         method: "GET"
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
