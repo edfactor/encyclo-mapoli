@@ -1,4 +1,4 @@
-import { MenuItem, Select, TextField, FormLabel, Checkbox, FormControlLabel } from "@mui/material";
+import { MenuItem, Select, TextField, FormLabel } from "@mui/material";
 import Grid2 from '@mui/material/Grid2';
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
@@ -10,7 +10,7 @@ import { setBreakdownByStoreQueryParams } from "reduxstore/slices/yearsEndSlice"
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
 
 interface BreakdownSearchParams {
-    store?: string;
+    store?: number;
     employeeStatus?: string;
     badgeId?: string;
     employeeName?: string;
@@ -20,12 +20,12 @@ interface BreakdownSearchParams {
 }
 
 interface OptionItem {
-    id: string;
+    id: number;
     label: string;
 }
 
 const schema = yup.object().shape({
-    store: yup.string(),
+    store: yup.number(),
     employeeStatus: yup.string(),
     badgeId: yup.string(),
     employeeName: yup.string(),
@@ -36,7 +36,7 @@ const schema = yup.object().shape({
 
 interface QPAY066TABreakdownParametersProps {
     activeTab: 'all' | 'stores' | 'summaries' | 'totals';
-    onStoreChange?: (store: string) => void;
+    onStoreChange?: (store: number) => void;
 }
 
 const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> = ({
@@ -47,12 +47,12 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
   const profitYear = useDecemberFlowProfitYear();
   
     const [employeeStatuses] = useState<OptionItem[]>([
-        { id: '700', label: '700 - Retired - Drawing Pension' },
-        { id: '701', label: '701 - Active - Drawing Pension' },
-        { id: '800', label: '800 - Terminated' },
-        { id: '801', label: '801 - Terminated w/ Zero Balance' },
-        { id: '802', label: '802 - Terminated w/ Balance but No Vesting' },
-        { id: '900', label: '900 - Monthly Payroll' }
+        { id: 700, label: '700 - Retired - Drawing Pension' },
+        { id: 701, label: '701 - Active - Drawing Pension' },
+        { id: 800, label: '800 - Terminated' },
+        { id: 801, label: '801 - Terminated w/ Zero Balance' },
+        { id: 802, label: '802 - Terminated w/ Balance but No Vesting' },
+        { id: 900, label: '900 - Monthly Payroll' }
     ]);
 
     const {
@@ -65,7 +65,7 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
     } = useForm<BreakdownSearchParams>({
         resolver: yupResolver(schema),
         defaultValues: {
-            store: '700',
+            store: 700,
             employeeStatus: '',
             badgeId: '',
             employeeName: '',
@@ -94,13 +94,12 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
             if (onStoreChange && data.store) {
                 onStoreChange(data.store);
             }
-            
+
             dispatch(setBreakdownByStoreQueryParams({
                 profitYear: profitYear,
                 storeNumber: data.store,
-                under21Only: data.under21Only,
                 pagination: {
-                    take: 255,
+                    take: 25,
                     skip: 0,
                     sortBy: data.sortBy,
                     isSortDescending: data.isSortDescending,
@@ -111,7 +110,7 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
 
     const handleReset = () => {
         reset({
-            store: '700',
+            store: 700,
             employeeStatus: '',
             badgeId: '',
             employeeName: '',
@@ -153,7 +152,7 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
                                     onChange={(e) => {
                                         field.onChange(e);
                                         if (onStoreChange) {
-                                            onStoreChange(e.target.value);
+                                            onStoreChange(Number(e.target.value));
                                         }
                                     }}
                                 />

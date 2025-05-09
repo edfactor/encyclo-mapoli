@@ -44,13 +44,13 @@ const QPAY066TA = () => {
             spacing={4}>
             <StoreContent store={store} />
             <TotalsContent store={store} />
-            <SummariesContent store={store} />
+            <SummariesContent />
           </Grid2>
         );
       case 1:
         return <StoreContent store={store} />;
       case 2:
-        return <SummariesContent store={store} />;
+        return <SummariesContent />;
       case 3:
         return <TotalsContent store={store} />;
       default:

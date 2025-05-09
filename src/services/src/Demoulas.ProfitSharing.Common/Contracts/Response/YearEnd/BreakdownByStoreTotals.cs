@@ -15,4 +15,3 @@ public record BreakdownByStoreTotals
 
     public decimal TotalVestedBalance { get; set; }
 }
-

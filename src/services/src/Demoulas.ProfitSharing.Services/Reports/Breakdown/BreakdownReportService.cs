@@ -10,6 +10,7 @@ using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 
+
 namespace Demoulas.ProfitSharing.Services.Reports.Breakdown;
 
 public sealed class BreakdownReportService : IBreakdownService
@@ -47,6 +48,7 @@ public sealed class BreakdownReportService : IBreakdownService
         public decimal? CurrentBalance { get; set; }
         public decimal? VestedBalance { get; set; }
         public decimal? EtvaBalance { get; set; }
+        public decimal? VestedPercent { get; set; }
     }
 
     private sealed record EmployeeFinancialSnapshot(
@@ -55,7 +57,97 @@ public sealed class BreakdownReportService : IBreakdownService
         InternalProfitDetailDto Txn,
         decimal VestingRatio);
 
+    private sealed record CombinedTotals(
+        short StoreNumber,
+        decimal VestingRatio,
+        decimal EndBalance);
+
     #endregion
+
+    public Task<GrandTotalsByStoreResponseDto> GetGrandTotals(
+     YearRequest request,
+     CancellationToken cancellationToken)
+    {
+        return _dataContextFactory.UseReadOnlyContext(async ctx =>
+        {
+            var memberStores = await BuildEmployeesBaseQuery(ctx, request.ProfitYear)
+                .Select(m => new { m.Ssn, m.StoreNumber })
+                .ToListAsync(cancellationToken);
+
+            var ssns = memberStores.Select(x => x.Ssn).ToHashSet();
+            ThrowIfInvalidSsns(ssns);
+
+            var snapshots = await GetEmployeeFinancialSnapshotsAsync(
+                ctx, request.ProfitYear, ssns, cancellationToken);
+
+            
+            var combined = memberStores
+                .Join(
+                    snapshots,
+                    m => m.Ssn,
+                    s => s.Ssn,
+                    (m, s) => new CombinedTotals(
+                        m.StoreNumber,
+                        VestingRatio: s.VestingRatio,
+                        EndBalance: s.BeginningBalance
+                                     + s.Txn.TotalEarnings
+                                     + s.Txn.TotalContributions
+                                     + s.Txn.TotalForfeitures
+                                     + s.Txn.Distribution
+                                     + s.Txn.BeneficiaryAllocation))
+                .ToList(); // bring into memory once
+
+            HashSet<int> storeKeys = [700, 701, 800, 801, 802, 900];
+            var categories = new[]
+            {
+            ("Grand Total",         (Func<CombinedTotals,bool>)(x => true)),
+            ("100% Vested",         x => x.VestingRatio == 1m),
+            ("Partially Vested",    x => x.VestingRatio is > 0m and < 1m),
+            ("Not Vested",          x => x.VestingRatio == 0m)
+        };
+
+            var rows = new List<GrandTotalsByStoreRowDto>();
+
+            foreach (var (label, predicate) in categories)
+            {
+                var subset = combined.Where(predicate);
+
+                decimal SumFor(short store) =>
+                    subset.Where(x => x.StoreNumber == store).Sum(x => x.EndBalance);
+
+                var row = new GrandTotalsByStoreRowDto
+                {
+                    Category = label,
+                    Store700 = SumFor(700),
+                    Store701 = SumFor(701),
+                    Store800 = SumFor(800),
+                    Store801 = SumFor(801),
+                    Store802 = SumFor(802),
+                    Store900 = SumFor(900),
+                    StoreOther = subset
+                                    .Where(x => !storeKeys.Contains(x.StoreNumber))
+                                    .Sum(x => x.EndBalance)
+                };
+
+                // compute the total across all columns
+                row = row with
+                {
+                    RowTotal = row.Store700
+                             + row.Store701
+                             + row.Store800
+                             + row.Store801
+                             + row.Store802
+                             + row.Store900
+                             + row.StoreOther
+                };
+
+                rows.Add(row);
+            }
+
+            return new GrandTotalsByStoreResponseDto { Rows = rows };
+        });
+    }
+
 
     public Task<BreakdownByStoreTotals> GetTotalsByStore(
         BreakdownByStoreRequest request,
@@ -66,7 +158,8 @@ public sealed class BreakdownReportService : IBreakdownService
             ValidateStoreNumber(request);
 
             // ── Query ------------------------------------------------------------------
-            var employeesBase = BuildEmployeesBaseQuery(ctx, request);
+            var employeesBase = BuildEmployeesBaseQuery(ctx, request.ProfitYear);
+            employeesBase = employeesBase.Where(q => q.StoreNumber == request.StoreNumber);
             var employeeSsns = await employeesBase.Select(e => e.Ssn).ToHashSetAsync(cancellationToken);
 
             ThrowIfInvalidSsns(employeeSsns);
@@ -115,7 +208,8 @@ public sealed class BreakdownReportService : IBreakdownService
         {
             ValidateStoreNumber(request);
 
-            var employeesBase = BuildEmployeesBaseQuery(ctx, request);
+            var employeesBase = BuildEmployeesBaseQuery(ctx, request.ProfitYear);
+            employeesBase = employeesBase.Where(q => q.StoreNumber == request.StoreNumber);
 
             // Store‑level + management filter
             employeesBase = request.StoreManagement ? ApplyStoreManagementFilter(employeesBase)
@@ -175,16 +269,15 @@ public sealed class BreakdownReportService : IBreakdownService
     /// – Returns the sequence already filtered to the store requested by the UI
     /// </summary>
     private IQueryable<ActiveMemberDto> BuildEmployeesBaseQuery(
-        IProfitSharingDbContext ctx,
-        BreakdownByStoreRequest request)
+        IProfitSharingDbContext ctx, short profitYear)
     {
         /*──────────────────────────── 1️⃣  inline sub-queries – still IQueryable */
         var balances =
             _totalService.TotalVestingBalance(
-                ctx, request.ProfitYear, DateTime.UtcNow.ToDateOnly());
+                ctx, profitYear, DateTime.UtcNow.ToDateOnly());
 
         var etvaBalances =
-            _totalService.GetTotalComputedEtva(ctx, request.ProfitYear);
+            _totalService.GetTotalComputedEtva(ctx, profitYear);
 
         /* hard-coded list from COBOL
            https://demoulas.atlassian.net/wiki/spaces/NGDS/pages/305004545/QPAY066TA.pco
@@ -283,10 +376,9 @@ public sealed class BreakdownReportService : IBreakdownService
                 PayClassificationName = d.PayClassification!.Name,
                 CurrentBalance = bal == null ? 0 : bal.CurrentBalance,
                 VestedBalance = bal == null ? 0 : bal.VestedBalance,
+                VestedPercent = bal == null ? 0 : bal.VestingPercent,
                 EtvaBalance = etva == null ? 0 : etva.Total
             };
-
-        query = query.Where(q => q.StoreNumber == request.StoreNumber);
 
         return query;
     }
