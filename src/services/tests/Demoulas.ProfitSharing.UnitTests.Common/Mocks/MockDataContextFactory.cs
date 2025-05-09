@@ -103,6 +103,10 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         List<ParticipantTotalVestingBalance> participantTotalVestingBalances = new ParticipantTotalVestingBalanceFaker(demographics, beneficiaries).Generate(demographics.Count + beneficiaries.Count);
         Constants.FakeParticipantTotalVestingBalances = [.. participantTotalVestingBalances];
 
+        List<ParticipantTotal> etvaBalances = new ParticipantEtvaTotalFaker(profitDetails).Generate(profitDetails.Count);
+        Constants.FakeEtvaTotals = [.. etvaBalances];
+        
+
         List<FrozenState>? frozenStates = new FrozenStateFaker().Generate(1);
 
         Mock<DbSet<Beneficiary>> mockBeneficiaries = beneficiaries.AsQueryable().BuildMockDbSet();
