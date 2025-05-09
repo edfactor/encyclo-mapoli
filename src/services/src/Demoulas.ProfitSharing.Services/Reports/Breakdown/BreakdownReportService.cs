@@ -70,7 +70,6 @@ public sealed class BreakdownReportService : IBreakdownService
     {
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            // 1️⃣ Fetch each member’s SSN & StoreNumber
             var memberStores = await BuildEmployeesBaseQuery(ctx, request.ProfitYear)
                 .Select(m => new { m.Ssn, m.StoreNumber })
                 .ToListAsync(cancellationToken);
@@ -78,11 +77,10 @@ public sealed class BreakdownReportService : IBreakdownService
             var ssns = memberStores.Select(x => x.Ssn).ToHashSet();
             ThrowIfInvalidSsns(ssns);
 
-            // 2️⃣ Pull all the financial snapshot data
             var snapshots = await GetEmployeeFinancialSnapshotsAsync(
                 ctx, request.ProfitYear, ssns, cancellationToken);
 
-            // 3️⃣ Join store + vest info + compute end balance
+            
             var combined = memberStores
                 .Join(
                     snapshots,
@@ -99,7 +97,6 @@ public sealed class BreakdownReportService : IBreakdownService
                                      + s.Txn.BeneficiaryAllocation))
                 .ToList(); // bring into memory once
 
-            // 4️⃣ Define stores & categories
             HashSet<int> storeKeys = [700, 701, 800, 801, 802, 900];
             var categories = new[]
             {
@@ -111,7 +108,6 @@ public sealed class BreakdownReportService : IBreakdownService
 
             var rows = new List<GrandTotalsByStoreRowDto>();
 
-            // 5️⃣ Build each row
             foreach (var (label, predicate) in categories)
             {
                 var subset = combined.Where(predicate);

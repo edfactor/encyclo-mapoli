@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 import {
   addBadgeNumberToUpdateAdjustmentSummary,
-  clearBreakdownByStore, clearBreakdownByStoreTotals,
+  clearBreakdownByStore, clearBreakdownByStoreTotals, clearBreakdownGrandTotals,
   clearControlSheet,
   clearProfitMasterApply,
   clearProfitMasterRevert,
@@ -17,7 +17,7 @@ import {
   setAdditionalExecutivesGrid,
   setBalanceByAge,
   setBalanceByYears,
-  setBreakdownByStore, setBreakdownByStoreMangement, setBreakdownByStoreTotals,
+  setBreakdownByStore, setBreakdownByStoreMangement, setBreakdownByStoreTotals, setBreakdownGrandTotals,
   setContributionsByAge,
   setControlSheet,
   setDemographicBadgesNotInPayprofitData,
@@ -118,7 +118,7 @@ import {
   ForfeitureAdjustmentRequest,
   ForfeitureAdjustmentResponse,
   ForfeitureAdjustmentUpdateRequest,
-  ForfeitureAdjustmentDetail
+  ForfeitureAdjustmentDetail, GrandTotalsByStoreResponseDto
 } from "reduxstore/types";
 import { tryddmmyyyyToDate } from "../../utils/dateUtils";
 import { Paged } from "smart-ui-library";
@@ -845,6 +845,25 @@ export const YearsEndApi = createApi({
         } catch (err) {
           console.log("Err: " + err);
           dispatch(clearBreakdownByStoreTotals());
+        }
+      }
+    }),
+    getBreakdownGrandTotals: builder.query<GrandTotalsByStoreResponseDto, ProfitYearRequest>({
+      query: (params) => ({
+        url: `yearend/breakdown-by-store/totals`,
+        method: "GET",
+        params: {
+          profitYear: params.profitYear
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          dispatch(clearBreakdownByStoreTotals());
+          const { data } = await queryFulfilled;
+          dispatch(setBreakdownGrandTotals(data));
+        } catch (err) {
+          console.log("Err: " + err);
+          dispatch(clearBreakdownGrandTotals());
         }
       }
     }),

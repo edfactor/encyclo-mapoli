@@ -914,6 +914,22 @@ export interface BreakdownByStoreTotals {
   totalVestedBalance: number;
 }
 
+export interface GrandTotalsByStoreResponseDto {
+  Rows: GrandTotalsByStoreRowDto[]
+}
+
+export interface GrandTotalsByStoreRowDto {
+  Category: string;
+  Store700: number;
+  Store701: number;
+  Store800: number;
+  Store801: number;
+  Store802: number;
+  Store900: number;
+  StoreOther: number;
+  RowTotal: number;
+}
+
 export interface BreakdownByStoreResponse {
   reportName: string;
   reportDate: string;
