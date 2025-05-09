@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Data.Entities;
+﻿namespace Demoulas.ProfitSharing.Data.Entities.Virtual;
 public class ParticipantTotalVestingBalance
 {
     public int Ssn { get; set; }

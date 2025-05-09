@@ -1,5 +1,5 @@
 ﻿using System.Text.Json;
-using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Entities.Virtual;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Common;
 public static class Constants

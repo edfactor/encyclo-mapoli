@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Moq;
 using Demoulas.ProfitSharing.UnitTests.Common.Common;
 using Demoulas.ProfitSharing.UnitTests.Common.Helpers;

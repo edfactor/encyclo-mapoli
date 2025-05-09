@@ -5,6 +5,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 
 namespace Demoulas.ProfitSharing.Services;
 public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
@@ -287,7 +288,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                         .Where(pp => pp.DemographicId == employeeData.Id && pp.ProfitYear == req.ProfitYear)
                         .ExecuteUpdateAsync(p => p
                             .SetProperty(pp => pp.EnrollmentId, newEnrollmentId)
-                            .SetProperty(pp => pp.LastUpdate, DateTime.Now), 
+                            .SetProperty(pp => pp.LastUpdate, DateTimeOffset.UtcNow),
                             cancellationToken);
                 }
             }

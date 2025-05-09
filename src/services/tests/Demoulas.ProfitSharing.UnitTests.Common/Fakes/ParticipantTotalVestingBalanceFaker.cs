@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Bogus;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Entities.Virtual;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Fakes;
 internal sealed class ParticipantTotalVestingBalanceFaker : Faker<ParticipantTotalVestingBalance>

@@ -175,19 +175,18 @@ public sealed class BreakdownReportService : IBreakdownService
     /// – Returns the sequence already filtered to the store requested by the UI
     /// </summary>
     private IQueryable<ActiveMemberDto> BuildEmployeesBaseQuery(
-        IProfitSharingDbContext ctx,
-        BreakdownByStoreRequest request)
+    IProfitSharingDbContext ctx,
+    BreakdownByStoreRequest request)
     {
-        /*───────────────────────────────────────────────────────────────────────────
-          1️⃣  Sub-queries that EF will inline (remain IQueryable, so no DB hit yet)
-        ───────────────────────────────────────────────────────────────────────────*/
-        var balances = _totalService.TotalVestingBalance(
-                               ctx, request.ProfitYear, DateTime.UtcNow.ToDateOnly());
+        /*──────────────────────────── 1️⃣  inline sub-queries – still IQueryable */
+        var balances =
+            _totalService.TotalVestingBalance(
+                ctx, request.ProfitYear, DateTime.UtcNow.ToDateOnly());
 
-        var etvaBalances = _totalService.GetTotalComputedEtva(
-                               ctx, request.ProfitYear);           // IQueryable<EtvaDto>
+        var etvaBalances =
+            _totalService.GetTotalComputedEtva(ctx, request.ProfitYear);
 
-        /* Hard-coded list copied from the COBOL paragraph that assigns 701 */
+        /* hard-coded list from COBOL (Devart can translate a constant-array .Contains) */
         int[] pensionerSsns =
         {
         023202688, 016201949, 023228733, 025329422, 001301944, 033324971,
@@ -195,74 +194,51 @@ public sealed class BreakdownReportService : IBreakdownService
         018306437, 126264073, 012242916, 028280107, 031260942, 024243451
     };
 
-        /*───────────────────────────────────────────────────────────────────────────
-          2️⃣  ONE LINQ query  →  ONE SQL statement
-        ───────────────────────────────────────────────────────────────────────────*/
+        /*──────────────────────────── 2️⃣  single LINQ → single SQL */
         var query =
             from d in ctx.Demographics
 
-                /* ---  LEFT-join year-end PS balances ------------------------------- */
             join b in balances on d.Ssn equals b.Ssn into balGrp
             from bal in balGrp.DefaultIfEmpty()
 
-                /* ---  LEFT-join ETVA balances -------------------------------------- */
             join e in etvaBalances on d.Ssn equals e.Ssn into etvaGrp
             from etva in etvaGrp.DefaultIfEmpty()
 
-                /* ---  Derived columns that EF can translate to SQL ----------------- */
-            let totalBal = (bal == null ? 0m : bal.CurrentBalance)
-                           + (etva == null ? 0m : etva.Total)
-
-            let vestedBal = bal == null ? 0m : bal.VestedBalance
-
-            /*  COBOL store-bucket translation – expressed as a CASE that SQL
-                (and therefore EF Core) can generate                             */
-            let virtualStore =
-                /* 700 – retired (termination code “W”) */
-                d.TerminationCodeId == TerminationCode.Constants.Retired
-                    ? (short)700
-
-                /* 701 – active payroll & on pension (hard-coded SSNs) */
-                : pensionerSsns.Contains(d.Ssn)
-                    ? (short)701
-
-                /* 900 – monthly payroll, still active/inactive           */
-                : (d.PayFrequencyId == PayFrequency.Constants.Monthly &&
-                   (d.EmploymentStatusId == EmploymentStatus.Constants.Active ||
-                    d.EmploymentStatusId == EmploymentStatus.Constants.Inactive))
-                    ? (short)900
-
-                /* 801 – term / inactive, weekly or monthly,  **zero** balance */
-                : ((d.EmploymentStatusId == EmploymentStatus.Constants.Terminated ||
-                    d.EmploymentStatusId == EmploymentStatus.Constants.Inactive) &&
-                   (d.PayFrequencyId == PayFrequency.Constants.Weekly ||
-                    d.PayFrequencyId == PayFrequency.Constants.Monthly) &&
-                   totalBal <= 0)
-                    ? (short)801
-
-                /* 802 – terminated, balance > 0, BUT no vesting & no ETVA */
-                : (d.EmploymentStatusId == EmploymentStatus.Constants.Terminated &&
-                   (d.PayFrequencyId == PayFrequency.Constants.Weekly ||
-                    d.PayFrequencyId == PayFrequency.Constants.Monthly) &&
-                   (bal == null ? 0 : bal.CurrentBalance) > 0 &&
-                   vestedBal == 0 &&
-                   (etva == null ? 0 : etva.Total) == 0)
-                    ? (short)802
-
-                /* 800 – everybody else who is weekly / monthly and not active */
-                : ((d.PayFrequencyId == PayFrequency.Constants.Weekly ||
-                    d.PayFrequencyId == PayFrequency.Constants.Monthly) &&
-                   d.EmploymentStatusId != EmploymentStatus.Constants.Active)
-                    ? (short)800
-
-                /* Fallback – keep original store */
-                : d.StoreNumber
-
-            /* ---  Final projection -------------------------------------------- */
             select new ActiveMemberDto
             {
                 BadgeNumber = d.BadgeNumber,
-                StoreNumber = virtualStore,      // computed above – still SQL
+
+                /* ── “virtual” store computed in SQL (flat CASE) ─────────────── */
+                StoreNumber =
+                    (short)(d.TerminationCodeId == TerminationCode.Constants.Retired
+                            ? 700
+                            : pensionerSsns.Contains(d.Ssn)
+                                ? 701
+                                : (d.PayFrequencyId == PayFrequency.Constants.Monthly &&
+                                   (d.EmploymentStatusId == EmploymentStatus.Constants.Active ||
+                                    d.EmploymentStatusId == EmploymentStatus.Constants.Inactive))
+                                    ? 900
+                                    : ((d.EmploymentStatusId == EmploymentStatus.Constants.Terminated ||
+                                        d.EmploymentStatusId == EmploymentStatus.Constants.Inactive) &&
+                                       (d.PayFrequencyId == PayFrequency.Constants.Weekly ||
+                                        d.PayFrequencyId == PayFrequency.Constants.Monthly) &&
+                                       (((bal == null ? 0 : bal.CurrentBalance)
+                                          + (etva == null ? 0 : etva.Total)) <= 0))
+                                        ? 801
+                                        : (d.EmploymentStatusId == EmploymentStatus.Constants.Terminated &&
+                                           (d.PayFrequencyId == PayFrequency.Constants.Weekly ||
+                                            d.PayFrequencyId == PayFrequency.Constants.Monthly) &&
+                                           ((bal == null ? 0 : bal.CurrentBalance) > 0) &&
+                                           ((bal == null ? 0 : bal.VestedBalance) == 0) &&
+                                           ((etva == null ? 0 : etva.Total) == 0))
+                                            ? 802
+                                            : ((d.PayFrequencyId == PayFrequency.Constants.Weekly ||
+                                                d.PayFrequencyId == PayFrequency.Constants.Monthly) &&
+                                               d.EmploymentStatusId != EmploymentStatus.Constants.Active)
+                                                ? 800
+                                                : d.StoreNumber),
+
+                /* ── plain columns ───────────────────────────────────────────── */
                 FullName = d.ContactInfo.FullName!,
                 Ssn = d.Ssn,
                 DateOfBirth = d.DateOfBirth,
@@ -277,12 +253,15 @@ public sealed class BreakdownReportService : IBreakdownService
                 PayClassificationName = d.PayClassification!.Name,
 
                 CurrentBalance = bal == null ? 0 : bal.CurrentBalance,
-                VestedBalance = vestedBal,
+                VestedBalance = bal == null ? 0 : bal.VestedBalance,
                 EtvaBalance = etva == null ? 0 : etva.Total
             };
 
+        query = query.Where(q => q.StoreNumber == request.StoreNumber);
+
         return query;
     }
+
 
 
     private async Task<List<EmployeeFinancialSnapshot>> GetEmployeeFinancialSnapshotsAsync(

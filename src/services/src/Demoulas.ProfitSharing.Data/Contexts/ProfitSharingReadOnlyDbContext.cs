@@ -4,6 +4,7 @@ using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;

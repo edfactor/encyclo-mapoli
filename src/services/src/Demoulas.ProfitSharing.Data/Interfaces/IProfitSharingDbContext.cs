@@ -1,4 +1,5 @@
 ﻿using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Query;

@@ -5,6 +5,7 @@ using Demoulas.Common.Data.Services.Entities.Entities;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.UnitTests.Common.Common;
 using Demoulas.ProfitSharing.UnitTests.Common.Fakes;

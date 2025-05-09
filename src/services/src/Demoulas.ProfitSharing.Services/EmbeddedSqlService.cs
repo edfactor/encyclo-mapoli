@@ -1,18 +1,11 @@
 ﻿using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services;
-
-public interface IEmbeddedSqlService
-{
-    IQueryable<ParticipantTotal> GetTotalBalanceAlt(IProfitSharingDbContext ctx, short profitYear);
-    IQueryable<ParticipantTotalYear> GetYearsOfServiceAlt(IProfitSharingDbContext ctx, short profitYear);
-    IQueryable<ParticipantTotalRatio> GetVestingRatioAlt(IProfitSharingDbContext ctx, short profitYear,
-        DateOnly asOfDate);
-    IQueryable<ParticipantTotalVestingBalance> TotalVestingBalanceAlt(IProfitSharingDbContext ctx,
-        short employeeYear, short profitYear, DateOnly asOfDate);
-}
 
 public sealed class EmbeddedSqlService : IEmbeddedSqlService
 {
@@ -37,6 +30,21 @@ public sealed class EmbeddedSqlService : IEmbeddedSqlService
         var query = GetVestingRatioQuery(profitYear, asOfDate);
 
         return ctx.ParticipantTotalRatios.FromSqlRaw(query);
+    }
+
+    public IQueryable<ParticipantTotal> GetTotalComputedEtvaAlt(IProfitSharingDbContext ctx, short profitYear)
+    {
+        FormattableString query = $@"SELECT
+          pd.SSN,
+          NVL(SUM(CASE WHEN pd.PROFIT_CODE_ID = {ProfitCode.Constants.IncomingQdroBeneficiary.Id}  THEN pd.CONTRIBUTION ELSE 0 END), 0)
+        + NVL(SUM(CASE WHEN pd.PROFIT_CODE_ID = {ProfitCode.Constants.Incoming100PercentVestedEarnings.Id}  THEN pd.EARNINGS     ELSE 0 END), 0)
+        - NVL(SUM(CASE WHEN pd.PROFIT_CODE_ID = {ProfitCode.Constants.Outgoing100PercentVestedPayment.Id}  THEN pd.FORFEITURE   ELSE 0 END), 0)
+          AS total
+        FROM PROFIT_DETAIL pd
+        WHERE pd.PROFIT_YEAR <= {profitYear}
+        GROUP BY pd.SSN";
+
+        return ctx.ParticipantTotals.FromSqlInterpolated(query);
     }
 
     public IQueryable<ParticipantTotalVestingBalance> TotalVestingBalanceAlt(IProfitSharingDbContext ctx,
@@ -155,6 +163,4 @@ SELECT pd.SSN, SUM(pd.YEARS_OF_SERVICE_CREDIT) YEARS
 ";
         return query;
     }
-
-
 }
