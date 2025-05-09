@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Linq.Expressions;
 
-namespace Demoulas.ProfitSharing.UnitTests.Common.Helpers;
+namespace Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 public static class ICollectionExtensions
 {
     public static IQueryable<T> AsAsyncQueryable<T>(this ICollection<T> source) =>

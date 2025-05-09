@@ -1,8 +1,8 @@
 import Grid2 from '@mui/material/Grid2';
 import { Typography } from "@mui/material";
-import { InfoCard } from '../FiscalFlow/ProfitShareReportEditRun/InfoCard';
+import { InfoCard } from '../../FiscalFlow/ProfitShareReportEditRun/InfoCard';
 import { useNavigate } from 'react-router-dom';
-import { CAPTIONS, ROUTES } from "../../constants";
+import { CAPTIONS, ROUTES } from "../../../constants";
 
 interface StoreReportCategory {
   code: string;

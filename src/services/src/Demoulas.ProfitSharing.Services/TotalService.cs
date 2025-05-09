@@ -3,8 +3,10 @@ using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Extensions;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Microsoft.EntityFrameworkCore;
@@ -93,26 +95,9 @@ public sealed class TotalService : ITotalService
     /// <returns>
     /// A queryable collection of <see cref="ParticipantTotalDto"/> objects, each containing the SSN and total profit-sharing amount for a participant.
     /// </returns>
-    internal IQueryable<ParticipantTotalDto> GetTotalComputedEtva(IProfitSharingDbContext ctx, short profitYear)
+    internal IQueryable<ParticipantTotal> GetTotalComputedEtva(IProfitSharingDbContext ctx, short profitYear)
     {
-        return (
-            from pd in ctx.ProfitDetails
-            where pd.ProfitYear <= profitYear
-            group pd by pd.Ssn
-            into pd_g
-            select new ParticipantTotalDto
-            {
-                Ssn = pd_g.Key,
-                Total = pd_g.Where(x => x.ProfitCodeId == ProfitCode.Constants.IncomingQdroBeneficiary.Id /*6*/)
-                            .Sum(x => x.Contribution)
-                        + pd_g.Where(
-                                x => x.ProfitCodeId == ProfitCode.Constants.Incoming100PercentVestedEarnings.Id /*8*/)
-                            .Sum(x => x.Earnings)
-                        - pd_g.Where(
-                                x => x.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment.Id /*9*/)
-                            .Sum(x => x.Forfeiture)
-            }
-        );
+        return _embeddedSqlService.GetTotalComputedEtvaAlt(ctx, profitYear);
     }
 
 
@@ -175,11 +160,6 @@ public sealed class TotalService : ITotalService
                  group pdx by pdx.Ssn into pdxGrp
                  select new ParticipantTotalYearsDto() { Ssn = pdxGrp.Key, Years = (byte)pdxGrp.Sum(x => x.YearsOfServiceCredit) }
                 );
-    }
-
-    internal IQueryable<ParticipantTotalYear> GetYearsOfServiceAlt(IProfitSharingDbContext ctx, short profitYear)
-    {
-        return _embeddedSqlService.GetYearsOfServiceAlt(ctx, profitYear);
     }
 
     /// <summary>
@@ -335,12 +315,6 @@ public sealed class TotalService : ITotalService
 #pragma warning restore S1244 // Floating point numbers should not be tested for equality
     }
 
-    internal IQueryable<ParticipantTotalRatio> GetVestingRatioAlt(IProfitSharingDbContext ctx, short profitYear,
-        DateOnly asOfDate)
-    {
-        return _embeddedSqlService.GetVestingRatioAlt(ctx, profitYear, asOfDate);
-    }
-
     /// <summary>
     /// Retrieves the total vesting balance for participants based on the provided profit year and date.
     /// </summary>
@@ -438,35 +412,6 @@ public sealed class TotalService : ITotalService
                 });
 
         }
-    }
-
-    public static IQueryable<InternalProfitDetailDto> GetTransactionsBySsnForProfitYear(IProfitSharingDbContext ctx, short profitYear)
-    {
-        return ctx.ProfitDetails
-            .Where(pd => pd.ProfitYear == profitYear)
-            .GroupBy(details => details.Ssn)
-            .Select(g => new
-            {
-                Ssn = g.Key,
-                TotalContributions = g.Sum(x => x.CalculateContribution()),
-                TotalEarnings = g.Sum(x => x.CalculateEarnings()),
-                TotalForfeitures = g.Sum(x => x.CalculateForfeiture()),
-                TotalPayments = g.Sum(x => x.CalculatePayment()),
-                Distribution = g.Sum(x => x.CalculateDistribution()),
-                BeneficiaryAllocation = g.Sum(x => x.CalculateBeneficiaryAllocation()),
-                CurrentBalance = g.Sum(x => x.CalculateRowBalance())
-            })
-            .Select(r => new InternalProfitDetailDto
-            {
-                Ssn = r.Ssn,
-                TotalContributions = r.TotalContributions,
-                TotalEarnings = r.TotalEarnings,
-                TotalForfeitures = r.TotalForfeitures,
-                TotalPayments = r.TotalPayments,
-                CurrentAmount = r.CurrentBalance,
-                Distribution = r.Distribution,
-                BeneficiaryAllocation = r.BeneficiaryAllocation
-            });
     }
 
     /// <summary>

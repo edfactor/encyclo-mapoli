@@ -1,20 +1,20 @@
 import { Typography } from "@mui/material";
-import { DSMGrid, ISortParams, Pagination, agGridNumberToCurrency } from "smart-ui-library";
-import { useMemo, useEffect, useState, useCallback } from "react";
 import Grid2 from "@mui/material/Grid2";
-import { useLazyGetBreakdownByStoreQuery } from "reduxstore/api/YearsEndApi";
-import { useSelector } from "react-redux";
-import { RootState } from "reduxstore/store";
 import { ICellRendererParams } from "ag-grid-community";
-import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import { useLazyGetBreakdownByStoreQuery } from "reduxstore/api/YearsEndApi";
+import { RootState } from "reduxstore/store";
+import { DSMGrid, ISortParams, Pagination, agGridNumberToCurrency } from "smart-ui-library";
+import { viewBadgeLinkRenderer } from "../../../../utils/masterInquiryLink";
+import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
 
-interface AssociatesGridProps {
+interface StoreManagementGridProps {
   store: number;
 }
 
-const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store }) => {
+const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [sortParams, setSortParams] = useState<ISortParams>({
@@ -22,11 +22,10 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store }) => {
     isSortDescending: false
   });
 
-  const [fetchBreakdownByStore, { isFetching }] = useLazyGetBreakdownByStoreQuery();
-  const breakdownByStore = useSelector((state: RootState) => state.yearsEnd.breakdownByStore);
+  const [fetchStoreManagement, { isFetching }] = useLazyGetBreakdownByStoreQuery();
+  const storeManagement = useSelector((state: RootState) => state.yearsEnd.storeManagementBreakdown);
   const queryParams = useSelector((state: RootState) => state.yearsEnd.breakdownByStoreQueryParams);
   const navigate = useNavigate();
-  const profitYear = useDecemberFlowProfitYear();
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
 
   const handleNavigation = useCallback(
@@ -37,12 +36,13 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store }) => {
   );
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
+  const profitYear = useDecemberFlowProfitYear();
   
   const fetchData = useCallback(() => {
     const params = {
       profitYear: queryParams?.profitYear || profitYear,
       storeNumber: store,
-      storeManagement: false,
+      storeManagement: true,
       pagination: {
         skip: pageNumber * pageSize,
         take: pageSize,
@@ -50,11 +50,11 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store }) => {
         isSortDescending: sortParams.isSortDescending
       }
     };
-    if (hasToken)
+    if ( hasToken)
     {
-    fetchBreakdownByStore(params);
+    fetchStoreManagement(params);
     }
-  }, [fetchBreakdownByStore, hasToken, pageNumber, pageSize, profitYear, queryParams?.profitYear, sortParams.isSortDescending, sortParams.sortBy, store]);
+  }, [fetchStoreManagement, hasToken, pageNumber, pageSize, profitYear, queryParams?.profitYear, sortParams.isSortDescending, sortParams.sortBy, store]);
 
   useEffect(() => {
     fetchData();
@@ -133,26 +133,26 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store }) => {
         <Typography
           variant="h6"
           sx={{ color: "#0258A5", marginBottom: "16px" }}>
-          Associates
+          Store Management
         </Typography>
       </Grid2>
       <Grid2 width="100%">
         <DSMGrid
-          preferenceKey={`BREAKDOWN_REPORT_ASSOCIATES_STORE_${store}`}
+          preferenceKey={`STORE_MANAGEMENT_STORE_${store}`}
           isLoading={isFetching}
           handleSortChanged={sortEventHandler}
           providedOptions={{
-            rowData: breakdownByStore?.response?.results || [],
+            rowData: storeManagement?.response?.results || [],
             columnDefs: columnDefs
           }}
         />
-        {breakdownByStore?.response?.results && breakdownByStore.response.results.length > 0 && (
+        {storeManagement?.response?.results && storeManagement.response.results.length > 0 && (
           <Pagination
             pageNumber={pageNumber}
             setPageNumber={(value: number) => setPageNumber(value - 1)}
             pageSize={pageSize}
             setPageSize={setPageSize}
-            recordCount={breakdownByStore.response.total || 0}
+            recordCount={storeManagement.response.total || 0}
           />
         )}
       </Grid2>
@@ -160,4 +160,4 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store }) => {
   );
 };
 
-export default AssociatesGrid;
+export default StoreManagementGrid;

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
+using Demoulas.ProfitSharing.Data.Entities.Virtual;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
 internal sealed class ParticipantTotalRatioMap : IEntityTypeConfiguration<ParticipantTotalRatio>

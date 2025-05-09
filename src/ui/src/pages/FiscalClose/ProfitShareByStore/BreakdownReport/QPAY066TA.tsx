@@ -2,7 +2,7 @@ import { Divider, Tab, Tabs } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import { useState } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
-import { CAPTIONS } from "../../../constants";
+import { CAPTIONS } from "../../../../constants";
 import QPAY066TABreakdownParameters from "./QPAY066TABreakdownParameters";
 import StoreContent from "./StoreContent";
 import SummariesContent from "./SummariesContent";

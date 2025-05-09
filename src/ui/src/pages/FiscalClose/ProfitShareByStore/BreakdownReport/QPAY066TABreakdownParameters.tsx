@@ -7,7 +7,7 @@ import * as yup from "yup";
 import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { setBreakdownByStoreQueryParams } from "reduxstore/slices/yearsEndSlice";
-import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
 
 interface BreakdownSearchParams {
     store?: string;

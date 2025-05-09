@@ -1,6 +1,6 @@
 import { ICellRendererParams, ValueFormatterParams } from "ag-grid-community";
 import { agGridNumberToCurrency } from "smart-ui-library";
-import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
+import { viewBadgeLinkRenderer } from "../../../../utils/masterInquiryLink";
 
 
 export const GetUnder21BreakdownColumnDefs = (navFunction?: (path: string) => void) => [

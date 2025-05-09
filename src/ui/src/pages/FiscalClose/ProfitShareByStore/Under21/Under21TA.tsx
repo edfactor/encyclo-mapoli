@@ -1,14 +1,14 @@
 import { Divider, CircularProgress, Box } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import { DSMAccordion, Page } from "smart-ui-library";
-import { CAPTIONS } from "../../../constants";
+import { CAPTIONS } from "../../../../constants";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { useLazyGetUnder21TotalsQuery, useLazyGetUnder21InactiveQuery } from "reduxstore/api/YearsEndApi";
 import Under21Summary from "./Under21Summary";
 import Under21InactiveGrid from "./Under21InactiveGrid";
-import useFiscalCloseProfitYear from "../../../hooks/useFiscalCloseProfitYear";
+import useFiscalCloseProfitYear from "../../../../hooks/useFiscalCloseProfitYear";
 
 const Under21TA = () => {
   const [fetchUnder21Totals, { isLoading: isTotalsLoading }] = useLazyGetUnder21TotalsQuery();

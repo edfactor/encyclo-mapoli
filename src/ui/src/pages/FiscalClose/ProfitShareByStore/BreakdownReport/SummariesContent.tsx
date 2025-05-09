@@ -54,53 +54,7 @@ const allEmployeesGrandTotal = {
   total: "XX"
 };
 
-const under21EmployeesSampleData = [
-  {
-    category: "100% Vested",
-    ste1: "XX",
-    "700": "XX",
-    "701": "XX",
-    "800": "XX",
-    "801": "XX",
-    "802": "XX",
-    "900": "XX",
-    total: "XX"
-  },
-  {
-    category: "Partially Vested",
-    ste1: "XX",
-    "700": "XX",
-    "701": "XX",
-    "800": "XX",
-    "801": "XX",
-    "802": "XX",
-    "900": "XX",
-    total: "XX"
-  },
-  {
-    category: "Not Vested",
-    ste1: "XX",
-    "700": "XX",
-    "701": "XX",
-    "800": "XX",
-    "801": "XX",
-    "802": "XX",
-    "900": "XX",
-    total: "XX"
-  }
-];
 
-const under21EmployeesGrandTotal = {
-  category: "Grand Total",
-  ste1: "XX",
-  "700": "XX",
-  "701": "XX",
-  "800": "XX",
-  "801": "XX",
-  "802": "XX",
-  "900": "XX",
-  total: "XX"
-};
 
 const SummariesContent: React.FC<SummariesContentProps> = ({ store }) => {
   const allEmployeesColumnDefs = [
@@ -233,31 +187,7 @@ const SummariesContent: React.FC<SummariesContentProps> = ({ store }) => {
             ...gridOptions
           }}
         />
-      </Grid2>
-
-      <Grid2
-        style={{ marginTop: "32px" }}
-        paddingX="24px">
-        <Typography
-          variant="h2"
-          sx={{ color: "#0258A5", marginBottom: "16px" }}>
-          {`Under 21 Employees (included in above totals)`}
-        </Typography>
-      </Grid2>
-      <Grid2 width="100%">
-        <DSMGrid
-          preferenceKey={`BREAKDOWN_REPORT_UNDER_21_EMPLOYEES_SUMMARY_STORE_${store}`}
-          isLoading={false}
-          handleSortChanged={(_params) => {}}
-          providedOptions={{
-            rowData: under21EmployeesSampleData,
-            columnDefs: under21EmployeesColumnDefs,
-            domLayout: "autoHeight",
-            pinnedTopRowData: [under21EmployeesGrandTotal],
-            ...gridOptions
-          }}
-        />
-      </Grid2>
+      </Grid2>     
     </Grid2>
   );
 };
