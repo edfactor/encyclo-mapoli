@@ -9,6 +9,7 @@ using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Demoulas.ProfitSharing.Services.Reports.Breakdown;
 
@@ -57,6 +58,54 @@ public sealed class BreakdownReportService : IBreakdownService
 
     #endregion
 
+    public Task<BreakdownByStoreTotals> GetGrandTotals(
+       YearRequest request,
+       CancellationToken cancellationToken)
+    {
+        return _dataContextFactory.UseReadOnlyContext(async ctx =>
+        {
+            // ── Query ------------------------------------------------------------------
+            var employeesBase = BuildEmployeesBaseQuery(ctx, request.ProfitYear);
+            var employeeSsns = await employeesBase.Select(e => e.Ssn).ToHashSetAsync(cancellationToken);
+
+            ThrowIfInvalidSsns(employeeSsns);
+
+            var snapshots = await GetEmployeeFinancialSnapshotsAsync(
+                ctx, request.ProfitYear, employeeSsns, cancellationToken);
+
+            // ── Aggregate --------------------------------------------------------------
+            var totals = new BreakdownByStoreTotals
+            {
+                TotalNumberEmployees = (short)snapshots.Count,
+                TotalBeginningBalances = snapshots.Sum(x => x.BeginningBalance),
+                TotalEarnings = snapshots.Sum(x => x.Txn.TotalEarnings),
+                TotalContributions = snapshots.Sum(x => x.Txn.TotalContributions),
+                TotalForfeitures = snapshots.Sum(x => x.Txn.TotalForfeitures),
+                TotalDisbursements = snapshots.Sum(x => x.Txn.Distribution)
+            };
+
+            totals.TotalEndBalances = totals.TotalBeginningBalances
+                                     + totals.TotalEarnings
+                                     + totals.TotalContributions
+                                     + totals.TotalForfeitures
+                                     + totals.TotalDisbursements
+                                     + snapshots.Sum(x => x.Txn.BeneficiaryAllocation);
+
+            totals.TotalVestedBalance = snapshots.Sum(x =>
+            {
+                var endBal = x.BeginningBalance
+                           + x.Txn.TotalContributions
+                           + x.Txn.TotalEarnings
+                           + x.Txn.TotalForfeitures
+                           + x.Txn.Distribution
+                           + x.Txn.BeneficiaryAllocation;
+                return endBal * x.VestingRatio;
+            });
+
+            return totals;
+        });
+    }
+
     public Task<BreakdownByStoreTotals> GetTotalsByStore(
         BreakdownByStoreRequest request,
         CancellationToken cancellationToken)
@@ -66,7 +115,8 @@ public sealed class BreakdownReportService : IBreakdownService
             ValidateStoreNumber(request);
 
             // ── Query ------------------------------------------------------------------
-            var employeesBase = BuildEmployeesBaseQuery(ctx, request);
+            var employeesBase = BuildEmployeesBaseQuery(ctx, request.ProfitYear);
+            employeesBase = employeesBase.Where(q => q.StoreNumber == request.StoreNumber);
             var employeeSsns = await employeesBase.Select(e => e.Ssn).ToHashSetAsync(cancellationToken);
 
             ThrowIfInvalidSsns(employeeSsns);
@@ -115,7 +165,8 @@ public sealed class BreakdownReportService : IBreakdownService
         {
             ValidateStoreNumber(request);
 
-            var employeesBase = BuildEmployeesBaseQuery(ctx, request);
+            var employeesBase = BuildEmployeesBaseQuery(ctx, request.ProfitYear);
+            employeesBase = employeesBase.Where(q => q.StoreNumber == request.StoreNumber);
 
             // Store‑level + management filter
             employeesBase = request.StoreManagement ? ApplyStoreManagementFilter(employeesBase)
@@ -175,16 +226,15 @@ public sealed class BreakdownReportService : IBreakdownService
     /// – Returns the sequence already filtered to the store requested by the UI
     /// </summary>
     private IQueryable<ActiveMemberDto> BuildEmployeesBaseQuery(
-        IProfitSharingDbContext ctx,
-        BreakdownByStoreRequest request)
+        IProfitSharingDbContext ctx, short profitYear)
     {
         /*──────────────────────────── 1️⃣  inline sub-queries – still IQueryable */
         var balances =
             _totalService.TotalVestingBalance(
-                ctx, request.ProfitYear, DateTime.UtcNow.ToDateOnly());
+                ctx, profitYear, DateTime.UtcNow.ToDateOnly());
 
         var etvaBalances =
-            _totalService.GetTotalComputedEtva(ctx, request.ProfitYear);
+            _totalService.GetTotalComputedEtva(ctx, profitYear);
 
         /* hard-coded list from COBOL
            https://demoulas.atlassian.net/wiki/spaces/NGDS/pages/305004545/QPAY066TA.pco
@@ -285,8 +335,6 @@ public sealed class BreakdownReportService : IBreakdownService
                 VestedBalance = bal == null ? 0 : bal.VestedBalance,
                 EtvaBalance = etva == null ? 0 : etva.Total
             };
-
-        query = query.Where(q => q.StoreNumber == request.StoreNumber);
 
         return query;
     }
