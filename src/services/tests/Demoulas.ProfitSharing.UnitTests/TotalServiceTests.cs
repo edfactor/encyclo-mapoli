@@ -28,7 +28,7 @@ public class TotalServiceTests : ApiTestBase<Program>
             var ppTest = await ctx.PayProfits.FirstAsync(CancellationToken.None);
             ppTest.ProfitYear = 2100;
             ppTest.Etva = 4321;
-            var etvaResult = await _totalService.GetTotalComputedEtva(ctx, 2100).FirstAsync();
+            var etvaResult = _totalService.GetTotalComputedEtva(ctx, 2100).First();
             etvaResult.Total.Should().Be(-20750.98m);
         });
     }
