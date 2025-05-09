@@ -1154,7 +1154,7 @@ export const {
   useLazyGetMasterRevertQuery,
   useLazyGetProfitSharingLabelsQuery,
   useLazyGetProfitMasterStatusQuery,
-  useGetForfeitureAdjustmentsQuery,
+  useLazyGetBreakdownGrandTotalsQuery,
   useLazyGetForfeitureAdjustmentsQuery,
   useUpdateForfeitureAdjustmentMutation
 } = YearsEndApi;
