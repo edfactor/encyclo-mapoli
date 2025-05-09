@@ -77,10 +77,10 @@ public class NavigationServiceTests : ApiTestBase<Program>
 
         this.navigationStatusList = new List<NavigationStatusDto>()
         {
-            new NavigationStatusDto() { Id = NavigationStatusConstant.NotStarted, Name = "Not Started" },
-            new NavigationStatusDto() { Id = NavigationStatusConstant.InProgress, Name = "In Progress" },
-            new NavigationStatusDto() { Id = NavigationStatusConstant.Blocked, Name = "Blocked" },
-            new NavigationStatusDto() { Id = NavigationStatusConstant.Successful, Name = "Successful" }
+            new NavigationStatusDto() { Id = NavigationStatus.Constants.NotStarted, Name = "Not Started" },
+            new NavigationStatusDto() { Id = NavigationStatus.Constants.InProgress, Name = "In Progress" },
+            new NavigationStatusDto() { Id = NavigationStatus.Constants.Blocked, Name = "Blocked" },
+            new NavigationStatusDto() { Id = NavigationStatus.Constants.Successful, Name = "Successful" }
         };
     }
     [Fact(DisplayName = "PS-1009: Navigation")]

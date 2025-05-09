@@ -12,10 +12,10 @@ public class NavigationStatusFaker
     public List<NavigationStatus> DummyNavigationStatus()
     {
         return new List<NavigationStatus>() {
-            new NavigationStatus() { Id = NavigationStatusConstant.NotStarted, Name = "Not Started" },
-            new NavigationStatus() { Id = NavigationStatusConstant.InProgress, Name = "In Progress" },
-            new NavigationStatus() { Id = NavigationStatusConstant.Blocked, Name = "Blocked" },
-            new NavigationStatus() { Id = NavigationStatusConstant.Successful, Name = "Successful" }
+            new NavigationStatus() { Id = NavigationStatus.Constants.NotStarted, Name = "Not Started" },
+            new NavigationStatus() { Id = NavigationStatus.Constants.InProgress, Name = "In Progress" },
+            new NavigationStatus() { Id = NavigationStatus.Constants.Blocked, Name = "Blocked" },
+            new NavigationStatus() { Id = NavigationStatus.Constants.Successful, Name = "Successful" }
         };
     }
 }
