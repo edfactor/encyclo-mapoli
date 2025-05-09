@@ -29,12 +29,11 @@ public class BreakdownGrandTotalEndpoint : Endpoint<YearRequest, GrandTotalsBySt
         });
         Group<YearEndGroup>();
 
-        if (!(Env.IsTestEnvironment() || Debugger.IsAttached))
-        {
-            // Specify caching duration and store it in metadata
-            TimeSpan cacheDuration = TimeSpan.FromMinutes(15);
-            Options(x => x.CacheOutput(p => p.Expire(cacheDuration)));
-        }
+        int chacheMinutes = (!(Env.IsTestEnvironment() || Debugger.IsAttached)) ? 15 : 1;
+
+        Options(o => o.CacheOutput(p =>
+            p.Expire(TimeSpan.FromMinutes(chacheMinutes))           // same value as Cache-Control
+                .SetVaryByQuery("profitYear")));                 // vary key if needed
     }
 
     public override Task<GrandTotalsByStoreResponseDto> ExecuteAsync(YearRequest req, CancellationToken ct)
