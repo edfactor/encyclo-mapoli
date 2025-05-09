@@ -85,7 +85,7 @@ public class NavigationService : INavigationService
             { 
                 NavigationId = navigationId, 
                 StatusId = statusId, 
-                Username = _appUser.UserName,
+                Username = _appUser.UserName??"",
                 LastModified = DateTimeOffset.UtcNow
             }, cancellationToken);
             return await context.SaveChangesAsync(cancellationToken);
