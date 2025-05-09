@@ -8,4 +8,6 @@ public interface IBreakdownService
 {
     Task<ReportResponseBase<MemberYearSummaryDto>> GetActiveMembersByStore(BreakdownByStoreRequest request, CancellationToken cancellationToken);
     Task<BreakdownByStoreTotals> GetTotalsByStore(BreakdownByStoreRequest request, CancellationToken cancellationToken);
+
+    public Task<BreakdownByStoreTotals> GetGrandTotals(YearRequest request, CancellationToken cancellationToken);
 }
