@@ -915,19 +915,19 @@ export interface BreakdownByStoreTotals {
 }
 
 export interface GrandTotalsByStoreResponseDto {
-  Rows: GrandTotalsByStoreRowDto[]
+  rows: GrandTotalsByStoreRowDto[]
 }
 
 export interface GrandTotalsByStoreRowDto {
-  Category: string;
-  Store700: number;
-  Store701: number;
-  Store800: number;
-  Store801: number;
-  Store802: number;
-  Store900: number;
-  StoreOther: number;
-  RowTotal: number;
+  category: string;
+  store700: number;
+  store701: number;
+  store800: number;
+  store801: number;
+  store802: number;
+  store900: number;
+  storeOther: number;
+  rowTotal: number;
 }
 
 export interface BreakdownByStoreResponse {

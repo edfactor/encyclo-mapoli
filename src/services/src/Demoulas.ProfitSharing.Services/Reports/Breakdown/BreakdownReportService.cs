@@ -103,7 +103,7 @@ public sealed class BreakdownReportService : IBreakdownService
             ("Grand Total",         (Func<CombinedTotals,bool>)(x => true)),
             ("100% Vested",         x => x.VestingRatio == 1m),
             ("Partially Vested",    x => x.VestingRatio is > 0m and < 1m),
-            ("Not vested",          x => x.VestingRatio == 0m)
+            ("Not Vested",          x => x.VestingRatio == 0m)
         };
 
             var rows = new List<GrandTotalsByStoreRowDto>();
