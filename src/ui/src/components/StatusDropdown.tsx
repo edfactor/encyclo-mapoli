@@ -1,32 +1,30 @@
 import { MenuItem, Select, SelectChangeEvent } from "@mui/material";
 import { useState } from "react";
+import { NavigationStatusDto } from "reduxstore/types";
 
-export type ProcessStatus = "Not Yet Started" | "In Progress" | "Complete";
 
 interface StatusDropdownProps {
-    initialStatus?: ProcessStatus;
-    onStatusChange: (newStatus: ProcessStatus) => void;
+    initialStatus?: string;
+    navigationStatusList?: NavigationStatusDto[];
+    onStatusChange: (newStatus: string) => void;
 }
 
-const StatusDropdown = ({ initialStatus = "Not Yet Started", onStatusChange }: StatusDropdownProps) => {
-    const [status, setStatus] = useState<ProcessStatus>(initialStatus);
+const StatusDropdown = ({ initialStatus = "1",navigationStatusList, onStatusChange }: StatusDropdownProps) => {
+    const [status, setStatus] = useState(initialStatus);
 
-    const handleChange = (event: SelectChangeEvent<ProcessStatus>) => {
-        const newStatus = event.target.value as ProcessStatus;
-        setStatus(newStatus);
+    const handleChange = (event: SelectChangeEvent<string>) => {
+        const newStatus = event.target.value;
         onStatusChange(newStatus);
     };
 
     return (
         <Select
             size="small"
-            value={status}
+            value={initialStatus}
             onChange={handleChange}
             fullWidth
         >
-            <MenuItem value="Not Yet Started">Not Yet Started</MenuItem>
-            <MenuItem value="In Progress">In Progress</MenuItem>
-            <MenuItem value="Complete">Complete</MenuItem>
+            {navigationStatusList?.map((value, index)=><MenuItem value={value.id}>{value.name}</MenuItem>)}
         </Select>
     );
 };

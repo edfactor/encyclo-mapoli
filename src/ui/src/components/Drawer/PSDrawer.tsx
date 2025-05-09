@@ -405,7 +405,7 @@ const PSDrawer: FC<PSDrawerProps> = ({navigationData}) => {
                                         <Box sx={{ display: "flex", alignItems: "right", gap: 1 }}>
                                           <Chip
                                             variant="outlined"
-                                            label={"Not Started"}
+                                            label={subPage.statusName}
                                             className="text-gray-700 border-gray-700"
                                             size="small"
                                           />
@@ -458,7 +458,7 @@ const PSDrawer: FC<PSDrawerProps> = ({navigationData}) => {
                               <Box sx={{ display: "flex", alignItems: "right", gap: 1 }}>
                                 <Chip
                                   variant="outlined"
-                                  label={"Not Started"}
+                                  label={page.statusName}
                                   className="text-gray-700 border-gray-700"
                                   size="small"
                                 />
