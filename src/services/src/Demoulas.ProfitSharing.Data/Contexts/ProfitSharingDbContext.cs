@@ -48,6 +48,7 @@ public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>, I
     public virtual DbSet<Missive> Missives {  get; set; }
     public virtual DbSet<YearEndUpdateStatus> YearEndUpdateStatuses { get; set; }
     public virtual DbSet<ParticipantTotal> ParticipantTotals { get; set; }
+    public virtual DbSet<ParticipantTotal> ParticipantEvtaTotals { get; set; }
     public virtual DbSet<ParticipantTotalRatio> ParticipantTotalRatios { get; set; }
     public virtual DbSet<ParticipantTotalYear> ParticipantTotalYears { get; set; }
     public virtual DbSet<ParticipantTotalVestingBalance> ParticipantTotalVestingBalances { get; set; }

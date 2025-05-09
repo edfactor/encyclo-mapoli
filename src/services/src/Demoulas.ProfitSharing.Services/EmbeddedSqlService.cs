@@ -43,7 +43,7 @@ public sealed class EmbeddedSqlService : IEmbeddedSqlService
         WHERE pd.PROFIT_YEAR <= {profitYear}
         GROUP BY pd.SSN";
 
-        return ctx.ParticipantTotals.FromSqlInterpolated(query);
+        return ctx.ParticipantEvtaTotals.FromSqlInterpolated(query);
     }
 
     public IQueryable<ParticipantTotalVestingBalance> TotalVestingBalanceAlt(IProfitSharingDbContext ctx,

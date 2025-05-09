@@ -9,6 +9,7 @@ using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Moq;
 using Demoulas.ProfitSharing.UnitTests.Common.Common;
+using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using Demoulas.ProfitSharing.UnitTests.Common.Helpers;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Mocks;
