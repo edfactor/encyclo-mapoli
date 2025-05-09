@@ -162,11 +162,6 @@ public sealed class TotalService : ITotalService
                 );
     }
 
-    internal IQueryable<ParticipantTotalYear> GetYearsOfServiceAlt(IProfitSharingDbContext ctx, short profitYear)
-    {
-        return _embeddedSqlService.GetYearsOfServiceAlt(ctx, profitYear);
-    }
-
     /// <summary>
     /// Gets the sum total of forfeitures by SSN over the course of history with an employee
     /// </summary>
