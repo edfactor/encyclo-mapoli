@@ -175,8 +175,8 @@ public sealed class BreakdownReportService : IBreakdownService
     /// – Returns the sequence already filtered to the store requested by the UI
     /// </summary>
     private IQueryable<ActiveMemberDto> BuildEmployeesBaseQuery(
-    IProfitSharingDbContext ctx,
-    BreakdownByStoreRequest request)
+        IProfitSharingDbContext ctx,
+        BreakdownByStoreRequest request)
     {
         /*──────────────────────────── 1️⃣  inline sub-queries – still IQueryable */
         var balances =
@@ -186,15 +186,47 @@ public sealed class BreakdownReportService : IBreakdownService
         var etvaBalances =
             _totalService.GetTotalComputedEtva(ctx, request.ProfitYear);
 
-        /* hard-coded list from COBOL (Devart can translate a constant-array .Contains) */
+        /* hard-coded list from COBOL
+           https://demoulas.atlassian.net/wiki/spaces/NGDS/pages/305004545/QPAY066TA.pco
+           https://bitbucket.org/demoulas/hpux/raw/37d043c297e04f3a5a557e0163239177087c2163/iqs-source/QPAY066TA.pco
+        
+        11-14-02  R MAISON  #196500 REMNVED SSN#'S 020281084,012289813*
+           *                                            019280284,033281522*
+           *                                            018184033,014167484*
+           *                             ADDED   SSN#'S 025282890,016269940*
+           *                             AT LINES 2750 THRU 2790           *
+           *                             AS PER DON MULLIGAN       
+
+        02/18/04  DPRUGH   P#7790  ADDED 024329422, 034305451 AND    *
+           *                             022325439 TO THE 701 SECTION .    *
+           *                             ALSO CLEANED UP THE SECTION BY    *
+           *                             REMNVING THE COMMENTED OUT SSN'S  *
+           *                             SINCE THEY ARE ALREADY NOTED IN   *
+           *                             THE COMMENT ABNVE THE SECTION  
+         */
         int[] pensionerSsns =
         {
-        023202688, 016201949, 023228733, 025329422, 001301944, 033324971,
-        020283297, 018260600, 017169396, 026786919, 029321863, 016269940,
-        018306437, 126264073, 012242916, 028280107, 031260942, 024243451
-    };
+            023202688, 016201949, 023228733, 025329422, 001301944, 033324971, 020283297, 018260600, 017169396,
+            026786919, 029321863, 016269940, 018306437, 126264073, 012242916, 028280107, 031260942, 024243451
+        };
 
-        /*──────────────────────────── 2️⃣  single LINQ → single SQL */
+        /*
+       
+       *| Report store                                        | When the COBOL assigns it                                                                                | Key tests in the code                                                                                                                                  |
+         | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+         | **700 – “Retired – Drawing Pension”**               | `B-TERM = "W"` (“W” is the retirement term-code).                                                        | `COMPUTE W-ST = WS-STR-VAL-PS-PENSION-RETIRED + 1000`                                                                                                  |
+         | **701 – “Active – Drawing Pension”**                | Hard-coded list of SSNs that are still on the active payroll **after** retirement.                       | Later in the same paragraph:<br>`IF B-SSN = 023202688 OR … THEN COMPUTE W-ST = WS-STR-VAL-PS-PENSION-ACTIVE + 1000`                                    |
+         | **800 – “Terminated / non-employee beneficiaries”** | Weekly **or** monthly pay-frequency and the employee is no longer active.                                | `IF B-FREQ = 1 OR B-FREQ = 2 THEN COMPUTE W-ST = WS-STR-VAL-PS-TERM-EMPL + 1000`                                                                       |
+         | **801 – “Terminated w/ zero balance”**              | Same as 800 **but** profit-sharing balance is zero (or becomes zero after disbursements)                 | Immediately after the 800 test:<br>`IF (B-PS-AMT <= 0 OR ((B-PS-AMT + B-PROF-DISBURSE5) <= 0 …)) … COMPUTE W-ST = WS-STR-VAL-PS-TERM-EMPL-ZERO + 1000` |
+         | **802 – “Terminated w/ balance but no vesting”**    | Balance > 0 **and** fully un-vested (`PS-VAMT = 0` and `PS-ETVA = 0`) and the status code is terminated. | `IF (B-PS-AMT > 0 AND (B-PS-VAMT = 0 AND B-PS-ETVA = 0) AND B-ST-CD = "T") … COMPUTE W-ST = WS-STR-VAL-PS-TERM-EMPL-NOVEST + 1000`                     |
+         | **900 – “Monthly Payroll”**                         | Active or inactive employees who are still on the **monthly** payroll.                                   | Wherever the code finds `B-FREQ = 2` it sets 900:<br>`COMPUTE W-ST = WS-STR-VAL-PS-MONTHLY-EMPL + 1000`                                                |
+
+      In short
+          Retiree vs. active-pensioner is keyed off the termination code (“W”) or an explicit SSN list.
+          Terminated buckets (800–802) depend on pay-frequency plus the size/vesting of the participant’s profit-sharing balance.
+          Monthly payroll (900) is simply anyone with FREQ = 2.
+       */
+
         var query =
             from d in ctx.Demographics
 
@@ -211,47 +243,44 @@ public sealed class BreakdownReportService : IBreakdownService
                 /* ── “virtual” store computed in SQL (flat CASE) ─────────────── */
                 StoreNumber =
                     (short)(d.TerminationCodeId == TerminationCode.Constants.Retired
-                            ? 700
-                            : pensionerSsns.Contains(d.Ssn)
-                                ? 701
-                                : (d.PayFrequencyId == PayFrequency.Constants.Monthly &&
-                                   (d.EmploymentStatusId == EmploymentStatus.Constants.Active ||
-                                    d.EmploymentStatusId == EmploymentStatus.Constants.Inactive))
-                                    ? 900
-                                    : ((d.EmploymentStatusId == EmploymentStatus.Constants.Terminated ||
-                                        d.EmploymentStatusId == EmploymentStatus.Constants.Inactive) &&
+                        ? 700
+                        : pensionerSsns.Contains(d.Ssn)
+                            ? 701
+                            : (d.PayFrequencyId == PayFrequency.Constants.Monthly &&
+                               (d.EmploymentStatusId == EmploymentStatus.Constants.Active ||
+                                d.EmploymentStatusId == EmploymentStatus.Constants.Inactive))
+                                ? 900
+                                : ((d.EmploymentStatusId == EmploymentStatus.Constants.Terminated ||
+                                    d.EmploymentStatusId == EmploymentStatus.Constants.Inactive) &&
+                                   (d.PayFrequencyId == PayFrequency.Constants.Weekly ||
+                                    d.PayFrequencyId == PayFrequency.Constants.Monthly) &&
+                                   (((bal == null ? 0 : bal.CurrentBalance)
+                                     + (etva == null ? 0 : etva.Total)) <= 0))
+                                    ? 801
+                                    : (d.EmploymentStatusId == EmploymentStatus.Constants.Terminated &&
                                        (d.PayFrequencyId == PayFrequency.Constants.Weekly ||
                                         d.PayFrequencyId == PayFrequency.Constants.Monthly) &&
-                                       (((bal == null ? 0 : bal.CurrentBalance)
-                                          + (etva == null ? 0 : etva.Total)) <= 0))
-                                        ? 801
-                                        : (d.EmploymentStatusId == EmploymentStatus.Constants.Terminated &&
-                                           (d.PayFrequencyId == PayFrequency.Constants.Weekly ||
+                                       ((bal == null ? 0 : bal.CurrentBalance) > 0) &&
+                                       ((bal == null ? 0 : bal.VestedBalance) == 0) &&
+                                       ((etva == null ? 0 : etva.Total) == 0))
+                                        ? 802
+                                        : ((d.PayFrequencyId == PayFrequency.Constants.Weekly ||
                                             d.PayFrequencyId == PayFrequency.Constants.Monthly) &&
-                                           ((bal == null ? 0 : bal.CurrentBalance) > 0) &&
-                                           ((bal == null ? 0 : bal.VestedBalance) == 0) &&
-                                           ((etva == null ? 0 : etva.Total) == 0))
-                                            ? 802
-                                            : ((d.PayFrequencyId == PayFrequency.Constants.Weekly ||
-                                                d.PayFrequencyId == PayFrequency.Constants.Monthly) &&
-                                               d.EmploymentStatusId != EmploymentStatus.Constants.Active)
-                                                ? 800
-                                                : d.StoreNumber),
+                                           d.EmploymentStatusId != EmploymentStatus.Constants.Active)
+                                            ? 800
+                                            : d.StoreNumber),
 
                 /* ── plain columns ───────────────────────────────────────────── */
                 FullName = d.ContactInfo.FullName!,
                 Ssn = d.Ssn,
                 DateOfBirth = d.DateOfBirth,
-
                 PayClassificationId = d.PayClassificationId,
                 EmploymentStatusId = d.EmploymentStatusId,
                 DepartmentId = d.DepartmentId,
                 PayFrequencyId = d.PayFrequencyId,
                 TerminationCodeId = d.TerminationCodeId,
-
                 DepartmentName = d.Department!.Name,
                 PayClassificationName = d.PayClassification!.Name,
-
                 CurrentBalance = bal == null ? 0 : bal.CurrentBalance,
                 VestedBalance = bal == null ? 0 : bal.VestedBalance,
                 EtvaBalance = etva == null ? 0 : etva.Total
@@ -261,7 +290,6 @@ public sealed class BreakdownReportService : IBreakdownService
 
         return query;
     }
-
 
 
     private async Task<List<EmployeeFinancialSnapshot>> GetEmployeeFinancialSnapshotsAsync(
