@@ -314,7 +314,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         var birthDate21 = calInfo.FiscalEndDate.AddYears(-21);
 
 
-        ProfitShareTotals tot = await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        var totTask = _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             if (req.IncludeTotals)
             {
@@ -327,16 +327,14 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             return new ProfitShareTotals(0, 0, 0, 0, 0, 0, 0, 0);
             
         });
-        
 
-        var response = await _dataContextFactory.UseReadOnlyContext(async ctx =>
+
+        var responseTask = _dataContextFactory.UseReadOnlyContext(ctx =>
         {
-            var response = new YearEndProfitSharingReportResponse
+            if (!req.IncludeDetails)
             {
-                ReportDate = DateTimeOffset.Now,
-                ReportName = $"PROFIT SHARE YEAR END REPORT FOR {req.ProfitYear}",
-                Response = new PaginatedResponseDto<YearEndProfitSharingReportDetail>()
-            };
+                return Task.FromResult(new PaginatedResponseDto<YearEndProfitSharingReportDetail>(req));
+            }
 
             // ──────────────────────────────────────────────────────────────────────────
             //  Base PayProfit query (no projection yet)
@@ -459,40 +457,47 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 employeeWithBalanceQry = employeeWithBalanceQry
                     .Where(x => (x.Balance > 0) == wantPrior);
             }
-            
+
             // ──────────────────────────────────────────────────────────────────────────
             //  Details (paged)
             // ──────────────────────────────────────────────────────────────────────────
-            if (req.IncludeDetails)
-            {
-                response.Response = await employeeWithBalanceQry
-                    .Select(x => new YearEndProfitSharingReportDetail
-                    {
-                        BadgeNumber = x.Employee.BadgeNumber,
-                        EmployeeName = x.Employee.FullName!,
-                        StoreNumber = x.Employee.StoreNumber,
-                        EmployeeTypeCode = x.Employee.EmploymentTypeId[0],
-                        EmployeeTypeName = x.Employee.EmploymentTypeName,
-                        DateOfBirth = x.Employee.DateOfBirth,
-                        Age = 0, // back‑filled later
-                        Ssn = x.Employee.Ssn.MaskSsn(),
-                        Wages = x.Employee.Wages,
-                        Hours = x.Employee.Hours,
-                        Points = Convert.ToInt16(x.Employee.PointsEarned),
-                        IsNew = x.Balance == 0 &&
-                                x.Employee.Hours >
-                                ReferenceData.MinimumHoursForContribution(),
-                        IsUnder21 = false, // back‑filled later
-                        EmployeeStatus = x.Employee.EmploymentStatusId,
-                        Balance = x.Balance,
-                        YearsInPlan = x.Employee.Years ?? 0
-                    })
-                    .ToPaginationResultsAsync(req, cancellationToken);
-            }
 
-            return response;
+            return employeeWithBalanceQry
+                .Select(x => new YearEndProfitSharingReportDetail
+                {
+                    BadgeNumber = x.Employee.BadgeNumber,
+                    EmployeeName = x.Employee.FullName!,
+                    StoreNumber = x.Employee.StoreNumber,
+                    EmployeeTypeCode = x.Employee.EmploymentTypeId[0],
+                    EmployeeTypeName = x.Employee.EmploymentTypeName,
+                    DateOfBirth = x.Employee.DateOfBirth,
+                    Age = 0, // back‑filled later
+                    Ssn = x.Employee.Ssn.MaskSsn(),
+                    Wages = x.Employee.Wages,
+                    Hours = x.Employee.Hours,
+                    Points = Convert.ToInt16(x.Employee.PointsEarned),
+                    IsNew = x.Balance == 0 &&
+                            x.Employee.Hours >
+                            ReferenceData.MinimumHoursForContribution(),
+                    IsUnder21 = false, // back‑filled later
+                    EmployeeStatus = x.Employee.EmploymentStatusId,
+                    Balance = x.Balance,
+                    YearsInPlan = x.Employee.Years ?? 0
+                })
+                .ToPaginationResultsAsync(req, cancellationToken);
+
         });
 
+        await Task.WhenAll(totTask, responseTask);
+
+        var response = new YearEndProfitSharingReportResponse
+        {
+            ReportDate = DateTimeOffset.Now,
+            ReportName = $"PROFIT SHARE YEAR END REPORT FOR {req.ProfitYear}",
+            Response = await responseTask
+        };
+
+        var tot = await totTask;
         response.WagesTotal = tot.WagesTotal;
         response.HoursTotal = tot.HoursTotal;
         response.PointsTotal = tot.PointsTotal;
