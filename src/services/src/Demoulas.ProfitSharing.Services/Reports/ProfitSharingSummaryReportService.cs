@@ -324,7 +324,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                     birthDate21, cancellationToken);
             }
 
-            return new ProfitShareTotals(0, 0, 0, 0, 0, 0, 0, 0);
+            return new ProfitShareTotals(0, 0, 0, 0, 0, 0, 0, 0, 0);
             
         });
 
@@ -503,6 +503,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         response.PointsTotal = tot.PointsTotal;
         response.TerminatedWagesTotal = tot.TerminatedWagesTotal;
         response.TerminatedHoursTotal = tot.TerminatedHoursTotal;
+        response.TerminatedPointsTotal = tot.TerminatedPointsTotal;
         response.NumberOfEmployees = tot.NumberOfEmployees;
         response.NumberOfNewEmployees = tot.NumberOfNewEmployees;
         response.NumberOfEmployeesInPlan =
@@ -670,12 +671,15 @@ SELECT
     SUM(points_earned)                                              AS points_total,
 
     /* terminated employees prior to fiscal year-end --------*/
-    SUM(CASE WHEN emp_status = 'T'
+    SUM(CASE WHEN emp_status = '{EmploymentStatus.Constants.Terminated}'
               AND term_date      < TO_DATE('{fiscalEndDate.ToString("yyyy-MM-dd")}','YYYY-MM-DD')
              THEN wages ELSE 0 END)                                 AS terminated_wages_total,
-    SUM(CASE WHEN emp_status = 'T'
+    SUM(CASE WHEN emp_status = '{EmploymentStatus.Constants.Terminated}'
               AND term_date      < TO_DATE('{fiscalEndDate.ToString("yyyy-MM-dd")}','YYYY-MM-DD')
              THEN hours ELSE 0 END)                                 AS terminated_hours_total,
+    SUM(CASE WHEN emp_status = '{EmploymentStatus.Constants.Terminated}'
+            AND term_date      < TO_DATE('{fiscalEndDate.ToString("yyyy-MM-dd")}','YYYY-MM-DD')
+                     THEN points_earned ELSE 0 END)                AS terminated_points_total,
 
     /* head-counts ------------------------------------------*/
     COUNT(*)                                                        AS number_of_employees,

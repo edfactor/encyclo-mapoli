@@ -6,6 +6,7 @@ public sealed record ProfitShareTotals(
     decimal PointsTotal,
     decimal TerminatedWagesTotal,
     decimal TerminatedHoursTotal,
+    decimal TerminatedPointsTotal,
     int NumberOfEmployees,
     int NumberOfNewEmployees,
     int NumberOfEmployeesUnder21

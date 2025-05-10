@@ -27,6 +27,10 @@ internal sealed class ProfitShareTotalsMap : IEntityTypeConfiguration<ProfitShar
         builder.Property(x => x.TerminatedHoursTotal)
             .HasColumnName("TERMINATED_HOURS_TOTAL");
 
+        builder.Property(x => x.TerminatedPointsTotal)
+            .HasColumnName("TERMINATED_POINTS_TOTAL");
+        
+
         builder.Property(x => x.NumberOfEmployees)
             .HasColumnName("NUMBER_OF_EMPLOYEES");
 

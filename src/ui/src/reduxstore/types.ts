@@ -791,6 +791,7 @@ export interface YearEndProfitSharingReportResponse {
   pointsTotal: number;
   terminatedWagesTotal: number;
   terminatedHoursTotal: number;
+  terminatedPointsTotal: number;
   numberOfEmployees: number;
   numberOfNewEmployees: number;
   numberOfEmployeesUnder21: number;
