@@ -23,7 +23,6 @@ public class GetNavigationStatusEndpoint : Endpoint<GetNavigationStatusRequestDt
 
     public override void Configure()
     {
-        AllowAnonymous();
         Get("/status");
         Summary(m =>
         {
