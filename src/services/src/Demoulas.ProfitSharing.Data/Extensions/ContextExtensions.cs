@@ -4,7 +4,6 @@ using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Audit;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.MassTransit;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Navigations;
 using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Virtual;
-using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.VirtualTables;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Data.Extensions;
