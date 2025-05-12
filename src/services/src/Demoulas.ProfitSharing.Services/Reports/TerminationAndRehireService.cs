@@ -151,7 +151,7 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
         var ending = req.EndingDate.ToDateOnly(DateTimeKind.Local) > bracket.FiscalEndDate ? bracket.FiscalEndDate : req.EndingDate.ToDateOnly(DateTimeKind.Local);
 
         var yearsOfServiceQuery = _totalService.GetYearsOfService(context, (short)req.EndingDate.Year);
-
+        var lastYear = (short)(req.ProfitYear - 1);
         var query = context.Demographics
             .Join(
                 context.PayProfits.Include(e=> e.Enrollment)
@@ -211,27 +211,41 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
             )
             .SelectMany(
                 temp => temp.yipGroup.DefaultIfEmpty(),
-                (temp, yip) => new MilitaryAndRehireProfitSummaryQueryResponse
+                (temp, yip) => new 
                 {
-                    BadgeNumber = temp.member.BadgeNumber,
-                    FullName = temp.member.FullName,
-                    Ssn = temp.member.Ssn,
-                    HireDate = temp.member.HireDate,
-                    TerminationDate = temp.member.TerminationDate,
-                    ReHiredDate = temp.member.ReHireDate ?? SqlDateTime.MinValue.Value.ToDateOnly(DateTimeKind.Local),
-                    StoreNumber = temp.member.StoreNumber,
-                    CompanyContributionYears = yip!.Years ?? 0,
-                    EnrollmentId = temp.member.EnrollmentId,
-                    EnrollmentName = temp.member.Enrollment!.Name,
-                    HoursCurrentYear = temp.member.CurrentHoursYear,
-                    NetBalanceLastYear = 0, //Filled out in detail report
-                    VestedBalanceLastYear = 0, //Filled out in detail report
-                    EmploymentStatusId = temp.member.EmploymentStatusId,
-                    EmploymentStatus = temp.member.EmploymentStatus,
-                    Forfeiture = temp.member.Forfeiture,
-                    Remark = temp.member.Remark,
-                    ProfitYear = temp.member.ProfitYear,
-                    ProfitCodeId = temp.member.ProfitCodeId
+                    temp.member,
+                    yip
+                }
+            )
+            .GroupJoin(
+                _totalService.TotalVestingBalance(context, lastYear, ending),
+                member => member.member.Ssn,
+                tot => tot.Ssn,
+                (member, tot) => new { member, tot}
+            )
+            .SelectMany(
+                temp => temp.tot.DefaultIfEmpty(),
+                (temp, tot) => new MilitaryAndRehireProfitSummaryQueryResponse
+                {
+                    BadgeNumber = temp.member.member.BadgeNumber,
+                    FullName = temp.member.member.FullName,
+                    Ssn = temp.member.member.Ssn,
+                    HireDate = temp.member.member.HireDate,
+                    TerminationDate = temp.member.member.TerminationDate,
+                    ReHiredDate = temp.member.member.ReHireDate ?? SqlDateTime.MinValue.Value.ToDateOnly(DateTimeKind.Local),
+                    StoreNumber = temp.member.member.StoreNumber,
+                    CompanyContributionYears = temp.member.yip!.Years ?? 0,
+                    EnrollmentId = temp.member.member.EnrollmentId,
+                    EnrollmentName = temp.member.member.Enrollment!.Name,
+                    HoursCurrentYear = temp.member.member.CurrentHoursYear,
+                    NetBalanceLastYear = tot != null ? tot.CurrentBalance ?? 0 : 0m,
+                    VestedBalanceLastYear = tot != null ? tot.VestedBalance ?? 0 : 0m,
+                    EmploymentStatusId = temp.member.member.EmploymentStatusId,
+                    EmploymentStatus = temp.member.member.EmploymentStatus,
+                    Forfeiture = temp.member.member.Forfeiture,
+                    Remark = temp.member.member.Remark,
+                    ProfitYear = temp.member.member.ProfitYear,
+                    ProfitCodeId = temp.member.member.ProfitCodeId
                 }
             )
             .OrderBy(m => m.BadgeNumber)

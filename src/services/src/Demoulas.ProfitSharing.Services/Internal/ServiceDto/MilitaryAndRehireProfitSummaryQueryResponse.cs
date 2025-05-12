@@ -18,8 +18,8 @@ internal sealed record MilitaryAndRehireProfitSummaryQueryResponse
     internal required string? Remark { get; set; }
     internal required byte EnrollmentId { get; set; }
     internal required string EnrollmentName { get; set; }
-    internal decimal NetBalanceLastYear { get; set; }
-    internal decimal VestedBalanceLastYear { get; set; }
+    internal decimal? NetBalanceLastYear { get; set; }
+    internal decimal? VestedBalanceLastYear { get; set; }
     internal char EmploymentStatusId { get; set; }
     internal byte ProfitCodeId { get; set; }
     internal string? EmploymentStatus { get; set; }

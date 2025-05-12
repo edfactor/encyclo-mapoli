@@ -11,8 +11,8 @@ public sealed record RehireForfeituresResponse
     public required DateOnly ReHiredDate { get; set; }
     public required DateOnly HireDate { get; set; }
     public DateOnly? TerminationDate { get; set; }
-    public decimal NetBalanceLastYear { get; init; }
-    public decimal VestedBalanceLastYear { get; set; }
+    public decimal? NetBalanceLastYear { get; init; }
+    public decimal? VestedBalanceLastYear { get; set; }
     public required byte CompanyContributionYears { get; set; }
     public required decimal HoursCurrentYear { get; set; }
     public required byte EnrollmentId  { get; set; }
