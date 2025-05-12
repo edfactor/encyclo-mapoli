@@ -1,4 +1,5 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Response.Navigations;
+﻿using Demoulas.Common.Contracts.Interfaces;
+using Demoulas.ProfitSharing.Common.Contracts.Response.Navigations;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -7,10 +8,12 @@ namespace Demoulas.ProfitSharing.Services.Navigations;
 public class NavigationService : INavigationService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
+    private readonly IAppUser _appUser;
 
-    public NavigationService(IProfitSharingDataContextFactory dataContextFactory)
+    public NavigationService(IProfitSharingDataContextFactory dataContextFactory, IAppUser appUser)
     {
         this._dataContextFactory = dataContextFactory;
+        this._appUser = appUser;
     }
 
 
@@ -69,12 +72,22 @@ public class NavigationService : INavigationService
     {
         var success = await _dataContextFactory.UseWritableContext(async context =>
         {
+            //update navigation status
             var nav = await context.Navigations.FirstOrDefaultAsync(x => x.Id == navigationId, cancellationToken);
             if(nav == null)
             {
                 return 0;
             }
             nav.StatusId = statusId;
+
+            //Navigation Tracker
+            await context.NavigationTrackings.AddAsync(new Data.Entities.Navigations.NavigationTracking() 
+            { 
+                NavigationId = navigationId, 
+                StatusId = statusId, 
+                Username = _appUser.UserName??"",
+                LastModified = DateTimeOffset.UtcNow
+            }, cancellationToken);
             return await context.SaveChangesAsync(cancellationToken);
         },cancellationToken);
         return success > 0;

@@ -23,7 +23,6 @@ public class UpdateNavigationStatusEndpoint : Endpoint<UpdateNavigationRequestDt
 
     public override void Configure()
     {
-        AllowAnonymous();
         Put("");
         Summary(m =>
         {
