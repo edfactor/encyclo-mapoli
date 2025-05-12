@@ -113,7 +113,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
 
         var profitShareTotal = new ProfitShareTotalFaker().Generate();
         Constants.ProfitShareTotals = [profitShareTotal];
-        _profitSharingReadOnlyDbContext.Setup(m => m.ProfitShareTotals).Returns(Constants.ProfitShareTotals.AsQueryable().BuildMockDbSet().Object);
+       
 
 
         List<FrozenState>? frozenStates = new FrozenStateFaker().Generate(1);

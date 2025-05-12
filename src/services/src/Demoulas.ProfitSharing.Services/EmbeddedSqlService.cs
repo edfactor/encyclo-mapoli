@@ -86,6 +86,89 @@ LEFT JOIN (
         return ctx.ParticipantTotalVestingBalances.FromSqlRaw(query);
     }
 
+
+    public IQueryable<ProfitShareTotal> GetProfitShareTotals(IProfitSharingDbContext ctx, short profitYear, DateOnly fiscalEndDate,
+       short min_hours, DateOnly birthdate_21, CancellationToken cancellationToken)
+    {
+        string query = @$"/*-----------------------------------------------------------
+  Bind variables                                             
+    :p_profit_year      – Profit year being reported on       
+    :p_fiscal_end_date  – End-of-year date (same value used   
+                           when the report is built)          
+    :p_birthdate_21     – :p_fiscal_end_date – 21 years       
+    :p_min_hours        – ReferenceData.MinimumHoursForContribution()                        
+-----------------------------------------------------------*/
+WITH balances AS (
+    /* 1️⃣  History-to-date balance per participant --------*/
+    SELECT bal.ssn, bal.total
+    FROM  (
+        /* identical text as EmbeddedSqlService.GetTotalBalanceQuery */
+        SELECT pd.ssn,
+               SUM(CASE WHEN pd.profit_code_id = 0 THEN  pd.contribution ELSE 0 END) +
+               SUM(CASE WHEN pd.profit_code_id IN (0,2) THEN pd.earnings     ELSE 0 END) +
+               SUM(CASE WHEN pd.profit_code_id = 0 THEN  pd.forfeiture   ELSE 0 END) +
+               SUM(CASE WHEN pd.profit_code_id IN (1,3,5)
+                         THEN -pd.forfeiture ELSE 0 END) +
+               SUM(CASE WHEN pd.profit_code_id = 2
+                         THEN -pd.forfeiture ELSE 0 END) +
+               (  SUM(CASE WHEN pd.profit_code_id = 6 THEN pd.contribution ELSE 0 END)
+                + SUM(CASE WHEN pd.profit_code_id = 8 THEN pd.earnings     ELSE 0 END)
+                + SUM(CASE WHEN pd.profit_code_id = 9 THEN -pd.forfeiture  ELSE 0 END) )
+               AS total
+        FROM   profit_detail pd
+        WHERE  pd.profit_year <= {profitYear}
+        GROUP  BY pd.ssn
+    ) bal
+),
+employees AS (
+    /* 2️⃣  One row per employee / beneficiary for this year */
+    SELECT  d.ssn,
+            /* same formulas the LINQ uses */
+            pp.current_income_year + pp.income_executive   AS wages,
+            pp.current_hours_year  + pp.hours_executive    AS hours,
+            pp.points_earned                                 points_earned,
+            d.employment_status_id                          emp_status,
+            d.termination_date                              term_date,
+            d.date_of_birth                                 dob,
+            NVL(bal.total,0)                                balance
+    FROM    pay_profit  pp
+      JOIN  demographic d         ON d.id = pp.demographic_id
+      LEFT  JOIN balances bal     ON bal.ssn = d.ssn
+    WHERE   pp.profit_year = {profitYear}
+            /* —> add any extra WHERE clauses that ApplyRequestFilters
+                   currently injects (store, hours range, age range, etc.) */
+)
+SELECT
+    /* numeric totals --------------------------------------*/
+    SUM(wages)                                                      AS wages_total,
+    SUM(hours)                                                      AS hours_total,
+    SUM(points_earned)                                              AS points_total,
+
+    /* terminated employees prior to fiscal year-end --------*/
+    SUM(CASE WHEN emp_status = '{EmploymentStatus.Constants.Terminated}'
+              AND term_date      < TO_DATE('{fiscalEndDate.ToString("yyyy-MM-dd")}','YYYY-MM-DD')
+             THEN wages ELSE 0 END)                                 AS terminated_wages_total,
+    SUM(CASE WHEN emp_status = '{EmploymentStatus.Constants.Terminated}'
+              AND term_date      < TO_DATE('{fiscalEndDate.ToString("yyyy-MM-dd")}','YYYY-MM-DD')
+             THEN hours ELSE 0 END)                                 AS terminated_hours_total,
+    SUM(CASE WHEN emp_status = '{EmploymentStatus.Constants.Terminated}'
+            AND term_date      < TO_DATE('{fiscalEndDate.ToString("yyyy-MM-dd")}','YYYY-MM-DD')
+                     THEN points_earned ELSE 0 END)                AS terminated_points_total,
+
+    /* head-counts ------------------------------------------*/
+    COUNT(*)                                                        AS number_of_employees,
+    SUM(CASE WHEN balance = 0
+              AND hours  > {min_hours}
+             THEN 1 ELSE 0 END)                                     AS number_of_new_employees,
+    SUM(CASE WHEN dob > TO_DATE('{birthdate_21.ToString("yyyy-MM-dd")}','YYYY-MM-DD')
+             THEN 1 ELSE 0 END)                                     AS number_of_employees_under21
+FROM   employees
+";
+
+
+        return ctx.ProfitShareTotals.FromSqlRaw(query);
+    }
+
     private static string GetTotalBalanceQuery(short profitYear)
     {
         var query = @$"
