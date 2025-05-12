@@ -322,10 +322,10 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 return await GetTotals(ctx, req.ProfitYear, 
                     calInfo.FiscalEndDate,
                     ReferenceData.MinimumHoursForContribution(),
-                    birthDate21, cancellationToken) ?? new ProfitShareTotal(0, 0, 0, 0, 0, 0, 0, 0, 0);
+                    birthDate21, cancellationToken) ?? new ProfitShareTotal();
             }
 
-            return new ProfitShareTotal(0, 0, 0, 0, 0, 0, 0, 0, 0);
+            return new ProfitShareTotal();
         });
 
 
