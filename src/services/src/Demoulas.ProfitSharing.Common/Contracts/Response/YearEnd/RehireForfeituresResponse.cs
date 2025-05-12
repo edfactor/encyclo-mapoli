@@ -6,8 +6,13 @@ public sealed record RehireForfeituresResponse
 {
     public required int BadgeNumber { get; set; }
     public required string? FullName { get; set; }
+    public short StoreNumber { get; set; }
     public required string Ssn { get; set; }
     public required DateOnly ReHiredDate { get; set; }
+    public required DateOnly HireDate { get; set; }
+    public DateOnly? TerminationDate { get; set; }
+    public decimal NetBalanceLastYear { get; init; }
+    public decimal VestedBalanceLastYear { get; set; }
     public required byte CompanyContributionYears { get; set; }
     public required decimal HoursCurrentYear { get; set; }
     public required byte EnrollmentId  { get; set; }
@@ -28,7 +33,12 @@ public sealed record RehireForfeituresResponse
             EnrollmentId = 4,
             EnrollmentName = "New vesting plan has Forfeiture records",
             EmploymentStatus = "Terminated",
+            StoreNumber = 22,
+            NetBalanceLastYear = (decimal)1_234_567.89,
+            VestedBalanceLastYear = (decimal)987_654.32,
             ReHiredDate = DateTime.Today.AddYears(-2).ToDateOnly(),
+            HireDate = DateTime.Today.AddYears(-5).ToDateOnly(),
+            TerminationDate = DateTime.Today.AddYears(-3).ToDateOnly(),
             Details = new List<MilitaryRehireProfitSharingDetailResponse>
             {
                 new MilitaryRehireProfitSharingDetailResponse
