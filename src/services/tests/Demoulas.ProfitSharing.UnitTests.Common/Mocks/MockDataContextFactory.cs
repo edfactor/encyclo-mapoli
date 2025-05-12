@@ -117,6 +117,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
 
 
         List<FrozenState>? frozenStates = new FrozenStateFaker().Generate(1);
+        List<NavigationTracking>? navigationTrackings = new NavigationTrackingFaker().Generate(1);
 
         Mock<DbSet<Beneficiary>> mockBeneficiaries = beneficiaries.AsQueryable().BuildMockDbSet();
         Mock<DbSet<BeneficiaryContact>> mockBeneficiaryContacts =
@@ -145,6 +146,9 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         Mock<DbSet<FrozenState>> mockFrozenStates = frozenStates.AsQueryable().BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.FrozenStates).Returns(mockFrozenStates.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.FrozenStates).Returns(mockFrozenStates.Object);
+        Mock<DbSet<NavigationTracking>> mocknavigationTrackings = navigationTrackings.AsQueryable().BuildMockDbSet();
+        _profitSharingDbContext.Setup(m => m.NavigationTrackings).Returns(mocknavigationTrackings.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.NavigationTrackings).Returns(mocknavigationTrackings.Object);
 
         _profitSharingDbContext.Setup(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()));
         _profitSharingDbContext.Setup(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()))
