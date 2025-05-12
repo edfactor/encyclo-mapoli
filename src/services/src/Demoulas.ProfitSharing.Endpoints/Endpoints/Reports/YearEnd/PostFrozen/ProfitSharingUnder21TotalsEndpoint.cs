@@ -27,7 +27,7 @@ public class ProfitSharingUnder21TotalsEndpoint: Endpoint<ProfitYearRequest, Pro
         Get("post-frozen/totals");
         Summary(s =>
         {
-            s.Summary = "ProfitShareUpdateTotals lines for under 21 reports";
+            s.Summary = "Totals lines for under 21 reports";
             s.Description = "Produces a series of totals related to participants under 21";
             s.ExampleRequest = ProfitYearRequest.RequestExample();
             s.ResponseExamples = new Dictionary<int, object>
