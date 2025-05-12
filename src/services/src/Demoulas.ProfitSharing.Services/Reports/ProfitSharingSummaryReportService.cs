@@ -316,16 +316,16 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
 
         var totTask = _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
+            
             if (req.IncludeTotals)
             {
                 return await GetTotals(ctx, req.ProfitYear, 
                     calInfo.FiscalEndDate,
                     ReferenceData.MinimumHoursForContribution(),
-                    birthDate21, cancellationToken);
+                    birthDate21, cancellationToken) ?? new ProfitShareTotal(0, 0, 0, 0, 0, 0, 0, 0, 0);
             }
 
-            return new ProfitShareTotals(0, 0, 0, 0, 0, 0, 0, 0, 0);
-            
+            return new ProfitShareTotal(0, 0, 0, 0, 0, 0, 0, 0, 0);
         });
 
 
@@ -337,7 +337,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             }
 
             // ──────────────────────────────────────────────────────────────────────────
-            //  Base PayProfit query (no projection yet)
+            //  Base PayProfit query
             // ──────────────────────────────────────────────────────────────────────────
             IQueryable<PayProfit> basePayProfits = ctx.PayProfits
                 .Where(p => p.ProfitYear == req.ProfitYear)
@@ -613,7 +613,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         return qry;
     }
 
-    private static Task<ProfitShareTotals> GetTotals(IProfitSharingDbContext ctx, short profitYear, DateOnly fiscalEndDate,
+    private static Task<ProfitShareTotal?> GetTotals(IProfitSharingDbContext ctx, short profitYear, DateOnly fiscalEndDate,
         short min_hours, DateOnly birthdate_21, CancellationToken cancellationToken)
     {
         string query = @$"/*-----------------------------------------------------------
@@ -692,6 +692,6 @@ FROM   employees
 ";
 
 
-        return ctx.ProfitShareTotals.FromSqlRaw(query).FirstAsync(cancellationToken);
+        return ctx.ProfitShareTotals.FromSqlRaw(query).FirstOrDefaultAsync(cancellationToken);
     }
 }

@@ -1,6 +1,6 @@
 ﻿
 namespace Demoulas.ProfitSharing.Data.Entities.Virtual;
-public sealed record ProfitShareTotals(
+public sealed record ProfitShareTotal(
     decimal WagesTotal,
     decimal HoursTotal,
     decimal PointsTotal,

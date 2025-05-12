@@ -18,6 +18,7 @@ public static class Constants
 
     public static List<ParticipantTotal> FakeParticipantTotals { get; set; } = new List<ParticipantTotal>();
     public static List<ParticipantTotal> FakeEtvaTotals { get; set; } = new List<ParticipantTotal>();
+    public static List<ProfitShareTotal> ProfitShareTotals { get; set; } = new List<ProfitShareTotal>();
     public static List<ParticipantTotalVestingBalance> FakeParticipantTotalVestingBalances { get; set; } = new List<ParticipantTotalVestingBalance>();
 
     internal static JsonSerializerOptions GetJsonSerializerOptions()

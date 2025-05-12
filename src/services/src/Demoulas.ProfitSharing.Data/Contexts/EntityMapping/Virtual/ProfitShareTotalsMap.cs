@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Virtual;
-internal sealed class ProfitShareTotalsMap : IEntityTypeConfiguration<ProfitShareTotals>
+internal sealed class ProfitShareTotalsMap : IEntityTypeConfiguration<ProfitShareTotal>
 {
     //This table is virtual in nature.  It uses the FromSql method to access data.
-    public void Configure(EntityTypeBuilder<ProfitShareTotals> builder)
+    public void Configure(EntityTypeBuilder<ProfitShareTotal> builder)
     {
         builder.Metadata.SetIsTableExcludedFromMigrations(true);
 

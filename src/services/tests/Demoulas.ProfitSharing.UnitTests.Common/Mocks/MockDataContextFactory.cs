@@ -110,7 +110,11 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
 
         List<ParticipantTotal> etvaBalances = new ParticipantEtvaTotalFaker(profitDetails).Generate(profitDetails.Count);
         Constants.FakeEtvaTotals = [.. etvaBalances];
-        
+
+        var profitShareTotal = new ProfitShareTotalFaker().Generate();
+        Constants.ProfitShareTotals = [profitShareTotal];
+        _profitSharingReadOnlyDbContext.Setup(m => m.ProfitShareTotals).Returns(Constants.ProfitShareTotals.AsQueryable().BuildMockDbSet().Object);
+
 
         List<FrozenState>? frozenStates = new FrozenStateFaker().Generate(1);
 
