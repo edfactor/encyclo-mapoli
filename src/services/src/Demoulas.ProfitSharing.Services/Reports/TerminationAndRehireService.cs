@@ -225,7 +225,7 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
             )
             .SelectMany(
                 temp => temp.tot.DefaultIfEmpty(),
-                (temp, tot) => new MilitaryAndRehireProfitSummaryQueryResponse
+                (temp, tot) => new RehireProfitSummaryQuery
                 {
                     BadgeNumber = temp.member.member.BadgeNumber,
                     FullName = temp.member.member.FullName,
