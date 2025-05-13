@@ -17,6 +17,7 @@ internal static class PolicyExtensions
             options.AddPolicy(Policy.CanViewBalances, x => x.RequireRole(Role.ITOPERATIONS, Role.FINANCEMANAGER, Role.DISTRIBUTIONSCLERK, Role.ADMINISTRATOR, Role.HARDSHIPADMINISTRATOR));
             options.AddPolicy(Policy.CanRunYearEndProcesses, x => x.RequireRole(Role.ITOPERATIONS, Role.ADMINISTRATOR, Role.FINANCEMANAGER));
             options.AddPolicy(Policy.CanRunMasterInquiry, x => x.RequireRole(Role.ITOPERATIONS, Role.ADMINISTRATOR, Role.FINANCEMANAGER));
+            options.AddPolicy(Policy.CanMaintainBeneficiaries, x => x.RequireRole(Role.ITOPERATIONS, Role.ADMINISTRATOR, Role.FINANCEMANAGER, Role.DISTRIBUTIONSCLERK));
             options.AddPolicy(Policy.CanFreezeDemographics, x => x.RequireRole(Role.ITOPERATIONS));
         });
 
