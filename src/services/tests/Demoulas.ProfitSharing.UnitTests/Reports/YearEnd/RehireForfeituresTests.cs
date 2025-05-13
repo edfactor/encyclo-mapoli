@@ -199,6 +199,10 @@ public class RehireForfeituresTests : ApiTestBase<Program>
         demo.EmploymentStatusId = EmploymentStatus.Constants.Active;
         demo.EmploymentStatus = new EmploymentStatus { Id = EmploymentStatus.Constants.Active, Name = "Active" };
         demo.ReHireDate = new DateTime(2024, 12, 01, 01, 01, 01, DateTimeKind.Local).ToDateOnly();
+        demo.HireDate = new DateTime(2017, 10, 04, 01, 01, 01, DateTimeKind.Local).ToDateOnly();
+        
+
+        demo.TerminationDate = new DateTime(2021, 10, 04, 01, 01, 01, DateTimeKind.Local).ToDateOnly();
 
         var profitYear = (short)Math.Min(demo.ReHireDate!.Value.Year, 2024);
 
