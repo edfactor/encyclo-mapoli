@@ -7,6 +7,7 @@ public record NavigationDto
     public string? SubTitle { get; set; }
     public string? Url { get; set; }
     public byte? StatusId { get; set; }
+    public string? StatusName { get; set; }
     public byte OrderNumber { get; set; }
     public string? Icon { get; set; }
     public List<string>? RequiredRoles { get; set; }

@@ -5,6 +5,7 @@ using Demoulas.Common.Data.Services.Entities.Entities;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.UnitTests.Common.Common;
 using Demoulas.ProfitSharing.UnitTests.Common.Fakes;
@@ -54,6 +55,11 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingDbContext.Setup(m => m.Navigations).Returns(mockNavigation.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.Navigations).Returns(mockNavigation.Object);
 
+        List<NavigationStatus>? navigationStatus = new NavigationStatusFaker().DummyNavigationStatus();
+        Mock<DbSet<NavigationStatus>> mockNavigationStatus = navigationStatus.AsQueryable().BuildMockDbSet();
+        _profitSharingDbContext.Setup(m => m.NavigationStatuses).Returns(mockNavigationStatus.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.NavigationStatuses).Returns(mockNavigationStatus.Object);
+
         List<PayClassification>? payClassifications = new PayClassificationFaker().Generate(500);
         Mock<DbSet<PayClassification>> mockPayClassifications = payClassifications.AsQueryable().BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.PayClassifications).Returns(mockPayClassifications.Object);
@@ -102,7 +108,12 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         List<ParticipantTotalVestingBalance> participantTotalVestingBalances = new ParticipantTotalVestingBalanceFaker(demographics, beneficiaries).Generate(demographics.Count + beneficiaries.Count);
         Constants.FakeParticipantTotalVestingBalances = [.. participantTotalVestingBalances];
 
+        List<ParticipantTotal> etvaBalances = new ParticipantEtvaTotalFaker(profitDetails).Generate(profitDetails.Count);
+        Constants.FakeEtvaTotals = [.. etvaBalances];
+        
+
         List<FrozenState>? frozenStates = new FrozenStateFaker().Generate(1);
+        List<NavigationTracking>? navigationTrackings = new NavigationTrackingFaker().Generate(1);
 
         Mock<DbSet<Beneficiary>> mockBeneficiaries = beneficiaries.AsQueryable().BuildMockDbSet();
         Mock<DbSet<BeneficiaryContact>> mockBeneficiaryContacts =
@@ -131,6 +142,9 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         Mock<DbSet<FrozenState>> mockFrozenStates = frozenStates.AsQueryable().BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.FrozenStates).Returns(mockFrozenStates.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.FrozenStates).Returns(mockFrozenStates.Object);
+        Mock<DbSet<NavigationTracking>> mocknavigationTrackings = navigationTrackings.AsQueryable().BuildMockDbSet();
+        _profitSharingDbContext.Setup(m => m.NavigationTrackings).Returns(mocknavigationTrackings.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.NavigationTrackings).Returns(mocknavigationTrackings.Object);
 
         _profitSharingDbContext.Setup(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()));
         _profitSharingDbContext.Setup(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()))

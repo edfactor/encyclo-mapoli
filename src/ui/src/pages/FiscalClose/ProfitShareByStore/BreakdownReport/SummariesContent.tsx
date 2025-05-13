@@ -1,0 +1,238 @@
+
+import { Typography, CircularProgress } from "@mui/material";
+import Grid2 from "@mui/material/Grid2";
+import { agGridNumberToCurrency, DSMGrid } from "smart-ui-library";
+import { useEffect, useState } from "react";
+import { useLazyGetBreakdownGrandTotalsQuery } from "reduxstore/api/YearsEndApi";
+import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../../reduxstore/store";
+import { GrandTotalsByStoreResponseDto, GrandTotalsByStoreRowDto } from "../../../../reduxstore/types";
+
+const SummariesContent: React.FC = () => {
+  const profitYear = useDecemberFlowProfitYear();
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
+
+  // Component-level loading state
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Use API hook
+  const [getBreakdownGrandTotals, { data: breakdownGrandTotals }] = useLazyGetBreakdownGrandTotalsQuery();
+
+  // Row data state
+  // Define the type for row data
+  interface RowData {
+    category: string;
+    ste1: string;
+    "700": string;
+    "701": string;
+    "800": string;
+    "801": string;
+    "802": string;
+    "900": string;
+    total: string;
+  }
+
+  const [rowData, setRowData] = useState<RowData[]>([]);
+  const [grandTotal, setGrandTotal] = useState<RowData>({
+    category: '',
+    ste1: '',
+    "700": '',
+    "701": '',
+    "800": '',
+    "801": '',
+    "802": '',
+    "900": '',
+    total: ''
+  });
+
+  // Load data when component mounts
+  useEffect(() => {
+    if (hasToken) {
+      setIsLoading(true);
+      getBreakdownGrandTotals({
+        profitYear: profitYear
+      })
+        .unwrap()
+        .then((data) => {
+          if (data && data.rows) {
+            updateGridFromApiData(data);
+          }
+          setIsLoading(false);
+        })
+        .catch((error) => {
+          console.error("Error fetching breakdown grand totals:", error);
+          setIsLoading(false);
+        });
+    }
+  }, [profitYear, getBreakdownGrandTotals, hasToken]);
+
+  // Separate effect to handle updates to breakdownGrandTotals
+  useEffect(() => {
+    if (breakdownGrandTotals && breakdownGrandTotals.rows) {
+      updateGridFromApiData(breakdownGrandTotals);
+      setIsLoading(false);
+    }
+  }, [breakdownGrandTotals]);
+
+  const updateGridFromApiData = (data: GrandTotalsByStoreResponseDto) => {
+    // Find rows by category
+    const fullyVestedRow = data.rows.find((row: GrandTotalsByStoreRowDto) => row.category === "100% Vested");
+    const partiallyVestedRow = data.rows.find((row: GrandTotalsByStoreRowDto) => row.category === "Partially Vested");
+    const notVestedRow = data.rows.find((row: GrandTotalsByStoreRowDto) => row.category === "Not Vested");
+    const grandTotalRow = data.rows.find((row: GrandTotalsByStoreRowDto) => row.category === "Grand Total");
+
+    const rows = [
+      {
+        category: "100% Vested",
+        ste1: fullyVestedRow ? fullyVestedRow.storeOther : 0,
+        "700": fullyVestedRow ? fullyVestedRow.store700 : 0,
+        "701": fullyVestedRow ? fullyVestedRow.store701 : 0,
+        "800": fullyVestedRow ? fullyVestedRow.store800 : 0,
+        "801": fullyVestedRow ? fullyVestedRow.store801 : 0,
+        "802": fullyVestedRow ? fullyVestedRow.store802 : 0,
+        "900": fullyVestedRow ? fullyVestedRow.store900 : 0,
+        total: fullyVestedRow ? fullyVestedRow.rowTotal.toString() : "0"
+      },
+      {
+        category: "Partially Vested",
+        ste1: partiallyVestedRow ? partiallyVestedRow.storeOther : 0,
+        "700": partiallyVestedRow ? partiallyVestedRow.store700 : 0,
+        "701": partiallyVestedRow ? partiallyVestedRow.store701 : 0,
+        "800": partiallyVestedRow ? partiallyVestedRow.store800 : 0,
+        "801": partiallyVestedRow ? partiallyVestedRow.store801 : 0,
+        "802": partiallyVestedRow ? partiallyVestedRow.store802 : 0,
+        "900": partiallyVestedRow ? partiallyVestedRow.store900 : 0,
+        total: partiallyVestedRow ? partiallyVestedRow.rowTotal.toString() : "0"
+      },
+      {
+        category: "Not Vested",
+        ste1: notVestedRow ? notVestedRow.storeOther : 0,
+        "700": notVestedRow ? notVestedRow.store700 : 0,
+        "701": notVestedRow ? notVestedRow.store701 : 0,
+        "800": notVestedRow ? notVestedRow.store800 : 0,
+        "801": notVestedRow ? notVestedRow.store801 : 0,
+        "802": notVestedRow ? notVestedRow.store802 : 0,
+        "900": notVestedRow ? notVestedRow.store900 : 0,
+        total: notVestedRow ? notVestedRow.rowTotal.toString() : "0"
+      }
+    ];
+
+    const total = {
+      category: "Grand Total",
+      ste1: grandTotalRow ? grandTotalRow.storeOther : 0,
+      "700": grandTotalRow ? grandTotalRow.store700 : 0,
+      "701": grandTotalRow ? grandTotalRow.store701 : 0,
+      "800": grandTotalRow ? grandTotalRow.store800 : 0,
+      "801": grandTotalRow ? grandTotalRow.store801 : 0,
+      "802": grandTotalRow ? grandTotalRow.store802 : 0,
+      "900": grandTotalRow ? grandTotalRow.store900 : 0,
+      total: grandTotalRow ? grandTotalRow.rowTotal.toString() : "0"
+    };
+
+    setRowData(rows);
+    setGrandTotal(total);
+  };
+
+  const allEmployeesColumnDefs = [
+    {
+      headerName: "Category",
+      field: "category",
+      width: 150
+    },
+    {
+      headerName: "STE 1-140",
+      field: "ste1",
+      width: 100,
+      valueFormatter: agGridNumberToCurrency
+    },
+    {
+      headerName: "700",
+      field: "700",
+      width: 70,
+      valueFormatter: agGridNumberToCurrency
+    },
+    {
+      headerName: "701",
+      field: "701",
+      width: 70,
+      valueFormatter: agGridNumberToCurrency
+    },
+    {
+      headerName: "800",
+      field: "800",
+      width: 70,
+      valueFormatter: agGridNumberToCurrency
+    },
+    {
+      headerName: "801",
+      field: "801",
+      width: 70,
+      valueFormatter: agGridNumberToCurrency
+    },
+    {
+      headerName: "802",
+      field: "802",
+      width: 70,
+      valueFormatter: agGridNumberToCurrency
+    },
+    {
+      headerName: "900",
+      field: "900",
+      width: 70,
+      valueFormatter: agGridNumberToCurrency
+    },
+    {
+      headerName: "Total",
+      field: "total",
+      width: 70,
+      valueFormatter: agGridNumberToCurrency
+    }
+  ];
+
+  const gridOptions = {
+    getRowStyle: (params: any) => {
+      if (params.node.rowPinned) {
+        return { background: "#f0f0f0", fontWeight: "bold" };
+      }
+      return undefined;
+    }
+  };
+
+  return (
+    <Grid2
+      container
+      direction="column"
+      width="100%">
+      <Grid2 paddingX="24px">
+        <Typography
+          variant="h2"
+          sx={{ color: "#0258A5", marginBottom: "16px" }}>
+          {`All Employees (By report section)`}
+        </Typography>
+      </Grid2>
+      <Grid2 width="100%">
+        {isLoading ? (
+          <Grid2 sx={{ display: 'flex', justifyContent: 'center', padding: 4 }}>
+            <CircularProgress />
+          </Grid2>
+        ) : (
+          <DSMGrid
+            preferenceKey={`BREAKDOWN_REPORT_ALL_EMPLOYEES_SUMMARY_STORE`}
+            isLoading={false}
+            handleSortChanged={(_params) => {}}
+            providedOptions={{
+              rowData: rowData,
+              columnDefs: allEmployeesColumnDefs,
+              domLayout: "autoHeight",
+              pinnedTopRowData: [grandTotal],
+              ...gridOptions
+            }}
+          />
+        )}
+      </Grid2>
+    </Grid2>
+  );
+};
+
+export default SummariesContent;

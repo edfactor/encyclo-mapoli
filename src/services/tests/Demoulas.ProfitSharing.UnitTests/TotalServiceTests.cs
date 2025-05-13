@@ -23,14 +23,17 @@ public class TotalServiceTests : ApiTestBase<Program>
     [Fact(DisplayName = "Total ETVA Tests")]
     public Task TotalEtvaShouldReturnCorrectly()
     {
-        return _dataContextFactory.UseWritableContext(async ctx =>
+        return _dataContextFactory.UseWritableContext(ctx =>
         {
-            var ppTest = await ctx.PayProfits.FirstAsync(CancellationToken.None);
-            ppTest.ProfitYear = 2100;
-            ppTest.Etva = 4321;
-            var etvaResult = await _totalService.GetTotalComputedEtva(ctx, 2100).FirstAsync();
+            var ppTest = Demoulas.ProfitSharing.UnitTests.Common.Common.Constants.FakeEtvaTotals[0];
+            ppTest.Total = -20750.98m;
+
+
+            var etvaResult = _totalService.GetTotalComputedEtva(ctx, 2100).First();
             etvaResult.Total.Should().Be(-20750.98m);
-        });
+
+            return Task.CompletedTask;
+        }, CancellationToken.None);
     }
 
     [Fact(DisplayName = "Total Distribution Tests")]

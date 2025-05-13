@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Demoulas.ProfitSharing.Data.Entities.Navigations;
+﻿namespace Demoulas.ProfitSharing.Data.Entities.Navigations;
 public class NavigationTracking
 {
     public int Id { get; set; }

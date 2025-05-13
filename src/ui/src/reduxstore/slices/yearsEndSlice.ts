@@ -5,8 +5,10 @@ import {
   BalanceByAge,
   BalanceByYears,
   BreakdownByStoreRequest,
-  BreakdownByStoreResponse, BreakdownByStoreTotals,
+  BreakdownByStoreResponse,
+  BreakdownByStoreTotals,
   ContributionsByAge,
+  ControlSheetResponse,
   DemographicBadgesNotInPayprofit,
   DistributionsAndForfeitures,
   DistributionsAndForfeituresQueryParams,
@@ -23,6 +25,7 @@ import {
   ForfeituresAndPointsQueryParams,
   ForfeituresByAge,
   FrozenReportsByAgeRequestType,
+  GrandTotalsByStoreResponseDto,
   GrossWagesReportRequest,
   GrossWagesReportResponse,
   MilitaryAndRehireForfeiture,
@@ -50,8 +53,7 @@ import {
   UpdateSummaryResponse,
   VestedAmountsByAge,
   YearEndProfitSharingReportResponse,
-  YearEndProfitSharingReportSummaryResponse,
-  ControlSheetResponse
+  YearEndProfitSharingReportSummaryResponse
 } from "reduxstore/types";
 import { Paged } from "smart-ui-library";
 
@@ -144,6 +146,7 @@ export interface YearsEndState {
   updateSummary: UpdateSummaryResponse | null;
   profitSharingLabels: Paged<ProfitSharingLabel> | null;
   controlSheet: ControlSheetResponse | null;
+  breakdownGrandTotals: GrandTotalsByStoreResponseDto | null;
 }
 
 const initialState: YearsEndState = {
@@ -239,6 +242,7 @@ const initialState: YearsEndState = {
   updateSummary: null,
   profitSharingLabels: null,
   controlSheet: null,
+  breakdownGrandTotals: null
 };
 
 export const yearsEndSlice = createSlice({
@@ -929,6 +933,12 @@ export const yearsEndSlice = createSlice({
     clearBreakdownByStoreTotals: (state) => {
       state.breakdownByStoreTotals = null;
     },
+    setBreakdownGrandTotals: (state, action: PayloadAction<GrandTotalsByStoreResponseDto>) => {
+      state.breakdownGrandTotals = action.payload;
+    },
+    clearBreakdownGrandTotals: (state) => {
+      state.breakdownGrandTotals = null;
+    },
     setBreakdownByStoreQueryParams: (state, action: PayloadAction<BreakdownByStoreRequest>) => {
       state.breakdownByStoreQueryParams = action.payload;
     },
@@ -990,17 +1000,14 @@ export const yearsEndSlice = createSlice({
     // Your existing matchers
 
     // Add this new matcher for the getBreakdownByStore endpoint
-    builder.addMatcher(
-      YearsEndApi.endpoints.getBreakdownByStore.matchFulfilled,
-      (state, action) => {
-        // Store data in different state variables based on storeManagement parameter
-        if (action.meta.arg.originalArgs.storeManagement) {
-          state.storeManagementBreakdown = action.payload;
-        } else {
-          state.breakdownByStore = action.payload;
-        }
+    builder.addMatcher(YearsEndApi.endpoints.getBreakdownByStore.matchFulfilled, (state, action) => {
+      // Store data in different state variables based on storeManagement parameter
+      if (action.meta.arg.originalArgs.storeManagement) {
+        state.storeManagementBreakdown = action.payload;
+      } else {
+        state.breakdownByStore = action.payload;
       }
-    );
+    });
   }
 });
 
@@ -1072,6 +1079,8 @@ export const {
   clearBreakdownByStoreMangement,
   setBreakdownByStoreTotals,
   clearBreakdownByStoreTotals,
+  setBreakdownGrandTotals,
+  clearBreakdownGrandTotals,
   setBreakdownByStoreQueryParams,
   setUnder21BreakdownByStore,
   clearUnder21BreakdownByStore,

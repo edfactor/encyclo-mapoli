@@ -919,6 +919,22 @@ export interface BreakdownByStoreTotals {
   totalVestedBalance: number;
 }
 
+export interface GrandTotalsByStoreResponseDto {
+  rows: GrandTotalsByStoreRowDto[]
+}
+
+export interface GrandTotalsByStoreRowDto {
+  category: string;
+  store700: number;
+  store701: number;
+  store800: number;
+  store801: number;
+  store802: number;
+  store900: number;
+  storeOther: number;
+  rowTotal: number;
+}
+
 export interface BreakdownByStoreResponse {
   reportName: string;
   reportDate: string;
@@ -1155,7 +1171,8 @@ export interface NavigationDto {
   title: string;
   subTitle: string;
   url: string;
-  StatusId: string;
+  statusId?: number;
+  statusName?: string;
   orderNumber: number;
   icon: string;
   requiredRoles: string[];
@@ -1212,3 +1229,31 @@ export interface ControlSheetResponse {
   employeeBeneficiaryAmount: number;
   profitSharingAmount: number;
 }
+
+export interface NavigationStatusDto {
+  id: number;
+  name?: string;
+}
+
+export interface GetNavigationStatusRequestDto {
+  id?: number;
+}
+
+export interface GetNavigationStatusResponseDto {
+  navigationStatusList?: NavigationStatusDto[]
+}
+
+export interface UpdateNavigationRequestDto {
+ navigationId?: number;
+ statusId?: number; 
+}
+
+export interface UpdateNavigationResponseDto {
+  isSuccessful?: boolean;
+ }
+
+ export interface CurrentNavigation {
+  navigationId?: number; 
+  statusId? : number;
+  statusName?: string;
+ }

@@ -142,7 +142,7 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
         };
     }
 
-    private async Task<IQueryable<MilitaryAndRehireProfitSummaryQueryResponse>> GetRehireProfitQueryBase(ProfitSharingReadOnlyDbContext context,
+    private async Task<IQueryable<RehireProfitSummaryQuery>> GetRehireProfitQueryBase(ProfitSharingReadOnlyDbContext context,
     RehireForfeituresRequest req, CancellationToken cancellationToken)
     {
         var bracket = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
