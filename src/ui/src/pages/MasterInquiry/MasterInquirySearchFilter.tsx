@@ -17,7 +17,7 @@ import { useLazyGetProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { MasterInquiryRequest, MasterInquirySearch } from "reduxstore/types";
+import { MasterInquiryRequest, MasterInquirySearch, MissiveResponse } from "reduxstore/types";
 import {
   clearMasterInquiryData,
   clearMasterInquiryRequestParams,
@@ -88,11 +88,12 @@ const schema = yup.object().shape({
 
 interface MasterInquirySearchFilterProps {
   setInitialSearchLoaded: (include: boolean) => void;
+  setMissiveAlerts: (alerts: MissiveResponse[]) => void;
 }
 
 const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
-  //setVoids,
-  setInitialSearchLoaded
+  setInitialSearchLoaded,
+  setMissiveAlerts
 }) => {
   const [triggerSearch, { isFetching }] = useLazyGetProfitMasterInquiryQuery();
   const { masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
@@ -162,18 +163,46 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
         memberType: memberTypeGetNumberMap[determineCorrectMemberType(badgeNumber)]
       };
 
-      triggerSearch(searchParams, false);
+      // Hard to see how someone would arrive with a badge number in the URL that
+      // is invalid, but it will be handled here. Note that we are assuming this
+      // is an employee search and not a beneficiary search as we do not have
+      // a memberType in the URL.
+      triggerSearch(searchParams, false).unwrap().then((response) => {
+        
+        if (!response.employeeDetails)  {
+          setMissiveAlerts([
+            {
+              id: 990,
+              message: "Employee not on file",
+              severity: "Error",
+              description: "The Employee Badge Number you have entered is not found on file. Re-enter using a valid Badge Number. It may mean you are not authorized to view this employee's information.",
+            }
+          ])
+        }
+        
+        else if (!response.inquiryResults.results || response.inquiryResults.results.length === 0) {
+            setMissiveAlerts([
+            {
+              id: 993,
+              message: "No Profit Sharing Records Found",
+              severity: "Error",
+              description: "The Employee Badge Number you have entered has no Profit Sharing Records. Re-enter an Employee Badge Number with Profit Sharing.",
+            }
+          ])
+                              
+        }
+      });
     }
-  }, [badgeNumber, hasToken, reset, triggerSearch]);
+  }, [badgeNumber, hasToken, reset, setMissiveAlerts, triggerSearch]);
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
       const searchParams: MasterInquiryRequest = {
         pagination: {
-          skip: data.pagination.skip,
-          take: data.pagination.take,
-          sortBy: data.pagination.sortBy,
-          isSortDescending: data.pagination.isSortDescending
+          skip: data.pagination?.skip || 0,
+          take: data.pagination?.take || 25,
+          sortBy: data.pagination?.sortBy || "profitYear",
+          isSortDescending: data.pagination?.isSortDescending || true
         },
         ...(!!data.endProfitYear && { endProfitYear: data.endProfitYear }),
         ...(!!data.startProfitMonth && { startProfitMonth: data.startProfitMonth }),
@@ -189,12 +218,83 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
         ...(!!data.payment && { payment: data.payment })
       };
 
-      triggerSearch(searchParams, false).unwrap();
+      triggerSearch(searchParams, false).unwrap().then((response) => {
+      
+        // We need to figure out who was searched for
+        let personTypeString;
+
+        switch (data.memberType) {
+          case "employees":
+            personTypeString = "employee";
+            break;
+          case "beneficiaries":
+            personTypeString = "beneficiary";
+            break;
+          default:
+            personTypeString = "employee or beneficiary";
+            break;
+        }
+
+
+        // We face a few situations here:
+        // 1. If we searched for an individual ssn or badgenumber, and there are no employee
+        //    details, we need to show an error message
+        // 2. If we searched for an individual ssn or badgenumber, and there are employee details,
+        //    but no inquiry results, we need to show a different error message
+
+        // These only come into play if we are searching for an individual
+        if (data.badgeNumber || data.socialSecurity) {
+
+          if (data.badgeNumber && !response.employeeDetails) {
+            setMissiveAlerts([
+              {
+                id: 990,
+                message: `The ${personTypeString} is not on file`,
+                severity: "Error",
+                description: `The ${personTypeString} number you have entered is not found on file. Re-enter using a valid number. It may mean you are not authorized to view this person's information.`,
+              }
+            ]);
+
+        } else if (data.badgeNumber && !response.inquiryResults.results) {
+            setMissiveAlerts([
+              {
+                id: 993,
+                message: "No Profit Sharing Records Found",
+                severity: "Error",
+                description: `The ${personTypeString} number you have entered has no Profit Sharing Records. Re-enter a number with Profit Sharing.`,
+              }
+            ]);
+
+          }
+        
+        else if (data.socialSecurity && !response.employeeDetails) {
+            setMissiveAlerts([
+              {
+                id: 991,
+                message: `The ${personTypeString} is not on file`,
+                severity: "Error",
+                description: `The ${personTypeString} SSN you have entered is not found on file. Re-enter using a valid SSN. It may mean you are not authorized to view this person's information.`,
+              }
+            ]);
+          } else if (data.socialSecurity && !response.inquiryResults.results) {
+            setMissiveAlerts([
+              {
+                id: 993,
+                message: "No Profit Sharing Records Found",
+                severity: "Error",
+                description: "The SSN you have entered has no Profit Sharing Records. Re-enter an SSN with Profit Sharing.",
+              }
+            ]);
+          }
+        }          
+      });
+    
       dispatch(setMasterInquiryRequestParams(data));
     }
   });
 
   const handleReset = () => {
+    setMissiveAlerts([]);
     setInitialSearchLoaded(false);
     dispatch(clearMasterInquiryRequestParams());
     dispatch(clearMasterInquiryData());
@@ -480,4 +580,4 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
   );
 };
 
-export default MasterInquirySearchFilter;
+export default MasterInquirySearchFilter
