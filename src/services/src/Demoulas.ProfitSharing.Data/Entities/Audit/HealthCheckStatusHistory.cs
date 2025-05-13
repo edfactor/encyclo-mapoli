@@ -3,6 +3,7 @@ namespace Demoulas.ProfitSharing.Data.Entities.Audit;
 
 public sealed class HealthCheckStatusHistory
 {
+    public int Id { get; set; }
     public required string Key { get; set; }
     public required string Status { get; set; }
     public required string? Description { get; set; }

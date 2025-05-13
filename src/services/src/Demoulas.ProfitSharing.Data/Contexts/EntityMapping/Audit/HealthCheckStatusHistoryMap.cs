@@ -9,9 +9,10 @@ public sealed class HealthCheckStatusHistoryMap : IEntityTypeConfiguration<Healt
     public void Configure(EntityTypeBuilder<HealthCheckStatusHistory> builder)
     {
         _ = builder.ToTable("_HEALTH_CHECK_STATUS_HISTORY");
-        _ = builder.HasKey(c => c.Key);
+        _ = builder.HasKey(c => c.Id);
 
-        _ = builder.Property(d => d.Key).HasColumnName("KEY").ValueGeneratedNever();
+        _ = builder.Property(d => d.Id).HasColumnName("ID").ValueGeneratedOnAdd();
+        _ = builder.Property(d => d.Key).HasColumnName("KEY");
         _ = builder.Property(d => d.Status).HasColumnName("STATUS").IsRequired();
         _ = builder.Property(d => d.Description).HasColumnName("DESCRIPTION").IsRequired(false);
         _ = builder.Property(d => d.Exception).HasColumnName("EXCEPTION").IsRequired(false);
