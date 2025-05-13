@@ -14,6 +14,7 @@ definitions:
         - self.hosted
       script:
         # Set environment variables
+        - $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
         - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests"
         - $env:REPORTS_PATH = "../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}"
         
@@ -48,7 +49,7 @@ definitions:
           
 
         # Run tests and generate JUnit reports
-        - dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --configuration Release --test-adapter-path:. --logger:"junit;LogFilePath={$env:REPORTS_PATH}/junit.xml"
+        - dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --configuration Release -p:RestoreAdditionalProjectSources=$env:NUGET_ORG --test-adapter-path:. --logger:"junit;LogFilePath={$env:REPORTS_PATH}/junit.xml"
 
       artifacts:
         - test-reports/**
