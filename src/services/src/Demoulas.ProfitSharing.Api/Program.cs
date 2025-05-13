@@ -102,7 +102,6 @@ builder.ConfigureDefaultEndpoints(meterNames: [],
     .AddSwaggerOpenApi(oktaSettingsAction: OktaSettingsAction, documentSettingsAction: OktaDocumentSettings)
     .AddSwaggerOpenApi(version: 2, oktaSettingsAction: OktaSettingsAction, documentSettingsAction: OktaDocumentSettings);
 
-builder.Services.AddHostedService<MetricLogger>();
 builder.Services.AddHealthChecks().AddCheck<EnvironmentHealthCheck>("Environment");
 
 
