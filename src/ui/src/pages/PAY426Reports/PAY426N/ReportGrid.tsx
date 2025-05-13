@@ -21,7 +21,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: 'lastName',
+    sortBy: 'badgeNumber',
     isSortDescending: false
   });
   
