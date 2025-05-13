@@ -77,7 +77,9 @@ const MasterInquiry = () => {
         ))}
         <Grid2 size={{ xs: 12 }} width={"100%"}>
           <DSMAccordion title="Filter">
-            <MasterInquirySearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
+            <MasterInquirySearchFilter setInitialSearchLoaded={setInitialSearchLoaded} 
+            setMissiveAlerts={setMissiveAlerts}
+            />
           </DSMAccordion>
         </Grid2>
 
