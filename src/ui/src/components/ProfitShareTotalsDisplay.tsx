@@ -91,10 +91,10 @@ const ProfitShareTotalsDisplay = ({ data }: ProfitShareTotalsDisplayProps) => {
               <TableCell sx={headerCellStyles} width="25%">Points</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell sx={labelCellStyles}>Section Total</TableCell>
+              <TableCell sx={labelCellStyles}>Terminated Section Total</TableCell>
               <TableCell sx={dataCellStyles}>{numberToCurrency(data?.terminatedWagesTotal || 0)}</TableCell>
               <TableCell sx={dataCellStyles}>{data?.terminatedHoursTotal?.toLocaleString() || "0"}</TableCell>
-              <TableCell sx={dataCellStyles}>{data?.pointsTotal?.toLocaleString() || "0"}</TableCell>
+              <TableCell sx={dataCellStyles}>{data?.terminatedPointsTotal?.toLocaleString() || "0"}</TableCell>
             </TableRow>
           </TableBody>
         </Table>

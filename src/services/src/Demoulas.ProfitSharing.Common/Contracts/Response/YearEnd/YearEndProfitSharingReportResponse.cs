@@ -13,6 +13,7 @@ public sealed record YearEndProfitSharingReportResponse : ReportResponseBase<Yea
     public int NumberOfNewEmployees { get; set; }
     public int NumberOfEmployeesUnder21 { get; set; }
     public int NumberOfEmployeesInPlan { get; set; }
+    public decimal TerminatedPointsTotal { get; set; }
 
     public static YearEndProfitSharingReportResponse ResponseExample()
     {

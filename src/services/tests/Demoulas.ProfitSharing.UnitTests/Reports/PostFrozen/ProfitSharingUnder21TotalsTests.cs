@@ -13,7 +13,7 @@ namespace Demoulas.ProfitSharing.UnitTests.Reports.PostFrozen;
 
 public sealed class ProfitSharingUnder21TotalsTests:ApiTestBase<Program>
 {
-    [Fact(DisplayName = "PS-759 - Profit Sharing under 21 Totals")]
+    [Fact(DisplayName = "PS-759 - Profit Sharing under 21 ProfitShareUpdateTotals")]
     public async Task CheckUnder21Totals()
     {
         var request = new ProfitYearRequest() { ProfitYear = 2024, Skip = 0, Take = 255 };

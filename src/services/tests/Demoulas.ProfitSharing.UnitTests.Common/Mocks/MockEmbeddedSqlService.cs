@@ -10,7 +10,6 @@ using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Moq;
 using Demoulas.ProfitSharing.UnitTests.Common.Common;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
-using Demoulas.ProfitSharing.UnitTests.Common.Helpers;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Mocks;
 public static class MockEmbeddedSqlService
@@ -29,6 +28,10 @@ public static class MockEmbeddedSqlService
 
         mock.Setup(m => m.GetTotalComputedEtvaAlt(It.IsAny<IProfitSharingDbContext>(), It.IsAny<short>()))
             .Returns((IProfitSharingDbContext x, short y) => Constants.FakeEtvaTotals.AsAsyncQueryable());
+
+
+        mock.Setup(m => m.GetProfitShareTotals(It.IsAny<IProfitSharingDbContext>(), It.IsAny<short>(), It.IsAny<DateOnly>(), It.IsAny<short>(), It.IsAny<DateOnly>(), It.IsAny<CancellationToken>()))
+            .Returns((IProfitSharingDbContext x, short y, DateOnly z, short a, DateOnly b, CancellationToken c) => Constants.ProfitShareTotals.AsAsyncQueryable()); 
 
         return mock.Object;
 

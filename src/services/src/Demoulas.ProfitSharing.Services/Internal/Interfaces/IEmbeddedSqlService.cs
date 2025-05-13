@@ -14,4 +14,8 @@ public interface IEmbeddedSqlService
         short employeeYear, short profitYear, DateOnly asOfDate);
 
     IQueryable<ParticipantTotal> GetTotalComputedEtvaAlt(IProfitSharingDbContext ctx, short profitYear);
+
+    IQueryable<ProfitShareTotal?> GetProfitShareTotals(IProfitSharingDbContext ctx, short profitYear,
+        DateOnly fiscalEndDate,
+        short min_hours, DateOnly birthdate_21, CancellationToken cancellationToken);
 }
