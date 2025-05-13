@@ -34,8 +34,7 @@ public sealed record RehireForfeituresResponse
             EnrollmentName = "New vesting plan has Forfeiture records",
             EmploymentStatus = "Terminated",
             StoreNumber = 61,
-            NetBalanceLastYear = 02211.826337257500000M,
-            VestedBalanceLastYear = 223457.091903424000000M,
+           
             ReHiredDate = new DateTime(2024, 12, 01, 01, 01, 01, DateTimeKind.Local).ToDateOnly(),
             HireDate = new DateTime(2017, 10, 04, 01, 01, 01, DateTimeKind.Local).ToDateOnly(),
             TerminationDate = new DateTime(2021, 10, 04, 01, 01, 01, DateTimeKind.Local).ToDateOnly()
