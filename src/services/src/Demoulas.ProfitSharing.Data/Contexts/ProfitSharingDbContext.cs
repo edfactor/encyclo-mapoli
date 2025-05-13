@@ -2,6 +2,7 @@
 using Demoulas.Common.Data.Services.Entities.Entities;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
@@ -59,6 +60,8 @@ public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>, I
     public virtual DbSet<NavigationTracking> NavigationTrackings { get; set; }
 
     public virtual DbSet<ProfitShareTotal> ProfitShareTotals { get; set; }
+
+    public virtual DbSet<HealthCheckStatusHistory> HealthCheckStatusHistories { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

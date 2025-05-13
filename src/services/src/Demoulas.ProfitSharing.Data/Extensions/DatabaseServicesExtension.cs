@@ -1,10 +1,12 @@
 ﻿using Demoulas.Common.Data.Contexts.DTOs.Context;
+using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Data.Configuration;
 using Demoulas.ProfitSharing.Data.Factories;
 using Demoulas.ProfitSharing.Data.Interceptors;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 
 namespace Demoulas.ProfitSharing.Data.Extensions;
@@ -50,6 +52,16 @@ public static class DatabaseServicesExtension
         IProfitSharingDataContextFactory factory = DataContextFactory.Initialize(builder, factoryRequests);
 
         _ = builder.Services.AddSingleton(factory);
+
+        builder.Services.Configure<HealthCheckPublisherOptions>(options =>
+        {
+            options.Delay = TimeSpan.FromSeconds(15);       // Initial delay before the first run
+            options.Period = TimeSpan.FromMinutes(30);     // How often health checks are run
+            options.Predicate = _ => true;
+        });
+
+        builder.Services.AddSingleton<IHealthCheckPublisher, HealthCheckResultLogger>();
+
 
         return builder;
     }

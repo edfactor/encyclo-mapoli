@@ -23,7 +23,7 @@ public sealed class AuditEventMap : IEntityTypeConfiguration<AuditEvent>
             .HasColumnName("OPERATION");
 
         _ = builder.Property(e => e.PrimaryKey)
-            .HasMaxLength(24)
+            .HasMaxLength(32)
             .HasColumnName("PRIMARY_KEY");
 
 
