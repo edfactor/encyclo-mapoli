@@ -1,6 +1,6 @@
-import { ColDef, ICellRendererParams, ValueFormatterParams } from "ag-grid-community";
-import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
+import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { agGridNumberToCurrency } from "smart-ui-library";
+import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
 
 export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
   return [
@@ -36,9 +36,40 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       resizable: true
     },
     {
+      headerName: "Store",
+      field: "storeNumber",
+      colId: "storeNumber",
+      minWidth: 40,
+      headerClass: "left-align",
+      cellClass: "left-align",
+      resizable: true,
+      sortable: true,
+    },
+    
+    {
       headerName: "Status",
       field: "employmentStatus",
       colId: "employmentStatus",
+      minWidth: 90,
+      headerClass: "left-align",
+      cellClass: "left-align",
+      resizable: true,
+      sortable: true
+    },
+    {
+      headerName: "Hire Date",
+      field: "hireDate",
+      colId: "hireDate",
+      minWidth: 90,
+      headerClass: "left-align",
+      cellClass: "left-align",
+      resizable: true,
+      sortable: true
+    },
+    {
+      headerName: "Termination Date",
+      field: "terminationDate",
+      colId: "terminationDate",
       minWidth: 90,
       headerClass: "left-align",
       cellClass: "left-align",
@@ -64,6 +95,28 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       cellClass: "left-align",
       resizable: true,
       sortable: true
+    },
+    {
+      headerName: "Beginning Balance",
+      field: "netBalanceLastYear",
+      colId: "netBalanceLastYear",
+      minWidth: 90,
+      headerClass: "right-align",
+      cellClass: "right-align",
+      resizable: true,
+      sortable: true,
+      valueFormatter: agGridNumberToCurrency
+    },
+    {
+      headerName: "Vested Balance",
+      field: "vestedBalanceLastYear",
+      colId: "vestedBalanceLastYear",
+      minWidth: 90,
+      headerClass: "right-align",
+      cellClass: "right-align",
+      resizable: true,
+      sortable: true,
+      valueFormatter: agGridNumberToCurrency
     },
     {
       headerName: "Hours Current Year",
@@ -98,7 +151,7 @@ export const GetDetailColumns = (): ColDef[] => {
       headerName: "Profit Year",
       field: "profitYear",
       colId: "profitYear",
-      minWidth: 100,
+      minWidth: 60,
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
