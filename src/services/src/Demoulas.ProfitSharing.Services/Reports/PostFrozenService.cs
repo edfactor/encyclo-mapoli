@@ -630,8 +630,8 @@ public class PostFrozenService : IPostFrozenService
 
     internal class Under21IntermediaryResult
     {
-        internal required Demographic d { get; set; }
-        internal required ParticipantTotalVestingBalance bal { get; set; }
-        internal required ParticipantTotalVestingBalance lyBal { get; set; }
+        internal required Demographic d { get; init; }
+        internal required ParticipantTotalVestingBalance bal { get; init; }
+        internal required ParticipantTotalVestingBalance lyBal { get; init; }
     }
 }

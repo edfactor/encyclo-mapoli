@@ -45,10 +45,10 @@ public sealed class BreakdownReportService : IBreakdownService
         public byte DepartmentId { get; init; }
         public byte PayFrequencyId { get; init; }
         public char? TerminationCodeId { get; init; }
-        public decimal? CurrentBalance { get; set; }
-        public decimal? VestedBalance { get; set; }
-        public decimal? EtvaBalance { get; set; }
-        public decimal? VestedPercent { get; set; }
+        public decimal? CurrentBalance { get; init; }
+        public decimal? VestedBalance { get; init; }
+        public decimal? EtvaBalance { get; init; }
+        public decimal? VestedPercent { get; init; }
     }
 
     private sealed record EmployeeFinancialSnapshot(

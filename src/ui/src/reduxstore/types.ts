@@ -199,6 +199,11 @@ export interface MilitaryAndRehireForfeiture {
   enrollmentName: string;
   employmentStatus: string;
   hoursCurrentYear: number;
+  netBalanceLastYear: number;
+  vestedBalanceLastYear: number;
+  hireDate: string;
+  terminationDate: string;
+  storeNumber: number;
   details: ForfeitureDetail[];
 }
 
@@ -791,6 +796,7 @@ export interface YearEndProfitSharingReportResponse {
   pointsTotal: number;
   terminatedWagesTotal: number;
   terminatedHoursTotal: number;
+  terminatedPointsTotal: number;
   numberOfEmployees: number;
   numberOfNewEmployees: number;
   numberOfEmployeesUnder21: number;

@@ -92,7 +92,7 @@ const SummariesContent: React.FC = () => {
         "801": fullyVestedRow ? fullyVestedRow.store801 : 0,
         "802": fullyVestedRow ? fullyVestedRow.store802 : 0,
         "900": fullyVestedRow ? fullyVestedRow.store900 : 0,
-        total: fullyVestedRow ? fullyVestedRow.rowTotal.toString() : "0"
+        total: fullyVestedRow ? fullyVestedRow.rowTotal : 0
       },
       {
         category: "Partially Vested",
@@ -127,7 +127,7 @@ const SummariesContent: React.FC = () => {
       "801": grandTotalRow ? grandTotalRow.store801 : 0,
       "802": grandTotalRow ? grandTotalRow.store802 : 0,
       "900": grandTotalRow ? grandTotalRow.store900 : 0,
-      total: grandTotalRow ? grandTotalRow.rowTotal.toString() : "0"
+      total: grandTotalRow ? grandTotalRow.rowTotal : 0
     };
 
     setRowData(rows);

@@ -5,6 +5,6 @@ namespace Demoulas.ProfitSharing.Services.Internal.ProfitShareUpdate;
 internal sealed record ProfitShareUpdateOutcome(
     List<MemberFinancials> MemberFinancials,
     AdjustmentsSummaryDto AdjustmentsSummaryData,
-    TotalsDto TotalsDto,
+    ProfitShareUpdateTotals ProfitShareUpdateTotals,
     bool RerunNeeded
 );

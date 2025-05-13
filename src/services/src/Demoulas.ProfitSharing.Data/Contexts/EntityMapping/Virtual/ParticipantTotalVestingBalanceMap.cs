@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Microsoft.EntityFrameworkCore;
-using Demoulas.ProfitSharing.Data.Entities.Virtual;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
+namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Virtual;
 internal sealed class ParticipantTotalVestingBalanceMap : IEntityTypeConfiguration<ParticipantTotalVestingBalance>
 {
     //This table is virtual in nature.  It uses the FromSql method to access data.

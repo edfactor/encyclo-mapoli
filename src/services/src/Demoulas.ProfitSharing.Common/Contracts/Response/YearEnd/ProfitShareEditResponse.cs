@@ -2,7 +2,7 @@
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
 /// <summary>
-/// The Totals of all the YE Update Transactions (aka PROFIT_DETAIL rows)
+/// The ProfitShareUpdateTotals of all the YE Update Transactions (aka PROFIT_DETAIL rows)
 /// </summary>
 public sealed record ProfitShareEditResponse : ReportResponseBase<ProfitShareEditMemberRecordResponse>
 {

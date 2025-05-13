@@ -2,7 +2,7 @@
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 
 // This set of totals reflects the effect of running PAY444 with a user selected set of parameters (ie, contribution = 11.5%, ...)
-public record TotalsDto
+public record ProfitShareUpdateTotals
 {
     public decimal BeginningBalance { get; set; }
     public decimal TotalContribution { get; set; }

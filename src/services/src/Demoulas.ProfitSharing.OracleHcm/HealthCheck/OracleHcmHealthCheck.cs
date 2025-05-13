@@ -41,7 +41,10 @@ public class OracleHcmHealthCheck : IHealthCheck
 
     private async Task<string> BuildUrl(CancellationToken cancellationToken = default)
     {
-        Dictionary<string, string> initialQuery = new Dictionary<string, string> { { "limit", "1" }, { "totalResults", "false" }, { "onlyData", "true" } };
+        Dictionary<string, string> initialQuery = new Dictionary<string, string>
+        {
+            { "limit", "1" }, { "totalResults", "false" }, { "onlyData", "true" }, { "fields", "PersonNumber" }
+        };
         UriBuilder initialUriBuilder = new UriBuilder(string.Concat(_oracleHcmConfig.BaseAddress, _oracleHcmConfig.DemographicUrl));
         string initialQueryString = await new FormUrlEncodedContent(initialQuery).ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
         initialUriBuilder.Query = initialQueryString;
