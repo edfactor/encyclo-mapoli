@@ -199,6 +199,11 @@ export interface MilitaryAndRehireForfeiture {
   enrollmentName: string;
   employmentStatus: string;
   hoursCurrentYear: number;
+  netBalanceLastYear: number;
+  vestedBalanceLastYear: number;
+  hireDate: string;
+  terminationDate: string;
+  storeNumber: number;
   details: ForfeitureDetail[];
 }
 

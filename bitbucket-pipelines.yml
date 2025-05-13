@@ -79,7 +79,7 @@ definitions:
         - Demoulas.Common.Build.Cli --buildid ${env:BITBUCKET_BUILD_NUMBER} --Branch ${env:BITBUCKET_BRANCH} --CommitHash ${env:BITBUCKET_COMMIT}
         - Copy-Item -Path ".buildinfo.json" -Destination ".\public" -Force
         
-        - npm install;
+        - npm ci;
         - npm run build:${env:ENV}
    
     
@@ -158,7 +158,7 @@ definitions:
         - Demoulas.Common.Build.Cli --buildid ${env:BITBUCKET_BUILD_NUMBER} --Branch ${env:BITBUCKET_BRANCH} --CommitHash ${env:BITBUCKET_COMMIT}
         - Copy-Item -Path ".buildinfo.json" -Destination ".\public" -Force
         
-        - npm install;
+        - npm ci;
         - npm run build:${env:ENV}
 
         - Copy-Item -Path ".\src\web.config" -Destination "..\..\src\UI\build"
@@ -192,7 +192,7 @@ definitions:
         - if (Test-Path -Path "package-lock.json") { Remove-Item -Force "package-lock.json" }
 
         # Install dependencies
-        - npm install;
+        - npm ci;
 
         # Generate and copy buildInfo.json
         - dotnet tool update --global Demoulas.Common.Build.Cli
