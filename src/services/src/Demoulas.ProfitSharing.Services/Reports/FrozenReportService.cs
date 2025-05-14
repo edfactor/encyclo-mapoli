@@ -88,9 +88,10 @@ public class FrozenReportService : IFrozenReportService
 
                 var netBalances = await _contributionService.GetNetBalance(req.ProfitYear, allBadgeNumbers.ToHashSet(), cancellationToken);
 
+                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
                 // Get forfeitures for current year
                 var forfeitures = await ctx.ProfitDetails
-                    .Join(ctx.Demographics, pd => pd.Ssn, d => d.Ssn, (pd, d) => new { pd, d })
+                    .Join(demographics, pd => pd.Ssn, d => d.Ssn, (pd, d) => new { pd, d })
                     .Where(x => x.pd.ProfitYear == req.ProfitYear &&
                                 x.pd.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id)
                     .GroupBy(x => x.d.BadgeNumber)
@@ -98,7 +99,7 @@ public class FrozenReportService : IFrozenReportService
                     .ToDictionaryAsync(x => x.Key, x => x.SumValue, cancellationToken);
 
                 var currentYearDetails = await (from pd in ctx.ProfitDetails
-                                                join d in ctx.Demographics on pd.Ssn equals d.Ssn
+                                                join d in demographics on pd.Ssn equals d.Ssn
                                                 where pd.ProfitYear == req.ProfitYear && allBadgeNumbers.Contains(d.BadgeNumber)
                                                 group pd by new { BadgeNumber = d.BadgeNumber }
                     into pd_g
@@ -260,10 +261,11 @@ public class FrozenReportService : IFrozenReportService
         const string PT = "PartTime";
         DateTime asOfDate = await GetAsOfDate(req, cancellationToken);
 
-        var queryResult = await _dataContextFactory.UseReadOnlyContext(ctx =>
+        var queryResult = await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
+            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
             var query = (from pd in ctx.ProfitDetails
-                         join d in ctx.Demographics on pd.Ssn equals d.Ssn
+                         join d in demographics on pd.Ssn equals d.Ssn
                          where pd.ProfitYear == req.ProfitYear && codes.Contains(pd.ProfitCodeId)
                          select new
                          {
@@ -281,7 +283,7 @@ public class FrozenReportService : IFrozenReportService
                 _ => query
             };
 
-            return query.ToListAsync(cancellationToken: cancellationToken);
+            return await query.ToListAsync(cancellationToken: cancellationToken);
         });
 
         var details = queryResult.Select(x => new
@@ -403,10 +405,11 @@ public class FrozenReportService : IFrozenReportService
         const string FT = "FullTime";
         const string PT = "PartTime";
 
-        var queryResult = await _dataContextFactory.UseReadOnlyContext(ctx =>
+        var queryResult = await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
+            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
             var query = (from pd in ctx.ProfitDetails
-                         join d in ctx.Demographics on pd.Ssn equals d.Ssn
+                         join d in demographics on pd.Ssn equals d.Ssn
                          where pd.ProfitYear == req.ProfitYear
                                && pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions
                                && pd.Contribution > 0
@@ -426,7 +429,7 @@ public class FrozenReportService : IFrozenReportService
             };
 
 
-            return query.ToListAsync(cancellationToken: cancellationToken);
+            return await query.ToListAsync(cancellationToken: cancellationToken);
         });
 
         var asOfDate = await GetAsOfDate(req, cancellationToken);
@@ -479,10 +482,11 @@ public class FrozenReportService : IFrozenReportService
         const string FT = "FullTime";
         const string PT = "PartTime";
 
-        var queryResult = await _dataContextFactory.UseReadOnlyContext(ctx =>
+        var queryResult = await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
+            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
             var query = (from pd in ctx.ProfitDetails
-                         join d in ctx.Demographics on pd.Ssn equals d.Ssn
+                         join d in demographics on pd.Ssn equals d.Ssn
                          where pd.ProfitYear == req.ProfitYear
                                && pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id
                                && pd.Forfeiture > 0
@@ -502,7 +506,7 @@ public class FrozenReportService : IFrozenReportService
             };
 
 
-            return query.ToListAsync(cancellationToken: cancellationToken);
+            return await query.ToListAsync(cancellationToken: cancellationToken);
         });
 
         var asOfDate = await GetAsOfDate(req, cancellationToken);
@@ -574,12 +578,13 @@ public class FrozenReportService : IFrozenReportService
 
         var startEnd = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
 
-        var rawResult = await _dataContextFactory.UseReadOnlyContext(ctx =>
+        var rawResult = await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             var query = _totalService.TotalVestingBalance(ctx, req.ProfitYear, startEnd.FiscalEndDate);
+            var demo = await _demographicReaderService.BuildDemographicQuery(ctx);
 
             var joinedQuery = from q in query
-                              join d in ctx.Demographics on q.Ssn equals d.Ssn into demographics
+                              join d in demo on q.Ssn equals d.Ssn into demographics
                               from demographic in demographics.DefaultIfEmpty()
                               join b in ctx.BeneficiaryContacts on q.Ssn equals b.Ssn into beneficiaries
                               from beneficiary in beneficiaries.DefaultIfEmpty()
@@ -607,7 +612,7 @@ public class FrozenReportService : IFrozenReportService
                 _ => joinedQuery
             };
 
-            return joinedQuery.ToListAsync(cancellationToken);
+            return await joinedQuery.ToListAsync(cancellationToken);
         });
 
         // Client-side processing for grouping and filtering
@@ -681,12 +686,13 @@ public class FrozenReportService : IFrozenReportService
 
         var startEnd = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
 
-        var rawResult = await _dataContextFactory.UseReadOnlyContext(ctx =>
+        var rawResult = await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             var query = _totalService.TotalVestingBalance(ctx, req.ProfitYear, startEnd.FiscalEndDate);
-
+            var demo = await _demographicReaderService.BuildDemographicQuery(ctx);
+            
             var joinedQuery = from q in query
-                              join d in ctx.Demographics on q.Ssn equals d.Ssn into demographics
+                              join d in demo on q.Ssn equals d.Ssn into demographics
                               from demographic in demographics.DefaultIfEmpty()
                               join b in ctx.BeneficiaryContacts on q.Ssn equals b.Ssn into beneficiaries
                               from beneficiary in beneficiaries.DefaultIfEmpty()
@@ -705,7 +711,7 @@ public class FrozenReportService : IFrozenReportService
                                       : (beneficiary!.DateOfBirth),
                               };
 
-            return joinedQuery
+            return await joinedQuery
                 .Where(detail => (detail.CurrentBalance > 0 || detail.VestedBalance > 0))
                 .ToListAsync(cancellationToken);
         });
@@ -816,14 +822,16 @@ public class FrozenReportService : IFrozenReportService
 
         var startEnd = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
 
-        var detailList = await _dataContextFactory.UseReadOnlyContext(ctx =>
+        var detailList = await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             var query = _totalService.TotalVestingBalance(ctx, req.ProfitYear, startEnd.FiscalEndDate);
             var yearsInPlanQuery = _totalService.GetYearsOfService(ctx, req.ProfitYear);
-
+            var demo = await _demographicReaderService.BuildDemographicQuery(ctx);
+            
             var joinedQuery = from q in query
                               join yip in yearsInPlanQuery on q.Ssn equals yip.Ssn
-                              join d in ctx.Demographics.Include(d => d.PayProfits) on q.Ssn equals d.Ssn into demographics
+                              join d in demo
+                                  .Include(d => d.PayProfits) on q.Ssn equals d.Ssn into demographics
                               from demographic in demographics.DefaultIfEmpty()
                               join b in ctx.BeneficiaryContacts on q.Ssn equals b.Ssn into beneficiaries
                               from beneficiary in beneficiaries.DefaultIfEmpty()
@@ -849,7 +857,7 @@ public class FrozenReportService : IFrozenReportService
                 _ => joinedQuery
             };
 
-            return joinedQuery.ToListAsync(cancellationToken);
+            return await joinedQuery.ToListAsync(cancellationToken);
                
         });
 
@@ -919,7 +927,8 @@ public class FrozenReportService : IFrozenReportService
         var rawResult = await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             //Get population of both employees and beneficiaries
-            var demoBase = (await _demographicReaderService.BuildDemographicQuery(ctx, true)).Select(x =>
+            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx, true);
+            var demoBase = demographics.Select(x =>
                 new
                 {
                     x.Ssn,
@@ -931,7 +940,7 @@ public class FrozenReportService : IFrozenReportService
                     x.StoreNumber
                 });
             var beneficiaryBase = ctx.BeneficiaryContacts
-                .Where(x => !ctx.Demographics.Any(d => d.Ssn == x.Ssn))
+                .Where(x => !demographics.Any(d => d.Ssn == x.Ssn))
                 .Select(x => new
                 {
                     x.Ssn,
@@ -1101,6 +1110,8 @@ public class FrozenReportService : IFrozenReportService
             {
                 var rsp = new ProfitControlSheetResponse();
 
+                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx, true);
+
                 rsp.EmployeeContributionProfitSharingAmount = (await (
                     from bal in _totalService.GetTotalBalanceSetEmployeePortion(ctx, request.ProfitYear)
                     group bal by true into balGrp
@@ -1110,7 +1121,7 @@ public class FrozenReportService : IFrozenReportService
                 rsp.NonEmployeeProfitSharingAmount = (await (
                     from bc in ctx.BeneficiaryContacts
                     join b in ctx.Beneficiaries on bc.Id equals b.BeneficiaryContactId
-                    where (!ctx.Demographics.Any(d => d.Ssn == bc.Ssn))
+                    where (!demographics.Any(d => d.Ssn == bc.Ssn))
                     group b by true into bGrp
                     select new { Total = bGrp.Sum(x => 0) } // Needs to use profit detail rows to get the correct amount
                 ).FirstOrDefaultAsync(cancellationToken))?.Total ?? 0;
@@ -1118,7 +1129,7 @@ public class FrozenReportService : IFrozenReportService
                 rsp.EmployeeBeneficiaryAmount = (await (
                     from bc in ctx.BeneficiaryContacts
                     join b in ctx.Beneficiaries on bc.Id equals b.BeneficiaryContactId
-                    where (ctx.Demographics.Any(d => d.Ssn == bc.Ssn))
+                    where (demographics.Any(d => d.Ssn == bc.Ssn))
                     group b by true into bGrp
                     select new { Total = bGrp.Sum(x => 0) } // Needs to use profit detail rows to get the correct amount
                 ).FirstOrDefaultAsync(cancellationToken))?.Total ?? 0;
