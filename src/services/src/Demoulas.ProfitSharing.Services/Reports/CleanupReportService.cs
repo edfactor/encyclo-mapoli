@@ -8,6 +8,7 @@ using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +25,7 @@ public class CleanupReportService : ICleanupReportService
     private readonly ILogger<CleanupReportService> _logger;
     private readonly TotalService _totalService;
     private readonly IHostEnvironment _host;
+    private readonly IDemographicReaderService _demographicReaderService;
 
     private readonly byte[] _distributionProfitCodes =
     [
@@ -45,13 +47,15 @@ public class CleanupReportService : ICleanupReportService
         ILoggerFactory factory,
         ICalendarService calendarService,
         TotalService totalService,
-        IHostEnvironment host)
+        IHostEnvironment host,
+        IDemographicReaderService demographicReaderService)
     {
         _dataContextFactory = dataContextFactory;
         _contributionService = contributionService;
         _calendarService = calendarService;
         _totalService = totalService;
         _host = host;
+        _demographicReaderService = demographicReaderService;
         _logger = factory.CreateLogger<CleanupReportService>();
 
     }
@@ -63,9 +67,10 @@ public class CleanupReportService : ICleanupReportService
     {
         using (_logger.BeginScope("Request BEGIN DEMOGRAPHIC BADGES NOT IN PAY PROFIT"))
         {
-            var results = await _dataContextFactory.UseReadOnlyContext(ctx =>
+            var results = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
-                var query = from dem in ctx.Demographics
+                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+                var query = from dem in demographics
                         .Include(d => d.EmploymentStatus)
                     where !(from pp in ctx.PayProfits select pp.DemographicId).Contains(dem.Id)
                     select new DemographicBadgesNotInPayProfitResponse
@@ -77,7 +82,7 @@ public class CleanupReportService : ICleanupReportService
                         StatusName = dem.EmploymentStatus!.Name,
                         Store = dem.StoreNumber,
                     };
-                return query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
+                return await query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
             });
 
             _logger.LogInformation("Returned {Results} records", results.Results.Count());
@@ -99,7 +104,8 @@ public class CleanupReportService : ICleanupReportService
         {
             var results = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
-                var query = from dem in ctx.Demographics
+                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+                var query = from dem in demographics
 #pragma warning disable CA1847
                     where dem.ContactInfo.FullName == null || !dem.ContactInfo.FullName.Contains(",")
 #pragma warning restore CA1847
@@ -131,11 +137,11 @@ public class CleanupReportService : ICleanupReportService
             var results = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
                 IQueryable<DemographicMatchDto> dupNameSlashDateOfBirth;
-
+                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
                 // Fallback for mocked (in-memory) db context which does not support raw SQL
                 if (_host.IsTestEnvironment())
                 {
-                    dupNameSlashDateOfBirth = ctx.Demographics
+                    dupNameSlashDateOfBirth = demographics
                         .Include(d => d.ContactInfo)
                         .Select(d => new DemographicMatchDto { FullName = d.ContactInfo.FullName! });
                 }
@@ -172,7 +178,9 @@ FROM FILTERED_DEMOGRAPHIC p1
                     .Select(d => d.FullName)
                     .ToHashSetAsync(cancellationToken);
 
-                var query = from dem in ctx.Demographics.Include(d => d.EmploymentStatus)
+                
+                var query = from dem in demographics
+                        .Include(d => d.EmploymentStatus)
                     join ppLj in ctx.PayProfits on new { DemographicId = dem.Id, req.ProfitYear } equals new
                     {
                         ppLj.DemographicId, ppLj.ProfitYear
@@ -234,7 +242,7 @@ FROM FILTERED_DEMOGRAPHIC p1
 
                 dict = await (
                     from yis in _totalService.GetYearsOfService(ctx, req.ProfitYear)
-                    join d in ctx.Demographics on yis.Ssn equals d.Ssn
+                    join d in demographics on yis.Ssn equals d.Ssn
                     select new { d.BadgeNumber, Years = yis.Years ?? 0 }
                 ).ToDictionaryAsync(x => x.BadgeNumber, x => x.Years, cancellationToken: cancellationToken);
 
@@ -268,7 +276,8 @@ FROM FILTERED_DEMOGRAPHIC p1
         {
             var results = _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
-                var nameAndDobQuery = ctx.Demographics
+                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+                var nameAndDobQuery = demographics
                     .Include(d => d.PayProfits.Where(p => p.ProfitYear == req.ProfitYear))
                     .Select(x => new
                     {
