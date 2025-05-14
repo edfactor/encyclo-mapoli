@@ -55,7 +55,7 @@ public static class DatabaseServicesExtension
 
         builder.Services.Configure<HealthCheckPublisherOptions>(options =>
         {
-            options.Delay = TimeSpan.FromSeconds(30);       // Initial delay before the first run
+            options.Delay = TimeSpan.FromMinutes(5);       // Initial delay before the first run
             options.Period = TimeSpan.FromMinutes(30);     // How often health checks are run
             options.Predicate = _ => true;
         });
