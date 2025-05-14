@@ -65,7 +65,6 @@ public class PostFrozenService : IPostFrozenService
     {
         var lastProfitYear = (short)(request.ProfitYear - 1);
         var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
-        var lyCalInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(lastProfitYear, cancellationToken);
             
 
         var rslt = await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
@@ -73,7 +72,9 @@ public class PostFrozenService : IPostFrozenService
             //Report uses the current date as the offset to calculate the age.
             var birthDate21 = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-21));
 
-            var totalBaseQuery = await (from d in ctx.Demographics.Where(x => x.DateOfBirth >= birthDate21)
+            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+
+            var totalBaseQuery = await (from d in demographics.Where(x => x.DateOfBirth >= birthDate21)
                     join balTbl in _totalService.TotalVestingBalance(ctx, request.ProfitYear, request.ProfitYear, calInfo.FiscalEndDate) on d.Ssn equals balTbl.Ssn into balTmp
                     from bal in balTmp.DefaultIfEmpty()
                     join lyBalTbl in _totalService.TotalVestingBalance(ctx, lastProfitYear, lastProfitYear, calInfo.FiscalEndDate) on d.Ssn equals lyBalTbl.Ssn into lyBalTmp
@@ -123,7 +124,7 @@ public class PostFrozenService : IPostFrozenService
             var totalUnder21 = totalBaseQuery.Count;
 
             var pagedData = await (
-                from d in ctx.Demographics.Where(x => x.DateOfBirth >= birthDate21)
+                from d in demographics.Where(x => x.DateOfBirth >= birthDate21)
                 join bal in _totalService.TotalVestingBalance(ctx, request.ProfitYear, request.ProfitYear, calInfo.FiscalEndDate) on d.Ssn equals bal.Ssn 
                 join lyPpTbl in ctx.PayProfits.Where(x => x.ProfitYear == request.ProfitYear - 1) on d.Id equals lyPpTbl.DemographicId into lyPpTmp
                 from lyPp in lyPpTmp.DefaultIfEmpty()
@@ -175,9 +176,11 @@ public class PostFrozenService : IPostFrozenService
            
         var rslt = await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx => {
 
+            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+
             var qry = (
                 from pp in ctx.PayProfits.Where(x => x.ProfitYear == request.ProfitYear)
-                join d in ctx.Demographics.Include(d => d.ContactInfo) on pp.DemographicId equals d.Id
+                join d in demographics on pp.DemographicId equals d.Id
                 join lyTotTbl in _totalService.GetTotalBalanceSet(ctx, lastYear) on d.Ssn equals lyTotTbl.Ssn into lyTotTmp
                 from lyTot in lyTotTmp.DefaultIfEmpty()
                 join tyTotTbl in _totalService.TotalVestingBalance(ctx, request.ProfitYear, calInfo.FiscalEndDate) on d.Ssn equals tyTotTbl.Ssn into tyTotalTmp
@@ -590,7 +593,7 @@ public class PostFrozenService : IPostFrozenService
                 var beneInfo = (
                     from bc in ctx.BeneficiaryContacts
                     join b in ctx.Beneficiaries on bc.Id equals b.BeneficiaryContactId
-                    where !ctx.Demographics.Any(d=>d.Ssn == bc.Ssn)
+                    where !demographicQuery.Any(d=>d.Ssn == bc.Ssn)
                     select new
                     {
                         bc.Ssn,
