@@ -74,7 +74,7 @@ public class BeneficiaryServiceTest : ApiTestBase<Program>
     {
         var res = await _beneficiaryService.GetBeneficiary(new BeneficiaryRequestDto() { BadgeNumber = 703244, PsnSuffix = 1000 }, CancellationToken.None);
         Assert.NotNull(res);
-        res.ShouldBeEquivalentTo(_beneficiaryList);
+        res.Results.ShouldBeEquivalentTo(_beneficiaryList);
     }
 
 
