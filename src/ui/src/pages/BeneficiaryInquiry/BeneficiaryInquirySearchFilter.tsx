@@ -58,7 +58,13 @@ interface BeneficiaryInquirySearchFilterProps {
       } = useForm({
         resolver: yupResolver(schema)
       });
-      const onSubmit = (data:any) => console.log(data);
+      const onSubmit = (data:any) => {
+        console.log(data)
+    };
+
+      const handleReset = ()=>{
+        reset({badgeNumber: '', psnSuffix: ''});
+      }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -120,13 +126,12 @@ interface BeneficiaryInquirySearchFilterProps {
           justifyContent="flex-end"
           paddingY="16px">
           <Grid2 size={{ xs: 12 }}>
-            {/* <SearchAndReset
+             <SearchAndReset
               handleReset={handleReset}
-              handleSearch={validateAndSearch}
-              isFetching={isFetching}
+              handleSearch={onSubmit}
+              isFetching= {false}
               disabled={!isValid}
-            /> */}
-            <input type="submit" />
+            /> 
           </Grid2>
         </Grid2>
       </Grid2>
