@@ -13,12 +13,16 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
     private readonly IProfitSharingDataContextFactory _dbContextFactory;
     private readonly ITotalService _totalService;
     private readonly IEmbeddedSqlService _embeddedSqlService;
+    private readonly IDemographicReaderService _demographicReaderService;
 
-    public ForfeitureAdjustmentService(IProfitSharingDataContextFactory dbContextFactory, ITotalService totalService, IEmbeddedSqlService embeddedSqlService)
+    public ForfeitureAdjustmentService(IProfitSharingDataContextFactory dbContextFactory, 
+        ITotalService totalService, IEmbeddedSqlService embeddedSqlService,
+        IDemographicReaderService demographicReaderService)
     {
         _dbContextFactory = dbContextFactory;
         _totalService = totalService;
         _embeddedSqlService = embeddedSqlService;
+        _demographicReaderService = demographicReaderService;
     }
 
     private sealed class EmployeeInfo
@@ -168,7 +172,8 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
 
         await _dbContextFactory.UseWritableContext(async context =>
         {
-            var employeeData = await context.Demographics
+            var demographics= await _demographicReaderService.BuildDemographicQuery(context, false);
+            var employeeData = await demographics
                 .Where(d => d.BadgeNumber == req.BadgeNumber)
                 .Select(d => new
                 {
