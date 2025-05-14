@@ -233,14 +233,14 @@ public class PostFrozenService : IPostFrozenService
         };
     }
 
-    public async Task<ReportResponseBase<ProfitSharingUnder21InactiveNoBalanceResponse>> ProfitSharingUnder21InactiveNoBalance(FrozenProfitYearRequest request, CancellationToken cancellationToken)
+    public async Task<ReportResponseBase<ProfitSharingUnder21InactiveNoBalanceResponse>> ProfitSharingUnder21InactiveNoBalance(ProfitYearRequest request, CancellationToken cancellationToken)
     {
         var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
         var age21 = calInfo.FiscalEndDate.AddYears(-21);
         short lastYear = (short)(request.ProfitYear - 1);
         var rslt = await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, request);
+            var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, true);
 
             return await (
                 from d in demographicQuery.Where(x => x.DateOfBirth >= age21)
@@ -286,7 +286,7 @@ public class PostFrozenService : IPostFrozenService
         };
     }
 
-    public async Task<ProfitSharingUnder21TotalsResponse> GetUnder21Totals(FrozenProfitYearRequest request, CancellationToken cancellationToken)
+    public async Task<ProfitSharingUnder21TotalsResponse> GetUnder21Totals(ProfitYearRequest request, CancellationToken cancellationToken)
     {
         var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
         var age21 = calInfo.FiscalEndDate.AddYears(-21);
@@ -295,7 +295,7 @@ public class PostFrozenService : IPostFrozenService
 
         _ = await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, request);
+            var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, true);
 
             var rootQuery = from d in demographicQuery.Where(x => x.DateOfBirth >= age21)
                 join pp in ctx.PayProfits.Where(x => x.ProfitYear == request.ProfitYear) on d.Id equals pp.DemographicId
@@ -550,20 +550,20 @@ public class PostFrozenService : IPostFrozenService
         }
     }
 
-    public async Task<List<string>> GetProfitSharingLabelsExport(FrozenProfitYearRequest request, CancellationToken ct)
+    public async Task<List<string>> GetProfitSharingLabelsExport(ProfitYearRequest request, CancellationToken ct)
     {
         var rawData = await GetProfitSharingLabels(request, ct);
         var rslt = rawData.Results.Select(x=>$"{x.EmployeeName};{x.Address1};{x.City};{x.State};{x.PostalCode};{x.FirstName};{x.StoreNumber};{x.DepartmentId};{x.PayClassificationId};{x.BadgeNumber}").ToList();
 
         return rslt;
     }
-    public async Task<PaginatedResponseDto<ProfitSharingLabelResponse>> GetProfitSharingLabels(FrozenProfitYearRequest request, CancellationToken ct)
+    public async Task<PaginatedResponseDto<ProfitSharingLabelResponse>> GetProfitSharingLabels(ProfitYearRequest request, CancellationToken ct)
     {
         using (_logger.BeginScope("Request PROFIT SHARING EMPLOYEE LABEL REPORT"))
         {
             return await (_profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
             {
-                var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, request);
+                var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, true);
 
                 var demoInfo = (
                     from d in demographicQuery

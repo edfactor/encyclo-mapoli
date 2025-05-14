@@ -1,5 +1,4 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Data.Entities;
+﻿using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.AspNetCore.Http;
 
@@ -10,6 +9,5 @@ namespace Demoulas.ProfitSharing.Services.Internal.Interfaces;
 /// </summary>
 public interface IDemographicReaderService
 {
-    Task<IQueryable<Demographic>> BuildDemographicQuery(IProfitSharingDbContext ctx,
-        FrozenProfitYearRequest? request = null);
+    Task<IQueryable<Demographic>> BuildDemographicQuery(IProfitSharingDbContext ctx, bool useFrozenData = false);
 }

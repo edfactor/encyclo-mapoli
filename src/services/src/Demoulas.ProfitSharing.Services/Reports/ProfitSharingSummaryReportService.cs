@@ -362,7 +362,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
 
             if (req.IsYearEnd)
             {
-                var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, req);
+                var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, true);
                 basePayProfits = basePayProfits
                     .Join(demographicQuery, p => p.DemographicId, d => d.Id, (p, _) => p);
             }

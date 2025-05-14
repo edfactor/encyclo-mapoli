@@ -2,7 +2,7 @@
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Request;
 
-public record YearEndProfitSharingReportRequest : FrozenProfitYearRequest
+public record YearEndProfitSharingReportRequest : ProfitYearRequest
 {
     [DefaultValue(true)] public bool IsYearEnd { get; set; }
 

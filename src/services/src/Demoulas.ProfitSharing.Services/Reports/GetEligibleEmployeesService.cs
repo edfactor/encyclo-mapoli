@@ -27,7 +27,7 @@ public sealed class GetEligibleEmployeesService : IGetEligibleEmployeesService
         _demographicReaderService = demographicReaderService;
     }
 
-    public async Task<GetEligibleEmployeesResponse> GetEligibleEmployeesAsync(FrozenProfitYearRequest request,
+    public async Task<GetEligibleEmployeesResponse> GetEligibleEmployeesAsync(ProfitYearRequest request,
         CancellationToken cancellationToken)
     {
         CalendarResponseDto response =
@@ -37,7 +37,7 @@ public sealed class GetEligibleEmployeesService : IGetEligibleEmployeesService
 
         return await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, request);
+            var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, true);
 
             var baseQuery = ctx.PayProfits.Where(p => p.ProfitYear == request.ProfitYear)
                 .Join(

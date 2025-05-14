@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Request;
-public record GrossWagesReportRequest : FrozenProfitYearRequest
+public record GrossWagesReportRequest : ProfitYearRequest
 {
     private const int DefaultGrossAmount = 50000;
 

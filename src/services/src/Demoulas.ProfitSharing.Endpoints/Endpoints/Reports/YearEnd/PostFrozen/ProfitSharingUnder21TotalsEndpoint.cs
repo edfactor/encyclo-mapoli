@@ -9,11 +9,10 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using FastEndpoints;
-using Microsoft.AspNetCore.Http;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.PostFrozen;
 
-public class ProfitSharingUnder21TotalsEndpoint: Endpoint<FrozenProfitYearRequest, ProfitSharingUnder21TotalsResponse>
+public class ProfitSharingUnder21TotalsEndpoint: Endpoint<ProfitYearRequest, ProfitSharingUnder21TotalsResponse>
 {
     private readonly IPostFrozenService _postFrozenService;
 
@@ -39,7 +38,7 @@ public class ProfitSharingUnder21TotalsEndpoint: Endpoint<FrozenProfitYearReques
         Group<YearEndGroup>();
     }
 
-    public override Task<ProfitSharingUnder21TotalsResponse> ExecuteAsync(FrozenProfitYearRequest req, CancellationToken ct)
+    public override Task<ProfitSharingUnder21TotalsResponse> ExecuteAsync(ProfitYearRequest req, CancellationToken ct)
     {
         return _postFrozenService.GetUnder21Totals(req, ct);
     }

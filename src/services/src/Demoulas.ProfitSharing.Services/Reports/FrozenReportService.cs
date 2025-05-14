@@ -8,7 +8,6 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
-using Demoulas.ProfitSharing.Services.ItOperations;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -42,7 +41,7 @@ public class FrozenReportService : IFrozenReportService
     }
 
     public async Task<ForfeituresAndPointsForYearResponseWithTotals> GetForfeituresAndPointsForYearAsync(
-    FrozenProfitYearRequest req,
+        FrozenProfitYearRequest req,
     CancellationToken cancellationToken = default)
     {
         using (_logger.BeginScope("Request FORFEITURES AND POINTS FOR YEAR"))
@@ -52,7 +51,7 @@ public class FrozenReportService : IFrozenReportService
             var result = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
                 // Create base query with appropriate demographics data (frozen or current)
-                var demographicExpression = await _demographicReaderService.BuildDemographicQuery(ctx, req);
+                var demographicExpression = await _demographicReaderService.BuildDemographicQuery(ctx, req.UseFrozenData);
 
                 var combinedQuery = from d in demographicExpression
                                     join pp in ctx.PayProfits on d.Id equals pp.DemographicId
@@ -911,7 +910,7 @@ public class FrozenReportService : IFrozenReportService
         };
     }
 
-    public async Task<UpdateSummaryReportResponse> GetUpdateSummaryReport(FrozenProfitYearRequest req,
+    public async Task<UpdateSummaryReportResponse> GetUpdateSummaryReport(ProfitYearRequest req,
         CancellationToken cancellationToken = default)
     {
         var lastYear = (short)(req.ProfitYear - 1);
@@ -920,7 +919,7 @@ public class FrozenReportService : IFrozenReportService
         var rawResult = await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             //Get population of both employees and beneficiaries
-            var demoBase = (await _demographicReaderService.BuildDemographicQuery(ctx, req)).Select(x =>
+            var demoBase = (await _demographicReaderService.BuildDemographicQuery(ctx, true)).Select(x =>
                 new
                 {
                     x.Ssn,
@@ -1044,7 +1043,7 @@ public class FrozenReportService : IFrozenReportService
             var rslt = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
                 short lastProfitYear = (short)(req.ProfitYear - 1);
-                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx, req);
+                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx, true);
                 var reportDemographics = await (from d in demographics
                     join lyPP in ctx.PayProfits on new { d.Id, Year = lastProfitYear } equals new
                     {

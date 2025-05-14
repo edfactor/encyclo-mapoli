@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Headers;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -18,6 +19,8 @@ public sealed class DemographicReaderService : IDemographicReaderService
     private readonly IHttpContextAccessor _http;
 
     public const string ItemKey = "__demographic_data_window";
+    
+    private FrozenStateResponse? _frozenState = null;
 
     public DemographicReaderService(
         IFrozenService frozenService,
@@ -27,24 +30,23 @@ public sealed class DemographicReaderService : IDemographicReaderService
         _http = http;
     }
 
-    public async Task<IQueryable<Demographic>> BuildDemographicQuery(IProfitSharingDbContext ctx,
-        FrozenProfitYearRequest? request = null)
+    public async Task<IQueryable<Demographic>> BuildDemographicQuery(IProfitSharingDbContext ctx, bool useFrozenData = false)
     {
-        if (request?.UseFrozenData ?? false)
+        if (useFrozenData)
         {
             // ---- FROZEN ------------------------------------------------------
-            var freeze = await _frozenService
+            _frozenState ??= await _frozenService
                          .GetActiveFrozenDemographic();
 
             var meta = new DataWindowMetadata(
                 IsFrozen: true,
-                ProfitYear: freeze.ProfitYear,
-                WindowStart: freeze.AsOfDateTime,
-                WindowEnd: freeze.AsOfDateTime); // snapshot → start == end
+                ProfitYear: _frozenState.ProfitYear,
+                WindowStart: _frozenState.AsOfDateTime,
+                WindowEnd: _frozenState.AsOfDateTime); // snapshot → start == end
 
             _http.HttpContext!.Items[ItemKey] = meta;
 
-            return FrozenService.GetDemographicSnapshot(ctx, freeze.ProfitYear); // :contentReference[oaicite:0]{index=0}:contentReference[oaicite:1]{index=1}
+            return FrozenService.GetDemographicSnapshot(ctx, _frozenState.ProfitYear); // :contentReference[oaicite:0]{index=0}:contentReference[oaicite:1]{index=1}
         }
 
         // ---- LIVE -----------------------------------------------------------

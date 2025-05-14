@@ -16,7 +16,7 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.PostFrozen;
 
 public sealed class ProfitSharingUnder21InactiveNoBalanceEndpoint :
     EndpointWithCsvBase<
-        FrozenProfitYearRequest,
+        ProfitYearRequest,
         ProfitSharingUnder21InactiveNoBalanceResponse,
         ProfitSharingUnder21InactiveNoBalanceEndpoint.ProfitSharingUnder21InaactiveNoBalanceClassMap>
 {
@@ -46,7 +46,7 @@ public sealed class ProfitSharingUnder21InactiveNoBalanceEndpoint :
         Group<YearEndGroup>();
     }
 
-    public override Task<ReportResponseBase<ProfitSharingUnder21InactiveNoBalanceResponse>> GetResponse(FrozenProfitYearRequest req, CancellationToken ct)
+    public override Task<ReportResponseBase<ProfitSharingUnder21InactiveNoBalanceResponse>> GetResponse(ProfitYearRequest req, CancellationToken ct)
     {
         return _postFrozenService.ProfitSharingUnder21InactiveNoBalance(req, ct);
     }
