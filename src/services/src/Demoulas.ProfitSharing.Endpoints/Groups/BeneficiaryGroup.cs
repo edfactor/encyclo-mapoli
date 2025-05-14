@@ -8,7 +8,7 @@ namespace Demoulas.ProfitSharing.Endpoints.Groups;
 
 public sealed class BeneficiaryGroup : GroupBase
 {
-    protected override string Route => "beneficiary inquiry";
+    protected override string Route => "beneficiary-inquiry";
     protected override string RouteName => "Beneficiary Inquiry";
 
     public BeneficiaryGroup()

@@ -1,4 +1,5 @@
 import { ISortParams, Paged, PaginationParams } from "smart-ui-library";
+import internal from "stream";
 
 export enum ImpersonationRoles {
   FinanceManager = "Finance-Manager",
@@ -1258,3 +1259,59 @@ export interface UpdateNavigationResponseDto {
   statusId? : number;
   statusName?: string;
  }
+export interface ContactInfoDto {
+  fullName?:string;
+  lastName:string;
+  firstName:string;
+  middleName?:string;
+  phoneNumber?:string;
+  mobileNumber?:string;
+  emailAddress?:string;
+}
+export interface AddressDto {
+  street?:string;
+  street2?: string;
+  city?:string;
+  state?:string;
+  postalCode?:string;
+  countryIso?:string
+}
+ export interface BeneficiaryContactDto {
+  id:number;
+  ssn: string;
+  dateOfBirth: Date;
+  address?: AddressDto;
+  contactInfo?: ContactInfoDto;
+  createdDate: Date;
+ }
+ export interface BeneficiaryKindDto {
+  id: string;
+  name?:string;
+ }
+ export interface BeneficiaryDto {
+  id: number;
+  psnSuffix: number;
+  badgeNumber: number;
+  demographicId: number;
+  psn: string;
+  contact?: BeneficiaryContactDto;
+  beneficiaryContactId:number;
+  relationship?:string;
+  kindId?:number;
+  kind?:BeneficiaryKindDto;
+  percent: number;
+
+
+ }
+
+ export interface BeneficiaryRequestDto extends SortedPaginationRequestDto {
+  badgeNumber: number;
+  psnSuffix: number;
+ }
+
+ export interface BeneficiaryResponseDto {
+  beneficiaryList?: Paged<BeneficiaryDto>
+ }
+
+
+

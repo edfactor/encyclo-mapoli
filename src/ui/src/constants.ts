@@ -80,6 +80,7 @@ export const ROUTES = {
 } as const;
 
 export const CAPTIONS = {
+  BENEFICIARY_INQUIRY: "Beneficiary Inquiry",
   BALANCE_BY_AGE: "Get Balance by Age (PROF130B)",
   BALANCE_BY_YEARS: "Get Balance by Years (PROF130Y)",
   CONTRIBUTIONS_BY_AGE: "Get Contributions by Age (PROF130)",
