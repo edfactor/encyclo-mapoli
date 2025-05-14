@@ -6,6 +6,7 @@ using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Demoulas.ProfitSharing.Services.ItOperations;
 using Demoulas.Util.Extensions;
@@ -20,6 +21,7 @@ public class FrozenReportService : IFrozenReportService
     private readonly ContributionService _contributionService;
     private readonly TotalService _totalService;
     private readonly ICalendarService _calendarService;
+    private readonly IDemographicReaderService _demographicReaderService;
     private readonly ILogger _logger;
 
     public FrozenReportService(
@@ -27,13 +29,15 @@ public class FrozenReportService : IFrozenReportService
         ILoggerFactory loggerFactory,
         ContributionService contributionService,
         TotalService totalService,
-        ICalendarService calendarService
+        ICalendarService calendarService,
+        IDemographicReaderService demographicReaderService
     )
     {
         _dataContextFactory = dataContextFactory;
         _contributionService = contributionService;
         _totalService = totalService;
         _calendarService = calendarService;
+        _demographicReaderService = demographicReaderService;
         _logger = loggerFactory.CreateLogger<FrozenReportService>();
     }
 
@@ -48,9 +52,7 @@ public class FrozenReportService : IFrozenReportService
             var result = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
                 // Create base query with appropriate demographics data (frozen or current)
-                var demographicExpression = req.UseFrozenData
-                    ? FrozenService.GetDemographicSnapshot(ctx, req.ProfitYear)
-                    : ctx.Demographics.Include(d => d.ContactInfo);
+                var demographicExpression = await _demographicReaderService.BuildDemographicQuery(ctx, req);
 
                 var combinedQuery = from d in demographicExpression
                                     join pp in ctx.PayProfits on d.Id equals pp.DemographicId
@@ -909,7 +911,7 @@ public class FrozenReportService : IFrozenReportService
         };
     }
 
-    public async Task<UpdateSummaryReportResponse> GetUpdateSummaryReport(ProfitYearRequest req,
+    public async Task<UpdateSummaryReportResponse> GetUpdateSummaryReport(FrozenProfitYearRequest req,
         CancellationToken cancellationToken = default)
     {
         var lastYear = (short)(req.ProfitYear - 1);
@@ -918,7 +920,7 @@ public class FrozenReportService : IFrozenReportService
         var rawResult = await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             //Get population of both employees and beneficiaries
-            var demoBase = FrozenService.GetDemographicSnapshot(ctx, req.ProfitYear).Select(x =>
+            var demoBase = (await _demographicReaderService.BuildDemographicQuery(ctx, req)).Select(x =>
                 new
                 {
                     x.Ssn,
@@ -1042,7 +1044,7 @@ public class FrozenReportService : IFrozenReportService
             var rslt = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
                 short lastProfitYear = (short)(req.ProfitYear - 1);
-                var demographics = FrozenService.GetDemographicSnapshot(ctx, req.ProfitYear);
+                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx, req);
                 var reportDemographics = await (from d in demographics
                     join lyPP in ctx.PayProfits on new { d.Id, Year = lastProfitYear } equals new
                     {

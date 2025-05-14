@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Request;
-public record GrossWagesReportRequest : ProfitYearRequest
+public record GrossWagesReportRequest : FrozenProfitYearRequest
 {
     private const int DefaultGrossAmount = 50000;
 
@@ -12,7 +12,7 @@ public record GrossWagesReportRequest : ProfitYearRequest
     {
         return new GrossWagesReportRequest()
         {
-            ProfitYear = 2023,
+            ProfitYear = 2024,
             MinGrossAmount = DefaultGrossAmount
         };
     }

@@ -9,7 +9,7 @@ using Demoulas.ProfitSharing.Security;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Eligibility;
 
-public class GetEligibleEmployeesEndpoint : EndpointWithCsvTotalsBase<ProfitYearRequest, GetEligibleEmployeesResponse, EligibleEmployee, GetEligibleEmployeesEndpoint.GetEligibleEmployeesResponseDtoMap>
+public class GetEligibleEmployeesEndpoint : EndpointWithCsvTotalsBase<FrozenProfitYearRequest, GetEligibleEmployeesResponse, EligibleEmployee, GetEligibleEmployeesEndpoint.GetEligibleEmployeesResponseDtoMap>
 {
     private readonly IGetEligibleEmployeesService _getEligibleEmployeesService;
     public override string ReportFileName { get; } = "GetEligibleEmployeesReport.csv";
@@ -35,7 +35,7 @@ public class GetEligibleEmployeesEndpoint : EndpointWithCsvTotalsBase<ProfitYear
         base.Configure();
     }
 
-    public override Task<GetEligibleEmployeesResponse> GetResponse(ProfitYearRequest req, CancellationToken ct)
+    public override Task<GetEligibleEmployeesResponse> GetResponse(FrozenProfitYearRequest req, CancellationToken ct)
     {
         return _getEligibleEmployeesService.GetEligibleEmployeesAsync(req, ct);
     }

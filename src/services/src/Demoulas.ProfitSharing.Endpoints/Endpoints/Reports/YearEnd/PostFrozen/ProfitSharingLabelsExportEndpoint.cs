@@ -13,7 +13,7 @@ using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.PostFrozen;
-public sealed class ProfitSharingLabelsExportEndpoint : Endpoint<ProfitYearRequest, PaginatedResponseDto<ProfitSharingLabelResponse>>
+public sealed class ProfitSharingLabelsExportEndpoint : Endpoint<FrozenProfitYearRequest, PaginatedResponseDto<ProfitSharingLabelResponse>>
 {
     private readonly IPostFrozenService _postFrozenService;
 
@@ -38,7 +38,7 @@ public sealed class ProfitSharingLabelsExportEndpoint : Endpoint<ProfitYearReque
         Group<YearEndGroup>();
     }
 
-    public override async Task HandleAsync(ProfitYearRequest req, CancellationToken ct)
+    public override async Task HandleAsync(FrozenProfitYearRequest req, CancellationToken ct)
     {
         var response = await _postFrozenService.GetProfitSharingLabelsExport(req, ct);
         var memoryStream = new MemoryStream();

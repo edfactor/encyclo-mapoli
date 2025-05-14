@@ -5,20 +5,12 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.Headers;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.ItOperations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services;
-
-/// <summary>
-/// Chooses live or frozen data **per request** and records the choice in <see cref="HttpContext.Items"/>.
-/// </summary>
-public interface IDemographicReaderService
-{
-    Task<IQueryable<Demographic>> BuildQuery(IProfitSharingDbContext ctx,
-        FrozenProfitYearRequest request);
-}
 
 public sealed class DemographicReaderService : IDemographicReaderService
 {
@@ -35,10 +27,10 @@ public sealed class DemographicReaderService : IDemographicReaderService
         _http = http;
     }
 
-    public async Task<IQueryable<Demographic>> BuildQuery(IProfitSharingDbContext ctx,
-        FrozenProfitYearRequest request)
+    public async Task<IQueryable<Demographic>> BuildDemographicQuery(IProfitSharingDbContext ctx,
+        FrozenProfitYearRequest? request = null)
     {
-        if (request.UseFrozenData)
+        if (request?.UseFrozenData ?? false)
         {
             // ---- FROZEN ------------------------------------------------------
             var freeze = await _frozenService
