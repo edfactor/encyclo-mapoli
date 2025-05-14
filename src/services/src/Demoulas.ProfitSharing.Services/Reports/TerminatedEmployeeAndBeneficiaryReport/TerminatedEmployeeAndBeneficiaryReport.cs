@@ -265,8 +265,8 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 continue;
             }
 
-            byte enrollmentId = member.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions
-                ? Enrollment.Constants.NotEnrolled
+            byte enrollmentId = member.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions /*2*/
+                ? Enrollment.Constants.NotEnrolled /*0*/
                 : member.EnrollmentId;
 
             if (member.ZeroCont == ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested)

@@ -5,3 +5,4 @@
 Rule ID | Category | Severity | Notes
 --------|----------|----------|--------------------
 DSM001  | Security |  Error   | DSM001_SsnPropertyAnalyzer, [Documentation](DSM001_Documentation_Link)
+DSMPS001  | Usage |  Error   | DSMPS001_DemographicsDbSetAnalyzer, [Documentation](DSMPS001_Documentation_Link)
