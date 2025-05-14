@@ -20,16 +20,15 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.BeneficiaryInquiry;
 public class BeneficiaryEndpoint : Endpoint<BeneficiaryRequestDto, BeneficiaryResponseDto>
 {
 
-    private readonly IBeneficiaryService _beneficiaryService;
+    private readonly IBeneficiaryInquiryService _beneficiaryService;
 
-    public BeneficiaryEndpoint(IBeneficiaryService beneficiaryService)
+    public BeneficiaryEndpoint(IBeneficiaryInquiryService beneficiaryService)
     {
         _beneficiaryService = beneficiaryService;
     }
 
     public override void Configure()
     {
-        AllowAnonymous();
         Get("");
         Summary(m =>
         {
