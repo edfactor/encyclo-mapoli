@@ -335,7 +335,8 @@ pipelines:
     release:
       - parallel:
           - step: *build-and-test-backend
-          - step: *test-frontend          
+          - step: *audit-frontend
+          - step: *audit-backend
       - parallel:
           - step: *create-api-artifacts
           - step: *create-service-artifacts
