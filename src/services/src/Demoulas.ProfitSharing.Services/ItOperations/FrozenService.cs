@@ -31,7 +31,7 @@ public class FrozenService: IFrozenService
     /// <param name="ctx">The data context used for querying</param>
     /// <param name="profitYear">Show data as of the last frozen date for a profit year.</param>
     /// <returns></returns>
-    public static IQueryable<Demographic> GetDemographicSnapshot(IProfitSharingDbContext ctx, short profitYear)
+    internal static IQueryable<Demographic> GetDemographicSnapshot(IProfitSharingDbContext ctx, short profitYear)
     {
         return 
             from dh in ctx.DemographicHistories
