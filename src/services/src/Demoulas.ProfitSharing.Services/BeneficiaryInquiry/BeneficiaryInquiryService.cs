@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
@@ -11,21 +13,22 @@ using MassTransit.Testing;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.BeneficiaryInquiry;
-public class BeneficiaryService : IBeneficiaryService
+public class BeneficiaryInquiryService : IBeneficiaryInquiryService
 {
 
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
 
-    public BeneficiaryService(IProfitSharingDataContextFactory dataContextFactory)
+    public BeneficiaryInquiryService(IProfitSharingDataContextFactory dataContextFactory)
     {
         _dataContextFactory = dataContextFactory;
     }
 
 
-    public async Task<List<BeneficiaryDto>> GetBeneficiary(BeneficiaryRequestDto request, CancellationToken cancellationToken)
+    public async Task<PaginatedResponseDto<BeneficiaryDto>> GetBeneficiary(BeneficiaryRequestDto request, CancellationToken cancellationToken)
     {
-        var beneficiary =  await _dataContextFactory.UseReadOnlyContext(context =>
-            context.Beneficiaries.Include(x => x.Contact)
+        var beneficiary = await _dataContextFactory.UseReadOnlyContext(async context =>
+        {
+            var result = context.Beneficiaries.Include(x => x.Contact)
             .Where(x => x.BadgeNumber == request.BadgeNumber && x.PsnSuffix == request.PsnSuffix)
             .Select(x => new BeneficiaryDto()
             {
@@ -68,7 +71,10 @@ public class BeneficiaryService : IBeneficiaryService
                     Name = x.Kind != null ? x.Kind.Name : null
                 },
                 Relationship = x.Relationship
-            }).ToListAsync(cancellationToken)
+            });
+            PaginatedResponseDto<BeneficiaryDto> final = await result.ToPaginationResultsAsync(request,cancellationToken);
+            return final;
+        }
         );
 
         return beneficiary;
