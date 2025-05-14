@@ -16,12 +16,12 @@ using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.BeneficiaryInquiry;
 public class BeneficiaryServiceTest : ApiTestBase<Program>
 {
-    private readonly IBeneficiaryService _beneficiaryService;
+    private readonly IBeneficiaryInquiryService _beneficiaryService;
     private readonly List<BeneficiaryDto> _beneficiaryList;
 
     public BeneficiaryServiceTest()
     {
-        _beneficiaryService = ServiceProvider?.GetRequiredService<IBeneficiaryService>()!;
+        _beneficiaryService = ServiceProvider?.GetRequiredService<IBeneficiaryInquiryService>()!;
         _beneficiaryList = new List<BeneficiaryDto>()
         {
             new BeneficiaryDto()
