@@ -1,4 +1,5 @@
 ﻿using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Extensions;
@@ -7,6 +8,7 @@ using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Extensions;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -41,17 +43,19 @@ public class MasterInquiryService : IMasterInquiryService
     private readonly ILogger _logger;
     private readonly ITotalService _totalService;
     private readonly IMissiveService _missiveService;
+    private readonly IDemographicReaderService _demographicReaderService;
 
     public MasterInquiryService(
         IProfitSharingDataContextFactory dataContextFactory,
         ITotalService totalService,
         ILoggerFactory loggerFactory,
-        IMissiveService missiveService
-    )
+        IMissiveService missiveService, 
+        IDemographicReaderService demographicReaderService)
     {
         _dataContextFactory = dataContextFactory;
         _totalService = totalService;
         _missiveService = missiveService;
+        _demographicReaderService = demographicReaderService;
         _logger = loggerFactory.CreateLogger<MasterInquiryService>();
     }
 
@@ -228,7 +232,8 @@ public class MasterInquiryService : IMasterInquiryService
     private async Task<EmployeeDetails?> GetDemographicDetails(ProfitSharingReadOnlyDbContext ctx,
        int ssn, short currentYear, short previousYear, CancellationToken cancellationToken)
     {
-        var memberData = await ctx.Demographics
+        var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+        var memberData = await demographics
             .Include(d => d.PayProfits)
             .ThenInclude(pp => pp.Enrollment)
             .Where(d => d.Ssn == ssn)
