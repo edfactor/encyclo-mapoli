@@ -5,6 +5,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -13,12 +14,15 @@ namespace Demoulas.ProfitSharing.Services.Reports;
 public class NegativeEtvaReportService : INegativeEtvaReportService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
+    private readonly IDemographicReaderService _demographicReaderService;
     private readonly ILogger<NegativeEtvaReportService> _logger;
 
     public NegativeEtvaReportService(IProfitSharingDataContextFactory dataContextFactory,
-        ILoggerFactory loggerFactory)
+        ILoggerFactory loggerFactory,
+        IDemographicReaderService demographicReaderService)
     {
         _dataContextFactory = dataContextFactory;
+        _demographicReaderService = demographicReaderService;
         _logger = loggerFactory.CreateLogger<NegativeEtvaReportService>();
     }
 
@@ -26,12 +30,14 @@ public class NegativeEtvaReportService : INegativeEtvaReportService
     {
         using (_logger.BeginScope("Request NEGATIVE ETVA FOR SSNs ON PAYPROFIT"))
         {
-            var results = await _dataContextFactory.UseReadOnlyContext(c =>
+            var results = await _dataContextFactory.UseReadOnlyContext(async c =>
             {
-                var ssnUnion = c.Demographics.Select(d => d.Ssn)
+                var demographics = await _demographicReaderService.BuildDemographicQuery(c);
+                
+                var ssnUnion = demographics.Select(d => d.Ssn)
                     .Union(c.Beneficiaries.Include(b => b.Contact).Select(b => b.Contact!.Ssn));
 
-                return c.PayProfits
+                return await c.PayProfits
                     .Include(p => p.Demographic)
                     .Where(p => p.ProfitYear == req.ProfitYear
                                 && ssnUnion.Contains(p.Demographic!.Ssn)
