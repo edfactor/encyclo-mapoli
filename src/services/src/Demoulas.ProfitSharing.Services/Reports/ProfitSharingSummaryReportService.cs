@@ -288,7 +288,10 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 response.LineItems.Add(lineItem);
             }
 
-            var beneQry = ctx.BeneficiaryContacts.Where(bc => !ctx.Demographics.Any(x => x.Ssn == bc.Ssn))
+
+            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+            var beneQry = ctx.BeneficiaryContacts
+                .Where(bc => !demographics.Any(x => x.Ssn == bc.Ssn))
                 .Join(_totalService.GetTotalBalanceSet(ctx, req.ProfitYear), x => x.Ssn, x => x.Ssn,
                     (pp, tot) => new { pp, tot });
 
@@ -376,10 +379,11 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
 
             if (req.IncludeBeneficiaries)
             {
+                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
                 beneficiaryQuery = ctx.Beneficiaries
                     .Include(b => b.Contact)!
                     .ThenInclude(c => c!.ContactInfo)
-                    .Where(b => !ctx.Demographics.Any(x => x.Ssn == b.Contact!.Ssn));
+                    .Where(b => !demographics.Any(x => x.Ssn == b.Contact!.Ssn));
             }
 
             // ──────────────────────────────────────────────────────────────────────────
