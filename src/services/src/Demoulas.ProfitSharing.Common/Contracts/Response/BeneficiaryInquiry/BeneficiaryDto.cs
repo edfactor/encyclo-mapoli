@@ -13,9 +13,6 @@ public class BeneficiaryDto
     public required int BadgeNumber { get; set; }
     public required int DemographicId { get; set; }
 
-    // Reconstruct the full PSN dynamically
-    public string Psn => $"{BadgeNumber}{PsnSuffix:D4}"; // Reconstruct PSN w
-
     public BeneficiaryContactDto? Contact { get; set; }
     public required int BeneficiaryContactId { get; set; }
 

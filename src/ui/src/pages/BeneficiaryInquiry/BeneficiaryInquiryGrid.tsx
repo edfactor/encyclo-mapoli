@@ -23,30 +23,27 @@ const BeneficiaryInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearc
   });
 
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
-  const { beneficiaryList } = useSelector((state: RootState) => state.beneficiaries);
+  const { beneficiaryList, beneficiaryRequest } = useSelector((state: RootState) => state.beneficiaries);
   const [triggerSearch, { isFetching }] = useLazyGetBeneficiariesQuery();
 
-  const createMasterInquiryRequest = useCallback(
+  const createBeneficiaryInquiryRequest = useCallback(
     (skip: number, sortBy: string, isSortDescending: boolean): BeneficiaryRequestDto | null => {
-      //if (!masterInquiryRequestParams) return null;
+      if (!beneficiaryRequest) return null;
 
-      return {
-
-        
-      };
+      return beneficiaryRequest;
     },
-    [masterInquiryRequestParams, pageSize, _sortParams]
+    [beneficiaryRequest, pageSize, _sortParams]
   );
 
   const sortEventHandler = (update: ISortParams) => {
     if (update.sortBy === "") {
-      update.sortBy = "profitYear";
+      update.sortBy = "fullName";
       update.isSortDescending = true;
     }
     setSortParams(update);
     setPageNumber(0);
 
-    const request = createMasterInquiryRequest(0, update.sortBy, update.isSortDescending);
+    const request = createBeneficiaryInquiryRequest(0, update.sortBy, update.isSortDescending);
     if (!request) return;
 
     triggerSearch(request, false);
@@ -55,14 +52,14 @@ const BeneficiaryInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearc
   const columnDefs = useMemo(() => BeneficiaryInquiryGridColumns(), []);
 
   const onSearch = useCallback(async () => {
-    const request = createMasterInquiryRequest(pageNumber * pageSize, _sortParams.sortBy, _sortParams.isSortDescending);
+    const request = createBeneficiaryInquiryRequest(pageNumber * pageSize, _sortParams.sortBy, _sortParams.isSortDescending);
     if (!request) return;
 
     await triggerSearch(request, false);
-  }, [createMasterInquiryRequest, pageNumber, pageSize, _sortParams, triggerSearch]);
+  }, [createBeneficiaryInquiryRequest, pageNumber, pageSize, _sortParams, triggerSearch]);
 
   useEffect(() => {
-    if (initialSearchLoaded) {
+    if (hasToken && initialSearchLoaded) {
       onSearch();
     }
   }, [initialSearchLoaded, pageNumber, pageSize, _sortParams, onSearch]);
@@ -75,7 +72,7 @@ const BeneficiaryInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearc
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`Master Inquiry (${beneficiaryList?.beneficiaryList?.total || 0} ${beneficiaryList?.beneficiaryList?.total === 1 ? "Record" : "Records"})`}
+              {`Beneficiary (${beneficiaryList?.beneficiaryList?.total || 0} ${beneficiaryList?.beneficiaryList?.total === 1 ? "Record" : "Records"})`}
             </Typography>
           </div>
           <DSMGrid

@@ -8,9 +8,11 @@ import { RootState } from "reduxstore/store";
 import { MissiveResponse } from "reduxstore/types";
 import { DSMAccordion, Page } from "smart-ui-library";
 import BeneficiaryInquirySearchFilter from "./BeneficiaryInquirySearchFilter";
+import BeneficiaryInquiryGrid from "./BeneficiaryInquiryGrid";
 
 
 const BeneficiaryInquiry = () => {
+    const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
  
   return (
     <Page label="BENEFICIARY INQUIRY">
@@ -32,10 +34,7 @@ const BeneficiaryInquiry = () => {
         {/* {masterInquiryEmployeeDetails && <MasterInquiryEmployeeDetails details={masterInquiryEmployeeDetails} missives={missives}/>} */}
 
         <Grid2 size={{ xs: 12 }} width="100%">
-          {/* <MasterInquiryGrid
-            initialSearchLoaded={initialSearchLoaded}
-            setInitialSearchLoaded={setInitialSearchLoaded}
-          /> */}
+          <BeneficiaryInquiryGrid initialSearchLoaded = {initialSearchLoaded} setInitialSearchLoaded={setInitialSearchLoaded}  />
         </Grid2>
       </Grid2>
     </Page>

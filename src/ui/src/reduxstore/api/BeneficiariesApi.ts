@@ -11,7 +11,7 @@ import { setBeneficiary, setBeneficiaryError } from "reduxstore/slices/beneficia
 
 export const BeneficiariesApi = createApi({
     baseQuery: fetchBaseQuery({
-        baseUrl: `${url}/api/beneficiary-inquiry`,
+        baseUrl: `${url}/api/beneficiary`,
         prepareHeaders: (headers, { getState }) => {
             const token = (getState() as RootState).security.token;
             const impersonating = (getState() as RootState).security.impersonating;
@@ -35,10 +35,7 @@ export const BeneficiariesApi = createApi({
             query: (request) => ({
                 url: ``,
                 method: "GET",
-                params: {
-                    badgeNumber: request.badgeNumber,
-                    psnSuffix: request.psnSuffix
-                }
+                params: request
             }),
             async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {

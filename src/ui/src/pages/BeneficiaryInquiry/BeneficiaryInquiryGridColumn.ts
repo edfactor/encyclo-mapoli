@@ -1,5 +1,7 @@
 import { agGridNumberToCurrency } from "smart-ui-library";
 import { ColDef, ICellRendererParams } from "ag-grid-community";
+import { mmDDYYYY_HHMMSS_Format } from "utils/dateUtils";
+
 
 export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
   return [
@@ -7,16 +9,16 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       headerName: "Badge Number",
       field: "badgeNumber",
       colId: "badgeNumber",
-      minWidth: 120,
-      headerClass: "left-align",
-      cellClass: "left-align",
+      minWidth: 130,
+      headerClass: "center-align",
+      cellClass: "center-align",
       resizable: true
     },
     {
       headerName: "Psn Suffix",
       field: "psnSuffix",
       colId: "psnSuffix",
-      minWidth: 120,
+      minWidth: 100,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true
@@ -25,25 +27,25 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       headerName: "Psn",
       field: "psn",
       colId: "psn",
-      minWidth: 100,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      minWidth: 120,
+      headerClass: "center-align",
+      cellClass: "center-align",
       resizable: true,
       sortable: true,
-      unSortIcon: true
+      unSortIcon: true,
+      valueFormatter: (params)=>{
+        return `${params.data.badgeNumber}${params.data.psnSuffix}`
+      }
     },
     {
       headerName: "SSN",
       field: "ssn",
       colId: "ssn",
       minWidth: 100,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      headerClass: "center-align",
+      cellClass: "center-align",
       resizable: true,
       valueFormatter: (params) => {
-        const id = params.data.profitCodeId; // assuming 'status' is in the row data
-        const name = params.data.profitCodeName; // assuming 'statusName' is in the row data
-        //see if one is undefined or null then show other
         return `${params.data.contact.ssn}`;
       }
     },
@@ -52,8 +54,8 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       field: "dateOfBirth",
       colId: "dateOfBirth",
       minWidth: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      headerClass: "center-align",
+      cellClass: "center-align",
       resizable: true,
       valueFormatter: (params)=> {
         return `${params.data.contact.dateOfBirth}`
@@ -63,9 +65,9 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       headerName: "Street",
       field: "street",
       colId: "street",
-      minWidth: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      minWidth: 150,
+      headerClass: "center-align",
+      cellClass: "center-align",
       resizable: true,
       valueFormatter: (params)=>{
         return `${params.data.contact.address.street}`
@@ -76,8 +78,8 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       field: "city",
       colId: "city",
       minWidth: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      headerClass: "center-align",
+      cellClass: "center-align",
       resizable: true,
       valueFormatter: (params)=>{
         return `${params.data.contact.address.city}`
@@ -88,8 +90,8 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       field: "state",
       colId: "state",
       minWidth: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      headerClass: "center-align",
+      cellClass: "center-align",
       resizable: true,
       valueFormatter: (params)=>{
         return `${params.data.contact.address.state}`
@@ -99,9 +101,9 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       headerName: "Postal Code",
       field: "postalCode",
       colId: "postalCode",
-      minWidth: 100,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      minWidth: 120,
+      headerClass: "center-align",
+      cellClass: "center-align",
       sortable: false,
       resizable: true,
       valueFormatter: (params)=>{
@@ -113,8 +115,8 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       field: "countryIso",
       colId: "countryIso",
       minWidth: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      headerClass: "center-align",
+      cellClass: "center-align",
       resizable: true,
       sortable: false,
       valueFormatter: (params)=>{
@@ -125,9 +127,9 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       headerName: "Full Name",
       field: "fullName",
       colId: "fullName",
-      minWidth: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      minWidth: 170,
+      headerClass: "center-align",
+      cellClass: "center-align",
       resizable: true,
       sortable: false,
       valueFormatter: (params)=>{
@@ -138,46 +140,47 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       headerName: "Phone Number",
       field: "phoneNumber",
       colId: "phoneNumber",
-      minWidth: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      minWidth: 130,
+      headerClass: "center-align",
+      cellClass: "center-align",
       resizable: true,
       valueFormatter: (params)=>{
-        return `${params.data.contact.contactInfo.phoneNumber}`
+        return `${params.data.contact.contactInfo.phoneNumber??""}`
       }
     },
     {
       headerName: "Mobile Number",
       field: "mobileNumber",
       colId: "mobileNumber",
-      minWidth: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      minWidth: 130,
+      headerClass: "center-align",
+      cellClass: "center-align",
       resizable: true,
       valueFormatter: (params)=>{
-        return `${params.data.contact.contactInfo.mobileNumber}`
+        return `${params.data.contact.contactInfo.mobileNumber??""}`
       }
     },
     {
       headerName: "Email Address",
       field: "emailAddress",
       colId: "emailAddress",
-      minWidth: 100,
+      minWidth: 130,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
       valueFormatter: (params)=>{
-        return `${params.data.contact.contactInfo.emailAddress}`
+        return `${params.data.contact.contactInfo.emailAddress??""}`
       }
     },
     {
       headerName: "Created Date",
       field: "createdDate",
       colId: "createdDate",
-      minWidth: 100,
-      headerClass: "right-align",
-      cellClass: "right-align",
-      resizable: true
+      minWidth: 170,
+      headerClass: "center-align",
+      cellClass: "center-align",
+      resizable: true,
+      valueFormatter: (params) => (params.data.contact.createdDate ? mmDDYYYY_HHMMSS_Format(params.data.contact.createdDate) : "")
     }
   ];
 };

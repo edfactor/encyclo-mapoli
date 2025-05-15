@@ -31,9 +31,6 @@ export const beneficiarySlice = createSlice({
                 state.beneficiaryRequest = action.payload;
                 state.error = null;
             }
-            else {
-                state.error = "Failed to fetch  navigations"
-            }
         },
         setBeneficiaryError: (state, action: PayloadAction<string>) => {
             state.error = action.payload;
@@ -42,6 +39,6 @@ export const beneficiarySlice = createSlice({
     }
 });
 
-export const { setBeneficiary, setBeneficiaryError} = beneficiarySlice.actions;
+export const { setBeneficiary, setBeneficiaryError, setBeneficiaryRequest} = beneficiarySlice.actions;
 
 export default beneficiarySlice.reducer;

@@ -29,6 +29,7 @@ import { RootState } from "reduxstore/store";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 import { useLazyGetBeneficiariesQuery } from "reduxstore/api/BeneficiariesApi";
+import { setBeneficiaryRequest } from "reduxstore/slices/beneficiarySlice";
 
 const schema = yup.object().shape({
     badgeNumber: yup.string().required(),
@@ -50,6 +51,8 @@ interface BeneficiaryInquirySearchFilterProps {
 // }) => {
 const BeneficiaryInquirySearchFilter = () => {
     const [triggerSearch, {data,isLoading,isError,isFetching}] = useLazyGetBeneficiariesQuery();
+    const dispatch = useDispatch();
+    
     const {
         control,
         register,
@@ -74,6 +77,7 @@ const BeneficiaryInquirySearchFilter = () => {
                 sortBy: "id"
             };
             triggerSearch(beneficiaryRequestDto);
+            dispatch(setBeneficiaryRequest(beneficiaryRequestDto));
         }
         
         console.log({bnumber: badgeNumber, psn: psnSuffix});
