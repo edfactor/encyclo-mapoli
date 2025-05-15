@@ -2,21 +2,25 @@
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-using Demoulas.ProfitSharing.Data.Entities;
-using Microsoft.EntityFrameworkCore;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.Reports
 {
     public class PayrollDuplicateSsnReportService : IPayrollDuplicateSsnReportService
     {
         private readonly IProfitSharingDataContextFactory _dataContextFactory;
+        private readonly IDemographicReaderService _demographicReaderService;
 
-        public PayrollDuplicateSsnReportService(IProfitSharingDataContextFactory dataContextFactory)
+        public PayrollDuplicateSsnReportService(IProfitSharingDataContextFactory dataContextFactory,
+            IDemographicReaderService demographicReaderService)
         {
             _dataContextFactory = dataContextFactory;
+            _demographicReaderService = demographicReaderService;
         }
 
         public Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetDuplicateSsnAsync(SortedPaginationRequestDto req, CancellationToken ct)
@@ -24,14 +28,15 @@ namespace Demoulas.ProfitSharing.Services.Reports
             return _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
                 int cutoffYear = DateTime.UtcNow.Year - 5;
+                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
 
-                var dupSsns = await ctx.Demographics
+                var dupSsns = await demographics
                     .GroupBy(x => x.Ssn)
                     .Where(g => g.Count() > 1)
                     .Select(g => g.Key)
                     .ToHashSetAsync(ct);
 
-                var rslts = await ctx.Demographics
+                var rslts = await demographics
                     .Include(x => x.EmploymentStatus)
                     .Where(dem => dupSsns.Contains(dem.Ssn))
                     .OrderBy(d => d.Ssn)

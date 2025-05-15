@@ -10,6 +10,7 @@ using Demoulas.ProfitSharing.Common.Validators;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Demoulas.Util.Extensions;
 using FluentValidation;
@@ -24,18 +25,21 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
     private readonly ICalendarService _calendarService;
     private readonly TotalService _totalService;
     private readonly ILoggerFactory _factory;
+    private readonly IDemographicReaderService _demographicReaderService;
     private readonly ILogger<TerminationAndRehireService> _logger;
 
     public TerminationAndRehireService(
         IProfitSharingDataContextFactory dataContextFactory,
         ICalendarService calendarService,
         TotalService totalService,
-        ILoggerFactory factory)
+        ILoggerFactory factory,
+        IDemographicReaderService demographicReaderService)
     {
         _dataContextFactory = dataContextFactory;
         _calendarService = calendarService;
         _totalService = totalService;
         _factory = factory;
+        _demographicReaderService = demographicReaderService;
         _logger = factory.CreateLogger<TerminationAndRehireService>();
     }
 
@@ -49,8 +53,10 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
     {
         var militaryMembers = await _dataContextFactory.UseReadOnlyContext(async context =>
         {
-            var inactiveMilitaryMembers = await context.Demographics.Where(d => d.TerminationCodeId == TerminationCode.Constants.Military
-                                                                                && d.EmploymentStatusId == EmploymentStatus.Constants.Inactive)
+            var demographics = await _demographicReaderService.BuildDemographicQuery(context);
+            var inactiveMilitaryMembers = await demographics
+                .Where(d => d.TerminationCodeId == TerminationCode.Constants.Military
+                                     && d.EmploymentStatusId == EmploymentStatus.Constants.Inactive)
                 .OrderBy(d => d.ContactInfo.FullName)
                 .Select(d => new EmployeesOnMilitaryLeaveResponse
                 {
@@ -151,8 +157,10 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
         var ending = req.EndingDate.ToDateOnly(DateTimeKind.Local) > bracket.FiscalEndDate ? bracket.FiscalEndDate : req.EndingDate.ToDateOnly(DateTimeKind.Local);
 
         var yearsOfServiceQuery = _totalService.GetYearsOfService(context, (short)req.EndingDate.Year);
+        var demographics = await _demographicReaderService.BuildDemographicQuery(context);
+        
         var lastYear = (short)(req.ProfitYear - 1);
-        var query = context.Demographics
+        var query = demographics
             .Join(
                 context.PayProfits.Include(e=> e.Enrollment)
                     .Where(x => x.ProfitYear == req.ProfitYear), // Table to join with (PayProfit)
