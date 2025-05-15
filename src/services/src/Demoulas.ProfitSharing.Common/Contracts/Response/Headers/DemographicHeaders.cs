@@ -4,6 +4,5 @@
 public static class DemographicHeaders
 {
     public const string Source = "X-Demographic-Data-Source"; // Live | Frozen
-    public const string Start = "X-Demographic-Window-Start";
     public const string End = "X-Demographic-Window-End";
 }

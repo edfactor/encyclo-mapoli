@@ -6,7 +6,6 @@ namespace Demoulas.ProfitSharing.Common.Contracts.Response.Headers
     public sealed record DataWindowMetadata(
         bool IsFrozen,
         short? ProfitYear,
-        DateTimeOffset WindowStart,
         DateTimeOffset WindowEnd);
 }
 

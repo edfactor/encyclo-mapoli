@@ -32,29 +32,32 @@ public sealed class DemographicReaderService : IDemographicReaderService
         if (useFrozenData)
         {
             // ---- FROZEN ------------------------------------------------------
-            _frozenState ??= await _frozenService
-                         .GetActiveFrozenDemographic();
+            _frozenState ??= await _frozenService.GetActiveFrozenDemographic();
 
-            var meta = new DataWindowMetadata(
-                IsFrozen: true,
-                ProfitYear: _frozenState.ProfitYear,
-                WindowStart: _frozenState.AsOfDateTime,
-                WindowEnd: _frozenState.AsOfDateTime); // snapshot → start == end
+            if (_http.HttpContext != null)
+            {
+                var meta = new DataWindowMetadata(
+                    IsFrozen: true,
+                    ProfitYear: _frozenState.ProfitYear,
+                    WindowEnd: _frozenState.AsOfDateTime); // snapshot → start == end
 
-            _http.HttpContext!.Items[ItemKey] = meta;
+                _http.HttpContext!.Items[ItemKey] = meta;
+            }
 
             return FrozenService.GetDemographicSnapshot(ctx, _frozenState.ProfitYear); // :contentReference[oaicite:0]{index=0}:contentReference[oaicite:1]{index=1}
         }
 
         // ---- LIVE -----------------------------------------------------------
-        var now = DateTimeOffset.UtcNow;
-        var liveMeta = new DataWindowMetadata(
-            IsFrozen: false,
-            ProfitYear: null,
-            WindowStart: now,
-            WindowEnd: now);
+        if (_http.HttpContext != null)
+        {
+            var now = DateTimeOffset.UtcNow;
+            var liveMeta = new DataWindowMetadata(
+                IsFrozen: false,
+                ProfitYear: null,
+                WindowEnd: now);
 
-        _http.HttpContext!.Items[ItemKey] = liveMeta;
+            _http.HttpContext.Items[ItemKey] = liveMeta;
+        }
 
         return ctx.Demographics
                   .Include(d => d.ContactInfo)

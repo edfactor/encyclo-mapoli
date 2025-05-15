@@ -18,12 +18,11 @@ public sealed class DemographicHeaderMiddleware
 
             if (ctx.Items.TryGetValue(
                     DemographicReaderService.ItemKey,
-                    out var obj) &&
+                    out object? obj) &&
                 obj is DataWindowMetadata meta)
             {
                 var headers = ctx.Response.Headers;
                 headers[DemographicHeaders.Source] = meta.IsFrozen ? "Frozen" : "Live";
-                headers[DemographicHeaders.Start] = meta.WindowStart.ToString("o");
                 headers[DemographicHeaders.End] = meta.WindowEnd.ToString("o");
             }
 
