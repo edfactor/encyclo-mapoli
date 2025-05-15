@@ -72,7 +72,7 @@ const BeneficiaryInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearc
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`Beneficiary (${beneficiaryList?.beneficiaryList?.total || 0} ${beneficiaryList?.beneficiaryList?.total === 1 ? "Record" : "Records"})`}
+              {`Beneficiary (${beneficiaryList?.total || 0} ${beneficiaryList?.total === 1 ? "Record" : "Records"})`}
             </Typography>
           </div>
           <DSMGrid
@@ -80,14 +80,14 @@ const BeneficiaryInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearc
             isLoading={isFetching}
             handleSortChanged={sortEventHandler}
             providedOptions={{
-              rowData: beneficiaryList?.beneficiaryList?.results,
+              rowData: beneficiaryList?.results,
               columnDefs: columnDefs,
               suppressMultiSort: true
             }}
           />
         </>
       )}
-      {!!beneficiaryList && beneficiaryList.beneficiaryList && beneficiaryList.beneficiaryList?.results.length > 0 && (
+      {!!beneficiaryList && beneficiaryList && beneficiaryList?.results.length > 0 && (
         <Pagination
           pageNumber={pageNumber}
           setPageNumber={(value: number) => {
@@ -100,7 +100,7 @@ const BeneficiaryInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearc
             setPageNumber(1);
             setInitialSearchLoaded(true);
           }}
-          recordCount={beneficiaryList.beneficiaryList?.total}
+          recordCount={beneficiaryList?.total}
         />
       )}
     </>

@@ -2,6 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 import { RootState } from "reduxstore/store";
 import {
+    BeneficiaryDto,
     BeneficiaryRequestDto,
     BeneficiaryResponseDto
 } from "reduxstore/types";
@@ -31,7 +32,7 @@ export const BeneficiariesApi = createApi({
     }),
     reducerPath: "beneficiariesApi",
     endpoints: (builder) => ({
-        getBeneficiaries: builder.query<BeneficiaryResponseDto, BeneficiaryRequestDto>({
+        getBeneficiaries: builder.query<Paged<BeneficiaryDto>, BeneficiaryRequestDto>({
             query: (request) => ({
                 url: ``,
                 method: "GET",

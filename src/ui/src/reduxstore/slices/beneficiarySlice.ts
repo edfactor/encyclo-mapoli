@@ -1,12 +1,13 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import {BeneficiaryRequestDto, BeneficiaryResponseDto} from '../types';
+import {BeneficiaryDto, BeneficiaryRequestDto, BeneficiaryResponseDto} from '../types';
+import { Paged } from 'smart-ui-library';
 
-export interface NavigationState {
-  beneficiaryList: BeneficiaryResponseDto | null;
+export interface BeneficiaryState {
+  beneficiaryList: Paged<BeneficiaryDto> | null;
   beneficiaryRequest: BeneficiaryRequestDto | null;
   error: string | null;
 }
-const initialState: NavigationState = {
+const initialState: BeneficiaryState = {
   beneficiaryList: null,
   beneficiaryRequest: null,
   error: null
@@ -17,7 +18,7 @@ export const beneficiarySlice = createSlice({
     name: 'navigation',
     initialState,
     reducers:{
-        setBeneficiary: (state, action: PayloadAction<BeneficiaryResponseDto | null>) => {
+        setBeneficiary: (state, action: PayloadAction<Paged<BeneficiaryDto> | null>) => {
             if(action.payload){
                 state.beneficiaryList = action.payload;
                 state.error = null;
