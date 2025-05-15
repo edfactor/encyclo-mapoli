@@ -17,12 +17,10 @@ namespace Demoulas.ProfitSharing.Services.ItOperations;
 public class FrozenService: IFrozenService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
-    private readonly IAppUser _appUser;
-
-    public FrozenService(IProfitSharingDataContextFactory dataContextFactory, IAppUser appUser)
+    
+    public FrozenService(IProfitSharingDataContextFactory dataContextFactory)
     {
         _dataContextFactory = dataContextFactory;
-        _appUser = appUser;
     }
 
     /// <summary>
@@ -74,9 +72,12 @@ public class FrozenService: IFrozenService
     /// </summary>
     /// <param name="profitYear">Profit year for which to set the freeze date/time</param>
     /// <param name="asOfDateTime"></param>
+    /// <param name="userName"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public async Task<FrozenStateResponse> FreezeDemographics(short profitYear, DateTime asOfDateTime, CancellationToken cancellationToken = default)
+    public async Task<FrozenStateResponse> FreezeDemographics(short profitYear, DateTime asOfDateTime, 
+        string userName = "Unknown",
+        CancellationToken cancellationToken = default)
     {
         var validator = new InlineValidator<short>();
 
@@ -86,8 +87,6 @@ public class FrozenService: IFrozenService
             .WithMessage($"ProfitYear must be between {thisYear - 1} and {thisYear}.");
 
         await validator.ValidateAndThrowAsync(profitYear, cancellationToken);
-
-        string userName = _appUser.UserName ?? "Unknown";
 
         return await _dataContextFactory.UseWritableContext(async ctx =>
         {
@@ -104,7 +103,7 @@ public class FrozenService: IFrozenService
             {
                 Id = frozenState.Id,
                 ProfitYear = profitYear,
-                FrozenBy = _appUser.UserName,
+                FrozenBy = userName,
                 AsOfDateTime = asOfDateTime,
                 IsActive = true
             };

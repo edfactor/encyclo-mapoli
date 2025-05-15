@@ -1,4 +1,5 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.Common.Contracts.Interfaces;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
@@ -9,10 +10,12 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.ItOperations;
 public class FreezeDemographicsEndpoint : Endpoint<SetFrozenStateRequest, FrozenStateResponse>
 {
     private readonly IFrozenService _frozenService;
+    private readonly IAppUser _appUser;
 
-    public FreezeDemographicsEndpoint(IFrozenService frozenService)
+    public FreezeDemographicsEndpoint(IFrozenService frozenService, IAppUser appUser)
     {
         _frozenService = frozenService;
+        _appUser = appUser;
     }
 
     public override void Configure()
@@ -31,6 +34,6 @@ public class FreezeDemographicsEndpoint : Endpoint<SetFrozenStateRequest, Frozen
 
     public override Task<FrozenStateResponse> ExecuteAsync(SetFrozenStateRequest req, CancellationToken ct)
     {
-        return _frozenService.FreezeDemographics(req.ProfitYear, req.AsOfDateTime, ct);
+        return _frozenService.FreezeDemographics(req.ProfitYear, req.AsOfDateTime, _appUser.UserName!, ct);
     }
 }
