@@ -940,7 +940,9 @@ public class FrozenReportService : IFrozenReportService
                     x.StoreNumber
                 });
             var beneficiaryBase = ctx.BeneficiaryContacts
-                .Where(x => !demographics.Any(d => d.Ssn == x.Ssn))
+#pragma warning disable DSMPS001
+                .Where(x => !ctx.Demographics.Any(d => d.Ssn == x.Ssn))
+#pragma warning restore DSMPS001
                 .Select(x => new
                 {
                     x.Ssn,
