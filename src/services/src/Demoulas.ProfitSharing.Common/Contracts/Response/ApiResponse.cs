@@ -1,7 +1,0 @@
-﻿using Demoulas.ProfitSharing.Common.Interfaces;
-
-namespace Demoulas.ProfitSharing.Common.Contracts.Response;
-public record ApiResponse<T>(
-    DateOnly StartDate,
-    DateOnly EndDate,
-    T Data) : IHasDateRange;

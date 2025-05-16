@@ -33,13 +33,11 @@ public class FrozenService: IFrozenService
     {
         return 
             from dh in ctx.DemographicHistories
-            join d in ctx.Demographics
-                .Include(x => x.ContactInfo)
-                .Include(x => x.Address) on dh.DemographicId equals d.Id
+            join d in ctx.Demographics on dh.DemographicId equals d.Id
             from fs in ctx.FrozenStates.Where(x => x.ProfitYear == profitYear && x.IsActive)
             join dpts in ctx.Departments on dh.DepartmentId equals dpts.Id
             where fs.AsOfDateTime >= dh.ValidFrom && fs.AsOfDateTime < dh.ValidTo
-            select new Demographic()
+            select new Demographic
             {
                 Id = dh.DemographicId,
                 OracleHcmId = dh.OracleHcmId,

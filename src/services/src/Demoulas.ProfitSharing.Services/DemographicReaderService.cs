@@ -44,7 +44,7 @@ public sealed class DemographicReaderService : IDemographicReaderService
                 _http.HttpContext!.Items[ItemKey] = meta;
             }
 
-            return FrozenService.GetDemographicSnapshot(ctx, _frozenState.ProfitYear); // :contentReference[oaicite:0]{index=0}:contentReference[oaicite:1]{index=1}
+            return FrozenService.GetDemographicSnapshot(ctx, _frozenState.ProfitYear);
         }
 
         // ---- LIVE -----------------------------------------------------------
@@ -59,8 +59,6 @@ public sealed class DemographicReaderService : IDemographicReaderService
             _http.HttpContext.Items[ItemKey] = liveMeta;
         }
 
-        return ctx.Demographics
-                  .Include(d => d.ContactInfo)
-                  .Include(d => d.Address);                                        // :contentReference[oaicite:2]{index=2}:contentReference[oaicite:3]{index=3}
+        return ctx.Demographics;
     }
 }
