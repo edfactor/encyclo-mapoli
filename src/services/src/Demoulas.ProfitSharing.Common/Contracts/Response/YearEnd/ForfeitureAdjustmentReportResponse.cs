@@ -18,6 +18,8 @@ public sealed record ForfeitureAdjustmentReportResponse:ReportResponseBase<Forfe
             ReportDate = DateTime.UtcNow,
             TotatNetBalance = 1000,
             TotatNetVested = 1000,
+            StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
+            EndDate = DateOnly.FromDateTime(DateTime.UtcNow),
             Response = new Demoulas.Common.Contracts.Contracts.Response.PaginatedResponseDto<ForfeitureAdjustmentReportDetail>()
             {
                 Total = 1,

@@ -15,14 +15,16 @@ public sealed record ProfitSharingUnder21ReportResponse:ReportResponseBase<Profi
 
     public static ProfitSharingUnder21ReportResponse ResponseExample()
     {
-        return new ProfitSharingUnder21ReportResponse()
+        return new ProfitSharingUnder21ReportResponse
         {
             ReportName = REPORT_NAME,
-            ReportDate = DateTime.UtcNow,
+            ReportDate = DateTimeOffset.UtcNow,
             ActiveTotals = new ProfitSharingUnder21TotalForStatus(4, 1, 5),
             InactiveTotals = new ProfitSharingUnder21TotalForStatus(3, 9, 2),
             TerminatedTotals = new ProfitSharingUnder21TotalForStatus(6, 8, 7),
             TotalUnder21 = 45,
+            StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
+            EndDate = DateOnly.FromDateTime(DateTime.UtcNow),
             Response = new Demoulas.Common.Contracts.Contracts.Response.PaginatedResponseDto<ProfitSharingUnder21ReportDetail>()
             {
                 Total = 1,

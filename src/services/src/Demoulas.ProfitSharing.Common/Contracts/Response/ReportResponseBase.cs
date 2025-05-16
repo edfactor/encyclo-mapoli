@@ -1,10 +1,13 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response;
-public record ReportResponseBase<TResponse> where TResponse : class
+public record ReportResponseBase<TResponse>: IHasDateRange where TResponse : class
 {
     public required string ReportName { get; init; }
     public DateTimeOffset ReportDate { get; init; } = DateTimeOffset.Now;
 
     public required PaginatedResponseDto<TResponse> Response { get; set; }
+    public required DateOnly StartDate { get; init; }
+    public required DateOnly EndDate { get; init; }
 }
