@@ -40,7 +40,7 @@ public class FreezeDemographicsEndpointTests
         };
 
         _frozenServiceMock
-            .Setup(service => service.FreezeDemographics(request.ProfitYear, request.AsOfDateTime, "UnitTest", It.IsAny<CancellationToken>()))
+            .Setup(service => service.FreezeDemographics(request.ProfitYear, request.AsOfDateTime, expectedResponse.FrozenBy, It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResponse);
 
         // Act

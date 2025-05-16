@@ -34,6 +34,6 @@ public class FreezeDemographicsEndpoint : Endpoint<SetFrozenStateRequest, Frozen
 
     public override Task<FrozenStateResponse> ExecuteAsync(SetFrozenStateRequest req, CancellationToken ct)
     {
-        return _frozenService.FreezeDemographics(req.ProfitYear, req.AsOfDateTime, _appUser.UserName!, ct);
+        return _frozenService.FreezeDemographics(req.ProfitYear, req.AsOfDateTime, _appUser.UserName, ct);
     }
 }

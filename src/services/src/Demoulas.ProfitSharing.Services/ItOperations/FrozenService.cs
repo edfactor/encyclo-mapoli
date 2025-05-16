@@ -76,7 +76,7 @@ public class FrozenService: IFrozenService
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     public async Task<FrozenStateResponse> FreezeDemographics(short profitYear, DateTime asOfDateTime, 
-        string userName = "Unknown",
+        string? userName = "Unknown",
         CancellationToken cancellationToken = default)
     {
         var validator = new InlineValidator<short>();
