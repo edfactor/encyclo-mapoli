@@ -15,14 +15,17 @@ public class NegativeEtvaReportService : INegativeEtvaReportService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly IDemographicReaderService _demographicReaderService;
+    private readonly ICalendarService _calendarService;
     private readonly ILogger<NegativeEtvaReportService> _logger;
 
     public NegativeEtvaReportService(IProfitSharingDataContextFactory dataContextFactory,
         ILoggerFactory loggerFactory,
-        IDemographicReaderService demographicReaderService)
+        IDemographicReaderService demographicReaderService,
+        ICalendarService calendarService)
     {
         _dataContextFactory = dataContextFactory;
         _demographicReaderService = demographicReaderService;
+        _calendarService = calendarService;
         _logger = loggerFactory.CreateLogger<NegativeEtvaReportService>();
     }
 
@@ -54,10 +57,14 @@ public class NegativeEtvaReportService : INegativeEtvaReportService
 
             _logger.LogWarning("Returned {Results} records", results.Results.Count());
 
+            var cal = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
+
             return new ReportResponseBase<NegativeEtvaForSsNsOnPayProfitResponse>
             {
                 ReportName = "NEGATIVE ETVA FOR SSNs ON PAYPROFIT",
-                ReportDate = DateTimeOffset.Now,
+                ReportDate = DateTimeOffset.UtcNow,
+                StartDate = cal.FiscalBeginDate,
+                EndDate = cal.FiscalEndDate,
                 Response = results
             };
         }
