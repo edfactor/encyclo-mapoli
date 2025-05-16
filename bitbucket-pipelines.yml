@@ -14,6 +14,7 @@ definitions:
         - self.hosted
       script:
         # Set environment variables
+        - $env:NUGET_ORG = "https://api.nuget.org/v3/index.json"
         - $env:TEST_PROJECT_NAME = "Demoulas.ProfitSharing.UnitTests"
         - $env:REPORTS_PATH = "../../../../test-reports/build_${BITBUCKET_BUILD_NUMBER}"
         
@@ -48,7 +49,7 @@ definitions:
           
 
         # Run tests and generate JUnit reports
-        - dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --configuration Release --test-adapter-path:. --logger:"junit;LogFilePath={$env:REPORTS_PATH}/junit.xml"
+        - dotnet test src/services/tests/Demoulas.ProfitSharing.UnitTests/{$env:TEST_PROJECT_NAME}.csproj --configuration Release -p:RestoreAdditionalProjectSources=$env:NUGET_ORG --test-adapter-path:. --logger:"junit;LogFilePath={$env:REPORTS_PATH}/junit.xml"
 
       artifacts:
         - test-reports/**
@@ -70,8 +71,7 @@ definitions:
             registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
             //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=$env:JFROG_WORKSPACE_VARIABLE
             "@ | Out-File -FilePath .npmrc -Encoding ASCII
-        - if (Test-Path -Path "node_modules") { Remove-Item -Recurse -Force "node_modules" }
-        - if (Test-Path -Path "package-lock.json") { Remove-Item -Force "package-lock.json" }
+        - if (Test-Path -Path "node_modules") { Remove-Item -Recurse -Force "node_modules" }        
         
         - dotnet tool update --global Demoulas.Common.Build.Cli
         - dotnet tool update --global --all
@@ -149,8 +149,7 @@ definitions:
             registry=https://demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/
             //demoulas.jfrog.io/artifactory/api/npm/demoulas-npm-virt/:_authToken=$env:JFROG_WORKSPACE_VARIABLE
             "@ | Out-File -FilePath .npmrc -Encoding ASCII
-        - if (Test-Path -Path "node_modules") { Remove-Item -Recurse -Force "node_modules" }
-        - if (Test-Path -Path "package-lock.json") { Remove-Item -Force "package-lock.json" }
+        - if (Test-Path -Path "node_modules") { Remove-Item -Recurse -Force "node_modules" }        
         
         - dotnet tool update --global Demoulas.Common.Build.Cli
         - dotnet tool update --global --all
@@ -189,7 +188,6 @@ definitions:
 
         # Clean node_modules and package-lock.json to resolve npm optional dependency bug
         - if (Test-Path -Path "node_modules") { Remove-Item -Recurse -Force "node_modules" }
-        - if (Test-Path -Path "package-lock.json") { Remove-Item -Force "package-lock.json" }
 
         # Install dependencies
         - npm ci;
@@ -228,8 +226,7 @@ definitions:
         - cd .\src\UI
         # Clean node_modules and package-lock.json to resolve npm optional dependency bug
         - if (Test-Path -Path "node_modules") { Remove-Item -Recurse -Force "node_modules" }
-        - if (Test-Path -Path "package-lock.json") { Remove-Item -Force "package-lock.json" }
-        - ${env:NPM} install;
+        - ${env:NPM} ci;
         
         # Generate and copy buildInfo.json
         - dotnet tool update --global Demoulas.Common.Build.Cli
@@ -338,7 +335,8 @@ pipelines:
     release:
       - parallel:
           - step: *build-and-test-backend
-          - step: *test-frontend          
+          - step: *audit-frontend
+          - step: *audit-backend
       - parallel:
           - step: *create-api-artifacts
           - step: *create-service-artifacts
