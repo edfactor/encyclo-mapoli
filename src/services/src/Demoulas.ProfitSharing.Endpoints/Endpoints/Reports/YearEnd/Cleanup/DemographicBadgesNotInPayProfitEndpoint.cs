@@ -37,6 +37,8 @@ public class DemographicBadgesNotInPayProfitEndpoint : EndpointWithCsvBase<Sorte
                     {
                         ReportName = ReportFileName,
                         ReportDate = DateTimeOffset.Now,
+                        StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
+                        EndDate = DateOnly.FromDateTime(DateTime.UtcNow),
                         Response = new PaginatedResponseDto<DemographicBadgesNotInPayProfitResponse>()
                         {
                             Results = new List<DemographicBadgesNotInPayProfitResponse>

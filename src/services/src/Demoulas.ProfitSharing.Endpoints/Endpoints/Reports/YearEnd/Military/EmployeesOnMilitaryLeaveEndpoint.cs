@@ -38,6 +38,8 @@ public class EmployeesOnMilitaryLeaveEndpoint : EndpointWithCsvBase<SortedPagina
                     {
                         ReportName = ReportFileName,
                         ReportDate = DateTimeOffset.Now,
+                        StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
+                        EndDate = DateOnly.FromDateTime(DateTime.UtcNow),
                         Response = new PaginatedResponseDto<EmployeesOnMilitaryLeaveResponse>
                         {
                             Results = new List<EmployeesOnMilitaryLeaveResponse> { EmployeesOnMilitaryLeaveResponse.ResponseExample() }

@@ -33,6 +33,8 @@ public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<ProfitYear
                     new ReportResponseBase<DuplicateNamesAndBirthdaysResponse>
                     {
                         ReportDate = DateTime.Now,
+                        StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
+                        EndDate = DateOnly.FromDateTime(DateTime.UtcNow),
                         ReportName = "DUPLICATE NAMES AND BIRTHDAYS",
                         Response = new PaginatedResponseDto<DuplicateNamesAndBirthdaysResponse>
                         {
