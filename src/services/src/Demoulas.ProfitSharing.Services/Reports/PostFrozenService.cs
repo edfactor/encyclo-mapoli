@@ -240,7 +240,6 @@ public class PostFrozenService : IPostFrozenService
     {
         var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
         var age21 = calInfo.FiscalEndDate.AddYears(-21);
-        short lastYear = (short)(request.ProfitYear - 1);
         var rslt = await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
         {
             var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, true);
@@ -284,6 +283,8 @@ public class PostFrozenService : IPostFrozenService
         return new ReportResponseBase<ProfitSharingUnder21InactiveNoBalanceResponse>
         {
             ReportDate = DateTimeOffset.UtcNow,
+            StartDate = calInfo.FiscalBeginDate,
+            EndDate = calInfo.FiscalEndDate,
             ReportName = ProfitSharingUnder21InactiveNoBalanceResponse.REPORT_NAME,
             Response = rslt
         };
