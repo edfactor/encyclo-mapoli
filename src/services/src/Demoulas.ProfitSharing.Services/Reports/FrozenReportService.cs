@@ -221,10 +221,14 @@ public class FrozenReportService : IFrozenReportService
             });
 
             _logger.LogInformation("Returned {Results} records", result.Pagination.Results.Count());
+            var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
+
 
             return new ForfeituresAndPointsForYearResponseWithTotals
             {
-                ReportDate = DateTimeOffset.Now,
+                ReportDate = DateTimeOffset.UtcNow,
+                StartDate = calInfo.FiscalBeginDate,
+                EndDate = calInfo.FiscalEndDate,
                 ReportName = $"PROFIT SHARING FORFEITURES AND POINTS FOR {req.ProfitYear}",
                 Response = result.Pagination,
                 TotalForfeitures = result.Totals.TotalForfeitures,
@@ -357,11 +361,14 @@ public class FrozenReportService : IFrozenReportService
         }
 
         var totalAggregates = ComputeAggregates(details);
+        var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
 
         return new DistributionsByAge
         {
             ReportName = "PROFIT SHARING DISTRIBUTIONS BY AGE",
-            ReportDate = DateTimeOffset.Now,
+            ReportDate = DateTimeOffset.UtcNow,
+            StartDate = calInfo.FiscalBeginDate,
+            EndDate = calInfo.FiscalEndDate,
             ReportType = req.ReportType,
             RegularTotalEmployees = totalAggregates.RegularTotalEmployees,
             RegularTotalAmount = totalAggregates.RegularAmount,
@@ -460,11 +467,13 @@ public class FrozenReportService : IFrozenReportService
 
         req = req with { Take = details.Count + 1 };
 
-
+        var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
         return new ContributionsByAge
         {
             ReportName = "PROFIT SHARING CONTRIBUTIONS BY AGE",
-            ReportDate = DateTimeOffset.Now,
+            ReportDate = DateTimeOffset.UtcNow,
+            StartDate = calInfo.FiscalBeginDate,
+            EndDate = calInfo.FiscalEndDate,
             ReportType = req.ReportType,
             TotalAmount = details.Sum(d => d.Amount),
             TotalEmployees = (short)details.Sum(d => d.EmployeeCount),
@@ -537,11 +546,13 @@ public class FrozenReportService : IFrozenReportService
 
         req = req with { Take = details.Count + 1 };
 
-
+        var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
         return new ForfeituresByAge
         {
             ReportName = "PROFIT SHARING FORFEITURES BY AGE",
-            ReportDate = DateTimeOffset.Now,
+            ReportDate = DateTimeOffset.UtcNow,
+            StartDate = calInfo.FiscalBeginDate,
+            EndDate = calInfo.FiscalEndDate,
             ReportType = req.ReportType,
             TotalAmount = details.Sum(d => d.Amount),
             TotalEmployees = (short)details.Sum(d => d.EmployeeCount),
@@ -660,7 +671,9 @@ public class FrozenReportService : IFrozenReportService
         return new BalanceByAge
         {
             ReportName = "PROFIT SHARING BALANCE BY AGE",
-            ReportDate = DateTimeOffset.Now,
+            ReportDate = DateTimeOffset.UtcNow,
+            StartDate = startEnd.FiscalBeginDate,
+            EndDate = startEnd.FiscalEndDate,
             ReportType = req.ReportType,
             BalanceTotalAmount = details.Sum(d => d.CurrentBalance),
             VestedTotalAmount = details.Sum(d => d.VestedBalance),
@@ -794,7 +807,9 @@ public class FrozenReportService : IFrozenReportService
         return new VestedAmountsByAge
         {
             ReportName = "PROFIT SHARING VESTED AMOUNTS BY AGE",
-            ReportDate = DateTimeOffset.Now,
+            ReportDate = DateTimeOffset.UtcNow,
+            StartDate = startEnd.FiscalBeginDate,
+            EndDate = startEnd.FiscalEndDate,
             TotalFullTimeCount = totalFullTimeCount,
             TotalNotVestedCount = totalNotVestedCount,
             TotalPartialVestedCount = totalPartialVestedCount,
@@ -900,7 +915,9 @@ public class FrozenReportService : IFrozenReportService
         return new BalanceByYears
         {
             ReportName = "PROFIT SHARING BALANCE BY YEARS",
-            ReportDate = DateTimeOffset.Now,
+            ReportDate = DateTimeOffset.UtcNow,
+            StartDate = startEnd.FiscalBeginDate,
+            EndDate = startEnd.FiscalEndDate,
             ReportType = req.ReportType,
             BalanceTotalAmount = details.Sum(d => d.CurrentBalance),
             VestedTotalAmount = details.Sum(d => d.VestedBalance),
@@ -1025,7 +1042,9 @@ public class FrozenReportService : IFrozenReportService
             return new UpdateSummaryReportResponse()
             {
                 ReportName = $"UPDATE SUMMARY FOR PROFIT SHARING :{req.ProfitYear}",
-                ReportDate = DateTimeOffset.Now,
+                ReportDate = DateTimeOffset.UtcNow,
+                StartDate = startEnd.FiscalBeginDate,
+                EndDate = lyStartEnd.FiscalEndDate,
                 Response =
                     new PaginatedResponseDto<UpdateSummaryReportDetail>(req)
                     {
@@ -1089,9 +1108,12 @@ public class FrozenReportService : IFrozenReportService
                 return reportDemographics;
             });
 
+            var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
             return new GrossWagesReportResponse()
             {
                 ReportDate = DateTimeOffset.UtcNow,
+                StartDate = calInfo.FiscalBeginDate,
+                EndDate = calInfo.FiscalEndDate,
                 ReportName = GrossWagesReportResponse.REPORT_NAME,
                 Response =
                     new PaginatedResponseDto<GrossWagesReportDetail>(req) { Results = rslt.Skip(req.Skip ?? 0).Take(req.Take ?? int.MaxValue), Total = rslt.Count },
