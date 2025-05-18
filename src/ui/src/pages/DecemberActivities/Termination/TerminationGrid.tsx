@@ -91,7 +91,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({ initialSearchLo
             </Typography>
             <Typography
               sx={{ color: "#0258A5" }}>
-              {`Report Range: ${termination.startDate} - ${termination.endDate}`}
+              {`Report Range: ${termination.startDate} - ${termination.endDate} || Data Source: ${termination.dataSource}`}
             </Typography>
           </div>
           <DSMGrid

@@ -1,8 +1,11 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import type { FetchBaseQueryMeta, FetchArgs, BaseQueryFn, FetchBaseQueryError } from "@reduxjs/toolkit/query";
 
 import {
   addBadgeNumberToUpdateAdjustmentSummary,
-  clearBreakdownByStore, clearBreakdownByStoreTotals, clearBreakdownGrandTotals,
+  clearBreakdownByStore, 
+  clearBreakdownByStoreTotals, 
+  clearBreakdownGrandTotals,
   clearControlSheet,
   clearProfitMasterApply,
   clearProfitMasterRevert,
@@ -129,27 +132,45 @@ import {
   clearForfeitureAdjustmentData
 } from "reduxstore/slices/forfeituresAdjustmentSlice";
 
-export const YearsEndApi = createApi({
-  baseQuery: fetchBaseQuery({
-    baseUrl: `${url}/api/`,
-    prepareHeaders: (headers, { getState }) => {
-      const root = getState() as RootState;
-      const token = root.security.token;
-      const impersonating = root.security.impersonating;
-      if (token) {
-        headers.set("authorization", `Bearer ${token}`);
-      }
-      if (impersonating) {
-        headers.set("impersonation", impersonating);
-      } else {
-        const localImpersonation = localStorage.getItem("impersonatingRole");
-        if (localImpersonation) {
-          headers.set("impersonation", localImpersonation);
-        }
-      }
-      return headers;
+
+// --- dataSource header handling --------------------------------------------
+const rawBaseQuery = fetchBaseQuery({
+  baseUrl: `${url}/api/`,
+  prepareHeaders: (headers, { getState }) => {
+    const root = getState() as RootState;
+    const token = root.security.token;
+    const impersonating = root.security.impersonating;
+    if (token) {
+      headers.set("authorization", `Bearer ${token}`);
     }
-  }),
+    if (impersonating) {
+      headers.set("impersonation", impersonating);
+    } else {
+      const localImpersonation = localStorage.getItem("impersonatingRole");
+      if (localImpersonation) {
+        headers.set("impersonation", localImpersonation);
+      }
+    }
+    return headers;
+  }
+});
+
+const baseQueryWithDataSource: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError, {}, FetchBaseQueryMeta> = async (
+  args,
+  api,
+  extraOptions
+) => {
+  const result = await rawBaseQuery(args, api, extraOptions);
+  if (result?.data && typeof result.data === "object" && "dataSource" in result.data) {
+    const hdr =
+      result?.meta?.response?.headers?.get("x-demographic-data-source") ?? "Live";
+    (result.data as Record<string, unknown>).dataSource = hdr;
+  }
+  return result;
+};
+
+export const YearsEndApi = createApi({
+  baseQuery: baseQueryWithDataSource,
   reducerPath: "yearsEndApi",
   endpoints: (builder) => ({
     updateExecutiveHoursAndDollars: builder.mutation({
