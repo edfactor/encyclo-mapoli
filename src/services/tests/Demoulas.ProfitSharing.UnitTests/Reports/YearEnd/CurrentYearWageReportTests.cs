@@ -8,6 +8,7 @@ using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Wages;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services.Reports;
@@ -17,6 +18,7 @@ using Demoulas.Util.Extensions;
 using FastEndpoints;
 using FluentAssertions;
 using JetBrains.Annotations;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
@@ -27,7 +29,8 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
 
     public CurrentYearWageReportTests()
     {
-        WagesService mockService = new WagesService(MockDbContextFactory);
+        var calendarService = ServiceProvider!.GetRequiredService<ICalendarService>();
+        WagesService mockService = new WagesService(MockDbContextFactory, calendarService);
         _endpoint = new CurrentYearWagesEndpoint(mockService);
     }
 

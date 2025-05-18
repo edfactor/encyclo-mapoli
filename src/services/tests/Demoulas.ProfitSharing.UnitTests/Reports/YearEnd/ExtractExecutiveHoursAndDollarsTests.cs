@@ -5,6 +5,7 @@ using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ExecutiveHoursAndDollars;
@@ -16,6 +17,7 @@ using Demoulas.Util.Extensions;
 using FastEndpoints;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
@@ -34,7 +36,8 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
 
     public ExecutiveHoursAndDollarsTests()
     {
-        ExecutiveHoursAndDollarsService mockService = new(MockDbContextFactory);
+        var calendarService = ServiceProvider!.GetRequiredService<ICalendarService>();
+        ExecutiveHoursAndDollarsService mockService = new(MockDbContextFactory, calendarService);
         _endpoint = new ExecutiveHoursAndDollarsEndpoint(mockService);
     }
 

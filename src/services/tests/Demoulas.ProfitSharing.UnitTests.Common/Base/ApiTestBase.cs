@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
@@ -57,6 +58,7 @@ public class ApiTestBase<TStartup> where TStartup : class
                     services.AddTransient((_)=> MockDbContextFactory);
 
                     services.AddTransient((_) => MockEmbeddedSqlService.Initialize());
+                    services.AddTransient<ICalendarService, CalendarService>();
 
                     ServiceProvider = services.BuildServiceProvider();
                 });
