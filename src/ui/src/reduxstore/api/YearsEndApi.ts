@@ -1,11 +1,8 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import type { FetchBaseQueryMeta, FetchArgs, BaseQueryFn, FetchBaseQueryError } from "@reduxjs/toolkit/query";
 
 import {
   addBadgeNumberToUpdateAdjustmentSummary,
-  clearBreakdownByStore, 
-  clearBreakdownByStoreTotals, 
-  clearBreakdownGrandTotals,
+  clearBreakdownByStore, clearBreakdownByStoreTotals, clearBreakdownGrandTotals,
   clearControlSheet,
   clearProfitMasterApply,
   clearProfitMasterRevert,
@@ -133,8 +130,12 @@ import {
 } from "reduxstore/slices/forfeituresAdjustmentSlice";
 
 
-// --- dataSource header handling --------------------------------------------
+/* -------------------------------------------------------------------------
+   Automatic x-demographic-data-source header copier
+   ------------------------------------------------------------------------- */
+import type { BaseQueryFn, FetchArgs, FetchBaseQueryError, FetchBaseQueryMeta } from "@reduxjs/toolkit/query";
 const rawBaseQuery = fetchBaseQuery({
+
   baseUrl: `${url}/api/`,
   prepareHeaders: (headers, { getState }) => {
     const root = getState() as RootState;
@@ -153,24 +154,21 @@ const rawBaseQuery = fetchBaseQuery({
     }
     return headers;
   }
-});
 
-const baseQueryWithDataSource: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError, {}, FetchBaseQueryMeta> = async (
-  args,
-  api,
-  extraOptions
-) => {
-  const result = await rawBaseQuery(args, api, extraOptions);
-  if (result?.data && typeof result.data === "object" && "dataSource" in result.data) {
+});
+const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (args, api, extra) => {
+  const result = await rawBaseQuery(args, api, extra);
+  if (result.data && typeof result.data === "object") {
     const hdr =
-      result?.meta?.response?.headers?.get("x-demographic-data-source") ?? "Live";
-    (result.data as Record<string, unknown>).dataSource = hdr;
-  }
+      (result.meta as FetchBaseQueryMeta | undefined)?.response?.headers?.get("x-demographic-data-source") ?? "Live";
+    (result.data as any).dataSource = hdr;
+  }  
   return result;
 };
+/* ------------------------------------------------------------------------- */
 
 export const YearsEndApi = createApi({
-  baseQuery: baseQueryWithDataSource,
+  baseQuery: baseQuery,
   reducerPath: "yearsEndApi",
   endpoints: (builder) => ({
     updateExecutiveHoursAndDollars: builder.mutation({
