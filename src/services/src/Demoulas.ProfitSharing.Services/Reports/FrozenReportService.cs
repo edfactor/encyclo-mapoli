@@ -1043,8 +1043,8 @@ public class FrozenReportService : IFrozenReportService
             {
                 ReportName = $"UPDATE SUMMARY FOR PROFIT SHARING :{req.ProfitYear}",
                 ReportDate = DateTimeOffset.UtcNow,
-                StartDate = startEnd.FiscalBeginDate,
-                EndDate = lyStartEnd.FiscalEndDate,
+                StartDate = lyStartEnd.FiscalBeginDate,
+                EndDate = startEnd.FiscalEndDate,
                 Response =
                     new PaginatedResponseDto<UpdateSummaryReportDetail>(req)
                     {

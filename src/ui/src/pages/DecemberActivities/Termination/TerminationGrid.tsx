@@ -89,6 +89,10 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({ initialSearchLo
               sx={{ color: "#0258A5" }}>
               {`TERMINATIONS REPORT (${termination.response.total || 0} ${termination.response.total === 1 ? "Record" : "Records"})`}
             </Typography>
+            <Typography
+              sx={{ color: "#0258A5" }}>
+              {`Report Range: ${termination.startDate} - ${termination.endDate}`}
+            </Typography>
           </div>
           <DSMGrid
             preferenceKey={"TERM"}
