@@ -512,7 +512,9 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
 
         var response = new YearEndProfitSharingReportResponse
         {
-            ReportDate = DateTimeOffset.Now,
+            ReportDate = DateTimeOffset.UtcNow,
+            StartDate = calInfo.FiscalBeginDate,
+            EndDate = calInfo.FiscalEndDate,
             ReportName = $"PROFIT SHARE YEAR END REPORT FOR {req.ProfitYear}",
             Response = await responseTask
         };
