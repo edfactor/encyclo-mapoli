@@ -82,7 +82,12 @@ namespace Demoulas.ProfitSharing.Services.Reports
                     })
                     .ToPaginationResultsAsync(req, ct);
 
-                var endDate = rslts.Results.SelectMany(r => r.PayProfits.Select(p => p.LastUpdate)).Max();
+                DateTimeOffset endDate = DateTimeOffset.UtcNow;
+                if (rslts.Results.Any())
+                {
+                    endDate = rslts.Results.SelectMany(r => r.PayProfits.Select(p => p.LastUpdate)).Max();
+                }
+
                 return new ReportResponseBase<PayrollDuplicateSsnResponseDto>
                 {
                     ReportName = "Duplicate SSNs on Demographics",
