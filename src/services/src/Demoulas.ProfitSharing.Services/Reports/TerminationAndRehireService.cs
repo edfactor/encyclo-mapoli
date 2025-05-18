@@ -75,7 +75,9 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
         return new ReportResponseBase<EmployeesOnMilitaryLeaveResponse>
         {
             ReportName = "EMPLOYEES ON MILITARY LEAVE",
-            ReportDate = DateTimeOffset.Now,
+            ReportDate = DateTimeOffset.UtcNow,
+            StartDate = SqlDateTime.MinValue.Value.ToDateOnly(),
+            EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
             Response = militaryMembers
         };
     }
@@ -140,10 +142,14 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
                 .ThenByDescending(x=> x.ReHiredDate)
                 .ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
         });
+
+        var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
         return new ReportResponseBase<RehireForfeituresResponse>
         {
             ReportName = "REHIRE'S PROFIT SHARING DATA",
-            ReportDate = DateTimeOffset.Now,
+            ReportDate = DateTimeOffset.UtcNow,
+            StartDate = calInfo.FiscalBeginDate,
+            EndDate = calInfo.FiscalEndDate,
             Response = militaryMembers
         };
     }

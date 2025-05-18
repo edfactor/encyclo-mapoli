@@ -325,10 +325,15 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         // Apply pagination
         var paginatedResults = membersSummary.Skip(req.Skip ?? 0).Take(req.Take ?? byte.MaxValue).ToList();
 
+        var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
+        var lastCalInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(lastYear, cancellationToken);
+
         return new TerminatedEmployeeAndBeneficiaryResponse
         {
             ReportName = "Terminated Employee and Beneficiary Report",
-            ReportDate = DateTimeOffset.Now,
+            ReportDate = DateTimeOffset.UtcNow,
+            StartDate = calInfo.FiscalBeginDate,
+            EndDate = lastCalInfo.FiscalEndDate,
             TotalVested = totalVested,
             TotalForfeit = totalForfeit,
             TotalEndingBalance = totalEndingBalance,

@@ -10,10 +10,13 @@ namespace Demoulas.ProfitSharing.Services.Reports;
 public class WagesService : IWagesService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
- 
-    public WagesService(IProfitSharingDataContextFactory dataContextFactory)
+    private readonly ICalendarService _calendarService;
+
+    public WagesService(IProfitSharingDataContextFactory dataContextFactory,
+        ICalendarService calendarService)
     {
         _dataContextFactory = dataContextFactory;
+        _calendarService = calendarService;
     }
 
     public async Task<ReportResponseBase<WagesCurrentYearResponse>> GetWagesReportAsync(ProfitYearRequest request, CancellationToken cancellationToken)
@@ -34,10 +37,13 @@ public class WagesService : IWagesService
 
         });
 
+        var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
         return new ReportResponseBase<WagesCurrentYearResponse>
         {
             ReportName = $"EJR PROF-DOLLAR-EXTRACT YEAR={request.ProfitYear}",
-            ReportDate = DateTimeOffset.Now,
+            ReportDate = DateTimeOffset.UtcNow,
+            StartDate = calInfo.FiscalBeginDate,
+            EndDate = calInfo.FiscalEndDate,
             Response = await result
         };
     }
