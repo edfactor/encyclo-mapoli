@@ -81,7 +81,9 @@ public sealed class GetEligibleEmployeesService : IGetEligibleEmployeesService
             return new GetEligibleEmployeesResponse
             {
                 ReportName = $"Get Eligible Employees for Year {request.ProfitYear}",
-                ReportDate = DateTimeOffset.Now,
+                ReportDate = DateTimeOffset.UtcNow,
+                StartDate = response.FiscalBeginDate,
+                EndDate = response.FiscalEndDate,
                 Response = result,
                 NumberReadOnFrozen = numberReadOnFrozen,
                 NumberNotSelected = numberNotSelected,
