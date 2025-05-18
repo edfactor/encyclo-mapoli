@@ -65,7 +65,8 @@ public class PostFrozenService : IPostFrozenService
     {
         var lastProfitYear = (short)(request.ProfitYear - 1);
         var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
-            
+        var lastCalInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(lastProfitYear, cancellationToken);
+
 
         var rslt = await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
         {
@@ -152,13 +153,15 @@ public class PostFrozenService : IPostFrozenService
                     tyPp != null ? tyPp.EnrollmentId : (byte)0
                 )).ToPaginationResultsAsync(request, cancellationToken: cancellationToken);
 
-            var response = new ProfitSharingUnder21ReportResponse()
+            var response = new ProfitSharingUnder21ReportResponse
             {
                 ActiveTotals = new ProfitSharingUnder21TotalForStatus(activeTotalVested, activePartiallyVested, activePartiallyVestedButLessThanThreeYears),
                 InactiveTotals = new ProfitSharingUnder21TotalForStatus(inactiveTotalVested, inactivePartiallyVested, inactivePartiallyVestedButLessThanThreeYears),
                 TerminatedTotals = new ProfitSharingUnder21TotalForStatus(terminatedTotalVested, terminatedPartiallyVested, terminatedPartiallyVestedButLessThanThreeYears),
                 TotalUnder21 = totalUnder21,
-                ReportDate = DateTime.UtcNow,
+                ReportDate = DateTimeOffset.UtcNow,
+                StartDate = lastCalInfo.FiscalBeginDate,
+                EndDate = calInfo.FiscalEndDate,
                 ReportName = ProfitSharingUnder21ReportResponse.REPORT_NAME,
                 Response = pagedData
             };
@@ -173,7 +176,8 @@ public class PostFrozenService : IPostFrozenService
         var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellation);
         var age21 = calInfo.FiscalEndDate.AddYears(-21);
         short lastYear = (short)(request.ProfitYear - 1);
-           
+        var lastCalInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(lastYear, cancellation);
+        
         var rslt = await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx => {
 
             var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
@@ -230,7 +234,9 @@ public class PostFrozenService : IPostFrozenService
 
         return new ReportResponseBase<ProfitSharingUnder21BreakdownByStoreResponse>()
         {
-            ReportDate = DateTime.UtcNow,
+            ReportDate = DateTimeOffset.UtcNow,
+            StartDate = lastCalInfo.FiscalBeginDate,
+            EndDate = calInfo.FiscalEndDate,
             ReportName = ProfitSharingUnder21BreakdownByStoreResponse.REPORT_NAME,
             Response = rslt
         };
