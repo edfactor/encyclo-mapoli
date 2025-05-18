@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Data.SqlTypes;
+using System.Net;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
@@ -11,6 +12,7 @@ using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services.Reports;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
+using Demoulas.Util.Extensions;
 using FastEndpoints;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
@@ -233,7 +235,10 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
         return new ReportResponseBase<ExecutiveHoursAndDollarsResponse>
         {
             ReportName = _expectedReportName,
-            ReportDate = DateTimeOffset.Now,
+            ReportDate = DateTimeOffset.UtcNow,
+            StartDate = SqlDateTime.MinValue.Value.ToDateOnly(),
+            EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
+
             Response = new PaginatedResponseDto<ExecutiveHoursAndDollarsResponse>
             {
                 Results = [ExecutiveHoursAndDollarsResponse.ResponseExample()]

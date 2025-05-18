@@ -1,20 +1,22 @@
-﻿using System.Net;
-using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-using FluentAssertions;
-using Demoulas.Common.Contracts.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
-using Demoulas.Common.Contracts.Contracts.Response;
-using Demoulas.ProfitSharing.Services.Reports;
-using JetBrains.Annotations;
-using Demoulas.ProfitSharing.Security;
-using FastEndpoints;
-using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Wages;
-using CsvHelper.Configuration;
-using CsvHelper;
+﻿using System.Data.SqlTypes;
 using System.Globalization;
+using System.Net;
+using CsvHelper;
+using CsvHelper.Configuration;
+using Demoulas.Common.Contracts.Contracts.Request;
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Wages;
+using Demoulas.ProfitSharing.Security;
+using Demoulas.ProfitSharing.Services.Reports;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
+using Demoulas.Util.Extensions;
+using FastEndpoints;
+using FluentAssertions;
+using JetBrains.Annotations;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
@@ -37,7 +39,9 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
         var expectedResponse = new ReportResponseBase<WagesCurrentYearResponse>
         {
             ReportName = $"EJR PROF-DOLLAR-EXTRACT YEAR={2023}",
-            ReportDate = DateTimeOffset.Now,
+            ReportDate = DateTimeOffset.UtcNow,
+            StartDate = SqlDateTime.MinValue.Value.ToDateOnly(),
+            EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
             Response = new PaginatedResponseDto<WagesCurrentYearResponse> { Results = new List<WagesCurrentYearResponse> { } }
         };
 
