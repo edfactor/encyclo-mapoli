@@ -1,4 +1,5 @@
-﻿using Demoulas.ProfitSharing.Data.Entities;
+﻿using System.Data.SqlTypes;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -6,6 +7,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Demoulas.Util.Extensions;
 
 namespace Demoulas.ProfitSharing.Services;
 public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
@@ -38,7 +40,9 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
         var response = new ForfeitureAdjustmentReportResponse
         {
             ReportName = ForfeitureAdjustmentReportResponse.REPORT_NAME,
-            ReportDate = DateTime.Now,
+            ReportDate = DateTimeOffset.UtcNow,
+            StartDate = SqlDateTime.MinValue.Value.ToDateOnly(),
+            EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
             TotatNetBalance = 0,
             TotatNetVested = 0,
             Response = new PaginatedResponseDto<ForfeitureAdjustmentReportDetail>
