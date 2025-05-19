@@ -319,18 +319,14 @@ BEGIN
         PY_PH AS CURRENT_HOURS_YEAR,
         PY_PD AS CURRENT_INCOME_YEAR,
         PY_WEEKS_WORK AS WEEKS_WORKED_YEAR,
-        CASE
-            WHEN PY_PROF_CERT = '1' THEN
-                TO_DATE(TO_CHAR(this_year) || '-01-01', 'YYYY-MM-DD')
-            ELSE NULL
-            END AS PS_CERTIFICATE_ISSUED_DATE,
+        null as PS_CERTIFICATE_ISSUED_DATE, -- calculated and set during YE process (is this internal, ie not on any screens?)
         PY_PS_ENROLLED AS ENROLLMENT_ID,
         PY_PROF_BENEFICIARY AS BENEFICIARY_ID,
         PY_PROF_NEWEMP AS EMPLOYEE_TYPE_ID,
-        PY_PROF_ZEROCONT AS ZERO_CONTRIBUTION_REASON_ID,
+        null AS ZERO_CONTRIBUTION_REASON_ID, -- calculated and set during YE process (is this internal, ie not on any screens?)
         0 AS HOURS_EXECUTIVE,
         0 AS INCOME_EXECUTIVE,
-        PY_PROF_POINTS,
+        0 as POINTS_EARNED, -- calculated and set during YE process  (is this internal, ie not on any screens?)
         PY_PS_ETVA as ETVA
     FROM {SOURCE_PROFITSHARE_SCHEMA}.PAYPROFIT
     where PAYPROF_BADGE in ( select BADGE_NUMBER from DEMOGRAPHIC  );
@@ -360,12 +356,13 @@ BEGIN
         NULL AS PS_CERTIFICATE_ISSUED_DATE,
         PY_PS_ENROLLED,
         PY_PROF_BENEFICIARY AS BENEFICIARY_ID,
-        PY_PROF_NEWEMP AS EMPLOYEE_TYPE_ID,
-        PY_PROF_ZEROCONT AS ZERO_CONTRIBUTION_REASON_ID,
+         0 as EMPLOYEE_TYPE_ID, -- calculated and set during YE process (ie NEW, or Not New employee) 
+         -- See PAY456.cbl Lines 152-165
+        case when PY_PROF_ZEROCONT < 6 then 0 else PY_PROF_ZEROCONT end as ZERO_CONTRIBUTION_REASON_ID, -- We keep last years value, if it gets to be >= 6 
         NVL(PY_PH_EXEC, 0) AS HOURS_EXECUTIVE,
         NVL(PY_PD_EXEC, 0) AS INCOME_EXECUTIVE,
-        PY_PROF_POINTS AS POINTS_EARNED,
-        PY_PRIOR_ETVA as ETVA
+        0 AS POINTS_EARNED, -- calculated and set during YE process
+        PY_PRIOR_ETVA as ETVA 
     FROM
         {SOURCE_PROFITSHARE_SCHEMA}.PAYPROFIT pp
             LEFT JOIN {SOURCE_PROFITSHARE_SCHEMA}.DEMOGRAPHICS d on d.DEM_BADGE = pp.PAYPROF_BADGE
