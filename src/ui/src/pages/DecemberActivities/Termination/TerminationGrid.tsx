@@ -3,12 +3,13 @@ import { useSelector } from "react-redux";
 import { Path, useNavigate } from "react-router";
 import { useLazyGetTerminationReportQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, numberToCurrency, Pagination } from "smart-ui-library";
+import { DSMGrid, ISortParams, mmDDYYFormat, numberToCurrency, Pagination } from "smart-ui-library";
 import { TotalsGrid } from "../../../components/TotalsGrid/TotalsGrid";
 import { Typography } from "@mui/material";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 
 import { GetTerminationColumns } from "./TerminationGridColumn";
+import { tryddmmyyyyToDate } from "../../../utils/dateUtils";
 
 interface TerminationGridSearchProps {
   initialSearchLoaded: boolean;
@@ -91,7 +92,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({ initialSearchLo
             </Typography>
             <Typography
               sx={{ color: "#0258A5" }}>
-              {`Report Range: ${termination.startDate} - ${termination.endDate} || Data Source: ${termination.dataSource}`}
+              {`Report Range: ${mmDDYYFormat(termination.startDate)} - ${mmDDYYFormat(termination.endDate)} || Data Source: ${termination.dataSource}`}
             </Typography>
           </div>
           <DSMGrid
