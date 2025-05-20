@@ -66,7 +66,6 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
       employeeStatus: "",
       badgeId: "",
       employeeName: "",
-      under21Only: false,
       sortBy: "badgeNumber",
       isSortDescending: true
     }
@@ -99,7 +98,7 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
         profitYear: profitYear,
         storeNumber: data.store,
         badgeNumber: data.badgeId,
-        employeeName: data.employeeName
+        employeeName: data.employeeName,
         pagination: {
           take: 25,
           skip: 0,
@@ -116,7 +115,6 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
       employeeStatus: "",
       badgeId: "",
       employeeName: "",
-      under21Only: false,
       sortBy: "badgeNumber",
       isSortDescending: true
     });
