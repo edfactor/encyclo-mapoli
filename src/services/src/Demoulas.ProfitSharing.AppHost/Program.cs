@@ -46,12 +46,7 @@ var configuration = new ConfigurationBuilder()
     .AddUserSecrets<Program>()
     .Build();
 
-string? profitSharingConnectionString = configuration.GetConnectionString("ProfitSharing");
-if (string.IsNullOrWhiteSpace(profitSharingConnectionString))
-{
-    throw new InvalidOperationException("Connection string 'ProfitSharing' not found in configuration.");
-}
-var database = builder.AddConnectionString("Oracle", profitSharingConnectionString);
+var database = builder.AddConnectionString("Oracle", "ProfitSharing");
 
 var api = builder.AddProject<Demoulas_ProfitSharing_Api>("ProfitSharing-Api")
     //.WithHealthCheck("/health")
