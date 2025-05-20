@@ -12,7 +12,7 @@ import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYe
 interface BreakdownSearchParams {
   store?: number;
   employeeStatus?: string;
-  badgeId?: number;
+  badgeId?: number | null;
   employeeName?: string;
   sortBy: string;
   isSortDescending: boolean;
@@ -62,7 +62,7 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
     defaultValues: {
       store: 700,
       employeeStatus: "",
-      badgeId: 0,
+      badgeId: null,
       employeeName: "",
       sortBy: "badgeNumber",
       isSortDescending: true
@@ -111,7 +111,7 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
     reset({
       store: 700,
       employeeStatus: "",
-      badgeId: 0,
+      badgeId: null,
       employeeName: "",
       sortBy: "badgeNumber",
       isSortDescending: true
