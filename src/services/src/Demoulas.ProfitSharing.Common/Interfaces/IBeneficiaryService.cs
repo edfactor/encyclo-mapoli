@@ -5,4 +5,5 @@ namespace Demoulas.ProfitSharing.Common.Interfaces;
 public interface IBeneficiaryService
 {
     Task<CreateBeneficiaryResponse> CreateBeneficiary(CreateBeneficiaryRequest req, CancellationToken cancellationToken);
+    Task UpdateBeneficiary(UpdateBeneficiaryRequest req, CancellationToken cancellationToken);
 }
