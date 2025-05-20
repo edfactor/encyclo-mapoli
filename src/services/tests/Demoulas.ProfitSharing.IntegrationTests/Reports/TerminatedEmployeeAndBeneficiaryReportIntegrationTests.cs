@@ -9,8 +9,10 @@ using Demoulas.ProfitSharing.IntegrationTests.Helpers;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services;
+using Demoulas.ProfitSharing.Services.ItOperations;
 using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 using FluentAssertions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports;
@@ -35,7 +37,9 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         // var calendarService = _fixture.Services.GetRequiredService<ICalendarService>()!
         // var totalService = _fixture.Services.GetRequiredService<TotalService>()!
         var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService());
-        var totalService = new TotalService(DbFactory, calendarService, new EmbeddedSqlService());
+        var totalService = new TotalService(DbFactory,
+            CalendarService, new EmbeddedSqlService(),
+            new DemographicReaderService(new FrozenService(DbFactory), new HttpContextAccessor()));
         TerminatedEmployeeAndBeneficiaryReportService mockService =
             new TerminatedEmployeeAndBeneficiaryReportService(DbFactory, calendarService, totalService);
 

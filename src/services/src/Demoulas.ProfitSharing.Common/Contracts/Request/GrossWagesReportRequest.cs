@@ -12,7 +12,7 @@ public record GrossWagesReportRequest : ProfitYearRequest
     {
         return new GrossWagesReportRequest()
         {
-            ProfitYear = 2023,
+            ProfitYear = 2024,
             MinGrossAmount = DefaultGrossAmount
         };
     }

@@ -8,7 +8,9 @@ using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Demoulas.ProfitSharing.Services.ItOperations;
 using Demoulas.ProfitSharing.Services.Reports.Breakdown;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Breakdown;
@@ -27,7 +29,8 @@ public class BreakdownReportByStoreTests
         _dataContextFactory = new PristineDataContextFactory();
         _calendarService = new CalendarService(_dataContextFactory, _aps);
         _embeddedSqlService = new EmbeddedSqlService();
-        _totalService = new TotalService(_dataContextFactory, _calendarService, _embeddedSqlService);
+        _totalService = new TotalService(_dataContextFactory, _calendarService, _embeddedSqlService,
+            new DemographicReaderService(new FrozenService(_dataContextFactory), new HttpContextAccessor()));
         _breakdownService = new BreakdownReportService(_dataContextFactory, _calendarService, _totalService);
     }
 

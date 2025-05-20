@@ -6,6 +6,7 @@ using Demoulas.Common.Logging.Extensions;
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Api.Extensions;
 using Demoulas.ProfitSharing.Common.ActivitySources;
+using Demoulas.ProfitSharing.Data;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.Data.Interceptors;
@@ -18,6 +19,7 @@ using Demoulas.ProfitSharing.Services.Extensions;
 using Demoulas.Security;
 using Demoulas.Security.Extensions;
 using Demoulas.Util.Extensions;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using NSwag.Generation.AspNetCore;
 using Scalar.AspNetCore;
 
@@ -84,9 +86,6 @@ builder.AddDatabaseServices((services, factoryRequests) =>
 });
 builder.AddProjectServices();
 
-
-
-
 void OktaSettingsAction(OktaSwaggerConfiguration settings)
 {
     builder.Configuration.Bind("Okta", settings);
@@ -105,10 +104,20 @@ builder.ConfigureDefaultEndpoints(meterNames: [],
 builder.Services.AddHealthChecks().AddCheck<EnvironmentHealthCheck>("Environment");
 
 
+builder.Services.Configure<HealthCheckPublisherOptions>(options =>
+{
+    options.Delay = TimeSpan.FromMinutes(5);       // Initial delay before the first run
+    options.Period = TimeSpan.FromMinutes(30);     // How often health checks are run
+    options.Predicate = _ => true;
+});
+
+builder.Services.AddSingleton<IHealthCheckPublisher, HealthCheckResultLogger>();
+
 WebApplication app = builder.Build();
 
 app.UseCors();
 
+app.UseDemographicHeaders();
 app.UseDefaultEndpoints(OktaSettingsAction)
     .UseReDoc(settings =>
     {

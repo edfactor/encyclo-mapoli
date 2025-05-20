@@ -9,6 +9,7 @@ using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
+using static FastEndpoints.Ep;
 
 
 namespace Demoulas.ProfitSharing.Services.Reports.Breakdown;
@@ -230,9 +231,12 @@ public sealed class BreakdownReportService : IBreakdownService
                 .ThenBy(m => m.FullName, StringComparer.Ordinal)
                 .ToList();
 
+            var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
             return new ReportResponseBase<MemberYearSummaryDto>
             {
-                ReportDate = DateTimeOffset.Now,
+                ReportDate = DateTimeOffset.UtcNow,
+                StartDate = calInfo.FiscalBeginDate,
+                EndDate = calInfo.FiscalEndDate,
                 ReportName = $"Breakdown Report for {request.ProfitYear}",
                 Response = new PaginatedResponseDto<MemberYearSummaryDto>
                 {

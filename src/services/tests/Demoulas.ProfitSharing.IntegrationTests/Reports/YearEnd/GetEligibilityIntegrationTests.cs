@@ -4,8 +4,10 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services;
+using Demoulas.ProfitSharing.Services.ItOperations;
 using Demoulas.ProfitSharing.Services.Reports;
 using FluentAssertions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
@@ -20,7 +22,7 @@ public class GetEligibilityIntegrationTests : PristineBaseTest
     [Fact]
     public async Task BasicTest()
     {
-        GetEligibleEmployeesService es = new(DbFactory, CalendarService);
+        GetEligibleEmployeesService es = new(DbFactory, CalendarService, new DemographicReaderService(new FrozenService(DbFactory), new HttpContextAccessor()));
         GetEligibleEmployeesResponse empls = await es.GetEligibleEmployeesAsync(new ProfitYearRequest { ProfitYear = 2024, Take = int.MaxValue }, CancellationToken.None);
 
         TestOutputHelper.WriteLine("On Frozen: " + empls.NumberReadOnFrozen);

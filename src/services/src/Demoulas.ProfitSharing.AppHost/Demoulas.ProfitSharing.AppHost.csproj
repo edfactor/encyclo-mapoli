@@ -1,5 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Sdk Name="Aspire.AppHost.Sdk" Version="9.2.1" />
+  <Sdk Name="Aspire.AppHost.Sdk" Version="9.3.0" />
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\tests\Demoulas.ProfitSharing.UnitTests\Demoulas.ProfitSharing.UnitTests.csproj" />
     <ProjectReference Include="..\Demoulas.ProfitSharing.Api\Demoulas.ProfitSharing.Api.csproj" />
     <ProjectReference Include="..\Demoulas.ProfitSharing.Data.Cli\Demoulas.ProfitSharing.Data.Cli.csproj" />
     <ProjectReference Include="..\Demoulas.ProfitSharing.EmployeeDelta.Sync\Demoulas.ProfitSharing.EmployeeDelta.Sync.csproj" />

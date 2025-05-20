@@ -14,10 +14,13 @@ namespace Demoulas.ProfitSharing.Services.Reports;
 public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
+    private readonly ICalendarService _calendarService;
 
-    public ExecutiveHoursAndDollarsService(IProfitSharingDataContextFactory dataContextFactory)
+    public ExecutiveHoursAndDollarsService(IProfitSharingDataContextFactory dataContextFactory,
+        ICalendarService calendarService)
     {
         _dataContextFactory = dataContextFactory;
+        _calendarService = calendarService;
     }
 
     /// <summary>
@@ -84,10 +87,14 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
                 .ToPaginationResultsAsync(request, cancellationToken);
         });
 
+        var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
+        
         return new ReportResponseBase<ExecutiveHoursAndDollarsResponse>
         {
             ReportName = $"Executive Hours and Dollars for Year {request.ProfitYear}",
-            ReportDate = DateTimeOffset.Now,
+            ReportDate = DateTimeOffset.UtcNow,
+            StartDate = calInfo.FiscalBeginDate,
+            EndDate = calInfo.FiscalEndDate,
             Response =  result
         };
 

@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Data.SqlTypes;
+using System.Net;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Api;
@@ -12,6 +13,7 @@ using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Military;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
+using Demoulas.Util.Extensions;
 using FastEndpoints;
 using FluentAssertions;
 using JetBrains.Annotations;
@@ -42,7 +44,9 @@ public class MilitaryAndRehireTests : ApiTestBase<Program>
             var expectedResponse = new ReportResponseBase<EmployeesOnMilitaryLeaveResponse>
             {
                 ReportName = "EMPLOYEES ON MILITARY LEAVE",
-                ReportDate = DateTimeOffset.Now,
+                ReportDate = DateTimeOffset.UtcNow,
+                StartDate = SqlDateTime.MinValue.Value.ToDateOnly(),
+                EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
                 Response = new PaginatedResponseDto<EmployeesOnMilitaryLeaveResponse> { Results = new List<EmployeesOnMilitaryLeaveResponse> { setup.ExpectedResponse } }
             };
 
@@ -97,7 +101,9 @@ public class MilitaryAndRehireTests : ApiTestBase<Program>
         var expectedResponse = new ReportResponseBase<EmployeesOnMilitaryLeaveResponse>
         {
             ReportName = "EMPLOYEES ON MILITARY LEAVE",
-            ReportDate = DateTimeOffset.Now,
+            ReportDate = DateTimeOffset.UtcNow,
+            StartDate = SqlDateTime.MinValue.Value.ToDateOnly(),
+            EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
             Response = new PaginatedResponseDto<EmployeesOnMilitaryLeaveResponse> { Results = new List<EmployeesOnMilitaryLeaveResponse>() }
         };
 
@@ -117,7 +123,11 @@ public class MilitaryAndRehireTests : ApiTestBase<Program>
         var cancellationToken = CancellationToken.None;
         var expectedResponse = new ReportResponseBase<EmployeesOnMilitaryLeaveResponse>
         {
-            ReportName = "EMPLOYEES ON MILITARY LEAVE", ReportDate = DateTimeOffset.Now, Response = new PaginatedResponseDto<EmployeesOnMilitaryLeaveResponse> { Results = [] }
+            ReportName = "EMPLOYEES ON MILITARY LEAVE", 
+            ReportDate = DateTimeOffset.UtcNow,
+            StartDate = SqlDateTime.MinValue.Value.ToDateOnly(),
+            EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
+            Response = new PaginatedResponseDto<EmployeesOnMilitaryLeaveResponse> { Results = [] }
         };
 
         // Act

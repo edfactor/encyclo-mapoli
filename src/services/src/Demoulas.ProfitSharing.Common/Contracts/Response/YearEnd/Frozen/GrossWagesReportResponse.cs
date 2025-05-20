@@ -25,6 +25,8 @@ public sealed record GrossWagesReportResponse:ReportResponseBase<GrossWagesRepor
             TotalLoans = 22500,
             TotalGrossWages = 826962.97m,
             TotalProfitSharingAmount = 6272199.89m,
+            StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
+            EndDate = DateOnly.FromDateTime(DateTime.UtcNow),
             Response = new Demoulas.Common.Contracts.Contracts.Response.PaginatedResponseDto<GrossWagesReportDetail>(new PaginationRequestDto())
             {
                 Results = new List<GrossWagesReportDetail>() { GrossWagesReportDetail.ResponseExample() }

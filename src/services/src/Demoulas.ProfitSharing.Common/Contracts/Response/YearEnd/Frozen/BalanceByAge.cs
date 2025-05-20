@@ -20,7 +20,8 @@ public sealed record BalanceByAge : BalanceByBase<BalanceByAgeDetail>
             BalanceTotalAmount = (decimal)1_855_156.09,
             TotalMembers = 63,
             TotalBeneficiaries = 13,
-
+            StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
+            EndDate = DateOnly.FromDateTime(DateTime.UtcNow),
             Response = new PaginatedResponseDto<BalanceByAgeDetail>(new PaginationRequestDto())
             {
                 Results = new List<BalanceByAgeDetail> { BalanceByAgeDetail.ResponseExample() }

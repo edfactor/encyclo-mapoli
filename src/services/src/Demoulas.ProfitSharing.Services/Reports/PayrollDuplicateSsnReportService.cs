@@ -1,37 +1,48 @@
-﻿using Demoulas.Common.Contracts.Contracts.Request;
+﻿using System.Threading;
+using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-using Demoulas.ProfitSharing.Data.Entities;
-using Microsoft.EntityFrameworkCore;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Demoulas.Util.Extensions;
+using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.Reports
 {
     public class PayrollDuplicateSsnReportService : IPayrollDuplicateSsnReportService
     {
         private readonly IProfitSharingDataContextFactory _dataContextFactory;
+        private readonly IDemographicReaderService _demographicReaderService;
+        private readonly ICalendarService _calendarService;
 
-        public PayrollDuplicateSsnReportService(IProfitSharingDataContextFactory dataContextFactory)
+        public PayrollDuplicateSsnReportService(IProfitSharingDataContextFactory dataContextFactory,
+            IDemographicReaderService demographicReaderService,
+            ICalendarService calendarService)
         {
             _dataContextFactory = dataContextFactory;
+            _demographicReaderService = demographicReaderService;
+            _calendarService = calendarService;
         }
 
         public Task<ReportResponseBase<PayrollDuplicateSsnResponseDto>> GetDuplicateSsnAsync(SortedPaginationRequestDto req, CancellationToken ct)
         {
             return _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
-                int cutoffYear = DateTime.UtcNow.Year - 5;
+                short cutoffYear = (short)(DateTime.UtcNow.Year - 5);
+                var cal = await _calendarService.GetYearStartAndEndAccountingDatesAsync(cutoffYear, ct);
+                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
 
-                var dupSsns = await ctx.Demographics
+                var dupSsns = await demographics
                     .GroupBy(x => x.Ssn)
                     .Where(g => g.Count() > 1)
                     .Select(g => g.Key)
                     .ToHashSetAsync(ct);
 
-                var rslts = await ctx.Demographics
+                var rslts = await demographics
                     .Include(x => x.EmploymentStatus)
                     .Where(dem => dupSsns.Contains(dem.Ssn))
                     .OrderBy(d => d.Ssn)
@@ -71,10 +82,18 @@ namespace Demoulas.ProfitSharing.Services.Reports
                     })
                     .ToPaginationResultsAsync(req, ct);
 
+                DateTimeOffset endDate = DateTimeOffset.UtcNow;
+                if (rslts.Results.Any())
+                {
+                    endDate = rslts.Results.SelectMany(r => r.PayProfits.Select(p => p.LastUpdate)).Max();
+                }
+
                 return new ReportResponseBase<PayrollDuplicateSsnResponseDto>
                 {
                     ReportName = "Duplicate SSNs on Demographics",
-                    Response = rslts
+                    StartDate = cal.FiscalBeginDate,
+                    EndDate = endDate.ToDateOnly(),
+                    Response = rslts,
                 };
             });
         }

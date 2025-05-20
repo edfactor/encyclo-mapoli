@@ -125,7 +125,7 @@ internal static class Program
         // activitiesToRun = Specify(bothReadyAndSmartActivities, ["R0", "R2S",  "R18", "S18" ]); // "R20", "R21", "R22", "R23"]);
         // activitiesToRun = Specify(bothReadyAndSmartActivities, ["", "S18"]); // "S23"]);
         // activitiesToRun = Specify(bothReadyAndSmartActivities, ["R0", "R18", "R20", "R21", "R22", "R2S"]);
-        activitiesToRun = Specify(bothReadyAndSmartActivities, ["R23"]);
+        activitiesToRun = Specify(bothReadyAndSmartActivities, ["R0", "R18"]);
         // activitiesToRun = Specify(bothReadyAndSmartActivities, ["R23"]);
 
 

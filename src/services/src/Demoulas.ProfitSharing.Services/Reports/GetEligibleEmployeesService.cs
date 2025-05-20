@@ -5,21 +5,26 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.ItOperations;
 using Microsoft.EntityFrameworkCore;
+using static FastEndpoints.Ep;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
 
 public sealed class GetEligibleEmployeesService : IGetEligibleEmployeesService
 {
     private readonly ICalendarService _calendarService;
+    private readonly IDemographicReaderService _demographicReaderService;
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
 
     public GetEligibleEmployeesService(IProfitSharingDataContextFactory dataContextFactory,
-        ICalendarService calendarService)
+        ICalendarService calendarService,
+        IDemographicReaderService demographicReaderService)
     {
         _dataContextFactory = dataContextFactory;
         _calendarService = calendarService;
+        _demographicReaderService = demographicReaderService;
     }
 
     public async Task<GetEligibleEmployeesResponse> GetEligibleEmployeesAsync(ProfitYearRequest request,
@@ -32,9 +37,11 @@ public sealed class GetEligibleEmployeesService : IGetEligibleEmployeesService
 
         return await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
+            var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, true);
+
             var baseQuery = ctx.PayProfits.Where(p => p.ProfitYear == request.ProfitYear)
                 .Join(
-                    FrozenService.GetDemographicSnapshot(ctx, request.ProfitYear),
+                    demographicQuery,
                     pp => pp.DemographicId,
                     d => d.Id,
                     (pp, d) => new
@@ -74,7 +81,9 @@ public sealed class GetEligibleEmployeesService : IGetEligibleEmployeesService
             return new GetEligibleEmployeesResponse
             {
                 ReportName = $"Get Eligible Employees for Year {request.ProfitYear}",
-                ReportDate = DateTimeOffset.Now,
+                ReportDate = DateTimeOffset.UtcNow,
+                StartDate = response.FiscalBeginDate,
+                EndDate = response.FiscalEndDate,
                 Response = result,
                 NumberReadOnFrozen = numberReadOnFrozen,
                 NumberNotSelected = numberNotSelected,

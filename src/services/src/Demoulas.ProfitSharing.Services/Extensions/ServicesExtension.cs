@@ -4,6 +4,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Common.Interfaces.ItOperations;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
+using Demoulas.ProfitSharing.Services.Beneficiaries;
 using Demoulas.ProfitSharing.Services.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Services.Caching.Extensions;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
@@ -46,6 +47,7 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IPayrollDuplicateSsnReportService, PayrollDuplicateSsnReportService>();
         _ = builder.Services.AddScoped<INegativeEtvaReportService, NegativeEtvaReportService>();
         _ = builder.Services.AddScoped<IProfitSharingSummaryReportService, ProfitSharingSummaryReportService>();
+        _ = builder.Services.AddScoped<IBeneficiaryService, BeneficiaryService>();
         
 
 
@@ -74,7 +76,7 @@ public static class ServicesExtension
 
         _ = builder.Services.AddScoped<ITableMetadataService, TableMetadataService>();
 
-        
+        _ = builder.Services.AddScoped<IDemographicReaderService, DemographicReaderService>();
 
 
         #region Mappers

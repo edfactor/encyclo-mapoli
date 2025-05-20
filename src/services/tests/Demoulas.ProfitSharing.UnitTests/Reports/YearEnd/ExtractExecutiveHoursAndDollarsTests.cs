@@ -1,9 +1,11 @@
-﻿using System.Net;
+﻿using System.Data.SqlTypes;
+using System.Net;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ExecutiveHoursAndDollars;
@@ -11,9 +13,11 @@ using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Services.Reports;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
+using Demoulas.Util.Extensions;
 using FastEndpoints;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
@@ -32,7 +36,8 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
 
     public ExecutiveHoursAndDollarsTests()
     {
-        ExecutiveHoursAndDollarsService mockService = new(MockDbContextFactory);
+        var calendarService = ServiceProvider!.GetRequiredService<ICalendarService>();
+        ExecutiveHoursAndDollarsService mockService = new(MockDbContextFactory, calendarService);
         _endpoint = new ExecutiveHoursAndDollarsEndpoint(mockService);
     }
 
@@ -233,7 +238,10 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
         return new ReportResponseBase<ExecutiveHoursAndDollarsResponse>
         {
             ReportName = _expectedReportName,
-            ReportDate = DateTimeOffset.Now,
+            ReportDate = DateTimeOffset.UtcNow,
+            StartDate = SqlDateTime.MinValue.Value.ToDateOnly(),
+            EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
+
             Response = new PaginatedResponseDto<ExecutiveHoursAndDollarsResponse>
             {
                 Results = [ExecutiveHoursAndDollarsResponse.ResponseExample()]
