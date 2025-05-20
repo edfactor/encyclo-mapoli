@@ -7,6 +7,9 @@ public sealed class ZeroContributionReason : ILookupTable<byte>
 #pragma warning disable CS0618
     public static class Constants
     {
+        /// <summary>
+        /// Normal Participant in Plan
+        /// </summary>
         public const byte Normal = 0;
         
         /// <summary>
@@ -22,10 +25,8 @@ public sealed class ZeroContributionReason : ILookupTable<byte>
         /// <summary>
         /// OVER 64 AND < 1000 HOURS GETS 1 YEAR VESTING (obsolete 11/20)
         /// </summary>
-
         [Obsolete("Carried over from COBOL. No longer used.")]
         public const byte Over64WithLess1000Hours1YearVesting = 3;
-
 
         /// <summary>
         /// OVER 64 AND < 1000 HOURS GETS 2 YEARS VESTING (obsolete 11/20)
