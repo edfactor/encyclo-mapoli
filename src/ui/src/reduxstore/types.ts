@@ -888,6 +888,8 @@ export interface YearEndProfitSharingEmployee {
 export interface BreakdownByStoreRequest extends ProfitYearRequest {
   storeNumber?: number;
   storeManagement?: boolean;
+  badgeNumber?: number;
+  employeeName?: string;
   pagination: SortedPaginationRequestDto;
 }
 
