@@ -12,9 +12,8 @@ import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYe
 interface BreakdownSearchParams {
   store?: number;
   employeeStatus?: string;
-  badgeId?: string;
+  badgeId?: number;
   employeeName?: string;
-  under21Only?: boolean;
   sortBy: string;
   isSortDescending: boolean;
 }
@@ -27,9 +26,8 @@ interface OptionItem {
 const schema = yup.object().shape({
   store: yup.number(),
   employeeStatus: yup.string(),
-  badgeId: yup.string(),
+  badgeId: yup.number(),
   employeeName: yup.string(),
-  under21Only: yup.boolean(),
   sortBy: yup.string(),
   isSortDescending: yup.boolean()
 });
@@ -64,7 +62,7 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
     defaultValues: {
       store: 700,
       employeeStatus: "",
-      badgeId: "",
+      badgeId: 0,
       employeeName: "",
       sortBy: "badgeNumber",
       isSortDescending: true
@@ -113,7 +111,7 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
     reset({
       store: 700,
       employeeStatus: "",
-      badgeId: "",
+      badgeId: 0,
       employeeName: "",
       sortBy: "badgeNumber",
       isSortDescending: true
