@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -210,5 +211,26 @@ public sealed class BeneficiaryServiceTests : ApiTestBase<Program>
         resp = await _service.CreateBeneficiary(newBeneficiaryReq, CancellationToken.None);
         resp.Should().NotBeNull();
         resp.PsnSuffix.Should().Be(1111);
+    }
+
+    [Fact]
+    public async Task UpdateBeneficiary()
+    {
+        var initialSsn = _beneficiary.Contact!.Ssn;
+
+        var req = UpdateBeneficiaryRequest.SampleRequest();
+        req.Id = _beneficiary.Id;
+        req.Relationship = "2nd Cousin";
+        req.BeneficiarySsn = null;
+
+        await _service.UpdateBeneficiary(req, CancellationToken.None);
+        _beneficiary.Relationship.Should().Be("2nd Cousin");
+        _beneficiary.Contact.Ssn.Should().Be(initialSsn);
+
+        int newSsn = 999887777;
+        req.BeneficiarySsn = newSsn;
+        await _service.UpdateBeneficiary(req, CancellationToken.None);
+        _beneficiary.Contact.Ssn.Should().Be(newSsn);
+
     }
 }
