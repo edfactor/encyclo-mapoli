@@ -4,6 +4,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -18,14 +19,17 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
     private readonly IProfitSharingDataContextFactory _factory;
     private readonly ICalendarService _calendarService;
     private readonly TotalService _totalService;
+    private readonly IDemographicReaderService _demographicReaderService;
 
     public TerminatedEmployeeAndBeneficiaryReport(IProfitSharingDataContextFactory factory,
         ICalendarService calendarService,
-        TotalService totalService)
+        TotalService totalService,
+        IDemographicReaderService demographicReaderService)
     {
         _factory = factory;
         _calendarService = calendarService;
         _totalService = totalService;
+        _demographicReaderService = demographicReaderService;
     }
 
     public Task<TerminatedEmployeeAndBeneficiaryResponse> CreateDataAsync(ProfitYearRequest req, CancellationToken cancellationToken)
@@ -43,16 +47,17 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         CancellationToken cancellationToken)
     {
         CalendarResponseDto startEnd = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
-        var terminatedEmployees = GetTerminatedEmployees(ctx, request, startEnd);
+        var terminatedEmployees = await GetTerminatedEmployees(ctx, request, startEnd);
         var terminatedWithContributions = GetEmployeesAsMembers(ctx, request, terminatedEmployees);
         var beneficiaries = GetBeneficiaries(ctx, request);
         return await CombineEmployeeAndBeneficiarySlices(terminatedWithContributions, beneficiaries, cancellationToken);
     }
 
-    private IQueryable<TerminatedEmployeeDto> GetTerminatedEmployees(IProfitSharingDbContext ctx, ProfitYearRequest request,
+    private async Task<IQueryable<TerminatedEmployeeDto>> GetTerminatedEmployees(IProfitSharingDbContext ctx, ProfitYearRequest request,
         CalendarResponseDto startEnd)
     {
-        var queryable = ctx.Demographics
+        var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+        var queryable = demographics
             .Include(d => d.PayProfits)
             .Include(d => d.ContactInfo)
             .Where(d => d.EmploymentStatusId == EmploymentStatus.Constants.Terminated
@@ -265,8 +270,8 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 continue;
             }
 
-            byte enrollmentId = member.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions
-                ? Enrollment.Constants.NotEnrolled
+            byte enrollmentId = member.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions /*2*/
+                ? Enrollment.Constants.NotEnrolled /*0*/
                 : member.EnrollmentId;
 
             if (member.ZeroCont == ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested)
@@ -325,10 +330,15 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         // Apply pagination
         var paginatedResults = membersSummary.Skip(req.Skip ?? 0).Take(req.Take ?? byte.MaxValue).ToList();
 
+        var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
+        var lastCalInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(lastYear, cancellationToken);
+
         return new TerminatedEmployeeAndBeneficiaryResponse
         {
             ReportName = "Terminated Employee and Beneficiary Report",
-            ReportDate = DateTimeOffset.Now,
+            ReportDate = DateTimeOffset.UtcNow,
+            StartDate = lastCalInfo.FiscalBeginDate,
+            EndDate = calInfo.FiscalEndDate,
             TotalVested = totalVested,
             TotalForfeit = totalForfeit,
             TotalEndingBalance = totalEndingBalance,

@@ -1,4 +1,5 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.Common.Contracts.Interfaces;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.ItOperations;
@@ -14,7 +15,9 @@ public class FreezeDemographicsEndpointTests
     public FreezeDemographicsEndpointTests()
     {
         _frozenServiceMock = new Mock<IFrozenService>();
-        _endpoint = new FreezeDemographicsEndpoint(_frozenServiceMock.Object);
+        var appUserMock = new Mock<IAppUser>();
+        appUserMock.Setup(u => u.UserName).Returns("TestUser");
+        _endpoint = new FreezeDemographicsEndpoint(_frozenServiceMock.Object, appUserMock.Object);
     }
 
     [Fact]
@@ -37,7 +40,7 @@ public class FreezeDemographicsEndpointTests
         };
 
         _frozenServiceMock
-            .Setup(service => service.FreezeDemographics(request.ProfitYear, request.AsOfDateTime, It.IsAny<CancellationToken>()))
+            .Setup(service => service.FreezeDemographics(request.ProfitYear, request.AsOfDateTime, expectedResponse.FrozenBy, It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResponse);
 
         // Act

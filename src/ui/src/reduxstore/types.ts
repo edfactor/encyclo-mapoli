@@ -49,6 +49,9 @@ export interface DemographicBadgesNotInPayprofitRequestDto {
 export interface PagedReportResponse<T> {
   reportName: string;
   reportDate: string;
+  startDate: string;
+  endDate: string;
+  dataSource: string;
   response: Paged<T>;
 }
 

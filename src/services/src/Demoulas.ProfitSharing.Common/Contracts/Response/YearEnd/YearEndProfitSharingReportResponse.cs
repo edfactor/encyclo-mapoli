@@ -30,6 +30,8 @@ public sealed record YearEndProfitSharingReportResponse : ReportResponseBase<Yea
             NumberOfNewEmployees = 55,
             NumberOfEmployeesInPlan = 2044,
             NumberOfEmployeesUnder21 = 015,
+            StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
+            EndDate = DateOnly.FromDateTime(DateTime.UtcNow),
             Response = new PaginatedResponseDto<YearEndProfitSharingReportDetail>(new PaginationRequestDto())
                 { Total = 1, Results = new List<YearEndProfitSharingReportDetail>() { YearEndProfitSharingReportDetail.ResponseExample() } }
                 

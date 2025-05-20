@@ -12,7 +12,7 @@ using Demoulas.ProfitSharing.Security;
 using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.PostFrozen;
-public sealed class ProfitSharingLabelsEndpoint : Endpoint<ProfitYearRequest, PaginatedResponseDto<ProfitSharingLabelResponse>>
+public sealed class ProfitSharingLabelsEndpoint : Endpoint<FrozenProfitYearRequest, PaginatedResponseDto<ProfitSharingLabelResponse>>
 {
     private readonly IPostFrozenService _postFrozenService;
 
@@ -37,7 +37,7 @@ public sealed class ProfitSharingLabelsEndpoint : Endpoint<ProfitYearRequest, Pa
         Group<YearEndGroup>();
     }
 
-    public sealed override async Task HandleAsync(ProfitYearRequest req, CancellationToken ct)
+    public sealed override async Task HandleAsync(FrozenProfitYearRequest req, CancellationToken ct)
     {
         var response = await _postFrozenService.GetProfitSharingLabels(req, ct);
 

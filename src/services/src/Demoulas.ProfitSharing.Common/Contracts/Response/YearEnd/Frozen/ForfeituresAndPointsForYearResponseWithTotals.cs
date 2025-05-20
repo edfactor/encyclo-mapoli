@@ -15,6 +15,8 @@ public sealed record ForfeituresAndPointsForYearResponseWithTotals : ReportRespo
             TotalForfeitures = 1234.56m,
             TotalForfeitPoints = 15000,
             TotalEarningPoints = 85000,
+            StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
+            EndDate = DateOnly.FromDateTime(DateTime.UtcNow),
             Response = new Demoulas.Common.Contracts.Contracts.Response.PaginatedResponseDto<ForfeituresAndPointsForYearResponse>
             {
                 Results = new List<ForfeituresAndPointsForYearResponse> { ForfeituresAndPointsForYearResponse.ResponseExample() }

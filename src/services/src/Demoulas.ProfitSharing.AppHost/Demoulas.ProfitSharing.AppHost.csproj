@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\tests\Demoulas.ProfitSharing.UnitTests\Demoulas.ProfitSharing.UnitTests.csproj" />
     <ProjectReference Include="..\Demoulas.ProfitSharing.Api\Demoulas.ProfitSharing.Api.csproj" />
     <ProjectReference Include="..\Demoulas.ProfitSharing.Data.Cli\Demoulas.ProfitSharing.Data.Cli.csproj" />
     <ProjectReference Include="..\Demoulas.ProfitSharing.EmployeeDelta.Sync\Demoulas.ProfitSharing.EmployeeDelta.Sync.csproj" />

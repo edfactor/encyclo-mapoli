@@ -23,6 +23,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
     private readonly TotalService _totalService;
     private readonly IEmbeddedSqlService _embeddedSqlService;
     private readonly IHostEnvironment _hostEnvironment;
+    private readonly IDemographicReaderService _demographicReaderService;
 
     private sealed record EmployeeProjection
     {
@@ -52,13 +53,15 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         ICalendarService calendarService,
         TotalService totalService,
         IEmbeddedSqlService embeddedSqlService,
-        IHostEnvironment hostEnvironment)
+        IHostEnvironment hostEnvironment,
+        IDemographicReaderService demographicReaderService)
     {
         _dataContextFactory = dataContextFactory;
         _calendarService = calendarService;
         _totalService = totalService;
         _embeddedSqlService = embeddedSqlService;
         _hostEnvironment = hostEnvironment;
+        _demographicReaderService = demographicReaderService;
     }
 
     public async Task<YearEndProfitSharingReportSummaryResponse> GetYearEndProfitSharingSummaryReportAsync(
@@ -285,7 +288,10 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 response.LineItems.Add(lineItem);
             }
 
-            var beneQry = ctx.BeneficiaryContacts.Where(bc => !ctx.Demographics.Any(x => x.Ssn == bc.Ssn))
+
+            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+            var beneQry = ctx.BeneficiaryContacts
+                .Where(bc => !demographics.Any(x => x.Ssn == bc.Ssn))
                 .Join(_totalService.GetTotalBalanceSet(ctx, req.ProfitYear), x => x.Ssn, x => x.Ssn,
                     (pp, tot) => new { pp, tot });
 
@@ -342,11 +348,11 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         });
 
 
-        var responseTask = _dataContextFactory.UseReadOnlyContext(ctx =>
+        Task<PaginatedResponseDto<YearEndProfitSharingReportDetail>> responseTask = _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             if (!req.IncludeDetails)
             {
-                return Task.FromResult(new PaginatedResponseDto<YearEndProfitSharingReportDetail>(req));
+                return new PaginatedResponseDto<YearEndProfitSharingReportDetail>(req);
             }
 
             // ──────────────────────────────────────────────────────────────────────────
@@ -359,9 +365,9 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
 
             if (req.IsYearEnd)
             {
-                var snap = FrozenService.GetDemographicSnapshot(ctx, req.ProfitYear);
+                var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, true);
                 basePayProfits = basePayProfits
-                    .Join(snap, p => p.DemographicId, d => d.Id, (p, _) => p);
+                    .Join(demographicQuery, p => p.DemographicId, d => d.Id, (p, _) => p);
             }
 
             // ──────────────────────────────────────────────────────────────────────────
@@ -373,10 +379,11 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
 
             if (req.IncludeBeneficiaries)
             {
+                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
                 beneficiaryQuery = ctx.Beneficiaries
                     .Include(b => b.Contact)!
                     .ThenInclude(c => c!.ContactInfo)
-                    .Where(b => !ctx.Demographics.Any(x => x.Ssn == b.Contact!.Ssn));
+                    .Where(b => !demographics.Any(x => x.Ssn == b.Contact!.Ssn));
             }
 
             // ──────────────────────────────────────────────────────────────────────────
@@ -475,7 +482,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             //  Details (paged)
             // ──────────────────────────────────────────────────────────────────────────
 
-            return employeeWithBalanceQry
+            return await employeeWithBalanceQry
                 .Select(x => new YearEndProfitSharingReportDetail
                 {
                     BadgeNumber = x.Employee.BadgeNumber,
@@ -505,7 +512,9 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
 
         var response = new YearEndProfitSharingReportResponse
         {
-            ReportDate = DateTimeOffset.Now,
+            ReportDate = DateTimeOffset.UtcNow,
+            StartDate = calInfo.FiscalBeginDate,
+            EndDate = calInfo.FiscalEndDate,
             ReportName = $"PROFIT SHARE YEAR END REPORT FOR {req.ProfitYear}",
             Response = await responseTask
         };

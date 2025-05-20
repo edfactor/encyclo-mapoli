@@ -60,13 +60,17 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
             TreatAsBeneficiary = m.TreatAsBeneficiary
         }).ToList();
 
+
+        var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(profitShareUpdateRequest.ProfitYear, cancellationToken);
         return new ProfitShareUpdateResponse
         {
             HasExceededMaximumContributions = employeeExceededMaxContribution,
             AdjustmentsSummary = adjustmentReportData,
             ProfitShareUpdateTotals = totalsDto,
             ReportName = "Profit Sharing Update",
-            ReportDate = DateTimeOffset.Now,
+            ReportDate = DateTimeOffset.UtcNow,
+            StartDate = calInfo.FiscalBeginDate,
+            EndDate = calInfo.FiscalEndDate,
             Response = new PaginatedResponseDto<ProfitShareUpdateMemberResponse>(profitShareUpdateRequest)
             {
                 Total = members.Count,

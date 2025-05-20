@@ -6,7 +6,9 @@ using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate.Formatters;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Internal.ProfitShareUpdate;
+using Demoulas.ProfitSharing.Services.ItOperations;
 using Demoulas.ProfitSharing.Services.ProfitShareEdit;
+using Microsoft.AspNetCore.Http;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
 
@@ -33,7 +35,7 @@ internal sealed class ProfitShareUpdateReport
 
     public async Task ProfitSharingUpdatePaginated(ProfitShareUpdateRequest profitShareUpdateRequest)
     {
-        TotalService totalService = new TotalService(_dbFactory, _calendarService, new EmbeddedSqlService());
+        TotalService totalService = new TotalService(_dbFactory, _calendarService, new EmbeddedSqlService(), new DemographicReaderService(new FrozenService(_dbFactory), new HttpContextAccessor()));
         ProfitShareUpdateService psu = new(_dbFactory, totalService, _calendarService);
         _profitYear = profitShareUpdateRequest.ProfitYear;
 

@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Common.Contracts.Response;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
@@ -43,6 +43,8 @@ public class GetForfeitureAdjustmentsEndpoint : EndpointWithCsvTotalsBase<Forfei
                     {
                         ReportName = "Forfeiture Adjustments",
                         ReportDate = DateTimeOffset.Now,
+                        StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
+                        EndDate = DateOnly.FromDateTime(DateTime.UtcNow),
                         TotatNetBalance = 1000,
                         TotatNetVested = 1000,
                         Response = new PaginatedResponseDto<ForfeitureAdjustmentReportDetail>()

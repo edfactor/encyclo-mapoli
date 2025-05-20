@@ -20,6 +20,8 @@ public sealed record DistributionsAndForfeitureTotalsResponse : ReportResponseBa
             StateTaxTotal = 1234.56m,
             FederalTaxTotal = 987.65m,
             ForfeitureTotal = 345.67m,
+            StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
+            EndDate = DateOnly.FromDateTime(DateTime.UtcNow),
             Response = new PaginatedResponseDto<DistributionsAndForfeitureResponse>
             {
                 Results = [DistributionsAndForfeitureResponse.ResponseExample()]

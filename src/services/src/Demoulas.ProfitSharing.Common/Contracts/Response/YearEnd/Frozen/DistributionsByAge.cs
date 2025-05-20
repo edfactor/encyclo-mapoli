@@ -43,7 +43,8 @@ public sealed record DistributionsByAge : ReportResponseBase<DistributionsByAgeD
             HardshipTotalEmployees = 18,
             RegularTotalAmount = (decimal)1_855_156.09,
             HardshipTotalAmount = (decimal)386_243.46,
-
+            StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
+            EndDate = DateOnly.FromDateTime(DateTime.UtcNow),
             Response = new PaginatedResponseDto<DistributionsByAgeDetail>(new PaginationRequestDto())
             {
                 Results = new List<DistributionsByAgeDetail> { DistributionsByAgeDetail.ResponseExample() }

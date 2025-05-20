@@ -30,18 +30,18 @@ definitions:
                 if ($sdk -match "^9\.(\d+)\.(\d+)") {
                   $minor = [int]$matches[1];
                   $patch = [int]$matches[2];
-                  if ($minor -gt 0 -or $patch -ge 200) {
+                  if ($minor -gt 0 -or $patch -ge 300) {
                     $isSdkValid = $true;
                     break;
                   }
                 }
               }
               if ($isSdkValid) {
-                Write-Output ".NET SDK 9.0.200 or higher is installed.";
+                Write-Output ".NET SDK 9.0.300 or higher is installed.";
               } else {
-                Write-Output ".NET SDK 9.0.200 or higher is NOT installed.";
-                Invoke-WebRequest -Uri "https://download.visualstudio.microsoft.com/download/pr/83c595a0-def1-4aba-8284-2fd98007aa3d/5e5b47fb819ee59b2a10485f8cf5a89a/dotnet-sdk-9.0.200-win-x64.exe" -OutFile "$env:TEMP\dotnet-sdk-9.0.200-win-x64.exe";
-                Start-Process -FilePath "$env:TEMP\dotnet-sdk-9.0.200-win-x64.exe" -ArgumentList "/quiet", "/norestart" -Wait;
+                Write-Output ".NET SDK 9.0.300 or higher is NOT installed.";
+                Invoke-WebRequest -Uri "https://builds.dotnet.microsoft.com/dotnet/Sdk/9.0.300/dotnet-sdk-9.0.300-win-x64.exe" -OutFile "$env:TEMP\dotnet-sdk-9.0.300-win-x64.exe";
+                Start-Process -FilePath "$env:TEMP\dotnet-sdk-9.0.300-win-x64.exe" -ArgumentList "/quiet", "/norestart" -Wait;
               }
             } else {
               Write-Output "No .NET 9.x SDK installed.";
