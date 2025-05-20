@@ -13,8 +13,7 @@ public class BeneficiaryDto
     public required int BadgeNumber { get; set; }
     public required int DemographicId { get; set; }
 
-    public BeneficiaryContactDto? Contact { get; set; }
-    public required int BeneficiaryContactId { get; set; }
+    public required BeneficiaryContactDto Contact { get; set; }
 
     public string? Relationship { get; set; }
     public char? KindId { get; set; }

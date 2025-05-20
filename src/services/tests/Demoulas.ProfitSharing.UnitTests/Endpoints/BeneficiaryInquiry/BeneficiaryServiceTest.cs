@@ -56,7 +56,6 @@ public class BeneficiaryServiceTest : ApiTestBase<Program>
                     },
                     CreatedDate = DateOnly.FromDateTime(new DateTime(2025,5,8,0,0,0,DateTimeKind.Utc))
                 },
-                BeneficiaryContactId = 145,
                 Relationship = "DAUGHTER",
                 KindId ='P',
                 Kind =new BeneficiaryKindDto()

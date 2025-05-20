@@ -35,7 +35,6 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                 Id = x.Id,
                 BadgeNumber = x.BadgeNumber,
                 PsnSuffix = x.PsnSuffix,
-                BeneficiaryContactId = x.BeneficiaryContactId,
                 DemographicId = x.DemographicId,
                 Percent = x.Percent,
                 KindId = x.KindId,
