@@ -9,6 +9,8 @@
   <ItemGroup>
     <PackageReference Include="CsvHelper" />
     <PackageReference Include="Demoulas.Common.Api" />
+    <PackageReference Include="FastEndpoints.AspVersioning" />
+    <PackageReference Include="FastEndpoints.Swagger" />
     <PackageReference Include="OpenTelemetry.Api" />
   </ItemGroup>
 
