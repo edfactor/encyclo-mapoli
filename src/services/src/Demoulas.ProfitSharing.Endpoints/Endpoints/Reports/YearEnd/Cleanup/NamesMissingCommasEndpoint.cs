@@ -32,6 +32,8 @@ public class NamesMissingCommasEndpoint : EndpointWithCsvBase<SortedPaginationRe
                     {
                         ReportDate = DateTime.Now,
                         ReportName = "MISSING COMMA IN PY_NAME",
+                        StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
+                        EndDate = DateOnly.FromDateTime(DateTime.UtcNow),
                         Response = new PaginatedResponseDto<NamesMissingCommaResponse>
                         {
                             Results = new List<NamesMissingCommaResponse>

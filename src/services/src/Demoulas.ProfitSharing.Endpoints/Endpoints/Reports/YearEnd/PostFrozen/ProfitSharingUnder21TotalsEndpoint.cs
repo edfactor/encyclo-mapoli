@@ -9,7 +9,6 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using FastEndpoints;
-using Microsoft.AspNetCore.Http;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.PostFrozen;
 
@@ -17,7 +16,7 @@ public class ProfitSharingUnder21TotalsEndpoint: Endpoint<ProfitYearRequest, Pro
 {
     private readonly IPostFrozenService _postFrozenService;
 
-    public ProfitSharingUnder21TotalsEndpoint(IPostFrozenService postFrozenService): base()
+    public ProfitSharingUnder21TotalsEndpoint(IPostFrozenService postFrozenService)
     {
         _postFrozenService = postFrozenService;
     }

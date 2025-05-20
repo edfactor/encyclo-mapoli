@@ -6,6 +6,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -15,18 +16,21 @@ internal sealed class MissiveService : IMissiveService
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly ITotalService _totalService;
     private readonly ICalendarService _calendarService;
+    private readonly IDemographicReaderService _demographicReaderService;
     private readonly ILogger<MissiveService> _logger;
 
     public MissiveService(
         IProfitSharingDataContextFactory dataContextFactory,
         ITotalService totalService,
         ILoggerFactory loggerFactory,
-        ICalendarService calendarService
+        ICalendarService calendarService,
+        IDemographicReaderService demographicReaderService
     ) 
     {
         _dataContextFactory = dataContextFactory;
         _totalService = totalService;
         _calendarService = calendarService;
+        _demographicReaderService = demographicReaderService;
         _logger = loggerFactory.CreateLogger<MissiveService>();
     }
     public async Task<List<int>> DetermineMissivesForSsn(int ssn, short profitYear, CancellationToken cancellation)
@@ -77,10 +81,11 @@ internal sealed class MissiveService : IMissiveService
     private async Task<bool> HasNewVestingPlanHasContributions(ProfitSharingReadOnlyDbContext ctx,int ssn, short profitYear, CancellationToken cancellation)
     {
         var memberBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(Common.Contracts.Request.SearchBy.Ssn, ssn, profitYear, cancellation);
-        if (memberBalance != null && memberBalance.YearsInPlan >= 2 && memberBalance.YearsInPlan <= 7)
+        if (memberBalance is { YearsInPlan: >= 2 and <= 7 })
         {
+            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
             var vestingIncreased = await (
-                from d in ctx.Demographics
+                from d in demographics
                 join pp in ctx.PayProfits.Where(x => x.ProfitYear == profitYear) on d.Id equals pp.DemographicId
                 where d.Ssn == ssn
                   && pp.CurrentHoursYear + pp.HoursExecutive > ReferenceData.MinimumHoursForContribution()
@@ -94,10 +99,11 @@ internal sealed class MissiveService : IMissiveService
         return false;
     }
 
-    private static Task<bool> VestingIsNow100Percent(ProfitSharingReadOnlyDbContext ctx, int ssn, CalendarResponseDto calInfo, CancellationToken cancellation)
+    private async Task<bool> VestingIsNow100Percent(ProfitSharingReadOnlyDbContext ctx, int ssn, CalendarResponseDto calInfo, CancellationToken cancellation)
     {
         var sixtyFiveBirthDate = DateOnly.FromDateTime(DateTime.Today).AddYears(-65);
-        return (from d in ctx.Demographics
+        var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+        return await (from d in demographics
                 where d.Ssn == ssn && 
                       d.DateOfBirth <= sixtyFiveBirthDate && 
                       (!d.TerminationDate.HasValue || d.TerminationDate > calInfo.FiscalEndDate) &&
@@ -110,10 +116,11 @@ internal sealed class MissiveService : IMissiveService
         return (from bc in ctx.BeneficiaryContacts where bc.Ssn == ssn select bc.Id).AnyAsync(token);
     }
 
-    private static Task<bool> EmployeeMayBe100Percent(ProfitSharingReadOnlyDbContext ctx, int ssn, short profitYear, CancellationToken token) 
+    private async Task<bool> EmployeeMayBe100Percent(ProfitSharingReadOnlyDbContext ctx, int ssn, short profitYear, CancellationToken token) 
     {
-        return (from pp in ctx.PayProfits.Where(x => x.ProfitYear == profitYear)
-                join d in ctx.Demographics on pp.DemographicId equals d.Id
+        var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+        return await (from pp in ctx.PayProfits.Where(x => x.ProfitYear == profitYear)
+                join d in demographics on pp.DemographicId equals d.Id
                 where pp.ZeroContributionReasonId == ZeroContributionReason.Constants.SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay
                     && d.Ssn == ssn
                 select d.Id).AnyAsync(token);

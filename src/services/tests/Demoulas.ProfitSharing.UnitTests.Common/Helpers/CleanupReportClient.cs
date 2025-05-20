@@ -9,6 +9,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.UnitTests.Common.Common;
+using Demoulas.Util.Extensions;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Helpers;
 public sealed class CleanupReportClient : ClientBase, ICleanupReportService
@@ -101,6 +102,8 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
         {
             ReportName = Constants.ErrorMessages.ReportNotFound,
             ReportDate = SqlDateTime.MinValue.Value,
+            StartDate = SqlDateTime.MinValue.Value.ToDateOnly(),
+            EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
             Response = new PaginatedResponseDto<TResponseDto>()
         };
     }

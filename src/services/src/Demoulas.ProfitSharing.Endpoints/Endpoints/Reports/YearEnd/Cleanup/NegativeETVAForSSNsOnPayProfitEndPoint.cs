@@ -35,6 +35,8 @@ public class NegativeEtvaForSsNsOnPayProfitEndPoint : EndpointWithCsvBase<Profit
                     {
                         ReportName = ReportFileName,
                         ReportDate = DateTimeOffset.Now,
+                        StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
+                        EndDate = DateOnly.FromDateTime(DateTime.UtcNow),
                         Response = new PaginatedResponseDto<NegativeEtvaForSsNsOnPayProfitResponse>()
                         {
                             Results = new List<NegativeEtvaForSsNsOnPayProfitResponse>

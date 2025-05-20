@@ -117,6 +117,7 @@ WebApplication app = builder.Build();
 
 app.UseCors();
 
+app.UseDemographicHeaders();
 app.UseDefaultEndpoints(OktaSettingsAction)
     .UseReDoc(settings =>
     {

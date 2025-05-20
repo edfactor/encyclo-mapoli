@@ -3,6 +3,7 @@ using System.Net;
 using System.Text.Json;
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.Response.Headers;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Eligibility;
@@ -13,7 +14,6 @@ using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
 using FastEndpoints;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using Xunit.Abstractions;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
@@ -33,7 +33,7 @@ public class GetEligibleEmployeesTests : ApiTestBase<Program>
         _scenarioFactory = new ScenarioFactory().EmployeeWithHistory(); // Sets up a single employee with demographic history
         MockDbContextFactory = _scenarioFactory.BuildMocks();
         _testProfitYear = _scenarioFactory.ProfitYear;
-        _requestDto = new ProfitYearRequest { ProfitYear = _testProfitYear };
+        _requestDto = new ProfitYearRequest { ProfitYear = _testProfitYear};
         _d = _scenarioFactory.Demographics[0];
         _pp = _scenarioFactory.PayProfits[0];
         _dh = _scenarioFactory.DemographicHistories[0];
@@ -92,48 +92,60 @@ public class GetEligibleEmployeesTests : ApiTestBase<Program>
             DateOnly yearEndDate = new(_testProfitYear, 12, 31);
             DateOnly birthDateOfExactly21YearsOld = yearEndDate.AddYears(-21);
 
-            int expectedNumberReadOnFrozen = await c.PayProfits.Where(p => p.ProfitYear == _testProfitYear).CountAsync(CancellationToken.None);
+            int expectedNumberReadOnFrozen = await c.PayProfits
+                .Where(p => p.ProfitYear == _testProfitYear)
+                .CountAsync(CancellationToken.None);
 
             int expectedNumberNotSelected = await c.PayProfits
                 .Include(p => p.Demographic)
                 .Where(p => p.ProfitYear == _testProfitYear)
-                .Where(p => p.Demographic!.DateOfBirth > birthDateOfExactly21YearsOld /*too young*/
-                            || p.CurrentHoursYear  < 1000 ||
-                            p.Demographic!.EmploymentStatusId == EmploymentStatus.Constants.Terminated)
+                .Where(p => p.Demographic!.DateOfBirth > birthDateOfExactly21YearsOld /* too young */
+                            || p.CurrentHoursYear < 1000
+                            || p.Demographic!.EmploymentStatusId == EmploymentStatus.Constants.Terminated)
                 .CountAsync(CancellationToken.None);
 
             int expectedNumberWritten = await c.PayProfits
                 .Include(p => p.Demographic)
                 .Where(p => p.ProfitYear == _testProfitYear)
-                .Where(p => p.Demographic!.DateOfBirth <= birthDateOfExactly21YearsOld /*over 21*/ && p.CurrentHoursYear >= 1000 &&
-                            p.Demographic!.EmploymentStatusId != EmploymentStatus.Constants.Terminated).CountAsync(CancellationToken.None);
+                .Where(p => p.Demographic!.DateOfBirth <= birthDateOfExactly21YearsOld /* over 21 */
+                            && p.CurrentHoursYear >= 1000
+                            && p.Demographic!.EmploymentStatusId != EmploymentStatus.Constants.Terminated)
+                .CountAsync(CancellationToken.None);
 
             // Act
             TestResult<GetEligibleEmployeesResponse> response =
                 await DownloadClient
                     .GETAsync<GetEligibleEmployeesEndpoint, ProfitYearRequest, GetEligibleEmployeesResponse>(_requestDto);
 
-            // Assert
-            response.Response.Content.Should().NotBeNull();
+            // Assert – new header check
+            response.Response.Headers
+                .TryGetValues(DemographicHeaders.Source, out var sourceValues)
+                .Should().BeTrue("the API should always emit the demographic-source header");
 
-            // Verify CSV file
+            sourceValues!.Single().Should().Be("Frozen",
+                $"when UseFrozenData is true the {DemographicHeaders.Source} header must equal \"Frozen\"");
+
+            // Assert – CSV file
+            response.Response.Content.Should().NotBeNull();
             string csvData = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
             string[] lines = csvData.Split(["\r\n", "\n"], StringSplitOptions.None);
-            // line 0 is today's date
+
             lines[0].Should().NotBeEmpty();
             lines[1].Should().Be($"Get Eligible Employees for Year {_testProfitYear}");
-            lines[2].Should().BeEmpty(); // blank link
+            lines[2].Should().BeEmpty();                                // blank line
             lines[3].Should().Be($"Number read on FROZEN,{expectedNumberReadOnFrozen}");
             lines[4].Should().Be($"Number not selected,{expectedNumberNotSelected}");
             lines[5].Should().Be($"Number written,{expectedNumberWritten}");
 
             lines[6].Should().Be("ASSIGNMENT_ID,BADGE_PSN,NAME");
 
-            lines.Skip(7).Should().Contain($"{_dh.DepartmentId},{_dh.BadgeNumber},\"{_d.ContactInfo!.FullName!}\"");
+            lines.Skip(7).Should()
+                 .Contain($"{_dh.DepartmentId},{_dh.BadgeNumber},\"{_d.ContactInfo!.FullName!}\"");
 
             return Task.CompletedTask;
         });
     }
+
 
     [Fact]
     public Task no_employees_too_young()

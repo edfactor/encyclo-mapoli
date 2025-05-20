@@ -11,7 +11,7 @@ using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
-public sealed  class UpdateSummaryReportEndpoint:EndpointWithCsvTotalsBase<ProfitYearRequest, UpdateSummaryReportResponse, UpdateSummaryReportDetail, UpdateSummaryReportEndpoint.UpdateSummaryReportMapper>
+public sealed  class UpdateSummaryReportEndpoint:EndpointWithCsvTotalsBase<FrozenProfitYearRequest, UpdateSummaryReportResponse, UpdateSummaryReportDetail, UpdateSummaryReportEndpoint.UpdateSummaryReportMapper>
 {
     private readonly IFrozenReportService _frozenReportService;
 
@@ -41,7 +41,7 @@ public sealed  class UpdateSummaryReportEndpoint:EndpointWithCsvTotalsBase<Profi
         base.Configure();
     }
 
-    public override Task<UpdateSummaryReportResponse> GetResponse(ProfitYearRequest req, CancellationToken ct)
+    public override Task<UpdateSummaryReportResponse> GetResponse(FrozenProfitYearRequest req, CancellationToken ct)
     {
         return _frozenReportService.GetUpdateSummaryReport(req, ct);
     }

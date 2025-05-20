@@ -9,6 +9,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,10 +17,13 @@ namespace Demoulas.ProfitSharing.Services.Beneficiaries;
 public class BeneficiaryService : IBeneficiaryService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
+    private readonly IDemographicReaderService _demographicReaderService;
 
-    public BeneficiaryService(IProfitSharingDataContextFactory dataContextFactory)
+    public BeneficiaryService(IProfitSharingDataContextFactory dataContextFactory,
+        IDemographicReaderService demographicReaderService)
     {
         _dataContextFactory = dataContextFactory;
+        _demographicReaderService = demographicReaderService;
     }
     public async Task<CreateBeneficiaryResponse> CreateBeneficiary(CreateBeneficiaryRequest req, CancellationToken cancellationToken)
     {
@@ -44,8 +48,9 @@ public class BeneficiaryService : IBeneficiaryService
             var beneficiaryContact = await GetOrCreateBeneficiaryContact(req, ctx, cancellationToken);
 
             resp.ContactExisted = beneficiaryContact.Id != 0;
-
-            var demographic = await ctx.Demographics.Where(x=>x.BadgeNumber == req.EmployeeBadgeNumber).FirstOrDefaultAsync(cancellationToken);
+            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+            
+            var demographic = await demographics.Where(x=>x.BadgeNumber == req.EmployeeBadgeNumber).FirstOrDefaultAsync(cancellationToken);
             if (demographic == default)
             {
                 throw new InvalidOperationException("EmployeeBadgeNumber is invalid");

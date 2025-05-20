@@ -1,5 +1,8 @@
-using Demoulas.Common.Data.Services.Service;
+﻿using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Services;
+using Demoulas.ProfitSharing.Services.ItOperations;
+using Demoulas.Security;
+using Microsoft.AspNetCore.Http;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 
@@ -15,7 +18,9 @@ public abstract class PristineBaseTest
     {
         DbFactory = new PristineDataContextFactory();
         CalendarService = new CalendarService(DbFactory, Aps);
-        TotalService = new TotalService(DbFactory, CalendarService, new EmbeddedSqlService());
+        TotalService = new TotalService(DbFactory, 
+            CalendarService, new EmbeddedSqlService(), 
+            new DemographicReaderService(new FrozenService(DbFactory), new HttpContextAccessor()));
         TestOutputHelper = testOutputHelper;
     }
 }

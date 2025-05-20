@@ -49,7 +49,9 @@ public class RehireForfeituresTests : ApiTestBase<Program>
             var expectedResponse = new ReportResponseBase<RehireForfeituresResponse>
             {
                 ReportName = "REHIRE'S PROFIT SHARING DATA",
-                ReportDate = DateTimeOffset.Now,
+                ReportDate = DateTimeOffset.UtcNow,
+                StartDate = SqlDateTime.MinValue.Value.ToDateOnly(),
+                EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
                 Response = new PaginatedResponseDto<RehireForfeituresResponse>
                 {
                     Results = new List<RehireForfeituresResponse> { setup.ExpectedResponse }
@@ -152,7 +154,9 @@ public class RehireForfeituresTests : ApiTestBase<Program>
         var expectedResponse = new ReportResponseBase<RehireForfeituresResponse>
         {
             ReportName = "REHIRE'S PROFIT SHARING DATA",
-            ReportDate = DateTimeOffset.Now,
+            ReportDate = DateTimeOffset.UtcNow,
+            StartDate = SqlDateTime.MinValue.Value.ToDateOnly(),
+            EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
             Response = new PaginatedResponseDto<RehireForfeituresResponse> { Results = new List<RehireForfeituresResponse>() }
         };
 
@@ -173,7 +177,9 @@ public class RehireForfeituresTests : ApiTestBase<Program>
         var expectedResponse = new ReportResponseBase<RehireForfeituresResponse>
         {
             ReportName = "REHIRE'S PROFIT SHARING DATA",
-            ReportDate = DateTimeOffset.Now,
+            ReportDate = DateTimeOffset.UtcNow,
+            StartDate = SqlDateTime.MinValue.Value.ToDateOnly(),
+            EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
             Response = new PaginatedResponseDto<RehireForfeituresResponse> { Results = [] }
         };
 

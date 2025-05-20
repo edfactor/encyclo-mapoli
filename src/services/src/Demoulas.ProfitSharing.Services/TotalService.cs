@@ -27,14 +27,17 @@ public sealed class TotalService : ITotalService
     private readonly IProfitSharingDataContextFactory _profitSharingDataContextFactory;
     private readonly ICalendarService _calendarService;
     private readonly IEmbeddedSqlService _embeddedSqlService;
+    private readonly IDemographicReaderService _demographicReaderService;
 
     public TotalService(IProfitSharingDataContextFactory profitSharingDataContextFactory,
         ICalendarService calendarService,
-        IEmbeddedSqlService embeddedSqlService)
+        IEmbeddedSqlService embeddedSqlService,
+        IDemographicReaderService demographicReaderService)
     {
         _profitSharingDataContextFactory = profitSharingDataContextFactory;
         _calendarService = calendarService;
         _embeddedSqlService = embeddedSqlService;
+        _demographicReaderService = demographicReaderService;
     }
 
     /// <summary>
@@ -379,8 +382,9 @@ public sealed class TotalService : ITotalService
             case SearchBy.BadgeNumber:
                 return await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
                 {
+                    var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
                     var rslt = await (from t in TotalVestingBalance(ctx, profitYear, calendarInfo.FiscalEndDate)
-                                      join d in ctx.Demographics on t.Ssn equals d.Ssn
+                                      join d in demographics on t.Ssn equals d.Ssn
                                       where d.BadgeNumber == badgeNumberOrSsn
                                       select new BalanceEndpointResponse
                                       {

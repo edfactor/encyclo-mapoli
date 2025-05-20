@@ -27,7 +27,8 @@ public sealed record ForfeituresByAge : ReportResponseBase<ForfeituresByAgeDetai
             ReportDate = DateTimeOffset.Now,
             TotalAmount = (decimal)1_855_156.09,
             TotalEmployees = 63,
-
+            StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
+            EndDate = DateOnly.FromDateTime(DateTime.UtcNow),
             Response = new PaginatedResponseDto<ForfeituresByAgeDetail>(new PaginationRequestDto())
             {
                 Results = new List<ForfeituresByAgeDetail> { ForfeituresByAgeDetail.ResponseExample() }
