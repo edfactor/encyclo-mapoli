@@ -24,7 +24,7 @@ export const beneficiarySlice = createSlice({
                 state.error = null;
             }
             else {
-                state.error = "Failed to fetch  navigations"
+                state.error = "Failed to fetch  beneficiaries"
             }
         },
         setBeneficiaryRequest: (state, action: PayloadAction<BeneficiaryRequestDto | null>) => {

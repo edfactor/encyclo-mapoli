@@ -1,33 +1,15 @@
 import {
-    Checkbox,
-    FormControl,
-    FormControlLabel,
     FormHelperText,
     FormLabel,
-    MenuItem,
-    Radio,
-    RadioGroup,
-    Select,
     TextField
 } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
-import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { useLazyGetProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { BeneficiaryRequestDto, MasterInquiryRequest, MasterInquirySearch, MissiveResponse } from "reduxstore/types";
-import {
-    clearMasterInquiryData,
-    clearMasterInquiryRequestParams,
-    setMasterInquiryRequestParams
-} from "reduxstore/slices/inquirySlice";
-import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
-import { RootState } from "reduxstore/store";
-import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
-import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
+import { BeneficiaryRequestDto } from "reduxstore/types";
+import { useDispatch } from "react-redux";
 import { useLazyGetBeneficiariesQuery } from "reduxstore/api/BeneficiariesApi";
 import { setBeneficiaryRequest } from "reduxstore/slices/beneficiarySlice";
 
@@ -40,10 +22,6 @@ interface bRequest{
     psnSuffix:string;
 }
 
-interface BeneficiaryInquirySearchFilterProps {
-    setInitialSearchLoaded: (include: boolean) => void;
-    setMissiveAlerts: (alerts: MissiveResponse[]) => void;
-}
 
 // const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterProps> = ({
 //   setInitialSearchLoaded,
