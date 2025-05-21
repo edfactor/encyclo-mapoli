@@ -344,6 +344,7 @@ export interface MasterInquiryDetail extends ProfitYearRequest {
   transactionDate?: Date;
   currentIncomeYear?: number;
   currentHoursYear?: number;
+  psnSuffix?: number;
 }
 
 export interface MasterInquiryRequest {
