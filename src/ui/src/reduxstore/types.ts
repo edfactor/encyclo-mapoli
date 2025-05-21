@@ -1110,7 +1110,6 @@ export interface ForfeitureAdjustmentRequest {
 }
 
 export interface ForfeitureAdjustmentUpdateRequest {
-  clientNumber: number;
   badgeNumber: number;
   forfeitureAmount: number;
   reason?: string;
@@ -1118,7 +1117,6 @@ export interface ForfeitureAdjustmentUpdateRequest {
 }
 
 export interface ForfeitureAdjustmentDetail {
-  clientNumber: number;
   badgeNumber: number;
   startingBalance: number;
   forfeitureAmount: number;

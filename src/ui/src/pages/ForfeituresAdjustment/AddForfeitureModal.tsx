@@ -10,8 +10,7 @@ interface AddForfeitureModalProps {
   open: boolean;
   onClose: () => void;
   onSave: (formData: {
-    clnNum: string;
-    empNum: string;
+    badgeNumber: string;
     startingBalance: number;
     forfeitureAmount: number;
     netBalance: number;
@@ -27,8 +26,7 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({
   employeeDetails
 }) => {
   const [formData, setFormData] = useState({
-    clnNum: "",
-    empNum: "",
+    badgeNumber: "",
     startingBalance: 0,
     forfeitureAmount: undefined,
     netBalance: 0,
@@ -41,8 +39,7 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({
     if (employeeDetails) {
       setFormData(prevState => ({
         ...prevState,
-        clnNum: employeeDetails.storeNumber.toString() || '',
-        empNum: employeeDetails.badgeNumber || '',
+        badgeNumber: employeeDetails.badgeNumber || '',
         startingBalance: employeeDetails.currentPSAmount || 0,
         forfeitureAmount: undefined,
         netBalance: employeeDetails.currentPSAmount || 0,
@@ -76,16 +73,14 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({
 
   const handleSave = async () => {
     try {
-      const clientNum = parseInt(formData.clnNum) || 0;
-      const badgeNum = parseInt(formData.empNum) || 0;
+      const badgeNum = parseInt(formData.badgeNumber) || 0;
 
       if (!badgeNum) {
-        alert("Employee number is required");
+        alert("Badge Number is required");
         return;
       }
 
       const request: ForfeitureAdjustmentUpdateRequest = {
-        clientNumber: clientNum,
         badgeNumber: badgeNum,
         forfeitureAmount: formData.forfeitureAmount || 0,
         profitYear: profitYear
@@ -121,22 +116,11 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({
       ]}
     >
       <Grid2 container spacing={2}>
-        <Grid2 size={{ xs: 6 }}>
-          <Typography variant="body2" gutterBottom>CLN NUM</Typography>
+        <Grid2 size={{ xs: 12 }}>
+          <Typography variant="body2" gutterBottom>Badge Number</Typography>
           <TextField
-            name="clnNum"
-            value={formData.clnNum}
-            onChange={handleChange}
-            fullWidth
-            size="small"
-            variant="outlined"
-          />
-        </Grid2>
-        <Grid2 size={{ xs: 6 }}>
-          <Typography variant="body2" gutterBottom>EMP NUM</Typography>
-          <TextField
-            name="empNum"
-            value={formData.empNum}
+            name="badgeNumber"
+            value={formData.badgeNumber}
             onChange={handleChange}
             fullWidth
             size="small"

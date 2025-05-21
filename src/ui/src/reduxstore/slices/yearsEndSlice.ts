@@ -976,7 +976,7 @@ export const yearsEndSlice = createSlice({
     setProfitShareSummaryReport: (state, action: PayloadAction<YearEndProfitSharingReportSummaryResponse>) => {
       state.profitShareSummaryReport = action.payload;
     },
-    setUpdateSummary: (state, action: PayloadAction<UpdateSummaryResponse>) => {
+    setUpdateSummary: (state, action: PayloadAction<UpdateSummaryResponse | null>) => {
       state.updateSummary = action.payload;
     },
     clearUpdateSummary: (state) => {

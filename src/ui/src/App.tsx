@@ -45,8 +45,24 @@ const App = () => {
 
   useEffect(() => {
     const config = oktaConfig(clientId, issuer);
-    setOktaAuth(new OktaAuth(config.oidc));
-  }, []);
+    const auth = new OktaAuth({
+      ...config.oidc,
+      services: {
+        autoRenew: true,
+        autoRemove: true,
+        syncStorage: true
+      }
+    });
+    setOktaAuth(auth);
+    
+    // Start the OktaAuth service to enable token auto-renewal (temporary, longterm solution is to use refresh tokens)
+    // https://github.com/okta/okta-auth-js/blob/master/docs/autoRenew-notice.md
+    auth.start();
+    
+    return () => {
+      auth.stop();
+    };
+  }, [clientId, issuer]);
 
   // Redux selectors
   //const state = useSelector((state: RootState) => state);
@@ -145,7 +161,7 @@ const App = () => {
         buildVersionNumber={buildInfoText}
         userName={username}
         environmentMode={EnvironmentUtils.envMode}
-        apiStatus={health?.status}
+        apiStatus={health?.status as "Healthy" | "Degraded" | "Unhealthy" | undefined}
         apiStatusMessage={health ? getHealthStatusDescription(health) : undefined}
         oktaEnabled={EnvironmentUtils.isOktaEnabled}>
         <AppErrorBoundary>
