@@ -1,6 +1,5 @@
 ﻿using Demoulas.ProfitSharing.AppHost;
 using Demoulas.ProfitSharing.AppHost.Helpers;
-using k8s.Models;
 using Projects;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
