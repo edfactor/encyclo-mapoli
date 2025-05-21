@@ -58,8 +58,9 @@ public static class ServicesExtension
 
         _ = builder.Services.AddScoped<IFrozenService, FrozenService>();
         _ = builder.Services.AddScoped<IStoreService, StoreService>();
-        _ = builder.Services.AddScoped<IAccountingPeriodsService, AccountingPeriodsService>();
-        _ = builder.Services.AddScoped<ICalendarService, CalendarService>();
+        _ = builder.Services.AddSingleton<IAccountingPeriodsService, AccountingPeriodsService>();
+        _ = builder.Services.AddSingleton<ICalendarService, CalendarService>();
+        _ = builder.Services.AddHostedService<CalendarService>();
 
         _ = builder.Services.AddScoped<IProfitShareUpdateService, ProfitShareUpdateService>();
         _ = builder.Services.AddScoped<IInternalProfitShareUpdateService, ProfitShareUpdateService>();
