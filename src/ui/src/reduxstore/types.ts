@@ -665,7 +665,7 @@ export interface ProfitShareUpdateResponse {
   response: Paged<ProfitShareUpdateDetail[]>;
   hasExceededMaximumContributions: true;
   adjustmentsSummary: ProfitShareAdjustmentSummary;
-  totals: ProfitShareUpdateTotals;
+  profitShareUpdateTotals: ProfitShareUpdateTotals;
 }
 
 export interface ProfitShareUpdateTotals {
