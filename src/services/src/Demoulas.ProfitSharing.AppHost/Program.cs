@@ -56,7 +56,7 @@ var api = builder.AddProject<Demoulas_ProfitSharing_Api>("ProfitSharing-Api")
     .WaitForCompletion(cliRunner)
     .WithUrlForEndpoint("https", annotation =>
     {
-        annotation.DisplayText = "Swagger";
+        annotation.DisplayText = "Swagger UI";
     });
 
 // Use AddViteApp for Vite applications as per the latest CommunityToolkit.Aspire guidance
