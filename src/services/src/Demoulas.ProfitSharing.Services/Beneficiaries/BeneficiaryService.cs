@@ -86,6 +86,44 @@ public class BeneficiaryService : IBeneficiaryService
         return rslt;
     }
 
+    public async Task UpdateBeneficiary(UpdateBeneficiaryRequest req, CancellationToken cancellationToken)
+    {
+        _ = await _dataContextFactory.UseWritableContextAsync(async (ctx, transaction) =>
+        {
+            var beneficiary = await ctx.Beneficiaries.SingleAsync(x => x.Id == req.Id, cancellationToken);
+
+            beneficiary.Contact!.ContactInfo.FirstName = req.FirstName;
+            beneficiary.Contact!.ContactInfo.LastName = req.LastName;
+            beneficiary.Contact!.Address.Street = req.Street;
+            beneficiary.Contact!.Address.Street2 = req.Street2;
+            beneficiary.Contact!.Address.Street3 = req.Street3;
+            beneficiary.Contact!.Address.Street4 = req.Street4;
+            beneficiary.Contact!.Address.City = req.City;
+            beneficiary.Contact!.Address.State = req.State;
+            beneficiary.Contact!.Address.PostalCode = req.PostalCode;
+            beneficiary.Contact!.Address.CountryIso = req.CountryIso;
+            beneficiary.KindId = req.KindId;
+
+            if (!string.IsNullOrEmpty(req.Relationship))
+            {
+                beneficiary.Relationship = req.Relationship;
+            }
+
+            if (req.BeneficiarySsn.HasValue)
+            {
+                beneficiary.Contact.Ssn = req.BeneficiarySsn.Value;
+            }
+
+            await ctx.SaveChangesAsync(cancellationToken);
+            if (transaction != null) 
+            { 
+                await transaction.CommitAsync(cancellationToken);
+            }
+
+            return Task.FromResult(true);
+        }, cancellationToken);
+    }
+
     private static async Task<BeneficiaryContact> GetOrCreateBeneficiaryContact(CreateBeneficiaryRequest req, ProfitSharingDbContext ctx, CancellationToken token)
     {
         var beneficiaryContact = await ctx.BeneficiaryContacts.Where(x=>x.Ssn == req.BeneficiarySsn).FirstOrDefaultAsync(token);
