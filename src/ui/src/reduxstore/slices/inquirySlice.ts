@@ -30,6 +30,8 @@ export const inquirySlice = createSlice({
 
       if (action.payload.employeeDetails) {
         state.masterInquiryEmployeeDetails = action.payload.employeeDetails;
+      } else {
+        state.masterInquiryEmployeeDetails = null;
       }
     },
     clearMasterInquiryData: (state) => {
