@@ -71,7 +71,8 @@ var ui = builder.AddViteApp("ProfitSharing-Ui", "../../../ui/")
     .WithUrlForEndpoint("http", annotation =>
     {
         annotation.DisplayText = "Profit Sharing";
-    });
+    })
+    .WithNpmPackageInstallation();
 
 ui.WithReference(api)
     .WaitFor(api)
