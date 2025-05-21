@@ -505,43 +505,46 @@ const ProfitShareEditUpdate = () => {
             </Grid2>
           </>
         )}
-        {profitSharingUpdate && profitSharingEdit && (
+        {profitSharingUpdate && profitSharingUpdate.profitShareUpdateTotals && profitSharingEdit && (
           <Grid2 width={"100%"}>
             <div className="px-[24px]">
               <h2 className="text-dsm-secondary">Summary (PAY444)</h2>
               <Typography
                 fontWeight="bold"
                 variant="body2">
-                {`Employees: ${profitSharingUpdate.totals.totalEmployees} | Beneficiaries: ${profitSharingUpdate.totals.totalBeneficaries}`}
+                {`Employees: ${profitSharingUpdate.profitShareUpdateTotals.totalEmployees} | Beneficiaries: ${profitSharingUpdate.profitShareUpdateTotals.totalBeneficaries}`}
               </Typography>
             </div>
 
             <TotalsGrid
               displayData={[
                 [
-                  numberToCurrency(profitSharingUpdate.totals.beginningBalance || 0),
-                  numberToCurrency(profitSharingUpdate.totals.totalContribution || 0),
-                  numberToCurrency(profitSharingUpdate.totals.earnings || 0),
-                  numberToCurrency(profitSharingUpdate.totals.earnings2 || 0),
-                  numberToCurrency(profitSharingUpdate.totals.forfeiture || 0),
-                  numberToCurrency(profitSharingUpdate.totals.military || 0),
-                  numberToCurrency(profitSharingUpdate.totals.endingBalance || 0)
+                  numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.beginningBalance || 0),
+                  numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.totalContribution || 0),
+                  numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.earnings || 0),
+                  numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.earnings2 || 0),
+                  numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.forfeiture || 0),
+                  numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.distributions || 0),
+                  numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.military || 0),
+                  numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.endingBalance || 0)
                 ],
                 [
                   "",
-                  numberToCurrency(profitSharingUpdate.totals.allocations || 0),
+                  numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.allocations || 0),
                   "",
                   "",
-                  numberToCurrency(profitSharingUpdate.totals.maxPointsTotal || 0),
-                  numberToCurrency(profitSharingUpdate.totals.paidAllocations || 0),
+                  numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.maxPointsTotal || 0),
+                  "",
+                  numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.paidAllocations || 0),
                   numberToCurrency(
-                    (profitSharingUpdate.totals.allocations || 0) + (profitSharingUpdate.totals.paidAllocations || 0)
+                    (profitSharingUpdate.profitShareUpdateTotals.allocations || 0) + (profitSharingUpdate.profitShareUpdateTotals.paidAllocations || 0)
                   )
                 ],
                 [
                   "",
-                  numberToCurrency(profitSharingUpdate.totals.contributionPoints || 0),
-                  numberToCurrency(profitSharingUpdate.totals.earningPoints || 0),
+                  numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.contributionPoints || 0),
+                  numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.earningPoints || 0),
+                  "",
                   "",
                   "",
                   "",
@@ -556,7 +559,8 @@ const ProfitShareEditUpdate = () => {
                 "Earnings",
                 "Earnings2",
                 "Forfeitures",
-                "Distributions Military/Paid Allocation",
+                "Distributions",
+                "Military/Paid Allocation",
                 "Ending Balance"
               ]}
               tablePadding="12px"
@@ -565,11 +569,11 @@ const ProfitShareEditUpdate = () => {
               <div style={{ display: "flex", gap: "75px" }}>
                 <span style={{ color: totalForfeituresGreaterThanZero == true ? "red" : "inherit" }}>
                   <strong>Total Forfeitures</strong>:{" "}
-                  {numberToCurrency(profitSharingUpdate.totals.maxOverTotal || 0) + "      "}{" "}
+                  {numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.maxOverTotal || 0) + "      "}{" "}
                 </span>
                 <span>
                   <strong>Total Points</strong>:{" "}
-                  {numberToCurrency(profitSharingUpdate.totals.maxPointsTotal || 0) + " "}{" "}
+                  {numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.maxPointsTotal || 0) + " "}{" "}
                 </span>
                 <span>
                   <strong>For Employees Exceeding Max Contribution</strong> :{" "}

@@ -184,7 +184,8 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
       triggerSearchUpdate(updateParams, false)
         .unwrap()
         .then((response) => {
-          if (response.totals.maxOverTotal > 0) {
+          // We need to set the profitSharingUpdate in the store
+          if (response.profitShareUpdateTotals && response.profitShareUpdateTotals.maxOverTotal > 0) {
             dispatch(setTotalForfeituresGreaterThanZero(true));
           } else {
             dispatch(setTotalForfeituresGreaterThanZero(false));

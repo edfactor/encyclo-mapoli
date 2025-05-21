@@ -98,6 +98,8 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
   const [triggerSearch, { isFetching }] = useLazyGetProfitMasterInquiryQuery();
   const { masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
 
+  const { missives } = useSelector((state: RootState) => state.lookups);
+
   const dispatch = useDispatch();
 
   const { badgeNumber } = useParams<{
@@ -286,7 +288,22 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
               }
             ]);
           }
-        }          
+        }  
+
+        if (!response.employeeDetails) {
+          setMissiveAlerts([])
+        } else { 
+          if (missives && response.employeeDetails.missives &&  response.employeeDetails.missives.length > 0) {
+      
+            const alerts = response.employeeDetails.missives.map((id: number) => {
+            const missiveResponse =  missives.find((missive: MissiveResponse) => missive.id === id);
+            return missiveResponse;
+            }).filter((alert) => alert !== null) as MissiveResponse[];
+
+            // This will send the list to the screen
+            setMissiveAlerts(alerts);
+          }
+        }
       });
     
       dispatch(setMasterInquiryRequestParams(data));

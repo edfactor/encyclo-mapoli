@@ -344,6 +344,7 @@ export interface MasterInquiryDetail extends ProfitYearRequest {
   transactionDate?: Date;
   currentIncomeYear?: number;
   currentHoursYear?: number;
+  psnSuffix?: number;
 }
 
 export interface MasterInquiryRequest {
@@ -665,7 +666,7 @@ export interface ProfitShareUpdateResponse {
   response: Paged<ProfitShareUpdateDetail[]>;
   hasExceededMaximumContributions: true;
   adjustmentsSummary: ProfitShareAdjustmentSummary;
-  totals: ProfitShareUpdateTotals;
+  profitShareUpdateTotals: ProfitShareUpdateTotals;
 }
 
 export interface ProfitShareUpdateTotals {
