@@ -22,22 +22,22 @@ var cliRunner = builder.AddExecutable("Database-Cli",
     .WithCommand(
         name: "upgrade-db",
         displayName: "Upgrade database",
-        executeCommand: (c) => Task.FromResult(CommandHelper.RunConsoleApp(projectPath!, "upgrade-db", logger)),
+        executeCommand: (c) => Task.FromResult(CommandHelper.RunConsoleApp(projectPath!, "upgrade-db", logger, "upgrade-db")),
         commandOptions: new CommandOptions { IconName = "Database", IconVariant = IconVariant.Filled })
     .WithCommand(
         name: "drop-recreate-db",
         displayName: "Drop and recreate database",
-        executeCommand: (c) => Task.FromResult(CommandHelper.RunConsoleApp(projectPath!, "drop-recreate-db", logger)),
+        executeCommand: (c) => Task.FromResult(CommandHelper.RunConsoleApp(projectPath!, "drop-recreate-db", logger, "drop-recreate-db")),
         commandOptions: new CommandOptions { IconName = "Database", IconVariant = IconVariant.Filled })
     .WithCommand(
         name: "import-from-ready",
         displayName: "Import from READY",
-        executeCommand: (c) => Task.FromResult(CommandHelper.RunConsoleApp(projectPath!, "import-from-ready", logger)),
+        executeCommand: (c) => Task.FromResult(CommandHelper.RunConsoleApp(projectPath!, "import-from-ready", logger, "import-from-ready")),
         commandOptions: new CommandOptions { IconName = "Database", IconVariant = IconVariant.Filled })
     .WithCommand(
         name: "import-from-navigation",
         displayName: "Import from navigation",
-        executeCommand: (c) => Task.FromResult(CommandHelper.RunConsoleApp(projectPath!, "import-from-navigation", logger)),
+        executeCommand: (c) => Task.FromResult(CommandHelper.RunConsoleApp(projectPath!, "import-from-navigation", logger, "import-from-navigation")),
         commandOptions: new CommandOptions { IconName = "Database", IconVariant = IconVariant.Filled });
 
 var configuration = new ConfigurationBuilder()

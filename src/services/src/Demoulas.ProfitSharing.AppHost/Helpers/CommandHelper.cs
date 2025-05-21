@@ -5,7 +5,7 @@ namespace Demoulas.ProfitSharing.AppHost.Helpers;
 
 public static class CommandHelper
 {
-    public static ExecuteCommandResult RunConsoleApp(string projectPath, string launchProfile, ILogger logger)
+    public static ExecuteCommandResult RunConsoleApp(string projectPath, string launchProfile, ILogger logger, string? operationName = null)
     {
         using var process = new Process
         {
@@ -27,11 +27,29 @@ public static class CommandHelper
         process.WaitForExit();
 
         logger.LogError(output);
+        ExecuteCommandResult result;
         if (!string.IsNullOrWhiteSpace(error))
         {
             logger.LogError(error);
-            return new ExecuteCommandResult { Success = false, ErrorMessage = error };
+            result = new ExecuteCommandResult { Success = false, ErrorMessage = error };
         }
-        return CommandResults.Success();
+        else
+        {
+            result = CommandResults.Success();
+        }
+
+        // Feedback logging if operationName is provided
+        if (!string.IsNullOrWhiteSpace(operationName))
+        {
+            if (result.Success)
+            {
+                logger.LogInformation("[{Operation}] completed successfully.", operationName);
+            }
+            else
+            {
+                logger.LogError("[{Operation}] failed: {ErrorMessage}", operationName, result.ErrorMessage);
+            }
+        }
+        return result;
     }
 }
