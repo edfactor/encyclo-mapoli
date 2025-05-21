@@ -93,7 +93,7 @@ internal sealed class MissiveService : IMissiveService
                 select d.Id
 
             ).AnyAsync(cancellation);
-            return true;
+            return vestingIncreased;
         }
 
         return false;
