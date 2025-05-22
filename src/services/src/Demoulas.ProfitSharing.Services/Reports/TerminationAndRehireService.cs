@@ -26,7 +26,6 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
     private readonly TotalService _totalService;
     private readonly ILoggerFactory _factory;
     private readonly IDemographicReaderService _demographicReaderService;
-    private readonly ILogger<TerminationAndRehireService> _logger;
 
     public TerminationAndRehireService(
         IProfitSharingDataContextFactory dataContextFactory,
@@ -40,7 +39,6 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
         _totalService = totalService;
         _factory = factory;
         _demographicReaderService = demographicReaderService;
-        _logger = factory.CreateLogger<TerminationAndRehireService>();
     }
 
     /// <summary>
@@ -92,11 +90,11 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
     {
         var validator = new RehireForfeituresRequestValidator(_calendarService, _factory);
         await validator.ValidateAndThrowAsync(req, cancellationToken);
-        _logger.LogInformation("Finding rehires with forfeitures for profit year {ProfitYear}", req.ProfitYear);
+        
 
         var militaryMembers = await _dataContextFactory.UseReadOnlyContext(async context =>
         {
-            var query = await GetRehireProfitQueryBase(context, req, cancellationToken);
+            var query = await GetRehireProfitQueryBase(context, req);
             return await query.Where(pd => pd.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures)
                 .GroupBy(m => new
                 {
@@ -143,33 +141,29 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
                 .ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
         });
 
-        var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
         return new ReportResponseBase<RehireForfeituresResponse>
         {
             ReportName = "REHIRE'S PROFIT SHARING DATA",
             ReportDate = DateTimeOffset.UtcNow,
-            StartDate = calInfo.FiscalBeginDate,
-            EndDate = calInfo.FiscalEndDate,
+            StartDate = req.BeginningDate.ToDateOnly(),
+            EndDate = req.EndingDate.ToDateOnly(),
             Response = militaryMembers
         };
     }
 
     private async Task<IQueryable<RehireProfitSummaryQuery>> GetRehireProfitQueryBase(ProfitSharingReadOnlyDbContext context,
-    RehireForfeituresRequest req, CancellationToken cancellationToken)
+    RehireForfeituresRequest req)
     {
-        var bracket = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
-
-        var beginning = req.BeginningDate.ToDateOnly(DateTimeKind.Local) > bracket.FiscalBeginDate ? bracket.FiscalBeginDate : req.BeginningDate.ToDateOnly(DateTimeKind.Local);
-        var ending = req.EndingDate.ToDateOnly(DateTimeKind.Local) > bracket.FiscalEndDate ? bracket.FiscalEndDate : req.EndingDate.ToDateOnly(DateTimeKind.Local);
+        var beginning = req.BeginningDate.ToDateOnly(DateTimeKind.Local);
+        var ending = req.EndingDate.ToDateOnly(DateTimeKind.Local);
 
         var yearsOfServiceQuery = _totalService.GetYearsOfService(context, (short)req.EndingDate.Year);
         var demographics = await _demographicReaderService.BuildDemographicQuery(context);
         
-        var lastYear = (short)(req.ProfitYear - 1);
         var query = demographics
             .Join(
                 context.PayProfits.Include(e=> e.Enrollment)
-                    .Where(x => x.ProfitYear == req.ProfitYear), // Table to join with (PayProfit)
+                    .Where(x => x.ProfitYear >= beginning.Year && x.ProfitYear <= ending.Year), // Table to join with (PayProfit)
                 demographics => demographics.Id, // Primary key selector from Demographics
                 payProfit => payProfit.DemographicId, // Foreign key selector from PayProfit
                 (demographics, payProfit) => new // Result selector after joining
@@ -232,7 +226,7 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
                 }
             )
             .GroupJoin(
-                _totalService.TotalVestingBalance(context, lastYear, ending),
+                _totalService.TotalVestingBalance(context, (short)(beginning.Year -1), ending),
                 member => member.member.Ssn,
                 tot => tot.Ssn,
                 (member, tot) => new { member, tot}

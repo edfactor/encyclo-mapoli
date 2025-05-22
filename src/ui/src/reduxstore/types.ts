@@ -181,7 +181,7 @@ export interface EmployeesOnMilitaryLeaveResponse {
   terminationDate: string;
 }
 
-export interface RehireForfeituresRequest extends ProfitYearRequest {
+export interface RehireForfeituresRequest {
   beginningDate: string;
   endingDate: string;
   pagination: SortedPaginationRequestDto;

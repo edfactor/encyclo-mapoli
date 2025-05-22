@@ -18,8 +18,7 @@ public class RehireForfeituresRequestValidator : PaginationValidatorBase<RehireF
         _calendarService = calendarService;
         _logger = factory.CreateLogger<RehireForfeituresRequestValidator>();
 
-        RuleFor(x => x.ProfitYear).GreaterThan((short)0).WithMessage("Profit year must be greater than zero.");
-
+        
         RuleFor(x => x.BeginningDate)
             .NotEmpty().WithMessage("Beginning date is required.")
             .MustAsync(BeWithinFiscalYear)
@@ -28,8 +27,6 @@ public class RehireForfeituresRequestValidator : PaginationValidatorBase<RehireF
 
         RuleFor(x => x.EndingDate)
             .NotEmpty().WithMessage("Ending date is required.")
-            .MustAsync(BeWithinFiscalYear)
-            .WithMessage("Ending date must be within the fiscal year range: {FiscalBegin} through {FiscalEnd}.")
             .GreaterThanOrEqualTo(x => x.BeginningDate)
             .WithMessage("Ending date must be greater than or equal to beginning date.");
     }
@@ -38,7 +35,7 @@ public class RehireForfeituresRequestValidator : PaginationValidatorBase<RehireF
     {
         try
         {
-            var bracket = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
+            var bracket = await _calendarService.GetYearStartAndEndAccountingDatesAsync((short)request.BeginningDate.Year, cancellationToken);
             var fiscalBegin = bracket.FiscalBeginDate.ToDateTime(TimeOnly.MinValue);
             var fiscalEnd = bracket.FiscalEndDate.ToDateTime(TimeOnly.MinValue);
             if (date < fiscalBegin || date > fiscalEnd)
