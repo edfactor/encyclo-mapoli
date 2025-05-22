@@ -44,18 +44,26 @@ internal static class Program
         List<IActivity> activitiesToRun = Specify([
             "P0", // Init READY / Init Smart
             
+//            "Reduce-To-2-Employees",
+            
+            // Do a smart freeze on 01/04/2025
+            "S12",
+            
+  //          "Fire-employee",
+            
             // The obfuscation data is already at the FROZEN point (SHIFT already applied), so we start here
-            "P15",
-            "P16",
-            "P17",
-            "P18", // PAY426  / YearEndService
+//            "P15",
+//            "P16",
+//            "P17",
+            "P18", // PAY426 / YearEndService
            
             "Test-PayProfit-Selected-Columns", // Test PayProfit Updates; EarnPoints, ZeroCont, New Employee, CertDate 
 
-            "P19",
-            "P20",
-            "P21", // PAY444 - update intermediate values
-            "P22", // PAY447 - creates a data file
+//            "P19",
+//            "P20",
+            "R21", // PAY444 - update intermediate values
+            "R22", // PAY447 - creates a data file
+            
             "P23", // Does Contributions
 
             "Test-ProfitDetail-Selected-Columns", // TEST: code,cont,earn,fort,cmt,zercont

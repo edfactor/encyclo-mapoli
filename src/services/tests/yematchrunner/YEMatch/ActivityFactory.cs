@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using Microsoft.Extensions.Configuration;
-using YEMatch.YEMatch;
 
 namespace YEMatch;
 

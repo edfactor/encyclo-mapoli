@@ -263,7 +263,7 @@ public static class SmartActivityFactory
         TestToken.CreateAndAssignTokenForClient(httpClient, "IT-Operations");
         HttpRequestMessage request = new(HttpMethod.Post, "http://localhost:5298/api/itoperations/freeze")
         {
-            Content = new StringContent("{ \"ProfitYear\" : " + _profitYear + ", \"asOfDateTime\": \"2025-05-06T00:00:00-04:00\"}"
+            Content = new StringContent("{ \"ProfitYear\" : " + _profitYear + ", \"asOfDateTime\": \"2025-01-09T00:00:00-04:00\"}"
                 , Encoding.UTF8, "application/json")
         };
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("*/*"));
