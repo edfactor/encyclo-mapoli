@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-import { EmployeeDetails, MasterInquiryResponseType, MasterInquirySearch } from "reduxstore/types";
+import { EmployeeDetails, MasterInquiryDetail, MasterInquiryResponseType, MasterInquirySearch } from "reduxstore/types";
 
 export interface InquiryState {
   masterInquiryData: MasterInquiryResponseType | null;
@@ -37,6 +37,13 @@ export const inquirySlice = createSlice({
     clearMasterInquiryData: (state) => {
       state.masterInquiryData = null;
       state.masterInquiryEmployeeDetails = null;
+    },
+    updateMasterInquiryResults: (state, action: PayloadAction<MasterInquiryDetail[]>) => {
+      if (state.masterInquiryData && state.masterInquiryData.inquiryResults) {
+        state.masterInquiryData.inquiryResults.results = [
+          ...action.payload
+        ];
+      }
     }
   }
 });
@@ -45,6 +52,7 @@ export const {
   clearMasterInquiryData,
   clearMasterInquiryRequestParams,
   setMasterInquiryData,
-  setMasterInquiryRequestParams
+  setMasterInquiryRequestParams,
+  updateMasterInquiryResults
 } = inquirySlice.actions;
 export default inquirySlice.reducer;
