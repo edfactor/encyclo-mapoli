@@ -34,12 +34,14 @@ const schema = yup.object().shape({
 interface MilitaryAndRehireForfeituresSearchFilterProps {
   setInitialSearchLoaded: (include: boolean) => void;
   fiscalData: CalendarResponseDto;
+  onSearch: () => void;
 }
 
 const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearchFilterProps> = ({
-                                                                                                  setInitialSearchLoaded,
-                                                                                                  fiscalData
-                                                                                                }) => {
+  setInitialSearchLoaded,
+  fiscalData,
+  onSearch 
+}) => {
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const [triggerSearch, { isFetching }] = useLazyGetRehireForfeituresQuery();
   const { rehireForfeituresQueryParams } = useSelector((state: RootState) => state.yearsEnd);
@@ -59,6 +61,7 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
 
       dispatch(setMilitaryAndRehireForfeituresQueryParams(updatedData));
       triggerSearch(updatedData);
+      onSearch(); // Call onSearch to trigger page reset
     }
   };
 
@@ -160,3 +163,4 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
 };
 
 export default RehireForfeituresSearchFilter;
+
