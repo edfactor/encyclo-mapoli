@@ -198,6 +198,10 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
   }, [badgeNumber, hasToken, reset, setMissiveAlerts, triggerSearch]);
 
   const validateAndSearch = handleSubmit((data) => {
+
+    // Always clear missives on search
+    setMissiveAlerts([]);
+
     if (isValid) {
       const searchParams: MasterInquiryRequest = {
         pagination: {
@@ -290,9 +294,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
           }
         }  
 
-        if (!response.employeeDetails) {
-          setMissiveAlerts([])
-        } else { 
+        if (response.employeeDetails) { 
           if (missives && response.employeeDetails.missives &&  response.employeeDetails.missives.length > 0) {
       
             const alerts = response.employeeDetails.missives.map((id: number) => {
