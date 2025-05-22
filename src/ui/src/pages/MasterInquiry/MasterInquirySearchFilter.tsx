@@ -310,10 +310,11 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
         }
 
         // So if the employee is also a beneficiary, we need to do some work on the badge and psn
-        if (response.inquiryResults && response.inquiryResults.results.length > 0) {
+        if (response.inquiryResults && response.inquiryResults.results.length > 0 && response.employeeDetails?.missives) {
 
-        const isEmployeeAndBeneficiary = response.inquiryResults.results.some((row) => row.psnSuffix !== undefined && row.psnSuffix > 0);
-        
+        // If someone is both, the 3rd missive message proves this
+        const isEmployeeAndBeneficiary = response.employeeDetails?.missives.some((row) => row=== 3);
+                
         if (isEmployeeAndBeneficiary) {
           
           const originalBadgeNumber = response.inquiryResults.results.find((row) => row.psnSuffix === 0)?.badgeNumber;
