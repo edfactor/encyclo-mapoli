@@ -5,13 +5,13 @@ namespace YEMatch;
 
 public static class ReadyActivityFactory
 {
-    public static List<Activity> CreateActivities(string dataDirectory)
+    public static List<IActivity> CreateActivities(string dataDirectory)
     {
         IConfigurationRoot secretConfig = new ConfigurationBuilder().AddUserSecrets<ReadyActivity>().Build();
         string? username = secretConfig["YEMatchHost:Username"];
         string? password = secretConfig["YEMatchHost:Password"];
         string host = "tduapp01";
-        bool chatty = true;
+        bool chatty = false;
 
         if (username == null || password == null)
         {
@@ -23,7 +23,7 @@ public static class ReadyActivityFactory
         SftpClient sftpClient = new(host, username, password);
         sftpClient.Connect();
 
-        List<Activity> activities =
+        List<IActivity> activities =
         [
             new ReadyActivity(sshClient, sftpClient, chatty, "A0", "PROFSHARE-BUILD-READY", "", dataDirectory),
 

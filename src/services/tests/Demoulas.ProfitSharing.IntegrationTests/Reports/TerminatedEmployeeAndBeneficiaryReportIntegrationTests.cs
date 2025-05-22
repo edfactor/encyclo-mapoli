@@ -43,8 +43,9 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         var totalService = new TotalService(DbFactory,
             CalendarService, new EmbeddedSqlService(),
             new DemographicReaderService(new FrozenService(DbFactory), new HttpContextAccessor()));
+        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory), new HttpContextAccessor());
         TerminatedEmployeeAndBeneficiaryReportService mockService =
-            new TerminatedEmployeeAndBeneficiaryReportService(DbFactory, calendarService, totalService, new DemographicReaderService(new FrozenService(DbFactory), new HttpContextAccessor()));
+            new TerminatedEmployeeAndBeneficiaryReportService(DbFactory, calendarService, totalService, demographicReaderService);
 
         Stopwatch stopwatch = Stopwatch.StartNew();
         stopwatch.Start();
