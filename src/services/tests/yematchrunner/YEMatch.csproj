@@ -14,6 +14,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" />
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="Okta.AspNetCore" />
+    <PackageReference Include="Oracle.ManagedDataAccess.Core" />
     <PackageReference Include="SSH.NET" />
   </ItemGroup>
 
