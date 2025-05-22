@@ -38,7 +38,13 @@ This file defines workspace-specific guidelines and preferences for GitHub Copil
 - **Secrets:**
   - Store sensitive data in `secrets.json` (never commit secrets).
 - **Testing:**
-  - Place unit/integration tests in the `tests` directory. Use xUnit and FluentAssertions.
+  - Place unit/integration tests in the `tests` directory. Use xUnit and shouldly.
+- **Code Quality & Analyzers**
+  - Each public or internal class must be its own file
+  - Include, or update xml comments for all public methods
+  - Prefer accessing members through interfaces rather than concrete implementations
+  - Ensure classes follow single responsibility principle
+  - Avoid circular dependencies between classes
 
 ## Code Quality & Analyzers
 - **Security:**
@@ -60,6 +66,7 @@ This file defines workspace-specific guidelines and preferences for GitHub Copil
 - Update README and inline comments as needed.
 - Follow SOLID principles and project architecture.
 - Ensure backward compatibility and cross-platform support.
+ 
 
 ## Copilot Usage
 - Prefer Copilot suggestions that match these conventions.
@@ -67,6 +74,11 @@ This file defines workspace-specific guidelines and preferences for GitHub Copil
 - For background services, use `BackgroundService` as the base class.
 - For dependency injection, use constructor injection and register services in the appropriate DI container.
 - For database access, prefer async/await and EF Core best practices.
+- Each public or internal class must be its own file
+- Include, or update xml comments for all public methods
+- Prefer accessing members through interfaces rather than concrete implementations
+- Ensure classes follow single responsibility principle
+- Avoid circular dependencies between classes
 
 ---
 
