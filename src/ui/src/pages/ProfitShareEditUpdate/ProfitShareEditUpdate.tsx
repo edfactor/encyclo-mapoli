@@ -42,6 +42,7 @@ import ProfitShareEditConfirmation from "./ProfitShareEditConfirmation";
 import ProfitShareEditUpdateSearchFilter from "./ProfitShareEditUpdateSearchFilter";
 import ProfitShareEditUpdateTabs from "./ProfitShareEditUpdateTabs";
 import ChangesList from "./ChangesList";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 
 enum MessageKeys {
   ProfitShareEditUpdate = "ProfitShareEditUpdate"
@@ -437,6 +438,9 @@ const ProfitShareEditUpdate = () => {
         console.error("ERROR: Did not revert changes to year end", error);
       });
   }, [profitYear, triggerStatusUpdate, dispatch]);
+  const renderActionNode = () => {
+    return <StatusDropdownActionNode />;
+  };
 
   useEffect(() => {
     if (hasToken) {
@@ -464,6 +468,7 @@ const ProfitShareEditUpdate = () => {
         <div className="flex  justify-end gap-2">
           {RenderRevertButton(setOpenRevertModal, isLoading)}
           {RenderSaveButton(setOpenSaveModal, setOpenEmptyModal, profitMasterStatus, isLoading)}
+          {renderActionNode()}
         </div>
       }>
       <div>

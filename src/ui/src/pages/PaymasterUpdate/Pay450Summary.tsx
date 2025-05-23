@@ -9,6 +9,7 @@ import Pay450Grid from "./Pay450Grid";
 import LabelValueSection from "components/LabelValueSection";
 import { RootState } from "reduxstore/store";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 
 interface ProfitYearSearch {
     profitYear: number;
@@ -49,13 +50,16 @@ const Pay450Summary = () => {
             value: updateSummary ? numberToCurrency(updateSummary.totalAfterVestedAmount) : "-"
         }
     ];
+    const renderActionNode = () => {
+        return <StatusDropdownActionNode />;
+      };
 
     const onSearch = (data: ProfitYearSearch) => {
         setInitialSearchLoaded(true);
     };
 
     return (
-        <Page label={CAPTIONS.PAY450_SUMMARY}>
+        <Page label={CAPTIONS.PAY450_SUMMARY} actionNode={renderActionNode()}>
             <Grid2
                 container
                 rowSpacing="24px">

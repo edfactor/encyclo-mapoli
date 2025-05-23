@@ -6,15 +6,22 @@ import RehireForfeituresGrid from "./RehireForfeituresGrid";
 import { useState } from "react";
 import { CAPTIONS } from "../../../constants";
 import useFiscalCalendarYear from "../../../hooks/useFiscalCalendarYear";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 
 const RehireForfeitures = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const fiscalCalendarYear = useFiscalCalendarYear();
+  const renderActionNode = () => {
+      return <StatusDropdownActionNode />;
+    };
   
   const isCalendarDataLoaded = !!fiscalCalendarYear?.fiscalBeginDate && !!fiscalCalendarYear?.fiscalEndDate;
 
   return (
-    <Page label={`${CAPTIONS.REHIRE_FORFEITURES}`}>
+    <Page 
+    label={`${CAPTIONS.REHIRE_FORFEITURES}`}
+    actionNode={renderActionNode()}
+    >
       <Grid2
         container
         rowSpacing="24px">
