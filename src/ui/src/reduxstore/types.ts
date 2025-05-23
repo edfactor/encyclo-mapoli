@@ -181,7 +181,7 @@ export interface EmployeesOnMilitaryLeaveResponse {
   terminationDate: string;
 }
 
-export interface RehireForfeituresRequest extends ProfitYearRequest {
+export interface RehireForfeituresRequest {
   beginningDate: string;
   endingDate: string;
   pagination: SortedPaginationRequestDto;
@@ -889,6 +889,8 @@ export interface YearEndProfitSharingEmployee {
 export interface BreakdownByStoreRequest extends ProfitYearRequest {
   storeNumber?: number;
   storeManagement?: boolean;
+  badgeNumber?: number;
+  employeeName?: string;
   pagination: SortedPaginationRequestDto;
 }
 

@@ -1,14 +1,13 @@
-﻿using System.Diagnostics;
-using Demoulas.ProfitSharing.AppHost;
+﻿using Demoulas.ProfitSharing.AppHost;
 using Demoulas.ProfitSharing.AppHost.Helpers;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Projects;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 
+
 var logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger("AppHost");
 IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(options: new DistributedApplicationOptions { AllowUnsecuredTransport = true });
-int uiPort = 3100;
+
 
 // Kill all node processes using helper
 ProcessHelper.KillProcessesByName("node", logger);
@@ -23,22 +22,22 @@ var cliRunner = builder.AddExecutable("Database-Cli",
     .WithCommand(
         name: "upgrade-db",
         displayName: "Upgrade database",
-        executeCommand: (c) => Task.FromResult(CommandHelper.RunConsoleApp(projectPath!, "upgrade-db", logger)),
+        executeCommand: (c) => Task.FromResult(CommandHelper.RunConsoleApp(projectPath!, "upgrade-db", logger, "upgrade-db")),
         commandOptions: new CommandOptions { IconName = "Database", IconVariant = IconVariant.Filled })
     .WithCommand(
         name: "drop-recreate-db",
         displayName: "Drop and recreate database",
-        executeCommand: (c) => Task.FromResult(CommandHelper.RunConsoleApp(projectPath!, "drop-recreate-db", logger)),
+        executeCommand: (c) => Task.FromResult(CommandHelper.RunConsoleApp(projectPath!, "drop-recreate-db", logger, "drop-recreate-db")),
         commandOptions: new CommandOptions { IconName = "Database", IconVariant = IconVariant.Filled })
     .WithCommand(
         name: "import-from-ready",
         displayName: "Import from READY",
-        executeCommand: (c) => Task.FromResult(CommandHelper.RunConsoleApp(projectPath!, "import-from-ready", logger)),
+        executeCommand: (c) => Task.FromResult(CommandHelper.RunConsoleApp(projectPath!, "import-from-ready", logger, "import-from-ready")),
         commandOptions: new CommandOptions { IconName = "Database", IconVariant = IconVariant.Filled })
     .WithCommand(
         name: "import-from-navigation",
         displayName: "Import from navigation",
-        executeCommand: (c) => Task.FromResult(CommandHelper.RunConsoleApp(projectPath!, "import-from-navigation", logger)),
+        executeCommand: (c) => Task.FromResult(CommandHelper.RunConsoleApp(projectPath!, "import-from-navigation", logger, "import-from-navigation")),
         commandOptions: new CommandOptions { IconName = "Database", IconVariant = IconVariant.Filled });
 
 var configuration = new ConfigurationBuilder()
@@ -54,15 +53,29 @@ var api = builder.AddProject<Demoulas_ProfitSharing_Api>("ProfitSharing-Api")
     .WithSwaggerUi()
     .WithRedoc()
     .WithScalar()
-    .WaitForCompletion(cliRunner);
+    .WaitForCompletion(cliRunner)
+    .WithUrlForEndpoint("https", annotation =>
+    {
+        annotation.DisplayText = "Swagger UI";
+    });
 
-var ui = builder.AddNpmApp("ProfitSharing-Ui", "../../../ui/", "dev");
-CommandHelper.RunNpmInstall(ui.Resource.WorkingDirectory, logger);
+// Use AddViteApp for Vite applications as per the latest CommunityToolkit.Aspire guidance
+var ui = builder.AddViteApp("ProfitSharing-Ui", "../../../ui/")
+    .WithEndpoint("http", annotation =>
+    {
+        annotation.IsProxied = false;
+        annotation.TargetPort = 3100;
+        annotation.Port = 3100;
+    })
+    .WithUrlForEndpoint("http", annotation =>
+    {
+        annotation.DisplayText = "Profit Sharing";
+    })
+    .WithNpmPackageInstallation();
 
 ui.WithReference(api)
     .WaitFor(api)
     .WithParentRelationship(api)
-    .WithHttpEndpoint(port: uiPort, isProxied: false)
     .WithOtlpExporter();
 
 _ = builder.AddProject<Demoulas_ProfitSharing_EmployeeFull_Sync>(name: "ProfitSharing-EmployeeFull-Sync")

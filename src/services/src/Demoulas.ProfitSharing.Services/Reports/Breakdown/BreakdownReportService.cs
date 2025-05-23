@@ -10,6 +10,7 @@ using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using static FastEndpoints.Ep;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 
 namespace Demoulas.ProfitSharing.Services.Reports.Breakdown;
@@ -215,6 +216,17 @@ public sealed class BreakdownReportService : IBreakdownService
             // Store‑level + management filter
             employeesBase = request.StoreManagement ? ApplyStoreManagementFilter(employeesBase)
                 : ApplyNonStoreManagementFilter(employeesBase);
+
+            if (request.BadgeNumber > 0)
+            {
+                employeesBase = employeesBase.Where(e => e.BadgeNumber == request.BadgeNumber);
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.EmployeeName))
+            {
+                var pattern = $"%{request.EmployeeName.ToUpperInvariant()}%";
+                employeesBase = employeesBase.Where(x => EF.Functions.Like(x.FullName.ToUpper(), pattern));
+            }
 
             var paginated = await employeesBase.ToPaginationResultsAsync(request, cancellationToken);
             var employeeSsns = paginated.Results.Select(r => r.Ssn).ToHashSet();

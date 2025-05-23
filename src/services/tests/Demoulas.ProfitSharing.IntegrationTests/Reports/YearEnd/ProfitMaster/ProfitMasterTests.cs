@@ -9,6 +9,7 @@ using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Oracle.ManagedDataAccess.Client;
+using Microsoft.Extensions.Caching.Memory;
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 
