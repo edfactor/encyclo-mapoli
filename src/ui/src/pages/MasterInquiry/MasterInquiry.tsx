@@ -45,6 +45,7 @@ const MasterInquiry = () => {
     
     // There could be more than one missive
     if (masterInquiryEmployeeDetails.missives.length > 0) {
+      
       const alerts = masterInquiryEmployeeDetails.missives.map((id: number) => {
       const missiveResponse =  missives.find((missive: MissiveResponse) => missive.id === id);
       return missiveResponse;
@@ -53,6 +54,7 @@ const MasterInquiry = () => {
       // This will send the list to the screen
       setMissiveAlerts(alerts);
     } else {
+      setMissiveAlerts(null);
       console.log("No missives found to display.");
     }
   }
@@ -77,7 +79,9 @@ const MasterInquiry = () => {
         ))}
         <Grid2 size={{ xs: 12 }} width={"100%"}>
           <DSMAccordion title="Filter">
-            <MasterInquirySearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
+            <MasterInquirySearchFilter setInitialSearchLoaded={setInitialSearchLoaded} 
+            setMissiveAlerts={setMissiveAlerts}
+            />
           </DSMAccordion>
         </Grid2>
 

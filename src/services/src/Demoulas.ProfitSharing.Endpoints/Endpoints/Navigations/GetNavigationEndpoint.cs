@@ -27,7 +27,7 @@ public class GetNavigationEndpoint: Endpoint<NavigationRequestDto,NavigationResp
     public override void Configure()
     {
         AllowAnonymous();
-        Get($"/list");
+        Get("");
         Summary(m =>
         {
             m.Summary = "Get all navigation";
@@ -35,13 +35,6 @@ public class GetNavigationEndpoint: Endpoint<NavigationRequestDto,NavigationResp
             m.ResponseExamples = new Dictionary<int, object> { { 200, new NavigationResponseDto() } };
         });
         Group<NavigationGroup>();
-
-        if (!(Env.IsTestEnvironment() || Debugger.IsAttached))
-        {
-            // Specify caching duration and store it in metadata
-            TimeSpan cacheDuration = TimeSpan.FromMinutes(15);
-            Options(x => x.CacheOutput(p => p.Expire(cacheDuration)));
-        }
     }
 
     public override async Task<NavigationResponseDto> ExecuteAsync(NavigationRequestDto req, CancellationToken ct)

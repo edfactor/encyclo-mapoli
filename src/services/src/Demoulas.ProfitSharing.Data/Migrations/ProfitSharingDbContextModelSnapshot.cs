@@ -18,7 +18,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .UseCollation("USING_NLS_COMP")
-                .HasAnnotation("ProductVersion", "9.0.4")
+                .HasAnnotation("ProductVersion", "9.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             OracleModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -25545,8 +25545,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("OPERATION");
 
                     b.Property<string>("PrimaryKey")
-                        .HasMaxLength(24)
-                        .HasColumnType("NVARCHAR2(24)")
+                        .HasMaxLength(32)
+                        .HasColumnType("NVARCHAR2(32)")
                         .HasColumnName("PRIMARY_KEY");
 
                     b.Property<string>("TableName")
@@ -25561,6 +25561,49 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasDatabaseName("IX_AUDIT_EVENT_TABLENAME");
 
                     b.ToTable("AUDIT_EVENT", (string)null);
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Audit.HealthCheckStatusHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("TIMESTAMP(7) WITH TIME ZONE")
+                        .HasColumnName("CREATED_AT");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnName("DESCRIPTION");
+
+                    b.Property<TimeSpan>("Duration")
+                        .HasColumnType("INTERVAL DAY(8) TO SECOND(7)")
+                        .HasColumnName("DURATION");
+
+                    b.Property<string>("Exception")
+                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasColumnName("EXCEPTION");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("NVARCHAR2(128)")
+                        .HasColumnName("KEY");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(24)
+                        .HasColumnType("NVARCHAR2(24)")
+                        .HasColumnName("STATUS");
+
+                    b.HasKey("Id")
+                        .HasName("PK__HEALTH_CHECK_STATUS_HISTORY");
+
+                    b.ToTable("_HEALTH_CHECK_STATUS_HISTORY", (string)null);
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Beneficiary", b =>
@@ -28962,7 +29005,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTimeOffset?>("LastModified")
-                        .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
                         .HasColumnName("LAST_MODIFIED");
 
@@ -28989,84 +29031,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasDatabaseName("IX_NAVIGATION_TRACKING_STATUS_ID");
 
                     b.ToTable("NAVIGATION_TRACKING", (string)null);
-                });
-
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.ParticipantTotal", b =>
-                {
-                    b.Property<int>("Ssn")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(10)")
-                        .HasColumnName("SSN");
-
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Ssn"));
-
-                    b.Property<decimal?>("Total")
-                        .HasColumnType("DECIMAL(18, 2)")
-                        .HasColumnName("TOTAL");
-
-                    b.HasKey("Ssn")
-                        .HasName("PK_PARTICIPANTTOTALS");
-
-                    b.ToTable("PARTICIPANTTOTALS", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
-                });
-
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.ParticipantTotalRatio", b =>
-                {
-                    b.Property<int>("Ssn")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(10)")
-                        .HasColumnName("SSN");
-
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Ssn"));
-
-                    b.Property<decimal>("Ratio")
-                        .HasColumnType("DECIMAL(18, 2)")
-                        .HasColumnName("RATIO");
-
-                    b.HasKey("Ssn")
-                        .HasName("PK_PARTICIPANTTOTALRATIOS");
-
-                    b.ToTable("PARTICIPANTTOTALRATIOS", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
-                });
-
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.ParticipantTotalVestingBalance", b =>
-                {
-                    b.Property<int>("Ssn")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(10)")
-                        .HasColumnName("SSN");
-
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Ssn"));
-
-                    b.Property<decimal?>("CurrentBalance")
-                        .HasColumnType("DECIMAL(18, 2)")
-                        .HasColumnName("CURRENTBALANCE");
-
-                    b.Property<decimal?>("VestedBalance")
-                        .HasColumnType("DECIMAL(18, 2)")
-                        .HasColumnName("VESTEDBALANCE");
-
-                    b.Property<decimal?>("VestingPercent")
-                        .HasColumnType("DECIMAL(18, 2)")
-                        .HasColumnName("RATIO");
-
-                    b.Property<byte?>("YearsInPlan")
-                        .HasColumnType("NUMBER(3)")
-                        .HasColumnName("YEARS");
-
-                    b.HasKey("Ssn")
-                        .HasName("PK_PARTICIPANTTOTALVESTINGBALANCES");
-
-                    b.ToTable("PARTICIPANTTOTALVESTINGBALANCES", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.ParticipantTotalYear", b =>
@@ -30339,6 +30303,128 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         {
                             Id = "Z",
                             Name = "IsDeceased"
+                        });
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Virtual.ParticipantTotal", b =>
+                {
+                    b.Property<int>("Ssn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("SSN");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Ssn"));
+
+                    b.Property<decimal?>("Total")
+                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasColumnName("TOTAL");
+
+                    b.HasKey("Ssn")
+                        .HasName("PK_PARTICIPANTTOTAL");
+
+                    b.ToTable("PARTICIPANTTOTAL", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Virtual.ParticipantTotalRatio", b =>
+                {
+                    b.Property<int>("Ssn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("SSN");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Ssn"));
+
+                    b.Property<decimal>("Ratio")
+                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasColumnName("RATIO");
+
+                    b.HasKey("Ssn")
+                        .HasName("PK_PARTICIPANTTOTALRATIOS");
+
+                    b.ToTable("PARTICIPANTTOTALRATIOS", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Virtual.ParticipantTotalVestingBalance", b =>
+                {
+                    b.Property<int>("Ssn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("SSN");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Ssn"));
+
+                    b.Property<decimal?>("CurrentBalance")
+                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasColumnName("CURRENTBALANCE");
+
+                    b.Property<decimal?>("VestedBalance")
+                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasColumnName("VESTEDBALANCE");
+
+                    b.Property<decimal?>("VestingPercent")
+                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasColumnName("RATIO");
+
+                    b.Property<byte?>("YearsInPlan")
+                        .HasColumnType("NUMBER(3)")
+                        .HasColumnName("YEARS");
+
+                    b.HasKey("Ssn")
+                        .HasName("PK_PARTICIPANTTOTALVESTINGBALANCES");
+
+                    b.ToTable("PARTICIPANTTOTALVESTINGBALANCES", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Virtual.ProfitShareTotal", b =>
+                {
+                    b.Property<decimal>("HoursTotal")
+                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasColumnName("HOURS_TOTAL");
+
+                    b.Property<int>("NumberOfEmployees")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("NUMBER_OF_EMPLOYEES");
+
+                    b.Property<int>("NumberOfEmployeesUnder21")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("NUMBER_OF_EMPLOYEES_UNDER21");
+
+                    b.Property<int>("NumberOfNewEmployees")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("NUMBER_OF_NEW_EMPLOYEES");
+
+                    b.Property<decimal>("PointsTotal")
+                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasColumnName("POINTS_TOTAL");
+
+                    b.Property<decimal>("TerminatedHoursTotal")
+                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasColumnName("TERMINATED_HOURS_TOTAL");
+
+                    b.Property<decimal>("TerminatedPointsTotal")
+                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasColumnName("TERMINATED_POINTS_TOTAL");
+
+                    b.Property<decimal>("TerminatedWagesTotal")
+                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasColumnName("TERMINATED_WAGES_TOTAL");
+
+                    b.Property<decimal>("WagesTotal")
+                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasColumnName("WAGES_TOTAL");
+
+                    b.ToTable("PROFITSHARETOTALS", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
                         });
                 });
 

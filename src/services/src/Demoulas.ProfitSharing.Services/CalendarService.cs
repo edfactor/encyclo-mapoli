@@ -2,44 +2,65 @@
 using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Hosting;
+using System.Text.Json;
 
 namespace Demoulas.ProfitSharing.Services;
 /// <summary>
-/// Provides services related to calendar operations within the profit-sharing context.
+/// Hosted service for calendar operations, periodically refreshing calendar data in distributed cache.
 /// </summary>
-public sealed class CalendarService : ICalendarService
+public sealed class CalendarService : BackgroundService, ICalendarService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly IAccountingPeriodsService _accountingPeriodsService;
+    private readonly IDistributedCache _distributedCache;
+    private readonly TimeSpan _refreshInterval = TimeSpan.FromHours(2); // Every two hours refresh
+    private const string YearDatesCacheKey = "CalendarService_YearDates";
 
-    public CalendarService(IProfitSharingDataContextFactory dataContextFactory, IAccountingPeriodsService accountingPeriodsService)
+    public CalendarService(IProfitSharingDataContextFactory dataContextFactory, IAccountingPeriodsService accountingPeriodsService, IDistributedCache distributedCache)
     {
         _dataContextFactory = dataContextFactory;
         _accountingPeriodsService = accountingPeriodsService;
+        _distributedCache = distributedCache;
     }
 
-    /// <summary>
-    /// Finds the week-ending date from a given date.
-    /// </summary>
-    /// <param name="dateTime">The date from which to find the week-ending date.</param>
-    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    /// <returns>A task that represents the asynchronous operation. The task result contains the week-ending date.</returns>
-    /// <exception cref="ArgumentOutOfRangeException">
-    /// Thrown when the <paramref name="dateTime"/> is not within the valid range (between January 1, 2000, and 5 years from today's date).
-    /// </exception>
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            await RefreshCacheAsync(stoppingToken);
+            await Task.Delay(_refreshInterval, stoppingToken);
+        }
+    }
+
+    private async Task RefreshCacheAsync(CancellationToken cancellationToken)
+    {
+        var now = DateTimeOffset.UtcNow;
+        var years = Enumerable.Range(now.Year - 1, 7).Select(y => (short)y);
+        foreach (var year in years)
+        {
+            var yearDates = await _dataContextFactory.UseReadOnlyContext(c => _accountingPeriodsService.GetYearStartAndEndAccountingDatesAsync(c, year, cancellationToken));
+            var serialized = JsonSerializer.SerializeToUtf8Bytes(yearDates);
+            await _distributedCache.SetAsync($"{YearDatesCacheKey}_{year}", serialized, new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = _refreshInterval }, cancellationToken);
+        }
+    }
+
     public Task<DateOnly> FindWeekendingDateFromDateAsync(DateOnly dateTime, CancellationToken cancellationToken = default)
     {
+        // No caching for weekending date, but could be added if needed
         return _dataContextFactory.UseReadOnlyContext(c => _accountingPeriodsService.FindWeekendingDateFromDateAsync(c, dateTime, cancellationToken));
     }
 
-    /// <summary>
-    /// Retrieves the start and end accounting dates for a specified calendar year.
-    /// </summary>
-    /// <param name="calendarYear">The calendar year for which to retrieve the accounting dates.</param>
-    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    /// <returns>A task that represents the asynchronous operation. The task result contains a tuple with the start and end accounting dates.</returns>
-    public Task<CalendarResponseDto> GetYearStartAndEndAccountingDatesAsync(short calendarYear, CancellationToken cancellationToken = default)
+    public async Task<CalendarResponseDto> GetYearStartAndEndAccountingDatesAsync(short calendarYear, CancellationToken cancellationToken = default)
     {
-        return _dataContextFactory.UseReadOnlyContext(c => _accountingPeriodsService.GetYearStartAndEndAccountingDatesAsync(c, calendarYear, cancellationToken));
+        var cacheKey = $"{YearDatesCacheKey}_{calendarYear}";
+        var cached = await _distributedCache.GetAsync(cacheKey, cancellationToken);
+        if (cached != null)
+        {
+            return JsonSerializer.Deserialize<CalendarResponseDto>(cached)!;
+        }
+        return await _dataContextFactory.UseReadOnlyContext(c => _accountingPeriodsService.GetYearStartAndEndAccountingDatesAsync(c, calendarYear, cancellationToken));
     }
 }

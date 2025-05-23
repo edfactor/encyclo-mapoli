@@ -48,6 +48,8 @@ public class TerminatedEmployeeAndBeneficiaryDataEndpoint
                         TotalForfeit = 2000,
                         TotalEndingBalance = 3000,
                         TotalBeneficiaryAllocation = 4000,
+                        StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
+                        EndDate = DateOnly.FromDateTime(DateTime.UtcNow),
                         Response = new PaginatedResponseDto<TerminatedEmployeeAndBeneficiaryDataResponseDto>
                         {
                             Total = 1,

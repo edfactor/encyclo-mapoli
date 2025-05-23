@@ -31,7 +31,8 @@ public sealed record VestedAmountsByAge : ReportResponseBase<VestedAmountsByAgeD
             TotalNotVestedCount = 20,
             TotalPartialVestedCount = 15,
             TotalBeneficiaryCount = 10,
-
+            StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
+            EndDate = DateOnly.FromDateTime(DateTime.UtcNow),
             Response = new PaginatedResponseDto<VestedAmountsByAgeDetail>(new PaginationRequestDto())
             {
                 Results = new List<VestedAmountsByAgeDetail>

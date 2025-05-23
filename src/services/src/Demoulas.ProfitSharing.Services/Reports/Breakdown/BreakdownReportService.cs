@@ -7,7 +7,11 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
+using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
+using static FastEndpoints.Ep;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+
 
 namespace Demoulas.ProfitSharing.Services.Reports.Breakdown;
 
@@ -42,6 +46,11 @@ public sealed class BreakdownReportService : IBreakdownService
         public char EmploymentStatusId { get; init; }
         public byte DepartmentId { get; init; }
         public byte PayFrequencyId { get; init; }
+        public char? TerminationCodeId { get; init; }
+        public decimal? CurrentBalance { get; init; }
+        public decimal? VestedBalance { get; init; }
+        public decimal? EtvaBalance { get; init; }
+        public decimal? VestedPercent { get; init; }
     }
 
     private sealed record EmployeeFinancialSnapshot(
@@ -50,7 +59,97 @@ public sealed class BreakdownReportService : IBreakdownService
         InternalProfitDetailDto Txn,
         decimal VestingRatio);
 
+    private sealed record CombinedTotals(
+        short StoreNumber,
+        decimal VestingRatio,
+        decimal EndBalance);
+
     #endregion
+
+    public Task<GrandTotalsByStoreResponseDto> GetGrandTotals(
+     YearRequest request,
+     CancellationToken cancellationToken)
+    {
+        return _dataContextFactory.UseReadOnlyContext(async ctx =>
+        {
+            var memberStores = await BuildEmployeesBaseQuery(ctx, request.ProfitYear)
+                .Select(m => new { m.Ssn, m.StoreNumber })
+                .ToListAsync(cancellationToken);
+
+            var ssns = memberStores.Select(x => x.Ssn).ToHashSet();
+            ThrowIfInvalidSsns(ssns);
+
+            var snapshots = await GetEmployeeFinancialSnapshotsAsync(
+                ctx, request.ProfitYear, ssns, cancellationToken);
+
+            
+            var combined = memberStores
+                .Join(
+                    snapshots,
+                    m => m.Ssn,
+                    s => s.Ssn,
+                    (m, s) => new CombinedTotals(
+                        m.StoreNumber,
+                        VestingRatio: s.VestingRatio,
+                        EndBalance: s.BeginningBalance
+                                     + s.Txn.TotalEarnings
+                                     + s.Txn.TotalContributions
+                                     + s.Txn.TotalForfeitures
+                                     + s.Txn.Distribution
+                                     + s.Txn.BeneficiaryAllocation))
+                .ToList(); // bring into memory once
+
+            HashSet<int> storeKeys = [700, 701, 800, 801, 802, 900];
+            var categories = new[]
+            {
+            ("Grand Total",         (Func<CombinedTotals,bool>)(x => true)),
+            ("100% Vested",         x => x.VestingRatio == 1m),
+            ("Partially Vested",    x => x.VestingRatio is > 0m and < 1m),
+            ("Not Vested",          x => x.VestingRatio == 0m)
+        };
+
+            var rows = new List<GrandTotalsByStoreRowDto>();
+
+            foreach (var (label, predicate) in categories)
+            {
+                var subset = combined.Where(predicate);
+
+                decimal SumFor(short store) =>
+                    subset.Where(x => x.StoreNumber == store).Sum(x => x.EndBalance);
+
+                var row = new GrandTotalsByStoreRowDto
+                {
+                    Category = label,
+                    Store700 = SumFor(700),
+                    Store701 = SumFor(701),
+                    Store800 = SumFor(800),
+                    Store801 = SumFor(801),
+                    Store802 = SumFor(802),
+                    Store900 = SumFor(900),
+                    StoreOther = subset
+                                    .Where(x => !storeKeys.Contains(x.StoreNumber))
+                                    .Sum(x => x.EndBalance)
+                };
+
+                // compute the total across all columns
+                row = row with
+                {
+                    RowTotal = row.Store700
+                             + row.Store701
+                             + row.Store800
+                             + row.Store801
+                             + row.Store802
+                             + row.Store900
+                             + row.StoreOther
+                };
+
+                rows.Add(row);
+            }
+
+            return new GrandTotalsByStoreResponseDto { Rows = rows };
+        });
+    }
+
 
     public Task<BreakdownByStoreTotals> GetTotalsByStore(
         BreakdownByStoreRequest request,
@@ -61,7 +160,8 @@ public sealed class BreakdownReportService : IBreakdownService
             ValidateStoreNumber(request);
 
             // ── Query ------------------------------------------------------------------
-            var employeesBase = BuildEmployeesBaseQuery(ctx, request);
+            var employeesBase = BuildEmployeesBaseQuery(ctx, request.ProfitYear);
+            employeesBase = employeesBase.Where(q => q.StoreNumber == request.StoreNumber);
             var employeeSsns = await employeesBase.Select(e => e.Ssn).ToHashSetAsync(cancellationToken);
 
             ThrowIfInvalidSsns(employeeSsns);
@@ -110,11 +210,23 @@ public sealed class BreakdownReportService : IBreakdownService
         {
             ValidateStoreNumber(request);
 
-            var employeesBase = BuildEmployeesBaseQuery(ctx, request);
+            var employeesBase = BuildEmployeesBaseQuery(ctx, request.ProfitYear);
+            employeesBase = employeesBase.Where(q => q.StoreNumber == request.StoreNumber);
 
             // Store‑level + management filter
             employeesBase = request.StoreManagement ? ApplyStoreManagementFilter(employeesBase)
                 : ApplyNonStoreManagementFilter(employeesBase);
+
+            if (request.BadgeNumber > 0)
+            {
+                employeesBase = employeesBase.Where(e => e.BadgeNumber == request.BadgeNumber);
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.EmployeeName))
+            {
+                var pattern = $"%{request.EmployeeName.ToUpperInvariant()}%";
+                employeesBase = employeesBase.Where(x => EF.Functions.Like(x.FullName.ToUpper(), pattern));
+            }
 
             var paginated = await employeesBase.ToPaginationResultsAsync(request, cancellationToken);
             var employeeSsns = paginated.Results.Select(r => r.Ssn).ToHashSet();
@@ -131,9 +243,12 @@ public sealed class BreakdownReportService : IBreakdownService
                 .ThenBy(m => m.FullName, StringComparer.Ordinal)
                 .ToList();
 
+            var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
             return new ReportResponseBase<MemberYearSummaryDto>
             {
-                ReportDate = DateTimeOffset.Now,
+                ReportDate = DateTimeOffset.UtcNow,
+                StartDate = calInfo.FiscalBeginDate,
+                EndDate = calInfo.FiscalEndDate,
                 ReportName = $"Breakdown Report for {request.ProfitYear}",
                 Response = new PaginatedResponseDto<MemberYearSummaryDto>
                 {
@@ -163,17 +278,108 @@ public sealed class BreakdownReportService : IBreakdownService
         }
     }
 
+    /// <summary>
+    /// Base query for “active‐members” with ONE round-trip to Oracle.
+    /// – Joins year-end Profit-Sharing balances  *and*  ETVA balances  
+    /// – Re-creates the legacy COBOL store-bucket logic (700, 701, 800, 801, 802, 900) **inside the SQL**  
+    /// – Returns the sequence already filtered to the store requested by the UI
+    /// </summary>
     private IQueryable<ActiveMemberDto> BuildEmployeesBaseQuery(
-        IProfitSharingDbContext ctx,
-        BreakdownByStoreRequest request)
+        IProfitSharingDbContext ctx, short profitYear)
     {
-        var query = ctx.Demographics
-            .Include(d => d.PayClassification)
-            .Include(d => d.Department)
-            .Select(d => new ActiveMemberDto
+        /*──────────────────────────── 1️⃣  inline sub-queries – still IQueryable */
+        var balances =
+            _totalService.TotalVestingBalance(
+                ctx, profitYear, DateTime.UtcNow.ToDateOnly());
+
+        var etvaBalances =
+            _totalService.GetTotalComputedEtva(ctx, profitYear);
+
+        /* hard-coded list from COBOL
+           https://demoulas.atlassian.net/wiki/spaces/NGDS/pages/305004545/QPAY066TA.pco
+           https://bitbucket.org/demoulas/hpux/raw/37d043c297e04f3a5a557e0163239177087c2163/iqs-source/QPAY066TA.pco
+        
+        11-14-02  R MAISON  #196500 REMNVED SSN#'S 020281084,012289813*
+           *                                            019280284,033281522*
+           *                                            018184033,014167484*
+           *                             ADDED   SSN#'S 025282890,016269940*
+           *                             AT LINES 2750 THRU 2790           *
+           *                             AS PER DON MULLIGAN       
+
+        02/18/04  DPRUGH   P#7790  ADDED 024329422, 034305451 AND    *
+           *                             022325439 TO THE 701 SECTION .    *
+           *                             ALSO CLEANED UP THE SECTION BY    *
+           *                             REMNVING THE COMMENTED OUT SSN'S  *
+           *                             SINCE THEY ARE ALREADY NOTED IN   *
+           *                             THE COMMENT ABNVE THE SECTION  
+         */
+        int[] pensionerSsns =
+        {
+            023202688, 016201949, 023228733, 025329422, 001301944, 033324971, 020283297, 018260600, 017169396,
+            026786919, 029321863, 016269940, 018306437, 126264073, 012242916, 028280107, 031260942, 024243451
+        };
+
+        /*
+       
+       *| Report store                                        | When the COBOL assigns it                                                                                | Key tests in the code                                                                                                                                  |
+         | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+         | **700 – “Retired – Drawing Pension”**               | `B-TERM = "W"` (“W” is the retirement term-code).                                                        | `COMPUTE W-ST = WS-STR-VAL-PS-PENSION-RETIRED + 1000`                                                                                                  |
+         | **701 – “Active – Drawing Pension”**                | Hard-coded list of SSNs that are still on the active payroll **after** retirement.                       | Later in the same paragraph:<br>`IF B-SSN = 023202688 OR … THEN COMPUTE W-ST = WS-STR-VAL-PS-PENSION-ACTIVE + 1000`                                    |
+         | **800 – “Terminated / non-employee beneficiaries”** | Weekly **or** monthly pay-frequency and the employee is no longer active.                                | `IF B-FREQ = 1 OR B-FREQ = 2 THEN COMPUTE W-ST = WS-STR-VAL-PS-TERM-EMPL + 1000`                                                                       |
+         | **801 – “Terminated w/ zero balance”**              | Same as 800 **but** profit-sharing balance is zero (or becomes zero after disbursements)                 | Immediately after the 800 test:<br>`IF (B-PS-AMT <= 0 OR ((B-PS-AMT + B-PROF-DISBURSE5) <= 0 …)) … COMPUTE W-ST = WS-STR-VAL-PS-TERM-EMPL-ZERO + 1000` |
+         | **802 – “Terminated w/ balance but no vesting”**    | Balance > 0 **and** fully un-vested (`PS-VAMT = 0` and `PS-ETVA = 0`) and the status code is terminated. | `IF (B-PS-AMT > 0 AND (B-PS-VAMT = 0 AND B-PS-ETVA = 0) AND B-ST-CD = "T") … COMPUTE W-ST = WS-STR-VAL-PS-TERM-EMPL-NOVEST + 1000`                     |
+         | **900 – “Monthly Payroll”**                         | Active or inactive employees who are still on the **monthly** payroll.                                   | Wherever the code finds `B-FREQ = 2` it sets 900:<br>`COMPUTE W-ST = WS-STR-VAL-PS-MONTHLY-EMPL + 1000`                                                |
+
+      In short
+          Retiree vs. active-pensioner is keyed off the termination code (“W”) or an explicit SSN list.
+          Terminated buckets (800–802) depend on pay-frequency plus the size/vesting of the participant’s profit-sharing balance.
+          Monthly payroll (900) is simply anyone with FREQ = 2.
+       */
+
+        var query =
+            from d in ctx.Demographics
+
+            join b in balances on d.Ssn equals b.Ssn into balGrp
+            from bal in balGrp.DefaultIfEmpty()
+
+            join e in etvaBalances on d.Ssn equals e.Ssn into etvaGrp
+            from etva in etvaGrp.DefaultIfEmpty()
+
+            select new ActiveMemberDto
             {
                 BadgeNumber = d.BadgeNumber,
-                StoreNumber = d.StoreNumber,
+
+                /* ── “virtual” store computed in SQL (flat CASE) ─────────────── */
+                StoreNumber =
+                    (short)(d.TerminationCodeId == TerminationCode.Constants.Retired
+                        ? 700
+                        : pensionerSsns.Contains(d.Ssn)
+                            ? 701
+                            : (d.PayFrequencyId == PayFrequency.Constants.Monthly &&
+                               (d.EmploymentStatusId == EmploymentStatus.Constants.Active ||
+                                d.EmploymentStatusId == EmploymentStatus.Constants.Inactive))
+                                ? 900
+                                : ((d.EmploymentStatusId == EmploymentStatus.Constants.Terminated ||
+                                    d.EmploymentStatusId == EmploymentStatus.Constants.Inactive) &&
+                                   (d.PayFrequencyId == PayFrequency.Constants.Weekly ||
+                                    d.PayFrequencyId == PayFrequency.Constants.Monthly) &&
+                                   (((bal == null ? 0 : bal.CurrentBalance)
+                                     + (etva == null ? 0 : etva.Total)) <= 0))
+                                    ? 801
+                                    : (d.EmploymentStatusId == EmploymentStatus.Constants.Terminated &&
+                                       (d.PayFrequencyId == PayFrequency.Constants.Weekly ||
+                                        d.PayFrequencyId == PayFrequency.Constants.Monthly) &&
+                                       ((bal == null ? 0 : bal.CurrentBalance) > 0) &&
+                                       ((bal == null ? 0 : bal.VestedBalance) == 0) &&
+                                       ((etva == null ? 0 : etva.Total) == 0))
+                                        ? 802
+                                        : ((d.PayFrequencyId == PayFrequency.Constants.Weekly ||
+                                            d.PayFrequencyId == PayFrequency.Constants.Monthly) &&
+                                           d.EmploymentStatusId != EmploymentStatus.Constants.Active)
+                                            ? 800
+                                            : d.StoreNumber),
+
+                /* ── plain columns ───────────────────────────────────────────── */
                 FullName = d.ContactInfo.FullName!,
                 Ssn = d.Ssn,
                 DateOfBirth = d.DateOfBirth,
@@ -181,12 +387,18 @@ public sealed class BreakdownReportService : IBreakdownService
                 EmploymentStatusId = d.EmploymentStatusId,
                 DepartmentId = d.DepartmentId,
                 PayFrequencyId = d.PayFrequencyId,
+                TerminationCodeId = d.TerminationCodeId,
                 DepartmentName = d.Department!.Name,
                 PayClassificationName = d.PayClassification!.Name,
-            });
+                CurrentBalance = bal == null ? 0 : bal.CurrentBalance,
+                VestedBalance = bal == null ? 0 : bal.VestedBalance,
+                VestedPercent = bal == null ? 0 : bal.VestingPercent,
+                EtvaBalance = etva == null ? 0 : etva.Total
+            };
 
-        return query.Where(e => e.StoreNumber == request.StoreNumber);
+        return query;
     }
+
 
     private async Task<List<EmployeeFinancialSnapshot>> GetEmployeeFinancialSnapshotsAsync(
         IProfitSharingDbContext ctx,
@@ -308,6 +520,6 @@ public sealed class BreakdownReportService : IBreakdownService
             PayClassificationName = member.PayClassificationName
         };
     }
-
+    
     #endregion
 }

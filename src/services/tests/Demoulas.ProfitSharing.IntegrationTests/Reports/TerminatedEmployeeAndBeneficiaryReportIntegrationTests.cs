@@ -9,9 +9,13 @@ using Demoulas.ProfitSharing.IntegrationTests.Helpers;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services;
+using Demoulas.ProfitSharing.Services.ItOperations;
 using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 using FluentAssertions;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports;
 
@@ -34,10 +38,14 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         // Throws exceptions at test run time
         // var calendarService = _fixture.Services.GetRequiredService<ICalendarService>()!
         // var totalService = _fixture.Services.GetRequiredService<TotalService>()!
-        var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService());
-        var totalService = new TotalService(DbFactory, calendarService, new EmbeddedSqlService());
+        var distributedCache = new MemoryDistributedCache(new Microsoft.Extensions.Options.OptionsWrapper<MemoryDistributedCacheOptions>(new MemoryDistributedCacheOptions()));
+        var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
+        var totalService = new TotalService(DbFactory,
+            CalendarService, new EmbeddedSqlService(),
+            new DemographicReaderService(new FrozenService(DbFactory), new HttpContextAccessor()));
+        DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory), new HttpContextAccessor());
         TerminatedEmployeeAndBeneficiaryReportService mockService =
-            new TerminatedEmployeeAndBeneficiaryReportService(DbFactory, calendarService, totalService);
+            new TerminatedEmployeeAndBeneficiaryReportService(DbFactory, calendarService, totalService, demographicReaderService);
 
         Stopwatch stopwatch = Stopwatch.StartNew();
         stopwatch.Start();

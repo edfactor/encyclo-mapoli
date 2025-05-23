@@ -1,4 +1,5 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Response.Navigations;
+﻿using Demoulas.Common.Contracts.Interfaces;
+using Demoulas.ProfitSharing.Common.Contracts.Response.Navigations;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -7,19 +8,22 @@ namespace Demoulas.ProfitSharing.Services.Navigations;
 public class NavigationService : INavigationService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
+    private readonly IAppUser _appUser;
 
-    public NavigationService(IProfitSharingDataContextFactory dataContextFactory)
+    public NavigationService(IProfitSharingDataContextFactory dataContextFactory, IAppUser appUser)
     {
         this._dataContextFactory = dataContextFactory;
+        this._appUser = appUser;
     }
 
-    
+
     public async Task<List<NavigationDto>> GetNavigation(CancellationToken cancellationToken)
     {
         var flatList = await _dataContextFactory.UseReadOnlyContext(context =>
             context.Navigations
-                .Include(m=>m.Items)
-                .Include(m=>m.RequiredRoles)
+                .Include(m => m.Items)
+                .Include(m => m.RequiredRoles)
+                .Include(m => m.NavigationStatus)
                 .OrderBy(x => x.OrderNumber)
                 .ToListAsync(cancellationToken)
         );
@@ -35,12 +39,13 @@ public class NavigationService : INavigationService
                     OrderNumber = x.OrderNumber,
                     ParentId = x.ParentId,
                     StatusId = x.StatusId,
+                    StatusName = x.NavigationStatus?.Name,
                     Title = x.Title,
                     Url = x.Url,
                     SubTitle = x.SubTitle,
                     Items = BuildTree(x.Id),
                     Disabled = x.Disabled,
-                    RequiredRoles = x.RequiredRoles?.Select(m=>m.Name).ToList()
+                    RequiredRoles = x.RequiredRoles?.Select(m => m.Name).ToList()
                 })
                 .ToList();
         }
@@ -53,4 +58,39 @@ public class NavigationService : INavigationService
     {
         throw new NotImplementedException();
     }
+
+    public async Task<List<NavigationStatusDto>> GetNavigationStatus(CancellationToken cancellationToken)
+    {
+        var navigationStatusList = await _dataContextFactory.UseReadOnlyContext(context =>
+            context.NavigationStatuses.Select(x => new NavigationStatusDto { Id = x.Id, Name = x.Name }).ToListAsync(cancellationToken)
+        );
+        return navigationStatusList;
+    }
+
+
+    public async Task<bool> UpdateNavigation(int navigationId, byte statusId, CancellationToken cancellationToken)
+    {
+        var success = await _dataContextFactory.UseWritableContext(async context =>
+        {
+            //update navigation status
+            var nav = await context.Navigations.FirstOrDefaultAsync(x => x.Id == navigationId, cancellationToken);
+            if(nav == null)
+            {
+                return 0;
+            }
+            nav.StatusId = statusId;
+
+            //Navigation Tracker
+            await context.NavigationTrackings.AddAsync(new Data.Entities.Navigations.NavigationTracking() 
+            { 
+                NavigationId = navigationId, 
+                StatusId = statusId, 
+                Username = _appUser.UserName??"",
+                LastModified = DateTimeOffset.UtcNow
+            }, cancellationToken);
+            return await context.SaveChangesAsync(cancellationToken);
+        },cancellationToken);
+        return success > 0;
+    }
+
 }

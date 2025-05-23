@@ -4,30 +4,33 @@ namespace YEMatch;
 
 #pragma warning disable CS1998
 
-public class SmartActivity : Activity
+public class SmartActivity : IActivity
 {
-    public static readonly string smartPrefix = "                                                   ";
     private readonly ApiClient _client;
     private readonly Func<ApiClient, string, string, Task<Outcome>> _func;
     private readonly string Command;
+    private readonly string name;
 
     public SmartActivity(Func<ApiClient, string, string, Task<Outcome>> func, ApiClient client, string ActivityLetterNumber, string command)
     {
         _func = func;
         _client = client;
-        this.ActivityLetterNumber = ActivityLetterNumber;
+        name = ActivityLetterNumber.Substring(0, 1).Replace("A", "S") + ActivityLetterNumber.Substring(1);
         Command = command;
-        prefix = smartPrefix;
     }
 
-    public override string ActivityLetterNumber { get; set; }
 
-    public override async Task<Outcome> execute()
+    public string Name()
     {
-        Console.WriteLine($"{prefix}{ActivityLetterNumber} {Command}  - start at: {DateTime.Now}");
+        return name;
+    }
+
+    public async Task<Outcome> Execute()
+    {
+        Console.WriteLine($"SMART>         {name} {Command}  - start at: {DateTime.Now}");
         Stopwatch stopwatch = new();
         stopwatch.Start();
-        Outcome outcome = await _func(_client, ActivityLetterNumber, Command);
+        Outcome outcome = await _func(_client, name, Command);
         stopwatch.Stop();
         if (outcome.took == null && outcome.Status == OutcomeStatus.Ok)
         {

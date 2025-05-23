@@ -6,7 +6,9 @@ using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate.Formatters;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Internal.ProfitShareUpdate;
+using Demoulas.ProfitSharing.Services.ItOperations;
 using Demoulas.ProfitSharing.Services.ProfitShareEdit;
+using Microsoft.AspNetCore.Http;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
 
@@ -33,18 +35,18 @@ internal sealed class ProfitShareUpdateReport
 
     public async Task ProfitSharingUpdatePaginated(ProfitShareUpdateRequest profitShareUpdateRequest)
     {
-        TotalService totalService = new TotalService(_dbFactory, _calendarService, new EmbeddedSqlService());
+        TotalService totalService = new TotalService(_dbFactory, _calendarService, new EmbeddedSqlService(), new DemographicReaderService(new FrozenService(_dbFactory), new HttpContextAccessor()));
         ProfitShareUpdateService psu = new(_dbFactory, totalService, _calendarService);
         _profitYear = profitShareUpdateRequest.ProfitYear;
 
-        (List<MemberFinancials> members, AdjustmentsSummaryDto adjustmentsApplied, TotalsDto totalsDto, bool _) =
+        (List<MemberFinancials> members, AdjustmentsSummaryDto adjustmentsApplied, ProfitShareUpdateTotals totalsDto, bool _) =
             await psu.ProfitSharingUpdate(profitShareUpdateRequest, TestContext.Current.CancellationToken);
 
         m805PrintSequence(members, profitShareUpdateRequest.MaxAllowedContributions, totalsDto);
         m1000AdjustmentReport(profitShareUpdateRequest, adjustmentsApplied);
     }
 
-    public void m805PrintSequence(List<MemberFinancials> members, long maxAllowedContribution, TotalsDto totalsDto)
+    public void m805PrintSequence(List<MemberFinancials> members, long maxAllowedContribution, ProfitShareUpdateTotals profitShareUpdateTotals)
     {
         Header1 header_1 = new();
         header_1.HDR1_YY = TodaysDateTime.Year - 2000;
@@ -61,7 +63,7 @@ internal sealed class ProfitShareUpdateReport
             m810WriteReport(reportCounters, header_1, memberFinancials);
         }
 
-        m850PrintTotals(reportCounters, totalsDto, maxAllowedContribution);
+        m850PrintTotals(reportCounters, profitShareUpdateTotals, maxAllowedContribution);
     }
 
     private void WRITE(object obj)
@@ -170,24 +172,24 @@ internal sealed class ProfitShareUpdateReport
     }
 
 
-    public void m850PrintTotals(ReportCounters reportCounters, TotalsDto wsClientTotalsDto,
+    public void m850PrintTotals(ReportCounters reportCounters, ProfitShareUpdateTotals wsClientProfitShareUpdateTotals,
         long maxAllowedContribution)
     {
         ClientTot client_tot = new();
-        client_tot.BEG_BAL_TOT = wsClientTotalsDto.BeginningBalance;
-        client_tot.DIST1_TOT = wsClientTotalsDto.Distributions;
-        client_tot.MIL_TOT = wsClientTotalsDto.Military;
-        client_tot.CONT_TOT = wsClientTotalsDto.TotalContribution;
-        client_tot.FORF_TOT = wsClientTotalsDto.Forfeiture;
-        client_tot.EARN_TOT = wsClientTotalsDto.Earnings;
-        client_tot.EARN2_TOT = wsClientTotalsDto.Earnings2;
-        if (wsClientTotalsDto.Earnings2 != 0)
+        client_tot.BEG_BAL_TOT = wsClientProfitShareUpdateTotals.BeginningBalance;
+        client_tot.DIST1_TOT = wsClientProfitShareUpdateTotals.Distributions;
+        client_tot.MIL_TOT = wsClientProfitShareUpdateTotals.Military;
+        client_tot.CONT_TOT = wsClientProfitShareUpdateTotals.TotalContribution;
+        client_tot.FORF_TOT = wsClientProfitShareUpdateTotals.Forfeiture;
+        client_tot.EARN_TOT = wsClientProfitShareUpdateTotals.Earnings;
+        client_tot.EARN2_TOT = wsClientProfitShareUpdateTotals.Earnings2;
+        if (wsClientProfitShareUpdateTotals.Earnings2 != 0)
         {
-            Console.WriteLine($"Earnings2 NOT 0 {wsClientTotalsDto.Earnings2}");
+            Console.WriteLine($"Earnings2 NOT 0 {wsClientProfitShareUpdateTotals.Earnings2}");
         }
 
-        client_tot.EARN2_TOT = wsClientTotalsDto.ClassActionFund;
-        client_tot.END_BAL_TOT = wsClientTotalsDto.EndingBalance;
+        client_tot.EARN2_TOT = wsClientProfitShareUpdateTotals.ClassActionFund;
+        client_tot.END_BAL_TOT = wsClientProfitShareUpdateTotals.EndingBalance;
 
         TotalHeader1 total_header_1 = new();
         total_header_1.TOT_HDR1_YEAR1 = _profitYear;
@@ -205,15 +207,15 @@ internal sealed class ProfitShareUpdateReport
         WRITE(client_tot);
 
         client_tot = new();
-        client_tot.CONT_TOT = wsClientTotalsDto.Allocations;
-        client_tot.MIL_TOT = wsClientTotalsDto.PaidAllocations;
-        client_tot.END_BAL_TOT = wsClientTotalsDto.PaidAllocations + wsClientTotalsDto.Allocations;
+        client_tot.CONT_TOT = wsClientProfitShareUpdateTotals.Allocations;
+        client_tot.MIL_TOT = wsClientProfitShareUpdateTotals.PaidAllocations;
+        client_tot.END_BAL_TOT = wsClientProfitShareUpdateTotals.PaidAllocations + wsClientProfitShareUpdateTotals.Allocations;
         client_tot.TOT_FILLER = "ALLOC   ";
         WRITE(client_tot);
 
         client_tot = new();
-        client_tot.CONT_TOT = wsClientTotalsDto.ContributionPoints;
-        client_tot.EARN_TOT = wsClientTotalsDto.EarningPoints;
+        client_tot.CONT_TOT = wsClientProfitShareUpdateTotals.ContributionPoints;
+        client_tot.EARN_TOT = wsClientProfitShareUpdateTotals.EarningPoints;
         client_tot.useRedefineFormatting = true;
         client_tot.TOT_FILLER = "POINT";
         WRITE("");
@@ -229,8 +231,8 @@ internal sealed class ProfitShareUpdateReport
         WRITE(beneficiaryCountTotPayben);
 
         RerunTotals rerunTotals = new();
-        rerunTotals.RERUN_OVER = wsClientTotalsDto.MaxOverTotal;
-        rerunTotals.RERUN_POINTS = wsClientTotalsDto.MaxPointsTotal;
+        rerunTotals.RERUN_OVER = wsClientProfitShareUpdateTotals.MaxOverTotal;
+        rerunTotals.RERUN_POINTS = wsClientProfitShareUpdateTotals.MaxPointsTotal;
         rerunTotals.RERUN_MAX = maxAllowedContribution;
 
         ReportLines.Add("\n\n\n\n\n\n\n\n\n");

@@ -40,6 +40,8 @@ public class RehireForfeituresEndpoint :
                     {
                         ReportName = ReportFileName,
                         ReportDate = DateTimeOffset.Now,
+                        StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
+                        EndDate = DateOnly.FromDateTime(DateTime.UtcNow),
                         Response = new PaginatedResponseDto<RehireForfeituresResponse>
                         {
                             Results = new List<RehireForfeituresResponse> { RehireForfeituresResponse.ResponseExample() }
@@ -117,9 +119,14 @@ public class RehireForfeituresEndpoint :
             Map(m => m.FullName).Index(3).Name("EMPLOYEE NAME");
             Map(m => m.Ssn).Index(4).Name("SSN");
             Map(m => m.ReHiredDate).Index(5).Name("REHIRED").TypeConverter<YearMonthDayTypeConverter>();
-            Map(m => m.CompanyContributionYears).Index(6).Name("PY-YRS");
-            Map(m => m.HoursCurrentYear).Index(7).Name("YTD HOURS").TypeConverterOption.Format("0.00");
-            Map().Index(8).Name("EC"); // Assuming EC is blank, leave an empty column
+            Map(m => m.HireDate).Index(6).Name("HIRE DATE").TypeConverter<YearMonthDayTypeConverter>();
+            Map(m => m.TerminationDate).Index(7).Name("TERMINATION DATE").TypeConverter<YearMonthDayTypeConverter>();
+            Map(m => m.StoreNumber).Index(8).Name("STORE");
+            Map(m => m.NetBalanceLastYear).Index(9).Name("BEGINNING BALANCE").TypeConverterOption.Format("0.00");
+            Map(m => m.VestedBalanceLastYear).Index(10).Name("BEGIN VESTED AMOUNT").TypeConverterOption.Format("0.00");
+            Map(m => m.CompanyContributionYears).Index(11).Name("PY-YRS");
+            Map(m => m.HoursCurrentYear).Index(12).Name("YTD HOURS").TypeConverterOption.Format("0.00");
+            Map().Index(13).Name("EC"); // Assuming EC is blank, leave an empty column
         }
     }
 }

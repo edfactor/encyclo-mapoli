@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 import {
   addBadgeNumberToUpdateAdjustmentSummary,
-  clearBreakdownByStore, clearBreakdownByStoreTotals,
+  clearBreakdownByStore, clearBreakdownByStoreTotals, clearBreakdownGrandTotals,
   clearControlSheet,
   clearProfitMasterApply,
   clearProfitMasterRevert,
@@ -17,7 +17,7 @@ import {
   setAdditionalExecutivesGrid,
   setBalanceByAge,
   setBalanceByYears,
-  setBreakdownByStore, setBreakdownByStoreTotals,
+  setBreakdownByStore, setBreakdownByStoreMangement, setBreakdownByStoreTotals, setBreakdownGrandTotals,
   setContributionsByAge,
   setControlSheet,
   setDemographicBadgesNotInPayprofitData,
@@ -118,7 +118,7 @@ import {
   ForfeitureAdjustmentRequest,
   ForfeitureAdjustmentResponse,
   ForfeitureAdjustmentUpdateRequest,
-  ForfeitureAdjustmentDetail
+  ForfeitureAdjustmentDetail, GrandTotalsByStoreResponseDto
 } from "reduxstore/types";
 import { tryddmmyyyyToDate } from "../../utils/dateUtils";
 import { Paged } from "smart-ui-library";
@@ -129,27 +129,46 @@ import {
   clearForfeitureAdjustmentData
 } from "reduxstore/slices/forfeituresAdjustmentSlice";
 
-export const YearsEndApi = createApi({
-  baseQuery: fetchBaseQuery({
-    baseUrl: `${url}/api/`,
-    prepareHeaders: (headers, { getState }) => {
-      const root = getState() as RootState;
-      const token = root.security.token;
-      const impersonating = root.security.impersonating;
-      if (token) {
-        headers.set("authorization", `Bearer ${token}`);
-      }
-      if (impersonating) {
-        headers.set("impersonation", impersonating);
-      } else {
-        const localImpersonation = localStorage.getItem("impersonatingRole");
-        if (localImpersonation) {
-          headers.set("impersonation", localImpersonation);
-        }
-      }
-      return headers;
+
+/* -------------------------------------------------------------------------
+   Automatic x-demographic-data-source header copier
+   ------------------------------------------------------------------------- */
+import type { BaseQueryFn, FetchArgs, FetchBaseQueryError, FetchBaseQueryMeta } from "@reduxjs/toolkit/query";
+const rawBaseQuery = fetchBaseQuery({
+
+  baseUrl: `${url}/api/`,
+  prepareHeaders: (headers, { getState }) => {
+    const root = getState() as RootState;
+    const token = root.security.token;
+    const impersonating = root.security.impersonating;
+    if (token) {
+      headers.set("authorization", `Bearer ${token}`);
     }
-  }),
+    if (impersonating) {
+      headers.set("impersonation", impersonating);
+    } else {
+      const localImpersonation = localStorage.getItem("impersonatingRole");
+      if (localImpersonation) {
+        headers.set("impersonation", localImpersonation);
+      }
+    }
+    return headers;
+  }
+
+});
+const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (args, api, extra) => {
+  const result = await rawBaseQuery(args, api, extra);
+  if (result.data && typeof result.data === "object") {
+    const hdr =
+      (result.meta as FetchBaseQueryMeta | undefined)?.response?.headers?.get("x-demographic-data-source") ?? "Live";
+    (result.data as any).dataSource = hdr;
+  }  
+  return result;
+};
+/* ------------------------------------------------------------------------- */
+
+export const YearsEndApi = createApi({
+  baseQuery: baseQuery,
   reducerPath: "yearsEndApi",
   endpoints: (builder) => ({
     updateExecutiveHoursAndDollars: builder.mutation({
@@ -804,6 +823,8 @@ export const YearsEndApi = createApi({
           profitYear: params.profitYear,
           storeNumber: params.storeNumber,
           storeManagement: params.storeManagement,
+          employeeName: params.employeeName,
+          badgeNumber: params.badgeNumber,
           take: params.pagination.take,
           skip: params.pagination.skip,
           sortBy: params.pagination.sortBy,
@@ -845,6 +866,25 @@ export const YearsEndApi = createApi({
         } catch (err) {
           console.log("Err: " + err);
           dispatch(clearBreakdownByStoreTotals());
+        }
+      }
+    }),
+    getBreakdownGrandTotals: builder.query<GrandTotalsByStoreResponseDto, ProfitYearRequest>({
+      query: (params) => ({
+        url: `yearend/breakdown-by-store/totals`,
+        method: "GET",
+        params: {
+          profitYear: params.profitYear
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          dispatch(clearBreakdownByStoreTotals());
+          const { data } = await queryFulfilled;
+          dispatch(setBreakdownGrandTotals(data));
+        } catch (err) {
+          console.log("Err: " + err);
+          dispatch(clearBreakdownGrandTotals());
         }
       }
     }),
@@ -1135,7 +1175,7 @@ export const {
   useLazyGetMasterRevertQuery,
   useLazyGetProfitSharingLabelsQuery,
   useLazyGetProfitMasterStatusQuery,
-  useGetForfeitureAdjustmentsQuery,
+  useLazyGetBreakdownGrandTotalsQuery,
   useLazyGetForfeitureAdjustmentsQuery,
   useUpdateForfeitureAdjustmentMutation
 } = YearsEndApi;

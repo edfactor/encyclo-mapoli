@@ -33,11 +33,11 @@ import ProfCtrlSheet from "pages/PaymasterUpdate/ProfCtrlSheet";
 import BalanceByYears from "pages/PROF130/BalanceByYears/BalanceByYears";
 import VestedAmountsByAge from "pages/PROF130/VestedAmountsByAge/VestedAmountsByAge";
 import Profall from "pages/Profall/Profall";
-import QPAY066TA from "pages/ProfitShareByStore/BreakdownReport/QPAY066TA";
-import NewPSLabels from "pages/ProfitShareByStore/NewPSLabels";
-import ProfitShareByStore from "pages/ProfitShareByStore/ProfitShareByStore";
-import Under21Report from "pages/ProfitShareByStore/Under21Report";
-import Under21TA from "pages/ProfitShareByStore/Under21/Under21TA";
+import QPAY066TA from "pages/FiscalClose/ProfitShareByStore/BreakdownReport/QPAY066TA";
+import NewPSLabels from "pages/FiscalClose/ProfitShareByStore/NewPSLabels";
+import ProfitShareByStore from "pages/FiscalClose/ProfitShareByStore/ProfitShareByStore";
+import Under21Report from "pages/FiscalClose/ProfitShareByStore/Under21Report";
+import Under21TA from "pages/FiscalClose/ProfitShareByStore/Under21/Under21TA";
 import ProfitShareGrossReport from "pages/ProfitShareGrossReport/ProfitShareGrossReport";
 import ProfitShareReport from "pages/ProfitShareReport/ProfitShareReport";
 import ProfitShareTotals426 from "pages/ProfitShareTotals426/ProfitShareTotals426";
@@ -67,6 +67,7 @@ import MilitaryEntryAndModification
 import DevDebug from "../../pages/Dev/DevDebug";
 import ForfeituresAdjustment from "../../pages/ForfeituresAdjustment/ForfeituresAdjustment";
 import PAY426N from "pages/PAY426Reports/PAY426N/PAY426N";
+import BeneficiaryInquiry from "pages/BeneficiaryInquiry/BeneficiaryInquiry";
 
 const RouterSubAssembly: React.FC = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";
@@ -165,6 +166,9 @@ const RouterSubAssembly: React.FC = () => {
             </Box>
             <PSDrawer navigationData={data} />
             <RouteSecurity oktaEnabled={oktaEnabled}>
+            <Route
+                path={ROUTES.BENEFICIARY_INQUIRY}
+                element={<BeneficiaryInquiry />}></Route>
               <Route
                 path={ROUTES.DEMOGRAPHIC_BADGES}
                 element={<DemographicBadgesNotInPayprofit />}></Route>

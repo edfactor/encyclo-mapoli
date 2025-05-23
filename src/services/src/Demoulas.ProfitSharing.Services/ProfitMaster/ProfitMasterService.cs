@@ -156,14 +156,14 @@ public class ProfitMasterService : IProfitMasterService
                 MERGE INTO pay_profit pp
                 USING (
                   -- find all the employees who got an altered ETVA, via the new 8 records.
-                  SELECT d.id AS demographic_id, pp2.Etva
+                  SELECT d.id AS demographic_id, ppNow.Etva
                   FROM profit_detail pd
                   JOIN demographic d ON pd.ssn = d.ssn
-                  JOIN pay_profit pp2 ON d.id = pp2.demographic_id
+                  JOIN pay_profit ppNow ON d.id = ppNow.demographic_id
                   WHERE pd.profit_code_id = /*8*/ {ProfitCode.Constants.Incoming100PercentVestedEarnings.Id} 
                     AND pd.profit_year = {profitYear}
                     AND pd.comment_type_id = /* 23 '100% Earnings' */{CommentType.Constants.OneHundredPercentEarnings.Id} 
-                    AND pp2.profit_year = {nowYear}
+                    AND ppNow.profit_year = {nowYear}
                 ) oq    
                 ON (pp.demographic_id = oq.demographic_id AND pp.profit_year = {profitYear})
                 WHEN MATCHED THEN

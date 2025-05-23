@@ -36,6 +36,8 @@ public class DistributionsAndForfeitureEndpoint: EndpointWithCsvTotalsBase<Distr
                     {
                         ReportName = ReportFileName,
                         ReportDate = DateTimeOffset.Now,
+                        StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
+                        EndDate = DateOnly.FromDateTime(DateTime.UtcNow),
                         Response = new PaginatedResponseDto<DistributionsAndForfeitureResponse>
                         {
                             Results = new List<DistributionsAndForfeitureResponse> { DistributionsAndForfeitureResponse.ResponseExample() }

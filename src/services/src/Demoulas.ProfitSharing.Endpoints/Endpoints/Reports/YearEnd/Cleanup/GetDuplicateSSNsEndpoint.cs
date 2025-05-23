@@ -35,6 +35,8 @@ public class GetDuplicateSsNsEndpoint : EndpointWithCsvBase<SortedPaginationRequ
                     {
                         ReportName = ReportFileName,
                         ReportDate = DateTimeOffset.Now,
+                        StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
+                        EndDate = DateOnly.FromDateTime(DateTime.UtcNow),
                         Response = new PaginatedResponseDto<PayrollDuplicateSsnResponseDto>
                         {
                             Results = new List<PayrollDuplicateSsnResponseDto>

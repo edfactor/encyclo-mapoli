@@ -21,5 +21,15 @@ public static class ReferenceData
     {
         return 18;
     }
+
+    public static short RetirementAge()
+    {
+        return 65;
+    }
+
+    public static short VestingYears()
+    {
+        return 5;
+    }
 #pragma warning restore S3400
 }

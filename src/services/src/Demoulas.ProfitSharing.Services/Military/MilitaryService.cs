@@ -1,23 +1,27 @@
-﻿using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Military;
+using Demoulas.ProfitSharing.Common.Contracts.Response.Military;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
-using Microsoft.EntityFrameworkCore;
+using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using FluentValidation;
-using Demoulas.ProfitSharing.Common.Contracts.Response.Military;
+using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.Military;
 
 public class MilitaryService : IMilitaryService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
+    private readonly IDemographicReaderService _demographicReaderService;
 
-    public MilitaryService(IProfitSharingDataContextFactory dataContextFactory)
+    public MilitaryService(IProfitSharingDataContextFactory dataContextFactory,
+        IDemographicReaderService demographicReaderService)
     {
         _dataContextFactory = dataContextFactory;
+        _demographicReaderService = demographicReaderService;
     }
 
     public Task<Result<MilitaryContributionResponse>> CreateMilitaryServiceRecordAsync(
@@ -53,7 +57,9 @@ public class MilitaryService : IMilitaryService
         #endregion
         return _dataContextFactory.UseWritableContext(async c =>
         {
+#pragma warning disable DSMPS001
             var d = await c.Demographics.FirstOrDefaultAsync(d => d.BadgeNumber == req.BadgeNumber,
+#pragma warning restore DSMPS001
                 cancellationToken);
 
             if (d == null)
@@ -71,7 +77,7 @@ public class MilitaryService : IMilitaryService
                 Ssn = d.Ssn,
                 YearsOfServiceCredit = (byte)(req.AddContributionYear ? 1 : 0),
                 MonthToDate = (byte)req.ContributionDate.Month,
-                YearToDate = (short)req.ContributionDate.Year,
+                YearToDate = (short)req.ContributionDate.Year
             };
             c.ProfitDetails.Add(pd);
 
@@ -118,11 +124,12 @@ public class MilitaryService : IMilitaryService
 
         #endregion
 
-        var result = await _dataContextFactory.UseReadOnlyContext(c =>
+        var result = await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            return c.ProfitDetails
+            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+            return await ctx.ProfitDetails
                 .Include(pd=> pd.CommentType)
-                .Join(c.Demographics,
+                .Join(demographics,
                     c => c.Ssn,
                     cm => cm.Ssn,
                     (pd, d) => new { pd , d})

@@ -9,12 +9,21 @@
   <ItemGroup>
     <PackageReference Include="CsvHelper" />
     <PackageReference Include="Demoulas.Common.Api" />
+    <PackageReference Include="FastEndpoints.AspVersioning" />
+    <PackageReference Include="FastEndpoints.Swagger" />
     <PackageReference Include="OpenTelemetry.Api" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Demoulas.ProfitSharing.Data\Demoulas.ProfitSharing.Data.csproj" />
     <ProjectReference Include="..\Demoulas.ProfitSharing.Security\Demoulas.ProfitSharing.Security.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Demoulas.ProfitSharing.Analyzers\Demoulas.ProfitSharing.Analyzers.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <OutputItemType>Analyzer</OutputItemType>
+    </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>

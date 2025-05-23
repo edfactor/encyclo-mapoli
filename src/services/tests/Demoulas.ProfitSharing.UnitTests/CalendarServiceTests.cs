@@ -14,6 +14,15 @@ using FastEndpoints;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Distributed;
+using Moq;
+using Xunit;
+using System.Text.Json;
+using Demoulas.Common.Data.Services.Interfaces;
+using Demoulas.ProfitSharing.Data.Contexts;
+using Demoulas.Util.Extensions;
 
 namespace Demoulas.ProfitSharing.UnitTests;
 
@@ -21,12 +30,10 @@ public class CalendarServiceTests : ApiTestBase<Program>
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
 
-
     public CalendarServiceTests()
     {
         _dataContextFactory = MockDbContextFactory;
     }
-
 
     [Fact(DisplayName = "Check Calendar can be accessed")]
     public async Task CheckCalendarAccess()
@@ -64,7 +71,6 @@ public class CalendarServiceTests : ApiTestBase<Program>
         return act.Should().ThrowAsync<Exception>();
     }
 
-
     [Fact(DisplayName = "Find Weekending Date - Future Date")]
     public Task FindWeekendingDate_FutureDate()
     {
@@ -74,7 +80,6 @@ public class CalendarServiceTests : ApiTestBase<Program>
         return act.Should().ThrowAsync<ArgumentOutOfRangeException>()
             .WithMessage($"{AccountingPeriodsService.InvalidDateError} (Parameter 'dateTime')");
     }
-
 
     [Fact(DisplayName = "Find Weekending Date - Valid Date")]
     public async Task FindWeekendingDate_ValidDate()
@@ -95,7 +100,60 @@ public class CalendarServiceTests : ApiTestBase<Program>
                 .GETAsync<CalendarRecordEndpoint, YearRequest, CalendarResponseDto>(new YearRequest { ProfitYear = 2023 });
 
         response.Result.Should().NotBeNull();
-        response.Result.FiscalBeginDate.Should().NotBeOnOrBefore(DateOnly.MinValue);
-        response.Result.FiscalEndDate.Should().NotBeOnOrBefore(DateOnly.MinValue);
+        response.Result.FiscalBeginDate.Should().NotBe(DateTimeOffset.MinValue.ToDateOnly());
+        response.Result.FiscalEndDate.Should().NotBe(DateTimeOffset.MinValue.ToDateOnly());
+    }
+}
+
+public class CalendarServiceCacheTests
+{
+    [Fact]
+    public async Task GetYearStartAndEndAccountingDatesAsync_ReturnsFromCache_IfPresent()
+    {
+        // Arrange
+        var year = (short)2024;
+        var expected = new CalendarResponseDto { FiscalBeginDate = DateTimeOffset.Parse("2024-01-01", CultureInfo.InvariantCulture).ToDateOnly(), FiscalEndDate = DateTimeOffset.Parse("2024-12-31", CultureInfo.InvariantCulture).ToDateOnly() };
+        var cacheKey = $"CalendarService_YearDates_{year}";
+        var distributedCache = new Mock<IDistributedCache>();
+        distributedCache.Setup(c => c.GetAsync(cacheKey, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(JsonSerializer.SerializeToUtf8Bytes(expected));
+        var dataContextFactory = new Mock<IProfitSharingDataContextFactory>();
+        var accountingPeriodsService = new Mock<IAccountingPeriodsService>();
+        var service = new Demoulas.ProfitSharing.Services.CalendarService(dataContextFactory.Object, accountingPeriodsService.Object, distributedCache.Object);
+
+        // Act
+        var result = await service.GetYearStartAndEndAccountingDatesAsync(year);
+
+        // Assert
+        Assert.Equal(expected.FiscalBeginDate, result.FiscalBeginDate);
+        Assert.Equal(expected.FiscalEndDate, result.FiscalEndDate);
+        distributedCache.Verify(c => c.GetAsync(cacheKey, It.IsAny<CancellationToken>()), Times.Once);
+        dataContextFactory.VerifyNoOtherCalls();
+    }
+
+    [Fact]
+    public async Task GetYearStartAndEndAccountingDatesAsync_FallsBackToDb_IfCacheMiss()
+    {
+        // Arrange
+        var year = (short)2024;
+        var expected = new CalendarResponseDto { FiscalBeginDate = DateTimeOffset.Parse("2024-01-01", CultureInfo.InvariantCulture).ToDateOnly(), FiscalEndDate = DateTimeOffset.Parse("2024-12-31", CultureInfo.InvariantCulture).ToDateOnly() };
+        var cacheKey = $"CalendarService_YearDates_{year}";
+        var distributedCache = new Mock<IDistributedCache>();
+        distributedCache.Setup(c => c.GetAsync(cacheKey, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((byte[]?)null);
+        var dataContextFactory = new Mock<IProfitSharingDataContextFactory>();
+        var accountingPeriodsService = new Mock<IAccountingPeriodsService>();
+        dataContextFactory.Setup(f => f.UseReadOnlyContext(It.IsAny<Func<ProfitSharingReadOnlyDbContext, Task<CalendarResponseDto>>>() ))
+            .ReturnsAsync(expected);
+        var service = new Demoulas.ProfitSharing.Services.CalendarService(dataContextFactory.Object, accountingPeriodsService.Object, distributedCache.Object);
+
+        // Act
+        var result = await service.GetYearStartAndEndAccountingDatesAsync(year);
+
+        // Assert
+        Assert.Equal(expected.FiscalBeginDate, result.FiscalBeginDate);
+        Assert.Equal(expected.FiscalEndDate, result.FiscalEndDate);
+        distributedCache.Verify(c => c.GetAsync(cacheKey, It.IsAny<CancellationToken>()), Times.Once);
+        dataContextFactory.Verify(f => f.UseReadOnlyContext(It.IsAny<Func<ProfitSharingReadOnlyDbContext, Task<CalendarResponseDto>>>()), Times.Once);
     }
 }

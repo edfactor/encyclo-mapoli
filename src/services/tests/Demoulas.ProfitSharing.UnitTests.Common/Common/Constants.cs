@@ -1,5 +1,5 @@
 ﻿using System.Text.Json;
-using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Entities.Virtual;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Common;
 public static class Constants
@@ -17,6 +17,8 @@ public static class Constants
     }
 
     public static List<ParticipantTotal> FakeParticipantTotals { get; set; } = new List<ParticipantTotal>();
+    public static List<ParticipantTotal> FakeEtvaTotals { get; set; } = new List<ParticipantTotal>();
+    public static List<ProfitShareTotal> ProfitShareTotals { get; set; } = new List<ProfitShareTotal>();
     public static List<ParticipantTotalVestingBalance> FakeParticipantTotalVestingBalances { get; set; } = new List<ParticipantTotalVestingBalance>();
 
     internal static JsonSerializerOptions GetJsonSerializerOptions()

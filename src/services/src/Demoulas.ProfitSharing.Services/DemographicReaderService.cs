@@ -1,0 +1,64 @@
+﻿using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.Response.Headers;
+using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Demoulas.ProfitSharing.Services.ItOperations;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+
+namespace Demoulas.ProfitSharing.Services;
+
+public sealed class DemographicReaderService : IDemographicReaderService
+{
+    private readonly IFrozenService _frozenService;
+    private readonly IHttpContextAccessor _http;
+
+    public const string ItemKey = "__demographic_data_window";
+    
+    private FrozenStateResponse? _frozenState = null;
+
+    public DemographicReaderService(
+        IFrozenService frozenService,
+        IHttpContextAccessor http)
+    {
+        _frozenService = frozenService;
+        _http = http;
+    }
+
+    public async Task<IQueryable<Demographic>> BuildDemographicQuery(IProfitSharingDbContext ctx, bool useFrozenData = false)
+    {
+        if (useFrozenData)
+        {
+            // ---- FROZEN ------------------------------------------------------
+            _frozenState ??= await _frozenService.GetActiveFrozenDemographic();
+
+            if (_http.HttpContext != null)
+            {
+                var meta = new DataWindowMetadata(
+                    IsFrozen: true,
+                    ProfitYear: _frozenState.ProfitYear,
+                    WindowEnd: _frozenState.AsOfDateTime); // snapshot → start == end
+
+                _http.HttpContext!.Items[ItemKey] = meta;
+            }
+
+            return FrozenService.GetDemographicSnapshot(ctx, _frozenState.ProfitYear);
+        }
+
+        // ---- LIVE -----------------------------------------------------------
+        if (_http.HttpContext != null)
+        {
+            var now = DateTimeOffset.UtcNow;
+            var liveMeta = new DataWindowMetadata(
+                IsFrozen: false,
+                ProfitYear: null,
+                WindowEnd: now);
+
+            _http.HttpContext.Items[ItemKey] = liveMeta;
+        }
+
+        return ctx.Demographics;
+    }
+}

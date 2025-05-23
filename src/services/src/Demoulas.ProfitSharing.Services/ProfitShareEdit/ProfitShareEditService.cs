@@ -2,6 +2,7 @@
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
@@ -20,10 +21,13 @@ namespace Demoulas.ProfitSharing.Services.ProfitShareEdit;
 public class ProfitShareEditService : IInternalProfitShareEditService
 {
     private readonly IInternalProfitShareUpdateService _profitShareUpdateService;
+    private readonly ICalendarService _calendarService;
 
-    public ProfitShareEditService(IInternalProfitShareUpdateService profitShareUpdateService)
+    public ProfitShareEditService(IInternalProfitShareUpdateService profitShareUpdateService,
+        ICalendarService calendarService)
     {
         _profitShareUpdateService = profitShareUpdateService;
+        _calendarService = calendarService;
     }
 
     public async Task<ProfitShareEditResponse> ProfitShareEdit(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
@@ -47,10 +51,16 @@ public class ProfitShareEditService : IInternalProfitShareEditService
             YearExtension = m.YearExtension
         }).ToList();
 
+
+
+        var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(profitShareUpdateRequest.ProfitYear, cancellationToken);
+        
         return new ProfitShareEditResponse
         {
             ReportName = "Profit Sharing Edit",
-            ReportDate = DateTimeOffset.Now,
+            ReportDate = DateTimeOffset.UtcNow,
+            StartDate = calInfo.FiscalBeginDate,
+            EndDate = calInfo.FiscalEndDate,
             BeginningBalanceTotal = beginningBalanceTotal,
             ContributionGrandTotal = contributionGrandTotal,
             IncomingForfeitureGrandTotal = incomingForfeitureGrandTotal,

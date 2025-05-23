@@ -22,6 +22,8 @@ public sealed record UpdateSummaryReportResponse : ReportResponseBase<UpdateSumm
             TotalAfterVestedAmount = 7400,
             TotalBeforeProfitSharingAmount = 11500,
             TotalBeforeVestedAmount = 6800,
+            StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
+            EndDate = DateOnly.FromDateTime(DateTime.UtcNow),
             Response = new Demoulas.Common.Contracts.Contracts.Response.PaginatedResponseDto<UpdateSummaryReportDetail>(new PaginationRequestDto())
             {
                 Results = new List<UpdateSummaryReportDetail>() { UpdateSummaryReportDetail.ResponseExample()}

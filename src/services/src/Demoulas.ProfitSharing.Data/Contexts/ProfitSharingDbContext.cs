@@ -1,8 +1,11 @@
 ﻿using Demoulas.Common.Data.Contexts.Contexts;
 using Demoulas.Common.Data.Services.Entities.Entities;
+using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -47,6 +50,7 @@ public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>, I
     public virtual DbSet<Missive> Missives {  get; set; }
     public virtual DbSet<YearEndUpdateStatus> YearEndUpdateStatuses { get; set; }
     public virtual DbSet<ParticipantTotal> ParticipantTotals { get; set; }
+    public virtual DbSet<ParticipantTotal> ParticipantEvtaTotals { get; set; }
     public virtual DbSet<ParticipantTotalRatio> ParticipantTotalRatios { get; set; }
     public virtual DbSet<ParticipantTotalYear> ParticipantTotalYears { get; set; }
     public virtual DbSet<ParticipantTotalVestingBalance> ParticipantTotalVestingBalances { get; set; }
@@ -54,6 +58,10 @@ public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>, I
     public virtual DbSet<NavigationRole> NavigationRoles { get; set; }
     public virtual DbSet<NavigationStatus> NavigationStatuses { get; set; }
     public virtual DbSet<NavigationTracking> NavigationTrackings { get; set; }
+
+    public virtual DbSet<ProfitShareTotal> ProfitShareTotals { get; set; }
+
+    public virtual DbSet<HealthCheckStatusHistory> HealthCheckStatusHistories { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

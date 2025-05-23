@@ -1,10 +1,13 @@
-﻿using Demoulas.ProfitSharing.Data.Entities;
+﻿using System.Data.SqlTypes;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Demoulas.Util.Extensions;
 
 namespace Demoulas.ProfitSharing.Services;
 public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
@@ -12,12 +15,16 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
     private readonly IProfitSharingDataContextFactory _dbContextFactory;
     private readonly ITotalService _totalService;
     private readonly IEmbeddedSqlService _embeddedSqlService;
+    private readonly IDemographicReaderService _demographicReaderService;
 
-    public ForfeitureAdjustmentService(IProfitSharingDataContextFactory dbContextFactory, ITotalService totalService, IEmbeddedSqlService embeddedSqlService)
+    public ForfeitureAdjustmentService(IProfitSharingDataContextFactory dbContextFactory, 
+        ITotalService totalService, IEmbeddedSqlService embeddedSqlService,
+        IDemographicReaderService demographicReaderService)
     {
         _dbContextFactory = dbContextFactory;
         _totalService = totalService;
         _embeddedSqlService = embeddedSqlService;
+        _demographicReaderService = demographicReaderService;
     }
 
     private sealed class EmployeeInfo
@@ -33,7 +40,9 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
         var response = new ForfeitureAdjustmentReportResponse
         {
             ReportName = ForfeitureAdjustmentReportResponse.REPORT_NAME,
-            ReportDate = DateTime.Now,
+            ReportDate = DateTimeOffset.UtcNow,
+            StartDate = SqlDateTime.MinValue.Value.ToDateOnly(),
+            EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
             TotatNetBalance = 0,
             TotatNetVested = 0,
             Response = new PaginatedResponseDto<ForfeitureAdjustmentReportDetail>
@@ -167,7 +176,8 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
 
         await _dbContextFactory.UseWritableContext(async context =>
         {
-            var employeeData = await context.Demographics
+            var demographics= await _demographicReaderService.BuildDemographicQuery(context, false);
+            var employeeData = await demographics
                 .Where(d => d.BadgeNumber == req.BadgeNumber)
                 .Select(d => new
                 {
@@ -287,7 +297,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                         .Where(pp => pp.DemographicId == employeeData.Id && pp.ProfitYear == req.ProfitYear)
                         .ExecuteUpdateAsync(p => p
                             .SetProperty(pp => pp.EnrollmentId, newEnrollmentId)
-                            .SetProperty(pp => pp.LastUpdate, DateTime.Now), 
+                            .SetProperty(pp => pp.LastUpdate, DateTimeOffset.UtcNow),
                             cancellationToken);
                 }
             }

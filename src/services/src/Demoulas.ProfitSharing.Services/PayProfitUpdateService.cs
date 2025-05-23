@@ -5,12 +5,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services;
 
-public interface IPayProfitUpdateService
-{
-    Task SetZeroContributionReason(IQueryable<PayProfit> records, byte zeroContributionReasonId, CancellationToken cancellationToken);
-    Task SetEnrollmentId(short profitYear, CancellationToken ct);
-}
-
 public sealed class PayProfitUpdateService : IPayProfitUpdateService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;

@@ -1,8 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Query;
-using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Demoulas.ProfitSharing.Data.Interfaces;
 
@@ -21,8 +20,11 @@ public interface IProfitSharingDbContext
     DbSet<FakeSsn> FakeSsns { get; set; }
     DbSet<Missive> Missives { get; set; }
     DbSet<ParticipantTotal> ParticipantTotals { get; set; }
+    DbSet<ParticipantTotal> ParticipantEvtaTotals { get; set; }
     DbSet<ParticipantTotalRatio> ParticipantTotalRatios { get; set; }
     DbSet<ParticipantTotalYear> ParticipantTotalYears { get; set; }
     DbSet<ParticipantTotalVestingBalance> ParticipantTotalVestingBalances { get; set; }
+
+    DbSet<ProfitShareTotal> ProfitShareTotals { get; set; }
     DatabaseFacade Database { get; }
 }

@@ -13,6 +13,7 @@ public sealed record YearEndProfitSharingReportResponse : ReportResponseBase<Yea
     public int NumberOfNewEmployees { get; set; }
     public int NumberOfEmployeesUnder21 { get; set; }
     public int NumberOfEmployeesInPlan { get; set; }
+    public decimal TerminatedPointsTotal { get; set; }
 
     public static YearEndProfitSharingReportResponse ResponseExample()
     {
@@ -29,53 +30,11 @@ public sealed record YearEndProfitSharingReportResponse : ReportResponseBase<Yea
             NumberOfNewEmployees = 55,
             NumberOfEmployeesInPlan = 2044,
             NumberOfEmployeesUnder21 = 015,
+            StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
+            EndDate = DateOnly.FromDateTime(DateTime.UtcNow),
             Response = new PaginatedResponseDto<YearEndProfitSharingReportDetail>(new PaginationRequestDto())
                 { Total = 1, Results = new List<YearEndProfitSharingReportDetail>() { YearEndProfitSharingReportDetail.ResponseExample() } }
                 
         };
     }
 }
-
-public sealed record YearEndProfitSharingReportDetail
-{
-    public required int BadgeNumber { get; set; }
-    public required string EmployeeName { get; set; }
-    public required short StoreNumber { get; set; }
-    public required char EmployeeTypeCode { get; set; }
-    public required string EmployeeTypeName { get; set; }
-    public required DateOnly DateOfBirth { get; set; }
-    public required byte Age { get; set; }
-    public required string Ssn { get; set; }
-    public required decimal Wages { get; set; }
-    public required decimal Hours { get; set; }
-    public short? Points { get; set; }
-    public required bool IsUnder21 { get; set; }
-    public required bool IsNew { get; set; }
-    public char? EmployeeStatus { get; set; }
-    public required decimal Balance { get; set; }
-    public required short YearsInPlan { get; set; }
-
-    public static YearEndProfitSharingReportDetail ResponseExample()
-    {
-        return new YearEndProfitSharingReportDetail()
-        {
-            BadgeNumber = 135,
-            EmployeeName = "John Doe",
-            StoreNumber = 23,
-            EmployeeTypeCode = 'p',
-            EmployeeTypeName = "Part Time",
-            DateOfBirth = new DateOnly(1996, 9, 21),
-            Age = 28,
-            Ssn = "XXX-XX-1234",
-            Wages = 26527,
-            Hours = 1475,
-            Points = 2653,
-            IsUnder21 = false,
-            IsNew = false,
-            EmployeeStatus = ' ',
-            Balance = 51351.55m,
-            YearsInPlan = 1
-        };
-    }
-}
-
