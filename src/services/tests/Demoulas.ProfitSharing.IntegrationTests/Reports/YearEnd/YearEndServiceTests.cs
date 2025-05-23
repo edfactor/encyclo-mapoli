@@ -41,8 +41,6 @@ public class YearEndServiceTests : PristineBaseTest
         // ------- Arrange
         const short profitYear = 2024;
         CancellationToken ct = CancellationToken.None;
-        // Get Ready's rows for PayProfit
-        Dictionary<int, YearEndChange> readyRowsBySsn = await GetReadyPayProfit();
 
         await DbFactory.UseWritableContext(async ctx =>
         {
@@ -55,15 +53,17 @@ public class YearEndServiceTests : PristineBaseTest
             DbTransaction transaction = await c.BeginTransactionAsync();
             await yearEndService.RunFinalYearEndUpdates(profitYear, ct);
             await transaction.CommitAsync();
-
+            
             return 7;
         });
 
         //  ----- Assert
+        // Get Ready's rows (expected) for PayProfit
+        Dictionary<int, YearEndChange> readyRowsBySsn = await GetReadyPayProfit();
         // Get the results by reading all the pay_profit rows
         Dictionary<int, YearEndChange> smartRowsBySsn = await GetSmartRowsBySsn(profitYear);
 
-        // -- Assert 
+        // ensure number of rows match 
         readyRowsBySsn.Count.Should().Be(smartRowsBySsn.Count);
 
         // Now check each row

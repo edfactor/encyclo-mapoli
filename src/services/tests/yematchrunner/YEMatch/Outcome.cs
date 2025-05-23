@@ -29,4 +29,27 @@ public sealed record Outcome(
     {
         return message.Replace("\n", "\n    ");
     }
+
+    // When running activities in parallel - at the end the two outcomes get merged.  
+    // Merging two activities is awkward, but gets the job done for now
+    public Outcome Merge(Outcome secondOutcome)
+    {
+        var mergedStatus = Status;
+        if (secondOutcome.Status == OutcomeStatus.Error)
+        {
+            mergedStatus = OutcomeStatus.Error;
+        }
+
+        var tookLonger = took;
+        if (secondOutcome.took != null && secondOutcome.took.Value > took!.Value)
+        {
+            tookLonger = secondOutcome.took;
+        }
+
+        return new Outcome(ActivityLetterNumber + "/" + secondOutcome.ActivityLetterNumber,
+            Name + "/" + secondOutcome.Name,
+            fullcommand, mergedStatus, $"first:{Message}\nsecond:{secondOutcome.Message}",
+            tookLonger, isSmart, $"firstOut:{StandardOut}\nsecondOut:{secondOutcome.StandardOut}",
+            $"firstErr:{StandardError}\nsecondErr:{secondOutcome.StandardError}");
+    }
 }

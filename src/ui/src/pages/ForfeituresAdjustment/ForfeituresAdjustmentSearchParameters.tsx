@@ -3,7 +3,7 @@ import { FormHelperText, FormLabel, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, Resolver } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
@@ -11,19 +11,19 @@ import { useLazyGetForfeitureAdjustmentsQuery } from "reduxstore/api/YearsEndApi
 import { setForfeitureAdjustmentQueryParams, clearForfeitureAdjustmentData, clearForfeitureAdjustmentQueryParams } from "reduxstore/slices/forfeituresAdjustmentSlice";
 import { RootState } from "reduxstore/store";
 
+// Define the search parameters interface
 interface ForfeituresAdjustmentSearchParams {
   ssn?: string;
   badge?: string;
   year?: number;
-  client?: string;
 }
 
 interface ForfeituresAdjustmentSearchParametersProps {
   setInitialSearchLoaded: (loaded: boolean) => void;
 }
 
-const schema = yup.object().shape({
-  // will make either ssn or badge required, depending on which one is provided
+// Define schema for validation without circular references
+const schema = yup.object({
   ssn: yup.string().optional(),
   badge: yup.string().optional(),
   year: yup
@@ -33,8 +33,13 @@ const schema = yup.object().shape({
     .min(2020, "Year must be 2020 or later")
     .max(2100, "Year must be 2100 or earlier")
     .optional(),
-  client: yup.string().optional()
-});
+}).test(
+  'at-least-one-required',
+  'Either SSN or Badge is required',
+  function(value) {
+    return !!(value.ssn || value.badge);
+  }
+);
 
 const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearchParametersProps> = ({
   setInitialSearchLoaded
@@ -50,13 +55,13 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
     formState: { errors },
     reset
   } = useForm<ForfeituresAdjustmentSearchParams>({
-    resolver: yupResolver(schema),
+    resolver: yupResolver(schema) as Resolver<ForfeituresAdjustmentSearchParams>,
     defaultValues: {
       ssn: forfeitureAdjustmentQueryParams?.ssn || "",
       badge: forfeitureAdjustmentQueryParams?.badge || "",
       year: forfeitureAdjustmentQueryParams?.profitYear || profitYear,
-      client: ""
-    }
+    },
+    mode: "onSubmit"
   });
 
   const validateAndSearch = handleSubmit((data) => {
@@ -91,7 +96,6 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
       ssn: "",
       badge: "",
       year: profitYear,
-      client: ""
     });
     dispatch(clearForfeitureAdjustmentData());
     dispatch(clearForfeitureAdjustmentQueryParams());
@@ -108,7 +112,7 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
           container
           spacing={3}
           width="100%">
-          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
             <FormLabel>SSN</FormLabel>
             <Controller
               name="ssn"
@@ -118,15 +122,16 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
                   {...field}
                   fullWidth
                   variant="outlined"
-                  error={!!errors.ssn}
+                  error={!!errors.ssn || !!errors.root?.message}
                   placeholder="SSN"
                 />
               )}
             />
             {errors.ssn && <FormHelperText error>{errors.ssn.message}</FormHelperText>}
+            {errors.root && <FormHelperText error>{errors.root.message}</FormHelperText>}
           </Grid2>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
             <FormLabel>Badge</FormLabel>
             <Controller
               name="badge"
@@ -136,7 +141,7 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
                   {...field}
                   fullWidth
                   variant="outlined"
-                  error={!!errors.badge}
+                  error={!!errors.badge || !!errors.root?.message}
                   placeholder="Badge"
                 />
               )}
@@ -144,7 +149,7 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
             {errors.badge && <FormHelperText error>{errors.badge.message}</FormHelperText>}
           </Grid2>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
             <Controller
               name="year"
               control={control}
@@ -163,24 +168,6 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
               )}
             />
             {errors.year && <FormHelperText error>{errors.year.message}</FormHelperText>}
-          </Grid2>
-
-          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-            <FormLabel>Client</FormLabel>
-            <Controller
-              name="client"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  variant="outlined"
-                  error={!!errors.client}
-                  placeholder="Client"
-                />
-              )}
-            />
-            {errors.client && <FormHelperText error>{errors.client.message}</FormHelperText>}
           </Grid2>
         </Grid2>
       </Grid2>

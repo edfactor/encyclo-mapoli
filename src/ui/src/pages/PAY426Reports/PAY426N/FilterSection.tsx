@@ -16,16 +16,16 @@ interface FilterSectionProps {
   currentPreset: ReportPreset | null;
   onPresetChange: (preset: ReportPreset | null) => void;
   onReset: () => void;
+  isLoading?: boolean;
 }
 
 const FilterSection: React.FC<FilterSectionProps> = ({
   presets,
   currentPreset,
   onPresetChange,
-  onReset
+  onReset,
+  isLoading = false
 }) => {
-  const [isFetching, setIsFetching] = useState(false);
-
   const handlePresetChange = (event: SelectChangeEvent<string>) => {
     const presetId = event.target.value;
     const selected = presets.find(p => p.id === presetId) || null;
@@ -33,7 +33,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   };
 
   const handleApply = () => {
-   
+    // No-op as the actual data fetching is handled by the parent component
   };
 
   const handleReset = () => {
@@ -173,8 +173,8 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         <SearchAndReset
           handleReset={handleReset}
           handleSearch={handleApply}
-          isFetching={isFetching}
-          disabled={!currentPreset}
+          isFetching={isLoading}
+          disabled={!currentPreset || isLoading}
         />
       </Grid2>
     </form>

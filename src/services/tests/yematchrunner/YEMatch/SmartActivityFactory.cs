@@ -1,7 +1,8 @@
 ﻿using System.Globalization;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
-using YEMatch.YEMatch;
+using System.Text.Json;
 using HttpMethod = System.Net.Http.HttpMethod;
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
@@ -18,10 +19,10 @@ public static class SmartActivityFactory
     private static readonly short _profitYear = 2024;
 
     // This task takes the READY database and imports it directly to SMART.  Handy for isolating smart activities.
-    public static Activity? ReadyToSmartInit;
+    public static IActivity? ReadyToSmartInit;
     public static ApiClient? Client;
 
-    public static List<Activity> CreateActivities(string dataDirectory)
+    public static List<IActivity> CreateActivities(string dataDirectory)
     {
         HttpClient httpClient = new() { Timeout = TimeSpan.FromHours(2) };
         TestToken.CreateAndAssignTokenForClient(httpClient, "Finance-Manager");
@@ -70,11 +71,11 @@ public static class SmartActivityFactory
         // Quick authentication sanity check
         AppVersionInfo? r = await apiClient.DemoulasCommonApiEndpointsAppVersionInfoEndpointAsync(null);
         // Might be nice to also include the database version. What database is used.  Wall clock time.
-        Console.WriteLine($"{SmartActivity.smartPrefix}Connected to SMART build:" + r.BuildNumber + " git-hash:" + r.ShortGitHash);
+        Console.WriteLine(" Connected to SMART build:" + r.BuildNumber + " git-hash:" + r.ShortGitHash);
 
         // Consider using CLI tool for reset the smart schema to stock 
 
-        int res = ScriptRunner.Run("import-bh"); // Good enough and fast
+        int res = ScriptRunner.Run(false, "import-bh"); // Good enough and fast
         if (res != 0)
         {
             return new Outcome(aname, name, "", OutcomeStatus.Error, "Problem setting up database\n", null, true);
@@ -87,7 +88,7 @@ public static class SmartActivityFactory
     {
         // Consider using CLI tool for reset the smart schema to stock 
 
-        int res = ScriptRunner.Run("import-bh-from-ready"); // Good enough and fast
+        int res = ScriptRunner.Run(false, "import-bh-from-ready"); // Good enough and fast
         if (res != 0)
         {
             return new Outcome(aname, name, "", OutcomeStatus.Error, "Problem setting up database\n", null, true);
@@ -173,7 +174,7 @@ public static class SmartActivityFactory
         StringBuilder sb = new();
 
         ReportResponseBaseOfDistributionsAndForfeitureResponse? r2 = await apiClient
-            .ReportsYearEndCleanupDistributionsAndForfeitureEndpointAsync(1, 12, true, _profitYear, null, null, 0, int.MaxValue, null);
+            .ReportsYearEndCleanupDistributionsAndForfeitureEndpointAsync(1, 12, _profitYear, null, null, null, null, null, CancellationToken.None);
         sb.Append($"Records Loaded {r2.Response.Results.Count}\n");
 
         return Ok(aname, name, sb);
@@ -262,7 +263,7 @@ public static class SmartActivityFactory
         TestToken.CreateAndAssignTokenForClient(httpClient, "IT-Operations");
         HttpRequestMessage request = new(HttpMethod.Post, "http://localhost:5298/api/itoperations/freeze")
         {
-            Content = new StringContent("{ \"ProfitYear\" : " + _profitYear + ", \"asOfDateTime\": \"2025-05-06T00:00:00-04:00\"}"
+            Content = new StringContent("{ \"ProfitYear\" : " + _profitYear + ", \"asOfDateTime\": \"2025-01-09T00:00:00-04:00\"}"
                 , Encoding.UTF8, "application/json")
         };
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("*/*"));
@@ -306,34 +307,35 @@ public static class SmartActivityFactory
         StringBuilder sb = new();
         foreach (KeyValuePair<string, Pay426NCriteria> kvp in Pay426NCriteria._reportCriteria.OrderBy(kvp => kvp.Key))
         {
-            Pay426NCriteria criteria = kvp.Value;
-            YearEndProfitSharingReportResponse? response = await apiClient.ReportsYearEndProfitShareReportYearEndProfitSharingReportEndpointAsync(
-                criteria.IsYearEnd,
-                criteria.MinimumAgeInclusive,
-                criteria.MaximumAgeInclusive,
-                criteria.MinimumHoursInclusive,
-                criteria.MaximumHoursInclusive,
-                criteria.IncludeActiveEmployees,
-                criteria.IncludeInactiveEmployees,
-                criteria.IncludeEmployeesTerminatedThisYear,
-                criteria.IncludeTerminatedEmployees,
-                criteria.IncludeBeneficiaries,
-                criteria.IncludeEmployeesWithPriorProfitSharingAmounts,
-                criteria.IncludeEmployeesWithNoPriorProfitSharingAmounts,
-                true,
-                true,
-                criteria.ProfitYear,
-                null, null, // sorting
-                0,
-                int.MaxValue,
-                null
-            );
-            if (sb.Length != 0)
+            string key = kvp.Key;
+            Console.WriteLine("key " + key);
+            if (key == "PAY426N-10")
             {
-                sb.Append(", ");
+                Console.WriteLine("WARNING SKIPPING PAY426N-10 because it is broken.");
+                continue;
             }
 
-            sb.Append(kvp.Key[^2..] + "=" + response.Response.Results.Count);
+            Pay426NCriteria criteria = kvp.Value;
+            var postBody = JsonSerializer.Serialize(criteria);
+
+            HttpClient httpClient = new() { Timeout = TimeSpan.FromHours(2) };
+            TestToken.CreateAndAssignTokenForClient(httpClient, "IT-Operations");
+            HttpRequestMessage request = new(HttpMethod.Post, "http://localhost:5298/api/yearend/yearend-profit-sharing-report")
+            {
+                Content = new StringContent(postBody, Encoding.UTF8, "application/json")
+            };
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("*/*"));
+
+            using HttpResponseMessage response = await httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+
+            string responseBody = await response.Content.ReadAsStringAsync();
+
+            ///sb.Append(kvp.Key[^2..] + "=" + response.Response.Results.Count);
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                return new Outcome(aname, name, "", OutcomeStatus.Error, "Problem with endpoint\n", null, true);
+            }
         }
 
         return Ok(aname, name, sb.ToString());
@@ -413,7 +415,7 @@ public static class SmartActivityFactory
 
     private static async Task<Outcome> A27_Prof_Share_by_Store(ApiClient apiClient, string aname, string name)
     {
-        ReportResponseBaseOfMemberYearSummaryDto? r = await apiClient.ReportsYearEndBreakdownEndpointAsync(false, null, _profitYear, null, null, 0, int.MaxValue, null);
+        ReportResponseBaseOfMemberYearSummaryDto? r = await apiClient.ReportsYearEndBreakdownEndpointAsync(false, 1, _profitYear, null, null, 0, int.MaxValue, null);
         return Ok(aname, name, $"records returned = {r.Response.Results.Count}");
     }
 

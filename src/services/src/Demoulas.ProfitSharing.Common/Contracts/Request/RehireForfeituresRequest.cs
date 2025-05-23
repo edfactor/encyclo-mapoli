@@ -1,14 +1,16 @@
 ﻿
 
+using Demoulas.Common.Contracts.Contracts.Request;
+
 namespace Demoulas.ProfitSharing.Common.Contracts.Request;
-public sealed record RehireForfeituresRequest : ProfitYearRequest
+public sealed record RehireForfeituresRequest : SortedPaginationRequestDto
 {
     public DateTime BeginningDate { get; set; }
     public DateTime EndingDate { get; set; }
 
 
 
-    public static new RehireForfeituresRequest RequestExample()
+    public static RehireForfeituresRequest RequestExample()
     {
         return new RehireForfeituresRequest
         {
@@ -17,8 +19,7 @@ public sealed record RehireForfeituresRequest : ProfitYearRequest
             Skip = 1,
             Take = 10,
             SortBy = "BadgeNumber",
-            IsSortDescending = false,
-            ProfitYear = 2024
+            IsSortDescending = false
         };
     }
 }

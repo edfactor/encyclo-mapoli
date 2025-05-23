@@ -43,7 +43,16 @@ public sealed class YearEndService : IYearEndService
     }
 
 
-    // RunFinalYearEndUpdates very closely follows the logic of https://bitbucket.org/demoulas/hpux/src/master/prg-source/PAY426.cbl
+    /*
+        The RunFinalYearEndUpdates's "ComputeChange" method (see below) very closely follows the logic of https://bitbucket.org/demoulas/hpux/src/master/prg-source/PAY426.cbl
+
+        Profit sharing state updated by RunFinalYearEndUpdates (YE Activity 18):
+
+          Earn Points                 - How much money goes towards allocating a contribution
+          ZeroContributionReason      - How was your contribution handled?  Normal, Under21, Terminated (Vest Only), Retired, Soon to be Retired
+          EmployeeType                - Is this a "new employee  in the plan" - aka this is your first year >21 and >1000 hours - employee may already have V-ONLY records
+          PsCertificateIssuedDate     - indicates that this employee should get a physically printed certificate.   It is really a proxy for Earn Points > 0.   
+    */
     public async Task RunFinalYearEndUpdates(short profitYear, CancellationToken ct)
     {
         // Will Upgrade to using Frozen Demographics shortly.
@@ -107,7 +116,7 @@ public sealed class YearEndService : IYearEndService
             UpdatePayProfitChanges(oracleConnection, profitYear, changes);
         }, ct);
     }
-    
+
     public Task UpdateEnrollmentId(short profitYear, CancellationToken ct)
     {
         return _payProfitUpdateService.SetEnrollmentId(profitYear, ct);
@@ -181,12 +190,12 @@ public sealed class YearEndService : IYearEndService
             zeroContributionReason = /*6*/ ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested;
         }
 
-        if (yearsSinceFirstContribution == (ReferenceData.VestingYears()-1) && age >= ReferenceData.RetirementAge())
+        if (yearsSinceFirstContribution == (ReferenceData.VestingYears() - 1) && age >= ReferenceData.RetirementAge())
         {
             zeroContributionReason = /*7*/ ZeroContributionReason.Constants.SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay;
         }
 
-        if (yearsSinceFirstContribution >= (ReferenceData.VestingYears()-1) && age == (ReferenceData.RetirementAge()-1))
+        if (yearsSinceFirstContribution >= (ReferenceData.VestingYears() - 1) && age == (ReferenceData.RetirementAge() - 1))
         {
             zeroContributionReason = /*7*/ ZeroContributionReason.Constants.SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay;
         }

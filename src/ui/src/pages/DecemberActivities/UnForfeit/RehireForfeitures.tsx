@@ -10,6 +10,7 @@ import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 
 const RehireForfeitures = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
+  const [resetPageFlag, setResetPageFlag] = useState(false);
   const fiscalCalendarYear = useFiscalCalendarYear();
   const renderActionNode = () => {
       return <StatusDropdownActionNode />;
@@ -40,6 +41,7 @@ const RehireForfeitures = () => {
                 <RehireForfeituresSearchFilter 
                   setInitialSearchLoaded={setInitialSearchLoaded} 
                   fiscalData={fiscalCalendarYear} 
+                  onSearch={() => setResetPageFlag(flag => !flag)}
                 />
               </DSMAccordion>
             </Grid2>
@@ -48,6 +50,7 @@ const RehireForfeitures = () => {
               <RehireForfeituresGrid
                 initialSearchLoaded={initialSearchLoaded}
                 setInitialSearchLoaded={setInitialSearchLoaded}
+                resetPageFlag={resetPageFlag}
               />
             </Grid2>
           </>

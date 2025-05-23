@@ -5,7 +5,7 @@ namespace Demoulas.ProfitSharing.AppHost.Helpers;
 
 public static class CommandHelper
 {
-    public static ExecuteCommandResult RunConsoleApp(string projectPath, string launchProfile, ILogger logger)
+    public static ExecuteCommandResult RunConsoleApp(string projectPath, string launchProfile, ILogger logger, string? operationName = null)
     {
         using var process = new Process
         {
@@ -27,49 +27,29 @@ public static class CommandHelper
         process.WaitForExit();
 
         logger.LogError(output);
+        ExecuteCommandResult result;
         if (!string.IsNullOrWhiteSpace(error))
         {
             logger.LogError(error);
-            return new ExecuteCommandResult { Success = false, ErrorMessage = error };
+            result = new ExecuteCommandResult { Success = false, ErrorMessage = error };
         }
-        return CommandResults.Success();
-    }
-
-    public static void RunNpmInstall(string projectPath, ILogger logger)
-    {
-        try
+        else
         {
-            string npmExecutable = OperatingSystem.IsWindows() ? @"C:\\Program Files\\nodejs\\npm.cmd" : "npm";
-            using var process = new Process
+            result = CommandResults.Success();
+        }
+
+        // Feedback logging if operationName is provided
+        if (!string.IsNullOrWhiteSpace(operationName))
+        {
+            if (result.Success)
             {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = npmExecutable,
-                    WorkingDirectory = projectPath,
-                    Arguments = "install",
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                }
-            };
-            process.Start();
-            string output = process.StandardOutput.ReadToEnd();
-            string error = process.StandardError.ReadToEnd();
-            process.WaitForExit();
-            logger.LogInformation(output);
-            if (!string.IsNullOrWhiteSpace(error))
-            {
-                logger.LogInformation("npm install error: {Error}", error);
+                logger.LogInformation("[{Operation}] completed successfully.", operationName);
             }
             else
             {
-                logger.LogInformation("npm install completed successfully.");
+                logger.LogError("[{Operation}] failed: {ErrorMessage}", operationName, result.ErrorMessage);
             }
         }
-        catch (Exception ex)
-        {
-            logger.LogInformation(ex, "An error occurred while running npm install: {Message}", ex.Message);
-        }
+        return result;
     }
 }

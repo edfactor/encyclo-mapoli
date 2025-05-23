@@ -59,80 +59,94 @@ VALUES(13,1, 'Profit Share Report', 'PAY426','profit-share-report', 1, 9, '', 0)
 --Fiscal Close
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
 VALUES(14,55, 'Fiscal Close', '','fiscal-close', 1, 2, '', 0);
+
+-- Fiscal Close menu items updated according to ticket requirements
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(15,14, 'Manage Executive Hours and Dollars', '008-09','manage-executive-hours-and-dollars', 1, 1, '', 0);
+VALUES(16,14, 'YTD Wages Extract', 'PROF-DOLLAR-EXTRACT','ytd-wages-extract', 1, 1, '', 0);
+
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(16,14, 'YTD Wages Extract', 'PROF-DOLLAR-EXTRACT','ytd-wages-extract', 1, 2, '', 0);
+VALUES(15,14, 'Manage Executive Hours', 'PROF-DOLLAR-EXEC-EXTRACT, TPR008-09','manage-executive-hours-and-dollars', 1, 2, '', 0);
+
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(17,14, 'Profit Share Report', 'PAY426','profit-share-report', 1, 3, '', 0);
+VALUES(18,14, 'Profit Share Report (Edit Run)', 'PAY426','pay426n', 1, 3, '', 0);
+
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(18,14, 'Profit Share Report Edit Run', 'PAY426N','', 1, 4, '', 0);
---sub values for Profit Share Report Edit Run
-INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(19,18, 'Active/inactive employees age 18 - 20 with 1000 hours or more', '','pay426-1', 1, 1, '', 0);
-INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(21,18, 'Active/inactive employees age 21 & with 1000 hours or more', '','pay426-2', 1, 2, '', 0);
-INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(22,18, 'Active/inactive employees under 18', '','pay426-3', 1, 3, '', 0);
-INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(23,18, 'Active/inactive employees 18 and older with prior profit sharing amounts and <1000 hours', '','pay426-4', 1, 4, '', 0);
-INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(24,18, 'Active/inactive employees 18 and older with no prior profit sharing amounts and <1000 hours', '','pay426-5', 1, 5, '', 0);
-INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(25,18, 'Terminated employees 18 and older with 1000 hours or more', '','pay426-6', 1, 6, '', 0);
-INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(26,18, 'Terminated employees 18 and older with no prior profit sharing amounts and < 1000 hours', '','pay426-7', 1, 7, '', 0);
-INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED)
-VALUES(27,18, 'Terminated employees 18 and older with prior profit sharing amounts and < 1000 hours', '','pay426-8', 1, 8, '', 0);
-INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(28,18, 'Profit sharing summary page', '','pay426-9', 1, 9, '', 0);
-INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(29,18, 'All non-employee beneficiaries', '','pay426-10', 1, 10, '', 0);
---sub values for Fiscal Close
+VALUES(17,14, 'Profit Share Report (Final Run)', 'PAY426','profit-share-report', 1, 4, '', 0);
+
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
 VALUES(30,14, 'Get Eligible Employees', 'GET-ELIGIBLE-EMPS','eligible-employees', 1, 5, '', 0);
+
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(31,14, 'Forfeit', 'PAY443','forfeit', 1, 6, '', 0);
+VALUES(31,14, 'Profit Share Forfeit', 'PAY443','forfeit', 1, 6, '', 0);
+
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(32,14, 'Profit Share Updates', 'PAY444|PAY447','profit-share-update', 1, 7, '', 0);
+VALUES(60,14, 'Profit Share Update', 'PAY444','profit-share-update', 1, 7, '', 0);
+
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(33,14, 'Update Summary', 'PAY450','pay450-summary', 1, 8, '', 0);
+VALUES(61,14, 'Profit Share Edit', 'PAY447','profit-share-edit', 1, 8, '', 0);
+
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(34,14, 'Reports by Age', '','', 1, 9, '', 0);
---sub values for Report by Age
+VALUES(62,14, 'Profit Master Update', 'PAY460, PROFTLD','profit-master-update', 1, 9, '', 0);
+
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(35,34, 'Get Contributions by Age', 'PROF130','contributions-by-age', 1, 1, '', 0);
+VALUES(33,14, 'Prof PayMaster Update', 'PAY450','pay450-summary', 1, 10, '', 0);
+
+-- Prof control sheet
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(36,34, 'Get Distributions by Age', 'PROF130','distributions-by-age', 1, 2, '', 0);
+VALUES(64,14, 'Prof Control Sheet', 'PROF-CNTRL-SHEET','prof-control-sheet', 1, 16, '', 0);
+
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(37,34, 'Get Forfeiture by Age', 'PROF130','forfeitures-by-age', 1, 3, '', 0);
+VALUES(34,14, 'Prof Share Report By Age', 'Prof130','', 1, 11, '', 0);
+
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(38,34, 'Get Balance by Age', 'PROF130B','balance-by-age', 1, 4, '', 0);
+VALUES(41,14, 'Prof Share Gross Rpt', 'QPAY501','profit-share-gross-report', 1, 12, '', 0);
+
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(39,34, 'Get Vested Amounts by Age', 'PROF130V','vested-amounts-by-age', 1, 5, '', 0);
+VALUES(42,14, 'Prof Share by Store', 'QPAY066TA','', 1, 13, '', 0);
+
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(40,34, 'Get Balance by Years', 'PROF130Y','balance-by-years', 1, 6, '', 0);
---sub values for Fiscal Close
+VALUES(49,14, 'Print Profit Certs', 'PAYCERT','print-profit-certs', 1, 14, '', 0);
+
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(41,14, 'Profit Share Gross Report', 'QPAY501','profit-share-gross-report', 1, 10, '', 0);
+VALUES(63,14, 'Save Prof Paymstr', '','save-prof-paymstr', 1, 15, '', 0);
+
+--sub values for Report by Age - updated per requirements
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(42,14, 'Profit Share by Store', 'QPAY066TA','', 1, 11, '', 0);
---sub values of Profit Share by Store
+VALUES(36,34, 'DISTRIBUTIONS BY AGE', 'PROF130','distributions-by-age', 1, 1, '', 0);
+
+INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
+VALUES(35,34, 'CONTRIBUTIONS BY AGE', 'PROF130','contributions-by-age', 1, 2, '', 0);
+
+INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
+VALUES(37,34, 'FORFEITURES BY AGE', 'PROF130','forfeitures-by-age', 1, 3, '', 0);
+
+INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
+VALUES(38,34, 'BALANCE BY AGE', 'PROF130B','balance-by-age', 1, 4, '', 0);
+
+INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
+VALUES(39,34, 'VESTED AMOUNTS BY AGE', 'PROF130V','vested-amounts-by-age', 1, 5, '', 0);
+
+INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
+VALUES(40,34, 'BALANCE BY YEARS', 'PROF130Y','balance-by-years', 1, 6, '', 0);
+
+--sub values of Profit Share by Store - updated per requirements
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
 VALUES(43,42, 'QPAY066-UNDR21', '','qpay066-under21', 1, 1, '', 0);
+
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
 VALUES(44,42, 'QPAY066TA-UNDR21', '','qpay066ta-under21', 1, 2, '', 0);
+
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
 VALUES(45,42, 'QPAY066TA', '','qpay066ta', 1, 3, '', 0);
+
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(46,41, 'PROFALL Report', '','profall', 1, 4, '', 0);
+VALUES(47,42, 'QNEWPROFLBL', '','new-ps-labels', 1, 4, '', 0);
+
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(47,41, 'New Labels', 'QNEWPROFLBL','new-ps-labels', 1, 5, '', 0);
+VALUES(48,42, 'PROFNEW', '','profnew', 1, 5, '', 0);
+
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(48,41, 'PROFNEW', '','', 1, 6, '', 0);
---sub value for Fiscal Close
-INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(49,14, 'Print Profit Certs', 'PAYCERT','', 1, 12, '', 0);
+VALUES(46,42, 'PROFALL', '','profall', 1, 6, '', 0);
 
 --Inserting value for IT Operation for role management
 INSERT INTO NAVIGATION_ASSIGNED_ROLES(NAVIGATIONID, REQUIREDROLESID) VALUES (56,6 );

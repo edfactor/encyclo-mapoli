@@ -181,6 +181,13 @@ export const YearsEndApi = createApi({
       // after we do the update. Yet the working copy in the grid is
       // the correct data, a refresh is not needed.
     }),
+    updateEnrollment: builder.mutation({
+      query: () => ({
+        url: `yearend/update-enrollment`,
+        method: "POST",
+        body: {}
+      })
+    }),
     getDuplicateSSNs: builder.query<PagedReportResponse<DuplicateSSNDetail>, DuplicateSSNsRequestDto>({
       query: (params) => ({
         url: `yearend/duplicate-ssns`,
@@ -823,6 +830,8 @@ export const YearsEndApi = createApi({
           profitYear: params.profitYear,
           storeNumber: params.storeNumber,
           storeManagement: params.storeManagement,
+          employeeName: params.employeeName,
+          badgeNumber: params.badgeNumber,
           take: params.pagination.take,
           skip: params.pagination.skip,
           sortBy: params.pagination.sortBy,
@@ -1132,6 +1141,13 @@ export const YearsEndApi = createApi({
         method: "PUT",
         body: params
       })
+    }),
+    finalizeReport: builder.mutation<void, { profitYear: number }>({
+      query: (params) => ({
+        url: "yearend/final",
+        method: "POST",
+        body: params
+      })
     })
   })
 });
@@ -1175,5 +1191,8 @@ export const {
   useLazyGetProfitMasterStatusQuery,
   useLazyGetBreakdownGrandTotalsQuery,
   useLazyGetForfeitureAdjustmentsQuery,
-  useUpdateForfeitureAdjustmentMutation
+  useUpdateForfeitureAdjustmentMutation,
+  useLazyGetUpdateSummaryQuery,
+  useUpdateEnrollmentMutation,
+  useFinalizeReportMutation
 } = YearsEndApi;

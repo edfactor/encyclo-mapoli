@@ -255,7 +255,6 @@ public class RehireForfeituresTests : ApiTestBase<Program>
             {
                 Skip = 0,
                 Take = 10,
-                ProfitYear = profitYear,
                 BeginningDate = example.ReHiredDate.AddDays(-5).ToDateTime(TimeOnly.MinValue),
                 EndingDate = example.ReHiredDate.AddDays(5).ToDateTime(TimeOnly.MinValue)
             }, example);

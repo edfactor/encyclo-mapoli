@@ -8,12 +8,12 @@
     <Project Path="src/Demoulas.ProfitSharing.EmployeePayroll.Sync/Demoulas.ProfitSharing.EmployeePayroll.Sync.csproj" />
   </Folder>
   <Folder Name="/Database/" />
-  <Folder Name="/Database/ddl/" Id="34344e05-2809-70d5-5d93-e9d1b9219d15">
+  <Folder Name="/Database/ddl/">
     <File Path="../database/ddl/ddl.sql" />
     <File Path="../database/ddl/profit_sharing_ddl.png" />
   </Folder>
-  <Folder Name="/Database/Obfuscation/" Id="64c6b0c5-6452-8afb-bf76-7a20f5b2eb96" />
-  <Folder Name="/Database/Obfuscation/scripts/" Id="e5f55d26-f93e-35f8-b497-cce051b21704">
+  <Folder Name="/Database/Obfuscation/" />
+  <Folder Name="/Database/Obfuscation/scripts/">
     <File Path="../database/obfuscation/scripts/CHANGELOG.txt" />
     <File Path="../database/obfuscation/scripts/check_psn_orphans.sql" />
     <File Path="../database/obfuscation/scripts/create_employee_obf_table.sql" />
@@ -65,7 +65,7 @@
     <File Path="../database/obfuscation/scripts/test_view_data.sql" />
     <File Path="../database/ready_import/SQL update comment types.sql" />
   </Folder>
-  <Folder Name="/Database/ready import/" Id="7e7919e0-df50-6ca1-80f7-3dd8cf17a72e">
+  <Folder Name="/Database/ready import/">
     <File Path="../database/ready_import/Import Validations.sql" />
     <File Path="../database/ready_import/Readme.txt" />
     <File Path="../database/ready_import/SQL copy all from ready to smart ps.sql" />
@@ -74,7 +74,7 @@
   <Folder Name="/Database/ready import/Navigations/" Id="02ea681e-c7d8-13c7-8484-4ac65e1b71e8">
     <File Path="../database/ready_import/Navigations/add-navigation-data.sql" />
   </Folder>
-  <Folder Name="/Database/SQL calculations view/" Id="ea803e27-1926-874e-7e63-a2a241a2e100">
+  <Folder Name="/Database/SQL calculations view/">
     <File Path="../database/SQL calculations view/SQL READY Profit Sharing view creation for calculations includes bene and zeroc-check.sql" />
     <File Path="../database/SQL calculations view/SQL SMART Profit Sharing view creation for calculations includes bene and zeroc-check.sql" />
     <File Path="../database/SQL calculations view/SQL SMART vs READY SQL comparison of vesting balance.sql" />
@@ -92,7 +92,8 @@
   <Folder Name="/Solution Items/">
     <File Path="../../README.md" />
   </Folder>
-  <Folder Name="/Solution Items/Backend/" Id="0e4d4381-89ae-352e-7790-362a8c43b63b">
+  <Folder Name="/Solution Items/Backend/">
+    <File Path="../../.github/COPILOT_INSTRUCTIONS.md" />
     <File Path=".editorconfig" />
     <File Path="Directory.Build.props" />
     <File Path="Directory.Packages.props" />

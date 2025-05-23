@@ -6,7 +6,7 @@ namespace YEMatch;
 
 public static class ScriptRunner
 {
-    public static int Run(string scriptName)
+    public static int Run(bool chatty, string scriptName)
     {
         string homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         string scriptExtension = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".bat" : "";
@@ -40,11 +40,14 @@ public static class ScriptRunner
         }
 
         string stdout = process.StandardOutput.ReadToEnd();
-        Console.WriteLine($"<STANDARD-OUT>{stdout}</STANDARD-OUT>");
+        if (chatty)
+        {
+            Console.WriteLine($"<STANDARD-OUT>{stdout}</STANDARD-OUT>");
+        }
 
         if (stdout.Contains("error", StringComparison.CurrentCultureIgnoreCase))
         {
-            throw new EvaluateException($"Error running script: {scriptName}");
+            throw new EvaluateException($"Error running script - string 'error' found in output when running : {scriptName}");
         }
 
         return process.ExitCode;
