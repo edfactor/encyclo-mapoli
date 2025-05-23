@@ -14,11 +14,13 @@ import { GetDetailColumns, GetMilitaryAndRehireForfeituresColumns } from "./Rehi
 interface MilitaryAndRehireForfeituresGridSearchProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
+  resetPageFlag: boolean;
 }
 
 const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProps> = ({
                                                                                         initialSearchLoaded,
-                                                                                        setInitialSearchLoaded
+                                                                                        setInitialSearchLoaded,
+                                                                                        resetPageFlag // Destructure the new prop
                                                                                       }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
@@ -66,6 +68,11 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
       performSearch(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending);
     }
   }, [initialSearchLoaded, pageNumber, pageSize, sortParams, performSearch]);
+
+  // Reset page number to 0 when resetPageFlag changes
+  useEffect(() => {
+    setPageNumber(0);
+  }, [resetPageFlag]);
 
   // Initialize expandedRows when data is loaded
   useEffect(() => {
@@ -299,3 +306,4 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
 };
 
 export default RehireForfeituresGrid;
+

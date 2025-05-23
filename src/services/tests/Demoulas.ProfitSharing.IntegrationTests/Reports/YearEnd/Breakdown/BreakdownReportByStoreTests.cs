@@ -12,6 +12,8 @@ using Demoulas.ProfitSharing.Services.ItOperations;
 using Demoulas.ProfitSharing.Services.Reports.Breakdown;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Breakdown;
 
@@ -27,7 +29,8 @@ public class BreakdownReportByStoreTests
     public BreakdownReportByStoreTests()
     {
         _dataContextFactory = new PristineDataContextFactory();
-        _calendarService = new CalendarService(_dataContextFactory, _aps);
+        var distributedCache = new MemoryDistributedCache(new Microsoft.Extensions.Options.OptionsWrapper<MemoryDistributedCacheOptions>(new MemoryDistributedCacheOptions()));
+        _calendarService = new CalendarService(_dataContextFactory, _aps, distributedCache);
         _embeddedSqlService = new EmbeddedSqlService();
         _totalService = new TotalService(_dataContextFactory, _calendarService, _embeddedSqlService,
             new DemographicReaderService(new FrozenService(_dataContextFactory), new HttpContextAccessor()));

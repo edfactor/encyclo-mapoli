@@ -24,6 +24,8 @@ import AppSupportSlice from "./slices/appSupportSlice";
 import { NavigationStatusApi } from "./api/NavigationStatusApi";
 import  navigationStatusSlice  from "./slices/NavigationStatusSlice";
 import forfeituresAdjustmentSlice from "./slices/forfeituresAdjustmentSlice";
+import { BeneficiariesApi } from "./api/BeneficiariesApi";
+import  beneficiarySlice  from "./slices/beneficiarySlice";
 
 export const store = configureStore({
   reducer: {
@@ -40,6 +42,7 @@ export const store = configureStore({
     navigation: navigationSlice,
     navigationStatus: navigationStatusSlice,
     forfeituresAdjustment: forfeituresAdjustmentSlice,
+    beneficiaries: beneficiarySlice,
 
     [SecurityApi.reducerPath]: SecurityApi.reducer,
     [YearsEndApi.reducerPath]: YearsEndApi.reducer,
@@ -50,7 +53,8 @@ export const store = configureStore({
     [CommonApi.reducerPath]: CommonApi.reducer,
     [NavigationApi.reducerPath]: NavigationApi.reducer,
     [AppSupportApi.reducerPath]: AppSupportApi.reducer,
-    [NavigationStatusApi.reducerPath]: NavigationStatusApi.reducer
+    [NavigationStatusApi.reducerPath]: NavigationStatusApi.reducer,
+    [BeneficiariesApi.reducerPath]: BeneficiariesApi.reducer
   },
 
   middleware: (getDefaultMiddleware) =>
@@ -67,6 +71,7 @@ export const store = configureStore({
       .concat(NavigationApi.middleware)
       .concat(AppSupportApi.middleware)
       .concat(NavigationStatusApi.middleware)
+      .concat(BeneficiariesApi.middleware)
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself

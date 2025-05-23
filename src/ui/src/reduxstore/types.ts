@@ -181,7 +181,7 @@ export interface EmployeesOnMilitaryLeaveResponse {
   terminationDate: string;
 }
 
-export interface RehireForfeituresRequest extends ProfitYearRequest {
+export interface RehireForfeituresRequest {
   beginningDate: string;
   endingDate: string;
   pagination: SortedPaginationRequestDto;
@@ -344,6 +344,7 @@ export interface MasterInquiryDetail extends ProfitYearRequest {
   transactionDate?: Date;
   currentIncomeYear?: number;
   currentHoursYear?: number;
+  psnSuffix?: number;
 }
 
 export interface MasterInquiryRequest {
@@ -665,7 +666,7 @@ export interface ProfitShareUpdateResponse {
   response: Paged<ProfitShareUpdateDetail[]>;
   hasExceededMaximumContributions: true;
   adjustmentsSummary: ProfitShareAdjustmentSummary;
-  totals: ProfitShareUpdateTotals;
+  profitShareUpdateTotals: ProfitShareUpdateTotals;
 }
 
 export interface ProfitShareUpdateTotals {
@@ -888,6 +889,8 @@ export interface YearEndProfitSharingEmployee {
 export interface BreakdownByStoreRequest extends ProfitYearRequest {
   storeNumber?: number;
   storeManagement?: boolean;
+  badgeNumber?: number;
+  employeeName?: string;
   pagination: SortedPaginationRequestDto;
 }
 
@@ -1259,3 +1262,59 @@ export interface UpdateNavigationResponseDto {
   statusId? : number;
   statusName?: string;
  }
+export interface ContactInfoDto {
+  fullName?:string;
+  lastName:string;
+  firstName:string;
+  middleName?:string;
+  phoneNumber?:string;
+  mobileNumber?:string;
+  emailAddress?:string;
+}
+export interface AddressDto {
+  street?:string;
+  street2?: string;
+  city?:string;
+  state?:string;
+  postalCode?:string;
+  countryIso?:string
+}
+ export interface BeneficiaryContactDto {
+  id:number;
+  ssn: string;
+  dateOfBirth: Date;
+  address?: AddressDto;
+  contactInfo?: ContactInfoDto;
+  createdDate: Date;
+ }
+ export interface BeneficiaryKindDto {
+  id: string;
+  name?:string;
+ }
+ export interface BeneficiaryDto {
+  id: number;
+  psnSuffix: number;
+  badgeNumber: number;
+  demographicId: number;
+  psn: string;
+  contact?: BeneficiaryContactDto;
+  beneficiaryContactId:number;
+  relationship?:string;
+  kindId?:number;
+  kind?:BeneficiaryKindDto;
+  percent: number;
+
+
+ }
+
+ export interface BeneficiaryRequestDto extends SortedPaginationRequestDto {
+  badgeNumber: number;
+  psnSuffix: number;
+ }
+
+ export interface BeneficiaryResponseDto {
+  beneficiaryList?: Paged<BeneficiaryDto>
+ }
+
+
+

@@ -1,9 +1,11 @@
 ﻿using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Common.Interfaces.ItOperations;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Services.Beneficiaries;
+using Demoulas.ProfitSharing.Services.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Services.Caching.Extensions;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.ItOperations;
@@ -56,8 +58,9 @@ public static class ServicesExtension
 
         _ = builder.Services.AddScoped<IFrozenService, FrozenService>();
         _ = builder.Services.AddScoped<IStoreService, StoreService>();
-        _ = builder.Services.AddScoped<IAccountingPeriodsService, AccountingPeriodsService>();
-        _ = builder.Services.AddScoped<ICalendarService, CalendarService>();
+        _ = builder.Services.AddSingleton<IAccountingPeriodsService, AccountingPeriodsService>();
+        _ = builder.Services.AddSingleton<ICalendarService, CalendarService>();
+        _ = builder.Services.AddHostedService<CalendarService>();
 
         _ = builder.Services.AddScoped<IProfitShareUpdateService, ProfitShareUpdateService>();
         _ = builder.Services.AddScoped<IInternalProfitShareUpdateService, ProfitShareUpdateService>();
@@ -69,6 +72,8 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IPayProfitUpdateService, PayProfitUpdateService>();
         _ = builder.Services.AddScoped<IBreakdownService, BreakdownReportService>();
         _ = builder.Services.AddScoped<INavigationService, NavigationService>();
+        _ = builder.Services.AddScoped<IBeneficiaryInquiryService, BeneficiaryInquiryService>();
+
 
         _ = builder.Services.AddScoped<ITableMetadataService, TableMetadataService>();
 

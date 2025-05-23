@@ -18,7 +18,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .UseCollation("USING_NLS_COMP")
-                .HasAnnotation("ProductVersion", "9.0.4")
+                .HasAnnotation("ProductVersion", "9.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             OracleModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -25590,12 +25590,14 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.Property<string>("Key")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasMaxLength(128)
+                        .HasColumnType("NVARCHAR2(128)")
                         .HasColumnName("KEY");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR2(2000)")
+                        .HasMaxLength(24)
+                        .HasColumnType("NVARCHAR2(24)")
                         .HasColumnName("STATUS");
 
                     b.HasKey("Id")

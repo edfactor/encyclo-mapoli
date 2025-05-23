@@ -830,6 +830,8 @@ export const YearsEndApi = createApi({
           profitYear: params.profitYear,
           storeNumber: params.storeNumber,
           storeManagement: params.storeManagement,
+          employeeName: params.employeeName,
+          badgeNumber: params.badgeNumber,
           take: params.pagination.take,
           skip: params.pagination.skip,
           sortBy: params.pagination.sortBy,

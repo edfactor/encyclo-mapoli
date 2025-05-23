@@ -67,6 +67,7 @@ import MilitaryEntryAndModification
 import DevDebug from "../../pages/Dev/DevDebug";
 import ForfeituresAdjustment from "../../pages/ForfeituresAdjustment/ForfeituresAdjustment";
 import PAY426N from "pages/PAY426Reports/PAY426N/PAY426N";
+import BeneficiaryInquiry from "pages/BeneficiaryInquiry/BeneficiaryInquiry";
 
 const RouterSubAssembly: React.FC = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";
@@ -165,6 +166,9 @@ const RouterSubAssembly: React.FC = () => {
             </Box>
             <PSDrawer navigationData={data} />
             <RouteSecurity oktaEnabled={oktaEnabled}>
+            <Route
+                path={ROUTES.BENEFICIARY_INQUIRY}
+                element={<BeneficiaryInquiry />}></Route>
               <Route
                 path={ROUTES.DEMOGRAPHIC_BADGES}
                 element={<DemographicBadgesNotInPayprofit />}></Route>

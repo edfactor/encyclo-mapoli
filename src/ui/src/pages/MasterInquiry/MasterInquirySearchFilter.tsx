@@ -21,7 +21,8 @@ import { MasterInquiryRequest, MasterInquirySearch, MissiveResponse } from "redu
 import {
   clearMasterInquiryData,
   clearMasterInquiryRequestParams,
-  setMasterInquiryRequestParams
+  setMasterInquiryRequestParams,
+  updateMasterInquiryResults
 } from "reduxstore/slices/inquirySlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
@@ -97,6 +98,8 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
 }) => {
   const [triggerSearch, { isFetching }] = useLazyGetProfitMasterInquiryQuery();
   const { masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
+
+  const { missives } = useSelector((state: RootState) => state.lookups);
 
   const dispatch = useDispatch();
 
@@ -196,6 +199,10 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
   }, [badgeNumber, hasToken, reset, setMissiveAlerts, triggerSearch]);
 
   const validateAndSearch = handleSubmit((data) => {
+
+    // Always clear missives on search
+    setMissiveAlerts([]);
+
     if (isValid) {
       const searchParams: MasterInquiryRequest = {
         pagination: {
@@ -244,6 +251,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
 
         // These only come into play if we are searching for an individual
         if (data.badgeNumber || data.socialSecurity) {
+          console.log("Searching for an individual");
 
           if (data.badgeNumber && !response.employeeDetails) {
             setMissiveAlerts([
@@ -286,8 +294,55 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
               }
             ]);
           }
-        }          
+        }  
+
+        if (response.employeeDetails) { 
+          if (missives && response.employeeDetails.missives &&  response.employeeDetails.missives.length > 0) {
+      
+            const alerts = response.employeeDetails.missives.map((id: number) => {
+            const missiveResponse =  missives.find((missive: MissiveResponse) => missive.id === id);
+            return missiveResponse;
+            }).filter((alert) => alert !== null) as MissiveResponse[];
+
+            // This will send the list to the screen
+            setMissiveAlerts(alerts);
+          }
+        }
+
+        // So if the employee is also a beneficiary, we need to do some work on the badge and psn
+        if (response.inquiryResults && response.inquiryResults.results.length > 0 && response.employeeDetails?.missives) {
+
+        // If someone is both, the 3rd missive message proves this
+        const isEmployeeAndBeneficiary = response.employeeDetails?.missives.some((row) => row=== 3);
+                
+        if (isEmployeeAndBeneficiary) {
+          
+          const originalBadgeNumber = response.inquiryResults.results.find((row) => row.psnSuffix === 0)?.badgeNumber;
+          
+          // We want all badge numbers to be the same,
+          // and use the badge numbers of the person
+          // that this employee is a beneficiary of
+          // to be used as base of the psnSuffix field
+          const updatedResults = response.inquiryResults.results.map((row) => {
+            if (row.psnSuffix !== undefined && row.psnSuffix > 0) {
+              return {
+                ...row,
+                badgeNumber: originalBadgeNumber,
+                psnSuffix: Number(`${row.badgeNumber}${row.psnSuffix}`)
+              };
+            } 
+            
+            return row;
+          });
+
+          // Now we need to set the updated results back to the response
+          dispatch(updateMasterInquiryResults(updatedResults));
+
+        }  
+      }
       });
+
+      
     
       dispatch(setMasterInquiryRequestParams(data));
     }
