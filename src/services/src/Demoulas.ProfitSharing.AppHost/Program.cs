@@ -60,13 +60,8 @@ var api = builder.AddProject<Demoulas_ProfitSharing_Api>("ProfitSharing-Api")
     });
 
 // Use AddViteApp for Vite applications as per the latest CommunityToolkit.Aspire guidance
-var ui = builder.AddViteApp("ProfitSharing-Ui", "../../../ui/")
-    .WithEndpoint("http", annotation =>
-    {
-        annotation.IsProxied = false;
-        annotation.TargetPort = 3100;
-        annotation.Port = 3100;
-    })
+var ui = builder.AddNpmApp("ProfitSharing-Ui", "../../../ui/", scriptName: "dev")
+    .WithHttpEndpoint(port: 3100, isProxied: false)
     .WithUrlForEndpoint("http", annotation =>
     {
         annotation.DisplayText = "Profit Sharing";
