@@ -71,6 +71,7 @@ var ui = builder.AddNpmApp("ProfitSharing-Ui", "../../../ui/", scriptName: "dev"
 ui.WithReference(api)
     .WaitFor(api)
     .WithParentRelationship(api)
+    .WithExternalHttpEndpoints()
     .WithOtlpExporter();
 
 _ = builder.AddProject<Demoulas_ProfitSharing_EmployeeFull_Sync>(name: "ProfitSharing-EmployeeFull-Sync")
