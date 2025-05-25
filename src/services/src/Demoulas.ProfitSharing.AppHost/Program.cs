@@ -48,7 +48,7 @@ var configuration = new ConfigurationBuilder()
 var database = builder.AddConnectionString("Oracle", "ProfitSharing");
 
 var api = builder.AddProject<Demoulas_ProfitSharing_Api>("ProfitSharing-Api")
-    //.WithHealthCheck("/health")
+    .WithHttpHealthCheck("/health")
     //.WithReference(database)
     .WithSwaggerUi()
     .WithRedoc()
@@ -66,6 +66,7 @@ var ui = builder.AddNpmApp("ProfitSharing-Ui", "../../../ui/", scriptName: "dev"
     {
         annotation.DisplayText = "Profit Sharing";
     })
+    .WithOtlpExporter()
     .WithNpmPackageInstallation();
 
 ui.WithReference(api)
