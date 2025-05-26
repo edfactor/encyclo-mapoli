@@ -9,19 +9,11 @@ namespace YEMatch;
 public class ReadyActivity(SshClient client, SftpClient sftpClient, bool chatty, string AName, string ksh, string args, string dataDirectory) : IActivity
 {
     private const string OptionalLocalResourceBase = "/Users/robertherrmann/prj/smart-profit-sharing/src/services/tests/Demoulas.ProfitSharing.IntegrationTests/Resources/";
-    private readonly bool updateIntegrationTestResources = false;
+    private const bool UpdateIntegrationTestResources = false;
 
     public string Name()
     {
         return AName.Substring(0, 1).Replace("A", "R") + AName.Substring(1);
-    }
-
-    private void IfChatty(string msg)
-    {
-        if (chatty)
-        {
-            Console.WriteLine(msg);
-        }
     }
 
     public async Task<Outcome> Execute()
@@ -98,7 +90,7 @@ public class ReadyActivity(SshClient client, SftpClient sftpClient, bool chatty,
 
                 IfChatty($"copied {qpay066Remote} to $qpay066Local");
                 string testingFile2 = OptionalLocalResourceBase + "terminatedEmployeeAndBeneficiaryReport-correct.txt";
-                if (HasDirectory(testingFile2) && updateIntegrationTestResources)
+                if (HasDirectory(testingFile2) && UpdateIntegrationTestResources)
                 {
                     File.Copy(qpay066Local, testingFile2, true);
                     IfChatty($"NOTE::: Updated {testingFile2}");
@@ -120,7 +112,7 @@ public class ReadyActivity(SshClient client, SftpClient sftpClient, bool chatty,
                 IfChatty($"copied {remote} to {local}");
 
                 string testingFile3 = OptionalLocalResourceBase + "pay447.txt";
-                if (HasDirectory(testingFile3)  && updateIntegrationTestResources)
+                if (HasDirectory(testingFile3) && UpdateIntegrationTestResources)
                 {
                     File.Copy(local, testingFile3, true);
                     IfChatty($"NOTE::: Updated {testingFile3}");
@@ -148,7 +140,7 @@ public class ReadyActivity(SshClient client, SftpClient sftpClient, bool chatty,
                 }
 
                 string testingFile = OptionalLocalResourceBase + "psupdate-pay444-r2.txt";
-                if (HasDirectory(testingFile) && filenameLocal == "PAY444L" && File.Exists(testingFile) && updateIntegrationTestResources)
+                if (HasDirectory(testingFile) && filenameLocal == "PAY444L" && File.Exists(testingFile) && UpdateIntegrationTestResources)
                 {
                     File.Copy(qpay066Local, testingFile, true);
                     IfChatty($"NOTE::: Updated {testingFile}");
@@ -174,6 +166,14 @@ public class ReadyActivity(SshClient client, SftpClient sftpClient, bool chatty,
         }
 
         return new Outcome(Name(), ksh, $"{ksh} {args}", OutcomeStatus.Ok, lines[^1], took, false, result.Result, result.Error);
+    }
+
+    private void IfChatty(string msg)
+    {
+        if (chatty)
+        {
+            Console.WriteLine(msg);
+        }
     }
 
     private static bool HasDirectory(string testingFile2)

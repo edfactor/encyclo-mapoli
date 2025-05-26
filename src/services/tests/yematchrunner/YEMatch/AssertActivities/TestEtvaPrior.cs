@@ -2,13 +2,8 @@ using Oracle.ManagedDataAccess.Client;
 
 namespace YEMatch;
 
-public class TestEtvaPrior : SqlTester
+public class TestEtvaPrior : BaseSqlActivity
 {
-    public override string Name()
-    {
-        return "Test-Etva-Prior";
-    }
-
     public override async Task<Outcome> Execute()
     {
         OracleConnection connection = new(SmartConnString);

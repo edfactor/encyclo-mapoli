@@ -5,6 +5,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ProfitShareUpdate;
+using Demoulas.ProfitSharing.Services.ItOperations;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.ProfitShareEdit;
@@ -12,8 +13,7 @@ namespace Demoulas.ProfitSharing.Services.ProfitShareEdit;
 internal static class EmployeeProcessorHelper
 {
     public static async Task<(List<MemberFinancials>, bool)> ProcessEmployees(IProfitSharingDataContextFactory dbContextFactory, ICalendarService calendarService,
-        TotalService totalService, ProfitShareUpdateRequest profitShareUpdateRequest,
-        AdjustmentsSummaryDto adjustmentsSummaryDto,
+        TotalService totalService, IFrozenService frozenService, ProfitShareUpdateRequest profitShareUpdateRequest, AdjustmentsSummaryDto adjustmentsSummaryDto,
         CancellationToken cancellationToken)
     {
         bool employeeExceededMaxContribution = false;
@@ -24,21 +24,16 @@ internal static class EmployeeProcessorHelper
         CalendarResponseDto fiscalDates = await calendarService.GetYearStartAndEndAccountingDatesAsync(priorYear, cancellationToken);
         var employeeFinancialsList = await dbContextFactory.UseReadOnlyContext(async ctx =>
         {
-            var t = await ctx.PayProfits
-                .Join(ctx.PayProfits,
-                    ppYE => ppYE.DemographicId,
-                    ppNow => ppNow.DemographicId,
-                    (ppYE, ppNow) => new { ppYE, ppNow })
-                .Where(x => x.ppYE.ProfitYear == profitYear && x.ppNow.ProfitYear == profitYear + 1).ToListAsync();
             var employees = ctx.PayProfits
                 .Join(ctx.PayProfits,
                     ppYE => ppYE.DemographicId,
                     ppNow => ppNow.DemographicId,
                     (ppYE, ppNow) => new { ppYE, ppNow })
                 .Where(x => x.ppYE.ProfitYear == profitYear && x.ppNow.ProfitYear == profitYear + 1)
+                .Join(FrozenService.GetDemographicSnapshot(ctx, profitYear), pp => pp.ppNow.DemographicId, d => d.Id, (pp, frozenDemographics) => new { ppYE = pp.ppYE, ppNow = pp.ppNow, frozenDemographics })
                 .Select(x => new
                 {
-                    x.ppYE.Demographic!.BadgeNumber, // SHOULD BE FROM Frozen
+                    x.frozenDemographics.BadgeNumber,
                     x.ppYE.Demographic.Ssn,
                     Name = x.ppYE.Demographic.ContactInfo!.FullName,
                     EnrolledId = x.ppYE.EnrollmentId,
@@ -86,8 +81,8 @@ internal static class EmployeeProcessorHelper
         List<MemberFinancials> members = new();
         foreach (EmployeeFinancials empl in employeeFinancialsList)
         {
-            if (empl.EnrolledId != /*0*/ Enrollment.Constants.NotEnrolled || empl.YearsInPlan != 0 || empl.EmployeeTypeId == /*1*/ EmployeeType.Constants.NewLastYear || empl.HasTransactionAmounts() ||
-                empl.ZeroContributionReasonId != /*0*/ ZeroContributionReason.Constants.Normal )
+            if (empl.EnrolledId != /*0*/ Enrollment.Constants.NotEnrolled || empl.YearsInPlan != 0 || empl.EmployeeTypeId == /*1*/ EmployeeType.Constants.NewLastYear ||
+                empl.HasTransactionAmounts() || empl.ZeroContributionReasonId != /*0*/ ZeroContributionReason.Constants.Normal)
             {
                 var profitDetailTotals = new ProfitDetailTotals(empl.DistributionsTotal ?? 0, empl.ForfeitsTotal ?? 0,
                     empl.AllocationsTotal ?? 0, empl.PaidAllocationsTotal ?? 0, empl.MilitaryTotal ?? 0, empl.ClassActionFundTotal ?? 0);

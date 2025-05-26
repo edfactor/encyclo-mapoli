@@ -35,8 +35,9 @@ internal sealed class ProfitShareUpdateReport
 
     public async Task ProfitSharingUpdatePaginated(ProfitShareUpdateRequest profitShareUpdateRequest)
     {
-        TotalService totalService = new TotalService(_dbFactory, _calendarService, new EmbeddedSqlService(), new DemographicReaderService(new FrozenService(_dbFactory), new HttpContextAccessor()));
-        ProfitShareUpdateService psu = new(_dbFactory, totalService, _calendarService);
+        FrozenService frozenService = new FrozenService(_dbFactory);
+        TotalService totalService = new TotalService(_dbFactory, _calendarService, new EmbeddedSqlService(), new DemographicReaderService(frozenService, new HttpContextAccessor()));
+        ProfitShareUpdateService psu = new(_dbFactory, totalService, _calendarService, frozenService);
         _profitYear = profitShareUpdateRequest.ProfitYear;
 
         (List<MemberFinancials> members, AdjustmentsSummaryDto adjustmentsApplied, ProfitShareUpdateTotals totalsDto, bool _) =
@@ -235,7 +236,7 @@ internal sealed class ProfitShareUpdateReport
         rerunTotals.RERUN_POINTS = wsClientProfitShareUpdateTotals.MaxPointsTotal;
         rerunTotals.RERUN_MAX = maxAllowedContribution;
 
-        ReportLines.Add("\n\n\n\n\n\n\n\n\n");
+        ReportLines.Add("\n\n\n\n\n\n\n\n");
         WRITE(rerunTotals);
     }
 

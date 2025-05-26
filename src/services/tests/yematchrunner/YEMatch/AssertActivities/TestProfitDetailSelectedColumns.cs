@@ -2,13 +2,8 @@ using Oracle.ManagedDataAccess.Client;
 
 namespace YEMatch;
 
-public class TestProfitDetailSelected : SqlTester
+public class TestProfitDetailSelectedColumns : BaseSqlActivity
 {
-    public override string Name()
-    {
-        return "Test-ProfitDetail-Selected-Columns";
-    }
-
     public override async Task<Outcome> Execute()
     {
         OracleConnection connection = new(SmartConnString);

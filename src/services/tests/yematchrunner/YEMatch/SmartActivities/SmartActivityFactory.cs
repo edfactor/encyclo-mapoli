@@ -18,8 +18,6 @@ public static class SmartActivityFactory
 {
     private static readonly short _profitYear = 2024;
 
-    // This task takes the READY database and imports it directly to SMART.  Handy for isolating smart activities.
-    public static IActivity? ReadyToSmartInit;
     public static ApiClient? Client;
 
     public static List<IActivity> CreateActivities(string dataDirectory)
@@ -27,8 +25,6 @@ public static class SmartActivityFactory
         HttpClient httpClient = new() { Timeout = TimeSpan.FromHours(2) };
         TestToken.CreateAndAssignTokenForClient(httpClient, "Finance-Manager");
         Client = new ApiClient(httpClient);
-
-        ReadyToSmartInit = new SmartActivity(Ready_to_Smart_Initialize_Database, Client, "R2S", "Initialize Database with READY data");
 
         return
         [
@@ -76,19 +72,6 @@ public static class SmartActivityFactory
         // Consider using CLI tool for reset the smart schema to stock 
 
         int res = ScriptRunner.Run(false, "import-bh"); // Good enough and fast
-        if (res != 0)
-        {
-            return new Outcome(aname, name, "", OutcomeStatus.Error, "Problem setting up database\n", null, true);
-        }
-
-        return new Outcome(aname, name, "", OutcomeStatus.Ok, "Database setup complete.\n", null, true);
-    }
-
-    private static async Task<Outcome> Ready_to_Smart_Initialize_Database(ApiClient apiClient, string aname, string name)
-    {
-        // Consider using CLI tool for reset the smart schema to stock 
-
-        int res = ScriptRunner.Run(false, "import-bh-from-ready"); // Good enough and fast
         if (res != 0)
         {
             return new Outcome(aname, name, "", OutcomeStatus.Error, "Problem setting up database\n", null, true);
@@ -261,7 +244,7 @@ public static class SmartActivityFactory
         // }'
         HttpClient httpClient = new() { Timeout = TimeSpan.FromHours(2) };
         TestToken.CreateAndAssignTokenForClient(httpClient, "IT-Operations");
-        HttpRequestMessage request = new(HttpMethod.Post, "http://localhost:5298/api/itoperations/freeze")
+        HttpRequestMessage request = new(HttpMethod.Post, apiClient.BaseUrl + "api/itoperations/freeze")
         {
             Content = new StringContent("{ \"ProfitYear\" : " + _profitYear + ", \"asOfDateTime\": \"2025-01-09T00:00:00-04:00\"}"
                 , Encoding.UTF8, "application/json")
@@ -316,11 +299,11 @@ public static class SmartActivityFactory
             }
 
             Pay426NCriteria criteria = kvp.Value;
-            var postBody = JsonSerializer.Serialize(criteria);
+            string postBody = JsonSerializer.Serialize(criteria);
 
             HttpClient httpClient = new() { Timeout = TimeSpan.FromHours(2) };
             TestToken.CreateAndAssignTokenForClient(httpClient, "IT-Operations");
-            HttpRequestMessage request = new(HttpMethod.Post, "http://localhost:5298/api/yearend/yearend-profit-sharing-report")
+            HttpRequestMessage request = new(HttpMethod.Post, apiClient.BaseUrl + "api/yearend/yearend-profit-sharing-report")
             {
                 Content = new StringContent(postBody, Encoding.UTF8, "application/json")
             };
@@ -347,7 +330,7 @@ public static class SmartActivityFactory
 
         HttpClient httpClient = new() { Timeout = TimeSpan.FromHours(2) };
         TestToken.CreateAndAssignTokenForClient(httpClient, "Finance-Manager");
-        HttpRequestMessage request = new(HttpMethod.Post, "http://localhost:5298/api/yearend/final")
+        HttpRequestMessage request = new(HttpMethod.Post, apiClient.BaseUrl + "api/yearend/final")
         {
             Content = new StringContent("{ \"ProfitYear\" : " + _profitYear + "}", Encoding.UTF8, "application/json")
         };

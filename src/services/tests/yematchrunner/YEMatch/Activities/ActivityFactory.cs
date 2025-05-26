@@ -9,18 +9,17 @@ public sealed class ActivityFactory
     //  private static readonly HashSet<string> activitiesWithUpdates = ["A6", "A7", "A12", "A13A", "A13B", "A18", "A21", "A22", "A23", "A24"]
 
     private static ActivityFactory? _instance;
+    private readonly List<IActivity> _parallelActivities = [];
     private readonly List<IActivity> _readyActivities;
     private readonly List<IActivity> _smartActivities;
     private readonly List<IActivity> _testActivities;
-    private readonly List<IActivity> _parallelActivities =[];
 
     private ActivityFactory()
     {
         // used to get desired BaseDataDirectory for writing log files
         IConfigurationRoot config = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json", true, true)
-            .Build();
+            .AddJsonFile("appsettings.json", true, true).Build();
 
         string baseDir = config["BaseDataDirectory"] ?? Path.Combine("/tmp", "ye");
         Directory.CreateDirectory(baseDir);
@@ -50,10 +49,9 @@ public sealed class ActivityFactory
                     $"READY and SMART activities are different at index {i}  s={_smartActivities[i].Name()} r={_readyActivities[i].Name()}");
             }
 
-            _parallelActivities.Add(new ParallelActivity("P"+_readyActivities[i].Name().Substring(1),
+            _parallelActivities.Add(new ParallelActivity("P" + _readyActivities[i].Name().Substring(1),
                 _readyActivities[i], _smartActivities[i]));
         }
-
     }
 
     private static ActivityFactory inst => _instance ??

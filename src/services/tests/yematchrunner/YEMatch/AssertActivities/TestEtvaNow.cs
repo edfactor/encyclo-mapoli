@@ -2,13 +2,8 @@ using Oracle.ManagedDataAccess.Client;
 
 namespace YEMatch;
 
-public class TestEtvaNow : SqlTester
+public class TestEtvaNow : BaseSqlActivity
 {
-    public override string Name()
-    {
-        return "Test-Etva-Now";
-    }
-
     public override async Task<Outcome> Execute()
     {
         OracleConnection connection = new(ReadyConnString);
@@ -22,17 +17,17 @@ public class TestEtvaNow : SqlTester
                         FROM
                         payprofit
                         """;
-        string queryB = $"""
-                                 SELECT
-                                     badge_number,
-                                     etva
-                                 FROM
-                                          {smartSchema}.pay_profit pp
-                                     JOIN {smartSchema}.demographic d ON d.id = pp.demographic_id
-                                 WHERE
-                                     pp.profit_year = 2025
-                         """;
 
+        string queryB = $"""
+                         SELECT
+                         badge_number,
+                         etva
+                         FROM
+                              {smartSchema}.pay_profit pp
+                         JOIN {smartSchema}.demographic d ON d.id = pp.demographic_id
+                         WHERE
+                         pp.profit_year = 2025
+                         """;
         OracleCommand command = new(QueryDiff(queryA, queryB), connection);
         OracleDataReader? reader = await command.ExecuteReaderAsync();
 

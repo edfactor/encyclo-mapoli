@@ -1,7 +1,7 @@
 ﻿namespace YEMatch;
 
 /*
- * This is a generic task in yerunner, not just a ye activity. 
+ * This is a generic task in yerunner, not just a ye activity.
  */
 public interface IActivity
 {

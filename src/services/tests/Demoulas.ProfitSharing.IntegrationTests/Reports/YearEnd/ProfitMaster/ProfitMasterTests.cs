@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics;
 using Demoulas.Common.Contracts.Interfaces;
-using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Services;
+using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Services.ItOperations;
 using Demoulas.ProfitSharing.Services.ProfitMaster;
 using Demoulas.ProfitSharing.Services.ProfitShareEdit;
 using FluentAssertions;
@@ -35,9 +35,10 @@ public class ProfitMasterTests : PristineBaseTest
         // Arrange
         short profitYear = 2024;
         IAppUser iAppUser = new Mock<IAppUser>().Object;
-        ProfitShareUpdateService psus = new ProfitShareUpdateService(DbFactory, TotalService, CalendarService);
-        ProfitShareEditService pses = new ProfitShareEditService(psus, CalendarService);
-        ProfitMasterService pms = new ProfitMasterService(pses, DbFactory, iAppUser);
+        IFrozenService frozenService = new FrozenService(DbFactory);
+        ProfitShareUpdateService psus = new (DbFactory, TotalService, CalendarService, frozenService);
+        ProfitShareEditService pses = new (psus, CalendarService);
+        ProfitMasterService pms = new (pses, DbFactory, iAppUser);
 
         Stopwatch sw = Stopwatch.StartNew();
         try
@@ -96,7 +97,8 @@ public class ProfitMasterTests : PristineBaseTest
         // Arrange
         short profitYear = 2024;
         IAppUser iAppUser = new Mock<IAppUser>().Object;
-        ProfitShareUpdateService psus = new ProfitShareUpdateService(DbFactory, TotalService, CalendarService);
+        IFrozenService frozenService = new FrozenService(DbFactory);
+        ProfitShareUpdateService psus = new ProfitShareUpdateService(DbFactory, TotalService, CalendarService, frozenService);
         ProfitShareEditService pses = new ProfitShareEditService(psus, CalendarService);
         ProfitMasterService pms = new ProfitMasterService(pses, DbFactory, iAppUser);
 

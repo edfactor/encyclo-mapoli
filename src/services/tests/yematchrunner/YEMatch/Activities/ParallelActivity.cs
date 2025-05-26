@@ -1,10 +1,11 @@
 namespace YEMatch;
 
 
+// Combines two activities into one.   The activities are run in parallel.  Typically this is so READY and SMART can run activties at the saem time.
 public sealed class ParallelActivity : IActivity
 {
-    private readonly string _name;
     private readonly IActivity _first;
+    private readonly string _name;
     private readonly IActivity _second;
 
     public ParallelActivity(string name, IActivity first, IActivity second)
@@ -14,17 +15,20 @@ public sealed class ParallelActivity : IActivity
         _second = second;
     }
 
-    public string Name() => _name;
+    public string Name()
+    {
+        return _name;
+    }
 
     public async Task<Outcome> Execute()
     {
-        var firstTask = _first.Execute();
-        var secondTask = _second.Execute();
+        Task<Outcome> firstTask = _first.Execute();
+        Task<Outcome> secondTask = _second.Execute();
 
         await Task.WhenAll(firstTask, secondTask);
 
-        var firstOutcome = await firstTask;
-        var secondOutcome = await secondTask;
+        Outcome firstOutcome = await firstTask;
+        Outcome secondOutcome = await secondTask;
 
         return firstOutcome.Merge(secondOutcome);
     }

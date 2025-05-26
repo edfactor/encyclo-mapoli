@@ -4,6 +4,7 @@ using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.ItOperations;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Oracle.ManagedDataAccess.Client;
@@ -17,7 +18,7 @@ public record YearEndChange
     public required decimal EarnPoints { get; init; }
     public required DateOnly? PsCertificateIssuedDate { get; init; }
 
-    public bool IsChanged(PayProfit employee)
+    public bool IsChanged(PayProfitDto employee)
     {
         return employee.EmployeeTypeId != IsNew
                || employee.ZeroContributionReasonId != ZeroCont
@@ -25,6 +26,21 @@ public record YearEndChange
                || employee.PsCertificateIssuedDate != PsCertificateIssuedDate;
     }
 }
+
+public sealed class PayProfitDto
+{
+    public required int ProfitYear { get; init; }
+    public required decimal CurrentHoursYear { get; init; }
+    public required decimal HoursExecutive { get; init; }
+    public Demographic Demographic { get; init; } = default!;
+    public required int EmployeeTypeId { get; set; }
+    public required byte? ZeroContributionReasonId { get; set; }
+    public required decimal? PointsEarned { get; set; }
+    public required DateOnly? PsCertificateIssuedDate { get; set; }
+    public required decimal IncomeExecutive { get; set; }
+    public required decimal CurrentIncomeYear { get; set; }
+}
+
 
 public sealed class YearEndService : IYearEndService
 {
@@ -55,29 +71,45 @@ public sealed class YearEndService : IYearEndService
     */
     public async Task RunFinalYearEndUpdates(short profitYear, CancellationToken ct)
     {
-        // Will Upgrade to using Frozen Demographics shortly.
-
         CalendarResponseDto calendarInfo = await _calendar.GetYearStartAndEndAccountingDatesAsync(profitYear, ct);
         await _profitSharingDataContextFactory.UseWritableContext(async ctx =>
         {
             DateOnly fiscalEndDate /*Fiscal End Date*/ = calendarInfo.FiscalEndDate;
             DateOnly vestingOver18 = fiscalEndDate.AddYears(-ReferenceData.MinimumAgeForVesting());
             DateOnly almostRetired64 = fiscalEndDate.AddYears(-ReferenceData.RetirementAge() - 1);
-
-            List<PayProfit> employees = await ctx.PayProfits
-                .Include(pp => pp.Demographic)
-                .Where(pp => pp.ProfitYear == profitYear
-                             && (
-                                 pp.Demographic!.DateOfBirth <= vestingOver18 && (pp.CurrentHoursYear + pp.HoursExecutive) >= 1000
-                                 || pp.Demographic!.DateOfBirth < almostRetired64
-                             )
-                             && pp.Demographic.HireDate < fiscalEndDate
-                             &&
-                             !(
-                                 pp.Demographic.DateOfBirth <= almostRetired64 &&
-                                 pp.CurrentHoursYear + pp.HoursExecutive < 1000
-                             )
+            
+            var snapshot = FrozenService.GetDemographicSnapshot(ctx, profitYear);
+            List<PayProfitDto> employees = await ctx.PayProfits
+                .Join(snapshot,
+                    pp => pp.DemographicId,
+                    d => d.Id,
+                    (pp, d) => new { pp, d })
+                .AsNoTracking()
+                .Where(x =>
+                    x.pp.ProfitYear == profitYear &&
+                    (
+                        x.d.DateOfBirth <= vestingOver18 && (x.pp.CurrentHoursYear + x.pp.HoursExecutive) >= 1000
+                        || x.d.DateOfBirth < almostRetired64
+                    ) &&
+                    x.d.HireDate < fiscalEndDate &&
+                    !(
+                        x.d.DateOfBirth <= almostRetired64 &&
+                        (x.pp.CurrentHoursYear + x.pp.HoursExecutive) < 1000
+                    )
                 )
+                .Select(x => new PayProfitDto
+                {
+                    ProfitYear = x.pp.ProfitYear,
+                    CurrentHoursYear = x.pp.CurrentHoursYear,
+                    HoursExecutive = x.pp.HoursExecutive,
+                    Demographic = x.d,
+                    EmployeeTypeId = x.pp.EmployeeTypeId,
+                    ZeroContributionReasonId = x.pp.ZeroContributionReasonId,
+                    PointsEarned = x.pp.PointsEarned,
+                    PsCertificateIssuedDate = x.pp.PsCertificateIssuedDate,
+                    IncomeExecutive = x.pp.IncomeExecutive,
+                    CurrentIncomeYear = x.pp.CurrentIncomeYear,
+                })
                 .ToListAsync(ct);
 
             HashSet<int> employeeSsnSet = employees.Select(pp => pp.Demographic!.Ssn).ToHashSet();
@@ -97,7 +129,7 @@ public sealed class YearEndService : IYearEndService
                     g => g.Min(e => e.ProfitYear), ct);
 
             Dictionary<int, YearEndChange> changes = [];
-            foreach (PayProfit employee in employees)
+            foreach (PayProfitDto employee in employees)
             {
                 int ssn = employee.Demographic!.Ssn;
                 short age = employee.Demographic!.DateOfBirth.Age(fiscalEndDate.ToDateTime(TimeOnly.MinValue));
@@ -107,7 +139,7 @@ public sealed class YearEndService : IYearEndService
                 YearEndChange change = ComputeChange(profitYear, firstYearContribution, age, lastYearBalance, employee, fiscalEndDate);
                 if (change.IsChanged(employee))
                 {
-                    changes.Add(employee.DemographicId, change);
+                    changes.Add(employee.Demographic.Id, change);
                 }
             }
 
@@ -125,7 +157,7 @@ public sealed class YearEndService : IYearEndService
 
     // Calculates the Year End Change for a single employee.
     //  Very closely follows PAY456.cbl, 405-calculate-points
-    private YearEndChange ComputeChange(short profitYear, short? firstContributionYear, short age, decimal currentBalance, PayProfit employee, DateOnly fiscalEnd)
+    private YearEndChange ComputeChange(short profitYear, short? firstContributionYear, short age, decimal currentBalance, PayProfitDto employee, DateOnly fiscalEnd)
     {
         int newEmpl = 0;
         decimal points = 0;
@@ -200,7 +232,7 @@ public sealed class YearEndService : IYearEndService
             zeroContributionReason = /*7*/ ZeroContributionReason.Constants.SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay;
         }
 
-        if (employee.Demographic!.EmploymentStatusId == EmploymentStatus.Constants.Terminated)
+        if (employee.Demographic!.EmploymentStatusId == EmploymentStatus.Constants.Terminated && employee.Demographic.TerminationDate < fiscalEnd )
         {
             newEmpl = EmployeeType.Constants.NotNewLastYear;
         }
