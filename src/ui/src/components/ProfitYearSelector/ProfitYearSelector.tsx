@@ -1,21 +1,11 @@
 import { FormControl, MenuItem, Select, SelectChangeEvent } from "@mui/material";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetHistoricalFrozenStateResponseQuery } from "reduxstore/api/ItOperationsApi";
+import { useLazyGetAccountingYearQuery } from "reduxstore/api/LookupsApi";
 import { RootState } from "reduxstore/store";
-import { mmDDYYFormat } from "../../utils/dateUtils";
 import InputLabel from "@mui/material/InputLabel";
-
-/**
- * TODO/Future improvement to be made:
- * This current implementation has some assumptions about which years to show and
- * how to display dates for different years (current year shows today's date, past years show
- * frozen data if available). This is likely fine for now, but for better long-term maintainability, consider:
- *
- * 1. Making the available years API-driven instead of calculating relative to current year
- * 2. API also provides the frozen date for each year for display in the selector.
- * 3. ProfitYearSelector component then just receives the list of years and the frozen date for each year and sets in redux.
- */
+import { mmDDYYFormat } from "../../utils/dateUtils";
 
 export interface ProfitYearSelectorProps {
   selectedProfitYear: number;
@@ -24,22 +14,22 @@ export interface ProfitYearSelectorProps {
   disabled?: boolean;
   disabledWhileLoading?: boolean;
   defaultValue?: string;
-  displayYears?: number[];
 }
 
 const ProfitYearSelector = ({
-  selectedProfitYear,
-  handleChange,
-  showDates = true,
-  disabled = false,
-  disabledWhileLoading = true,
-  defaultValue
-}: ProfitYearSelectorProps) => {
+                              selectedProfitYear,
+                              handleChange,
+                              showDates = true,
+                              disabled = false,
+                              disabledWhileLoading = true,
+                              defaultValue
+                            }: ProfitYearSelectorProps) => {
   const frozenStateCollectionData = useSelector((state: RootState) => state.frozen.frozenStateCollectionData);
   const token = useSelector((state: RootState) => state.security.token);
-  const [triggerFrozenStateSearch, { isLoading }] = useLazyGetHistoricalFrozenStateResponseQuery();
+  const [triggerFrozenStateSearch, { isLoading: isFrozenLoading }] = useLazyGetHistoricalFrozenStateResponseQuery();
   const thisYear = new Date().getFullYear();
 
+  // Get frozen profit year if available
   useEffect(() => {
     if (showDates && token) {
       triggerFrozenStateSearch({
@@ -54,64 +44,69 @@ const ProfitYearSelector = ({
   const activeFrozenState = frozenStateCollectionData?.results?.find((state) => state.isActive);
   const hasFrozenData = frozenStateCollectionData?.results && frozenStateCollectionData.results.length > 0;
 
+  // Build years to display
   const yearsToDisplay: number[] = [];
   if (hasFrozenData && activeFrozenState?.profitYear) {
     yearsToDisplay.push(activeFrozenState.profitYear);
   }
-
   if (!yearsToDisplay.includes(thisYear)) {
     yearsToDisplay.push(thisYear);
   }
-
-  const formattedAsOfDate = activeFrozenState?.asOfDateTime ? ` - ${mmDDYYFormat(activeFrozenState.asOfDateTime)}` : "";
-
-  const todayFormattedString = ` - ${mmDDYYFormat(new Date())}`;
-
   if (yearsToDisplay.length === 0) {
     yearsToDisplay.push(thisYear);
   }
 
+  // Fetch accounting year data for each year
+  const [accountingYearData, setAccountingYearData] = useState<Record<number, { startDate: string; endDate: string }>>({});
+  const [fetchAccountingYear] = useLazyGetAccountingYearQuery();
+
+  useEffect(() => {
+    yearsToDisplay.forEach((year) => {
+      if (!accountingYearData[year]) {
+        fetchAccountingYear({ profitYear: year }).unwrap().then((data) => {
+          setAccountingYearData((prev) => ({
+            ...prev,
+            [year]: {
+              startDate: data.fiscalBeginDate,
+              endDate: data.fiscalEndDate
+            }
+          }));
+        });
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [yearsToDisplay.join(","), fetchAccountingYear]);
+
   const initialSelectionMadeRef = useRef(false);
 
-// Add useEffect to auto-select the only value if there's just one option
   useEffect(() => {
-    // Only run auto-selection once, when API has completed and no defaultValue is provided
-    if (!isLoading &&
+    if (
+      !isFrozenLoading &&
       yearsToDisplay.length === 1 &&
       selectedProfitYear !== yearsToDisplay[0] &&
       !defaultValue &&
-      !initialSelectionMadeRef.current) {
-
-      // Create a synthetic event to mimic the Select's change event
+      !initialSelectionMadeRef.current
+    ) {
       const syntheticEvent = {
         target: { value: yearsToDisplay[0].toString() }
       } as SelectChangeEvent;
-
-      // Mark that we've done the initial selection
       initialSelectionMadeRef.current = true;
       handleChange(syntheticEvent);
     }
-  }, [yearsToDisplay, selectedProfitYear, handleChange, isLoading, defaultValue]);
+  }, [yearsToDisplay, selectedProfitYear, handleChange, isFrozenLoading, defaultValue]);
 
-// Reset the ref when the component unmounts
   useEffect(() => {
     return () => {
       initialSelectionMadeRef.current = false;
     };
   }, []);
 
-
   return (
     <div className="flex items-center gap-2 h-10 min-w-[174px]">
-      <FormControl
-        fullWidth
-        size="small">
-        <InputLabel
-          id="profit-year-label"
-          sx={{ color: "black" }}>
+      <FormControl fullWidth size="small">
+        <InputLabel id="profit-year-label" sx={{ color: "black" }}>
           Profit Year
         </InputLabel>
-
         <Select
           labelId="profit-year-selector"
           id="profit-year-selector"
@@ -120,20 +115,24 @@ const ProfitYearSelector = ({
           label="Profit Year"
           size="small"
           fullWidth
-          disabled={disabled || (disabledWhileLoading && isLoading)}
-          onChange={handleChange}>
-          {yearsToDisplay.map((year) => (
-            <MenuItem
-              key={year}
-              value={year}>
-              {year}
-              {showDates && (
-                <>
-                  {year === thisYear && <span className="text-gray-600 ml-2">{todayFormattedString} (Live Data)</span>}
-                  {year !== thisYear && activeFrozenState?.profitYear === year && (
-                    <span className="text-gray-600 ml-2">{formattedAsOfDate} (Frozen)</span>
-                  )}
-                </>
+          disabled={disabled || (disabledWhileLoading && isFrozenLoading)}
+          onChange={handleChange}
+          sx={{ fontSize: '0.9rem' }} // Shrinks font in the select input
+          MenuProps={{
+            PaperProps: {
+              sx: {
+                fontSize: '0.9rem', // Shrinks font in the dropdown menu
+              },
+            },
+          }}
+        >
+        {yearsToDisplay.map((year) => (
+            <MenuItem key={year} value={year}>
+              {year} -
+              {showDates && accountingYearData[year] && (
+                <span className="text-gray-500 ml-1">
+                  {mmDDYYFormat(accountingYearData[year].startDate)} - {mmDDYYFormat(accountingYearData[year].endDate)}
+                </span>
               )}
             </MenuItem>
           ))}

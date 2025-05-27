@@ -168,7 +168,7 @@ const PSDrawer: FC<PSDrawerProps> = ({navigationData}) => {
         }
       }
     }
-  }, [currentPath, activeSubmenu]);
+  }, [currentPath, activeSubmenu, navigationData, isRouteActive]);
 
   return (
     <>
@@ -275,8 +275,9 @@ const PSDrawer: FC<PSDrawerProps> = ({navigationData}) => {
               {activeSubmenu === MENU_LABELS.DECEMBER_ACTIVITIES && (
                 <div style={{ padding: '24px' }}>
                   {showDecemberBanner && (
-                    <Alert 
+                    <Alert
                       severity="info"
+                      sx={{ fontSize: '0.8rem' }} // Shrink font size
                       action={
                         <IconButton
                           aria-label="close"
