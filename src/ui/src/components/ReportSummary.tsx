@@ -12,7 +12,7 @@ export function ReportSummary<T>({ report }: ReportSummaryProps<T>) {
     <>
       <div style={{ padding: "0 24px 0 24px" }}>
         <Typography variant="h2" sx={{ color: "#0258A5" }}>
-          {`${report.reportName} (${report.response.total || 0} ${
+          {`${report.reportName || ""} (${report.response.total || 0} ${
             report.response.total === 1 ? "Record" : "Records"
           })`}
         </Typography>

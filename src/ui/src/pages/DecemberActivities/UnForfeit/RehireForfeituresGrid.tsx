@@ -29,7 +29,6 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
     isSortDescending: false
   });
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
-  const profitYear = useDecemberFlowProfitYear();
   const fiscalCalendarYear = useFiscalCalendarYear();
   const { rehireForfeitures, rehireForfeituresQueryParams } = useSelector((state: RootState) => state.yearsEnd);
 
