@@ -1,4 +1,4 @@
-import { ChevronLeft, ExpandLess, ExpandMore } from "@mui/icons-material";
+import { ChevronLeft, ExpandLess, ExpandMore, Close } from "@mui/icons-material";
 import {
   Box,
   Chip,
@@ -12,7 +12,8 @@ import {
   ListItemText,
   SelectChangeEvent,
   SvgIcon,
-  Typography
+  Typography,
+  Alert
 } from "@mui/material";
 import React, { useState, useEffect, useRef, FC } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -61,6 +62,8 @@ const PSDrawer: FC<PSDrawerProps> = ({navigationData}) => {
   );
   const [expandedLevels, setExpandedLevels] = useState<{ [key: string]: boolean }>({});
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
+  const [showDecemberBanner, setShowDecemberBanner] = useState(true);
+  const [showFiscalCloseBanner, setShowFiscalCloseBanner] = useState(true);
   const currentPath = location.pathname; // Directly use location.pathname instead of state
   const pathRef = useRef(currentPath); // Use ref to track previous path
   const dispatch = useDispatch();
@@ -271,6 +274,23 @@ const PSDrawer: FC<PSDrawerProps> = ({navigationData}) => {
               </ListItemButton>
               {activeSubmenu === MENU_LABELS.DECEMBER_ACTIVITIES && (
                 <div style={{ padding: '24px' }}>
+                  {showDecemberBanner && (
+                    <Alert 
+                      severity="info"
+                      action={
+                        <IconButton
+                          aria-label="close"
+                          color="inherit"
+                          size="small"
+                          onClick={() => setShowDecemberBanner(false)}
+                        >
+                          <Close fontSize="inherit" />
+                        </IconButton>
+                      }
+                    >
+                      Sets accounting calendar year
+                    </Alert>
+                  )}
                   <ProfitYearSelector
                     selectedProfitYear={selectedProfitYearForDecemberActivities}
                     handleChange={handleDecemberProfitYearChange}
@@ -280,12 +300,31 @@ const PSDrawer: FC<PSDrawerProps> = ({navigationData}) => {
               )}
 
               {activeSubmenu === MENU_LABELS.FISCAL_CLOSE && (
-                <div style={{ padding: '24px' }}>
-                  <ProfitYearSelector
-                    selectedProfitYear={selectedProfitYearForFiscalClose}
-                    handleChange={handleFiscalCloseProfitYearChange}
-                    defaultValue={fiscalFlowProfitYear?.toString()}
-                  />
+                <div>
+                  {showFiscalCloseBanner && (
+                    <Alert 
+                      severity="info" 
+                      action={
+                        <IconButton
+                          aria-label="close"
+                          color="inherit"
+                          size="small"
+                          onClick={() => setShowFiscalCloseBanner(false)}
+                        >
+                          <Close fontSize="inherit" />
+                        </IconButton>
+                      }
+                    >
+                      Sets accounting calendar year
+                    </Alert>
+                  )}
+                  <div style={{ padding: '24px' }}>
+                    <ProfitYearSelector
+                      selectedProfitYear={selectedProfitYearForFiscalClose}
+                      handleChange={handleFiscalCloseProfitYearChange}
+                      defaultValue={fiscalFlowProfitYear?.toString()}
+                    />
+                  </div>
                 </div>
               )}
               <List>

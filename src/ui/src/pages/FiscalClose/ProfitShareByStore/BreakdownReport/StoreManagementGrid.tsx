@@ -43,6 +43,8 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store }) => {
       profitYear: queryParams?.profitYear || profitYear,
       storeNumber: store,
       storeManagement: true,
+      badgeNumber: queryParams?.badgeNumber,
+      employeeName: queryParams?.employeeName,
       pagination: {
         skip: pageNumber * pageSize,
         take: pageSize,
