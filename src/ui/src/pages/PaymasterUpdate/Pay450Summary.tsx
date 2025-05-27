@@ -1,4 +1,4 @@
-import { Divider } from "@mui/material";
+import { Box, Divider, Stack } from "@mui/material";
 import Grid2 from '@mui/material/Grid2';
 import { Page, DSMAccordion, numberToCurrency, SmartModal } from "smart-ui-library";
 import { useState, useEffect } from "react";
@@ -11,6 +11,7 @@ import { RootState } from "reduxstore/store";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useLazyGetUpdateSummaryQuery, useUpdateEnrollmentMutation } from "reduxstore/api/YearsEndApi";
 import { Button } from "@mui/material";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 
 interface ProfitYearSearch {
     profitYear: number;
@@ -40,14 +41,17 @@ const Pay450Summary = () => {
 
     const renderActionNode = () => {
         if (!updateSummary) return null;
-        
+
         return (
-            <Button
-                onClick={() => setIsModalOpen(true)}
-                variant="outlined"
-                className="h-10 whitespace-nowrap min-w-fit">
-                Update
-            </Button>
+            <Stack direction="row" spacing={2}>
+                <Button
+                    onClick={() => setIsModalOpen(true)}
+                    variant="outlined"
+                    className="h-10 whitespace-nowrap min-w-fit">
+                    Update
+                </Button>
+                <StatusDropdownActionNode />
+            </Stack>
         );
     };
 

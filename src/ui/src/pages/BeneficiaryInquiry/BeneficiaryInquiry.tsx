@@ -31,8 +31,6 @@ const BeneficiaryInquiry = () => {
           </DSMAccordion>
         </Grid2>
 
-        {/* {masterInquiryEmployeeDetails && <MasterInquiryEmployeeDetails details={masterInquiryEmployeeDetails} missives={missives}/>} */}
-
         <Grid2 size={{ xs: 12 }} width="100%">
           <BeneficiaryInquiryGrid initialSearchLoaded = {initialSearchLoaded} setInitialSearchLoaded={setInitialSearchLoaded}  />
         </Grid2>

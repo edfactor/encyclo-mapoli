@@ -1,4 +1,4 @@
-import { Typography } from "@mui/material";
+import { Divider, Grid2, Typography } from "@mui/material";
 import { useEffect, useMemo } from "react";
 import { DSMGrid, Page } from "smart-ui-library";
 import { useLazyGetYearEndProfitSharingSummaryReportQuery } from "reduxstore/api/YearsEndApi";
@@ -109,9 +109,9 @@ const ProfitSummary = () => {
 
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const profitYear = useFiscalCloseProfitYear();
-  
+
   useEffect(() => {
-    if ( hasToken) {
+    if (hasToken) {
       trigger({
         useFrozenData: true,
         profitYear: profitYear
@@ -121,9 +121,10 @@ const ProfitSummary = () => {
 
   const renderActionNode = () => {
     return (
-        <StatusDropdownActionNode />
+      <StatusDropdownActionNode />
     );
-};
+  };
+  
 
   const columnDefs = useMemo(() => GetProfitSummaryGridColumns(), []);
 
@@ -131,28 +132,28 @@ const ProfitSummary = () => {
   // If data exists for a row, it replaces the placeholder; otherwise the placeholder is used - ensuring all rows are displayed regardless of whether data exists for them
   const activeAndInactiveRowData = useMemo(() => {
     if (!data?.lineItems) return activeInactivePlaceholders;
-    
+
     const dataMap = new Map(
       data.lineItems
         .filter(item => item.subgroup.toUpperCase() === "ACTIVE AND INACTIVE")
         .map(item => [item.lineItemPrefix, item])
     );
-    
-    return activeInactivePlaceholders.map(placeholder => 
+
+    return activeInactivePlaceholders.map(placeholder =>
       dataMap.get(placeholder.lineItemPrefix) || placeholder
     );
   }, [data]);
 
   const terminatedRowData = useMemo(() => {
     if (!data?.lineItems) return terminatedPlaceholders;
-    
+
     const dataMap = new Map(
       data.lineItems
         .filter(item => item.subgroup.toUpperCase() === "TERMINATED")
         .map(item => [item.lineItemPrefix, item])
     );
-    
-    return terminatedPlaceholders.map(placeholder => 
+
+    return terminatedPlaceholders.map(placeholder =>
       dataMap.get(placeholder.lineItemPrefix) || placeholder
     );
   }, [data]);
@@ -196,44 +197,34 @@ const ProfitSummary = () => {
       }
     ];
   }, [terminatedRowData]);
+  
 
   return (
     <>
-      <div>
-        <Typography
-          variant="h6"
-          sx={{ color: "#0258A5", padding: "12px 24px", fontWeight: "bold" }}>
-          Active and Inactive
-        </Typography>
-        <DSMGrid
-          preferenceKey={CAPTIONS.PAY426_SUMMARY}
-          isLoading={isFetching}
-          handleSortChanged={() => {}}
-          providedOptions={{
-            rowData: activeAndInactiveRowData,
-            pinnedTopRowData: getActiveAndInactiveTotals,
-            columnDefs: columnDefs
-          }}
-        />
-      </div>
+      <Page label="Active and Inactive" actionNode={renderActionNode()}>
+        <Grid2
+          container
+          rowSpacing="24px">
+          <Grid2 width={"100%"}>
+            <Divider />
+          </Grid2>
 
-      <div>
-        <Typography
-          variant="h6"
-          sx={{ color: "#0258A5", padding: "12px 24px", fontWeight: "bold" }}>
-          Terminated
-        </Typography>
-        <DSMGrid
-          preferenceKey={"TERMINATED_SUMMARY"}
-          isLoading={isFetching}
-          handleSortChanged={() => {}}
-          providedOptions={{
-            rowData: terminatedRowData,
-            pinnedTopRowData: getTerminatedTotals,
-            columnDefs: columnDefs
-          }}
-        />
-      </div>
+          <Grid2 width={"100%"}>
+            <DSMGrid
+              preferenceKey={"TERMINATED_SUMMARY"}
+              isLoading={isFetching}
+              handleSortChanged={() => { }}
+              providedOptions={{
+                rowData: terminatedRowData,
+                pinnedTopRowData: getTerminatedTotals,
+                columnDefs: columnDefs
+              }}
+            />
+          </Grid2>
+
+        </Grid2>
+      </Page>
+      
     </>
   );
 };

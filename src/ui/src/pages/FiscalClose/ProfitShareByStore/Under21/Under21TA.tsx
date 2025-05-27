@@ -9,6 +9,7 @@ import { useLazyGetUnder21TotalsQuery, useLazyGetUnder21InactiveQuery } from "re
 import Under21Summary from "./Under21Summary";
 import Under21InactiveGrid from "./Under21InactiveGrid";
 import useFiscalCloseProfitYear from "../../../../hooks/useFiscalCloseProfitYear";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 
 const Under21TA = () => {
   const [fetchUnder21Totals, { isLoading: isTotalsLoading }] = useLazyGetUnder21TotalsQuery();
@@ -28,6 +29,9 @@ const Under21TA = () => {
   const isLoading = isTotalsLoading || isInactiveLoading;
 
   const hasData = !!under21Totals && !!under21Inactive;
+  const renderActionNode = () => {
+    return <StatusDropdownActionNode />;
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -88,7 +92,7 @@ const Under21TA = () => {
   };
 
   return (
-    <Page label={CAPTIONS.QPAY066TA_UNDER21}>
+    <Page label={CAPTIONS.QPAY066TA_UNDER21} actionNode={renderActionNode()}>
       <Grid2
         container
         rowSpacing="24px">
