@@ -592,14 +592,11 @@ export interface TerminationDetail {
   enrollmentCode: number;
 }
 
-export interface TerminationResponse {
+export interface TerminationResponse extends PagedReportResponse<TerminationDetail>{
   totalVested: number;
   totalForfeit: number;
   totalEndingBalance: number;
-  totalBeneficiaryAllocation: number;
-  reportName: string;
-  reportDate: string;
-  response: Paged<TerminationDetail[]>;
+  totalBeneficiaryAllocation: number;  
 }
 
 export interface ProfitShareUpdateRequest {

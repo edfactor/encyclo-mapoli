@@ -9,7 +9,6 @@ import { Typography } from "@mui/material";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 
 import { GetTerminationColumns } from "./TerminationGridColumn";
-import { tryddmmyyyyToDate } from "../../../utils/dateUtils";
 
 interface TerminationGridSearchProps {
   initialSearchLoaded: boolean;
