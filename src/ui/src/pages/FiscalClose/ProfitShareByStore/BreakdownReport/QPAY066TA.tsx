@@ -7,6 +7,7 @@ import QPAY066TABreakdownParameters from "./QPAY066TABreakdownParameters";
 import StoreContent from "./StoreContent";
 import SummariesContent from "./SummariesContent";
 import TotalsContent from "./TotalsContent";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 
 const QPAY066TA = () => {
   const [tabValue, setTabValue] = useState(0);
@@ -16,6 +17,9 @@ const QPAY066TA = () => {
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
+  };
+  const renderActionNode = () => {
+    return <StatusDropdownActionNode />;
   };
 
   const getActiveTab = (): "all" | "stores" | "summaries" | "totals" => {
@@ -59,7 +63,7 @@ const QPAY066TA = () => {
   };
 
   return (
-    <Page label={CAPTIONS.BREAKDOWN_REPORT}>
+    <Page label={CAPTIONS.BREAKDOWN_REPORT} actionNode={renderActionNode()}>
       <Grid2
         container
         rowSpacing="24px">

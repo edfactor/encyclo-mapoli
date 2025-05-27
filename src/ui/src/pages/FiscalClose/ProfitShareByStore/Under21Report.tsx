@@ -9,6 +9,7 @@ import { useLazyGetUnder21TotalsQuery, useLazyGetUnder21BreakdownByStoreQuery } 
 import Under21Summary from "./Under21/Under21Summary";
 import Under21BreakdownGrid from "./Under21/Under21BreakdownGrid";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 
 const Under21Report = () => {
   const [fetchUnder21Totals, { isLoading: isTotalsLoading }] = useLazyGetUnder21TotalsQuery();
@@ -27,6 +28,9 @@ const Under21Report = () => {
   const profitYear = useDecemberFlowProfitYear();
   const isLoading = isTotalsLoading || isBreakdownLoading;
   const hasData = !!under21Totals && !!under21Breakdown;
+  const renderActionNode = () => {
+    return <StatusDropdownActionNode />;
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -87,7 +91,7 @@ const Under21Report = () => {
   };
 
   return (
-    <Page label={CAPTIONS.QPAY066_UNDER21}>
+    <Page label={CAPTIONS.QPAY066_UNDER21} actionNode={renderActionNode()}>
       <Grid2
         container
         rowSpacing="24px">

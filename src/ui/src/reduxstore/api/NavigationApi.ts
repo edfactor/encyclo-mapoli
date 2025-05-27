@@ -45,16 +45,16 @@ export const NavigationApi = createApi({
           // Check token before attempting the query
           const state = getState() as RootState;
           const token = state.security.token;
-          
+          const { data } = await queryFulfilled;
+          console.log("Navigation data successfully fetched");
+          dispatch(setNavigation(data));
           if (!token) {
             console.warn("Navigation API called without a valid token");
             dispatch(setNavigationError("Authentication token missing"));
             return;
           }
           
-          const { data } = await queryFulfilled;
-          console.log("Navigation data successfully fetched");
-          dispatch(setNavigation(data));
+          
         } catch (err) {
           console.error("Failed to fetch navigation:", err);
           // More descriptive error message

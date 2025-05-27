@@ -35,6 +35,7 @@ import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { ICommon } from "smart-ui-library";
 import { NavigationResponseDto } from "reduxstore/types";
+import { setCurrentNavigationId } from "reduxstore/slices/navigationSlice";
 
 // Define the highlight color as a constant
 const HIGHLIGHT_COLOR = "#0258A5";
@@ -119,12 +120,20 @@ const PSDrawer: FC<PSDrawerProps> = ({navigationData}) => {
     setSelectedLevel(null);
   };
 
-  const handlePageClick = (route: string) => {
+  const settingCurrentNavigation = (navigationId?:number) => {
+    if(navigationId){
+      dispatch(setCurrentNavigationId(navigationId))
+    }
+  }
+
+  const handlePageClick = (route: string, navigationId: number | null) => {
+    settingCurrentNavigation(navigationId??undefined);
     navigate(`/${route}`);
     console.log(`Top page Navigating to ${route}`);
   };
 
-  const handleSubPageClick = (subRoute: string) => {
+  const handleSubPageClick = (subRoute: string, navigationId:number| null) => {
+    settingCurrentNavigation(navigationId??undefined);
     navigate(`/${subRoute}`);
     console.log(`Sub page Navigating to ${subRoute}`);
   };
@@ -419,7 +428,7 @@ const PSDrawer: FC<PSDrawerProps> = ({navigationData}) => {
                                               `${HIGHLIGHT_COLOR}25` : (theme) => theme.palette.action.hover,
                                           }
                                         }}
-                                        onClick={() => handleSubPageClick(subPage.subRoute ?? "")}>
+                                        onClick={() => handleSubPageClick(subPage.subRoute ?? "",subPage.navigationId??null)}>
                                         <Box sx={{ display: "flex", alignItems: "center" }}>
                                           <ListItemText
                                             primary={getNewReportName(subPage.subTitle || "")}
@@ -460,7 +469,7 @@ const PSDrawer: FC<PSDrawerProps> = ({navigationData}) => {
                           <>
                             <ListItemButton
                               key={page.topTitle}
-                              onClick={() => handlePageClick(page.topRoute ?? "")}
+                              onClick={() => handlePageClick(page.topRoute ?? "", page.navigationId??null)}
                               sx={{
                                 pl: 2,
                                 display: "flex",
