@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { GetUnder21BreakdownColumnDefs } from './GetUnder21BreakdownColumnDefs';
 import { useNavigate } from 'react-router-dom';
+import ReportSummary from "../../../../components/ReportSummary";
 
 interface Under21BreakdownGridProps {
   isLoading?: boolean;
@@ -52,13 +53,7 @@ const Under21BreakdownGrid: React.FC<Under21BreakdownGridProps> = ({
 
   return (
     <Grid2 container direction="column" width="100%">
-      <Grid2 paddingX="24px">
-        <Typography
-          variant="h6"
-          sx={{ color: "#0258A5", marginBottom: "16px" }}>
-          Under 21 Breakdown
-        </Typography>
-      </Grid2>
+      <ReportSummary report={under21Breakdown} />
       <Grid2 width="100%">
         <DSMGrid
           preferenceKey="UNDER_21_BREAKDOWN_REPORT"
