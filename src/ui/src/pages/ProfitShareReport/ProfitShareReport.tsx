@@ -12,10 +12,11 @@ import { RootState } from "reduxstore/store";
 import { Page, ISortParams, SmartModal } from "smart-ui-library";
 import { CAPTIONS} from "../../constants";
 import ProfitShareReportGrid from "./ProfitShareReportGrid";
+import ReportSummary from "../../components/ReportSummary";
 
 const ProfitShareReport = () => {
   const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(5);
   const [sortParams, setSortParams] = useState<ISortParams>({
     sortBy: "badgeNumber",
     isSortDescending: true
@@ -157,14 +158,12 @@ const ProfitShareReport = () => {
 
         <Grid2 width="100%">
           {!initialDataLoaded ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+            <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
               <CircularProgress />
             </Box>
           ) : (
-            <DSMCollapsedAccordion
-              isCollapsedOnRender={true}
-              expandable={true}
-              title={`${CAPTIONS.PROFIT_SHARE_REPORT}${!isFetching && yearEndProfitSharingReport?.response.total !== undefined ? ` (${yearEndProfitSharingReport.response.total} records)` : ''}`}>
+            <>
+              <ReportSummary report={yearEndProfitSharingReport} />
               <ProfitShareReportGrid
                 data={yearEndProfitSharingReport?.response.results || []}
                 isLoading={isFetching}
@@ -176,7 +175,7 @@ const ProfitShareReport = () => {
                 onPageSizeChange={handlePageSizeChange}
                 onSortChange={handleSortChange}
               />
-            </DSMCollapsedAccordion>
+            </>
           )}
         </Grid2>
       </Grid2>
@@ -191,7 +190,14 @@ const ProfitShareReport = () => {
             color="primary"
             disabled={isFinalizing}
             className="mr-2">
-            {isFinalizing ? <CircularProgress size={24} color="inherit" /> : 'Yes, Commit'}
+            {isFinalizing ? (
+              <CircularProgress
+                size={24}
+                color="inherit"
+              />
+            ) : (
+              "Yes, Commit"
+            )}
           </Button>,
           <Button
             onClick={handleCancel}
@@ -199,8 +205,7 @@ const ProfitShareReport = () => {
             No, Cancel
           </Button>
         ]}
-        title="Are you ready to Commit?"
-      >
+        title="Are you ready to Commit?">
         Committing this change will update and save:
       </SmartModal>
     </Page>
