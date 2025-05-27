@@ -4,7 +4,7 @@ using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.Services.ItOperations;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Oracle.ManagedDataAccess.Client;
@@ -48,16 +48,17 @@ public sealed class YearEndService : IYearEndService
     private readonly IPayProfitUpdateService _payProfitUpdateService;
     private readonly IProfitSharingDataContextFactory _profitSharingDataContextFactory;
     private readonly TotalService _totalService;
+    private readonly IDemographicReaderService _demographicReaderService;
 
     public YearEndService(IProfitSharingDataContextFactory profitSharingDataContextFactory, ICalendarService calendar, IPayProfitUpdateService payProfitUpdateService,
-        TotalService totalService)
+        TotalService totalService, IDemographicReaderService demographicReaderService)
     {
         _profitSharingDataContextFactory = profitSharingDataContextFactory;
         _calendar = calendar;
         _payProfitUpdateService = payProfitUpdateService;
         _totalService = totalService;
+        _demographicReaderService = demographicReaderService;
     }
-
 
     /*
         The RunFinalYearEndUpdates's "ComputeChange" method (see below) very closely follows the logic of https://bitbucket.org/demoulas/hpux/src/master/prg-source/PAY426.cbl
@@ -78,9 +79,9 @@ public sealed class YearEndService : IYearEndService
             DateOnly vestingOver18 = fiscalEndDate.AddYears(-ReferenceData.MinimumAgeForVesting());
             DateOnly almostRetired64 = fiscalEndDate.AddYears(-ReferenceData.RetirementAge() - 1);
             
-            var snapshot = FrozenService.GetDemographicSnapshot(ctx, profitYear);
+            var frozenDemographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, true);
             List<PayProfitDto> employees = await ctx.PayProfits
-                .Join(snapshot,
+                .Join(frozenDemographicQuery,
                     pp => pp.DemographicId,
                     d => d.Id,
                     (pp, d) => new { pp, d })

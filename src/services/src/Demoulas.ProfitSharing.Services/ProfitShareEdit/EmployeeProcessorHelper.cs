@@ -4,6 +4,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services.ItOperations;
 using Microsoft.EntityFrameworkCore;
@@ -13,7 +14,7 @@ namespace Demoulas.ProfitSharing.Services.ProfitShareEdit;
 internal static class EmployeeProcessorHelper
 {
     public static async Task<(List<MemberFinancials>, bool)> ProcessEmployees(IProfitSharingDataContextFactory dbContextFactory, ICalendarService calendarService,
-        TotalService totalService, IFrozenService frozenService, ProfitShareUpdateRequest profitShareUpdateRequest, AdjustmentsSummaryDto adjustmentsSummaryDto,
+        TotalService totalService, IFrozenService frozenService, IDemographicReaderService demographicReaderService, ProfitShareUpdateRequest profitShareUpdateRequest, AdjustmentsSummaryDto adjustmentsSummaryDto,
         CancellationToken cancellationToken)
     {
         bool employeeExceededMaxContribution = false;
@@ -24,13 +25,14 @@ internal static class EmployeeProcessorHelper
         CalendarResponseDto fiscalDates = await calendarService.GetYearStartAndEndAccountingDatesAsync(priorYear, cancellationToken);
         var employeeFinancialsList = await dbContextFactory.UseReadOnlyContext(async ctx =>
         {
+            var frozenDemographicQuery = await demographicReaderService.BuildDemographicQuery(ctx, true);
             var employees = ctx.PayProfits
                 .Join(ctx.PayProfits,
                     ppYE => ppYE.DemographicId,
                     ppNow => ppNow.DemographicId,
                     (ppYE, ppNow) => new { ppYE, ppNow })
                 .Where(x => x.ppYE.ProfitYear == profitYear && x.ppNow.ProfitYear == profitYear + 1)
-                .Join(FrozenService.GetDemographicSnapshot(ctx, profitYear), pp => pp.ppNow.DemographicId, d => d.Id, (pp, frozenDemographics) => new { ppYE = pp.ppYE, ppNow = pp.ppNow, frozenDemographics })
+                .Join(frozenDemographicQuery, pp => pp.ppNow.DemographicId, d => d.Id, (pp, frozenDemographics) => new { ppYE = pp.ppYE, ppNow = pp.ppNow, frozenDemographics })
                 .Select(x => new
                 {
                     x.frozenDemographics.BadgeNumber,

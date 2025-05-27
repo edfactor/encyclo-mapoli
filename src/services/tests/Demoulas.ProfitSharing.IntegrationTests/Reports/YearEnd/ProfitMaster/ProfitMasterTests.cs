@@ -35,10 +35,9 @@ public class ProfitMasterTests : PristineBaseTest
         // Arrange
         short profitYear = 2024;
         IAppUser iAppUser = new Mock<IAppUser>().Object;
-        IFrozenService frozenService = new FrozenService(DbFactory);
-        ProfitShareUpdateService psus = new (DbFactory, TotalService, CalendarService, frozenService);
+        ProfitShareUpdateService psus = new (DbFactory, TotalService, CalendarService, FrozenService, DemographicReaderService);
         ProfitShareEditService pses = new (psus, CalendarService);
-        ProfitMasterService pms = new (pses, DbFactory, iAppUser);
+        ProfitMasterService pms = new (pses, DbFactory, iAppUser, FrozenService);
 
         Stopwatch sw = Stopwatch.StartNew();
         try
@@ -97,10 +96,9 @@ public class ProfitMasterTests : PristineBaseTest
         // Arrange
         short profitYear = 2024;
         IAppUser iAppUser = new Mock<IAppUser>().Object;
-        IFrozenService frozenService = new FrozenService(DbFactory);
-        ProfitShareUpdateService psus = new ProfitShareUpdateService(DbFactory, TotalService, CalendarService, frozenService);
-        ProfitShareEditService pses = new ProfitShareEditService(psus, CalendarService);
-        ProfitMasterService pms = new ProfitMasterService(pses, DbFactory, iAppUser);
+        ProfitShareUpdateService psus = new (DbFactory, TotalService, CalendarService, FrozenService, DemographicReaderService);
+        ProfitShareEditService pses = new (psus, CalendarService);
+        ProfitMasterService pms = new (pses, DbFactory, iAppUser, FrozenService);
 
         Stopwatch sw = Stopwatch.StartNew();
         // Act

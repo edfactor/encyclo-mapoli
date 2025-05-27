@@ -22,13 +22,15 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
     private readonly IProfitSharingDataContextFactory _dbContextFactory;
     private readonly TotalService _totalService;
     private readonly IFrozenService _frozenService;
+    private readonly IDemographicReaderService _demographicReaderService;
 
-    public ProfitShareUpdateService(IProfitSharingDataContextFactory dbContextFactory, TotalService totalService, ICalendarService calendarService, IFrozenService frozenService)
+    public ProfitShareUpdateService(IProfitSharingDataContextFactory dbContextFactory, TotalService totalService, ICalendarService calendarService, IFrozenService frozenService, IDemographicReaderService demographicReaderService)
     {
         _dbContextFactory = dbContextFactory;
         _totalService = totalService;
         _calendarService = calendarService;
         _frozenService = frozenService;
+        _demographicReaderService = demographicReaderService;
     }
 
     public async Task<ProfitShareUpdateResponse> ProfitShareUpdate(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
@@ -122,7 +124,7 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
 
         // Start off loading the employees.
         (List<MemberFinancials> members, bool employeeExceededMaxContribution) = await EmployeeProcessorHelper.ProcessEmployees(_dbContextFactory, _calendarService, _totalService,
-            _frozenService, profitShareUpdateRequest, adjustmentsSummaryData, cancellationToken);
+            _frozenService, _demographicReaderService, profitShareUpdateRequest, adjustmentsSummaryData, cancellationToken);
 
         // Go get the Bene's.  NOTE: May modify some employees if they are both bene and employee (that's why "members" is passed in - to lookup loaded employees and see if they are also Bene's)
         await BeneficiariesProcessingHelper.ProcessBeneficiaries(_dbContextFactory, _totalService, members, profitShareUpdateRequest, cancellationToken);
