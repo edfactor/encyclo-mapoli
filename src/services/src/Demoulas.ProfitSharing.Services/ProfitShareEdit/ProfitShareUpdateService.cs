@@ -21,14 +21,16 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
     private readonly ICalendarService _calendarService;
     private readonly IProfitSharingDataContextFactory _dbContextFactory;
     private readonly TotalService _totalService;
+    private readonly IFrozenService _frozenService;
+    private readonly IDemographicReaderService _demographicReaderService;
 
-    public ProfitShareUpdateService(IProfitSharingDataContextFactory dbContextFactory,
-        TotalService totalService,
-        ICalendarService calendarService)
+    public ProfitShareUpdateService(IProfitSharingDataContextFactory dbContextFactory, TotalService totalService, ICalendarService calendarService, IFrozenService frozenService, IDemographicReaderService demographicReaderService)
     {
         _dbContextFactory = dbContextFactory;
         _totalService = totalService;
         _calendarService = calendarService;
+        _frozenService = frozenService;
+        _demographicReaderService = demographicReaderService;
     }
 
     public async Task<ProfitShareUpdateResponse> ProfitShareUpdate(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
@@ -73,8 +75,7 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
             EndDate = calInfo.FiscalEndDate,
             Response = new PaginatedResponseDto<ProfitShareUpdateMemberResponse>(profitShareUpdateRequest)
             {
-                Total = members.Count,
-                Results =  ProfitShareEditService.HandleInMemorySortAndPaging(profitShareUpdateRequest, members)
+                Total = members.Count, Results = ProfitShareEditService.HandleInMemorySortAndPaging(profitShareUpdateRequest, members)
             }
         };
     }
@@ -123,7 +124,7 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
 
         // Start off loading the employees.
         (List<MemberFinancials> members, bool employeeExceededMaxContribution) = await EmployeeProcessorHelper.ProcessEmployees(_dbContextFactory, _calendarService, _totalService,
-            profitShareUpdateRequest, adjustmentsSummaryData, cancellationToken);
+            _frozenService, _demographicReaderService, profitShareUpdateRequest, adjustmentsSummaryData, cancellationToken);
 
         // Go get the Bene's.  NOTE: May modify some employees if they are both bene and employee (that's why "members" is passed in - to lookup loaded employees and see if they are also Bene's)
         await BeneficiariesProcessingHelper.ProcessBeneficiaries(_dbContextFactory, _totalService, members, profitShareUpdateRequest, cancellationToken);
@@ -137,7 +138,7 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
             profitShareUpdateTotals.Distributions += memberFinancials.Distributions;
             profitShareUpdateTotals.TotalContribution += memberFinancials.Contributions;
             profitShareUpdateTotals.Military += memberFinancials.Military;
-            profitShareUpdateTotals.Forfeiture += memberFinancials.IncomingForfeitures;
+            profitShareUpdateTotals.Forfeiture += memberFinancials.IncomingForfeitures - memberFinancials.Forfeits;
             profitShareUpdateTotals.Earnings += memberFinancials.AllEarnings;
             profitShareUpdateTotals.Earnings2 += memberFinancials.AllSecondaryEarnings;
             profitShareUpdateTotals.EndingBalance += memberFinancials.EndingBalance;

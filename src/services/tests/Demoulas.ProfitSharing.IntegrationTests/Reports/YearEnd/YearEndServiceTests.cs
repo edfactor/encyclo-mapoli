@@ -45,7 +45,7 @@ public class YearEndServiceTests : PristineBaseTest
         await DbFactory.UseWritableContext(async ctx =>
         {
             PayProfitUpdateService ppus = new(DbFactory, _loggerFactory);
-            YearEndService yearEndService = new(DbFactory, CalendarService, ppus, TotalService);
+            YearEndService yearEndService = new(DbFactory, CalendarService, ppus, TotalService, DemographicReaderService);
             OracleConnection c = (ctx.Database.GetDbConnection() as OracleConnection)!;
             await c.OpenAsync(ct);
 

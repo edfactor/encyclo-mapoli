@@ -52,7 +52,7 @@ public class ProfitShareUpdateTests : PristineBaseTest
                 AdjustEarningsAmount = 0,
                 AdjustIncomingForfeitAmount = 0,
                 AdjustEarningsSecondaryAmount = 0
-            });
+            },DemographicReaderService);
         sw.Stop();
         TestOutputHelper.WriteLine($"Query took {sw.Elapsed}");
 
@@ -61,7 +61,7 @@ public class ProfitShareUpdateTests : PristineBaseTest
 
         string expectedReport = LoadExpectedReport(reportName);
 
-#if false
+#if true
         // Enabling this path enables the diff program to pop up the differences
  
         // The sort order on READY is not great, this maybe tweaked soon.
@@ -129,7 +129,7 @@ public class ProfitShareUpdateTests : PristineBaseTest
                 AdjustEarningsAmount = 22.33m,
                 AdjustIncomingForfeitAmount = 18.16m,
                 AdjustEarningsSecondaryAmount = 0
-            });
+            }, DemographicReaderService);
 
         // Assert
         string expected = HandleSortingOddness(LoadExpectedReport(reportName));

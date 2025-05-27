@@ -13,8 +13,48 @@ public record YearEndChange
 }
 
 [SuppressMessage("Usage", "VSTHRD103:Call async methods when in an async method")]
-public class TestPayProfitSelect : SqlTester
+public class TestPayProfitSelectedColumns : BaseSqlActivity
 {
+    public override Task<Outcome> Execute()
+    {
+        const short profitYear = 2024;
+
+        // Get Ready's rows (expected) for PayProfit
+        Dictionary<int, YearEndChange> readyRowsBySsn = GetReadyPayProfit().GetAwaiter().GetResult();
+        // Get the results by reading all the pay_profit rows
+        Dictionary<int, YearEndChange> smartRowsBySsn = GetSmartRowsBySsn(profitYear).GetAwaiter().GetResult();
+
+        // ensure number of rows match 
+        if (readyRowsBySsn.Count != smartRowsBySsn.Count)
+        {
+            return Task.FromResult(new Outcome(Name(), "test", "", OutcomeStatus.Error, "Number of rows Message", null, false));
+        }
+
+        // Now check each row
+        int badRows = 0;
+        for (int i = 0; i < smartRowsBySsn.Count; i++)
+        {
+            KeyValuePair<int, YearEndChange> kvp = smartRowsBySsn.ElementAt(i);
+            bool mismatch = !readyRowsBySsn.TryGetValue(kvp.Key, out YearEndChange? ready) || kvp.Value != ready;
+            if (mismatch)
+            {
+                badRows++;
+                if (badRows < 30)
+                {
+                    Console.WriteLine($"Ssn {kvp.Key} r:{readyRowsBySsn.GetValueOrDefault(kvp.Key)} s:{kvp.Value}");
+                }
+            }
+        }
+
+        Console.WriteLine($"ok: {readyRowsBySsn.Count - badRows}, bad: {badRows}");
+        if (badRows > 1)
+        {
+            return Task.FromResult(new Outcome(Name(), "test", "", OutcomeStatus.Error, "Too many bad rows", null, false));
+        }
+
+        return Task.FromResult(new Outcome(Name(), "test", "", OutcomeStatus.Ok, "", null, false));
+    }
+
     private async Task<Dictionary<int, YearEndChange>> GetSmartRowsBySsn(short profitYear)
     {
         OracleConnection connection = new(SmartConnString);
@@ -79,47 +119,5 @@ public class TestPayProfitSelect : SqlTester
         Console.WriteLine($"READY data count {data.Count}");
 
         return data;
-    }
-
-    public override string Name()
-    {
-        return "Test-PayProfit-Selected-Columns";
-    }
-
-    public override Task<Outcome> Execute()
-    {
-        const short profitYear = 2024;
-        CancellationToken ct = CancellationToken.None;
-
-        // Get Ready's rows (expected) for PayProfit
-        Dictionary<int, YearEndChange> readyRowsBySsn = GetReadyPayProfit().GetAwaiter().GetResult();
-        // Get the results by reading all the pay_profit rows
-        Dictionary<int, YearEndChange> smartRowsBySsn = GetSmartRowsBySsn(profitYear).GetAwaiter().GetResult();
-
-        // ensure number of rows match 
-        if (readyRowsBySsn.Count != smartRowsBySsn.Count)
-        {
-            return Task.FromResult(new Outcome(Name(), "test", "", OutcomeStatus.Error, "Number of rows Message", null, false));
-        }
-
-        // Now check each row
-        int badRows = smartRowsBySsn.Count(kvp =>
-        {
-            bool mismatch = !readyRowsBySsn.TryGetValue(kvp.Key, out YearEndChange? ready) || kvp.Value != ready;
-            if (mismatch)
-            {
-                Console.WriteLine($"Ssn {kvp.Key} r:{readyRowsBySsn.GetValueOrDefault(kvp.Key)} s:{kvp.Value}");
-            }
-
-            return mismatch;
-        });
-
-        Console.WriteLine($"ok: {readyRowsBySsn.Count - badRows}, bad: {badRows}");
-        if (badRows > 1)
-        {
-            return Task.FromResult(new Outcome(Name(), "test", "", OutcomeStatus.Error, "Too many bad rows", null, false));
-        }
-
-        return Task.FromResult(new Outcome(Name(), "test", "", OutcomeStatus.Ok, "", null, false));
     }
 }

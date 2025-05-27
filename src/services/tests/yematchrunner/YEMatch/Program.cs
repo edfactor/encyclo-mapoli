@@ -24,62 +24,48 @@ internal static class Program
     // A23 - Profit Master Update
     // A24 - Updates enrollement_id 
 
+#pragma warning disable AsyncFixer01
     private static async Task Main(string[] args)
     {
-        Stopwatch wholeRunStopWatch = Stopwatch.StartNew();
-
         ActivityFactory.Initialize();
 
-        // -------------------------------------------------
-        // Activities are run in a myriad of ways depending on the demands of the moment.    
-        // The current way of specifying what gets run is "lack luster" 
-        // Some variations are;
-        //  - Only SMART
-        //  - Only Ready
-        //  - only some of SMART and READY (like first 5 jobs)
-        //  - run some of ready, then migrate ready 2 smart, then stop.
-        // 
-        // These variations should be codified in a clear structure, but they are ad-hoc at the moment
-
-        List<IActivity> activitiesToRun = Specify([
-            "P0", // Init READY / Init Smart
-            
-//            "Reduce-To-2-Employees",
-            
-            // Do a smart freeze on 01/04/2025
-            "S12",
-            
-  //          "Fire-employee",
-            
-            // The obfuscation data is already at the FROZEN point (SHIFT already applied), so we start here
-//            "P15",
-//            "P16",
-//            "P17",
+        // Tests that Frozen is handled correctly by messing up the badges.
+        await Run(Specify(
+            "R0", // import obfuscated
+            "TrimTo14Employees", // Reduces execution time to 1 minute
+            "R2S",
+            "S12", // Freeze on Smart
+            "OverwriteBadges", // Obliterate the Live Badges
             "P18", // PAY426 / YearEndService
-           
-            "Test-PayProfit-Selected-Columns", // Test PayProfit Updates; EarnPoints, ZeroCont, New Employee, CertDate 
-
-//            "P19",
-//            "P20",
+            "TestPayProfitSelectedColumns", // Test PayProfit Updates; EarnPoints, ZeroCont, New Employee, CertDate 
             "R21", // PAY444 - update intermediate values
             "R22", // PAY447 - creates a data file
-            
+            "P23", // Does Contributions <-- smart does not yet use frozen - so it will fail
+            "TestProfitDetailSelectedColumns", // TEST: code,cont,earn,fort,cmt,zercont
+            "TestEtvaNow", // Verify ETVA for 2025
+            "TestEtvaPrior" // Verify correct ETVA for 2024
+        ));
+
+        // Baseline correct
+        await Run(Specify(
+            "P0",
+            "S12", // Freeze on Smart
+            "P18",
+            "TestPayProfitSelectedColumns", // Test PayProfit Updates; EarnPoints, ZeroCont, New Employee, CertDate 
+            "R21", // PAY444 - update intermediate values
+            "R22", // PAY447 - creates a data file
             "P23", // Does Contributions
+            "TestProfitDetailSelectedColumns", // TEST: code,cont,earn,fort,cmt,zercont
+            "TestEtvaNow", // Verify ETVA for 2025
+            "TestEtvaPrior" // Verify correct ETVA for 2024
+        ));
+    }
+#pragma warning restore AsyncFixer01
 
-            "Test-ProfitDetail-Selected-Columns", // TEST: code,cont,earn,fort,cmt,zercont
-            "Test-Etva-Now", // Verify ETVA for 2025
-            "Test-Etva-Prior" // Verify correct ETVA for 2024
-
-        ]);
-        // activitiesToRun = Specify(bothReadyAndSmartActivities, ["R23"]);
-
-
-        // ------------------- End of selection of steps zone
-
-        // ensure we stop if a stop is requested on either side
-        bool stopOnSmartSide = activitiesToRun.Any(a => a is SmartActivity);
-
-        if (activitiesToRun.Any(a => a is SmartActivity && a != SmartActivityFactory.ReadyToSmartInit))
+    private static async Task Run(List<IActivity> activitiesToRun)
+    {
+        Stopwatch wholeRunStopWatch = Stopwatch.StartNew();
+        if (activitiesToRun.Any(a => a is SmartActivity))
         {
             // Quick authentication sanity check
             AppVersionInfo? r = await SmartActivityFactory.Client!.DemoulasCommonApiEndpointsAppVersionInfoEndpointAsync(null);
@@ -113,13 +99,11 @@ internal static class Program
         await File.WriteAllTextAsync(filePath, JsonSerializer.Serialize(outcomes));
         Console.WriteLine("Saved outcomes to file.");
 
-        // Summary.print("latest");
-
         TimeSpan wholeRunElapsed = wholeRunStopWatch.Elapsed;
         Console.WriteLine($"\n---- Completed in Took:  {wholeRunElapsed.Hours}h {wholeRunElapsed.Minutes}m {wholeRunElapsed.Seconds}s");
     }
 
-    private static List<IActivity> Specify(List<string> activityNames)
+    private static List<IActivity> Specify(params List<string> activityNames)
     {
         return activityNames.Select(name => ActivityFactory.AllActivtiesByName()[name]).ToList();
     }

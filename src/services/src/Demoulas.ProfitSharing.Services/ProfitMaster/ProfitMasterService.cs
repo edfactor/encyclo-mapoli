@@ -32,12 +32,14 @@ public class ProfitMasterService : IProfitMasterService
     private readonly IAppUser _appUser;
     private readonly IProfitSharingDataContextFactory _dbFactory;
     private readonly IInternalProfitShareEditService _profitShareEditService;
+    private readonly IFrozenService _frozenService;
 
-    public ProfitMasterService(IInternalProfitShareEditService profitShareEditService, IProfitSharingDataContextFactory dbFactory, IAppUser appUser)
+    public ProfitMasterService(IInternalProfitShareEditService profitShareEditService, IProfitSharingDataContextFactory dbFactory, IAppUser appUser, IFrozenService frozenService)
     {
         _profitShareEditService = profitShareEditService;
         _dbFactory = dbFactory;
         _appUser = appUser;
+        _frozenService = frozenService;
     }
 
     public async Task<ProfitMasterUpdateResponse?> Status(ProfitYearRequest profitShareUpdateRequest, CancellationToken cancellationToken)
@@ -86,12 +88,22 @@ public class ProfitMasterService : IProfitMasterService
                 throw new BadHttpRequestException($"Can not add new profit detail records for year {profitShareUpdateRequest.ProfitYear} until existing ones are removed.");
             }
 
-            // === The following code is going to be altered in https://demoulas.atlassian.net/browse/PS-948 ===
-            // to be more flexible.  Right now, the profit year is year locked to the wall clock year -1.
+            // The profit year is year locked to the wall clock year -1.   
             // This has to do with getting the correct ETVA values for the employees.
             if (profitShareUpdateRequest.ProfitYear != DateTime.Now.Year - 1)
             {
                 throw new BadHttpRequestException($"The Profit year must be last year. {DateTime.Now.Year - 1}");
+            }
+
+            var fs = await _frozenService.GetActiveFrozenDemographic(cancellationToken);
+            if (!fs.IsActive)
+            {
+                throw new BadHttpRequestException($"The Profit Master update service requires frozen profit share data");
+            }
+
+            if (fs.ProfitYear != profitShareUpdateRequest.ProfitYear)
+            {
+                throw new BadHttpRequestException($"The requested year must match the frozen year.");
             }
 
             Dictionary<byte, ProfitCode> code2ProfitCode = await ctx.ProfitCodes.ToDictionaryAsync(pc => pc.Id, pc => pc, cancellationToken);
@@ -260,14 +272,14 @@ public class ProfitMasterService : IProfitMasterService
                 Debug.WriteLine($"Can not Revert. There is no year end update for profit year {profitYearRequest.ProfitYear}");
                 throw new BadHttpRequestException($"Can not Revert. There is no year end update for profit year {profitYearRequest.ProfitYear}");
             }
-            
+
             // Consider adding additional checking to ensure that:
             // - the ETVA selection (how many EVTA rows will be altered)
             // - the employee count
             // - the bene count
             // if any of these counts do not match, the revert should halt - and return the expected and actual numbers.
             // or perhaps the counts should be "number of profit count 0 records" and "number of profit count 8 records"
-    
+
             // --- Adjust ETVA
 
             // Rollback the effect of the transactions on the "NOW" ETVA.
