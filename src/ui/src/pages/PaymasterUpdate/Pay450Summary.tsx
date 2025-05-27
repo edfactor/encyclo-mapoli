@@ -1,4 +1,4 @@
-import { Divider } from "@mui/material";
+import { Box, Divider, Stack } from "@mui/material";
 import Grid2 from '@mui/material/Grid2';
 import { Page, DSMAccordion, numberToCurrency, SmartModal } from "smart-ui-library";
 import { useState, useEffect } from "react";
@@ -41,14 +41,17 @@ const Pay450Summary = () => {
 
     const renderActionNode = () => {
         if (!updateSummary) return null;
-        
+
         return (
-            <Button
-                onClick={() => setIsModalOpen(true)}
-                variant="outlined"
-                className="h-10 whitespace-nowrap min-w-fit">
-                Update
-            </Button>
+            <Stack direction="row" spacing={2}>
+                <Button
+                    onClick={() => setIsModalOpen(true)}
+                    variant="outlined"
+                    className="h-10 whitespace-nowrap min-w-fit">
+                    Update
+                </Button>
+                <StatusDropdownActionNode />
+            </Stack>
         );
     };
 
@@ -78,9 +81,6 @@ const Pay450Summary = () => {
             value: updateSummary ? numberToCurrency(updateSummary.totalAfterVestedAmount) : "-"
         }
     ];
-    const renderActionNode = () => {
-        return <StatusDropdownActionNode />;
-      };
 
     const onSearch = (data: ProfitYearSearch) => {
         setInitialSearchLoaded(true);
