@@ -95,7 +95,7 @@ const App = () => {
         console.warn("Could not parse token for username:", error);
       }
     }
-  }, [token, stateUsername, dispatch]);
+  }, [token, stateUsername, dispatch, loadMissives]);
 
   // Derived values
   const postLogoutRedirectUri = EnvironmentUtils.postLogoutRedirectUri;

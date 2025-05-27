@@ -1,6 +1,7 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
 import { agGridNumberToCurrency } from "smart-ui-library";
+import { dateMMDDYYYY } from "../../../utils/dateUtils";
 
 // The default is to show all columns, but if the mini flag is set to true, only show the
 // badge, name, and ssn columns
@@ -24,7 +25,10 @@ export const GetMilitaryContributionColumns = (): ColDef[] => {
       minWidth: 120,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true
+      resizable: true,
+      valueFormatter: (params) => {
+        return dateMMDDYYYY(params.data.ContributionDate);
+      }
     },
     {
       headerName: "Amount",
@@ -37,9 +41,9 @@ export const GetMilitaryContributionColumns = (): ColDef[] => {
       valueFormatter: agGridNumberToCurrency
     },
     {
-      headerName: "Increments Contribution Years",
-      field: "incrementsContributionYears",
-      colId: "incrementsContributionYears",
+      headerName: "Supplemental Contribution",
+      field: "isSupplementalContribution",
+      colId: "isSupplementalContribution",
       minWidth: 120,
       headerClass: "left-align",
       cellClass: "left-align",
