@@ -44,7 +44,9 @@ public sealed class DemographicReaderService : IDemographicReaderService
                 _http.HttpContext!.Items[ItemKey] = meta;
             }
 
+#pragma warning disable DSMPS001
             return FrozenService.GetDemographicSnapshot(ctx, _frozenState.ProfitYear);
+#pragma warning restore DSMPS001
         }
 
         // ---- LIVE -----------------------------------------------------------

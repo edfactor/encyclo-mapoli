@@ -43,11 +43,10 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
       return {
         beginningDate: rehireForfeituresQueryParams.beginningDate || fiscalCalendarYear?.fiscalBeginDate || "",
         endingDate: rehireForfeituresQueryParams.endingDate || fiscalCalendarYear?.fiscalEndDate || "",
-        pagination: { skip, take: pageSize, sortBy, isSortDescending },
-        profitYear: rehireForfeituresQueryParams.profitYear || profitYear
+        pagination: { skip, take: pageSize, sortBy, isSortDescending }
       };
     },
-    [rehireForfeituresQueryParams, fiscalCalendarYear?.fiscalBeginDate, fiscalCalendarYear?.fiscalEndDate, pageSize, profitYear]
+    [rehireForfeituresQueryParams, fiscalCalendarYear?.fiscalBeginDate, fiscalCalendarYear?.fiscalEndDate, pageSize]
   );
 
   const performSearch = useCallback(
