@@ -46,14 +46,11 @@ const ProfitYearSelector = ({
 
   // Build years to display
   const yearsToDisplay: number[] = [];
-  if (hasFrozenData && activeFrozenState?.profitYear) {
-    yearsToDisplay.push(activeFrozenState.profitYear);
-  }
   if (!yearsToDisplay.includes(thisYear)) {
     yearsToDisplay.push(thisYear);
   }
-  if (yearsToDisplay.length === 0) {
-    yearsToDisplay.push(thisYear);
+  if (hasFrozenData && activeFrozenState?.profitYear) {
+    yearsToDisplay.push(activeFrozenState.profitYear);
   }
 
   // Fetch accounting year data for each year
