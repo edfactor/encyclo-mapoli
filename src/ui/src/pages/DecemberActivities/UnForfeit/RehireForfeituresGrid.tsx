@@ -1,6 +1,6 @@
 import { Typography } from "@mui/material";
 import { ICellRendererParams } from "ag-grid-community";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetRehireForfeituresQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
@@ -10,6 +10,7 @@ import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear"
 import useFiscalCalendarYear from "../../../hooks/useFiscalCalendarYear";
 import { RehireForfeituresRequest } from "../../../reduxstore/types";
 import { GetDetailColumns, GetMilitaryAndRehireForfeituresColumns } from "./RehireForfeituresGridColumns";
+import ReportSummary from "../../../components/ReportSummary";
 
 interface MilitaryAndRehireForfeituresGridSearchProps {
   initialSearchLoaded: boolean;
@@ -248,12 +249,6 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
 
   return (
     <div>
-      <Typography
-        variant="h2"
-        sx={{ color: "#0258A5" }}>
-        {`${CAPTIONS.REHIRE_FORFEITURES} (${rehireForfeitures?.response.total || 0} ${rehireForfeitures?.response.total === 1 ? "Record" : "Records"})`}
-      </Typography>
-
       <style>
         {`
           .detail-row {
@@ -264,6 +259,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
 
       {rehireForfeitures?.response && (
         <>
+          <ReportSummary report={rehireForfeitures} />
           <DSMGrid
             preferenceKey={"QPREV-PROF"}
             isLoading={isFetching}

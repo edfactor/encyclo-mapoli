@@ -5,6 +5,7 @@ import { useLazyGetEligibleEmployeesQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetEligibleEmployeesColumns } from "./EligibleEmployeesGridColumn";
+import ReportSummary from "../../../components/ReportSummary";
 
 interface EligibleEmployeesGridProps {
   initialSearchLoaded: boolean;
@@ -36,7 +37,7 @@ const EligibleEmployeesGrid: React.FC<EligibleEmployeesGridProps> = ({
     };
 
     await triggerSearch(request, false);
-  }, [eligibleEmployeesQueryParams?.profitYear, pageNumber, pageSize, triggerSearch]);
+  }, [eligibleEmployeesQueryParams?.profitYear, pageNumber, pageSize, sortParams.isSortDescending, sortParams.sortBy, triggerSearch]);
 
   useEffect(() => {
     if (initialSearchLoaded) {
@@ -55,6 +56,7 @@ const EligibleEmployeesGrid: React.FC<EligibleEmployeesGridProps> = ({
               {`PROFIT-ELIGIBLE REPORT (${eligibleEmployees?.response.total || 0} records)`}
             </Typography>
           </div>
+          <ReportSummary report={eligibleEmployees} />
           <DSMGrid
             preferenceKey={"ELIGIBLE_EMPLOYEES"}
             isLoading={isFetching}

@@ -331,7 +331,6 @@ export const YearsEndApi = createApi({
         url: `yearend/rehire-forfeitures/`,
         method: "POST",
         body: {
-          profitYear: params.profitYear,
           beginningDate: params.beginningDate ? tryddmmyyyyToDate(params.beginningDate) : params.beginningDate,
           endingDate: params.endingDate ? tryddmmyyyyToDate(params.endingDate) : params.endingDate,
           take: params.pagination.take,
@@ -367,27 +366,7 @@ export const YearsEndApi = createApi({
           console.log("Err: " + err);
         }
       }
-    }),
-    getNamesMissingCommas: builder.query<PagedReportResponse<MissingCommasInPYName>, MissingCommasInPYNameRequestDto>({
-      query: (params) => ({
-        url: "yearend/names-missing-commas",
-        method: "GET",
-        params: {
-          take: params.pagination.take,
-          skip: params.pagination.skip,
-          sortBy: params.pagination.sortBy,
-          isSortDescending: params.pagination.isSortDescending
-        }
-      }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
-          dispatch(setMissingCommaInPYName(data));
-        } catch (err) {
-          console.log("Err: " + err);
-        }
-      }
-    }),
+    }),   
     getNegativeEVTASSN: builder.query<
       PagedReportResponse<NegativeEtvaForSSNsOnPayProfit>,
       NegativeEtvaForSSNsOnPayprofitRequestDto
@@ -1173,7 +1152,6 @@ export const {
   useLazyGetForfeituresByAgeQuery,
   useLazyGetGrossWagesReportQuery,
   useLazyGetRehireForfeituresQuery,
-  useLazyGetNamesMissingCommasQuery,
   useLazyGetNegativeEVTASSNQuery,
   useLazyGetProfitShareEditQuery,
   useLazyGetProfitShareUpdateQuery,
