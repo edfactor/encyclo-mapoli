@@ -858,13 +858,13 @@ export interface CreateMilitaryContributionRequest extends ProfitYearRequest {
   badgeNumber: number;
   contributionAmount: number;
   contributionDate: Date;
-  addContributionYear: boolean;
+  isSupplementalContribution: boolean;
 }
 
 export interface MilitaryContribution {
   contributionDate: Date | null;
   contributionAmount: number | null;
-  addContributionYear: boolean | false;
+  isSupplementalContribution: boolean | false;
 }
 
 export interface YearEndProfitSharingEmployee {

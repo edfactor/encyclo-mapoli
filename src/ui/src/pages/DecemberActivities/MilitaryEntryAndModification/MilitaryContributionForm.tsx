@@ -9,7 +9,7 @@ import { CreateMilitaryContributionRequest, MilitaryContribution } from "reduxst
 interface FormData {
   contributionDate: Date | null;
   contributionAmount: number | null;
-  addContributionYear: boolean | null;
+  isSupplementalContribution: boolean | null;
 }
 
 interface MilitaryContributionFormProps {
@@ -35,7 +35,7 @@ const MilitaryContributionForm = ({
     defaultValues: {
       contributionDate: null,
       contributionAmount: null,
-      addContributionYear: false
+      isSupplementalContribution: false
     }
   });
 
@@ -44,7 +44,7 @@ const MilitaryContributionForm = ({
       reset({
         contributionDate: initialData.contributionDate,
         contributionAmount: initialData.contributionAmount,
-        addContributionYear: false
+        isSupplementalContribution: false
       });
     }
   }, [initialData, reset]);
@@ -58,7 +58,7 @@ const MilitaryContributionForm = ({
       const contribution: MilitaryContribution = {
         contributionDate: data.contributionDate,
         contributionAmount: data.contributionAmount,
-        addContributionYear: data.addContributionYear || false
+        isSupplementalContribution: data.isSupplementalContribution || false
       };
 
       try {
@@ -69,7 +69,7 @@ const MilitaryContributionForm = ({
           profitYear,
           contributionDate: data.contributionDate,
           contributionAmount: data.contributionAmount,
-          addContributionYear: data.addContributionYear || false
+          isSupplementalContribution: data.isSupplementalContribution || false
         };
 
         console.log("Calling API with request:", request);
@@ -84,7 +84,7 @@ const MilitaryContributionForm = ({
       console.warn("Form validation failed:", {
         date: data.contributionDate,
         amount: data.contributionAmount,
-        addContributionYear: data.addContributionYear
+        isSupplementalContribution: data.isSupplementalContribution
       });
     }
   };
@@ -143,7 +143,7 @@ const MilitaryContributionForm = ({
           container
           spacing={2}>
           <Controller
-            name="addContributionYear"
+            name="isSupplementalContribution"
             control={control}
             render={({ field, fieldState: { error } }) => (
               <FormControl error={!!error}>
@@ -156,7 +156,7 @@ const MilitaryContributionForm = ({
                       inputRef={field.ref}
                     />
                   }
-                  label="Add Contribution Year"
+                  label="Is Supplemental Contribution"
                 />                
               </FormControl>
             )}

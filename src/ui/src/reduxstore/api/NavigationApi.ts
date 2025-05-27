@@ -40,13 +40,29 @@ export const NavigationApi = createApi({
         url: ``,
         method: "GET"
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(arg, { dispatch, queryFulfilled, getState }) {
         try {
+          // Check token before attempting the query
+          const state = getState() as RootState;
+          const token = state.security.token;
+          
+          if (!token) {
+            console.warn("Navigation API called without a valid token");
+            dispatch(setNavigationError("Authentication token missing"));
+            return;
+          }
+          
           const { data } = await queryFulfilled;
+          console.log("Navigation data successfully fetched");
           dispatch(setNavigation(data));
         } catch (err) {
           console.error("Failed to fetch navigation:", err);
-          dispatch(setNavigationError("Failed to fetch military contributions"));
+          // More descriptive error message
+          const errorMessage = err.error?.status === 401 
+            ? "Authentication error - please log in again" 
+            : "Failed to fetch navigation data";
+          
+          dispatch(setNavigationError(errorMessage));
         }
       }
     })
