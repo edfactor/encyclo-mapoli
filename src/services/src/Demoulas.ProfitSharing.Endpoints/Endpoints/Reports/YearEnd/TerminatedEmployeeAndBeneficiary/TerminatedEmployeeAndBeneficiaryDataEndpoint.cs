@@ -32,7 +32,7 @@ public class TerminatedEmployeeAndBeneficiaryDataEndpoint
         Get("/terminated-employee-and-beneficiary");
         Summary(s =>
         {
-            s.Summary = "Provide the Terminated Employee and Beneficiary Report (QPAY066) report.";
+            s.Summary = "Provide the Terminated Employees (QPAY066) report.";
             s.Description =
                 "Reports on beneficiaries with a non-zero balance and employees who were terminated (and not retired) in the specified date range.";
             s.ExampleRequest = new ProfitYearRequest() { ProfitYear = 2024 };
@@ -42,7 +42,7 @@ public class TerminatedEmployeeAndBeneficiaryDataEndpoint
                     200,
                     new TerminatedEmployeeAndBeneficiaryResponse
                     {
-                        ReportName = "Terminated Employee and Beneficiary Report",
+                        ReportName = "Terminated Employees",
                         ReportDate = default,
                         TotalVested = 1000,
                         TotalForfeit = 2000,

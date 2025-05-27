@@ -335,7 +335,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 
         return new TerminatedEmployeeAndBeneficiaryResponse
         {
-            ReportName = "Terminated Employee and Beneficiary Report",
+            ReportName = "Terminated Employees",
             ReportDate = DateTimeOffset.UtcNow,
             StartDate = lastCalInfo.FiscalBeginDate,
             EndDate = calInfo.FiscalEndDate,
