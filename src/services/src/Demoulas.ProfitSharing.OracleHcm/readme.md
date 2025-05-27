@@ -47,10 +47,9 @@ This project integrates with Oracle HCM Cloud to synchronize employee and payrol
 ---
 
 
-## Mermaid.js Diagram
+## Diagram showing the major processes and their interactions
 
-[Diagram showing the major processes and their interactions](://diagram.html)
-
+![Workload](diagram.png)
 
 ---
 
