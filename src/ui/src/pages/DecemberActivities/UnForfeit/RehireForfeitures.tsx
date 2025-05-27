@@ -10,18 +10,17 @@ import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 
 const RehireForfeitures = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
-  const [resetPageFlag, setResetPageFlag] = useState(false);
   const fiscalCalendarYear = useFiscalCalendarYear();
   const renderActionNode = () => {
-      return <StatusDropdownActionNode />;
-    };
-  
+    return <StatusDropdownActionNode />;
+  };
+
   const isCalendarDataLoaded = !!fiscalCalendarYear?.fiscalBeginDate && !!fiscalCalendarYear?.fiscalEndDate;
 
   return (
-    <Page 
-    label={`${CAPTIONS.REHIRE_FORFEITURES}`}
-    actionNode={renderActionNode()}
+    <Page
+      label={`${CAPTIONS.REHIRE_FORFEITURES}`}
+      actionNode={renderActionNode()}
     >
       <Grid2
         container
@@ -29,7 +28,7 @@ const RehireForfeitures = () => {
         <Grid2 width={"100%"}>
           <Divider />
         </Grid2>
-        
+
         {!isCalendarDataLoaded ? (
           <Grid2 width={"100%"} container justifyContent="center" padding={4}>
             <CircularProgress />
@@ -38,10 +37,9 @@ const RehireForfeitures = () => {
           <>
             <Grid2 width={"100%"}>
               <DSMAccordion title="Filter">
-                <RehireForfeituresSearchFilter 
-                  setInitialSearchLoaded={setInitialSearchLoaded} 
-                  fiscalData={fiscalCalendarYear} 
-                  onSearch={() => setResetPageFlag(flag => !flag)}
+                <RehireForfeituresSearchFilter
+                  setInitialSearchLoaded={setInitialSearchLoaded}
+                  fiscalData={fiscalCalendarYear}
                 />
               </DSMAccordion>
             </Grid2>
@@ -50,7 +48,6 @@ const RehireForfeitures = () => {
               <RehireForfeituresGrid
                 initialSearchLoaded={initialSearchLoaded}
                 setInitialSearchLoaded={setInitialSearchLoaded}
-                resetPageFlag={resetPageFlag}
               />
             </Grid2>
           </>

@@ -83,8 +83,8 @@ public class NavigationServiceTests : ApiTestBase<Program>
         {
             new NavigationStatusDto() { Id = NavigationStatus.Constants.NotStarted, Name = "Not Started" },
             new NavigationStatusDto() { Id = NavigationStatus.Constants.InProgress, Name = "In Progress" },
-            new NavigationStatusDto() { Id = NavigationStatus.Constants.Blocked, Name = "Blocked" },
-            new NavigationStatusDto() { Id = NavigationStatus.Constants.Successful, Name = "Successful" }
+            new NavigationStatusDto() { Id = NavigationStatus.Constants.OnHold, Name = "On Hold" },
+            new NavigationStatusDto() { Id = NavigationStatus.Constants.Complete, Name = "Complete" }
         };
     }
     [Fact(DisplayName = "PS-1009: Navigation")]

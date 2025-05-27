@@ -8,8 +8,8 @@ public class NavigationStatus: ILookupTable<byte>
     {
         public const byte NotStarted = 1;
         public const byte InProgress = 2;
-        public const byte Blocked = 3;
-        public const byte Successful = 4;
+        public const byte OnHold = 3;
+        public const byte Complete = 4;
     }
 
     public byte Id { get; set; }
