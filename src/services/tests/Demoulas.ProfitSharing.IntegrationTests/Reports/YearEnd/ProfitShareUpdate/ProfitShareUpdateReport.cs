@@ -5,6 +5,7 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate.Formatters;
 using Demoulas.ProfitSharing.Services;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services.ItOperations;
 using Demoulas.ProfitSharing.Services.ProfitShareEdit;
@@ -33,10 +34,11 @@ internal sealed class ProfitShareUpdateReport
     public DateTime TodaysDateTime { get; set; }
     public List<string> ReportLines { get; set; } = [];
 
-    public async Task ProfitSharingUpdatePaginated(ProfitShareUpdateRequest profitShareUpdateRequest)
+    public async Task ProfitSharingUpdatePaginated(ProfitShareUpdateRequest profitShareUpdateRequest, IDemographicReaderService demographicReaderService)
     {
-        TotalService totalService = new TotalService(_dbFactory, _calendarService, new EmbeddedSqlService(), new DemographicReaderService(new FrozenService(_dbFactory), new HttpContextAccessor()));
-        ProfitShareUpdateService psu = new(_dbFactory, totalService, _calendarService);
+        FrozenService frozenService = new FrozenService(_dbFactory);
+        TotalService totalService = new TotalService(_dbFactory, _calendarService, new EmbeddedSqlService(), demographicReaderService);
+        ProfitShareUpdateService psu = new(_dbFactory, totalService, _calendarService, frozenService, demographicReaderService);
         _profitYear = profitShareUpdateRequest.ProfitYear;
 
         (List<MemberFinancials> members, AdjustmentsSummaryDto adjustmentsApplied, ProfitShareUpdateTotals totalsDto, bool _) =
@@ -235,7 +237,7 @@ internal sealed class ProfitShareUpdateReport
         rerunTotals.RERUN_POINTS = wsClientProfitShareUpdateTotals.MaxPointsTotal;
         rerunTotals.RERUN_MAX = maxAllowedContribution;
 
-        ReportLines.Add("\n\n\n\n\n\n\n\n\n");
+        ReportLines.Add("\n\n\n\n\n\n\n\n");
         WRITE(rerunTotals);
     }
 

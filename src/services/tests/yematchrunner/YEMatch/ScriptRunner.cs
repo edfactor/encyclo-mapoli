@@ -47,6 +47,7 @@ public static class ScriptRunner
 
         if (stdout.Contains("error", StringComparison.CurrentCultureIgnoreCase))
         {
+            Console.WriteLine($"<STANDARD-OUT>{stdout}</STANDARD-OUT>");
             throw new EvaluateException($"Error running script - string 'error' found in output when running : {scriptName}");
         }
 
