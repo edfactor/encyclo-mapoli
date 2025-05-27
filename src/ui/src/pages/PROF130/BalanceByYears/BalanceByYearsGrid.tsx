@@ -29,7 +29,7 @@ const BalanceByYearsGrid: React.FC<BalanceByYearsGridProps> = ({ initialSearchLo
   const columnDefsPartTime = GetBalanceByYearsGridColumns(FrozenReportsByAgeRequestType.PartTime);
 
   const onSearch = useCallback(async () => {
-    triggerSearch(
+    await triggerSearch(
       {
         profitYear: balanceByYearsQueryParams?.profitYear ?? 0,
         reportType: FrozenReportsByAgeRequestType.Total,
@@ -37,7 +37,7 @@ const BalanceByYearsGrid: React.FC<BalanceByYearsGridProps> = ({ initialSearchLo
       },
       false
     ).unwrap();
-    triggerSearch(
+    await triggerSearch(
       {
         profitYear: balanceByYearsQueryParams?.profitYear ?? 0,
         reportType: FrozenReportsByAgeRequestType.FullTime,
@@ -45,7 +45,7 @@ const BalanceByYearsGrid: React.FC<BalanceByYearsGridProps> = ({ initialSearchLo
       },
       false
     ).unwrap();
-    triggerSearch(
+    await triggerSearch(
       {
         profitYear: balanceByYearsQueryParams?.profitYear ?? 0,
         reportType: FrozenReportsByAgeRequestType.PartTime,

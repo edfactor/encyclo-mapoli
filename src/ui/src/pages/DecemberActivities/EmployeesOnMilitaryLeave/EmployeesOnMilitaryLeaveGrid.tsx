@@ -1,11 +1,12 @@
 import { Typography } from "@mui/material";
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetEmployeesOnMilitaryLeaveQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetMilitaryAndRehireColumns } from "./EmployeesOnMilitaryLeaveGridColumns";
 import { CAPTIONS } from "../../../constants";
+import ReportSummary from "../../../components/ReportSummary";
 
 const EmployeesOnMilitaryLeaveGrid: React.FC = () => {
   const [pageNumber, setPageNumber] = useState(0);
@@ -42,13 +43,7 @@ const EmployeesOnMilitaryLeaveGrid: React.FC = () => {
     <>
       {employeesOnMilitaryLeave?.response && (
         <>
-          <div style={{ padding: "0 24px 0 24px" }}>
-            <Typography
-              variant="h2"
-              sx={{ color: "#0258A5" }}>
-              {`(${employeesOnMilitaryLeave?.response.total || 0} records)`}
-            </Typography>
-          </div>
+          <ReportSummary report={employeesOnMilitaryLeave} />
           <DSMGrid
             preferenceKey={CAPTIONS.EMPLOYEES_MILITARY}
             isLoading={isFetching}

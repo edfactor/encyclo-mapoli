@@ -1,11 +1,12 @@
 import { Typography } from "@mui/material";
-import { useMemo, useState, useEffect, useCallback } from "react";
+import React, { useMemo, useState, useEffect, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetDuplicateSSNsQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetDuplicateSSNsOnDemographicsColumns } from "./DuplicateSSNsOnDemographicsGridColumns";
 import { CAPTIONS } from "../../../constants";
+import ReportSummary from "../../../components/ReportSummary";
 
 const DuplicateSSNsOnDemographicsGrid: React.FC = () => {
   const [pageNumber, setPageNumber] = useState(0);
@@ -40,13 +41,7 @@ const DuplicateSSNsOnDemographicsGrid: React.FC = () => {
     <>
       {duplicateSSNsData?.response && (
         <>
-          <div style={{ padding: "0 24px 0 24px" }}>
-            <Typography
-              variant="h2"
-              sx={{ color: "#0258A5" }}>
-              {`(${duplicateSSNsData?.response.total || 0} records)`}
-            </Typography>
-          </div>
+          <ReportSummary report={duplicateSSNsData} />
           <DSMGrid
             preferenceKey={CAPTIONS.DUPLICATE_SSNS}
             isLoading={isFetching}

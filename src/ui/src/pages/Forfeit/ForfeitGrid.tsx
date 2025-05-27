@@ -8,17 +8,12 @@ import { RootState } from "reduxstore/store";
 import { useLazyGetForfeituresAndPointsQuery } from "reduxstore/api/YearsEndApi";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { CAPTIONS } from "../../constants";
+import ReportSummary from "../../components/ReportSummary";
 
 interface ForfeitGridProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
 }
-
-const totalsRow = {
-  forfeitures: "0.00",
-  forfeitPoints: 0,
-  earningsPoints: 0
-};
 
 const ForfeitGrid: React.FC<ForfeitGridProps> = ({ initialSearchLoaded, setInitialSearchLoaded }) => {
   const navigate = useNavigate();
@@ -78,13 +73,7 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ initialSearchLoaded, setIniti
     <>
       {forfeituresAndPoints?.response && (
         <>
-          <div style={{ padding: "0 24px 0 24px" }}>
-            <Typography
-              variant="h2"
-              sx={{ color: "#0258A5" }}>
-              {`${CAPTIONS.FORFEIT} (${forfeituresAndPoints?.response.total || 2} records)`}
-            </Typography>
-          </div>
+          <ReportSummary report={forfeituresAndPoints} />
           <DSMGrid
             preferenceKey={CAPTIONS.FORFEIT}
             isLoading={isFetching}

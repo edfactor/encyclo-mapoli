@@ -41,7 +41,7 @@ public class ForfeitureAdjustmentTests : ApiTestBase<Program>
         // Assert
         response.Should().NotBeNull();
         response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
-        response.Result.ReportName.Should().Be("FORFEITURES REPORT");
+        response.Result.ReportName.Should().Be("Forfeiture Adjustments");
         response.Result.Response.Should().NotBeNull();
     }
 

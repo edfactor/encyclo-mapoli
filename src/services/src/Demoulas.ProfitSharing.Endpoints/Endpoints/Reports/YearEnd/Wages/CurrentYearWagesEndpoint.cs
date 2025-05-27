@@ -52,7 +52,7 @@ public class CurrentYearWagesEndpoint : EndpointWithCsvBase<ProfitYearRequest, W
         base.Configure();
     }
 
-    public override string ReportFileName => "EJR PROF-DOLLAR-EXTRACT YEAR=THIS";
+    public override string ReportFileName => "YTD Wages Extract (PROF-DOLLAR-EXTRACT)";
 
     public override Task<ReportResponseBase<WagesCurrentYearResponse>> GetResponse(ProfitYearRequest req, CancellationToken ct)
     {

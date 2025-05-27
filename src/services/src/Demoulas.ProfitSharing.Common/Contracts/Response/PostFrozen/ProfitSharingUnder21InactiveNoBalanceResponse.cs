@@ -11,7 +11,7 @@ public sealed record ProfitSharingUnder21InactiveNoBalanceResponse
     public byte Age { get; set; }
     public byte EnrollmentId { get; set; }
 
-    public const string REPORT_NAME = "INACT/TERM WEEKLYS AND TERM MONTHLYS - NO BALANCE";
+    public const string REPORT_NAME = "Inactive/Terminated Under 21";
     public static ProfitSharingUnder21InactiveNoBalanceResponse SampleResponse()
     {
         return new ProfitSharingUnder21InactiveNoBalanceResponse()

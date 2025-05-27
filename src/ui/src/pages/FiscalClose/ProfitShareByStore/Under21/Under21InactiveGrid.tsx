@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { under21InactiveColumnDefs } from './GetUnder21BreakdownColumnDefs';
 import { useNavigate } from 'react-router-dom';
+import ReportSummary from "../../../../components/ReportSummary";
 
 interface Under21InactiveGridProps {
   isLoading?: boolean;
@@ -52,13 +53,7 @@ const Under21InactiveGrid: React.FC<Under21InactiveGridProps> = ({
 
   return (
     <Grid2 container direction="column" width="100%">
-      <Grid2 paddingX="24px">
-        <Typography
-          variant="h6"
-          sx={{ color: "#0258A5", marginBottom: "16px" }}>
-          Inactive/Terminated Under 21
-        </Typography>
-      </Grid2>
+      <ReportSummary report={under21Inactive} />      
       <Grid2 width="100%">
         <DSMGrid
           preferenceKey="UNDER_21_INACTIVE_REPORT"

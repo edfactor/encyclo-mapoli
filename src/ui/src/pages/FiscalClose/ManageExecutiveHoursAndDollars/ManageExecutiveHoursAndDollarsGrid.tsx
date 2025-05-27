@@ -1,7 +1,7 @@
 import { AddOutlined } from "@mui/icons-material";
 import { Button, Tooltip, Typography } from "@mui/material";
 import { CellValueChangedEvent, IRowNode, SelectionChangedEvent } from "ag-grid-community";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetExecutiveHoursAndDollarsQuery } from "reduxstore/api/YearsEndApi";
 import {
@@ -23,6 +23,7 @@ import { DSMGrid, ISortParams, Pagination, SmartModal } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
 import { GetManageExecutiveHoursAndDollarsColumns } from "./ManageExecutiveHoursAndDollarsGridColumns";
 import SearchAndAddExecutive from "./SearchAndAddExecutive";
+import ReportSummary from "../../../components/ReportSummary";
 
 interface RenderAddExecutiveButtonProps {
   reportReponse: PagedReportResponse<ExecutiveHoursAndDollars> | null;
@@ -287,17 +288,9 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
 
   const isRowDataThere = (isModal: boolean | undefined): boolean => {
     if (isModal) {
-      return (
-        additionalExecutivesGrid?.response != null &&
-        additionalExecutivesGrid?.response != undefined &&
-        executiveHoursAndDollars?.response?.results != null
-      );
+      return (additionalExecutivesGrid?.response != null  && executiveHoursAndDollars?.response?.results != null);
     } else {
-      return (
-        mutableCopyOfGridData?.response != null &&
-        mutableCopyOfGridData?.response != undefined &&
-        executiveHoursAndDollars?.response?.results != null
-      );
+      return (mutableCopyOfGridData?.response != null  && executiveHoursAndDollars?.response?.results != null);
     }
   };
 
@@ -317,12 +310,8 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
           {!isModal && (
             <>
               <div className="px-[24px]">
-                <Typography
-                  variant="h2"
-                  sx={{ color: "#0258A5" }}>
-                  {`Manage Executive Hours and Dollars (${mutableCopyOfGridData?.response.total || 0} records)`}
-                </Typography>
-              </div>
+                <ReportSummary report={mutableCopyOfGridData} />
+              </div>             
               <div style={{ gap: "36px", display: "flex", justifyContent: "end", marginRight: 28 }}>
                 <RenderAddExecutiveButton
                   reportReponse={mutableCopyOfGridData}

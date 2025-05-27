@@ -30,7 +30,7 @@ const BalanceByAgeGrid: React.FC<BalanceByAgeGridProps> = ({ initialSearchLoaded
   const columnDefsPartTime = GetBalanceByAgeColumns(FrozenReportsByAgeRequestType.PartTime);
 
   const onSearch = useCallback(async () => {
-    triggerSearch(
+    await triggerSearch(
       {
         profitYear: balanceByAgeQueryParams?.profitYear ?? 0,
         reportType: FrozenReportsByAgeRequestType.Total,
@@ -38,7 +38,7 @@ const BalanceByAgeGrid: React.FC<BalanceByAgeGridProps> = ({ initialSearchLoaded
       },
       false
     ).unwrap();
-    triggerSearch(
+    await triggerSearch(
       {
         profitYear: balanceByAgeQueryParams?.profitYear ?? 0,
         reportType: FrozenReportsByAgeRequestType.FullTime,
@@ -46,7 +46,7 @@ const BalanceByAgeGrid: React.FC<BalanceByAgeGridProps> = ({ initialSearchLoaded
       },
       false
     ).unwrap();
-    triggerSearch(
+    await triggerSearch(
       {
         profitYear: balanceByAgeQueryParams?.profitYear ?? 0,
         reportType: FrozenReportsByAgeRequestType.PartTime,
