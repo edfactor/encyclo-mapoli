@@ -3,8 +3,8 @@
 
 dotnet tool install --global NSwag.ConsoleCore 
 
-nswag openapi2csclient /classname:ApiClient /namespace:YEMatch /input:https://localhost:7141/swagger/Release%201.0/swagger.json  /output:YEMatch/ApiClient.cs
+nswag openapi2csclient /classname:ApiClient /namespace:YEMatch /input:https://localhost:7141/swagger/Release%201.0/swagger.json  /output:YEMatch/SmartActivities/ApiClient.cs
 
 # this makes the swagger endpoint names less wordy
-sed -i '' "s/DemoulasProfitSharingEndpointsEndpoints//g" YEMatch/ApiClient.cs
+sed -i '' "s/DemoulasProfitSharingEndpointsEndpoints//g" YEMatch/SmartActivities/ApiClient.cs
 

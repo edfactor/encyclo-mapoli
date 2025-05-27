@@ -73,9 +73,7 @@ public class FrozenService: IFrozenService
     /// <param name="userName"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public async Task<FrozenStateResponse> FreezeDemographics(short profitYear, DateTime asOfDateTime, 
-        string? userName = "Unknown",
-        CancellationToken cancellationToken = default)
+    public async Task<FrozenStateResponse> FreezeDemographics(short profitYear, DateTime asOfDateTime, string? userName, CancellationToken cancellationToken = default)
     {
         var validator = new InlineValidator<short>();
 
@@ -91,6 +89,10 @@ public class FrozenService: IFrozenService
             //Inactivate any prior frozen states
             await ctx.FrozenStates.Where(x => x.IsActive).ForEachAsync(x => x.IsActive = false, cancellationToken);
 
+            if (userName == null)
+            {
+                userName = "Unknown"; // aka test driven, got through cert validation, but user is undefined.  Only happens during testing.
+            }
             //Create new record
             var frozenState = new FrozenState { IsActive = true, ProfitYear = profitYear, AsOfDateTime = asOfDateTime, FrozenBy = userName };
             ctx.FrozenStates.Add(frozenState);

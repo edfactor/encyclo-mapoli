@@ -1,7 +1,8 @@
 ﻿using Demoulas.Common.Data.Services.Service;
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Services;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.ItOperations;
-using Demoulas.Security;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Caching.Distributed;
@@ -15,15 +16,21 @@ public abstract class PristineBaseTest
     protected readonly TotalService TotalService;
     protected readonly PristineDataContextFactory DbFactory;
     protected readonly ITestOutputHelper TestOutputHelper;
+    protected readonly IDemographicReaderService DemographicReaderService;
+    protected readonly IFrozenService FrozenService;
+    protected readonly IEmbeddedSqlService EmbeddedSqlService;
+    protected readonly IHttpContextAccessor HttpContextAccessor = new HttpContextAccessor();
+    protected readonly MemoryDistributedCache DistributedCache;
 
     protected PristineBaseTest(ITestOutputHelper testOutputHelper)
     {
         DbFactory = new PristineDataContextFactory();
-        var distributedCache = new MemoryDistributedCache(new Microsoft.Extensions.Options.OptionsWrapper<MemoryDistributedCacheOptions>(new MemoryDistributedCacheOptions()));
-        CalendarService = new CalendarService(DbFactory, Aps, distributedCache);
-        TotalService = new TotalService(DbFactory, 
-            CalendarService, new EmbeddedSqlService(), 
-            new DemographicReaderService(new FrozenService(DbFactory), new HttpContextAccessor()));
+        DistributedCache = new MemoryDistributedCache(new Microsoft.Extensions.Options.OptionsWrapper<MemoryDistributedCacheOptions>(new MemoryDistributedCacheOptions()));
+        CalendarService = new CalendarService(DbFactory, Aps, DistributedCache);
+        FrozenService = new FrozenService(DbFactory);
+        EmbeddedSqlService = new EmbeddedSqlService();
+        DemographicReaderService = new DemographicReaderService(FrozenService, HttpContextAccessor);
+        TotalService = new TotalService(DbFactory, CalendarService, EmbeddedSqlService, DemographicReaderService);
         TestOutputHelper = testOutputHelper;
     }
 }
