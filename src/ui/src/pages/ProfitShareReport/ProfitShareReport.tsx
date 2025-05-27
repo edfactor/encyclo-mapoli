@@ -16,7 +16,7 @@ import ReportSummary from "../../components/ReportSummary";
 
 const ProfitShareReport = () => {
   const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(5);
+  const [pageSize, setPageSize] = useState(10);
   const [sortParams, setSortParams] = useState<ISortParams>({
     sortBy: "badgeNumber",
     isSortDescending: true

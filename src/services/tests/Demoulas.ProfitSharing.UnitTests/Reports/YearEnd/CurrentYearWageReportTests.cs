@@ -41,7 +41,7 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
 
         var expectedResponse = new ReportResponseBase<WagesCurrentYearResponse>
         {
-            ReportName = $"EJR PROF-DOLLAR-EXTRACT YEAR={2023}",
+            ReportName = $"YTD Wages Extract (PROF-DOLLAR-EXTRACT) - {2023}",
             ReportDate = DateTimeOffset.UtcNow,
             StartDate = SqlDateTime.MinValue.Value.ToDateOnly(),
             EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
@@ -114,6 +114,6 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
         var reportFileName = _endpoint.ReportFileName;
 
         // Assert
-        reportFileName.Should().Be("EJR PROF-DOLLAR-EXTRACT YEAR=THIS");
+        reportFileName.Should().Be("YTD Wages Extract (PROF-DOLLAR-EXTRACT)");
     }
 }

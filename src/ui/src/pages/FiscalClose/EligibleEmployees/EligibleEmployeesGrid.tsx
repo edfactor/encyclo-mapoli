@@ -49,13 +49,6 @@ const EligibleEmployeesGrid: React.FC<EligibleEmployeesGridProps> = ({
     <>
       {eligibleEmployees?.response && (
         <>
-          <div style={{ padding: "0 24px 0 24px" }}>
-            <Typography
-              variant="h2"
-              sx={{ color: "#0258A5" }}>
-              {`PROFIT-ELIGIBLE REPORT (${eligibleEmployees?.response.total || 0} records)`}
-            </Typography>
-          </div>
           <ReportSummary report={eligibleEmployees} />
           <DSMGrid
             preferenceKey={"ELIGIBLE_EMPLOYEES"}

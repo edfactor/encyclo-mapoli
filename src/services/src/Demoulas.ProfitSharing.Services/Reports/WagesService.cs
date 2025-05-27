@@ -40,7 +40,7 @@ public class WagesService : IWagesService
         var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
         return new ReportResponseBase<WagesCurrentYearResponse>
         {
-            ReportName = $"EJR PROF-DOLLAR-EXTRACT YEAR={request.ProfitYear}",
+            ReportName = $"YTD Wages Extract (PROF-DOLLAR-EXTRACT) - {request.ProfitYear}",
             ReportDate = DateTimeOffset.UtcNow,
             StartDate = calInfo.FiscalBeginDate,
             EndDate = calInfo.FiscalEndDate,
