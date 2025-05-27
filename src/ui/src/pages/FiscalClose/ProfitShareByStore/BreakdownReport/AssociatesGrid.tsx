@@ -43,6 +43,8 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store }) => {
       profitYear: queryParams?.profitYear || profitYear,
       storeNumber: store,
       storeManagement: false,
+      badgeNumber: queryParams?.badgeNumber,
+      employeeName: queryParams?.employeeName,
       pagination: {
         skip: pageNumber * pageSize,
         take: pageSize,
