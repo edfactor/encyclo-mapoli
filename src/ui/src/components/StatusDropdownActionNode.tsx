@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import StatusDropdown from "./StatusDropdown";
-import { useGetNavigationStatusQuery, useLazyUpdateNavigationStatusQuery, useUpdateNavigationStatusQuery } from "reduxstore/api/NavigationStatusApi";
+import { useGetNavigationStatusQuery, useLazyGetNavigationStatusQuery, useLazyUpdateNavigationStatusQuery, useUpdateNavigationStatusQuery } from "reduxstore/api/NavigationStatusApi";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { NavigationDto } from "reduxstore/types";
@@ -12,15 +12,16 @@ interface StatusDropdownActionNodeProps {
 }
 
 const StatusDropdownActionNode: React.FC<StatusDropdownActionNodeProps> = ({ initialStatus, navigationId }) => {
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const [currentStatus, setCurrentStatus] = useState("1");
   const [navigationObj, setNavigationObj] = useState<NavigationDto | null>(null);
-  const { isSuccess, data } = useGetNavigationStatusQuery({});
+  //const { isSuccess, data } = useGetNavigationStatusQuery({});
+  const [triggerGetNavigationStatus, {data, isSuccess}] = useLazyGetNavigationStatusQuery({});
+
   const navigationList = useSelector(
     (state: RootState) => state.navigation.navigationData
   );
-  const currentNavigationId = useSelector(
-    (state: RootState) => state.navigation.currentNavigationId
-  );
+  const currentNavigationId = parseInt(localStorage.getItem('navigationId') ?? "");
   const [triggerUpdate] = useLazyUpdateNavigationStatusQuery();
   const [triggerGetNavigation] = useLazyGetNavigationQuery();
   const handleStatusChange = async (newStatus: string) => {
@@ -49,11 +50,13 @@ const StatusDropdownActionNode: React.FC<StatusDropdownActionNodeProps> = ({ ini
   }
 
   useEffect(() => {
-    const obj = getNavigationObjectBasedOnId(navigationList?.navigation, currentNavigationId??undefined);
+    if (hasToken)
+      triggerGetNavigationStatus({});
+    const obj = getNavigationObjectBasedOnId(navigationList?.navigation, currentNavigationId ?? undefined);
     if (obj)
       setNavigationObj(obj);
     setCurrentStatus(obj?.statusId + "");
-  }, [data, navigationList,currentNavigationId])
+  }, [data, navigationList, currentNavigationId, hasToken])
 
   return (
     <div className="flex items-center gap-2 h-10">
