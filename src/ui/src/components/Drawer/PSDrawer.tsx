@@ -282,7 +282,7 @@ const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
                 </Typography>
               </ListItemButton>
               {activeSubmenu === MENU_LABELS.DECEMBER_ACTIVITIES && (
-                <div style={{ padding: "24px" }}>
+                <div>
                   {showDecemberBanner && (
                     <Alert
                       severity="info"
@@ -299,11 +299,13 @@ const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
                       Sets accounting calendar year
                     </Alert>
                   )}
-                  <ProfitYearSelector
-                    selectedProfitYear={selectedProfitYearForDecemberActivities}
-                    handleChange={handleDecemberProfitYearChange}
-                    defaultValue={profitYear?.toString()}
-                  />
+                  <div style={{ padding: "24px" }}>
+                    <ProfitYearSelector
+                      selectedProfitYear={selectedProfitYearForDecemberActivities}
+                      handleChange={handleDecemberProfitYearChange}
+                      defaultValue={profitYear?.toString()}
+                    />
+                  </div>
                 </div>
               )}
 
