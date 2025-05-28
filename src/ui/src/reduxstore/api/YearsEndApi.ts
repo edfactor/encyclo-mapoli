@@ -2,8 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 import {
   addBadgeNumberToUpdateAdjustmentSummary,
-  clearBreakdownByStore, clearBreakdownByStoreTotals, clearBreakdownGrandTotals,
-  clearControlSheet,
+  clearBreakdownByStoreTotals, clearBreakdownGrandTotals,
   clearProfitMasterApply,
   clearProfitMasterRevert,
   clearProfitMasterStatus,
@@ -33,7 +32,6 @@ import {
   setForfeituresByAge,
   setGrossWagesReport,
   setMilitaryAndRehireForfeituresDetails,
-  setMissingCommaInPYName,
   setNegativeEtvaForSSNsOnPayprofit,
   setProfitMasterApply,
   setProfitMasterRevert,
@@ -85,8 +83,6 @@ import {
   GrossWagesReportDto,
   GrossWagesReportResponse,
   MilitaryAndRehireForfeiture,
-  MissingCommasInPYName,
-  MissingCommasInPYNameRequestDto,
   NegativeEtvaForSSNsOnPayProfit,
   NegativeEtvaForSSNsOnPayprofitRequestDto,
   PagedReportResponse,
@@ -122,7 +118,7 @@ import {
 } from "reduxstore/types";
 import { tryddmmyyyyToDate } from "../../utils/dateUtils";
 import { Paged } from "smart-ui-library";
-import { url } from "./api";
+import { createDataSourceAwareBaseQuery, url } from "./api";
 
 import {
   setForfeitureAdjustmentData,
@@ -130,41 +126,8 @@ import {
 } from "reduxstore/slices/forfeituresAdjustmentSlice";
 
 
-/* -------------------------------------------------------------------------
-   Automatic x-demographic-data-source header copier
-   ------------------------------------------------------------------------- */
-import type { BaseQueryFn, FetchArgs, FetchBaseQueryError, FetchBaseQueryMeta } from "@reduxjs/toolkit/query";
-const rawBaseQuery = fetchBaseQuery({
-
-  baseUrl: `${url}/api/`,
-  prepareHeaders: (headers, { getState }) => {
-    const root = getState() as RootState;
-    const token = root.security.token;
-    const impersonating = root.security.impersonating;
-    if (token) {
-      headers.set("authorization", `Bearer ${token}`);
-    }
-    if (impersonating) {
-      headers.set("impersonation", impersonating);
-    } else {
-      const localImpersonation = localStorage.getItem("impersonatingRole");
-      if (localImpersonation) {
-        headers.set("impersonation", localImpersonation);
-      }
-    }
-    return headers;
-  }
-
-});
-const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (args, api, extra) => {
-  const result = await rawBaseQuery(args, api, extra);
-  if (result.data && typeof result.data === "object") {
-    const hdr =
-      (result.meta as FetchBaseQueryMeta | undefined)?.response?.headers?.get("x-demographic-data-source") ?? "Live";
-    (result.data as any).dataSource = hdr;
-  }  
-  return result;
-};
+/* Use the centralized data source aware base query */
+const baseQuery = createDataSourceAwareBaseQuery();
 /* ------------------------------------------------------------------------- */
 
 export const YearsEndApi = createApi({

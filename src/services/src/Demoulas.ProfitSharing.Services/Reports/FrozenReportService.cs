@@ -98,7 +98,7 @@ public class FrozenReportService : IFrozenReportService
 
                 var netBalances = await _contributionService.GetNetBalance(req.ProfitYear, allBadgeNumbers.ToHashSet(), cancellationToken);
 
-                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx, req.UseFrozenData);
                 // Get forfeitures for current year
                 var forfeitures = await ctx.ProfitDetails
                     .Join(demographics, pd => pd.Ssn, d => d.Ssn, (pd, d) => new { pd, d })

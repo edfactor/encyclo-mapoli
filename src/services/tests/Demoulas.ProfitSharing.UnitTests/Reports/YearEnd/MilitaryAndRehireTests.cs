@@ -3,6 +3,7 @@ using System.Net;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Api;
+using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Extensions;
@@ -45,7 +46,7 @@ public class MilitaryAndRehireTests : ApiTestBase<Program>
             {
                 ReportName = "EMPLOYEES ON MILITARY LEAVE",
                 ReportDate = DateTimeOffset.UtcNow,
-                StartDate = SqlDateTime.MinValue.Value.ToDateOnly(),
+                StartDate = ReferenceData.DsmMinValue(),
                 EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
                 Response = new PaginatedResponseDto<EmployeesOnMilitaryLeaveResponse> { Results = new List<EmployeesOnMilitaryLeaveResponse> { setup.ExpectedResponse } }
             };
@@ -102,7 +103,7 @@ public class MilitaryAndRehireTests : ApiTestBase<Program>
         {
             ReportName = "EMPLOYEES ON MILITARY LEAVE",
             ReportDate = DateTimeOffset.UtcNow,
-            StartDate = SqlDateTime.MinValue.Value.ToDateOnly(),
+            StartDate = ReferenceData.DsmMinValue(),
             EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
             Response = new PaginatedResponseDto<EmployeesOnMilitaryLeaveResponse> { Results = new List<EmployeesOnMilitaryLeaveResponse>() }
         };
@@ -125,7 +126,7 @@ public class MilitaryAndRehireTests : ApiTestBase<Program>
         {
             ReportName = "EMPLOYEES ON MILITARY LEAVE", 
             ReportDate = DateTimeOffset.UtcNow,
-            StartDate = SqlDateTime.MinValue.Value.ToDateOnly(),
+            StartDate = ReferenceData.DsmMinValue(),
             EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
             Response = new PaginatedResponseDto<EmployeesOnMilitaryLeaveResponse> { Results = [] }
         };

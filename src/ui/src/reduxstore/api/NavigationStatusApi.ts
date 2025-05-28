@@ -1,42 +1,24 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-import { RootState } from "reduxstore/store";
 import {
   GetNavigationStatusRequestDto,
   GetNavigationStatusResponseDto,
   UpdateNavigationRequestDto,
   UpdateNavigationResponseDto,
 } from "reduxstore/types";
-import { url } from "./api";
+import { createDataSourceAwareBaseQuery, url } from "./api";
 import { setNavigationStatus, setNavigationStatusError } from "reduxstore/slices/NavigationStatusSlice";
-import { Paged } from "smart-ui-library";
 import { NavigationApi } from "./NavigationApi";
 
+const baseQuery = createDataSourceAwareBaseQuery();
+
 export const NavigationStatusApi = createApi({
-  baseQuery: fetchBaseQuery({
-    baseUrl: `${url}/api/navigation`,
-    prepareHeaders: (headers, { getState }) => {
-      const token = (getState() as RootState).security.token;
-      const impersonating = (getState() as RootState).security.impersonating;
-      if (token) {
-        headers.set("authorization", `Bearer ${token}`);
-      }
-      if (impersonating) {
-        headers.set("impersonation", impersonating);
-      } else {
-        const localImpersonation = localStorage.getItem("impersonatingRole");
-        if (localImpersonation) {
-          headers.set("impersonation", localImpersonation);
-        }
-      }
-      return headers;
-    }
-  }),
+  baseQuery: baseQuery,
   reducerPath: "navigationStatusApi",
   endpoints: (builder) => ({
     getNavigationStatus: builder.query<GetNavigationStatusResponseDto, GetNavigationStatusRequestDto>({
       query: (request) => ({
-        url: `status`,
+        url: `/navigation/status`,
         method: "GET"
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -51,7 +33,7 @@ export const NavigationStatusApi = createApi({
     }),
     updateNavigationStatus: builder.query<UpdateNavigationResponseDto, UpdateNavigationRequestDto>({
         query: (request) => ({
-          url: ``,
+          url: `/navigation`,
           method: "PUT",
           body: request
         }),
@@ -73,4 +55,4 @@ export const NavigationStatusApi = createApi({
   })
 });
 
-export const { useGetNavigationStatusQuery, useLazyGetNavigationStatusQuery, useLazyUpdateNavigationStatusQuery, useUpdateNavigationStatusQuery } = NavigationStatusApi;
+export const { useGetNavigationStatusQuery, useLazyUpdateNavigationStatusQuery, useUpdateNavigationStatusQuery } = NavigationStatusApi;

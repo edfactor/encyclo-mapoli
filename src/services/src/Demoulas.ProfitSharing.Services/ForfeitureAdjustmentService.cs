@@ -6,6 +6,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.Util.Extensions;
 
@@ -41,7 +42,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
         {
             ReportName = ForfeitureAdjustmentReportResponse.REPORT_NAME,
             ReportDate = DateTimeOffset.UtcNow,
-            StartDate = SqlDateTime.MinValue.Value.ToDateOnly(),
+            StartDate = ReferenceData.DsmMinValue(),
             EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
             TotatNetBalance = 0,
             TotatNetVested = 0,
