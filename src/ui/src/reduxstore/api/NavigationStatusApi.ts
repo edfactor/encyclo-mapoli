@@ -18,7 +18,7 @@ export const NavigationStatusApi = createApi({
   endpoints: (builder) => ({
     getNavigationStatus: builder.query<GetNavigationStatusResponseDto, GetNavigationStatusRequestDto>({
       query: (request) => ({
-        url: `status`,
+        url: `/navigation/status`,
         method: "GET"
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
