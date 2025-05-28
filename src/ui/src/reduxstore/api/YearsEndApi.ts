@@ -96,7 +96,7 @@ import {
   ProfitSharingLabel,
   ProfitSharingLabelsRequest,
   ProfitYearRequest,
-  RehireForfeituresRequest,
+  StartAndEndDateRequest,
   TerminationRequest,
   TerminationResponse,
   Under21BreakdownByStoreRequest,
@@ -289,7 +289,7 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getRehireForfeitures: builder.query<PagedReportResponse<MilitaryAndRehireForfeiture>, RehireForfeituresRequest>({
+    getRehireForfeitures: builder.query<PagedReportResponse<MilitaryAndRehireForfeiture>, StartAndEndDateRequest>({
       query: (params) => ({
         url: `yearend/rehire-forfeitures/`,
         method: "POST",
@@ -650,7 +650,7 @@ export const YearsEndApi = createApi({
         }
 
         return {
-          url: "yearend/terminated-employee-and-beneficiary",
+          url: "yearend/terminated-employees",
           method: "GET",
           params: {
             profitYear: params.profitYear,

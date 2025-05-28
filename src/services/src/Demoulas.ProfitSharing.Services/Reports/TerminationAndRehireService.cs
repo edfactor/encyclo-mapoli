@@ -87,9 +87,9 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
     /// <param name="req">The pagination request containing the necessary parameters for the search.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a report response with the rehire profit sharing data.</returns>
-    public async Task<ReportResponseBase<RehireForfeituresResponse>> FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYearsAsync(RehireForfeituresRequest req, CancellationToken cancellationToken)
+    public async Task<ReportResponseBase<RehireForfeituresResponse>> FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYearsAsync(StartAndEndDateRequest req, CancellationToken cancellationToken)
     {
-        var validator = new RehireForfeituresRequestValidator(_calendarService, _factory);
+        var validator = new StartAndEndDateRequestValidator(_calendarService, _factory);
         await validator.ValidateAndThrowAsync(req, cancellationToken);
         
 
@@ -146,22 +146,22 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
         {
             ReportName = "REHIRE'S PROFIT SHARING DATA",
             ReportDate = DateTimeOffset.UtcNow,
-            StartDate = req.BeginningDate.ToDateOnly(),
-            EndDate = req.EndingDate.ToDateOnly(),
+            StartDate = req.BeginningDate,
+            EndDate = req.EndingDate,
             Response = militaryMembers
         };
     }
 
     private async Task<IQueryable<RehireProfitSummaryQuery>> GetRehireProfitQueryBase(ProfitSharingReadOnlyDbContext context,
-    RehireForfeituresRequest req)
+        StartAndEndDateRequest req)
     {
-        var beginning = req.BeginningDate.ToDateOnly(DateTimeKind.Local);
-        var ending = req.EndingDate.ToDateOnly(DateTimeKind.Local);
+        var beginning = req.BeginningDate;
+        var ending = req.EndingDate;
 
         var yearsOfServiceQuery = _totalService.GetYearsOfService(context, (short)req.EndingDate.Year);
-        var demographics = await _demographicReaderService.BuildDemographicQuery(context);
+        var demo = await _demographicReaderService.BuildDemographicQuery(context);
         
-        var query = demographics
+        var query = demo
             .Join(
                 context.PayProfits.Include(e=> e.Enrollment)
                     .Where(x => x.ProfitYear >= beginning.Year && x.ProfitYear <= ending.Year), // Table to join with (PayProfit)

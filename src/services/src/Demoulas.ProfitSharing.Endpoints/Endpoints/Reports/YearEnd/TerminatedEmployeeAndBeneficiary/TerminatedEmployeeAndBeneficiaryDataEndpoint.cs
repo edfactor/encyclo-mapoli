@@ -13,7 +13,7 @@ using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Terminat
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.TerminatedEmployeeAndBeneficiary;
 
 public class TerminatedEmployeeAndBeneficiaryDataEndpoint
-    : EndpointWithCsvTotalsBase<ProfitYearRequest,
+    : EndpointWithCsvTotalsBase<StartAndEndDateRequest,
         TerminatedEmployeeAndBeneficiaryResponse,
         TerminatedEmployeeAndBeneficiaryDataResponseDto,
         TerminatedEmployeeAndBeneficiaryDataResponseMap>
@@ -29,7 +29,7 @@ public class TerminatedEmployeeAndBeneficiaryDataEndpoint
 
     public override void Configure()
     {
-        Get("/terminated-employee-and-beneficiary");
+        Get("/terminated-employees");
         Summary(s =>
         {
             s.Summary = "Provide the Terminated Employees (QPAY066) report.";
@@ -66,7 +66,7 @@ public class TerminatedEmployeeAndBeneficiaryDataEndpoint
         base.Configure();
     }
 
-    public override Task<TerminatedEmployeeAndBeneficiaryResponse> GetResponse(ProfitYearRequest req, CancellationToken ct)
+    public override Task<TerminatedEmployeeAndBeneficiaryResponse> GetResponse(StartAndEndDateRequest req, CancellationToken ct)
     {
         return _terminatedEmployeeAndBeneficiaryReportService.GetReportAsync(req, ct);
     }

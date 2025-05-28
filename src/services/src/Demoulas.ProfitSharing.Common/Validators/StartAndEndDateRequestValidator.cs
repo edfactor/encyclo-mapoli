@@ -6,17 +6,17 @@ using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Common.Validators;
 
-public class RehireForfeituresRequestValidator : PaginationValidatorBase<RehireForfeituresRequest>
+public class StartAndEndDateRequestValidator : PaginationValidatorBase<StartAndEndDateRequest>
 {
     private readonly ICalendarService _calendarService;
-    private readonly ILogger<RehireForfeituresRequestValidator> _logger;
+    private readonly ILogger<StartAndEndDateRequestValidator> _logger;
 
-    public RehireForfeituresRequestValidator(
+    public StartAndEndDateRequestValidator(
         ICalendarService calendarService,
         ILoggerFactory factory)
     {
         _calendarService = calendarService;
-        _logger = factory.CreateLogger<RehireForfeituresRequestValidator>();
+        _logger = factory.CreateLogger<StartAndEndDateRequestValidator>();
 
         
         RuleFor(x => x.BeginningDate)
@@ -31,7 +31,7 @@ public class RehireForfeituresRequestValidator : PaginationValidatorBase<RehireF
             .WithMessage("Ending date must be greater than or equal to beginning date.");
     }
 
-    private async Task<bool> BeWithinFiscalYear(RehireForfeituresRequest request, DateTime date, ValidationContext<RehireForfeituresRequest> context, CancellationToken cancellationToken)
+    private async Task<bool> BeWithinFiscalYear(StartAndEndDateRequest request, DateTime date, ValidationContext<StartAndEndDateRequest> context, CancellationToken cancellationToken)
     {
         try
         {

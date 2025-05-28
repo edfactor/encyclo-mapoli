@@ -8,7 +8,7 @@ import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import useFiscalCalendarYear from "../../../hooks/useFiscalCalendarYear";
-import { RehireForfeituresRequest } from "../../../reduxstore/types";
+import { StartAndEndDateRequest } from "../../../reduxstore/types";
 import { GetDetailColumns, GetMilitaryAndRehireForfeituresColumns } from "./RehireForfeituresGridColumns";
 import ReportSummary from "../../../components/ReportSummary";
 
@@ -37,7 +37,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
 
   // Create a request object based on current parameters
   const createRequest = useCallback(
-    (skip: number, sortBy: string, isSortDescending: boolean): RehireForfeituresRequest | null => {
+    (skip: number, sortBy: string, isSortDescending: boolean): StartAndEndDateRequest | null => {
       if (!rehireForfeituresQueryParams) return null;
 
       return {

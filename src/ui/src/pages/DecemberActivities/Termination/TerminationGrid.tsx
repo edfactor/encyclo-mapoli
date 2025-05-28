@@ -30,8 +30,12 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({ initialSearchLo
   const navigate = useNavigate();
 
   const onSearch = useCallback(async () => {
+    const { termination } = useSelector((state: RootState) => state.yearsEnd);
+
     const request = {
       profitYear: profitYear || 0,
+      beginningDate: termination?.startDate,
+      endingDate: termination?.endDate,
       pagination: {
         skip: pageNumber * pageSize,
         take: pageSize,

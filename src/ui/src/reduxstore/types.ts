@@ -177,7 +177,7 @@ export interface EmployeesOnMilitaryLeaveResponse {
   terminationDate: string;
 }
 
-export interface RehireForfeituresRequest {
+export interface StartAndEndDateRequest {
   beginningDate: string;
   endingDate: string;
   pagination: SortedPaginationRequestDto;
@@ -545,9 +545,8 @@ export interface VestedAmountsByAgeDetail {
   partialVestedCount: number;
 }
 
-export interface TerminationRequest {
-  profitYear: number;
-  pagination: SortedPaginationRequestDto;
+export interface TerminationRequest extends StartAndEndDateRequest{
+  profitYear: number;  
 }
 
 export interface TerminationDetail {

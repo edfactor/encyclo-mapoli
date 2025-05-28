@@ -41,7 +41,7 @@ import {
   ProfitSharingDistributionsByAge,
   ProfitSharingLabel,
   ProfitYearRequest,
-  RehireForfeituresRequest,
+  StartAndEndDateRequest,
   ReportsByAgeParams,
   TerminationResponse,
   Under21BreakdownByStoreRequest,
@@ -112,9 +112,9 @@ export interface YearsEndState {
   militaryAndRehire: PagedReportResponse<EmployeesOnMilitaryLeaveResponse> | null;
   militaryEntryAndModification: EmployeeDetails | null;
   rehireForfeitures: PagedReportResponse<MilitaryAndRehireForfeiture> | null;
-  rehireForfeituresQueryParams: RehireForfeituresRequest | null;
-  rehireProfitSummaryQueryParams: RehireForfeituresRequest | null;
-  militaryAndRehireQueryParams: RehireForfeituresRequest | null;
+  rehireForfeituresQueryParams: StartAndEndDateRequest | null;
+  rehireProfitSummaryQueryParams: StartAndEndDateRequest | null;
+  militaryAndRehireQueryParams: StartAndEndDateRequest | null;
   missingCommaInPYName: PagedReportResponse<MissingCommasInPYName> | null;
   negativeEtvaForSSNsOnPayprofit: PagedReportResponse<NegativeEtvaForSSNsOnPayProfit> | null;
   negativeEtvaForSSNsOnPayprofitParams: ProfitYearRequest | null;
@@ -550,7 +550,7 @@ export const yearsEndSlice = createSlice({
     clearForfeituresAndPointsQueryParams: (state) => {
       state.forfeituresAndPointsQueryParams = null;
     },
-    setMilitaryAndRehireProfitSummaryQueryParams: (state, action: PayloadAction<RehireForfeituresRequest>) => {
+    setMilitaryAndRehireProfitSummaryQueryParams: (state, action: PayloadAction<StartAndEndDateRequest>) => {
       state.rehireProfitSummaryQueryParams = action.payload;
     },
     setEmployeesOnMilitaryLeaveDetails: (
@@ -571,7 +571,7 @@ export const yearsEndSlice = createSlice({
     clearRehireForfeituresDetails: (state) => {
       state.rehireForfeitures = null;
     },
-    setMilitaryAndRehireForfeituresQueryParams: (state, action: PayloadAction<RehireForfeituresRequest>) => {
+    setMilitaryAndRehireForfeituresQueryParams: (state, action: PayloadAction<StartAndEndDateRequest>) => {
       state.rehireForfeituresQueryParams = action.payload;
     },
     clearRehireForfeituresQueryParams: (state) => {

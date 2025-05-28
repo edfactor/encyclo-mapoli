@@ -32,7 +32,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         _demographicReaderService = demographicReaderService;
     }
 
-    public Task<TerminatedEmployeeAndBeneficiaryResponse> CreateDataAsync(ProfitYearRequest req, CancellationToken cancellationToken)
+    public Task<TerminatedEmployeeAndBeneficiaryResponse> CreateDataAsync(StartAndEndDateRequest req, CancellationToken cancellationToken)
     {
         return _factory.UseReadOnlyContext(async ctx =>
         {
@@ -42,32 +42,36 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
     }
 
     #region Get Employees and Beneficiaries
+    
+    private (short beginProfitYear, short endProfitYear) GetProfitYearRange(StartAndEndDateRequest request)
+    {
+        return ((short)request.BeginningDate.Year, (short)request.EndingDate.Year);
+    }
 
-    private async Task<List<MemberSlice>> RetrieveMemberSlices(IProfitSharingDbContext ctx, ProfitYearRequest request,
+    private async Task<List<MemberSlice>> RetrieveMemberSlices(IProfitSharingDbContext ctx, StartAndEndDateRequest request,
         CancellationToken cancellationToken)
     {
-        CalendarResponseDto startEnd = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
-        var terminatedEmployees = await GetTerminatedEmployees(ctx, request, startEnd);
+        var terminatedEmployees = await GetTerminatedEmployees(ctx, request);
         var terminatedWithContributions = GetEmployeesAsMembers(ctx, request, terminatedEmployees);
         var beneficiaries = GetBeneficiaries(ctx, request);
         return await CombineEmployeeAndBeneficiarySlices(terminatedWithContributions, beneficiaries, cancellationToken);
     }
 
-    private async Task<IQueryable<TerminatedEmployeeDto>> GetTerminatedEmployees(IProfitSharingDbContext ctx, ProfitYearRequest request,
-        CalendarResponseDto startEnd)
+    private async Task<IQueryable<TerminatedEmployeeDto>> GetTerminatedEmployees(IProfitSharingDbContext ctx, StartAndEndDateRequest request)
     {
         var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+        var profitYearRange = GetProfitYearRange(request);
         var queryable = demographics
             .Include(d => d.PayProfits)
             .Include(d => d.ContactInfo)
             .Where(d => d.EmploymentStatusId == EmploymentStatus.Constants.Terminated
                         && d.TerminationCodeId != TerminationCode.Constants.RetiredReceivingPension
-                        && d.TerminationDate >= startEnd.FiscalBeginDate && d.TerminationDate <= startEnd.FiscalEndDate)
+                        && d.TerminationDate >= request.BeginningDate && d.TerminationDate <= request.EndingDate)
             .Select(d => new TerminatedEmployeeDto
             {
                 Demographic = d,
                 PayProfit = d.PayProfits
-                    .Where(p => p.ProfitYear == request.ProfitYear)
+                    .Where(p => p.ProfitYear >= profitYearRange.beginProfitYear && p.ProfitYear <= profitYearRange.endProfitYear)
                     .GroupBy(p => p.ProfitYear)
                     .Select(g => g.First())
                     .FirstOrDefault()
@@ -76,15 +80,15 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         return queryable;
     }
 
-    private IQueryable<MemberSlice> GetEmployeesAsMembers(IProfitSharingDbContext ctx, ProfitYearRequest request,
+    private IQueryable<MemberSlice> GetEmployeesAsMembers(IProfitSharingDbContext ctx, StartAndEndDateRequest request,
         IQueryable<TerminatedEmployeeDto> terminatedEmployees)
     {
         var query = from employee in terminatedEmployees
             join payProfit in ctx.PayProfits on employee.Demographic.Id equals payProfit.DemographicId
-            join yipTbl in _totalService.GetYearsOfService(ctx, request.ProfitYear) on payProfit.Demographic!.Ssn equals yipTbl.Ssn into yipTmp
+            join yipTbl in _totalService.GetYearsOfService(ctx, (short)request.EndingDate.Year) on payProfit.Demographic!.Ssn equals yipTbl.Ssn into yipTmp
             from yip in yipTmp.DefaultIfEmpty()
-            where payProfit.ProfitYear == request.ProfitYear
-            select new MemberSlice
+            where payProfit.ProfitYear >= request.BeginningDate.Year && payProfit.ProfitYear <= request.EndingDate.Year
+                    select new MemberSlice
             {
                 PsnSuffix = 0,
                 BadgeNumber = employee.Demographic.BadgeNumber,
@@ -111,15 +115,15 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
     }
 
 #pragma warning disable S1172
-    private IQueryable<MemberSlice> GetBeneficiaries(IProfitSharingDbContext ctx, ProfitYearRequest request)
+    private IQueryable<MemberSlice> GetBeneficiaries(IProfitSharingDbContext ctx, StartAndEndDateRequest request)
     {
         // This query loads the Beneficiary and then the employee they are related to
         var query = ctx.Beneficiaries
             .Include(b => b.Contact)
             .ThenInclude(c => c!.ContactInfo)
             .Include(b => b.Demographic)
-            .ThenInclude(d => d!.PayProfits.Where(p => p.ProfitYear == request.ProfitYear))
-            .Select(b => new { Beneficiary = b, b.Demographic, PayProfit = b.Demographic!.PayProfits.FirstOrDefault(p => p.ProfitYear == request.ProfitYear) })
+            .ThenInclude(d => d!.PayProfits.Where(p => p.ProfitYear >= request.BeginningDate.Year && p.ProfitYear <= request.EndingDate.Year))
+            .Select(b => new { Beneficiary = b, b.Demographic, PayProfit = b.Demographic!.PayProfits.FirstOrDefault(p => p.ProfitYear >= request.BeginningDate.Year && p.ProfitYear <= request.EndingDate.Year) })
             .Select(x => new MemberSlice
             {
                 PsnSuffix = x.Beneficiary.PsnSuffix,
@@ -161,7 +165,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 
     #endregion
 
-    private async Task<TerminatedEmployeeAndBeneficiaryResponse> MergeAndCreateDataset(IProfitSharingDbContext ctx, ProfitYearRequest req,
+    private async Task<TerminatedEmployeeAndBeneficiaryResponse> MergeAndCreateDataset(IProfitSharingDbContext ctx, StartAndEndDateRequest req,
         List<MemberSlice> memberSliceUnion, CancellationToken cancellationToken)
     {
         decimal totalVested = 0;
@@ -169,15 +173,15 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         decimal totalEndingBalance = 0;
         decimal totalBeneficiaryAllocation = 0;
 
-        short lastYear = (short)(req.ProfitYear - 1);
-        var today = DateOnly.FromDateTime(DateTime.Today);
+        var profitYearRange = GetProfitYearRange(req);
 
         // Extract SSNs needed in the loop
         var ssns = memberSliceUnion.Select(ms => ms.Ssn).ToHashSet();
+        
 
         // Bulk load profit details for this profit year, grouped by SSN.
         var profitDetailsDict = await ctx.ProfitDetails
-            .Where(pd => pd.ProfitYear == req.ProfitYear && ssns.Contains(pd.Ssn))
+            .Where(pd => pd.ProfitYear >= profitYearRange.beginProfitYear && pd.ProfitYear <= profitYearRange.endProfitYear && ssns.Contains(pd.Ssn))
             .GroupBy(pd => pd.Ssn)
             .Select(g => new InternalProfitDetailDto
             {
@@ -203,12 +207,14 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             .ToDictionaryAsync(x => x.Ssn, cancellationToken);
 
         // Bulk load last year balances as a dictionary keyed by SSN.
-        var lastYearBalancesDict = await _totalService.GetTotalBalanceSet(ctx, lastYear)
+        var lastYearBalancesDict = await _totalService.GetTotalBalanceSet(ctx, profitYearRange.beginProfitYear)
             .Where(x => ssns.Contains(x.Ssn))
             .ToDictionaryAsync(x => x.Ssn, cancellationToken);
 
         // Bulk load current year vesting balances as a dictionary keyed by SSN.
-        var thisYearBalancesDict = await _totalService.TotalVestingBalance(ctx, req.ProfitYear, req.ProfitYear, today)
+
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        var thisYearBalancesDict = await _totalService.TotalVestingBalance(ctx, profitYearRange.beginProfitYear, profitYearRange.endProfitYear, today)
             .Where(x => ssns.Contains(x.Ssn))
             .ToDictionaryAsync(x => x.Ssn, cancellationToken);
 
@@ -330,15 +336,12 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         // Apply pagination
         var paginatedResults = membersSummary.Skip(req.Skip ?? 0).Take(req.Take ?? byte.MaxValue).ToList();
 
-        var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
-        var lastCalInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(lastYear, cancellationToken);
-
         return new TerminatedEmployeeAndBeneficiaryResponse
         {
             ReportName = "Terminated Employees",
             ReportDate = DateTimeOffset.UtcNow,
-            StartDate = lastCalInfo.FiscalBeginDate,
-            EndDate = calInfo.FiscalEndDate,
+            StartDate = req.BeginningDate,
+            EndDate = req.EndingDate,
             TotalVested = totalVested,
             TotalForfeit = totalForfeit,
             TotalEndingBalance = totalEndingBalance,
