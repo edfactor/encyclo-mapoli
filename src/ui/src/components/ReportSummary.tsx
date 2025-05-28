@@ -1,7 +1,7 @@
 import React from "react";
 import { Typography } from "@mui/material";
 import { PagedReportResponse } from "../reduxstore/types";
-import { tryddmmyyyyToDate } from "../utils/dateUtils";
+import { mmDDYYFormat } from "../utils/dateUtils";
 
 interface ReportSummaryProps<T> {
   report: PagedReportResponse<T>;
@@ -17,7 +17,7 @@ export function ReportSummary<T>({ report }: ReportSummaryProps<T>) {
           })`}
         </Typography>
         <Typography sx={{ color: "#0258A5" }}>
-          {`Report Range: ${tryddmmyyyyToDate(report.startDate)} - ${tryddmmyyyyToDate(report.endDate)} || Data Source: ${
+          {`Report Range: ${mmDDYYFormat(report.startDate)} - ${mmDDYYFormat(report.endDate)} || Data Source: ${
             report.dataSource
           }`}
         </Typography>

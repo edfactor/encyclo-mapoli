@@ -658,11 +658,6 @@ export const YearsEndApi = createApi({
       },
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
-          // Don't proceed with API call if validation failed
-          if (arg.profitYear < 2020 || arg.profitYear > 2100) {
-            return;
-          }
-
           const { data } = await queryFulfilled;
           dispatch(setTermination(data));
         } catch (err) {
