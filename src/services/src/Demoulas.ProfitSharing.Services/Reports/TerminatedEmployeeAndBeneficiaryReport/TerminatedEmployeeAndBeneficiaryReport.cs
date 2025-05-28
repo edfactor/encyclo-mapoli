@@ -1,7 +1,6 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
@@ -17,17 +16,14 @@ namespace Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficia
 public sealed class TerminatedEmployeeAndBeneficiaryReport
 {
     private readonly IProfitSharingDataContextFactory _factory;
-    private readonly ICalendarService _calendarService;
     private readonly TotalService _totalService;
     private readonly IDemographicReaderService _demographicReaderService;
 
     public TerminatedEmployeeAndBeneficiaryReport(IProfitSharingDataContextFactory factory,
-        ICalendarService calendarService,
         TotalService totalService,
         IDemographicReaderService demographicReaderService)
     {
         _factory = factory;
-        _calendarService = calendarService;
         _totalService = totalService;
         _demographicReaderService = demographicReaderService;
     }

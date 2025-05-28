@@ -28,6 +28,42 @@ The Definition of Ready outlines the prerequisites for any user story, task, or 
    - **Level of Effort:** Reach consensus on the effort estimation (e.g., story points) by the development team.
    - **Capacity Planning:** Consider team capacity and workload when allocating tasks.
 
+## Definition of Done (DoD)
+The Definition of Done outlines the criteria that must be met for any user story, task, or bug fix to be considered complete and ready for release or deployment.
+
+### Criteria
+1. **Acceptance Criteria Met**
+   - All acceptance criteria defined in the user story or task are fully implemented and verified.
+2. **Code Quality**
+   - Code is reviewed and approved according to the Code Review and Pull Request Guidelines.
+   - No critical or high-severity bugs remain unresolved.
+3. **Testing**
+   - All relevant unit, integration, and end-to-end tests are written and passing.
+   - Test coverage is adequate for new and changed code.
+   - Manual testing (if required) is completed and documented.
+4. **Documentation**
+   - Code is documented where necessary (methods, classes, complex logic).
+   - User-facing documentation is updated (if applicable).
+   - Release notes or change logs are updated (if required).
+5. **Deployment Readiness**
+   - Code is merged to the main branch and builds successfully.
+   - All automated checks (CI/CD) pass.
+   - Feature is deployed to the appropriate environment(s) for validation.
+6. **Compliance and Security**
+   - All security, compliance, and regulatory requirements are met.
+   - Sensitive data is handled according to project standards.
+7. **Stakeholder Review**
+   - Product owner or relevant stakeholders have reviewed and accepted the work.
+8. **Story Points Added**
+   - Each user story, task, or bug fix must have story points assigned and documented to support estimation and velocity tracking.
+
+<!--
+Solution Explanation:
+- Added a new criterion (8. Story Points Added) to the Definition of Done section.
+- This ensures that every completed work item is estimated, supporting agile best practices and team velocity tracking.
+- The comment block above explains the rationale for this addition for future maintainers and reviewers.
+-->
+
 ## Code Review and Pull Request Guidelines
 1. **Code Correctness and Functionality**
    - Verify that the code meets its intended functionality.
