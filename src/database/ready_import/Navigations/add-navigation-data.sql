@@ -80,13 +80,10 @@ INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUM
 VALUES(31,14, 'Profit Share Forfeit', 'PAY443','forfeit', 1, 6, '', 0);
 
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(60,14, 'Profit Share Update', 'PAY444','profit-share-update', 1, 7, '', 0);
+VALUES(60,14, 'Master Update', 'PAY444|PAY447','profit-share-update', 1, 7, '', 0);
 
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(61,14, 'Profit Share Edit', 'PAY447','profit-share-edit', 1, 8, '', 0);
-
-INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(62,14, 'Profit Master Update', 'PAY460, PROFTLD','profit-master-update', 1, 9, '', 0);
+VALUES(62,14, 'Profit Master Update', 'PAY460, PROFTLD','profit-master-update', 1, 8, '', 1);
 
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
 VALUES(33,14, 'Prof PayMaster Update', 'PAY450','pay450-summary', 1, 10, '', 0);
