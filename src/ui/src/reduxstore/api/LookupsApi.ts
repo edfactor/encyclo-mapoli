@@ -1,39 +1,21 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
 
 import { setAccountingYearData, setMissivesData } from "reduxstore/slices/lookupsSlice";
-import { RootState } from "reduxstore/store";
 import {
   CalendarResponseDto,
   MissiveResponse,
   ProfitYearRequest
 } from "reduxstore/types";
-import { url } from "./api";
+import { createDataSourceAwareBaseQuery, url } from "./api";
 
+const baseQuery = createDataSourceAwareBaseQuery();
 export const LookupsApi = createApi({
-  baseQuery: fetchBaseQuery({
-    baseUrl: `${url}/api/lookup/`,
-    prepareHeaders: (headers, { getState }) => {
-      const token = (getState() as RootState).security.token;
-      const impersonating = (getState() as RootState).security.impersonating;
-      if (token) {
-        headers.set("authorization", `Bearer ${token}`);
-      }
-      if (impersonating) {
-        headers.set("impersonation", impersonating);
-      } else {
-        const localImpersonation = localStorage.getItem("impersonatingRole");
-        if (localImpersonation) {
-          headers.set("impersonation", localImpersonation);
-        }
-      }
-      return headers;
-    }
-  }),
+  baseQuery: baseQuery,
   reducerPath: "lookupsApi",
   endpoints: (builder) => ({
     getAccountingYear: builder.query<CalendarResponseDto, ProfitYearRequest>({
       query: (params) => ({
-        url: "calendar/accounting-year",
+        url: "/lookup/calendar/accounting-year",
         method: "GET",
         params: {
           profitYear: params.profitYear

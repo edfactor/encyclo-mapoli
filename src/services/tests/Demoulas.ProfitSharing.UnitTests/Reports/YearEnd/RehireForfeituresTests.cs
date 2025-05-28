@@ -7,6 +7,7 @@ using CsvHelper.Configuration;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Api;
+using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -50,7 +51,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
             {
                 ReportName = "REHIRE'S PROFIT SHARING DATA",
                 ReportDate = DateTimeOffset.UtcNow,
-                StartDate = SqlDateTime.MinValue.Value.ToDateOnly(),
+                StartDate = ReferenceData.DsmMinValue(),
                 EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
                 Response = new PaginatedResponseDto<RehireForfeituresResponse>
                 {
@@ -155,7 +156,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
         {
             ReportName = "REHIRE'S PROFIT SHARING DATA",
             ReportDate = DateTimeOffset.UtcNow,
-            StartDate = SqlDateTime.MinValue.Value.ToDateOnly(),
+            StartDate = ReferenceData.DsmMinValue(),
             EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
             Response = new PaginatedResponseDto<RehireForfeituresResponse> { Results = new List<RehireForfeituresResponse>() }
         };
@@ -178,7 +179,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
         {
             ReportName = "REHIRE'S PROFIT SHARING DATA",
             ReportDate = DateTimeOffset.UtcNow,
-            StartDate = SqlDateTime.MinValue.Value.ToDateOnly(),
+            StartDate = ReferenceData.DsmMinValue(),
             EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
             Response = new PaginatedResponseDto<RehireForfeituresResponse> { Results = [] }
         };
@@ -244,7 +245,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
         example.FullName = demo.ContactInfo.FullName;
         example.CompanyContributionYears = 0;
         example.HoursCurrentYear = payProfit.CurrentHoursYear;
-        example.ReHiredDate = demo.ReHireDate ?? SqlDateTime.MinValue.Value.ToDateOnly();
+        example.ReHiredDate = demo.ReHireDate ?? ReferenceData.DsmMinValue();
         example.EmploymentStatus = demo.EmploymentStatus.Name;
         example.Details = details.Select(pd => new MilitaryRehireProfitSharingDetailResponse { Forfeiture = pd.Forfeiture, Remark = pd.Remark, ProfitYear = pd.ProfitYear })
             .ToList();

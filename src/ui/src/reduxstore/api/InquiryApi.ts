@@ -1,30 +1,12 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
 
 import { setMasterInquiryData } from "reduxstore/slices/inquirySlice";
-import { RootState } from "reduxstore/store";
 import { MasterInquiryRequest, MasterInquiryResponseType } from "reduxstore/types";
-import { url } from "./api";
+import { createDataSourceAwareBaseQuery } from "./api";
 
+const baseQuery = createDataSourceAwareBaseQuery();
 export const InquiryApi = createApi({
-  baseQuery: fetchBaseQuery({
-    baseUrl: `${url}/api/`,
-    prepareHeaders: (headers, { getState }) => {
-      const token = (getState() as RootState).security.token;
-      const impersonating = (getState() as RootState).security.impersonating;
-      if (token) {
-        headers.set("authorization", `Bearer ${token}`);
-      }
-      if (impersonating) {
-        headers.set("impersonation", impersonating);
-      } else {
-        const localImpersonation = localStorage.getItem("impersonatingRole");
-        if (localImpersonation) {
-          headers.set("impersonation", localImpersonation);
-        }
-      }
-      return headers;
-    }
-  }),
+  baseQuery: baseQuery,
   reducerPath: "inquiryApi",
   endpoints: (builder) => ({
     getProfitMasterInquiry: builder.query<MasterInquiryResponseType, MasterInquiryRequest>({
