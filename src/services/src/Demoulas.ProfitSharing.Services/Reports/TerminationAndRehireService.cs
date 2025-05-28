@@ -23,22 +23,16 @@ namespace Demoulas.ProfitSharing.Services.Reports;
 public sealed class TerminationAndRehireService : ITerminationAndRehireService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
-    private readonly ICalendarService _calendarService;
     private readonly TotalService _totalService;
-    private readonly ILoggerFactory _factory;
     private readonly IDemographicReaderService _demographicReaderService;
 
     public TerminationAndRehireService(
         IProfitSharingDataContextFactory dataContextFactory,
-        ICalendarService calendarService,
         TotalService totalService,
-        ILoggerFactory factory,
         IDemographicReaderService demographicReaderService)
     {
         _dataContextFactory = dataContextFactory;
-        _calendarService = calendarService;
         _totalService = totalService;
-        _factory = factory;
         _demographicReaderService = demographicReaderService;
     }
 
@@ -89,7 +83,7 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
     /// <returns>A task that represents the asynchronous operation. The task result contains a report response with the rehire profit sharing data.</returns>
     public async Task<ReportResponseBase<RehireForfeituresResponse>> FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYearsAsync(StartAndEndDateRequest req, CancellationToken cancellationToken)
     {
-        var validator = new StartAndEndDateRequestValidator(_calendarService, _factory);
+        var validator = new StartAndEndDateRequestValidator();
         await validator.ValidateAndThrowAsync(req, cancellationToken);
         
 

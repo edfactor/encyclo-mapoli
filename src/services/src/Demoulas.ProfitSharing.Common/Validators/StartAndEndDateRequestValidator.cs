@@ -8,50 +8,15 @@ namespace Demoulas.ProfitSharing.Common.Validators;
 
 public class StartAndEndDateRequestValidator : PaginationValidatorBase<StartAndEndDateRequest>
 {
-    private readonly ICalendarService _calendarService;
-    private readonly ILogger<StartAndEndDateRequestValidator> _logger;
-
-    public StartAndEndDateRequestValidator(
-        ICalendarService calendarService,
-        ILoggerFactory factory)
+    public StartAndEndDateRequestValidator()
     {
-        _calendarService = calendarService;
-        _logger = factory.CreateLogger<StartAndEndDateRequestValidator>();
-
-        
         RuleFor(x => x.BeginningDate)
-            .NotEmpty().WithMessage("Beginning date is required.")
-            .MustAsync(BeWithinFiscalYear)
-            .WithMessage("Beginning date must be within the fiscal year range: {FiscalBegin} through {FiscalEnd}.");
-
+            .NotEmpty().WithMessage("Beginning date is required.");
+  
 
         RuleFor(x => x.EndingDate)
             .NotEmpty().WithMessage("Ending date is required.")
             .GreaterThanOrEqualTo(x => x.BeginningDate)
             .WithMessage("Ending date must be greater than or equal to beginning date.");
     }
-
-    private async Task<bool> BeWithinFiscalYear(StartAndEndDateRequest request, DateTime date, ValidationContext<StartAndEndDateRequest> context, CancellationToken cancellationToken)
-    {
-        try
-        {
-            var bracket = await _calendarService.GetYearStartAndEndAccountingDatesAsync((short)request.BeginningDate.Year, cancellationToken);
-            var fiscalBegin = bracket.FiscalBeginDate.ToDateTime(TimeOnly.MinValue);
-            var fiscalEnd = bracket.FiscalEndDate.ToDateTime(TimeOnly.MinValue);
-            if (date < fiscalBegin || date > fiscalEnd)
-            {
-                // Add the fiscal year range to the message
-                context.MessageFormatter.AppendArgument("FiscalBegin", fiscalBegin.ToString("MMM-dd"));
-                context.MessageFormatter.AppendArgument("FiscalEnd", fiscalEnd.ToString("MMM-dd"));
-                return false;
-            }
-            return true;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error validating date against fiscal year boundaries");
-            return false;
-        }
-    }
-
 }

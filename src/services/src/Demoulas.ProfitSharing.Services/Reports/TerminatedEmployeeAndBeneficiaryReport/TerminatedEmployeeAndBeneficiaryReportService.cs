@@ -9,17 +9,14 @@ namespace Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficia
 public class TerminatedEmployeeAndBeneficiaryReportService : ITerminatedEmployeeAndBeneficiaryReportService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
-    private readonly ICalendarService _calendarService;
     private readonly TotalService _totalService;
     private readonly IDemographicReaderService _demographicReaderService;
 
     public TerminatedEmployeeAndBeneficiaryReportService(IProfitSharingDataContextFactory dataContextFactory,
-        ICalendarService calendarService,
         TotalService totalService,
         IDemographicReaderService demographicReaderService)
     {
         _dataContextFactory = dataContextFactory;
-        _calendarService = calendarService;
         _totalService = totalService;
         _demographicReaderService = demographicReaderService;
     }
@@ -27,7 +24,7 @@ public class TerminatedEmployeeAndBeneficiaryReportService : ITerminatedEmployee
 
     public Task<TerminatedEmployeeAndBeneficiaryResponse> GetReportAsync(StartAndEndDateRequest req, CancellationToken ct)
     {
-        TerminatedEmployeeAndBeneficiaryReport reportGenerator = new(_dataContextFactory, _calendarService, _totalService, _demographicReaderService);
+        TerminatedEmployeeAndBeneficiaryReport reportGenerator = new(_dataContextFactory, _totalService, _demographicReaderService);
         return reportGenerator.CreateDataAsync(req, ct);
     }
 }
