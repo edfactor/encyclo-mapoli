@@ -67,7 +67,7 @@ builder.Services.AddCors(options =>
         _ = pol.AllowAnyMethod() // Specify the allowed methods, e.g., GET, POST, etc.
             .AllowAnyHeader()
             .AllowAnyOrigin()
-            .WithExposedHeaders("Location");
+            .WithExposedHeaders("Location", "x-demographic-data-source");
     });
 });
 
