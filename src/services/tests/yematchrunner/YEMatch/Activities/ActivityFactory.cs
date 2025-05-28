@@ -14,20 +14,8 @@ public sealed class ActivityFactory
     private readonly List<IActivity> _smartActivities;
     private readonly List<IActivity> _testActivities;
 
-    private ActivityFactory()
+    private ActivityFactory(string dataDirectory)
     {
-        // used to get desired BaseDataDirectory for writing log files
-        IConfigurationRoot config = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json", true, true).Build();
-
-        string baseDir = config["BaseDataDirectory"] ?? Path.Combine("/tmp", "ye");
-        Directory.CreateDirectory(baseDir);
-
-        string dataDirectory = Path.Combine(baseDir, $"{DateTime.Now:dd-MMM-HH-mm}");
-        Directory.CreateDirectory(dataDirectory);
-        Console.WriteLine($"Directory created: file:///{dataDirectory}");
-
         Stopwatch wholeRunStopWatch = new();
         wholeRunStopWatch.Start();
 
@@ -57,14 +45,14 @@ public sealed class ActivityFactory
     private static ActivityFactory inst => _instance ??
                                            throw new InvalidOperationException("ActivityFactory not initialized.");
 
-    public static void Initialize()
+    public static void Initialize(string dataDirectory)
     {
         if (_instance is not null)
         {
             throw new InvalidOperationException("TestEnvironment already initialized.");
         }
 
-        _instance = new ActivityFactory();
+        _instance = new ActivityFactory(dataDirectory);
     }
 
 

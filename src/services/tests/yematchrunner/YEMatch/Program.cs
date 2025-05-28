@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
+using Microsoft.Extensions.Configuration;
 
 namespace YEMatch;
 
@@ -25,9 +26,41 @@ internal static class Program
     // A24 - Updates enrollement_id 
 
 #pragma warning disable AsyncFixer01
+
+    private static string _dataDirectory = "";
+
     private static async Task Main(string[] args)
     {
-        ActivityFactory.Initialize();
+        _dataDirectory = Config.CreateDataDirectory();
+        ActivityFactory.Initialize(_dataDirectory);
+
+        await Run(Specify(
+            "R0",
+            "DropBadBenes",
+            "R2S",
+            "S12", // Freeze on Smart
+            "P18",  // Test PayProfit Updates; EarnPoints, ZeroCont, New Employee, CertDate 
+            "TestPayProfitSelectedColumns", // Test PayProfit Updates; EarnPoints, ZeroCont, New Employee, CertDate 
+            "R20" // Pay444 report
+        ));
+    }
+
+    /*
+     * Should probably become [Fact] test cases.
+     */
+    public static async Task Others()
+    {
+        await Run(Specify(
+            "R0", // import obfuscated
+            // "TrimTo14Employees", // Reduces execution time to 1 minute
+            "R15",
+            "R16",
+            "R17",
+            "R18",
+            "R19",
+            "R20",
+            "R21"
+        ));
 
         // Tests that Frozen is handled correctly by messing up the badges.
         await Run(Specify(
@@ -94,13 +127,12 @@ internal static class Program
             }
         }
 
-        // This could go into the log directory, but I like seeing in the ide... so for now I'm  leave it at the project root
-        string filePath = $"../../../outcomes-{DateTime.Now:yyyyMMdd-HHmmss}.json";
-        await File.WriteAllTextAsync(filePath, JsonSerializer.Serialize(outcomes));
-        Console.WriteLine("Saved outcomes to file.");
+        string filePath = $"{_dataDirectory}/outcome.json";
+        var options = new JsonSerializerOptions { WriteIndented = true };
+        await File.WriteAllTextAsync(filePath, JsonSerializer.Serialize(outcomes,options));
 
         TimeSpan wholeRunElapsed = wholeRunStopWatch.Elapsed;
-        Console.WriteLine($"\n---- Completed in Took:  {wholeRunElapsed.Hours}h {wholeRunElapsed.Minutes}m {wholeRunElapsed.Seconds}s");
+        Console.WriteLine($"\n---- Completed YERunner.  Took:  {wholeRunElapsed.Hours}h {wholeRunElapsed.Minutes}m {wholeRunElapsed.Seconds}s");
     }
 
     private static List<IActivity> Specify(params List<string> activityNames)
