@@ -6,8 +6,7 @@ public record ReportResponseBase<TResponse>: IHasDateRange where TResponse : cla
 {
     public required string ReportName { get; init; }
     public DateTimeOffset ReportDate { get; init; } = DateTimeOffset.Now;
-
-    public required PaginatedResponseDto<TResponse> Response { get; set; }
     public required DateOnly StartDate { get; set; }
     public required DateOnly EndDate { get; set; }
+    public required PaginatedResponseDto<TResponse> Response { get; set; }
 }
