@@ -642,18 +642,13 @@ export const YearsEndApi = createApi({
     }),
     getTerminationReport: builder.query<TerminationResponse, TerminationRequest>({
       query: (params) => {
-        // Validate profit year range
-        if (params.profitYear < 2020 || params.profitYear > 2100) {
-          console.error("Invalid profit year: Must be between 2020 and 2100");
-          // Return a dummy endpoint that won't be called
-          return { url: "invalid-request", method: "GET" };
-        }
-
+       
         return {
           url: "yearend/terminated-employees",
           method: "GET",
           params: {
-            profitYear: params.profitYear,
+            beginningDate: params.beginningDate,
+            endingDate: params.endingDate,
             skip: params.pagination.skip,
             take: params.pagination.take,
             sortBy: params.pagination.sortBy,

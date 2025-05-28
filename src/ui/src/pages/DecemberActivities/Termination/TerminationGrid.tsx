@@ -8,15 +8,17 @@ import { TotalsGrid } from "../../../components/TotalsGrid/TotalsGrid";
 import { Typography } from "@mui/material";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import { ReportSummary } from "../../../components/ReportSummary";
+import { TerminationRequest } from "reduxstore/types";
 
 import { GetTerminationColumns } from "./TerminationGridColumn";
 
 interface TerminationGridSearchProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
+  searchParams: TerminationRequest | null;
 }
 
-const TerminationGrid: React.FC<TerminationGridSearchProps> = ({ initialSearchLoaded, setInitialSearchLoaded }) => {
+const TerminationGrid: React.FC<TerminationGridSearchProps> = ({ initialSearchLoaded, setInitialSearchLoaded, searchParams }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
@@ -25,33 +27,23 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({ initialSearchLo
   });
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const { termination } = useSelector((state: RootState) => state.yearsEnd);
-  const profitYear = useDecemberFlowProfitYear();
   const [triggerSearch, { isFetching }] = useLazyGetTerminationReportQuery();
   const navigate = useNavigate();
 
-  const onSearch = useCallback(async () => {
-    const { termination } = useSelector((state: RootState) => state.yearsEnd);
-
-    const request = {
-      profitYear: profitYear || 0,
-      beginningDate: termination?.startDate,
-      endingDate: termination?.endDate,
-      pagination: {
-        skip: pageNumber * pageSize,
-        take: pageSize,
-        sortBy: sortParams.sortBy,
-        isSortDescending: sortParams.isSortDescending
-      }
-    };
-
-    await triggerSearch(request, false);
-  }, [pageNumber, pageSize, sortParams, profitYear, triggerSearch]);
-
   useEffect(() => {
-    if (initialSearchLoaded && hasToken) {
-      onSearch();
+    if (searchParams && hasToken) {
+      const request = {
+        ...searchParams,
+        pagination: {
+          skip: pageNumber * pageSize,
+          take: pageSize,
+          sortBy: sortParams.sortBy,
+          isSortDescending: sortParams.isSortDescending
+        }
+      };
+      triggerSearch(request, false);
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch, hasToken]);
+  }, [searchParams, pageNumber, pageSize, sortParams, hasToken, triggerSearch]);
 
   // Wrapper to pass react function to non-react class
   const handleNavigationForButton = useCallback(

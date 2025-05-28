@@ -1,25 +1,19 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import Grid2 from "@mui/material/Grid2";
 import { Controller, useForm } from "react-hook-form";
-import { useDispatch, useSelector } from "react-redux";
-import { useLazyGetTerminationReportQuery } from "reduxstore/api/YearsEndApi";
-import {
-  clearRehireForfeituresDetails,
-  clearRehireForfeituresQueryParams,
-  setMilitaryAndRehireForfeituresQueryParams
-} from "reduxstore/slices/yearsEndSlice";
-import { RootState } from "reduxstore/store";
+import { useSelector } from "react-redux";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 import { CalendarResponseDto, TerminationRequest } from "../../../reduxstore/types";
 import { tryddmmyyyyToDate } from "../../../utils/dateUtils";
+import { RootState } from "reduxstore/store";
 
 const schema = yup.object().shape({
   profitYear: yup.number().required("Profit Year is required"),
-  beginningDate: yup.string().nullable(),
-  endingDate: yup.string().nullable(),
+  beginningDate: yup.string().required("Begin Date is required"),
+  endingDate: yup.string().required("End Date is required"),
   pagination: yup
     .object({
       skip: yup.number().required(),
@@ -32,8 +26,8 @@ const schema = yup.object().shape({
 
 interface TerminationSearchFilterProps {
   setInitialSearchLoaded: (include: boolean) => void;
-  fiscalData: CalendarResponseDto;
-  onSearch: () => void;
+  fiscalData: CalendarResponseDto | null;
+  onSearch: (params: TerminationRequest) => void;
 }
 
 const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
@@ -41,25 +35,10 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
   fiscalData,
   onSearch 
 }) => {
-  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
-  const [triggerSearch, { isFetching }] = useLazyGetTerminationReportQuery();
+  if (!fiscalData) return null;
+
   const { termination } = useSelector((state: RootState) => state.yearsEnd);
   const defaultProfitYear = useDecemberFlowProfitYear();
-  const dispatch = useDispatch();
-
-  const validateAndSubmit = (data: TerminationRequest) => {
-    if (isValid && hasToken) {
-      const updatedData = {
-        ...data,
-        profitYear: defaultProfitYear || 0,
-        beginningDate: data.beginningDate || fiscalData.fiscalBeginDate || '',
-        endingDate: data.endingDate || fiscalData.fiscalEndDate || '',
-      };
-
-      triggerSearch(updatedData);
-      onSearch(); // Call onSearch to trigger page reset
-    }
-  };
 
   const {
     control,
@@ -68,28 +47,34 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
     reset,
     trigger
   } = useForm<TerminationRequest>({
-    resolver: yupResolver<TerminationRequest>(schema),
+    resolver: yupResolver(schema),
     defaultValues: {
       profitYear: defaultProfitYear || 0,
-      beginningDate: termination?.startDate || fiscalData.fiscalBeginDate || undefined,
-      endingDate: termination?.endDate || fiscalData.fiscalEndDate || undefined,
+      beginningDate: termination?.startDate || fiscalData.fiscalBeginDate || '',
+      endingDate: termination?.endDate || fiscalData.fiscalEndDate || '',
       pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }
     }
   });
 
-  // Effect to fetch fiscal data when profit year changes
+  const validateAndSubmit = (data: TerminationRequest) => {
+    onSearch({
+      ...data,
+      profitYear: defaultProfitYear || 0,
+      beginningDate: data.beginningDate || fiscalData.fiscalBeginDate || '',
+      endingDate: data.endingDate || fiscalData.fiscalEndDate || '',
+    });
+  };
+
   const validateAndSearch = handleSubmit(validateAndSubmit);
 
   const handleReset = () => {
     setInitialSearchLoaded(false);
-
     reset({ 
       profitYear: defaultProfitYear || 0,
       beginningDate: fiscalData.fiscalBeginDate,
       endingDate: fiscalData.fiscalEndDate,
       pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }
     });
-
     trigger();
   };
 
@@ -150,8 +135,8 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
         <SearchAndReset
           handleReset={handleReset}
           handleSearch={validateAndSearch}
-          isFetching={isFetching}
-          disabled={!isValid || isFetching}
+          isFetching={false}
+          disabled={!isValid}
         />
       </Grid2>
     </form>
