@@ -1,6 +1,5 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
 
-import { RootState } from "reduxstore/store";
 import {
   FrozenStateResponse,
   SortedPaginationRequestDto,
@@ -9,30 +8,12 @@ import {
   CurrentUserResponseDto
 } from "reduxstore/types";
 import { setFrozenStateResponse, setFrozenStateCollectionResponse } from "reduxstore/slices/frozenSlice";
-import { url } from "./api";
+import { createDataSourceAwareBaseQuery } from "./api";
 import { Paged } from "smart-ui-library";
 
+const baseQuery = createDataSourceAwareBaseQuery();
 export const ItOperationsApi = createApi({
-  baseQuery: fetchBaseQuery({
-    baseUrl: `${url}/api/`,
-    prepareHeaders: (headers, { getState }) => {
-      const root = getState() as RootState;
-      const token = root.security.token;
-      const impersonating = root.security.impersonating;
-      if (token) {
-        headers.set("authorization", `Bearer ${token}`);
-      }
-      if (impersonating) {
-        headers.set("impersonation", impersonating);
-      } else {
-        const localImpersonation = localStorage.getItem("impersonatingRole");
-        if (localImpersonation) {
-          headers.set("impersonation", localImpersonation);
-        }
-      }
-      return headers;
-    }
-  }),
+  baseQuery: baseQuery,
   reducerPath: "itOperationsApi",
   endpoints: (builder) => ({
     getFrozenStateResponse: builder.query<FrozenStateResponse, void>({

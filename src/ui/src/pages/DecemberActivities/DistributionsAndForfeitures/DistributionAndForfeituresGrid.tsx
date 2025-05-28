@@ -1,5 +1,5 @@
 import { Typography } from "@mui/material";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetDistributionsAndForfeituresQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
@@ -8,6 +8,7 @@ import { GetDistributionsAndForfeituresColumns } from "./DistributionAndForfeitu
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import { CAPTIONS } from "../../../constants";
 import { TotalsGrid } from "../../../components/TotalsGrid/TotalsGrid";
+import ReportSummary from "../../../components/ReportSummary";
 
 interface DistributionsAndForfeituresGridSearchProps {
   initialSearchLoaded: boolean;
@@ -87,14 +88,8 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
               leftColumnHeaders={["Forfeitures"]}
               topRowHeaders={[]}></TotalsGrid>
           </div>
-          
-          <div style={{ padding: "0 24px 0 24px" }}>
-            <Typography
-              variant="h2"
-              sx={{ color: "#0258A5" }}>
-              {`DISTRIBUTIONS AND FORFEITURES (${distributionsAndForfeitures?.response.total || 0} ${distributionsAndForfeitures?.response.total === 1 ? 'Record' : 'Records'})`}
-            </Typography>
-          </div>
+
+          <ReportSummary report={distributionsAndForfeitures} />
           <DSMGrid
             preferenceKey={CAPTIONS.DISTRIBUTIONS_AND_FORFEITURES}
             isLoading={isFetching}

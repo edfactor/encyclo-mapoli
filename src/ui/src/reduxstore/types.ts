@@ -27,11 +27,7 @@ export interface ReportsByAgeParams extends ProfitYearRequest {
   reportType: FrozenReportsByAgeRequestType;
 }
 
-export interface DemographicBadgesNotInPayprofitResponse {
-  reportName: string;
-  reportDate: string;
-  response: Paged<DemographicBadgesNotInPayprofit>;
-}
+export type DemographicBadgesNotInPayprofitResponse = PagedReportResponse<DemographicBadgesNotInPayprofit>
 
 export interface DemographicBadgesNotInPayprofit {
   badgeNumber: number;
@@ -268,13 +264,10 @@ export interface EligibleEmployee {
   storeNumber: number;
 }
 
-export interface EligibleEmployeeResponseDto {
+export interface EligibleEmployeeResponseDto extends PagedReportResponse<EligibleEmployee> {
   numberReadOnFrozen: number;
   numberNotSelected: number;
-  numberWritten: number;
-  reportName: string;
-  reportDate: string;
-  response: Paged<EligibleEmployee>;
+  numberWritten: number;  
 }
 
 export interface ForfeituresAndPointsQueryParams extends ProfitYearRequest {
@@ -381,9 +374,7 @@ export interface FrozenReportsForfeituresAndPointsRequest extends ProfitYearRequ
   useFrozenData: boolean;
 }
 
-export interface ProfitSharingDistributionsByAge {
-  reportName: string;
-  reportDate: string;
+export interface ProfitSharingDistributionsByAge extends PagedReportResponse<ProfitSharingDistributionsByAgeResponse> {
   reportType: FrozenReportsByAgeRequestType;
   hardshipTotalEmployees: number;
   regularTotalAmount: number;
@@ -392,8 +383,7 @@ export interface ProfitSharingDistributionsByAge {
   distributionTotalAmount: number;
   totalEmployees: number;
   bothHardshipAndRegularEmployees: number;
-  bothHardshipAndRegularAmount: number;
-  response: Paged<ProfitSharingDistributionsByAgeResponse>;
+  bothHardshipAndRegularAmount: number;  
 }
 
 export interface ProfitSharingDistributionsByAgeResponse {
@@ -408,13 +398,10 @@ export interface ProfitSharingDistributionsByAgeResponse {
   commentTypeId: number | null;
 }
 
-export interface ContributionsByAge {
-  reportName: string;
-  reportDate: string;
+export interface ContributionsByAge extends PagedReportResponse<ContributionsByAgeDetail> {
   reportType: FrozenReportsByAgeRequestType;
   totalEmployees: number;
-  totalAmount: number;
-  response: Paged<ContributionsByAgeDetail>;
+  totalAmount: number;  
 }
 
 export interface ContributionsByAgeDetail {
@@ -423,13 +410,10 @@ export interface ContributionsByAgeDetail {
   amount: number;
 }
 
-export interface ForfeituresByAge {
-  reportName: string;
-  reportDate: string;
+export interface ForfeituresByAge extends PagedReportResponse<ForfeituresByAgeDetail> {
   reportType: FrozenReportsByAgeRequestType;
   totalEmployees: number;
-  totalAmount: number;
-  response: Paged<ForfeituresByAgeDetail>;
+  totalAmount: number;  
 }
 
 export interface ForfeituresAndPointsDetail {
@@ -439,17 +423,14 @@ export interface ForfeituresAndPointsDetail {
   forfeitures: number;
   forfeitPoints: number;
   earningPoints: number;
-  benefificaryPsn: number;
+  beneficiaryPsn: number;
 }
 
-export interface ForfeituresAndPoints {
-  reportName: string;
-  reportDate: string;
+export interface ForfeituresAndPoints extends PagedReportResponse<ForfeituresAndPointsDetail>{
   useFrozenData: boolean;
   totalEarningPoints: number;
   totalForfeitPoints: number;
-  totalForfeitures: number;
-  response: Paged<ForfeituresAndPointsDetail>;
+  totalForfeitures: number;  
 }
 
 export interface ForfeituresByAgeDetail {
@@ -504,9 +485,7 @@ export interface BalanceByDetailBase {
   partTimeCount?: number;
 }
 
-export interface BalanceByBase<TDetail extends BalanceByDetailBase> {
-  reportName: string;
-  reportDate: string;
+export interface BalanceByBase<TDetail extends BalanceByDetailBase> extends PagedReportResponse<TDetail> {
   reportType: FrozenReportsByAgeRequestType;
   balanceTotalAmount: number;
   vestedTotalAmount?: number;
@@ -518,8 +497,7 @@ export interface BalanceByBase<TDetail extends BalanceByDetailBase> {
   totalEmployeeAmount: number; // Derived
   totalEmployeesVestedAmount: number; // Derived
   totalFullTimeCount?: number;
-  totalPartTimeCount?: number;
-  response: Paged<TDetail>;
+  totalPartTimeCount?: number;  
 }
 
 export interface BalanceByAgeDetail extends BalanceByDetailBase {
@@ -532,7 +510,7 @@ export interface BalanceByAge extends BalanceByBase<BalanceByAgeDetail> { }
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 export interface BalanceByYears extends BalanceByBase<BalanceByAgeDetail> { }
 
-export interface VestedAmountsByAge {
+export interface VestedAmountsByAge extends PagedReportResponse<VestedAmountsByAgeDetail> {
   totalFullTime100PercentAmount: number;
   totalFullTimePartialAmount: number;
   totalFullTimeNotVestedAmount: number;
@@ -543,10 +521,7 @@ export interface VestedAmountsByAge {
   totalBeneficiaryAmount: number;
   totalFullTimeCount: number;
   totalNotVestedCount: number;
-  totalPartialVestedCount: number;
-  reportName: string;
-  reportDate: string;
-  response: Paged<VestedAmountsByAgeDetail>;
+  totalPartialVestedCount: number;  
 }
 
 export interface VestedAmountsByAgeDetail {
@@ -592,14 +567,11 @@ export interface TerminationDetail {
   enrollmentCode: number;
 }
 
-export interface TerminationResponse {
+export interface TerminationResponse extends PagedReportResponse<TerminationDetail>{
   totalVested: number;
   totalForfeit: number;
   totalEndingBalance: number;
-  totalBeneficiaryAllocation: number;
-  reportName: string;
-  reportDate: string;
-  response: Paged<TerminationDetail[]>;
+  totalBeneficiaryAllocation: number;  
 }
 
 export interface ProfitShareUpdateRequest {
@@ -656,14 +628,11 @@ export interface ProfitShareUpdateDetail {
   treatAsBeneficiary: boolean;
 }
 
-export interface ProfitShareUpdateResponse {
+export interface ProfitShareUpdateResponse extends PagedReportResponse<ProfitShareUpdateDetail> {
   totalVested: number;
   totalForfeit: number;
   totalEndingBalance: number;
   totalBeneficiaryAllocation: number;
-  reportName: string;
-  reportDate: string;
-  response: Paged<ProfitShareUpdateDetail[]>;
   hasExceededMaximumContributions: true;
   adjustmentsSummary: ProfitShareAdjustmentSummary;
   profitShareUpdateTotals: ProfitShareUpdateTotals;
@@ -733,25 +702,18 @@ export interface GrossWagesReportDetail {
   enrollmentId: number;
 }
 
-export interface GrossWagesReportResponse {
-  reportName: string;
-  reportDate: string;
-  response: Paged<GrossWagesReportDetail[]>;
+export interface GrossWagesReportResponse extends PagedReportResponse<GrossWagesReportDetail> {
   totalGrossWages: number;
   totalProfitSharingAmount: number;
   totalLoans: number;
   totalForfeitures: number;
 }
 
-export interface ProfitShareEditResponse {
+export interface ProfitShareEditResponse  extends PagedReportResponse<ProfitShareEditDetail> {
   beginningBalanceTotal: number;
   contributionGrandTotal: number;
   incomingForfeitureGrandTotal: number;
   earningsGrandTotal: number;
-
-  reportName: string;
-  reportDate: string;
-  response: Paged<ProfitShareEditDetail[]>;
 }
 
 export interface ProfitShareMasterResponse {
@@ -791,10 +753,7 @@ export interface ProfitShareEditUpdateQueryParams extends ProfitMasterParams {
   badgeToAdjust2?: number | null;
 }
 
-export interface YearEndProfitSharingReportResponse {
-  reportName: string;
-  reportDate: string;
-  response: Paged<YearEndProfitSharingEmployee>;
+export interface YearEndProfitSharingReportResponse extends PagedReportResponse<YearEndProfitSharingEmployee> {
   wagesTotal: number;
   hoursTotal: number;
   pointsTotal: number;
@@ -819,15 +778,6 @@ export interface FrozenStateResponse {
 export interface FreezeDemographicsRequest {
   asOfDateTime: string;
   profitYear: number;
-}
-
-export interface ProfallData {
-  badge: number;
-  employeeName: string;
-  address: string;
-  city: string;
-  state: string;
-  zipCode: string;
 }
 
 export interface MilitaryContributionRequest extends ProfitYearRequest {
@@ -942,10 +892,7 @@ export interface GrandTotalsByStoreRowDto {
   rowTotal: number;
 }
 
-export interface BreakdownByStoreResponse {
-  reportName: string;
-  reportDate: string;
-  response: Paged<BreakdownByStoreEmployee>;
+export interface BreakdownByStoreResponse extends PagedReportResponse<BreakdownByStoreEmployee> {
   totalBeginningBalance: number;
   totalEarnings: number;
   totalContribution: number;
@@ -977,10 +924,8 @@ export interface Under21BreakdownByStoreEmployee {
   enrollmentId: number;
 }
 
-export interface Under21BreakdownByStoreResponse {
-  reportName: string;
-  reportDate: string;
-  response: Paged<Under21BreakdownByStoreEmployee>;
+export interface Under21BreakdownByStoreResponse extends PagedReportResponse<Under21BreakdownByStoreEmployee> {
+  
 }
 
 export interface Under21InactiveRequest extends ProfitYearRequest {
@@ -999,10 +944,8 @@ export interface Under21InactiveEmployee {
   enrollmentId: number;
 }
 
-export interface Under21InactiveResponse {
-  reportName: string;
-  reportDate: string;
-  response: Paged<Under21InactiveEmployee>;
+export interface Under21InactiveResponse extends PagedReportResponse<Under21InactiveEmployee> {
+
 }
 
 export interface Under21TotalsRequest extends ProfitYearRequest {
@@ -1084,22 +1027,13 @@ export interface UpdateSummaryEmployee {
   };
 }
 
-export interface UpdateSummaryResponse {
+export interface UpdateSummaryResponse extends PagedReportResponse<UpdateSummaryEmployee> {
   totalNumberOfEmployees: number;
   totalNumberOfBeneficiaries: number;
   totalBeforeProfitSharingAmount: number;
   totalBeforeVestedAmount: number;
   totalAfterProfitSharingAmount: number;
-  totalAfterVestedAmount: number;
-  reportName: string;
-  reportDate: string;
-  response: {
-    pageSize: number;
-    currentPage: number;
-    totalPages: number;
-    total: number;
-    results: UpdateSummaryEmployee[];
-  };
+  totalAfterVestedAmount: number;  
 }
 
 export interface ForfeitureAdjustmentRequest {
@@ -1127,18 +1061,9 @@ export interface ForfeitureAdjustmentDetail {
   netVested: number;
 }
 
-export interface ForfeitureAdjustmentResponse {
+export interface ForfeitureAdjustmentResponse extends PagedReportResponse<ForfeitureAdjustmentDetail> {
   totatNetBalance: number;
-  totatNetVested: number;
-  reportName: string;
-  reportDate: string;
-  response: {
-    pageSize: number | null;
-    currentPage: number | null;
-    totalPages: number | null;
-    total: number;
-    results: ForfeitureAdjustmentDetail[];
-  };
+  totatNetVested: number;  
 }
 
 export interface MissiveResponse {
@@ -1205,23 +1130,6 @@ export interface ReportPreset {
   name: string;
   description: string;
   params: FilterParams;
-}
-
-export interface ReportQueryParams {
-  profitYear: number;
-  pagination: PaginationParams;
-  isYearEnd: boolean;
-  minimumAgeInclusive?: number;
-  maximumAgeInclusive?: number;
-  minimumHoursInclusive?: number;
-  maximumHoursInclusive?: number;
-  includeActiveEmployees: boolean;
-  includeInactiveEmployees: boolean;
-  includeEmployeesTerminatedThisYear: boolean;
-  includeTerminatedEmployees: boolean;
-  includeBeneficiaries: boolean;
-  includeEmployeesWithPriorProfitSharingAmounts: boolean;
-  includeEmployeesWithNoPriorProfitSharingAmounts: boolean;
 }
 
 export interface ControlSheetRequest extends ProfitYearRequest {

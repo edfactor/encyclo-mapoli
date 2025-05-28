@@ -1,5 +1,6 @@
-import { ChevronLeft, ExpandLess, ExpandMore, Close } from "@mui/icons-material";
+import { ChevronLeft, Close, ExpandLess, ExpandMore } from "@mui/icons-material";
 import {
+  Alert,
   Box,
   Chip,
   Collapse,
@@ -12,12 +13,12 @@ import {
   ListItemText,
   SelectChangeEvent,
   SvgIcon,
-  Typography,
-  Alert
+  SvgIconProps,
+  Typography
 } from "@mui/material";
-import React, { useState, useEffect, useRef, FC } from "react";
+import React, { FC, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { clearActiveSubMenu, closeDrawer, openDrawer, setActiveSubMenu } from "reduxstore/slices/generalSlice";
 import {
   checkDecemberParamsAndGridsProfitYears,
@@ -28,13 +29,12 @@ import {
 import { drawerTitle, menuLevels } from "../../MenuData";
 import { drawerClosedWidth, drawerOpenWidth, MENU_LABELS } from "../../constants";
 import ProfitYearSelector from "components/ProfitYearSelector/ProfitYearSelector";
-
-import { SvgIconProps } from "@mui/material";
 import { RootState } from "reduxstore/store";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { ICommon } from "smart-ui-library";
 import { NavigationResponseDto } from "reduxstore/types";
+import { setCurrentNavigationId } from "reduxstore/slices/navigationSlice";
 
 // Define the highlight color as a constant
 const HIGHLIGHT_COLOR = "#0258A5";
@@ -50,10 +50,10 @@ const SidebarIcon = (props: SvgIconProps) => (
 );
 
 export interface PSDrawerProps extends ICommon {
-  navigationData?: NavigationResponseDto
+  navigationData?: NavigationResponseDto;
 }
 
-const PSDrawer: FC<PSDrawerProps> = ({navigationData}) => {
+const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isDrawerOpen: drawerOpen, activeSubmenu } = useSelector((state: RootState) => state.general);
@@ -69,7 +69,7 @@ const PSDrawer: FC<PSDrawerProps> = ({navigationData}) => {
   const dispatch = useDispatch();
   const profitYear = useDecemberFlowProfitYear();
   const fiscalFlowProfitYear = useFiscalCloseProfitYear();
-  const expandedOnceRef = useRef<{[key: string]: boolean}>({});
+  const expandedOnceRef = useRef<{ [key: string]: boolean }>({});
 
   const hasThirdLevel = (level: string, secondLevel: string) => {
     const hasSome = menuLevels(navigationData).some(
@@ -119,12 +119,20 @@ const PSDrawer: FC<PSDrawerProps> = ({navigationData}) => {
     setSelectedLevel(null);
   };
 
-  const handlePageClick = (route: string) => {
+  const settingCurrentNavigation = (navigationId?: number) => {
+    if (navigationId) {
+      dispatch(setCurrentNavigationId(navigationId));
+    }
+  };
+
+  const handlePageClick = (route: string, navigationId: number | null) => {
+    settingCurrentNavigation(navigationId ?? undefined);
     navigate(`/${route}`);
     console.log(`Top page Navigating to ${route}`);
   };
 
-  const handleSubPageClick = (subRoute: string) => {
+  const handleSubPageClick = (subRoute: string, navigationId: number | null) => {
+    settingCurrentNavigation(navigationId ?? undefined);
     navigate(`/${subRoute}`);
     console.log(`Sub page Navigating to ${subRoute}`);
   };
@@ -152,23 +160,24 @@ const PSDrawer: FC<PSDrawerProps> = ({navigationData}) => {
       pathRef.current = currentPath; // Update ref to current path
 
       if (activeSubmenu) {
-        const menuLevel = menuLevels(navigationData).find(l => l.mainTitle === activeSubmenu);
+        const menuLevel = menuLevels(navigationData).find((l) => l.mainTitle === activeSubmenu);
         if (menuLevel) {
           // Find top-level page containing the current route
-          const activePage = menuLevel.topPage.find(page =>
-            (page.topRoute && isRouteActive(page.topRoute)) ||
-            page.subPages.some(subPage => subPage.subRoute && isRouteActive(subPage.subRoute))
+          const activePage = menuLevel.topPage.find(
+            (page) =>
+              (page.topRoute && isRouteActive(page.topRoute)) ||
+              page.subPages.some((subPage) => subPage.subRoute && isRouteActive(subPage.subRoute))
           );
 
           if (activePage && !expandedOnceRef.current[activePage.topTitle]) {
             // Only expand if we haven't expanded this section before
-            setExpandedLevels(prev => ({ ...prev, [activePage.topTitle]: true }));
+            setExpandedLevels((prev) => ({ ...prev, [activePage.topTitle]: true }));
             expandedOnceRef.current[activePage.topTitle] = true;
           }
         }
       }
     }
-  }, [currentPath, activeSubmenu]);
+  }, [currentPath, activeSubmenu, navigationData, isRouteActive]);
 
   return (
     <>
@@ -273,52 +282,51 @@ const PSDrawer: FC<PSDrawerProps> = ({navigationData}) => {
                 </Typography>
               </ListItemButton>
               {activeSubmenu === MENU_LABELS.DECEMBER_ACTIVITIES && (
-                <div style={{ padding: '24px' }}>
+                <div>
                   {showDecemberBanner && (
-                    <Alert 
+                    <Alert
                       severity="info"
+                      sx={{ fontSize: "0.8rem" }} // Shrink font size
                       action={
                         <IconButton
                           aria-label="close"
                           color="inherit"
                           size="small"
-                          onClick={() => setShowDecemberBanner(false)}
-                        >
+                          onClick={() => setShowDecemberBanner(false)}>
                           <Close fontSize="inherit" />
                         </IconButton>
-                      }
-                    >
+                      }>
                       Sets accounting calendar year
                     </Alert>
                   )}
-                  <ProfitYearSelector
-                    selectedProfitYear={selectedProfitYearForDecemberActivities}
-                    handleChange={handleDecemberProfitYearChange}
-                    defaultValue={profitYear?.toString()}
-                  />
+                  <div style={{ padding: "24px" }}>
+                    <ProfitYearSelector
+                      selectedProfitYear={selectedProfitYearForDecemberActivities}
+                      handleChange={handleDecemberProfitYearChange}
+                      defaultValue={profitYear?.toString()}
+                    />
+                  </div>
                 </div>
               )}
 
               {activeSubmenu === MENU_LABELS.FISCAL_CLOSE && (
                 <div>
                   {showFiscalCloseBanner && (
-                    <Alert 
-                      severity="info" 
+                    <Alert
+                      severity="info"
                       action={
                         <IconButton
                           aria-label="close"
                           color="inherit"
                           size="small"
-                          onClick={() => setShowFiscalCloseBanner(false)}
-                        >
+                          onClick={() => setShowFiscalCloseBanner(false)}>
                           <Close fontSize="inherit" />
                         </IconButton>
-                      }
-                    >
+                      }>
                       Sets accounting calendar year
                     </Alert>
                   )}
-                  <div style={{ padding: '24px' }}>
+                  <div style={{ padding: "24px" }}>
                     <ProfitYearSelector
                       selectedProfitYear={selectedProfitYearForFiscalClose}
                       handleChange={handleFiscalCloseProfitYearChange}
@@ -330,12 +338,11 @@ const PSDrawer: FC<PSDrawerProps> = ({navigationData}) => {
               <List>
                 {menuLevels(navigationData)
                   .find((l) => l.mainTitle === activeSubmenu)
-                  ?.topPage
-                  .filter(page => !page.disabled)
+                  ?.topPage.filter((page) => !page.disabled)
                   .map((page, index) => {
                     const isTopPageActive = page.topRoute && isRouteActive(page.topRoute);
-                    const hasActiveSubPage = page.subPages.some(subPage =>
-                      subPage.subRoute && isRouteActive(subPage.subRoute)
+                    const hasActiveSubPage = page.subPages.some(
+                      (subPage) => subPage.subRoute && isRouteActive(subPage.subRoute)
                     );
 
                     return (
@@ -356,16 +363,19 @@ const PSDrawer: FC<PSDrawerProps> = ({navigationData}) => {
                                 justifyContent: "space-between",
                                 py: 1.75,
                                 minHeight: 0,
-                                backgroundColor: isTopPageActive ? // Only check direct match
-                                  `${HIGHLIGHT_COLOR}15` : 'transparent',
-                                borderLeft: isTopPageActive ? // Only check direct match
-                                  `4px solid ${HIGHLIGHT_COLOR}` : '4px solid transparent',
-                                '&:hover': {
-                                  backgroundColor: isTopPageActive ?
-                                    `${HIGHLIGHT_COLOR}25` : (theme) => theme.palette.action.hover,
+                                backgroundColor: isTopPageActive // Only check direct match
+                                  ? `${HIGHLIGHT_COLOR}15`
+                                  : "transparent",
+                                borderLeft: isTopPageActive // Only check direct match
+                                  ? `4px solid ${HIGHLIGHT_COLOR}`
+                                  : "4px solid transparent",
+                                "&:hover": {
+                                  backgroundColor: isTopPageActive
+                                    ? `${HIGHLIGHT_COLOR}25`
+                                    : (theme) => theme.palette.action.hover
                                 }
                               }}>
-                            <Box sx={{ display: "flex", alignItems: "center" }}>
+                              <Box sx={{ display: "flex", alignItems: "center" }}>
                                 <ListItemText
                                   primary={getNewReportName(page.topTitle)}
                                   secondary={getLegacyReportName(page.topTitle)}
@@ -379,8 +389,8 @@ const PSDrawer: FC<PSDrawerProps> = ({navigationData}) => {
                                     margin: 0,
                                     "& .MuiTypography-root": {
                                       fontSize: "0.875rem",
-                                      fontWeight: hasActiveSubPage ? 'bold' : 'normal',
-                                      color: hasActiveSubPage ? HIGHLIGHT_COLOR : 'inherit'
+                                      fontWeight: hasActiveSubPage ? "bold" : "normal",
+                                      color: hasActiveSubPage ? HIGHLIGHT_COLOR : "inherit"
                                     }
                                   }}
                                 />
@@ -396,7 +406,7 @@ const PSDrawer: FC<PSDrawerProps> = ({navigationData}) => {
                                 component="div"
                                 disablePadding>
                                 {page.subPages
-                                  .filter(page => !page.disabled)
+                                  .filter((page) => !page.disabled)
                                   .map((subPage) => {
                                     const isSubPageActive = subPage.subRoute && isRouteActive(subPage.subRoute);
 
@@ -409,16 +419,19 @@ const PSDrawer: FC<PSDrawerProps> = ({navigationData}) => {
                                           justifyContent: "space-between",
                                           py: 1,
                                           minHeight: 0,
-                                          backgroundColor: isSubPageActive ?
-                                            `${HIGHLIGHT_COLOR}15` : 'transparent',
-                                          borderLeft: isSubPageActive ?
-                                            `4px solid ${HIGHLIGHT_COLOR}` : '4px solid transparent',
-                                          '&:hover': {
-                                            backgroundColor: isSubPageActive ?
-                                              `${HIGHLIGHT_COLOR}25` : (theme) => theme.palette.action.hover,
+                                          backgroundColor: isSubPageActive ? `${HIGHLIGHT_COLOR}15` : "transparent",
+                                          borderLeft: isSubPageActive
+                                            ? `4px solid ${HIGHLIGHT_COLOR}`
+                                            : "4px solid transparent",
+                                          "&:hover": {
+                                            backgroundColor: isSubPageActive
+                                              ? `${HIGHLIGHT_COLOR}25`
+                                              : (theme) => theme.palette.action.hover
                                           }
                                         }}
-                                        onClick={() => handleSubPageClick(subPage.subRoute ?? "")}>
+                                        onClick={() =>
+                                          handleSubPageClick(subPage.subRoute ?? "", subPage.navigationId ?? null)
+                                        }>
                                         <Box sx={{ display: "flex", alignItems: "center" }}>
                                           <ListItemText
                                             primary={getNewReportName(subPage.subTitle || "")}
@@ -432,8 +445,8 @@ const PSDrawer: FC<PSDrawerProps> = ({navigationData}) => {
                                             primaryTypographyProps={{
                                               variant: "body2",
                                               sx: {
-                                                fontWeight: isSubPageActive ? 'bold' : 'normal',
-                                                color: isSubPageActive ? HIGHLIGHT_COLOR : 'inherit'
+                                                fontWeight: isSubPageActive ? "bold" : "normal",
+                                                color: isSubPageActive ? HIGHLIGHT_COLOR : "inherit"
                                               }
                                             }}
                                             sx={{
@@ -447,10 +460,25 @@ const PSDrawer: FC<PSDrawerProps> = ({navigationData}) => {
                                             label={subPage.statusName}
                                             className="text-gray-700 border-gray-700"
                                             size="small"
+                                            sx={{
+                                              backgroundColor:
+                                                subPage.statusName === "In Progress"
+                                                  ? "#E6F4EA" // subtle green
+                                                  : subPage.statusName === "On Hold"
+                                                    ? "#FFF9E5" // subtle yellow
+                                                    : undefined,
+                                              color:
+                                                subPage.statusName === "In Progress"
+                                                  ? "#22543D" // dark green text
+                                                  : subPage.statusName === "On Hold"
+                                                    ? "#8D6B04" // medium/dark yellow text
+                                                    : undefined,
+                                              fontWeight: 500
+                                            }}
                                           />
                                         </Box>
                                       </ListItemButton>
-                                    )
+                                    );
                                   })}
                               </List>
                             </Collapse>
@@ -459,20 +487,19 @@ const PSDrawer: FC<PSDrawerProps> = ({navigationData}) => {
                           <>
                             <ListItemButton
                               key={page.topTitle}
-                              onClick={() => handlePageClick(page.topRoute ?? "")}
+                              onClick={() => handlePageClick(page.topRoute ?? "", page.navigationId ?? null)}
                               sx={{
                                 pl: 2,
                                 display: "flex",
                                 justifyContent: "space-between",
                                 py: 1,
                                 minHeight: 0,
-                                backgroundColor: isTopPageActive ?
-                                  `${HIGHLIGHT_COLOR}15` : 'transparent',
-                                borderLeft: isTopPageActive ?
-                                  `4px solid ${HIGHLIGHT_COLOR}` : '4px solid transparent',
-                                '&:hover': {
-                                  backgroundColor: isTopPageActive ?
-                                    `${HIGHLIGHT_COLOR}25` : (theme) => theme.palette.action.hover,
+                                backgroundColor: isTopPageActive ? `${HIGHLIGHT_COLOR}15` : "transparent",
+                                borderLeft: isTopPageActive ? `4px solid ${HIGHLIGHT_COLOR}` : "4px solid transparent",
+                                "&:hover": {
+                                  backgroundColor: isTopPageActive
+                                    ? `${HIGHLIGHT_COLOR}25`
+                                    : (theme) => theme.palette.action.hover
                                 }
                               }}>
                               <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -489,7 +516,7 @@ const PSDrawer: FC<PSDrawerProps> = ({navigationData}) => {
                                     margin: 0,
                                     "& .MuiTypography-root": {
                                       fontSize: "0.875rem",
-                                      fontWeight: isTopPageActive ? 'bold' : 'normal',
+                                      fontWeight: isTopPageActive ? "bold" : "normal"
                                     }
                                   }}
                                 />
@@ -500,6 +527,21 @@ const PSDrawer: FC<PSDrawerProps> = ({navigationData}) => {
                                   label={page.statusName}
                                   className="text-gray-700 border-gray-700"
                                   size="small"
+                                  sx={{
+                                    backgroundColor:
+                                      page.statusName === "In Progress"
+                                        ? "#E6F4EA" // subtle green
+                                        : page.statusName === "On Hold"
+                                          ? "#FFF9E5" // subtle yellow
+                                          : undefined,
+                                    color:
+                                      page.statusName === "In Progress"
+                                        ? "#22543D" // dark green text
+                                        : page.statusName === "On Hold"
+                                          ? "#8D6B04" // medium/dark yellow text
+                                          : undefined,
+                                    fontWeight: 500
+                                  }}
                                 />
                               </Box>
                             </ListItemButton>
@@ -516,9 +558,10 @@ const PSDrawer: FC<PSDrawerProps> = ({navigationData}) => {
               <List>
                 {menuLevels(navigationData).map((level, index) => {
                   // Check if this top-level menu contains the active route
-                  const hasActiveRoute = level.topPage.some(page =>
-                    (page.topRoute && isRouteActive(page.topRoute)) ||
-                    page.subPages.some(subPage => subPage.subRoute && isRouteActive(subPage.subRoute))
+                  const hasActiveRoute = level.topPage.some(
+                    (page) =>
+                      (page.topRoute && isRouteActive(page.topRoute)) ||
+                      page.subPages.some((subPage) => subPage.subRoute && isRouteActive(subPage.subRoute))
                   );
 
                   return (
@@ -528,19 +571,19 @@ const PSDrawer: FC<PSDrawerProps> = ({navigationData}) => {
                           onClick={() => handleLevelClick(level.mainTitle)}
                           sx={{
                             backgroundColor: "transparent", // No highlighting based on children
-                            borderLeft: '4px solid transparent',
+                            borderLeft: "4px solid transparent",
                             "&:hover": {
                               backgroundColor: (theme) => theme.palette.action.hover
                             },
                             "& .MuiListItemText-primary": {
                               color: (theme) => theme.palette.text.primary,
-                              fontWeight: 'normal'
+                              fontWeight: "normal"
                             },
                             display: "flex",
                             justifyContent: "space-between",
                             alignItems: "center"
                           }}>
-                        {drawerOpen && (
+                          {drawerOpen && (
                             <>
                               <ListItemText
                                 primary={level.mainTitle}

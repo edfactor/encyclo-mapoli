@@ -2,7 +2,7 @@
 
 public sealed record ForfeitureAdjustmentReportResponse:ReportResponseBase<ForfeitureAdjustmentReportDetail>
 {
-    public static readonly string REPORT_NAME = "FORFEITURES REPORT";
+    public static readonly string REPORT_NAME = "Forfeiture Adjustments";
     public ForfeitureAdjustmentReportResponse()
     {
         this.ReportName = REPORT_NAME;

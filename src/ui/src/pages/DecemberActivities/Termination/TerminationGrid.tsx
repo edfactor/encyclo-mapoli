@@ -7,9 +7,9 @@ import { DSMGrid, ISortParams, mmDDYYFormat, numberToCurrency, Pagination } from
 import { TotalsGrid } from "../../../components/TotalsGrid/TotalsGrid";
 import { Typography } from "@mui/material";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
+import { ReportSummary } from "../../../components/ReportSummary";
 
 import { GetTerminationColumns } from "./TerminationGridColumn";
-import { tryddmmyyyyToDate } from "../../../utils/dateUtils";
 
 interface TerminationGridSearchProps {
   initialSearchLoaded: boolean;
@@ -84,17 +84,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({ initialSearchLo
               topRowHeaders={[]}></TotalsGrid>
           </div>
 
-          <div style={{ padding: "0 24px 0 24px" }}>
-            <Typography
-              variant="h2"
-              sx={{ color: "#0258A5" }}>
-              {`TERMINATIONS REPORT (${termination.response.total || 0} ${termination.response.total === 1 ? "Record" : "Records"})`}
-            </Typography>
-            <Typography
-              sx={{ color: "#0258A5" }}>
-              {`Report Range: ${mmDDYYFormat(termination.startDate)} - ${mmDDYYFormat(termination.endDate)} || Data Source: ${termination.dataSource}`}
-            </Typography>
-          </div>
+          <ReportSummary report={termination} />
           <DSMGrid
             preferenceKey={"TERM"}
             isLoading={isFetching}

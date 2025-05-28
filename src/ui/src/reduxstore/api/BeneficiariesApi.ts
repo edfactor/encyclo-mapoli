@@ -1,40 +1,21 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
 
-import { RootState } from "reduxstore/store";
 import {
     BeneficiaryDto,
     BeneficiaryRequestDto,
-    BeneficiaryResponseDto
 } from "reduxstore/types";
-import { url } from "./api";
+import { createDataSourceAwareBaseQuery } from "./api";
 import { Paged } from "smart-ui-library";
 import { setBeneficiary, setBeneficiaryError } from "reduxstore/slices/beneficiarySlice";
 
+const baseQuery = createDataSourceAwareBaseQuery();
 export const BeneficiariesApi = createApi({
-    baseQuery: fetchBaseQuery({
-        baseUrl: `${url}/api/beneficiary`,
-        prepareHeaders: (headers, { getState }) => {
-            const token = (getState() as RootState).security.token;
-            const impersonating = (getState() as RootState).security.impersonating;
-            if (token) {
-                headers.set("authorization", `Bearer ${token}`);
-            }
-            if (impersonating) {
-                headers.set("impersonation", impersonating);
-            } else {
-                const localImpersonation = localStorage.getItem("impersonatingRole");
-                if (localImpersonation) {
-                    headers.set("impersonation", localImpersonation);
-                }
-            }
-            return headers;
-        }
-    }),
+    baseQuery: baseQuery,
     reducerPath: "beneficiariesApi",
     endpoints: (builder) => ({
         getBeneficiaries: builder.query<Paged<BeneficiaryDto>, BeneficiaryRequestDto>({
             query: (request) => ({
-                url: ``,
+                url: `/beneficiary`,
                 method: "GET",
                 params: request
             }),
@@ -51,4 +32,4 @@ export const BeneficiariesApi = createApi({
     })
 });
 
-export const { useGetBeneficiariesQuery, useLazyGetBeneficiariesQuery } = BeneficiariesApi;
+export const { useLazyGetBeneficiariesQuery } = BeneficiariesApi;

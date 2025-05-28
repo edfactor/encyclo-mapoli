@@ -1,5 +1,5 @@
 import { Typography } from "@mui/material";
-import { useState, useMemo, useCallback, useEffect } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetDuplicateNamesAndBirthdaysQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
@@ -7,6 +7,7 @@ import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetDuplicateNamesAndBirthdayColumns } from "./DuplicateNamesAndBirthdaysGridColumns";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import { CAPTIONS } from "../../../constants";
+import ReportSummary from "../../../components/ReportSummary";
 
 interface DuplicateNamesAndBirthdaysGridSearchProps {
   initialSearchLoaded: boolean;
@@ -56,13 +57,7 @@ const DuplicateNamesAndBirthdaysGrid: React.FC<DuplicateNamesAndBirthdaysGridSea
     <>
       {duplicateNamesAndBirthdays?.response && (
         <>
-          <div style={{ padding: "0 24px 0 24px" }}>
-            <Typography
-              variant="h2"
-              sx={{ color: "#0258A5" }}>
-              {`DUPLICATE NAMES AND BIRTHDAYS (${duplicateNamesAndBirthdays?.response.total || 0} records)`}
-            </Typography>
-          </div>
+          <ReportSummary report={duplicateNamesAndBirthdays} />
           <DSMGrid
             preferenceKey={CAPTIONS.DUPLICATE_NAMES}
             isLoading={isFetching}

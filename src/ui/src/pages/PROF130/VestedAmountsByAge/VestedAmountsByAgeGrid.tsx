@@ -6,6 +6,7 @@ import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams } from "smart-ui-library";
 import { VestedAmountsByAge } from "../../../reduxstore/types";
 import { GetVestedAmountsByAgeColumns } from "./VestedAmountsByAgeGridColumns";
+import ReportSummary from "../../../components/ReportSummary";
 
 interface VestedAmountsByAgeGridProps {
   gridTitle: string;
@@ -36,13 +37,7 @@ const VestedAmountsByAgeGrid: React.FC<VestedAmountsByAgeGridProps> = ({
     <>
       {vestedAmountsByAge?.response && (
         <>
-          <div style={{ padding: "0 24px 0 24px" }}>
-            <Typography
-              variant="h2"
-              sx={{ color: "#0258A5" }}>
-              {`${gridTitle} ${totalCount != undefined ? `(${vestedAmountsByAge[totalCount]})` : ""}`}
-            </Typography>
-          </div>
+          <ReportSummary report={vestedAmountsByAge} />
           <DSMGrid
             preferenceKey={gridTitle}
             isLoading={isFetching}

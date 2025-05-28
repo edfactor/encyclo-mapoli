@@ -8,6 +8,7 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
+using Demoulas.ProfitSharing.Services.ItOperations;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -21,6 +22,7 @@ public class FrozenReportService : IFrozenReportService
     private readonly TotalService _totalService;
     private readonly ICalendarService _calendarService;
     private readonly IDemographicReaderService _demographicReaderService;
+    private readonly IFrozenService _frozenService;
     private readonly ILogger _logger;
 
     public FrozenReportService(
@@ -29,7 +31,8 @@ public class FrozenReportService : IFrozenReportService
         ContributionService contributionService,
         TotalService totalService,
         ICalendarService calendarService,
-        IDemographicReaderService demographicReaderService
+        IDemographicReaderService demographicReaderService,
+        IFrozenService frozenService
     )
     {
         _dataContextFactory = dataContextFactory;
@@ -37,6 +40,7 @@ public class FrozenReportService : IFrozenReportService
         _totalService = totalService;
         _calendarService = calendarService;
         _demographicReaderService = demographicReaderService;
+        _frozenService = frozenService;
         _logger = loggerFactory.CreateLogger<FrozenReportService>();
     }
 
@@ -47,6 +51,12 @@ public class FrozenReportService : IFrozenReportService
         using (_logger.BeginScope("Request FORFEITURES AND POINTS FOR YEAR"))
         {
             var hoursWorkedRequirement = ContributionService.MinimumHoursForContribution();
+            var frozen = await _frozenService.GetActiveFrozenDemographic(cancellationToken);
+
+            if (req.UseFrozenData && req.ProfitYear != frozen.ProfitYear)
+            {
+                throw new ArgumentException($"Frozen data requested for profit year {req.ProfitYear}, but active frozen data is for {frozen.ProfitYear}");
+            }
 
             var result = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
@@ -88,7 +98,7 @@ public class FrozenReportService : IFrozenReportService
 
                 var netBalances = await _contributionService.GetNetBalance(req.ProfitYear, allBadgeNumbers.ToHashSet(), cancellationToken);
 
-                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx, req.UseFrozenData);
                 // Get forfeitures for current year
                 var forfeitures = await ctx.ProfitDetails
                     .Join(demographics, pd => pd.Ssn, d => d.Ssn, (pd, d) => new { pd, d })

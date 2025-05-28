@@ -1,5 +1,6 @@
 ﻿using System.Data.SqlTypes;
 using System.Runtime.CompilerServices;
+using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Messaging;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
@@ -100,7 +101,7 @@ internal class EmployeeSyncConsumer : IConsumer<MessageRequest<OracleEmployee[]>
                 OracleHcmId = employee.PersonId,
                 BadgeNumber = employee.BadgeNumber,
                 DateOfBirth = employee.DateOfBirth,
-                HireDate = employee.WorkRelationship?.StartDate ?? SqlDateTime.MinValue.Value.ToDateOnly(),
+                HireDate = employee.WorkRelationship?.StartDate ?? ReferenceData.DsmMinValue(),
                 TerminationDate = employee.WorkRelationship?.TerminationDate,
                 Ssn =
                     employee.NationalIdentifier?.NationalIdentifierNumber.ConvertSsnToInt() ??

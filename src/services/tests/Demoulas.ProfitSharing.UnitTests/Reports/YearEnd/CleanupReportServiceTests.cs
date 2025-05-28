@@ -315,7 +315,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         var response = await ApiClient.POSTAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse>(req);
 
         response.Result.Should().NotBeNull();
-        response.Result.ReportName.Should().BeEquivalentTo($"PROFIT SHARE YEAR END REPORT FOR {req.ProfitYear}");
+        response.Result.ReportName.Should().BeEquivalentTo($"PROFIT SHARE REPORT (PAY426) - {req.ProfitYear}");
         response.Result.Response.Total.Should().BeGreaterThanOrEqualTo(1);
         response.Result.Response.Results.Count().Should().BeGreaterThanOrEqualTo(1);
 
@@ -423,7 +423,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
 
         var response = await ApiClient.POSTAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse>(req);
         response.Should().NotBeNull();
-        response.Result.ReportName.Should().BeEquivalentTo($"PROFIT SHARE YEAR END REPORT FOR {req.ProfitYear}");
+        response.Result.ReportName.Should().BeEquivalentTo($"PROFIT SHARE REPORT (PAY426) - {req.ProfitYear}");
         response.Result.Response.Total.Should().BeGreaterThanOrEqualTo(1);
         response.Result.Response.Results.Count().Should().BeGreaterThanOrEqualTo(1);
 

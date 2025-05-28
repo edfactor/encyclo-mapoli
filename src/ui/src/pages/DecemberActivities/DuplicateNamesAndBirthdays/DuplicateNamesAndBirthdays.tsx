@@ -3,11 +3,15 @@ import Grid2 from "@mui/material/Grid2";
 import { useState } from "react";
 import { Page } from "smart-ui-library";
 import DuplicateNamesAndBirthdaysGrid from "./DuplicateNamesAndBirthdaysGrid";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 
 const DuplicateNamesAndBirthdays = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
+  const renderActionNode = () => {
+    return <StatusDropdownActionNode />;
+  };
   return (
-    <Page label="Duplicate Names and Birthdays">
+    <Page label="Duplicate Names and Birthdays" actionNode={renderActionNode()}>
       <Grid2
         container
         rowSpacing="24px">

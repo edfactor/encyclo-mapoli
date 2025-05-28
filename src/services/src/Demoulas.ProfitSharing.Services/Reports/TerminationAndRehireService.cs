@@ -1,6 +1,7 @@
 ﻿using System.Data.SqlTypes;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -74,7 +75,7 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
         {
             ReportName = "EMPLOYEES ON MILITARY LEAVE",
             ReportDate = DateTimeOffset.UtcNow,
-            StartDate = SqlDateTime.MinValue.Value.ToDateOnly(),
+            StartDate = ReferenceData.DsmMinValue(),
             EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
             Response = militaryMembers
         };
@@ -240,7 +241,7 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
                     Ssn = temp.member.member.Ssn,
                     HireDate = temp.member.member.HireDate,
                     TerminationDate = temp.member.member.TerminationDate,
-                    ReHiredDate = temp.member.member.ReHireDate ?? SqlDateTime.MinValue.Value.ToDateOnly(DateTimeKind.Local),
+                    ReHiredDate = temp.member.member.ReHireDate ?? ReferenceData.DsmMinValue(),
                     StoreNumber = temp.member.member.StoreNumber,
                     CompanyContributionYears = temp.member.yip!.Years ?? 0,
                     EnrollmentId = temp.member.member.EnrollmentId,

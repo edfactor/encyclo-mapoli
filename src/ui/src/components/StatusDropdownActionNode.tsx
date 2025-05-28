@@ -4,63 +4,60 @@ import { useGetNavigationStatusQuery, useLazyUpdateNavigationStatusQuery, useUpd
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { NavigationDto } from "reduxstore/types";
-import { useNavigate, useLocation } from "react-router-dom";
 import { useLazyGetNavigationQuery } from "reduxstore/api/NavigationApi";
 
 interface StatusDropdownActionNodeProps {
   initialStatus?: string;
+  navigationId?: number;
 }
 
-const StatusDropdownActionNode: React.FC<StatusDropdownActionNodeProps> = ({ initialStatus }) => {
-  const [currentStatus,setCurrentStatus] = useState("1");
+const StatusDropdownActionNode: React.FC<StatusDropdownActionNodeProps> = ({ initialStatus, navigationId }) => {
+  const [currentStatus, setCurrentStatus] = useState("1");
   const [navigationObj, setNavigationObj] = useState<NavigationDto | null>(null);
-  const { isSuccess, data}  = useGetNavigationStatusQuery({});
-  const location = useLocation();
+  const { isSuccess, data } = useGetNavigationStatusQuery({});
   const navigationList = useSelector(
-    (state:RootState)=> state.navigation.navigationData
+    (state: RootState) => state.navigation.navigationData
   );
-  const [triggerUpdate]  = useLazyUpdateNavigationStatusQuery();
-  const [ triggerGetNavigation] = useLazyGetNavigationQuery();
+  const currentNavigationId = useSelector(
+    (state: RootState) => state.navigation.currentNavigationId
+  );
+  const [triggerUpdate] = useLazyUpdateNavigationStatusQuery();
+  const [triggerGetNavigation] = useLazyGetNavigationQuery();
   const handleStatusChange = async (newStatus: string) => {
-    const result = await triggerUpdate({navigationId: navigationObj?.id, statusId: parseInt(newStatus)})
-    if(result.data?.isSuccessful){
+    const result = await triggerUpdate({ navigationId: navigationObj?.id, statusId: parseInt(newStatus) })
+    if (result.data?.isSuccessful) {
       setCurrentStatus(newStatus);
-      triggerGetNavigation({navigationId:undefined});
+      triggerGetNavigation({ navigationId: undefined });
     }
   };
 
-  const getNavigationObjectBasedOnUrl = (navigationArray?: NavigationDto[], url?: string): NavigationDto | undefined => {
-    if(navigationArray){
-    for(const item of navigationArray){
-      if(item.url == url){
-        return item;
-      }
-      if(item.items && item.items.length>0){
-        const found = getNavigationObjectBasedOnUrl(item.items, url);
-        if(found){
-          return found;
+  const getNavigationObjectBasedOnId = (navigationArray?: NavigationDto[], id?: number): NavigationDto | undefined => {
+    if (navigationArray) {
+      for (const item of navigationArray) {
+        if (item.id == id) {
+          return item;
+        }
+        if (item.items && item.items.length > 0) {
+          const found = getNavigationObjectBasedOnId(item.items, id);
+          if (found) {
+            return found;
+          }
         }
       }
     }
-  }
     return undefined;
   }
 
-  useEffect(()=>{
-    const obj = getNavigationObjectBasedOnUrl(navigationList?.navigation, location.pathname.replace("/",""));
-    if(obj)
+  useEffect(() => {
+    const obj = getNavigationObjectBasedOnId(navigationList?.navigation, currentNavigationId??undefined);
+    if (obj)
       setNavigationObj(obj);
-    setCurrentStatus(obj?.statusId+"");
-  },[data, navigationList])
-
-  
-  
-
-
+    setCurrentStatus(obj?.statusId + "");
+  }, [data, navigationList,currentNavigationId])
 
   return (
     <div className="flex items-center gap-2 h-10">
-      {isSuccess?<StatusDropdown navigationStatusList={data.navigationStatusList} onStatusChange={handleStatusChange} initialStatus={currentStatus} />:<></>}
+      {isSuccess ? <StatusDropdown navigationStatusList={data.navigationStatusList} onStatusChange={handleStatusChange} initialStatus={currentStatus} /> : <></>}
     </div>
   );
 };

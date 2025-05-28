@@ -3,10 +3,14 @@ import Grid2 from "@mui/material/Grid2";
 import { Page, TotalsGrid } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
 import Under21ReportGrid from "./Under21ReportGrid";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 
 const NewPSLabels = () => {
+  const renderActionNode = () => {
+    return <StatusDropdownActionNode />;
+  };
   return (
-    <Page label={CAPTIONS.NEW_PS_LABELS}>
+    <Page label={CAPTIONS.NEW_PS_LABELS} actionNode={renderActionNode()}>
       <Grid2
         container
         rowSpacing="24px">

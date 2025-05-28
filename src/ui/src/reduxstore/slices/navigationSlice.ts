@@ -4,10 +4,12 @@ import {NavigationResponseDto} from '../types';
 export interface NavigationState {
   navigationData: NavigationResponseDto | null;
   error: string | null;
+  currentNavigationId: number | null;
 }
 const initialState: NavigationState = {
   navigationData: null,
-  error: null
+  error: null,
+  currentNavigationId: null
 };
 
 
@@ -26,11 +28,13 @@ export const navigationSlice = createSlice({
         },
         setNavigationError: (state, action: PayloadAction<string>) => {
             state.error = action.payload;
-            state.navigationData = null;
+        },
+        setCurrentNavigationId: (state, action: PayloadAction<number>)=>{
+            state.currentNavigationId = action.payload;
         }
     }
 });
 
-export const { setNavigation, setNavigationError} = navigationSlice.actions;
+export const { setNavigation, setNavigationError, setCurrentNavigationId} = navigationSlice.actions;
 
 export default navigationSlice.reducer;
