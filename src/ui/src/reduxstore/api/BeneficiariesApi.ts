@@ -3,6 +3,8 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 import {
     BeneficiaryDto,
     BeneficiaryRequestDto,
+    CreateBeneficiaryRequestDto,
+    CreateBeneficiaryResponseDto,
 } from "reduxstore/types";
 import { createDataSourceAwareBaseQuery } from "./api";
 import { Paged } from "smart-ui-library";
@@ -28,8 +30,23 @@ export const BeneficiariesApi = createApi({
                     dispatch(setBeneficiaryError("Failed to fetch beneficiaries"));
                 }
             }
+        }),
+        createBeneficiaries: builder.query<Paged<CreateBeneficiaryRequestDto>, CreateBeneficiaryResponseDto>({
+            query: (request) => ({
+                url: `/beneficiaries`,
+                method: "POST",
+                params: request
+            }),
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+                try {
+                    const { data } = await queryFulfilled;
+                } catch (err) {
+                    console.error("Failed to fetch beneficiaries:", err);
+                    dispatch(setBeneficiaryError("Failed to fetch beneficiaries"));
+                }
+            }
         })
     })
 });
 
-export const { useLazyGetBeneficiariesQuery } = BeneficiariesApi;
+export const { useLazyGetBeneficiariesQuery, useLazyCreateBeneficiariesQuery } = BeneficiariesApi;
