@@ -15,12 +15,13 @@ export const dateMMDDYYYY = (date: Date | undefined): string => {
 //Takes in date and returns it in MM/dd/yyyy format if date exists.
 export const mmDDYYFormat = (date: string | Date | undefined) => {
   const dateForm = "MM/dd/yyyy";
-  date = date ? format(new Date(date), dateForm) : "";
-  return date;
+  const parsedDate = tryddmmyyyyToDate(date);
+  return parsedDate ? format(parsedDate, dateForm) : "";
 };
 
 export const mmDDYYYY_HHMMSS_Format = (date: string | Date | undefined) => {
-  return date ? format(new Date(date), DATE_TIME_FORMAT_MMDDYYYY_HHMMSS) : "";
+  const parsedDate = tryddmmyyyyToDate(date);
+  return parsedDate ? format(parsedDate, DATE_TIME_FORMAT_MMDDYYYY_HHMMSS) : "";
 };
 
 
