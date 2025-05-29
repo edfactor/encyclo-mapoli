@@ -251,7 +251,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
 
         // These only come into play if we are searching for an individual
         if (data.badgeNumber || data.socialSecurity) {
-          console.log("Searching for an individual");
+
 
           if (data.badgeNumber && !response.employeeDetails) {
             setMissiveAlerts([
@@ -263,7 +263,8 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
               }
             ]);
 
-        } else if (data.badgeNumber && !response.inquiryResults.results) {
+        } 
+        else if (data.badgeNumber && !response.inquiryResults.results) {
             setMissiveAlerts([
               {
                 id: 993,
@@ -273,8 +274,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
               }
             ]);
 
-          }
-        
+        }
         else if (data.socialSecurity && !response.employeeDetails) {
             setMissiveAlerts([
               {
@@ -284,7 +284,8 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
                 description: `The ${personTypeString} SSN you have entered is not found on file. Re-enter using a valid SSN. It may mean you are not authorized to view this person's information.`,
               }
             ]);
-          } else if (data.socialSecurity && !response.inquiryResults.results) {
+        } 
+        else if (data.socialSecurity && !response.inquiryResults.results) {
             setMissiveAlerts([
               {
                 id: 993,
@@ -293,8 +294,20 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
                 description: "The SSN you have entered has no Profit Sharing Records. Re-enter an SSN with Profit Sharing.",
               }
             ]);
-          }
-        }  
+        }
+        // Need to cover case where searching for member type "all" or "beneficaries" with SSN
+        // and we have one record with isEmployee coming back as false, that we set a missive alert
+        else if (data.socialSecurity && data.memberType !== "beneficiaries" && response.employeeDetails && !response.employeeDetails.isEmployee) {
+          setMissiveAlerts([
+            {
+              id: 998,
+              message: `Beneficiary ${data.socialSecurity} found`,
+              severity: "Warning",
+              description: `The SSN has been found for a beneficiary.`
+            }
+          ]);
+        }       
+      }  
 
         if (response.employeeDetails) { 
           if (missives && response.employeeDetails.missives &&  response.employeeDetails.missives.length > 0) {

@@ -308,6 +308,7 @@ export interface MasterInquirySearch {
 
 export interface MasterInquiryDetail extends ProfitYearRequest {
   id: number;
+  isEmployee: boolean;
   ssn: number;
   profitYearIteration: number;
   distributionSequence: number;
@@ -440,6 +441,7 @@ export interface ForfeituresByAgeDetail {
 }
 
 export interface EmployeeDetails {
+  isEmployee: boolean;
   firstName: string;
   lastName: string;
   address: string;
