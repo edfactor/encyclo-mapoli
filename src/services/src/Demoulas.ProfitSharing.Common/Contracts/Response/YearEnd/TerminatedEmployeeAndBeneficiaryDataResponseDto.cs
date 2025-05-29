@@ -1,6 +1,7 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 public sealed record TerminatedEmployeeAndBeneficiaryDataResponseDto
 {
+    public short ProfitYear { get; set; }
     public required int BadgeNumber { get; set; }
     public required short PsnSuffix { get; set; }
 

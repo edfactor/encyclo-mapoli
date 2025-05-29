@@ -163,15 +163,16 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 
         var profitYearRange = GetProfitYearRange(req);
 
-        // Extract SSNs needed in the loop
+        // Extract (SSN, ProfitYear) pairs needed in the loop
         var ssns = memberSliceUnion.Select(ms => ms.Ssn).ToHashSet();
-        
 
-        // Bulk load profit details for this profit year, grouped by SSN.
-        var profitDetailsDict = await ctx.ProfitDetails
+        // Bulk load profit details for this profit year, grouped by SSN and ProfitYear.
+        var profitDetailsRaw = await ctx.ProfitDetails
             .Where(pd => pd.ProfitYear >= profitYearRange.beginProfitYear && pd.ProfitYear <= profitYearRange.endProfitYear && ssns.Contains(pd.Ssn))
-            .GroupBy(pd => new {pd.Ssn, pd.ProfitYear})
-            .Select(g => new InternalProfitDetailDto
+            .ToListAsync(cancellationToken);
+        var profitDetailsDict = profitDetailsRaw
+            .GroupBy(pd => (pd.Ssn, pd.ProfitYear))
+            .ToDictionary(g => g.Key, g => new InternalProfitDetailDto
             {
                 Ssn = g.Key.Ssn,
                 ProfitYear = g.Key.ProfitYear,
@@ -192,20 +193,21 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 CurrentAmount = g.Sum(x => x.Contribution + x.Earnings +
                                            (x.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0) -
                                            (x.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0))
-            })
-            .ToDictionaryAsync(x => x.Ssn, cancellationToken);
+            });
 
-        // Bulk load last year balances as a dictionary keyed by SSN.
-        var lastYearBalancesDict = await _totalService.GetTotalBalanceSet(ctx, (short)(profitYearRange.endProfitYear - 1))
+        // Bulk load last year balances as a dictionary keyed by (SSN, ProfitYear)
+        var lastYear = (short)(profitYearRange.endProfitYear - 1);
+        var lastYearBalancesRaw = await _totalService.GetTotalBalanceSet(ctx, lastYear)
             .Where(x => ssns.Contains(x.Ssn))
-            .ToDictionaryAsync(x => x.Ssn, cancellationToken);
+            .ToListAsync(cancellationToken);
+        var lastYearBalancesDict = lastYearBalancesRaw.ToDictionary(x => (x.Ssn, lastYear), x => x);
 
-        // Bulk load current year vesting balances as a dictionary keyed by SSN.
-
+        // Bulk load current year vesting balances as a dictionary keyed by SSN (ProfitYear not available)
         var today = DateOnly.FromDateTime(DateTime.Today);
-        var thisYearBalancesDict = await _totalService.TotalVestingBalance(ctx, profitYearRange.beginProfitYear, profitYearRange.endProfitYear, today)
+        var thisYearBalancesRaw = await _totalService.TotalVestingBalance(ctx, profitYearRange.beginProfitYear, profitYearRange.endProfitYear, today)
             .Where(x => ssns.Contains(x.Ssn))
-            .ToDictionaryAsync(x => x.Ssn, cancellationToken);
+            .ToListAsync(cancellationToken);
+        var thisYearBalancesDict = thisYearBalancesRaw.ToDictionary(x => x.Ssn, x => x);
 
         var membersSummary = new List<TerminatedEmployeeAndBeneficiaryDataResponseDto>();
         var unions = memberSliceUnion.ToList();
@@ -213,18 +215,19 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         // Refactored loop using bulk loaded dictionary lookup
         foreach (var memberSlice in unions)
         {
+            var key = (memberSlice.Ssn, memberSlice.ProfitYear);
             // Lookup profit details; if missing, use a default instance.
-            if (!profitDetailsDict.TryGetValue(memberSlice.Ssn, out InternalProfitDetailDto? transactionsThisYear))
+            if (!profitDetailsDict.TryGetValue(key, out InternalProfitDetailDto? transactionsThisYear))
             {
                 transactionsThisYear = new InternalProfitDetailDto();
             }
 
             // Lookup last year balance (BeginningAmount)
-            decimal? beginningAmount = lastYearBalancesDict.TryGetValue(memberSlice.Ssn, out var lastYearBalance)
+            decimal? beginningAmount = lastYearBalancesDict.TryGetValue((memberSlice.Ssn, lastYear), out var lastYearBalance)
                 ? lastYearBalance.Total
                 : 0m;
 
-            // Lookup vesting balance and vesting percent for current year.
+            // Lookup vesting balance and vesting percent for current year (by Ssn only)
             var thisYearBalance = thisYearBalancesDict.GetValueOrDefault(memberSlice.Ssn);
 
             decimal vestedBalance = thisYearBalance?.VestedBalance ?? 0m;
@@ -234,6 +237,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             var member = new Member
             {
                 BadgeNumber = memberSlice.BadgeNumber,
+                ProfitYear = memberSlice.ProfitYear,
                 PsnSuffix = memberSlice.PsnSuffix,
                 FullName = memberSlice.FullName,
                 FirstName = memberSlice.FirstName,
@@ -299,6 +303,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             {
                 BadgeNumber = member.BadgeNumber,
                 PsnSuffix = member.PsnSuffix,
+                ProfitYear = member.ProfitYear,
                 Name = member.FullName,
                 BeginningBalance = member.BeginningAmount,
                 BeneficiaryAllocation = member.BeneficiaryAllocation,

@@ -35,21 +35,18 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         DateOnly endDate = new DateOnly(2024, 12, 28);
         DateOnly effectiveDateOfTestData = new DateOnly(2024, 04, 08);
 
-        // Throws exceptions at test run time
-        // var calendarService = _fixture.Services.GetRequiredService<ICalendarService>()!
-        // var totalService = _fixture.Services.GetRequiredService<TotalService>()!
         var distributedCache = new MemoryDistributedCache(new Microsoft.Extensions.Options.OptionsWrapper<MemoryDistributedCacheOptions>(new MemoryDistributedCacheOptions()));
         var calendarService = new CalendarService(DbFactory, new AccountingPeriodsService(), distributedCache);
         var totalService = new TotalService(DbFactory,
-            CalendarService, new EmbeddedSqlService(),
+            calendarService, new EmbeddedSqlService(),
             new DemographicReaderService(new FrozenService(DbFactory), new HttpContextAccessor()));
         DemographicReaderService demographicReaderService = new(new FrozenService(DbFactory), new HttpContextAccessor());
         TerminatedEmployeeAndBeneficiaryReportService mockService =
-            new TerminatedEmployeeAndBeneficiaryReportService(DbFactory, calendarService, totalService, demographicReaderService);
+            new TerminatedEmployeeAndBeneficiaryReportService(DbFactory, totalService, demographicReaderService);
 
         Stopwatch stopwatch = Stopwatch.StartNew();
         stopwatch.Start();
-        var data = await mockService.GetReportAsync(new ProfitYearRequest { ProfitYear = profitSharingYear, Take = int.MaxValue}, TestContext.Current.CancellationToken);
+        var data = await mockService.GetReportAsync(new StartAndEndDateRequest{ BeginningDate = startDate, EndingDate = endDate, Take = int.MaxValue}, TestContext.Current.CancellationToken);
 
         string actualText = CreateTextReport(effectiveDateOfTestData, startDate, endDate, profitSharingYear, data);
         stopwatch.Stop();
