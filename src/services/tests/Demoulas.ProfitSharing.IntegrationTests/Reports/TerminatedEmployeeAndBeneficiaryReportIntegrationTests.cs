@@ -74,10 +74,13 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
 
         foreach (var ms in report.Response.Results)
         {
-            textReportGenerator.PrintDetails(ms.BadgePSn, ms.Name, ms.BeginningBalance,
-                ms.BeneficiaryAllocation, ms.DistributionAmount, ms.Forfeit,
-                ms.EndingBalance, ms.VestedBalance, ms.DateTerm, ms.YtdPsHours, ms.VestedPercent, ms.Age,
-                ms.EnrollmentCode ?? 0);
+            foreach (var yd in ms.YearDetails)
+            {
+                textReportGenerator.PrintDetails(ms.BadgePSn, ms.Name, yd.BeginningBalance,
+                    yd.BeneficiaryAllocation, yd.DistributionAmount, yd.Forfeit,
+                    yd.EndingBalance, yd.VestedBalance, yd.DateTerm, yd.YtdPsHours, yd.VestedPercent, yd.Age,
+                    yd.EnrollmentCode ?? 0);
+            }
         }
         textReportGenerator.PrintTotals(report.TotalEndingBalance, report.TotalVested, report.TotalForfeit, report.TotalBeneficiaryAllocation);
         return textReportGenerator.GetReport();

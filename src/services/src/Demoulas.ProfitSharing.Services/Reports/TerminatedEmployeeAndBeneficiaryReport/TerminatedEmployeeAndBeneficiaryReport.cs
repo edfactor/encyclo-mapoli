@@ -162,11 +162,8 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         decimal totalBeneficiaryAllocation = 0;
 
         var profitYearRange = GetProfitYearRange(req);
-
-        // Extract (SSN, ProfitYear) pairs needed in the loop
         var ssns = memberSliceUnion.Select(ms => ms.Ssn).ToHashSet();
 
-        // Bulk load profit details for this profit year, grouped by SSN and ProfitYear.
         var profitDetailsRaw = await ctx.ProfitDetails
             .Where(pd => pd.ProfitYear >= profitYearRange.beginProfitYear && pd.ProfitYear <= profitYearRange.endProfitYear && ssns.Contains(pd.Ssn))
             .ToListAsync(cancellationToken);
@@ -195,45 +192,38 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                                            (x.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0))
             });
 
-        // Bulk load last year balances as a dictionary keyed by (SSN, ProfitYear)
         var lastYear = (short)(profitYearRange.endProfitYear - 1);
         var lastYearBalancesRaw = await _totalService.GetTotalBalanceSet(ctx, lastYear)
             .Where(x => ssns.Contains(x.Ssn))
             .ToListAsync(cancellationToken);
         var lastYearBalancesDict = lastYearBalancesRaw.ToDictionary(x => (x.Ssn, lastYear), x => x);
 
-        // Bulk load current year vesting balances as a dictionary keyed by SSN (ProfitYear not available)
         var today = DateOnly.FromDateTime(DateTime.Today);
         var thisYearBalancesRaw = await _totalService.TotalVestingBalance(ctx, profitYearRange.beginProfitYear, profitYearRange.endProfitYear, today)
             .Where(x => ssns.Contains(x.Ssn))
             .ToListAsync(cancellationToken);
         var thisYearBalancesDict = thisYearBalancesRaw.ToDictionary(x => x.Ssn, x => x);
 
-        var membersSummary = new List<TerminatedEmployeeAndBeneficiaryDataResponseDto>();
+        // Build a list of all year details, then group by BadgeNumber, PsnSuffix, Name
+        var yearDetailsList = new List<(int BadgeNumber, short PsnSuffix, string? Name, TerminatedEmployeeAndBeneficiaryYearDetailDto YearDetail)>();
         var unions = memberSliceUnion.ToList();
 
-        // Refactored loop using bulk loaded dictionary lookup
         foreach (var memberSlice in unions)
         {
             var key = (memberSlice.Ssn, memberSlice.ProfitYear);
-            // Lookup profit details; if missing, use a default instance.
             if (!profitDetailsDict.TryGetValue(key, out InternalProfitDetailDto? transactionsThisYear))
             {
                 transactionsThisYear = new InternalProfitDetailDto();
             }
 
-            // Lookup last year balance (BeginningAmount)
             decimal? beginningAmount = lastYearBalancesDict.TryGetValue((memberSlice.Ssn, lastYear), out var lastYearBalance)
                 ? lastYearBalance.Total
                 : 0m;
 
-            // Lookup vesting balance and vesting percent for current year (by Ssn only)
             var thisYearBalance = thisYearBalancesDict.GetValueOrDefault(memberSlice.Ssn);
-
             decimal vestedBalance = thisYearBalance?.VestedBalance ?? 0m;
             var vestingPercent = thisYearBalance?.VestingPercent ?? 0;
 
-            // Construct member record.
             var member = new Member
             {
                 BadgeNumber = memberSlice.BadgeNumber,
@@ -262,49 +252,26 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 VestedBalance = vestedBalance
             };
 
-            // If not interesting, skip.
             if (!IsInteresting(member))
             {
                 memberSliceUnion.Remove(memberSlice);
                 continue;
             }
 
-            byte enrollmentId = member.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions /*2*/
-                ? Enrollment.Constants.NotEnrolled /*0*/
-                : member.EnrollmentId;
-
+            byte enrollmentId = member.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions ? Enrollment.Constants.NotEnrolled : member.EnrollmentId;
             if (member.ZeroCont == ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested)
             {
                 vestedBalance = member.EndingBalance;
             }
-
-            if (vestedBalance < 0)
-            {
-                vestedBalance = 0;
-            }
-
-            if (memberSlice.IsOnlyBeneficiary)
-            {
-                vestingPercent = 1; // = 100%
-            }
-
-            if (member.EndingBalance == 0 && vestedBalance == 0)
-            {
-                vestingPercent = 0;
-            }
-
+            if (vestedBalance < 0) { vestedBalance = 0; }
+            if (memberSlice.IsOnlyBeneficiary) { vestingPercent = 1; }
+            if (member.EndingBalance == 0 && vestedBalance == 0) { vestingPercent = 0; }
             int? age = null;
-            if (member.Birthday.HasValue)
-            {
-                age = member.Birthday.Value.Age();
-            }
+            if (member.Birthday.HasValue) { age = member.Birthday.Value.Age(); }
 
-            membersSummary.Add(new TerminatedEmployeeAndBeneficiaryDataResponseDto
+            var yearDetail = new TerminatedEmployeeAndBeneficiaryYearDetailDto
             {
-                BadgeNumber = member.BadgeNumber,
-                PsnSuffix = member.PsnSuffix,
                 ProfitYear = member.ProfitYear,
-                Name = member.FullName,
                 BeginningBalance = member.BeginningAmount,
                 BeneficiaryAllocation = member.BeneficiaryAllocation,
                 DistributionAmount = member.DistributionAmount,
@@ -316,7 +283,9 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 VestedPercent = vestingPercent * 100,
                 Age = age,
                 EnrollmentCode = enrollmentId
-            });
+            };
+
+            yearDetailsList.Add((member.BadgeNumber, member.PsnSuffix, member.FullName, yearDetail));
 
             totalVested += vestedBalance;
             totalForfeit += member.ForfeitAmount;
@@ -324,11 +293,20 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             totalBeneficiaryAllocation += member.BeneficiaryAllocation;
         }
 
-        // Calculate total count before pagination
-        int totalCount = membersSummary.Count;
+        // Group by BadgeNumber, PsnSuffix, Name
+        var grouped = yearDetailsList
+            .GroupBy(x => new { x.BadgeNumber, x.PsnSuffix, x.Name })
+            .Select(g => new TerminatedEmployeeAndBeneficiaryDataResponseDto
+            {
+                BadgeNumber = g.Key.BadgeNumber,
+                PsnSuffix = g.Key.PsnSuffix,
+                Name = g.Key.Name,
+                YearDetails = g.Select(x => x.YearDetail).OrderBy(y => y.ProfitYear).ToList()
+            })
+            .ToList();
 
-        // Apply pagination
-        var paginatedResults = membersSummary.Skip(req.Skip ?? 0).Take(req.Take ?? byte.MaxValue).ToList();
+        int totalCount = grouped.Count;
+        var paginatedResults = grouped.Skip(req.Skip ?? 0).Take(req.Take ?? byte.MaxValue).ToList();
 
         return new TerminatedEmployeeAndBeneficiaryResponse
         {
