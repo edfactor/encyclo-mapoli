@@ -7,10 +7,13 @@ using Microsoft.Extensions.Configuration;
 
 var logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger("AppHost");
 IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(options: new DistributedApplicationOptions { AllowUnsecuredTransport = true });
+short uiPort = 3100;
 
-
-// Kill all node processes using helper
-ProcessHelper.KillProcessesByName("node", logger);
+// Kill all node processes using helper if port is in use
+if (PortHelper.IsTcpPortInUse(uiPort))
+{
+    ProcessHelper.KillProcessesByName("node", logger);
+}
 
 Demoulas_ProfitSharing_Data_Cli cli = new Demoulas_ProfitSharing_Data_Cli();
 var projectPath = new FileInfo(cli.ProjectPath).Directory?.FullName;
@@ -61,7 +64,7 @@ var api = builder.AddProject<Demoulas_ProfitSharing_Api>("ProfitSharing-Api")
 
 // Use AddViteApp for Vite applications as per the latest CommunityToolkit.Aspire guidance
 var ui = builder.AddNpmApp("ProfitSharing-Ui", "../../../ui/", scriptName: "dev")
-    .WithHttpEndpoint(port: 3100, isProxied: false)
+    .WithHttpEndpoint(port: uiPort, isProxied: false)
     .WithUrlForEndpoint("http", annotation =>
     {
         annotation.DisplayText = "Profit Sharing";
