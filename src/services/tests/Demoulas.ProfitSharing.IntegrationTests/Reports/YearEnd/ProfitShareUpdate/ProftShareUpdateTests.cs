@@ -75,6 +75,8 @@ public class ProfitShareUpdateTests : PristineBaseTest
         var onlyReady = readyHash.Except(smartHash);
         var onlySmart = smartHash.Except(readyHash);
 
+        TestOutputHelper.WriteLine($"READY member in report count {employeeExpectedReportLines.Count}, Only SMART member in report count {employeeActualReportLines.Count}");
+
         TestOutputHelper.WriteLine($"only READY count {onlyReady.Count()}, Only SMART count {onlySmart.Count()}");
 
         TestOutputHelper.WriteLine("Only Ready");
