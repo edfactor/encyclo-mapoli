@@ -98,6 +98,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                     : payProfit.ZeroContributionReasonId ?? 0),
                 EnrollmentId = payProfit.EnrollmentId,
                 Etva = payProfit.Etva,
+                ProfitYear = payProfit.ProfitYear
             };
 
         return query;
@@ -111,8 +112,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             .Include(b => b.Contact)
             .ThenInclude(c => c!.ContactInfo)
             .Include(b => b.Demographic)
-            .ThenInclude(d => d!.PayProfits.Where(p => p.ProfitYear >= request.BeginningDate.Year && p.ProfitYear <= request.EndingDate.Year))
-            .Select(b => new { Beneficiary = b, b.Demographic, PayProfit = b.Demographic!.PayProfits.FirstOrDefault(p => p.ProfitYear >= request.BeginningDate.Year && p.ProfitYear <= request.EndingDate.Year) })
+            .Select(b => new { Beneficiary = b, b.Demographic })
             .Select(x => new MemberSlice
             {
                 PsnSuffix = x.Beneficiary.PsnSuffix,
@@ -130,9 +130,8 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 TerminationDate = (x.Beneficiary!.Contact!.Ssn == x.Demographic!.Ssn) ? x.Demographic.TerminationDate : null,
                 ZeroCont = /*6*/ ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested,
                 IsOnlyBeneficiary = true,
-#pragma warning disable S1125
-                IsBeneficiaryAndEmployee = (x.Beneficiary!.Contact!.Ssn == x.Demographic!.Ssn) ? true : false,
-#pragma warning restore S1125
+                IsBeneficiaryAndEmployee = (x.Beneficiary!.Contact!.Ssn == x.Demographic!.Ssn),
+                
             });
 
         return query;
@@ -171,10 +170,11 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         // Bulk load profit details for this profit year, grouped by SSN.
         var profitDetailsDict = await ctx.ProfitDetails
             .Where(pd => pd.ProfitYear >= profitYearRange.beginProfitYear && pd.ProfitYear <= profitYearRange.endProfitYear && ssns.Contains(pd.Ssn))
-            .GroupBy(pd => pd.Ssn)
+            .GroupBy(pd => new {pd.Ssn, pd.ProfitYear})
             .Select(g => new InternalProfitDetailDto
             {
-                Ssn = g.Key,
+                Ssn = g.Key.Ssn,
+                ProfitYear = g.Key.ProfitYear,
                 TotalContributions = g.Sum(x => x.Contribution),
                 TotalEarnings = g.Sum(x => x.Earnings),
                 TotalForfeitures = g.Sum(x => x.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id
@@ -196,7 +196,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             .ToDictionaryAsync(x => x.Ssn, cancellationToken);
 
         // Bulk load last year balances as a dictionary keyed by SSN.
-        var lastYearBalancesDict = await _totalService.GetTotalBalanceSet(ctx, profitYearRange.beginProfitYear)
+        var lastYearBalancesDict = await _totalService.GetTotalBalanceSet(ctx, (short)(profitYearRange.endProfitYear - 1))
             .Where(x => ssns.Contains(x.Ssn))
             .ToDictionaryAsync(x => x.Ssn, cancellationToken);
 
