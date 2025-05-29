@@ -38,11 +38,11 @@ internal sealed class ProfitShareUpdateReport
     {
         FrozenService frozenService = new FrozenService(_dbFactory);
         TotalService totalService = new TotalService(_dbFactory, _calendarService, new EmbeddedSqlService(), demographicReaderService);
-        ProfitShareUpdateService psu = new(_dbFactory, totalService, _calendarService, frozenService, demographicReaderService);
+        ProfitShareUpdateService psu = new(_dbFactory, totalService, _calendarService, demographicReaderService);
         _profitYear = profitShareUpdateRequest.ProfitYear;
 
         (List<MemberFinancials> members, AdjustmentsSummaryDto adjustmentsApplied, ProfitShareUpdateTotals totalsDto, bool _) =
-            await psu.ProfitSharingUpdate(profitShareUpdateRequest, TestContext.Current.CancellationToken);
+            await psu.ProfitSharingUpdate(profitShareUpdateRequest, TestContext.Current.CancellationToken, false);
         
         // Sort like READY sorts, meaning "Mc" comes after "ME" (aka it is doing a pure ascii sort - lowercase characters are higher.) 
         members = members
@@ -151,13 +151,11 @@ internal sealed class ProfitShareUpdateReport
         {
             if (memberFinancials.BadgeNumber > 0)
             {
-                reportCounters.EmployeeCounter += 1;
                 WRITE(employeeReportLine);
             }
 
             if (memberFinancials.BadgeNumber == 0)
             {
-                reportCounters.BeneficiaryCounter += 1;
                 WRITE(beneReportLine);
             }
 
@@ -229,11 +227,11 @@ internal sealed class ProfitShareUpdateReport
         WRITE(client_tot);
 
         EmployeeCountTotal employeeCountTotal = new();
-        employeeCountTotal.PR_TOT_EMPLOYEE_COUNT = reportCounters.EmployeeCounter;
+        employeeCountTotal.PR_TOT_EMPLOYEE_COUNT = wsClientProfitShareUpdateTotals.TotalEmployees;
         WRITE("");
         WRITE(employeeCountTotal);
         BeneficiaryCountTotal beneficiaryCountTotPayben = new();
-        beneficiaryCountTotPayben.PB_TOT_EMPLOYEE_COUNT = reportCounters.BeneficiaryCounter;
+        beneficiaryCountTotPayben.PB_TOT_EMPLOYEE_COUNT = wsClientProfitShareUpdateTotals.TotalBeneficaries;
         WRITE("");
         WRITE(beneficiaryCountTotPayben);
 
@@ -258,8 +256,7 @@ internal sealed class ProfitShareUpdateReport
         Header1 header_1 = new();
         Header4 header_4 = new();
         Header5 header_5 = new();
-
-
+        
         header_1.HDR1_PAGE = 1;
         header_1.HDR1_RPT = "PAY444A";
         WRITE2_afterPage(header_1);
