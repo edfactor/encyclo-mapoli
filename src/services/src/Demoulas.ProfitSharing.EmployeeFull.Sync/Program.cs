@@ -32,7 +32,7 @@ builder.Configuration.Bind("Logging:Smart", smartConfig);
 FileSystemLogConfig fileSystemLog = new FileSystemLogConfig();
 builder.Configuration.Bind("Logging:FileSystem", fileSystemLog);
 
-await builder.SetDefaultLoggerConfigurationAsync(smartConfig, fileSystemLog).ConfigureAwait(false);
+builder.SetDefaultLoggerConfiguration(smartConfig, fileSystemLog);
 
 
 builder.AddDatabaseServices((services, factoryRequests) =>

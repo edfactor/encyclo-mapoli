@@ -56,21 +56,14 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
     private async Task<IQueryable<TerminatedEmployeeDto>> GetTerminatedEmployees(IProfitSharingDbContext ctx, StartAndEndDateRequest request)
     {
         var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
-        var profitYearRange = GetProfitYearRange(request);
         var queryable = demographics
-            .Include(d => d.PayProfits)
             .Include(d => d.ContactInfo)
             .Where(d => d.EmploymentStatusId == EmploymentStatus.Constants.Terminated
                         && d.TerminationCodeId != TerminationCode.Constants.RetiredReceivingPension
                         && d.TerminationDate >= request.BeginningDate && d.TerminationDate <= request.EndingDate)
             .Select(d => new TerminatedEmployeeDto
             {
-                Demographic = d,
-                PayProfit = d.PayProfits
-                    .Where(p => p.ProfitYear >= profitYearRange.beginProfitYear && p.ProfitYear <= profitYearRange.endProfitYear)
-                    .GroupBy(p => p.ProfitYear)
-                    .Select(g => g.First())
-                    .FirstOrDefault()
+                Demographic = d
             });
 
         return queryable;
