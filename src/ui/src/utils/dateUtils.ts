@@ -24,13 +24,30 @@ export const mmDDYYYY_HHMMSS_Format = (date: string | Date | undefined) => {
 };
 
 
-export const tryddmmyyyyToDate = (date?: string | Date | null): any | null => {
+export const tryddmmyyyyToDate = (date?: string | Date | null): Date | null => {
   if (!date) return null;
   if (date === DATE_FORMAT_YYYYMMDD) return null;
 
   // If date is already a Date object, just apply startOfDay
   if (date instanceof Date) {
     return startOfDay(date);
+  }
+
+  // Handle C# DateOnly: yyyy-MM-dd or yyyy-MM-ddTHH:mm:ss (no timezone adjustment)
+  if (typeof date === 'string') {
+    // yyyy-MM-dd
+    const dateOnlyMatch = date.match(/^\d{4}-\d{2}-\d{2}$/);
+    if (dateOnlyMatch) {
+      const [year, month, day] = date.split('-').map(Number);
+      return new Date(year, month - 1, day); // JS months are 0-based
+    }
+    // yyyy-MM-ddTHH:mm:ss (no Z, no offset)
+    const dateTimeMatch = date.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/);
+    if (dateTimeMatch) {
+      const [datePart] = date.split('T');
+      const [year, month, day] = datePart.split('-').map(Number);
+      return new Date(year, month - 1, day);
+    }
   }
 
   // Try to parse the date
@@ -72,7 +89,6 @@ export const tryddmmyyyyToDate = (date?: string | Date | null): any | null => {
 
     // Return parsed date with start of day, or null if parsing failed
     return parsedDate ? startOfDay(parsedDate) : null;
-
   } catch (error) {
     console.warn("Error parsing date:", error);
     return null;
