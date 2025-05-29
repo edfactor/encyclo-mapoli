@@ -1,6 +1,6 @@
-import { ColDef, ICellRendererParams } from 'ag-grid-community';
-import { viewBadgeLinkRenderer } from 'utils/masterInquiryLink';
+import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { agGridNumberToCurrency } from "smart-ui-library";
+import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
 import { getEnrolledStatus } from "../../../utils/enrollmentUtil";
 
 export const GetTerminationColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
@@ -25,6 +25,22 @@ export const GetTerminationColumns = (navFunction: (badgeNumber: string) => void
       cellClass: "left-align",
       resizable: true,
       sortable: true
+    }
+  ];
+};
+
+// Separate function for detail columns that will be used for master-detail view
+export const GetDetailColumns = (): ColDef[] => {
+  return [
+    {
+      headerName: "Year",
+      field: "profitYear",
+      colId: "profitYear",
+      minWidth: 120,
+      headerClass: "right-align",
+      cellClass: "right-align",
+      resizable: true,
+      sortable: false
     },
     {
       headerName: "Beginning Balance",
@@ -34,7 +50,7 @@ export const GetTerminationColumns = (navFunction: (badgeNumber: string) => void
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
-      sortable: true,
+      sortable: false,
       valueFormatter: agGridNumberToCurrency
     },
     {
@@ -45,7 +61,7 @@ export const GetTerminationColumns = (navFunction: (badgeNumber: string) => void
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
-      sortable: true,
+      sortable: false,
       valueFormatter: agGridNumberToCurrency
     },
     {
@@ -56,7 +72,7 @@ export const GetTerminationColumns = (navFunction: (badgeNumber: string) => void
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
-      sortable: true,
+      sortable: false,
       valueFormatter: agGridNumberToCurrency
     },
     {
@@ -67,7 +83,7 @@ export const GetTerminationColumns = (navFunction: (badgeNumber: string) => void
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
-      sortable: true,
+      sortable: false,
       valueFormatter: agGridNumberToCurrency
     },
     {
@@ -78,7 +94,7 @@ export const GetTerminationColumns = (navFunction: (badgeNumber: string) => void
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
-      sortable: true,
+      sortable: false,
       valueFormatter: agGridNumberToCurrency
     },
     {
@@ -89,7 +105,7 @@ export const GetTerminationColumns = (navFunction: (badgeNumber: string) => void
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
-      sortable: true,
+      sortable: false,
       valueFormatter: agGridNumberToCurrency
     },
     {
@@ -100,7 +116,7 @@ export const GetTerminationColumns = (navFunction: (badgeNumber: string) => void
       headerClass: "center-align",
       cellClass: "center-align",
       resizable: true,
-      sortable: true
+      sortable: false
     },
     {
       headerName: "YTD PS Hours",
@@ -110,7 +126,7 @@ export const GetTerminationColumns = (navFunction: (badgeNumber: string) => void
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
-      sortable: true
+      sortable: false
     },
     {
       headerName: "Vested %",
@@ -120,7 +136,7 @@ export const GetTerminationColumns = (navFunction: (badgeNumber: string) => void
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
-      sortable: true,
+      sortable: false,
       valueFormatter: (params) => `${params.value}%`
     },
     {
@@ -131,7 +147,7 @@ export const GetTerminationColumns = (navFunction: (badgeNumber: string) => void
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
-      sortable: true
+      sortable: false
     },
     {
       headerName: "Enrollment",
@@ -141,7 +157,7 @@ export const GetTerminationColumns = (navFunction: (badgeNumber: string) => void
       headerClass: "center-align",
       cellClass: "center-align",
       resizable: true,
-      sortable: true,
+      sortable: false,
       valueFormatter: (params) => getEnrolledStatus(params.value)
     }
   ];
