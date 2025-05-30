@@ -27,4 +27,5 @@ internal sealed record Member
     internal byte EnrollmentId { get; init; }
     internal decimal Evta { get; init; }
     internal decimal BeneficiaryAllocation { get; init; }
+    public short ProfitYear { get; set; }
 }

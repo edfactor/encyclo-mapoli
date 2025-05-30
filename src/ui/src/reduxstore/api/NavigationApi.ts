@@ -5,7 +5,7 @@ import {
   NavigationRequestDto,
   NavigationResponseDto,  
 } from "reduxstore/types";
-import { createDataSourceAwareBaseQuery, url } from "./api";
+import { createDataSourceAwareBaseQuery } from "./api";
 import { setNavigation, setNavigationError } from "reduxstore/slices/navigationSlice";
 
 const baseQuery = createDataSourceAwareBaseQuery();
