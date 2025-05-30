@@ -1248,6 +1248,7 @@ export interface AddressDto {
     phoneNumber?: string | null;
     mobileNumber?: string | null;
     emailAddress?: string | null;
+    addressSameAsBeneficiary: boolean;
 }
 
 export interface CreateBeneficiaryResponseDto {

@@ -40,6 +40,7 @@
     "ag-grid-community": "33.2.2",
     "ag-grid-react": "33.2.2",
     "date-fns": "3.6.0",
+    "dayjs": "^1.11.13",
     "dotenv": "16.4.7",
     "env-cmd": "10.1.0",
     "react": "19.1.0",
