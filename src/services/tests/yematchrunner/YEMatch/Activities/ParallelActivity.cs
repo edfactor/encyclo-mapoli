@@ -1,6 +1,5 @@
 namespace YEMatch;
 
-
 // Combines two activities into one.   The activities are run in parallel.  Typically this is so READY and SMART can run activties at the saem time.
 public sealed class ParallelActivity : IActivity
 {

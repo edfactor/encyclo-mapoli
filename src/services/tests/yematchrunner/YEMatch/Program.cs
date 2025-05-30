@@ -1,7 +1,11 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
-using Microsoft.Extensions.Configuration;
+
+#pragma warning disable CS0162 // Unreachable code detected
+
+// ReSharper disable FieldCanBeMadeReadOnly.Local
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 
 namespace YEMatch;
 
@@ -9,8 +13,53 @@ namespace YEMatch;
 
 [SuppressMessage("Major Code Smell", "S125:Sections of code should not be commented out")]
 [SuppressMessage("Major Code Smell", "S1854:Unused assignments should be removed")]
+[SuppressMessage("Style", "IDE0044:Add readonly modifier")]
 internal static class Program
 {
+    private static async Task Run(List<IActivity> activitiesToRun)
+    {
+        Stopwatch wholeRunStopWatch = Stopwatch.StartNew();
+        if (activitiesToRun.Any(a => a is SmartActivity))
+        {
+            // Quick authentication sanity check
+            AppVersionInfo? r = await SmartActivityFactory.Client!.DemoulasCommonApiEndpointsAppVersionInfoEndpointAsync(null);
+            // Might be nice to also include the database version. What database is used.  Wall clock time.
+            Console.WriteLine(" Connected to SMART build:" + r.BuildNumber + " git-hash:" + r.ShortGitHash);
+        }
+
+        List<Outcome> outcomes = [];
+        foreach (IActivity activity in activitiesToRun)
+        {
+            Console.WriteLine($"------------------- Starting execution: {activity.Name()}");
+            Outcome outcome = await activity.Execute();
+            outcomes.Add(outcome);
+            string msg = outcome.Message.Replace("\n", "\n" + "   ").Trim();
+            if (msg.Length != 0)
+            {
+                Console.WriteLine($"   {msg}");
+            }
+
+            Console.WriteLine($"   Took: {outcome.took}    Status: {outcome.Status}");
+
+            if (outcome.Status == OutcomeStatus.Error)
+            {
+                Console.WriteLine("------------------- Stopping execution due to error/failure: " + outcome.Name);
+                break;
+            }
+        }
+
+        string filePath = $"{_dataDirectory}/outcome.json";
+        JsonSerializerOptions options = new() { WriteIndented = true };
+        await File.WriteAllTextAsync(filePath, JsonSerializer.Serialize(outcomes, options));
+
+        TimeSpan wholeRunElapsed = wholeRunStopWatch.Elapsed;
+        Console.WriteLine($"\n---- Completed YERunner.  Took:  {wholeRunElapsed.Hours}h {wholeRunElapsed.Minutes}m {wholeRunElapsed.Seconds}s");
+    }
+
+    private static List<IActivity> Specify(params List<string> activityNames)
+    {
+        return activityNames.Select(name => ActivityFactory.AllActivtiesByName()[name]).ToList();
+    }
     // Steps which modify the database (or input to next job which does) on READY 
     // A6 - Clear exec hours and dollars (only on ready)
     // A7 - Enter executive hours and dollars
@@ -34,15 +83,35 @@ internal static class Program
         _dataDirectory = Config.CreateDataDirectory();
         ActivityFactory.Initialize(_dataDirectory);
 
+        GetGold.Fetch(ReadyActivityFactory.SftpClient!);
+
+        return;
+
+        _dataDirectory = Config.CreateDataDirectory();
+        ActivityFactory.Initialize(_dataDirectory);
+
+        // Generate the Golden files.
         await Run(Specify(
-            "R0",
+            "R0", // import obfuscated
             "DropBadBenes",
-            "R2S",
-            "S12", // Freeze on Smart
-            "P18",  // Test PayProfit Updates; EarnPoints, ZeroCont, New Employee, CertDate 
-            "TestPayProfitSelectedColumns", // Test PayProfit Updates; EarnPoints, ZeroCont, New Employee, CertDate 
-            "R20" // Pay444 report
+            "R15",
+            "R16",
+            "R17",
+            "R18",
+            "R19",
+            "R20",
+            "R21",
+            "R22",
+            "R23",
+            "R24",
+            "R25",
+            "R26",
+            "R27",
+            "R28"
         ));
+
+#if false
+#endif
     }
 
     /*
@@ -50,6 +119,17 @@ internal static class Program
      */
     public static async Task Others()
     {
+        // Runs up to PAY444 and stops.   Lets developer run/re-run SMART PAY444 and shake out issues.
+        await Run(Specify(
+            "R0",
+            "DropBadBenes",
+            "R2S",
+            "S12", // Freeze on Smart
+            "P18", // Test PayProfit Updates; EarnPoints, ZeroCont, New Employee, CertDate 
+            "TestPayProfitSelectedColumns", // Test PayProfit Updates; EarnPoints, ZeroCont, New Employee, CertDate 
+            "R20" // Pay444 report
+        ));
+
         await Run(Specify(
             "R0", // import obfuscated
             // "TrimTo14Employees", // Reduces execution time to 1 minute
@@ -94,49 +174,4 @@ internal static class Program
         ));
     }
 #pragma warning restore AsyncFixer01
-
-    private static async Task Run(List<IActivity> activitiesToRun)
-    {
-        Stopwatch wholeRunStopWatch = Stopwatch.StartNew();
-        if (activitiesToRun.Any(a => a is SmartActivity))
-        {
-            // Quick authentication sanity check
-            AppVersionInfo? r = await SmartActivityFactory.Client!.DemoulasCommonApiEndpointsAppVersionInfoEndpointAsync(null);
-            // Might be nice to also include the database version. What database is used.  Wall clock time.
-            Console.WriteLine(" Connected to SMART build:" + r.BuildNumber + " git-hash:" + r.ShortGitHash);
-        }
-
-        List<Outcome> outcomes = [];
-        foreach (IActivity activity in activitiesToRun)
-        {
-            Console.WriteLine($"------------------- Starting execution: {activity.Name()}");
-            Outcome outcome = await activity.Execute();
-            outcomes.Add(outcome);
-            string msg = outcome.Message.Replace("\n", "\n" + "   ").Trim();
-            if (msg.Length != 0)
-            {
-                Console.WriteLine($"   {msg}");
-            }
-
-            Console.WriteLine($"   Took: {outcome.took}    Status: {outcome.Status}");
-
-            if (outcome.Status == OutcomeStatus.Error)
-            {
-                Console.WriteLine("------------------- Stopping execution due to error/failure: " + outcome.Name);
-                break;
-            }
-        }
-
-        string filePath = $"{_dataDirectory}/outcome.json";
-        var options = new JsonSerializerOptions { WriteIndented = true };
-        await File.WriteAllTextAsync(filePath, JsonSerializer.Serialize(outcomes,options));
-
-        TimeSpan wholeRunElapsed = wholeRunStopWatch.Elapsed;
-        Console.WriteLine($"\n---- Completed YERunner.  Took:  {wholeRunElapsed.Hours}h {wholeRunElapsed.Minutes}m {wholeRunElapsed.Seconds}s");
-    }
-
-    private static List<IActivity> Specify(params List<string> activityNames)
-    {
-        return activityNames.Select(name => ActivityFactory.AllActivtiesByName()[name]).ToList();
-    }
 }
