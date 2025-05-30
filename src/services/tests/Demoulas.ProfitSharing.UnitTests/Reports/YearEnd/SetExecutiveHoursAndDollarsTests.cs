@@ -36,8 +36,11 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Program>
                 .PUTAsync<SetExecutiveHoursAndDollarsEndpoint, SetExecutiveHoursAndDollarsRequest, HttpResponseMessage>(request);
         response.Response.StatusCode.ShouldBeEquivalentTo(HttpStatusCode.BadRequest);
 
-        // Assert
-        await ErrorMessageShouldBe(response, "", "Badge Numbers must be unique.");
+        
+        response.Response.Content.Headers.ContentType!.MediaType.Should().Be("application/problem+json");
+        var pd = await response.Response.Content.ReadFromJsonAsync<ProblemDetails>();
+        pd.Should().NotBeNull();
+        pd!.Errors.SelectMany(e=> e.Reason).Should().Contain("Badge Numbers must be unique.");
     }
 
     [Fact]
@@ -107,7 +110,11 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Program>
         response.Response.StatusCode.ShouldBeEquivalentTo(HttpStatusCode.BadRequest);
 
         // Assert
-        await ErrorMessageShouldBe(response, "executiveHoursAndDollars.Count", "At least one employee must be provided");
+        response.Response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response.Response.Content.Headers.ContentType!.MediaType.Should().Be("application/problem+json");
+        var pd = await response.Response.Content.ReadFromJsonAsync<ProblemDetails>();
+        pd.Should().NotBeNull();
+        pd!.Errors.SelectMany(e => e.Reason).Should().Contain("At least one employee must be provided");
     }
 
 
@@ -220,26 +227,5 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             demographicsWithPayProfitsReloaded.PayProfit.HoursExecutive.Should().Be(origExecutiveHoursExecutive);
             demographicsWithPayProfitsReloaded.PayProfit.IncomeExecutive.Should().Be(origIncomeExecutive);
         });
-    }
-
-    private static async Task ErrorMessageShouldBe(TestResult<HttpResponseMessage> response, string fieldName, string expectedMessage)
-    {
-        response.Response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        response.Response.Content.Headers.ContentType!.MediaType.Should().Be("application/problem+json");
-        string responseContent = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
-
-        using JsonDocument doc = JsonDocument.Parse(responseContent);
-        // If the 400 is from the service, it has the message in the title.
-        if (doc.RootElement.TryGetProperty("title", out JsonElement title))
-        {
-            title.GetString().Should().Be(expectedMessage);
-            return;
-        }
-
-        // If the 400 is from the Validator, it has the message in the errors array.
-        string message = doc.RootElement.GetProperty("message").ToString();
-        string errorMessage = doc.RootElement.GetProperty("errors").GetProperty(fieldName)[0].GetString()!;
-        message.Should().Be("One or more errors occurred!");
-        errorMessage.Should().Be(expectedMessage);
     }
 }

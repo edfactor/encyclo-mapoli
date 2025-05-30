@@ -96,7 +96,7 @@ import {
   ProfitSharingLabel,
   ProfitSharingLabelsRequest,
   ProfitYearRequest,
-  RehireForfeituresRequest,
+  StartAndEndDateRequest,
   TerminationRequest,
   TerminationResponse,
   Under21BreakdownByStoreRequest,
@@ -289,13 +289,13 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getRehireForfeitures: builder.query<PagedReportResponse<MilitaryAndRehireForfeiture>, RehireForfeituresRequest>({
+    getRehireForfeitures: builder.query<PagedReportResponse<MilitaryAndRehireForfeiture>, StartAndEndDateRequest>({
       query: (params) => ({
         url: `yearend/rehire-forfeitures/`,
         method: "POST",
         body: {
-          beginningDate: params.beginningDate ? tryddmmyyyyToDate(params.beginningDate) : params.beginningDate,
-          endingDate: params.endingDate ? tryddmmyyyyToDate(params.endingDate) : params.endingDate,
+          beginningDate: params.beginningDate,
+          endingDate: params.endingDate,
           take: params.pagination.take,
           skip: params.pagination.skip,
           sortBy: params.pagination.sortBy,
@@ -640,20 +640,15 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getTerminationReport: builder.query<TerminationResponse, TerminationRequest>({
+    getTerminationReport: builder.query<TerminationResponse, StartAndEndDateRequest>({
       query: (params) => {
-        // Validate profit year range
-        if (params.profitYear < 2020 || params.profitYear > 2100) {
-          console.error("Invalid profit year: Must be between 2020 and 2100");
-          // Return a dummy endpoint that won't be called
-          return { url: "invalid-request", method: "GET" };
-        }
-
+       
         return {
-          url: "yearend/terminated-employee-and-beneficiary",
+          url: "yearend/terminated-employees",
           method: "GET",
           params: {
-            profitYear: params.profitYear,
+            beginningDate: params.beginningDate,
+            endingDate: params.endingDate,
             skip: params.pagination.skip,
             take: params.pagination.take,
             sortBy: params.pagination.sortBy,
@@ -663,11 +658,6 @@ export const YearsEndApi = createApi({
       },
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
-          // Don't proceed with API call if validation failed
-          if (arg.profitYear < 2020 || arg.profitYear > 2100) {
-            return;
-          }
-
           const { data } = await queryFulfilled;
           dispatch(setTermination(data));
         } catch (err) {

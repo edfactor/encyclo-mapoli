@@ -9,11 +9,11 @@ import {
   setMilitaryAndRehireForfeituresQueryParams
 } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
-import { SearchAndReset } from "smart-ui-library";
+import { dateYYYYMMDD, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
-import { CalendarResponseDto, RehireForfeituresRequest } from "../../../reduxstore/types";
+import { CalendarResponseDto, StartAndEndDateRequest } from "../../../reduxstore/types";
 import { tryddmmyyyyToDate } from "../../../utils/dateUtils";
 
 const schema = yup.object().shape({
@@ -48,15 +48,15 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
   const defaultProfitYear = useDecemberFlowProfitYear();
   const dispatch = useDispatch();
 
-  const validateAndSubmit = (data: RehireForfeituresRequest) => {
+  const validateAndSubmit = (data: StartAndEndDateRequest) => {
     if (isValid && hasToken) {
       const beginDate = data.beginningDate || fiscalData.fiscalBeginDate || '';
       const endDate = data.endingDate || fiscalData.fiscalEndDate || '';
 
       const updatedData = {
         ...data,
-        beginningDate: beginDate,
-        endingDate: endDate,
+        beginningDate: dateYYYYMMDD(new Date(beginDate)),
+        endingDate: dateYYYYMMDD(new Date(endDate)),
       };
 
       dispatch(setMilitaryAndRehireForfeituresQueryParams(updatedData));
@@ -71,8 +71,8 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
     formState: { errors, isValid },
     reset,
     trigger
-  } = useForm<RehireForfeituresRequest>({
-    resolver: yupResolver<RehireForfeituresRequest>(schema),
+  } = useForm<StartAndEndDateRequest>({
+    resolver: yupResolver<StartAndEndDateRequest>(schema),
     defaultValues: {
       beginningDate: rehireForfeituresQueryParams?.beginningDate || fiscalData.fiscalBeginDate || undefined,
       endingDate: rehireForfeituresQueryParams?.endingDate || fiscalData.fiscalEndDate || undefined,

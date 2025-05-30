@@ -13,7 +13,7 @@ using Demoulas.ProfitSharing.Security;
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Military;
 
 public class RehireForfeituresEndpoint :
-    EndpointWithCsvBase<RehireForfeituresRequest, RehireForfeituresResponse, RehireForfeituresEndpoint.RehireProfitSharingResponseMap>
+    EndpointWithCsvBase<StartAndEndDateRequest, RehireForfeituresResponse, RehireForfeituresEndpoint.RehireProfitSharingResponseMap>
 {
     private readonly ITerminationAndRehireService _reportService;
 
@@ -31,7 +31,7 @@ public class RehireForfeituresEndpoint :
             s.Description =
                 "The Rehire Profit Sharing Data endpoint produces a comprehensive report on employees who are either currently on military leave or have been rehired, focusing on their eligibility for forfeiture adjustments in profit-sharing. The report contains employee information, such as badge number, rehire date, and current year-to-date hours, along with profit-sharing records, including profit year, forfeiture amounts, and comments. This report supports multiple executions and is primarily used to address forfeiture discrepancies before profit sharing is finalized.";
 
-            s.ExampleRequest = RehireForfeituresRequest.RequestExample();
+            s.ExampleRequest = StartAndEndDateRequest.RequestExample();
             s.ResponseExamples = new Dictionary<int, object>
             {
                 {
@@ -57,7 +57,7 @@ public class RehireForfeituresEndpoint :
 
     public override string ReportFileName => "REHIRE'S PROFIT SHARING DATA";
 
-    public override Task<ReportResponseBase<RehireForfeituresResponse>> GetResponse(RehireForfeituresRequest req, CancellationToken ct)
+    public override Task<ReportResponseBase<RehireForfeituresResponse>> GetResponse(StartAndEndDateRequest req, CancellationToken ct)
     {
         return _reportService.FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYearsAsync(req, ct);
     }

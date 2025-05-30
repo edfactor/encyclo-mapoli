@@ -4,19 +4,14 @@ using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
-using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.TerminatedEmployeeAndBeneficiary.TerminatedEmployeeAndBeneficiaryDataEndpoint;
-
+using System.Text;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.TerminatedEmployeeAndBeneficiary;
 
 public class TerminatedEmployeeAndBeneficiaryDataEndpoint
-    : EndpointWithCsvTotalsBase<ProfitYearRequest,
-        TerminatedEmployeeAndBeneficiaryResponse,
-        TerminatedEmployeeAndBeneficiaryDataResponseDto,
-        TerminatedEmployeeAndBeneficiaryDataResponseMap>
+    : FastEndpoints.Endpoint<StartAndEndDateRequest, TerminatedEmployeeAndBeneficiaryResponse>
 {
     private readonly ITerminatedEmployeeAndBeneficiaryReportService _terminatedEmployeeAndBeneficiaryReportService;
 
@@ -29,7 +24,7 @@ public class TerminatedEmployeeAndBeneficiaryDataEndpoint
 
     public override void Configure()
     {
-        Get("/terminated-employee-and-beneficiary");
+        Get("/terminated-employees");
         Summary(s =>
         {
             s.Summary = "Provide the Terminated Employees (QPAY066) report.";
@@ -58,28 +53,39 @@ public class TerminatedEmployeeAndBeneficiaryDataEndpoint
                     }
                 }
             };
-
-
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
         Group<YearEndGroup>();
-        base.Configure();
     }
 
-    public override Task<TerminatedEmployeeAndBeneficiaryResponse> GetResponse(ProfitYearRequest req, CancellationToken ct)
+    public override async Task HandleAsync(StartAndEndDateRequest req, CancellationToken ct)
     {
-        return _terminatedEmployeeAndBeneficiaryReportService.GetReportAsync(req, ct);
+        string acceptHeader = HttpContext.Request.Headers.Accept.ToString().ToLower(System.Globalization.CultureInfo.InvariantCulture);
+        if (acceptHeader.Contains("text/csv"))
+        {
+            req = req with { Skip = 0, Take = int.MaxValue };
+        }
+        var response = await _terminatedEmployeeAndBeneficiaryReportService.GetReportAsync(req, ct);
+        if (acceptHeader.Contains("text/csv"))
+        {
+            await using var memoryStream = new MemoryStream();
+            await using (var streamWriter = new StreamWriter(memoryStream, Encoding.UTF8, leaveOpen: true))
+            await using (var csvWriter = new CsvWriter(streamWriter, new CsvConfiguration(System.Globalization.CultureInfo.InvariantCulture) { Delimiter = "," }))
+            {
+                await GenerateCsvContent(csvWriter, response);
+                await streamWriter.FlushAsync(ct);
+            }
+            memoryStream.Position = 0;
+            await SendStreamAsync(memoryStream, $"{ReportFileName}.csv", contentType: "text/csv", cancellation: ct);
+            return;
+        }
+        await SendOkAsync(response, ct);
     }
 
-    public override string ReportFileName { get; }
+    public string ReportFileName { get; }
 
-
-    protected internal override async Task GenerateCsvContent(CsvWriter csvWriter, TerminatedEmployeeAndBeneficiaryResponse responseWithTotals,
-        CancellationToken cancellationToken)
+    private static async Task GenerateCsvContent(CsvWriter csvWriter, TerminatedEmployeeAndBeneficiaryResponse responseWithTotals)
     {
-        // Register the class map for the main member data
-        csvWriter.Context.RegisterClassMap<TerminatedEmployeeAndBeneficiaryDataResponseMap>();
-
         // Write out totals
         await csvWriter.NextRecordAsync();
         csvWriter.WriteField("Amount In Profit Sharing");
@@ -92,37 +98,46 @@ public class TerminatedEmployeeAndBeneficiaryDataEndpoint
         csvWriter.WriteField(responseWithTotals.TotalBeneficiaryAllocation);
 
         await csvWriter.NextRecordAsync();
-
-        // Move to the next record to separate the headers from the data
         await csvWriter.NextRecordAsync();
 
-        // Write the headers using the registered class map
-        csvWriter.WriteHeader<TerminatedEmployeeAndBeneficiaryDataResponseDto>();
-
+        // Write the headers for the flattened structure
+        csvWriter.WriteField("BADGE_PSN");
+        csvWriter.WriteField("NAME");
+        csvWriter.WriteField("PROFIT_YEAR");
+        csvWriter.WriteField("BEGINNING_BALANCE");
+        csvWriter.WriteField("BENEFICIARY_ALLOCATION");
+        csvWriter.WriteField("DISTRIBUTION_AMOUNT");
+        csvWriter.WriteField("FORFEIT");
+        csvWriter.WriteField("ENDING_BALANCE");
+        csvWriter.WriteField("VESTED_BALANCE");
+        csvWriter.WriteField("DATE_TERM");
+        csvWriter.WriteField("YTD_PS_HOURS");
+        csvWriter.WriteField("VESTED_PERCENT");
+        csvWriter.WriteField("AGE");
+        csvWriter.WriteField("ENROLLMENT_CODE");
         await csvWriter.NextRecordAsync();
 
-        await base.GenerateCsvContent(csvWriter, responseWithTotals, cancellationToken);
-    }
-
-
-    public sealed class
-        TerminatedEmployeeAndBeneficiaryDataResponseMap : ClassMap<TerminatedEmployeeAndBeneficiaryDataResponseDto>
-    {
-        public TerminatedEmployeeAndBeneficiaryDataResponseMap()
+        // Write each year detail as a row
+        foreach (var employee in responseWithTotals.Response.Results)
         {
-            Map(m => m.BadgePSn).Index(0).Name("BADGE_PSN");
-            Map(m => m.Name).Index(1).Name("NAME");
-            Map(m => m.BeginningBalance).Index(2).Name("BEGINNING_BALANCE");
-            Map(m => m.BeneficiaryAllocation).Index(3).Name("BENEFICIARY_ALLOCATION");
-            Map(m => m.DistributionAmount).Index(4).Name("DISTRIBUTION_AMOUNT");
-            Map(m => m.Forfeit).Index(5).Name("FORFEIT");
-            Map(m => m.EndingBalance).Index(6).Name("ENDING_BALANCE");
-            Map(m => m.VestedBalance).Index(7).Name("VESTED_BALANCE");
-            Map(m => m.DateTerm).Index(8).Name("DATE_TERM");
-            Map(m => m.YtdPsHours).Index(9).Name("YTD_PS_HOURS");
-            Map(m => m.VestedPercent).Index(10).Name("VESTED_PERCENT");
-            Map(m => m.Age).Index(11).Name("AGE");
-            Map(m => m.EnrollmentCode).Index(12).Name("ENROLLMENT_CODE");
+            foreach (var yd in employee.YearDetails)
+            {
+                csvWriter.WriteField(employee.BadgePSn);
+                csvWriter.WriteField(employee.Name);
+                csvWriter.WriteField(yd.ProfitYear);
+                csvWriter.WriteField(yd.BeginningBalance);
+                csvWriter.WriteField(yd.BeneficiaryAllocation);
+                csvWriter.WriteField(yd.DistributionAmount);
+                csvWriter.WriteField(yd.Forfeit);
+                csvWriter.WriteField(yd.EndingBalance);
+                csvWriter.WriteField(yd.VestedBalance);
+                csvWriter.WriteField(yd.DateTerm);
+                csvWriter.WriteField(yd.YtdPsHours);
+                csvWriter.WriteField(yd.VestedPercent);
+                csvWriter.WriteField(yd.Age);
+                csvWriter.WriteField(yd.EnrollmentCode);
+                await csvWriter.NextRecordAsync();
+            }
         }
     }
 }

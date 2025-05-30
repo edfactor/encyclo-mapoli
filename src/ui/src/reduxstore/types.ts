@@ -177,7 +177,7 @@ export interface EmployeesOnMilitaryLeaveResponse {
   terminationDate: string;
 }
 
-export interface RehireForfeituresRequest {
+export interface StartAndEndDateRequest {
   beginningDate: string;
   endingDate: string;
   pagination: SortedPaginationRequestDto;
@@ -308,6 +308,7 @@ export interface MasterInquirySearch {
 
 export interface MasterInquiryDetail extends ProfitYearRequest {
   id: number;
+  isEmployee: boolean;
   ssn: number;
   profitYearIteration: number;
   distributionSequence: number;
@@ -440,6 +441,7 @@ export interface ForfeituresByAgeDetail {
 }
 
 export interface EmployeeDetails {
+  isEmployee: boolean;
   firstName: string;
   lastName: string;
   address: string;
@@ -545,26 +547,27 @@ export interface VestedAmountsByAgeDetail {
   partialVestedCount: number;
 }
 
-export interface TerminationRequest {
-  profitYear: number;
-  pagination: SortedPaginationRequestDto;
-}
-
 export interface TerminationDetail {
   badgeNumber: number;
   psnSuffix: number;
-  name: string;
+  name: string | null;
+  badgePSn: string;
+  yearDetails: TerminationYearDetail[];
+}
+
+export interface TerminationYearDetail {
+  profitYear: number;
   beginningBalance: number;
   beneficiaryAllocation: number;
   distributionAmount: number;
   forfeit: number;
   endingBalance: number;
   vestedBalance: number;
-  dateTerm: string;
+  dateTerm: string | null;
   ytdPsHours: number;
   vestedPercent: number;
-  age: number;
-  enrollmentCode: number;
+  age: number | null;
+  enrollmentCode: number | null;
 }
 
 export interface TerminationResponse extends PagedReportResponse<TerminationDetail>{

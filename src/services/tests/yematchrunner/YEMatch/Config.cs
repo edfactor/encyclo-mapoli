@@ -1,5 +1,3 @@
-
-
 using Microsoft.Extensions.Configuration;
 
 namespace YEMatch;
@@ -21,5 +19,4 @@ internal static class Config
         Console.WriteLine($"Directory created: file:///{dataDirectory}");
         return dataDirectory;
     }
-
 }

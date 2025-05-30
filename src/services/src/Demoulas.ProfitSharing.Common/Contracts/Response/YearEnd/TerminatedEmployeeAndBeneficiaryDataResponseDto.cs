@@ -1,8 +1,10 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+
 public sealed record TerminatedEmployeeAndBeneficiaryDataResponseDto
 {
     public required int BadgeNumber { get; set; }
     public required short PsnSuffix { get; set; }
+    public required string? Name { get; set; }
 
     public string BadgePSn
     {
@@ -12,22 +14,11 @@ public sealed record TerminatedEmployeeAndBeneficiaryDataResponseDto
             {
                 return BadgeNumber.ToString();
             }
-
             return $"{BadgeNumber}{PsnSuffix}";
         }
     }
-    public required string? Name { get; set; }
-    public required decimal BeginningBalance { get; set; }
-    public required decimal BeneficiaryAllocation { get; set; }
-    public required decimal DistributionAmount { get; set; }
-    public required decimal Forfeit { get; set; }
-    public required decimal EndingBalance { get; set; }
-    public required decimal VestedBalance { get; set; }
-    public required DateOnly? DateTerm { get; set; }
-    public required decimal YtdPsHours { get; set; }
-    public required decimal VestedPercent { get; set; }
-    public required int? Age { get; set; }
-    public required byte? EnrollmentCode { get; set; }
+
+    public List<TerminatedEmployeeAndBeneficiaryYearDetailDto> YearDetails { get; set; } = new();
 
     public static TerminatedEmployeeAndBeneficiaryDataResponseDto ResponseExample()
     {
@@ -36,18 +27,40 @@ public sealed record TerminatedEmployeeAndBeneficiaryDataResponseDto
             BadgeNumber = 777123,
             PsnSuffix = 100,
             Name = "Example, Joe F",
-            BeginningBalance = 100,
-            BeneficiaryAllocation = 200,
-            DistributionAmount = 300,
-            Forfeit = 400,
-            EndingBalance = 500,
-            VestedBalance = 600,
-            DateTerm = null,
-            YtdPsHours = 980,
-            VestedPercent = 20,
-            Age = 44,
-            EnrollmentCode = 4,
+            YearDetails = new List<TerminatedEmployeeAndBeneficiaryYearDetailDto>
+            {
+                new TerminatedEmployeeAndBeneficiaryYearDetailDto
+                {
+                    ProfitYear = 2024,
+                    BeginningBalance = 100,
+                    BeneficiaryAllocation = 200,
+                    DistributionAmount = 300,
+                    Forfeit = 400,
+                    EndingBalance = 500,
+                    VestedBalance = 600,
+                    DateTerm = null,
+                    YtdPsHours = 980,
+                    VestedPercent = 20,
+                    Age = 44,
+                    EnrollmentCode = 4,
+                }
+            }
         };
     }
+}
 
+public sealed record TerminatedEmployeeAndBeneficiaryYearDetailDto
+{
+    public short ProfitYear { get; set; }
+    public decimal BeginningBalance { get; set; }
+    public decimal BeneficiaryAllocation { get; set; }
+    public decimal DistributionAmount { get; set; }
+    public decimal Forfeit { get; set; }
+    public decimal EndingBalance { get; set; }
+    public decimal VestedBalance { get; set; }
+    public DateOnly? DateTerm { get; set; }
+    public decimal YtdPsHours { get; set; }
+    public decimal VestedPercent { get; set; }
+    public int? Age { get; set; }
+    public byte? EnrollmentCode { get; set; }
 }

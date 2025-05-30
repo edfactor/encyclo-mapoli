@@ -34,7 +34,7 @@ public class ProfitEditReportTests : PristineBaseTest
     {
         // Arrange
         const short profitYear = 2024;
-        ProfitShareUpdateService psu = new(DbFactory, TotalService, CalendarService, FrozenService, DemographicReaderService);
+        ProfitShareUpdateService psu = new(DbFactory, TotalService, CalendarService, DemographicReaderService);
         ProfitShareEditService profitShareEditService = new(psu, CalendarService);
         ProfitShareUpdateRequest req = new()
         {
