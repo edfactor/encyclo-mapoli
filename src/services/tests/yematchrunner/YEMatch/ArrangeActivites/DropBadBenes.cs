@@ -10,13 +10,14 @@ public class DropBadBenes : BaseSqlActivity
         return new Outcome(Name(), Name(), "delete from ...", OutcomeStatus.Ok, "deleted", null, false);
     }
 
-    private async Task VerifyDelete(int  expectedDeletes, string sqlStr)
+    private async Task VerifyDelete(int expectedDeletes, string sqlStr)
     {
         int rowsAffected = await RdySql(sqlStr);
         if (rowsAffected != expectedDeletes)
         {
             throw new InvalidOperationException($"delete failed. effected={rowsAffected}/expected={expectedDeletes} sql: " + sqlStr);
         }
+
         Console.WriteLine($"Deleted {rowsAffected} rows of: {sqlStr}");
     }
 }

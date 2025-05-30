@@ -68,6 +68,4 @@ public abstract class BaseSqlActivity : IActivity
 
         throw new FormatException("User Id not found in connection string.");
     }
-
-
 }
