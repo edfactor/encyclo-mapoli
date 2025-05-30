@@ -122,11 +122,6 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     return rows;
   }, [termination, expandedRows]);
 
-  // Debug: log gridData to verify what is being rendered
-  useEffect(() => {
-    // eslint-disable-next-line no-console
-    console.log("TerminationGrid gridData:", gridData);
-  }, [gridData]);
 
   // Compose columns: show main columns for parent, detail columns for detail
   const columnDefs = useMemo(() => {
@@ -157,7 +152,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     const indentationColumn = {
       headerName: "",
       field: "isDetail",
-      width: 30,
+      width: 10,
       cellRenderer: (params: ICellRendererParams) => {
         return params.data.isDetail ? "" : "";
       },

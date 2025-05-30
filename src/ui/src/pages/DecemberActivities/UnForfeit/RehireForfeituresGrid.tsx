@@ -175,7 +175,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
     const indentationColumn = {
       headerName: "",
       field: "isDetail",
-      width: 30,
+      width: 10,
       cellRenderer: (params: ICellRendererParams) => {
         return params.data.isDetail ? "" : "";
       },
