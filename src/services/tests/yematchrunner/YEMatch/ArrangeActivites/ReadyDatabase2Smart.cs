@@ -5,7 +5,7 @@ internal sealed class ReadyDatabase2Smart : IActivity
 {
     public string Name()
     {
-        return "R2S";  // Short for Ready to Smart
+        return "R2S"; // Short for Ready to Smart
     }
 
     public Task<Outcome> Execute()
