@@ -1,12 +1,9 @@
-import { Typography } from "@mui/material";
 import { ICellRendererParams } from "ag-grid-community";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetRehireForfeituresQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { CAPTIONS } from "../../../constants";
-import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import useFiscalCalendarYear from "../../../hooks/useFiscalCalendarYear";
 import { StartAndEndDateRequest } from "../../../reduxstore/types";
 import { GetDetailColumns, GetMilitaryAndRehireForfeituresColumns } from "./RehireForfeituresGridColumns";
