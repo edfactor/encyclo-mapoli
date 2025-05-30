@@ -294,8 +294,8 @@ export const YearsEndApi = createApi({
         url: `yearend/rehire-forfeitures/`,
         method: "POST",
         body: {
-          beginningDate: params.beginningDate ? tryddmmyyyyToDate(params.beginningDate) : params.beginningDate,
-          endingDate: params.endingDate ? tryddmmyyyyToDate(params.endingDate) : params.endingDate,
+          beginningDate: params.beginningDate,
+          endingDate: params.endingDate,
           take: params.pagination.take,
           skip: params.pagination.skip,
           sortBy: params.pagination.sortBy,
