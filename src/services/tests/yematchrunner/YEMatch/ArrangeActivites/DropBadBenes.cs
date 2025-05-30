@@ -1,15 +1,11 @@
 namespace YEMatch;
 
-public class TrimTo14Employees : BaseSqlActivity
+public class DropBadBenes : BaseSqlActivity
 {
     public override async Task<Outcome> Execute()
     {
-        const string condition = " not in (select dem_ssn from demographics where py_scod = 'A' and dem_badge < 700100)";
-
-        await VerifyDelete(116395, $"delete from profit_detail where PR_DET_S_SEC_NUMBER {condition}");
-        await VerifyDelete(10481, $"delete from payprofit where payprof_ssn {condition}");
-        await VerifyDelete(10481, $"delete from demographics where dem_ssn {condition}");
-        await VerifyDelete(176, "delete from payben");
+        await VerifyDelete(2, "delete from payben where pyben_payssn in (700010556, 700010596 )");
+        await VerifyDelete(63, "delete from profit_detail where pr_det_s_sec_number IN ( 700010556, 700010596 )");
 
         return new Outcome(Name(), Name(), "delete from ...", OutcomeStatus.Ok, "deleted", null, false);
     }

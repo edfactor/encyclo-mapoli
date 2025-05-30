@@ -55,4 +55,4 @@ export const NavigationStatusApi = createApi({
   })
 });
 
-export const { useGetNavigationStatusQuery, useLazyUpdateNavigationStatusQuery, useUpdateNavigationStatusQuery } = NavigationStatusApi;
+export const { useGetNavigationStatusQuery, useLazyGetNavigationStatusQuery, useLazyUpdateNavigationStatusQuery, useUpdateNavigationStatusQuery } = NavigationStatusApi;

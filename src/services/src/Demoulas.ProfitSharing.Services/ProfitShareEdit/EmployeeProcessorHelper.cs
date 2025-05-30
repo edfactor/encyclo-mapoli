@@ -14,8 +14,8 @@ namespace Demoulas.ProfitSharing.Services.ProfitShareEdit;
 internal static class EmployeeProcessorHelper
 {
     public static async Task<(List<MemberFinancials>, bool)> ProcessEmployees(IProfitSharingDataContextFactory dbContextFactory, ICalendarService calendarService,
-        TotalService totalService, IFrozenService frozenService, IDemographicReaderService demographicReaderService, ProfitShareUpdateRequest profitShareUpdateRequest, AdjustmentsSummaryDto adjustmentsSummaryDto,
-        CancellationToken cancellationToken)
+        TotalService totalService, IDemographicReaderService demographicReaderService, ProfitShareUpdateRequest profitShareUpdateRequest,
+        AdjustmentsSummaryDto adjustmentsSummaryDto, CancellationToken cancellationToken)
     {
         bool employeeExceededMaxContribution = false;
         short profitYear = profitShareUpdateRequest.ProfitYear;
