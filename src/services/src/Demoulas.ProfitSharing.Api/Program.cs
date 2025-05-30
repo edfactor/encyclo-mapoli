@@ -16,7 +16,6 @@ using Demoulas.ProfitSharing.OracleHcm.Extensions;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Security.Extensions;
 using Demoulas.ProfitSharing.Services.Extensions;
-using Demoulas.Security;
 using Demoulas.Security.Extensions;
 using Demoulas.Util.Extensions;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -44,7 +43,7 @@ builder.Configuration.Bind("Logging:Smart", smartConfig);
 FileSystemLogConfig fileSystemLog = new FileSystemLogConfig();
 builder.Configuration.Bind("Logging:FileSystem", fileSystemLog);
 
-await builder.SetDefaultLoggerConfigurationAsync(smartConfig, fileSystemLog);
+builder.SetDefaultLoggerConfiguration(smartConfig, fileSystemLog);
 
 _ = builder.AddSecurityServices();
 

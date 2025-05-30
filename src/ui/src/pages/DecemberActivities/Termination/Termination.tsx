@@ -1,18 +1,25 @@
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
-import { Page } from "smart-ui-library";
+import { Page, DSMAccordion } from "smart-ui-library";
 
-import { Divider } from "@mui/material";
+import { Divider, CircularProgress } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 
 import { CAPTIONS } from "../../../constants";
 import TerminationGrid from "./TerminationGrid";
+import TerminationSearchFilter from "./TerminationSearchFilter";
+import { TerminationRequest } from "reduxstore/types";
+import useFiscalCalendarYear from "hooks/useFiscalCalendarYear";
 
 const Termination = () => {
-  const navigate = useNavigate();
-
+  const fiscalData = useFiscalCalendarYear();
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
+  const [searchParams, setSearchParams] = useState<TerminationRequest | null>(null);
+
+  const handleSearch = (params: TerminationRequest) => {
+    setSearchParams(params);
+    setInitialSearchLoaded(true);
+  };
 
   const renderActionNode = () => {
     return <StatusDropdownActionNode />;
@@ -23,6 +30,7 @@ const Termination = () => {
     setInitialSearchLoaded(true);
   }, []);
 
+  const isCalendarDataLoaded = !!fiscalData?.fiscalBeginDate && !!fiscalData?.fiscalEndDate;
 
   return (
     <Page
@@ -34,12 +42,30 @@ const Termination = () => {
         <Grid2 width={"100%"}>
           <Divider />
         </Grid2>
+         {!isCalendarDataLoaded ? (
+          <Grid2 width={"100%"} container justifyContent="center" padding={4}>
+            <CircularProgress />
+          </Grid2>
+        ) : (
+          <>
+        <Grid2 width="100%">
+           <DSMAccordion title="Filter">
+          <TerminationSearchFilter
+            setInitialSearchLoaded={setInitialSearchLoaded}
+            fiscalData={fiscalData}
+            onSearch={handleSearch}
+          />
+          </DSMAccordion>
+        </Grid2>
         <Grid2 width="100%">
           <TerminationGrid
             setInitialSearchLoaded={setInitialSearchLoaded}
             initialSearchLoaded={initialSearchLoaded}
+            searchParams={searchParams}
           />
         </Grid2>
+                  </>
+        )}
       </Grid2>
     </Page>
   );
