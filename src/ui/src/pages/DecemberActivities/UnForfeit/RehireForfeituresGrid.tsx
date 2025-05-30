@@ -169,22 +169,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
       lockVisible: true,
       lockPosition: true,
       pinned: "left"
-    };
-
-    // Add a style column to handle indentation
-    const indentationColumn = {
-      headerName: "",
-      field: "isDetail",
-      width: 10,
-      cellRenderer: (params: ICellRendererParams) => {
-        return params.data.isDetail ? "" : "";
-      },
-      suppressSizeToFit: true,
-      suppressAutoSize: true,
-      lockVisible: true,
-      lockPosition: true,
-      pinned: "left"
-    };
+    };   
 
     // Determine which columns to display based on whether it's a detail row
     const visibleColumns = mainColumns.map((column) => {
@@ -236,7 +221,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
       });
 
     // Combine all columns
-    return [expansionColumn, indentationColumn, ...visibleColumns, ...detailOnlyColumns];
+    return [expansionColumn, ...visibleColumns, ...detailOnlyColumns];
   }, [mainColumns, detailColumns]);
 
   // Custom CSS classes for rows

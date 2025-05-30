@@ -65,14 +65,16 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
       if (badgeNumbers !== prevBadgeNumbers) {
         const initialExpandState: Record<string, boolean> = {};
         termination.response.results.forEach((row: any) => {
+          // Set to TRUE to auto-expand rows with details!
           if (row.yearDetails && row.yearDetails.length > 0) {
-            initialExpandState[row.badgeNumber] = false;
+            initialExpandState[row.badgeNumber] = true;
           }
         });
         setExpandedRows(initialExpandState);
       }
     }
   }, [termination?.response?.results]);
+
 
   const handleRowExpansion = (badgeNumber: string) => {
     setExpandedRows((prev) => ({
@@ -148,21 +150,6 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
       pinned: "left"
     };
 
-    // Add a style column to handle indentation
-    const indentationColumn = {
-      headerName: "",
-      field: "isDetail",
-      width: 10,
-      cellRenderer: (params: ICellRendererParams) => {
-        return params.data.isDetail ? "" : "";
-      },
-      suppressSizeToFit: true,
-      suppressAutoSize: true,
-      lockVisible: true,
-      lockPosition: true,
-      pinned: "left"
-    };
-
     // Determine which columns to display based on whether it's a detail row
     const visibleColumns = mainColumns.map((column) => {
       return {
@@ -213,7 +200,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
       });
 
     // Combine all columns
-    return [expansionColumn, indentationColumn, ...visibleColumns, ...detailOnlyColumns];
+    return [expansionColumn, ...visibleColumns, ...detailOnlyColumns];
   }, [mainColumns, detailColumns]);
 
   // Row class for detail rows
