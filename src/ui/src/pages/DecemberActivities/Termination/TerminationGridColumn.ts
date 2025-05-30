@@ -33,7 +33,7 @@ export const GetTerminationColumns = (): ColDef[] => {
 export const GetDetailColumns = (): ColDef[] => {
   return [
     {
-      headerName: "Year",
+      headerName: "Profit Year",
       field: "profitYear",
       colId: "profitYear",
       width: 80,

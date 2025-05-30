@@ -7,20 +7,22 @@ import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, numberToCurrency, Pagination } from "smart-ui-library";
 import { TotalsGrid } from "../../../components/TotalsGrid/TotalsGrid";
 import { ReportSummary } from "../../../components/ReportSummary";
-import { TerminationRequest } from "reduxstore/types";
-
+import { StartAndEndDateRequest } from "reduxstore/types";
+import useFiscalCalendarYear from "../../../hooks/useFiscalCalendarYear";
 import { GetDetailColumns, GetTerminationColumns } from "./TerminationGridColumn";
 
 interface TerminationGridSearchProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
-  searchParams: TerminationRequest | null;
+  searchParams: StartAndEndDateRequest | null;
+  resetPageFlag: boolean;
 }
 
 const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   initialSearchLoaded,
   setInitialSearchLoaded,
-  searchParams
+  searchParams,
+  resetPageFlag
 }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
@@ -32,7 +34,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const { termination } = useSelector((state: RootState) => state.yearsEnd);
   const [triggerSearch, { isFetching }] = useLazyGetTerminationReportQuery();
-  const navigate = useNavigate();
+  const fiscalCalendarYear = useFiscalCalendarYear();
 
   useEffect(() => {
     if (searchParams && hasToken) {
@@ -48,6 +50,11 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
       triggerSearch(request, false);
     }
   }, [searchParams, pageNumber, pageSize, sortParams, hasToken, triggerSearch]);
+
+    // Reset page number to 0 when resetPageFlag changes
+  useEffect(() => {
+    setPageNumber(0);
+  }, [resetPageFlag]);
 
   // Initialize expandedRows when data is loaded
   useEffect(() => {
@@ -81,7 +88,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   // Build grid data with expandable rows
   const gridData = useMemo(() => {
     if (!termination?.response?.results) return [];
-    const rows: any[] = [];
+    const rows = [];
     for (const row of termination.response.results) {
       const hasDetails = row.yearDetails && row.yearDetails.length > 0;
 

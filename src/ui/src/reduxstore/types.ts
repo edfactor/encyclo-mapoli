@@ -545,10 +545,6 @@ export interface VestedAmountsByAgeDetail {
   partialVestedCount: number;
 }
 
-export interface TerminationRequest extends StartAndEndDateRequest{
-  profitYear: number;  
-}
-
 export interface TerminationDetail {
   badgeNumber: number;
   psnSuffix: number;

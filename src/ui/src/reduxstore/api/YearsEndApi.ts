@@ -640,7 +640,7 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getTerminationReport: builder.query<TerminationResponse, TerminationRequest>({
+    getTerminationReport: builder.query<TerminationResponse, StartAndEndDateRequest>({
       query: (params) => {
        
         return {
