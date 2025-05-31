@@ -22,25 +22,23 @@ public class MasterInquiryMemberDetailsEndpoint : Endpoint<MasterInquiryMemberDe
         Get("master-inquiry/member/{MemberType}/{Id}/details");
         Summary(s =>
         {
-            s.Summary = "PS Master Inquiry (008-10)";
-            s.Description =
-                "This endpoint returns master inquiry details.";
-
+            s.Summary = "Get paginated profit details for a specific member (employee or beneficiary).";
+            s.Description = "Returns paginated profit sharing details for a specific member, filtered by MemberType and Id. Use MemberType=1 for employees and MemberType=2 for beneficiaries.";
+            s.ExampleRequest = new MasterInquiryMemberDetailsRequest { MemberType = 1, Id = 123 };
             s.ResponseExamples = new Dictionary<int, object>
             {
                 {
                     200,
-                    new MasterInquiryWithDetailsResponseDto
+                    new PaginatedResponseDto<MasterInquiryResponseDto>
                     {
-                        EmployeeDetails = null,
-                        InquiryResults = new PaginatedResponseDto<MasterInquiryResponseDto>
-                        {
-                            Results = new List<MasterInquiryResponseDto> { MasterInquiryResponseDto.ResponseExample() }
-                        }
+                        Results = new List<MasterInquiryResponseDto> { MasterInquiryResponseDto.ResponseExample() },
+                        Total = 1
                     }
                 }
             };
-            s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
+            s.Responses[400] = "Bad Request. Invalid parameters provided.";
+            s.Responses[403] = $"Forbidden. Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
+            s.Responses[404] = "Not Found. The requested member or details could not be found.";
         });
         Group<MasterInquiryGroup>();
     }
