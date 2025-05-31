@@ -184,17 +184,45 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 query = query.Where(x => x.Member.Ssn == req.Ssn);
             }
 
-            var memberDetailsQuery = query.Select(x => new MemberDetails
-            {
-                FirstName = x.Member.FirstName,
-                LastName = x.Member.LastName,
-                BadgeNumber = x.Member.BadgeNumber,
-                PsnSuffix = x.Member.PsnSuffix,
-                Ssn = x.Member.Ssn.ToString(),
-                
-            });
+            // Get unique SSNs from the query
+            var ssnList = await query.Select(x => x.Member.Ssn).Distinct().ToListAsync(cancellationToken);
+            short currentYear = req.ProfitYear;
+            short previousYear = (short)(currentYear - 1);
+            var memberType = req.MemberType;
+            var detailsList = new List<MemberDetails>();
 
-            return await memberDetailsQuery.ToPaginationResultsAsync(req, cancellationToken);
+            foreach (var ssn in ssnList)
+            {
+                MemberDetails? details = null;
+                if (memberType == 1)
+                {
+                    details = await GetDemographicDetails(ctx, ssn, currentYear, previousYear, cancellationToken);
+                }
+                else if (memberType == 2)
+                {
+                    details = await GetBeneficiaryDetails(ctx, ssn, currentYear, previousYear, cancellationToken);
+                }
+                else
+                {
+                    details = await GetDemographicDetails(ctx, ssn, currentYear, previousYear, cancellationToken)
+                        ?? await GetBeneficiaryDetails(ctx, ssn, currentYear, previousYear, cancellationToken);
+                }
+
+                if (details != null)
+                {
+                    detailsList.Add(details);
+                }
+            }
+
+            // Paginate results
+            var skip = req.Skip ?? 0;
+            var take = req.Take ?? 25;
+            var paged = detailsList.Skip(skip).Take(take).ToList();
+            return new PaginatedResponseDto<MemberDetails>(req)
+            {
+                Results = paged,
+                Total = detailsList.Count
+            };
         });
     }
 
