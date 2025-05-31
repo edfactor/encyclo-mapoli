@@ -3,29 +3,31 @@ import Grid2 from '@mui/material/Grid2';
 import LabelValueSection from "components/LabelValueSection";
 import React, { useEffect } from "react";
 import { EmployeeDetails, MissiveResponse } from "reduxstore/types";
-import { mmDDYYFormat, numberToCurrency } from "smart-ui-library";
+import { numberToCurrency } from "smart-ui-library";
 import { formatPercentage } from "utils/formatPercentage";
 import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
-import { tryddmmyyyyToDate } from "../../utils/dateUtils";
+import { mmDDYYFormat } from "../../utils/dateUtils";
 import { getEnrolledStatus, getForfeitedStatus } from "../../utils/enrollmentUtil";
 import { useLazyGetProfitMasterInquiryMemberQuery } from "reduxstore/api/InquiryApi";
+import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 
 
 interface MasterInquiryEmployeeDetailsProps {
   memberType: number;
   ssn: string | number;
-  profitYear?: number;
-  missives?: MissiveResponse[] | null;
+  profitYear?: number | null | undefined;
 }
 
-const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> = ({ memberType, ssn, profitYear, missives }) => {
+const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> = ({ memberType, ssn, profitYear }) => {
   const [trigger, { data: details, isLoading, isError }] = useLazyGetProfitMasterInquiryMemberQuery();
+
+const defaultProfitYear = useDecemberFlowProfitYear();
 
   useEffect(() => {
     if (memberType && ssn) {
-      trigger({ memberType, ssn: typeof ssn === 'string' ? parseInt(ssn) : ssn, profitYear });
+      trigger({ memberType, ssn: typeof ssn === 'string' ? parseInt(ssn) : ssn, profitYear:  profitYear ?? defaultProfitYear });
     }
-  }, [memberType, ssn, profitYear, trigger]);
+  }, [memberType, ssn, profitYear, trigger, defaultProfitYear]);
 
   if (isLoading) return <Typography>Loading...</Typography>;
   if (isError || !details) return <Typography>No details found.</Typography>;
@@ -71,7 +73,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
 
   const employeeSection = [
     { label: "Badge", value: viewBadgeLinkRenderer(Number(badgeNumber)) },
-    { label: "DOB", value: mmDDYYFormat(tryddmmyyyyToDate(dateOfBirth)) },
+    { label: "DOB", value: mmDDYYFormat(dateOfBirth) },
     { label: "SSN", value: `${ssnValue}` },
     { label: "ETVA", value: currentEtva },
     { label: "Status", value: employmentStatus },
@@ -86,10 +88,10 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
   ];
 
   const hireSection = [
-    { label: "Hire", value: mmDDYYFormat(tryddmmyyyyToDate(hireDate)) },
-    { label: "Term", value: terminationDate ? mmDDYYFormat(tryddmmyyyyToDate(terminationDate)) : 'N/A' },
+    { label: "Hire", value: mmDDYYFormat(hireDate) },
+    { label: "Term", value: terminationDate ? mmDDYYFormat(terminationDate) : 'N/A' },
     { label: "Store", value: storeNumber },
-    { label: "Rehire", value: reHireDate ? mmDDYYFormat(tryddmmyyyyToDate(reHireDate)) : 'N/A' },
+    { label: "Rehire", value: reHireDate ? mmDDYYFormat(reHireDate) : 'N/A' },
   ];
 
   const amountsSection = [

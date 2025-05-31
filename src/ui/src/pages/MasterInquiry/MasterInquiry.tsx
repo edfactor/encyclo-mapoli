@@ -10,6 +10,7 @@ import { DSMAccordion, Page } from "smart-ui-library";
 import MasterInquiryEmployeeDetails from "./MasterInquiryEmployeeDetails";
 import MasterInquiryGrid from "./MasterInquiryGrid";
 import MasterInquirySearchFilter from "./MasterInquirySearchFilter";
+import { memberTypeGetNumberMap } from "./MasterInquiryFunctions";
 
 
 const MasterInquiry = () => {
@@ -86,12 +87,11 @@ const MasterInquiry = () => {
         </Grid2>
 
         {/* Render employee details if identifiers are present in request params */}
-        {masterInquiryRequestParams && masterInquiryRequestParams.memberType !== undefined && masterInquiryRequestParams.ssn && (
+        {masterInquiryRequestParams && masterInquiryRequestParams.memberType !== undefined && masterInquiryRequestParams.socialSecurity && (
           <MasterInquiryEmployeeDetails
-            memberType={masterInquiryRequestParams.memberType}
-            ssn={masterInquiryRequestParams.ssn}
-            profitYear={masterInquiryRequestParams.profitYear}
-            missives={missives}
+            memberType={memberTypeGetNumberMap[masterInquiryRequestParams.memberType]}
+            ssn={masterInquiryRequestParams.socialSecurity}
+            profitYear={masterInquiryRequestParams.endProfitYear}
           />
         )}
 
