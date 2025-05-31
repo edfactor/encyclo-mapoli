@@ -1,9 +1,9 @@
-﻿using Demoulas.Common.Contracts.Contracts.Request;
-
+﻿
 namespace Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
-public record MasterInquiryMemberRequest : SortedPaginationRequestDto 
+public record MasterInquiryMemberRequest : ProfitYearRequest 
 {
-    public int? SocialSecurity { get; set; }
-    public int? BadgeNumber { get; set; }
-    public short? PsnSuffix { get; set; }
+    public byte? MemberType { get; set; }
+#pragma warning disable DSM001
+    public int Ssn { get; set; }
+#pragma warning restore DSM001
 }

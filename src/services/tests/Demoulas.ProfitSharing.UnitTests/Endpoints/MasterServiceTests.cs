@@ -89,7 +89,7 @@ public class MasterServiceTests : ApiTestBase<Program>
     public async Task GetMasterInquiryWithSocialSecurity()
     {
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
-        var request = new MasterInquiryRequest() { SocialSecurity = 000000000, Skip = 0, Take = 25 };
+        var request = new MasterInquiryRequest() { Ssn = 000000000, Skip = 0, Take = 25 };
         var response = await ApiClient.POSTAsync<MasterInquiryEndpoint, MasterInquiryRequest, PaginatedResponseDto<MasterInquiryResponseDto>>(request);
         response.Should().NotBeNull();
         response.Response.EnsureSuccessStatusCode();
@@ -109,7 +109,7 @@ public class MasterServiceTests : ApiTestBase<Program>
             ForfeitureAmount = 0,
             PaymentAmount = 0,
             ProfitCode = ProfitCode.Constants.IncomingContributions.Id,
-            SocialSecurity = 000000000,
+            Ssn = 000000000,
             Skip = 0,
             Take = 25
         };

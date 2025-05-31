@@ -14,5 +14,4 @@ public record MasterInquiryRequest : MasterInquiryMemberRequest
     public decimal? PaymentAmount { get; set; }
     public string? Name { get; set; }
     public byte? PaymentType { get; set; }
-    public byte? MemberType { get; set; }
 }

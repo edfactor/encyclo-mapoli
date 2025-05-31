@@ -1,5 +1,6 @@
-﻿using Demoulas.Common.Data.Contexts.Extensions;
-using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
+﻿using System.Runtime.Intrinsics.X86;
+using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -10,13 +11,16 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Extensions;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Services;
 
-public class MasterInquiryService : IMasterInquiryService
+public sealed class MasterInquiryService : IMasterInquiryService
 {
+    #region Private DTO
+
     private sealed  class MasterInquiryItem
     {
         public required ProfitDetail ProfitDetail { get; init; }
@@ -39,6 +43,8 @@ public class MasterInquiryService : IMasterInquiryService
         public decimal CurrentHoursYear { get; init; }
     }
 
+
+    #endregion
 
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly ILogger _logger;
@@ -156,6 +162,31 @@ public class MasterInquiryService : IMasterInquiryService
         });
 
         return inquiryResults;
+    }
+
+    public Task<MemberDetails?> GetMemberAsync(MasterInquiryMemberRequest req, CancellationToken cancellationToken = default)
+    {
+        short currentYear = req.ProfitYear;
+        short previousYear = (short)(currentYear - 1);
+        return _dataContextFactory.UseReadOnlyContext(ctx =>
+        {
+            switch (req.MemberType)
+            {
+                // Employee only
+                case 1:
+                    return GetDemographicDetails(ctx, req.Ssn, currentYear, previousYear, cancellationToken);
+                // Beneficiary only
+                case 2:
+                    return GetBeneficiaryDetails(ctx, req.Ssn, currentYear, previousYear, cancellationToken);
+                default:
+                    throw new ValidationException("Invalid MemberType provided");
+            }
+        });
+    }
+
+    public Task<PaginatedResponseDto<MasterInquiryResponseDto>> GetMemberProfitDetails(MasterInquiryMemberDetailsRequest req, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
     }
 
     private static IQueryable<MasterInquiryItem> GetMasterInquiryDemographics(IProfitSharingDbContext ctx)
@@ -434,9 +465,9 @@ public class MasterInquiryService : IMasterInquiryService
             query = query.Where(x => x.ProfitDetail.Earnings == req.EarningsAmount);
         }
 
-        if (req.SocialSecurity != null)
+        if (req.Ssn != null)
         {
-            query = query.Where(x => x.ProfitDetail.Ssn == req.SocialSecurity);
+            query = query.Where(x => x.ProfitDetail.Ssn == req.Ssn);
         }
 
         if (req.ForfeitureAmount.HasValue)
