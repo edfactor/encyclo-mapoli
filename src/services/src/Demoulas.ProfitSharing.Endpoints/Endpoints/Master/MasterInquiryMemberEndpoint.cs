@@ -41,8 +41,14 @@ public class MasterInquiryMemberEndpoint : Endpoint<MasterInquiryMemberRequest, 
         Group<MasterInquiryGroup>();
     }
 
-    public override Task<MemberDetails> ExecuteAsync(MasterInquiryMemberRequest req, CancellationToken ct)
+    public override async Task<MemberDetails> ExecuteAsync(MasterInquiryMemberRequest req, CancellationToken ct)
     {
-        return _masterInquiryService.GetMemberAsync(req, ct);
+        var result = await _masterInquiryService.GetMemberAsync(req, ct);
+        if (result is null)
+        {
+            await SendNotFoundAsync(ct);
+            return null!;
+        }
+        return result;
     }
 }

@@ -11,6 +11,7 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Extensions;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Demoulas.ProfitSharing.Services.Mappers;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -32,10 +33,13 @@ public sealed class MasterInquiryService : IMasterInquiryService
         public DateTimeOffset TransactionDate { get; init; }
     }
 
-    private sealed class InquiryDemographics
+    public sealed class InquiryDemographics
     {
         public int BadgeNumber { get; init; }
         public required string FullName { get; init; }
+        public required string FirstName { get; init; }
+        public required string LastName { get; init; }
+
         public byte PayFrequencyId { get; init; }
         public short PsnSuffix { get; init; }
         public int Ssn { get; init; }
@@ -164,29 +168,51 @@ public sealed class MasterInquiryService : IMasterInquiryService
         return inquiryResults;
     }
 
-    public Task<MemberDetails?> GetMemberAsync(MasterInquiryMemberRequest req, CancellationToken cancellationToken = default)
+    public async Task<PaginatedResponseDto<MemberDetails>> GetMembersAsync(MasterInquiryMemberRequest req, CancellationToken cancellationToken = default)
     {
-        short currentYear = req.ProfitYear;
-        short previousYear = (short)(currentYear - 1);
-        return _dataContextFactory.UseReadOnlyContext(ctx =>
+        return await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            switch (req.MemberType)
+            IQueryable<MasterInquiryItem> query = req.MemberType switch
             {
-                // Employee only
-                case 1:
-                    return GetDemographicDetails(ctx, req.Ssn, currentYear, previousYear, cancellationToken);
-                // Beneficiary only
-                case 2:
-                    return GetBeneficiaryDetails(ctx, req.Ssn, currentYear, previousYear, cancellationToken);
-                default:
-                    throw new ValidationException("Invalid MemberType provided");
+                1 => GetMasterInquiryDemographics(ctx),
+                2 => GetMasterInquiryBeneficiary(ctx),
+                _ => GetMasterInquiryDemographics(ctx).Union(GetMasterInquiryBeneficiary(ctx))
+            };
+
+            if (req.Ssn != 0)
+            {
+                query = query.Where(x => x.Member.Ssn == req.Ssn);
             }
+
+            var memberDetailsQuery = query.Select(x => new MemberDetails
+            {
+                FirstName = x.Member.FirstName,
+                LastName = x.Member.LastName,
+                BadgeNumber = x.Member.BadgeNumber,
+                PsnSuffix = x.Member.PsnSuffix,
+                Ssn = x.Member.Ssn.ToString(),
+                
+            });
+
+            return await memberDetailsQuery.ToPaginationResultsAsync(req, cancellationToken);
         });
     }
 
-    /// <summary>
-    /// Returns paginated profit details for a specific member, filtered by MemberType and Id.
-    /// </summary>
+    public async Task<MemberDetails?> GetMemberAsync(MasterInquiryMemberRequest req, CancellationToken cancellationToken = default)
+    {
+        short currentYear = req.ProfitYear;
+        short previousYear = (short)(currentYear - 1);
+        return await _dataContextFactory.UseReadOnlyContext(ctx =>
+        {
+            return req.MemberType switch
+            {
+                1 => GetDemographicDetails(ctx, req.Ssn, currentYear, previousYear, cancellationToken),
+                2 => GetBeneficiaryDetails(ctx, req.Ssn, currentYear, previousYear, cancellationToken),
+                _ => throw new ValidationException("Invalid MemberType provided")
+            };
+        });
+    }
+
     public Task<PaginatedResponseDto<MasterInquiryResponseDto>> GetMemberProfitDetails(MasterInquiryMemberDetailsRequest req, CancellationToken cancellationToken = default)
     {
         return _dataContextFactory.UseReadOnlyContext(ctx =>
@@ -267,6 +293,8 @@ public sealed class MasterInquiryService : IMasterInquiryService
                     {
                         BadgeNumber = d.BadgeNumber,
                         FullName = d.ContactInfo.FullName != null ? d.ContactInfo.FullName : d.ContactInfo.LastName,
+                        FirstName = d.ContactInfo.FirstName,
+                        LastName = d.ContactInfo.LastName,
                         PayFrequencyId = d.PayFrequencyId,
                         Ssn = d.Ssn,
                         PsnSuffix = 0,
@@ -305,6 +333,8 @@ public sealed class MasterInquiryService : IMasterInquiryService
                     {
                         BadgeNumber = d.BadgeNumber,
                         FullName = d.Contact!.ContactInfo.FullName != null ? d.Contact.ContactInfo.FullName : d.Contact.ContactInfo.LastName,
+                        FirstName = d.Contact!.ContactInfo.FirstName,
+                        LastName = d.Contact!.ContactInfo.LastName,
                         PayFrequencyId = PayFrequency.Constants.Weekly,
                         PsnSuffix = d.PsnSuffix,
                         Ssn = d.Contact!=null?d.Contact.Ssn: 0,

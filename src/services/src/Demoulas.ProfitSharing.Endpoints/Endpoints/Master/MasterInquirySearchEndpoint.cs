@@ -8,7 +8,7 @@ using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Master;
 
-public class MasterInquirySearchEndpoint : Endpoint<MasterInquiryRequest, MasterInquiryWithDetailsResponseDto>
+public class MasterInquirySearchEndpoint : Endpoint<MasterInquiryRequest, PaginatedResponseDto<MemberDetails>>
 {
     private readonly IMasterInquiryService _masterInquiryService;
 
@@ -45,8 +45,8 @@ public class MasterInquirySearchEndpoint : Endpoint<MasterInquiryRequest, Master
         Group<MasterInquiryGroup>();
     }
 
-    public override Task<MasterInquiryWithDetailsResponseDto> ExecuteAsync(MasterInquiryRequest req, CancellationToken ct)
+    public override Task<PaginatedResponseDto<MemberDetails>> ExecuteAsync(MasterInquiryRequest req, CancellationToken ct)
     {
-        return _masterInquiryService.GetMasterInquiryAsync(req, ct);
+        return _masterInquiryService.GetMembersAsync(req, ct);
     }
 }
