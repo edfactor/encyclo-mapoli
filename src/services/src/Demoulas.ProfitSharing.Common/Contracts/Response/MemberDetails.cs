@@ -1,5 +1,5 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response;
-public sealed record EmployeeDetails
+public sealed record MemberDetails
 {
     public bool IsEmployee { get; init; }
     public int BadgeNumber { get; init; }

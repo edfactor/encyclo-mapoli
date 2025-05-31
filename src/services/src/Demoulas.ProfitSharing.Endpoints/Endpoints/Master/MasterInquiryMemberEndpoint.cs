@@ -8,18 +8,18 @@ using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Master;
 
-public class MasterInquiryEndpoint : Endpoint<MasterInquiryRequest, MasterInquiryWithDetailsResponseDto>
+public class MasterInquiryMemberEndpoint : Endpoint<MasterInquiryMemberRequest, MemberDetails>
 {
     private readonly IMasterInquiryService _masterInquiryService;
 
-    public MasterInquiryEndpoint(IMasterInquiryService masterInquiryService)
+    public MasterInquiryMemberEndpoint(IMasterInquiryService masterInquiryService)
     {
         _masterInquiryService = masterInquiryService;
     }
 
     public override void Configure()
     {
-        Post("master-inquiry");
+        Post("master-inquiry/member");
         Summary(s =>
         {
             s.Summary = "PS Master Inquiry (008-10)";
@@ -30,13 +30,9 @@ public class MasterInquiryEndpoint : Endpoint<MasterInquiryRequest, MasterInquir
             {
                 {
                     200,
-                    new MasterInquiryWithDetailsResponseDto
+                    new MemberDetails
                     {
-                        EmployeeDetails = null,
-                        InquiryResults = new PaginatedResponseDto<MasterInquiryResponseDto>
-                        {
-                            Results = new List<MasterInquiryResponseDto> { MasterInquiryResponseDto.ResponseExample() }
-                        }
+                        
                     }
                 }
             };
@@ -45,8 +41,8 @@ public class MasterInquiryEndpoint : Endpoint<MasterInquiryRequest, MasterInquir
         Group<MasterInquiryGroup>();
     }
 
-    public override Task<MasterInquiryWithDetailsResponseDto> ExecuteAsync(MasterInquiryRequest req, CancellationToken ct)
+    public override Task<MemberDetails> ExecuteAsync(MasterInquiryMemberRequest req, CancellationToken ct)
     {
-        return _masterInquiryService.GetMasterInquiryAsync(req, ct);
+        return _masterInquiryService.GetMemberAsync(req, ct);
     }
 }

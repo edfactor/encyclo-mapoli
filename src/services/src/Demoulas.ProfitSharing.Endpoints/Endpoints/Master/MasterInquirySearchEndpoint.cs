@@ -8,18 +8,18 @@ using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Master;
 
-public class MasterInquiryEndpoint : Endpoint<MasterInquiryRequest, MasterInquiryWithDetailsResponseDto>
+public class MasterInquirySearchEndpoint : Endpoint<MasterInquiryRequest, MasterInquiryWithDetailsResponseDto>
 {
     private readonly IMasterInquiryService _masterInquiryService;
 
-    public MasterInquiryEndpoint(IMasterInquiryService masterInquiryService)
+    public MasterInquirySearchEndpoint(IMasterInquiryService masterInquiryService)
     {
         _masterInquiryService = masterInquiryService;
     }
 
     public override void Configure()
     {
-        Post("master-inquiry");
+        Post("master-inquiry/search");
         Summary(s =>
         {
             s.Summary = "PS Master Inquiry (008-10)";

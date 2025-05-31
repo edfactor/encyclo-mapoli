@@ -8,18 +8,18 @@ using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Master;
 
-public class MasterInquiryEndpoint : Endpoint<MasterInquiryRequest, MasterInquiryWithDetailsResponseDto>
+public class MasterInquiryMemberDetailsEndpoint : Endpoint<MasterInquiryMemberDetailsRequest, PaginatedResponseDto<MasterInquiryResponseDto>>
 {
     private readonly IMasterInquiryService _masterInquiryService;
 
-    public MasterInquiryEndpoint(IMasterInquiryService masterInquiryService)
+    public MasterInquiryMemberDetailsEndpoint(IMasterInquiryService masterInquiryService)
     {
         _masterInquiryService = masterInquiryService;
     }
 
     public override void Configure()
     {
-        Post("master-inquiry");
+        Post("master-inquiry/member/{type}/{id}/details", request => new {request.MemberType, request.Id} );
         Summary(s =>
         {
             s.Summary = "PS Master Inquiry (008-10)";
@@ -45,8 +45,8 @@ public class MasterInquiryEndpoint : Endpoint<MasterInquiryRequest, MasterInquir
         Group<MasterInquiryGroup>();
     }
 
-    public override Task<MasterInquiryWithDetailsResponseDto> ExecuteAsync(MasterInquiryRequest req, CancellationToken ct)
+    public override Task<PaginatedResponseDto<MasterInquiryResponseDto>> ExecuteAsync(MasterInquiryMemberDetailsRequest req, CancellationToken ct)
     {
-        return _masterInquiryService.GetMasterInquiryAsync(req, ct);
+        return _masterInquiryService.GetMemberProfitDetails(req, ct);
     }
 }

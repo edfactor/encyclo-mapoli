@@ -1,6 +1,7 @@
 ﻿using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -127,7 +128,7 @@ public class MasterInquiryService : IMasterInquiryService
             });
             var result = await formattedQuery.ToPaginationResultsAsync(req, cancellationToken);
             ISet<int> uniqueSsns = await combinedQuery.Select(q => q.Member.Ssn).ToHashSetAsync(cancellationToken: cancellationToken);
-            EmployeeDetails? employeeDetails = null;
+            MemberDetails? employeeDetails = null;
 
             if (uniqueSsns.Count == 1)
             {
@@ -229,7 +230,7 @@ public class MasterInquiryService : IMasterInquiryService
         return query;
     }
 
-    private async Task<EmployeeDetails?> GetDemographicDetails(ProfitSharingReadOnlyDbContext ctx,
+    private async Task<MemberDetails?> GetDemographicDetails(ProfitSharingReadOnlyDbContext ctx,
        int ssn, short currentYear, short previousYear, CancellationToken cancellationToken)
     {
         var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
@@ -291,7 +292,7 @@ public class MasterInquiryService : IMasterInquiryService
 
         var missives = await _missiveService.DetermineMissivesForSsn(ssn, currentYear, cancellationToken);
 
-        return new EmployeeDetails
+        return new MemberDetails
         {
             IsEmployee = true,
             FirstName = memberData.FirstName,
@@ -324,7 +325,7 @@ public class MasterInquiryService : IMasterInquiryService
         };
     }
 
-    private async Task<EmployeeDetails?> GetBeneficiaryDetails(ProfitSharingReadOnlyDbContext ctx,
+    private async Task<MemberDetails?> GetBeneficiaryDetails(ProfitSharingReadOnlyDbContext ctx,
        int ssn, short currentYear, short previousYear, CancellationToken cancellationToken)
     {
         var memberData = await ctx.Beneficiaries
@@ -373,7 +374,7 @@ public class MasterInquiryService : IMasterInquiryService
             _logger.LogWarning(ex, "Failed to retrieve balances for SSN {SSN}", ssn);
         }
 
-        return new EmployeeDetails
+        return new MemberDetails
         {
             IsEmployee = false,
             FirstName = memberData.FirstName,
