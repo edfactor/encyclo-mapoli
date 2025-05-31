@@ -94,7 +94,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 combinedQuery = demographics.Union(beneficiary);
             }
 
-            combinedQuery = FilterPaymentType(req, combinedQuery);
+            combinedQuery = FilterMemberQuery(req, combinedQuery);
 
             var formattedQuery = combinedQuery.Select(x => new MasterInquiryResponseDto
             {
@@ -179,19 +179,10 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 _ => GetMasterInquiryDemographics(ctx).Union(GetMasterInquiryBeneficiary(ctx))
             };
 
-            if (req.Ssn != 0)
-            {
-                query = query.Where(x => x.Member.Ssn == req.Ssn);
-            }
+            query = FilterMemberQuery(req, query);
 
-            if (!string.IsNullOrWhiteSpace(req.Name))
-            {
-                var pattern = $"%{req.Name.ToUpperInvariant()}%";
-                query = query.Where(x => EF.Functions.Like(x.Member.FullName.ToUpper(), pattern));
-            }
-
-            // Get unique SSNs from the query
-            var ssnList = await query.Select(x => x.Member.Ssn).Distinct().ToListAsync(cancellationToken);
+             // Get unique SSNs from the query
+             var ssnList = await query.Select(x => x.Member.Ssn).Distinct().ToListAsync(cancellationToken);
             short currentYear = req.ProfitYear;
             short previousYear = (short)(currentYear - 1);
             var memberType = req.MemberType;
@@ -549,7 +540,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
         };
     }
 
-    private static IQueryable<MasterInquiryItem> FilterPaymentType(MasterInquiryRequest req, IQueryable<MasterInquiryItem> query)
+    private static IQueryable<MasterInquiryItem> FilterMemberQuery(MasterInquiryRequest req, IQueryable<MasterInquiryItem> query)
     {
         if (req.EndProfitYear.HasValue)
         {
