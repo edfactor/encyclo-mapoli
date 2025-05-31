@@ -168,7 +168,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
         return inquiryResults;
     }
 
-    public async Task<PaginatedResponseDto<MemberDetails>> GetMembersAsync(MasterInquiryMemberRequest req, CancellationToken cancellationToken = default)
+    public async Task<PaginatedResponseDto<MemberDetails>> GetMembersAsync(MasterInquiryRequest req, CancellationToken cancellationToken = default)
     {
         return await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
@@ -182,6 +182,12 @@ public sealed class MasterInquiryService : IMasterInquiryService
             if (req.Ssn != 0)
             {
                 query = query.Where(x => x.Member.Ssn == req.Ssn);
+            }
+
+            if (!string.IsNullOrWhiteSpace(req.Name))
+            {
+                var pattern = $"%{req.Name.ToUpperInvariant()}%";
+                query = query.Where(x => EF.Functions.Like(x.Member.FullName.ToUpper(), pattern));
             }
 
             // Get unique SSNs from the query
@@ -384,6 +390,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             .Where(d => d.Ssn == ssn)
             .Select(d => new
             {
+                d.Id,
                 d.ContactInfo.FirstName,
                 d.ContactInfo.LastName,
                 d.Address.City,
@@ -439,6 +446,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
         return new MemberDetails
         {
             IsEmployee = true,
+            Id = memberData.Id,
             FirstName = memberData.FirstName,
             LastName = memberData.LastName,
             AddressCity = memberData.City!,

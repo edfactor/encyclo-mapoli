@@ -19,7 +19,7 @@ public class MasterInquiryMemberDetailsEndpoint : Endpoint<MasterInquiryMemberDe
 
     public override void Configure()
     {
-        Post("master-inquiry/member/{type}/{id}/details", request => new {request.MemberType, request.Id} );
+        Get("master-inquiry/member/{MemberType}/{Id}/details");
         Summary(s =>
         {
             s.Summary = "PS Master Inquiry (008-10)";

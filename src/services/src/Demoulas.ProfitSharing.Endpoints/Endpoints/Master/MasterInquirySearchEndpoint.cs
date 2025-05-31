@@ -26,21 +26,13 @@ public class MasterInquirySearchEndpoint : Endpoint<MasterInquiryRequest, Pagina
             s.Description =
                 "This endpoint returns master inquiry details.";
 
+            s.ExampleRequest = MasterInquiryRequest.RequestExample();
             s.ResponseExamples = new Dictionary<int, object>
             {
-                {
-                    200,
-                    new MasterInquiryWithDetailsResponseDto
-                    {
-                        EmployeeDetails = null,
-                        InquiryResults = new PaginatedResponseDto<MasterInquiryResponseDto>
-                        {
-                            Results = new List<MasterInquiryResponseDto> { MasterInquiryResponseDto.ResponseExample() }
-                        }
-                    }
-                }
+                { 200, new PaginatedResponseDto<MasterInquiryResponseDto> { Results = new List<MasterInquiryResponseDto> { MasterInquiryResponseDto.ResponseExample() } } }
             };
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
+            s.Responses[404] = "Not Found. The requested resource could not be found.";
         });
         Group<MasterInquiryGroup>();
     }

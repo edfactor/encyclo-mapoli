@@ -14,4 +14,24 @@ public record MasterInquiryRequest : MasterInquiryMemberRequest
     public decimal? PaymentAmount { get; set; }
     public string? Name { get; set; }
     public byte? PaymentType { get; set; }
+
+    public static new MasterInquiryRequest RequestExample()
+    {
+        return new MasterInquiryRequest
+        {
+            ProfitYear = 2024,
+            MemberType = 1,
+            Ssn = 123456789,
+            EndProfitYear = 2025,
+            StartProfitMonth = 1,
+            EndProfitMonth = 12,
+            ProfitCode = 2,
+            ContributionAmount = 1000.00m,
+            EarningsAmount = 150.50m,
+            ForfeitureAmount = 0m,
+            PaymentAmount = 500.00m,
+            Name = "John Doe",
+            PaymentType = 1
+        };
+    }
 }
