@@ -8,15 +8,15 @@ import Grid2 from "@mui/material/Grid2";
 import { CAPTIONS } from "../../../constants";
 import TerminationGrid from "./TerminationGrid";
 import TerminationSearchFilter from "./TerminationSearchFilter";
-import { TerminationRequest } from "reduxstore/types";
 import useFiscalCalendarYear from "hooks/useFiscalCalendarYear";
+import { StartAndEndDateRequest } from "../../../reduxstore/types";
 
 const Termination = () => {
   const fiscalData = useFiscalCalendarYear();
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
-  const [searchParams, setSearchParams] = useState<TerminationRequest | null>(null);
+  const [searchParams, setSearchParams] = useState<StartAndEndDateRequest | null>(null);
 
-  const handleSearch = (params: TerminationRequest) => {
+  const handleSearch = (params: StartAndEndDateRequest) => {
     setSearchParams(params);
     setInitialSearchLoaded(true);
   };

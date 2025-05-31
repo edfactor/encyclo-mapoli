@@ -1,14 +1,12 @@
 import { ICellRendererParams } from "ag-grid-community";
 import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router";
 import { useLazyGetTerminationReportQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, numberToCurrency, Pagination } from "smart-ui-library";
 import { TotalsGrid } from "../../../components/TotalsGrid/TotalsGrid";
 import { ReportSummary } from "../../../components/ReportSummary";
 import { StartAndEndDateRequest } from "reduxstore/types";
-import useFiscalCalendarYear from "../../../hooks/useFiscalCalendarYear";
 import { GetDetailColumns, GetTerminationColumns } from "./TerminationGridColumn";
 
 interface TerminationGridSearchProps {
@@ -33,8 +31,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const { termination } = useSelector((state: RootState) => state.yearsEnd);
-  const [triggerSearch, { isFetching }] = useLazyGetTerminationReportQuery();
-  const fiscalCalendarYear = useFiscalCalendarYear();
+  const [triggerSearch, { isFetching }] = useLazyGetTerminationReportQuery();  
 
   useEffect(() => {
     if (searchParams && hasToken) {
