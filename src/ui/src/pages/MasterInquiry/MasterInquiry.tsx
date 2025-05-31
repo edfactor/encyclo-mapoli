@@ -13,7 +13,7 @@ import MasterInquirySearchFilter from "./MasterInquirySearchFilter";
 
 
 const MasterInquiry = () => {
-  const { masterInquiryEmployeeDetails } = useSelector((state: RootState) => state.inquiry);
+  const { masterInquiryEmployeeDetails, masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
 
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [missiveAlerts, setMissiveAlerts] = useState<MissiveResponse[] | null>(null);
@@ -85,7 +85,15 @@ const MasterInquiry = () => {
           </DSMAccordion>
         </Grid2>
 
-        {masterInquiryEmployeeDetails && <MasterInquiryEmployeeDetails details={masterInquiryEmployeeDetails} missives={missives}/>}
+        {/* Render employee details if identifiers are present in request params */}
+        {masterInquiryRequestParams && masterInquiryRequestParams.memberType !== undefined && masterInquiryRequestParams.ssn && (
+          <MasterInquiryEmployeeDetails
+            memberType={masterInquiryRequestParams.memberType}
+            ssn={masterInquiryRequestParams.ssn}
+            profitYear={masterInquiryRequestParams.profitYear}
+            missives={missives}
+          />
+        )}
 
         <Grid2 size={{ xs: 12 }} width="100%">
           <MasterInquiryGrid

@@ -6,8 +6,8 @@ import {
   MasterInquiryMemberRequest,
   MasterInquiryResponseType,
   MasterInquiryResponseDto,
-  MemberDetails,
-  PagedReportResponse
+  PagedReportResponse,
+  EmployeeDetails
 } from "../types";
 import { createDataSourceAwareBaseQuery } from "./api";
 
@@ -51,14 +51,14 @@ export const InquiryApi = createApi({
       }
     }),
     // Master Inquiry API endpoints
-    searchProfitMasterInquiry: builder.query<PagedReportResponse<MemberDetails>, MasterInquiryRequest>({
+    searchProfitMasterInquiry: builder.query<PagedReportResponse<EmployeeDetails>, MasterInquiryRequest>({
       query: (params) => ({
         url: "master/master-inquiry/search",
         method: "POST",
         body: params
       })
     }),
-    getProfitMasterInquiryMember: builder.query<MemberDetails, MasterInquiryMemberRequest>({
+    getProfitMasterInquiryMember: builder.query<EmployeeDetails, MasterInquiryMemberRequest>({
       query: (params) => ({
         url: "master/master-inquiry/member",
         method: "POST",
@@ -75,4 +75,4 @@ export const InquiryApi = createApi({
   })
 });
 
-export const { useLazyGetProfitMasterInquiryQuery } = InquiryApi;
+export const { useLazyGetProfitMasterInquiryQuery, useLazyGetProfitMasterInquiryMemberQuery } = InquiryApi;

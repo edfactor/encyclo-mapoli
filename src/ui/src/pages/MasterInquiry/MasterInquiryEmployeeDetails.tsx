@@ -1,21 +1,35 @@
 import { Typography } from "@mui/material";
 import Grid2 from '@mui/material/Grid2';
 import LabelValueSection from "components/LabelValueSection";
-import React from "react";
+import React, { useEffect } from "react";
 import { EmployeeDetails, MissiveResponse } from "reduxstore/types";
 import { mmDDYYFormat, numberToCurrency } from "smart-ui-library";
 import { formatPercentage } from "utils/formatPercentage";
 import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
 import { tryddmmyyyyToDate } from "../../utils/dateUtils";
 import { getEnrolledStatus, getForfeitedStatus } from "../../utils/enrollmentUtil";
+import { useLazyGetProfitMasterInquiryMemberQuery } from "reduxstore/api/InquiryApi";
 
 
 interface MasterInquiryEmployeeDetailsProps {
-  details: EmployeeDetails;
-  missives: MissiveResponse[]  | null;
+  memberType: number;
+  ssn: string | number;
+  profitYear?: number;
+  missives?: MissiveResponse[] | null;
 }
 
-const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> = ({ details, missives }) => {
+const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> = ({ memberType, ssn, profitYear, missives }) => {
+  const [trigger, { data: details, isLoading, isError }] = useLazyGetProfitMasterInquiryMemberQuery();
+
+  useEffect(() => {
+    if (memberType && ssn) {
+      trigger({ memberType, ssn: typeof ssn === 'string' ? parseInt(ssn) : ssn, profitYear });
+    }
+  }, [memberType, ssn, profitYear, trigger]);
+
+  if (isLoading) return <Typography>Loading...</Typography>;
+  if (isError || !details) return <Typography>No details found.</Typography>;
+
   const {
     firstName,
     lastName,
@@ -24,7 +38,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     addressState,
     addressZipCode,
     dateOfBirth,
-    ssn,
+    ssn: ssnValue,
     yearToDateProfitSharingHours,
     yearsInPlan,
     percentageVested,
@@ -46,7 +60,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
 
   const enrolled = getEnrolledStatus(enrollmentId);
   const forfeited = getForfeitedStatus(enrollmentId);
-  
+
   const infoSection = [
     { label: "", value: `${lastName}, ${firstName}` },
     { label: "", value: `${address}` },
@@ -58,12 +72,12 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
   const employeeSection = [
     { label: "Badge", value: viewBadgeLinkRenderer(Number(badgeNumber)) },
     { label: "DOB", value: mmDDYYFormat(tryddmmyyyyToDate(dateOfBirth)) },
-    { label: "SSN", value: `${ssn}` },
+    { label: "SSN", value: `${ssnValue}` },
     { label: "ETVA", value: currentEtva },
-    { label: "Status", value: employmentStatus },   
+    { label: "Status", value: employmentStatus },
     { label: "Enrollment", value: enrollment },
   ].filter(field => field.value !== 0);
-  
+
   const planSection = [
     { label: "YTD P/S Hours", value: yearToDateProfitSharingHours },
     { label: "Years In Plan", value: yearsInPlan },

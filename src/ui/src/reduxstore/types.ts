@@ -357,7 +357,7 @@ export interface MasterInquiryRequest {
   paymentAmount?: number;
   name?: string;
   paymentType?: number;
-  pagination?: SortedPaginationRequestDto;
+  pagination: SortedPaginationRequestDto;
 }
 
 export interface MasterInquiryMemberRequest {
@@ -370,10 +370,6 @@ export interface MasterInquiryMemberRequest {
   isSortDescending?: boolean;
 }
 
-export interface MasterInquiryWithDetailsResponseDto {
-  employeeDetails?: MemberDetails | null;
-  inquiryResults: PagedReportResponse<MasterInquiryResponseDto>;
-}
 
 export interface MasterInquiryResponseDto {
   isEmployee: boolean;
@@ -414,39 +410,6 @@ export interface MasterInquiryResponseDto {
   currentIncomeYear: number;
   currentHoursYear: number;
   employmentStatusId: string;
-  employmentStatus?: string;
-}
-
-export interface MemberDetails {
-  id: number;
-  isEmployee: boolean;
-  badgeNumber: number;
-  psnSuffix: number;
-  ssn: string;
-  firstName: string;
-  lastName: string;
-  address: string;
-  addressCity: string;
-  addressState: string;
-  addressZipCode: string;
-  dateOfBirth: string;
-  yearToDateProfitSharingHours: number;
-  yearsInPlan: number;
-  percentageVested: number;
-  contributionsLastYear: boolean;
-  enrollmentId?: number;
-  enrollment?: string;
-  hireDate?: string;
-  terminationDate?: string;
-  reHireDate?: string;
-  storeNumber: number;
-  beginPSAmount: number;
-  currentPSAmount: number;
-  beginVestedAmount: number;
-  currentVestedAmount: number;
-  currentEtva: number;
-  previousEtva: number;
-  missives: number[];
   employmentStatus?: string;
 }
 
@@ -532,6 +495,7 @@ export interface ForfeituresByAgeDetail {
 }
 
 export interface EmployeeDetails {
+  id: number;
   isEmployee: boolean;
   firstName: string;
   lastName: string;
