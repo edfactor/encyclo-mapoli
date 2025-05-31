@@ -6,7 +6,7 @@ export enum ImpersonationRoles {
   HardshipAdministrator = "Hardship-Administrator",
   ProfitSharingAdministrator = "Profit-Sharing-Administrator",
   ItOperations = "IT-Operations"
-}
+ }
 
 export interface SortedPaginationRequestDto extends PaginationParams, ISortParams { }
 
@@ -342,6 +342,11 @@ export interface MasterInquiryDetail extends ProfitYearRequest {
 }
 
 export interface MasterInquiryRequest {
+  memberType?: number;
+  badgeNumber?: number;
+  psnSuffix?: number;
+  ssn?: number;
+  profitYear?: number;
   endProfitYear?: number;
   startProfitMonth?: number;
   endProfitMonth?: number;
@@ -350,13 +355,99 @@ export interface MasterInquiryRequest {
   earningsAmount?: number;
   forfeitureAmount?: number;
   paymentAmount?: number;
-  socialSecurity?: number;
   name?: string;
   paymentType?: number;
+  pagination?: SortedPaginationRequestDto;
+}
+
+export interface MasterInquiryMemberRequest {
   memberType?: number;
+  ssn?: number;
+  profitYear?: number;
+  skip?: number;
+  take?: number;
+  sortBy?: string;
+  isSortDescending?: boolean;
+}
+
+export interface MasterInquiryWithDetailsResponseDto {
+  employeeDetails?: MemberDetails | null;
+  inquiryResults: PagedReportResponse<MasterInquiryResponseDto>;
+}
+
+export interface MasterInquiryResponseDto {
+  isEmployee: boolean;
+  id: number;
+  ssn: string;
+  profitYear: number;
+  profitYearIteration: number;
+  distributionSequence: number;
+  profitCodeId: number;
+  contribution: number;
+  earnings: number;
+  forfeiture: number;
+  monthToDate: number;
+  yearToDate: number;
+  remark?: string;
+  zeroContributionReasonId?: number;
+  federalTaxes: number;
+  stateTaxes: number;
+  taxCodeId?: string;
+  commentTypeId?: number;
+  commentRelatedCheckNumber?: string;
+  commentRelatedState?: string;
+  commentRelatedOracleHcmId?: number;
+  commentRelatedPsnSuffix?: number;
+  commentIsPartialTransaction?: boolean;
   badgeNumber?: number;
-  psnSuffix?: number;
-  pagination: SortedPaginationRequestDto;
+  profitCodeName?: string;
+  zeroContributionReasonName?: string;
+  taxCodeName?: string;
+  commentTypeName?: string;
+  psnSuffix: number;
+  payment?: number;
+  vestedBalance?: number;
+  vestingPercent?: number;
+  currentBalance?: number;
+  payFrequencyId: number;
+  transactionDate: string;
+  currentIncomeYear: number;
+  currentHoursYear: number;
+  employmentStatusId: string;
+  employmentStatus?: string;
+}
+
+export interface MemberDetails {
+  id: number;
+  isEmployee: boolean;
+  badgeNumber: number;
+  psnSuffix: number;
+  ssn: string;
+  firstName: string;
+  lastName: string;
+  address: string;
+  addressCity: string;
+  addressState: string;
+  addressZipCode: string;
+  dateOfBirth: string;
+  yearToDateProfitSharingHours: number;
+  yearsInPlan: number;
+  percentageVested: number;
+  contributionsLastYear: boolean;
+  enrollmentId?: number;
+  enrollment?: string;
+  hireDate?: string;
+  terminationDate?: string;
+  reHireDate?: string;
+  storeNumber: number;
+  beginPSAmount: number;
+  currentPSAmount: number;
+  beginVestedAmount: number;
+  currentVestedAmount: number;
+  currentEtva: number;
+  previousEtva: number;
+  missives: number[];
+  employmentStatus?: string;
 }
 
 export enum FrozenReportsByAgeRequestType {

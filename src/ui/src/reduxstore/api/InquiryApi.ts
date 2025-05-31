@@ -1,7 +1,14 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 
 import { setMasterInquiryData } from "reduxstore/slices/inquirySlice";
-import { MasterInquiryRequest, MasterInquiryResponseType } from "reduxstore/types";
+import {
+  MasterInquiryRequest,
+  MasterInquiryMemberRequest,
+  MasterInquiryResponseType,
+  MasterInquiryResponseDto,
+  MemberDetails,
+  PagedReportResponse
+} from "../types";
 import { createDataSourceAwareBaseQuery } from "./api";
 
 const baseQuery = createDataSourceAwareBaseQuery();
@@ -24,7 +31,7 @@ export const InquiryApi = createApi({
           earningsAmount: params.earningsAmount,
           forfeitureAmount: params.forfeitureAmount,
           paymentAmount: params.paymentAmount,
-          socialSecurity: params.socialSecurity,
+          ssn: params.ssn,
           paymentType: params.paymentType,
           memberType: params.memberType,
           name: params.name,
@@ -42,6 +49,28 @@ export const InquiryApi = createApi({
           console.log("Err: " + err);
         }
       }
+    }),
+    // Master Inquiry API endpoints
+    searchProfitMasterInquiry: builder.query<PagedReportResponse<MemberDetails>, MasterInquiryRequest>({
+      query: (params) => ({
+        url: "master/master-inquiry/search",
+        method: "POST",
+        body: params
+      })
+    }),
+    getProfitMasterInquiryMember: builder.query<MemberDetails, MasterInquiryMemberRequest>({
+      query: (params) => ({
+        url: "master/master-inquiry/member",
+        method: "POST",
+        body: params
+      })
+    }),
+    getProfitMasterInquiryMemberDetails: builder.query<PagedReportResponse<MasterInquiryResponseDto>, { memberType: number; id: number; skip?: number; take?: number; sortBy?: string; isSortDescending?: boolean }>({
+      query: ({ memberType, id, ...pagination }) => ({
+        url: `master/master-inquiry/member/${memberType}/${id}/details`,
+        method: "GET",
+        params: pagination
+      })
     })
   })
 });

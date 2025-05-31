@@ -134,8 +134,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             combinedQuery = FilterMemberQuery(req, combinedQuery);
 
             // Materialize the query first, then project to DTO in memory
-            var items = await combinedQuery.ToListAsync(cancellationToken);
-            var formattedResults = items.Select(x => new MasterInquiryResponseDto
+            var formattedResults = await combinedQuery.Select(x => new MasterInquiryResponseDto
             {
                 Id = x.ProfitDetail.Id,
                 Ssn = x.ProfitDetail.Ssn.MaskSsn(),
@@ -170,19 +169,11 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 TransactionDate = x.TransactionDate,
                 CurrentIncomeYear = x.Member.CurrentIncomeYear,
                 CurrentHoursYear = x.Member.CurrentHoursYear
-            }).ToList();
+            }).ToPaginationResultsAsync(req, cancellationToken);
 
-            // Paginate in memory
-            var skip = req.Skip ?? 0;
-            var take = req.Take ?? 25;
-            var pagedResults = formattedResults.Skip(skip).Take(take).ToList();
-            var result = new PaginatedResponseDto<MasterInquiryResponseDto>(req)
-            {
-                Results = pagedResults,
-                Total = formattedResults.Count
-            };
+           
 
-            ISet<int> uniqueSsns = items.Select(q => q.Member.Ssn).ToHashSet();
+            ISet<int> uniqueSsns = await combinedQuery.Select(q => q.Member.Ssn).ToHashSetAsync(cancellationToken);
             MemberDetails? employeeDetails = null;
 
             if (uniqueSsns.Count == 1)
@@ -206,7 +197,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 }
             }
 
-            return new MasterInquiryWithDetailsResponseDto { InquiryResults = result, EmployeeDetails = employeeDetails };
+            return new MasterInquiryWithDetailsResponseDto { InquiryResults = formattedResults, EmployeeDetails = employeeDetails };
         });
 
         return inquiryResults;
