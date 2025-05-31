@@ -79,7 +79,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             {
                 combinedQuery = GetMasterInquiryDemographics(ctx);
             }
-            else if (req.MemberType == 2 || (req.BadgeNumber.HasValue && (req.PsnSuffix ?? 0) > 0))// Beneficiary only
+            else if (req.MemberType == 2) // Beneficiary only
             {
                 combinedQuery = GetMasterInquiryBeneficiary(ctx);
             }
@@ -184,9 +184,64 @@ public sealed class MasterInquiryService : IMasterInquiryService
         });
     }
 
+    /// <summary>
+    /// Returns paginated profit details for a specific member, filtered by MemberType and Id.
+    /// </summary>
     public Task<PaginatedResponseDto<MasterInquiryResponseDto>> GetMemberProfitDetails(MasterInquiryMemberDetailsRequest req, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        return _dataContextFactory.UseReadOnlyContext(ctx =>
+        {
+            IQueryable<MasterInquiryItem> query = req.MemberType switch
+            {
+                1 => GetMasterInquiryDemographics(ctx),
+                2 => GetMasterInquiryBeneficiary(ctx),
+                _ => GetMasterInquiryDemographics(ctx).Union(GetMasterInquiryBeneficiary(ctx))
+            };
+
+            if (req.Id.HasValue)
+            {
+                query = query.Where(x => x.ProfitDetail.Id == req.Id.Value);
+            }
+
+            var formattedQuery = query.Select(x => new MasterInquiryResponseDto
+            {
+                Id = x.ProfitDetail.Id,
+                Ssn = x.ProfitDetail.Ssn.MaskSsn(),
+                ProfitYear = x.ProfitDetail.ProfitYear,
+                ProfitYearIteration = x.ProfitDetail.ProfitYearIteration,
+                DistributionSequence = x.ProfitDetail.DistributionSequence,
+                ProfitCodeId = x.ProfitDetail.ProfitCodeId,
+                ProfitCodeName = x.ProfitCode.Name,
+                Contribution = x.ProfitDetail.CalculateContribution(),
+                Earnings = x.ProfitDetail.CalculateEarnings(),
+                Forfeiture = x.ProfitDetail.CalculateForfeiture(),
+                Payment = x.ProfitDetail.CalculatePayment(),
+                MonthToDate = x.ProfitDetail.MonthToDate,
+                YearToDate = x.ProfitDetail.YearToDate,
+                Remark = x.ProfitDetail.Remark,
+                ZeroContributionReasonId = x.ProfitDetail.ZeroContributionReasonId,
+                ZeroContributionReasonName = x.ZeroContributionReason != null ? x.ZeroContributionReason.Name : string.Empty,
+                FederalTaxes = x.ProfitDetail.FederalTaxes,
+                StateTaxes = x.ProfitDetail.StateTaxes,
+                TaxCodeId = x.ProfitDetail.TaxCodeId != null ? x.ProfitDetail.TaxCodeId : TaxCode.Constants.Unknown.Id,
+                TaxCodeName = x.TaxCode != null ? x.TaxCode.Name : TaxCode.Constants.Unknown.Name,
+                CommentTypeId = x.ProfitDetail.CommentTypeId,
+                CommentTypeName = x.CommentType != null ? x.CommentType.Name : string.Empty,
+                CommentRelatedCheckNumber = x.ProfitDetail.CommentRelatedCheckNumber,
+                CommentRelatedState = x.ProfitDetail.CommentRelatedState,
+                CommentRelatedOracleHcmId = x.ProfitDetail.CommentRelatedOracleHcmId,
+                CommentRelatedPsnSuffix = x.ProfitDetail.CommentRelatedPsnSuffix,
+                CommentIsPartialTransaction = x.ProfitDetail.CommentIsPartialTransaction != null ? x.ProfitDetail.CommentIsPartialTransaction : false,
+                BadgeNumber = x.Member.BadgeNumber,
+                PsnSuffix = x.Member.PsnSuffix,
+                PayFrequencyId = x.Member.PayFrequencyId,
+                TransactionDate = x.TransactionDate,
+                CurrentIncomeYear = x.Member.CurrentIncomeYear,
+                CurrentHoursYear = x.Member.CurrentHoursYear
+            });
+
+            return formattedQuery.ToPaginationResultsAsync(req, cancellationToken);
+        });
     }
 
     private static IQueryable<MasterInquiryItem> GetMasterInquiryDemographics(IProfitSharingDbContext ctx)
@@ -430,11 +485,6 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
     private static IQueryable<MasterInquiryItem> FilterPaymentType(MasterInquiryRequest req, IQueryable<MasterInquiryItem> query)
     {
-        if (req.BadgeNumber.HasValue)
-        {
-            query = query.Where(x => x.Member.BadgeNumber == req.BadgeNumber);
-        }
-
         if (req.EndProfitYear.HasValue)
         {
             query = query.Where(x => x.ProfitDetail.ProfitYear <= req.EndProfitYear);
@@ -465,7 +515,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             query = query.Where(x => x.ProfitDetail.Earnings == req.EarningsAmount);
         }
 
-        if (req.Ssn != null)
+        if (req.Ssn != 0)
         {
             query = query.Where(x => x.ProfitDetail.Ssn == req.Ssn);
         }
@@ -482,11 +532,6 @@ public sealed class MasterInquiryService : IMasterInquiryService
             query = query.Where(x =>
                 x.ProfitDetail.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id &&
                 x.ProfitDetail.Forfeiture == req.PaymentAmount);
-        }
-
-        if (req.PsnSuffix is > 0)
-        {
-            query = query.Where(x => x.Member.PsnSuffix == req.PsnSuffix);
         }
 
         if (!string.IsNullOrWhiteSpace(req.Name))
