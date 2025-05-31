@@ -4,7 +4,7 @@ import { Box, Typography } from "@mui/material";
 import Grid2 from '@mui/material/Grid2';
 interface LabelValueItem {
   label: string;
-  value: string | number;
+  value: React.ReactNode;
 }
 
 interface LabelValueSectionProps {

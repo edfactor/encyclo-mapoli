@@ -75,4 +75,6 @@ export const InquiryApi = createApi({
   })
 });
 
-export const { useLazyGetProfitMasterInquiryQuery, useLazyGetProfitMasterInquiryMemberQuery } = InquiryApi;
+export const { useLazyGetProfitMasterInquiryQuery, 
+  useLazyGetProfitMasterInquiryMemberQuery,
+useLazySearchProfitMasterInquiryQuery} = InquiryApi;

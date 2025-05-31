@@ -32,12 +32,6 @@ import { memberTypeGetNumberMap, paymentTypeGetNumberMap } from "./MasterInquiry
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 
 const schema = yup.object().shape({
-  startProfitYear: yup
-    .number()
-    .min(2020, "Year must be 2020 or later")
-    .max(2100, "Year must be 2100 or earlier")
-    .typeError("Invalid date")
-    .nullable(),
   endProfitYear: yup
     .number()
     .min(2020, "Year must be 2020 or later")
