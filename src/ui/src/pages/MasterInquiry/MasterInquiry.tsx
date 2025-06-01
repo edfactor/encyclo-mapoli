@@ -11,6 +11,7 @@ import MasterInquiryEmployeeDetails from "./MasterInquiryEmployeeDetails";
 import MasterInquiryGrid from "./MasterInquiryGrid";
 import MasterInquirySearchFilter from "./MasterInquirySearchFilter";
 import { memberTypeGetNumberMap } from "./MasterInquiryFunctions";
+import MasterInquiryMemberGrid from "./MasterInquiryMemberGrid";
 
 
 const MasterInquiry = () => {
@@ -18,6 +19,7 @@ const MasterInquiry = () => {
 
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [missiveAlerts, setMissiveAlerts] = useState<MissiveResponse[] | null>(null);
+  const [searchParams, setSearchParams] = useState<MasterInquiryRequest | null>(null);
 
   // This is the front-end cache of back end missives messages
   const { missives } = useSelector((state: RootState) => state.lookups);
@@ -80,11 +82,17 @@ const MasterInquiry = () => {
         ))}
         <Grid2 size={{ xs: 12 }} width={"100%"}>
           <DSMAccordion title="Filter">
-            <MasterInquirySearchFilter setInitialSearchLoaded={setInitialSearchLoaded} 
-            setMissiveAlerts={setMissiveAlerts}
+            <MasterInquirySearchFilter 
+              setInitialSearchLoaded={setInitialSearchLoaded}
+              setMissiveAlerts={setMissiveAlerts}
+              onSearch={setSearchParams}
             />
           </DSMAccordion>
         </Grid2>
+
+        {searchParams && (
+          <MasterInquiryMemberGrid {...searchParams} />
+        )}
 
         {/* Render employee details if identifiers are present in request params */}
         {masterInquiryRequestParams && masterInquiryRequestParams.memberType !== undefined && masterInquiryRequestParams.socialSecurity && (
