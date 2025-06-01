@@ -1,6 +1,6 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
@@ -8,7 +8,7 @@ using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Master;
 
-public class MasterInquiryMemberEndpoint : Endpoint<MasterInquiryMemberRequest, MemberDetails>
+public class MasterInquiryMemberEndpoint : Endpoint<MasterInquiryMemberRequest, MemberProfitPlanDetails>
 {
     private readonly IMasterInquiryService _masterInquiryService;
 
@@ -34,7 +34,7 @@ public class MasterInquiryMemberEndpoint : Endpoint<MasterInquiryMemberRequest, 
             {
                 {
                     200,
-                    new MemberDetails
+                    new MemberProfitPlanDetails
                     {
                         Id = 1,
                         IsEmployee = true,
@@ -76,7 +76,7 @@ public class MasterInquiryMemberEndpoint : Endpoint<MasterInquiryMemberRequest, 
         Group<MasterInquiryGroup>();
     }
 
-    public override async Task<MemberDetails> ExecuteAsync(MasterInquiryMemberRequest req, CancellationToken ct)
+    public override async Task<MemberProfitPlanDetails> ExecuteAsync(MasterInquiryMemberRequest req, CancellationToken ct)
     {
         var result = await _masterInquiryService.GetMemberAsync(req, ct);
         if (result is null)

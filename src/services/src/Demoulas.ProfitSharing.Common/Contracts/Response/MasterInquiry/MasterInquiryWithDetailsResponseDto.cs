@@ -1,10 +1,10 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Response;
 
-namespace Demoulas.ProfitSharing.Common.Contracts.Response;
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
 
 public sealed record MasterInquiryWithDetailsResponseDto
 {
-    public MemberDetails? EmployeeDetails { get; init; }
+    public MemberProfitPlanDetails? EmployeeDetails { get; init; }
     public PaginatedResponseDto<MasterInquiryResponseDto> InquiryResults { get; init; } = null!;
 
     public static MasterInquiryWithDetailsResponseDto ResponseExample()

@@ -4,6 +4,7 @@ using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Contexts;
@@ -174,7 +175,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
            
 
             ISet<int> uniqueSsns = await combinedQuery.Select(q => q.Member.Ssn).ToHashSetAsync(cancellationToken);
-            MemberDetails? employeeDetails = null;
+            MemberProfitPlanDetails? employeeDetails = null;
 
             if (uniqueSsns.Count == 1)
             {
@@ -254,7 +255,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
         });
     }
 
-    public async Task<MemberDetails?> GetMemberAsync(MasterInquiryMemberRequest req, CancellationToken cancellationToken = default)
+    public async Task<MemberProfitPlanDetails?> GetMemberAsync(MasterInquiryMemberRequest req, CancellationToken cancellationToken = default)
     {
         short currentYear = req.ProfitYear;
         short previousYear = (short)(currentYear - 1);
@@ -462,7 +463,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
         return query;
     }
 
-    private async Task<MemberDetails?> GetDemographicDetails(ProfitSharingReadOnlyDbContext ctx,
+    private async Task<MemberProfitPlanDetails?> GetDemographicDetails(ProfitSharingReadOnlyDbContext ctx,
        int ssn, short currentYear, short previousYear, CancellationToken cancellationToken)
     {
         var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
@@ -525,7 +526,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
         var missives = await _missiveService.DetermineMissivesForSsn(ssn, currentYear, cancellationToken);
 
-        return new MemberDetails
+        return new MemberProfitPlanDetails
         {
             IsEmployee = true,
             Id = memberData.Id,
@@ -559,7 +560,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
         };
     }
 
-    private async Task<MemberDetails?> GetBeneficiaryDetails(ProfitSharingReadOnlyDbContext ctx,
+    private async Task<MemberProfitPlanDetails?> GetBeneficiaryDetails(ProfitSharingReadOnlyDbContext ctx,
        int ssn, short currentYear, short previousYear, CancellationToken cancellationToken)
     {
         var memberData = await ctx.Beneficiaries
@@ -608,7 +609,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             _logger.LogWarning(ex, "Failed to retrieve balances for SSN {SSN}", ssn);
         }
 
-        return new MemberDetails
+        return new MemberProfitPlanDetails
         {
             IsEmployee = false,
             FirstName = memberData.FirstName,
@@ -694,7 +695,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
             var missives = await _missiveService.DetermineMissivesForSsn(memberData.Ssn, currentYear, cancellationToken);
 
-            detailsList.Add(new MemberDetails
+            detailsList.Add(new MemberProfitPlanDetails
             {
                 IsEmployee = true,
                 Id = memberData.Id,
@@ -781,7 +782,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 _logger.LogWarning(ex, "Failed to retrieve balances for SSN {SSN}", memberData.Ssn);
             }
 
-            detailsList.Add(new MemberDetails
+            detailsList.Add(new MemberProfitPlanDetails
             {
                 IsEmployee = false,
                 FirstName = memberData.FirstName,
