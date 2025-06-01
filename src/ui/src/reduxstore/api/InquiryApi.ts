@@ -55,7 +55,27 @@ export const InquiryApi = createApi({
       query: (params) => ({
         url: "master/master-inquiry/search",
         method: "POST",
-        body: params
+        body: {
+          badgeNumber: Number(params.badgeNumber?.toString().substring(0, 6)),
+          psnSuffix: Number(params.badgeNumber?.toString().substring(6)),
+          profitYear: params.profitYear,
+          endProfitYear: params.endProfitYear,
+          startProfitMonth: params.startProfitMonth,
+          endProfitMonth: params.endProfitMonth,
+          profitCode: params.profitCode,
+          contributionAmount: params.contributionAmount,
+          earningsAmount: params.earningsAmount,
+          forfeitureAmount: params.forfeitureAmount,
+          paymentAmount: params.paymentAmount,
+          ssn: params.ssn,
+          paymentType: params.paymentType,
+          memberType: params.memberType,
+          name: params.name,
+          take: params.pagination.take,
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
+        }
       })
     }),
     getProfitMasterInquiryMember: builder.query<EmployeeDetails, MasterInquiryMemberRequest>({

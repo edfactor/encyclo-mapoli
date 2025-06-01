@@ -38,6 +38,10 @@ public class MasterInquirySearchEndpoint : Endpoint<MasterInquiryRequest, Pagina
 
     public override Task<PaginatedResponseDto<MemberDetails>> ExecuteAsync(MasterInquiryRequest req, CancellationToken ct)
     {
+        if (req is { ProfitYear: 0, EndProfitYear: > 0 })
+        {
+            req.ProfitYear = req.EndProfitYear.Value;
+        }
         return _masterInquiryService.GetMembersAsync(req, ct);
     }
 }

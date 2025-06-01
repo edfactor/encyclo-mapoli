@@ -38,11 +38,11 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryRequest> = (searchParams) =
         <>
           <DSMGrid
             providedOptions={{
-              rowData: data.response.results as EmployeeDetails[],
+              rowData: Array.isArray(data?.results) ? data.results as EmployeeDetails[] : [],
               columnDefs: columns
             }}
           />
-          {data.response.results.length > 0 && (
+          {Array.isArray(data?.results) && data.results.length > 0 && (
             <Pagination
               pageNumber={pageNumber}
               setPageNumber={(value: number) => {
@@ -65,7 +65,7 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryRequest> = (searchParams) =
                   }
                 }));
               }}
-              recordCount={data.response.total}
+              recordCount={data.total}
             />
           )}
         </>

@@ -5,7 +5,7 @@ import Grid2 from '@mui/material/Grid2';
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
-import { MissiveResponse } from "reduxstore/types";
+import { MissiveResponse, MasterInquiryRequest } from "reduxstore/types";
 import { DSMAccordion, Page } from "smart-ui-library";
 import MasterInquiryEmployeeDetails from "./MasterInquiryEmployeeDetails";
 import MasterInquiryGrid from "./MasterInquiryGrid";

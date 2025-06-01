@@ -84,11 +84,13 @@ const schema = yup.object().shape({
 interface MasterInquirySearchFilterProps {
   setInitialSearchLoaded: (include: boolean) => void;
   setMissiveAlerts: (alerts: MissiveResponse[]) => void;
+  onSearch: (params: MasterInquiryRequest) => void;
 }
 
 const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
   setInitialSearchLoaded,
-  setMissiveAlerts
+  setMissiveAlerts,
+  onSearch
 }) => {
   const [triggerSearch, { isFetching }] = useLazyGetProfitMasterInquiryQuery();
   const { masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
@@ -218,6 +220,9 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
         ...(!!data.forfeiture && { forfeiture: data.forfeiture }),
         ...(!!data.payment && { payment: data.payment })
       };
+
+      // Call the onSearch prop to lift search params to parent
+      onSearch(searchParams);
 
       triggerSearch(searchParams, false).unwrap().then((response) => {
       
