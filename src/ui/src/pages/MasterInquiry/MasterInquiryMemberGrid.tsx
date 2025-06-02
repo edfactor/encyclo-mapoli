@@ -12,7 +12,7 @@ const columns: ColDef[] = [
     headerName: "Badge #",
     width: 120,
     cellRenderer: (params: any) => {
-      const { badgeNumber, memberType, id } = params.data;
+      const { badgeNumber, isEmployee, id } = params.data;
       return (
         <a
           href="#"
@@ -20,7 +20,7 @@ const columns: ColDef[] = [
           onClick={e => {
             e.preventDefault();
             if (params.context && params.context.onBadgeClick) {
-              params.context.onBadgeClick({ memberType, id });
+              params.context.onBadgeClick({ memberType: isEmployee ? 1 : 2, id });
             }
           }}
         >

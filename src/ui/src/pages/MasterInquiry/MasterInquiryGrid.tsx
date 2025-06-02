@@ -8,6 +8,7 @@ import { GetMasterInquiryGridColumns } from "./MasterInquiryGridColumns";
 import { MasterInquiryRequest } from "reduxstore/types";
 import { paymentTypeGetNumberMap, memberTypeGetNumberMap } from "./MasterInquiryFunctions";
 import { CAPTIONS } from "../../constants";
+
 interface MasterInquiryGridProps {
   initialSearchLoaded?: boolean;
   setInitialSearchLoaded?: (loaded: boolean) => void;
@@ -16,28 +17,47 @@ interface MasterInquiryGridProps {
 }
 
 const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoaded, setInitialSearchLoaded, memberType, id }) => {
+  const columnDefs = useMemo(() => GetMasterInquiryGridColumns(), []);
+
+  // MEMBER DETAILS MODE: Only use member details API, skip all search logic
+  if (memberType !== undefined && id !== undefined) {
+    const [triggerMemberDetails, { data: memberDetailsData, isFetching: isFetchingMemberDetails }] = useLazyGetProfitMasterInquiryMemberDetailsQuery();
+    useEffect(() => {
+      triggerMemberDetails({ memberType, id });
+    }, [memberType, id, triggerMemberDetails]);
+
+    return (
+      <>
+        {isFetchingMemberDetails && <Typography>Loading member details...</Typography>}
+        {memberDetailsData && (
+          <DSMGrid
+            preferenceKey={CAPTIONS.MASTER_INQUIRY}
+            isLoading={isFetchingMemberDetails}
+            providedOptions={{
+              rowData: memberDetailsData.results,
+              columnDefs: columnDefs,
+              suppressMultiSort: true
+            }}
+          />
+        )}
+      </>
+    );
+  }
+
+  // SEARCH MODE: Only use search API logic if NOT in member details mode
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [_sortParams, setSortParams] = useState<ISortParams>({
     sortBy: "profitYear",
     isSortDescending: true
   });
-
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const { masterInquiryData, masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
   const [triggerSearch, { isFetching }] = useLazySearchProfitMasterInquiryQuery();
-  const [triggerMemberDetails, { data: memberDetailsData, isFetching: isFetchingMemberDetails }] = useLazyGetProfitMasterInquiryMemberDetailsQuery();
-
-  useEffect(() => {
-    if (memberType !== undefined && id !== undefined) {
-      triggerMemberDetails({ memberType, id });
-    }
-  }, [memberType, id, triggerMemberDetails]);
 
   const createMasterInquiryRequest = useCallback(
     (skip: number, sortBy: string, isSortDescending: boolean): MasterInquiryRequest | null => {
       if (!masterInquiryRequestParams) return null;
-
       return {
         pagination: { skip, take: pageSize, sortBy, isSortDescending },
         ...(!!masterInquiryRequestParams.endProfitYear && {
@@ -77,19 +97,14 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoad
     }
     setSortParams(update);
     setPageNumber(0);
-
     const request = createMasterInquiryRequest(0, update.sortBy, update.isSortDescending);
     if (!request) return;
-
     triggerSearch(request, false);
   };
-
-  const columnDefs = useMemo(() => GetMasterInquiryGridColumns(), []);
 
   const onSearch = useCallback(async () => {
     const request = createMasterInquiryRequest(pageNumber * pageSize, _sortParams.sortBy, _sortParams.isSortDescending);
     if (!request) return;
-
     await triggerSearch(request, false);
   }, [createMasterInquiryRequest, pageNumber, pageSize, _sortParams, triggerSearch]);
 
@@ -98,25 +113,6 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoad
       onSearch();
     }
   }, [initialSearchLoaded, pageNumber, pageSize, _sortParams, onSearch]);
-
-  if (memberType !== undefined && id !== undefined) {
-    return (
-      <>
-        {isFetchingMemberDetails && <Typography>Loading member details...</Typography>}
-        {memberDetailsData && (
-          <DSMGrid
-            preferenceKey={CAPTIONS.MASTER_INQUIRY}
-            isLoading={isFetchingMemberDetails}
-            providedOptions={{
-              rowData: memberDetailsData.results,
-              columnDefs: columnDefs,
-              suppressMultiSort: true
-            }}
-          />
-        )}
-      </>
-    );
-  }
 
   return (
     <>
