@@ -153,6 +153,17 @@
     text-decoration: underline;
     cursor: pointer;
   }
+
+  .missive-alerts-box {
+    background: #f5f5f5;
+    border-radius: 6px;
+    padding: 16px 20px;
+    margin-top: 24px;
+  }
+
+  .missive-alert + .missive-alert {
+    margin-top: 12px;
+  }
 }
 /*
 @font-face {

@@ -10,6 +10,8 @@ import { mmDDYYFormat } from "../../utils/dateUtils";
 import { getEnrolledStatus, getForfeitedStatus } from "../../utils/enrollmentUtil";
 import { useLazyGetProfitMasterInquiryMemberQuery } from "reduxstore/api/InquiryApi";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
+import { useSelector } from "react-redux";
+import { RootState } from "reduxstore/store";
 
 
 interface MasterInquiryEmployeeDetailsProps {
@@ -20,8 +22,9 @@ interface MasterInquiryEmployeeDetailsProps {
 
 const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> = ({ memberType, id, profitYear }) => {
   const [trigger, { data: details, isLoading, isError }] = useLazyGetProfitMasterInquiryMemberQuery();
+  const missives = useSelector((state: RootState) => state.lookups.missives);
 
-const defaultProfitYear = useDecemberFlowProfitYear();
+  const defaultProfitYear = useDecemberFlowProfitYear();
 
   useEffect(() => {
     if (memberType && id) {
@@ -31,6 +34,12 @@ const defaultProfitYear = useDecemberFlowProfitYear();
 
   if (isLoading) return <Typography>Loading...</Typography>;
   if (isError || !details) return <Typography>No details found.</Typography>;
+
+  // Missive alerts logic (moved from filter/member grid)
+  let missiveAlerts: MissiveResponse[] = [];
+  if (details && details.missives && missives) {
+    missiveAlerts = details.missives.map((id: number) => missives.find((m: MissiveResponse) => m.id === id)).filter(Boolean) as MissiveResponse[];
+  }
 
   const {
     firstName,
@@ -102,50 +111,64 @@ const defaultProfitYear = useDecemberFlowProfitYear();
   ];
 
   return (
-    <Grid2
-    container
-    paddingX="24px"
-    width={"100%"}>
-      <Grid2 size={{ xs: 12 }}>
-        <Typography
-          variant="h2"
-          sx={{ color: "#0258A5" }}>
-          Member Details
-        </Typography>
-      </Grid2>
+    <>
+      <Grid2
+        container
+        paddingX="24px"
+        width={"100%"}>
+        <Grid2 size={{ xs: 12 }}>
+          <Typography
+            variant="h2"
+            sx={{ color: "#0258A5" }}>
+            Member Details
+          </Typography>
+        </Grid2>
 
-      <Grid2 size={{ xs: 12 }}>
-        <Grid2
-          container
-          spacing={3}>
-          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-            <LabelValueSection
-              data={infoSection}
-            />
-          </Grid2>
-          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-            <LabelValueSection
-              data={employeeSection}
-            />
-          </Grid2>
-          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-            <LabelValueSection
-              data={planSection}
-            />
-          </Grid2>
-          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-            <LabelValueSection
-              data={hireSection}
-            />
-          </Grid2>
-          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-            <LabelValueSection
-              data={amountsSection}
-            />
+        <Grid2 size={{ xs: 12 }}>
+          <Grid2
+            container
+            spacing={3}>
+            <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+              <LabelValueSection
+                data={infoSection}
+              />
+            </Grid2>
+            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+              <LabelValueSection
+                data={employeeSection}
+              />
+            </Grid2>
+            <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+              <LabelValueSection
+                data={planSection}
+              />
+            </Grid2>
+            <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+              <LabelValueSection
+                data={hireSection}
+              />
+            </Grid2>
+            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+              <LabelValueSection
+                data={amountsSection}
+              />
+            </Grid2>
           </Grid2>
         </Grid2>
       </Grid2>
-    </Grid2>
+      {missiveAlerts.length > 0 && (
+        <Grid2 size={{ xs: 12 }}>
+          <div className="missive-alerts-box">
+            {missiveAlerts.map((alert, idx) => (
+              <div key={alert.id || idx} className="missive-alert">
+                <Typography color={alert.severity === 'Error' ? 'error' : 'warning'} variant="body1" fontWeight={600}>{alert.message}</Typography>
+                <Typography variant="body2">{alert.description}</Typography>
+              </div>
+            ))}
+          </div>
+        </Grid2>
+      )}
+    </>
   );
 };
 
