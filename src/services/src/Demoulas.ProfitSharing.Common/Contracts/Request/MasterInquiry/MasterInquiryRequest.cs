@@ -25,6 +25,7 @@ public record MasterInquiryRequest : MasterInquiryMemberRequest
             ProfitYear = 2024,
             MemberType = 1,
             Id = 123,
+            Ssn = 123456987,
             EndProfitYear = 2025,
             StartProfitMonth = 1,
             EndProfitMonth = 12,
