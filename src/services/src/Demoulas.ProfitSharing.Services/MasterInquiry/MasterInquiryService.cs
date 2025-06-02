@@ -402,8 +402,8 @@ public sealed class MasterInquiryService : IMasterInquiryService
             return (0, new MemberDetails());
         }
 
-      
-        var missives = await _missiveService.DetermineMissivesForSsn(ssn, currentYear, cancellationToken);
+        var missives = await _missiveService.DetermineMissivesForSsns(new[] { ssn }, currentYear, cancellationToken);
+        var missiveList = missives.TryGetValue(ssn, out var m) ? m : new List<int>();
 
         return (ssn = memberData.Ssn, memberDetails: new MemberDetails
         {
@@ -428,7 +428,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             CurrentEtva = memberData.CurrentPayProfit?.Etva ?? 0,
             PreviousEtva = memberData.PreviousPayProfit?.Etva ?? 0,
             EmploymentStatus = memberData.EmploymentStatus?.Name,
-            Missives = missives
+            Missives = missiveList
         });
     }
 
@@ -589,11 +589,12 @@ public sealed class MasterInquiryService : IMasterInquiryService
             })
             .ToListAsync(cancellationToken);
 
+        var missivesDict = await _missiveService.DetermineMissivesForSsns(members.Select(m => m.Ssn), currentYear, cancellationToken);
+
         var detailsList = new List<MemberDetails>();
         foreach (var memberData in members)
         {
-            var missives = await _missiveService.DetermineMissivesForSsn(memberData.Ssn, currentYear, cancellationToken);
-
+            var missiveList = missivesDict.TryGetValue(memberData.Ssn, out var m) ? m : new List<int>();
             detailsList.Add(new MemberDetails
             {
                 IsEmployee = true,
@@ -617,7 +618,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 CurrentEtva = memberData.CurrentPayProfit?.Etva ?? 0,
                 PreviousEtva = memberData.PreviousPayProfit?.Etva ?? 0,
                 EmploymentStatus = memberData.EmploymentStatus?.Name,
-                Missives = missives
+                Missives = missiveList
             });
         }
         return detailsList;
