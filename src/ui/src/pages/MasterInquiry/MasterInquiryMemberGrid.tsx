@@ -1,5 +1,5 @@
 import { Typography } from "@mui/material";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useLazySearchProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
 import { MasterInquiryRequest, EmployeeDetails } from "reduxstore/types";
 import { DSMGrid, Pagination } from "smart-ui-library";
@@ -50,6 +50,7 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = (searchP
 
   const [request, setRequest] = useState<MasterInquiryRequest>(searchParams);
   const [trigger, { data, isLoading, isError }] = useLazySearchProfitMasterInquiryQuery();
+  const autoSelectedRef = useRef<number | null>(null);
 
   useEffect(() => {
     setRequest(searchParams);
@@ -61,22 +62,40 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = (searchP
 
   // If only one member is returned, auto-select and hide the grid
   useEffect(() => {
-    if (data && data.results.length === 1 && searchParams.onBadgeClick) {
+    if (
+      data &&
+      data.results.length === 1 &&
+      searchParams.onBadgeClick &&
+      autoSelectedRef.current !== data.results[0].id
+    ) {
       const member = data.results[0];
       searchParams.onBadgeClick({
         memberType: member.isEmployee ? 1 : 2,
         id: member.id,
         ssn: member.ssn
       });
+      autoSelectedRef.current = member.id;
+    }
+    // If no results, clear selection
+    if (data && data.results.length === 0 && searchParams.onBadgeClick) {
+      searchParams.onBadgeClick(undefined);
     }
   }, [data, searchParams]);
 
   const pageSize = request.pagination.take;
   const pageNumber = Math.floor(request.pagination.skip / request.pagination.take);
 
-  
+  // Show a message if no results
+  if (data && data.results.length === 0) {
+    return (
+      <Box sx={{ width: "100%", padding: "24px" }}>
+        <Typography color="error" variant="h6">No results found.</Typography>
+      </Box>
+    );
+  }
+
   // Hide the grid if only one member is returned
-  if (data && data.results.length <= 1) {
+  if (data && data.results.length === 1) {
     return null;
   }
 
