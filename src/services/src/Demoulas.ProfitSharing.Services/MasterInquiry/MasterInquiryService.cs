@@ -1,4 +1,5 @@
-﻿using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Request;
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
@@ -126,36 +127,30 @@ public sealed class MasterInquiryService : IMasterInquiryService
             short currentYear = req.ProfitYear;
             short previousYear = (short)(currentYear - 1);
             var memberType = req.MemberType;
-            List<MemberDetails> detailsList;
+            PaginatedResponseDto<MemberDetails> detailsList;
 
             if (memberType == 1)
             {
-                detailsList = await GetDemographicDetailsForSsns(ctx, ssnList, currentYear, previousYear, cancellationToken);
+                detailsList = await GetDemographicDetailsForSsns(ctx, req, ssnList, currentYear, previousYear, cancellationToken);
             }
             else if (memberType == 2)
             {
-                detailsList = await GetBeneficiaryDetailsForSsns(ctx, ssnList, currentYear, previousYear, cancellationToken);
+                detailsList = await GetBeneficiaryDetailsForSsns(ctx, req, ssnList, cancellationToken);
             }
             else
             {
                 // For both, merge and deduplicate by SSN
-                var employeeDetails = await GetDemographicDetailsForSsns(ctx, ssnList, currentYear, previousYear, cancellationToken);
-                var beneficiaryDetails = await GetBeneficiaryDetailsForSsns(ctx, ssnList, currentYear, previousYear, cancellationToken);
-                detailsList = employeeDetails.Concat(beneficiaryDetails)
+                var employeeDetails = await GetDemographicDetailsForSsns(ctx, req, ssnList, currentYear, previousYear, cancellationToken);
+                var beneficiaryDetails = await GetBeneficiaryDetailsForSsns(ctx, req, ssnList, cancellationToken);
+                var concatResults = employeeDetails.Results.Concat(beneficiaryDetails.Results)
                     .GroupBy(d => d.Ssn)
                     .Select(g => g.First())
                     .ToList();
+
+                detailsList = new PaginatedResponseDto<MemberDetails>(req) { Results = concatResults, Total = employeeDetails.Total + beneficiaryDetails.Total };
             }
 
-            // Paginate results
-            var skip = req.Skip ?? 0;
-            var take = req.Take ?? 25;
-            var paged = detailsList.Skip(skip).Take(take).ToList();
-            return new PaginatedResponseDto<MemberDetails>(req)
-            {
-                Results = paged,
-                Total = detailsList.Count
-            };
+            return detailsList;
         });
     }
 
@@ -553,13 +548,8 @@ public sealed class MasterInquiryService : IMasterInquiryService
         return detailsList;
     }
 
-    private async Task<List<MemberDetails>> GetDemographicDetailsForSsns(ProfitSharingReadOnlyDbContext ctx, List<int> ssns, short currentYear, short previousYear, CancellationToken cancellationToken)
+    private async Task<PaginatedResponseDto<MemberDetails>> GetDemographicDetailsForSsns(ProfitSharingReadOnlyDbContext ctx, SortedPaginationRequestDto req, List<int> ssns, short currentYear, short previousYear, CancellationToken cancellationToken)
     {
-        if (ssns == null || ssns.Count == 0)
-        {
-            return [];
-        }
-
         var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
         var members = await demographics
             .Include(d => d.PayProfits)
@@ -587,12 +577,12 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 CurrentPayProfit = d.PayProfits.FirstOrDefault(x => x.ProfitYear == currentYear),
                 PreviousPayProfit = d.PayProfits.FirstOrDefault(x => x.ProfitYear == previousYear)
             })
-            .ToListAsync(cancellationToken);
+            .ToPaginationResultsAsync(req, cancellationToken);
 
-        var missivesDict = await _missiveService.DetermineMissivesForSsns(members.Select(m => m.Ssn), currentYear, cancellationToken);
+        var missivesDict = await _missiveService.DetermineMissivesForSsns(members.Results.Select(m => m.Ssn), currentYear, cancellationToken);
 
         var detailsList = new List<MemberDetails>();
-        foreach (var memberData in members)
+        foreach (var memberData in members.Results)
         {
             var missiveList = missivesDict.TryGetValue(memberData.Ssn, out var m) ? m : new List<int>();
             detailsList.Add(new MemberDetails
@@ -621,18 +611,16 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 Missives = missiveList
             });
         }
-        return detailsList;
+
+        return new PaginatedResponseDto<MemberDetails>(req) { Results = detailsList, Total = members.Total };
     }
 
-    private async Task<List<MemberDetails>> GetBeneficiaryDetailsForSsns(ProfitSharingReadOnlyDbContext ctx, List<int> ssns, short currentYear, short previousYear,
+    private Task<PaginatedResponseDto<MemberDetails>> GetBeneficiaryDetailsForSsns(ProfitSharingReadOnlyDbContext ctx,
+        SortedPaginationRequestDto req,
+        List<int> ssns,
         CancellationToken cancellationToken)
     {
-        if (ssns == null || ssns.Count == 0)
-        {
-            return [];
-        }
-
-        var members = await ctx.Beneficiaries
+        var members = ctx.Beneficiaries
             .Include(b => b.Contact)
             .Where(b => b.Contact != null && ssns.Contains(b.Contact.Ssn))
             .Select(b => new
@@ -648,8 +636,8 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 b.BadgeNumber,
                 b.PsnSuffix,
                 DemographicId = b.Id
-            })
-            .ToListAsync(cancellationToken);
+            });
+
 
         return members.Select(memberData => new MemberDetails
             {
@@ -665,7 +653,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 BadgeNumber = memberData.BadgeNumber,
                 PsnSuffix = memberData.PsnSuffix,
             })
-            .ToList();
+            .ToPaginationResultsAsync(req, cancellationToken);
     }
 
     private static IQueryable<MasterInquiryItem> FilterMemberQuery(MasterInquiryRequest req, IQueryable<MasterInquiryItem> query)
