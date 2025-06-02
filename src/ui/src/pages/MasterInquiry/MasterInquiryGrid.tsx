@@ -1,7 +1,7 @@
 import { Typography } from "@mui/material";
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { useLazySearchProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
+import { useLazySearchProfitMasterInquiryQuery, useLazyGetProfitMasterInquiryMemberDetailsQuery } from "reduxstore/api/InquiryApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetMasterInquiryGridColumns } from "./MasterInquiryGridColumns";
@@ -9,12 +9,13 @@ import { MasterInquiryRequest } from "reduxstore/types";
 import { paymentTypeGetNumberMap, memberTypeGetNumberMap } from "./MasterInquiryFunctions";
 import { CAPTIONS } from "../../constants";
 interface MasterInquiryGridProps {
-  initialSearchLoaded: boolean;
-  setInitialSearchLoaded: (loaded: boolean) => void;
-  //handleSortChanged: (sort: ISortParams) => void;
+  initialSearchLoaded?: boolean;
+  setInitialSearchLoaded?: (loaded: boolean) => void;
+  memberType?: number;
+  id?: number;
 }
 
-const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoaded, setInitialSearchLoaded }) => {
+const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoaded, setInitialSearchLoaded, memberType, id }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [_sortParams, setSortParams] = useState<ISortParams>({
@@ -25,6 +26,13 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoad
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const { masterInquiryData, masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
   const [triggerSearch, { isFetching }] = useLazySearchProfitMasterInquiryQuery();
+  const [triggerMemberDetails, { data: memberDetailsData, isFetching: isFetchingMemberDetails }] = useLazyGetProfitMasterInquiryMemberDetailsQuery();
+
+  useEffect(() => {
+    if (memberType !== undefined && id !== undefined) {
+      triggerMemberDetails({ memberType, id });
+    }
+  }, [memberType, id, triggerMemberDetails]);
 
   const createMasterInquiryRequest = useCallback(
     (skip: number, sortBy: string, isSortDescending: boolean): MasterInquiryRequest | null => {
@@ -90,6 +98,25 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoad
       onSearch();
     }
   }, [initialSearchLoaded, pageNumber, pageSize, _sortParams, onSearch]);
+
+  if (memberType !== undefined && id !== undefined) {
+    return (
+      <>
+        {isFetchingMemberDetails && <Typography>Loading member details...</Typography>}
+        {memberDetailsData && (
+          <DSMGrid
+            preferenceKey={CAPTIONS.MASTER_INQUIRY}
+            isLoading={isFetchingMemberDetails}
+            providedOptions={{
+              rowData: memberDetailsData.results,
+              columnDefs: columnDefs,
+              suppressMultiSort: true
+            }}
+          />
+        )}
+      </>
+    );
+  }
 
   return (
     <>

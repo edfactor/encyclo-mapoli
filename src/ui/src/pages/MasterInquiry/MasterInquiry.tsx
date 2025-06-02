@@ -20,6 +20,7 @@ const MasterInquiry = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [missiveAlerts, setMissiveAlerts] = useState<MissiveResponse[] | null>(null);
   const [searchParams, setSearchParams] = useState<MasterInquiryRequest | null>(null);
+  const [selectedMember, setSelectedMember] = useState<{ memberType: number; id: number } | null>(null);
 
   // This is the front-end cache of back end missives messages
   const { missives } = useSelector((state: RootState) => state.lookups);
@@ -91,7 +92,15 @@ const MasterInquiry = () => {
         </Grid2>
 
         {searchParams && (
-          <MasterInquiryMemberGrid {...searchParams} />
+          <MasterInquiryMemberGrid {...searchParams} onBadgeClick={setSelectedMember} />
+        )}
+
+        {/* Render details for selected member if present */}
+        {selectedMember && (
+          <MasterInquiryGrid
+            memberType={selectedMember.memberType}
+            id={selectedMember.id}
+          />
         )}
 
         {/* Render employee details if identifiers are present in request params */}
