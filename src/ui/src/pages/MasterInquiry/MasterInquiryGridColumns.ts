@@ -32,8 +32,6 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
-      rowGroup: true,
-      showRowGroup: "always",
       valueFormatter: (params) => {
         const badgeNumber = params.data?.badgeNumber;
         const psnSuffix = params.data?.psnSuffix.toString();

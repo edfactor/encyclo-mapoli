@@ -8,7 +8,7 @@ import { RootState } from "reduxstore/store";
 import { MissiveResponse, MasterInquiryRequest } from "reduxstore/types";
 import { DSMAccordion, Page } from "smart-ui-library";
 import MasterInquiryEmployeeDetails from "./MasterInquiryEmployeeDetails";
-import MasterInquiryGrid from "./MasterInquiryGrid";
+import MasterInquiryGrid from "./MasterInquiryDetailsGrid";
 import MasterInquirySearchFilter from "./MasterInquirySearchFilter";
 import { memberTypeGetNumberMap } from "./MasterInquiryFunctions";
 import MasterInquiryMemberGrid from "./MasterInquiryMemberGrid";
@@ -95,14 +95,6 @@ const MasterInquiry = () => {
           <MasterInquiryMemberGrid {...searchParams} onBadgeClick={setSelectedMember} />
         )}
 
-        {/* Render details for selected member if present */}
-        {selectedMember && (
-          <MasterInquiryGrid
-            memberType={selectedMember.memberType}
-            id={selectedMember.id}
-          />
-        )}
-
         {/* Render employee details if identifiers are present in request params */}
         {masterInquiryRequestParams && masterInquiryRequestParams.memberType !== undefined && masterInquiryRequestParams.socialSecurity && (
           <MasterInquiryEmployeeDetails
@@ -112,12 +104,13 @@ const MasterInquiry = () => {
           />
         )}
 
-        <Grid2 size={{ xs: 12 }} width="100%">
+         {/* Render details for selected member if present */}
+        {selectedMember && (
           <MasterInquiryGrid
-            initialSearchLoaded={initialSearchLoaded}
-            setInitialSearchLoaded={setInitialSearchLoaded}
+            memberType={selectedMember.memberType}
+            id={selectedMember.id}
           />
-        </Grid2>
+        )}
       </Grid2>
     </Page>
   );

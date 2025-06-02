@@ -277,7 +277,9 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 CurrentHoursYear = x.CurrentHoursYear
             });
 
-            return new PaginatedResponseDto<MasterInquiryResponseDto>(req) { Results = formattedResults, Total = rawQuery.Total };
+            return new PaginatedResponseDto<MasterInquiryResponseDto>(req) { 
+                Results = formattedResults, 
+                Total = rawQuery.Total };
         });
     }
 
