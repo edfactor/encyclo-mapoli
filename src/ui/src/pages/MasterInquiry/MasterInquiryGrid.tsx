@@ -1,7 +1,7 @@
 import { Typography } from "@mui/material";
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { useLazyGetProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
+import { useLazySearchProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetMasterInquiryGridColumns } from "./MasterInquiryGridColumns";
@@ -24,7 +24,7 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoad
 
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const { masterInquiryData, masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
-  const [triggerSearch, { isFetching }] = useLazyGetProfitMasterInquiryQuery();
+  const [triggerSearch, { isFetching }] = useLazySearchProfitMasterInquiryQuery();
 
   const createMasterInquiryRequest = useCallback(
     (skip: number, sortBy: string, isSortDescending: boolean): MasterInquiryRequest | null => {
@@ -95,7 +95,7 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearchLoad
     <>
       {!!masterInquiryData && (
         <>
-          <div style={{ padding: "0 24px 0 24px" }}>
+          <div className="master-inquiry-header">
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>

@@ -13,7 +13,7 @@ import {
 import Grid2 from "@mui/material/Grid2";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { useLazyGetProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
+import { useLazySearchProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -92,7 +92,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
   setMissiveAlerts,
   onSearch
 }) => {
-  const [triggerSearch, { isFetching }] = useLazyGetProfitMasterInquiryQuery();
+  const [triggerSearch, { isFetching }] = useLazySearchProfitMasterInquiryQuery();
   const { masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
 
   const { missives } = useSelector((state: RootState) => state.lookups);
@@ -121,7 +121,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     trigger
   } = useForm<MasterInquirySearch>({
-    resolver: yupResolver(schema),
+    resolver: yupResolver(schema) as any,
     defaultValues: {
       endProfitYear: profitYear || masterInquiryRequestParams?.endProfitYear || undefined,
       startProfitMonth: masterInquiryRequestParams?.startProfitMonth || undefined,
@@ -138,7 +138,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
       voids: false,
       pagination: {
         skip: 0,
-        take: 25,
+        take: 5,
         sortBy: "badgeNumber",
         isSortDescending: true
       }
@@ -157,7 +157,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
 
       // Trigger search automatically when badge number is present
       const searchParams: MasterInquiryRequest = {
-        pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true },
+        pagination: { skip: 0, take: 5, sortBy: "badgeNumber", isSortDescending: true },
         badgeNumber: Number(badgeNumber),
         memberType: memberTypeGetNumberMap[determineCorrectMemberType(badgeNumber)]
       };
@@ -166,7 +166,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
       // is invalid, but it will be handled here. Note that we are assuming this
       // is an employee search and not a beneficiary search as we do not have
       // a memberType in the URL.
-      triggerSearch(searchParams, false).unwrap().then((response) => {
+      triggerSearch(searchParams, false).unwrap().then((response: any) => {
         
         if (!response.employeeDetails)  {
           setMissiveAlerts([
@@ -203,7 +203,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
       const searchParams: MasterInquiryRequest = {
         pagination: {
           skip: data.pagination?.skip || 0,
-          take: data.pagination?.take || 25,
+          take: data.pagination?.take || 5,
           sortBy: data.pagination?.sortBy || "badgeNumber",
           isSortDescending: data.pagination?.isSortDescending || true
         },
@@ -224,7 +224,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
       // Call the onSearch prop to lift search params to parent
       onSearch(searchParams);
 
-      triggerSearch(searchParams, false).unwrap().then((response) => {
+      triggerSearch(searchParams, false).unwrap().then((response: any) => {
       
         // We need to figure out who was searched for
         let personTypeString;
@@ -314,7 +314,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
             const alerts = response.employeeDetails.missives.map((id: number) => {
             const missiveResponse =  missives.find((missive: MissiveResponse) => missive.id === id);
             return missiveResponse;
-            }).filter((alert) => alert !== null) as MissiveResponse[];
+            }).filter((alert: any) => alert !== null) as MissiveResponse[];
 
             // This will send the list to the screen
             setMissiveAlerts(alerts);
@@ -325,17 +325,17 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
         if (response.inquiryResults && response.inquiryResults.results.length > 0 && response.employeeDetails?.missives) {
 
         // If someone is both, the 3rd missive message proves this
-        const isEmployeeAndBeneficiary = response.employeeDetails?.missives.some((row) => row=== 3);
+        const isEmployeeAndBeneficiary = response.employeeDetails?.missives.some((row: any) => row=== 3);
                 
         if (isEmployeeAndBeneficiary) {
           
-          const originalBadgeNumber = response.inquiryResults.results.find((row) => row.psnSuffix === 0)?.badgeNumber;
+          const originalBadgeNumber = response.inquiryResults.results.find((row: any) => row.psnSuffix === 0)?.badgeNumber;
           
           // We want all badge numbers to be the same,
           // and use the badge numbers of the person
           // that this employee is a beneficiary of
           // to be used as base of the psnSuffix field
-          const updatedResults = response.inquiryResults.results.map((row) => {
+          const updatedResults = response.inquiryResults.results.map((row: any) => {
             if (row.psnSuffix !== undefined && row.psnSuffix > 0) {
               return {
                 ...row,
@@ -356,7 +356,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
 
       
     
-      dispatch(setMasterInquiryRequestParams(data));
+      dispatch(setMasterInquiryRequestParams(data as MasterInquirySearch));
     }
   });
 
@@ -381,7 +381,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
       voids: false,
       pagination: {
         skip: 0,
-        take: 25,
+        take: 5,
         sortBy: "badgeNumber",
         isSortDescending: true
       }

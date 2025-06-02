@@ -4,7 +4,7 @@ import Grid2 from "@mui/material/Grid2";
 import { useEffect, useState } from "react";
 import { useForm, Controller, Resolver } from "react-hook-form";
 import { useDispatch } from "react-redux";
-import { useLazyGetProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
+import { useLazySearchProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
 import { clearMasterInquiryData } from "reduxstore/slices/inquirySlice";
 import { clearMilitaryContributions } from "reduxstore/slices/militarySlice";
 import { SearchAndReset } from "smart-ui-library";
@@ -30,7 +30,7 @@ const validationSchema = yup.object({
 );
 
 const MilitaryEntryAndModificationSearchFilter: React.FC<SearchFilterProps> = ({ setInitialSearchLoaded }) => {
-  const [triggerSearch, { isFetching }] = useLazyGetProfitMasterInquiryQuery();
+  const [triggerSearch, { isFetching }] = useLazySearchProfitMasterInquiryQuery();
   const [activeField, setActiveField] = useState<"socialSecurity" | "badgeNumber" | null>(null);
   
   const {

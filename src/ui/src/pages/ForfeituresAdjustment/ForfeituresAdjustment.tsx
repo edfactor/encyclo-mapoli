@@ -10,7 +10,7 @@ import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { RootState } from "reduxstore/store";
 import AddForfeitureModal from "./AddForfeitureModal";
 import { useLazyGetForfeitureAdjustmentsQuery } from "reduxstore/api/YearsEndApi";
-import { useLazyGetProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
+import { useLazySearchProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
 import ForfeitureAdjustmentEmployeeDetails from "./ForfeitureAdjustmentEmployeeDetails";
 
 const ForfeituresAdjustment = () => {
@@ -20,7 +20,7 @@ const ForfeituresAdjustment = () => {
   const { forfeitureAdjustmentData, forfeitureAdjustmentQueryParams } = useSelector((state: RootState) => state.forfeituresAdjustment);
   const { masterInquiryEmployeeDetails } = useSelector((state: RootState) => state.inquiry);
   const [triggerSearch] = useLazyGetForfeitureAdjustmentsQuery();
-  const [triggerMasterInquiry] = useLazyGetProfitMasterInquiryQuery();
+  const [triggerMasterInquiry] = useLazySearchProfitMasterInquiryQuery();
 
   const renderActionNode = () => {
     return (

@@ -1,4 +1,5 @@
-﻿using Demoulas.Common.Contracts.Contracts.Request;
+﻿using System.Linq;
+using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
@@ -142,9 +143,11 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 // For both, merge and deduplicate by SSN
                 var employeeDetails = await GetDemographicDetailsForSsns(ctx, req, ssnList, currentYear, previousYear, cancellationToken);
                 var beneficiaryDetails = await GetBeneficiaryDetailsForSsns(ctx, req, ssnList, cancellationToken);
+
                 var concatResults = employeeDetails.Results.Concat(beneficiaryDetails.Results)
                     .GroupBy(d => d.Ssn)
                     .Select(g => g.First())
+                    .Take(req.Take ?? 25)
                     .ToList();
 
                 detailsList = new PaginatedResponseDto<MemberDetails>(req) { Results = concatResults, Total = employeeDetails.Total + beneficiaryDetails.Total };
