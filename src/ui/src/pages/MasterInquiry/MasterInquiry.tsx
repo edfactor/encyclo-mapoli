@@ -30,7 +30,6 @@ const MasterInquiry = () => {
           <DSMAccordion title="Filter">
             <MasterInquirySearchFilter 
               setInitialSearchLoaded={setInitialSearchLoaded}
-              setMissiveAlerts={() => {}}
               onSearch={setSearchParams}
             />
           </DSMAccordion>
@@ -40,12 +39,12 @@ const MasterInquiry = () => {
           <MasterInquiryMemberGrid {...searchParams} onBadgeClick={setSelectedMember} />
         )}
 
-        {/* Render employee details if identifiers are present in request params */}
-        {selectedMember && masterInquiryRequestParams && selectedMember.memberType !== undefined && selectedMember.id && (
+        {/* Render employee details if identifiers are present in selectedMember */}
+        {selectedMember && selectedMember.memberType !== undefined && selectedMember.id && (
           <MasterInquiryEmployeeDetails
             memberType={selectedMember.memberType}
             id={selectedMember.id}
-            profitYear={masterInquiryRequestParams.endProfitYear}
+            profitYear={searchParams?.endProfitYear}
           />
         )}
 
