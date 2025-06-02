@@ -64,7 +64,7 @@ internal sealed class MissiveService : IMissiveService
                 }
 
                 return Task.FromResult(true);
-            }).Unwrap();
+            });
 
             return rslt;
         }

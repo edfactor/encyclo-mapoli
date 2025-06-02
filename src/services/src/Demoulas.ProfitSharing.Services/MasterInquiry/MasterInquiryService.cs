@@ -1,5 +1,4 @@
-﻿using System.Runtime.Intrinsics.X86;
-using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
@@ -12,12 +11,11 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Extensions;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
-using Demoulas.ProfitSharing.Services.Mappers;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace Demoulas.ProfitSharing.Services;
+namespace Demoulas.ProfitSharing.Services.MasterInquiry;
 
 public sealed class MasterInquiryService : IMasterInquiryService
 {
@@ -110,100 +108,6 @@ public sealed class MasterInquiryService : IMasterInquiryService
     }
 
 
-    public async Task<MasterInquiryWithDetailsResponseDto> GetMasterInquiryAsync(MasterInquiryRequest req,
-        CancellationToken cancellationToken = default)
-    {
-        var inquiryResults = await _dataContextFactory.UseReadOnlyContext(async ctx =>
-        {
-            IQueryable<MasterInquiryItem> combinedQuery;
-
-            if (req.MemberType == 1)
-            {
-                combinedQuery = GetMasterInquiryDemographics(ctx);
-            }
-            else if (req.MemberType == 2)
-            {
-                combinedQuery = GetMasterInquiryBeneficiary(ctx);
-            }
-            else
-            {
-                var demographics = GetMasterInquiryDemographics(ctx);
-                var beneficiary = GetMasterInquiryBeneficiary(ctx);
-                combinedQuery = demographics.Union(beneficiary);
-            }
-
-            combinedQuery = FilterMemberQuery(req, combinedQuery);
-
-            // Materialize the query first, then project to DTO in memory
-            var formattedResults = await combinedQuery.Select(x => new MasterInquiryResponseDto
-            {
-                Id = x.ProfitDetail.Id,
-                Ssn = x.ProfitDetail.Ssn.MaskSsn(),
-                ProfitYear = x.ProfitDetail.ProfitYear,
-                ProfitYearIteration = x.ProfitDetail.ProfitYearIteration,
-                DistributionSequence = x.ProfitDetail.DistributionSequence,
-                ProfitCodeId = x.ProfitDetail.ProfitCodeId,
-                ProfitCodeName = x.ProfitCode.Name,
-                Contribution = x.ProfitDetail.CalculateContribution(),
-                Earnings = x.ProfitDetail.CalculateEarnings(),
-                Forfeiture = x.ProfitDetail.CalculateForfeiture(),
-                Payment = x.ProfitDetail.CalculatePayment(),
-                MonthToDate = x.ProfitDetail.MonthToDate,
-                YearToDate = x.ProfitDetail.YearToDate,
-                Remark = x.ProfitDetail.Remark,
-                ZeroContributionReasonId = x.ProfitDetail.ZeroContributionReasonId,
-                ZeroContributionReasonName = x.ZeroContributionReason != null ? x.ZeroContributionReason.Name : string.Empty,
-                FederalTaxes = x.ProfitDetail.FederalTaxes,
-                StateTaxes = x.ProfitDetail.StateTaxes,
-                TaxCodeId = x.ProfitDetail.TaxCodeId != null ? x.ProfitDetail.TaxCodeId : TaxCode.Constants.Unknown.Id,
-                TaxCodeName = x.TaxCode != null ? x.TaxCode.Name : TaxCode.Constants.Unknown.Name,
-                CommentTypeId = x.ProfitDetail.CommentTypeId,
-                CommentTypeName = x.CommentType != null ? x.CommentType.Name : string.Empty,
-                CommentRelatedCheckNumber = x.ProfitDetail.CommentRelatedCheckNumber,
-                CommentRelatedState = x.ProfitDetail.CommentRelatedState,
-                CommentRelatedOracleHcmId = x.ProfitDetail.CommentRelatedOracleHcmId,
-                CommentRelatedPsnSuffix = x.ProfitDetail.CommentRelatedPsnSuffix,
-                CommentIsPartialTransaction = x.ProfitDetail.CommentIsPartialTransaction != null ? x.ProfitDetail.CommentIsPartialTransaction : false,
-                BadgeNumber = x.Member.BadgeNumber,
-                PsnSuffix = x.Member.PsnSuffix,
-                PayFrequencyId = x.Member.PayFrequencyId,
-                TransactionDate = x.TransactionDate,
-                CurrentIncomeYear = x.Member.CurrentIncomeYear,
-                CurrentHoursYear = x.Member.CurrentHoursYear
-            }).ToPaginationResultsAsync(req, cancellationToken);
-
-           
-
-            ISet<int> uniqueSsns = await combinedQuery.Select(q => q.Member.Ssn).ToHashSetAsync(cancellationToken);
-            MemberProfitPlanDetails? employeeDetails = null;
-
-            if (uniqueSsns.Count == 1)
-            {
-                int ssn = uniqueSsns.First();
-                short currentYear = req.EndProfitYear ?? (short)DateTime.Today.Year;
-                short previousYear = (short)(currentYear - 1);
-
-                if (req.MemberType == 1)
-                {
-                    employeeDetails = await GetDemographicDetails(ctx, ssn, currentYear, previousYear, cancellationToken);
-                }
-                else if (req.MemberType == 2)
-                {
-                    employeeDetails = await GetBeneficiaryDetails(ctx, ssn, currentYear, previousYear, cancellationToken);
-                }
-                else
-                {
-                    employeeDetails = await GetDemographicDetails(ctx, ssn, currentYear, previousYear, cancellationToken) ??
-                                      await GetBeneficiaryDetails(ctx, ssn, currentYear, previousYear, cancellationToken);
-                }
-            }
-
-            return new MasterInquiryWithDetailsResponseDto { InquiryResults = formattedResults, EmployeeDetails = employeeDetails };
-        });
-
-        return inquiryResults;
-    }
-
     public async Task<PaginatedResponseDto<MemberDetails>> GetMembersAsync(MasterInquiryRequest req, CancellationToken cancellationToken = default)
     {
         return await _dataContextFactory.UseReadOnlyContext(async ctx =>
@@ -255,22 +159,29 @@ public sealed class MasterInquiryService : IMasterInquiryService
         });
     }
 
-    public async Task<MemberProfitPlanDetails?> GetMemberAsync(MasterInquiryMemberRequest req, CancellationToken cancellationToken = default)
+    public async Task<MemberProfitPlanDetails?> GetMemberVestingAsync(MasterInquiryMemberRequest req, CancellationToken cancellationToken = default)
     {
         short currentYear = req.ProfitYear;
         short previousYear = (short)(currentYear - 1);
-        return await _dataContextFactory.UseReadOnlyContext(ctx =>
+        var members = await _dataContextFactory.UseReadOnlyContext(ctx =>
         {
             return req.MemberType switch
             {
                 1 => GetDemographicDetails(ctx, req.Ssn, currentYear, previousYear, cancellationToken),
-                2 => GetBeneficiaryDetails(ctx, req.Ssn, currentYear, previousYear, cancellationToken),
+                2 => GetBeneficiaryDetails(ctx, req.Ssn, cancellationToken),
                 _ => throw new ValidationException("Invalid MemberType provided")
             };
         });
+        Dictionary<int, MemberDetails> memberDetailsMap = new Dictionary<int, MemberDetails>
+        {
+            { members.ssn, members.memberDetails ?? new MemberDetails() }
+        };
+
+        var details = await GetVestingDetails(memberDetailsMap, currentYear, previousYear, cancellationToken);
+        return details.FirstOrDefault();
     }
 
-   public Task<PaginatedResponseDto<MasterInquiryResponseDto>> GetMemberProfitDetails(MasterInquiryMemberDetailsRequest req, CancellationToken cancellationToken = default)
+    public Task<PaginatedResponseDto<MasterInquiryResponseDto>> GetMemberProfitDetails(MasterInquiryMemberDetailsRequest req, CancellationToken cancellationToken = default)
     {
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
@@ -323,14 +234,9 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 CurrentHoursYear = x.Member.CurrentHoursYear
             });
 
-            // Pagination in SQL
-            var skip = req.Skip ?? 0;
-            var take = req.Take ?? 25;
-            var total = await rawQuery.CountAsync(cancellationToken);
-            var rawItems = await rawQuery.Skip(skip).Take(take).ToListAsync(cancellationToken);
+           
 
-            // Second projection: C#-only logic
-            var formattedResults = rawItems.Select(x => new MasterInquiryResponseDto
+            var formattedResults = await rawQuery.Select(x => new MasterInquiryResponseDto
             {
                 Id = x.Id,
                 Ssn = x.Ssn.MaskSsn(),
@@ -350,7 +256,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 ZeroContributionReasonName = x.ZeroContributionReasonName ?? string.Empty,
                 FederalTaxes = x.FederalTaxes,
                 StateTaxes = x.StateTaxes,
-                TaxCodeId = !string.IsNullOrEmpty(x.TaxCodeId) && x.TaxCodeId.Length == 1 ? (char?)x.TaxCodeId[0] : null,
+                TaxCodeId = !string.IsNullOrEmpty(x.TaxCodeId) && x.TaxCodeId.Length == 1 ? x.TaxCodeId[0] : null,
                 TaxCodeName = x.TaxCodeName ?? string.Empty,
                 CommentTypeId = x.CommentTypeId,
                 CommentTypeName = x.CommentTypeName ?? string.Empty,
@@ -365,15 +271,9 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 TransactionDate = x.TransactionDate,
                 CurrentIncomeYear = x.CurrentIncomeYear,
                 CurrentHoursYear = x.CurrentHoursYear
-            }).ToList();
+            }).ToPaginationResultsAsync(req, cancellationToken);
 
-            var result = new PaginatedResponseDto<MasterInquiryResponseDto>(req)
-            {
-                Results = formattedResults,
-                Total = total
-            };
-
-            return result;
+            return formattedResults;
         });
     }
 
@@ -463,7 +363,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
         return query;
     }
 
-    private async Task<MemberProfitPlanDetails?> GetDemographicDetails(ProfitSharingReadOnlyDbContext ctx,
+    private async Task<(int ssn, MemberDetails? memberDetails)> GetDemographicDetails(ProfitSharingReadOnlyDbContext ctx,
        int ssn, short currentYear, short previousYear, CancellationToken cancellationToken)
     {
         var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
@@ -488,45 +388,24 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 d.TerminationDate,
                 d.StoreNumber,
                 DemographicId = d.Id,
-                EmploymentStatusId = d.EmploymentStatusId,
-                EmploymentStatus = d.EmploymentStatus,
+                d.EmploymentStatusId,
+                d.EmploymentStatus,
                 CurrentPayProfit = d.PayProfits
                     .FirstOrDefault(x => x.ProfitYear == currentYear),
                 PreviousPayProfit = d.PayProfits
-                    .FirstOrDefault(x => x.ProfitYear == currentYear)
+                    .FirstOrDefault(x => x.ProfitYear == previousYear)
             })
             .FirstOrDefaultAsync(cancellationToken);
 
         if (memberData == null)
         {
-            return null;
+            return (0, new MemberDetails());
         }
 
-        BalanceEndpointResponse? currentBalance = null;
-        BalanceEndpointResponse? previousBalance = null;
-        try
-        {
-            Task<BalanceEndpointResponse?> previousBalanceTask =
-                _totalService.GetVestingBalanceForSingleMemberAsync(
-                    SearchBy.Ssn, ssn, previousYear, cancellationToken);
-
-            Task<BalanceEndpointResponse?> currentBalanceTask =
-                _totalService.GetVestingBalanceForSingleMemberAsync(
-                    SearchBy.Ssn, ssn, currentYear, cancellationToken);
-
-            await Task.WhenAll(previousBalanceTask, currentBalanceTask);
-
-            currentBalance = await currentBalanceTask;
-            previousBalance = await previousBalanceTask;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Failed to retrieve balances for SSN {SSN}", ssn);
-        }
-
+      
         var missives = await _missiveService.DetermineMissivesForSsn(ssn, currentYear, cancellationToken);
 
-        return new MemberProfitPlanDetails
+        return (ssn = memberData.Ssn, memberDetails: new MemberDetails
         {
             IsEmployee = true,
             Id = memberData.Id,
@@ -539,29 +418,22 @@ public sealed class MasterInquiryService : IMasterInquiryService
             DateOfBirth = memberData.DateOfBirth,
             Ssn = memberData.Ssn.MaskSsn(),
             YearToDateProfitSharingHours = memberData.CurrentPayProfit?.CurrentHoursYear ?? 0,
-            YearsInPlan = currentBalance?.YearsInPlan ?? (short)0,
             HireDate = memberData.HireDate,
             ReHireDate = memberData.ReHireDate,
             TerminationDate = memberData.TerminationDate,
             StoreNumber = memberData.StoreNumber,
-            PercentageVested = currentBalance?.VestingPercent ?? 0,
-            ContributionsLastYear = previousBalance is { CurrentBalance: > 0 },
             EnrollmentId = memberData.CurrentPayProfit?.EnrollmentId,
             Enrollment = memberData.CurrentPayProfit?.Enrollment?.Name,
             BadgeNumber = memberData.BadgeNumber,
-            BeginPSAmount = (previousBalance?.CurrentBalance ?? 0),
-            CurrentPSAmount = (currentBalance?.CurrentBalance ?? 0),
-            BeginVestedAmount = (previousBalance?.VestedBalance ?? 0),
-            CurrentVestedAmount = (currentBalance?.VestedBalance ?? 0),
             CurrentEtva = memberData.CurrentPayProfit?.Etva ?? 0,
             PreviousEtva = memberData.PreviousPayProfit?.Etva ?? 0,
             EmploymentStatus = memberData.EmploymentStatus?.Name,
             Missives = missives
-        };
+        });
     }
 
-    private async Task<MemberProfitPlanDetails?> GetBeneficiaryDetails(ProfitSharingReadOnlyDbContext ctx,
-       int ssn, short currentYear, short previousYear, CancellationToken cancellationToken)
+    private async Task<(int ssn, MemberDetails? memberDetails)> GetBeneficiaryDetails(ProfitSharingReadOnlyDbContext ctx,
+     int ssn, CancellationToken cancellationToken)
     {
         var memberData = await ctx.Beneficiaries
             .Include(b => b.Contact)
@@ -584,32 +456,11 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
         if (memberData == null)
         {
-            return null;
+            return (0, new MemberDetails());
         }
 
-        BalanceEndpointResponse? currentBalance = null;
-        BalanceEndpointResponse? previousBalance = null;
-        try
-        {
-            Task<BalanceEndpointResponse?> previousBalanceTask =
-                _totalService.GetVestingBalanceForSingleMemberAsync(
-                    SearchBy.Ssn, ssn, previousYear, cancellationToken);
-
-            Task<BalanceEndpointResponse?> currentBalanceTask =
-                _totalService.GetVestingBalanceForSingleMemberAsync(
-                    SearchBy.Ssn, ssn, currentYear, cancellationToken);
-
-            await Task.WhenAll(previousBalanceTask, currentBalanceTask);
-
-            currentBalance = await currentBalanceTask;
-            previousBalance = await previousBalanceTask;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Failed to retrieve balances for SSN {SSN}", ssn);
-        }
-
-        return new MemberProfitPlanDetails
+       
+        return (memberData.Ssn, new MemberDetails
         {
             IsEmployee = false,
             FirstName = memberData.FirstName,
@@ -620,23 +471,93 @@ public sealed class MasterInquiryService : IMasterInquiryService
             AddressZipCode = memberData.PostalCode!,
             DateOfBirth = memberData.DateOfBirth,
             Ssn = memberData.Ssn.MaskSsn(),
-            YearsInPlan = 0,
-            PercentageVested = currentBalance?.VestingPercent ?? 0,
-            ContributionsLastYear = previousBalance is { CurrentBalance: > 0 },
             BadgeNumber = memberData.BadgeNumber,
-            PsnSuffix = memberData.PsnSuffix,
-            BeginPSAmount = (previousBalance?.CurrentBalance ?? 0),
-            CurrentPSAmount = (currentBalance?.CurrentBalance ?? 0),
-            BeginVestedAmount = (previousBalance?.VestedBalance ?? 0),
-            CurrentVestedAmount = (currentBalance?.VestedBalance ?? 0)
-        };
+            PsnSuffix = memberData.PsnSuffix
+        });
+    }
+
+    private async Task<IEnumerable<MemberProfitPlanDetails>> GetVestingDetails(Dictionary<int, MemberDetails> memberDetailsMap,
+        short currentYear, 
+        short previousYear, 
+        CancellationToken cancellationToken)
+    {
+        
+        var ssnCollection = memberDetailsMap.Keys.ToHashSet();
+        List<BalanceEndpointResponse> currentBalance = [];
+        List<BalanceEndpointResponse> previousBalance = [];
+        try
+        {
+            var previousBalanceTask =
+                _totalService.GetVestingBalanceForMembersAsync(
+                    SearchBy.Ssn, ssnCollection, previousYear, cancellationToken);
+
+            var currentBalanceTask =
+                _totalService.GetVestingBalanceForMembersAsync(
+                    SearchBy.Ssn, ssnCollection, currentYear, cancellationToken);
+
+            await Task.WhenAll(previousBalanceTask, currentBalanceTask);
+
+            currentBalance = await currentBalanceTask;
+            previousBalance = await previousBalanceTask;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to retrieve balances for SSN {SSN}", ssnCollection);
+        }
+        
+        List< MemberProfitPlanDetails > detailsList = new List<MemberProfitPlanDetails>(currentBalance.Count);
+
+        foreach (var balance in currentBalance)
+        {
+            if (!memberDetailsMap.TryGetValue(balance.Id, out var memberData))
+            {
+                continue;
+            }
+            
+            var previousBalanceItem = previousBalance.FirstOrDefault(b => b.Id == balance.Id);
+
+            detailsList.Add(new MemberProfitPlanDetails
+            {
+                IsEmployee = memberData.IsEmployee,
+                Id = memberData.Id,
+                FirstName = memberData.FirstName,
+                LastName = memberData.LastName,
+                AddressCity = memberData.AddressCity,
+                AddressState = memberData.AddressState,
+                Address = memberData.Address,
+                AddressZipCode = memberData.AddressZipCode,
+                DateOfBirth = memberData.DateOfBirth,
+                Ssn = memberData.Ssn,
+                YearToDateProfitSharingHours = memberData.YearToDateProfitSharingHours,
+                HireDate = memberData.HireDate,
+                ReHireDate = memberData.ReHireDate,
+                TerminationDate = memberData.TerminationDate,
+                StoreNumber = memberData.StoreNumber,
+                EnrollmentId = memberData.EnrollmentId,
+                Enrollment = memberData.Enrollment,
+                CurrentEtva = memberData.CurrentEtva,
+                PreviousEtva = memberData.PreviousEtva,
+                EmploymentStatus = memberData.EmploymentStatus,
+                Missives = memberData.Missives,
+                YearsInPlan = balance?.YearsInPlan ?? 0,
+                PercentageVested = balance?.VestingPercent ?? 0,
+                ContributionsLastYear = previousBalanceItem is { CurrentBalance: > 0 },
+                BadgeNumber = memberData.BadgeNumber,
+                BeginPSAmount = previousBalanceItem?.CurrentBalance ?? 0,
+                CurrentPSAmount = balance?.CurrentBalance ?? 0,
+                BeginVestedAmount = previousBalanceItem?.VestedBalance ?? 0,
+                CurrentVestedAmount = balance?.VestedBalance ?? 0,
+            });
+        }
+
+        return detailsList;
     }
 
     private async Task<List<MemberDetails>> GetDemographicDetailsForSsns(ProfitSharingReadOnlyDbContext ctx, List<int> ssns, short currentYear, short previousYear, CancellationToken cancellationToken)
     {
         if (ssns == null || ssns.Count == 0)
         {
-            return new List<MemberDetails>();
+            return [];
         }
 
         var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
@@ -661,8 +582,8 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 d.TerminationDate,
                 d.StoreNumber,
                 DemographicId = d.Id,
-                EmploymentStatusId = d.EmploymentStatusId,
-                EmploymentStatus = d.EmploymentStatus,
+                d.EmploymentStatusId,
+                d.EmploymentStatus,
                 CurrentPayProfit = d.PayProfits.FirstOrDefault(x => x.ProfitYear == currentYear),
                 PreviousPayProfit = d.PayProfits.FirstOrDefault(x => x.ProfitYear == previousYear)
             })
@@ -671,31 +592,9 @@ public sealed class MasterInquiryService : IMasterInquiryService
         var detailsList = new List<MemberDetails>();
         foreach (var memberData in members)
         {
-            BalanceEndpointResponse? currentBalance = null;
-            BalanceEndpointResponse? previousBalance = null;
-            try
-            {
-                Task<BalanceEndpointResponse?> previousBalanceTask =
-                    _totalService.GetVestingBalanceForSingleMemberAsync(
-                        SearchBy.Ssn, memberData.Ssn, previousYear, cancellationToken);
-
-                Task<BalanceEndpointResponse?> currentBalanceTask =
-                    _totalService.GetVestingBalanceForSingleMemberAsync(
-                        SearchBy.Ssn, memberData.Ssn, currentYear, cancellationToken);
-
-                await Task.WhenAll(previousBalanceTask, currentBalanceTask);
-
-                currentBalance = await currentBalanceTask;
-                previousBalance = await previousBalanceTask;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Failed to retrieve balances for SSN {SSN}", memberData.Ssn);
-            }
-
             var missives = await _missiveService.DetermineMissivesForSsn(memberData.Ssn, currentYear, cancellationToken);
 
-            detailsList.Add(new MemberProfitPlanDetails
+            detailsList.Add(new MemberDetails
             {
                 IsEmployee = true,
                 Id = memberData.Id,
@@ -708,20 +607,13 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 DateOfBirth = memberData.DateOfBirth,
                 Ssn = memberData.Ssn.MaskSsn(),
                 YearToDateProfitSharingHours = memberData.CurrentPayProfit?.CurrentHoursYear ?? 0,
-                YearsInPlan = currentBalance?.YearsInPlan ?? (short)0,
                 HireDate = memberData.HireDate,
                 ReHireDate = memberData.ReHireDate,
                 TerminationDate = memberData.TerminationDate,
                 StoreNumber = memberData.StoreNumber,
-                PercentageVested = currentBalance?.VestingPercent ?? 0,
-                ContributionsLastYear = previousBalance is { CurrentBalance: > 0 },
                 EnrollmentId = memberData.CurrentPayProfit?.EnrollmentId,
                 Enrollment = memberData.CurrentPayProfit?.Enrollment?.Name,
                 BadgeNumber = memberData.BadgeNumber,
-                BeginPSAmount = (previousBalance?.CurrentBalance ?? 0),
-                CurrentPSAmount = (currentBalance?.CurrentBalance ?? 0),
-                BeginVestedAmount = (previousBalance?.VestedBalance ?? 0),
-                CurrentVestedAmount = (currentBalance?.VestedBalance ?? 0),
                 CurrentEtva = memberData.CurrentPayProfit?.Etva ?? 0,
                 PreviousEtva = memberData.PreviousPayProfit?.Etva ?? 0,
                 EmploymentStatus = memberData.EmploymentStatus?.Name,
@@ -731,11 +623,12 @@ public sealed class MasterInquiryService : IMasterInquiryService
         return detailsList;
     }
 
-    private async Task<List<MemberDetails>> GetBeneficiaryDetailsForSsns(ProfitSharingReadOnlyDbContext ctx, List<int> ssns, short currentYear, short previousYear, CancellationToken cancellationToken)
+    private async Task<List<MemberDetails>> GetBeneficiaryDetailsForSsns(ProfitSharingReadOnlyDbContext ctx, List<int> ssns, short currentYear, short previousYear,
+        CancellationToken cancellationToken)
     {
         if (ssns == null || ssns.Count == 0)
         {
-            return new List<MemberDetails>();
+            return [];
         }
 
         var members = await ctx.Beneficiaries
@@ -757,32 +650,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             })
             .ToListAsync(cancellationToken);
 
-        var detailsList = new List<MemberDetails>();
-        foreach (var memberData in members)
-        {
-            BalanceEndpointResponse? currentBalance = null;
-            BalanceEndpointResponse? previousBalance = null;
-            try
-            {
-                Task<BalanceEndpointResponse?> previousBalanceTask =
-                    _totalService.GetVestingBalanceForSingleMemberAsync(
-                        SearchBy.Ssn, memberData.Ssn, previousYear, cancellationToken);
-
-                Task<BalanceEndpointResponse?> currentBalanceTask =
-                    _totalService.GetVestingBalanceForSingleMemberAsync(
-                        SearchBy.Ssn, memberData.Ssn, currentYear, cancellationToken);
-
-                await Task.WhenAll(previousBalanceTask, currentBalanceTask);
-
-                currentBalance = await currentBalanceTask;
-                previousBalance = await previousBalanceTask;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Failed to retrieve balances for SSN {SSN}", memberData.Ssn);
-            }
-
-            detailsList.Add(new MemberProfitPlanDetails
+        return members.Select(memberData => new MemberDetails
             {
                 IsEmployee = false,
                 FirstName = memberData.FirstName,
@@ -793,18 +661,10 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 AddressZipCode = memberData.PostalCode!,
                 DateOfBirth = memberData.DateOfBirth,
                 Ssn = memberData.Ssn.MaskSsn(),
-                YearsInPlan = 0,
-                PercentageVested = currentBalance?.VestingPercent ?? 0,
-                ContributionsLastYear = previousBalance is { CurrentBalance: > 0 },
                 BadgeNumber = memberData.BadgeNumber,
                 PsnSuffix = memberData.PsnSuffix,
-                BeginPSAmount = (previousBalance?.CurrentBalance ?? 0),
-                CurrentPSAmount = (currentBalance?.CurrentBalance ?? 0),
-                BeginVestedAmount = (previousBalance?.VestedBalance ?? 0),
-                CurrentVestedAmount = (currentBalance?.VestedBalance ?? 0)
-            });
-        }
-        return detailsList;
+            })
+            .ToList();
     }
 
     private static IQueryable<MasterInquiryItem> FilterMemberQuery(MasterInquiryRequest req, IQueryable<MasterInquiryItem> query)

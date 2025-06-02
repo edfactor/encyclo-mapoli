@@ -78,7 +78,7 @@ public class MasterInquiryMemberEndpoint : Endpoint<MasterInquiryMemberRequest, 
 
     public override async Task<MemberProfitPlanDetails> ExecuteAsync(MasterInquiryMemberRequest req, CancellationToken ct)
     {
-        var result = await _masterInquiryService.GetMemberAsync(req, ct);
+        var result = await _masterInquiryService.GetMemberVestingAsync(req, ct);
         if (result is null)
         {
             await SendNotFoundAsync(ct);

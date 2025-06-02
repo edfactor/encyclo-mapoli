@@ -13,7 +13,17 @@ public record MemberDetails
     public string AddressState { get; init; } = string.Empty;
     public string AddressZipCode { get; init; } = string.Empty;
     public DateOnly DateOfBirth { get; init; }
-    
-    public List<int> Missives { get; set; } = new List<int>();
+    public DateOnly? HireDate { get; init; }
+    public DateOnly? TerminationDate { get; init; } = null;
+    public DateOnly? ReHireDate { get; init; } = null;
     public string? EmploymentStatus { get; set; }
+    public decimal YearToDateProfitSharingHours { get; init; }
+    public byte? EnrollmentId { get; init; }
+    public string? Enrollment { get; init; }
+    public short StoreNumber { get; set; }
+    public decimal CurrentEtva { get; set; }
+    public decimal PreviousEtva { get; set; }
+
+
+    public List<int> Missives { get; set; } = new List<int>();
 }
