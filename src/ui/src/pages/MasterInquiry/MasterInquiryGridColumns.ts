@@ -14,7 +14,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       resizable: true
     },
     {
-      headerName: "Badge",
+      headerName: "Badge/Psn",
       field: "badgeNumber",
       colId: "badgeNumber",
       minWidth: 120,
@@ -22,31 +22,21 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       cellClass: "left-align",
       resizable: true,
       cellRenderer: (params: ICellRendererParams) =>
-        viewBadgeLinkRenderer(params.data.badgeNumber)
-    },
-    {
-      headerName: "PSN",
-      field: "psnSuffix",
-      colId: "psnSuffix",
-      minWidth: 120,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
+        viewBadgeLinkRenderer(params.data.badgeNumber, params.data.psnSuffix),
       valueFormatter: (params) => {
         const badgeNumber = params.data?.badgeNumber;
-        const psnSuffix = params.data?.psnSuffix.toString();
-        if (psnSuffix === '0' || (!badgeNumber && !psnSuffix)) {
+        const psnSuffix = params.data?.psnSuffix;
+        // If both are null/undefined, just return an empty string
+        if (!badgeNumber && !psnSuffix) {
           return "";
         }
-        
-        if (psnSuffix.length > 9) {
-          // Put a '-' between the psnSuffix and the last 4 digits of the psnSuffix
-          const lastFourDigits = psnSuffix.slice(-4);
-          const psnSuffixWithoutLastFour = psnSuffix.slice(0, -4);
-          return `${psnSuffixWithoutLastFour}-${lastFourDigits}`;          
+
+        if (psnSuffix > 0) {
+          // If both exist, format as "name (id)"
+          return `${badgeNumber}-${psnSuffix}`;
         }
 
-        return psnSuffix;
+        return badgeNumber;
       }
     },
     {
@@ -209,15 +199,6 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       }
     },
     {
-      headerName: "Remark",
-      field: "remark",
-      colId: "remark",
-      minWidth: 120,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
-    {
       headerName: "Comment Type",
       headerTooltip: "Comment Type",
       field: "commentTypeName",
@@ -242,7 +223,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       headerName: "State",
       field: "commentRelatedState",
       colId: "commentRelatedState",
-      minWidth: 50,
+      minWidth: 60,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true
@@ -251,7 +232,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       headerName: "Partial Transaction",
       field: "commentIsPartialTransaction",
       colId: "commentIsPartialTransaction",
-      minWidth: 50,
+      minWidth: 120,
       headerClass: "center-align",
       cellClass: "center-align",
       resizable: true,
@@ -261,6 +242,16 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
         // Return "No" for false, null, undefined, or any other falsy value
         return params.value === true ? "Yes" : "No";
       }
-    }
+    },
+    {
+      headerName: "Status",
+      field: "employmentStatus",
+      colId: "employmentStatus",
+      minWidth: 60,
+      headerClass: "right-align",
+      cellClass: "right-align",
+      resizable: true,
+      sortable: false
+    },
   ];
 };
