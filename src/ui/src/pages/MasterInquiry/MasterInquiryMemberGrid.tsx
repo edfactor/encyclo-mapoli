@@ -59,10 +59,24 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = (searchP
     trigger(request);
   }, [request, trigger]);
 
+  // If only one member is returned, auto-select and hide the grid
+  useEffect(() => {
+    if (data && data.results.length === 1 && searchParams.onBadgeClick) {
+      const member = data.results[0];
+      searchParams.onBadgeClick({
+        memberType: member.isEmployee ? 1 : 2,
+        id: member.id,
+        ssn: member.ssn
+      });
+    }
+  }, [data, searchParams]);
+
   const pageSize = request.pagination.take;
   const pageNumber = Math.floor(request.pagination.skip / request.pagination.take);
 
-  if (data && data.results.length === 0) {
+  
+  // Hide the grid if only one member is returned
+  if (data && data.results.length <= 1) {
     return null;
   }
 

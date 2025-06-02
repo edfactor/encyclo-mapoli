@@ -1,10 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-
-import { setMasterInquiryData } from "reduxstore/slices/inquirySlice";
 import {
   MasterInquiryRequest,
   MasterInquiryMemberRequest,
-  MasterInquiryResponseType,
   MasterInquiryResponseDto,
   PagedReportResponse,
   EmployeeDetails
