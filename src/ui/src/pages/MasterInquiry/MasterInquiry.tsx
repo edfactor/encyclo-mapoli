@@ -5,18 +5,22 @@ import Grid2 from '@mui/material/Grid2';
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
-import { MissiveResponse } from "reduxstore/types";
+import { MissiveResponse, MasterInquiryRequest } from "reduxstore/types";
 import { DSMAccordion, Page } from "smart-ui-library";
 import MasterInquiryEmployeeDetails from "./MasterInquiryEmployeeDetails";
-import MasterInquiryGrid from "./MasterInquiryGrid";
+import MasterInquiryGrid from "./MasterInquiryDetailsGrid";
 import MasterInquirySearchFilter from "./MasterInquirySearchFilter";
+import { memberTypeGetNumberMap } from "./MasterInquiryFunctions";
+import MasterInquiryMemberGrid from "./MasterInquiryMemberGrid";
 
 
 const MasterInquiry = () => {
-  const { masterInquiryEmployeeDetails } = useSelector((state: RootState) => state.inquiry);
+  const { masterInquiryEmployeeDetails, masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
 
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [missiveAlerts, setMissiveAlerts] = useState<MissiveResponse[] | null>(null);
+  const [searchParams, setSearchParams] = useState<MasterInquiryRequest | null>(null);
+  const [selectedMember, setSelectedMember] = useState<{ memberType: number; id: number, ssn: number } | null>(null);
 
   // This is the front-end cache of back end missives messages
   const { missives } = useSelector((state: RootState) => state.lookups);
@@ -79,20 +83,34 @@ const MasterInquiry = () => {
         ))}
         <Grid2 size={{ xs: 12 }} width={"100%"}>
           <DSMAccordion title="Filter">
-            <MasterInquirySearchFilter setInitialSearchLoaded={setInitialSearchLoaded} 
-            setMissiveAlerts={setMissiveAlerts}
+            <MasterInquirySearchFilter 
+              setInitialSearchLoaded={setInitialSearchLoaded}
+              setMissiveAlerts={setMissiveAlerts}
+              onSearch={setSearchParams}
             />
           </DSMAccordion>
         </Grid2>
 
-        {masterInquiryEmployeeDetails && <MasterInquiryEmployeeDetails details={masterInquiryEmployeeDetails} missives={missives}/>}
+        {searchParams && (
+          <MasterInquiryMemberGrid {...searchParams} onBadgeClick={setSelectedMember} />
+        )}
 
-        <Grid2 size={{ xs: 12 }} width="100%">
-          <MasterInquiryGrid
-            initialSearchLoaded={initialSearchLoaded}
-            setInitialSearchLoaded={setInitialSearchLoaded}
+        {/* Render employee details if identifiers are present in request params */}
+        {selectedMember && masterInquiryRequestParams && selectedMember.memberType !== undefined && selectedMember.id && (
+          <MasterInquiryEmployeeDetails
+            memberType={selectedMember.memberType}
+            id={selectedMember.id}
+            profitYear={masterInquiryRequestParams.endProfitYear}
           />
-        </Grid2>
+        )}
+
+         {/* Render details for selected member if present */}
+        {selectedMember && (
+          <MasterInquiryGrid
+            memberType={selectedMember.memberType}
+            id={selectedMember.id}
+          />
+        )}
       </Grid2>
     </Page>
   );

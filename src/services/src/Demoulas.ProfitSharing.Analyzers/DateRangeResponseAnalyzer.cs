@@ -22,7 +22,7 @@ namespace Demoulas.ProfitSharing.Analyzers
             description:
             "Every FastEndpoints endpoint must return a response type that implements IHasDateRange so that consumers always know the covered date range.");
 
-        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [_rule];
+        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(_rule);
 
         public override void Initialize(AnalysisContext context)
         {
