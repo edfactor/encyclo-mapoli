@@ -83,13 +83,11 @@ const schema = yup.object().shape({
 
 interface MasterInquirySearchFilterProps {
   setInitialSearchLoaded: (include: boolean) => void;
-  setMissiveAlerts: (alerts: MissiveResponse[]) => void;
   onSearch: (params: MasterInquiryRequest) => void;
 }
 
 const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
   setInitialSearchLoaded,
-  setMissiveAlerts,
   onSearch
 }) => {
   const [triggerSearch, { isFetching }] = useLazySearchProfitMasterInquiryQuery();
@@ -121,7 +119,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
   } = useForm<MasterInquirySearch>({
     resolver: yupResolver(schema) as any,
     defaultValues: {
-      endProfitYear: profitYear || masterInquiryRequestParams?.endProfitYear || undefined,
+      endProfitYear: profitYear, // Always use profitYear const as default
       startProfitMonth: masterInquiryRequestParams?.startProfitMonth || undefined,
       endProfitMonth: masterInquiryRequestParams?.endProfitMonth || undefined,
       socialSecurity: masterInquiryRequestParams?.socialSecurity || undefined,
@@ -157,6 +155,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
       const searchParams: MasterInquiryRequest = {
         pagination: { skip: 0, take: 5, sortBy: "badgeNumber", isSortDescending: true },
         badgeNumber: Number(badgeNumber),
+        endProfitYear: profitYear || undefined,
         memberType: memberTypeGetNumberMap[determineCorrectMemberType(badgeNumber)]
       };
 
@@ -173,7 +172,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
           sortBy: data.pagination?.sortBy || "badgeNumber",
           isSortDescending: data.pagination?.isSortDescending || true
         },
-        ...(!!data.endProfitYear && { endProfitYear: data.endProfitYear }),
+        endProfitYear: data.endProfitYear || profitYear, // Always set endProfitYear, fallback to profitYear
         ...(!!data.startProfitMonth && { startProfitMonth: data.startProfitMonth }),
         ...(!!data.endProfitMonth && { endProfitMonth: data.endProfitMonth }),
         ...(!!data.socialSecurity && { ssn: data.socialSecurity }),
@@ -196,7 +195,6 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
   });
 
   const handleReset = () => {
-    setMissiveAlerts([]);
     setInitialSearchLoaded(false);
     dispatch(clearMasterInquiryRequestParams());
     dispatch(clearMasterInquiryData());
