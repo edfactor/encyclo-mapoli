@@ -710,7 +710,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
         if (req.Ssn != 0)
         {
-            query = query.Where(x => x.ProfitDetail.Ssn == req.Ssn);
+            query = query.Where(x => x.Member.Ssn == req.Ssn);
         }
 
         if (req.ForfeitureAmount.HasValue)
