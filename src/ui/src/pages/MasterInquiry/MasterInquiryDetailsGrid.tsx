@@ -70,15 +70,17 @@ return (
               {`Master Inquiry (${memberDetailsData?.total || 0} ${memberDetailsData?.total === 1 ? "Record" : "Records"})`}
             </Typography>
           </div>
-          <DSMGrid
-            preferenceKey={CAPTIONS.MASTER_INQUIRY}
-            isLoading={isFetchingMemberDetails}
-            providedOptions={{
-              rowData: memberDetailsData?.results,
-              columnDefs: columnDefs,
-              suppressMultiSort: true
-            }}
-          />
+          <div style={{ height: "400px", width: "100%" }}>
+            <DSMGrid
+              preferenceKey={CAPTIONS.MASTER_INQUIRY}
+              isLoading={isFetchingMemberDetails}
+              providedOptions={{
+                rowData: memberDetailsData?.results,
+                columnDefs: columnDefs,
+                suppressMultiSort: true
+              }}
+            />
+          </div>
         </>
       )}
       {!!memberDetailsData && memberDetailsData.results.length > 0 && (
