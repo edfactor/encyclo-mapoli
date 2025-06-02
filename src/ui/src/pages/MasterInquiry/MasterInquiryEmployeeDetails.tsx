@@ -14,20 +14,20 @@ import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 
 interface MasterInquiryEmployeeDetailsProps {
   memberType: number;
-  ssn: string | number;
+  id: string | number;
   profitYear?: number | null | undefined;
 }
 
-const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> = ({ memberType, ssn, profitYear }) => {
+const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> = ({ memberType, id, profitYear }) => {
   const [trigger, { data: details, isLoading, isError }] = useLazyGetProfitMasterInquiryMemberQuery();
 
 const defaultProfitYear = useDecemberFlowProfitYear();
 
   useEffect(() => {
-    if (memberType && ssn) {
-      trigger({ memberType, ssn: typeof ssn === 'string' ? parseInt(ssn) : ssn, profitYear:  profitYear ?? defaultProfitYear });
+    if (memberType && id) {
+      trigger({ memberType, id: typeof id === 'string' ? parseInt(id) : id, profitYear:  profitYear ?? defaultProfitYear });
     }
-  }, [memberType, ssn, profitYear, trigger, defaultProfitYear]);
+  }, [memberType, id, profitYear, trigger, defaultProfitYear]);
 
   if (isLoading) return <Typography>Loading...</Typography>;
   if (isError || !details) return <Typography>No details found.</Typography>;

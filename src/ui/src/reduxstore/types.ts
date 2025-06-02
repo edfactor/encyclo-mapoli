@@ -362,7 +362,7 @@ export interface MasterInquiryRequest {
 
 export interface MasterInquiryMemberRequest {
   memberType?: number;
-  ssn?: number;
+  id?: number;
   profitYear?: number;
   skip?: number;
   take?: number;

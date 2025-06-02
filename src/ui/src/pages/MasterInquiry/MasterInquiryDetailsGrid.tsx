@@ -68,7 +68,7 @@ return (
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`Master Inquiry (${memberDetailsData?.total || 0} ${memberDetailsData?.total === 1 ? "Record" : "Records"})`}
+              {`Profit Details (${memberDetailsData?.total || 0} ${memberDetailsData?.total === 1 ? "Record" : "Records"})`}
             </Typography>
           </div>          
             <DSMGrid

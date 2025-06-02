@@ -27,7 +27,7 @@ public class MasterInquiryMemberEndpoint : Endpoint<MasterInquiryMemberRequest, 
             s.ExampleRequest = new MasterInquiryMemberRequest
             {
                 MemberType = 1,
-                Ssn = 123456789,
+                Id = 123,
                 ProfitYear = 2023
             };
             s.ResponseExamples = new Dictionary<int, object>

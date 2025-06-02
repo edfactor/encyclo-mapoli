@@ -166,8 +166,8 @@ public sealed class MasterInquiryService : IMasterInquiryService
         {
             return req.MemberType switch
             {
-                1 => GetDemographicDetails(ctx, req.Ssn, currentYear, previousYear, cancellationToken),
-                2 => GetBeneficiaryDetails(ctx, req.Ssn, cancellationToken),
+                1 => GetDemographicDetails(ctx, req.Id, currentYear, previousYear, cancellationToken),
+                2 => GetBeneficiaryDetails(ctx, req.Id, cancellationToken),
                 _ => throw new ValidationException("Invalid MemberType provided")
             };
         });
@@ -362,13 +362,13 @@ public sealed class MasterInquiryService : IMasterInquiryService
     }
 
     private async Task<(int ssn, MemberDetails? memberDetails)> GetDemographicDetails(ProfitSharingReadOnlyDbContext ctx,
-       int ssn, short currentYear, short previousYear, CancellationToken cancellationToken)
+       int id, short currentYear, short previousYear, CancellationToken cancellationToken)
     {
         var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
         var memberData = await demographics
             .Include(d => d.PayProfits)
             .ThenInclude(pp => pp.Enrollment)
-            .Where(d => d.Ssn == ssn)
+            .Where(d => d.Id == id)
             .Select(d => new
             {
                 d.Id,
@@ -400,10 +400,10 @@ public sealed class MasterInquiryService : IMasterInquiryService
             return (0, new MemberDetails());
         }
 
-        var missives = await _missiveService.DetermineMissivesForSsns(new[] { ssn }, currentYear, cancellationToken);
-        var missiveList = missives.TryGetValue(ssn, out var m) ? m : new List<int>();
+        var missives = await _missiveService.DetermineMissivesForSsns([memberData.Ssn], currentYear, cancellationToken);
+        var missiveList = missives.TryGetValue(memberData.Ssn, out var m) ? m : new List<int>();
 
-        return (ssn = memberData.Ssn, memberDetails: new MemberDetails
+        return (ssn: memberData.Ssn, memberDetails: new MemberDetails
         {
             IsEmployee = true,
             Id = memberData.Id,
@@ -431,13 +431,14 @@ public sealed class MasterInquiryService : IMasterInquiryService
     }
 
     private async Task<(int ssn, MemberDetails? memberDetails)> GetBeneficiaryDetails(ProfitSharingReadOnlyDbContext ctx,
-     int ssn, CancellationToken cancellationToken)
+     int id, CancellationToken cancellationToken)
     {
         var memberData = await ctx.Beneficiaries
             .Include(b => b.Contact)
-            .Where(b => b.Contact!.Ssn == ssn)
+            .Where(b => b.Id == id)
             .Select(b => new
             {
+                b.Id,
                 b.Contact!.ContactInfo.FirstName,
                 b.Contact.ContactInfo.LastName,
                 b.Contact.Address.City,
@@ -448,7 +449,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 b.Contact.Ssn,
                 b.BadgeNumber,
                 b.PsnSuffix,
-                DemographicId = b.Id
+                b.DemographicId
             })
             .FirstOrDefaultAsync(cancellationToken);
 
@@ -461,6 +462,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
         return (memberData.Ssn, new MemberDetails
         {
             IsEmployee = false,
+            Id = memberData.Id,
             FirstName = memberData.FirstName,
             LastName = memberData.LastName,
             AddressCity = memberData.City!,

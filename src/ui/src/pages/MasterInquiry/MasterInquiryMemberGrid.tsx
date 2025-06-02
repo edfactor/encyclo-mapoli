@@ -35,7 +35,7 @@ const columns: ColDef[] = [
 ];
 
 interface MasterInquiryMemberGridProps extends MasterInquiryRequest {
-  onBadgeClick?: (args: { memberType: number; id: number }) => void;
+  onBadgeClick?: (args: { memberType: number; id: number, ssn: number }) => void;
 }
 
 const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = (searchParams) => {

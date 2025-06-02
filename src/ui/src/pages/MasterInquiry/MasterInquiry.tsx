@@ -20,7 +20,7 @@ const MasterInquiry = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [missiveAlerts, setMissiveAlerts] = useState<MissiveResponse[] | null>(null);
   const [searchParams, setSearchParams] = useState<MasterInquiryRequest | null>(null);
-  const [selectedMember, setSelectedMember] = useState<{ memberType: number; id: number } | null>(null);
+  const [selectedMember, setSelectedMember] = useState<{ memberType: number; id: number, ssn: number } | null>(null);
 
   // This is the front-end cache of back end missives messages
   const { missives } = useSelector((state: RootState) => state.lookups);
@@ -96,10 +96,10 @@ const MasterInquiry = () => {
         )}
 
         {/* Render employee details if identifiers are present in request params */}
-        {masterInquiryRequestParams && masterInquiryRequestParams.memberType !== undefined && masterInquiryRequestParams.socialSecurity && (
+        {selectedMember && masterInquiryRequestParams && selectedMember.memberType !== undefined && selectedMember.id && (
           <MasterInquiryEmployeeDetails
-            memberType={memberTypeGetNumberMap[masterInquiryRequestParams.memberType]}
-            ssn={masterInquiryRequestParams.socialSecurity}
+            memberType={selectedMember.memberType}
+            id={selectedMember.id}
             profitYear={masterInquiryRequestParams.endProfitYear}
           />
         )}
