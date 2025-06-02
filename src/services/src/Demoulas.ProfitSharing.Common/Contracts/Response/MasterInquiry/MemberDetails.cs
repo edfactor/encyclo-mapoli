@@ -8,10 +8,12 @@ public record MemberDetails
     public string Ssn { get; init; } = string.Empty;
     public string FirstName { get; init; } = string.Empty;
     public string LastName { get; init; } = string.Empty;
+    public string FullName => $"{LastName}, {FirstName}";
     public string Address { get; init; } = string.Empty;
     public string AddressCity { get; init; } = string.Empty;
     public string AddressState { get; init; } = string.Empty;
     public string AddressZipCode { get; init; } = string.Empty;
+    public short Age { get; set; }
     public DateOnly DateOfBirth { get; init; }
     public DateOnly? HireDate { get; init; }
     public DateOnly? TerminationDate { get; init; } = null;

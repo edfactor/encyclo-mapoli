@@ -10,7 +10,7 @@ const columns: ColDef[] = [
   {
     field: "badgeNumber",
     headerName: "Badge #",
-    width: 120,
+    maxWidth: 120,
     cellRenderer: (params: any) => {
       const { badgeNumber, isEmployee, id } = params.data;
       return (
@@ -29,9 +29,14 @@ const columns: ColDef[] = [
       );
     }
   },
-  { field: "firstName", headerName: "First Name", width: 160 },
-  { field: "lastName", headerName: "Last Name", width: 160 },
-  { field: "dateOfBirth", headerName: "Date of Birth", width: 140 }
+  { field: "fullName", headerName: "Name", width: 500 },
+  { field: "ssn", headerName: "SSN", maxWidth: 250 },
+  { field: "address", headerName: "Street", maxWidth: 400 },
+  { field: "addressCity", headerName: "City", maxWidth: 300 },
+  { field: "addressState", headerName: "State", maxWidth: 100 },
+  { field: "addressZipCode", headerName: "Zip", maxWidth: 160 },
+  { field: "age", headerName: "Age", maxWidth: 120, },
+  { field: "employmentStatus", headerName: "Status", maxWidth: 120, },
 ];
 
 interface MasterInquiryMemberGridProps extends MasterInquiryRequest {

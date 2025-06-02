@@ -13,6 +13,7 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Extensions;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Demoulas.Util.Extensions;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -152,6 +153,11 @@ public sealed class MasterInquiryService : IMasterInquiryService
                     .ToList();
 
                 detailsList = new PaginatedResponseDto<MemberDetails>(req) { Results = concatResults, Total = employeeDetails.Total + beneficiaryDetails.Total };
+            }
+
+            foreach (MemberDetails details in detailsList.Results)
+            {
+                details.Age = details.DateOfBirth.Age();
             }
 
             return detailsList;
@@ -414,6 +420,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             Address = memberData.Address,
             AddressZipCode = memberData.PostalCode!,
             DateOfBirth = memberData.DateOfBirth,
+            Age = memberData.DateOfBirth.Age(),
             Ssn = memberData.Ssn.MaskSsn(),
             YearToDateProfitSharingHours = memberData.CurrentPayProfit?.CurrentHoursYear ?? 0,
             HireDate = memberData.HireDate,
@@ -470,6 +477,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             Address = memberData.Address,
             AddressZipCode = memberData.PostalCode!,
             DateOfBirth = memberData.DateOfBirth,
+            Age = memberData.DateOfBirth.Age(),
             Ssn = memberData.Ssn.MaskSsn(),
             BadgeNumber = memberData.BadgeNumber,
             PsnSuffix = memberData.PsnSuffix
@@ -527,6 +535,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 Address = memberData.Address,
                 AddressZipCode = memberData.AddressZipCode,
                 DateOfBirth = memberData.DateOfBirth,
+                Age = memberData.DateOfBirth.Age(),
                 Ssn = memberData.Ssn,
                 YearToDateProfitSharingHours = memberData.YearToDateProfitSharingHours,
                 HireDate = memberData.HireDate,
@@ -601,6 +610,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 Address = memberData.Address,
                 AddressZipCode = memberData.PostalCode!,
                 DateOfBirth = memberData.DateOfBirth,
+                Age = memberData.DateOfBirth.Age(),
                 Ssn = memberData.Ssn.MaskSsn(),
                 YearToDateProfitSharingHours = memberData.CurrentPayProfit?.CurrentHoursYear ?? 0,
                 HireDate = memberData.HireDate,
