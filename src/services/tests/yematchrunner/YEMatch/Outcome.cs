@@ -40,16 +40,16 @@ public sealed record Outcome(
             mergedStatus = OutcomeStatus.Error;
         }
 
-        TimeSpan? tookLonger = took;
-        if (secondOutcome.took != null && secondOutcome.took.Value > took!.Value)
+        TimeSpan? mergeToLongerTime = took;
+        if (took != null && secondOutcome.took != null && secondOutcome.took.Value > took.Value)
         {
-            tookLonger = secondOutcome.took;
+            mergeToLongerTime = secondOutcome.took;
         }
 
         return new Outcome(ActivityLetterNumber + "/" + secondOutcome.ActivityLetterNumber,
             Name + "/" + secondOutcome.Name,
             fullcommand, mergedStatus, $"first:{Message}\nsecond:{secondOutcome.Message}",
-            tookLonger, isSmart, $"firstOut:{StandardOut}\nsecondOut:{secondOutcome.StandardOut}",
+            mergeToLongerTime, isSmart, $"firstOut:{StandardOut}\nsecondOut:{secondOutcome.StandardOut}",
             $"firstErr:{StandardError}\nsecondErr:{secondOutcome.StandardError}");
     }
 }
