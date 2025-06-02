@@ -61,16 +61,16 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({
 
 return (
     <>
+    <div style={{ height: "400px", width: "100%" }}>
       {!!memberDetailsData && (
-        <>
+        <>        
           <div style={{ padding: "0 24px 0 24px" }}>
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
               {`Master Inquiry (${memberDetailsData?.total || 0} ${memberDetailsData?.total === 1 ? "Record" : "Records"})`}
             </Typography>
-          </div>
-          <div style={{ height: "400px", width: "100%" }}>
+          </div>          
             <DSMGrid
               preferenceKey={CAPTIONS.MASTER_INQUIRY}
               isLoading={isFetchingMemberDetails}
@@ -79,8 +79,7 @@ return (
                 columnDefs: columnDefs,
                 suppressMultiSort: true
               }}
-            />
-          </div>
+            />          
         </>
       )}
       {!!memberDetailsData && memberDetailsData.results.length > 0 && (
@@ -97,8 +96,8 @@ return (
           recordCount={memberDetailsData.total}
         />
       )}
+      </div>
     </>
-  );
-};
-
-export default MasterInquiryGrid;
+  );  
+}
+  export default MasterInquiryGrid;
