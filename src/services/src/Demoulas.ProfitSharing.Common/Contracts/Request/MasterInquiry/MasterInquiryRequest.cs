@@ -18,6 +18,8 @@ public record MasterInquiryRequest : MasterInquiryMemberRequest
     public int Ssn { get; set; }
 #pragma warning restore DSM001
 
+    public int? BadgeNumber { get; set; }
+
     public static new MasterInquiryRequest RequestExample()
     {
         return new MasterInquiryRequest

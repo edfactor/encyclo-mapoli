@@ -1,3 +1,4 @@
+import { Typography } from "@mui/material";
 import React, { useState, useEffect } from "react";
 import { useLazySearchProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
 import { MasterInquiryRequest, EmployeeDetails } from "reduxstore/types";
@@ -61,12 +62,23 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = (searchP
   const pageSize = request.pagination.take;
   const pageNumber = Math.floor(request.pagination.skip / request.pagination.take);
 
+  if (data && data.results.length === 0) {
+    return null;
+  }
+
   return (
     <Box sx={{ width: "100%" }}>
       {isLoading && <CircularProgress />}
       {isError && <div>Error loading data.</div>}
-      {data && (
+      {data && data.results.length > 0 && (
         <>
+          <div style={{ padding: "0 24px 0 24px" }}>
+            <Typography
+              variant="h2"
+              sx={{ color: "#0258A5" }}>
+              {`Search Results (${data?.total || 0} ${data?.total === 1 ? "Record" : "Records"})`}
+            </Typography>
+          </div>
           <DSMGrid
             isLoading={isLoading}
             preferenceKey="MASTER_INQUIRY_MEMBER_GRID"
@@ -76,32 +88,30 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = (searchP
               context: { onBadgeClick: searchParams.onBadgeClick }
             }}
           />
-          {Array.isArray(data?.results) && data.results.length > 0 && (
-            <Pagination
-              pageNumber={pageNumber}
-              setPageNumber={(value: number) => {
-                setRequest((prev) => ({
-                  ...prev,
-                  pagination: {
-                    ...prev.pagination,
-                    skip: value * prev.pagination.take
-                  }
-                }));
-              }}
-              pageSize={pageSize}
-              setPageSize={(value: number) => {
-                setRequest((prev) => ({
-                  ...prev,
-                  pagination: {
-                    ...prev.pagination,
-                    take: value,
-                    skip: 0
-                  }
-                }));
-              }}
-              recordCount={data.total}
-            />
-          )}
+          <Pagination
+            pageNumber={pageNumber}
+            setPageNumber={(value: number) => {
+              setRequest((prev) => ({
+                ...prev,
+                pagination: {
+                  ...prev.pagination,
+                  skip: value * prev.pagination.take
+                }
+              }));
+            }}
+            pageSize={pageSize}
+            setPageSize={(value: number) => {
+              setRequest((prev) => ({
+                ...prev,
+                pagination: {
+                  ...prev.pagination,
+                  take: value,
+                  skip: 0
+                }
+              }));
+            }}
+            recordCount={data.total}
+          />
         </>
       )}
     </Box>

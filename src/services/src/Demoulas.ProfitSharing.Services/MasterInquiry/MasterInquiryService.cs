@@ -673,6 +673,11 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
     private static IQueryable<MasterInquiryItem> FilterMemberQuery(MasterInquiryRequest req, IQueryable<MasterInquiryItem> query)
     {
+        if (req.BadgeNumber.HasValue)
+        {
+            query = query.Where(x => x.Member.BadgeNumber == req.BadgeNumber);
+        }
+
         if (req.EndProfitYear.HasValue)
         {
             query = query.Where(x => x.ProfitDetail.ProfitYear <= req.EndProfitYear);
