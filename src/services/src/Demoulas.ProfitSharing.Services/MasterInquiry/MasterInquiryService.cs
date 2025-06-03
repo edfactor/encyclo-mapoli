@@ -341,7 +341,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             .Join(ctx.Beneficiaries.Include(m => m.Contact),
                 pd => pd.Ssn,
                 b => b.Contact != null ? b.Contact.Ssn : 0,
-                (pd, d) => new MasterInquiryItem
+                (pd, b) => new MasterInquiryItem
                 {
                     ProfitDetail = pd,
                     ProfitCode = pd.ProfitCode,
@@ -351,16 +351,16 @@ public sealed class MasterInquiryService : IMasterInquiryService
                     TransactionDate = pd.TransactionDate,
                     Member = new InquiryDemographics
                     {
-                        Id = d.Id,
-                        BadgeNumber = d.BadgeNumber,
-                        FullName = d.Contact!.ContactInfo.FullName != null ? d.Contact.ContactInfo.FullName : d.Contact.ContactInfo.LastName,
-                        FirstName = d.Contact!.ContactInfo.FirstName,
-                        LastName = d.Contact!.ContactInfo.LastName,
+                        Id = b.Id,
+                        BadgeNumber = b.BadgeNumber,
+                        FullName = b.Contact!.ContactInfo.FullName != null ? b.Contact.ContactInfo.FullName : b.Contact.ContactInfo.LastName,
+                        FirstName = b.Contact!.ContactInfo.FirstName,
+                        LastName = b.Contact!.ContactInfo.LastName,
                         PayFrequencyId = PayFrequency.Constants.Weekly,
-                        PsnSuffix = d.PsnSuffix,
-                        Ssn = d.Contact != null ? d.Contact.Ssn : 0,
+                        PsnSuffix = b.PsnSuffix,
+                        Ssn = b.Contact != null ? b.Contact.Ssn : 0,
                         CurrentIncomeYear = 0,
-                        CurrentHoursYear = 0
+                        CurrentHoursYear = 0,
                     }
                 });
 
@@ -552,6 +552,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 PercentageVested = balance?.VestingPercent ?? 0,
                 ContributionsLastYear = previousBalanceItem is { CurrentBalance: > 0 },
                 BadgeNumber = memberData.BadgeNumber,
+                PsnSuffix = memberData.PsnSuffix,
                 BeginPSAmount = previousBalanceItem?.CurrentBalance ?? 0,
                 CurrentPSAmount = balance?.CurrentBalance ?? 0,
                 BeginVestedAmount = previousBalanceItem?.VestedBalance ?? 0,

@@ -56,6 +56,8 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
   }
 
   const {
+    badgeNumber,
+    psnSuffix,
     firstName,
     lastName,
     address,
@@ -70,7 +72,6 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     contributionsLastYear,
     enrollmentId,
     enrollment,
-    badgeNumber,
     hireDate,
     terminationDate,
     reHireDate,
@@ -80,7 +81,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     beginVestedAmount,
     currentVestedAmount,
     currentEtva,
-    employmentStatus,
+    employmentStatus    
   } = details;
 
   const enrolled = getEnrolledStatus(enrollmentId);
@@ -95,26 +96,27 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
   ];
 
   const employeeSection = [
-    { label: "Badge", value: viewBadgeLinkRenderer(Number(badgeNumber)) },
+    { label: "Badge", value: viewBadgeLinkRenderer(badgeNumber) },
+    { label: "Psn", value: viewBadgeLinkRenderer(badgeNumber, psnSuffix) },
     { label: "DOB", value: mmDDYYFormat(dateOfBirth) },
     { label: "SSN", value: `${ssnValue}` },
     { label: "ETVA", value: currentEtva },
-    { label: "Status", value: employmentStatus },
-    { label: "Enrollment", value: enrollment },
+    { label: "Enrollment", value: enrollment ?? "N/A" },
   ].filter(field => field.value !== 0);
 
   const planSection = [
     { label: "YTD P/S Hours", value: yearToDateProfitSharingHours },
     { label: "Years In Plan", value: yearsInPlan },
     { label: "Percentage Vested", value: formatPercentage(percentageVested) },
-    { label: "Cont Last Year", value: contributionsLastYear ? "Yes" : "No" }
+    { label: "Status", value: employmentStatus ?? "N/A" },
   ];
 
   const hireSection = [
-    { label: "Hire", value: mmDDYYFormat(hireDate) },
+    { label: "Hire", value: hireDate ? mmDDYYFormat(hireDate) : 'N/A' },
     { label: "Term", value: terminationDate ? mmDDYYFormat(terminationDate) : 'N/A' },
-    { label: "Store", value: storeNumber },
+    { label: "Store", value: storeNumber > 0 ? storeNumber : "N/A" },
     { label: "Rehire", value: reHireDate ? mmDDYYFormat(reHireDate) : 'N/A' },
+    { label: "Cont Last Year", value: contributionsLastYear ? "Yes" : "No" }
   ];
 
   const amountsSection = [

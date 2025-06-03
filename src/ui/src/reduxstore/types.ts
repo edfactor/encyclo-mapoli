@@ -496,6 +496,8 @@ export interface ForfeituresByAgeDetail {
 
 export interface EmployeeDetails {
   id: number;
+  badgeNumber: number;
+  psnSuffix: number;
   isEmployee: boolean;
   firstName: string;
   lastName: string;
@@ -511,7 +513,6 @@ export interface EmployeeDetails {
   contributionsLastYear: boolean;
   enrollmentId: number;
   enrollment: string;
-  badgeNumber: string;
   hireDate: string;
   terminationDate: string | null;
   reHireDate: string | null;
