@@ -1,65 +1,22 @@
 import { Divider } from "@mui/material";
-import Alert from '@mui/material/Alert';
-import AlertTitle from '@mui/material/AlertTitle';
-import Grid2 from '@mui/material/Grid2';
-import { useEffect, useState } from "react";
+import Grid2 from "@mui/material/Grid2";
+import { useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
-import { MissiveResponse } from "reduxstore/types";
+import { MasterInquiryRequest } from "reduxstore/types";
 import { DSMAccordion, Page } from "smart-ui-library";
 import MasterInquiryEmployeeDetails from "./MasterInquiryEmployeeDetails";
-import MasterInquiryGrid from "./MasterInquiryGrid";
+import MasterInquiryGrid from "./MasterInquiryDetailsGrid";
 import MasterInquirySearchFilter from "./MasterInquirySearchFilter";
+import MasterInquiryMemberGrid from "./MasterInquiryMemberGrid";
 
 
 const MasterInquiry = () => {
-  const { masterInquiryEmployeeDetails } = useSelector((state: RootState) => state.inquiry);
+  const { masterInquiryEmployeeDetails, masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
 
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
-  const [missiveAlerts, setMissiveAlerts] = useState<MissiveResponse[] | null>(null);
-
-  // This is the front-end cache of back end missives messages
-  const { missives } = useSelector((state: RootState) => state.lookups);
-
-  const getAlertColorForSeverity = (severity: string) => {
-
-    switch (severity) {
-      case "Error":
-        return "error";
-      case "Warning":
-      case "Information":
-        return "warning";
-      case "Success":
-        return "success";
-      default:
-        return "info";  
-    }
-  };
-
-  const removeLeadingAndTrailingChars = (str: string) => {
-    return str.replace(/^\*+|\*+$/g, "").trim();
-  };
-
-  useEffect(() => {
-    if (missives && masterInquiryEmployeeDetails && masterInquiryEmployeeDetails.missives) {
-    
-    // There could be more than one missive
-    if (masterInquiryEmployeeDetails.missives.length > 0) {
-      
-      const alerts = masterInquiryEmployeeDetails.missives.map((id: number) => {
-      const missiveResponse =  missives.find((missive: MissiveResponse) => missive.id === id);
-      return missiveResponse;
-      }).filter((alert) => alert !== null) as MissiveResponse[];
-
-      // This will send the list to the screen
-      setMissiveAlerts(alerts);
-    } else {
-      setMissiveAlerts(null);
-      console.log("No missives found to display.");
-    }
-  }
-  }, [masterInquiryEmployeeDetails, missives]);
-
+  const [searchParams, setSearchParams] = useState<MasterInquiryRequest | null>(null);
+  const [selectedMember, setSelectedMember] = useState<{ memberType: number; id: number, ssn: number } | null>(null);
 
   return (
     <Page label="MASTER INQUIRY (008-10)">
@@ -69,30 +26,35 @@ const MasterInquiry = () => {
         <Grid2 size={{ xs: 12 }} width={"100%"}>
           <Divider />
         </Grid2>
-        {missiveAlerts && missiveAlerts.map((alert, index) => (
-          <Grid2 key={index} size={{ xs: 12 }} width={"100%"}>
-            <Alert severity={getAlertColorForSeverity(alert.severity)}>
-              <AlertTitle>{removeLeadingAndTrailingChars(alert.message)}</AlertTitle>
-              {alert.description}
-            </Alert>
-          </Grid2>
-        ))}
         <Grid2 size={{ xs: 12 }} width={"100%"}>
           <DSMAccordion title="Filter">
-            <MasterInquirySearchFilter setInitialSearchLoaded={setInitialSearchLoaded} 
-            setMissiveAlerts={setMissiveAlerts}
+            <MasterInquirySearchFilter 
+              setInitialSearchLoaded={setInitialSearchLoaded}
+              onSearch={setSearchParams}
             />
           </DSMAccordion>
         </Grid2>
 
-        {masterInquiryEmployeeDetails && <MasterInquiryEmployeeDetails details={masterInquiryEmployeeDetails} missives={missives}/>}
+        {searchParams && (
+          <MasterInquiryMemberGrid {...searchParams} onBadgeClick={setSelectedMember} />
+        )}
 
-        <Grid2 size={{ xs: 12 }} width="100%">
-          <MasterInquiryGrid
-            initialSearchLoaded={initialSearchLoaded}
-            setInitialSearchLoaded={setInitialSearchLoaded}
+        {/* Render employee details if identifiers are present in selectedMember */}
+        {selectedMember && selectedMember.memberType !== undefined && selectedMember.id && (
+          <MasterInquiryEmployeeDetails
+            memberType={selectedMember.memberType}
+            id={selectedMember.id}
+            profitYear={searchParams?.endProfitYear}
           />
-        </Grid2>
+        )}
+
+         {/* Render details for selected member if present */}
+        {selectedMember && (
+          <MasterInquiryGrid
+            memberType={selectedMember.memberType}
+            id={selectedMember.id}
+          />
+        )}
       </Grid2>
     </Page>
   );

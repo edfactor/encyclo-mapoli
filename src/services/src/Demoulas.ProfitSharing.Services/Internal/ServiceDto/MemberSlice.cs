@@ -25,4 +25,5 @@ internal sealed record MemberSlice
     internal decimal Etva { get; init; }
     public bool IsBeneficiaryAndEmployee { get; set; }
     public bool IsOnlyBeneficiary { get; set; }
+    public short ProfitYear { get; set; }
 }

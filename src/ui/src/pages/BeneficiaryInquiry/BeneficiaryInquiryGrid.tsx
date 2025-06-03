@@ -1,7 +1,7 @@
 import { Typography } from "@mui/material";
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { useLazyGetProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
+import { useLazySearchProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { BeneficiaryInquiryGridColumns } from "./BeneficiaryInquiryGridColumn";
@@ -68,7 +68,7 @@ const BeneficiaryInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearc
     <>
       {!!beneficiaryList && (
         <>
-          <div style={{ padding: "0 24px 0 24px" }}>
+          <div className="master-inquiry-header">
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>

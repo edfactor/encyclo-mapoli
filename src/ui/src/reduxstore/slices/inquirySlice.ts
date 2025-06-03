@@ -1,9 +1,9 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-import { EmployeeDetails, MasterInquiryDetail, MasterInquiryResponseType, MasterInquirySearch } from "reduxstore/types";
+import { EmployeeDetails, MasterInquiryDetail, MasterInquirySearch } from "reduxstore/types";
 
 export interface InquiryState {
-  masterInquiryData: MasterInquiryResponseType | null;
+  masterInquiryData: EmployeeDetails | null;
   masterInquiryEmployeeDetails: EmployeeDetails | null;
   masterInquiryRequestParams: MasterInquirySearch | null;
 }
@@ -25,11 +25,11 @@ export const inquirySlice = createSlice({
       state.masterInquiryRequestParams = null;
     },
 
-    setMasterInquiryData: (state, action: PayloadAction<MasterInquiryResponseType>) => {
+    setMasterInquiryData: (state, action: PayloadAction<EmployeeDetails>) => {
       state.masterInquiryData = action.payload;
 
-      if (action.payload.employeeDetails) {
-        state.masterInquiryEmployeeDetails = action.payload.employeeDetails;
+      if (action.payload) {
+        state.masterInquiryEmployeeDetails = action.payload;
       } else {
         state.masterInquiryEmployeeDetails = null;
       }
@@ -39,8 +39,9 @@ export const inquirySlice = createSlice({
       state.masterInquiryEmployeeDetails = null;
     },
     updateMasterInquiryResults: (state, action: PayloadAction<MasterInquiryDetail[]>) => {
-      if (state.masterInquiryData && state.masterInquiryData.inquiryResults) {
-        state.masterInquiryData.inquiryResults.results = [
+      // Only update if masterInquiryData has inquiryResults property
+      if (state.masterInquiryData && (state.masterInquiryData as any).inquiryResults) {
+        (state.masterInquiryData as any).inquiryResults.results = [
           ...action.payload
         ];
       }

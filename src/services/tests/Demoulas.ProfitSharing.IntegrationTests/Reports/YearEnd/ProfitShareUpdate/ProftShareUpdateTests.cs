@@ -3,13 +3,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Data.Interfaces;
-using Demoulas.ProfitSharing.Services;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
 
@@ -31,7 +26,7 @@ public class ProfitShareUpdateTests : PristineBaseTest
 
         string reportName = "psupdate-pay444-r2.txt";
         profitShareUpdateService.TodaysDateTime =
-            new DateTime(2025, 04, 07, 17, 02, 0, DateTimeKind.Local); // time report was generated
+            new DateTime(2025, 05, 07, 15, 13, 0, DateTimeKind.Local); // time this report was generated
 
         Stopwatch sw = Stopwatch.StartNew();
         // Act
@@ -52,18 +47,18 @@ public class ProfitShareUpdateTests : PristineBaseTest
                 AdjustEarningsAmount = 0,
                 AdjustIncomingForfeitAmount = 0,
                 AdjustEarningsSecondaryAmount = 0
-            },DemographicReaderService);
+            }, DemographicReaderService);
         sw.Stop();
         TestOutputHelper.WriteLine($"Query took {sw.Elapsed}");
 
-        // We can not do a simple report to report comparison because I believe that READY's sorting random
-        // when users have the same name.   To cope with this we extract lines with employee/bene information and compare lines.
+        // We cannot do a simple report to report comparison because I believe that READY's sorting random
+        // when users have the same name.   To cope with this, we extract lines with employee/bene information and compare lines.
 
         string expectedReport = LoadExpectedReport(reportName);
 
 #if true
         // Enabling this path enables the diff program to pop up the differences
- 
+
         // The sort order on READY is not great, this maybe tweaked soon.
         string expected = HandleSortingOddness(LoadExpectedReport(reportName));
         string actual = HandleSortingOddness(CollectLines(profitShareUpdateService.ReportLines));
@@ -79,6 +74,8 @@ public class ProfitShareUpdateTests : PristineBaseTest
 
         var onlyReady = readyHash.Except(smartHash);
         var onlySmart = smartHash.Except(readyHash);
+
+        TestOutputHelper.WriteLine($"READY member in report count {employeeExpectedReportLines.Count}, Only SMART member in report count {employeeActualReportLines.Count}");
 
         TestOutputHelper.WriteLine($"only READY count {onlyReady.Count()}, Only SMART count {onlySmart.Count()}");
 

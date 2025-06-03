@@ -28,7 +28,7 @@ namespace Demoulas.ProfitSharing.Analyzers
             description: _description
         );
 
-        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [_rule];
+        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(_rule);
 
         public override void Initialize(AnalysisContext context)
         {
@@ -64,7 +64,9 @@ namespace Demoulas.ProfitSharing.Analyzers
             if (!ImplementsIProfitSharingDbContext(containingType))
             { return;}
 
-            // Report diagnostic on the 'Demographics' identifier
+            // Report diagnostic on any usage of Demographics, even if it's part of a larger expression
+            // (e.g., ctx.Demographics.Select(...), ctx.Demographics.Where(...), etc.)
+            // This will flag the 'Demographics' identifier in all such cases.
             var diagnostic = Diagnostic.Create(_rule, memberAccess.Name.GetLocation());
             context.ReportDiagnostic(diagnostic);
         }

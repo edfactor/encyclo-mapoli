@@ -1,11 +1,12 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormLabel, TextField, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
+import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import { useEffect, useState } from "react";
 import { useForm, Controller, Resolver } from "react-hook-form";
 import { useDispatch } from "react-redux";
-import { useLazyGetProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
-import { clearMasterInquiryData } from "reduxstore/slices/inquirySlice";
+import { useLazySearchProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
+import { clearMasterInquiryData, setMasterInquiryData } from "reduxstore/slices/inquirySlice";
 import { clearMilitaryContributions } from "reduxstore/slices/militarySlice";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
@@ -30,8 +31,9 @@ const validationSchema = yup.object({
 );
 
 const MilitaryEntryAndModificationSearchFilter: React.FC<SearchFilterProps> = ({ setInitialSearchLoaded }) => {
-  const [triggerSearch, { isFetching }] = useLazyGetProfitMasterInquiryQuery();
+  const [triggerSearch, { isFetching }] = useLazySearchProfitMasterInquiryQuery();
   const [activeField, setActiveField] = useState<"socialSecurity" | "badgeNumber" | null>(null);
+  const defaultProfitYear = useDecemberFlowProfitYear();
   
   const {
     control,
@@ -64,12 +66,16 @@ const MilitaryEntryAndModificationSearchFilter: React.FC<SearchFilterProps> = ({
     triggerSearch(
       {
         pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: false },
-        ...(!!data.socialSecurity && { socialSecurity: Number(data.socialSecurity) }),
-        ...(!!data.badgeNumber && { badgeNumber: Number(data.badgeNumber) })
+        ...(!!data.socialSecurity && { ssn: Number(data.socialSecurity) }),
+        ...(!!data.badgeNumber && { badgeNumber: Number(data.badgeNumber) }),
+        profitYear: defaultProfitYear
       },
       false
-    ).then(() => {
-      setInitialSearchLoaded(true); // Set to true after successful search
+    ).then((result) => {
+      if (result?.data) {
+        dispatch(setMasterInquiryData(result.data.results[0]));
+      }
+      setInitialSearchLoaded(!!(result?.data?.results?.length > 0));
     });
   };
 
@@ -102,6 +108,7 @@ const MilitaryEntryAndModificationSearchFilter: React.FC<SearchFilterProps> = ({
             render={({ field }) => (
               <TextField
                 {...field}
+                value={field.value ?? ""}
                 fullWidth
                 variant="outlined"
                 placeholder="Enter SSN"
@@ -126,6 +133,7 @@ const MilitaryEntryAndModificationSearchFilter: React.FC<SearchFilterProps> = ({
             render={({ field }) => (
               <TextField
                 {...field}
+                value={field.value ?? ""}
                 fullWidth
                 variant="outlined"
                 placeholder="Enter Badge Number"

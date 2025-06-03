@@ -1,35 +1,17 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi} from "@reduxjs/toolkit/query/react";
 
-import { RootState } from "reduxstore/store";
 import {
   CreateMilitaryContributionRequest,
   MasterInquiryDetail,
   MilitaryContributionRequest
 } from "reduxstore/types";
-import { url } from "./api";
+import { createDataSourceAwareBaseQuery } from "./api";
 import { setMilitaryContributions, setMilitaryError } from "reduxstore/slices/militarySlice";
 import { Paged } from "smart-ui-library";
 
+const baseQuery = createDataSourceAwareBaseQuery();
 export const MilitaryApi = createApi({
-  baseQuery: fetchBaseQuery({
-    baseUrl: `${url}/api/`,
-    prepareHeaders: (headers, { getState }) => {
-      const token = (getState() as RootState).security.token;
-      const impersonating = (getState() as RootState).security.impersonating;
-      if (token) {
-        headers.set("authorization", `Bearer ${token}`);
-      }
-      if (impersonating) {
-        headers.set("impersonation", impersonating);
-      } else {
-        const localImpersonation = localStorage.getItem("impersonatingRole");
-        if (localImpersonation) {
-          headers.set("impersonation", localImpersonation);
-        }
-      }
-      return headers;
-    }
-  }),
+  baseQuery: baseQuery,
   reducerPath: "militaryApi",
   endpoints: (builder) => ({
     getMilitaryContributions: builder.query<Paged<MasterInquiryDetail>, MilitaryContributionRequest>({

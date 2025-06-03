@@ -6,7 +6,6 @@ using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
-using Elastic.Clients.Elasticsearch;
 using FastEndpoints;
 using FluentAssertions;
 using JetBrains.Annotations;

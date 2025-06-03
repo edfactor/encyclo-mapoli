@@ -19,7 +19,9 @@ public class TrimTo14Employees : BaseSqlActivity
         int rowsAffected = await RdySql(sqlStr);
         if (rowsAffected != expectedDeletes)
         {
-            throw new InvalidOperationException("delete failed " + sqlStr);
+            throw new InvalidOperationException($"delete failed. effected={rowsAffected}/expected={expectedDeletes} sql: " + sqlStr);
         }
+
+        Console.WriteLine($"Deleted {rowsAffected} rows of: {sqlStr}");
     }
 }

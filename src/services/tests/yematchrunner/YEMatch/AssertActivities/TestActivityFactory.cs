@@ -6,14 +6,18 @@ internal static class TestActivityFactory
     {
         return
         [
+            // Test
             new TestPayProfitSelectedColumns(),
             new TestProfitDetailSelectedColumns(),
             new TestEtvaNow(),
             new TestEtvaPrior(),
-            new TrimTo14Employees(),
             new ReadyDatabase2Smart(),
-            new SetDateOfBirthTo19YearsAgo(),
-            new OverwriteBadges()
+
+            // Arrange
+            new TrimTo14Employees(),
+            new DropBadBenes(),
+            new OverwriteBadges(),
+            new SetDateOfBirthTo19YearsAgo()
         ];
     }
 }

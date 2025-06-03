@@ -8,7 +8,7 @@ import MasterInquiryEmployeeDetails from "../../MasterInquiry/MasterInquiryEmplo
 import { GetMilitaryContributionColumns } from "./MilitaryContributionFormGridColumns";
 import { CAPTIONS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
-import ReportSummary from "../../../components/ReportSummary";
+
 
 interface MilitaryContributionGridProps {
   initialSearchLoaded: boolean;
@@ -64,7 +64,10 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
 
   return (
     <>
-      {masterInquiryEmployeeDetails && <MasterInquiryEmployeeDetails details={masterInquiryEmployeeDetails} />}
+      {masterInquiryEmployeeDetails && profitYear > 0 && <MasterInquiryEmployeeDetails 
+       memberType={masterInquiryEmployeeDetails.isEmployee ? 1 : 2}
+            id={masterInquiryEmployeeDetails.id}
+            profitYear={profitYear} />}
 
       {militaryContributionsData && (
         <>

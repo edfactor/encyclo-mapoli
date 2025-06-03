@@ -110,7 +110,7 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
             {
                 throw new BadHttpRequestException($"Year {profitYear} is not valid.");
             }
-            var badges = executiveHoursAndDollarsDtos.Select(dto => dto.BadgeNumber).ToList();
+            var badges = executiveHoursAndDollarsDtos.Select(dto => dto.BadgeNumber).ToHashSet();
 
             var ppQuery = await ctx.PayProfits
                 .Include(p => p.Demographic)
@@ -118,7 +118,7 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
                 .Where(p => badges.Contains(p.Demographic!.BadgeNumber))
                 .ToListAsync(cancellationToken);
 
-            if (executiveHoursAndDollarsDtos.Count != ppQuery.Count)
+            if (badges.Count != ppQuery.Count)
             {
                 throw new BadHttpRequestException("One or more badge numbers were not found.");
             }

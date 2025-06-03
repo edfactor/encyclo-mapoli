@@ -118,8 +118,8 @@ public static class SmartActivityFactory
 
         ExtendedRehireForfeituresRequest rehireForfeituresRequest = new();
         rehireForfeituresRequest.ProfitYear = _profitYear;
-        rehireForfeituresRequest.BeginningDate = DateTimeOffset.Parse("2024-01-07", CultureInfo.InvariantCulture);
-        rehireForfeituresRequest.EndingDate = DateTimeOffset.Parse("2024-12-28", CultureInfo.InvariantCulture);
+        rehireForfeituresRequest.BeginningDate = DateTimeOffset.Parse("2024-01-06", CultureInfo.InvariantCulture);
+        rehireForfeituresRequest.EndingDate = DateTimeOffset.Parse("2025-01-04", CultureInfo.InvariantCulture);
 
         ReportResponseBaseOfRehireForfeituresResponse? r2 = await apiClient.ReportsYearEndMilitaryRehireForfeituresEndpointAsync(null, rehireForfeituresRequest);
         sb.Append($"Military And Rehire Forfeitures - records loaded: {r2.Response.Results.Count}\n");
@@ -137,7 +137,7 @@ public static class SmartActivityFactory
         return new Outcome(aname, name, "", OutcomeStatus.Ok, str, null, true);
     }
 
-    // NSwagger doesnt handle POST requests well.  Its defition of the Request is missing the "profitYear" share parameter
+    // NSwagger does not handle POST requests well.  Its definition of the Request is missing the "profitYear" share parameter
     public class ExtendedRehireForfeituresRequest : RehireForfeituresRequest
     {
         public int ProfitYear { get; set; }

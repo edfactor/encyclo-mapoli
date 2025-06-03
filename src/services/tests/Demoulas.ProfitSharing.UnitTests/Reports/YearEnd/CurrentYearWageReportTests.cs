@@ -5,6 +5,7 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -43,7 +44,7 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
         {
             ReportName = $"YTD Wages Extract (PROF-DOLLAR-EXTRACT) - {2023}",
             ReportDate = DateTimeOffset.UtcNow,
-            StartDate = SqlDateTime.MinValue.Value.ToDateOnly(),
+            StartDate = ReferenceData.DsmMinValue,
             EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
             Response = new PaginatedResponseDto<WagesCurrentYearResponse> { Results = new List<WagesCurrentYearResponse> { } }
         };

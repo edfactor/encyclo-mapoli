@@ -365,3 +365,6 @@ FodyWeavers.xsd
 # Jetbrains metadata
 .idea/
 /publishOutput
+
+# The mac leaves this litter round
+.DS_Store

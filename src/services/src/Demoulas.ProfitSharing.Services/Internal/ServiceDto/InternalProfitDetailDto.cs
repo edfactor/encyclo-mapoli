@@ -14,4 +14,5 @@ public sealed record InternalProfitDetailDto
     public decimal CurrentAmount { get; set; }
     public decimal Distribution { get; set; }
     public decimal BeneficiaryAllocation { get; set; }
+    public short ProfitYear { get; set; }
 }

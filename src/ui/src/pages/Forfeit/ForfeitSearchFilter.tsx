@@ -62,7 +62,7 @@ const ForfeitSearchParameters: React.FC<ForfeitSearchParametersProps> = ({ setIn
           pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }
         },
         false
-      ).unwrap();
+      );
       dispatch(setForfeituresAndPointsQueryParams({
         profitYear: fiscalCloseProfitYear,
         useFrozenData: data.useFrozenData
@@ -81,7 +81,7 @@ const ForfeitSearchParameters: React.FC<ForfeitSearchParametersProps> = ({ setIn
   };
 
   return (
-    <form onSubmit={validateAndSearch}>
+    <form>
       <Grid2
         container
         paddingX="24px"
@@ -113,7 +113,7 @@ const ForfeitSearchParameters: React.FC<ForfeitSearchParametersProps> = ({ setIn
           </Grid2>
         </Grid2>
         <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-          <FormLabel>Use Frozen Data</FormLabel>
+          <FormLabel>Use Frozen Demographic Data</FormLabel>
           <Controller
             name="useFrozenData"
             control={control}

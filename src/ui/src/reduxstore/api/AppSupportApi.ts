@@ -1,4 +1,3 @@
-// src/reduxstore/api/AppSupportApi.ts
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { prepareHeaders, url } from "./api";
 import { Health } from "../healthTypes";
