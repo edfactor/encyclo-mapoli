@@ -92,8 +92,6 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
 }) => {
   const [triggerSearch, { isFetching }] = useLazySearchProfitMasterInquiryQuery();
   const { masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
-  const missives = useSelector((state: RootState) => state.lookups.missives);
-  const [missiveAlerts, setMissiveAlerts] = useState<any[]>([]);
 
   const dispatch = useDispatch();
 
@@ -166,21 +164,16 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
           setInitialSearchLoaded(true);
           onSearch(searchParams);
         } else {
-          setMissiveAlerts([
-            {
-              id: 993,
-              message: "No Profit Sharing Records Found",
-              severity: "Error",
-              description: "The Employee Badge Number you have entered has no Profit Sharing Records. Re-enter an Employee Badge Number with Profit Sharing.",
-            }
-          ]);
+          // Instead of setting missiveAlerts, pass up a signal (to be implemented)
+          // setMissiveAlerts([...]);
+          setInitialSearchLoaded(false);
+          onSearch(undefined);
         }
       });
     }
-  }, [badgeNumber, hasToken, reset, setMissiveAlerts, triggerSearch, profitYear]);
+  }, [badgeNumber, hasToken, reset, triggerSearch, profitYear]);
 
   const validateAndSearch = handleSubmit((data) => {
-    setMissiveAlerts([]);
     if (isValid) {
       const searchParams: MasterInquiryRequest = {
         pagination: {
@@ -209,14 +202,8 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
           setInitialSearchLoaded(true);
           onSearch(searchParams);
         } else {
-          setMissiveAlerts([
-            {
-              id: 993,
-              message: "No Profit Sharing Records Found",
-              severity: "Error",
-              description: "The Employee Badge Number you have entered has no Profit Sharing Records. Re-enter an Employee Badge Number with Profit Sharing.",
-            }
-          ]);
+          setInitialSearchLoaded(false);
+          onSearch(undefined);
         }
       });
       dispatch(setMasterInquiryRequestParams(data));
@@ -224,7 +211,6 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
   });
 
   const handleReset = () => {
-    setMissiveAlerts([]);
     setInitialSearchLoaded(false);
     dispatch(clearMasterInquiryRequestParams());
     dispatch(clearMasterInquiryData());
@@ -249,7 +235,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
         isSortDescending: true
       }
     });
-    onSearch(undefined); // <-- Add this to clear downstream components
+    onSearch(undefined);
   };
 
   const months = Array.from({ length: 12 }, (_, i) => i + 1);
@@ -507,19 +493,6 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
           </Grid2>
         </Grid2>
       </Grid2>
-      {/* Render missive alerts at the bottom of the component */}
-      {missiveAlerts.length > 0 && (
-        <Grid2 size={{ xs: 12 }}>
-          <div className="missive-alerts-box">
-            {missiveAlerts.map((alert, idx) => (
-              <div key={alert.id || idx} className={`missive-alert ${alert.severity === 'Error' ? 'missive-error' : 'missive-warning'}`}>
-                <span className="missive-message">{alert.message}</span>
-                <div className="missive-description">{alert.description}</div>
-              </div>
-            ))}
-          </div>
-        </Grid2>
-      )}
     </form>
   );
 };
