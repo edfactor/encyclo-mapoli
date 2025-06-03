@@ -179,7 +179,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
         });
         Dictionary<int, MemberDetails> memberDetailsMap = new Dictionary<int, MemberDetails>
         {
-            { members.ssn, members.memberDetails ?? new MemberDetails() }
+            { members.ssn, members.memberDetails ?? new MemberDetails { Id = 0} }
         };
 
         var details = await GetVestingDetails(memberDetailsMap, currentYear, previousYear, cancellationToken);
@@ -403,7 +403,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
         if (memberData == null)
         {
-            return (0, new MemberDetails());
+            return (0, new MemberDetails { Id = 0 });
         }
 
         var missives = await _missiveService.DetermineMissivesForSsns([memberData.Ssn], currentYear, cancellationToken);
@@ -462,7 +462,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
         if (memberData == null)
         {
-            return (0, new MemberDetails());
+            return (0, new MemberDetails{ Id = 0 });
         }
 
        
@@ -640,6 +640,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             .Where(b => b.Contact != null && ssns.Contains(b.Contact.Ssn))
             .Select(b => new
             {
+                b.Id,
                 b.Contact!.ContactInfo.FirstName,
                 b.Contact.ContactInfo.LastName,
                 b.Contact.Address.City,
@@ -656,6 +657,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
         return members.Select(memberData => new MemberDetails
             {
+                Id = memberData.Id,
                 IsEmployee = false,
                 FirstName = memberData.FirstName,
                 LastName = memberData.LastName,
