@@ -154,23 +154,18 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
       });
 
       const searchParams: MasterInquiryRequest = {
-          pagination: { skip: 0, take: 5, sortBy: "badgeNumber", isSortDescending: true },
+        pagination: { skip: 0, take: 5, sortBy: "badgeNumber", isSortDescending: true },
         badgeNumber: Number(badgeNumber),
-        memberType: memberTypeGetNumberMap[determineCorrectMemberType(badgeNumber)]
+        memberType: memberTypeGetNumberMap[determineCorrectMemberType(badgeNumber)],
+        endProfitYear: profitYear
       };
 
       triggerSearch(searchParams, false).unwrap().then((response) => {
-        if (!response.employeeDetails)  {
-          setMissiveAlerts([
-            {
-              id: 990,
-              message: "Employee not on file",
-              severity: "Error",
-              description: "The Employee Badge Number you have entered is not found on file. Re-enter using a valid Badge Number. It may mean you are not authorized to view this employee's information.",
-            }
-          ])
-        }
-        else if (!response.inquiryResults.results || response.inquiryResults.results.length === 0) {
+        // If data is returned, trigger downstream components
+        if (response && Array.isArray(response) ? response.length > 0 : response.results && response.results.length > 0) {
+          setInitialSearchLoaded(true);
+          onSearch(searchParams);
+        } else {
           setMissiveAlerts([
             {
               id: 993,
@@ -178,11 +173,11 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
               severity: "Error",
               description: "The Employee Badge Number you have entered has no Profit Sharing Records. Re-enter an Employee Badge Number with Profit Sharing.",
             }
-          ])
+          ]);
         }
       });
     }
-  }, [badgeNumber, hasToken, reset, setMissiveAlerts, triggerSearch]);
+  }, [badgeNumber, hasToken, reset, setMissiveAlerts, triggerSearch, profitYear]);
 
   const validateAndSearch = handleSubmit((data) => {
     setMissiveAlerts([]);
@@ -191,13 +186,13 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
         pagination: {
           skip: data.pagination?.skip || 0,
           take: data.pagination?.take || 5,
-              sortBy: data.pagination?.sortBy || "badgeNumber",
+          sortBy: data.pagination?.sortBy || "badgeNumber",
           isSortDescending: data.pagination?.isSortDescending || true
         },
-          ...(!!data.endProfitYear && { endProfitYear: data.endProfitYear || profitYear, }),
+        ...(!!data.endProfitYear && { endProfitYear: data.endProfitYear || profitYear, }),
         ...(!!data.startProfitMonth && { startProfitMonth: data.startProfitMonth }),
         ...(!!data.endProfitMonth && { endProfitMonth: data.endProfitMonth }),
-          ...(!!data.socialSecurity && { ssn: data.socialSecurity }),
+        ...(!!data.socialSecurity && { ssn: data.socialSecurity }),
         ...(!!data.name && { name: data.name }),
         ...(!!data.badgeNumber && { badgeNumber: data.badgeNumber }),
         ...(!!data.paymentType && { paymentType: paymentTypeGetNumberMap[data.paymentType] }),
@@ -209,82 +204,19 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
       };
 
       triggerSearch(searchParams, false).unwrap().then((response) => {
-        let personTypeString;
-        switch (data.memberType) {
-          case "employees":
-            personTypeString = "employee";
-            break;
-          case "beneficiaries":
-            personTypeString = "beneficiary";
-            break;
-          default:
-            personTypeString = "employee or beneficiary";
-            break;
-        }
-        if (data.badgeNumber || data.socialSecurity) {
-          if (data.badgeNumber && !response.employeeDetails) {
-            setMissiveAlerts([
-              {
-                id: 990,
-                message: `The ${personTypeString} is not on file`,
-                severity: "Error",
-                description: `The ${personTypeString} number you have entered is not found on file. Re-enter using a valid number. It may mean you are not authorized to view this person's information.`,
-              }
-            ]);
-          } else if (data.badgeNumber && !response.inquiryResults.results) {
-            setMissiveAlerts([
-              {
-                id: 993,
-                message: "No Profit Sharing Records Found",
-                severity: "Error",
-                description: `The ${personTypeString} number you have entered has no Profit Sharing Records. Re-enter a number with Profit Sharing.`,
-              }
-            ]);
-          } else if (data.socialSecurity && !response.employeeDetails) {
-            setMissiveAlerts([
-              {
-                id: 991,
-                message: `The ${personTypeString} is not on file`,
-                severity: "Error",
-                description: `The ${personTypeString} SSN you have entered is not found on file. Re-enter using a valid SSN. It may mean you are not authorized to view this person's information.`,
-              }
-            ]);
-          } else if (data.socialSecurity && !response.inquiryResults.results) {
-            setMissiveAlerts([
-              {
-                id: 993,
-                message: "No Profit Sharing Records Found",
-                severity: "Error",
-                description: "The SSN you have entered has no Profit Sharing Records. Re-enter an SSN with Profit Sharing.",
-              }
-            ]);
-          }
-        }
-        if (response.employeeDetails) {
-          if (missives && response.employeeDetails.missives && response.employeeDetails.missives.length > 0) {
-            const alerts = response.employeeDetails.missives.map((id: number) => {
-              const missiveResponse = missives.find((missive: any) => missive.id === id);
-              return missiveResponse;
-            }).filter((alert) => alert !== null) as any[];
-            setMissiveAlerts(alerts);
-          }
-        }
-        if (response.inquiryResults && response.inquiryResults.results.length > 0 && response.employeeDetails?.missives) {
-          const isEmployeeAndBeneficiary = response.employeeDetails?.missives.some((row: any) => row === 3);
-          if (isEmployeeAndBeneficiary) {
-            const originalBadgeNumber = response.inquiryResults.results.find((row: any) => row.psnSuffix === 0)?.badgeNumber;
-            const updatedResults = response.inquiryResults.results.map((row: any) => {
-              if (row.psnSuffix !== undefined && row.psnSuffix > 0) {
-                return {
-                  ...row,
-                  badgeNumber: originalBadgeNumber,
-                  psnSuffix: Number(`${row.badgeNumber}${row.psnSuffix}`)
-                };
-              }
-              return row;
-            });
-            dispatch(updateMasterInquiryResults(updatedResults));
-          }
+        // If data is returned, trigger downstream components
+        if (response && Array.isArray(response) ? response.length > 0 : response.results && response.results.length > 0) {
+          setInitialSearchLoaded(true);
+          onSearch(searchParams);
+        } else {
+          setMissiveAlerts([
+            {
+              id: 993,
+              message: "No Profit Sharing Records Found",
+              severity: "Error",
+              description: "The Employee Badge Number you have entered has no Profit Sharing Records. Re-enter an Employee Badge Number with Profit Sharing.",
+            }
+          ]);
         }
       });
       dispatch(setMasterInquiryRequestParams(data));
