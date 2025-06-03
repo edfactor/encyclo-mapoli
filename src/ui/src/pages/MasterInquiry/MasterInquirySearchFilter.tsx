@@ -17,7 +17,7 @@ import { useLazySearchProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { MasterInquiryRequest, MasterInquirySearch, MissiveResponse } from "reduxstore/types";
+import { MasterInquiryRequest, MasterInquirySearch } from "reduxstore/types";
 import {
   clearMasterInquiryData,
   clearMasterInquiryRequestParams,
@@ -83,19 +83,15 @@ const schema = yup.object().shape({
 
 interface MasterInquirySearchFilterProps {
   setInitialSearchLoaded: (include: boolean) => void;
-  setMissiveAlerts: (alerts: MissiveResponse[]) => void;
   onSearch: (params: MasterInquiryRequest) => void;
 }
 
 const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
   setInitialSearchLoaded,
-  setMissiveAlerts,
   onSearch
 }) => {
   const [triggerSearch, { isFetching }] = useLazySearchProfitMasterInquiryQuery();
   const { masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
-
-  const { missives } = useSelector((state: RootState) => state.lookups);
 
   const dispatch = useDispatch();
 
@@ -123,7 +119,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
   } = useForm<MasterInquirySearch>({
     resolver: yupResolver(schema) as any,
     defaultValues: {
-      endProfitYear: profitYear || masterInquiryRequestParams?.endProfitYear || undefined,
+      endProfitYear: profitYear, // Always use profitYear const as default
       startProfitMonth: masterInquiryRequestParams?.startProfitMonth || undefined,
       endProfitMonth: masterInquiryRequestParams?.endProfitMonth || undefined,
       socialSecurity: masterInquiryRequestParams?.socialSecurity || undefined,
@@ -159,46 +155,16 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
       const searchParams: MasterInquiryRequest = {
         pagination: { skip: 0, take: 5, sortBy: "badgeNumber", isSortDescending: true },
         badgeNumber: Number(badgeNumber),
+        endProfitYear: profitYear || undefined,
         memberType: memberTypeGetNumberMap[determineCorrectMemberType(badgeNumber)]
       };
 
-      // Hard to see how someone would arrive with a badge number in the URL that
-      // is invalid, but it will be handled here. Note that we are assuming this
-      // is an employee search and not a beneficiary search as we do not have
-      // a memberType in the URL.
-      triggerSearch(searchParams, false).unwrap().then((response: any) => {
-        
-        if (!response.employeeDetails)  {
-          setMissiveAlerts([
-            {
-              id: 990,
-              message: "Employee not on file",
-              severity: "Error",
-              description: "The Employee Badge Number you have entered is not found on file. Re-enter using a valid Badge Number. It may mean you are not authorized to view this employee's information.",
-            }
-          ])
-        }
-        
-        else if (!response.inquiryResults.results || response.inquiryResults.results.length === 0) {
-            setMissiveAlerts([
-            {
-              id: 993,
-              message: "No Profit Sharing Records Found",
-              severity: "Error",
-              description: "The Employee Badge Number you have entered has no Profit Sharing Records. Re-enter an Employee Badge Number with Profit Sharing.",
-            }
-          ])
-                              
-        }
-      });
+      // Notify parent so other components load
+      onSearch(searchParams);
     }
-  }, [badgeNumber, hasToken, reset, setMissiveAlerts, triggerSearch]);
+  }, [badgeNumber, hasToken, reset, onSearch, profitYear]);
 
   const validateAndSearch = handleSubmit((data) => {
-
-    // Always clear missives on search
-    setMissiveAlerts([]);
-
     if (isValid) {
       const searchParams: MasterInquiryRequest = {
         pagination: {
@@ -207,7 +173,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
           sortBy: data.pagination?.sortBy || "badgeNumber",
           isSortDescending: data.pagination?.isSortDescending || true
         },
-        ...(!!data.endProfitYear && { endProfitYear: data.endProfitYear }),
+        endProfitYear: data.endProfitYear || profitYear, // Always set endProfitYear, fallback to profitYear
         ...(!!data.startProfitMonth && { startProfitMonth: data.startProfitMonth }),
         ...(!!data.endProfitMonth && { endProfitMonth: data.endProfitMonth }),
         ...(!!data.socialSecurity && { ssn: data.socialSecurity }),
@@ -224,144 +190,12 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
       // Call the onSearch prop to lift search params to parent
       onSearch(searchParams);
 
-      triggerSearch(searchParams, false).unwrap().then((response: any) => {
-      
-        // We need to figure out who was searched for
-        let personTypeString;
-
-        switch (data.memberType) {
-          case "employees":
-            personTypeString = "employee";
-            break;
-          case "beneficiaries":
-            personTypeString = "beneficiary";
-            break;
-          default:
-            personTypeString = "employee or beneficiary";
-            break;
-        }
-
-
-        // We face a few situations here:
-        // 1. If we searched for an individual ssn or badgenumber, and there are no employee
-        //    details, we need to show an error message
-        // 2. If we searched for an individual ssn or badgenumber, and there are employee details,
-        //    but no inquiry results, we need to show a different error message
-
-        // These only come into play if we are searching for an individual
-        if (data.badgeNumber || data.socialSecurity) {
-
-
-          if (data.badgeNumber && !response.employeeDetails) {
-            setMissiveAlerts([
-              {
-                id: 990,
-                message: `The ${personTypeString} is not on file`,
-                severity: "Error",
-                description: `The ${personTypeString} number you have entered is not found on file. Re-enter using a valid number. It may mean you are not authorized to view this person's information.`,
-              }
-            ]);
-
-        } 
-        else if (data.badgeNumber && !response.inquiryResults.results) {
-            setMissiveAlerts([
-              {
-                id: 993,
-                message: "No Profit Sharing Records Found",
-                severity: "Error",
-                description: `The ${personTypeString} number you have entered has no Profit Sharing Records. Re-enter a number with Profit Sharing.`,
-              }
-            ]);
-
-        }
-        else if (data.socialSecurity && !response.employeeDetails) {
-            setMissiveAlerts([
-              {
-                id: 991,
-                message: `The ${personTypeString} is not on file`,
-                severity: "Error",
-                description: `The ${personTypeString} SSN you have entered is not found on file. Re-enter using a valid SSN. It may mean you are not authorized to view this person's information.`,
-              }
-            ]);
-        } 
-        else if (data.socialSecurity && !response.inquiryResults.results) {
-            setMissiveAlerts([
-              {
-                id: 993,
-                message: "No Profit Sharing Records Found",
-                severity: "Error",
-                description: "The SSN you have entered has no Profit Sharing Records. Re-enter an SSN with Profit Sharing.",
-              }
-            ]);
-        }
-        // Need to cover case where searching for member type "all" or "beneficaries" with SSN
-        // and we have one record with isEmployee coming back as false, that we set a missive alert
-        else if (data.socialSecurity && data.memberType !== "beneficiaries" && response.employeeDetails && !response.employeeDetails.isEmployee) {
-          setMissiveAlerts([
-            {
-              id: 998,
-              message: `Beneficiary ${data.socialSecurity} found`,
-              severity: "Warning",
-              description: `The SSN has been found for a beneficiary.`
-            }
-          ]);
-        }       
-      }  
-
-        if (response.employeeDetails) { 
-          if (missives && response.employeeDetails.missives &&  response.employeeDetails.missives.length > 0) {
-      
-            const alerts = response.employeeDetails.missives.map((id: number) => {
-            const missiveResponse =  missives.find((missive: MissiveResponse) => missive.id === id);
-            return missiveResponse;
-            }).filter((alert: any) => alert !== null) as MissiveResponse[];
-
-            // This will send the list to the screen
-            setMissiveAlerts(alerts);
-          }
-        }
-
-        // So if the employee is also a beneficiary, we need to do some work on the badge and psn
-        if (response.inquiryResults && response.inquiryResults.results.length > 0 && response.employeeDetails?.missives) {
-
-        // If someone is both, the 3rd missive message proves this
-        const isEmployeeAndBeneficiary = response.employeeDetails?.missives.some((row: any) => row=== 3);
-                
-        if (isEmployeeAndBeneficiary) {
-          
-          const originalBadgeNumber = response.inquiryResults.results.find((row: any) => row.psnSuffix === 0)?.badgeNumber;
-          
-          // We want all badge numbers to be the same,
-          // and use the badge numbers of the person
-          // that this employee is a beneficiary of
-          // to be used as base of the psnSuffix field
-          const updatedResults = response.inquiryResults.results.map((row: any) => {
-            if (row.psnSuffix !== undefined && row.psnSuffix > 0) {
-              return {
-                ...row,
-                badgeNumber: originalBadgeNumber,
-                psnSuffix: Number(`${row.badgeNumber}${row.psnSuffix}`)
-              };
-            } 
-            
-            return row;
-          });
-
-          // Now we need to set the updated results back to the response
-          dispatch(updateMasterInquiryResults(updatedResults));
-
-        }  
-      }
-      });
-
-      
-    
+      triggerSearch(searchParams, false);
       dispatch(setMasterInquiryRequestParams(data as MasterInquirySearch));
     }
   });
 
   const handleReset = () => {
-    setMissiveAlerts([]);
     setInitialSearchLoaded(false);
     dispatch(clearMasterInquiryRequestParams());
     dispatch(clearMasterInquiryData());
