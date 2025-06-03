@@ -11,7 +11,7 @@ import {
   TextField
 } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
-import { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useLazySearchProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
 import { SearchAndReset } from "smart-ui-library";
@@ -92,6 +92,8 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
 }) => {
   const [triggerSearch, { isFetching }] = useLazySearchProfitMasterInquiryQuery();
   const { masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
+  const missives = useSelector((state: RootState) => state.lookups.missives);
+  const [missiveAlerts, setMissiveAlerts] = useState<any[]>([]);
 
   const dispatch = useDispatch();
 
@@ -151,32 +153,51 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
         badgeNumber: Number(badgeNumber)
       });
 
-      // Trigger search automatically when badge number is present
       const searchParams: MasterInquiryRequest = {
-        pagination: { skip: 0, take: 5, sortBy: "badgeNumber", isSortDescending: true },
+          pagination: { skip: 0, take: 5, sortBy: "badgeNumber", isSortDescending: true },
         badgeNumber: Number(badgeNumber),
-        endProfitYear: profitYear || undefined,
         memberType: memberTypeGetNumberMap[determineCorrectMemberType(badgeNumber)]
       };
 
-      // Notify parent so other components load
-      onSearch(searchParams);
+      triggerSearch(searchParams, false).unwrap().then((response) => {
+        if (!response.employeeDetails)  {
+          setMissiveAlerts([
+            {
+              id: 990,
+              message: "Employee not on file",
+              severity: "Error",
+              description: "The Employee Badge Number you have entered is not found on file. Re-enter using a valid Badge Number. It may mean you are not authorized to view this employee's information.",
+            }
+          ])
+        }
+        else if (!response.inquiryResults.results || response.inquiryResults.results.length === 0) {
+          setMissiveAlerts([
+            {
+              id: 993,
+              message: "No Profit Sharing Records Found",
+              severity: "Error",
+              description: "The Employee Badge Number you have entered has no Profit Sharing Records. Re-enter an Employee Badge Number with Profit Sharing.",
+            }
+          ])
+        }
+      });
     }
-  }, [badgeNumber, hasToken, reset, onSearch, profitYear]);
+  }, [badgeNumber, hasToken, reset, setMissiveAlerts, triggerSearch]);
 
   const validateAndSearch = handleSubmit((data) => {
+    setMissiveAlerts([]);
     if (isValid) {
       const searchParams: MasterInquiryRequest = {
         pagination: {
           skip: data.pagination?.skip || 0,
           take: data.pagination?.take || 5,
-          sortBy: data.pagination?.sortBy || "badgeNumber",
+              sortBy: data.pagination?.sortBy || "badgeNumber",
           isSortDescending: data.pagination?.isSortDescending || true
         },
-        endProfitYear: data.endProfitYear || profitYear, // Always set endProfitYear, fallback to profitYear
+          ...(!!data.endProfitYear && { endProfitYear: data.endProfitYear || profitYear, }),
         ...(!!data.startProfitMonth && { startProfitMonth: data.startProfitMonth }),
         ...(!!data.endProfitMonth && { endProfitMonth: data.endProfitMonth }),
-        ...(!!data.socialSecurity && { ssn: data.socialSecurity }),
+          ...(!!data.socialSecurity && { ssn: data.socialSecurity }),
         ...(!!data.name && { name: data.name }),
         ...(!!data.badgeNumber && { badgeNumber: data.badgeNumber }),
         ...(!!data.paymentType && { paymentType: paymentTypeGetNumberMap[data.paymentType] }),
@@ -187,15 +208,91 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
         ...(!!data.payment && { payment: data.payment })
       };
 
-      // Call the onSearch prop to lift search params to parent
-      onSearch(searchParams);
-
-      triggerSearch(searchParams, false);
-      dispatch(setMasterInquiryRequestParams(data as MasterInquirySearch));
+      triggerSearch(searchParams, false).unwrap().then((response) => {
+        let personTypeString;
+        switch (data.memberType) {
+          case "employees":
+            personTypeString = "employee";
+            break;
+          case "beneficiaries":
+            personTypeString = "beneficiary";
+            break;
+          default:
+            personTypeString = "employee or beneficiary";
+            break;
+        }
+        if (data.badgeNumber || data.socialSecurity) {
+          if (data.badgeNumber && !response.employeeDetails) {
+            setMissiveAlerts([
+              {
+                id: 990,
+                message: `The ${personTypeString} is not on file`,
+                severity: "Error",
+                description: `The ${personTypeString} number you have entered is not found on file. Re-enter using a valid number. It may mean you are not authorized to view this person's information.`,
+              }
+            ]);
+          } else if (data.badgeNumber && !response.inquiryResults.results) {
+            setMissiveAlerts([
+              {
+                id: 993,
+                message: "No Profit Sharing Records Found",
+                severity: "Error",
+                description: `The ${personTypeString} number you have entered has no Profit Sharing Records. Re-enter a number with Profit Sharing.`,
+              }
+            ]);
+          } else if (data.socialSecurity && !response.employeeDetails) {
+            setMissiveAlerts([
+              {
+                id: 991,
+                message: `The ${personTypeString} is not on file`,
+                severity: "Error",
+                description: `The ${personTypeString} SSN you have entered is not found on file. Re-enter using a valid SSN. It may mean you are not authorized to view this person's information.`,
+              }
+            ]);
+          } else if (data.socialSecurity && !response.inquiryResults.results) {
+            setMissiveAlerts([
+              {
+                id: 993,
+                message: "No Profit Sharing Records Found",
+                severity: "Error",
+                description: "The SSN you have entered has no Profit Sharing Records. Re-enter an SSN with Profit Sharing.",
+              }
+            ]);
+          }
+        }
+        if (response.employeeDetails) {
+          if (missives && response.employeeDetails.missives && response.employeeDetails.missives.length > 0) {
+            const alerts = response.employeeDetails.missives.map((id: number) => {
+              const missiveResponse = missives.find((missive: any) => missive.id === id);
+              return missiveResponse;
+            }).filter((alert) => alert !== null) as any[];
+            setMissiveAlerts(alerts);
+          }
+        }
+        if (response.inquiryResults && response.inquiryResults.results.length > 0 && response.employeeDetails?.missives) {
+          const isEmployeeAndBeneficiary = response.employeeDetails?.missives.some((row: any) => row === 3);
+          if (isEmployeeAndBeneficiary) {
+            const originalBadgeNumber = response.inquiryResults.results.find((row: any) => row.psnSuffix === 0)?.badgeNumber;
+            const updatedResults = response.inquiryResults.results.map((row: any) => {
+              if (row.psnSuffix !== undefined && row.psnSuffix > 0) {
+                return {
+                  ...row,
+                  badgeNumber: originalBadgeNumber,
+                  psnSuffix: Number(`${row.badgeNumber}${row.psnSuffix}`)
+                };
+              }
+              return row;
+            });
+            dispatch(updateMasterInquiryResults(updatedResults));
+          }
+        }
+      });
+      dispatch(setMasterInquiryRequestParams(data));
     }
   });
 
   const handleReset = () => {
+    setMissiveAlerts([]);
     setInitialSearchLoaded(false);
     dispatch(clearMasterInquiryRequestParams());
     dispatch(clearMasterInquiryData());
@@ -477,8 +574,21 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
           </Grid2>
         </Grid2>
       </Grid2>
+      {/* Render missive alerts at the bottom of the component */}
+      {missiveAlerts.length > 0 && (
+        <Grid2 size={{ xs: 12 }}>
+          <div className="missive-alerts-box">
+            {missiveAlerts.map((alert, idx) => (
+              <div key={alert.id || idx} className={`missive-alert ${alert.severity === 'Error' ? 'missive-error' : 'missive-warning'}`}>
+                <span className="missive-message">{alert.message}</span>
+                <div className="missive-description">{alert.description}</div>
+              </div>
+            ))}
+          </div>
+        </Grid2>
+      )}
     </form>
   );
 };
 
-export default MasterInquirySearchFilter
+export default MasterInquirySearchFilter;
