@@ -51,7 +51,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
             {
                 ReportName = "REHIRE'S PROFIT SHARING DATA",
                 ReportDate = DateTimeOffset.UtcNow,
-                StartDate = ReferenceData.DsmMinValue(),
+                StartDate = ReferenceData.DsmMinValue,
                 EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
                 Response = new PaginatedResponseDto<RehireForfeituresResponse>
                 {
@@ -156,7 +156,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
         {
             ReportName = "REHIRE'S PROFIT SHARING DATA",
             ReportDate = DateTimeOffset.UtcNow,
-            StartDate = ReferenceData.DsmMinValue(),
+            StartDate = ReferenceData.DsmMinValue,
             EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
             Response = new PaginatedResponseDto<RehireForfeituresResponse> { Results = new List<RehireForfeituresResponse>() }
         };
@@ -179,7 +179,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
         {
             ReportName = "REHIRE'S PROFIT SHARING DATA",
             ReportDate = DateTimeOffset.UtcNow,
-            StartDate = ReferenceData.DsmMinValue(),
+            StartDate = ReferenceData.DsmMinValue,
             EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
             Response = new PaginatedResponseDto<RehireForfeituresResponse> { Results = [] }
         };
@@ -245,7 +245,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
         example.FullName = demo.ContactInfo.FullName;
         example.CompanyContributionYears = 0;
         example.HoursCurrentYear = payProfit.CurrentHoursYear;
-        example.ReHiredDate = demo.ReHireDate ?? ReferenceData.DsmMinValue();
+        example.ReHiredDate = demo.ReHireDate ?? ReferenceData.DsmMinValue;
         example.EmploymentStatus = demo.EmploymentStatus.Name;
         example.Details = details.Select(pd => new MilitaryRehireProfitSharingDetailResponse { Forfeiture = pd.Forfeiture, Remark = pd.Remark, ProfitYear = pd.ProfitYear })
             .ToList();

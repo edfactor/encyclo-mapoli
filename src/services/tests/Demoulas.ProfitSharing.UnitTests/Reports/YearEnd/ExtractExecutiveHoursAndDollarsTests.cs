@@ -240,7 +240,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
         {
             ReportName = _expectedReportName,
             ReportDate = DateTimeOffset.UtcNow,
-            StartDate = ReferenceData.DsmMinValue(),
+            StartDate = ReferenceData.DsmMinValue,
             EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
 
             Response = new PaginatedResponseDto<ExecutiveHoursAndDollarsResponse>

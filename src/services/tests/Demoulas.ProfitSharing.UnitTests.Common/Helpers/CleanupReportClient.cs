@@ -102,8 +102,8 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
         return rslt ?? new ReportResponseBase<TResponseDto>
         {
             ReportName = Constants.ErrorMessages.ReportNotFound,
-            ReportDate = ReferenceData.DsmMinValue().ToDateTime(TimeOnly.MinValue),
-            StartDate = ReferenceData.DsmMinValue(),
+            ReportDate = ReferenceData.DsmMinValue.ToDateTime(TimeOnly.MinValue),
+            StartDate = ReferenceData.DsmMinValue,
             EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
             Response = new PaginatedResponseDto<TResponseDto>()
         };

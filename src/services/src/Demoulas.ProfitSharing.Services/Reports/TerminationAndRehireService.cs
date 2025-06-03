@@ -69,7 +69,7 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
         {
             ReportName = "EMPLOYEES ON MILITARY LEAVE",
             ReportDate = DateTimeOffset.UtcNow,
-            StartDate = ReferenceData.DsmMinValue(),
+            StartDate = ReferenceData.DsmMinValue,
             EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
             Response = militaryMembers
         };
@@ -235,7 +235,7 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
                     Ssn = temp.member.member.Ssn,
                     HireDate = temp.member.member.HireDate,
                     TerminationDate = temp.member.member.TerminationDate,
-                    ReHiredDate = temp.member.member.ReHireDate ?? ReferenceData.DsmMinValue(),
+                    ReHiredDate = temp.member.member.ReHireDate ?? ReferenceData.DsmMinValue,
                     StoreNumber = temp.member.member.StoreNumber,
                     CompanyContributionYears = temp.member.yip!.Years ?? 0,
                     EnrollmentId = temp.member.member.EnrollmentId,

@@ -91,7 +91,7 @@ public class CleanupReportService : ICleanupReportService
             return new ReportResponseBase<DemographicBadgesNotInPayProfitResponse>
             {
                 ReportDate = DateTimeOffset.UtcNow,
-                StartDate = ReferenceData.DsmMinValue(),
+                StartDate = ReferenceData.DsmMinValue,
                 EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
                 ReportName = "DEMOGRAPHICS BADGES NOT ON PAYPROFIT",
                 Response = results
@@ -126,7 +126,7 @@ public class CleanupReportService : ICleanupReportService
             return new ReportResponseBase<NamesMissingCommaResponse>
             {
                 ReportDate = DateTimeOffset.UtcNow,
-                StartDate = ReferenceData.DsmMinValue(),
+                StartDate = ReferenceData.DsmMinValue,
                 EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
                 ReportName = "MISSING COMMA IN PY_NAME", Response = results
             };
@@ -270,7 +270,7 @@ FROM FILTERED_DEMOGRAPHIC p1
             return new ReportResponseBase<DuplicateNamesAndBirthdaysResponse>()
             {
                 ReportDate = DateTimeOffset.UtcNow,
-                StartDate = ReferenceData.DsmMinValue(),
+                StartDate = ReferenceData.DsmMinValue,
                 EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
                 ReportName = "DUPLICATE NAMES AND BIRTHDAYS", Response = results
             };

@@ -6,7 +6,7 @@ export enum ImpersonationRoles {
   HardshipAdministrator = "Hardship-Administrator",
   ProfitSharingAdministrator = "Profit-Sharing-Administrator",
   ItOperations = "IT-Operations"
-}
+ }
 
 export interface SortedPaginationRequestDto extends PaginationParams, ISortParams { }
 
@@ -342,6 +342,11 @@ export interface MasterInquiryDetail extends ProfitYearRequest {
 }
 
 export interface MasterInquiryRequest {
+  memberType?: number;
+  badgeNumber?: number;
+  psnSuffix?: number;
+  ssn?: number;
+  profitYear?: number;
   endProfitYear?: number;
   startProfitMonth?: number;
   endProfitMonth?: number;
@@ -350,13 +355,62 @@ export interface MasterInquiryRequest {
   earningsAmount?: number;
   forfeitureAmount?: number;
   paymentAmount?: number;
-  socialSecurity?: number;
   name?: string;
   paymentType?: number;
-  memberType?: number;
-  badgeNumber?: number;
-  psnSuffix?: number;
   pagination: SortedPaginationRequestDto;
+}
+
+export interface MasterInquiryMemberRequest {
+  memberType?: number;
+  id?: number;
+  profitYear?: number;
+  skip?: number;
+  take?: number;
+  sortBy?: string;
+  isSortDescending?: boolean;
+}
+
+
+export interface MasterInquiryResponseDto {
+  isEmployee: boolean;
+  id: number;
+  ssn: string;
+  profitYear: number;
+  profitYearIteration: number;
+  distributionSequence: number;
+  profitCodeId: number;
+  contribution: number;
+  earnings: number;
+  forfeiture: number;
+  monthToDate: number;
+  yearToDate: number;
+  remark?: string;
+  zeroContributionReasonId?: number;
+  federalTaxes: number;
+  stateTaxes: number;
+  taxCodeId?: string;
+  commentTypeId?: number;
+  commentRelatedCheckNumber?: string;
+  commentRelatedState?: string;
+  commentRelatedOracleHcmId?: number;
+  commentRelatedPsnSuffix?: number;
+  commentIsPartialTransaction?: boolean;
+  badgeNumber?: number;
+  profitCodeName?: string;
+  zeroContributionReasonName?: string;
+  taxCodeName?: string;
+  commentTypeName?: string;
+  psnSuffix: number;
+  payment?: number;
+  vestedBalance?: number;
+  vestingPercent?: number;
+  currentBalance?: number;
+  payFrequencyId: number;
+  transactionDate: string;
+  currentIncomeYear: number;
+  currentHoursYear: number;
+  employmentStatusId: string;
+  employmentStatus?: string;
 }
 
 export enum FrozenReportsByAgeRequestType {
@@ -441,6 +495,7 @@ export interface ForfeituresByAgeDetail {
 }
 
 export interface EmployeeDetails {
+  id: number;
   isEmployee: boolean;
   firstName: string;
   lastName: string;

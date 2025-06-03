@@ -1,6 +1,6 @@
 ﻿namespace Demoulas.ProfitSharing.Data.Entities;
 
-public class DemographicHistory
+public sealed class DemographicHistory
 {
     public long Id { get; set; }
     public int DemographicId { get; set; }

@@ -375,6 +375,14 @@ public sealed class TotalService : ITotalService
     public async Task<BalanceEndpointResponse?> GetVestingBalanceForSingleMemberAsync(SearchBy searchBy,
         int badgeNumberOrSsn, short profitYear, CancellationToken cancellationToken)
     {
+        var list = await GetVestingBalanceForMembersAsync(searchBy, new HashSet<int> { badgeNumberOrSsn }, profitYear, cancellationToken);
+        return list?.FirstOrDefault();
+    }
+
+
+    public async Task<List<BalanceEndpointResponse>> GetVestingBalanceForMembersAsync(SearchBy searchBy,
+        ISet<int> badgeNumberOrSsnCollection, short profitYear, CancellationToken cancellationToken)
+    {
         var calendarInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(profitYear, cancellationToken);
 
         switch (searchBy)
@@ -385,16 +393,16 @@ public sealed class TotalService : ITotalService
                     var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
                     var rslt = await (from t in TotalVestingBalance(ctx, profitYear, calendarInfo.FiscalEndDate)
                                       join d in demographics on t.Ssn equals d.Ssn
-                                      where d.BadgeNumber == badgeNumberOrSsn
+                                      where badgeNumberOrSsnCollection.Contains(d.BadgeNumber)
                                       select new BalanceEndpointResponse
                                       {
-                                          Id = badgeNumberOrSsn,
+                                          Id = d.Ssn,
                                           Ssn = t.Ssn.MaskSsn(),
                                           CurrentBalance = (t.CurrentBalance ?? 0),
                                           VestedBalance = (t.VestedBalance ?? 0),
                                           VestingPercent = (t.VestingPercent ?? 0),
                                           YearsInPlan = (t.YearsInPlan ?? 0)
-                                      }).FirstOrDefaultAsync(cancellationToken);
+                                      }).ToListAsync(cancellationToken);
                     return rslt;
                 });
 
@@ -402,16 +410,16 @@ public sealed class TotalService : ITotalService
                 return await _profitSharingDataContextFactory.UseReadOnlyContext(ctx =>
                 {
                     var rslt = (from t in TotalVestingBalance(ctx, profitYear, calendarInfo.FiscalEndDate)
-                                where t.Ssn == badgeNumberOrSsn
+                                where badgeNumberOrSsnCollection.Contains(t.Ssn)
                                 select new BalanceEndpointResponse
                                 {
-                                    Id = badgeNumberOrSsn,
+                                    Id = t.Ssn,
                                     Ssn = t.Ssn.MaskSsn(),
                                     CurrentBalance = (t.CurrentBalance ?? 0),
                                     VestedBalance = (t.VestedBalance ?? 0),
                                     VestingPercent = (t.VestingPercent ?? 0),
                                     YearsInPlan = (t.YearsInPlan ?? 0)
-                                }).FirstOrDefaultAsync(cancellationToken);
+                                }).ToListAsync(cancellationToken);
                     return rslt;
                 });
 
