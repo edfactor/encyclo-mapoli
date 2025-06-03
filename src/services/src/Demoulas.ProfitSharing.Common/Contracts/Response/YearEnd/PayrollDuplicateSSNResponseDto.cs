@@ -25,7 +25,7 @@ public sealed record PayrollDuplicateSsnResponseDto
             Ssn = "XXX-XX-6789",
             Name = "John Doe",
             Address = AddressResponseDto.ResponseExample(),
-            HireDate = ReferenceData.DsmMinValue(),
+            HireDate = ReferenceData.DsmMinValue,
             TerminationDate = DateTime.Today.ToDateOnly(),
             Status = 't',
             EmploymentStatusName = "Terminated",

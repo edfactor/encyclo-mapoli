@@ -101,7 +101,7 @@ internal class EmployeeSyncConsumer : IConsumer<MessageRequest<OracleEmployee[]>
                 OracleHcmId = employee.PersonId,
                 BadgeNumber = employee.BadgeNumber,
                 DateOfBirth = employee.DateOfBirth,
-                HireDate = employee.WorkRelationship?.StartDate ?? ReferenceData.DsmMinValue(),
+                HireDate = employee.WorkRelationship?.StartDate ?? ReferenceData.DsmMinValue,
                 TerminationDate = employee.WorkRelationship?.TerminationDate,
                 Ssn =
                     employee.NationalIdentifier?.NationalIdentifierNumber.ConvertSsnToInt() ??

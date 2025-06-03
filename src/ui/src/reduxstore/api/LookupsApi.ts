@@ -30,8 +30,8 @@ export const LookupsApi = createApi({
         }
       }
     }),
-    getMissives: builder.query<MissiveResponse[],void>({
-      query: (params) => ({
+    getMissives: builder.query<MissiveResponse[], void>({
+      query: () => ({
         url: "/lookup/missives",
         method: "GET",
       }),

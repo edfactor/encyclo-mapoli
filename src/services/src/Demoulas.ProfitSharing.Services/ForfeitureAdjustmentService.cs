@@ -42,7 +42,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
         {
             ReportName = ForfeitureAdjustmentReportResponse.REPORT_NAME,
             ReportDate = DateTimeOffset.UtcNow,
-            StartDate = ReferenceData.DsmMinValue(),
+            StartDate = ReferenceData.DsmMinValue,
             EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
             TotatNetBalance = 0,
             TotatNetVested = 0,

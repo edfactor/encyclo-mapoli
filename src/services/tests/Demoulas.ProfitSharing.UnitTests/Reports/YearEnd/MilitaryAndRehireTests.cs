@@ -46,7 +46,7 @@ public class MilitaryAndRehireTests : ApiTestBase<Program>
             {
                 ReportName = "EMPLOYEES ON MILITARY LEAVE",
                 ReportDate = DateTimeOffset.UtcNow,
-                StartDate = ReferenceData.DsmMinValue(),
+                StartDate = ReferenceData.DsmMinValue,
                 EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
                 Response = new PaginatedResponseDto<EmployeesOnMilitaryLeaveResponse> { Results = new List<EmployeesOnMilitaryLeaveResponse> { setup.ExpectedResponse } }
             };
@@ -103,7 +103,7 @@ public class MilitaryAndRehireTests : ApiTestBase<Program>
         {
             ReportName = "EMPLOYEES ON MILITARY LEAVE",
             ReportDate = DateTimeOffset.UtcNow,
-            StartDate = ReferenceData.DsmMinValue(),
+            StartDate = ReferenceData.DsmMinValue,
             EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
             Response = new PaginatedResponseDto<EmployeesOnMilitaryLeaveResponse> { Results = new List<EmployeesOnMilitaryLeaveResponse>() }
         };
@@ -126,7 +126,7 @@ public class MilitaryAndRehireTests : ApiTestBase<Program>
         {
             ReportName = "EMPLOYEES ON MILITARY LEAVE", 
             ReportDate = DateTimeOffset.UtcNow,
-            StartDate = ReferenceData.DsmMinValue(),
+            StartDate = ReferenceData.DsmMinValue,
             EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
             Response = new PaginatedResponseDto<EmployeesOnMilitaryLeaveResponse> { Results = [] }
         };
