@@ -526,10 +526,6 @@ export interface EmployeeDetails {
   missives: number[] | null;
 }
 
-export interface MasterInquiryResponseType {
-  employeeDetails: EmployeeDetails | null;
-  inquiryResults: Paged<MasterInquiryDetail>;
-}
 
 export interface BalanceByDetailBase {
   employeeCount: number;

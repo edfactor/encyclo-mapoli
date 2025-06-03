@@ -13,7 +13,7 @@ const columns: ColDef[] = [
     headerName: "Badge #",
     maxWidth: 120,
     cellRenderer: (params: any) => {
-      const { badgeNumber, isEmployee, id } = params.data;
+      const { badgeNumber, psnSuffix, isEmployee, id } = params.data;
       return (
         <a
           href="#"
@@ -25,7 +25,7 @@ const columns: ColDef[] = [
             }
           }}
         >
-          {badgeNumber}
+          {psnSuffix > 0 ? `${badgeNumber}-${psnSuffix}` : badgeNumber}
         </a>
       );
     }
