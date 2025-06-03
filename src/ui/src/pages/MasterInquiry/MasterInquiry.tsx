@@ -17,6 +17,7 @@ const MasterInquiry = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [searchParams, setSearchParams] = useState<MasterInquiryRequest | null>(null);
   const [selectedMember, setSelectedMember] = useState<{ memberType: number; id: number, ssn: number } | null>(null);
+  const [noResults, setNoResults] = useState(false);
 
   return (
     <Page label="MASTER INQUIRY (008-10)">
@@ -30,7 +31,11 @@ const MasterInquiry = () => {
           <DSMAccordion title="Filter">
             <MasterInquirySearchFilter 
               setInitialSearchLoaded={setInitialSearchLoaded}
-              onSearch={setSearchParams}
+              onSearch={(params) => {
+                setSearchParams(params);
+                setSelectedMember(null);
+                setNoResults(!params);
+              }}
             />
           </DSMAccordion>
         </Grid2>
@@ -39,12 +44,13 @@ const MasterInquiry = () => {
           <MasterInquiryMemberGrid {...searchParams} onBadgeClick={setSelectedMember} />
         )}
 
-        {/* Render employee details if identifiers are present in selectedMember */}
-        {selectedMember && selectedMember.memberType !== undefined && selectedMember.id && (
+        {/* Render employee details if identifiers are present in selectedMember, or show missive if noResults */}
+        {(noResults || (selectedMember && selectedMember.memberType !== undefined && selectedMember.id)) && (
           <MasterInquiryEmployeeDetails
-            memberType={selectedMember.memberType}
-            id={selectedMember.id}
+            memberType={selectedMember?.memberType ?? 0}
+            id={selectedMember?.id ?? 0}
             profitYear={searchParams?.endProfitYear}
+            noResults={noResults}
           />
         )}
 
