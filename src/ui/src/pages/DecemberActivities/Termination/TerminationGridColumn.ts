@@ -2,6 +2,7 @@ import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { agGridNumberToCurrency } from "smart-ui-library";
 import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
 import { getEnrolledStatus } from "../../../utils/enrollmentUtil";
+import { mmDDYYFormat } from "utils/dateUtils";
 
 export const GetTerminationColumns = (): ColDef[] => {
   return [
@@ -20,7 +21,7 @@ export const GetTerminationColumns = (): ColDef[] => {
       headerName: "Name",
       field: "name",
       colId: "name",
-      width: 120,
+      width: 400,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
@@ -40,7 +41,8 @@ export const GetDetailColumns = (): ColDef[] => {
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
-      sortable: false
+      sortable: false,
+      valueFormatter: (params) => (params.value == null || params.value === undefined || params.value === "") ? "N/A" : params.value
     },
     {
       headerName: "Beginning Balance",
@@ -116,7 +118,11 @@ export const GetDetailColumns = (): ColDef[] => {
       headerClass: "center-align",
       cellClass: "center-align",
       resizable: true,
-      sortable: false
+      sortable: false,
+      valueFormatter: (params) => {
+        const date = params.value;
+        return mmDDYYFormat(date);
+      }
     },
     {
       headerName: "YTD PS Hours",
