@@ -37,7 +37,12 @@ const columns: ColDef[] = [
   { field: "addressState", headerName: "State", maxWidth: 100 },
   { field: "addressZipCode", headerName: "Zip", maxWidth: 160 },
   { field: "age", headerName: "Age", maxWidth: 120, },
-  { field: "employmentStatus", headerName: "Status", maxWidth: 120, },
+  { field: "employmentStatus", headerName: "Status", maxWidth: 120,
+    valueFormatter: (params: any) => {
+      const value = params.value;
+      return value == null || value === undefined || value === "" ? "N/A" : value;
+    }
+  },
 ];
 
 interface MasterInquiryMemberGridProps extends MasterInquiryRequest {
