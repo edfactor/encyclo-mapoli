@@ -229,7 +229,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
     dispatch(clearMasterInquiryRequestParams());
     dispatch(clearMasterInquiryData());
     reset({
-      endProfitYear: undefined,
+      endProfitYear: profitYear, // Always reset to default profitYear
       startProfitMonth: undefined,
       endProfitMonth: undefined,
       socialSecurity: undefined,
@@ -249,6 +249,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
         isSortDescending: true
       }
     });
+    onSearch(undefined); // <-- Add this to clear downstream components
   };
 
   const months = Array.from({ length: 12 }, (_, i) => i + 1);
