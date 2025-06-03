@@ -6,12 +6,11 @@ import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
-import { CalendarResponseDto, TerminationRequest } from "../../../reduxstore/types";
+import { CalendarResponseDto, StartAndEndDateRequest } from "../../../reduxstore/types";
 import { tryddmmyyyyToDate } from "../../../utils/dateUtils";
 import { RootState } from "reduxstore/store";
 
 const schema = yup.object().shape({
-  profitYear: yup.number().required("Profit Year is required"),
   beginningDate: yup.string().required("Begin Date is required"),
   endingDate: yup.string().required("End Date is required"),
   pagination: yup
@@ -27,7 +26,7 @@ const schema = yup.object().shape({
 interface TerminationSearchFilterProps {
   setInitialSearchLoaded: (include: boolean) => void;
   fiscalData: CalendarResponseDto | null;
-  onSearch: (params: TerminationRequest) => void;
+  onSearch: (params: StartAndEndDateRequest) => void;
 }
 
 const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
@@ -46,20 +45,18 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
     formState: { errors, isValid },
     reset,
     trigger
-  } = useForm<TerminationRequest>({
+  } = useForm<StartAndEndDateRequest>({
     resolver: yupResolver(schema),
     defaultValues: {
-      profitYear: defaultProfitYear || 0,
       beginningDate: termination?.startDate || fiscalData.fiscalBeginDate || '',
       endingDate: termination?.endDate || fiscalData.fiscalEndDate || '',
       pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }
     }
   });
 
-  const validateAndSubmit = (data: TerminationRequest) => {
+  const validateAndSubmit = (data: StartAndEndDateRequest) => {
     onSearch({
       ...data,
-      profitYear: defaultProfitYear || 0,
       beginningDate: data.beginningDate || fiscalData.fiscalBeginDate || '',
       endingDate: data.endingDate || fiscalData.fiscalEndDate || '',
     });
@@ -69,8 +66,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
 
   const handleReset = () => {
     setInitialSearchLoaded(false);
-    reset({ 
-      profitYear: defaultProfitYear || 0,
+    reset({
       beginningDate: fiscalData.fiscalBeginDate,
       endingDate: fiscalData.fiscalEndDate,
       pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }

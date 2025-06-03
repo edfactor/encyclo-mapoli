@@ -11,7 +11,8 @@ import { RootState } from "reduxstore/store";
 import AddForfeitureModal from "./AddForfeitureModal";
 import { useLazyGetForfeitureAdjustmentsQuery } from "reduxstore/api/YearsEndApi";
 import { useLazySearchProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
-import ForfeitureAdjustmentEmployeeDetails from "./ForfeitureAdjustmentEmployeeDetails";
+import MasterInquiryEmployeeDetails from "pages/MasterInquiry/MasterInquiryEmployeeDetails";
+import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 
 const ForfeituresAdjustment = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
@@ -21,6 +22,7 @@ const ForfeituresAdjustment = () => {
   const { masterInquiryEmployeeDetails } = useSelector((state: RootState) => state.inquiry);
   const [triggerSearch] = useLazyGetForfeitureAdjustmentsQuery();
   const [triggerMasterInquiry] = useLazySearchProfitMasterInquiryQuery();
+  const profitYear = useDecemberFlowProfitYear();
 
   const renderActionNode = () => {
     return (
@@ -43,10 +45,12 @@ const ForfeituresAdjustment = () => {
     // Call Master Inquiry API
     triggerMasterInquiry({
       badgeNumber,
+      profitYear,
+      memberType: 1, // Assuming 1 is for employee
       pagination: {
         take: 10,
         skip: 0,
-        sortBy: "profitYear",
+        sortBy: "badgeNumber",
         isSortDescending: true
       }
     });
@@ -116,8 +120,10 @@ const ForfeituresAdjustment = () => {
           </DSMAccordion>
         </Grid2>
 
-        {showEmployeeDetails && masterInquiryEmployeeDetails && (
-          <ForfeitureAdjustmentEmployeeDetails details={masterInquiryEmployeeDetails} />
+        {showEmployeeDetails && masterInquiryEmployeeDetails && profitYear && (
+          <MasterInquiryEmployeeDetails memberType={masterInquiryEmployeeDetails.isEmployee ? 1 : 2}
+            id={masterInquiryEmployeeDetails.id}
+            profitYear={profitYear} />
         )}
 
         <Grid2 width="100%">

@@ -1,4 +1,5 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -267,7 +268,10 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             if (memberSlice.IsOnlyBeneficiary) { vestingPercent = 1; }
             if (member.EndingBalance == 0 && vestedBalance == 0) { vestingPercent = 0; }
             int? age = null;
-            if (member.Birthday.HasValue) { age = member.Birthday.Value.Age(); }
+            if (member.Birthday.HasValue)
+            {
+                age = member.ProfitYear > ReferenceData.DsmMinValue.Year ? member.Birthday.Value.Age(new DateTime(member.ProfitYear, 12, 31)) : member.Birthday.Value.Age();
+            }
 
             var yearDetail = new TerminatedEmployeeAndBeneficiaryYearDetailDto
             {
@@ -301,7 +305,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 BadgeNumber = g.Key.BadgeNumber,
                 PsnSuffix = g.Key.PsnSuffix,
                 Name = g.Key.Name,
-                YearDetails = g.Select(x => x.YearDetail).OrderBy(y => y.ProfitYear).ToList()
+                YearDetails = g.Select(x => x.YearDetail).OrderByDescending(y => y.ProfitYear).ToList()
             })
             .ToList();
 

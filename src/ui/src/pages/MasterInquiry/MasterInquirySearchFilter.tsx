@@ -11,7 +11,7 @@ import {
   TextField
 } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
-import { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useLazySearchProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
 import { SearchAndReset } from "smart-ui-library";
@@ -92,6 +92,8 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
 }) => {
   const [triggerSearch, { isFetching }] = useLazySearchProfitMasterInquiryQuery();
   const { masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
+  const missives = useSelector((state: RootState) => state.lookups.missives);
+  const [missiveAlerts, setMissiveAlerts] = useState<any[]>([]);
 
   const dispatch = useDispatch();
 
@@ -151,20 +153,34 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
         badgeNumber: Number(badgeNumber)
       });
 
-      // Trigger search automatically when badge number is present
       const searchParams: MasterInquiryRequest = {
         pagination: { skip: 0, take: 5, sortBy: "badgeNumber", isSortDescending: true },
         badgeNumber: Number(badgeNumber),
-        endProfitYear: profitYear || undefined,
-        memberType: memberTypeGetNumberMap[determineCorrectMemberType(badgeNumber)]
+        memberType: memberTypeGetNumberMap[determineCorrectMemberType(badgeNumber)],
+        endProfitYear: profitYear
       };
 
-      // Notify parent so other components load
-      onSearch(searchParams);
+      triggerSearch(searchParams, false).unwrap().then((response) => {
+        // If data is returned, trigger downstream components
+        if (response && Array.isArray(response) ? response.length > 0 : response.results && response.results.length > 0) {
+          setInitialSearchLoaded(true);
+          onSearch(searchParams);
+        } else {
+          setMissiveAlerts([
+            {
+              id: 993,
+              message: "No Profit Sharing Records Found",
+              severity: "Error",
+              description: "The Employee Badge Number you have entered has no Profit Sharing Records. Re-enter an Employee Badge Number with Profit Sharing.",
+            }
+          ]);
+        }
+      });
     }
-  }, [badgeNumber, hasToken, reset, onSearch, profitYear]);
+  }, [badgeNumber, hasToken, reset, setMissiveAlerts, triggerSearch, profitYear]);
 
   const validateAndSearch = handleSubmit((data) => {
+    setMissiveAlerts([]);
     if (isValid) {
       const searchParams: MasterInquiryRequest = {
         pagination: {
@@ -173,7 +189,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
           sortBy: data.pagination?.sortBy || "badgeNumber",
           isSortDescending: data.pagination?.isSortDescending || true
         },
-        endProfitYear: data.endProfitYear || profitYear, // Always set endProfitYear, fallback to profitYear
+        ...(!!data.endProfitYear && { endProfitYear: data.endProfitYear || profitYear, }),
         ...(!!data.startProfitMonth && { startProfitMonth: data.startProfitMonth }),
         ...(!!data.endProfitMonth && { endProfitMonth: data.endProfitMonth }),
         ...(!!data.socialSecurity && { ssn: data.socialSecurity }),
@@ -187,20 +203,33 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
         ...(!!data.payment && { payment: data.payment })
       };
 
-      // Call the onSearch prop to lift search params to parent
-      onSearch(searchParams);
-
-      triggerSearch(searchParams, false);
-      dispatch(setMasterInquiryRequestParams(data as MasterInquirySearch));
+      triggerSearch(searchParams, false).unwrap().then((response) => {
+        // If data is returned, trigger downstream components
+        if (response && Array.isArray(response) ? response.length > 0 : response.results && response.results.length > 0) {
+          setInitialSearchLoaded(true);
+          onSearch(searchParams);
+        } else {
+          setMissiveAlerts([
+            {
+              id: 993,
+              message: "No Profit Sharing Records Found",
+              severity: "Error",
+              description: "The Employee Badge Number you have entered has no Profit Sharing Records. Re-enter an Employee Badge Number with Profit Sharing.",
+            }
+          ]);
+        }
+      });
+      dispatch(setMasterInquiryRequestParams(data));
     }
   });
 
   const handleReset = () => {
+    setMissiveAlerts([]);
     setInitialSearchLoaded(false);
     dispatch(clearMasterInquiryRequestParams());
     dispatch(clearMasterInquiryData());
     reset({
-      endProfitYear: undefined,
+      endProfitYear: profitYear, // Always reset to default profitYear
       startProfitMonth: undefined,
       endProfitMonth: undefined,
       socialSecurity: undefined,
@@ -220,6 +249,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
         isSortDescending: true
       }
     });
+    onSearch(undefined); // <-- Add this to clear downstream components
   };
 
   const months = Array.from({ length: 12 }, (_, i) => i + 1);
@@ -477,8 +507,21 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
           </Grid2>
         </Grid2>
       </Grid2>
+      {/* Render missive alerts at the bottom of the component */}
+      {missiveAlerts.length > 0 && (
+        <Grid2 size={{ xs: 12 }}>
+          <div className="missive-alerts-box">
+            {missiveAlerts.map((alert, idx) => (
+              <div key={alert.id || idx} className={`missive-alert ${alert.severity === 'Error' ? 'missive-error' : 'missive-warning'}`}>
+                <span className="missive-message">{alert.message}</span>
+                <div className="missive-description">{alert.description}</div>
+              </div>
+            ))}
+          </div>
+        </Grid2>
+      )}
     </form>
   );
 };
 
-export default MasterInquirySearchFilter
+export default MasterInquirySearchFilter;
