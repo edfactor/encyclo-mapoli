@@ -18,12 +18,15 @@ public class BeneficiaryService : IBeneficiaryService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly IDemographicReaderService _demographicReaderService;
+    private readonly TotalService _totalService;
 
     public BeneficiaryService(IProfitSharingDataContextFactory dataContextFactory,
-        IDemographicReaderService demographicReaderService)
+        IDemographicReaderService demographicReaderService,
+        TotalService totalService)
     {
         _dataContextFactory = dataContextFactory;
         _demographicReaderService = demographicReaderService;
+        _totalService = totalService;
     }
     public async Task<CreateBeneficiaryResponse> CreateBeneficiary(CreateBeneficiaryRequest req, CancellationToken cancellationToken)
     {
@@ -43,6 +46,8 @@ public class BeneficiaryService : IBeneficiaryService
             {
                 throw new InvalidOperationException("ThirdLevelBeneficiaryNumber must be between 1 and 9");
             }
+
+            //await ValidatePercentages(ctx, req.EmployeeBadgeNumber, req.Percentage, cancellationToken);
 
             var resp = new CreateBeneficiaryResponse();
             var beneficiaryContact = await GetOrCreateBeneficiaryContact(req, ctx, cancellationToken);
@@ -90,7 +95,7 @@ public class BeneficiaryService : IBeneficiaryService
     {
         _ = await _dataContextFactory.UseWritableContextAsync(async (ctx, transaction) =>
         {
-            var beneficiary = await ctx.Beneficiaries.SingleAsync(x => x.Id == req.Id, cancellationToken);
+            var beneficiary = await ctx.Beneficiaries.Include(x=>x.Contact).Include(x=>x.Contact!.ContactInfo).Include(x=>x.Contact!.Address).SingleAsync(x => x.Id == req.Id, cancellationToken);
 
             beneficiary.Contact!.ContactInfo.FirstName = req.FirstName;
             beneficiary.Contact!.ContactInfo.LastName = req.LastName;
@@ -122,6 +127,125 @@ public class BeneficiaryService : IBeneficiaryService
 
             return Task.FromResult(true);
         }, cancellationToken);
+    }
+
+    public async Task DeleteBeneficiary(int id, CancellationToken cancellationToken)
+    {
+        _ = await _dataContextFactory.UseWritableContextAsync(async (ctx, transaction) =>
+        {
+            var beneficiaryToDelete = await ctx.Beneficiaries.Include(x=>x.Contact).Include(x=>x.Contact!.ContactInfo).Include(x=>x.Contact!.Address).SingleAsync(x=>x.Id == id);
+            if (await CanIDeleteThisBeneficiary(beneficiaryToDelete, ctx, cancellationToken))
+            {
+                var deleteContact = false;
+                if (beneficiaryToDelete.Contact != null)
+                {
+                    deleteContact = await CanIDeleteThisBeneficiaryContact(id, beneficiaryToDelete!.Contact, ctx, cancellationToken);
+                }
+
+                ctx.Beneficiaries.Remove(beneficiaryToDelete);
+                if (deleteContact && beneficiaryToDelete.Contact != null)
+                {
+                    if (beneficiaryToDelete!.Contact.Address != null)
+                    {
+                        ctx.Remove(beneficiaryToDelete!.Contact.Address);
+                    }
+                    if (beneficiaryToDelete!.Contact.ContactInfo != null)
+                    {
+                        ctx.Remove(beneficiaryToDelete!.Contact.ContactInfo);
+                    }
+                    ctx.BeneficiaryContacts.Remove(beneficiaryToDelete.Contact);
+                }
+            }
+
+            await ctx.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+
+            return true;
+        }, cancellationToken);
+    }
+
+    public async Task DeleteBeneficiaryContact(int id, CancellationToken cancellation)
+    {
+        _ = await _dataContextFactory.UseWritableContextAsync(async (ctx, transaction) =>
+        {
+            var contactToDelete = await ctx.BeneficiaryContacts.Include(x => x.Beneficiaries).SingleAsync(x => x.Id == id, cancellation);
+            var deleteContact = true;
+            Beneficiary? beneficiaryToDelete = null;
+            if (contactToDelete.Beneficiaries?.Count == 1) //If contact is only associated with one beneficiary, check to see if we can delete it.
+            {
+                var firstBeneficiary = contactToDelete.Beneficiaries.First();
+                deleteContact = await CanIDeleteThisBeneficiary(firstBeneficiary, ctx, cancellation);
+                beneficiaryToDelete = firstBeneficiary;
+            }
+            if (deleteContact)
+            {
+                if (beneficiaryToDelete != null)
+                {
+                    ctx.Beneficiaries.Remove(beneficiaryToDelete);
+                }
+                if (contactToDelete.Address != null)
+                {
+                    ctx.Remove(contactToDelete.Address);
+                }
+                if (contactToDelete.ContactInfo != null)
+                {
+                    ctx.Remove(contactToDelete.ContactInfo);
+                }
+                ctx.BeneficiaryContacts.Remove(contactToDelete);
+                await ctx.SaveChangesAsync(cancellation);
+                await transaction.CommitAsync(cancellation);
+            }
+            return true;
+        }, cancellation);
+    }
+
+    private async Task<bool> CanIDeleteThisBeneficiary(Beneficiary beneficiary, ProfitSharingDbContext ctx, CancellationToken cancellationToken)
+    {
+        var balanceInfo = await _totalService.GetVestingBalanceForSingleMemberAsync(Common.Contracts.Request.SearchBy.Ssn, beneficiary.Contact!.Ssn, (short)DateTime.Now.Year, cancellationToken);
+        if (balanceInfo?.CurrentBalance != 0) {
+            throw new InvalidOperationException("Balance is not zero, cannot delete beneficiary.");
+        }
+
+        if (await ctx.DistributionPayees.AnyAsync(x => x.Ssn == beneficiary.Contact!.Ssn, cancellationToken))
+        {
+            throw new InvalidOperationException("Beneficiary is a payee for a distribution, cannot delete beneficiary.");
+        }
+
+        return true;
+    }
+
+    private async Task<bool> CanIDeleteThisBeneficiaryContact(int beneficiaryId, BeneficiaryContact contact, ProfitSharingDbContext ctx, CancellationToken token)
+    {
+        return !(await ctx.Beneficiaries.AnyAsync(b => b.BeneficiaryContactId == contact.Id && b.Id != beneficiaryId, token));
+    }
+    private async Task ValidatePercentages(ProfitSharingDbContext ctx, int badgeNumber, byte proposedPctOfNewBeneficiary, CancellationToken token)
+    {
+        var beneficiaries = await ctx.Beneficiaries.Where(x=>x.DemographicId == badgeNumber).OrderBy(x=>x.Psn).ToListAsync(token);
+        var rootBeneficiaries = new List<Beneficiary>();
+
+        foreach (var beneficiary in beneficiaries)
+        {
+            int childMask = 10;
+            if (beneficiary.PsnSuffix % 100 == 0 && beneficiary.PsnSuffix % 1000 != 0)
+            {
+                childMask = 100;
+            } else if (beneficiary.PsnSuffix % 1000 == 0)
+            {
+                childMask = 1000;
+            }
+            if (!beneficiaries.Any(x=>x.PsnSuffix > beneficiary.PsnSuffix && x.PsnSuffix < beneficiary.PsnSuffix + childMask))
+            {
+                rootBeneficiaries.Add(beneficiary);
+            }
+        }
+
+        if (rootBeneficiaries.Sum(x=>x.Percent) + proposedPctOfNewBeneficiary > 100)
+        {
+            throw new InvalidOperationException("Total percentage for employee would be more than 100%");
+        }
+        
+        
+
     }
 
     private static async Task<BeneficiaryContact> GetOrCreateBeneficiaryContact(CreateBeneficiaryRequest req, ProfitSharingDbContext ctx, CancellationToken token)
