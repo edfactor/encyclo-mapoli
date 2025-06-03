@@ -164,6 +164,12 @@
   .missive-alert + .missive-alert {
     margin-top: 12px;
   }
+
+  .military-contribution-message {
+    padding: 2rem;
+    text-align: center;
+    color: #888;
+  }
 }
 /*
 @font-face {

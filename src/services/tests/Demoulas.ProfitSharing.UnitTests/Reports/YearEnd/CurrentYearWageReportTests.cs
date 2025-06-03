@@ -44,7 +44,7 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
         {
             ReportName = $"YTD Wages Extract (PROF-DOLLAR-EXTRACT) - {2023}",
             ReportDate = DateTimeOffset.UtcNow,
-            StartDate = ReferenceData.DsmMinValue(),
+            StartDate = ReferenceData.DsmMinValue,
             EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
             Response = new PaginatedResponseDto<WagesCurrentYearResponse> { Results = new List<WagesCurrentYearResponse> { } }
         };
