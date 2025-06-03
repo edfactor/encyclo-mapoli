@@ -159,9 +159,10 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
         memberType: memberTypeGetNumberMap[determineCorrectMemberType(badgeNumber)]
       };
 
-      triggerSearch(searchParams, false);
+      // Notify parent so other components load
+      onSearch(searchParams);
     }
-  }, [badgeNumber, hasToken, reset, triggerSearch]);
+  }, [badgeNumber, hasToken, reset, onSearch, profitYear]);
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {

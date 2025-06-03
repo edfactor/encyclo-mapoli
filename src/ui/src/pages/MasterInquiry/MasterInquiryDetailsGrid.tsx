@@ -40,7 +40,7 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({
   }, [memberType, id, triggerMemberDetails]);
 
   if (isFetchingMemberDetails) {
-    return <Typography>Loading member details...</Typography>;
+    return <Typography>Loading profit details...</Typography>;
   }
 
   if (isErrorMemberDetails) {
