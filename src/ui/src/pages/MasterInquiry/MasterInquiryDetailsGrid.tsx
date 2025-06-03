@@ -51,14 +51,6 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({
     );
   }
 
-  // Debug: Show the actual API response shape
-  console.log("Member Details Data:", memberDetailsData);
-  
-    <pre style={{ maxHeight: 300, overflow: 'auto', background: '#f5f5f5', fontSize: 12 }}>
-      {JSON.stringify(memberDetailsData, null, 2)}
-    </pre>
-  
-
 return (
     <>
     <div style={{ height: "400px", width: "100%" }}>
