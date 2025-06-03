@@ -97,7 +97,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
 
   const employeeSection = [
     { label: "Badge", value: viewBadgeLinkRenderer(badgeNumber) },
-    { label: "Psn", value: viewBadgeLinkRenderer(badgeNumber, psnSuffix) },
+    ...(psnSuffix && psnSuffix !== 0 ? [{ label: "Psn", value: viewBadgeLinkRenderer(badgeNumber, psnSuffix) }] : []),
     { label: "DOB", value: mmDDYYFormat(dateOfBirth) },
     { label: "SSN", value: `${ssnValue}` },
     { label: "ETVA", value: currentEtva },
