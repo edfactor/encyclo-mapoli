@@ -58,6 +58,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
   const {
     badgeNumber,
     psnSuffix,
+    isEmployee,
     firstName,
     lastName,
     address,
