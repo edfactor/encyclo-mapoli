@@ -134,6 +134,15 @@ export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: str
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true
+    },
+    {
+      headerName: "Inactive date",
+      field: "terminationDate",
+      colId: "terminationDate",
+      minWidth: 120,
+      headerClass: "center-align",
+      cellClass: "center-align",
+      resizable: true
     }
   ];
 };
