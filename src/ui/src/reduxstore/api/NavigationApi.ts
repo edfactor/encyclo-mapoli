@@ -15,9 +15,8 @@ export const NavigationApi = createApi({
   reducerPath: "navigationApi",
   endpoints: (builder) => ({
     getNavigation: builder.query<NavigationResponseDto, NavigationRequestDto>({
-      // Ensure navigationId is sent as a query param, not as a body
       query: (request) => ({
-        url: request?.navigationId ? `/navigation?navigationId=${request.navigationId}` : `/navigation`,
+        url: `/navigation`,
         method: "GET"
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled, getState }) {
