@@ -1,7 +1,6 @@
 import { ICellRendererParams } from "ag-grid-community";
 import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { useLazyGetTerminationReportQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, numberToCurrency, Pagination } from "smart-ui-library";
 import { TotalsGrid } from "../../../components/TotalsGrid/TotalsGrid";
@@ -31,24 +30,8 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const { termination } = useSelector((state: RootState) => state.yearsEnd);
-  const [triggerSearch, { isFetching }] = useLazyGetTerminationReportQuery();  
 
-  useEffect(() => {
-    if (searchParams && hasToken) {
-      const request = {
-        ...searchParams,
-        pagination: {
-          skip: pageNumber * pageSize,
-          take: pageSize,
-          sortBy: sortParams.sortBy,
-          isSortDescending: sortParams.isSortDescending
-        }
-      };
-      triggerSearch(request, false);
-    }
-  }, [searchParams, pageNumber, pageSize, sortParams, hasToken, triggerSearch]);
-
-    // Reset page number to 0 when resetPageFlag changes
+  // Reset page number to 0 when resetPageFlag changes
   useEffect(() => {
     setPageNumber(0);
   }, [resetPageFlag]);
@@ -244,8 +227,8 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
 
           <DSMGrid
             preferenceKey={"QPREV-PROF"}
-            isLoading={isFetching}
             handleSortChanged={sortEventHandler}
+            maxHeight={800}
             providedOptions={{
               rowData: gridData,
               columnDefs: columnDefs,
