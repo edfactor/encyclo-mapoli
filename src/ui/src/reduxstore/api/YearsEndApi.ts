@@ -645,8 +645,8 @@ export const YearsEndApi = createApi({
        
         return {
           url: "yearend/terminated-employees",
-          method: "GET",
-          params: {
+          method: "POST",
+          body: {
             beginningDate: params.beginningDate,
             endingDate: params.endingDate,
             skip: params.pagination.skip,
