@@ -1115,6 +1115,7 @@ export interface ForfeitureAdjustmentUpdateRequest {
 }
 
 export interface ForfeitureAdjustmentDetail {
+  demographicId: number;
   badgeNumber: number;
   startingBalance: number;
   forfeitureAmount: number;

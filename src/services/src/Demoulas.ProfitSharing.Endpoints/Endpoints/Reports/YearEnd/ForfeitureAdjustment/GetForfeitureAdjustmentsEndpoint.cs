@@ -69,7 +69,6 @@ public class GetForfeitureAdjustmentsEndpoint : EndpointWithCsvTotalsBase<Forfei
         public ForfeitureAdjustmentResponseMap()
         {
             // Map properties from the detail record for CSV generation
-            Map(m => m.ClientNumber).Name("Client Number");
             Map(m => m.BadgeNumber).Name("Badge Number");
             Map(m => m.StartingBalance).Name("Starting Balance");
             Map(m => m.ForfeitureAmount).Name("Forfeiture Amount");
