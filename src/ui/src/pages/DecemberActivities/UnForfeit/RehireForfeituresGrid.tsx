@@ -246,7 +246,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
             preferenceKey={"QPREV-PROF"}
             isLoading={isFetching}
             handleSortChanged={sortEventHandler}
-            maxHeight={800}
+            maxHeight={1000}
             providedOptions={{
               rowData: gridData,
               columnDefs: columnDefs,
