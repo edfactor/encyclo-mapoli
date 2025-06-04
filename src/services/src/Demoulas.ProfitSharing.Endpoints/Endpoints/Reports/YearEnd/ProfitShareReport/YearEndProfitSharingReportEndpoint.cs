@@ -62,6 +62,10 @@ public class YearEndProfitSharingReportEndpoint: EndpointWithCsvTotalsBase<YearE
             Map(m => m.Points).Index(9).Name("Points");
             Map(m => m.IsUnder21).Index(10).Name("Is under 21");
             Map(m => m.IsNew).Index(11).Name("Is new");
+            Map(m => m.EmployeeStatus).Index(12).Name("Employee Status");
+            Map(m => m.Balance).Index(13).Name("Balance");
+            Map(m => m.YearsInPlan).Index(14).Name("Years in Plan");
+            Map(m => m.TerminationDate).Index(15).Name("Inactive date");
         }
     }
 

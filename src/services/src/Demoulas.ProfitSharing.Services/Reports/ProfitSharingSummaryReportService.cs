@@ -502,7 +502,8 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                     IsUnder21 = false, // back‑filled later
                     EmployeeStatus = x.Employee.EmploymentStatusId,
                     Balance = x.Balance,
-                    YearsInPlan = x.Employee.Years ?? 0
+                    YearsInPlan = x.Employee.Years ?? 0,
+                    TerminationDate = x.Employee.TerminationDate
                 })
                 .ToPaginationResultsAsync(req, cancellationToken);
 

@@ -894,6 +894,7 @@ export interface YearEndProfitSharingEmployee {
   employeeStatus: string;
   balance: number;
   yearsInPlan: number;
+  terminationDate: Date | null;
 }
 
 export interface BreakdownByStoreRequest extends ProfitYearRequest {
