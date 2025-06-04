@@ -27,10 +27,12 @@ public class TerminatedEmployeeAndBeneficiaryDataEndpoint
         Get("/terminated-employees");
         Summary(s =>
         {
-            s.Summary = "Provide the Terminated Employees (QPAY066) report.";
+            s.Summary = "Get the Terminated Employees (QPAY066) report as JSON or CSV.";
             s.Description =
-                "Reports on beneficiaries with a non-zero balance and employees who were terminated (and not retired) in the specified date range.";
-            s.ExampleRequest = new ProfitYearRequest() { ProfitYear = 2024 };
+                "Returns a report of beneficiaries with a non-zero balance and employees who were terminated (and not retired) in the specified date range. " +
+                "The endpoint supports both JSON and CSV output based on the Accept header. " +
+                "Requires roles: ADMINISTRATOR or FINANCEMANAGER.";
+            s.ExampleRequest = StartAndEndDateRequest.RequestExample();
             s.ResponseExamples = new Dictionary<int, object>
             {
                 {
@@ -53,7 +55,11 @@ public class TerminatedEmployeeAndBeneficiaryDataEndpoint
                     }
                 }
             };
-            s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
+            s.Responses[200] = "Success. Returns the report as JSON or CSV (if Accept: text/csv).";
+            s.Responses[400] = "Bad Request. Invalid or missing parameters.";
+            s.Responses[403] = $"Forbidden. Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
+            s.Responses[500] = "Internal Server Error. Unexpected error occurred.";
+            // Parameter documentation is included in the description due to FastEndpoints limitations.
         });
         Group<YearEndGroup>();
     }

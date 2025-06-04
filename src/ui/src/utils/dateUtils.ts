@@ -13,7 +13,7 @@ export const dateMMDDYYYY = (date: Date | undefined): string => {
 };
 
 //Takes in date and returns it in MM/dd/yyyy format if date exists.
-export const mmDDYYFormat = (date: string | Date | undefined) => {
+export const mmDDYYFormat = (date: string | Date | undefined | null) => {
   const dateForm = "MM/dd/yyyy";
   const parsedDate = tryddmmyyyyToDate(date);
   return parsedDate ? format(parsedDate, dateForm) : "";
@@ -56,7 +56,7 @@ export const tryddmmyyyyToDate = (date?: string | Date | null): Date | null => {
     let parsedDate: Date | null = null;
 
     // Case 1: Try parsing as DD/MM/YYYY format
-    if (date.includes('/') && date.split('/').length === 3) {
+    if (typeof date === 'string' && date.includes('/') && date.split('/').length === 3) {
       const tempDate = parse(date, 'dd/MM/yyyy', new Date());
       if (isValid(tempDate)) {
         parsedDate = tempDate;
@@ -64,7 +64,7 @@ export const tryddmmyyyyToDate = (date?: string | Date | null): Date | null => {
     }
 
     // Case 2: Try parsing as ISO format
-    if (!parsedDate) {
+    if (!parsedDate && typeof date === 'string') {
       const tempDate = parseISO(date);
       if (isValid(tempDate)) {
         parsedDate = tempDate;
@@ -73,7 +73,7 @@ export const tryddmmyyyyToDate = (date?: string | Date | null): Date | null => {
 
     // Case 3: Try parsing JavaScript's toString format 
     // (e.g., "Sat Jan 13 2024 00:00:00 GMT-0500 (Eastern Standard Time)")
-    if (!parsedDate && date.includes('GMT')) {
+    if (!parsedDate && typeof date === 'string' && date.includes('GMT')) {
       const tempDate = new Date(date);
       if (isValid(tempDate)) {
         parsedDate = tempDate;
@@ -81,7 +81,7 @@ export const tryddmmyyyyToDate = (date?: string | Date | null): Date | null => {
     }
 
     // Case 4: Last resort - try generic Date constructor
-    if (!parsedDate) {
+    if (!parsedDate && typeof date === 'string') {
       const tempDate = new Date(date);
       if (isValid(tempDate)) {
         parsedDate = tempDate;
