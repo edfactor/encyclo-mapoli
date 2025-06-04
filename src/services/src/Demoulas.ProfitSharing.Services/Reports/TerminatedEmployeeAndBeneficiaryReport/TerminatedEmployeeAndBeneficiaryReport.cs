@@ -165,12 +165,12 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         var profitYearRange = GetProfitYearRange(req);
         var ssns = memberSliceUnion.Select(ms => ms.Ssn).ToHashSet();
 
-        var profitDetailsRaw = await ctx.ProfitDetails
-            .Where(pd => pd.ProfitYear >= profitYearRange.beginProfitYear && pd.ProfitYear <= profitYearRange.endProfitYear && ssns.Contains(pd.Ssn))
-            .ToListAsync(cancellationToken);
-        var profitDetailsDict = profitDetailsRaw
-            .GroupBy(pd => (pd.Ssn, pd.ProfitYear))
-            .ToDictionary(g => g.Key, g => new InternalProfitDetailDto
+        var profitDetailsRaw = ctx.ProfitDetails
+            .Where(pd => pd.ProfitYear >= profitYearRange.beginProfitYear && pd.ProfitYear <= profitYearRange.endProfitYear && ssns.Contains(pd.Ssn));
+            
+        var profitDetailsDict = await profitDetailsRaw
+            .GroupBy(pd =>new {pd.Ssn, pd.ProfitYear})
+            .ToDictionaryAsync(g => g.Key, g => new InternalProfitDetailDto
             {
                 Ssn = g.Key.Ssn,
                 ProfitYear = g.Key.ProfitYear,
@@ -191,19 +191,17 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 CurrentAmount = g.Sum(x => x.Contribution + x.Earnings +
                                            (x.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0) -
                                            (x.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0))
-            });
+            }, cancellationToken);
 
         var lastYear = (short)(profitYearRange.endProfitYear - 1);
-        var lastYearBalancesRaw = await _totalService.GetTotalBalanceSet(ctx, lastYear)
+        var lastYearBalancesDict = await _totalService.GetTotalBalanceSet(ctx, lastYear)
             .Where(x => ssns.Contains(x.Ssn))
-            .ToListAsync(cancellationToken);
-        var lastYearBalancesDict = lastYearBalancesRaw.ToDictionary(x => (x.Ssn, lastYear), x => x);
+            .ToDictionaryAsync(x => (x.Ssn, lastYear), x => x, cancellationToken);
 
         var today = DateOnly.FromDateTime(DateTime.Today);
-        var thisYearBalancesRaw = await _totalService.TotalVestingBalance(ctx, profitYearRange.beginProfitYear, profitYearRange.endProfitYear, today)
+        var thisYearBalancesDict = await _totalService.TotalVestingBalance(ctx, profitYearRange.beginProfitYear, profitYearRange.endProfitYear, today)
             .Where(x => ssns.Contains(x.Ssn))
-            .ToListAsync(cancellationToken);
-        var thisYearBalancesDict = thisYearBalancesRaw.ToDictionary(x => x.Ssn, x => x);
+            .ToDictionaryAsync(x => x.Ssn, x => x, cancellationToken);
 
         // Build a list of all year details, then group by BadgeNumber, PsnSuffix, Name
         var yearDetailsList = new List<(int BadgeNumber, short PsnSuffix, string? Name, TerminatedEmployeeAndBeneficiaryYearDetailDto YearDetail)>();
@@ -211,7 +209,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 
         foreach (var memberSlice in unions)
         {
-            var key = (memberSlice.Ssn, memberSlice.ProfitYear);
+            var key = new { memberSlice.Ssn, memberSlice.ProfitYear };
             if (!profitDetailsDict.TryGetValue(key, out InternalProfitDetailDto? transactionsThisYear))
             {
                 transactionsThisYear = new InternalProfitDetailDto();
