@@ -1,8 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
-import { CalendarResponseDto } from "../reduxstore/types";
-import { useLazyGetAccountingYearQuery } from "reduxstore/api/LookupsApi";
+import { CalendarResponseDto, YearRangeRequest } from "../reduxstore/types";
+import { useLazyGetAccountingYearQuery, useLazyGetAccountingRangeQuery } from "reduxstore/api/LookupsApi";
 import useDecemberFlowProfitYear from "./useDecemberFlowProfitYear";
 
 /**
@@ -28,6 +28,25 @@ const useFiscalCalendarYear = (): CalendarResponseDto | null => {
   }, [profitYear, hasToken, fetchAccountingYear]);
 
   return accountingYearData;
+};
+
+/**
+ * Overload: Fetches accounting range from beginYear to current December flow profit year.
+ * @param yearsBack The number of years to go back from the current year.
+ * @returns [trigger, result] from useLazyGetAccountingRangeQuery
+ */
+export const useLazyGetAccountingRangeToCurrent = (yearsBack: number) => {
+  const endYear = useDecemberFlowProfitYear();
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
+  const [trigger, result] = useLazyGetAccountingRangeQuery();
+  // Memoized wrapped trigger: only call if hasToken is true
+  const wrappedTrigger = useCallback(() => {
+    if (hasToken) {
+      return trigger({ beginProfitYear: endYear - yearsBack, endProfitYear: endYear });
+    }
+    return Promise.resolve(undefined);
+  }, [hasToken, endYear, yearsBack, trigger]);
+  return [wrappedTrigger, result] as const;
 };
 
 export default useFiscalCalendarYear;

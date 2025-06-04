@@ -37,8 +37,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
   if (!fiscalData) return null;
 
   const { termination } = useSelector((state: RootState) => state.yearsEnd);
-  const defaultProfitYear = useDecemberFlowProfitYear();
-
+  
   const {
     control,
     handleSubmit,
@@ -96,7 +95,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
                 label="Begin Date"
                 disableFuture
                 error={errors.beginningDate?.message}
-                minDate={new Date(defaultProfitYear - 5, 0, 1)}
+                minDate={tryddmmyyyyToDate(fiscalData.fiscalBeginDate)}
                 maxDate={tryddmmyyyyToDate(fiscalData.fiscalEndDate)}
               />
             )}
@@ -118,7 +117,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
                 label="End Date"
                 disableFuture
                 error={errors.endingDate?.message}
-                minDate={new Date(defaultProfitYear - 5, 0, 2)}
+                minDate={tryddmmyyyyToDate(fiscalData.fiscalBeginDate)}
                 maxDate={tryddmmyyyyToDate(fiscalData.fiscalEndDate)}
               />
             )}

@@ -27,4 +27,4 @@ export const AppSupportApi = createApi({
   })
 });
 
-export const { useGetHealthQuery } = AppSupportApi;
+export const { useGetHealthQuery, useLazyGetHealthQuery } = AppSupportApi;
