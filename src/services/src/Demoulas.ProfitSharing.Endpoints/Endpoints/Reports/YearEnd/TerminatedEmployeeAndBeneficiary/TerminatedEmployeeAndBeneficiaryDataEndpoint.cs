@@ -24,7 +24,7 @@ public class TerminatedEmployeeAndBeneficiaryDataEndpoint
 
     public override void Configure()
     {
-        Get("/terminated-employees");
+        Post("/terminated-employees");
         Summary(s =>
         {
             s.Summary = "Get the Terminated Employees (QPAY066) report as JSON or CSV.";

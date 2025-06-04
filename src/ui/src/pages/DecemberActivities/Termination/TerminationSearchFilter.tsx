@@ -9,6 +9,7 @@ import { CalendarResponseDto, StartAndEndDateRequest } from "../../../reduxstore
 import { tryddmmyyyyToDate } from "../../../utils/dateUtils";
 import { RootState } from "reduxstore/store";
 import { useLazyGetTerminationReportQuery } from "reduxstore/api/YearsEndApi";
+import { dateYYYYMMDD } from "smart-ui-library";
 
 const schema = yup.object().shape({
   beginningDate: yup.string().required("Begin Date is required"),
@@ -58,8 +59,8 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
   const validateAndSubmit = async (data: StartAndEndDateRequest) => {
     const params = {
       ...data,
-      beginningDate: data.beginningDate || fiscalData.fiscalBeginDate || '',
-      endingDate: data.endingDate || fiscalData.fiscalEndDate || '',
+      beginningDate: data.beginningDate ? dateYYYYMMDD(new Date(data.beginningDate)) : dateYYYYMMDD(new Date(fiscalData.fiscalBeginDate)),
+      endingDate: data.endingDate ? dateYYYYMMDD(new Date(data.endingDate)) : dateYYYYMMDD(new Date(fiscalData.fiscalEndDate)),
     };
     // Call the API and only call onSearch after success
     try {
