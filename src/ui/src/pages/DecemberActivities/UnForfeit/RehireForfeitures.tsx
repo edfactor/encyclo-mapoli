@@ -3,17 +3,22 @@ import Grid2 from "@mui/material/Grid2";
 import { DSMAccordion, Page } from "smart-ui-library";
 import RehireForfeituresSearchFilter from "./RehireForfeituresSearchFilter";
 import RehireForfeituresGrid from "./RehireForfeituresGrid";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CAPTIONS } from "../../../constants";
-import useFiscalCalendarYear from "../../../hooks/useFiscalCalendarYear";
+import { useLazyGetAccountingRangeToCurrent } from "../../../hooks/useFiscalCalendarYear";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 
 const RehireForfeitures = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
-  const fiscalCalendarYear = useFiscalCalendarYear();
+  const [fetchAccountingRange, { data: fiscalCalendarYear, isLoading: isRangeLoading }] = useLazyGetAccountingRangeToCurrent(6);
   const renderActionNode = () => {
     return <StatusDropdownActionNode />;
   };
+
+  // Fetch the fiscal calendar year range on mount
+  useEffect(() => {
+    fetchAccountingRange();
+  }, [fetchAccountingRange]);
 
   const isCalendarDataLoaded = !!fiscalCalendarYear?.fiscalBeginDate && !!fiscalCalendarYear?.fiscalEndDate;
 

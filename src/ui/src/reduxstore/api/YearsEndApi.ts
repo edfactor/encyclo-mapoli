@@ -291,7 +291,7 @@ export const YearsEndApi = createApi({
     }),
     getRehireForfeitures: builder.query<PagedReportResponse<MilitaryAndRehireForfeiture>, StartAndEndDateRequest>({
       query: (params) => ({
-        url: `yearend/rehire-forfeitures/`,
+        url: `yearend/unforfeitures/`,
         method: "POST",
         body: {
           beginningDate: params.beginningDate,

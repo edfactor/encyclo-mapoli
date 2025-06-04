@@ -34,13 +34,13 @@ const schema = yup.object().shape({
 interface MilitaryAndRehireForfeituresSearchFilterProps {
   setInitialSearchLoaded: (include: boolean) => void;
   fiscalData: CalendarResponseDto;
-  onSearch: () => void;
+  onSearch?: () => void;
 }
 
 const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearchFilterProps> = ({
   setInitialSearchLoaded,
   fiscalData,
-  onSearch 
+  onSearch
 }) => {
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const [triggerSearch, { isFetching }] = useLazyGetRehireForfeituresQuery();
@@ -61,7 +61,7 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
 
       dispatch(setMilitaryAndRehireForfeituresQueryParams(updatedData));
       triggerSearch(updatedData);
-      onSearch(); // Call onSearch to trigger page reset
+      if (onSearch) onSearch(); // Only call if onSearch is provided
     }
   };
 
@@ -72,7 +72,7 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
     reset,
     trigger
   } = useForm<StartAndEndDateRequest>({
-    resolver: yupResolver<StartAndEndDateRequest>(schema),
+    resolver: yupResolver(schema),
     defaultValues: {
       beginningDate: rehireForfeituresQueryParams?.beginningDate || fiscalData.fiscalBeginDate || undefined,
       endingDate: rehireForfeituresQueryParams?.endingDate || fiscalData.fiscalEndDate || undefined,

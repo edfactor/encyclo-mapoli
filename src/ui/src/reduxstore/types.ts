@@ -14,6 +14,11 @@ export interface ProfitYearRequest {
   profitYear: number;
 }
 
+export interface YearRangeRequest {
+  beginProfitYear: number;
+  endProfitYear: number;
+}
+
 export interface CalendarResponseDto {
   fiscalBeginDate: string;
   fiscalEndDate: string;
