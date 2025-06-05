@@ -1,5 +1,8 @@
 ﻿using System.Net.Http.Headers;
 using System.Text;
+using System.Threading.Channels;
+using Demoulas.ProfitSharing.Common.Contracts.Messaging;
+using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Clients;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
@@ -14,7 +17,6 @@ using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Caching.Extensions;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.Util.Extensions;
-using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -167,7 +169,7 @@ public static class OracleHcmExtension
         services.AddTransient<IJobFactory, OracleHcmJobFactory>();
         services.AddTransient<ISchedulerFactory, StdSchedulerFactory>();
 
-        services.AddTransient<IFakeSsnService, FakeSsnService>();
+        services.AddSingleton<IFakeSsnService, FakeSsnService>();
         
     }
 
@@ -238,28 +240,27 @@ public static class OracleHcmExtension
         options.TotalRequestTimeout = commonOptions.TotalRequestTimeoutOptions;
     }
 
+
     /// <summary>
-    /// Configures and registers the messaging services required for Oracle HCM.
+    /// Configures the messaging infrastructure for Oracle HCM synchronization.
     /// </summary>
-    /// <param name="builder">The <see cref="IHostApplicationBuilder"/> used to configure the application.</param>
-    /// <returns>The updated <see cref="IHostApplicationBuilder"/> instance.</returns>
+    /// <param name="builder">
+    /// The <see cref="IHostApplicationBuilder"/> used to configure the application.
+    /// </param>
+    /// <returns>
+    /// The modified <see cref="IHostApplicationBuilder"/> with Oracle HCM messaging services configured.
+    /// </returns>
     /// <remarks>
-    /// This method performs the following actions:
-    /// - Configures MassTransit with an in-memory transport.
-    /// - Sets the endpoint name formatter to kebab-case.
-    /// - Registers the <see cref="OracleHcmMessageConsumer"/> as a consumer.
-    /// - Configures endpoints for the registered consumers.
+    /// This method registers bounded channels for handling Oracle HCM employee and payroll messages.
+    /// It also adds hosted services for consuming these channels.
     /// </remarks>
     private static IHostApplicationBuilder AddOracleHcmMessaging(this IHostApplicationBuilder builder)
     {
-        builder.Services.AddMassTransit(x =>
-        {
-            x.SetKebabCaseEndpointNameFormatter();
-            x.AddConsumer<OracleHcmMessageConsumer>();
-            x.AddConsumer<EmployeeSyncConsumer>();
-            x.AddConsumer<PayrollSyncConsumer>();
-            x.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
-        });
+        builder.Services.AddSingleton(Channel.CreateBounded<MessageRequest<OracleEmployee[]>>(byte.MaxValue));
+        builder.Services.AddSingleton(Channel.CreateBounded<MessageRequest<PayrollItem[]>>(byte.MaxValue));
+
+        builder.Services.AddHostedService<EmployeeSyncChannelConsumer>();
+        builder.Services.AddHostedService<PayrollSyncChannelConsumer>();
 
         return builder;
     }
