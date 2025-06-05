@@ -1,7 +1,8 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.Navigations;
-public record NavigationDto
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.Navigations;
+public record NavigationDto : IdRequest
 {
-    public int Id { get; set; }
     public int? ParentId { get; set; }
     public required string Title { get; set; }
     public string? SubTitle { get; set; }

@@ -1,7 +1,8 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
-public record MemberDetails
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
+public record MemberDetails : IdRequest
 {
-    public required int Id { get; set; }
     public bool IsEmployee { get; init; }
     public int BadgeNumber { get; init; }
     public short PsnSuffix { get; init; }
