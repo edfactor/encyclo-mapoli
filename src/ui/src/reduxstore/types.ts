@@ -1315,5 +1315,17 @@ export interface CreateBeneficiaryResponseDto {
     contactExisted: boolean;
 }
 
+export interface BeneficiaryTypeDto {
+  id: number;
+  name?: string;
+}
+
+export interface BeneficiaryTypesRequestDto {
+  id?: number;
+}
+export interface BeneficiaryTypesResponseDto {
+  beneficiaryTypeList?: BeneficiaryTypeDto[]; 
+}
+
 
 

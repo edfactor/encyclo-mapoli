@@ -3,6 +3,8 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 import {
     BeneficiaryDto,
     BeneficiaryRequestDto,
+    BeneficiaryTypesRequestDto,
+    BeneficiaryTypesResponseDto,
     CreateBeneficiaryRequestDto,
     CreateBeneficiaryResponseDto,
 } from "reduxstore/types";
@@ -31,6 +33,22 @@ export const BeneficiariesApi = createApi({
                 }
             }
         }),
+        getBeneficiarytypes: builder.query<BeneficiaryTypesResponseDto, BeneficiaryTypesRequestDto>({
+            query: (request) => ({
+                url: `/beneficiaryType`,
+                method: "GET",
+                params: request
+            }),
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+                try {
+                    const { data } = await queryFulfilled;
+                    console.log(data);
+                } catch (err) {
+                    console.error("Failed to fetch beneficiaries:", err);
+                    dispatch(setBeneficiaryError("Failed to fetch beneficiaries"));
+                }
+            }
+        }),
         createBeneficiaries: builder.query<Paged<CreateBeneficiaryRequestDto>, CreateBeneficiaryResponseDto>({
             query: (request) => ({
                 url: `/beneficiaries`,
@@ -49,4 +67,4 @@ export const BeneficiariesApi = createApi({
     })
 });
 
-export const { useLazyGetBeneficiariesQuery, useLazyCreateBeneficiariesQuery } = BeneficiariesApi;
+export const { useLazyGetBeneficiariesQuery, useLazyCreateBeneficiariesQuery, useLazyGetBeneficiarytypesQuery } = BeneficiariesApi;
