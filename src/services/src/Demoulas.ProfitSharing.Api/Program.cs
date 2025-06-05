@@ -106,7 +106,7 @@ builder.Services.AddHealthChecks().AddCheck<EnvironmentHealthCheck>("Environment
 builder.Services.Configure<HealthCheckPublisherOptions>(options =>
 {
     options.Delay = TimeSpan.FromMinutes(1);       // Initial delay before the first run
-    options.Period = TimeSpan.FromMinutes(5);     // How often health checks are run
+    options.Period = TimeSpan.FromMinutes(15);     // How often health checks are run
     options.Predicate = _ => true;
 });
 

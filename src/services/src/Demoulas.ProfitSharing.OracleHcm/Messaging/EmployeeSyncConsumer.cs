@@ -1,5 +1,4 @@
-﻿using System.Data.SqlTypes;
-using System.Runtime.CompilerServices;
+﻿using System.Threading.Channels;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Messaging;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
@@ -12,27 +11,30 @@ using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Extensions;
 using Demoulas.ProfitSharing.OracleHcm.Validators;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
-using Demoulas.Util.Extensions;
-using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using ValidationResult = FluentValidation.Results.ValidationResult;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Messaging;
 
-internal class EmployeeSyncConsumer : IConsumer<MessageRequest<OracleEmployee[]>>
+internal class EmployeeSyncChannelConsumer : BackgroundService
 {
+    private readonly ChannelReader<MessageRequest<OracleEmployee[]>> _reader;
     private readonly OracleEmployeeValidator _employeeValidator;
     private readonly IDemographicsServiceInternal _demographicsService;
     private readonly OracleHcmConfig _oracleHcmConfig;
     private readonly IFakeSsnService _fakeSsnService;
     private readonly IProfitSharingDataContextFactory _contextFactory;
 
-    public EmployeeSyncConsumer(OracleEmployeeValidator employeeValidator,
+    public EmployeeSyncChannelConsumer(
+        Channel<MessageRequest<OracleEmployee[]>> channel,
+        OracleEmployeeValidator employeeValidator,
         IDemographicsServiceInternal demographicsServiceInternal,
         OracleHcmConfig oracleHcmConfig,
         IFakeSsnService fakeSsnService,
         IProfitSharingDataContextFactory contextFactory)
     {
+        _reader = channel.Reader;
         _employeeValidator = employeeValidator;
         _demographicsService = demographicsServiceInternal;
         _oracleHcmConfig = oracleHcmConfig;
@@ -40,21 +42,26 @@ internal class EmployeeSyncConsumer : IConsumer<MessageRequest<OracleEmployee[]>
         _contextFactory = contextFactory;
     }
 
-    public async Task Consume(ConsumeContext<MessageRequest<OracleEmployee[]>> context)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        OracleEmployee[] employees = context.Message.Body;
-        DemographicsRequest[] requestDtoEnumerable = await ConvertToRequestDto(employees, context.Message.UserId, context.CancellationToken).ConfigureAwait(false);
-        await _demographicsService.AddDemographicsStreamAsync(requestDtoEnumerable, _oracleHcmConfig.Limit,
-            context.CancellationToken).ConfigureAwait(false);
+        await foreach (var message in _reader.ReadAllAsync(stoppingToken).ConfigureAwait(false))
+        {
+            await ProcessMessage(message, stoppingToken).ConfigureAwait(false);
+        }
+    }
+
+    private async Task ProcessMessage(MessageRequest<OracleEmployee[]> message, CancellationToken cancellationToken)
+    {
+        OracleEmployee[] employees = message.Body;
+        DemographicsRequest[] requestDtoEnumerable = await ConvertToRequestDto(employees, message.UserId, cancellationToken).ConfigureAwait(false);
+        await _demographicsService.AddDemographicsStreamAsync(requestDtoEnumerable, _oracleHcmConfig.Limit, cancellationToken).ConfigureAwait(false);
     }
 
     private async Task<DemographicsRequest[]> ConvertToRequestDto(OracleEmployee[] employees,
         string requestedBy, CancellationToken cancellationToken)
     {
-
         async Task<Dictionary<long, int>> GetFakeSsns(List<long> oracleHcmIds)
         {
-            // Get existing SSN mappings from database
             Dictionary<long, int> empSsnDic = await _contextFactory.UseReadOnlyContext(c =>
             {
                 return c.Demographics.Where(d => oracleHcmIds.Contains(d.OracleHcmId))
@@ -62,40 +69,30 @@ internal class EmployeeSyncConsumer : IConsumer<MessageRequest<OracleEmployee[]>
                     .ToDictionaryAsync(d => d.OracleHcmId, d => d.Ssn, cancellationToken);
             }).ConfigureAwait(false);
 
-            // Find which IDs need new SSNs
             var missingIds = oracleHcmIds.Where(id => !empSsnDic.ContainsKey(id)).ToList();
-
             var newSsns = await _fakeSsnService.GenerateFakeSsnBatchAsync(missingIds.Count, cancellationToken).ConfigureAwait(false);
-            // Generate new SSNs for missing IDs
             for (int i = 0; i < missingIds.Count; i++)
             {
-
                 empSsnDic.Add(missingIds[i], newSsns[i]);
             }
-
             return empSsnDic;
         }
 
         var empSsnDic = await GetFakeSsns(employees.Select(e => e.PersonId).ToList()).ConfigureAwait(false);
-
         List<DemographicsRequest> requests = new();
         foreach (var employee in employees)
         {
-
             int badgeNumber = employee?.BadgeNumber ?? 0;
             if (employee == null || badgeNumber == 0)
             {
                 continue;
             }
-
             ValidationResult? result = await _employeeValidator.ValidateAsync(employee!, cancellationToken).ConfigureAwait(false);
             if (!result.IsValid)
             {
-                await _demographicsService.AuditError(badgeNumber, employee?.PersonId ?? 0, result.Errors, requestedBy,
-                    cancellationToken).ConfigureAwait(false);
+                await _demographicsService.AuditError(badgeNumber, employee?.PersonId ?? 0, result.Errors, requestedBy, cancellationToken).ConfigureAwait(false);
                 continue;
             }
-
             var dr = new DemographicsRequest
             {
                 OracleHcmId = employee.PersonId,
@@ -103,18 +100,13 @@ internal class EmployeeSyncConsumer : IConsumer<MessageRequest<OracleEmployee[]>
                 DateOfBirth = employee.DateOfBirth,
                 HireDate = employee.WorkRelationship?.StartDate ?? ReferenceData.DsmMinValue,
                 TerminationDate = employee.WorkRelationship?.TerminationDate,
-                Ssn =
-                    employee.NationalIdentifier?.NationalIdentifierNumber.ConvertSsnToInt() ??
-                    empSsnDic[employee.PersonId],
+                Ssn = employee.NationalIdentifier?.NationalIdentifierNumber.ConvertSsnToInt() ?? empSsnDic[employee.PersonId],
                 StoreNumber = employee.WorkRelationship?.Assignment.LocationCode ?? 0,
                 DepartmentId = employee.WorkRelationship?.Assignment.GetDepartmentId() ?? 0,
                 PayClassificationId = employee.WorkRelationship?.Assignment.JobCode ?? 0,
                 EmploymentTypeCode = employee.WorkRelationship?.Assignment.GetEmploymentType() ?? char.MinValue,
                 PayFrequencyId = employee.WorkRelationship?.Assignment.GetPayFrequency() ?? byte.MinValue,
-                EmploymentStatusId =
-                    employee.WorkRelationship?.TerminationDate == null
-                        ? EmploymentStatus.Constants.Active
-                        : EmploymentStatus.Constants.Terminated,
+                EmploymentStatusId = employee.WorkRelationship?.TerminationDate == null ? EmploymentStatus.Constants.Active : EmploymentStatus.Constants.Terminated,
                 GenderCode = employee.LegislativeInfoItem?.Gender switch
                 {
                     "M" => Gender.Constants.Male,
@@ -122,16 +114,15 @@ internal class EmployeeSyncConsumer : IConsumer<MessageRequest<OracleEmployee[]>
                     "ORA_HRX_X" => Gender.Constants.Nonbinary,
                     _ => Gender.Constants.Unknown
                 },
-                ContactInfo =
-                    new ContactInfoRequestDto
-                    {
-                        FirstName = employee.Name.FirstName,
-                        MiddleName = employee.Name.MiddleNames,
-                        LastName = employee.Name.LastName,
-                        FullName = $"{employee.Name.LastName}, {employee.Name.FirstName}",
-                        PhoneNumber = employee.Phone?.PhoneNumber,
-                        EmailAddress = employee.Email?.EmailAddress
-                    },
+                ContactInfo = new ContactInfoRequestDto
+                {
+                    FirstName = employee.Name.FirstName,
+                    MiddleName = employee.Name.MiddleNames,
+                    LastName = employee.Name.LastName,
+                    FullName = $"{employee.Name.LastName}, {employee.Name.FirstName}",
+                    PhoneNumber = employee.Phone?.PhoneNumber,
+                    EmailAddress = employee.Email?.EmailAddress
+                },
                 Address = new AddressRequestDto
                 {
                     Street = employee.Address!.AddressLine1,
@@ -144,10 +135,8 @@ internal class EmployeeSyncConsumer : IConsumer<MessageRequest<OracleEmployee[]>
                     CountryIso = employee.Address.Country
                 }
             };
-
             requests.Add(dr);
         }
-
         return requests.ToArray();
     }
 }
