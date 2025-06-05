@@ -94,6 +94,10 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
         // Format month to always have two digits
         const formattedMonth = month.toString().padStart(2, "0");
 
+        if (month === 0 && year === 0) {
+          return "";
+        }
+        
         return `${formattedMonth}/${year}`;
       }
     },
