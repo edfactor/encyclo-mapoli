@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace YEMatch;
 
 [SuppressMessage("AsyncUsage", "AsyncFixer01:Unnecessary async/await usage")]
-public class GoldenReadyOnly : Runnable
+public class GoldenReadyOnlyRun : Runnable
 {
     public override async Task Exec()
     {
@@ -26,7 +26,7 @@ public class GoldenReadyOnly : Runnable
             "R27",
             "R28"
         ));
-        
+
         // Copy the golden files to the integration test Resources directory
         GetGold.Fetch(ReadyActivityFactory.SftpClient!);
     }

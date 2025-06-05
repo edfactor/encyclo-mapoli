@@ -12,6 +12,7 @@ internal static class TestActivityFactory
             new TestEtvaNow(),
             new TestEtvaPrior(),
             new ReadyDatabase2Smart(),
+            new TestMasterInquiry(),
 
             // Arrange
             new TrimTo14Employees(),
