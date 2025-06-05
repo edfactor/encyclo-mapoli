@@ -10,6 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="FluentAssertions"/>
     <PackageReference Include="Microsoft.Extensions.Configuration.Json"/>
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets"/>
     <PackageReference Include="Newtonsoft.Json"/>
@@ -18,5 +19,11 @@
     <PackageReference Include="SSH.NET"/>
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="YEMatch\Resources\OUTFL">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>OUTFL</Link>
+    </None>
+  </ItemGroup>
 
 </Project>
