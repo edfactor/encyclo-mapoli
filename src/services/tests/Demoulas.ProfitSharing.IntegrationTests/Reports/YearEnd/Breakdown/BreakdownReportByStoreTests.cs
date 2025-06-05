@@ -34,7 +34,7 @@ public class BreakdownReportByStoreTests
         _embeddedSqlService = new EmbeddedSqlService();
         _totalService = new TotalService(_dataContextFactory, _calendarService, _embeddedSqlService,
             new DemographicReaderService(new FrozenService(_dataContextFactory), new HttpContextAccessor()));
-        _breakdownService = new BreakdownReportService(_dataContextFactory, _calendarService, _totalService);
+        _breakdownService = new BreakdownReportService(_dataContextFactory, _calendarService, _totalService, null!);
     }
 
     [Fact]

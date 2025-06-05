@@ -28,6 +28,7 @@ using Quartz.Spi;
 using AddressMapper = Demoulas.ProfitSharing.OracleHcm.Mappers.AddressMapper;
 using ContactInfoMapper = Demoulas.ProfitSharing.OracleHcm.Mappers.ContactInfoMapper;
 using DemographicMapper = Demoulas.ProfitSharing.OracleHcm.Mappers.DemographicMapper;
+using Polly;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Extensions;
 
@@ -204,20 +205,53 @@ public static class OracleHcmExtension
             }
         };
 
+        // Custom retry handler for 401 Unauthorized, with jitter. Bulkhead is not available directly in this API version.
+        static void AddRetryOn401WithJitter(HttpStandardResilienceOptions options)
+        {
+            options.Retry.ShouldHandle = args =>
+            {
+                if (args.Outcome.Result is { StatusCode: System.Net.HttpStatusCode.Unauthorized })
+                {
+                    // Optionally log here
+                    return ValueTask.FromResult(true);
+                }
+                return ValueTask.FromResult(false);
+            };
+            options.Retry.MaxRetryAttempts = 3;
+            options.Retry.BackoffType = DelayBackoffType.Exponential;
+            options.Retry.Delay = TimeSpan.FromMinutes(2);
+
+            // Add jitter to retry delay
+            var random = new Random();
+            options.Retry.DelayGenerator = args =>
+            {
+                var baseDelay = TimeSpan.FromSeconds(2);
+                var exponential = TimeSpan.FromSeconds(Math.Pow(2, args.AttemptNumber));
+                var jitter = TimeSpan.FromMilliseconds(random.Next(0, 1000));
+                return new ValueTask<TimeSpan?>(baseDelay + exponential + jitter);
+            };
+        }
+
+        void ConfigureWith401RetryAndBulkhead(HttpStandardResilienceOptions options, HttpResilienceOptions commonOptions)
+        {
+            ApplyResilienceOptions(options, commonOptions);
+            AddRetryOn401WithJitter(options);
+        }
+
         services.AddHttpClient<AtomFeedClient>("AtomFeedSync", BuildOracleHcmAuthClient)
-            .AddStandardResilienceHandler(options => ApplyResilienceOptions(options, commonHttpOptions));
+            .AddStandardResilienceHandler(options => ConfigureWith401RetryAndBulkhead(options, commonHttpOptions));
 
         services.AddHttpClient<EmployeeFullSyncClient>("EmployeeSync", BuildOracleHcmAuthClient)
-            .AddStandardResilienceHandler(options => ApplyResilienceOptions(options, commonHttpOptions));
+            .AddStandardResilienceHandler(options => ConfigureWith401RetryAndBulkhead(options, commonHttpOptions));
 
         services.AddHttpClient<PayrollSyncClient>("PayrollSyncClient", BuildOracleHcmAuthClient)
-            .AddStandardResilienceHandler(options => ApplyResilienceOptions(options, commonHttpOptions));
+            .AddStandardResilienceHandler(options => ConfigureWith401RetryAndBulkhead(options, commonHttpOptions));
 
         services.AddHttpClient<PayrollSyncService>("PayrollSyncService", BuildOracleHcmAuthClient)
-            .AddStandardResilienceHandler(options => ApplyResilienceOptions(options, commonHttpOptions));
+            .AddStandardResilienceHandler(options => ConfigureWith401RetryAndBulkhead(options, commonHttpOptions));
 
         services.AddHttpClient<OracleHcmHealthCheck>("OracleHcmHealthCheck", BuildOracleHcmAuthClient)
-            .AddStandardResilienceHandler(options => ApplyResilienceOptions(options, commonHttpOptions));
+            .AddStandardResilienceHandler(options => ConfigureWith401RetryAndBulkhead(options, commonHttpOptions));
     }
 
     /// <summary>
@@ -256,8 +290,8 @@ public static class OracleHcmExtension
     /// </remarks>
     private static IHostApplicationBuilder AddOracleHcmMessaging(this IHostApplicationBuilder builder)
     {
-        builder.Services.AddSingleton(Channel.CreateBounded<MessageRequest<OracleEmployee[]>>(byte.MaxValue));
-        builder.Services.AddSingleton(Channel.CreateBounded<MessageRequest<PayrollItem[]>>(byte.MaxValue));
+        builder.Services.AddSingleton(Channel.CreateBounded<MessageRequest<OracleEmployee[]>>(50));
+        builder.Services.AddSingleton(Channel.CreateBounded<MessageRequest<PayrollItem[]>>(50));
 
         builder.Services.AddHostedService<EmployeeSyncChannelConsumer>();
         builder.Services.AddHostedService<PayrollSyncChannelConsumer>();
