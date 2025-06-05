@@ -20,6 +20,7 @@ import * as yup from "yup";
 import { MasterInquiryRequest, MasterInquirySearch } from "reduxstore/types";
 import {
   clearMasterInquiryData,
+  clearMasterInquiryGroupingData,
   clearMasterInquiryRequestParams,
   setMasterInquiryRequestParams,
   updateMasterInquiryResults
@@ -214,6 +215,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
     setInitialSearchLoaded(false);
     dispatch(clearMasterInquiryRequestParams());
     dispatch(clearMasterInquiryData());
+    dispatch(clearMasterInquiryGroupingData());
     reset({
       endProfitYear: profitYear, // Always reset to default profitYear
       startProfitMonth: undefined,

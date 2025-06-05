@@ -347,6 +347,7 @@ export interface MasterInquiryDetail extends ProfitYearRequest {
 }
 
 export interface MasterInquiryRequest {
+  id?: number;
   memberType?: number;
   badgeNumber?: number;
   psnSuffix?: number;
