@@ -89,6 +89,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
         public decimal Payment { get; set; }
     }
 
+
     #endregion
 
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
@@ -126,7 +127,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             query = FilterMemberQuery(req, query);
 
             // Get unique SSNs from the query
-            var ssnList = await query.Select(x => x.Member.Ssn).Distinct().ToListAsync(cancellationToken);
+            var ssnList = await query.Select(x => x.Member.Ssn).ToHashSetAsync(cancellationToken);
             short currentYear = req.ProfitYear;
             short previousYear = (short)(currentYear - 1);
             var memberType = req.MemberType;
@@ -163,6 +164,48 @@ public sealed class MasterInquiryService : IMasterInquiryService
             return detailsList;
         });
     }
+
+    public async Task<PaginatedResponseDto<GroupedProfitSummaryDto>> GetGroupedProfitDetails(MasterInquiryRequest req, CancellationToken cancellationToken = default)
+    {
+        return await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        {
+            IQueryable<MasterInquiryItem> query = req.MemberType switch
+            {
+                1 => await GetMasterInquiryDemographics(ctx),
+                2 => GetMasterInquiryBeneficiary(ctx),
+                _ => (await GetMasterInquiryDemographics(ctx)).Union(GetMasterInquiryBeneficiary(ctx))
+            };
+
+            query = FilterMemberQuery(req, query);
+
+            var rawQuery = query.Select(x => new
+            {
+                x.ProfitDetail.ProfitYear,
+                x.ProfitDetail.MonthToDate,
+                Contribution = x.ProfitDetail.CalculateContribution(),
+                Earnings = x.ProfitDetail.CalculateEarnings(),
+                Forfeiture = x.ProfitDetail.CalculateForfeiture(),
+                Payment = x.ProfitDetail.CalculatePayment()
+            });
+
+            return await rawQuery
+                .GroupBy(x => new { x.ProfitYear, x.MonthToDate })
+                .Select(g => new GroupedProfitSummaryDto
+                {
+                    ProfitYear = g.Key.ProfitYear,
+                    MonthToDate = g.Key.MonthToDate,
+                    TotalContribution = g.Sum(x => x.Contribution),
+                    TotalEarnings = g.Sum(x => x.Earnings),
+                    TotalForfeiture = g.Sum(x => x.Forfeiture),
+                    TotalPayment = g.Sum(x => x.Payment),
+                    TransactionCount = g.Count()
+                })
+                .OrderBy(x => x.ProfitYear)
+                .ThenBy(x => x.MonthToDate)
+                .ToPaginationResultsAsync(req, cancellationToken);
+        });
+    }
+
 
     public async Task<MemberProfitPlanDetails?> GetMemberVestingAsync(MasterInquiryMemberRequest req, CancellationToken cancellationToken = default)
     {
@@ -564,7 +607,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
         return detailsList;
     }
 
-    private async Task<PaginatedResponseDto<MemberDetails>> GetDemographicDetailsForSsns(ProfitSharingReadOnlyDbContext ctx, SortedPaginationRequestDto req, List<int> ssns, short currentYear, short previousYear, CancellationToken cancellationToken)
+    private async Task<PaginatedResponseDto<MemberDetails>> GetDemographicDetailsForSsns(ProfitSharingReadOnlyDbContext ctx, SortedPaginationRequestDto req, ISet<int> ssns, short currentYear, short previousYear, CancellationToken cancellationToken)
     {
         var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
         var members = await demographics
@@ -634,7 +677,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
     private Task<PaginatedResponseDto<MemberDetails>> GetBeneficiaryDetailsForSsns(ProfitSharingReadOnlyDbContext ctx,
         SortedPaginationRequestDto req,
-        List<int> ssns,
+        ISet<int> ssns,
         CancellationToken cancellationToken)
     {
         var members = ctx.Beneficiaries
