@@ -167,6 +167,15 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
     public async Task<PaginatedResponseDto<GroupedProfitSummaryDto>> GetGroupedProfitDetails(MasterInquiryRequest req, CancellationToken cancellationToken = default)
     {
+        // These are the ProfitCode IDs used in GetProfitCodesForBalanceCalc()
+        byte[] balanceProfitCodes = new byte[] {
+            ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id,
+            ProfitCode.Constants.OutgoingForfeitures.Id,
+            ProfitCode.Constants.OutgoingDirectPayments.Id,
+            ProfitCode.Constants.OutgoingXferBeneficiary.Id,
+            ProfitCode.Constants.Outgoing100PercentVestedPayment.Id
+        };
+
         return await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             IQueryable<MasterInquiryItem> query = req.MemberType switch
@@ -178,26 +187,18 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
             query = FilterMemberQuery(req, query);
 
-            var rawQuery = query.Select(x => new
-            {
-                x.ProfitDetail.ProfitYear,
-                x.ProfitDetail.MonthToDate,
-                Contribution = x.ProfitDetail.Contribution,
-                Earnings = x.ProfitDetail.Earnings,
-                Forfeiture = x.ProfitDetail.CalculateForfeiture(),
-                Payment = x.ProfitDetail.CalculatePayment()
-            });
-
-            return await rawQuery
-                .GroupBy(x => new { x.ProfitYear, x.MonthToDate })
+            return await query
+                .GroupBy(x => new { x.ProfitDetail.ProfitYear, x.ProfitDetail.MonthToDate })
                 .Select(g => new GroupedProfitSummaryDto
                 {
                     ProfitYear = g.Key.ProfitYear,
                     MonthToDate = g.Key.MonthToDate,
-                    TotalContribution = g.Sum(x => x.Contribution),
-                    TotalEarnings = g.Sum(x => x.Earnings),
-                    TotalForfeiture = g.Sum(x => x.Forfeiture),
-                    TotalPayment = g.Sum(x => x.Payment),
+                    TotalContribution = g.Sum(x => x.ProfitDetail.Contribution),
+                    TotalEarnings = g.Sum(x => x.ProfitDetail.Earnings),
+                    TotalForfeiture = g.Sum(x =>
+                        !balanceProfitCodes.Contains(x.ProfitDetail.ProfitCodeId) ? x.ProfitDetail.Forfeiture : 0),
+                    TotalPayment = g.Sum(x =>
+                        balanceProfitCodes.Contains(x.ProfitDetail.ProfitCodeId) ? x.ProfitDetail.Forfeiture : 0),
                     TransactionCount = g.Count()
                 })
                 .OrderBy(x => x.ProfitYear)
