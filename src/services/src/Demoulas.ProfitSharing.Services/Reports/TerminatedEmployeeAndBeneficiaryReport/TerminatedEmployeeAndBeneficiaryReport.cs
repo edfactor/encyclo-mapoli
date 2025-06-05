@@ -1,4 +1,5 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -164,12 +165,12 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         var profitYearRange = GetProfitYearRange(req);
         var ssns = memberSliceUnion.Select(ms => ms.Ssn).ToHashSet();
 
-        var profitDetailsRaw = await ctx.ProfitDetails
-            .Where(pd => pd.ProfitYear >= profitYearRange.beginProfitYear && pd.ProfitYear <= profitYearRange.endProfitYear && ssns.Contains(pd.Ssn))
-            .ToListAsync(cancellationToken);
-        var profitDetailsDict = profitDetailsRaw
-            .GroupBy(pd => (pd.Ssn, pd.ProfitYear))
-            .ToDictionary(g => g.Key, g => new InternalProfitDetailDto
+        var profitDetailsRaw = ctx.ProfitDetails
+            .Where(pd => pd.ProfitYear >= profitYearRange.beginProfitYear && pd.ProfitYear <= profitYearRange.endProfitYear && ssns.Contains(pd.Ssn));
+            
+        var profitDetailsDict = await profitDetailsRaw
+            .GroupBy(pd =>new {pd.Ssn, pd.ProfitYear})
+            .ToDictionaryAsync(g => g.Key, g => new InternalProfitDetailDto
             {
                 Ssn = g.Key.Ssn,
                 ProfitYear = g.Key.ProfitYear,
@@ -190,19 +191,17 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 CurrentAmount = g.Sum(x => x.Contribution + x.Earnings +
                                            (x.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0) -
                                            (x.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id ? x.Forfeiture : 0))
-            });
+            }, cancellationToken);
 
         var lastYear = (short)(profitYearRange.endProfitYear - 1);
-        var lastYearBalancesRaw = await _totalService.GetTotalBalanceSet(ctx, lastYear)
+        var lastYearBalancesDict = await _totalService.GetTotalBalanceSet(ctx, lastYear)
             .Where(x => ssns.Contains(x.Ssn))
-            .ToListAsync(cancellationToken);
-        var lastYearBalancesDict = lastYearBalancesRaw.ToDictionary(x => (x.Ssn, lastYear), x => x);
+            .ToDictionaryAsync(x => (x.Ssn, lastYear), x => x, cancellationToken);
 
         var today = DateOnly.FromDateTime(DateTime.Today);
-        var thisYearBalancesRaw = await _totalService.TotalVestingBalance(ctx, profitYearRange.beginProfitYear, profitYearRange.endProfitYear, today)
+        var thisYearBalancesDict = await _totalService.TotalVestingBalance(ctx, profitYearRange.beginProfitYear, profitYearRange.endProfitYear, today)
             .Where(x => ssns.Contains(x.Ssn))
-            .ToListAsync(cancellationToken);
-        var thisYearBalancesDict = thisYearBalancesRaw.ToDictionary(x => x.Ssn, x => x);
+            .ToDictionaryAsync(x => x.Ssn, x => x, cancellationToken);
 
         // Build a list of all year details, then group by BadgeNumber, PsnSuffix, Name
         var yearDetailsList = new List<(int BadgeNumber, short PsnSuffix, string? Name, TerminatedEmployeeAndBeneficiaryYearDetailDto YearDetail)>();
@@ -210,7 +209,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 
         foreach (var memberSlice in unions)
         {
-            var key = (memberSlice.Ssn, memberSlice.ProfitYear);
+            var key = new { memberSlice.Ssn, memberSlice.ProfitYear };
             if (!profitDetailsDict.TryGetValue(key, out InternalProfitDetailDto? transactionsThisYear))
             {
                 transactionsThisYear = new InternalProfitDetailDto();
@@ -267,7 +266,10 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             if (memberSlice.IsOnlyBeneficiary) { vestingPercent = 1; }
             if (member.EndingBalance == 0 && vestedBalance == 0) { vestingPercent = 0; }
             int? age = null;
-            if (member.Birthday.HasValue) { age = member.Birthday.Value.Age(); }
+            if (member.Birthday.HasValue)
+            {
+                age = member.ProfitYear > ReferenceData.DsmMinValue.Year ? member.Birthday.Value.Age(new DateTime(member.ProfitYear, 12, 31)) : member.Birthday.Value.Age();
+            }
 
             var yearDetail = new TerminatedEmployeeAndBeneficiaryYearDetailDto
             {
@@ -301,7 +303,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 BadgeNumber = g.Key.BadgeNumber,
                 PsnSuffix = g.Key.PsnSuffix,
                 Name = g.Key.Name,
-                YearDetails = g.Select(x => x.YearDetail).OrderBy(y => y.ProfitYear).ToList()
+                YearDetails = g.Select(x => x.YearDetail).OrderByDescending(y => y.ProfitYear).ToList()
             })
             .ToList();
 

@@ -10,17 +10,15 @@ import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { RootState } from "reduxstore/store";
 import AddForfeitureModal from "./AddForfeitureModal";
 import { useLazyGetForfeitureAdjustmentsQuery } from "reduxstore/api/YearsEndApi";
-import { useLazySearchProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
-import ForfeitureAdjustmentEmployeeDetails from "./ForfeitureAdjustmentEmployeeDetails";
+import MasterInquiryEmployeeDetails from "pages/MasterInquiry/MasterInquiryEmployeeDetails";
+import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 
 const ForfeituresAdjustment = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
-  const [showEmployeeDetails, setShowEmployeeDetails] = useState(false);
   const [isAddForfeitureModalOpen, setIsAddForfeitureModalOpen] = useState(false);
   const { forfeitureAdjustmentData, forfeitureAdjustmentQueryParams } = useSelector((state: RootState) => state.forfeituresAdjustment);
-  const { masterInquiryEmployeeDetails } = useSelector((state: RootState) => state.inquiry);
+  const profitYear = useDecemberFlowProfitYear();
   const [triggerSearch] = useLazyGetForfeitureAdjustmentsQuery();
-  const [triggerMasterInquiry] = useLazySearchProfitMasterInquiryQuery();
 
   const renderActionNode = () => {
     return (
@@ -30,26 +28,6 @@ const ForfeituresAdjustment = () => {
 
   const handleSearchComplete = (loaded: boolean) => {
     setInitialSearchLoaded(loaded);
-    setShowEmployeeDetails(loaded);
-
-    // If we have results, get employee details
-    if (loaded && forfeitureAdjustmentData?.response?.results && forfeitureAdjustmentData.response.results.length > 0) {
-      const badgeNumber = forfeitureAdjustmentData.response.results[0].badgeNumber;
-      fetchEmployeeDetails(badgeNumber);
-    }
-  };
-
-  const fetchEmployeeDetails = (badgeNumber: number) => {
-    // Call Master Inquiry API
-    triggerMasterInquiry({
-      badgeNumber,
-      pagination: {
-        take: 10,
-        skip: 0,
-        sortBy: "profitYear",
-        isSortDescending: true
-      }
-    });
   };
 
   const handleOpenAddForfeitureModal = () => {
@@ -87,21 +65,6 @@ const ForfeituresAdjustment = () => {
     }
   }, []);
 
-  // Reset employee details visibility when search results change
-  useEffect(() => {
-    if (forfeitureAdjustmentData) {
-      setShowEmployeeDetails(true);
-
-      // If we have results, get employee details
-      if (forfeitureAdjustmentData.response?.results && forfeitureAdjustmentData.response.results.length > 0) {
-        const badgeNumber = forfeitureAdjustmentData.response.results[0].badgeNumber;
-        fetchEmployeeDetails(badgeNumber);
-      }
-    } else {
-      setShowEmployeeDetails(false);
-    }
-  }, [forfeitureAdjustmentData]);
-
   return (
     <Page label={CAPTIONS.FORFEITURES_ADJUSTMENT} actionNode={renderActionNode()}>
       <Grid2
@@ -116,8 +79,13 @@ const ForfeituresAdjustment = () => {
           </DSMAccordion>
         </Grid2>
 
-        {showEmployeeDetails && masterInquiryEmployeeDetails && (
-          <ForfeitureAdjustmentEmployeeDetails details={masterInquiryEmployeeDetails} />
+        {/* Only show details if we have forfeitureAdjustmentData and a result */}
+        {forfeitureAdjustmentData?.response?.results?.[0] && profitYear && (
+          <MasterInquiryEmployeeDetails
+            memberType={1}
+            id={forfeitureAdjustmentData.response.results[0].demographicId}
+            profitYear={profitYear}
+          />
         )}
 
         <Grid2 width="100%">
@@ -133,7 +101,7 @@ const ForfeituresAdjustment = () => {
         open={isAddForfeitureModalOpen}
         onClose={handleCloseAddForfeitureModal}
         onSave={handleSaveForfeiture}
-        employeeDetails={masterInquiryEmployeeDetails}
+        employeeDetails={forfeitureAdjustmentData?.response?.results?.[0]}
       />
     </Page>
   );

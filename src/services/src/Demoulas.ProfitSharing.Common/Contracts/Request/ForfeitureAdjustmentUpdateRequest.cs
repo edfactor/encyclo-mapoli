@@ -5,7 +5,6 @@
 /// </summary>
 public record ForfeitureAdjustmentUpdateRequest
 {
-    public required int ClientNumber { get; init; }
     public required int BadgeNumber { get; init; }
     public required decimal ForfeitureAmount { get; init; }
     public string? Reason { get; init; }
@@ -15,7 +14,6 @@ public record ForfeitureAdjustmentUpdateRequest
     {
         return new ForfeitureAdjustmentUpdateRequest
         {
-            ClientNumber = 1,
             BadgeNumber = 1234567890,
             ForfeitureAmount = 1000,
             Reason = "Example reason",

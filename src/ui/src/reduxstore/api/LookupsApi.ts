@@ -4,7 +4,8 @@ import { setAccountingYearData, setMissivesData } from "reduxstore/slices/lookup
 import {
   CalendarResponseDto,
   MissiveResponse,
-  ProfitYearRequest
+  ProfitYearRequest,
+  YearRangeRequest
 } from "reduxstore/types";
 import { createDataSourceAwareBaseQuery, url } from "./api";
 
@@ -43,8 +44,18 @@ export const LookupsApi = createApi({
           console.log("Err: " + err);
         }
       }
-    })
+    }),
+    getAccountingRange: builder.query<CalendarResponseDto, YearRangeRequest>({
+      query: (params) => ({
+        url: "/lookup/calendar/accounting-range",
+        method: "GET",
+        params: {
+          beginProfitYear: params.beginProfitYear,
+          endProfitYear: params.endProfitYear
+        }
+      })
+    }),
   })
 });
 
-export const { useLazyGetAccountingYearQuery, useLazyGetMissivesQuery } = LookupsApi;
+export const { useLazyGetAccountingYearQuery, useLazyGetMissivesQuery, useLazyGetAccountingRangeQuery } = LookupsApi;

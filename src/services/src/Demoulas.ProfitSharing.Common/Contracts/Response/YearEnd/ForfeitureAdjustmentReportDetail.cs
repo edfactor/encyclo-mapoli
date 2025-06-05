@@ -2,7 +2,7 @@
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 public sealed record ForfeitureAdjustmentReportDetail
 {
-    public required int ClientNumber { get; set; }
+    public required int DemographicId { get; set; }
     public required int BadgeNumber { get; set; }
     public required decimal StartingBalance { get; set; }
     public required decimal ForfeitureAmount { get; set; }
@@ -13,7 +13,7 @@ public sealed record ForfeitureAdjustmentReportDetail
     {
         return new ForfeitureAdjustmentReportDetail
         {
-            ClientNumber = 123,
+            DemographicId = 123,
             BadgeNumber = 456,
             StartingBalance = 1000,
             ForfeitureAmount = 100,

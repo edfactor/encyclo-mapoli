@@ -14,6 +14,11 @@ export interface ProfitYearRequest {
   profitYear: number;
 }
 
+export interface YearRangeRequest {
+  beginProfitYear: number;
+  endProfitYear: number;
+}
+
 export interface CalendarResponseDto {
   fiscalBeginDate: string;
   fiscalEndDate: string;
@@ -496,6 +501,8 @@ export interface ForfeituresByAgeDetail {
 
 export interface EmployeeDetails {
   id: number;
+  badgeNumber: number;
+  psnSuffix: number;
   isEmployee: boolean;
   firstName: string;
   lastName: string;
@@ -511,7 +518,6 @@ export interface EmployeeDetails {
   contributionsLastYear: boolean;
   enrollmentId: number;
   enrollment: string;
-  badgeNumber: string;
   hireDate: string;
   terminationDate: string | null;
   reHireDate: string | null;
@@ -526,10 +532,6 @@ export interface EmployeeDetails {
   missives: number[] | null;
 }
 
-export interface MasterInquiryResponseType {
-  employeeDetails: EmployeeDetails | null;
-  inquiryResults: Paged<MasterInquiryDetail>;
-}
 
 export interface BalanceByDetailBase {
   employeeCount: number;
@@ -892,6 +894,7 @@ export interface YearEndProfitSharingEmployee {
   employeeStatus: string;
   balance: number;
   yearsInPlan: number;
+  terminationDate: Date | null;
 }
 
 export interface BreakdownByStoreRequest extends ProfitYearRequest {
@@ -1112,6 +1115,7 @@ export interface ForfeitureAdjustmentUpdateRequest {
 }
 
 export interface ForfeitureAdjustmentDetail {
+  demographicId: number;
   badgeNumber: number;
   startingBalance: number;
   forfeitureAmount: number;

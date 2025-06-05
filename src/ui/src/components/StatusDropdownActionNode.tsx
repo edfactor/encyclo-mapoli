@@ -28,7 +28,9 @@ const StatusDropdownActionNode: React.FC<StatusDropdownActionNodeProps> = ({ ini
     const result = await triggerUpdate({ navigationId: navigationObj?.id, statusId: parseInt(newStatus) })
     if (result.data?.isSuccessful) {
       setCurrentStatus(newStatus);
-      triggerGetNavigation({ navigationId: undefined });
+      if (hasToken) {
+        triggerGetNavigation({ navigationId: undefined });
+      }
     }
   };
 
@@ -65,4 +67,4 @@ const StatusDropdownActionNode: React.FC<StatusDropdownActionNodeProps> = ({ ini
   );
 };
 
-export default StatusDropdownActionNode; 
+export default StatusDropdownActionNode;

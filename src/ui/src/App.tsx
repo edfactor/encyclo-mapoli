@@ -15,7 +15,7 @@ import { RootState } from "./reduxstore/store";
 import EnvironmentUtils from "./utils/environmentUtils";
 import { Settings } from "@mui/icons-material";
 import { useLazyGetMissivesQuery } from "reduxstore/api/LookupsApi";
-import { useGetHealthQuery } from "./reduxstore/api/AppSupportApi";
+import { useLazyGetHealthQuery } from "./reduxstore/api/AppSupportApi";
 import { getHealthStatusDescription } from "./utils/appSupportUtil";
 
 // Types
@@ -38,7 +38,7 @@ const App = () => {
   const { buildNumber } = useSelector((state: RootState) => state.common);
   const [oktaAuth, setOktaAuth] = useState<any>(null);
   const [loadMissives, { isFetching }] = useLazyGetMissivesQuery();
-  const { data: healthData, isLoading } = useGetHealthQuery();
+  const [triggerHealth, { data: healthData, isLoading }] = useLazyGetHealthQuery();
 
   const health = useSelector((state: RootState) => state.support.health);
 
@@ -139,6 +139,10 @@ const App = () => {
       setBuildInfoText(buildInfo);
     }
   }, [buildNumber, uiBuildInfo]);
+
+  useEffect(() => {
+    triggerHealth();
+  }, [triggerHealth]);
 
   // Theme setup
   const theme = createTheme(themeOptions);

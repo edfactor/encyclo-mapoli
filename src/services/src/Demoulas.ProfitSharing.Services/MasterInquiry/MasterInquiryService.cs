@@ -118,9 +118,9 @@ public sealed class MasterInquiryService : IMasterInquiryService
         {
             IQueryable<MasterInquiryItem> query = req.MemberType switch
             {
-                1 => GetMasterInquiryDemographics(ctx),
+                1 => await GetMasterInquiryDemographics(ctx),
                 2 => GetMasterInquiryBeneficiary(ctx),
-                _ => GetMasterInquiryDemographics(ctx).Union(GetMasterInquiryBeneficiary(ctx))
+                _ => (await GetMasterInquiryDemographics(ctx)).Union(GetMasterInquiryBeneficiary(ctx))
             };
 
             query = FilterMemberQuery(req, query);
@@ -179,7 +179,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
         });
         Dictionary<int, MemberDetails> memberDetailsMap = new Dictionary<int, MemberDetails>
         {
-            { members.ssn, members.memberDetails ?? new MemberDetails() }
+            { members.ssn, members.memberDetails ?? new MemberDetails { Id = 0} }
         };
 
         var details = await GetVestingDetails(memberDetailsMap, currentYear, previousYear, cancellationToken);
@@ -192,9 +192,9 @@ public sealed class MasterInquiryService : IMasterInquiryService
         {
             IQueryable<MasterInquiryItem> query = req.MemberType switch
             {
-                1 => GetMasterInquiryDemographics(ctx),
+                1 => await GetMasterInquiryDemographics(ctx),
                 2 => GetMasterInquiryBeneficiary(ctx),
-                _ => GetMasterInquiryDemographics(ctx).Union(GetMasterInquiryBeneficiary(ctx))
+                _ => (await GetMasterInquiryDemographics(ctx)).Union(GetMasterInquiryBeneficiary(ctx))
             };
 
             if (req.Id.HasValue)
@@ -289,14 +289,15 @@ public sealed class MasterInquiryService : IMasterInquiryService
         });
     }
 
-    private static IQueryable<MasterInquiryItem> GetMasterInquiryDemographics(IProfitSharingDbContext ctx)
+    private async Task<IQueryable<MasterInquiryItem>> GetMasterInquiryDemographics(ProfitSharingReadOnlyDbContext ctx)
     {
+        var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
         var query = ctx.ProfitDetails
             .Include(pd => pd.ProfitCode)
             .Include(pd => pd.ZeroContributionReason)
             .Include(pd => pd.TaxCode)
             .Include(pd => pd.CommentType)
-            .Join(ctx.Demographics
+            .Join(demographics
                     .Include(d=> d.PayProfits),
                 pd => pd.Ssn,
                 d => d.Ssn,
@@ -341,7 +342,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             .Join(ctx.Beneficiaries.Include(m => m.Contact),
                 pd => pd.Ssn,
                 b => b.Contact != null ? b.Contact.Ssn : 0,
-                (pd, d) => new MasterInquiryItem
+                (pd, b) => new MasterInquiryItem
                 {
                     ProfitDetail = pd,
                     ProfitCode = pd.ProfitCode,
@@ -351,16 +352,16 @@ public sealed class MasterInquiryService : IMasterInquiryService
                     TransactionDate = pd.TransactionDate,
                     Member = new InquiryDemographics
                     {
-                        Id = d.Id,
-                        BadgeNumber = d.BadgeNumber,
-                        FullName = d.Contact!.ContactInfo.FullName != null ? d.Contact.ContactInfo.FullName : d.Contact.ContactInfo.LastName,
-                        FirstName = d.Contact!.ContactInfo.FirstName,
-                        LastName = d.Contact!.ContactInfo.LastName,
+                        Id = b.Id,
+                        BadgeNumber = b.BadgeNumber,
+                        FullName = b.Contact!.ContactInfo.FullName != null ? b.Contact.ContactInfo.FullName : b.Contact.ContactInfo.LastName,
+                        FirstName = b.Contact!.ContactInfo.FirstName,
+                        LastName = b.Contact!.ContactInfo.LastName,
                         PayFrequencyId = PayFrequency.Constants.Weekly,
-                        PsnSuffix = d.PsnSuffix,
-                        Ssn = d.Contact != null ? d.Contact.Ssn : 0,
+                        PsnSuffix = b.PsnSuffix,
+                        Ssn = b.Contact != null ? b.Contact.Ssn : 0,
                         CurrentIncomeYear = 0,
-                        CurrentHoursYear = 0
+                        CurrentHoursYear = 0,
                     }
                 });
 
@@ -403,7 +404,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
         if (memberData == null)
         {
-            return (0, new MemberDetails());
+            return (0, new MemberDetails { Id = 0 });
         }
 
         var missives = await _missiveService.DetermineMissivesForSsns([memberData.Ssn], currentYear, cancellationToken);
@@ -462,7 +463,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
         if (memberData == null)
         {
-            return (0, new MemberDetails());
+            return (0, new MemberDetails{ Id = 0 });
         }
 
        
@@ -552,6 +553,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 PercentageVested = balance?.VestingPercent ?? 0,
                 ContributionsLastYear = previousBalanceItem is { CurrentBalance: > 0 },
                 BadgeNumber = memberData.BadgeNumber,
+                PsnSuffix = memberData.PsnSuffix,
                 BeginPSAmount = previousBalanceItem?.CurrentBalance ?? 0,
                 CurrentPSAmount = balance?.CurrentBalance ?? 0,
                 BeginVestedAmount = previousBalanceItem?.VestedBalance ?? 0,
@@ -640,6 +642,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             .Where(b => b.Contact != null && ssns.Contains(b.Contact.Ssn))
             .Select(b => new
             {
+                b.Id,
                 b.Contact!.ContactInfo.FirstName,
                 b.Contact.ContactInfo.LastName,
                 b.Contact.Address.City,
@@ -656,6 +659,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
         return members.Select(memberData => new MemberDetails
             {
+                Id = memberData.Id,
                 IsEmployee = false,
                 FirstName = memberData.FirstName,
                 LastName = memberData.LastName,

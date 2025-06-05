@@ -18,9 +18,10 @@ interface MasterInquiryEmployeeDetailsProps {
   memberType: number;
   id: string | number;
   profitYear?: number | null | undefined;
+  noResults?: boolean;
 }
 
-const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> = ({ memberType, id, profitYear }) => {
+const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> = ({ memberType, id, profitYear, noResults }) => {
   const [trigger, { data: details, isLoading, isError }] = useLazyGetProfitMasterInquiryMemberQuery();
   const missives = useSelector((state: RootState) => state.lookups.missives);
 
@@ -32,6 +33,19 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     }
   }, [memberType, id, profitYear, trigger, defaultProfitYear]);
 
+  if (noResults) {
+    return (
+      <Grid2 size={{ xs: 12 }}>
+        <div className="missive-alerts-box">
+          <div className="missive-alert missive-error">
+            <Typography sx={{ color: 'error.main' }} variant="body1" fontWeight={600}>No Profit Sharing Records Found</Typography>
+            <Typography variant="body2">The Employee Badge Number you have entered has no Profit Sharing Records. Re-enter an Employee Badge Number with Profit Sharing.</Typography>
+          </div>
+        </div>
+      </Grid2>
+    );
+  }
+
   if (isLoading) return <Typography>Loading...</Typography>;
   if (isError || !details) return <Typography>No details found.</Typography>;
 
@@ -42,6 +56,9 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
   }
 
   const {
+    badgeNumber,
+    psnSuffix,
+    isEmployee,
     firstName,
     lastName,
     address,
@@ -56,7 +73,6 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     contributionsLastYear,
     enrollmentId,
     enrollment,
-    badgeNumber,
     hireDate,
     terminationDate,
     reHireDate,
@@ -66,7 +82,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     beginVestedAmount,
     currentVestedAmount,
     currentEtva,
-    employmentStatus,
+    employmentStatus    
   } = details;
 
   const enrolled = getEnrolledStatus(enrollmentId);
@@ -81,26 +97,27 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
   ];
 
   const employeeSection = [
-    { label: "Badge", value: viewBadgeLinkRenderer(Number(badgeNumber)) },
+    { label: "Badge", value: viewBadgeLinkRenderer(badgeNumber) },
+    ...(psnSuffix && psnSuffix !== 0 ? [{ label: "Psn", value: viewBadgeLinkRenderer(badgeNumber, psnSuffix) }] : []),
     { label: "DOB", value: mmDDYYFormat(dateOfBirth) },
     { label: "SSN", value: `${ssnValue}` },
     { label: "ETVA", value: currentEtva },
-    { label: "Status", value: employmentStatus },
-    { label: "Enrollment", value: enrollment },
+    { label: "Enrollment", value: enrollment ?? "N/A" },
   ].filter(field => field.value !== 0);
 
   const planSection = [
     { label: "YTD P/S Hours", value: yearToDateProfitSharingHours },
     { label: "Years In Plan", value: yearsInPlan },
     { label: "Percentage Vested", value: formatPercentage(percentageVested) },
-    { label: "Cont Last Year", value: contributionsLastYear ? "Yes" : "No" }
+    { label: "Status", value: employmentStatus ?? "N/A" },
   ];
 
   const hireSection = [
-    { label: "Hire", value: mmDDYYFormat(hireDate) },
+    { label: "Hire", value: hireDate ? mmDDYYFormat(hireDate) : 'N/A' },
     { label: "Term", value: terminationDate ? mmDDYYFormat(terminationDate) : 'N/A' },
-    { label: "Store", value: storeNumber },
+    { label: "Store", value: storeNumber > 0 ? storeNumber : "N/A" },
     { label: "Rehire", value: reHireDate ? mmDDYYFormat(reHireDate) : 'N/A' },
+    { label: "Cont Last Year", value: contributionsLastYear ? "Yes" : "No" }
   ];
 
   const amountsSection = [
@@ -159,9 +176,9 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
       {missiveAlerts.length > 0 && (
         <Grid2 size={{ xs: 12 }}>
           <div className="missive-alerts-box">
-            {missiveAlerts.map((alert, idx) => (
-              <div key={alert.id || idx} className="missive-alert">
-                <Typography color={alert.severity === 'Error' ? 'error' : 'warning'} variant="body1" fontWeight={600}>{alert.message}</Typography>
+            {missiveAlerts.map((alert: MissiveResponse, idx: number) => (
+              <div key={alert.id || idx} className={`missive-alert ${alert.severity === 'Error' ? 'missive-error' : 'missive-warning'}`}>
+                <Typography sx={{ color: alert.severity === 'Error' ? 'error.main' : 'warning.main' }} variant="body1" fontWeight={600}>{alert.message}</Typography>
                 <Typography variant="body2">{alert.description}</Typography>
               </div>
             ))}

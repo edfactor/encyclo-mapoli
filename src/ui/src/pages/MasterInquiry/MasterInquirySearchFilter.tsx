@@ -11,7 +11,7 @@ import {
   TextField
 } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
-import { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useLazySearchProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
 import { SearchAndReset } from "smart-ui-library";
@@ -151,18 +151,27 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
         badgeNumber: Number(badgeNumber)
       });
 
-      // Trigger search automatically when badge number is present
       const searchParams: MasterInquiryRequest = {
         pagination: { skip: 0, take: 5, sortBy: "badgeNumber", isSortDescending: true },
         badgeNumber: Number(badgeNumber),
-        endProfitYear: profitYear || undefined,
-        memberType: memberTypeGetNumberMap[determineCorrectMemberType(badgeNumber)]
+        memberType: memberTypeGetNumberMap[determineCorrectMemberType(badgeNumber)],
+        endProfitYear: profitYear
       };
 
-      // Notify parent so other components load
-      onSearch(searchParams);
+      triggerSearch(searchParams, false).unwrap().then((response) => {
+        // If data is returned, trigger downstream components
+        if (response && Array.isArray(response) ? response.length > 0 : response.results && response.results.length > 0) {
+          setInitialSearchLoaded(true);
+          onSearch(searchParams);
+        } else {
+          // Instead of setting missiveAlerts, pass up a signal (to be implemented)
+          // setMissiveAlerts([...]);
+          setInitialSearchLoaded(false);
+          onSearch(undefined);
+        }
+      });
     }
-  }, [badgeNumber, hasToken, reset, onSearch, profitYear]);
+  }, [badgeNumber, hasToken, reset, triggerSearch, profitYear]);
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
@@ -173,7 +182,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
           sortBy: data.pagination?.sortBy || "badgeNumber",
           isSortDescending: data.pagination?.isSortDescending || true
         },
-        endProfitYear: data.endProfitYear || profitYear, // Always set endProfitYear, fallback to profitYear
+        ...(!!data.endProfitYear && { endProfitYear: data.endProfitYear || profitYear, }),
         ...(!!data.startProfitMonth && { startProfitMonth: data.startProfitMonth }),
         ...(!!data.endProfitMonth && { endProfitMonth: data.endProfitMonth }),
         ...(!!data.socialSecurity && { ssn: data.socialSecurity }),
@@ -187,11 +196,17 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
         ...(!!data.payment && { payment: data.payment })
       };
 
-      // Call the onSearch prop to lift search params to parent
-      onSearch(searchParams);
-
-      triggerSearch(searchParams, false);
-      dispatch(setMasterInquiryRequestParams(data as MasterInquirySearch));
+      triggerSearch(searchParams, false).unwrap().then((response) => {
+        // If data is returned, trigger downstream components
+        if (response && Array.isArray(response) ? response.length > 0 : response.results && response.results.length > 0) {
+          setInitialSearchLoaded(true);
+          onSearch(searchParams);
+        } else {
+          setInitialSearchLoaded(false);
+          onSearch(undefined);
+        }
+      });
+      dispatch(setMasterInquiryRequestParams(data));
     }
   });
 
@@ -200,7 +215,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
     dispatch(clearMasterInquiryRequestParams());
     dispatch(clearMasterInquiryData());
     reset({
-      endProfitYear: undefined,
+      endProfitYear: profitYear, // Always reset to default profitYear
       startProfitMonth: undefined,
       endProfitMonth: undefined,
       socialSecurity: undefined,
@@ -220,6 +235,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
         isSortDescending: true
       }
     });
+    onSearch(undefined);
   };
 
   const months = Array.from({ length: 12 }, (_, i) => i + 1);
@@ -481,4 +497,4 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
   );
 };
 
-export default MasterInquirySearchFilter
+export default MasterInquirySearchFilter;

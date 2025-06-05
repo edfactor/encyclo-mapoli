@@ -1,8 +1,9 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 
-public sealed record FrozenStateResponse
+namespace Demoulas.ProfitSharing.Common.Contracts.Response;
+
+public sealed record FrozenStateResponse : IdRequest
 {
-    public int Id { get; set; }
     public short ProfitYear { get; set; }
     public string? FrozenBy { get; set; }
     public DateTimeOffset AsOfDateTime { get; set; }

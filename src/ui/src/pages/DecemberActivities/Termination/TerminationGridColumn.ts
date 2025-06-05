@@ -2,6 +2,7 @@ import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { agGridNumberToCurrency } from "smart-ui-library";
 import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
 import { getEnrolledStatus } from "../../../utils/enrollmentUtil";
+import { mmDDYYFormat } from "utils/dateUtils";
 
 export const GetTerminationColumns = (): ColDef[] => {
   return [
@@ -9,7 +10,7 @@ export const GetTerminationColumns = (): ColDef[] => {
       headerName: "Badge",
       field: "badgePSn",
       colId: "badgePSn",
-      width: 80,
+      width: 100,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
@@ -20,7 +21,7 @@ export const GetTerminationColumns = (): ColDef[] => {
       headerName: "Name",
       field: "name",
       colId: "name",
-      width: 120,
+      width: 300,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
@@ -40,13 +41,14 @@ export const GetDetailColumns = (): ColDef[] => {
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
-      sortable: false
+      sortable: false,
+      valueFormatter: (params) => (params.value == null || params.value === undefined || params.value === "") ? "N/A" : params.value
     },
     {
       headerName: "Beginning Balance",
       field: "beginningBalance",
       colId: "beginningBalance",
-      width: 120,
+      width: 150,
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
@@ -57,7 +59,7 @@ export const GetDetailColumns = (): ColDef[] => {
       headerName: "Beneficiary Allocation",
       field: "beneficiaryAllocation",
       colId: "beneficiaryAllocation",
-      width: 120,
+      width: 125,
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
@@ -68,7 +70,7 @@ export const GetDetailColumns = (): ColDef[] => {
       headerName: "Distribution Amount",
       field: "distributionAmount",
       colId: "distributionAmount",
-      width: 120,
+      width: 150,
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
@@ -79,7 +81,7 @@ export const GetDetailColumns = (): ColDef[] => {
       headerName: "Forfeit",
       field: "forfeit",
       colId: "forfeit",
-      width: 100,
+      width: 125,
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
@@ -90,7 +92,7 @@ export const GetDetailColumns = (): ColDef[] => {
       headerName: "Ending Balance",
       field: "endingBalance",
       colId: "endingBalance",
-      width: 120,
+      width: 150,
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
@@ -101,7 +103,7 @@ export const GetDetailColumns = (): ColDef[] => {
       headerName: "Vested Balance",
       field: "vestedBalance",
       colId: "vestedBalance",
-      width: 120,
+      width: 150,
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
@@ -112,17 +114,21 @@ export const GetDetailColumns = (): ColDef[] => {
       headerName: "Term Date",
       field: "dateTerm",
       colId: "dateTerm",
-      width: 100,
+      width: 150,
       headerClass: "center-align",
       cellClass: "center-align",
       resizable: true,
-      sortable: false
+      sortable: false,
+      valueFormatter: (params) => {
+        const date = params.value;
+        return mmDDYYFormat(date);
+      }
     },
     {
       headerName: "YTD PS Hours",
       field: "ytdPsHours",
       colId: "ytdPsHours",
-      width: 100,
+      width: 125,
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,

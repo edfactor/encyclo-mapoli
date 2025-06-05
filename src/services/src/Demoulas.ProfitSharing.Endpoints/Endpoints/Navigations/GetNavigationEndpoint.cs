@@ -1,17 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.ProfitSharing.Common.Contracts.Request.Naviations;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Naviations;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Navigations;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Groups;
-using Demoulas.Util.Extensions;
 using FastEndpoints;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Navigations;
 public class GetNavigationEndpoint: Endpoint<NavigationRequestDto,NavigationResponseDto>

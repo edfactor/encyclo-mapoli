@@ -8,11 +8,11 @@ import Grid2 from "@mui/material/Grid2";
 import { CAPTIONS } from "../../../constants";
 import TerminationGrid from "./TerminationGrid";
 import TerminationSearchFilter from "./TerminationSearchFilter";
-import useFiscalCalendarYear from "hooks/useFiscalCalendarYear";
+import { useLazyGetAccountingRangeToCurrent } from "../../../hooks/useFiscalCalendarYear";
 import { StartAndEndDateRequest } from "../../../reduxstore/types";
 
 const Termination = () => {
-  const fiscalData = useFiscalCalendarYear();
+  const [fetchAccountingRange, { data: fiscalData, isLoading: isRangeLoading }] = useLazyGetAccountingRangeToCurrent(6);
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [searchParams, setSearchParams] = useState<StartAndEndDateRequest | null>(null);
 
@@ -30,6 +30,10 @@ const Termination = () => {
     setInitialSearchLoaded(true);
   }, []);
 
+    useEffect(() => {
+      fetchAccountingRange();
+    }, [fetchAccountingRange]);
+  
   const isCalendarDataLoaded = !!fiscalData?.fiscalBeginDate && !!fiscalData?.fiscalEndDate;
 
   return (

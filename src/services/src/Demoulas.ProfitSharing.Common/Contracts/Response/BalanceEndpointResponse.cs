@@ -1,7 +1,8 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response;
-public sealed record BalanceEndpointResponse
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.Response;
+public sealed record BalanceEndpointResponse : IdRequest
 {
-    public required int Id { get; set; }
     public required string Ssn { get; set; }
     public decimal VestedBalance { get; set; }
     public decimal Etva { get; set; }

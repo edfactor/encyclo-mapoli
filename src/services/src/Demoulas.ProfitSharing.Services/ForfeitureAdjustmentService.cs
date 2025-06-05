@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common;
+using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.Util.Extensions;
 
@@ -30,9 +31,9 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
 
     private sealed class EmployeeInfo
     {
-        public int Ssn { get; init; }
-        public int BadgeNumber { get; init; }
-        public int StoreNumber { get; init; }
+        public required int Id { get; init; }
+        public required int Ssn { get; init; }
+        public required int BadgeNumber { get; init; }
     }
 
     public Task<ForfeitureAdjustmentReportResponse> GetForfeitureAdjustmentReportAsync(ForfeitureAdjustmentRequest req, CancellationToken cancellationToken = default)
@@ -100,7 +101,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
 
             var detail = new ForfeitureAdjustmentReportDetail
             {
-                ClientNumber = employeeData.StoreNumber > 0 ? employeeData.StoreNumber : 0,
+                DemographicId = employeeData.Id,
                 BadgeNumber = employeeData.BadgeNumber,
                 StartingBalance = startingBalance,
                 ForfeitureAmount = forfeitureAmount,
@@ -124,36 +125,37 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
             return response;
         });
     }
-
-
-    private static async Task<EmployeeInfo?> FindEmployeeAsync(IProfitSharingDbContext context,
+    
+    private async Task<EmployeeInfo?> FindEmployeeAsync(ProfitSharingReadOnlyDbContext context,
         ForfeitureAdjustmentRequest req, CancellationToken cancellationToken)
     {
+        var demographics =  await _demographicReaderService.BuildDemographicQuery(context);
+
         // If SSN is provided, use that for lookup
-        if (req.SSN.HasValue)
+        if (req.SSN > 0)
         {
-            return await context.Demographics
+            return await demographics
                 .Where(d => d.Ssn == req.SSN.Value)
                 .Where(d => context.PayProfits.Any(pp => pp.DemographicId == d.Id && pp.ProfitYear == req.ProfitYear))
                 .Select(d => new EmployeeInfo
                 {
+                    Id = d.Id,
                     Ssn = d.Ssn,
-                    BadgeNumber = d.BadgeNumber,
-                    StoreNumber = d.StoreNumber
+                    BadgeNumber = d.BadgeNumber
                 })
                 .FirstOrDefaultAsync(cancellationToken);
         }
         // Otherwise, if Badge is provided, use that for lookup
-        else if (req.Badge.HasValue)
+        if (req.Badge > 0)
         {
-            return await context.Demographics
+            return await demographics
                 .Where(d => d.BadgeNumber == req.Badge.Value)
                 .Where(d => context.PayProfits.Any(pp => pp.DemographicId == d.Id && pp.ProfitYear == req.ProfitYear))
                 .Select(d => new EmployeeInfo
                 {
+                    Id = d.Id,
                     Ssn = d.Ssn,
-                    BadgeNumber = d.BadgeNumber,
-                    StoreNumber = d.StoreNumber
+                    BadgeNumber = d.BadgeNumber
                 })
                 .FirstOrDefaultAsync(cancellationToken);
         }
@@ -325,7 +327,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
             // Create the response
             result = new ForfeitureAdjustmentReportDetail
             {
-                ClientNumber = req.ClientNumber,
+                DemographicId = employeeData.Id,
                 BadgeNumber = req.BadgeNumber,
                 StartingBalance = startingBalance,
                 ForfeitureAmount = forfeitureAmount,
@@ -336,7 +338,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
 
         return result ?? new ForfeitureAdjustmentReportDetail
         {
-            ClientNumber = 0,
+            DemographicId = 0,
             BadgeNumber = 0,
             StartingBalance = 0,
             ForfeitureAmount = 0,

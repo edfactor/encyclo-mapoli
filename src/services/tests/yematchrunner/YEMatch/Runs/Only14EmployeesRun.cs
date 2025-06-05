@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace YEMatch;
 
 [SuppressMessage("AsyncUsage", "AsyncFixer01:Unnecessary async/await usage")]
-public class Only14Employees : Runnable
+public class Only14EmployeesRun : Runnable
 {
     public override async Task Exec()
     {

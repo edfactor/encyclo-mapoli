@@ -1,5 +1,8 @@
 ﻿using System.Net.Http.Headers;
 using System.Text;
+using System.Threading.Channels;
+using Demoulas.ProfitSharing.Common.Contracts.Messaging;
+using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Clients;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
@@ -14,7 +17,6 @@ using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Caching.Extensions;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.Util.Extensions;
-using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -26,6 +28,7 @@ using Quartz.Spi;
 using AddressMapper = Demoulas.ProfitSharing.OracleHcm.Mappers.AddressMapper;
 using ContactInfoMapper = Demoulas.ProfitSharing.OracleHcm.Mappers.ContactInfoMapper;
 using DemographicMapper = Demoulas.ProfitSharing.OracleHcm.Mappers.DemographicMapper;
+using Polly;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Extensions;
 
@@ -167,7 +170,7 @@ public static class OracleHcmExtension
         services.AddTransient<IJobFactory, OracleHcmJobFactory>();
         services.AddTransient<ISchedulerFactory, StdSchedulerFactory>();
 
-        services.AddTransient<IFakeSsnService, FakeSsnService>();
+        services.AddSingleton<IFakeSsnService, FakeSsnService>();
         
     }
 
@@ -202,20 +205,53 @@ public static class OracleHcmExtension
             }
         };
 
+        // Custom retry handler for 401 Unauthorized, with jitter. Bulkhead is not available directly in this API version.
+        static void AddRetryOn401WithJitter(HttpStandardResilienceOptions options)
+        {
+            options.Retry.ShouldHandle = args =>
+            {
+                if (args.Outcome.Result is { StatusCode: System.Net.HttpStatusCode.Unauthorized })
+                {
+                    // Optionally log here
+                    return ValueTask.FromResult(true);
+                }
+                return ValueTask.FromResult(false);
+            };
+            options.Retry.MaxRetryAttempts = 3;
+            options.Retry.BackoffType = DelayBackoffType.Exponential;
+            options.Retry.Delay = TimeSpan.FromMinutes(2);
+
+            // Add jitter to retry delay
+            var random = new Random();
+            options.Retry.DelayGenerator = args =>
+            {
+                var baseDelay = TimeSpan.FromSeconds(2);
+                var exponential = TimeSpan.FromSeconds(Math.Pow(2, args.AttemptNumber));
+                var jitter = TimeSpan.FromMilliseconds(random.Next(0, 1000));
+                return new ValueTask<TimeSpan?>(baseDelay + exponential + jitter);
+            };
+        }
+
+        void ConfigureWith401RetryAndBulkhead(HttpStandardResilienceOptions options, HttpResilienceOptions commonOptions)
+        {
+            ApplyResilienceOptions(options, commonOptions);
+            AddRetryOn401WithJitter(options);
+        }
+
         services.AddHttpClient<AtomFeedClient>("AtomFeedSync", BuildOracleHcmAuthClient)
-            .AddStandardResilienceHandler(options => ApplyResilienceOptions(options, commonHttpOptions));
+            .AddStandardResilienceHandler(options => ConfigureWith401RetryAndBulkhead(options, commonHttpOptions));
 
         services.AddHttpClient<EmployeeFullSyncClient>("EmployeeSync", BuildOracleHcmAuthClient)
-            .AddStandardResilienceHandler(options => ApplyResilienceOptions(options, commonHttpOptions));
+            .AddStandardResilienceHandler(options => ConfigureWith401RetryAndBulkhead(options, commonHttpOptions));
 
         services.AddHttpClient<PayrollSyncClient>("PayrollSyncClient", BuildOracleHcmAuthClient)
-            .AddStandardResilienceHandler(options => ApplyResilienceOptions(options, commonHttpOptions));
+            .AddStandardResilienceHandler(options => ConfigureWith401RetryAndBulkhead(options, commonHttpOptions));
 
         services.AddHttpClient<PayrollSyncService>("PayrollSyncService", BuildOracleHcmAuthClient)
-            .AddStandardResilienceHandler(options => ApplyResilienceOptions(options, commonHttpOptions));
+            .AddStandardResilienceHandler(options => ConfigureWith401RetryAndBulkhead(options, commonHttpOptions));
 
         services.AddHttpClient<OracleHcmHealthCheck>("OracleHcmHealthCheck", BuildOracleHcmAuthClient)
-            .AddStandardResilienceHandler(options => ApplyResilienceOptions(options, commonHttpOptions));
+            .AddStandardResilienceHandler(options => ConfigureWith401RetryAndBulkhead(options, commonHttpOptions));
     }
 
     /// <summary>
@@ -238,28 +274,27 @@ public static class OracleHcmExtension
         options.TotalRequestTimeout = commonOptions.TotalRequestTimeoutOptions;
     }
 
+
     /// <summary>
-    /// Configures and registers the messaging services required for Oracle HCM.
+    /// Configures the messaging infrastructure for Oracle HCM synchronization.
     /// </summary>
-    /// <param name="builder">The <see cref="IHostApplicationBuilder"/> used to configure the application.</param>
-    /// <returns>The updated <see cref="IHostApplicationBuilder"/> instance.</returns>
+    /// <param name="builder">
+    /// The <see cref="IHostApplicationBuilder"/> used to configure the application.
+    /// </param>
+    /// <returns>
+    /// The modified <see cref="IHostApplicationBuilder"/> with Oracle HCM messaging services configured.
+    /// </returns>
     /// <remarks>
-    /// This method performs the following actions:
-    /// - Configures MassTransit with an in-memory transport.
-    /// - Sets the endpoint name formatter to kebab-case.
-    /// - Registers the <see cref="OracleHcmMessageConsumer"/> as a consumer.
-    /// - Configures endpoints for the registered consumers.
+    /// This method registers bounded channels for handling Oracle HCM employee and payroll messages.
+    /// It also adds hosted services for consuming these channels.
     /// </remarks>
     private static IHostApplicationBuilder AddOracleHcmMessaging(this IHostApplicationBuilder builder)
     {
-        builder.Services.AddMassTransit(x =>
-        {
-            x.SetKebabCaseEndpointNameFormatter();
-            x.AddConsumer<OracleHcmMessageConsumer>();
-            x.AddConsumer<EmployeeSyncConsumer>();
-            x.AddConsumer<PayrollSyncConsumer>();
-            x.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
-        });
+        builder.Services.AddSingleton(Channel.CreateBounded<MessageRequest<OracleEmployee[]>>(50));
+        builder.Services.AddSingleton(Channel.CreateBounded<MessageRequest<PayrollItem[]>>(50));
+
+        builder.Services.AddHostedService<EmployeeSyncChannelConsumer>();
+        builder.Services.AddHostedService<PayrollSyncChannelConsumer>();
 
         return builder;
     }

@@ -24,7 +24,7 @@ public class RehireForfeituresEndpoint :
 
     public override void Configure()
     {
-        Post("rehire-forfeitures");
+        Post("unforfeitures");
         Summary(s =>
         {
             s.Summary = "Rehire Forfeiture Adjustments Endpoint";

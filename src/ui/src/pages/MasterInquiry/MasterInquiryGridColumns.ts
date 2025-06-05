@@ -5,41 +5,6 @@ import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
 export const GetMasterInquiryGridColumns = (): ColDef[] => {
   return [
     {
-      headerName: "SSN",
-      field: "ssn",
-      colId: "ssn",
-      minWidth: 120,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
-    {
-      headerName: "Badge/Psn",
-      field: "badgeNumber",
-      colId: "badgeNumber",
-      minWidth: 120,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      cellRenderer: (params: ICellRendererParams) =>
-        viewBadgeLinkRenderer(params.data.badgeNumber, params.data.psnSuffix),
-      valueFormatter: (params) => {
-        const badgeNumber = params.data?.badgeNumber;
-        const psnSuffix = params.data?.psnSuffix;
-        // If both are null/undefined, just return an empty string
-        if (!badgeNumber && !psnSuffix) {
-          return "";
-        }
-
-        if (psnSuffix > 0) {
-          // If both exist, format as "name (id)"
-          return `${badgeNumber}-${psnSuffix}`;
-        }
-
-        return badgeNumber;
-      }
-    },
-    {
       headerName: "Profit Year",
       field: "profitYear",
       colId: "profitYear",
@@ -129,6 +94,10 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
         // Format month to always have two digits
         const formattedMonth = month.toString().padStart(2, "0");
 
+        if (month === 0 && year === 0) {
+          return "";
+        }
+        
         return `${formattedMonth}/${year}`;
       }
     },
