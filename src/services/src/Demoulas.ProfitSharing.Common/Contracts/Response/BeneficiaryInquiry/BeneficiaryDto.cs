@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.BeneficiaryInquiry;
-public class BeneficiaryDto
+public record BeneficiaryDto : IdRequest
 {
-    public required int Id { get; set; }
     public required short PsnSuffix { get; set; } // Suffix for hierarchy (1000, 2000, etc.)
 
     public required int BadgeNumber { get; set; }

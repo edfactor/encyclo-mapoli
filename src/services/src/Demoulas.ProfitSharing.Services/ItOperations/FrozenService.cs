@@ -2,6 +2,7 @@
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -33,7 +34,9 @@ public class FrozenService: IFrozenService
     {
         return 
             from dh in ctx.DemographicHistories
+#pragma warning disable DSMPS001
             join d in ctx.Demographics on dh.DemographicId equals d.Id
+#pragma warning restore DSMPS001
             from fs in ctx.FrozenStates.Where(x => x.ProfitYear == profitYear && x.IsActive)
             join dpts in ctx.Departments on dh.DepartmentId equals dpts.Id
             where fs.AsOfDateTime >= dh.ValidFrom && fs.AsOfDateTime < dh.ValidTo
@@ -153,8 +156,8 @@ public class FrozenService: IFrozenService
                 CreatedDateTime = f.CreatedDateTime
             }).FirstOrDefaultAsync(cancellationToken);
             
-            return frozen ?? new FrozenStateResponse { ProfitYear = (short)DateTime.Today.Year, 
-                CreatedDateTime = DateTimeOffset.MinValue,
+            return frozen ?? new FrozenStateResponse { Id = 0, ProfitYear = (short)DateTime.Today.Year, 
+                CreatedDateTime = ReferenceData.DsmMinValue.ToDateTime(TimeOnly.MinValue),
                 AsOfDateTime = DateTimeOffset.UtcNow, IsActive = false};
         });
     }

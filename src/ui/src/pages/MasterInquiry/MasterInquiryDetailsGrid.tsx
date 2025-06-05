@@ -36,8 +36,15 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({
   ] = useLazyGetProfitMasterInquiryMemberDetailsQuery();
 
   useEffect(() => {
-    triggerMemberDetails({ memberType, id });
-  }, [memberType, id, triggerMemberDetails]);
+    triggerMemberDetails({ 
+      memberType, 
+      id,
+      skip: pageNumber * pageSize,
+      take: pageSize,
+      sortBy: "profitYear",
+      isSortDescending: true
+    });
+  }, [memberType, id, pageNumber, pageSize, triggerMemberDetails]);
 
   if (isFetchingMemberDetails) {
     return <Typography>Loading profit details...</Typography>;
@@ -83,7 +90,7 @@ return (
           pageSize={pageSize}
           setPageSize={(value: number) => {
             setPageSize(value);
-            setPageNumber(1);
+            setPageNumber(0);
           }}
           recordCount={memberDetailsData.total}
         />

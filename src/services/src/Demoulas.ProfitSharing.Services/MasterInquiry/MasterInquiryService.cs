@@ -118,9 +118,9 @@ public sealed class MasterInquiryService : IMasterInquiryService
         {
             IQueryable<MasterInquiryItem> query = req.MemberType switch
             {
-                1 => GetMasterInquiryDemographics(ctx),
+                1 => await GetMasterInquiryDemographics(ctx),
                 2 => GetMasterInquiryBeneficiary(ctx),
-                _ => GetMasterInquiryDemographics(ctx).Union(GetMasterInquiryBeneficiary(ctx))
+                _ => (await GetMasterInquiryDemographics(ctx)).Union(GetMasterInquiryBeneficiary(ctx))
             };
 
             query = FilterMemberQuery(req, query);
@@ -192,9 +192,9 @@ public sealed class MasterInquiryService : IMasterInquiryService
         {
             IQueryable<MasterInquiryItem> query = req.MemberType switch
             {
-                1 => GetMasterInquiryDemographics(ctx),
+                1 => await GetMasterInquiryDemographics(ctx),
                 2 => GetMasterInquiryBeneficiary(ctx),
-                _ => GetMasterInquiryDemographics(ctx).Union(GetMasterInquiryBeneficiary(ctx))
+                _ => (await GetMasterInquiryDemographics(ctx)).Union(GetMasterInquiryBeneficiary(ctx))
             };
 
             if (req.Id.HasValue)
@@ -289,14 +289,15 @@ public sealed class MasterInquiryService : IMasterInquiryService
         });
     }
 
-    private static IQueryable<MasterInquiryItem> GetMasterInquiryDemographics(IProfitSharingDbContext ctx)
+    private async Task<IQueryable<MasterInquiryItem>> GetMasterInquiryDemographics(ProfitSharingReadOnlyDbContext ctx)
     {
+        var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
         var query = ctx.ProfitDetails
             .Include(pd => pd.ProfitCode)
             .Include(pd => pd.ZeroContributionReason)
             .Include(pd => pd.TaxCode)
             .Include(pd => pd.CommentType)
-            .Join(ctx.Demographics
+            .Join(demographics
                     .Include(d=> d.PayProfits),
                 pd => pd.Ssn,
                 d => d.Ssn,

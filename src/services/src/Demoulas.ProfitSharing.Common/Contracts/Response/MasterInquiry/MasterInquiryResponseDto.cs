@@ -1,9 +1,10 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 
-public sealed record MasterInquiryResponseDto
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
+
+public sealed record MasterInquiryResponseDto : IdRequest
 {
     public bool IsEmployee => PsnSuffix == 0;
-    public int Id { get; set; }
     public string Ssn { get; set; } = string.Empty;
     public short ProfitYear { get; set; }
     public byte ProfitYearIteration { get; set; }
