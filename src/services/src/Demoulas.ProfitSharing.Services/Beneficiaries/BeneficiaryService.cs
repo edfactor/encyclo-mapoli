@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Beneficiaries;
+using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -17,9 +18,8 @@ namespace Demoulas.ProfitSharing.Services.Beneficiaries;
 public class BeneficiaryService : IBeneficiaryService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
-    private readonly IDemographicReaderService _demographicReaderService;
     private readonly TotalService _totalService;
-
+    private readonly IDemographicReaderService _demographicReaderService;
     public BeneficiaryService(IProfitSharingDataContextFactory dataContextFactory,
         IDemographicReaderService demographicReaderService,
         TotalService totalService)
@@ -32,6 +32,23 @@ public class BeneficiaryService : IBeneficiaryService
     {
         var rslt = await _dataContextFactory.UseWritableContextAsync(async (ctx, transaction) =>
         {
+            var beneficiaryContact = await ctx.BeneficiaryContacts.FirstOrDefaultAsync(x=>x.Id == req.BeneficiaryContactId, cancellationToken);
+            if (beneficiaryContact == default)
+            {
+                throw new InvalidOperationException("Beneficiary Contact does not exist");
+            }
+            
+            var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, false);
+            if (! await demographicQuery.AnyAsync(x => x.Id == req.DemographicId, cancellationToken))
+            {
+                throw new InvalidOperationException("Employee does not exist");
+            }
+            
+            if (!await demographicQuery.AnyAsync(x => x.BadgeNumber == req.EmployeeBadgeNumber, cancellationToken))
+            {
+                throw new InvalidOperationException("Employee Badge does not exist");
+            }
+
             if (req.FirstLevelBeneficiaryNumber.HasValue && (req.FirstLevelBeneficiaryNumber < 0 || req.FirstLevelBeneficiaryNumber > 9))
             {
                 throw new InvalidOperationException("FirstLevelBeneficiaryNumber must be between 1 and 9");
@@ -46,20 +63,12 @@ public class BeneficiaryService : IBeneficiaryService
             {
                 throw new InvalidOperationException("ThirdLevelBeneficiaryNumber must be between 1 and 9");
             }
+            if (req.Percentage < 0 || req.Percentage > 100)
+            {
+                throw new InvalidOperationException("Invalid percentage");
+            }
 
             //await ValidatePercentages(ctx, req.EmployeeBadgeNumber, req.Percentage, cancellationToken);
-
-            var resp = new CreateBeneficiaryResponse();
-            var beneficiaryContact = await GetOrCreateBeneficiaryContact(req, ctx, cancellationToken);
-
-            resp.ContactExisted = beneficiaryContact.Id != 0;
-            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
-            
-            var demographic = await demographics.Where(x=>x.BadgeNumber == req.EmployeeBadgeNumber).FirstOrDefaultAsync(cancellationToken);
-            if (demographic == default)
-            {
-                throw new InvalidOperationException("EmployeeBadgeNumber is invalid");
-            }
             
             var psnSuffix = await FindPsn(req, ctx, cancellationToken);
             var beneficiary = new Beneficiary
@@ -67,9 +76,9 @@ public class BeneficiaryService : IBeneficiaryService
                 Id = 0,
                 BadgeNumber = req.EmployeeBadgeNumber,
                 PsnSuffix = psnSuffix,
-                DemographicId = demographic!.Id,
+                DemographicId = req.DemographicId,
                 Contact = beneficiaryContact,
-                BeneficiaryContactId = beneficiaryContact.Id,
+                BeneficiaryContactId = req.BeneficiaryContactId,
                 Relationship = req.Relationship,
                 KindId = req.KindId,
                 Percent = req.Percentage
@@ -82,13 +91,96 @@ public class BeneficiaryService : IBeneficiaryService
                 await transaction.CommitAsync(cancellationToken);
             }
 
-            resp.PsnSuffix = psnSuffix;
-            resp.BeneficiaryId = beneficiary.Id;
+            var resp = new CreateBeneficiaryResponse()
+            {
+                BeneficiaryId = beneficiary.Id,
+                PsnSuffix = psnSuffix,
+                EmployeeBadgeNumber = req.EmployeeBadgeNumber,
+                DemographicId = req.DemographicId,
+                BeneficiaryContactId = beneficiaryContact.Id,
+                Relationship = beneficiary.Relationship,
+                KindId = beneficiary.KindId,
+                Percent = beneficiary.Percent
+            };
             
             return resp;
         }, cancellationToken);
 
         return rslt;
+    }
+
+    public async Task<CreateBeneficiaryContactResponse> CreateBeneficiaryContact(CreateBeneficiaryContactRequest req, CancellationToken cancellationToken)
+    {
+        var rslt = await _dataContextFactory.UseWritableContextAsync(async (ctx, transaction) =>
+        {
+            if (req.ContactSsn > 999999999)
+            {
+                throw new InvalidOperationException("Contact Ssn must be 9 digits");
+            }
+            if (await ctx.BeneficiaryContacts.AnyAsync(x => x.Ssn == req.ContactSsn, cancellationToken))
+            {
+                throw new InvalidOperationException("Contact Ssn already exists");
+            }
+            var beneficiaryContact = new BeneficiaryContact() {
+                Id = 0,
+                Ssn = req.ContactSsn,
+                DateOfBirth = req.DateOfBirth,
+                Address = new Address()
+                {
+                    Street = req.Street,
+                    Street2 = req.Street2,
+                    Street3 = req.Street3,
+                    Street4 = req.Street4,
+                    City = req.City,
+                    State = req.State,
+                    PostalCode = req.PostalCode,
+                    CountryIso = req.CountryIso,
+                },
+                ContactInfo = new ContactInfo()
+                {
+                    FullName = $"{req.LastName}, {req.FirstName}",
+                    FirstName = req.FirstName,
+                    LastName = req.LastName,
+                    MiddleName = req.MiddleName,
+                    PhoneNumber = req.PhoneNumber,
+                    MobileNumber = req.MobileNumber,
+                    EmailAddress = req.EmailAddress,
+                },
+                CreatedDate = DateTime.Now.ToDateOnly()
+            };
+            ctx.Add(beneficiaryContact);
+
+            await ctx.SaveChangesAsync(cancellationToken);
+            if (transaction != default)
+            {
+                await transaction.CommitAsync(cancellationToken);
+            }
+
+            return beneficiaryContact;
+        }, cancellationToken);
+
+        var response = new CreateBeneficiaryContactResponse
+        {
+            Id = rslt.Id,
+            Ssn = rslt.Ssn.MaskSsn(),
+            DateOfBirth = rslt.DateOfBirth,
+            Street = rslt.Address.Street,
+            Street2 = rslt.Address.Street2,
+            Street3 = rslt.Address.Street3,
+            Street4 = rslt.Address.Street4,
+            City = rslt.Address.City ?? string.Empty,
+            State = rslt.Address.State ?? string.Empty,
+            PostalCode = rslt.Address.PostalCode ?? string.Empty,
+            CountryIso = rslt.Address.CountryIso,
+            FirstName = rslt.ContactInfo!.FirstName,
+            LastName = rslt.ContactInfo.LastName,
+            MiddleName = rslt.ContactInfo.MiddleName,
+            PhoneNumber = rslt.ContactInfo.PhoneNumber,
+            MobileNumber = rslt.ContactInfo.MobileNumber,
+            EmailAddress = rslt.ContactInfo.EmailAddress
+        };
+
+        return response;
     }
 
     public async Task UpdateBeneficiary(UpdateBeneficiaryRequest req, CancellationToken cancellationToken)
@@ -246,47 +338,6 @@ public class BeneficiaryService : IBeneficiaryService
         
         
 
-    }
-
-    private static async Task<BeneficiaryContact> GetOrCreateBeneficiaryContact(CreateBeneficiaryRequest req, ProfitSharingDbContext ctx, CancellationToken token)
-    {
-        var beneficiaryContact = await ctx.BeneficiaryContacts.Where(x=>x.Ssn == req.BeneficiarySsn).FirstOrDefaultAsync(token);
-        if (beneficiaryContact != default)
-        {
-            return beneficiaryContact;
-        }
-
-        beneficiaryContact = new BeneficiaryContact()
-        {
-            Id = 0,
-            Ssn = req.BeneficiarySsn,
-            DateOfBirth = req.DateOfBirth,
-            Address = new Address()
-            {
-                Street = req.Street,
-                Street2 = req.Street2,
-                Street3 = req.Street3,
-                Street4 = req.Street4,
-                City = req.City,
-                State = req.State,
-                PostalCode = req.PostalCode,
-                CountryIso = req.CountryIso,
-            },
-            ContactInfo = new ContactInfo()
-            {
-                FullName = $"{req.LastName}, {req.FirstName}",
-                FirstName = req.FirstName,
-                LastName = req.LastName,
-                MiddleName = req.MiddleName,
-                PhoneNumber = req.PhoneNumber,
-                MobileNumber = req.MobileNumber,
-                EmailAddress = req.EmailAddress,
-            },
-            CreatedDate = DateTime.Now.ToDateOnly(),
-        };
-        ctx.Add(beneficiaryContact);
-
-        return beneficiaryContact;
     }
 
     private static async Task<short> FindPsn(CreateBeneficiaryRequest req, ProfitSharingDbContext ctx, CancellationToken token)
