@@ -1,10 +1,10 @@
 ﻿namespace Demoulas.ProfitSharing.Data.Entities;
 
-public class DemographicHistory
+public sealed class DemographicHistory
 {
     public long Id { get; set; }
     public int DemographicId { get; set; }
-    public DateTimeOffset ValidFrom { get; set; } = new DateTime(1917, 1, 1, 0, 0, 0, DateTimeKind.Local);
+    public DateTimeOffset ValidFrom { get; set; } = new DateTime(1971, 1, 1, 0, 0, 0, DateTimeKind.Local);
     public DateTimeOffset ValidTo { get; set; } = new DateTime(2100, 1, 1, 0, 0, 0, DateTimeKind.Local);
 
     public required long OracleHcmId { get; set; }

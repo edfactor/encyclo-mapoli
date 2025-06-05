@@ -9,12 +9,17 @@ import ReportGrid from './ReportGrid';
 import { CAPTIONS } from '../../../constants';
 import StatusDropdownActionNode from 'components/StatusDropdownActionNode';
 import { FilterParams, ReportPreset } from 'reduxstore/types';
+import { clearYearEndProfitSharingReport } from 'reduxstore/slices/yearsEndSlice';
+import { useDispatch } from 'react-redux';
 
 const PAY426N: React.FC = () => {
   const [currentPreset, setCurrentPreset] = useState<ReportPreset | null>(null);
   const [showSummaryReport, setShowSummaryReport] = useState(false);
-
+  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useDispatch();
+  
   const handlePresetChange = (preset: ReportPreset | null) => {
+    dispatch(clearYearEndProfitSharingReport());
     setCurrentPreset(preset);
     if (preset) {
       setShowSummaryReport(preset.id === 'PAY426-9');
@@ -26,6 +31,10 @@ const PAY426N: React.FC = () => {
   const handleReset = () => {
     setCurrentPreset(null);
     setShowSummaryReport(false);
+  };
+
+  const handleLoadingChange = (loading: boolean) => {
+    setIsLoading(loading);
   };
 
   const renderActionNode = () => {
@@ -49,13 +58,17 @@ const PAY426N: React.FC = () => {
               currentPreset={currentPreset}
               onPresetChange={handlePresetChange}
               onReset={handleReset}
+              isLoading={isLoading}
             />
           </DSMAccordion>
         </Grid2>
         
         <Grid2 width="100%">
           {currentPreset && !showSummaryReport && (
-            <ReportGrid params={currentPreset.params} />
+            <ReportGrid 
+              params={currentPreset.params} 
+              onLoadingChange={handleLoadingChange}
+            />
           )}
           
           {showSummaryReport && (

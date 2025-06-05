@@ -17,7 +17,7 @@ public sealed record ProfitSharingUnder21BreakdownByStoreResponse
     public byte Age { get; set; }
     public byte EnrollmentId { get; set; }
 
-    public static readonly string REPORT_NAME = "PROFIT SHARING UNDER 21 BREAKDOWN REPORT";
+    public static readonly string REPORT_NAME = "Under 21 Breakdown";
     public static ProfitSharingUnder21BreakdownByStoreResponse ResponseExample()
     {
         return new ProfitSharingUnder21BreakdownByStoreResponse()

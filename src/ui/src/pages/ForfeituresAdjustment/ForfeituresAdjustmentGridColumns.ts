@@ -1,18 +1,15 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { agGridNumberToCurrency } from "smart-ui-library";
+import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
 
-export const GetForfeituresAdjustmentColumns = (handleNavigation: (badgeNumber: string) => void): ColDef[] => {
+export const GetForfeituresAdjustmentColumns = (): ColDef[] => {
   const getColDefForForfeiture = (): ColDef[] => {
     return [
       {
-        headerName: "Client #",
-        field: "clientNumber",
-        width: 150
-      },
-      {
         headerName: "Badge #",
         field: "badgeNumber",
-        width: 150
+        width: 150,
+        cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber)
       },
       {
         headerName: "Starting Balance",

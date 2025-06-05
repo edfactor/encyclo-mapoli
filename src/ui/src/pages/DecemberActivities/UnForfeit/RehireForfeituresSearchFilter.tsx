@@ -9,11 +9,11 @@ import {
   setMilitaryAndRehireForfeituresQueryParams
 } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
-import { SearchAndReset } from "smart-ui-library";
+import { dateYYYYMMDD, SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
-import { CalendarResponseDto, RehireForfeituresRequest } from "../../../reduxstore/types";
+import { CalendarResponseDto, StartAndEndDateRequest } from "../../../reduxstore/types";
 import { tryddmmyyyyToDate } from "../../../utils/dateUtils";
 
 const schema = yup.object().shape({
@@ -34,34 +34,33 @@ const schema = yup.object().shape({
 interface MilitaryAndRehireForfeituresSearchFilterProps {
   setInitialSearchLoaded: (include: boolean) => void;
   fiscalData: CalendarResponseDto;
-  onSearch: () => void;
+  onSearch?: () => void;
 }
 
 const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearchFilterProps> = ({
   setInitialSearchLoaded,
   fiscalData,
-  onSearch 
+  onSearch
 }) => {
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const [triggerSearch, { isFetching }] = useLazyGetRehireForfeituresQuery();
   const { rehireForfeituresQueryParams } = useSelector((state: RootState) => state.yearsEnd);
-  const defaultProfitYear = useDecemberFlowProfitYear();
   const dispatch = useDispatch();
 
-  const validateAndSubmit = (data: RehireForfeituresRequest) => {
+  const validateAndSubmit = (data: StartAndEndDateRequest) => {
     if (isValid && hasToken) {
       const beginDate = data.beginningDate || fiscalData.fiscalBeginDate || '';
       const endDate = data.endingDate || fiscalData.fiscalEndDate || '';
 
       const updatedData = {
         ...data,
-        beginningDate: beginDate,
-        endingDate: endDate,
+        beginningDate: dateYYYYMMDD(new Date(beginDate)),
+        endingDate: dateYYYYMMDD(new Date(endDate)),
       };
 
       dispatch(setMilitaryAndRehireForfeituresQueryParams(updatedData));
       triggerSearch(updatedData);
-      onSearch(); // Call onSearch to trigger page reset
+      if (onSearch) onSearch(); // Only call if onSearch is provided
     }
   };
 
@@ -71,8 +70,8 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
     formState: { errors, isValid },
     reset,
     trigger
-  } = useForm<RehireForfeituresRequest>({
-    resolver: yupResolver<RehireForfeituresRequest>(schema),
+  } = useForm<StartAndEndDateRequest>({
+    resolver: yupResolver(schema),
     defaultValues: {
       beginningDate: rehireForfeituresQueryParams?.beginningDate || fiscalData.fiscalBeginDate || undefined,
       endingDate: rehireForfeituresQueryParams?.endingDate || fiscalData.fiscalEndDate || undefined,
@@ -119,7 +118,7 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
                 label="Rehire Begin Date"
                 disableFuture
                 error={errors.beginningDate?.message}
-                minDate={new Date(defaultProfitYear - 5, 0, 1)}
+                minDate={tryddmmyyyyToDate(fiscalData.fiscalBeginDate)}
                 maxDate={tryddmmyyyyToDate(fiscalData.fiscalEndDate)}
               />
             )}
@@ -141,7 +140,7 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
                 label="Rehire Ending Date"
                 disableFuture
                 error={errors.endingDate?.message}
-                minDate={new Date(defaultProfitYear - 5, 0, 2)}
+                minDate={tryddmmyyyyToDate(fiscalData.fiscalBeginDate)}
                 maxDate={tryddmmyyyyToDate(fiscalData.fiscalEndDate)}
               />
             )}

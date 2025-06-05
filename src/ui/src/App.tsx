@@ -15,7 +15,7 @@ import { RootState } from "./reduxstore/store";
 import EnvironmentUtils from "./utils/environmentUtils";
 import { Settings } from "@mui/icons-material";
 import { useLazyGetMissivesQuery } from "reduxstore/api/LookupsApi";
-import { useGetHealthQuery } from "./reduxstore/api/AppSupportApi";
+import { useLazyGetHealthQuery } from "./reduxstore/api/AppSupportApi";
 import { getHealthStatusDescription } from "./utils/appSupportUtil";
 
 // Types
@@ -38,15 +38,31 @@ const App = () => {
   const { buildNumber } = useSelector((state: RootState) => state.common);
   const [oktaAuth, setOktaAuth] = useState<any>(null);
   const [loadMissives, { isFetching }] = useLazyGetMissivesQuery();
-  const { data: healthData, isLoading } = useGetHealthQuery();
+  const [triggerHealth, { data: healthData, isLoading }] = useLazyGetHealthQuery();
 
   const health = useSelector((state: RootState) => state.support.health);
 
 
   useEffect(() => {
     const config = oktaConfig(clientId, issuer);
-    setOktaAuth(new OktaAuth(config.oidc));
-  }, []);
+    const auth = new OktaAuth({
+      ...config.oidc,
+      services: {
+        autoRenew: true,
+        autoRemove: true,
+        syncStorage: true
+      }
+    });
+    setOktaAuth(auth);
+    
+    // Start the OktaAuth service to enable token auto-renewal (temporary, longterm solution is to use refresh tokens)
+    // https://github.com/okta/okta-auth-js/blob/master/docs/autoRenew-notice.md
+    auth.start();
+    
+    return () => {
+      auth.stop();
+    };
+  }, [clientId, issuer]);
 
   // Redux selectors
   //const state = useSelector((state: RootState) => state);
@@ -79,7 +95,7 @@ const App = () => {
         console.warn("Could not parse token for username:", error);
       }
     }
-  }, [token, stateUsername, dispatch]);
+  }, [token, stateUsername, dispatch, loadMissives]);
 
   // Derived values
   const postLogoutRedirectUri = EnvironmentUtils.postLogoutRedirectUri;
@@ -124,6 +140,10 @@ const App = () => {
     }
   }, [buildNumber, uiBuildInfo]);
 
+  useEffect(() => {
+    triggerHealth();
+  }, [triggerHealth]);
+
   // Theme setup
   const theme = createTheme(themeOptions);
 
@@ -145,7 +165,7 @@ const App = () => {
         buildVersionNumber={buildInfoText}
         userName={username}
         environmentMode={EnvironmentUtils.envMode}
-        apiStatus={health?.status}
+        apiStatus={health?.status as "Healthy" | "Degraded" | "Unhealthy" | undefined}
         apiStatusMessage={health ? getHealthStatusDescription(health) : undefined}
         oktaEnabled={EnvironmentUtils.isOktaEnabled}>
         <AppErrorBoundary>

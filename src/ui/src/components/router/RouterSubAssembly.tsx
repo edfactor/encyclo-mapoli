@@ -7,7 +7,6 @@ import DuplicateNamesAndBirthdays from "pages/DecemberActivities/DuplicateNamesA
 import DuplicateSSNsOnDemographics from "pages/DecemberActivities/DuplicateSSNsOnDemographics/DuplicateSSNsOnDemographics";
 import EmployeesOnMilitaryLeave from "pages/DecemberActivities/EmployeesOnMilitaryLeave/EmployeesOnMilitaryLeave";
 import ManageExecutiveHoursAndDollars from "pages/FiscalClose/ManageExecutiveHoursAndDollars/ManageExecutiveHoursAndDollars";
-import MissingCommaInPyName from "pages/DecemberActivities/MissingCommaInPyName/MissingCommaInPyName";
 import NegativeEtvaForSSNsOnPayprofit from "pages/DecemberActivities/NegativeEtvaForSSNsOnPayprofit/NegativeEtvaForSSNsOnPayprofit";
 import Termination from "pages/DecemberActivities/Termination/Termination";
 import EligibleEmployees from "pages/FiscalClose/EligibleEmployees/EligibleEmployees";
@@ -181,9 +180,6 @@ const RouterSubAssembly: React.FC = () => {
               <Route
                 path={ROUTES.DUPLICATE_NAMES}
                 element={<DuplicateNamesAndBirthdays />}></Route>
-              <Route
-                path={ROUTES.MISSING_COMMA}
-                element={<MissingCommaInPyName />}></Route>
               <Route
                 path={ROUTES.MILITARY_LEAVE}
                 element={<EmployeesOnMilitaryLeave />}></Route>

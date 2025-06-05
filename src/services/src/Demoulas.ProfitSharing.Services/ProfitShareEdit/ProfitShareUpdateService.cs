@@ -21,20 +21,20 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
     private readonly ICalendarService _calendarService;
     private readonly IProfitSharingDataContextFactory _dbContextFactory;
     private readonly TotalService _totalService;
+    private readonly IDemographicReaderService _demographicReaderService;
 
-    public ProfitShareUpdateService(IProfitSharingDataContextFactory dbContextFactory,
-        TotalService totalService,
-        ICalendarService calendarService)
+    public ProfitShareUpdateService(IProfitSharingDataContextFactory dbContextFactory, TotalService totalService, ICalendarService calendarService, IDemographicReaderService demographicReaderService)
     {
         _dbContextFactory = dbContextFactory;
         _totalService = totalService;
         _calendarService = calendarService;
+        _demographicReaderService = demographicReaderService;
     }
 
     public async Task<ProfitShareUpdateResponse> ProfitShareUpdate(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
         (List<MemberFinancials> memberFinancials, AdjustmentsSummaryDto adjustmentReportData, ProfitShareUpdateTotals totalsDto, bool employeeExceededMaxContribution) =
-            await ProfitSharingUpdate(profitShareUpdateRequest, cancellationToken);
+            await ProfitSharingUpdate(profitShareUpdateRequest, cancellationToken, false);
 
         List<ProfitShareUpdateMemberResponse> members = memberFinancials.Select(m => new ProfitShareUpdateMemberResponse
         {
@@ -73,8 +73,7 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
             EndDate = calInfo.FiscalEndDate,
             Response = new PaginatedResponseDto<ProfitShareUpdateMemberResponse>(profitShareUpdateRequest)
             {
-                Total = members.Count,
-                Results =  ProfitShareEditService.HandleInMemorySortAndPaging(profitShareUpdateRequest, members)
+                Total = members.Count, Results = ProfitShareEditService.HandleInMemorySortAndPaging(profitShareUpdateRequest, members)
             }
         };
     }
@@ -84,7 +83,7 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
     /// </summary>
     public async Task<ProfitShareUpdateResult> ProfitShareUpdateInternal(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
     {
-        (List<MemberFinancials> memberFinancials, _, _, bool employeeExceededMaxContribution) = await ProfitSharingUpdate(profitShareUpdateRequest, cancellationToken);
+        (List<MemberFinancials> memberFinancials, _, _, bool employeeExceededMaxContribution) = await ProfitSharingUpdate(profitShareUpdateRequest, cancellationToken, true);
         List<ProfitShareUpdateMember> members = memberFinancials.Select(m => new ProfitShareUpdateMember
         {
             IsEmployee = m.IsEmployee,
@@ -113,22 +112,29 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
     }
 
     /// <summary>
-    ///     Applies updates specified in request and returns members with updated
+    ///     Applies updates specified in the request and returns members with updated
     ///     Contributions/Earnings/IncomingForfeitures/SecondaryEarnings
+    ///
+    /// The "includeZeroAmounts" is because PAY444 doesnt show members with no financial change, PAY447 does include members with changes to ZeroContributions.
     /// </summary>
-    public async Task<ProfitShareUpdateOutcome> ProfitSharingUpdate(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken)
-    {
+    public async Task<ProfitShareUpdateOutcome> ProfitSharingUpdate(ProfitShareUpdateRequest profitShareUpdateRequest, CancellationToken cancellationToken, bool includeZeroAmounts)
+        {
         // Values collected for an "Adjustment Report" that we do not yet generate (see https://demoulas.atlassian.net/browse/PS-900)
         AdjustmentsSummaryDto adjustmentsSummaryData = new();
 
         // Start off loading the employees.
         (List<MemberFinancials> members, bool employeeExceededMaxContribution) = await EmployeeProcessorHelper.ProcessEmployees(_dbContextFactory, _calendarService, _totalService,
-            profitShareUpdateRequest, adjustmentsSummaryData, cancellationToken);
+            _demographicReaderService, profitShareUpdateRequest, adjustmentsSummaryData, cancellationToken);
 
         // Go get the Bene's.  NOTE: May modify some employees if they are both bene and employee (that's why "members" is passed in - to lookup loaded employees and see if they are also Bene's)
         await BeneficiariesProcessingHelper.ProcessBeneficiaries(_dbContextFactory, _totalService, members, profitShareUpdateRequest, cancellationToken);
-
+        
         members = members.OrderBy(m => m.Name).ToList();
+        // The PAY444 Report/Page does not show the zero event individuals, but the PAY447 needs the ZeroContribution records for the PAY447 report/page. 
+        if (!includeZeroAmounts)
+        {
+            members = members.Where(m=>!m.IsAllZeros()).ToList();
+        }
 
         ProfitShareUpdateTotals profitShareUpdateTotals = new();
         foreach (MemberFinancials memberFinancials in members)
@@ -137,7 +143,7 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
             profitShareUpdateTotals.Distributions += memberFinancials.Distributions;
             profitShareUpdateTotals.TotalContribution += memberFinancials.Contributions;
             profitShareUpdateTotals.Military += memberFinancials.Military;
-            profitShareUpdateTotals.Forfeiture += memberFinancials.IncomingForfeitures;
+            profitShareUpdateTotals.Forfeiture += memberFinancials.IncomingForfeitures - memberFinancials.Forfeits;
             profitShareUpdateTotals.Earnings += memberFinancials.AllEarnings;
             profitShareUpdateTotals.Earnings2 += memberFinancials.AllSecondaryEarnings;
             profitShareUpdateTotals.EndingBalance += memberFinancials.EndingBalance;
@@ -148,6 +154,7 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
             profitShareUpdateTotals.ClassActionFund += memberFinancials.Caf;
             profitShareUpdateTotals.MaxOverTotal += memberFinancials.MaxOver;
             profitShareUpdateTotals.MaxPointsTotal += memberFinancials.MaxPoints;
+            
             // members can be both employees and beneficiaries, but I presume that the employee count is the one that matters.
             if (memberFinancials.IsEmployee)
             {

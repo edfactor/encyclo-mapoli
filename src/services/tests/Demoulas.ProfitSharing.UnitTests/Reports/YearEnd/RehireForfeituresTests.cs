@@ -7,6 +7,7 @@ using CsvHelper.Configuration;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Api;
+using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -50,7 +51,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
             {
                 ReportName = "REHIRE'S PROFIT SHARING DATA",
                 ReportDate = DateTimeOffset.UtcNow,
-                StartDate = SqlDateTime.MinValue.Value.ToDateOnly(),
+                StartDate = ReferenceData.DsmMinValue,
                 EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
                 Response = new PaginatedResponseDto<RehireForfeituresResponse>
                 {
@@ -61,7 +62,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
             // Act
             ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
             var response =
-                await ApiClient.POSTAsync<RehireForfeituresEndpoint, RehireForfeituresRequest, ReportResponseBase<RehireForfeituresResponse>>(
+                await ApiClient.POSTAsync<RehireForfeituresEndpoint, StartAndEndDateRequest, ReportResponseBase<RehireForfeituresResponse>>(
                     setup.Request);
 
             // Assert
@@ -92,7 +93,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
 
             // Act
             DownloadClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-            var response = await DownloadClient.POSTAsync<RehireForfeituresEndpoint, RehireForfeituresRequest, StreamContent>(setup.Request);
+            var response = await DownloadClient.POSTAsync<RehireForfeituresEndpoint, StartAndEndDateRequest, StreamContent>(setup.Request);
             response.Response.Content.Should().NotBeNull();
 
             string result = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
@@ -139,7 +140,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
             var setup = await SetupTestEmployee(c);
 
             var response =
-                await ApiClient.POSTAsync<RehireForfeituresEndpoint, RehireForfeituresRequest, ReportResponseBase<RehireForfeituresResponse>>(setup.Request);
+                await ApiClient.POSTAsync<RehireForfeituresEndpoint, StartAndEndDateRequest, ReportResponseBase<RehireForfeituresResponse>>(setup.Request);
 
             response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
         });
@@ -149,13 +150,13 @@ public class RehireForfeituresTests : ApiTestBase<Program>
     public async Task GetResponse_Should_HandleEmptyResults()
     {
         // Arrange
-        var request = RehireForfeituresRequest.RequestExample();
+        var request = StartAndEndDateRequest.RequestExample();
         var cancellationToken = CancellationToken.None;
         var expectedResponse = new ReportResponseBase<RehireForfeituresResponse>
         {
             ReportName = "REHIRE'S PROFIT SHARING DATA",
             ReportDate = DateTimeOffset.UtcNow,
-            StartDate = SqlDateTime.MinValue.Value.ToDateOnly(),
+            StartDate = ReferenceData.DsmMinValue,
             EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
             Response = new PaginatedResponseDto<RehireForfeituresResponse> { Results = new List<RehireForfeituresResponse>() }
         };
@@ -172,13 +173,13 @@ public class RehireForfeituresTests : ApiTestBase<Program>
     public async Task GetResponse_Should_HandleNullResults()
     {
         // Arrange
-        var request = RehireForfeituresRequest.RequestExample();
+        var request = StartAndEndDateRequest.RequestExample();
         var cancellationToken = CancellationToken.None;
         var expectedResponse = new ReportResponseBase<RehireForfeituresResponse>
         {
             ReportName = "REHIRE'S PROFIT SHARING DATA",
             ReportDate = DateTimeOffset.UtcNow,
-            StartDate = SqlDateTime.MinValue.Value.ToDateOnly(),
+            StartDate = ReferenceData.DsmMinValue,
             EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
             Response = new PaginatedResponseDto<RehireForfeituresResponse> { Results = [] }
         };
@@ -201,7 +202,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
         reportFileName.Should().Be("REHIRE'S PROFIT SHARING DATA");
     }
 
-    private static async Task<(RehireForfeituresRequest Request, RehireForfeituresResponse ExpectedResponse)> SetupTestEmployee(ProfitSharingDbContext c)
+    private static async Task<(StartAndEndDateRequest Request, RehireForfeituresResponse ExpectedResponse)> SetupTestEmployee(ProfitSharingDbContext c)
     {
         // Setup
         RehireForfeituresResponse example = RehireForfeituresResponse.ResponseExample();
@@ -244,19 +245,19 @@ public class RehireForfeituresTests : ApiTestBase<Program>
         example.FullName = demo.ContactInfo.FullName;
         example.CompanyContributionYears = 0;
         example.HoursCurrentYear = payProfit.CurrentHoursYear;
-        example.ReHiredDate = demo.ReHireDate ?? SqlDateTime.MinValue.Value.ToDateOnly();
+        example.ReHiredDate = demo.ReHireDate ?? ReferenceData.DsmMinValue;
         example.EmploymentStatus = demo.EmploymentStatus.Name;
         example.Details = details.Select(pd => new MilitaryRehireProfitSharingDetailResponse { Forfeiture = pd.Forfeiture, Remark = pd.Remark, ProfitYear = pd.ProfitYear })
             .ToList();
 
 
         return (
-            new RehireForfeituresRequest
+            new StartAndEndDateRequest
             {
                 Skip = 0,
                 Take = 10,
-                BeginningDate = example.ReHiredDate.AddDays(-5).ToDateTime(TimeOnly.MinValue),
-                EndingDate = example.ReHiredDate.AddDays(5).ToDateTime(TimeOnly.MinValue)
+                BeginningDate = example.ReHiredDate.AddDays(-5),
+                EndingDate = example.ReHiredDate.AddDays(5)
             }, example);
     }
 }

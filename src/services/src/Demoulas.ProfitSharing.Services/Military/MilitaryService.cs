@@ -75,7 +75,7 @@ public class MilitaryService : IMilitaryService
                 CommentTypeId = /* 19 */CommentType.Constants.Military.Id,
                 Contribution = req.ContributionAmount,
                 Ssn = d.Ssn,
-                YearsOfServiceCredit = (byte)(req.AddContributionYear ? 1 : 0),
+                YearsOfServiceCredit = (byte)(req.IsSupplementalContribution ? 0 : 1),
                 MonthToDate = (byte)req.ContributionDate.Month,
                 YearToDate = (short)req.ContributionDate.Year
             };
@@ -90,7 +90,7 @@ public class MilitaryService : IMilitaryService
                 ProfitYear = req.ProfitYear,
                 ContributionDate = new DateOnly(pd.YearToDate, pd.MonthToDate, 01),
                 Amount = pd.Contribution,
-                IncrementsContributionYears = pd.YearsOfServiceCredit == 1
+                IsSupplementalContribution = pd.YearsOfServiceCredit == 0
             });
         }, cancellationToken);
     }
@@ -144,7 +144,7 @@ public class MilitaryService : IMilitaryService
                     CommentTypeId = x.pd.CommentTypeId,
                     ContributionDate = new DateOnly(x.pd.YearToDate == 0 ? req.ProfitYear : x.pd.YearToDate, x.pd.MonthToDate == 0 ? 1 : x.pd.MonthToDate, 01),
                     Amount = x.pd.Contribution,
-                    IncrementsContributionYears = x.pd.YearsOfServiceCredit == 1
+                    IsSupplementalContribution = x.pd.YearsOfServiceCredit == 0
                 })
                 .ToPaginationResultsAsync(req, cancellationToken);
         });

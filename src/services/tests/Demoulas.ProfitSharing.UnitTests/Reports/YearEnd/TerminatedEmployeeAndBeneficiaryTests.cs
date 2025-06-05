@@ -23,7 +23,7 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
         // Act
         var response =
             await ApiClient
-                .GETAsync<TerminatedEmployeeAndBeneficiaryDataEndpoint,
+                .POSTAsync<TerminatedEmployeeAndBeneficiaryDataEndpoint,
                     ProfitYearRequest, TerminatedEmployeeAndBeneficiaryResponse>(_requestDto);
 
         // Assert

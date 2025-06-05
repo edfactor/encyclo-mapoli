@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Typography } from '@mui/material';
+import { Typography, Box, CircularProgress } from '@mui/material';
 import { DSMGrid, ISortParams, Pagination } from 'smart-ui-library';
 import { useNavigate, Path } from 'react-router-dom';
 import { useLazyGetYearEndProfitSharingReportQuery } from 'reduxstore/api/YearsEndApi';
@@ -14,20 +14,28 @@ import { FilterParams } from 'reduxstore/types';
 
 interface ReportGridProps {
   params: FilterParams;
+  onLoadingChange?: (isLoading: boolean) => void;
 }
 
-const ReportGrid: React.FC<ReportGridProps> = ({ params }) => {
+const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
   const navigate = useNavigate();
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: 'badgeNumber',
+    sortBy: 'employeeName',
     isSortDescending: false
   });
   
-  const [trigger, { data, isFetching }] = useLazyGetYearEndProfitSharingReportQuery();
+  const [trigger, { isFetching }] = useLazyGetYearEndProfitSharingReportQuery();
   const hasToken = useSelector((state: RootState) => !!state.security.token);
   const profitYear = useFiscalCloseProfitYear();
+
+  const data = useSelector((state: RootState) => state.yearsEnd.yearEndProfitSharingReport);
+
+  // Notify parent component about loading state changes
+  useEffect(() => {
+    onLoadingChange?.(isFetching);
+  }, [isFetching, onLoadingChange]);
 
   const getReportTitle = () => {
     const matchingPreset = presets.find(preset => 
@@ -146,24 +154,33 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params }) => {
           {`${getReportTitle()} (${data?.response?.total || 0} records)`}
         </Typography>
       </div>
-      <DSMGrid
-        preferenceKey="PAY426N_REPORT"
-        isLoading={isFetching}
-        handleSortChanged={sortEventHandler}
-        providedOptions={{
-          rowData: data?.response?.results || [],
-          columnDefs: columnDefs,
-          pinnedTopRowData: pinnedTopRowData
-        }}
-      />
-      {!!data && data.response.results.length > 0 && (
-        <Pagination
-          pageNumber={pageNumber}
-          setPageNumber={(value: number) => setPageNumber(value - 1)}
-          pageSize={pageSize}
-          setPageSize={setPageSize}
-          recordCount={data.response.total}
-        />
+      
+      {isFetching ? (
+        <Box display="flex" justifyContent="center" alignItems="center" py={4}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <>
+          <DSMGrid
+            preferenceKey="PAY426N_REPORT"
+            isLoading={isFetching}
+            handleSortChanged={sortEventHandler}
+            providedOptions={{
+              rowData: data?.response?.results || [],
+              columnDefs: columnDefs,
+              pinnedTopRowData: pinnedTopRowData
+            }}
+          />
+          {!!data && data.response.results.length > 0 && (
+            <Pagination
+              pageNumber={pageNumber}
+              setPageNumber={(value: number) => setPageNumber(value - 1)}
+              pageSize={pageSize}
+              setPageSize={setPageSize}
+              recordCount={data.response.total}
+            />
+          )}
+        </>
       )}
     </>
   );

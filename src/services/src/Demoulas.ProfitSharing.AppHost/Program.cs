@@ -7,10 +7,13 @@ using Microsoft.Extensions.Configuration;
 
 var logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger("AppHost");
 IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(options: new DistributedApplicationOptions { AllowUnsecuredTransport = true });
+short uiPort = 3100;
 
-
-// Kill all node processes using helper
-ProcessHelper.KillProcessesByName("node", logger);
+// Kill all node processes using helper if port is in use
+if (PortHelper.IsTcpPortInUse(uiPort))
+{
+    ProcessHelper.KillProcessesByName("node", logger);
+}
 
 Demoulas_ProfitSharing_Data_Cli cli = new Demoulas_ProfitSharing_Data_Cli();
 var projectPath = new FileInfo(cli.ProjectPath).Directory?.FullName;
@@ -48,7 +51,7 @@ var configuration = new ConfigurationBuilder()
 var database = builder.AddConnectionString("Oracle", "ProfitSharing");
 
 var api = builder.AddProject<Demoulas_ProfitSharing_Api>("ProfitSharing-Api")
-    //.WithHealthCheck("/health")
+    .WithHttpHealthCheck("/health")
     //.WithReference(database)
     .WithSwaggerUi()
     .WithRedoc()
@@ -60,22 +63,19 @@ var api = builder.AddProject<Demoulas_ProfitSharing_Api>("ProfitSharing-Api")
     });
 
 // Use AddViteApp for Vite applications as per the latest CommunityToolkit.Aspire guidance
-var ui = builder.AddViteApp("ProfitSharing-Ui", "../../../ui/")
-    .WithEndpoint("http", annotation =>
-    {
-        annotation.IsProxied = false;
-        annotation.TargetPort = 3100;
-        annotation.Port = 3100;
-    })
+var ui = builder.AddNpmApp("ProfitSharing-Ui", "../../../ui/", scriptName: "dev")
+    .WithHttpEndpoint(port: uiPort, isProxied: false)
     .WithUrlForEndpoint("http", annotation =>
     {
         annotation.DisplayText = "Profit Sharing";
     })
+    .WithOtlpExporter()
     .WithNpmPackageInstallation();
 
 ui.WithReference(api)
     .WaitFor(api)
     .WithParentRelationship(api)
+    .WithExternalHttpEndpoints()
     .WithOtlpExporter();
 
 _ = builder.AddProject<Demoulas_ProfitSharing_EmployeeFull_Sync>(name: "ProfitSharing-EmployeeFull-Sync")

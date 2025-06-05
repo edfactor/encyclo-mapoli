@@ -37,7 +37,7 @@ export const ROUTES = {
   DUPLICATE_NAMES: "duplicate-names-and-birthdays",
   MISSING_COMMA: "missing-comma-in-py-name",
   MILITARY_LEAVE: "employees-on-military-leave",
-  REHIRE_FORFEITURES: "rehire-forfeitures",
+  REHIRE_FORFEITURES: "unforfeitures",
   PROFIT_SHARE_REPORT: "profit-share-report",
   PROFIT_SHARE_TOTALS: "profit-share-totals",
   PROFIT_SHARE_REPORT_EDIT_RUN: "profit-share-report-edit-run",
@@ -63,12 +63,12 @@ export const ROUTES = {
   PAY426N: "pay426n",
   FORFEIT: "forfeit",
   PAYMASTER_UPDATE: "paymaster-update",
-  PROFIT_MASTER_UPDATE: "/",
+  PROFIT_MASTER_UPDATE: "profit-master-update",
   PROFIT_SHARE_BY_STORE: "profit-share-by-store",
   PROFIT_SHARE_GROSS_REPORT: "profit-share-gross-report",
   PAY450_SUMMARY: "pay450-summary",
   PROF_CTRLSHEET: "prof-control-sheet",
-  PRINT_PROFIT_CERTS: "/",
+  PRINT_PROFIT_CERTS: "print-profit-certs",
   UNDER_21_REPORT: "under-21-report",
   QPAY066_UNDER21: "qpay066-under21",
   QPAY066TA_UNDER21: "qpay066ta-under21",
@@ -76,7 +76,9 @@ export const ROUTES = {
   NEW_PS_LABELS: "new-ps-labels",
   PROFALL: "profall",
   DEMO_FREEZE: "demographic-freeze",
-  DEV_DEBUG: "dev-debug"
+  DEV_DEBUG: "dev-debug",
+  PROFIT_SHARE_EDIT: "profit-share-edit",
+  SAVE_PROF_PAYMSTR: "save-prof-paymstr"
 } as const;
 
 export const CAPTIONS = {
@@ -97,7 +99,7 @@ export const CAPTIONS = {
   EMPLOYEES_MILITARY: "Employees on Military Leave (QPAY511)",
   FORFEIT: "Forfeit (PAY443)",
   FORFEITURES_BY_AGE: "Get Forfeitures by Age (PROF130)",
-  FORFEITURES_ADJUSTMENT: "Forfeitures (008-12)",
+  FORFEITURES_ADJUSTMENT: "Forfeitures Adjustment(008-12)",
   MANAGE_EXECUTIVE_HOURS: "Manage Executive Hours and Dollars (TPR008-09)",
   MASTER_INQUIRY: "Master Inquiry",
   MILITARY_ENTRY_AND_MODIFICATION: "Military Entry and Modification",

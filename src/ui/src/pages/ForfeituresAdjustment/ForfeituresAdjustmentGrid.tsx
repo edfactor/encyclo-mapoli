@@ -1,5 +1,5 @@
 import { Typography, Button } from "@mui/material";
-import { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { DSMGrid, Pagination } from "smart-ui-library";
@@ -8,6 +8,7 @@ import { GetForfeituresAdjustmentColumns } from "./ForfeituresAdjustmentGridColu
 import { RootState } from "reduxstore/store";
 import { AddOutlined } from "@mui/icons-material";
 import { useLazyGetForfeitureAdjustmentsQuery } from "reduxstore/api/YearsEndApi";
+import ReportSummary from "../../components/ReportSummary";
 
 interface ISortParams {
   sortBy: string;
@@ -64,12 +65,6 @@ const ForfeituresAdjustmentGrid: React.FC<ForfeituresAdjustmentGridProps> = ({
       {initialSearchLoaded && (
         <>
           <div style={{ padding: "0 24px 24px 24px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <Typography
-              variant="h2"
-              sx={{ color: "#0258A5" }}>
-              {`${forfeitureAdjustmentData?.reportName || "Forfeiture Adjustments"} (${totalRecords} records)`}
-            </Typography>
-            
             {onAddForfeiture && (
               <Button 
                 onClick={onAddForfeiture}
@@ -81,6 +76,7 @@ const ForfeituresAdjustmentGrid: React.FC<ForfeituresAdjustmentGridProps> = ({
               </Button>
             )}
           </div>
+          <ReportSummary report={forfeitureAdjustmentData} />
           <DSMGrid
             preferenceKey={CAPTIONS.FORFEITURES_ADJUSTMENT}
             isLoading={isFetching}

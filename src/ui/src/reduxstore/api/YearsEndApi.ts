@@ -2,8 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 import {
   addBadgeNumberToUpdateAdjustmentSummary,
-  clearBreakdownByStore, clearBreakdownByStoreTotals, clearBreakdownGrandTotals,
-  clearControlSheet,
+  clearBreakdownByStoreTotals, clearBreakdownGrandTotals,
   clearProfitMasterApply,
   clearProfitMasterRevert,
   clearProfitMasterStatus,
@@ -33,7 +32,6 @@ import {
   setForfeituresByAge,
   setGrossWagesReport,
   setMilitaryAndRehireForfeituresDetails,
-  setMissingCommaInPYName,
   setNegativeEtvaForSSNsOnPayprofit,
   setProfitMasterApply,
   setProfitMasterRevert,
@@ -85,8 +83,6 @@ import {
   GrossWagesReportDto,
   GrossWagesReportResponse,
   MilitaryAndRehireForfeiture,
-  MissingCommasInPYName,
-  MissingCommasInPYNameRequestDto,
   NegativeEtvaForSSNsOnPayProfit,
   NegativeEtvaForSSNsOnPayprofitRequestDto,
   PagedReportResponse,
@@ -100,7 +96,7 @@ import {
   ProfitSharingLabel,
   ProfitSharingLabelsRequest,
   ProfitYearRequest,
-  RehireForfeituresRequest,
+  StartAndEndDateRequest,
   TerminationRequest,
   TerminationResponse,
   Under21BreakdownByStoreRequest,
@@ -122,7 +118,7 @@ import {
 } from "reduxstore/types";
 import { tryddmmyyyyToDate } from "../../utils/dateUtils";
 import { Paged } from "smart-ui-library";
-import { url } from "./api";
+import { createDataSourceAwareBaseQuery, url } from "./api";
 
 import {
   setForfeitureAdjustmentData,
@@ -130,41 +126,8 @@ import {
 } from "reduxstore/slices/forfeituresAdjustmentSlice";
 
 
-/* -------------------------------------------------------------------------
-   Automatic x-demographic-data-source header copier
-   ------------------------------------------------------------------------- */
-import type { BaseQueryFn, FetchArgs, FetchBaseQueryError, FetchBaseQueryMeta } from "@reduxjs/toolkit/query";
-const rawBaseQuery = fetchBaseQuery({
-
-  baseUrl: `${url}/api/`,
-  prepareHeaders: (headers, { getState }) => {
-    const root = getState() as RootState;
-    const token = root.security.token;
-    const impersonating = root.security.impersonating;
-    if (token) {
-      headers.set("authorization", `Bearer ${token}`);
-    }
-    if (impersonating) {
-      headers.set("impersonation", impersonating);
-    } else {
-      const localImpersonation = localStorage.getItem("impersonatingRole");
-      if (localImpersonation) {
-        headers.set("impersonation", localImpersonation);
-      }
-    }
-    return headers;
-  }
-
-});
-const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (args, api, extra) => {
-  const result = await rawBaseQuery(args, api, extra);
-  if (result.data && typeof result.data === "object") {
-    const hdr =
-      (result.meta as FetchBaseQueryMeta | undefined)?.response?.headers?.get("x-demographic-data-source") ?? "Live";
-    (result.data as any).dataSource = hdr;
-  }  
-  return result;
-};
+/* Use the centralized data source aware base query */
+const baseQuery = createDataSourceAwareBaseQuery();
 /* ------------------------------------------------------------------------- */
 
 export const YearsEndApi = createApi({
@@ -180,6 +143,13 @@ export const YearsEndApi = createApi({
       // Note that it seems as if we should do something here to the store
       // after we do the update. Yet the working copy in the grid is
       // the correct data, a refresh is not needed.
+    }),
+    updateEnrollment: builder.mutation({
+      query: () => ({
+        url: `yearend/update-enrollment`,
+        method: "POST",
+        body: {}
+      })
     }),
     getDuplicateSSNs: builder.query<PagedReportResponse<DuplicateSSNDetail>, DuplicateSSNsRequestDto>({
       query: (params) => ({
@@ -319,14 +289,13 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getRehireForfeitures: builder.query<PagedReportResponse<MilitaryAndRehireForfeiture>, RehireForfeituresRequest>({
+    getRehireForfeitures: builder.query<PagedReportResponse<MilitaryAndRehireForfeiture>, StartAndEndDateRequest>({
       query: (params) => ({
-        url: `yearend/rehire-forfeitures/`,
+        url: `yearend/unforfeitures/`,
         method: "POST",
         body: {
-          profitYear: params.profitYear,
-          beginningDate: params.beginningDate ? tryddmmyyyyToDate(params.beginningDate) : params.beginningDate,
-          endingDate: params.endingDate ? tryddmmyyyyToDate(params.endingDate) : params.endingDate,
+          beginningDate: params.beginningDate,
+          endingDate: params.endingDate,
           take: params.pagination.take,
           skip: params.pagination.skip,
           sortBy: params.pagination.sortBy,
@@ -360,27 +329,7 @@ export const YearsEndApi = createApi({
           console.log("Err: " + err);
         }
       }
-    }),
-    getNamesMissingCommas: builder.query<PagedReportResponse<MissingCommasInPYName>, MissingCommasInPYNameRequestDto>({
-      query: (params) => ({
-        url: "yearend/names-missing-commas",
-        method: "GET",
-        params: {
-          take: params.pagination.take,
-          skip: params.pagination.skip,
-          sortBy: params.pagination.sortBy,
-          isSortDescending: params.pagination.isSortDescending
-        }
-      }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
-          dispatch(setMissingCommaInPYName(data));
-        } catch (err) {
-          console.log("Err: " + err);
-        }
-      }
-    }),
+    }),   
     getNegativeEVTASSN: builder.query<
       PagedReportResponse<NegativeEtvaForSSNsOnPayProfit>,
       NegativeEtvaForSSNsOnPayprofitRequestDto
@@ -691,20 +640,15 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getTerminationReport: builder.query<TerminationResponse, TerminationRequest>({
+    getTerminationReport: builder.query<TerminationResponse, StartAndEndDateRequest>({
       query: (params) => {
-        // Validate profit year range
-        if (params.profitYear < 2020 || params.profitYear > 2100) {
-          console.error("Invalid profit year: Must be between 2020 and 2100");
-          // Return a dummy endpoint that won't be called
-          return { url: "invalid-request", method: "GET" };
-        }
-
+       
         return {
-          url: "yearend/terminated-employee-and-beneficiary",
-          method: "GET",
-          params: {
-            profitYear: params.profitYear,
+          url: "yearend/terminated-employees",
+          method: "POST",
+          body: {
+            beginningDate: params.beginningDate,
+            endingDate: params.endingDate,
             skip: params.pagination.skip,
             take: params.pagination.take,
             sortBy: params.pagination.sortBy,
@@ -714,11 +658,6 @@ export const YearsEndApi = createApi({
       },
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
-          // Don't proceed with API call if validation failed
-          if (arg.profitYear < 2020 || arg.profitYear > 2100) {
-            return;
-          }
-
           const { data } = await queryFulfilled;
           dispatch(setTermination(data));
         } catch (err) {
@@ -1134,6 +1073,13 @@ export const YearsEndApi = createApi({
         method: "PUT",
         body: params
       })
+    }),
+    finalizeReport: builder.mutation<void, { profitYear: number }>({
+      query: (params) => ({
+        url: "yearend/final",
+        method: "POST",
+        body: params
+      })
     })
   })
 });
@@ -1159,7 +1105,6 @@ export const {
   useLazyGetForfeituresByAgeQuery,
   useLazyGetGrossWagesReportQuery,
   useLazyGetRehireForfeituresQuery,
-  useLazyGetNamesMissingCommasQuery,
   useLazyGetNegativeEVTASSNQuery,
   useLazyGetProfitShareEditQuery,
   useLazyGetProfitShareUpdateQuery,
@@ -1177,5 +1122,8 @@ export const {
   useLazyGetProfitMasterStatusQuery,
   useLazyGetBreakdownGrandTotalsQuery,
   useLazyGetForfeitureAdjustmentsQuery,
-  useUpdateForfeitureAdjustmentMutation
+  useUpdateForfeitureAdjustmentMutation,
+  useLazyGetUpdateSummaryQuery,
+  useUpdateEnrollmentMutation,
+  useFinalizeReportMutation
 } = YearsEndApi;

@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Web;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -101,8 +102,8 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
         return rslt ?? new ReportResponseBase<TResponseDto>
         {
             ReportName = Constants.ErrorMessages.ReportNotFound,
-            ReportDate = SqlDateTime.MinValue.Value,
-            StartDate = SqlDateTime.MinValue.Value.ToDateOnly(),
+            ReportDate = ReferenceData.DsmMinValue.ToDateTime(TimeOnly.MinValue),
+            StartDate = ReferenceData.DsmMinValue,
             EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
             Response = new PaginatedResponseDto<TResponseDto>()
         };

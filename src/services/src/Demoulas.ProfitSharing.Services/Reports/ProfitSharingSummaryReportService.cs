@@ -502,7 +502,8 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                     IsUnder21 = false, // back‑filled later
                     EmployeeStatus = x.Employee.EmploymentStatusId,
                     Balance = x.Balance,
-                    YearsInPlan = x.Employee.Years ?? 0
+                    YearsInPlan = x.Employee.Years ?? 0,
+                    TerminationDate = x.Employee.TerminationDate
                 })
                 .ToPaginationResultsAsync(req, cancellationToken);
 
@@ -515,7 +516,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             ReportDate = DateTimeOffset.UtcNow,
             StartDate = calInfo.FiscalBeginDate,
             EndDate = calInfo.FiscalEndDate,
-            ReportName = $"PROFIT SHARE YEAR END REPORT FOR {req.ProfitYear}",
+            ReportName = $"PROFIT SHARE REPORT (PAY426) - {req.ProfitYear}",
             Response = await responseTask
         };
 

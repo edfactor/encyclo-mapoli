@@ -31,5 +31,7 @@ public static class ReferenceData
     {
         return 5;
     }
+
+    public static readonly DateOnly DsmMinValue = new DateOnly(1971, 01, 01);
 #pragma warning restore S3400
 }

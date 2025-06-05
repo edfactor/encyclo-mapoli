@@ -5,6 +5,7 @@ import { useLazyGetDemographicBadgesNotInPayprofitQuery } from "reduxstore/api/Y
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetDemographicBadgesNotInPayprofitColumns } from "./DemographicBadgesNotInPayprofitGridColumns";
+import ReportSummary from "../../../components/ReportSummary";
 
 const DemographicBadgesNotInPayprofitGrid: React.FC = () => {
   const [pageNumber, setPageNumber] = useState(0);
@@ -53,13 +54,7 @@ const DemographicBadgesNotInPayprofitGrid: React.FC = () => {
     <>
       {demographicBadges?.response && (
         <>
-          <div style={{ padding: "0 24px 0 24px" }}>
-            <Typography
-              variant="h2"
-              sx={{ color: "#0258A5" }}>
-              {`(${demographicBadges?.response.total || 0} records)`}
-            </Typography>
-          </div>
+          <ReportSummary report={demographicBadges} />
           <DSMGrid
             preferenceKey={"DEMO_BADGES"}
             isLoading={isFetching}

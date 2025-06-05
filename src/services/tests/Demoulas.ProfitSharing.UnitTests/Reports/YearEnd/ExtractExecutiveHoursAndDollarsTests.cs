@@ -2,6 +2,7 @@
 using System.Net;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Api;
+using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -239,7 +240,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
         {
             ReportName = _expectedReportName,
             ReportDate = DateTimeOffset.UtcNow,
-            StartDate = SqlDateTime.MinValue.Value.ToDateOnly(),
+            StartDate = ReferenceData.DsmMinValue,
             EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
 
             Response = new PaginatedResponseDto<ExecutiveHoursAndDollarsResponse>

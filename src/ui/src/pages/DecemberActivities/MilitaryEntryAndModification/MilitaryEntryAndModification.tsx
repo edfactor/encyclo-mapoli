@@ -73,11 +73,17 @@ const MilitaryEntryAndModification = () => {
         </Grid2>
 
         <Grid2 width="100%">
-          <MilitaryContributionGrid
-            setInitialSearchLoaded={setInitialSearchLoaded}
-            initialSearchLoaded={initialSearchLoaded}
-            onAddContribution={handleOpenForm}
-          />
+          {masterInquiryEmployeeDetails ? (
+            <MilitaryContributionGrid
+              setInitialSearchLoaded={setInitialSearchLoaded}
+              initialSearchLoaded={initialSearchLoaded}
+              onAddContribution={handleOpenForm}
+            />
+          ) : (
+            <div className="military-contribution-message">
+              Please search for and select an employee to view military contributions.
+            </div>
+          )}
         </Grid2>
       </Grid2>
 

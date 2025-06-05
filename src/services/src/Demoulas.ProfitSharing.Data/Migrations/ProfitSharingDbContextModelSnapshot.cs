@@ -28986,12 +28986,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         new
                         {
                             Id = (byte)3,
-                            Name = "Blocked"
+                            Name = "On Hold"
                         },
                         new
                         {
                             Id = (byte)4,
-                            Name = "Successful"
+                            Name = "Complete"
                         });
                 });
 

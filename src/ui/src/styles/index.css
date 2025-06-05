@@ -143,6 +143,68 @@
       0px 4px 5px 0px rgba(0, 0, 0, 0.14),
       0px 1px 10px 0px rgba(0, 0, 0, 0.12);
   }
+
+  .master-inquiry-header {
+    padding: 0 24px 0 24px;
+  }
+
+  .badge-link {
+    color: #0258a5;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  .missive-alerts-box {
+    background: #f5f5f5;
+    border-radius: 6px;
+    padding: 16px 20px;
+    margin-top: 24px;
+  }
+
+  .missive-alerts-box {
+    margin-top: 24px;
+    padding: 12px 0;
+  }
+
+  .missive-alert {
+    border-left: 4px solid #ed6c02;
+    background: #fff3e0;
+    margin-bottom: 12px;
+    padding: 12px 16px;
+    border-radius: 4px;
+  }
+
+  .missive-error {
+    border-left-color: #d32f2f;
+    background: #ffebee;
+  }
+
+  .missive-warning {
+    border-left-color: #ed6c02;
+    background: #fff3e0;
+  }
+
+  .missive-message {
+    font-weight: 600;
+    display: block;
+    margin-bottom: 4px;
+    color: #d32f2f;
+  }
+
+  .missive-warning .missive-message {
+    color: #ed6c02;
+  }
+
+  .missive-description {
+    font-size: 0.95em;
+    color: #333;
+  }
+
+  .military-contribution-message {
+    padding: 2rem;
+    text-align: center;
+    color: #888;
+  }
 }
 /*
 @font-face {

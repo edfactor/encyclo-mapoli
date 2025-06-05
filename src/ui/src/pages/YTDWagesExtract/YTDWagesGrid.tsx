@@ -9,6 +9,7 @@ import { GetYTDWagesColumns } from "./YTDWagesGridColumn";
 import { RefObject } from "react";
 import { useLazyGetEmployeeWagesForYearQuery } from "reduxstore/api/YearsEndApi";
 import useFiscalCloseProfitYear from "../../hooks/useFiscalCloseProfitYear";
+import ReportSummary from "../../components/ReportSummary";
 
 interface YTDWagesGridProps {
   innerRef: RefObject<HTMLDivElement | null>;
@@ -58,13 +59,7 @@ const YTDWagesGrid = ({ innerRef, initialSearchLoaded, setInitialSearchLoaded }:
     <>
       {employeeWagesForYear?.response && (
         <div ref={innerRef}>
-          <div style={{ padding: "0 24px 0 24px" }}>
-            <Typography
-              variant="h2"
-              sx={{ color: "#0258A5" }}>
-              {`${CAPTIONS.YTD_WAGES_EXTRACT} (${employeeWagesForYear.response.total || 0} records)`}
-            </Typography>
-          </div>
+          <ReportSummary report={employeeWagesForYear} />
           <DSMGrid
             preferenceKey={"TERM"}
             isLoading={isFetching}

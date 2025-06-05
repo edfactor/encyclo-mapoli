@@ -6,6 +6,8 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import { setUpdateSummary } from "reduxstore/slices/yearsEndSlice";
+import { useDispatch } from "react-redux";
 
 interface ProfitYearSearch {
     profitYear: number;
@@ -30,6 +32,8 @@ const Pay450SearchFilters: React.FC<ProfitYearSearchFilterProps> = ({
     isFetching = false
 }) => {
     const fiscalCloseProfitYear = useFiscalCloseProfitYear();
+
+    const dispatch = useDispatch();
     
     const {
         control,
@@ -53,6 +57,7 @@ const Pay450SearchFilters: React.FC<ProfitYearSearchFilterProps> = ({
         reset({
             profitYear: fiscalCloseProfitYear
         });
+        dispatch(setUpdateSummary(null));
     };
 
     return (

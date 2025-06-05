@@ -10,6 +10,7 @@ using Demoulas.ProfitSharing.Services.Caching.Extensions;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.ItOperations;
 using Demoulas.ProfitSharing.Services.Mappers;
+using Demoulas.ProfitSharing.Services.MasterInquiry;
 using Demoulas.ProfitSharing.Services.Military;
 using Demoulas.ProfitSharing.Services.Navigations;
 using Demoulas.ProfitSharing.Services.ProfitMaster;

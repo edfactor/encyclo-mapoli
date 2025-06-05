@@ -18,6 +18,7 @@ public sealed record YearEndProfitSharingReportDetail
     public char? EmployeeStatus { get; set; }
     public required decimal Balance { get; set; }
     public required short YearsInPlan { get; set; }
+    public DateOnly? TerminationDate { get; set; }
 
     public static YearEndProfitSharingReportDetail ResponseExample()
     {
@@ -38,7 +39,8 @@ public sealed record YearEndProfitSharingReportDetail
             IsNew = false,
             EmployeeStatus = ' ',
             Balance = 51351.55m,
-            YearsInPlan = 1
+            YearsInPlan = 1,
+            TerminationDate = null
         };
     }
 }

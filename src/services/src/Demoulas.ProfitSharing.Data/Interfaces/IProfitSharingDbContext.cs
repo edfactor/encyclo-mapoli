@@ -17,6 +17,7 @@ public interface IProfitSharingDbContext
     DbSet<PayProfit> PayProfits { get; set; }
     DbSet<ProfitDetail> ProfitDetails { get; set; }
     DbSet<Distribution> Distributions { get; set; }
+    DbSet<DistributionPayee> DistributionPayees { get; set; }
     DbSet<FakeSsn> FakeSsns { get; set; }
     DbSet<Missive> Missives { get; set; }
     DbSet<ParticipantTotal> ParticipantTotals { get; set; }

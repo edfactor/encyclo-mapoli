@@ -1,15 +1,13 @@
-import { Typography } from "@mui/material";
 import { ICellRendererParams } from "ag-grid-community";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetRehireForfeituresQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { CAPTIONS } from "../../../constants";
-import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import useFiscalCalendarYear from "../../../hooks/useFiscalCalendarYear";
-import { RehireForfeituresRequest } from "../../../reduxstore/types";
+import { StartAndEndDateRequest } from "../../../reduxstore/types";
 import { GetDetailColumns, GetMilitaryAndRehireForfeituresColumns } from "./RehireForfeituresGridColumns";
+import ReportSummary from "../../../components/ReportSummary";
 
 interface MilitaryAndRehireForfeituresGridSearchProps {
   initialSearchLoaded: boolean;
@@ -29,7 +27,6 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
     isSortDescending: false
   });
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
-  const profitYear = useDecemberFlowProfitYear();
   const fiscalCalendarYear = useFiscalCalendarYear();
   const { rehireForfeitures, rehireForfeituresQueryParams } = useSelector((state: RootState) => state.yearsEnd);
 
@@ -37,17 +34,16 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
 
   // Create a request object based on current parameters
   const createRequest = useCallback(
-    (skip: number, sortBy: string, isSortDescending: boolean): RehireForfeituresRequest | null => {
+    (skip: number, sortBy: string, isSortDescending: boolean): StartAndEndDateRequest | null => {
       if (!rehireForfeituresQueryParams) return null;
 
       return {
         beginningDate: rehireForfeituresQueryParams.beginningDate || fiscalCalendarYear?.fiscalBeginDate || "",
         endingDate: rehireForfeituresQueryParams.endingDate || fiscalCalendarYear?.fiscalEndDate || "",
-        pagination: { skip, take: pageSize, sortBy, isSortDescending },
-        profitYear: rehireForfeituresQueryParams.profitYear || profitYear
+        pagination: { skip, take: pageSize, sortBy, isSortDescending }
       };
     },
-    [rehireForfeituresQueryParams, fiscalCalendarYear?.fiscalBeginDate, fiscalCalendarYear?.fiscalEndDate, pageSize, profitYear]
+    [rehireForfeituresQueryParams, fiscalCalendarYear?.fiscalBeginDate, fiscalCalendarYear?.fiscalEndDate, pageSize]
   );
 
   const performSearch = useCallback(
@@ -173,22 +169,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
       lockVisible: true,
       lockPosition: true,
       pinned: "left"
-    };
-
-    // Add a style column to handle indentation
-    const indentationColumn = {
-      headerName: "",
-      field: "isDetail",
-      width: 30,
-      cellRenderer: (params: ICellRendererParams) => {
-        return params.data.isDetail ? "" : "";
-      },
-      suppressSizeToFit: true,
-      suppressAutoSize: true,
-      lockVisible: true,
-      lockPosition: true,
-      pinned: "left"
-    };
+    };   
 
     // Determine which columns to display based on whether it's a detail row
     const visibleColumns = mainColumns.map((column) => {
@@ -240,7 +221,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
       });
 
     // Combine all columns
-    return [expansionColumn, indentationColumn, ...visibleColumns, ...detailOnlyColumns];
+    return [expansionColumn, ...visibleColumns, ...detailOnlyColumns];
   }, [mainColumns, detailColumns]);
 
   // Custom CSS classes for rows
@@ -250,12 +231,6 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
 
   return (
     <div>
-      <Typography
-        variant="h2"
-        sx={{ color: "#0258A5" }}>
-        {`${CAPTIONS.REHIRE_FORFEITURES} (${rehireForfeitures?.response.total || 0} ${rehireForfeitures?.response.total === 1 ? "Record" : "Records"})`}
-      </Typography>
-
       <style>
         {`
           .detail-row {
@@ -266,10 +241,12 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
 
       {rehireForfeitures?.response && (
         <>
+          <ReportSummary report={rehireForfeitures} />
           <DSMGrid
             preferenceKey={"QPREV-PROF"}
             isLoading={isFetching}
             handleSortChanged={sortEventHandler}
+            maxHeight={1000}
             providedOptions={{
               rowData: gridData,
               columnDefs: columnDefs,

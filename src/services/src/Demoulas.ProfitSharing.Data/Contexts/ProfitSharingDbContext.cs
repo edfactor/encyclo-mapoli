@@ -38,6 +38,7 @@ public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>, I
     public virtual DbSet<BeneficiaryContact> BeneficiaryContacts { get; set; }
     public virtual DbSet<PayProfit> PayProfits { get; set; }
     public virtual DbSet<Distribution> Distributions { get; set; }
+    public virtual DbSet<DistributionPayee> DistributionPayees { get; set; }
 
     public virtual DbSet<Job> Jobs { get; set; }
     public virtual DbSet<DemographicSyncAudit> DemographicSyncAudit { get; set; }

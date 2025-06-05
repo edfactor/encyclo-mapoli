@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.ProfitSharing.Common.Contracts.Request.Naviations;
-using Demoulas.ProfitSharing.Common.Contracts.Request.Navigations;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Navigations;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Navigations;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Groups;

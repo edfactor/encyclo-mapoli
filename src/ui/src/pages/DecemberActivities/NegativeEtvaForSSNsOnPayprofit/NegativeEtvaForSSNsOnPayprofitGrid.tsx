@@ -1,5 +1,5 @@
 import { Typography } from "@mui/material";
-import { useState, useMemo, useCallback, useEffect } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetNegativeEVTASSNQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
@@ -8,6 +8,7 @@ import { GetNegativeEtvaForSSNsOnPayProfitColumns } from "./NegativeEtvaForSSNsO
 import { Path, useNavigate } from "react-router";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import { CAPTIONS } from "../../../constants";
+import ReportSummary from "../../../components/ReportSummary";
 
 interface NegativeEtvaForSSNsOnPayprofitGridProps {
   initialSearchLoaded: boolean;
@@ -71,13 +72,7 @@ const NegativeEtvaForSSNsOnPayprofitGrid: React.FC<NegativeEtvaForSSNsOnPayprofi
     <>
       {negativeEtvaForSSNsOnPayprofit?.response && (
         <>
-          <div style={{ padding: "0 24px 0 24px" }}>
-            <Typography
-              variant="h2"
-              sx={{ color: "#0258A5" }}>
-              {`(${negativeEtvaForSSNsOnPayprofit?.response.total || 0} records)`}
-            </Typography>
-          </div>
+          <ReportSummary report={negativeEtvaForSSNsOnPayprofit} />
           <DSMGrid
             preferenceKey={CAPTIONS.NEGATIVE_ETVA}
             isLoading={isFetching}

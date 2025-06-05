@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetMilitaryContributionsQuery } from "reduxstore/api/MilitaryApi";
 import { RootState } from "reduxstore/store";
@@ -8,6 +8,7 @@ import MasterInquiryEmployeeDetails from "../../MasterInquiry/MasterInquiryEmplo
 import { GetMilitaryContributionColumns } from "./MilitaryContributionFormGridColumns";
 import { CAPTIONS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+
 
 interface MilitaryContributionGridProps {
   initialSearchLoaded: boolean;
@@ -63,13 +64,20 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
 
   return (
     <>
-      {masterInquiryEmployeeDetails && (
-        <MasterInquiryEmployeeDetails details={masterInquiryEmployeeDetails} />
-      )}
+      {masterInquiryEmployeeDetails && profitYear > 0 && <MasterInquiryEmployeeDetails 
+       memberType={masterInquiryEmployeeDetails.isEmployee ? 1 : 2}
+            id={masterInquiryEmployeeDetails.id}
+            profitYear={profitYear} />}
 
       {militaryContributionsData && (
         <>
-          <div style={{ padding: "0 24px 24px 24px", display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div
+            style={{
+              padding: "0 24px 24px 24px",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center"
+            }}>
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
@@ -94,7 +102,7 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
             }}
           />
 
-          {!!militaryContributionsData && militaryContributionsData?.results?.length > 0 && (          
+          {!!militaryContributionsData && militaryContributionsData?.results?.length > 0 && (
             <Pagination
               pageNumber={pageNumber}
               setPageNumber={(value: number) => {
