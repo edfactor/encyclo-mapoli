@@ -182,8 +182,8 @@ public sealed class MasterInquiryService : IMasterInquiryService
             {
                 x.ProfitDetail.ProfitYear,
                 x.ProfitDetail.MonthToDate,
-                Contribution = x.ProfitDetail.CalculateContribution(),
-                Earnings = x.ProfitDetail.CalculateEarnings(),
+                Contribution = x.ProfitDetail.Contribution,
+                Earnings = x.ProfitDetail.Earnings,
                 Forfeiture = x.ProfitDetail.CalculateForfeiture(),
                 Payment = x.ProfitDetail.CalculatePayment()
             });
