@@ -61,6 +61,8 @@ public sealed class DemographicReaderService : IDemographicReaderService
             _http.HttpContext.Items[ItemKey] = liveMeta;
         }
 
+#pragma warning disable DSMPS001
         return ctx.Demographics;
+#pragma warning restore DSMPS001
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,10 +12,13 @@ namespace Demoulas.ProfitSharing.Services;
 public sealed class ContributionService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
+    private readonly IDemographicReaderService _demographicReaderService;
 
-    public ContributionService(IProfitSharingDataContextFactory dataContextFactory)
+    public ContributionService(IProfitSharingDataContextFactory dataContextFactory,
+        IDemographicReaderService demographicReaderService)
     {
         _dataContextFactory = dataContextFactory;
+        _demographicReaderService = demographicReaderService;
     }
 
     /// <summary>
@@ -30,7 +34,7 @@ public sealed class ContributionService
     /// An <see cref="IQueryable{T}"/> of <see cref="InternalProfitDetailDto"/> containing net balance details,
     /// including contributions, earnings, forfeitures, payments, and taxes for each employee.
     /// </returns>
-    internal IQueryable<InternalProfitDetailDto> GetNetBalanceQuery(short profitYear, IProfitSharingDbContext ctx)
+    internal async Task<IQueryable<InternalProfitDetailDto>> GetNetBalanceQuery(short profitYear, IProfitSharingDbContext ctx)
     {
         var pdQuery = ctx.ProfitDetails
                 .Where(details => details.ProfitYear <= profitYear)
@@ -47,8 +51,8 @@ public sealed class ContributionService
                 });
 
 
-
-        var demoQuery = ctx.Demographics
+        var demographics = await _demographicReaderService.BuildDemographicQuery(ctx, useFrozenData: false);
+        var demoQuery = demographics
             .Select(d => new { d.OracleHcmId, BadgeNumber = d.BadgeNumber, d.Ssn });
 
         var query = from d in demoQuery
@@ -85,11 +89,11 @@ public sealed class ContributionService
     /// </returns>
     internal Task<Dictionary<int, InternalProfitDetailDto>> GetNetBalance(short profitYear, ISet<int> badgeNumbers, CancellationToken cancellationToken)
     {
-        return _dataContextFactory.UseReadOnlyContext(ctx =>
+        return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            var query = from d in GetNetBalanceQuery(profitYear, ctx).Where(x => badgeNumbers.Contains(x.BadgeNumber)) select d;
+            var query = from d in (await GetNetBalanceQuery(profitYear, ctx)).Where(x => badgeNumbers.Contains(x.BadgeNumber)) select d;
 
-            return query.ToDictionaryAsync(d => d.BadgeNumber, cancellationToken);
+            return await query.ToDictionaryAsync(d => d.BadgeNumber, cancellationToken);
         });
     }
 

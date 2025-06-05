@@ -2,6 +2,7 @@
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -224,15 +225,16 @@ public sealed class TotalService : ITotalService
     /// An <see cref="IQueryable{T}"/> of <see cref="ParticipantTotalRatioDto"/> containing the calculated vesting ratios
     /// for each participant.
     /// </returns>
-    internal IQueryable<ParticipantTotalRatioDto> GetVestingRatio(IProfitSharingDbContext ctx, short profitYear,
+    internal async Task<IQueryable<ParticipantTotalRatioDto>> GetVestingRatio(ProfitSharingReadOnlyDbContext ctx, short profitYear,
         DateOnly asOfDate)
     {
 
         var birthDate65 = asOfDate.AddYears(-65);
         var beginningOfYear = asOfDate.AddYears(-1).AddDays(1);
+        var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
 
         var demoInfo = (
-            from d in ctx.Demographics
+            from d in demographics
             select new
             {
                 d.Ssn,
@@ -243,7 +245,7 @@ public sealed class TotalService : ITotalService
 
         var beneficiaryInfo = (
             from b in ctx.Beneficiaries
-            join dt in ctx.Demographics on b.Contact!.Ssn equals dt.Ssn into d_join
+            join dt in demographics on b.Contact!.Ssn equals dt.Ssn into d_join
             where !d_join.Any()
             select new
             {
@@ -259,7 +261,7 @@ public sealed class TotalService : ITotalService
 #pragma warning disable S1244 // Floating point numbers should not be tested for equality
         return (
             from db in demoOrBeneficiary
-            join dTbl in ctx.Demographics on db.Ssn equals dTbl.Ssn into dTmp
+            join dTbl in demographics on db.Ssn equals dTbl.Ssn into dTmp
             from d in dTmp.DefaultIfEmpty()
             join ppTbl in ctx.PayProfits on new { Id = (d != null ? d.Id : 0), ProfitYear = profitYear } equals new { ppTbl.Demographic!.Id, ppTbl.ProfitYear } into ppTmp
             from pp in ppTmp.DefaultIfEmpty()
