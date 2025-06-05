@@ -1,7 +1,6 @@
 ﻿using System.Net;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using FluentAssertions;
 using FastEndpoints;
 using JetBrains.Annotations;
 using Demoulas.ProfitSharing.Api;
@@ -9,6 +8,7 @@ using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
+using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
@@ -29,9 +29,9 @@ public class BalanceByAgeEndpointTest : ApiTestBase<Program>
             .GETAsync<BalanceByAgeEndpoint, FrozenReportsByAgeRequest, BalanceByAge>(request);
 
         // Assert
-        response.Should().NotBeNull();
-        response.Result.ReportName.Should().Be("PROFIT SHARING BALANCE BY AGE");
-        response.Result.ReportType.Should().Be(request.ReportType);
+        response.ShouldNotBeNull();
+        response.Result.ReportName.ShouldBe("PROFIT SHARING BALANCE BY AGE");
+        response.Result.ReportType.ShouldBe(request.ReportType);
     }
 
     [Fact]
@@ -47,8 +47,8 @@ public class BalanceByAgeEndpointTest : ApiTestBase<Program>
 
             
         string content = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
-        content.Should().Contain("AGE,EMPS,BALANCE,VESTED");
-        content.Should().Contain("BEN");
+        content.ShouldContain("AGE,EMPS,BALANCE,VESTED");
+        content.ShouldContain("BEN");
     }
 
     [Fact(DisplayName = "PS-502: Check to ensure unauthorized")]
@@ -63,6 +63,6 @@ public class BalanceByAgeEndpointTest : ApiTestBase<Program>
         TestResult<BalanceByAge> response = await ApiClient
             .GETAsync<BalanceByAgeEndpoint, FrozenReportsByAgeRequest, BalanceByAge>(request);
 
-        response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
 }

@@ -6,7 +6,6 @@ using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using FastEndpoints;
-using FluentAssertions;
 using Xunit.Abstractions;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints;

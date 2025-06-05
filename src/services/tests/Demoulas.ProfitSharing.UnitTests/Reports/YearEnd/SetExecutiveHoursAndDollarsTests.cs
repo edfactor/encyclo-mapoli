@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
-using System.Text.Json;
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ExecutiveHoursAndDollars;
@@ -8,8 +7,8 @@ using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using FastEndpoints;
-using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
@@ -34,13 +33,12 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Program>
         var response =
             await ApiClient
                 .PUTAsync<SetExecutiveHoursAndDollarsEndpoint, SetExecutiveHoursAndDollarsRequest, HttpResponseMessage>(request);
-        response.Response.StatusCode.ShouldBeEquivalentTo(HttpStatusCode.BadRequest);
+        Assert.Equal(HttpStatusCode.BadRequest, response.Response.StatusCode);
 
-        
-        response.Response.Content.Headers.ContentType!.MediaType.Should().Be("application/problem+json");
+        Assert.Equal("application/problem+json", response.Response.Content.Headers.ContentType!.MediaType);
         var pd = await response.Response.Content.ReadFromJsonAsync<ProblemDetails>();
-        pd.Should().NotBeNull();
-        pd!.Errors.SelectMany(e=> e.Reason).Should().Contain("Badge Numbers must be unique.");
+        Assert.NotNull(pd);
+        Assert.Contains("Badge Numbers must be unique.", pd!.Errors.SelectMany(e=> e.Reason).Select(r => r.ToString()));
     }
 
     [Fact]
@@ -63,8 +61,8 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Program>
         Assert.False(response.Response.IsSuccessStatusCode);
 
         var pd = await response.Response.Content.ReadFromJsonAsync<ProblemDetails>();
-        pd.Should().NotBeNull();
-        pd!.Detail?.Should().Contain("Year 0 is not valid.");
+        Assert.NotNull(pd);
+        Assert.Contains("Year 0 is not valid.", pd!.Detail);
     }
 
     [Fact]
@@ -86,13 +84,12 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Program>
         var response = await ApiClient
             .PUTAsync<SetExecutiveHoursAndDollarsEndpoint, SetExecutiveHoursAndDollarsRequest, HttpResponseMessage>(request);
 
-
         // Assert
         Assert.False(response.Response.IsSuccessStatusCode);
 
         var pd = await response.Response.Content.ReadFromJsonAsync<ProblemDetails>();
-        pd.Should().NotBeNull();
-        pd!.Detail?.Should().Contain("One or more badge numbers were not found.");
+        Assert.NotNull(pd);
+        Assert.Contains("One or more badge numbers were not found.", pd!.Detail ?? string.Empty);
     }
 
     [Fact]
@@ -107,14 +104,14 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Program>
         var response =
             await ApiClient
                 .PUTAsync<SetExecutiveHoursAndDollarsEndpoint, SetExecutiveHoursAndDollarsRequest, HttpResponseMessage>(request);
-        response.Response.StatusCode.ShouldBeEquivalentTo(HttpStatusCode.BadRequest);
+        Assert.Equal(HttpStatusCode.BadRequest, response.Response.StatusCode);
 
         // Assert
-        response.Response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        response.Response.Content.Headers.ContentType!.MediaType.Should().Be("application/problem+json");
+        Assert.Equal(HttpStatusCode.BadRequest, response.Response.StatusCode);
+        Assert.Equal("application/problem+json", response.Response.Content.Headers.ContentType!.MediaType);
         var pd = await response.Response.Content.ReadFromJsonAsync<ProblemDetails>();
-        pd.Should().NotBeNull();
-        pd!.Errors.SelectMany(e => e.Reason).Should().Contain("At least one employee must be provided");
+        Assert.NotNull(pd);
+        Assert.Contains("At least one employee must be provided", pd!.Errors.SelectMany(e => e.Reason).Select(r => r.ToString()));
     }
 
 
@@ -163,8 +160,8 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Program>
                 .FirstAsync(CancellationToken.None);
 
             // verify updated hours and income
-            payProfit.HoursExecutive.Should().Be(newHoursExecutive);
-            payProfit.IncomeExecutive.Should().Be(newIncomeExecutive);
+            Assert.Equal(newHoursExecutive, payProfit.HoursExecutive);
+            Assert.Equal(newIncomeExecutive, payProfit.IncomeExecutive);
         });
     }
 
@@ -211,8 +208,8 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             Assert.False(response.Response.IsSuccessStatusCode);
 
             var pd = await response.Response.Content.ReadFromJsonAsync<ProblemDetails>();
-            pd.Should().NotBeNull();
-            pd!.Detail?.Should().Contain("One or more badge numbers were not found.");
+            pd.ShouldNotBeNull();
+            pd!.Detail?.ShouldContain("One or more badge numbers were not found.");
 
             // verify no change to existing employee.
             var demographicsWithPayProfitsReloaded = await ctx.Demographics
@@ -224,8 +221,8 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Program>
                 .Where(joined => joined.PayProfit.ProfitYear == profitYear)
                 .FirstAsync(CancellationToken.None);
 
-            demographicsWithPayProfitsReloaded.PayProfit.HoursExecutive.Should().Be(origExecutiveHoursExecutive);
-            demographicsWithPayProfitsReloaded.PayProfit.IncomeExecutive.Should().Be(origIncomeExecutive);
+            Assert.Equal(origExecutiveHoursExecutive, demographicsWithPayProfitsReloaded.PayProfit.HoursExecutive);
+            Assert.Equal(origIncomeExecutive, demographicsWithPayProfitsReloaded.PayProfit.IncomeExecutive);
         });
     }
 }

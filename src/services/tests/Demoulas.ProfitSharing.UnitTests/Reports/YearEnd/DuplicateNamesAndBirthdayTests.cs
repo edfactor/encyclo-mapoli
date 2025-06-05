@@ -6,8 +6,8 @@ using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Helpers;
-using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Shouldly;
 using Xunit.Abstractions;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
@@ -35,8 +35,8 @@ public class DuplicateNamesAndBirthdayTests : ApiTestBase<Program>
 
         var response = await _cleanupReportClient.GetDuplicateNamesAndBirthdaysAsync(request, CancellationToken.None);
 
-        response.Should().NotBeNull();
-        response.Response.Results.Count().Should().BeGreaterThanOrEqualTo(DuplicateRowCount);
+        response.ShouldNotBeNull();
+        response.Response.Results.Count().ShouldBeGreaterThanOrEqualTo(DuplicateRowCount);
         LogResponse(response);
     }
 
@@ -48,8 +48,8 @@ public class DuplicateNamesAndBirthdayTests : ApiTestBase<Program>
 
         var response = await _cleanupReportClient.GetDuplicateNamesAndBirthdaysAsync(request, CancellationToken.None);
 
-        response.Should().NotBeNull();
-        response.Response.Results.Count().Should().BeGreaterThanOrEqualTo(2);
+        response.ShouldNotBeNull();
+        response.Response.Results.Count().ShouldBeGreaterThanOrEqualTo(2);
         LogResponse(response);
     }
 
@@ -61,8 +61,8 @@ public class DuplicateNamesAndBirthdayTests : ApiTestBase<Program>
 
         var response = await _cleanupReportClient.GetDuplicateNamesAndBirthdaysAsync(request, CancellationToken.None);
 
-        response.Should().NotBeNull();
-        response.Response.Results.Count().Should().BeGreaterThanOrEqualTo(2);
+        response.ShouldNotBeNull();
+        response.Response.Results.Count().ShouldBeGreaterThanOrEqualTo(2);
         LogResponse(response);
     }
 
@@ -74,8 +74,8 @@ public class DuplicateNamesAndBirthdayTests : ApiTestBase<Program>
 
         var response = await _cleanupReportClient.GetDuplicateNamesAndBirthdaysAsync(request, CancellationToken.None);
 
-        response.Should().NotBeNull();
-        response.Response.Results.Should().HaveCount(1);
+        response.ShouldNotBeNull();
+        response.Response.Results.Count().ShouldBe(1);
         LogResponse(response);
     }
 
@@ -85,14 +85,14 @@ public class DuplicateNamesAndBirthdayTests : ApiTestBase<Program>
         await CreateExactDuplicateRecords();
 
         var stream = await _cleanupReportClient.DownloadDuplicateNamesAndBirthdays(_defaultRequest.ProfitYear, CancellationToken.None);
-        stream.Should().NotBeNull();
+        stream.ShouldNotBeNull();
 
         using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, bufferSize: 1024, leaveOpen: true);
         string result = await reader.ReadToEndAsync(CancellationToken.None);
 
-        result.Should().NotBeNullOrEmpty();
+        result.ShouldNotBeNullOrEmpty();
         var lines = result.Split(Environment.NewLine);
-        lines.Count().Should().BeGreaterThanOrEqualTo(DuplicateRowCount + 4);
+        lines.Count().ShouldBeGreaterThanOrEqualTo(DuplicateRowCount + 4);
         _testOutputHelper.WriteLine(result);
     }
 

@@ -7,8 +7,8 @@ using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using FastEndpoints;
-using FluentAssertions;
 using JetBrains.Annotations;
+using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
@@ -28,15 +28,15 @@ public class DistributionsByAgeEndpointTest : ApiTestBase<Program>
             .GETAsync<DistributionsByAgeEndpoint, FrozenReportsByAgeRequest, DistributionsByAge>(request);
 
         // Assert
-        response.Should().NotBeNull();
-        response.Result.ReportName.Should().Be("PROFIT SHARING DISTRIBUTIONS BY AGE");
-        response.Result.ReportType.Should().Be(request.ReportType);
+        response.ShouldNotBeNull();
+        response.Result.ReportName.ShouldBe("PROFIT SHARING DISTRIBUTIONS BY AGE");
+        response.Result.ReportType.ShouldBe(request.ReportType);
 
         var ftCount = response.Result.Response.Results.Where(c=> c.RegularAmount > 0).Sum(c => c.EmployeeCount);
         var hardshipCount = response.Result.Response.Results.Where(c=> c.HardshipAmount > 0).Sum(c => c.EmployeeCount);
 
-        ftCount.Should().Be(response.Result.RegularTotalEmployees);
-        hardshipCount.Should().Be(response.Result.HardshipTotalEmployees);
+        ftCount.ShouldBe(response.Result.RegularTotalEmployees);
+        hardshipCount.ShouldBe(response.Result.HardshipTotalEmployees);
     }
 
     [Fact]
@@ -52,9 +52,9 @@ public class DistributionsByAgeEndpointTest : ApiTestBase<Program>
 
 
         string content = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
-        content.Should().Contain("AGE,EMPS,AMOUNT");
-        content.Should().Contain("HARDSHIP,");
-        content.Should().Contain("DIST TTL,,");
+        content.ShouldContain("AGE,EMPS,AMOUNT");
+        content.ShouldContain("HARDSHIP,");
+        content.ShouldContain("DIST TTL,,");
     }
 
     [Fact(DisplayName = "PS-401: Check to ensure unauthorized")]
@@ -68,6 +68,6 @@ public class DistributionsByAgeEndpointTest : ApiTestBase<Program>
         TestResult<DistributionsByAge> response = await ApiClient
             .GETAsync<DistributionsByAgeEndpoint, FrozenReportsByAgeRequest, DistributionsByAge>(request);
 
-        response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Reflection;
 using Castle.Core.Internal;
-using FluentAssertions;
+using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 
@@ -19,40 +19,66 @@ public static class ComparisonExtensions
     /// </remarks>
     public static void ShouldBeEquivalentTo<T, Tu>(this T entity, Tu dto)
     {
-        PropertyInfo[] entityProperties = typeof(T).GetProperties();
-        PropertyInfo[] dtoProperties = typeof(Tu).GetProperties();
+        if (entity is IEnumerable entityEnumerable && dto is IEnumerable dtoEnumerable && !(entity is string) && !(dto is string))
+        {
+            var entityList = entityEnumerable.Cast<object>().ToList();
+            var dtoList = dtoEnumerable.Cast<object>().ToList();
+            entityList.Count.ShouldBe(dtoList.Count, "Collections should have the same count");
+            for (int i = 0; i < entityList.Count; i++)
+            {
+                entityList[i].ShouldBeEquivalentTo(dtoList[i]);
+            }
+            return;
+        }
+
+        PropertyInfo[] entityProperties = entity?.GetType().GetProperties().Where(p => p.GetIndexParameters().Length == 0).ToArray() ?? typeof(T).GetProperties().Where(p => p.GetIndexParameters().Length == 0).ToArray();
+        PropertyInfo[] dtoProperties = dto?.GetType().GetProperties().Where(p => p.GetIndexParameters().Length == 0).ToArray() ?? typeof(Tu).GetProperties().Where(p => p.GetIndexParameters().Length == 0).ToArray();
 
         foreach (PropertyInfo entityProperty in entityProperties)
         {
-            // Skip navigation properties
             if (IsNavigationProperty(entityProperty.PropertyType))
             {
                 continue;
             }
 
             PropertyInfo? dtoProperty = dtoProperties.Find(p => p.Name == entityProperty.Name);
-
             if (dtoProperty == null)
             {
-                // skip properties that don't match They will need to be checked manually.
                 continue;
             }
-
             if (IsNavigationProperty(dtoProperty.PropertyType))
             {
                 continue;
             }
-
             if (entityProperty.PropertyType != dtoProperty.PropertyType)
             {
-                // Skip properties that don't have the same type
                 continue;
             }
 
             object? entityValue = entityProperty.GetValue(entity);
             object? dtoValue = dtoProperty.GetValue(dto);
 
-            dtoValue.Should().Be(entityValue, because: $"{dtoProperty.Name} property should be equivalent.");
+            if (entityValue is IEnumerable entityValEnum && dtoValue is IEnumerable dtoValEnum && !(entityValue is string) && !(dtoValue is string))
+            {
+                var entityValList = entityValEnum.Cast<object>().ToList();
+                var dtoValList = dtoValEnum.Cast<object>().ToList();
+                entityValList.Count.ShouldBe(dtoValList.Count, $"{dtoProperty.Name} collection count should match");
+                for (int i = 0; i < entityValList.Count; i++)
+                {
+                    entityValList[i].ShouldBeEquivalentTo(dtoValList[i]);
+                }
+            }
+            else
+            {
+                if (dtoValue?.GetType() == entityValue?.GetType())
+                {
+                    dtoValue.ShouldBe(entityValue, $"{dtoProperty.Name} property should be equivalent.");
+                }
+                else
+                {
+                    (dtoValue?.Equals(entityValue) == true).ShouldBeTrue($"{dtoProperty.Name} property should be equivalent.");
+                }
+            }
         }
     }
 

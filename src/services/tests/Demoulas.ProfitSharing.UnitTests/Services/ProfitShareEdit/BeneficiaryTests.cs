@@ -5,8 +5,6 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
-using Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
-using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.UnitTests.Services.ProfitShareEdit;
@@ -38,7 +36,7 @@ public class BeneficiaryTests : ApiTestBase<Program>
         ProfitShareEditResponse response = await _service.ProfitShareEdit(req, CancellationToken.None);
 
         // Assert
-        response.Response.Should().NotBeNull();
+        response.Response.ShouldNotBeNull();
         
     }
 }

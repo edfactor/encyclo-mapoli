@@ -6,7 +6,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitMaster;
 using Demoulas.ProfitSharing.Services.ProfitShareEdit;
-using FluentAssertions;
+using Shouldly;
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 
@@ -100,8 +100,8 @@ public class ProfitEditReportTests : PristineBaseTest
             TestOutputHelper.WriteLine($"ONLY SMART PAY447 {onlySmart[i]}");
         }
 
-        onlyReady.Count.Should().Be(0);
-        onlySmart.Count.Should().BeLessOrEqualTo(2);
+        onlyReady.Count.ShouldBe(0);
+        onlySmart.Count.ShouldBeLessThanOrEqualTo(2);
     }
 
     private static List<Pay477Entry> LoadReadyResults(string rawPay447Report)

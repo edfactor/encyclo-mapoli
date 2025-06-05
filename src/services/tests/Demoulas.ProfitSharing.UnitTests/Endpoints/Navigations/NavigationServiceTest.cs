@@ -3,10 +3,8 @@ using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Navigations;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
-using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Navigations;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
-using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 

@@ -1,7 +1,6 @@
 ﻿using System.Net;
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Contexts;
@@ -11,9 +10,9 @@ using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using FastEndpoints;
-using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
@@ -41,7 +40,7 @@ public class ProfitShareUpdateServiceEndpointTests : ApiTestBase<Program>
                     ProfitShareUpdateRequest, ProfitShareUpdateResponse>(req);
 
         // Assert
-        response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
 
     [Fact]
@@ -58,7 +57,7 @@ public class ProfitShareUpdateServiceEndpointTests : ApiTestBase<Program>
                     ProfitShareUpdateRequest, ProfitShareUpdateResponse>(req);
 
         // Assert
-        response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
 
 
@@ -80,8 +79,8 @@ public class ProfitShareUpdateServiceEndpointTests : ApiTestBase<Program>
                         ProfitShareUpdateRequest, ProfitShareUpdateResponse>(req);
 
             // Assert
-            response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
-            response.Result.HasExceededMaximumContributions.Should().BeTrue();
+            response.Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+            response.Result.HasExceededMaximumContributions.ShouldBeTrue();
         });
     }
 
@@ -114,7 +113,7 @@ public class ProfitShareUpdateServiceEndpointTests : ApiTestBase<Program>
         ProfitShareUpdateResponse response = await _endpoint.GetResponse(req, CancellationToken.None);
 
         // Assert
-        response.Should().NotBeNull();
+        response.ShouldNotBeNull();
     }
 
     private async Task SetupBeneficiary(decimal currentBalance)
