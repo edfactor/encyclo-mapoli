@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using FastEndpoints;
+using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.PostFrozen;
 
@@ -17,14 +18,13 @@ public class ProfitControlSheetTests : ApiTestBase<Program>
     {
         var request = new ProfitYearRequest() { ProfitYear = 2024 };
         var response = await ApiClient.GETAsync<ProfitControlSheetEndpoint, ProfitYearRequest, ProfitControlSheetResponse>(request);
-        response.Should().NotBeNull();
-        response.Response.StatusCode.Should().Be(System.Net.HttpStatusCode.Unauthorized);
+        response.ShouldNotBeNull();
+        response.Response.StatusCode.ShouldBe(System.Net.HttpStatusCode.Unauthorized);
 
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
 
         response = await ApiClient.GETAsync<ProfitControlSheetEndpoint, ProfitYearRequest, ProfitControlSheetResponse>(request);
-
-        response.Should().NotBeNull();
-        response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.ShouldNotBeNull();
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
 }

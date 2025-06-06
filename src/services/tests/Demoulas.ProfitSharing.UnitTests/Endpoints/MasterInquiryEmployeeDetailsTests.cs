@@ -6,6 +6,7 @@ using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using FastEndpoints;
+using Shouldly;
 using Xunit.Abstractions;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints;
@@ -26,7 +27,7 @@ public class MasterInquiryEmployeeDetailsTests : ApiTestBase<Api.Program>
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
         var request = new MasterInquiryRequest { EndProfitYear = 2023, Skip = 0, Take = 25 };
         var response = await ApiClient.POSTAsync<MasterInquirySearchEndpoint, MasterInquiryRequest, PaginatedResponseDto<MemberDetails>>(request);
-        response.Should().NotBeNull();
+        response.ShouldNotBeNull();
         response.Response.EnsureSuccessStatusCode();
     }
 
@@ -36,7 +37,7 @@ public class MasterInquiryEmployeeDetailsTests : ApiTestBase<Api.Program>
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
         var request = new MasterInquiryRequest { StartProfitMonth = 1, Skip = 0, Take = 25, ProfitYear = profitYear };
         var response = await ApiClient.POSTAsync<MasterInquirySearchEndpoint, MasterInquiryRequest, PaginatedResponseDto<MemberDetails>>(request);
-        response.Should().NotBeNull();
+        response.ShouldNotBeNull();
         response.Response.EnsureSuccessStatusCode();
     }
 
@@ -46,7 +47,7 @@ public class MasterInquiryEmployeeDetailsTests : ApiTestBase<Api.Program>
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
         var request = new MasterInquiryRequest { EndProfitMonth = 12, Skip = 0, Take = 25, ProfitYear = profitYear };
         var response = await ApiClient.POSTAsync<MasterInquirySearchEndpoint, MasterInquiryRequest, PaginatedResponseDto<MemberDetails>>(request);
-        response.Should().NotBeNull();
+        response.ShouldNotBeNull();
         response.Response.EnsureSuccessStatusCode();
     }
 
@@ -56,7 +57,7 @@ public class MasterInquiryEmployeeDetailsTests : ApiTestBase<Api.Program>
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
         var request = new MasterInquiryRequest { ProfitCode = 1, Skip = 0, Take = 25, ProfitYear = profitYear }; // Use a valid ProfitCode constant as needed
         var response = await ApiClient.POSTAsync<MasterInquirySearchEndpoint, MasterInquiryRequest, PaginatedResponseDto<MemberDetails>>(request);
-        response.Should().NotBeNull();
+        response.ShouldNotBeNull();
         response.Response.EnsureSuccessStatusCode();
     }
 
@@ -66,7 +67,7 @@ public class MasterInquiryEmployeeDetailsTests : ApiTestBase<Api.Program>
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
         var request = new MasterInquiryRequest { ContributionAmount = 100.0m, Skip = 0, Take = 25, ProfitYear = profitYear };
         var response = await ApiClient.POSTAsync<MasterInquirySearchEndpoint, MasterInquiryRequest, PaginatedResponseDto<MemberDetails>>(request);
-        response.Should().NotBeNull();
+        response.ShouldNotBeNull();
 
         if (!response.Response.IsSuccessStatusCode)
         {
@@ -91,7 +92,7 @@ public class MasterInquiryEmployeeDetailsTests : ApiTestBase<Api.Program>
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
         var request = new MasterInquiryRequest { EarningsAmount = 0.0m, Skip = 0, Take = 25, ProfitYear = profitYear };
         var response = await ApiClient.POSTAsync<MasterInquirySearchEndpoint, MasterInquiryRequest, PaginatedResponseDto<MemberDetails>>(request);
-        response.Should().NotBeNull();
+        response.ShouldNotBeNull();
         response.Response.EnsureSuccessStatusCode();
     }
 
@@ -101,7 +102,7 @@ public class MasterInquiryEmployeeDetailsTests : ApiTestBase<Api.Program>
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
         var request = new MasterInquiryRequest { PaymentAmount = 0.0m, Skip = 0, Take = 25, ProfitYear = profitYear };
         var response = await ApiClient.POSTAsync<MasterInquirySearchEndpoint, MasterInquiryRequest, PaginatedResponseDto<MemberDetails>>(request);
-        response.Should().NotBeNull();
+        response.ShouldNotBeNull();
         response.Response.EnsureSuccessStatusCode();
     }
 
@@ -111,7 +112,7 @@ public class MasterInquiryEmployeeDetailsTests : ApiTestBase<Api.Program>
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
         var request = new MasterInquiryRequest { Ssn = 000000000, Skip = 0, Take = 25, ProfitYear = profitYear };
         var response = await ApiClient.POSTAsync<MasterInquirySearchEndpoint, MasterInquiryRequest, PaginatedResponseDto<MemberDetails>>(request);
-        response.Should().NotBeNull();
+        response.ShouldNotBeNull();
         response.Response.EnsureSuccessStatusCode();
     }
 
@@ -135,7 +136,7 @@ public class MasterInquiryEmployeeDetailsTests : ApiTestBase<Api.Program>
             ProfitYear = profitYear
         };
         var response = await ApiClient.POSTAsync<MasterInquirySearchEndpoint, MasterInquiryRequest, PaginatedResponseDto<MemberDetails>>(request);
-        response.Should().NotBeNull();
+        response.ShouldNotBeNull();
         response.Response.EnsureSuccessStatusCode();
     }
 }

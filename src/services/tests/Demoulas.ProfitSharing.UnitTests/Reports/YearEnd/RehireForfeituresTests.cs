@@ -22,6 +22,7 @@ using FastEndpoints;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Shouldly;
 using Xunit;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
@@ -66,11 +67,10 @@ public class RehireForfeituresTests : ApiTestBase<Program>
             // Assert
             Assert.Equal(expectedResponse.ReportName, response.Result.ReportName);
             Assert.True(response.Result.Response.Results.Count() >= expectedResponse.Response.Results.Count());
-            response.Result.Response.Results.First().ShouldBeEquivalentTo(expectedResponse.Response.Results.First(),
-                options => options
-                    .Excluding(x => x.NetBalanceLastYear)
-                    .Excluding(x => x.VestedBalanceLastYear)
-            );
+            // Deep compare using JSON for equivalence
+            var actualJson = System.Text.Json.JsonSerializer.Serialize(response.Result.Response.Results.First());
+            var expectedJson = System.Text.Json.JsonSerializer.Serialize(setup.ExpectedResponse);
+            actualJson.ShouldBe(expectedJson);
         });
     }
 
@@ -89,7 +89,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
             // CSV assertions
             Assert.NotNull(response.Response.Content);
             string result = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
-            Assert.False(string.IsNullOrEmpty(result));
+            result.ShouldNotBeNullOrEmpty();
             using var reader = new StringReader(result);
             using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture));
             await csv.ReadAsync();
@@ -101,13 +101,13 @@ public class RehireForfeituresTests : ApiTestBase<Program>
             await csv.ReadAsync();
             csv.ReadHeader();
             var headers = csv.HeaderRecord;
-            Assert.NotNull(headers);
-            Assert.Equal(new[] { "", "", "BADGE", "EMPLOYEE NAME", "SSN", "REHIRED", "PY-YRS", "YTD HOURS", "EC" }, headers);
+            headers.ShouldNotBeNull();
+            headers.ShouldBe(new[] { "", "", "BADGE", "EMPLOYEE NAME", "SSN", "REHIRED", "PY-YRS", "YTD HOURS", "EC" });
             await csv.ReadAsync();
             csv.ReadHeader();
             var headers2 = csv.HeaderRecord;
-            Assert.NotNull(headers2);
-            Assert.Equal(new[] { "", "", "", "", "", "YEAR", "FORFEITURES", "COMMENT" }, headers2);
+            headers2.ShouldNotBeNull();
+            headers2.ShouldBe(new[] { "", "", "", "", "", "YEAR", "FORFEITURES", "COMMENT" });
         });
     }
 
@@ -146,7 +146,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
 
         // Assert
         response.ReportName.ShouldBe(expectedResponse.ReportName);
-        response.Response.Results.ShouldBeEquivalentTo(expectedResponse.Response.Results);
+        response.Response.Results.ShouldBe(expectedResponse.Response.Results, ignoreOrder: true);
     }
 
     [Fact(DisplayName = "PS-345: Null Results")]
@@ -169,7 +169,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
 
         // Assert
         response.ReportName.ShouldBe(expectedResponse.ReportName);
-        response.Response.Results.ShouldBeEquivalentTo(expectedResponse.Response.Results);
+        response.Response.Results.ShouldBe(expectedResponse.Response.Results, ignoreOrder: true);
     }
 
     [Fact(DisplayName = "PS-345: Report name is correct")]
@@ -177,9 +177,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
     {
         // Act
         var reportFileName = _endpoint.ReportFileName;
-
-        // Assert
-        Assert.Equal("REHIRE'S PROFIT SHARING DATA", reportFileName);
+        reportFileName.ShouldBe("REHIRE'S PROFIT SHARING DATA");
     }
 
     private static async Task<(StartAndEndDateRequest Request, RehireForfeituresResponse ExpectedResponse)> SetupTestEmployee(ProfitSharingDbContext c)

@@ -22,7 +22,8 @@ namespace UnitTests
             var str = "Hello, World!";
 
             // Act & Assert
-            str.ShouldStartWith("Hello").And.EndWith("World!");
+            str.ShouldStartWith("Hello");
+            str.ShouldEndWith("World!");
         }
     }
 }

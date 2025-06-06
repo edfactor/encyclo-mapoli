@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.Services.Navigations;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Navigations;
 
@@ -90,7 +91,7 @@ public class NavigationServiceTests : ApiTestBase<Program>
     {
         var navigation = await _navigationService.GetNavigation(CancellationToken.None);
         Assert.NotNull(navigation);
-        navigation.Should().BeEquivalentTo(DummyNavigationData());
+        navigation.ShouldBeEquivalentTo(DummyNavigationData());
     }
 
     //Dummy Data
@@ -126,7 +127,7 @@ public class NavigationServiceTests : ApiTestBase<Program>
     {
         var navigationStatus = await _navigationService.GetNavigationStatus(CancellationToken.None);
         Assert.NotNull(navigationStatus);
-        navigationStatus.Should().BeEquivalentTo(this.navigationStatusList);
+        navigationStatus.ShouldBeEquivalentTo(this.navigationStatusList);
     }
 
     [Fact(DisplayName = "PS-1059: Update navigation status")]
