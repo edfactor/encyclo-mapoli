@@ -31,7 +31,6 @@ public class BeneficiaryTypeEndpoint : Endpoint<BeneficiaryTypesRequestDto, Bene
 
     public override void Configure()
     {
-        AllowAnonymous();
         Get("");
         Summary(m =>
         {
