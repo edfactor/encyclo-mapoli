@@ -1,5 +1,5 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { agGridNumberToCurrency } from "smart-ui-library";
+import { agGridNumberToCurrency, formatNumberWithComma } from "smart-ui-library";
 import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
 import { getEnrolledStatus } from "../../../utils/enrollmentUtil";
 import { mmDDYYFormat } from "utils/dateUtils";
@@ -132,7 +132,11 @@ export const GetDetailColumns = (): ColDef[] => {
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
-      sortable: false
+      sortable: false,
+      valueFormatter: (params) => {
+        const hours = params.value;
+        return formatNumberWithComma(hours);
+      }
     },
     {
       headerName: "Vested %",

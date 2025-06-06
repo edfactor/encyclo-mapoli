@@ -1,4 +1,4 @@
-import { agGridNumberToCurrency } from "smart-ui-library";
+import { agGridNumberToCurrency, formatNumberWithComma } from "smart-ui-library";
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
 
@@ -111,10 +111,8 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       resizable: true,
       sortable: false,
       valueFormatter: (params) => {
-        if (params.value === null || params.value === undefined) {
-          return "";
-        }
-        return params.value.toLocaleString("en-US");
+        const hours = params.value;
+        return formatNumberWithComma(hours);
       }
     },
     {
