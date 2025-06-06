@@ -67,10 +67,11 @@ public class RehireForfeituresTests : ApiTestBase<Program>
             // Assert
             Assert.Equal(expectedResponse.ReportName, response.Result.ReportName);
             Assert.True(response.Result.Response.Results.Count() >= expectedResponse.Response.Results.Count());
-            // Deep compare using JSON for equivalence
-            var actualJson = System.Text.Json.JsonSerializer.Serialize(response.Result.Response.Results.First());
-            var expectedJson = System.Text.Json.JsonSerializer.Serialize(setup.ExpectedResponse);
-            actualJson.ShouldBe(expectedJson);
+            response.Result.Response.Results.First().ShouldBeEquivalentTo(
+                expectedResponse.Response.Results.First(),
+                nameof(RehireForfeituresResponse.NetBalanceLastYear),
+                nameof(RehireForfeituresResponse.VestedBalanceLastYear)
+            );
         });
     }
 

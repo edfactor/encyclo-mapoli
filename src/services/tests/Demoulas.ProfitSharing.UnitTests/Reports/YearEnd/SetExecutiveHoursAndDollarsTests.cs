@@ -38,7 +38,7 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Program>
         Assert.Equal("application/problem+json", response.Response.Content.Headers.ContentType!.MediaType);
         var pd = await response.Response.Content.ReadFromJsonAsync<ProblemDetails>();
         Assert.NotNull(pd);
-        Assert.Contains("Badge Numbers must be unique.", pd!.Errors.SelectMany(e=> e.Reason).Select(r => r.ToString()));
+        Assert.Contains("Badge Numbers must be unique.", pd!.Errors.Select(e=> e.Reason));
     }
 
     [Fact]
@@ -111,7 +111,7 @@ public class SetExecutiveHoursAndDollarsTests : ApiTestBase<Program>
         Assert.Equal("application/problem+json", response.Response.Content.Headers.ContentType!.MediaType);
         var pd = await response.Response.Content.ReadFromJsonAsync<ProblemDetails>();
         Assert.NotNull(pd);
-        Assert.Contains("At least one employee must be provided", pd!.Errors.SelectMany(e => e.Reason).Select(r => r.ToString()));
+        Assert.Contains("At least one employee must be provided", pd!.Errors.Select(e => e.Reason));
     }
 
 
