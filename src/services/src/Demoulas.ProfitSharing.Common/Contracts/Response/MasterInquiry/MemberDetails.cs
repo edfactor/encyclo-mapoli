@@ -1,4 +1,5 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using System.Diagnostics.Eventing.Reader;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
 public record MemberDetails : IdRequest
@@ -26,7 +27,16 @@ public record MemberDetails : IdRequest
     public short StoreNumber { get; set; }
     public decimal CurrentEtva { get; set; }
     public decimal PreviousEtva { get; set; }
-
+    
+    public required string Department { get; set; }
+    public required string Classification { get; set; }
+    public required string Sex { get; set; }
+    public required string PhoneNumber { get; set; }
+    public required string WorkLocation { get; set; }
+    public required bool ReceivedContributionsLastYear { get; set; }
+    public required DateOnly FullTimeDate { get; set; }
+    public required string TerminationReason { get; set; }
+    
 
     public List<int> Missives { get; set; } = new List<int>();
 }

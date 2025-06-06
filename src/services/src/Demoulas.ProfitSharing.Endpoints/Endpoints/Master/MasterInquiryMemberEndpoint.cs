@@ -47,14 +47,18 @@ public class MasterInquiryMemberEndpoint : Endpoint<MasterInquiryMemberRequest, 
                         AddressCity = "Lowell",
                         AddressState = "MA",
                         AddressZipCode = "01850",
-                        DateOfBirth = new DateOnly(1980, 1, 1),
+                        DateOfBirth = new DateOnly(1980,
+                            1,
+                            1),
                         YearToDateProfitSharingHours = 1200.5m,
                         YearsInPlan = 10,
                         PercentageVested = 100m,
                         ContributionsLastYear = true,
                         EnrollmentId = 2,
                         Enrollment = "Active",
-                        HireDate = new DateOnly(2010, 5, 1),
+                        HireDate = new DateOnly(2010,
+                            5,
+                            1),
                         TerminationDate = null,
                         ReHireDate = null,
                         StoreNumber = 101,
@@ -64,8 +68,20 @@ public class MasterInquiryMemberEndpoint : Endpoint<MasterInquiryMemberRequest, 
                         CurrentVestedAmount = 15000m,
                         CurrentEtva = 1000m,
                         PreviousEtva = 900m,
-                        Missives = new List<int> { 1, 2 },
-                        EmploymentStatus = "Active"
+                        Missives = new List<int>
+                        {
+                            1,
+                            2
+                        },
+                        EmploymentStatus = "Active",
+                        Department = "Grocery",
+                        Classification = "Unknown",
+                        Sex = "M",
+                        PhoneNumber = "603-555-5555",
+                        WorkLocation = "Store 4",
+                        ReceivedContributionsLastYear = false,
+                        FullTimeDate = default,
+                        TerminationReason = "Retired"
                     }
                 }
             };
