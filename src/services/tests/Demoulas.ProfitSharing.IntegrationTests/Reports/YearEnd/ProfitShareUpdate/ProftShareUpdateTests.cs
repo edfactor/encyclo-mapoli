@@ -4,7 +4,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using FluentAssertions;
+using Shouldly;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
 
@@ -94,7 +94,7 @@ public class ProfitShareUpdateTests : PristineBaseTest
         onlyReady.Count().Should().BeLessThan(5);
         onlySmart.Count().Should().BeLessThan(5);
 #endif
-        true.Should().BeTrue();
+        true.ShouldBeTrue();
     }
 
 
@@ -204,14 +204,14 @@ public class ProfitShareUpdateTests : PristineBaseTest
         string? externalDiffTool = Environment.GetEnvironmentVariable("EXTERNAL_DIFF_TOOL");
         if (externalDiffTool == null)
         {
-            actual.Should().Be(expected);
+            actual.ShouldBe(expected);
             return;
         }
 
         // This trim is a slight cheat, but it's a good enough approximation for now.
         if (actual.Trim() == expected.Trim())
         {
-            actual.Should().Be(expected);
+            actual.ShouldBe(expected);
             return;
         }
 

@@ -11,18 +11,15 @@ using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using FastEndpoints;
-using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Distributed;
 using Moq;
-using Xunit;
 using System.Text.Json;
 using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.Util.Extensions;
+using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests;
 
@@ -40,7 +37,7 @@ public class CalendarServiceTests : ApiTestBase<Program>
     {
         long count = await _dataContextFactory.UseReadOnlyContext(c => c.AccountingPeriods.LongCountAsync(CancellationToken.None));
 
-        count.ShouldBeEquivalentTo(CaldarRecordSeeder.Records.Count());
+        count.ShouldBe(CaldarRecordSeeder.Records.Count());
     }
 
     [InlineData("000101")]
@@ -56,10 +53,10 @@ public class CalendarServiceTests : ApiTestBase<Program>
 
         var weekEndingDate = await calendarService.FindWeekendingDateFromDateAsync(date);
 
-        weekEndingDate.Should().BeOnOrAfter(date);
+        weekEndingDate.ShouldBeGreaterThanOrEqualTo(date);
 
         // Verify that the weekEndingDate is a Saturday
-        weekEndingDate.DayOfWeek.Should().Be(DayOfWeek.Saturday);
+        weekEndingDate.DayOfWeek.ShouldBe(DayOfWeek.Saturday);
     }
 
     [Fact(DisplayName = "Find Weekending Date - Invalid Date")]
@@ -68,17 +65,17 @@ public class CalendarServiceTests : ApiTestBase<Program>
         var invalidDate = DateOnly.MaxValue;
         var calendarService = ServiceProvider?.GetRequiredService<ICalendarService>()!;
         Func<Task> act = async () => await calendarService.FindWeekendingDateFromDateAsync(invalidDate);
-        return act.Should().ThrowAsync<Exception>();
+        return act.ShouldThrowAsync<Exception>();
     }
 
     [Fact(DisplayName = "Find Weekending Date - Future Date")]
-    public Task FindWeekendingDate_FutureDate()
+    public async Task FindWeekendingDate_FutureDate()
     {
         var futureDate = DateOnly.FromDateTime(DateTime.Now.AddYears(6));
         var calendarService = ServiceProvider?.GetRequiredService<ICalendarService>()!;
         Func<Task> act = async () => await calendarService.FindWeekendingDateFromDateAsync(futureDate);
-        return act.Should().ThrowAsync<ArgumentOutOfRangeException>()
-            .WithMessage($"{AccountingPeriodsService.InvalidDateError} (Parameter 'dateTime')");
+        var ex = await act.ShouldThrowAsync<ArgumentOutOfRangeException>();
+        ex.Message.ShouldBe($"{AccountingPeriodsService.InvalidDateError} (Parameter 'dateTime')");
     }
 
     [Fact(DisplayName = "Find Weekending Date - Valid Date")]
@@ -87,8 +84,8 @@ public class CalendarServiceTests : ApiTestBase<Program>
         var validDate = DateOnly.ParseExact("230101", "yyMMdd", CultureInfo.InvariantCulture);
         var calendarService = ServiceProvider?.GetRequiredService<ICalendarService>()!;
         var weekEndingDate = await calendarService.FindWeekendingDateFromDateAsync(validDate);
-        weekEndingDate.Should().BeOnOrAfter(validDate);
-        weekEndingDate.DayOfWeek.Should().Be(DayOfWeek.Saturday);
+        weekEndingDate.ShouldBeGreaterThanOrEqualTo(validDate);
+        weekEndingDate.DayOfWeek.ShouldBe(DayOfWeek.Saturday);
     }
 
     [Fact(DisplayName = "PS-366 Get start and end dates for a provided fiscal year")]
@@ -99,9 +96,9 @@ public class CalendarServiceTests : ApiTestBase<Program>
             await ApiClient
                 .GETAsync<CalendarRecordEndpoint, YearRequest, CalendarResponseDto>(new YearRequest { ProfitYear = 2023 });
 
-        response.Result.Should().NotBeNull();
-        response.Result.FiscalBeginDate.Should().NotBe(DateTimeOffset.MinValue.ToDateOnly());
-        response.Result.FiscalEndDate.Should().NotBe(DateTimeOffset.MinValue.ToDateOnly());
+        response.Result.ShouldNotBeNull();
+        response.Result.FiscalBeginDate.ShouldNotBe(DateTimeOffset.MinValue.ToDateOnly());
+        response.Result.FiscalEndDate.ShouldNotBe(DateTimeOffset.MinValue.ToDateOnly());
     }
 }
 

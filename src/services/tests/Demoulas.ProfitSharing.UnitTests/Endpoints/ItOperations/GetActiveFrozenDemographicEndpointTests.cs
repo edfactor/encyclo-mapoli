@@ -6,8 +6,8 @@ using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using FastEndpoints;
-using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.ItOperations;
 
@@ -21,13 +21,13 @@ public class GetActiveFrozenDemographicEndpointTests : ApiTestBase<Program>
 
         ApiClient.CreateAndAssignTokenForClient(Role.ITOPERATIONS);
         TestResult<FrozenStateResponse> response = await ApiClient.GETAsync<GetActiveFrozenDemographicEndpoint, FrozenStateResponse>();
-        response.Should().NotBeNull();
+        response.ShouldNotBeNull();
 
 
-        response.Result.AsOfDateTime.ToUniversalTime().Should().BeSameDateAs(frozenDemographics.AsOfDateTime.ToUniversalTime());
-        response.Result.CreatedDateTime.ToUniversalTime().Should().BeSameDateAs(frozenDemographics.CreatedDateTime.ToUniversalTime());
-        response.Result.ProfitYear.Should().Be(frozenDemographics.ProfitYear);
-        response.Result.FrozenBy.Should().Be(frozenDemographics.FrozenBy);
-        response.Result.IsActive.Should().Be(frozenDemographics.IsActive);
+        response.Result.AsOfDateTime.ToUniversalTime().ShouldBe(frozenDemographics.AsOfDateTime.ToUniversalTime());
+        response.Result.CreatedDateTime.ToUniversalTime().ShouldBe(frozenDemographics.CreatedDateTime.ToUniversalTime());
+        response.Result.ProfitYear.ShouldBe(frozenDemographics.ProfitYear);
+        response.Result.FrozenBy.ShouldBe(frozenDemographics.FrozenBy);
+        response.Result.IsActive.ShouldBe(frozenDemographics.IsActive);
     }
 }

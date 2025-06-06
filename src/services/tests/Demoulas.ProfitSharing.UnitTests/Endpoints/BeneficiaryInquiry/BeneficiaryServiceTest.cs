@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.ProfitSharing.Api;
+﻿using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Request.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Microsoft.Extensions.DependencyInjection;
 using Demoulas.ProfitSharing.Common.Contracts.Response.BeneficiaryInquiry;
-using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 

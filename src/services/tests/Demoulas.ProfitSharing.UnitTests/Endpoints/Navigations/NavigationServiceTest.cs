@@ -3,12 +3,12 @@ using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Navigations;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
-using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Navigations;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
-using FluentAssertions;
+using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Navigations;
 
@@ -16,7 +16,7 @@ public class NavigationServiceTests : ApiTestBase<Program>
 {
     private readonly INavigationService _navigationService;
     private readonly List<Navigation> _navigationListObj;
-    private readonly List<NavigationStatusDto> navigationStatusList;
+    private readonly List<NavigationStatusDto> _navigationStatusList;
 
     public NavigationServiceTests()
     {
@@ -79,7 +79,7 @@ public class NavigationServiceTests : ApiTestBase<Program>
         };
 
 
-        this.navigationStatusList = new List<NavigationStatusDto>()
+        this._navigationStatusList = new List<NavigationStatusDto>()
         {
             new NavigationStatusDto() { Id = NavigationStatus.Constants.NotStarted, Name = "Not Started" },
             new NavigationStatusDto() { Id = NavigationStatus.Constants.InProgress, Name = "In Progress" },
@@ -92,7 +92,7 @@ public class NavigationServiceTests : ApiTestBase<Program>
     {
         var navigation = await _navigationService.GetNavigation(CancellationToken.None);
         Assert.NotNull(navigation);
-        navigation.Should().BeEquivalentTo(DummyNavigationData());
+        ComparisonExtensions.ShouldBeEquivalentTo(navigation, DummyNavigationData());
     }
 
     //Dummy Data
@@ -128,7 +128,7 @@ public class NavigationServiceTests : ApiTestBase<Program>
     {
         var navigationStatus = await _navigationService.GetNavigationStatus(CancellationToken.None);
         Assert.NotNull(navigationStatus);
-        navigationStatus.Should().BeEquivalentTo(this.navigationStatusList);
+        navigationStatus.ShouldBeEquivalentTo(this._navigationStatusList);
     }
 
     [Fact(DisplayName = "PS-1059: Update navigation status")]

@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.ProfitSharing.Api;
+﻿using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
-using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
+using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Services;
 public sealed class BeneficiaryServiceTests : ApiTestBase<Program>
@@ -39,13 +33,13 @@ public sealed class BeneficiaryServiceTests : ApiTestBase<Program>
         req.BeneficiarySsn = null;
 
         await _service.UpdateBeneficiary(req, CancellationToken.None);
-        _beneficiary.Relationship.Should().Be("2nd Cousin");
-        _beneficiary.Contact.Ssn.Should().Be(initialSsn);
+        _beneficiary.Relationship.ShouldBe("2nd Cousin");
+        _beneficiary.Contact.Ssn.ShouldBe(initialSsn);
 
         int newSsn = 999887777;
         req.BeneficiarySsn = newSsn;
         await _service.UpdateBeneficiary(req, CancellationToken.None);
-        _beneficiary.Contact.Ssn.Should().Be(newSsn);
+        _beneficiary.Contact.Ssn.ShouldBe(newSsn);
 
     }
 }

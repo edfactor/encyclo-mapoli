@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Net;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
@@ -13,7 +8,7 @@ using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using FastEndpoints;
-using FluentAssertions;
+using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.PostFrozen;
 
@@ -25,14 +20,13 @@ public class ProfitSharingUnder21BreakdownByStoreTests : ApiTestBase<Program>
         var request = new ProfitYearRequest() { ProfitYear = 2024, Skip = 0, Take = 255 };
         var response = await ApiClient.GETAsync<ProfitSharingUnder21BreakdownByStoreEndpoint, ProfitYearRequest, PaginatedResponseDto<ProfitSharingUnder21BreakdownByStoreResponse>>(request);
 
-        response.Should().NotBeNull();
-        response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        response.ShouldNotBeNull();
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
 
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         response = await ApiClient.GETAsync<ProfitSharingUnder21BreakdownByStoreEndpoint, ProfitYearRequest, PaginatedResponseDto<ProfitSharingUnder21BreakdownByStoreResponse>>(request);
-
-        response.Should().NotBeNull();
-        response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.ShouldNotBeNull();
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
     }
 }

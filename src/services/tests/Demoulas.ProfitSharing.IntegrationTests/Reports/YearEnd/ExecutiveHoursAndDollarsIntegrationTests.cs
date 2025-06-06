@@ -5,7 +5,7 @@ using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ExecutiveHoursA
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using FastEndpoints;
-using FluentAssertions;
+using Shouldly;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 
@@ -34,10 +34,10 @@ public class ExecutiveHoursAndDollarsIntegrationTests : ApiIntegrationTestBase<P
         var lines = csvData.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
 
         // Todays date
-        lines[0].Should().NotBeEmpty();
+        lines[0].ShouldNotBeEmpty();
 
         // Title check
-        lines[1].Should().Be($"Executive Hours and Dollars for Year {YearThis}");
+        lines[1].ShouldBe($"Executive Hours and Dollars for Year {YearThis}");
 
         // remaining content should match expectedCsvContent
         var actualCsvContents = string.Join("\n", lines.Skip(2));
@@ -64,16 +64,16 @@ public class ExecutiveHoursAndDollarsIntegrationTests : ApiIntegrationTestBase<P
         var lines = csvData.Split(["\r\n", "\n"], StringSplitOptions.None);
 
         // Todays date
-        lines[0].Should().NotBeEmpty();
+        lines[0].ShouldNotBeEmpty();
 
         // Title check
-        lines[1].Should().Be($"Executive Hours and Dollars for Year {YearLast}");
+        lines[1].ShouldBe($"Executive Hours and Dollars for Year {YearLast}");
 
         // remaining content should match expectedCsvContent
         var actualCsvContents = string.Join("\n", lines.Skip(2));
 
         // We do not have actual executive hours and dollars for prior years, so we expect just the headers
-        actualCsvContents.Should().Be("BADGE,NAME,STR,EXEC HRS,EXEC DOLS,ORA HRS CUR,ORA DOLS CUR,FREQ,STATUS\n");
+        actualCsvContents.ShouldBe("BADGE,NAME,STR,EXEC HRS,EXEC DOLS,ORA HRS CUR,ORA DOLS CUR,FREQ,STATUS\n");
     }
 
 

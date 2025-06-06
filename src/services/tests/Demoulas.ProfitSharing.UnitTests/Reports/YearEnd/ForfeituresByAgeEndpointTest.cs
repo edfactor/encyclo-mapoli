@@ -7,8 +7,8 @@ using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using FastEndpoints;
-using FluentAssertions;
 using JetBrains.Annotations;
+using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
@@ -28,9 +28,9 @@ public class ForfeituresByAgeEndpointTest : ApiTestBase<Program>
             .GETAsync<ForfeituresByAgeEndpoint, FrozenReportsByAgeRequest, ForfeituresByAge>(request);
 
         // Assert
-        response.Should().NotBeNull();
-        response.Result.ReportName.Should().Be("PROFIT SHARING FORFEITURES BY AGE");
-        response.Result.ReportType.Should().Be(request.ReportType);
+        response.ShouldNotBeNull();
+        response.Result.ReportName.ShouldBe("PROFIT SHARING FORFEITURES BY AGE");
+        response.Result.ReportType.ShouldBe(request.ReportType);
     }
 
     [Fact]
@@ -46,21 +46,23 @@ public class ForfeituresByAgeEndpointTest : ApiTestBase<Program>
 
 
         string content = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
-        content.Should().Contain("AGE,EMPS,AMOUNT");
-        content.Should().Contain("FORF TTL,,");
+        content.ShouldContain("AGE,EMPS,AMOUNT");
+        content.ShouldContain("FORF TTL,,");
     }
 
-    [Fact(DisplayName = "PS-502: Check to ensure unauthorized")]
-    public async Task Unauthorized()
+    [Fact]
+    public async Task GetResponse_WithInvalidToken_ShouldReturnUnauthorized()
     {
         // Arrange
         var request = new FrozenReportsByAgeRequest { ProfitYear = 2023, ReportType = FrozenReportsByAgeRequest.Report.Total };
 
 
         // Act
+        ApiClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "invalid_token");
         TestResult<ForfeituresByAge> response = await ApiClient
             .GETAsync<ForfeituresByAgeEndpoint, FrozenReportsByAgeRequest, ForfeituresByAge>(request);
 
-        response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        // Assert
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
 }
