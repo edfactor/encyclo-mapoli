@@ -7,8 +7,8 @@ import BeneficiaryInquiryGrid from "./BeneficiaryInquiryGrid";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { BeneficiaryTypeDto, BeneficiaryTypesResponseDto, CreateBeneficiaryRequestDto } from "reduxstore/types";
-import { useLazyCreateBeneficiariesQuery, useLazyGetBeneficiarytypesQuery } from "reduxstore/api/BeneficiariesApi";
+import { BeneficiaryTypeDto, BeneficiaryTypesResponseDto, CreateBeneficiaryContactRequest, CreateBeneficiaryContactResponse, CreateBeneficiaryRequest } from "reduxstore/types";
+import { useLazyCreateBeneficiariesQuery, useLazyCreateBeneficiaryContactQuery, useLazyGetBeneficiarytypesQuery } from "reduxstore/api/BeneficiariesApi";
 import Checkbox from '@mui/material/Checkbox';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -50,6 +50,7 @@ export interface cb {
 const CreateBeneficiary = () => {
     const [triggerAdd, { isFetching }] = useLazyCreateBeneficiariesQuery();
     const [triggerGetBeneficiaryType, { data, isSuccess }] = useLazyGetBeneficiarytypesQuery();
+    const [triggerCreateBeneficiaryContact, createBeneficiaryContactResponse] = useLazyCreateBeneficiaryContactQuery();
     const [beneficiaryTypes, setBeneficiaryTypes] = useState<BeneficiaryTypesResponseDto>({});
 
     const {
@@ -70,9 +71,47 @@ const CreateBeneficiary = () => {
     }
 
     const onSubmit = (data: cb) => {
+        let request: CreateBeneficiaryContactRequest = {
+            contactSsn: data.beneficiarySsn,
+            city: data.city,
+            countryIso: '',
+            dateOfBirth: new Date(data.dateOfBirth),
+            emailAddress: '',
+            firstName: data.firstName,
+            lastName: data.lastName,
+            middleName: '',
+            mobileNumber: '',
+            phoneNumber: '',
+            postalCode: data.postalCode,
+            state: data.state,
+            street: data.street,
+            street2: '',
+            street3: '',
+            street4: ''
+        }
+        triggerCreateBeneficiaryContact(request).unwrap().then((res: CreateBeneficiaryContactResponse) => {
 
-        console.log(data);
+            console.log(res);
+            saveBeneficiary(res.id, data);
+        }).catch((err) => { console.error(err) });
     };
+
+    const saveBeneficiary  = (beneficiaryContactId:number, data:cb)=>{
+        let request: CreateBeneficiaryRequest = {
+            beneficiaryContactId: beneficiaryContactId, 
+            demographicId : 0,
+            employeeBadgeNumber: 0,
+            firstLevelBeneficiaryNumber: 0,
+            kindId: 'M', 
+            percentage : data.percentage,
+            relationship: data.relationship,
+            secondLevelBeneficiaryNumber: 0,
+            thirdLevelBeneficiaryNumber: 0
+        }
+        triggerAdd(request).unwrap().then((value)=>{
+            console.log('saved successfully');
+        }).catch((err)=>{console.error(err)})
+    }
     const validateAndSubmit = handleSubmit(onSubmit);
     useEffect(() => {
         triggerGetBeneficiaryType({}).unwrap().then((data) => {
@@ -85,8 +124,9 @@ const CreateBeneficiary = () => {
 
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <Grid2 container size={12} rowSpacing={3}>
-                <form onSubmit={validateAndSubmit}>
+            <form onSubmit={validateAndSubmit}>
+                <Grid2 container size={12} rowSpacing={3}>
+
                     <Grid2 size={{ md: 5, xs: 12 }}>
                         <FormLabel>First Name</FormLabel>
                         <Controller
@@ -351,8 +391,9 @@ const CreateBeneficiary = () => {
                         </Grid2>
                     </Grid2>
 
-                </form>
-            </Grid2>
+
+                </Grid2>
+            </form>
         </LocalizationProvider>
 
     );

@@ -5,8 +5,10 @@ import {
     BeneficiaryRequestDto,
     BeneficiaryTypesRequestDto,
     BeneficiaryTypesResponseDto,
-    CreateBeneficiaryRequestDto,
-    CreateBeneficiaryResponseDto,
+    CreateBeneficiaryContactRequest,
+    CreateBeneficiaryContactResponse,
+    CreateBeneficiaryRequest,
+    CreateBeneficiaryResponse
 } from "reduxstore/types";
 import { createDataSourceAwareBaseQuery } from "./api";
 import { Paged } from "smart-ui-library";
@@ -49,22 +51,37 @@ export const BeneficiariesApi = createApi({
                 }
             }
         }),
-        createBeneficiaries: builder.query<Paged<CreateBeneficiaryRequestDto>, CreateBeneficiaryResponseDto>({
+        createBeneficiaries: builder.query<Paged<CreateBeneficiaryResponse>, CreateBeneficiaryRequest>({
             query: (request) => ({
                 url: `/beneficiaries`,
                 method: "POST",
-                params: request
+                body: request
             }),
             async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
                     const { data } = await queryFulfilled;
                 } catch (err) {
-                    console.error("Failed to fetch beneficiaries:", err);
-                    dispatch(setBeneficiaryError("Failed to fetch beneficiaries"));
+                    console.error("Failed to create beneficiaries:", err);
+                    dispatch(setBeneficiaryError("Failed to create beneficiaries"));
+                }
+            }
+        }),
+        createBeneficiaryContact: builder.query<CreateBeneficiaryContactResponse, CreateBeneficiaryContactRequest>({
+            query: (request) => ({
+                url: `/beneficiaries/contact`,
+                method: "POST",
+                body: request
+            }),
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+                try {
+                    const { data } = await queryFulfilled;
+                } catch (err) {
+                    console.error("Failed to create beneficiary contact", err);
+                    dispatch(setBeneficiaryError("Failed to create beneficiary contact"));
                 }
             }
         })
     })
 });
 
-export const { useLazyGetBeneficiariesQuery, useLazyCreateBeneficiariesQuery, useLazyGetBeneficiarytypesQuery } = BeneficiariesApi;
+export const { useLazyGetBeneficiariesQuery, useLazyCreateBeneficiariesQuery, useLazyGetBeneficiarytypesQuery, useLazyCreateBeneficiaryContactQuery } = BeneficiariesApi;
