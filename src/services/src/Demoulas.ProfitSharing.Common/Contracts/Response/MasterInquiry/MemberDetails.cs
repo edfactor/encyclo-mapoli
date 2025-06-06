@@ -28,14 +28,14 @@ public record MemberDetails : IdRequest
     public decimal CurrentEtva { get; set; }
     public decimal PreviousEtva { get; set; }
     
-    public required string Department { get; set; }
-    public required string Classification { get; set; }
-    public required string Sex { get; set; }
-    public required string PhoneNumber { get; set; }
-    public required string WorkLocation { get; set; }
-    public required bool ReceivedContributionsLastYear { get; set; }
-    public required DateOnly FullTimeDate { get; set; }
-    public required string TerminationReason { get; set; }
+    public string? Department { get; set; }
+    public string? PayClassification { get; set; }
+    public string? Gender { get; set; }
+    public string? PhoneNumber { get; set; }
+    public string? WorkLocation { get; set; }
+    public bool ReceivedContributionsLastYear { get; set; }
+    public DateOnly? FullTimeDate { get; set; }
+    public string? TerminationReason { get; set; }
     
 
     public List<int> Missives { get; set; } = new List<int>();

@@ -2,6 +2,7 @@
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.Common.Data.Services.Entities.Entities;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -419,12 +420,17 @@ public sealed class MasterInquiryService : IMasterInquiryService
         var memberData = await demographics
             .Include(d => d.PayProfits)
             .ThenInclude(pp => pp.Enrollment)
+            .Include(d => d.Department)
+            .Include(d => d.TerminationCode)
+            .Include(d => d.PayClassification)
+            .Include(d => d.Gender)
             .Where(d => d.Id == id)
             .Select(d => new
             {
                 d.Id,
                 d.ContactInfo.FirstName,
                 d.ContactInfo.LastName,
+                d.ContactInfo.PhoneNumber,
                 d.Address.City,
                 d.Address.State,
                 Address = d.Address.Street,
@@ -439,6 +445,13 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 DemographicId = d.Id,
                 d.EmploymentStatusId,
                 d.EmploymentStatus,
+
+                d.FullTimeDate,
+                Department = d.Department != null ? d.Department.Name : "N/A",
+                TerminationReason = d.TerminationCode != null ? d.TerminationCode.Name : "N/A",
+                Gender = d.Gender != null ? d.Gender.Name : "N/A",
+                PayClassification = d.PayClassification != null ? d.PayClassification.Name : "N/A",
+                
                 CurrentPayProfit = d.PayProfits
                     .FirstOrDefault(x => x.ProfitYear == currentYear),
                 PreviousPayProfit = d.PayProfits
@@ -470,6 +483,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             YearToDateProfitSharingHours = memberData.CurrentPayProfit?.CurrentHoursYear ?? 0,
             HireDate = memberData.HireDate,
             ReHireDate = memberData.ReHireDate,
+            FullTimeDate = memberData.FullTimeDate,
             TerminationDate = memberData.TerminationDate,
             StoreNumber = memberData.StoreNumber,
             EnrollmentId = memberData.CurrentPayProfit?.EnrollmentId,
@@ -477,7 +491,16 @@ public sealed class MasterInquiryService : IMasterInquiryService
             BadgeNumber = memberData.BadgeNumber,
             CurrentEtva = memberData.CurrentPayProfit?.Etva ?? 0,
             PreviousEtva = memberData.PreviousPayProfit?.Etva ?? 0,
+            
             EmploymentStatus = memberData.EmploymentStatus?.Name,
+            
+            Department = memberData.Department,
+            TerminationReason = memberData.TerminationReason,
+            Gender = memberData.Gender,
+            PayClassification = memberData.PayClassification,
+            PhoneNumber = memberData.PhoneNumber,
+
+
             Missives = missiveList
         });
     }
@@ -602,6 +625,12 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 CurrentPSAmount = balance?.CurrentBalance ?? 0,
                 BeginVestedAmount = previousBalanceItem?.VestedBalance ?? 0,
                 CurrentVestedAmount = balance?.VestedBalance ?? 0,
+
+                FullTimeDate = memberData.FullTimeDate,
+                Department = memberData.Department,
+                TerminationReason = memberData.TerminationReason,
+                Gender = memberData.Gender,
+                PayClassification = memberData.PayClassification,
             });
         }
 
