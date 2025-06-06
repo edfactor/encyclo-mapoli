@@ -30,8 +30,8 @@ public class GetFrozenDemographicsEndpointTests : ApiTestBase<Program>
             var expected = frozenDemographics[i];
             var actual = array[i];
 
-            actual.AsOfDateTime.ToUniversalTime().ShouldBe(expected.AsOfDateTime.ToUniversalTime());
-            actual.CreatedDateTime.ToUniversalTime().ShouldBe(expected.CreatedDateTime.ToUniversalTime());
+            actual.AsOfDateTime.ShouldBe(expected.AsOfDateTime);
+            actual.CreatedDateTime.ShouldBe(expected.CreatedDateTime);
             actual.ProfitYear.ShouldBe(expected.ProfitYear);
             actual.FrozenBy.ShouldBe(expected.FrozenBy);
             actual.IsActive.ShouldBe(expected.IsActive);
