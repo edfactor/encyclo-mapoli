@@ -12,6 +12,7 @@ import { useLazyGetProfitMasterInquiryMemberQuery } from "reduxstore/api/Inquiry
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
+import "../../styles/employee-details-lightbox.css";
 
 
 interface MasterInquiryEmployeeDetailsProps {
@@ -71,10 +72,13 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     yearsInPlan,
     percentageVested,
     contributionsLastYear,
+    receivedContributionsLastYear,
     enrollmentId,
     enrollment,
     hireDate,
+    fullTimeDate,
     terminationDate,
+    terminationReason,
     reHireDate,
     storeNumber,
     beginPSAmount,
@@ -82,53 +86,67 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     beginVestedAmount,
     currentVestedAmount,
     currentEtva,
-    employmentStatus    
+    previousEtva,
+    employmentStatus,
+    department,
+    PayClassification,
+    gender,
+    phoneNumber,
+    workLocation
   } = details;
 
   const enrolled = getEnrolledStatus(enrollmentId);
   const forfeited = getForfeitedStatus(enrollmentId);
 
-  const infoSection = [
-    { label: "", value: `${lastName}, ${firstName}` },
-    { label: "", value: `${address}` },
+  // Section 1: Employee Summary (Name, Address, Contact)
+  const summarySection = [
+    { label: "Name", value: `${lastName}, ${firstName}` },
+    { label: "Address", value: `${address}` },
     { label: "", value: `${addressCity}, ${addressState} ${addressZipCode}` },
+    { label: "Phone #", value: phoneNumber || "N/A" },
+    { label: "Work Location", value: workLocation || "N/A" },
+    { label: "Store", value: storeNumber > 0 ? storeNumber : "N/A" },
     { label: "Enrolled", value: enrolled },
-    { label: "Forfeited", value: forfeited }
+    { label: "Forfeited", value: forfeited },
   ];
 
-  const employeeSection = [
-    { label: "Badge", value: viewBadgeLinkRenderer(badgeNumber) },
+  // Section 2: Employment/Personal Info
+  const personalSection = [
+    { label: "Employee #", value: badgeNumber },
     ...(psnSuffix && psnSuffix !== 0 ? [{ label: "Psn", value: viewBadgeLinkRenderer(badgeNumber, psnSuffix) }] : []),
+    { label: "Department", value: department || "N/A" },
+    { label: "Class", value: PayClassification || "N/A" },
+    { label: "Status", value: employmentStatus ?? "N/A" },
+    { label: "Gender", value: gender || "N/A" },
     { label: "DOB", value: mmDDYYFormat(dateOfBirth) },
     { label: "SSN", value: `${ssnValue}` },
-    { label: "ETVA", value: currentEtva },
-    { label: "Enrollment", value: enrollment ?? "N/A" },
-  ].filter(field => field.value !== 0);
+  ];
 
+  // Section 3: Plan/Profit Sharing
   const planSection = [
-    { label: "YTD P/S Hours", value: yearToDateProfitSharingHours },
+    { label: "Begin Balance", value: numberToCurrency(beginPSAmount) },
+    { label: "Current Balance", value: numberToCurrency(currentPSAmount) },
+    { label: "Begin Vested Balance", value: numberToCurrency(beginVestedAmount) },
+    { label: "Current Vested Balance", value: numberToCurrency(currentVestedAmount) },
+    { label: "Profit Sharing Hours", value: yearToDateProfitSharingHours },
     { label: "Years In Plan", value: yearsInPlan },
-    { label: "Percentage Vested", value: formatPercentage(percentageVested) },
-    { label: "Status", value: employmentStatus ?? "N/A" },
+    { label: "Vested Percent", value: formatPercentage(percentageVested) },
+    { label: "Received Contributions Last Year", value: receivedContributionsLastYear ? "Yes" : "No" }
   ];
 
-  const hireSection = [
-    { label: "Hire", value: hireDate ? mmDDYYFormat(hireDate) : 'N/A' },
-    { label: "Term", value: terminationDate ? mmDDYYFormat(terminationDate) : 'N/A' },
-    { label: "Store", value: storeNumber > 0 ? storeNumber : "N/A" },
-    { label: "Rehire", value: reHireDate ? mmDDYYFormat(reHireDate) : 'N/A' },
-    { label: "Cont Last Year", value: contributionsLastYear ? "Yes" : "No" }
-  ];
-
-  const amountsSection = [
-    { label: "Begin PS Amount", value: numberToCurrency(beginPSAmount) },
-    { label: "Current PS Amount", value: numberToCurrency(currentPSAmount) },
-    { label: "Begin Vested Amount", value: numberToCurrency(beginVestedAmount) },
-    { label: "Current Vested Amount", value: numberToCurrency(currentVestedAmount) },
+  // Section 4: Milestones/Status
+  const milestoneSection = [
+    { label: "Hire Date", value: hireDate ? mmDDYYFormat(hireDate) : 'N/A' },
+    { label: "Full Time Date", value: fullTimeDate ? mmDDYYFormat(fullTimeDate) : 'N/A' },
+    { label: "Termination Date", value: terminationDate ? mmDDYYFormat(terminationDate) : 'N/A' },
+    { label: "Termination Reason", value: terminationReason || 'N/A' },
+    { label: "Re-Hire Date", value: reHireDate ? mmDDYYFormat(reHireDate) : 'N/A' },
+    { label: "ETVA", value: numberToCurrency(currentEtva) },
+    { label: "Previous ETVA", value: numberToCurrency(previousEtva) }
   ];
 
   return (
-    <>
+    <div className="employee-details-lightbox" style={{ width: '100%' }}>
       <Grid2
         container
         paddingX="24px"
@@ -145,29 +163,24 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
           <Grid2
             container
             spacing={3}>
-            <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
               <LabelValueSection
-                data={infoSection}
+                data={summarySection}
               />
             </Grid2>
             <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
               <LabelValueSection
-                data={employeeSection}
+                data={personalSection}
               />
             </Grid2>
-            <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+              <LabelValueSection
+                data={milestoneSection}
+              />
+            </Grid2>
+             <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
               <LabelValueSection
                 data={planSection}
-              />
-            </Grid2>
-            <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
-              <LabelValueSection
-                data={hireSection}
-              />
-            </Grid2>
-            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-              <LabelValueSection
-                data={amountsSection}
               />
             </Grid2>
           </Grid2>
@@ -185,7 +198,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
           </div>
         </Grid2>
       )}
-    </>
+    </div>
   );
 };
 

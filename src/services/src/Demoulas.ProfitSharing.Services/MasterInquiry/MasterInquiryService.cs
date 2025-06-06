@@ -2,6 +2,7 @@
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.Common.Data.Services.Entities.Entities;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -89,6 +90,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
         public decimal Payment { get; set; }
     }
 
+
     #endregion
 
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
@@ -126,7 +128,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             query = FilterMemberQuery(req, query);
 
             // Get unique SSNs from the query
-            var ssnList = await query.Select(x => x.Member.Ssn).Distinct().ToListAsync(cancellationToken);
+            var ssnList = await query.Select(x => x.Member.Ssn).ToHashSetAsync(cancellationToken);
             short currentYear = req.ProfitYear;
             short previousYear = (short)(currentYear - 1);
             var memberType = req.MemberType;
@@ -163,6 +165,49 @@ public sealed class MasterInquiryService : IMasterInquiryService
             return detailsList;
         });
     }
+
+    public async Task<PaginatedResponseDto<GroupedProfitSummaryDto>> GetGroupedProfitDetails(MasterInquiryRequest req, CancellationToken cancellationToken = default)
+    {
+        // These are the ProfitCode IDs used in GetProfitCodesForBalanceCalc()
+        byte[] balanceProfitCodes = new byte[] {
+            ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id,
+            ProfitCode.Constants.OutgoingForfeitures.Id,
+            ProfitCode.Constants.OutgoingDirectPayments.Id,
+            ProfitCode.Constants.OutgoingXferBeneficiary.Id,
+            ProfitCode.Constants.Outgoing100PercentVestedPayment.Id
+        };
+
+        return await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        {
+            IQueryable<MasterInquiryItem> query = req.MemberType switch
+            {
+                1 => await GetMasterInquiryDemographics(ctx),
+                2 => GetMasterInquiryBeneficiary(ctx),
+                _ => (await GetMasterInquiryDemographics(ctx)).Union(GetMasterInquiryBeneficiary(ctx))
+            };
+
+            query = FilterMemberQuery(req, query);
+
+            return await query
+                .GroupBy(x => new { x.ProfitDetail.ProfitYear, x.ProfitDetail.MonthToDate })
+                .Select(g => new GroupedProfitSummaryDto
+                {
+                    ProfitYear = g.Key.ProfitYear,
+                    MonthToDate = g.Key.MonthToDate,
+                    TotalContribution = g.Sum(x => x.ProfitDetail.Contribution),
+                    TotalEarnings = g.Sum(x => x.ProfitDetail.Earnings),
+                    TotalForfeiture = g.Sum(x =>
+                        !balanceProfitCodes.Contains(x.ProfitDetail.ProfitCodeId) ? x.ProfitDetail.Forfeiture : 0),
+                    TotalPayment = g.Sum(x =>
+                        balanceProfitCodes.Contains(x.ProfitDetail.ProfitCodeId) ? x.ProfitDetail.Forfeiture : 0),
+                    TransactionCount = g.Count()
+                })
+                .OrderBy(x => x.ProfitYear)
+                .ThenBy(x => x.MonthToDate)
+                .ToPaginationResultsAsync(req, cancellationToken);
+        });
+    }
+
 
     public async Task<MemberProfitPlanDetails?> GetMemberVestingAsync(MasterInquiryMemberRequest req, CancellationToken cancellationToken = default)
     {
@@ -375,12 +420,17 @@ public sealed class MasterInquiryService : IMasterInquiryService
         var memberData = await demographics
             .Include(d => d.PayProfits)
             .ThenInclude(pp => pp.Enrollment)
+            .Include(d => d.Department)
+            .Include(d => d.TerminationCode)
+            .Include(d => d.PayClassification)
+            .Include(d => d.Gender)
             .Where(d => d.Id == id)
             .Select(d => new
             {
                 d.Id,
                 d.ContactInfo.FirstName,
                 d.ContactInfo.LastName,
+                d.ContactInfo.PhoneNumber,
                 d.Address.City,
                 d.Address.State,
                 Address = d.Address.Street,
@@ -395,6 +445,13 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 DemographicId = d.Id,
                 d.EmploymentStatusId,
                 d.EmploymentStatus,
+
+                d.FullTimeDate,
+                Department = d.Department != null ? d.Department.Name : "N/A",
+                TerminationReason = d.TerminationCode != null ? d.TerminationCode.Name : "N/A",
+                Gender = d.Gender != null ? d.Gender.Name : "N/A",
+                PayClassification = d.PayClassification != null ? d.PayClassification.Name : "N/A",
+                
                 CurrentPayProfit = d.PayProfits
                     .FirstOrDefault(x => x.ProfitYear == currentYear),
                 PreviousPayProfit = d.PayProfits
@@ -426,6 +483,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             YearToDateProfitSharingHours = memberData.CurrentPayProfit?.CurrentHoursYear ?? 0,
             HireDate = memberData.HireDate,
             ReHireDate = memberData.ReHireDate,
+            FullTimeDate = memberData.FullTimeDate,
             TerminationDate = memberData.TerminationDate,
             StoreNumber = memberData.StoreNumber,
             EnrollmentId = memberData.CurrentPayProfit?.EnrollmentId,
@@ -433,7 +491,16 @@ public sealed class MasterInquiryService : IMasterInquiryService
             BadgeNumber = memberData.BadgeNumber,
             CurrentEtva = memberData.CurrentPayProfit?.Etva ?? 0,
             PreviousEtva = memberData.PreviousPayProfit?.Etva ?? 0,
+            
             EmploymentStatus = memberData.EmploymentStatus?.Name,
+            
+            Department = memberData.Department,
+            TerminationReason = memberData.TerminationReason,
+            Gender = memberData.Gender,
+            PayClassification = memberData.PayClassification,
+            PhoneNumber = memberData.PhoneNumber,
+
+
             Missives = missiveList
         });
     }
@@ -558,13 +625,19 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 CurrentPSAmount = balance?.CurrentBalance ?? 0,
                 BeginVestedAmount = previousBalanceItem?.VestedBalance ?? 0,
                 CurrentVestedAmount = balance?.VestedBalance ?? 0,
+
+                FullTimeDate = memberData.FullTimeDate,
+                Department = memberData.Department,
+                TerminationReason = memberData.TerminationReason,
+                Gender = memberData.Gender,
+                PayClassification = memberData.PayClassification,
             });
         }
 
         return detailsList;
     }
 
-    private async Task<PaginatedResponseDto<MemberDetails>> GetDemographicDetailsForSsns(ProfitSharingReadOnlyDbContext ctx, SortedPaginationRequestDto req, List<int> ssns, short currentYear, short previousYear, CancellationToken cancellationToken)
+    private async Task<PaginatedResponseDto<MemberDetails>> GetDemographicDetailsForSsns(ProfitSharingReadOnlyDbContext ctx, SortedPaginationRequestDto req, ISet<int> ssns, short currentYear, short previousYear, CancellationToken cancellationToken)
     {
         var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
         var members = await demographics
@@ -634,7 +707,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
     private Task<PaginatedResponseDto<MemberDetails>> GetBeneficiaryDetailsForSsns(ProfitSharingReadOnlyDbContext ctx,
         SortedPaginationRequestDto req,
-        List<int> ssns,
+        ISet<int> ssns,
         CancellationToken cancellationToken)
     {
         var members = ctx.Beneficiaries

@@ -9,8 +9,8 @@ using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using FastEndpoints;
-using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 public class FrozenReportServiceTests : ApiTestBase<Program>
@@ -21,7 +21,7 @@ public class FrozenReportServiceTests : ApiTestBase<Program>
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         var request = new ProfitYearRequest() { ProfitYear = 2023, Skip = 0, Take = 255 };
         var response = await ApiClient.GETAsync<ForfeituresAndPointsForYearEndpoint, ProfitYearRequest, ForfeituresAndPointsForYearResponseWithTotals>(request);
-        response.Should().NotBeNull();
+        response.ShouldNotBeNull();
     }
 
     [Fact(DisplayName = "PS-61: Check to ensure unauthorized")]
@@ -30,7 +30,7 @@ public class FrozenReportServiceTests : ApiTestBase<Program>
         var response =
             await ApiClient.GETAsync<ForfeituresAndPointsForYearEndpoint, ProfitYearRequest, ForfeituresAndPointsForYearResponseWithTotals>(new ProfitYearRequest());
 
-        response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
 
     }
 
@@ -58,8 +58,8 @@ public class FrozenReportServiceTests : ApiTestBase<Program>
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         var request = new FrozenProfitYearRequest() { ProfitYear = 2023, Skip = 0, Take = int.MaxValue, UseFrozenData = false };
         var response = await ApiClient.GETAsync<ForfeituresAndPointsForYearEndpoint, FrozenProfitYearRequest, ReportResponseBase<ForfeituresAndPointsForYearResponse>>(request);
-        response.Should().NotBeNull();
-        response.Result.Response.Total.Should().BeGreaterThan(0);
+        response.ShouldNotBeNull();
+        response.Result.Response.Total.ShouldBeGreaterThan(0);
     }
 
     [Fact(DisplayName = "PS-404 - Gross Wages Report")]
@@ -114,11 +114,11 @@ public class FrozenReportServiceTests : ApiTestBase<Program>
         };
 
         var response = await ApiClient.GETAsync<GrossWagesReportEndpoint, GrossWagesReportRequest,  GrossWagesReportResponse>(request);
-        response.Should().NotBeNull();
-        response.Result.Response.Total.Should().BeGreaterThan(0);
+        response.ShouldNotBeNull();
+        response.Result.Response.Total.ShouldBeGreaterThan(0);
         var testRec = response.Result.Response.Results.First(x => x.BadgeNumber == demoBadgeNumber);
-        testRec.Should().NotBeNull();
-        testRec.GrossWages.Should().Be(49995 + 25);
+        testRec.ShouldNotBeNull();
+        testRec.GrossWages.ShouldBe(49995 + 25);
     }
 
     [Fact(DisplayName = "Update Summary Report - PS-394")]
@@ -147,11 +147,11 @@ public class FrozenReportServiceTests : ApiTestBase<Program>
         var request = new ProfitYearRequest() { ProfitYear = 2023, Skip = 0, Take = 255 };
     var response = await ApiClient.GETAsync<UpdateSummaryReportEndpoint, ProfitYearRequest, UpdateSummaryReportResponse>(request);
 
-        response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
 
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         response = await ApiClient.GETAsync<UpdateSummaryReportEndpoint, ProfitYearRequest, UpdateSummaryReportResponse>(request);
-        response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
-        response.Result.Should().NotBeNull();
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.OK);
+        response.Result.ShouldNotBeNull();
     }
 }

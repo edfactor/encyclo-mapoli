@@ -1,5 +1,4 @@
-﻿using System.Data.SqlTypes;
-using System.Net;
+﻿using System.Net;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Api;
@@ -16,10 +15,10 @@ using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using Demoulas.Util.Extensions;
 using FastEndpoints;
-using FluentAssertions;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
@@ -57,8 +56,8 @@ public class MilitaryAndRehireTests : ApiTestBase<Program>
                 await ApiClient.GETAsync<EmployeesOnMilitaryLeaveEndpoint, PaginationRequestDto, ReportResponseBase<EmployeesOnMilitaryLeaveResponse>>(setup.Request);
 
             // Assert
-            response.Result.ReportName.Should().BeEquivalentTo(expectedResponse.ReportName);
-            response.Result.Response.Results.Should().BeEquivalentTo(expectedResponse.Response.Results);
+            response.Result.ReportName.ShouldBe(expectedResponse.ReportName);
+            response.Result.Response.Results.ShouldBeEquivalentTo(expectedResponse.Response.Results);
         });
     }
 
@@ -72,10 +71,10 @@ public class MilitaryAndRehireTests : ApiTestBase<Program>
             // Act
             DownloadClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
             var response = await DownloadClient.GETAsync<EmployeesOnMilitaryLeaveEndpoint, PaginationRequestDto, StreamContent>(setup.Request);
-            response.Response.Content.Should().NotBeNull();
+            response.Response.Content.ShouldNotBeNull();
 
             string result = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
-            result.Should().NotBeNullOrEmpty();
+            result.ShouldNotBeNullOrEmpty();
         });
     }
 
@@ -89,7 +88,7 @@ public class MilitaryAndRehireTests : ApiTestBase<Program>
             var response =
                 await ApiClient.GETAsync<EmployeesOnMilitaryLeaveEndpoint, PaginationRequestDto, ReportResponseBase<EmployeesOnMilitaryLeaveResponse>>(setup.Request);
 
-            response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+            response.Response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
         });
     }
 
@@ -112,8 +111,8 @@ public class MilitaryAndRehireTests : ApiTestBase<Program>
         var response = await _endpoint.GetResponse(request, cancellationToken);
 
         // Assert
-        response.ReportName.Should().BeEquivalentTo(expectedResponse.ReportName);
-        response.Response.Results.Should().BeEquivalentTo(expectedResponse.Response.Results);
+        response.ReportName.ShouldBe(expectedResponse.ReportName);
+        response.Response.Results.ShouldBeEquivalentTo(expectedResponse.Response.Results);
     }
 
     [Fact(DisplayName = "PS-156: Null Results")]
@@ -135,8 +134,8 @@ public class MilitaryAndRehireTests : ApiTestBase<Program>
         var response = await _endpoint.GetResponse(request, cancellationToken);
 
         // Assert
-        response.ReportName.Should().BeEquivalentTo(expectedResponse.ReportName);
-        response.Response.Results.Should().BeEquivalentTo(expectedResponse.Response.Results);
+        response.ReportName.ShouldBe(expectedResponse.ReportName);
+        response.Response.Results.ShouldBeEquivalentTo(expectedResponse.Response.Results);
     }
 
     [Fact(DisplayName = "PS-156: Report name is correct")]
@@ -146,7 +145,7 @@ public class MilitaryAndRehireTests : ApiTestBase<Program>
         var reportFileName = _endpoint.ReportFileName;
 
         // Assert
-        reportFileName.Should().Be("EMPLOYEES ON MILITARY LEAVE");
+        reportFileName.ShouldBe("EMPLOYEES ON MILITARY LEAVE");
     }
 
     private static async Task<(PaginationRequestDto Request, EmployeesOnMilitaryLeaveResponse ExpectedResponse)> SetupTestEmployee(ProfitSharingDbContext c)

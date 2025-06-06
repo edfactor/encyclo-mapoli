@@ -2,15 +2,13 @@
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
-using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
 using FastEndpoints;
-using FluentAssertions;
+using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
@@ -41,7 +39,7 @@ public sealed class ProfitShareEditServiceEndpointTests : ApiTestBase<Program>
                     ProfitShareUpdateRequest, ProfitShareEditResponse>(req);
 
         // Assert
-        response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
 
 
@@ -58,7 +56,7 @@ public sealed class ProfitShareEditServiceEndpointTests : ApiTestBase<Program>
                 .GETAsync<ProfitShareEditEndpoint, ProfitShareUpdateRequest, ProfitShareEditResponse>(req);
 
         // Assert
-        response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
 
     public static decimal ComputeBeneficiaryEarnings(decimal beneInitialBalance, decimal earningsPercent)
@@ -79,15 +77,15 @@ public sealed class ProfitShareEditServiceEndpointTests : ApiTestBase<Program>
         TestResult<StreamContent> response = await DownloadClient.GETAsync<ProfitShareEditEndpoint, ProfitShareUpdateRequest, StreamContent>(req);
 
         string result = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
-        result.Should().NotBeNullOrEmpty();
+        result.ShouldNotBeNullOrEmpty();
 
         // Assert CSV format
         string csvData = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
         string[] lines = csvData.Split(["\r\n", "\n"], StringSplitOptions.None);
         // line 0 is today's date
         int l = 0;
-        lines[l++].Should().NotBeEmpty(); // has Date/time
-        lines[l++].Should().Be("Profit Sharing Edit");
-        lines[l].Should().Be("Number,Name,Code,Contribution Amount,Earnings Amount,Incoming Forfeitures,Reason");
+        lines[l++].ShouldNotBeEmpty(); // has Date/time
+        lines[l++].ShouldBe("Profit Sharing Edit");
+        lines[l].ShouldBe("Number,Name,Code,Contribution Amount,Earnings Amount,Incoming Forfeitures,Reason");
     }
 }

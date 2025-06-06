@@ -3,6 +3,6 @@
 namespace Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
 public record MasterInquiryMemberDetailsRequest : SortedPaginationRequestDto 
 {
-    public byte? MemberType { get; set; }
-    public int? Id { get; set; }
+    public required byte? MemberType { get; set; }
+    public required int? Id { get; set; }
 }

@@ -1,10 +1,7 @@
-﻿using System.Linq.Expressions;
-using Demoulas.ProfitSharing.Data.Contexts;
+﻿using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query;
 using Moq;
 
 namespace Demoulas.ProfitSharing.UnitTests;

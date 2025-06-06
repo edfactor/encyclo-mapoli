@@ -151,7 +151,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
           }
 
           // Otherwise just return the field value
-          return params.valueFormatted !== undefined ? params.valueFormatted : params.value;
+          return params.valueFormatted ? params.valueFormatted : params.value;
         }
       };
     });
@@ -174,7 +174,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
             }
 
             // Otherwise just return the field value
-            return params.valueFormatted !== undefined ? params.valueFormatted : params.value;
+            return params.valueFormatted ? params.valueFormatted : params.value;
           }
         };
       });

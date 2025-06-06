@@ -347,6 +347,7 @@ export interface MasterInquiryDetail extends ProfitYearRequest {
 }
 
 export interface MasterInquiryRequest {
+  id?: number;
   memberType?: number;
   badgeNumber?: number;
   psnSuffix?: number;
@@ -529,6 +530,17 @@ export interface EmployeeDetails {
   currentEtva: number;
   previousEtva: number;
   employmentStatus?: string;
+
+ department : string;
+ PayClassification : string;
+ gender : string
+ phoneNumber : string
+ workLocation : string
+receivedContributionsLastYear : boolean
+fullTimeDate : string
+terminationReason : string
+
+  
   missives: number[] | null;
 }
 

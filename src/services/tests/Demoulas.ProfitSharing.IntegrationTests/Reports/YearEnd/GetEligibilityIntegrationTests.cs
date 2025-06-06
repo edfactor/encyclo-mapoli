@@ -6,9 +6,9 @@ using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.ItOperations;
 using Demoulas.ProfitSharing.Services.Reports;
-using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Shouldly;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 
@@ -29,9 +29,9 @@ public class GetEligibilityIntegrationTests : PristineBaseTest
         TestOutputHelper.WriteLine("Not Selected: " + empls.NumberNotSelected);
         TestOutputHelper.WriteLine("Written: " + empls.NumberWritten);
         TestOutputHelper.WriteLine($"Got {empls.Response.Results.Count()} employees");
-        empls.Response.Results.Count().Should().BePositive();
-        empls.NumberReadOnFrozen.Should().BePositive();
-        empls.NumberNotSelected.Should().BePositive();
-        empls.NumberWritten.Should().BePositive();
+        empls.Response.Results.Count().ShouldBeGreaterThan(0);
+        empls.NumberReadOnFrozen.ShouldBeGreaterThan(0);
+        empls.NumberNotSelected.ShouldBeGreaterThan(0);
+        empls.NumberWritten.ShouldBeGreaterThan(0);
     }
 }
