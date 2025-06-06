@@ -274,6 +274,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
                   label="Profit Year"
                   disableFuture
                   views={["year"]}
+                  minDate={new Date(2020, 0)}
                   error={errors.endProfitYear?.message}
                 />
               )}

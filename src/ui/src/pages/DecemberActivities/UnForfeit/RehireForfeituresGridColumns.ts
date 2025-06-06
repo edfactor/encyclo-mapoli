@@ -1,5 +1,5 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { agGridNumberToCurrency } from "smart-ui-library";
+import { agGridNumberToCurrency, formatNumberWithComma } from "smart-ui-library";
 import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
 import { mmDDYYFormat } from "utils/dateUtils";
 
@@ -9,7 +9,7 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       headerName: "Badge",
       field: "badgeNumber",
       colId: "badgeNumber",
-      width: 50,
+      minWidth: 100,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
@@ -25,13 +25,14 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
-      sortable: true
+      sortable: true,
+      flex: 1
     },
     {
       headerName: "SSN",
       field: "ssn",
       colId: "ssn",
-      width: 90,
+      minWidth: 100,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true
@@ -40,7 +41,7 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       headerName: "Store",
       field: "storeNumber",
       colId: "storeNumber",
-      width: 40,
+      minWidth: 40,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
@@ -61,7 +62,7 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       headerName: "Hire Date",
       field: "hireDate",
       colId: "hireDate",
-      width: 90,
+      width: 120,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
@@ -75,7 +76,7 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       headerName: "Termination Date",
       field: "terminationDate",
       colId: "terminationDate",
-      width: 90,
+      width: 120,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
@@ -89,7 +90,7 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       headerName: "Rehired Date",
       field: "reHiredDate",
       colId: "reHiredDate",
-      width: 90,
+      width: 120,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
@@ -103,7 +104,7 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       headerName: "Contribution Years",
       field: "companyContributionYears",
       colId: "companyContributionYears",
-      width: 90,
+      width: 100,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
@@ -113,7 +114,7 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       headerName: "Beginning Balance",
       field: "netBalanceLastYear",
       colId: "netBalanceLastYear",
-      width: 90,
+      width: 120,
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
@@ -124,7 +125,7 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       headerName: "Vested Balance",
       field: "vestedBalanceLastYear",
       colId: "vestedBalanceLastYear",
-      width: 90,
+      width: 120,
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
@@ -135,11 +136,15 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       headerName: "Hours Current Year",
       field: "hoursCurrentYear",
       colId: "hoursCurrentYear",
-      width: 90,
+      width: 120,
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
-      sortable: true
+      sortable: true,
+      valueFormatter: (params) => {
+        const hours = params.value;
+        return formatNumberWithComma(hours);
+      }
     },
     {
       headerName: "Enrollment",
@@ -164,7 +169,7 @@ export const GetDetailColumns = (): ColDef[] => {
       headerName: "Profit Year",
       field: "profitYear",
       colId: "profitYear",
-      width: 60,
+      width: 80,
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
