@@ -12,6 +12,7 @@ import { useLazyGetProfitMasterInquiryMemberQuery } from "reduxstore/api/Inquiry
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
+import "../../styles/employee-details-lightbox.css";
 
 
 interface MasterInquiryEmployeeDetailsProps {
@@ -145,7 +146,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
   ];
 
   return (
-    <>
+    <div className="employee-details-lightbox" style={{ width: '100%' }}>
       <Grid2
         container
         paddingX="24px"
@@ -197,7 +198,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
           </div>
         </Grid2>
       )}
-    </>
+    </div>
   );
 };
 
