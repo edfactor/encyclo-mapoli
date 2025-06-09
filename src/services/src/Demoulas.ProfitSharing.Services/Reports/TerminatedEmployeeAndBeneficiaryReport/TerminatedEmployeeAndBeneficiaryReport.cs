@@ -50,7 +50,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
     {
         var terminatedEmployees = await GetTerminatedEmployees(ctx, request);
         var terminatedWithContributions = GetEmployeesAsMembers(ctx, request, terminatedEmployees);
-        var beneficiaries = GetBeneficiaries(ctx, request);
+        var beneficiaries = GetBeneficiaries(ctx);
         return await CombineEmployeeAndBeneficiarySlices(terminatedWithContributions, beneficiaries, cancellationToken);
     }
 
@@ -90,13 +90,13 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 FirstName = employee.Demographic.ContactInfo.FirstName,
                 MiddleInitial = employee.Demographic.ContactInfo.MiddleName,
                 LastName = employee.Demographic.ContactInfo.LastName,
-                YearsInPs = yip != null ? (yip.Years ?? 0) : (byte)0,
+                YearsInPs = yip != null ? (yip.Years) : (byte)0,
                 TerminationDate = employee.Demographic.TerminationDate,
                 IncomeRegAndExecCurrentYear = payProfit.CurrentIncomeYear + payProfit.IncomeExecutive,
                 TerminationCode = employee.Demographic.TerminationCodeId,
                 ZeroCont = (employee.Demographic.TerminationCodeId == TerminationCode.Constants.Deceased
                     ? ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested
-                    : payProfit.ZeroContributionReasonId ?? 0),
+                    : payProfit.ZeroContributionReasonId != null ? payProfit.ZeroContributionReasonId : 0),
                 EnrollmentId = payProfit.EnrollmentId,
                 Etva = payProfit.Etva,
                 ProfitYear = payProfit.ProfitYear
@@ -106,7 +106,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
     }
 
 #pragma warning disable S1172
-    private IQueryable<MemberSlice> GetBeneficiaries(IProfitSharingDbContext ctx, StartAndEndDateRequest request)
+    private IQueryable<MemberSlice> GetBeneficiaries(IProfitSharingDbContext ctx)
     {
         // This query loads the Beneficiary and then the employee they are related to
         var query = ctx.Beneficiaries

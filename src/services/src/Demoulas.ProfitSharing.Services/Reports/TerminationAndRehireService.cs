@@ -237,7 +237,7 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
                     TerminationDate = temp.member.member.TerminationDate,
                     ReHiredDate = temp.member.member.ReHireDate ?? ReferenceData.DsmMinValue,
                     StoreNumber = temp.member.member.StoreNumber,
-                    CompanyContributionYears = temp.member.yip!.Years ?? 0,
+                    CompanyContributionYears = temp.member.yip!.Years,
                     EnrollmentId = temp.member.member.EnrollmentId,
                     EnrollmentName = temp.member.member.Enrollment!.Name,
                     HoursCurrentYear = temp.member.member.CurrentHoursYear,

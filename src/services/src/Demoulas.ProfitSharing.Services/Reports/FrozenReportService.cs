@@ -891,7 +891,7 @@ public class FrozenReportService : IFrozenReportService
             .GroupBy(item => item.YearsInPlan)
             .Select(group => new BalanceByYearsDetail
             {
-                Years = group.Key ?? 0,
+                Years = group.Key,
                 CurrentBalance = group.Sum(e => (e.CurrentBalance ?? 0)),
                 CurrentBeneficiaryBalance = group.Sum(e => e.IsBeneficiary ? (e.CurrentBalance ?? 0) : 0),
                 CurrentBeneficiaryVestedBalance = group.Sum(e => e.IsBeneficiary ? (e.VestedBalance ?? 0) : 0),

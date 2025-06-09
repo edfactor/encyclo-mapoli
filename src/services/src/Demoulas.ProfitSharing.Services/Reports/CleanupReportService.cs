@@ -249,7 +249,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                 dict = await (
                     from yis in _totalService.GetYearsOfService(ctx, req.ProfitYear)
                     join d in demographics on yis.Ssn equals d.Ssn
-                    select new { d.BadgeNumber, Years = yis.Years ?? 0 }
+                    select new { d.BadgeNumber, Years = yis.Years }
                 ).ToDictionaryAsync(x => x.BadgeNumber, x => x.Years, cancellationToken: cancellationToken);
 
                 return rslt;
