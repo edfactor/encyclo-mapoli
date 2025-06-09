@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Headers;
+﻿using System.Diagnostics;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Channels;
 using Demoulas.ProfitSharing.Common.Contracts.Messaging;
@@ -226,7 +227,7 @@ public static class OracleHcmExtension
             options.Retry.DelayGenerator = args =>
             {
                 var baseDelay = TimeSpan.FromSeconds(2);
-                var exponential = TimeSpan.FromSeconds(Math.Pow(2, args.AttemptNumber));
+                var exponential = TimeSpan.FromMinutes(Math.Pow(2, args.AttemptNumber));
                 var jitter = TimeSpan.FromMilliseconds(random.Next(0, 1000));
                 return new ValueTask<TimeSpan?>(baseDelay + exponential + jitter);
             };
@@ -235,7 +236,10 @@ public static class OracleHcmExtension
         void ConfigureWith401RetryAndBulkhead(HttpStandardResilienceOptions options, HttpResilienceOptions commonOptions)
         {
             ApplyResilienceOptions(options, commonOptions);
-            AddRetryOn401WithJitter(options);
+            if (!Debugger.IsAttached)
+            {
+                AddRetryOn401WithJitter(options);
+            }
         }
 
         services.AddHttpClient<AtomFeedClient>("AtomFeedSync", BuildOracleHcmAuthClient)
