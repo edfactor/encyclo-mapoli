@@ -3,6 +3,7 @@ using Demoulas.Common.Contracts.Configuration;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.Common.Data.Services.Entities.Contexts;
 using Demoulas.Common.Logging.Extensions;
+using Demoulas.ProfitSharing.Common.LogMasking;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.Data.Interceptors;
@@ -41,6 +42,7 @@ builder.Configuration.Bind("Logging:Smart", smartConfig);
 FileSystemLogConfig fileSystemLog = new FileSystemLogConfig();
 builder.Configuration.Bind("Logging:FileSystem", fileSystemLog);
 
+smartConfig.MaskingOperators = [new UnformattedSocialSecurityNumberMaskingOperator()];
 builder.SetDefaultLoggerConfiguration(smartConfig, fileSystemLog);
 
 builder.AddEmployeePayrollSyncService();
