@@ -8,34 +8,34 @@ import {
 } from '@mui/material';
 import { KeyboardArrowDown, KeyboardArrowRight } from '@mui/icons-material';
 
-export interface INestedGridRowData {
+export type INestedGridRowData<T = any> = {
   id: string | number;
   [key: string]: any;
-}
+} & T
 
-export interface INestedGridColumn {
+export interface INestedGridColumn<T = any> {
   key: string;
   label: string;
   align?: 'left' | 'center' | 'right';
   width?: number | string;
-  render?: (value: any, row: INestedGridRowData) => React.ReactNode;
+  render?: (value: any, row: INestedGridRowData<T>) => React.ReactNode;
 }
 
-interface INestedGridRowProps {
-  row: INestedGridRowData;
-  columns: INestedGridColumn[];
-  renderNestedContent: (row: INestedGridRowData, isExpanded: boolean) => React.ReactNode;
-  onRowExpand?: (row: INestedGridRowData, isExpanded: boolean) => void;
+interface INestedGridRowProps<T = any> {
+  row: INestedGridRowData<T>;
+  columns: INestedGridColumn<T>[];
+  renderNestedContent: (row: INestedGridRowData<T>, isExpanded: boolean) => React.ReactNode;
+  onRowExpand?: (row: INestedGridRowData<T>, isExpanded: boolean) => void;
   expandedBackgroundColor: string;
 }
 
-export const NestedGridRow: React.FC<INestedGridRowProps> = ({ 
+export const NestedGridRow = <T,>({ 
   row, 
   columns, 
   renderNestedContent,
   onRowExpand,
   expandedBackgroundColor
-}) => {
+}: INestedGridRowProps<T>) => {
   const [open, setOpen] = useState(false);
 
   const handleToggle = () => {

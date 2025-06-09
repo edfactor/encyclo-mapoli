@@ -12,18 +12,18 @@ import {
 } from '@mui/material';
 import { NestedGridRow, INestedGridRowData, INestedGridColumn } from './NestedGridRow';
 
-export interface INestedGridProps {
-  data: INestedGridRowData[];
-  columns: INestedGridColumn[];
-  renderNestedContent: (row: INestedGridRowData, isExpanded: boolean) => React.ReactNode;
+export interface INestedGridProps<T = any> {
+  data: INestedGridRowData<T>[];
+  columns: INestedGridColumn<T>[];
+  renderNestedContent: (row: INestedGridRowData<T>, isExpanded: boolean) => React.ReactNode;
   title?: string;
   className?: string;
-  onRowExpand?: (row: INestedGridRowData, isExpanded: boolean) => void;
+  onRowExpand?: (row: INestedGridRowData<T>, isExpanded: boolean) => void;
   showTitle?: boolean;
   expandedBackgroundColor?: string;
 }
 
-export const NestedGrid: React.FC<INestedGridProps> = ({ 
+export const NestedGrid = <T,>({ 
   data, 
   columns,
   renderNestedContent,
@@ -32,7 +32,7 @@ export const NestedGrid: React.FC<INestedGridProps> = ({
   onRowExpand,
   showTitle = true,
   expandedBackgroundColor = 'white'
-}) => {
+}: INestedGridProps<T>) => {
   return (
     <Box className={className} sx={{ width: '100%' }}>
       {showTitle && title && (

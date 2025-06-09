@@ -1,41 +1,54 @@
-import { useEffect, useMemo } from "react";
-import { useLazyGetProfitMasterInquiryGroupingQuery } from "reduxstore/api/InquiryApi";
+import { useEffect, useMemo, useState } from "react";
+import { useLazyGetProfitMasterInquiryGroupingQuery, useLazyGetProfitMasterInquiryMemberDetailsQuery } from "reduxstore/api/InquiryApi";
 import { GetMasterInquiryGridColumns } from "./MasterInquiryGridColumns";
 import { Typography, Box, CircularProgress } from "@mui/material";
 import { RootState } from "reduxstore/store";
 import { useSelector } from "react-redux";
-import { MasterInquiryRequest, GroupedProfitSummaryDto } from "reduxstore/types";
+import { MasterInquiryRequest, GroupedProfitSummaryDto, MasterInquiryResponseDto } from "reduxstore/types";
 import { NestedGrid } from "components/DSMNestedGrid/NestedGrid";
 import { INestedGridColumn, INestedGridRowData } from "components/DSMNestedGrid/NestedGridRow";
 import { numberToCurrency, DSMGrid } from "smart-ui-library";
-import { ColDef } from "ag-grid-community";
 
 const MasterInquiryGroupingGrid = ({ searchParams }: { searchParams: MasterInquiryRequest }) => {
     const [getProfitMasterInquiryGrouping, { isLoading: isGroupingLoading }] = useLazyGetProfitMasterInquiryGroupingQuery();
+    const [getMemberDetails, { data: memberDetailsData, isFetching: isFetchingMemberDetails }] = useLazyGetProfitMasterInquiryMemberDetailsQuery();
+    const [expandedRowIds, setExpandedRowIds] = useState<Set<string>>(new Set());
+    const [expandedRowDataMap, setExpandedRowDataMap] = useState<Record<string, MasterInquiryResponseDto[]>>({});
 
-    const searchParamsForQuery = {
-        profitYear: searchParams.profitYear,
-        endProfitYear: searchParams.endProfitYear,
-        sortBy: null,
-        isSortDescending: null,
+    const searchParamsForQuery = useMemo(() => ({
+        ...searchParams,
         pagination: {
             skip: 0,
-            take: 255,
+            take: 25,
             sortBy: "profitYear",
             isSortDescending: true
-        }
-    };
+        },
+        memberType: searchParams.memberType === 0 ? undefined : searchParams.memberType,
+        paymentType: searchParams.paymentType === 0 ? undefined : searchParams.paymentType
+    }), [searchParams]);
 
     useEffect(() => {
         getProfitMasterInquiryGrouping({
             ...searchParamsForQuery,
         });
-    }, [getProfitMasterInquiryGrouping, searchParams]);
+    }, [getProfitMasterInquiryGrouping, searchParamsForQuery]);
+
+    useEffect(() => {
+        if (memberDetailsData && expandedRowIds.size > 0) {
+            const latestExpandedRowId = Array.from(expandedRowIds).pop();
+            if (latestExpandedRowId) {
+                setExpandedRowDataMap(prev => ({
+                    ...prev,
+                    [latestExpandedRowId]: (memberDetailsData as any).results || []
+                }));
+            }
+        }
+    }, [memberDetailsData, expandedRowIds]);
 
 
     const { masterInquiryGroupingData } = useSelector((state: RootState) => state.inquiry);
 
-    const groupingColumns: INestedGridColumn[] = useMemo(() => [
+    const groupingColumns = useMemo((): INestedGridColumn<GroupedProfitSummaryDto>[] => [
         {
             key: 'profitYear',
             label: 'Profit Year',
@@ -114,49 +127,54 @@ const MasterInquiryGroupingGrid = ({ searchParams }: { searchParams: MasterInqui
         }
     ], []);
 
-    const nestedGridData: INestedGridRowData[] = useMemo(() => {
-        if (!masterInquiryGroupingData) return [];
-        
-        return masterInquiryGroupingData.map((item: GroupedProfitSummaryDto) => ({
+    const nestedGridData = useMemo((): INestedGridRowData<GroupedProfitSummaryDto>[] =>
+        masterInquiryGroupingData?.map((item: GroupedProfitSummaryDto) => ({
             id: `${item.profitYear}-${item.monthToDate}`,
             ...item
-        }));
-    }, [masterInquiryGroupingData]);
+        })) || []
+        , [masterInquiryGroupingData]);
 
-    const renderNestedContent = (row: INestedGridRowData, isExpanded: boolean) => {
-        if (!isExpanded) return null;
+    const detailColumns = useMemo(() => GetMasterInquiryGridColumns(), []);
 
-        const detailColumns: ColDef[] = [
-            { field: "badge", headerName: "Badge", width: 80, cellStyle: { textAlign: 'center' } },
-            { field: "name", headerName: "Name", width: 180, flex: 1, minWidth: 150 },
-            { field: "ssn", headerName: "SSN", width: 120, cellStyle: { textAlign: 'center' } },
-            { field: "date", headerName: "Date", width: 100 },
-            { field: "distributionAmount", headerName: "Distribution Amount", width: 150, valueFormatter: (params) => numberToCurrency(params.value), cellStyle: { textAlign: 'right' } },
-            { field: "stateTax", headerName: "State Tax", width: 110, valueFormatter: (params) => numberToCurrency(params.value), cellStyle: { textAlign: 'right' } },
-            { field: "federalTax", headerName: "Federal Tax", width: 110, valueFormatter: (params) => numberToCurrency(params.value), cellStyle: { textAlign: 'right' } },
-            { field: "forfeitAmount", headerName: "Forfeit Amount", width: 130, valueFormatter: (params) => numberToCurrency(params.value), cellStyle: { textAlign: 'right' } },
-            { field: "tc", headerName: "T C", width: 60, cellStyle: { textAlign: 'center' } },
-            { field: "age", headerName: "Age", width: 70, cellStyle: { textAlign: 'center' } },
-            { field: "otherName", headerName: "Other Name", width: 120 },
-            { field: "distribution", headerName: "Distribution", width: 120 }
-        ];
+    const renderNestedContent = (row: INestedGridRowData<GroupedProfitSummaryDto>, isExpanded: boolean) => {
+        const rowId = String(row.id);
 
-        const dummyDetailData = [
-            { badge: "47479", name: "BACHELIER, BRAD R", ssn: "***-**-7423", date: "MM/DD/YYYY", distributionAmount: 15000, stateTax: 750, federalTax: 3000, forfeitAmount: 0, tc: "X", age: 45, otherName: "", distribution: "XX" },
-            { badge: "28294", name: "BRADL, STEVEN", ssn: "***-**-2824", date: "MM/DD/YYYY", distributionAmount: 22000, stateTax: 1100, federalTax: 4400, forfeitAmount: 0, tc: "A", age: 52, otherName: "", distribution: "XX" },
-            { badge: "38744", name: "BRADLEY, ZACHARY W", ssn: "***-**-5744", date: "MM/DD/YYYY", distributionAmount: 8500, stateTax: 425, federalTax: 1700, forfeitAmount: 0, tc: "B", age: 38, otherName: "", distribution: "XX" },
-            { badge: "54863", name: "COCHRAN, BRENDAN E", ssn: "***-**-4861", date: "MM/DD/YYYY", distributionAmount: 12750, stateTax: 637, federalTax: 2550, forfeitAmount: 0, tc: "C", age: 41, otherName: "", distribution: "XX" }
-        ];
+        if (!isExpanded) {
+            if (expandedRowIds.has(rowId)) {
+                setExpandedRowIds(prev => {
+                    const newSet = new Set(prev);
+                    newSet.delete(rowId);
+                    return newSet;
+                });
+                setExpandedRowDataMap(prev => {
+                    const { [rowId]: _, ...rest } = prev;
+                    return rest;
+                });
+            }
+            return null;
+        }
+
+        if (!expandedRowIds.has(rowId)) {
+            setExpandedRowIds(prev => new Set(prev).add(rowId));
+            getMemberDetails({
+                memberType: searchParams.memberType || 0,
+                id: row.profitYear,
+                skip: 0,
+                take: 25,
+                sortBy: "profitYear",
+                isSortDescending: true
+            });
+        }
 
         return (
             <Box sx={{ mx: 0, px: 0, py: 0 }}>
                 <DSMGrid
                     preferenceKey={`master-inquiry-detail-${row.id}`}
-                    isLoading={false}
+                    isLoading={isFetchingMemberDetails && !expandedRowDataMap[rowId]}
                     showColumnControl={false}
                     maxHeight={250}
                     providedOptions={{
-                        rowData: dummyDetailData,
+                        rowData: expandedRowDataMap[rowId] || [],
                         columnDefs: detailColumns,
                         defaultColDef: {
                             resizable: true,
@@ -174,29 +192,31 @@ const MasterInquiryGroupingGrid = ({ searchParams }: { searchParams: MasterInqui
         );
     };
 
-    return (
-        <div style={{ width: '100%' }}>
-            {isGroupingLoading && 
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-                    <CircularProgress />
-                </Box>
-            }
+    if (isGroupingLoading) {
+        return (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                <CircularProgress />
+            </Box>
+        );
+    }
 
-            {masterInquiryGroupingData && masterInquiryGroupingData.length > 0 ? (
-                <NestedGrid 
-                    title={`Master Inquiry (${masterInquiryGroupingData.length} ${masterInquiryGroupingData.length === 1 ? "Record" : "Records"})`}
-                    data={nestedGridData}
-                    columns={groupingColumns}
-                    renderNestedContent={renderNestedContent}
-                    className="w-full"
-                />
-            ) : !isGroupingLoading && masterInquiryGroupingData && masterInquiryGroupingData.length === 0 ? (
-                <Typography variant="body1" sx={{ padding: 2 }}>
-                    No profit grouping data found for the selected criteria.
-                </Typography>
-            ) : null}
-        </div>
-    )
+    if (!masterInquiryGroupingData?.length) {
+        return (
+            <Typography variant="body1" sx={{ padding: 2 }}>
+                No profit grouping data found for the selected criteria.
+            </Typography>
+        );
+    }
+
+    return (
+        <NestedGrid
+            title={`Master Inquiry (${masterInquiryGroupingData.length} ${masterInquiryGroupingData.length === 1 ? "Record" : "Records"})`}
+            data={nestedGridData}
+            columns={groupingColumns}
+            renderNestedContent={renderNestedContent}
+            className="w-full"
+        />
+    );
 }
 
 export default MasterInquiryGroupingGrid;
