@@ -419,6 +419,16 @@ export interface MasterInquiryResponseDto {
   employmentStatus?: string;
 }
 
+export interface GroupedProfitSummaryDto {
+  profitYear: number;
+  monthToDate: number;
+  totalContribution: number;
+  totalEarnings: number;
+  totalForfeiture: number;
+  totalPayment: number;
+  transactionCount: number;
+}
+
 export enum FrozenReportsByAgeRequestType {
   Total = "Total",
   FullTime = "FullTime",

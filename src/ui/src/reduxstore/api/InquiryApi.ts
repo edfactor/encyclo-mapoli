@@ -4,8 +4,10 @@ import {
   MasterInquiryMemberRequest,
   MasterInquiryResponseDto,
   PagedReportResponse,
-  EmployeeDetails
+  EmployeeDetails,
+  GroupedProfitSummaryDto
 } from "../types";
+import { Paged } from "smart-ui-library";
 import { createDataSourceAwareBaseQuery } from "./api";
 import { setMasterInquiryGroupingData } from "reduxstore/slices/inquirySlice";
 
@@ -56,14 +58,13 @@ export const InquiryApi = createApi({
         params: pagination
       })
     }),
-    // url is master-inquiry/grouping - no member type or id
-    getProfitMasterInquiryGrouping: builder.query<PagedReportResponse<MasterInquiryResponseDto>, MasterInquiryRequest>({
+    getProfitMasterInquiryGrouping: builder.query<Paged<GroupedProfitSummaryDto>, MasterInquiryRequest>({
       query: (params) => ({
         url: `master/master-inquiry/grouping`,
         method: "POST",
         body: {
-          badgeNumber: Number(params.badgeNumber?.toString().substring(0, 6)),
-          psnSuffix: Number(params.badgeNumber?.toString().substring(6)),
+          badgeNumber: params.badgeNumber ? Number(params.badgeNumber?.toString().substring(0, 6)) : undefined,
+          psnSuffix: params.badgeNumber && params.badgeNumber.toString().length > 6 ? Number(params.badgeNumber?.toString().substring(6)) : undefined,
           profitYear: params.profitYear,
           endProfitYear: params.endProfitYear,
           startProfitMonth: params.startProfitMonth,
@@ -77,18 +78,18 @@ export const InquiryApi = createApi({
           paymentType: params.paymentType,
           memberType: params.memberType,
           name: params.name,
-          take: params.pagination.take,
-          skip: params.pagination.skip,
           sortBy: params.pagination.sortBy,
-          isSortDescending: params.pagination.isSortDescending
+          isSortDescending: params.pagination.isSortDescending,
+          skip: params.pagination.skip,
+          take: params.pagination.take
         }
       }),
       async onQueryStarted(params: MasterInquiryRequest, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          dispatch(setMasterInquiryGroupingData(data.response.results));
+          dispatch(setMasterInquiryGroupingData(data.results));
         } catch (err) {
-          console.log("Err: " + err);
+          console.log("Error in getProfitMasterInquiryGrouping:", err);
         }
       }
     })

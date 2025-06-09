@@ -6,6 +6,7 @@ using Demoulas.Common.Logging.Extensions;
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Api.Extensions;
 using Demoulas.ProfitSharing.Common.ActivitySources;
+using Demoulas.ProfitSharing.Common.LogMasking;
 using Demoulas.ProfitSharing.Data;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Extensions;
@@ -21,6 +22,7 @@ using Demoulas.Util.Extensions;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using NSwag.Generation.AspNetCore;
 using Scalar.AspNetCore;
+using Serilog.Enrichers.Sensitive;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder();
 
@@ -43,6 +45,7 @@ builder.Configuration.Bind("Logging:Smart", smartConfig);
 FileSystemLogConfig fileSystemLog = new FileSystemLogConfig();
 builder.Configuration.Bind("Logging:FileSystem", fileSystemLog);
 
+smartConfig.MaskingOperators = [new UnformattedSocialSecurityNumberMaskingOperator()];
 builder.SetDefaultLoggerConfiguration(smartConfig, fileSystemLog);
 
 _ = builder.AddSecurityServices();

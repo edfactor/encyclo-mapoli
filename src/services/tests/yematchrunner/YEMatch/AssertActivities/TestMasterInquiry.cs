@@ -6,6 +6,8 @@ using Newtonsoft.Json;
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 namespace YEMatch;
 
+/* Activity which compares SMART master inquiry endpoint to READY master inquery screens (Saved in the OUTFL file.) */
+[SuppressMessage("Major Code Smell", "S125:Sections of code should not be commented out")]
 public class TestMasterInquiry : BaseSqlActivity
 {
     private readonly HttpClient httpClient = new() { Timeout = TimeSpan.FromHours(2) };
@@ -14,68 +16,108 @@ public class TestMasterInquiry : BaseSqlActivity
     {
         string path = Path.Combine(AppContext.BaseDirectory, "OUTFL");
         string content = await File.ReadAllTextAsync(path);
+        List<OutFL> outties = OutFLParser.ParseStringIntoRecords(content);
 
-        List<OutFL> outties = OutFL.ParseStringIntoRecords(content);
+        int profitYear = 2024;
+        int quantity = 50;
 
-        Console.WriteLine($"Count of reference MasterInquiry Screens {outties.Count}");
+        Console.WriteLine($"### Comparision of READY(mtpr) MasterInquiry vs SMART (profitYear={profitYear})");
+        Console.WriteLine("");
+        Console.WriteLine($"Showing the first {quantity} differences of {outties.Count} Master Inquiry screen dumps.");
+        Console.WriteLine("");
 
         int missing = 0;
         int bad = 0;
         int good = 0;
-        int quantity = 1000;
-        foreach (OutFL ready in outties.Slice(0, quantity))
+        Dictionary<string, int> diffsByFieldName = [];
+        foreach (OutFL ready in outties)
         {
-
-            MemberProfitPlanDetails? employeeDetails = await GetEmployeeDetails(ready.OUT_SSN);
+            MemberProfitPlanDetails? employeeDetails = await GetEmployeeDetails(profitYear, ready.OUT_SSN);
             if (employeeDetails == null)
             {
-                OutFL.HeaderIfNeeded();
                 missing++;
-                ready.ConsoleStock("READY");
-                OutFL.ConsoleMissing("SMART");
-            }
-            else
-            {
-                string outSsn = employeeDetails.Ssn;
-                decimal outHrs = employeeDetails.YearToDateProfitSharingHours;
-                int outYears = employeeDetails.YearsInPlan;
-                string outEnrolled = EnrollmentToReady(employeeDetails.EnrollmentId);
-                decimal outBeginBal = employeeDetails.BeginPSAmount;
-                decimal outBeginVest = employeeDetails.BeginVestedAmount;
-                decimal outCurrentBal = employeeDetails.CurrentPSAmount;
-                decimal outVestingPct = employeeDetails.PercentageVested;
-                decimal outVestingAmt = employeeDetails.CurrentVestedAmount;
-                string outErrMesg = string.Join(",", employeeDetails.Missives);
-
-                OutFL smart = new()
+                bad++;
+                if (bad < quantity)
                 {
-                    OUT_SSN = outSsn,
-                    OUT_HRS = outHrs,
-                    OUT_YEARS = outYears,
-                    OUT_ENROLLED = outEnrolled,
-                    OUT_BEGIN_BAL = outBeginBal,
-                    OUT_BEGIN_VEST = outBeginVest,
-                    OUT_CURRENT_BAL = outCurrentBal,
-                    OUT_VESTING_PCT = outVestingPct,
-                    OUT_VESTING_AMT = outVestingAmt,
-                    OUT_ERR_MESG = outErrMesg
-                };
-
-                if (!OutFL.IsSame(ready, smart))
-                {
-                    bad++;
-                    OutFL.PrintComparisonTable(ready, smart);
+                    OutFLPrinter.ConsoleStock("READY", ready);
+                    OutFLPrinter.ConsoleMissing("SMART");
                 }
                 else
                 {
-                    good++;
+                    break;
                 }
+
+                continue;
+            }
+
+            OutFL smart = LoadFromSmart(employeeDetails);
+            if (OutFLComparer.IsSame(ready, smart))
+            {
+                good++;
+                continue;
+            }
+
+            bad++;
+            if (bad < quantity)
+            {
+                OutFLPrinter.PrintComparisonTable(diffsByFieldName, ready, smart);
+            }
+            else
+            {
+                break;
             }
         }
 
-        Console.WriteLine($"Missing: {missing} Bad: {bad} Good: {good} of tested {quantity}");
-
+        DumpColumnStats(missing, bad, good, diffsByFieldName);
         return new Outcome(Name(), Name(), "", OutcomeStatus.Ok, "", null, false);
+    }
+
+    private OutFL LoadFromSmart(MemberProfitPlanDetails employeeDetails)
+    {
+        string outSsn = employeeDetails.Ssn;
+        decimal outHrs = employeeDetails.YearToDateProfitSharingHours;
+        int outYears = employeeDetails.YearsInPlan;
+        string outEnrolled = EnrollmentToReady(employeeDetails.EnrollmentId);
+        decimal outBeginBal = employeeDetails.BeginPSAmount;
+        decimal outBeginVest = employeeDetails.BeginVestedAmount;
+        decimal outCurrentBal = employeeDetails.CurrentPSAmount;
+        decimal outVestingPct = employeeDetails.PercentageVested;
+        decimal outVestingAmt = employeeDetails.CurrentVestedAmount;
+        bool outContLastYear = employeeDetails.ContributionsLastYear;
+        decimal outEtva = employeeDetails.CurrentEtva;
+        string outErrMesg = string.Join(",", employeeDetails.Missives);
+
+        return new()
+        {
+            OUT_SSN = outSsn,
+            OUT_HRS = outHrs,
+            OUT_YEARS = outYears,
+            OUT_ENROLLED = outEnrolled,
+            OUT_BEGIN_BAL = outBeginBal,
+            OUT_BEGIN_VEST = outBeginVest,
+            OUT_CURRENT_BAL = outCurrentBal,
+            OUT_VESTING_PCT = outVestingPct,
+            OUT_VESTING_AMT = outVestingAmt,
+            OUT_CONT_LAST_YEAR = outContLastYear,
+            OUT_ETVA = outEtva,
+            OUT_ERR_MESG = outErrMesg
+        };
+    }
+
+    private static void DumpColumnStats(int missing, int bad, int good, Dictionary<string, int> diffsByFieldName)
+    {
+        Console.WriteLine("");
+        Console.WriteLine($"Missing: {missing} Bad: {bad} Good: {good}");
+        Console.WriteLine("");
+        Console.WriteLine("| Field Name | Differences |");
+        Console.WriteLine("|------------|------------ |");
+
+        foreach (var (field, count) in diffsByFieldName)
+        {
+            Console.WriteLine($"| {field} | {count} |");
+        }
+
+        Console.WriteLine("");
     }
 
     private static string EnrollmentToReady(byte? employeeDetailsEnrollmentId)
@@ -89,7 +131,7 @@ public class TestMasterInquiry : BaseSqlActivity
     }
 
 
-    private async Task<MemberProfitPlanDetails?> GetEmployeeDetails(string ssn)
+    private async Task<MemberProfitPlanDetails?> GetEmployeeDetails(int profitYear, string ssn)
     {
         ApiClient apiClient = SmartActivityFactory.Client!;
 
@@ -101,11 +143,21 @@ public class TestMasterInquiry : BaseSqlActivity
         };
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("*/*"));
 
-        // Console.WriteLine(("Requesting.... "));
-        using HttpResponseMessage response = await httpClient.SendAsync(request);
-        response.EnsureSuccessStatusCode();
+        // Console.WriteLine(("Requesting.... "))
+        string responseBody = "";
+        try
+        {
+            using HttpResponseMessage response = await httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+            responseBody = await response.Content.ReadAsStringAsync();
+        }
+        catch (HttpRequestException ex)
+        {
+            Console.WriteLine($"HTTP request failed for SSN: {ssn}");
+            Console.WriteLine(ex);
+            throw;
+        }
 
-        string responseBody = await response.Content.ReadAsStringAsync();
 
         PaginatedResponseDtoOfMemberDetails jresponse1 = JsonConvert.DeserializeObject<PaginatedResponseDtoOfMemberDetails>(responseBody)!;
         if (jresponse1.Total == 0)
@@ -140,7 +192,7 @@ public class TestMasterInquiry : BaseSqlActivity
                   {
                     "memberType": 1,
                     "id": {{Id}},
-                    "profitYear": 2025
+                    "profitYear": {{profitYear}}
                   }
                   """,
                 Encoding.UTF8, "application/json")

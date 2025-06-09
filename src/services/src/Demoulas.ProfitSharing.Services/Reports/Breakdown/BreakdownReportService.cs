@@ -414,10 +414,9 @@ public sealed class BreakdownReportService : IBreakdownService
         var priorYear = (short)(profitYear - 1);
 
         // Dictionaries ----------------------------------------------------------------
-        var vestingBySsn = await (await _totalService
-            .GetVestingRatio(ctx, profitYear, calInfo.FiscalEndDate))
-            .Where(vr => employeeSsns.Contains(vr.Ssn ?? 0))
-            .ToDictionaryAsync(vr => vr.Ssn ?? 0, vr => vr.Ratio, ct);
+        var vestingBySsn = await _totalService.GetVestingRatio(ctx, profitYear, calInfo.FiscalEndDate)
+            .Where(vr => employeeSsns.Contains(vr.Ssn))
+            .ToDictionaryAsync(vr => vr.Ssn, vr => vr.Ratio, ct);
 
         var balanceBySsnLastYear = await _totalService
             .GetTotalBalanceSet(ctx, priorYear)
@@ -434,7 +433,7 @@ public sealed class BreakdownReportService : IBreakdownService
             ssn,
             balanceBySsnLastYear.GetValueOrDefault(ssn),
             txnsBySsn.GetValueOrDefault(ssn) ?? new InternalProfitDetailDto(),
-            vestingBySsn.GetValueOrDefault(ssn) ?? 0)).ToList();
+            vestingBySsn.GetValueOrDefault(ssn))).ToList();
     }
 
     private static IQueryable<ActiveMemberDto> ApplyStoreManagementFilter(IQueryable<ActiveMemberDto> q) =>
