@@ -57,7 +57,6 @@ const BeneficiaryInquirySearchFilter = () => {
             triggerSearch(beneficiaryRequestDto);
             dispatch(setBeneficiaryRequest(beneficiaryRequestDto));
         }
-        
         console.log({bnumber: badgeNumber, psn: psnSuffix});
     };
 
