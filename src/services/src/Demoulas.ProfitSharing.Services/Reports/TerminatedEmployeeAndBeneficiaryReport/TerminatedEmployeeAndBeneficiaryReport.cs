@@ -205,9 +205,8 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 
         // Build a list of all year details, then group by BadgeNumber, PsnSuffix, Name
         var yearDetailsList = new List<(int BadgeNumber, short PsnSuffix, string? Name, TerminatedEmployeeAndBeneficiaryYearDetailDto YearDetail)>();
-        var unions = memberSliceUnion.ToList();
-
-        foreach (var memberSlice in unions)
+        
+        foreach (var memberSlice in memberSliceUnion)
         {
             var key = new { memberSlice.Ssn, memberSlice.ProfitYear };
             if (!profitDetailsDict.TryGetValue(key, out InternalProfitDetailDto? transactionsThisYear))
@@ -253,7 +252,6 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
 
             if (!IsInteresting(member))
             {
-                memberSliceUnion.Remove(memberSlice);
                 continue;
             }
 
