@@ -78,7 +78,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             join yipTbl in _totalService.GetYearsOfService(ctx, (short)request.EndingDate.Year) on payProfit.Demographic!.Ssn equals yipTbl.Ssn into yipTmp
             from yip in yipTmp.DefaultIfEmpty()
             where payProfit.ProfitYear >= request.BeginningDate.Year && payProfit.ProfitYear <= request.EndingDate.Year
-                    select new MemberSlice
+            select new MemberSlice
             {
                 PsnSuffix = 0,
                 BadgeNumber = employee.Demographic.BadgeNumber,
@@ -98,7 +98,9 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                     : payProfit.ZeroContributionReasonId != null ? payProfit.ZeroContributionReasonId : 0),
                 EnrollmentId = payProfit.EnrollmentId,
                 Etva = payProfit.Etva,
-                ProfitYear = payProfit.ProfitYear
+                ProfitYear = payProfit.ProfitYear,
+                IsOnlyBeneficiary = false,
+                IsBeneficiaryAndEmployee = false
             };
 
         return query;
@@ -119,16 +121,21 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 BadgeNumber = (x.Beneficiary!.Contact!.Ssn == x.Demographic!.Ssn) ? x.Demographic.BadgeNumber : x.Beneficiary!.BadgeNumber,
                 Ssn = x.Beneficiary.Contact!.Ssn,
                 BirthDate = x.Beneficiary.Contact!.DateOfBirth,
+                HoursCurrentYear = 0, // default for beneficiaries
+                EmploymentStatusCode = '\0', // default for beneficiaries
                 FullName = x.Beneficiary.Contact!.ContactInfo.FullName!,
                 FirstName = x.Beneficiary.Contact.ContactInfo.FirstName,
                 LastName = x.Beneficiary.Contact.ContactInfo.LastName,
                 YearsInPs = 10, // Makes function IsInteresting() always return true for beneficiaries.  This is the same value/convention used in READY.
-                TerminationCode = (x.Beneficiary!.Contact!.Ssn == x.Demographic!.Ssn) ? x.Demographic.TerminationCodeId : null,
                 TerminationDate = (x.Beneficiary!.Contact!.Ssn == x.Demographic!.Ssn) ? x.Demographic.TerminationDate : null,
-                ZeroCont = /*6*/ ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested,
+                IncomeRegAndExecCurrentYear = 0, // default for beneficiaries
+                TerminationCode = (x.Beneficiary!.Contact!.Ssn == x.Demographic!.Ssn) ? x.Demographic.TerminationCodeId : null,
+                ZeroCont = ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested,
+                EnrollmentId = 0, // default for beneficiaries
+                Etva = 0, // default for beneficiaries
+                ProfitYear = 0, // default for beneficiaries
                 IsOnlyBeneficiary = true,
-                IsBeneficiaryAndEmployee = (x.Beneficiary!.Contact!.Ssn == x.Demographic!.Ssn),
-                
+                IsBeneficiaryAndEmployee = (x.Beneficiary!.Contact!.Ssn == x.Demographic!.Ssn)
             });
 
         return query;
