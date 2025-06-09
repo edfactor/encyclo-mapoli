@@ -222,102 +222,14 @@ public sealed class TotalService : ITotalService
     /// The date as of which the vesting ratio is being determined.
     /// </param>
     /// <returns>
-    /// An <see cref="IQueryable{T}"/> of <see cref="ParticipantTotalRatioDto"/> containing the calculated vesting ratios
+    /// An <see cref="IQueryable{T}"/> of <see cref="ParticipantTotalRatio"/> containing the calculated vesting ratios
     /// for each participant.
     /// </returns>
-    internal async Task<IQueryable<ParticipantTotalRatioDto>> GetVestingRatio(ProfitSharingReadOnlyDbContext ctx, short profitYear,
+    internal IQueryable<ParticipantTotalRatio> GetVestingRatio(ProfitSharingReadOnlyDbContext ctx, short profitYear,
         DateOnly asOfDate)
     {
 
-        var birthDate65 = asOfDate.AddYears(-65);
-        var beginningOfYear = asOfDate.AddYears(-1).AddDays(1);
-        var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
-
-        var demoInfo = (
-            from d in demographics
-            select new
-            {
-                d.Ssn,
-                d.DateOfBirth,
-                FromBeneficiary = (short)0,
-            }
-        );
-
-        var beneficiaryInfo = (
-            from b in ctx.Beneficiaries
-            join dt in demographics on b.Contact!.Ssn equals dt.Ssn into d_join
-            where !d_join.Any()
-            select new
-            {
-                b.Contact!.Ssn,
-                b.Contact.DateOfBirth,
-                FromBeneficiary = (short)1,
-            }
-        );
-
-        var demoOrBeneficiary = demoInfo.Union(beneficiaryInfo);
-        var hoursWorkedRequirement = ContributionService.MinimumHoursForContribution();
-
-#pragma warning disable S1244 // Floating point numbers should not be tested for equality
-        return (
-            from db in demoOrBeneficiary
-            join dTbl in demographics on db.Ssn equals dTbl.Ssn into dTmp
-            from d in dTmp.DefaultIfEmpty()
-            join ppTbl in ctx.PayProfits on new { Id = (d != null ? d.Id : 0), ProfitYear = profitYear } equals new { ppTbl.Demographic!.Id, ppTbl.ProfitYear } into ppTmp
-            from pp in ppTmp.DefaultIfEmpty()
-            join cyTbl in GetYearsOfService(ctx, profitYear) on db.Ssn equals cyTbl.Ssn into cyTmp
-            from cy in cyTmp.DefaultIfEmpty()
-            select new ParticipantTotalRatioDto
-            {
-                Ssn = db.Ssn,
-                Ratio =
-                    //Beneficiaries are always 100% vested
-                    db.FromBeneficiary == 1 ? 1.0m :
-
-                    //Otherwise, If over 65, and not terminated this year, 100% vested
-                    db.DateOfBirth <= birthDate65 &&
-                        ((d != null && d.TerminationDate == null) || (d != null && d.TerminationDate < beginningOfYear)) ? 1m :
-
-                    //Otherwise, If enrollment has forfeitures, 100%
-                    (pp != null && pp.EnrollmentId ==
-                        Enrollment.Constants.OldVestingPlanHasForfeitureRecords) || (pp != null && pp.EnrollmentId == Enrollment.Constants.NewVestingPlanHasForfeitureRecords) ? 1m :
-
-                    //Otherwise, If deceased, mark for 100% vested
-                    (d != null && d.TerminationCodeId == TerminationCode.Constants.Deceased) ? 1m :
-
-                    //Otherwise, If zero contribution reason is as below, 100% vested 
-                    (pp != null && pp.ZeroContributionReasonId == ZeroContributionReason.Constants
-                        .SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested) ? 1m :
-
-                    //Otherwise, If total years (including the present one) is 0, 1, or 2, 0% Vested
-                    ((pp != null && pp.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions) ? 1 : 0) +
-                        ((pp != null && pp.CurrentHoursYear + pp.HoursExecutive >= hoursWorkedRequirement) ? 1 : 0) + (cy != null ? cy.Years : 0) < 3 ? 0m :
-
-                    //Otherwise, If total years (including the present one) is 3, 20% Vested
-                    ((pp != null && pp.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions) ? 1 : 0) +
-                        ((pp != null && pp.CurrentHoursYear + pp.HoursExecutive >= hoursWorkedRequirement) ? 1 : 0) + (cy != null ? cy.Years : 0) == 3 ? .2m :
-
-                    //Otherwise, If total years (including the present one) is 4, 40% Vested
-                    ((pp != null && pp.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions) ? 1 : 0) +
-                        ((pp != null && pp.CurrentHoursYear + pp.HoursExecutive >= hoursWorkedRequirement) ? 1 : 0) + (cy != null ? cy.Years : 0) == 4 ? .4m :
-
-                    //Otherwise, If total years (including the present one) is 5, 60% Vested
-                    ((pp != null && pp.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions) ? 1 : 0) +
-                        ((pp != null && pp.CurrentHoursYear + pp.HoursExecutive >= hoursWorkedRequirement) ? 1 : 0) + (cy != null ? cy.Years : 0) == 5 ? .6m :
-
-                    //Otherwise, If total years (including the present one) is 6, 80% Vested
-                    ((pp != null && pp.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions) ? 1 : 0) +
-                        ((pp != null && pp.CurrentHoursYear + pp.HoursExecutive >= hoursWorkedRequirement) ? 1 : 0) + (cy != null ? cy.Years : 0) == 6 ? .8m :
-
-                    //Otherwise, If total years (including the present one) is more than 6, 100% Vested
-                    ((pp != null && pp.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions) ? 1 : 0) +
-                        ((pp != null && pp.CurrentHoursYear + pp.HoursExecutive >= hoursWorkedRequirement) ? 1 : 0) + (cy != null ? cy.Years : 0) > 6 ? 1m :
-
-                    //Otherwise, 0% vested
-                    0
-            }
-        );
-#pragma warning restore S1244 // Floating point numbers should not be tested for equality
+        return _embeddedSqlService.GetVestingRatioAlt(ctx, profitYear, asOfDate);
     }
 
     /// <summary>

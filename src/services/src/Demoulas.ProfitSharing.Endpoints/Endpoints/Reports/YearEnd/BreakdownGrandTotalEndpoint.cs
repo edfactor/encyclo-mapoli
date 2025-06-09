@@ -29,10 +29,10 @@ public class BreakdownGrandTotalEndpoint : Endpoint<YearRequest, GrandTotalsBySt
         });
         Group<YearEndGroup>();
 
-        int chacheMinutes = (!(Env.IsTestEnvironment() || Debugger.IsAttached)) ? 15 : 1;
+        int cacheMinutes = (!(Env.IsTestEnvironment() || Debugger.IsAttached)) ? 15 : 1;
 
         Options(o => o.CacheOutput(p =>
-            p.Expire(TimeSpan.FromMinutes(chacheMinutes))           // same value as Cache-Control
+            p.Expire(TimeSpan.FromMinutes(cacheMinutes))           // same value as Cache-Control
                 .SetVaryByQuery("profitYear")));                 // vary key if needed
     }
 
