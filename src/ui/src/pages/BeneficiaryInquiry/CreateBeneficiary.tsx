@@ -16,6 +16,8 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import { useFieldState } from "@mui/x-date-pickers/internals/hooks/useField/useFieldState";
 import SubmitAndReset from "./SubmitAndReset";
+import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
+import { tryddmmyyyyToDate } from "utils/dateUtils";
 
 const schema = yup.object().shape({
     beneficiarySsn: yup.number().required(),
@@ -194,17 +196,17 @@ const CreateBeneficiary = () => {
                             name="dateOfBirth"
                             control={control}
                             render={({ field }) => (
-                                <DatePicker
-                                    {...field}
-                                    value={field.value ? dayjs(field.value) : null}
-                                    onChange={(date) => field.onChange(date?.toDate() ?? null)}
-                                    slotProps={{
-                                        textField: {
-                                            error: !!errors.dateOfBirth,
-                                            helperText: errors.dateOfBirth?.message,
-                                        }
-                                    }}
-                                />
+                                <DsmDatePicker
+                                                id="dateOfBirth"
+                                                onChange={(value: Date | null) => {
+                                                  field.onChange(value || undefined);
+                                                }}
+                                                value={field.value ? tryddmmyyyyToDate(field.value) : null}
+                                                required={false}
+                                                label="End Date"
+                                                disableFuture
+                                                error={errors.dateOfBirth?.message}
+                                              />
                             )}
                         />
                     </Grid2>
