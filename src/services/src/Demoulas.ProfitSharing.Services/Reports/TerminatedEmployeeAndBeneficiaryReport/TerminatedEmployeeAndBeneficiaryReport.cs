@@ -88,7 +88,6 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 EmploymentStatusCode = employee.Demographic.EmploymentStatusId,
                 FullName = employee.Demographic.ContactInfo.FullName,
                 FirstName = employee.Demographic.ContactInfo.FirstName,
-                MiddleInitial = employee.Demographic.ContactInfo.MiddleName,
                 LastName = employee.Demographic.ContactInfo.LastName,
                 YearsInPs = yip != null ? (yip.Years) : (byte)0,
                 TerminationDate = employee.Demographic.TerminationDate,
@@ -122,9 +121,6 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 BirthDate = x.Beneficiary.Contact!.DateOfBirth,
                 FullName = x.Beneficiary.Contact!.ContactInfo.FullName!,
                 FirstName = x.Beneficiary.Contact.ContactInfo.FirstName,
-                MiddleInitial = x.Beneficiary.Contact.ContactInfo.MiddleName != null
-                    ? x.Beneficiary.Contact.ContactInfo.MiddleName.Substring(0, 1)
-                    : string.Empty,
                 LastName = x.Beneficiary.Contact.ContactInfo.LastName,
                 YearsInPs = 10, // Makes function IsInteresting() always return true for beneficiaries.  This is the same value/convention used in READY.
                 TerminationCode = (x.Beneficiary!.Contact!.Ssn == x.Demographic!.Ssn) ? x.Demographic.TerminationCodeId : null,
@@ -142,14 +138,14 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         IQueryable<MemberSlice> beneficiaries, CancellationToken cancellation)
     {
         // NOTE: the server side union fails
-        var benes = await beneficiaries.ToListAsync(cancellation);
-        var employees = await terminatedWithContributions.ToListAsync(cancellation);
-        return benes.Concat(employees)
+        var benes = beneficiaries;
+        var employees = terminatedWithContributions;
+        return await benes.Concat(employees)
             // NOTE: Sort using same character handling that ready uses (ie "Mc" sorts after "ME") aka the Ordinal sort.
             // Failure to use this sort, causes READY and SMART reports to not match.
-            .OrderBy(x => x.FullName, StringComparer.Ordinal)
+            .OrderBy(x => x.FullName)
             .ThenBy(x => x.BadgeNumber)
-            .ToList();
+            .ToListAsync(cancellation);
     }
 
     #endregion
@@ -230,7 +226,6 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 FullName = memberSlice.FullName,
                 FirstName = memberSlice.FirstName,
                 LastName = memberSlice.LastName,
-                MiddleInitial = memberSlice.MiddleInitial?.Length > 1 ? memberSlice.MiddleInitial[..1] : memberSlice.MiddleInitial,
                 Birthday = memberSlice.BirthDate,
                 HoursCurrentYear = memberSlice.HoursCurrentYear,
                 EarningsCurrentYear = memberSlice.IncomeRegAndExecCurrentYear,

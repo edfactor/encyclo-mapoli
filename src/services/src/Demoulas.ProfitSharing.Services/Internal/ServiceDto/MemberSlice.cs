@@ -13,7 +13,6 @@ internal sealed record MemberSlice
     internal char EmploymentStatusCode { get; init; }
     internal string? FullName { get; init; } = string.Empty;
     internal string FirstName { get; init; } = string.Empty;
-    internal string? MiddleInitial { get; init; } = string.Empty;
     internal string LastName { get; init; } = string.Empty;
     internal byte YearsInPs { get; init; }
     internal DateOnly? BirthDate { get; init; }
