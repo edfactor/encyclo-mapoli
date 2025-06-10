@@ -44,7 +44,7 @@ internal sealed class EmployeeFullSyncClient
                 break;
             }
 
-            foreach (var emps in demographics.Employees.Chunk(50))
+            foreach (var emps in demographics.Employees.Chunk(75))
             {
               yield return emps;
             }
@@ -85,7 +85,7 @@ internal sealed class EmployeeFullSyncClient
     private async Task<string> BuildUrl(int offset = 0, long? oracleHcmId = null, CancellationToken cancellationToken = default)
     {
         // Oracle will limit us to 500, but we run the risk of timeout well below that, so we need to be conservative.
-        ushort limit = ushort.Min(50, _oracleHcmConfig.Limit);
+        ushort limit = ushort.Min(75, _oracleHcmConfig.Limit);
         Dictionary<string, string> initialQuery = new Dictionary<string, string>()
         {
             { "limit", $"{limit}" },

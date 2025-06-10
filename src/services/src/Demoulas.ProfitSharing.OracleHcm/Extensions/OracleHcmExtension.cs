@@ -192,17 +192,17 @@ public static class OracleHcmExtension
         {
             CircuitBreakerOptions = new HttpCircuitBreakerStrategyOptions
             {
-                SamplingDuration = TimeSpan.FromMinutes(2),
+                SamplingDuration = TimeSpan.FromMinutes(4),
                 MinimumThroughput = 10, // Add minimum throughput
                 FailureRatio = 0.5 // Add failure ratio
             },
             AttemptTimeoutOptions = new HttpTimeoutStrategyOptions
             {
-                Timeout = TimeSpan.FromMinutes(1)
+                Timeout = TimeSpan.FromMinutes(2)
             },
             TotalRequestTimeoutOptions = new HttpTimeoutStrategyOptions
             {
-                Timeout = TimeSpan.FromMinutes(2)
+                Timeout = TimeSpan.FromMinutes(5)
             }
         };
 
