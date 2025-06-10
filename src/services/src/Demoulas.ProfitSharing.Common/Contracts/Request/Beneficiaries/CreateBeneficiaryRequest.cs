@@ -8,7 +8,6 @@ namespace Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
 public sealed record CreateBeneficiaryRequest
 {
     public int BeneficiaryContactId { get; set; }
-    public int DemographicId { get; set; }
     public int EmployeeBadgeNumber { get; set; }
     public byte? FirstLevelBeneficiaryNumber { get; set; }
     public byte? SecondLevelBeneficiaryNumber { get; set; }
@@ -20,7 +19,6 @@ public sealed record CreateBeneficiaryRequest
     public static CreateBeneficiaryRequest SampleRequest() => new CreateBeneficiaryRequest
     {
         BeneficiaryContactId = 1,
-        DemographicId = 1,
         FirstLevelBeneficiaryNumber = 1,
         SecondLevelBeneficiaryNumber = 2,
         ThirdLevelBeneficiaryNumber = 3,

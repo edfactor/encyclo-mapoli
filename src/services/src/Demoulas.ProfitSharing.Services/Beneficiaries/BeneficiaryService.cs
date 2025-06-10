@@ -39,12 +39,8 @@ public class BeneficiaryService : IBeneficiaryService
             }
             
             var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, false);
-            if (! await demographicQuery.AnyAsync(x => x.Id == req.DemographicId, cancellationToken))
-            {
-                throw new InvalidOperationException("Employee does not exist");
-            }
-            
-            if (!await demographicQuery.AnyAsync(x => x.BadgeNumber == req.EmployeeBadgeNumber, cancellationToken))
+            var demographic = await demographicQuery.SingleOrDefaultAsync(cancellationToken);
+            if (demographic == default)
             {
                 throw new InvalidOperationException("Employee Badge does not exist");
             }
@@ -76,7 +72,7 @@ public class BeneficiaryService : IBeneficiaryService
                 Id = 0,
                 BadgeNumber = req.EmployeeBadgeNumber,
                 PsnSuffix = psnSuffix,
-                DemographicId = req.DemographicId,
+                DemographicId = demographic.Id,
                 Contact = beneficiaryContact,
                 BeneficiaryContactId = req.BeneficiaryContactId,
                 Relationship = req.Relationship,
@@ -96,7 +92,7 @@ public class BeneficiaryService : IBeneficiaryService
                 BeneficiaryId = beneficiary.Id,
                 PsnSuffix = psnSuffix,
                 EmployeeBadgeNumber = req.EmployeeBadgeNumber,
-                DemographicId = req.DemographicId,
+                DemographicId = demographic.Id,
                 BeneficiaryContactId = beneficiaryContact.Id,
                 Relationship = beneficiary.Relationship,
                 KindId = beneficiary.KindId,
