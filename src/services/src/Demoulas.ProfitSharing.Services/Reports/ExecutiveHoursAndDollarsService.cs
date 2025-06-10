@@ -40,20 +40,30 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
                 .Include(p => p.Demographic)
                 .ThenInclude(d => d!.EmploymentStatus)
                 .AsQueryable();
-            if (request.HasExecutiveHoursAndDollars.HasValue && request.HasExecutiveHoursAndDollars.Value)
+
+            if (request.HasExecutiveHoursAndDollars.HasValue && request.HasExecutiveHoursAndDollars.Value && request.IsMonthlyPayroll.HasValue && request.IsMonthlyPayroll.Value)
             {
-                query = query.Where(p => p.HoursExecutive > 0 || p.IncomeExecutive > 0);
+                query = query.Where(p => (p.HoursExecutive > 0 || p.IncomeExecutive > 0) || (p.Demographic!.PayFrequencyId == PayFrequency.Constants.Monthly));
+            } 
+            else
+            {
+                if (request.HasExecutiveHoursAndDollars.HasValue && request.HasExecutiveHoursAndDollars.Value)
+                {
+                    query = query.Where(p => p.HoursExecutive > 0 || p.IncomeExecutive > 0);
+                }
+                // Executives often have a pay frequency value of 2
+                if (request.IsMonthlyPayroll.HasValue && request.IsMonthlyPayroll.Value)
+                {
+                    query = query.Where(pp => pp.Demographic!.PayFrequencyId == PayFrequency.Constants.Monthly);
+                }
             }
+
+            
             if (request.BadgeNumber.HasValue)
             {
                 query = query.Where(pp => pp.Demographic!.BadgeNumber == request.BadgeNumber);
             }
             
-            // Executives often have a pay frequency value of 2
-            if (request.IsMonthlyPayroll.HasValue && request.IsMonthlyPayroll.Value) {
-                query = query.Where(pp => pp.Demographic!.PayFrequencyId == PayFrequency.Constants.Monthly);
-            }
-
             if (request.Ssn!= null)
             {
                 query = query.Where(pp => pp.Demographic!.Ssn == request.Ssn);
