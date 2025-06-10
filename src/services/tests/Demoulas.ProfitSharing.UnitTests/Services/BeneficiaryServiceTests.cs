@@ -30,16 +30,9 @@ public sealed class BeneficiaryServiceTests : ApiTestBase<Program>
         var req = UpdateBeneficiaryRequest.SampleRequest();
         req.Id = _beneficiary.Id;
         req.Relationship = "2nd Cousin";
-        req.BeneficiarySsn = null;
 
         await _service.UpdateBeneficiary(req, CancellationToken.None);
         _beneficiary.Relationship.ShouldBe("2nd Cousin");
         _beneficiary.Contact.Ssn.ShouldBe(initialSsn);
-
-        int newSsn = 999887777;
-        req.BeneficiarySsn = newSsn;
-        await _service.UpdateBeneficiary(req, CancellationToken.None);
-        _beneficiary.Contact.Ssn.ShouldBe(newSsn);
-
     }
 }
