@@ -39,7 +39,7 @@ public class BeneficiaryService : IBeneficiaryService
             }
             
             var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, false);
-            var demographic = await demographicQuery.SingleOrDefaultAsync(cancellationToken);
+            var demographic = await demographicQuery.Where(x=>x.BadgeNumber == req.EmployeeBadgeNumber).SingleOrDefaultAsync(cancellationToken);
             if (demographic == default)
             {
                 throw new InvalidOperationException("Employee Badge does not exist");
