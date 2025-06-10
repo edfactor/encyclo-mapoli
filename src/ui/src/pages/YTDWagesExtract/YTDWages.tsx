@@ -1,13 +1,13 @@
 import { Divider } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { useRef, useState } from "react";
+import { useSelector } from "react-redux";
 import { useLazyGetEmployeeWagesForYearQuery } from "reduxstore/api/YearsEndApi";
-import { DSMAccordion, ISortParams, Page } from "smart-ui-library";
+import { RootState } from "reduxstore/store";
+import { DSMAccordion, Page } from "smart-ui-library";
 import YTDWagesGrid from "./YTDWagesGrid";
 import YTDWagesSearchFilter from "./YTDWagesSearchFilter";
-import StatusDropdownActionNode from "components/StatusDropdownActionNode";
-import { useSelector } from "react-redux";
-import { RootState } from "reduxstore/store";
 
 const YTDWages: React.FC = () => {
   const [triggerSearch] = useLazyGetEmployeeWagesForYearQuery();

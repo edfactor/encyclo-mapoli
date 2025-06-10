@@ -73,7 +73,7 @@ const YTDWagesSearchFilter: React.FC<YTDWagesSearchFilterProps> = ({ setInitialS
         <div className="search-buttons flex mt-5 justify-start">
           <Button
             variant="contained"
-            disabled={false || isFetching}
+            disabled={isFetching}
             data-testid="searchButton"
             type="submit"
             onClick={doSearch}
