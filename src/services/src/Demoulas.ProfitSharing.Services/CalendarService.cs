@@ -1,22 +1,22 @@
-﻿using Demoulas.Common.Contracts.Contracts.Response;
+﻿using System.Text.Json;
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Services.Interfaces;
+using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Hosting;
-using System.Text.Json;
 
 namespace Demoulas.ProfitSharing.Services;
 /// <summary>
 /// Hosted service for calendar operations, periodically refreshing calendar data in distributed cache.
 /// </summary>
-public sealed class CalendarService : BackgroundService, ICalendarService
+public sealed class CalendarService : ICalendarService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly IAccountingPeriodsService _accountingPeriodsService;
     private readonly IDistributedCache _distributedCache;
-    private readonly TimeSpan _refreshInterval = TimeSpan.FromHours(2); // Every two hours refresh
+    private readonly TimeSpan _refreshInterval = TimeSpan.FromHours(4); // Every two hours refresh
     private const string YearDatesCacheKey = "CalendarService_YearDates";
 
     public CalendarService(IProfitSharingDataContextFactory dataContextFactory, IAccountingPeriodsService accountingPeriodsService, IDistributedCache distributedCache)
@@ -24,27 +24,6 @@ public sealed class CalendarService : BackgroundService, ICalendarService
         _dataContextFactory = dataContextFactory;
         _accountingPeriodsService = accountingPeriodsService;
         _distributedCache = distributedCache;
-    }
-
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            await RefreshCacheAsync(stoppingToken);
-            await Task.Delay(_refreshInterval, stoppingToken);
-        }
-    }
-
-    private async Task RefreshCacheAsync(CancellationToken cancellationToken)
-    {
-        var now = DateTimeOffset.UtcNow;
-        var years = Enumerable.Range(now.Year - 1, 7).Select(y => (short)y);
-        foreach (var year in years)
-        {
-            var yearDates = await _dataContextFactory.UseReadOnlyContext(c => _accountingPeriodsService.GetYearStartAndEndAccountingDatesAsync(c, year, cancellationToken));
-            var serialized = JsonSerializer.SerializeToUtf8Bytes(yearDates);
-            await _distributedCache.SetAsync($"{YearDatesCacheKey}_{year}", serialized, new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = _refreshInterval }, cancellationToken);
-        }
     }
 
     public Task<DateOnly> FindWeekendingDateFromDateAsync(DateOnly dateTime, CancellationToken cancellationToken = default)
@@ -61,6 +40,73 @@ public sealed class CalendarService : BackgroundService, ICalendarService
         {
             return JsonSerializer.Deserialize<CalendarResponseDto>(cached)!;
         }
-        return await _dataContextFactory.UseReadOnlyContext(c => _accountingPeriodsService.GetYearStartAndEndAccountingDatesAsync(c, calendarYear, cancellationToken));
+
+        short minCalendarYear = (short)ReferenceData.DsmMinValue.Year;
+        if (calendarYear < minCalendarYear)
+        {
+            throw new ArgumentOutOfRangeException(nameof(calendarYear),
+                $"Calendar Year value must be greater than {ReferenceData.DsmMinValue.Year}");
+        }
+
+        var returnValue = await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        {
+            var fiscalDates = await ctx.AccountingPeriods
+                .Where(r => r.WeekendingDate >= new DateOnly(calendarYear, 1, 1) &&
+                            (r.WeekNo == 1 || r.WeekNo >= 52)).GroupBy(r => 1) // Group all records to fetch min and max in one query
+                .Select(g => new
+                {
+                    StartingDate = g.Min(r => r.WeekendingDate),
+                    EndingDate = g.Where(r => r.Period == 12)
+                        .OrderByDescending(r => r.WeekNo)
+                        .Select(r => r.WeekendingDate)
+                        .FirstOrDefault()
+                })
+                .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+
+            if (fiscalDates == null || fiscalDates.EndingDate == default || fiscalDates.StartingDate == default)
+            {
+                var startingDate = fiscalDates?.StartingDate ?? DateOnly.MinValue;
+                var endingDate = fiscalDates?.EndingDate ?? DateOnly.MinValue;
+
+                // Adjust startingDate to the first Sunday on or after the date if it's null or MinValue
+                if (startingDate == DateOnly.MinValue || startingDate == default)
+                {
+                    startingDate = AdjustToNextSunday(new DateOnly(calendarYear, 01, 01));
+                }
+
+                // Adjust endingDate to the first Saturday on or after the date if it's null or MinValue
+                if (endingDate == DateOnly.MinValue || endingDate == default)
+                {
+                    endingDate = AdjustToNextSaturday(new DateOnly(calendarYear, 12, 31));
+                }
+
+                fiscalDates = new { StartingDate = startingDate, EndingDate = endingDate };
+            }
+
+            return new CalendarResponseDto { FiscalBeginDate = fiscalDates.StartingDate, FiscalEndDate = fiscalDates.EndingDate };
+        });
+
+        var serialized = JsonSerializer.SerializeToUtf8Bytes(returnValue);
+        await _distributedCache.SetAsync(cacheKey, serialized, new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = _refreshInterval },
+            cancellationToken);
+        return returnValue;
+    }
+
+    private static DateOnly AdjustToNextSunday(DateOnly date)
+    {
+        while (date.DayOfWeek != DayOfWeek.Sunday)
+        {
+            date = date.AddDays(1);
+        }
+        return date;
+    }
+
+    private static DateOnly AdjustToNextSaturday(DateOnly date)
+    {
+        while (date.DayOfWeek != DayOfWeek.Saturday)
+        {
+            date = date.AddDays(1);
+        }
+        return date;
     }
 }

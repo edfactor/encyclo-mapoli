@@ -62,7 +62,6 @@ public static class ServicesExtension
         _ = builder.Services.AddSingleton<IFakeSsnService, FakeSsnService>();
         _ = builder.Services.AddSingleton<IAccountingPeriodsService, AccountingPeriodsService>();
         _ = builder.Services.AddSingleton<ICalendarService, CalendarService>();
-        _ = builder.Services.AddHostedService<CalendarService>();
 
         _ = builder.Services.AddScoped<IProfitShareUpdateService, ProfitShareUpdateService>();
         _ = builder.Services.AddScoped<IInternalProfitShareUpdateService, ProfitShareUpdateService>();
