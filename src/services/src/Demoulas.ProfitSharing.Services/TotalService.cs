@@ -150,20 +150,11 @@ public sealed class TotalService : ITotalService
     /// The employee year for which the total years of service are to be returned.
     /// </param>
     /// <returns>
-    /// An <see cref="IQueryable{T}"/> of <see cref="ParticipantTotalYearsDto"/> containing the SSN and total years of service for each participant.
+    /// An <see cref="IQueryable{T}"/> of <see cref="ParticipantTotalYear"/> containing the SSN and total years of service for each participant.
     /// </returns>
-    internal IQueryable<ParticipantTotalYearsDto> GetYearsOfService(IProfitSharingDbContext ctx, short profitYear)
+    internal IQueryable<ParticipantTotalYear> GetYearsOfService(IProfitSharingDbContext ctx, short profitYear)
     {
-        return
-                (from pdx in
-                     (from pd in ctx.ProfitDetails
-                      where pd.ProfitYear <= profitYear
-                      group pd by new { pd.Ssn, pd.ProfitYear } into pdGrp
-                      select new { pdGrp.Key.Ssn, pdGrp.Key.ProfitYear, YearsOfServiceCredit = pdGrp.Max(x => x.YearsOfServiceCredit) }
-                     ) // Get the max value per year, and use that.  This is so that if a year has more than one row, we're only counting the max value for that year.
-                 group pdx by pdx.Ssn into pdxGrp
-                 select new ParticipantTotalYearsDto() { Ssn = pdxGrp.Key, Years = (byte)pdxGrp.Sum(x => x.YearsOfServiceCredit) }
-                );
+        return _embeddedSqlService.GetYearsOfServiceAlt(ctx, profitYear);
     }
 
     /// <summary>

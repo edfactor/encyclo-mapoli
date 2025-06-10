@@ -154,10 +154,10 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
 
         var yearsOfServiceQuery = _totalService.GetYearsOfService(context, (short)req.EndingDate.Year);
         var demo = await _demographicReaderService.BuildDemographicQuery(context);
-        
+
         var query = demo
             .Join(
-                context.PayProfits.Include(e=> e.Enrollment)
+                context.PayProfits.Include(e => e.Enrollment)
                     .Where(x => x.ProfitYear >= beginning.Year && x.ProfitYear <= ending.Year), // Table to join with (PayProfit)
                 demographics => demographics.Id, // Primary key selector from Demographics
                 payProfit => payProfit.DemographicId, // Foreign key selector from PayProfit
@@ -214,17 +214,13 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
             )
             .SelectMany(
                 temp => temp.yipGroup.DefaultIfEmpty(),
-                (temp, yip) => new 
-                {
-                    temp.member,
-                    yip
-                }
+                (temp, yip) => new { temp.member, yip }
             )
             .GroupJoin(
-                _totalService.TotalVestingBalance(context, (short)(beginning.Year -1), ending),
+                _totalService.TotalVestingBalance(context, (short)(beginning.Year - 1), ending),
                 member => member.member.Ssn,
                 tot => tot.Ssn,
-                (member, tot) => new { member, tot}
+                (member, tot) => new { member, tot }
             )
             .SelectMany(
                 temp => temp.tot.DefaultIfEmpty(),
@@ -237,7 +233,7 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
                     TerminationDate = temp.member.member.TerminationDate,
                     ReHiredDate = temp.member.member.ReHireDate ?? ReferenceData.DsmMinValue,
                     StoreNumber = temp.member.member.StoreNumber,
-                    CompanyContributionYears = temp.member.yip!.Years ?? 0,
+                    CompanyContributionYears = temp.member.yip!.Years,
                     EnrollmentId = temp.member.member.EnrollmentId,
                     EnrollmentName = temp.member.member.Enrollment!.Name,
                     HoursCurrentYear = temp.member.member.CurrentHoursYear,
@@ -250,9 +246,7 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
                     ProfitYear = temp.member.member.ProfitYear,
                     ProfitCodeId = temp.member.member.ProfitCodeId
                 }
-            )
-            .OrderBy(m => m.BadgeNumber)
-            .ThenBy(m => m.FullName);
+            );
 
         return query;
     }

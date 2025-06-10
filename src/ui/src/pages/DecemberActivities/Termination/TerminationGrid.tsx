@@ -228,7 +228,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
           <DSMGrid
             preferenceKey={"QPREV-PROF"}
             handleSortChanged={sortEventHandler}
-            maxHeight={1000}
+            maxHeight={800}
             providedOptions={{
               rowData: gridData,
               columnDefs: columnDefs,

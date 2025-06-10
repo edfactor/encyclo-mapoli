@@ -105,7 +105,7 @@ public class TotalServiceIntegrationTests : PristineBaseTest
                     x => x.tots.DefaultIfEmpty(), // Left join behavior, handles nulls on the right side
                     (x, tot) => new
                     {
-                        BadgeNumber = x.p.Demographic!.BadgeNumber, Years = (int)(tot == null ? 0 : (tot.Years == null) ? 0 : tot.Years) // Handle missing Years values safely
+                        BadgeNumber = x.p.Demographic!.BadgeNumber, Years = (tot == null ? 0 : tot.Years) // Handle missing Years values safely
                     }
                 )
                 .ToDictionaryAsync(
