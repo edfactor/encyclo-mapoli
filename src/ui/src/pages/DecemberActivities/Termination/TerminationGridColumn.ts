@@ -21,11 +21,12 @@ export const GetTerminationColumns = (): ColDef[] => {
       headerName: "Name",
       field: "name",
       colId: "name",
-      width: 300,
+      width: 200,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
-      sortable: true
+      sortable: true,
+      flex: 1,
     }
   ];
 };
@@ -42,7 +43,6 @@ export const GetDetailColumns = (): ColDef[] => {
       cellClass: "right-align",
       resizable: true,
       sortable: false,
-      valueFormatter: (params) => (params.value == null || params.value === undefined || params.value === "") ? "N/A" : params.value
     },
     {
       headerName: "Beginning Balance",
@@ -54,12 +54,12 @@ export const GetDetailColumns = (): ColDef[] => {
       resizable: true,
       sortable: false,
       valueFormatter: agGridNumberToCurrency
-    },
+    },     
     {
       headerName: "Beneficiary Allocation",
       field: "beneficiaryAllocation",
       colId: "beneficiaryAllocation",
-      width: 125,
+      width: 150,
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
