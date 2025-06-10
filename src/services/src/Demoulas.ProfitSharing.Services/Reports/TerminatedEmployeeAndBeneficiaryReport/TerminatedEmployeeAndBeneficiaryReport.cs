@@ -141,15 +141,20 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         return query;
     }
 
-    private static async Task<List<MemberSlice>> CombineEmployeeAndBeneficiarySlices(IQueryable<MemberSlice> terminatedWithContributions,
+    private static Task<List<MemberSlice>> CombineEmployeeAndBeneficiarySlices(IQueryable<MemberSlice> terminatedWithContributions,
         IQueryable<MemberSlice> beneficiaries, CancellationToken cancellation)
     {
         // NOTE: the server side union fails
         var benes = beneficiaries;
-        var employees = terminatedWithContributions;
-        return await benes.Concat(employees)
-            // NOTE: Sort using same character handling that ready uses (ie "Mc" sorts after "ME") aka the Ordinal sort.
-            // Failure to use this sort, causes READY and SMART reports to not match.
+        var employees = terminatedWithContributions.Where(member => ((member.EnrollmentId == Enrollment.Constants.NotEnrolled ||
+                                                                            member.EnrollmentId == Enrollment.Constants.OldVestingPlanHasContributions ||
+                                                                            member.EnrollmentId == Enrollment.Constants.OldVestingPlanHasForfeitureRecords)
+                                                                           && member.YearsInPs > 2)
+                                                                          ||
+                                                                          ((member.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions ||
+                                                                            member.EnrollmentId == Enrollment.Constants.NewVestingPlanHasForfeitureRecords)
+                                                                           && member.YearsInPs > 1));
+        return benes.Concat(employees)
             .OrderBy(x => x.FullName)
             .ThenBy(x => x.BadgeNumber)
             .ToListAsync(cancellation);
