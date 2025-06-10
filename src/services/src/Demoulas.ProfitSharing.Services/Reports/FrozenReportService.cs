@@ -962,20 +962,23 @@ public class FrozenReportService : IFrozenReportService
                     x.ContactInfo.FirstName,
                     x.ContactInfo.LastName,
                     x.BadgeNumber,
+                    PsnSuffix = (short)0,
                     DemographicId = x.Id,
                     IsEmployee = true,
                     x.StoreNumber
                 });
-            var beneficiaryBase = ctx.BeneficiaryContacts
+            var beneficiaryBase = ctx.Beneficiaries
+                
 #pragma warning disable DSMPS001
-                .Where(x => !ctx.Demographics.Any(d => d.Ssn == x.Ssn))
+                .Where(x => !ctx.Demographics.Any(d => d.Ssn == x.Contact!.Ssn))
 #pragma warning restore DSMPS001
                 .Select(x => new
                 {
-                    x.Ssn,
-                    x.ContactInfo.FirstName,
-                    x.ContactInfo.LastName,
-                    BadgeNumber = 0,
+                    x.Contact!.Ssn,
+                    x.Contact.ContactInfo.FirstName,
+                    x.Contact.ContactInfo.LastName,
+                    x.BadgeNumber,
+                    x.PsnSuffix,
                     DemographicId = 0,
                     IsEmployee = false,
                     StoreNumber = (short)0
@@ -1001,6 +1004,7 @@ public class FrozenReportService : IFrozenReportService
                 select new
                 {
                     m.BadgeNumber,
+                    m.PsnSuffix,
                     m.FirstName,
                     m.LastName,
                     m.StoreNumber,
@@ -1030,6 +1034,7 @@ public class FrozenReportService : IFrozenReportService
             var resp = baseQuery.Select(x => new UpdateSummaryReportDetail()
             {
                 BadgeNumber = x.BadgeNumber,
+                PsnSuffix = x.PsnSuffix,
                 StoreNumber = x.StoreNumber,
                 Name = $"{x.LastName}, {x.FirstName}",
                 IsEmployee = x.IsEmployee,

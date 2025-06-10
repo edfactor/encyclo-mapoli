@@ -1,4 +1,4 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
 
 import {
   addBadgeNumberToUpdateAdjustmentSummary,
@@ -49,7 +49,6 @@ import {
   setVestedAmountsByAge,
   setYearEndProfitSharingReport
 } from "reduxstore/slices/yearsEndSlice";
-import { RootState } from "reduxstore/store";
 import {
   BalanceByAge,
   BalanceByYears,
@@ -75,11 +74,16 @@ import {
   EmployeeWagesForYearRequestDto,
   ExecutiveHoursAndDollars,
   ExecutiveHoursAndDollarsRequestDto,
+  ForfeitureAdjustmentDetail,
+  ForfeitureAdjustmentRequest,
+  ForfeitureAdjustmentResponse,
+  ForfeitureAdjustmentUpdateRequest,
   ForfeituresAndPoints,
   ForfeituresByAge,
   FrozenProfitYearRequest,
   FrozenReportsByAgeRequest,
   FrozenReportsForfeituresAndPointsRequest,
+  GrandTotalsByStoreResponseDto,
   GrossWagesReportDto,
   GrossWagesReportResponse,
   MilitaryAndRehireForfeiture,
@@ -97,7 +101,6 @@ import {
   ProfitSharingLabelsRequest,
   ProfitYearRequest,
   StartAndEndDateRequest,
-  TerminationRequest,
   TerminationResponse,
   Under21BreakdownByStoreRequest,
   Under21BreakdownByStoreResponse,
@@ -110,19 +113,14 @@ import {
   VestedAmountsByAge,
   YearEndProfitSharingReportRequest,
   YearEndProfitSharingReportResponse,
-  YearEndProfitSharingReportSummaryResponse,
-  ForfeitureAdjustmentRequest,
-  ForfeitureAdjustmentResponse,
-  ForfeitureAdjustmentUpdateRequest,
-  ForfeitureAdjustmentDetail, GrandTotalsByStoreResponseDto
+  YearEndProfitSharingReportSummaryResponse
 } from "reduxstore/types";
-import { tryddmmyyyyToDate } from "../../utils/dateUtils";
 import { Paged } from "smart-ui-library";
-import { createDataSourceAwareBaseQuery, url } from "./api";
+import { createDataSourceAwareBaseQuery } from "./api";
 
 import {
-  setForfeitureAdjustmentData,
-  clearForfeitureAdjustmentData
+  clearForfeitureAdjustmentData,
+  setForfeitureAdjustmentData
 } from "reduxstore/slices/forfeituresAdjustmentSlice";
 
 
