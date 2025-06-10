@@ -84,7 +84,6 @@ const Pay450Summary = () => {
 
     const onSearch = (data: ProfitYearSearch) => {
         setInitialSearchLoaded(true);
-        console.log("Huh");
         getUpdateSummary({
             profitYear: data.profitYear, pagination: {
                 skip: 0, take: 255,

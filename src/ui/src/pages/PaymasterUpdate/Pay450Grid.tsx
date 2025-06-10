@@ -78,11 +78,12 @@ const Pay450Grid: React.FC<Pay450GridProps> = ({
 
   const gridData = useMemo(() => {
     if (!updateSummary?.response?.results) return [];
-    
+
     return updateSummary.response.results.map(employee => ({
-      badge: employee.badgeNumber,
+      badgeNumber: employee.badgeNumber,
+      psnSuffix: employee.psnSuffix,
       employeeName: employee.name,
-      store: employee.storeNumber,
+      storeNumber: employee.storeNumber === 0 ? "-" : employee.storeNumber,
       psAmountOriginal: employee.before.profitSharingAmount,
       psVestedOriginal: employee.before.vestedProfitSharingAmount,
       yearsOriginal: employee.before.yearsInPlan,

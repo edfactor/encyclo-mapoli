@@ -6,14 +6,24 @@ export const GetPay450GridColumns = (navFunction: (badgeNumber: string) => void)
   return [
     {
       headerName: "Badge",
-      field: "badge",
-      colId: "badge",
+      field: "badgeNumber",
+      colId: "badgeNumber",
       minWidth: 100,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
       sortable: true,
-      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badge, navFunction)
+      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber, navFunction)
+    },
+    {
+      headerName: "PSN Suffix",
+      field: "psnSuffix",
+      colId: "psnSuffix",
+      minWidth: 100,
+      headerClass: "left-align",
+      cellClass: "left-align",
+      resizable: true,
+      sortable: true,
     },
     {
       headerName: "Name",
@@ -27,8 +37,8 @@ export const GetPay450GridColumns = (navFunction: (badgeNumber: string) => void)
     },
     {
       headerName: "Store",
-      field: "store",
-      colId: "store",
+      field: "storeNumber",
+      colId: "storeNumber",
       minWidth: 80,
       headerClass: "right-align",
       cellClass: "right-align",

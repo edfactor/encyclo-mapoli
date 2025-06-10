@@ -23,7 +23,7 @@ public sealed class UpdateBeneficiaryEndpoint : Endpoint<UpdateBeneficiaryReques
         Put("/");
         Summary(s =>
         {
-            s.Summary = "Updates a beneficiary and its contact info";
+            s.Summary = "Updates beneficiary information";
             s.ExampleRequest = UpdateBeneficiaryRequest.SampleRequest();
         });
         Group<BeneficiariesGroup>();

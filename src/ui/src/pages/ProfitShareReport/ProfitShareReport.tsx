@@ -1,18 +1,17 @@
-import { Box, Divider, Typography, CircularProgress, Button } from "@mui/material";
+import { Box, Button, CircularProgress, Divider, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
-import DSMCollapsedAccordion from "components/DSMCollapsedAccordion";
 import ProfitShareTotalsDisplay from "components/ProfitShareTotalsDisplay";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useLazyGetYearEndProfitSharingReportQuery, useFinalizeReportMutation } from "reduxstore/api/YearsEndApi";
+import { useFinalizeReportMutation, useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
 import { setYearEndProfitSharingReportQueryParams } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
-import { Page, ISortParams, SmartModal } from "smart-ui-library";
-import { CAPTIONS} from "../../constants";
-import ProfitShareReportGrid from "./ProfitShareReportGrid";
+import { ISortParams, Page, SmartModal } from "smart-ui-library";
 import ReportSummary from "../../components/ReportSummary";
+import { CAPTIONS } from "../../constants";
+import ProfitShareReportGrid from "./ProfitShareReportGrid";
 
 const ProfitShareReport = () => {
   const [pageNumber, setPageNumber] = useState(0);

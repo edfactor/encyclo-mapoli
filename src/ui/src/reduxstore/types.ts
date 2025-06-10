@@ -1094,6 +1094,7 @@ export interface UpdateSummaryRequest extends ProfitYearRequest {
 export interface UpdateSummaryEmployee {
   badgeNumber: number;
   storeNumber: number;
+  psnSuffix: number;
   name: string;
   isEmployee: boolean;
   before: {
