@@ -1,5 +1,6 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Request.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
@@ -71,5 +72,15 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
         );
 
         return beneficiary;
+    }
+
+    public async Task<BeneficiaryTypesResponseDto> GetBeneficiaryTypes(BeneficiaryTypesRequestDto beneficiaryTypesRequestDto, CancellationToken cancellation)
+    {
+        var result = await _dataContextFactory.UseReadOnlyContext(async context =>
+        {
+            return context.BeneficiaryTypes.Select(x => new BeneficiaryTypeDto { Id = x.Id, Name = x.Name }).ToListAsync();
+        });
+
+        return new BeneficiaryTypesResponseDto() { BeneficiaryTypeList = result.Result };
     }
 }

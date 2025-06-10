@@ -37,6 +37,7 @@ public class ProfitSharingReadOnlyDbContext : ReadOnlyOracleDbContext<ProfitShar
     public virtual DbSet<TaxCode> TaxCodes { get; set; }
     public virtual DbSet<Beneficiary> Beneficiaries { get; set; }
     public virtual DbSet<BeneficiaryContact> BeneficiaryContacts { get; set; }
+    public virtual DbSet<BeneficiaryType> BeneficiaryTypes { get; set; }
     public virtual DbSet<PayProfit> PayProfits { get; set; }
     public virtual DbSet<Distribution> Distributions { get; set; }
     public virtual DbSet<DistributionPayee> DistributionPayees { get; set; }
