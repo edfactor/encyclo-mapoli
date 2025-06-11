@@ -94,7 +94,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     phoneNumber,
     workLocation
   } = details;
-
+  
   const enrolled = getEnrolledStatus(enrollmentId);
   const forfeited = getForfeitedStatus(enrollmentId);
 
@@ -104,19 +104,20 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     { label: "Address", value: `${address}` },
     { label: "", value: `${addressCity}, ${addressState} ${addressZipCode}` },
     { label: "Phone #", value: phoneNumber || "N/A" },
-    { label: "Work Location", value: workLocation || "N/A" },
-    { label: "Store", value: storeNumber > 0 ? storeNumber : "N/A" },
+    ...(isEmployee ? [{ label: "Work Location", value: workLocation || "N/A" }] : []),
+    ...(isEmployee ? [{ label: "Store", value: storeNumber > 0 ? storeNumber : "N/A" }]: []),
     { label: "Enrolled", value: enrolled },
     { label: "Forfeited", value: forfeited },
   ];
 
   // Section 2: Employment/Personal Info
   const personalSection = [
-    { label: "Employee #", value: badgeNumber },
-    ...(psnSuffix && psnSuffix !== 0 ? [{ label: "Psn", value: viewBadgeLinkRenderer(badgeNumber, psnSuffix) }] : []),
-    { label: "Department", value: department || "N/A" },
-    { label: "Class", value: PayClassification || "N/A" },
-    { label: "Status", value: employmentStatus ?? "N/A" },
+    //{ label: "Employee #", value: badgeNumber },
+    ...(isEmployee ? [{ label: "Employee #", value: badgeNumber }] : []),
+    ...(!isEmployee ? [{ label: "PSN", value: viewBadgeLinkRenderer(badgeNumber, psnSuffix) }] : []),
+    ...(isEmployee ? [{ label: "Department", value: department || "N/A" }] : []),
+    ...(isEmployee ? [{ label: "Class", value: PayClassification || "N/A" }] : []),
+    ...(isEmployee ? [{ label: "Status", value: employmentStatus ?? "N/A" }] : []),
     { label: "Gender", value: gender || "N/A" },
     { label: "DOB", value: mmDDYYFormat(dateOfBirth) },
     { label: "SSN", value: `${ssnValue}` },
@@ -128,21 +129,22 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     { label: "Current Balance", value: numberToCurrency(currentPSAmount) },
     { label: "Begin Vested Balance", value: numberToCurrency(beginVestedAmount) },
     { label: "Current Vested Balance", value: numberToCurrency(currentVestedAmount) },
-    { label: "Profit Sharing Hours", value: yearToDateProfitSharingHours },
-    { label: "Years In Plan", value: yearsInPlan },
+    ...(isEmployee ? [{ label: "Profit Sharing Hours", value: yearToDateProfitSharingHours }]: []),
+    ...(isEmployee ? [{ label: "Years In Plan", value: yearsInPlan }] : []),
     { label: "Vested Percent", value: formatPercentage(percentageVested) },
     { label: "Received Contributions Last Year", value: receivedContributionsLastYear ? "Yes" : "No" }
   ];
 
   // Section 4: Milestones/Status
   const milestoneSection = [
-    { label: "Hire Date", value: hireDate ? mmDDYYFormat(hireDate) : 'N/A' },
-    { label: "Full Time Date", value: fullTimeDate ? mmDDYYFormat(fullTimeDate) : 'N/A' },
-    { label: "Termination Date", value: terminationDate ? mmDDYYFormat(terminationDate) : 'N/A' },
-    { label: "Termination Reason", value: terminationReason || 'N/A' },
-    { label: "Re-Hire Date", value: reHireDate ? mmDDYYFormat(reHireDate) : 'N/A' },
+    ...(isEmployee ? [{ label: "Hire Date", value: hireDate ? mmDDYYFormat(hireDate) : 'N/A' }] : []),
+    ...(isEmployee ? [{ label: "Full Time Date", value: fullTimeDate ? mmDDYYFormat(fullTimeDate) : 'N/A' }] : []),
+    ...(isEmployee ? [{ label: "Termination Date", value: terminationDate ? mmDDYYFormat(terminationDate) : 'N/A' }] : []),
+    ...(isEmployee ? [{ label: "Termination Reason", value: terminationReason || 'N/A' }] : []),
+    ...(isEmployee ? [{ label: "Re-Hire Date", value: reHireDate ? mmDDYYFormat(reHireDate) : 'N/A' }] : []),
     { label: "ETVA", value: numberToCurrency(currentEtva) },
-    { label: "Previous ETVA", value: numberToCurrency(previousEtva) }
+    { label: "Previous ETVA", value: numberToCurrency(previousEtva) },
+
   ];
 
   return (
