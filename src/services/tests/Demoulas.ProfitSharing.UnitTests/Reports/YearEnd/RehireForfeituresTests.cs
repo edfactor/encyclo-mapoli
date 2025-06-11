@@ -34,7 +34,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
 
     public RehireForfeituresTests()
     {
-        ITerminationAndRehireService mockService = ServiceProvider?.GetRequiredService<ITerminationAndRehireService>()!;
+        IUnForfeitService mockService = ServiceProvider?.GetRequiredService<IUnForfeitService>()!;
         _endpoint = new RehireForfeituresEndpoint(mockService);
     }
 
