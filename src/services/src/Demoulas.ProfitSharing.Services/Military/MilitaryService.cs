@@ -76,7 +76,7 @@ public class MilitaryService : IMilitaryService
                 Contribution = req.ContributionAmount,
                 Ssn = d.Ssn,
                 YearsOfServiceCredit = (byte)(req.IsSupplementalContribution ? 0 : 1),
-                MonthToDate = (byte)req.ContributionDate.Month,
+                MonthToDate = 12,
                 YearToDate = (short)req.ContributionDate.Year
             };
             c.ProfitDetails.Add(pd);
@@ -88,7 +88,7 @@ public class MilitaryService : IMilitaryService
                 BadgeNumber = req.BadgeNumber,
                 CommentTypeId = /* 19 */CommentType.Constants.Military,
                 ProfitYear = req.ProfitYear,
-                ContributionDate = new DateOnly(pd.YearToDate, pd.MonthToDate, 01),
+                ContributionDate = new DateOnly(pd.YearToDate, pd.MonthToDate, 31),
                 Amount = pd.Contribution,
                 IsSupplementalContribution = pd.YearsOfServiceCredit == 0
             });
@@ -142,7 +142,7 @@ public class MilitaryService : IMilitaryService
                     BadgeNumber = x.d.BadgeNumber,
                     ProfitYear = x.pd.ProfitYear,
                     CommentTypeId = x.pd.CommentTypeId,
-                    ContributionDate = new DateOnly(x.pd.YearToDate == 0 ? req.ProfitYear : x.pd.YearToDate, x.pd.MonthToDate == 0 ? 1 : x.pd.MonthToDate, 01),
+                    ContributionDate = new DateOnly(x.pd.YearToDate == 0 ? req.ProfitYear : x.pd.YearToDate, x.pd.MonthToDate == 0 ? 12 : x.pd.MonthToDate, 31),
                     Amount = x.pd.Contribution,
                     IsSupplementalContribution = x.pd.YearsOfServiceCredit == 0
                 })
