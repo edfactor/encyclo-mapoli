@@ -133,7 +133,8 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
                             ProfitCodeId = pd.ProfitCodeId
                         })
                         .ToList()
-                }).ToPaginationResultsAsync(req, cancellationToken);
+                }).Where(x=> x.Details.Any())
+                .ToPaginationResultsAsync(req, cancellationToken);
         });
 
         return new ReportResponseBase<RehireForfeituresResponse>
