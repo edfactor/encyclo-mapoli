@@ -20,13 +20,16 @@ public sealed class UnForfeitService : IUnForfeitService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly IDemographicReaderService _demographicReaderService;
+    private readonly TotalService _totalService;
 
     public UnForfeitService(
         IProfitSharingDataContextFactory dataContextFactory,
-        IDemographicReaderService demographicReaderService)
+        IDemographicReaderService demographicReaderService,
+        TotalService totalService)
     {
         _dataContextFactory = dataContextFactory;
         _demographicReaderService = demographicReaderService;
+        _totalService = totalService;
     }
 
     public async Task<ReportResponseBase<RehireForfeituresResponse>> FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYearsAsync(StartAndEndDateRequest req, CancellationToken cancellationToken)
@@ -36,12 +39,20 @@ public sealed class UnForfeitService : IUnForfeitService
 
         var militaryMembers = await _dataContextFactory.UseReadOnlyContext(async context =>
         {
+
+            var beginning = req.BeginningDate;
+            var ending = req.EndingDate;
+
+            var yearsOfServiceQuery = _totalService.GetYearsOfService(context, (short)req.EndingDate.Year);
             var demo = await _demographicReaderService.BuildDemographicQuery(context);
+            
             var query =
                 from d in demo.Include(d=> d.EmploymentStatus)
                 join pp in context.PayProfits.Include(p=> p.Enrollment) on d.Id equals pp.DemographicId
                 join pd in context.ProfitDetails on new { d.Ssn, pp.ProfitYear } equals new { Ssn = pd.Ssn, pd.ProfitYear }
-                where pd.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id && d.EmploymentStatusId == EmploymentStatus.Constants.Active
+                where pd.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id 
+                      && d.EmploymentStatusId == EmploymentStatus.Constants.Active
+                      && pp.ProfitYear >= beginning.Year && pp.ProfitYear <= ending.Year
                 group new { d, pp, pd } by new
                 {
                     d.BadgeNumber,
@@ -75,7 +86,8 @@ public sealed class UnForfeitService : IUnForfeitService
                         Forfeiture = x.pd.Forfeiture,
                         Remark = x.pd.Remark,
                         ProfitCodeId = x.pd.ProfitCodeId
-                    }).ToList()
+                    })
+                    .ToList()
                 };
 
             return await query.ToPaginationResultsAsync(req, cancellationToken);
