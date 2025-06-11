@@ -16,8 +16,6 @@ public sealed record RehireForfeituresResponse
     public required byte CompanyContributionYears { get; set; }
     public required short StoreNumber { get; set; }
     public required IEnumerable<MilitaryRehireProfitSharingDetailResponse> Details { get; set; }
-    public required string? EmploymentStatus { get; set; }
-
 
 
     public static RehireForfeituresResponse ResponseExample()

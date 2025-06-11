@@ -111,17 +111,7 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       cellClass: "left-align",
       resizable: true,
       sortable: true,
-    },    
-    {
-      headerName: "Status",
-      field: "employmentStatus",
-      colId: "employmentStatus",
-      width: 90,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      sortable: true
-    },
+    }
   ];
 };
 

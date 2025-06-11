@@ -47,13 +47,15 @@ public sealed class UnForfeitService : IUnForfeitService
             var demo = await _demographicReaderService.BuildDemographicQuery(context);
             
             var query =
-                from d in demo.Include(d=> d.EmploymentStatus)
+                from d in demo
                 join pp in context.PayProfits.Include(p=> p.Enrollment) on d.Id equals pp.DemographicId
                 join pd in context.ProfitDetails on new { d.Ssn, pp.ProfitYear } equals new { Ssn = pd.Ssn, pd.ProfitYear }
+                join yos in yearsOfServiceQuery on d.Ssn equals yos.Ssn into yosTmp
+                from yos in yosTmp.DefaultIfEmpty()
                 where pd.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id 
                       && d.EmploymentStatusId == EmploymentStatus.Constants.Active
                       && pp.ProfitYear >= beginning.Year && pp.ProfitYear <= ending.Year
-                group new { d, pp, pd } by new
+                group new { d, pp, pd, yos } by new
                 {
                     d.BadgeNumber,
                     d.ContactInfo.FullName,
@@ -62,7 +64,7 @@ public sealed class UnForfeitService : IUnForfeitService
                     d.TerminationDate,
                     d.ReHireDate,
                     d.StoreNumber,
-                    EmploymentStatus = d.EmploymentStatus!.Name
+                    YearsOfService = yos != null ? yos.Years : (byte)0
                 }
                 into g
                 orderby g.Key.BadgeNumber
@@ -75,8 +77,7 @@ public sealed class UnForfeitService : IUnForfeitService
                     TerminationDate = g.Key.TerminationDate,
                     ReHiredDate = g.Key.ReHireDate ?? default,
                     StoreNumber = g.Key.StoreNumber,
-                    CompanyContributionYears = (byte)g.Sum(x => x.pd.YearsOfServiceCredit),
-                    EmploymentStatus = g.Key.EmploymentStatus,
+                    CompanyContributionYears = g.Key.YearsOfService,
                     Details = g.Select(x => new MilitaryRehireProfitSharingDetailResponse
                     {
                         ProfitYear = x.pp.ProfitYear,
