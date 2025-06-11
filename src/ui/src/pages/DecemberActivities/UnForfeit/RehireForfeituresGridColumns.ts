@@ -9,7 +9,7 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       headerName: "Badge",
       field: "badgeNumber",
       colId: "badgeNumber",
-      minWidth: 100,
+      width: 100,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
@@ -32,31 +32,10 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       headerName: "SSN",
       field: "ssn",
       colId: "ssn",
-      minWidth: 100,
+      width: 125,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true
-    },
-    {
-      headerName: "Store",
-      field: "storeNumber",
-      colId: "storeNumber",
-      minWidth: 40,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      sortable: true,
-    },
-    
-    {
-      headerName: "Status",
-      field: "employmentStatus",
-      colId: "employmentStatus",
-      width: 90,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      sortable: true
     },
     {
       headerName: "Hire Date",
@@ -100,16 +79,7 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
         return mmDDYYFormat(date);
       }
     },
-    {
-      headerName: "Contribution Years",
-      field: "companyContributionYears",
-      colId: "companyContributionYears",
-      width: 100,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      sortable: true
-    },
+    
     {
       headerName: "Beginning Balance",
       field: "netBalanceLastYear",
@@ -131,21 +101,7 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       resizable: true,
       sortable: true,
       valueFormatter: agGridNumberToCurrency
-    },
-    {
-      headerName: "Hours Current Year",
-      field: "hoursCurrentYear",
-      colId: "hoursCurrentYear",
-      width: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
-      resizable: true,
-      sortable: true,
-      valueFormatter: (params) => {
-        const hours = params.value;
-        return formatNumberWithComma(hours);
-      }
-    },
+    },    
     {
       headerName: "Enrollment",
       width: 120,
@@ -169,11 +125,45 @@ export const GetDetailColumns = (): ColDef[] => {
       headerName: "Profit Year",
       field: "profitYear",
       colId: "profitYear",
-      width: 80,
+      width: 100,
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
       sortable: false
+    },
+    {
+      headerName: "Hours Current Year",
+      field: "hoursCurrentYear",
+      colId: "hoursCurrentYear",
+      width: 120,
+      headerClass: "right-align",
+      cellClass: "right-align",
+      resizable: true,
+      sortable: true,
+      valueFormatter: (params) => {
+        const hours = params.value;
+        return formatNumberWithComma(hours);
+      }
+    },
+    {
+      headerName: "Store",
+      field: "storeNumber",
+      colId: "storeNumber",
+      width: 60,
+      headerClass: "left-align",
+      cellClass: "left-align",
+      resizable: true,
+      sortable: true,
+    },    
+    {
+      headerName: "Status",
+      field: "employmentStatus",
+      colId: "employmentStatus",
+      width: 90,
+      headerClass: "left-align",
+      cellClass: "left-align",
+      resizable: true,
+      sortable: true
     },
     {
       headerName: "Forfeiture",
@@ -195,6 +185,16 @@ export const GetDetailColumns = (): ColDef[] => {
       cellClass: "left-align",
       resizable: true,
       sortable: false,
-    }
+    },
+    {
+      headerName: "Contribution Years",
+      field: "companyContributionYears",
+      colId: "companyContributionYears",
+      width: 100,
+      headerClass: "left-align",
+      cellClass: "left-align",
+      resizable: true,
+      sortable: true
+    },
   ];
 };

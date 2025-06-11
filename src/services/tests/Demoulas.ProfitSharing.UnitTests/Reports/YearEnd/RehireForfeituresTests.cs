@@ -223,11 +223,14 @@ public class RehireForfeituresTests : ApiTestBase<Program>
         example.BadgeNumber = demo.BadgeNumber;
         example.Ssn = demo.Ssn.MaskSsn();
         example.FullName = demo.ContactInfo.FullName;
-        example.CompanyContributionYears = 0;
-        example.HoursCurrentYear = payProfit.CurrentHoursYear;
         example.ReHiredDate = demo.ReHireDate ?? ReferenceData.DsmMinValue;
-        example.EmploymentStatus = demo.EmploymentStatus.Name;
-        example.Details = details.Select(pd => new MilitaryRehireProfitSharingDetailResponse { Forfeiture = pd.Forfeiture, Remark = pd.Remark, ProfitYear = pd.ProfitYear })
+        example.Details = details.Select(pd => new MilitaryRehireProfitSharingDetailResponse
+            {
+                Forfeiture = pd.Forfeiture, Remark = pd.Remark, ProfitYear = pd.ProfitYear, HoursCurrentYear = payProfit.CurrentHoursYear,
+                EmploymentStatus = demo.EmploymentStatus.Name,
+                StoreNumber = 99,
+                CompanyContributionYears = 0
+        })
             .ToList();
 
 

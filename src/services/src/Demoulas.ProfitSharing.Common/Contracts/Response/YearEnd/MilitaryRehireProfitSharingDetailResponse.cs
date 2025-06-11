@@ -4,4 +4,8 @@ public sealed record MilitaryRehireProfitSharingDetailResponse
     public required short ProfitYear { get; set; }
     public required decimal Forfeiture { get; set; }
     public required string? Remark { get; set; }
+    public required decimal HoursCurrentYear { get; set; }
+    public required byte EnrollmentId { get; set; }
+    public required string EnrollmentName { get; set; }
+    public byte ProfitCodeId { get; set; }
 }
