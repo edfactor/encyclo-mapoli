@@ -15,9 +15,9 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Military;
 public class RehireForfeituresEndpoint :
     EndpointWithCsvBase<StartAndEndDateRequest, RehireForfeituresResponse, RehireForfeituresEndpoint.RehireProfitSharingResponseMap>
 {
-    private readonly ITerminationAndRehireService _reportService;
+    private readonly IUnForfeitService _reportService;
 
-    public RehireForfeituresEndpoint(ITerminationAndRehireService reportService)
+    public RehireForfeituresEndpoint(IUnForfeitService reportService)
     {
         _reportService = reportService;
     }

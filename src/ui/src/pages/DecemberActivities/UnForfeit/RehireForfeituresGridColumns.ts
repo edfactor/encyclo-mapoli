@@ -103,18 +103,25 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       valueFormatter: agGridNumberToCurrency
     },    
     {
-      headerName: "Enrollment",
-      width: 120,
+      headerName: "Store",
+      field: "storeNumber",
+      colId: "storeNumber",
+      width: 60,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
       sortable: true,
-      valueGetter: (params) => {
-        const id = params.data?.enrollmentId; // assuming 'status' is in the row data
-        const name = params.data?.enrollmentName; // assuming 'statusName' is in the row data        
-        return `[${id}] ${name}`;
-      }
-    }
+    },    
+    {
+      headerName: "Status",
+      field: "employmentStatus",
+      colId: "employmentStatus",
+      width: 90,
+      headerClass: "left-align",
+      cellClass: "left-align",
+      resizable: true,
+      sortable: true
+    },
   ];
 };
 
@@ -144,26 +151,19 @@ export const GetDetailColumns = (): ColDef[] => {
         const hours = params.value;
         return formatNumberWithComma(hours);
       }
-    },
+    },    
     {
-      headerName: "Store",
-      field: "storeNumber",
-      colId: "storeNumber",
-      width: 60,
+      headerName: "Enrollment",
+      width: 120,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
       sortable: true,
-    },    
-    {
-      headerName: "Status",
-      field: "employmentStatus",
-      colId: "employmentStatus",
-      width: 90,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      sortable: true
+      valueGetter: (params) => {
+        const id = params.data?.enrollmentId; // assuming 'status' is in the row data
+        const name = params.data?.enrollmentName; // assuming 'statusName' is in the row data        
+        return `[${id}] ${name}`;
+      }
     },
     {
       headerName: "Forfeiture",
