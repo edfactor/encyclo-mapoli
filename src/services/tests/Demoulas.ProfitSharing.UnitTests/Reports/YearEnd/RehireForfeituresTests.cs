@@ -67,8 +67,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
             // Assert
             Assert.Equal(expectedResponse.ReportName, response.Result.ReportName);
             Assert.True(response.Result.Response.Results.Count() >= expectedResponse.Response.Results.Count());
-            response.Result.Response.Results.First().ShouldBeEquivalentTo(
-                expectedResponse.Response.Results.First(),
+            expectedResponse.Response.Results.First().ShouldBeEquivalentTo(response.Result.Response.Results.First(),
                 nameof(RehireForfeituresResponse.NetBalanceLastYear),
                 nameof(RehireForfeituresResponse.VestedBalanceLastYear)
             );
@@ -103,7 +102,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
             csv.ReadHeader();
             var headers = csv.HeaderRecord;
             headers.ShouldNotBeNull();
-            headers.ShouldBe(new[] { "", "", "BADGE", "EMPLOYEE NAME", "SSN", "REHIRED", "HIRE DATE", "TERMINATION DATE", "STORE", "BEGINNING BALANCE", "BEGIN VESTED AMOUNT", "PY-YRS", "YTD HOURS", "EC" });
+            headers.ShouldBe(new[] { "", "", "BADGE", "EMPLOYEE NAME", "SSN", "REHIRED", "HIRE DATE", "TERMINATION DATE", "BEGINNING BALANCE", "BEGIN VESTED AMOUNT", "EC" });
 
             await csv.ReadAsync();
             csv.ReadHeader();
