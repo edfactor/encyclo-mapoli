@@ -105,6 +105,7 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
                     m.StoreNumber,
                     m.EmploymentStatus
                 })
+                .AsEnumerable() // Switch to client-s
                 .Select(group => new RehireForfeituresResponse
                 {
                     BadgeNumber = group.Key.BadgeNumber,
@@ -119,7 +120,6 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
                     EmploymentStatus = group.Key.EmploymentStatus,
                     CompanyContributionYears = group.Key.CompanyContributionYears,
                     Details = group.SelectMany(x => x.Details)
-                        .Where(d => d.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures)
                         .OrderByDescending(d => d.ProfitYear)
                         .ThenBy(d => d.Remark)
                         .Select(pd => new MilitaryRehireProfitSharingDetailResponse
@@ -133,7 +133,7 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
                             ProfitCodeId = pd.ProfitCodeId
                         })
                         .ToList()
-                }).Where(x=> x.Details.Any())
+                }).AsQueryable()
                 .ToPaginationResultsAsync(req, cancellationToken);
         });
 
@@ -173,12 +173,9 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
                     demographics.StoreNumber,
                     demographics.EmploymentStatusId,
                     EmploymentStatus = demographics.EmploymentStatus!.Name,
-                    PayProfit = new 
+                    PayProfit = new
                     {
-                        payProfit.DemographicId,
-                        payProfit.EnrollmentId,
-                        payProfit.Enrollment,
-                        payProfit.CurrentHoursYear,
+                        payProfit.DemographicId, payProfit.EnrollmentId, payProfit.Enrollment, payProfit.CurrentHoursYear,
                     }
                 }
             )
@@ -204,12 +201,9 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
                     member.EmploymentStatus,
                     Details = new
                     {
-                        member.PayProfit.Enrollment,
+                        EnrollmentName = member.PayProfit.Enrollment!.Name,
                         member.PayProfit.EnrollmentId,
                         member.PayProfit.CurrentHoursYear,
-                        member.EmploymentStatus,
-                        member.StoreNumber,
-                        CompanyContributionYears = 0, // Will be set later from yearsOfServiceQuery
                         profitDetail.Forfeiture,
                         profitDetail.Remark,
                         profitDetail.ProfitYear,
@@ -249,40 +243,21 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
                     VestedBalanceLastYear = tot != null ? tot.VestedBalance ?? 0 : 0m,
                     EmploymentStatusId = temp.member.member.EmploymentStatusId,
                     EmploymentStatus = temp.member.member.EmploymentStatus,
-                    Details = new List<RehireProfitSummaryQueryDetails> {
-                        // The Details property will be filled below
+                    Details = new List<RehireProfitSummaryQueryDetails>
+                    {
+                        new RehireProfitSummaryQueryDetails
+                        {
+                            EnrollmentId = temp.member.member.Details.EnrollmentId,
+                            EnrollmentName = temp.member.member.Details.EnrollmentName,
+                            Forfeiture = temp.member.member.Details.Forfeiture,
+                            HoursCurrentYear = temp.member.member.Details.CurrentHoursYear,
+                            ProfitYear = temp.member.member.Details.ProfitYear,
+                            Remark = temp.member.member.Details.Remark,
+                            ProfitCodeId = temp.member.member.Details.ProfitCodeId
+                        }
                     }
                 }
-            )
-            // Now, after the query is materialized, project the Details property properly
-            .AsEnumerable()
-            .Select(q =>
-            {
-                // The Details property is a collection of all joined ProfitDetails for this member
-                // We need to extract the details from the anonymous type used in the join
-                // For this, we need to go back to the join and collect all details for each member
-                // But since we are now in-memory, we can use grouping by the member's key
-                // For simplicity, let's assume the query above is correct and just needs the Details property fixed
-                // In reality, this should be done in the main query, but for now, let's fix the Details property here
-                // (If needed, refactor the query to group by member and select details)
-                return q with
-                {
-                    Details = q.Details
-                        .Where(d => d.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures)
-                        .Select(d => new RehireProfitSummaryQueryDetails
-                        {
-                            ProfitYear = d.ProfitYear,
-                            Forfeiture = d.Forfeiture,
-                            Remark = d.Remark,
-                            EnrollmentId = d.EnrollmentId,
-                            EnrollmentName = d.EnrollmentName,
-                            ProfitCodeId = d.ProfitCodeId,
-                            HoursCurrentYear = d.HoursCurrentYear
-                        })
-                        .ToList()
-                };
-            })
-            .AsQueryable();
+            );
 
         return query;
     }
