@@ -44,6 +44,7 @@ public sealed class UnForfeitService : IUnForfeitService
             var ending = req.EndingDate;
 
             var yearsOfServiceQuery = _totalService.GetYearsOfService(context, (short)req.EndingDate.Year);
+            var vestingServiceQuery = _totalService.TotalVestingBalance(context, (short)(beginning.Year - 1), ending);
             var demo = await _demographicReaderService.BuildDemographicQuery(context);
             
             var query =
@@ -52,10 +53,12 @@ public sealed class UnForfeitService : IUnForfeitService
                 join pd in context.ProfitDetails on new { d.Ssn, pp.ProfitYear } equals new { Ssn = pd.Ssn, pd.ProfitYear }
                 join yos in yearsOfServiceQuery on d.Ssn equals yos.Ssn into yosTmp
                 from yos in yosTmp.DefaultIfEmpty()
+                join vest in vestingServiceQuery on d.Ssn equals vest.Ssn into vestTmp
+                from vest in vestTmp.DefaultIfEmpty()
                 where pd.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id 
                       && d.EmploymentStatusId == EmploymentStatus.Constants.Active
                       && pp.ProfitYear >= beginning.Year && pp.ProfitYear <= ending.Year
-                group new { d, pp, pd, yos } by new
+                group new { d, pp, pd, yos, vest } by new
                 {
                     d.BadgeNumber,
                     d.ContactInfo.FullName,
@@ -64,7 +67,10 @@ public sealed class UnForfeitService : IUnForfeitService
                     d.TerminationDate,
                     d.ReHireDate,
                     d.StoreNumber,
-                    YearsOfService = yos != null ? yos.Years : (byte)0
+                    YearsOfService = yos != null ? yos.Years : (byte)0,
+                    NetBalanceLastYear = vest != null ? vest.CurrentBalance ?? 0 : 0,
+                    VestedBalanceLastYear = vest != null ? vest.VestedBalance ?? 0 : 0,
+                    d.EmploymentStatusId
                 }
                 into g
                 orderby g.Key.BadgeNumber
@@ -78,6 +84,8 @@ public sealed class UnForfeitService : IUnForfeitService
                     ReHiredDate = g.Key.ReHireDate ?? default,
                     StoreNumber = g.Key.StoreNumber,
                     CompanyContributionYears = g.Key.YearsOfService,
+                    NetBalanceLastYear = g.Key.NetBalanceLastYear,
+                    VestedBalanceLastYear = g.Key.VestedBalanceLastYear,
                     Details = g.Select(x => new MilitaryRehireProfitSharingDetailResponse
                     {
                         ProfitYear = x.pp.ProfitYear,
@@ -86,7 +94,7 @@ public sealed class UnForfeitService : IUnForfeitService
                         EnrollmentId = x.pp.EnrollmentId,
                         Forfeiture = x.pd.Forfeiture,
                         Remark = x.pd.Remark,
-                        ProfitCodeId = x.pd.ProfitCodeId
+                        ProfitCodeId = x.pd.ProfitCodeId,
                     })
                     .ToList()
                 };

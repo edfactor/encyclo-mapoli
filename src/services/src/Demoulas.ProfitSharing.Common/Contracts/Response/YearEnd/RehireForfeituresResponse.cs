@@ -25,7 +25,6 @@ public sealed record RehireForfeituresResponse
             BadgeNumber = 123,
             Ssn = "XXX-XX-1234",
             FullName = "Doe, John",
-            EmploymentStatus = "Terminated",
             StoreNumber = 61,
             CompanyContributionYears = 3,
             ReHiredDate = new DateTime(2024, 12, 01, 01, 01, 01, DateTimeKind.Local).ToDateOnly(),
