@@ -105,37 +105,34 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
                     m.StoreNumber,
                     m.EmploymentStatus
                 })
-                .Select(group =>
+                .Select(group => new RehireForfeituresResponse
                 {
-                    return new RehireForfeituresResponse
-                    {
-                        BadgeNumber = group.Key.BadgeNumber,
-                        Ssn = group.Key.Ssn.MaskSsn(),
-                        FullName = group.Key.FullName,
-                        HireDate = group.Key.HireDate,
-                        TerminationDate = group.Key.TerminationDate,
-                        ReHiredDate = group.Key.ReHiredDate,
-                        VestedBalanceLastYear = group.Key.VestedBalanceLastYear,
-                        NetBalanceLastYear =  group.Key.NetBalanceLastYear,
-                        StoreNumber = group.Key.StoreNumber,
-                        EmploymentStatus = group.Key.EmploymentStatus,
-                        CompanyContributionYears = group.Key.CompanyContributionYears,
-                        Details = group.SelectMany(x => x.Details)
-                            .Where(d => d.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures)
-                            .OrderByDescending(d => d.ProfitYear)
-                            .ThenBy(d => d.Remark)
-                            .Select(pd => new MilitaryRehireProfitSharingDetailResponse
-                            {
-                                Forfeiture = pd.Forfeiture,
-                                Remark = pd.Remark,
-                                ProfitYear = pd.ProfitYear,
-                                HoursCurrentYear = pd.HoursCurrentYear,
-                                EnrollmentId = pd.EnrollmentId,
-                                EnrollmentName = pd.EnrollmentName,
-                                ProfitCodeId = pd.ProfitCodeId
-                            })
-                            .ToList()
-                    };
+                    BadgeNumber = group.Key.BadgeNumber,
+                    Ssn = group.Key.Ssn.MaskSsn(),
+                    FullName = group.Key.FullName,
+                    HireDate = group.Key.HireDate,
+                    TerminationDate = group.Key.TerminationDate,
+                    ReHiredDate = group.Key.ReHiredDate,
+                    VestedBalanceLastYear = group.Key.VestedBalanceLastYear,
+                    NetBalanceLastYear =  group.Key.NetBalanceLastYear,
+                    StoreNumber = group.Key.StoreNumber,
+                    EmploymentStatus = group.Key.EmploymentStatus,
+                    CompanyContributionYears = group.Key.CompanyContributionYears,
+                    Details = group.SelectMany(x => x.Details)
+                        .Where(d => d.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures)
+                        .OrderByDescending(d => d.ProfitYear)
+                        .ThenBy(d => d.Remark)
+                        .Select(pd => new MilitaryRehireProfitSharingDetailResponse
+                        {
+                            Forfeiture = pd.Forfeiture,
+                            Remark = pd.Remark,
+                            ProfitYear = pd.ProfitYear,
+                            HoursCurrentYear = pd.HoursCurrentYear,
+                            EnrollmentId = pd.EnrollmentId,
+                            EnrollmentName = pd.EnrollmentName,
+                            ProfitCodeId = pd.ProfitCodeId
+                        })
+                        .ToList()
                 }).ToPaginationResultsAsync(req, cancellationToken);
         });
 

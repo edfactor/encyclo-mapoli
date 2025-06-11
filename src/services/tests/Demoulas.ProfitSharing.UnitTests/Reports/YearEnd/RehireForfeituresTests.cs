@@ -227,9 +227,10 @@ public class RehireForfeituresTests : ApiTestBase<Program>
         example.Details = details.Select(pd => new MilitaryRehireProfitSharingDetailResponse
             {
                 Forfeiture = pd.Forfeiture, Remark = pd.Remark, ProfitYear = pd.ProfitYear, HoursCurrentYear = payProfit.CurrentHoursYear,
-                EmploymentStatus = demo.EmploymentStatus.Name,
-                StoreNumber = 99,
-                CompanyContributionYears = 0
+                EnrollmentName = demo.EmploymentStatus.Name,
+                EnrollmentId = 0,
+                ProfitCodeId = 0
+                
         })
             .ToList();
 
