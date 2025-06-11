@@ -21,13 +21,17 @@ interface bRequest{
     badgeNumber:string;
     psnSuffix:string;
 }
+// Define the type of props
+type Props = {
+  searchClicked: (badgeNumber:number) => void;
+};
 
 
 // const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterProps> = ({
 //   setInitialSearchLoaded,
 //   setMissiveAlerts
 // }) => {
-const BeneficiaryInquirySearchFilter = () => {
+const BeneficiaryInquirySearchFilter:React.FC<Props> = ({searchClicked}) => {
     const [triggerSearch, {data,isLoading,isError,isFetching}] = useLazyGetBeneficiariesQuery();
     const dispatch = useDispatch();
     
@@ -45,6 +49,7 @@ const BeneficiaryInquirySearchFilter = () => {
     });
     const onSubmit = (data: any) => {
         const {badgeNumber, psnSuffix} = data;
+        searchClicked(badgeNumber);
         if (isValid && data["badgeNumber"]) { 
             const beneficiaryRequestDto: BeneficiaryRequestDto = {
                 badgeNumber: badgeNumber,
