@@ -1311,7 +1311,6 @@ export interface BeneficiaryResponseDto {
 
 export interface CreateBeneficiaryRequest {
     beneficiaryContactId: number;
-    demographicId: number;
     employeeBadgeNumber: number;
     firstLevelBeneficiaryNumber: number | null;
     secondLevelBeneficiaryNumber: number | null;

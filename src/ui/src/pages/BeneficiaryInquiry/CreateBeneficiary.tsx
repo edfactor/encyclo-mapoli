@@ -48,8 +48,12 @@ export interface cb {
     addressSameAsBeneficiary: boolean;
     beneficiaryTypeId: number;
 }
+type Props = {
+    badgeNumber:number;
+    onSaveSuccess: ()=>void
+}
 
-const CreateBeneficiary = () => {
+const CreateBeneficiary: React.FC<Props> = ({badgeNumber, onSaveSuccess}) => {
     const [triggerAdd, { isFetching }] = useLazyCreateBeneficiariesQuery();
     const [triggerGetBeneficiaryType, { data, isSuccess }] = useLazyGetBeneficiarytypesQuery();
     const [triggerCreateBeneficiaryContact, createBeneficiaryContactResponse] = useLazyCreateBeneficiaryContactQuery();
@@ -100,11 +104,10 @@ const CreateBeneficiary = () => {
 
     const saveBeneficiary  = (beneficiaryContactId:number, data:cb)=>{
         let request: CreateBeneficiaryRequest = {
-            beneficiaryContactId: beneficiaryContactId, 
-            demographicId : 0,
-            employeeBadgeNumber: 0,
-            firstLevelBeneficiaryNumber: 0,
-            kindId: 'M', 
+            beneficiaryContactId: beneficiaryContactId,
+            employeeBadgeNumber: badgeNumber,
+            firstLevelBeneficiaryNumber: 1,
+            kindId: 'P', 
             percentage : data.percentage,
             relationship: data.relationship,
             secondLevelBeneficiaryNumber: 0,
@@ -112,6 +115,7 @@ const CreateBeneficiary = () => {
         }
         triggerAdd(request).unwrap().then((value)=>{
             console.log('saved successfully');
+            onSaveSuccess();
         }).catch((err)=>{console.error(err)})
     }
     const validateAndSubmit = handleSubmit(onSubmit);
@@ -203,7 +207,7 @@ const CreateBeneficiary = () => {
                                                 }}
                                                 value={field.value ? tryddmmyyyyToDate(field.value) : null}
                                                 required={false}
-                                                label="End Date"
+                                                label=""
                                                 disableFuture
                                                 error={errors.dateOfBirth?.message}
                                               />
