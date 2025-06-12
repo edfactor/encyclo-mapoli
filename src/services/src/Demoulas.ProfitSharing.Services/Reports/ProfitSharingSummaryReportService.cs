@@ -9,7 +9,6 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
-using Demoulas.ProfitSharing.Services.ItOperations;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
@@ -36,7 +35,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         public int Ssn { get; init; }
         public string? FullName { get; init; } = null!;
         public short StoreNumber { get; init; }
-        public string EmploymentTypeId { get; init; } = null!;
+        public char EmploymentTypeId { get; init; }
         public string EmploymentTypeName { get; init; } = null!;
         public decimal? PointsEarned { get; init; }
         public byte? Years { get; init; }
@@ -317,8 +316,6 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         YearEndProfitSharingReportRequest req,
         CancellationToken cancellationToken = default)
     {
-
-
         // ──────────────────────────────────────────────────────────────────────────
         //  Calendar helpers
         // ──────────────────────────────────────────────────────────────────────────
@@ -340,7 +337,6 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
 
 #pragma warning disable AsyncFixer02
                 return (_hostEnvironment.IsTestEnvironment() ? Task.FromResult(queryable.First()) : queryable.FirstAsync(cancellationToken))!;
-
 #pragma warning restore AsyncFixer02
             }
 
@@ -414,7 +410,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                     Ssn = pp.Demographic!.Ssn,
                     FullName = pp.Demographic!.ContactInfo.FullName,
                     StoreNumber = pp.Demographic!.StoreNumber,
-                    EmploymentTypeId = pp.Demographic!.EmploymentTypeId.ToString(),
+                    EmploymentTypeId = pp.Demographic!.EmploymentTypeId,
                     EmploymentTypeName = et.Name,
                     PointsEarned = pp.PointsEarned,
                     Years = yip.Years
@@ -431,12 +427,12 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                         Hours = 0m,
                         Wages = 0m,
                         DateOfBirth = b.Contact!.DateOfBirth,
-                        EmploymentStatusId = ' ',
+                        EmploymentStatusId = EmploymentStatus.Constants.Terminated,
                         TerminationDate = null,
                         Ssn = b.Contact!.Ssn,
                         FullName = b.Contact!.ContactInfo.FullName,
                         StoreNumber = 0,
-                        EmploymentTypeId = " ",
+                        EmploymentTypeId = EmploymentType.Constants.PartTime,
                         EmploymentTypeName = "",
                         PointsEarned = null,
                         Years = 0
@@ -488,7 +484,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                     BadgeNumber = x.Employee.BadgeNumber,
                     EmployeeName = x.Employee.FullName!,
                     StoreNumber = x.Employee.StoreNumber,
-                    EmployeeTypeCode = x.Employee.EmploymentTypeId[0],
+                    EmployeeTypeCode = x.Employee.EmploymentTypeId,
                     EmployeeTypeName = x.Employee.EmploymentTypeName,
                     DateOfBirth = x.Employee.DateOfBirth,
                     Age = 0, // back‑filled later

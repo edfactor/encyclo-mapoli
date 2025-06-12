@@ -9,7 +9,7 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       headerName: "Badge",
       field: "badgeNumber",
       colId: "badgeNumber",
-      minWidth: 100,
+      width: 100,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
@@ -32,31 +32,10 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       headerName: "SSN",
       field: "ssn",
       colId: "ssn",
-      minWidth: 100,
+      width: 125,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true
-    },
-    {
-      headerName: "Store",
-      field: "storeNumber",
-      colId: "storeNumber",
-      minWidth: 40,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      sortable: true,
-    },
-    
-    {
-      headerName: "Status",
-      field: "employmentStatus",
-      colId: "employmentStatus",
-      width: 90,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      sortable: true
     },
     {
       headerName: "Hire Date",
@@ -100,16 +79,7 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
         return mmDDYYFormat(date);
       }
     },
-    {
-      headerName: "Contribution Years",
-      field: "companyContributionYears",
-      colId: "companyContributionYears",
-      width: 100,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      sortable: true
-    },
+    
     {
       headerName: "Beginning Balance",
       field: "netBalanceLastYear",
@@ -131,9 +101,35 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       resizable: true,
       sortable: true,
       valueFormatter: agGridNumberToCurrency
+    },    
+    {
+      headerName: "Store",
+      field: "storeNumber",
+      colId: "storeNumber",
+      width: 60,
+      headerClass: "left-align",
+      cellClass: "left-align",
+      resizable: true,
+      sortable: true,
+    }
+  ];
+};
+
+// Separate function for detail columns that will be used for master-detail view
+export const GetDetailColumns = (): ColDef[] => {
+  return [
+    {
+      headerName: "Profit Year",
+      field: "profitYear",
+      colId: "profitYear",
+      width: 100,
+      headerClass: "right-align",
+      cellClass: "right-align",
+      resizable: true,
+      sortable: false
     },
     {
-      headerName: "Hours Current Year",
+      headerName: "Hours",
       field: "hoursCurrentYear",
       colId: "hoursCurrentYear",
       width: 120,
@@ -145,6 +141,28 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
         const hours = params.value;
         return formatNumberWithComma(hours);
       }
+    },    
+     {
+      headerName: "Wages",
+      field: "wages",
+      colId: "wages",
+      width: 120,
+      headerClass: "right-align",
+      cellClass: "right-align",
+      resizable: true,
+      sortable: true,
+      valueFormatter: agGridNumberToCurrency
+    },    
+    ,
+    {
+      headerName: "Contribution Years",
+      field: "companyContributionYears",
+      colId: "companyContributionYears",
+      width: 100,
+      headerClass: "left-align",
+      cellClass: "left-align",
+      resizable: true,
+      sortable: true
     },
     {
       headerName: "Enrollment",
@@ -158,22 +176,6 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
         const name = params.data?.enrollmentName; // assuming 'statusName' is in the row data        
         return `[${id}] ${name}`;
       }
-    }
-  ];
-};
-
-// Separate function for detail columns that will be used for master-detail view
-export const GetDetailColumns = (): ColDef[] => {
-  return [
-    {
-      headerName: "Profit Year",
-      field: "profitYear",
-      colId: "profitYear",
-      width: 80,
-      headerClass: "right-align",
-      cellClass: "right-align",
-      resizable: true,
-      sortable: false
     },
     {
       headerName: "Forfeiture",

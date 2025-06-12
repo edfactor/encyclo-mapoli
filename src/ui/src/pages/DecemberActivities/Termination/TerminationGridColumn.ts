@@ -38,7 +38,7 @@ export const GetDetailColumns = (): ColDef[] => {
       headerName: "Profit Year",
       field: "profitYear",
       colId: "profitYear",
-      width: 80,
+      width: 100,
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
