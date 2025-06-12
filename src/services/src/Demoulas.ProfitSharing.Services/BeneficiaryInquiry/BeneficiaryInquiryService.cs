@@ -23,8 +23,17 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
     {
         var beneficiary = await _dataContextFactory.UseReadOnlyContext(async context =>
         {
-            var result = context.Beneficiaries.Include(x => x.Contact)
-            .Where(x => x.BadgeNumber == request.BadgeNumber && x.PsnSuffix == request.PsnSuffix)
+            var result = context.Beneficiaries.Include(x => x.Contact).Include(x => x.Contact.ContactInfo)
+            .Where(
+                x => 
+                (request.BadgeNumber == null || x.BadgeNumber == request.BadgeNumber) && 
+                (request.PsnSuffix == null ||x.PsnSuffix == request.PsnSuffix) &&
+                (request.Name == null || x.Contact.ContactInfo.FullName.Contains(request.Name)) &&
+                (request.Ssn == null || x.Contact.Ssn == request.Ssn) &&
+                (request.Address == null || x.Contact.Address.Street.Contains(request.Address)) &&
+                (request.City == null || x.Contact.Address.City.Contains(request.City)) &&
+                (request.State == null || x.Contact.Address.State.Contains(request.State))
+                )
             .Select(x => new BeneficiaryDto()
             {
                 Id = x.Id,
@@ -66,7 +75,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                 },
                 Relationship = x.Relationship
             });
-            PaginatedResponseDto<BeneficiaryDto> final = await result.ToPaginationResultsAsync(request,cancellationToken);
+            PaginatedResponseDto<BeneficiaryDto> final = await result.ToPaginationResultsAsync(request, cancellationToken);
             return final;
         }
         );
