@@ -73,9 +73,11 @@ const MilitaryEntryAndModificationSearchFilter: React.FC<SearchFilterProps> = ({
       false
     ).then((result) => {
       if (result?.data) {
-        dispatch(setMasterInquiryData(result.data.results[0]));
+        dispatch(setMasterInquiryData(result.data.response.results[0]));
       }
-      setInitialSearchLoaded(!!(result?.data?.results?.length > 0));
+      setInitialSearchLoaded(
+        !!(result?.data?.response?.results && Array.isArray(result.data.response.results) && result.data.response.results.length > 0)
+      );
     });
   };
 
