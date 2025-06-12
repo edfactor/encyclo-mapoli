@@ -15,9 +15,9 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Military;
 public class RehireForfeituresEndpoint :
     EndpointWithCsvBase<StartAndEndDateRequest, RehireForfeituresResponse, RehireForfeituresEndpoint.RehireProfitSharingResponseMap>
 {
-    private readonly ITerminationAndRehireService _reportService;
+    private readonly IUnForfeitService _reportService;
 
-    public RehireForfeituresEndpoint(ITerminationAndRehireService reportService)
+    public RehireForfeituresEndpoint(IUnForfeitService reportService)
     {
         _reportService = reportService;
     }
@@ -121,11 +121,9 @@ public class RehireForfeituresEndpoint :
             Map(m => m.ReHiredDate).Index(5).Name("REHIRED").TypeConverter<YearMonthDayTypeConverter>();
             Map(m => m.HireDate).Index(6).Name("HIRE DATE").TypeConverter<YearMonthDayTypeConverter>();
             Map(m => m.TerminationDate).Index(7).Name("TERMINATION DATE").TypeConverter<YearMonthDayTypeConverter>();
-            Map(m => m.StoreNumber).Index(8).Name("STORE");
             Map(m => m.NetBalanceLastYear).Index(9).Name("BEGINNING BALANCE").TypeConverterOption.Format("0.00");
             Map(m => m.VestedBalanceLastYear).Index(10).Name("BEGIN VESTED AMOUNT").TypeConverterOption.Format("0.00");
-            Map(m => m.CompanyContributionYears).Index(11).Name("PY-YRS");
-            Map(m => m.HoursCurrentYear).Index(12).Name("YTD HOURS").TypeConverterOption.Format("0.00");
+           
             Map().Index(13).Name("EC"); // Assuming EC is blank, leave an empty column
         }
     }

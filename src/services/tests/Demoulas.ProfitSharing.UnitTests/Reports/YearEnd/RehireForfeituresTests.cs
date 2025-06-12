@@ -34,7 +34,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
 
     public RehireForfeituresTests()
     {
-        ITerminationAndRehireService mockService = ServiceProvider?.GetRequiredService<ITerminationAndRehireService>()!;
+        IUnForfeitService mockService = ServiceProvider?.GetRequiredService<IUnForfeitService>()!;
         _endpoint = new RehireForfeituresEndpoint(mockService);
     }
 
@@ -67,10 +67,10 @@ public class RehireForfeituresTests : ApiTestBase<Program>
             // Assert
             Assert.Equal(expectedResponse.ReportName, response.Result.ReportName);
             Assert.True(response.Result.Response.Results.Count() >= expectedResponse.Response.Results.Count());
-            response.Result.Response.Results.First().ShouldBeEquivalentTo(
-                expectedResponse.Response.Results.First(),
+            expectedResponse.Response.Results.First().ShouldBeEquivalentTo(response.Result.Response.Results.First(),
                 nameof(RehireForfeituresResponse.NetBalanceLastYear),
-                nameof(RehireForfeituresResponse.VestedBalanceLastYear)
+                nameof(RehireForfeituresResponse.VestedBalanceLastYear),
+                nameof(RehireForfeituresResponse.CompanyContributionYears)
             );
         });
     }
@@ -103,7 +103,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
             csv.ReadHeader();
             var headers = csv.HeaderRecord;
             headers.ShouldNotBeNull();
-            headers.ShouldBe(new[] { "", "", "BADGE", "EMPLOYEE NAME", "SSN", "REHIRED", "HIRE DATE", "TERMINATION DATE", "STORE", "BEGINNING BALANCE", "BEGIN VESTED AMOUNT", "PY-YRS", "YTD HOURS", "EC" });
+            headers.ShouldBe(new[] { "", "", "BADGE", "EMPLOYEE NAME", "SSN", "REHIRED", "HIRE DATE", "TERMINATION DATE", "BEGINNING BALANCE", "BEGIN VESTED AMOUNT", "EC" });
 
             await csv.ReadAsync();
             csv.ReadHeader();
@@ -223,11 +223,15 @@ public class RehireForfeituresTests : ApiTestBase<Program>
         example.BadgeNumber = demo.BadgeNumber;
         example.Ssn = demo.Ssn.MaskSsn();
         example.FullName = demo.ContactInfo.FullName;
-        example.CompanyContributionYears = 0;
-        example.HoursCurrentYear = payProfit.CurrentHoursYear;
         example.ReHiredDate = demo.ReHireDate ?? ReferenceData.DsmMinValue;
-        example.EmploymentStatus = demo.EmploymentStatus.Name;
-        example.Details = details.Select(pd => new MilitaryRehireProfitSharingDetailResponse { Forfeiture = pd.Forfeiture, Remark = pd.Remark, ProfitYear = pd.ProfitYear })
+        example.Details = details.Select(pd => new MilitaryRehireProfitSharingDetailResponse
+            {
+                Forfeiture = pd.Forfeiture, Remark = pd.Remark, ProfitYear = pd.ProfitYear, HoursCurrentYear = payProfit.CurrentHoursYear,
+                EnrollmentName = demo.EmploymentStatus.Name,
+                EnrollmentId = 0,
+                ProfitCodeId = 0
+                
+        })
             .ToList();
 
 

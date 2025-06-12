@@ -191,6 +191,11 @@ export interface StartAndEndDateRequest {
 export interface ForfeitureDetail extends ProfitYearRequest {
   forfeiture: number;
   remark: string;
+  hoursCurrentYear: number;
+  wages: number;
+  enrollmentId: number;
+  enrollmentName: string;
+  
 }
 
 export interface MilitaryAndRehireForfeiture {
@@ -199,10 +204,7 @@ export interface MilitaryAndRehireForfeiture {
   ssn: string;
   reHiredDate: string;
   companyContributionYears: number;
-  enrollmentId: number;
-  enrollmentName: string;
-  employmentStatus: string;
-  hoursCurrentYear: number;
+  employmentStatus: string;  
   netBalanceLastYear: number;
   vestedBalanceLastYear: number;
   hireDate: string;

@@ -216,7 +216,7 @@ internal class PayrollSyncClient
     private async Task<string> BuildUrl(int offset = 0, CancellationToken cancellationToken = default)
     {
         const int payrollActionId = 2003;
-        ushort limit = ushort.Min(50, _oracleHcmConfig.Limit);
+        ushort limit = ushort.Min(75, _oracleHcmConfig.Limit);
         Dictionary<string, string> initialQuery = new Dictionary<string, string>()
         {
             { "limit", $"{limit}" },
