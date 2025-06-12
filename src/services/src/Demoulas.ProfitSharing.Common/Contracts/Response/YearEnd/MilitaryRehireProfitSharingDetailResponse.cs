@@ -8,4 +8,5 @@ public sealed record MilitaryRehireProfitSharingDetailResponse
     public required byte EnrollmentId { get; set; }
     public required string EnrollmentName { get; set; }
     public byte ProfitCodeId { get; set; }
+    public decimal Wages { get; set; }
 }

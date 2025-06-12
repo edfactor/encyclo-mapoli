@@ -129,7 +129,7 @@ export const GetDetailColumns = (): ColDef[] => {
       sortable: false
     },
     {
-      headerName: "Hours Current Year",
+      headerName: "Hours",
       field: "hoursCurrentYear",
       colId: "hoursCurrentYear",
       width: 120,
@@ -142,6 +142,28 @@ export const GetDetailColumns = (): ColDef[] => {
         return formatNumberWithComma(hours);
       }
     },    
+     {
+      headerName: "Wages",
+      field: "wages",
+      colId: "wages",
+      width: 120,
+      headerClass: "right-align",
+      cellClass: "right-align",
+      resizable: true,
+      sortable: true,
+      valueFormatter: agGridNumberToCurrency
+    },    
+    ,
+    {
+      headerName: "Contribution Years",
+      field: "companyContributionYears",
+      colId: "companyContributionYears",
+      width: 100,
+      headerClass: "left-align",
+      cellClass: "left-align",
+      resizable: true,
+      sortable: true
+    },
     {
       headerName: "Enrollment",
       width: 120,
@@ -175,16 +197,6 @@ export const GetDetailColumns = (): ColDef[] => {
       cellClass: "left-align",
       resizable: true,
       sortable: false,
-    },
-    {
-      headerName: "Contribution Years",
-      field: "companyContributionYears",
-      colId: "companyContributionYears",
-      width: 100,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      sortable: true
-    },
+    }
   ];
 };

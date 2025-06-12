@@ -91,6 +91,7 @@ public sealed class UnForfeitService : IUnForfeitService
                         Forfeiture = x.pd.Forfeiture,
                         Remark = x.pd.Remark,
                         ProfitCodeId = x.pd.ProfitCodeId,
+                        Wages = x.pp.CurrentIncomeYear + x.pp.IncomeExecutive
                     })
                     .ToList()
                 };
