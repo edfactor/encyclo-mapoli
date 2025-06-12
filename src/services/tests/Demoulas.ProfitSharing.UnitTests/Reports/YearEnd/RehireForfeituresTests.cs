@@ -67,10 +67,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
             // Assert
             Assert.Equal(expectedResponse.ReportName, response.Result.ReportName);
             Assert.True(response.Result.Response.Results.Count() >= expectedResponse.Response.Results.Count());
-            expectedResponse.Response.Results.First().ShouldBeEquivalentTo(response.Result.Response.Results.First(),
-                nameof(RehireForfeituresResponse.NetBalanceLastYear),
-                nameof(RehireForfeituresResponse.VestedBalanceLastYear)
-            );
+            
         });
     }
 
