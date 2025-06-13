@@ -28,7 +28,7 @@ export const GetProfallGridColumns = (navFunction: (badgeNumber: string) => void
       headerName: "Name",
       field: "employeeName",
       colId: "employeeName",
-      minWidth: 150,
+      minWidth: 180,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,

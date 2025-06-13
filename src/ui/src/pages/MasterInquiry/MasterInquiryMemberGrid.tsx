@@ -10,7 +10,7 @@ import './MasterInquiryMemberGrid.css'; // Import the CSS file for styles
 const columns: ColDef[] = [
   {
     field: "badgeNumber",
-    headerName: "Badge #",
+    headerName: "Badge",
     maxWidth: 120,
     cellRenderer: (params: any) => {
       const { badgeNumber, psnSuffix, isEmployee, id } = params.data;
