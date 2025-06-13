@@ -1305,6 +1305,11 @@ export interface BeneficiaryDto {
 export interface BeneficiaryRequestDto extends SortedPaginationRequestDto {
   badgeNumber: number;
   psnSuffix: number;
+  name: string;
+  city: string;
+  address: string;
+  state: string;
+  ssn: number;
 }
 
 export interface BeneficiaryResponseDto {
