@@ -8,9 +8,9 @@ public class MasterInquiryRun : Runnable
     public override async Task Exec()
     {
         await Run(Specify(
-            // "R0", // import obfuscated
+            // "R0", // import obfuscated/scramble
             // "DropBadBenes",
-            // "R2S", // Import SMART Schema directly from READY Schema (with dropped Bad Bene)
+            // "ImportReadyDbToSmartDb", // Import SMART Schema directly from READY Schema (with dropped Bad Bene)
             "TestMasterInquiry"
         ));
     }

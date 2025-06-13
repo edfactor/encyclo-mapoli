@@ -53,6 +53,7 @@ public static class SmartActivityFactory
             new SmartActivity(A22_Profit_Share_Edit_PAY477, Client, "A22", "Profit Share Edit (pay447)"),
             new SmartActivity(A23_Profit_Master_Update, Client, "A23", "Profit Master Update"),
             new SmartActivity(A24_PROF_PAYMASTER_UPD, Client, "A24", "PROF PAYMASTER UPD"),
+            new SmartActivity(A24B_PROF_PAYMASTER_UPD, Client, "A24B", "PROF PAYMASTER UPD part two"), // Do an update to BE.
             new SmartActivity(A25_Prof_Share_Report_By_Age, Client, "A25", "Prof Share Report By Age (prof130 prof130b prof130v prof130y)"),
             new SmartActivity(A26_Prof_Share_Gross_Rpt_QPAY501, Client, "A26", "Prof Share Gross Rpt (qpay501)"),
             new SmartActivity(A27_Prof_Share_by_Store, Client, "A27", "Prof Share by Store (qpay066-undr21 qpay066ta-undr21 qpay066ta \"newlabels report\" labels labelsnew)"),
@@ -386,6 +387,11 @@ public static class SmartActivityFactory
     }
 
     private static async Task<Outcome> A24_PROF_PAYMASTER_UPD(ApiClient apiClient, string aname, string name)
+    {
+        return TBD(aname, name);
+    }
+
+    private static async Task<Outcome> A24B_PROF_PAYMASTER_UPD(ApiClient apiClient, string aname, string name)
     {
         return TBD(aname, name);
     }
