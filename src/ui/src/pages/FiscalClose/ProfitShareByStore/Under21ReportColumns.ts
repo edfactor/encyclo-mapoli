@@ -18,7 +18,7 @@ export const GetUnder21ReportColumns = (navFunction: (badgeNumber: string) => vo
       headerName: "Full Name",
       field: "fullName",
       colId: "fullName",
-      minWidth: 150,
+      minWidth: 180,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true

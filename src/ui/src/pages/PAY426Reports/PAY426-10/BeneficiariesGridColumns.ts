@@ -58,7 +58,7 @@ export const GetBeneficiariesGridColumns = (navFunction: (badgeNumber: string) =
       headerName: "Age",
       field: "age",
       colId: "age",
-      minWidth: 80,
+      minWidth: 70,
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true
