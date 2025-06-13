@@ -11,7 +11,7 @@ public class FrozenTestingRun : Runnable
         await Run(Specify(
             "R0", // import obfuscated
             "TrimTo14Employees", // Reduces execution time to 1 minute
-            "R2S",
+            "ImportReadyDbToSmartDb",
             "S12", // Freeze on Smart
             "OverwriteBadges", // Obliterate the Live Badges
             "P18", // PAY426 / YearEndService
