@@ -1310,6 +1310,7 @@ export interface BeneficiaryRequestDto extends SortedPaginationRequestDto {
   address: string;
   state: string;
   ssn: number;
+  percentage: number;
 }
 
 export interface BeneficiaryResponseDto {

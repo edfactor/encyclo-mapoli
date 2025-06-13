@@ -50,14 +50,14 @@ export interface cb {
 }
 type Props = {
     badgeNumber:number;
-    onSaveSuccess: ()=>void
+    beneficiaryTypes: BeneficiaryTypeDto[];
+    onSaveSuccess: ()=>void;
 }
 
-const CreateBeneficiary: React.FC<Props> = ({badgeNumber, onSaveSuccess}) => {
+const CreateBeneficiary: React.FC<Props> = ({badgeNumber, onSaveSuccess,beneficiaryTypes}) => {
     const [triggerAdd, { isFetching }] = useLazyCreateBeneficiariesQuery();
-    const [triggerGetBeneficiaryType, { data, isSuccess }] = useLazyGetBeneficiarytypesQuery();
+    
     const [triggerCreateBeneficiaryContact, createBeneficiaryContactResponse] = useLazyCreateBeneficiaryContactQuery();
-    const [beneficiaryTypes, setBeneficiaryTypes] = useState<BeneficiaryTypesResponseDto>({});
 
     const {
         control,
@@ -120,12 +120,6 @@ const CreateBeneficiary: React.FC<Props> = ({badgeNumber, onSaveSuccess}) => {
     }
     const validateAndSubmit = handleSubmit(onSubmit);
     useEffect(() => {
-        triggerGetBeneficiaryType({}).unwrap().then((data) => {
-            console.log(data);
-            setBeneficiaryTypes(data)
-        }).catch((err) => {
-            console.error(err);
-        })
     }, [])
 
     return (
@@ -333,7 +327,7 @@ const CreateBeneficiary: React.FC<Props> = ({badgeNumber, onSaveSuccess}) => {
                                         label="Beneficiary Type"
                                         onChange={(e) => field.onChange(e.target.value)}
                                     >
-                                        {isSuccess && data.beneficiaryTypeList?.map((d) => (
+                                        {beneficiaryTypes.map((d) => (
                                             <MenuItem value={d.id}>{d.name}</MenuItem>
                                         ))}
                                     </Select>
