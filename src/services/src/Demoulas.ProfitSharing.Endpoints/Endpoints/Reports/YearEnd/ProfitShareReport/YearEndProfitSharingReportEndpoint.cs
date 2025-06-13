@@ -9,6 +9,10 @@ using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitShareReport;
+
+/// <summary>
+/// Endpoint for generating the year-end profit sharing report. Returns a list of employees eligible for profit sharing, with filtering options and CSV export support.
+/// </summary>
 public class YearEndProfitSharingReportEndpoint: EndpointWithCsvTotalsBase<YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse,YearEndProfitSharingReportDetail, YearEndProfitSharingReportEndpoint.YearEndProfitSharingReportClassMap>
 {
     private readonly IProfitSharingSummaryReportService _cleanupReportService;
@@ -24,7 +28,10 @@ public class YearEndProfitSharingReportEndpoint: EndpointWithCsvTotalsBase<YearE
         Summary(s =>
         {
             s.Summary = "Year end profit sharing report";
-            s.Description = "Returns a list of employees who will participate in the profit sharing this year, as well as their qualifying attributes.";
+            s.Description = @"Returns a list of employees who will participate in the profit sharing this year, as well as their qualifying attributes. 
+
+Request parameters allow filtering by age, hours, employment status, and more. The endpoint supports CSV export if the Accept header is set to 'text/csv'.";
+            
             s.ExampleRequest = new YearEndProfitSharingReportRequest() { IsYearEnd = true, ProfitYear = 2025, Skip = SimpleExampleRequest.Skip, Take =SimpleExampleRequest.Take};
             s.ResponseExamples = new Dictionary<int, object>
             {
@@ -33,12 +40,16 @@ public class YearEndProfitSharingReportEndpoint: EndpointWithCsvTotalsBase<YearE
                     YearEndProfitSharingReportResponse.ResponseExample()
                 }
             };
+            s.Responses[400] = "Bad request. Invalid or missing parameters.";
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
         Group<YearEndGroup>();
 
         base.Configure();
     }
+    /// <summary>
+    /// Handles the request and returns the year-end profit sharing report response.
+    /// </summary>
     public override Task<YearEndProfitSharingReportResponse> GetResponse(YearEndProfitSharingReportRequest req, CancellationToken ct)
     {
         return _cleanupReportService.GetYearEndProfitSharingReportAsync(req, ct);

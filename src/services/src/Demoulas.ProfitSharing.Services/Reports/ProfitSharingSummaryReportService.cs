@@ -320,8 +320,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         //  Calendar helpers
         // ──────────────────────────────────────────────────────────────────────────
         var calInfo = await _calendarService
-            .GetYearStartAndEndAccountingDatesAsync(
-                req.ProfitYear, cancellationToken);
+            .GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
         var birthDate21 = calInfo.FiscalEndDate.AddYears(-21);
 
 
@@ -551,6 +550,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         YearEndProfitSharingReportRequest req,
         CalendarResponseDto calInfo)
     {
+
         if (req.MinimumHoursInclusive.HasValue)
         {
             qry = qry.Where(p => p.Hours >= req.MinimumHoursInclusive.Value);
@@ -628,6 +628,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 _ => qry.Where(p => statuses.Contains(p.EmploymentStatusId))
             };
         }
+
 
         return qry;
     }
