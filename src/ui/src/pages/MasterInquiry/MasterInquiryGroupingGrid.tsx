@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useLazyGetProfitMasterInquiryGroupingQuery, useLazyGetProfitMasterInquiryMemberDetailsQuery } from "reduxstore/api/InquiryApi";
+import { useLazyGetProfitMasterInquiryGroupingQuery, useLazyGetProfitMasterInquiryFilteredDetailsQuery } from "reduxstore/api/InquiryApi";
 import { GetMasterInquiryGridColumns } from "./MasterInquiryGridColumns";
 import { Typography, Box, CircularProgress } from "@mui/material";
 import { RootState } from "reduxstore/store";
@@ -11,10 +11,10 @@ import { numberToCurrency, DSMGrid } from "smart-ui-library";
 
 const MasterInquiryGroupingGrid = ({ searchParams }: { searchParams: MasterInquiryRequest }) => {
     const [getProfitMasterInquiryGrouping, { isLoading: isGroupingLoading }] = useLazyGetProfitMasterInquiryGroupingQuery();
-    const [getMemberDetails, { data: memberDetailsData, isFetching: isFetchingMemberDetails }] = useLazyGetProfitMasterInquiryMemberDetailsQuery();
+    const [getFilteredDetails, { data: filteredDetailsData, isFetching: isFetchingFilteredDetails }] = useLazyGetProfitMasterInquiryFilteredDetailsQuery();
     const [expandedRowIds, setExpandedRowIds] = useState<Set<string>>(new Set());
     const [expandedRowDataMap, setExpandedRowDataMap] = useState<Record<string, MasterInquiryResponseDto[]>>({});
-
+    
     const searchParamsForQuery = useMemo(() => ({
         ...searchParams,
         pagination: {
@@ -28,23 +28,20 @@ const MasterInquiryGroupingGrid = ({ searchParams }: { searchParams: MasterInqui
     }), [searchParams]);
 
     useEffect(() => {
-        getProfitMasterInquiryGrouping({
-            ...searchParamsForQuery,
-        });
+        getProfitMasterInquiryGrouping(searchParamsForQuery);
     }, [getProfitMasterInquiryGrouping, searchParamsForQuery]);
 
     useEffect(() => {
-        if (memberDetailsData && expandedRowIds.size > 0) {
+        if (filteredDetailsData?.results && expandedRowIds.size > 0) {
             const latestExpandedRowId = Array.from(expandedRowIds).pop();
             if (latestExpandedRowId) {
                 setExpandedRowDataMap(prev => ({
                     ...prev,
-                    [latestExpandedRowId]: (memberDetailsData as any).results || []
+                    [latestExpandedRowId]: filteredDetailsData.results || []
                 }));
             }
         }
-    }, [memberDetailsData, expandedRowIds]);
-
+    }, [filteredDetailsData, expandedRowIds]);
 
     const { masterInquiryGroupingData } = useSelector((state: RootState) => state.inquiry);
 
@@ -156,9 +153,23 @@ const MasterInquiryGroupingGrid = ({ searchParams }: { searchParams: MasterInqui
 
         if (!expandedRowIds.has(rowId)) {
             setExpandedRowIds(prev => new Set(prev).add(rowId));
-            getMemberDetails({
+            
+            getFilteredDetails({
                 memberType: searchParams.memberType || 0,
-                id: row.profitYear,
+                profitYear: row.profitYear,
+                monthToDate: row.monthToDate,
+                badgeNumber: searchParams.badgeNumber,
+                psnSuffix: searchParams.psnSuffix,
+                ssn: searchParams.ssn?.toString(),
+                startProfitMonth: searchParams.startProfitMonth,
+                endProfitMonth: searchParams.endProfitMonth,
+                profitCode: searchParams.profitCode,
+                contributionAmount: searchParams.contributionAmount,
+                earningsAmount: searchParams.earningsAmount,
+                forfeitureAmount: searchParams.forfeitureAmount,
+                paymentAmount: searchParams.paymentAmount,
+                name: searchParams.name,
+                paymentType: searchParams.paymentType,
                 skip: 0,
                 take: 25,
                 sortBy: "profitYear",
@@ -170,7 +181,7 @@ const MasterInquiryGroupingGrid = ({ searchParams }: { searchParams: MasterInqui
             <Box sx={{ mx: 0, px: 0, py: 0 }}>
                 <DSMGrid
                     preferenceKey={`master-inquiry-detail-${row.id}`}
-                    isLoading={isFetchingMemberDetails && !expandedRowDataMap[rowId]}
+                    isLoading={isFetchingFilteredDetails && !expandedRowDataMap[rowId]}
                     showColumnControl={false}
                     maxHeight={250}
                     providedOptions={{

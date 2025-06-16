@@ -5,6 +5,7 @@ namespace YEMatch;
 
 public static class ReadyActivityFactory
 {
+    public static SshClient? sshClient { get; set; }
     public static SftpClient? SftpClient { get; set; }
 
     public static List<IActivity> CreateActivities(string dataDirectory)
@@ -20,7 +21,7 @@ public static class ReadyActivityFactory
             throw new InvalidOperationException("Username and password are required");
         }
 
-        SshClient sshClient = new(host, username, password);
+        sshClient = new(host, username, password);
         sshClient.Connect();
 
         SftpClient = new SftpClient(host, username, password);
@@ -60,7 +61,8 @@ public static class ReadyActivityFactory
             new ReadyActivity(sshClient, SftpClient, chatty, "A21", "PROF-UPD1", "YEAR=2024.0", dataDirectory),
             new ReadyActivity(sshClient, SftpClient, chatty, "A22", "PROF-EDIT", "YEAR=2024", dataDirectory),
             new ReadyActivity(sshClient, SftpClient, chatty, "A23", "PROF-DBUPD", "YEAR=2024.0", dataDirectory),
-            new ReadyActivity(sshClient, SftpClient, chatty, "A24", "PROF-UPD2", "sw[6]=1 YEAR=2024", dataDirectory),
+            new ReadyActivity(sshClient, SftpClient, chatty, "A24", "PROF-UPD2", "sw[6]=1 sw[8]=1 YEAR=2024", dataDirectory),
+            new ReadyActivity(sshClient, SftpClient, chatty, "A24B", "PROF-UPD2", "YEAR=2024", dataDirectory),
             new ReadyActivity(sshClient, SftpClient, chatty, "A25", "PROFSHARE-RPT", "CDATE=20241228", dataDirectory),
             new ReadyActivity(sshClient, SftpClient, chatty, "A26", "PROFGROSS", "YDATE=2024 GROSS=50000", dataDirectory),
 

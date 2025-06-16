@@ -75,13 +75,14 @@ public static class GetGold
     ];
 
 
-    public static void Fetch(SftpClient sftpClient)
+    public static void Fetch(string dataDirectory, SftpClient sftpClient)
     {
         string goldenDir = $"{ReadyActivity.OptionalLocalResourceBase}golden";
-        string outcomeFile = "/tmp/ye/29-May-15-50/outcome.json";
+        string outcomeFile = $"{dataDirectory}/outcome.json";
+        File.Copy(outcomeFile, $"{goldenDir}/outcome.json", true);
+
         string json = File.ReadAllText(outcomeFile);
         List<Outcome> outcomes = JsonSerializer.Deserialize<List<Outcome>>(json)!;
-        File.Copy(outcomeFile, $"{goldenDir}/outcome.json", true);
 
         Dictionary<string, string> activityByPid = new();
         foreach (Outcome outcome in outcomes)

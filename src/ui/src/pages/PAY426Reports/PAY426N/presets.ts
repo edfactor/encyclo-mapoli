@@ -60,7 +60,7 @@ const presets: ReportPreset[] = [
     params: {
       isYearEnd: true,
       minimumAgeInclusive: 18,
-      maximumHoursInclusive: 999,
+      maximumHoursInclusive: 1000,
       includeActiveEmployees: true,
       includeInactiveEmployees: true,
       includeEmployeesTerminatedThisYear: false,
@@ -77,7 +77,7 @@ const presets: ReportPreset[] = [
     params: {
       isYearEnd: true,
       minimumAgeInclusive: 18,
-      maximumHoursInclusive: 999,
+      maximumHoursInclusive: 1000,
       includeActiveEmployees: true,
       includeInactiveEmployees: true,
       includeEmployeesTerminatedThisYear: false,
@@ -111,7 +111,7 @@ const presets: ReportPreset[] = [
     params: {
       isYearEnd: true,
       minimumAgeInclusive: 18,
-      maximumHoursInclusive: 999,
+      maximumHoursInclusive: 1000,
       includeActiveEmployees: false,
       includeInactiveEmployees: false,
       includeEmployeesTerminatedThisYear: true,
@@ -128,7 +128,7 @@ const presets: ReportPreset[] = [
     params: {
       isYearEnd: true,
       minimumAgeInclusive: 18,
-      maximumHoursInclusive: 999,
+      maximumHoursInclusive: 1000,
       includeActiveEmployees: false,
       includeInactiveEmployees: false,
       includeEmployeesTerminatedThisYear: true,

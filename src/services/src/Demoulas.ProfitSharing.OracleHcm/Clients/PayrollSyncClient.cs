@@ -146,8 +146,6 @@ internal class PayrollSyncClient
                 return;
             }
 
-            await TrySyncMissingEmployees(results!.Items, cancellationToken).ConfigureAwait(false);
-
             // Queue Here
             const string requestedBy = "System";
             foreach (PayrollItem[] items in results!.Items.Chunk(10))
@@ -156,6 +154,8 @@ internal class PayrollSyncClient
 
                 await _payrollSyncBus.Writer.WriteAsync(message, cancellationToken).ConfigureAwait(false);
             }
+
+            await TrySyncMissingEmployees(results!.Items, cancellationToken).ConfigureAwait(false);
 
             if (!results.HasMore)
             {

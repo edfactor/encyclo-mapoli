@@ -110,6 +110,17 @@ export const GetDetailColumns = (): ColDef[] => {
       sortable: false,
       valueFormatter: agGridNumberToCurrency
     },
+     {
+      headerName: "Vested %",
+      field: "vestedPercent",
+      colId: "vestedPercent",
+      width: 100,
+      headerClass: "right-align",
+      cellClass: "right-align",
+      resizable: true,
+      sortable: false,
+      valueFormatter: (params) => `${params.value}%`
+    },
     {
       headerName: "Term Date",
       field: "dateTerm",
@@ -137,18 +148,7 @@ export const GetDetailColumns = (): ColDef[] => {
         const hours = params.value;
         return formatNumberWithComma(hours);
       }
-    },
-    {
-      headerName: "Vested %",
-      field: "vestedPercent",
-      colId: "vestedPercent",
-      width: 90,
-      headerClass: "right-align",
-      cellClass: "right-align",
-      resizable: true,
-      sortable: false,
-      valueFormatter: (params) => `${params.value}%`
-    },
+    },   
     {
       headerName: "Age",
       field: "age",

@@ -6,6 +6,32 @@ using Newtonsoft.Json;
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 namespace YEMatch;
 
+using System;
+using System.IO;
+
+public sealed class TeeWriter(TextWriter one, TextWriter two) : TextWriter
+{
+    public override Encoding Encoding => one.Encoding;
+
+    public override void Write(char value)
+    {
+        one.Write(value);
+        two.Write(value);
+    }
+
+    public override void WriteLine(string? value)
+    {
+        one.WriteLine(value);
+        two.WriteLine(value);
+    }
+
+    public override void Flush()
+    {
+        one.Flush();
+        two.Flush();
+    }
+}
+
 /* Activity which compares SMART master inquiry endpoint to READY master inquery screens (Saved in the OUTFL file.) */
 [SuppressMessage("Major Code Smell", "S125:Sections of code should not be commented out")]
 public class TestMasterInquiry : BaseSqlActivity
@@ -14,12 +40,17 @@ public class TestMasterInquiry : BaseSqlActivity
 
     public override async Task<Outcome> Execute()
     {
+        TestToken.CreateAndAssignTokenForClient(httpClient, "IT-Operations");
+        
         string path = Path.Combine(AppContext.BaseDirectory, "OUTFL");
         string content = await File.ReadAllTextAsync(path);
         List<OutFL> outties = OutFLParser.ParseStringIntoRecords(content);
 
+        await using var writer = new StreamWriter("compare.md") { AutoFlush = true };
+        Console.SetOut(new TeeWriter(Console.Out, writer));
+
         int profitYear = 2024;
-        int quantity = 50;
+        int quantity = Int32.MaxValue;
 
         Console.WriteLine($"### Comparision of READY(mtpr) MasterInquiry vs SMART (profitYear={profitYear})");
         Console.WriteLine("");
@@ -135,7 +166,7 @@ public class TestMasterInquiry : BaseSqlActivity
     {
         ApiClient apiClient = SmartActivityFactory.Client!;
 
-        TestToken.CreateAndAssignTokenForClient(httpClient, "IT-Operations");
+        
         HttpRequestMessage request = new(HttpMethod.Post, apiClient.BaseUrl + "api/master/master-inquiry/search")
         {
             Content = new StringContent($$"""{"Ssn": {{ssn}},"memberType":1,"profitYear":2024}""",

@@ -1,6 +1,7 @@
 import { agGridNumberToCurrency } from "smart-ui-library";
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
+import { GRID_COLUMN_WIDTHS } from "../../../constants";
 
 export const GetBeneficiariesGridColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   return [
@@ -8,7 +9,7 @@ export const GetBeneficiariesGridColumns = (navFunction: (badgeNumber: string) =
       headerName: "Badge",
       field: "badgeNumber",
       colId: "badgeNumber",
-      minWidth: 100,
+      minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
@@ -58,7 +59,7 @@ export const GetBeneficiariesGridColumns = (navFunction: (badgeNumber: string) =
       headerName: "Age",
       field: "age",
       colId: "age",
-      minWidth: 80,
+      minWidth: 70,
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true
@@ -67,7 +68,7 @@ export const GetBeneficiariesGridColumns = (navFunction: (badgeNumber: string) =
       headerName: "SSN",
       field: "ssn",
       colId: "ssn",
-      minWidth: 120,
+      minWidth: GRID_COLUMN_WIDTHS.SSN,
       headerClass: "center-align",
       cellClass: "center-align",
       resizable: true

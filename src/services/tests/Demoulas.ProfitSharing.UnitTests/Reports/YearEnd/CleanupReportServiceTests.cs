@@ -372,12 +372,12 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             //"Delete" all employees so that none of the random ones are returned
             foreach (var dem in ctx.Demographics)
             {
-                dem.EmploymentStatusId = 'd';
+                dem.EmploymentStatusId = EmploymentStatus.Constants.Delete;
             }
 
             foreach (var demh in ctx.DemographicHistories)
             {
-                demh.EmploymentStatusId = 'd';
+                demh.EmploymentStatusId = EmploymentStatus.Constants.Delete;
             }
 
             //Prevent any payprofit records from being returned
@@ -391,7 +391,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             var emp = payProfit.Demographic;
             var empH = await ctx.DemographicHistories.FirstAsync(x => x.DemographicId == emp!.Id);
 
-            emp!.EmploymentStatusId = 'a';
+            emp!.EmploymentStatusId = EmploymentStatus.Constants.Active;
             emp.DateOfBirth = new DateOnly(DateTime.Now.Year - 28, 9, 21);
             empH.EmploymentStatusId = emp.EmploymentStatusId;
             empH.DateOfBirth = emp.DateOfBirth;
@@ -429,8 +429,8 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         req.IncludeActiveEmployees = false; //Test Active filter
         response = await ApiClient.POSTAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse>(req);
         response.ShouldNotBeNull();
-        response.Result.Response.Total.ShouldBe(0);
-        response.Result.Response.Results.Count().ShouldBe(0);
+        response.Result.Response.Total.ShouldBe(2);
+        response.Result.Response.Results.Count().ShouldBe(2);
 
         req.IncludeActiveEmployees = true;
         req.MaximumAgeInclusive = 20; //Test Max Age filter

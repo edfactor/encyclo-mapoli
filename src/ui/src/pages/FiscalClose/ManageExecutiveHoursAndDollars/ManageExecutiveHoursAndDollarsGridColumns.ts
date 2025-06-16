@@ -1,6 +1,7 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
 import { agGridNumberToCurrency } from "smart-ui-library";
+import { GRID_COLUMN_WIDTHS } from "../../../constants";
 
 // The default is to show all columns, but if the mini flag is set to true, only show the
 // badge, name, and ssn columns
@@ -10,7 +11,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       headerName: "Badge",
       field: "badgeNumber",
       colId: "badgeNumber",
-      minWidth: 80,
+      minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
       headerClass: mini ? "left-align" : "right-align",
       cellClass: mini ? "left-align" : "right-align",
       resizable: true,
@@ -22,7 +23,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       headerName: "Name",
       field: "fullName",
       colId: "fullName",
-      minWidth: 120,
+      minWidth: GRID_COLUMN_WIDTHS.FULL_NAME,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true
@@ -31,7 +32,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       headerName: "Store",
       field: "storeNumber",
       colId: "storeNumber",
-      minWidth: 120,
+      minWidth: 80,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true
@@ -40,7 +41,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       headerName: "SSN",
       field: "ssn",
       colId: "ssn",
-      minWidth: 120,
+      minWidth: GRID_COLUMN_WIDTHS.SSN,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true

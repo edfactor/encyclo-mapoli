@@ -3,6 +3,7 @@ import { yyyyMMDDToMMDDYYYY } from "smart-ui-library";
 import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
 import { agGridNumberToCurrency } from "smart-ui-library";
 import { getEnrolledStatus } from "../../../utils/enrollmentUtil";
+import { GRID_COLUMN_WIDTHS } from "../../../constants";
 
 export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
   return [
@@ -10,7 +11,7 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       headerName: "Badge",
       field: "badgeNumber",
       colId: "badgeNumber",
-      minWidth: 80,
+      minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
@@ -29,7 +30,7 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       headerName: "SSN",
       field: "ssn",
       colId: "ssn",
-      minWidth: 100,
+      minWidth: GRID_COLUMN_WIDTHS.SSN,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true
