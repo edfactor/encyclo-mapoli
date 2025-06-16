@@ -9,12 +9,12 @@ import {
   setMilitaryAndRehireForfeituresQueryParams
 } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
-import { dateYYYYMMDD, SearchAndReset } from "smart-ui-library";
+import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 import { CalendarResponseDto, StartAndEndDateRequest } from "../../../reduxstore/types";
-import { tryddmmyyyyToDate } from "../../../utils/dateUtils";
+import { tryddmmyyyyToDate, mmDDYYFormat } from "../../../utils/dateUtils";
 
 const schema = yup.object().shape({
   beginningDate: yup.string().required("Beginning Date is required"),
@@ -54,8 +54,8 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
 
       const updatedData = {
         ...data,
-        beginningDate: dateYYYYMMDD(new Date(beginDate)),
-        endingDate: dateYYYYMMDD(new Date(endDate)),
+        beginningDate: mmDDYYFormat(beginDate),
+        endingDate: mmDDYYFormat(endDate),
       };
 
       dispatch(setMilitaryAndRehireForfeituresQueryParams(updatedData));
