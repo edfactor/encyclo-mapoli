@@ -490,6 +490,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
                 <TextField
                   {...field}
                   fullWidth
+                  type="number"
                   size="small"
                   variant="outlined"
                   value={field.value ?? ""}
@@ -513,6 +514,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
                 <TextField
                   {...field}
                   fullWidth
+                  type="number"
                   size="small"
                   variant="outlined"
                   value={field.value ?? ""}
@@ -536,6 +538,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
                 <TextField
                   {...field}
                   fullWidth
+                  type="number"
                   size="small"
                   variant="outlined"
                   value={field.value ?? ""}
@@ -559,6 +562,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
                 <TextField
                   {...field}
                   fullWidth
+                  type="number"
                   size="small"
                   variant="outlined"
                   value={field.value ?? ""}

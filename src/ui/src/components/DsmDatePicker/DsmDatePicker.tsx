@@ -35,7 +35,7 @@ const DsmDatePicker: FC<MyProps> = ({
   ref,
   id,
   disabled,
-  minDate,
+  minDate = new Date(new Date().getFullYear() - 6, 0, 1),
   maxDate
 }) => {
   const isInvalid = error ? error?.length > 0 : false;
