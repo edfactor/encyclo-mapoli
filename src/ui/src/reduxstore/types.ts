@@ -186,6 +186,7 @@ export interface StartAndEndDateRequest {
   beginningDate: string;
   endingDate: string;
   pagination: SortedPaginationRequestDto;
+  excludeZeroBalance?: boolean;
 }
 
 export interface ForfeitureDetail extends ProfitYearRequest {

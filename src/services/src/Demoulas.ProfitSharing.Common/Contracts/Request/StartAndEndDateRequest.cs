@@ -7,6 +7,7 @@ public record StartAndEndDateRequest : SortedPaginationRequestDto
 {
     public DateOnly BeginningDate { get; set; }
     public DateOnly EndingDate { get; set; }
+    public bool ExcludeZeroBalance { get; set; } = false;
 
 
 
