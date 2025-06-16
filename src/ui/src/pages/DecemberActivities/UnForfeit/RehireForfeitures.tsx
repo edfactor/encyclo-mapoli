@@ -10,6 +10,7 @@ import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 
 const RehireForfeitures = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
+  const [resetPageFlag, setResetPageFlag] = useState(false);
   const [fetchAccountingRange, { data: fiscalCalendarYear, isLoading: isRangeLoading }] = useLazyGetAccountingRangeToCurrent(6);
   const renderActionNode = () => {
     return <StatusDropdownActionNode />;
@@ -21,6 +22,10 @@ const RehireForfeitures = () => {
   }, [fetchAccountingRange]);
 
   const isCalendarDataLoaded = !!fiscalCalendarYear?.fiscalBeginDate && !!fiscalCalendarYear?.fiscalEndDate;
+
+  const handleSearch = () => {
+    setResetPageFlag(prev => !prev);
+  };
 
   return (
     <Page
@@ -45,6 +50,7 @@ const RehireForfeitures = () => {
                 <RehireForfeituresSearchFilter
                   setInitialSearchLoaded={setInitialSearchLoaded}
                   fiscalData={fiscalCalendarYear}
+                  onSearch={handleSearch}
                 />
               </DSMAccordion>
             </Grid2>
@@ -53,6 +59,7 @@ const RehireForfeitures = () => {
               <RehireForfeituresGrid
                 initialSearchLoaded={initialSearchLoaded}
                 setInitialSearchLoaded={setInitialSearchLoaded}
+                resetPageFlag={resetPageFlag}
               />
             </Grid2>
           </>
