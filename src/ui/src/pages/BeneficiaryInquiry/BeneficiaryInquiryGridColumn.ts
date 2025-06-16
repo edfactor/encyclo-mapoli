@@ -2,6 +2,7 @@ import { agGridNumberToCurrency } from "smart-ui-library";
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { mmDDYYYY_HHMMSS_Format } from "utils/dateUtils";
 import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
+import { GRID_COLUMN_WIDTHS } from "../../constants";
 
 
 export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
@@ -40,7 +41,7 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       headerName: "SSN",
       field: "ssn",
       colId: "ssn",
-      minWidth: 100,
+      minWidth: GRID_COLUMN_WIDTHS.SSN,
       headerClass: "center-align",
       cellClass: "center-align",
       resizable: true,
@@ -126,7 +127,7 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       headerName: "Full Name",
       field: "fullName",
       colId: "fullName",
-      minWidth: 170,
+      minWidth: GRID_COLUMN_WIDTHS.FULL_NAME,
       headerClass: "center-align",
       cellClass: "center-align",
       resizable: true,

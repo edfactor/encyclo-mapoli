@@ -1,6 +1,7 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
 import { agGridNumberToCurrency } from "smart-ui-library";
+import { GRID_COLUMN_WIDTHS } from "../../constants";
 
 export const GetYTDWagesColumns = (): ColDef[] => {
   const columns: ColDef[] = [
@@ -8,7 +9,7 @@ export const GetYTDWagesColumns = (): ColDef[] => {
       headerName: "Badge",
       field: "badgeNumber",
       colId: "badgeNumber",
-      minWidth: 80,
+      minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
