@@ -64,7 +64,6 @@ public sealed class MasterInquiryService : IMasterInquiryService
         public decimal Contribution { get; init; }
         public decimal Earnings { get; init; }
         public decimal Forfeiture { get; init; }
-        // Remove Payment from SQL projection, will calculate in C#
         public byte MonthToDate { get; init; }
         public short YearToDate { get; init; }
         public string? Remark { get; init; }
@@ -242,9 +241,38 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 _ => (await GetMasterInquiryDemographics(ctx)).Union(GetMasterInquiryBeneficiary(ctx))
             };
 
+            var masterInquiryRequest = new MasterInquiryRequest
+            {
+                MemberType = req.MemberType,
+                BadgeNumber = req.BadgeNumber,
+                Ssn = !string.IsNullOrWhiteSpace(req.Ssn) ? int.Parse(req.Ssn) : 0,
+                EndProfitYear = req.EndProfitYear,
+                StartProfitMonth = req.StartProfitMonth,
+                EndProfitMonth = req.EndProfitMonth,
+                ProfitCode = req.ProfitCode,
+                ContributionAmount = req.ContributionAmount,
+                EarningsAmount = req.EarningsAmount,
+                ForfeitureAmount = req.ForfeitureAmount,
+                PaymentAmount = req.PaymentAmount,
+                Name = req.Name,
+                PaymentType = req.PaymentType
+            };
+
+            query = FilterMemberQuery(masterInquiryRequest, query);
+
             if (req.Id.HasValue)
             {
                 query = query.Where(x => x.Member.Id == req.Id.Value);
+            }
+
+            if (req.ProfitYear.HasValue)
+            {
+                query = query.Where(x => x.ProfitDetail.ProfitYear == req.ProfitYear.Value);
+            }
+
+            if (req.MonthToDate.HasValue)
+            {
+                query = query.Where(x => x.ProfitDetail.MonthToDate == req.MonthToDate.Value);
             }
 
             // First projection: SQL-translatable only
@@ -289,9 +317,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 CurrentHoursYear = x.Member.CurrentHoursYear
             }).ToPaginationResultsAsync(req, cancellationToken);
 
-           
-
-            var formattedResults =  rawQuery.Results.Select(x => new MasterInquiryResponseDto
+            var formattedResults = rawQuery.Results.Select(x => new MasterInquiryResponseDto
             {
                 Id = x.Id,
                 Ssn = x.Ssn.MaskSsn(),
