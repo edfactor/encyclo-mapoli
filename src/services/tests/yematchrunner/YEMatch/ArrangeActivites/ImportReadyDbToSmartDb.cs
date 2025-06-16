@@ -1,11 +1,11 @@
 ﻿namespace YEMatch;
 
 // This task takes the READY database and imports it directly to SMART.  Handy for isolating smart activities.
-internal sealed class ReadyDatabase2Smart : IActivity
+internal sealed class ImportReadyDbToSmartDb : IActivity
 {
     public string Name()
     {
-        return "R2S"; // Short for Ready to Smart
+        return "ImportReadyDbToSmartDb";
     }
 
     public Task<Outcome> Execute()

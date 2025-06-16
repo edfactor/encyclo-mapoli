@@ -1,14 +1,15 @@
 import { Divider, Grid2, Typography } from "@mui/material";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DSMGrid, Page } from "smart-ui-library";
 import { useLazyGetYearEndProfitSharingSummaryReportQuery } from "reduxstore/api/YearsEndApi";
 import { GetProfitSummaryGridColumns } from "./ProfitSummaryGridColumns";
 import { YearEndProfitSharingReportSummaryLineItem } from "reduxstore/types";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
-import { CAPTIONS } from "../../../constants";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../reduxstore/store";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import ReportGrid from "../PAY426N/ReportGrid";
+import presets from "../PAY426N/presets";
 
 /**
  * Default rows for "Active and Inactive" section - these will display with zero values
@@ -106,9 +107,37 @@ const terminatedPlaceholders: YearEndProfitSharingReportSummaryLineItem[] = [
 
 const ProfitSummary = () => {
   const [trigger, { data, isFetching }] = useLazyGetYearEndProfitSharingSummaryReportQuery();
+  const [selectedLineItem, setSelectedLineItem] = useState<string | null>(null);
 
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const profitYear = useFiscalCloseProfitYear();
+
+  const getPresetForLineItem = (lineItemPrefix: string) => {
+    const presetMap: { [key: string]: string } = {
+      "1": "PAY426-1",
+      "2": "PAY426-2",
+      "3": "PAY426-3",
+      "4": "PAY426-4",
+      "5": "PAY426-5",
+      "6": "PAY426-6",
+      "7": "PAY426-7",
+      "8": "PAY426-8",
+      "9": "PAY426-3",
+      "N": "PAY426-10"
+    };
+    
+    const presetId = presetMap[lineItemPrefix];
+    return presets.find(preset => preset.id === presetId)?.params || null;
+  };
+
+  const handleRowClick = (event: { data: YearEndProfitSharingReportSummaryLineItem }) => {
+    const rowData = event.data;
+    const clickedLineItem = rowData.lineItemPrefix;
+    
+    setSelectedLineItem(prevSelected => 
+      prevSelected === clickedLineItem ? null : clickedLineItem
+    );
+  };
 
   useEffect(() => {
     if (hasToken) {
@@ -125,7 +154,6 @@ const ProfitSummary = () => {
     );
   };
   
-
   const columnDefs = useMemo(() => GetProfitSummaryGridColumns(), []);
 
   // Here we combine the API data with placeholders for "Active and Inactive" and "terminated" section
@@ -197,11 +225,12 @@ const ProfitSummary = () => {
       }
     ];
   }, [terminatedRowData]);
-  
+
+  const shouldShowDetailGrid = selectedLineItem && getPresetForLineItem(selectedLineItem);
 
   return (
     <>
-      <Page label="Active and Inactive" actionNode={renderActionNode()}>
+      <Page label="Profit Summary" actionNode={renderActionNode()}>
         <Grid2
           container
           rowSpacing="24px">
@@ -210,6 +239,26 @@ const ProfitSummary = () => {
           </Grid2>
 
           <Grid2 width={"100%"}>
+            <Typography variant="h6" sx={{ mb: 2, px: 3 }}>
+              Active and Inactive
+            </Typography>
+            <DSMGrid
+              preferenceKey={"ACTIVE_INACTIVE_SUMMARY"}
+              isLoading={isFetching}
+              handleSortChanged={() => { }}
+              providedOptions={{
+                rowData: activeAndInactiveRowData,
+                pinnedTopRowData: getActiveAndInactiveTotals,
+                columnDefs: columnDefs,
+                onRowClicked: handleRowClick
+              }}
+            />
+          </Grid2>
+
+          <Grid2 width={"100%"}>
+            <Typography variant="h6" sx={{ mb: 2, px: 3 }}>
+              Terminated
+            </Typography>
             <DSMGrid
               preferenceKey={"TERMINATED_SUMMARY"}
               isLoading={isFetching}
@@ -217,14 +266,23 @@ const ProfitSummary = () => {
               providedOptions={{
                 rowData: terminatedRowData,
                 pinnedTopRowData: getTerminatedTotals,
-                columnDefs: columnDefs
+                columnDefs: columnDefs,
+                onRowClicked: handleRowClick
               }}
             />
           </Grid2>
 
+          {shouldShowDetailGrid && (
+            <Grid2 width={"100%"}>
+              <ReportGrid 
+                params={getPresetForLineItem(selectedLineItem)!}
+                onLoadingChange={() => {}}
+              />
+            </Grid2>
+          )}
+
         </Grid2>
       </Page>
-      
     </>
   );
 };

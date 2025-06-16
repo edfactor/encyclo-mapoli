@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetProfitShareReportColumns } from "./ProfitShareReportGridColumn";
-import ReportSummary from "../../components/ReportSummary";
 
 interface ProfitShareReportGridProps {
   data: any[];

@@ -18,7 +18,7 @@ public class GoldenExpressRun : Runnable
         await Run(Specify(
             "R0", // Start by importing the READY database from the scramble data.
             "DropBadBenes", // Git rid of the two Bene/Employees w/o Demographics rows
-            "R2S", // Import SMART database from READY database
+            "ImportReadyDbToSmartDb", // Import SMART database from READY database
             "S12", // Freeze on Smart
             "P18", // Run YearEndServce on SMART and "PROF-SHARE sw[2]=1 CDATE=250104 YEAREND=Y" on READY
             "TestPayProfitSelectedColumns", // VERIFY: Test PayProfit Updates; EarnPoints, ZeroCont, New Employee, CertDate 

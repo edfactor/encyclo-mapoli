@@ -58,6 +58,35 @@ export const InquiryApi = createApi({
         params: pagination
       })
     }),
+    getProfitMasterInquiryFilteredDetails: builder.query<{ results: MasterInquiryResponseDto[], total: number }, { 
+      memberType: number; 
+      id?: number;
+      profitYear?: number; 
+      monthToDate?: number; 
+      badgeNumber?: number;
+      psnSuffix?: number;
+      ssn?: string;
+      endProfitYear?: number;
+      startProfitMonth?: number;
+      endProfitMonth?: number;
+      profitCode?: number;
+      contributionAmount?: number;
+      earningsAmount?: number;
+      forfeitureAmount?: number;
+      paymentAmount?: number;
+      name?: string;
+      paymentType?: number;
+      skip?: number; 
+      take?: number; 
+      sortBy?: string; 
+      isSortDescending?: boolean 
+    }>({
+      query: ({ memberType, ...pagination }) => ({
+        url: `master/master-inquiry/member/${memberType}/details`,
+        method: "GET",
+        params: pagination
+      })
+    }),
     getProfitMasterInquiryGrouping: builder.query<Paged<GroupedProfitSummaryDto>, MasterInquiryRequest>({
       query: (params) => ({
         url: `master/master-inquiry/grouping`,
@@ -89,7 +118,6 @@ export const InquiryApi = createApi({
           const { data } = await queryFulfilled;
           dispatch(setMasterInquiryGroupingData(data.results));
         } catch (err) {
-          console.log("Error in getProfitMasterInquiryGrouping:", err);
         }
       }
     })
@@ -100,5 +128,6 @@ export const {
   useLazyGetProfitMasterInquiryMemberQuery,
   useLazySearchProfitMasterInquiryQuery,
   useLazyGetProfitMasterInquiryMemberDetailsQuery,
+  useLazyGetProfitMasterInquiryFilteredDetailsQuery,
   useLazyGetProfitMasterInquiryGroupingQuery
 } = InquiryApi;

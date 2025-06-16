@@ -8,7 +8,7 @@ export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: str
       headerName: "Badge",
       field: "badgeNumber",
       colId: "badgeNumber",
-      minWidth: 100,
+      minWidth: 80,
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
@@ -56,7 +56,7 @@ export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: str
       headerName: "Age",
       field: "age",
       colId: "age",
-      minWidth: 80,
+      minWidth: 70,
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true

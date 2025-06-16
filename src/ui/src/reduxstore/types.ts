@@ -186,11 +186,17 @@ export interface StartAndEndDateRequest {
   beginningDate: string;
   endingDate: string;
   pagination: SortedPaginationRequestDto;
+  excludeZeroBalance?: boolean;
 }
 
 export interface ForfeitureDetail extends ProfitYearRequest {
   forfeiture: number;
   remark: string;
+  hoursCurrentYear: number;
+  wages: number;
+  enrollmentId: number;
+  enrollmentName: string;
+  
 }
 
 export interface MilitaryAndRehireForfeiture {
@@ -199,10 +205,7 @@ export interface MilitaryAndRehireForfeiture {
   ssn: string;
   reHiredDate: string;
   companyContributionYears: number;
-  enrollmentId: number;
-  enrollmentName: string;
-  employmentStatus: string;
-  hoursCurrentYear: number;
+  employmentStatus: string;  
   netBalanceLastYear: number;
   vestedBalanceLastYear: number;
   hireDate: string;
@@ -1303,6 +1306,11 @@ export interface BeneficiaryDto {
 export interface BeneficiaryRequestDto extends SortedPaginationRequestDto {
   badgeNumber: number;
   psnSuffix: number;
+  name: string;
+  city: string;
+  address: string;
+  state: string;
+  ssn: number;
 }
 
 export interface BeneficiaryResponseDto {
@@ -1311,7 +1319,6 @@ export interface BeneficiaryResponseDto {
 
 export interface CreateBeneficiaryRequest {
     beneficiaryContactId: number;
-    demographicId: number;
     employeeBadgeNumber: number;
     firstLevelBeneficiaryNumber: number | null;
     secondLevelBeneficiaryNumber: number | null;

@@ -105,14 +105,14 @@ const MilitaryContributionForm = ({
             render={({ field, fieldState: { error } }) => (
               <DsmDatePicker
                 id="contributionDate"
-                label="Contribution Date"
+                label="Contribution Year"
                 onChange={(value: Date | null) => field.onChange(value)}
                 value={field.value ?? null}
                 error={error?.message}
                 required={true}
                 disableFuture={true}
-                minDate={new Date(profitYear - 5, 0, 1)}
-                views={["year", "month"]}
+                minDate={new Date(profitYear - 6, 0, 1)}
+                views={["year"]}
               />
             )}
           />

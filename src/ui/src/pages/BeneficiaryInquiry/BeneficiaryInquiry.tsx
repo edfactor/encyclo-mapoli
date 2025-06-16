@@ -15,10 +15,19 @@ import CreateBeneficiary from "./CreateBeneficiary";
 const BeneficiaryInquiry = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [open, setOpen] = useState(false);
+  const [badgeNumber, setBadgeNumber]  = useState(0);
 
   const handleClickOpen = () => {
     setOpen(true);
   };
+
+  const currentBadge = (badgeNumber:number) => {
+    setBadgeNumber(badgeNumber);
+  }
+  const onBeneficiarySaveSuccess = ()=>{
+    setOpen(false);
+    
+  }
 
   const handleClose = () => {
     setOpen(false);
@@ -46,7 +55,7 @@ const BeneficiaryInquiry = () => {
         >
           <DialogTitle>Add Beneficiary</DialogTitle>
           <DialogContent>
-            <CreateBeneficiary></CreateBeneficiary>
+            <CreateBeneficiary badgeNumber={badgeNumber} onSaveSuccess={onBeneficiarySaveSuccess}></CreateBeneficiary>
 
           </DialogContent>
         </Dialog>
@@ -62,7 +71,7 @@ const BeneficiaryInquiry = () => {
             {/* <MasterInquirySearchFilter setInitialSearchLoaded={setInitialSearchLoaded} 
             setMissiveAlerts={setMissiveAlerts}
             /> */}
-            <BeneficiaryInquirySearchFilter></BeneficiaryInquirySearchFilter>
+            <BeneficiaryInquirySearchFilter searchClicked={currentBadge}></BeneficiaryInquirySearchFilter>
           </DSMAccordion>
         </Grid2>
 

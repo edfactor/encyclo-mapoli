@@ -22,7 +22,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       headerName: "Name",
       field: "fullName",
       colId: "fullName",
-      minWidth: 120,
+      minWidth: 180,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true
@@ -31,7 +31,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       headerName: "Store",
       field: "storeNumber",
       colId: "storeNumber",
-      minWidth: 120,
+      minWidth: 80,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true

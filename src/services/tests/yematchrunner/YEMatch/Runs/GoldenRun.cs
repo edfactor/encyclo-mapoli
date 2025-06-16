@@ -1,9 +1,11 @@
 using System.Diagnostics.CodeAnalysis;
 
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+
 namespace YEMatch;
 
 [SuppressMessage("AsyncUsage", "AsyncFixer01:Unnecessary async/await usage")]
-public class GoldenReadyOnlyRun : Runnable
+public class GoldenRun : Runnable
 {
     public override async Task Exec()
     {
@@ -21,6 +23,7 @@ public class GoldenReadyOnlyRun : Runnable
             "R22",
             "R23",
             "R24",
+            "R24B",
             "R25",
             "R26",
             "R27",
@@ -28,6 +31,6 @@ public class GoldenReadyOnlyRun : Runnable
         ));
 
         // Copy the golden files to the integration test Resources directory
-        GetGold.Fetch(ReadyActivityFactory.SftpClient!);
+        GetGold.Fetch(DataDirectory, ReadyActivityFactory.SftpClient!);
     }
 }

@@ -6,7 +6,7 @@ export const GetForfeituresAdjustmentColumns = (): ColDef[] => {
   const getColDefForForfeiture = (): ColDef[] => {
     return [
       {
-        headerName: "Badge #",
+        headerName: "Badge",
         field: "badgeNumber",
         width: 150,
         cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber)

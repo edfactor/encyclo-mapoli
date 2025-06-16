@@ -39,7 +39,7 @@ const YTDWagesGrid = ({ innerRef, initialSearchLoaded, setInitialSearchLoaded }:
     };
 
     await triggerSearch(request, false);
-  }, [pageNumber, pageSize, sortParams, triggerSearch, employeeWagesForYearQueryParams?.profitYear]);
+  }, [employeeWagesForYearQueryParams?.profitYear, fiscalCloseProfitYear, pageNumber, pageSize, sortParams.sortBy, sortParams.isSortDescending, triggerSearch]);
 
   useEffect(() => {
     if (initialSearchLoaded && hasToken) {
