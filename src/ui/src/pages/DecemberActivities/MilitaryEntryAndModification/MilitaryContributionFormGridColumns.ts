@@ -1,6 +1,7 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
 import { agGridNumberToCurrency } from "smart-ui-library";
+import { GRID_COLUMN_WIDTHS } from "../../../constants";
 
 
 // The default is to show all columns, but if the mini flag is set to true, only show the
@@ -11,7 +12,7 @@ export const GetMilitaryContributionColumns = (): ColDef[] => {
       headerName: "Badge",
       field: "badgeNumber",
       colId: "badgeNumber",
-      minWidth: 80,
+      minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,

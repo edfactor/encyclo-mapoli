@@ -153,3 +153,9 @@ export const CAPTIONS = {
 export const VIEW = "View";
 
 export const SMART_PS_QA_IMPERSONATION = "SMART-PS-QA-Impersonation";
+
+export const GRID_COLUMN_WIDTHS = {
+  BADGE_NUMBER: 100,
+  SSN: 125,
+  FULL_NAME: 150
+} as const;
