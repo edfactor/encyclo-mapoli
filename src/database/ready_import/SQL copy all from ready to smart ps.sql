@@ -969,6 +969,23 @@ BEGIN
     SET comment_type_id = 24
     WHERE REMARK = '>64 & >5 100%';
 
+    --https://demoulas.atlassian.net/wiki/spaces/MAIN/pages/402817082/008-12+to+forfeit+Class+Action+-+Mockup
+    UPDATE profit_detail pd
+    SET comment_type_id = 25
+    WHERE REMARK LIKE 'FORFEIT CA';
+
+    UPDATE PROFIT_DETAIL pd
+       SET COMMENT_TYPE_ID = 25
+     WHERE EXISTS 
+      (
+		    SELECT pdF.Id FROM PROFIT_DETAIL pdF
+		    JOIN PROFIT_DETAIL pdCa ON pdF.SSN = pdCa.SSN AND pdF.PROFIT_YEAR >= pdCa.PROFIT_YEAR
+		    WHERE pdF.COMMENT_TYPE_ID = 6
+		    AND pdCa.COMMENT_TYPE_ID = 8
+		    AND pdF.FORFEITURE  = pdCA.EARNINGS
+		    AND pd.ID  = pdF.ID
+      ) -- Forfeits that match a class action should be categorized as FORFEIT CA 
+
     -- Set flag on Profit Detail marking a year of elibility for Profit Sharing
 -- Comment types indicating years of service other than a contribution include:
 -- V-Only

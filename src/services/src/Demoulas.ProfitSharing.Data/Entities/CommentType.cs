@@ -33,6 +33,7 @@ public sealed class CommentType : ILookupTable<byte>
         public static CommentType OneHundredPercentEarnings => new() { Id = 23, Name = "100% Earnings" };
         // The variable name here purposely corresponds to the ZeroContrbutionReason.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested name
         public static CommentType SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested => new() { Id = 24, Name = ">64 & >5 100%" };
+        public static CommentType ForfeitClassAction => new() { Id = 25, Name = "Forfeit Class Action" }; //https://demoulas.atlassian.net/wiki/spaces/MAIN/pages/402817082/008-12+to+forfeit+Class+Action+-+Mockup
     }
 
     // Override Equals method for correct comparison between materialized values and constants
