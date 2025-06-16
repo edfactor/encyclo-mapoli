@@ -10,8 +10,8 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import CreateBeneficiary from "./CreateBeneficiary";
-import { useLazyGetBeneficiarytypesQuery } from "reduxstore/api/BeneficiariesApi";
-import { BeneficiaryTypeDto } from "reduxstore/types";
+import { useLazyGetBeneficiarytypesQuery, useLazyGetBeneficiaryKindQuery } from "reduxstore/api/BeneficiariesApi";
+import { BeneficiaryKindDto, BeneficiaryTypeDto } from "reduxstore/types";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 
@@ -19,10 +19,10 @@ import { RootState } from "reduxstore/store";
 const BeneficiaryInquiry = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const { token, appUser, username: stateUsername } = useSelector((state: RootState) => state.security);
-  const [triggerGetBeneficiaryType] = useLazyGetBeneficiarytypesQuery();
+  const [triggerGetBeneficiaryKind] = useLazyGetBeneficiaryKindQuery();
   const [open, setOpen] = useState(false);
   const [badgeNumber, setBadgeNumber] = useState(0);
-  const [beneficiaryTypes, setBeneficiaryTypes] = useState<BeneficiaryTypeDto[]>([]);
+  const [beneficiaryKind, setBeneficiaryKind] = useState<BeneficiaryKindDto[]>([]);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -42,13 +42,13 @@ const BeneficiaryInquiry = () => {
 
   useEffect(() => {
     if (token) {
-      triggerGetBeneficiaryType({}).unwrap().then((data) => {
-        setBeneficiaryTypes(data.beneficiaryTypeList ?? []);
+      triggerGetBeneficiaryKind({}).unwrap().then((data) => {
+        setBeneficiaryKind(data.beneficiaryKindList ?? []);
       }).catch((reason) => { console.error(reason); })
     }
 
 
-  }, [beneficiaryTypes, token])
+  }, [beneficiaryKind, token])
 
 
   return (
@@ -73,7 +73,7 @@ const BeneficiaryInquiry = () => {
         >
           <DialogTitle>Add Beneficiary</DialogTitle>
           <DialogContent>
-            <CreateBeneficiary beneficiaryTypes={beneficiaryTypes} badgeNumber={badgeNumber} onSaveSuccess={onBeneficiarySaveSuccess}></CreateBeneficiary>
+            <CreateBeneficiary beneficiaryKind={beneficiaryKind} badgeNumber={badgeNumber} onSaveSuccess={onBeneficiarySaveSuccess}></CreateBeneficiary>
 
           </DialogContent>
         </Dialog>
@@ -89,7 +89,7 @@ const BeneficiaryInquiry = () => {
             {/* <MasterInquirySearchFilter setInitialSearchLoaded={setInitialSearchLoaded} 
             setMissiveAlerts={setMissiveAlerts}
             /> */}
-            <BeneficiaryInquirySearchFilter beneficiaryTypes={beneficiaryTypes} searchClicked={currentBadge}></BeneficiaryInquirySearchFilter>
+            <BeneficiaryInquirySearchFilter beneficiaryKind={beneficiaryKind} searchClicked={currentBadge}></BeneficiaryInquirySearchFilter>
           </DSMAccordion>
         </Grid2>
 

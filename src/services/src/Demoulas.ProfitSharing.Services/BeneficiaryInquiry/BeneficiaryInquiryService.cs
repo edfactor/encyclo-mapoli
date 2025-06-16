@@ -38,16 +38,16 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
             var result = context.Beneficiaries.Include(x => x.Contact).Include(x => x.Contact.ContactInfo)
             .Where(
                 x => 
-                (request.BadgeNumber == null || x.BadgeNumber == request.BadgeNumber) && 
-                (request.PsnSuffix == null ||x.PsnSuffix == request.PsnSuffix) &&
+                (request.BadgeNumber == null || request.BadgeNumber ==0 || x.BadgeNumber == request.BadgeNumber) && 
+                (request.PsnSuffix == null || request.PsnSuffix == 0 || x.PsnSuffix == request.PsnSuffix) &&
                 (request.Name == null || x.Contact.ContactInfo.FullName.Contains(request.Name)) &&
-                (request.Ssn == null || x.Contact.Ssn == request.Ssn) &&
+                (request.Ssn == null || request.Ssn == 0 || x.Contact.Ssn == request.Ssn) &&
                 (request.Address == null || x.Contact.Address.Street.Contains(request.Address)) &&
                 (request.City == null || x.Contact.Address.City.Contains(request.City)) &&
                 (request.State == null || x.Contact.Address.State.Contains(request.State)) &&
-                (request.Percentage == null || x.Percent == request.Percentage)
-                //(request.BeneficiaryTypeId == null || x.BeneficiaryTypeId == request.BeneficiaryTypeId) //we don't have BeneficiaryTypeId in Beneficiary table. 
-                )
+                (request.Percentage == null || request.Percentage ==0 || x.Percent == request.Percentage) &&
+                (request.KindId == null || x.KindId == request.KindId) 
+                ).Skip(request.Skip??0).Take(request.Take??25)
             .Select(x => new BeneficiaryDto()
             {
                 Id = x.Id,
@@ -61,7 +61,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                     Id = x.Contact != null ? x.Contact.Id : 0,
                     CreatedDate = x.Contact != null ? x.Contact.CreatedDate : DateOnly.MaxValue,
                     DateOfBirth = x.Contact != null ? x.Contact.DateOfBirth : DateOnly.MaxValue,
-                    Ssn = x.Contact != null ? x.Contact.Ssn.MaskSsn() : null,
+                    Ssn = x.Contact != null ? x.Contact.Ssn.ToString() : null,
                     Address = new Common.Contracts.Response.AddressResponseDto()
                     {
                         City = x.Contact != null ? x.Contact.Address.City : null,
@@ -93,7 +93,14 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
             return final;
         }
         );
-        //setting CurrentBalance
+        //setting Current balance
+        foreach (var item in beneficiary.Results)
+        {
+            int ssn = item.Contact.Ssn.ConvertSsnToInt();
+            var currentBalanceRes = await _totalService.GetVestingBalanceForSingleMemberAsync(SearchBy.Ssn, ssn, yearEnd, cancellationToken);
+            item.CurrentBalance = currentBalanceRes?.CurrentBalance;
+            item.Contact.Ssn = ssn.MaskSsn();
+        }
 
 
         return beneficiary;
@@ -107,5 +114,16 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
         });
 
         return new BeneficiaryTypesResponseDto() { BeneficiaryTypeList = result.Result };
+    }
+
+
+    public async Task<BeneficiaryKindResponseDto> GetBeneficiaryKind(BeneficiaryKindRequestDto beneficiaryKindRequestDto, CancellationToken cancellation)
+    {
+        var result = await _dataContextFactory.UseReadOnlyContext(async context =>
+        {
+            return context.BeneficiaryKinds.Select(x => new BeneficiaryKindDto { Id = x.Id, Name = x.Name }).ToListAsync();
+        });
+
+        return new BeneficiaryKindResponseDto() { BeneficiaryKindList = result.Result };
     }
 }

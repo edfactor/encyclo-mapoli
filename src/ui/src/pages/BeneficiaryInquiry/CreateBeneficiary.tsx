@@ -7,7 +7,7 @@ import BeneficiaryInquiryGrid from "./BeneficiaryInquiryGrid";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { BeneficiaryTypeDto, BeneficiaryTypesResponseDto, CreateBeneficiaryContactRequest, CreateBeneficiaryContactResponse, CreateBeneficiaryRequest } from "reduxstore/types";
+import { BeneficiaryKindDto, BeneficiaryTypeDto, BeneficiaryTypesResponseDto, CreateBeneficiaryContactRequest, CreateBeneficiaryContactResponse, CreateBeneficiaryRequest } from "reduxstore/types";
 import { useLazyCreateBeneficiariesQuery, useLazyCreateBeneficiaryContactQuery, useLazyGetBeneficiarytypesQuery } from "reduxstore/api/BeneficiariesApi";
 import Checkbox from '@mui/material/Checkbox';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -31,7 +31,7 @@ const schema = yup.object().shape({
     firstName: yup.string().required(),
     lastName: yup.string().required(),
     addressSameAsBeneficiary: yup.boolean().notRequired(),
-    beneficiaryTypeId: yup.number().required()
+    kindId: yup.string().required()
 });
 
 export interface cb {
@@ -46,15 +46,15 @@ export interface cb {
     firstName: string;
     lastName: string;
     addressSameAsBeneficiary: boolean;
-    beneficiaryTypeId: number;
+    kindId: string;
 }
 type Props = {
     badgeNumber:number;
-    beneficiaryTypes: BeneficiaryTypeDto[];
+    beneficiaryKind: BeneficiaryKindDto[];
     onSaveSuccess: ()=>void;
 }
 
-const CreateBeneficiary: React.FC<Props> = ({badgeNumber, onSaveSuccess,beneficiaryTypes}) => {
+const CreateBeneficiary: React.FC<Props> = ({badgeNumber, onSaveSuccess,beneficiaryKind}) => {
     const [triggerAdd, { isFetching }] = useLazyCreateBeneficiariesQuery();
     
     const [triggerCreateBeneficiaryContact, createBeneficiaryContactResponse] = useLazyCreateBeneficiaryContactQuery();
@@ -311,9 +311,9 @@ const CreateBeneficiary: React.FC<Props> = ({badgeNumber, onSaveSuccess,benefici
 
                     <Grid2 container columnSpacing={4} size={{ xs: 12, md: 12 }}>
                         <Grid2 size={{ md: 5, xs: 12 }}>
-                            <FormLabel>Beneficiary Type</FormLabel>
+                            <FormLabel>Beneficiary Kind</FormLabel>
                             <Controller
-                                name="beneficiaryTypeId"
+                                name="kindId"
                                 control={control}
                                 render={({ field }) => (
                                     <Select
@@ -321,13 +321,13 @@ const CreateBeneficiary: React.FC<Props> = ({badgeNumber, onSaveSuccess,benefici
                                         fullWidth
                                         size="small"
                                         variant="outlined"
-                                        labelId="beneficiaryTypeId"
-                                        id="beneficiaryTypeId"
+                                        labelId="kindId"
+                                        id="kindId"
                                         value={field.value}
-                                        label="Beneficiary Type"
+                                        label="Beneficiary Kind"
                                         onChange={(e) => field.onChange(e.target.value)}
                                     >
-                                        {beneficiaryTypes.map((d) => (
+                                        {beneficiaryKind.map((d) => (
                                             <MenuItem value={d.id}>{d.name}</MenuItem>
                                         ))}
                                     </Select>

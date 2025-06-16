@@ -37,6 +37,16 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       cellRenderer: (params: ICellRendererParams) =>viewBadgeLinkRenderer(params.data.badgeNumber,params.data.psnSuffix)
     },
     {
+      headerName: "Current Balance",
+      field: "currentBalance",
+      colId: "currentBalance",
+      minWidth: 170,
+      headerClass: "center-align",
+      cellClass: "center-align",
+      resizable: true,
+      sortable: false
+    },
+    {
       headerName: "SSN",
       field: "ssn",
       colId: "ssn",

@@ -10,7 +10,7 @@ import { Controller, useForm, Resolver } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { BeneficiaryRequestDto, BeneficiaryTypeDto } from "reduxstore/types";
+import { BeneficiaryKindDto, BeneficiaryRequestDto, BeneficiaryTypeDto } from "reduxstore/types";
 import { useDispatch } from "react-redux";
 import { useLazyGetBeneficiariesQuery } from "reduxstore/api/BeneficiariesApi";
 import { setBeneficiaryRequest } from "reduxstore/slices/beneficiarySlice";
@@ -25,22 +25,22 @@ const schema = yup.object().shape({
     state: yup.string().notRequired(),
     ssn: yup.number().notRequired(),
     percentage: yup.number().notRequired(),
-    beneficiaryTypeId: yup.number().notRequired()
+    kindId: yup.string().notRequired()
 });
 interface bRequest {
-    badgeNumber: number;
-    psnSuffix: number;
+    badgeNumber?: number;
+    psnSuffix?: number;
     name: string;
     address: string;
     city: string;
     state: string;
     ssn: number;
     percentage:number;
-    beneficiaryTypeId: number;
+    kindId: string;
 }
 // Define the type of props
 type Props = {
-    beneficiaryTypes: BeneficiaryTypeDto[],
+    beneficiaryKind: BeneficiaryKindDto[],
   searchClicked: (badgeNumber:number) => void;
 };
 
@@ -49,7 +49,7 @@ type Props = {
 //   setInitialSearchLoaded,
 //   setMissiveAlerts
 // }) => {
-const BeneficiaryInquirySearchFilter:React.FC<Props> = ({searchClicked,beneficiaryTypes}) => {
+const BeneficiaryInquirySearchFilter:React.FC<Props> = ({searchClicked,beneficiaryKind}) => {
     const [triggerSearch, {data,isLoading,isError,isFetching}] = useLazyGetBeneficiariesQuery();
     const dispatch = useDispatch();
 
@@ -76,16 +76,16 @@ const BeneficiaryInquirySearchFilter:React.FC<Props> = ({searchClicked,beneficia
     const onSubmit = (data: any) => {
         const { badgeNumber, psnSuffix, name, ssn, address, city, state,percentage } = data;
         searchClicked(badgeNumber);
-        if (isValid && checkIfAnyValueIsThereInTheFilter(data)) {
+        if (isValid) {
             const beneficiaryRequestDto: BeneficiaryRequestDto = {
-                badgeNumber: badgeNumber,
-                psnSuffix: psnSuffix,
+                badgeNumber: badgeNumber??0,
+                psnSuffix: psnSuffix??0,
                 name: name,
                 ssn: ssn,
                 address: address,
                 city: city,
                 state: state,
-                percentage: percentage,
+                percentage: percentage??0,
                 skip: 0,
                 take: 255,
                 isSortDescending: true,
@@ -96,13 +96,14 @@ const BeneficiaryInquirySearchFilter:React.FC<Props> = ({searchClicked,beneficia
         }
         console.log({ bnumber: badgeNumber, psn: psnSuffix });
     };
+    const validateAndSubmit = handleSubmit(onSubmit);
 
     const handleReset = () => {
         reset({ badgeNumber: undefined, psnSuffix: undefined, address: undefined, city: undefined, name: undefined, ssn: undefined, state: undefined });
     }
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={validateAndSubmit}>
             <Grid2
                 container
                 paddingX="24px">
@@ -276,7 +277,7 @@ const BeneficiaryInquirySearchFilter:React.FC<Props> = ({searchClicked,beneficia
                                     error={!!errors.percentage}
                                     onChange={(e) => {
                                         const parsedValue = e.target.value === "" ? null : Number(e.target.value);
-                                        field.onChange(e.target.value);
+                                        field.onChange(parsedValue);
                                     }}
                                 />
                             )}
@@ -284,9 +285,9 @@ const BeneficiaryInquirySearchFilter:React.FC<Props> = ({searchClicked,beneficia
                         {errors?.percentage && <FormHelperText error>{errors.percentage.message}</FormHelperText>}
                     </Grid2>
                     <Grid2 size={{xs:12, sm:2, md:2}}>
-                            <FormLabel>Beneficiary Type</FormLabel>
+                            <FormLabel>Beneficiary Kind</FormLabel>
                             <Controller
-                                name="beneficiaryTypeId"
+                                name="kindId"
                                 control={control}
                                 render={({ field }) => (
                                     <Select
@@ -294,13 +295,13 @@ const BeneficiaryInquirySearchFilter:React.FC<Props> = ({searchClicked,beneficia
                                         fullWidth
                                         size="small"
                                         variant="outlined"
-                                        labelId="beneficiaryTypeId"
-                                        id="beneficiaryTypeId"
+                                        labelId="kindId"
+                                        id="kindId"
                                         value={field.value}
-                                        label="Beneficiary Type"
+                                        label="Beneficiary Kind"
                                         onChange={(e) => field.onChange(e.target.value)}
                                     >
-                                        {beneficiaryTypes.map((d) => (
+                                        {beneficiaryKind.map((d) => (
                                             <MenuItem value={d.id}>{d.name}</MenuItem>
                                         ))}
                                     </Select>
@@ -317,7 +318,7 @@ const BeneficiaryInquirySearchFilter:React.FC<Props> = ({searchClicked,beneficia
                     <Grid2 size={{ xs: 12 }}>
                         <SearchAndReset
                             handleReset={handleReset}
-                            handleSearch={onSubmit}
+                            handleSearch={validateAndSubmit}
                             isFetching={isFetching}
                             disabled={!isValid}
                         />
