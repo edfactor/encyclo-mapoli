@@ -79,7 +79,8 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             };
 
             // AGE 18-20 WITH >= 1000 PS HOURS
-            var qry = ctx.PayProfits.Include(x => x.Demographic).Where(p => p.ProfitYear == req.ProfitYear)
+            var qry = ctx.PayProfits.Include(x => x.Demographic)
+                .Where(p => p.ProfitYear == req.ProfitYear)
                 .Where(p => nonTerminatedStatuses.Contains(p.Demographic!.EmploymentStatusId) ||
                             (p.Demographic!.TerminationDate > calInfo.FiscalEndDate))
                 .Where(x => (x.CurrentHoursYear + x.HoursExecutive) >= 1000 &&
@@ -196,8 +197,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             //Terminated >= AGE 18 WITH >= 1000 PS HOURS 
             qry = ctx.PayProfits.Include(x => x.Demographic).Where(p => p.ProfitYear == req.ProfitYear)
                 .Where(p => p.Demographic!.EmploymentStatusId == EmploymentStatus.Constants.Terminated &&
-                            p.Demographic!.TerminationDate <= calInfo.FiscalEndDate &&
-                            p.Demographic!.TerminationDate >= calInfo.FiscalBeginDate)
+                            p.Demographic!.TerminationDate > calInfo.FiscalEndDate)
                 .Where(x => (x.CurrentHoursYear + x.HoursExecutive) >= 1000 && x.Demographic!.DateOfBirth <= birthday18)
                 .Join(_totalService.GetTotalBalanceSet(ctx, req.ProfitYear), x => x.Demographic!.Ssn, x => x.Ssn,
                     (pp, tot) => new { pp, tot });
@@ -358,9 +358,9 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 .Include(p => p.Demographic)!
                 .ThenInclude(d => d!.ContactInfo);
 
+            var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, true);
             if (req.IsYearEnd)
             {
-                var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, true);
                 basePayProfits = basePayProfits
                     .Join(demographicQuery, p => p.DemographicId, d => d.Id, (p, _) => p);
             }
@@ -374,11 +374,10 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
 
             if (req.IncludeBeneficiaries)
             {
-                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
                 beneficiaryQuery = ctx.Beneficiaries
                     .Include(b => b.Contact)!
                     .ThenInclude(c => c!.ContactInfo)
-                    .Where(b => !demographics.Any(x => x.Ssn == b.Contact!.Ssn));
+                    .Where(b => !demographicQuery.Any(x => x.Ssn == b.Contact!.Ssn));
             }
 
             // ──────────────────────────────────────────────────────────────────────────
@@ -553,8 +552,10 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
 
         if (req.MinimumHoursInclusive.HasValue)
         {
-            qry = qry.Where(p => p.Hours >= req.MinimumHoursInclusive.Value);
+            var minHours = req.MinimumHoursInclusive.Value;
+            qry = qry.Where(p => p.Hours >= minHours);
         }
+
 
         if (req.MaximumHoursInclusive.HasValue)
         {
@@ -577,57 +578,11 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         }
 
         // employment‑status permutations
-        if (!req.IncludeBeneficiaries &&
-            (!req.IncludeActiveEmployees ||
-             !req.IncludeInactiveEmployees ||
-             !req.IncludeEmployeesTerminatedThisYear))
-        {
-            var statuses = new List<char>();
-            if (req.IncludeActiveEmployees)
-            {
-                statuses.Add(EmploymentStatus.Constants.Active);
-            }
-
-            if (req.IncludeInactiveEmployees)
-            {
-                statuses.Add(EmploymentStatus.Constants.Inactive);
-            }
-
-            if (req.IncludeEmployeesTerminatedThisYear ||
-                req.IncludeTerminatedEmployees)
-            {
-                statuses.Add(EmploymentStatus.Constants.Terminated);
-            }
-
-            qry = req switch
-            {
-                {
-                    IncludeActiveEmployees: true,
-                    IncludeEmployeesTerminatedThisYear: false
-                } => qry.Where(p =>
-                    statuses.Contains(p.EmploymentStatusId) ||
-                    p.TerminationDate > calInfo.FiscalEndDate),
-
-                {
-                    IncludeEmployeesTerminatedThisYear: true,
-                    IncludeActiveEmployees: false,
-                    IncludeInactiveEmployees: false
-                } => qry.Where(p =>
-                    statuses.Contains(p.EmploymentStatusId) &&
-                    p.TerminationDate <= calInfo.FiscalEndDate &&
-                    p.TerminationDate >= calInfo.FiscalBeginDate),
-
-                {
-                    IncludeTerminatedEmployees: true,
-                    IncludeInactiveEmployees: false,
-                    IncludeActiveEmployees: false
-                } => qry.Where(p =>
-                    statuses.Contains(p.EmploymentStatusId) &&
-                    p.TerminationDate <= calInfo.FiscalEndDate),
-
-                _ => qry.Where(p => statuses.Contains(p.EmploymentStatusId))
-            };
-        }
+        qry = qry.Where(p =>
+            (p.EmploymentStatusId == EmploymentStatus.Constants.Active ||
+             p.EmploymentStatusId == EmploymentStatus.Constants.Inactive ||
+             (p.EmploymentStatusId == EmploymentStatus.Constants.Terminated &&
+              p.TerminationDate > calInfo.FiscalEndDate)));
 
 
         return qry;
