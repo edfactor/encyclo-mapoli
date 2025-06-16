@@ -186,7 +186,7 @@ internal class PayrollSyncService
                 }
             }
 
-            payProfit.LastUpdate = DateTime.Now;
+            payProfit.LastUpdate = DateTimeOffset.UtcNow;
 
             int resultCount = await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 

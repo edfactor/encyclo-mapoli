@@ -17,10 +17,10 @@ public sealed record YearEndProfitSharingReportResponse : ReportResponseBase<Yea
 
     public static YearEndProfitSharingReportResponse ResponseExample()
     {
-        return new YearEndProfitSharingReportResponse()
+        return new YearEndProfitSharingReportResponse
         {
             ReportName = "yearend-profit-sharing-report",
-            ReportDate = DateTime.UtcNow,
+            ReportDate = DateTimeOffset.UtcNow,
             WagesTotal = 291941.55m,
             HoursTotal = 10052,
             PointsTotal = 2919m,

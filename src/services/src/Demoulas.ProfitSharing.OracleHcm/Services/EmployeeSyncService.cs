@@ -102,7 +102,7 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
             StartMethodId = StartMethod.Constants.System,
             RequestedBy = requestedBy,
             JobStatusId = JobStatus.Constants.Running,
-            Started = DateTime.Now
+            Started = DateTimeOffset.UtcNow
         };
 
         await _profitSharingDataContextFactory.UseWritableContext(db =>
@@ -113,7 +113,7 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         bool success = true;
         try
         {
-            DateTimeOffset maxDate = DateTimeOffset.Now;
+            DateTimeOffset maxDate = DateTimeOffset.UtcNow;
             DateTimeOffset minDate = await _profitSharingDataContextFactory.UseReadOnlyContext(c =>
             {
                 return c.Demographics.MinAsync(d => d.LastModifiedDate - TimeSpan.FromDays(7), cancellationToken: cancellationToken);

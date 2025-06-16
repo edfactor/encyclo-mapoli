@@ -203,6 +203,24 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                 throw new ArgumentException($"No profit sharing data found for employee with badge number {req.BadgeNumber} for year {req.ProfitYear}");
             }
 
+            // Determine if this is a forfeit or un-forfeit operation
+            bool isForfeit = req.ForfeitureAmount > 0;
+
+            if (req.OffsettingProfitDetailId.HasValue)
+            {
+                var offsettingProfitDetail = await context.ProfitDetails
+                    .FirstOrDefaultAsync(pd => pd.Id == req.OffsettingProfitDetailId.Value, cancellationToken);
+                if (offsettingProfitDetail == null)
+                {
+                    throw new InvalidOperationException($"Offsetting profit detail with ID {req.OffsettingProfitDetailId.Value} not found");
+                }
+
+                if (offsettingProfitDetail?.CommentTypeId == CommentType.Constants.ForfeitClassAction && !isForfeit)
+                {
+                    throw new InvalidOperationException($"Offsetting profit detail with ID {req.OffsettingProfitDetailId.Value} is a class action forfeiture and cannot be unforfeited.");
+                }
+            }
+
             // Get vesting balance from the total service
             var vestingBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(
                 Common.Contracts.Request.SearchBy.Ssn,
@@ -215,9 +233,6 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
             {
                 throw new ArgumentException($"No vesting balance data found for employee with badge number {req.BadgeNumber}");
             }
-
-            // Determine if this is a forfeit or un-forfeit operation
-            bool isForfeit = req.ForfeitureAmount > 0;
 
             // From docs: "From the screen in figure 2, if you enter the value in #17 to box #12 and hit enter, you will create a PROFIT_DETAIL record.
             // When the value is negative the record has UN-FORFEIT in the PROFIT_CMNT field and when the value is positive the PROFIT_CMNT field is FORFEIT."

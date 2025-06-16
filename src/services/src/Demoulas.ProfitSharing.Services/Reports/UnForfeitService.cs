@@ -54,6 +54,7 @@ public sealed class UnForfeitService : IUnForfeitService
                 where pd.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id 
                       && d.EmploymentStatusId == EmploymentStatus.Constants.Active
                       && pp.ProfitYear >= beginning.Year && pp.ProfitYear <= ending.Year
+                      && (!req.ExcludeZeroBalance || (vest != null && (vest.CurrentBalance != 0 || vest.VestedBalance != 0)))
                 group new { d, pp, pd, yos, vest } by new
                 {
                     d.BadgeNumber,
