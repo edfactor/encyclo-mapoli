@@ -242,6 +242,11 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         CalendarResponseDto calInfo)
     {
 
+        if (req.BadgeNumber.HasValue)
+        {
+            qry = qry.Where(e => e.BadgeNumber == req.BadgeNumber);
+        }
+
         if (req.MinimumHoursInclusive.HasValue)
         {
             var minHours = req.MinimumHoursInclusive.Value;
