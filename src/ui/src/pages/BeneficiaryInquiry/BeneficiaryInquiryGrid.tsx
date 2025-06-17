@@ -29,7 +29,6 @@ const BeneficiaryInquiryGrid: React.FC<MasterInquiryGridProps> = ({ initialSearc
   const createBeneficiaryInquiryRequest = useCallback(
     (skip: number, sortBy: string, isSortDescending: boolean): BeneficiaryRequestDto | null => {
       if (!beneficiaryRequest) return null;
-
       return beneficiaryRequest;
     },
     [beneficiaryRequest, pageSize, _sortParams]
