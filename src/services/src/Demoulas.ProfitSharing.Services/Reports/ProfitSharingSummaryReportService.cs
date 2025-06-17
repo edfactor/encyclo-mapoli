@@ -130,19 +130,36 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         ProfitShareTotal? totals = null;
         if (req.IncludeTotals)
         {
-            totals = new ProfitShareTotal
+            var terminatedStatus = EmploymentStatus.Constants.Terminated;
+            // Batch all DB-compatible totals
+            var totalsResult = await employees.GroupBy(e => 1).Select(g => new
             {
-                WagesTotal = employees.Sum(e => e.Employee.Wages),
-                HoursTotal = employees.Sum(e => e.Employee.Hours),
-                PointsTotal = employees.Sum(e => e.Employee.PointsEarned ?? 0),
-                TerminatedWagesTotal = employees.Where(e => e.Employee.EmploymentStatusId == EmploymentStatus.Constants.Terminated).Sum(e => e.Employee.Wages),
-                TerminatedHoursTotal = employees.Where(e => e.Employee.EmploymentStatusId == EmploymentStatus.Constants.Terminated).Sum(e => e.Employee.Hours),
-                TerminatedPointsTotal = employees.Where(e => e.Employee.EmploymentStatusId == EmploymentStatus.Constants.Terminated).Sum(e => e.Employee.PointsEarned ?? 0),
-                NumberOfEmployees = employees.Count(),
-                NumberOfNewEmployees = employees.Count(e => e.Employee.Years == 0),
-                NumberOfEmployeesUnder21 = employees.Count(e =>
-                    (calInfo.FiscalEndDate.Year - e.Employee.DateOfBirth.Year - (calInfo.FiscalEndDate.DayOfYear < e.Employee.DateOfBirth.DayOfYear ? 1 : 0)) < 21)
-            };
+                WagesTotal = g.Sum(e => e.Employee.Wages),
+                HoursTotal = g.Sum(e => e.Employee.Hours),
+                PointsTotal = g.Sum(e => e.Employee.PointsEarned ?? 0),
+                TerminatedWagesTotal = g.Sum(e => e.Employee.EmploymentStatusId == terminatedStatus ? e.Employee.Wages : 0),
+                TerminatedHoursTotal = g.Sum(e => e.Employee.EmploymentStatusId == terminatedStatus ? e.Employee.Hours : 0),
+                TerminatedPointsTotal = g.Sum(e => e.Employee.EmploymentStatusId == terminatedStatus ? (e.Employee.PointsEarned ?? 0) : 0),
+                NumberOfEmployees = g.Count(),
+                NumberOfNewEmployees = g.Sum(e => e.Employee.Years == 0 ? 1 : 0)
+            }).FirstOrDefaultAsync(cancellationToken);
+
+            // Do under-21 count in memory
+            var birthdates = await employees.Select(e => e.Employee.DateOfBirth).ToListAsync(cancellationToken);
+            var numberOfEmployeesUnder21 = birthdates.Count(dob => dob.Age(calInfo.FiscalEndDate.ToDateTime(TimeOnly.MinValue)) < 21);
+
+            totals = totalsResult != null ? new ProfitShareTotal
+            {
+                WagesTotal = totalsResult.WagesTotal,
+                HoursTotal = totalsResult.HoursTotal,
+                PointsTotal = totalsResult.PointsTotal,
+                TerminatedWagesTotal = totalsResult.TerminatedWagesTotal,
+                TerminatedHoursTotal = totalsResult.TerminatedHoursTotal,
+                TerminatedPointsTotal = totalsResult.TerminatedPointsTotal,
+                NumberOfEmployees = totalsResult.NumberOfEmployees,
+                NumberOfNewEmployees = totalsResult.NumberOfNewEmployees,
+                NumberOfEmployeesUnder21 = numberOfEmployeesUnder21
+            } : new ProfitShareTotal();
         }
 
         // Build response
