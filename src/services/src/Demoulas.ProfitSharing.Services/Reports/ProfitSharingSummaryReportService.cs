@@ -81,20 +81,24 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         var birthday18 = calInfo.FiscalEndDate.AddYears(-18);
         var birthday21 = calInfo.FiscalEndDate.AddYears(-21);
         var nonTerminatedStatuses = new List<char> { EmploymentStatus.Constants.Active, EmploymentStatus.Constants.Inactive };
+
         // Helper lambdas for status
         bool IsActiveOrInactive(char? status, DateOnly? termDate) =>
             (status != null && nonTerminatedStatuses.Contains(status.Value)) || (termDate != null && termDate > calInfo.FiscalEndDate);
+
         bool IsTerminated(char? status, DateOnly? termDate) =>
             status == EmploymentStatus.Constants.Terminated && termDate != null && termDate > calInfo.FiscalEndDate;
+
         bool IsTerminatedWithinFiscal(char? status, DateOnly? termDate) =>
             status == EmploymentStatus.Constants.Terminated && termDate != null && termDate <= calInfo.FiscalEndDate && termDate >= calInfo.FiscalBeginDate;
+
         // Compute summary line items in memory
         var lineItems = new List<YearEndProfitSharingReportSummaryLineItem>();
         // 1. AGE 18-20 WITH >= 1000 PS HOURS
         var lineItem1 = details.Where(x =>
-            IsActiveOrInactive(x.EmployeeStatus, x.TerminationDate) &&
-            x.Hours >= 1000 &&
-            x.DateOfBirth <= birthday18 && x.DateOfBirth > birthday21)
+                IsActiveOrInactive(x.EmployeeStatus, x.TerminationDate) &&
+                x.Hours >= 1000 &&
+                x.DateOfBirth <= birthday18 && x.DateOfBirth > birthday21)
             .GroupBy(_ => true)
             .Select(g => new YearEndProfitSharingReportSummaryLineItem
             {
@@ -105,12 +109,16 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 TotalWages = g.Sum(y => y.Wages),
                 TotalBalance = g.Sum(y => y.Balance)
             }).FirstOrDefault();
-        if (lineItem1 != null) {lineItems.Add(lineItem1);}
+        if (lineItem1 != null)
+        {
+            lineItems.Add(lineItem1);
+        }
+
         // 2. >= AGE 21 WITH >= 1000 PS HOURS
         var lineItem2 = details.Where(x =>
-            IsActiveOrInactive(x.EmployeeStatus, x.TerminationDate) &&
-            x.Hours >= 1000 &&
-            x.DateOfBirth <= birthday21)
+                IsActiveOrInactive(x.EmployeeStatus, x.TerminationDate) &&
+                x.Hours >= 1000 &&
+                x.DateOfBirth <= birthday21)
             .GroupBy(_ => true)
             .Select(g => new YearEndProfitSharingReportSummaryLineItem
             {
@@ -121,11 +129,15 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 TotalWages = g.Sum(y => y.Wages),
                 TotalBalance = g.Sum(y => y.Balance)
             }).FirstOrDefault();
-        if (lineItem2 != null) {lineItems.Add(lineItem2);}
+        if (lineItem2 != null)
+        {
+            lineItems.Add(lineItem2);
+        }
+
         // 3. < AGE 18
         var lineItem3 = details.Where(x =>
-            IsActiveOrInactive(x.EmployeeStatus, x.TerminationDate) &&
-            x.DateOfBirth > birthday18)
+                IsActiveOrInactive(x.EmployeeStatus, x.TerminationDate) &&
+                x.DateOfBirth > birthday18)
             .GroupBy(_ => true)
             .Select(g => new YearEndProfitSharingReportSummaryLineItem
             {
@@ -136,13 +148,17 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 TotalWages = g.Sum(y => y.Wages),
                 TotalBalance = g.Sum(y => y.Balance)
             }).FirstOrDefault();
-        if (lineItem3 != null) {lineItems.Add(lineItem3);}
+        if (lineItem3 != null)
+        {
+            lineItems.Add(lineItem3);
+        }
+
         // 4. >= AGE 18 WITH < 1000 PS HOURS AND PRIOR PS AMOUNT
         var lineItem4 = details.Where(x =>
-            IsActiveOrInactive(x.EmployeeStatus, x.TerminationDate) &&
-            x.Hours < 1000 &&
-            x.DateOfBirth <= birthday18 &&
-            x.Balance > 0)
+                IsActiveOrInactive(x.EmployeeStatus, x.TerminationDate) &&
+                x.Hours < 1000 &&
+                x.DateOfBirth <= birthday18 &&
+                x.Balance > 0)
             .GroupBy(_ => true)
             .Select(g => new YearEndProfitSharingReportSummaryLineItem
             {
@@ -153,13 +169,17 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 TotalWages = g.Sum(y => y.Wages),
                 TotalBalance = g.Sum(y => y.Balance)
             }).FirstOrDefault();
-        if (lineItem4 != null) {lineItems.Add(lineItem4);}
+        if (lineItem4 != null)
+        {
+            lineItems.Add(lineItem4);
+        }
+
         // 5. >= AGE 18 WITH < 1000 PS HOURS AND NO PRIOR PS AMOUNT
         var lineItem5 = details.Where(x =>
-            IsActiveOrInactive(x.EmployeeStatus, x.TerminationDate) &&
-            x.Hours < 1000 &&
-            x.DateOfBirth <= birthday18 &&
-            x.Balance == 0)
+                IsActiveOrInactive(x.EmployeeStatus, x.TerminationDate) &&
+                x.Hours < 1000 &&
+                x.DateOfBirth <= birthday18 &&
+                x.Balance == 0)
             .GroupBy(_ => true)
             .Select(g => new YearEndProfitSharingReportSummaryLineItem
             {
@@ -170,12 +190,16 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 TotalWages = g.Sum(y => y.Wages),
                 TotalBalance = g.Sum(y => y.Balance)
             }).FirstOrDefault();
-        if (lineItem5 != null) lineItems.Add(lineItem5);
+        if (lineItem5 != null)
+        {
+            lineItems.Add(lineItem5);
+        }
+
         // 6. TERMINATED: >= AGE 18 WITH >= 1000 PS HOURS
         var lineItem6 = details.Where(x =>
-            IsTerminated(x.EmployeeStatus, x.TerminationDate) &&
-            x.Hours >= 1000 &&
-            x.DateOfBirth <= birthday18)
+                IsTerminated(x.EmployeeStatus, x.TerminationDate) &&
+                x.Hours >= 1000 &&
+                x.DateOfBirth <= birthday18)
             .GroupBy(_ => true)
             .Select(g => new YearEndProfitSharingReportSummaryLineItem
             {
@@ -189,10 +213,10 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         if (lineItem6 != null) lineItems.Add(lineItem6);
         // 7. TERMINATED: >= AGE 18 WITH < 1000 PS HOURS AND NO PRIOR PS AMOUNT
         var lineItem7 = details.Where(x =>
-            IsTerminatedWithinFiscal(x.EmployeeStatus, x.TerminationDate) &&
-            x.Hours < 1000 &&
-            x.DateOfBirth <= birthday18 &&
-            x.Balance == 0)
+                IsTerminatedWithinFiscal(x.EmployeeStatus, x.TerminationDate) &&
+                x.Hours < 1000 &&
+                x.DateOfBirth <= birthday18 &&
+                x.Balance == 0)
             .GroupBy(_ => true)
             .Select(g => new YearEndProfitSharingReportSummaryLineItem
             {
@@ -203,13 +227,17 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 TotalWages = g.Sum(y => y.Wages),
                 TotalBalance = g.Sum(y => y.Balance)
             }).FirstOrDefault();
-        if (lineItem7 != null) lineItems.Add(lineItem7);
+        if (lineItem7 != null)
+        {
+            lineItems.Add(lineItem7);
+        }
+
         // 8. TERMINATED: >= AGE 18 WITH < 1000 PS HOURS AND PRIOR PS AMOUNT
         var lineItem8 = details.Where(x =>
-            IsTerminatedWithinFiscal(x.EmployeeStatus, x.TerminationDate) &&
-            x.Hours < 1000 &&
-            x.DateOfBirth <= birthday18 &&
-            x.Balance != 0)
+                IsTerminatedWithinFiscal(x.EmployeeStatus, x.TerminationDate) &&
+                x.Hours < 1000 &&
+                x.DateOfBirth <= birthday18 &&
+                x.Balance != 0)
             .GroupBy(_ => true)
             .Select(g => new YearEndProfitSharingReportSummaryLineItem
             {
@@ -223,9 +251,9 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         if (lineItem8 != null) lineItems.Add(lineItem8);
         // X. TERMINATED: < AGE 18 NO WAGES : 0
         var lineItemX = details.Where(x =>
-            IsTerminatedWithinFiscal(x.EmployeeStatus, x.TerminationDate) &&
-            x.Wages == 0 &&
-            x.DateOfBirth > birthday18)
+                IsTerminatedWithinFiscal(x.EmployeeStatus, x.TerminationDate) &&
+                x.Wages == 0 &&
+                x.DateOfBirth > birthday18)
             .GroupBy(_ => true)
             .Select(g => new YearEndProfitSharingReportSummaryLineItem
             {
@@ -236,11 +264,12 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 TotalWages = g.Sum(y => y.Wages),
                 TotalBalance = g.Sum(y => y.Balance)
             }).FirstOrDefault();
-        if (lineItemX != null) lineItems.Add(lineItemX);
-        return new YearEndProfitSharingReportSummaryResponse
+        if (lineItemX != null)
         {
-            LineItems = lineItems
-        };
+            lineItems.Add(lineItemX);
+        }
+
+        return new YearEndProfitSharingReportSummaryResponse { LineItems = lineItems };
     }
 
     public async Task<YearEndProfitSharingReportResponse> GetYearEndProfitSharingReportAsync(
@@ -300,18 +329,20 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             var birthdates = await employees.Select(e => e.Employee.DateOfBirth).ToListAsync(cancellationToken);
             var numberOfEmployeesUnder21 = birthdates.Count(dob => dob.Age(calInfo.FiscalEndDate.ToDateTime(TimeOnly.MinValue)) < 21);
 
-            totals = totalsResult != null ? new ProfitShareTotal
-            {
-                WagesTotal = totalsResult.WagesTotal,
-                HoursTotal = totalsResult.HoursTotal,
-                PointsTotal = totalsResult.PointsTotal,
-                TerminatedWagesTotal = totalsResult.TerminatedWagesTotal,
-                TerminatedHoursTotal = totalsResult.TerminatedHoursTotal,
-                TerminatedPointsTotal = totalsResult.TerminatedPointsTotal,
-                NumberOfEmployees = totalsResult.NumberOfEmployees,
-                NumberOfNewEmployees = totalsResult.NumberOfNewEmployees,
-                NumberOfEmployeesUnder21 = numberOfEmployeesUnder21
-            } : new ProfitShareTotal();
+            totals = totalsResult != null
+                ? new ProfitShareTotal
+                {
+                    WagesTotal = totalsResult.WagesTotal,
+                    HoursTotal = totalsResult.HoursTotal,
+                    PointsTotal = totalsResult.PointsTotal,
+                    TerminatedWagesTotal = totalsResult.TerminatedWagesTotal,
+                    TerminatedHoursTotal = totalsResult.TerminatedHoursTotal,
+                    TerminatedPointsTotal = totalsResult.TerminatedPointsTotal,
+                    NumberOfEmployees = totalsResult.NumberOfEmployees,
+                    NumberOfNewEmployees = totalsResult.NumberOfNewEmployees,
+                    NumberOfEmployeesUnder21 = numberOfEmployeesUnder21
+                }
+                : new ProfitShareTotal();
         }
 
         // Build response
@@ -378,7 +409,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                  (p.EmploymentStatusId == EmploymentStatus.Constants.Terminated &&
                   p.TerminationDate > calInfo.FiscalEndDate)));
         }
-        
+
         else if (req.IncludeTerminatedEmployees)
         {
             qry = qry.Where(p =>
