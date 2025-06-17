@@ -13,7 +13,7 @@ import MasterInquiryGroupingGrid from "./MasterInquiryGroupingGrid";
 
 
 const MasterInquiry = () => {
-  const { masterInquiryEmployeeDetails, masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
+  const { } = useSelector((state: RootState) => state.inquiry);
 
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [searchParams, setSearchParams] = useState<MasterInquiryRequest | null>(null);
@@ -55,7 +55,7 @@ const MasterInquiry = () => {
           />
         )}
 
-        {searchParams && (
+        {searchParams && !selectedMember && (
           <MasterInquiryGroupingGrid searchParams={searchParams} />
           )
         }

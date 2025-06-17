@@ -2,8 +2,8 @@ import { Typography } from "@mui/material";
 import Grid2 from '@mui/material/Grid2';
 import LabelValueSection from "components/LabelValueSection";
 import React, { useEffect } from "react";
-import { EmployeeDetails, MissiveResponse } from "reduxstore/types";
-import { numberToCurrency } from "smart-ui-library";
+import { MissiveResponse } from "reduxstore/types";
+import { numberToCurrency, formatNumberWithComma } from "smart-ui-library";
 import { formatPercentage } from "utils/formatPercentage";
 import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
 import { mmDDYYFormat } from "../../utils/dateUtils";
@@ -128,7 +128,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     { label: "Current Balance", value: numberToCurrency(currentPSAmount) },
     { label: "Begin Vested Balance", value: numberToCurrency(beginVestedAmount) },
     { label: "Current Vested Balance", value: numberToCurrency(currentVestedAmount) },
-    ...(isEmployee ? [{ label: "Profit Sharing Hours", value: yearToDateProfitSharingHours }]: []),
+    ...(isEmployee ? [{ label: "Profit Sharing Hours", value: formatNumberWithComma(yearToDateProfitSharingHours) }]: []),
     ...(isEmployee ? [{ label: "Years In Plan", value: yearsInPlan }] : []),
     { label: "Vested Percent", value: formatPercentage(percentageVested) },
     { label: "Received Contributions Last Year", value: receivedContributionsLastYear ? "Yes" : "No" }
