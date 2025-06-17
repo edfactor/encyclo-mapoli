@@ -152,25 +152,111 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             .GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
         var birthDate21 = calInfo.FiscalEndDate.AddYears(-21);
 
-
-        var totTask = _dataContextFactory.UseReadOnlyContext<ProfitShareTotal>(ctx =>
+        // Build filtered employee query for both details and totals
+        var filteredEmployeeQryTask = _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
+            IQueryable<PayProfit> basePayProfits = ctx.PayProfits
+                .Where(p => p.ProfitYear == req.ProfitYear)
+                .Include(p => p.Demographic)!
+                .ThenInclude(d => d!.ContactInfo);
 
-            if (req.IncludeTotals)
+            var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, true);
+            if (req.IsYearEnd)
             {
-                var queryable = _embeddedSqlService.GetProfitShareTotals(ctx, req.ProfitYear,
-                    calInfo.FiscalEndDate,
-                    ReferenceData.MinimumHoursForContribution(),
-                    birthDate21, cancellationToken);
-
-#pragma warning disable AsyncFixer02
-                return (_hostEnvironment.IsTestEnvironment() ? Task.FromResult(queryable.First()) : queryable.FirstAsync(cancellationToken))!;
-#pragma warning restore AsyncFixer02
+                basePayProfits = basePayProfits
+                    .Join(demographicQuery, p => p.DemographicId, d => d.Id, (p, _) => p);
             }
 
-            return Task.FromResult(new ProfitShareTotal());
+            IQueryable<Beneficiary> beneficiaryQuery = Enumerable
+                .Empty<Beneficiary>()
+                .AsQueryable();
+
+            if (req.IncludeBeneficiaries)
+            {
+                beneficiaryQuery = ctx.Beneficiaries
+                    .Include(b => b.Contact)!
+                    .ThenInclude(c => c!.ContactInfo)
+                    .Where(b => !demographicQuery.Any(x => x.Ssn == b.Contact!.Ssn));
+            }
+
+            var yearsOfService = _totalService.GetYearsOfService(ctx, req.ProfitYear);
+            var balances = _totalService.GetTotalBalanceSet(ctx, req.ProfitYear);
+
+            var employeeQry =
+                from pp in basePayProfits
+                join et in ctx.EmploymentTypes
+                    on pp.Demographic!.EmploymentTypeId equals et.Id
+                join yip in yearsOfService
+                    on pp.Demographic!.Ssn equals yip.Ssn into yipTmp
+                from yip in yipTmp.DefaultIfEmpty()
+                select new EmployeeProjection
+                {
+                    BadgeNumber = pp.Demographic!.BadgeNumber,
+                    Hours = pp.CurrentHoursYear + pp.HoursExecutive,
+                    Wages = pp.CurrentIncomeYear + pp.IncomeExecutive,
+                    DateOfBirth = pp.Demographic!.DateOfBirth,
+                    EmploymentStatusId = pp.Demographic!.EmploymentStatusId,
+                    TerminationDate = pp.Demographic!.TerminationDate,
+                    Ssn = pp.Demographic!.Ssn,
+                    FullName = pp.Demographic!.ContactInfo.FullName,
+                    StoreNumber = pp.Demographic!.StoreNumber,
+                    EmploymentTypeId = pp.Demographic!.EmploymentTypeId,
+                    EmploymentTypeName = et.Name,
+                    PointsEarned = pp.PointsEarned,
+                    Years = yip.Years
+                };
+
+            //  beneficiaries shaped like employees
+            if (req.IncludeBeneficiaries)
+            {
+                employeeQry = employeeQry.Union(
+                    from b in beneficiaryQuery
+                    select new EmployeeProjection
+                    {
+                        BadgeNumber = 0,
+                        Hours = 0m,
+                        Wages = 0m,
+                        DateOfBirth = b.Contact!.DateOfBirth,
+                        EmploymentStatusId = EmploymentStatus.Constants.Terminated,
+                        TerminationDate = null,
+                        Ssn = b.Contact!.Ssn,
+                        FullName = b.Contact!.ContactInfo.FullName,
+                        StoreNumber = 0,
+                        EmploymentTypeId = EmploymentType.Constants.PartTime,
+                        EmploymentTypeName = "",
+                        PointsEarned = null,
+                        Years = 0
+                    });
+            }
+
+            // Apply filters
+            employeeQry = ApplyRequestFilters(employeeQry, req, calInfo);
+
+            return employeeQry.ToList();
         });
 
+        var totTask = filteredEmployeeQryTask.ContinueWith(t =>
+        {
+            var filteredEmployees = t.Result;
+            if (req.IncludeTotals && filteredEmployees.Any())
+            {
+                // Calculate totals from filtered employees
+                return Task.FromResult(new ProfitShareTotal
+                {
+                    WagesTotal = filteredEmployees.Sum(e => e.Wages),
+                    HoursTotal = filteredEmployees.Sum(e => e.Hours),
+                    PointsTotal = filteredEmployees.Sum(e => e.PointsEarned ?? 0),
+                    TerminatedWagesTotal = filteredEmployees.Where(e => e.EmploymentStatusId == EmploymentStatus.Constants.Terminated).Sum(e => e.Wages),
+                    TerminatedHoursTotal = filteredEmployees.Where(e => e.EmploymentStatusId == EmploymentStatus.Constants.Terminated).Sum(e => e.Hours),
+                    TerminatedPointsTotal = filteredEmployees.Where(e => e.EmploymentStatusId == EmploymentStatus.Constants.Terminated).Sum(e => e.PointsEarned ?? 0),
+                    NumberOfEmployees = filteredEmployees.Count,
+                    NumberOfNewEmployees = filteredEmployees.Count(e => e.Years == 0),
+                    NumberOfEmployeesUnder21 = filteredEmployees.Count(e =>
+                        (calInfo.FiscalEndDate.Year - e.DateOfBirth.Year - (calInfo.FiscalEndDate.DayOfYear < e.DateOfBirth.DayOfYear ? 1 : 0)) < 21)
+                });
+            }
+            return Task.FromResult(new ProfitShareTotal());
+        }, cancellationToken).Unwrap();
 
         Task<PaginatedResponseDto<YearEndProfitSharingReportDetail>> responseTask = _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
