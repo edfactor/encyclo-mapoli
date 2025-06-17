@@ -116,7 +116,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       }
     },
     {
-      headerName: "Income",
+      headerName: "Wages",
       field: "currentIncomeYear",
       colId: "currentIncomeYear",
       minWidth: 120,
