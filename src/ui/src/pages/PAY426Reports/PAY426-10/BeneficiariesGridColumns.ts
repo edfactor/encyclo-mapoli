@@ -1,7 +1,8 @@
-import { agGridNumberToCurrency } from "smart-ui-library";
+import { agGridNumberToCurrency, formatNumberWithComma } from "smart-ui-library";
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
+import { mmDDYYFormat } from "../../../utils/dateUtils";
 
 export const GetBeneficiariesGridColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   return [
@@ -53,7 +54,8 @@ export const GetBeneficiariesGridColumns = (navFunction: (badgeNumber: string) =
       minWidth: 120,
       headerClass: "center-align",
       cellClass: "center-align",
-      resizable: true
+      resizable: true,
+      valueFormatter: (params) => mmDDYYFormat(params.value)
     },
     {
       headerName: "Age",
@@ -90,7 +92,8 @@ export const GetBeneficiariesGridColumns = (navFunction: (badgeNumber: string) =
       minWidth: 100,
       headerClass: "right-align",
       cellClass: "right-align",
-      resizable: true
+      resizable: true,
+      valueFormatter: (params) => formatNumberWithComma(params.value)
     },
     {
       headerName: "Points",
@@ -99,7 +102,8 @@ export const GetBeneficiariesGridColumns = (navFunction: (badgeNumber: string) =
       minWidth: 100,
       headerClass: "right-align",
       cellClass: "right-align",
-      resizable: true
+      resizable: true,
+      valueFormatter: (params) => formatNumberWithComma(params.value)
     },
     {
       headerName: "New",
@@ -118,7 +122,8 @@ export const GetBeneficiariesGridColumns = (navFunction: (badgeNumber: string) =
       minWidth: 120,
       headerClass: "center-align",
       cellClass: "center-align",
-      resizable: true
+      resizable: true,
+      valueFormatter: (params) => mmDDYYFormat(params.value)
     },
     {
       headerName: "Current Balance",
