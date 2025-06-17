@@ -20,4 +20,5 @@ public record YearEndProfitSharingReportRequest : ProfitYearRequest
     [DefaultValue(true)] public bool IncludeEmployeesWithNoPriorProfitSharingAmounts { get; set; } = true;
     [DefaultValue(true)] public bool IncludeTotals { get; set; } = true;
     [DefaultValue(true)] public bool IncludeDetails { get; set; } = true;
+    public int? BadgeNumber { get; set; }
 }

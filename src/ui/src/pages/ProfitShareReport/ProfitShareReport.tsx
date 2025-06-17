@@ -8,13 +8,17 @@ import { useDispatch, useSelector } from "react-redux";
 import { useFinalizeReportMutation, useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
 import { setYearEndProfitSharingReportQueryParams } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
-import { Page, SmartModal } from "smart-ui-library";
+import { Page, SmartModal, DSMAccordion } from "smart-ui-library";
 import { CAPTIONS} from "../../constants";
 import ProfitSummary from "../PAY426Reports/PAY426-9/ProfitSummary";
+import ProfitShareReportSearchFilters from "./ProfitShareReportSearchFilters";
+import ReportGrid from "../PAY426Reports/PAY426N/ReportGrid";
+import { FilterParams } from "reduxstore/types";
 
 const ProfitShareReport = () => {
   const [initialDataLoaded, setInitialDataLoaded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedPresetParams, setSelectedPresetParams] = useState<FilterParams | null>(null);
   
   const { yearEndProfitSharingReport } = useSelector(
     (state: RootState) => state.yearsEnd
@@ -73,6 +77,10 @@ const ProfitShareReport = () => {
     setIsModalOpen(false);
   };
 
+  const handlePresetParamsChange = (params: FilterParams | null) => {
+    setSelectedPresetParams(params);
+  };
+
   const renderActionNode = () => {
     if (!initialDataLoaded || !yearEndProfitSharingReport) return null;
 
@@ -123,9 +131,23 @@ const ProfitShareReport = () => {
               <CircularProgress />
             </Box>
           ) : (
-            <ProfitSummary />
+            <ProfitSummary onPresetParamsChange={handlePresetParamsChange} />
           )}
         </Grid2>
+
+        {selectedPresetParams && (
+          <Grid2 width="100%">
+            <DSMAccordion title="Filter">
+              <ProfitShareReportSearchFilters profitYear={profitYear} presetParams={selectedPresetParams} />
+            </DSMAccordion>
+          </Grid2>
+        )}
+
+        {selectedPresetParams && (
+          <Grid2 width="100%">
+            <ReportGrid params={selectedPresetParams} onLoadingChange={() => {}} />
+          </Grid2>
+        )}
       </Grid2>
 
       <SmartModal
