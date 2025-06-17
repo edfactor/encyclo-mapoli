@@ -82,17 +82,19 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
 
         // Use local functions for status checks
         static bool IsActiveOrInactive(char? status, DateOnly? termDate, List<char> nonTerminatedStatuses, DateOnly fiscalEnd) =>
-            (status != null && nonTerminatedStatuses.Contains(status.Value)) || (termDate != null && termDate > fiscalEnd);
+            (status != null && nonTerminatedStatuses.Contains(status.Value)) || (termDate > fiscalEnd);
+        
         static bool IsTerminated(char? status, DateOnly? termDate, DateOnly fiscalEnd) =>
-            status == EmploymentStatus.Constants.Terminated && termDate != null && termDate > fiscalEnd;
+            status == EmploymentStatus.Constants.Terminated && termDate > fiscalEnd;
+        
         static bool IsTerminatedWithinFiscal(char? status, DateOnly? termDate, DateOnly fiscalBegin, DateOnly fiscalEnd) =>
-            status == EmploymentStatus.Constants.Terminated && termDate != null && termDate <= fiscalEnd && termDate >= fiscalBegin;
+            status == EmploymentStatus.Constants.Terminated;
 
         // Helper to create a summary line
         YearEndProfitSharingReportSummaryLineItem? CreateLine(string subgroup, string prefix, string title, Func<YearEndProfitSharingReportDetail, bool> filter)
         {
             var group = details.Where(filter).ToList();
-            if (!group.Any()) { return null; }
+            
             return new YearEndProfitSharingReportSummaryLineItem
             {
                 Subgroup = subgroup,
@@ -121,9 +123,10 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             CreateLine("Active and Inactive", "5", ">= AGE 18 WITH < 1000 PS HOURS AND NO PRIOR PS AMOUNT", x =>
                 IsActiveOrInactive(x.EmployeeStatus, x.TerminationDate, nonTerminatedStatuses, calInfo.FiscalEndDate) &&
                 x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.Balance == 0),
+            
             CreateLine("TERMINATED", "6", ">= AGE 18 WITH >= 1000 PS HOURS", x =>
-                IsTerminated(x.EmployeeStatus, x.TerminationDate, calInfo.FiscalEndDate) &&
-                x.Hours >= 1000 && x.DateOfBirth <= birthday18),
+                IsTerminated(x.EmployeeStatus, x.TerminationDate, calInfo.FiscalEndDate) && x.Hours >= 1000 && x.DateOfBirth <= birthday18),
+            
             CreateLine("TERMINATED", "7", ">= AGE 18 WITH < 1000 PS HOURS AND NO PRIOR PS AMOUNT", x =>
                 IsTerminatedWithinFiscal(x.EmployeeStatus, x.TerminationDate, calInfo.FiscalBeginDate, calInfo.FiscalEndDate) &&
                 x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.Balance == 0),
@@ -284,10 +287,11 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                   p.TerminationDate > calInfo.FiscalEndDate)));
         }
 
-        else if (req.IncludeTerminatedEmployees)
+        if (req.IncludeTerminatedEmployees)
         {
             qry = qry.Where(p =>
-                p.EmploymentStatusId == EmploymentStatus.Constants.Terminated && p.TerminationDate >= calInfo.FiscalEndDate);
+                p.EmploymentStatusId == EmploymentStatus.Constants.Terminated &&
+                p.TerminationDate >= calInfo.FiscalEndDate);
         }
 
         return qry;
