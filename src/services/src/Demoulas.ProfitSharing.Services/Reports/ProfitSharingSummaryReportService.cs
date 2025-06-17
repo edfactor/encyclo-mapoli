@@ -21,8 +21,6 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly ICalendarService _calendarService;
     private readonly TotalService _totalService;
-    private readonly IEmbeddedSqlService _embeddedSqlService;
-    private readonly IHostEnvironment _hostEnvironment;
     private readonly IDemographicReaderService _demographicReaderService;
 
     private sealed record EmployeeProjection
@@ -52,15 +50,11 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
     public ProfitSharingSummaryReportService(IProfitSharingDataContextFactory dataContextFactory,
         ICalendarService calendarService,
         TotalService totalService,
-        IEmbeddedSqlService embeddedSqlService,
-        IHostEnvironment hostEnvironment,
         IDemographicReaderService demographicReaderService)
     {
         _dataContextFactory = dataContextFactory;
         _calendarService = calendarService;
         _totalService = totalService;
-        _embeddedSqlService = embeddedSqlService;
-        _hostEnvironment = hostEnvironment;
         _demographicReaderService = demographicReaderService;
     }
 
