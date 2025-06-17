@@ -288,7 +288,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         else if (req.IncludeTerminatedEmployees)
         {
             qry = qry.Where(p =>
-                p.EmploymentStatusId == EmploymentStatus.Constants.Terminated && p.TerminationDate >= calInfo.FiscalEndDate);
+                p.EmploymentStatusId == EmploymentStatus.Constants.Terminated && p.TerminationDate < calInfo.FiscalEndDate);
         }
 
         return qry;
