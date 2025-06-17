@@ -218,11 +218,21 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         }
 
         // employment‑status permutations
-        qry = qry.Where(p =>
-            (p.EmploymentStatusId == EmploymentStatus.Constants.Active ||
-             p.EmploymentStatusId == EmploymentStatus.Constants.Inactive ||
-             (p.EmploymentStatusId == EmploymentStatus.Constants.Terminated &&
-              p.TerminationDate > calInfo.FiscalEndDate)));
+        if (req.IncludeActiveEmployees)
+        {
+            qry = qry.Where(p =>
+                (p.EmploymentStatusId == EmploymentStatus.Constants.Active ||
+                 p.EmploymentStatusId == EmploymentStatus.Constants.Inactive ||
+                 (p.EmploymentStatusId == EmploymentStatus.Constants.Terminated &&
+                  p.TerminationDate > calInfo.FiscalEndDate)));
+        }
+        
+        else if (req.IncludeTerminatedEmployees)
+        {
+            qry = qry.Where(p =>
+                p.EmploymentStatusId == EmploymentStatus.Constants.Terminated && p.TerminationDate >= calInfo.FiscalEndDate);
+        }
+
         return qry;
     }
 
