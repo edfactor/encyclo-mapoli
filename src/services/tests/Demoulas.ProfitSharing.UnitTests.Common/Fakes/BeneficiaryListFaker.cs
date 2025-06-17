@@ -15,52 +15,11 @@ internal sealed class BeneficiaryListFaker
         {
             new Beneficiary()
             {
-                Id = 144,
-                PsnSuffix = 1000,
-                BadgeNumber = 701218,
-                DemographicId = 1147,
-                Contact = new BeneficiaryContact()
-                {
-                    Id = 144,
-                    Ssn = 700010691,
-                    DateOfBirth = DateOnly.FromDateTime(new DateTime(1966,09,11,0,0,0,DateTimeKind.Utc)),
-                    Address =new Address()
-                    {
-                        Street = "12 PINE PARKWAY",
-                        Street2 = null,
-                        City = "SAUGUS",
-                        State ="NH",
-                        PostalCode = "3729",
-                        CountryIso = "US"
-                    },
-                    ContactInfo = new ContactInfo()
-                    {
-                        FullName ="EVANS, VALENTINA",
-                        LastName = "EVANS",
-                        FirstName = "VALENTINA",
-                        MiddleName =null,
-                        PhoneNumber = null,
-                        MobileNumber = null,
-                        EmailAddress = null
-                    },
-                    CreatedDate = DateOnly.FromDateTime(new DateTime(2025,5,8,0,0,0,DateTimeKind.Utc))
-                },
-                BeneficiaryContactId = 144,
-                Relationship = "HUSBAND",
-                KindId ='P',
-                Kind =new BeneficiaryKind()
-                {
-                    Id = 'P',
-                    Name = "Primary"
-                },
-                Percent = 100
-            },
-            new Beneficiary()
-            {
                 Id = 145,
                 PsnSuffix = 1000,
                 BadgeNumber = 703244,
                 DemographicId = 3173,
+                CurrentBalance = 0,
                 Contact = new BeneficiaryContact()
                 {
                     Id = 145,

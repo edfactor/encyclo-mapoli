@@ -24,6 +24,7 @@ public class BeneficiaryServiceTest : ApiTestBase<Program>
                 PsnSuffix = 1000,
                 BadgeNumber = 703244,
                 DemographicId = 3173,
+                CurrentBalance = 0,
                 Contact = new BeneficiaryContactDto()
                 {
                     Id = 145,

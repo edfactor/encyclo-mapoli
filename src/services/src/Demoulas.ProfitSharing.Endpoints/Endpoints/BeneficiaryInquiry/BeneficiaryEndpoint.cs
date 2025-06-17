@@ -30,6 +30,7 @@ public class BeneficiaryEndpoint : Endpoint<BeneficiaryRequestDto, PaginatedResp
 
     public override void Configure()
     {
+        AllowAnonymous();
         Get("");
         Summary(m =>
         {
