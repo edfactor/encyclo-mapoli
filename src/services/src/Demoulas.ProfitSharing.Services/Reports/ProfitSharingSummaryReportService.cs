@@ -62,39 +62,22 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         FrozenProfitYearRequest req, CancellationToken cancellationToken = default)
     {
         var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
-        var reportReq = new YearEndProfitSharingReportRequest
-        {
-            ProfitYear = req.ProfitYear,
-            IncludeDetails = true,
-            IncludeTotals = false,
-            IncludeActiveEmployees = true,
-            IncludeTerminatedEmployees = true,
-            IncludeBeneficiaries = false,
-            IsYearEnd = true,
-            Take = int.MaxValue
-        };
-        var report = await GetYearEndProfitSharingReportAsync(reportReq, cancellationToken);
-        var details = report.Response.Results.ToList();
-
         var birthday18 = calInfo.FiscalEndDate.AddYears(-18);
         var birthday21 = calInfo.FiscalEndDate.AddYears(-21);
         var nonTerminatedStatuses = new List<char> { EmploymentStatus.Constants.Active, EmploymentStatus.Constants.Inactive };
 
-        // Use local functions for status checks
+        // Helper functions
         static bool IsActiveOrInactive(char? status, DateOnly? termDate, List<char> nonTerminatedStatuses, DateOnly fiscalEnd) =>
             (status != null && nonTerminatedStatuses.Contains(status.Value)) || (termDate > fiscalEnd);
-        
         static bool IsTerminated(char? status, DateOnly? termDate, DateOnly fiscalEnd) =>
             status == EmploymentStatus.Constants.Terminated && termDate > fiscalEnd;
-        
         static bool IsTerminatedWithinFiscal(char? status, DateOnly? termDate, DateOnly fiscalBegin, DateOnly fiscalEnd) =>
-            status == EmploymentStatus.Constants.Terminated;
+            status == EmploymentStatus.Constants.Terminated && termDate != null && termDate <= fiscalEnd && termDate >= fiscalBegin;
 
         // Helper to create a summary line
-        YearEndProfitSharingReportSummaryLineItem? CreateLine(string subgroup, string prefix, string title, Func<YearEndProfitSharingReportDetail, bool> filter)
+        YearEndProfitSharingReportSummaryLineItem? CreateLine(string subgroup, string prefix, string title, List<YearEndProfitSharingReportDetail> details, Func<YearEndProfitSharingReportDetail, bool> filter)
         {
             var group = details.Where(filter).ToList();
-            
             return new YearEndProfitSharingReportSummaryLineItem
             {
                 Subgroup = subgroup,
@@ -106,32 +89,64 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             };
         }
 
+        // Query for active/inactive
+        var activeReq = new YearEndProfitSharingReportRequest
+        {
+            ProfitYear = req.ProfitYear,
+            IncludeDetails = true,
+            IncludeTotals = false,
+            IncludeActiveEmployees = true,
+            IncludeTerminatedEmployees = false,
+            IncludeBeneficiaries = false,
+            IsYearEnd = true,
+            Take = int.MaxValue
+        };
+        var activeReport = await GetYearEndProfitSharingReportAsync(activeReq, cancellationToken);
+        var activeDetails = activeReport.Response.Results.ToList();
+
+        // Query for terminated
+        var terminatedReq = new YearEndProfitSharingReportRequest
+        {
+            ProfitYear = req.ProfitYear,
+            IncludeDetails = true,
+            IncludeTotals = false,
+            IncludeActiveEmployees = false,
+            IncludeTerminatedEmployees = true,
+            IncludeBeneficiaries = false,
+            IsYearEnd = true,
+            Take = int.MaxValue
+        };
+        var terminatedReport = await GetYearEndProfitSharingReportAsync(terminatedReq, cancellationToken);
+        var terminatedDetails = terminatedReport.Response.Results.ToList();
+
         var lineItems = new List<YearEndProfitSharingReportSummaryLineItem?>
         {
-            CreateLine("Active and Inactive", "1", "AGE 18-20 WITH >= 1000 PS HOURS", x =>
+            // Active/Inactive lines
+            CreateLine("Active and Inactive", "1", "AGE 18-20 WITH >= 1000 PS HOURS", activeDetails, x =>
                 IsActiveOrInactive(x.EmployeeStatus, x.TerminationDate, nonTerminatedStatuses, calInfo.FiscalEndDate) &&
                 x.Hours >= 1000 && x.DateOfBirth <= birthday18 && x.DateOfBirth > birthday21),
-            CreateLine("Active and Inactive", "2", ">= AGE 21 WITH >= 1000 PS HOURS", x =>
+            CreateLine("Active and Inactive", "2", ">= AGE 21 WITH >= 1000 PS HOURS", activeDetails, x =>
                 IsActiveOrInactive(x.EmployeeStatus, x.TerminationDate, nonTerminatedStatuses, calInfo.FiscalEndDate) &&
                 x.Hours >= 1000 && x.DateOfBirth <= birthday21),
-            CreateLine("Active and Inactive", "3", "<  AGE 18", x =>
+            CreateLine("Active and Inactive", "3", "<  AGE 18", activeDetails, x =>
                 IsActiveOrInactive(x.EmployeeStatus, x.TerminationDate, nonTerminatedStatuses, calInfo.FiscalEndDate) &&
                 x.DateOfBirth > birthday18),
-            CreateLine("Active and Inactive", "4", ">= AGE 18 WITH < 1000 PS HOURS AND PRIOR PS AMOUNT", x =>
+            CreateLine("Active and Inactive", "4", ">= AGE 18 WITH < 1000 PS HOURS AND PRIOR PS AMOUNT", activeDetails, x =>
                 IsActiveOrInactive(x.EmployeeStatus, x.TerminationDate, nonTerminatedStatuses, calInfo.FiscalEndDate) &&
                 x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.Balance > 0),
-            CreateLine("Active and Inactive", "5", ">= AGE 18 WITH < 1000 PS HOURS AND NO PRIOR PS AMOUNT", x =>
+            CreateLine("Active and Inactive", "5", ">= AGE 18 WITH < 1000 PS HOURS AND NO PRIOR PS AMOUNT", activeDetails, x =>
                 IsActiveOrInactive(x.EmployeeStatus, x.TerminationDate, nonTerminatedStatuses, calInfo.FiscalEndDate) &&
                 x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.Balance == 0),
-            CreateLine("TERMINATED", "6", ">= AGE 18 WITH >= 1000 PS HOURS", x =>
+            // Terminated lines
+            CreateLine("TERMINATED", "6", ">= AGE 18 WITH >= 1000 PS HOURS", terminatedDetails, x =>
                 IsTerminated(x.EmployeeStatus, x.TerminationDate, calInfo.FiscalEndDate) && x.Hours >= 1000 && x.DateOfBirth <= birthday18),
-            CreateLine("TERMINATED", "7", ">= AGE 18 WITH < 1000 PS HOURS AND NO PRIOR PS AMOUNT", x =>
+            CreateLine("TERMINATED", "7", ">= AGE 18 WITH < 1000 PS HOURS AND NO PRIOR PS AMOUNT", terminatedDetails, x =>
                 IsTerminatedWithinFiscal(x.EmployeeStatus, x.TerminationDate, calInfo.FiscalBeginDate, calInfo.FiscalEndDate) &&
                 x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.Balance == 0),
-            CreateLine("TERMINATED", "8", ">= AGE 18 WITH < 1000 PS HOURS AND PRIOR PS AMOUNT", x =>
+            CreateLine("TERMINATED", "8", ">= AGE 18 WITH < 1000 PS HOURS AND PRIOR PS AMOUNT", terminatedDetails, x =>
                 IsTerminatedWithinFiscal(x.EmployeeStatus, x.TerminationDate, calInfo.FiscalBeginDate, calInfo.FiscalEndDate) &&
                 x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.Balance != 0),
-            CreateLine("TERMINATED", "X", "<  AGE 18           NO WAGES :   0", x =>
+            CreateLine("TERMINATED", "X", "<  AGE 18           NO WAGES :   0", terminatedDetails, x =>
                 IsTerminatedWithinFiscal(x.EmployeeStatus, x.TerminationDate, calInfo.FiscalBeginDate, calInfo.FiscalEndDate) &&
                 x.Wages == 0 && x.DateOfBirth > birthday18)
         };
