@@ -14,4 +14,5 @@ public record BeneficiaryDto : IdRequest
     public char? KindId { get; set; }
     public BeneficiaryKindDto? Kind { get; set; }
     public required decimal Percent { get; set; }
+    public decimal? CurrentBalance { get; set; }
 }

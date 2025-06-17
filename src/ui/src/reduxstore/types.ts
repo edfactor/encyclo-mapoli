@@ -1299,18 +1299,18 @@ export interface BeneficiaryDto {
   kindId?: number;
   kind?: BeneficiaryKindDto;
   percent: number;
-
-
+  currentBalance?: number;
 }
 
 export interface BeneficiaryRequestDto extends SortedPaginationRequestDto {
-  badgeNumber: number;
-  psnSuffix: number;
+  badgeNumber?: number;
+  psnSuffix?: number;
   name: string;
   city: string;
   address: string;
   state: string;
-  ssn: number;
+  ssn?: number;
+  percentage?: number;
 }
 
 export interface BeneficiaryResponseDto {
@@ -1390,6 +1390,18 @@ export interface BeneficiaryTypesRequestDto {
 }
 export interface BeneficiaryTypesResponseDto {
   beneficiaryTypeList?: BeneficiaryTypeDto[];
+}
+
+export interface BeneficiaryKindDto {
+  id: string;
+  name?: string;
+}
+
+export interface BeneficiaryKindRequestDto {
+  id?: number;
+}
+export interface BeneficiaryKindResponseDto {
+  beneficiaryKindList?: BeneficiaryKindDto[];
 }
 
 

@@ -17,4 +17,6 @@ namespace Demoulas.ProfitSharing.Common.Contracts.Request.BeneficiaryInquiry;
 #pragma warning disable DSM001
     public int? Ssn { get; set; }
 #pragma warning restore DSM001
+    public int? Percentage { get; set; }
+    public char? KindId { get; set; }
 }
