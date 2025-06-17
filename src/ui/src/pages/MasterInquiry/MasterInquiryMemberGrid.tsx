@@ -2,7 +2,7 @@ import { Typography } from "@mui/material";
 import React, { useState, useEffect, useRef } from "react";
 import { useLazySearchProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
 import { MasterInquiryRequest, EmployeeDetails } from "reduxstore/types";
-import { DSMGrid, Pagination } from "smart-ui-library";
+import { DSMGrid, Pagination, formatNumberWithComma } from "smart-ui-library";
 import { Box, CircularProgress } from "@mui/material";
 import { ColDef } from "ag-grid-community";
 import './MasterInquiryMemberGrid.css'; // Import the CSS file for styles
@@ -114,7 +114,7 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = (searchP
             <Typography
               variant="h2"
               sx={{ color: "#0258A5" }}>
-              {`Search Results (${data?.total || 0} ${data?.total === 1 ? "Record" : "Records"})`}
+              {`Search Results (${formatNumberWithComma(data?.total) || 0} ${data?.total === 1 ? "Record" : "Records"})`}
             </Typography>
           </div>
           <DSMGrid
