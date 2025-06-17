@@ -984,7 +984,7 @@ BEGIN
 		    AND pdCa.COMMENT_TYPE_ID = 8
 		    AND pdF.FORFEITURE  = pdCA.EARNINGS
 		    AND pd.ID  = pdF.ID
-      ) -- Forfeits that match a class action should be categorized as FORFEIT CA 
+      ); -- Forfeits that match a class action should be categorized as FORFEIT CA 
 
     -- Set flag on Profit Detail marking a year of elibility for Profit Sharing
 -- Comment types indicating years of service other than a contribution include:
