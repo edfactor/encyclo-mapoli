@@ -333,8 +333,9 @@ FROM FILTERED_DEMOGRAPHIC p1
                            (pd.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment.Id &&
                             (!pd.CommentTypeId.HasValue ||
                              !transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value)))) &&
-                            (!req.StartDate.HasValue || pd.TransactionDate >= req.StartDate.Value.ToDateTime(TimeOnly.MinValue)) &&
-                            (!req.EndDate.HasValue || pd.TransactionDate <= req.EndDate.Value.ToDateTime(TimeOnly.MaxValue))
+                            (!req.StartDate.HasValue || pd.TransactionDate.ToDateOnly() >= req.StartDate.Value) &&
+                            (!req.EndDate.HasValue || pd.TransactionDate.ToDateOnly() <= req.EndDate.Value) &&
+                            !(pd.ProfitCodeId == 9 && transferAndQdroCommentTypes.Contains((int)pd.CommentTypeId))
 
                     select new
                     {
