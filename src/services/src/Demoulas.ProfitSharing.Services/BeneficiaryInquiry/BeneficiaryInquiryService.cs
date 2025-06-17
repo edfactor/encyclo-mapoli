@@ -6,6 +6,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
@@ -47,7 +48,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                 (request.State == null || x.Contact.Address.State.Contains(request.State)) &&
                 (request.Percentage == null || request.Percentage ==0 || x.Percent == request.Percentage) &&
                 (request.KindId == null || x.KindId == request.KindId) 
-                ).Skip(request.Skip??0).Take(request.Take??25)
+                )
             .Select(x => new BeneficiaryDto()
             {
                 Id = x.Id,
@@ -84,7 +85,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                 },
                 Kind = new BeneficiaryKindDto()
                 {
-                    Id = x.Kind != null ? x.Kind.Id : '0',
+                    Id = x.Kind != null ? x.Kind.Id : BeneficiaryKind.Constants.Primary,
                     Name = x.Kind != null ? x.Kind.Name : null
                 },
                 Relationship = x.Relationship
@@ -94,36 +95,34 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
         }
         );
         //setting Current balance
+        ISet<int> ssnList = new HashSet<int>(beneficiary.Results.Select(x => Convert.ToInt32(x.Contact.Ssn)).ToList());
+        var balanceList =await _totalService.GetVestingBalanceForMembersAsync(SearchBy.Ssn, ssnList, yearEnd, cancellationToken); 
         foreach (var item in beneficiary.Results)
         {
-            int ssn = item.Contact.Ssn.ConvertSsnToInt();
-            var currentBalanceRes = await _totalService.GetVestingBalanceForSingleMemberAsync(SearchBy.Ssn, ssn, yearEnd, cancellationToken);
-            item.CurrentBalance = currentBalanceRes?.CurrentBalance;
-            item.Contact.Ssn = ssn.MaskSsn();
+            item.CurrentBalance = balanceList.Where(x => x.Id.ToString() == item.Contact.Ssn).Select(x => x.CurrentBalance).FirstOrDefault();
+            item.Contact.Ssn = item.Contact.Ssn.MaskSsn();
         }
-
-
         return beneficiary;
     }
 
     public async Task<BeneficiaryTypesResponseDto> GetBeneficiaryTypes(BeneficiaryTypesRequestDto beneficiaryTypesRequestDto, CancellationToken cancellation)
     {
-        var result = await _dataContextFactory.UseReadOnlyContext(async context =>
+        var result = await _dataContextFactory.UseReadOnlyContext(context =>
         {
-            return context.BeneficiaryTypes.Select(x => new BeneficiaryTypeDto { Id = x.Id, Name = x.Name }).ToListAsync();
+            return context.BeneficiaryTypes.Select(x => new BeneficiaryTypeDto { Id = x.Id, Name = x.Name }).ToListAsync(cancellation);
         });
 
-        return new BeneficiaryTypesResponseDto() { BeneficiaryTypeList = result.Result };
+        return new BeneficiaryTypesResponseDto() { BeneficiaryTypeList = result };
     }
 
 
     public async Task<BeneficiaryKindResponseDto> GetBeneficiaryKind(BeneficiaryKindRequestDto beneficiaryKindRequestDto, CancellationToken cancellation)
     {
-        var result = await _dataContextFactory.UseReadOnlyContext(async context =>
+        var result = await _dataContextFactory.UseReadOnlyContext(context =>
         {
-            return context.BeneficiaryKinds.Select(x => new BeneficiaryKindDto { Id = x.Id, Name = x.Name }).ToListAsync();
+            return context.BeneficiaryKinds.Select(x => new BeneficiaryKindDto { Id = x.Id, Name = x.Name }).ToListAsync(cancellation);
         });
 
-        return new BeneficiaryKindResponseDto() { BeneficiaryKindList = result.Result };
+        return new BeneficiaryKindResponseDto() { BeneficiaryKindList = result };
     }
 }

@@ -23,6 +23,20 @@ public static class SsnExtensions
         return new string(resultSpan);
     }
 
+    public static string MaskSsn(this object ssn)
+    {
+        string _ssn = ssn.ToString()??string.Empty;
+        Span<char> ssnSpan = stackalloc char[9];
+        _ssn.AsSpan().CopyTo(ssnSpan[(9 - _ssn.Length)..]);
+        ssnSpan[..(9 - _ssn.Length)].Fill('0');
+
+        Span<char> resultSpan = stackalloc char[11];
+        "XXX-XX-".AsSpan().CopyTo(resultSpan);
+        ssnSpan.Slice(5, 4).CopyTo(resultSpan[7..]);
+
+        return new string(resultSpan);
+    }
+
     /// <summary>
     /// Converts a formatted Social Security Number (SSN) string into an integer representation.
     /// </summary>
