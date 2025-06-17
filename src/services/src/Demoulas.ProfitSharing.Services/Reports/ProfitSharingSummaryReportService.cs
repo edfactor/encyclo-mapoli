@@ -439,6 +439,11 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             // ──────────────────────────────────────────────────────────────────────────
             employeeQry = ApplyRequestFilters(employeeQry, req, calInfo);
 
+            if (req.BadgeNumber.HasValue)
+            {
+                employeeQry = employeeQry.Where(e => e.BadgeNumber == req.BadgeNumber.Value);
+            }
+
             // ──────────────────────────────────────────────────────────────────────────
             //  Balance join (only if needed)
             // ──────────────────────────────────────────────────────────────────────────
