@@ -1,7 +1,7 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Checkbox, FormHelperText, FormLabel, TextField } from "@mui/material";
+import { FormHelperText } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, Resolver, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetDistributionsAndForfeituresQuery } from "reduxstore/api/YearsEndApi";
 import {
@@ -13,11 +13,18 @@ import { RootState } from "reduxstore/store";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
+import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
+import { format } from "date-fns";
+
+const formatDateOnly = (date: Date | null): string | undefined => {
+  if (!date) return undefined;
+  return format(date, 'yyyy-MM-dd');
+};
 
 interface DistributionsAndForfeituresSearch {
   profitYear: number;
-  startMonth?: number | null | undefined;
-  endMonth?: number | null | undefined;  
+  startDate: Date | null;
+  endDate: Date | null;
 }
 
 const schema = yup.object().shape({
@@ -28,20 +35,17 @@ const schema = yup.object().shape({
     .min(2020, "Year must be 2020 or later")
     .max(2100, "Year must be 2100 or earlier")
     .required("Year is required"),
-  startMonth: yup
-    .number()
-    .typeError("Start Month must be a number")
-    .integer("Start Month must be an integer")
-    .min(1, "Start Month must be 1 or higher")
-    .max(12, "Start Month must be 12 or lower")
-    .transform((value) => (isNaN(value) ? undefined : value)),
-  endMonth: yup
-    .number()
-    .typeError("End Month must be a number")
-    .integer("End Month must be an integer")
-    .min(1, "End Month must be 1 or higher")
-    .max(12, "End Month must be 12 or lower")
+  startDate: yup
+    .date()
+    .nullable(),
+  endDate: yup
+    .date()
     .nullable()
+    .test('is-after-start', 'End Date must be after Start Date', function(value) {
+      const { startDate } = this.parent;
+      if (!startDate || !value) return true;
+      return value > startDate;
+    })
 });
 
 interface DistributionsAndForfeituresSearchFilterProps {
@@ -62,13 +66,14 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
     control,
     handleSubmit,
     formState: { errors, isValid },
-    reset
+    reset,
+    trigger
   } = useForm<DistributionsAndForfeituresSearch>({
-    resolver: yupResolver(schema),
+    resolver: yupResolver(schema) as Resolver<DistributionsAndForfeituresSearch>,
     defaultValues: {
       profitYear: profitYear || distributionsAndForfeituresQueryParams?.profitYear || undefined,
-      startMonth: distributionsAndForfeituresQueryParams?.startMonth || 1,
-      endMonth: distributionsAndForfeituresQueryParams?.endMonth || 12
+      startDate: null,
+      endDate: null
     }
   });
 
@@ -77,8 +82,8 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
       triggerSearch(
         {
           profitYear: data.profitYear,
-          ...(data.startMonth && { startMonth: data.startMonth }),
-          ...(data.endMonth && { endMonth: data.endMonth }),
+          ...(data.startDate && { startDate: formatDateOnly(data.startDate) }),
+          ...(data.endDate && { endDate: formatDateOnly(data.endDate) }),
           pagination: { skip: 0, take: 25, sortBy: "employeeName, date", isSortDescending: false }
         },
         false
@@ -86,8 +91,8 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
       dispatch(
         setDistributionsAndForfeituresQueryParams({
           profitYear: data.profitYear,
-          startMonth: data.startMonth,
-          endMonth: data.endMonth || undefined
+          startDate: formatDateOnly(data.startDate),
+          endDate: formatDateOnly(data.endDate)
         })
       );
     }
@@ -99,8 +104,8 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
     // Clear the form fields
     reset({
       profitYear: profitYear || undefined,
-      startMonth: 1,  
-      endMonth: 12
+      startDate: null,
+      endDate: null
     });
 
     // Clear the data in Redux store
@@ -115,20 +120,19 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
         paddingX="24px"
         gap="24px">
         <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-          <FormLabel>Profit Year</FormLabel>
           <Controller
             name="profitYear"
             control={control}
             render={({ field }) => (
-              <TextField
-                {...field}
-                fullWidth
-                variant="outlined"
-                error={!!errors.profitYear}
-                onChange={(e) => {
-                  field.onChange(e);
-                }}
-                type="number"
+              <DsmDatePicker
+                id="profitYear"
+                onChange={(value: Date | null) => field.onChange(value?.getFullYear() || undefined)}
+                value={field.value ? new Date(field.value, 0) : null}
+                required={true}
+                label="Profit Year"
+                disableFuture
+                views={["year"]}
+                error={errors.profitYear?.message}
                 disabled={true}
               />
             )}
@@ -136,54 +140,46 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
           {errors.profitYear && <FormHelperText error>{errors.profitYear.message}</FormHelperText>}
         </Grid2>
         <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-          <FormLabel>Start Month</FormLabel>
           <Controller
-            name="startMonth"
+            name="startDate"
             control={control}
             render={({ field }) => (
-              <TextField
-                {...field}
-                fullWidth
-                variant="outlined"
-                error={!!errors.startMonth}
-                // Convert undefined to empty string for the TextField
-                value={field.value === undefined ? '' : field.value}
-                // Handle changes to ensure undefined is properly set instead of empty string
-                onChange={(e) => {
-                  const value = e.target.value;
-                  field.onChange(value === '' ? undefined : Number(value));
+              <DsmDatePicker
+                id="startDate"
+                onChange={(value: Date | null) => {
+                  field.onChange(value);
+                  trigger('endDate'); 
                 }}
-
-                type="number"
+                value={field.value}
+                required={false}
+                label="Start Date"
+                disableFuture
+                error={errors.startDate?.message}
               />
             )}
           />
-          {errors.startMonth && <FormHelperText error>{errors.startMonth.message}</FormHelperText>}
+          {errors.startDate && <FormHelperText error>{errors.startDate.message}</FormHelperText>}
         </Grid2>
         <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-          <FormLabel>End Month</FormLabel>
           <Controller
-            name="endMonth"
+            name="endDate"
             control={control}
             render={({ field }) => (
-              <TextField
-                {...field}
-                fullWidth
-                variant="outlined"
-                error={!!errors.endMonth}
-                // Convert undefined to empty string for the TextField
-                value={field.value === undefined ? '' : field.value}
-                // Handle changes to ensure undefined is properly set instead of empty string
-                onChange={(e) => {
-                  const value = e.target.value;
-                  field.onChange(value === '' ? undefined : Number(value));
+              <DsmDatePicker
+                id="endDate"
+                onChange={(value: Date | null) => {
+                  field.onChange(value);
+                  trigger('endDate'); 
                 }}
-
-                type="number"
+                value={field.value}
+                required={false}
+                label="End Date"
+                disableFuture
+                error={errors.endDate?.message}
               />
             )}
           />
-          {errors.endMonth && <FormHelperText error>{errors.endMonth.message}</FormHelperText>}
+          {errors.endDate && <FormHelperText error>{errors.endDate.message}</FormHelperText>}
         </Grid2>       
       </Grid2>
       <Grid2

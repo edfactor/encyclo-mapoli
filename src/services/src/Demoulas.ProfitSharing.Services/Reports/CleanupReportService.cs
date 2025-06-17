@@ -333,8 +333,9 @@ FROM FILTERED_DEMOGRAPHIC p1
                            (pd.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment.Id &&
                             (!pd.CommentTypeId.HasValue ||
                              !transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value)))) &&
-                          (req.StartMonth == 0 || pd.MonthToDate >= req.StartMonth) &&
-                          (req.EndMonth == 0 || pd.MonthToDate <= req.EndMonth)
+                            (!req.StartDate.HasValue || pd.TransactionDate >= req.StartDate.Value.ToDateTime(TimeOnly.MinValue)) &&
+                            (!req.EndDate.HasValue || pd.TransactionDate <= req.EndDate.Value.ToDateTime(TimeOnly.MaxValue))
+
                     select new
                     {
                         BadgeNumber = nameAndDob.BadgeNumber,
