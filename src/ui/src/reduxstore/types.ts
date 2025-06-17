@@ -886,6 +886,7 @@ export interface YearEndProfitSharingReportRequest {
   includeEmployeesWithPriorProfitSharingAmounts: boolean;
   includeEmployeesWithNoPriorProfitSharingAmounts: boolean;
   profitYear: number;
+  badgeNumber?: number | null;
   pagination: SortedPaginationRequestDto;
 }
 
