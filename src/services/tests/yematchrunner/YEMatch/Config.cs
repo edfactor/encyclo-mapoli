@@ -6,7 +6,7 @@ internal static class Config
 {
     public static string CreateDataDirectory()
     {
-        // used to get desired BaseDataDirectory for writing log files
+        // used to get BaseDataDirectory for writing log files
         IConfigurationRoot config = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", true, true).Build();

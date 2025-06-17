@@ -81,7 +81,7 @@ public static class GetGold
         string outcomeFile = $"{dataDirectory}/outcome.json";
         File.Copy(outcomeFile, $"{goldenDir}/outcome.json", true);
 
-        string json = File.ReadAllText(outcomeFile);
+        string json = File.ReadAllText($"{goldenDir}/outcome.json");
         List<Outcome> outcomes = JsonSerializer.Deserialize<List<Outcome>>(json)!;
 
         Dictionary<string, string> activityByPid = new();
