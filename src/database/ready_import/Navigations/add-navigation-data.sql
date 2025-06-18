@@ -39,10 +39,10 @@ INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUM
 VALUES(6,2, 'Duplicate Names and Birthdays', '','duplicate-names-and-birthdays', 1, 4, '', 0);
 --sub values for December Activities
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(7,1, 'Military Contributions', '008-13','military-entry-and-modification', 1, 2, '', 0);
+VALUES(7,1, 'Military Contributions', '008-13','military-entry-and-modification', 1, 3, '', 0);
 
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(8,1, 'UnForfeit', 'QPREV-PROF','unforfeitures', 1, 3, '', 0);
+VALUES(8,1, 'UnForfeit', 'QPREV-PROF','unforfeitures', 1, 2, '', 0);
 
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
 VALUES(9,1, 'Terminations', 'QPAY066','prof-term', 1, 4, '', 0);
@@ -88,24 +88,23 @@ VALUES(62,14, 'Profit Master Update', 'PAY460, PROFTLD','profit-master-update', 
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
 VALUES(33,14, 'Prof PayMaster Update', 'PAY450','pay450-summary', 1, 10, '', 0);
 
--- Prof control sheet
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(64,14, 'Prof Control Sheet', 'PROF-CNTRL-SHEET','prof-control-sheet', 1, 16, '', 0);
+VALUES(64,14, 'Prof Control Sheet', 'PROF-CNTRL-SHEET','prof-control-sheet', 1, 11, '', 0);
 
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(34,14, 'Prof Share Report By Age', 'Prof130','', 1, 11, '', 0);
+VALUES(34,14, 'Prof Share Report By Age', 'Prof130','', 1, 12, '', 0);
 
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(41,14, 'Prof Share Gross Rpt', 'QPAY501','profit-share-gross-report', 1, 12, '', 0);
+VALUES(41,14, 'Prof Share Gross Rpt', 'QPAY501','profit-share-gross-report', 1, 13, '', 0);
 
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(42,14, 'Prof Share by Store', 'QPAY066TA','', 1, 13, '', 0);
+VALUES(42,14, 'Prof Share by Store', 'QPAY066TA','', 1, 14, '', 0);
 
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(49,14, 'Print Profit Certs', 'PAYCERT','print-profit-certs', 1, 14, '', 0);
+VALUES(49,14, 'Print Profit Certs', 'PAYCERT','print-profit-certs', 1, 15, '', 0);
 
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(63,14, 'Save Prof Paymstr', '','save-prof-paymstr', 1, 15, '', 0);
+VALUES(63,14, 'Save Prof Paymstr', '','save-prof-paymstr', 1, 16, '', 0);
 
 --sub values for Report by Age - updated per requirements
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
