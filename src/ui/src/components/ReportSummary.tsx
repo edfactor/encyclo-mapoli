@@ -3,6 +3,7 @@ import { Typography } from "@mui/material";
 import { PagedReportResponse } from "../reduxstore/types";
 import { mmDDYYFormat } from "../utils/dateUtils";
 import EnvironmentUtils from "../utils/environmentUtils";
+import { formatNumberWithComma } from "smart-ui-library";
 
 
 interface ReportSummaryProps<T> {
@@ -18,7 +19,7 @@ export function ReportSummary<T>({ report }: ReportSummaryProps<T>) {
     <>
       <div style={{ padding: "0 24px 0 24px" }}>
         <Typography variant="h2" sx={{ color: "#0258A5" }}>
-          {`${report.reportName || ""} (${report.response.total || 0} ${
+          {`${report.reportName || ""} (${formatNumberWithComma(report.response.total) || 0} ${
             report.response.total === 1 ? "Record" : "Records"
           })`}
         </Typography>

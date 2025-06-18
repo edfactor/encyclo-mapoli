@@ -11,15 +11,15 @@ public sealed class EmbeddedSqlService : IEmbeddedSqlService
     public IQueryable<ParticipantTotal> GetTotalBalanceAlt(IProfitSharingDbContext ctx, short profitYear)
     {
 
-        var query = GetTotalBalanceQuery(profitYear);
+        FormattableString query = GetTotalBalanceQuery(profitYear);
 
-        return ctx.ParticipantTotals.FromSqlRaw(query);
+        return ctx.ParticipantTotals.FromSqlInterpolated(query);
     }
 
     public IQueryable<ParticipantTotalYear> GetYearsOfServiceAlt(IProfitSharingDbContext ctx, short profitYear)
     {
         var query = GetYearsOfServiceQuery(profitYear);
-        return ctx.ParticipantTotalYears.FromSqlRaw(query);
+        return ctx.ParticipantTotalYears.FromSqlInterpolated(query);
     }
 
     public IQueryable<ParticipantTotalRatio> GetVestingRatioAlt(IProfitSharingDbContext ctx, short profitYear,
@@ -169,9 +169,9 @@ FROM   employees
         return ctx.ProfitShareTotals.FromSqlRaw(query);
     }
 
-    private static string GetTotalBalanceQuery(short profitYear)
+    private static FormattableString GetTotalBalanceQuery(short profitYear)
     {
-        var query = @$"
+        FormattableString query = @$"
 SELECT
     pd.SSN as Ssn,
     --Contributions + Earnings + EtvaForfeitures + Distributions + Forfeitures + VestedEarnings
@@ -234,9 +234,9 @@ FROM (
 ";
         return query;
     }
-    private static string GetYearsOfServiceQuery(short profitYear)
+    private static FormattableString GetYearsOfServiceQuery(short profitYear)
     {
-        var query = @$"
+        FormattableString query = @$"
 SELECT pd.SSN, SUM(pd.YEARS_OF_SERVICE_CREDIT) YEARS
             FROM PROFIT_DETAIL pd 
             WHERE pd.PROFIT_YEAR  <= {profitYear}
