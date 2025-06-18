@@ -62,10 +62,10 @@ VALUES(14,55, 'Fiscal Close', '','fiscal-close', 1, 2, '', 0);
 
 -- Fiscal Close menu items updated according to ticket requirements
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(16,14, 'YTD Wages Extract', 'PROF-DOLLAR-EXTRACT','ytd-wages-extract', 1, 1, '', 0);
+VALUES(15,14, 'Manage Executive Hours', 'PROF-DOLLAR-EXEC-EXTRACT, TPR008-09','manage-executive-hours-and-dollars', 1, 1, '', 0);
 
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(15,14, 'Manage Executive Hours', 'PROF-DOLLAR-EXEC-EXTRACT, TPR008-09','manage-executive-hours-and-dollars', 1, 2, '', 0);
+VALUES(16,14, 'YTD Wages Extract', 'PROF-DOLLAR-EXTRACT','ytd-wages-extract', 1, 2, '', 0);
 
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
 VALUES(18,14, 'Profit Share Report (Edit Run)', 'PAY426','pay426n', 1, 3, '', 0);
