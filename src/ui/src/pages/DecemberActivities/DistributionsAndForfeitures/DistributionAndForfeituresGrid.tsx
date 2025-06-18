@@ -36,19 +36,19 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
   const onSearch = useCallback(async () => {
     const request = {
       profitYear: profitYear || 0,
-      ...(distributionsAndForfeituresQueryParams?.startMonth && {
-        startMonth: distributionsAndForfeituresQueryParams?.startMonth
+      ...(distributionsAndForfeituresQueryParams?.startDate && {
+        startDate: distributionsAndForfeituresQueryParams?.startDate
       }),
-      ...(distributionsAndForfeituresQueryParams?.endMonth && {
-        endMonth: distributionsAndForfeituresQueryParams?.endMonth
+      ...(distributionsAndForfeituresQueryParams?.endDate && {
+        endDate: distributionsAndForfeituresQueryParams?.endDate
       }),
       pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: sortParams.sortBy, isSortDescending: sortParams.isSortDescending }
     };
 
     await triggerSearch(request, false);
   }, [
-    distributionsAndForfeituresQueryParams?.endMonth,
-    distributionsAndForfeituresQueryParams?.startMonth,
+    distributionsAndForfeituresQueryParams?.endDate,
+    distributionsAndForfeituresQueryParams?.startDate,
     profitYear,
     pageNumber,
     pageSize,

@@ -57,8 +57,8 @@ export interface PagedReportResponse<T> {
 }
 
 export interface DistributionsAndForfeituresRequestDto extends ProfitYearRequest {
-  startMonth?: number;
-  endMonth?: number;
+  startDate?: string;
+  endDate?: string;
   pagination: SortedPaginationRequestDto;
 }
 
@@ -291,8 +291,8 @@ export interface ExecutiveHoursAndDollarsQueryParams extends ProfitYearRequest {
 }
 
 export interface DistributionsAndForfeituresQueryParams extends ProfitYearRequest {
-  startMonth?: number;
-  endMonth?: number;
+  startDate?: string;
+  endDate?: string;
 }
 
 
