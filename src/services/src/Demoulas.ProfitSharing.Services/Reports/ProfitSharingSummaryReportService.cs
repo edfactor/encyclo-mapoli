@@ -12,7 +12,7 @@ using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
+
 
 namespace Demoulas.ProfitSharing.Services.Reports;
 
@@ -25,9 +25,9 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
 
     private sealed record EmployeeProjection
     {
-        public int BadgeNumber { get; init; }
-        public decimal Hours { get; init; }
-        public decimal Wages { get; init; }
+        public required int BadgeNumber { get; init; }
+        public required decimal Hours { get; init; }
+        public required decimal Wages { get; init; }
         public DateOnly DateOfBirth { get; init; }
         public char EmploymentStatusId { get; init; }
         public DateOnly? TerminationDate { get; init; }
@@ -42,8 +42,9 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
 
     private sealed record EmployeeWithBalance
     {
-        public EmployeeProjection Employee { get; init; } = null!;
-        public decimal Balance { get; init; }
+        public required EmployeeProjection Employee { get; init; } = null!;
+        public required decimal Balance { get; init; }
+        public required decimal PriorBalance { get; init; }
     }
 
 
@@ -142,7 +143,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 IsTerminated(x.EmployeeStatus, x.TerminationDate, calInfo.FiscalEndDate) && x.Hours >= 1000 && x.DateOfBirth <= birthday18),
             CreateLine("TERMINATED", "7", ">= AGE 18 WITH < 1000 PS HOURS AND NO PRIOR PS AMOUNT", terminatedDetails, x =>
                 IsTerminatedWithinFiscal(x.EmployeeStatus, x.TerminationDate, calInfo.FiscalBeginDate, calInfo.FiscalEndDate) &&
-                x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.Balance == 0),
+                x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.PriorBalance == 0),
             CreateLine("TERMINATED", "8", ">= AGE 18 WITH < 1000 PS HOURS AND PRIOR PS AMOUNT", terminatedDetails, x =>
                 IsTerminatedWithinFiscal(x.EmployeeStatus, x.TerminationDate, calInfo.FiscalBeginDate, calInfo.FiscalEndDate) &&
                 x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.Balance != 0),
@@ -181,6 +182,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 Age = (byte)x.Employee.DateOfBirth.Age(DateTime.UtcNow),
                 Ssn = x.Employee.Ssn.MaskSsn(),
                 Wages = x.Employee.Wages,
+                PriorBalance = x.PriorBalance,
                 Hours = x.Employee.Hours,
                 Points = Convert.ToInt16(x.Employee.PointsEarned),
                 IsNew = x.Balance == 0 && x.Employee.Hours > ReferenceData.MinimumHoursForContribution(),
@@ -337,8 +339,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         }
 
         var yearsOfService = _totalService.GetYearsOfService(ctx, req.ProfitYear);
-        var balances = _totalService.GetTotalBalanceSet(ctx, req.ProfitYear);
-
+        
         var employeeQry =
             from pp in basePayProfits
             join et in ctx.EmploymentTypes on pp.Demographic!.EmploymentTypeId equals et.Id
@@ -385,11 +386,19 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
 
         employeeQry = ApplyRequestFilters(employeeQry, req, calInfo);
 
+        var balances = _totalService.GetTotalBalanceSet(ctx, req.ProfitYear);
+        var priorBalances = _totalService.GetTotalBalanceSet(ctx, (short)(req.ProfitYear-1));
+        
         var employeeWithBalanceQry =
             from e in employeeQry
             join bal in balances on e.Ssn equals bal.Ssn into balTmp
             from bal in balTmp.DefaultIfEmpty()
-            select new EmployeeWithBalance { Employee = e, Balance = (decimal)(bal != null && bal.Total != null ? bal.Total : 0) };
+            select new EmployeeWithBalance
+            {
+                Employee = e, 
+                Balance = (decimal)(bal != null && bal.Total != null ? bal.Total : 0),
+                PriorBalance =0
+            };
 
         return employeeWithBalanceQry;
     }
