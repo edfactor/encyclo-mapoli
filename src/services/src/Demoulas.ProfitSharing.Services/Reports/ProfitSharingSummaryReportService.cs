@@ -138,15 +138,19 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             CreateLine("Active and Inactive", "5", ">= AGE 18 WITH < 1000 PS HOURS AND NO PRIOR PS AMOUNT", activeDetails, x =>
                 IsActiveOrInactive(x.EmployeeStatus, x.TerminationDate, nonTerminatedStatuses, calInfo.FiscalEndDate) &&
                 x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.Balance == 0),
+            
             // Terminated lines
             CreateLine("TERMINATED", "6", ">= AGE 18 WITH >= 1000 PS HOURS", terminatedDetails, x =>
                 IsTerminated(x.EmployeeStatus, x.TerminationDate, calInfo.FiscalEndDate) && x.Hours >= 1000 && x.DateOfBirth <= birthday18),
+
             CreateLine("TERMINATED", "7", ">= AGE 18 WITH < 1000 PS HOURS AND NO PRIOR PS AMOUNT", terminatedDetails, x =>
                 IsTerminatedWithinFiscal(x.EmployeeStatus, x.TerminationDate, calInfo.FiscalBeginDate, calInfo.FiscalEndDate) &&
                 x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.PriorBalance == 0),
+            
             CreateLine("TERMINATED", "8", ">= AGE 18 WITH < 1000 PS HOURS AND PRIOR PS AMOUNT", terminatedDetails, x =>
                 IsTerminatedWithinFiscal(x.EmployeeStatus, x.TerminationDate, calInfo.FiscalBeginDate, calInfo.FiscalEndDate) &&
-                x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.Balance != 0),
+                x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.PriorBalance != 0),
+            
             CreateLine("TERMINATED", "X", "<  AGE 18           NO WAGES :   0", terminatedDetails, x =>
                 IsTerminatedWithinFiscal(x.EmployeeStatus, x.TerminationDate, calInfo.FiscalBeginDate, calInfo.FiscalEndDate) &&
                 x.Wages == 0 && x.DateOfBirth > birthday18)
