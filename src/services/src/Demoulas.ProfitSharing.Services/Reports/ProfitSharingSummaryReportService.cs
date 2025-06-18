@@ -120,6 +120,9 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         var terminatedReport = await GetYearEndProfitSharingReportAsync(terminatedReq, cancellationToken);
         var terminatedDetails = terminatedReport.Response.Results.ToList();
 
+        // Determine if we should include employees terminated this year (only available on YearEndProfitSharingReportRequest, not FrozenProfitYearRequest)
+        bool includeEmployeesTerminatedThisYear = false; // Default for FrozenProfitYearRequest
+
         var lineItems = new List<YearEndProfitSharingReportSummaryLineItem?>
         {
             // Active/Inactive lines
@@ -140,8 +143,12 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.Balance == 0),
             
             // Terminated lines
+            // Updated TERMINATED 6 filter to not use req.IncludeEmployeesTerminatedThisYear
             CreateLine("TERMINATED", "6", ">= AGE 18 WITH >= 1000 PS HOURS", terminatedDetails, x =>
-                IsTerminated(x.EmployeeStatus, x.TerminationDate, calInfo.FiscalEndDate) && x.Hours >= 1000 && x.DateOfBirth <= birthday18),
+                x is { EmployeeStatus: EmploymentStatus.Constants.Terminated, TerminationDate: not null } &&
+                ((x.TerminationDate < calInfo.FiscalEndDate) ||
+                 (includeEmployeesTerminatedThisYear && x.TerminationDate >= calInfo.FiscalBeginDate && x.TerminationDate <= calInfo.FiscalEndDate)) &&
+                x.Hours >= 1000 && x.DateOfBirth <= birthday18),
 
             CreateLine("TERMINATED", "7", ">= AGE 18 WITH < 1000 PS HOURS AND NO PRIOR PS AMOUNT", terminatedDetails, x =>
                 IsTerminatedWithinFiscal(x.EmployeeStatus, x.TerminationDate, calInfo.FiscalBeginDate, calInfo.FiscalEndDate) &&
