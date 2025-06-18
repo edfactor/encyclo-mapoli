@@ -393,11 +393,13 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             from e in employeeQry
             join bal in balances on e.Ssn equals bal.Ssn into balTmp
             from bal in balTmp.DefaultIfEmpty()
+            join priorBal in priorBalances on e.Ssn equals priorBal.Ssn into priorBalTmp
+            from priorBal in priorBalTmp.DefaultIfEmpty()
             select new EmployeeWithBalance
             {
                 Employee = e, 
                 Balance = (decimal)(bal != null && bal.Total != null ? bal.Total : 0),
-                PriorBalance =0
+                PriorBalance = (decimal)(priorBal != null && priorBal.Total != null ? priorBal.Total : 0)
             };
 
         return employeeWithBalanceQry;
