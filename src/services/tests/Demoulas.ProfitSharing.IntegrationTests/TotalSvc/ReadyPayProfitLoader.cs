@@ -11,6 +11,7 @@ public static class ReadyPayProfitLoader
         await connection.OpenAsync();
 
         string query = "select payprof_badge, PAYPROF_SSN, PY_PS_YEARS, PY_PS_AMT, PY_PS_VAMT, PY_PS_ETVA from PROFITSHARE.PAYPROFIT";
+        // string query = "select payprof_badge, PAYPROF_SSN, PY_PS_YEARS, PY_PS_AMT, PY_PS_VAMT, PY_PS_ETVA from tbherrmann.PAYPROFIT"
 
         Dictionary<int, PayProfitData> data = new();
         OracleCommand command = new(query, connection);
