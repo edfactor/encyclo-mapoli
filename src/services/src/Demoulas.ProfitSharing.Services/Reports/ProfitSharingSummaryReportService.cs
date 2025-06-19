@@ -70,10 +70,9 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         // Helper functions
         static bool IsActiveOrInactive(char? status, DateOnly? termDate, List<char> nonTerminatedStatuses, DateOnly fiscalEnd) =>
             (status != null && nonTerminatedStatuses.Contains(status.Value)) || (termDate > fiscalEnd);
-        static bool IsTerminated(char? status, DateOnly? termDate, DateOnly fiscalEnd) =>
-            status == EmploymentStatus.Constants.Terminated && termDate > fiscalEnd;
+        
         static bool IsTerminatedWithinFiscal(char? status, DateOnly? termDate, DateOnly fiscalBegin, DateOnly fiscalEnd) =>
-            status == EmploymentStatus.Constants.Terminated && termDate != null && termDate <= fiscalEnd && termDate >= fiscalBegin;
+            status == EmploymentStatus.Constants.Terminated && termDate <= fiscalEnd && termDate >= fiscalBegin;
 
         // Helper to create a summary line
         YearEndProfitSharingReportSummaryLineItem? CreateLine(string subgroup, string prefix, string title, List<YearEndProfitSharingReportDetail> details, Func<YearEndProfitSharingReportDetail, bool> filter)
@@ -86,39 +85,18 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 LineItemTitle = title,
                 NumberOfMembers = group.Count,
                 TotalWages = group.Sum(y => y.Wages),
-                TotalBalance = group.Sum(y => y.Balance)
+                TotalBalance = group.Sum(y => y.Balance),
+                TotalPriorBalance = group.Sum(y => y.PriorBalance)
             };
         }
 
-        // Query for active/inactive
-        var activeReq = new YearEndProfitSharingReportRequest
-        {
-            ProfitYear = req.ProfitYear,
-            IncludeDetails = true,
-            IncludeTotals = false,
-            IncludeActiveEmployees = true,
-            IncludeTerminatedEmployees = false,
-            IncludeBeneficiaries = false,
-            IsYearEnd = true,
-            Take = int.MaxValue
-        };
-        var activeReport = await GetYearEndProfitSharingReportAsync(activeReq, cancellationToken);
-        var activeDetails = activeReport.Response.Results.ToList();
+        var activeDetailsTask = ActiveSummary(req, cancellationToken);
+        var terminatedDetailsTask = TerminatedSummary(req, cancellationToken);
 
-        // Query for terminated
-        var terminatedReq = new YearEndProfitSharingReportRequest
-        {
-            ProfitYear = req.ProfitYear,
-            IncludeDetails = true,
-            IncludeTotals = false,
-            IncludeActiveEmployees = false,
-            IncludeTerminatedEmployees = true,
-            IncludeBeneficiaries = false,
-            IsYearEnd = true,
-            Take = int.MaxValue
-        };
-        var terminatedReport = await GetYearEndProfitSharingReportAsync(terminatedReq, cancellationToken);
-        var terminatedDetails = terminatedReport.Response.Results.ToList();
+        await Task.WhenAll(activeDetailsTask, terminatedDetailsTask);
+
+        var activeDetails = await activeDetailsTask;
+        var terminatedDetails = await terminatedDetailsTask;
 
         // Determine if we should include employees terminated this year (only available on YearEndProfitSharingReportRequest, not FrozenProfitYearRequest)
         bool includeEmployeesTerminatedThisYear = false; // Default for FrozenProfitYearRequest
@@ -142,6 +120,9 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 IsActiveOrInactive(x.EmployeeStatus, x.TerminationDate, nonTerminatedStatuses, calInfo.FiscalEndDate) &&
                 x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.Balance == 0),
             
+            
+            
+            
             // Terminated lines
             // Updated TERMINATED 6 filter to not use req.IncludeEmployeesTerminatedThisYear
             CreateLine("TERMINATED", "6", ">= AGE 18 WITH >= 1000 PS HOURS", terminatedDetails, x =>
@@ -156,7 +137,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             
             CreateLine("TERMINATED", "8", ">= AGE 18 WITH < 1000 PS HOURS AND PRIOR PS AMOUNT", terminatedDetails, x =>
                 IsTerminatedWithinFiscal(x.EmployeeStatus, x.TerminationDate, calInfo.FiscalBeginDate, calInfo.FiscalEndDate) &&
-                x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.PriorBalance != 0),
+                x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.PriorBalance > 0),
             
             CreateLine("TERMINATED", "X", "<  AGE 18           NO WAGES :   0", terminatedDetails, x =>
                 IsTerminatedWithinFiscal(x.EmployeeStatus, x.TerminationDate, calInfo.FiscalBeginDate, calInfo.FiscalEndDate) &&
@@ -167,6 +148,44 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         {
             LineItems = lineItems.Where(li => li != null).ToList()!
         };
+    }
+
+    private async Task<List<YearEndProfitSharingReportDetail>> TerminatedSummary(FrozenProfitYearRequest req, CancellationToken cancellationToken)
+    {
+        // Query for terminated
+        var terminatedReq = new YearEndProfitSharingReportRequest
+        {
+            ProfitYear = req.ProfitYear,
+            IncludeDetails = true,
+            IncludeTotals = false,
+            IncludeActiveEmployees = false,
+            IncludeTerminatedEmployees = true,
+            IncludeBeneficiaries = false,
+            IsYearEnd = true,
+            Take = int.MaxValue
+        };
+        var terminatedReport = await GetYearEndProfitSharingReportAsync(terminatedReq, cancellationToken);
+        var terminatedDetails = terminatedReport.Response.Results.ToList();
+        return terminatedDetails;
+    }
+
+    private async Task<List<YearEndProfitSharingReportDetail>> ActiveSummary(FrozenProfitYearRequest req, CancellationToken cancellationToken)
+    {
+        // Query for active/inactive
+        var activeReq = new YearEndProfitSharingReportRequest
+        {
+            ProfitYear = req.ProfitYear,
+            IncludeDetails = true,
+            IncludeTotals = false,
+            IncludeActiveEmployees = true,
+            IncludeTerminatedEmployees = false,
+            IncludeBeneficiaries = false,
+            IsYearEnd = true,
+            Take = int.MaxValue
+        };
+        var activeReport = await GetYearEndProfitSharingReportAsync(activeReq, cancellationToken);
+        var activeDetails = activeReport.Response.Results.ToList();
+        return activeDetails;
     }
 
     public async Task<YearEndProfitSharingReportResponse> GetYearEndProfitSharingReportAsync(

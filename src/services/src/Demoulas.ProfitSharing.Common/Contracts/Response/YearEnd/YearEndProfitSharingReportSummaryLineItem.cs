@@ -6,6 +6,7 @@ public sealed record YearEndProfitSharingReportSummaryLineItem
     public required string LineItemPrefix { get; set; }
     public required string LineItemTitle { get; set; }
     public int NumberOfMembers { get; set; }
-    public Decimal TotalWages { get; set; }
-    public Decimal TotalBalance { get; set; }
+    public decimal TotalWages { get; set; }
+    public decimal TotalBalance { get; set; }
+    public decimal TotalPriorBalance { get; set; }
 }

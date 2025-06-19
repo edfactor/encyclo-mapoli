@@ -1,4 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Headers;
 using System.Text;
 using Newtonsoft.Json;
@@ -50,7 +50,7 @@ public class TestMasterInquiry : BaseSqlActivity
         Console.SetOut(new TeeWriter(Console.Out, writer));
 
         int profitYear = 2024;
-        int quantity = Int32.MaxValue;
+        int quantity = int.MaxValue;
 
         Console.WriteLine($"### Comparision of READY(mtpr) MasterInquiry vs SMART (profitYear={profitYear})");
         Console.WriteLine("");
