@@ -11,9 +11,10 @@ internal static class TestActivityFactory
             new TestProfitDetailSelectedColumns(),
             new TestEtvaNow(),
             new TestEtvaPrior(),
-            new ReadyDatabase2Smart(),
+            new TestMasterInquiry(),
 
             // Arrange
+            new ImportReadyDbToSmartDb(),
             new TrimTo14Employees(),
             new DropBadBenes(),
             new OverwriteBadges(),

@@ -9,10 +9,11 @@ import MasterInquiryEmployeeDetails from "./MasterInquiryEmployeeDetails";
 import MasterInquiryGrid from "./MasterInquiryDetailsGrid";
 import MasterInquirySearchFilter from "./MasterInquirySearchFilter";
 import MasterInquiryMemberGrid from "./MasterInquiryMemberGrid";
+import MasterInquiryGroupingGrid from "./MasterInquiryGroupingGrid";
 
 
 const MasterInquiry = () => {
-  const { masterInquiryEmployeeDetails, masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
+  const { } = useSelector((state: RootState) => state.inquiry);
 
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [searchParams, setSearchParams] = useState<MasterInquiryRequest | null>(null);
@@ -29,7 +30,7 @@ const MasterInquiry = () => {
         </Grid2>
         <Grid2 size={{ xs: 12 }} width={"100%"}>
           <DSMAccordion title="Filter">
-            <MasterInquirySearchFilter 
+            <MasterInquirySearchFilter
               setInitialSearchLoaded={setInitialSearchLoaded}
               onSearch={(params) => {
                 setSearchParams(params);
@@ -54,7 +55,12 @@ const MasterInquiry = () => {
           />
         )}
 
-         {/* Render details for selected member if present */}
+        {searchParams && !selectedMember && (
+          <MasterInquiryGroupingGrid searchParams={searchParams} />
+          )
+        }
+
+        {/* Render details for selected member if present */}
         {selectedMember && (
           <MasterInquiryGrid
             memberType={selectedMember.memberType}

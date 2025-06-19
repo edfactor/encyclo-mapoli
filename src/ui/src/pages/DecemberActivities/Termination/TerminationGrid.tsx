@@ -7,6 +7,7 @@ import { TotalsGrid } from "../../../components/TotalsGrid/TotalsGrid";
 import { ReportSummary } from "../../../components/ReportSummary";
 import { StartAndEndDateRequest } from "reduxstore/types";
 import { GetDetailColumns, GetTerminationColumns } from "./TerminationGridColumn";
+import { useLazyGetTerminationReportQuery } from "reduxstore/api/YearsEndApi";
 
 interface TerminationGridSearchProps {
   initialSearchLoaded: boolean;
@@ -30,6 +31,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const { termination } = useSelector((state: RootState) => state.yearsEnd);
+  const [triggerSearch, { isFetching }] = useLazyGetTerminationReportQuery();
 
   // Reset page number to 0 when resetPageFlag changes
   useEffect(() => {
@@ -54,6 +56,22 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
       }
     }
   }, [termination?.response?.results]);
+
+  // Fetch data when pagination, sort, or searchParams change
+  useEffect(() => {
+    if (searchParams) {
+      const params = {
+        ...searchParams,
+        pagination: {
+          skip: pageNumber * pageSize,
+          take: pageSize,
+          sortBy: sortParams.sortBy,
+          isSortDescending: sortParams.isSortDescending
+        }
+      };
+      triggerSearch(params, false);
+    }
+  }, [searchParams, pageNumber, pageSize, sortParams, triggerSearch]);
 
 
   const handleRowExpansion = (badgeNumber: string) => {
@@ -151,7 +169,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
           }
 
           // Otherwise just return the field value
-          return params.value;
+          return params.valueFormatted ? params.valueFormatted : params.value;
         }
       };
     });
@@ -174,7 +192,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
             }
 
             // Otherwise just return the field value
-            return params.value;
+            return params.valueFormatted ? params.valueFormatted : params.value;
           }
         };
       });
@@ -194,14 +212,34 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   };
 
   return (
-    <div>
+    <div className="termination-grid-container">
       <style>
         {`
-          .detail-row {
-            background-color: #f5f5f5;
+          .termination-spinner-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.6);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          .termination-spinner {
+            width: 48px;
+            height: 48px;
           }
         `}
       </style>
+      {isFetching && (
+        <div className="termination-spinner-overlay">
+          <div className="spinner-border termination-spinner" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      )}
       {termination?.response && (
         <>
           <ReportSummary report={termination} />
@@ -228,7 +266,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
           <DSMGrid
             preferenceKey={"QPREV-PROF"}
             handleSortChanged={sortEventHandler}
-            maxHeight={1000}
+            maxHeight={800}
             providedOptions={{
               rowData: gridData,
               columnDefs: columnDefs,

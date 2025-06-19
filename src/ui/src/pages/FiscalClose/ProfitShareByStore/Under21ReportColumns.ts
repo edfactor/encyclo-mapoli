@@ -1,5 +1,6 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
+import { GRID_COLUMN_WIDTHS } from "../../../constants";
 
 export const GetUnder21ReportColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   return [
@@ -18,7 +19,7 @@ export const GetUnder21ReportColumns = (navFunction: (badgeNumber: string) => vo
       headerName: "Full Name",
       field: "fullName",
       colId: "fullName",
-      minWidth: 150,
+      minWidth: GRID_COLUMN_WIDTHS.FULL_NAME,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true
@@ -27,7 +28,7 @@ export const GetUnder21ReportColumns = (navFunction: (badgeNumber: string) => vo
       headerName: "SSN",
       field: "ssn",
       colId: "ssn",
-      minWidth: 120,
+      minWidth: GRID_COLUMN_WIDTHS.SSN,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true

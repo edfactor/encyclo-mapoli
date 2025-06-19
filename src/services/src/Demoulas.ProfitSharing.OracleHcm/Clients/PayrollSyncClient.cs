@@ -2,6 +2,7 @@
 using System.Net.Http.Json;
 using System.Runtime;
 using System.Text.Json;
+using System.Threading.Channels;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.Contracts.Messaging;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
@@ -9,7 +10,6 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
-using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -26,7 +26,7 @@ internal class PayrollSyncClient
     private readonly OracleHcmConfig _oracleHcmConfig;
     private readonly EmployeeFullSyncClient _oracleEmployeeDataSyncClient;
     private readonly ILogger<PayrollSyncClient> _logger;
-    private readonly IBus _payrollSyncBus;
+    private readonly Channel<MessageRequest<PayrollItem[]>> _payrollSyncBus;
     private readonly JsonSerializerOptions _jsonSerializerOptions;
 
    
@@ -36,7 +36,7 @@ internal class PayrollSyncClient
         OracleHcmConfig oracleHcmConfig,
         EmployeeFullSyncClient oracleEmployeeDataSyncClient,
         ILogger<PayrollSyncClient> logger,
-        IBus payrollSyncBus)
+        Channel<MessageRequest<PayrollItem[]>> payrollSyncBus)
     {
         _httpClient = httpClient;
         _profitSharingDataContextFactory = profitSharingDataContextFactory;
@@ -146,17 +146,16 @@ internal class PayrollSyncClient
                 return;
             }
 
-            await TrySyncMissingEmployees(results!.Items, cancellationToken).ConfigureAwait(false);
-
             // Queue Here
             const string requestedBy = "System";
             foreach (PayrollItem[] items in results!.Items.Chunk(10))
             {
                 MessageRequest<PayrollItem[]> message = new() { ApplicationName = nameof(PayrollSyncClient), Body = items, UserId = requestedBy };
 
-                await _payrollSyncBus.Publish(message, cancellationToken).ConfigureAwait(false);
-
+                await _payrollSyncBus.Writer.WriteAsync(message, cancellationToken).ConfigureAwait(false);
             }
+
+            await TrySyncMissingEmployees(results!.Items, cancellationToken).ConfigureAwait(false);
 
             if (!results.HasMore)
             {
@@ -217,7 +216,7 @@ internal class PayrollSyncClient
     private async Task<string> BuildUrl(int offset = 0, CancellationToken cancellationToken = default)
     {
         const int payrollActionId = 2003;
-        ushort limit = ushort.Min(50, _oracleHcmConfig.Limit);
+        ushort limit = ushort.Min(75, _oracleHcmConfig.Limit);
         Dictionary<string, string> initialQuery = new Dictionary<string, string>()
         {
             { "limit", $"{limit}" },

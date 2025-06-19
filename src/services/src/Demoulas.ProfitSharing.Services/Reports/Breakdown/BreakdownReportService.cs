@@ -4,13 +4,13 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
-using static FastEndpoints.Ep;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 
 namespace Demoulas.ProfitSharing.Services.Reports.Breakdown;
@@ -20,15 +20,18 @@ public sealed class BreakdownReportService : IBreakdownService
     private readonly ICalendarService _calendarService;
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly TotalService _totalService;
+    private readonly IDemographicReaderService _demographicReaderService;
 
     public BreakdownReportService(
         IProfitSharingDataContextFactory dataContextFactory,
         ICalendarService calendarService,
-        TotalService totalService)
+        TotalService totalService,
+        IDemographicReaderService demographicReaderService)
     {
         _dataContextFactory = dataContextFactory;
         _calendarService = calendarService;
         _totalService = totalService;
+        _demographicReaderService = demographicReaderService;
     }
 
     #region ── Helper DTOs ────────────────────────────────────────────────────────────────
@@ -72,7 +75,7 @@ public sealed class BreakdownReportService : IBreakdownService
     {
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            var memberStores = await BuildEmployeesBaseQuery(ctx, request.ProfitYear)
+            var memberStores =await (await BuildEmployeesBaseQuery(ctx, request.ProfitYear))
                 .Select(m => new { m.Ssn, m.StoreNumber })
                 .ToListAsync(cancellationToken);
 
@@ -160,7 +163,7 @@ public sealed class BreakdownReportService : IBreakdownService
             ValidateStoreNumber(request);
 
             // ── Query ------------------------------------------------------------------
-            var employeesBase = BuildEmployeesBaseQuery(ctx, request.ProfitYear);
+            var employeesBase = await BuildEmployeesBaseQuery(ctx, request.ProfitYear);
             employeesBase = employeesBase.Where(q => q.StoreNumber == request.StoreNumber);
             var employeeSsns = await employeesBase.Select(e => e.Ssn).ToHashSetAsync(cancellationToken);
 
@@ -210,7 +213,7 @@ public sealed class BreakdownReportService : IBreakdownService
         {
             ValidateStoreNumber(request);
 
-            var employeesBase = BuildEmployeesBaseQuery(ctx, request.ProfitYear);
+            var employeesBase = await BuildEmployeesBaseQuery(ctx, request.ProfitYear);
             employeesBase = employeesBase.Where(q => q.StoreNumber == request.StoreNumber);
 
             // Store‑level + management filter
@@ -284,8 +287,8 @@ public sealed class BreakdownReportService : IBreakdownService
     /// – Re-creates the legacy COBOL store-bucket logic (700, 701, 800, 801, 802, 900) **inside the SQL**  
     /// – Returns the sequence already filtered to the store requested by the UI
     /// </summary>
-    private IQueryable<ActiveMemberDto> BuildEmployeesBaseQuery(
-        IProfitSharingDbContext ctx, short profitYear)
+    private async Task<IQueryable<ActiveMemberDto>> BuildEmployeesBaseQuery(
+        ProfitSharingReadOnlyDbContext ctx, short profitYear)
     {
         /*──────────────────────────── 1️⃣  inline sub-queries – still IQueryable */
         var balances =
@@ -335,9 +338,9 @@ public sealed class BreakdownReportService : IBreakdownService
           Terminated buckets (800–802) depend on pay-frequency plus the size/vesting of the participant’s profit-sharing balance.
           Monthly payroll (900) is simply anyone with FREQ = 2.
        */
-
+        var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
         var query =
-            from d in ctx.Demographics
+            from d in demographics
 
             join b in balances on d.Ssn equals b.Ssn into balGrp
             from bal in balGrp.DefaultIfEmpty()
@@ -401,7 +404,7 @@ public sealed class BreakdownReportService : IBreakdownService
 
 
     private async Task<List<EmployeeFinancialSnapshot>> GetEmployeeFinancialSnapshotsAsync(
-        IProfitSharingDbContext ctx,
+        ProfitSharingReadOnlyDbContext ctx,
         short profitYear,
         HashSet<int> employeeSsns,
         CancellationToken ct)
@@ -411,10 +414,9 @@ public sealed class BreakdownReportService : IBreakdownService
         var priorYear = (short)(profitYear - 1);
 
         // Dictionaries ----------------------------------------------------------------
-        var vestingBySsn = await _totalService
-            .GetVestingRatio(ctx, profitYear, calInfo.FiscalEndDate)
-            .Where(vr => employeeSsns.Contains(vr.Ssn ?? 0))
-            .ToDictionaryAsync(vr => vr.Ssn ?? 0, vr => vr.Ratio, ct);
+        var vestingBySsn = await _totalService.GetVestingRatio(ctx, profitYear, calInfo.FiscalEndDate)
+            .Where(vr => employeeSsns.Contains(vr.Ssn))
+            .ToDictionaryAsync(vr => vr.Ssn, vr => vr.Ratio, ct);
 
         var balanceBySsnLastYear = await _totalService
             .GetTotalBalanceSet(ctx, priorYear)
@@ -431,7 +433,7 @@ public sealed class BreakdownReportService : IBreakdownService
             ssn,
             balanceBySsnLastYear.GetValueOrDefault(ssn),
             txnsBySsn.GetValueOrDefault(ssn) ?? new InternalProfitDetailDto(),
-            vestingBySsn.GetValueOrDefault(ssn) ?? 0)).ToList();
+            vestingBySsn.GetValueOrDefault(ssn))).ToList();
     }
 
     private static IQueryable<ActiveMemberDto> ApplyStoreManagementFilter(IQueryable<ActiveMemberDto> q) =>

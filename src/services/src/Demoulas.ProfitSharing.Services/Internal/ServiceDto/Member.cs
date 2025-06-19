@@ -10,7 +10,6 @@ internal sealed record Member
     internal int Ssn { get; init; }
     internal string? FullName { get; init; } = string.Empty;
     internal string FirstName { get; init; } = string.Empty;
-    internal string? MiddleInitial { get; init; } = string.Empty;
     internal string LastName { get; init; } = string.Empty;
     internal DateOnly? Birthday { get; init; }
     internal decimal HoursCurrentYear { get; init; }

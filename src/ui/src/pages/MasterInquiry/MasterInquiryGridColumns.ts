@@ -1,4 +1,4 @@
-import { agGridNumberToCurrency } from "smart-ui-library";
+import { agGridNumberToCurrency, formatNumberWithComma } from "smart-ui-library";
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
 
@@ -94,6 +94,10 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
         // Format month to always have two digits
         const formattedMonth = month.toString().padStart(2, "0");
 
+        if (month === 0 && year === 0) {
+          return "";
+        }
+        
         return `${formattedMonth}/${year}`;
       }
     },
@@ -107,14 +111,12 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       resizable: true,
       sortable: false,
       valueFormatter: (params) => {
-        if (params.value === null || params.value === undefined) {
-          return "";
-        }
-        return params.value.toLocaleString("en-US");
+        const hours = params.value;
+        return formatNumberWithComma(hours);
       }
     },
     {
-      headerName: "Income",
+      headerName: "Wages",
       field: "currentIncomeYear",
       colId: "currentIncomeYear",
       minWidth: 120,

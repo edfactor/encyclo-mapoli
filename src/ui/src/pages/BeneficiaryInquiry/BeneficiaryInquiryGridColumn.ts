@@ -1,28 +1,30 @@
 import { agGridNumberToCurrency } from "smart-ui-library";
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { mmDDYYYY_HHMMSS_Format } from "utils/dateUtils";
+import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
+import { GRID_COLUMN_WIDTHS } from "../../constants";
 
 
 export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
   return [
-    {
-      headerName: "Badge Number",
-      field: "badgeNumber",
-      colId: "badgeNumber",
-      minWidth: 130,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true
-    },
-    {
-      headerName: "Psn Suffix",
-      field: "psnSuffix",
-      colId: "psnSuffix",
-      minWidth: 100,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
+    // {
+    //   headerName: "Badge Number",
+    //   field: "badgeNumber",
+    //   colId: "badgeNumber",
+    //   minWidth: 130,
+    //   headerClass: "center-align",
+    //   cellClass: "center-align",
+    //   resizable: true
+    // },
+    // {
+    //   headerName: "Psn Suffix",
+    //   field: "psnSuffix",
+    //   colId: "psnSuffix",
+    //   minWidth: 100,
+    //   headerClass: "left-align",
+    //   cellClass: "left-align",
+    //   resizable: true
+    // },
     {
       headerName: "Psn",
       field: "psn",
@@ -33,15 +35,23 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       resizable: true,
       sortable: true,
       unSortIcon: true,
-      valueFormatter: (params)=>{
-        return `${params.data.badgeNumber}${params.data.psnSuffix}`
-      }
+      cellRenderer: (params: ICellRendererParams) =>viewBadgeLinkRenderer(params.data.badgeNumber,params.data.psnSuffix)
+    },
+    {
+      headerName: "Current Balance",
+      field: "currentBalance",
+      colId: "currentBalance",
+      minWidth: 170,
+      headerClass: "center-align",
+      cellClass: "center-align",
+      resizable: true,
+      sortable: false
     },
     {
       headerName: "SSN",
       field: "ssn",
       colId: "ssn",
-      minWidth: 100,
+      minWidth: GRID_COLUMN_WIDTHS.SSN,
       headerClass: "center-align",
       cellClass: "center-align",
       resizable: true,
@@ -127,7 +137,7 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       headerName: "Full Name",
       field: "fullName",
       colId: "fullName",
-      minWidth: 170,
+      minWidth: GRID_COLUMN_WIDTHS.FULL_NAME,
       headerClass: "center-align",
       cellClass: "center-align",
       resizable: true,

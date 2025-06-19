@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.BeneficiaryInquiry;
-public record BeneficiaryContactDto
+public record BeneficiaryContactDto : IdRequest
 {
-    public int Id { get; set; }
-
-    public  string? Ssn { get; set; }
+    public required  string Ssn { get; set; }
 
     public DateOnly DateOfBirth { get; set; }
 

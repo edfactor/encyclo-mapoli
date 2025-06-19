@@ -5,7 +5,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.TerminatedEmployeeAndBeneficiary;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using FastEndpoints;
-using FluentAssertions;
+using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
@@ -27,6 +27,6 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
                     ProfitYearRequest, TerminatedEmployeeAndBeneficiaryResponse>(_requestDto);
 
         // Assert
-        response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
 }

@@ -9,6 +9,7 @@ public record ForfeitureAdjustmentUpdateRequest
     public required decimal ForfeitureAmount { get; init; }
     public string? Reason { get; init; }
     public int ProfitYear { get; init; }
+    public int? OffsettingProfitDetailId { get; set; } // This states which profit detail record the user is trying to offset against.
 
     public static ForfeitureAdjustmentUpdateRequest RequestExample()
     {

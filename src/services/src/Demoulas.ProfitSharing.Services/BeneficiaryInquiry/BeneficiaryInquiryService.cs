@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Request.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response.BeneficiaryInquiry;
+using Demoulas.ProfitSharing.Common.Extensions;
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using MassTransit.Testing;
+using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.BeneficiaryInquiry;
@@ -17,19 +16,39 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
 {
 
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
+    private readonly IFrozenService _frozenService;
+    private readonly ITotalService _totalService;
 
-    public BeneficiaryInquiryService(IProfitSharingDataContextFactory dataContextFactory)
+    public BeneficiaryInquiryService(IProfitSharingDataContextFactory dataContextFactory, IFrozenService frozenService, ITotalService totalService)
     {
         _dataContextFactory = dataContextFactory;
+        _frozenService = frozenService;
+        _totalService = totalService;   
     }
 
 
     public async Task<PaginatedResponseDto<BeneficiaryDto>> GetBeneficiary(BeneficiaryRequestDto request, CancellationToken cancellationToken)
     {
+        var frozenStateResponse = await _frozenService.GetActiveFrozenDemographic(cancellationToken);
+        short yearEnd = frozenStateResponse.ProfitYear;
+       
+
+
         var beneficiary = await _dataContextFactory.UseReadOnlyContext(async context =>
         {
-            var result = context.Beneficiaries.Include(x => x.Contact)
-            .Where(x => x.BadgeNumber == request.BadgeNumber && x.PsnSuffix == request.PsnSuffix)
+            var result = context.Beneficiaries.Include(x => x.Contact).Include(x => x.Contact.ContactInfo)
+            .Where(
+                x => 
+                (request.BadgeNumber == null || request.BadgeNumber ==0 || x.BadgeNumber == request.BadgeNumber) && 
+                (request.PsnSuffix == null || request.PsnSuffix == 0 || x.PsnSuffix == request.PsnSuffix) &&
+                (request.Name == null || x.Contact.ContactInfo.FullName.Contains(request.Name)) &&
+                (request.Ssn == null || request.Ssn == 0 || x.Contact.Ssn == request.Ssn) &&
+                (request.Address == null || x.Contact.Address.Street.Contains(request.Address)) &&
+                (request.City == null || x.Contact.Address.City.Contains(request.City)) &&
+                (request.State == null || x.Contact.Address.State.Contains(request.State)) &&
+                (request.Percentage == null || request.Percentage ==0 || x.Percent == request.Percentage) &&
+                (request.KindId == null || x.KindId == request.KindId) 
+                )
             .Select(x => new BeneficiaryDto()
             {
                 Id = x.Id,
@@ -66,16 +85,44 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                 },
                 Kind = new BeneficiaryKindDto()
                 {
-                    Id = x.Kind != null ? x.Kind.Id : '0',
+                    Id = x.Kind != null ? x.Kind.Id : BeneficiaryKind.Constants.Primary,
                     Name = x.Kind != null ? x.Kind.Name : null
                 },
                 Relationship = x.Relationship
             });
-            PaginatedResponseDto<BeneficiaryDto> final = await result.ToPaginationResultsAsync(request,cancellationToken);
+            PaginatedResponseDto<BeneficiaryDto> final = await result.ToPaginationResultsAsync(request, cancellationToken);
             return final;
         }
         );
-
+        //setting Current balance
+        ISet<int> ssnList = new HashSet<int>(beneficiary.Results.Select(x => Convert.ToInt32(x.Contact.Ssn)).ToList());
+        var balanceList =await _totalService.GetVestingBalanceForMembersAsync(SearchBy.Ssn, ssnList, yearEnd, cancellationToken); 
+        foreach (var item in beneficiary.Results)
+        {
+            item.CurrentBalance = balanceList.Where(x => x.Id.ToString() == item.Contact.Ssn).Select(x => x.CurrentBalance).FirstOrDefault();
+            item.Contact.Ssn = item.Contact.Ssn.MaskSsn();
+        }
         return beneficiary;
+    }
+
+    public async Task<BeneficiaryTypesResponseDto> GetBeneficiaryTypes(BeneficiaryTypesRequestDto beneficiaryTypesRequestDto, CancellationToken cancellation)
+    {
+        var result = await _dataContextFactory.UseReadOnlyContext(context =>
+        {
+            return context.BeneficiaryTypes.Select(x => new BeneficiaryTypeDto { Id = x.Id, Name = x.Name }).ToListAsync(cancellation);
+        });
+
+        return new BeneficiaryTypesResponseDto() { BeneficiaryTypeList = result };
+    }
+
+
+    public async Task<BeneficiaryKindResponseDto> GetBeneficiaryKind(BeneficiaryKindRequestDto beneficiaryKindRequestDto, CancellationToken cancellation)
+    {
+        var result = await _dataContextFactory.UseReadOnlyContext(context =>
+        {
+            return context.BeneficiaryKinds.Select(x => new BeneficiaryKindDto { Id = x.Id, Name = x.Name }).ToListAsync(cancellation);
+        });
+
+        return new BeneficiaryKindResponseDto() { BeneficiaryKindList = result };
     }
 }

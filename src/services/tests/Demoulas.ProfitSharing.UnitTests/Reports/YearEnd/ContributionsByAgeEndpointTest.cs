@@ -7,8 +7,8 @@ using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using FastEndpoints;
-using FluentAssertions;
 using JetBrains.Annotations;
+using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
@@ -28,9 +28,9 @@ public class ContributionsByAgeEndpointTest : ApiTestBase<Program>
             .GETAsync<ContributionsByAgeEndpoint, FrozenReportsByAgeRequest, ContributionsByAge>(request);
 
         // Assert
-        response.Should().NotBeNull();
-        response.Result.ReportName.Should().Be("PROFIT SHARING CONTRIBUTIONS BY AGE");
-        response.Result.ReportType.Should().Be(request.ReportType);
+        response.ShouldNotBeNull();
+        response.Result.ReportName.ShouldBe("PROFIT SHARING CONTRIBUTIONS BY AGE");
+        response.Result.ReportType.ShouldBe(request.ReportType);
     }
 
     [Fact]
@@ -46,8 +46,8 @@ public class ContributionsByAgeEndpointTest : ApiTestBase<Program>
 
 
         string content = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
-        content.Should().Contain("AGE,EMPS,AMOUNT");
-        content.Should().Contain("CONT TTL,,");
+        content.ShouldContain("AGE,EMPS,AMOUNT");
+        content.ShouldContain("CONT TTL,,");
     }
 
     [Fact(DisplayName = "PS-502: Check to ensure unauthorized")]
@@ -61,6 +61,6 @@ public class ContributionsByAgeEndpointTest : ApiTestBase<Program>
         TestResult<ContributionsByAge> response = await ApiClient
             .GETAsync<ContributionsByAgeEndpoint, FrozenReportsByAgeRequest, ContributionsByAge>(request);
 
-        response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
 }

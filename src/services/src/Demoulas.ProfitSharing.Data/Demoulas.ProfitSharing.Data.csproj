@@ -32,7 +32,6 @@
     <PackageReference Include="OpenTelemetry.Api" />
     <PackageReference Include="Oracle.EntityFrameworkCore" />
     <PackageReference Include="Oracle.ManagedDataAccess.Core" />
-    <PackageReference Include="MassTransit" />
   </ItemGroup>
 
   <ItemGroup>

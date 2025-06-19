@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Runtime;
 using System.Runtime.CompilerServices;
+using System.Threading.Channels;
 using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.Contracts.Messaging;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
@@ -10,7 +11,6 @@ using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Clients;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using FluentValidation.Results;
-using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Job = Demoulas.ProfitSharing.Data.Entities.MassTransit.Job;
 
@@ -26,19 +26,20 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
     private readonly IDemographicsServiceInternal _demographicsService;
     private readonly AtomFeedClient _atomFeedClient;
     private readonly IProfitSharingDataContextFactory _profitSharingDataContextFactory;
-    private readonly IBus _employeeSyncBus;
+    private readonly Channel<MessageRequest<OracleEmployee[]>> _employeeChannel;
 
     public EmployeeSyncService(AtomFeedClient atomFeedClient,
         EmployeeFullSyncClient oracleEmployeeDataSyncClient,
         IDemographicsServiceInternal demographicsService,
         IProfitSharingDataContextFactory profitSharingDataContextFactory,
-        IBus employeeSyncBus)
+        Channel<MessageRequest<OracleEmployee[]>> employeeChannel)
     {
         _oracleEmployeeDataSyncClient = oracleEmployeeDataSyncClient;
         _demographicsService = demographicsService;
         _atomFeedClient = atomFeedClient;
         _profitSharingDataContextFactory = profitSharingDataContextFactory;
-        _employeeSyncBus = employeeSyncBus;
+
+        _employeeChannel = employeeChannel;
     }
 
     public async Task ExecuteFullSyncAsync(string requestedBy = Constants.SystemAccountName, CancellationToken cancellationToken = default)
@@ -101,7 +102,7 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
             StartMethodId = StartMethod.Constants.System,
             RequestedBy = requestedBy,
             JobStatusId = JobStatus.Constants.Running,
-            Started = DateTime.Now
+            Started = DateTimeOffset.UtcNow
         };
 
         await _profitSharingDataContextFactory.UseWritableContext(db =>
@@ -112,7 +113,7 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         bool success = true;
         try
         {
-            DateTimeOffset maxDate = DateTimeOffset.Now;
+            DateTimeOffset maxDate = DateTimeOffset.UtcNow;
             DateTimeOffset minDate = await _profitSharingDataContextFactory.UseReadOnlyContext(c =>
             {
                 return c.Demographics.MinAsync(d => d.LastModifiedDate - TimeSpan.FromDays(7), cancellationToken: cancellationToken);
@@ -165,14 +166,14 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
         }
     }
 
-    public Task QueueEmployee(string requestedBy, OracleEmployee[] employees, CancellationToken cancellationToken)
+    public ValueTask QueueEmployee(string requestedBy, OracleEmployee[] employees, CancellationToken cancellationToken)
     {
         MessageRequest<OracleEmployee[]> message = new MessageRequest<OracleEmployee[]>
         {
             ApplicationName = nameof(EmployeeSyncService), Body = employees, UserId = requestedBy
         };
 
-        return _employeeSyncBus.Publish(message, cancellationToken);
+       return _employeeChannel.Writer.WriteAsync(message, cancellationToken);
     }
 
 

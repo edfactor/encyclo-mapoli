@@ -1,7 +1,4 @@
-﻿using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Text.Json;
-
+﻿using System.Diagnostics.CodeAnalysis;
 
 #pragma warning disable CS0162 // Unreachable code detected
 // ReSharper disable FieldCanBeMadeReadOnly.Local
@@ -21,7 +18,9 @@ internal static class Program
         string dataDirectory = Config.CreateDataDirectory();
         ActivityFactory.Initialize(dataDirectory);
 
-        Runnable runner = new GoldenExpress { DataDirectory = dataDirectory };
+        //Runnable runner = new GoldenExpressRun { DataDirectory = dataDirectory };
+        // Runnable runner = new GoldenRun { DataDirectory = dataDirectory };
+        Runnable runner = new MasterInquiryRun { DataDirectory = dataDirectory };
         await runner.Exec();
     }
 }

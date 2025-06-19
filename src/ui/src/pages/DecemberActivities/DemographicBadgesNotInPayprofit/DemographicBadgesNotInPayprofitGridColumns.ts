@@ -1,11 +1,12 @@
 import { ColDef } from "ag-grid-community";
+import { GRID_COLUMN_WIDTHS } from "../../../constants";
 export const GetDemographicBadgesNotInPayprofitColumns = (): ColDef[] => {
   return [
     {
       headerName: "Badge",
       field: "badgeNumber",
       colId: "badgeNumber",
-      minWidth: 50,
+      minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
       maxWidth: 200,
       headerClass: "left-align",
       cellClass: "left-align",
@@ -20,7 +21,7 @@ export const GetDemographicBadgesNotInPayprofitColumns = (): ColDef[] => {
       headerName: "Demographic SSN",
       field: "ssn",
       colId: "ssn",
-      minWidth: 120,
+      minWidth: GRID_COLUMN_WIDTHS.SSN,
       maxWidth: 250,
       headerClass: "left-align",
       cellClass: "left-align",

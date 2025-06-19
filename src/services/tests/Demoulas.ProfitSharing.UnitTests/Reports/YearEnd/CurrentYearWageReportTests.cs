@@ -1,5 +1,4 @@
-﻿using System.Data.SqlTypes;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Net;
 using CsvHelper;
 using CsvHelper.Configuration;
@@ -17,9 +16,9 @@ using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using Demoulas.Util.Extensions;
 using FastEndpoints;
-using FluentAssertions;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
+using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
@@ -55,9 +54,9 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
             await ApiClient.GETAsync<CurrentYearWagesEndpoint, ProfitYearRequest, ReportResponseBase<WagesCurrentYearResponse>>(new ProfitYearRequest{ ProfitYear = 2023});
 
         // Assert
-        response.Result.ReportName.Should().BeEquivalentTo(expectedResponse.ReportName);
-        response.Result.Response.Results.Should().BeAssignableTo<List<WagesCurrentYearResponse>>();
-        response.Result.Response.Results.Should().HaveCountGreaterThan(0);
+        response.Result.ReportName.ShouldBe(expectedResponse.ReportName);
+        response.Result.Response.Results.ShouldBeAssignableTo<List<WagesCurrentYearResponse>>();
+        response.Result.Response.Results.Count().ShouldBeGreaterThan(0);
 
     }
 
@@ -67,10 +66,10 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
         // Act
         DownloadClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         var response = await DownloadClient.GETAsync<CurrentYearWagesEndpoint, ProfitYearRequest, StreamContent>(new ProfitYearRequest { ProfitYear = 2023 });
-        response.Response.Content.Should().NotBeNull();
+        response.Response.Content.ShouldNotBeNull();
 
         string result = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
-        result.Should().NotBeNullOrEmpty();
+        result.ShouldNotBeNullOrEmpty();
 
         // Assert CSV format
         using var reader = new StringReader(result);
@@ -79,11 +78,11 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
         // Read the first two rows (date and report name)
         await csv.ReadAsync();  // First row is the date
         string? dateLine = csv.GetField(0);
-        dateLine.Should().NotBeNullOrEmpty();
+        dateLine.ShouldNotBeNullOrEmpty();
 
         await csv.ReadAsync();  // Second row is the report name
         string? reportNameLine = csv.GetField(0);
-        reportNameLine.Should().NotBeNullOrEmpty();
+        reportNameLine.ShouldNotBeNullOrEmpty();
 
         // Start reading the actual CSV content from row 2 (0-based index)
         await csv.ReadAsync();  // Read the header row (starting at column 2)
@@ -91,8 +90,8 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
 
         // Validate the headers
         var headers = csv.HeaderRecord;
-        headers.Should().NotBeNull();
-        headers.Should().ContainInOrder("", "", "BADGE", "HOURS YR", "DOLLARS YR");
+        headers.ShouldNotBeNull();
+        headers.ShouldBe(new[] { "", "", "BADGE", "HOURS YR", "DOLLARS YR" });
 
     }
 
@@ -104,7 +103,7 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
         var response =
             await ApiClient.GETAsync<CurrentYearWagesEndpoint, PaginationRequestDto, ReportResponseBase<WagesCurrentYearResponse>>(new PaginationRequestDto());
 
-        response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
 
     }
 
@@ -115,6 +114,6 @@ public class CurrentYearWageReportTests : ApiTestBase<Api.Program>
         var reportFileName = _endpoint.ReportFileName;
 
         // Assert
-        reportFileName.Should().Be("YTD Wages Extract (PROF-DOLLAR-EXTRACT)");
+        reportFileName.ShouldBe("YTD Wages Extract (PROF-DOLLAR-EXTRACT)");
     }
 }

@@ -1,13 +1,10 @@
 ﻿using System.Net;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ForfeitureAdjustment;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
-using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
 using Demoulas.ProfitSharing.Api;
 using FastEndpoints;
 
@@ -39,10 +36,10 @@ public class ForfeitureAdjustmentTests : ApiTestBase<Program>
             ForfeitureAdjustmentRequest, ForfeitureAdjustmentReportResponse>(request);
 
         // Assert
-        response.Should().NotBeNull();
-        response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
-        response.Result.ReportName.Should().Be("Forfeiture Adjustments");
-        response.Result.Response.Should().NotBeNull();
+        Assert.NotNull(response);
+        Assert.Equal(HttpStatusCode.OK, response.Response.StatusCode);
+        Assert.Equal("Forfeiture Adjustments", response.Result.ReportName);
+        Assert.NotNull(response.Result.Response);
     }
 
     [Fact(DisplayName = "Get Forfeiture Adjustments - Filter By SSN")]
@@ -61,9 +58,9 @@ public class ForfeitureAdjustmentTests : ApiTestBase<Program>
             ForfeitureAdjustmentRequest, ForfeitureAdjustmentReportResponse>(request);
 
         // Assert
-        response.Should().NotBeNull();
-        response.Response.StatusCode.Should().Be(HttpStatusCode.OK);
-        response.Result.Should().NotBeNull();
+        Assert.NotNull(response);
+        Assert.Equal(HttpStatusCode.OK, response.Response.StatusCode);
+        Assert.NotNull(response.Result);
     }
 
     [Fact(DisplayName = "Get Forfeiture Adjustments - Missing Required Role")]
@@ -81,6 +78,6 @@ public class ForfeitureAdjustmentTests : ApiTestBase<Program>
             ForfeitureAdjustmentRequest, ForfeitureAdjustmentReportResponse>(request);
 
         // Assert
-        response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        Assert.Equal(HttpStatusCode.Unauthorized, response.Response.StatusCode);
     }
 }

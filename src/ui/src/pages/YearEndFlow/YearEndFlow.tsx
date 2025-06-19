@@ -2,7 +2,6 @@ import { Divider } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import DSMCollapsedAccordion from "components/DSMCollapsedAccordion";
 import { useNavigate } from "react-router";
-import { RootState } from "reduxstore/store";
 import { Page } from "smart-ui-library";
 import { CAPTIONS, MENU_LABELS } from "../../constants";
 

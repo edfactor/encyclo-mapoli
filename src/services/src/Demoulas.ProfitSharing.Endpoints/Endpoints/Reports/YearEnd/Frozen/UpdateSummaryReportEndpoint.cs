@@ -52,16 +52,19 @@ public sealed  class UpdateSummaryReportEndpoint:EndpointWithCsvTotalsBase<Froze
         public UpdateSummaryReportMapper()
         {
             Map(m => m.BadgeNumber).Index(0).Name("BADGE#");
-            Map(m => m.Name).Index(1).Name("NAME");
-            Map(m => m.StoreNumber).Index(2).Name("STR");
-            Map(m => m.Before.ProfitSharingAmount).Index(3).Name("BEFORE_P/S_AMOUNT");
-            Map(m => m.Before.VestedProfitSharingAmount).Index(4).Name("BEFORE_P/S_VESTED");
-            Map(m => m.Before.YearsInPlan).Index(5).Name("YEARS");
-            Map(m => m.Before.EnrollmentId).Index(6).Name("ENROLL");
-            Map(m => m.After.ProfitSharingAmount).Index(3).Name("BEFORE_P/S_AMOUNT");
-            Map(m => m.After.ProfitSharingAmount).Index(3).Name("BEFORE_P/S_AMOUNT");
-            Map(m => m.After.YearsInPlan).Index(5).Name("YEARS");
-            Map(m => m.After.EnrollmentId).Index(6).Name("ENROLL");
+            Map(m => m.PsnSuffix).Index(1).Name("PSN_SUFFIX");
+            Map(m => m.Name).Index(2).Name("NAME");
+            Map(m => m.StoreNumber).Index(3).Name("STR");
+
+            Map(m => m.Before.ProfitSharingAmount).Index(4).Name("BEFORE_P/S_AMOUNT");
+            Map(m => m.Before.VestedProfitSharingAmount).Index(5).Name("BEFORE_P/S_VESTED");
+            Map(m => m.Before.YearsInPlan).Index(6).Name("YEARS");
+            Map(m => m.Before.EnrollmentId).Index(7).Name("ENROLL");
+
+            Map(m => m.After.ProfitSharingAmount).Index(4).Name("AFTER_P/S_AMOUNT");
+            Map(m => m.After.VestedProfitSharingAmount).Index(5).Name("AFTER_P/S_VESTED");
+            Map(m => m.After.YearsInPlan).Index(6).Name("YEARS");
+            Map(m => m.After.EnrollmentId).Index(7).Name("ENROLL");
         }
     }
 }

@@ -40,11 +40,12 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IGetEligibleEmployeesService, GetEligibleEmployeesService>();
         _ = builder.Services.AddScoped<IMissiveService, MissiveService>();
         _ = builder.Services.AddScoped<ITerminationAndRehireService, TerminationAndRehireService>();
+        _ = builder.Services.AddScoped<IUnForfeitService, UnForfeitService>();
+        
         _ = builder.Services.AddScoped<ITotalService, TotalService>();
         _ = builder.Services.AddScoped<IWagesService, WagesService>();
         _ = builder.Services.AddScoped<IYearEndService, YearEndService>();
         _ = builder.Services.AddScoped<IMilitaryService, MilitaryService>();
-        _ = builder.Services.AddScoped<IFakeSsnService, FakeSsnService>();
         _ = builder.Services.AddScoped<IPayrollDuplicateSsnReportService, PayrollDuplicateSsnReportService>();
         _ = builder.Services.AddScoped<INegativeEtvaReportService, NegativeEtvaReportService>();
         _ = builder.Services.AddScoped<IProfitSharingSummaryReportService, ProfitSharingSummaryReportService>();
@@ -59,9 +60,10 @@ public static class ServicesExtension
 
         _ = builder.Services.AddScoped<IFrozenService, FrozenService>();
         _ = builder.Services.AddScoped<IStoreService, StoreService>();
+        
+        _ = builder.Services.AddSingleton<IFakeSsnService, FakeSsnService>();
         _ = builder.Services.AddSingleton<IAccountingPeriodsService, AccountingPeriodsService>();
         _ = builder.Services.AddSingleton<ICalendarService, CalendarService>();
-        _ = builder.Services.AddHostedService<CalendarService>();
 
         _ = builder.Services.AddScoped<IProfitShareUpdateService, ProfitShareUpdateService>();
         _ = builder.Services.AddScoped<IInternalProfitShareUpdateService, ProfitShareUpdateService>();

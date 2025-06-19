@@ -140,14 +140,14 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
 
         if (req is DistributionsAndForfeituresRequest dafr)
         {
-            if (dafr.StartMonth.HasValue)
+            if (dafr.StartDate.HasValue)
             {
-                query[nameof(DistributionsAndForfeituresRequest.StartMonth)] = dafr.StartMonth.ToString();
+                query[nameof(DistributionsAndForfeituresRequest.StartDate)] = dafr.StartDate.Value.ToString();
             }
 
-            if (dafr.EndMonth.HasValue)
+            if (dafr.EndDate.HasValue)
             {
-                query[nameof(DistributionsAndForfeituresRequest.EndMonth)] = dafr.EndMonth.ToString();
+                query[nameof(DistributionsAndForfeituresRequest.EndDate)] = dafr.EndDate.Value.ToString();
             }
         }
 

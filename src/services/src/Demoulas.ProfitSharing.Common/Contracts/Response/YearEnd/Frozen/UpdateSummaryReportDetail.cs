@@ -2,6 +2,8 @@
 public sealed class UpdateSummaryReportDetail
 {
     public int BadgeNumber { get; set; }
+
+    public required int PsnSuffix { get; set; }
     public short StoreNumber { get; set; }
     public required string Name { get; set; }
     public bool IsEmployee { get; set; }
@@ -13,6 +15,7 @@ public sealed class UpdateSummaryReportDetail
         return new UpdateSummaryReportDetail()
         {
             BadgeNumber = 2002,
+            PsnSuffix = 1000,
             StoreNumber = 10,
             Name = "Oscar Taylor",
             Before = new UpdateSummaryReportPointInTimeDetail()

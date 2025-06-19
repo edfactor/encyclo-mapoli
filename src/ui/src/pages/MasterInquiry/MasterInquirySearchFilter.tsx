@@ -20,6 +20,7 @@ import * as yup from "yup";
 import { MasterInquiryRequest, MasterInquirySearch } from "reduxstore/types";
 import {
   clearMasterInquiryData,
+  clearMasterInquiryGroupingData,
   clearMasterInquiryRequestParams,
   setMasterInquiryRequestParams,
   updateMasterInquiryResults
@@ -83,7 +84,7 @@ const schema = yup.object().shape({
 
 interface MasterInquirySearchFilterProps {
   setInitialSearchLoaded: (include: boolean) => void;
-  onSearch: (params: MasterInquiryRequest) => void;
+  onSearch: (params: MasterInquiryRequest | undefined) => void;
 }
 
 const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
@@ -190,10 +191,10 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
         ...(!!data.badgeNumber && { badgeNumber: data.badgeNumber }),
         ...(!!data.paymentType && { paymentType: paymentTypeGetNumberMap[data.paymentType] }),
         ...(!!data.memberType && { memberType: memberTypeGetNumberMap[data.memberType] }),
-        ...(!!data.contribution && { contribution: data.contribution }),
-        ...(!!data.earnings && { earnings: data.earnings }),
-        ...(!!data.forfeiture && { forfeiture: data.forfeiture }),
-        ...(!!data.payment && { payment: data.payment })
+        ...(!!data.contribution && { contributionAmount: data.contribution }),
+        ...(!!data.earnings && { earningsAmount: data.earnings }),
+        ...(!!data.forfeiture && { forfeitureAmount: data.forfeiture }),
+        ...(!!data.payment && { paymentAmount: data.payment })
       };
 
       triggerSearch(searchParams, false).unwrap().then((response) => {
@@ -214,6 +215,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
     setInitialSearchLoaded(false);
     dispatch(clearMasterInquiryRequestParams());
     dispatch(clearMasterInquiryData());
+    dispatch(clearMasterInquiryGroupingData());
     reset({
       endProfitYear: profitYear, // Always reset to default profitYear
       startProfitMonth: undefined,
@@ -272,6 +274,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
                   label="Profit Year"
                   disableFuture
                   views={["year"]}
+                  minDate={new Date(2020, 0)}
                   error={errors.endProfitYear?.message}
                 />
               )}
@@ -476,7 +479,128 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
                 )}
               />
             </FormControl>
-          </Grid2>          
+          </Grid2>
+
+          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+            <FormLabel>Contribution</FormLabel>
+            <Controller
+              name="contribution"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  type="number"
+                  size="small"
+                  variant="outlined"
+                  value={field.value ?? ""}
+                  error={!!errors.contribution}
+                  onChange={(e) => {
+                    const parsedValue = e.target.value === "" ? null : Number(e.target.value);
+                    field.onChange(parsedValue);
+                  }}
+                />
+              )}
+            />
+            {errors.contribution && <FormHelperText error>{errors.contribution.message}</FormHelperText>}
+          </Grid2>
+
+          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+            <FormLabel>Earnings</FormLabel>
+            <Controller
+              name="earnings"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  type="number"
+                  size="small"
+                  variant="outlined"
+                  value={field.value ?? ""}
+                  error={!!errors.earnings}
+                  onChange={(e) => {
+                    const parsedValue = e.target.value === "" ? null : Number(e.target.value);
+                    field.onChange(parsedValue);
+                  }}
+                />
+              )}
+            />
+            {errors.earnings && <FormHelperText error>{errors.earnings.message}</FormHelperText>}
+          </Grid2>
+
+          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+            <FormLabel>Forfeiture</FormLabel>
+            <Controller
+              name="forfeiture"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  type="number"
+                  size="small"
+                  variant="outlined"
+                  value={field.value ?? ""}
+                  error={!!errors.forfeiture}
+                  onChange={(e) => {
+                    const parsedValue = e.target.value === "" ? null : Number(e.target.value);
+                    field.onChange(parsedValue);
+                  }}
+                />
+              )}
+            />
+            {errors.forfeiture && <FormHelperText error>{errors.forfeiture.message}</FormHelperText>}
+          </Grid2>
+
+          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+            <FormLabel>Payment</FormLabel>
+            <Controller
+              name="payment"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  type="number"
+                  size="small"
+                  variant="outlined"
+                  value={field.value ?? ""}
+                  error={!!errors.payment}
+                  onChange={(e) => {
+                    const parsedValue = e.target.value === "" ? null : Number(e.target.value);
+                    field.onChange(parsedValue);
+                  }}
+                />
+              )}
+            />
+            {errors.payment && <FormHelperText error>{errors.payment.message}</FormHelperText>}
+          </Grid2>
+
+          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+            <Controller
+              name="voids"
+              control={control}
+              render={({ field }) => (
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      {...field}
+                      checked={field.value}
+                      size="small"
+                    />
+                  }
+                  label="Voids"
+                  sx={{ 
+                    marginTop: '20px', 
+                    height: '40px',
+                    display: 'flex', 
+                    alignItems: 'center' 
+                  }}
+                />
+              )}
+            />
+          </Grid2>
         </Grid2>
 
         <Grid2

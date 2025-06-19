@@ -1,6 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Net;
-using System.Text.Json;
+﻿using System.Net;
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Headers;
@@ -12,8 +10,8 @@ using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using Demoulas.ProfitSharing.UnitTests.Common.Mocks;
 using FastEndpoints;
-using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
@@ -48,7 +46,7 @@ public class GetEligibleEmployeesTests : ApiTestBase<Program>
                 .GETAsync<GetEligibleEmployeesEndpoint, ProfitYearRequest, GetEligibleEmployeesResponse>(_requestDto);
 
         // Assert
-        response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        Assert.Equal(HttpStatusCode.Unauthorized, response.Response.StatusCode);
     }
 
     [Fact]
@@ -65,17 +63,17 @@ public class GetEligibleEmployeesTests : ApiTestBase<Program>
                     .GETAsync<GetEligibleEmployeesEndpoint, ProfitYearRequest, GetEligibleEmployeesResponse>(_requestDto);
 
             // Assert
-            response.Result.ReportName.Should().Be($"Get Eligible Employees for Year {_testProfitYear}");
-            EligibleEmployee dto = response.Result.Response.Results.First(e => e.BadgeNumber == _dh.BadgeNumber);
-            dto.Should().BeEquivalentTo(new EligibleEmployee
-                {
-                    OracleHcmId = _d.OracleHcmId,
-                    BadgeNumber = _dh.BadgeNumber,
-                    FullName = _d.ContactInfo!.FullName!,
-                    DepartmentId = _dh.DepartmentId,
-                    Department = "Dairy"
-                }
-            );
+            Assert.Equal($"Get Eligible Employees for Year {_testProfitYear}", response.Result.ReportName);
+            var dto = response.Result.Response.Results.First(e => e.BadgeNumber == _dh.BadgeNumber);
+            var expected = new EligibleEmployee
+            {
+                OracleHcmId = _d.OracleHcmId,
+                BadgeNumber = _dh.BadgeNumber,
+                FullName = _d.ContactInfo!.FullName!,
+                DepartmentId = _dh.DepartmentId,
+                Department = "Dairy"
+            };
+            Assert.True(AreEquivalent(dto, expected));
 
             return Task.CompletedTask;
         });
@@ -118,29 +116,22 @@ public class GetEligibleEmployeesTests : ApiTestBase<Program>
                     .GETAsync<GetEligibleEmployeesEndpoint, ProfitYearRequest, GetEligibleEmployeesResponse>(_requestDto);
 
             // Assert – new header check
-            response.Response.Headers
-                .TryGetValues(DemographicHeaders.Source, out var sourceValues)
-                .Should().BeTrue("the API should always emit the demographic-source header");
-
-            sourceValues!.Single().Should().Be("Frozen",
-                $"when UseFrozenData is true the {DemographicHeaders.Source} header must equal \"Frozen\"");
+            response.Response.Headers.TryGetValues(DemographicHeaders.Source, out var sourceValues).ShouldBeTrue("the API should always emit the demographic-source header");
+            sourceValues!.Single().ShouldBe("Frozen", $"when UseFrozenData is true the {DemographicHeaders.Source} header must equal \"Frozen\"");
 
             // Assert – CSV file
-            response.Response.Content.Should().NotBeNull();
+            Assert.NotNull(response.Response.Content);
             string csvData = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
             string[] lines = csvData.Split(["\r\n", "\n"], StringSplitOptions.None);
 
-            lines[0].Should().NotBeEmpty();
-            lines[1].Should().Be($"Get Eligible Employees for Year {_testProfitYear}");
-            lines[2].Should().BeEmpty();                                // blank line
-            lines[3].Should().Be($"Number read on FROZEN,{expectedNumberReadOnFrozen}");
-            lines[4].Should().Be($"Number not selected,{expectedNumberNotSelected}");
-            lines[5].Should().Be($"Number written,{expectedNumberWritten}");
-
-            lines[6].Should().Be("ASSIGNMENT_ID,BADGE_PSN,NAME");
-
-            lines.Skip(7).Should()
-                 .Contain($"{_dh.DepartmentId},{_dh.BadgeNumber},\"{_d.ContactInfo!.FullName!}\"");
+            Assert.False(string.IsNullOrEmpty(lines[0]));
+            lines[1].ShouldBe($"Get Eligible Employees for Year {_testProfitYear}");
+            Assert.True(string.IsNullOrEmpty(lines[2]));
+            lines[3].ShouldBe($"Number read on FROZEN,{expectedNumberReadOnFrozen}");
+            lines[4].ShouldBe($"Number not selected,{expectedNumberNotSelected}");
+            lines[5].ShouldBe($"Number written,{expectedNumberWritten}");
+            lines[6].ShouldBe("ASSIGNMENT_ID,BADGE_PSN,NAME");
+            lines.Skip(7).ShouldContain($"{_dh.DepartmentId},{_dh.BadgeNumber},\"{_d.ContactInfo!.FullName!}\"");
 
             return Task.CompletedTask;
         });
@@ -163,9 +154,7 @@ public class GetEligibleEmployeesTests : ApiTestBase<Program>
                     .GETAsync<GetEligibleEmployeesEndpoint, ProfitYearRequest, GetEligibleEmployeesResponse>(_requestDto);
 
             // Assert
-            response.Result.Response.Results
-                .Should()
-                .NotContain(e => e.BadgeNumber == _dh.BadgeNumber);
+            Assert.DoesNotContain(response.Result.Response.Results, e => e.BadgeNumber == _dh.BadgeNumber);
 
             return Task.CompletedTask;
         });
@@ -188,9 +177,7 @@ public class GetEligibleEmployeesTests : ApiTestBase<Program>
                     .GETAsync<GetEligibleEmployeesEndpoint, ProfitYearRequest, GetEligibleEmployeesResponse>(_requestDto);
 
             // Assert
-            response.Result.Response.Results
-                .Should()
-                .NotContain(e => e.BadgeNumber == _dh.BadgeNumber);
+            Assert.DoesNotContain(response.Result.Response.Results, e => e.BadgeNumber == _dh.BadgeNumber);
 
             return Task.CompletedTask;
         });
@@ -211,11 +198,18 @@ public class GetEligibleEmployeesTests : ApiTestBase<Program>
                     .GETAsync<GetEligibleEmployeesEndpoint, ProfitYearRequest, GetEligibleEmployeesResponse>(_requestDto);
 
             // Assert
-            response.Result.Response.Results
-                .Should()
-                .NotContain(e => e.BadgeNumber == _dh.BadgeNumber);
+            Assert.DoesNotContain(response.Result.Response.Results, e => e.BadgeNumber == _dh.BadgeNumber);
 
             return Task.CompletedTask;
         });
+    }
+
+    private static bool AreEquivalent(EligibleEmployee actual, EligibleEmployee expected)
+    {
+        return actual.OracleHcmId == expected.OracleHcmId &&
+               actual.BadgeNumber == expected.BadgeNumber &&
+               actual.FullName == expected.FullName &&
+               actual.DepartmentId == expected.DepartmentId &&
+               actual.Department == expected.Department;
     }
 }

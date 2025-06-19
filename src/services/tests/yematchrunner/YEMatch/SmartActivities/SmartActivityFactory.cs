@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -54,6 +53,7 @@ public static class SmartActivityFactory
             new SmartActivity(A22_Profit_Share_Edit_PAY477, Client, "A22", "Profit Share Edit (pay447)"),
             new SmartActivity(A23_Profit_Master_Update, Client, "A23", "Profit Master Update"),
             new SmartActivity(A24_PROF_PAYMASTER_UPD, Client, "A24", "PROF PAYMASTER UPD"),
+            new SmartActivity(A24B_PROF_PAYMASTER_UPD, Client, "A24B", "PROF PAYMASTER UPD part two"), // Do an update to BE.
             new SmartActivity(A25_Prof_Share_Report_By_Age, Client, "A25", "Prof Share Report By Age (prof130 prof130b prof130v prof130y)"),
             new SmartActivity(A26_Prof_Share_Gross_Rpt_QPAY501, Client, "A26", "Prof Share Gross Rpt (qpay501)"),
             new SmartActivity(A27_Prof_Share_by_Store, Client, "A27", "Prof Share by Store (qpay066-undr21 qpay066ta-undr21 qpay066ta \"newlabels report\" labels labelsnew)"),
@@ -107,24 +107,24 @@ public static class SmartActivityFactory
         return new Outcome(aname, name, "", OutcomeStatus.Ok, sb.ToString(), null, true);
     }
 
-
     private static async Task<Outcome> A2_Military_and_Rehire(ApiClient apiClient, string aname, string name)
     {
-        StringBuilder sb = new();
+/*
+       StringBuilder sb = new();
 
         ReportResponseBaseOfEmployeesOnMilitaryLeaveResponse? result = await apiClient
             .ReportsYearEndMilitaryEmployeesOnMilitaryLeaveEndpointAsync(null, null, 0, int.MaxValue, null);
         sb.Append($"Employees On Military Leave - records loaded: {result.Response.Results.Count}\n");
 
-        ExtendedRehireForfeituresRequest rehireForfeituresRequest = new();
-        rehireForfeituresRequest.ProfitYear = _profitYear;
-        rehireForfeituresRequest.BeginningDate = DateTimeOffset.Parse("2024-01-06", CultureInfo.InvariantCulture);
-        rehireForfeituresRequest.EndingDate = DateTimeOffset.Parse("2025-01-04", CultureInfo.InvariantCulture);
+        StartAndEndDateRequest sedr = new();
+        //sedr.ProfitYear = _profitYear;
+        sedr.BeginningDate = DateOnly.FromDateTime(DateTime.Parse("2024-01-06", CultureInfo.InvariantCulture));
+        sedr.EndingDate = DateOnly.FromDateTime(DateTime.Parse("2025-01-04", CultureInfo.InvariantCulture));
 
-        ReportResponseBaseOfRehireForfeituresResponse? r2 = await apiClient.ReportsYearEndMilitaryRehireForfeituresEndpointAsync(null, rehireForfeituresRequest);
+        ReportResponseBaseOfRehireForfeituresResponse? r2 = await apiClient.ReportsYearEndMilitaryRehireForfeituresEndpointAsync(null);
         sb.Append($"Military And Rehire Forfeitures - records loaded: {r2.Response.Results.Count}\n");
-
-        return Ok(aname, name, sb);
+*/
+        return TBD(name, name, "Changed to use POST, invokation requires update");
     }
 
     private static Outcome Ok(string aname, string name, StringBuilder sb)
@@ -138,15 +138,20 @@ public static class SmartActivityFactory
     }
 
     // NSwagger does not handle POST requests well.  Its definition of the Request is missing the "profitYear" share parameter
-    public class ExtendedRehireForfeituresRequest : RehireForfeituresRequest
+    public record StartAndEndDateRequest
     {
-        public int ProfitYear { get; set; }
+        public DateOnly BeginningDate { get; set; }
+        public DateOnly EndingDate { get; set; }
     }
+
+
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     private static async Task<Outcome> A3_Prof_Termination(ApiClient apiClient, string aname, string name)
     {
+        DateTimeOffset dto = DateTimeOffset.Now;
+        DateTimeOffset dto2 = dto.AddYears(-1);
         TerminatedEmployeeAndBeneficiaryResponse? result = await apiClient
-            .ReportsYearEndTerminatedEmployeeAndBeneficiaryTerminatedEmployeeAndBeneficiaryDataEndpointAsync(_profitYear, null,
+            .ReportsYearEndTerminatedEmployeeAndBeneficiaryTerminatedEmployeeAndBeneficiaryDataEndpointAsync(dto, dto2, null,
                 null, 0, int.MaxValue, null);
 
         return Ok(aname, name, $"Records Loaded {result.Response.Results.Count}");
@@ -386,6 +391,11 @@ public static class SmartActivityFactory
         return TBD(aname, name);
     }
 
+    private static async Task<Outcome> A24B_PROF_PAYMASTER_UPD(ApiClient apiClient, string aname, string name)
+    {
+        return TBD(aname, name);
+    }
+
     private static async Task<Outcome> A25_Prof_Share_Report_By_Age(ApiClient apiClient, string aname, string name)
     {
         return TBD(aname, name);
@@ -398,7 +408,7 @@ public static class SmartActivityFactory
 
     private static async Task<Outcome> A27_Prof_Share_by_Store(ApiClient apiClient, string aname, string name)
     {
-        ReportResponseBaseOfMemberYearSummaryDto? r = await apiClient.ReportsYearEndBreakdownEndpointAsync(false, 1, _profitYear, null, null, 0, int.MaxValue, null);
+        ReportResponseBaseOfMemberYearSummaryDto? r = await apiClient.ReportsYearEndBreakdownEndpointAsync(false, 1, null, null, 2025, "", null, null, null, null);
         return Ok(aname, name, $"records returned = {r.Response.Results.Count}");
     }
 

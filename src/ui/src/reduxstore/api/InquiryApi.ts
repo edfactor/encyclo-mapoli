@@ -4,9 +4,12 @@ import {
   MasterInquiryMemberRequest,
   MasterInquiryResponseDto,
   PagedReportResponse,
-  EmployeeDetails
+  EmployeeDetails,
+  GroupedProfitSummaryDto
 } from "../types";
+import { Paged } from "smart-ui-library";
 import { createDataSourceAwareBaseQuery } from "./api";
+import { setMasterInquiryGroupingData } from "reduxstore/slices/inquirySlice";
 
 const baseQuery = createDataSourceAwareBaseQuery();
 export const InquiryApi = createApi({
@@ -54,6 +57,69 @@ export const InquiryApi = createApi({
         method: "GET",
         params: pagination
       })
+    }),
+    getProfitMasterInquiryFilteredDetails: builder.query<{ results: MasterInquiryResponseDto[], total: number }, { 
+      memberType: number; 
+      id?: number;
+      profitYear?: number; 
+      monthToDate?: number; 
+      badgeNumber?: number;
+      psnSuffix?: number;
+      ssn?: string;
+      endProfitYear?: number;
+      startProfitMonth?: number;
+      endProfitMonth?: number;
+      profitCode?: number;
+      contributionAmount?: number;
+      earningsAmount?: number;
+      forfeitureAmount?: number;
+      paymentAmount?: number;
+      name?: string;
+      paymentType?: number;
+      skip?: number; 
+      take?: number; 
+      sortBy?: string; 
+      isSortDescending?: boolean 
+    }>({
+      query: ({ memberType, ...pagination }) => ({
+        url: `master/master-inquiry/member/${memberType}/details`,
+        method: "GET",
+        params: pagination
+      })
+    }),
+    getProfitMasterInquiryGrouping: builder.query<Paged<GroupedProfitSummaryDto>, MasterInquiryRequest>({
+      query: (params) => ({
+        url: `master/master-inquiry/grouping`,
+        method: "POST",
+        body: {
+          badgeNumber: params.badgeNumber ? Number(params.badgeNumber?.toString().substring(0, 6)) : undefined,
+          psnSuffix: params.badgeNumber && params.badgeNumber.toString().length > 6 ? Number(params.badgeNumber?.toString().substring(6)) : undefined,
+          profitYear: params.profitYear,
+          endProfitYear: params.endProfitYear,
+          startProfitMonth: params.startProfitMonth,
+          endProfitMonth: params.endProfitMonth,
+          profitCode: params.profitCode,
+          contributionAmount: params.contributionAmount,
+          earningsAmount: params.earningsAmount,
+          forfeitureAmount: params.forfeitureAmount,
+          paymentAmount: params.paymentAmount,
+          ssn: params.ssn,
+          paymentType: params.paymentType,
+          memberType: params.memberType,
+          name: params.name,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending,
+          skip: params.pagination.skip,
+          take: params.pagination.take
+        }
+      }),
+      async onQueryStarted(params: MasterInquiryRequest, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setMasterInquiryGroupingData(data.results));
+        } catch (err) {
+        }
+      }
     })
   })
 });
@@ -61,5 +127,7 @@ export const InquiryApi = createApi({
 export const {
   useLazyGetProfitMasterInquiryMemberQuery,
   useLazySearchProfitMasterInquiryQuery,
-  useLazyGetProfitMasterInquiryMemberDetailsQuery
+  useLazyGetProfitMasterInquiryMemberDetailsQuery,
+  useLazyGetProfitMasterInquiryFilteredDetailsQuery,
+  useLazyGetProfitMasterInquiryGroupingQuery
 } = InquiryApi;

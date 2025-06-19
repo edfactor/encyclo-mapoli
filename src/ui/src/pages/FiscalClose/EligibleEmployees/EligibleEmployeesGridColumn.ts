@@ -1,5 +1,6 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
+import { GRID_COLUMN_WIDTHS } from "../../../constants";
 
 export const GetEligibleEmployeesColumns = (): ColDef[] => {
   return [
@@ -7,7 +8,7 @@ export const GetEligibleEmployeesColumns = (): ColDef[] => {
       headerName: "Badge",
       field: "badgeNumber",
       colId: "badgeNumber",
-      minWidth: 80,
+      minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
@@ -19,7 +20,7 @@ export const GetEligibleEmployeesColumns = (): ColDef[] => {
       headerName: "Full Name",
       field: "fullName",
       colId: "fullName",
-      minWidth: 120,
+      minWidth: GRID_COLUMN_WIDTHS.FULL_NAME,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true

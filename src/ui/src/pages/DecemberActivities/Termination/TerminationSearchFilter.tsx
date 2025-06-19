@@ -6,10 +6,8 @@ import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 import { CalendarResponseDto, StartAndEndDateRequest } from "../../../reduxstore/types";
-import { tryddmmyyyyToDate } from "../../../utils/dateUtils";
+import { tryddmmyyyyToDate, mmDDYYFormat } from "../../../utils/dateUtils";
 import { RootState } from "reduxstore/store";
-import { useLazyGetTerminationReportQuery } from "reduxstore/api/YearsEndApi";
-import { dateYYYYMMDD } from "smart-ui-library";
 
 const schema = yup.object().shape({
   beginningDate: yup.string().required("Begin Date is required"),
@@ -39,8 +37,6 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
 
   const dispatch = useDispatch();
   const { termination } = useSelector((state: RootState) => state.yearsEnd);
-  const [triggerSearch, { isFetching }] = useLazyGetTerminationReportQuery();
-
   const {
     control,
     handleSubmit,
@@ -59,17 +55,12 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
   const validateAndSubmit = async (data: StartAndEndDateRequest) => {
     const params = {
       ...data,
-      beginningDate: data.beginningDate ? dateYYYYMMDD(new Date(data.beginningDate)) : dateYYYYMMDD(new Date(fiscalData.fiscalBeginDate)),
-      endingDate: data.endingDate ? dateYYYYMMDD(new Date(data.endingDate)) : dateYYYYMMDD(new Date(fiscalData.fiscalEndDate)),
+      beginningDate: data.beginningDate ? mmDDYYFormat(data.beginningDate) : mmDDYYFormat(fiscalData.fiscalBeginDate),
+      endingDate: data.endingDate ? mmDDYYFormat(data.endingDate) : mmDDYYFormat(fiscalData.fiscalEndDate),
     };
-    // Call the API and only call onSearch after success
-    try {
-      await triggerSearch(params, false).unwrap();
-      onSearch(params);
-      setInitialSearchLoaded(true);
-    } catch (e) {
-      setInitialSearchLoaded(false);
-    }
+    // Only update search params and initial loaded state; let the grid trigger the API
+    onSearch(params);
+    setInitialSearchLoaded(true);
   };
 
   const validateAndSearch = handleSubmit(validateAndSubmit);
@@ -141,8 +132,8 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
         <SearchAndReset
           handleReset={handleReset}
           handleSearch={validateAndSearch}
-          isFetching={isFetching}
-          disabled={!isValid || isFetching}
+          isFetching={false}
+          disabled={!isValid}
         />
       </Grid2>
     </form>

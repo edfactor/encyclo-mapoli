@@ -4,7 +4,7 @@ using Oracle.ManagedDataAccess.Client;
 namespace YEMatch;
 
 // The base class for activities which directly interact with the database
-public abstract class BaseSqlActivity : IActivity
+public abstract class BaseSqlActivity : BaseActivity
 {
     protected readonly string ReadyConnString;
     protected readonly string SmartConnString;
@@ -16,13 +16,6 @@ public abstract class BaseSqlActivity : IActivity
         ReadyConnString = secretConfig["ReadyConnectionString"]!;
         SmartConnString = secretConfig["SmartConnectionString"]!;
     }
-
-    public virtual string Name()
-    {
-        return GetType().Name;
-    }
-
-    public abstract Task<Outcome> Execute();
 
     // Compares two sql statements by subtracting the resuls from each results.  This yields the differences.
     protected static string QueryDiff(string queryA, string queryB)

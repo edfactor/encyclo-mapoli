@@ -1,12 +1,11 @@
-import { Typography } from "@mui/material";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetVestingAmountByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams } from "smart-ui-library";
+import ReportSummary from "../../../components/ReportSummary";
 import { VestedAmountsByAge } from "../../../reduxstore/types";
 import { GetVestedAmountsByAgeColumns } from "./VestedAmountsByAgeGridColumns";
-import ReportSummary from "../../../components/ReportSummary";
 
 interface VestedAmountsByAgeGridProps {
   gridTitle: string;

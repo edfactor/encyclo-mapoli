@@ -1,62 +1,53 @@
-import { Box, Divider, Typography, CircularProgress, Button } from "@mui/material";
+import { Box, Button, CircularProgress, Divider, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
-import DSMCollapsedAccordion from "components/DSMCollapsedAccordion";
 import ProfitShareTotalsDisplay from "components/ProfitShareTotalsDisplay";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useLazyGetYearEndProfitSharingReportQuery, useFinalizeReportMutation } from "reduxstore/api/YearsEndApi";
+import { useFinalizeReportMutation, useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
 import { setYearEndProfitSharingReportQueryParams } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
-import { Page, ISortParams, SmartModal } from "smart-ui-library";
+import { Page, SmartModal, DSMAccordion } from "smart-ui-library";
 import { CAPTIONS} from "../../constants";
-import ProfitShareReportGrid from "./ProfitShareReportGrid";
-import ReportSummary from "../../components/ReportSummary";
+import ProfitSummary from "../PAY426Reports/PAY426-9/ProfitSummary";
+import ProfitShareReportSearchFilters from "./ProfitShareReportSearchFilters";
+import ReportGrid from "../PAY426Reports/PAY426N/ReportGrid";
+import { FilterParams } from "reduxstore/types";
 
 const ProfitShareReport = () => {
-  const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
-  const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "badgeNumber",
-    isSortDescending: true
-  });
   const [initialDataLoaded, setInitialDataLoaded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedPresetParams, setSelectedPresetParams] = useState<FilterParams | null>(null);
   
-  const { yearEndProfitSharingReport, yearEndProfitSharingReportQueryParams } = useSelector(
+  const { yearEndProfitSharingReport } = useSelector(
     (state: RootState) => state.yearsEnd
   );
   const hasToken = !!useSelector((state: RootState) => state.security.token);
   const profitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
-  const [triggerSearch, { isFetching }] = useLazyGetYearEndProfitSharingReportQuery();
+  const [triggerSearch] = useLazyGetYearEndProfitSharingReportQuery();
   const [finalizeReport, { isLoading: isFinalizing }] = useFinalizeReportMutation();
 
-  const createSearchRequest = useCallback((pYear: number) => {
-    return {
-      isYearEnd: false,
-      includeActiveEmployees: true,
-      includeInactiveEmployees: true,
-      includeEmployeesTerminatedThisYear: false,
-      includeTerminatedEmployees: true,
-      includeBeneficiaries: false,
-      includeEmployeesWithPriorProfitSharingAmounts: true,
-      includeEmployeesWithNoPriorProfitSharingAmounts: true,
-      profitYear: pYear,
-      pagination: {
-        skip: pageNumber * pageSize,
-        take: pageSize,
-        sortBy: sortParams.sortBy,
-        isSortDescending: sortParams.isSortDescending
-      }
-    };
-  }, [pageNumber, pageSize, sortParams]);
-
-  // initial load on page mount
   useEffect(() => {
     if (hasToken && profitYear && !initialDataLoaded) {
-      const request = createSearchRequest(profitYear);
+      const request = {
+        isYearEnd: false,
+        includeActiveEmployees: true,
+        includeInactiveEmployees: true,
+        includeEmployeesTerminatedThisYear: false,
+        includeTerminatedEmployees: true,
+        includeBeneficiaries: false,
+        includeEmployeesWithPriorProfitSharingAmounts: true,
+        includeEmployeesWithNoPriorProfitSharingAmounts: true,
+        profitYear: profitYear,
+        pagination: {
+          skip: 0,
+          take: 10,
+          sortBy: "badgeNumber",
+          isSortDescending: true
+        }
+      };
       
       triggerSearch(request, false)
         .then((result) => {
@@ -69,33 +60,7 @@ const ProfitShareReport = () => {
           console.error("Initial search failed:", error);
         });
     }
-  }, [hasToken, profitYear, initialDataLoaded, createSearchRequest, triggerSearch, dispatch]);
-
-  
-  const handlePaginationOrSortChange = useCallback(() => {
-    if (initialDataLoaded && yearEndProfitSharingReportQueryParams?.profitYear) {
-      const request = createSearchRequest(yearEndProfitSharingReportQueryParams.profitYear);
-      triggerSearch(request, false).catch((error) => {
-        console.error("Pagination search failed:", error);
-      });
-    }
-  }, [initialDataLoaded, yearEndProfitSharingReportQueryParams, createSearchRequest, triggerSearch]);
-
-  const handlePageChange = (value: number) => {
-    setPageNumber(value - 1);
-    setTimeout(() => handlePaginationOrSortChange(), 0);
-  };
-
-  const handlePageSizeChange = (value: number) => {
-    setPageSize(value);
-    setPageNumber(0);
-    setTimeout(() => handlePaginationOrSortChange(), 0);
-  };
-
-  const handleSortChange = (update: ISortParams) => {
-    setSortParams(update);
-    setTimeout(() => handlePaginationOrSortChange(), 0);
-  };
+  }, [hasToken, profitYear, initialDataLoaded, triggerSearch, dispatch]);
 
   const handleCommit = async () => {
     if (profitYear) {
@@ -110,6 +75,10 @@ const ProfitShareReport = () => {
 
   const handleCancel = () => {
     setIsModalOpen(false);
+  };
+
+  const handlePresetParamsChange = (params: FilterParams | null) => {
+    setSelectedPresetParams(params);
   };
 
   const renderActionNode = () => {
@@ -162,22 +131,23 @@ const ProfitShareReport = () => {
               <CircularProgress />
             </Box>
           ) : (
-            <>
-              <ReportSummary report={yearEndProfitSharingReport} />
-              <ProfitShareReportGrid
-                data={yearEndProfitSharingReport?.response.results || []}
-                isLoading={isFetching}
-                pageNumber={pageNumber}
-                pageSize={pageSize}
-                sortParams={sortParams}
-                recordCount={yearEndProfitSharingReport?.response.total || 0}
-                onPageChange={handlePageChange}
-                onPageSizeChange={handlePageSizeChange}
-                onSortChange={handleSortChange}
-              />
-            </>
+            <ProfitSummary onPresetParamsChange={handlePresetParamsChange} />
           )}
         </Grid2>
+
+        {selectedPresetParams && (
+          <Grid2 width="100%">
+            <DSMAccordion title="Filter">
+              <ProfitShareReportSearchFilters profitYear={profitYear} presetParams={selectedPresetParams} />
+            </DSMAccordion>
+          </Grid2>
+        )}
+
+        {selectedPresetParams && (
+          <Grid2 width="100%">
+            <ReportGrid params={selectedPresetParams} onLoadingChange={() => {}} />
+          </Grid2>
+        )}
       </Grid2>
 
       <SmartModal

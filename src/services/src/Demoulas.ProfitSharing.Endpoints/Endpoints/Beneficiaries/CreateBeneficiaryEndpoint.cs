@@ -18,7 +18,7 @@ public class CreateBeneficiaryAndContactEndpoint : Endpoint<CreateBeneficiaryReq
         Post("/");
         Summary(s =>
         {
-            s.Summary = "Adds a new beneficiary, and contact.";
+            s.Summary = "Adds a new beneficiary";
             s.ResponseExamples = new Dictionary<int, object>
             {
                 { 200, CreateBeneficiaryResponse.SampleResponse()}

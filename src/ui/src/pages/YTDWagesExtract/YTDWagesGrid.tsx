@@ -1,15 +1,12 @@
-import { Typography } from "@mui/material";
-import { useCallback, useMemo, useState, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { CAPTIONS } from "../../constants";
-import { GetYTDWagesColumns } from "./YTDWagesGridColumn";
 
 import { RefObject } from "react";
 import { useLazyGetEmployeeWagesForYearQuery } from "reduxstore/api/YearsEndApi";
-import useFiscalCloseProfitYear from "../../hooks/useFiscalCloseProfitYear";
 import ReportSummary from "../../components/ReportSummary";
+import useFiscalCloseProfitYear from "../../hooks/useFiscalCloseProfitYear";
 
 interface YTDWagesGridProps {
   innerRef: RefObject<HTMLDivElement | null>;
@@ -42,7 +39,7 @@ const YTDWagesGrid = ({ innerRef, initialSearchLoaded, setInitialSearchLoaded }:
     };
 
     await triggerSearch(request, false);
-  }, [pageNumber, pageSize, sortParams, triggerSearch, employeeWagesForYearQueryParams?.profitYear]);
+  }, [employeeWagesForYearQueryParams?.profitYear, fiscalCloseProfitYear, pageNumber, pageSize, sortParams.sortBy, sortParams.isSortDescending, triggerSearch]);
 
   useEffect(() => {
     if (initialSearchLoaded && hasToken) {

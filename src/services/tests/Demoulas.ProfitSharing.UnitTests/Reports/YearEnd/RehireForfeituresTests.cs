@@ -1,10 +1,8 @@
-﻿using System.Data.SqlTypes;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Net;
 using System.Text.Json;
 using CsvHelper;
 using CsvHelper.Configuration;
-using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common;
@@ -21,10 +19,11 @@ using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using Demoulas.Util.Extensions;
 using FastEndpoints;
-using FluentAssertions;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Shouldly;
+using Xunit;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
@@ -35,7 +34,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
 
     public RehireForfeituresTests()
     {
-        ITerminationAndRehireService mockService = ServiceProvider?.GetRequiredService<ITerminationAndRehireService>()!;
+        IUnForfeitService mockService = ServiceProvider?.GetRequiredService<IUnForfeitService>()!;
         _endpoint = new RehireForfeituresEndpoint(mockService);
     }
 
@@ -66,20 +65,12 @@ public class RehireForfeituresTests : ApiTestBase<Program>
                     setup.Request);
 
             // Assert
-            response.Result.ReportName.Should().BeEquivalentTo(expectedResponse.ReportName);
-            response.Result.Response.Results.Should().HaveCountGreaterThanOrEqualTo(expectedResponse.Response.Results.Count());
-
-#pragma warning disable S1481
-            var expected = JsonSerializer.Serialize(expectedResponse.Response.Results);
-
-            var actual = JsonSerializer.Serialize(response.Result.Response.Results);
-#pragma warning restore S1481
-
-            response.Result.Response.Results.First().Should().BeEquivalentTo(
-                expectedResponse.Response.Results.First(),
-                options => options
-                    .Excluding(x => x.NetBalanceLastYear)
-                    .Excluding(x => x.VestedBalanceLastYear)
+            Assert.Equal(expectedResponse.ReportName, response.Result.ReportName);
+            Assert.True(response.Result.Response.Results.Count() >= expectedResponse.Response.Results.Count());
+            expectedResponse.Response.Results.First().ShouldBeEquivalentTo(response.Result.Response.Results.First(),
+                nameof(RehireForfeituresResponse.NetBalanceLastYear),
+                nameof(RehireForfeituresResponse.VestedBalanceLastYear),
+                nameof(RehireForfeituresResponse.CompanyContributionYears)
             );
         });
     }
@@ -94,40 +85,31 @@ public class RehireForfeituresTests : ApiTestBase<Program>
             // Act
             DownloadClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
             var response = await DownloadClient.POSTAsync<RehireForfeituresEndpoint, StartAndEndDateRequest, StreamContent>(setup.Request);
-            response.Response.Content.Should().NotBeNull();
+            response.Response.Content.ShouldNotBeNull();
 
+            // CSV assertions
+            Assert.NotNull(response.Response.Content);
             string result = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
-            result.Should().NotBeNullOrEmpty();
-
-            // Assert CSV format
+            result.ShouldNotBeNullOrEmpty();
             using var reader = new StringReader(result);
             using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture));
-
-            // Read the first two rows (date and report name)
-            await csv.ReadAsync(); // First row is the date
+            await csv.ReadAsync();
             string? dateLine = csv.GetField(0);
-            dateLine.Should().NotBeNullOrEmpty();
-
-            await csv.ReadAsync(); // Second row is the report name
+            Assert.False(string.IsNullOrEmpty(dateLine));
+            await csv.ReadAsync();
             string? reportNameLine = csv.GetField(0);
-            reportNameLine.Should().NotBeNullOrEmpty();
-
-            // Start reading the actual CSV content from row 2 (0-based index)
-            await csv.ReadAsync(); // Read the header row (starting at column 2)
+            Assert.False(string.IsNullOrEmpty(reportNameLine));
+            await csv.ReadAsync();
             csv.ReadHeader();
-
-            // Validate the headers
             var headers = csv.HeaderRecord;
-            headers.Should().NotBeNull();
-            headers.Should().ContainInOrder("", "", "BADGE", "EMPLOYEE NAME", "SSN", "REHIRED", "PY-YRS", "YTD HOURS", "EC");
+            headers.ShouldNotBeNull();
+            headers.ShouldBe(new[] { "", "", "BADGE", "EMPLOYEE NAME", "SSN", "REHIRED", "HIRE DATE", "TERMINATION DATE", "BEGINNING BALANCE", "BEGIN VESTED AMOUNT", "EC" });
 
-            await csv.ReadAsync(); // Read the header row (starting at column 2)
+            await csv.ReadAsync();
             csv.ReadHeader();
-
-            // Validate the second row of headers
             var headers2 = csv.HeaderRecord;
-            headers2.Should().NotBeNull();
-            headers2.Should().ContainInOrder("", "", "", "", "", "YEAR", "FORFEITURES", "COMMENT");
+            headers2.ShouldNotBeNull();
+            headers2.ShouldBe(new[] { "", "", "", "", "", "YEAR", "FORFEITURES", "COMMENT" });
         });
     }
 
@@ -142,7 +124,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
             var response =
                 await ApiClient.POSTAsync<RehireForfeituresEndpoint, StartAndEndDateRequest, ReportResponseBase<RehireForfeituresResponse>>(setup.Request);
 
-            response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+            Assert.Equal(HttpStatusCode.Unauthorized, response.Response.StatusCode);
         });
     }
 
@@ -165,8 +147,8 @@ public class RehireForfeituresTests : ApiTestBase<Program>
         var response = await _endpoint.GetResponse(request, cancellationToken);
 
         // Assert
-        response.ReportName.Should().BeEquivalentTo(expectedResponse.ReportName);
-        response.Response.Results.Should().BeEquivalentTo(expectedResponse.Response.Results);
+        response.ReportName.ShouldBe(expectedResponse.ReportName);
+        response.Response.Results.ShouldBe(expectedResponse.Response.Results, ignoreOrder: true);
     }
 
     [Fact(DisplayName = "PS-345: Null Results")]
@@ -188,8 +170,8 @@ public class RehireForfeituresTests : ApiTestBase<Program>
         var response = await _endpoint.GetResponse(request, cancellationToken);
 
         // Assert
-        response.ReportName.Should().BeEquivalentTo(expectedResponse.ReportName);
-        response.Response.Results.Should().BeEquivalentTo(expectedResponse.Response.Results);
+        response.ReportName.ShouldBe(expectedResponse.ReportName);
+        response.Response.Results.ShouldBe(expectedResponse.Response.Results, ignoreOrder: true);
     }
 
     [Fact(DisplayName = "PS-345: Report name is correct")]
@@ -197,9 +179,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
     {
         // Act
         var reportFileName = _endpoint.ReportFileName;
-
-        // Assert
-        reportFileName.Should().Be("REHIRE'S PROFIT SHARING DATA");
+        reportFileName.ShouldBe("REHIRE'S PROFIT SHARING DATA");
     }
 
     private static async Task<(StartAndEndDateRequest Request, RehireForfeituresResponse ExpectedResponse)> SetupTestEmployee(ProfitSharingDbContext c)
@@ -243,11 +223,15 @@ public class RehireForfeituresTests : ApiTestBase<Program>
         example.BadgeNumber = demo.BadgeNumber;
         example.Ssn = demo.Ssn.MaskSsn();
         example.FullName = demo.ContactInfo.FullName;
-        example.CompanyContributionYears = 0;
-        example.HoursCurrentYear = payProfit.CurrentHoursYear;
         example.ReHiredDate = demo.ReHireDate ?? ReferenceData.DsmMinValue;
-        example.EmploymentStatus = demo.EmploymentStatus.Name;
-        example.Details = details.Select(pd => new MilitaryRehireProfitSharingDetailResponse { Forfeiture = pd.Forfeiture, Remark = pd.Remark, ProfitYear = pd.ProfitYear })
+        example.Details = details.Select(pd => new MilitaryRehireProfitSharingDetailResponse
+            {
+                Forfeiture = pd.Forfeiture, Remark = pd.Remark, ProfitYear = pd.ProfitYear, HoursCurrentYear = payProfit.CurrentHoursYear,
+                EnrollmentName = demo.EmploymentStatus.Name,
+                EnrollmentId = 0,
+                ProfitCodeId = 0
+                
+        })
             .ToList();
 
 

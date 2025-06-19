@@ -3,16 +3,15 @@ using System.Diagnostics.CodeAnalysis;
 namespace YEMatch;
 
 [SuppressMessage("AsyncUsage", "AsyncFixer01:Unnecessary async/await usage")]
-public class FrozenTesting : Runnable
+public class FrozenTestingRun : Runnable
 {
     public override async Task Exec()
     {
-
         // Tests that Frozen is handled correctly by messing up the badges.
         await Run(Specify(
             "R0", // import obfuscated
             "TrimTo14Employees", // Reduces execution time to 1 minute
-            "R2S",
+            "ImportReadyDbToSmartDb",
             "S12", // Freeze on Smart
             "OverwriteBadges", // Obliterate the Live Badges
             "P18", // PAY426 / YearEndService
@@ -24,7 +23,5 @@ public class FrozenTesting : Runnable
             "TestEtvaNow", // Verify ETVA for 2025
             "TestEtvaPrior" // Verify correct ETVA for 2024
         ));
-
-
     }
 }

@@ -1,4 +1,4 @@
-import { agGridNumberToCurrency } from "smart-ui-library";
+import { agGridNumberToCurrency, formatNumberWithComma } from "smart-ui-library";
 import { ColDef } from "ag-grid-community";
 
 export const GetProfitSummaryGridColumns = (): ColDef[] => {
@@ -22,7 +22,8 @@ export const GetProfitSummaryGridColumns = (): ColDef[] => {
       minWidth: 120,
       headerClass: "right-align",
       cellClass: "right-align",
-      resizable: true
+      resizable: true,
+      valueFormatter: (params) => formatNumberWithComma(params.value)
     },
     {
       headerName: "Total Wages",

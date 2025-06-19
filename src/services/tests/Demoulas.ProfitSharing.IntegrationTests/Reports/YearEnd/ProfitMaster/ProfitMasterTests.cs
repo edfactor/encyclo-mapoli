@@ -5,7 +5,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Services.ItOperations;
 using Demoulas.ProfitSharing.Services.ProfitMaster;
 using Demoulas.ProfitSharing.Services.ProfitShareEdit;
-using FluentAssertions;
+using Shouldly;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Oracle.ManagedDataAccess.Client;
@@ -87,7 +87,7 @@ public class ProfitMasterTests : PristineBaseTest
 
         sw.Stop();
         TestOutputHelper.WriteLine($"Update {sw.Took()} for transactions:{psur.TransactionsCreated} etvasEffected:{psur.EtvasEffected}");
-        true.Should().Be(true);
+        true.ShouldBeTrue();
     }
 
     [Fact]
@@ -107,6 +107,6 @@ public class ProfitMasterTests : PristineBaseTest
 
         sw.Stop();
         TestOutputHelper.WriteLine($"Revert took {sw.Took()}; for TransactionsRemoved:{prs.TransactionsRemoved} etvasEffected:{prs.EtvasEffected}");
-        true.Should().Be(true);
+        true.ShouldBeTrue();
     }
 }

@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common;
+using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.Util.Extensions;
 
@@ -30,7 +31,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
 
     private sealed class EmployeeInfo
     {
-        public required int Id { get; set; }
+        public required int Id { get; init; }
         public required int Ssn { get; init; }
         public required int BadgeNumber { get; init; }
     }
@@ -124,15 +125,16 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
             return response;
         });
     }
-
-
-    private static async Task<EmployeeInfo?> FindEmployeeAsync(IProfitSharingDbContext context,
+    
+    private async Task<EmployeeInfo?> FindEmployeeAsync(ProfitSharingReadOnlyDbContext context,
         ForfeitureAdjustmentRequest req, CancellationToken cancellationToken)
     {
+        var demographics =  await _demographicReaderService.BuildDemographicQuery(context);
+
         // If SSN is provided, use that for lookup
         if (req.SSN > 0)
         {
-            return await context.Demographics
+            return await demographics
                 .Where(d => d.Ssn == req.SSN.Value)
                 .Where(d => context.PayProfits.Any(pp => pp.DemographicId == d.Id && pp.ProfitYear == req.ProfitYear))
                 .Select(d => new EmployeeInfo
@@ -146,7 +148,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
         // Otherwise, if Badge is provided, use that for lookup
         if (req.Badge > 0)
         {
-            return await context.Demographics
+            return await demographics
                 .Where(d => d.BadgeNumber == req.Badge.Value)
                 .Where(d => context.PayProfits.Any(pp => pp.DemographicId == d.Id && pp.ProfitYear == req.ProfitYear))
                 .Select(d => new EmployeeInfo
@@ -201,6 +203,24 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                 throw new ArgumentException($"No profit sharing data found for employee with badge number {req.BadgeNumber} for year {req.ProfitYear}");
             }
 
+            // Determine if this is a forfeit or un-forfeit operation
+            bool isForfeit = req.ForfeitureAmount > 0;
+
+            if (req.OffsettingProfitDetailId.HasValue)
+            {
+                var offsettingProfitDetail = await context.ProfitDetails
+                    .FirstOrDefaultAsync(pd => pd.Id == req.OffsettingProfitDetailId.Value, cancellationToken);
+                if (offsettingProfitDetail == null)
+                {
+                    throw new InvalidOperationException($"Offsetting profit detail with ID {req.OffsettingProfitDetailId.Value} not found");
+                }
+
+                if (offsettingProfitDetail?.CommentTypeId == CommentType.Constants.ForfeitClassAction && !isForfeit)
+                {
+                    throw new InvalidOperationException($"Offsetting profit detail with ID {req.OffsettingProfitDetailId.Value} is a class action forfeiture and cannot be unforfeited.");
+                }
+            }
+
             // Get vesting balance from the total service
             var vestingBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(
                 Common.Contracts.Request.SearchBy.Ssn,
@@ -213,9 +233,6 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
             {
                 throw new ArgumentException($"No vesting balance data found for employee with badge number {req.BadgeNumber}");
             }
-
-            // Determine if this is a forfeit or un-forfeit operation
-            bool isForfeit = req.ForfeitureAmount > 0;
 
             // From docs: "From the screen in figure 2, if you enter the value in #17 to box #12 and hit enter, you will create a PROFIT_DETAIL record.
             // When the value is negative the record has UN-FORFEIT in the PROFIT_CMNT field and when the value is positive the PROFIT_CMNT field is FORFEIT."

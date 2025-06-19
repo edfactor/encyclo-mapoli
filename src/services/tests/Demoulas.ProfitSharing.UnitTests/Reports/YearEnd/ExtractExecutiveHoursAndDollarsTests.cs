@@ -1,5 +1,4 @@
-﻿using System.Data.SqlTypes;
-using System.Net;
+﻿using System.Net;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common;
@@ -16,9 +15,9 @@ using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using Demoulas.Util.Extensions;
 using FastEndpoints;
-using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
@@ -55,7 +54,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
                     .GETAsync<ExecutiveHoursAndDollarsEndpoint, ExecutiveHoursAndDollarsRequest,
                         ReportResponseBase<ExecutiveHoursAndDollarsResponse>>(_request);
 
-            response.Response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+            response.Response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
         });
     }
 
@@ -78,9 +77,9 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
                         ReportResponseBase<ExecutiveHoursAndDollarsResponse>>(_request);
 
             // Assert
-            response.Result.ReportName.Should().BeEquivalentTo(expectedResponse.ReportName);
-            response.Result.Response.Results.Count().Should().Be(1);
-            response.Result.Response.Results.Should().BeEquivalentTo(expectedResponse.Response.Results);
+            response.Result.ReportName.ShouldBe(expectedResponse.ReportName);
+            response.Result.Response.Results.Count().ShouldBe(1);
+            response.Result.Response.Results.ShouldBeEquivalentTo(expectedResponse.Response.Results);
         });
     }
 
@@ -102,8 +101,8 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
 
             // Assert
 
-            response.Result.ReportName.Should().BeEquivalentTo(_expectedReportName);
-            response.Result.Response.Results.Count().Should().Be(0);
+            response.Result.ReportName.ShouldBe(_expectedReportName);
+            response.Result.Response.Results.Count().ShouldBe(0);
         });
     }
 
@@ -124,9 +123,9 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
                         ReportResponseBase<ExecutiveHoursAndDollarsResponse>>(_request);
 
             // Assert
-            response.Result.ReportName.Should().BeEquivalentTo(expectedResponse.ReportName);
-            response.Result.Response.Results.Count().Should().Be(1);
-            response.Result.Response.Results.Should().BeEquivalentTo(expectedResponse.Response.Results);
+            response.Result.ReportName.ShouldBeEquivalentTo(expectedResponse.ReportName);
+            response.Result.Response.Results.Count().ShouldBe(1);
+            response.Result.Response.Results.ShouldBeEquivalentTo(expectedResponse.Response.Results);
         });
     }
 
@@ -145,16 +144,16 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
                 .GETAsync<ExecutiveHoursAndDollarsEndpoint, ExecutiveHoursAndDollarsRequest, StreamContent>(request);
 
             // Assert
-            response.Response.Content.Should().NotBeNull();
+            response.Response.Content.ShouldNotBeNull();
 
             // Verify CSV file
             string csvData = await response.Response.Content.ReadAsStringAsync(CancellationToken.None);
             string[] lines = csvData.Split(["\r\n", "\n"], StringSplitOptions.None);
             const string testSSN = "XXX-XX-8825";
-            lines[1].Should().Be(_expectedReportName);
-            lines[2].Should().Be("BADGE,NAME,STR,EXEC HRS,EXEC DOLS,ORA HRS CUR,ORA DOLS CUR,FREQ,STATUS,SSN");
-            lines[3].Should().Be(@"1,""John, Null E"",2,3,4,5,6,2,a," + testSSN);
-            lines[4].Should().Be("");
+            lines[1].ShouldBe(_expectedReportName);
+            lines[2].ShouldBe("BADGE,NAME,STR,EXEC HRS,EXEC DOLS,ORA HRS CUR,ORA DOLS CUR,FREQ,STATUS,SSN");
+            lines[3].ShouldBe(@"1,""John, Null E"",2,3,4,5,6,2,a," + testSSN);
+            lines[4].ShouldBe("");
         });
     }
 
@@ -171,15 +170,15 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             await _endpoint.GetResponse(_request, CancellationToken.None);
 
         // Assert
-        response.ReportName.Should().BeEquivalentTo(expectedResponse.ReportName);
-        response.Response.Results.Should().BeEquivalentTo(expectedResponse.Response.Results);
+        response.ReportName.ShouldBeEquivalentTo(expectedResponse.ReportName);
+        response.Response.Results.ShouldBeEquivalentTo(expectedResponse.Response.Results);
     }
 
     [Fact(DisplayName = "PS-360: Report name is correct")]
     public void ReportFileName_Should_ReturnCorrectValue()
     {
         string reportFileName = _endpoint.ReportFileName;
-        reportFileName.Should().Be("Executive Hours and Dollars");
+        reportFileName.ShouldBe("Executive Hours and Dollars");
     }
 
     [Fact]
@@ -204,9 +203,9 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
                         ReportResponseBase<ExecutiveHoursAndDollarsResponse>>(request);
 
             // Assert
-            response.Result.ReportName.Should().BeEquivalentTo(expectedResponse.ReportName);
-            response.Result.Response.Results.Count().Should().Be(1);
-            response.Result.Response.Results.Should().BeEquivalentTo(expectedResponse.Response.Results);
+            response.Result.ReportName.ShouldBeEquivalentTo(expectedResponse.ReportName);
+            response.Result.Response.Results.Count().ShouldBe(1);
+            response.Result.Response.Results.ShouldBeEquivalentTo(expectedResponse.Response.Results);
         });
     }
 
@@ -230,7 +229,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
                         ReportResponseBase<ExecutiveHoursAndDollarsResponse>>(request);
 
             // Assert
-            response.Result.Response.Results.Count().Should().Be(0);
+            response.Result.Response.Results.Count().ShouldBe(0);
         });
     }
 

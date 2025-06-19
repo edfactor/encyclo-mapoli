@@ -1,14 +1,18 @@
-import { agGridNumberToCurrency } from "smart-ui-library";
+import { agGridNumberToCurrency, formatNumberWithComma} from "smart-ui-library";
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
+import { GRID_COLUMN_WIDTHS } from "../../../constants";
+import { mmDDYYFormat } from "../../../utils/dateUtils";
 
 export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
+  // Import the date formatter from dateutils
+
   return [
     {
       headerName: "Badge",
       field: "badgeNumber",
       colId: "badgeNumber",
-      minWidth: 100,
+      minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
@@ -50,13 +54,14 @@ export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: str
       minWidth: 120,
       headerClass: "center-align",
       cellClass: "center-align",
-      resizable: true
+      resizable: true,
+      valueFormatter: (params) => mmDDYYFormat(params.value)
     },
     {
       headerName: "Age",
       field: "age",
       colId: "age",
-      minWidth: 80,
+      minWidth: 70,
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true
@@ -65,7 +70,7 @@ export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: str
       headerName: "SSN",
       field: "ssn",
       colId: "ssn",
-      minWidth: 120,
+      minWidth: GRID_COLUMN_WIDTHS.SSN,
       headerClass: "center-align",
       cellClass: "center-align",
       resizable: true
@@ -87,7 +92,8 @@ export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: str
       minWidth: 100,
       headerClass: "right-align",
       cellClass: "right-align",
-      resizable: true
+      resizable: true,
+      valueFormatter: (params) => formatNumberWithComma(params.value)
     },
     {
       headerName: "Points",
@@ -96,7 +102,8 @@ export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: str
       minWidth: 100,
       headerClass: "right-align",
       cellClass: "right-align",
-      resizable: true
+      resizable: true,
+      valueFormatter: (params) => formatNumberWithComma(params.value)
     },
     {
       headerName: "New",
@@ -142,7 +149,8 @@ export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: str
       minWidth: 120,
       headerClass: "center-align",
       cellClass: "center-align",
-      resizable: true
+      resizable: true,
+      valueFormatter: (params) => mmDDYYFormat(params.value)
     }
   ];
 };

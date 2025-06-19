@@ -18,7 +18,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .UseCollation("USING_NLS_COMP")
-                .HasAnnotation("ProductVersion", "9.0.5")
+                .HasAnnotation("ProductVersion", "9.0.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             OracleModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -25940,6 +25940,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         {
                             Id = (byte)24,
                             Name = ">64 & >5 100%"
+                        },
+                        new
+                        {
+                            Id = (byte)25,
+                            Name = "Forfeit Class Action"
                         });
                 });
 
@@ -31057,7 +31062,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .WithMany("Distributions")
                         .HasForeignKey("PayeeId")
                         .OnDelete(DeleteBehavior.NoAction)
-                        .HasConstraintName("FK_DISTRIBUTION_DISTRIBUTIONPAYEE_PAYEEID");
+                        .HasConstraintName("FK_DISTRIBUTION_DISTRIBUTIONPAYEES_PAYEEID");
 
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.DistributionStatus", "Status")
                         .WithMany()

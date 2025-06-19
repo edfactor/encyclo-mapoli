@@ -1,5 +1,4 @@
-﻿using System.Data.SqlTypes;
-using Demoulas.Common.Contracts.Contracts.Request;
+﻿using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common;
@@ -249,7 +248,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                 dict = await (
                     from yis in _totalService.GetYearsOfService(ctx, req.ProfitYear)
                     join d in demographics on yis.Ssn equals d.Ssn
-                    select new { d.BadgeNumber, Years = yis.Years ?? 0 }
+                    select new { d.BadgeNumber, Years = yis.Years }
                 ).ToDictionaryAsync(x => x.BadgeNumber, x => x.Years, cancellationToken: cancellationToken);
 
                 return rslt;
@@ -334,8 +333,10 @@ FROM FILTERED_DEMOGRAPHIC p1
                            (pd.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment.Id &&
                             (!pd.CommentTypeId.HasValue ||
                              !transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value)))) &&
-                          (req.StartMonth == 0 || pd.MonthToDate >= req.StartMonth) &&
-                          (req.EndMonth == 0 || pd.MonthToDate <= req.EndMonth)
+                            (!req.StartDate.HasValue || pd.TransactionDate.ToDateOnly() >= req.StartDate.Value) &&
+                            (!req.EndDate.HasValue || pd.TransactionDate.ToDateOnly() <= req.EndDate.Value) &&
+                            !(pd.ProfitCodeId == 9 && transferAndQdroCommentTypes.Contains((int)pd.CommentTypeId))
+
                     select new
                     {
                         BadgeNumber = nameAndDob.BadgeNumber,

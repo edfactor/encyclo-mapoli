@@ -1,5 +1,5 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { agGridNumberToCurrency } from "smart-ui-library";
+import { agGridNumberToCurrency, formatNumberWithComma } from "smart-ui-library";
 import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
 import { getEnrolledStatus } from "../../../utils/enrollmentUtil";
 import { mmDDYYFormat } from "utils/dateUtils";
@@ -21,11 +21,12 @@ export const GetTerminationColumns = (): ColDef[] => {
       headerName: "Name",
       field: "name",
       colId: "name",
-      width: 300,
+      width: 200,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
-      sortable: true
+      sortable: true,
+      flex: 1,
     }
   ];
 };
@@ -37,12 +38,11 @@ export const GetDetailColumns = (): ColDef[] => {
       headerName: "Profit Year",
       field: "profitYear",
       colId: "profitYear",
-      width: 80,
+      width: 100,
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
       sortable: false,
-      valueFormatter: (params) => (params.value == null || params.value === undefined || params.value === "") ? "N/A" : params.value
     },
     {
       headerName: "Beginning Balance",
@@ -54,12 +54,12 @@ export const GetDetailColumns = (): ColDef[] => {
       resizable: true,
       sortable: false,
       valueFormatter: agGridNumberToCurrency
-    },
+    },     
     {
       headerName: "Beneficiary Allocation",
       field: "beneficiaryAllocation",
       colId: "beneficiaryAllocation",
-      width: 125,
+      width: 150,
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
@@ -110,6 +110,17 @@ export const GetDetailColumns = (): ColDef[] => {
       sortable: false,
       valueFormatter: agGridNumberToCurrency
     },
+     {
+      headerName: "Vested %",
+      field: "vestedPercent",
+      colId: "vestedPercent",
+      width: 100,
+      headerClass: "right-align",
+      cellClass: "right-align",
+      resizable: true,
+      sortable: false,
+      valueFormatter: (params) => `${params.value}%`
+    },
     {
       headerName: "Term Date",
       field: "dateTerm",
@@ -132,19 +143,12 @@ export const GetDetailColumns = (): ColDef[] => {
       headerClass: "right-align",
       cellClass: "right-align",
       resizable: true,
-      sortable: false
-    },
-    {
-      headerName: "Vested %",
-      field: "vestedPercent",
-      colId: "vestedPercent",
-      width: 90,
-      headerClass: "right-align",
-      cellClass: "right-align",
-      resizable: true,
       sortable: false,
-      valueFormatter: (params) => `${params.value}%`
-    },
+      valueFormatter: (params) => {
+        const hours = params.value;
+        return formatNumberWithComma(hours);
+      }
+    },   
     {
       headerName: "Age",
       field: "age",

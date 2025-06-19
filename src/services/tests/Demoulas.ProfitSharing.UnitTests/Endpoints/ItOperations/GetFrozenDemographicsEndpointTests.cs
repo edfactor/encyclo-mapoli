@@ -7,8 +7,8 @@ using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using FastEndpoints;
-using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.ItOperations;
 public class GetFrozenDemographicsEndpointTests : ApiTestBase<Program>
@@ -20,7 +20,7 @@ public class GetFrozenDemographicsEndpointTests : ApiTestBase<Program>
 
         ApiClient.CreateAndAssignTokenForClient(Role.ITOPERATIONS);
         TestResult<PaginatedResponseDto<FrozenStateResponse>> response = await ApiClient.GETAsync<GetFrozenDemographicsEndpoint, PaginatedResponseDto<FrozenStateResponse>>();
-        response.Should().NotBeNull();
+        response.ShouldNotBeNull();
 
         // Assert each property
 
@@ -30,11 +30,11 @@ public class GetFrozenDemographicsEndpointTests : ApiTestBase<Program>
             var expected = frozenDemographics[i];
             var actual = array[i];
 
-            actual.AsOfDateTime.ToUniversalTime().Should().BeSameDateAs(expected.AsOfDateTime.ToUniversalTime());
-            actual.CreatedDateTime.ToUniversalTime().Should().BeSameDateAs(expected.CreatedDateTime.ToUniversalTime());
-            actual.ProfitYear.Should().Be(expected.ProfitYear);
-            actual.FrozenBy.Should().Be(expected.FrozenBy);
-            actual.IsActive.Should().Be(expected.IsActive);
+            actual.AsOfDateTime.ShouldBe(expected.AsOfDateTime);
+            actual.CreatedDateTime.ShouldBe(expected.CreatedDateTime);
+            actual.ProfitYear.ShouldBe(expected.ProfitYear);
+            actual.FrozenBy.ShouldBe(expected.FrozenBy);
+            actual.IsActive.ShouldBe(expected.IsActive);
         }
     }
 }

@@ -1,14 +1,15 @@
 import { Divider, Grid2, Typography } from "@mui/material";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DSMGrid, Page } from "smart-ui-library";
 import { useLazyGetYearEndProfitSharingSummaryReportQuery } from "reduxstore/api/YearsEndApi";
 import { GetProfitSummaryGridColumns } from "./ProfitSummaryGridColumns";
-import { YearEndProfitSharingReportSummaryLineItem } from "reduxstore/types";
+import { YearEndProfitSharingReportSummaryLineItem, FilterParams } from "reduxstore/types";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
-import { CAPTIONS } from "../../../constants";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../reduxstore/store";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import ReportGrid from "../PAY426N/ReportGrid";
+import presets from "../PAY426N/presets";
 
 /**
  * Default rows for "Active and Inactive" section - these will display with zero values
@@ -104,11 +105,50 @@ const terminatedPlaceholders: YearEndProfitSharingReportSummaryLineItem[] = [
   }
 ];
 
-const ProfitSummary = () => {
+interface ProfitSummaryProps {
+  onPresetParamsChange?: (params: FilterParams | null) => void;
+}
+
+const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange }) => {
   const [trigger, { data, isFetching }] = useLazyGetYearEndProfitSharingSummaryReportQuery();
+  const [selectedLineItem, setSelectedLineItem] = useState<string | null>(null);
 
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const profitYear = useFiscalCloseProfitYear();
+
+  const getPresetForLineItem = (lineItemPrefix: string): FilterParams | null => {
+    const presetMap: { [key: string]: string } = {
+      "1": "PAY426-1",
+      "2": "PAY426-2",
+      "3": "PAY426-3",
+      "4": "PAY426-4",
+      "5": "PAY426-5",
+      "6": "PAY426-6",
+      "7": "PAY426-7",
+      "8": "PAY426-8",
+      "9": "PAY426-3",
+      "N": "PAY426-10"
+    };
+    
+    const presetId = presetMap[lineItemPrefix];
+    return presets.find(preset => preset.id === presetId)?.params || null;
+  };
+
+  const handleRowClick = (event: { data: YearEndProfitSharingReportSummaryLineItem }) => {
+    const rowData = event.data;
+    const clickedLineItem = rowData.lineItemPrefix;
+    
+    setSelectedLineItem(prevSelected => {
+      const newSelected = prevSelected === clickedLineItem ? null : clickedLineItem;
+      if (newSelected) {
+        const params = getPresetForLineItem(newSelected);
+        onPresetParamsChange?.(params);
+      } else {
+        onPresetParamsChange?.(null);
+      }
+      return newSelected;
+    });
+  };
 
   useEffect(() => {
     if (hasToken) {
@@ -125,7 +165,6 @@ const ProfitSummary = () => {
     );
   };
   
-
   const columnDefs = useMemo(() => GetProfitSummaryGridColumns(), []);
 
   // Here we combine the API data with placeholders for "Active and Inactive" and "terminated" section
@@ -145,63 +184,38 @@ const ProfitSummary = () => {
   }, [data]);
 
   const terminatedRowData = useMemo(() => {
-    if (!data?.lineItems) return terminatedPlaceholders;
+    if (!data?.lineItems) return [];
 
-    const dataMap = new Map(
-      data.lineItems
-        .filter(item => item.subgroup.toUpperCase() === "TERMINATED")
-        .map(item => [item.lineItemPrefix, item])
-    );
-
-    return terminatedPlaceholders.map(placeholder =>
-      dataMap.get(placeholder.lineItemPrefix) || placeholder
-    );
+    return data.lineItems.filter(item => item.subgroup.toUpperCase() === "TERMINATED");
   }, [data]);
 
   const getActiveAndInactiveTotals = useMemo(() => {
-    const totals = activeAndInactiveRowData.reduce(
-      (acc, curr) => ({
-        numberOfMembers: acc.numberOfMembers + curr.numberOfMembers,
-        totalWages: acc.totalWages + curr.totalWages,
-        totalBalance: acc.totalBalance + curr.totalBalance
-      }),
-      { numberOfMembers: 0, totalWages: 0, totalBalance: 0 }
-    );
+    if (!activeAndInactiveRowData) return [];
 
-    return [
-      {
-        lineItemTitle: "Total all reports",
-        numberOfMembers: totals.numberOfMembers,
-        totalWages: totals.totalWages,
-        totalBalance: totals.totalBalance
-      }
-    ];
+    return [{
+      lineItemTitle: "TOTAL",
+      numberOfMembers: activeAndInactiveRowData.reduce((acc, curr) => acc + curr.numberOfMembers, 0),
+      totalWages: activeAndInactiveRowData.reduce((acc, curr) => acc + curr.totalWages, 0),
+      totalBalance: activeAndInactiveRowData.reduce((acc, curr) => acc + curr.totalBalance, 0)
+    }];
   }, [activeAndInactiveRowData]);
 
   const getTerminatedTotals = useMemo(() => {
-    const totals = terminatedRowData.reduce(
-      (acc, curr) => ({
-        numberOfMembers: acc.numberOfMembers + curr.numberOfMembers,
-        totalWages: acc.totalWages + curr.totalWages,
-        totalBalance: acc.totalBalance + curr.totalBalance
-      }),
-      { numberOfMembers: 0, totalWages: 0, totalBalance: 0 }
-    );
+    if (!terminatedRowData) return [];
 
-    return [
-      {
-        lineItemTitle: "Total all reports",
-        numberOfMembers: totals.numberOfMembers,
-        totalWages: totals.totalWages,
-        totalBalance: totals.totalBalance
-      }
-    ];
+    return [{
+      lineItemTitle: "TOTAL",
+      numberOfMembers: terminatedRowData.reduce((acc, curr) => acc + curr.numberOfMembers, 0),
+      totalWages: terminatedRowData.reduce((acc, curr) => acc + curr.totalWages, 0),
+      totalBalance: terminatedRowData.reduce((acc, curr) => acc + curr.totalBalance, 0)
+    }];
   }, [terminatedRowData]);
-  
+
+  const shouldShowDetailGrid = selectedLineItem && getPresetForLineItem(selectedLineItem);
 
   return (
     <>
-      <Page label="Active and Inactive" actionNode={renderActionNode()}>
+      <Page label="Profit Summary" actionNode={renderActionNode()}>
         <Grid2
           container
           rowSpacing="24px">
@@ -210,6 +224,26 @@ const ProfitSummary = () => {
           </Grid2>
 
           <Grid2 width={"100%"}>
+            <Typography variant="h6" sx={{ mb: 2, px: 3 }}>
+              Active and Inactive
+            </Typography>
+            <DSMGrid
+              preferenceKey={"ACTIVE_INACTIVE_SUMMARY"}
+              isLoading={isFetching}
+              handleSortChanged={() => { }}
+              providedOptions={{
+                rowData: activeAndInactiveRowData,
+                pinnedTopRowData: getActiveAndInactiveTotals,
+                columnDefs: columnDefs,
+                onRowClicked: handleRowClick
+              }}
+            />
+          </Grid2>
+
+          <Grid2 width={"100%"}>
+            <Typography variant="h6" sx={{ mb: 2, px: 3 }}>
+              Terminated
+            </Typography>
             <DSMGrid
               preferenceKey={"TERMINATED_SUMMARY"}
               isLoading={isFetching}
@@ -217,14 +251,14 @@ const ProfitSummary = () => {
               providedOptions={{
                 rowData: terminatedRowData,
                 pinnedTopRowData: getTerminatedTotals,
-                columnDefs: columnDefs
+                columnDefs: columnDefs,
+                onRowClicked: handleRowClick
               }}
             />
           </Grid2>
 
         </Grid2>
       </Page>
-      
     </>
   );
 };
