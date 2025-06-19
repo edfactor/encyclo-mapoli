@@ -112,7 +112,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
 
   // Section 2: Employment/Personal Info
   const personalSection = [
-    ...(isEmployee ? [{ label: "Employee #", value: badgeNumber }] : []),
+    { label: "Badge", value: viewBadgeLinkRenderer(badgeNumber) },
     ...(!isEmployee ? [{ label: "PSN", value: viewBadgeLinkRenderer(badgeNumber, psnSuffix) }] : []),
     ...(isEmployee ? [{ label: "Department", value: department || "N/A" }] : []),
     ...(isEmployee ? [{ label: "Class", value: PayClassification || "N/A" }] : []),

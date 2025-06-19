@@ -429,8 +429,8 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         req.IncludeActiveEmployees = false; //Test Active filter
         response = await ApiClient.POSTAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse>(req);
         response.ShouldNotBeNull();
-        response.Result.Response.Total.ShouldBe(2);
-        response.Result.Response.Results.Count().ShouldBe(2);
+        response.Result.Response.Total.ShouldBe(4);
+        response.Result.Response.Results.Count().ShouldBe(4);
 
         req.IncludeActiveEmployees = true;
         req.MaximumAgeInclusive = 20; //Test Max Age filter

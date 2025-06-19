@@ -11,6 +11,7 @@ public sealed record YearEndProfitSharingReportDetail
     public required byte Age { get; set; }
     public required string Ssn { get; set; }
     public required decimal Wages { get; set; }
+    public required decimal PriorBalance { get; set; }
     public required decimal Hours { get; set; }
     public short? Points { get; set; }
     public required bool IsUnder21 { get; set; }
@@ -33,6 +34,7 @@ public sealed record YearEndProfitSharingReportDetail
             Age = 28,
             Ssn = "XXX-XX-1234",
             Wages = 26527,
+            PriorBalance = 12345,
             Hours = 1475,
             Points = 2653,
             IsUnder21 = false,
