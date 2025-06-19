@@ -1,4 +1,5 @@
-﻿using Demoulas.Common.Contracts.Contracts.Response;
+﻿using System.Diagnostics;
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
@@ -234,9 +235,11 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             {
                 WagesTotal = g.Sum(e => e.Employee.Wages),
                 HoursTotal = g.Sum(e => e.Employee.Hours),
+                BalanceTotal = g.Sum(e => e.Balance),
                 PointsTotal = g.Sum(e => e.Employee.PointsEarned ?? 0),
                 TerminatedWagesTotal = g.Sum(e => e.Employee.EmploymentStatusId == terminatedStatus ? e.Employee.Wages : 0),
                 TerminatedHoursTotal = g.Sum(e => e.Employee.EmploymentStatusId == terminatedStatus ? e.Employee.Hours : 0),
+                TerminatedBalanceTotal = g.Sum(e => e.Employee.EmploymentStatusId == terminatedStatus ? e.Balance : 0),
                 TerminatedPointsTotal = g.Sum(e => e.Employee.EmploymentStatusId == terminatedStatus ? (e.Employee.PointsEarned ?? 0) : 0),
                 NumberOfEmployees = g.Count(),
                 NumberOfNewEmployees = g.Sum(e => e.Employee.Years == 0 ? 1 : 0)
@@ -252,9 +255,11 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                     WagesTotal = totalsResult.WagesTotal,
                     HoursTotal = totalsResult.HoursTotal,
                     PointsTotal = totalsResult.PointsTotal,
+                    BalanceTotal = totalsResult.BalanceTotal,
                     TerminatedWagesTotal = totalsResult.TerminatedWagesTotal,
                     TerminatedHoursTotal = totalsResult.TerminatedHoursTotal,
                     TerminatedPointsTotal = totalsResult.TerminatedPointsTotal,
+                    TerminatedBalanceTotal = totalsResult.TerminatedBalanceTotal,
                     NumberOfEmployees = totalsResult.NumberOfEmployees,
                     NumberOfNewEmployees = totalsResult.NumberOfNewEmployees,
                     NumberOfEmployeesUnder21 = numberOfEmployeesUnder21
@@ -273,9 +278,11 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             WagesTotal = totals?.WagesTotal ?? 0,
             HoursTotal = totals?.HoursTotal ?? 0,
             PointsTotal = totals?.PointsTotal ?? 0,
+            BalanceTotal = totals?.BalanceTotal ?? 0,
             TerminatedWagesTotal = totals?.TerminatedWagesTotal ?? 0,
             TerminatedHoursTotal = totals?.TerminatedHoursTotal ?? 0,
             TerminatedPointsTotal = totals?.TerminatedPointsTotal ?? 0,
+            TerminatedBalanceTotal = totals?.TerminatedBalanceTotal ?? 0,
             NumberOfEmployees = totals?.NumberOfEmployees ?? 0,
             NumberOfNewEmployees = totals?.NumberOfNewEmployees ?? 0,
             NumberOfEmployeesInPlan = totals != null ? (totals.NumberOfEmployees - totals.NumberOfEmployeesUnder21 - totals.NumberOfNewEmployees) : 0,
@@ -432,6 +439,8 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 PriorBalance = (decimal)(priorBal != null && priorBal.Total != null ? priorBal.Total : 0)
             };
 
+        
+        Debug.WriteLine(employeeWithBalanceQry.ToQueryString());
         return employeeWithBalanceQry;
     }
 }

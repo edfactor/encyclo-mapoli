@@ -93,19 +93,22 @@ const EighteenToTwentyGrid = () => {
   const pinnedTopRowData = useMemo(() => {
     if (!data) return [];
     
+    console.log("API data:", data);
     return [
       {
-        employeeName: `TOTAL EMPS: ${data.numberOfEmployeesInPlan || 0}`,
+        employeeName: `TOTAL EMPZ: ${data.numberOfEmployeesInPlan || 0}`,
         wages: data.wagesTotal || 0,
         hours: data.hoursTotal || 0,
         points: data.pointsTotal || 0,
+        balance: data.balanceTotal || 0,
         isNew: data.numberOfNewEmployees || 0,
       },
       {
         employeeName: "No Wages",
         wages: 0,
         hours: 0,
-        points: 0
+        points: 0,
+        balance: 0
       }
     ];
   }, [data]);
@@ -116,7 +119,7 @@ const EighteenToTwentyGrid = () => {
         <Typography
           variant="h2"
           sx={{ color: "#0258A5" }}>
-          {`${CAPTIONS.PAY426_ACTIVE_18_20} (${data?.response?.total || 0} records)`}
+          {`${CAPTIONS.PAY426_ACTIVE_18_20} (${data?.response?.total || 0} recordz)`}
         </Typography>
       </div>
       <DSMGrid
