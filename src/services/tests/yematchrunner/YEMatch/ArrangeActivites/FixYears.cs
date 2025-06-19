@@ -1,5 +1,7 @@
 namespace YEMatch;
 
+// Updates the READY Years to match the computed values by SMART
+// a work around for ensuring the systems calculate the same amount.
 public class FixYears : BaseSqlActivity
 {
     public override async Task<Outcome> Execute()
