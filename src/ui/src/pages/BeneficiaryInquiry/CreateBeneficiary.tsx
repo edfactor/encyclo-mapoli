@@ -23,7 +23,7 @@ const schema = yup.object().shape({
     beneficiarySsn: yup.number().required(),
     relationship: yup.string().required(),
     percentage: yup.number().required(),
-    dateOfBirth: yup.string().required(),
+    dateOfBirth: yup.date().required(),
     street: yup.string().required(),
     city: yup.string().required(),
     state: yup.string().required(),
@@ -38,7 +38,7 @@ export interface cb {
     beneficiarySsn: number;
     relationship: string;
     percentage: number;
-    dateOfBirth: string;
+    dateOfBirth: Date;
     street: string;
     city: string;
     state: string;
@@ -81,7 +81,7 @@ const CreateBeneficiary: React.FC<Props> = ({badgeNumber, onSaveSuccess,benefici
             contactSsn: data.beneficiarySsn,
             city: data.city,
             countryIso: '',
-            dateOfBirth: new Date(data.dateOfBirth),
+            dateOfBirth: data.dateOfBirth.toISOString().split('T')[0],
             emailAddress: '',
             firstName: data.firstName,
             lastName: data.lastName,

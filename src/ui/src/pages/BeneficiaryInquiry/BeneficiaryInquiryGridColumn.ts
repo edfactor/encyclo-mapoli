@@ -1,30 +1,30 @@
 import { agGridNumberToCurrency } from "smart-ui-library";
 import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { mmDDYYYY_HHMMSS_Format } from "utils/dateUtils";
+import { mmDDYYFormat, mmDDYYYY_HHMMSS_Format } from "utils/dateUtils";
 import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
 import { GRID_COLUMN_WIDTHS } from "../../constants";
 
 
 export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
   return [
-    // {
-    //   headerName: "Badge Number",
-    //   field: "badgeNumber",
-    //   colId: "badgeNumber",
-    //   minWidth: 130,
-    //   headerClass: "center-align",
-    //   cellClass: "center-align",
-    //   resizable: true
-    // },
-    // {
-    //   headerName: "Psn Suffix",
-    //   field: "psnSuffix",
-    //   colId: "psnSuffix",
-    //   minWidth: 100,
-    //   headerClass: "left-align",
-    //   cellClass: "left-align",
-    //   resizable: true
-    // },
+    {
+      headerName: "Badge Number",
+      field: "badgeNumber",
+      colId: "badgeNumber",
+      minWidth: 130,
+      headerClass: "center-align",
+      cellClass: "center-align",
+      resizable: true
+    },
+    {
+      headerName: "Psn Suffix",
+      field: "psnSuffix",
+      colId: "psnSuffix",
+      minWidth: 100,
+      headerClass: "left-align",
+      cellClass: "left-align",
+      resizable: true
+    },
     {
       headerName: "Psn",
       field: "psn",
@@ -68,7 +68,7 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       cellClass: "center-align",
       resizable: true,
       valueFormatter: (params)=> {
-        return `${params.data.contact.dateOfBirth}`
+        return `${mmDDYYFormat( params.data.contact.dateOfBirth)}`
       }
     },
     {
@@ -190,7 +190,7 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       headerClass: "center-align",
       cellClass: "center-align",
       resizable: true,
-      valueFormatter: (params) => (params.data.contact.createdDate ? mmDDYYYY_HHMMSS_Format(params.data.contact.createdDate) : "")
+      valueFormatter: (params) => (params.data.contact.createdDate ? mmDDYYFormat(params.data.contact.createdDate) : "")
     }
   ];
 };

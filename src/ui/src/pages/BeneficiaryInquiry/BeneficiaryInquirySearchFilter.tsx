@@ -17,8 +17,7 @@ import { setBeneficiaryRequest } from "reduxstore/slices/beneficiarySlice";
 import { ElectricScooterRounded } from "@mui/icons-material";
 
 const schema = yup.object().shape({
-    badgeNumber: yup.number().notRequired(),
-    psnSuffix: yup.number().notRequired(),
+    badgePsn: yup.string().notRequired(),
     name: yup.string().notRequired(),
     address: yup.string().notRequired(),
     city: yup.string().notRequired(),
@@ -28,8 +27,7 @@ const schema = yup.object().shape({
     kindId: yup.string().notRequired()
 });
 interface bRequest {
-    badgeNumber?: number;
-    psnSuffix?: number;
+    badgePsn?:string;
     name: string;
     address: string;
     city: string;
@@ -66,20 +64,16 @@ const BeneficiaryInquirySearchFilter:React.FC<Props> = ({searchClicked,beneficia
         resolver: yupResolver(schema) as Resolver<bRequest>
     });
 
-    const checkIfAnyValueIsThereInTheFilter = (data: bRequest) => {
-        if (data.badgeNumber || data.psnSuffix || data.address || data.name || data.ssn || data.city || data.state) {
-            return true;
-        }
-        return false;
-
-    }
     const onSubmit = (data: any) => {
-        const { badgeNumber, psnSuffix, name, ssn, address, city, state,percentage } = data;
-        searchClicked(badgeNumber);
+        const { badgePsn, name, ssn, address, city, state,percentage } = data;
+
+        const badge= badgePsn?parseInt(badgePsn.slice(0, -4)): 0;
+        const psn = badgePsn?parseInt(badgePsn.slice(-4)): 0;
+        searchClicked(badge);
         if (isValid) {
             const beneficiaryRequestDto: BeneficiaryRequestDto = {
-                badgeNumber: badgeNumber??0,
-                psnSuffix: psnSuffix??0,
+                badgeNumber: badge??0,
+                psnSuffix: psn??0,
                 name: name,
                 ssn: ssn,
                 address: address,
@@ -94,12 +88,11 @@ const BeneficiaryInquirySearchFilter:React.FC<Props> = ({searchClicked,beneficia
             triggerSearch(beneficiaryRequestDto);
             dispatch(setBeneficiaryRequest(beneficiaryRequestDto));
         }
-        console.log({ bnumber: badgeNumber, psn: psnSuffix });
     };
     const validateAndSubmit = handleSubmit(onSubmit);
 
     const handleReset = () => {
-        reset({ badgeNumber: undefined, psnSuffix: undefined, address: undefined, city: undefined, name: undefined, ssn: undefined, state: undefined });
+        reset({ badgePsn:undefined, address: undefined, city: undefined, name: undefined, ssn: undefined, state: undefined });
     }
 
     return (
@@ -112,9 +105,9 @@ const BeneficiaryInquirySearchFilter:React.FC<Props> = ({searchClicked,beneficia
                     spacing={2}
                     width="100%">
                     <Grid2 size={{ xs: 12, sm: 3, md: 3 }}>
-                        <FormLabel>Badge Number</FormLabel>
+                        <FormLabel>Badge/Psn</FormLabel>
                         <Controller
-                            name="badgeNumber"
+                            name="badgePsn"
                             control={control}
                             render={({ field }) => (
                                 <TextField
@@ -123,7 +116,7 @@ const BeneficiaryInquirySearchFilter:React.FC<Props> = ({searchClicked,beneficia
                                     size="small"
                                     variant="outlined"
                                     value={field.value ?? ""}
-                                    error={!!errors.badgeNumber}
+                                    error={!!errors.badgePsn}
                                     onChange={(e) => {
                                         const parsedValue = e.target.value === "" ? null : Number(e.target.value);
                                         field.onChange(parsedValue);
@@ -131,31 +124,10 @@ const BeneficiaryInquirySearchFilter:React.FC<Props> = ({searchClicked,beneficia
                                 />
                             )}
                         />
-                        {errors?.badgeNumber && <FormHelperText error>{errors.badgeNumber.message}</FormHelperText>}
+                        {errors?.badgePsn && <FormHelperText error>{errors.badgePsn.message}</FormHelperText>}
                     </Grid2>
 
-                    <Grid2 size={{ xs: 12, sm: 3, md: 3 }}>
-                        <FormLabel>PSN Suffix</FormLabel>
-                        <Controller
-                            name="psnSuffix"
-                            control={control}
-                            render={({ field }) => (
-                                <TextField
-                                    {...field}
-                                    fullWidth
-                                    size="small"
-                                    variant="outlined"
-                                    value={field.value ?? ""}
-                                    error={!!errors.psnSuffix}
-                                    onChange={(e) => {
-                                        const parsedValue = e.target.value === "" ? null : Number(e.target.value);
-                                        field.onChange(parsedValue);
-                                    }}
-                                />
-                            )}
-                        />
-                        {errors.psnSuffix && <FormHelperText error>{errors.psnSuffix.message}</FormHelperText>}
-                    </Grid2>
+                    
                     <Grid2 size={{ xs: 12, sm: 3, md: 3 }}>
                         <FormLabel>Name</FormLabel>
                         <Controller
