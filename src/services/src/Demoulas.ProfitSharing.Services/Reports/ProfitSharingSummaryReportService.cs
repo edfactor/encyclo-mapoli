@@ -116,10 +116,10 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 x.DateOfBirth > birthday18),
             CreateLine("Active and Inactive", "4", ">= AGE 18 WITH < 1000 PS HOURS AND PRIOR PS AMOUNT", activeDetails, x =>
                 IsActiveOrInactive(x.EmployeeStatus, x.TerminationDate, nonTerminatedStatuses, calInfo.FiscalEndDate) &&
-                x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.Balance > 0),
+                x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.PriorBalance > 0),
             CreateLine("Active and Inactive", "5", ">= AGE 18 WITH < 1000 PS HOURS AND NO PRIOR PS AMOUNT", activeDetails, x =>
                 IsActiveOrInactive(x.EmployeeStatus, x.TerminationDate, nonTerminatedStatuses, calInfo.FiscalEndDate) &&
-                x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.Balance == 0),
+                x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.PriorBalance == 0),
             
             
             
