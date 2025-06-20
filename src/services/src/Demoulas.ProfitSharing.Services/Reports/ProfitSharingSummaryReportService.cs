@@ -218,13 +218,13 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 Age = (byte)x.Employee.DateOfBirth.Age(DateTime.UtcNow),
                 Ssn = x.Employee.Ssn.MaskSsn(),
                 Wages = x.Employee.Wages,
-                PriorBalance = x.PriorBalance,
                 Hours = x.Employee.Hours,
                 Points = Convert.ToInt16(x.Employee.PointsEarned),
                 IsNew = x.Balance == 0 && x.Employee.Hours > ReferenceData.MinimumHoursForContribution(),
                 IsUnder21 = (DateTime.UtcNow.Year - x.Employee.DateOfBirth.Year - (DateTime.UtcNow.DayOfYear < x.Employee.DateOfBirth.DayOfYear ? 1 : 0)) < 21,
                 EmployeeStatus = x.Employee.EmploymentStatusId,
                 Balance = x.Balance,
+                PriorBalance = x.PriorBalance,
                 YearsInPlan = x.Employee.Years ?? 0,
                 TerminationDate = x.Employee.TerminationDate
             }).ToPaginationResultsAsync(req, cancellationToken);
@@ -448,7 +448,6 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             };
 
         
-        Debug.WriteLine(employeeWithBalanceQry.ToQueryString());
         return employeeWithBalanceQry;
     }
 

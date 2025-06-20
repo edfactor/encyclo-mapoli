@@ -130,7 +130,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
      console.log("API data:", data);
     return [
       {
-        employeeName: `TOTAL EMPS: ${data.numberOfEmployeesInPlan || 0}`,
+        employeeName: `TOTAL EMPS: ${data.numberOfEmployees || 0}`,
         wages: data.wagesTotal || 0,
         hours: data.hoursTotal || 0,
         points: data.pointsTotal || 0,
