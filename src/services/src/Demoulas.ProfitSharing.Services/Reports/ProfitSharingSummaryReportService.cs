@@ -44,7 +44,10 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
     private sealed record EmployeeWithBalance
     {
         public required EmployeeProjection Employee { get; init; } = null!;
+        public required short ProfitYear { get; init; }
         public required decimal Balance { get; init; }
+
+        public required short PriorProfitYear { get; init; }
         public required decimal PriorBalance { get; init; }
     }
 
@@ -75,10 +78,18 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         static bool IsTerminatedWithinFiscal(char? status, DateOnly? termDate, DateOnly fiscalBegin, DateOnly fiscalEnd) =>
             status == EmploymentStatus.Constants.Terminated && termDate <= fiscalEnd && termDate >= fiscalBegin;
 
-        // Helper to create a summary line
-        YearEndProfitSharingReportSummaryLineItem? CreateLine(string subgroup, string prefix, string title, List<YearEndProfitSharingReportDetail> details, Func<YearEndProfitSharingReportDetail, bool> filter)
+        YearEndProfitSharingReportSummaryLineItem? CreateLine(
+            string subgroup, string prefix, string title,
+            List<YearEndProfitSharingReportDetail> details,
+            Func<YearEndProfitSharingReportDetail, bool> filter)
         {
-            var group = details.Where(filter).ToList();
+            // Ensure unique employees in aggregation by SSN
+            var group = details
+                .Where(filter)
+                .GroupBy(x => new {x.Ssn, x.ProfitYear})
+                .Select(g => g.First())
+                .ToList();
+
             return new YearEndProfitSharingReportSummaryLineItem
             {
                 Subgroup = subgroup,
@@ -90,6 +101,9 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 TotalPriorBalance = group.Sum(y => y.PriorBalance)
             };
         }
+
+
+
 
         var activeDetailsTask = ActiveSummary(req, cancellationToken);
         var terminatedDetailsTask = TerminatedSummary(req, cancellationToken);
@@ -205,6 +219,8 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             details = await employees.Select(x => new YearEndProfitSharingReportDetail
             {
                 BadgeNumber = x.Employee.BadgeNumber,
+                ProfitYear = x.ProfitYear,
+                PriorProfitYear = x.PriorProfitYear,
                 EmployeeName = x.Employee.FullName!,
                 StoreNumber = x.Employee.StoreNumber,
                 EmployeeTypeCode = x.Employee.EmploymentTypeId,
@@ -435,7 +451,9 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             select new EmployeeWithBalance
             {
                 Employee = e, 
+                ProfitYear = req.ProfitYear,
                 Balance = (decimal)(bal != null && bal.Total != null ? bal.Total : 0),
+                PriorProfitYear = (short)(req.ProfitYear - 1),
                 PriorBalance = (decimal)(priorBal != null && priorBal.Total != null ? priorBal.Total : 0)
             };
 
