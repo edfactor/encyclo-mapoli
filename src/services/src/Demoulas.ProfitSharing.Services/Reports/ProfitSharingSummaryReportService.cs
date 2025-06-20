@@ -64,7 +64,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
     }
 
     public async Task<YearEndProfitSharingReportSummaryResponse> GetYearEndProfitSharingSummaryReportAsync(
-        FrozenProfitYearRequest req, CancellationToken cancellationToken = default)
+        ProfitYearRequest req, CancellationToken cancellationToken = default)
     {
         var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
         var birthday18 = calInfo.FiscalEndDate.AddYears(-18);
@@ -230,37 +230,46 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             }).ToPaginationResultsAsync(req, cancellationToken);
         }
 
-        // Totals (now DRY and always matches summary logic)
+        // Totals
         ProfitShareTotal? totals = null;
         if (req.IncludeTotals)
         {
-            var summaryReq = new FrozenProfitYearRequest
+            var terminatedStatus = EmploymentStatus.Constants.Terminated;
+            // Batch all DB-compatible totals
+            var totalsResult = await employees.GroupBy(e => 1).Select(g => new
             {
-                ProfitYear = req.ProfitYear,
-                // copy other fields as needed
-            };
-            var summary = await GetYearEndProfitSharingSummaryReportAsync(summaryReq, cancellationToken);
+                WagesTotal = g.Sum(e => e.Employee.Wages),
+                HoursTotal = g.Sum(e => e.Employee.Hours),
+                BalanceTotal = g.Sum(e => e.Balance),
+                PointsTotal = g.Sum(e => e.Employee.PointsEarned ?? 0),
+                TerminatedWagesTotal = g.Sum(e => e.Employee.EmploymentStatusId == terminatedStatus ? e.Employee.Wages : 0),
+                TerminatedHoursTotal = g.Sum(e => e.Employee.EmploymentStatusId == terminatedStatus ? e.Employee.Hours : 0),
+                TerminatedBalanceTotal = g.Sum(e => e.Employee.EmploymentStatusId == terminatedStatus ? e.Balance : 0),
+                TerminatedPointsTotal = g.Sum(e => e.Employee.EmploymentStatusId == terminatedStatus ? (e.Employee.PointsEarned ?? 0) : 0),
+                NumberOfEmployees = req.IncludeDetails ? details!.Total : g.Count(),
+                NumberOfNewEmployees = g.Sum(e => e.Employee.Years == 0 ? 1 : 0)
+            }).FirstOrDefaultAsync(cancellationToken);
 
-            var allLines = summary.LineItems;
-            var terminatedLines = summary.LineItems.Where(li => li.Subgroup == "TERMINATED").ToList();
+            // Do under-21 count in memory
+            var birthdates = await employees.Select(e => e.Employee.DateOfBirth).ToListAsync(cancellationToken);
+            var numberOfEmployeesUnder21 = birthdates.Count(dob => dob.Age(calInfo.FiscalEndDate.ToDateTime(TimeOnly.MinValue)) < 21);
 
-
-            // You can customize these based on what your app/COBOL needs to match
-            totals = new ProfitShareTotal
-            {
-                WagesTotal = allLines.Sum(li => li.TotalWages),
-                HoursTotal = allLines.Sum(li => li.TotalHours), 
-                BalanceTotal = allLines.Sum(li => li.TotalBalance),
-                PointsTotal = allLines.Sum(li => li.TotalPoints),
-                NumberOfEmployees = allLines.Sum(li => li.NumberOfMembers),
-                
-                // TERMINATED employees only
-                TerminatedWagesTotal = terminatedLines.Sum(li => li.TotalWages),
-                TerminatedHoursTotal = terminatedLines.Sum(li => li.TotalHours),
-                TerminatedBalanceTotal = terminatedLines.Sum(li => li.TotalBalance),
-                TerminatedPointsTotal = terminatedLines.Sum(li => li.TotalPoints),
-                
-            };
+            totals = totalsResult != null
+                ? new ProfitShareTotal
+                {
+                    WagesTotal = totalsResult.WagesTotal,
+                    HoursTotal = totalsResult.HoursTotal,
+                    PointsTotal = totalsResult.PointsTotal,
+                    BalanceTotal = totalsResult.BalanceTotal,
+                    TerminatedWagesTotal = totalsResult.TerminatedWagesTotal,
+                    TerminatedHoursTotal = totalsResult.TerminatedHoursTotal,
+                    TerminatedPointsTotal = totalsResult.TerminatedPointsTotal,
+                    TerminatedBalanceTotal = totalsResult.TerminatedBalanceTotal,
+                    NumberOfEmployees = totalsResult.NumberOfEmployees,
+                    NumberOfNewEmployees = totalsResult.NumberOfNewEmployees,
+                    NumberOfEmployeesUnder21 = numberOfEmployeesUnder21
+                }
+                : new ProfitShareTotal();
         }
 
         // Build response as before
@@ -443,7 +452,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         return employeeWithBalanceQry;
     }
 
-    private async Task<List<YearEndProfitSharingReportDetail>> TerminatedSummary(FrozenProfitYearRequest req, CancellationToken cancellationToken)
+    private async Task<List<YearEndProfitSharingReportDetail>> TerminatedSummary(ProfitYearRequest req, CancellationToken cancellationToken)
     {
         // Query for terminated
         var terminatedReq = new YearEndProfitSharingReportRequest
@@ -462,7 +471,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         return terminatedDetails;
     }
 
-    private async Task<List<YearEndProfitSharingReportDetail>> ActiveSummary(FrozenProfitYearRequest req, CancellationToken cancellationToken)
+    private async Task<List<YearEndProfitSharingReportDetail>> ActiveSummary(ProfitYearRequest req, CancellationToken cancellationToken)
     {
         // Query for active/inactive
         var activeReq = new YearEndProfitSharingReportRequest
