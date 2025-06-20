@@ -81,26 +81,39 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         YearEndProfitSharingReportSummaryLineItem? CreateLine(
             string subgroup, string prefix, string title,
             List<YearEndProfitSharingReportDetail> details,
-            Func<YearEndProfitSharingReportDetail, bool> filter)
+            Func<YearEndProfitSharingReportDetail, bool> mainFilter,
+            Func<YearEndProfitSharingReportDetail, bool>? totalsFilter = null // optional
+        )
         {
-            // Ensure unique employees in aggregation by SSN
-            var group = details
-                .Where(filter)
-                .GroupBy(x => new {x.Ssn, x.ProfitYear})
+            // All unique employees matching main filter
+            var mainGroup = details
+                .Where(mainFilter)
+                .GroupBy(x => new { x.Ssn, x.ProfitYear })
                 .Select(g => g.First())
                 .ToList();
+
+            // Only those with >= 100 hours (for totals)
+            var totalsGroup = mainGroup;
+            if (totalsFilter != null)
+            {
+                totalsGroup = details.Where(totalsFilter).ToList();
+            }
 
             return new YearEndProfitSharingReportSummaryLineItem
             {
                 Subgroup = subgroup,
                 LineItemPrefix = prefix,
                 LineItemTitle = title,
-                NumberOfMembers = group.Count,
-                TotalWages = group.Sum(y => y.Wages),
-                TotalBalance = group.Sum(y => y.Balance),
-                TotalPriorBalance = group.Sum(y => y.PriorBalance)
+                NumberOfMembers = totalsGroup.Count,
+                BadgeNumbers = mainGroup.Select(g => g.BadgeNumber).ToHashSet(),
+                TotalWages = mainGroup.Sum(y => y.Wages),
+                TotalHours = mainGroup.Sum(y => y.Hours),
+                TotalPoints = mainGroup.Sum(y => y.Points ?? 0),
+                TotalBalance = mainGroup.Sum(y => y.Balance),
+                TotalPriorBalance = mainGroup.Sum(y => y.PriorBalance)
             };
         }
+
 
 
 
@@ -139,21 +152,35 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             
             
             // Terminated lines
-            // Updated TERMINATED 6 filter to not use req.IncludeEmployeesTerminatedThisYear
             CreateLine("TERMINATED", "6", ">= AGE 18 WITH >= 1000 PS HOURS", terminatedDetails, x =>
                 x is { EmployeeStatus: EmploymentStatus.Constants.Terminated, TerminationDate: not null } &&
                 ((x.TerminationDate < calInfo.FiscalEndDate) ||
                  (includeEmployeesTerminatedThisYear && x.TerminationDate >= calInfo.FiscalBeginDate && x.TerminationDate <= calInfo.FiscalEndDate)) &&
                 x.Hours >= 1000 && x.DateOfBirth <= birthday18),
 
-            CreateLine("TERMINATED", "7", ">= AGE 18 WITH < 1000 PS HOURS AND NO PRIOR PS AMOUNT", terminatedDetails, x =>
-                IsTerminatedWithinFiscal(x.EmployeeStatus, x.TerminationDate, calInfo.FiscalBeginDate, calInfo.FiscalEndDate) &&
-                x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.PriorBalance == 0),
-            
-            CreateLine("TERMINATED", "8", ">= AGE 18 WITH < 1000 PS HOURS AND PRIOR PS AMOUNT", terminatedDetails, x =>
-                IsTerminatedWithinFiscal(x.EmployeeStatus, x.TerminationDate, calInfo.FiscalBeginDate, calInfo.FiscalEndDate) &&
-                x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.PriorBalance > 0),
-            
+            CreateLine(
+                "TERMINATED",
+                "7",
+                ">= AGE 18 WITH < 1000 PS HOURS AND NO PRIOR PS AMOUNT",
+                terminatedDetails,
+                x =>
+                    IsTerminatedWithinFiscal(x.EmployeeStatus, x.TerminationDate, calInfo.FiscalBeginDate, calInfo.FiscalEndDate) &&
+                    x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.PriorBalance == 0
+            ),
+
+            CreateLine(
+                "TERMINATED",
+                "8",
+                ">= AGE 18 WITH < 1000 PS HOURS AND PRIOR PS AMOUNT",
+                terminatedDetails,
+                x =>
+                    IsTerminatedWithinFiscal(x.EmployeeStatus, x.TerminationDate, calInfo.FiscalBeginDate, calInfo.FiscalEndDate) &&
+                    x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.PriorBalance > 0,
+                x => x.Hours is >= 0 and < 1000 && x.DateOfBirth <= birthday18 && x.PriorBalance > 0
+            ),
+
+
+
             CreateLine("TERMINATED", "X", "<  AGE 18           NO WAGES :   0", terminatedDetails, x =>
                 IsTerminatedWithinFiscal(x.EmployeeStatus, x.TerminationDate, calInfo.FiscalBeginDate, calInfo.FiscalEndDate) &&
                 x.Wages == 0 && x.DateOfBirth > birthday18)
@@ -166,8 +193,8 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
     }
 
     public async Task<YearEndProfitSharingReportResponse> GetYearEndProfitSharingReportAsync(
-        YearEndProfitSharingReportRequest req,
-        CancellationToken cancellationToken = default)
+     YearEndProfitSharingReportRequest req,
+     CancellationToken cancellationToken = default)
     {
         var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
         var employees = await _dataContextFactory.UseReadOnlyContext(ctx =>
@@ -203,49 +230,40 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             }).ToPaginationResultsAsync(req, cancellationToken);
         }
 
-        // Totals
+        // Totals (now DRY and always matches summary logic)
         ProfitShareTotal? totals = null;
         if (req.IncludeTotals)
         {
-            var terminatedStatus = EmploymentStatus.Constants.Terminated;
-            // Batch all DB-compatible totals
-            var totalsResult = await employees.GroupBy(e => 1).Select(g => new
+            var summaryReq = new FrozenProfitYearRequest
             {
-                WagesTotal = g.Sum(e => e.Employee.Wages),
-                HoursTotal = g.Sum(e => e.Employee.Hours),
-                BalanceTotal = g.Sum(e => e.Balance),
-                PointsTotal = g.Sum(e => e.Employee.PointsEarned ?? 0),
-                TerminatedWagesTotal = g.Sum(e => e.Employee.EmploymentStatusId == terminatedStatus ? e.Employee.Wages : 0),
-                TerminatedHoursTotal = g.Sum(e => e.Employee.EmploymentStatusId == terminatedStatus ? e.Employee.Hours : 0),
-                TerminatedBalanceTotal = g.Sum(e => e.Employee.EmploymentStatusId == terminatedStatus ? e.Balance : 0),
-                TerminatedPointsTotal = g.Sum(e => e.Employee.EmploymentStatusId == terminatedStatus ? (e.Employee.PointsEarned ?? 0) : 0),
-                NumberOfEmployees = g.Count(),
-                NumberOfNewEmployees = g.Sum(e => e.Employee.Years == 0 ? 1 : 0)
-            }).FirstOrDefaultAsync(cancellationToken);
+                ProfitYear = req.ProfitYear,
+                // copy other fields as needed
+            };
+            var summary = await GetYearEndProfitSharingSummaryReportAsync(summaryReq, cancellationToken);
 
-            // Do under-21 count in memory
-            var birthdates = await employees.Select(e => e.Employee.DateOfBirth).ToListAsync(cancellationToken);
-            var numberOfEmployeesUnder21 = birthdates.Count(dob => dob.Age(calInfo.FiscalEndDate.ToDateTime(TimeOnly.MinValue)) < 21);
+            var allLines = summary.LineItems;
+            var terminatedLines = summary.LineItems.Where(li => li.Subgroup == "TERMINATED").ToList();
 
-            totals = totalsResult != null
-                ? new ProfitShareTotal
-                {
-                    WagesTotal = totalsResult.WagesTotal,
-                    HoursTotal = totalsResult.HoursTotal,
-                    PointsTotal = totalsResult.PointsTotal,
-                    BalanceTotal = totalsResult.BalanceTotal,
-                    TerminatedWagesTotal = totalsResult.TerminatedWagesTotal,
-                    TerminatedHoursTotal = totalsResult.TerminatedHoursTotal,
-                    TerminatedPointsTotal = totalsResult.TerminatedPointsTotal,
-                    TerminatedBalanceTotal = totalsResult.TerminatedBalanceTotal,
-                    NumberOfEmployees = totalsResult.NumberOfEmployees,
-                    NumberOfNewEmployees = totalsResult.NumberOfNewEmployees,
-                    NumberOfEmployeesUnder21 = numberOfEmployeesUnder21
-                }
-                : new ProfitShareTotal();
+
+            // You can customize these based on what your app/COBOL needs to match
+            totals = new ProfitShareTotal
+            {
+                WagesTotal = allLines.Sum(li => li.TotalWages),
+                HoursTotal = allLines.Sum(li => li.TotalHours), 
+                BalanceTotal = allLines.Sum(li => li.TotalBalance),
+                PointsTotal = allLines.Sum(li => li.TotalPoints),
+                NumberOfEmployees = allLines.Sum(li => li.NumberOfMembers),
+                
+                // TERMINATED employees only
+                TerminatedWagesTotal = terminatedLines.Sum(li => li.TotalWages),
+                TerminatedHoursTotal = terminatedLines.Sum(li => li.TotalHours),
+                TerminatedBalanceTotal = terminatedLines.Sum(li => li.TotalBalance),
+                TerminatedPointsTotal = terminatedLines.Sum(li => li.TotalPoints),
+                
+            };
         }
 
-        // Build response
+        // Build response as before
         var response = new YearEndProfitSharingReportResponse
         {
             ReportDate = DateTimeOffset.UtcNow,
@@ -268,6 +286,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         };
         return response;
     }
+
 
     private static IQueryable<EmployeeProjection> ApplyRequestFilters(
         IQueryable<EmployeeProjection> qry,
