@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.Beneficiaries;
-public sealed record UpdateBeneficiaryContactResponse
+public record UpdateBeneficiaryContactResponse
 {
     public int Id { get; set; }
     public required string Ssn { get; set; }
