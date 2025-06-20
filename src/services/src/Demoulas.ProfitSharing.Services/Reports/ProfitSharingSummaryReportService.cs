@@ -165,44 +165,6 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         };
     }
 
-    private async Task<List<YearEndProfitSharingReportDetail>> TerminatedSummary(FrozenProfitYearRequest req, CancellationToken cancellationToken)
-    {
-        // Query for terminated
-        var terminatedReq = new YearEndProfitSharingReportRequest
-        {
-            ProfitYear = req.ProfitYear,
-            IncludeDetails = true,
-            IncludeTotals = false,
-            IncludeActiveEmployees = false,
-            IncludeTerminatedEmployees = true,
-            IncludeBeneficiaries = false,
-            IsYearEnd = true,
-            Take = int.MaxValue
-        };
-        var terminatedReport = await GetYearEndProfitSharingReportAsync(terminatedReq, cancellationToken);
-        var terminatedDetails = terminatedReport.Response.Results.ToList();
-        return terminatedDetails;
-    }
-
-    private async Task<List<YearEndProfitSharingReportDetail>> ActiveSummary(FrozenProfitYearRequest req, CancellationToken cancellationToken)
-    {
-        // Query for active/inactive
-        var activeReq = new YearEndProfitSharingReportRequest
-        {
-            ProfitYear = req.ProfitYear,
-            IncludeDetails = true,
-            IncludeTotals = false,
-            IncludeActiveEmployees = true,
-            IncludeTerminatedEmployees = false,
-            IncludeBeneficiaries = false,
-            IsYearEnd = true,
-            Take = int.MaxValue
-        };
-        var activeReport = await GetYearEndProfitSharingReportAsync(activeReq, cancellationToken);
-        var activeDetails = activeReport.Response.Results.ToList();
-        return activeDetails;
-    }
-
     public async Task<YearEndProfitSharingReportResponse> GetYearEndProfitSharingReportAsync(
         YearEndProfitSharingReportRequest req,
         CancellationToken cancellationToken = default)
@@ -460,5 +422,43 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         
         Debug.WriteLine(employeeWithBalanceQry.ToQueryString());
         return employeeWithBalanceQry;
+    }
+
+    private async Task<List<YearEndProfitSharingReportDetail>> TerminatedSummary(FrozenProfitYearRequest req, CancellationToken cancellationToken)
+    {
+        // Query for terminated
+        var terminatedReq = new YearEndProfitSharingReportRequest
+        {
+            ProfitYear = req.ProfitYear,
+            IncludeDetails = true,
+            IncludeTotals = false,
+            IncludeActiveEmployees = false,
+            IncludeTerminatedEmployees = true,
+            IncludeBeneficiaries = false,
+            IsYearEnd = true,
+            Take = int.MaxValue
+        };
+        var terminatedReport = await GetYearEndProfitSharingReportAsync(terminatedReq, cancellationToken);
+        var terminatedDetails = terminatedReport.Response.Results.ToList();
+        return terminatedDetails;
+    }
+
+    private async Task<List<YearEndProfitSharingReportDetail>> ActiveSummary(FrozenProfitYearRequest req, CancellationToken cancellationToken)
+    {
+        // Query for active/inactive
+        var activeReq = new YearEndProfitSharingReportRequest
+        {
+            ProfitYear = req.ProfitYear,
+            IncludeDetails = true,
+            IncludeTotals = false,
+            IncludeActiveEmployees = true,
+            IncludeTerminatedEmployees = false,
+            IncludeBeneficiaries = false,
+            IsYearEnd = true,
+            Take = int.MaxValue
+        };
+        var activeReport = await GetYearEndProfitSharingReportAsync(activeReq, cancellationToken);
+        var activeDetails = activeReport.Response.Results.ToList();
+        return activeDetails;
     }
 }
