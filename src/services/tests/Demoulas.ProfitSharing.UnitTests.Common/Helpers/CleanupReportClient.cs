@@ -135,7 +135,9 @@ public sealed class CleanupReportClient : ClientBase, ICleanupReportService
 
         if (req is YearEndProfitSharingReportRequest yreq)
         {
-            query[nameof(YearEndProfitSharingReportRequest.IsYearEnd)] = yreq.IsYearEnd.ToString();
+            query[nameof(YearEndProfitSharingReportRequest.ReportId)] = yreq.ReportId.ToString();
+            if (yreq.BadgeNumber.HasValue)
+            {query[nameof(YearEndProfitSharingReportRequest.BadgeNumber)] = yreq.BadgeNumber.Value.ToString();}
         }
 
         if (req is DistributionsAndForfeituresRequest dafr)

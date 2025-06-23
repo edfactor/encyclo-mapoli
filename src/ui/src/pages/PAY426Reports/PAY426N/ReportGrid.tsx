@@ -3,7 +3,6 @@ import { Typography, Box, CircularProgress } from '@mui/material';
 import { DSMGrid, ISortParams, Pagination } from 'smart-ui-library';
 import { useNavigate, Path } from 'react-router-dom';
 import { useLazyGetYearEndProfitSharingReportQuery } from 'reduxstore/api/YearsEndApi';
-import { CAPTIONS } from '../../../constants';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../reduxstore/store';
 import useFiscalCloseProfitYear from 'hooks/useFiscalCloseProfitYear';
@@ -51,7 +50,11 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
 
   useEffect(() => {
     if (hasToken && params) {
+      const matchingPreset = presets.find(preset =>
+        JSON.stringify(preset.params) === JSON.stringify(params)
+      );
       trigger({
+        reportId: matchingPreset ? Number(matchingPreset.id) : 0,
         profitYear: profitYear,
         pagination: {
           skip: pageNumber * pageSize,

@@ -875,6 +875,7 @@ export interface MilitaryContributionRequest extends ProfitYearRequest {
 }
 
 export interface YearEndProfitSharingReportRequest {
+  reportId: number;
   isYearEnd: boolean;
   minimumAgeInclusive?: number;
   maximumAgeInclusive?: number;

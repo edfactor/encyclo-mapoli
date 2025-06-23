@@ -15,7 +15,7 @@ public sealed record YearEndProfitSharingReportDetail
     public required decimal Wages { get; set; }
     public required decimal PriorBalance { get; set; }
     public required decimal Hours { get; set; }
-    public short? Points { get; set; }
+    public short Points { get; set; }
     public required bool IsUnder21 { get; set; }
     public required bool IsNew { get; set; }
     public char? EmployeeStatus { get; set; }

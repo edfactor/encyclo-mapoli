@@ -13,7 +13,7 @@ using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
-
+using System.Linq.Expressions;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
 
@@ -108,7 +108,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 BadgeNumbers = mainGroup.Select(g => g.BadgeNumber).ToHashSet(),
                 TotalWages = mainGroup.Sum(y => y.Wages),
                 TotalHours = mainGroup.Sum(y => y.Hours),
-                TotalPoints = mainGroup.Sum(y => y.Points ?? 0),
+                TotalPoints = mainGroup.Sum(y => y.Points),
                 TotalBalance = mainGroup.Sum(y => y.Balance),
                 TotalPriorBalance = mainGroup.Sum(y => y.PriorBalance)
             };
@@ -193,105 +193,118 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
     }
 
     public async Task<YearEndProfitSharingReportResponse> GetYearEndProfitSharingReportAsync(
-     YearEndProfitSharingReportRequest req,
-     CancellationToken cancellationToken = default)
+        YearEndProfitSharingReportRequest req,
+        CancellationToken cancellationToken = default)
     {
         var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
         var employees = await _dataContextFactory.UseReadOnlyContext(ctx =>
-            BuildFilteredEmployeeSetAsync(ctx, req, calInfo)
+            BuildFilteredEmployeeSetAsync(ctx, req)
         );
 
-        // Details
-        PaginatedResponseDto<YearEndProfitSharingReportDetail>? details = null;
-        if (req.IncludeDetails)
+        // Always fetch all details for the year
+        IQueryable<YearEndProfitSharingReportDetail> allDetails = employees.Select(x => new YearEndProfitSharingReportDetail
         {
-            details = await employees.Select(x => new YearEndProfitSharingReportDetail
+            BadgeNumber = x.Employee.BadgeNumber,
+            ProfitYear = x.ProfitYear,
+            PriorProfitYear = x.PriorProfitYear,
+            EmployeeName = x.Employee.FullName!,
+            StoreNumber = x.Employee.StoreNumber,
+            EmployeeTypeCode = x.Employee.EmploymentTypeId,
+            EmployeeTypeName = x.Employee.EmploymentTypeName,
+            DateOfBirth = x.Employee.DateOfBirth,
+            Age = (byte)x.Employee.DateOfBirth.Age(DateTime.UtcNow),
+            Ssn = x.Employee.Ssn.MaskSsn(),
+            Wages = x.Employee.Wages,
+            Hours = x.Employee.Hours,
+            Points = Convert.ToInt16(x.Employee.PointsEarned),
+            IsNew = x.Balance == 0 && x.Employee.Hours > ReferenceData.MinimumHoursForContribution(),
+            IsUnder21 = (DateTime.UtcNow.Year - x.Employee.DateOfBirth.Year - (DateTime.UtcNow.DayOfYear < x.Employee.DateOfBirth.DayOfYear ? 1 : 0)) < 21,
+            EmployeeStatus = x.Employee.EmploymentStatusId,
+            Balance = x.Balance,
+            PriorBalance = x.PriorBalance,
+            YearsInPlan = x.Employee.Years ?? 0,
+            TerminationDate = x.Employee.TerminationDate
+        });
+
+        // Apply report-specific filtering for ReportId 1-8, 10
+        IQueryable<YearEndProfitSharingReportDetail> filteredDetails = allDetails;
+        if (req.ReportId is >= 1 and <= 8 or 10)
+        {
+            var birthday18 = calInfo.FiscalEndDate.AddYears(-18);
+            var birthday21 = calInfo.FiscalEndDate.AddYears(-21);
+            var nonTerminatedStatuses = new List<char> { EmploymentStatus.Constants.Active, EmploymentStatus.Constants.Inactive };
+
+            Expression<Func<YearEndProfitSharingReportDetail, bool>> filter = req.ReportId switch
             {
-                BadgeNumber = x.Employee.BadgeNumber,
-                ProfitYear = x.ProfitYear,
-                PriorProfitYear = x.PriorProfitYear,
-                EmployeeName = x.Employee.FullName!,
-                StoreNumber = x.Employee.StoreNumber,
-                EmployeeTypeCode = x.Employee.EmploymentTypeId,
-                EmployeeTypeName = x.Employee.EmploymentTypeName,
-                DateOfBirth = x.Employee.DateOfBirth,
-                Age = (byte)x.Employee.DateOfBirth.Age(DateTime.UtcNow),
-                Ssn = x.Employee.Ssn.MaskSsn(),
-                Wages = x.Employee.Wages,
-                Hours = x.Employee.Hours,
-                Points = Convert.ToInt16(x.Employee.PointsEarned),
-                IsNew = x.Balance == 0 && x.Employee.Hours > ReferenceData.MinimumHoursForContribution(),
-                IsUnder21 = (DateTime.UtcNow.Year - x.Employee.DateOfBirth.Year - (DateTime.UtcNow.DayOfYear < x.Employee.DateOfBirth.DayOfYear ? 1 : 0)) < 21,
-                EmployeeStatus = x.Employee.EmploymentStatusId,
-                Balance = x.Balance,
-                PriorBalance = x.PriorBalance,
-                YearsInPlan = x.Employee.Years ?? 0,
-                TerminationDate = x.Employee.TerminationDate
-            }).ToPaginationResultsAsync(req, cancellationToken);
+                1 => x =>
+                    ((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.TerminationDate > calInfo.FiscalEndDate))
+                    && x.Hours >= 1000 && x.DateOfBirth <= birthday18 && x.DateOfBirth > birthday21,
+                2 => x =>
+                    ((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.TerminationDate > calInfo.FiscalEndDate))
+                    && x.Hours >= 1000 && x.DateOfBirth <= birthday21,
+                3 => x =>
+                    ((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.TerminationDate > calInfo.FiscalEndDate))
+                    && x.DateOfBirth > birthday18,
+                4 => x =>
+                    ((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.TerminationDate > calInfo.FiscalEndDate))
+                    && x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.PriorBalance > 0,
+                5 => x =>
+                    ((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.TerminationDate > calInfo.FiscalEndDate))
+                    && x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.PriorBalance == 0,
+                6 => x =>
+                    x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate < calInfo.FiscalEndDate
+                    && x.Hours >= 1000 && x.DateOfBirth <= birthday18,
+                7 => x =>
+                    x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate <= calInfo.FiscalEndDate && x.TerminationDate >= calInfo.FiscalBeginDate
+                    && x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.PriorBalance == 0,
+                8 => x =>
+                    x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate <= calInfo.FiscalEndDate && x.TerminationDate >= calInfo.FiscalBeginDate
+                    && x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.PriorBalance > 0,
+                10 => x =>
+                    x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate <= calInfo.FiscalEndDate && x.TerminationDate >= calInfo.FiscalBeginDate
+                    && x.Wages == 0 && x.DateOfBirth > birthday18,
+                _ => x => true
+            };
+            filteredDetails = allDetails.Where(filter);
         }
 
-        // Totals
-        ProfitShareTotal? totals = null;
-        if (req.IncludeTotals)
+        var details = await filteredDetails.ToPaginationResultsAsync(req, cancellationToken);
+
+        // Totals (use filteredDetails for counts)
+        ProfitShareTotal totals = new ProfitShareTotal
         {
-            var terminatedStatus = EmploymentStatus.Constants.Terminated;
-            // Batch all DB-compatible totals
-            var totalsResult = await employees.GroupBy(e => 1).Select(g => new
-            {
-                WagesTotal = g.Sum(e => e.Employee.Wages),
-                HoursTotal = g.Sum(e => e.Employee.Hours),
-                BalanceTotal = g.Sum(e => e.Balance),
-                PointsTotal = g.Sum(e => e.Employee.PointsEarned ?? 0),
-                TerminatedWagesTotal = g.Sum(e => e.Employee.EmploymentStatusId == terminatedStatus ? e.Employee.Wages : 0),
-                TerminatedHoursTotal = g.Sum(e => e.Employee.EmploymentStatusId == terminatedStatus ? e.Employee.Hours : 0),
-                TerminatedBalanceTotal = g.Sum(e => e.Employee.EmploymentStatusId == terminatedStatus ? e.Balance : 0),
-                TerminatedPointsTotal = g.Sum(e => e.Employee.EmploymentStatusId == terminatedStatus ? (e.Employee.PointsEarned ?? 0) : 0),
-                NumberOfEmployees = req.IncludeDetails ? details!.Total : g.Count(),
-                NumberOfNewEmployees = g.Sum(e => e.Employee.Years == 0 ? 1 : 0)
-            }).FirstOrDefaultAsync(cancellationToken);
+            WagesTotal = filteredDetails.Sum(x => x.Wages),
+            HoursTotal = filteredDetails.Sum(x => x.Hours),
+            PointsTotal = filteredDetails.Sum(x => x.Points),
+            BalanceTotal = filteredDetails.Sum(x => x.Balance),
+            //TerminatedWagesTotal = filteredDetails.Where(x => x.EmployeeStatus == EmploymentStatus.Constants.Terminated).Sum(x => x.Wages),
+            //TerminatedHoursTotal = filteredDetails.Where(x => x.EmployeeStatus == EmploymentStatus.Constants.Terminated).Sum(x => x.Hours),
+            //TerminatedPointsTotal = filteredDetails.Where(x => x.EmployeeStatus == EmploymentStatus.Constants.Terminated).Sum(x => x.Points),
+            //TerminatedBalanceTotal = filteredDetails.Where(x => x.EmployeeStatus == EmploymentStatus.Constants.Terminated).Sum(x => x.Balance),
+            NumberOfEmployees = details.Total,
+            NumberOfNewEmployees = filteredDetails.Count(x => x.YearsInPlan == 0),
+            //NumberOfEmployeesUnder21 = filteredDetails.Count(x => x.Age < 21)
+        };
 
-            // Do under-21 count in memory
-            var birthdates = await employees.Select(e => e.Employee.DateOfBirth).ToListAsync(cancellationToken);
-            var numberOfEmployeesUnder21 = birthdates.Count(dob => dob.Age(calInfo.FiscalEndDate.ToDateTime(TimeOnly.MinValue)) < 21);
-
-            totals = totalsResult != null
-                ? new ProfitShareTotal
-                {
-                    WagesTotal = totalsResult.WagesTotal,
-                    HoursTotal = totalsResult.HoursTotal,
-                    PointsTotal = totalsResult.PointsTotal,
-                    BalanceTotal = totalsResult.BalanceTotal,
-                    TerminatedWagesTotal = totalsResult.TerminatedWagesTotal,
-                    TerminatedHoursTotal = totalsResult.TerminatedHoursTotal,
-                    TerminatedPointsTotal = totalsResult.TerminatedPointsTotal,
-                    TerminatedBalanceTotal = totalsResult.TerminatedBalanceTotal,
-                    NumberOfEmployees = totalsResult.NumberOfEmployees,
-                    NumberOfNewEmployees = totalsResult.NumberOfNewEmployees,
-                    NumberOfEmployeesUnder21 = numberOfEmployeesUnder21
-                }
-                : new ProfitShareTotal();
-        }
-
-        // Build response as before
         var response = new YearEndProfitSharingReportResponse
         {
             ReportDate = DateTimeOffset.UtcNow,
             StartDate = calInfo.FiscalBeginDate,
             EndDate = calInfo.FiscalEndDate,
             ReportName = $"PROFIT SHARE REPORT (PAY426) - {req.ProfitYear}",
-            Response = details ?? new PaginatedResponseDto<YearEndProfitSharingReportDetail>(req),
-            WagesTotal = totals?.WagesTotal ?? 0,
-            HoursTotal = totals?.HoursTotal ?? 0,
-            PointsTotal = totals?.PointsTotal ?? 0,
-            BalanceTotal = totals?.BalanceTotal ?? 0,
-            TerminatedWagesTotal = totals?.TerminatedWagesTotal ?? 0,
-            TerminatedHoursTotal = totals?.TerminatedHoursTotal ?? 0,
-            TerminatedPointsTotal = totals?.TerminatedPointsTotal ?? 0,
-            TerminatedBalanceTotal = totals?.TerminatedBalanceTotal ?? 0,
-            NumberOfEmployees = totals?.NumberOfEmployees ?? 0,
-            NumberOfNewEmployees = totals?.NumberOfNewEmployees ?? 0,
-            NumberOfEmployeesInPlan = totals != null ? (totals.NumberOfEmployees - totals.NumberOfEmployeesUnder21 - totals.NumberOfNewEmployees) : 0,
-            NumberOfEmployeesUnder21 = totals?.NumberOfEmployeesUnder21 ?? 0
+            Response = details,
+            WagesTotal = totals.WagesTotal,
+            HoursTotal = totals.HoursTotal,
+            PointsTotal = totals.PointsTotal,
+            BalanceTotal = totals.BalanceTotal,
+            TerminatedWagesTotal = totals.TerminatedWagesTotal,
+            TerminatedHoursTotal = totals.TerminatedHoursTotal,
+            TerminatedPointsTotal = totals.TerminatedPointsTotal,
+            TerminatedBalanceTotal = totals.TerminatedBalanceTotal,
+            NumberOfEmployees = totals.NumberOfEmployees,
+            NumberOfNewEmployees = totals.NumberOfNewEmployees,
+            NumberOfEmployeesInPlan = totals.NumberOfEmployees - totals.NumberOfEmployeesUnder21 - totals.NumberOfNewEmployees,
+            NumberOfEmployeesUnder21 = totals.NumberOfEmployeesUnder21
         };
         return response;
     }
@@ -299,66 +312,20 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
 
     private static IQueryable<EmployeeProjection> ApplyRequestFilters(
         IQueryable<EmployeeProjection> qry,
-        YearEndProfitSharingReportRequest req,
-        CalendarResponseDto calInfo)
+        YearEndProfitSharingReportRequest req)
     {
-
         if (req.BadgeNumber.HasValue)
         {
             qry = qry.Where(e => e.BadgeNumber == req.BadgeNumber);
         }
-
-        if (req.MinimumHoursInclusive.HasValue)
-        {
-            var minHours = req.MinimumHoursInclusive.Value;
-            qry = qry.Where(p => p.Hours >= minHours);
-        }
-
-
-        if (req.MaximumHoursInclusive.HasValue)
-        {
-            qry = qry.Where(p => p.Hours <= req.MaximumHoursInclusive.Value);
-        }
-
-        if (req.MinimumAgeInclusive.HasValue)
-        {
-            var minBirth = calInfo.FiscalEndDate
-                .AddYears(-req.MinimumAgeInclusive.Value);
-            qry = qry.Where(p => p.DateOfBirth <= minBirth);
-        }
-
-        if (req.MaximumAgeInclusive.HasValue)
-        {
-            var maxBirth = calInfo.FiscalEndDate
-                .AddYears(-(req.MaximumAgeInclusive.Value + 1))
-                .AddDays(1);
-            qry = qry.Where(p => p.DateOfBirth >= maxBirth);
-        }
-
-        // employment‑status permutations
-        if (req.IncludeActiveEmployees)
-        {
-            qry = qry.Where(p =>
-                (p.EmploymentStatusId == EmploymentStatus.Constants.Active ||
-                 p.EmploymentStatusId == EmploymentStatus.Constants.Inactive ||
-                 (p.EmploymentStatusId == EmploymentStatus.Constants.Terminated &&
-                  p.TerminationDate > calInfo.FiscalEndDate)));
-        }
-
-        else if (req.IncludeTerminatedEmployees)
-        {
-            qry = qry.Where(p =>
-                p.EmploymentStatusId == EmploymentStatus.Constants.Terminated && p.TerminationDate < calInfo.FiscalEndDate);
-        }
-
+        // All other filters removed for simplification
         return qry;
     }
 
     // Unified method to build filtered employee set with balances and years
     private async Task<IQueryable<EmployeeWithBalance>> BuildFilteredEmployeeSetAsync(
         ProfitSharingReadOnlyDbContext ctx,
-        YearEndProfitSharingReportRequest req,
-        CalendarResponseDto calInfo)
+        YearEndProfitSharingReportRequest req)
     {
         IQueryable<PayProfit> basePayProfits = ctx.PayProfits
             .Where(p => p.ProfitYear == req.ProfitYear)
@@ -366,23 +333,11 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             .ThenInclude(d => d!.ContactInfo);
 
         var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, true);
-        if (req.IsYearEnd)
-        {
-            basePayProfits = basePayProfits
-                .Join(demographicQuery, p => p.DemographicId, d => d.Id, (p, _) => p);
-        }
-
-        IQueryable<Beneficiary> beneficiaryQuery = Enumerable.Empty<Beneficiary>().AsQueryable();
-        if (req.IncludeBeneficiaries)
-        {
-            beneficiaryQuery = ctx.Beneficiaries
-                .Include(b => b.Contact)!
-                .ThenInclude(c => c!.ContactInfo)
-                .Where(b => !demographicQuery.Any(x => x.Ssn == b.Contact!.Ssn));
-        }
+        // No IsYearEnd check, always join
+        basePayProfits = basePayProfits
+            .Join(demographicQuery, p => p.DemographicId, d => d.Id, (p, _) => p);
 
         var yearsOfService = _totalService.GetYearsOfService(ctx, req.ProfitYear);
-        
         var employeeQry =
             from pp in basePayProfits
             join et in ctx.EmploymentTypes on pp.Demographic!.EmploymentTypeId equals et.Id
@@ -405,33 +360,10 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 Years = yip.Years
             };
 
-        if (req.IncludeBeneficiaries)
-        {
-            employeeQry = employeeQry.Union(
-                from b in beneficiaryQuery
-                select new EmployeeProjection
-                {
-                    BadgeNumber = 0,
-                    Hours = 0m,
-                    Wages = 0m,
-                    DateOfBirth = b.Contact!.DateOfBirth,
-                    EmploymentStatusId = EmploymentStatus.Constants.Terminated,
-                    TerminationDate = null,
-                    Ssn = b.Contact!.Ssn,
-                    FullName = b.Contact!.ContactInfo.FullName,
-                    StoreNumber = 0,
-                    EmploymentTypeId = EmploymentType.Constants.PartTime,
-                    EmploymentTypeName = "",
-                    PointsEarned = null,
-                    Years = 0
-                });
-        }
-
-        employeeQry = ApplyRequestFilters(employeeQry, req, calInfo);
+        employeeQry = ApplyRequestFilters(employeeQry, req);
 
         var balances = _totalService.GetTotalBalanceSet(ctx, req.ProfitYear);
         var priorBalances = _totalService.GetTotalBalanceSet(ctx, (short)(req.ProfitYear-1));
-        
         var employeeWithBalanceQry =
             from e in employeeQry
             join bal in balances on e.Ssn equals bal.Ssn into balTmp
@@ -446,46 +378,32 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 PriorProfitYear = (short)(req.ProfitYear - 1),
                 PriorBalance = (decimal)(priorBal != null && priorBal.Total != null ? priorBal.Total : 0)
             };
-
-        
         return employeeWithBalanceQry;
     }
 
     private async Task<List<YearEndProfitSharingReportDetail>> TerminatedSummary(ProfitYearRequest req, CancellationToken cancellationToken)
     {
-        // Query for terminated
-        var terminatedReq = new YearEndProfitSharingReportRequest
+        // Fetch all details for the year, do NOT filter by ReportId
+        var terminatedReport = await GetYearEndProfitSharingReportAsync(new YearEndProfitSharingReportRequest
         {
-            ProfitYear = req.ProfitYear,
-            IncludeDetails = true,
-            IncludeTotals = false,
-            IncludeActiveEmployees = false,
-            IncludeTerminatedEmployees = true,
-            IncludeBeneficiaries = false,
-            IsYearEnd = true,
-            Take = int.MaxValue
-        };
-        var terminatedReport = await GetYearEndProfitSharingReportAsync(terminatedReq, cancellationToken);
-        var terminatedDetails = terminatedReport.Response.Results.ToList();
-        return terminatedDetails;
+            ProfitYear = req.ProfitYear
+            // Do not set ReportId, get all employees
+        }, cancellationToken);
+        var allDetails = terminatedReport.Response.Results.ToList();
+        // Return all details, filtering for terminated will be done in CreateLine
+        return allDetails;
     }
 
     private async Task<List<YearEndProfitSharingReportDetail>> ActiveSummary(ProfitYearRequest req, CancellationToken cancellationToken)
     {
-        // Query for active/inactive
-        var activeReq = new YearEndProfitSharingReportRequest
+        // Fetch all details for the year, do NOT filter by ReportId
+        var activeReport = await GetYearEndProfitSharingReportAsync(new YearEndProfitSharingReportRequest
         {
-            ProfitYear = req.ProfitYear,
-            IncludeDetails = true,
-            IncludeTotals = false,
-            IncludeActiveEmployees = true,
-            IncludeTerminatedEmployees = false,
-            IncludeBeneficiaries = false,
-            IsYearEnd = true,
-            Take = int.MaxValue
-        };
-        var activeReport = await GetYearEndProfitSharingReportAsync(activeReq, cancellationToken);
-        var activeDetails = activeReport.Response.Results.ToList();
-        return activeDetails;
+            ProfitYear = req.ProfitYear
+            // Do not set ReportId, get all employees
+        }, cancellationToken);
+        var allDetails = activeReport.Response.Results.ToList();
+        // Return all details, filtering for active/inactive will be done in CreateLine
+        return allDetails;
     }
 }
