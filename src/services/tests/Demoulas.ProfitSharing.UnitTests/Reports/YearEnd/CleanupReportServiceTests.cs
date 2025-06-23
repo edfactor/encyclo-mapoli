@@ -250,7 +250,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             Skip = 0,
             Take = byte.MaxValue,
             ProfitYear = profitYear,
-            ReportId = 1 // Default to report 1 for active/inactive
+            ReportId = 2 // Default to report 2 for active/inactive
         };
         var testHours = 1001;
         await MockDbContextFactory.UseWritableContext(async ctx =>
@@ -360,7 +360,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
     {
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
         var profitYear = (short)Math.Min(DateTime.Now.Year - 1, 2024);
-        var req = new YearEndProfitSharingReportRequest() { Skip = 0, Take = byte.MaxValue, ProfitYear = profitYear, ReportId = 1 };
+        var req = new YearEndProfitSharingReportRequest() { Skip = 0, Take = byte.MaxValue, ProfitYear = profitYear, ReportId = 2 };
         var testHours = 1001;
         await MockDbContextFactory.UseWritableContext(async ctx =>
         {
