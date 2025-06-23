@@ -842,9 +842,11 @@ export interface YearEndProfitSharingReportResponse extends PagedReportResponse<
   wagesTotal: number;
   hoursTotal: number;
   pointsTotal: number;
+  balanceTotal: number;
   terminatedWagesTotal: number;
   terminatedHoursTotal: number;
   terminatedPointsTotal: number;
+  terminatedBalanceTotal: number;
   numberOfEmployees: number;
   numberOfNewEmployees: number;
   numberOfEmployeesUnder21: number;
@@ -873,6 +875,7 @@ export interface MilitaryContributionRequest extends ProfitYearRequest {
 }
 
 export interface YearEndProfitSharingReportRequest {
+  reportId: number;
   isYearEnd: boolean;
   minimumAgeInclusive?: number;
   maximumAgeInclusive?: number;

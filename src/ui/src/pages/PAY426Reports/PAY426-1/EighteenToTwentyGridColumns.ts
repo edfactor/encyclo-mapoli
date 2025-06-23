@@ -104,7 +104,7 @@ export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: str
       cellClass: "right-align",
       resizable: true,
       valueFormatter: (params) => formatNumberWithComma(params.value)
-    },
+    },  
     {
       headerName: "New",
       field: "isNew",

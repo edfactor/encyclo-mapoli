@@ -6,7 +6,7 @@ using Demoulas.ProfitSharing.Security;
 using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitShareReport;
-public sealed class YearEndProfitSharingSummaryReportEndpoint : Endpoint<FrozenProfitYearRequest, YearEndProfitSharingReportSummaryResponse>
+public sealed class YearEndProfitSharingSummaryReportEndpoint : Endpoint<ProfitYearRequest, YearEndProfitSharingReportSummaryResponse>
 {
     private readonly IProfitSharingSummaryReportService _cleanupReportService;
 
@@ -22,7 +22,7 @@ public sealed class YearEndProfitSharingSummaryReportEndpoint : Endpoint<FrozenP
         {
             s.Summary = "Yearend profit sharing summary report";
             s.Description = "Returns a breakdown of member counts/sum by various descriminators";
-            s.ExampleRequest = new FrozenProfitYearRequest() { UseFrozenData = true, ProfitYear = 2025 };
+            s.ExampleRequest = new ProfitYearRequest { ProfitYear = 2025 };
             s.ResponseExamples = new Dictionary<int, object>
             {
                 {
@@ -35,7 +35,7 @@ public sealed class YearEndProfitSharingSummaryReportEndpoint : Endpoint<FrozenP
         Group<YearEndGroup>();
     }
 
-    public override Task<YearEndProfitSharingReportSummaryResponse> ExecuteAsync(FrozenProfitYearRequest req, CancellationToken ct)
+    public override Task<YearEndProfitSharingReportSummaryResponse> ExecuteAsync(ProfitYearRequest req, CancellationToken ct)
     {
         return _cleanupReportService.GetYearEndProfitSharingSummaryReportAsync(req, ct);
     }

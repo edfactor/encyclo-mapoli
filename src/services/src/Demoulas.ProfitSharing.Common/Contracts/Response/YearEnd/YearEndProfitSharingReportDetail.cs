@@ -3,6 +3,8 @@
 public sealed record YearEndProfitSharingReportDetail
 {
     public required int BadgeNumber { get; set; }
+    public required short ProfitYear { get; set; }
+    public required short PriorProfitYear { get; set; }
     public required string EmployeeName { get; set; }
     public required short StoreNumber { get; set; }
     public required char EmployeeTypeCode { get; set; }
@@ -13,7 +15,7 @@ public sealed record YearEndProfitSharingReportDetail
     public required decimal Wages { get; set; }
     public required decimal PriorBalance { get; set; }
     public required decimal Hours { get; set; }
-    public short? Points { get; set; }
+    public short Points { get; set; }
     public required bool IsUnder21 { get; set; }
     public required bool IsNew { get; set; }
     public char? EmployeeStatus { get; set; }
@@ -26,6 +28,8 @@ public sealed record YearEndProfitSharingReportDetail
         return new YearEndProfitSharingReportDetail()
         {
             BadgeNumber = 135,
+            PriorProfitYear = 2023,
+            ProfitYear = 2024,
             EmployeeName = "John Doe",
             StoreNumber = 23,
             EmployeeTypeCode = 'p',
