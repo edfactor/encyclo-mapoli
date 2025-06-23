@@ -1,11 +1,11 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
-public sealed record UpdateBeneficiaryRequest : IdRequest
+public sealed record UpdateBeneficiaryRequest : UpdateBeneficiaryContactRequest
 {
     public char? KindId { get; set; }
     public string? Relationship { get; set; }
     public decimal? Percentage { get; set; }
 
-    public static UpdateBeneficiaryRequest SampleRequest()
+    public static new UpdateBeneficiaryRequest SampleRequest()
     {
         return new UpdateBeneficiaryRequest()
         {
