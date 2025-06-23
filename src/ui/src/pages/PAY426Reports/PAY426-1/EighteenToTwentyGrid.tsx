@@ -96,7 +96,7 @@ const EighteenToTwentyGrid = () => {
     console.log("API data:", data);
     return [
       {
-        employeeName: `TOTAL EMPZ: ${data.numberOfEmployeesInPlan || 0}`,
+        employeeName: `TOTAL EMPS: ${data.numberOfEmployeesInPlan || 0}`,
         wages: data.wagesTotal || 0,
         hours: data.hoursTotal || 0,
         points: data.pointsTotal || 0,
@@ -119,7 +119,7 @@ const EighteenToTwentyGrid = () => {
         <Typography
           variant="h2"
           sx={{ color: "#0258A5" }}>
-          {`${CAPTIONS.PAY426_ACTIVE_18_20} (${data?.response?.total || 0} recordz)`}
+          {`${CAPTIONS.PAY426_ACTIVE_18_20} (${data?.response?.total || 0} records)`}
         </Typography>
       </div>
       <DSMGrid
