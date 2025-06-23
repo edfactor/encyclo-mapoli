@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-using Demoulas.Common.Contracts.Contracts.Response;
-using Demoulas.Common.Data.Contexts.Extensions;
+﻿using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -17,6 +15,9 @@ using System.Linq.Expressions;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
 
+/// <summary>
+/// Service for generating year-end profit sharing summary and detail reports.
+/// </summary>
 public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryReportService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
@@ -51,7 +52,9 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         public required decimal PriorBalance { get; init; }
     }
 
-
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ProfitSharingSummaryReportService"/> class.
+    /// </summary>
     public ProfitSharingSummaryReportService(IProfitSharingDataContextFactory dataContextFactory,
         ICalendarService calendarService,
         TotalService totalService,
@@ -63,6 +66,12 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         _demographicReaderService = demographicReaderService;
     }
 
+    /// <summary>
+    /// Generates the year-end profit sharing summary report, grouped by eligibility and status.
+    /// </summary>
+    /// <param name="req">The profit year request.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Summary response with line items for each group.</returns>
     public async Task<YearEndProfitSharingReportSummaryResponse> GetYearEndProfitSharingSummaryReportAsync(
         ProfitYearRequest req, CancellationToken cancellationToken = default)
     {
@@ -84,6 +93,16 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             );
         }
 
+        /// <summary>
+        /// Creates a summary line item for a specific group of employees.
+        /// </summary>
+        /// <param name="subgroup">The subgroup label.</param>
+        /// <param name="prefix">The line item prefix.</param>
+        /// <param name="title">The line item title.</param>
+        /// <param name="details">Queryable of report details.</param>
+        /// <param name="mainFilter">Main filter for the group.</param>
+        /// <param name="totalsFilter">Optional filter for totals.</param>
+        /// <returns>Summary line item for the group.</returns>
         async Task<YearEndProfitSharingReportSummaryLineItem?> CreateLine(
             string subgroup, string prefix, string title,
             IQueryable<YearEndProfitSharingReportDetail> details,
@@ -145,9 +164,45 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             await CreateLine("TERMINATED", "X", "<  AGE 18           NO WAGES :   0", activeDetails, GetReportFilter(10, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21))
         };
 
+        // Special query for non-employee beneficiaries (line N)
+        YearEndProfitSharingReportSummaryLineItem? beneficiaryLineItem = null;
+        await _dataContextFactory.UseReadOnlyContext<object>(async ctx =>
+        {
+            var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+            var beneQry = ctx.BeneficiaryContacts
+                .Where(bc => !demographics.Any(x => x.Ssn == bc.Ssn))
+                .Join(_totalService.GetTotalBalanceSet(ctx, req.ProfitYear), x => x.Ssn, x => x.Ssn,
+                    (pp, tot) => new { pp, tot });
+
+            beneficiaryLineItem = await beneQry.GroupBy(x => true).Select(x => new YearEndProfitSharingReportSummaryLineItem()
+            {
+                Subgroup = "TERMINATED",
+                LineItemPrefix = "N",
+                LineItemTitle = "NON-EMPLOYEE BENEFICIARIES",
+                NumberOfMembers = x.Count(),
+                TotalWages = 0,
+                TotalHours = 0,
+                TotalPoints = 0,
+                TotalBalance = x.Sum(y => y.tot.Total ?? 0),
+                TotalPriorBalance = 0,
+                BadgeNumbers = new HashSet<int>()
+            }).FirstOrDefaultAsync(cancellationToken);
+            return null;
+        });
+        if (beneficiaryLineItem != null)
+        {
+            lineItems.Add(beneficiaryLineItem);
+        }
+
         return new YearEndProfitSharingReportSummaryResponse { LineItems = lineItems.Where(li => li != null).ToList()! };
     }
 
+    /// <summary>
+    /// Generates the year-end profit sharing detail report for a given request.
+    /// </summary>
+    /// <param name="req">The report request, including filters and report ID.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Detailed report response with totals and pagination.</returns>
     public async Task<YearEndProfitSharingReportResponse> GetYearEndProfitSharingReportAsync(
         YearEndProfitSharingReportRequest req,
         CancellationToken cancellationToken = default)
@@ -204,8 +259,9 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         return response;
     }
 
-
-    // Unified method to build filtered employee set with balances and years
+    /// <summary>
+    /// Builds a filtered set of employees with balances and years of service for a given year and optional badge number.
+    /// </summary>
     private async Task<IQueryable<EmployeeWithBalance>> BuildFilteredEmployeeSetAsync(
         ProfitSharingReadOnlyDbContext ctx,
         ProfitYearRequest req,
@@ -243,6 +299,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 PointsEarned = pp.PointsEarned,
                 Years = yip.Years
             };
+      
 
         if (badgeNumber.HasValue)
         {
@@ -268,14 +325,22 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         return employeeWithBalanceQry;
     }
 
+    /// <summary>
+    /// Returns a queryable of year-end profit sharing report details for the given request.
+    /// </summary>
     private Task<IQueryable<YearEndProfitSharingReportDetail>> ActiveSummary(YearEndProfitSharingReportRequest req)
     {
         return ActiveSummary(req, req.BadgeNumber);
     }
 
+    /// <summary>
+    /// Returns a queryable of year-end profit sharing report details for the given year and optional badge number.
+    /// </summary>
     private async Task<IQueryable<YearEndProfitSharingReportDetail>> ActiveSummary(ProfitYearRequest req, int? badgeNumber = null)
     {
         var employees = await _dataContextFactory.UseReadOnlyContext(ctx => BuildFilteredEmployeeSetAsync(ctx, req, badgeNumber));
+
+      
 
         // Always fetch all details for the year
         IQueryable<YearEndProfitSharingReportDetail> allDetails = employees.Select(x => new YearEndProfitSharingReportDetail
@@ -308,6 +373,12 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
     /// <summary>
     /// Returns the filter expression for a given report ID or line number.
     /// </summary>
+    /// <param name="reportId">The report ID or line number.</param>
+    /// <param name="fiscalBeginDate">Fiscal year begin date.</param>
+    /// <param name="fiscalEndDate">Fiscal year end date.</param>
+    /// <param name="birthday18">Date representing 18 years before fiscal end.</param>
+    /// <param name="birthday21">Date representing 21 years before fiscal end.</param>
+    /// <returns>Filter expression for the report line.</returns>
     private static Expression<Func<YearEndProfitSharingReportDetail, bool>> GetReportFilter(
         int reportId,
         DateOnly fiscalBeginDate,
@@ -344,6 +415,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             10 => x =>
                 x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate <= fiscalEndDate && x.TerminationDate >= fiscalBeginDate &&
                 x.Wages == 0 && x.DateOfBirth > birthday18,
+            11 => x => x.BadgeNumber == 0,
             _ => x => true
         };
     }

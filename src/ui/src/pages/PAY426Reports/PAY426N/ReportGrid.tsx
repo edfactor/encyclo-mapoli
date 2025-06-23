@@ -77,6 +77,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
   const sortEventHandler = (update: ISortParams) => {
     const t = () => { 
         trigger({
+          reportId: matchingPreset ? Number(matchingPreset.id) : 0,
           profitYear: profitYear,
           pagination: {
             skip: 0,

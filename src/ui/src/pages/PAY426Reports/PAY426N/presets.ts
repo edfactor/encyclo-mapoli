@@ -152,21 +152,6 @@ const presets: ReportPreset[] = [
       includeEmployeesWithPriorProfitSharingAmounts: true,
       includeEmployeesWithNoPriorProfitSharingAmounts: true,
     }
-  },
-  {
-    id: '10',
-    name: 'PAY426-10',
-    description: CAPTIONS.PAY426_NON_EMPLOYEE,
-    params: {
-      isYearEnd: true,
-      includeActiveEmployees: false,
-      includeInactiveEmployees: false,
-      includeEmployeesTerminatedThisYear: false,
-      includeTerminatedEmployees: false,
-      includeBeneficiaries: true,
-      includeEmployeesWithPriorProfitSharingAmounts: false,
-      includeEmployeesWithNoPriorProfitSharingAmounts: false,
-    }
   }
 ];
 
