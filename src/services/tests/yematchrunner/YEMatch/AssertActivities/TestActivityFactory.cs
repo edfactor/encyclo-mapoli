@@ -18,7 +18,8 @@ internal static class TestActivityFactory
             new TrimTo14Employees(),
             new DropBadBenes(),
             new OverwriteBadges(),
-            new SetDateOfBirthTo19YearsAgo()
+            new SetDateOfBirthTo19YearsAgo(),
+            new FixYears()
         ];
     }
 }

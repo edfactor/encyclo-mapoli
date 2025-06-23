@@ -18,9 +18,11 @@ internal static class Program
         string dataDirectory = Config.CreateDataDirectory();
         ActivityFactory.Initialize(dataDirectory);
 
-        //Runnable runner = new GoldenExpressRun { DataDirectory = dataDirectory };
+        // Runnable runner = new GoldenExpressRun { DataDirectory = dataDirectory };
         // Runnable runner = new GoldenRun { DataDirectory = dataDirectory };
         Runnable runner = new MasterInquiryRun { DataDirectory = dataDirectory };
+        
+        Console.WriteLine(" STARTING RUN: "+runner.GetType().Name);
         await runner.Exec();
     }
 }

@@ -28,7 +28,9 @@ public class GoldenExpressRun : Runnable
             "TestProfitDetailSelectedColumns", // TEST: PROFIT_DETAILS; code,cont,earn,fort,cmt,zercont
             "TestEtvaNow", // Verify ETVA for 2025
             "TestEtvaPrior", // Verify correct ETVA for 2024
-            "P24" // This should update enrollments
+            "P24", // 
+            "P24B" // Updates the enrollment and the Years on READY
+            
         ));
     }
 }
