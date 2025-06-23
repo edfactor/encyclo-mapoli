@@ -110,48 +110,30 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         var lineItems = new List<YearEndProfitSharingReportSummaryLineItem?>
         {
             // Active/Inactive lines
-            await CreateLine("Active and Inactive", "1", "AGE 18-20 WITH >= 1000 PS HOURS", activeDetails, x =>
-                ((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.TerminationDate > calInfo.FiscalEndDate)) &&
-                x.Hours >= 1000 && x.DateOfBirth <= birthday18 && x.DateOfBirth > birthday21),
-            await CreateLine("Active and Inactive", "2", ">= AGE 21 WITH >= 1000 PS HOURS", activeDetails, x =>
-                ((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.TerminationDate > calInfo.FiscalEndDate)) &&
-                x.Hours >= 1000 && x.DateOfBirth <= birthday21),
-            await CreateLine("Active and Inactive", "3", "<  AGE 18", activeDetails, x =>
-                ((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.TerminationDate > calInfo.FiscalEndDate)) &&
-                x.DateOfBirth > birthday18),
-            await CreateLine("Active and Inactive", "4", ">= AGE 18 WITH < 1000 PS HOURS AND PRIOR PS AMOUNT", activeDetails, x =>
-                ((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.TerminationDate > calInfo.FiscalEndDate)) &&
-                x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.PriorBalance > 0),
-            await CreateLine("Active and Inactive", "5", ">= AGE 18 WITH < 1000 PS HOURS AND NO PRIOR PS AMOUNT", activeDetails, x =>
-                ((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.TerminationDate > calInfo.FiscalEndDate)) &&
-                x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.PriorBalance == 0),
+            await CreateLine("Active and Inactive", "1", "AGE 18-20 WITH >= 1000 PS HOURS", activeDetails, GetReportFilter(1, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21)),
+            await CreateLine("Active and Inactive", "2", ">= AGE 21 WITH >= 1000 PS HOURS", activeDetails, GetReportFilter(2, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21)),
+            await CreateLine("Active and Inactive", "3", "<  AGE 18", activeDetails, GetReportFilter(3, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21)),
+            await CreateLine("Active and Inactive", "4", ">= AGE 18 WITH < 1000 PS HOURS AND PRIOR PS AMOUNT", activeDetails, GetReportFilter(4, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21)),
+            await CreateLine("Active and Inactive", "5", ">= AGE 18 WITH < 1000 PS HOURS AND NO PRIOR PS AMOUNT", activeDetails, GetReportFilter(5, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21)),
 
             // Terminated lines
-            await CreateLine("TERMINATED", "6", ">= AGE 18 WITH >= 1000 PS HOURS", activeDetails, x =>
-                x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate < calInfo.FiscalEndDate &&
-                x.Hours >= 1000 && x.DateOfBirth <= birthday18),
+            await CreateLine("TERMINATED", "6", ">= AGE 18 WITH >= 1000 PS HOURS", activeDetails, GetReportFilter(6, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21)),
             await CreateLine(
                 "TERMINATED",
                 "7",
                 ">= AGE 18 WITH < 1000 PS HOURS AND NO PRIOR PS AMOUNT",
                 activeDetails,
-                x =>
-                    x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate <= calInfo.FiscalEndDate && x.TerminationDate >= calInfo.FiscalBeginDate &&
-                    x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.PriorBalance == 0
+                GetReportFilter(7, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21)
             ),
             await CreateLine(
                 "TERMINATED",
                 "8",
                 ">= AGE 18 WITH < 1000 PS HOURS AND PRIOR PS AMOUNT",
                 activeDetails,
-                x =>
-                    x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate <= calInfo.FiscalEndDate && x.TerminationDate >= calInfo.FiscalBeginDate &&
-                    x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.PriorBalance > 0,
+                GetReportFilter(8, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21),
                 x => x.Hours >= 0 && x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.PriorBalance > 0
             ),
-            await CreateLine("TERMINATED", "X", "<  AGE 18           NO WAGES :   0", activeDetails, x =>
-                x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate <= calInfo.FiscalEndDate && x.TerminationDate >= calInfo.FiscalBeginDate &&
-                x.Wages == 0 && x.DateOfBirth > birthday18)
+            await CreateLine("TERMINATED", "X", "<  AGE 18           NO WAGES :   0", activeDetails, GetReportFilter(10, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21))
         };
 
         return new YearEndProfitSharingReportSummaryResponse { LineItems = lineItems.Where(li => li != null).ToList()! };
@@ -173,42 +155,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             var birthday18 = calInfo.FiscalEndDate.AddYears(-18);
             var birthday21 = calInfo.FiscalEndDate.AddYears(-21);
 
-            Expression<Func<YearEndProfitSharingReportDetail, bool>> filter = req.ReportId switch
-            {
-                1 => x =>
-                    ((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) ||
-                     (x.TerminationDate > calInfo.FiscalEndDate))
-                    && x.Hours >= 1000 && x.DateOfBirth <= birthday18 && x.DateOfBirth > birthday21,
-                2 => x =>
-                    ((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) ||
-                     (x.TerminationDate > calInfo.FiscalEndDate))
-                    && x.Hours >= 1000 && x.DateOfBirth <= birthday21,
-                3 => x =>
-                    ((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) ||
-                     (x.TerminationDate > calInfo.FiscalEndDate))
-                    && x.DateOfBirth > birthday18,
-                4 => x =>
-                    ((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) ||
-                     (x.TerminationDate > calInfo.FiscalEndDate))
-                    && x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.PriorBalance > 0,
-                5 => x =>
-                    ((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) ||
-                     (x.TerminationDate > calInfo.FiscalEndDate))
-                    && x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.PriorBalance == 0,
-                6 => x =>
-                    x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate < calInfo.FiscalEndDate
-                                                                              && x.Hours >= 1000 && x.DateOfBirth <= birthday18,
-                7 => x =>
-                    x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate <= calInfo.FiscalEndDate && x.TerminationDate >= calInfo.FiscalBeginDate
-                    && x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.PriorBalance == 0,
-                8 => x =>
-                    x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate <= calInfo.FiscalEndDate && x.TerminationDate >= calInfo.FiscalBeginDate
-                    && x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.PriorBalance > 0,
-                10 => x =>
-                    x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate <= calInfo.FiscalEndDate && x.TerminationDate >= calInfo.FiscalBeginDate
-                    && x.Wages == 0 && x.DateOfBirth > birthday18,
-                _ => x => true
-            };
+            var filter = GetReportFilter(req.ReportId, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21);
             filteredDetails = allDetails.Where(filter);
         }
 
@@ -347,5 +294,48 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         });
 
         return allDetails;
+    }
+
+    /// <summary>
+    /// Returns the filter expression for a given report ID or line number.
+    /// </summary>
+    private static Expression<Func<YearEndProfitSharingReportDetail, bool>> GetReportFilter(
+        int reportId,
+        DateOnly fiscalBeginDate,
+        DateOnly fiscalEndDate,
+        DateOnly birthday18,
+        DateOnly birthday21)
+    {
+        return reportId switch
+        {
+            1 => x =>
+                ((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.TerminationDate > fiscalEndDate)) &&
+                x.Hours >= 1000 && x.DateOfBirth <= birthday18 && x.DateOfBirth > birthday21,
+            2 => x =>
+                ((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.TerminationDate > fiscalEndDate)) &&
+                x.Hours >= 1000 && x.DateOfBirth <= birthday21,
+            3 => x =>
+                ((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.TerminationDate > fiscalEndDate)) &&
+                x.DateOfBirth > birthday18,
+            4 => x =>
+                ((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.TerminationDate > fiscalEndDate)) &&
+                x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.PriorBalance > 0,
+            5 => x =>
+                ((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.TerminationDate > fiscalEndDate)) &&
+                x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.PriorBalance == 0,
+            6 => x =>
+                x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate < fiscalEndDate &&
+                x.Hours >= 1000 && x.DateOfBirth <= birthday18,
+            7 => x =>
+                x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate <= fiscalEndDate && x.TerminationDate >= fiscalBeginDate &&
+                x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.PriorBalance == 0,
+            8 => x =>
+                x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate <= fiscalEndDate && x.TerminationDate >= fiscalBeginDate &&
+                x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.PriorBalance > 0,
+            10 => x =>
+                x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate <= fiscalEndDate && x.TerminationDate >= fiscalBeginDate &&
+                x.Wages == 0 && x.DateOfBirth > birthday18,
+            _ => x => true
+        };
     }
 }
