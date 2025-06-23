@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
-public sealed record UpdateBeneficiaryContactRequest:IdRequest
+public record UpdateBeneficiaryContactRequest:IdRequest
 {
     public int? ContactSsn { get; set; }
     public DateOnly? DateOfBirth { get; set; }
