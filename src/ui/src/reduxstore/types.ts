@@ -1346,7 +1346,7 @@ export interface CreateBeneficiaryResponse {
 
 export interface CreateBeneficiaryContactRequest {
     contactSsn: number;
-    dateOfBirth: Date;
+    dateOfBirth: string;
     street: string;
     street2: string | null;
     street3: string | null;

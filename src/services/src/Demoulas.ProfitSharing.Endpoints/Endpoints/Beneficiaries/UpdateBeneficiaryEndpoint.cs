@@ -4,12 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
+using Demoulas.ProfitSharing.Common.Contracts.Response.Beneficiaries;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Beneficiaries;
-public sealed class UpdateBeneficiaryEndpoint : Endpoint<UpdateBeneficiaryRequest>
+public sealed class UpdateBeneficiaryEndpoint : Endpoint<UpdateBeneficiaryRequest, UpdateBeneficiaryResponse>
 {
     private readonly IBeneficiaryService _beneficiaryService;
 
@@ -29,9 +30,8 @@ public sealed class UpdateBeneficiaryEndpoint : Endpoint<UpdateBeneficiaryReques
         Group<BeneficiariesGroup>();
     }
 
-    public async override Task HandleAsync(UpdateBeneficiaryRequest req, CancellationToken ct)
+    public override Task<UpdateBeneficiaryResponse> ExecuteAsync(UpdateBeneficiaryRequest req, CancellationToken ct)
     {
-        await _beneficiaryService.UpdateBeneficiary(req, ct);
-        await SendOkAsync(req, ct);
+        return _beneficiaryService.UpdateBeneficiary(req, ct);
     }
 }
