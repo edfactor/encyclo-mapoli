@@ -18,19 +18,19 @@ public static class MockEmbeddedSqlService
     {
         var mock = new Mock<IEmbeddedSqlService>();
         mock.Setup(m => m.GetTotalBalanceAlt(It.IsAny<IProfitSharingDbContext>(), It.IsAny<short>()))
-            .Returns((IProfitSharingDbContext x, short y) => Constants.FakeParticipantTotals.AsAsyncQueryable());
+            .Returns((IProfitSharingDbContext x, short y) => Constants.FakeParticipantTotals.Object);
 
         mock.Setup(m => m.TotalVestingBalanceAlt(It.IsAny<IProfitSharingDbContext>(), It.IsAny<short>(), It.IsAny<short>(), It.IsAny<DateOnly>()))
-            .Returns((IProfitSharingDbContext x, short y, short z, DateOnly w) => Constants.FakeParticipantTotalVestingBalances.AsAsyncQueryable());
+            .Returns((IProfitSharingDbContext x, short y, short z, DateOnly w) => Constants.FakeParticipantTotalVestingBalances.Object);
 
         mock.Setup(m => m.TotalVestingBalanceAlt(It.IsAny<IProfitSharingDbContext>(), It.IsAny<short>(), It.IsAny<short>(), It.IsAny<DateOnly>()))
-            .Returns((IProfitSharingDbContext x, short y, short z, DateOnly w) => Constants.FakeParticipantTotalVestingBalances.AsAsyncQueryable());
+            .Returns((IProfitSharingDbContext x, short y, short z, DateOnly w) => Constants.FakeParticipantTotalVestingBalances.Object);
 
         mock.Setup(m => m.GetTotalComputedEtvaAlt(It.IsAny<IProfitSharingDbContext>(), It.IsAny<short>()))
-            .Returns((IProfitSharingDbContext x, short y) => Constants.FakeEtvaTotals.AsAsyncQueryable());
+            .Returns((IProfitSharingDbContext x, short y) => Constants.FakeEtvaTotals.Object);
 
         mock.Setup(m => m.GetProfitShareTotals(It.IsAny<IProfitSharingDbContext>(), It.IsAny<short>(), It.IsAny<DateOnly>(), It.IsAny<short>(), It.IsAny<DateOnly>(), It.IsAny<CancellationToken>()))
-            .Returns((IProfitSharingDbContext x, short y, DateOnly z, short a, DateOnly b, CancellationToken c) => Constants.ProfitShareTotals.AsAsyncQueryable());
+            .Returns((IProfitSharingDbContext x, short y, DateOnly z, short a, DateOnly b, CancellationToken c) => Constants.ProfitShareTotals.Object);
 
         // Mock GetYearsOfServiceAlt to return the correct LINQ result using fake ProfitDetails
         mock.Setup(m => m.GetYearsOfServiceAlt(It.IsAny<IProfitSharingDbContext>(), It.IsAny<short>()))

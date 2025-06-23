@@ -1,4 +1,5 @@
-﻿using Demoulas.ProfitSharing.Api;
+﻿using System.Linq;
+using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services;
@@ -25,7 +26,7 @@ public class TotalServiceTests : ApiTestBase<Program>
     {
         return _dataContextFactory.UseWritableContext(ctx =>
         {
-            var ppTest = Demoulas.ProfitSharing.UnitTests.Common.Common.Constants.FakeEtvaTotals[0];
+            var ppTest = Demoulas.ProfitSharing.UnitTests.Common.Common.Constants.FakeEtvaTotals.Object.First();
             ppTest.Total = -20750.98m;
 
 
