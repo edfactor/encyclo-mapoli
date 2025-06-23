@@ -11,18 +11,25 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import CreateBeneficiary from "./CreateBeneficiary";
 import { useLazyGetBeneficiarytypesQuery, useLazyGetBeneficiaryKindQuery } from "reduxstore/api/BeneficiariesApi";
-import { BeneficiaryKindDto, BeneficiaryTypeDto } from "reduxstore/types";
+import { BeneficiaryKindDto, BeneficiaryTypeDto, MasterInquiryRequest } from "reduxstore/types";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
+import MasterInquiryMemberGrid from "pages/MasterInquiry/MasterInquiryMemberGrid";
+import MasterInquiryEmployeeDetails from "pages/MasterInquiry/MasterInquiryEmployeeDetails";
 
 
 const BeneficiaryInquiry = () => {
-  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const { token, appUser, username: stateUsername } = useSelector((state: RootState) => state.security);
   const [triggerGetBeneficiaryKind] = useLazyGetBeneficiaryKindQuery();
+  const[triggerGetBeneficiaryType] = useLazyGetBeneficiarytypesQuery();
   const [open, setOpen] = useState(false);
   const [badgeNumber, setBadgeNumber] = useState(0);
   const [beneficiaryKind, setBeneficiaryKind] = useState<BeneficiaryKindDto[]>([]);
+  const [beneficiaryType, setBeneficiaryType] = useState<BeneficiaryTypeDto[]>([]);
+  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
+  const [searchParams, setSearchParams] = useState<MasterInquiryRequest | null>(null);
+  const [selectedMember, setSelectedMember] = useState<{ memberType: number; id: number, ssn: number } | null>(null);
+  const [noResults, setNoResults] = useState(false);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -44,7 +51,10 @@ const BeneficiaryInquiry = () => {
     if (token) {
       triggerGetBeneficiaryKind({}).unwrap().then((data) => {
         setBeneficiaryKind(data.beneficiaryKindList ?? []);
-      }).catch((reason) => { console.error(reason); })
+      }).catch((reason) => { console.error(reason); });
+      triggerGetBeneficiaryType({}).unwrap().then((data)=>{
+        setBeneficiaryType(data.beneficiaryTypeList??[]);
+      }).catch((reason)=>console.error(reason));
     }
 
 
@@ -89,33 +99,50 @@ const BeneficiaryInquiry = () => {
             {/* <MasterInquirySearchFilter setInitialSearchLoaded={setInitialSearchLoaded} 
             setMissiveAlerts={setMissiveAlerts}
             /> */}
-            <BeneficiaryInquirySearchFilter beneficiaryKind={beneficiaryKind} searchClicked={currentBadge}></BeneficiaryInquirySearchFilter>
+            <BeneficiaryInquirySearchFilter setInitialSearchLoaded={setInitialSearchLoaded}
+              onSearch={(params) => {
+                setSearchParams(params);
+                setSelectedMember(null);
+                setNoResults(!params);
+              }} beneficiaryKind={beneficiaryKind} searchClicked={currentBadge}></BeneficiaryInquirySearchFilter>
           </DSMAccordion>
         </Grid2>
 
         <Grid2 size={{ xs: 12 }} width="100%">
           {/* <Button onClick={handleClickOpen}>Add Beneficiary</Button> */}
-          <div
-            style={{
-              padding: "0 24px 24px 24px",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center"
-            }}>
-            <Typography
-              variant="h2"
-              sx={{ color: "#0258A5" }}>
-              {`Beneficiaries`}
-            </Typography>
 
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleClickOpen}>
-              Add Beneficiary
-            </Button>
-          </div>
-          <BeneficiaryInquiryGrid initialSearchLoaded={initialSearchLoaded} setInitialSearchLoaded={setInitialSearchLoaded} />
+          {/* <BeneficiaryInquiryGrid initialSearchLoaded={initialSearchLoaded} setInitialSearchLoaded={setInitialSearchLoaded} /> */}
+          {searchParams && (
+            <MasterInquiryMemberGrid {...searchParams} onBadgeClick={setSelectedMember} />
+          )}
+
+          {/* Render employee details if identifiers are present in selectedMember, or show missive if noResults */}
+          {(noResults || (selectedMember && selectedMember.memberType !== undefined && selectedMember.id)) && (
+            <>
+              <MasterInquiryEmployeeDetails
+                memberType={selectedMember?.memberType ?? 0}
+                id={selectedMember?.id ?? 0}
+                profitYear={searchParams?.endProfitYear}
+                noResults={noResults}
+              />
+              <div
+                style={{
+                  padding: "24px",
+                  display: "flex",
+                  justifyContent: "right",
+                  alignItems: "center"
+                }}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleClickOpen}>
+                  Add Beneficiary
+                </Button>
+              </div>
+            </>
+
+          )}
+
         </Grid2>
       </Grid2>
     </Page>
