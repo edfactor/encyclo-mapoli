@@ -84,10 +84,7 @@ const BeneficiaryInquirySearchFilter: React.FC<Props> = ({ searchClicked, benefi
         const { badgePsn, name, ssn, address, city, state, percentage } = data;
         let badge = undefined, psn = undefined;
         if (badgePsn && badgePsn.length > 0) {
-            if (badgePsn.length == 4) {
-                psn = parseInt(badgePsn);
-            }
-            else if (badgePsn.length == 6) {
+            if (badgePsn.length == 6) {
                 badge = parseInt(badgePsn);
             }
             else {
