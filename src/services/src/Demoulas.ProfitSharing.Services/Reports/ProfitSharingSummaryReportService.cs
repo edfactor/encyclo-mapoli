@@ -70,6 +70,19 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         var birthday18 = calInfo.FiscalEndDate.AddYears(-18);
         var birthday21 = calInfo.FiscalEndDate.AddYears(-21);
         
+        // Helper to aggregate a list of details into summary values
+        static (int Count, HashSet<int> BadgeNumbers, decimal TotalWages, decimal TotalHours, int TotalPoints, decimal TotalBalance, decimal TotalPriorBalance) AggregateDetails(List<YearEndProfitSharingReportDetail> details)
+        {
+            return (
+                details.Count,
+                details.Select(g => g.BadgeNumber).ToHashSet(),
+                details.Sum(y => y.Wages),
+                details.Sum(y => y.Hours),
+                details.Sum(y => y.Points),
+                details.Sum(y => y.Balance),
+                details.Sum(y => y.PriorBalance)
+            );
+        }
 
         async Task<YearEndProfitSharingReportSummaryLineItem?> CreateLine(
             string subgroup, string prefix, string title,
@@ -78,30 +91,26 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             Expression<Func<YearEndProfitSharingReportDetail, bool>>? totalsFilter = null // optional
         )
         {
-            // All unique employees matching main filter
-            var mainGroup = await details
-                .Where(mainFilter)
-                .ToListAsync(cancellationToken);
-
-            // Only those with >= 100 hours (for totals)
+            var mainGroup = await details.Where(mainFilter).ToListAsync(cancellationToken);
             var totalsGroup = mainGroup;
             if (totalsFilter != null)
             {
                 totalsGroup = await details.Where(totalsFilter).ToListAsync(cancellationToken);
             }
-
+            var mainAgg = AggregateDetails(mainGroup);
+            var totalsAgg = AggregateDetails(totalsGroup);
             return new YearEndProfitSharingReportSummaryLineItem
             {
                 Subgroup = subgroup,
                 LineItemPrefix = prefix,
                 LineItemTitle = title,
-                NumberOfMembers = totalsGroup.Count,
-                BadgeNumbers = mainGroup.Select(g => g.BadgeNumber).ToHashSet(),
-                TotalWages = mainGroup.Sum(y => y.Wages),
-                TotalHours = mainGroup.Sum(y => y.Hours),
-                TotalPoints = mainGroup.Sum(y => y.Points),
-                TotalBalance = mainGroup.Sum(y => y.Balance),
-                TotalPriorBalance = mainGroup.Sum(y => y.PriorBalance)
+                NumberOfMembers = totalsAgg.Count,
+                BadgeNumbers = mainAgg.BadgeNumbers,
+                TotalWages = mainAgg.TotalWages,
+                TotalHours = mainAgg.TotalHours,
+                TotalPoints = mainAgg.TotalPoints,
+                TotalBalance = mainAgg.TotalBalance,
+                TotalPriorBalance = mainAgg.TotalPriorBalance
             };
         }
 
