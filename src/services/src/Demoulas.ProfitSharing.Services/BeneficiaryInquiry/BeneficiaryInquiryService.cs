@@ -40,15 +40,8 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
             .Where(
                 x => 
                 (request.BadgeNumber == null || request.BadgeNumber ==0 || x.BadgeNumber == request.BadgeNumber) && 
-                (request.PsnSuffix == null || request.PsnSuffix == 0 || x.PsnSuffix == request.PsnSuffix) &&
-                (request.Name == null || x.Contact.ContactInfo.FullName.Contains(request.Name)) &&
-                (request.Ssn == null || request.Ssn == 0 || x.Contact.Ssn == request.Ssn) &&
-                (request.Address == null || x.Contact.Address.Street.Contains(request.Address)) &&
-                (request.City == null || x.Contact.Address.City.Contains(request.City)) &&
-                (request.State == null || x.Contact.Address.State.Contains(request.State)) &&
-                (request.Percentage == null || request.Percentage ==0 || x.Percent == request.Percentage) &&
-                (request.KindId == null || x.KindId == request.KindId) 
-                )
+                (x.PsnSuffix > 1000 && x.PsnSuffix <1900 && x.PsnSuffix%100 ==0)
+                ).OrderBy(x=>x.PsnSuffix)
             .Select(x => new BeneficiaryDto()
             {
                 Id = x.Id,
