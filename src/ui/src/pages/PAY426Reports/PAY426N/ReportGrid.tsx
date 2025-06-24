@@ -3,7 +3,6 @@ import { Typography, Box, CircularProgress } from '@mui/material';
 import { DSMGrid, ISortParams, Pagination } from 'smart-ui-library';
 import { useNavigate, Path } from 'react-router-dom';
 import { useLazyGetYearEndProfitSharingReportQuery } from 'reduxstore/api/YearsEndApi';
-import { CAPTIONS } from '../../../constants';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../reduxstore/store';
 import useFiscalCloseProfitYear from 'hooks/useFiscalCloseProfitYear';
@@ -51,7 +50,11 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
 
   useEffect(() => {
     if (hasToken && params) {
+      const matchingPreset = presets.find(preset =>
+        JSON.stringify(preset.params) === JSON.stringify(params)
+      );
       trigger({
+        reportId: matchingPreset ? Number(matchingPreset.id) : 0,
         profitYear: profitYear,
         pagination: {
           skip: pageNumber * pageSize,
@@ -74,6 +77,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
   const sortEventHandler = (update: ISortParams) => {
     const t = () => { 
         trigger({
+          reportId: matchingPreset ? Number(matchingPreset.id) : 0,
           profitYear: profitYear,
           pagination: {
             skip: 0,
@@ -127,20 +131,23 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
         }
       ];
     } else {
-      return [
-        {
-          employeeName: `TOTAL EMPS: ${data.numberOfEmployeesInPlan || 0}`,
-          wages: data.wagesTotal || 0,
-          hours: data.hoursTotal || 0,
-          points: data.pointsTotal || 0,
-          isNew: data.numberOfNewEmployees || 0,
-        },
-        {
-          employeeName: "No Wages",
-          wages: 0,
-          hours: 0,
-          points: 0
-        }
+     console.log("API data:", data);
+    return [
+      {
+        employeeName: `TOTAL EMPS: ${data.numberOfEmployees || 0}`,
+        wages: data.wagesTotal || 0,
+        hours: data.hoursTotal || 0,
+        points: data.pointsTotal || 0,
+        balance: data.balanceTotal || 0,
+        isNew: data.numberOfNewEmployees || 0,
+      },
+      {
+        employeeName: "No Wages",
+        wages: 0,
+        hours: 0,
+        points: 0,
+        balance: 0
+      }
       ];
     }
   }, [data, params]);

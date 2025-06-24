@@ -115,6 +115,7 @@ export const CAPTIONS = {
   PAY426_ACTIVE_PRIOR_SHARING:
     "Active/inactive employees 18 and older with prior profit sharing amounts and <1000 hours",
   PAY426_ACTIVE_UNDER_18: "Active/inactive employees under 18",
+  PAY426_TERMINATED_UNDER_18: "< AGE 18 NO WAGES",
   PAY426_NON_EMPLOYEE: "All non-employee beneficiaries",
   PAY426_SUMMARY: "Profit sharing summary page",
   PAY426_TERMINATED_1000_PLUS: "Terminated employees 18 and older with 1000 hours or more",

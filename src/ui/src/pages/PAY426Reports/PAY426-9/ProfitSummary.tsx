@@ -8,7 +8,6 @@ import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../reduxstore/store";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-import ReportGrid from "../PAY426N/ReportGrid";
 import presets from "../PAY426N/presets";
 
 /**
