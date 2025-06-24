@@ -340,7 +340,37 @@ pipelines:
       - parallel:
           - step: *create-api-artifacts
           - step: *create-service-artifacts
-          - step: *create-frontend-artifact-qa      
+          - step: *create-frontend-artifact-qa
+  
+      - step:
+          name: "Tag QA Deployment"
+          runs-on:
+          - windows
+          - self.hosted
+          script:
+          # Ensure you have git installed and authenticated
+          # Find .buildinfo.json - adjust path if needed
+          - |
+            $buildinfoPath = ".buildinfo.json"
+            if (!(Test-Path $buildinfoPath)) {
+            # Try artifact folders if not in root
+            $buildinfoPath = Get-ChildItem -Path .\dist -Recurse -Filter .buildinfo.json | Select-Object -First 1 | % { $_.FullName }
+            }
+            if (!(Test-Path $buildinfoPath)) {
+            Write-Error "Could not find .buildinfo.json"
+            exit 1
+            }
+            $version = (Get-Content $buildinfoPath | ConvertFrom-Json).version
+            if (-not $version) {
+            Write-Error "Version not found in $buildinfoPath"
+            exit 1
+            }
+            $tag = "qa-$version"
+            git config --global user.email "ci-bot@demoulas.com"
+            git config --global user.name "CI Bot"
+            git fetch --tags
+            git tag $tag
+            git push origin $tag
       - step:
           name: "Application Deployment"
           runs-on:
