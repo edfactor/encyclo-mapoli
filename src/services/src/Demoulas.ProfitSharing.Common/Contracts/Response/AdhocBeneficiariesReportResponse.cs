@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Demoulas.Common.Contracts.Contracts.Response;
 
@@ -27,5 +27,4 @@ public record BeneficiaryReportDto(
 public record AdhocBeneficiariesReportResponse : ReportResponseBase<BeneficiaryReportDto>
 {
     public decimal TotalEndingBalance { get; init; }
-    public int TotalCount { get; init; }
 }

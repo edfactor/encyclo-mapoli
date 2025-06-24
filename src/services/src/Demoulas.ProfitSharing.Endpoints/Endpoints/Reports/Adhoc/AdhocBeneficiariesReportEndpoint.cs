@@ -28,7 +28,7 @@ public class AdhocBeneficiariesReportEndpoint : EndpointWithCsvTotalsBase<AdhocB
         {
             s.Summary = "Adhoc Beneficiaries Report";
             s.Description = "Returns a report of employee and non-employee beneficiaries, with optional detail lines.";
-            s.ExampleRequest = new AdhocBeneficiariesReportRequest(2020, true, false);
+            s.ExampleRequest = new AdhocBeneficiariesReportRequest(true);
             s.ResponseExamples = new Dictionary<int, object>
             {
                 {
@@ -40,7 +40,6 @@ public class AdhocBeneficiariesReportEndpoint : EndpointWithCsvTotalsBase<AdhocB
                         StartDate = DateOnly.MinValue,
                         EndDate = DateOnly.MaxValue,
                         TotalEndingBalance = 10000,
-                        TotalCount = 2,
                         Response = new PaginatedResponseDto<BeneficiaryReportDto>
                         {
                             Results = new List<BeneficiaryReportDto>()
