@@ -33,7 +33,7 @@ const schema = yup.object().shape({
         .min(0, "SSN must be positive")
         .max(999999999, "SSN must be 9 digits or less")
         .nullable(),
-    memberType: yup.string().nullable()
+    memberType: yup.string().notRequired()
     // percentage: yup.number().notRequired(),
     // kindId: yup.string().notRequired()
 });
@@ -81,7 +81,8 @@ const BeneficiaryInquirySearchFilter: React.FC<Props> = ({ searchClicked, benefi
     });
 
     const onSubmit = (data: any) => {
-        const { badgePsn, name, ssn, address, city, state, percentage } = data;
+        let { badgePsn, name, ssn, memberType } = data;
+        memberType = memberType??"beneficiaries";
         let badge = undefined, psn = undefined;
         if (badgePsn && badgePsn.length > 0) {
             if (badgePsn.length == 6) {
@@ -128,7 +129,7 @@ const BeneficiaryInquirySearchFilter: React.FC<Props> = ({ searchClicked, benefi
                 badgeNumber: badge,
                 psnSuffix: psn,
                 // ...(!!data.paymentType && { paymentType: paymentTypeGetNumberMap[data.paymentType] }),
-                 ...(!!data.memberType && { memberType: memberTypeGetNumberMap[data.memberType] }),
+                 memberType: memberTypeGetNumberMap[memberType],
                 // ...(!!data.contribution && { contributionAmount: data.contribution }),
                 // ...(!!data.earnings && { earningsAmount: data.earnings }),
                 // ...(!!data.forfeiture && { forfeitureAmount: data.forfeiture }),
@@ -326,19 +327,19 @@ const BeneficiaryInquirySearchFilter: React.FC<Props> = ({ searchClicked, benefi
                             render={({ field }) => (
                                 <Select
                                     {...field}
+                                    defaultValue="beneficiaries"
                                     fullWidth
                                     size="small"
                                     variant="outlined"
                                     labelId="memberType"
                                     id="memberType"
                                     value={field.value}
-                                    label="Beneficiary Kind"
+                                    label="Member Type"
                                     onChange={(e) => field.onChange(e.target.value)}
                                 >
                                     <MenuItem value="all">All</MenuItem>
                                     <MenuItem value="employees">Employees</MenuItem>
                                     <MenuItem value="beneficiaries">Beneficiaries</MenuItem>
-
                                 </Select>
                             )}
                         />
