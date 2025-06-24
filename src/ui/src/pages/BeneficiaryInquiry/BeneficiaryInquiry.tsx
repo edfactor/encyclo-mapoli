@@ -28,7 +28,7 @@ const BeneficiaryInquiry = () => {
   const [beneficiaryType, setBeneficiaryType] = useState<BeneficiaryTypeDto[]>([]);
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [searchParams, setSearchParams] = useState<MasterInquiryRequest | null>(null);
-  const [selectedMember, setSelectedMember] = useState<{ memberType: number; id: number, ssn: number } | null>(null);
+  const [selectedMember, setSelectedMember] = useState<{ memberType: number; id: number, ssn: number, badgeNumber: number, psnSuffix:number } | null>(null);
   const [noResults, setNoResults] = useState(false);
 
   const handleClickOpen = () => {
@@ -83,7 +83,7 @@ const BeneficiaryInquiry = () => {
         >
           <DialogTitle>Add Beneficiary</DialogTitle>
           <DialogContent>
-            <CreateBeneficiary beneficiaryKind={beneficiaryKind} badgeNumber={badgeNumber} onSaveSuccess={onBeneficiarySaveSuccess}></CreateBeneficiary>
+            <CreateBeneficiary beneficiaryKind={beneficiaryKind} badgeNumber={selectedMember?.badgeNumber??0} onSaveSuccess={onBeneficiarySaveSuccess}></CreateBeneficiary>
 
           </DialogContent>
         </Dialog>

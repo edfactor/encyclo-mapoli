@@ -46,7 +46,7 @@ const columns: ColDef[] = [
 ];
 
 interface MasterInquiryMemberGridProps extends MasterInquiryRequest {
-  onBadgeClick?: (args: { memberType: number; id: number, ssn: number }) => void;
+  onBadgeClick?: (args: { memberType: number; id: number, ssn: number, badgeNumber:number, psnSuffix:number }) => void;
 }
 
 const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = (searchParams) => {
@@ -77,7 +77,9 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = (searchP
       searchParams.onBadgeClick({
         memberType: member.isEmployee ? 1 : 2,
         id: member.id,
-        ssn: member.ssn
+        ssn: member.ssn,
+        badgeNumber: member.badgeNumber,
+        psnSuffix: member.psnSuffix
       });
       autoSelectedRef.current = member.id;
     }
