@@ -3,6 +3,7 @@ using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -74,12 +75,13 @@ public class AdhocBeneficiariesReport : IAdhocBeneficiariesReport
 
 
                 return new BeneficiaryReportDto(
-                    b.Id,
+                    b.PsnSuffix,
                     b.Contact?.ContactInfo?.FullName ?? string.Empty,
-                    b.Contact != null ? b.Contact.Ssn.ToString() : string.Empty,
+                    b.Contact != null ? b.Contact.Ssn.MaskSsn() : string.Empty,
                     b.Relationship,
                     totalBalance?.Total ?? 0,
                     b.BadgeNumber,
+                    b.PsnSuffix,
                     profitDetailsForBeneficiary
                 );
             }).ToList();

@@ -20,7 +20,8 @@ public record BeneficiaryReportDto(
     string Ssn,
     string? Relationship,
     decimal? Balance,
-    int? BadgeNumber,
+    int BadgeNumber,
+    short PsnSuffix,
     List<ProfitDetailDto>? ProfitDetails
 );
 
