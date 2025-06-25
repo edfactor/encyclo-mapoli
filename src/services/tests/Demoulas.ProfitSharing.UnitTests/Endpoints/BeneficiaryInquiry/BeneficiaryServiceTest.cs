@@ -66,7 +66,7 @@ public class BeneficiaryServiceTest : ApiTestBase<Program>
     [Fact(DisplayName ="Get beneficiary by badge_number & psn_suffix")]
     public async Task GetBeneficiary()
     {
-        var res = await _beneficiaryService.GetBeneficiary(new BeneficiaryRequestDto() { BadgeNumber = 703244, PsnSuffix = 1000 }, CancellationToken.None);
+        var res = await _beneficiaryService.GetBeneficiary(new BeneficiaryRequestDto() { BadgeNumber = 703244 }, CancellationToken.None);
         Assert.NotNull(res);
         res.Results.ShouldBeEquivalentTo(_beneficiaryList);
     }
