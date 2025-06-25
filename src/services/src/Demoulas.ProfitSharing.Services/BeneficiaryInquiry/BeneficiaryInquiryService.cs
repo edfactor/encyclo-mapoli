@@ -39,16 +39,8 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
             var result = context.Beneficiaries.Include(x => x.Contact).Include(x => x.Contact.ContactInfo)
             .Where(
                 x => 
-                (request.BadgeNumber == null || request.BadgeNumber ==0 || x.BadgeNumber == request.BadgeNumber) && 
-                (request.PsnSuffix == null || request.PsnSuffix == 0 || x.PsnSuffix == request.PsnSuffix) &&
-                (request.Name == null || x.Contact.ContactInfo.FullName.Contains(request.Name)) &&
-                (request.Ssn == null || request.Ssn == 0 || x.Contact.Ssn == request.Ssn) &&
-                (request.Address == null || x.Contact.Address.Street.Contains(request.Address)) &&
-                (request.City == null || x.Contact.Address.City.Contains(request.City)) &&
-                (request.State == null || x.Contact.Address.State.Contains(request.State)) &&
-                (request.Percentage == null || request.Percentage ==0 || x.Percent == request.Percentage) &&
-                (request.KindId == null || x.KindId == request.KindId) 
-                )
+                (request.BadgeNumber == null || request.BadgeNumber ==0 || x.BadgeNumber == request.BadgeNumber) 
+                ).OrderBy(x=>x.PsnSuffix)
             .Select(x => new BeneficiaryDto()
             {
                 Id = x.Id,
