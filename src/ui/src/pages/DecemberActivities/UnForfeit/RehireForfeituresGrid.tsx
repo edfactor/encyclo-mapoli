@@ -1,4 +1,4 @@
-import { ICellRendererParams } from "ag-grid-community";
+import { GridApi } from "ag-grid-community";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetRehireForfeituresQuery } from "reduxstore/api/YearsEndApi";
@@ -8,6 +8,7 @@ import useFiscalCalendarYear from "../../../hooks/useFiscalCalendarYear";
 import { StartAndEndDateRequest } from "../../../reduxstore/types";
 import { GetDetailColumns, GetMilitaryAndRehireForfeituresColumns } from "./RehireForfeituresGridColumns";
 import ReportSummary from "../../../components/ReportSummary";
+import Grid2 from "@mui/material/Grid2";
 
 interface MilitaryAndRehireForfeituresGridSearchProps {
   initialSearchLoaded: boolean;
@@ -15,11 +16,26 @@ interface MilitaryAndRehireForfeituresGridSearchProps {
   resetPageFlag: boolean;
 }
 
+interface GridRowData {
+  isDetail: boolean;
+  badgeNumber: number;
+  profitYear?: number;
+  suggestedForfeit?: number;
+  [key: string]: any;
+}
+
+interface EditedValues {
+  [key: string]: {
+    value: number;
+    hasError: boolean;
+  };
+}
+
 const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProps> = ({
-                                                                                        initialSearchLoaded,
-                                                                                        setInitialSearchLoaded,
-                                                                                        resetPageFlag // Destructure the new prop
-                                                                                      }) => {
+  initialSearchLoaded,
+  setInitialSearchLoaded,
+  resetPageFlag
+}) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
@@ -27,10 +43,42 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
     isSortDescending: false
   });
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
+  const [selectedRows, setSelectedRows] = useState<GridRowData[]>([]);
+  const [gridApi, setGridApi] = useState<GridApi | null>(null);
+  const [editedValues, setEditedValues] = useState<EditedValues>({});
   const fiscalCalendarYear = useFiscalCalendarYear();
   const { rehireForfeitures, rehireForfeituresQueryParams } = useSelector((state: RootState) => state.yearsEnd);
 
   const [triggerSearch, { isFetching }] = useLazyGetRehireForfeituresQuery();
+
+  const onGridReady = useCallback((params: { api: GridApi }) => {
+    setGridApi(params.api);
+  }, []);
+
+  const addRowToSelectedRows = useCallback((id: number) => {
+    if (gridApi) {
+      const node = gridApi.getRowNode(id.toString());
+      if (node) {
+        setSelectedRows(prev => [...prev, node.data]);
+      }
+    }
+  }, [gridApi]);
+
+  const removeRowFromSelectedRows = useCallback((id: number) => {
+    if (gridApi) {
+      const node = gridApi.getRowNode(id.toString());
+      if (node) {
+        setSelectedRows(prev => prev.filter(row => row.badgeNumber !== node.data.badgeNumber));
+      }
+    }
+  }, [gridApi]);
+
+  const updateEditedValue = useCallback((rowKey: string, value: number, hasError: boolean) => {
+    setEditedValues(prev => ({
+      ...prev,
+      [rowKey]: { value, hasError }
+    }));
+  }, []);
 
   // Create a request object based on current parameters
   const createRequest = useCallback(
@@ -78,7 +126,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
       // Set all rows with details to be expanded by default
       rehireForfeitures.response.results.forEach((row) => {
         if (row.details && row.details.length > 0) {
-          initialExpandState[row.badgeNumber] = true;
+          initialExpandState[row.badgeNumber.toString()] = true;
         }
       });
 
@@ -105,13 +153,13 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
 
   // Get the main and detail columns
   const mainColumns = useMemo(() => GetMilitaryAndRehireForfeituresColumns(), []);
-  const detailColumns = useMemo(() => GetDetailColumns(), []);
+  const detailColumns = useMemo(() => GetDetailColumns(addRowToSelectedRows, removeRowFromSelectedRows), [addRowToSelectedRows, removeRowFromSelectedRows]);
 
   // Create the grid data with expandable rows
   const gridData = useMemo(() => {
     if (!rehireForfeitures?.response?.results) return [];
 
-    const rows = [];
+    const rows: GridRowData[] = [];
 
     for (const row of rehireForfeitures.response.results) {
       const hasDetails = row.details && row.details.length > 0;
@@ -120,22 +168,22 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
       rows.push({
         ...row,
         isExpandable: hasDetails,
-        isExpanded: hasDetails && Boolean(expandedRows[row.badgeNumber])
+        isExpanded: hasDetails && Boolean(expandedRows[row.badgeNumber.toString()]),
+        isDetail: false
       });
 
       // Add detail rows if expanded
-      if (hasDetails && expandedRows[row.badgeNumber]) {
+      if (hasDetails && expandedRows[row.badgeNumber.toString()]) {
         for (const detail of row.details) {
-          // Create a base detail row with all parent properties to prevent undefined values
-          // and then override with detail properties
-          const detailRow = {
-            // Copy all parent row properties first
+          const detailRow: GridRowData = {
             ...row,
-            // Then add detail properties, which will override any duplicate fields
             ...detail,
-            // Add special properties for UI handling
             isDetail: true,
-            parentId: row.badgeNumber
+            isExpandable: false,
+            isExpanded: false,
+            parentId: row.badgeNumber,
+            // Keep original value, let valueGetter handle edited values
+            suggestedForfeit: (detail as any).suggestedForfeit || 0
           };
 
           rows.push(detailRow);
@@ -148,86 +196,32 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
 
   // Create column definitions with expand/collapse functionality
   const columnDefs = useMemo(() => {
-    // Add an expansion column as the first column
+    // Add an expansion column
     const expansionColumn = {
       headerName: "",
       field: "isExpandable",
       width: 50,
-      cellRenderer: (params: ICellRendererParams) => {
-        if (!params.data.isDetail && params.data.isExpandable) {
+      cellRenderer: (params: any) => {
+        if (params.data && !params.data.isDetail && params.data.isExpandable) {
           return params.data.isExpanded ? "▼" : "►";
         }
         return "";
       },
-      onCellClicked: (params: ICellRendererParams) => {
-        if (!params.data.isDetail && params.data.isExpandable) {
-          handleRowExpansion(params.data.badgeNumber);
+      onCellClicked: (event: any) => {
+        if (event.data && !event.data.isDetail && event.data.isExpandable) {
+          handleRowExpansion(event.data.badgeNumber.toString());
         }
       },
       suppressSizeToFit: true,
       suppressAutoSize: true,
       lockVisible: true,
       lockPosition: true,
-      pinned: "left"
+      pinned: "left" as const
     };   
 
-    // Determine which columns to display based on whether it's a detail row
-    const visibleColumns = mainColumns.map((column) => {
-      return {
-        ...column,
-        cellRenderer: (params: ICellRendererParams) => {
-          // For detail rows, either hide the column or show a specific value
-          if (params.data.isDetail) {
-            // Check if this main column should be hidden in detail rows
-            const hideInDetails = !detailColumns.some((detailCol) => detailCol.field === column.field);
-
-            if (hideInDetails) {
-              return ""; // Hide this column's content for detail rows
-            }
-          }
-
-          // Use the default renderer for this column if available
-          if (column.cellRenderer) {
-            return column.cellRenderer(params);
-          }
-
-          // Otherwise just return the field value
-          return params.valueFormatted ? params.valueFormatted : params.value;
-        }
-      };
-    });
-
-    // Add detail-specific columns that only appear for detail rows
-    const detailOnlyColumns = detailColumns
-      .filter((detailCol) => !mainColumns.some((mainCol) => mainCol.field === detailCol.field))
-      .map((column) => {
-        return {
-          ...column,
-          cellRenderer: (params: ICellRendererParams) => {
-            // Only show content for detail rows
-            if (!params.data.isDetail) {
-              return "";
-            }
-
-            // Use the default renderer for this column if available
-            if (column.cellRenderer) {
-              return column.cellRenderer(params);
-            }
-
-            // Otherwise just return the field value
-            return params.valueFormatted ? params.valueFormatted : params.value;
-          }
-        };
-      });
-
     // Combine all columns
-    return [expansionColumn, ...visibleColumns, ...detailOnlyColumns];
+    return [expansionColumn, ...mainColumns, ...detailColumns];
   }, [mainColumns, detailColumns]);
-
-  // Custom CSS classes for rows
-  const getRowClass = (params: { data: { isDetail: boolean } }) => {
-    return params.data.isDetail ? "detail-row" : "";
-  };
 
   return (
     <div>
@@ -236,12 +230,25 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
           .detail-row {
             background-color: #f5f5f5;
           }
+          .invalid-cell {
+            background-color: #fff6f6;
+          }
+          .validation-error {
+            color: #d32f2f;
+            font-size: 0.75rem;
+            margin-top: 3px;
+          }
         `}
       </style>
 
       {rehireForfeitures?.response && (
         <>
-          <ReportSummary report={rehireForfeitures} />
+          <Grid2 container justifyContent="space-between" alignItems="center" marginBottom={2}>
+            <Grid2>
+              <ReportSummary report={rehireForfeitures} />
+            </Grid2>
+          </Grid2>
+
           <DSMGrid
             preferenceKey={"QPREV-PROF"}
             isLoading={isFetching}
@@ -250,12 +257,18 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
             providedOptions={{
               rowData: gridData,
               columnDefs: columnDefs,
-              getRowClass: getRowClass,
+              getRowClass: (params: any) => params.data.isDetail ? "detail-row" : "",
+              rowSelection: "multiple",
               suppressRowClickSelection: true,
               rowHeight: 40,
               suppressMultiSort: true,
               defaultColDef: {
                 resizable: true
+              },
+              onGridReady: onGridReady,
+              context: {
+                editedValues,
+                updateEditedValue
               }
             }}
           />
