@@ -145,7 +145,7 @@ const BeneficiaryInquiry = () => {
                 </Button>
               </div>
 
-              <BeneficiaryInquiryGrid change={change} badgeNumber={ selectedMember?.badgeNumber ?? 0}  />
+              <BeneficiaryInquiryGrid  selectedMember={selectedMember}  />
             </>
 
           )}

@@ -1308,6 +1308,7 @@ export interface BeneficiaryDto {
 
 export interface BeneficiaryRequestDto extends SortedPaginationRequestDto {
   badgeNumber?: number;
+  psnSuffix?:number;
 }
 
 export interface BeneficiaryResponseDto {

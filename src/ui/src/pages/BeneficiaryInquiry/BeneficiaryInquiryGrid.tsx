@@ -11,12 +11,10 @@ import { useLazyGetBeneficiariesQuery } from "reduxstore/api/BeneficiariesApi";
 interface BeneficiaryInquiryGridProps {
   // initialSearchLoaded: boolean;
   // setInitialSearchLoaded: (loaded: boolean) => void;
-  badgeNumber: number;
   selectedMember: any;
-  change: number;
 }
 
-const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({  badgeNumber, selectedMember }) => {
+const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({selectedMember }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [_sortParams, setSortParams] = useState<ISortParams>({
@@ -35,11 +33,12 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({  badgeN
   //     return beneficiaryRequest;
   //   },
   //   [beneficiaryRequest, pageSize, _sortParams]
-  // );
+  // );1
   const createBeneficiaryInquiryRequest =
-    (skip: number, sortBy: string, isSortDescending: boolean,take:number, badgeNumber: number): BeneficiaryRequestDto | null => {
+    (skip: number, sortBy: string, isSortDescending: boolean,take:number, badgeNumber: number, psnSuffix:number): BeneficiaryRequestDto | null => {
       let request: BeneficiaryRequestDto = {
         badgeNumber : badgeNumber,
+        psnSuffix: psnSuffix,
         isSortDescending: isSortDescending,
         skip: skip,
         sortBy: sortBy,
@@ -56,7 +55,7 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({  badgeN
     setSortParams(update);
     setPageNumber(0);
 
-    const request = createBeneficiaryInquiryRequest(0, update.sortBy, update.isSortDescending,25,badgeNumber);
+    const request = createBeneficiaryInquiryRequest(0, update.sortBy, update.isSortDescending,25,selectedMember?.badgeNumber, selectedMember?.psnSuffix);
     if (!request) return;
 
     triggerSearch(request, false).unwrap().then((value)=>{
@@ -80,7 +79,7 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({  badgeN
   // }, [pageNumber, pageSize, _sortParams, onSearch]);
 
    const onSearch = useCallback(() => {
-    const request = createBeneficiaryInquiryRequest(pageNumber * pageSize, _sortParams.sortBy, _sortParams.isSortDescending,25,selectedMember?.badgeNumber);
+    const request = createBeneficiaryInquiryRequest(pageNumber * pageSize, _sortParams.sortBy, _sortParams.isSortDescending,25,selectedMember?.badgeNumber, selectedMember?.psnSuffix);
     if (!request) return;
 
      triggerSearch(request, false).unwrap().then((value)=>{
