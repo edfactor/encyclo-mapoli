@@ -1,6 +1,6 @@
 import { Button, Divider, Typography } from "@mui/material";
 import Grid2 from '@mui/material/Grid2';
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
 import BeneficiaryInquirySearchFilter from "./BeneficiaryInquirySearchFilter";
 import BeneficiaryInquiryGrid from "./BeneficiaryInquiryGrid";
