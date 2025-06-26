@@ -2,6 +2,7 @@
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+using Demoulas.ProfitSharing.Common.Contracts.Report;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Contexts;
@@ -12,6 +13,7 @@ using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using System.ComponentModel;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
 
@@ -137,31 +139,30 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
 
         var lineItems = new List<YearEndProfitSharingReportSummaryLineItem?>
         {
-            // Active/Inactive lines
-            await CreateLine("Active and Inactive", "1", "AGE 18-20 WITH >= 1000 PS HOURS", activeDetails, GetReportFilter(1, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21)),
-            await CreateLine("Active and Inactive", "2", ">= AGE 21 WITH >= 1000 PS HOURS", activeDetails, GetReportFilter(2, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21)),
-            await CreateLine("Active and Inactive", "3", "<  AGE 18", activeDetails, GetReportFilter(3, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21)),
-            await CreateLine("Active and Inactive", "4", ">= AGE 18 WITH < 1000 PS HOURS AND PRIOR PS AMOUNT", activeDetails, GetReportFilter(4, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21)),
-            await CreateLine("Active and Inactive", "5", ">= AGE 18 WITH < 1000 PS HOURS AND NO PRIOR PS AMOUNT", activeDetails, GetReportFilter(5, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21)),
+            await CreateLine("Active and Inactive", ((int)YearEndProfitSharingReportId.Age18To20With1000Hours).ToString(), GetEnumDescription(YearEndProfitSharingReportId.Age18To20With1000Hours), activeDetails, GetReportFilter((int)YearEndProfitSharingReportId.Age18To20With1000Hours, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21)),
+            await CreateLine("Active and Inactive", ((int)YearEndProfitSharingReportId.Age21OrOlderWith1000Hours).ToString(), GetEnumDescription(YearEndProfitSharingReportId.Age21OrOlderWith1000Hours), activeDetails, GetReportFilter((int)YearEndProfitSharingReportId.Age21OrOlderWith1000Hours, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21)),
+            await CreateLine("Active and Inactive", ((int)YearEndProfitSharingReportId.Under18).ToString(), GetEnumDescription(YearEndProfitSharingReportId.Under18), activeDetails, GetReportFilter((int)YearEndProfitSharingReportId.Under18, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21)),
+            await CreateLine("Active and Inactive", ((int)YearEndProfitSharingReportId.Age18OrOlderWithLessThan1000HoursAndPriorAmount).ToString(), GetEnumDescription(YearEndProfitSharingReportId.Age18OrOlderWithLessThan1000HoursAndPriorAmount), activeDetails, GetReportFilter((int)YearEndProfitSharingReportId.Age18OrOlderWithLessThan1000HoursAndPriorAmount, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21)),
+            await CreateLine("Active and Inactive", ((int)YearEndProfitSharingReportId.Age18OrOlderWithLessThan1000HoursAndNoPriorAmount).ToString(), GetEnumDescription(YearEndProfitSharingReportId.Age18OrOlderWithLessThan1000HoursAndNoPriorAmount), activeDetails, GetReportFilter((int)YearEndProfitSharingReportId.Age18OrOlderWithLessThan1000HoursAndNoPriorAmount, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21)),
 
             // Terminated lines
-            await CreateLine("TERMINATED", "6", ">= AGE 18 WITH >= 1000 PS HOURS", activeDetails, GetReportFilter(6, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21)),
+            await CreateLine("TERMINATED", ((int)YearEndProfitSharingReportId.TerminatedAge18OrOlderWith1000Hours).ToString(), GetEnumDescription(YearEndProfitSharingReportId.TerminatedAge18OrOlderWith1000Hours), activeDetails, GetReportFilter((int)YearEndProfitSharingReportId.TerminatedAge18OrOlderWith1000Hours, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21)),
             await CreateLine(
                 "TERMINATED",
-                "7",
-                ">= AGE 18 WITH < 1000 PS HOURS AND NO PRIOR PS AMOUNT",
+                ((int)YearEndProfitSharingReportId.TerminatedAge18OrOlderWithLessThan1000HoursAndNoPriorAmount).ToString(),
+                GetEnumDescription(YearEndProfitSharingReportId.TerminatedAge18OrOlderWithLessThan1000HoursAndNoPriorAmount),
                 activeDetails,
-                GetReportFilter(7, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21)
+                GetReportFilter((int)YearEndProfitSharingReportId.TerminatedAge18OrOlderWithLessThan1000HoursAndNoPriorAmount, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21)
             ),
             await CreateLine(
                 "TERMINATED",
-                "8",
-                ">= AGE 18 WITH < 1000 PS HOURS AND PRIOR PS AMOUNT",
+                ((int)YearEndProfitSharingReportId.TerminatedAge18OrOlderWithLessThan1000HoursAndPriorAmount).ToString(),
+                GetEnumDescription(YearEndProfitSharingReportId.TerminatedAge18OrOlderWithLessThan1000HoursAndPriorAmount),
                 activeDetails,
-                GetReportFilter(8, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21),
+                GetReportFilter((int)YearEndProfitSharingReportId.TerminatedAge18OrOlderWithLessThan1000HoursAndPriorAmount, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21),
                 x => x.Hours >= 0 && x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.PriorBalance > 0
             ),
-            await CreateLine("TERMINATED", "X", "<  AGE 18           NO WAGES :   0", activeDetails, GetReportFilter(10, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21))
+            await CreateLine("TERMINATED", ((int)YearEndProfitSharingReportId.TerminatedUnder18NoWages).ToString(), GetEnumDescription(YearEndProfitSharingReportId.TerminatedUnder18NoWages), activeDetails, GetReportFilter((int)YearEndProfitSharingReportId.TerminatedUnder18NoWages, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21))
         };
 
         // Special query for non-employee beneficiaries (line N)
@@ -213,12 +214,13 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
 
         // Apply report-specific filtering for ReportId 1-8, 10
         IQueryable<YearEndProfitSharingReportDetail> filteredDetails = allDetails;
-        if (req.ReportId is >= 1 and <= 8 or 10)
+        var reportIdInt = (int)req.ReportId;
+        if (reportIdInt is >= 1 and <= 8 or 10)
         {
             var birthday18 = calInfo.FiscalEndDate.AddYears(-18);
             var birthday21 = calInfo.FiscalEndDate.AddYears(-21);
 
-            var filter = GetReportFilter(req.ReportId, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21);
+            var filter = GetReportFilter(reportIdInt, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21);
             filteredDetails = allDetails.Where(filter);
         }
 
@@ -417,5 +419,13 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             11 => x => x.BadgeNumber == 0,
             _ => x => true
         };
+    }
+
+    // Helper to get Description from enum
+    private static string GetEnumDescription(YearEndProfitSharingReportId value)
+    {
+        var field = typeof(YearEndProfitSharingReportId).GetField(value.ToString());
+        var attr = (DescriptionAttribute?)Attribute.GetCustomAttribute(field!, typeof(DescriptionAttribute));
+        return attr?.Description ?? value.ToString();
     }
 }
