@@ -12,9 +12,10 @@ interface BeneficiaryInquiryGridProps {
   // initialSearchLoaded: boolean;
   // setInitialSearchLoaded: (loaded: boolean) => void;
   selectedMember: any;
+  count: number;
 }
 
-const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({selectedMember }) => {
+const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({selectedMember, count }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [_sortParams, setSortParams] = useState<ISortParams>({
@@ -92,7 +93,7 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({selected
     if (hasToken) {
       onSearch();
     }
-  }, [selectedMember,pageNumber, pageSize, _sortParams]);
+  }, [selectedMember,pageNumber, pageSize, _sortParams, count]);
 
   return (
     <>

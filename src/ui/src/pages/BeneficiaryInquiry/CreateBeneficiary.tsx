@@ -50,11 +50,12 @@ export interface cb {
 }
 type Props = {
     badgeNumber:number;
+    psnSuffix: number;
     beneficiaryKind: BeneficiaryKindDto[];
     onSaveSuccess: ()=>void;
 }
 
-const CreateBeneficiary: React.FC<Props> = ({badgeNumber, onSaveSuccess,beneficiaryKind}) => {
+const CreateBeneficiary: React.FC<Props> = ({badgeNumber, onSaveSuccess,beneficiaryKind, psnSuffix}) => {
     const [triggerAdd, { isFetching }] = useLazyCreateBeneficiariesQuery();
     
     const [triggerCreateBeneficiaryContact, createBeneficiaryContactResponse] = useLazyCreateBeneficiaryContactQuery();
@@ -106,12 +107,12 @@ const CreateBeneficiary: React.FC<Props> = ({badgeNumber, onSaveSuccess,benefici
         let request: CreateBeneficiaryRequest = {
             beneficiaryContactId: beneficiaryContactId,
             employeeBadgeNumber: badgeNumber,
-            firstLevelBeneficiaryNumber: 1,
+            firstLevelBeneficiaryNumber: Math.floor(psnSuffix / 1000) % 10,
             kindId: 'P', 
             percentage : data.percentage,
             relationship: data.relationship,
-            secondLevelBeneficiaryNumber: 0,
-            thirdLevelBeneficiaryNumber: 0
+            secondLevelBeneficiaryNumber: Math.floor(psnSuffix / 100) % 10,
+            thirdLevelBeneficiaryNumber: Math.floor(psnSuffix / 10) % 10
         }
         triggerAdd(request).unwrap().then((value)=>{
             console.log('saved successfully');

@@ -1,6 +1,6 @@
 import { Button, Divider, Typography } from "@mui/material";
 import Grid2 from '@mui/material/Grid2';
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
 import BeneficiaryInquirySearchFilter from "./BeneficiaryInquirySearchFilter";
 import BeneficiaryInquiryGrid from "./BeneficiaryInquiryGrid";
@@ -45,7 +45,7 @@ const BeneficiaryInquiry = () => {
   }
   const onBeneficiarySaveSuccess = () => {
     setOpen(false);
-
+    setChange(prev=>prev+1);
   }
 
   const handleClose = () => {
@@ -88,7 +88,7 @@ const BeneficiaryInquiry = () => {
         >
           <DialogTitle>Add Beneficiary</DialogTitle>
           <DialogContent>
-            <CreateBeneficiary beneficiaryKind={beneficiaryKind} badgeNumber={selectedMember?.badgeNumber??0} onSaveSuccess={onBeneficiarySaveSuccess}></CreateBeneficiary>
+            <CreateBeneficiary beneficiaryKind={beneficiaryKind} badgeNumber={selectedMember?.badgeNumber??0} psnSuffix={selectedMember?.psnSuffix??0} onSaveSuccess={onBeneficiarySaveSuccess}></CreateBeneficiary>
 
           </DialogContent>
         </Dialog>
@@ -145,7 +145,7 @@ const BeneficiaryInquiry = () => {
                 </Button>
               </div>
 
-              <BeneficiaryInquiryGrid  selectedMember={selectedMember}  />
+              <BeneficiaryInquiryGrid count={change}  selectedMember={selectedMember}  />
             </>
 
           )}
