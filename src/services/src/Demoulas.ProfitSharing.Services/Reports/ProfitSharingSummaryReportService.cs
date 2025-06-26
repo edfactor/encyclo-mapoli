@@ -165,8 +165,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         };
 
         // Special query for non-employee beneficiaries (line N)
-        YearEndProfitSharingReportSummaryLineItem? beneficiaryLineItem = null;
-        await _dataContextFactory.UseReadOnlyContext<object>(async ctx =>
+        YearEndProfitSharingReportSummaryLineItem? beneficiaryLineItem = await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
             var beneQry = ctx.BeneficiaryContacts
@@ -174,7 +173,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 .Join(_totalService.GetTotalBalanceSet(ctx, req.ProfitYear), x => x.Ssn, x => x.Ssn,
                     (pp, tot) => new { pp, tot });
 
-            beneficiaryLineItem = await beneQry.GroupBy(x => true).Select(x => new YearEndProfitSharingReportSummaryLineItem()
+            return await beneQry.GroupBy(x => true).Select(x => new YearEndProfitSharingReportSummaryLineItem()
             {
                 Subgroup = "TERMINATED",
                 LineItemPrefix = "N",
@@ -187,8 +186,8 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 TotalPriorBalance = 0,
                 BadgeNumbers = new HashSet<int>()
             }).FirstOrDefaultAsync(cancellationToken);
-            return null;
         });
+        
         if (beneficiaryLineItem != null)
         {
             lineItems.Add(beneficiaryLineItem);
