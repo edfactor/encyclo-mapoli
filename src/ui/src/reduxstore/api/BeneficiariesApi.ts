@@ -30,7 +30,7 @@ export const BeneficiariesApi = createApi({
             async onQueryStarted(arg, { dispatch, queryFulfilled }) {
                 try {
                     const { data } = await queryFulfilled;
-                    dispatch(setBeneficiary(data));
+                    //dispatch(setBeneficiary(data));
                 } catch (err) {
                     console.error("Failed to fetch beneficiaries:", err);
                     dispatch(setBeneficiaryError("Failed to fetch beneficiaries"));

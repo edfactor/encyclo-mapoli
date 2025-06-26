@@ -30,10 +30,15 @@ const BeneficiaryInquiry = () => {
   const [searchParams, setSearchParams] = useState<MasterInquiryRequest | null>(null);
   const [selectedMember, setSelectedMember] = useState<{ memberType: number; id: number, ssn: number, badgeNumber: number, psnSuffix:number } | null>(null);
   const [noResults, setNoResults] = useState(false);
+  const[change, setChange] = useState<number>(0);
 
   const handleClickOpen = () => {
     setOpen(true);
   };
+  const onBadgeClick = (data:any)=> {
+    setSelectedMember(data);
+    setChange(change+1);
+  }
 
   const currentBadge = (badgeNumber: number) => {
     setBadgeNumber(badgeNumber);
@@ -104,7 +109,7 @@ const BeneficiaryInquiry = () => {
                 setSearchParams(params);
                 setSelectedMember(null);
                 setNoResults(!params);
-              }} beneficiaryKind={beneficiaryKind} searchClicked={currentBadge}></BeneficiaryInquirySearchFilter>
+              }} beneficiaryType={beneficiaryType} searchClicked={currentBadge}></BeneficiaryInquirySearchFilter>
           </DSMAccordion>
         </Grid2>
 
@@ -113,7 +118,7 @@ const BeneficiaryInquiry = () => {
 
           {/* <BeneficiaryInquiryGrid initialSearchLoaded={initialSearchLoaded} setInitialSearchLoaded={setInitialSearchLoaded} /> */}
           {searchParams && (
-            <MasterInquiryMemberGrid {...searchParams} onBadgeClick={setSelectedMember} />
+            <MasterInquiryMemberGrid {...searchParams} onBadgeClick={onBadgeClick} />
           )}
 
           {/* Render employee details if identifiers are present in selectedMember, or show missive if noResults */}
@@ -139,6 +144,8 @@ const BeneficiaryInquiry = () => {
                   Add Beneficiary
                 </Button>
               </div>
+
+              <BeneficiaryInquiryGrid  selectedMember={selectedMember}  />
             </>
 
           )}

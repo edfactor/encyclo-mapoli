@@ -21,7 +21,7 @@ const columns: ColDef[] = [
           onClick={e => {
             e.preventDefault();
             if (params.context && params.context.onBadgeClick) {
-              params.context.onBadgeClick({ memberType: isEmployee ? 1 : 2, id });
+              params.context.onBadgeClick({ memberType: isEmployee ? 1 : 2, id, badgeNumber, psnSuffix });
             }
           }}
         >
