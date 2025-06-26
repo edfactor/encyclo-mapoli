@@ -6,22 +6,13 @@ import { GRID_COLUMN_WIDTHS } from "../../../constants";
 import { Checkbox, IconButton, TextField, Tooltip } from "@mui/material";
 import { SaveOutlined, ErrorOutline } from "@mui/icons-material";
 import { useState, useRef, useEffect } from "react";
+import { 
+  RehireForfeituresHeaderComponentProps, 
+  RehireForfeituresSaveButtonCellParams, 
+  RehireForfeituresUpdatePayload 
+} from "../../../reduxstore/types";
 
-interface HeaderComponentProps extends IHeaderParams {
-  addRowToSelectedRows: (id: number) => void;
-  removeRowFromSelectedRows: (id: number) => void;
-}
 
-interface SaveButtonCellParams extends ICellRendererParams {
-  removeRowFromSelectedRows: (id: number) => void;
-  addRowToSelectedRows: (id: number) => void;
-}
-
-interface UpdatePayload {
-  badgeNumber: number;
-  profitYear: number;
-  suggestedForfeit: number;
-}
 
 const validateSuggestedForfeit = (value: number): string | null => {
   if (value > 1000) {
@@ -111,7 +102,7 @@ function SuggestedForfeitCellRenderer(params: ICellRendererParams) {
   );
 }
 
-export const HeaderComponent: React.FC<HeaderComponentProps> = (props: HeaderComponentProps) => {
+export const HeaderComponent: React.FC<RehireForfeituresHeaderComponentProps> = (props) => {
   const [allRowsSelected, setAllRowsSelected] = useState(false);
 
   const handleSelectAll = () => {
@@ -137,7 +128,7 @@ export const HeaderComponent: React.FC<HeaderComponentProps> = (props: HeaderCom
   };
 
   const handleSave = () => {
-    const selectedNodes: UpdatePayload[] = [];
+    const selectedNodes: RehireForfeituresUpdatePayload[] = [];
     props.api.forEachNode(node => {
       if (node.isSelected() && node.data.isDetail) {
         const rowKey = `${node.data.badgeNumber}-${node.data.profitYear}`;
@@ -153,16 +144,18 @@ export const HeaderComponent: React.FC<HeaderComponentProps> = (props: HeaderCom
     console.log('Bulk update payload:', selectedNodes);
   };
 
-  return <div>
-    <Checkbox 
-      onClick={handleSelectAll}
-      checked={allRowsSelected}
-      onChange={handleSelectAll}
-    />
-    <IconButton onClick={handleSave}>
-      <SaveOutlined />
-    </IconButton>
-  </div>;
+  return (
+    <div>
+      <Checkbox 
+        onClick={handleSelectAll}
+        checked={allRowsSelected}
+        onChange={handleSelectAll}
+      />
+      <IconButton onClick={handleSave}>
+        <SaveOutlined />
+      </IconButton>
+    </div>
+  );
 };
 
 export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
@@ -391,6 +384,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       lockPinned: true,
       resizable: false,
       sortable: false,
+      cellStyle: { backgroundColor: '#E8E8E8' },
       headerComponent: HeaderComponent,
       headerComponentParams: {
         addRowToSelectedRows,
@@ -400,7 +394,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
         addRowToSelectedRows,
         removeRowFromSelectedRows
       },
-      cellRenderer: (params: SaveButtonCellParams) => {
+      cellRenderer: (params: RehireForfeituresSaveButtonCellParams) => {
         if (!params.data.isDetail) {
           return '';
         }

@@ -5,7 +5,7 @@ import { useLazyGetRehireForfeituresQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import useFiscalCalendarYear from "../../../hooks/useFiscalCalendarYear";
-import { StartAndEndDateRequest } from "../../../reduxstore/types";
+import { StartAndEndDateRequest, RehireForfeituresEditedValues, RehireForfeituresSelectedRow } from "../../../reduxstore/types";
 import { GetDetailColumns, GetMilitaryAndRehireForfeituresColumns } from "./RehireForfeituresGridColumns";
 import ReportSummary from "../../../components/ReportSummary";
 import Grid2 from "@mui/material/Grid2";
@@ -14,21 +14,6 @@ interface MilitaryAndRehireForfeituresGridSearchProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
   resetPageFlag: boolean;
-}
-
-interface GridRowData {
-  isDetail: boolean;
-  badgeNumber: number;
-  profitYear?: number;
-  suggestedForfeit?: number;
-  [key: string]: any;
-}
-
-interface EditedValues {
-  [key: string]: {
-    value: number;
-    hasError: boolean;
-  };
 }
 
 const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProps> = ({
@@ -43,9 +28,9 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
     isSortDescending: false
   });
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
-  const [selectedRows, setSelectedRows] = useState<GridRowData[]>([]);
+  const [selectedRows, setSelectedRows] = useState<RehireForfeituresSelectedRow[]>([]);
   const [gridApi, setGridApi] = useState<GridApi | null>(null);
-  const [editedValues, setEditedValues] = useState<EditedValues>({});
+  const [editedValues, setEditedValues] = useState<RehireForfeituresEditedValues>({});
   const fiscalCalendarYear = useFiscalCalendarYear();
   const { rehireForfeitures, rehireForfeituresQueryParams } = useSelector((state: RootState) => state.yearsEnd);
 
@@ -58,20 +43,21 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
   const addRowToSelectedRows = useCallback((id: number) => {
     if (gridApi) {
       const node = gridApi.getRowNode(id.toString());
-      if (node) {
-        setSelectedRows(prev => [...prev, node.data]);
+      if (node && node.data.isDetail) {
+        const selectedRow: RehireForfeituresSelectedRow = {
+          id,
+          badgeNumber: node.data.badgeNumber,
+          profitYear: node.data.profitYear,
+          suggestedForfeit: node.data.suggestedForfeit
+        };
+        setSelectedRows(prev => [...prev.filter(row => row.id !== id), selectedRow]);
       }
     }
   }, [gridApi]);
 
   const removeRowFromSelectedRows = useCallback((id: number) => {
-    if (gridApi) {
-      const node = gridApi.getRowNode(id.toString());
-      if (node) {
-        setSelectedRows(prev => prev.filter(row => row.badgeNumber !== node.data.badgeNumber));
-      }
-    }
-  }, [gridApi]);
+    setSelectedRows(prev => prev.filter(row => row.id !== id));
+  }, []);
 
   const updateEditedValue = useCallback((rowKey: string, value: number, hasError: boolean) => {
     setEditedValues(prev => ({
@@ -136,10 +122,8 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
 
   // Sort handler that immediately triggers a search with the new sort parameters
   const sortEventHandler = (update: ISortParams) => {
-    setSortParams(update); // Update state for future reference
-    setPageNumber(0); // Reset to first page when sorting
-
-    // Immediately perform search with the new sort params
+    setSortParams(update);
+    setPageNumber(0);
     performSearch(0, update.sortBy, update.isSortDescending);
   };
 
@@ -159,7 +143,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
   const gridData = useMemo(() => {
     if (!rehireForfeitures?.response?.results) return [];
 
-    const rows: GridRowData[] = [];
+    const rows = [];
 
     for (const row of rehireForfeitures.response.results) {
       const hasDetails = row.details && row.details.length > 0;
@@ -175,18 +159,15 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
       // Add detail rows if expanded
       if (hasDetails && expandedRows[row.badgeNumber.toString()]) {
         for (const detail of row.details) {
-          const detailRow: GridRowData = {
+          rows.push({
             ...row,
             ...detail,
             isDetail: true,
             isExpandable: false,
             isExpanded: false,
             parentId: row.badgeNumber,
-            // Keep original value, let valueGetter handle edited values
             suggestedForfeit: (detail as any).suggestedForfeit || 0
-          };
-
-          rows.push(detailRow);
+          });
         }
       }
     }
@@ -219,7 +200,6 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
       pinned: "left" as const
     };   
 
-    // Combine all columns
     return [expansionColumn, ...mainColumns, ...detailColumns];
   }, [mainColumns, detailColumns]);
 
@@ -232,11 +212,6 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
           }
           .invalid-cell {
             background-color: #fff6f6;
-          }
-          .validation-error {
-            color: #d32f2f;
-            font-size: 0.75rem;
-            margin-top: 3px;
           }
         `}
       </style>
