@@ -1,4 +1,6 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
@@ -17,7 +19,6 @@ namespace Demoulas.ProfitSharing.Services.Reports;
 public class FrozenReportService : IFrozenReportService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
-    private readonly ContributionService _contributionService;
     private readonly TotalService _totalService;
     private readonly ICalendarService _calendarService;
     private readonly IDemographicReaderService _demographicReaderService;
@@ -27,7 +28,6 @@ public class FrozenReportService : IFrozenReportService
     public FrozenReportService(
         IProfitSharingDataContextFactory dataContextFactory,
         ILoggerFactory loggerFactory,
-        ContributionService contributionService,
         TotalService totalService,
         ICalendarService calendarService,
         IDemographicReaderService demographicReaderService,
@@ -35,7 +35,6 @@ public class FrozenReportService : IFrozenReportService
     )
     {
         _dataContextFactory = dataContextFactory;
-        _contributionService = contributionService;
         _totalService = totalService;
         _calendarService = calendarService;
         _demographicReaderService = demographicReaderService;
@@ -61,26 +60,53 @@ public class FrozenReportService : IFrozenReportService
             {
                 // Create base query with appropriate demographics data (frozen or current)
                 var demographicExpression = await _demographicReaderService.BuildDemographicQuery(ctx, req.UseFrozenData);
-
+                var lastProfitYear = (short)(req.ProfitYear - 1);
                 var combinedQuery = from d in demographicExpression
                                     join pp in ctx.PayProfits on d.Id equals pp.DemographicId
                                     join lastYearPp in ctx.PayProfits on new { DemographicId = d.Id, ProfitYear = (short)(req.ProfitYear - 1) }
                                         equals new { DemographicId = lastYearPp.DemographicId, ProfitYear = lastYearPp.ProfitYear } into lastYearPpGroup
                                     from lastYearPp in lastYearPpGroup.DefaultIfEmpty()
+                                    join lyBalTmp in _totalService.GetTotalBalanceSet(ctx, lastProfitYear) on d.Ssn equals lyBalTmp.Ssn into lyBalGroup
+                                    from lyBal in lyBalGroup.DefaultIfEmpty()
+                                    join distTmp in (
+                                        from pd in ctx.ProfitDetails
+                                        where pd.ProfitYear == lastProfitYear &&
+                                              pd.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id
+                                        group pd by pd.Ssn into pd_g
+                                        select new { pd_g.Key, Total = pd_g.Sum(x => x.Forfeiture) }
+                                    ) on d.Ssn equals distTmp.Key into distGroup
+                                    from dist in distGroup.DefaultIfEmpty()
                                     where pp.ProfitYear == req.ProfitYear
+                                            && (lastYearPp.PointsEarned > 0
+                                                || lyBal.Total > 0
+                                                || dist.Total > 0)
+
                                     select new
                                     {
                                         d.BadgeNumber,
                                         d.Ssn,
-                                        EmployeeName = d.ContactInfo.FullName ?? "",
-                                        LastYearIncome = lastYearPp != null ? lastYearPp.CurrentIncomeYear : 0m,
-                                        MetHoursRequirement = lastYearPp != null &&
-                                            (lastYearPp.HoursExecutive + lastYearPp.CurrentHoursYear) >= hoursWorkedRequirement
+                                        EmployeeName = d.ContactInfo.FullName,
+                                        LastYearIncome = lastYearPp.CurrentIncomeYear,
+                                        LastYearHours = lastYearPp.CurrentHoursYear,
+                                        LastYearExecutiveHours = lastYearPp.HoursExecutive,
+                                        Forfeiture = (decimal?)dist.Total,
+                                        Balance = lyBal.Total,
                                     };
+                var minHours = ReferenceData.MinimumHoursForContribution();
+                var totals = await (
+                    from c in combinedQuery
+                    group c by true into g
+                    select new
+                    {
+                        Count = g.Count(),
+                        TotalForfeitures = g.Sum(x => x.Forfeiture ?? 0),
+                        TotalIncomeLastYearForForfeitPoints = g.Where(x=>x.LastYearHours + x.LastYearExecutiveHours > minHours).Sum(x => x.LastYearIncome),
+                        TotalBalanceForEarningPoints = g.Where(x=> x.LastYearHours + x.LastYearExecutiveHours > minHours).Sum(x => x.Balance ?? 0m),
+                        TotalBalance = g.Sum(x => x.Balance ?? 0m)
+                    }
+                ).FirstOrDefaultAsync(cancellationToken);
 
-                var totalCount = await combinedQuery.CountAsync(cancellationToken);
-
-                if (totalCount == 0)
+                if (totals == default || totals.Count == 0)
                 {
                     return new ForfeitureAndPointsDbResponse()
                     {
@@ -92,56 +118,6 @@ public class FrozenReportService : IFrozenReportService
                         Totals = new ForfeitureAndPointsTotals { TotalForfeitures = 0m, TotalForfeitPoints = 0, TotalEarningPoints = 0 }
                     };
                 }
-
-                var allBadgeNumbers = await combinedQuery.Select(x => x.BadgeNumber).ToListAsync(cancellationToken);
-
-                var netBalances = await _contributionService.GetNetBalance(req.ProfitYear, allBadgeNumbers.ToHashSet(), cancellationToken);
-
-                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx, req.UseFrozenData);
-                // Get forfeitures for current year
-                var forfeitures = await ctx.ProfitDetails
-                    .Join(demographics, pd => pd.Ssn, d => d.Ssn, (pd, d) => new { pd, d })
-                    .Where(x => x.pd.ProfitYear == req.ProfitYear &&
-                                x.pd.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id)
-                    .GroupBy(x => x.d.BadgeNumber)
-                    .Select(g => new { g.Key, SumValue = g.Sum(x => x.pd.Forfeiture) })
-                    .ToDictionaryAsync(x => x.Key, x => x.SumValue, cancellationToken);
-
-                var currentYearDetails = await (from pd in ctx.ProfitDetails
-                                                join d in demographics on pd.Ssn equals d.Ssn
-                                                where pd.ProfitYear == req.ProfitYear && allBadgeNumbers.Contains(d.BadgeNumber)
-                                                group pd by new { BadgeNumber = d.BadgeNumber }
-                    into pd_g
-                                                select new
-                                                {
-                                                    pd_g.Key.BadgeNumber,
-                                                    loan1Total =
-                                                        pd_g.Where(x =>
-                                                            new[]
-                                                                {
-                                    ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id,
-                                    ProfitCode.Constants.OutgoingDirectPayments.Id
-                                                                }
-                                                                .Contains(x.ProfitCodeId) ||
-                                                            (x.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment) &&
-                                                            x.CommentTypeId != CommentType.Constants.TransferOut).Sum(x => x.Forfeiture),
-                                                    forfeitTotal =
-                                                        pd_g.Where(x => x.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures)
-                                                            .Sum(x => x.Forfeiture),
-                                                    loan2Total =
-                                                        pd_g.Where(x => x.ProfitCodeId == ProfitCode.Constants.OutgoingXferBeneficiary)
-                                                            .Sum(x => x.Forfeiture)
-                                                }).ToDictionaryAsync(x => x.BadgeNumber, x => x, cancellationToken);
-
-                decimal totalForfeitures = forfeitures.Values.Sum();
-
-                var eligibleForForfeitPoints = await combinedQuery
-                    .Where(x => x.MetHoursRequirement)
-                    .Select(x => new { x.BadgeNumber, x.LastYearIncome })
-                    .ToListAsync(cancellationToken);
-
-                int totalForfeitPoints = eligibleForForfeitPoints
-                    .Sum(x => Convert.ToInt32(Math.Round(x.LastYearIncome / 100, 0, MidpointRounding.AwayFromZero)));
 
                 var profitCodeIds = new[]
                 {
@@ -158,7 +134,7 @@ public class FrozenReportService : IFrozenReportService
                 };
 
                 var totalAllocations = await (
-                    from d in demographics
+                    from d in demographicExpression
                     join pd in ctx.ProfitDetails on d.Ssn equals pd.Ssn
                     where pd.ProfitYear == req.ProfitYear &&
                           profitCodeIds.Contains(pd.ProfitCodeId)
@@ -174,75 +150,30 @@ public class FrozenReportService : IFrozenReportService
                     }
                 ).SingleOrDefaultAsync(cancellationToken);
 
-                decimal? totalBalance = await (
-                    from b in _totalService.GetTotalBalanceSet(ctx, req.ProfitYear)
-                    group b by true into g
-                    select g.Sum(x=>x.Total)
-                ).SingleOrDefaultAsync(cancellationToken);
-
-                int totalEarningPoints = 0;
-
-                foreach (var badgeNumber in allBadgeNumbers)
-                {
-                    if (netBalances.TryGetValue(badgeNumber, out var netBalance) &&
-                        currentYearDetails.TryGetValue(badgeNumber, out var cy))
-                    {
-                        decimal points = (netBalance.TotalContributions +
-                                      netBalance.TotalEarnings +
-                                      netBalance.TotalForfeitures -
-                                      netBalance.TotalPayments) -
-                                     (cy.loan1Total - cy.loan2Total - cy.forfeitTotal);
-
-                        totalEarningPoints += Convert.ToInt32(Math.Round(points / 100, 0, MidpointRounding.AwayFromZero));
-                    }
-                }
-
-                // Get paginated results - @RUSS/Backend team - should totals reflect only paginated dataset or all?
-                var paginatedData = await combinedQuery
-                    .OrderBy(x => x.EmployeeName)
-                    .Skip(req.Skip ?? 0)
-                    .Take(req.Take ?? int.MaxValue)
-                    .ToListAsync(cancellationToken);
+                // Get paginated results 
+                var paginatedData = await combinedQuery.ToPaginationResultsAsync(req, cancellationToken);
 
                 var results = new List<ForfeituresAndPointsForYearResponse>();
 
-                foreach (var item in paginatedData)
+                foreach (var item in paginatedData.Results)
                 {
                     var result = new ForfeituresAndPointsForYearResponse
                     {
                         BadgeNumber = item.BadgeNumber,
                         EmployeeName = item.EmployeeName,
                         Ssn = item.Ssn.MaskSsn(),
-                        Forfeitures = 0,
+                        Forfeitures = item.Forfeiture,
                         ForfeitPoints = 0,
                         EarningPoints = 0
                     };
 
-                    // Calculate earning points
-                    if (netBalances.TryGetValue(item.BadgeNumber, out var netBalance) &&
-                        currentYearDetails.TryGetValue(item.BadgeNumber, out var cy))
-                    {
-                        decimal points = (netBalance.TotalContributions +
-                                      netBalance.TotalEarnings +
-                                      netBalance.TotalForfeitures -
-                                      netBalance.TotalPayments) -
-                                     (cy.loan1Total - cy.loan2Total - cy.forfeitTotal);
-
-                        result.EarningPoints = Convert.ToInt16(Math.Round(points / 100, 0, MidpointRounding.AwayFromZero));
-                    }
-
                     // Calculate and set forfeit points from last year
-                    if (item.MetHoursRequirement)
-                    {
+                    //if (item.MetHoursRequirement)
+                    //{
                         result.ForfeitPoints = Convert.ToInt16(
                             Math.Round(item.LastYearIncome / 100, 0, MidpointRounding.AwayFromZero));
-                    }
-
-                    // Set forfeitures
-                    if (forfeitures.TryGetValue(item.BadgeNumber, out var forfeiture))
-                    {
-                        result.Forfeitures = forfeiture;
-                    }
+                        result.EarningPoints = Convert.ToInt16(Math.Round((item.Balance ?? 0m) / 100, 0, MidpointRounding.AwayFromZero));
+                    //}
 
                     // Only include records with non-zero values
                     if (result.EarningPoints != 0 || result.ForfeitPoints != 0 || result.Forfeitures != 0)
@@ -256,17 +187,17 @@ public class FrozenReportService : IFrozenReportService
                     Pagination = new PaginatedResponseDto<ForfeituresAndPointsForYearResponse>(req)
                     {
                         Results = results,
-                        Total = totalCount
+                        Total = totals.Count
                     },
                     Totals = new ForfeitureAndPointsTotals()
                     {
-                        TotalForfeitures = totalForfeitures,
-                        TotalForfeitPoints = totalForfeitPoints,
-                        TotalEarningPoints = totalEarningPoints,
+                        TotalForfeitures = totals.TotalForfeitures,
+                        TotalForfeitPoints = Convert.ToInt32(Math.Round(totals.TotalIncomeLastYearForForfeitPoints / 100m, 0, MidpointRounding.AwayFromZero)),
+                        TotalEarningPoints = Convert.ToInt32(Math.Round(totals.TotalBalanceForEarningPoints / 100m, 0, MidpointRounding.AwayFromZero)),
                         AllocationsFromTotals = (decimal)(totalAllocations?.AllocationFrom ?? 0),
                         AllocationsToTotals = (decimal)(totalAllocations?.AllocationTo ?? 0),
                         DistributionTotals = (decimal)(totalAllocations?.Distributions ?? 0),
-                        TotalProfitSharingBalance = (decimal)(totalBalance ?? 0m)
+                        TotalProfitSharingBalance = totals.TotalBalance,
                     }
                 };
             });
