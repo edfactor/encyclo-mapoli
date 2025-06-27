@@ -11,7 +11,7 @@ import {
   RehireForfeituresSaveButtonCellParams, 
   RehireForfeituresUpdatePayload 
 } from "../../../reduxstore/types";
-import { SuggestedForfeitEditor, SuggestedForfeitCellRenderer } from "../../../components/SuggestedForfeitComponents";
+import { SuggestedForfeitEditor, SuggestedForfeitCellRenderer } from "../../../components/SuggestedForfeiture";
 
 export const HeaderComponent: React.FC<RehireForfeituresHeaderComponentProps> = (props) => {
   const [allRowsSelected, setAllRowsSelected] = useState(false);
