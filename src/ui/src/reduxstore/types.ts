@@ -1326,6 +1326,8 @@ export interface CreateBeneficiaryRequest {
     percentage: number;
 }
 
+
+
 export interface CreateBeneficiaryResponse {
     beneficiaryId: number;
     psnSuffix: number;
@@ -1335,6 +1337,41 @@ export interface CreateBeneficiaryResponse {
     relationship: string | null;
     kindId: string | null;
     percent: number;
+}
+
+export interface UpdateBeneficiaryRequest extends UpdateBeneficiaryContactRequest {
+    relationship: string;
+    kindId: string;
+    percentage: number;
+}
+
+export interface UpdateBeneficiaryResponse {
+    badgeNumber: number;
+    demographicId: number;
+    beneficiaryContactId: number;
+    relationship: string | null;
+    kindId: string | null;
+    percent: number;
+}
+
+export interface UpdateBeneficiaryContactRequest {
+    id: number;
+    contactSsn: number;
+    dateOfBirth: string;
+    street1: string;
+    street2: string | null;
+    street3: string | null;
+    street4: string | null;
+    city: string;
+    state: string;
+    postalCode: string;
+    countryIso: string | null;
+    firstName: string;
+    lastName: string;
+    middleName: string | null;
+    phoneNumber: string | null;
+    mobileNumber: string | null;
+    emailAddress: string | null;
 }
 
 

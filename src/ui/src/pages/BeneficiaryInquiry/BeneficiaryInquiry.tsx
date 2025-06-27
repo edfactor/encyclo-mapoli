@@ -11,7 +11,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import CreateBeneficiary from "./CreateBeneficiary";
 import { useLazyGetBeneficiarytypesQuery, useLazyGetBeneficiaryKindQuery } from "reduxstore/api/BeneficiariesApi";
-import { BeneficiaryKindDto, BeneficiaryTypeDto, MasterInquiryRequest } from "reduxstore/types";
+import { BeneficiaryDto, BeneficiaryKindDto, BeneficiaryTypeDto, MasterInquiryRequest } from "reduxstore/types";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import MasterInquiryMemberGrid from "pages/MasterInquiry/MasterInquiryMemberGrid";
@@ -31,6 +31,7 @@ const BeneficiaryInquiry = () => {
   const [selectedMember, setSelectedMember] = useState<{ memberType: number; id: number, ssn: number, badgeNumber: number, psnSuffix:number } | null>(null);
   const [noResults, setNoResults] = useState(false);
   const[change, setChange] = useState<number>(0);
+  const [selectedBeneficiary, setSelectedBeneficiary] = useState<BeneficiaryDto | undefined>();
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -51,6 +52,11 @@ const BeneficiaryInquiry = () => {
   const handleClose = () => {
     setOpen(false);
   };
+  const createOrUpdateBeneficiary = (data?:BeneficiaryDto) => {
+    setSelectedBeneficiary(data);
+    setOpen(true);
+
+  }
 
   useEffect(() => {
     if (token) {
@@ -88,7 +94,7 @@ const BeneficiaryInquiry = () => {
         >
           <DialogTitle>Add Beneficiary</DialogTitle>
           <DialogContent>
-            <CreateBeneficiary beneficiaryKind={beneficiaryKind} badgeNumber={selectedMember?.badgeNumber??0} psnSuffix={selectedMember?.psnSuffix??0} onSaveSuccess={onBeneficiarySaveSuccess}></CreateBeneficiary>
+            <CreateBeneficiary selectedBeneficiary={selectedBeneficiary} beneficiaryKind={beneficiaryKind} badgeNumber={selectedMember?.badgeNumber??0} psnSuffix={selectedMember?.psnSuffix??0} onSaveSuccess={onBeneficiarySaveSuccess}></CreateBeneficiary>
 
           </DialogContent>
         </Dialog>
@@ -140,12 +146,12 @@ const BeneficiaryInquiry = () => {
                 <Button
                   variant="contained"
                   color="primary"
-                  onClick={handleClickOpen}>
+                  onClick={()=>createOrUpdateBeneficiary(undefined)}>
                   Add Beneficiary
                 </Button>
               </div>
 
-              <BeneficiaryInquiryGrid count={change}  selectedMember={selectedMember}  />
+              <BeneficiaryInquiryGrid count={change}  selectedMember={selectedMember} createOrUpdateBeneficiary={createOrUpdateBeneficiary}  />
             </>
 
           )}

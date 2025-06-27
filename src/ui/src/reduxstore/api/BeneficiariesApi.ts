@@ -10,7 +10,9 @@ import {
     CreateBeneficiaryContactRequest,
     CreateBeneficiaryContactResponse,
     CreateBeneficiaryRequest,
-    CreateBeneficiaryResponse
+    CreateBeneficiaryResponse,
+    UpdateBeneficiaryRequest,
+    UpdateBeneficiaryResponse
 } from "reduxstore/types";
 import { createDataSourceAwareBaseQuery } from "./api";
 import { Paged } from "smart-ui-library";
@@ -97,8 +99,23 @@ export const BeneficiariesApi = createApi({
                     dispatch(setBeneficiaryError("Failed to create beneficiary contact"));
                 }
             }
+        }),
+        updateBeneficiary: builder.query<UpdateBeneficiaryResponse, UpdateBeneficiaryRequest>({
+            query: (request) => ({
+                url: `/beneficiaries`,
+                method: "PUT",
+                body: request
+            }),
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+                try {
+                    const { data } = await queryFulfilled;
+                } catch (err) {
+                    console.error("Failed to update beneficiary", err);
+                    dispatch(setBeneficiaryError("Failed to update beneficiary"));
+                }
+            }
         })
     })
 });
 
-export const { useLazyGetBeneficiariesQuery, useLazyCreateBeneficiariesQuery, useLazyGetBeneficiarytypesQuery, useLazyCreateBeneficiaryContactQuery, useLazyGetBeneficiaryKindQuery } = BeneficiariesApi;
+export const { useLazyUpdateBeneficiaryQuery, useLazyGetBeneficiariesQuery, useLazyCreateBeneficiariesQuery, useLazyGetBeneficiarytypesQuery, useLazyCreateBeneficiaryContactQuery, useLazyGetBeneficiaryKindQuery } = BeneficiariesApi;

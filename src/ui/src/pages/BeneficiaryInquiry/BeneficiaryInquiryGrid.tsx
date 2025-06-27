@@ -15,9 +15,10 @@ interface BeneficiaryInquiryGridProps {
   // setInitialSearchLoaded: (loaded: boolean) => void;
   selectedMember: any;
   count: number;
+  createOrUpdateBeneficiary: (selectedMember:BeneficiaryDto)=>any;
 }
 
-const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({ selectedMember, count }) => {
+const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({ selectedMember, count, createOrUpdateBeneficiary }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [_sortParams, setSortParams] = useState<ISortParams>({
@@ -66,7 +67,7 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({ selecte
     });
   };
   const actionButtons = (data:any): JSX.Element => {
-    return (<><Button onClick={()=>{console.log(data)}} size="small" color="primary"><Edit fontSize="small" /></Button><Button size="small" color="error"><Delete fontSize="small" /></Button></>)
+    return (<><Button onClick={()=>{createOrUpdateBeneficiary(data)}} size="small" color="primary"><Edit fontSize="small" /></Button><Button size="small" color="error"><Delete fontSize="small" /></Button></>)
   }
 
   const columnDefs = useMemo(() => {
