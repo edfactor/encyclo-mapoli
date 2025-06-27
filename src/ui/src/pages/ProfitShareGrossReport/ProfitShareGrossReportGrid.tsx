@@ -54,17 +54,18 @@ const ProfitShareGrossReportGrid: React.FC<ProfitShareGrossReportGridProps> = ({
   const onSearch = useCallback(async () => {
     const request: GrossWagesReportDto = {
       profitYear: grossWagesReportQueryParams?.profitYear ?? 0,
-      pagination: { skip: pageNumber * pageSize, take: pageSize }
+      pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: sortParams.sortBy, isSortDescending: sortParams.isSortDescending },
+      minGrossAmount: grossWagesReportQueryParams?.minGrossAmount ?? 0,
     };
 
     await triggerSearch(request, false);
-  }, [pageNumber, pageSize, triggerSearch, grossWagesReportQueryParams?.profitYear]);
+  }, [pageNumber, pageSize, triggerSearch, grossWagesReportQueryParams?.profitYear, grossWagesReportQueryParams?.minGrossAmount, sortParams]);
 
   useEffect(() => {
     if (initialSearchLoaded) {
       onSearch();
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, onSearch]);
+  }, [initialSearchLoaded, pageNumber, pageSize, onSearch, sortParams]);
 
   return (
     <>
@@ -80,7 +81,7 @@ const ProfitShareGrossReportGrid: React.FC<ProfitShareGrossReportGridProps> = ({
           <DSMGrid
             preferenceKey={"PROFIT_SHARE_GROSS_REPORT"}
             isLoading={isFetching}
-            handleSortChanged={(_params) => { }}
+            handleSortChanged={sortEventHandler}
             providedOptions={{
               rowData: grossWagesReport?.response.results,
               pinnedTopRowData: [
