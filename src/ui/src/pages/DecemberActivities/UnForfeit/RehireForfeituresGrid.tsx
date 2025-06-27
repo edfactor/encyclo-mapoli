@@ -9,6 +9,7 @@ import { StartAndEndDateRequest, RehireForfeituresEditedValues, RehireForfeiture
 import { GetDetailColumns, GetMilitaryAndRehireForfeituresColumns } from "./RehireForfeituresGridColumns";
 import ReportSummary from "../../../components/ReportSummary";
 import Grid2 from "@mui/material/Grid2";
+import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 
 interface MilitaryAndRehireForfeituresGridSearchProps {
   initialSearchLoaded: boolean;
@@ -32,6 +33,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
   const [gridApi, setGridApi] = useState<GridApi | null>(null);
   const [editedValues, setEditedValues] = useState<RehireForfeituresEditedValues>({});
   const fiscalCalendarYear = useFiscalCalendarYear();
+  const selectedProfitYear = useDecemberFlowProfitYear();
   const { rehireForfeitures, rehireForfeituresQueryParams } = useSelector((state: RootState) => state.yearsEnd);
 
   const [triggerSearch, { isFetching }] = useLazyGetRehireForfeituresQuery();
@@ -137,7 +139,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
 
   // Get the main and detail columns
   const mainColumns = useMemo(() => GetMilitaryAndRehireForfeituresColumns(), []);
-  const detailColumns = useMemo(() => GetDetailColumns(addRowToSelectedRows, removeRowFromSelectedRows), [addRowToSelectedRows, removeRowFromSelectedRows]);
+  const detailColumns = useMemo(() => GetDetailColumns(addRowToSelectedRows, removeRowFromSelectedRows, selectedProfitYear), [addRowToSelectedRows, removeRowFromSelectedRows, selectedProfitYear]);
 
   // Create the grid data with expandable rows
   const gridData = useMemo(() => {

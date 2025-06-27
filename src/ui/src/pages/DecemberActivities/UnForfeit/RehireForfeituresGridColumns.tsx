@@ -1,106 +1,17 @@
-import { ColDef, ICellRendererParams, IHeaderParams, ICellEditorParams } from "ag-grid-community";
+import { ColDef, ICellRendererParams, IHeaderParams } from "ag-grid-community";
 import { agGridNumberToCurrency, formatNumberWithComma } from "smart-ui-library";
 import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
 import { mmDDYYFormat } from "utils/dateUtils";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
-import { Checkbox, IconButton, TextField, Tooltip } from "@mui/material";
-import { SaveOutlined, ErrorOutline } from "@mui/icons-material";
-import { useState, useRef, useEffect } from "react";
+import { Checkbox, IconButton } from "@mui/material";
+import { SaveOutlined } from "@mui/icons-material";
+import { useState } from "react";
 import { 
   RehireForfeituresHeaderComponentProps, 
   RehireForfeituresSaveButtonCellParams, 
   RehireForfeituresUpdatePayload 
 } from "../../../reduxstore/types";
-
-
-
-const validateSuggestedForfeit = (value: number): string | null => {
-  if (value > 1000) {
-    return 'Suggested forfeit cannot exceed $1,000';
-  }
-  return null;
-};
-
-function SuggestedForfeitEditor(props: ICellEditorParams) {
-  const [value, setValue] = useState(props.value || 0);
-  const [error, setError] = useState<string | null>(null);
-  const refInput = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    refInput.current?.focus();
-  }, []);
-
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = parseFloat(event.target.value) || 0;
-    setValue(newValue);
-    const newError = validateSuggestedForfeit(newValue);
-    setError(newError);
-    
-    // Update the context
-    const rowKey = `${props.data.badgeNumber}-${props.data.profitYear}`;
-    props.context?.updateEditedValue?.(rowKey, newValue, !!newError);
-  };
-
-  const handleKeyDown = (event: React.KeyboardEvent) => {
-    if (event.key === 'Enter' && !error) {
-      props.api.stopEditing();
-    }
-    if (event.key === 'Escape') {
-      setValue(props.value || 0);
-      props.api.stopEditing();
-    }
-  };
-
-  const getValue = () => value;
-
-  return (
-    <div style={{ display: 'flex', alignItems: 'center'}}>
-      {error && (
-        <Tooltip title={error} placement="top">
-          <ErrorOutline sx={{ color: '#d32f2f', fontSize: 20, marginRight: '8px' }} />
-        </Tooltip>
-      )}
-      <TextField
-        style={{ flex: 1 }}
-        inputRef={refInput}
-        type="number"
-        value={value}
-        onChange={handleChange}
-        onKeyDown={handleKeyDown}
-        error={!!error}
-        variant="outlined"
-        fullWidth
-        inputProps={{ min: 0, step: 0.01 }}
-      />
-    </div>
-  );
-}
-
-function SuggestedForfeitCellRenderer(params: ICellRendererParams) {
-  if (!params.data?.isDetail) {
-    return null;
-  }
-
-  const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}`;
-  const hasError = params.context?.editedValues?.[rowKey]?.hasError;
-  const currentValue = params.context?.editedValues?.[rowKey]?.value ?? params.data.suggestedForfeit;
-  const formattedValue = new Intl.NumberFormat('en-US', { 
-    style: 'currency', 
-    currency: 'USD' 
-  }).format(currentValue || 0);
-  const errorMessage = hasError ? validateSuggestedForfeit(currentValue) : null;
-
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-      {hasError && errorMessage && (
-        <Tooltip title={errorMessage} placement="top">
-          <ErrorOutline sx={{ color: '#d32f2f', fontSize: 16, marginRight: '4px' }} />
-        </Tooltip>
-      )}
-      <span>{formattedValue}</span>
-    </div>
-  );
-}
+import { SuggestedForfeitEditor, SuggestedForfeitCellRenderer } from "../../../components/SuggestedForfeitComponents";
 
 export const HeaderComponent: React.FC<RehireForfeituresHeaderComponentProps> = (props) => {
   const [allRowsSelected, setAllRowsSelected] = useState(false);
@@ -269,7 +180,7 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
   ];
 };
 
-export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, removeRowFromSelectedRows: (id: number) => void): ColDef[] => {
+export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, removeRowFromSelectedRows: (id: number) => void, selectedProfitYear: number): ColDef[] => {
   return [
     {
       headerName: "Profit Year",
@@ -341,7 +252,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       valueFormatter: agGridNumberToCurrency
     },
     {
-      headerName: "Suggested Forfeit",
+      headerName: "Suggested Unforfeiture",
       field: "suggestedForfeit",
       colId: "suggestedForfeit",
       width: 150,
@@ -354,9 +265,9 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       },
       resizable: true,
       sortable: false,
-      editable: ({ node }) => node.data.isDetail,
+      editable: ({ node }) => node.data.isDetail && node.data.profitYear === selectedProfitYear,
       cellEditor: SuggestedForfeitEditor,
-      cellRenderer: SuggestedForfeitCellRenderer,
+      cellRenderer: (params: ICellRendererParams) => SuggestedForfeitCellRenderer({ ...params, selectedProfitYear }),
       valueFormatter: agGridNumberToCurrency,
       valueGetter: (params) => {
         if (!params.data.isDetail) return params.data.suggestedForfeit;
@@ -395,7 +306,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
         removeRowFromSelectedRows
       },
       cellRenderer: (params: RehireForfeituresSaveButtonCellParams) => {
-        if (!params.data.isDetail) {
+        if (!params.data.isDetail || params.data.profitYear !== selectedProfitYear) {
           return '';
         }
         const id = Number(params.node?.id) || -1;
