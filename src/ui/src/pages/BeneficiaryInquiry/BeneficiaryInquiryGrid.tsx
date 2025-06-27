@@ -1,5 +1,5 @@
-import { Typography } from "@mui/material";
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { Button, Typography } from "@mui/material";
+import { useState, useMemo, useCallback, useEffect, JSX } from "react";
 import { useSelector } from "react-redux";
 import { useLazySearchProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
 import { RootState } from "reduxstore/store";
@@ -8,6 +8,8 @@ import { BeneficiaryInquiryGridColumns } from "./BeneficiaryInquiryGridColumn";
 import { BeneficiaryDto, BeneficiaryRequestDto, MasterInquiryRequest } from "reduxstore/types";
 import { CAPTIONS } from "../../constants";
 import { useLazyGetBeneficiariesQuery } from "reduxstore/api/BeneficiariesApi";
+import { ICellRendererParams } from "ag-grid-community";
+import { ChevronLeft, Close, ExpandLess, ExpandMore, Edit, Delete } from "@mui/icons-material";
 interface BeneficiaryInquiryGridProps {
   // initialSearchLoaded: boolean;
   // setInitialSearchLoaded: (loaded: boolean) => void;
@@ -15,7 +17,7 @@ interface BeneficiaryInquiryGridProps {
   count: number;
 }
 
-const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({selectedMember, count }) => {
+const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({ selectedMember, count }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [_sortParams, setSortParams] = useState<ISortParams>({
@@ -36,9 +38,9 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({selected
   //   [beneficiaryRequest, pageSize, _sortParams]
   // );1
   const createBeneficiaryInquiryRequest =
-    (skip: number, sortBy: string, isSortDescending: boolean,take:number, badgeNumber: number, psnSuffix:number): BeneficiaryRequestDto | null => {
+    (skip: number, sortBy: string, isSortDescending: boolean, take: number, badgeNumber: number, psnSuffix: number): BeneficiaryRequestDto | null => {
       let request: BeneficiaryRequestDto = {
-        badgeNumber : badgeNumber,
+        badgeNumber: badgeNumber,
         psnSuffix: psnSuffix,
         isSortDescending: isSortDescending,
         skip: skip,
@@ -56,15 +58,29 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({selected
     setSortParams(update);
     setPageNumber(0);
 
-    const request = createBeneficiaryInquiryRequest(0, update.sortBy, update.isSortDescending,25,selectedMember?.badgeNumber, selectedMember?.psnSuffix);
+    const request = createBeneficiaryInquiryRequest(0, update.sortBy, update.isSortDescending, 25, selectedMember?.badgeNumber, selectedMember?.psnSuffix);
     if (!request) return;
 
-    triggerSearch(request, false).unwrap().then((value)=>{
+    triggerSearch(request, false).unwrap().then((value) => {
       setBeneficiaryList(value);
     });
   };
+  const actionButtons = (data:any): JSX.Element => {
+    return (<><Button onClick={()=>{console.log(data)}} size="small" color="primary"><Edit fontSize="small" /></Button><Button size="small" color="error"><Delete fontSize="small" /></Button></>)
+  }
 
-  const columnDefs = useMemo(() => BeneficiaryInquiryGridColumns(), []);
+  const columnDefs = useMemo(() => {
+
+    var columns = BeneficiaryInquiryGridColumns();
+    return [{
+      headerName: "Actions",
+      field: "actions",
+      minWidth: 120,
+      headerClass: "center-align",
+      cellClass: "center-align",
+      cellRenderer: (params: ICellRendererParams) => { return actionButtons(params.data); }
+    }, ...columns];
+  }, [])
 
   // const onSearch = useCallback(async () => {
   //   const request = createBeneficiaryInquiryRequest(pageNumber * pageSize, _sortParams.sortBy, _sortParams.isSortDescending,badgeNumber);
@@ -79,21 +95,21 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({selected
   //   }
   // }, [pageNumber, pageSize, _sortParams, onSearch]);
 
-   const onSearch = useCallback(() => {
-    const request = createBeneficiaryInquiryRequest(pageNumber * pageSize, _sortParams.sortBy, _sortParams.isSortDescending,25,selectedMember?.badgeNumber, selectedMember?.psnSuffix);
+  const onSearch = useCallback(() => {
+    const request = createBeneficiaryInquiryRequest(pageNumber * pageSize, _sortParams.sortBy, _sortParams.isSortDescending, 25, selectedMember?.badgeNumber, selectedMember?.psnSuffix);
     if (!request) return;
 
-     triggerSearch(request, false).unwrap().then((value)=>{
+    triggerSearch(request, false).unwrap().then((value) => {
       setBeneficiaryList(value)
-     });
-  },[selectedMember]
-);
+    });
+  }, [selectedMember]
+  );
 
   useEffect(() => {
     if (hasToken) {
       onSearch();
     }
-  }, [selectedMember,pageNumber, pageSize, _sortParams, count]);
+  }, [selectedMember, pageNumber, pageSize, _sortParams, count]);
 
   return (
     <>
