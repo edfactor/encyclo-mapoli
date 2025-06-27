@@ -113,19 +113,14 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         )
         {
             var mainGroup = await details.Where(mainFilter).ToListAsync(cancellationToken);
-            var totalsGroup = mainGroup;
-            if (totalsFilter != null)
-            {
-                totalsGroup = await details.Where(totalsFilter).ToListAsync(cancellationToken);
-            }
+
             var mainAgg = AggregateDetails(mainGroup);
-            var totalsAgg = AggregateDetails(totalsGroup);
-            return new YearEndProfitSharingReportSummaryLineItem
+            var response = new YearEndProfitSharingReportSummaryLineItem
             {
                 Subgroup = subgroup,
                 LineItemPrefix = prefix,
                 LineItemTitle = title,
-                NumberOfMembers = totalsAgg.Count,
+                NumberOfMembers = mainAgg.Count,
                 BadgeNumbers = mainAgg.BadgeNumbers,
                 TotalWages = mainAgg.TotalWages,
                 TotalHours = mainAgg.TotalHours,
@@ -133,6 +128,15 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 TotalBalance = mainAgg.TotalBalance,
                 TotalPriorBalance = mainAgg.TotalPriorBalance
             };
+
+            if (totalsFilter != null)
+            {
+                List<YearEndProfitSharingReportDetail> totalsGroup = await details.Where(totalsFilter).ToListAsync(cancellationToken);
+                var totalsAgg = AggregateDetails(totalsGroup);
+                response.NumberOfMembers = totalsAgg.Count;
+            }
+
+            return response;
         }
 
         var activeDetails = await ActiveSummary(req);
@@ -307,8 +311,9 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             employeeQry = employeeQry.Where(e => e.BadgeNumber == badgeNumber);
         }
 
-        var balances = _totalService.GetTotalBalanceSet(ctx, req.ProfitYear);
-        var priorBalances = _totalService.GetTotalBalanceSet(ctx, (short)(req.ProfitYear - 1));
+        var beginningBalance = (short)(req.ProfitYear - 1);
+        var balances = _totalService.GetTotalBalanceSet(ctx, beginningBalance);
+        var priorBalances = _totalService.GetTotalBalanceSet(ctx, (short)(beginningBalance - 1));
         var employeeWithBalanceQry =
             from e in employeeQry
             join bal in balances on e.Ssn equals bal.Ssn into balTmp
@@ -390,7 +395,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         return reportId switch
         {
             1 => x =>
-                ((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.TerminationDate > fiscalEndDate)) &&
+                ((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate > fiscalEndDate)) &&
                 x.Hours >= 1000 && x.DateOfBirth <= birthday18 && x.DateOfBirth > birthday21,
             2 => x =>
                 ((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.TerminationDate > fiscalEndDate)) &&
