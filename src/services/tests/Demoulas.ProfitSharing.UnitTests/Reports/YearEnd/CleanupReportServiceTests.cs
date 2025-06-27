@@ -568,7 +568,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         var req = new FrozenProfitYearRequest() { ProfitYear = 2024, UseFrozenData = false };
         var response  =
             await ApiClient
-                .GETAsync<YearEndProfitSharingSummaryReportEndpoint,
+                .POSTAsync<YearEndProfitSharingSummaryReportEndpoint,
                     FrozenProfitYearRequest, YearEndProfitSharingReportSummaryResponse>(req);
 
         response.Response.StatusCode.ShouldBe(System.Net.HttpStatusCode.Unauthorized);
@@ -576,7 +576,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         response =
             await ApiClient
-                .GETAsync<YearEndProfitSharingSummaryReportEndpoint,
+                .POSTAsync<YearEndProfitSharingSummaryReportEndpoint,
                     FrozenProfitYearRequest, YearEndProfitSharingReportSummaryResponse>(req);
 
         response.Response.StatusCode.ShouldBe(System.Net.HttpStatusCode.OK);
