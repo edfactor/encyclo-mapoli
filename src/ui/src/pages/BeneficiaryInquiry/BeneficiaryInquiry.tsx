@@ -10,7 +10,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import CreateBeneficiary from "./CreateBeneficiary";
-import { useLazyGetBeneficiarytypesQuery, useLazyGetBeneficiaryKindQuery } from "reduxstore/api/BeneficiariesApi";
+import { useLazyGetBeneficiarytypesQuery, useLazyGetBeneficiaryKindQuery, useLazyDeleteBeneficiaryQuery } from "reduxstore/api/BeneficiariesApi";
 import { BeneficiaryDto, BeneficiaryKindDto, BeneficiaryTypeDto, MasterInquiryRequest } from "reduxstore/types";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
@@ -21,24 +21,38 @@ import MasterInquiryEmployeeDetails from "pages/MasterInquiry/MasterInquiryEmplo
 const BeneficiaryInquiry = () => {
   const { token, appUser, username: stateUsername } = useSelector((state: RootState) => state.security);
   const [triggerGetBeneficiaryKind] = useLazyGetBeneficiaryKindQuery();
-  const[triggerGetBeneficiaryType] = useLazyGetBeneficiarytypesQuery();
+  const [triggerGetBeneficiaryType] = useLazyGetBeneficiarytypesQuery();
+  const [triggerDeleteBeneficiary] = useLazyDeleteBeneficiaryQuery();
   const [open, setOpen] = useState(false);
   const [badgeNumber, setBadgeNumber] = useState(0);
   const [beneficiaryKind, setBeneficiaryKind] = useState<BeneficiaryKindDto[]>([]);
   const [beneficiaryType, setBeneficiaryType] = useState<BeneficiaryTypeDto[]>([]);
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [searchParams, setSearchParams] = useState<MasterInquiryRequest | null>(null);
-  const [selectedMember, setSelectedMember] = useState<{ memberType: number; id: number, ssn: number, badgeNumber: number, psnSuffix:number } | null>(null);
+  const [selectedMember, setSelectedMember] = useState<{ memberType: number; id: number, ssn: number, badgeNumber: number, psnSuffix: number } | null>(null);
   const [noResults, setNoResults] = useState(false);
-  const[change, setChange] = useState<number>(0);
+  const [change, setChange] = useState<number>(0);
   const [selectedBeneficiary, setSelectedBeneficiary] = useState<BeneficiaryDto | undefined>();
+
 
   const handleClickOpen = () => {
     setOpen(true);
   };
-  const onBadgeClick = (data:any)=> {
+  const onBadgeClick = (data: any) => {
     setSelectedMember(data);
-    setChange(change+1);
+    setChange(change + 1);
+  }
+
+  const deleteBeneficiary = (id: number) => {
+    var deleteConfirm = confirm('Are you sure you want to delete ?');
+    if (deleteConfirm) {
+      triggerDeleteBeneficiary({ id: id }).unwrap().then((res: any) => {
+        alert('deleted successfully!');
+      }).catch((err:any)=>{
+        alert(`Something went wrong! Error: ${err.data.title}`)
+      });
+    }
+
   }
 
   const currentBadge = (badgeNumber: number) => {
@@ -46,13 +60,13 @@ const BeneficiaryInquiry = () => {
   }
   const onBeneficiarySaveSuccess = () => {
     setOpen(false);
-    setChange(prev=>prev+1);
+    setChange(prev => prev + 1);
   }
 
   const handleClose = () => {
     setOpen(false);
   };
-  const createOrUpdateBeneficiary = (data?:BeneficiaryDto) => {
+  const createOrUpdateBeneficiary = (data?: BeneficiaryDto) => {
     setSelectedBeneficiary(data);
     setOpen(true);
 
@@ -63,9 +77,9 @@ const BeneficiaryInquiry = () => {
       triggerGetBeneficiaryKind({}).unwrap().then((data) => {
         setBeneficiaryKind(data.beneficiaryKindList ?? []);
       }).catch((reason) => { console.error(reason); });
-      triggerGetBeneficiaryType({}).unwrap().then((data)=>{
-        setBeneficiaryType(data.beneficiaryTypeList??[]);
-      }).catch((reason)=>console.error(reason));
+      triggerGetBeneficiaryType({}).unwrap().then((data) => {
+        setBeneficiaryType(data.beneficiaryTypeList ?? []);
+      }).catch((reason) => console.error(reason));
     }
 
 
@@ -94,7 +108,7 @@ const BeneficiaryInquiry = () => {
         >
           <DialogTitle>Add Beneficiary</DialogTitle>
           <DialogContent>
-            <CreateBeneficiary selectedBeneficiary={selectedBeneficiary} beneficiaryKind={beneficiaryKind} badgeNumber={selectedMember?.badgeNumber??0} psnSuffix={selectedMember?.psnSuffix??0} onSaveSuccess={onBeneficiarySaveSuccess}></CreateBeneficiary>
+            <CreateBeneficiary selectedBeneficiary={selectedBeneficiary} beneficiaryKind={beneficiaryKind} badgeNumber={selectedMember?.badgeNumber ?? 0} psnSuffix={selectedMember?.psnSuffix ?? 0} onSaveSuccess={onBeneficiarySaveSuccess}></CreateBeneficiary>
 
           </DialogContent>
         </Dialog>
@@ -146,12 +160,12 @@ const BeneficiaryInquiry = () => {
                 <Button
                   variant="contained"
                   color="primary"
-                  onClick={()=>createOrUpdateBeneficiary(undefined)}>
+                  onClick={() => createOrUpdateBeneficiary(undefined)}>
                   Add Beneficiary
                 </Button>
               </div>
 
-              <BeneficiaryInquiryGrid count={change}  selectedMember={selectedMember} createOrUpdateBeneficiary={createOrUpdateBeneficiary}  />
+              <BeneficiaryInquiryGrid count={change} selectedMember={selectedMember} createOrUpdateBeneficiary={createOrUpdateBeneficiary} deleteBeneficiary={deleteBeneficiary} />
             </>
 
           )}

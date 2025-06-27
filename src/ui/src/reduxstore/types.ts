@@ -1354,6 +1354,10 @@ export interface UpdateBeneficiaryResponse {
     percent: number;
 }
 
+export interface DeleteBeneficiaryRequest {
+    id: number;
+}
+
 export interface UpdateBeneficiaryContactRequest {
     id: number;
     contactSsn: number;
