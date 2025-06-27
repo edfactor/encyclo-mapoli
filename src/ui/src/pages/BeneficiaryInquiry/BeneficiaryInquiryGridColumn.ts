@@ -7,24 +7,24 @@ import { GRID_COLUMN_WIDTHS } from "../../constants";
 
 export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
   return [
-    {
-      headerName: "Badge Number",
-      field: "badgeNumber",
-      colId: "badgeNumber",
-      minWidth: 130,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true
-    },
-    {
-      headerName: "Psn Suffix",
-      field: "psnSuffix",
-      colId: "psnSuffix",
-      minWidth: 100,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
+    // {
+    //   headerName: "Badge Number",
+    //   field: "badgeNumber",
+    //   colId: "badgeNumber",
+    //   minWidth: 130,
+    //   headerClass: "center-align",
+    //   cellClass: "center-align",
+    //   resizable: true
+    // },
+    // {
+    //   headerName: "Psn Suffix",
+    //   field: "psnSuffix",
+    //   colId: "psnSuffix",
+    //   minWidth: 100,
+    //   headerClass: "left-align",
+    //   cellClass: "left-align",
+    //   resizable: true
+    // },
     {
       headerName: "Psn",
       field: "psn",

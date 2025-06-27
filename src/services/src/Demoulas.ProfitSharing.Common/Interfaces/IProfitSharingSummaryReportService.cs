@@ -6,7 +6,7 @@ namespace Demoulas.ProfitSharing.Common.Interfaces;
 public interface IProfitSharingSummaryReportService
 {
     Task<YearEndProfitSharingReportSummaryResponse> GetYearEndProfitSharingSummaryReportAsync(
-        FrozenProfitYearRequest req, CancellationToken cancellationToken = default);
+        ProfitYearRequest req, CancellationToken cancellationToken = default);
 
     Task<YearEndProfitSharingReportResponse> GetYearEndProfitSharingReportAsync(
         YearEndProfitSharingReportRequest req,

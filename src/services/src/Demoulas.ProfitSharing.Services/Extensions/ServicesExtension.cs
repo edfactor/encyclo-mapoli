@@ -50,6 +50,7 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<INegativeEtvaReportService, NegativeEtvaReportService>();
         _ = builder.Services.AddScoped<IProfitSharingSummaryReportService, ProfitSharingSummaryReportService>();
         _ = builder.Services.AddScoped<IBeneficiaryService, BeneficiaryService>();
+        _ = builder.Services.AddScoped<IAdhocBeneficiariesReport, AdhocBeneficiariesReport>();
         
 
 
