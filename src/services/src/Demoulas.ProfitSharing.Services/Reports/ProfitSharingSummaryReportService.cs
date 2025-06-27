@@ -75,18 +75,17 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Summary response with line items for each group.</returns>
     public async Task<YearEndProfitSharingReportSummaryResponse> GetYearEndProfitSharingSummaryReportAsync(
-        ProfitYearRequest req, CancellationToken cancellationToken = default)
+        BadgeNumberRequest req, CancellationToken cancellationToken = default)
     {
         var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
         var birthday18 = calInfo.FiscalEndDate.AddYears(-18);
         var birthday21 = calInfo.FiscalEndDate.AddYears(-21);
         
         // Helper to aggregate a list of details into summary values
-        static (int Count, HashSet<int> BadgeNumbers, decimal TotalWages, decimal TotalHours, int TotalPoints, decimal TotalBalance, decimal TotalPriorBalance) AggregateDetails(List<YearEndProfitSharingReportDetail> details)
+        static (int Count, decimal TotalWages, decimal TotalHours, int TotalPoints, decimal TotalBalance, decimal TotalPriorBalance) AggregateDetails(List<YearEndProfitSharingReportDetail> details)
         {
             return (
                 details.Count,
-                details.Select(g => g.BadgeNumber).ToHashSet(),
                 details.Sum(y => y.Wages),
                 details.Sum(y => y.Hours),
                 details.Sum(y => y.Points),
@@ -121,7 +120,6 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 LineItemPrefix = prefix,
                 LineItemTitle = title,
                 NumberOfMembers = mainAgg.Count,
-                BadgeNumbers = mainAgg.BadgeNumbers,
                 TotalWages = mainAgg.TotalWages,
                 TotalHours = mainAgg.TotalHours,
                 TotalPoints = mainAgg.TotalPoints,
@@ -188,8 +186,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 TotalHours = 0,
                 TotalPoints = 0,
                 TotalBalance = x.Sum(y => y.tot.Total ?? 0),
-                TotalPriorBalance = 0,
-                BadgeNumbers = new HashSet<int>()
+                TotalPriorBalance = 0
             }).FirstOrDefaultAsync(cancellationToken);
         });
         
@@ -274,7 +271,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
     {
         IQueryable<PayProfit> basePayProfits = ctx.PayProfits
             .Where(p => p.ProfitYear == req.ProfitYear)
-            .Include(p => p.Demographic)!
+            .Include(p => p.Demographic)
             .ThenInclude(d => d!.ContactInfo);
 
         var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, true);
@@ -334,7 +331,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
     /// <summary>
     /// Returns a queryable of year-end profit sharing report details for the given request.
     /// </summary>
-    private Task<IQueryable<YearEndProfitSharingReportDetail>> ActiveSummary(YearEndProfitSharingReportRequest req)
+    private Task<IQueryable<YearEndProfitSharingReportDetail>> ActiveSummary(BadgeNumberRequest req)
     {
         return ActiveSummary(req, req.BadgeNumber);
     }

@@ -28,6 +28,12 @@ export interface FrozenProfitYearRequest extends ProfitYearRequest {
   useFrozenData: boolean;
 }
 
+export interface BadgeNumberRequest extends FrozenProfitYearRequest {
+  badgeNumber: number | null;
+}
+
+
+
 export interface ReportsByAgeParams extends ProfitYearRequest {
   reportType: FrozenReportsByAgeRequestType;
 }
@@ -874,22 +880,8 @@ export interface MilitaryContributionRequest extends ProfitYearRequest {
   pagination: SortedPaginationRequestDto;
 }
 
-export interface YearEndProfitSharingReportRequest {
-  reportId: number;
-  isYearEnd: boolean;
-  minimumAgeInclusive?: number;
-  maximumAgeInclusive?: number;
-  minimumHoursInclusive?: number;
-  maximumHoursInclusive?: number;
-  includeActiveEmployees: boolean;
-  includeInactiveEmployees: boolean;
-  includeEmployeesTerminatedThisYear: boolean;
-  includeTerminatedEmployees: boolean;
-  includeBeneficiaries: boolean;
-  includeEmployeesWithPriorProfitSharingAmounts: boolean;
-  includeEmployeesWithNoPriorProfitSharingAmounts: boolean;
+export interface YearEndProfitSharingReportRequest extends FilterParams{
   profitYear: number;
-  badgeNumber?: number | null;
   pagination: SortedPaginationRequestDto;
 }
 
@@ -1203,6 +1195,8 @@ export interface NavigationDto {
 }
 
 export interface FilterParams {
+  reportId: number;
+  badgeNumber?: number | null;
   isYearEnd: boolean;
   minimumAgeInclusive?: number;
   maximumAgeInclusive?: number;

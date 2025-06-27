@@ -18,8 +18,7 @@ public sealed record YearEndProfitSharingReportSummaryResponse
                     TotalWages = 95842.45m,
                     TotalBalance = 0m,
                     TotalHours = 123,
-                    TotalPoints = 321,
-                    BadgeNumbers = new HashSet<int>()
+                    TotalPoints = 321
                 }
             }
         };

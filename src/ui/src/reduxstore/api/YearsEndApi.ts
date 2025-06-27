@@ -47,7 +47,7 @@ import {
   setUnder21Totals,
   setUpdateSummary,
   setVestedAmountsByAge,
-  setYearEndProfitSharingReport
+  setYearEndProfitSharingReport,
 } from "reduxstore/slices/yearsEndSlice";
 import {
   BalanceByAge,
@@ -80,7 +80,7 @@ import {
   ForfeitureAdjustmentUpdateRequest,
   ForfeituresAndPoints,
   ForfeituresByAge,
-  FrozenProfitYearRequest,
+  BadgeNumberRequest,
   FrozenReportsByAgeRequest,
   FrozenReportsForfeituresAndPointsRequest,
   GrandTotalsByStoreResponseDto,
@@ -979,14 +979,15 @@ export const YearsEndApi = createApi({
     ),
     getYearEndProfitSharingSummaryReport: builder.query<
       YearEndProfitSharingReportSummaryResponse,
-      FrozenProfitYearRequest
+      BadgeNumberRequest
     >({
       query: (params) => ({
         url: "yearend/yearend-profit-sharing-summary-report",
-        method: "GET",
-        params: {
+        method: "POST",
+        body: {
           useFrozenData: params.useFrozenData,
           profitYear: params.profitYear,
+          badgeNumber: params.badgeNumber,
           skip: 0,
           take: 255
         }
