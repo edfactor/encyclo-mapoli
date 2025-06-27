@@ -6,6 +6,8 @@ import { mmDDYYFormat } from "utils/dateUtils";
 import { Checkbox, IconButton } from "@mui/material";
 import { SaveOutlined } from "@mui/icons-material";
 import { useState } from "react";
+import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import { SuggestedForfeitEditor, SuggestedForfeitCellRenderer } from "../../../components/SuggestedForfeiture";
 
 export const GetTerminationColumns = (): ColDef[] => {
   return [
@@ -35,7 +37,7 @@ export const GetTerminationColumns = (): ColDef[] => {
 };
 
 // Separate function for detail columns that will be used for master-detail view
-export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, removeRowFromSelectedRows: (id: number) => void, selectedRowIds: number[]): ColDef[] => {
+export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, removeRowFromSelectedRows: (id: number) => void, selectedRowIds: number[], selectedProfitYear: number): ColDef[] => {
   return [
     {
       headerName: "Profit Year",
@@ -179,17 +181,24 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       colId: "suggestedForfeit",
       minWidth: 150,
       headerClass: "right-align",
-      cellClass: "right-align",
+      cellClass: (params) => {
+        if (!params.data.isDetail) return '';
+        const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}`;
+        const hasError = params.context?.editedValues?.[rowKey]?.hasError;
+        return `right-align ${hasError ? 'invalid-cell' : ''}`;
+      },
       resizable: true,
       sortable: false,
-      editable: ({ node }) => node.data.isDetail,
+      editable: ({ node }) => node.data.isDetail && node.data.profitYear === selectedProfitYear,
       flex: 1,
+      cellEditor: SuggestedForfeitEditor,
+      cellRenderer: (params: ICellRendererParams) => SuggestedForfeitCellRenderer({ ...params, selectedProfitYear }),
       valueFormatter: agGridNumberToCurrency,
-      cellRenderer: (params: ICellRendererParams) => {
-        if (!params.data.isDetail) {
-          return '';
-        }
-        return params.valueFormatted || params.value;
+      valueGetter: (params) => {
+        if (!params.data.isDetail) return params.data.suggestedForfeit;
+        const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}`;
+        const editedValue = params.context?.editedValues?.[rowKey]?.value;
+        return editedValue !== undefined ? editedValue : params.data.suggestedForfeit;
       }
     },
     {
@@ -201,6 +210,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       lockPinned: true,
       resizable: false,
       sortable: false,
+      cellStyle: { backgroundColor: '#E8E8E8' },
       headerComponent: HeaderComponent,
       headerComponentParams: {
         addRowToSelectedRows,
@@ -211,8 +221,15 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
         removeRowFromSelectedRows
       },
       cellRenderer: (params: SaveButtonCellParams) => {
+        if (!params.data.isDetail || params.data.profitYear !== selectedProfitYear) {
+          return '';
+        }
         const id = Number(params.node?.id) || -1;
         const isSelected = params.node?.isSelected() || false;
+        const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}`;
+        const hasError = params.context?.editedValues?.[rowKey]?.hasError;
+        const currentValue = params.context?.editedValues?.[rowKey]?.value ?? params.data.suggestedForfeit;
+        
         return <div>
           <Checkbox checked={isSelected} onChange={() => {
             if (isSelected) {
@@ -222,15 +239,18 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
             }
             params.node?.setSelected(!isSelected);
           }} />
-          <IconButton onClick={() => {
-            if (params.data.isDetail) {
-              console.log('Update payload:', {
-                badgeNumber: params.data.badgeNumber,
-                profitYear: params.data.profitYear,
-                suggestedForfeit: params.data.suggestedForfeit
-              });
-            }
-          }}>
+          <IconButton 
+            onClick={() => {
+              if (params.data.isDetail) {
+                console.log('Update payload:', {
+                  badgeNumber: params.data.badgeNumber,
+                  profitYear: params.data.profitYear,
+                  suggestedForfeit: currentValue
+                });
+              }
+            }}
+            disabled={hasError}
+          >
             <SaveOutlined />
           </IconButton>
         </div>;
@@ -257,26 +277,27 @@ interface UpdatePayload {
 
 export const HeaderComponent: React.FC<HeaderComponentProps> = (params: HeaderComponentProps) => {
   const [allRowsSelected, setAllRowsSelected] = useState(false);
+  const selectedProfitYear = useDecemberFlowProfitYear();
 
   const handleSelectAll = () => {
     if (allRowsSelected) {
       params.api.deselectAll();
       params.api.forEachNode(node => {
-        if (node.data.isDetail) {
+        if (node.data.isDetail && node.data.profitYear === selectedProfitYear) {
           const id = Number(node.id) || -1;
           params.removeRowFromSelectedRows(id);
         }
       });
     } else {
       params.api.forEachNode(node => {
-        if (node.data.isDetail) {
+        if (node.data.isDetail && node.data.profitYear === selectedProfitYear) {
           node.setSelected(true);
           const id = Number(node.id) || -1;
           params.addRowToSelectedRows(id);
         }
       });
     }
-    params.api.refreshCells({ columns: ['saveButton'] });
+    params.api.refreshCells({ force: true });
     setAllRowsSelected(!allRowsSelected);
   };
 
@@ -284,10 +305,13 @@ export const HeaderComponent: React.FC<HeaderComponentProps> = (params: HeaderCo
     const selectedNodes: UpdatePayload[] = [];
     params.api.forEachNode(node => {
       if (node.isSelected() && node.data.isDetail) {
+        const rowKey = `${node.data.badgeNumber}-${node.data.profitYear}`;
+        const currentValue = params.context?.editedValues?.[rowKey]?.value ?? node.data.suggestedForfeit;
+        
         selectedNodes.push({
           badgeNumber: node.data.badgeNumber,
           profitYear: node.data.profitYear,
-          suggestedForfeit: node.data.suggestedForfeit
+          suggestedForfeit: currentValue
         });
       }
     });

@@ -1,5 +1,5 @@
 import { ICellRendererParams, CellClickedEvent, ColDef } from "ag-grid-community";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, numberToCurrency, Pagination } from "smart-ui-library";
@@ -8,6 +8,7 @@ import { ReportSummary } from "../../../components/ReportSummary";
 import { StartAndEndDateRequest } from "reduxstore/types";
 import { useLazyGetTerminationReportQuery } from "reduxstore/api/YearsEndApi";
 import { GetDetailColumns, GetTerminationColumns } from "./TerminationGridColumn";
+import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 
 interface TerminationGridSearchProps {
   initialSearchLoaded: boolean;
@@ -33,6 +34,8 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   const { termination } = useSelector((state: RootState) => state.yearsEnd);
   const [triggerSearch, { isFetching }] = useLazyGetTerminationReportQuery();
   const [selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
+  const [editedValues, setEditedValues] = useState<Record<string, { value: number; hasError: boolean }>>({});
+  const selectedProfitYear = useDecemberFlowProfitYear();
 
   // Reset page number to 0 when resetPageFlag changes
   useEffect(() => {
@@ -90,9 +93,16 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     setSelectedRowIds(selectedRowIds.filter((rowId) => rowId !== id));
   };
 
+  const updateEditedValue = useCallback((rowKey: string, value: number, hasError: boolean) => {
+    setEditedValues(prev => ({
+      ...prev,
+      [rowKey]: { value, hasError }
+    }));
+  }, []);
+
   // Get main and detail columns
   const mainColumns = useMemo(() => GetTerminationColumns(), []);
-  const detailColumns = useMemo(() => GetDetailColumns(addRowToSelectedRows, removeRowFromSelectedRows, selectedRowIds), [selectedRowIds]);
+  const detailColumns = useMemo(() => GetDetailColumns(addRowToSelectedRows, removeRowFromSelectedRows, selectedRowIds, selectedProfitYear), [selectedRowIds, selectedProfitYear]);
 
   // Build grid data with expandable rows
   const gridData = useMemo(() => {
@@ -240,6 +250,12 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
             width: 48px;
             height: 48px;
           }
+          .detail-row {
+            background-color: #f5f5f5;
+          }
+          .invalid-cell {
+            background-color: #fff6f6;
+          }
         `}
       </style>
       {isFetching && (
@@ -287,6 +303,10 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
               suppressMultiSort: true,
               defaultColDef: {
                 resizable: true
+              },
+              context: {
+                editedValues,
+                updateEditedValue
               }
             }}
           />
