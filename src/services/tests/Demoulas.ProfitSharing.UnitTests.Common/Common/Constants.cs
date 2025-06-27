@@ -1,5 +1,7 @@
 ﻿using System.Text.Json;
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
+using Microsoft.EntityFrameworkCore;
+using Moq;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Common;
 public static class Constants
@@ -16,10 +18,10 @@ public static class Constants
         internal const string ReportNotFound = "Report not found";
     }
 
-    public static List<ParticipantTotal> FakeParticipantTotals { get; set; } = new List<ParticipantTotal>();
-    public static List<ParticipantTotal> FakeEtvaTotals { get; set; } = new List<ParticipantTotal>();
-    public static List<ProfitShareTotal> ProfitShareTotals { get; set; } = new List<ProfitShareTotal>();
-    public static List<ParticipantTotalVestingBalance> FakeParticipantTotalVestingBalances { get; set; } = new List<ParticipantTotalVestingBalance>();
+    public static Mock<DbSet<ParticipantTotal>> FakeParticipantTotals { get; set; } = new Mock<DbSet<ParticipantTotal>>();
+    public static Mock<DbSet<ParticipantTotal>> FakeEtvaTotals { get; set; } = new Mock<DbSet<ParticipantTotal>>();
+    public static Mock<DbSet<ProfitShareTotal>> ProfitShareTotals { get; set; } = new Mock<DbSet<ProfitShareTotal>>();
+    public static Mock<DbSet<ParticipantTotalVestingBalance>> FakeParticipantTotalVestingBalances { get; set; } = new Mock<DbSet<ParticipantTotalVestingBalance>>();
 
     internal static JsonSerializerOptions GetJsonSerializerOptions()
     {

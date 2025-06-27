@@ -5,6 +5,10 @@ public sealed record ForfeituresAndPointsForYearResponseWithTotals : ReportRespo
     public decimal TotalForfeitures { get; set; }
     public int TotalForfeitPoints { get; set; }
     public int TotalEarningPoints { get; set; }
+    public decimal? TotalProfitSharingBalance { get; set; }
+    public decimal? DistributionTotals { get; set; }
+    public decimal? AllocationToTotals { get; set; }
+    public decimal? AllocationsFromTotals { get; set; }
 
     public static ForfeituresAndPointsForYearResponseWithTotals ResponseExample()
     {
