@@ -1,5 +1,5 @@
 import { Typography } from "@mui/material";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Path, useNavigate } from "react-router";
 import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
@@ -60,10 +60,14 @@ const PriorHoursGrid = () => {
   );
 
   // Need a useEffect to reset the page number when data changes
+  const prevData = useRef<any>(null);
   useEffect(() => {
-    if (data) {
+    if (data?.response?.results && data.response.results.length > 0 &&
+        (prevData.current === null || 
+         data.response.results.length !== prevData.current.response.results.length)) {
       setPageNumber(0);
     }
+    prevData.current = data;
   }, [data]);
 
   const sortEventHandler = (update: ISortParams) => {

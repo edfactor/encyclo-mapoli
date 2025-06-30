@@ -3,7 +3,7 @@ import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { Path, useNavigate } from "react-router";
 import { GetProfitShareGrossReportColumns } from "./ProfitShareGrossReportColumns";
 import { useLazyGetGrossWagesReportQuery } from "reduxstore/api/YearsEndApi";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { GrossWagesReportDto } from "reduxstore/types";
@@ -68,10 +68,14 @@ const ProfitShareGrossReportGrid: React.FC<ProfitShareGrossReportGridProps> = ({
   }, [initialSearchLoaded, pageNumber, pageSize, onSearch, sortParams]);
 
   // Need a useEffect to reset the page number when data changes
+  const prevGrossWagesReport = useRef<any>(null);
   useEffect(() => {
-    if (grossWagesReport?.response?.results) {
+    if (grossWagesReport?.response?.results && grossWagesReport.response.results.length > 0 &&
+        (prevGrossWagesReport.current === null || 
+         grossWagesReport.response.results.length !== prevGrossWagesReport.current.response.results.length)) {
       setPageNumber(0);
     }
+    prevGrossWagesReport.current = grossWagesReport;
   }, [grossWagesReport]);
 
   return (

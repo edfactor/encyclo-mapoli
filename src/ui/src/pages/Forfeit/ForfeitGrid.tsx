@@ -1,5 +1,5 @@
 import { Typography } from "@mui/material";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Path, useNavigate } from "react-router";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetProfitShareForfeitColumns } from "./ForfeitGridColumns";
@@ -57,13 +57,17 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ initialSearchLoaded, setIniti
     }
   }, [initialSearchLoaded, pageNumber, pageSize, onSearch]);
 
-    // Need a useEffect on a change in forfeituresAndPoints to reset the page number
+  // Need a useEffect on a change in forfeituresAndPoints to reset the page number
+  const prevForfeituresAndPoints = useRef<any>(null);
   useEffect(() => {
-    if (forfeituresAndPoints?.response?.results && forfeituresAndPoints.response.results.length > 0) {
+    if (forfeituresAndPoints?.response?.results && forfeituresAndPoints.response.results.length > 0 &&
+        (prevForfeituresAndPoints.current === null || 
+         forfeituresAndPoints.response.results.length !== prevForfeituresAndPoints.current.response?.results.length)) {
       setPageNumber(0);
     }
+    prevForfeituresAndPoints.current = forfeituresAndPoints;
   }, [forfeituresAndPoints]);
-  
+
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
   const totalForfeitures = forfeituresAndPoints?.totalForfeitures ?? 0;

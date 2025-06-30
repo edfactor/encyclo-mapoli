@@ -1,6 +1,6 @@
 import { Typography } from "@mui/material";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { Path, useNavigate } from "react-router";
 import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
@@ -61,10 +61,14 @@ const EighteenToTwentyGrid = () => {
   );
 
   // Need a useEffect to reset the page number when data changes
+  const prevData = useRef<any>(null);
   useEffect(() => {
-    if (data?.response?.results && data.response.results.length > 0) {
+    if (data?.response?.results && data.response.results.length > 0 &&
+        (prevData.current === null || 
+         data.response.results.length !== prevData.current.response.results.length)) {
       setPageNumber(0);
     }
+    prevData.current = data;  
   }, [data]);
 
   const sortEventHandler = (update: ISortParams) => {

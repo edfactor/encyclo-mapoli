@@ -1,6 +1,6 @@
 import { Typography } from "@mui/material";
 import { DSMGrid, ISortParams, Pagination, agGridNumberToCurrency } from "smart-ui-library";
-import { useMemo, useEffect, useState, useCallback } from "react";
+import { useMemo, useEffect, useState, useCallback, useRef } from "react";
 import Grid2 from "@mui/material/Grid2";
 import { useLazyGetBreakdownByStoreQuery } from "reduxstore/api/YearsEndApi";
 import { useSelector } from "react-redux";
@@ -63,10 +63,14 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store }) => {
   }, [fetchData]);
 
   // Need a useEffect on a change in breakdownByStore to reset the page number
+  const prevBreakdownByStore = useRef<any>(null);
   useEffect(() => {
-    if (breakdownByStore?.response?.results && breakdownByStore.response.results.length > 0) {
+    if (breakdownByStore?.response?.results && breakdownByStore.response.results.length > 0 &&
+        (prevBreakdownByStore.current === null || 
+         breakdownByStore.response.results.length !== prevBreakdownByStore.current.response?.results.length)) {
       setPageNumber(0);
     }
+    prevBreakdownByStore.current = breakdownByStore;
   } , [breakdownByStore]);
 
   const columnDefs = useMemo(

@@ -1,5 +1,5 @@
 import { Typography } from "@mui/material";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetProfitShareUpdateQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
@@ -56,10 +56,14 @@ const ProfitShareEditUpdateGrid = ({ initialSearchLoaded, setInitialSearchLoaded
   }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch, hasToken]);
 
   // Need a useEffect to reset the page number when data changes
+  const prevData = useRef<any>(null);
   useEffect(() => {
-    if (profitSharingUpdate?.response?.results) {
+    if (profitSharingUpdate?.response?.results && profitSharingUpdate.response.results.length > 0 &&
+        (prevData.current === null || 
+         profitSharingUpdate.response.results.length !== prevData.current.response.results.length)) {
       setPageNumber(0);
     }
+    prevData.current = profitSharingUpdate;
   }, [profitSharingUpdate]);
 
   return (

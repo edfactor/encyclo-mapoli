@@ -1,5 +1,5 @@
 import { Typography } from "@mui/material";
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetHistoricalFrozenStateResponseQuery } from "reduxstore/api/ItOperationsApi";
 import { RootState } from "reduxstore/store";
@@ -50,10 +50,14 @@ const DemographicFreeze: React.FC<DemoFreezeSearchProps> = ({initialSearchLoaded
   const columnDefs = useMemo(() => GetFreezeColumns(), []);
 
   // Need a useEffect to reset the page number when freezeResults changes
+  const prevFreezeResults = useRef<any>(null);
   useEffect(() => {
-    if (freezeResults?.results && freezeResults.results.length > 0) {
+    if (freezeResults?.results && freezeResults.results.length > 0 &&
+        (prevFreezeResults.current === null || 
+         freezeResults.results.length !== prevFreezeResults.current.results.length)) {
       setPageNumber(0);
     }
+    prevFreezeResults.current = freezeResults;
   }, [freezeResults]);
 
   return (

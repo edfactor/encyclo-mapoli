@@ -1,5 +1,5 @@
 import { Typography } from "@mui/material";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetEmployeesOnMilitaryLeaveQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
@@ -39,11 +39,17 @@ const EmployeesOnMilitaryLeaveGrid: React.FC = () => {
   const { militaryAndRehire: employeesOnMilitaryLeave } = useSelector((state: RootState) => state.yearsEnd);
 
    // Need a useEffect on a change in employeesOnMilitaryLeave to reset the page number
+   const prevEmployeesOnMilitaryLeave = useRef<any>(null);
   useEffect(() => {
-   
-    if (employeesOnMilitaryLeave?.response?.results && employeesOnMilitaryLeave.response.results.length > 0) {
+
+    if (
+      employeesOnMilitaryLeave !== prevEmployeesOnMilitaryLeave.current &&
+      employeesOnMilitaryLeave?.response?.results &&
+      employeesOnMilitaryLeave.response.results.length !== prevEmployeesOnMilitaryLeave.current?.response?.results?.length
+    ) {
       setPageNumber(0);
     }
+    prevEmployeesOnMilitaryLeave.current = employeesOnMilitaryLeave;
   }, [employeesOnMilitaryLeave]);
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);

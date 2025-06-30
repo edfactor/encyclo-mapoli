@@ -1,14 +1,13 @@
-import { Typography } from "@mui/material";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetDistributionsAndForfeituresQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, numberToCurrency, Pagination } from "smart-ui-library";
-import { GetDistributionsAndForfeituresColumns } from "./DistributionAndForfeituresGridColumns";
-import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
-import { CAPTIONS } from "../../../constants";
-import { TotalsGrid } from "../../../components/TotalsGrid/TotalsGrid";
 import ReportSummary from "../../../components/ReportSummary";
+import { TotalsGrid } from "../../../components/TotalsGrid/TotalsGrid";
+import { CAPTIONS } from "../../../constants";
+import { GetDistributionsAndForfeituresColumns } from "./DistributionAndForfeituresGridColumns";
 
 interface DistributionsAndForfeituresGridSearchProps {
   initialSearchLoaded: boolean;
@@ -57,10 +56,16 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
   ]);
 
   // Need a useEffect on a change in distributionsAndForfeitures to reset the page number 
+  const prevDistributionsAndForfeitures = useRef<any>(null);
   useEffect(() => {
-    if (distributionsAndForfeitures?.response?.results && distributionsAndForfeitures.response.results.length > 0) {
+    if (
+      distributionsAndForfeitures !== prevDistributionsAndForfeitures.current &&
+      distributionsAndForfeitures?.response?.results &&
+      distributionsAndForfeitures.response.results.length !== prevDistributionsAndForfeitures.current?.response?.results?.length
+    ) {
       setPageNumber(0);
     }
+    prevDistributionsAndForfeitures.current = distributionsAndForfeitures;
   }, [distributionsAndForfeitures]);
 
   useEffect(() => {

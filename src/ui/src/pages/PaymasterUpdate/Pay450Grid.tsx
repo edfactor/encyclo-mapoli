@@ -1,5 +1,5 @@
 import { Typography } from "@mui/material";
-import { useCallback, useMemo, useState, useEffect } from "react";
+import { useCallback, useMemo, useState, useEffect, useRef } from "react";
 import { useSelector } from "react-redux"; 
 import { Path } from "react-router";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
@@ -54,10 +54,14 @@ const Pay450Grid: React.FC<Pay450GridProps> = ({
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
   // Need a useEffect to reset the page number when data changes
+  const prevData = useRef<any>(null);
   useEffect(() => {
-    if (updateSummary?.response?.results) {
+    if (updateSummary?.response?.results && updateSummary.response.results.length > 0 &&
+        (prevData.current === null || 
+         updateSummary.response.results.length !== prevData.current.response.results.length)) {
       setPageNumber(0);
     }
+    prevData.current = updateSummary;
   }, [updateSummary]);
   
   // Mock function to handle navigation (needed for GetPay450GridColumns)

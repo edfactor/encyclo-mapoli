@@ -1,11 +1,12 @@
 import { Typography } from "@mui/material";
-import { useMemo, useState, useCallback, useEffect } from "react";
+import { useMemo, useState, useCallback, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetEligibleEmployeesQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetEligibleEmployeesColumns } from "./EligibleEmployeesGridColumn";
 import ReportSummary from "../../../components/ReportSummary";
+import React from "react";
 
 interface EligibleEmployeesGridProps {
   initialSearchLoaded: boolean;
@@ -46,10 +47,16 @@ const EligibleEmployeesGrid: React.FC<EligibleEmployeesGridProps> = ({
   }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch]);
 
   // Need a useEffect on a change in eligibleEmployees to reset the page number
+  const prevEligibleEmployees = useRef<any>(null);
   useEffect(() => {
-    if (eligibleEmployees?.response?.results && eligibleEmployees.response.results.length > 0) {
+    if (
+      eligibleEmployees !== prevEligibleEmployees.current &&
+      eligibleEmployees?.response?.results &&
+      eligibleEmployees.response.results.length !== prevEligibleEmployees.current?.response?.results?.length
+    ) {
       setPageNumber(0);
     }
+    prevEligibleEmployees.current = eligibleEmployees;
   }, [eligibleEmployees]);
 
   return (
