@@ -72,7 +72,7 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({ selecte
 
   const columnDefs = useMemo(() => {
 
-    var columns = BeneficiaryInquiryGridColumns();
+    const columns = BeneficiaryInquiryGridColumns();
     return [{
       headerName: "Actions",
       field: "actions",

@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import { Path, useNavigate } from "react-router";
 import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { CAPTIONS } from "../../../constants";
+import { CAPTIONS, PAY426_REPORT_IDS } from "../../../constants";
 import { RootState } from "../../../reduxstore/store";
 import pay426Utils from "../Pay427Utils";
 import { GetProfitSharingReportGridColumns } from "./EighteenToTwentyGridColumns";
@@ -22,8 +22,8 @@ const EighteenToTwentyGrid = () => {
   });
   const hasToken = useSelector((state: RootState) => !!state.security.token);
   const profitYear = useFiscalCloseProfitYear();
-  const baseParams = {
-    reportId: 1,
+  const baseParams = useMemo(() => ({
+    reportId: PAY426_REPORT_IDS.EIGHTEEN_TO_TWENTY,
     isYearEnd: true,
     minimumAgeInclusive: 18,
     maximumAgeInclusive: 20,
@@ -35,7 +35,7 @@ const EighteenToTwentyGrid = () => {
     includeBeneficiaries: false,
     includeEmployeesWithPriorProfitSharingAmounts: true,
     includeEmployeesWithNoPriorProfitSharingAmounts: true,
-  };
+  }), []);
 
   useEffect(() => {
     if (hasToken) {

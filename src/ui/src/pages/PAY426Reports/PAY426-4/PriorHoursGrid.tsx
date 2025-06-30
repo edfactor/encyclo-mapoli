@@ -6,7 +6,7 @@ import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetProfitSharingReportGridColumns } from "../PAY426-1/EighteenToTwentyGridColumns";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../reduxstore/store";
-import { CAPTIONS } from "../../../constants";
+import { CAPTIONS, PAY426_REPORT_IDS } from "../../../constants";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import pay426Utils from "../Pay427Utils";
 
@@ -24,7 +24,7 @@ const PriorHoursGrid = () => {
   const profitYear = useFiscalCloseProfitYear();
 
   const baseParams = {
-    isYearEnd: true,
+    reportId: PAY426_REPORT_IDS.PRIOR_HOURS,
     minimumAgeInclusive: 18,
     maximumHoursInclusive: 1000,
     includeActiveEmployees: true,

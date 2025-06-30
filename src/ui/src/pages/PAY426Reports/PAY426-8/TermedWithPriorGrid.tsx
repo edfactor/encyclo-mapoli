@@ -6,7 +6,7 @@ import { GetProfitSharingReportGridColumns } from "../PAY426-1/EighteenToTwentyG
 import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../reduxstore/store";
-import { CAPTIONS } from "../../../constants";
+import { CAPTIONS, PAY426_REPORT_IDS } from "../../../constants";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import pay426Utils from "../Pay427Utils";
 
@@ -23,6 +23,7 @@ const TermedWithPriorGrid = () => {
   const hasToken = useSelector((state: RootState) => !!state.security.token);
   const profitYear = useFiscalCloseProfitYear();
   const baseParams = {
+    reportId: PAY426_REPORT_IDS.TERMINATED_WITH_PRIOR_PS,
     isYearEnd: true,
     minimumAgeInclusive: 18,
     maximumHoursInclusive: 1000,
