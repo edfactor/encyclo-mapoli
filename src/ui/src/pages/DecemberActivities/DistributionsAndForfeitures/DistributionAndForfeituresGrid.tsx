@@ -1,4 +1,5 @@
-import { Typography } from "@mui/material";
+import { Popover, Typography } from "@mui/material";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetDistributionsAndForfeituresQuery } from "reduxstore/api/YearsEndApi";
@@ -9,6 +10,7 @@ import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import { CAPTIONS } from "../../../constants";
 import { TotalsGrid } from "../../../components/TotalsGrid/TotalsGrid";
 import ReportSummary from "../../../components/ReportSummary";
+import "./DistributionAndForfeituresGrid.css";
 
 interface DistributionsAndForfeituresGridSearchProps {
   initialSearchLoaded: boolean;
@@ -25,6 +27,14 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
     sortBy: "employeeName, date",
     isSortDescending: false
   });
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handlePopoverClose = () => {
+    setAnchorEl(null);
+  };
+  const open = Boolean(anchorEl);
 
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const { distributionsAndForfeitures, distributionsAndForfeituresQueryParams } = useSelector(
@@ -64,21 +74,61 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
   const columnDefs = useMemo(() => GetDistributionsAndForfeituresColumns(), []);
+  const stateTaxTotals = distributionsAndForfeitures?.stateTaxTotals || {};
 
   return (
     <>
       {distributionsAndForfeitures?.response && (
         <>
-
-          <div className="flex sticky top-0 z-10 bg-white">
+          <div className="flex sticky top-0 z-10 bg-white totals-flex-container">
             <TotalsGrid
               displayData={[[numberToCurrency(distributionsAndForfeitures.distributionTotal || 0)]]}
               leftColumnHeaders={["Distributions"]}
               topRowHeaders={[]}></TotalsGrid>
-            <TotalsGrid
-              displayData={[[numberToCurrency(distributionsAndForfeitures.stateTaxTotal || 0)]]}
-              leftColumnHeaders={["StateTaxs"]}
-              topRowHeaders={[]}></TotalsGrid>
+            <div className="totals-flex-popover">
+              <TotalsGrid
+                displayData={[[numberToCurrency(distributionsAndForfeitures.stateTaxTotal || 0)]]}
+                leftColumnHeaders={["StateTaxs"]}
+                topRowHeaders={[]}
+              />
+              {distributionsAndForfeitures.stateTaxTotals && Object.keys(distributionsAndForfeitures.stateTaxTotals).length > 0 && (
+                <>
+                  <InfoOutlinedIcon
+                    className="state-tax-info-icon"
+                    fontSize="small"
+                    onClick={handlePopoverOpen}
+                    style={{ cursor: "pointer", marginLeft: 4 }}
+                  />
+                  <Popover
+                    open={open}
+                    anchorEl={anchorEl}
+                    onClose={handlePopoverClose}
+                    anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+                    PaperProps={{ style: { maxHeight: 300, maxWidth: 350, overflow: "auto" } }}
+                  >
+                    <div className="state-tax-popover-table">
+                      <Typography variant="subtitle2" sx={{ p: 1 }}>State Tax Breakdown</Typography>
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>State</th>
+                            <th>Tax Total</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {Object.entries(distributionsAndForfeitures.stateTaxTotals).map(([state, total]) => (
+                            <tr key={state}>
+                              <td>{state}</td>
+                              <td>{numberToCurrency(total)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </Popover>
+                </>
+              )}
+            </div>
             <TotalsGrid
               displayData={[[numberToCurrency(distributionsAndForfeitures.federalTaxTotal || 0)]]}
               leftColumnHeaders={["FederalTaxs"]}
