@@ -11,5 +11,4 @@ public sealed record YearEndProfitSharingReportSummaryLineItem
     public required int TotalPoints { get; set; }
     public decimal TotalBalance { get; set; }
     public decimal TotalPriorBalance { get; set; }
-    public required ISet<int> BadgeNumbers { get; set; }
 }

@@ -1,4 +1,5 @@
 ﻿using CsvHelper.Configuration;
+using Demoulas.ProfitSharing.Common.Contracts.Report;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -26,11 +27,13 @@ public class YearEndProfitSharingReportEndpoint: EndpointWithCsvTotalsBase<YearE
         Summary(s =>
         {
             s.Summary = "Year end profit sharing report";
-            s.Description = @"Returns a list of employees who will participate in the profit sharing this year, as well as their qualifying attributes. 
+            s.Description = @"Returns a list of employees who will participate in the profit sharing this year, as well as their qualifying attributes.\n\nRequest parameters allow filtering by age, hours, employment status, and more. The endpoint supports CSV export if the Accept header is set to 'text/csv'.\n\n" +
+                "ReportId options (see enum YearEndProfitSharingReportId):\n" +
+                string.Join("\n", Enum.GetValues(typeof(YearEndProfitSharingReportId))
+                    .Cast<YearEndProfitSharingReportId>()
+                    .Select(e => $"{(int)e}: {GetEnumDescription(e)}"));
 
-Request parameters allow filtering by age, hours, employment status, and more. The endpoint supports CSV export if the Accept header is set to 'text/csv'.";
-            
-            s.ExampleRequest = new YearEndProfitSharingReportRequest() { ProfitYear = 2025, ReportId = 1, Skip = SimpleExampleRequest.Skip, Take = SimpleExampleRequest.Take};
+            s.ExampleRequest = new YearEndProfitSharingReportRequest() { ProfitYear = 2025, ReportId = YearEndProfitSharingReportId.Age18To20With1000Hours, Skip = SimpleExampleRequest.Skip, Take = SimpleExampleRequest.Take};
             s.ResponseExamples = new Dictionary<int, object>
             {
                 {
@@ -54,6 +57,13 @@ Request parameters allow filtering by age, hours, employment status, and more. T
     }
 
     public override string ReportFileName => "yearend-profit-sharing-report";
+
+    private static string GetEnumDescription(YearEndProfitSharingReportId value)
+    {
+        var field = typeof(YearEndProfitSharingReportId).GetField(value.ToString());
+        var attr = (System.ComponentModel.DescriptionAttribute?)Attribute.GetCustomAttribute(field!, typeof(System.ComponentModel.DescriptionAttribute));
+        return attr?.Description ?? value.ToString();
+    }
 
     public class YearEndProfitSharingReportClassMap: ClassMap<YearEndProfitSharingReportDetail>
     {
