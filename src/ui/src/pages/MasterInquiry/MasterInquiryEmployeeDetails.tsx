@@ -98,7 +98,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     workLocation
   } = details;
 
-  if (!isEmployee && masterInquiryRequestParams?.memberType !== "beneficiaries") {
+  if (!isEmployee && masterInquiryRequestParams?.memberType == "all") {
     // Need to add a new missive warning saying a beneficiary was found
     missiveAlerts.push({
       id: 976,
