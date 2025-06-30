@@ -63,18 +63,20 @@ const MilitaryEntryAndModificationSearchFilter: React.FC<SearchFilterProps> = ({
   const dispatch = useDispatch();
   
   const onSubmit = (data: SearchFormData) => {
+    
     triggerSearch(
       {
         pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: false },
         ...(!!data.socialSecurity && { ssn: Number(data.socialSecurity) }),
         ...(!!data.badgeNumber && { badgeNumber: Number(data.badgeNumber) }),
         profitYear: defaultProfitYear
-      },
+      }, 
       false
     ).then((result) => {
-      if (result?.data) {
-        dispatch(setMasterInquiryData(result.data.response.results[0]));
+      if (result?.data?.response?.results) {
+        dispatch(setMasterInquiryData(result.data.response?.results[0]));
       }
+
       setInitialSearchLoaded(
         !!(result?.data?.response?.results && Array.isArray(result.data.response.results) && result.data.response.results.length > 0)
       );
