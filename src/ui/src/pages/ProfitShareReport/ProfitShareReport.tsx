@@ -33,6 +33,7 @@ const ProfitShareReport = () => {
     if (hasToken && profitYear && !initialDataLoaded) {
       const request = {
         isYearEnd: false,
+        badgeNumber: null,
         includeActiveEmployees: true,
         includeInactiveEmployees: true,
         includeEmployeesTerminatedThisYear: false,

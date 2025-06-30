@@ -57,53 +57,6 @@ const activeInactivePlaceholders: YearEndProfitSharingReportSummaryLineItem[] = 
   }
 ];
 
-/**
- * Default rows for "Terminated" section - these will display with zero values
- * if no data is returned from the API for any particular row
- */
-const terminatedPlaceholders: YearEndProfitSharingReportSummaryLineItem[] = [
-  {
-    subgroup: "TERMINATED",
-    lineItemPrefix: "6",
-    lineItemTitle: ">= AGE 18 WITH >= 1000 PS HOURS",
-    numberOfMembers: 0,
-    totalWages: 0,
-    totalBalance: 0
-  },
-  {
-    subgroup: "TERMINATED",
-    lineItemPrefix: "7",
-    lineItemTitle: ">= AGE 18 WITH < 1000 PS HOURS AND NO PRIOR PS AMOUNT",
-    numberOfMembers: 0,
-    totalWages: 0,
-    totalBalance: 0
-  },
-  {
-    subgroup: "TERMINATED",
-    lineItemPrefix: "8",
-    lineItemTitle: ">= AGE 18 WITH < 1000 PS HOURS AND PRIOR PS AMOUNT",
-    numberOfMembers: 0,
-    totalWages: 0,
-    totalBalance: 0
-  },
-  {
-    subgroup: "TERMINATED",
-    lineItemPrefix: "9",
-    lineItemTitle: "< AGE 18 NO WAGES",
-    numberOfMembers: 0,
-    totalWages: 0,
-    totalBalance: 0
-  },
-  {
-    subgroup: "TERMINATED",
-    lineItemPrefix: "N",
-    lineItemTitle: "NON-EMPLOYEE BENEFICIARIES",
-    numberOfMembers: 0,
-    totalWages: 0,
-    totalBalance: 0
-  }
-];
-
 interface ProfitSummaryProps {
   onPresetParamsChange?: (params: FilterParams | null) => void;
 }
@@ -153,7 +106,8 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange }) =
     if (hasToken) {
       trigger({
         useFrozenData: true,
-        profitYear: profitYear
+        profitYear: profitYear,
+        badgeNumber: null,
       });
     }
   }, [trigger, profitYear, hasToken]);
