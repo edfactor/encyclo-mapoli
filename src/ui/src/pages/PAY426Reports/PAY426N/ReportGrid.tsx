@@ -54,7 +54,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
         JSON.stringify(preset.params) === JSON.stringify(params)
       );
       trigger({
-        reportId: matchingPreset ? Number(matchingPreset.id) : 0,
+        //reportId: matchingPreset ? Number(matchingPreset.id) : 0,
         profitYear: profitYear,
         pagination: {
           skip: pageNumber * pageSize,
@@ -74,10 +74,17 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
     [navigate]
   );
 
+  // Need a useEffect to reset the page number when data changes
+  useEffect(() => {
+    if (data) {
+      setPageNumber(0);
+    }
+  }, [data]);
+
   const sortEventHandler = (update: ISortParams) => {
     const t = () => { 
         trigger({
-          reportId: matchingPreset ? Number(matchingPreset.id) : 0,
+          //reportId: matchingPreset ? Number(matchingPreset.id) : 0,
           profitYear: profitYear,
           pagination: {
             skip: 0,

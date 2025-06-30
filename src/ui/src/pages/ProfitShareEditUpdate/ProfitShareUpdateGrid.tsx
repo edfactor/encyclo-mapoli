@@ -55,6 +55,13 @@ const ProfitShareEditUpdateGrid = ({ initialSearchLoaded, setInitialSearchLoaded
     }
   }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch, hasToken]);
 
+  // Need a useEffect to reset the page number when data changes
+  useEffect(() => {
+    if (profitSharingUpdate?.response?.results) {
+      setPageNumber(0);
+    }
+  }, [profitSharingUpdate]);
+
   return (
     <>
       <div className="px-[24px]">

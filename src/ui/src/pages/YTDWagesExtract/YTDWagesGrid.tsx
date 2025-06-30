@@ -7,6 +7,7 @@ import { RefObject } from "react";
 import { useLazyGetEmployeeWagesForYearQuery } from "reduxstore/api/YearsEndApi";
 import ReportSummary from "../../components/ReportSummary";
 import useFiscalCloseProfitYear from "../../hooks/useFiscalCloseProfitYear";
+import { GetYTDWagesColumns } from "./YTDWagesGridColumn";
 
 interface YTDWagesGridProps {
   innerRef: RefObject<HTMLDivElement | null>;
@@ -51,6 +52,13 @@ const YTDWagesGrid = ({ innerRef, initialSearchLoaded, setInitialSearchLoaded }:
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
   const columnDefs = useMemo(() => GetYTDWagesColumns(), []);
+
+  // Need a useEffect to reset the page number when data changes
+  useEffect(() => {
+    if (employeeWagesForYear?.response?.results) {
+      setPageNumber(0);
+    }
+  }, [employeeWagesForYear]);
 
   return (
     <>

@@ -45,6 +45,13 @@ const EligibleEmployeesGrid: React.FC<EligibleEmployeesGridProps> = ({
     }
   }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch]);
 
+  // Need a useEffect on a change in eligibleEmployees to reset the page number
+  useEffect(() => {
+    if (eligibleEmployees?.response?.results && eligibleEmployees.response.results.length > 0) {
+      setPageNumber(0);
+    }
+  }, [eligibleEmployees]);
+
   return (
     <>
       {eligibleEmployees?.response && (

@@ -44,6 +44,9 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
 
   // Initialize expandedRows when data is loaded
   useEffect(() => {
+
+    setPageNumber(0);
+    
     if (termination?.response?.results && termination.response.results.length > 0) {
       // Only reset if badgeNumbers have changed
       const badgeNumbers = termination.response.results.map((row: any) => row.badgeNumber).join(",");

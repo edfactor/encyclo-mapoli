@@ -74,6 +74,14 @@ const Under21Report = () => {
     }
   }, [initialSearchLoaded, pageNumber, pageSize, sortParams, fetchUnder21Totals, fetchUnder21Breakdown]);
 
+
+  // Need a useEffect to reset the page number when under21Totals or under21Breakdown changes
+  useEffect(() => {
+    if (under21Totals?.response?.results && under21Totals.response.results.length > 0) {
+      setPageNumber(0);
+    }
+  }, [under21Totals, under21Breakdown]);
+  
   const handleSearch = (profitYear: number, isSortDescending: boolean) => {
     const queryParams = {
       profitYear,

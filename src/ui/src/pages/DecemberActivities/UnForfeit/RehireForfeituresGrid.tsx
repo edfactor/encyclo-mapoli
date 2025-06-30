@@ -68,6 +68,13 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
     }));
   }, []);
 
+  // Need a useEffect to reset the page number when rehireForfeitures changes
+  useEffect(() => {
+    if (rehireForfeitures?.response?.results && rehireForfeitures.response.results.length > 0) {
+      setPageNumber(0);
+    }
+  }, [rehireForfeitures]);
+
   // Create a request object based on current parameters
   const createRequest = useCallback(
     (skip: number, sortBy: string, isSortDescending: boolean): StartAndEndDateRequest | null => {

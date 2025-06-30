@@ -88,6 +88,13 @@ const TwentyOnePlusGrid = () => {
     ];
   }, [data]);
 
+  // Need a useEffect to reset the page number when data changes
+  useEffect(() => {
+    if (data?.response?.results && data.response.results.length > 0) {
+      setPageNumber(0);
+    }
+  }, [data]);
+
   const sortEventHandler = (update: ISortParams) => {
     const t = () => { 
         trigger({

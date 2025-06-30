@@ -52,6 +52,13 @@ const Pay450Grid: React.FC<Pay450GridProps> = ({
   }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch, hasToken]);
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
+
+  // Need a useEffect to reset the page number when data changes
+  useEffect(() => {
+    if (updateSummary?.response?.results) {
+      setPageNumber(0);
+    }
+  }, [updateSummary]);
   
   // Mock function to handle navigation (needed for GetPay450GridColumns)
   const handleNavigationForButton = useCallback(

@@ -58,6 +58,13 @@ const TermedWithPriorGrid = () => {
     [navigate]
   );
 
+  // Need a useEffect to reset the page number when data changes
+  useEffect(() => {
+    if (data) {
+      setPageNumber(0);
+    }
+  }, [data]);
+
   const sortEventHandler = (update: ISortParams) => {
       const t = () => { 
           trigger({

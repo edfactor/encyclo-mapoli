@@ -49,6 +49,13 @@ const DemographicFreeze: React.FC<DemoFreezeSearchProps> = ({initialSearchLoaded
 
   const columnDefs = useMemo(() => GetFreezeColumns(), []);
 
+  // Need a useEffect to reset the page number when freezeResults changes
+  useEffect(() => {
+    if (freezeResults?.results && freezeResults.results.length > 0) {
+      setPageNumber(0);
+    }
+  }, [freezeResults]);
+
   return (
     <>
       {freezeResults && (

@@ -54,9 +54,16 @@ const ForfeituresAdjustmentGrid: React.FC<ForfeituresAdjustmentGridProps> = ({
   );
 
   const columnDefs = useMemo(
-    () => GetForfeituresAdjustmentColumns(handleNavigationForButton),
+    () => GetForfeituresAdjustmentColumns(),
     [handleNavigationForButton]
   );
+
+  // Need a useEffect to reset the page number when forfeitureAdjustmentData changes
+  React.useEffect(() => {
+    if (forfeitureAdjustmentData?.response?.results && forfeitureAdjustmentData.response.results.length > 0) {
+      setPageNumber(0);
+    }
+  }, [forfeitureAdjustmentData]);
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
@@ -76,7 +83,9 @@ const ForfeituresAdjustmentGrid: React.FC<ForfeituresAdjustmentGridProps> = ({
               </Button>
             )}
           </div>
-          <ReportSummary report={forfeitureAdjustmentData} />
+          {forfeitureAdjustmentData && (
+            <ReportSummary report={forfeitureAdjustmentData} />
+          )}
           <DSMGrid
             preferenceKey={CAPTIONS.FORFEITURES_ADJUSTMENT}
             isLoading={isFetching}

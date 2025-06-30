@@ -56,6 +56,13 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
     triggerSearch
   ]);
 
+  // Need a useEffect on a change in distributionsAndForfeitures to reset the page number 
+  useEffect(() => {
+    if (distributionsAndForfeitures?.response?.results && distributionsAndForfeitures.response.results.length > 0) {
+      setPageNumber(0);
+    }
+  }, [distributionsAndForfeitures]);
+
   useEffect(() => {
     if (hasToken && (initialSearchLoaded || sortParams)) {
       onSearch();

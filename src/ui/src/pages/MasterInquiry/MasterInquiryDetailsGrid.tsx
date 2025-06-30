@@ -46,6 +46,13 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({
     });
   }, [memberType, id, pageNumber, pageSize, triggerMemberDetails]);
 
+  // Need a useEffect to reset the page number when memberDetailsData changes
+  useEffect(() => {
+    if (memberDetailsData) {
+      setPageNumber(0);
+    }
+  }, [memberDetailsData]);
+
   if (isFetchingMemberDetails) {
     return <Typography>Loading profit details...</Typography>;
   }

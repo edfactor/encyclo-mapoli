@@ -67,6 +67,13 @@ const ProfitShareGrossReportGrid: React.FC<ProfitShareGrossReportGridProps> = ({
     }
   }, [initialSearchLoaded, pageNumber, pageSize, onSearch, sortParams]);
 
+  // Need a useEffect to reset the page number when data changes
+  useEffect(() => {
+    if (grossWagesReport?.response?.results) {
+      setPageNumber(0);
+    }
+  }, [grossWagesReport]);
+
   return (
     <>
       {!!grossWagesReport && (

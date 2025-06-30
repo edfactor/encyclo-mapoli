@@ -24,7 +24,7 @@ const NoPriorHoursGrid = () => {
   const profitYear = useFiscalCloseProfitYear();
 
   const baseParams = {
-    reportId: PAY426_REPORT_IDS.NO_PRIOR_HOURS,
+    reportId: PAY426_REPORT_IDS.TERMINATED_NO_PRIOR_PS,
     isYearEnd: true,
     minimumAgeInclusive: 18,
     maximumHoursInclusive: 1000,
@@ -58,7 +58,13 @@ const NoPriorHoursGrid = () => {
     },
     [navigate]
   );
-  
+  // Need a useEffect to reset the page number when data changes
+  useEffect(() => {
+    if (data) {
+      setPageNumber(0);
+    }
+  }, [data]);
+
   const sortEventHandler = (update: ISortParams) => {
     const t = () => { 
         trigger({

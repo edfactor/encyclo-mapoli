@@ -24,7 +24,8 @@ const PriorHoursGrid = () => {
   const profitYear = useFiscalCloseProfitYear();
 
   const baseParams = {
-    reportId: PAY426_REPORT_IDS.PRIOR_HOURS,
+    reportId: PAY426_REPORT_IDS.FEWER_THAN_1000_PRIOR_PS,
+    isYearEnd: true,
     minimumAgeInclusive: 18,
     maximumHoursInclusive: 1000,
     includeActiveEmployees: true,
@@ -57,6 +58,13 @@ const PriorHoursGrid = () => {
     },
     [navigate]
   );
+
+  // Need a useEffect to reset the page number when data changes
+  useEffect(() => {
+    if (data) {
+      setPageNumber(0);
+    }
+  }, [data]);
 
   const sortEventHandler = (update: ISortParams) => {
       const t = () => { 

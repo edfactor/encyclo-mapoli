@@ -62,6 +62,13 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store }) => {
     fetchData();
   }, [fetchData]);
 
+  // Need a useEffect on a change in storeManagement to reset the page number
+  useEffect(() => {
+    if (storeManagement?.response?.results && storeManagement.response.results.length > 0) {
+      setPageNumber(0);
+    }
+  }, [storeManagement]);
+
   const columnDefs = useMemo(
     () => [
       {

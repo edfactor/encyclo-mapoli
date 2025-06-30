@@ -57,6 +57,13 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ initialSearchLoaded, setIniti
     }
   }, [initialSearchLoaded, pageNumber, pageSize, onSearch]);
 
+    // Need a useEffect on a change in forfeituresAndPoints to reset the page number
+  useEffect(() => {
+    if (forfeituresAndPoints?.response?.results && forfeituresAndPoints.response.results.length > 0) {
+      setPageNumber(0);
+    }
+  }, [forfeituresAndPoints]);
+  
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
   const totalForfeitures = forfeituresAndPoints?.totalForfeitures ?? 0;

@@ -52,6 +52,13 @@ const ProfallGrid = () => {
     [navigate]
   );
 
+  // Need a useEffect to reset the page number when data changes
+  useEffect(() => {
+    if (profitSharingLabels?.results) {
+      setPageNumber(0);
+    }
+  }, [profitSharingLabels]);
+
   const columnDefs = useMemo(() => GetProfallGridColumns(handleNavigationForButton), [handleNavigationForButton]);
   
   const rowData = useMemo(() => {

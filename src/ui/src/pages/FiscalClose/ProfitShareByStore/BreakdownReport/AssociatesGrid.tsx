@@ -62,6 +62,13 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store }) => {
     fetchData();
   }, [fetchData]);
 
+  // Need a useEffect on a change in breakdownByStore to reset the page number
+  useEffect(() => {
+    if (breakdownByStore?.response?.results && breakdownByStore.response.results.length > 0) {
+      setPageNumber(0);
+    }
+  } , [breakdownByStore]);
+
   const columnDefs = useMemo(
     () => [
       {

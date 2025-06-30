@@ -34,7 +34,17 @@ const EmployeesOnMilitaryLeaveGrid: React.FC = () => {
     fetchData();
   }, [pageNumber, pageSize, triggerSearch]);
 
+ 
+
   const { militaryAndRehire: employeesOnMilitaryLeave } = useSelector((state: RootState) => state.yearsEnd);
+
+   // Need a useEffect on a change in employeesOnMilitaryLeave to reset the page number
+  useEffect(() => {
+   
+    if (employeesOnMilitaryLeave?.response?.results && employeesOnMilitaryLeave.response.results.length > 0) {
+      setPageNumber(0);
+    }
+  }, [employeesOnMilitaryLeave]);
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
   const columnDefs = useMemo(() => GetMilitaryAndRehireColumns(), []);

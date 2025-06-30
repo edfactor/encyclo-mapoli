@@ -40,7 +40,7 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({ selecte
   // );1
   const createBeneficiaryInquiryRequest =
     (skip: number, sortBy: string, isSortDescending: boolean, take: number, badgeNumber: number, psnSuffix: number): BeneficiaryRequestDto | null => {
-      let request: BeneficiaryRequestDto = {
+      const request: BeneficiaryRequestDto = {
         badgeNumber: badgeNumber,
         psnSuffix: psnSuffix,
         isSortDescending: isSortDescending,

@@ -156,6 +156,13 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
     }
   }, [initialSearchLoaded, properPageNumber, properPageSize, sortParams, onSearch]);
 
+  // Need a useEffect on a change in executiveHoursAndDollars to reset the page number
+  useEffect(() => {
+    if (executiveHoursAndDollars?.response?.results && executiveHoursAndDollars.response.results.length > 0) {
+      setPageNumber(0);
+    }
+  }, [executiveHoursAndDollars]);
+
   // This function checks to see if we have a change for this badge number already pending for a save
   const isRowStagedToSave = (badge: number): boolean => {
     const found = executiveHoursAndDollarsGrid?.executiveHoursAndDollars.find(

@@ -56,7 +56,12 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
   }, [initialSearchLoaded, pageNumber, pageSize, sortParams, masterInquiryEmployeeDetails, onSearch]);
 
 
-
+  // Need a useEffect on a change in militaryContributionsData to reset the page number
+  useEffect(() => {
+    if (militaryContributionsData?.results && militaryContributionsData.results.length > 0) {
+      setPageNumber(0);
+    }
+  }, [militaryContributionsData]);
 
   const columnDefs = useMemo(() => GetMilitaryContributionColumns(), []);
 
