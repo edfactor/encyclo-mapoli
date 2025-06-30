@@ -113,7 +113,8 @@ import {
   VestedAmountsByAge,
   YearEndProfitSharingReportRequest,
   YearEndProfitSharingReportResponse,
-  YearEndProfitSharingReportSummaryResponse
+  YearEndProfitSharingReportSummaryResponse,
+  DistributionsAndForfeitureTotalsResponse
 } from "reduxstore/types";
 import { Paged } from "smart-ui-library";
 import { createDataSourceAwareBaseQuery } from "./api";
@@ -193,7 +194,7 @@ export const YearsEndApi = createApi({
       }
     }),
     getDistributionsAndForfeitures: builder.query<
-      PagedReportResponse<DistributionsAndForfeitures>,
+      DistributionsAndForfeitureTotalsResponse,
       DistributionsAndForfeituresRequestDto
     >({
       query: (params) => ({

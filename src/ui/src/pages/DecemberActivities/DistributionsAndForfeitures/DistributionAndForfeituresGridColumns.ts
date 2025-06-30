@@ -54,7 +54,7 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       cellClass: "right-align",
       resizable: true,
       valueFormatter: agGridNumberToCurrency
-    },
+    },    
     {
       headerName: "State Tax",
       field: "stateTax",
@@ -64,6 +64,15 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       cellClass: "right-align",
       resizable: true,
       valueFormatter: agGridNumberToCurrency
+    },
+    {
+      headerName: "State",
+      field: "state",
+      colId: "state",
+      minWidth: 120,
+      headerClass: "left-align",
+      cellClass: "left-align",
+      resizable: true
     },
     {
       headerName: "Federal Tax",
