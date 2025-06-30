@@ -1,4 +1,6 @@
 import { ISortParams, Paged, PaginationParams } from "smart-ui-library";
+import { Dispatch } from "@reduxjs/toolkit";
+import { IHeaderParams, ICellRendererParams } from "ag-grid-community";
 
 export enum ImpersonationRoles {
   FinanceManager = "Finance-Manager",
@@ -1400,6 +1402,40 @@ export interface BeneficiaryKindRequestDto {
 }
 export interface BeneficiaryKindResponseDto {
   beneficiaryKindList?: BeneficiaryKindDto[];
+}
+
+// New types for rehire forfeitures editing functionality
+export interface RehireForfeituresEditedValues {
+  [rowKey: string]: {
+    value: number;
+    hasError: boolean;
+  };
+}
+
+export interface RehireForfeituresHeaderComponentProps extends IHeaderParams {
+  addRowToSelectedRows: (id: number) => void;
+  removeRowFromSelectedRows: (id: number) => void;
+}
+
+export interface RehireForfeituresSaveButtonCellParams extends ICellRendererParams {
+  removeRowFromSelectedRows: (id: number) => void;
+  addRowToSelectedRows: (id: number) => void;
+}
+
+export interface RehireForfeituresUpdatePayload {
+  badgeNumber: number;
+  profitYear: number;
+  suggestedForfeit: number;
+}
+
+export interface RehireForfeituresSelectedRow {
+  id: number;
+  badgeNumber: number;
+  profitYear: number;
+  suggestedForfeit: number;
+}
+
+export interface ApiResponse<T> {
 }
 
 

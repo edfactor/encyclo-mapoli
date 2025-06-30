@@ -227,6 +227,7 @@ const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
         id="DrawerItself"
         sx={{
           width: drawerOpen ? drawerOpenWidth : drawerClosedWidth,
+          display: drawerOpen ? "block" : "none",
           flexShrink: 0,
 
           // THIS IS WHAT STYLES THE AQUAMARINE COLORED SPACE
