@@ -1,6 +1,6 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import {BeneficiaryDto, BeneficiaryRequestDto, BeneficiaryResponseDto} from '../types';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Paged } from 'smart-ui-library';
+import { BeneficiaryDto, BeneficiaryRequestDto } from '../types';
 
 export interface BeneficiaryState {
   beneficiaryList: Paged<BeneficiaryDto> | null;

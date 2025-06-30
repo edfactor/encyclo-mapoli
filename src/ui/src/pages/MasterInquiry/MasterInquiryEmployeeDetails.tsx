@@ -28,6 +28,9 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
 
   const defaultProfitYear = useDecemberFlowProfitYear();
 
+  // We need to get the saved query params
+  const { masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
+  
   useEffect(() => {
     if (memberType && id) {
       trigger({ memberType, id: typeof id === 'string' ? parseInt(id) : id, profitYear: profitYear ?? defaultProfitYear });
@@ -94,6 +97,17 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     phoneNumber,
     workLocation
   } = details;
+
+  if (!isEmployee && masterInquiryRequestParams?.memberType == "all") {
+    // Need to add a new missive warning saying a beneficiary was found
+    missiveAlerts.push({
+      id: 976,
+      severity: 'info',
+      message: `Beneficiary ${ssnValue} Found`,
+      description: 'This member is a beneficiary and not an employee.',
+    });
+
+  } 
 
   const enrolled = getEnrolledStatus(enrollmentId);
   const forfeited = getForfeitedStatus(enrollmentId);
