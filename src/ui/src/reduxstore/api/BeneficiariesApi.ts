@@ -1,5 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 
+import { setBeneficiaryError } from "reduxstore/slices/beneficiarySlice";
 import {
     BeneficiaryDto,
     BeneficiaryKindRequestDto,
@@ -14,9 +15,8 @@ import {
     UpdateBeneficiaryRequest,
     UpdateBeneficiaryResponse
 } from "reduxstore/types";
-import { createDataSourceAwareBaseQuery } from "./api";
 import { Paged } from "smart-ui-library";
-import { setBeneficiary, setBeneficiaryError } from "reduxstore/slices/beneficiarySlice";
+import { createDataSourceAwareBaseQuery } from "./api";
 
 const baseQuery = createDataSourceAwareBaseQuery();
 export const BeneficiariesApi = createApi({
