@@ -1,12 +1,14 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
-public sealed record ForfeitureAdjustmentReportResponse:ReportResponseBase<ForfeitureAdjustmentReportDetail>
+public sealed record ForfeitureAdjustmentReportResponse : ReportResponseBase<ForfeitureAdjustmentReportDetail>
 {
     public static readonly string REPORT_NAME = "Forfeiture Adjustments";
+
     public ForfeitureAdjustmentReportResponse()
     {
         this.ReportName = REPORT_NAME;
     }
+
     public int TotatNetBalance { get; set; }
     public int TotatNetVested { get; set; }
 
@@ -22,8 +24,7 @@ public sealed record ForfeitureAdjustmentReportResponse:ReportResponseBase<Forfe
             EndDate = DateOnly.FromDateTime(DateTime.UtcNow),
             Response = new Demoulas.Common.Contracts.Contracts.Response.PaginatedResponseDto<ForfeitureAdjustmentReportDetail>()
             {
-                Total = 1,
-                Results = new List<ForfeitureAdjustmentReportDetail>() { ForfeitureAdjustmentReportDetail.ResponseExample() }
+                Total = 1, Results = new List<ForfeitureAdjustmentReportDetail>() { ForfeitureAdjustmentReportDetail.ResponseExample() }
             }
         };
     }

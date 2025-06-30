@@ -93,19 +93,22 @@ const EighteenToTwentyGrid = () => {
   const pinnedTopRowData = useMemo(() => {
     if (!data) return [];
     
+    console.log("API data:", data);
     return [
       {
         employeeName: `TOTAL EMPS: ${data.numberOfEmployeesInPlan || 0}`,
         wages: data.wagesTotal || 0,
         hours: data.hoursTotal || 0,
         points: data.pointsTotal || 0,
+        balance: data.balanceTotal || 0,
         isNew: data.numberOfNewEmployees || 0,
       },
       {
         employeeName: "No Wages",
         wages: 0,
         hours: 0,
-        points: 0
+        points: 0,
+        balance: 0
       }
     ];
   }, [data]);

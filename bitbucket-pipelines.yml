@@ -340,7 +340,7 @@ pipelines:
       - parallel:
           - step: *create-api-artifacts
           - step: *create-service-artifacts
-          - step: *create-frontend-artifact-qa      
+          - step: *create-frontend-artifact-qa
       - step:
           name: "Application Deployment"
           runs-on:

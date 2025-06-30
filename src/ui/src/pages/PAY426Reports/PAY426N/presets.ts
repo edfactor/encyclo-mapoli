@@ -3,7 +3,7 @@ import { CAPTIONS } from "../../../constants";
 
 const presets: ReportPreset[] = [
   {
-    id: 'PAY426-1',
+    id: '1',
     name: 'PAY426-1',
     description: CAPTIONS.PAY426_ACTIVE_18_20,
     params: {
@@ -21,7 +21,7 @@ const presets: ReportPreset[] = [
     }
   },
   {
-    id: 'PAY426-2',
+    id: '2',
     name: 'PAY426-2',
     description: CAPTIONS.PAY426_ACTIVE_21_PLUS,
     params: {
@@ -38,7 +38,7 @@ const presets: ReportPreset[] = [
     }
   },
   {
-    id: 'PAY426-3',
+    id: '3',
     name: 'PAY426-3',
     description: CAPTIONS.PAY426_ACTIVE_UNDER_18,
     params: {
@@ -54,7 +54,7 @@ const presets: ReportPreset[] = [
     }
   },
   {
-    id: 'PAY426-4',
+    id: '4',
     name: 'PAY426-4',
     description: CAPTIONS.PAY426_ACTIVE_PRIOR_SHARING,
     params: {
@@ -71,7 +71,7 @@ const presets: ReportPreset[] = [
     }
   },
   {
-    id: 'PAY426-5',
+    id: '5',
     name: 'PAY426-5',
     description: CAPTIONS.PAY426_ACTIVE_NO_PRIOR,
     params: {
@@ -88,7 +88,7 @@ const presets: ReportPreset[] = [
     }
   },
   {
-    id: 'PAY426-6',
+    id: '6',
     name: 'PAY426-6',
     description: CAPTIONS.PAY426_TERMINATED_1000_PLUS,
     params: {
@@ -105,7 +105,7 @@ const presets: ReportPreset[] = [
     }
   },
   {
-    id: 'PAY426-7',
+    id: '7',
     name: 'PAY426-7',
     description: CAPTIONS.PAY426_TERMINATED_NO_PRIOR,
     params: {
@@ -122,7 +122,7 @@ const presets: ReportPreset[] = [
     }
   },
   {
-    id: 'PAY426-8',
+    id: '8',
     name: 'PAY426-8',
     description: CAPTIONS.PAY426_TERMINATED_PRIOR,
     params: {
@@ -139,7 +139,7 @@ const presets: ReportPreset[] = [
     }
   },
   {
-    id: 'PAY426-9',
+    id: '9',
     name: 'PAY426-9',
     description: CAPTIONS.PAY426_SUMMARY,
     params: {
@@ -151,21 +151,6 @@ const presets: ReportPreset[] = [
       includeBeneficiaries: true,
       includeEmployeesWithPriorProfitSharingAmounts: true,
       includeEmployeesWithNoPriorProfitSharingAmounts: true,
-    }
-  },
-  {
-    id: 'PAY426-10',
-    name: 'PAY426-10',
-    description: CAPTIONS.PAY426_NON_EMPLOYEE,
-    params: {
-      isYearEnd: true,
-      includeActiveEmployees: false,
-      includeInactiveEmployees: false,
-      includeEmployeesTerminatedThisYear: false,
-      includeTerminatedEmployees: false,
-      includeBeneficiaries: true,
-      includeEmployeesWithPriorProfitSharingAmounts: false,
-      includeEmployeesWithNoPriorProfitSharingAmounts: false,
     }
   }
 ];

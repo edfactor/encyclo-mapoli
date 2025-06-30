@@ -5,10 +5,10 @@ public sealed record UpdateSummaryReportResponse : ReportResponseBase<UpdateSumm
 {
     public int TotalNumberOfEmployees { get; set; }
     public int TotalNumberOfBeneficiaries { get; set; }
-    public Decimal TotalBeforeProfitSharingAmount { get; set; }
-    public Decimal TotalBeforeVestedAmount { get; set; }
-    public Decimal TotalAfterProfitSharingAmount { get; set; }
-    public Decimal TotalAfterVestedAmount { get; set; }
+    public decimal TotalBeforeProfitSharingAmount { get; set; }
+    public decimal TotalBeforeVestedAmount { get; set; }
+    public decimal TotalAfterProfitSharingAmount { get; set; }
+    public decimal TotalAfterVestedAmount { get; set; }
 
     public static UpdateSummaryReportResponse ResponseExample()
     {

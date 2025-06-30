@@ -30,7 +30,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
 
   useEffect(() => {
     if (memberType && id) {
-      trigger({ memberType, id: typeof id === 'string' ? parseInt(id) : id, profitYear:  profitYear ?? defaultProfitYear });
+      trigger({ memberType, id: typeof id === 'string' ? parseInt(id) : id, profitYear: profitYear ?? defaultProfitYear });
     }
   }, [memberType, id, profitYear, trigger, defaultProfitYear]);
 
@@ -94,7 +94,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     phoneNumber,
     workLocation
   } = details;
-  
+
   const enrolled = getEnrolledStatus(enrollmentId);
   const forfeited = getForfeitedStatus(enrollmentId);
 
@@ -105,7 +105,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     { label: "", value: `${addressCity}, ${addressState} ${addressZipCode}` },
     { label: "Phone #", value: phoneNumber || "N/A" },
     ...(isEmployee ? [{ label: "Work Location", value: workLocation || "N/A" }] : []),
-    ...(isEmployee ? [{ label: "Store", value: storeNumber > 0 ? storeNumber : "N/A" }]: []),
+    ...(isEmployee ? [{ label: "Store", value: storeNumber > 0 ? storeNumber : "N/A" }] : []),
     { label: "Enrolled", value: enrolled },
     { label: "Forfeited", value: forfeited },
   ];
@@ -128,7 +128,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     { label: "Current Balance", value: numberToCurrency(currentPSAmount) },
     { label: "Begin Vested Balance", value: numberToCurrency(beginVestedAmount) },
     { label: "Current Vested Balance", value: numberToCurrency(currentVestedAmount) },
-    ...(isEmployee ? [{ label: "Profit Sharing Hours", value: formatNumberWithComma(yearToDateProfitSharingHours) }]: []),
+    ...(isEmployee ? [{ label: "Profit Sharing Hours", value: formatNumberWithComma(yearToDateProfitSharingHours) }] : []),
     ...(isEmployee ? [{ label: "Years In Plan", value: yearsInPlan }] : []),
     { label: "Vested Percent", value: formatPercentage(percentageVested) },
     { label: "Received Contributions Last Year", value: receivedContributionsLastYear ? "Yes" : "No" }
@@ -179,7 +179,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
                 data={milestoneSection}
               />
             </Grid2>
-             <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
               <LabelValueSection
                 data={planSection}
               />

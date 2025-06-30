@@ -1,4 +1,6 @@
 import { ISortParams, Paged, PaginationParams } from "smart-ui-library";
+import { Dispatch } from "@reduxjs/toolkit";
+import { IHeaderParams, ICellRendererParams } from "ag-grid-community";
 
 export enum ImpersonationRoles {
   FinanceManager = "Finance-Manager",
@@ -842,9 +844,11 @@ export interface YearEndProfitSharingReportResponse extends PagedReportResponse<
   wagesTotal: number;
   hoursTotal: number;
   pointsTotal: number;
+  balanceTotal: number;
   terminatedWagesTotal: number;
   terminatedHoursTotal: number;
   terminatedPointsTotal: number;
+  terminatedBalanceTotal: number;
   numberOfEmployees: number;
   numberOfNewEmployees: number;
   numberOfEmployeesUnder21: number;
@@ -873,6 +877,7 @@ export interface MilitaryContributionRequest extends ProfitYearRequest {
 }
 
 export interface YearEndProfitSharingReportRequest {
+  reportId: number;
   isYearEnd: boolean;
   minimumAgeInclusive?: number;
   maximumAgeInclusive?: number;
@@ -1305,13 +1310,7 @@ export interface BeneficiaryDto {
 
 export interface BeneficiaryRequestDto extends SortedPaginationRequestDto {
   badgeNumber?: number;
-  psnSuffix?: number;
-  name: string;
-  city: string;
-  address: string;
-  state: string;
-  ssn?: number;
-  percentage?: number;
+  psnSuffix?:number;
 }
 
 export interface BeneficiaryResponseDto {
@@ -1329,6 +1328,8 @@ export interface CreateBeneficiaryRequest {
     percentage: number;
 }
 
+
+
 export interface CreateBeneficiaryResponse {
     beneficiaryId: number;
     psnSuffix: number;
@@ -1338,6 +1339,41 @@ export interface CreateBeneficiaryResponse {
     relationship: string | null;
     kindId: string | null;
     percent: number;
+}
+
+export interface UpdateBeneficiaryRequest extends UpdateBeneficiaryContactRequest {
+    relationship: string;
+    kindId: string;
+    percentage: number;
+}
+
+export interface UpdateBeneficiaryResponse {
+    badgeNumber: number;
+    demographicId: number;
+    beneficiaryContactId: number;
+    relationship: string | null;
+    kindId: string | null;
+    percent: number;
+}
+
+export interface UpdateBeneficiaryContactRequest {
+    id: number;
+    contactSsn: number;
+    dateOfBirth: string;
+    street1: string;
+    street2: string | null;
+    street3: string | null;
+    street4: string | null;
+    city: string;
+    state: string;
+    postalCode: string;
+    countryIso: string | null;
+    firstName: string;
+    lastName: string;
+    middleName: string | null;
+    phoneNumber: string | null;
+    mobileNumber: string | null;
+    emailAddress: string | null;
 }
 
 
@@ -1403,6 +1439,40 @@ export interface BeneficiaryKindRequestDto {
 }
 export interface BeneficiaryKindResponseDto {
   beneficiaryKindList?: BeneficiaryKindDto[];
+}
+
+// New types for rehire forfeitures editing functionality
+export interface RehireForfeituresEditedValues {
+  [rowKey: string]: {
+    value: number;
+    hasError: boolean;
+  };
+}
+
+export interface RehireForfeituresHeaderComponentProps extends IHeaderParams {
+  addRowToSelectedRows: (id: number) => void;
+  removeRowFromSelectedRows: (id: number) => void;
+}
+
+export interface RehireForfeituresSaveButtonCellParams extends ICellRendererParams {
+  removeRowFromSelectedRows: (id: number) => void;
+  addRowToSelectedRows: (id: number) => void;
+}
+
+export interface RehireForfeituresUpdatePayload {
+  badgeNumber: number;
+  profitYear: number;
+  suggestedForfeit: number;
+}
+
+export interface RehireForfeituresSelectedRow {
+  id: number;
+  badgeNumber: number;
+  profitYear: number;
+  suggestedForfeit: number;
+}
+
+export interface ApiResponse<T> {
 }
 
 

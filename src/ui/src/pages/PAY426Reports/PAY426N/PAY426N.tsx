@@ -22,7 +22,7 @@ const PAY426N: React.FC = () => {
     dispatch(clearYearEndProfitSharingReport());
     setCurrentPreset(preset);
     if (preset) {
-      setShowSummaryReport(preset.id === 'PAY426-9');
+      setShowSummaryReport(preset.id === '9');
     } else {
       setShowSummaryReport(false);
     }

@@ -986,18 +986,104 @@ BEGIN
             AND pd.ID  = pdF.ID
       ); -- Forfeits that match a class action should be categorized as FORFEIT CA 
 
-    -- Set flag on Profit Detail marking a year of elibility for Profit Sharing
--- Comment types indicating years of service other than a contribution include:
--- V-Only
--- > 64 - 1 Year Vested
--- > 64 - 2 Year Vested
--- > 64 - 3 Year Vested
--- >64 & >5 100%
--- Military
--- https://demoulas.atlassian.net/browse/PS-1147
-    UPDATE PROFIT_DETAIL pd
-       SET pd.YEARS_OF_SERVICE_CREDIT = CASE WHEN (pd.Contribution > 0 OR pd.COMMENT_TYPE_ID IN (5, 16, 17, 18, 19)) AND MONTH_TO_DATE != 20 THEN 1 ELSE 0 END
-     WHERE EXISTS (SELECT SSN FROM DEMOGRAPHIC d WHERE d.SSN = pd.SSN);
+
+-- Handle basic allocation of YEARS_OF_SERVICE_CREDIT.  There is de-duplication happening 
+-- because some profit_years have multiple profit_code_id = 0 contributions
+MERGE INTO profit_detail pd
+    USING (
+        SELECT
+            id,
+            yr_sum
+        FROM
+            (
+                SELECT
+                    MIN(id) AS id,
+                    MAX(
+                            CASE
+                                WHEN comment_type_id = 16 THEN -- '>64 - 1 YR VEST'
+                                    1
+                                WHEN comment_type_id = 17 THEN --  '>64 - 2 YR VEST'
+                                    2
+                                WHEN comment_type_id = 18 THEN --  '>64 - 3 YR VEST'
+                                    3
+                                WHEN comment_type_id = 5  THEN -- V-ONLY
+                                    1
+                                WHEN pd.contribution != 0 THEN -- Normal contribution
+                                    1
+                                ELSE
+                                    0
+                                END
+                    )       AS yr_sum
+                FROM
+                    profit_detail pd
+                WHERE
+                    -- We handle 19, Military later
+                    ( comment_type_id IS NULL OR comment_type_id != 19 )
+                  AND profit_year_iteration = 0
+                  AND profit_code_id = 0
+                GROUP BY
+                    ssn,
+                    profit_year
+            )
+        WHERE
+            yr_sum > 0
+    ) src ON ( pd.id = src.id )
+    WHEN MATCHED THEN UPDATE
+        SET pd.years_of_service_credit = src.yr_sum;
+
+
+-- The profit year "1989.5" caused 301 people (in the scramble) to get an extra year of vesting, so we duplicate that
+-- in SMART
+MERGE INTO profit_detail pd
+    USING (
+        SELECT
+            id
+        FROM
+            (
+                SELECT
+                    id,
+                    ROW_NUMBER()
+                        OVER(PARTITION BY ssn
+                     ORDER BY
+                         contribution DESC
+                ) AS rn
+                FROM
+                    profit_detail
+                WHERE
+                    profit_year_iteration = 5
+                  AND profit_code_id = 0
+                  AND contribution != 0
+                AND ( comment_type_id = 5 OR comment_type_id IS NULL )
+                order by id
+            ) ranked
+        WHERE
+            rn = 1
+    ) src ON ( pd.id = src.id )
+    WHEN MATCHED THEN UPDATE
+        SET pd.years_of_service_credit = 1;
+
+-- Handle 1998.5 V-ONLY rows
+update profit_detail set YEARS_OF_SERVICE_CREDIT = 1  where id in (
+    select min(id) from profit_detail pd where profit_year = 1989 and profit_year_iteration = 5 and comment_type_id = 5 group by ssn )
+;
+
+-- Finally, handle the MILITARY contributions with MONTH_TO_DATE=20 
+UPDATE profit_detail pd
+SET
+    pd.years_of_service_credit = 1
+WHERE
+    comment_type_id = 19
+  AND profit_code_id = 0
+  AND month_to_date = 20
+  and profit_year_iteration = 1
+  AND EXISTS (
+    SELECT
+        ssn
+    FROM
+        demographic d
+    WHERE
+        d.ssn = pd.ssn
+);
 
 
 -- https://demoulas.atlassian.net/browse/PS-1147
@@ -1005,7 +1091,7 @@ Update PROFIT_DETAIL pd
     SET MONTH_TO_DATE = 1 
         WHERE MONTH_TO_DATE = 20;
 
--- Approimate the creation date to aid in correct sorting of the transactions
+-- Approximate the creation date to aid in correct sorting of the transactions
 UPDATE PROFIT_DETAIL
 SET CREATED_UTC = TO_TIMESTAMP(
         YEAR_TO_DATE || '-' ||

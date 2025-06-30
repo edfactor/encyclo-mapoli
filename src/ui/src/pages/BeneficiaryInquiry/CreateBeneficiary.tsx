@@ -7,8 +7,8 @@ import BeneficiaryInquiryGrid from "./BeneficiaryInquiryGrid";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { BeneficiaryKindDto, BeneficiaryTypeDto, BeneficiaryTypesResponseDto, CreateBeneficiaryContactRequest, CreateBeneficiaryContactResponse, CreateBeneficiaryRequest } from "reduxstore/types";
-import { useLazyCreateBeneficiariesQuery, useLazyCreateBeneficiaryContactQuery, useLazyGetBeneficiarytypesQuery } from "reduxstore/api/BeneficiariesApi";
+import { BeneficiaryDto, BeneficiaryKindDto, BeneficiaryTypeDto, BeneficiaryTypesResponseDto, CreateBeneficiaryContactRequest, CreateBeneficiaryContactResponse, CreateBeneficiaryRequest, UpdateBeneficiaryRequest, UpdateBeneficiaryResponse } from "reduxstore/types";
+import { useLazyCreateBeneficiariesQuery, useLazyCreateBeneficiaryContactQuery, useLazyGetBeneficiarytypesQuery, useLazyUpdateBeneficiaryQuery } from "reduxstore/api/BeneficiariesApi";
 import Checkbox from '@mui/material/Checkbox';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -38,7 +38,7 @@ export interface cb {
     beneficiarySsn: number;
     relationship: string;
     percentage: number;
-    dateOfBirth: Date;
+    dateOfBirth?: Date;
     street: string;
     city: string;
     state: string;
@@ -49,15 +49,18 @@ export interface cb {
     kindId: string;
 }
 type Props = {
-    badgeNumber:number;
+    badgeNumber: number;
+    psnSuffix: number;
     beneficiaryKind: BeneficiaryKindDto[];
-    onSaveSuccess: ()=>void;
+    onSaveSuccess: () => void;
+    selectedBeneficiary?: BeneficiaryDto
 }
 
-const CreateBeneficiary: React.FC<Props> = ({badgeNumber, onSaveSuccess,beneficiaryKind}) => {
+const CreateBeneficiary: React.FC<Props> = ({ badgeNumber, onSaveSuccess, beneficiaryKind, psnSuffix, selectedBeneficiary }) => {
     const [triggerAdd, { isFetching }] = useLazyCreateBeneficiariesQuery();
-    
+
     const [triggerCreateBeneficiaryContact, createBeneficiaryContactResponse] = useLazyCreateBeneficiaryContactQuery();
+    const [triggerUpdateBeneficiary, udpateResponse] = useLazyUpdateBeneficiaryQuery();
 
     const {
         control,
@@ -69,19 +72,46 @@ const CreateBeneficiary: React.FC<Props> = ({badgeNumber, onSaveSuccess,benefici
         setFocus,
         watch
     } = useForm<cb>({
-        resolver: yupResolver(schema) as Resolver<cb>
+        resolver: yupResolver(schema) as Resolver<cb>,
+        defaultValues: selectedBeneficiary ? {
+            beneficiarySsn: undefined,
+            relationship: selectedBeneficiary.relationship,
+            percentage: selectedBeneficiary.percent,
+            dateOfBirth: selectedBeneficiary.contact?.dateOfBirth,
+            street: selectedBeneficiary.contact?.address?.street,
+            city: selectedBeneficiary.contact?.address?.city,
+            state: selectedBeneficiary.contact?.address?.state,
+            postalCode: selectedBeneficiary.contact?.address?.postalCode,
+            firstName: selectedBeneficiary.contact?.contactInfo?.firstName,
+            lastName: selectedBeneficiary.contact?.contactInfo?.lastName,
+            addressSameAsBeneficiary: false,
+            kindId: selectedBeneficiary.kindId + ''
+        } : {
+            beneficiarySsn: 0,
+            relationship: '',
+            percentage: 0,
+            dateOfBirth: undefined,
+            street: '',
+            city: '',
+            state: '',
+            postalCode: '',
+            firstName: '',
+            lastName: '',
+            addressSameAsBeneficiary: false,
+            kindId: ''
+        }
     });
 
     const handleReset = () => {
         reset();
     }
 
-    const onSubmit = (data: cb) => {
+    const createBeneficiary = (data: cb) => {
         let request: CreateBeneficiaryContactRequest = {
             contactSsn: data.beneficiarySsn,
             city: data.city,
             countryIso: '',
-            dateOfBirth: data.dateOfBirth.toISOString().split('T')[0],
+            dateOfBirth: data.dateOfBirth ? data.dateOfBirth.toISOString().split('T')[0] : '',
             emailAddress: '',
             firstName: data.firstName,
             lastName: data.lastName,
@@ -100,23 +130,61 @@ const CreateBeneficiary: React.FC<Props> = ({badgeNumber, onSaveSuccess,benefici
             console.log(res);
             saveBeneficiary(res.id, data);
         }).catch((err) => { console.error(err) });
+    }
+
+    const updateBeneficiary = (data: cb) => {
+        var request: UpdateBeneficiaryRequest = {
+            contactSsn: data.beneficiarySsn,
+            city: data.city,
+            countryIso: null,
+            dateOfBirth: data.dateOfBirth ? data.dateOfBirth.toISOString().split('T')[0] : '',
+            emailAddress: null,
+            firstName: data.firstName,
+            lastName: data.lastName,
+            middleName: null,
+            mobileNumber: null,
+            phoneNumber: null,
+            postalCode: data.postalCode,
+            state: data.state,
+            street1: data.street,
+            street2: null,
+            street3: null,
+            street4: null,
+            id: selectedBeneficiary?.id ?? 0,
+            kindId: data.kindId,
+            percentage: data.percentage,
+            relationship: data.relationship
+        }
+        triggerUpdateBeneficiary(request).unwrap().then((res: UpdateBeneficiaryResponse)=>{
+            console.log('update successfully');
+            onSaveSuccess();
+        })
+    }
+
+
+    const onSubmit = (data: cb) => {
+        if(selectedBeneficiary){
+            updateBeneficiary(data);
+        }else {
+            createBeneficiary(data);
+        }
     };
 
-    const saveBeneficiary  = (beneficiaryContactId:number, data:cb)=>{
+    const saveBeneficiary = (beneficiaryContactId: number, data: cb) => {
         let request: CreateBeneficiaryRequest = {
             beneficiaryContactId: beneficiaryContactId,
             employeeBadgeNumber: badgeNumber,
-            firstLevelBeneficiaryNumber: 1,
-            kindId: 'P', 
-            percentage : data.percentage,
+            firstLevelBeneficiaryNumber: Math.floor(psnSuffix / 1000) % 10,
+            kindId: data.kindId,
+            percentage: data.percentage,
             relationship: data.relationship,
-            secondLevelBeneficiaryNumber: 0,
-            thirdLevelBeneficiaryNumber: 0
+            secondLevelBeneficiaryNumber: Math.floor(psnSuffix / 100) % 10,
+            thirdLevelBeneficiaryNumber: Math.floor(psnSuffix / 10) % 10
         }
-        triggerAdd(request).unwrap().then((value)=>{
+        triggerAdd(request).unwrap().then((value) => {
             console.log('saved successfully');
             onSaveSuccess();
-        }).catch((err)=>{console.error(err)})
+        }).catch((err) => { console.error(err) })
     }
     const validateAndSubmit = handleSubmit(onSubmit);
     useEffect(() => {
@@ -195,16 +263,16 @@ const CreateBeneficiary: React.FC<Props> = ({badgeNumber, onSaveSuccess,benefici
                             control={control}
                             render={({ field }) => (
                                 <DsmDatePicker
-                                                id="dateOfBirth"
-                                                onChange={(value: Date | null) => {
-                                                  field.onChange(value || undefined);
-                                                }}
-                                                value={field.value ? tryddmmyyyyToDate(field.value) : null}
-                                                required={false}
-                                                label=""
-                                                disableFuture
-                                                error={errors.dateOfBirth?.message}
-                                              />
+                                    id="dateOfBirth"
+                                    onChange={(value: Date | null) => {
+                                        field.onChange(value || undefined);
+                                    }}
+                                    value={field.value ? tryddmmyyyyToDate(field.value) : null}
+                                    required={false}
+                                    label=""
+                                    disableFuture
+                                    error={errors.dateOfBirth?.message}
+                                />
                             )}
                         />
                     </Grid2>
