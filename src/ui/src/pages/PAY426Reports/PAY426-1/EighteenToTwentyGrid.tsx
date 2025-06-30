@@ -1,15 +1,14 @@
 import { Typography } from "@mui/material";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { GetProfitSharingReportGridColumns } from "./EighteenToTwentyGridColumns";
-import { useNavigate, Path } from "react-router";
-import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
-import { CAPTIONS } from "../../../constants";
-import { useSelector } from "react-redux";
-import { RootState } from "../../../reduxstore/store";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
+import { Path, useNavigate } from "react-router";
+import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
+import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { CAPTIONS } from "../../../constants";
+import { RootState } from "../../../reduxstore/store";
 import pay426Utils from "../Pay427Utils";
-import { set } from "date-fns";
+import { GetProfitSharingReportGridColumns } from "./EighteenToTwentyGridColumns";
 
 const EighteenToTwentyGrid = () => {
   const navigate = useNavigate();
@@ -24,6 +23,7 @@ const EighteenToTwentyGrid = () => {
   const hasToken = useSelector((state: RootState) => !!state.security.token);
   const profitYear = useFiscalCloseProfitYear();
   const baseParams = {
+    reportId: 1,
     isYearEnd: true,
     minimumAgeInclusive: 18,
     maximumAgeInclusive: 20,
@@ -40,7 +40,6 @@ const EighteenToTwentyGrid = () => {
   useEffect(() => {
     if (hasToken) {
       trigger({
-        
         profitYear: profitYear,
         pagination: {
           skip: pageNumber * pageSize,
@@ -51,7 +50,7 @@ const EighteenToTwentyGrid = () => {
         ...baseParams
       });
     }
-  }, [trigger, hasToken, profitYear, pageNumber, pageSize, sortParams]);
+  }, [trigger, hasToken, profitYear, pageNumber, pageSize, sortParams, baseParams]);
 
   // Wrapper to pass react function to non-react class
   const handleNavigationForButton = useCallback(

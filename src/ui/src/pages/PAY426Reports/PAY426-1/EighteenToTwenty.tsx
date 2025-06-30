@@ -1,9 +1,9 @@
-import { CAPTIONS } from "../../../constants";
-import { DSMAccordion, Page } from "smart-ui-library";
-import EighteenToTwentyGrid from "./EighteenToTwentyGrid";
 import { Divider } from "@mui/material";
 import Grid2 from '@mui/material/Grid2';
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
+import { Page } from "smart-ui-library";
+import { CAPTIONS } from "../../../constants";
+import EighteenToTwentyGrid from "./EighteenToTwentyGrid";
 
 const renderActionNode = () => {
     return (
