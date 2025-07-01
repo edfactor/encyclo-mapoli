@@ -12,6 +12,7 @@ import {
     CreateBeneficiaryContactResponse,
     CreateBeneficiaryRequest,
     CreateBeneficiaryResponse,
+    DeleteBeneficiaryRequest,
     UpdateBeneficiaryRequest,
     UpdateBeneficiaryResponse
 } from "reduxstore/types";
@@ -114,8 +115,22 @@ export const BeneficiariesApi = createApi({
                     dispatch(setBeneficiaryError("Failed to update beneficiary"));
                 }
             }
+        }),
+        deleteBeneficiary: builder.query<any , DeleteBeneficiaryRequest>({
+            query: (request) => ({
+                url: `/beneficiaries/${request.id}`,
+                method: "DELETE"
+            }),
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+                try {
+                    const { data } = await queryFulfilled;
+                } catch (err) {
+                    console.error("Failed to delete beneficiary", err);
+                    dispatch(setBeneficiaryError("Failed to delete beneficiary"));
+                }
+            }
         })
     })
 });
 
-export const { useLazyUpdateBeneficiaryQuery, useLazyGetBeneficiariesQuery, useLazyCreateBeneficiariesQuery, useLazyGetBeneficiarytypesQuery, useLazyCreateBeneficiaryContactQuery, useLazyGetBeneficiaryKindQuery } = BeneficiariesApi;
+export const { useLazyDeleteBeneficiaryQuery, useLazyUpdateBeneficiaryQuery, useLazyGetBeneficiariesQuery, useLazyCreateBeneficiariesQuery, useLazyGetBeneficiarytypesQuery, useLazyCreateBeneficiaryContactQuery, useLazyGetBeneficiaryKindQuery } = BeneficiariesApi;
