@@ -1,4 +1,4 @@
-import { Button, Divider, Typography } from "@mui/material";
+import { Button, CircularProgress, Divider, Typography } from "@mui/material";
 import Grid2 from '@mui/material/Grid2';
 import { useEffect, useState } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
@@ -16,6 +16,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import MasterInquiryMemberGrid from "pages/MasterInquiry/MasterInquiryMemberGrid";
 import MasterInquiryEmployeeDetails from "pages/MasterInquiry/MasterInquiryEmployeeDetails";
+import { bool } from "yup";
 
 
 const BeneficiaryInquiry = () => {
@@ -24,6 +25,7 @@ const BeneficiaryInquiry = () => {
   const [triggerGetBeneficiaryType] = useLazyGetBeneficiarytypesQuery();
   const [triggerDeleteBeneficiary] = useLazyDeleteBeneficiaryQuery();
   const [open, setOpen] = useState(false);
+  const [openDeleteConfirmationDialog, setOpenDeleteConfirmationDialog] = useState(false);
   const [badgeNumber, setBadgeNumber] = useState(0);
   const [beneficiaryKind, setBeneficiaryKind] = useState<BeneficiaryKindDto[]>([]);
   const [beneficiaryType, setBeneficiaryType] = useState<BeneficiaryTypeDto[]>([]);
@@ -33,6 +35,8 @@ const BeneficiaryInquiry = () => {
   const [noResults, setNoResults] = useState(false);
   const [change, setChange] = useState<number>(0);
   const [selectedBeneficiary, setSelectedBeneficiary] = useState<BeneficiaryDto | undefined>();
+  const [deleteBeneficiaryId, setDeleteBeneficairyId] = useState<number>(0);
+  const[deleteInProgress,setDeleteInProgress] = useState<boolean>(false);
 
 
   const handleClickOpen = () => {
@@ -44,15 +48,21 @@ const BeneficiaryInquiry = () => {
   }
 
   const deleteBeneficiary = (id: number) => {
-    var deleteConfirm = confirm('Are you sure you want to delete ?');
-    if (deleteConfirm) {
-      triggerDeleteBeneficiary({ id: id }).unwrap().then((res: any) => {
-        alert('deleted successfully!');
-      }).catch((err:any)=>{
-        alert(`Something went wrong! Error: ${err.data.title}`)
-      });
+    setDeleteBeneficairyId(id);
+    setOpenDeleteConfirmationDialog(true);
+  }
+  const handleDeleteConfirmationDialog = (del: boolean) => {
+    if (del) {
+      setDeleteInProgress(true);
+      triggerDeleteBeneficiary({ id: deleteBeneficiaryId }).unwrap().then((res: any) => {
+        setChange(prev => prev + 1);
+      }).catch((err: any) => {
+        console.error(`Something went wrong! Error: ${err.data.title}`)
+      }).finally(() => { setOpenDeleteConfirmationDialog(false); setDeleteBeneficairyId(0); setDeleteInProgress(false); });
     }
-
+    else {
+      setOpenDeleteConfirmationDialog(false);
+    }
   }
 
   const currentBadge = (badgeNumber: number) => {
@@ -111,6 +121,23 @@ const BeneficiaryInquiry = () => {
             <CreateBeneficiary selectedBeneficiary={selectedBeneficiary} beneficiaryKind={beneficiaryKind} badgeNumber={selectedMember?.badgeNumber ?? 0} psnSuffix={selectedMember?.psnSuffix ?? 0} onSaveSuccess={onBeneficiarySaveSuccess}></CreateBeneficiary>
 
           </DialogContent>
+        </Dialog>
+        <Dialog
+          open={openDeleteConfirmationDialog}
+        >
+          <DialogTitle>Confirmation</DialogTitle>
+          <DialogContent>
+            <p>Are you sure you want to delete ?</p>
+          </DialogContent>
+          <DialogActions>
+            <Button autoFocus onClick={() => handleDeleteConfirmationDialog(false)}>
+              Cancel
+            </Button>
+            <Button color={"error"} onClick={() => handleDeleteConfirmationDialog(true)}>
+              Delete it! &nbsp;
+              {deleteInProgress? <CircularProgress size={"15px"} color={"error"}  /> :<></>}
+              </Button>
+          </DialogActions>
         </Dialog>
       </>
       <Grid2
