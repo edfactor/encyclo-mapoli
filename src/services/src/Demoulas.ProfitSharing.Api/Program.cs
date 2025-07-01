@@ -84,7 +84,8 @@ builder.AddDatabaseServices((services, factoryRequests) =>
     factoryRequests.Add(ContextFactoryRequest.Initialize<ProfitSharingDbContext>("ProfitSharing",
         interceptorFactory: sp => [
             sp.GetRequiredService<AuditSaveChangesInterceptor>(),
-            sp.GetRequiredService<BeneficiarySaveChangesInterceptor>()
+            sp.GetRequiredService<BeneficiarySaveChangesInterceptor>(),
+            sp.GetRequiredService<BeneficiaryContactSaveChangesInterceptor>()
         ]));
     factoryRequests.Add(ContextFactoryRequest.Initialize<ProfitSharingReadOnlyDbContext>("ProfitSharing"));
     factoryRequests.Add(ContextFactoryRequest.Initialize<DemoulasCommonDataContext>("ProfitSharing"));

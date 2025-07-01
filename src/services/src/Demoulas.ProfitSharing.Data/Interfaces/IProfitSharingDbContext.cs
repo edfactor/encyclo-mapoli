@@ -16,6 +16,7 @@ public interface IProfitSharingDbContext
     DbSet<Country> Countries { get; set; }
     DbSet<Beneficiary> Beneficiaries { get; set; }
     DbSet<BeneficiaryArchive> BeneficiaryArchives { get; set; }
+    DbSet<BeneficiaryContactArchive> BeneficiaryContactArchives { get; set; }
     DbSet<PayProfit> PayProfits { get; set; }
     DbSet<ProfitDetail> ProfitDetails { get; set; }
     DbSet<Distribution> Distributions { get; set; }

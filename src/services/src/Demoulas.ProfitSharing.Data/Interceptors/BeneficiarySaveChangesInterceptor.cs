@@ -1,9 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
-using Demoulas.ProfitSharing.Data.Configuration;
 using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Audit;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Demoulas.Util.Extensions;
 using Demoulas.Common.Contracts.Interfaces;
@@ -26,6 +24,7 @@ public class BeneficiarySaveChangesInterceptor : SaveChangesInterceptor
         }
 
         var archiveEntries = context.ChangeTracker.Entries<Beneficiary>()
+                .Where(e => e.State is EntityState.Deleted)
                 .Select(x=>new BeneficiaryArchive()
                 {
                     Id = x.Entity.Id,
