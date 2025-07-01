@@ -1,4 +1,5 @@
 ﻿using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -14,6 +15,7 @@ public interface IProfitSharingDbContext
     DbSet<FrozenState> FrozenStates { get; set; }
     DbSet<Country> Countries { get; set; }
     DbSet<Beneficiary> Beneficiaries { get; set; }
+    DbSet<BeneficiaryArchive> BeneficiaryArchives { get; set; }
     DbSet<PayProfit> PayProfits { get; set; }
     DbSet<ProfitDetail> ProfitDetails { get; set; }
     DbSet<Distribution> Distributions { get; set; }
