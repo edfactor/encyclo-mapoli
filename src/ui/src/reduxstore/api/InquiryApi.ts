@@ -51,7 +51,7 @@ export const InquiryApi = createApi({
         body: params
       })
     }),
-    getProfitMasterInquiryMemberDetails: builder.query<PagedReportResponse<MasterInquiryResponseDto>, { memberType: number; id: number; skip?: number; take?: number; sortBy?: string; isSortDescending?: boolean }>({
+    getProfitMasterInquiryMemberDetails: builder.query<Paged<MasterInquiryResponseDto>, { memberType: number; id: number; skip?: number; take?: number; sortBy?: string; isSortDescending?: boolean }>({
       query: ({ memberType, id, ...pagination }) => ({
         url: `master/master-inquiry/member/${memberType}/${id}/details`,
         method: "GET",

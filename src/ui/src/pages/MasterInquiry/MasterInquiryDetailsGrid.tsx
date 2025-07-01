@@ -47,8 +47,9 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({
   // Need a useEffect to reset the page number when memberDetailsData changes
   const prevMemberDetailsData = useRef<any>(null);
   useEffect(() => {
-    if (memberDetailsData && (prevMemberDetailsData.current === null || 
-         memberDetailsData.response.total !== prevMemberDetailsData.current.response.total)) {
+    if (memberDetailsData && 
+      (prevMemberDetailsData.current === undefined || 
+         memberDetailsData.total !== prevMemberDetailsData.current.total)) {
       setPageNumber(0);
     }
     prevMemberDetailsData.current = memberDetailsData;  
