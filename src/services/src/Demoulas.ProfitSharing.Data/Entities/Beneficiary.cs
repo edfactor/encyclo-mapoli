@@ -1,5 +1,5 @@
 ﻿namespace Demoulas.ProfitSharing.Data.Entities;
-public class Beneficiary
+public sealed class Beneficiary
 {
     public required int Id { get; set; }
     public required int BadgeNumber { get; set; }
