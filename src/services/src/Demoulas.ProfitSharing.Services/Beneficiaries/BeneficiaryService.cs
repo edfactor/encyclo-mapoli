@@ -491,7 +491,7 @@ public class BeneficiaryService : IBeneficiaryService
     private async Task<bool> CanIDeleteThisBeneficiary(Beneficiary beneficiary, ProfitSharingDbContext ctx, CancellationToken cancellationToken)
     {
         var balanceInfo = await _totalService.GetVestingBalanceForSingleMemberAsync(Common.Contracts.Request.SearchBy.Ssn, beneficiary.Contact!.Ssn, (short)DateTime.Now.Year, cancellationToken);
-        if (balanceInfo?.CurrentBalance != 0) {
+        if ((balanceInfo?.CurrentBalance ?? 0)!= 0) {
             throw new InvalidOperationException("Balance is not zero, cannot delete beneficiary.");
         }
 
