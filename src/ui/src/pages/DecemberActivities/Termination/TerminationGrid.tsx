@@ -15,13 +15,17 @@ interface TerminationGridSearchProps {
   setInitialSearchLoaded: (loaded: boolean) => void;
   searchParams: StartAndEndDateRequest | null;
   resetPageFlag: boolean;
+  onUnsavedChanges: (hasChanges: boolean) => void;
+  hasUnsavedChanges: boolean;
 }
 
 const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   initialSearchLoaded,
   setInitialSearchLoaded,
   searchParams,
-  resetPageFlag
+  resetPageFlag,
+  onUnsavedChanges,
+  hasUnsavedChanges
 }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
@@ -41,6 +45,12 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   useEffect(() => {
     setPageNumber(0);
   }, [resetPageFlag]);
+
+  // Track unsaved changes
+  useEffect(() => {
+    const hasChanges = selectedRowIds.length > 0;
+    onUnsavedChanges(hasChanges);
+  }, [selectedRowIds, onUnsavedChanges]);
 
   // Initialize expandedRows when data is loaded
   useEffect(() => {
@@ -318,11 +328,19 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
             <Pagination
               pageNumber={pageNumber}
               setPageNumber={(value: number) => {
+                if (hasUnsavedChanges) {
+                  alert("Please save your changes.");
+                  return;
+                }
                 setPageNumber(value - 1);
                 setInitialSearchLoaded(true);
               }}
               pageSize={pageSize}
               setPageSize={(value: number) => {
+                if (hasUnsavedChanges) {
+                  alert("Please save your changes.");
+                  return;
+                }
                 setPageSize(value);
                 setPageNumber(0);
                 setInitialSearchLoaded(true);

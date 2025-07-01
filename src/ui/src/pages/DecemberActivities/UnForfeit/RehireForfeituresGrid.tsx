@@ -15,12 +15,16 @@ interface MilitaryAndRehireForfeituresGridSearchProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
   resetPageFlag: boolean;
+  onUnsavedChanges: (hasChanges: boolean) => void;
+  hasUnsavedChanges: boolean;
 }
 
 const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProps> = ({
   initialSearchLoaded,
   setInitialSearchLoaded,
-  resetPageFlag
+  resetPageFlag,
+  onUnsavedChanges,
+  hasUnsavedChanges
 }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
@@ -29,7 +33,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
     isSortDescending: false
   });
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
-  const [selectedRows, setSelectedRows] = useState<RehireForfeituresSelectedRow[]>([]);
+  const [selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
   const [gridApi, setGridApi] = useState<GridApi | null>(null);
   const [editedValues, setEditedValues] = useState<RehireForfeituresEditedValues>({});
   const fiscalCalendarYear = useFiscalCalendarYear();
@@ -42,24 +46,13 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
     setGridApi(params.api);
   }, []);
 
-  const addRowToSelectedRows = useCallback((id: number) => {
-    if (gridApi) {
-      const node = gridApi.getRowNode(id.toString());
-      if (node && node.data.isDetail) {
-        const selectedRow: RehireForfeituresSelectedRow = {
-          id,
-          badgeNumber: node.data.badgeNumber,
-          profitYear: node.data.profitYear,
-          suggestedForfeit: node.data.suggestedForfeit
-        };
-        setSelectedRows(prev => [...prev.filter(row => row.id !== id), selectedRow]);
-      }
-    }
-  }, [gridApi]);
+  const addRowToSelectedRows = (id: number) => {
+    setSelectedRowIds([...selectedRowIds, id]);
+  };
 
-  const removeRowFromSelectedRows = useCallback((id: number) => {
-    setSelectedRows(prev => prev.filter(row => row.id !== id));
-  }, []);
+  const removeRowFromSelectedRows = (id: number) => {
+    setSelectedRowIds(selectedRowIds.filter((rowId) => rowId !== id));
+  };
 
   const updateEditedValue = useCallback((rowKey: string, value: number, hasError: boolean) => {
     setEditedValues(prev => ({
@@ -119,6 +112,11 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
     setPageNumber(0);
   }, [resetPageFlag]);
 
+  useEffect(() => {
+    const hasChanges = selectedRowIds.length > 0;
+    onUnsavedChanges(hasChanges);
+  }, [selectedRowIds, onUnsavedChanges]);
+
   // Initialize expandedRows when data is loaded
   useEffect(() => {
     if (rehireForfeitures?.response?.results) {
@@ -152,7 +150,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
 
   // Get the main and detail columns
   const mainColumns = useMemo(() => GetMilitaryAndRehireForfeituresColumns(), []);
-  const detailColumns = useMemo(() => GetDetailColumns(addRowToSelectedRows, removeRowFromSelectedRows, selectedProfitYear), [addRowToSelectedRows, removeRowFromSelectedRows, selectedProfitYear]);
+  const detailColumns = useMemo(() => GetDetailColumns(addRowToSelectedRows, removeRowFromSelectedRows, selectedProfitYear), [selectedRowIds, selectedProfitYear]);
 
   // Create the grid data with expandable rows
   const gridData = useMemo(() => {
@@ -267,11 +265,19 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
             <Pagination
               pageNumber={pageNumber}
               setPageNumber={(value: number) => {
+                if (hasUnsavedChanges) {
+                  alert("Please save your changes.");
+                  return;
+                }
                 setPageNumber(value - 1);
                 setInitialSearchLoaded(true);
               }}
               pageSize={pageSize}
               setPageSize={(value: number) => {
+                if (hasUnsavedChanges) {
+                  alert("Please save your changes.");
+                  return;
+                }
                 setPageSize(value);
                 setPageNumber(0);
                 setInitialSearchLoaded(true);
