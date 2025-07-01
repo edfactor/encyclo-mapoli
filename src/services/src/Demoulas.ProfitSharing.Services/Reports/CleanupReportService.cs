@@ -345,6 +345,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                         EmployeeName = nameAndDob.FullName,
                         DistributionAmount = _distributionProfitCodes.Contains(pd.ProfitCodeId) ? pd.Forfeiture : 0,
                         TaxCode = pd.TaxCodeId,
+                        State = pd.CommentRelatedState,
                         StateTax = pd.StateTaxes,
                         FederalTax = pd.FederalTaxes,
                         ForfeitAmount = pd.ProfitCodeId == 2 ? pd.Forfeiture : 0,
@@ -369,10 +370,17 @@ FROM FILTERED_DEMOGRAPHIC p1
                     DistributionTotal = 0m, StateTaxTotal = 0m, FederalTaxTotal = 0m, ForfeitureTotal = 0m
                 };
 
-                var paginated = await query.ToPaginationResultsAsync(req, cancellationToken);
+                // Calculate state tax totals by state
+                var stateTaxTotals = await query
+                    .Where(s=> s.StateTax > 0)
+                    .GroupBy(x => x.State)
+                    .Select(g => new { State = g.Key, Total = g.Sum(x => x.StateTax) })
+                    .ToDictionaryAsync(x => x.State ?? string.Empty, x => x.Total, cancellationToken);
 
                 var calInfo =
                     await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
+                
+                var paginated = await query.ToPaginationResultsAsync(req, cancellationToken);
                 var apiResponse = paginated.Results.Select(pd => new DistributionsAndForfeitureResponse
                 {
                     BadgeNumber = pd.BadgeNumber,
@@ -382,6 +390,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                     DistributionAmount = pd.DistributionAmount,
                     TaxCode = pd.TaxCode,
                     StateTax = pd.StateTax,
+                    State = pd.State,
                     FederalTax = pd.FederalTax,
                     ForfeitAmount = pd.ForfeitAmount,
                     Date = pd.MonthToDate is > 0 and <= 12 ? new DateOnly(pd.YearToDate, pd.MonthToDate, 1) : pd.Date.ToDateOnly(),
@@ -404,6 +413,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                     StateTaxTotal = totals.StateTaxTotal,
                     FederalTaxTotal = totals.FederalTaxTotal,
                     ForfeitureTotal = totals.ForfeitureTotal,
+                    StateTaxTotals = stateTaxTotals,
                     Response = new PaginatedResponseDto<DistributionsAndForfeitureResponse>(req)
                     {
                         Results = apiResponse.ToList(), Total = paginated.Total

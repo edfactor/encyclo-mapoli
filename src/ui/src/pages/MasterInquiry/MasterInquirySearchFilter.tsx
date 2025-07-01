@@ -1,3 +1,4 @@
+import { yupResolver } from "@hookform/resolvers/yup";
 import {
   Checkbox,
   FormControl,
@@ -11,26 +12,24 @@ import {
   TextField
 } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
-import React, { useEffect, useState } from "react";
+import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
+import React, { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
 import { useLazySearchProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
-import { SearchAndReset } from "smart-ui-library";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
-import { MasterInquiryRequest, MasterInquirySearch } from "reduxstore/types";
 import {
   clearMasterInquiryData,
   clearMasterInquiryGroupingData,
   clearMasterInquiryRequestParams,
-  setMasterInquiryRequestParams,
-  updateMasterInquiryResults
+  setMasterInquiryRequestParams
 } from "reduxstore/slices/inquirySlice";
-import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
 import { RootState } from "reduxstore/store";
-import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
-import { memberTypeGetNumberMap, paymentTypeGetNumberMap } from "./MasterInquiryFunctions";
+import { MasterInquiryRequest, MasterInquirySearch } from "reduxstore/types";
+import { SearchAndReset } from "smart-ui-library";
+import * as yup from "yup";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
+import { memberTypeGetNumberMap, paymentTypeGetNumberMap } from "./MasterInquiryFunctions";
 
 const schema = yup.object().shape({
   endProfitYear: yup

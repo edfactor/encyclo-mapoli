@@ -1,26 +1,31 @@
-import { ICellRendererParams } from "ag-grid-community";
-import { useEffect, useMemo, useState } from "react";
+import { ICellRendererParams, CellClickedEvent, ColDef } from "ag-grid-community";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, numberToCurrency, Pagination } from "smart-ui-library";
 import { TotalsGrid } from "../../../components/TotalsGrid/TotalsGrid";
 import { ReportSummary } from "../../../components/ReportSummary";
 import { StartAndEndDateRequest } from "reduxstore/types";
-import { GetDetailColumns, GetTerminationColumns } from "./TerminationGridColumn";
 import { useLazyGetTerminationReportQuery } from "reduxstore/api/YearsEndApi";
+import { GetDetailColumns, GetTerminationColumns } from "./TerminationGridColumn";
+import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 
 interface TerminationGridSearchProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
   searchParams: StartAndEndDateRequest | null;
   resetPageFlag: boolean;
+  onUnsavedChanges: (hasChanges: boolean) => void;
+  hasUnsavedChanges: boolean;
 }
 
 const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   initialSearchLoaded,
   setInitialSearchLoaded,
   searchParams,
-  resetPageFlag
+  resetPageFlag,
+  onUnsavedChanges,
+  hasUnsavedChanges
 }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
@@ -32,14 +37,26 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const { termination } = useSelector((state: RootState) => state.yearsEnd);
   const [triggerSearch, { isFetching }] = useLazyGetTerminationReportQuery();
+  const [selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
+  const [editedValues, setEditedValues] = useState<Record<string, { value: number; hasError: boolean }>>({});
+  const selectedProfitYear = useDecemberFlowProfitYear();
 
   // Reset page number to 0 when resetPageFlag changes
   useEffect(() => {
     setPageNumber(0);
   }, [resetPageFlag]);
 
+  // Track unsaved changes
+  useEffect(() => {
+    const hasChanges = selectedRowIds.length > 0;
+    onUnsavedChanges(hasChanges);
+  }, [selectedRowIds, onUnsavedChanges]);
+
   // Initialize expandedRows when data is loaded
   useEffect(() => {
+
+    setPageNumber(0);
+    
     if (termination?.response?.results && termination.response.results.length > 0) {
       // Only reset if badgeNumbers have changed
       const badgeNumbers = termination.response.results.map((row: any) => row.badgeNumber).join(",");
@@ -73,7 +90,6 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     }
   }, [searchParams, pageNumber, pageSize, sortParams, triggerSearch]);
 
-
   const handleRowExpansion = (badgeNumber: string) => {
     setExpandedRows((prev) => ({
       ...prev,
@@ -81,9 +97,25 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     }));
   };
 
+
+  const addRowToSelectedRows = (id: number) => {
+    setSelectedRowIds([...selectedRowIds, id]);
+  };
+
+  const removeRowFromSelectedRows = (id: number) => {
+    setSelectedRowIds(selectedRowIds.filter((rowId) => rowId !== id));
+  };
+
+  const updateEditedValue = useCallback((rowKey: string, value: number, hasError: boolean) => {
+    setEditedValues(prev => ({
+      ...prev,
+      [rowKey]: { value, hasError }
+    }));
+  }, []);
+
   // Get main and detail columns
   const mainColumns = useMemo(() => GetTerminationColumns(), []);
-  const detailColumns = useMemo(() => GetDetailColumns(), []);
+  const detailColumns = useMemo(() => GetDetailColumns(addRowToSelectedRows, removeRowFromSelectedRows, selectedRowIds, selectedProfitYear), [selectedRowIds, selectedProfitYear]);
 
   // Build grid data with expandable rows
   const gridData = useMemo(() => {
@@ -136,7 +168,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
         }
         return "";
       },
-      onCellClicked: (params: ICellRendererParams) => {
+      onCellClicked: (params: CellClickedEvent) => {
         if (!params.data.isDetail && params.data.isExpandable) {
           handleRowExpansion(params.data.badgeNumber);
         }
@@ -146,7 +178,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
       lockVisible: true,
       lockPosition: true,
       pinned: "left"
-    };
+    } as ColDef;
 
     // Determine which columns to display based on whether it's a detail row
     const visibleColumns = mainColumns.map((column) => {
@@ -231,6 +263,12 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
             width: 48px;
             height: 48px;
           }
+          .detail-row {
+            background-color: #f5f5f5;
+          }
+          .invalid-cell {
+            background-color: #fff6f6;
+          }
         `}
       </style>
       {isFetching && (
@@ -267,15 +305,21 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
             preferenceKey={"QPREV-PROF"}
             handleSortChanged={sortEventHandler}
             maxHeight={800}
+            isLoading={isFetching}
             providedOptions={{
               rowData: gridData,
               columnDefs: columnDefs,
               getRowClass: getRowClass,
+              rowSelection: 'multiple',
               suppressRowClickSelection: true,
               rowHeight: 40,
               suppressMultiSort: true,
               defaultColDef: {
                 resizable: true
+              },
+              context: {
+                editedValues,
+                updateEditedValue
               }
             }}
           />
@@ -284,11 +328,19 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
             <Pagination
               pageNumber={pageNumber}
               setPageNumber={(value: number) => {
+                if (hasUnsavedChanges) {
+                  alert("Please save your changes.");
+                  return;
+                }
                 setPageNumber(value - 1);
                 setInitialSearchLoaded(true);
               }}
               pageSize={pageSize}
               setPageSize={(value: number) => {
+                if (hasUnsavedChanges) {
+                  alert("Please save your changes.");
+                  return;
+                }
                 setPageSize(value);
                 setPageNumber(0);
                 setInitialSearchLoaded(true);

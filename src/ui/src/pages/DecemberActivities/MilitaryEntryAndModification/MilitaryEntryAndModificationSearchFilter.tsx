@@ -8,6 +8,7 @@ import { useDispatch } from "react-redux";
 import { useLazySearchProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
 import { clearMasterInquiryData, setMasterInquiryData } from "reduxstore/slices/inquirySlice";
 import { clearMilitaryContributions } from "reduxstore/slices/militarySlice";
+import { MasterInquiryRequest } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 
@@ -63,20 +64,23 @@ const MilitaryEntryAndModificationSearchFilter: React.FC<SearchFilterProps> = ({
   const dispatch = useDispatch();
   
   const onSubmit = (data: SearchFormData) => {
-    triggerSearch(
-      {
-        pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: false },
-        ...(!!data.socialSecurity && { ssn: Number(data.socialSecurity) }),
-        ...(!!data.badgeNumber && { badgeNumber: Number(data.badgeNumber) }),
-        profitYear: defaultProfitYear
-      },
-      false
-    ).then((result) => {
-      if (result?.data) {
-        dispatch(setMasterInquiryData(result.data.response.results[0]));
+
+    const searchParams: MasterInquiryRequest = {
+      pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: false },
+
+      ...(!!data.socialSecurity && { ssn: Number(data.socialSecurity) }),
+      ...(!!data.badgeNumber && { badgeNumber: Number(data.badgeNumber) }),
+      profitYear: defaultProfitYear
+    };
+
+   triggerSearch(searchParams, false).unwrap().then((search_response) => {
+      
+      if (search_response?.results) {
+        dispatch(setMasterInquiryData(search_response.results[0]));
       }
+
       setInitialSearchLoaded(
-        !!(result?.data?.response?.results && Array.isArray(result.data.response.results) && result.data.response.results.length > 0)
+        !!(search_response?.results && Array.isArray(search_response.results) && search_response.results.length > 0)
       );
     });
   };

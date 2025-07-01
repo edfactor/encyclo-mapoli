@@ -1,5 +1,5 @@
 import { Typography } from "@mui/material";
-import { useMemo, useEffect, useState } from "react";
+import { useMemo, useEffect, useState, useRef } from "react";
 import { useLazyGetProfitMasterInquiryMemberDetailsQuery } from "reduxstore/api/InquiryApi";
 import { DSMGrid, Pagination} from "smart-ui-library";
 import { GetMasterInquiryGridColumns } from "./MasterInquiryGridColumns";
@@ -20,11 +20,6 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({
   const [pageSize, setPageSize] = useState(25);
   const columnDefs = useMemo(() => GetMasterInquiryGridColumns(), []);
 
-  // Only render if both memberType and id are present
-  if (memberType === undefined || id === undefined) {
-    return null;
-  }
-
   const [
     triggerMemberDetails,
     {
@@ -35,7 +30,10 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({
     },
   ] = useLazyGetProfitMasterInquiryMemberDetailsQuery();
 
+  
+
   useEffect(() => {
+    if (id === undefined || memberType === undefined) return;
     triggerMemberDetails({ 
       memberType, 
       id,
@@ -46,6 +44,18 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({
     });
   }, [memberType, id, pageNumber, pageSize, triggerMemberDetails]);
 
+  // Need a useEffect to reset the page number when memberDetailsData changes
+  const prevMemberDetailsData = useRef<any>(null);
+  useEffect(() => {
+    if (memberDetailsData && 
+      (prevMemberDetailsData.current === undefined || 
+         memberDetailsData.total !== prevMemberDetailsData.current.total)) {
+      setPageNumber(0);
+    }
+    prevMemberDetailsData.current = memberDetailsData;  
+  }, [memberDetailsData]);
+
+  
   if (isFetchingMemberDetails) {
     return <Typography>Loading profit details...</Typography>;
   }

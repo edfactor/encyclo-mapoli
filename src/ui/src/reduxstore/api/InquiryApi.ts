@@ -17,7 +17,7 @@ export const InquiryApi = createApi({
   reducerPath: "inquiryApi",
   endpoints: (builder) => ({
     // Master Inquiry API endpoints
-    searchProfitMasterInquiry: builder.query<PagedReportResponse<EmployeeDetails>, MasterInquiryRequest>({
+    searchProfitMasterInquiry: builder.query<Paged<EmployeeDetails>, MasterInquiryRequest>({
       query: (params) => ({
         url: "master/master-inquiry/search",
         method: "POST",
@@ -51,7 +51,7 @@ export const InquiryApi = createApi({
         body: params
       })
     }),
-    getProfitMasterInquiryMemberDetails: builder.query<PagedReportResponse<MasterInquiryResponseDto>, { memberType: number; id: number; skip?: number; take?: number; sortBy?: string; isSortDescending?: boolean }>({
+    getProfitMasterInquiryMemberDetails: builder.query<Paged<MasterInquiryResponseDto>, { memberType: number; id: number; skip?: number; take?: number; sortBy?: string; isSortDescending?: boolean }>({
       query: ({ memberType, id, ...pagination }) => ({
         url: `master/master-inquiry/member/${memberType}/${id}/details`,
         method: "GET",
@@ -118,6 +118,7 @@ export const InquiryApi = createApi({
           const { data } = await queryFulfilled;
           dispatch(setMasterInquiryGroupingData(data.results));
         } catch (err) {
+          console.error("Failed to fetch profit master inquiry grouping:", err);
         }
       }
     })

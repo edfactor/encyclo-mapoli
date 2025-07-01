@@ -1,5 +1,5 @@
 import { Typography, Button } from "@mui/material";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { DSMGrid, Pagination } from "smart-ui-library";
@@ -54,9 +54,20 @@ const ForfeituresAdjustmentGrid: React.FC<ForfeituresAdjustmentGridProps> = ({
   );
 
   const columnDefs = useMemo(
-    () => GetForfeituresAdjustmentColumns(handleNavigationForButton),
+    () => GetForfeituresAdjustmentColumns(),
     [handleNavigationForButton]
   );
+
+  // Need a useEffect to reset the page number when forfeitureAdjustmentData changes
+  const prevForfeitureAdjustmentData = useRef<any>(null);
+  useEffect(() => {
+    if (forfeitureAdjustmentData?.response?.results && forfeitureAdjustmentData.response.results.length > 0 &&
+        (prevForfeitureAdjustmentData.current === null || 
+         forfeitureAdjustmentData.response.results.length !== prevForfeitureAdjustmentData.current.response?.results.length)) {
+      setPageNumber(0);
+    }
+    prevForfeitureAdjustmentData.current = forfeitureAdjustmentData;
+  }, [forfeitureAdjustmentData]);
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
@@ -76,7 +87,9 @@ const ForfeituresAdjustmentGrid: React.FC<ForfeituresAdjustmentGridProps> = ({
               </Button>
             )}
           </div>
-          <ReportSummary report={forfeitureAdjustmentData} />
+          {forfeitureAdjustmentData && (
+            <ReportSummary report={forfeitureAdjustmentData} />
+          )}
           <DSMGrid
             preferenceKey={CAPTIONS.FORFEITURES_ADJUSTMENT}
             isLoading={isFetching}

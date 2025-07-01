@@ -17,6 +17,11 @@ public record MemberYearSummaryDto
     public decimal EndingBalance { get; init; }
     public decimal VestedAmount { get; init; }
     public byte VestedPercent { get; init; }
+    public DateOnly DateOfBirth { get;init; }
+    public DateOnly HireDate { get; init; }
+    public DateOnly? TerminationDate { get; init; }
+    public byte? EnrollmentId { get; init; }
+    public decimal ProfitShareHours { get; init; }
 
 }
 

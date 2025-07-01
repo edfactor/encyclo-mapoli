@@ -6,7 +6,7 @@ import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsE
 import { GetBeneficiariesGridColumns } from "./BeneficiariesGridColumns";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../reduxstore/store";
-import { CAPTIONS } from "../../../constants";
+import { CAPTIONS, PAY426_REPORT_IDS } from "../../../constants";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import pay426Utils from "../Pay427Utils";
 
@@ -23,6 +23,7 @@ const BeneficiariesGrid = () => {
   const hasToken = useSelector((state: RootState) => !!state.security.token);
   const profitYear = useFiscalCloseProfitYear();
   const baseParams = {
+    reportId: PAY426_REPORT_IDS.TERMINATED_UNDER_EIGHTEEN_NO_WAGES,
     isYearEnd: true,
     includeActiveEmployees: false,
     includeInactiveEmployees: false,

@@ -26,12 +26,14 @@ interface TerminationSearchFilterProps {
   setInitialSearchLoaded: (include: boolean) => void;
   fiscalData: CalendarResponseDto | null;
   onSearch: (params: StartAndEndDateRequest) => void;
+  hasUnsavedChanges?: boolean;
 }
 
 const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
   setInitialSearchLoaded,
   fiscalData,
-  onSearch
+  onSearch,
+  hasUnsavedChanges
 }) => {
   if (!fiscalData) return null;
 
@@ -53,6 +55,11 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
   });
 
   const validateAndSubmit = async (data: StartAndEndDateRequest) => {
+    if (hasUnsavedChanges) {
+      alert("Please save your changes.");
+      return;
+    }
+    
     const params = {
       ...data,
       beginningDate: data.beginningDate ? mmDDYYFormat(data.beginningDate) : mmDDYYFormat(fiscalData.fiscalBeginDate),

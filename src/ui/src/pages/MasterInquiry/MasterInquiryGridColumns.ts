@@ -1,6 +1,5 @@
+import { ColDef } from "ag-grid-community";
 import { agGridNumberToCurrency, formatNumberWithComma } from "smart-ui-library";
-import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
 
 export const GetMasterInquiryGridColumns = (): ColDef[] => {
   return [

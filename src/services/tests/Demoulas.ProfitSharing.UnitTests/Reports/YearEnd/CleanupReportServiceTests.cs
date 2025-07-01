@@ -2,6 +2,7 @@
 using System.Text.Json;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.ProfitSharing.Api;
+using Demoulas.ProfitSharing.Common.Contracts.Report;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Data.Entities;
@@ -250,7 +251,8 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
             Skip = 0,
             Take = byte.MaxValue,
             ProfitYear = profitYear,
-            ReportId = 2 // Default to report 2 for active/inactive
+            ReportId = YearEndProfitSharingReportId.Age21OrOlderWith1000Hours
+                 // Default to report 2 for active/inactive
         };
         var testHours = 1001;
         await MockDbContextFactory.UseWritableContext(async ctx =>
@@ -360,7 +362,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
     {
         _cleanupReportClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
         var profitYear = (short)Math.Min(DateTime.Now.Year - 1, 2024);
-        var req = new YearEndProfitSharingReportRequest() { Skip = 0, Take = byte.MaxValue, ProfitYear = profitYear, ReportId = 2 };
+        var req = new YearEndProfitSharingReportRequest() { Skip = 0, Take = byte.MaxValue, ProfitYear = profitYear, ReportId = YearEndProfitSharingReportId.Age21OrOlderWith1000Hours };
         var testHours = 1001;
         await MockDbContextFactory.UseWritableContext(async ctx =>
         {
@@ -419,12 +421,12 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         _testOutputHelper.WriteLine(JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true }));
 
         // Test with different ReportIds for different filters
-        req.ReportId = 3; // Example: < AGE 18
+        req.ReportId = YearEndProfitSharingReportId.Under18; // Example: < AGE 18
         response = await ApiClient.POSTAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse>(req);
         response.ShouldNotBeNull();
         // Add assertions as needed for this filter
 
-        req.ReportId = 4; // Example: >= AGE 18 WITH < 1000 PS HOURS AND PRIOR PS AMOUNT
+        req.ReportId = YearEndProfitSharingReportId.Age18OrOlderWithLessThan1000HoursAndPriorAmount; // Example: >= AGE 18 WITH < 1000 PS HOURS AND PRIOR PS AMOUNT
         response = await ApiClient.POSTAsync<YearEndProfitSharingReportEndpoint, YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse>(req);
         response.ShouldNotBeNull();
         // Add assertions as needed for this filter
@@ -566,7 +568,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         var req = new FrozenProfitYearRequest() { ProfitYear = 2024, UseFrozenData = false };
         var response  =
             await ApiClient
-                .GETAsync<YearEndProfitSharingSummaryReportEndpoint,
+                .POSTAsync<YearEndProfitSharingSummaryReportEndpoint,
                     FrozenProfitYearRequest, YearEndProfitSharingReportSummaryResponse>(req);
 
         response.Response.StatusCode.ShouldBe(System.Net.HttpStatusCode.Unauthorized);
@@ -574,7 +576,7 @@ public class CleanupReportServiceTests : ApiTestBase<Program>
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
         response =
             await ApiClient
-                .GETAsync<YearEndProfitSharingSummaryReportEndpoint,
+                .POSTAsync<YearEndProfitSharingSummaryReportEndpoint,
                     FrozenProfitYearRequest, YearEndProfitSharingReportSummaryResponse>(req);
 
         response.Response.StatusCode.ShouldBe(System.Net.HttpStatusCode.OK);

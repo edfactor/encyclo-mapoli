@@ -75,6 +75,12 @@ const Under21TA = () => {
     }
   }, [initialSearchLoaded, pageNumber, pageSize, sortParams, fetchUnder21Totals, fetchUnder21Inactive, profitYear]);
 
+
+  // Need a useEffect to reset the page number when under21Totals or under21Inactive changes
+  useEffect(() => {  
+      setPageNumber(0);
+  }, [under21Totals, under21Inactive]);
+
   const handleSearch = (profitYear: number, isSortDescending: boolean) => {
     const queryParams = {
       profitYear,

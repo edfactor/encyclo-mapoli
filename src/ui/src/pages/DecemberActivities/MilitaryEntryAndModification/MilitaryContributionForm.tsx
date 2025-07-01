@@ -168,20 +168,20 @@ const MilitaryContributionForm = ({
           size={{ xs: 12 }}
           container
           spacing={2}
-          paddingTop="8px">
-          <Grid2>
-            <Button
-              onClick={onCancel}
-              variant="outlined">
-              Cancel
-            </Button>
-          </Grid2>
+          paddingTop="8px">       
           <Grid2>
             <Button
               type="submit"
               variant="contained"
               disabled={isLoading || isSubmitting}>
               Submit
+            </Button>
+          </Grid2>
+          <Grid2>
+            <Button
+              onClick={onCancel}
+              variant="outlined">
+              Cancel
             </Button>
           </Grid2>
         </Grid2>

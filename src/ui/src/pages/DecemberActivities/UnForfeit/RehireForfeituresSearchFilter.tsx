@@ -36,12 +36,14 @@ interface MilitaryAndRehireForfeituresSearchFilterProps {
   setInitialSearchLoaded: (include: boolean) => void;
   fiscalData: CalendarResponseDto;
   onSearch?: () => void;
+  hasUnsavedChanges?: boolean;
 }
 
 const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearchFilterProps> = ({
   setInitialSearchLoaded,
   fiscalData,
-  onSearch
+  onSearch,
+  hasUnsavedChanges
 }) => {
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const [triggerSearch, { isFetching }] = useLazyGetRehireForfeituresQuery();
@@ -49,6 +51,11 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
   const dispatch = useDispatch();
 
   const validateAndSubmit = (data: StartAndEndDateRequest) => {
+    if (hasUnsavedChanges) {
+      alert("Please save your changes.");
+      return;
+    }
+    
     if (isValid && hasToken) {
       const beginDate = data.beginningDate || fiscalData.fiscalBeginDate || '';
       const endDate = data.endingDate || fiscalData.fiscalEndDate || '';

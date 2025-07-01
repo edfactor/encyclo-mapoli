@@ -1,3 +1,4 @@
+import { ICellRendererParams, IHeaderParams } from "ag-grid-community";
 import { ISortParams, Paged, PaginationParams } from "smart-ui-library";
 
 export enum ImpersonationRoles {
@@ -27,6 +28,12 @@ export interface CalendarResponseDto {
 export interface FrozenProfitYearRequest extends ProfitYearRequest {
   useFrozenData: boolean;
 }
+
+export interface BadgeNumberRequest extends FrozenProfitYearRequest {
+  badgeNumber: number | null;
+}
+
+
 
 export interface ReportsByAgeParams extends ProfitYearRequest {
   reportType: FrozenReportsByAgeRequestType;
@@ -62,6 +69,14 @@ export interface DistributionsAndForfeituresRequestDto extends ProfitYearRequest
   pagination: SortedPaginationRequestDto;
 }
 
+export interface DistributionsAndForfeitureTotalsResponse extends PagedReportResponse<DistributionsAndForfeitures> {
+  distributionTotal: number;
+  stateTaxTotal: number;
+  federalTaxTotal: number;
+  forfeitureTotal: number;
+  stateTaxTotals: Record<string, number>; 
+}
+
 export interface DistributionsAndForfeitures {
   badgeNumber: number;
   psnSuffix: number;
@@ -70,6 +85,7 @@ export interface DistributionsAndForfeitures {
   date: string;
   distributionAmount: number;
   stateTax: number;
+  state: string | null;
   federalTax: number;
   forfeitAmount: number;
   age: number;
@@ -77,6 +93,7 @@ export interface DistributionsAndForfeitures {
   otherName: string | null;
   otherSsn: string | null;
   enrolled: boolean | null;
+
 }
 
 export interface DuplicateSSNAddress {
@@ -543,17 +560,14 @@ export interface EmployeeDetails {
   currentEtva: number;
   previousEtva: number;
   employmentStatus?: string;
-
- department : string;
- PayClassification : string;
- gender : string
- phoneNumber : string
- workLocation : string
-receivedContributionsLastYear : boolean
-fullTimeDate : string
-terminationReason : string
-
-  
+  department : string;
+  PayClassification : string;
+  gender : string
+  phoneNumber : string
+  workLocation : string
+  receivedContributionsLastYear : boolean
+  fullTimeDate : string
+  terminationReason : string
   missives: number[] | null;
 }
 
@@ -874,22 +888,8 @@ export interface MilitaryContributionRequest extends ProfitYearRequest {
   pagination: SortedPaginationRequestDto;
 }
 
-export interface YearEndProfitSharingReportRequest {
-  reportId: number;
-  isYearEnd: boolean;
-  minimumAgeInclusive?: number;
-  maximumAgeInclusive?: number;
-  minimumHoursInclusive?: number;
-  maximumHoursInclusive?: number;
-  includeActiveEmployees: boolean;
-  includeInactiveEmployees: boolean;
-  includeEmployeesTerminatedThisYear: boolean;
-  includeTerminatedEmployees: boolean;
-  includeBeneficiaries: boolean;
-  includeEmployeesWithPriorProfitSharingAmounts: boolean;
-  includeEmployeesWithNoPriorProfitSharingAmounts: boolean;
+export interface YearEndProfitSharingReportRequest extends FilterParams{
   profitYear: number;
-  badgeNumber?: number | null;
   pagination: SortedPaginationRequestDto;
 }
 
@@ -1203,6 +1203,8 @@ export interface NavigationDto {
 }
 
 export interface FilterParams {
+  reportId: number;
+  badgeNumber?: number | null;
   isYearEnd: boolean;
   minimumAgeInclusive?: number;
   maximumAgeInclusive?: number;
@@ -1441,6 +1443,40 @@ export interface BeneficiaryKindRequestDto {
 }
 export interface BeneficiaryKindResponseDto {
   beneficiaryKindList?: BeneficiaryKindDto[];
+}
+
+// New types for rehire forfeitures editing functionality
+export interface RehireForfeituresEditedValues {
+  [rowKey: string]: {
+    value: number;
+    hasError: boolean;
+  };
+}
+
+export interface RehireForfeituresHeaderComponentProps extends IHeaderParams {
+  addRowToSelectedRows: (id: number) => void;
+  removeRowFromSelectedRows: (id: number) => void;
+}
+
+export interface RehireForfeituresSaveButtonCellParams extends ICellRendererParams {
+  removeRowFromSelectedRows: (id: number) => void;
+  addRowToSelectedRows: (id: number) => void;
+}
+
+export interface RehireForfeituresUpdatePayload {
+  badgeNumber: number;
+  profitYear: number;
+  suggestedForfeit: number;
+}
+
+export interface RehireForfeituresSelectedRow {
+  id: number;
+  badgeNumber: number;
+  profitYear: number;
+  suggestedForfeit: number;
+}
+
+export interface ApiResponse<T> {
 }
 
 
