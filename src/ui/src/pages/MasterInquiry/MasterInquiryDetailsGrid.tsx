@@ -1,5 +1,5 @@
 import { Typography } from "@mui/material";
-import { useMemo, useEffect, useState } from "react";
+import { useMemo, useEffect, useState, useRef } from "react";
 import { useLazyGetProfitMasterInquiryMemberDetailsQuery } from "reduxstore/api/InquiryApi";
 import { DSMGrid, Pagination} from "smart-ui-library";
 import { GetMasterInquiryGridColumns } from "./MasterInquiryGridColumns";
@@ -45,6 +45,16 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({
       isSortDescending: true
     });
   }, [memberType, id, pageNumber, pageSize, triggerMemberDetails]);
+
+  // Need a useEffect to reset the page number when memberDetailsData changes
+  const prevMemberDetailsData = useRef<any>(null);
+  useEffect(() => {
+    if (memberDetailsData && (prevMemberDetailsData.current === null || 
+         memberDetailsData.response.total !== prevMemberDetailsData.current.response.total)) {
+      setPageNumber(0);
+    }
+    prevMemberDetailsData.current = memberDetailsData;  
+  }, [memberDetailsData]);
 
   if (isFetchingMemberDetails) {
     return <Typography>Loading profit details...</Typography>;

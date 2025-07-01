@@ -1,7 +1,7 @@
 import { Typography } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import { ICellRendererParams } from "ag-grid-community";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useLazyGetBreakdownByStoreQuery } from "reduxstore/api/YearsEndApi";
@@ -61,6 +61,17 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store }) => {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // Need a useEffect on a change in storeManagement to reset the page number
+  const prevStoreManagement = useRef<any>(null);
+  useEffect(() => {
+    if (storeManagement?.response?.results && storeManagement.response.results.length > 0 &&
+        (prevStoreManagement.current === null || 
+         storeManagement.response.results.length !== prevStoreManagement.current.response?.results.length)) {
+      setPageNumber(0);
+    }
+    prevStoreManagement.current = storeManagement;
+  }, [storeManagement]);
 
   const columnDefs = useMemo(
     () => [

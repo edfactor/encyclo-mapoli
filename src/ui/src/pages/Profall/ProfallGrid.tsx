@@ -1,5 +1,5 @@
 import { Typography } from "@mui/material";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Path, useNavigate } from "react-router";
 import { useLazyGetProfitSharingLabelsQuery } from "reduxstore/api/YearsEndApi";
 import { useSelector } from "react-redux";
@@ -51,6 +51,17 @@ const ProfallGrid = () => {
     },
     [navigate]
   );
+
+  // Need a useEffect to reset the page number when data changes
+  const prevData = useRef<any>(null);
+  useEffect(() => {
+    if (profitSharingLabels?.results && profitSharingLabels.results.length > 0 &&
+        (prevData.current === null || 
+         profitSharingLabels.results.length !== prevData.current.response.results.length)) {
+      setPageNumber(0);
+    }
+    prevData.current = profitSharingLabels;
+  }, [profitSharingLabels]);
 
   const columnDefs = useMemo(() => GetProfallGridColumns(handleNavigationForButton), [handleNavigationForButton]);
   

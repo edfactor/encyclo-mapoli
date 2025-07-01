@@ -1,5 +1,5 @@
 import { GridApi } from "ag-grid-community";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetRehireForfeituresQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
@@ -67,6 +67,19 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
       [rowKey]: { value, hasError }
     }));
   }, []);
+
+  // Need a useEffect to reset the page number when rehireForfeitures changes
+  const prevRehireForfeitures = useRef<any>(null);
+  useEffect(() => {
+    if (
+      rehireForfeitures !== prevRehireForfeitures.current &&
+      rehireForfeitures?.response?.results &&
+      rehireForfeitures.response.results.length !== prevRehireForfeitures.current?.response?.results?.length
+    ) {
+      setPageNumber(0);
+    }
+    prevRehireForfeitures.current = rehireForfeitures;
+  }, [rehireForfeitures]);
 
   // Create a request object based on current parameters
   const createRequest = useCallback(

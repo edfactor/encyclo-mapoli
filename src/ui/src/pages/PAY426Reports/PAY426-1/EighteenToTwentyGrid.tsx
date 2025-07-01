@@ -1,15 +1,14 @@
 import { Typography } from "@mui/material";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { GetProfitSharingReportGridColumns } from "./EighteenToTwentyGridColumns";
-import { useNavigate, Path } from "react-router";
-import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
-import { CAPTIONS } from "../../../constants";
-import { useSelector } from "react-redux";
-import { RootState } from "../../../reduxstore/store";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSelector } from "react-redux";
+import { Path, useNavigate } from "react-router";
+import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
+import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { CAPTIONS, PAY426_REPORT_IDS } from "../../../constants";
+import { RootState } from "../../../reduxstore/store";
 import pay426Utils from "../Pay427Utils";
-import { set } from "date-fns";
+import { GetProfitSharingReportGridColumns } from "./EighteenToTwentyGridColumns";
 
 const EighteenToTwentyGrid = () => {
   const navigate = useNavigate();
@@ -23,7 +22,8 @@ const EighteenToTwentyGrid = () => {
   });
   const hasToken = useSelector((state: RootState) => !!state.security.token);
   const profitYear = useFiscalCloseProfitYear();
-  const baseParams = {
+  const baseParams = useMemo(() => ({
+    reportId: PAY426_REPORT_IDS.EIGHTEEN_TO_TWENTY,
     isYearEnd: true,
     minimumAgeInclusive: 18,
     maximumAgeInclusive: 20,
@@ -35,12 +35,11 @@ const EighteenToTwentyGrid = () => {
     includeBeneficiaries: false,
     includeEmployeesWithPriorProfitSharingAmounts: true,
     includeEmployeesWithNoPriorProfitSharingAmounts: true,
-  };
+  }), []);
 
   useEffect(() => {
     if (hasToken) {
       trigger({
-        
         profitYear: profitYear,
         pagination: {
           skip: pageNumber * pageSize,
@@ -51,7 +50,7 @@ const EighteenToTwentyGrid = () => {
         ...baseParams
       });
     }
-  }, [trigger, hasToken, profitYear, pageNumber, pageSize, sortParams]);
+  }, [trigger, hasToken, profitYear, pageNumber, pageSize, sortParams, baseParams]);
 
   // Wrapper to pass react function to non-react class
   const handleNavigationForButton = useCallback(
@@ -60,6 +59,17 @@ const EighteenToTwentyGrid = () => {
     },
     [navigate]
   );
+
+  // Need a useEffect to reset the page number when data changes
+  const prevData = useRef<any>(null);
+  useEffect(() => {
+    if (data?.response?.results && data.response.results.length > 0 &&
+        (prevData.current === null || 
+         data.response.results.length !== prevData.current.response.results.length)) {
+      setPageNumber(0);
+    }
+    prevData.current = data;  
+  }, [data]);
 
   const sortEventHandler = (update: ISortParams) => {
     const t = () => { 

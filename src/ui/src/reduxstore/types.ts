@@ -1,6 +1,5 @@
+import { ICellRendererParams, IHeaderParams } from "ag-grid-community";
 import { ISortParams, Paged, PaginationParams } from "smart-ui-library";
-import { Dispatch } from "@reduxjs/toolkit";
-import { IHeaderParams, ICellRendererParams } from "ag-grid-community";
 
 export enum ImpersonationRoles {
   FinanceManager = "Finance-Manager",

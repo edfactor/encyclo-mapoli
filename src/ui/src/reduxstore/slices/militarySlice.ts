@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { MasterInquiryDetail, PagedReportResponse } from "reduxstore/types";
+import { MasterInquiryDetail } from "reduxstore/types";
 import { Paged } from "smart-ui-library";
 
 export interface MilitaryState {
