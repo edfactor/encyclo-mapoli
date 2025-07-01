@@ -20,11 +20,6 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({
   const [pageSize, setPageSize] = useState(25);
   const columnDefs = useMemo(() => GetMasterInquiryGridColumns(), []);
 
-  // Only render if both memberType and id are present
-  if (memberType === undefined || id === undefined) {
-    return null;
-  }
-
   const [
     triggerMemberDetails,
     {
@@ -35,7 +30,10 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({
     },
   ] = useLazyGetProfitMasterInquiryMemberDetailsQuery();
 
+  
+
   useEffect(() => {
+    if (id === undefined || memberType === undefined) return;
     triggerMemberDetails({ 
       memberType, 
       id,
@@ -56,6 +54,7 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({
     prevMemberDetailsData.current = memberDetailsData;  
   }, [memberDetailsData]);
 
+  
   if (isFetchingMemberDetails) {
     return <Typography>Loading profit details...</Typography>;
   }
