@@ -118,6 +118,7 @@ export const InquiryApi = createApi({
           const { data } = await queryFulfilled;
           dispatch(setMasterInquiryGroupingData(data.results));
         } catch (err) {
+          console.error("Failed to fetch profit master inquiry grouping:", err);
         }
       }
     })
