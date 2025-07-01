@@ -100,11 +100,12 @@ const RehireForfeitures = () => {
           <>
             <Grid2 width={"100%"}>
               <DSMAccordion title="Filter">
-                <RehireForfeituresSearchFilter
-                  setInitialSearchLoaded={setInitialSearchLoaded}
-                  fiscalData={fiscalCalendarYear}
-                  onSearch={handleSearch}
-                />
+                              <RehireForfeituresSearchFilter
+                setInitialSearchLoaded={setInitialSearchLoaded}
+                fiscalData={fiscalCalendarYear}
+                onSearch={handleSearch}
+                hasUnsavedChanges={hasUnsavedChanges}
+              />
               </DSMAccordion>
             </Grid2>
 

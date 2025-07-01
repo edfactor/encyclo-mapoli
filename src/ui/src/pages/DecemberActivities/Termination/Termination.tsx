@@ -131,6 +131,7 @@ const Termination = () => {
             setInitialSearchLoaded={setInitialSearchLoaded}
             fiscalData={fiscalData}
             onSearch={handleSearch}
+            hasUnsavedChanges={hasUnsavedChanges}
           />
           </DSMAccordion>
         </Grid2>
