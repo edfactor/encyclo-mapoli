@@ -66,13 +66,13 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.9.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Quartz" Version="1.11.0-beta.2" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.9.0" />
-    <PackageVersion Include="Oracle.EntityFrameworkCore" Version="9.23.80" />
-    <PackageVersion Include="Oracle.ManagedDataAccess.Core" Version="23.8.0" />
+    <PackageVersion Include="Oracle.EntityFrameworkCore" Version="9.23.90" />
+    <PackageVersion Include="Oracle.ManagedDataAccess.Core" Version="23.9.0" />
     <PackageVersion Include="Oracle.ManagedDataAccess.OpenTelemetry" Version="23.5.0" />
     <PackageVersion Include="Quartz" Version="3.14.0" />
     <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.14.0" />
     <PackageVersion Include="Riok.Mapperly" Version="4.2.1" />
-    <PackageVersion Include="Scalar.AspNetCore" Version="2.5.0" />
+    <PackageVersion Include="Scalar.AspNetCore" Version="2.5.3" />
     <PackageVersion Include="Serilog.AspNetCore" Version="8.0.2" />
     <PackageVersion Include="Serilog.Enrichers.Environment" Version="3.0.1" />
     <PackageVersion Include="Serilog.Enrichers.MassTransit" Version="2.0.4" />
