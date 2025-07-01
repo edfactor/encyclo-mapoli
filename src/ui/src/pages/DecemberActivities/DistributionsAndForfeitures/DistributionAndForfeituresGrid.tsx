@@ -2,7 +2,6 @@ import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Popover, Typography } from "@mui/material";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetDistributionsAndForfeituresQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
@@ -29,8 +28,8 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
     isSortDescending: false
   });
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
+  const handlePopoverOpen = (event: React.MouseEvent<SVGSVGElement>) => {
+    setAnchorEl(event.currentTarget as unknown as HTMLElement);
   };
   const handlePopoverClose = () => {
     setAnchorEl(null);
