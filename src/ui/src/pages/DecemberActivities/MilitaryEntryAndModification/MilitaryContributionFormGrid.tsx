@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetMilitaryContributionsQuery } from "reduxstore/api/MilitaryApi";
 import { RootState } from "reduxstore/store";
@@ -56,7 +56,18 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
   }, [initialSearchLoaded, pageNumber, pageSize, sortParams, masterInquiryEmployeeDetails, onSearch]);
 
 
-
+  // Need a useEffect on a change in militaryContributionsData to reset the page number
+  const prevMilitaryContributionsData = useRef<any>(null);
+  useEffect(() => {
+    if (
+      militaryContributionsData !== prevMilitaryContributionsData.current &&
+      militaryContributionsData?.results &&
+      militaryContributionsData.results.length !== prevMilitaryContributionsData.current?.results?.length
+    ) {
+      setPageNumber(0);
+    }
+    prevMilitaryContributionsData.current = militaryContributionsData;  
+  }, [militaryContributionsData]);
 
   const columnDefs = useMemo(() => GetMilitaryContributionColumns(), []);
 

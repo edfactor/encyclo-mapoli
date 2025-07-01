@@ -2,7 +2,7 @@ import { Divider, CircularProgress, Box } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import { Page } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { useLazyGetUnder21TotalsQuery, useLazyGetUnder21BreakdownByStoreQuery } from "reduxstore/api/YearsEndApi";
@@ -73,6 +73,16 @@ const Under21Report = () => {
       fetchUnder21Breakdown(queryParams);
     }
   }, [initialSearchLoaded, pageNumber, pageSize, sortParams, fetchUnder21Totals, fetchUnder21Breakdown]);
+
+
+  // Need a useEffect to reset the page number when under21Totals changes
+  const prevUnder21Totals = useRef<any>(null);
+  useEffect(() => {
+    if (under21Totals?.numberOfEmployees !== prevUnder21Totals.current?.numberOfEmployees)  {
+      setPageNumber(0);
+    }
+    prevUnder21Totals.current = under21Totals;
+  }, [under21Totals]);
 
   const handleSearch = (profitYear: number, isSortDescending: boolean) => {
     const queryParams = {

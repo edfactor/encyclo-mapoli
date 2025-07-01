@@ -1,12 +1,12 @@
 import { Typography } from "@mui/material";
-import { useMemo, useEffect, useCallback, useState } from "react";
+import { useMemo, useEffect, useCallback, useState, useRef } from "react";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { Path, useNavigate } from "react-router";
 import { GetProfitSharingReportGridColumns } from "../PAY426-1/EighteenToTwentyGridColumns";
 import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../reduxstore/store";
-import { CAPTIONS } from "../../../constants";
+import { CAPTIONS, PAY426_REPORT_IDS } from "../../../constants";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import pay426Utils from "../Pay427Utils";
 
@@ -25,6 +25,7 @@ const TwentyOnePlusGrid = () => {
   const profitYear = useFiscalCloseProfitYear();
 
   const baseParams = {
+    reportId: PAY426_REPORT_IDS.TWENTY_ONE_PLUS,
     isYearEnd: true,
     minimumAgeInclusive: 21,
     minimumHoursInclusive: 1000,
@@ -85,6 +86,17 @@ const TwentyOnePlusGrid = () => {
         balance: 0
       }
     ];
+  }, [data]);
+
+  // Need a useEffect to reset the page number when data changes
+  const prevData = useRef<any>(null);
+  useEffect(() => {
+    if (data?.response?.results && data.response.results.length > 0 &&
+        (prevData.current === null || 
+         data.response.results.length !== prevData.current.response.results.length)) {
+      setPageNumber(0);
+    }
+    prevData.current = data;
   }, [data]);
 
   const sortEventHandler = (update: ISortParams) => {

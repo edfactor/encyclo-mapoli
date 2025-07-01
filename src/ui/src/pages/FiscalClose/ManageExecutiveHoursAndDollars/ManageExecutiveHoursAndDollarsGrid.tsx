@@ -1,7 +1,7 @@
 import { AddOutlined } from "@mui/icons-material";
 import { Button, Tooltip, Typography } from "@mui/material";
 import { CellValueChangedEvent, IRowNode, SelectionChangedEvent } from "ag-grid-community";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetExecutiveHoursAndDollarsQuery } from "reduxstore/api/YearsEndApi";
 import {
@@ -155,6 +155,19 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
       onSearch();
     }
   }, [initialSearchLoaded, properPageNumber, properPageSize, sortParams, onSearch]);
+
+  // Need a useEffect on a change in executiveHoursAndDollars to reset the page number
+  const prevExecutiveHoursAndDollars = useRef<any>(null);
+  useEffect(() => {
+    if (
+      executiveHoursAndDollars !== prevExecutiveHoursAndDollars.current &&
+      executiveHoursAndDollars?.response?.results &&
+      executiveHoursAndDollars.response.results.length !== prevExecutiveHoursAndDollars.current?.response?.results?.length
+    ) {
+      setPageNumber(0);
+    }
+    prevExecutiveHoursAndDollars.current = executiveHoursAndDollars;
+  }, [executiveHoursAndDollars]);
 
   // This function checks to see if we have a change for this badge number already pending for a save
   const isRowStagedToSave = (badge: number): boolean => {
