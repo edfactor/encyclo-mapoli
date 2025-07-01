@@ -17,7 +17,7 @@ export const InquiryApi = createApi({
   reducerPath: "inquiryApi",
   endpoints: (builder) => ({
     // Master Inquiry API endpoints
-    searchProfitMasterInquiry: builder.query<PagedReportResponse<EmployeeDetails>, MasterInquiryRequest>({
+    searchProfitMasterInquiry: builder.query<Paged<EmployeeDetails>, MasterInquiryRequest>({
       query: (params) => ({
         url: "master/master-inquiry/search",
         method: "POST",
