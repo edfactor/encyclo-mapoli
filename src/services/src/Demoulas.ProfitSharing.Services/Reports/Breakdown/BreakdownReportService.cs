@@ -54,6 +54,10 @@ public sealed class BreakdownReportService : IBreakdownService
         public decimal? VestedBalance { get; init; }
         public decimal? EtvaBalance { get; init; }
         public decimal? VestedPercent { get; init; }
+        public DateOnly HireDate { get; init; }
+        public DateOnly? TerminationDate { get; init; }
+        public byte EnrollmentId { get; init; }
+        public Decimal ProfitShareHours { get; init; }
     }
 
     private sealed record EmployeeFinancialSnapshot(
@@ -342,11 +346,14 @@ public sealed class BreakdownReportService : IBreakdownService
         var query =
             from d in demographics
 
+            join pp in ctx.PayProfits on d.Id equals pp.DemographicId
+
             join b in balances on d.Ssn equals b.Ssn into balGrp
             from bal in balGrp.DefaultIfEmpty()
 
             join e in etvaBalances on d.Ssn equals e.Ssn into etvaGrp
             from etva in etvaGrp.DefaultIfEmpty()
+            where pp.ProfitYear == profitYear
 
             select new ActiveMemberDto
             {
@@ -396,7 +403,11 @@ public sealed class BreakdownReportService : IBreakdownService
                 CurrentBalance = bal == null ? 0 : bal.CurrentBalance,
                 VestedBalance = bal == null ? 0 : bal.VestedBalance,
                 VestedPercent = bal == null ? 0 : bal.VestingPercent,
-                EtvaBalance = etva == null ? 0 : etva.Total
+                EtvaBalance = etva == null ? 0 : etva.Total,
+                HireDate = d.HireDate,
+                TerminationDate = d.TerminationDate,
+                EnrollmentId = pp.EnrollmentId,
+                ProfitShareHours = pp.CurrentHoursYear + pp.HoursExecutive
             };
 
         return query;
@@ -519,7 +530,12 @@ public sealed class BreakdownReportService : IBreakdownService
             VestedAmount = endBal * snap.VestingRatio,
             VestedPercent = (byte)(snap.VestingRatio * 100),
             PayClassificationId = member.PayClassificationId,
-            PayClassificationName = member.PayClassificationName
+            PayClassificationName = member.PayClassificationName,
+            HireDate = member.HireDate,
+            TerminationDate = member.TerminationDate,
+            DateOfBirth = member.DateOfBirth,
+            ProfitShareHours = member.ProfitShareHours,
+            EnrollmentId = member.EnrollmentId,
         };
     }
     
