@@ -20,8 +20,6 @@ import EighteenToTwenty from "pages/PAY426Reports/PAY426-1/EighteenToTwenty";
 import Beneficiaries from "pages/PAY426Reports/PAY426-10/Beneficiaries";
 import TwentyOnePlus from "pages/PAY426Reports/PAY426-2/TwentyOnePlus";
 import UnderEighteen from "pages/PAY426Reports/PAY426-3/UnderEighteen";
-import PriorHours from "pages/PAY426Reports/PAY426-4/PriorHours";
-import NoPriorHours from "pages/PAY426Reports/PAY426-5/NoPriorHours";
 import TermedWithHours from "pages/PAY426Reports/PAY426-6/TermedWithHours";
 import TermedNoPrior from "pages/PAY426Reports/PAY426-7/TermedNoPrior";
 import TermedWithPrior from "pages/PAY426Reports/PAY426-8/TermedWithPrior";
@@ -297,15 +295,7 @@ const RouterSubAssembly: React.FC = () => {
               <Route
                 path={ROUTES.PAY426_ACTIVE_UNDER_18}
                 element={<UnderEighteen />}
-              />
-              <Route
-                path={ROUTES.PAY426_ACTIVE_PRIOR_SHARING}
-                element={<PriorHours />}
-              />
-              <Route
-                path={ROUTES.PAY426_ACTIVE_NO_PRIOR}
-                element={<NoPriorHours />}
-              />
+              />             
               <Route
                 path={ROUTES.PAY426_TERMINATED_1000_PLUS}
                 element={<TermedWithHours />}
