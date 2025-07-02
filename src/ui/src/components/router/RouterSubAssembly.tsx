@@ -66,6 +66,7 @@ import MilitaryEntryAndModification
 import DevDebug from "../../pages/Dev/DevDebug";
 import ForfeituresAdjustment from "../../pages/ForfeituresAdjustment/ForfeituresAdjustment";
 import PAY426N from "pages/PAY426Reports/PAY426N/PAY426N";
+import QPAY066AdHocReports from "pages/QPAY066AdHocReports/QPAY066AdHocReports";
 import BeneficiaryInquiry from "pages/BeneficiaryInquiry/BeneficiaryInquiry";
 
 const RouterSubAssembly: React.FC = () => {
@@ -360,6 +361,10 @@ const RouterSubAssembly: React.FC = () => {
               <Route
                 path={ROUTES.PAY426N}
                 element={<PAY426N />}
+              />
+              <Route
+                path={ROUTES.QPAY066_ADHOC}
+                element={<QPAY066AdHocReports />}
               />
             </RouteSecurity>
           </Box>
