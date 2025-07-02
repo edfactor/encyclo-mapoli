@@ -7,17 +7,7 @@ const presets: ReportPreset[] = [
     name: 'PAY426-1',
     description: CAPTIONS.PAY426_ACTIVE_18_20,
     params: {
-      isYearEnd: true,
-      minimumAgeInclusive: 18,
-      maximumAgeInclusive: 20,
-      minimumHoursInclusive: 1000,
-      includeActiveEmployees: true,
-      includeInactiveEmployees: true,
-      includeEmployeesTerminatedThisYear: false,
-      includeTerminatedEmployees: false,
-      includeBeneficiaries: false,
-      includeEmployeesWithPriorProfitSharingAmounts: true,
-      includeEmployeesWithNoPriorProfitSharingAmounts: true,
+      reportId: 1,
     }
   },
   {
@@ -25,16 +15,7 @@ const presets: ReportPreset[] = [
     name: 'PAY426-2',
     description: CAPTIONS.PAY426_ACTIVE_21_PLUS,
     params: {
-      isYearEnd: true,
-      minimumAgeInclusive: 21,
-      minimumHoursInclusive: 1000,
-      includeActiveEmployees: true,
-      includeInactiveEmployees: true,
-      includeEmployeesTerminatedThisYear: false,
-      includeTerminatedEmployees: false,
-      includeBeneficiaries: false,
-      includeEmployeesWithPriorProfitSharingAmounts: true,
-      includeEmployeesWithNoPriorProfitSharingAmounts: true,
+     reportId: 2,
     }
   },
   {
@@ -42,15 +23,7 @@ const presets: ReportPreset[] = [
     name: 'PAY426-3',
     description: CAPTIONS.PAY426_ACTIVE_UNDER_18,
     params: {
-      isYearEnd: true,
-      maximumAgeInclusive: 17,
-      includeActiveEmployees: true,
-      includeInactiveEmployees: true,
-      includeEmployeesTerminatedThisYear: false,
-      includeTerminatedEmployees: false,
-      includeBeneficiaries: false,
-      includeEmployeesWithPriorProfitSharingAmounts: true,
-      includeEmployeesWithNoPriorProfitSharingAmounts: true,
+     reportId: 3,
     }
   },
   {
@@ -58,16 +31,7 @@ const presets: ReportPreset[] = [
     name: 'PAY426-4',
     description: CAPTIONS.PAY426_ACTIVE_PRIOR_SHARING,
     params: {
-      isYearEnd: true,
-      minimumAgeInclusive: 18,
-      maximumHoursInclusive: 1000,
-      includeActiveEmployees: true,
-      includeInactiveEmployees: true,
-      includeEmployeesTerminatedThisYear: false,
-      includeTerminatedEmployees: false,
-      includeBeneficiaries: false,
-      includeEmployeesWithPriorProfitSharingAmounts: true,
-      includeEmployeesWithNoPriorProfitSharingAmounts: false,
+     reportId: 4,
     }
   },
   {
@@ -75,16 +39,7 @@ const presets: ReportPreset[] = [
     name: 'PAY426-5',
     description: CAPTIONS.PAY426_ACTIVE_NO_PRIOR,
     params: {
-      isYearEnd: true,
-      minimumAgeInclusive: 18,
-      maximumHoursInclusive: 1000,
-      includeActiveEmployees: true,
-      includeInactiveEmployees: true,
-      includeEmployeesTerminatedThisYear: false,
-      includeTerminatedEmployees: false,
-      includeBeneficiaries: false,
-      includeEmployeesWithPriorProfitSharingAmounts: false,
-      includeEmployeesWithNoPriorProfitSharingAmounts: true,
+     reportId: 5,
     }
   },
   {
@@ -92,16 +47,7 @@ const presets: ReportPreset[] = [
     name: 'PAY426-6',
     description: CAPTIONS.PAY426_TERMINATED_1000_PLUS,
     params: {
-      isYearEnd: true,
-      minimumAgeInclusive: 18,
-      minimumHoursInclusive: 1000,
-      includeActiveEmployees: false,
-      includeInactiveEmployees: false,
-      includeEmployeesTerminatedThisYear: true,
-      includeTerminatedEmployees: true,
-      includeBeneficiaries: false,
-      includeEmployeesWithPriorProfitSharingAmounts: true,
-      includeEmployeesWithNoPriorProfitSharingAmounts: true,
+     reportId: 6,
     }
   },
   {
@@ -109,16 +55,7 @@ const presets: ReportPreset[] = [
     name: 'PAY426-7',
     description: CAPTIONS.PAY426_TERMINATED_NO_PRIOR,
     params: {
-      isYearEnd: true,
-      minimumAgeInclusive: 18,
-      maximumHoursInclusive: 1000,
-      includeActiveEmployees: false,
-      includeInactiveEmployees: false,
-      includeEmployeesTerminatedThisYear: true,
-      includeTerminatedEmployees: true,
-      includeBeneficiaries: false,
-      includeEmployeesWithPriorProfitSharingAmounts: false,
-      includeEmployeesWithNoPriorProfitSharingAmounts: true,
+      reportId: 7,
     }
   },
   {
@@ -126,16 +63,7 @@ const presets: ReportPreset[] = [
     name: 'PAY426-8',
     description: CAPTIONS.PAY426_TERMINATED_PRIOR,
     params: {
-      isYearEnd: true,
-      minimumAgeInclusive: 18,
-      maximumHoursInclusive: 1000,
-      includeActiveEmployees: false,
-      includeInactiveEmployees: false,
-      includeEmployeesTerminatedThisYear: true,
-      includeTerminatedEmployees: true,
-      includeBeneficiaries: false,
-      includeEmployeesWithPriorProfitSharingAmounts: true,
-      includeEmployeesWithNoPriorProfitSharingAmounts: false,
+      reportId: 8,
     }
   },
   {
@@ -143,14 +71,7 @@ const presets: ReportPreset[] = [
     name: 'PAY426-9',
     description: CAPTIONS.PAY426_SUMMARY,
     params: {
-      isYearEnd: true,
-      includeActiveEmployees: true,
-      includeInactiveEmployees: true,
-      includeEmployeesTerminatedThisYear: true,
-      includeTerminatedEmployees: true,
-      includeBeneficiaries: true,
-      includeEmployeesWithPriorProfitSharingAmounts: true,
-      includeEmployeesWithNoPriorProfitSharingAmounts: true,
+      reportId: 9,
     }
   }
 ];

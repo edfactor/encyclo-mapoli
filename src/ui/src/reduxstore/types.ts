@@ -1205,18 +1205,6 @@ export interface NavigationDto {
 export interface FilterParams {
   reportId: number;
   badgeNumber?: number | null;
-  isYearEnd: boolean;
-  minimumAgeInclusive?: number;
-  maximumAgeInclusive?: number;
-  minimumHoursInclusive?: number;
-  maximumHoursInclusive?: number;
-  includeActiveEmployees: boolean;
-  includeInactiveEmployees: boolean;
-  includeEmployeesTerminatedThisYear: boolean;
-  includeTerminatedEmployees: boolean;
-  includeBeneficiaries: boolean;
-  includeEmployeesWithPriorProfitSharingAmounts: boolean;
-  includeEmployeesWithNoPriorProfitSharingAmounts: boolean;
 }
 
 export interface ReportPreset {
