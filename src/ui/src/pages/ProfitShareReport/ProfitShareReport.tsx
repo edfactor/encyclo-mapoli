@@ -32,15 +32,7 @@ const ProfitShareReport = () => {
   useEffect(() => {
     if (hasToken && profitYear && !initialDataLoaded) {
       const request = {
-        isYearEnd: false,
-        badgeNumber: null,
-        includeActiveEmployees: true,
-        includeInactiveEmployees: true,
-        includeEmployeesTerminatedThisYear: false,
-        includeTerminatedEmployees: true,
-        includeBeneficiaries: false,
-        includeEmployeesWithPriorProfitSharingAmounts: true,
-        includeEmployeesWithNoPriorProfitSharingAmounts: true,
+        reportId: 4,
         profitYear: profitYear,
         pagination: {
           skip: 0,
