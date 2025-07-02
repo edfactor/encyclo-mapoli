@@ -110,31 +110,6 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
   const pinnedTopRowData = useMemo(() => {
     if (!data) return [];
     
-    if (params.includeBeneficiaries && !params.includeActiveEmployees && !params.includeInactiveEmployees) {
-      const beneficiaryCount = data.numberOfEmployees || 0;
-      const wagesTotal = data.wagesTotal || 0;
-      
-      let balanceTotal = 0;
-      if (data.response?.results) {
-        balanceTotal = data.response.results.reduce((total, curr) => total + (curr.balance || 0), 0);
-      }
-
-      return [
-        {
-          employeeName: `Total Non-EMPs Beneficiaries`,
-          storeNumber: beneficiaryCount,
-          wages: wagesTotal,
-          balance: balanceTotal
-        },
-        {
-          employeeName: "No Wages",
-          storeNumber: 0,
-          wages: 0,
-          balance: 0
-        }
-      ];
-    } else {
-     console.log("API data:", data);
     return [
       {
         employeeName: `TOTAL EMPS: ${data.numberOfEmployees || 0}`,
@@ -152,7 +127,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
         balance: 0
       }
       ];
-    }
+
   }, [data, params]);
 
   return (
