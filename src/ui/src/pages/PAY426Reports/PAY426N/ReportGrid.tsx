@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Typography, Box, CircularProgress } from '@mui/material';
 import { DSMGrid, ISortParams, Pagination } from 'smart-ui-library';
 import { useNavigate, Path } from 'react-router-dom';
@@ -54,7 +54,6 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
         JSON.stringify(preset.params) === JSON.stringify(params)
       );
       trigger({
-        reportId: matchingPreset ? Number(matchingPreset.id) : 0,
         profitYear: profitYear,
         pagination: {
           skip: pageNumber * pageSize,
@@ -62,7 +61,8 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
           sortBy: sortParams.sortBy,
           isSortDescending: sortParams.isSortDescending
         },
-        ...params
+        ...params,
+         reportId: matchingPreset ? Number(matchingPreset.id) : 0,       
       });
     }
   }, [trigger, hasToken, profitYear, pageNumber, pageSize, sortParams, params]);
@@ -74,21 +74,12 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
     [navigate]
   );
 
-  // Need a useEffect to reset the page number when data changes
-  const prevData = useRef<any>(null);
-  useEffect(() => {
-    if (data?.response?.results && data.response.results.length > 0 &&
-        (prevData.current === null || 
-         data.response.results.length !== prevData.current.response.results.length)) {
-      setPageNumber(0);
-    }
-    prevData.current = data;
-  }, [data]);
-
   const sortEventHandler = (update: ISortParams) => {
+    const matchingPreset = presets.find(preset =>
+      JSON.stringify(preset.params) === JSON.stringify(params)
+    );
     const t = () => { 
         trigger({
-          //reportId: matchingPreset ? Number(matchingPreset.id) : 0,
           profitYear: profitYear,
           pagination: {
             skip: 0,
@@ -96,7 +87,8 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
             sortBy: update.sortBy,
             isSortDescending: update.isSortDescending
           },
-          ...params
+          ...params,
+          reportId: matchingPreset ? Number(matchingPreset.id) : 0,
         }
       );
     }
