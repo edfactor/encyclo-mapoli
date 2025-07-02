@@ -3,6 +3,7 @@ using System;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Oracle.EntityFrameworkCore.Metadata;
 
@@ -11,9 +12,11 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    partial class ProfitSharingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250701155737_addBeneficiaryArchive")]
+    partial class addBeneficiaryArchive
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -25629,54 +25632,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.ToTable("BENEFICIARY_ARCHIVE", (string)null);
                 });
 
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Audit.BeneficiaryContactArchive", b =>
-                {
-                    b.Property<int>("ArchiveId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(10)")
-                        .HasColumnName("ARCHIVE_ID");
-
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ArchiveId"));
-
-                    b.Property<DateTime>("CreatedDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("DATE")
-                        .HasColumnName("CREATED_DATE")
-                        .HasDefaultValueSql("SYSDATE");
-
-                    b.Property<DateTime>("DateOfBirth")
-                        .HasColumnType("DATE")
-                        .HasColumnName("DATE_OF_BIRTH");
-
-                    b.Property<string>("DeleteDate")
-                        .IsRequired()
-                        .HasColumnType("NVARCHAR2(10)")
-                        .HasColumnName("DELETE_DATE");
-
-                    b.Property<string>("DeletedBy")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(24)
-                        .HasColumnType("NVARCHAR2(24)")
-                        .HasColumnName("DELETED_BY")
-                        .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
-
-                    b.Property<int>("Id")
-                        .HasPrecision(9)
-                        .HasColumnType("NUMBER(9)")
-                        .HasColumnName("ID");
-
-                    b.Property<int>("Ssn")
-                        .HasPrecision(9)
-                        .HasColumnType("NUMBER(9)")
-                        .HasColumnName("SSN");
-
-                    b.HasKey("ArchiveId")
-                        .HasName("PK_BENEFICIARY_CONTACT_ARCHIVE");
-
-                    b.ToTable("BENEFICIARY_CONTACT_ARCHIVE", (string)null);
-                });
-
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Audit.HealthCheckStatusHistory", b =>
                 {
                     b.Property<int>("Id")
@@ -30759,149 +30714,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_AUDIT_CHANGE__AUDIT_EVENT_AUDITCHANGE_CHANGESID");
-                });
-
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Audit.BeneficiaryContactArchive", b =>
-                {
-                    b.OwnsOne("Demoulas.ProfitSharing.Data.Entities.Address", "Address", b1 =>
-                        {
-                            b1.Property<int>("BeneficiaryContactArchiveArchiveId")
-                                .HasColumnType("NUMBER(10)")
-                                .HasColumnName("ARCHIVE_ID");
-
-                            b1.Property<string>("City")
-                                .IsRequired()
-                                .HasMaxLength(36)
-                                .HasColumnType("NVARCHAR2(36)")
-                                .HasColumnName("CITY")
-                                .HasComment("City");
-
-                            b1.Property<string>("CountryIso")
-                                .ValueGeneratedOnAdd()
-                                .HasMaxLength(2)
-                                .HasColumnType("NVARCHAR2(2)")
-                                .HasDefaultValue("US")
-                                .HasColumnName("COUNTRY_ISO");
-
-                            b1.Property<string>("PostalCode")
-                                .IsRequired()
-                                .HasMaxLength(9)
-                                .HasColumnType("NVARCHAR2(9)")
-                                .HasColumnName("POSTAL_CODE")
-                                .HasComment("Postal Code");
-
-                            b1.Property<string>("State")
-                                .IsRequired()
-                                .HasMaxLength(3)
-                                .HasColumnType("NVARCHAR2(3)")
-                                .HasColumnName("STATE")
-                                .HasComment("State");
-
-                            b1.Property<string>("Street")
-                                .IsRequired()
-                                .HasMaxLength(56)
-                                .HasColumnType("NVARCHAR2(56)")
-                                .HasColumnName("STREET")
-                                .HasComment("Street");
-
-                            b1.Property<string>("Street2")
-                                .HasMaxLength(56)
-                                .HasColumnType("NVARCHAR2(56)")
-                                .HasColumnName("STREET2")
-                                .HasComment("Street2");
-
-                            b1.Property<string>("Street3")
-                                .HasMaxLength(56)
-                                .HasColumnType("NVARCHAR2(56)")
-                                .HasColumnName("STREET3")
-                                .HasComment("Street3");
-
-                            b1.Property<string>("Street4")
-                                .HasMaxLength(56)
-                                .HasColumnType("NVARCHAR2(56)")
-                                .HasColumnName("STREET4")
-                                .HasComment("Street4");
-
-                            b1.HasKey("BeneficiaryContactArchiveArchiveId");
-
-                            b1.HasIndex("CountryIso")
-                                .HasDatabaseName("IX_BENEFICIARY_CONTACT_ARCHIVE_COUNTRY_ISO");
-
-                            b1.ToTable("BENEFICIARY_CONTACT_ARCHIVE");
-
-                            b1.WithOwner()
-                                .HasForeignKey("BeneficiaryContactArchiveArchiveId")
-                                .HasConstraintName("FK_BENEFICIARY_CONTACT_ARCHIVE_BENEFICIARY_CONTACT_ARCHIVE_ARCHIVE_ID");
-
-                            b1.HasOne("Demoulas.ProfitSharing.Data.Entities.Country", null)
-                                .WithMany()
-                                .HasForeignKey("CountryIso")
-                                .OnDelete(DeleteBehavior.NoAction)
-                                .HasConstraintName("FK_BENEFICIARY_CONTACT_ARCHIVE_COUNTRY_COUNTRY_ISO");
-                        });
-
-                    b.OwnsOne("Demoulas.ProfitSharing.Data.Entities.ContactInfo", "ContactInfo", b1 =>
-                        {
-                            b1.Property<int>("BeneficiaryContactArchiveArchiveId")
-                                .HasColumnType("NUMBER(10)")
-                                .HasColumnName("ARCHIVE_ID");
-
-                            b1.Property<string>("EmailAddress")
-                                .HasMaxLength(84)
-                                .HasColumnType("NVARCHAR2(84)")
-                                .HasColumnName("EMAIL_ADDRESS");
-
-                            b1.Property<string>("FirstName")
-                                .IsRequired()
-                                .HasMaxLength(30)
-                                .HasColumnType("NVARCHAR2(30)")
-                                .HasColumnName("FIRST_NAME")
-                                .HasComment("FirstName");
-
-                            b1.Property<string>("FullName")
-                                .IsRequired()
-                                .HasMaxLength(84)
-                                .HasColumnType("NVARCHAR2(84)")
-                                .HasColumnName("FULL_NAME")
-                                .HasComment("FullName");
-
-                            b1.Property<string>("LastName")
-                                .IsRequired()
-                                .HasMaxLength(30)
-                                .HasColumnType("NVARCHAR2(30)")
-                                .HasColumnName("LAST_NAME")
-                                .HasComment("LastName");
-
-                            b1.Property<string>("MiddleName")
-                                .HasMaxLength(25)
-                                .HasColumnType("NVARCHAR2(25)")
-                                .HasColumnName("MIDDLE_NAME")
-                                .HasComment("MiddleName");
-
-                            b1.Property<string>("MobileNumber")
-                                .HasMaxLength(16)
-                                .HasColumnType("NVARCHAR2(16)")
-                                .HasColumnName("MOBILE_NUMBER");
-
-                            b1.Property<string>("PhoneNumber")
-                                .HasMaxLength(16)
-                                .HasColumnType("NVARCHAR2(16)")
-                                .HasColumnName("PHONE_NUMBER");
-
-                            b1.HasKey("BeneficiaryContactArchiveArchiveId");
-
-                            b1.ToTable("BENEFICIARY_CONTACT_ARCHIVE");
-
-                            b1.WithOwner()
-                                .HasForeignKey("BeneficiaryContactArchiveArchiveId")
-                                .HasConstraintName("FK_BENEFICIARY_CONTACT_ARCHIVE_BENEFICIARY_CONTACT_ARCHIVE_ARCHIVE_ID");
-                        });
-
-                    b.Navigation("Address")
-                        .IsRequired();
-
-                    b.Navigation("ContactInfo")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Beneficiary", b =>

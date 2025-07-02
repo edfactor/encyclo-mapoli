@@ -82,7 +82,11 @@ builder.AddDatabaseServices((services, factoryRequests) =>
 {
     // Register contexts without immediately resolving the interceptor
     factoryRequests.Add(ContextFactoryRequest.Initialize<ProfitSharingDbContext>("ProfitSharing",
-        interceptorFactory: sp => [sp.GetRequiredService<AuditSaveChangesInterceptor>()]));
+        interceptorFactory: sp => [
+            sp.GetRequiredService<AuditSaveChangesInterceptor>(),
+            sp.GetRequiredService<BeneficiarySaveChangesInterceptor>(),
+            sp.GetRequiredService<BeneficiaryContactSaveChangesInterceptor>()
+        ]));
     factoryRequests.Add(ContextFactoryRequest.Initialize<ProfitSharingReadOnlyDbContext>("ProfitSharing"));
     factoryRequests.Add(ContextFactoryRequest.Initialize<DemoulasCommonDataContext>("ProfitSharing"));
 });

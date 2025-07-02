@@ -44,6 +44,8 @@ public static class DatabaseServicesExtension
             return dataConfig;
         });
         _ = builder.Services.AddSingleton<AuditSaveChangesInterceptor>();
+        _ = builder.Services.AddSingleton<BeneficiarySaveChangesInterceptor>();
+        _ = builder.Services.AddSingleton<BeneficiaryContactSaveChangesInterceptor>();
         _ = builder.Services.AddHttpContextAccessor();
 
 
