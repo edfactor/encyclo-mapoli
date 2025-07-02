@@ -21,7 +21,6 @@ public sealed class BeneficiaryContactArchiveMap : IEntityTypeConfiguration<Bene
 
         _ = builder.Property(d => d.Id).HasColumnName("ID").HasPrecision(9);
 
-        _ = builder.HasIndex(d => d.Ssn, "IX_SSN");
         _ = builder.Property(c => c.Ssn).IsRequired().HasPrecision(9).HasColumnName("SSN");
 
         _ = builder.Property(b => b.DateOfBirth).HasColumnType("DATE").HasConversion<DateOnlyConverter>().HasColumnName("DATE_OF_BIRTH");
