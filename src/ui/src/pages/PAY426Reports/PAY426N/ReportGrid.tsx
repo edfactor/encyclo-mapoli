@@ -54,7 +54,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
         JSON.stringify(preset.params) === JSON.stringify(params)
       );
       trigger({
-        //reportId: matchingPreset ? Number(matchingPreset.id) : 0,
+        reportId: matchingPreset ? Number(matchingPreset.id) : 0,
         profitYear: profitYear,
         pagination: {
           skip: pageNumber * pageSize,
