@@ -610,17 +610,14 @@ public sealed class MasterInquiryService : IMasterInquiryService
         {
             _logger.LogWarning(ex, "Failed to retrieve balances for SSN {SSN}", ssnCollection);
         }
-        
-        List< MemberProfitPlanDetails > detailsList = new List<MemberProfitPlanDetails>(currentBalance.Count);
 
-        foreach (var balance in currentBalance)
+        var detailsList = new List<MemberProfitPlanDetails>(memberDetailsMap.Count);
+
+        foreach (var kvp in memberDetailsMap)
         {
-            if (!memberDetailsMap.TryGetValue(balance.Id, out var memberData))
-            {
-                continue;
-            }
-            
-            var previousBalanceItem = previousBalance.FirstOrDefault(b => b.Id == balance.Id);
+            var memberData = kvp.Value;
+            var balance = currentBalance.FirstOrDefault(b => b.Id == kvp.Key);
+            var previousBalanceItem = previousBalance.FirstOrDefault(b => b.Id == kvp.Key);
 
             detailsList.Add(new MemberProfitPlanDetails
             {
