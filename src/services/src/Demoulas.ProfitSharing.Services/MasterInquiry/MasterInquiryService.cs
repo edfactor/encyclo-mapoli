@@ -187,18 +187,21 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
             query = FilterMemberQuery(req, query);
 
+            // Only group by non-null ProfitDetail
+            query = query.Where(x => x.ProfitDetail != null);
+
             return await query
-                .GroupBy(x => new { x.ProfitDetail.ProfitYear, x.ProfitDetail.MonthToDate })
+                .GroupBy(x => new { ProfitYear = x.ProfitDetail != null ? x.ProfitDetail.ProfitYear : (short)0, MonthToDate = x.ProfitDetail != null ? x.ProfitDetail.MonthToDate : (byte)0 })
                 .Select(g => new GroupedProfitSummaryDto
                 {
                     ProfitYear = g.Key.ProfitYear,
                     MonthToDate = g.Key.MonthToDate,
-                    TotalContribution = g.Sum(x => x.ProfitDetail.Contribution),
-                    TotalEarnings = g.Sum(x => x.ProfitDetail.Earnings),
+                    TotalContribution = g.Sum(x => x.ProfitDetail != null ? x.ProfitDetail.Contribution : 0),
+                    TotalEarnings = g.Sum(x => x.ProfitDetail != null ? x.ProfitDetail.Earnings : 0),
                     TotalForfeiture = g.Sum(x =>
-                        !balanceProfitCodes.Contains(x.ProfitDetail.ProfitCodeId) ? x.ProfitDetail.Forfeiture : 0),
+                        x.ProfitDetail != null && !balanceProfitCodes.Contains(x.ProfitDetail.ProfitCodeId) ? x.ProfitDetail.Forfeiture : 0),
                     TotalPayment = g.Sum(x =>
-                        balanceProfitCodes.Contains(x.ProfitDetail.ProfitCodeId) ? x.ProfitDetail.Forfeiture : 0),
+                        x.ProfitDetail != null && balanceProfitCodes.Contains(x.ProfitDetail.ProfitCodeId) ? x.ProfitDetail.Forfeiture : 0),
                     TransactionCount = g.Count()
                 })
                 .OrderBy(x => x.ProfitYear)
@@ -278,9 +281,9 @@ public sealed class MasterInquiryService : IMasterInquiryService
             // First projection: SQL-translatable only
             var rawQuery = await query.Select(x => new MasterInquiryRawDto
             {
-                Id = x.ProfitDetail.Id,
-                Ssn = x.ProfitDetail.Ssn,
-                ProfitYear = x.ProfitDetail.ProfitYear,
+                Id = x.ProfitDetail != null ? x.ProfitDetail.Id : 0,
+                Ssn = x.Member.Ssn,
+                ProfitYear = x.ProfitDetail != null ? x.ProfitDetail.ProfitYear : (short)0,
                 ProfitYearIteration = x.ProfitDetail.ProfitYearIteration,
                 DistributionSequence = x.ProfitDetail.DistributionSequence,
                 ProfitCodeId = x.ProfitDetail.ProfitCodeId,
