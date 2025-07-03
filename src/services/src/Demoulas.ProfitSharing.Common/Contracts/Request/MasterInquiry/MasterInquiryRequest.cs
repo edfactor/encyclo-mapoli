@@ -19,6 +19,7 @@ public record MasterInquiryRequest : MasterInquiryMemberRequest
 #pragma warning restore DSM001
 
     public int? BadgeNumber { get; set; }
+    public short? PsnSuffix { get; set; }
 
     public static new MasterInquiryRequest RequestExample()
     {
