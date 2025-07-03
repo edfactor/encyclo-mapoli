@@ -145,7 +145,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
             </div>
             <TotalsGrid
               displayData={[[numberToCurrency(distributionsAndForfeitures.federalTaxTotal || 0)]]}
-              leftColumnHeaders={["FederalTaxs"]}
+              leftColumnHeaders={["Federal Taxes"]}
               topRowHeaders={[]}></TotalsGrid>
             <TotalsGrid
               displayData={[[numberToCurrency(distributionsAndForfeitures.forfeitureTotal || 0)]]}
