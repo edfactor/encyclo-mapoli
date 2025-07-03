@@ -101,7 +101,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
             <div className="totals-flex-popover">
               <TotalsGrid
                 displayData={[[numberToCurrency(distributionsAndForfeitures.stateTaxTotal || 0)]]}
-                leftColumnHeaders={["StateTaxs"]}
+                leftColumnHeaders={["State Taxes"]}
                 topRowHeaders={[]}
               />
               {distributionsAndForfeitures.stateTaxTotals && Object.keys(distributionsAndForfeitures.stateTaxTotals).length > 0 && (
@@ -118,6 +118,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
                     onClose={handlePopoverClose}
                     anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
                     PaperProps={{ style: { maxHeight: 300, maxWidth: 350, overflow: "auto" } }}
+                    
                   >
                     <div className="state-tax-popover-table">
                       <Typography variant="subtitle2" sx={{ p: 1 }}>State Tax Breakdown</Typography>
