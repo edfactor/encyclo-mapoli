@@ -29,7 +29,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
     {
         public required ProfitDetail? ProfitDetail { get; init; }
         public required InquiryDemographics Member { get; init; }
-        public required ProfitCode ProfitCode { get; init; }
+        public required ProfitCode? ProfitCode { get; init; }
         public required ZeroContributionReason? ZeroContributionReason { get; init; }
         public required TaxCode? TaxCode { get; init; }
         public required CommentType? CommentType { get; init; }
@@ -270,48 +270,44 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
             if (req.ProfitYear.HasValue)
             {
-                query = query.Where(x => x.ProfitDetail.ProfitYear == req.ProfitYear.Value);
+                query = query.Where(x => x.ProfitDetail != null && x.ProfitDetail.ProfitYear == req.ProfitYear.Value);
             }
 
             if (req.MonthToDate.HasValue)
             {
-                query = query.Where(x => x.ProfitDetail.MonthToDate == req.MonthToDate.Value);
+                query = query.Where(x => x.ProfitDetail != null && x.ProfitDetail.MonthToDate == req.MonthToDate.Value);
             }
 
             // First projection: SQL-translatable only
             var rawQuery = await query.Select(x => new MasterInquiryRawDto
             {
                 Id = x.ProfitDetail != null ? x.ProfitDetail.Id : 0,
-                Ssn = x.Member.Ssn,
+                Ssn = x.ProfitDetail != null ? x.ProfitDetail.Ssn : x.Member.Ssn,
                 ProfitYear = x.ProfitDetail != null ? x.ProfitDetail.ProfitYear : (short)0,
-                ProfitYearIteration = x.ProfitDetail.ProfitYearIteration,
-                DistributionSequence = x.ProfitDetail.DistributionSequence,
-                ProfitCodeId = x.ProfitDetail.ProfitCodeId,
-                ProfitCodeName = x.ProfitCode.Name,
-                Contribution = x.ProfitDetail.CalculateContribution(),
-                Earnings = x.ProfitDetail.CalculateEarnings(),
-                Forfeiture = x.ProfitDetail.CalculateForfeiture(),
-                Payment = x.ProfitDetail.CalculatePayment(),
-                MonthToDate = x.ProfitDetail.MonthToDate,
-                YearToDate = x.ProfitDetail.YearToDate,
-                Remark = x.ProfitDetail.Remark,
-                ZeroContributionReasonId = x.ProfitDetail.ZeroContributionReasonId,
-                ZeroContributionReasonName =
-                    x.ZeroContributionReason != null
-                        ? x.ZeroContributionReason.Name
-                        : string.Empty,
-                FederalTaxes = x.ProfitDetail.FederalTaxes,
-                StateTaxes = x.ProfitDetail.StateTaxes,
-                TaxCodeId = x.ProfitDetail.TaxCodeId != null ? x.ProfitDetail.TaxCodeId : TaxCode.Constants.Unknown.Id,
+                ProfitYearIteration = x.ProfitDetail != null ? x.ProfitDetail.ProfitYearIteration : (byte)0,
+                DistributionSequence = x.ProfitDetail != null ? x.ProfitDetail.DistributionSequence : 0,
+                ProfitCodeId = x.ProfitDetail != null ? x.ProfitDetail.ProfitCodeId : (byte)0,
+                ProfitCodeName = x.ProfitCode != null ? x.ProfitCode.Name : string.Empty,
+                Contribution = x.ProfitDetail != null ? x.ProfitDetail.CalculateContribution() : 0,
+                Earnings = x.ProfitDetail != null ? x.ProfitDetail.CalculateEarnings() : 0,
+                Forfeiture = x.ProfitDetail != null ? x.ProfitDetail.CalculateForfeiture() : 0,
+                Payment = x.ProfitDetail != null ? x.ProfitDetail.CalculatePayment() : 0,
+                MonthToDate = x.ProfitDetail != null ? x.ProfitDetail.MonthToDate : (byte)0,
+                YearToDate = x.ProfitDetail != null ? x.ProfitDetail.YearToDate : (short)0,
+                Remark = x.ProfitDetail != null ? x.ProfitDetail.Remark : null,
+                ZeroContributionReasonId = x.ProfitDetail != null ? x.ProfitDetail.ZeroContributionReasonId : null,
+                ZeroContributionReasonName = x.ZeroContributionReason != null ? x.ZeroContributionReason.Name : string.Empty,
+                FederalTaxes = x.ProfitDetail != null ? x.ProfitDetail.FederalTaxes : 0,
+                StateTaxes = x.ProfitDetail != null ? x.ProfitDetail.StateTaxes : 0,
+                TaxCodeId = x.ProfitDetail != null && x.ProfitDetail.TaxCodeId != null ? x.ProfitDetail.TaxCodeId : TaxCode.Constants.Unknown.Id,
                 TaxCodeName = x.TaxCode != null ? x.TaxCode.Name : TaxCode.Constants.Unknown.Name,
-                CommentTypeId = x.ProfitDetail.CommentTypeId,
-                CommentTypeName =
-                    x.CommentType != null ? x.CommentType.Name : string.Empty,
-                CommentRelatedCheckNumber = x.ProfitDetail.CommentRelatedCheckNumber,
-                CommentRelatedState = x.ProfitDetail.CommentRelatedState,
-                CommentRelatedOracleHcmId = x.ProfitDetail.CommentRelatedOracleHcmId,
-                CommentRelatedPsnSuffix = x.ProfitDetail.CommentRelatedPsnSuffix,
-                CommentIsPartialTransaction = x.ProfitDetail.CommentIsPartialTransaction != null ? x.ProfitDetail.CommentIsPartialTransaction : false,
+                CommentTypeId = x.ProfitDetail != null ? x.ProfitDetail.CommentTypeId : null,
+                CommentTypeName = x.CommentType != null ? x.CommentType.Name : string.Empty,
+                CommentRelatedCheckNumber = x.ProfitDetail != null ? x.ProfitDetail.CommentRelatedCheckNumber : null,
+                CommentRelatedState = x.ProfitDetail != null ? x.ProfitDetail.CommentRelatedState : null,
+                CommentRelatedOracleHcmId = x.ProfitDetail != null ? x.ProfitDetail.CommentRelatedOracleHcmId : null,
+                CommentRelatedPsnSuffix = x.ProfitDetail != null ? x.ProfitDetail.CommentRelatedPsnSuffix : null,
+                CommentIsPartialTransaction = x.ProfitDetail != null && x.ProfitDetail.CommentIsPartialTransaction != null ? x.ProfitDetail.CommentIsPartialTransaction : false,
                 BadgeNumber = x.Member.BadgeNumber,
                 PsnSuffix = x.Member.PsnSuffix,
                 PayFrequencyId = x.Member.PayFrequencyId,
@@ -855,15 +851,15 @@ public sealed class MasterInquiryService : IMasterInquiryService
             {
                 case 1: // Hardship/Distribution
                     List<byte?> array = [CommentType.Constants.Hardship.Id, CommentType.Constants.Distribution.Id];
-                    query = query.Where(x => array.Contains(x.ProfitDetail.CommentTypeId));
+                    query = query.Where(x => x.ProfitDetail != null && array.Contains(x.ProfitDetail.CommentTypeId));
                     break;
                 case 2: // payoffs
                     array = [CommentType.Constants.Payoff.Id, CommentType.Constants.Forfeit.Id];
-                    query = query.Where(x => array.Contains(x.ProfitDetail.CommentTypeId));
+                    query = query.Where(x => x.ProfitDetail != null && array.Contains(x.ProfitDetail.CommentTypeId));
                     break;
                 case 3: // rollovers
                     array = [CommentType.Constants.Rollover.Id, CommentType.Constants.RothIra.Id];
-                    query = query.Where(x => array.Contains(x.ProfitDetail.CommentTypeId));
+                    query = query.Where(x => x.ProfitDetail != null && array.Contains(x.ProfitDetail.CommentTypeId));
                     break;
             }
         }
