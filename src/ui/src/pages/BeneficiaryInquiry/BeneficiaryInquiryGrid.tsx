@@ -1,4 +1,4 @@
-import { Button, Typography } from "@mui/material";
+import { Button, TextField, Typography } from "@mui/material";
 import { useState, useMemo, useCallback, useEffect, JSX } from "react";
 import { useSelector } from "react-redux";
 import { useLazySearchProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
@@ -71,17 +71,42 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({ selecte
     return (<><Button onClick={()=>{createOrUpdateBeneficiary(data)}} size="small" color="primary"><Edit fontSize="small" /></Button><Button onClick={()=>deleteBeneficiary(data.id)} size="small" color="error"><Delete fontSize="small" /></Button></>)
   }
 
+  const percentageFieldRenderer =(percentage: number, id:number)=>{
+    return (
+
+      <>
+        <TextField type="number" defaultValue={percentage} onClick={()=>console.log(id)}></TextField>
+      </>
+    )
+  }
+
   const columnDefs = useMemo(() => {
 
     const columns = BeneficiaryInquiryGridColumns();
-    return [{
-      headerName: "Actions",
-      field: "actions",
+    columns.splice(6, 0,{
+      headerName: "Percentage",
+      field: "percentage",
+      colId: "percentage",
       minWidth: 120,
       headerClass: "center-align",
       cellClass: "center-align",
+      sortable: false,
+      resizable: true,
+      cellRenderer: (params: ICellRendererParams)=> percentageFieldRenderer(params.data.percent, params.data.id)
+    }, )
+    return [ ...columns,{
+      headerName: "Actions",
+      field: "actions",
+      lockPinned: true,
+      pinned:"right",
+      resizable:false,
+      sortable: false,
+      cellStyle: { backgroundColor: '#E8E8E8' },
+      minWidth: 150,
+      headerClass: "center-align",
+      cellClass: "center-align",
       cellRenderer: (params: ICellRendererParams) => { return actionButtons(params.data); }
-    }, ...columns];
+    }];
   }, [])
 
   // const onSearch = useCallback(async () => {

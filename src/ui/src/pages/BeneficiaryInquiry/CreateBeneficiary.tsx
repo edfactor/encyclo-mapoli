@@ -22,7 +22,7 @@ import { tryddmmyyyyToDate } from "utils/dateUtils";
 const schema = yup.object().shape({
     beneficiarySsn: yup.number().required(),
     relationship: yup.string().required(),
-    percentage: yup.number().required(),
+    //percentage: yup.number().required(),
     dateOfBirth: yup.date().required(),
     street: yup.string().required(),
     city: yup.string().required(),
@@ -37,7 +37,7 @@ const schema = yup.object().shape({
 export interface cb {
     beneficiarySsn: number;
     relationship: string;
-    percentage: number;
+    //percentage: number;
     dateOfBirth?: Date;
     street: string;
     city: string;
@@ -76,7 +76,7 @@ const CreateBeneficiary: React.FC<Props> = ({ badgeNumber, onSaveSuccess, benefi
         defaultValues: selectedBeneficiary ? {
             beneficiarySsn: undefined,
             relationship: selectedBeneficiary.relationship,
-            percentage: selectedBeneficiary.percent,
+            //percentage: selectedBeneficiary.percent,
             dateOfBirth: selectedBeneficiary.contact?.dateOfBirth,
             street: selectedBeneficiary.contact?.address?.street,
             city: selectedBeneficiary.contact?.address?.city,
@@ -89,7 +89,7 @@ const CreateBeneficiary: React.FC<Props> = ({ badgeNumber, onSaveSuccess, benefi
         } : {
             beneficiarySsn: 0,
             relationship: '',
-            percentage: 0,
+            //percentage: 0,
             dateOfBirth: undefined,
             street: '',
             city: '',
@@ -152,7 +152,7 @@ const CreateBeneficiary: React.FC<Props> = ({ badgeNumber, onSaveSuccess, benefi
             street4: null,
             id: selectedBeneficiary?.id ?? 0,
             kindId: data.kindId,
-            percentage: data.percentage,
+            //percentage: data.percentage,
             relationship: data.relationship
         }
         triggerUpdateBeneficiary(request).unwrap().then((res: UpdateBeneficiaryResponse)=>{
@@ -176,7 +176,7 @@ const CreateBeneficiary: React.FC<Props> = ({ badgeNumber, onSaveSuccess, benefi
             employeeBadgeNumber: badgeNumber,
             firstLevelBeneficiaryNumber: Math.floor(psnSuffix / 1000) % 10,
             kindId: data.kindId,
-            percentage: data.percentage,
+            //percentage: data.percentage,
             relationship: data.relationship,
             secondLevelBeneficiaryNumber: Math.floor(psnSuffix / 100) % 10,
             thirdLevelBeneficiaryNumber: Math.floor(psnSuffix / 10) % 10
@@ -422,7 +422,7 @@ const CreateBeneficiary: React.FC<Props> = ({ badgeNumber, onSaveSuccess, benefi
                                 )}
                             />
                         </Grid2>
-                        <Grid2 size={{ md: 3, xs: 12 }}>
+                        {/* <Grid2 size={{ md: 3, xs: 12 }}>
                             <FormLabel>Percentage</FormLabel>
                             <Controller
                                 name="percentage"
@@ -442,7 +442,7 @@ const CreateBeneficiary: React.FC<Props> = ({ badgeNumber, onSaveSuccess, benefi
                                     />
                                 )}
                             />
-                        </Grid2>
+                        </Grid2> */}
                     </Grid2>
 
                     <Grid2
