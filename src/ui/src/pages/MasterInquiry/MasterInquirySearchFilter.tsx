@@ -182,7 +182,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
           sortBy: data.pagination?.sortBy || "badgeNumber",
           isSortDescending: data.pagination?.isSortDescending || true
         },
-        ...(!!data.endProfitYear && { endProfitYear: data.endProfitYear || profitYear, }),
+        endProfitYear: data.endProfitYear ?? profitYear,
         ...(!!data.startProfitMonth && { startProfitMonth: data.startProfitMonth }),
         ...(!!data.endProfitMonth && { endProfitMonth: data.endProfitMonth }),
         ...(!!data.socialSecurity && { ssn: data.socialSecurity }),
