@@ -4,14 +4,18 @@ import { Controller, useForm } from "react-hook-form";
 import { useSelector, useDispatch } from "react-redux";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
+import { FormControl, FormLabel, InputLabel, MenuItem, Select } from "@mui/material";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 import { CalendarResponseDto, StartAndEndDateRequest } from "../../../reduxstore/types";
 import { tryddmmyyyyToDate, mmDDYYFormat } from "../../../utils/dateUtils";
 import { RootState } from "reduxstore/store";
+import { TerminationSearchRequest } from "./Termination";
+
 
 const schema = yup.object().shape({
   beginningDate: yup.string().required("Begin Date is required"),
   endingDate: yup.string().required("End Date is required"),
+  forfeitureStatus: yup.string().required("Forfeiture Status is required"),
   pagination: yup
     .object({
       skip: yup.number().required(),
@@ -25,7 +29,7 @@ const schema = yup.object().shape({
 interface TerminationSearchFilterProps {
   setInitialSearchLoaded: (include: boolean) => void;
   fiscalData: CalendarResponseDto | null;
-  onSearch: (params: StartAndEndDateRequest) => void;
+  onSearch: (params: TerminationSearchRequest) => void;
   hasUnsavedChanges?: boolean;
 }
 
@@ -45,16 +49,17 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
     formState: { errors, isValid },
     reset,
     trigger
-  } = useForm<StartAndEndDateRequest>({
+  } = useForm<TerminationSearchRequest>({
     resolver: yupResolver(schema),
     defaultValues: {
       beginningDate: termination?.startDate || fiscalData.fiscalBeginDate || '',
       endingDate: termination?.endDate || fiscalData.fiscalEndDate || '',
+      forfeitureStatus: 'showAll',
       pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }
     }
   });
 
-  const validateAndSubmit = async (data: StartAndEndDateRequest) => {
+  const validateAndSubmit = async (data: TerminationSearchRequest) => {
     if (hasUnsavedChanges) {
       alert("Please save your changes.");
       return;
@@ -77,6 +82,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
     reset({
       beginningDate: fiscalData.fiscalBeginDate,
       endingDate: fiscalData.fiscalEndDate,
+      forfeitureStatus: 'showAll',
       pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }
     });
     trigger();
@@ -104,8 +110,8 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
                 label="Begin Date"
                 disableFuture
                 error={errors.beginningDate?.message}
-                minDate={tryddmmyyyyToDate(fiscalData.fiscalBeginDate)}
-                maxDate={tryddmmyyyyToDate(fiscalData.fiscalEndDate)}
+                minDate={tryddmmyyyyToDate(fiscalData.fiscalBeginDate) || undefined}
+                maxDate={tryddmmyyyyToDate(fiscalData.fiscalEndDate) || undefined}
               />
             )}
           />
@@ -126,9 +132,34 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
                 label="End Date"
                 disableFuture
                 error={errors.endingDate?.message}
-                minDate={tryddmmyyyyToDate(fiscalData.fiscalBeginDate)}
-                maxDate={tryddmmyyyyToDate(fiscalData.fiscalEndDate)}
+                minDate={tryddmmyyyyToDate(fiscalData.fiscalBeginDate) || undefined}
+                maxDate={tryddmmyyyyToDate(fiscalData.fiscalEndDate) || undefined}
               />
+            )}
+          />
+        </Grid2>
+        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+          <Controller
+            name="forfeitureStatus"
+            control={control}
+            render={({ field }) => (
+              <FormControl fullWidth size="small">
+                <FormLabel>Forfeiture Status</FormLabel>
+                <Select
+                  labelId="forfeiture-status-label"
+                  id="forfeitureStatus"
+                  value={field.value}
+                  onChange={(e) => {
+                    field.onChange(e.target.value);
+                    trigger('forfeitureStatus');
+                  }}
+                  error={!!errors.forfeitureStatus}
+                >
+                  <MenuItem value="showAll">Show All</MenuItem>
+                  <MenuItem value="needsReview">Show Needs Review</MenuItem>
+                  <MenuItem value="asExpected">Show As Expected</MenuItem>
+                </Select>
+              </FormControl>
             )}
           />
         </Grid2>

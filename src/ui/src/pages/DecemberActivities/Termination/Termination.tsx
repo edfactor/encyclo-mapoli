@@ -11,15 +11,19 @@ import TerminationSearchFilter from "./TerminationSearchFilter";
 import { useLazyGetAccountingRangeToCurrent } from "../../../hooks/useFiscalCalendarYear";
 import { StartAndEndDateRequest } from "../../../reduxstore/types";
 
+export interface TerminationSearchRequest extends StartAndEndDateRequest {
+  forfeitureStatus: string;
+}
+
 const Termination = () => {
   const [fetchAccountingRange, { data: fiscalData, isLoading: isRangeLoading }] = useLazyGetAccountingRangeToCurrent(6);
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
-  const [searchParams, setSearchParams] = useState<StartAndEndDateRequest | null>(null);
+  const [searchParams, setSearchParams] = useState<TerminationSearchRequest | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [resetPageFlag, setResetPageFlag] = useState(false);
   const [shouldBlock, setShouldBlock] = useState(false);
 
-  const handleSearch = (params: StartAndEndDateRequest) => {
+  const handleSearch = (params: TerminationSearchRequest) => {
     setSearchParams(params);
     setInitialSearchLoaded(true);
     setResetPageFlag(prev => !prev);
