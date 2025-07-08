@@ -5,9 +5,9 @@ import { getEnrolledStatus } from "../../../utils/enrollmentUtil";
 import { mmDDYYFormat } from "utils/dateUtils";
 import { Checkbox, IconButton } from "@mui/material";
 import { SaveOutlined } from "@mui/icons-material";
-import { useState } from "react";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { SuggestedForfeitEditor, SuggestedForfeitCellRenderer } from "../../../components/SuggestedForfeiture";
+import { SelectableGridHeader } from "components/SelectableGridHeader";
 
 export const GetTerminationColumns = (): ColDef[] => {
   return [
@@ -276,56 +276,26 @@ interface UpdatePayload {
 }
 
 export const HeaderComponent: React.FC<HeaderComponentProps> = (params: HeaderComponentProps) => {
-  const [allRowsSelected, setAllRowsSelected] = useState(false);
   const selectedProfitYear = useDecemberFlowProfitYear();
 
-  const handleSelectAll = () => {
-    if (allRowsSelected) {
-      params.api.deselectAll();
-      params.api.forEachNode(node => {
-        if (node.data.isDetail && node.data.profitYear === selectedProfitYear) {
-          const id = Number(node.id) || -1;
-          params.removeRowFromSelectedRows(id);
-        }
-      });
-    } else {
-      params.api.forEachNode(node => {
-        if (node.data.isDetail && node.data.profitYear === selectedProfitYear) {
-          node.setSelected(true);
-          const id = Number(node.id) || -1;
-          params.addRowToSelectedRows(id);
-        }
-      });
-    }
-    params.api.refreshCells({ force: true });
-    setAllRowsSelected(!allRowsSelected);
+  const isNodeEligible = (nodeData: any) => {
+    return nodeData.isDetail && nodeData.profitYear === selectedProfitYear;
   };
 
-  const handleSave = () => {
-    const selectedNodes: UpdatePayload[] = [];
-    params.api.forEachNode(node => {
-      if (node.isSelected() && node.data.isDetail) {
-        const rowKey = `${node.data.badgeNumber}-${node.data.profitYear}`;
-        const currentValue = params.context?.editedValues?.[rowKey]?.value ?? node.data.suggestedForfeit;
-        
-        selectedNodes.push({
-          badgeNumber: node.data.badgeNumber,
-          profitYear: node.data.profitYear,
-          suggestedForfeit: currentValue
-        });
-      }
-    });
-    console.log('Bulk update payload:', selectedNodes);
+  const createUpdatePayload = (nodeData: any, context: any) => {
+    const rowKey = `${nodeData.badgeNumber}-${nodeData.profitYear}`;
+    const currentValue = context?.editedValues?.[rowKey]?.value ?? nodeData.suggestedForfeit;
+    
+    return {
+      badgeNumber: nodeData.badgeNumber,
+      profitYear: nodeData.profitYear,
+      suggestedForfeit: currentValue
+    };
   };
 
-  return <div>
-    <Checkbox 
-      onClick={handleSelectAll}
-      checked={allRowsSelected}
-      onChange={handleSelectAll}
-    />
-    <IconButton onClick={handleSave}>
-      <SaveOutlined />
-    </IconButton>
-  </div>;
+  return <SelectableGridHeader 
+    {...params}
+    isNodeEligible={isNodeEligible}
+    createUpdatePayload={createUpdatePayload}
+  />;
 };

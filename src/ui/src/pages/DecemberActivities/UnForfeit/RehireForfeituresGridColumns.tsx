@@ -5,68 +5,35 @@ import { mmDDYYFormat } from "utils/dateUtils";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
 import { Checkbox, IconButton } from "@mui/material";
 import { SaveOutlined } from "@mui/icons-material";
-import { useState } from "react";
 import { 
   RehireForfeituresHeaderComponentProps, 
   RehireForfeituresSaveButtonCellParams, 
   RehireForfeituresUpdatePayload 
 } from "../../../reduxstore/types";
 import { SuggestedForfeitEditor, SuggestedForfeitCellRenderer } from "../../../components/SuggestedForfeiture";
+import { SelectableGridHeader } from "components/SelectableGridHeader";
 
 export const HeaderComponent: React.FC<RehireForfeituresHeaderComponentProps> = (props) => {
-  const [allRowsSelected, setAllRowsSelected] = useState(false);
-
-  const handleSelectAll = () => {
-    if (allRowsSelected) {
-      props.api.deselectAll();
-      props.api.forEachNode(node => {
-        if (node.data.isDetail) {
-          const id = Number(node.id) || -1;
-          props.removeRowFromSelectedRows(id);
-        }
-      });
-    } else {
-      props.api.forEachNode(node => {
-        if (node.data.isDetail) {
-          node.setSelected(true);
-          const id = Number(node.id) || -1;
-          props.addRowToSelectedRows(id);
-        }
-      });
-    }
-    props.api.refreshCells({ force: true });
-    setAllRowsSelected(!allRowsSelected);
+  const isNodeEligible = (nodeData: any) => {
+    return nodeData.isDetail;
   };
 
-  const handleSave = () => {
-    const selectedNodes: RehireForfeituresUpdatePayload[] = [];
-    props.api.forEachNode(node => {
-      if (node.isSelected() && node.data.isDetail) {
-        const rowKey = `${node.data.badgeNumber}-${node.data.profitYear}`;
-        const currentValue = props.context?.editedValues?.[rowKey]?.value ?? node.data.suggestedForfeit;
-        
-        selectedNodes.push({
-          badgeNumber: node.data.badgeNumber,
-          profitYear: node.data.profitYear,
-          suggestedForfeit: currentValue
-        });
-      }
-    });
-    console.log('Bulk update payload:', selectedNodes);
+  const createUpdatePayload = (nodeData: any, context: any) => {
+    const rowKey = `${nodeData.badgeNumber}-${nodeData.profitYear}`;
+    const currentValue = context?.editedValues?.[rowKey]?.value ?? nodeData.suggestedForfeit;
+    
+    return {
+      badgeNumber: nodeData.badgeNumber,
+      profitYear: nodeData.profitYear,
+      suggestedForfeit: currentValue
+    };
   };
 
-  return (
-    <div>
-      <Checkbox 
-        onClick={handleSelectAll}
-        checked={allRowsSelected}
-        onChange={handleSelectAll}
-      />
-      <IconButton onClick={handleSave}>
-        <SaveOutlined />
-      </IconButton>
-    </div>
-  );
+  return <SelectableGridHeader 
+    {...props}
+    isNodeEligible={isNodeEligible}
+    createUpdatePayload={createUpdatePayload}
+  />;
 };
 
 export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
