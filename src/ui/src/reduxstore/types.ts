@@ -1313,7 +1313,7 @@ export interface CreateBeneficiaryRequest {
     thirdLevelBeneficiaryNumber: number | null;
     relationship: string;
     kindId: string;
-    percentage: number;
+    //percentage: number;
 }
 
 
@@ -1332,7 +1332,7 @@ export interface CreateBeneficiaryResponse {
 export interface UpdateBeneficiaryRequest extends UpdateBeneficiaryContactRequest {
     relationship: string;
     kindId: string;
-    percentage: number;
+    //percentage: number;
 }
 
 export interface UpdateBeneficiaryResponse {
