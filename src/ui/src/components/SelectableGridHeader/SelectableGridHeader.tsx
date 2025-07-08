@@ -9,7 +9,7 @@ interface SelectableGridHeaderProps extends IHeaderParams {
   createUpdatePayload: (node: any, context: any) => any;
 }
 
-const SelectableGridHeader: React.FC<SelectableGridHeaderProps> = (props) => {
+export const SelectableGridHeader: React.FC<SelectableGridHeaderProps> = (props) => {
   const getSelectionState = () => {
     let totalEligible = 0;
     let totalSelected = 0;
@@ -79,5 +79,3 @@ const SelectableGridHeader: React.FC<SelectableGridHeaderProps> = (props) => {
     </div>
   );
 }; 
-
-export default SelectableGridHeader;

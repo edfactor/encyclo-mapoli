@@ -7,7 +7,7 @@ import { Checkbox, IconButton } from "@mui/material";
 import { SaveOutlined } from "@mui/icons-material";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { SuggestedForfeitEditor, SuggestedForfeitCellRenderer } from "../../../components/SuggestedForfeiture";
-import { SelectableGridHeader } from "components/SelectableGridHeader";
+import { SelectableGridHeader } from "../../../components/SelectableGridHeader";
 
 export const GetTerminationColumns = (): ColDef[] => {
   return [

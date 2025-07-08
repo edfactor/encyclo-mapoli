@@ -11,7 +11,7 @@ import {
   RehireForfeituresUpdatePayload 
 } from "../../../reduxstore/types";
 import { SuggestedForfeitEditor, SuggestedForfeitCellRenderer } from "../../../components/SuggestedForfeiture";
-import { SelectableGridHeader } from "components/SelectableGridHeader";
+import { SelectableGridHeader } from "../../../components/SelectableGridHeader";
 
 export const HeaderComponent: React.FC<RehireForfeituresHeaderComponentProps> = (props) => {
   const isNodeEligible = (nodeData: any) => {
