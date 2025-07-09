@@ -1,15 +1,14 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-import {
-  MasterInquiryRequest,
-  MasterInquiryMemberRequest,
-  MasterInquiryResponseDto,
-  PagedReportResponse,
-  EmployeeDetails,
-  GroupedProfitSummaryDto
-} from "../types";
-import { Paged } from "smart-ui-library";
-import { createDataSourceAwareBaseQuery } from "./api";
 import { setMasterInquiryGroupingData } from "reduxstore/slices/inquirySlice";
+import { Paged } from "smart-ui-library";
+import {
+  EmployeeDetails,
+  GroupedProfitSummaryDto,
+  MasterInquiryMemberRequest,
+  MasterInquiryRequest,
+  MasterInquiryResponseDto
+} from "../types";
+import { createDataSourceAwareBaseQuery } from "./api";
 
 const baseQuery = createDataSourceAwareBaseQuery();
 export const InquiryApi = createApi({

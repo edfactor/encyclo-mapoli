@@ -5,9 +5,9 @@ import { getEnrolledStatus } from "../../../utils/enrollmentUtil";
 import { mmDDYYFormat } from "utils/dateUtils";
 import { Checkbox, IconButton } from "@mui/material";
 import { SaveOutlined } from "@mui/icons-material";
-import { useState } from "react";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { SuggestedForfeitEditor, SuggestedForfeitCellRenderer } from "../../../components/SuggestedForfeiture";
+import { SelectableGridHeader } from "../../../components/SelectableGridHeader";
 
 export const GetTerminationColumns = (): ColDef[] => {
   return [
@@ -44,8 +44,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       field: "profitYear",
       colId: "profitYear",
       width: 100,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: false,
     },
@@ -54,8 +53,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       field: "beginningBalance",
       colId: "beginningBalance",
       width: 150,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: false,
       valueFormatter: agGridNumberToCurrency
@@ -65,8 +63,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       field: "beneficiaryAllocation",
       colId: "beneficiaryAllocation",
       width: 150,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: false,
       valueFormatter: agGridNumberToCurrency
@@ -76,8 +73,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       field: "distributionAmount",
       colId: "distributionAmount",
       width: 150,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: false,
       valueFormatter: agGridNumberToCurrency
@@ -87,8 +83,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       field: "forfeit",
       colId: "forfeit",
       width: 125,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: false,
       valueFormatter: agGridNumberToCurrency
@@ -98,8 +93,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       field: "endingBalance",
       colId: "endingBalance",
       width: 150,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: false,
       valueFormatter: agGridNumberToCurrency
@@ -109,8 +103,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       field: "vestedBalance",
       colId: "vestedBalance",
       width: 150,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: false,
       valueFormatter: agGridNumberToCurrency
@@ -120,8 +113,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       field: "vestedPercent",
       colId: "vestedPercent",
       width: 100,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: false,
       valueFormatter: (params) => `${params.value}%`
@@ -145,8 +137,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       field: "ytdPsHours",
       colId: "ytdPsHours",
       width: 125,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: false,
       valueFormatter: (params) => {
@@ -159,8 +150,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       field: "age",
       colId: "age",
       width: 70,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: false
     },
@@ -180,15 +170,15 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       field: "suggestedForfeit",
       colId: "suggestedForfeit",
       minWidth: 150,
-      headerClass: "right-align",
+      type: "rightAligned",
+      resizable: true,
+      sortable: false,
       cellClass: (params) => {
         if (!params.data.isDetail) return '';
         const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}`;
         const hasError = params.context?.editedValues?.[rowKey]?.hasError;
-        return `right-align ${hasError ? 'invalid-cell' : ''}`;
+        return hasError ? 'invalid-cell' : '';
       },
-      resizable: true,
-      sortable: false,
       editable: ({ node }) => node.data.isDetail && node.data.profitYear === selectedProfitYear,
       flex: 1,
       cellEditor: SuggestedForfeitEditor,
@@ -276,56 +266,26 @@ interface UpdatePayload {
 }
 
 export const HeaderComponent: React.FC<HeaderComponentProps> = (params: HeaderComponentProps) => {
-  const [allRowsSelected, setAllRowsSelected] = useState(false);
   const selectedProfitYear = useDecemberFlowProfitYear();
 
-  const handleSelectAll = () => {
-    if (allRowsSelected) {
-      params.api.deselectAll();
-      params.api.forEachNode(node => {
-        if (node.data.isDetail && node.data.profitYear === selectedProfitYear) {
-          const id = Number(node.id) || -1;
-          params.removeRowFromSelectedRows(id);
-        }
-      });
-    } else {
-      params.api.forEachNode(node => {
-        if (node.data.isDetail && node.data.profitYear === selectedProfitYear) {
-          node.setSelected(true);
-          const id = Number(node.id) || -1;
-          params.addRowToSelectedRows(id);
-        }
-      });
-    }
-    params.api.refreshCells({ force: true });
-    setAllRowsSelected(!allRowsSelected);
+  const isNodeEligible = (nodeData: any) => {
+    return nodeData.isDetail && nodeData.profitYear === selectedProfitYear;
   };
 
-  const handleSave = () => {
-    const selectedNodes: UpdatePayload[] = [];
-    params.api.forEachNode(node => {
-      if (node.isSelected() && node.data.isDetail) {
-        const rowKey = `${node.data.badgeNumber}-${node.data.profitYear}`;
-        const currentValue = params.context?.editedValues?.[rowKey]?.value ?? node.data.suggestedForfeit;
-        
-        selectedNodes.push({
-          badgeNumber: node.data.badgeNumber,
-          profitYear: node.data.profitYear,
-          suggestedForfeit: currentValue
-        });
-      }
-    });
-    console.log('Bulk update payload:', selectedNodes);
+  const createUpdatePayload = (nodeData: any, context: any) => {
+    const rowKey = `${nodeData.badgeNumber}-${nodeData.profitYear}`;
+    const currentValue = context?.editedValues?.[rowKey]?.value ?? nodeData.suggestedForfeit;
+    
+    return {
+      badgeNumber: nodeData.badgeNumber,
+      profitYear: nodeData.profitYear,
+      suggestedForfeit: currentValue
+    };
   };
 
-  return <div>
-    <Checkbox 
-      onClick={handleSelectAll}
-      checked={allRowsSelected}
-      onChange={handleSelectAll}
-    />
-    <IconButton onClick={handleSave}>
-      <SaveOutlined />
-    </IconButton>
-  </div>;
+  return <SelectableGridHeader 
+    {...params}
+    isNodeEligible={isNodeEligible}
+    createUpdatePayload={createUpdatePayload}
+  />;
 };

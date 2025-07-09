@@ -91,8 +91,7 @@ export const GetDuplicateSSNsOnDemographicsColumns = (): ColDef[] => {
       field: "storeNumber",
       colId: "storeNumber",
       minWidth: 50,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true
     },
     {

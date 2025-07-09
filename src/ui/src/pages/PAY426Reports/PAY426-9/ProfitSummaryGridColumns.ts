@@ -20,8 +20,7 @@ export const GetProfitSummaryGridColumns = (): ColDef[] => {
       field: "numberOfMembers",
       colId: "numberOfMembers",
       minWidth: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       valueFormatter: (params) => formatNumberWithComma(params.value)
     },
@@ -30,8 +29,7 @@ export const GetProfitSummaryGridColumns = (): ColDef[] => {
       field: "totalWages",
       colId: "totalWages",
       minWidth: 180,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       valueFormatter: agGridNumberToCurrency
     },
@@ -40,8 +38,7 @@ export const GetProfitSummaryGridColumns = (): ColDef[] => {
       field: "totalBalance",
       colId: "totalBalance",
       minWidth: 180,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       valueFormatter: agGridNumberToCurrency
     }

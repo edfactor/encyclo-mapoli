@@ -14,7 +14,8 @@ export function SuggestedForfeitCellRenderer(params: SuggestedForfeitCellRendere
 
   const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}`;
   const currentValue = params.context?.editedValues?.[rowKey]?.value ?? params.data.suggestedForfeit;
-  const errorMessage = validateSuggestedForfeit(currentValue, params.data.forfeiture || 0);
+  const maxForfeitOrUnforfeiture = Math.abs(params.data.forfeiture || 0);
+  const errorMessage = validateSuggestedForfeit(currentValue, maxForfeitOrUnforfeiture);
   const hasError = !!errorMessage;
   const formattedValue = new Intl.NumberFormat('en-US', { 
     style: 'currency', 

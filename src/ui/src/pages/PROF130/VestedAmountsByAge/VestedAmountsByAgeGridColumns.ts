@@ -7,8 +7,7 @@ export const GetVestedAmountsByAgeColumns = (countColName: string, amountColName
       headerName: "Age",
       field: "age",
       minWidth: 80,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sort: "asc",
       cellDataType: "text"
@@ -18,8 +17,7 @@ export const GetVestedAmountsByAgeColumns = (countColName: string, amountColName
       field: countColName,
       colId: countColName,
       minWidth: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true
     },
     {
@@ -27,8 +25,7 @@ export const GetVestedAmountsByAgeColumns = (countColName: string, amountColName
       field: amountColName,
       colId: amountColName,
       minWidth: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       valueFormatter: agGridNumberToCurrency
     }

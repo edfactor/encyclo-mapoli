@@ -12,8 +12,7 @@ export const GetBalanceByAgeColumns = (reportType: FrozenReportsByAgeRequestType
           field: "age",
           colId: "age",
           minWidth: 80,
-          headerClass: "right-align",
-          cellClass: "right-align",
+          type: "rightAligned",
           resizable: true,
           sort: "asc",
           cellDataType: "text"
@@ -32,8 +31,7 @@ export const GetBalanceByAgeColumns = (reportType: FrozenReportsByAgeRequestType
           field: "currentBalance",
           colId: "currentBalance",
           minWidth: 150,
-          headerClass: "left-align",
-          cellClass: "left-align",
+          type: "rightAligned",
           resizable: true,
           valueFormatter: agGridNumberToCurrency
         },
@@ -42,8 +40,7 @@ export const GetBalanceByAgeColumns = (reportType: FrozenReportsByAgeRequestType
           field: "vestedBalance",
           colId: "vestedBalance",
           minWidth: 150,
-          headerClass: "left-align",
-          cellClass: "left-align",
+          type: "rightAligned",
           resizable: true,
           valueFormatter: agGridNumberToCurrency
         }

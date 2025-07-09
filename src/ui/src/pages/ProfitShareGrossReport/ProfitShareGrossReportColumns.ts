@@ -10,8 +10,7 @@ export const GetProfitShareGrossReportColumns = (navFunction: (badgeNumber: stri
       field: "badgeNumber",
       colId: "badgeNumber",
       minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: true,
       cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber, navFunction)
@@ -48,8 +47,7 @@ export const GetProfitShareGrossReportColumns = (navFunction: (badgeNumber: stri
       field: "grossWages",
       colId: "grossWages",
       minWidth: 150,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       valueFormatter: agGridNumberToCurrency
     },
@@ -58,8 +56,7 @@ export const GetProfitShareGrossReportColumns = (navFunction: (badgeNumber: stri
       field: "profitSharingAmount",
       colId: "profitSharingAmount",
       minWidth: 150,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       valueFormatter: agGridNumberToCurrency
     },
@@ -68,8 +65,7 @@ export const GetProfitShareGrossReportColumns = (navFunction: (badgeNumber: stri
       field: "loans",
       colId: "loans",
       minWidth: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       valueFormatter: agGridNumberToCurrency
     },
@@ -78,8 +74,7 @@ export const GetProfitShareGrossReportColumns = (navFunction: (badgeNumber: stri
       field: "forfeitures",
       colId: "forfeitures",
       minWidth: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       valueFormatter: agGridNumberToCurrency
     },
@@ -88,8 +83,7 @@ export const GetProfitShareGrossReportColumns = (navFunction: (badgeNumber: stri
       field: "enrollmentId",
       colId: "enrollmentId",
       minWidth: 100,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
     }
   ];

@@ -1,9 +1,9 @@
-import { CAPTIONS } from "../../../constants";
-import { DSMAccordion, Page } from "smart-ui-library";
 import { Divider } from "@mui/material";
 import Grid2 from '@mui/material/Grid2';
-import TwentyOnePlusGrid from "./TwentyOnePlusGrid";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
+import { Page } from "smart-ui-library";
+import { CAPTIONS } from "../../../constants";
+import TwentyOnePlusGrid from "./TwentyOnePlusGrid";
 
 const renderActionNode = () => {
     return (

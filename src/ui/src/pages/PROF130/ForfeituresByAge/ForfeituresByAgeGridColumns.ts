@@ -12,8 +12,7 @@ export const GetForfeituresByAgeColumns = (reportType: FrozenReportsByAgeRequest
           field: "age",
           colId: "age",
           minWidth: 80,
-          headerClass: "right-align",
-          cellClass: "right-align",
+          type: "rightAligned",
           resizable: true,
           sort: "asc",
           cellDataType: "text"
@@ -23,8 +22,7 @@ export const GetForfeituresByAgeColumns = (reportType: FrozenReportsByAgeRequest
           field: "employeeCount",
           colId: "employeeCount",
           minWidth: 100,
-          headerClass: "left-align",
-          cellClass: "left-align",
+          type: "rightAligned",
           resizable: true
         },
         {
@@ -32,8 +30,7 @@ export const GetForfeituresByAgeColumns = (reportType: FrozenReportsByAgeRequest
           field: "amount",
           colId: "amount",
           minWidth: 150,
-          headerClass: "left-align",
-          cellClass: "left-align",
+          type: "rightAligned",
           resizable: true,
           valueFormatter: agGridNumberToCurrency
         }
