@@ -30,8 +30,7 @@ export const GetProfitShareReportColumns = (): ColDef[] => {
       field: "storeNumber",
       colId: "storeNumber",
       minWidth: 60,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true
     },
     {
@@ -81,8 +80,7 @@ export const GetProfitShareReportColumns = (): ColDef[] => {
       field: "wages",
       colId: "wages",
       minWidth: 150,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       valueFormatter: agGridNumberToCurrency
     },
@@ -91,8 +89,7 @@ export const GetProfitShareReportColumns = (): ColDef[] => {
       field: "hours",
       colId: "hours",
       minWidth: 150,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true
     },
     {
@@ -100,8 +97,7 @@ export const GetProfitShareReportColumns = (): ColDef[] => {
       field: "points",
       colId: "points",
       minWidth: 150,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true
     },
     {

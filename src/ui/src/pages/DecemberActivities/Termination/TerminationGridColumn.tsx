@@ -44,8 +44,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       field: "profitYear",
       colId: "profitYear",
       width: 100,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: false,
     },
@@ -54,8 +53,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       field: "beginningBalance",
       colId: "beginningBalance",
       width: 150,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: false,
       valueFormatter: agGridNumberToCurrency
@@ -65,8 +63,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       field: "beneficiaryAllocation",
       colId: "beneficiaryAllocation",
       width: 150,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: false,
       valueFormatter: agGridNumberToCurrency
@@ -76,8 +73,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       field: "distributionAmount",
       colId: "distributionAmount",
       width: 150,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: false,
       valueFormatter: agGridNumberToCurrency
@@ -87,8 +83,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       field: "forfeit",
       colId: "forfeit",
       width: 125,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: false,
       valueFormatter: agGridNumberToCurrency
@@ -98,8 +93,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       field: "endingBalance",
       colId: "endingBalance",
       width: 150,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: false,
       valueFormatter: agGridNumberToCurrency
@@ -109,8 +103,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       field: "vestedBalance",
       colId: "vestedBalance",
       width: 150,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: false,
       valueFormatter: agGridNumberToCurrency
@@ -120,8 +113,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       field: "vestedPercent",
       colId: "vestedPercent",
       width: 100,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: false,
       valueFormatter: (params) => `${params.value}%`
@@ -145,8 +137,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       field: "ytdPsHours",
       colId: "ytdPsHours",
       width: 125,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: false,
       valueFormatter: (params) => {
@@ -159,8 +150,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       field: "age",
       colId: "age",
       width: 70,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: false
     },
@@ -180,15 +170,15 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       field: "suggestedForfeit",
       colId: "suggestedForfeit",
       minWidth: 150,
-      headerClass: "right-align",
+      type: "rightAligned",
+      resizable: true,
+      sortable: false,
       cellClass: (params) => {
         if (!params.data.isDetail) return '';
         const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}`;
         const hasError = params.context?.editedValues?.[rowKey]?.hasError;
-        return `right-align ${hasError ? 'invalid-cell' : ''}`;
+        return hasError ? 'invalid-cell' : '';
       },
-      resizable: true,
-      sortable: false,
       editable: ({ node }) => node.data.isDetail && node.data.profitYear === selectedProfitYear,
       flex: 1,
       cellEditor: SuggestedForfeitEditor,

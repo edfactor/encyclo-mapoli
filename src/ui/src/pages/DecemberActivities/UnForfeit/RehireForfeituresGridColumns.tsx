@@ -117,8 +117,7 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       field: "netBalanceLastYear",
       colId: "netBalanceLastYear",
       minWidth: 150,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: true,
       valueFormatter: agGridNumberToCurrency
@@ -128,8 +127,7 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       field: "vestedBalanceLastYear",
       colId: "vestedBalanceLastYear",
       minWidth: 150,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: true,
       valueFormatter: agGridNumberToCurrency
@@ -154,8 +152,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       field: "profitYear",
       colId: "profitYear",
       width: 100,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: false
     },
@@ -164,8 +161,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       field: "hoursCurrentYear",
       colId: "hoursCurrentYear",
       width: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: true,
       valueFormatter: (params) => {
@@ -178,8 +174,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       field: "wages",
       colId: "wages",
       width: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: true,
       valueFormatter: agGridNumberToCurrency
@@ -212,8 +207,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       field: "forfeiture",
       colId: "forfeiture",
       width: 150,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: false,
       valueFormatter: agGridNumberToCurrency
@@ -223,13 +217,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       field: "suggestedForfeit",
       colId: "suggestedForfeit",
       width: 150,
-      headerClass: "right-align",
-      cellClass: (params) => {
-        if (!params.data.isDetail) return '';
-        const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}`;
-        const hasError = params.context?.editedValues?.[rowKey]?.hasError;
-        return `right-align ${hasError ? 'invalid-cell' : ''}`;
-      },
+      type: "rightAligned",
       resizable: true,
       sortable: false,
       editable: ({ node }) => node.data.isDetail && node.data.profitYear === selectedProfitYear,

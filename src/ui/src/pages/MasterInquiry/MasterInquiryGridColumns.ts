@@ -8,8 +8,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       field: "profitYear",
       colId: "profitYear",
       minWidth: 100,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: true,
       unSortIcon: true,
@@ -24,8 +23,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       field: "profitCodeId",
       colId: "profitCodeId",
       minWidth: 100,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       tooltipValueGetter: (params) => {
         return params.data?.profitCodeName;
@@ -42,8 +40,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       field: "contribution",
       colId: "contribution",
       minWidth: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       valueFormatter: agGridNumberToCurrency
     },
@@ -52,8 +49,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       field: "earnings",
       colId: "earnings",
       minWidth: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       valueFormatter: agGridNumberToCurrency
     },
@@ -62,8 +58,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       field: "forfeiture",
       colId: "forfeiture",
       minWidth: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       valueFormatter: agGridNumberToCurrency
     },
@@ -72,8 +67,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       field: "payment",
       colId: "payment",
       minWidth: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       valueFormatter: agGridNumberToCurrency
     },
@@ -83,8 +77,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       field: "monthToDate",
       colId: "monthToDate",
       minWidth: 100,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       sortable: false,
       resizable: true,
       valueFormatter: (params) => {
@@ -105,8 +98,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       field: "currentHoursYear",
       colId: "currentHoursYear",
       minWidth: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: false,
       valueFormatter: (params) => {
@@ -119,8 +111,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       field: "currentIncomeYear",
       colId: "currentIncomeYear",
       minWidth: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: false,
       valueFormatter: agGridNumberToCurrency
@@ -130,8 +121,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       field: "federalTaxes",
       colId: "federalTaxes",
       minWidth: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       valueFormatter: agGridNumberToCurrency
     },
@@ -140,8 +130,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       field: "stateTaxes",
       colId: "stateTaxes",
       minWidth: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       valueFormatter: agGridNumberToCurrency
     },
@@ -170,8 +159,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       field: "commentTypeName",
       colId: "commentTypeName",
       minWidth: 100,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true
     },
     {
@@ -214,8 +202,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       field: "employmentStatus",
       colId: "employmentStatus",
       minWidth: 60,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: false
     },

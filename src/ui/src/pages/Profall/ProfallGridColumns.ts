@@ -9,8 +9,7 @@ export const GetProfallGridColumns = (navFunction: (badgeNumber: string) => void
       field: "storeNumber",
       colId: "storeNumber",
       minWidth: 80,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: true
     },
@@ -19,8 +18,7 @@ export const GetProfallGridColumns = (navFunction: (badgeNumber: string) => void
       field: "badgeNumber",
       colId: "badgeNumber",
       minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: true,
       cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber, navFunction)

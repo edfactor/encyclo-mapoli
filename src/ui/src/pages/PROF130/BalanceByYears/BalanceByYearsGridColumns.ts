@@ -12,8 +12,7 @@ export const GetBalanceByYearsGridColumns = (reportType: FrozenReportsByAgeReque
           field: "years",
           colId: "years",
           minWidth: 80,
-          headerClass: "right-align",
-          cellClass: "right-align",
+          type: "rightAligned",
           resizable: true,
           sort: "asc",
           cellDataType: "text"
@@ -23,8 +22,7 @@ export const GetBalanceByYearsGridColumns = (reportType: FrozenReportsByAgeReque
           field: "employeeCount",
           colId: "employeeCount",
           minWidth: 100,
-          headerClass: "left-align",
-          cellClass: "left-align",
+          type: "rightAligned",
           resizable: true
         },
         {
@@ -32,8 +30,7 @@ export const GetBalanceByYearsGridColumns = (reportType: FrozenReportsByAgeReque
           field: "currentBalance",
           colId: "currentBalance",
           minWidth: 150,
-          headerClass: "left-align",
-          cellClass: "left-align",
+          type: "rightAligned",
           resizable: true,
           valueFormatter: agGridNumberToCurrency
         },
@@ -42,8 +39,7 @@ export const GetBalanceByYearsGridColumns = (reportType: FrozenReportsByAgeReque
           field: "vestedBalance",
           colId: "vestedBalance",
           minWidth: 150,
-          headerClass: "left-align",
-          cellClass: "left-align",
+          type: "rightAligned",
           resizable: true,
           valueFormatter: agGridNumberToCurrency
         }

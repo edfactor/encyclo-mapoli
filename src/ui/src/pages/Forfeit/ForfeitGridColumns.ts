@@ -39,8 +39,7 @@ export const GetProfitShareForfeitColumns = (navFunction: (badgeNumber: string) 
       field: "forfeitures",
       colId: "forfeitures",
       minWidth: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       valueFormatter: agGridNumberToCurrency
     },

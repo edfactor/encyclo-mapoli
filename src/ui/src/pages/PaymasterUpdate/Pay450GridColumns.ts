@@ -40,8 +40,7 @@ export const GetPay450GridColumns = (navFunction: (badgeNumber: string) => void)
       field: "storeNumber",
       colId: "storeNumber",
       minWidth: 80,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true
     },
     {
@@ -52,8 +51,7 @@ export const GetPay450GridColumns = (navFunction: (badgeNumber: string) => void)
           field: "psAmountOriginal",
           colId: "psAmountOriginal",
           minWidth: 120,
-          headerClass: "right-align",
-          cellClass: "right-align",
+          type: "rightAligned",
           resizable: true,
           valueFormatter: agGridNumberToCurrency
         },
@@ -62,8 +60,7 @@ export const GetPay450GridColumns = (navFunction: (badgeNumber: string) => void)
           field: "psVestedOriginal",
           colId: "psVestedOriginal",
           minWidth: 120,
-          headerClass: "right-align",
-          cellClass: "right-align",
+          type: "rightAligned",
           resizable: true,
           valueFormatter: agGridNumberToCurrency
         },
@@ -72,8 +69,7 @@ export const GetPay450GridColumns = (navFunction: (badgeNumber: string) => void)
           field: "yearsOriginal",
           colId: "yearsOriginal",
           minWidth: 80,
-          headerClass: "right-align",
-          cellClass: "right-align",
+          type: "rightAligned",
           resizable: true
         },
         {
@@ -81,8 +77,7 @@ export const GetPay450GridColumns = (navFunction: (badgeNumber: string) => void)
           field: "enrollOriginal",
           colId: "enrollOriginal",
           minWidth: 80,
-          headerClass: "right-align",
-          cellClass: "right-align",
+          type: "rightAligned",
           resizable: true
         }
       ]
@@ -95,8 +90,7 @@ export const GetPay450GridColumns = (navFunction: (badgeNumber: string) => void)
           field: "psAmountUpdated",
           colId: "psAmountUpdated",
           minWidth: 120,
-          headerClass: "right-align",
-          cellClass: "right-align",
+          type: "rightAligned",
           resizable: true,
           valueFormatter: agGridNumberToCurrency
         },
@@ -105,8 +99,7 @@ export const GetPay450GridColumns = (navFunction: (badgeNumber: string) => void)
           field: "psVestedUpdated",
           colId: "psVestedUpdated",
           minWidth: 120,
-          headerClass: "right-align",
-          cellClass: "right-align",
+          type: "rightAligned",
           resizable: true,
           valueFormatter: agGridNumberToCurrency
         },
@@ -115,8 +108,7 @@ export const GetPay450GridColumns = (navFunction: (badgeNumber: string) => void)
           field: "yearsUpdated",
           colId: "yearsUpdated",
           minWidth: 80,
-          headerClass: "right-align",
-          cellClass: "right-align",
+          type: "rightAligned",
           resizable: true
         },
         {
@@ -124,8 +116,7 @@ export const GetPay450GridColumns = (navFunction: (badgeNumber: string) => void)
           field: "enrollUpdated",
           colId: "enrollUpdated",
           minWidth: 80,
-          headerClass: "right-align",
-          cellClass: "right-align",
+          type: "rightAligned",
           resizable: true
         }
       ]
