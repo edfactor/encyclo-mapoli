@@ -16,7 +16,7 @@ export function SuggestedForfeitEditor(props: ICellEditorParams) {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = parseFloat(event.target.value) || 0;
     setValue(newValue);
-    const newError = validateSuggestedForfeit(newValue, props.data.forfeiture * -1 || 0);
+    const newError = validateSuggestedForfeit(newValue, Math.abs(props.data.forfeiture || 0));
     setError(newError);
     
     const rowKey = `${props.data.badgeNumber}-${props.data.profitYear}`;

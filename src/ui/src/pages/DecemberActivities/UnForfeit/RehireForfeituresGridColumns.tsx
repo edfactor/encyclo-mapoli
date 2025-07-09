@@ -5,68 +5,35 @@ import { mmDDYYFormat } from "utils/dateUtils";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
 import { Checkbox, IconButton } from "@mui/material";
 import { SaveOutlined } from "@mui/icons-material";
-import { useState } from "react";
 import { 
   RehireForfeituresHeaderComponentProps, 
   RehireForfeituresSaveButtonCellParams, 
   RehireForfeituresUpdatePayload 
 } from "../../../reduxstore/types";
 import { SuggestedForfeitEditor, SuggestedForfeitCellRenderer } from "../../../components/SuggestedForfeiture";
+import { SelectableGridHeader } from "../../../components/SelectableGridHeader";
 
 export const HeaderComponent: React.FC<RehireForfeituresHeaderComponentProps> = (props) => {
-  const [allRowsSelected, setAllRowsSelected] = useState(false);
-
-  const handleSelectAll = () => {
-    if (allRowsSelected) {
-      props.api.deselectAll();
-      props.api.forEachNode(node => {
-        if (node.data.isDetail) {
-          const id = Number(node.id) || -1;
-          props.removeRowFromSelectedRows(id);
-        }
-      });
-    } else {
-      props.api.forEachNode(node => {
-        if (node.data.isDetail) {
-          node.setSelected(true);
-          const id = Number(node.id) || -1;
-          props.addRowToSelectedRows(id);
-        }
-      });
-    }
-    props.api.refreshCells({ force: true });
-    setAllRowsSelected(!allRowsSelected);
+  const isNodeEligible = (nodeData: any) => {
+    return nodeData.isDetail;
   };
 
-  const handleSave = () => {
-    const selectedNodes: RehireForfeituresUpdatePayload[] = [];
-    props.api.forEachNode(node => {
-      if (node.isSelected() && node.data.isDetail) {
-        const rowKey = `${node.data.badgeNumber}-${node.data.profitYear}`;
-        const currentValue = props.context?.editedValues?.[rowKey]?.value ?? node.data.suggestedForfeit;
-        
-        selectedNodes.push({
-          badgeNumber: node.data.badgeNumber,
-          profitYear: node.data.profitYear,
-          suggestedForfeit: currentValue
-        });
-      }
-    });
-    console.log('Bulk update payload:', selectedNodes);
+  const createUpdatePayload = (nodeData: any, context: any) => {
+    const rowKey = `${nodeData.badgeNumber}-${nodeData.profitYear}`;
+    const currentValue = context?.editedValues?.[rowKey]?.value ?? nodeData.suggestedForfeit;
+    
+    return {
+      badgeNumber: nodeData.badgeNumber,
+      profitYear: nodeData.profitYear,
+      suggestedForfeit: currentValue
+    };
   };
 
-  return (
-    <div>
-      <Checkbox 
-        onClick={handleSelectAll}
-        checked={allRowsSelected}
-        onChange={handleSelectAll}
-      />
-      <IconButton onClick={handleSave}>
-        <SaveOutlined />
-      </IconButton>
-    </div>
-  );
+  return <SelectableGridHeader 
+    {...props}
+    isNodeEligible={isNodeEligible}
+    createUpdatePayload={createUpdatePayload}
+  />;
 };
 
 export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
@@ -150,8 +117,7 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       field: "netBalanceLastYear",
       colId: "netBalanceLastYear",
       minWidth: 150,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: true,
       valueFormatter: agGridNumberToCurrency
@@ -161,8 +127,7 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       field: "vestedBalanceLastYear",
       colId: "vestedBalanceLastYear",
       minWidth: 150,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: true,
       valueFormatter: agGridNumberToCurrency
@@ -187,8 +152,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       field: "profitYear",
       colId: "profitYear",
       width: 100,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: false
     },
@@ -197,8 +161,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       field: "hoursCurrentYear",
       colId: "hoursCurrentYear",
       width: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: true,
       valueFormatter: (params) => {
@@ -211,8 +174,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       field: "wages",
       colId: "wages",
       width: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: true,
       valueFormatter: agGridNumberToCurrency
@@ -245,8 +207,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       field: "forfeiture",
       colId: "forfeiture",
       width: 150,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: false,
       valueFormatter: agGridNumberToCurrency
@@ -256,13 +217,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       field: "suggestedForfeit",
       colId: "suggestedForfeit",
       width: 150,
-      headerClass: "right-align",
-      cellClass: (params) => {
-        if (!params.data.isDetail) return '';
-        const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}`;
-        const hasError = params.context?.editedValues?.[rowKey]?.hasError;
-        return `right-align ${hasError ? 'invalid-cell' : ''}`;
-      },
+      type: "rightAligned",
       resizable: true,
       sortable: false,
       editable: ({ node }) => node.data.isDetail && node.data.profitYear === selectedProfitYear,

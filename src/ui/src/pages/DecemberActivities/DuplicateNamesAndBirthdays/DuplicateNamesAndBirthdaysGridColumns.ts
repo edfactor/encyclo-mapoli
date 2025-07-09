@@ -100,8 +100,7 @@ export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
       field: "years",
       colId: "years",
       minWidth: 60,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true
     },
     {
@@ -109,8 +108,7 @@ export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
       field: "storeNumber",
       colId: "storeNumber",
       minWidth: 60,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true
     },
     {
@@ -118,8 +116,7 @@ export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
       field: "hoursCurrentYear",
       colId: "hoursCurrentYear",
       minWidth: 60,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true
     },
     {
@@ -127,8 +124,7 @@ export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
       field: "netBalance",
       colId: "netBalance",
       minWidth: 60,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       valueFormatter: agGridNumberToCurrency
     },
@@ -137,8 +133,7 @@ export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
       field: "incomeCurrentYear",
       colId: "incomeCurrentYear",
       minWidth: 60,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       valueFormatter: agGridNumberToCurrency
     },
