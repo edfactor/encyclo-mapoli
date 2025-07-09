@@ -250,7 +250,12 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
     }
     dispatch(clearExecutiveHoursAndDollarsAddQueryParams());
     dispatch(clearAdditionalExecutivesChosen());
-    
+    setOneAddSearchFilterEntered(false);
+    setActiveField(null);
+    socialSecurityChosen = false;
+    badgeNumberChosen = false;
+    fullNameChosen = false;
+    isMonthlyPayrollChosen = false;
 
     reset({
       profitYear: profitYear,
