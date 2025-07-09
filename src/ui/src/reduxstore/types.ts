@@ -1344,6 +1344,15 @@ export interface UpdateBeneficiaryResponse {
     percent: number;
 }
 
+export interface UpdateBeneficiaryPercentageRequest {
+    id: number;
+    percentage: number;
+}
+
+export interface UpdateBeneficiaryPercentageResponse {
+    success: boolean
+}
+
 export interface DeleteBeneficiaryRequest {
     id: number;
 }
