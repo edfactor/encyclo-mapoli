@@ -237,31 +237,6 @@ public class BeneficiaryService : IBeneficiaryService
     }
 
 
-    public async Task<UpdateBeneficiaryPercentageResponse> UpdateBeneficiaryPercentage(UpdateBeneficiaryPercentageRequest req, CancellationToken cancellationToken)
-    {
-        var resp = await _dataContextFactory.UseWritableContextAsync(async (ctx, transaction) =>
-        {
-            var beneficiary = await ctx.Beneficiaries.SingleAsync(x => x.Id == req.Id, cancellationToken);
-            if (req.Percentage.HasValue)
-            {
-                beneficiary.Percent = req.Percentage.Value;
-            }
-            var response = new UpdateBeneficiaryPercentageResponse()
-            {
-                Success = true,
-            };
-
-            await ctx.SaveChangesAsync(cancellationToken);
-            if (transaction != null)
-            {
-                await transaction.CommitAsync(cancellationToken);
-            }
-            return Task.FromResult(response);
-        }, cancellationToken);
-
-        return await resp;
-    }
-
     public Task<UpdateBeneficiaryContactResponse> UpdateBeneficiaryContact(UpdateBeneficiaryContactRequest req, CancellationToken cancellationToken)
     {
         var response = _dataContextFactory.UseWritableContextAsync(async (ctx, transaction) =>

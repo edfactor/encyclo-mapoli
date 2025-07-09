@@ -118,21 +118,7 @@ export const BeneficiariesApi = createApi({
                 }
             }
         }),
-        updateBeneficiaryPercentage: builder.query<UpdateBeneficiaryPercentageResponse, UpdateBeneficiaryPercentageRequest>({
-            query: (request) => ({
-                url: `/beneficiaries/percentage`,
-                method: "PUT",
-                body: request
-            }),
-            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-                try {
-                    const { data } = await queryFulfilled;
-                } catch (err) {
-                    console.error("Failed to update beneficiary percentage", err);
-                    dispatch(setBeneficiaryError("Failed to update beneficiary percentage"));
-                }
-            }
-        }),
+        
         deleteBeneficiary: builder.query<any , DeleteBeneficiaryRequest>({
             query: (request) => ({
                 url: `/beneficiaries/${request.id}`,
@@ -150,4 +136,4 @@ export const BeneficiariesApi = createApi({
     })
 });
 
-export const { useLazyUpdateBeneficiaryPercentageQuery, useLazyDeleteBeneficiaryQuery, useLazyUpdateBeneficiaryQuery, useLazyGetBeneficiariesQuery, useLazyCreateBeneficiariesQuery, useLazyGetBeneficiarytypesQuery, useLazyCreateBeneficiaryContactQuery, useLazyGetBeneficiaryKindQuery } = BeneficiariesApi;
+export const {  useLazyDeleteBeneficiaryQuery, useLazyUpdateBeneficiaryQuery, useLazyGetBeneficiariesQuery, useLazyCreateBeneficiariesQuery, useLazyGetBeneficiarytypesQuery, useLazyCreateBeneficiaryContactQuery, useLazyGetBeneficiaryKindQuery } = BeneficiariesApi;

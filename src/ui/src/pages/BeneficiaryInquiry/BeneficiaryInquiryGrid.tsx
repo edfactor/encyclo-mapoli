@@ -7,7 +7,7 @@ import { DSMGrid, ISortParams, Paged, Pagination } from "smart-ui-library";
 import { BeneficiaryInquiryGridColumns } from "./BeneficiaryInquiryGridColumn";
 import { BeneficiaryDto, BeneficiaryRequestDto, MasterInquiryRequest } from "reduxstore/types";
 import { CAPTIONS } from "../../constants";
-import { useLazyGetBeneficiariesQuery, useLazyUpdateBeneficiaryPercentageQuery } from "reduxstore/api/BeneficiariesApi";
+import { useLazyGetBeneficiariesQuery, useLazyUpdateBeneficiaryQuery } from "reduxstore/api/BeneficiariesApi";
 import { ICellRendererParams } from "ag-grid-community";
 import { ChevronLeft, Close, ExpandLess, ExpandMore, Edit, Delete } from "@mui/icons-material";
 interface BeneficiaryInquiryGridProps {
@@ -33,7 +33,7 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({ refresh
   // const { beneficiaryList, beneficiaryRequest } = useSelector((state: RootState) => state.beneficiaries);
   const [beneficiaryList, setBeneficiaryList] = useState<Paged<BeneficiaryDto> | undefined>()
   const [triggerSearch, { isFetching }] = useLazyGetBeneficiariesQuery();
-  const [triggerPercentageUpdate] = useLazyUpdateBeneficiaryPercentageQuery();
+  const [triggerUpdate] = useLazyUpdateBeneficiaryQuery();
 
   // const createBeneficiaryInquiryRequest = useCallback(
   //   (skip: number, sortBy: string, isSortDescending: boolean, badgeNumber: number): BeneficiaryRequestDto | null => {
@@ -85,9 +85,10 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({ refresh
       if (sum <= 100) {
         setErrorPercentage(false);
         //call api to save the percentage.
-        triggerPercentageUpdate({ id: id, percentage: currentValue }, false).unwrap().then((res) => {
-          if (hasToken)
-            onSearch()
+        
+        triggerUpdate({id: id, percentage: currentValue},false).unwrap().then((res)=>{
+          if(hasToken)
+            onSearch();
         })
       } else {
         setErrorPercentage(true);
