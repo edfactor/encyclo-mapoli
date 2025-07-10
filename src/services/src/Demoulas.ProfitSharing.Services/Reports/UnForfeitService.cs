@@ -67,7 +67,7 @@ public sealed class UnForfeitService : IUnForfeitService
                     YearsOfService = yos != null ? yos.Years : (byte)0,
                     NetBalanceLastYear = vest != null ? vest.CurrentBalance ?? 0 : 0,
                     VestedBalanceLastYear = vest != null ? vest.VestedBalance ?? 0 : 0,
-                    d.EmploymentStatusId
+                    d.EmploymentStatusId,
                 }
                 into g
                 orderby g.Key.BadgeNumber
@@ -93,36 +93,14 @@ public sealed class UnForfeitService : IUnForfeitService
                         Remark = x.pd.Remark,
                         ProfitCodeId = x.pd.ProfitCodeId,
                         Wages = x.pp.CurrentIncomeYear + x.pp.IncomeExecutive,
-                        SuggestedForfeiture = 0m // This will be calculated later if needed
+                        SuggestedForfeiture =  x.pp.EnrollmentId == Enrollment.Constants.OldVestingPlanHasForfeitureRecords || x.pp.EnrollmentId == Enrollment.Constants.NewVestingPlanHasForfeitureRecords ?
+                            - x.pd.Forfeiture 
+                            : null
                     })
                     .ToList()
                 };
 
-            var rslt = await query.ToPaginationResultsAsync(req, cancellationToken);
-            foreach (var member in rslt.Results)
-            {
-                foreach (var det in member.Details)
-                {
-                    if (det.Forfeiture != 0)
-                    {
-                        var pp = await (from d in demo
-                                  join p in context.PayProfits on d.Id equals p.DemographicId
-                                  where d.BadgeNumber == member.BadgeNumber && p.ProfitYear == det.ProfitYear
-                                  select p
-                                 ).FirstOrDefaultAsync(cancellationToken);
-                        if (pp != null && (pp.EnrollmentId == 3 || pp.EnrollmentId == 4))
-                        {
-                            det.SuggestedForfeiture = - await (from d in demo
-                                                      join pd in context.ProfitDetails on new { d.Ssn, det.ProfitYear } equals new { Ssn = pd.Ssn, pd.ProfitYear }
-                                                      where pd.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id && d.BadgeNumber == member.BadgeNumber
-                                                      group pd by true into g
-                                                      select g.Sum(x => x.Forfeiture)).FirstOrDefaultAsync(cancellationToken);
-                        }
-                    }
-                }
-            }
-
-            return rslt;
+            return await query.ToPaginationResultsAsync(req, cancellationToken);            
         });
 
         return new ReportResponseBase<RehireForfeituresResponse>
