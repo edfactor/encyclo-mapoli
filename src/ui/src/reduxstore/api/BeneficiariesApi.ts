@@ -13,6 +13,8 @@ import {
     CreateBeneficiaryRequest,
     CreateBeneficiaryResponse,
     DeleteBeneficiaryRequest,
+    UpdateBeneficiaryPercentageRequest,
+    UpdateBeneficiaryPercentageResponse,
     UpdateBeneficiaryRequest,
     UpdateBeneficiaryResponse
 } from "reduxstore/types";
@@ -116,6 +118,7 @@ export const BeneficiariesApi = createApi({
                 }
             }
         }),
+        
         deleteBeneficiary: builder.query<any , DeleteBeneficiaryRequest>({
             query: (request) => ({
                 url: `/beneficiaries/${request.id}`,
@@ -133,4 +136,4 @@ export const BeneficiariesApi = createApi({
     })
 });
 
-export const { useLazyDeleteBeneficiaryQuery, useLazyUpdateBeneficiaryQuery, useLazyGetBeneficiariesQuery, useLazyCreateBeneficiariesQuery, useLazyGetBeneficiarytypesQuery, useLazyCreateBeneficiaryContactQuery, useLazyGetBeneficiaryKindQuery } = BeneficiariesApi;
+export const {  useLazyDeleteBeneficiaryQuery, useLazyUpdateBeneficiaryQuery, useLazyGetBeneficiariesQuery, useLazyCreateBeneficiariesQuery, useLazyGetBeneficiarytypesQuery, useLazyCreateBeneficiaryContactQuery, useLazyGetBeneficiaryKindQuery } = BeneficiariesApi;

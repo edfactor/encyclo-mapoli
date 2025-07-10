@@ -1330,9 +1330,9 @@ export interface CreateBeneficiaryResponse {
 }
 
 export interface UpdateBeneficiaryRequest extends UpdateBeneficiaryContactRequest {
-    relationship: string;
-    kindId: string;
-    //percentage: number;
+    relationship?: string;
+    kindId?: string;
+    percentage?: number;
 }
 
 export interface UpdateBeneficiaryResponse {
@@ -1344,28 +1344,30 @@ export interface UpdateBeneficiaryResponse {
     percent: number;
 }
 
+
+
 export interface DeleteBeneficiaryRequest {
     id: number;
 }
 
 export interface UpdateBeneficiaryContactRequest {
-    id: number;
-    contactSsn: number;
-    dateOfBirth: string;
-    street1: string;
-    street2: string | null;
-    street3: string | null;
-    street4: string | null;
-    city: string;
-    state: string;
-    postalCode: string;
-    countryIso: string | null;
-    firstName: string;
-    lastName: string;
-    middleName: string | null;
-    phoneNumber: string | null;
-    mobileNumber: string | null;
-    emailAddress: string | null;
+    id?: number;
+    contactSsn?: number;
+    dateOfBirth?: string;
+    street1?: string;
+    street2?: string | null;
+    street3?: string | null;
+    street4?: string | null;
+    city?: string;
+    state?: string;
+    postalCode?: string;
+    countryIso?: string | null;
+    firstName?: string;
+    lastName?: string;
+    middleName?: string | null;
+    phoneNumber?: string | null;
+    mobileNumber?: string | null;
+    emailAddress?: string | null;
 }
 
 
