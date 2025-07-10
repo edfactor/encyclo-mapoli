@@ -63,4 +63,5 @@ public sealed record TerminatedEmployeeAndBeneficiaryYearDetailDto
     public decimal VestedPercent { get; set; }
     public int? Age { get; set; }
     public byte? EnrollmentCode { get; set; }
+    public decimal? SuggestedForfeit { get; set; }
 }
