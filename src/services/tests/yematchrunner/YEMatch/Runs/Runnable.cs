@@ -10,6 +10,8 @@ public abstract class Runnable
 {
     public required string DataDirectory { get; set; }
 
+    public bool CompletedWithoutError { get; set; } = true;
+
     public abstract Task Exec();
 
     protected async Task Run(List<IActivity> activitiesToRun)
@@ -39,7 +41,11 @@ public abstract class Runnable
 
             if (outcome.Status == OutcomeStatus.Error)
             {
+             
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("------------------- Stopping execution due to error/failure: " + outcome.Name);
+                Console.ResetColor();
+                CompletedWithoutError = false;
                 break;
             }
         }
@@ -50,6 +56,8 @@ public abstract class Runnable
 
         TimeSpan wholeRunElapsed = wholeRunStopWatch.Elapsed;
         Console.WriteLine($"\n---- Completed YERunner.  Took:  {wholeRunElapsed.Hours}h {wholeRunElapsed.Minutes}m {wholeRunElapsed.Seconds}s");
+            
+        Process.Start("afplay", "/System/Library/Sounds/Submarine.aiff");
     }
 
     protected static List<IActivity> Specify(params List<string> activityNames)

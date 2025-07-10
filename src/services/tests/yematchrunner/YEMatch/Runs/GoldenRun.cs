@@ -29,7 +29,6 @@ public class GoldenRun : Runnable
             "R27",
             "R28"
         ));
-
         // Copy the golden files to the integration test Resources directory
         GetGold.Fetch(DataDirectory, ReadyActivityFactory.SftpClient!);
     }

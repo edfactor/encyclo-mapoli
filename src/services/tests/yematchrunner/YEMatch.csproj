@@ -20,9 +20,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="YEMatch\Resources\OUTFL">
+    <None Include="YEMatch\Resources\MTPR.OUTFL">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Link>OUTFL</Link>
+      <Link>MTPR.OUTFL</Link>
     </None>
   </ItemGroup>
 
