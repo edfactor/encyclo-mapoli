@@ -2,17 +2,17 @@ import { Typography } from "@mui/material";
 import Grid2 from '@mui/material/Grid2';
 import LabelValueSection from "components/LabelValueSection";
 import React, { useEffect } from "react";
+import { useSelector } from "react-redux";
+import { useLazyGetProfitMasterInquiryMemberQuery } from "reduxstore/api/InquiryApi";
+import { RootState } from "reduxstore/store";
 import { MissiveResponse } from "reduxstore/types";
-import { numberToCurrency, formatNumberWithComma } from "smart-ui-library";
+import { formatNumberWithComma, numberToCurrency } from "smart-ui-library";
 import { formatPercentage } from "utils/formatPercentage";
-import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
+import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
+import "../../styles/employee-details-lightbox.css";
 import { mmDDYYFormat } from "../../utils/dateUtils";
 import { getEnrolledStatus, getForfeitedStatus } from "../../utils/enrollmentUtil";
-import { useLazyGetProfitMasterInquiryMemberQuery } from "reduxstore/api/InquiryApi";
-import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
-import { useSelector } from "react-redux";
-import { RootState } from "reduxstore/store";
-import "../../styles/employee-details-lightbox.css";
+import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
 
 
 interface MasterInquiryEmployeeDetailsProps {
@@ -24,9 +24,12 @@ interface MasterInquiryEmployeeDetailsProps {
 
 const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> = ({ memberType, id, profitYear, noResults }) => {
   const [trigger, { data: details, isLoading, isError }] = useLazyGetProfitMasterInquiryMemberQuery();
+  const { masterInquiryResults } = useSelector((state: RootState) => state.inquiry);
+
   const missives = useSelector((state: RootState) => state.lookups.missives);
 
   const defaultProfitYear = useDecemberFlowProfitYear();
+  const [isMilitary, setIsMilitary] = React.useState(false);
 
   // We need to get the saved query params
   const { masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
@@ -36,6 +39,17 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
       trigger({ memberType, id: typeof id === 'string' ? parseInt(id) : id, profitYear: profitYear ?? defaultProfitYear });
     }
   }, [memberType, id, profitYear, trigger, defaultProfitYear]);
+
+  useEffect(() => {
+    if (masterInquiryResults) {
+      // We check transaction comment types to know if this is a military member
+      const militaryTransactions = masterInquiryResults.filter(item => item.commentTypeName === "Military");
+      setIsMilitary(militaryTransactions.length > 0);
+    } else {
+      setIsMilitary(false);
+    }
+  }, [masterInquiryResults]);
+
 
   if (noResults) {
     return (
@@ -108,6 +122,16 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     });
 
   } 
+
+  // Warning needed if military member has vested money
+  if (isMilitary && percentageVested > 0) {
+    missiveAlerts.push({
+      id: 961, // invented id as this is not from back end
+      severity: 'warning',
+      message: 'Military entry has affected vested percentage',
+      description: `Vested percentage now at ${percentageVested * 100}%.`,
+    });
+  }
 
   const enrolled = getEnrolledStatus(enrollmentId);
   const forfeited = getForfeitedStatus(enrollmentId);
