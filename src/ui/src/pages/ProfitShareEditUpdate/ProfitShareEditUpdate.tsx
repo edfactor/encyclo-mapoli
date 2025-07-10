@@ -460,6 +460,8 @@ const ProfitShareEditUpdate = () => {
         setChangesApplied(true);
         dispatch(setProfitEditUpdateChangesAvailable(false));
         dispatch(setProfitEditUpdateRevertChangesAvailable(true));
+      } else {
+        setChangesApplied(false);
       }
     }
   }, [onStatusSearch, hasToken, updatedTime, updatedBy]);
