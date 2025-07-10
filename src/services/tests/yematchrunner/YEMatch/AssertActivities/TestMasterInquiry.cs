@@ -52,7 +52,7 @@ public class TestMasterInquiry : BaseSqlActivity
         int profitYear = 2024;
         int quantity = int.MaxValue;
 
-        Console.WriteLine($"### Comparision of READY(mtpr) MasterInquiry vs SMART (profitYear={profitYear})");
+        Console.WriteLine($"### Comparision of READY (mtpr) MasterInquiry vs SMART (profitYear={profitYear})");
         Console.WriteLine("");
         Console.WriteLine($"Showing the first {quantity} differences of {outties.Count} Master Inquiry screen dumps.");
         Console.WriteLine("");
