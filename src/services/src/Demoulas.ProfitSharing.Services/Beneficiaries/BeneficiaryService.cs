@@ -236,6 +236,7 @@ public class BeneficiaryService : IBeneficiaryService
         return await resp;
     }
 
+
     public Task<UpdateBeneficiaryContactResponse> UpdateBeneficiaryContact(UpdateBeneficiaryContactRequest req, CancellationToken cancellationToken)
     {
         var response = _dataContextFactory.UseWritableContextAsync(async (ctx, transaction) =>

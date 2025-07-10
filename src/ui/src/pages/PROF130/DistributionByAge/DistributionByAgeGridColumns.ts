@@ -12,8 +12,7 @@ export const GetDistributionsByAgeColumns = (reportType: FrozenReportsByAgeReque
           field: "age",
           colId: "age",
           minWidth: 80,
-          headerClass: "right-align",
-          cellClass: "right-align",
+          type: "rightAligned",
           resizable: true,
           sort: "asc",
           cellDataType: "text"
@@ -23,8 +22,7 @@ export const GetDistributionsByAgeColumns = (reportType: FrozenReportsByAgeReque
           field: "regularEmployeeCount",
           colId: "regularEmployeeCount",
           minWidth: 100,
-          headerClass: "right-align",
-          cellClass: "right-align",
+          type: "rightAligned",
           resizable: true
         },
         {
@@ -32,8 +30,7 @@ export const GetDistributionsByAgeColumns = (reportType: FrozenReportsByAgeReque
           field: "regularAmount",
           colId: "regularAmount",
           minWidth: 150,
-          headerClass: "right-align",
-          cellClass: "right-align",
+          type: "rightAligned",
           resizable: true,
           valueFormatter: agGridNumberToCurrency
         }

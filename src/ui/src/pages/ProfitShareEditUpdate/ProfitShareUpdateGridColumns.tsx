@@ -8,8 +8,7 @@ export const ProfitShareUpdateGridColumns = (): ColDef[] => {
             field: "psn",
             colId: "psn",
             minWidth: 100,
-            headerClass: "right-align",
-            cellClass: "right-align",
+            type: "rightAligned",
             resizable: true
         },
         {
@@ -26,8 +25,7 @@ export const ProfitShareUpdateGridColumns = (): ColDef[] => {
             field: "beginningAmount",
             colId: "beginningAmount",
             minWidth: 120,
-            headerClass: "right-align",
-            cellClass: "right-align",
+            type: "rightAligned",
             resizable: true,
             valueFormatter: agGridNumberToCurrency
         },
@@ -36,8 +34,7 @@ export const ProfitShareUpdateGridColumns = (): ColDef[] => {
             field: "contributions",
             colId: "contributions",
             minWidth: 120,
-            headerClass: "right-align",
-            cellClass: "right-align",
+            type: "rightAligned",
             resizable: true,
             valueFormatter: agGridNumberToCurrency
         },
@@ -46,8 +43,7 @@ export const ProfitShareUpdateGridColumns = (): ColDef[] => {
             field: "allEarnings",
             colId: "allEarnings",
             minWidth: 120,
-            headerClass: "right-align",
-            cellClass: "right-align",
+            type: "rightAligned",
             resizable: true,
             valueFormatter: agGridNumberToCurrency
         }, {
@@ -55,8 +51,7 @@ export const ProfitShareUpdateGridColumns = (): ColDef[] => {
             field: "allSecondaryEarnings",
             colId: "allSecondaryEarnings",
             minWidth: 120,
-            headerClass: "right-align",
-            cellClass: "right-align",
+            type: "rightAligned",
             resizable: true,
             valueFormatter: agGridNumberToCurrency
         },
@@ -65,8 +60,7 @@ export const ProfitShareUpdateGridColumns = (): ColDef[] => {
             field: "incomingForfeitures",
             colId: "incomingForfeitures",
             minWidth: 120,
-            headerClass: "right-align",
-            cellClass: "right-align",
+            type: "rightAligned",
             resizable: true,
             valueFormatter: agGridNumberToCurrency
         },
@@ -75,8 +69,7 @@ export const ProfitShareUpdateGridColumns = (): ColDef[] => {
             field: "distributions",
             colId: "distributions",
             minWidth: 100,
-            headerClass: "right-align",
-            cellClass: "right-align",
+            type: "rightAligned",
             resizable: true,
             valueFormatter: agGridNumberToCurrency
         },
@@ -85,8 +78,7 @@ export const ProfitShareUpdateGridColumns = (): ColDef[] => {
             field: "pxfer",
             colId: "pxfer",
             minWidth: 100,
-            headerClass: "right-align",
-            cellClass: "right-align",
+            type: "rightAligned",
             resizable: true,
             valueFormatter: agGridNumberToCurrency
         },
@@ -95,8 +87,7 @@ export const ProfitShareUpdateGridColumns = (): ColDef[] => {
             field: "endingBalance",
             colId: "endingBalance",
             minWidth: 150,
-            headerClass: "right-align",
-            cellClass: "right-align",
+            type: "rightAligned",
             resizable: true,
             valueFormatter: agGridNumberToCurrency
         },

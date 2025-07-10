@@ -50,8 +50,7 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       field: "distributionAmount",
       colId: "distributionAmount",
       minWidth: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: 'rightAligned',
       resizable: true,
       valueFormatter: agGridNumberToCurrency
     },    
@@ -60,8 +59,7 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       field: "stateTax",
       colId: "stateTax",
       minWidth: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       valueFormatter: agGridNumberToCurrency
     },
@@ -79,8 +77,7 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       field: "federalTax",
       colId: "federalTax",
       minWidth: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       valueFormatter: agGridNumberToCurrency
     },
@@ -89,8 +86,7 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       field: "forfeitAmount",
       colId: "forfeitAmount",
       minWidth: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       valueFormatter: agGridNumberToCurrency
     },
@@ -99,8 +95,7 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       field: "age",
       colId: "age",
       minWidth: 70,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true
     },
     {
@@ -108,8 +103,7 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       field: "taxCode",
       colId: "taxCode",
       minWidth: 80,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true
     },
     {

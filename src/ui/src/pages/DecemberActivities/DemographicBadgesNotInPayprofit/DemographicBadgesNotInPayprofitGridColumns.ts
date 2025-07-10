@@ -53,8 +53,7 @@ export const GetDemographicBadgesNotInPayprofitColumns = (): ColDef[] => {
       colId: "status",
       minWidth: 80,
       maxWidth: 250,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       valueFormatter: (params) => {
         const status = params.data.status; // assuming 'status' is in the row data

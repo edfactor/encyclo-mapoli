@@ -13,8 +13,7 @@ export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: str
       field: "badgeNumber",
       colId: "badgeNumber",
       minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: true,
       cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber, navFunction)
@@ -34,8 +33,7 @@ export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: str
       field: "storeNumber",
       colId: "storeNumber",
       minWidth: 80,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true
     },
     {
@@ -62,8 +60,7 @@ export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: str
       field: "age",
       colId: "age",
       minWidth: 70,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true
     },
     {
@@ -80,8 +77,7 @@ export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: str
       field: "wages",
       colId: "wages",
       minWidth: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       valueFormatter: agGridNumberToCurrency
     },
@@ -90,8 +86,7 @@ export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: str
       field: "hours",
       colId: "hours",
       minWidth: 100,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       valueFormatter: (params) => formatNumberWithComma(params.value)
     },
@@ -100,8 +95,7 @@ export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: str
       field: "points",
       colId: "points",
       minWidth: 100,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       valueFormatter: (params) => formatNumberWithComma(params.value)
     },  
@@ -128,8 +122,7 @@ export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: str
       field: "balance",
       colId: "balance",
       minWidth: 140,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       valueFormatter: agGridNumberToCurrency
     },
@@ -138,8 +131,7 @@ export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: str
       field: "yearsInPlan",
       colId: "yearsInPlan",
       minWidth: 80,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true
     },
     {
