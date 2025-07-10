@@ -53,6 +53,9 @@ const ProfitYearSelector = ({
     yearsToDisplay.push(activeFrozenState.profitYear);
   }
 
+  yearsToDisplay.push(thisYear - 1);
+
+
   // Fetch accounting year data for each year
   const [accountingYearData, setAccountingYearData] = useState<Record<number, { startDate: string; endDate: string }>>({});
   const [fetchAccountingYear] = useLazyGetAccountingYearQuery();

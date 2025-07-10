@@ -5,7 +5,14 @@ import { ColDef, ColGroupDef } from "ag-grid-community";
 export const GetDistributionsByAgeColumns = (reportType: FrozenReportsByAgeRequestType): ColDef[] => {
   const columns: (ColDef | ColGroupDef)[] = [
     {
-      headerName: reportType,
+      headerName: "A",
+      groupId: "blag",
+      columnGroupShow: "closed",
+      headerValueGetter: (params) => {
+        console.log("Header Value Getter for Group", params);
+                // params.columnGroup will give you access to the column group object
+                return 'Custom Group Name: ' + (params.columnGroup?.getGroupId() ?? 'No Group');
+            },
       children: [
         {
           headerName: "Age",
@@ -16,6 +23,7 @@ export const GetDistributionsByAgeColumns = (reportType: FrozenReportsByAgeReque
           resizable: true,
           sort: "asc",
           cellDataType: "text"
+          
         },
         {
           headerName: "EMPS",
@@ -25,6 +33,7 @@ export const GetDistributionsByAgeColumns = (reportType: FrozenReportsByAgeReque
           type: "rightAligned",
           resizable: true
         },
+        /*
         {
           headerName: "Amount",
           field: "regularAmount",
@@ -32,8 +41,10 @@ export const GetDistributionsByAgeColumns = (reportType: FrozenReportsByAgeReque
           minWidth: 150,
           type: "rightAligned",
           resizable: true,
-          valueFormatter: agGridNumberToCurrency
+          //columnGroupShow: "open",
+          //valueFormatter: agGridNumberToCurrency
         }
+          */
       ]
     }
   ];
