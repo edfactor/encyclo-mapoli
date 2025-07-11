@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿
+using System.ComponentModel;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Request;
 public record YearRequestWithRebuild

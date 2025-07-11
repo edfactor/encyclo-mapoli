@@ -238,7 +238,7 @@ public sealed class YearEndService : IYearEndService
         }
 
         if (employee.ZeroContributionReasonId > /*2*/ ZeroContributionReason.Constants.TerminatedEmployeeOver1000HoursWorkedGetsYearVested
-            && employee.ZeroContributionReasonId != 6)
+            && employee.ZeroContributionReasonId != /*6*/ ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested)
         {
             zeroContributionReason = /*0*/ ZeroContributionReason.Constants.Normal;
         }

@@ -90,7 +90,8 @@ internal class EnrollmentSummarizer
             VestedState = VestingStateType.PartiallyVested;
         }
 
-        if (pp.ZeroContributionReasonId == 6 || pp.Demographic!.TerminationCodeId == /*Z*/TerminationCode.Constants.Deceased)
+        if (pp.ZeroContributionReasonId == /*6*/ ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested ||
+            pp.Demographic!.TerminationCodeId == /*Z*/TerminationCode.Constants.Deceased)
         {
             VestedState = VestingStateType.FullyVested;
         }
@@ -207,21 +208,30 @@ internal class EnrollmentSummarizer
             if (pd.ProfitYear != LastYearSeen)
             {
                 byte zeroCont = pd.ZeroContributionReasonId ?? 0;
-                if (pd.ZeroContributionReasonId is < /*0*/ ZeroContributionReason.Constants.Normal or > /*7*/ ZeroContributionReason.Constants.SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay)
+                if (pd.ZeroContributionReasonId is < /*0*/ ZeroContributionReason.Constants.Normal or > /*7*/
+                    ZeroContributionReason.Constants.SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay)
                 {
                     zeroCont = /*0*/ ZeroContributionReason.Constants.Normal;
                 }
 
                 switch (zeroCont)
                 {
-                    case 0 when pd.Contribution != 0:
-                    case 1 when pd.CommentTypeId == CommentType.Constants.VOnly && pd.Contribution == 0:
-                    case 2 when pd.CommentTypeId == CommentType.Constants.VOnly && pd.Contribution == 0:
-                    case 3 when pd.ProfitYear < 2002:
-                    case 4 when pd.ProfitYear < 2002:
-                    case 5 when pd.ProfitYear < 2002:
-                    case 6 when pd.Contribution != 0:
-                    case 7 when pd.Contribution != 0:
+                    case /*0*/ ZeroContributionReason.Constants.Normal
+                        when pd.Contribution != 0:
+                    case /*1*/ ZeroContributionReason.Constants.Under21WithOver1Khours
+                        when pd.CommentTypeId == CommentType.Constants.VOnly && pd.Contribution == 0:
+                    case /*2*/ ZeroContributionReason.Constants.TerminatedEmployeeOver1000HoursWorkedGetsYearVested
+                        when pd.CommentTypeId == CommentType.Constants.VOnly && pd.Contribution == 0:
+                    case /*3*/ ZeroContributionReason.Constants.Over64WithLess1000Hours1YearVesting
+                        when pd.ProfitYear < 2002:
+                    case /*4*/ ZeroContributionReason.Constants.Over64WithLess1000Hours2YearsVesting
+                        when pd.ProfitYear < 2002:
+                    case /*5*/ ZeroContributionReason.Constants.Over64WithOver1000Hours3YearsVesting
+                        when pd.ProfitYear < 2002:
+                    case /*6*/ ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested
+                        when pd.Contribution != 0:
+                    case /*7*/ ZeroContributionReason.Constants.SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay
+                        when pd.Contribution != 0:
                         EnrollmentId = /*1*/ Enrollment.Constants.OldVestingPlanHasContributions;
                         LastYearSeen = pd.ProfitYear;
                         break;

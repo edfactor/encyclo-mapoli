@@ -261,6 +261,7 @@ SELECT pd.SSN, SUM(pd.YEARS_OF_SERVICE_CREDIT) YEARS
         FormattableString query = @$"
    SELECT pd.SSN, MIN(profit_year) INITIAL_CONTR_YEAR
             FROM PROFIT_DETAIL pd 
+            WHERE pd.PROFIT_CODE_ID = {/*0*/ ProfitCode.Constants.IncomingContributions} AND pd.CONTRIBUTION !=0
             GROUP BY pd.SSN";
         return query;
     }
