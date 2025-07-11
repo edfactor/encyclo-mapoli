@@ -1,9 +1,7 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 public sealed class UpdateSummaryReportDetail
 {
-    public int BadgeNumber { get; set; }
-
-    public required int PsnSuffix { get; set; }
+    public long BadgeNumber { get; set; }
     public short StoreNumber { get; set; }
     public required string Name { get; set; }
     public bool IsEmployee { get; set; }
@@ -15,22 +13,21 @@ public sealed class UpdateSummaryReportDetail
         return new UpdateSummaryReportDetail()
         {
             BadgeNumber = 2002,
-            PsnSuffix = 1000,
             StoreNumber = 10,
             Name = "Oscar Taylor",
-            Before = new UpdateSummaryReportPointInTimeDetail()
+            Before = new UpdateSummaryReportPointInTimeDetail
             {
                 ProfitSharingAmount = 100,
                 VestedProfitSharingAmount = 80,
                 YearsInPlan = 6,
-                EnrollmentId = 2
+                EnrollmentId = 2,
             },
-            After = new UpdateSummaryReportPointInTimeDetail()
+            After = new UpdateSummaryReportPointInTimeDetail
             {
                 ProfitSharingAmount = 200,
                 VestedProfitSharingAmount = 200,
                 YearsInPlan = 7,
-                EnrollmentId = 2
+                EnrollmentId = 2,
             }
         };
     }

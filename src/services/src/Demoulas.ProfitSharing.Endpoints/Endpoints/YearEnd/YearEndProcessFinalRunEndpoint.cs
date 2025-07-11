@@ -4,7 +4,7 @@ using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.YearEnd;
-public class YearEndProcessFinalRunEndpoint : Endpoint<YearRequest>
+public class YearEndProcessFinalRunEndpoint : Endpoint<YearRequestWithRebuild>
 {
     private readonly IYearEndService _yearEndService;
 
@@ -24,9 +24,9 @@ public class YearEndProcessFinalRunEndpoint : Endpoint<YearRequest>
         Group<YearEndGroup>();
     }
 
-    public override async Task HandleAsync(YearRequest req, CancellationToken ct)
+    public override async Task HandleAsync(YearRequestWithRebuild req, CancellationToken ct)
     {
-        await _yearEndService.RunFinalYearEndUpdates(req.ProfitYear, ct);
+        await _yearEndService.RunFinalYearEndUpdates(req.ProfitYear, req.Rebuild, ct);
         await SendNoContentAsync(ct);
     }
 }

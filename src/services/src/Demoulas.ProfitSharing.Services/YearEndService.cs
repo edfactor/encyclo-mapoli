@@ -41,7 +41,6 @@ public sealed class PayProfitDto
     public required decimal CurrentIncomeYear { get; set; }
 }
 
-
 public sealed class YearEndService : IYearEndService
 {
     private readonly ICalendarService _calendar;
@@ -68,9 +67,12 @@ public sealed class YearEndService : IYearEndService
           Earn Points                 - How much money goes towards allocating a contribution
           ZeroContributionReason      - How was your contribution handled?  Normal, Under21, Terminated (Vest Only), Retired, Soon to be Retired
           EmployeeType                - Is this a "new employee  in the plan" - aka this is your first year >21 and >1000 hours - employee may already have V-ONLY records
-          PsCertificateIssuedDate     - indicates that this employee should get a physically printed certificate.   It is really a proxy for Earn Points > 0.   
+          PsCertificateIssuedDate     - indicates that this employee should get a physically printed certificate.   It is really a proxy for Earn Points > 0.
+          
+          The "rebuild" argument is for rebuilding a prior year.   It rebuilds a year, but doesnt push the year values forward to the next year.  "rebuild" should only 
+          be used after importing scramble data to rebuild the prior year's values.
     */
-    public async Task RunFinalYearEndUpdates(short profitYear, CancellationToken ct)
+    public async Task RunFinalYearEndUpdates(short profitYear, bool rebuild, CancellationToken ct)
     {
         CalendarResponseDto calendarInfo = await _calendar.GetYearStartAndEndAccountingDatesAsync(profitYear, ct);
         await _profitSharingDataContextFactory.UseWritableContext(async ctx =>
@@ -78,40 +80,70 @@ public sealed class YearEndService : IYearEndService
             DateOnly fiscalEndDate /*Fiscal End Date*/ = calendarInfo.FiscalEndDate;
             DateOnly vestingOver18 = fiscalEndDate.AddYears(-ReferenceData.MinimumAgeForVesting());
             DateOnly almostRetired64 = fiscalEndDate.AddYears(-ReferenceData.RetirementAge() - 1);
-            
+
             var frozenDemographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, true);
-            List<PayProfitDto> employees = await ctx.PayProfits
-                .Join(frozenDemographicQuery,
-                    pp => pp.DemographicId,
-                    d => d.Id,
-                    (pp, d) => new { pp, d })
-                .AsNoTracking()
-                .Where(x =>
-                    x.pp.ProfitYear == profitYear &&
-                    (
-                        x.d.DateOfBirth <= vestingOver18 && (x.pp.CurrentHoursYear + x.pp.HoursExecutive) >= 1000
-                        || x.d.DateOfBirth < almostRetired64
-                    ) &&
-                    x.d.HireDate < fiscalEndDate &&
-                    !(
-                        x.d.DateOfBirth <= almostRetired64 &&
-                        (x.pp.CurrentHoursYear + x.pp.HoursExecutive) < 1000
-                    )
-                )
-                .Select(x => new PayProfitDto
-                {
-                    ProfitYear = x.pp.ProfitYear,
-                    CurrentHoursYear = x.pp.CurrentHoursYear,
-                    HoursExecutive = x.pp.HoursExecutive,
-                    Demographic = x.d,
-                    EmployeeTypeId = x.pp.EmployeeTypeId,
-                    ZeroContributionReasonId = x.pp.ZeroContributionReasonId,
-                    PointsEarned = x.pp.PointsEarned,
-                    PsCertificateIssuedDate = x.pp.PsCertificateIssuedDate,
-                    IncomeExecutive = x.pp.IncomeExecutive,
-                    CurrentIncomeYear = x.pp.CurrentIncomeYear,
-                })
-                .ToListAsync(ct);
+
+            IQueryable<PayProfitDto> query;
+
+            if (rebuild) // rebuild is used after importing data - to rebuild the ZeroContribution 
+            {
+                query = ctx.PayProfits
+                    .Join(frozenDemographicQuery,
+                        pp => pp.DemographicId,
+                        d => d.Id,
+                        (pp, d) => new { pp, d })
+                    .AsNoTracking()
+                    .Where(x => x.pp.ProfitYear == profitYear)
+                    .Select(x => new PayProfitDto
+                    {
+                        ProfitYear = x.pp.ProfitYear,
+                        CurrentHoursYear = x.pp.CurrentHoursYear,
+                        HoursExecutive = x.pp.HoursExecutive,
+                        Demographic = x.d,
+                        EmployeeTypeId = x.pp.EmployeeTypeId,
+                        ZeroContributionReasonId = x.pp.ZeroContributionReasonId,
+                        PointsEarned = x.pp.PointsEarned,
+                        PsCertificateIssuedDate = x.pp.PsCertificateIssuedDate,
+                        IncomeExecutive = x.pp.IncomeExecutive,
+                        CurrentIncomeYear = x.pp.CurrentIncomeYear,
+                    });
+            }
+            else
+            {
+                query = ctx.PayProfits
+                    .Join(frozenDemographicQuery,
+                        pp => pp.DemographicId,
+                        d => d.Id,
+                        (pp, d) => new { pp, d })
+                    .AsNoTracking()
+                    .Where(x =>
+                        x.pp.ProfitYear == profitYear &&
+                        (
+                            (x.d.DateOfBirth <= vestingOver18 &&
+                             (x.pp.CurrentHoursYear + x.pp.HoursExecutive) >= 1000)
+                            || x.d.DateOfBirth < almostRetired64
+                        ) &&
+                        x.d.HireDate < fiscalEndDate &&
+                        !(
+                            x.d.DateOfBirth <= almostRetired64 &&
+                            (x.pp.CurrentHoursYear + x.pp.HoursExecutive) < 1000
+                        ))
+                    .Select(x => new PayProfitDto
+                    {
+                        ProfitYear = x.pp.ProfitYear,
+                        CurrentHoursYear = x.pp.CurrentHoursYear,
+                        HoursExecutive = x.pp.HoursExecutive,
+                        Demographic = x.d,
+                        EmployeeTypeId = x.pp.EmployeeTypeId,
+                        ZeroContributionReasonId = x.pp.ZeroContributionReasonId,
+                        PointsEarned = x.pp.PointsEarned,
+                        PsCertificateIssuedDate = x.pp.PsCertificateIssuedDate,
+                        IncomeExecutive = x.pp.IncomeExecutive,
+                        CurrentIncomeYear = x.pp.CurrentIncomeYear,
+                    });
+            }
+
+            List<PayProfitDto> employees = await query.ToListAsync(ct);
 
             HashSet<int> employeeSsnSet = employees.Select(pp => pp.Demographic!.Ssn).ToHashSet();
 
@@ -137,7 +169,7 @@ public sealed class YearEndService : IYearEndService
                 short? firstYearContribution = firstContributionYearBySsn.ContainsKey(ssn) ? firstContributionYearBySsn[ssn] : null;
                 decimal lastYearBalance = lastYearBalanceBySsn.ContainsKey(ssn) ? lastYearBalanceBySsn[ssn] ?? 0m : 0m;
 
-                YearEndChange change = ComputeChange(profitYear, firstYearContribution, age, lastYearBalance, employee, fiscalEndDate);
+                YearEndChange change = ComputeChange(profitYear, rebuild, firstYearContribution, age, lastYearBalance, employee, fiscalEndDate);
                 if (change.IsChanged(employee))
                 {
                     changes.Add(employee.Demographic.Id, change);
@@ -146,7 +178,7 @@ public sealed class YearEndService : IYearEndService
 
             OracleConnection oracleConnection = (ctx.Database.GetDbConnection() as OracleConnection)!;
             await EnsureTempPayProfitChangesTableExistsAsync(oracleConnection);
-            UpdatePayProfitChanges(oracleConnection, profitYear, changes);
+            UpdatePayProfitChanges(oracleConnection, profitYear, changes, rebuild);
         }, ct);
     }
 
@@ -158,14 +190,14 @@ public sealed class YearEndService : IYearEndService
 
     // Calculates the Year End Change for a single employee.
     //  Very closely follows PAY456.cbl, 405-calculate-points
-    private YearEndChange ComputeChange(short profitYear, short? firstContributionYear, short age, decimal currentBalance, PayProfitDto employee, DateOnly fiscalEnd)
+    private YearEndChange ComputeChange(short profitYear, bool rebuild, short? firstContributionYear, short age, decimal currentBalance, PayProfitDto employee, DateOnly fiscalEnd)
     {
         int newEmpl = 0;
         decimal points = 0;
         DateOnly? certificationDate = null;
         DateOnly today = DateOnly.FromDateTime(DateTime.Now);
 
-        byte? zeroContributionReason = employee.ZeroContributionReasonId;
+        byte? zeroContributionReason = null; 
         if (firstContributionYear == null && age >= ReferenceData.MinimumAgeForContribution())
         {
             newEmpl = /*1*/ EmployeeType.Constants.NewLastYear;
@@ -233,7 +265,7 @@ public sealed class YearEndService : IYearEndService
             zeroContributionReason = /*7*/ ZeroContributionReason.Constants.SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay;
         }
 
-        if (employee.Demographic!.EmploymentStatusId == EmploymentStatus.Constants.Terminated && employee.Demographic.TerminationDate < fiscalEnd )
+        if (employee.Demographic!.EmploymentStatusId == EmploymentStatus.Constants.Terminated && employee.Demographic.TerminationDate < fiscalEnd)
         {
             newEmpl = EmployeeType.Constants.NotNewLastYear;
         }
@@ -246,10 +278,9 @@ public sealed class YearEndService : IYearEndService
      * 1) we bulk insert our changes into temp table
      * 2) merge in changes
      */
-    public static void UpdatePayProfitChanges(
-        OracleConnection connection,
+    public static void UpdatePayProfitChanges(OracleConnection connection,
         int profitYear,
-        Dictionary<int, YearEndChange> changes)
+        Dictionary<int, YearEndChange> changes, bool rebuild)
     {
         DataTable table = new();
         table.Columns.Add("demographic_id", typeof(int));
@@ -291,9 +322,11 @@ public sealed class YearEndService : IYearEndService
 
         cmd.ExecuteNonQuery();
 
-        // Copy the current ZeroContributionReason to the Now Year.    This might seem odd, but the YE process looks at ZeroContribution for 
-        // last year, and handles someone differently if they had a ZercontributionReason=6  last year.
-        cmd.CommandText = $@"
+        if (!rebuild)
+        {
+            // Copy the current ZeroContributionReason to the Now Year.    This might seem odd, but the YE process looks at ZeroContribution for 
+            // last year, and handles someone differently if they had a ZercontributionReason=6  last year.
+            cmd.CommandText = $@"
             MERGE INTO pay_profit pp
             USING pay_profit ppp
             ON (
@@ -304,7 +337,8 @@ public sealed class YearEndService : IYearEndService
             WHEN MATCHED THEN UPDATE SET
                 pp.zero_contribution_reason_id = ppp.zero_contribution_reason_id";
 
-        cmd.ExecuteNonQuery();
+            cmd.ExecuteNonQuery();
+        }
     }
 
     /*

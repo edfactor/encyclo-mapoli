@@ -46,7 +46,7 @@ public sealed class EmbeddedSqlService : IEmbeddedSqlService
         return ctx.ParticipantEvtaTotals.FromSqlInterpolated(query);
     }
 
-    public IQueryable<ParticipantTotalVestingBalance> TotalVestingBalanceAlt(IProfitSharingDbContext ctx,
+    public IQueryable<ParticipantTotalVestingBalance>  TotalVestingBalanceAlt(IProfitSharingDbContext ctx,
         short employeeYear, short profitYear, DateOnly asOfDate)
     {
         var totalBalanceQuery = GetTotalBalanceQuery(profitYear);
@@ -54,11 +54,10 @@ public sealed class EmbeddedSqlService : IEmbeddedSqlService
         var yearsOfServiceQuery = GetYearsOfServiceQuery(employeeYear);
 
         var query = $@"
-SELECT bal.Ssn, 
-       CASE WHEN ((bal.total + pdWrap.FORFEITURES - (pdWrap.PROF_6_CONTRIB + pdWrap.PROF_8_EARNINGS - pdWrap.PROF_9_FORFEIT)) * vr.RATIO) 
-                    + ((pdWrap.PROF_6_CONTRIB + pdWrap.PROF_8_EARNINGS - pdWrap.PROF_9_FORFEIT)-pdWrap.FORFEITURES) > 0 THEN 
-                 ((bal.total + pdWrap.FORFEITURES - (pdWrap.PROF_6_CONTRIB + pdWrap.PROF_8_EARNINGS - pdWrap.PROF_9_FORFEIT)) * vr.RATIO) 
-                    + ((pdWrap.PROF_6_CONTRIB + pdWrap.PROF_8_EARNINGS - pdWrap.PROF_9_FORFEIT)-pdWrap.FORFEITURES) ELSE 0 END AS VESTEDBALANCE,
+SELECT 
+       bal.Ssn, 
+         ((bal.total + pdWrap.FORFEITURES - (pdWrap.PROF_6_CONTRIB + pdWrap.PROF_8_EARNINGS - pdWrap.PROF_9_FORFEIT)) * vr.RATIO) 
+            + ((pdWrap.PROF_6_CONTRIB + pdWrap.PROF_8_EARNINGS - pdWrap.PROF_9_FORFEIT)-pdWrap.FORFEITURES) AS VESTEDBALANCE,
           bal.TOTAL AS CURRENTBALANCE,
           yip.YEARS,
           vr.RATIO
@@ -84,6 +83,7 @@ LEFT JOIN (
 ";
 
         return ctx.ParticipantTotalVestingBalances.FromSqlRaw(query);
+
     }
 
 
@@ -199,16 +199,23 @@ SELECT
     }
     private static string GetVestingRatioQuery(short profitYear, DateOnly asOfDate)
     {
+        var initialContributionFiveYearsAgo = asOfDate.AddYears(-5).Year;
         var birthDate65 = asOfDate.AddYears(-65);
-        var beginningOfYear = asOfDate.AddYears(-1).AddDays(1);
-        var yearsOfCreditQuery = GetYearsOfServiceQuery(profitYear);
+        // We get the year prior to the profit year, because this algorithm looks at the hours worked to decide if the protit year has enough hours create another year.
+        var priorYarsOfCreditQuery = GetYearsOfServiceQuery((short)(profitYear-1));
+        var initialContributionYearQuery = GetInitialContributionYearQuery();
 
         var query = @$"
 SELECT m.SSN,
   CASE WHEN m.IS_EMPLOYEE = 0 THEN 1 ELSE --Beneficiaries are always 100% vested
-  CASE WHEN m.DATE_OF_BIRTH < TO_DATE('{birthDate65.ToString("yyyy-MM-dd")}','YYYY-MM-DD') AND (m.IS_EMPLOYEE = 1 AND (m.TERMINATION_DATE IS NULL OR m.TERMINATION_DATE < TO_DATE('{beginningOfYear.ToString("yyyy-MM-dd")}','YYYY-MM-DD'))) THEN 1 ELSE --Otherwise, If over 65, and not terminated this year, 100% vested
+  CASE WHEN
+        -- If employee is active and age > 65, then 100%
+        (m.termination_date IS NULL OR m.termination_date > TO_DATE('{asOfDate.ToString("yyyy-MM-dd")}', 'YYYY-MM-DD') )
+        AND m.initial_contr_year < {initialContributionFiveYearsAgo}
+        AND m.date_of_birth < TO_DATE('{birthDate65.ToString("yyyy-MM-dd")}', 'YYYY-MM-DD')
+        THEN 1 ELSE              
   CASE WHEN m.ENROLLMENT_ID  IN (3, 4) THEN 1 ELSE --Otherwise, If enrollment has forfeitures, 100%
-  CASE WHEN m.IS_EMPLOYEE = 1 AND m.TERMINATION_CODE_ID = 'Z' THEN 1 ELSE --Otherwise, If deceased, mark for 100% vested
+  CASE WHEN m.IS_EMPLOYEE = 1 AND m.TERMINATION_CODE_ID = 'Z' AND TERMINATION_DATE<  TO_DATE('{asOfDate.ToString("yyyy-MM-dd")}', 'YYYY-MM-DD')  THEN 1 ELSE --Otherwise, If deceased, mark for 100% vested
   CASE WHEN m.ZERO_CONTRIBUTION_REASON_ID = 6 THEN 1 ELSE --Otherwise, If zero contribution reason is 65 or over, first contribution more than 5 years ago, 100% vested
   CASE WHEN m.YEARS_OF_SERVICE < 3 THEN 0 ELSE --Otherwise, If total years (including the present one) is 0, 1, or 2, 0% Vested
   CASE WHEN m.YEARS_OF_SERVICE = 3 THEN .2 ELSE --Otherwise, If total years (including the present one) is 3, 20% Vested
@@ -218,23 +225,26 @@ SELECT m.SSN,
   CASE WHEN m.YEARS_OF_SERVICE > 6 THEN 1 ELSE --Otherwise, If total years (including the present one) is more than 6, 100% Vested
   0 END END END END END END END END END END END AS RATIO
 FROM (
-    SELECT d.SSN, d.DATE_OF_BIRTH, 1 AS IS_EMPLOYEE, d.TERMINATION_DATE, pp.ENROLLMENT_ID, d.TERMINATION_CODE_ID, pp.ZERO_CONTRIBUTION_REASON_ID, yos.YEARS + CASE WHEN pp.ENROLLMENT_ID = 2 THEN 1 ELSE 0 END + CASE WHEN pp.CURRENT_HOURS_YEAR  + pp.HOURS_EXECUTIVE  > 1000 THEN 1 ELSE 0 END AS YEARS_OF_SERVICE
+    SELECT d.SSN, d.DATE_OF_BIRTH, 1 AS IS_EMPLOYEE, d.TERMINATION_DATE, pp.ENROLLMENT_ID, d.TERMINATION_CODE_ID, pp.ZERO_CONTRIBUTION_REASON_ID, INITIAL_CONTR_YEAR, yos.YEARS + CASE WHEN pp.ENROLLMENT_ID = 2 THEN 1 ELSE 0 END + CASE WHEN pp.CURRENT_HOURS_YEAR  + pp.HOURS_EXECUTIVE  >= 1000 THEN 1 ELSE 0 END AS YEARS_OF_SERVICE
     FROM DEMOGRAPHIC d
     LEFT JOIN PAY_PROFIT pp ON d.ID = pp.DEMOGRAPHIC_ID AND pp.PROFIT_YEAR  = {profitYear}
     LEFT JOIN (
-        {yearsOfCreditQuery}
+        {priorYarsOfCreditQuery}
     ) yos ON d.SSN = yos.SSN
-    
+    LEFT JOIN (
+        {initialContributionYearQuery}
+    ) initcontrib on d.ssn = initcontrib.ssn 
     UNION ALL
     
-    SELECT bc.SSN, bc.DATE_OF_BIRTH, 0 AS IS_EMPLOYEE, NULL AS TERMINATION_DATE, NULL AS ENROLLMENT_ID, NULL AS TERMINATION_CODE_ID, NULL AS ZERO_CONTRIBUTION_REASON_ID, 0 AS YEARS_OF_SERVICE
+    SELECT bc.SSN, bc.DATE_OF_BIRTH, 0 AS IS_EMPLOYEE, NULL AS TERMINATION_DATE, NULL AS ENROLLMENT_ID, NULL AS TERMINATION_CODE_ID, NULL AS ZERO_CONTRIBUTION_REASON_ID, 0 AS YEARS_OF_SERVICE, null as INITIAL_CONTR_YEAR
     FROM BENEFICIARY_CONTACT bc
     WHERE bc.SSN NOT IN (SELECT SSN FROM DEMOGRAPHIC)
 ) m
 ";
         return query;
     }
-    private static FormattableString GetYearsOfServiceQuery(short profitYear)
+    
+    public static FormattableString GetYearsOfServiceQuery(short profitYear)
     {
         FormattableString query = @$"
 SELECT pd.SSN, SUM(pd.YEARS_OF_SERVICE_CREDIT) YEARS
@@ -245,4 +255,14 @@ SELECT pd.SSN, SUM(pd.YEARS_OF_SERVICE_CREDIT) YEARS
 ";
         return query;
     }
+    
+    public static FormattableString GetInitialContributionYearQuery()
+    {
+        FormattableString query = @$"
+   SELECT pd.SSN, MIN(profit_year) INITIAL_CONTR_YEAR
+            FROM PROFIT_DETAIL pd 
+            GROUP BY pd.SSN";
+        return query;
+    }
+
 }
