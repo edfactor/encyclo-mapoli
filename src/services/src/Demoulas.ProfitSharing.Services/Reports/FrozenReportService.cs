@@ -1,4 +1,5 @@
-﻿using Demoulas.Common.Contracts.Contracts.Response;
+﻿using System.Diagnostics;
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
@@ -1145,40 +1146,28 @@ public class FrozenReportService : IFrozenReportService
     {
         using (_logger.BeginScope("Request PROFIT CONTROL SHEET"))
         {
-            var rslt = await _dataContextFactory.UseReadOnlyContext(async ctx =>
+            return await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
-                var rsp = new ProfitControlSheetResponse();
+                DateOnly fiscalEndDate = (await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken)).FiscalEndDate;
+                ProfitControlSheetResponse response = new();
+                HashSet<int> employeeSsn = await (await _demographicReaderService.BuildDemographicQuery(ctx, true)).Select(d => d.Ssn).ToHashSetAsync(cancellationToken);
+                HashSet<int> beneSsn = await ctx.BeneficiaryContacts.Select(bc => bc.Ssn).ToHashSetAsync(cancellationToken);
 
-                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx, true);
+                HashSet<int> pureEmployee = employeeSsn.Except(beneSsn).ToHashSet();
+                HashSet<int> pureBene = beneSsn.Except(employeeSsn).ToHashSet();
+                HashSet<int> both = employeeSsn.Intersect(beneSsn).ToHashSet();
 
-                rsp.EmployeeContributionProfitSharingAmount = (await (
-                    from bal in _totalService.GetTotalBalanceSetEmployeePortion(ctx, request.ProfitYear)
-                    group bal by true into balGrp
-                    select new { Total = balGrp.Sum(x => x.Total) ?? 0 }
-                ).FirstOrDefaultAsync(cancellationToken))?.Total ?? 0;
+                Dictionary<int, decimal> allMemberCurrentBalance = await _totalService.TotalVestingBalance(ctx, request.ProfitYear, fiscalEndDate)
+                    .ToDictionaryAsync(k => k.Ssn, v => v.CurrentBalance == null ? 0 : (decimal)v.CurrentBalance, cancellationToken);
 
-                rsp.NonEmployeeProfitSharingAmount = (await (
-                    from bc in ctx.BeneficiaryContacts
-                    join b in ctx.Beneficiaries on bc.Id equals b.BeneficiaryContactId
-                    where (!demographics.Any(d => d.Ssn == bc.Ssn))
-                    group b by true into bGrp
-                    select new { Total = bGrp.Sum(x => 0) } // Needs to use profit detail rows to get the correct amount
-                ).FirstOrDefaultAsync(cancellationToken))?.Total ?? 0;
+                response.EmployeeContributionProfitSharingAmount =
+                    allMemberCurrentBalance.Where(kvp => pureEmployee.Contains(kvp.Key)).Sum(kvp => kvp.Value);
+                response.NonEmployeeProfitSharingAmount = allMemberCurrentBalance.Where(kvp => pureBene.Contains(kvp.Key)).Sum(kvp => kvp.Value);
 
-                rsp.EmployeeBeneficiaryAmount = (await (
-                    from bc in ctx.BeneficiaryContacts
-                    join b in ctx.Beneficiaries on bc.Id equals b.BeneficiaryContactId
-                    where (demographics.Any(d => d.Ssn == bc.Ssn))
-                    group b by true into bGrp
-                    select new { Total = bGrp.Sum(x => 0) } // Needs to use profit detail rows to get the correct amount
-                ).FirstOrDefaultAsync(cancellationToken))?.Total ?? 0;
-
-                return rsp;
+                response.EmployeeBeneficiaryAmount = allMemberCurrentBalance.Where(kvp => both.Contains(kvp.Key)).Sum(kvp => kvp.Value);
+                return response;
             });
-
-            return rslt;
         }
-
     }
 
     private async Task<DateTime> GetAsOfDate(ProfitYearAndAsOfDateRequest req, CancellationToken cancellationToken)
