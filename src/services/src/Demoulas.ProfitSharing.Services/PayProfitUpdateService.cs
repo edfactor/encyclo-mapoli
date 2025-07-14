@@ -1,5 +1,7 @@
-﻿using Demoulas.ProfitSharing.Data.Entities;
+﻿using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -9,12 +11,16 @@ public sealed class PayProfitUpdateService : IPayProfitUpdateService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly ILogger _logger;
+    private readonly TotalService _totalService;
 
-    public PayProfitUpdateService(IProfitSharingDataContextFactory dataContextFactory, ILoggerFactory loggerFactory)
+
+    public PayProfitUpdateService(IProfitSharingDataContextFactory dataContextFactory, ILoggerFactory loggerFactory, ITotalService totalService)
     {
         _dataContextFactory = dataContextFactory;
         _logger = loggerFactory.CreateLogger<PayProfitUpdateService>();
+        _totalService = (TotalService)totalService;
     }
+
     public async Task SetZeroContributionReason(IQueryable<PayProfit> records, byte zeroContributionReasonId, CancellationToken cancellationToken)
     {
         using (_logger.BeginScope("Beginning Set Zero Contribution Reason to {0}", zeroContributionReasonId))
@@ -27,30 +33,34 @@ public sealed class PayProfitUpdateService : IPayProfitUpdateService
     {
         using (_logger.BeginScope("Setting EnrollmentId for ProfitYear {0}", profitYear))
         {
-            _ = await _dataContextFactory.UseWritableContext(async ctx => {
-                
-                //Update to 2 if there is an enrollment record for the year
-                await ctx.PayProfits.Include(x=>x.Demographic).Where(
-                    x => x.ProfitYear == profitYear && ctx.ProfitDetails.Any(pd=>pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions && x.Demographic!.Ssn == pd.Ssn && pd.ProfitYear == profitYear)
-                ).ExecuteUpdateAsync(x => x.SetProperty(pp => pp.EnrollmentId, Enrollment.Constants.NewVestingPlanHasContributions), ct);
+            await _dataContextFactory.UseWritableContext(async ctx =>
+            {
+                Dictionary<int, PayProfit> allPayProfitBySsn =
+                    await ctx.PayProfits.Where(pp => pp.ProfitYear == profitYear).Include(p => p.Demographic).ToDictionaryAsync(k => k.Demographic!.Ssn, v => v, ct);
+                Dictionary<int, byte> yearsBySsn = await _totalService.GetYearsOfService(ctx, profitYear).ToDictionaryAsync(t => t.Ssn, t => t.Years, ct);
 
+                // Is this likely to be too big for production?  Perhaps we should batch update?
+                List<ProfitDetail> allProfitDetail = await ctx.ProfitDetails.Where(pd => pd.ProfitYear <= profitYear).ToListAsync(ct);
+                Dictionary<int, List<ProfitDetail>> profitDetailBySsn = allProfitDetail.GroupBy(pd => pd.Ssn).ToDictionary(g => g.Key, g => g.ToList());
 
-                //Update to 4 if there is forfeiture, and no enrollment for the year.
-                await ctx.PayProfits.Include(x => x.Demographic).Where(
-                    x => x.ProfitYear == profitYear && 
-                    ctx.ProfitDetails.Any(pd =>
-                        pd.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures && 
-                        x.Demographic!.Ssn == pd.Ssn &&
-                        pd.ProfitYear == profitYear &&
-                        pd.Forfeiture > 0
-                    )  &&
-                    !ctx.ProfitDetails.Any(pd =>
-                        pd.ProfitYear == profitYear &&
-                        pd.Ssn == x.Demographic!.Ssn && 
-                        pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions
-                    )
-                ).ExecuteUpdateAsync(x => x.SetProperty(pp => pp.EnrollmentId, Enrollment.Constants.NewVestingPlanHasForfeitureRecords), ct);
-                return true;
+                foreach (PayProfit pp in allPayProfitBySsn.Values)
+                {
+                    int ssn = pp.Demographic!.Ssn;
+                    List<ProfitDetail> pds = profitDetailBySsn.ContainsKey(ssn)
+                        ? profitDetailBySsn[ssn].OrderBy(pd => pd.ProfitYear).ThenBy(pd => pd.ProfitYearIteration).ThenBy(pd => pd.ProfitCodeId).ToList()
+                        : new List<ProfitDetail>();
+                    byte years = yearsBySsn.ContainsKey(ssn) ? yearsBySsn[ssn] : (byte)0;
+                    byte newEnrollmentId = 0;
+                    if (profitDetailBySsn.ContainsKey(ssn))
+                    {
+                        EnrollmentSummarizer enrollmentSummarizer = new();
+                        newEnrollmentId = enrollmentSummarizer.ComputeEnrollment(pp, years, pds);
+                    }
+
+                    pp.EnrollmentId = newEnrollmentId;
+                }
+
+                await ctx.SaveChangesAsync(ct);
             }, ct);
         }
     }
