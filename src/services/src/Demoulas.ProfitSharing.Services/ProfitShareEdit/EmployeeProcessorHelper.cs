@@ -36,7 +36,7 @@ internal static class EmployeeProcessorHelper
                 .Select(x => new
                 {
                     x.frozenDemographics.BadgeNumber,
-                    x.ppYE.Demographic.Ssn,
+                    x.ppYE.Demographic!.Ssn,
                     Name = x.ppYE.Demographic.ContactInfo!.FullName,
                     EnrolledId = x.ppYE.EnrollmentId,
                     x.ppYE.EmployeeTypeId,
