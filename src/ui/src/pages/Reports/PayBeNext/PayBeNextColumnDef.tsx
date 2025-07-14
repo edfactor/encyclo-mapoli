@@ -1,0 +1,52 @@
+import { agGridNumberToCurrency } from "smart-ui-library";
+import { ColDef, ICellRendererParams } from "ag-grid-community";
+import { mmDDYYFormat, mmDDYYYY_HHMMSS_Format } from "utils/dateUtils";
+import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
+
+
+export const PayBeNextColumnDef = (): ColDef[] => {
+    return [
+        {
+            headerName: "Psn-Num",
+            field: "badgeNumber",
+            colId: "badgeNumber",
+            minWidth: 120,
+            headerClass: "center-align",
+            cellClass: "center-align",
+            resizable: true,
+            sortable: true,
+            unSortIcon: true,
+            cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber, params.data.psnSuffix)
+        },
+        {
+            headerName: "Name",
+            field: "fullName",
+            colId: "fullName",
+            minWidth: 170,
+            headerClass: "center-align",
+            cellClass: "center-align",
+            resizable: true,
+            sortable: false
+        },
+        {
+            headerName: "SSN",
+            field: "ssn",
+            colId: "ssn",
+            headerClass: "center-align",
+            cellClass: "center-align",
+            resizable: true,
+            valueFormatter: (params) => {
+                return `${params.data.ssn}`;
+            }
+        },
+        {
+            headerName: "Relationship",
+            field: "relationship",
+            colId: "relationship",
+            minWidth: 120,
+            headerClass: "center-align",
+            cellClass: "center-align",
+            resizable: true
+        }
+    ];
+};

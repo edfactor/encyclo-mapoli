@@ -114,7 +114,9 @@ import {
   YearEndProfitSharingReportRequest,
   YearEndProfitSharingReportResponse,
   YearEndProfitSharingReportSummaryResponse,
-  DistributionsAndForfeitureTotalsResponse
+  DistributionsAndForfeitureTotalsResponse,
+  AdhocBeneficiariesReportRequest,
+  adhocBeneficiariesReportResponse
 } from "reduxstore/types";
 import { Paged } from "smart-ui-library";
 import { createDataSourceAwareBaseQuery } from "./api";
@@ -1081,7 +1083,28 @@ export const YearsEndApi = createApi({
         method: "POST",
         body: params
       })
-    })
+    }),
+    adhocBeneficiariesReport: builder.query<adhocBeneficiariesReportResponse, AdhocBeneficiariesReportRequest>({
+      query: (params) => ({
+        url: "yearend/adhoc-beneficiaries-report",
+        method: "GET",
+        params: {
+          isAlsoEmployee: params.isAlsoEmployee,
+          profitYear: params.profitYear,
+          skip: params.skip || 0,
+          take: params.take || 255,
+          sortBy: params.sortBy,
+          isSortDescending: params.isSortDescending
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
+    }),
   })
 });
 
@@ -1126,5 +1149,6 @@ export const {
   useUpdateForfeitureAdjustmentMutation,
   useLazyGetUpdateSummaryQuery,
   useUpdateEnrollmentMutation,
-  useFinalizeReportMutation
+  useFinalizeReportMutation,
+  useLazyAdhocBeneficiariesReportQuery
 } = YearsEndApi;
