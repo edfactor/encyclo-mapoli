@@ -235,6 +235,7 @@ public class ProfitMasterService : IProfitMasterService
     private static List<ProfitDetail> CreateProfitDetailRecords(Dictionary<byte, ProfitCode> id2ProfitCode, short profitYear,
         IEnumerable<ProfitShareEditMemberRecord> rec)
     {
+        
         return rec.Select(r => new ProfitDetail
         {
             ProfitCode = id2ProfitCode[r.ProfitCode],
@@ -247,7 +248,8 @@ public class ProfitMasterService : IProfitMasterService
             Forfeiture = r.ForfeitureAmount,
             Remark = r.Remark,
             ZeroContributionReasonId = r.ZeroContStatus,
-            CommentTypeId = r.CommentTypeId
+            CommentTypeId = r.CommentTypeId,
+            YearsOfServiceCredit = (r.ProfitCode == 0 && ( r.ContributionAmount != 0  || r.ZeroContStatus is 1 or 2 )) ? (byte)1 : (byte)0
         }).ToList();
     }
 

@@ -921,8 +921,8 @@ public class FrozenReportService : IFrozenReportService
             }
         };
     }
-
-    public async Task<UpdateSummaryReportResponse> GetUpdateSummaryReport(ProfitYearRequest req,
+    
+     public async Task<UpdateSummaryReportResponse> GetUpdateSummaryReport(ProfitYearRequest req,
         CancellationToken cancellationToken = default)
     {
         var lastYear = (short)(req.ProfitYear - 1);
@@ -938,24 +938,22 @@ public class FrozenReportService : IFrozenReportService
                     x.Ssn,
                     x.ContactInfo.FirstName,
                     x.ContactInfo.LastName,
-                    x.BadgeNumber,
-                    PsnSuffix = (short)0,
+                    BadgeNumber = (long) x.BadgeNumber,
                     DemographicId = x.Id,
                     IsEmployee = true,
                     x.StoreNumber
                 });
-            var beneficiaryBase = ctx.Beneficiaries
-                
+            var beneficiaryBase = ctx.BeneficiaryContacts
 #pragma warning disable DSMPS001
-                .Where(x => !ctx.Demographics.Any(d => d.Ssn == x.Contact!.Ssn))
+                .Where(x => !ctx.Demographics.Any(d => d.Ssn == x.Ssn))
 #pragma warning restore DSMPS001
+                .Join(ctx.Beneficiaries, bc=>bc.Id, b=>b.BeneficiaryContactId, (bc, b)=>new {bc, b})
                 .Select(x => new
                 {
-                    x.Contact!.Ssn,
-                    x.Contact.ContactInfo.FirstName,
-                    x.Contact.ContactInfo.LastName,
-                    x.BadgeNumber,
-                    x.PsnSuffix,
+                    x.bc.Ssn,
+                    FirstName = x.bc.ContactInfo.FirstName.Trim(),
+                    x.bc.ContactInfo.LastName,
+                    BadgeNumber = (long)(x.b.BadgeNumber*10000 + x.b.PsnSuffix),
                     DemographicId = 0,
                     IsEmployee = false,
                     StoreNumber = (short)0
@@ -963,41 +961,48 @@ public class FrozenReportService : IFrozenReportService
             var
                 members = demoBase.Union(
                     beneficiaryBase); //UnionBy throws an error, so beneficiaries that are also employees are filtered out, and the regular Union can be used since we've filtered out possible duplicates.
-
+            
             var baseQuery = await (
                 from m in members
-                join bal in _totalService.TotalVestingBalance(ctx, req.ProfitYear, startEnd.FiscalBeginDate)
-                    on m.Ssn equals bal.Ssn
-                join lyBalTbl in _totalService.TotalVestingBalance(ctx, lastYear, lyStartEnd.FiscalBeginDate)
+                
+                join bal in _totalService.TotalVestingBalance(ctx, req.ProfitYear /*Employee*/, startEnd.FiscalEndDate)
+                    on m.Ssn equals bal.Ssn into balTmp
+                from bal in balTmp.DefaultIfEmpty()
+
+                // ToBeDone: This should be using the frozen for year "lastYear"
+                join lyBalTbl in _totalService.TotalVestingBalance(ctx, lastYear /*Transactions Up To*/, lyStartEnd.FiscalBeginDate)
                     on m.Ssn equals lyBalTbl.Ssn into lyBalTmp
                 from lyBal in lyBalTmp.DefaultIfEmpty()
+
                 join lyPpTbl in ctx.PayProfits.Where(x => x.ProfitYear == lastYear)
                     on m.DemographicId equals lyPpTbl.DemographicId into lyPpTmp
                 from lyPp in lyPpTmp.DefaultIfEmpty()
+                
                 join ppTbl in ctx.PayProfits.Where(x => x.ProfitYear == req.ProfitYear)
                     on m.DemographicId equals ppTbl.DemographicId into ppTmp
                 from pp in ppTmp.DefaultIfEmpty()
-                where bal.CurrentBalance != 0 && bal.VestedBalance != 0
+                
                 select new
                 {
                     m.BadgeNumber,
-                    m.PsnSuffix,
                     m.FirstName,
                     m.LastName,
                     m.StoreNumber,
                     m.IsEmployee,
+                    
                     BeforeEnrollmentId = lyPp != null ? lyPp.EnrollmentId : 0,
                     BeforeProfitSharingAmount = lyBal != null ? lyBal.CurrentBalance : 0,
                     BeforeVestedProfitSharingAmount = lyBal != null ? lyBal.VestedBalance : 0,
                     BeforeYearsInPlan = lyBal != null ? lyBal.YearsInPlan : (byte)0,
+                    
                     AfterEnrollmentId = pp != null ? pp.EnrollmentId : 0,
                     AfterProfitSharingAmount = bal.CurrentBalance,
                     AfterVestedProfitSharingAmount = bal.VestedBalance,
-                    AfterYearsInPlan = bal.YearsInPlan
+                    AfterYearsInPlan = bal.YearsInPlan 
                 }
             ).ToListAsync(
                 cancellationToken); //Have to materialize. Something in this query seems to be unable to render as an expression with the current version of the oracle provider.
-
+            
             var totals = baseQuery.GroupBy(x => true).Select(x => new
             {
                 TotalBeforeProfitSharing = x.Sum(c => c.BeforeProfitSharingAmount),
@@ -1011,7 +1016,6 @@ public class FrozenReportService : IFrozenReportService
             var resp = baseQuery.Select(x => new UpdateSummaryReportDetail()
             {
                 BadgeNumber = x.BadgeNumber,
-                PsnSuffix = x.PsnSuffix,
                 StoreNumber = x.StoreNumber,
                 Name = $"{x.LastName}, {x.FirstName}",
                 IsEmployee = x.IsEmployee,

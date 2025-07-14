@@ -52,7 +52,6 @@ public sealed  class UpdateSummaryReportEndpoint:EndpointWithCsvTotalsBase<Froze
         public UpdateSummaryReportMapper()
         {
             Map(m => m.BadgeNumber).Index(0).Name("BADGE#");
-            Map(m => m.PsnSuffix).Index(1).Name("PSN_SUFFIX");
             Map(m => m.Name).Index(2).Name("NAME");
             Map(m => m.StoreNumber).Index(3).Name("STR");
 
