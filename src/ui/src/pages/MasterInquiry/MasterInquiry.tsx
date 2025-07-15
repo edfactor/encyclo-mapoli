@@ -10,12 +10,20 @@ import MasterInquiryMemberGrid from "./MasterInquiryMemberGrid";
 import MasterInquirySearchFilter from "./MasterInquirySearchFilter";
 
 
+interface SelectedMember {
+  memberType: number;
+  id: number;
+  ssn: number;
+  badgeNumber: number;
+  psnSuffix: number;
+}
+
 const MasterInquiry = () => {
   //const { } = useSelector((state: RootState) => state.inquiry);
 
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [searchParams, setSearchParams] = useState<MasterInquiryRequest | null>(null);
-  const [selectedMember, setSelectedMember] = useState<{ memberType: number; id: number, ssn: number } | null>(null);
+  const [selectedMember, setSelectedMember] = useState<SelectedMember | null>(null);
   const [noResults, setNoResults] = useState(false);
 
   return (
@@ -40,7 +48,7 @@ const MasterInquiry = () => {
         </Grid2>
 
         {searchParams && (
-          <MasterInquiryMemberGrid {...searchParams} onBadgeClick={setSelectedMember} />
+          <MasterInquiryMemberGrid {...searchParams} onBadgeClick={(data) => setSelectedMember(data || null)} />
         )}
 
         {/* Render employee details if identifiers are present in selectedMember, or show missive if noResults */}
@@ -71,3 +79,6 @@ const MasterInquiry = () => {
 };
 
 export default MasterInquiry;
+
+
+

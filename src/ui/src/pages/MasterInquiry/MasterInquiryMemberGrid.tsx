@@ -2,7 +2,8 @@ import { Box, CircularProgress, Typography } from "@mui/material";
 import React, { useEffect, useRef, useState } from "react";
 import { useLazySearchProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
 import { EmployeeDetails, MasterInquiryRequest } from "reduxstore/types";
-import { DSMGrid, Pagination, formatNumberWithComma } from "smart-ui-library";
+import { DSMGrid, formatNumberWithComma } from "smart-ui-library";
+import Pagination from "../../components/Pagination/Pagination";
 import './MasterInquiryMemberGrid.css'; // Import the CSS file for styles
 import { GetMasterInquiryMemberGridColumns } from "./MasterInquiryMemberGridColumns";
 
@@ -13,7 +14,9 @@ interface MasterInquiryMemberGridProps extends MasterInquiryRequest {
 }
 
 const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = (searchParams) => {
+  
   const [request, setRequest] = useState<MasterInquiryRequest>(searchParams);
+  
   const [trigger, { data, isLoading, isError }] = useLazySearchProfitMasterInquiryQuery();
   const autoSelectedRef = useRef<number | null>(null);
 
@@ -94,16 +97,15 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = (searchP
             }}
           />
           <Pagination
+            rowsPerPageOptions={[5, 10, 50]}
             pageNumber={pageNumber}
             setPageNumber={(value: number) => {
-              console.log("page reset triggered by page change");
-              console.log("current page value", pageNumber);
-              console.log("page value", value);
               setRequest((prev) => ({
+ 
                 ...prev,
                 pagination: {
                   ...prev.pagination,
-                  skip: value * prev.pagination.take
+                  skip: (value - 1) * prev.pagination.take
                 }
               }));
             }}
