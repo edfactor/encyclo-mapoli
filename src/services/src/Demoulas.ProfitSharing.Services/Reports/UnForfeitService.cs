@@ -67,7 +67,7 @@ public sealed class UnForfeitService : IUnForfeitService
                     YearsOfService = yos != null ? yos.Years : (byte)0,
                     NetBalanceLastYear = vest != null ? vest.CurrentBalance ?? 0 : 0,
                     VestedBalanceLastYear = vest != null ? vest.VestedBalance ?? 0 : 0,
-                    d.EmploymentStatusId
+                    d.EmploymentStatusId,
                 }
                 into g
                 orderby g.Key.BadgeNumber
@@ -92,12 +92,15 @@ public sealed class UnForfeitService : IUnForfeitService
                         Forfeiture = x.pd.Forfeiture,
                         Remark = x.pd.Remark,
                         ProfitCodeId = x.pd.ProfitCodeId,
-                        Wages = x.pp.CurrentIncomeYear + x.pp.IncomeExecutive
+                        Wages = x.pp.CurrentIncomeYear + x.pp.IncomeExecutive,
+                        SuggestedForfeiture =  x.pp.EnrollmentId == Enrollment.Constants.OldVestingPlanHasForfeitureRecords || x.pp.EnrollmentId == Enrollment.Constants.NewVestingPlanHasForfeitureRecords ?
+                            - x.pd.Forfeiture 
+                            : null
                     })
                     .ToList()
                 };
 
-            return await query.ToPaginationResultsAsync(req, cancellationToken);
+            return await query.ToPaginationResultsAsync(req, cancellationToken);            
         });
 
         return new ReportResponseBase<RehireForfeituresResponse>
