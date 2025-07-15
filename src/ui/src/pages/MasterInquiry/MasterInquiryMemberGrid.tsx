@@ -1,5 +1,5 @@
 import { Box, CircularProgress, Typography } from "@mui/material";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useLazySearchProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
 import { EmployeeDetails, MasterInquiryRequest } from "reduxstore/types";
 import { DSMGrid, formatNumberWithComma } from "smart-ui-library";
@@ -14,19 +14,26 @@ interface MasterInquiryMemberGridProps extends MasterInquiryRequest {
 }
 
 const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = (searchParams) => {
-  
-  const [request, setRequest] = useState<MasterInquiryRequest>(searchParams);
-  
+  const [pageNumber, setPageNumber] = useState(0);
+  const [pageSize, setPageSize] = useState(5);
   const [trigger, { data, isLoading, isError }] = useLazySearchProfitMasterInquiryQuery();
   const autoSelectedRef = useRef<number | null>(null);
 
-  useEffect(() => {
-    setRequest(searchParams);
-  }, [searchParams]);
+  const onSearch = useCallback(async () => {
+    await trigger({
+      ...searchParams,
+      pagination: { 
+        skip: pageNumber * pageSize, 
+        take: pageSize,
+        sortBy: searchParams.pagination?.sortBy || '',
+        isSortDescending: searchParams.pagination?.isSortDescending || false
+      }
+    });
+  }, [pageNumber, pageSize, searchParams, trigger]);
 
   useEffect(() => {
-    trigger(request);
-  }, [request, trigger]);
+    onSearch();
+  }, [onSearch]);
 
   // If only one member is returned, auto-select and hide the grid
   useEffect(() => {
@@ -54,9 +61,6 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = (searchP
 
   // If no searchParams, render nothing
   if (!searchParams || Object.keys(searchParams).length === 0) return null;
-
-  const pageSize = request.pagination.take;
-  const pageNumber = Math.floor(request.pagination.skip / request.pagination.take);
 
   // Show a message if no results
   if (data && data.results.length === 0) {
@@ -100,25 +104,12 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = (searchP
             rowsPerPageOptions={[5, 10, 50]}
             pageNumber={pageNumber}
             setPageNumber={(value: number) => {
-              setRequest((prev) => ({
- 
-                ...prev,
-                pagination: {
-                  ...prev.pagination,
-                  skip: (value - 1) * prev.pagination.take
-                }
-              }));
+              setPageNumber(value - 1);
             }}
             pageSize={pageSize}
             setPageSize={(value: number) => {
-              setRequest((prev) => ({
-                ...prev,
-                pagination: {
-                  ...prev.pagination,
-                  take: value,
-                  skip: 0
-                }
-              }));
+              setPageSize(value);
+              setPageNumber(0);
             }}
             recordCount={data.total}
           />
