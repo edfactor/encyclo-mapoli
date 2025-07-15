@@ -8,6 +8,7 @@ import { SaveOutlined } from "@mui/icons-material";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { SuggestedForfeitEditor, SuggestedForfeitCellRenderer } from "../../../components/SuggestedForfeiture";
 import { SelectableGridHeader } from "../../../components/SelectableGridHeader";
+import { ForfeitureAdjustmentUpdateRequest } from "../../../reduxstore/types";
 
 export const GetTerminationColumns = (): ColDef[] => {
   return [
@@ -37,7 +38,7 @@ export const GetTerminationColumns = (): ColDef[] => {
 };
 
 // Separate function for detail columns that will be used for master-detail view
-export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, removeRowFromSelectedRows: (id: number) => void, selectedRowIds: number[], selectedProfitYear: number): ColDef[] => {
+export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, removeRowFromSelectedRows: (id: number) => void, selectedRowIds: number[], selectedProfitYear: number, onSave?: (request: ForfeitureAdjustmentUpdateRequest) => Promise<void>, onBulkSave?: (requests: ForfeitureAdjustmentUpdateRequest[]) => Promise<void>): ColDef[] => {
   return [
     {
       headerName: "Profit Year",
@@ -204,11 +205,13 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       headerComponent: HeaderComponent,
       headerComponentParams: {
         addRowToSelectedRows,
-        removeRowFromSelectedRows
+        removeRowFromSelectedRows,
+        onBulkSave
       },
       cellRendererParams: {
         addRowToSelectedRows,
-        removeRowFromSelectedRows
+        removeRowFromSelectedRows,
+        onSave
       },
       cellRenderer: (params: SaveButtonCellParams) => {
         if (!params.data.isDetail || params.data.profitYear !== selectedProfitYear) {
@@ -230,13 +233,14 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
             params.node?.setSelected(!isSelected);
           }} />
           <IconButton 
-            onClick={() => {
-              if (params.data.isDetail) {
-                console.log('Update payload:', {
+            onClick={async () => {
+              if (params.data.isDetail && params.onSave) {
+                const request: ForfeitureAdjustmentUpdateRequest = {
                   badgeNumber: params.data.badgeNumber,
                   profitYear: params.data.profitYear,
-                  suggestedForfeit: currentValue
-                });
+                  forfeitureAmount: currentValue || 0
+                };
+                await params.onSave(request);
               }
             }}
             disabled={hasError}
@@ -252,11 +256,13 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
 interface HeaderComponentProps extends IHeaderParams {
   addRowToSelectedRows: (id: number) => void;
   removeRowFromSelectedRows: (id: number) => void;
+  onBulkSave?: (requests: ForfeitureAdjustmentUpdateRequest[]) => Promise<void>;
 }
 
 interface SaveButtonCellParams extends ICellRendererParams {
   removeRowFromSelectedRows: (id: number) => void;
   addRowToSelectedRows: (id: number) => void;
+  onSave?: (request: ForfeitureAdjustmentUpdateRequest) => Promise<void>;
 }
 
 interface UpdatePayload {
@@ -268,18 +274,21 @@ interface UpdatePayload {
 export const HeaderComponent: React.FC<HeaderComponentProps> = (params: HeaderComponentProps) => {
   const selectedProfitYear = useDecemberFlowProfitYear();
 
-  const isNodeEligible = (nodeData: any) => {
-    return nodeData.isDetail && nodeData.profitYear === selectedProfitYear;
+  const isNodeEligible = (nodeData: any, context: any) => {
+    if (!nodeData.isDetail || nodeData.profitYear !== selectedProfitYear) return false;
+    const rowKey = `${nodeData.badgeNumber}-${nodeData.profitYear}`;
+    const currentValue = context?.editedValues?.[rowKey]?.value ?? nodeData.suggestedForfeit;
+    return (currentValue || 0) !== 0;
   };
 
-  const createUpdatePayload = (nodeData: any, context: any) => {
+  const createUpdatePayload = (nodeData: any, context: any): ForfeitureAdjustmentUpdateRequest => {
     const rowKey = `${nodeData.badgeNumber}-${nodeData.profitYear}`;
     const currentValue = context?.editedValues?.[rowKey]?.value ?? nodeData.suggestedForfeit;
     
     return {
       badgeNumber: nodeData.badgeNumber,
       profitYear: nodeData.profitYear,
-      suggestedForfeit: currentValue
+      forfeitureAmount: currentValue || 0
     };
   };
 

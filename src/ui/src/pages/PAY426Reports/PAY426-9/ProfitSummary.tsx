@@ -89,6 +89,9 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange }) =
   const handleRowClick = (event: { data: YearEndProfitSharingReportSummaryLineItem }) => {
     const rowData = event.data;
     const clickedLineItem = rowData.lineItemPrefix;
+
+    console.log("clickedLineItem", clickedLineItem);
+    console.log("onPresetParamsChange", onPresetParamsChange);
     
     setSelectedLineItem(prevSelected => {
       const newSelected = prevSelected === clickedLineItem ? null : clickedLineItem;
@@ -98,6 +101,7 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange }) =
       } else {
         onPresetParamsChange?.(null);
       }
+      console.log("newSelected", newSelected);
       return newSelected;
     });
   };

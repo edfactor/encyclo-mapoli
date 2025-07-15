@@ -8,32 +8,41 @@ import { SaveOutlined } from "@mui/icons-material";
 import { 
   RehireForfeituresHeaderComponentProps, 
   RehireForfeituresSaveButtonCellParams, 
-  RehireForfeituresUpdatePayload 
+  RehireForfeituresUpdatePayload,
+  ForfeitureAdjustmentUpdateRequest
 } from "../../../reduxstore/types";
 import { SuggestedForfeitEditor, SuggestedForfeitCellRenderer } from "../../../components/SuggestedForfeiture";
 import { SelectableGridHeader } from "../../../components/SelectableGridHeader";
+import { useUpdateForfeitureAdjustmentMutation } from "../../../reduxstore/api/YearsEndApi";
+import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 
-export const HeaderComponent: React.FC<RehireForfeituresHeaderComponentProps> = (props) => {
-  const isNodeEligible = (nodeData: any) => {
-    return nodeData.isDetail;
-  };
+export const HeaderComponent: React.FC<RehireForfeituresHeaderComponentProps> = (params: RehireForfeituresHeaderComponentProps) => {
+  const selectedProfitYear = useDecemberFlowProfitYear();
 
-  const createUpdatePayload = (nodeData: any, context: any) => {
+  const isNodeEligible = (nodeData: any, context: any) => {
+    if (!nodeData.isDetail || nodeData.profitYear !== selectedProfitYear) return false;
     const rowKey = `${nodeData.badgeNumber}-${nodeData.profitYear}`;
     const currentValue = context?.editedValues?.[rowKey]?.value ?? nodeData.suggestedForfeit;
-    
+    return (currentValue || 0) !== 0;
+  };
+
+  const createUpdatePayload = (nodeData: any, context: any): ForfeitureAdjustmentUpdateRequest => {
+    const rowKey = `${nodeData.badgeNumber}-${nodeData.profitYear}`;
+    const currentValue = context?.editedValues?.[rowKey]?.value ?? nodeData.suggestedForfeit;
     return {
       badgeNumber: nodeData.badgeNumber,
       profitYear: nodeData.profitYear,
-      suggestedForfeit: currentValue
+      forfeitureAmount: -(currentValue || 0)
     };
   };
 
-  return <SelectableGridHeader 
-    {...props}
-    isNodeEligible={isNodeEligible}
-    createUpdatePayload={createUpdatePayload}
-  />;
+  return (
+    <SelectableGridHeader
+      {...params}
+      isNodeEligible={isNodeEligible}
+      createUpdatePayload={createUpdatePayload}
+    />
+  );
 };
 
 export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
@@ -145,7 +154,7 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
   ];
 };
 
-export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, removeRowFromSelectedRows: (id: number) => void, selectedProfitYear: number): ColDef[] => {
+export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, removeRowFromSelectedRows: (id: number) => void, selectedProfitYear: number, onSave?: (request: ForfeitureAdjustmentUpdateRequest) => Promise<void>, onBulkSave?: (requests: ForfeitureAdjustmentUpdateRequest[]) => Promise<void>): ColDef[] => {
   return [
     {
       headerName: "Profit Year",
@@ -225,8 +234,8 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       cellRenderer: (params: ICellRendererParams) => SuggestedForfeitCellRenderer({ ...params, selectedProfitYear }),
       valueFormatter: agGridNumberToCurrency,
       valueGetter: (params) => {
-        if (!params.data.isDetail) return params.data.suggestedForfeit;
-        const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}`;
+        if (!params.data.isDetail) return null;
+        const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}${params.data.enrollmentId ? `-${params.data.enrollmentId}` : ''}`;
         const editedValue = params.context?.editedValues?.[rowKey]?.value;
         return editedValue !== undefined ? editedValue : params.data.suggestedForfeit;
       }
@@ -254,11 +263,13 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       headerComponent: HeaderComponent,
       headerComponentParams: {
         addRowToSelectedRows,
-        removeRowFromSelectedRows
+        removeRowFromSelectedRows,
+        onBulkSave
       },
       cellRendererParams: {
         addRowToSelectedRows,
-        removeRowFromSelectedRows
+        removeRowFromSelectedRows,
+        onSave
       },
       cellRenderer: (params: RehireForfeituresSaveButtonCellParams) => {
         if (!params.data.isDetail || params.data.profitYear !== selectedProfitYear) {
@@ -271,7 +282,10 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
         const currentValue = params.context?.editedValues?.[rowKey]?.value ?? params.data.suggestedForfeit;
 
         return <div>
-          <Checkbox checked={isSelected} onChange={() => {
+          <Checkbox 
+            checked={isSelected} 
+            disabled={(currentValue || 0) === 0}
+            onChange={() => {
             if (isSelected) {
               params.removeRowFromSelectedRows(id);
               params.node?.setSelected(false);
@@ -282,16 +296,17 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
             params.api.refreshCells({ force: true });
           }} />
           <IconButton 
-            onClick={() => {
-              if (params.data.isDetail) {
-                console.log('Update payload:', {
+            onClick={async () => {
+              if (params.data.isDetail && params.onSave) {
+                const request: ForfeitureAdjustmentUpdateRequest = {
                   badgeNumber: params.data.badgeNumber,
                   profitYear: params.data.profitYear,
-                  suggestedForfeit: currentValue
-                });
+                  forfeitureAmount: -(currentValue || 0)
+                };
+                await params.onSave(request);
               }
             }}
-            disabled={hasError}
+            disabled={hasError || (currentValue || 0) === 0}
           >
             <SaveOutlined />
           </IconButton>

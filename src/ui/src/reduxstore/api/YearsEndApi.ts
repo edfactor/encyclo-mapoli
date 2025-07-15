@@ -1075,6 +1075,15 @@ export const YearsEndApi = createApi({
         body: params
       })
     }),
+
+    updateForfeitureAdjustmentBulk: builder.mutation<ForfeitureAdjustmentDetail[], ForfeitureAdjustmentUpdateRequest[]>({
+      query: (params) => ({
+        url: "yearend/forfeiture-adjustments/bulk-update",
+        method: "PUT",
+        body: params
+      })
+    }),
+
     finalizeReport: builder.mutation<void, { profitYear: number }>({
       query: (params) => ({
         url: "yearend/final",
@@ -1124,6 +1133,7 @@ export const {
   useLazyGetBreakdownGrandTotalsQuery,
   useLazyGetForfeitureAdjustmentsQuery,
   useUpdateForfeitureAdjustmentMutation,
+  useUpdateForfeitureAdjustmentBulkMutation,
   useLazyGetUpdateSummaryQuery,
   useUpdateEnrollmentMutation,
   useFinalizeReportMutation

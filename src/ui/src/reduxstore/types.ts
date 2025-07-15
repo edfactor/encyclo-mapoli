@@ -1444,11 +1444,13 @@ export interface RehireForfeituresEditedValues {
 export interface RehireForfeituresHeaderComponentProps extends IHeaderParams {
   addRowToSelectedRows: (id: number) => void;
   removeRowFromSelectedRows: (id: number) => void;
+  onBulkSave?: (requests: ForfeitureAdjustmentUpdateRequest[]) => Promise<void>;
 }
 
 export interface RehireForfeituresSaveButtonCellParams extends ICellRendererParams {
   removeRowFromSelectedRows: (id: number) => void;
   addRowToSelectedRows: (id: number) => void;
+  onSave?: (request: ForfeitureAdjustmentUpdateRequest) => Promise<void>;
 }
 
 export interface RehireForfeituresUpdatePayload {
