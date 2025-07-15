@@ -1,14 +1,13 @@
-import { Typography } from "@mui/material";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Path, useNavigate } from "react-router";
-import {DSMGrid, ISortParams, numberToCurrency, Pagination} from "smart-ui-library";
-import { GetProfitShareForfeitColumns } from "./ForfeitGridColumns";
-import { useSelector } from "react-redux";
-import { RootState } from "reduxstore/store";
-import { useLazyGetForfeituresAndPointsQuery } from "reduxstore/api/YearsEndApi";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-import { CAPTIONS } from "../../constants";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSelector } from "react-redux";
+import { Path, useNavigate } from "react-router";
+import { useLazyGetForfeituresAndPointsQuery } from "reduxstore/api/YearsEndApi";
+import { RootState } from "reduxstore/store";
+import { DSMGrid, ISortParams, numberToCurrency, Pagination } from "smart-ui-library";
 import ReportSummary from "../../components/ReportSummary";
+import { CAPTIONS } from "../../constants";
+import { GetProfitShareForfeitColumns } from "./ForfeitGridColumns";
 
 interface ForfeitGridProps {
   initialSearchLoaded: boolean;

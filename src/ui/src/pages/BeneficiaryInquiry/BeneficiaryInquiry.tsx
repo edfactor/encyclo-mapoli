@@ -1,22 +1,20 @@
-import { Button, CircularProgress, Divider, Typography } from "@mui/material";
-import Grid2 from '@mui/material/Grid2';
-import { useEffect, useState } from "react";
-import { DSMAccordion, Page } from "smart-ui-library";
-import BeneficiaryInquirySearchFilter from "./BeneficiaryInquirySearchFilter";
-import BeneficiaryInquiryGrid from "./BeneficiaryInquiryGrid";
+import { Button, CircularProgress, Divider } from "@mui/material";
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import CreateBeneficiary from "./CreateBeneficiary";
-import { useLazyGetBeneficiarytypesQuery, useLazyGetBeneficiaryKindQuery, useLazyDeleteBeneficiaryQuery } from "reduxstore/api/BeneficiariesApi";
-import { BeneficiaryDto, BeneficiaryKindDto, BeneficiaryTypeDto, MasterInquiryRequest } from "reduxstore/types";
-import { useSelector } from "react-redux";
-import { RootState } from "reduxstore/store";
-import MasterInquiryMemberGrid from "pages/MasterInquiry/MasterInquiryMemberGrid";
+import Grid2 from '@mui/material/Grid2';
 import MasterInquiryEmployeeDetails from "pages/MasterInquiry/MasterInquiryEmployeeDetails";
-import { bool } from "yup";
+import MasterInquiryMemberGrid from "pages/MasterInquiry/MasterInquiryMemberGrid";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { useLazyDeleteBeneficiaryQuery, useLazyGetBeneficiaryKindQuery, useLazyGetBeneficiarytypesQuery } from "reduxstore/api/BeneficiariesApi";
+import { RootState } from "reduxstore/store";
+import { BeneficiaryDto, BeneficiaryKindDto, BeneficiaryTypeDto, MasterInquiryRequest } from "reduxstore/types";
+import { DSMAccordion, Page } from "smart-ui-library";
+import BeneficiaryInquiryGrid from "./BeneficiaryInquiryGrid";
+import BeneficiaryInquirySearchFilter from "./BeneficiaryInquirySearchFilter";
+import CreateBeneficiary from "./CreateBeneficiary";
 
 
 const BeneficiaryInquiry = () => {
