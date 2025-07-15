@@ -522,6 +522,10 @@ export interface ForfeituresAndPoints extends PagedReportResponse<ForfeituresAnd
   totalEarningPoints: number;
   totalForfeitPoints: number;
   totalForfeitures: number;
+  totalProfitSharingBalance: number;
+  distributionTotals: number;
+  allocationToTotals: number;
+  allocationsFromTotals: number;
 }
 
 export interface ForfeituresByAgeDetail {

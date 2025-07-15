@@ -40,36 +40,7 @@ public sealed class TotalService : ITotalService
         _embeddedSqlService = embeddedSqlService;
         _demographicReaderService = demographicReaderService;
     }
-
-    /// <summary>
-    /// Retrieves a queryable set of total balance data for participants based on the specified profit year.
-    /// </summary>
-    /// <param name="ctx">
-    /// The database context implementing <see cref="IProfitSharingDbContext"/> used to access profit-sharing data.
-    /// </param>
-    /// <param name="profitYear">
-    /// The profit year (as a <see cref="short"/>) up to which the total balances are calculated.
-    /// </param>
-    /// <returns>
-    /// An <see cref="IQueryable{T}"/> of <see cref="ParticipantTotalDto"/> containing the total balance data for participants.
-    /// </returns>
-    internal IQueryable<ParticipantTotalDto> GetTotalBalanceSetEmployeePortion(IProfitSharingDbContext ctx, short profitYear)
-    {
-        byte[] sumAllFieldProfitCodeTypes = ProfitDetailExtensions.GetProfitCodesForBalanceCalc();
-
-        return (from pd in ctx.ProfitDetails
-                where pd.ProfitYear <= profitYear && pd.CommentRelatedOracleHcmId == null
-                group pd by pd.Ssn
-            into pd_g
-                select new ParticipantTotalDto
-                {
-                    Ssn = pd_g.Key,
-                    Total = pd_g.Sum(x =>
-                        sumAllFieldProfitCodeTypes.Contains(x.ProfitCodeId)
-                            ? (-x.Forfeiture + x.Contribution + x.Earnings)
-                            : (x.Contribution + x.Earnings + x.Forfeiture)) //Just add the columns
-                });
-    }
+    
     /// <summary>
     /// Retrieves a queryable set of total balance data for participants based on the specified profit year.
     /// </summary>
