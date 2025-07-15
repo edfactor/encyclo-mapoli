@@ -334,7 +334,7 @@ export interface MasterInquirySearch {
 export interface MasterInquiryDetail extends ProfitYearRequest {
   id: number;
   isEmployee: boolean;
-  ssn: number;
+  ssn: string;
   profitYearIteration: number;
   distributionSequence: number;
   profitCodeId: number;
@@ -350,7 +350,7 @@ export interface MasterInquiryDetail extends ProfitYearRequest {
   stateTaxes: number;
   taxCodeId?: string;
   commentTypeId?: number;
-  commentRelatedCheckNumber?: number;
+  commentRelatedCheckNumber?: string;
   commentRelatedState?: string;
   commentRelatedOracleHcmId?: number;
   commentRelatedPsnSuffix?: number;
@@ -522,6 +522,10 @@ export interface ForfeituresAndPoints extends PagedReportResponse<ForfeituresAnd
   totalEarningPoints: number;
   totalForfeitPoints: number;
   totalForfeitures: number;
+  totalProfitSharingBalance: number;
+  distributionTotals: number;
+  allocationToTotals: number;
+  allocationsFromTotals: number;
 }
 
 export interface ForfeituresByAgeDetail {

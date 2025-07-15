@@ -8,13 +8,6 @@ using Oracle.ManagedDataAccess.Client;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 
-public record YearEndChange
-{
-    public required decimal EarnPoints;
-    public required int IsNew;
-    public required DateOnly? PsCertificateIssuedDate;
-    public required byte ZeroCont;
-}
 
 /*
  * This integration test requires that READY's test/reference schema should be run to "Activity 18", for this test to pass.
@@ -44,14 +37,14 @@ public class YearEndServiceTests : PristineBaseTest
 
         await DbFactory.UseWritableContext(async ctx =>
         {
-            PayProfitUpdateService ppus = new(DbFactory, _loggerFactory);
+            PayProfitUpdateService ppus = new(DbFactory, _loggerFactory, TotalService);
             YearEndService yearEndService = new(DbFactory, CalendarService, ppus, TotalService, DemographicReaderService);
             OracleConnection c = (ctx.Database.GetDbConnection() as OracleConnection)!;
             await c.OpenAsync(ct);
 
             // ------- Act
             DbTransaction transaction = await c.BeginTransactionAsync();
-            await yearEndService.RunFinalYearEndUpdates(profitYear, ct);
+            await yearEndService.RunFinalYearEndUpdates(profitYear, false, ct);
             await transaction.CommitAsync();
             
             return 7;

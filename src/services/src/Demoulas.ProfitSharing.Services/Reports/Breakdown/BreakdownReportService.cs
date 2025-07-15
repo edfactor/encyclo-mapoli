@@ -328,7 +328,7 @@ public sealed class BreakdownReportService : IBreakdownService
 
         /*
        
-       *| Report store                                        | When the COBOL assigns it                                                                                | Key tests in the code                                                                                                                                  |
+        *| Report store                                        | When the COBOL assigns it                                                                                | Key tests in the code                                                                                                                                  |
          | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
          | **700 – “Retired – Drawing Pension”**               | `B-TERM = "W"` (“W” is the retirement term-code).                                                        | `COMPUTE W-ST = WS-STR-VAL-PS-PENSION-RETIRED + 1000`                                                                                                  |
          | **701 – “Active – Drawing Pension”**                | Hard-coded list of SSNs that are still on the active payroll **after** retirement.                       | Later in the same paragraph:<br>`IF B-SSN = 023202688 OR … THEN COMPUTE W-ST = WS-STR-VAL-PS-PENSION-ACTIVE + 1000`                                    |
