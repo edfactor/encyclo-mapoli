@@ -1,4 +1,5 @@
-﻿using Demoulas.Common.Contracts.Contracts.Response;
+﻿using System.Diagnostics;
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
@@ -920,8 +921,8 @@ public class FrozenReportService : IFrozenReportService
             }
         };
     }
-
-    public async Task<UpdateSummaryReportResponse> GetUpdateSummaryReport(ProfitYearRequest req,
+    
+     public async Task<UpdateSummaryReportResponse> GetUpdateSummaryReport(ProfitYearRequest req,
         CancellationToken cancellationToken = default)
     {
         var lastYear = (short)(req.ProfitYear - 1);
@@ -937,24 +938,22 @@ public class FrozenReportService : IFrozenReportService
                     x.Ssn,
                     x.ContactInfo.FirstName,
                     x.ContactInfo.LastName,
-                    x.BadgeNumber,
-                    PsnSuffix = (short)0,
+                    BadgeNumber = (long) x.BadgeNumber,
                     DemographicId = x.Id,
                     IsEmployee = true,
                     x.StoreNumber
                 });
-            var beneficiaryBase = ctx.Beneficiaries
-                
+            var beneficiaryBase = ctx.BeneficiaryContacts
 #pragma warning disable DSMPS001
-                .Where(x => !ctx.Demographics.Any(d => d.Ssn == x.Contact!.Ssn))
+                .Where(x => !ctx.Demographics.Any(d => d.Ssn == x.Ssn))
 #pragma warning restore DSMPS001
+                .Join(ctx.Beneficiaries, bc=>bc.Id, b=>b.BeneficiaryContactId, (bc, b)=>new {bc, b})
                 .Select(x => new
                 {
-                    x.Contact!.Ssn,
-                    x.Contact.ContactInfo.FirstName,
-                    x.Contact.ContactInfo.LastName,
-                    x.BadgeNumber,
-                    x.PsnSuffix,
+                    x.bc.Ssn,
+                    FirstName = x.bc.ContactInfo.FirstName.Trim(),
+                    x.bc.ContactInfo.LastName,
+                    BadgeNumber = (long)(x.b.BadgeNumber*10000 + x.b.PsnSuffix),
                     DemographicId = 0,
                     IsEmployee = false,
                     StoreNumber = (short)0
@@ -962,41 +961,48 @@ public class FrozenReportService : IFrozenReportService
             var
                 members = demoBase.Union(
                     beneficiaryBase); //UnionBy throws an error, so beneficiaries that are also employees are filtered out, and the regular Union can be used since we've filtered out possible duplicates.
-
+            
             var baseQuery = await (
                 from m in members
-                join bal in _totalService.TotalVestingBalance(ctx, req.ProfitYear, startEnd.FiscalBeginDate)
-                    on m.Ssn equals bal.Ssn
-                join lyBalTbl in _totalService.TotalVestingBalance(ctx, lastYear, lyStartEnd.FiscalBeginDate)
+                
+                join bal in _totalService.TotalVestingBalance(ctx, req.ProfitYear /*Employee*/, startEnd.FiscalEndDate)
+                    on m.Ssn equals bal.Ssn into balTmp
+                from bal in balTmp.DefaultIfEmpty()
+
+                // ToBeDone: This should be using the frozen for year "lastYear"
+                join lyBalTbl in _totalService.TotalVestingBalance(ctx, lastYear /*Transactions Up To*/, lyStartEnd.FiscalBeginDate)
                     on m.Ssn equals lyBalTbl.Ssn into lyBalTmp
                 from lyBal in lyBalTmp.DefaultIfEmpty()
+
                 join lyPpTbl in ctx.PayProfits.Where(x => x.ProfitYear == lastYear)
                     on m.DemographicId equals lyPpTbl.DemographicId into lyPpTmp
                 from lyPp in lyPpTmp.DefaultIfEmpty()
+                
                 join ppTbl in ctx.PayProfits.Where(x => x.ProfitYear == req.ProfitYear)
                     on m.DemographicId equals ppTbl.DemographicId into ppTmp
                 from pp in ppTmp.DefaultIfEmpty()
-                where bal.CurrentBalance != 0 && bal.VestedBalance != 0
+                
                 select new
                 {
                     m.BadgeNumber,
-                    m.PsnSuffix,
                     m.FirstName,
                     m.LastName,
                     m.StoreNumber,
                     m.IsEmployee,
+                    
                     BeforeEnrollmentId = lyPp != null ? lyPp.EnrollmentId : 0,
                     BeforeProfitSharingAmount = lyBal != null ? lyBal.CurrentBalance : 0,
                     BeforeVestedProfitSharingAmount = lyBal != null ? lyBal.VestedBalance : 0,
                     BeforeYearsInPlan = lyBal != null ? lyBal.YearsInPlan : (byte)0,
+                    
                     AfterEnrollmentId = pp != null ? pp.EnrollmentId : 0,
                     AfterProfitSharingAmount = bal.CurrentBalance,
                     AfterVestedProfitSharingAmount = bal.VestedBalance,
-                    AfterYearsInPlan = bal.YearsInPlan
+                    AfterYearsInPlan = bal.YearsInPlan 
                 }
             ).ToListAsync(
                 cancellationToken); //Have to materialize. Something in this query seems to be unable to render as an expression with the current version of the oracle provider.
-
+            
             var totals = baseQuery.GroupBy(x => true).Select(x => new
             {
                 TotalBeforeProfitSharing = x.Sum(c => c.BeforeProfitSharingAmount),
@@ -1010,7 +1016,6 @@ public class FrozenReportService : IFrozenReportService
             var resp = baseQuery.Select(x => new UpdateSummaryReportDetail()
             {
                 BadgeNumber = x.BadgeNumber,
-                PsnSuffix = x.PsnSuffix,
                 StoreNumber = x.StoreNumber,
                 Name = $"{x.LastName}, {x.FirstName}",
                 IsEmployee = x.IsEmployee,
@@ -1145,40 +1150,28 @@ public class FrozenReportService : IFrozenReportService
     {
         using (_logger.BeginScope("Request PROFIT CONTROL SHEET"))
         {
-            var rslt = await _dataContextFactory.UseReadOnlyContext(async ctx =>
+            return await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
-                var rsp = new ProfitControlSheetResponse();
+                DateOnly fiscalEndDate = (await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken)).FiscalEndDate;
+                ProfitControlSheetResponse response = new();
+                HashSet<int> employeeSsn = await (await _demographicReaderService.BuildDemographicQuery(ctx, true)).Select(d => d.Ssn).ToHashSetAsync(cancellationToken);
+                HashSet<int> beneSsn = await ctx.BeneficiaryContacts.Select(bc => bc.Ssn).ToHashSetAsync(cancellationToken);
 
-                var demographics = await _demographicReaderService.BuildDemographicQuery(ctx, true);
+                HashSet<int> pureEmployee = employeeSsn.Except(beneSsn).ToHashSet();
+                HashSet<int> pureBene = beneSsn.Except(employeeSsn).ToHashSet();
+                HashSet<int> both = employeeSsn.Intersect(beneSsn).ToHashSet();
 
-                rsp.EmployeeContributionProfitSharingAmount = (await (
-                    from bal in _totalService.GetTotalBalanceSetEmployeePortion(ctx, request.ProfitYear)
-                    group bal by true into balGrp
-                    select new { Total = balGrp.Sum(x => x.Total) ?? 0 }
-                ).FirstOrDefaultAsync(cancellationToken))?.Total ?? 0;
+                Dictionary<int, decimal> allMemberCurrentBalance = await _totalService.TotalVestingBalance(ctx, request.ProfitYear, fiscalEndDate)
+                    .ToDictionaryAsync(k => k.Ssn, v => v.CurrentBalance == null ? 0 : (decimal)v.CurrentBalance, cancellationToken);
 
-                rsp.NonEmployeeProfitSharingAmount = (await (
-                    from bc in ctx.BeneficiaryContacts
-                    join b in ctx.Beneficiaries on bc.Id equals b.BeneficiaryContactId
-                    where (!demographics.Any(d => d.Ssn == bc.Ssn))
-                    group b by true into bGrp
-                    select new { Total = bGrp.Sum(x => 0) } // Needs to use profit detail rows to get the correct amount
-                ).FirstOrDefaultAsync(cancellationToken))?.Total ?? 0;
+                response.EmployeeContributionProfitSharingAmount =
+                    allMemberCurrentBalance.Where(kvp => pureEmployee.Contains(kvp.Key)).Sum(kvp => kvp.Value);
+                response.NonEmployeeProfitSharingAmount = allMemberCurrentBalance.Where(kvp => pureBene.Contains(kvp.Key)).Sum(kvp => kvp.Value);
 
-                rsp.EmployeeBeneficiaryAmount = (await (
-                    from bc in ctx.BeneficiaryContacts
-                    join b in ctx.Beneficiaries on bc.Id equals b.BeneficiaryContactId
-                    where (demographics.Any(d => d.Ssn == bc.Ssn))
-                    group b by true into bGrp
-                    select new { Total = bGrp.Sum(x => 0) } // Needs to use profit detail rows to get the correct amount
-                ).FirstOrDefaultAsync(cancellationToken))?.Total ?? 0;
-
-                return rsp;
+                response.EmployeeBeneficiaryAmount = allMemberCurrentBalance.Where(kvp => both.Contains(kvp.Key)).Sum(kvp => kvp.Value);
+                return response;
             });
-
-            return rslt;
         }
-
     }
 
     private async Task<DateTime> GetAsOfDate(ProfitYearAndAsOfDateRequest req, CancellationToken cancellationToken)

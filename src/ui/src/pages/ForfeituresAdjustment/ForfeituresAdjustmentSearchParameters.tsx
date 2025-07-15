@@ -1,5 +1,5 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FormHelperText, FormLabel, TextField } from "@mui/material";
+import { FormHelperText, FormLabel, TextField, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
@@ -10,6 +10,7 @@ import * as yup from "yup";
 import { useLazyGetForfeitureAdjustmentsQuery } from "reduxstore/api/YearsEndApi";
 import { setForfeitureAdjustmentQueryParams, clearForfeitureAdjustmentData, clearForfeitureAdjustmentQueryParams } from "reduxstore/slices/forfeituresAdjustmentSlice";
 import { RootState } from "reduxstore/store";
+import { useEffect, useState } from "react";
 
 // Define the search parameters interface
 interface ForfeituresAdjustmentSearchParams {
@@ -24,8 +25,16 @@ interface ForfeituresAdjustmentSearchParametersProps {
 
 // Define schema for validation without circular references
 const schema = yup.object({
-  ssn: yup.string().optional(),
-  badge: yup.string().optional(),
+  ssn: yup.number()
+    .typeError("SSN must be a number")
+    .integer("SSN must be an integer")
+    .min(0, "SSN must be positive")
+    .max(999999999, "SSN must be 9 digits or less").transform((value) => value || undefined),
+  badge: yup.number()
+    .typeError("Badge Number must be a number")
+    .integer("Badge Number must be an integer")
+    .min(0, "Badge must be positive")
+    .max(9999999, "Badge must be 7 digits or less").transform((value) => value || undefined),
   year: yup
     .number()
     .typeError("Year must be a number")
@@ -36,9 +45,7 @@ const schema = yup.object({
 }).test(
   'at-least-one-required',
   'Either SSN or Badge is required',
-  function(value) {
-    return !!(value.ssn || value.badge);
-  }
+  (values) => Boolean(values.ssn || values.badge)
 );
 
 const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearchParametersProps> = ({
@@ -49,10 +56,14 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
   const { forfeitureAdjustmentQueryParams } = useSelector((state: RootState) => state.forfeituresAdjustment);
   const profitYear = useFiscalCloseProfitYear();
 
+  const [activeField, setActiveField] = useState<"ssn" | "badge" | null>(null);
+  const [oneAddSearchFilterEntered, setOneAddSearchFilterEntered] = useState<boolean>(false);
+
   const {
     control,
     handleSubmit,
     formState: { errors },
+    watch,
     reset
   } = useForm<ForfeituresAdjustmentSearchParams>({
     resolver: yupResolver(schema) as Resolver<ForfeituresAdjustmentSearchParams>,
@@ -64,11 +75,37 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
     mode: "onSubmit"
   });
 
-  const validateAndSearch = handleSubmit((data) => {
-    if (!data.ssn && !data.badge) {
-      return;
+  let socialSecurityChosen = false;
+  let badgeNumberChosen = false;
+
+  const toggleSearchFieldEntered = (value: boolean, fieldType: string) => {
+    
+    if (fieldType === "ssn") {
+      socialSecurityChosen = value;
+    }
+    if (fieldType === "badge") {
+      badgeNumberChosen = value;
     }
 
+    setOneAddSearchFilterEntered(socialSecurityChosen || badgeNumberChosen);
+  };
+
+  const socialSecurity = watch("ssn");
+  const badgeNumber = watch("badge");
+
+   // Update active field based on which field has input
+  useEffect(() => {
+    if (socialSecurity && !badgeNumber) {
+      setActiveField("ssn");
+    } else if (badgeNumber && !socialSecurity) {
+      setActiveField("badge");
+    } else if (!socialSecurity && !badgeNumber) {
+      setActiveField(null);
+    }
+  }, [socialSecurity, badgeNumber]);
+
+  const validateAndSearch = handleSubmit((data) => {
+    
     const searchParams = {
       ssn: data.ssn,
       badge: data.badge,
@@ -100,7 +137,17 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
     dispatch(clearForfeitureAdjustmentData());
     dispatch(clearForfeitureAdjustmentQueryParams());
     setInitialSearchLoaded(false);
+    setOneAddSearchFilterEntered(false);
+    setActiveField(null);
+    socialSecurityChosen = false;
+    badgeNumberChosen = false;
   };
+
+  const requiredLabel = (    
+    <Typography component="span" color="error" fontWeight="bold">
+      *
+    </Typography>
+  );
 
   return (
     <form onSubmit={validateAndSearch}>
@@ -113,7 +160,7 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
           spacing={3}
           width="100%">
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-            <FormLabel>SSN</FormLabel>
+            <FormLabel>SSN {requiredLabel}</FormLabel>
             <Controller
               name="ssn"
               control={control}
@@ -122,8 +169,20 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
                   {...field}
                   fullWidth
                   variant="outlined"
+                  disabled={activeField === "badge"}
                   error={!!errors.ssn || !!errors.root?.message}
                   placeholder="SSN"
+                  onChange={(e) => {
+                    if (!isNaN(Number(e.target.value))) {
+                      const parsedValue = e.target.value === "" ? null : Number(e.target.value);
+                      field.onChange(parsedValue);
+                      if (e.target.value !== "") {
+                        toggleSearchFieldEntered(true, "ssn");
+                      } else {
+                        toggleSearchFieldEntered(false, "ssn");
+                      }
+                    }
+                  }}
                 />
               )}
             />
@@ -132,7 +191,7 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
           </Grid2>
 
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-            <FormLabel>Badge</FormLabel>
+            <FormLabel>Badge {requiredLabel}</FormLabel>
             <Controller
               name="badge"
               control={control}
@@ -143,6 +202,18 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
                   variant="outlined"
                   error={!!errors.badge || !!errors.root?.message}
                   placeholder="Badge"
+                  disabled={activeField === "ssn"}
+                  onChange={(e) => {
+                    if (!isNaN(Number(e.target.value))) {
+                      const parsedValue = e.target.value === "" ? null : Number(e.target.value);
+                      field.onChange(parsedValue);
+                      if (e.target.value !== "") {
+                        toggleSearchFieldEntered(true, "badge");
+                      } else {
+                        toggleSearchFieldEntered(false, "badge");
+                      }
+                    }
+                  }}
                 />
               )}
             />
@@ -175,6 +246,7 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
         width="100%"
         paddingX="24px">
         <SearchAndReset
+          disabled={!oneAddSearchFilterEntered}
           handleReset={handleReset}
           handleSearch={validateAndSearch}
           isFetching={isFetching}

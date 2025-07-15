@@ -1,10 +1,11 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-import { EmployeeDetails, MasterInquiryDetail, MasterInquirySearch, GroupedProfitSummaryDto } from "reduxstore/types";
+import { EmployeeDetails, GroupedProfitSummaryDto, MasterInquiryDetail, MasterInquirySearch } from "reduxstore/types";
 
 export interface InquiryState {
   masterInquiryData: EmployeeDetails | null;
   masterInquiryEmployeeDetails: EmployeeDetails | null;
+  masterInquiryResults: MasterInquiryDetail[] | null;
   masterInquiryRequestParams: MasterInquirySearch | null;
   masterInquiryGroupingData: GroupedProfitSummaryDto[] | null;
 }
@@ -12,6 +13,7 @@ export interface InquiryState {
 const initialState: InquiryState = {
   masterInquiryData: null,
   masterInquiryEmployeeDetails: null,
+  masterInquiryResults: null,
   masterInquiryRequestParams: null,
   masterInquiryGroupingData: null
 };
@@ -40,13 +42,12 @@ export const inquirySlice = createSlice({
       state.masterInquiryData = null;
       state.masterInquiryEmployeeDetails = null;
     },
-    updateMasterInquiryResults: (state, action: PayloadAction<MasterInquiryDetail[]>) => {
-      // Only update if masterInquiryData has inquiryResults property
-      if (state.masterInquiryData && (state.masterInquiryData as any).inquiryResults) {
-        (state.masterInquiryData as any).inquiryResults.results = [
-          ...action.payload
-        ];
-      }
+    setMasterInquiryResults: (state, action: PayloadAction<MasterInquiryDetail[]>) => {
+      
+      state.masterInquiryResults = action.payload;
+    },
+    clearMasterInquiryResults: (state) => {
+      state.masterInquiryResults = null;
     },
     setMasterInquiryGroupingData: (state, action: PayloadAction<GroupedProfitSummaryDto[]>) => {
       state.masterInquiryGroupingData = action.payload;
@@ -62,7 +63,8 @@ export const {
   clearMasterInquiryRequestParams,
   setMasterInquiryData,
   setMasterInquiryRequestParams,
-  updateMasterInquiryResults,
+  setMasterInquiryResults,
+  clearMasterInquiryResults,
   setMasterInquiryGroupingData,
   clearMasterInquiryGroupingData
 } = inquirySlice.actions;

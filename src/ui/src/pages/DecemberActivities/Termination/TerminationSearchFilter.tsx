@@ -1,14 +1,14 @@
 import { yupResolver } from "@hookform/resolvers/yup";
+import { FormControl, FormLabel, MenuItem, Select } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import { Controller, useForm } from "react-hook-form";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "reduxstore/store";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
-import { FormControl, FormLabel, InputLabel, MenuItem, Select } from "@mui/material";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
-import { CalendarResponseDto, StartAndEndDateRequest } from "../../../reduxstore/types";
-import { tryddmmyyyyToDate, mmDDYYFormat } from "../../../utils/dateUtils";
-import { RootState } from "reduxstore/store";
+import { CalendarResponseDto } from "../../../reduxstore/types";
+import { mmDDYYFormat, tryddmmyyyyToDate } from "../../../utils/dateUtils";
 import { TerminationSearchRequest } from "./Termination";
 
 

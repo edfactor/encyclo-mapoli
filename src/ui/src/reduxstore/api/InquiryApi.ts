@@ -1,15 +1,14 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-import {
-  MasterInquiryRequest,
-  MasterInquiryMemberRequest,
-  MasterInquiryResponseDto,
-  PagedReportResponse,
-  EmployeeDetails,
-  GroupedProfitSummaryDto
-} from "../types";
+import { setMasterInquiryGroupingData, setMasterInquiryResults } from "reduxstore/slices/inquirySlice";
 import { Paged } from "smart-ui-library";
+import {
+  EmployeeDetails,
+  GroupedProfitSummaryDto,
+  MasterInquiryMemberRequest,
+  MasterInquiryRequest,
+  MasterInquiryResponseDto
+} from "../types";
 import { createDataSourceAwareBaseQuery } from "./api";
-import { setMasterInquiryGroupingData } from "reduxstore/slices/inquirySlice";
 
 const baseQuery = createDataSourceAwareBaseQuery();
 export const InquiryApi = createApi({
@@ -56,7 +55,20 @@ export const InquiryApi = createApi({
         url: `master/master-inquiry/member/${memberType}/${id}/details`,
         method: "GET",
         params: pagination
-      })
+      }),
+      async onQueryStarted( _args, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+            const { results } = data;
+            const transformedResults = results.map((item: MasterInquiryResponseDto) => ({
+              ...item,
+              transactionDate: item.transactionDate ? new Date(item.transactionDate) : undefined,
+            }));
+            dispatch(setMasterInquiryResults(transformedResults));
+        } catch (err) {
+          console.error("Failed to fetch profit master inquiry member details:", err);
+        }
+      }
     }),
     getProfitMasterInquiryFilteredDetails: builder.query<{ results: MasterInquiryResponseDto[], total: number }, { 
       memberType: number; 

@@ -74,12 +74,26 @@ public static class GetGold
         "PAYCERT-19155"
     ];
 
+    /* delete all the golden files.   Ensures we dont mix a prior run with a new run. */
 
+    public static void Purge()
+    {
+        string goldenDir = $"{ReadyActivity.OptionalLocalResourceBase}golden";
+        foreach (string file in Directory.GetFiles(goldenDir))
+        {
+            File.Delete(file);
+        }
+
+    }
+    
     public static void Fetch(string dataDirectory, SftpClient sftpClient)
     {
         string goldenDir = $"{ReadyActivity.OptionalLocalResourceBase}golden";
         string outcomeFile = $"{dataDirectory}/outcome.json";
-        File.Copy(outcomeFile, $"{goldenDir}/outcome.json", true);
+        if (File.Exists(outcomeFile))
+        {
+            File.Copy(outcomeFile, $"{goldenDir}/outcome.json", true);
+        }
 
         string json = File.ReadAllText($"{goldenDir}/outcome.json");
         List<Outcome> outcomes = JsonSerializer.Deserialize<List<Outcome>>(json)!;
@@ -92,7 +106,11 @@ public static class GetGold
             if (match.Success)
             {
                 string logFilePath = match.Groups[2].Value;
-                activityByPid.Add(outcome.ActivityLetterNumber, logFilePath);
+                var activityName = outcome.ActivityLetterNumber.IndexOf("/") == -1
+                    ? outcome.ActivityLetterNumber
+                    : outcome.ActivityLetterNumber.Substring(0, outcome.ActivityLetterNumber.IndexOf("/")); 
+                activityByPid.Add(activityName, logFilePath);
+                Console.WriteLine($"Mapped {activityName} to logfile {logFilePath}");
             }
         }
 
@@ -100,7 +118,15 @@ public static class GetGold
         foreach (string logFile in _referenceLogfiles)
         {
             (string rName, string sName) = GetReferenceActivity(activityByPid, logFile);
-            Console.WriteLine($"{cnt++} downloading {rName} ==> {sName}");
+            if (rName.Length == 0)
+            {
+                Console.WriteLine($"{cnt++} MISSING data from {logFile}");
+                continue;
+            }
+            else
+            {
+                Console.WriteLine($"{cnt++} downloading {rName} ==> {sName}");
+            }
 
             string readyFile = "/dsmdev/data/PAYROLL/SYS/PVTSYSOUT/" + rName;
             string smartFile = $"{goldenDir}/{cnt:D2}-{sName}";
@@ -116,6 +142,10 @@ public static class GetGold
     private static (string readyName, string smartName) GetReferenceActivity(Dictionary<string, string> realActivityByPid, string logFileName)
     {
         (string activityName, string oldPid) = GetReferenceActivityAndPid(logFileName);
+        if (!realActivityByPid.ContainsKey(activityName))
+        {
+            return ("", "");
+        }
         string newPid = realActivityByPid[activityName];
         return (logFileName.Replace(oldPid, newPid), logFileName.Replace("-" + oldPid, ""));
     }

@@ -47,6 +47,10 @@ const BeneficiaryInquiry = () => {
     setChange(change + 1);
   }
 
+  const RefreshBeneficiaryGrid  = ()=>{
+    setChange((prev)=>prev+1);
+  }
+
   const deleteBeneficiary = (id: number) => {
     setDeleteBeneficairyId(id);
     setOpenDeleteConfirmationDialog(true);
@@ -192,7 +196,7 @@ const BeneficiaryInquiry = () => {
                 </Button>
               </div>
 
-              <BeneficiaryInquiryGrid count={change} selectedMember={selectedMember} createOrUpdateBeneficiary={createOrUpdateBeneficiary} deleteBeneficiary={deleteBeneficiary} />
+              <BeneficiaryInquiryGrid refresh={RefreshBeneficiaryGrid} count={change} selectedMember={selectedMember} createOrUpdateBeneficiary={createOrUpdateBeneficiary} deleteBeneficiary={deleteBeneficiary} />
             </>
 
           )}
