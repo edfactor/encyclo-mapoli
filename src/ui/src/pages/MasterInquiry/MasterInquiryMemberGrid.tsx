@@ -46,13 +46,10 @@ const columns: ColDef[] = [
 ];
 
 interface MasterInquiryMemberGridProps extends MasterInquiryRequest {
-  onBadgeClick?: (args: { memberType: number; id: number, ssn: number, badgeNumber:number, psnSuffix:number }) => void;
+  onBadgeClick?: (args: { memberType: number; id: number, ssn: number, badgeNumber:number, psnSuffix:number } | undefined) => void;
 }
 
 const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = (searchParams) => {
-  // If no searchParams, render nothing
-  if (!searchParams || Object.keys(searchParams).length === 0) return null;
-
   const [request, setRequest] = useState<MasterInquiryRequest>(searchParams);
   const [trigger, { data, isLoading, isError }] = useLazySearchProfitMasterInquiryQuery();
   const autoSelectedRef = useRef<number | null>(null);
@@ -76,10 +73,10 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = (searchP
       const member = data.results[0];
       searchParams.onBadgeClick({
         memberType: member.isEmployee ? 1 : 2,
-        id: member.id,
-        ssn: member.ssn,
-        badgeNumber: member.badgeNumber,
-        psnSuffix: member.psnSuffix
+        id: Number(member.id),
+        ssn: Number(member.ssn),
+        badgeNumber: Number(member.badgeNumber),
+        psnSuffix: Number(member.psnSuffix)
       });
       autoSelectedRef.current = member.id;
     }
@@ -88,6 +85,9 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = (searchP
       searchParams.onBadgeClick(undefined);
     }
   }, [data, searchParams]);
+
+  // If no searchParams, render nothing
+  if (!searchParams || Object.keys(searchParams).length === 0) return null;
 
   const pageSize = request.pagination.take;
   const pageNumber = Math.floor(request.pagination.skip / request.pagination.take);
@@ -131,6 +131,9 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = (searchP
           <Pagination
             pageNumber={pageNumber}
             setPageNumber={(value: number) => {
+              console.log("page reset triggered by page change");
+              console.log("current page value", pageNumber);
+              console.log("page value", value);
               setRequest((prev) => ({
                 ...prev,
                 pagination: {
