@@ -1,7 +1,7 @@
 import { Typography } from "@mui/material";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Path, useNavigate } from "react-router";
-import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import {DSMGrid, ISortParams, numberToCurrency, Pagination} from "smart-ui-library";
 import { GetProfitShareForfeitColumns } from "./ForfeitGridColumns";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
@@ -84,6 +84,14 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ initialSearchLoaded, setIniti
     <>
       {forfeituresAndPoints?.response && (
         <>
+          <table>
+            <tr><td>Total Profit Sharing Balance&nbsp;</td><td align="right">{numberToCurrency(forfeituresAndPoints?.totalProfitSharingBalance)}</td></tr>
+            <tr><td>Distribution Total</td><td align="right">{numberToCurrency(forfeituresAndPoints?.distributionTotals)} </td></tr>
+            <tr><td>Allocation To Total</td><td align="right">{numberToCurrency(forfeituresAndPoints?.allocationToTotals)}</td></tr>
+            <tr><td>Allocations From Total</td><td align="right">{numberToCurrency(forfeituresAndPoints?.allocationsFromTotals)}</td></tr>
+          </table>
+          <br />
+          
           <ReportSummary report={forfeituresAndPoints} />
           <DSMGrid
             preferenceKey={CAPTIONS.FORFEIT}
