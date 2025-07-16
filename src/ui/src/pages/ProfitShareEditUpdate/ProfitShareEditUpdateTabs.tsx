@@ -16,7 +16,12 @@ interface ProfitShareEditUpdateTabsProps {
   setPageNumberReset: (reset: boolean) => void;
 }
 
-const ProfitShareEditUpdateTabs = ({ initialSearchLoaded, setInitialSearchLoaded, pageNumberReset, setPageNumberReset }: ProfitShareEditUpdateTabsProps) => {
+const ProfitShareEditUpdateTabs = ({
+  initialSearchLoaded,
+  setInitialSearchLoaded,
+  pageNumberReset,
+  setPageNumberReset
+}: ProfitShareEditUpdateTabsProps) => {
   const [value, setValue] = useState("1");
   const { profitSharingUpdate } = useSelector((state: RootState) => state.yearsEnd);
 

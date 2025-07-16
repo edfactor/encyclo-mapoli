@@ -152,7 +152,6 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
       }
     };
     await triggerSearch(request, false);
-   
   }, [executiveHoursAndDollarsQueryParams, properPageNumber, properPageSize, sortParams, triggerSearch]);
 
   useEffect(() => {
@@ -162,9 +161,9 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
   }, [initialSearchLoaded, properPageNumber, properPageSize, sortParams, onSearch]);
 
   // Need a useEffect on a change in executiveHoursAndDollars to reset the page number
- 
+
   useEffect(() => {
-   if (pageNumberReset) {
+    if (pageNumberReset) {
       setPageNumber(0);
       setPageNumberReset(false);
     }
@@ -302,9 +301,9 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
 
   const isRowDataThere = (isModal: boolean | undefined): boolean => {
     if (isModal) {
-      return (additionalExecutivesGrid?.response != null  && executiveHoursAndDollars?.response?.results != null);
+      return additionalExecutivesGrid?.response != null && executiveHoursAndDollars?.response?.results != null;
     } else {
-      return (mutableCopyOfGridData?.response != null  && executiveHoursAndDollars?.response?.results != null);
+      return mutableCopyOfGridData?.response != null && executiveHoursAndDollars?.response?.results != null;
     }
   };
 
@@ -325,7 +324,7 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
             <>
               <div className="px-[24px]">
                 <ReportSummary report={mutableCopyOfGridData} />
-              </div>             
+              </div>
               <div style={{ gap: "36px", display: "flex", justifyContent: "end", marginRight: 28 }}>
                 <RenderAddExecutiveButton
                   reportReponse={mutableCopyOfGridData}

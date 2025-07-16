@@ -1,5 +1,5 @@
 import { Tooltip, Divider, Button } from "@mui/material";
-import Grid2 from '@mui/material/Grid2';
+import Grid2 from "@mui/material/Grid2";
 import { DSMAccordion, Page } from "smart-ui-library";
 import ManageExecutiveHoursAndDollarsSearchFilter from "./ManageExecutiveHoursAndDollarsSearchFilter";
 import ManageExecutiveHoursAndDollarsGrid from "./ManageExecutiveHoursAndDollarsGrid";
@@ -65,9 +65,7 @@ const ManageExecutiveHoursAndDollars = () => {
   const [pageNumberReset, setPageNumberReset] = useState(false);
 
   const renderActionNode = () => {
-    return (
-      <StatusDropdownActionNode />
-    );
+    return <StatusDropdownActionNode />;
   };
 
   return (
@@ -82,8 +80,10 @@ const ManageExecutiveHoursAndDollars = () => {
         </Grid2>
         <Grid2 width={"100%"}>
           <DSMAccordion title="Filter">
-            <ManageExecutiveHoursAndDollarsSearchFilter setInitialSearchLoaded={setInitialSearchLoaded}
-              setPageReset={setPageNumberReset} />
+            <ManageExecutiveHoursAndDollarsSearchFilter
+              setInitialSearchLoaded={setInitialSearchLoaded}
+              setPageNumberReset={setPageNumberReset}
+            />
           </DSMAccordion>
         </Grid2>
         <Grid2 width="100%">

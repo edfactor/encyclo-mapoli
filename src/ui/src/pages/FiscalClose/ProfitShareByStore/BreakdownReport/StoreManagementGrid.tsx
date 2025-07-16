@@ -38,7 +38,7 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store, pageNu
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
   const profitYear = useDecemberFlowProfitYear();
-  
+
   const fetchData = useCallback(() => {
     const params = {
       profitYear: queryParams?.profitYear || profitYear,
@@ -53,11 +53,20 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store, pageNu
         isSortDescending: sortParams.isSortDescending
       }
     };
-    if ( hasToken)
-    {
-    fetchStoreManagement(params);
+    if (hasToken) {
+      fetchStoreManagement(params);
     }
-  }, [fetchStoreManagement, hasToken, pageNumber, pageSize, profitYear, queryParams?.profitYear, sortParams.isSortDescending, sortParams.sortBy, store]);
+  }, [
+    fetchStoreManagement,
+    hasToken,
+    pageNumber,
+    pageSize,
+    profitYear,
+    queryParams?.profitYear,
+    sortParams.isSortDescending,
+    sortParams.sortBy,
+    store
+  ]);
 
   useEffect(() => {
     fetchData();
@@ -69,7 +78,6 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store, pageNu
       setPageNumberReset(false);
     }
   }, [pageNumberReset, setPageNumberReset]);
-  
 
   const columnDefs = useCallback(() => GetStoreManagementGridColumns(handleNavigation), [handleNavigation])();
 

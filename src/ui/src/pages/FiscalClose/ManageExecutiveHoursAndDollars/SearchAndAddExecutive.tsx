@@ -54,12 +54,16 @@ interface SearchAndAddExecutiveProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
   setOpenModal: React.Dispatch<React.SetStateAction<boolean>>;
+  pageNumberReset: boolean;
+  setPageNumberReset: (reset: boolean) => void;
 }
 
 const SearchAndAddExecutive = ({
   initialSearchLoaded,
   setInitialSearchLoaded,
-  setOpenModal
+  setOpenModal,
+  pageNumberReset,
+  setPageNumberReset
 }: SearchAndAddExecutiveProps) => {
   return (
     <Page
@@ -76,6 +80,7 @@ const SearchAndAddExecutive = ({
             <ManageExecutiveHoursAndDollarsSearchFilter
               setInitialSearchLoaded={setInitialSearchLoaded}
               isModal={true}
+              setPageNumberReset={setPageNumberReset}
             />
           </DSMAccordion>
         </Grid2>
@@ -84,6 +89,8 @@ const SearchAndAddExecutive = ({
             setInitialSearchLoaded={setInitialSearchLoaded}
             initialSearchLoaded={initialSearchLoaded}
             isModal={true}
+            pageNumberReset={pageNumberReset}
+            setPageNumberReset={setPageNumberReset}
           />
         </Grid2>
       </Grid2>
