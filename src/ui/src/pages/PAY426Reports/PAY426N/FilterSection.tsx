@@ -1,8 +1,8 @@
-import React, { useState } from "react";
-import { FormControl, Select, MenuItem, SelectChangeEvent, FormLabel, TextField } from "@mui/material";
+import { FormControl, FormLabel, MenuItem, Select, SelectChangeEvent, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
-import { SearchAndReset } from "smart-ui-library";
+import React from "react";
 import { ReportPreset } from "reduxstore/types";
+import { SearchAndReset } from "smart-ui-library";
 
 interface FilterSectionProps {
   presets: ReportPreset[];

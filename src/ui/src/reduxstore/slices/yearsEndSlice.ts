@@ -10,8 +10,8 @@ import {
   ContributionsByAge,
   ControlSheetResponse,
   DemographicBadgesNotInPayprofit,
-  DistributionsAndForfeitures,
   DistributionsAndForfeituresQueryParams,
+  DistributionsAndForfeitureTotalsResponse,
   DuplicateNameAndBirthday,
   DuplicateSSNDetail,
   EligibleEmployeeResponseDto,
@@ -41,8 +41,8 @@ import {
   ProfitSharingDistributionsByAge,
   ProfitSharingLabel,
   ProfitYearRequest,
-  StartAndEndDateRequest,
   ReportsByAgeParams,
+  StartAndEndDateRequest,
   TerminationResponse,
   Under21BreakdownByStoreRequest,
   Under21BreakdownByStoreResponse,
@@ -53,8 +53,7 @@ import {
   UpdateSummaryResponse,
   VestedAmountsByAge,
   YearEndProfitSharingReportResponse,
-  YearEndProfitSharingReportSummaryResponse,
-  DistributionsAndForfeitureTotalsResponse
+  YearEndProfitSharingReportSummaryResponse
 } from "reduxstore/types";
 import { Paged } from "smart-ui-library";
 
@@ -574,10 +573,7 @@ export const yearsEndSlice = createSlice({
     clearRehireForfeituresQueryParams: (state) => {
       state.rehireForfeituresQueryParams = null;
     },
-    setDistributionsAndForfeitures: (
-      state,
-      action: PayloadAction<DistributionsAndForfeitureTotalsResponse>
-    ) => {
+    setDistributionsAndForfeitures: (state, action: PayloadAction<DistributionsAndForfeitureTotalsResponse>) => {
       state.distributionsAndForfeitures = action.payload;
     },
     clearDistributionsAndForfeitures: (state) => {

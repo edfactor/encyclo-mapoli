@@ -1,6 +1,7 @@
 import { Replay } from "@mui/icons-material";
 import { Alert, AlertTitle, Button, CircularProgress, Divider, Tooltip, Typography } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -38,12 +39,10 @@ import {
   SmartModal
 } from "smart-ui-library";
 import { TotalsGrid } from "../../components/TotalsGrid";
+import ChangesList from "./ChangesList";
 import ProfitShareEditConfirmation from "./ProfitShareEditConfirmation";
 import ProfitShareEditUpdateSearchFilter from "./ProfitShareEditUpdateSearchFilter";
 import ProfitShareEditUpdateTabs from "./ProfitShareEditUpdateTabs";
-import ChangesList from "./ChangesList";
-import StatusDropdownActionNode from "components/StatusDropdownActionNode";
-import { set } from "date-fns";
 
 enum MessageKeys {
   ProfitShareEditUpdate = "ProfitShareEditUpdate"
@@ -512,25 +511,22 @@ const ProfitShareEditUpdate = () => {
             </DSMAccordion>
           </Grid2>
         )}
-        {(profitEditUpdateRevertChangesAvailable || profitMasterStatus) && profitEditUpdateRevertChangesAvailable && (
+        {profitEditUpdateRevertChangesAvailable && (
           <>
             <Grid2
-              width={"100%"}
+              width="100%"
               sx={{ marginLeft: "50px" }}>
               <Typography
-                component={"span"}
+                component="span"
                 variant="h6"
                 sx={{ fontWeight: "bold" }}>
-                {`These changes have already been applied: `}
+                These changes have already been applied:
               </Typography>
             </Grid2>
             <Grid2
-              width={"100%"}
+              width="100%"
               sx={{ marginLeft: "50px" }}>
-              {profitSharingEditQueryParams && !profitMasterStatus && (
-                <ChangesList params={profitSharingEditQueryParams} />
-              )}
-              {profitMasterStatus && !profitSharingEditQueryParams && <ChangesList params={profitMasterStatus} />}
+              <ChangesList params={profitSharingEditQueryParams || profitMasterStatus} />
             </Grid2>
           </>
         )}
