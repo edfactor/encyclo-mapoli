@@ -1,20 +1,21 @@
 import { Typography } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
-import { ICellRendererParams } from "ag-grid-community";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useLazyGetBreakdownByStoreQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, Pagination, agGridNumberToCurrency } from "smart-ui-library";
-import { viewBadgeLinkRenderer } from "../../../../utils/masterInquiryLink";
+import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
+import { GetStoreManagementGridColumns } from "./StoreManagementGridColumns";
 
 interface StoreManagementGridProps {
   store: number;
+  pageNumberReset: boolean;
+  setPageNumberReset: (reset: boolean) => void;
 }
 
-const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store }) => {
+const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store, pageNumberReset, setPageNumberReset }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [sortParams, setSortParams] = useState<ISortParams>({
@@ -62,80 +63,15 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store }) => {
     fetchData();
   }, [fetchData]);
 
-  // Need a useEffect on a change in storeManagement to reset the page number
-  const prevStoreManagement = useRef<any>(null);
   useEffect(() => {
-    if (storeManagement?.response?.results && storeManagement.response.results.length > 0 &&
-        (prevStoreManagement.current === null || 
-         storeManagement.response.results.length !== prevStoreManagement.current.response?.results.length)) {
+    if (pageNumberReset) {
       setPageNumber(0);
+      setPageNumberReset(false);
     }
-    prevStoreManagement.current = storeManagement;
-  }, [storeManagement]);
+  }, [pageNumberReset, setPageNumberReset]);
+  
 
-  const columnDefs = useMemo(
-    () => [
-      {
-        headerName: "Badge",
-        field: "badgeNumber",
-        width: 100,
-        cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber, handleNavigation)
-      },
-      {
-        headerName: "Name",
-        field: "fullName",
-        width: 200
-      },
-      {
-        headerName: "Position",
-        field: "payClassificationName",
-        width: 120
-      },
-      {
-        headerName: "Beginning Balance",
-        field: "beginningBalance",
-        width: 150,
-        valueFormatter: agGridNumberToCurrency
-      },
-      {
-        headerName: "Earnings",
-        field: "earnings",
-        width: 120,
-        valueFormatter: agGridNumberToCurrency
-      },
-      {
-        headerName: "Contributions",
-        field: "contributions",
-        width: 120,
-        valueFormatter: agGridNumberToCurrency
-      },
-      {
-        headerName: "Forfeiture",
-        field: "forfeitures",
-        width: 120,
-        valueFormatter: agGridNumberToCurrency
-      },
-      {
-        headerName: "Distributions",
-        field: "distributions",
-        width: 120,
-        valueFormatter: agGridNumberToCurrency
-      },
-      {
-        headerName: "Ending Balance",
-        field: "endingBalance",
-        width: 150,
-        valueFormatter: agGridNumberToCurrency
-      },
-      {
-        headerName: "Vested Amount",
-        field: "vestedAmount",
-        width: 150,
-        valueFormatter: agGridNumberToCurrency
-      }
-    ],
-    [handleNavigation]
-  );
+  const columnDefs = useCallback(() => GetStoreManagementGridColumns(handleNavigation), [handleNavigation])();
 
   return (
     <Grid2
