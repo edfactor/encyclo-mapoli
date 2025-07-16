@@ -289,7 +289,8 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 YtdPsHours = member.HoursCurrentYear,
                 VestedPercent = vestingPercent * 100,
                 Age = age,
-                EnrollmentCode = enrollmentId
+                EnrollmentCode = enrollmentId,
+                SuggestedForfeit = member.ProfitYear == req.EndingDate.Year ? member.EndingBalance - vestedBalance : null
             };
 
             yearDetailsList.Add((member.BadgeNumber, member.PsnSuffix, member.FullName, yearDetail));

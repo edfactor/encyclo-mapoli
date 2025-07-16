@@ -45,7 +45,7 @@ public sealed class GetEligibleEmployeesService : IGetEligibleEmployeesService
                     (pp, d) => new
                     {
                         d.OracleHcmId,
-                        Hours = pp.CurrentHoursYear /*+ pp.HoursExecutive -- not including executive hours per PS-786*/,
+                        Hours = pp.CurrentHoursYear + pp.HoursExecutive,
                         d.DateOfBirth,
                         d.EmploymentStatusId,
                         d.BadgeNumber,
