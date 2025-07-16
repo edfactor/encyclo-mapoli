@@ -57,11 +57,13 @@ const validationSchema = yup.object({
 interface ManageExecutiveHoursAndDollarsSearchFilterProps {
   isModal?: boolean;
   setInitialSearchLoaded: (include: boolean) => void;
+  setPageReset: (reset: boolean) => void;
 }
 
 const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursAndDollarsSearchFilterProps> = ({
   isModal,
-  setInitialSearchLoaded
+  setInitialSearchLoaded,
+  setPageReset
 }) => {
   const dispatch = useDispatch();
   dispatch(clearExecutiveHoursAndDollarsAddQueryParams());
@@ -224,6 +226,8 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
         })
       );
     }
+
+    setPageReset(true)
   });
 
   if (profitYear && !executiveHoursAndDollars) {
@@ -256,6 +260,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
     badgeNumberChosen = false;
     fullNameChosen = false;
     isMonthlyPayrollChosen = false;
+    setPageReset(true);
 
     reset({
       profitYear: profitYear,
