@@ -66,6 +66,7 @@ import ForfeituresAdjustment from "../../pages/ForfeituresAdjustment/Forfeitures
 import PAY426N from "pages/PAY426Reports/PAY426N/PAY426N";
 import QPAY066AdHocReports from "pages/QPAY066AdHocReports/QPAY066AdHocReports";
 import BeneficiaryInquiry from "pages/BeneficiaryInquiry/BeneficiaryInquiry";
+import PayBeNext from "pages/Reports/PayBeNext/PayBeNext";
 
 const RouterSubAssembly: React.FC = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";
@@ -167,6 +168,9 @@ const RouterSubAssembly: React.FC = () => {
             <Route
                 path={ROUTES.BENEFICIARY_INQUIRY}
                 element={<BeneficiaryInquiry />}></Route>
+                <Route
+                path={ROUTES.PAY_BE_NEXT}
+                element={<PayBeNext />}></Route>
               <Route
                 path={ROUTES.DEMOGRAPHIC_BADGES}
                 element={<DemographicBadgesNotInPayprofit />}></Route>
