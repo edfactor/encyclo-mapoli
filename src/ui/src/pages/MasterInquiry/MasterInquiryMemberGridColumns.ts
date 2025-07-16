@@ -1,4 +1,5 @@
 import { ColDef, ICellRendererParams, ValueFormatterParams } from "ag-grid-community";
+import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
 
 export const GetMasterInquiryMemberGridColumns = (): ColDef[] => {
     return [
@@ -8,7 +9,7 @@ export const GetMasterInquiryMemberGridColumns = (): ColDef[] => {
         maxWidth: 120,
         cellRenderer: (params: ICellRendererParams) => {
         const { badgeNumber, psnSuffix } = params.data;
-        return psnSuffix > 0 ? `${badgeNumber}-${psnSuffix}` : badgeNumber;
+        return viewBadgeLinkRenderer(badgeNumber, psnSuffix)
         }
     },
     { field: "fullName", headerName: "Name", maxWidth: 500 },

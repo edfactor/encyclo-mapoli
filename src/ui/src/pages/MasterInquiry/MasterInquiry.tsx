@@ -61,11 +61,6 @@ const MasterInquiry = () => {
           />
         )}
 
-        {searchParams && !selectedMember && (
-          <MasterInquiryGroupingGrid searchParams={searchParams} />
-          )
-        }
-
         {/* Render details for selected member if present */}
         {selectedMember && (
           <MasterInquiryGrid

@@ -17,7 +17,7 @@ export const GetEligibleEmployeesColumns = (): ColDef[] => {
       cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber)
     },
     {
-      headerName: "Full Name",
+      headerName: "Name",
       field: "fullName",
       colId: "fullName",
       minWidth: GRID_COLUMN_WIDTHS.FULL_NAME,

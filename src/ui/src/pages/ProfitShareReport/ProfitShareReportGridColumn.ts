@@ -17,7 +17,7 @@ export const GetProfitShareReportColumns = (): ColDef[] => {
       cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber)
     },
     {
-      headerName: "Full Name",
+      headerName: "Name",
       field: "employeeName",
       colId: "employeeName",
       minWidth: 120,
