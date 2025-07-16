@@ -38,7 +38,7 @@ const TermedNoPriorGrid: React.FC<TermedNoPriorGridProps> = ({ pageNumberReset, 
     includeTerminatedEmployees: true,
     includeBeneficiaries: false,
     includeEmployeesWithPriorProfitSharingAmounts: false,
-    includeEmployeesWithNoPriorProfitSharingAmounts: true,
+    includeEmployeesWithNoPriorProfitSharingAmounts: true
   };
 
   useEffect(() => {
@@ -53,8 +53,8 @@ const TermedNoPriorGrid: React.FC<TermedNoPriorGridProps> = ({ pageNumberReset, 
         },
         ...baseParams
       });
-  }
-}, [trigger, hasToken, profitYear, pageNumber, pageSize, sortParams]);
+    }
+  }, [trigger, hasToken, profitYear, pageNumber, pageSize, sortParams]);
 
   const handleNavigationForButton = useCallback(
     (destination: string | Partial<Path>) => {
@@ -71,28 +71,21 @@ const TermedNoPriorGrid: React.FC<TermedNoPriorGridProps> = ({ pageNumberReset, 
   }, [pageNumberReset, setPageNumberReset]);
 
   const sortEventHandler = (update: ISortParams) => {
-      const t = () => { 
-          trigger({
-            profitYear: profitYear,
-            pagination: {
-              skip: 0,
-              take: pageSize,
-              sortBy: update.sortBy,
-              isSortDescending: update.isSortDescending
-            },
-            ...baseParams
-          }
-        );
-      }
-  
-      pay426Utils.sortEventHandler(
-        update,
-        sortParams,
-        setSortParams,
-        setPageNumber,
-        t
-      );
-    }
+    const t = () => {
+      trigger({
+        profitYear: profitYear,
+        pagination: {
+          skip: 0,
+          take: pageSize,
+          sortBy: update.sortBy,
+          isSortDescending: update.isSortDescending
+        },
+        ...baseParams
+      });
+    };
+
+    pay426Utils.sortEventHandler(update, sortParams, setSortParams, setPageNumber, t);
+  };
 
   const columnDefs = useMemo(
     () => GetProfitSharingReportGridColumns(handleNavigationForButton),
@@ -101,7 +94,7 @@ const TermedNoPriorGrid: React.FC<TermedNoPriorGridProps> = ({ pageNumberReset, 
 
   const pinnedTopRowData = useMemo(() => {
     if (!data) return [];
-    
+
     console.log("API data:", data);
     return [
       {
@@ -110,7 +103,7 @@ const TermedNoPriorGrid: React.FC<TermedNoPriorGridProps> = ({ pageNumberReset, 
         hours: data.hoursTotal || 0,
         points: data.pointsTotal || 0,
         balance: data.balanceTotal || 0,
-        isNew: data.numberOfNewEmployees || 0,
+        isNew: data.numberOfNewEmployees || 0
       },
       {
         employeeName: "No Wages",

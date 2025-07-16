@@ -8,7 +8,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import { useLazyGetForfeitureAdjustmentsQuery } from "reduxstore/api/YearsEndApi";
-import { setForfeitureAdjustmentQueryParams, clearForfeitureAdjustmentData, clearForfeitureAdjustmentQueryParams } from "reduxstore/slices/forfeituresAdjustmentSlice";
+import {
+  setForfeitureAdjustmentQueryParams,
+  clearForfeitureAdjustmentData,
+  clearForfeitureAdjustmentQueryParams
+} from "reduxstore/slices/forfeituresAdjustmentSlice";
 import { RootState } from "reduxstore/store";
 import { useEffect, useState } from "react";
 
@@ -25,29 +29,31 @@ interface ForfeituresAdjustmentSearchParametersProps {
 }
 
 // Define schema for validation without circular references
-const schema = yup.object({
-  ssn: yup.number()
-    .typeError("SSN must be a number")
-    .integer("SSN must be an integer")
-    .min(0, "SSN must be positive")
-    .max(999999999, "SSN must be 9 digits or less").transform((value) => value || undefined),
-  badge: yup.number()
-    .typeError("Badge Number must be a number")
-    .integer("Badge Number must be an integer")
-    .min(0, "Badge must be positive")
-    .max(9999999, "Badge must be 7 digits or less").transform((value) => value || undefined),
-  year: yup
-    .number()
-    .typeError("Year must be a number")
-    .integer("Year must be an integer")
-    .min(2020, "Year must be 2020 or later")
-    .max(2100, "Year must be 2100 or earlier")
-    .optional(),
-}).test(
-  'at-least-one-required',
-  'Either SSN or Badge is required',
-  (values) => Boolean(values.ssn || values.badge)
-);
+const schema = yup
+  .object({
+    ssn: yup
+      .number()
+      .typeError("SSN must be a number")
+      .integer("SSN must be an integer")
+      .min(0, "SSN must be positive")
+      .max(999999999, "SSN must be 9 digits or less")
+      .transform((value) => value || undefined),
+    badge: yup
+      .number()
+      .typeError("Badge Number must be a number")
+      .integer("Badge Number must be an integer")
+      .min(0, "Badge must be positive")
+      .max(9999999, "Badge must be 7 digits or less")
+      .transform((value) => value || undefined),
+    year: yup
+      .number()
+      .typeError("Year must be a number")
+      .integer("Year must be an integer")
+      .min(2020, "Year must be 2020 or later")
+      .max(2100, "Year must be 2100 or earlier")
+      .optional()
+  })
+  .test("at-least-one-required", "Either SSN or Badge is required", (values) => Boolean(values.ssn || values.badge));
 
 const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearchParametersProps> = ({
   setInitialSearchLoaded,
@@ -72,7 +78,7 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
     defaultValues: {
       ssn: forfeitureAdjustmentQueryParams?.ssn || "",
       badge: forfeitureAdjustmentQueryParams?.badge || "",
-      year: forfeitureAdjustmentQueryParams?.profitYear || profitYear,
+      year: forfeitureAdjustmentQueryParams?.profitYear || profitYear
     },
     mode: "onSubmit"
   });
@@ -81,7 +87,6 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
   let badgeNumberChosen = false;
 
   const toggleSearchFieldEntered = (value: boolean, fieldType: string) => {
-    
     if (fieldType === "ssn") {
       socialSecurityChosen = value;
     }
@@ -95,7 +100,7 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
   const socialSecurity = watch("ssn");
   const badgeNumber = watch("badge");
 
-   // Update active field based on which field has input
+  // Update active field based on which field has input
   useEffect(() => {
     if (socialSecurity && !badgeNumber) {
       setActiveField("ssn");
@@ -107,7 +112,6 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
   }, [socialSecurity, badgeNumber]);
 
   const validateAndSearch = handleSubmit((data) => {
-    
     const searchParams = {
       ssn: data.ssn,
       badge: data.badge,
@@ -120,7 +124,7 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
 
     setPageReset(true);
     dispatch(setForfeitureAdjustmentQueryParams(searchParams));
-    
+
     triggerSearch(searchParams)
       .unwrap()
       .then(() => {
@@ -136,7 +140,7 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
     reset({
       ssn: "",
       badge: "",
-      year: profitYear,
+      year: profitYear
     });
     dispatch(clearForfeitureAdjustmentData());
     dispatch(clearForfeitureAdjustmentQueryParams());
@@ -147,8 +151,11 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
     badgeNumberChosen = false;
   };
 
-  const requiredLabel = (    
-    <Typography component="span" color="error" fontWeight="bold">
+  const requiredLabel = (
+    <Typography
+      component="span"
+      color="error"
+      fontWeight="bold">
       *
     </Typography>
   );
@@ -260,4 +267,4 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
   );
 };
 
-export default ForfeituresAdjustmentSearchParameters; 
+export default ForfeituresAdjustmentSearchParameters;

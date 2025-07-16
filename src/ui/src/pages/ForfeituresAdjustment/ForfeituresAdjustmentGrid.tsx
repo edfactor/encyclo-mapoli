@@ -23,8 +23,8 @@ interface ForfeituresAdjustmentGridProps {
   setPageNumberReset: (reset: boolean) => void;
 }
 
-const ForfeituresAdjustmentGrid: React.FC<ForfeituresAdjustmentGridProps> = ({ 
-  initialSearchLoaded, 
+const ForfeituresAdjustmentGrid: React.FC<ForfeituresAdjustmentGridProps> = ({
+  initialSearchLoaded,
   setInitialSearchLoaded,
   onAddForfeiture,
   pageNumberReset,
@@ -43,11 +43,13 @@ const ForfeituresAdjustmentGrid: React.FC<ForfeituresAdjustmentGridProps> = ({
   const { forfeitureAdjustmentData } = useSelector((state: RootState) => state.forfeituresAdjustment);
   const results = forfeitureAdjustmentData?.response?.results || [];
   const totalRecords = forfeitureAdjustmentData?.response?.total || 0;
-  
-  const totalsRow = forfeitureAdjustmentData ? {
-    netBalance: forfeitureAdjustmentData.totatNetBalance,
-    netVested: forfeitureAdjustmentData.totatNetVested
-  } : null;
+
+  const totalsRow = forfeitureAdjustmentData
+    ? {
+        netBalance: forfeitureAdjustmentData.totatNetBalance,
+        netVested: forfeitureAdjustmentData.totatNetVested
+      }
+    : null;
 
   // Wrapper to pass react function to non-react class
   const handleNavigationForButton = useCallback(
@@ -57,10 +59,7 @@ const ForfeituresAdjustmentGrid: React.FC<ForfeituresAdjustmentGridProps> = ({
     [navigate]
   );
 
-  const columnDefs = useMemo(
-    () => GetForfeituresAdjustmentColumns(),
-    [handleNavigationForButton]
-  );
+  const columnDefs = useMemo(() => GetForfeituresAdjustmentColumns(), [handleNavigationForButton]);
 
   useEffect(() => {
     if (pageNumberReset) {
@@ -75,21 +74,24 @@ const ForfeituresAdjustmentGrid: React.FC<ForfeituresAdjustmentGridProps> = ({
     <>
       {initialSearchLoaded && (
         <>
-          <div style={{ padding: "0 24px 24px 24px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div
+            style={{
+              padding: "0 24px 24px 24px",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center"
+            }}>
             {onAddForfeiture && (
-              <Button 
+              <Button
                 onClick={onAddForfeiture}
-                variant="contained" 
+                variant="contained"
                 startIcon={<AddOutlined />}
-                color="primary"
-              >
+                color="primary">
                 ADD FORFEITURE
               </Button>
             )}
           </div>
-          {forfeitureAdjustmentData && (
-            <ReportSummary report={forfeitureAdjustmentData} />
-          )}
+          {forfeitureAdjustmentData && <ReportSummary report={forfeitureAdjustmentData} />}
           <DSMGrid
             preferenceKey={CAPTIONS.FORFEITURES_ADJUSTMENT}
             isLoading={isFetching}
@@ -120,4 +122,4 @@ const ForfeituresAdjustmentGrid: React.FC<ForfeituresAdjustmentGridProps> = ({
   );
 };
 
-export default ForfeituresAdjustmentGrid; 
+export default ForfeituresAdjustmentGrid;

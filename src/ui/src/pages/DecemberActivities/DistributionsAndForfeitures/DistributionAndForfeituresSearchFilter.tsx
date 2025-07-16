@@ -18,7 +18,7 @@ import { format } from "date-fns";
 
 const formatDateOnly = (date: Date | null): string | undefined => {
   if (!date) return undefined;
-  return format(date, 'yyyy-MM-dd');
+  return format(date, "yyyy-MM-dd");
 };
 
 interface DistributionsAndForfeituresSearch {
@@ -35,13 +35,11 @@ const schema = yup.object().shape({
     .min(2020, "Year must be 2020 or later")
     .max(2100, "Year must be 2100 or earlier")
     .required("Year is required"),
-  startDate: yup
-    .date()
-    .nullable(),
+  startDate: yup.date().nullable(),
   endDate: yup
     .date()
     .nullable()
-    .test('is-after-start', 'End Date must be after Start Date', function(value) {
+    .test("is-after-start", "End Date must be after Start Date", function (value) {
       const { startDate } = this.parent;
       if (!startDate || !value) return true;
       return value > startDate;
@@ -58,9 +56,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const [triggerSearch, { isFetching }] = useLazyGetDistributionsAndForfeituresQuery();
   const dispatch = useDispatch();
-  const { distributionsAndForfeituresQueryParams } = useSelector(
-    (state: RootState) => state.yearsEnd
-  );
+  const { distributionsAndForfeituresQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const profitYear = useDecemberFlowProfitYear();
   const {
     control,
@@ -148,7 +144,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
                 id="startDate"
                 onChange={(value: Date | null) => {
                   field.onChange(value);
-                  trigger('endDate'); 
+                  trigger("endDate");
                 }}
                 value={field.value}
                 required={false}
@@ -169,7 +165,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
                 id="endDate"
                 onChange={(value: Date | null) => {
                   field.onChange(value);
-                  trigger('endDate'); 
+                  trigger("endDate");
                 }}
                 value={field.value}
                 required={false}
@@ -180,7 +176,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
             )}
           />
           {errors.endDate && <FormHelperText error>{errors.endDate.message}</FormHelperText>}
-        </Grid2>       
+        </Grid2>
       </Grid2>
       <Grid2
         width="100%"

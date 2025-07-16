@@ -96,7 +96,6 @@ const MilitaryContributionForm = ({
       <Grid2
         container
         spacing={3}>
-
         <Grid2 xs={6}>
           <Controller
             name="contributionDate"
@@ -157,7 +156,7 @@ const MilitaryContributionForm = ({
                     />
                   }
                   label="Is Supplemental Contribution"
-                />                
+                />
               </FormControl>
             )}
           />
@@ -168,7 +167,7 @@ const MilitaryContributionForm = ({
           size={{ xs: 12 }}
           container
           spacing={2}
-          paddingTop="8px">       
+          paddingTop="8px">
           <Grid2>
             <Button
               type="submit"

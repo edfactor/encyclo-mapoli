@@ -19,12 +19,7 @@ interface AddForfeitureModalProps {
   employeeDetails?: EmployeeDetails | null;
 }
 
-const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({
-  open,
-  onClose,
-  onSave,
-  employeeDetails
-}) => {
+const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, onSave, employeeDetails }) => {
   const [formData, setFormData] = useState({
     badgeNumber: "",
     startingBalance: 0,
@@ -37,9 +32,9 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({
 
   useEffect(() => {
     if (employeeDetails) {
-      setFormData(prevState => ({
+      setFormData((prevState) => ({
         ...prevState,
-        badgeNumber: employeeDetails.badgeNumber || '',
+        badgeNumber: employeeDetails.badgeNumber || "",
         startingBalance: employeeDetails.currentPSAmount || 0,
         forfeitureAmount: undefined,
         netBalance: employeeDetails.currentPSAmount || 0,
@@ -55,7 +50,7 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({
       const numericValue = parseFloat(value) || 0;
 
       const startingBalance = name === "startingBalance" ? numericValue : formData.startingBalance;
-      const forfeitureAmount = name === "forfeitureAmount" ? numericValue : (formData.forfeitureAmount || 0);
+      const forfeitureAmount = name === "forfeitureAmount" ? numericValue : formData.forfeitureAmount || 0;
       const netBalance = startingBalance - forfeitureAmount;
 
       setFormData({
@@ -107,17 +102,31 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({
       onClose={onClose}
       title="Add Forfeiture"
       actions={[
-        <Button key="save" onClick={handleSave} variant="contained" color="primary" disabled={isLoading}>
+        <Button
+          key="save"
+          onClick={handleSave}
+          variant="contained"
+          color="primary"
+          disabled={isLoading}>
           {isLoading ? "SAVING..." : "SAVE"}
         </Button>,
-        <Button key="cancel" onClick={onClose} variant="outlined" disabled={isLoading}>
+        <Button
+          key="cancel"
+          onClick={onClose}
+          variant="outlined"
+          disabled={isLoading}>
           CANCEL
         </Button>
-      ]}
-    >
-      <Grid2 container spacing={2}>
+      ]}>
+      <Grid2
+        container
+        spacing={2}>
         <Grid2 size={{ xs: 12 }}>
-          <Typography variant="body2" gutterBottom>Badge Number</Typography>
+          <Typography
+            variant="body2"
+            gutterBottom>
+            Badge Number
+          </Typography>
           <TextField
             name="badgeNumber"
             value={formData.badgeNumber}
@@ -128,7 +137,11 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({
           />
         </Grid2>
         <Grid2 size={{ xs: 6 }}>
-          <Typography variant="body2" gutterBottom>Starting Balance</Typography>
+          <Typography
+            variant="body2"
+            gutterBottom>
+            Starting Balance
+          </Typography>
           <TextField
             name="startingBalance"
             value={formData.startingBalance}
@@ -140,7 +153,11 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({
           />
         </Grid2>
         <Grid2 size={{ xs: 6 }}>
-          <Typography variant="body2" gutterBottom>Forfeiture Amount</Typography>
+          <Typography
+            variant="body2"
+            gutterBottom>
+            Forfeiture Amount
+          </Typography>
           <TextField
             name="forfeitureAmount"
             value={formData.forfeitureAmount}
@@ -152,7 +169,11 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({
           />
         </Grid2>
         <Grid2 size={{ xs: 6 }}>
-          <Typography variant="body2" gutterBottom>Net Balance</Typography>
+          <Typography
+            variant="body2"
+            gutterBottom>
+            Net Balance
+          </Typography>
           <TextField
             name="netBalance"
             value={formData.netBalance}
@@ -165,7 +186,11 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({
           />
         </Grid2>
         <Grid2 size={{ xs: 6 }}>
-          <Typography variant="body2" gutterBottom>Net Vested</Typography>
+          <Typography
+            variant="body2"
+            gutterBottom>
+            Net Vested
+          </Typography>
           <TextField
             name="netVested"
             value={formData.netVested}
@@ -181,4 +206,4 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({
   );
 };
 
-export default AddForfeitureModal; 
+export default AddForfeitureModal;

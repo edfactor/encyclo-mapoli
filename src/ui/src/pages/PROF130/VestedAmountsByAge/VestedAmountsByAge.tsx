@@ -33,7 +33,7 @@ const VestedAmountsByAge = () => {
   useEffect(() => {
     if (hasToken && profitYear && !hasInitialSearchRun) {
       setHasInitialSearchRun(true);
-      
+
       triggerSearch(
         {
           profitYear: profitYear,
@@ -53,13 +53,13 @@ const VestedAmountsByAge = () => {
   }, [hasToken, profitYear, hasInitialSearchRun, triggerSearch, dispatch]);
 
   const renderActionNode = () => {
-    return (
-        <StatusDropdownActionNode />
-    );
-};
+    return <StatusDropdownActionNode />;
+  };
 
   return (
-    <Page label="Vested Amounts by Age" actionNode={renderActionNode()}>
+    <Page
+      label="Vested Amounts by Age"
+      actionNode={renderActionNode()}>
       <Grid2
         container
         rowSpacing="24px">

@@ -38,7 +38,7 @@ const TermedWithPriorGrid: React.FC<TermedWithPriorGridProps> = ({ pageNumberRes
     includeTerminatedEmployees: true,
     includeBeneficiaries: false,
     includeEmployeesWithPriorProfitSharingAmounts: true,
-    includeEmployeesWithNoPriorProfitSharingAmounts: false,
+    includeEmployeesWithNoPriorProfitSharingAmounts: false
   };
 
   useEffect(() => {
@@ -53,8 +53,8 @@ const TermedWithPriorGrid: React.FC<TermedWithPriorGridProps> = ({ pageNumberRes
         },
         ...baseParams
       });
-  }
-}, [trigger, hasToken, profitYear, pageNumber, pageSize, sortParams]);
+    }
+  }, [trigger, hasToken, profitYear, pageNumber, pageSize, sortParams]);
 
   const handleNavigationForButton = useCallback(
     (destination: string | Partial<Path>) => {
@@ -71,28 +71,21 @@ const TermedWithPriorGrid: React.FC<TermedWithPriorGridProps> = ({ pageNumberRes
   }, [pageNumberReset, setPageNumberReset]);
 
   const sortEventHandler = (update: ISortParams) => {
-      const t = () => { 
-          trigger({
-            profitYear: profitYear,
-            pagination: {
-              skip: 0,
-              take: pageSize,
-              sortBy: update.sortBy,
-              isSortDescending: update.isSortDescending
-            },
-            ...baseParams
-          }
-        );
-      }
-  
-      pay426Utils.sortEventHandler(
-        update,
-        sortParams,
-        setSortParams,
-        setPageNumber,
-        t
-      );
-    }
+    const t = () => {
+      trigger({
+        profitYear: profitYear,
+        pagination: {
+          skip: 0,
+          take: pageSize,
+          sortBy: update.sortBy,
+          isSortDescending: update.isSortDescending
+        },
+        ...baseParams
+      });
+    };
+
+    pay426Utils.sortEventHandler(update, sortParams, setSortParams, setPageNumber, t);
+  };
 
   const columnDefs = useMemo(
     () => GetProfitSharingReportGridColumns(handleNavigationForButton),
@@ -101,8 +94,8 @@ const TermedWithPriorGrid: React.FC<TermedWithPriorGridProps> = ({ pageNumberRes
 
   const pinnedTopRowData = useMemo(() => {
     if (!data) return [];
-    
-   console.log("API data:", data);
+
+    console.log("API data:", data);
     return [
       {
         employeeName: `TOTAL EMPS: ${data.numberOfEmployeesInPlan || 0}`,
@@ -110,7 +103,7 @@ const TermedWithPriorGrid: React.FC<TermedWithPriorGridProps> = ({ pageNumberRes
         hours: data.hoursTotal || 0,
         points: data.pointsTotal || 0,
         balance: data.balanceTotal || 0,
-        isNew: data.numberOfNewEmployees || 0,
+        isNew: data.numberOfNewEmployees || 0
       },
       {
         employeeName: "No Wages",

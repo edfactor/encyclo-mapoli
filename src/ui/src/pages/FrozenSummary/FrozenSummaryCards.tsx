@@ -191,8 +191,7 @@ const FrozenSummaryCards: React.FC<FrozenSummaryCardsProps> = ({ setSelectedTab,
       (contributionsByAgeTotal.totalEmployees || 0);
 
     const amountsMatch =
-      (contributionsByAgePartTime.totalAmount || 0) +
-        (contributionsByAgeFullTime.totalAmount || 0) ===
+      (contributionsByAgePartTime.totalAmount || 0) + (contributionsByAgeFullTime.totalAmount || 0) ===
       (contributionsByAgeTotal.totalAmount || 0);
 
     return employeesMatch && amountsMatch;
@@ -206,8 +205,7 @@ const FrozenSummaryCards: React.FC<FrozenSummaryCardsProps> = ({ setSelectedTab,
       (forfeituresByAgeTotal.totalEmployees || 0);
 
     const amountsMatch =
-      (forfeituresByAgeFullTime.totalAmount || 0) +
-        (forfeituresByAgePartTime.totalAmount || 0) ===
+      (forfeituresByAgeFullTime.totalAmount || 0) + (forfeituresByAgePartTime.totalAmount || 0) ===
       (forfeituresByAgeTotal.totalAmount || 0);
 
     return employeesMatch && amountsMatch;

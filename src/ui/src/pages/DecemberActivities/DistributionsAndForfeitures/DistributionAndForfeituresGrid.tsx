@@ -52,7 +52,12 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
       ...(distributionsAndForfeituresQueryParams?.endDate && {
         endDate: distributionsAndForfeituresQueryParams?.endDate
       }),
-      pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: sortParams.sortBy, isSortDescending: sortParams.isSortDescending }
+      pagination: {
+        skip: pageNumber * pageSize,
+        take: pageSize,
+        sortBy: sortParams.sortBy,
+        isSortDescending: sortParams.isSortDescending
+      }
     };
 
     await triggerSearch(request, false);
@@ -66,13 +71,14 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
     triggerSearch
   ]);
 
-  // Need a useEffect on a change in distributionsAndForfeitures to reset the page number 
+  // Need a useEffect on a change in distributionsAndForfeitures to reset the page number
   const prevDistributionsAndForfeitures = useRef<any>(null);
   useEffect(() => {
     if (
       distributionsAndForfeitures !== prevDistributionsAndForfeitures.current &&
       distributionsAndForfeitures?.response?.results &&
-      distributionsAndForfeitures.response.results.length !== prevDistributionsAndForfeitures.current?.response?.results?.length
+      distributionsAndForfeitures.response.results.length !==
+        prevDistributionsAndForfeitures.current?.response?.results?.length
     ) {
       setPageNumber(0);
     }
@@ -104,44 +110,47 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
                 leftColumnHeaders={["State Taxes"]}
                 topRowHeaders={[]}
               />
-              {distributionsAndForfeitures.stateTaxTotals && Object.keys(distributionsAndForfeitures.stateTaxTotals).length > 0 && (
-                <>
-                  <InfoOutlinedIcon
-                    className="state-tax-info-icon"
-                    fontSize="small"
-                    onClick={handlePopoverOpen}
-                    style={{ cursor: "pointer", marginLeft: 4 }}
-                  />
-                  <Popover
-                    open={open}
-                    anchorEl={anchorEl}
-                    onClose={handlePopoverClose}
-                    anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-                    PaperProps={{ style: { maxHeight: 300, maxWidth: 350, overflow: "auto" } }}
-                    
-                  >
-                    <div className="state-tax-popover-table">
-                      <Typography variant="subtitle2" sx={{ p: 1 }}>State Tax Breakdown</Typography>
-                      <table>
-                        <thead>
-                          <tr>
-                            <th>State</th>
-                            <th>Tax Total</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {Object.entries(distributionsAndForfeitures.stateTaxTotals).map(([state, total]) => (
-                            <tr key={state}>
-                              <td>{state}</td>
-                              <td>{numberToCurrency(total)}</td>
+              {distributionsAndForfeitures.stateTaxTotals &&
+                Object.keys(distributionsAndForfeitures.stateTaxTotals).length > 0 && (
+                  <>
+                    <InfoOutlinedIcon
+                      className="state-tax-info-icon"
+                      fontSize="small"
+                      onClick={handlePopoverOpen}
+                      style={{ cursor: "pointer", marginLeft: 4 }}
+                    />
+                    <Popover
+                      open={open}
+                      anchorEl={anchorEl}
+                      onClose={handlePopoverClose}
+                      anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+                      PaperProps={{ style: { maxHeight: 300, maxWidth: 350, overflow: "auto" } }}>
+                      <div className="state-tax-popover-table">
+                        <Typography
+                          variant="subtitle2"
+                          sx={{ p: 1 }}>
+                          State Tax Breakdown
+                        </Typography>
+                        <table>
+                          <thead>
+                            <tr>
+                              <th>State</th>
+                              <th>Tax Total</th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </Popover>
-                </>
-              )}
+                          </thead>
+                          <tbody>
+                            {Object.entries(distributionsAndForfeitures.stateTaxTotals).map(([state, total]) => (
+                              <tr key={state}>
+                                <td>{state}</td>
+                                <td>{numberToCurrency(total)}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </Popover>
+                  </>
+                )}
             </div>
             <TotalsGrid
               displayData={[[numberToCurrency(distributionsAndForfeitures.federalTaxTotal || 0)]]}

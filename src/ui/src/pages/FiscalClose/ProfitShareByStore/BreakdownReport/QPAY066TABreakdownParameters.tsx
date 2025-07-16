@@ -85,12 +85,12 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
 
   const validateAndSubmit = handleSubmit((data) => {
     console.log("Form data being submitted:", data);
-    
+
     // Always submit regardless of isValid to enable searching with any combination
     if (onStoreChange && data.store) {
       onStoreChange(data.store);
     }
-  
+
     dispatch(
       setBreakdownByStoreQueryParams({
         profitYear: profitYear,
@@ -128,18 +128,19 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
 
   // Add a watch to see all form values
   const formValues = watch();
-  
+
   // Log form values on change to help with debugging
   useEffect(() => {
     console.log("Current form values:", formValues);
   }, [formValues]);
-  
+
   return (
-    <form onSubmit={(e) => {
-      e.preventDefault();
-      // Ensure the form values are captured and submitted
-      validateAndSubmit();
-    }}>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        // Ensure the form values are captured and submitted
+        validateAndSubmit();
+      }}>
       <Grid2
         container
         paddingX="24px"
@@ -162,11 +163,11 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
                   size="small"
                   fullWidth
                   type="number"
-                  value={field.value || ''}
+                  value={field.value || ""}
                   onChange={(e) => {
-                    const value = e.target.value === '' ? '' : Number(e.target.value);
+                    const value = e.target.value === "" ? "" : Number(e.target.value);
                     field.onChange(value);
-                    if (onStoreChange && value !== '') {
+                    if (onStoreChange && value !== "") {
                       onStoreChange(Number(value));
                     }
                   }}

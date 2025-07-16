@@ -12,13 +12,13 @@ const Forfeit = () => {
   const [pageNumberReset, setPageNumberReset] = useState(false);
 
   const renderActionNode = () => {
-    return (
-      <StatusDropdownActionNode />
-    );
+    return <StatusDropdownActionNode />;
   };
 
   return (
-    <Page label={CAPTIONS.FORFEIT} actionNode={renderActionNode()}>
+    <Page
+      label={CAPTIONS.FORFEIT}
+      actionNode={renderActionNode()}>
       <Grid2
         container
         rowSpacing="24px">
@@ -27,7 +27,10 @@ const Forfeit = () => {
         </Grid2>
         <Grid2 width={"100%"}>
           <DSMAccordion title="Filter">
-            <ForfeitSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} setPageReset={setPageNumberReset} />
+            <ForfeitSearchFilter
+              setInitialSearchLoaded={setInitialSearchLoaded}
+              setPageReset={setPageNumberReset}
+            />
           </DSMAccordion>
         </Grid2>
 

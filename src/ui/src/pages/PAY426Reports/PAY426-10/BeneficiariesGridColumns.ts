@@ -137,4 +137,4 @@ export const GetBeneficiariesGridColumns = (navFunction: (badgeNumber: string) =
       resizable: true
     }
   ];
-}; 
+};

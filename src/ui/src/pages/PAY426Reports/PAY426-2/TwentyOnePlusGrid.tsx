@@ -40,8 +40,8 @@ const TwentyOnePlusGrid: React.FC<TwentyOnePlusGridProps> = ({ pageNumberReset, 
     includeTerminatedEmployees: false,
     includeBeneficiaries: false,
     includeEmployeesWithPriorProfitSharingAmounts: true,
-    includeEmployeesWithNoPriorProfitSharingAmounts: true,
-  }
+    includeEmployeesWithNoPriorProfitSharingAmounts: true
+  };
 
   useEffect(() => {
     if (hasToken) {
@@ -72,7 +72,7 @@ const TwentyOnePlusGrid: React.FC<TwentyOnePlusGridProps> = ({ pageNumberReset, 
 
   const pinnedTopRowData = useMemo(() => {
     if (!data) return [];
-    
+
     console.log("API data:", data);
     return [
       {
@@ -81,7 +81,7 @@ const TwentyOnePlusGrid: React.FC<TwentyOnePlusGridProps> = ({ pageNumberReset, 
         hours: data.hoursTotal || 0,
         points: data.pointsTotal || 0,
         balance: data.balanceTotal || 0,
-        isNew: data.numberOfNewEmployees || 0,
+        isNew: data.numberOfNewEmployees || 0
       },
       {
         employeeName: "No Wages",
@@ -101,28 +101,21 @@ const TwentyOnePlusGrid: React.FC<TwentyOnePlusGridProps> = ({ pageNumberReset, 
   }, [pageNumberReset, setPageNumberReset]);
 
   const sortEventHandler = (update: ISortParams) => {
-    const t = () => { 
-        trigger({
-          profitYear: profitYear,
-          pagination: {
-            skip: 0,
-            take: pageSize,
-            sortBy: update.sortBy,
-            isSortDescending: update.isSortDescending
-          },
-          ...baseParams
-        }
-      );
-    }
+    const t = () => {
+      trigger({
+        profitYear: profitYear,
+        pagination: {
+          skip: 0,
+          take: pageSize,
+          sortBy: update.sortBy,
+          isSortDescending: update.isSortDescending
+        },
+        ...baseParams
+      });
+    };
 
-    pay426Utils.sortEventHandler(
-      update,
-      sortParams,
-      setSortParams,
-      setPageNumber,
-      t
-    );
-  }
+    pay426Utils.sortEventHandler(update, sortParams, setSortParams, setPageNumber, t);
+  };
 
   return (
     <>

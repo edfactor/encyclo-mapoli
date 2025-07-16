@@ -1,5 +1,5 @@
 import { Button, Divider } from "@mui/material";
-import Grid2 from '@mui/material/Grid2';
+import Grid2 from "@mui/material/Grid2";
 import { DSMAccordion, Page } from "smart-ui-library";
 import DistributionsAndForfeituresSearchFilter from "./DistributionAndForfeituresSearchFilter";
 import DistributionsAndForfeituresGrid from "./DistributionAndForfeituresGrid";
@@ -14,13 +14,11 @@ const DistributionsAndForfeitures = () => {
   const navigate = useNavigate();
 
   const renderActionNode = () => {
-    return (
-      <StatusDropdownActionNode />
-    );
+    return <StatusDropdownActionNode />;
   };
 
   return (
-    <Page 
+    <Page
       label="Distributions And Forfeitures (QPAY129)"
       actionNode={renderActionNode()}>
       <Grid2

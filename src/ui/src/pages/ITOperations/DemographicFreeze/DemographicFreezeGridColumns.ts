@@ -30,7 +30,7 @@ export const GetFreezeColumns = (): ColDef[] => {
       minWidth: 100,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true      
+      resizable: true
     },
     {
       headerName: "Frozen By",

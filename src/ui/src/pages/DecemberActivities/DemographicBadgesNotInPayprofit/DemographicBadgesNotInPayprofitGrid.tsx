@@ -20,28 +20,37 @@ const DemographicBadgesNotInPayprofitGrid: React.FC = () => {
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const onSearch = useCallback(async () => {
     const request = {
-      pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: _sortParams.sortBy, isSortDescending: _sortParams.isSortDescending }
+      pagination: {
+        skip: pageNumber * pageSize,
+        take: pageSize,
+        sortBy: _sortParams.sortBy,
+        isSortDescending: _sortParams.isSortDescending
+      }
     };
 
     await triggerSearch(request, false);
   }, [pageNumber, pageSize, _sortParams, triggerSearch]);
 
   const sortEventHandler = (update: ISortParams) => {
-
     if (update.sortBy === "") {
       update.sortBy = "badgeNumber";
       update.isSortDescending = true;
     }
-    
+
     const request = {
-      pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: update.sortBy, isSortDescending: update.isSortDescending }
+      pagination: {
+        skip: pageNumber * pageSize,
+        take: pageSize,
+        sortBy: update.sortBy,
+        isSortDescending: update.isSortDescending
+      }
     };
     setSortParams(update);
     setPageNumber(0);
 
     triggerSearch(request, false);
   };
-  
+
   useEffect(() => {
     if (hasToken) {
       onSearch();

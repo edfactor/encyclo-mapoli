@@ -27,20 +27,23 @@ const EighteenToTwentyGrid: React.FC<EighteenToTwentyGridProps> = ({ pageNumberR
   });
   const hasToken = useSelector((state: RootState) => !!state.security.token);
   const profitYear = useFiscalCloseProfitYear();
-  const baseParams = useMemo(() => ({
-    reportId: PAY426_REPORT_IDS.EIGHTEEN_TO_TWENTY,
-    isYearEnd: true,
-    minimumAgeInclusive: 18,
-    maximumAgeInclusive: 20,
-    minimumHoursInclusive: 1000,
-    includeActiveEmployees: true,
-    includeInactiveEmployees: true,
-    includeEmployeesTerminatedThisYear: false,
-    includeTerminatedEmployees: false,
-    includeBeneficiaries: false,
-    includeEmployeesWithPriorProfitSharingAmounts: true,
-    includeEmployeesWithNoPriorProfitSharingAmounts: true,
-  }), []);
+  const baseParams = useMemo(
+    () => ({
+      reportId: PAY426_REPORT_IDS.EIGHTEEN_TO_TWENTY,
+      isYearEnd: true,
+      minimumAgeInclusive: 18,
+      maximumAgeInclusive: 20,
+      minimumHoursInclusive: 1000,
+      includeActiveEmployees: true,
+      includeInactiveEmployees: true,
+      includeEmployeesTerminatedThisYear: false,
+      includeTerminatedEmployees: false,
+      includeBeneficiaries: false,
+      includeEmployeesWithPriorProfitSharingAmounts: true,
+      includeEmployeesWithNoPriorProfitSharingAmounts: true
+    }),
+    []
+  );
 
   useEffect(() => {
     if (hasToken) {
@@ -73,28 +76,21 @@ const EighteenToTwentyGrid: React.FC<EighteenToTwentyGridProps> = ({ pageNumberR
   }, [pageNumberReset, setPageNumberReset]);
 
   const sortEventHandler = (update: ISortParams) => {
-    const t = () => { 
-        trigger({
-          profitYear: profitYear,
-          pagination: {
-            skip: 0,
-            take: pageSize,
-            sortBy: update.sortBy,
-            isSortDescending: update.isSortDescending
-          },
-          ...baseParams
-        }
-      );
-    }
+    const t = () => {
+      trigger({
+        profitYear: profitYear,
+        pagination: {
+          skip: 0,
+          take: pageSize,
+          sortBy: update.sortBy,
+          isSortDescending: update.isSortDescending
+        },
+        ...baseParams
+      });
+    };
 
-    pay426Utils.sortEventHandler(
-      update,
-      sortParams,
-      setSortParams,
-      setPageNumber,
-      t
-    );
-  }
+    pay426Utils.sortEventHandler(update, sortParams, setSortParams, setPageNumber, t);
+  };
 
   const columnDefs = useMemo(
     () => GetProfitSharingReportGridColumns(handleNavigationForButton),
@@ -103,7 +99,7 @@ const EighteenToTwentyGrid: React.FC<EighteenToTwentyGridProps> = ({ pageNumberR
 
   const pinnedTopRowData = useMemo(() => {
     if (!data) return [];
-    
+
     console.log("API data:", data);
     return [
       {
@@ -112,7 +108,7 @@ const EighteenToTwentyGrid: React.FC<EighteenToTwentyGridProps> = ({ pageNumberR
         hours: data.hoursTotal || 0,
         points: data.pointsTotal || 0,
         balance: data.balanceTotal || 0,
-        isNew: data.numberOfNewEmployees || 0,
+        isNew: data.numberOfNewEmployees || 0
       },
       {
         employeeName: "No Wages",

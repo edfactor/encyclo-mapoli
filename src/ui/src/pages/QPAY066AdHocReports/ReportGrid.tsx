@@ -1,11 +1,11 @@
-import React, { useMemo } from 'react';
-import { Typography, Table, TableBody, TableCell, TableContainer, TableRow } from '@mui/material';
-import Grid2 from '@mui/material/Grid2';
-import { DSMGrid } from 'smart-ui-library';
-import { FilterParams } from 'reduxstore/types';
-import { numberToCurrency } from 'smart-ui-library';
-import presets from './presets';
-import { GetQPAY066AdHocGridColumns } from './QPAY066AdHocGridColumns';
+import React, { useMemo } from "react";
+import { Typography, Table, TableBody, TableCell, TableContainer, TableRow } from "@mui/material";
+import Grid2 from "@mui/material/Grid2";
+import { DSMGrid } from "smart-ui-library";
+import { FilterParams } from "reduxstore/types";
+import { numberToCurrency } from "smart-ui-library";
+import presets from "./presets";
+import { GetQPAY066AdHocGridColumns } from "./QPAY066AdHocGridColumns";
 
 interface ReportGridProps {
   params: FilterParams;
@@ -16,77 +16,75 @@ interface ReportGridProps {
 const dummyData = [
   {
     badge: 47425,
-    name: 'Wilkins, A...',
+    name: "Wilkins, A...",
     beginningBalance: 4781.67,
-    beneficiaryAllocation: 0.00,
-    distributionAmount: 0.00,
-    forfeit: 0.00,
+    beneficiaryAllocation: 0.0,
+    distributionAmount: 0.0,
+    forfeit: 0.0,
     endingBalance: 4781.67,
     vestingBalance: 4781.67,
-    dateTerm: 'XX/XX/X...',
+    dateTerm: "XX/XX/X...",
     ytdHours: 427,
-    years: 'XX',
-    vested: 'XX%',
-    age: 'XX'
+    years: "XX",
+    vested: "XX%",
+    age: "XX"
   },
   {
     badge: 82424,
-    name: 'Potts, Aria',
+    name: "Potts, Aria",
     beginningBalance: 2221.96,
-    beneficiaryAllocation: 0.00,
-    distributionAmount: 500.00,
-    forfeit: 0.00,
+    beneficiaryAllocation: 0.0,
+    distributionAmount: 500.0,
+    forfeit: 0.0,
     endingBalance: 1721.96,
     vestingBalance: 1721.96,
-    dateTerm: 'XX/XX/X...',
+    dateTerm: "XX/XX/X...",
     ytdHours: 241,
-    years: 'XX',
-    vested: 'XX%',
-    age: 'XX'
+    years: "XX",
+    vested: "XX%",
+    age: "XX"
   },
   {
     badge: 85744,
-    name: 'Lewis, Ami...',
+    name: "Lewis, Ami...",
     beginningBalance: 1801.33,
-    beneficiaryAllocation: 0.00,
-    distributionAmount: 0.00,
-    forfeit: 0.00,
+    beneficiaryAllocation: 0.0,
+    distributionAmount: 0.0,
+    forfeit: 0.0,
     endingBalance: 1801.33,
     vestingBalance: 1801.33,
-    dateTerm: 'XX/XX/X...',
+    dateTerm: "XX/XX/X...",
     ytdHours: 1788,
-    years: 'XX',
-    vested: 'XX%',
-    age: 'XX'
+    years: "XX",
+    vested: "XX%",
+    age: "XX"
   },
   {
     badge: 94861,
-    name: 'Curtis, John',
+    name: "Curtis, John",
     beginningBalance: 2922.24,
-    beneficiaryAllocation: 0.00,
-    distributionAmount: 0.00,
-    forfeit: 0.00,
+    beneficiaryAllocation: 0.0,
+    distributionAmount: 0.0,
+    forfeit: 0.0,
     endingBalance: 2922.24,
     vestingBalance: 2922.24,
-    dateTerm: 'XX/XX/X...',
+    dateTerm: "XX/XX/X...",
     ytdHours: 232.25,
-    years: 'XX',
-    vested: 'XX%',
-    age: 'XX'
+    years: "XX",
+    vested: "XX%",
+    age: "XX"
   }
 ];
 
 const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
   const getReportTitle = () => {
-    const matchingPreset = presets.find(preset => 
-      JSON.stringify(preset.params) === JSON.stringify(params)
-    );
-    
+    const matchingPreset = presets.find((preset) => JSON.stringify(preset.params) === JSON.stringify(params));
+
     if (matchingPreset) {
       return matchingPreset.description.toUpperCase();
     }
-    
-    return 'N/A';
+
+    return "N/A";
   };
 
   // Calculate summary data from dummy data
@@ -109,7 +107,9 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
   const columnDefs = useMemo(() => GetQPAY066AdHocGridColumns(), []);
 
   return (
-    <Grid2 container spacing={3}>
+    <Grid2
+      container
+      spacing={3}>
       {/* Summary Section */}
       <Grid2 size={{ xs: 12 }}>
         <div style={{ padding: "0 24px" }}>
@@ -124,38 +124,28 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
             <Table size="small">
               <TableBody>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 'bold', fontSize: '0.9rem', py: 1.5, width: '20%' }}>
+                  <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem", py: 1.5, width: "20%" }}>
                     Amount In Profit Sharing
                   </TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', fontSize: '0.9rem', py: 1.5, width: '20%' }}>
+                  <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem", py: 1.5, width: "20%" }}>
                     Vested Amount
                   </TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', fontSize: '0.9rem', py: 1.5, width: '20%' }}>
+                  <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem", py: 1.5, width: "20%" }}>
                     Total Forfeitures
                   </TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', fontSize: '0.9rem', py: 1.5, width: '20%' }}>
+                  <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem", py: 1.5, width: "20%" }}>
                     Total Loans
                   </TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', fontSize: '0.9rem', py: 1.5, width: '20%' }}>
+                  <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem", py: 1.5, width: "20%" }}>
                     Total Beneficiary Allocations
                   </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell sx={{ fontSize: '0.9rem', py: 1.5 }}>
-                    {summaryData.amountInProfitSharing}
-                  </TableCell>
-                  <TableCell sx={{ fontSize: '0.9rem', py: 1.5 }}>
-                    {summaryData.vestedAmount}
-                  </TableCell>
-                  <TableCell sx={{ fontSize: '0.9rem', py: 1.5 }}>
-                    {summaryData.totalForfeitures}
-                  </TableCell>
-                  <TableCell sx={{ fontSize: '0.9rem', py: 1.5 }}>
-                    {summaryData.totalLoans}
-                  </TableCell>
-                  <TableCell sx={{ fontSize: '0.9rem', py: 1.5 }}>
-                    {summaryData.totalBeneficiaryAllocations}
-                  </TableCell>
+                  <TableCell sx={{ fontSize: "0.9rem", py: 1.5 }}>{summaryData.amountInProfitSharing}</TableCell>
+                  <TableCell sx={{ fontSize: "0.9rem", py: 1.5 }}>{summaryData.vestedAmount}</TableCell>
+                  <TableCell sx={{ fontSize: "0.9rem", py: 1.5 }}>{summaryData.totalForfeitures}</TableCell>
+                  <TableCell sx={{ fontSize: "0.9rem", py: 1.5 }}>{summaryData.totalLoans}</TableCell>
+                  <TableCell sx={{ fontSize: "0.9rem", py: 1.5 }}>{summaryData.totalBeneficiaryAllocations}</TableCell>
                 </TableRow>
               </TableBody>
             </Table>
@@ -170,7 +160,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
           isLoading={false}
           providedOptions={{
             rowData: dummyData,
-            columnDefs: columnDefs,
+            columnDefs: columnDefs
           }}
         />
       </Grid2>
@@ -178,4 +168,4 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
   );
 };
 
-export default ReportGrid; 
+export default ReportGrid;

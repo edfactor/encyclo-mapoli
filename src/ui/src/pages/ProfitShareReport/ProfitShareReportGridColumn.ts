@@ -42,7 +42,7 @@ export const GetProfitShareReportColumns = (): ColDef[] => {
       cellClass: "left-align",
       resizable: true,
       valueFormatter: (params) => {
-        const id = params.data.employeeTypeCode; 
+        const id = params.data.employeeTypeCode;
         const name = params.data.employeeTypeName;
         return `${id} - ${name}`;
       }

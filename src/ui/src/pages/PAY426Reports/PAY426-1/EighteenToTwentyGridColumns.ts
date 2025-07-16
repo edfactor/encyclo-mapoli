@@ -1,4 +1,4 @@
-import { agGridNumberToCurrency, formatNumberWithComma} from "smart-ui-library";
+import { agGridNumberToCurrency, formatNumberWithComma } from "smart-ui-library";
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
@@ -98,7 +98,7 @@ export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: str
       type: "rightAligned",
       resizable: true,
       valueFormatter: (params) => formatNumberWithComma(params.value)
-    },  
+    },
     {
       headerName: "New",
       field: "isNew",

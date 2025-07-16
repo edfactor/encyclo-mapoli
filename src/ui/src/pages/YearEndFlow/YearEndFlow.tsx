@@ -9,8 +9,7 @@ const FiscalFlow = () => {
   const navigate = useNavigate();
 
   return (
-    <Page
-      label={MENU_LABELS.FISCAL_CLOSE}>
+    <Page label={MENU_LABELS.FISCAL_CLOSE}>
       <Grid2 container>
         <Grid2
           size={{ xs: 12 }}
@@ -47,8 +46,6 @@ const FiscalFlow = () => {
             <></>
           </DSMCollapsedAccordion>
         </Grid2>
-
-        
 
         <Grid2 width="100%">
           <DSMCollapsedAccordion

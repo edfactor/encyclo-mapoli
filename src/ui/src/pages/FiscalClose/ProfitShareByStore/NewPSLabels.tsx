@@ -10,7 +10,9 @@ const NewPSLabels = () => {
     return <StatusDropdownActionNode />;
   };
   return (
-    <Page label={CAPTIONS.NEW_PS_LABELS} actionNode={renderActionNode()}>
+    <Page
+      label={CAPTIONS.NEW_PS_LABELS}
+      actionNode={renderActionNode()}>
       <Grid2
         container
         rowSpacing="24px">

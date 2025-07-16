@@ -32,11 +32,23 @@ const EligibleEmployeesGrid: React.FC<EligibleEmployeesGridProps> = ({
   const onSearch = useCallback(async () => {
     const request = {
       profitYear: eligibleEmployeesQueryParams?.profitYear ?? 0,
-      pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: sortParams.sortBy, isSortDescending: sortParams.isSortDescending }
+      pagination: {
+        skip: pageNumber * pageSize,
+        take: pageSize,
+        sortBy: sortParams.sortBy,
+        isSortDescending: sortParams.isSortDescending
+      }
     };
 
     await triggerSearch(request, false);
-  }, [eligibleEmployeesQueryParams?.profitYear, pageNumber, pageSize, sortParams.isSortDescending, sortParams.sortBy, triggerSearch]);
+  }, [
+    eligibleEmployeesQueryParams?.profitYear,
+    pageNumber,
+    pageSize,
+    sortParams.isSortDescending,
+    sortParams.sortBy,
+    triggerSearch
+  ]);
 
   useEffect(() => {
     if (initialSearchLoaded) {
@@ -69,7 +81,7 @@ const EligibleEmployeesGrid: React.FC<EligibleEmployeesGridProps> = ({
             providedOptions={{
               rowData: eligibleEmployees?.response.results,
               columnDefs: columnDefs,
-              suppressMultiSort: true,
+              suppressMultiSort: true
             }}
           />
         </>

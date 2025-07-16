@@ -20,7 +20,13 @@ interface BeneficiaryInquiryGridProps {
   refresh: () => any;
 }
 
-const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({ refresh, selectedMember, count, createOrUpdateBeneficiary, deleteBeneficiary }) => {
+const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
+  refresh,
+  selectedMember,
+  count,
+  createOrUpdateBeneficiary,
+  deleteBeneficiary
+}) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [_sortParams, setSortParams] = useState<ISortParams>({
@@ -31,7 +37,7 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({ refresh
 
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   // const { beneficiaryList, beneficiaryRequest } = useSelector((state: RootState) => state.beneficiaries);
-  const [beneficiaryList, setBeneficiaryList] = useState<Paged<BeneficiaryDto> | undefined>()
+  const [beneficiaryList, setBeneficiaryList] = useState<Paged<BeneficiaryDto> | undefined>();
   const [triggerSearch, { isFetching }] = useLazyGetBeneficiariesQuery();
   const [triggerUpdate] = useLazyUpdateBeneficiaryQuery();
 
@@ -42,18 +48,24 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({ refresh
   //   },
   //   [beneficiaryRequest, pageSize, _sortParams]
   // );1
-  const createBeneficiaryInquiryRequest =
-    (skip: number, sortBy: string, isSortDescending: boolean, take: number, badgeNumber: number, psnSuffix: number): BeneficiaryRequestDto | null => {
-      const request: BeneficiaryRequestDto = {
-        badgeNumber: badgeNumber,
-        psnSuffix: psnSuffix,
-        isSortDescending: isSortDescending,
-        skip: skip,
-        sortBy: sortBy,
-        take: take
-      }
-      return request;
-    }
+  const createBeneficiaryInquiryRequest = (
+    skip: number,
+    sortBy: string,
+    isSortDescending: boolean,
+    take: number,
+    badgeNumber: number,
+    psnSuffix: number
+  ): BeneficiaryRequestDto | null => {
+    const request: BeneficiaryRequestDto = {
+      badgeNumber: badgeNumber,
+      psnSuffix: psnSuffix,
+      isSortDescending: isSortDescending,
+      skip: skip,
+      sortBy: sortBy,
+      take: take
+    };
+    return request;
+  };
 
   const sortEventHandler = (update: ISortParams) => {
     if (update.sortBy === "") {
@@ -63,49 +75,82 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({ refresh
     setSortParams(update);
     setPageNumber(0);
 
-    const request = createBeneficiaryInquiryRequest(0, update.sortBy, update.isSortDescending, 25, selectedMember?.badgeNumber, selectedMember?.psnSuffix);
+    const request = createBeneficiaryInquiryRequest(
+      0,
+      update.sortBy,
+      update.isSortDescending,
+      25,
+      selectedMember?.badgeNumber,
+      selectedMember?.psnSuffix
+    );
     if (!request) return;
 
-    triggerSearch(request, false).unwrap().then((value) => {
-      setBeneficiaryList(value);
-    });
+    triggerSearch(request, false)
+      .unwrap()
+      .then((value) => {
+        setBeneficiaryList(value);
+      });
   };
   const actionButtons = (data: any): JSX.Element => {
-    return (<><Button onClick={() => { createOrUpdateBeneficiary(data) }} size="small" color="primary"><Edit fontSize="small" /></Button><Button onClick={() => deleteBeneficiary(data.id)} size="small" color="error"><Delete fontSize="small" /></Button></>)
-  }
+    return (
+      <>
+        <Button
+          onClick={() => {
+            createOrUpdateBeneficiary(data);
+          }}
+          size="small"
+          color="primary">
+          <Edit fontSize="small" />
+        </Button>
+        <Button
+          onClick={() => deleteBeneficiary(data.id)}
+          size="small"
+          color="error">
+          <Delete fontSize="small" />
+        </Button>
+      </>
+    );
+  };
 
-  const validatePercentageOfBeneficiaries = (e: FocusEvent<HTMLInputElement|HTMLTextAreaElement, Element>, id: number) => {
+  const validatePercentageOfBeneficiaries = (
+    e: FocusEvent<HTMLInputElement | HTMLTextAreaElement, Element>,
+    id: number
+  ) => {
     var sum: number = 0;
     const currentValue = e.target.value ? parseInt(e.target.value) : 0;
     beneficiaryList?.results.forEach((value) => {
-      sum += (value.id == id) ? currentValue : value.percent;
-    })
-    const prevObj = beneficiaryList?.results.filter(x => x.id == id );
-    
-      if (sum <= 100) {
-        setErrorPercentage(false);
-        //call api to save the percentage.
-        
-        triggerUpdate({id: id, percentage: currentValue},false).unwrap().then((res)=>{
-          if(hasToken)
-            onSearch();
-        })
-      } else {
-        setErrorPercentage(true);
-        e.target.value = prevObj? prevObj[0].percent+"": "";
-      }
-  }
+      sum += value.id == id ? currentValue : value.percent;
+    });
+    const prevObj = beneficiaryList?.results.filter((x) => x.id == id);
+
+    if (sum <= 100) {
+      setErrorPercentage(false);
+      //call api to save the percentage.
+
+      triggerUpdate({ id: id, percentage: currentValue }, false)
+        .unwrap()
+        .then((res) => {
+          if (hasToken) onSearch();
+        });
+    } else {
+      setErrorPercentage(true);
+      e.target.value = prevObj ? prevObj[0].percent + "" : "";
+    }
+  };
 
   const percentageFieldRenderer = (percentage: number, id: number) => {
     return (
       <>
-        <TextField type="number" defaultValue={percentage} onBlur={(e) => validatePercentageOfBeneficiaries(e, id)} onClick={() => console.log(id)}></TextField>
+        <TextField
+          type="number"
+          defaultValue={percentage}
+          onBlur={(e) => validatePercentageOfBeneficiaries(e, id)}
+          onClick={() => console.log(id)}></TextField>
       </>
-    )
-  }
+    );
+  };
 
   const columnDefs = useMemo(() => {
-
     const columns = BeneficiaryInquiryGridColumns();
     columns.splice(6, 0, {
       headerName: "Percentage",
@@ -117,21 +162,26 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({ refresh
       sortable: false,
       resizable: true,
       cellRenderer: (params: ICellRendererParams) => percentageFieldRenderer(params.data.percent, params.data.id)
-    },)
-    return [...columns, {
-      headerName: "Actions",
-      field: "actions",
-      lockPinned: true,
-      pinned: "right",
-      resizable: false,
-      sortable: false,
-      cellStyle: { backgroundColor: '#E8E8E8' },
-      minWidth: 150,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      cellRenderer: (params: ICellRendererParams) => { return actionButtons(params.data); }
-    }];
-  }, [beneficiaryList])
+    });
+    return [
+      ...columns,
+      {
+        headerName: "Actions",
+        field: "actions",
+        lockPinned: true,
+        pinned: "right",
+        resizable: false,
+        sortable: false,
+        cellStyle: { backgroundColor: "#E8E8E8" },
+        minWidth: 150,
+        headerClass: "center-align",
+        cellClass: "center-align",
+        cellRenderer: (params: ICellRendererParams) => {
+          return actionButtons(params.data);
+        }
+      }
+    ];
+  }, [beneficiaryList]);
 
   // const onSearch = useCallback(async () => {
   //   const request = createBeneficiaryInquiryRequest(pageNumber * pageSize, _sortParams.sortBy, _sortParams.isSortDescending,badgeNumber);
@@ -147,14 +197,22 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({ refresh
   // }, [pageNumber, pageSize, _sortParams, onSearch]);
 
   const onSearch = useCallback(() => {
-    const request = createBeneficiaryInquiryRequest(pageNumber * pageSize, _sortParams.sortBy, _sortParams.isSortDescending, 25, selectedMember?.badgeNumber, selectedMember?.psnSuffix);
+    const request = createBeneficiaryInquiryRequest(
+      pageNumber * pageSize,
+      _sortParams.sortBy,
+      _sortParams.isSortDescending,
+      25,
+      selectedMember?.badgeNumber,
+      selectedMember?.psnSuffix
+    );
     if (!request) return;
 
-    triggerSearch(request, false).unwrap().then((value) => {
-      setBeneficiaryList(value)
-    });
-  }, [selectedMember]
-  );
+    triggerSearch(request, false)
+      .unwrap()
+      .then((value) => {
+        setBeneficiaryList(value);
+      });
+  }, [selectedMember]);
 
   useEffect(() => {
     if (hasToken) {
@@ -166,7 +224,15 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({ refresh
     <>
       {!!beneficiaryList && (
         <>
-          {errorPercentage ? <Alert variant="filled" severity="error">% Percentage should be equal to 100%</Alert> : <></>}
+          {errorPercentage ? (
+            <Alert
+              variant="filled"
+              severity="error">
+              % Percentage should be equal to 100%
+            </Alert>
+          ) : (
+            <></>
+          )}
           <div className="master-inquiry-header">
             <Typography
               variant="h2"

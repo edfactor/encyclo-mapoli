@@ -15,11 +15,11 @@ import MilitaryEntryAndModificationSearchFilter from "./MilitaryEntryAndModifica
 const MilitaryEntryAndModification = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [showContributions, setShowContributions] = useState(false);  
+  const [showContributions, setShowContributions] = useState(false);
   const { masterInquiryEmployeeDetails } = useSelector((state: RootState) => state.inquiry);
   const [fetchContributions, { isFetching }] = useLazyGetMilitaryContributionsQuery();
   const profitYear = useDecemberFlowProfitYear();
-  
+
   const renderActionNode = () => {
     return <StatusDropdownActionNode />;
   };
@@ -45,7 +45,9 @@ const MilitaryEntryAndModification = () => {
           skip: 0,
           take: 25,
           sortBy: "contributionDate",
-          isSortDescending: false}});
+          isSortDescending: false
+        }
+      });
       setShowContributions(true);
     }
   }, [fetchContributions, masterInquiryEmployeeDetails, profitYear]);
@@ -87,26 +89,25 @@ const MilitaryEntryAndModification = () => {
         </Grid2>
       </Grid2>
 
-        {/* Military Contribution Form Dialog */}
-        <Dialog
-          open={isDialogOpen}
-          onClose={handleCloseForm}
-          maxWidth="md"
-          fullWidth
-        >
-          <DialogTitle>Add Military Contribution</DialogTitle>
-          <DialogContent>
-            <MilitaryContributionForm
-              onSubmit={(rows) => {
-                handleCloseForm();         
-              }}
-              onCancel={handleCloseForm}
-              badgeNumber={Number(masterInquiryEmployeeDetails?.badgeNumber)}
-              profitYear={profitYear}
-            />
-          </DialogContent>
-        </Dialog>
-      </Page>
-    );
-  };
+      {/* Military Contribution Form Dialog */}
+      <Dialog
+        open={isDialogOpen}
+        onClose={handleCloseForm}
+        maxWidth="md"
+        fullWidth>
+        <DialogTitle>Add Military Contribution</DialogTitle>
+        <DialogContent>
+          <MilitaryContributionForm
+            onSubmit={(rows) => {
+              handleCloseForm();
+            }}
+            onCancel={handleCloseForm}
+            badgeNumber={Number(masterInquiryEmployeeDetails?.badgeNumber)}
+            profitYear={profitYear}
+          />
+        </DialogContent>
+      </Dialog>
+    </Page>
+  );
+};
 export default MilitaryEntryAndModification;

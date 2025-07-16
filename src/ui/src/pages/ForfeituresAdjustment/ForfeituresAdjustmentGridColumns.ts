@@ -39,4 +39,4 @@ export const GetForfeituresAdjustmentColumns = (): ColDef[] => {
   };
 
   return getColDefForForfeiture();
-}; 
+};
