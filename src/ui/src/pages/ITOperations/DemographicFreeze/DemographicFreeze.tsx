@@ -17,7 +17,10 @@ const DemographicFreeze = () => {
           <Divider />
         </Grid2>
         <Grid2 width={"100%"}>
-          <DemographicFreezeManager setInitialSearchLoaded={setInitialSearchLoaded} setPageReset={setPageNumberReset} />
+          <DemographicFreezeManager
+            setInitialSearchLoaded={setInitialSearchLoaded}
+            setPageReset={setPageNumberReset}
+          />
         </Grid2>
 
         <Grid2 width="100%">

@@ -26,16 +26,19 @@ const DuplicateNamesAndBirthdaysGrid: React.FC<DuplicateNamesAndBirthdaysGridSea
     isSortDescending: false
   });
 
-  const { duplicateNamesAndBirthdays } = useSelector(
-    (state: RootState) => state.yearsEnd
-  );
+  const { duplicateNamesAndBirthdays } = useSelector((state: RootState) => state.yearsEnd);
   const profitYear = useDecemberFlowProfitYear();
   const [triggerSearch, { isFetching }] = useLazyGetDuplicateNamesAndBirthdaysQuery();
 
   const onSearch = useCallback(async () => {
     const request = {
       profitYear: profitYear || 0,
-      pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: sortParams.sortBy, isSortDescending: sortParams.isSortDescending },
+      pagination: {
+        skip: pageNumber * pageSize,
+        take: pageSize,
+        sortBy: sortParams.sortBy,
+        isSortDescending: sortParams.isSortDescending
+      }
     };
 
     await triggerSearch(request, false);

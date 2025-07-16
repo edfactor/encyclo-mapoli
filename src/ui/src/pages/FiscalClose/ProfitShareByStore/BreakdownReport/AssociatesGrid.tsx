@@ -38,7 +38,7 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store, pageNumberReset,
   );
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
-  
+
   const fetchData = useCallback(() => {
     const params = {
       profitYear: queryParams?.profitYear || profitYear,
@@ -53,11 +53,20 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store, pageNumberReset,
         isSortDescending: sortParams.isSortDescending
       }
     };
-    if (hasToken)
-    {
-    fetchBreakdownByStore(params);
+    if (hasToken) {
+      fetchBreakdownByStore(params);
     }
-  }, [fetchBreakdownByStore, hasToken, pageNumber, pageSize, profitYear, queryParams?.profitYear, sortParams.isSortDescending, sortParams.sortBy, store]);
+  }, [
+    fetchBreakdownByStore,
+    hasToken,
+    pageNumber,
+    pageSize,
+    profitYear,
+    queryParams?.profitYear,
+    sortParams.isSortDescending,
+    sortParams.sortBy,
+    store
+  ]);
 
   useEffect(() => {
     fetchData();

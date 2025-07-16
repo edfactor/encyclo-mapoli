@@ -14,7 +14,12 @@ interface ProfitShareEditUpdateGridProps {
   setPageNumberReset: (reset: boolean) => void;
 }
 
-const ProfitShareEditUpdateGrid = ({ initialSearchLoaded, setInitialSearchLoaded, pageNumberReset, setPageNumberReset }: ProfitShareEditUpdateGridProps) => {
+const ProfitShareEditUpdateGrid = ({
+  initialSearchLoaded,
+  setInitialSearchLoaded,
+  pageNumberReset,
+  setPageNumberReset
+}: ProfitShareEditUpdateGridProps) => {
   const [pageNumber, setPageNumber] = useState(0);
   const hasToken = !!useSelector((state: RootState) => state.security.token);
   const [pageSize, setPageSize] = useState(25);

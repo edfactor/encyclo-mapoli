@@ -45,7 +45,7 @@ const ProfallGrid: React.FC<ProfallGridProps> = ({ pageNumberReset, setPageNumbe
         sortBy: sortParams.sortBy || "badgeNumber",
         isSortDescending: sortParams.isSortDescending
       }
-    })
+    });
   }, [profitYear, pageNumber, pageSize, sortParams, getProfitSharingLabels]);
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
@@ -65,7 +65,7 @@ const ProfallGrid: React.FC<ProfallGridProps> = ({ pageNumberReset, setPageNumbe
   }, [pageNumberReset, setPageNumberReset]);
 
   const columnDefs = useMemo(() => GetProfallGridColumns(handleNavigationForButton), [handleNavigationForButton]);
-  
+
   const rowData = useMemo(() => {
     return profitSharingLabels?.results || [];
   }, [profitSharingLabels]);

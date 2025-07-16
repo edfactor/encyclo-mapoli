@@ -4,7 +4,7 @@ import Grid from "@mui/material/Grid2";
 import React, { FC } from "react";
 import "./SubmitAndReset.css";
 
-export interface ISubmitAndResetProps  {
+export interface ISubmitAndResetProps {
   disabled?: boolean;
   handleSearch?: React.MouseEventHandler<HTMLButtonElement>;
   handleReset: React.MouseEventHandler<HTMLButtonElement>;

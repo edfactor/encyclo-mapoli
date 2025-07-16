@@ -45,7 +45,10 @@ interface DemographicFreezeSearchFilterProps {
   setPageReset: (reset: boolean) => void;
 }
 
-const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = ({ setInitialSearchLoaded, setPageReset }) => {
+const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = ({
+  setInitialSearchLoaded,
+  setPageReset
+}) => {
   const [freezeDemographics, { isLoading }] = useFreezeDemographicsMutation();
   const profitYear = useDecemberFlowProfitYear();
 

@@ -34,18 +34,16 @@ const EmployeesOnMilitaryLeaveGrid: React.FC = () => {
     fetchData();
   }, [pageNumber, pageSize, triggerSearch]);
 
- 
-
   const { militaryAndRehire: employeesOnMilitaryLeave } = useSelector((state: RootState) => state.yearsEnd);
 
-   // Need a useEffect on a change in employeesOnMilitaryLeave to reset the page number
-   const prevEmployeesOnMilitaryLeave = useRef<any>(null);
+  // Need a useEffect on a change in employeesOnMilitaryLeave to reset the page number
+  const prevEmployeesOnMilitaryLeave = useRef<any>(null);
   useEffect(() => {
-
     if (
       employeesOnMilitaryLeave !== prevEmployeesOnMilitaryLeave.current &&
       employeesOnMilitaryLeave?.response?.results &&
-      employeesOnMilitaryLeave.response.results.length !== prevEmployeesOnMilitaryLeave.current?.response?.results?.length
+      employeesOnMilitaryLeave.response.results.length !==
+        prevEmployeesOnMilitaryLeave.current?.response?.results?.length
     ) {
       setPageNumber(0);
     }

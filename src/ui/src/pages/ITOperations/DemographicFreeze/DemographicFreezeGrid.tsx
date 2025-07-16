@@ -13,22 +13,25 @@ interface DemoFreezeSearchProps {
   setPageNumberReset: (reset: boolean) => void;
 }
 
-const DemographicFreeze: React.FC<DemoFreezeSearchProps> = ({initialSearchLoaded, setInitialSearchLoaded, pageNumberReset, setPageNumberReset }) => {
+const DemographicFreeze: React.FC<DemoFreezeSearchProps> = ({
+  initialSearchLoaded,
+  setInitialSearchLoaded,
+  pageNumberReset,
+  setPageNumberReset
+}) => {
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
 
-  const freezeResults = useSelector(
-    (state: RootState) => state.frozen.frozenStateCollectionData
-  );
+  const freezeResults = useSelector((state: RootState) => state.frozen.frozenStateCollectionData);
 
   const [triggerSearch, { isFetching }] = useLazyGetHistoricalFrozenStateResponseQuery();
 
   const onSearch = useCallback(async () => {
     const request = {
-      skip: pageNumber * pageSize, 
-      take: pageSize, 
-      sortBy: "createdDateTime", 
+      skip: pageNumber * pageSize,
+      take: pageSize,
+      sortBy: "createdDateTime",
       isSortDescending: true
     };
 

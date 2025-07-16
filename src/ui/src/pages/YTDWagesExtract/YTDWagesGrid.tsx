@@ -17,7 +17,13 @@ interface YTDWagesGridProps {
   setPageNumberReset: (reset: boolean) => void;
 }
 
-const YTDWagesGrid = ({ innerRef, initialSearchLoaded, setInitialSearchLoaded, pageNumberReset, setPageNumberReset }: YTDWagesGridProps) => {
+const YTDWagesGrid = ({
+  innerRef,
+  initialSearchLoaded,
+  setInitialSearchLoaded,
+  pageNumberReset,
+  setPageNumberReset
+}: YTDWagesGridProps) => {
   const hasToken = !!useSelector((state: RootState) => state.security.token);
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
@@ -42,7 +48,15 @@ const YTDWagesGrid = ({ innerRef, initialSearchLoaded, setInitialSearchLoaded, p
     };
 
     await triggerSearch(request, false);
-  }, [employeeWagesForYearQueryParams?.profitYear, fiscalCloseProfitYear, pageNumber, pageSize, sortParams.sortBy, sortParams.isSortDescending, triggerSearch]);
+  }, [
+    employeeWagesForYearQueryParams?.profitYear,
+    fiscalCloseProfitYear,
+    pageNumber,
+    pageSize,
+    sortParams.sortBy,
+    sortParams.isSortDescending,
+    triggerSearch
+  ]);
 
   useEffect(() => {
     if (initialSearchLoaded && hasToken) {

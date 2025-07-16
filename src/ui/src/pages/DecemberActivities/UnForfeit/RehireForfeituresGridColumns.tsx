@@ -5,10 +5,10 @@ import { mmDDYYFormat } from "utils/dateUtils";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
 import { Checkbox, IconButton } from "@mui/material";
 import { SaveOutlined } from "@mui/icons-material";
-import { 
-  RehireForfeituresHeaderComponentProps, 
-  RehireForfeituresSaveButtonCellParams, 
-  RehireForfeituresUpdatePayload 
+import {
+  RehireForfeituresHeaderComponentProps,
+  RehireForfeituresSaveButtonCellParams,
+  RehireForfeituresUpdatePayload
 } from "../../../reduxstore/types";
 import { SuggestedForfeitEditor, SuggestedForfeitCellRenderer } from "../../../components/SuggestedForfeiture";
 import { SelectableGridHeader } from "../../../components/SelectableGridHeader";
@@ -21,7 +21,7 @@ export const HeaderComponent: React.FC<RehireForfeituresHeaderComponentProps> = 
   const createUpdatePayload = (nodeData: any, context: any) => {
     const rowKey = `${nodeData.badgeNumber}-${nodeData.profitYear}`;
     const currentValue = context?.editedValues?.[rowKey]?.value ?? nodeData.suggestedForfeit;
-    
+
     return {
       badgeNumber: nodeData.badgeNumber,
       profitYear: nodeData.profitYear,
@@ -29,11 +29,13 @@ export const HeaderComponent: React.FC<RehireForfeituresHeaderComponentProps> = 
     };
   };
 
-  return <SelectableGridHeader 
-    {...props}
-    isNodeEligible={isNodeEligible}
-    createUpdatePayload={createUpdatePayload}
-  />;
+  return (
+    <SelectableGridHeader
+      {...props}
+      isNodeEligible={isNodeEligible}
+      createUpdatePayload={createUpdatePayload}
+    />
+  );
 };
 
 export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
@@ -131,7 +133,7 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       resizable: true,
       sortable: true,
       valueFormatter: agGridNumberToCurrency
-    },    
+    },
     {
       headerName: "Store",
       field: "storeNumber",
@@ -140,12 +142,16 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
-      sortable: true,
+      sortable: true
     }
   ];
 };
 
-export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, removeRowFromSelectedRows: (id: number) => void, selectedProfitYear: number): ColDef[] => {
+export const GetDetailColumns = (
+  addRowToSelectedRows: (id: number) => void,
+  removeRowFromSelectedRows: (id: number) => void,
+  selectedProfitYear: number
+): ColDef[] => {
   return [
     {
       headerName: "Profit Year",
@@ -168,7 +174,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
         const hours = params.value;
         return formatNumberWithComma(hours);
       }
-    },    
+    },
     {
       headerName: "Wages",
       field: "wages",
@@ -198,7 +204,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       sortable: true,
       valueGetter: (params) => {
         const id = params.data?.enrollmentId;
-        const name = params.data?.enrollmentName;        
+        const name = params.data?.enrollmentName;
         return `[${id}] ${name}`;
       }
     },
@@ -239,7 +245,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
-      sortable: false,
+      sortable: false
     },
     {
       headerName: "Save Button",
@@ -250,7 +256,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       lockPinned: true,
       resizable: false,
       sortable: false,
-      cellStyle: { backgroundColor: '#E8E8E8' },
+      cellStyle: { backgroundColor: "#E8E8E8" },
       headerComponent: HeaderComponent,
       headerComponentParams: {
         addRowToSelectedRows,
@@ -262,7 +268,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       },
       cellRenderer: (params: RehireForfeituresSaveButtonCellParams) => {
         if (!params.data.isDetail || params.data.profitYear !== selectedProfitYear) {
-          return '';
+          return "";
         }
         const id = Number(params.node?.id) || -1;
         const isSelected = params.node?.isSelected() || false;
@@ -270,32 +276,36 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
         const hasError = params.context?.editedValues?.[rowKey]?.hasError;
         const currentValue = params.context?.editedValues?.[rowKey]?.value ?? params.data.suggestedForfeit;
 
-        return <div>
-          <Checkbox checked={isSelected} onChange={() => {
-            if (isSelected) {
-              params.removeRowFromSelectedRows(id);
-              params.node?.setSelected(false);
-            } else {
-              params.addRowToSelectedRows(id);
-              params.node?.setSelected(true);
-            }
-            params.api.refreshCells({ force: true });
-          }} />
-          <IconButton 
-            onClick={() => {
-              if (params.data.isDetail) {
-                console.log('Update payload:', {
-                  badgeNumber: params.data.badgeNumber,
-                  profitYear: params.data.profitYear,
-                  suggestedForfeit: currentValue
-                });
-              }
-            }}
-            disabled={hasError}
-          >
-            <SaveOutlined />
-          </IconButton>
-        </div>;
+        return (
+          <div>
+            <Checkbox
+              checked={isSelected}
+              onChange={() => {
+                if (isSelected) {
+                  params.removeRowFromSelectedRows(id);
+                  params.node?.setSelected(false);
+                } else {
+                  params.addRowToSelectedRows(id);
+                  params.node?.setSelected(true);
+                }
+                params.api.refreshCells({ force: true });
+              }}
+            />
+            <IconButton
+              onClick={() => {
+                if (params.data.isDetail) {
+                  console.log("Update payload:", {
+                    badgeNumber: params.data.badgeNumber,
+                    profitYear: params.data.profitYear,
+                    suggestedForfeit: currentValue
+                  });
+                }
+              }}
+              disabled={hasError}>
+              <SaveOutlined />
+            </IconButton>
+          </div>
+        );
       }
     }
   ];

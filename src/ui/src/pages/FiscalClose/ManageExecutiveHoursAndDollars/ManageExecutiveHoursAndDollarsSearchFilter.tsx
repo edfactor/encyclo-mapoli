@@ -53,7 +53,7 @@ const validationSchema = yup
       .typeError("Full Name must be a string")
       .nullable()
       .transform((value) => value || undefined),
-    hasExecutiveHoursAndDollars: yup.boolean().default(true).required(),
+    hasExecutiveHoursAndDollars: yup.boolean().default(false).required(),
     isMonthlyPayroll: yup.boolean().default(false).required()
   })
   .test("at-least-one-required", "At least one field must be provided", (values) =>
@@ -61,8 +61,8 @@ const validationSchema = yup
       values.socialSecurity ||
         values.badgeNumber ||
         values.fullNameContains ||
-        values.hasExecutiveHoursAndDollars !== undefined ||
-        values.isMonthlyPayroll !== undefined
+        values.hasExecutiveHoursAndDollars !== false ||
+        values.isMonthlyPayroll !== false
     )
   );
 
@@ -80,9 +80,11 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
   setPageNumberReset
 }) => {
   const dispatch = useDispatch();
-  dispatch(clearExecutiveHoursAndDollarsAddQueryParams());
-
   const [activeField, setActiveField] = useState<"socialSecurity" | "badgeNumber" | "fullNameContains" | null>(null);
+
+  useEffect(() => {
+    dispatch(clearExecutiveHoursAndDollarsAddQueryParams());
+  }, [dispatch]);
 
   const { executiveHoursAndDollarsQueryParams, executiveHoursAndDollars } = useSelector(
     (state: RootState) => state.yearsEnd
@@ -142,7 +144,15 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
     trigger // need this unused param to prevent console errors. No idea why - EL
   } = useForm<ExecutiveHoursAndDollarsSearch>({
     resolver: yupResolver(validationSchema) as Resolver<ExecutiveHoursAndDollarsSearch>,
-    mode: "onChange"
+    mode: "onChange",
+    defaultValues: {
+      profitYear: profitYear,
+      badgeNumber: undefined,
+      socialSecurity: undefined,
+      fullNameContains: "",
+      hasExecutiveHoursAndDollars: false,
+      isMonthlyPayroll: false
+    }
   });
 
   const socialSecurity = watch("socialSecurity");
@@ -248,9 +258,9 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
     setPageNumberReset(true);
   });
 
-  if (profitYear && !executiveHoursAndDollars) {
-    setInitialSearchLoaded(true);
-  }
+  //if (profitYear && !executiveHoursAndDollars) {
+  //  setInitialSearchLoaded(true);
+  //}
 
   const handleReset = () => {
     // If we ever decide that the reset button should clear pending changes
@@ -278,6 +288,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
     badgeNumberChosen = false;
     fullNameChosen = false;
     isMonthlyPayrollChosen = false;
+    hasExecutiveHoursAndDollarsChosen = false;
     setPageNumberReset(true);
 
     reset({
@@ -285,7 +296,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
       badgeNumber: undefined,
       socialSecurity: undefined,
       fullNameContains: "",
-      hasExecutiveHoursAndDollars: true,
+      hasExecutiveHoursAndDollars: false,
       isMonthlyPayroll: false
     });
   };
@@ -436,6 +447,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
                       <Checkbox
                         checked={field.value}
                         onChange={(e) => {
+                          console.log("hasExecutiveHoursAndDollars", e.target.checked);
                           field.onChange(e);
                           toggleSearchFieldEntered(e.target.checked, "hasExecutiveHoursAndDollars");
                         }}

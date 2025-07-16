@@ -9,7 +9,6 @@ import { GetMilitaryContributionColumns } from "./MilitaryContributionFormGridCo
 import { CAPTIONS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 
-
 interface MilitaryContributionGridProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
@@ -17,10 +16,10 @@ interface MilitaryContributionGridProps {
 }
 
 const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
-                                                                             initialSearchLoaded,
-                                                                             setInitialSearchLoaded,
-                                                                             onAddContribution
-                                                                           }) => {
+  initialSearchLoaded,
+  setInitialSearchLoaded,
+  onAddContribution
+}) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
@@ -31,7 +30,7 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
   const { masterInquiryEmployeeDetails } = useSelector((state: RootState) => state.inquiry);
   const { militaryContributionsData } = useSelector((state: RootState) => state.military);
   const [fetchContributions, { isFetching }] = useLazyGetMilitaryContributionsQuery();
-  
+
   const onSearch = useCallback(async () => {
     if (masterInquiryEmployeeDetails) {
       await fetchContributions({
@@ -55,7 +54,6 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
     }
   }, [initialSearchLoaded, pageNumber, pageSize, sortParams, masterInquiryEmployeeDetails, onSearch]);
 
-
   // Need a useEffect on a change in militaryContributionsData to reset the page number
   const prevMilitaryContributionsData = useRef<any>(null);
   useEffect(() => {
@@ -66,7 +64,7 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
     ) {
       setPageNumber(0);
     }
-    prevMilitaryContributionsData.current = militaryContributionsData;  
+    prevMilitaryContributionsData.current = militaryContributionsData;
   }, [militaryContributionsData]);
 
   const columnDefs = useMemo(() => GetMilitaryContributionColumns(), []);
@@ -75,10 +73,13 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
 
   return (
     <>
-      {masterInquiryEmployeeDetails && profitYear > 0 && <MasterInquiryEmployeeDetails 
-       memberType={masterInquiryEmployeeDetails.isEmployee ? 1 : 2}
-            id={masterInquiryEmployeeDetails.id}
-            profitYear={profitYear} />}
+      {masterInquiryEmployeeDetails && profitYear > 0 && (
+        <MasterInquiryEmployeeDetails
+          memberType={masterInquiryEmployeeDetails.isEmployee ? 1 : 2}
+          id={masterInquiryEmployeeDetails.id}
+          profitYear={profitYear}
+        />
+      )}
 
       {militaryContributionsData && (
         <>

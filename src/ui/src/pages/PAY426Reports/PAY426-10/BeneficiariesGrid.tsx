@@ -31,8 +31,8 @@ const BeneficiariesGrid = () => {
     includeTerminatedEmployees: false,
     includeBeneficiaries: true,
     includeEmployeesWithPriorProfitSharingAmounts: false,
-    includeEmployeesWithNoPriorProfitSharingAmounts: false,
-  }
+    includeEmployeesWithNoPriorProfitSharingAmounts: false
+  };
 
   useEffect(() => {
     if (hasToken) {
@@ -85,28 +85,21 @@ const BeneficiariesGrid = () => {
   );
 
   const sortEventHandler = (update: ISortParams) => {
-      const t = () => { 
-          trigger({
-            profitYear: profitYear,
-            pagination: {
-              skip: 0,
-              take: pageSize,
-              sortBy: update.sortBy,
-              isSortDescending: update.isSortDescending
-            },
-            ...baseParams
-          }
-        );
-      }
-  
-      pay426Utils.sortEventHandler(
-        update,
-        sortParams,
-        setSortParams,
-        setPageNumber,
-        t
-      );
-    }
+    const t = () => {
+      trigger({
+        profitYear: profitYear,
+        pagination: {
+          skip: 0,
+          take: pageSize,
+          sortBy: update.sortBy,
+          isSortDescending: update.isSortDescending
+        },
+        ...baseParams
+      });
+    };
+
+    pay426Utils.sortEventHandler(update, sortParams, setSortParams, setPageNumber, t);
+  };
 
   const columnDefs = useMemo(() => GetBeneficiariesGridColumns(handleNavigationForButton), [handleNavigationForButton]);
 

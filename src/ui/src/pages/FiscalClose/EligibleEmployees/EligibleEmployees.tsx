@@ -1,5 +1,5 @@
 import { Divider } from "@mui/material";
-import Grid2 from '@mui/material/Grid2';
+import Grid2 from "@mui/material/Grid2";
 import { Page } from "smart-ui-library";
 import { useState, useEffect } from "react";
 import EligibleEmployeesGrid from "./EligibleEmployeesGrid";
@@ -28,26 +28,26 @@ const EligibleEmployees = () => {
       };
 
       triggerSearch(request, false)
-        .then(result => {
+        .then((result) => {
           if (result.data) {
             dispatch(setEligibleEmployeesQueryParams(profitYear));
             setInitialSearchLoaded(true);
           }
         })
-        .catch(error => {
+        .catch((error) => {
           console.error("Initial eligible employees search failed:", error);
         });
     }
   }, [hasToken, profitYear, hasInitialSearchRun, triggerSearch, dispatch]);
 
   const renderActionNode = () => {
-    return (
-      <StatusDropdownActionNode />
-    );
+    return <StatusDropdownActionNode />;
   };
 
   return (
-    <Page label="Get Eligible Employees" actionNode={renderActionNode()}>
+    <Page
+      label="Get Eligible Employees"
+      actionNode={renderActionNode()}>
       <Grid2
         container
         rowSpacing="24px">

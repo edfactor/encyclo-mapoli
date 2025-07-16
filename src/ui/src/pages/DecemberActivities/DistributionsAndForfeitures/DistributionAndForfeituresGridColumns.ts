@@ -15,7 +15,8 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
-      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data?.badgeNumber, params.data?.psnSuffix)
+      cellRenderer: (params: ICellRendererParams) =>
+        viewBadgeLinkRenderer(params.data?.badgeNumber, params.data?.psnSuffix)
     },
     {
       headerName: "Name",
@@ -50,10 +51,10 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       field: "distributionAmount",
       colId: "distributionAmount",
       minWidth: 120,
-      type: 'rightAligned',
+      type: "rightAligned",
       resizable: true,
       valueFormatter: agGridNumberToCurrency
-    },    
+    },
     {
       headerName: "State Tax",
       field: "stateTax",

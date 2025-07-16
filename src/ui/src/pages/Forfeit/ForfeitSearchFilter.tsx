@@ -65,10 +65,12 @@ const ForfeitSearchParameters: React.FC<ForfeitSearchParametersProps> = ({ setIn
         },
         false
       );
-      dispatch(setForfeituresAndPointsQueryParams({
-        profitYear: fiscalCloseProfitYear,
-        useFrozenData: data.useFrozenData
-      }));
+      dispatch(
+        setForfeituresAndPointsQueryParams({
+          profitYear: fiscalCloseProfitYear,
+          useFrozenData: data.useFrozenData
+        })
+      );
       setInitialSearchLoaded(true);
     }
   });

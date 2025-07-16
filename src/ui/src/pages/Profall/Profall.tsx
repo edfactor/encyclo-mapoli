@@ -10,13 +10,13 @@ const Profall = () => {
   const [pageNumberReset, setPageNumberReset] = useState(false);
 
   const renderActionNode = () => {
-    return (
-      <StatusDropdownActionNode />
-    );
+    return <StatusDropdownActionNode />;
   };
 
   return (
-    <Page label={CAPTIONS.PROFALL} actionNode={renderActionNode()}>
+    <Page
+      label={CAPTIONS.PROFALL}
+      actionNode={renderActionNode()}>
       <Grid2
         container
         rowSpacing="24px">
@@ -24,7 +24,7 @@ const Profall = () => {
           <Divider />
         </Grid2>
         <Grid2 width="100%">
-          <ProfallGrid 
+          <ProfallGrid
             pageNumberReset={pageNumberReset}
             setPageNumberReset={setPageNumberReset}
           />

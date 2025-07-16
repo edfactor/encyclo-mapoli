@@ -1,8 +1,8 @@
 import { Typography } from "@mui/material";
 import LabelValueSection from "../../../../components/LabelValueSection";
-import Grid2 from '@mui/material/Grid2';
+import Grid2 from "@mui/material/Grid2";
 import { useEffect } from "react";
-import { useLazyGetBreakdownByStoreTotalsQuery } from "reduxstore/api/YearsEndApi";;
+import { useLazyGetBreakdownByStoreTotalsQuery } from "reduxstore/api/YearsEndApi";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
 import { numberToCurrency } from "smart-ui-library";
 import { useSelector } from "react-redux";
@@ -14,7 +14,7 @@ interface TotalsContentProps {
 
 const TotalsContent: React.FC<TotalsContentProps> = ({ store }) => {
   const { breakdownByStoreTotals } = useSelector((state: RootState) => state.yearsEnd);
-  const profitYear = useDecemberFlowProfitYear()
+  const profitYear = useDecemberFlowProfitYear();
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   // Use the API hook to fetch data
   const [getBreakdownByStoreTotals] = useLazyGetBreakdownByStoreTotalsQuery();
@@ -72,7 +72,10 @@ const TotalsContent: React.FC<TotalsContentProps> = ({ store }) => {
   ];
 
   return (
-    <Grid2 container direction="column" width="100%">
+    <Grid2
+      container
+      direction="column"
+      width="100%">
       <Grid2 paddingX="24px">
         <Typography
           variant="h2"
@@ -80,7 +83,9 @@ const TotalsContent: React.FC<TotalsContentProps> = ({ store }) => {
           {`Totals`}
         </Typography>
       </Grid2>
-      <Grid2 width="100%" paddingX="24px">
+      <Grid2
+        width="100%"
+        paddingX="24px">
         <LabelValueSection data={data} />
       </Grid2>
     </Grid2>

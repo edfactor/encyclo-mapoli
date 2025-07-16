@@ -1,7 +1,7 @@
-import Grid2 from '@mui/material/Grid2';
+import Grid2 from "@mui/material/Grid2";
 import { Typography } from "@mui/material";
-import { InfoCard } from '../FiscalFlow/ProfitShareReportEditRun/InfoCard';
-import { useNavigate } from 'react-router-dom';
+import { InfoCard } from "../FiscalFlow/ProfitShareReportEditRun/InfoCard";
+import { useNavigate } from "react-router-dom";
 import { CAPTIONS, ROUTES } from "../../constants";
 
 interface ProfitShareCategory {
@@ -10,7 +10,6 @@ interface ProfitShareCategory {
   data: { [key: string]: string };
   destinationUrl: string;
 }
-
 
 const profitShareCategories: ProfitShareCategory[] = [
   {
@@ -24,11 +23,10 @@ const profitShareCategories: ProfitShareCategory[] = [
     title: CAPTIONS.PROF_CTRLSHEET,
     data: { "[Label]:": "[Value]" },
     destinationUrl: ROUTES.PROF_CTRLSHEET
-  },
+  }
 ];
 
 const PaymasterUpdateResults = () => {
-
   const navigate = useNavigate();
 
   return (
@@ -52,7 +50,9 @@ const PaymasterUpdateResults = () => {
         paddingLeft="24px"
         width="100%">
         {profitShareCategories.map((category) => (
-          <Grid2 size={{ xs: 12, md: 6, lg: 6 }} key={category.code} >
+          <Grid2
+            size={{ xs: 12, md: 6, lg: 6 }}
+            key={category.code}>
             <InfoCard
               buttonDisabled={false}
               title={category.title}
@@ -64,7 +64,7 @@ const PaymasterUpdateResults = () => {
         ))}
       </Grid2>
     </Grid2>
-  )
+  );
 };
 
 export default PaymasterUpdateResults;

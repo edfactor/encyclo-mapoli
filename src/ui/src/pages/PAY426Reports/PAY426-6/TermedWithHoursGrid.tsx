@@ -38,7 +38,7 @@ const TermedWithHoursGrid: React.FC<TermedWithHoursGridProps> = ({ pageNumberRes
     includeTerminatedEmployees: true,
     includeBeneficiaries: false,
     includeEmployeesWithPriorProfitSharingAmounts: true,
-    includeEmployeesWithNoPriorProfitSharingAmounts: true,
+    includeEmployeesWithNoPriorProfitSharingAmounts: true
   };
 
   useEffect(() => {
@@ -51,7 +51,7 @@ const TermedWithHoursGrid: React.FC<TermedWithHoursGridProps> = ({ pageNumberRes
           sortBy: sortParams.sortBy,
           isSortDescending: sortParams.isSortDescending
         },
-      ...baseParams
+        ...baseParams
       });
     }
   }, [trigger, hasToken, profitYear, pageNumber, pageSize, sortParams]);
@@ -71,28 +71,21 @@ const TermedWithHoursGrid: React.FC<TermedWithHoursGridProps> = ({ pageNumberRes
   }, [pageNumberReset, setPageNumberReset]);
 
   const sortEventHandler = (update: ISortParams) => {
-      const t = () => { 
-          trigger({
-            profitYear: profitYear,
-            pagination: {
-              skip: 0,
-              take: pageSize,
-              sortBy: update.sortBy,
-              isSortDescending: update.isSortDescending
-            },
-            ...baseParams
-          }
-        );
-      }
-  
-      pay426Utils.sortEventHandler(
-        update,
-        sortParams,
-        setSortParams,
-        setPageNumber,
-        t
-      );
-    }
+    const t = () => {
+      trigger({
+        profitYear: profitYear,
+        pagination: {
+          skip: 0,
+          take: pageSize,
+          sortBy: update.sortBy,
+          isSortDescending: update.isSortDescending
+        },
+        ...baseParams
+      });
+    };
+
+    pay426Utils.sortEventHandler(update, sortParams, setSortParams, setPageNumber, t);
+  };
 
   const columnDefs = useMemo(
     () => GetProfitSharingReportGridColumns(handleNavigationForButton),
@@ -101,8 +94,8 @@ const TermedWithHoursGrid: React.FC<TermedWithHoursGridProps> = ({ pageNumberRes
 
   const pinnedTopRowData = useMemo(() => {
     if (!data) return [];
-    
-   console.log("API data:", data);
+
+    console.log("API data:", data);
     return [
       {
         employeeName: `TOTAL EMPS: ${data.numberOfEmployeesInPlan || 0}`,
@@ -110,7 +103,7 @@ const TermedWithHoursGrid: React.FC<TermedWithHoursGridProps> = ({ pageNumberRes
         hours: data.hoursTotal || 0,
         points: data.pointsTotal || 0,
         balance: data.balanceTotal || 0,
-        isNew: data.numberOfNewEmployees || 0,
+        isNew: data.numberOfNewEmployees || 0
       },
       {
         employeeName: "No Wages",

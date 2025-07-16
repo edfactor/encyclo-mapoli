@@ -1,5 +1,5 @@
-import { ColDef, ICellRendererParams } from 'ag-grid-community';
-import { numberToCurrency } from 'smart-ui-library';
+import { ColDef, ICellRendererParams } from "ag-grid-community";
+import { numberToCurrency } from "smart-ui-library";
 import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
 
 export const GetQPAY066AdHocGridColumns = (): ColDef[] => [
@@ -75,4 +75,4 @@ export const GetQPAY066AdHocGridColumns = (): ColDef[] => [
     field: "age",
     minWidth: 70
   }
-]; 
+];

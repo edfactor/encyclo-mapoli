@@ -9,28 +9,33 @@ import YTDWagesGrid from "./YTDWagesGrid";
 import YTDWagesSearchFilter from "./YTDWagesSearchFilter";
 
 const YTDWages: React.FC = () => {
-  
-
-  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);  
+  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [pageNumberReset, setPageNumberReset] = useState(false);
   const { employeeWagesForYear } = useSelector((state: RootState) => state.yearsEnd);
 
   const componentRef = useRef<HTMLDivElement>(null);
   const renderActionNode = () => {
-      return <StatusDropdownActionNode />;
-    };
+    return <StatusDropdownActionNode />;
+  };
 
   return (
-    <Page label={`YTD Wages Extract (PROF-DOLLAR-EXTRACT) (${employeeWagesForYear?.response&& employeeWagesForYear.response.total} records)` } actionNode={renderActionNode()}>
+    <Page
+      label={`YTD Wages Extract (PROF-DOLLAR-EXTRACT) (${employeeWagesForYear?.response && employeeWagesForYear.response.total} records)`}
+      actionNode={renderActionNode()}>
       <Grid2
         container
         rowSpacing="24px">
         <Grid2 width={"100%"}>
           <Divider />
         </Grid2>
-        <Grid2 width={"100%"} hidden={true}>
+        <Grid2
+          width={"100%"}
+          hidden={true}>
           <DSMAccordion title="Filter">
-            <YTDWagesSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} setPageReset={setPageNumberReset} />
+            <YTDWagesSearchFilter
+              setInitialSearchLoaded={setInitialSearchLoaded}
+              setPageReset={setPageNumberReset}
+            />
           </DSMAccordion>
         </Grid2>
 

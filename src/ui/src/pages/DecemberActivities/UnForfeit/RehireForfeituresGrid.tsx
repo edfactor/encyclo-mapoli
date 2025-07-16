@@ -5,7 +5,11 @@ import { useLazyGetRehireForfeituresQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import useFiscalCalendarYear from "../../../hooks/useFiscalCalendarYear";
-import { StartAndEndDateRequest, RehireForfeituresEditedValues, RehireForfeituresSelectedRow } from "../../../reduxstore/types";
+import {
+  StartAndEndDateRequest,
+  RehireForfeituresEditedValues,
+  RehireForfeituresSelectedRow
+} from "../../../reduxstore/types";
 import { GetDetailColumns, GetMilitaryAndRehireForfeituresColumns } from "./RehireForfeituresGridColumns";
 import ReportSummary from "../../../components/ReportSummary";
 import Grid2 from "@mui/material/Grid2";
@@ -55,7 +59,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
   };
 
   const updateEditedValue = useCallback((rowKey: string, value: number, hasError: boolean) => {
-    setEditedValues(prev => ({
+    setEditedValues((prev) => ({
       ...prev,
       [rowKey]: { value, hasError }
     }));
@@ -150,7 +154,10 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
 
   // Get the main and detail columns
   const mainColumns = useMemo(() => GetMilitaryAndRehireForfeituresColumns(), []);
-  const detailColumns = useMemo(() => GetDetailColumns(addRowToSelectedRows, removeRowFromSelectedRows, selectedProfitYear), [selectedRowIds, selectedProfitYear]);
+  const detailColumns = useMemo(
+    () => GetDetailColumns(addRowToSelectedRows, removeRowFromSelectedRows, selectedProfitYear),
+    [selectedRowIds, selectedProfitYear]
+  );
 
   // Create the grid data with expandable rows
   const gridData = useMemo(() => {
@@ -211,7 +218,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
       lockVisible: true,
       lockPosition: true,
       pinned: "left" as const
-    };   
+    };
 
     return [expansionColumn, ...mainColumns, ...detailColumns];
   }, [mainColumns, detailColumns]);
@@ -231,7 +238,11 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
 
       {rehireForfeitures?.response && (
         <>
-          <Grid2 container justifyContent="space-between" alignItems="center" marginBottom={2}>
+          <Grid2
+            container
+            justifyContent="space-between"
+            alignItems="center"
+            marginBottom={2}>
             <Grid2>
               <ReportSummary report={rehireForfeitures} />
             </Grid2>
@@ -245,7 +256,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
             providedOptions={{
               rowData: gridData,
               columnDefs: columnDefs,
-              getRowClass: (params: any) => params.data.isDetail ? "detail-row" : "",
+              getRowClass: (params: any) => (params.data.isDetail ? "detail-row" : ""),
               rowSelection: "multiple",
               suppressRowClickSelection: true,
               rowHeight: 40,
@@ -292,4 +303,3 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
 };
 
 export default RehireForfeituresGrid;
-

@@ -9,7 +9,6 @@ import MasterInquiryGroupingGrid from "./MasterInquiryGroupingGrid";
 import MasterInquiryMemberGrid from "./MasterInquiryMemberGrid";
 import MasterInquirySearchFilter from "./MasterInquirySearchFilter";
 
-
 interface SelectedMember {
   memberType: number;
   id: number;
@@ -31,10 +30,14 @@ const MasterInquiry = () => {
       <Grid2
         container
         rowSpacing="24px">
-        <Grid2 size={{ xs: 12 }} width={"100%"}>
+        <Grid2
+          size={{ xs: 12 }}
+          width={"100%"}>
           <Divider />
         </Grid2>
-        <Grid2 size={{ xs: 12 }} width={"100%"}>
+        <Grid2
+          size={{ xs: 12 }}
+          width={"100%"}>
           <DSMAccordion title="Filter">
             <MasterInquirySearchFilter
               setInitialSearchLoaded={setInitialSearchLoaded}
@@ -48,7 +51,10 @@ const MasterInquiry = () => {
         </Grid2>
 
         {searchParams && (
-          <MasterInquiryMemberGrid {...searchParams} onBadgeClick={(data) => setSelectedMember(data || null)} />
+          <MasterInquiryMemberGrid
+            {...searchParams}
+            onBadgeClick={(data) => setSelectedMember(data || null)}
+          />
         )}
 
         {/* Render employee details if identifiers are present in selectedMember, or show missive if noResults */}
@@ -61,10 +67,7 @@ const MasterInquiry = () => {
           />
         )}
 
-        {searchParams && !selectedMember && (
-          <MasterInquiryGroupingGrid searchParams={searchParams} />
-          )
-        }
+        {searchParams && !selectedMember && <MasterInquiryGroupingGrid searchParams={searchParams} />}
 
         {/* Render details for selected member if present */}
         {selectedMember && (
@@ -79,6 +82,3 @@ const MasterInquiry = () => {
 };
 
 export default MasterInquiry;
-
-
-

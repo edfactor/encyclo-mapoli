@@ -29,7 +29,7 @@ const ProfCtrlSheet = () => {
 
   const formatCurrency = (amount: number | undefined) => {
     if (amount === undefined) return "$XX,XXX,XXX.XX";
-    return `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    return `$${amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
   return (
