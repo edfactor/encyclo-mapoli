@@ -50,3 +50,79 @@ export const PayBeNextColumnDef = (): ColDef[] => {
         }
     ];
 };
+
+
+export const GetProfitDetailColumnDef = (addRowToSelectedRows: (id: number) => void, removeRowFromSelectedRows: (id: number) => void) => {
+    return [
+        {
+            headerName: "Year",
+            field: "year",
+            colId: "year",
+            width: 100,
+            headerClass: "right-align",
+            cellClass: "right-align",
+            resizable: true,
+            sortable: false
+        },
+        {
+            headerName: "Code",
+            field: "code",
+            colId: "code",
+            width: 100,
+            headerClass: "right-align",
+            cellClass: "right-align",
+            resizable: true,
+            sortable: false
+        },
+        {
+            headerName: "Contributions",
+            field: "contributions",
+            colId: "contributions",
+            width: 100,
+            headerClass: "right-align",
+            cellClass: "right-align",
+            resizable: true,
+            sortable: false
+        },
+        {
+            headerName: "Earnings",
+            field: "earnings",
+            colId: "earnings",
+            width: 100,
+            headerClass: "right-align",
+            cellClass: "right-align",
+            resizable: true,
+            sortable: false
+        },
+        {
+            headerName: "Forfeitures",
+            field: "forfeitures",
+            colId: "forfeitures",
+            width: 100,
+            headerClass: "right-align",
+            cellClass: "right-align",
+            resizable: true,
+            sortable: false
+        },
+        {
+            headerName: "Date",
+            field: "date",
+            colId: "date",
+            width: 100,
+            headerClass: "right-align",
+            cellClass: "right-align",
+            resizable: true,
+            sortable: false
+        },
+        {
+            headerName: "Comments",
+            field: "comments",
+            colId: "comments",
+            width: 100,
+            headerClass: "right-align",
+            cellClass: "right-align",
+            resizable: true,
+            sortable: false
+        },
+    ]
+}

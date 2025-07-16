@@ -2,7 +2,7 @@ import { Button, Checkbox, CircularProgress, Divider, FormLabel, MenuItem, Selec
 import Grid2 from '@mui/material/Grid2';
 import { useEffect, useMemo, useState } from "react";
 import * as yup from "yup";
-import { DSMAccordion, DSMGrid, ISortParams, Page, SearchAndReset,Pagination } from "smart-ui-library";
+import { DSMAccordion, DSMGrid, ISortParams, Page, SearchAndReset, Pagination } from "smart-ui-library";
 import { useLazyGetBeneficiarytypesQuery, useLazyGetBeneficiaryKindQuery, useLazyDeleteBeneficiaryQuery } from "reduxstore/api/BeneficiariesApi";
 import { AdhocBeneficiariesReportRequest, adhocBeneficiariesReportResponse, BeneficiaryDto, BeneficiaryKindDto, BeneficiaryReportDto, BeneficiaryTypeDto, MasterInquiryRequest, ProfitDetailDto } from "reduxstore/types";
 import { useSelector } from "react-redux";
@@ -13,7 +13,7 @@ import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { Controller, useForm, Resolver } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { CAPTIONS } from "../../../constants";
-import { PayBeNextColumnDef } from "./PayBeNextColumnDef";
+import { GetProfitDetailColumnDef, PayBeNextColumnDef } from "./PayBeNextColumnDef";
 
 const schema = yup.object().shape({
   profitYear: yup.string().notRequired(),
@@ -25,6 +25,7 @@ interface bRequest {
 }
 
 const PayBeNext = () => {
+  const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const { token, appUser, username: stateUsername } = useSelector((state: RootState) => state.security);
   const profitYear = useFiscalCloseProfitYear();
   const [triggerReport, { isFetching, isSuccess }] = useLazyAdhocBeneficiariesReportQuery();
@@ -35,6 +36,20 @@ const PayBeNext = () => {
     sortBy: "psnSuffix",
     isSortDescending: true
   });
+  const [selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
+
+
+  const addRowToSelectedRows = (id: number) => {
+
+    ([...selectedRowIds, id]);
+  };
+
+  const removeRowFromSelectedRows = (id: number) => {
+    setSelectedRowIds(selectedRowIds.filter((rowId) => rowId !== id));
+  };
+
+  const mainColumns = useMemo(() => PayBeNextColumnDef(), []);
+  const detailColumns = useMemo(() => GetProfitDetailColumnDef(addRowToSelectedRows, removeRowFromSelectedRows), [selectedRowIds]);
 
   const {
     control,
@@ -50,10 +65,77 @@ const PayBeNext = () => {
     defaultValues: { isAlsoEmployee: true, profitYear: "2024" }
   });
 
+  // Create the grid data with expandable rows
+  const gridData = useMemo(() => {
+    if (!adhocBeneficiariesReport?.response?.results) return [];
+
+    const rows = [];
+
+    for (const row of adhocBeneficiariesReport.response.results) {
+      const hasDetails = row.profitDetails && row.profitDetails.length > 0;
+
+      // Add main row
+      rows.push({
+        ...row,
+        isExpandable: hasDetails,
+        isExpanded: hasDetails && Boolean(expandedRows[row.badgeNumber.toString()+row.beneficiaryId.toString()]),
+        isDetail: false
+      });
+
+      // Add detail rows if expanded
+      if (hasDetails && expandedRows[row.badgeNumber.toString()+row.beneficiaryId.toString()]) {
+        for (const detail of row.profitDetails || []) {
+          rows.push({
+            ...row,
+            ...detail,
+            isDetail: true,
+            isExpandable: false,
+            isExpanded: false,
+            parentId: parseInt(row.badgeNumber+ "" + row.beneficiaryId),
+            suggestedForfeit: (detail as any).suggestedForfeit || 0
+          });
+        }
+      }
+    }
+
+    return rows;
+  }, [adhocBeneficiariesReport, expandedRows]);
+
+  // Handle row expansion toggle
+  const handleRowExpansion = (badgeNumber: string) => {
+    setExpandedRows((prev) => ({
+      ...prev,
+      [badgeNumber]: !prev[badgeNumber]
+    }));
+  };
+
+  // Create column definitions with expand/collapse functionality
   const columnDefs = useMemo(() => {
-    const columns = PayBeNextColumnDef();
-    return columns;
-  }, [adhocBeneficiariesReport])
+    // Add an expansion column
+    const expansionColumn = {
+      headerName: "",
+      field: "isExpandable",
+      width: 50,
+      cellRenderer: (params: any) => {
+        if (params.data && !params.data.isDetail && params.data.isExpandable) {
+          return params.data.isExpanded ? "▼" : "►";
+        }
+        return "";
+      },
+      onCellClicked: (event: any) => {
+        if (event.data && !event.data.isDetail && event.data.isExpandable) {
+          handleRowExpansion(event.data.badgeNumber.toString()+event.data.beneficiaryId.toString());
+        }
+      },
+      suppressSizeToFit: true,
+      suppressAutoSize: true,
+      lockVisible: true,
+      lockPosition: true,
+      pinned: "left" as const
+    };
+
+    return [expansionColumn, ...mainColumns, ...detailColumns];
+  }, [mainColumns, detailColumns]);
 
   const createAdhocBeneficiariesReportReqeust =
     (skip: number, sortBy: string, isSortDescending: boolean, take: number, isAlsoEmployee: boolean, _profityear: number): AdhocBeneficiariesReportRequest => {
@@ -90,7 +172,7 @@ const PayBeNext = () => {
 
 
   const onSubmit = (data: bRequest) => {
-    
+
     const request = createAdhocBeneficiariesReportReqeust(0, '', false, 50, data.isAlsoEmployee ?? true, parseInt(data.profitYear));
     triggerReport(request).unwrap().then((res) => {
       console.log(res);
@@ -106,7 +188,7 @@ const PayBeNext = () => {
 
 
   return (
-    <Page label="BENEFICIARY INQUIRY">
+    <Page label="PAY BE NEXT">
       <Grid2
         container
         rowSpacing="24px">
@@ -204,10 +286,10 @@ const PayBeNext = () => {
                   isLoading={isFetching}
                   handleSortChanged={sortEventHandler}
                   providedOptions={{
-                    rowData: adhocBeneficiariesReport?.response.results,
+                    rowData: gridData,
                     columnDefs: columnDefs,
                     suppressMultiSort: true,
-                    masterDetail:true,
+                    masterDetail: true,
                     detailCellRenderer: (params: BeneficiaryReportDto) => {
                       const pDetails = params.profitDetails || [];
                       return (
