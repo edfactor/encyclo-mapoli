@@ -1,17 +1,19 @@
-import { Button, Checkbox, CircularProgress, Divider, FormLabel, MenuItem, Select, Typography } from "@mui/material";
-import Grid2 from '@mui/material/Grid2';
-import { useEffect, useMemo, useState } from "react";
-import * as yup from "yup";
-import { DSMAccordion, DSMGrid, ISortParams, Page, SearchAndReset, Pagination } from "smart-ui-library";
-import { useLazyGetBeneficiarytypesQuery, useLazyGetBeneficiaryKindQuery, useLazyDeleteBeneficiaryQuery } from "reduxstore/api/BeneficiariesApi";
-import { AdhocBeneficiariesReportRequest, adhocBeneficiariesReportResponse, BeneficiaryDto, BeneficiaryKindDto, BeneficiaryReportDto, BeneficiaryTypeDto, MasterInquiryRequest, ProfitDetailDto } from "reduxstore/types";
-import { useSelector } from "react-redux";
-import { RootState } from "reduxstore/store";
-import MasterInquiryMemberGrid from "pages/MasterInquiry/MasterInquiryMemberGrid";
-import { useLazyAdhocBeneficiariesReportQuery } from "reduxstore/api/YearsEndApi";
-import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-import { Controller, useForm, Resolver } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { Checkbox, Divider, FormLabel, MenuItem, Select, Typography } from "@mui/material";
+import Grid2 from "@mui/material/Grid2";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import { useEffect, useMemo, useState } from "react";
+import { Controller, Resolver, useForm } from "react-hook-form";
+import { useSelector } from "react-redux";
+import { useLazyAdhocBeneficiariesReportQuery } from "reduxstore/api/YearsEndApi";
+import { RootState } from "reduxstore/store";
+import {
+  AdhocBeneficiariesReportRequest,
+  adhocBeneficiariesReportResponse,
+  BeneficiaryReportDto
+} from "reduxstore/types";
+import { DSMAccordion, DSMGrid, ISortParams, Page, Pagination, SearchAndReset } from "smart-ui-library";
+import * as yup from "yup";
 import { CAPTIONS } from "../../../constants";
 import { GetProfitDetailColumnDef, PayBeNextColumnDef } from "./PayBeNextColumnDef";
 
@@ -38,10 +40,8 @@ const PayBeNext = () => {
   });
   const [selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
 
-
   const addRowToSelectedRows = (id: number) => {
-
-    ([...selectedRowIds, id]);
+    [...selectedRowIds, id];
   };
 
   const removeRowFromSelectedRows = (id: number) => {
@@ -49,7 +49,10 @@ const PayBeNext = () => {
   };
 
   const mainColumns = useMemo(() => PayBeNextColumnDef(), []);
-  const detailColumns = useMemo(() => GetProfitDetailColumnDef(addRowToSelectedRows, removeRowFromSelectedRows), [selectedRowIds]);
+  const detailColumns = useMemo(
+    () => GetProfitDetailColumnDef(addRowToSelectedRows, removeRowFromSelectedRows),
+    [selectedRowIds]
+  );
 
   const {
     control,
@@ -78,12 +81,12 @@ const PayBeNext = () => {
       rows.push({
         ...row,
         isExpandable: hasDetails,
-        isExpanded: hasDetails && Boolean(expandedRows[row.badgeNumber.toString()+row.beneficiaryId.toString()]),
+        isExpanded: hasDetails && Boolean(expandedRows[row.badgeNumber.toString() + row.beneficiaryId.toString()]),
         isDetail: false
       });
 
       // Add detail rows if expanded
-      if (hasDetails && expandedRows[row.badgeNumber.toString()+row.beneficiaryId.toString()]) {
+      if (hasDetails && expandedRows[row.badgeNumber.toString() + row.beneficiaryId.toString()]) {
         for (const detail of row.profitDetails || []) {
           rows.push({
             ...row,
@@ -91,7 +94,7 @@ const PayBeNext = () => {
             isDetail: true,
             isExpandable: false,
             isExpanded: false,
-            parentId: parseInt(row.badgeNumber+ "" + row.beneficiaryId),
+            parentId: parseInt(row.badgeNumber + "" + row.beneficiaryId),
             suggestedForfeit: (detail as any).suggestedForfeit || 0
           });
         }
@@ -124,7 +127,7 @@ const PayBeNext = () => {
       },
       onCellClicked: (event: any) => {
         if (event.data && !event.data.isDetail && event.data.isExpandable) {
-          handleRowExpansion(event.data.badgeNumber.toString()+event.data.beneficiaryId.toString());
+          handleRowExpansion(event.data.badgeNumber.toString() + event.data.beneficiaryId.toString());
         }
       },
       suppressSizeToFit: true,
@@ -137,24 +140,29 @@ const PayBeNext = () => {
     return [expansionColumn, ...mainColumns, ...detailColumns];
   }, [mainColumns, detailColumns]);
 
-  const createAdhocBeneficiariesReportReqeust =
-    (skip: number, sortBy: string, isSortDescending: boolean, take: number, isAlsoEmployee: boolean, _profityear: number): AdhocBeneficiariesReportRequest => {
-      const request: AdhocBeneficiariesReportRequest = {
-        isAlsoEmployee: isAlsoEmployee,
-        profitYear: _profityear,
-        isSortDescending: isSortDescending,
-        skip: skip,
-        sortBy: sortBy,
-        take: take
-      }
-      return request;
-    }
+  const createAdhocBeneficiariesReportReqeust = (
+    skip: number,
+    sortBy: string,
+    isSortDescending: boolean,
+    take: number,
+    isAlsoEmployee: boolean,
+    _profityear: number
+  ): AdhocBeneficiariesReportRequest => {
+    const request: AdhocBeneficiariesReportRequest = {
+      isAlsoEmployee: isAlsoEmployee,
+      profitYear: _profityear,
+      isSortDescending: isSortDescending,
+      skip: skip,
+      sortBy: sortBy,
+      take: take
+    };
+    return request;
+  };
 
   useEffect(() => {
     if (token) {
     }
-  }, [token])
-
+  }, [token]);
 
   const sortEventHandler = (update: ISortParams) => {
     if (update.sortBy === "") {
@@ -164,38 +172,52 @@ const PayBeNext = () => {
     setSortParams(update);
     setPageNumber(0);
 
-    const request = createAdhocBeneficiariesReportReqeust(0, '', false, 50, true, 2024);
-    triggerReport(request).unwrap().then((res) => {
-      setAdhocBeneficiariesReport(res);
-    }).catch((err) => console.log(err));
+    const request = createAdhocBeneficiariesReportReqeust(0, "", false, 50, true, 2024);
+    triggerReport(request)
+      .unwrap()
+      .then((res) => {
+        setAdhocBeneficiariesReport(res);
+      })
+      .catch((err) => console.log(err));
   };
 
-
   const onSubmit = (data: bRequest) => {
-
-    const request = createAdhocBeneficiariesReportReqeust(0, '', false, 50, data.isAlsoEmployee ?? true, parseInt(data.profitYear));
-    triggerReport(request).unwrap().then((res) => {
-      console.log(res);
-      setAdhocBeneficiariesReport(res);
-    }).catch((err) => console.log(err));
-  }
+    const request = createAdhocBeneficiariesReportReqeust(
+      0,
+      "",
+      false,
+      50,
+      data.isAlsoEmployee ?? true,
+      parseInt(data.profitYear)
+    );
+    triggerReport(request)
+      .unwrap()
+      .then((res) => {
+        console.log(res);
+        setAdhocBeneficiariesReport(res);
+      })
+      .catch((err) => console.log(err));
+  };
 
   const validateAndSubmit = handleSubmit(onSubmit);
 
   const handleReset = () => {
     reset({ isAlsoEmployee: true, profitYear: "2024" });
-  }
-
+  };
 
   return (
     <Page label="PAY BE NEXT">
       <Grid2
         container
         rowSpacing="24px">
-        <Grid2 size={{ xs: 12 }} width={"100%"}>
+        <Grid2
+          size={{ xs: 12 }}
+          width={"100%"}>
           <Divider />
         </Grid2>
-        <Grid2 size={{ xs: 12 }} width={"100%"}>
+        <Grid2
+          size={{ xs: 12 }}
+          width={"100%"}>
           <DSMAccordion title="Filter">
             <form onSubmit={validateAndSubmit}>
               <Grid2
@@ -221,8 +243,7 @@ const PayBeNext = () => {
                           id="profitYear"
                           value={field.value}
                           label="Profit Year"
-                          onChange={(e) => field.onChange(e.target.value)}
-                        >
+                          onChange={(e) => field.onChange(e.target.value)}>
                           <MenuItem value="2024">2024</MenuItem>
                           <MenuItem value="2023">2023</MenuItem>
                           <MenuItem value="2022">2022</MenuItem>
@@ -240,7 +261,6 @@ const PayBeNext = () => {
                       render={({ field }) => (
                         <Checkbox
                           {...field}
-
                           size="small"
                           checked={!!field.value}
                           onChange={(e) => {
@@ -251,7 +271,6 @@ const PayBeNext = () => {
                     />
                   </Grid2>
                 </Grid2>
-
 
                 <Grid2
                   container
@@ -271,9 +290,11 @@ const PayBeNext = () => {
           </DSMAccordion>
         </Grid2>
 
-        <Grid2 size={{ xs: 12 }} width="100%">
-          {
-            (isSuccess && (<>
+        <Grid2
+          size={{ xs: 12 }}
+          width="100%">
+          {isSuccess && (
+            <>
               <div>
                 <Typography
                   variant="h2"
@@ -293,9 +314,9 @@ const PayBeNext = () => {
                     detailCellRenderer: (params: BeneficiaryReportDto) => {
                       const pDetails = params.profitDetails || [];
                       return (
-                        <div style={{ padding: '10px' }}>
+                        <div style={{ padding: "10px" }}>
                           {pDetails.length > 0 ? (
-                            <table style={{ width: '100%', marginTop: '8px' }}>
+                            <table style={{ width: "100%", marginTop: "8px" }}>
                               <thead>
                                 <tr>
                                   <th>Year</th>
@@ -327,31 +348,29 @@ const PayBeNext = () => {
                         </div>
                       );
                     }
-
                   }}
-
                 />
-
-                {adhocBeneficiariesReport && adhocBeneficiariesReport.response && adhocBeneficiariesReport.response.results.length > 0 && (
-                  <Pagination
-                    pageNumber={pageNumber}
-                    setPageNumber={(value: number) => {
-                      setPageNumber(value - 1);
-                    }}
-                    pageSize={pageSize}
-                    setPageSize={(value: number) => {
-                      setPageSize(value);
-                      setPageNumber(1);
-                    }}
-                    recordCount={adhocBeneficiariesReport.response.total}
-                  />
-                )}
+                {adhocBeneficiariesReport &&
+                  adhocBeneficiariesReport.response &&
+                  adhocBeneficiariesReport.response.results.length > 0 && (
+                    <Pagination
+                      pageNumber={pageNumber}
+                      setPageNumber={(value: number) => {
+                        setPageNumber(value - 1);
+                      }}
+                      pageSize={pageSize}
+                      setPageSize={(value: number) => {
+                        setPageSize(value);
+                        setPageNumber(1);
+                      }}
+                      recordCount={adhocBeneficiariesReport.response.total}
+                    />
+                  )}
               </div>
-            </>))
-          }
+            </>
+          )}
 
           {/**Render Report here! */}
-
         </Grid2>
       </Grid2>
     </Page>

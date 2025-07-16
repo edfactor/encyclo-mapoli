@@ -1,17 +1,16 @@
-import { ColDef, ICellRendererParams, IHeaderParams } from "ag-grid-community";
-import { agGridNumberToCurrency, formatNumberWithComma } from "smart-ui-library";
-import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
-import { mmDDYYFormat } from "utils/dateUtils";
-import { GRID_COLUMN_WIDTHS } from "../../../constants";
-import { Checkbox, IconButton } from "@mui/material";
 import { SaveOutlined } from "@mui/icons-material";
+import { Checkbox, IconButton } from "@mui/material";
+import { ColDef, ICellRendererParams } from "ag-grid-community";
+import { agGridNumberToCurrency, formatNumberWithComma } from "smart-ui-library";
+import { mmDDYYFormat } from "utils/dateUtils";
+import { SelectableGridHeader } from "../../../components/SelectableGridHeader";
+import { SuggestedForfeitCellRenderer, SuggestedForfeitEditor } from "../../../components/SuggestedForfeiture";
+import { GRID_COLUMN_WIDTHS } from "../../../constants";
 import {
   RehireForfeituresHeaderComponentProps,
-  RehireForfeituresSaveButtonCellParams,
-  RehireForfeituresUpdatePayload
+  RehireForfeituresSaveButtonCellParams
 } from "../../../reduxstore/types";
-import { SuggestedForfeitEditor, SuggestedForfeitCellRenderer } from "../../../components/SuggestedForfeiture";
-import { SelectableGridHeader } from "../../../components/SelectableGridHeader";
+import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
 
 export const HeaderComponent: React.FC<RehireForfeituresHeaderComponentProps> = (props) => {
   const isNodeEligible = (nodeData: any) => {
