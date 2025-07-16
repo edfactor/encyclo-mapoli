@@ -21,14 +21,20 @@ export const HeaderComponent: React.FC<RehireForfeituresHeaderComponentProps> = 
 
   const isNodeEligible = (nodeData: any, context: any) => {
     if (!nodeData.isDetail || nodeData.profitYear !== selectedProfitYear) return false;
-    const rowKey = `${nodeData.badgeNumber}-${nodeData.profitYear}`;
-    const currentValue = context?.editedValues?.[rowKey]?.value ?? nodeData.suggestedForfeit;
+    // For bulk operations, we need to check all possible rowKeys for this data
+    const baseRowKey = `${nodeData.badgeNumber}-${nodeData.profitYear}${nodeData.enrollmentId ? `-${nodeData.enrollmentId}` : ''}`;
+    const editedValues = context?.editedValues || {};
+    const matchingKey = Object.keys(editedValues).find(key => key.startsWith(baseRowKey));
+    const currentValue = matchingKey ? editedValues[matchingKey]?.value : nodeData.suggestedForfeit;
     return (currentValue || 0) !== 0;
   };
 
   const createUpdatePayload = (nodeData: any, context: any): ForfeitureAdjustmentUpdateRequest => {
-    const rowKey = `${nodeData.badgeNumber}-${nodeData.profitYear}`;
-    const currentValue = context?.editedValues?.[rowKey]?.value ?? nodeData.suggestedForfeit;
+    // For bulk operations, we need to find the actual edited value
+    const baseRowKey = `${nodeData.badgeNumber}-${nodeData.profitYear}${nodeData.enrollmentId ? `-${nodeData.enrollmentId}` : ''}`;
+    const editedValues = context?.editedValues || {};
+    const matchingKey = Object.keys(editedValues).find(key => key.startsWith(baseRowKey));
+    const currentValue = matchingKey ? editedValues[matchingKey]?.value : nodeData.suggestedForfeit;
     return {
       badgeNumber: nodeData.badgeNumber,
       profitYear: nodeData.profitYear,
@@ -60,7 +66,7 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber)
     },
     {
-      headerName: "Full Name",
+      headerName: "Name",
       field: "fullName",
       colId: "fullName",
       minWidth: GRID_COLUMN_WIDTHS.FULL_NAME,
@@ -231,11 +237,11 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       sortable: false,
       editable: ({ node }) => node.data.isDetail && node.data.profitYear === selectedProfitYear,
       cellEditor: SuggestedForfeitEditor,
-      cellRenderer: (params: ICellRendererParams) => SuggestedForfeitCellRenderer({ ...params, selectedProfitYear }),
+      cellRenderer: (params: ICellRendererParams) => SuggestedForfeitCellRenderer({ ...params, selectedProfitYear }, false, true),
       valueFormatter: agGridNumberToCurrency,
       valueGetter: (params) => {
         if (!params.data.isDetail) return null;
-        const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}${params.data.enrollmentId ? `-${params.data.enrollmentId}` : ''}`;
+        const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}${params.data.enrollmentId ? `-${params.data.enrollmentId}` : ''}-${params.node?.id || 'unknown'}`;
         const editedValue = params.context?.editedValues?.[rowKey]?.value;
         return editedValue !== undefined ? editedValue : params.data.suggestedForfeit;
       }
@@ -254,7 +260,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       headerName: "Save Button",
       field: "saveButton",
       colId: "saveButton",
-      minWidth: 70,
+      minWidth: 100,
       pinned: "right",
       lockPinned: true,
       resizable: false,
@@ -277,7 +283,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
         }
         const id = Number(params.node?.id) || -1;
         const isSelected = params.node?.isSelected() || false;
-        const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}`;
+        const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}${params.data.enrollmentId ? `-${params.data.enrollmentId}` : ''}-${params.node?.id || 'unknown'}`;
         const hasError = params.context?.editedValues?.[rowKey]?.hasError;
         const currentValue = params.context?.editedValues?.[rowKey]?.value ?? params.data.suggestedForfeit;
 

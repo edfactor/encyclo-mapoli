@@ -5,7 +5,7 @@ import { useState, useRef, useEffect } from "react";
 import { validateSuggestedForfeit } from "./validateSuggestedForfeit";
 
 export function SuggestedForfeitEditor(props: ICellEditorParams) {
-  const [value, setValue] = useState(props.value || 0);
+  const [value, setValue] = useState(props.data.suggestedForfeit ?? 0);
   const [error, setError] = useState<string | null>(null);
   const refInput = useRef<HTMLInputElement>(null);
 
@@ -16,10 +16,11 @@ export function SuggestedForfeitEditor(props: ICellEditorParams) {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = parseFloat(event.target.value) || 0;
     setValue(newValue);
-    const newError = validateSuggestedForfeit(newValue, Math.abs(props.data.forfeiture || 0));
+    const forfeitValue = props.data.forfeit || props.data.forfeiture || 0;
+    const newError = validateSuggestedForfeit(newValue, Math.abs(forfeitValue));
     setError(newError);
     
-    const rowKey = `${props.data.badgeNumber}-${props.data.profitYear}`;
+    const rowKey = `${props.data.badgeNumber}-${props.data.profitYear}${props.data.enrollmentId ? `-${props.data.enrollmentId}` : ''}-${props.node?.id || 'unknown'}`;
     props.context?.updateEditedValue?.(rowKey, newValue, !!newError);
   };
 
@@ -28,7 +29,7 @@ export function SuggestedForfeitEditor(props: ICellEditorParams) {
       props.api.stopEditing();
     }
     if (event.key === 'Escape') {
-      setValue(props.value || 0);
+      setValue(props.data.suggestedForfeit ?? 0);
       props.api.stopEditing();
     }
   };

@@ -17,6 +17,7 @@ export const GetTerminationColumns = (): ColDef[] => {
       field: "badgePSn",
       colId: "badgePSn",
       width: 100,
+      pinned: "left",
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
@@ -28,6 +29,7 @@ export const GetTerminationColumns = (): ColDef[] => {
       field: "name",
       colId: "name",
       width: 200,
+      pinned: "left",
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
@@ -183,20 +185,22 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       editable: ({ node }) => node.data.isDetail && node.data.profitYear === selectedProfitYear,
       flex: 1,
       cellEditor: SuggestedForfeitEditor,
-      cellRenderer: (params: ICellRendererParams) => SuggestedForfeitCellRenderer({ ...params, selectedProfitYear }),
+      cellRenderer: (params: ICellRendererParams) => SuggestedForfeitCellRenderer({
+        ...params, selectedProfitYear
+      }, true, false),
       valueFormatter: agGridNumberToCurrency,
       valueGetter: (params) => {
         if (!params.data.isDetail) return params.data.suggestedForfeit;
         const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}`;
         const editedValue = params.context?.editedValues?.[rowKey]?.value;
-        return editedValue !== undefined ? editedValue : params.data.suggestedForfeit;
+        return editedValue ?? params.data.suggestedForfeit ?? 0;
       }
     },
     {
       headerName: "Save Button",
       field: "saveButton",
       colId: "saveButton",
-      minWidth: 70,
+      minWidth: 100,
       pinned: "right",
       lockPinned: true,
       resizable: false,
@@ -222,7 +226,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
         const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}`;
         const hasError = params.context?.editedValues?.[rowKey]?.hasError;
         const currentValue = params.context?.editedValues?.[rowKey]?.value ?? params.data.suggestedForfeit;
-        
+
         return <div>
           <Checkbox checked={isSelected} onChange={() => {
             if (isSelected) {
@@ -232,13 +236,13 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
             }
             params.node?.setSelected(!isSelected);
           }} />
-          <IconButton 
+          <IconButton
             onClick={async () => {
               if (params.data.isDetail && params.onSave) {
                 const request: ForfeitureAdjustmentUpdateRequest = {
                   badgeNumber: params.data.badgeNumber,
                   profitYear: params.data.profitYear,
-                  forfeitureAmount: currentValue || 0
+                  forfeitureAmount: -(currentValue || 0)
                 };
                 await params.onSave(request);
               }
@@ -284,15 +288,15 @@ export const HeaderComponent: React.FC<HeaderComponentProps> = (params: HeaderCo
   const createUpdatePayload = (nodeData: any, context: any): ForfeitureAdjustmentUpdateRequest => {
     const rowKey = `${nodeData.badgeNumber}-${nodeData.profitYear}`;
     const currentValue = context?.editedValues?.[rowKey]?.value ?? nodeData.suggestedForfeit;
-    
+
     return {
       badgeNumber: nodeData.badgeNumber,
       profitYear: nodeData.profitYear,
-      forfeitureAmount: currentValue || 0
+      forfeitureAmount: -(currentValue || 0)
     };
   };
 
-  return <SelectableGridHeader 
+  return <SelectableGridHeader
     {...params}
     isNodeEligible={isNodeEligible}
     createUpdatePayload={createUpdatePayload}
