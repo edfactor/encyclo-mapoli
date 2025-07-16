@@ -163,7 +163,7 @@ const useRevertAction = (
 const useSaveAction = (
   setEmployeesReverted: (count: number) => void,
   setBeneficiariesReverted: (count: number) => void,
-  setEtvasReverted: (count: number) => void,
+  setEtvasReverted: (count: number) => void
 ) => {
   const { profitSharingEditQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const [trigger] = useLazyGetMasterApplyQuery();
@@ -364,14 +364,20 @@ const ProfitShareEditUpdate = () => {
   const [etvasReverted, setEtvasReverted] = useState(0);
   const [updatedBy, setUpdatedBy] = useState<string | null>(null);
   const [updatedTime, setUpdatedTime] = useState<string | null>(null);
-  
+
   // This is a flag used to indicate that the year end change have been made
   // and a banner should be shown indicating this
   const [changesApplied, setChangesApplied] = useState<boolean>(false);
 
-  const revertAction = useRevertAction(setEmployeesReverted, setBeneficiariesReverted, setEtvasReverted, setChangesApplied);
+  const revertAction = useRevertAction(
+    setEmployeesReverted,
+    setBeneficiariesReverted,
+    setEtvasReverted,
+    setChangesApplied
+  );
   const saveAction = useSaveAction(setEmployeesAffected, setBeneficiariesAffected, setEtvasAffected);
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
+  const [pageNumberReset, setPageNumberReset] = useState(false);
   const hasToken = !!useSelector((state: RootState) => state.security.token);
   const {
     profitSharingUpdateAdjustmentSummary,
@@ -386,8 +392,6 @@ const ProfitShareEditUpdate = () => {
   const [openSaveModal, setOpenSaveModal] = useState<boolean>(false);
   const [openRevertModal, setOpenRevertModal] = useState<boolean>(false);
   const [openEmptyModal, setOpenEmptyModal] = useState<boolean>(false);
-
-  
 
   const [triggerStatusUpdate, { isLoading }] = useLazyGetProfitMasterStatusQuery();
 
@@ -479,16 +483,18 @@ const ProfitShareEditUpdate = () => {
       <div>
         <ApiMessageAlert commonKey={MessageKeys.ProfitShareEditUpdate} />
       </div>
-      { // We are using an AlertTitle directly and not a missive because we want this alert message
+      {
+        // We are using an AlertTitle directly and not a missive because we want this alert message
         // to remain in place, not fade away
-       changesApplied && (
-        <div className="py-3 w-full">
-          <Alert severity={Messages.ProfitShareMasterUpdated.message.type}>
-            <AlertTitle sx={{ fontWeight: "bold" }}>{Messages.ProfitShareMasterUpdated.message.title}</AlertTitle>
-            {`Updated By: ${updatedBy} | Date: ${updatedTime} `}
-          </Alert>
-        </div>
-      )}
+        changesApplied && (
+          <div className="py-3 w-full">
+            <Alert severity={Messages.ProfitShareMasterUpdated.message.type}>
+              <AlertTitle sx={{ fontWeight: "bold" }}>{Messages.ProfitShareMasterUpdated.message.title}</AlertTitle>
+              {`Updated By: ${updatedBy} | Date: ${updatedTime} `}
+            </Alert>
+          </div>
+        )
+      }
       <Grid2
         container
         rowSpacing="24px"
@@ -499,7 +505,10 @@ const ProfitShareEditUpdate = () => {
         {profitShareEditUpdateShowSearch && (
           <Grid2 width={"100%"}>
             <DSMAccordion title="Parameters">
-              <ProfitShareEditUpdateSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
+              <ProfitShareEditUpdateSearchFilter
+                setInitialSearchLoaded={setInitialSearchLoaded}
+                setPageReset={setPageNumberReset}
+              />
             </DSMAccordion>
           </Grid2>
         )}
@@ -557,7 +566,8 @@ const ProfitShareEditUpdate = () => {
                   "",
                   numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.paidAllocations || 0),
                   numberToCurrency(
-                    (profitSharingUpdate.profitShareUpdateTotals.allocations || 0) + (profitSharingUpdate.profitShareUpdateTotals.paidAllocations || 0)
+                    (profitSharingUpdate.profitShareUpdateTotals.allocations || 0) +
+                      (profitSharingUpdate.profitShareUpdateTotals.paidAllocations || 0)
                   )
                 ],
                 [
@@ -671,6 +681,8 @@ const ProfitShareEditUpdate = () => {
               <ProfitShareEditUpdateTabs
                 initialSearchLoaded={initialSearchLoaded}
                 setInitialSearchLoaded={setInitialSearchLoaded}
+                pageNumberReset={pageNumberReset}
+                setPageNumberReset={setPageNumberReset}
               />
             </Grid2>
           </Grid2>

@@ -42,9 +42,10 @@ const schema = yup.object().shape({
 
 interface DemographicFreezeSearchFilterProps {
   setInitialSearchLoaded: (include: boolean) => void;
+  setPageReset: (reset: boolean) => void;
 }
 
-const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = ({ setInitialSearchLoaded }) => {
+const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = ({ setInitialSearchLoaded, setPageReset }) => {
   const [freezeDemographics, { isLoading }] = useFreezeDemographicsMutation();
   const profitYear = useDecemberFlowProfitYear();
 
@@ -78,6 +79,7 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
           // The format should match: "2025-03-19T00:00:00-04:00"
           const asOfDateTime = combinedDate.toISOString();
 
+          setPageReset(true);
           await freezeDemographics({
             asOfDateTime,
             profitYear: data.profitYear

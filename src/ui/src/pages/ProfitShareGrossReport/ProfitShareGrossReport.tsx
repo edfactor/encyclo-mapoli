@@ -9,6 +9,7 @@ import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 
 const ProfitShareGrossReport = () => {
     const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
+    const [pageNumberReset, setPageNumberReset] = useState(false);
 
     const renderActionNode = () => {
         return (
@@ -27,12 +28,17 @@ const ProfitShareGrossReport = () => {
                 <Grid2
                     width={"100%"}>
                     <DSMAccordion title="Filter">
-                        <ProfitShareGrossReportParameters />
+                        <ProfitShareGrossReportParameters setPageReset={setPageNumberReset} />
                     </DSMAccordion>
                 </Grid2>
 
                 <Grid2 width="100%">
-                    <ProfitShareGrossReportGrid initialSearchLoaded={initialSearchLoaded} setInitialSearchLoaded={setInitialSearchLoaded}/>
+                    <ProfitShareGrossReportGrid 
+                        initialSearchLoaded={initialSearchLoaded} 
+                        setInitialSearchLoaded={setInitialSearchLoaded}
+                        pageNumberReset={pageNumberReset}
+                        setPageNumberReset={setPageNumberReset}
+                    />
                 </Grid2>
             </Grid2>
         </Page>

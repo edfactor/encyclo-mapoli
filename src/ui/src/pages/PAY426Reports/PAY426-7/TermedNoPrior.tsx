@@ -4,6 +4,7 @@ import Grid2 from '@mui/material/Grid2';
 import TermedNoPriorGrid from "./TermedNoPriorGrid";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { Page } from "smart-ui-library";
+import { useState } from "react";
 
 const renderActionNode = () => {
     return (
@@ -12,6 +13,8 @@ const renderActionNode = () => {
 };
 
 const TermedNoPrior = () => {
+    const [pageNumberReset, setPageNumberReset] = useState(false);
+    
     return (
         <Page 
             label={CAPTIONS.PAY426_TERMINATED_NO_PRIOR}
@@ -21,7 +24,10 @@ const TermedNoPrior = () => {
                     <Divider />
                 </Grid2>
                 <Grid2 width="100%">
-                    <TermedNoPriorGrid />
+                    <TermedNoPriorGrid 
+                        pageNumberReset={pageNumberReset}
+                        setPageNumberReset={setPageNumberReset}
+                    />
                 </Grid2>
             </Grid2>
         </Page>

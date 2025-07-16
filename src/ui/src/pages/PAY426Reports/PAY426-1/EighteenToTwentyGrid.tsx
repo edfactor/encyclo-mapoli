@@ -1,6 +1,6 @@
 import { Typography } from "@mui/material";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { Path, useNavigate } from "react-router";
 import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
@@ -10,7 +10,12 @@ import { RootState } from "../../../reduxstore/store";
 import pay426Utils from "../Pay427Utils";
 import { GetProfitSharingReportGridColumns } from "./EighteenToTwentyGridColumns";
 
-const EighteenToTwentyGrid = () => {
+interface EighteenToTwentyGridProps {
+  pageNumberReset: boolean;
+  setPageNumberReset: (reset: boolean) => void;
+}
+
+const EighteenToTwentyGrid: React.FC<EighteenToTwentyGridProps> = ({ pageNumberReset, setPageNumberReset }) => {
   const navigate = useNavigate();
   const [trigger, { data, isFetching }] = useLazyGetYearEndProfitSharingReportQuery();
 
@@ -60,16 +65,12 @@ const EighteenToTwentyGrid = () => {
     [navigate]
   );
 
-  // Need a useEffect to reset the page number when data changes
-  const prevData = useRef<any>(null);
   useEffect(() => {
-    if (data?.response?.results && data.response.results.length > 0 &&
-        (prevData.current === null || 
-         data.response.results.length !== prevData.current.response.results.length)) {
+    if (pageNumberReset) {
       setPageNumber(0);
+      setPageNumberReset(false);
     }
-    prevData.current = data;  
-  }, [data]);
+  }, [pageNumberReset, setPageNumberReset]);
 
   const sortEventHandler = (update: ISortParams) => {
     const t = () => { 

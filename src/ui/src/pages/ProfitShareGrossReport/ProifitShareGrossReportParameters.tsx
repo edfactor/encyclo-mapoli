@@ -26,7 +26,11 @@ const schema = yup.object().shape({
     gross: yup.number().optional()
 });
 
-const ProfitShareGrossReportParameters = () => {
+interface ProfitShareGrossReportParametersProps {
+    setPageReset: (reset: boolean) => void;
+}
+
+const ProfitShareGrossReportParameters: React.FC<ProfitShareGrossReportParametersProps> = ({ setPageReset }) => {
     const fiscalCloseProfitYear = useFiscalCloseProfitYear();
     const dispatch = useDispatch();
     const [triggerSearch, { isFetching }] = useLazyGetGrossWagesReportQuery();
@@ -45,6 +49,7 @@ const ProfitShareGrossReportParameters = () => {
 
     const validateAndSubmit = handleSubmit((data) => {
         if (isValid) {
+            setPageReset(true);
             triggerSearch({
                 profitYear: data.profitYear,
                 minGrossAmount: data.gross,
@@ -58,6 +63,7 @@ const ProfitShareGrossReportParameters = () => {
     });
 
     const handleReset = () => {
+        setPageReset(true);
         reset({
             profitYear: fiscalCloseProfitYear,
             gross: 50000

@@ -4,8 +4,10 @@ import { Page } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
 import ProfallGrid from "./ProfallGrid";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
+import { useState } from "react";
 
 const Profall = () => {
+  const [pageNumberReset, setPageNumberReset] = useState(false);
 
   const renderActionNode = () => {
     return (
@@ -22,7 +24,10 @@ const Profall = () => {
           <Divider />
         </Grid2>
         <Grid2 width="100%">
-          <ProfallGrid />
+          <ProfallGrid 
+            pageNumberReset={pageNumberReset}
+            setPageNumberReset={setPageNumberReset}
+          />
         </Grid2>
       </Grid2>
     </Page>

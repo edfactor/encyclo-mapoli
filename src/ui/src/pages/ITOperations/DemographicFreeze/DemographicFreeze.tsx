@@ -7,6 +7,7 @@ import DemographicFreezeManager from "./DemographicFreezeManager";
 
 const DemographicFreeze = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
+  const [pageNumberReset, setPageNumberReset] = useState(false);
   return (
     <Page label="IT Commands - Demographic Freeze">
       <Grid2
@@ -16,13 +17,15 @@ const DemographicFreeze = () => {
           <Divider />
         </Grid2>
         <Grid2 width={"100%"}>
-          <DemographicFreezeManager setInitialSearchLoaded={setInitialSearchLoaded} />
+          <DemographicFreezeManager setInitialSearchLoaded={setInitialSearchLoaded} setPageReset={setPageNumberReset} />
         </Grid2>
 
         <Grid2 width="100%">
           <DemographicFreezeGrid
             setInitialSearchLoaded={setInitialSearchLoaded}
             initialSearchLoaded={initialSearchLoaded}
+            pageNumberReset={pageNumberReset}
+            setPageNumberReset={setPageNumberReset}
           />
         </Grid2>
       </Grid2>

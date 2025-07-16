@@ -78,12 +78,16 @@ interface ManageExecutiveHoursAndDollarsGridSearchProps {
   isModal?: boolean;
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
+  pageNumberReset: boolean;
+  setPageNumberReset: (reset: boolean) => void;
 }
 
 const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollarsGridSearchProps> = ({
   isModal,
   initialSearchLoaded,
-  setInitialSearchLoaded
+  setInitialSearchLoaded,
+  pageNumberReset,
+  setPageNumberReset
 }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
@@ -157,17 +161,13 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
   }, [initialSearchLoaded, properPageNumber, properPageSize, sortParams, onSearch]);
 
   // Need a useEffect on a change in executiveHoursAndDollars to reset the page number
-  const prevExecutiveHoursAndDollars = useRef<any>(null);
+
   useEffect(() => {
-    if (
-      executiveHoursAndDollars !== prevExecutiveHoursAndDollars.current &&
-      executiveHoursAndDollars?.response?.results &&
-      executiveHoursAndDollars.response.results.length !== prevExecutiveHoursAndDollars.current?.response?.results?.length
-    ) {
+    if (pageNumberReset) {
       setPageNumber(0);
+      setPageNumberReset(false);
     }
-    prevExecutiveHoursAndDollars.current = executiveHoursAndDollars;
-  }, [executiveHoursAndDollars]);
+  }, [pageNumberReset, setPageNumberReset]);
 
   // This function checks to see if we have a change for this badge number already pending for a save
   const isRowStagedToSave = (badge: number): boolean => {
@@ -301,9 +301,9 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
 
   const isRowDataThere = (isModal: boolean | undefined): boolean => {
     if (isModal) {
-      return (additionalExecutivesGrid?.response != null  && executiveHoursAndDollars?.response?.results != null);
+      return additionalExecutivesGrid?.response != null && executiveHoursAndDollars?.response?.results != null;
     } else {
-      return (mutableCopyOfGridData?.response != null  && executiveHoursAndDollars?.response?.results != null);
+      return mutableCopyOfGridData?.response != null && executiveHoursAndDollars?.response?.results != null;
     }
   };
 
@@ -318,13 +318,13 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
 
   return (
     <>
-      {isRowDataThere(isModal) && (
+      {isRowDataThere(isModal) && mutableCopyOfGridData && (
         <>
           {!isModal && (
             <>
               <div className="px-[24px]">
                 <ReportSummary report={mutableCopyOfGridData} />
-              </div>             
+              </div>
               <div style={{ gap: "36px", display: "flex", justifyContent: "end", marginRight: 28 }}>
                 <RenderAddExecutiveButton
                   reportReponse={mutableCopyOfGridData}

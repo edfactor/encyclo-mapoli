@@ -4,6 +4,7 @@ import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { Page } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
 import TwentyOnePlusGrid from "./TwentyOnePlusGrid";
+import { useState } from "react";
 
 const renderActionNode = () => {
     return (
@@ -12,6 +13,8 @@ const renderActionNode = () => {
 };
 
 const TwentyOnePlus = () => {
+    const [pageNumberReset, setPageNumberReset] = useState(false);
+    
     return (
         <Page 
             label={CAPTIONS.PAY426_ACTIVE_21_PLUS}
@@ -21,7 +24,10 @@ const TwentyOnePlus = () => {
                     <Divider />
                 </Grid2>               
                 <Grid2 width="100%">
-                    <TwentyOnePlusGrid />
+                    <TwentyOnePlusGrid 
+                        pageNumberReset={pageNumberReset}
+                        setPageNumberReset={setPageNumberReset}
+                    />
                 </Grid2>
             </Grid2>
         </Page>

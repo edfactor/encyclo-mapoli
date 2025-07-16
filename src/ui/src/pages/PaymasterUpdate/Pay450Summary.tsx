@@ -19,6 +19,7 @@ interface ProfitYearSearch {
 const Pay450Summary = () => {
     const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [pageNumberReset, setPageNumberReset] = useState(false);
     const fiscalCloseProfitYear = useFiscalCloseProfitYear();
     const { updateSummary } = useSelector((state: RootState) => state.yearsEnd);
 
@@ -103,7 +104,7 @@ const Pay450Summary = () => {
                 <Grid2
                     width={"100%"}>
                     <DSMAccordion title="Filter">
-                        <Pay450SearchFilters onSearch={onSearch} />
+                        <Pay450SearchFilters onSearch={onSearch} setPageReset={setPageNumberReset} />
                     </DSMAccordion>
                 </Grid2>
 
@@ -117,6 +118,8 @@ const Pay450Summary = () => {
                         initialSearchLoaded={initialSearchLoaded}
                         setInitialSearchLoaded={setInitialSearchLoaded}
                         profitYear={fiscalCloseProfitYear}
+                        pageNumberReset={pageNumberReset}
+                        setPageNumberReset={setPageNumberReset}
                     />
                 </Grid2>
             </Grid2>

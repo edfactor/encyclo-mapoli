@@ -21,6 +21,7 @@ interface ForfeituresAdjustmentSearchParams {
 
 interface ForfeituresAdjustmentSearchParametersProps {
   setInitialSearchLoaded: (loaded: boolean) => void;
+  setPageReset: (reset: boolean) => void;
 }
 
 // Define schema for validation without circular references
@@ -49,7 +50,8 @@ const schema = yup.object({
 );
 
 const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearchParametersProps> = ({
-  setInitialSearchLoaded
+  setInitialSearchLoaded,
+  setPageReset
 }) => {
   const dispatch = useDispatch();
   const [triggerSearch, { isFetching }] = useLazyGetForfeitureAdjustmentsQuery();
@@ -116,6 +118,7 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
       isSortDescending: false
     };
 
+    setPageReset(true);
     dispatch(setForfeitureAdjustmentQueryParams(searchParams));
     
     triggerSearch(searchParams)
@@ -129,6 +132,7 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
   });
 
   const handleReset = () => {
+    setPageReset(true);
     reset({
       ssn: "",
       badge: "",

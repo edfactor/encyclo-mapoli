@@ -1,12 +1,10 @@
-import { Typography } from "@mui/material";
-import { useMemo, useState, useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetEligibleEmployeesQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { GetEligibleEmployeesColumns } from "./EligibleEmployeesGridColumn";
 import ReportSummary from "../../../components/ReportSummary";
-import React from "react";
+import { GetEligibleEmployeesColumns } from "./EligibleEmployeesGridColumns";
 
 interface EligibleEmployeesGridProps {
   initialSearchLoaded: boolean;
