@@ -9,6 +9,7 @@ import { GetMasterInquiryMemberGridColumns } from "./MasterInquiryMemberGridColu
 
 
 
+
 interface MasterInquiryMemberGridProps extends MasterInquiryRequest {
   onBadgeClick?: (args: { memberType: number; id: number, ssn: number, badgeNumber:number, psnSuffix:number } | undefined) => void;
 }
