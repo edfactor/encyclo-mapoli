@@ -25,11 +25,13 @@ const schema = yup.object().shape({
 interface ProfitYearSearchFilterProps {
     onSearch?: (data: ProfitYearSearch) => void;
     isFetching?: boolean;
+    setPageReset: (reset: boolean) => void;
 }
 
 const Pay450SearchFilters: React.FC<ProfitYearSearchFilterProps> = ({
     onSearch,
-    isFetching = false
+    isFetching = false,
+    setPageReset
 }) => {
     const fiscalCloseProfitYear = useFiscalCloseProfitYear();
 
@@ -49,11 +51,13 @@ const Pay450SearchFilters: React.FC<ProfitYearSearchFilterProps> = ({
 
     const validateAndSubmit = handleSubmit((data) => {
         if (isValid && onSearch) {
+            setPageReset(true);
             onSearch(data);
         }
     });
 
     const handleReset = () => {
+        setPageReset(true);
         reset({
             profitYear: fiscalCloseProfitYear
         });

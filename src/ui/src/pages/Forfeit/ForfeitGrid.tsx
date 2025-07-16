@@ -1,5 +1,5 @@
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { Path, useNavigate } from "react-router";
 import { useLazyGetForfeituresAndPointsQuery } from "reduxstore/api/YearsEndApi";
@@ -12,9 +12,11 @@ import { GetProfitShareForfeitColumns } from "./ForfeitGridColumns";
 interface ForfeitGridProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
+  pageNumberReset: boolean;
+  setPageNumberReset: (reset: boolean) => void;
 }
 
-const ForfeitGrid: React.FC<ForfeitGridProps> = ({ initialSearchLoaded, setInitialSearchLoaded }) => {
+const ForfeitGrid: React.FC<ForfeitGridProps> = ({ initialSearchLoaded, setInitialSearchLoaded, pageNumberReset, setPageNumberReset }) => {
   const navigate = useNavigate();
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
@@ -56,16 +58,12 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ initialSearchLoaded, setIniti
     }
   }, [initialSearchLoaded, pageNumber, pageSize, onSearch]);
 
-  // Need a useEffect on a change in forfeituresAndPoints to reset the page number
-  const prevForfeituresAndPoints = useRef<any>(null);
   useEffect(() => {
-    if (forfeituresAndPoints?.response?.results && forfeituresAndPoints.response.results.length > 0 &&
-        (prevForfeituresAndPoints.current === null || 
-         forfeituresAndPoints.response.results.length !== prevForfeituresAndPoints.current.response?.results.length)) {
+    if (pageNumberReset) {
       setPageNumber(0);
+      setPageNumberReset(false);
     }
-    prevForfeituresAndPoints.current = forfeituresAndPoints;
-  }, [forfeituresAndPoints]);
+  }, [pageNumberReset, setPageNumberReset]);
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 

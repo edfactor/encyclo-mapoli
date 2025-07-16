@@ -4,6 +4,7 @@ import Grid2 from '@mui/material/Grid2';
 import UnderEighteenGrid from "./UnderEighteenGrid";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { Page } from "smart-ui-library";
+import { useState } from "react";
 
 const renderActionNode = () => {
     return (
@@ -12,6 +13,8 @@ const renderActionNode = () => {
 };
 
 const UnderEighteen = () => {
+    const [pageNumberReset, setPageNumberReset] = useState(false);
+    
     return (
         <Page 
             label={CAPTIONS.PAY426_ACTIVE_UNDER_18}
@@ -21,7 +24,10 @@ const UnderEighteen = () => {
                     <Divider />
                 </Grid2>               
                 <Grid2 width="100%">
-                    <UnderEighteenGrid />
+                    <UnderEighteenGrid 
+                        pageNumberReset={pageNumberReset}
+                        setPageNumberReset={setPageNumberReset}
+                    />
                 </Grid2>
             </Grid2>
         </Page>

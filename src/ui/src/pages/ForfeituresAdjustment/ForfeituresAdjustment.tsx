@@ -16,6 +16,7 @@ import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 const ForfeituresAdjustment = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [isAddForfeitureModalOpen, setIsAddForfeitureModalOpen] = useState(false);
+  const [pageNumberReset, setPageNumberReset] = useState(false);
   const { forfeitureAdjustmentData, forfeitureAdjustmentQueryParams } = useSelector((state: RootState) => state.forfeituresAdjustment);
   const profitYear = useDecemberFlowProfitYear();
   const [triggerSearch] = useLazyGetForfeitureAdjustmentsQuery();
@@ -75,7 +76,7 @@ const ForfeituresAdjustment = () => {
         </Grid2>
         <Grid2 width={"100%"}>
           <DSMAccordion title="Filter">
-            <ForfeituresAdjustmentSearchParameters setInitialSearchLoaded={handleSearchComplete} />
+            <ForfeituresAdjustmentSearchParameters setInitialSearchLoaded={handleSearchComplete} setPageReset={setPageNumberReset} />
           </DSMAccordion>
         </Grid2>
 
@@ -93,6 +94,8 @@ const ForfeituresAdjustment = () => {
             initialSearchLoaded={initialSearchLoaded}
             setInitialSearchLoaded={setInitialSearchLoaded}
             onAddForfeiture={handleOpenAddForfeitureModal}
+            pageNumberReset={pageNumberReset}
+            setPageNumberReset={setPageNumberReset}
           />
         </Grid2>
       </Grid2>

@@ -4,6 +4,7 @@ import Grid2 from '@mui/material/Grid2';
 import TermedWithHoursGrid from "./TermedWithHoursGrid";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { Page } from "smart-ui-library";
+import { useState } from "react";
 
 const renderActionNode = () => {
     return (
@@ -12,6 +13,8 @@ const renderActionNode = () => {
 };
 
 const TermedWithHours = () => {
+    const [pageNumberReset, setPageNumberReset] = useState(false);
+    
     return (
         <Page 
             label={CAPTIONS.PAY426_TERMINATED_1000_PLUS}
@@ -21,7 +24,10 @@ const TermedWithHours = () => {
                     <Divider />
                 </Grid2>               
                 <Grid2 width="100%">
-                    <TermedWithHoursGrid />
+                    <TermedWithHoursGrid 
+                        pageNumberReset={pageNumberReset}
+                        setPageNumberReset={setPageNumberReset}
+                    />
                 </Grid2>
             </Grid2>
         </Page>

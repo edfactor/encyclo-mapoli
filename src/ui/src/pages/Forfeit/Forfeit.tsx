@@ -9,6 +9,7 @@ import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 
 const Forfeit = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
+  const [pageNumberReset, setPageNumberReset] = useState(false);
 
   const renderActionNode = () => {
     return (
@@ -26,7 +27,7 @@ const Forfeit = () => {
         </Grid2>
         <Grid2 width={"100%"}>
           <DSMAccordion title="Filter">
-            <ForfeitSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
+            <ForfeitSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} setPageReset={setPageNumberReset} />
           </DSMAccordion>
         </Grid2>
 
@@ -34,6 +35,8 @@ const Forfeit = () => {
           <ForfeitGrid
             initialSearchLoaded={initialSearchLoaded}
             setInitialSearchLoaded={setInitialSearchLoaded}
+            pageNumberReset={pageNumberReset}
+            setPageNumberReset={setPageNumberReset}
           />
         </Grid2>
       </Grid2>

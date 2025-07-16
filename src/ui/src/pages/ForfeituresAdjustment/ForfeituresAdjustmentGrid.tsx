@@ -1,6 +1,6 @@
 import { AddOutlined } from "@mui/icons-material";
 import { Button } from "@mui/material";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useLazyGetForfeitureAdjustmentsQuery } from "reduxstore/api/YearsEndApi";
@@ -19,12 +19,16 @@ interface ForfeituresAdjustmentGridProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
   onAddForfeiture?: () => void;
+  pageNumberReset: boolean;
+  setPageNumberReset: (reset: boolean) => void;
 }
 
 const ForfeituresAdjustmentGrid: React.FC<ForfeituresAdjustmentGridProps> = ({ 
   initialSearchLoaded, 
   setInitialSearchLoaded,
-  onAddForfeiture
+  onAddForfeiture,
+  pageNumberReset,
+  setPageNumberReset
 }) => {
   const navigate = useNavigate();
   const [pageNumber, setPageNumber] = useState(0);
@@ -58,16 +62,12 @@ const ForfeituresAdjustmentGrid: React.FC<ForfeituresAdjustmentGridProps> = ({
     [handleNavigationForButton]
   );
 
-  // Need a useEffect to reset the page number when forfeitureAdjustmentData changes
-  const prevForfeitureAdjustmentData = useRef<any>(null);
   useEffect(() => {
-    if (forfeitureAdjustmentData?.response?.results && forfeitureAdjustmentData.response.results.length > 0 &&
-        (prevForfeitureAdjustmentData.current === null || 
-         forfeitureAdjustmentData.response.results.length !== prevForfeitureAdjustmentData.current.response?.results.length)) {
+    if (pageNumberReset) {
       setPageNumber(0);
+      setPageNumberReset(false);
     }
-    prevForfeitureAdjustmentData.current = forfeitureAdjustmentData;
-  }, [forfeitureAdjustmentData]);
+  }, [pageNumberReset, setPageNumberReset]);
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 

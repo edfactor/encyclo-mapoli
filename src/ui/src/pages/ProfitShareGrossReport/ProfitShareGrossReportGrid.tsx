@@ -3,7 +3,7 @@ import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { Path, useNavigate } from "react-router";
 import { GetProfitShareGrossReportColumns } from "./ProfitShareGrossReportColumns";
 import { useLazyGetGrossWagesReportQuery } from "reduxstore/api/YearsEndApi";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { GrossWagesReportDto } from "reduxstore/types";
@@ -18,11 +18,15 @@ const totalsRow = {
 interface ProfitShareGrossReportGridProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
+  pageNumberReset: boolean;
+  setPageNumberReset: (reset: boolean) => void;
 }
 
 const ProfitShareGrossReportGrid: React.FC<ProfitShareGrossReportGridProps> = ({
   initialSearchLoaded,
   setInitialSearchLoaded,
+  pageNumberReset,
+  setPageNumberReset,
 }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
@@ -67,16 +71,12 @@ const ProfitShareGrossReportGrid: React.FC<ProfitShareGrossReportGridProps> = ({
     }
   }, [initialSearchLoaded, pageNumber, pageSize, onSearch, sortParams]);
 
-  // Need a useEffect to reset the page number when data changes
-  const prevGrossWagesReport = useRef<any>(null);
   useEffect(() => {
-    if (grossWagesReport?.response?.results && grossWagesReport.response.results.length > 0 &&
-        (prevGrossWagesReport.current === null || 
-         grossWagesReport.response.results.length !== prevGrossWagesReport.current.response.results.length)) {
+    if (pageNumberReset) {
       setPageNumber(0);
+      setPageNumberReset(false);
     }
-    prevGrossWagesReport.current = grossWagesReport;
-  }, [grossWagesReport]);
+  }, [pageNumberReset, setPageNumberReset]);
 
   return (
     <>
