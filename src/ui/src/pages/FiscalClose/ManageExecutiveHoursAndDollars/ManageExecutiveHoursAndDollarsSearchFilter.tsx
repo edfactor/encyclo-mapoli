@@ -144,7 +144,15 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
     trigger // need this unused param to prevent console errors. No idea why - EL
   } = useForm<ExecutiveHoursAndDollarsSearch>({
     resolver: yupResolver(validationSchema) as Resolver<ExecutiveHoursAndDollarsSearch>,
-    mode: "onChange"
+    mode: "onChange",
+    defaultValues: {
+      profitYear: profitYear,
+      badgeNumber: undefined,
+      socialSecurity: undefined,
+      fullNameContains: "",
+      hasExecutiveHoursAndDollars: false,
+      isMonthlyPayroll: false
+    }
   });
 
   const socialSecurity = watch("socialSecurity");
