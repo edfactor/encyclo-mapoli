@@ -16,9 +16,10 @@ interface YTDWagesSearch {
 
 interface YTDWagesSearchFilterProps {
   setInitialSearchLoaded: (include: boolean) => void;
+  setPageReset: (reset: boolean) => void;
 }
 
-const YTDWagesSearchFilter: React.FC<YTDWagesSearchFilterProps> = ({ setInitialSearchLoaded }) => {
+const YTDWagesSearchFilter: React.FC<YTDWagesSearchFilterProps> = ({ setInitialSearchLoaded, setPageReset }) => {
   const [triggerSearch, { isFetching }] = useLazyGetEmployeeWagesForYearQuery();
   const { employeeWagesForYearQueryParams, employeeWagesForYear } = useSelector((state: RootState) => state.yearsEnd);
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
@@ -33,6 +34,7 @@ const YTDWagesSearchFilter: React.FC<YTDWagesSearchFilterProps> = ({ setInitialS
 
   const doSearch = handleSubmit((data) => {
     // Our one-select 'form' cannot be in an invalid state, so we can safely trigger the search
+    setPageReset(true);
     triggerSearch(
       {
         profitYear: fiscalCloseProfitYear,

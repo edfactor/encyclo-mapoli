@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
@@ -13,9 +13,11 @@ interface YTDWagesGridProps {
   innerRef: RefObject<HTMLDivElement | null>;
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
+  pageNumberReset: boolean;
+  setPageNumberReset: (reset: boolean) => void;
 }
 
-const YTDWagesGrid = ({ innerRef, initialSearchLoaded, setInitialSearchLoaded }: YTDWagesGridProps) => {
+const YTDWagesGrid = ({ innerRef, initialSearchLoaded, setInitialSearchLoaded, pageNumberReset, setPageNumberReset }: YTDWagesGridProps) => {
   const hasToken = !!useSelector((state: RootState) => state.security.token);
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
@@ -53,16 +55,12 @@ const YTDWagesGrid = ({ innerRef, initialSearchLoaded, setInitialSearchLoaded }:
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
   const columnDefs = useMemo(() => GetYTDWagesColumns(), []);
 
-  // Need a useEffect to reset the page number when data changes
-  const prevEmployeeWagesForYear = useRef<any>(null);
   useEffect(() => {
-    if (employeeWagesForYear?.response?.results && employeeWagesForYear.response.results.length > 0 &&
-        (prevEmployeeWagesForYear.current === null || 
-         employeeWagesForYear.response.results.length !== prevEmployeeWagesForYear.current.response.results.length)) {
+    if (pageNumberReset) {
       setPageNumber(0);
+      setPageNumberReset(false);
     }
-    prevEmployeeWagesForYear.current = employeeWagesForYear;
-  }, [employeeWagesForYear]);
+  }, [pageNumberReset, setPageNumberReset]);
 
   return (
     <>
