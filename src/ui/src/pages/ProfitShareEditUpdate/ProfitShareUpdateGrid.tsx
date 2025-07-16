@@ -1,5 +1,5 @@
 import { Typography } from "@mui/material";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetProfitShareUpdateQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
@@ -10,9 +10,11 @@ import { ProfitShareUpdateGridColumns } from "./ProfitShareUpdateGridColumns";
 interface ProfitShareEditUpdateGridProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
+  pageNumberReset: boolean;
+  setPageNumberReset: (reset: boolean) => void;
 }
 
-const ProfitShareEditUpdateGrid = ({ initialSearchLoaded, setInitialSearchLoaded }: ProfitShareEditUpdateGridProps) => {
+const ProfitShareEditUpdateGrid = ({ initialSearchLoaded, setInitialSearchLoaded, pageNumberReset, setPageNumberReset }: ProfitShareEditUpdateGridProps) => {
   const [pageNumber, setPageNumber] = useState(0);
   const hasToken = !!useSelector((state: RootState) => state.security.token);
   const [pageSize, setPageSize] = useState(25);
@@ -55,16 +57,12 @@ const ProfitShareEditUpdateGrid = ({ initialSearchLoaded, setInitialSearchLoaded
     }
   }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch, hasToken]);
 
-  // Need a useEffect to reset the page number when data changes
-  const prevData = useRef<any>(null);
   useEffect(() => {
-    if (profitSharingUpdate?.response?.results && profitSharingUpdate.response.results.length > 0 &&
-        (prevData.current === null || 
-         profitSharingUpdate.response.results.length !== prevData.current.response.results.length)) {
+    if (pageNumberReset) {
       setPageNumber(0);
+      setPageNumberReset(false);
     }
-    prevData.current = profitSharingUpdate;
-  }, [profitSharingUpdate]);
+  }, [pageNumberReset, setPageNumberReset]);
 
   return (
     <>

@@ -12,9 +12,11 @@ import ProfitShareUpdateGrid from "./ProfitShareUpdateGrid";
 interface ProfitShareEditUpdateTabsProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
+  pageNumberReset: boolean;
+  setPageNumberReset: (reset: boolean) => void;
 }
 
-const ProfitShareEditUpdateTabs = ({ initialSearchLoaded, setInitialSearchLoaded }: ProfitShareEditUpdateTabsProps) => {
+const ProfitShareEditUpdateTabs = ({ initialSearchLoaded, setInitialSearchLoaded, pageNumberReset, setPageNumberReset }: ProfitShareEditUpdateTabsProps) => {
   const [value, setValue] = useState("1");
   const { profitSharingUpdate } = useSelector((state: RootState) => state.yearsEnd);
 
@@ -45,12 +47,16 @@ const ProfitShareEditUpdateTabs = ({ initialSearchLoaded, setInitialSearchLoaded
               <ProfitShareUpdateGrid
                 initialSearchLoaded={initialSearchLoaded}
                 setInitialSearchLoaded={setInitialSearchLoaded}
+                pageNumberReset={pageNumberReset}
+                setPageNumberReset={setPageNumberReset}
               />
             </TabPanel>
             <TabPanel value="2">
               <ProfitShareEditGrid
                 initialSearchLoaded={initialSearchLoaded}
                 setInitialSearchLoaded={setInitialSearchLoaded}
+                pageNumberReset={pageNumberReset}
+                setPageNumberReset={setPageNumberReset}
               />
             </TabPanel>
           </TabContext>

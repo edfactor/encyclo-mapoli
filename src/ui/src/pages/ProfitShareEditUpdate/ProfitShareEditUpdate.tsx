@@ -372,6 +372,7 @@ const ProfitShareEditUpdate = () => {
   const revertAction = useRevertAction(setEmployeesReverted, setBeneficiariesReverted, setEtvasReverted, setChangesApplied);
   const saveAction = useSaveAction(setEmployeesAffected, setBeneficiariesAffected, setEtvasAffected);
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
+  const [pageNumberReset, setPageNumberReset] = useState(false);
   const hasToken = !!useSelector((state: RootState) => state.security.token);
   const {
     profitSharingUpdateAdjustmentSummary,
@@ -499,7 +500,7 @@ const ProfitShareEditUpdate = () => {
         {profitShareEditUpdateShowSearch && (
           <Grid2 width={"100%"}>
             <DSMAccordion title="Parameters">
-              <ProfitShareEditUpdateSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
+              <ProfitShareEditUpdateSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} setPageReset={setPageNumberReset} />
             </DSMAccordion>
           </Grid2>
         )}
@@ -671,6 +672,8 @@ const ProfitShareEditUpdate = () => {
               <ProfitShareEditUpdateTabs
                 initialSearchLoaded={initialSearchLoaded}
                 setInitialSearchLoaded={setInitialSearchLoaded}
+                pageNumberReset={pageNumberReset}
+                setPageNumberReset={setPageNumberReset}
               />
             </Grid2>
           </Grid2>
