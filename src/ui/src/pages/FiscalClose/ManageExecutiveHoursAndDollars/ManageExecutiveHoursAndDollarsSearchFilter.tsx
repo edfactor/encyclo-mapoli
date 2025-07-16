@@ -80,10 +80,11 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
   setPageNumberReset
 }) => {
   const dispatch = useDispatch();
-
-  dispatch(clearExecutiveHoursAndDollarsAddQueryParams());
-
   const [activeField, setActiveField] = useState<"socialSecurity" | "badgeNumber" | "fullNameContains" | null>(null);
+
+  useEffect(() => {
+    dispatch(clearExecutiveHoursAndDollarsAddQueryParams());
+  }, [dispatch]);
 
   const { executiveHoursAndDollarsQueryParams, executiveHoursAndDollars } = useSelector(
     (state: RootState) => state.yearsEnd
