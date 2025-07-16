@@ -48,6 +48,7 @@ export const ROUTES = {
   FROZEN_SUMMARY: "frozen-summary",
   MASTER_INQUIRY: "master-inquiry",
   BENEFICIARY_INQUIRY: "beneficiary",
+  PAY_BE_NEXT: "adhoc-beneficiaries-report",
   FORFEITURES_ADJUSTMENT: "forfeitures-adjustment",
 
   PAY426_ACTIVE_18_20: "pay426-1",
@@ -83,6 +84,7 @@ export const ROUTES = {
 } as const;
 
 export const CAPTIONS = {
+  PAY_BE_NEXT: "Pay Be Next",
   BENEFICIARY_INQUIRY: "Beneficiary Inquiry",
   BALANCE_BY_AGE: "Get Balance by Age (PROF130B)",
   BALANCE_BY_YEARS: "Get Balance by Years (PROF130Y)",
