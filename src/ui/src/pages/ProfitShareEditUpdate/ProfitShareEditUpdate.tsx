@@ -511,25 +511,22 @@ const ProfitShareEditUpdate = () => {
             </DSMAccordion>
           </Grid2>
         )}
-        {(profitEditUpdateRevertChangesAvailable || profitMasterStatus) && profitEditUpdateRevertChangesAvailable && (
+        {profitEditUpdateRevertChangesAvailable && (
           <>
             <Grid2
-              width={"100%"}
+              width="100%"
               sx={{ marginLeft: "50px" }}>
               <Typography
-                component={"span"}
+                component="span"
                 variant="h6"
                 sx={{ fontWeight: "bold" }}>
-                {`These changes have already been applied: `}
+                These changes have already been applied:
               </Typography>
             </Grid2>
             <Grid2
-              width={"100%"}
+              width="100%"
               sx={{ marginLeft: "50px" }}>
-              {profitSharingEditQueryParams && !profitMasterStatus && (
-                <ChangesList params={profitSharingEditQueryParams} />
-              )}
-              {profitMasterStatus && !profitSharingEditQueryParams && <ChangesList params={profitMasterStatus} />}
+              <ChangesList params={profitSharingEditQueryParams || profitMasterStatus} />
             </Grid2>
           </>
         )}
