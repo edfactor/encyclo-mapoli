@@ -1,15 +1,14 @@
-import { Button, TextField, Typography, Alert } from "@mui/material";
-import { useState, useMemo, useCallback, useEffect, JSX, ChangeEvent, FocusEvent } from "react";
-import { useSelector } from "react-redux";
-import { useLazySearchProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
-import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, Paged, Pagination } from "smart-ui-library";
-import { BeneficiaryInquiryGridColumns } from "./BeneficiaryInquiryGridColumn";
-import { BeneficiaryDto, BeneficiaryRequestDto, MasterInquiryRequest } from "reduxstore/types";
-import { CAPTIONS } from "../../constants";
-import { useLazyGetBeneficiariesQuery, useLazyUpdateBeneficiaryQuery } from "reduxstore/api/BeneficiariesApi";
+import { Delete, Edit } from "@mui/icons-material";
+import { Alert, Button, TextField, Typography } from "@mui/material";
 import { ICellRendererParams } from "ag-grid-community";
-import { ChevronLeft, Close, ExpandLess, ExpandMore, Edit, Delete } from "@mui/icons-material";
+import { FocusEvent, JSX, useCallback, useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
+import { useLazyGetBeneficiariesQuery, useLazyUpdateBeneficiaryQuery } from "reduxstore/api/BeneficiariesApi";
+import { RootState } from "reduxstore/store";
+import { BeneficiaryDto, BeneficiaryRequestDto } from "reduxstore/types";
+import { DSMGrid, ISortParams, Paged, Pagination } from "smart-ui-library";
+import { CAPTIONS } from "../../constants";
+import { BeneficiaryInquiryGridColumns } from "./BeneficiaryInquiryGridColumn";
 interface BeneficiaryInquiryGridProps {
   // initialSearchLoaded: boolean;
   // setInitialSearchLoaded: (loaded: boolean) => void;
@@ -116,7 +115,7 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
     e: FocusEvent<HTMLInputElement | HTMLTextAreaElement, Element>,
     id: number
   ) => {
-    var sum: number = 0;
+    let sum: number = 0;
     const currentValue = e.target.value ? parseInt(e.target.value) : 0;
     beneficiaryList?.results.forEach((value) => {
       sum += value.id == id ? currentValue : value.percent;

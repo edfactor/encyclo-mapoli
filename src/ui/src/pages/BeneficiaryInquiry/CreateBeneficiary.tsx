@@ -1,38 +1,30 @@
-import { Divider, FormLabel, MenuItem, Select, TextField } from "@mui/material";
+import { FormLabel, MenuItem, Select, TextField } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
-import { useEffect, useState } from "react";
-import { DSMAccordion, Page } from "smart-ui-library";
+import { useEffect } from "react";
 
-import BeneficiaryInquiryGrid from "./BeneficiaryInquiryGrid";
-import { Controller, Resolver, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
+import Checkbox from "@mui/material/Checkbox";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
+import { Controller, Resolver, useForm } from "react-hook-form";
+import {
+  useLazyCreateBeneficiariesQuery,
+  useLazyCreateBeneficiaryContactQuery,
+  useLazyUpdateBeneficiaryQuery
+} from "reduxstore/api/BeneficiariesApi";
 import {
   BeneficiaryDto,
   BeneficiaryKindDto,
-  BeneficiaryTypeDto,
-  BeneficiaryTypesResponseDto,
   CreateBeneficiaryContactRequest,
   CreateBeneficiaryContactResponse,
   CreateBeneficiaryRequest,
   UpdateBeneficiaryRequest,
   UpdateBeneficiaryResponse
 } from "reduxstore/types";
-import {
-  useLazyCreateBeneficiariesQuery,
-  useLazyCreateBeneficiaryContactQuery,
-  useLazyGetBeneficiarytypesQuery,
-  useLazyUpdateBeneficiaryQuery
-} from "reduxstore/api/BeneficiariesApi";
-import Checkbox from "@mui/material/Checkbox";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import dayjs from "dayjs";
-import { useFieldState } from "@mui/x-date-pickers/internals/hooks/useField/useFieldState";
-import SubmitAndReset from "./SubmitAndReset";
-import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import { tryddmmyyyyToDate } from "utils/dateUtils";
+import * as yup from "yup";
+import SubmitAndReset from "./SubmitAndReset";
 
 const schema = yup.object().shape({
   beneficiarySsn: yup.number().required(),
@@ -130,7 +122,7 @@ const CreateBeneficiary: React.FC<Props> = ({
   };
 
   const createBeneficiary = (data: cb) => {
-    let request: CreateBeneficiaryContactRequest = {
+    const request: CreateBeneficiaryContactRequest = {
       contactSsn: data.beneficiarySsn,
       city: data.city,
       countryIso: "",
@@ -160,7 +152,7 @@ const CreateBeneficiary: React.FC<Props> = ({
   };
 
   const updateBeneficiary = (data: cb) => {
-    var request: UpdateBeneficiaryRequest = {
+    const request: UpdateBeneficiaryRequest = {
       contactSsn: data.beneficiarySsn,
       city: data.city,
       countryIso: null,
@@ -199,7 +191,7 @@ const CreateBeneficiary: React.FC<Props> = ({
   };
 
   const saveBeneficiary = (beneficiaryContactId: number, data: cb) => {
-    let request: CreateBeneficiaryRequest = {
+    const request: CreateBeneficiaryRequest = {
       beneficiaryContactId: beneficiaryContactId,
       employeeBadgeNumber: badgeNumber,
       firstLevelBeneficiaryNumber: Math.floor(psnSuffix / 1000) % 10,
