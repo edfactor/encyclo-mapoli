@@ -5,19 +5,20 @@ import { ToastServiceUtils } from "smart-ui-library";
 interface ErrorPayload {
   data?: {
     statusCode?: number;
-    StatusCode?: number; // Keep for backward compatibility
+    StatusCode?: number; 
     message?: string;
-    Message?: string; // Keep for backward compatibility
+    Message?: string; 
     errors?: {
       [field: string]: string[];
     };
-    Errors?: string[]; // Keep for backward compatibility
+    Errors?: string[];
   };
 }
 
 interface MetaArg {
   endpointName: string;
-  suppressErrorToast?: boolean;
+  suppressAllToastErrors?: boolean;
+  onlyNetworkToastErrors?: boolean;
 }
 
 /**
@@ -25,7 +26,7 @@ interface MetaArg {
  * @param error - The RTK Query error object
  * @returns Object containing statusCode, message, and formatted error details
  */
-export const extractErrorDetails = (error: any) => {
+export const extractErrorDetails = (error: ErrorPayload | undefined) => {
   if (!error || !error.data) {
     return {
       statusCode: 0,
@@ -87,58 +88,81 @@ export const rtkQueryErrorToastMiddleware =
       const payload = (action as PayloadAction<unknown>).payload as ErrorPayload;
       const payloadData = payload.data;
       const arg = (action as any).meta?.arg as MetaArg;
+      const originalArg = (action as any).meta?.arg?.originalArgs || (action as any).meta?.arg;
+      const queryMeta = (action as any).meta?.arg?.meta;
       
-      // Skip toast if caller wants to handle errors manually
-      if (arg?.suppressErrorToast) {
+      // Useful for debugging
+      /*
+      console.log('RTK Error Middleware Debug:', {
+        endpointName: arg?.endpointName,
+        suppressAllToastErrors: arg?.suppressAllToastErrors,
+        onlyNetworkToastErrors: arg?.onlyNetworkToastErrors,
+        metaArg: (action as any).meta?.arg,
+        originalArg,
+        originalArgSuppressErrorToast: originalArg?.suppressAllToastErrors,
+        originalArgOnlyNetworkToastErrors: originalArg?.onlyNetworkToastErrors,
+        queryMeta,
+        queryMetaSuppressErrorToast: queryMeta?.suppressAllToastErrors,
+        queryMetaOnlyNetworkToastErrors: queryMeta?.onlyNetworkToastErrors
+      });
+      */
+
+      if (arg?.suppressAllToastErrors || originalArg?.suppressAllToastErrors || queryMeta?.suppressAllToastErrors) {
+        //console.log('Suppressing error toast for:', arg?.endpointName);
         return next(action);
       }
 
       if (!payloadData) {
-        const msgStr = `Request timed out for "${arg?.endpointName?.toUpperCase()}" endpoint`;
+        // This is a timeout or network error, which we will show all the time
+        const msgStr = `Service: "${arg?.endpointName?.toUpperCase()}" unavailable`;
         ToastServiceUtils.triggerError(msgStr);
         return next(action);
       }
 
-      // Handle both camelCase and PascalCase properties for backward compatibility
-      const statusCode = payloadData.statusCode || payloadData.StatusCode;
-      const message = payloadData.message || payloadData.Message;
+      // If onlyNetworkToastErrors is set, skip showing validation-style errors
+      if (!(arg?.onlyNetworkToastErrors || originalArg?.onlyNetworkToastErrors || queryMeta?.onlyNetworkToastErrors)) {
 
-      if (statusCode && statusCode >= 400) {
-        // Create the base error message
-        let msgStr = `${statusCode} : ${message}`;
+        // Handle both camelCase and PascalCase properties for backward compatibility
+        const statusCode = payloadData.statusCode || payloadData.StatusCode;
+        const message = payloadData.message || payloadData.Message;
 
-        // Handle field-level validation errors
-        if (payloadData.errors) {
-          // Format field errors with each field on its own line and indented messages
-          let fieldErrorsStr = "";
+        if (statusCode && statusCode >= 400) {
+          // Create the base error message
+          let msgStr = `${statusCode} : ${message}`;
 
-          Object.entries(payloadData.errors).forEach(([field, messages]) => {
-            // Add field name
-            fieldErrorsStr += `\n${field}:`;
+          // Handle field-level validation errors
+          if (payloadData.errors) {
+            // Format field errors with each field on its own line and indented messages
+            let fieldErrorsStr = "";
 
-            // Add indented messages
-            messages.forEach((message) => {
-              fieldErrorsStr += `\n  • ${message}`;
+            Object.entries(payloadData.errors).forEach(([field, messages]) => {
+              // Add field name
+              fieldErrorsStr += `\n${field}:`;
+
+              // Add indented messages
+              messages.forEach((message) => {
+                fieldErrorsStr += `\n  • ${message}`;
+              });
             });
-          });
 
-          if (fieldErrorsStr) {
-            msgStr += fieldErrorsStr;
+            if (fieldErrorsStr) {
+              msgStr += fieldErrorsStr;
+            }
+          } else if (payloadData.Errors && payloadData.Errors.length > 0) {
+            // Handle legacy error format with a similar format
+            msgStr += "\nErrors:";
+            payloadData.Errors.forEach((error) => {
+              msgStr += `\n  • ${error}`;
+            });
           }
-        } else if (payloadData.Errors && payloadData.Errors.length > 0) {
-          // Handle legacy error format with a similar format
-          msgStr += "\nErrors:";
-          payloadData.Errors.forEach((error) => {
-            msgStr += `\n  • ${error}`;
-          });
-        }
 
-        ToastServiceUtils.triggerError(msgStr);
-      } else {
-        // Fallback for timeout or other issues
-        const msgStr = `Request timed out for "${arg?.endpointName?.toUpperCase()}" endpoint`;
-        ToastServiceUtils.triggerError(msgStr);
+          ToastServiceUtils.triggerError(msgStr);
+        } else {
+          // Fallback for timeout or other issues
+          const msgStr = `Service call unsuccessful for "${arg?.endpointName?.toUpperCase()}" endpoint`;
+          ToastServiceUtils.triggerError(msgStr);
+        }
       }
-    }
+  }
     return next(action);
   };
