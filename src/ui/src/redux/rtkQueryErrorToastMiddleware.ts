@@ -1,7 +1,6 @@
 import type { Middleware, MiddlewareAPI, PayloadAction } from "@reduxjs/toolkit";
 import { isRejectedWithValue } from "@reduxjs/toolkit";
-import { ToastServiceUtils } from "../components/ToastService/ToastService";
-
+import { ToastServiceUtils } from "smart-ui-library";
 interface ErrorPayload {
   data?: {
     statusCode?: number;
