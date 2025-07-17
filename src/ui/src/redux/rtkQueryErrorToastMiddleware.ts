@@ -25,16 +25,19 @@ interface MetaArg {
 
 export const rtkQueryErrorToastMiddleware =
   (showErrors: boolean): Middleware =>
-  (api: MiddlewareAPI) =>
+  (_api: MiddlewareAPI) =>
   (next) =>
-  (action: PayloadAction<unknown>) => {
-    if (showErrors && isRejectedWithValue(action)) {
-      const payload = action.payload as ErrorPayload;
+  (action: unknown) => {
+    if (
+      showErrors &&
+      isRejectedWithValue(action)
+    ) {
+      const payload = (action as PayloadAction<unknown>).payload as ErrorPayload;
       const payloadData = payload.data;
-      const arg = action.meta.arg as MetaArg;
+      const arg = (action as any).meta?.arg as MetaArg;
 
       if (!payloadData) {
-        const msgStr = `Request timed out for "${arg?.endpointName.toUpperCase()}" endpoint`;
+        const msgStr = `Request timed out for "${arg?.endpointName?.toUpperCase()}" endpoint`;
         ToastServiceUtils.triggerError(msgStr);
         return next(action);
       }
@@ -76,7 +79,7 @@ export const rtkQueryErrorToastMiddleware =
         ToastServiceUtils.triggerError(msgStr);
       } else {
         // Fallback for timeout or other issues
-        const msgStr = `Request timed out for "${arg?.endpointName.toUpperCase()}" endpoint`;
+        const msgStr = `Request timed out for "${arg?.endpointName?.toUpperCase()}" endpoint`;
         ToastServiceUtils.triggerError(msgStr);
       }
     }
