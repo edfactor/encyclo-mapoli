@@ -1,6 +1,7 @@
 import type { Middleware, MiddlewareAPI, PayloadAction } from "@reduxjs/toolkit";
 import { isRejectedWithValue } from "@reduxjs/toolkit";
 import { ToastServiceUtils } from "smart-ui-library";
+
 interface ErrorPayload {
   data?: {
     statusCode?: number;
@@ -16,7 +17,58 @@ interface ErrorPayload {
 
 interface MetaArg {
   endpointName: string;
+  suppressErrorToast?: boolean;
 }
+
+/**
+ * Utility function to extract error details from RTK Query error objects
+ * @param error - The RTK Query error object
+ * @returns Object containing statusCode, message, and formatted error details
+ */
+export const extractErrorDetails = (error: any) => {
+  if (!error || !error.data) {
+    return {
+      statusCode: 0,
+      message: "Request failed or timed out",
+      formattedMessage: "Request failed or timed out"
+    };
+  }
+
+  const { data } = error;
+  const statusCode = data.statusCode || data.StatusCode || 0;
+  const message = data.message || data.Message || "Unknown error";
+  
+  let formattedMessage = `${statusCode} : ${message}`;
+  
+  // Handle field-level validation errors
+  if (data.errors) {
+    let fieldErrorsStr = "";
+    
+    Object.entries(data.errors).forEach(([field, messages]) => {
+      fieldErrorsStr += `\n${field}:`;
+      (messages as string[]).forEach((message) => {
+        fieldErrorsStr += `\n  • ${message}`;
+      });
+    });
+    
+    if (fieldErrorsStr) {
+      formattedMessage += fieldErrorsStr;
+    }
+  } else if (data.Errors && data.Errors.length > 0) {
+    formattedMessage += "\nErrors:";
+    data.Errors.forEach((error: string) => {
+      formattedMessage += `\n  • ${error}`;
+    });
+  }
+  
+  return {
+    statusCode,
+    message,
+    formattedMessage,
+    fieldErrors: data.errors,
+    errors: data.Errors
+  };
+};
 
 /**
  * An RTK Query middleware that intercepts rejected actions and displays error messages using a toast service.
@@ -35,6 +87,11 @@ export const rtkQueryErrorToastMiddleware =
       const payload = (action as PayloadAction<unknown>).payload as ErrorPayload;
       const payloadData = payload.data;
       const arg = (action as any).meta?.arg as MetaArg;
+      
+      // Skip toast if caller wants to handle errors manually
+      if (arg?.suppressErrorToast) {
+        return next(action);
+      }
 
       if (!payloadData) {
         const msgStr = `Request timed out for "${arg?.endpointName?.toUpperCase()}" endpoint`;
