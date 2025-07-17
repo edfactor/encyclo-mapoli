@@ -213,16 +213,46 @@ public sealed class BreakdownReportService : IBreakdownService
         BreakdownByStoreRequest request,
         CancellationToken cancellationToken)
     {
+        return GetMembersByStore(request, inActiveEmployees: false, cancellationToken);
+    }
+
+    public Task<ReportResponseBase<MemberYearSummaryDto>> GetInactiveMembersByStore(
+        BreakdownByStoreRequest request,
+        CancellationToken cancellationToken)
+    {
+        return GetMembersByStore(request, inActiveEmployees: true, cancellationToken);
+    }
+
+    #region ── Private: common building blocks ───────────────────────────────────────────
+
+    private Task<ReportResponseBase<MemberYearSummaryDto>> GetMembersByStore(
+        BreakdownByStoreRequest request,
+        bool inActiveEmployees,
+        CancellationToken cancellationToken)
+    {
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             ValidateStoreNumber(request);
 
             var employeesBase = await BuildEmployeesBaseQuery(ctx, request.ProfitYear);
-            employeesBase = employeesBase.Where(q => q.StoreNumber == request.StoreNumber);
+            if (inActiveEmployees)
+            {
+                employeesBase = employeesBase.Where(e => e.EmploymentStatusId == EmploymentStatus.Constants.Inactive && e.TerminationCodeId != TerminationCode.Constants.Transferred);
+            }
+            else
+            {
+                if (request.StoreNumber.HasValue)
+                {
+                    employeesBase = employeesBase.Where(q => q.StoreNumber == request.StoreNumber.Value);
+                }
 
-            // Store‑level + management filter
-            employeesBase = request.StoreManagement ? ApplyStoreManagementFilter(employeesBase)
-                : ApplyNonStoreManagementFilter(employeesBase);
+                // Store‑level + management filter
+                if (request.StoreManagement.HasValue)
+                {
+                    employeesBase = request.StoreManagement.Value ? ApplyStoreManagementFilter(employeesBase)
+                        : ApplyNonStoreManagementFilter(employeesBase);
+                }
+            }
 
             if (request.BadgeNumber > 0)
             {
@@ -265,9 +295,6 @@ public sealed class BreakdownReportService : IBreakdownService
             };
         });
     }
-
-    #region ── Private: common building blocks ───────────────────────────────────────────
-
     private static void ValidateStoreNumber(BreakdownByStoreRequest request)
     {
         if (request.StoreNumber <= 0)
