@@ -11,7 +11,7 @@ export interface FrozenState {
 const initialState: FrozenState = {
   frozenStateResponseData: null,
   frozenStateCollectionData: null,
-  error: null,
+  error: null
 };
 
 export const frozenSlice = createSlice({
@@ -37,8 +37,5 @@ export const frozenSlice = createSlice({
   }
 });
 
-export const {
-  setFrozenStateResponse,
-  setFrozenStateCollectionResponse
-} = frozenSlice.actions;
+export const { setFrozenStateResponse, setFrozenStateCollectionResponse } = frozenSlice.actions;
 export default frozenSlice.reducer;

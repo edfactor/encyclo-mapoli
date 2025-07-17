@@ -43,7 +43,7 @@ export const ROUTES = {
   PROFIT_SHARE_REPORT_EDIT_RUN: "profit-share-report-edit-run",
   PROFIT_SHARE_REPORT_FINAL_RUN: "profit-share-report-final-run",
   PROFIT_SHARE_UPDATE: "profit-share-update",
-  PROFNEW: "/",  
+  PROFNEW: "/",
 
   FROZEN_SUMMARY: "frozen-summary",
   MASTER_INQUIRY: "master-inquiry",
@@ -141,7 +141,7 @@ export const CAPTIONS = {
   PROFIT_SHARE_TOTALS: "Profit Share Totals Report (PAY426)",
   PROFIT_SHARE_UPDATE: "Profit Share Updates (PAY444|PAY447)",
   PROFIT_SHARING_CONTROL_SHEET: "Profit Sharing Control Sheet",
-  PRINT_PROFIT_CERTS:  "Print Profit Certs (PAYCERT)",
+  PRINT_PROFIT_CERTS: "Print Profit Certs (PAYCERT)",
   QPAY066_UNDER21: "QPAY066-UNDR21",
   QPAY066TA_UNDER21: "QPAY066TA-UNDR21",
   QPAY066TA: "QPAY066TA",

@@ -70,7 +70,7 @@ export const ItOperationsApi = createApi({
         url: `common/current-user`,
         method: "GET"
       })
-    }),
+    })
   })
 });
 

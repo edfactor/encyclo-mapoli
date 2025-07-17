@@ -2,9 +2,9 @@ import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { AppVersionInfo } from "reduxstore/api/CommonApi";
 
 const initialState: AppVersionInfo = {
-    buildNumber: '',
-    gitHash: '',
-    shortGitHash: '',
+  buildNumber: "",
+  gitHash: "",
+  shortGitHash: ""
 };
 
 export const commonSlice = createSlice({
@@ -15,7 +15,7 @@ export const commonSlice = createSlice({
       state.buildNumber = action.payload.buildNumber;
       state.gitHash = action.payload.gitHash;
       state.shortGitHash = action.payload.shortGitHash;
-    },
+    }
   }
 });
 

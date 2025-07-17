@@ -9,12 +9,12 @@ import React from "react";
 
 export type totalsGridProps = {
   displayData: (string | number)[][];
-  leftColumnHeaders?: string[];
   topRowHeaders: string[];
   makeNegativesRed?: boolean;
   tablePadding?: string;
   dataCellStyle?: React.CSSProperties;
   headerCellStyle?: React.CSSProperties;
+  leftColumnHeaders?: string[];
   breakpoints?: {
     xs?: number;
     sm?: number;
@@ -31,12 +31,12 @@ export type totalsRow = {
 
 export const TotalsGrid: React.FC<totalsGridProps> = ({
   displayData,
-  leftColumnHeaders,
   topRowHeaders,
   makeNegativesRed = true,
   tablePadding,
   dataCellStyle,
   headerCellStyle,
+  leftColumnHeaders,
   breakpoints
 }) => {
   const rows: totalsRow[] = displayData.map((row, index) => {
@@ -93,7 +93,7 @@ export const TotalsGrid: React.FC<totalsGridProps> = ({
                 sx={{
                   "&:last-child td, &:last-child th": { border: 0 }
                 }}>
-                {leftColumnHeaders && leftColumnHeaders.length != 0 && leftColumnHeaders[0] != "" && (
+                {leftColumnHeaders[0] && (
                   <TableCell
                     component="th"
                     scope="row"

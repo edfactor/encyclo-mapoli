@@ -13,8 +13,8 @@ export const SelectableGridHeader: React.FC<SelectableGridHeaderProps> = (props)
   const getSelectionState = () => {
     let totalEligible = 0;
     let totalSelected = 0;
-    
-    props.api.forEachNode(node => {
+
+    props.api.forEachNode((node) => {
       if (props.isNodeEligible(node.data)) {
         totalEligible++;
         if (node.isSelected()) {
@@ -22,16 +22,16 @@ export const SelectableGridHeader: React.FC<SelectableGridHeaderProps> = (props)
         }
       }
     });
-    
+
     return { totalEligible, totalSelected };
   };
 
   const handleSelectAll = () => {
     const { totalEligible, totalSelected } = getSelectionState();
     const shouldSelectAll = totalSelected < totalEligible;
-    
+
     if (shouldSelectAll) {
-      props.api.forEachNode(node => {
+      props.api.forEachNode((node) => {
         if (props.isNodeEligible(node.data)) {
           node.setSelected(true);
           const id = Number(node.id) || -1;
@@ -40,7 +40,7 @@ export const SelectableGridHeader: React.FC<SelectableGridHeaderProps> = (props)
       });
     } else {
       props.api.deselectAll();
-      props.api.forEachNode(node => {
+      props.api.forEachNode((node) => {
         if (props.isNodeEligible(node.data)) {
           const id = Number(node.id) || -1;
           props.removeRowFromSelectedRows(id);
@@ -52,13 +52,13 @@ export const SelectableGridHeader: React.FC<SelectableGridHeaderProps> = (props)
 
   const handleSave = () => {
     const selectedNodes: any[] = [];
-    props.api.forEachNode(node => {
+    props.api.forEachNode((node) => {
       if (node.isSelected() && props.isNodeEligible(node.data)) {
         const payload = props.createUpdatePayload(node.data, props.context);
         selectedNodes.push(payload);
       }
     });
-    console.log('Bulk update payload:', selectedNodes);
+    console.log("Bulk update payload:", selectedNodes);
   };
 
   const { totalEligible, totalSelected } = getSelectionState();
@@ -67,7 +67,7 @@ export const SelectableGridHeader: React.FC<SelectableGridHeaderProps> = (props)
 
   return (
     <div>
-      <Checkbox 
+      <Checkbox
         onClick={handleSelectAll}
         checked={allSelected}
         indeterminate={someSelected}
@@ -78,4 +78,4 @@ export const SelectableGridHeader: React.FC<SelectableGridHeaderProps> = (props)
       </IconButton>
     </div>
   );
-}; 
+};

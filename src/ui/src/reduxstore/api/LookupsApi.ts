@@ -1,12 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 
 import { setAccountingYearData, setMissivesData } from "reduxstore/slices/lookupsSlice";
-import {
-  CalendarResponseDto,
-  MissiveResponse,
-  ProfitYearRequest,
-  YearRangeRequest
-} from "reduxstore/types";
+import { CalendarResponseDto, MissiveResponse, ProfitYearRequest, YearRangeRequest } from "reduxstore/types";
 import { createDataSourceAwareBaseQuery, url } from "./api";
 
 const baseQuery = createDataSourceAwareBaseQuery();
@@ -34,7 +29,7 @@ export const LookupsApi = createApi({
     getMissives: builder.query<MissiveResponse[], void>({
       query: () => ({
         url: "/lookup/missives",
-        method: "GET",
+        method: "GET"
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
@@ -54,7 +49,7 @@ export const LookupsApi = createApi({
           endProfitYear: params.endProfitYear
         }
       })
-    }),
+    })
   })
 });
 

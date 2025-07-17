@@ -18,16 +18,16 @@ export function SuggestedForfeitEditor(props: ICellEditorParams) {
     setValue(newValue);
     const newError = validateSuggestedForfeit(newValue, Math.abs(props.data.forfeiture || 0));
     setError(newError);
-    
+
     const rowKey = `${props.data.badgeNumber}-${props.data.profitYear}`;
     props.context?.updateEditedValue?.(rowKey, newValue, !!newError);
   };
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
-    if (event.key === 'Enter' && !error) {
+    if (event.key === "Enter" && !error) {
       props.api.stopEditing();
     }
-    if (event.key === 'Escape') {
+    if (event.key === "Escape") {
       setValue(props.value || 0);
       props.api.stopEditing();
     }
@@ -36,10 +36,12 @@ export function SuggestedForfeitEditor(props: ICellEditorParams) {
   const getValue = () => value;
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center'}}>
+    <div style={{ display: "flex", alignItems: "center" }}>
       {error && (
-        <Tooltip title={error} placement="top">
-          <ErrorOutline sx={{ color: '#d32f2f', fontSize: 20, marginRight: '8px' }} />
+        <Tooltip
+          title={error}
+          placement="top">
+          <ErrorOutline sx={{ color: "#d32f2f", fontSize: 20, marginRight: "8px" }} />
         </Tooltip>
       )}
       <TextField
@@ -55,4 +57,4 @@ export function SuggestedForfeitEditor(props: ICellEditorParams) {
       />
     </div>
   );
-} 
+}
