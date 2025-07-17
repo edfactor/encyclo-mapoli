@@ -12,7 +12,7 @@ import { InquiryApi } from "./api/InquiryApi";
 import inquirySlice from "./slices/inquirySlice";
 import { LookupsApi } from "./api/LookupsApi";
 import lookupsSlice from "./slices/lookupsSlice";
-import { rtkQueryErrorToastMiddleware } from "smart-ui-library";
+import { rtkQueryErrorToastMiddleware } from "../redux/rtkQueryErrorToastMiddleware";
 import { CommonApi } from "./api/CommonApi";
 import commonSlice from "./slices/commonSlice";
 import { messageSlice } from "./slices/messageSlice";
