@@ -1076,7 +1076,7 @@ export const YearsEndApi = createApi({
           url: "yearend/forfeiture-adjustments/update",
           method: "PUT",
           body: requestData,
-          // Pass suppressAllToastErrors through meta so middleware can access it
+          // Pass params through meta so middleware can access it
           meta: { suppressAllToastErrors, onlyNetworkToastErrors }
         };
       }
