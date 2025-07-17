@@ -22,10 +22,10 @@ import navigationSlice from "./slices/navigationSlice";
 import { AppSupportApi } from "./api/AppSupportApi";
 import AppSupportSlice from "./slices/appSupportSlice";
 import { NavigationStatusApi } from "./api/NavigationStatusApi";
-import  navigationStatusSlice  from "./slices/NavigationStatusSlice";
+import navigationStatusSlice from "./slices/NavigationStatusSlice";
 import forfeituresAdjustmentSlice from "./slices/forfeituresAdjustmentSlice";
 import { BeneficiariesApi } from "./api/BeneficiariesApi";
-import  beneficiarySlice  from "./slices/beneficiarySlice";
+import beneficiarySlice from "./slices/beneficiarySlice";
 
 export const store = configureStore({
   reducer: {

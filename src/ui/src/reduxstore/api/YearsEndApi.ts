@@ -2,7 +2,8 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 
 import {
   addBadgeNumberToUpdateAdjustmentSummary,
-  clearBreakdownByStoreTotals, clearBreakdownGrandTotals,
+  clearBreakdownByStoreTotals,
+  clearBreakdownGrandTotals,
   clearProfitMasterApply,
   clearProfitMasterRevert,
   clearProfitMasterStatus,
@@ -16,7 +17,10 @@ import {
   setAdditionalExecutivesGrid,
   setBalanceByAge,
   setBalanceByYears,
-  setBreakdownByStore, setBreakdownByStoreMangement, setBreakdownByStoreTotals, setBreakdownGrandTotals,
+  setBreakdownByStore,
+  setBreakdownByStoreMangement,
+  setBreakdownByStoreTotals,
+  setBreakdownGrandTotals,
   setContributionsByAge,
   setControlSheet,
   setDemographicBadgesNotInPayprofitData,
@@ -47,7 +51,7 @@ import {
   setUnder21Totals,
   setUpdateSummary,
   setVestedAmountsByAge,
-  setYearEndProfitSharingReport,
+  setYearEndProfitSharingReport
 } from "reduxstore/slices/yearsEndSlice";
 import {
   BalanceByAge,
@@ -125,7 +129,6 @@ import {
   clearForfeitureAdjustmentData,
   setForfeitureAdjustmentData
 } from "reduxstore/slices/forfeituresAdjustmentSlice";
-
 
 /* Use the centralized data source aware base query */
 const baseQuery = createDataSourceAwareBaseQuery();
@@ -331,7 +334,7 @@ export const YearsEndApi = createApi({
           console.log("Err: " + err);
         }
       }
-    }),   
+    }),
     getNegativeEVTASSN: builder.query<
       PagedReportResponse<NegativeEtvaForSSNsOnPayProfit>,
       NegativeEtvaForSSNsOnPayprofitRequestDto
@@ -644,7 +647,6 @@ export const YearsEndApi = createApi({
     }),
     getTerminationReport: builder.query<TerminationResponse, StartAndEndDateRequest>({
       query: (params) => {
-       
         return {
           url: "yearend/terminated-employees",
           method: "POST",
@@ -980,10 +982,7 @@ export const YearsEndApi = createApi({
         }
       }
     ),
-    getYearEndProfitSharingSummaryReport: builder.query<
-      YearEndProfitSharingReportSummaryResponse,
-      BadgeNumberRequest
-    >({
+    getYearEndProfitSharingSummaryReport: builder.query<YearEndProfitSharingReportSummaryResponse, BadgeNumberRequest>({
       query: (params) => ({
         url: "yearend/yearend-profit-sharing-summary-report",
         method: "POST",
@@ -1104,7 +1103,7 @@ export const YearsEndApi = createApi({
           console.log("Err: " + err);
         }
       }
-    }),
+    })
   })
 });
 

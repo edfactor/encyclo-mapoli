@@ -57,7 +57,11 @@ const PopupMenu: FC<myProps> = ({ menuLabel, items, parentRoute, disabled, navig
     return menuLevels(navigationData).some((level) => level.mainTitle === caption);
   };
 
-  const handleClose = (event: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement> | MouseEvent, route?: string, caption?: string) => {
+  const handleClose = (
+    event: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement> | MouseEvent,
+    route?: string,
+    caption?: string
+  ) => {
     if (elemRef.current && elemRef.current.contains(event.target as Node)) {
       return;
     }
@@ -97,7 +101,7 @@ const PopupMenu: FC<myProps> = ({ menuLabel, items, parentRoute, disabled, navig
           aria-haspopup="true"
           onClick={disabled ? undefined : handleToggle}
           disableRipple={disabled}
-          sx={{ color: 'inherit', cursor: disabled ? 'default' : 'pointer', opacity: disabled ? 0.75 : 1 }}>
+          sx={{ color: "inherit", cursor: disabled ? "default" : "pointer", opacity: disabled ? 0.75 : 1 }}>
           {menuLabel}
         </Button>
       </span>

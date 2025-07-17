@@ -9,7 +9,7 @@ export enum ImpersonationRoles {
   ItOperations = "IT-Operations"
 }
 
-export interface SortedPaginationRequestDto extends PaginationParams, ISortParams { }
+export interface SortedPaginationRequestDto extends PaginationParams, ISortParams {}
 
 export interface ProfitYearRequest {
   profitYear: number;
@@ -33,13 +33,11 @@ export interface BadgeNumberRequest extends FrozenProfitYearRequest {
   badgeNumber: number | null;
 }
 
-
-
 export interface ReportsByAgeParams extends ProfitYearRequest {
   reportType: FrozenReportsByAgeRequestType;
 }
 
-export type DemographicBadgesNotInPayprofitResponse = PagedReportResponse<DemographicBadgesNotInPayprofit>
+export type DemographicBadgesNotInPayprofitResponse = PagedReportResponse<DemographicBadgesNotInPayprofit>;
 
 export interface DemographicBadgesNotInPayprofit {
   badgeNumber: number;
@@ -93,7 +91,6 @@ export interface DistributionsAndForfeitures {
   otherName: string | null;
   otherSsn: string | null;
   enrolled: boolean | null;
-
 }
 
 export interface DuplicateSSNAddress {
@@ -213,7 +210,6 @@ export interface ForfeitureDetail extends ProfitYearRequest {
   wages: number;
   enrollmentId: number;
   enrollmentName: string;
-
 }
 
 export interface MilitaryAndRehireForfeiture {
@@ -312,7 +308,6 @@ export interface DistributionsAndForfeituresQueryParams extends ProfitYearReques
   endDate?: string;
 }
 
-
 export interface MasterInquirySearch {
   endProfitYear?: number | null;
   startProfitMonth?: number | null;
@@ -395,7 +390,6 @@ export interface MasterInquiryMemberRequest {
   sortBy?: string;
   isSortDescending?: boolean;
 }
-
 
 export interface MasterInquiryResponseDto {
   isEmployee: boolean;
@@ -566,15 +560,14 @@ export interface EmployeeDetails {
   employmentStatus?: string;
   department: string;
   PayClassification: string;
-  gender: string
-  phoneNumber: string
-  workLocation: string
-  receivedContributionsLastYear: boolean
-  fullTimeDate: string
-  terminationReason: string
+  gender: string;
+  phoneNumber: string;
+  workLocation: string;
+  receivedContributionsLastYear: boolean;
+  fullTimeDate: string;
+  terminationReason: string;
   missives: number[] | null;
 }
-
 
 export interface BalanceByDetailBase {
   employeeCount: number;
@@ -607,10 +600,10 @@ export interface BalanceByAgeDetail extends BalanceByDetailBase {
 }
 
 /* eslint-disable @typescript-eslint/no-empty-object-type */
-export interface BalanceByAge extends BalanceByBase<BalanceByAgeDetail> { }
+export interface BalanceByAge extends BalanceByBase<BalanceByAgeDetail> {}
 
 /* eslint-disable @typescript-eslint/no-empty-object-type */
-export interface BalanceByYears extends BalanceByBase<BalanceByAgeDetail> { }
+export interface BalanceByYears extends BalanceByBase<BalanceByAgeDetail> {}
 
 export interface VestedAmountsByAge extends PagedReportResponse<VestedAmountsByAgeDetail> {
   totalFullTime100PercentAmount: number;
@@ -971,7 +964,7 @@ export interface BreakdownByStoreTotals {
 }
 
 export interface GrandTotalsByStoreResponseDto {
-  rows: GrandTotalsByStoreRowDto[]
+  rows: GrandTotalsByStoreRowDto[];
 }
 
 export interface GrandTotalsByStoreRowDto {
@@ -1018,9 +1011,7 @@ export interface Under21BreakdownByStoreEmployee {
   enrollmentId: number;
 }
 
-export interface Under21BreakdownByStoreResponse extends PagedReportResponse<Under21BreakdownByStoreEmployee> {
-
-}
+export interface Under21BreakdownByStoreResponse extends PagedReportResponse<Under21BreakdownByStoreEmployee> {}
 
 export interface Under21InactiveRequest extends ProfitYearRequest {
   isSortDescending?: boolean;
@@ -1038,9 +1029,7 @@ export interface Under21InactiveEmployee {
   enrollmentId: number;
 }
 
-export interface Under21InactiveResponse extends PagedReportResponse<Under21InactiveEmployee> {
-
-}
+export interface Under21InactiveResponse extends PagedReportResponse<Under21InactiveEmployee> {}
 
 export interface Under21TotalsRequest extends ProfitYearRequest {
   pagination: SortedPaginationRequestDto;
@@ -1239,7 +1228,7 @@ export interface GetNavigationStatusRequestDto {
 }
 
 export interface GetNavigationStatusResponseDto {
-  navigationStatusList?: NavigationStatusDto[]
+  navigationStatusList?: NavigationStatusDto[];
 }
 
 export interface UpdateNavigationRequestDto {
@@ -1271,7 +1260,7 @@ export interface AddressDto {
   city?: string;
   state?: string;
   postalCode?: string;
-  countryIso?: string
+  countryIso?: string;
 }
 export interface BeneficiaryContactDto {
   id: number;
@@ -1306,7 +1295,7 @@ export interface BeneficiaryRequestDto extends SortedPaginationRequestDto {
 }
 
 export interface BeneficiaryResponseDto {
-  beneficiaryList?: Paged<BeneficiaryDto>
+  beneficiaryList?: Paged<BeneficiaryDto>;
 }
 
 export interface CreateBeneficiaryRequest {
@@ -1319,8 +1308,6 @@ export interface CreateBeneficiaryRequest {
   kindId: string;
   //percentage: number;
 }
-
-
 
 export interface CreateBeneficiaryResponse {
   beneficiaryId: number;
@@ -1348,8 +1335,6 @@ export interface UpdateBeneficiaryResponse {
   percent: number;
 }
 
-
-
 export interface DeleteBeneficiaryRequest {
   id: number;
 }
@@ -1374,7 +1359,6 @@ export interface UpdateBeneficiaryContactRequest {
   emailAddress?: string | null;
 }
 
-
 export interface CreateBeneficiaryContactRequest {
   contactSsn: number;
   dateOfBirth: string;
@@ -1393,7 +1377,6 @@ export interface CreateBeneficiaryContactRequest {
   mobileNumber: string | null;
   emailAddress: string | null;
 }
-
 
 export interface CreateBeneficiaryContactResponse {
   id: number;
@@ -1470,10 +1453,7 @@ export interface RehireForfeituresSelectedRow {
   suggestedForfeit: number;
 }
 
-export interface ApiResponse<T> {
-}
-
-
+export interface ApiResponse<T> {}
 
 export interface AdhocBeneficiariesReportRequest extends ProfitYearRequest, SortedPaginationRequestDto {
   isAlsoEmployee: boolean;
@@ -1483,23 +1463,20 @@ export interface ProfitDetailDto {
   code: string;
   contributions: number;
   earnings: number;
-  forfeitures:number;
+  forfeitures: number;
   date: Date;
   comments?: string;
 }
-export interface BeneficiaryReportDto{
-  beneficiaryId:number;
+export interface BeneficiaryReportDto {
+  beneficiaryId: number;
   fullName: string;
   ssn: string;
   relationship?: string;
   balance?: string;
   badgeNumber: number;
-  psnSuffix:number;
+  psnSuffix: number;
   profitDetails?: ProfitDetailDto[];
-
 }
-export interface adhocBeneficiariesReportResponse extends PagedReportResponse<BeneficiaryReportDto>{
+export interface adhocBeneficiariesReportResponse extends PagedReportResponse<BeneficiaryReportDto> {
   totalEndingBalance: number;
 }
-
-

@@ -121,7 +121,7 @@ const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
 
   const settingCurrentNavigation = (navigationId?: number) => {
     if (navigationId) {
-      localStorage.setItem('navigationId',navigationId.toString());
+      localStorage.setItem("navigationId", navigationId.toString());
     }
   };
 

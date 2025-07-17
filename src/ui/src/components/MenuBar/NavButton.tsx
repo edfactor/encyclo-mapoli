@@ -20,7 +20,7 @@ const NavButton: FC<MyProps> = ({ isUnderlined, label, onClick, disabled }) => {
         aria-haspopup="true"
         onClick={disabled ? undefined : onClick}
         disableRipple={disabled}
-        sx={{ color: 'inherit', cursor: disabled ? 'default' : 'pointer', opacity: disabled ? 0.6 : 1 }}>
+        sx={{ color: "inherit", cursor: disabled ? "default" : "pointer", opacity: disabled ? 0.6 : 1 }}>
         {label}
       </Button>
     </span>
