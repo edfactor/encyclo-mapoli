@@ -7,14 +7,6 @@ const presets: ReportPreset[] = [
     description: 'Less than 20% Vested',
     params: {
       reportId: 1,
-      isYearEnd: true,
-      includeActiveEmployees: false,
-      includeInactiveEmployees: false,
-      includeEmployeesTerminatedThisYear: true,
-      includeTerminatedEmployees: true,
-      includeBeneficiaries: false,
-      includeEmployeesWithPriorProfitSharingAmounts: true,
-      includeEmployeesWithNoPriorProfitSharingAmounts: true,
     }
   },
   {
@@ -23,14 +15,6 @@ const presets: ReportPreset[] = [
     description: 'Less than 20% Vested (Variation 1)',
     params: {
       reportId: 2,
-      isYearEnd: true,
-      includeActiveEmployees: false,
-      includeInactiveEmployees: false,
-      includeEmployeesTerminatedThisYear: true,
-      includeTerminatedEmployees: true,
-      includeBeneficiaries: false,
-      includeEmployeesWithPriorProfitSharingAmounts: true,
-      includeEmployeesWithNoPriorProfitSharingAmounts: true,
     }
   },
   {
@@ -39,14 +23,6 @@ const presets: ReportPreset[] = [
     description: 'QPAY066AF Name',
     params: {
       reportId: 3,
-      isYearEnd: true,
-      includeActiveEmployees: false,
-      includeInactiveEmployees: false,
-      includeEmployeesTerminatedThisYear: true,
-      includeTerminatedEmployees: true,
-      includeBeneficiaries: false,
-      includeEmployeesWithPriorProfitSharingAmounts: true,
-      includeEmployeesWithNoPriorProfitSharingAmounts: true,
     }
   },
   {
@@ -55,15 +31,6 @@ const presets: ReportPreset[] = [
     description: 'Aged 70 and Over',
     params: {
       reportId: 4,
-      isYearEnd: true,
-      minimumAgeInclusive: 70,
-      includeActiveEmployees: true,
-      includeInactiveEmployees: true,
-      includeEmployeesTerminatedThisYear: true,
-      includeTerminatedEmployees: true,
-      includeBeneficiaries: false,
-      includeEmployeesWithPriorProfitSharingAmounts: true,
-      includeEmployeesWithNoPriorProfitSharingAmounts: true,
     }
   },
   {
@@ -72,14 +39,6 @@ const presets: ReportPreset[] = [
     description: 'Inactive Employees',
     params: {
       reportId: 5,
-      isYearEnd: true,
-      includeActiveEmployees: false,
-      includeInactiveEmployees: true,
-      includeEmployeesTerminatedThisYear: false,
-      includeTerminatedEmployees: false,
-      includeBeneficiaries: false,
-      includeEmployeesWithPriorProfitSharingAmounts: true,
-      includeEmployeesWithNoPriorProfitSharingAmounts: true,
     }
   },
   {
@@ -88,14 +47,6 @@ const presets: ReportPreset[] = [
     description: 'Beneficiaries Report',
     params: {
       reportId: 6,
-      isYearEnd: true,
-      includeActiveEmployees: false,
-      includeInactiveEmployees: false,
-      includeEmployeesTerminatedThisYear: false,
-      includeTerminatedEmployees: false,
-      includeBeneficiaries: true,
-      includeEmployeesWithPriorProfitSharingAmounts: true,
-      includeEmployeesWithNoPriorProfitSharingAmounts: true,
     }
   },
   {
@@ -104,30 +55,14 @@ const presets: ReportPreset[] = [
     description: 'Disabled Employees',
     params: {
       reportId: 7,
-      isYearEnd: true,
-      includeActiveEmployees: true,
-      includeInactiveEmployees: true,
-      includeEmployeesTerminatedThisYear: false,
-      includeTerminatedEmployees: false,
-      includeBeneficiaries: false,
-      includeEmployeesWithPriorProfitSharingAmounts: true,
-      includeEmployeesWithNoPriorProfitSharingAmounts: true,
     }
   },
   {
     id: 'QPAY066M',
     name: 'QPAY066M',
-    description: 'Military Leave Employees',
+    description: 'QPAY066M',
     params: {
       reportId: 8,
-      isYearEnd: true,
-      includeActiveEmployees: true,
-      includeInactiveEmployees: true,
-      includeEmployeesTerminatedThisYear: false,
-      includeTerminatedEmployees: false,
-      includeBeneficiaries: false,
-      includeEmployeesWithPriorProfitSharingAmounts: true,
-      includeEmployeesWithNoPriorProfitSharingAmounts: true,
     }
   },
   {
@@ -136,14 +71,6 @@ const presets: ReportPreset[] = [
     description: 'Employees with Wages',
     params: {
       reportId: 9,
-      isYearEnd: true,
-      includeActiveEmployees: true,
-      includeInactiveEmployees: true,
-      includeEmployeesTerminatedThisYear: true,
-      includeTerminatedEmployees: true,
-      includeBeneficiaries: false,
-      includeEmployeesWithPriorProfitSharingAmounts: true,
-      includeEmployeesWithNoPriorProfitSharingAmounts: true,
     }
   }
 ];

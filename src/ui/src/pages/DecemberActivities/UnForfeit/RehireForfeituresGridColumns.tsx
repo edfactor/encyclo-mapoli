@@ -63,6 +63,7 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       resizable: true,
       sortable: true,
       unSortIcon: true,
+      pinned: "left",
       cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber)
     },
     {
@@ -74,7 +75,8 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       cellClass: "left-align",
       resizable: true,
       sortable: true,
-      flex: 1
+      flex: 1,
+      pinned: "left",
     },
     {
       headerName: "SSN",

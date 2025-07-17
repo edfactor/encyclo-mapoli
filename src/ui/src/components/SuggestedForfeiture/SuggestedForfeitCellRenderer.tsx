@@ -16,7 +16,7 @@ export function SuggestedForfeitCellRenderer(params: SuggestedForfeitCellRendere
   const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}${params.data.enrollmentId ? `-${params.data.enrollmentId}` : ''}-${params.node?.id || 'unknown'}`;
   const currentValue = params.context?.editedValues?.[rowKey]?.value ?? params.data.suggestedForfeit;
 
-  const forfeitValue = params.data.forfeit || params.data.forfeiture || 0;
+  const forfeitValue = isTerminations ? params.data.suggestedForfeit : params.data.forfeiture || 0;
   const maxForfeitOrUnforfeiture = Math.abs(forfeitValue);
  
   const errorMessage = validateSuggestedForfeit(currentValue, maxForfeitOrUnforfeiture);
