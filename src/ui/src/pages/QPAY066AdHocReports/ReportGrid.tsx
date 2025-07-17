@@ -13,6 +13,7 @@ import { GetQPAY066AdHocGridColumns } from './QPAY066AdHocGridColumns';
 
 interface ReportGridProps {
   params: FilterParams;
+  storeNumber: number;
   onLoadingChange?: (isLoading: boolean) => void;
 }
 
@@ -80,7 +81,7 @@ const dummyData = [
   }
 ];
 
-const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
+const ReportGrid: React.FC<ReportGridProps> = ({ params, storeNumber, onLoadingChange }) => {
   const [fetchBreakdownByStore, { isFetching: isBreakdownFetching }] = useLazyGetBreakdownByStoreQuery();
   const [fetchBreakdownByStoreTotals, { isFetching: isTotalsFetching }] = useLazyGetBreakdownByStoreTotalsQuery();
   
@@ -95,10 +96,10 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
   const isLoadingQPAY066MData = isQPAY066MReport && (isBreakdownFetching || isTotalsFetching);
 
   useEffect(() => {
-    if (isQPAY066MReport && hasToken && profitYear) {
+    if (isQPAY066MReport && hasToken && profitYear && storeNumber) {
       fetchBreakdownByStore({
         profitYear: profitYear,
-        storeNumber: 1,
+        storeNumber: storeNumber,
         storeManagement: true,
         pagination: {
           skip: 0,
@@ -111,7 +112,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
       // Fetch totals data
       fetchBreakdownByStoreTotals({
         profitYear: profitYear,
-        storeNumber: 1, // 
+        storeNumber: storeNumber,
         storeManagement: true,
         pagination: {
           skip: 0,
@@ -121,7 +122,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
         }
       });
     }
-  }, [isQPAY066MReport, hasToken, profitYear, fetchBreakdownByStore, fetchBreakdownByStoreTotals]);
+  }, [isQPAY066MReport, hasToken, profitYear, storeNumber, fetchBreakdownByStore, fetchBreakdownByStoreTotals]);
 
   useEffect(() => {
     if (onLoadingChange) {
