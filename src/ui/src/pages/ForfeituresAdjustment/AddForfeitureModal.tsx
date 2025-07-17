@@ -19,11 +19,36 @@ interface AddForfeitureModalProps {
   employeeDetails?: EmployeeDetails | null;
 }
 
+
+const handleResponseError = (error: any) => {
+  const title = error?.data?.title;
+  
+  if (typeof title === "string") {
+    if (title.includes("Employee with badge number")) {
+      alert("Badge Number not found");
+    } else if (title.includes("Invalid badge number")) {
+      alert("Invalid Badge Number");
+    } else if (title.includes("Forfeiture amount cannot be zero")) {
+      alert("Forfeiture amount cannot be zero");
+    } else if (title.includes("Validation Error")) {
+      alert("The submission contains data format errors.");
+    } else {
+      alert("An unexpected error occurred. Please try again.");
+    }
+  } else {
+    alert("An unexpected error occurred. Please try again.");
+  }
+};
+
 const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, onSave, employeeDetails }) => {
+  
+  // Need top-level error strings for invalid badge number and badge numbe not found
+  
+
   const [formData, setFormData] = useState({
     badgeNumber: "",
     startingBalance: 0,
-    forfeitureAmount: undefined,
+    forfeitureAmount: "",
     netBalance: 0,
     netVested: 0
   });
@@ -34,9 +59,9 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
     if (employeeDetails) {
       setFormData((prevState) => ({
         ...prevState,
-        badgeNumber: employeeDetails.badgeNumber || "",
+        badgeNumber: employeeDetails.badgeNumber ? String(employeeDetails.badgeNumber) : "",
         startingBalance: employeeDetails.currentPSAmount || 0,
-        forfeitureAmount: undefined,
+        forfeitureAmount: "",
         netBalance: employeeDetails.currentPSAmount || 0,
         netVested: employeeDetails.currentVestedAmount || 0
       }));
@@ -50,12 +75,12 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
       const numericValue = parseFloat(value) || 0;
 
       const startingBalance = name === "startingBalance" ? numericValue : formData.startingBalance;
-      const forfeitureAmount = name === "forfeitureAmount" ? numericValue : formData.forfeitureAmount || 0;
+      const forfeitureAmount = name === "forfeitureAmount" ? numericValue : parseFloat(formData.forfeitureAmount) || 0;
       const netBalance = startingBalance - forfeitureAmount;
 
       setFormData({
         ...formData,
-        [name]: numericValue,
+        [name]: name === "startingBalance" ? numericValue : value,
         netBalance
       });
     } else {
@@ -77,22 +102,31 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
 
       const request: ForfeitureAdjustmentUpdateRequest = {
         badgeNumber: badgeNum,
-        forfeitureAmount: formData.forfeitureAmount || 0,
+        forfeitureAmount: parseFloat(formData.forfeitureAmount) || 0,
         profitYear: profitYear
       };
 
-      await updateForfeiture(request).unwrap();
+     
+      const response = await updateForfeiture(request);
+      
+      // If the response has an error block, handle it
+      if (response.error) {
+        handleResponseError(response.error);
+        return;
+      }
+
+      console.log("Forfeiture adjustment updated successfully");
 
       onSave({
         ...formData,
-        forfeitureAmount: formData.forfeitureAmount || 0
+        forfeitureAmount: parseFloat(formData.forfeitureAmount) || 0
       });
 
       // Close the modal
       onClose();
     } catch (error) {
-      console.error("Error updating forfeiture:", error);
-      alert("Failed to update forfeiture adjustment. Please try again.");
+      // Sometimes 500 errors go down here
+      handleResponseError(error);
     }
   };
 
