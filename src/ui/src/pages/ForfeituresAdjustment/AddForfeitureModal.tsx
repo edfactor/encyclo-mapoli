@@ -100,22 +100,22 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
         return;
       }
 
-      const request: ForfeitureAdjustmentUpdateRequest = {
+      const request: ForfeitureAdjustmentUpdateRequest & { suppressAllToastErrors?: boolean, onlyNetworkToastErrors?: boolean } = {
         badgeNumber: badgeNum,
         forfeitureAmount: parseFloat(formData.forfeitureAmount) || 0,
-        profitYear: profitYear
+        profitYear: profitYear,
+        //suppressAllToastErrors: false,
+        onlyNetworkToastErrors: true // Suppress validation errors, only show network errors
       };
 
      
-      const response = await updateForfeiture(request);
+      const result = await updateForfeiture(request);
       
       // If the response has an error block, handle it
-      if (response.error) {
-        handleResponseError(response.error);
+      if (result.error) {
+        handleResponseError(result.error);
         return;
       }
-
-      console.log("Forfeiture adjustment updated successfully");
 
       onSave({
         ...formData,
