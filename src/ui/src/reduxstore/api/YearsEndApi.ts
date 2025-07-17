@@ -1069,12 +1069,17 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    updateForfeitureAdjustment: builder.mutation<ForfeitureAdjustmentDetail, ForfeitureAdjustmentUpdateRequest>({
-      query: (params) => ({
-        url: "yearend/forfeiture-adjustments/update",
-        method: "PUT",
-        body: params
-      })
+    updateForfeitureAdjustment: builder.mutation<ForfeitureAdjustmentDetail, ForfeitureAdjustmentUpdateRequest & { suppressAllToastErrors?: boolean, onlyNetworkToastErrors?: boolean }>({
+      query: (params) => {
+        const { suppressAllToastErrors, onlyNetworkToastErrors, ...requestData } = params;
+        return {
+          url: "yearend/forfeiture-adjustments/update",
+          method: "PUT",
+          body: requestData,
+          // Pass suppressAllToastErrors through meta so middleware can access it
+          meta: { suppressAllToastErrors, onlyNetworkToastErrors }
+        };
+      }
     }),
     finalizeReport: builder.mutation<void, { profitYear: number }>({
       query: (params) => ({
