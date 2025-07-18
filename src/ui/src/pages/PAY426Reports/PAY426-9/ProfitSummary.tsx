@@ -98,7 +98,6 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange }) =
       } else {
         onPresetParamsChange?.(null);
       }
-      console.log("newSelected", newSelected);
       return newSelected;
     });
   };
