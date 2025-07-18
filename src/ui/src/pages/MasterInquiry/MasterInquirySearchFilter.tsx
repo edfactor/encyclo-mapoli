@@ -86,10 +86,7 @@ interface MasterInquirySearchFilterProps {
   onSearch: (params: MasterInquiryRequest | undefined) => void;
 }
 
-const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
-  setInitialSearchLoaded,
-  onSearch
-}) => {
+const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ setInitialSearchLoaded, onSearch }) => {
   const [triggerSearch, { isFetching }] = useLazySearchProfitMasterInquiryQuery();
   const { masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
 
@@ -140,8 +137,6 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
       }
     }
   });
-  
-  
 
   useEffect(() => {
     if (badgeNumber && hasToken) {
@@ -158,18 +153,22 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
         endProfitYear: profitYear
       };
 
-      triggerSearch(searchParams, false).unwrap().then((response) => {
-        // If data is returned, trigger downstream components
-        if (response && Array.isArray(response) ? response.length > 0 : response.results && response.results.length > 0) {
-          setInitialSearchLoaded(true);
-          onSearch(searchParams);
-        } else {
-          // Instead of setting missiveAlerts, pass up a signal (to be implemented)
-          // setMissiveAlerts([...]);
-          setInitialSearchLoaded(false);
-          onSearch(undefined);
-        }
-      });
+      triggerSearch(searchParams, false)
+        .unwrap()
+        .then((response) => {
+          // If data is returned, trigger downstream components
+          if (
+            response && Array.isArray(response) ? response.length > 0 : response.results && response.results.length > 0
+          ) {
+            setInitialSearchLoaded(true);
+            onSearch(searchParams);
+          } else {
+            // Instead of setting missiveAlerts, pass up a signal (to be implemented)
+            // setMissiveAlerts([...]);
+            setInitialSearchLoaded(false);
+            onSearch(undefined);
+          }
+        });
     }
   }, [badgeNumber, hasToken, reset, triggerSearch, profitYear]);
 
@@ -196,16 +195,20 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
         ...(!!data.payment && { paymentAmount: data.payment })
       };
 
-      triggerSearch(searchParams, false).unwrap().then((response) => {
-        // If data is returned, trigger downstream components
-        if (response && Array.isArray(response) ? response.length > 0 : response.results && response.results.length > 0) {
-          setInitialSearchLoaded(true);
-          onSearch(searchParams);
-        } else {
-          setInitialSearchLoaded(false);
-          onSearch(undefined);
-        }
-      });
+      triggerSearch(searchParams, false)
+        .unwrap()
+        .then((response) => {
+          // If data is returned, trigger downstream components
+          if (
+            response && Array.isArray(response) ? response.length > 0 : response.results && response.results.length > 0
+          ) {
+            setInitialSearchLoaded(true);
+            onSearch(searchParams);
+          } else {
+            setInitialSearchLoaded(false);
+            onSearch(undefined);
+          }
+        });
       dispatch(setMasterInquiryRequestParams(data));
     }
   });
@@ -259,7 +262,6 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
           container
           spacing={3}
           width="100%">
-         
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
             <Controller
               name="endProfitYear"
@@ -590,11 +592,11 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
                     />
                   }
                   label="Voids"
-                  sx={{ 
-                    marginTop: '20px', 
-                    height: '40px',
-                    display: 'flex', 
-                    alignItems: 'center' 
+                  sx={{
+                    marginTop: "20px",
+                    height: "40px",
+                    display: "flex",
+                    alignItems: "center"
                   }}
                 />
               )}

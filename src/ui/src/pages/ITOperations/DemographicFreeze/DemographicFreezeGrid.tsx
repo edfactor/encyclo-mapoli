@@ -1,5 +1,5 @@
 import { Typography } from "@mui/material";
-import { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetHistoricalFrozenStateResponseQuery } from "reduxstore/api/ItOperationsApi";
 import { RootState } from "reduxstore/store";
@@ -9,24 +9,29 @@ import { GetFreezeColumns } from "./DemographicFreezeGridColumns";
 interface DemoFreezeSearchProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
+  pageNumberReset: boolean;
+  setPageNumberReset: (reset: boolean) => void;
 }
 
-const DemographicFreeze: React.FC<DemoFreezeSearchProps> = ({initialSearchLoaded, setInitialSearchLoaded }) => {
+const DemographicFreeze: React.FC<DemoFreezeSearchProps> = ({
+  initialSearchLoaded,
+  setInitialSearchLoaded,
+  pageNumberReset,
+  setPageNumberReset
+}) => {
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
 
-  const freezeResults = useSelector(
-    (state: RootState) => state.frozen.frozenStateCollectionData
-  );
+  const freezeResults = useSelector((state: RootState) => state.frozen.frozenStateCollectionData);
 
   const [triggerSearch, { isFetching }] = useLazyGetHistoricalFrozenStateResponseQuery();
 
   const onSearch = useCallback(async () => {
     const request = {
-      skip: pageNumber * pageSize, 
-      take: pageSize, 
-      sortBy: "createdDateTime", 
+      skip: pageNumber * pageSize,
+      take: pageSize,
+      sortBy: "createdDateTime",
       isSortDescending: true
     };
 
@@ -49,16 +54,12 @@ const DemographicFreeze: React.FC<DemoFreezeSearchProps> = ({initialSearchLoaded
 
   const columnDefs = useMemo(() => GetFreezeColumns(), []);
 
-  // Need a useEffect to reset the page number when freezeResults changes
-  const prevFreezeResults = useRef<any>(null);
   useEffect(() => {
-    if (freezeResults?.results && freezeResults.results.length > 0 &&
-        (prevFreezeResults.current === null || 
-         freezeResults.results.length !== prevFreezeResults.current.results.length)) {
+    if (pageNumberReset) {
       setPageNumber(0);
+      setPageNumberReset(false);
     }
-    prevFreezeResults.current = freezeResults;
-  }, [freezeResults]);
+  }, [pageNumberReset, setPageNumberReset]);
 
   return (
     <>

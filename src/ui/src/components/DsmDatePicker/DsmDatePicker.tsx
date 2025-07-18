@@ -1,9 +1,9 @@
-import { FormHelperText, FormLabel } from "@mui/material";
+import { FormLabel } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { FC, KeyboardEvent } from "react";
 import { parseISO } from "date-fns";
+import { FC, KeyboardEvent } from "react";
 
 type MyProps = {
   id: string;
@@ -51,7 +51,7 @@ const DsmDatePicker: FC<MyProps> = ({
       }
     } else {
       const parts = value.split("/");
-      if (parts.length === 3) { 
+      if (parts.length === 3) {
         const swapped = [parts[2], parts[0], parts[1]];
         const yyyymmdd = swapped.join("-");
         const v = tryddmmyyyyToDate(yyyymmdd);
@@ -70,11 +70,10 @@ const DsmDatePicker: FC<MyProps> = ({
       <FormLabel
         required={required}
         error={isInvalid}
-        style={{ display: 'block' }}
-      >
+        style={{ display: "block" }}>
         {label}
       </FormLabel>
-      
+
       <LocalizationProvider dateAdapter={AdapterDateFns}>
         <DatePicker
           value={value}
@@ -88,7 +87,7 @@ const DsmDatePicker: FC<MyProps> = ({
               onKeyDown: (e) => onKeyDown?.(e),
               inputRef: ref,
               size: "small",
-              variant: "outlined",
+              variant: "outlined"
             }
           }}
           views={views}
@@ -99,7 +98,6 @@ const DsmDatePicker: FC<MyProps> = ({
           maxDate={maxDate || undefined}
         />
       </LocalizationProvider>
-      
     </div>
   );
 };

@@ -1,11 +1,11 @@
-import React, { useMemo } from 'react';
+import React, { useMemo } from "react";
 import { Typography } from "@mui/material";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import Grid2 from '@mui/material/Grid2';
+import Grid2 from "@mui/material/Grid2";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
-import { under21InactiveColumnDefs } from './GetUnder21BreakdownColumnDefs';
-import { useNavigate } from 'react-router-dom';
+import { under21InactiveColumnDefs } from "./GetUnder21BreakdownColumnDefs";
+import { useNavigate } from "react-router-dom";
 import ReportSummary from "../../../../components/ReportSummary";
 
 interface Under21InactiveGridProps {
@@ -20,7 +20,7 @@ interface Under21InactiveGridProps {
   setSortParams: (value: ISortParams) => void;
 }
 
-const Under21InactiveGrid: React.FC<Under21InactiveGridProps> = ({ 
+const Under21InactiveGrid: React.FC<Under21InactiveGridProps> = ({
   isLoading = false,
   initialSearchLoaded,
   setInitialSearchLoaded,
@@ -52,8 +52,11 @@ const Under21InactiveGrid: React.FC<Under21InactiveGridProps> = ({
   const columnDefs = useMemo(() => under21InactiveColumnDefs(handleNavigation), [handleNavigation]);
 
   return (
-    <Grid2 container direction="column" width="100%">
-      <ReportSummary report={under21Inactive} />      
+    <Grid2
+      container
+      direction="column"
+      width="100%">
+      <ReportSummary report={under21Inactive} />
       <Grid2 width="100%">
         <DSMGrid
           preferenceKey="UNDER_21_INACTIVE_REPORT"
@@ -85,4 +88,4 @@ const Under21InactiveGrid: React.FC<Under21InactiveGridProps> = ({
   );
 };
 
-export default Under21InactiveGrid; 
+export default Under21InactiveGrid;

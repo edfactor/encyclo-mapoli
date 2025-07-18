@@ -43,7 +43,6 @@ export const inquirySlice = createSlice({
       state.masterInquiryEmployeeDetails = null;
     },
     setMasterInquiryResults: (state, action: PayloadAction<MasterInquiryDetail[]>) => {
-      
       state.masterInquiryResults = action.payload;
     },
     clearMasterInquiryResults: (state) => {

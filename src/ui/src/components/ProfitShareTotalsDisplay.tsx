@@ -12,31 +12,31 @@ const ProfitShareTotalsDisplay = ({ data }: ProfitShareTotalsDisplayProps) => {
   const tableStyles = { mb: 4.5 };
 
   const headerCellStyles = {
-    fontWeight: 'bold',
-    fontSize: '0.9rem',
+    fontWeight: "bold",
+    fontSize: "0.9rem",
     py: 1.5,
-    textAlign: 'right'
+    textAlign: "right"
   };
 
   const firstHeaderCellStyles = {
-    fontWeight: 'bold',
-    fontSize: '0.9rem',
+    fontWeight: "bold",
+    fontSize: "0.9rem",
     py: 1.5,
-    textAlign: 'left'
+    textAlign: "left"
   };
 
   const labelCellStyles = {
-    fontWeight: 'bold', 
+    fontWeight: "bold",
     py: 1.5,
-    fontSize: '0.9rem',
+    fontSize: "0.9rem",
     pl: 3,
-    textAlign: 'left'
+    textAlign: "left"
   };
 
   const dataCellStyles = {
-    textAlign: 'right',
+    textAlign: "right",
     py: 1.5,
-    fontSize: '0.9rem'
+    fontSize: "0.9rem"
   };
 
   return (
@@ -45,10 +45,24 @@ const ProfitShareTotalsDisplay = ({ data }: ProfitShareTotalsDisplayProps) => {
         <Table size="small">
           <TableBody>
             <TableRow>
-              <TableCell sx={firstHeaderCellStyles} width="25%"></TableCell>
-              <TableCell sx={headerCellStyles} width="25%">Wages</TableCell>
-              <TableCell sx={headerCellStyles} width="25%">Hours</TableCell>
-              <TableCell sx={headerCellStyles} width="25%">Points</TableCell>
+              <TableCell
+                sx={firstHeaderCellStyles}
+                width="25%"></TableCell>
+              <TableCell
+                sx={headerCellStyles}
+                width="25%">
+                Wages
+              </TableCell>
+              <TableCell
+                sx={headerCellStyles}
+                width="25%">
+                Hours
+              </TableCell>
+              <TableCell
+                sx={headerCellStyles}
+                width="25%">
+                Points
+              </TableCell>
             </TableRow>
             <TableRow>
               <TableCell sx={labelCellStyles}>Section Total</TableCell>
@@ -64,11 +78,29 @@ const ProfitShareTotalsDisplay = ({ data }: ProfitShareTotalsDisplayProps) => {
         <Table size="small">
           <TableBody>
             <TableRow>
-              <TableCell sx={firstHeaderCellStyles} width="25%"></TableCell>
-              <TableCell sx={headerCellStyles} width="18.75%">All Employees</TableCell>
-              <TableCell sx={headerCellStyles} width="18.75%">New Employees</TableCell>
-              <TableCell sx={headerCellStyles} width="18.75%">Employees &lt; 21</TableCell>
-              <TableCell sx={headerCellStyles} width="18.75%">In-Plan</TableCell>
+              <TableCell
+                sx={firstHeaderCellStyles}
+                width="25%"></TableCell>
+              <TableCell
+                sx={headerCellStyles}
+                width="18.75%">
+                All Employees
+              </TableCell>
+              <TableCell
+                sx={headerCellStyles}
+                width="18.75%">
+                New Employees
+              </TableCell>
+              <TableCell
+                sx={headerCellStyles}
+                width="18.75%">
+                Employees &lt; 21
+              </TableCell>
+              <TableCell
+                sx={headerCellStyles}
+                width="18.75%">
+                In-Plan
+              </TableCell>
             </TableRow>
             <TableRow>
               <TableCell sx={labelCellStyles}>Employee Totals</TableCell>
@@ -85,10 +117,24 @@ const ProfitShareTotalsDisplay = ({ data }: ProfitShareTotalsDisplayProps) => {
         <Table size="small">
           <TableBody>
             <TableRow>
-              <TableCell sx={firstHeaderCellStyles} width="25%"></TableCell>
-              <TableCell sx={headerCellStyles} width="25%">Wages</TableCell>
-              <TableCell sx={headerCellStyles} width="25%">Hours</TableCell>
-              <TableCell sx={headerCellStyles} width="25%">Points</TableCell>
+              <TableCell
+                sx={firstHeaderCellStyles}
+                width="25%"></TableCell>
+              <TableCell
+                sx={headerCellStyles}
+                width="25%">
+                Wages
+              </TableCell>
+              <TableCell
+                sx={headerCellStyles}
+                width="25%">
+                Hours
+              </TableCell>
+              <TableCell
+                sx={headerCellStyles}
+                width="25%">
+                Points
+              </TableCell>
             </TableRow>
             <TableRow>
               <TableCell sx={labelCellStyles}>Terminated Section Total</TableCell>
@@ -103,4 +149,4 @@ const ProfitShareTotalsDisplay = ({ data }: ProfitShareTotalsDisplayProps) => {
   );
 };
 
-export default ProfitShareTotalsDisplay; 
+export default ProfitShareTotalsDisplay;

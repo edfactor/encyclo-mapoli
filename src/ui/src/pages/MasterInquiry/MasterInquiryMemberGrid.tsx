@@ -4,13 +4,13 @@ import { useLazySearchProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi
 import { EmployeeDetails, MasterInquiryRequest } from "reduxstore/types";
 import { DSMGrid, formatNumberWithComma } from "smart-ui-library";
 import Pagination from "../../components/Pagination/Pagination";
-import './MasterInquiryMemberGrid.css'; // Import the CSS file for styles
+import "./MasterInquiryMemberGrid.css"; // Import the CSS file for styles
 import { GetMasterInquiryMemberGridColumns } from "./MasterInquiryMemberGridColumns";
 
-
-
 interface MasterInquiryMemberGridProps extends MasterInquiryRequest {
-  onBadgeClick?: (args: { memberType: number; id: number, ssn: number, badgeNumber:number, psnSuffix:number } | undefined) => void;
+  onBadgeClick?: (
+    args: { memberType: number; id: number; ssn: number; badgeNumber: number; psnSuffix: number } | undefined
+  ) => void;
 }
 
 const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = (searchParams) => {
@@ -22,10 +22,10 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = (searchP
   const onSearch = useCallback(async () => {
     await trigger({
       ...searchParams,
-      pagination: { 
-        skip: pageNumber * pageSize, 
+      pagination: {
+        skip: pageNumber * pageSize,
         take: pageSize,
-        sortBy: searchParams.pagination?.sortBy || '',
+        sortBy: searchParams.pagination?.sortBy || "",
         isSortDescending: searchParams.pagination?.isSortDescending || false
       }
     });
@@ -66,7 +66,11 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = (searchP
   if (data && data.results.length === 0) {
     return (
       <Box sx={{ width: "100%", padding: "24px" }}>
-        <Typography color="error" variant="h6">No results found.</Typography>
+        <Typography
+          color="error"
+          variant="h6">
+          No results found.
+        </Typography>
       </Box>
     );
   }
@@ -95,7 +99,7 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = (searchP
             isLoading={isLoading}
             preferenceKey="MASTER_INQUIRY_MEMBER_GRID"
             providedOptions={{
-              rowData: Array.isArray(data?.results) ? data.results as EmployeeDetails[] : [],
+              rowData: Array.isArray(data?.results) ? (data.results as EmployeeDetails[]) : [],
               columnDefs: columns,
               context: { onBadgeClick: searchParams.onBadgeClick }
             }}

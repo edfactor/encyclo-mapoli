@@ -13,8 +13,9 @@ const RehireForfeitures = () => {
   const [resetPageFlag, setResetPageFlag] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [shouldBlock, setShouldBlock] = useState(false);
-  const [fetchAccountingRange, { data: fiscalCalendarYear, isLoading: isRangeLoading }] = useLazyGetAccountingRangeToCurrent(6);
-  
+  const [fetchAccountingRange, { data: fiscalCalendarYear, isLoading: isRangeLoading }] =
+    useLazyGetAccountingRangeToCurrent(6);
+
   const renderActionNode = () => {
     return <StatusDropdownActionNode />;
   };
@@ -31,14 +32,14 @@ const RehireForfeitures = () => {
 
   useEffect(() => {
     if (!shouldBlock) return;
-  
+
     const message = "Please save your changes. Do you want to leave without saving?";
-  
+
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       e.preventDefault();
       return message;
     };
-  
+
     const handlePopState = (e: PopStateEvent) => {
       const userConfirmed = window.confirm(message);
       if (!userConfirmed) {
@@ -46,13 +47,13 @@ const RehireForfeitures = () => {
         e.preventDefault?.();
       }
     };
-  
+
     const handleClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       const link = target.closest('a, [role="button"], button') as HTMLElement | null;
-      const href = link?.getAttribute('href');
-  
-      if (link && href && href !== window.location.pathname && href !== '#') {
+      const href = link?.getAttribute("href");
+
+      if (link && href && href !== window.location.pathname && href !== "#") {
         const userConfirmed = window.confirm(message);
         if (!userConfirmed) {
           e.preventDefault();
@@ -60,13 +61,13 @@ const RehireForfeitures = () => {
         }
       }
     };
-  
+
     window.addEventListener("beforeunload", handleBeforeUnload);
     window.addEventListener("popstate", handlePopState);
     document.addEventListener("click", handleClick, true);
-  
+
     window.history.pushState(null, "", window.location.href);
-  
+
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
       window.removeEventListener("popstate", handlePopState);
@@ -77,14 +78,13 @@ const RehireForfeitures = () => {
   const isCalendarDataLoaded = !!fiscalCalendarYear?.fiscalBeginDate && !!fiscalCalendarYear?.fiscalEndDate;
 
   const handleSearch = () => {
-    setResetPageFlag(prev => !prev);
+    setResetPageFlag((prev) => !prev);
   };
 
   return (
     <Page
       label={`${CAPTIONS.REHIRE_FORFEITURES}`}
-      actionNode={renderActionNode()}
-    >
+      actionNode={renderActionNode()}>
       <Grid2
         container
         rowSpacing="24px">
@@ -93,19 +93,23 @@ const RehireForfeitures = () => {
         </Grid2>
 
         {!isCalendarDataLoaded ? (
-          <Grid2 width={"100%"} container justifyContent="center" padding={4}>
+          <Grid2
+            width={"100%"}
+            container
+            justifyContent="center"
+            padding={4}>
             <CircularProgress />
           </Grid2>
         ) : (
           <>
             <Grid2 width={"100%"}>
               <DSMAccordion title="Filter">
-                              <RehireForfeituresSearchFilter
-                setInitialSearchLoaded={setInitialSearchLoaded}
-                fiscalData={fiscalCalendarYear}
-                onSearch={handleSearch}
-                hasUnsavedChanges={hasUnsavedChanges}
-              />
+                <RehireForfeituresSearchFilter
+                  setInitialSearchLoaded={setInitialSearchLoaded}
+                  fiscalData={fiscalCalendarYear}
+                  onSearch={handleSearch}
+                  hasUnsavedChanges={hasUnsavedChanges}
+                />
               </DSMAccordion>
             </Grid2>
 

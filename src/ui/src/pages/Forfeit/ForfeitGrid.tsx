@@ -1,5 +1,5 @@
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { Path, useNavigate } from "react-router";
 import { useLazyGetForfeituresAndPointsQuery } from "reduxstore/api/YearsEndApi";
@@ -12,9 +12,16 @@ import { GetProfitShareForfeitColumns } from "./ForfeitGridColumns";
 interface ForfeitGridProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
+  pageNumberReset: boolean;
+  setPageNumberReset: (reset: boolean) => void;
 }
 
-const ForfeitGrid: React.FC<ForfeitGridProps> = ({ initialSearchLoaded, setInitialSearchLoaded }) => {
+const ForfeitGrid: React.FC<ForfeitGridProps> = ({
+  initialSearchLoaded,
+  setInitialSearchLoaded,
+  pageNumberReset,
+  setPageNumberReset
+}) => {
   const navigate = useNavigate();
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
@@ -44,7 +51,12 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ initialSearchLoaded, setIniti
       {
         profitYear: fiscalCloseProfitYear,
         useFrozenData: true,
-        pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: sortParams.sortBy, isSortDescending: sortParams.isSortDescending }
+        pagination: {
+          skip: pageNumber * pageSize,
+          take: pageSize,
+          sortBy: sortParams.sortBy,
+          isSortDescending: sortParams.isSortDescending
+        }
       },
       false
     ).unwrap();
@@ -56,16 +68,12 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ initialSearchLoaded, setIniti
     }
   }, [initialSearchLoaded, pageNumber, pageSize, onSearch]);
 
-  // Need a useEffect on a change in forfeituresAndPoints to reset the page number
-  const prevForfeituresAndPoints = useRef<any>(null);
   useEffect(() => {
-    if (forfeituresAndPoints?.response?.results && forfeituresAndPoints.response.results.length > 0 &&
-        (prevForfeituresAndPoints.current === null || 
-         forfeituresAndPoints.response.results.length !== prevForfeituresAndPoints.current.response?.results.length)) {
+    if (pageNumberReset) {
       setPageNumber(0);
+      setPageNumberReset(false);
     }
-    prevForfeituresAndPoints.current = forfeituresAndPoints;
-  }, [forfeituresAndPoints]);
+  }, [pageNumberReset, setPageNumberReset]);
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
@@ -78,19 +86,31 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ initialSearchLoaded, setIniti
     forfeitPoints: totalForfeitPoints ?? 0,
     earningPoints: totalEarningPoints ?? 0
   };
-  
+
   return (
     <>
       {forfeituresAndPoints?.response && (
         <>
           <table>
-            <tr><td>Total Profit Sharing Balance&nbsp;</td><td align="right">{numberToCurrency(forfeituresAndPoints?.totalProfitSharingBalance)}</td></tr>
-            <tr><td>Distribution Total</td><td align="right">{numberToCurrency(forfeituresAndPoints?.distributionTotals)} </td></tr>
-            <tr><td>Allocation To Total</td><td align="right">{numberToCurrency(forfeituresAndPoints?.allocationToTotals)}</td></tr>
-            <tr><td>Allocations From Total</td><td align="right">{numberToCurrency(forfeituresAndPoints?.allocationsFromTotals)}</td></tr>
+            <tr>
+              <td>Total Profit Sharing Balance&nbsp;</td>
+              <td align="right">{numberToCurrency(forfeituresAndPoints?.totalProfitSharingBalance)}</td>
+            </tr>
+            <tr>
+              <td>Distribution Total</td>
+              <td align="right">{numberToCurrency(forfeituresAndPoints?.distributionTotals)} </td>
+            </tr>
+            <tr>
+              <td>Allocation To Total</td>
+              <td align="right">{numberToCurrency(forfeituresAndPoints?.allocationToTotals)}</td>
+            </tr>
+            <tr>
+              <td>Allocations From Total</td>
+              <td align="right">{numberToCurrency(forfeituresAndPoints?.allocationsFromTotals)}</td>
+            </tr>
           </table>
           <br />
-          
+
           <ReportSummary report={forfeituresAndPoints} />
           <DSMGrid
             preferenceKey={CAPTIONS.FORFEIT}
@@ -102,7 +122,7 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({ initialSearchLoaded, setIniti
               columnDefs: columnDefs
             }}
           />
-          {(forfeituresAndPoints.response.results.length > 0) && (
+          {forfeituresAndPoints.response.results.length > 0 && (
             <Pagination
               pageNumber={pageNumber}
               setPageNumber={(value: number) => {

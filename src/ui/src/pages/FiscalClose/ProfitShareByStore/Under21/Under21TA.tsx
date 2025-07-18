@@ -45,15 +45,12 @@ const Under21TA = () => {
           isSortDescending: sortParams.isSortDescending
         }
       };
-      
-      await Promise.all([
-        fetchUnder21Totals(queryParams),
-        fetchUnder21Inactive(queryParams)
-      ]);
-      
+
+      await Promise.all([fetchUnder21Totals(queryParams), fetchUnder21Inactive(queryParams)]);
+
       setInitialLoad(false);
     };
-    
+
     fetchData();
   }, [fetchUnder21Totals, fetchUnder21Inactive, pageNumber, pageSize, sortParams, profitYear]);
 
@@ -69,16 +66,15 @@ const Under21TA = () => {
           isSortDescending: sortParams.isSortDescending
         }
       };
-      
+
       fetchUnder21Totals(queryParams);
       fetchUnder21Inactive(queryParams);
     }
   }, [initialSearchLoaded, pageNumber, pageSize, sortParams, fetchUnder21Totals, fetchUnder21Inactive, profitYear]);
 
-
   // Need a useEffect to reset the page number when under21Totals or under21Inactive changes
-  useEffect(() => {  
-      setPageNumber(0);
+  useEffect(() => {
+    setPageNumber(0);
   }, [under21Totals, under21Inactive]);
 
   const handleSearch = (profitYear: number, isSortDescending: boolean) => {
@@ -92,13 +88,15 @@ const Under21TA = () => {
         isSortDescending
       }
     };
-    
+
     fetchUnder21Totals(queryParams);
     fetchUnder21Inactive(queryParams);
   };
 
   return (
-    <Page label={CAPTIONS.QPAY066TA_UNDER21} actionNode={renderActionNode()}>
+    <Page
+      label={CAPTIONS.QPAY066TA_UNDER21}
+      actionNode={renderActionNode()}>
       <Grid2
         container
         rowSpacing="24px">
@@ -108,16 +106,22 @@ const Under21TA = () => {
 
         {initialLoad ? (
           <Grid2 width="100%">
-            <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
+            <Box
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              minHeight="200px">
               <CircularProgress />
             </Box>
           </Grid2>
         ) : (
           <>
             {hasData && !isLoading && (
-              <Grid2 width="100%" paddingX="24px">
-                <Under21Summary 
-                  totals={under21Totals} 
+              <Grid2
+                width="100%"
+                paddingX="24px">
+                <Under21Summary
+                  totals={under21Totals}
                   isLoading={isTotalsLoading}
                   title="UNDER 21 INACTIVE (QPAY066TA-UNDR21)"
                 />
@@ -125,7 +129,7 @@ const Under21TA = () => {
             )}
 
             <Grid2 width="100%">
-              <Under21InactiveGrid 
+              <Under21InactiveGrid
                 isLoading={isInactiveLoading}
                 initialSearchLoaded={initialSearchLoaded}
                 setInitialSearchLoaded={setInitialSearchLoaded}

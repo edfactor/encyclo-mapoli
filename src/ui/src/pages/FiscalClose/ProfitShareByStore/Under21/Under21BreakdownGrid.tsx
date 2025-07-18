@@ -1,11 +1,11 @@
-import React, { useMemo } from 'react';
+import React, { useMemo } from "react";
 import { Typography } from "@mui/material";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import Grid2 from '@mui/material/Grid2';
+import Grid2 from "@mui/material/Grid2";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
-import { GetUnder21BreakdownColumnDefs } from './GetUnder21BreakdownColumnDefs';
-import { useNavigate } from 'react-router-dom';
+import { GetUnder21BreakdownColumnDefs } from "./GetUnder21BreakdownColumnDefs";
+import { useNavigate } from "react-router-dom";
 import ReportSummary from "../../../../components/ReportSummary";
 
 interface Under21BreakdownGridProps {
@@ -20,7 +20,7 @@ interface Under21BreakdownGridProps {
   setSortParams: (value: ISortParams) => void;
 }
 
-const Under21BreakdownGrid: React.FC<Under21BreakdownGridProps> = ({ 
+const Under21BreakdownGrid: React.FC<Under21BreakdownGridProps> = ({
   isLoading = false,
   initialSearchLoaded,
   setInitialSearchLoaded,
@@ -52,7 +52,10 @@ const Under21BreakdownGrid: React.FC<Under21BreakdownGridProps> = ({
   const columnDefs = useMemo(() => GetUnder21BreakdownColumnDefs(handleNavigation), [handleNavigation]);
 
   return (
-    <Grid2 container direction="column" width="100%">
+    <Grid2
+      container
+      direction="column"
+      width="100%">
       <ReportSummary report={under21Breakdown} />
       <Grid2 width="100%">
         <DSMGrid
@@ -85,4 +88,4 @@ const Under21BreakdownGrid: React.FC<Under21BreakdownGridProps> = ({
   );
 };
 
-export default Under21BreakdownGrid; 
+export default Under21BreakdownGrid;

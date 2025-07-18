@@ -89,7 +89,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
         if (month === 0 && year === 0) {
           return "";
         }
-        
+
         return `${formattedMonth}/${year}`;
       }
     },
@@ -205,6 +205,6 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       type: "rightAligned",
       resizable: true,
       sortable: false
-    },
+    }
   ];
 };

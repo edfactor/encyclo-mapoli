@@ -1,5 +1,5 @@
 import { Typography } from "@mui/material";
-import Grid2 from '@mui/material/Grid2';
+import Grid2 from "@mui/material/Grid2";
 import LabelValueSection from "components/LabelValueSection";
 import React from "react";
 import { EmployeeDetails } from "reduxstore/types";
@@ -52,13 +52,11 @@ const ForfeitureAdjustmentEmployeeDetails: React.FC<ForfeitureAdjustmentEmployee
       container
       paddingX="24px"
       width={"100%"}
-      sx={{ marginBottom: "24px" }}
-    >
+      sx={{ marginBottom: "24px" }}>
       <Grid2 size={{ xs: 12 }}>
         <Typography
           variant="h2"
-          sx={{ color: "#0258A5", marginBottom: "16px" }}
-        >
+          sx={{ color: "#0258A5", marginBottom: "16px" }}>
           Employee Details
         </Typography>
       </Grid2>
@@ -66,22 +64,15 @@ const ForfeitureAdjustmentEmployeeDetails: React.FC<ForfeitureAdjustmentEmployee
       <Grid2 size={{ xs: 12 }}>
         <Grid2
           container
-          spacing={3}
-        >
+          spacing={3}>
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-            <LabelValueSection
-              data={personalInfoSection}
-            />
+            <LabelValueSection data={personalInfoSection} />
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-            <LabelValueSection
-              data={planInfoSection}
-            />
+            <LabelValueSection data={planInfoSection} />
           </Grid2>
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-            <LabelValueSection
-              data={enrollmentSection}
-            />
+            <LabelValueSection data={enrollmentSection} />
           </Grid2>
         </Grid2>
       </Grid2>
@@ -89,4 +80,4 @@ const ForfeitureAdjustmentEmployeeDetails: React.FC<ForfeitureAdjustmentEmployee
   );
 };
 
-export default ForfeitureAdjustmentEmployeeDetails; 
+export default ForfeitureAdjustmentEmployeeDetails;

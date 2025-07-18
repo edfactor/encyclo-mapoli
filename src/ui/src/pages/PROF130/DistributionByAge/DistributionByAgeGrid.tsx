@@ -33,7 +33,7 @@ const DistributionByAgeGrid: React.FC<DistributionByAgeGridProps> = ({ initialSe
   const columnDefsPartTime = GetDistributionsByAgeColumns(FrozenReportsByAgeRequestType.PartTime);
 
   const onSearch = useCallback(async () => {
-   await triggerSearch(
+    await triggerSearch(
       {
         profitYear: distributionsByAgeQueryParams?.profitYear || 0,
         reportType: FrozenReportsByAgeRequestType.Total,
@@ -49,7 +49,7 @@ const DistributionByAgeGrid: React.FC<DistributionByAgeGridProps> = ({ initialSe
       },
       false
     ).unwrap();
-   await  triggerSearch(
+    await triggerSearch(
       {
         profitYear: distributionsByAgeQueryParams?.profitYear || 0,
         reportType: FrozenReportsByAgeRequestType.PartTime,

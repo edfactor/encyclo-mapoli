@@ -1,20 +1,18 @@
-import { ColDef, ICellRendererParams, IHeaderParams } from "ag-grid-community";
-import { agGridNumberToCurrency, formatNumberWithComma } from "smart-ui-library";
-import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
-import { mmDDYYFormat } from "utils/dateUtils";
-import { GRID_COLUMN_WIDTHS } from "../../../constants";
-import { Checkbox, IconButton } from "@mui/material";
 import { SaveOutlined } from "@mui/icons-material";
-import { 
-  RehireForfeituresHeaderComponentProps, 
-  RehireForfeituresSaveButtonCellParams, 
-  RehireForfeituresUpdatePayload,
-  ForfeitureAdjustmentUpdateRequest
-} from "../../../reduxstore/types";
-import { SuggestedForfeitEditor, SuggestedForfeitCellRenderer } from "../../../components/SuggestedForfeiture";
+import { Checkbox, IconButton } from "@mui/material";
+import { ColDef, ICellRendererParams } from "ag-grid-community";
+import { agGridNumberToCurrency, formatNumberWithComma } from "smart-ui-library";
+import { mmDDYYFormat } from "utils/dateUtils";
 import { SelectableGridHeader } from "../../../components/SelectableGridHeader";
-import { useUpdateForfeitureAdjustmentMutation } from "../../../reduxstore/api/YearsEndApi";
-import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import { SuggestedForfeitCellRenderer, SuggestedForfeitEditor } from "../../../components/SuggestedForfeiture";
+import { GRID_COLUMN_WIDTHS } from "../../../constants";
+import {
+  ForfeitureAdjustmentUpdateRequest,
+  RehireForfeituresHeaderComponentProps,
+  RehireForfeituresSaveButtonCellParams
+} from "../../../reduxstore/types";
+import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
+import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 
 export const HeaderComponent: React.FC<RehireForfeituresHeaderComponentProps> = (params: RehireForfeituresHeaderComponentProps) => {
   const selectedProfitYear = useDecemberFlowProfitYear();
@@ -148,7 +146,7 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       resizable: true,
       sortable: true,
       valueFormatter: agGridNumberToCurrency
-    },    
+    },
     {
       headerName: "Store",
       field: "storeNumber",
@@ -157,7 +155,7 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
-      sortable: true,
+      sortable: true
     }
   ];
 };
@@ -185,7 +183,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
         const hours = params.value;
         return formatNumberWithComma(hours);
       }
-    },    
+    },
     {
       headerName: "Wages",
       field: "wages",
@@ -215,7 +213,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       sortable: true,
       valueGetter: (params) => {
         const id = params.data?.enrollmentId;
-        const name = params.data?.enrollmentName;        
+        const name = params.data?.enrollmentName;
         return `[${id}] ${name}`;
       }
     },
@@ -256,7 +254,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
-      sortable: false,
+      sortable: false
     },
     {
       headerName: "Save Button",
@@ -267,7 +265,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       lockPinned: true,
       resizable: false,
       sortable: false,
-      cellStyle: { backgroundColor: '#E8E8E8' },
+      cellStyle: { backgroundColor: "#E8E8E8" },
       headerComponent: HeaderComponent,
       headerComponentParams: {
         addRowToSelectedRows,
@@ -281,7 +279,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       },
       cellRenderer: (params: RehireForfeituresSaveButtonCellParams) => {
         if (!params.data.isDetail || params.data.profitYear !== selectedProfitYear) {
-          return '';
+          return "";
         }
         const id = Number(params.node?.id) || -1;
         const isSelected = params.node?.isSelected() || false;

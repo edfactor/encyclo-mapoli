@@ -26,7 +26,7 @@ const Termination = () => {
   const handleSearch = (params: TerminationSearchRequest) => {
     setSearchParams(params);
     setInitialSearchLoaded(true);
-    setResetPageFlag(prev => !prev);
+    setResetPageFlag((prev) => !prev);
   };
 
   const handleUnsavedChanges = (hasChanges: boolean) => {
@@ -56,8 +56,8 @@ const Termination = () => {
       }
     };
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [shouldBlock]);
 
   useEffect(() => {
@@ -74,11 +74,11 @@ const Termination = () => {
     };
 
     window.history.pushState(null, "", window.location.href);
-    
-    window.addEventListener('popstate', handlePopState);
-    
+
+    window.addEventListener("popstate", handlePopState);
+
     return () => {
-      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener("popstate", handlePopState);
     };
   }, [shouldBlock]);
 
@@ -87,13 +87,13 @@ const Termination = () => {
 
     const handleClick = (event: Event) => {
       const target = event.target as HTMLElement;
-      
+
       const link = target.closest('a, [role="button"], button');
-      
+
       if (link && shouldBlock) {
-        const href = link.getAttribute('href');
-        
-        if (href && href !== window.location.pathname && href !== '#') {
+        const href = link.getAttribute("href");
+
+        if (href && href !== window.location.pathname && href !== "#") {
           const userConfirmed = window.confirm("Please save your changes. Do you want to leave without saving?");
           if (!userConfirmed) {
             event.preventDefault();
@@ -104,13 +104,13 @@ const Termination = () => {
       }
     };
 
-    document.addEventListener('click', handleClick, true);
-    
+    document.addEventListener("click", handleClick, true);
+
     return () => {
-      document.removeEventListener('click', handleClick, true);
+      document.removeEventListener("click", handleClick, true);
     };
   }, [shouldBlock]);
-  
+
   const isCalendarDataLoaded = !!fiscalData?.fiscalBeginDate && !!fiscalData?.fiscalEndDate;
 
   return (
@@ -123,33 +123,37 @@ const Termination = () => {
         <Grid2 width={"100%"}>
           <Divider />
         </Grid2>
-         {!isCalendarDataLoaded ? (
-          <Grid2 width={"100%"} container justifyContent="center" padding={4}>
+        {!isCalendarDataLoaded ? (
+          <Grid2
+            width={"100%"}
+            container
+            justifyContent="center"
+            padding={4}>
             <CircularProgress />
           </Grid2>
         ) : (
           <>
-        <Grid2 width="100%">
-           <DSMAccordion title="Filter">
-          <TerminationSearchFilter
-            setInitialSearchLoaded={setInitialSearchLoaded}
-            fiscalData={fiscalData}
-            onSearch={handleSearch}
-            hasUnsavedChanges={hasUnsavedChanges}
-          />
-          </DSMAccordion>
-        </Grid2>
-        <Grid2 width="100%">
-          <TerminationGrid
-            setInitialSearchLoaded={setInitialSearchLoaded}
-            initialSearchLoaded={initialSearchLoaded}
-            searchParams={searchParams}
-            resetPageFlag={resetPageFlag}
-            onUnsavedChanges={handleUnsavedChanges}
-            hasUnsavedChanges={hasUnsavedChanges}
-          />
-        </Grid2>
-                  </>
+            <Grid2 width="100%">
+              <DSMAccordion title="Filter">
+                <TerminationSearchFilter
+                  setInitialSearchLoaded={setInitialSearchLoaded}
+                  fiscalData={fiscalData}
+                  onSearch={handleSearch}
+                  hasUnsavedChanges={hasUnsavedChanges}
+                />
+              </DSMAccordion>
+            </Grid2>
+            <Grid2 width="100%">
+              <TerminationGrid
+                setInitialSearchLoaded={setInitialSearchLoaded}
+                initialSearchLoaded={initialSearchLoaded}
+                searchParams={searchParams}
+                resetPageFlag={resetPageFlag}
+                onUnsavedChanges={handleUnsavedChanges}
+                hasUnsavedChanges={hasUnsavedChanges}
+              />
+            </Grid2>
+          </>
         )}
       </Grid2>
     </Page>

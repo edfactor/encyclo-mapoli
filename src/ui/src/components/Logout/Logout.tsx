@@ -22,21 +22,13 @@ const LogoutButton: React.FC<LogoutButtonProps> = ({ redirectUri, children }) =>
     }
   };
 
-  return (
-    <button onClick={handleLogout}>
-      {children || "Logout"}
-    </button>
-  );
+  return <button onClick={handleLogout}>{children || "Logout"}</button>;
 };
 
 export default LogoutButton;
 
 // Also create a utility function for programmatic logout
-export const performLogout = (options: {
-  dispatch: any;
-  oktaAuth: any;
-  redirectUri?: string
-}) => {
+export const performLogout = (options: { dispatch: any; oktaAuth: any; redirectUri?: string }) => {
   const { dispatch, oktaAuth, redirectUri } = options;
   const postLogoutRedirectUri = redirectUri || window.location.origin;
 

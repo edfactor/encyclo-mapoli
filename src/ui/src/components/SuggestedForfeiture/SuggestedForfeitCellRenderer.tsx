@@ -21,19 +21,21 @@ export function SuggestedForfeitCellRenderer(params: SuggestedForfeitCellRendere
  
   const errorMessage = validateSuggestedForfeit(currentValue, maxForfeitOrUnforfeiture);
   const hasError = !!errorMessage;
-  const formattedValue = new Intl.NumberFormat('en-US', { 
-    style: 'currency', 
-    currency: 'USD' 
+  const formattedValue = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD"
   }).format(currentValue || 0);
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+    <div style={{ display: "flex", alignItems: "center", height: "100%" }}>
       {hasError && (
-        <Tooltip title={errorMessage} placement="top">
-          <ErrorOutline sx={{ color: '#d32f2f', fontSize: 16, marginRight: '4px' }} />
+        <Tooltip
+          title={errorMessage}
+          placement="top">
+          <ErrorOutline sx={{ color: "#d32f2f", fontSize: 16, marginRight: "4px" }} />
         </Tooltip>
       )}
-      <span style={{ color: hasError ? '#d32f2f' : 'inherit' }}>{formattedValue}</span>
+      <span style={{ color: hasError ? "#d32f2f" : "inherit" }}>{formattedValue}</span>
     </div>
   );
-} 
+}

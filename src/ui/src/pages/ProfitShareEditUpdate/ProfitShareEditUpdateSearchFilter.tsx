@@ -109,10 +109,12 @@ const schema = yup.object().shape({
 
 interface ProfitShareEditUpdateSearchFilterProps {
   setInitialSearchLoaded: (include: boolean) => void;
+  setPageReset: (reset: boolean) => void;
 }
 
 const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFilterProps> = ({
-  setInitialSearchLoaded
+  setInitialSearchLoaded,
+  setPageReset
 }) => {
   const [triggerSearchUpdate, { isFetching: isFetchingUpdate }] = useLazyGetProfitShareUpdateQuery();
   const [triggerSearchEdit, { isFetching: isFetchingEdit }] = useLazyGetProfitShareEditQuery();
@@ -159,6 +161,7 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
+      setPageReset(true);
       const updateParams: ProfitShareUpdateRequest = {
         pagination: {
           sortBy: "name",
@@ -218,6 +221,7 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
 
   const handleReset = () => {
     // We need to clear both grids and then both sets of query params
+    setPageReset(true);
     dispatch(clearProfitSharingEdit());
     dispatch(clearProfitSharingUpdate());
     dispatch(clearProfitSharingEditQueryParams());

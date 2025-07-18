@@ -1,5 +1,5 @@
 import { Typography } from "@mui/material";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Path, useNavigate } from "react-router";
 import { useLazyGetProfitSharingLabelsQuery } from "reduxstore/api/YearsEndApi";
 import { useSelector } from "react-redux";
@@ -9,7 +9,12 @@ import { DSMGrid, Pagination, ISortParams } from "smart-ui-library";
 import { GetProfallGridColumns } from "./ProfallGridColumns";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 
-const ProfallGrid = () => {
+interface ProfallGridProps {
+  pageNumberReset: boolean;
+  setPageNumberReset: (reset: boolean) => void;
+}
+
+const ProfallGrid: React.FC<ProfallGridProps> = ({ pageNumberReset, setPageNumberReset }) => {
   const navigate = useNavigate();
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
@@ -40,7 +45,7 @@ const ProfallGrid = () => {
         sortBy: sortParams.sortBy || "badgeNumber",
         isSortDescending: sortParams.isSortDescending
       }
-    })
+    });
   }, [profitYear, pageNumber, pageSize, sortParams, getProfitSharingLabels]);
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
@@ -52,19 +57,15 @@ const ProfallGrid = () => {
     [navigate]
   );
 
-  // Need a useEffect to reset the page number when data changes
-  const prevData = useRef<any>(null);
   useEffect(() => {
-    if (profitSharingLabels?.results && profitSharingLabels.results.length > 0 &&
-        (prevData.current === null || 
-         profitSharingLabels.results.length !== prevData.current.response.results.length)) {
+    if (pageNumberReset) {
       setPageNumber(0);
+      setPageNumberReset(false);
     }
-    prevData.current = profitSharingLabels;
-  }, [profitSharingLabels]);
+  }, [pageNumberReset, setPageNumberReset]);
 
   const columnDefs = useMemo(() => GetProfallGridColumns(handleNavigationForButton), [handleNavigationForButton]);
-  
+
   const rowData = useMemo(() => {
     return profitSharingLabels?.results || [];
   }, [profitSharingLabels]);

@@ -11,7 +11,6 @@ import { CalendarResponseDto } from "../../../reduxstore/types";
 import { mmDDYYFormat, tryddmmyyyyToDate } from "../../../utils/dateUtils";
 import { TerminationSearchRequest } from "./Termination";
 
-
 const schema = yup.object().shape({
   beginningDate: yup.string().required("Begin Date is required"),
   endingDate: yup.string().required("End Date is required"),
@@ -52,9 +51,9 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
   } = useForm<TerminationSearchRequest>({
     resolver: yupResolver(schema),
     defaultValues: {
-      beginningDate: termination?.startDate || fiscalData.fiscalBeginDate || '',
-      endingDate: termination?.endDate || fiscalData.fiscalEndDate || '',
-      forfeitureStatus: 'showAll',
+      beginningDate: termination?.startDate || fiscalData.fiscalBeginDate || "",
+      endingDate: termination?.endDate || fiscalData.fiscalEndDate || "",
+      forfeitureStatus: "showAll",
       pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }
     }
   });
@@ -64,11 +63,11 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
       alert("Please save your changes.");
       return;
     }
-    
+
     const params = {
       ...data,
       beginningDate: data.beginningDate ? mmDDYYFormat(data.beginningDate) : mmDDYYFormat(fiscalData.fiscalBeginDate),
-      endingDate: data.endingDate ? mmDDYYFormat(data.endingDate) : mmDDYYFormat(fiscalData.fiscalEndDate),
+      endingDate: data.endingDate ? mmDDYYFormat(data.endingDate) : mmDDYYFormat(fiscalData.fiscalEndDate)
     };
     // Only update search params and initial loaded state; let the grid trigger the API
     onSearch(params);
@@ -82,7 +81,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
     reset({
       beginningDate: fiscalData.fiscalBeginDate,
       endingDate: fiscalData.fiscalEndDate,
-      forfeitureStatus: 'showAll',
+      forfeitureStatus: "showAll",
       pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }
     });
     trigger();
@@ -93,7 +92,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
       <Grid2
         container
         paddingX="24px"
-        gap="24px">        
+        gap="24px">
         <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
           <Controller
             name="beginningDate"
@@ -103,7 +102,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
                 id="beginningDate"
                 onChange={(value: Date | null) => {
                   field.onChange(value || undefined);
-                  trigger('beginningDate');
+                  trigger("beginningDate");
                 }}
                 value={field.value ? tryddmmyyyyToDate(field.value) : null}
                 required={false}
@@ -125,7 +124,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
                 id="endingDate"
                 onChange={(value: Date | null) => {
                   field.onChange(value || undefined);
-                  trigger('endingDate');
+                  trigger("endingDate");
                 }}
                 value={field.value ? tryddmmyyyyToDate(field.value) : null}
                 required={false}
@@ -154,4 +153,3 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
 };
 
 export default TerminationSearchFilter;
-

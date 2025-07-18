@@ -1,15 +1,8 @@
-import React, { useState } from 'react';
-import { 
-  FormControl, 
-  Select,
-  MenuItem, 
-  SelectChangeEvent,
-  FormLabel,
-  TextField,
-} from '@mui/material';
-import Grid2 from '@mui/material/Grid2';
-import { SearchAndReset } from 'smart-ui-library';
-import { ReportPreset } from 'reduxstore/types';
+import { FormControl, FormLabel, MenuItem, Select, SelectChangeEvent, TextField } from "@mui/material";
+import Grid2 from "@mui/material/Grid2";
+import React from "react";
+import { ReportPreset } from "reduxstore/types";
+import { SearchAndReset } from "smart-ui-library";
 
 interface FilterSectionProps {
   presets: ReportPreset[];
@@ -28,7 +21,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
 }) => {
   const handlePresetChange = (event: SelectChangeEvent<string>) => {
     const presetId = event.target.value;
-    const selected = presets.find(p => p.id === presetId) || null;
+    const selected = presets.find((p) => p.id === presetId) || null;
     onPresetChange(selected);
   };
 
@@ -41,7 +34,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   };
 
   const getAgeRangeDisplay = () => {
-    if (!currentPreset) return '';
+    if (!currentPreset) return "";
     const { minimumAgeInclusive, maximumAgeInclusive } = currentPreset.params;
     if (minimumAgeInclusive && maximumAgeInclusive) {
       return `${minimumAgeInclusive}-${maximumAgeInclusive}`;
@@ -50,11 +43,11 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     } else if (maximumAgeInclusive) {
       return `0-${maximumAgeInclusive}`;
     }
-    return '';
+    return "";
   };
 
   const getHoursRangeDisplay = () => {
-    if (!currentPreset) return '';
+    if (!currentPreset) return "";
     const { minimumHoursInclusive, maximumHoursInclusive } = currentPreset.params;
     if (minimumHoursInclusive && maximumHoursInclusive) {
       return `${minimumHoursInclusive}-${maximumHoursInclusive}`;
@@ -63,39 +56,44 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     } else if (maximumHoursInclusive) {
       return `< ${maximumHoursInclusive}`;
     }
-    return '';
+    return "";
   };
 
   const getEmployeeStatusDisplay = () => {
-    if (!currentPreset) return '';
+    if (!currentPreset) return "";
     const { includeActiveEmployees, includeInactiveEmployees } = currentPreset.params;
-    
+
     if (includeActiveEmployees && includeInactiveEmployees) {
-      return 'Active/Inactive';
+      return "Active/Inactive";
     } else if (includeActiveEmployees) {
-      return 'Active';
+      return "Active";
     } else if (includeInactiveEmployees) {
-      return 'Inactive';
+      return "Inactive";
     }
-    return '';
+    return "";
   };
 
   const getPriorProfitShareDisplay = () => {
-    if (!currentPreset) return '';
-    const { includeEmployeesWithPriorProfitSharingAmounts, includeEmployeesWithNoPriorProfitSharingAmounts } = currentPreset.params;
-    
+    if (!currentPreset) return "";
+    const { includeEmployeesWithPriorProfitSharingAmounts, includeEmployeesWithNoPriorProfitSharingAmounts } =
+      currentPreset.params;
+
     if (includeEmployeesWithPriorProfitSharingAmounts && includeEmployeesWithNoPriorProfitSharingAmounts) {
-      return 'All';
+      return "All";
     } else if (includeEmployeesWithPriorProfitSharingAmounts) {
-      return 'With Prior Amounts';
+      return "With Prior Amounts";
     } else if (includeEmployeesWithNoPriorProfitSharingAmounts) {
-      return 'Without Prior Amounts';
+      return "Without Prior Amounts";
     }
-    return '';
+    return "";
   };
 
   return (
-    <form onSubmit={(e) => { e.preventDefault(); handleApply(); }}>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        handleApply();
+      }}>
       <Grid2
         container
         paddingX="24px">
@@ -107,13 +105,14 @@ const FilterSection: React.FC<FilterSectionProps> = ({
             <FormLabel>PAY426N Presets</FormLabel>
             <FormControl fullWidth>
               <Select
-                value={currentPreset?.id || ''}
+                value={currentPreset?.id || ""}
                 onChange={handlePresetChange}
-                displayEmpty
-              >
+                displayEmpty>
                 <MenuItem value="">Select a Report</MenuItem>
-                {presets.map(preset => (
-                  <MenuItem key={preset.id} value={preset.id}>
+                {presets.map((preset) => (
+                  <MenuItem
+                    key={preset.id}
+                    value={preset.id}>
                     {preset.name} - {preset.description}
                   </MenuItem>
                 ))}
@@ -165,7 +164,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
           </Grid2>
         </Grid2>
       </Grid2>
-      
+
       <Grid2
         width="100%"
         paddingX="24px"
@@ -181,4 +180,4 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   );
 };
 
-export default FilterSection; 
+export default FilterSection;

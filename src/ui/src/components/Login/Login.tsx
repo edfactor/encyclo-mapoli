@@ -33,7 +33,7 @@ const Login = () => {
       }
     }
   }, [authState, dispatch, oktaAuth, oktaEnabled]);
-  
+
   return <Outlet></Outlet>;
 };
 

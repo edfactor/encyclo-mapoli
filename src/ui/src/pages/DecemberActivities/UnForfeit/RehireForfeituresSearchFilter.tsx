@@ -18,9 +18,7 @@ import { mmDDYYFormat, tryddmmyyyyToDate } from "../../../utils/dateUtils";
 
 const schema = yup.object().shape({
   beginningDate: yup.string().required("Beginning Date is required"),
-  endingDate: yup.string()
-    .typeError("Invalid date")
-    .required("Ending Date is required"),
+  endingDate: yup.string().typeError("Invalid date").required("Ending Date is required"),
   pagination: yup
     .object({
       skip: yup.number().required(),
@@ -54,15 +52,15 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
       alert("Please save your changes.");
       return;
     }
-    
+
     if (isValid && hasToken) {
-      const beginDate = data.beginningDate || fiscalData.fiscalBeginDate || '';
-      const endDate = data.endingDate || fiscalData.fiscalEndDate || '';
+      const beginDate = data.beginningDate || fiscalData.fiscalBeginDate || "";
+      const endDate = data.endingDate || fiscalData.fiscalEndDate || "";
 
       const updatedData = {
         ...data,
         beginningDate: mmDDYYFormat(beginDate),
-        endingDate: mmDDYYFormat(endDate),
+        endingDate: mmDDYYFormat(endDate)
       };
 
       dispatch(setMilitaryAndRehireForfeituresQueryParams(updatedData));
@@ -121,7 +119,7 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
                 id="beginningDate"
                 onChange={(value: Date | null) => {
                   field.onChange(value ?? undefined);
-                  trigger('beginningDate');
+                  trigger("beginningDate");
                 }}
                 value={field.value ? tryddmmyyyyToDate(field.value) : null}
                 required={true}
@@ -143,7 +141,7 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
                 id="endingDate"
                 onChange={(value: Date | null) => {
                   field.onChange(value ?? undefined);
-                  trigger('endingDate');
+                  trigger("endingDate");
                 }}
                 value={field.value ? tryddmmyyyyToDate(field.value) : null}
                 required={true}
@@ -169,7 +167,6 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
                   />
                 }
                 label="Exclude 0 balance"
-                
               />
             )}
           />
@@ -190,4 +187,3 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
 };
 
 export default RehireForfeituresSearchFilter;
-

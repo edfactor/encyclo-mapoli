@@ -63,7 +63,9 @@ const QPAY066TA = () => {
   };
 
   return (
-    <Page label={CAPTIONS.BREAKDOWN_REPORT} actionNode={renderActionNode()}>
+    <Page
+      label={CAPTIONS.BREAKDOWN_REPORT}
+      actionNode={renderActionNode()}>
       <Grid2
         container
         rowSpacing="24px">

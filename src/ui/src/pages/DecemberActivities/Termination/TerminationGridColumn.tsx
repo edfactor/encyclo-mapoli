@@ -22,7 +22,8 @@ export const GetTerminationColumns = (): ColDef[] => {
       cellClass: "left-align",
       resizable: true,
       sortable: true,
-      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber, params.data.psnSuffix)
+      cellRenderer: (params: ICellRendererParams) =>
+        viewBadgeLinkRenderer(params.data.badgeNumber, params.data.psnSuffix)
     },
     {
       headerName: "Name",
@@ -34,7 +35,7 @@ export const GetTerminationColumns = (): ColDef[] => {
       cellClass: "left-align",
       resizable: true,
       sortable: true,
-      flex: 1,
+      flex: 1
     }
   ];
 };
@@ -49,7 +50,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       width: 100,
       type: "rightAligned",
       resizable: true,
-      sortable: false,
+      sortable: false
     },
     {
       headerName: "Beginning Balance",
@@ -177,10 +178,10 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       resizable: true,
       sortable: false,
       cellClass: (params) => {
-        if (!params.data.isDetail) return '';
+        if (!params.data.isDetail) return "";
         const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}`;
         const hasError = params.context?.editedValues?.[rowKey]?.hasError;
-        return hasError ? 'invalid-cell' : '';
+        return hasError ? "invalid-cell" : "";
       },
       editable: ({ node }) => node.data.isDetail && node.data.profitYear === selectedProfitYear,
       flex: 1,
@@ -205,7 +206,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       lockPinned: true,
       resizable: false,
       sortable: false,
-      cellStyle: { backgroundColor: '#E8E8E8' },
+      cellStyle: { backgroundColor: "#E8E8E8" },
       headerComponent: HeaderComponent,
       headerComponentParams: {
         addRowToSelectedRows,
@@ -219,7 +220,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       },
       cellRenderer: (params: SaveButtonCellParams) => {
         if (!params.data.isDetail || params.data.profitYear !== selectedProfitYear) {
-          return '';
+          return "";
         }
         const id = Number(params.node?.id) || -1;
         const isSelected = params.node?.isSelected() || false;

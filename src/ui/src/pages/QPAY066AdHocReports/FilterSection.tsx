@@ -37,9 +37,9 @@ const schema = yup.object().shape({
   storeNumber: yup.string().required('Store Number is required'),
   startDate: yup.date().nullable().default(null),
   endDate: yup.date().nullable().default(null),
-  vestedPercentage: yup.string().default(''),
-  age: yup.string().default(''),
-  employeeStatus: yup.string().default(''),
+  vestedPercentage: yup.string().default(""),
+  age: yup.string().default(""),
+  employeeStatus: yup.string().default("")
 });
 
 const FilterSection: React.FC<FilterSectionProps> = ({
@@ -62,9 +62,9 @@ const FilterSection: React.FC<FilterSectionProps> = ({
       storeNumber: '',
       startDate: null,
       endDate: null,
-      vestedPercentage: '',
-      age: '',
-      employeeStatus: '',
+      vestedPercentage: "",
+      age: "",
+      employeeStatus: ""
     }
   });
 
@@ -72,13 +72,13 @@ const FilterSection: React.FC<FilterSectionProps> = ({
 
   const handlePresetChange = (event: SelectChangeEvent<string>) => {
     const presetId = event.target.value;
-    const selected = presets.find(p => p.id === presetId) || null;
+    const selected = presets.find((p) => p.id === presetId) || null;
     onPresetChange(selected);
   };
 
   const handleFilter = (data: FilterFormData) => {
     // @D
-    console.log('Filter data:', data);
+    console.log("Filter data:", data);
   };
 
   const handleResetForm = () => {
@@ -87,28 +87,28 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   };
 
   const vestedPercentageOptions = [
-    { value: '', label: 'All' },
-    { value: '<20', label: '< 20%' },
-    { value: '20-50', label: '20-50%' },
-    { value: '50-80', label: '50-80%' },
-    { value: '>80', label: '> 80%' },
-    { value: '100', label: '100%' },
+    { value: "", label: "All" },
+    { value: "<20", label: "< 20%" },
+    { value: "20-50", label: "20-50%" },
+    { value: "50-80", label: "50-80%" },
+    { value: ">80", label: "> 80%" },
+    { value: "100", label: "100%" }
   ];
 
   const ageOptions = [
-    { value: '', label: 'All' },
-    { value: '<18', label: '< 18' },
-    { value: '18-21', label: '18-21' },
-    { value: '21-65', label: '21-65' },
-    { value: '>65', label: '> 65' },
-    { value: '>70', label: '> 70' },
+    { value: "", label: "All" },
+    { value: "<18", label: "< 18" },
+    { value: "18-21", label: "18-21" },
+    { value: "21-65", label: "21-65" },
+    { value: ">65", label: "> 65" },
+    { value: ">70", label: "> 70" }
   ];
 
   const employeeStatusOptions = [
-    { value: '', label: 'All' },
-    { value: 'active', label: 'Active' },
-    { value: 'inactive', label: 'Inactive' },
-    { value: 'terminated', label: 'Terminated' },
+    { value: "", label: "All" },
+    { value: "active", label: "Active" },
+    { value: "inactive", label: "Inactive" },
+    { value: "terminated", label: "Terminated" }
   ];
 
   return (
@@ -147,14 +147,16 @@ const FilterSection: React.FC<FilterSectionProps> = ({
             <FormLabel required>QPAY066 Presets</FormLabel>
             <FormControl fullWidth>
               <Select
-                value={currentPreset?.id || ''}
+                value={currentPreset?.id || ""}
                 onChange={handlePresetChange}
                 displayEmpty
                 disabled={!storeNumber.trim()}
               >
                 <MenuItem value="">Select a Report</MenuItem>
-                {presets.map(preset => (
-                  <MenuItem key={preset.id} value={preset.id}>
+                {presets.map((preset) => (
+                  <MenuItem
+                    key={preset.id}
+                    value={preset.id}>
                     {preset.name} - {preset.description}
                   </MenuItem>
                 ))}
@@ -166,7 +168,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         
         
       </Grid2>
-      
+
       <Grid2
         width="100%"
         paddingX="24px"
@@ -183,4 +185,4 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   );
 };
 
-export default FilterSection; 
+export default FilterSection;

@@ -2,7 +2,8 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 
 import {
   addBadgeNumberToUpdateAdjustmentSummary,
-  clearBreakdownByStoreTotals, clearBreakdownGrandTotals,
+  clearBreakdownByStoreTotals,
+  clearBreakdownGrandTotals,
   clearProfitMasterApply,
   clearProfitMasterRevert,
   clearProfitMasterStatus,
@@ -16,7 +17,10 @@ import {
   setAdditionalExecutivesGrid,
   setBalanceByAge,
   setBalanceByYears,
-  setBreakdownByStore, setBreakdownByStoreMangement, setBreakdownByStoreTotals, setBreakdownGrandTotals,
+  setBreakdownByStore,
+  setBreakdownByStoreMangement,
+  setBreakdownByStoreTotals,
+  setBreakdownGrandTotals,
   setContributionsByAge,
   setControlSheet,
   setDemographicBadgesNotInPayprofitData,
@@ -47,7 +51,7 @@ import {
   setUnder21Totals,
   setUpdateSummary,
   setVestedAmountsByAge,
-  setYearEndProfitSharingReport,
+  setYearEndProfitSharingReport
 } from "reduxstore/slices/yearsEndSlice";
 import {
   BalanceByAge,
@@ -114,7 +118,9 @@ import {
   YearEndProfitSharingReportRequest,
   YearEndProfitSharingReportResponse,
   YearEndProfitSharingReportSummaryResponse,
-  DistributionsAndForfeitureTotalsResponse
+  DistributionsAndForfeitureTotalsResponse,
+  AdhocBeneficiariesReportRequest,
+  adhocBeneficiariesReportResponse
 } from "reduxstore/types";
 import { Paged } from "smart-ui-library";
 import { createDataSourceAwareBaseQuery } from "./api";
@@ -123,7 +129,6 @@ import {
   clearForfeitureAdjustmentData,
   setForfeitureAdjustmentData
 } from "reduxstore/slices/forfeituresAdjustmentSlice";
-
 
 /* Use the centralized data source aware base query */
 const baseQuery = createDataSourceAwareBaseQuery();
@@ -329,7 +334,7 @@ export const YearsEndApi = createApi({
           console.log("Err: " + err);
         }
       }
-    }),   
+    }),
     getNegativeEVTASSN: builder.query<
       PagedReportResponse<NegativeEtvaForSSNsOnPayProfit>,
       NegativeEtvaForSSNsOnPayprofitRequestDto
@@ -642,7 +647,6 @@ export const YearsEndApi = createApi({
     }),
     getTerminationReport: builder.query<TerminationResponse, StartAndEndDateRequest>({
       query: (params) => {
-       
         return {
           url: "yearend/terminated-employees",
           method: "POST",
@@ -978,10 +982,7 @@ export const YearsEndApi = createApi({
         }
       }
     ),
-    getYearEndProfitSharingSummaryReport: builder.query<
-      YearEndProfitSharingReportSummaryResponse,
-      BadgeNumberRequest
-    >({
+    getYearEndProfitSharingSummaryReport: builder.query<YearEndProfitSharingReportSummaryResponse, BadgeNumberRequest>({
       query: (params) => ({
         url: "yearend/yearend-profit-sharing-summary-report",
         method: "POST",
@@ -1068,12 +1069,17 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    updateForfeitureAdjustment: builder.mutation<ForfeitureAdjustmentDetail, ForfeitureAdjustmentUpdateRequest>({
-      query: (params) => ({
-        url: "yearend/forfeiture-adjustments/update",
-        method: "PUT",
-        body: params
-      })
+    updateForfeitureAdjustment: builder.mutation<ForfeitureAdjustmentDetail, ForfeitureAdjustmentUpdateRequest & { suppressAllToastErrors?: boolean, onlyNetworkToastErrors?: boolean }>({
+      query: (params) => {
+        const { suppressAllToastErrors, onlyNetworkToastErrors, ...requestData } = params;
+        return {
+          url: "yearend/forfeiture-adjustments/update",
+          method: "PUT",
+          body: requestData,
+          // Pass params through meta so middleware can access it
+          meta: { suppressAllToastErrors, onlyNetworkToastErrors }
+        };
+      }
     }),
 
     updateForfeitureAdjustmentBulk: builder.mutation<ForfeitureAdjustmentDetail[], ForfeitureAdjustmentUpdateRequest[]>({
@@ -1090,6 +1096,27 @@ export const YearsEndApi = createApi({
         method: "POST",
         body: params
       })
+    }),
+    adhocBeneficiariesReport: builder.query<adhocBeneficiariesReportResponse, AdhocBeneficiariesReportRequest>({
+      query: (params) => ({
+        url: "yearend/adhoc-beneficiaries-report",
+        method: "GET",
+        params: {
+          isAlsoEmployee: params.isAlsoEmployee,
+          profitYear: params.profitYear,
+          skip: params.skip || 0,
+          take: params.take || 255,
+          sortBy: params.sortBy,
+          isSortDescending: params.isSortDescending
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+        } catch (err) {
+          console.log("Err: " + err);
+        }
+      }
     })
   })
 });
@@ -1136,5 +1163,6 @@ export const {
   useUpdateForfeitureAdjustmentBulkMutation,
   useLazyGetUpdateSummaryQuery,
   useUpdateEnrollmentMutation,
-  useFinalizeReportMutation
+  useFinalizeReportMutation,
+  useLazyAdhocBeneficiariesReportQuery
 } = YearsEndApi;

@@ -6,4 +6,4 @@ export const validateSuggestedForfeit = (value: number, maxForfeit: number): str
     return null;
   }
   return null;
-}; 
+};

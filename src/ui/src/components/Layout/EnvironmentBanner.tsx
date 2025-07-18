@@ -1,4 +1,3 @@
-
 import { InfoOutlined } from "@mui/icons-material";
 import Alert from "@mui/material/Alert";
 import { purple } from "@mui/material/colors";
@@ -9,9 +8,14 @@ export interface IEnvironmentBannerProps extends ICommon {
   environmentMode: "development" | "qa" | "uat" | "production";
   buildVersionNumber?: string;
   apiStatus?: "Healthy" | "Degraded" | "Unhealthy" | undefined;
-  apiStatusMessage? : string;
+  apiStatusMessage?: string;
 }
-export const EnvironmentBanner: React.FC<IEnvironmentBannerProps> = ({ environmentMode, buildVersionNumber, apiStatus, apiStatusMessage }) => {
+export const EnvironmentBanner: React.FC<IEnvironmentBannerProps> = ({
+  environmentMode,
+  buildVersionNumber,
+  apiStatus,
+  apiStatusMessage
+}) => {
   if (!environmentMode || environmentMode === "production") {
     return null; // No banner for production
   }
@@ -62,20 +66,20 @@ export const EnvironmentBanner: React.FC<IEnvironmentBannerProps> = ({ environme
         break;
     }
     return (
-      <Tooltip title={apiStatusMessage || ""} arrow>
+      <Tooltip
+        title={apiStatusMessage || ""}
+        arrow>
         <span
           style={{
             color: textColor,
             fontWeight: "bold",
             marginLeft: "4px"
-          }}
-        >
+          }}>
           {apiStatus}
         </span>
       </Tooltip>
     );
   };
-
 
   return (
     <Alert
@@ -102,10 +106,10 @@ export const EnvironmentBanner: React.FC<IEnvironmentBannerProps> = ({ environme
         className="flex justify-between"
         id="alert-message-container">
         <div className="flex items-center">
-          WARNING! {environmentName} ENVIRONMENT. CHANGES WILL NOT BE REFLECTED IN PRODUCTION!        
+          WARNING! {environmentName} ENVIRONMENT. CHANGES WILL NOT BE REFLECTED IN PRODUCTION!
         </div>
         <div></div>
-        <div>API Status: {renderApiStatusIcon()}</div>     
+        <div>API Status: {renderApiStatusIcon()}</div>
         <div>v.{versionNumber}</div>
       </div>
     </Alert>

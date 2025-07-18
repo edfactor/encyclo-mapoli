@@ -31,47 +31,66 @@ interface ExecutiveHoursAndDollarsSearch {
   isMonthlyPayroll: NonNullable<boolean>;
 }
 
-const validationSchema = yup.object({
-  profitYear: yup.number().required("Profit Year is required").typeError("Profit Year must be a number"),
-  socialSecurity: yup.number()
-    .typeError("SSN must be a number")
-    .integer("SSN must be an integer")
-    .min(0, "SSN must be positive")
-    .max(999999999, "SSN must be 9 digits or less").transform((value) => value || undefined),
-  badgeNumber: yup.number()
-    .typeError("Badge Number must be a number")
-    .integer("Badge Number must be an integer")
-    .min(0, "Badge must be positive")
-    .max(9999999, "Badge must be 7 digits or less").transform((value) => value || undefined),
-  fullNameContains: yup.string().typeError("Full Name must be a string").nullable().transform((value) => value || undefined),
-  hasExecutiveHoursAndDollars: yup.boolean().default(true).required(),
-  isMonthlyPayroll: yup.boolean().default(false).required()
-}).test(
-  "at-least-one-required",
-  "At least one field must be provided",
-  (values) => Boolean(values.socialSecurity || values.badgeNumber || values.fullNameContains || values.hasExecutiveHoursAndDollars !== undefined || values.isMonthlyPayroll !== undefined)
-);
+const validationSchema = yup
+  .object({
+    profitYear: yup.number().required("Profit Year is required").typeError("Profit Year must be a number"),
+    socialSecurity: yup
+      .number()
+      .typeError("SSN must be a number")
+      .integer("SSN must be an integer")
+      .min(0, "SSN must be positive")
+      .max(999999999, "SSN must be 9 digits or less")
+      .transform((value) => value || undefined),
+    badgeNumber: yup
+      .number()
+      .typeError("Badge Number must be a number")
+      .integer("Badge Number must be an integer")
+      .min(0, "Badge must be positive")
+      .max(9999999, "Badge must be 7 digits or less")
+      .transform((value) => value || undefined),
+    fullNameContains: yup
+      .string()
+      .typeError("Full Name must be a string")
+      .nullable()
+      .transform((value) => value || undefined),
+    hasExecutiveHoursAndDollars: yup.boolean().default(false).required(),
+    isMonthlyPayroll: yup.boolean().default(false).required()
+  })
+  .test("at-least-one-required", "At least one field must be provided", (values) =>
+    Boolean(
+      values.socialSecurity ||
+        values.badgeNumber ||
+        values.fullNameContains ||
+        values.hasExecutiveHoursAndDollars !== false ||
+        values.isMonthlyPayroll !== false
+    )
+  );
 
 // If we are using a modal window, we want a slimmed down version of the search filter
 // and we will
 interface ManageExecutiveHoursAndDollarsSearchFilterProps {
   isModal?: boolean;
   setInitialSearchLoaded: (include: boolean) => void;
+  setPageNumberReset: (reset: boolean) => void;
 }
 
 const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursAndDollarsSearchFilterProps> = ({
   isModal,
-  setInitialSearchLoaded
+  setInitialSearchLoaded,
+  setPageNumberReset
 }) => {
   const dispatch = useDispatch();
-  dispatch(clearExecutiveHoursAndDollarsAddQueryParams());
-
   const [activeField, setActiveField] = useState<"socialSecurity" | "badgeNumber" | "fullNameContains" | null>(null);
 
-  const { executiveHoursAndDollarsQueryParams, executiveHoursAndDollars } =
-    useSelector((state: RootState) => state.yearsEnd);
+  useEffect(() => {
+    dispatch(clearExecutiveHoursAndDollarsAddQueryParams());
+  }, [dispatch]);
 
-  const [oneAddSearchFilterEntered, setOneAddSearchFilterEntered] = useState<boolean>(false);  
+  const { executiveHoursAndDollarsQueryParams, executiveHoursAndDollars } = useSelector(
+    (state: RootState) => state.yearsEnd
+  );
+
+  const [oneAddSearchFilterEntered, setOneAddSearchFilterEntered] = useState<boolean>(false);
 
   let socialSecurityChosen = false;
   let badgeNumberChosen = false;
@@ -81,14 +100,12 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
 
   const toggleSearchFieldEntered = (value: boolean, fieldType: string) => {
     if (fieldType === "socialSecurity") {
-      
       socialSecurityChosen = value;
     }
     if (fieldType === "badgeNumber") {
       badgeNumberChosen = value;
     }
     if (fieldType === "fullNameContains") {
-     
       fullNameChosen = value;
     }
     if (fieldType === "hasExecutiveHoursAndDollars") {
@@ -97,8 +114,14 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
     if (fieldType === "isMonthlyPayroll") {
       isMonthlyPayrollChosen = value;
     }
-  
-    setOneAddSearchFilterEntered(socialSecurityChosen || badgeNumberChosen || fullNameChosen || hasExecutiveHoursAndDollarsChosen || isMonthlyPayrollChosen);
+
+    setOneAddSearchFilterEntered(
+      socialSecurityChosen ||
+        badgeNumberChosen ||
+        fullNameChosen ||
+        hasExecutiveHoursAndDollarsChosen ||
+        isMonthlyPayrollChosen
+    );
   };
 
   const profitYear = useFiscalCloseProfitYear();
@@ -121,14 +144,22 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
     trigger // need this unused param to prevent console errors. No idea why - EL
   } = useForm<ExecutiveHoursAndDollarsSearch>({
     resolver: yupResolver(validationSchema) as Resolver<ExecutiveHoursAndDollarsSearch>,
-        mode: "onChange"
+    mode: "onChange",
+    defaultValues: {
+      profitYear: profitYear,
+      badgeNumber: undefined,
+      socialSecurity: undefined,
+      fullNameContains: "",
+      hasExecutiveHoursAndDollars: false,
+      isMonthlyPayroll: false
+    }
   });
 
   const socialSecurity = watch("socialSecurity");
   const badgeNumber = watch("badgeNumber");
   const fullNameContains = watch("fullNameContains");
 
-   // Update active field based on which field has input
+  // Update active field based on which field has input
   useEffect(() => {
     if (socialSecurity && !badgeNumber) {
       setActiveField("socialSecurity");
@@ -141,17 +172,16 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
     }
   }, [socialSecurity, badgeNumber, fullNameContains]);
 
-
   useEffect(() => {
     if (profitYear) {
       dispatch(clearExecutiveHoursAndDollars());
       dispatch(clearAdditionalExecutivesChosen());
-      
-      reset(prevValues => ({
+
+      reset((prevValues) => ({
         ...prevValues,
         profitYear
       }));
-      
+
       if (executiveHoursAndDollarsQueryParams) {
         dispatch(
           setExecutiveHoursAndDollarsQueryParams({
@@ -160,7 +190,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
           })
         );
       }
-      
+
       setInitialSearchLoaded(false);
     }
   }, [profitYear]);
@@ -224,11 +254,13 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
         })
       );
     }
+
+    setPageNumberReset(true);
   });
 
-  if (profitYear && !executiveHoursAndDollars) {
-    setInitialSearchLoaded(true);
-  }
+  //if (profitYear && !executiveHoursAndDollars) {
+  //  setInitialSearchLoaded(true);
+  //}
 
   const handleReset = () => {
     // If we ever decide that the reset button should clear pending changes
@@ -236,7 +268,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
     // dispatch(clearExecutiveHoursAndDollarsGridRows());
     // ... and then import clearExecutiveHoursAndDollarsGridRows
     // from reduxstore/slices/yearsEndSlice
-    
+
     // Are we in modal
 
     if (!isModal) {
@@ -256,13 +288,15 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
     badgeNumberChosen = false;
     fullNameChosen = false;
     isMonthlyPayrollChosen = false;
+    hasExecutiveHoursAndDollarsChosen = false;
+    setPageNumberReset(true);
 
     reset({
       profitYear: profitYear,
       badgeNumber: undefined,
       socialSecurity: undefined,
       fullNameContains: "",
-      hasExecutiveHoursAndDollars: true,
+      hasExecutiveHoursAndDollars: false,
       isMonthlyPayroll: false
     });
   };
@@ -272,12 +306,13 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
   // or isMonthlyPayroll. But on the modal, we want to require at least one of the
   // name, social security, or badge number fields to be filled out as the other fields
   // are not relevant to the modal search, as this is about adding one specific person that is known.
-  const requiredLabel = (
-    isModal && (
-      <Typography component="span" color="error" fontWeight="bold">
-        *
-      </Typography>
-    )
+  const requiredLabel = isModal && (
+    <Typography
+      component="span"
+      color="error"
+      fontWeight="bold">
+      *
+    </Typography>
   );
 
   return (
@@ -412,6 +447,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
                       <Checkbox
                         checked={field.value}
                         onChange={(e) => {
+                          console.log("hasExecutiveHoursAndDollars", e.target.checked);
                           field.onChange(e);
                           toggleSearchFieldEntered(e.target.checked, "hasExecutiveHoursAndDollars");
                         }}

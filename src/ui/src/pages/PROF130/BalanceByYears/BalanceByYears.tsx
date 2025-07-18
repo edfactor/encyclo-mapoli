@@ -22,7 +22,7 @@ const BalanceByYears = () => {
   useEffect(() => {
     if (hasToken && profitYear && !hasInitialSearchRun) {
       setHasInitialSearchRun(true);
-      
+
       const fetchReport = (reportType: FrozenReportsByAgeRequestType) => {
         return triggerSearch(
           {
@@ -33,32 +33,32 @@ const BalanceByYears = () => {
           false
         );
       };
-      
+
       Promise.all([
         fetchReport(FrozenReportsByAgeRequestType.Total),
         fetchReport(FrozenReportsByAgeRequestType.FullTime),
         fetchReport(FrozenReportsByAgeRequestType.PartTime)
       ])
-        .then(results => {
+        .then((results) => {
           if (results[0].data) {
             dispatch(setBalanceByYearsQueryParams(profitYear));
             setInitialSearchLoaded(true);
           }
         })
-        .catch(error => {
+        .catch((error) => {
           console.error("Initial balance by years search failed:", error);
         });
     }
   }, [hasToken, profitYear, hasInitialSearchRun, triggerSearch, dispatch]);
 
   const renderActionNode = () => {
-    return (
-        <StatusDropdownActionNode />
-    );
-};
+    return <StatusDropdownActionNode />;
+  };
 
   return (
-    <Page label="Balance By Years" actionNode={renderActionNode()}>
+    <Page
+      label="Balance By Years"
+      actionNode={renderActionNode()}>
       <Grid2
         container
         rowSpacing="24px">

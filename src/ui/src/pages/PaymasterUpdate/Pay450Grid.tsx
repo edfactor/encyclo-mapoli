@@ -1,6 +1,6 @@
 import { Typography } from "@mui/material";
-import { useCallback, useMemo, useState, useEffect, useRef } from "react";
-import { useSelector } from "react-redux"; 
+import { useCallback, useMemo, useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import { Path } from "react-router";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { GetPay450GridColumns } from "./Pay450GridColumns";
@@ -11,12 +11,16 @@ interface Pay450GridProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
   profitYear: number;
+  pageNumberReset: boolean;
+  setPageNumberReset: (reset: boolean) => void;
 }
 
 const Pay450Grid: React.FC<Pay450GridProps> = ({
   initialSearchLoaded,
   setInitialSearchLoaded,
-  profitYear
+  profitYear,
+  pageNumberReset,
+  setPageNumberReset
 }) => {
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const [pageNumber, setPageNumber] = useState(0);
@@ -25,7 +29,7 @@ const Pay450Grid: React.FC<Pay450GridProps> = ({
     sortBy: "name",
     isSortDescending: false
   });
-  
+
   const { updateSummary } = useSelector((state: RootState) => state.yearsEnd);
   const [triggerSearch, { isFetching }] = YearsEndApi.endpoints.getUpdateSummary.useLazyQuery();
 
@@ -53,30 +57,23 @@ const Pay450Grid: React.FC<Pay450GridProps> = ({
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
-  // Need a useEffect to reset the page number when data changes
-  const prevData = useRef<any>(null);
   useEffect(() => {
-    if (updateSummary?.response?.results && updateSummary.response.results.length > 0 &&
-        (prevData.current === null || 
-         updateSummary.response.results.length !== prevData.current.response.results.length)) {
+    if (pageNumberReset) {
       setPageNumber(0);
+      setPageNumberReset(false);
     }
-    prevData.current = updateSummary;
-  }, [updateSummary]);
-  
+  }, [pageNumberReset, setPageNumberReset]);
+
   // Mock function to handle navigation (needed for GetPay450GridColumns)
-  const handleNavigationForButton = useCallback(
-    (destination: string | Partial<Path>) => {
-      console.log("Navigation to", destination);
-    },
-    []
-  );
-  
+  const handleNavigationForButton = useCallback((destination: string | Partial<Path>) => {
+    console.log("Navigation to", destination);
+  }, []);
+
   const columnDefs = useMemo(() => GetPay450GridColumns(handleNavigationForButton), [handleNavigationForButton]);
 
   const getSummaryRow = useCallback(() => {
     if (!updateSummary) return [];
-    
+
     return [
       {
         psAmountOriginal: updateSummary.totalBeforeProfitSharingAmount,
@@ -90,7 +87,7 @@ const Pay450Grid: React.FC<Pay450GridProps> = ({
   const gridData = useMemo(() => {
     if (!updateSummary?.response?.results) return [];
 
-    return updateSummary.response.results.map(employee => ({
+    return updateSummary.response.results.map((employee) => ({
       badgeNumber: employee.badgeNumber,
       employeeName: employee.name,
       storeNumber: employee.storeNumber === 0 ? "-" : employee.storeNumber,

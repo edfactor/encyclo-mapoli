@@ -9,7 +9,7 @@ export enum ImpersonationRoles {
   ItOperations = "IT-Operations"
 }
 
-export interface SortedPaginationRequestDto extends PaginationParams, ISortParams { }
+export interface SortedPaginationRequestDto extends PaginationParams, ISortParams {}
 
 export interface ProfitYearRequest {
   profitYear: number;
@@ -33,13 +33,11 @@ export interface BadgeNumberRequest extends FrozenProfitYearRequest {
   badgeNumber: number | null;
 }
 
-
-
 export interface ReportsByAgeParams extends ProfitYearRequest {
   reportType: FrozenReportsByAgeRequestType;
 }
 
-export type DemographicBadgesNotInPayprofitResponse = PagedReportResponse<DemographicBadgesNotInPayprofit>
+export type DemographicBadgesNotInPayprofitResponse = PagedReportResponse<DemographicBadgesNotInPayprofit>;
 
 export interface DemographicBadgesNotInPayprofit {
   badgeNumber: number;
@@ -74,7 +72,7 @@ export interface DistributionsAndForfeitureTotalsResponse extends PagedReportRes
   stateTaxTotal: number;
   federalTaxTotal: number;
   forfeitureTotal: number;
-  stateTaxTotals: Record<string, number>; 
+  stateTaxTotals: Record<string, number>;
 }
 
 export interface DistributionsAndForfeitures {
@@ -93,7 +91,6 @@ export interface DistributionsAndForfeitures {
   otherName: string | null;
   otherSsn: string | null;
   enrolled: boolean | null;
-
 }
 
 export interface DuplicateSSNAddress {
@@ -213,7 +210,6 @@ export interface ForfeitureDetail extends ProfitYearRequest {
   wages: number;
   enrollmentId: number;
   enrollmentName: string;
-  
 }
 
 export interface MilitaryAndRehireForfeiture {
@@ -222,7 +218,7 @@ export interface MilitaryAndRehireForfeiture {
   ssn: string;
   reHiredDate: string;
   companyContributionYears: number;
-  employmentStatus: string;  
+  employmentStatus: string;
   netBalanceLastYear: number;
   vestedBalanceLastYear: number;
   hireDate: string;
@@ -312,7 +308,6 @@ export interface DistributionsAndForfeituresQueryParams extends ProfitYearReques
   endDate?: string;
 }
 
-
 export interface MasterInquirySearch {
   endProfitYear?: number | null;
   startProfitMonth?: number | null;
@@ -395,7 +390,6 @@ export interface MasterInquiryMemberRequest {
   sortBy?: string;
   isSortDescending?: boolean;
 }
-
 
 export interface MasterInquiryResponseDto {
   isEmployee: boolean;
@@ -564,17 +558,16 @@ export interface EmployeeDetails {
   currentEtva: number;
   previousEtva: number;
   employmentStatus?: string;
-  department : string;
-  PayClassification : string;
-  gender : string
-  phoneNumber : string
-  workLocation : string
-  receivedContributionsLastYear : boolean
-  fullTimeDate : string
-  terminationReason : string
+  department: string;
+  PayClassification: string;
+  gender: string;
+  phoneNumber: string;
+  workLocation: string;
+  receivedContributionsLastYear: boolean;
+  fullTimeDate: string;
+  terminationReason: string;
   missives: number[] | null;
 }
-
 
 export interface BalanceByDetailBase {
   employeeCount: number;
@@ -607,10 +600,10 @@ export interface BalanceByAgeDetail extends BalanceByDetailBase {
 }
 
 /* eslint-disable @typescript-eslint/no-empty-object-type */
-export interface BalanceByAge extends BalanceByBase<BalanceByAgeDetail> { }
+export interface BalanceByAge extends BalanceByBase<BalanceByAgeDetail> {}
 
 /* eslint-disable @typescript-eslint/no-empty-object-type */
-export interface BalanceByYears extends BalanceByBase<BalanceByAgeDetail> { }
+export interface BalanceByYears extends BalanceByBase<BalanceByAgeDetail> {}
 
 export interface VestedAmountsByAge extends PagedReportResponse<VestedAmountsByAgeDetail> {
   totalFullTime100PercentAmount: number;
@@ -892,7 +885,7 @@ export interface MilitaryContributionRequest extends ProfitYearRequest {
   pagination: SortedPaginationRequestDto;
 }
 
-export interface YearEndProfitSharingReportRequest extends FilterParams{
+export interface YearEndProfitSharingReportRequest extends FilterParams {
   profitYear: number;
   pagination: SortedPaginationRequestDto;
 }
@@ -971,7 +964,7 @@ export interface BreakdownByStoreTotals {
 }
 
 export interface GrandTotalsByStoreResponseDto {
-  rows: GrandTotalsByStoreRowDto[]
+  rows: GrandTotalsByStoreRowDto[];
 }
 
 export interface GrandTotalsByStoreRowDto {
@@ -1018,9 +1011,7 @@ export interface Under21BreakdownByStoreEmployee {
   enrollmentId: number;
 }
 
-export interface Under21BreakdownByStoreResponse extends PagedReportResponse<Under21BreakdownByStoreEmployee> {
-
-}
+export interface Under21BreakdownByStoreResponse extends PagedReportResponse<Under21BreakdownByStoreEmployee> {}
 
 export interface Under21InactiveRequest extends ProfitYearRequest {
   isSortDescending?: boolean;
@@ -1038,9 +1029,7 @@ export interface Under21InactiveEmployee {
   enrollmentId: number;
 }
 
-export interface Under21InactiveResponse extends PagedReportResponse<Under21InactiveEmployee> {
-
-}
+export interface Under21InactiveResponse extends PagedReportResponse<Under21InactiveEmployee> {}
 
 export interface Under21TotalsRequest extends ProfitYearRequest {
   pagination: SortedPaginationRequestDto;
@@ -1239,7 +1228,7 @@ export interface GetNavigationStatusRequestDto {
 }
 
 export interface GetNavigationStatusResponseDto {
-  navigationStatusList?: NavigationStatusDto[]
+  navigationStatusList?: NavigationStatusDto[];
 }
 
 export interface UpdateNavigationRequestDto {
@@ -1271,7 +1260,7 @@ export interface AddressDto {
   city?: string;
   state?: string;
   postalCode?: string;
-  countryIso?: string
+  countryIso?: string;
 }
 export interface BeneficiaryContactDto {
   id: number;
@@ -1302,117 +1291,111 @@ export interface BeneficiaryDto {
 
 export interface BeneficiaryRequestDto extends SortedPaginationRequestDto {
   badgeNumber?: number;
-  psnSuffix?:number;
+  psnSuffix?: number;
 }
 
 export interface BeneficiaryResponseDto {
-  beneficiaryList?: Paged<BeneficiaryDto>
+  beneficiaryList?: Paged<BeneficiaryDto>;
 }
 
 export interface CreateBeneficiaryRequest {
-    beneficiaryContactId: number;
-    employeeBadgeNumber: number;
-    firstLevelBeneficiaryNumber: number | null;
-    secondLevelBeneficiaryNumber: number | null;
-    thirdLevelBeneficiaryNumber: number | null;
-    relationship: string;
-    kindId: string;
-    //percentage: number;
+  beneficiaryContactId: number;
+  employeeBadgeNumber: number;
+  firstLevelBeneficiaryNumber: number | null;
+  secondLevelBeneficiaryNumber: number | null;
+  thirdLevelBeneficiaryNumber: number | null;
+  relationship: string;
+  kindId: string;
+  //percentage: number;
 }
 
-
-
 export interface CreateBeneficiaryResponse {
-    beneficiaryId: number;
-    psnSuffix: number;
-    employeeBadgeNumber: number;
-    demographicId: number;
-    beneficiaryContactId: number;
-    relationship: string | null;
-    kindId: string | null;
-    percent: number;
+  beneficiaryId: number;
+  psnSuffix: number;
+  employeeBadgeNumber: number;
+  demographicId: number;
+  beneficiaryContactId: number;
+  relationship: string | null;
+  kindId: string | null;
+  percent: number;
 }
 
 export interface UpdateBeneficiaryRequest extends UpdateBeneficiaryContactRequest {
-    relationship?: string;
-    kindId?: string;
-    percentage?: number;
+  relationship?: string;
+  kindId?: string;
+  percentage?: number;
 }
 
 export interface UpdateBeneficiaryResponse {
-    badgeNumber: number;
-    demographicId: number;
-    beneficiaryContactId: number;
-    relationship: string | null;
-    kindId: string | null;
-    percent: number;
+  badgeNumber: number;
+  demographicId: number;
+  beneficiaryContactId: number;
+  relationship: string | null;
+  kindId: string | null;
+  percent: number;
 }
 
-
-
 export interface DeleteBeneficiaryRequest {
-    id: number;
+  id: number;
 }
 
 export interface UpdateBeneficiaryContactRequest {
-    id?: number;
-    contactSsn?: number;
-    dateOfBirth?: string;
-    street1?: string;
-    street2?: string | null;
-    street3?: string | null;
-    street4?: string | null;
-    city?: string;
-    state?: string;
-    postalCode?: string;
-    countryIso?: string | null;
-    firstName?: string;
-    lastName?: string;
-    middleName?: string | null;
-    phoneNumber?: string | null;
-    mobileNumber?: string | null;
-    emailAddress?: string | null;
+  id?: number;
+  contactSsn?: number;
+  dateOfBirth?: string;
+  street1?: string;
+  street2?: string | null;
+  street3?: string | null;
+  street4?: string | null;
+  city?: string;
+  state?: string;
+  postalCode?: string;
+  countryIso?: string | null;
+  firstName?: string;
+  lastName?: string;
+  middleName?: string | null;
+  phoneNumber?: string | null;
+  mobileNumber?: string | null;
+  emailAddress?: string | null;
 }
-
 
 export interface CreateBeneficiaryContactRequest {
-    contactSsn: number;
-    dateOfBirth: string;
-    street: string;
-    street2: string | null;
-    street3: string | null;
-    street4: string | null;
-    city: string;
-    state: string;
-    postalCode: string;
-    countryIso: string | null;
-    firstName: string;
-    lastName: string;
-    middleName: string | null;
-    phoneNumber: string | null;
-    mobileNumber: string | null;
-    emailAddress: string | null;
+  contactSsn: number;
+  dateOfBirth: string;
+  street: string;
+  street2: string | null;
+  street3: string | null;
+  street4: string | null;
+  city: string;
+  state: string;
+  postalCode: string;
+  countryIso: string | null;
+  firstName: string;
+  lastName: string;
+  middleName: string | null;
+  phoneNumber: string | null;
+  mobileNumber: string | null;
+  emailAddress: string | null;
 }
 
-
 export interface CreateBeneficiaryContactResponse {
-    id: number;
-    ssn: string;
-    dateOfBirth: string;
-    street: string;
-    street2: string | null;
-    street3: string | null;
-    street4: string | null;
-    city: string;
-    state: string;
-    postalCode: string;
-    countryIso: string | null;
-    firstName: string;
-    lastName: string;
-    middleName: string | null;
-    phoneNumber: string | null;
-    mobileNumber: string | null;
-    emailAddress: string | null;
+  id: number;
+  ssn: string;
+  dateOfBirth: string;
+  street: string;
+  street2: string | null;
+  street3: string | null;
+  street4: string | null;
+  city: string;
+  state: string;
+  postalCode: string;
+  countryIso: string | null;
+  firstName: string;
+  lastName: string;
+  middleName: string | null;
+  phoneNumber: string | null;
+  mobileNumber: string | null;
+  emailAddress: string | null;
 }
 
 export interface BeneficiaryTypeDto {
@@ -1472,8 +1455,30 @@ export interface RehireForfeituresSelectedRow {
   suggestedForfeit: number;
 }
 
-export interface ApiResponse<T> {
+export interface ApiResponse<T> {}
+
+export interface AdhocBeneficiariesReportRequest extends ProfitYearRequest, SortedPaginationRequestDto {
+  isAlsoEmployee: boolean;
 }
-
-
-
+export interface ProfitDetailDto {
+  year: number;
+  code: string;
+  contributions: number;
+  earnings: number;
+  forfeitures: number;
+  date: Date;
+  comments?: string;
+}
+export interface BeneficiaryReportDto {
+  beneficiaryId: number;
+  fullName: string;
+  ssn: string;
+  relationship?: string;
+  balance?: string;
+  badgeNumber: number;
+  psnSuffix: number;
+  profitDetails?: ProfitDetailDto[];
+}
+export interface adhocBeneficiariesReportResponse extends PagedReportResponse<BeneficiaryReportDto> {
+  totalEndingBalance: number;
+}

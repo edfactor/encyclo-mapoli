@@ -22,14 +22,19 @@ const DuplicateSSNsOnDemographicsGrid: React.FC = () => {
 
   const onSearch = useCallback(async () => {
     const request = {
-      pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: sortParams.sortBy, isSortDescending: sortParams.isSortDescending },
+      pagination: {
+        skip: pageNumber * pageSize,
+        take: pageSize,
+        sortBy: sortParams.sortBy,
+        isSortDescending: sortParams.isSortDescending
+      }
     };
 
     await triggerSearch(request, false);
   }, [pageNumber, pageSize, sortParams, triggerSearch]);
 
   useEffect(() => {
-    if ( hasToken) {
+    if (hasToken) {
       onSearch();
     }
   }, [pageNumber, pageSize, sortParams, onSearch]);

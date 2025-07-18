@@ -86,8 +86,6 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
 
   // Initialize expandedRows when data is loaded
   useEffect(() => {
-    
-    
     if (termination?.response?.results && termination.response.results.length > 0) {
       // Only reset if badgeNumbers have changed
       const badgeNumbers = termination.response.results.map((row: any) => row.badgeNumber).join(",");
@@ -128,7 +126,6 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     }));
   };
 
-
   const addRowToSelectedRows = (id: number) => {
     setSelectedRowIds([...selectedRowIds, id]);
   };
@@ -138,7 +135,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   };
 
   const updateEditedValue = useCallback((rowKey: string, value: number, hasError: boolean) => {
-    setEditedValues(prev => ({
+    setEditedValues((prev) => ({
       ...prev,
       [rowKey]: { value, hasError }
     }));
@@ -213,7 +210,6 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
 
     return rows;
   }, [termination, expandedRows]);
-
 
   // Compose columns: show main columns for parent, detail columns for detail
   const columnDefs = useMemo(() => {
@@ -333,7 +329,9 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
       </style>
       {isFetching && (
         <div className="termination-spinner-overlay">
-          <div className="spinner-border termination-spinner" role="status">
+          <div
+            className="spinner-border termination-spinner"
+            role="status">
             <span className="visually-hidden">Loading...</span>
           </div>
         </div>
@@ -370,7 +368,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
               rowData: gridData,
               columnDefs: columnDefs,
               getRowClass: getRowClass,
-              rowSelection: 'multiple',
+              rowSelection: "multiple",
               suppressRowClickSelection: true,
               rowHeight: 40,
               suppressMultiSort: true,

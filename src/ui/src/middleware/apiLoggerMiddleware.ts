@@ -1,5 +1,5 @@
-import { Middleware } from '@reduxjs/toolkit';
-import { url as baseUrl } from '../reduxstore/api/api';
+import { Middleware } from "@reduxjs/toolkit";
+import { url as baseUrl } from "../reduxstore/api/api";
 
 // For storing in-flight request information
 const requestTimings = new Map();
@@ -8,88 +8,91 @@ const requestTimings = new Map();
 const originalFetch = window.fetch;
 window.fetch = function captureUrlFetch(input, init) {
   const startTime = performance.now();
-  const requestUrl = typeof input === 'string' ? input : input.url;
+  const requestUrl = typeof input === "string" ? input : input.url;
 
   // Save the URL for later correlation with RTK Query actions
   const requestData = {
     url: requestUrl,
-    method: init?.method || (input instanceof Request ? input.method : 'GET'),
+    method: init?.method || (input instanceof Request ? input.method : "GET"),
     startTime,
     duration: 0
   };
 
   // Actual fetch call
-  return originalFetch.apply(this, arguments).then(response => {
-    const endTime = performance.now();
-    requestData.duration = Math.round(endTime - startTime);
-    requestData.status = response.status;
+  return originalFetch
+    .apply(this, arguments)
+    .then((response) => {
+      const endTime = performance.now();
+      requestData.duration = Math.round(endTime - startTime);
+      requestData.status = response.status;
 
-    // Check if this URL corresponds to a cached request ID
-    for (const [requestId, data] of requestTimings.entries()) {
-      if (data.url === 'pending' && !data.completed) {
-        // Update the request with actual data
-        requestTimings.set(requestId, {
-          ...data,
-          url: requestUrl,
-          method: requestData.method,
-          duration: requestData.duration,
-          status: requestData.status,
-          completed: true
-        });
+      // Check if this URL corresponds to a cached request ID
+      for (const [requestId, data] of requestTimings.entries()) {
+        if (data.url === "pending" && !data.completed) {
+          // Update the request with actual data
+          requestTimings.set(requestId, {
+            ...data,
+            url: requestUrl,
+            method: requestData.method,
+            duration: requestData.duration,
+            status: requestData.status,
+            completed: true
+          });
 
-        // Update the session storage
-        updateSessionStorage(requestId, {
-          url: requestUrl,
-          method: requestData.method,
-          status: requestData.status,
-          duration: requestData.duration
-        });
+          // Update the session storage
+          updateSessionStorage(requestId, {
+            url: requestUrl,
+            method: requestData.method,
+            status: requestData.status,
+            duration: requestData.duration
+          });
 
-        // Only update one request to avoid duplicates
-        break;
+          // Only update one request to avoid duplicates
+          break;
+        }
       }
-    }
 
-    return response;
-  }).catch(error => {
-    const endTime = performance.now();
-    requestData.duration = Math.round(endTime - startTime);
-    requestData.status = error.status || 500;
+      return response;
+    })
+    .catch((error) => {
+      const endTime = performance.now();
+      requestData.duration = Math.round(endTime - startTime);
+      requestData.status = error.status || 500;
 
-    // Check if this URL corresponds to a cached request ID
-    for (const [requestId, data] of requestTimings.entries()) {
-      if (data.url === 'pending' && !data.completed) {
-        // Update the request with actual data
-        requestTimings.set(requestId, {
-          ...data,
-          url: requestUrl,
-          method: requestData.method,
-          duration: requestData.duration,
-          status: requestData.status,
-          completed: true
-        });
+      // Check if this URL corresponds to a cached request ID
+      for (const [requestId, data] of requestTimings.entries()) {
+        if (data.url === "pending" && !data.completed) {
+          // Update the request with actual data
+          requestTimings.set(requestId, {
+            ...data,
+            url: requestUrl,
+            method: requestData.method,
+            duration: requestData.duration,
+            status: requestData.status,
+            completed: true
+          });
 
-        // Update the session storage
-        updateSessionStorage(requestId, {
-          url: requestUrl,
-          method: requestData.method,
-          status: requestData.status,
-          duration: requestData.duration
-        });
+          // Update the session storage
+          updateSessionStorage(requestId, {
+            url: requestUrl,
+            method: requestData.method,
+            status: requestData.status,
+            duration: requestData.duration
+          });
 
-        // Only update one request to avoid duplicates
-        break;
+          // Only update one request to avoid duplicates
+          break;
+        }
       }
-    }
 
-    throw error;
-  });
+      throw error;
+    });
 };
 
 // Helper function to update session storage with actual request data
 function updateSessionStorage(requestId, data) {
-  const history = JSON.parse(sessionStorage.getItem('api_request_history') || '[]');
-  const updatedHistory = history.map(entry => {
+  const history = JSON.parse(sessionStorage.getItem("api_request_history") || "[]");
+  const updatedHistory = history.map((entry) => {
     if (entry.requestId === requestId) {
       return {
         ...entry,
@@ -103,58 +106,56 @@ function updateSessionStorage(requestId, data) {
   });
 
   // Limit to 50 entries instead of no limit
-  sessionStorage.setItem('api_request_history', JSON.stringify(updatedHistory.slice(0, 50)));
+  sessionStorage.setItem("api_request_history", JSON.stringify(updatedHistory.slice(0, 50)));
 }
 
 /**
  * This middleware logs RTK Query API requests to session storage
  * by tracking pending/fulfilled action pairs and correlating them with fetch requests
  */
-export const apiLoggerMiddleware: Middleware = () => next => action => {
+export const apiLoggerMiddleware: Middleware = () => (next) => (action) => {
   // Handle RTK Query actions
-  if (action.type && typeof action.type === 'string') {
+  if (action.type && typeof action.type === "string") {
     // First check if it's an RTK Query action by looking for the pattern api/endpoint/status
-    const parts = action.type.split('/');
+    const parts = action.type.split("/");
 
     // Must have exactly 3 parts and end with a standard RTK Query status
-    if (parts.length === 3 &&
-      ['pending', 'fulfilled', 'rejected'].includes(parts[2])) {
-
-      const apiName = parts[0].replace(/Api$/, '');
+    if (parts.length === 3 && ["pending", "fulfilled", "rejected"].includes(parts[2])) {
+      const apiName = parts[0].replace(/Api$/, "");
       const endpointName = parts[1];
       const status = parts[2];
 
       // Only handle pending actions (start of request)
-      if (status === 'pending' && action.meta?.requestId) {
+      if (status === "pending" && action.meta?.requestId) {
         const requestId = action.meta.requestId;
 
         // Store timing information for this request
         requestTimings.set(requestId, {
           startTime: performance.now(),
-          url: 'pending',
-          method: 'GET',
+          url: "pending",
+          method: "GET",
           completed: false
         });
 
         // Initial entry for the request
         const requestInfo = {
           time: new Date().toISOString(), // Changed from Date.now() for better readability
-          method: 'GET', // Will be updated when fetch completes
+          method: "GET", // Will be updated when fetch completes
           url: `${baseUrl}/api/pending`, // Placeholder until fetch completes
-          status: 'pending',
+          status: "pending",
           duration: 0,
           requestId
         };
 
         // Add to history
-        const history = JSON.parse(sessionStorage.getItem('api_request_history') || '[]');
+        const history = JSON.parse(sessionStorage.getItem("api_request_history") || "[]");
         history.unshift(requestInfo);
         // Limit to exactly 50 entries
-        sessionStorage.setItem('api_request_history', JSON.stringify(history.slice(0, 50)));
+        sessionStorage.setItem("api_request_history", JSON.stringify(history.slice(0, 50)));
       }
 
       // Handle completion actions (end of request)
-      else if ((status === 'fulfilled' || status === 'rejected') && action.meta?.requestId) {
+      else if ((status === "fulfilled" || status === "rejected") && action.meta?.requestId) {
         const requestId = action.meta.requestId;
         const requestData = requestTimings.get(requestId);
 
@@ -162,8 +163,7 @@ export const apiLoggerMiddleware: Middleware = () => next => action => {
           // If the fetch hasn't updated with actual data yet, use the completion time
           const endTime = performance.now();
           const duration = Math.round(endTime - requestData.startTime);
-          const responseStatus = status === 'fulfilled' ? 200 :
-            (action.error?.status || 500);
+          const responseStatus = status === "fulfilled" ? 200 : action.error?.status || 500;
 
           // Update the request timing record
           requestTimings.set(requestId, {
@@ -175,7 +175,10 @@ export const apiLoggerMiddleware: Middleware = () => next => action => {
 
           // Update the session storage history
           updateSessionStorage(requestId, {
-            url: requestData.url !== 'pending' ? requestData.url : `${baseUrl}/api/${apiName.toLowerCase()}/${endpointName.toLowerCase()}`,
+            url:
+              requestData.url !== "pending"
+                ? requestData.url
+                : `${baseUrl}/api/${apiName.toLowerCase()}/${endpointName.toLowerCase()}`,
             method: requestData.method,
             status: responseStatus,
             duration
@@ -196,5 +199,5 @@ export const apiLoggerMiddleware: Middleware = () => next => action => {
 
 // Helper function to get the API call history
 export function getApiCallHistory() {
-  return JSON.parse(sessionStorage.getItem('api_request_history') || '[]');
+  return JSON.parse(sessionStorage.getItem("api_request_history") || "[]");
 }

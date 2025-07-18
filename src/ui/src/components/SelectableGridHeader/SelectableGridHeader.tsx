@@ -23,14 +23,14 @@ export const SelectableGridHeader: React.FC<SelectableGridHeaderProps> = (props)
         }
       }
     });
-    
+
     return { totalEligible, totalSelected };
   };
 
   const handleSelectAll = () => {
     const { totalEligible, totalSelected } = getSelectionState();
     const shouldSelectAll = totalSelected < totalEligible;
-    
+
     if (shouldSelectAll) {
       props.api.forEachNode(node => {
         if (props.isNodeEligible(node.data, props.context)) {
@@ -71,7 +71,7 @@ export const SelectableGridHeader: React.FC<SelectableGridHeaderProps> = (props)
 
   return (
     <div>
-      <Checkbox 
+      <Checkbox
         onClick={handleSelectAll}
         checked={allSelected}
         indeterminate={someSelected}
@@ -82,4 +82,4 @@ export const SelectableGridHeader: React.FC<SelectableGridHeaderProps> = (props)
       </IconButton>
     </div>
   );
-}; 
+};

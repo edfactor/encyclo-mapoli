@@ -9,7 +9,7 @@ import { useFinalizeReportMutation, useLazyGetYearEndProfitSharingReportQuery } 
 import { setYearEndProfitSharingReportQueryParams } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import { Page, SmartModal, DSMAccordion } from "smart-ui-library";
-import { CAPTIONS} from "../../constants";
+import { CAPTIONS } from "../../constants";
 import ProfitSummary from "../PAY426Reports/PAY426-9/ProfitSummary";
 import ProfitShareReportSearchFilters from "./ProfitShareReportSearchFilters";
 import ReportGrid from "../PAY426Reports/PAY426N/ReportGrid";
@@ -19,10 +19,8 @@ const ProfitShareReport = () => {
   const [initialDataLoaded, setInitialDataLoaded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPresetParams, setSelectedPresetParams] = useState<FilterParams | null>(null);
-  
-  const { yearEndProfitSharingReport } = useSelector(
-    (state: RootState) => state.yearsEnd
-  );
+
+  const { yearEndProfitSharingReport } = useSelector((state: RootState) => state.yearsEnd);
   const hasToken = !!useSelector((state: RootState) => state.security.token);
   const profitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
@@ -41,7 +39,7 @@ const ProfitShareReport = () => {
           isSortDescending: true
         }
       };
-      
+
       triggerSearch(request, false)
         .then((result) => {
           if (result.data) {
@@ -83,7 +81,7 @@ const ProfitShareReport = () => {
 
     return (
       <div className="flex items-center gap-2 h-10">
-        <Button 
+        <Button
           onClick={() => setIsModalOpen(true)}
           variant="outlined"
           className="h-10 whitespace-nowrap min-w-fit">
@@ -135,14 +133,20 @@ const ProfitShareReport = () => {
         {selectedPresetParams && (
           <Grid2 width="100%">
             <DSMAccordion title="Filter">
-              <ProfitShareReportSearchFilters profitYear={profitYear} presetParams={selectedPresetParams} />
+              <ProfitShareReportSearchFilters
+                profitYear={profitYear}
+                presetParams={selectedPresetParams}
+              />
             </DSMAccordion>
           </Grid2>
         )}
 
         {selectedPresetParams && (
           <Grid2 width="100%">
-            <ReportGrid params={selectedPresetParams} onLoadingChange={() => {}} />
+            <ReportGrid
+              params={selectedPresetParams}
+              onLoadingChange={() => {}}
+            />
           </Grid2>
         )}
       </Grid2>
