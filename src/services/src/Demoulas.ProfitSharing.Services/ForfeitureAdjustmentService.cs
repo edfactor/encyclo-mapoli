@@ -236,7 +236,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
 
             // From docs: "From the screen in figure 2, if you enter the value in #17 to box #12 and hit enter, you will create a PROFIT_DETAIL record.
             // When the value is negative the record has UN-FORFEIT in the PROFIT_CMNT field and when the value is positive the PROFIT_CMNT field is FORFEIT."
-            string remarkText = isForfeit ? "FORFEIT" : "UN-FORFEIT";
+            string remarkText = isForfeit ? CommentType.Constants.Forfeit.Name.ToUpper() : CommentType.Constants.UnForfeit.Name.ToUpper();
 
             // Create a new PROFIT_DETAIL record
             var profitDetail = new ProfitDetail
@@ -435,7 +435,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                     throw new ArgumentException($"No vesting balance data found for employee with badge number {req.BadgeNumber}");
                 }
 
-                string remarkText = isForfeit ? "FORFEIT" : "UN-FORFEIT";
+                string remarkText = isForfeit ? CommentType.Constants.Forfeit.Name.ToUpper() : CommentType.Constants.UnForfeit.Name.ToUpper();
 
                 // Create a new PROFIT_DETAIL record
                 var profitDetail = new ProfitDetail
