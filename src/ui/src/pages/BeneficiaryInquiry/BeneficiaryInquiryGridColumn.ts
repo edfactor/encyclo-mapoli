@@ -26,8 +26,8 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
     // },
     {
       headerName: "Psn",
-      field: "psn",
-      colId: "psn",
+      field: "psnSuffix",
+      colId: "psnSuffix",
       minWidth: 120,
       headerClass: "center-align",
       cellClass: "center-align",
@@ -56,7 +56,7 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       cellClass: "center-align",
       resizable: true,
       valueFormatter: (params) => {
-        return `${params.data.contact.ssn}`;
+        return `${params.data.ssn}`;
       }
     },
     {
@@ -68,7 +68,7 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       cellClass: "center-align",
       resizable: true,
       valueFormatter: (params) => {
-        return `${mmDDYYFormat(params.data.contact.dateOfBirth)}`;
+        return `${mmDDYYFormat(params.data.dateOfBirth)}`;
       }
     },
     {
@@ -80,7 +80,7 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       cellClass: "center-align",
       resizable: true,
       valueFormatter: (params) => {
-        return `${params.data.contact.address.street}`;
+        return `${params.data.street}`;
       }
     },
     {
@@ -92,7 +92,7 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       cellClass: "center-align",
       resizable: true,
       valueFormatter: (params) => {
-        return `${params.data.contact.address.city}`;
+        return `${params.data.city}`;
       }
     },
     {
@@ -104,7 +104,7 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       cellClass: "center-align",
       resizable: true,
       valueFormatter: (params) => {
-        return `${params.data.contact.address.state}`;
+        return `${params.data.state}`;
       }
     },
     {
@@ -117,7 +117,7 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       sortable: false,
       resizable: true,
       valueFormatter: (params) => {
-        return `${params.data.contact.address.postalCode}`;
+        return `${params.data.postalCode}`;
       }
     },
     {
@@ -130,7 +130,7 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       resizable: true,
       sortable: false,
       valueFormatter: (params) => {
-        return `${params.data.contact.address.countryIso}`;
+        return `${params.data.countryIso}`;
       }
     },
     {
@@ -143,7 +143,7 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       resizable: true,
       sortable: false,
       valueFormatter: (params) => {
-        return `${params.data.contact.contactInfo.lastName}, ${params.data.contact.contactInfo.firstName}`;
+        return `${params.data.lastName}, ${params.data.firstName}`;
       }
     },
     {
@@ -155,7 +155,7 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       cellClass: "center-align",
       resizable: true,
       valueFormatter: (params) => {
-        return `${params.data.contact.contactInfo.phoneNumber ?? ""}`;
+        return `${params.data.phoneNumber ?? ""}`;
       }
     },
     {
@@ -167,7 +167,7 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       cellClass: "center-align",
       resizable: true,
       valueFormatter: (params) => {
-        return `${params.data.contact.contactInfo.mobileNumber ?? ""}`;
+        return `${params.data.mobileNumber ?? ""}`;
       }
     },
     {
@@ -179,7 +179,7 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       cellClass: "left-align",
       resizable: true,
       valueFormatter: (params) => {
-        return `${params.data.contact.contactInfo.emailAddress ?? ""}`;
+        return `${params.data.emailAddress ?? ""}`;
       }
     },
     {
@@ -190,7 +190,7 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       headerClass: "center-align",
       cellClass: "center-align",
       resizable: true,
-      valueFormatter: (params) => (params.data.contact.createdDate ? mmDDYYFormat(params.data.contact.createdDate) : "")
+      valueFormatter: (params) => (params.data.createdDate ? mmDDYYFormat(params.data.createdDate) : "")
     }
   ];
 };

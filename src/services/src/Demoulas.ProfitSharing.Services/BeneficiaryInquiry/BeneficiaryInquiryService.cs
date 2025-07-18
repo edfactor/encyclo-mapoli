@@ -38,7 +38,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
         var beneficiary = await _dataContextFactory.UseReadOnlyContext(async context =>
         {
             var query = context.Beneficiaries.Include(x => x.Contact).Include(x => x.Contact.ContactInfo)
-            .Where(x=>request.BadgeNumber == null || request.BadgeNumber == 0 || x.BadgeNumber == request.BadgeNumber);
+            .Where(x => request.BadgeNumber == null || request.BadgeNumber == 0 || x.BadgeNumber == request.BadgeNumber);
 
             // Check if user is querying from root (psnSuffix null or 0)
             if (request.PsnSuffix == null || request.PsnSuffix == 0)
@@ -88,32 +88,22 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                 DemographicId = x.DemographicId,
                 Percent = x.Percent,
                 KindId = x.KindId,
-                Contact = new BeneficiaryContactDto()
-                {
-                    Id = x.Contact != null ? x.Contact.Id : 0,
-                    CreatedDate = x.Contact != null ? x.Contact.CreatedDate : DateOnly.MaxValue,
-                    DateOfBirth = x.Contact != null ? x.Contact.DateOfBirth : DateOnly.MaxValue,
-                    Ssn = x.Contact != null ? x.Contact.Ssn.ToString() : null,
-                    Address = new Common.Contracts.Response.AddressResponseDto()
-                    {
-                        City = x.Contact != null ? x.Contact.Address.City : null,
-                        CountryIso = x.Contact != null ? x.Contact.Address.CountryIso ?? "" : "",
-                        PostalCode = x.Contact != null ? x.Contact.Address.PostalCode : null,
-                        State = x.Contact != null ? x.Contact.Address.State : null,
-                        Street = x.Contact != null ? x.Contact.Address.Street : "",
-                        Street2 = x.Contact != null ? x.Contact.Address.Street2 : null,
-                    },
-                    ContactInfo = new Common.Contracts.Response.ContactInfoResponseDto()
-                    {
-                        FirstName = x.Contact != null ? x.Contact.ContactInfo.FirstName : "",
-                        LastName = x.Contact != null ? x.Contact.ContactInfo.LastName : "",
-                        EmailAddress = x.Contact != null ? x.Contact.ContactInfo.EmailAddress : "",
-                        FullName = x.Contact != null ? x.Contact.ContactInfo.FullName : "",
-                        MiddleName = x.Contact != null ? x.Contact.ContactInfo.MiddleName : null,
-                        MobileNumber = x.Contact != null ? x.Contact.ContactInfo.MobileNumber : "",
-                        PhoneNumber = x.Contact != null ? x.Contact.ContactInfo.PhoneNumber : ""
-                    }
-                },
+                CreatedDate = x.Contact != null ? x.Contact.CreatedDate : DateOnly.MaxValue,
+                DateOfBirth = x.Contact != null ? x.Contact.DateOfBirth : DateOnly.MaxValue,
+                Ssn = x.Contact != null ? x.Contact.Ssn.ToString() : null,
+                City = x.Contact != null ? x.Contact.Address.City : null,
+                CountryIso = x.Contact != null ? x.Contact.Address.CountryIso ?? "" : "",
+                PostalCode = x.Contact != null ? x.Contact.Address.PostalCode : null,
+                State = x.Contact != null ? x.Contact.Address.State : null,
+                Street = x.Contact != null ? x.Contact.Address.Street : "",
+                Street2 = x.Contact != null ? x.Contact.Address.Street2 : null,
+                FirstName = x.Contact != null ? x.Contact.ContactInfo.FirstName : "",
+                LastName = x.Contact != null ? x.Contact.ContactInfo.LastName : "",
+                EmailAddress = x.Contact != null ? x.Contact.ContactInfo.EmailAddress : "",
+                FullName = x.Contact != null ? x.Contact.ContactInfo.FullName : "",
+                MiddleName = x.Contact != null ? x.Contact.ContactInfo.MiddleName : null,
+                MobileNumber = x.Contact != null ? x.Contact.ContactInfo.MobileNumber : "",
+                PhoneNumber = x.Contact != null ? x.Contact.ContactInfo.PhoneNumber : "",
                 Kind = new BeneficiaryKindDto()
                 {
                     Id = x.Kind != null ? x.Kind.Id : BeneficiaryKind.Constants.Primary,
@@ -126,12 +116,12 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
         }
         );
         //setting Current balance
-        ISet<int> ssnList = new HashSet<int>(beneficiary.Results.Select(x => Convert.ToInt32(x.Contact.Ssn)).ToList());
+        ISet<int> ssnList = new HashSet<int>(beneficiary.Results.Select(x => Convert.ToInt32(x.Ssn)).ToList());
         var balanceList = await _totalService.GetVestingBalanceForMembersAsync(SearchBy.Ssn, ssnList, yearEnd, cancellationToken);
         foreach (var item in beneficiary.Results)
         {
-            item.CurrentBalance = balanceList.Where(x => x.Id.ToString() == item.Contact.Ssn).Select(x => x.CurrentBalance).FirstOrDefault();
-            item.Contact.Ssn = item.Contact.Ssn.MaskSsn();
+            item.CurrentBalance = balanceList.Where(x => x.Id.ToString() == item.Ssn).Select(x => x.CurrentBalance).FirstOrDefault();
+            item.Ssn = item.Ssn.MaskSsn();
         }
         return beneficiary;
     }
