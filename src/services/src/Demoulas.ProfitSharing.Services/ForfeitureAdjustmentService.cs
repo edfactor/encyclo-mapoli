@@ -265,10 +265,18 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                 // The PY_PS_ETVA gets calculated then written and PY_PS_ENROLLED gets subtracted by two. So 3 becomes 1 and 4 becomes 2."
                 if (isForfeit)
                 {
-                    // For forfeit: Set PY_PS_ETVA to 0 and increment enrollment by 2
-                    payProfit.Etva = 0;  // PY_PS_ETVA
+                    int wallClockYear = DateTime.Now.Year;
+                    if (req.ProfitYear <= wallClockYear - 2)
+                    {
+                        throw new ArgumentException($"Cannot update profit year {req.ProfitYear}. Only current year ({wallClockYear}) and previous year ({wallClockYear - 1}) are allowed.");
+                    }
 
-                    // Update EnrollmentId using ExecuteUpdateAsync - read-only resource constraints otherwise
+                    // Determine live year set - normally just current year, but includes previous year for special cases (YE)
+                    var liveYearSet = req.ProfitYear == wallClockYear - 1 
+                        ? new[] { wallClockYear - 1, wallClockYear }
+                        : new[] { wallClockYear };
+
+                    // For forfeit: Set PY_PS_ETVA to 0 and increment enrollment by 2
                     byte newEnrollmentId;
                     if (payProfit.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions)
                     {
@@ -284,9 +292,10 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                     }
 
                     await context.PayProfits
-                        .Where(pp => pp.DemographicId == employeeData.Id && pp.ProfitYear == req.ProfitYear)
+                        .Where(pp => pp.DemographicId == employeeData.Id && liveYearSet.Contains(pp.ProfitYear))
                         .ExecuteUpdateAsync(p => p
                             .SetProperty(pp => pp.EnrollmentId, newEnrollmentId)
+                            .SetProperty(pp => pp.Etva, 0)
                             .SetProperty(pp => pp.LastUpdate, DateTime.Now), 
                             cancellationToken);
                 }
@@ -459,10 +468,18 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                 {
                     if (isForfeit)
                     {
-                        // For forfeit: Set PY_PS_ETVA to 0 and increment enrollment by 2
-                        payProfit.Etva = 0;  // PY_PS_ETVA
+                        int wallClockYear = DateTime.Now.Year;
+                        if (req.ProfitYear <= wallClockYear - 2)
+                        {
+                            throw new ArgumentException($"Cannot update profit year {req.ProfitYear}. Only current year ({wallClockYear}) and previous year ({wallClockYear - 1}) are allowed.");
+                        }
 
-                        // Update EnrollmentId using ExecuteUpdateAsync
+                        // Determine live year set - normally just current year, but includes previous year for special cases (Year End)
+                        var liveYearSet = req.ProfitYear == wallClockYear - 1 
+                            ? new[] { wallClockYear - 1, wallClockYear }
+                            : new[] { wallClockYear };
+
+                        // For forfeit: Set PY_PS_ETVA to 0 and increment enrollment by 2
                         byte newEnrollmentId;
                         if (payProfit.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions)
                         {
@@ -478,9 +495,10 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                         }
 
                         await context.PayProfits
-                            .Where(pp => pp.DemographicId == employeeData.Id && pp.ProfitYear == req.ProfitYear)
+                            .Where(pp => pp.DemographicId == employeeData.Id && liveYearSet.Contains(pp.ProfitYear))
                             .ExecuteUpdateAsync(p => p
                                 .SetProperty(pp => pp.EnrollmentId, newEnrollmentId)
+                                .SetProperty(pp => pp.Etva, 0)
                                 .SetProperty(pp => pp.LastUpdate, DateTime.Now),
                                 cancellationToken);
                     }
