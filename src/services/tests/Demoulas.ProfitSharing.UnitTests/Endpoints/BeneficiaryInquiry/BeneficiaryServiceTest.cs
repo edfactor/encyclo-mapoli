@@ -25,32 +25,22 @@ public class BeneficiaryServiceTest : ApiTestBase<Program>
                 BadgeNumber = 703244,
                 DemographicId = 3173,
                 CurrentBalance = 0,
-                Contact = new BeneficiaryContactDto()
-                {
-                    Id = 145,
                     Ssn = "700010692",
                     DateOfBirth = DateOnly.FromDateTime(new DateTime(1984,3,4,0,0,0,DateTimeKind.Utc)),
-                    Address =new AddressResponseDto()
-                    {
                         Street = "243 SECOND COURT",
                         Street2 = null,
                         City = "PEPPERELL",
                         State ="MA",
                         PostalCode = "2318",
-                        CountryIso = "US"
-                    },
-                    ContactInfo = new ContactInfoResponseDto()
-                    {
+                        CountryIso = "US",
                         FullName ="DELAROSA, ZOE",
                         LastName = "DELAROSA",
                         FirstName = "ZOE",
                         MiddleName =null,
                         PhoneNumber = null,
                         MobileNumber = null,
-                        EmailAddress = null
-                    },
-                    CreatedDate = DateOnly.FromDateTime(new DateTime(2025,5,8,0,0,0,DateTimeKind.Utc))
-                },
+                        EmailAddress = null,
+                    CreatedDate = DateOnly.FromDateTime(new DateTime(2025,5,8,0,0,0,DateTimeKind.Utc)),
                 Relationship = "DAUGHTER",
                 KindId ='P',
                 Kind =new BeneficiaryKindDto()
@@ -63,7 +53,7 @@ public class BeneficiaryServiceTest : ApiTestBase<Program>
         };
     }
 
-    [Fact(DisplayName ="Get beneficiary by badge_number & psn_suffix")]
+    [Fact(DisplayName = "Get beneficiary by badge_number & psn_suffix")]
     public async Task GetBeneficiary()
     {
         var res = await _beneficiaryService.GetBeneficiary(new BeneficiaryRequestDto() { BadgeNumber = 703244 }, CancellationToken.None);

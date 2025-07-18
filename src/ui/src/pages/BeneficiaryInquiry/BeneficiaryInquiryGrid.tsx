@@ -74,21 +74,21 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
     setSortParams(update);
     setPageNumber(0);
 
-    const request = createBeneficiaryInquiryRequest(
-      0,
-      update.sortBy,
-      update.isSortDescending,
-      25,
-      selectedMember?.badgeNumber,
-      selectedMember?.psnSuffix
-    );
-    if (!request) return;
+    // const request = createBeneficiaryInquiryRequest(
+    //   0,
+    //   update.sortBy,
+    //   update.isSortDescending,
+    //   25,
+    //   selectedMember?.badgeNumber,
+    //   selectedMember?.psnSuffix
+    // );
+    // if (!request) return;
 
-    triggerSearch(request, false)
-      .unwrap()
-      .then((value) => {
-        setBeneficiaryList(value);
-      });
+    // triggerSearch(request, false)
+    //   .unwrap()
+    //   .then((value) => {
+    //     setBeneficiaryList(value);
+    //   });
   };
   const actionButtons = (data: any): JSX.Element => {
     return (
@@ -172,7 +172,7 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
         resizable: false,
         sortable: false,
         cellStyle: { backgroundColor: "#E8E8E8" },
-        minWidth: 150,
+        minWidth: 200,
         headerClass: "center-align",
         cellClass: "center-align",
         cellRenderer: (params: ICellRendererParams) => {
@@ -211,7 +211,7 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
       .then((value) => {
         setBeneficiaryList(value);
       });
-  }, [selectedMember]);
+  }, [selectedMember, _sortParams]);
 
   useEffect(() => {
     if (hasToken) {
