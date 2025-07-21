@@ -156,7 +156,7 @@ const RouterSubAssembly: React.FC = () => {
                   top: 0,
                   left: 0,
                   right: 0,
-                  paddingTop: "12px",
+                  paddingTop: "24px",
                   marginLeft: "24px",
                   marginRight: "24px"
                 }}>
