@@ -137,32 +137,6 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
             )}
           />
         </Grid2>
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-          <Controller
-            name="forfeitureStatus"
-            control={control}
-            render={({ field }) => (
-              <FormControl
-                fullWidth
-                size="small">
-                <FormLabel>Forfeiture Status</FormLabel>
-                <Select
-                  labelId="forfeiture-status-label"
-                  id="forfeitureStatus"
-                  value={field.value}
-                  onChange={(e) => {
-                    field.onChange(e.target.value);
-                    trigger("forfeitureStatus");
-                  }}
-                  error={!!errors.forfeitureStatus}>
-                  <MenuItem value="showAll">Show All</MenuItem>
-                  <MenuItem value="needsReview">Show Needs Review</MenuItem>
-                  <MenuItem value="asExpected">Show As Expected</MenuItem>
-                </Select>
-              </FormControl>
-            )}
-          />
-        </Grid2>
       </Grid2>
       <Grid2
         width="100%"

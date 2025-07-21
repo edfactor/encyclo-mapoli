@@ -14,6 +14,9 @@ import { GetDetailColumns, GetMilitaryAndRehireForfeituresColumns } from "./Rehi
 import ReportSummary from "../../../components/ReportSummary";
 import Grid2 from "@mui/material/Grid2";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import { ForfeitureAdjustmentUpdateRequest } from "../../../reduxstore/types";
+import { useUpdateForfeitureAdjustmentBulkMutation } from "reduxstore/api/YearsEndApi";
+import { useUpdateForfeitureAdjustmentMutation } from "reduxstore/api/YearsEndApi";
 
 interface MilitaryAndRehireForfeituresGridSearchProps {
   initialSearchLoaded: boolean;
@@ -34,7 +37,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
   const [pageSize, setPageSize] = useState(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
     sortBy: "badgeNumber",
-    isSortDescending: false
+    isSortDescending: true
   });
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const [selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
@@ -45,6 +48,8 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
   const { rehireForfeitures, rehireForfeituresQueryParams } = useSelector((state: RootState) => state.yearsEnd);
 
   const [triggerSearch, { isFetching }] = useLazyGetRehireForfeituresQuery();
+  const [updateForfeitureAdjustmentBulk] = useUpdateForfeitureAdjustmentBulkMutation();
+  const [updateForfeitureAdjustment] = useUpdateForfeitureAdjustmentMutation();
 
   const onGridReady = useCallback((params: { api: GridApi }) => {
     setGridApi(params.api);
@@ -91,6 +96,49 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
     },
     [rehireForfeituresQueryParams, fiscalCalendarYear?.fiscalBeginDate, fiscalCalendarYear?.fiscalEndDate, pageSize]
   );
+
+  const handleBulkSave = useCallback(async (requests: ForfeitureAdjustmentUpdateRequest[]) => {
+    try {
+      await updateForfeitureAdjustmentBulk(requests);
+      const updatedEditedValues = { ...editedValues };
+      requests.forEach(request => {
+        const rowKey = `${request.badgeNumber}-${request.profitYear}`;
+        delete updatedEditedValues[rowKey];
+      });
+      setEditedValues(updatedEditedValues);
+      setSelectedRowIds([]);
+      onUnsavedChanges(Object.keys(updatedEditedValues).length > 0);
+      if (rehireForfeituresQueryParams) {
+        const request = createRequest(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending);
+        if (request) {
+          await triggerSearch(request, false);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to save forfeiture adjustments:', error);
+      alert('Failed to save one or more adjustments. Please try again.');
+    }
+  }, [updateForfeitureAdjustmentBulk, editedValues, onUnsavedChanges, rehireForfeituresQueryParams, pageNumber, pageSize, sortParams, createRequest, triggerSearch]);
+
+  const handleSave = useCallback(async (request: ForfeitureAdjustmentUpdateRequest) => {
+    try {
+      await updateForfeitureAdjustment(request);
+      const rowKey = `${request.badgeNumber}-${request.profitYear}`;
+      const updatedEditedValues = { ...editedValues };
+      delete updatedEditedValues[rowKey];
+      setEditedValues(updatedEditedValues);
+      onUnsavedChanges(Object.keys(updatedEditedValues).length > 0);
+      if (rehireForfeituresQueryParams) {
+        const searchRequest = createRequest(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending);
+        if (searchRequest) {
+          await triggerSearch(searchRequest, false);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to save forfeiture adjustment:', error);
+      alert('Failed to save adjustment. Please try again.');
+    }
+  }, [updateForfeitureAdjustment, editedValues, onUnsavedChanges, rehireForfeituresQueryParams, pageNumber, pageSize, sortParams, createRequest, triggerSearch]);
 
   const performSearch = useCallback(
     async (skip: number, sortBy: string, isSortDescending: boolean) => {
@@ -154,10 +202,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
 
   // Get the main and detail columns
   const mainColumns = useMemo(() => GetMilitaryAndRehireForfeituresColumns(), []);
-  const detailColumns = useMemo(
-    () => GetDetailColumns(addRowToSelectedRows, removeRowFromSelectedRows, selectedProfitYear),
-    [selectedRowIds, selectedProfitYear]
-  );
+  const detailColumns = useMemo(() => GetDetailColumns(addRowToSelectedRows, removeRowFromSelectedRows, selectedProfitYear, handleSave, handleBulkSave), [selectedRowIds, selectedProfitYear, handleSave, handleBulkSave]);
 
   // Create the grid data with expandable rows
   const gridData = useMemo(() => {
@@ -249,7 +294,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
           </Grid2>
 
           <DSMGrid
-            preferenceKey={"QPREV-PROF"}
+            preferenceKey={"REHIRE-FORFEITURES"}
             isLoading={isFetching}
             handleSortChanged={sortEventHandler}
             maxHeight={800}

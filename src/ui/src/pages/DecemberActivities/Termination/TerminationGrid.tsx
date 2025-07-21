@@ -9,6 +9,8 @@ import { StartAndEndDateRequest } from "reduxstore/types";
 import { useLazyGetTerminationReportQuery } from "reduxstore/api/YearsEndApi";
 import { GetDetailColumns, GetTerminationColumns } from "./TerminationGridColumn";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import { ForfeitureAdjustmentUpdateRequest } from "reduxstore/types";
+import { useUpdateForfeitureAdjustmentMutation, useUpdateForfeitureAdjustmentBulkMutation } from "reduxstore/api/YearsEndApi";
 
 interface TerminationGridSearchProps {
   initialSearchLoaded: boolean;
@@ -40,6 +42,36 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   const [selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
   const [editedValues, setEditedValues] = useState<Record<string, { value: number; hasError: boolean }>>({});
   const selectedProfitYear = useDecemberFlowProfitYear();
+  const [updateForfeitureAdjustmentBulk] = useUpdateForfeitureAdjustmentBulkMutation();
+  const [updateForfeitureAdjustment] = useUpdateForfeitureAdjustmentMutation();
+
+  const handleSave = useCallback(async (request: ForfeitureAdjustmentUpdateRequest) => {
+    try {
+      await updateForfeitureAdjustment(request);
+      const rowKey = `${request.badgeNumber}-${request.profitYear}`;
+      setEditedValues(prev => {
+        const updated = { ...prev };
+        delete updated[rowKey];
+        return updated;
+      });
+      onUnsavedChanges(Object.keys(editedValues).length > 1);
+      if (searchParams) {
+        const params = {
+          ...searchParams,
+          pagination: {
+            skip: pageNumber * pageSize,
+            take: pageSize,
+            sortBy: sortParams.sortBy,
+            isSortDescending: sortParams.isSortDescending
+          }
+        };
+        triggerSearch(params, false);
+      }
+    } catch (error) {
+      console.error('Failed to save forfeiture adjustment:', error);
+      alert('Failed to save. Please try again.');
+    }
+  }, [updateForfeitureAdjustment, editedValues, onUnsavedChanges, searchParams, pageNumber, pageSize, sortParams, triggerSearch]);
 
   // Reset page number to 0 when resetPageFlag changes
   useEffect(() => {
@@ -109,12 +141,38 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     }));
   }, []);
 
+  const handleBulkSave = useCallback(async (requests: ForfeitureAdjustmentUpdateRequest[]) => {
+    try {
+      await updateForfeitureAdjustmentBulk(requests);
+      const updatedEditedValues = { ...editedValues };
+      requests.forEach(request => {
+        const rowKey = `${request.badgeNumber}-${request.profitYear}`;
+        delete updatedEditedValues[rowKey];
+      });
+      setEditedValues(updatedEditedValues);
+      setSelectedRowIds([]);
+      onUnsavedChanges(Object.keys(updatedEditedValues).length > 0);
+      if (searchParams) {
+        const params = {
+          ...searchParams,
+          pagination: {
+            skip: pageNumber * pageSize,
+            take: pageSize,
+            sortBy: sortParams.sortBy,
+            isSortDescending: sortParams.isSortDescending
+          }
+        };
+        triggerSearch(params, false);
+      }
+    } catch (error) {
+      console.error('Failed to save forfeiture adjustments:', error);
+      alert('Failed to save one or more adjustments. Please try again.');
+    }
+  }, [updateForfeitureAdjustmentBulk, editedValues, onUnsavedChanges, searchParams, pageNumber, pageSize, sortParams, triggerSearch]);
+
   // Get main and detail columns
   const mainColumns = useMemo(() => GetTerminationColumns(), []);
-  const detailColumns = useMemo(
-    () => GetDetailColumns(addRowToSelectedRows, removeRowFromSelectedRows, selectedRowIds, selectedProfitYear),
-    [selectedRowIds, selectedProfitYear]
-  );
+  const detailColumns = useMemo(() => GetDetailColumns(addRowToSelectedRows, removeRowFromSelectedRows, selectedRowIds, selectedProfitYear, handleSave, handleBulkSave), [selectedRowIds, selectedProfitYear, handleSave, handleBulkSave]);
 
   // Build grid data with expandable rows
   const gridData = useMemo(() => {

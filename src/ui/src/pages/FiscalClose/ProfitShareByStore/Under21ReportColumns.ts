@@ -15,7 +15,7 @@ export const GetUnder21ReportColumns = (navFunction: (badgeNumber: string) => vo
       cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badge, navFunction)
     },
     {
-      headerName: "Full Name",
+      headerName: "Name",
       field: "fullName",
       colId: "fullName",
       minWidth: GRID_COLUMN_WIDTHS.FULL_NAME,

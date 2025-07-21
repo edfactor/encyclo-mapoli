@@ -15,7 +15,7 @@ export const GetMilitaryAndRehireColumns = (): ColDef[] => {
       cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber)
     },
     {
-      headerName: "Full Name",
+      headerName: "Name",
       field: "fullName",
       colId: "fullName",
       minWidth: 150,

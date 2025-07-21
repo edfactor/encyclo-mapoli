@@ -213,14 +213,28 @@ public sealed class BreakdownReportService : IBreakdownService
         BreakdownByStoreRequest request,
         CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, inActiveEmployees: false, cancellationToken);
+        return GetMembersByStore(request, inActiveEmployees: false, terminatedEmployees: false, withBalance: false, cancellationToken);
     }
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetInactiveMembersByStore(
         BreakdownByStoreRequest request,
         CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, inActiveEmployees: true, cancellationToken);
+        return GetMembersByStore(request, inActiveEmployees: true, terminatedEmployees: false, withBalance: false, cancellationToken);
+    }
+
+    public Task<ReportResponseBase<MemberYearSummaryDto>> GetInactiveMembersWithBalanceByStore(
+        BreakdownByStoreRequest request,
+        CancellationToken cancellationToken)
+    {
+        return GetMembersByStore(request, inActiveEmployees: true, terminatedEmployees: false, withBalance: true, cancellationToken);
+    }
+
+    public Task<ReportResponseBase<MemberYearSummaryDto>> GetTerminatedMembersWithBalanceByStore(
+       BreakdownByStoreRequest request,
+       CancellationToken cancellationToken)
+    {
+        return GetMembersByStore(request, inActiveEmployees: false, terminatedEmployees: true, withBalance: true, cancellationToken);
     }
 
     #region ── Private: common building blocks ───────────────────────────────────────────
@@ -228,6 +242,8 @@ public sealed class BreakdownReportService : IBreakdownService
     private Task<ReportResponseBase<MemberYearSummaryDto>> GetMembersByStore(
         BreakdownByStoreRequest request,
         bool inActiveEmployees,
+        bool terminatedEmployees,
+        bool withBalance,
         CancellationToken cancellationToken)
     {
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
@@ -235,23 +251,40 @@ public sealed class BreakdownReportService : IBreakdownService
             ValidateStoreNumber(request);
 
             var employeesBase = await BuildEmployeesBaseQuery(ctx, request.ProfitYear);
+
             if (inActiveEmployees)
             {
                 employeesBase = employeesBase.Where(e => e.EmploymentStatusId == EmploymentStatus.Constants.Inactive && e.TerminationCodeId != TerminationCode.Constants.Transferred);
             }
-            else
-            {
-                if (request.StoreNumber.HasValue)
-                {
-                    employeesBase = employeesBase.Where(q => q.StoreNumber == request.StoreNumber.Value);
-                }
 
-                // Store‑level + management filter
-                if (request.StoreManagement.HasValue)
-                {
-                    employeesBase = request.StoreManagement.Value ? ApplyStoreManagementFilter(employeesBase)
-                        : ApplyNonStoreManagementFilter(employeesBase);
-                }
+            if (terminatedEmployees)
+            {
+                employeesBase = employeesBase.Where(e => e.EmploymentStatusId == EmploymentStatus.Constants.Terminated && e.TerminationCodeId != TerminationCode.Constants.RetiredReceivingPension);
+                                             
+            }
+            
+            if (request.StoreNumber.HasValue)
+            {
+                employeesBase = employeesBase.Where(q => q.StoreNumber == request.StoreNumber.Value);
+            }
+
+            if (withBalance)
+            {
+                employeesBase = employeesBase.Where(e => e.VestedBalance.HasValue && e.VestedBalance.Value != 0);
+            }
+
+
+            if (withBalance && inActiveEmployees)
+            {
+                employeesBase = employeesBase
+                    .Where(e => !ctx.ExcludedIds.Any(x=>e.BadgeNumber == x.ExcludedIdValue));
+            }
+
+            // Store‑level + management filter
+            if (request.StoreManagement.HasValue)
+            {
+                employeesBase = request.StoreManagement.Value ? ApplyStoreManagementFilter(employeesBase)
+                    : ApplyNonStoreManagementFilter(employeesBase);
             }
 
             if (request.BadgeNumber > 0)
@@ -347,11 +380,9 @@ public sealed class BreakdownReportService : IBreakdownService
            *                             SINCE THEY ARE ALREADY NOTED IN   *
            *                             THE COMMENT ABNVE THE SECTION  
          */
-        int[] pensionerSsns =
-        {
-            023202688, 016201949, 023228733, 025329422, 001301944, 033324971, 020283297, 018260600, 017169396,
-            026786919, 029321863, 016269940, 018306437, 126264073, 012242916, 028280107, 031260942, 024243451
-        };
+        int[] pensionerSsns = await ctx.ExcludedIds.Where(x => x.ExcludedIdTypeId == ExcludedIdType.Constants.QPay066TAExclusions)
+            .Select(x => x.ExcludedIdValue)
+            .ToArrayAsync();
 
         /*
        

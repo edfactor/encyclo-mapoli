@@ -5,17 +5,18 @@ import { SaveOutlined } from "@mui/icons-material";
 interface SelectableGridHeaderProps extends IHeaderParams {
   addRowToSelectedRows: (id: number) => void;
   removeRowFromSelectedRows: (id: number) => void;
-  isNodeEligible: (node: any) => boolean;
+  isNodeEligible: (node: any, context?: any) => boolean;
   createUpdatePayload: (node: any, context: any) => any;
+  onBulkSave?: (requests: any[]) => Promise<void>;
 }
 
 export const SelectableGridHeader: React.FC<SelectableGridHeaderProps> = (props) => {
   const getSelectionState = () => {
     let totalEligible = 0;
     let totalSelected = 0;
-
-    props.api.forEachNode((node) => {
-      if (props.isNodeEligible(node.data)) {
+    
+    props.api.forEachNode(node => {
+      if (props.isNodeEligible(node.data, props.context)) {
         totalEligible++;
         if (node.isSelected()) {
           totalSelected++;
@@ -31,8 +32,8 @@ export const SelectableGridHeader: React.FC<SelectableGridHeaderProps> = (props)
     const shouldSelectAll = totalSelected < totalEligible;
 
     if (shouldSelectAll) {
-      props.api.forEachNode((node) => {
-        if (props.isNodeEligible(node.data)) {
+      props.api.forEachNode(node => {
+        if (props.isNodeEligible(node.data, props.context)) {
           node.setSelected(true);
           const id = Number(node.id) || -1;
           props.addRowToSelectedRows(id);
@@ -40,8 +41,8 @@ export const SelectableGridHeader: React.FC<SelectableGridHeaderProps> = (props)
       });
     } else {
       props.api.deselectAll();
-      props.api.forEachNode((node) => {
-        if (props.isNodeEligible(node.data)) {
+      props.api.forEachNode(node => {
+        if (props.isNodeEligible(node.data, props.context)) {
           const id = Number(node.id) || -1;
           props.removeRowFromSelectedRows(id);
         }
@@ -50,15 +51,18 @@ export const SelectableGridHeader: React.FC<SelectableGridHeaderProps> = (props)
     props.api.refreshCells({ force: true });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const selectedNodes: any[] = [];
-    props.api.forEachNode((node) => {
-      if (node.isSelected() && props.isNodeEligible(node.data)) {
+    props.api.forEachNode(node => {
+      if (node.isSelected() && props.isNodeEligible(node.data, props.context)) {
         const payload = props.createUpdatePayload(node.data, props.context);
         selectedNodes.push(payload);
       }
     });
-    console.log("Bulk update payload:", selectedNodes);
+    
+    if (props.onBulkSave && selectedNodes.length > 0) {
+      await props.onBulkSave(selectedNodes);
+    }
   };
 
   const { totalEligible, totalSelected } = getSelectionState();

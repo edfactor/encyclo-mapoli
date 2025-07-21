@@ -236,7 +236,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
 
             // From docs: "From the screen in figure 2, if you enter the value in #17 to box #12 and hit enter, you will create a PROFIT_DETAIL record.
             // When the value is negative the record has UN-FORFEIT in the PROFIT_CMNT field and when the value is positive the PROFIT_CMNT field is FORFEIT."
-            string remarkText = isForfeit ? "FORFEIT" : "UN-FORFEIT";
+            string remarkText = isForfeit ? CommentType.Constants.Forfeit.Name.ToUpper() : CommentType.Constants.UnForfeit.Name.ToUpper();
 
             // Create a new PROFIT_DETAIL record
             var profitDetail = new ProfitDetail
@@ -265,10 +265,18 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                 // The PY_PS_ETVA gets calculated then written and PY_PS_ENROLLED gets subtracted by two. So 3 becomes 1 and 4 becomes 2."
                 if (isForfeit)
                 {
-                    // For forfeit: Set PY_PS_ETVA to 0 and increment enrollment by 2
-                    payProfit.Etva = 0;  // PY_PS_ETVA
+                    int wallClockYear = DateTime.Now.Year;
+                    if (req.ProfitYear <= wallClockYear - 2)
+                    {
+                        throw new ArgumentException($"Cannot update profit year {req.ProfitYear}. Only current year ({wallClockYear}) and previous year ({wallClockYear - 1}) are allowed.");
+                    }
 
-                    // Update EnrollmentId using ExecuteUpdateAsync - read-only resource constraints otherwise
+                    // Determine live year set - normally just current year, but includes previous year for special cases (YE)
+                    var liveYearSet = req.ProfitYear == wallClockYear - 1 
+                        ? new[] { wallClockYear - 1, wallClockYear }
+                        : new[] { wallClockYear };
+
+                    // For forfeit: Set PY_PS_ETVA to 0 and increment enrollment by 2
                     byte newEnrollmentId;
                     if (payProfit.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions)
                     {
@@ -284,9 +292,10 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                     }
 
                     await context.PayProfits
-                        .Where(pp => pp.DemographicId == employeeData.Id && pp.ProfitYear == req.ProfitYear)
+                        .Where(pp => pp.DemographicId == employeeData.Id && liveYearSet.Contains(pp.ProfitYear))
                         .ExecuteUpdateAsync(p => p
                             .SetProperty(pp => pp.EnrollmentId, newEnrollmentId)
+                            .SetProperty(pp => pp.Etva, 0)
                             .SetProperty(pp => pp.LastUpdate, DateTime.Now), 
                             cancellationToken);
                 }
@@ -360,6 +369,187 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
             NetBalance = 0,
             NetVested = 0
         };
+    }
+
+    public async Task<List<ForfeitureAdjustmentReportDetail>> UpdateForfeitureAdjustmentBulkAsync(List<ForfeitureAdjustmentUpdateRequest> requests, CancellationToken cancellationToken = default)
+    {
+        var results = new List<ForfeitureAdjustmentReportDetail>();
+
+        await _dbContextFactory.UseWritableContext(async context =>
+        {
+            foreach (var req in requests)
+            {
+                if (req.ForfeitureAmount == 0)
+                {
+                    throw new ArgumentException($"Forfeiture amount cannot be zero for badge {req.BadgeNumber}");
+                }
+
+                if (req.ProfitYear <= 0)
+                {
+                    throw new ArgumentException($"Profit year must be provided for badge {req.BadgeNumber}");
+                }
+
+                var demographics = await _demographicReaderService.BuildDemographicQuery(context, false);
+                var employeeData = await demographics
+                    .Where(d => d.BadgeNumber == req.BadgeNumber)
+                    .Select(d => new
+                    {
+                        d.Id,
+                        d.Ssn,
+                        d.BadgeNumber,
+                        d.StoreNumber,
+                        PayProfit = context.PayProfits
+                            .FirstOrDefault(pp => pp.DemographicId == d.Id && pp.ProfitYear == req.ProfitYear)
+                    })
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                if (employeeData == null)
+                {
+                    throw new ArgumentException($"Employee with badge number {req.BadgeNumber} not found");
+                }
+
+                if (employeeData.PayProfit == null)
+                {
+                    throw new ArgumentException($"No profit sharing data found for employee with badge number {req.BadgeNumber} for year {req.ProfitYear}");
+                }
+
+                // Determine if this is a forfeit or un-forfeit operation
+                bool isForfeit = req.ForfeitureAmount > 0;
+
+                if (req.OffsettingProfitDetailId.HasValue)
+                {
+                    var offsettingProfitDetail = await context.ProfitDetails
+                        .FirstOrDefaultAsync(pd => pd.Id == req.OffsettingProfitDetailId.Value, cancellationToken);
+                    if (offsettingProfitDetail == null)
+                    {
+                        throw new InvalidOperationException($"Offsetting profit detail with ID {req.OffsettingProfitDetailId.Value} not found");
+                    }
+
+                    if (offsettingProfitDetail?.CommentTypeId == CommentType.Constants.ForfeitClassAction && !isForfeit)
+                    {
+                        throw new InvalidOperationException($"Offsetting profit detail with ID {req.OffsettingProfitDetailId.Value} is a class action forfeiture and cannot be unforfeited.");
+                    }
+                }
+
+                // Get vesting balance from the total service
+                var vestingBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(
+                    Common.Contracts.Request.SearchBy.Ssn,
+                    employeeData.Ssn,
+                    (short)req.ProfitYear,
+                    cancellationToken);
+
+                // If no vesting balance found, throw an exception
+                if (vestingBalance == null)
+                {
+                    throw new ArgumentException($"No vesting balance data found for employee with badge number {req.BadgeNumber}");
+                }
+
+                string remarkText = isForfeit ? CommentType.Constants.Forfeit.Name.ToUpper() : CommentType.Constants.UnForfeit.Name.ToUpper();
+
+                // Create a new PROFIT_DETAIL record
+                var profitDetail = new ProfitDetail
+                {
+                    Ssn = employeeData.Ssn,
+                    ProfitYear = (short)req.ProfitYear,
+                    ProfitCodeId = ProfitCode.Constants.OutgoingForfeitures.Id,
+                    Forfeiture = -req.ForfeitureAmount,
+                    CommentTypeId = CommentType.Constants.Forfeit.Id,
+                    Remark = remarkText,
+                    TransactionDate = DateTimeOffset.UtcNow
+                };
+
+                context.ProfitDetails.Add(profitDetail);
+
+                // Get the PayProfit record to update
+                var payProfit = await context.PayProfits
+                    .FirstOrDefaultAsync(pp => pp.DemographicId == employeeData.Id && pp.ProfitYear == req.ProfitYear, cancellationToken);
+
+                if (payProfit != null)
+                {
+                    if (isForfeit)
+                    {
+                        int wallClockYear = DateTime.Now.Year;
+                        if (req.ProfitYear <= wallClockYear - 2)
+                        {
+                            throw new ArgumentException($"Cannot update profit year {req.ProfitYear}. Only current year ({wallClockYear}) and previous year ({wallClockYear - 1}) are allowed.");
+                        }
+
+                        // Determine live year set - normally just current year, but includes previous year for special cases (Year End)
+                        var liveYearSet = req.ProfitYear == wallClockYear - 1 
+                            ? new[] { wallClockYear - 1, wallClockYear }
+                            : new[] { wallClockYear };
+
+                        // For forfeit: Set PY_PS_ETVA to 0 and increment enrollment by 2
+                        byte newEnrollmentId;
+                        if (payProfit.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions)
+                        {
+                            newEnrollmentId = Enrollment.Constants.NewVestingPlanHasForfeitureRecords;
+                        }
+                        else if (payProfit.EnrollmentId == Enrollment.Constants.OldVestingPlanHasContributions)
+                        {
+                            newEnrollmentId = Enrollment.Constants.OldVestingPlanHasForfeitureRecords;
+                        }
+                        else
+                        {
+                            newEnrollmentId = Enrollment.Constants.NotEnrolled;
+                        }
+
+                        await context.PayProfits
+                            .Where(pp => pp.DemographicId == employeeData.Id && liveYearSet.Contains(pp.ProfitYear))
+                            .ExecuteUpdateAsync(p => p
+                                .SetProperty(pp => pp.EnrollmentId, newEnrollmentId)
+                                .SetProperty(pp => pp.Etva, 0)
+                                .SetProperty(pp => pp.LastUpdate, DateTime.Now),
+                                cancellationToken);
+                    }
+                    else
+                    {
+                        // For un-forfeit: Recalculate PY_PS_ETVA and decrement enrollment by 2
+                        byte newEnrollmentId;
+                        
+                        if (payProfit.EnrollmentId == Enrollment.Constants.NewVestingPlanHasForfeitureRecords)
+                        {
+                            newEnrollmentId = Enrollment.Constants.NewVestingPlanHasContributions;
+                        }
+                        else if (payProfit.EnrollmentId == Enrollment.Constants.OldVestingPlanHasForfeitureRecords)
+                        {
+                            newEnrollmentId = Enrollment.Constants.OldVestingPlanHasContributions;
+                        }
+                        else
+                        {
+                            newEnrollmentId = payProfit.EnrollmentId;
+                        }
+
+                        await context.PayProfits
+                            .Where(pp => pp.DemographicId == employeeData.Id && pp.ProfitYear == req.ProfitYear)
+                            .ExecuteUpdateAsync(p => p
+                                .SetProperty(pp => pp.EnrollmentId, newEnrollmentId)
+                                .SetProperty(pp => pp.LastUpdate, DateTimeOffset.UtcNow),
+                                cancellationToken);
+                    }
+                }
+
+                // Return the updated entity to the frontend to update grid
+                decimal startingBalance = vestingBalance.CurrentBalance;
+                decimal forfeitureAmount = req.ForfeitureAmount;
+                decimal netBalance = startingBalance - forfeitureAmount;
+                decimal netVested = vestingBalance.VestedBalance;
+
+                results.Add(new ForfeitureAdjustmentReportDetail
+                {
+                    DemographicId = employeeData.Id,
+                    BadgeNumber = employeeData.BadgeNumber,
+                    StartingBalance = startingBalance,
+                    ForfeitureAmount = forfeitureAmount,
+                    NetBalance = netBalance,
+                    NetVested = netVested
+                });
+            }
+
+            await context.SaveChangesAsync(cancellationToken);
+        });
+
+        return results;
     }
 }
 
