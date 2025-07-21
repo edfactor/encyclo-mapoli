@@ -37,7 +37,7 @@ public class PayBenReportService : IPayBenReportService
 
             var res = query.Select(x => new PayBenReportResponse()
             {
-                Ssn = x.Contact.Ssn.MaskSsn(),
+                Ssn = x.Contact.Ssn.ToString(),
                 BeneficiaryFullName = x.Contact.ContactInfo.FullName,
                 DemographicFullName = x.Demographic.ContactInfo.FullName,
                 Psn = x.Psn,
@@ -47,6 +47,10 @@ public class PayBenReportService : IPayBenReportService
             PaginatedResponseDto<PayBenReportResponse> final = await res.ToPaginationResultsAsync(request, cancellationToken);
             return final;
         });
+        foreach (var item in result.Results)
+        {
+            item.Ssn = Convert.ToInt32(item.Ssn).MaskSsn();
+        }
         return result;
     }
 }

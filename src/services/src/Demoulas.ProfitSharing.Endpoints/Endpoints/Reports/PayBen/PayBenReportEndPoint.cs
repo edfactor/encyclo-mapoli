@@ -33,7 +33,6 @@ public class PayBenReportEndpoint : Endpoint<PayBenReportRequest,
             s.ResponseExamples = new Dictionary<int, object> { { 200, new PaginatedResponseDto<PayBenReportResponse>() } };
         });
         Group<YearEndGroup>();
-        base.Configure();
     }
 
 
