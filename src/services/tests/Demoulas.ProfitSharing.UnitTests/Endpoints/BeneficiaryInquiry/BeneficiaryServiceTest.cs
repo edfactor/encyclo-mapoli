@@ -25,7 +25,7 @@ public class BeneficiaryServiceTest : ApiTestBase<Program>
                 BadgeNumber = 703244,
                 DemographicId = 3173,
                 CurrentBalance = 0,
-                    Ssn = "700010692",
+                    Ssn = "XXX-XX-0692",
                     DateOfBirth = DateOnly.FromDateTime(new DateTime(1984,3,4,0,0,0,DateTimeKind.Utc)),
                         Street = "243 SECOND COURT",
                         Street2 = null,
