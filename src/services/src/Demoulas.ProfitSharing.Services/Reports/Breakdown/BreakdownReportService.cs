@@ -213,14 +213,21 @@ public sealed class BreakdownReportService : IBreakdownService
         BreakdownByStoreRequest request,
         CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, inActiveEmployees: false, cancellationToken);
+        return GetMembersByStore(request, inActiveEmployees: false, terminatedEmployeesWithBalance: false, cancellationToken);
     }
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetInactiveMembersByStore(
         BreakdownByStoreRequest request,
         CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, inActiveEmployees: true, cancellationToken);
+        return GetMembersByStore(request, inActiveEmployees: true, terminatedEmployeesWithBalance: false, cancellationToken);
+    }
+
+    public Task<ReportResponseBase<MemberYearSummaryDto>> GetTerminatedMembersWithBalanceByStore(
+       BreakdownByStoreRequest request,
+       CancellationToken cancellationToken)
+    {
+        return GetMembersByStore(request, inActiveEmployees: false, terminatedEmployeesWithBalance: true, cancellationToken);
     }
 
     #region ── Private: common building blocks ───────────────────────────────────────────
@@ -228,6 +235,7 @@ public sealed class BreakdownReportService : IBreakdownService
     private Task<ReportResponseBase<MemberYearSummaryDto>> GetMembersByStore(
         BreakdownByStoreRequest request,
         bool inActiveEmployees,
+        bool terminatedEmployeesWithBalance,
         CancellationToken cancellationToken)
     {
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
@@ -235,23 +243,28 @@ public sealed class BreakdownReportService : IBreakdownService
             ValidateStoreNumber(request);
 
             var employeesBase = await BuildEmployeesBaseQuery(ctx, request.ProfitYear);
+
             if (inActiveEmployees)
             {
                 employeesBase = employeesBase.Where(e => e.EmploymentStatusId == EmploymentStatus.Constants.Inactive && e.TerminationCodeId != TerminationCode.Constants.Transferred);
             }
-            else
-            {
-                if (request.StoreNumber.HasValue)
-                {
-                    employeesBase = employeesBase.Where(q => q.StoreNumber == request.StoreNumber.Value);
-                }
 
-                // Store‑level + management filter
-                if (request.StoreManagement.HasValue)
-                {
-                    employeesBase = request.StoreManagement.Value ? ApplyStoreManagementFilter(employeesBase)
-                        : ApplyNonStoreManagementFilter(employeesBase);
-                }
+            if (terminatedEmployeesWithBalance)
+            {
+                employeesBase = employeesBase.Where(e => e.EmploymentStatusId == EmploymentStatus.Constants.Terminated && e.TerminationCodeId != TerminationCode.Constants.RetiredReceivingPension)
+                                             .Where(e => e.VestedBalance.HasValue && e.VestedBalance.Value != 0);
+            }
+            
+            if (request.StoreNumber.HasValue)
+            {
+                employeesBase = employeesBase.Where(q => q.StoreNumber == request.StoreNumber.Value);
+            }
+
+            // Store‑level + management filter
+            if (request.StoreManagement.HasValue)
+            {
+                employeesBase = request.StoreManagement.Value ? ApplyStoreManagementFilter(employeesBase)
+                    : ApplyNonStoreManagementFilter(employeesBase);
             }
 
             if (request.BadgeNumber > 0)
