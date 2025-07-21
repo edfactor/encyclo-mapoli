@@ -42,6 +42,8 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new EmployeeTypeMap());
         modelBuilder.ApplyConfiguration(new EmploymentStatusMap());
         modelBuilder.ApplyConfiguration(new EmploymentTypeMap());
+        modelBuilder.ApplyConfiguration(new ExcludedIdMap());
+        modelBuilder.ApplyConfiguration(new ExcludedIdTypeMap());
         modelBuilder.ApplyConfiguration(new EnrollmentMap());
         modelBuilder.ApplyConfiguration(new FrozenStateMap());
         modelBuilder.ApplyConfiguration(new GenderMap());
