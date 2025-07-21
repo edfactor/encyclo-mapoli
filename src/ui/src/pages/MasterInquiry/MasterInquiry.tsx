@@ -24,6 +24,7 @@ const MasterInquiry = () => {
   const [searchParams, setSearchParams] = useState<MasterInquiryRequest | null>(null);
   const [selectedMember, setSelectedMember] = useState<SelectedMember | null>(null);
   const [noResults, setNoResults] = useState(false);
+  const [searchActive, setSearchActive] = useState(false);
 
   return (
     <Page label="MASTER INQUIRY (008-10)">
@@ -46,6 +47,7 @@ const MasterInquiry = () => {
                 setSelectedMember(null);
                 setNoResults(!params);
               }}
+              setSearchActive={setSearchActive}
             />
           </DSMAccordion>
         </Grid2>
@@ -64,6 +66,7 @@ const MasterInquiry = () => {
             id={selectedMember?.id ?? 0}
             profitYear={searchParams?.endProfitYear}
             noResults={noResults}
+            searchActive={searchActive}
           />
         )}
 
