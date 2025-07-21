@@ -213,21 +213,28 @@ public sealed class BreakdownReportService : IBreakdownService
         BreakdownByStoreRequest request,
         CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, inActiveEmployees: false, terminatedEmployeesWithBalance: false, cancellationToken);
+        return GetMembersByStore(request, inActiveEmployees: false, terminatedEmployees: false, withBalance: false, cancellationToken);
     }
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetInactiveMembersByStore(
         BreakdownByStoreRequest request,
         CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, inActiveEmployees: true, terminatedEmployeesWithBalance: false, cancellationToken);
+        return GetMembersByStore(request, inActiveEmployees: true, terminatedEmployees: false, withBalance: false, cancellationToken);
+    }
+
+    public Task<ReportResponseBase<MemberYearSummaryDto>> GetInactiveMembersWithBalanceByStore(
+        BreakdownByStoreRequest request,
+        CancellationToken cancellationToken)
+    {
+        return GetMembersByStore(request, inActiveEmployees: true, terminatedEmployees: false, withBalance: true, cancellationToken);
     }
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetTerminatedMembersWithBalanceByStore(
        BreakdownByStoreRequest request,
        CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, inActiveEmployees: false, terminatedEmployeesWithBalance: true, cancellationToken);
+        return GetMembersByStore(request, inActiveEmployees: false, terminatedEmployees: true, withBalance: true, cancellationToken);
     }
 
     #region ── Private: common building blocks ───────────────────────────────────────────
@@ -235,7 +242,8 @@ public sealed class BreakdownReportService : IBreakdownService
     private Task<ReportResponseBase<MemberYearSummaryDto>> GetMembersByStore(
         BreakdownByStoreRequest request,
         bool inActiveEmployees,
-        bool terminatedEmployeesWithBalance,
+        bool terminatedEmployees,
+        bool withBalance,
         CancellationToken cancellationToken)
     {
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
@@ -249,15 +257,29 @@ public sealed class BreakdownReportService : IBreakdownService
                 employeesBase = employeesBase.Where(e => e.EmploymentStatusId == EmploymentStatus.Constants.Inactive && e.TerminationCodeId != TerminationCode.Constants.Transferred);
             }
 
-            if (terminatedEmployeesWithBalance)
+            if (terminatedEmployees)
             {
-                employeesBase = employeesBase.Where(e => e.EmploymentStatusId == EmploymentStatus.Constants.Terminated && e.TerminationCodeId != TerminationCode.Constants.RetiredReceivingPension)
-                                             .Where(e => e.VestedBalance.HasValue && e.VestedBalance.Value != 0);
+                employeesBase = employeesBase.Where(e => e.EmploymentStatusId == EmploymentStatus.Constants.Terminated && e.TerminationCodeId != TerminationCode.Constants.RetiredReceivingPension);
+                                             
             }
             
             if (request.StoreNumber.HasValue)
             {
                 employeesBase = employeesBase.Where(q => q.StoreNumber == request.StoreNumber.Value);
+            }
+
+            if (withBalance)
+            {
+                employeesBase = employeesBase.Where(e => e.VestedBalance.HasValue && e.VestedBalance.Value != 0);
+            }
+
+
+            //Research - do we reallly need to do this?
+            if (withBalance && inActiveEmployees)
+            {
+                var excludedBadgeNumbers = new[] { 01159, 03748, 06007, 09116, 11109, 18399, 22524, 23336, 24050, 51308 }; 
+                employeesBase = employeesBase
+                    .Where(e => !excludedBadgeNumbers.Contains(e.BadgeNumber));
             }
 
             // Store‑level + management filter
