@@ -19,8 +19,22 @@ export const mmDDYYFormat = (date: string | Date | undefined | null) => {
 };
 
 export const mmDDYYYY_HHMMSS_Format = (date: string | Date | undefined) => {
-  const parsedDate = tryddmmyyyyToDate(date);
-  return parsedDate ? format(parsedDate, DATE_TIME_FORMAT_MMDDYYYY_HHMMSS) : "";
+  if (!date) return "";
+  
+  // Handle Date objects directly
+  if (date instanceof Date) {
+    return format(date, DATE_TIME_FORMAT_MMDDYYYY_HHMMSS);
+  }
+  
+  // Handle ISO date strings (preserve time)
+  if (typeof date === 'string') {
+    const parsedDate = parseISO(date);
+    if (isValid(parsedDate)) {
+      return format(parsedDate, DATE_TIME_FORMAT_MMDDYYYY_HHMMSS);
+    }
+  }
+  
+  return "";
 };
 
 export const tryddmmyyyyToDate = (date?: string | Date | null): Date | null => {

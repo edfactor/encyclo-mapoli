@@ -72,6 +72,10 @@ const ProfitShareReport = () => {
     setSelectedPresetParams(params);
   };
 
+  useEffect(() => {
+    console.log("selectedPresetParams", selectedPresetParams);
+  }, [selectedPresetParams]);
+
   const renderActionNode = () => {
     if (!initialDataLoaded || !yearEndProfitSharingReport) return null;
 
