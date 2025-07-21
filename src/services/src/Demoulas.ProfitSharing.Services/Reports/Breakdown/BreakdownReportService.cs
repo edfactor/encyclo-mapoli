@@ -274,12 +274,10 @@ public sealed class BreakdownReportService : IBreakdownService
             }
 
 
-            //Research - do we reallly need to do this?
             if (withBalance && inActiveEmployees)
             {
-                var excludedBadgeNumbers = new[] { 01159, 03748, 06007, 09116, 11109, 18399, 22524, 23336, 24050, 51308 }; 
                 employeesBase = employeesBase
-                    .Where(e => !excludedBadgeNumbers.Contains(e.BadgeNumber));
+                    .Where(e => !ctx.ExcludedIds.Any(x=>e.BadgeNumber == x.ExcludedIdValue));
             }
 
             // Store‑level + management filter
@@ -382,11 +380,9 @@ public sealed class BreakdownReportService : IBreakdownService
            *                             SINCE THEY ARE ALREADY NOTED IN   *
            *                             THE COMMENT ABNVE THE SECTION  
          */
-        int[] pensionerSsns =
-        {
-            023202688, 016201949, 023228733, 025329422, 001301944, 033324971, 020283297, 018260600, 017169396,
-            026786919, 029321863, 016269940, 018306437, 126264073, 012242916, 028280107, 031260942, 024243451
-        };
+        int[] pensionerSsns = await ctx.ExcludedIds.Where(x => x.ExcludedIdTypeId == ExcludedIdType.Constants.QPay066TAExclusions)
+            .Select(x => x.ExcludedIdValue)
+            .ToArrayAsync();
 
         /*
        
