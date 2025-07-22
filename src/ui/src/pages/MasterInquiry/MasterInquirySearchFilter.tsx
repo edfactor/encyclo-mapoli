@@ -254,7 +254,9 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
         isSortDescending: true
       }
     });
-    onSearch(undefined);
+    // Instead of setting searchParams to undefined, pass null
+    // to avoid showing the "no results" message
+    onSearch(null);
   };
 
   const months = Array.from({ length: 12 }, (_, i) => i + 1);

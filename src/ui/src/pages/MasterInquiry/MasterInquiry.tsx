@@ -44,7 +44,9 @@ const MasterInquiry = () => {
               onSearch={(params) => {
                 setSearchParams(params ?? null);
                 setSelectedMember(null);
-                setNoResults(!params);
+                // Only set noResults to true if params is undefined (not found)
+                // but not when it's null (reset)
+                setNoResults(params === undefined);
               }}
             />
           </DSMAccordion>
