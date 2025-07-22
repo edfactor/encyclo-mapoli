@@ -17,9 +17,7 @@ namespace Demoulas.ProfitSharing.Services.Reports;
 public class PayBenReportService : IPayBenReportService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
-    public PayBenReportService(IProfitSharingDataContextFactory dataContextFactory,
-        IDemographicReaderService demographicReaderService,
-        TotalService totalService)
+    public PayBenReportService(IProfitSharingDataContextFactory dataContextFactory)
     {
         _dataContextFactory = dataContextFactory;
     }
@@ -33,11 +31,12 @@ public class PayBenReportService : IPayBenReportService
             .Include(x => x.Demographic)
             .Include(x => x.Contact)
             .Include(x => x.Contact.ContactInfo)
-            .Include(x => x.Demographic.ContactInfo);
+            .Include(x => x.Demographic.ContactInfo).Where(x=>request.Id==null || x.Id == request.Id);
+            
 
             var res = query.Select(x => new PayBenReportResponse()
             {
-                Ssn = x.Contact.Ssn.ToString(),
+                BeneficiarySsn = x.Contact.Ssn,
                 BeneficiaryFullName = x.Contact.ContactInfo.FullName,
                 DemographicFullName = x.Demographic.ContactInfo.FullName,
                 Psn = x.Psn,
@@ -47,10 +46,6 @@ public class PayBenReportService : IPayBenReportService
             PaginatedResponseDto<PayBenReportResponse> final = await res.ToPaginationResultsAsync(request, cancellationToken);
             return final;
         });
-        foreach (var item in result.Results)
-        {
-            item.Ssn = Convert.ToInt32(item.Ssn).MaskSsn();
-        }
         return result;
     }
 }

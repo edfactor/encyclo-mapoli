@@ -24,6 +24,7 @@ public class PayBenReportEndpoint : Endpoint<PayBenReportRequest,
 
     public override void Configure()
     {
+        AllowAnonymous();
         Get("payben-report");
         Summary(s =>
         {
