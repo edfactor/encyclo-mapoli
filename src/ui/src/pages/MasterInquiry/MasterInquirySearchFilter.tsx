@@ -84,10 +84,9 @@ const schema = yup.object().shape({
 interface MasterInquirySearchFilterProps {
   setInitialSearchLoaded: (include: boolean) => void;
   onSearch: (params: MasterInquiryRequest | undefined) => void;
-  setSearchActive: (active: boolean) => void;
 }
 
-const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ setInitialSearchLoaded, onSearch, setSearchActive }) => {
+const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ setInitialSearchLoaded, onSearch }) => {
   const [triggerSearch, { isFetching }] = useLazySearchProfitMasterInquiryQuery();
   const { masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
 
@@ -161,7 +160,6 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
           if (
             response && Array.isArray(response) ? response.length > 0 : response.results && response.results.length > 0
           ) {
-            setSearchActive(true);
             setInitialSearchLoaded(true);
             onSearch(searchParams);
           } else {
@@ -169,7 +167,6 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
             // setMissiveAlerts([...]);
             setInitialSearchLoaded(false);
             onSearch(undefined);
-            setSearchActive(false);
           }
         });
     }
@@ -221,7 +218,6 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
     dispatch(clearMasterInquiryRequestParams());
     dispatch(clearMasterInquiryData());
     dispatch(clearMasterInquiryGroupingData());
-    setSearchActive(false);
     reset({
       endProfitYear: profitYear, // Always reset to default profitYear
       startProfitMonth: undefined,

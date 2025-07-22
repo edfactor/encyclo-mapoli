@@ -19,15 +19,13 @@ interface MasterInquiryEmployeeDetailsProps {
   id: string | number;
   profitYear?: number | null | undefined;
   noResults?: boolean;
-  searchActive: boolean;
 }
 
 const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> = ({
   memberType,
   id,
   profitYear,
-  noResults,
-  searchActive
+  noResults
 }) => {
   const [trigger, { data: details, isLoading, isError }] = useLazyGetProfitMasterInquiryMemberQuery();
   const { masterInquiryResults } = useSelector((state: RootState) => state.inquiry);
@@ -59,10 +57,6 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
       setIsMilitary(false);
     }
   }, [masterInquiryResults]);
-
-  if (!searchActive) {
-    return null;
-  }
 
   if (noResults) {
     return (
