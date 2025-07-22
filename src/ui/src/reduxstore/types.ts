@@ -1505,7 +1505,7 @@ export interface PayBenReportRequest extends SortedPaginationRequestDto {
   id?: number;
 }
 export interface PayBenReport {
-maskedSsn: string;
+ssn: string;
 beneficiaryFullName: string;
 psn: string;
 badge: number;

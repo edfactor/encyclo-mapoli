@@ -24,7 +24,7 @@ const PayBenReport = () => {
     const [pageNumber, setPageNumber] = useState(0);
     const [pageSize, setPageSize] = useState(25);
     const [_sortParams, setSortParams] = useState<ISortParams>({
-        sortBy: "maskedSsn",
+        sortBy: "ssn",
         isSortDescending: true
     });
 
@@ -61,14 +61,14 @@ const PayBenReport = () => {
 
     useEffect(() => {
         if (token) {
-            const request = createPayBenReportRequest(0, _sortParams.sortBy, _sortParams.isSortDescending, pageSize);
+            const request = createPayBenReportRequest(pageNumber, _sortParams.sortBy, _sortParams.isSortDescending, pageSize);
             triggerReport(request).unwrap().then((res => {
                 setPayBenReportResponse(res);
             })).catch((err: any) => {
                 console.error(err);
             })
         }
-    }, [token, _sortParams, pageSize]);
+    }, [token, _sortParams, pageSize,pageNumber]);
 
     const sortEventHandler = (update: ISortParams) => {
         if (update.sortBy === "") {
@@ -96,11 +96,11 @@ const PayBenReport = () => {
                         <>
                             <div>
                                 <DSMGrid
-                                    preferenceKey={CAPTIONS.BENEFICIARY_INQUIRY}
+                                    preferenceKey={CAPTIONS.PAYBE_REPORT}
                                     isLoading={isFetching}
                                     handleSortChanged={sortEventHandler}
                                     providedOptions={{
-                                        rowData: gridData,
+                                        rowData: payBenReportResponse?.results,
                                         columnDefs: columnDefs,
                                         suppressMultiSort: true,
                                         masterDetail: true

@@ -4,22 +4,9 @@ import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
 export const PayBenReportColumnDef = (): ColDef[] => {
   return [
     {
-      headerName: "Psn-Num",
-      field: "badgeNumber",
-      colId: "badgeNumber",
-      minWidth: 120,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true,
-      sortable: true,
-      unSortIcon: true,
-      cellRenderer: (params: ICellRendererParams) =>
-        viewBadgeLinkRenderer(params.data.badgeNumber, params.data.psnSuffix)
-    },
-    {
       headerName: "SSN",
-      field: "maskedSsn",
-      colId: "maskedSsn",
+      field: "ssn",
+      colId: "ssn",
       minWidth: 170,
       headerClass: "center-align",
       cellClass: "center-align",
@@ -63,8 +50,8 @@ export const PayBenReportColumnDef = (): ColDef[] => {
     },
     {
       headerName: "Percent",
-      field: "percent",
-      colId: "percent",
+      field: "percentage",
+      colId: "percentage",
       minWidth: 120,
       headerClass: "center-align",
       cellClass: "center-align",
