@@ -8,8 +8,7 @@ using Demoulas.ProfitSharing.Common.Extensions;
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.PayBen;
 public record PayBenReportResponse
 {
-    public int BeneficiarySsn { get; set; }
-    public string MaskedSsn => BeneficiarySsn.MaskSsn();
+    public string? Ssn { get; set; }
     public string? BeneficiaryFullName { get; set; }
     public string? Psn { get; set; }
     public int? Badge { get; set; }
