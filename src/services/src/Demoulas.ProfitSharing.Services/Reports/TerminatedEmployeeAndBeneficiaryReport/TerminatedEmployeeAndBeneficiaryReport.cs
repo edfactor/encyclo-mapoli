@@ -8,6 +8,7 @@ using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 
@@ -155,8 +156,6 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                                                                             member.EnrollmentId == Enrollment.Constants.NewVestingPlanHasForfeitureRecords)
                                                                            && member.YearsInPs > 1));
         return benes.Concat(employees)
-            .OrderBy(x => x.FullName)
-            .ThenBy(x => x.BadgeNumber)
             .ToListAsync(cancellation);
     }
 
@@ -310,11 +309,13 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 PsnSuffix = g.Key.PsnSuffix,
                 Name = g.Key.Name,
                 YearDetails = g.Select(x => x.YearDetail).OrderByDescending(y => y.ProfitYear).ToList()
-            })
-            .ToList();
+            });
 
-        int totalCount = grouped.Count;
-        var paginatedResults = grouped.Skip(req.Skip ?? 0).Take(req.Take ?? byte.MaxValue).ToList();
+        // Apply sorting based on request parameters
+        var sortedResults = ApplySorting(grouped, req.SortBy, req.IsSortDescending ?? false).ToList();
+
+        int totalCount = sortedResults.Count;
+        var paginatedResults = sortedResults.Skip(req.Skip ?? 0).Take(req.Take ?? byte.MaxValue).ToList();
 
         return new TerminatedEmployeeAndBeneficiaryResponse
         {
@@ -330,6 +331,39 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         };
     }
 
+
+    private static IEnumerable<TerminatedEmployeeAndBeneficiaryDataResponseDto> ApplySorting(
+        IEnumerable<TerminatedEmployeeAndBeneficiaryDataResponseDto> query,
+        string? sortBy,
+        bool isSortDescending)
+    {
+        if (string.IsNullOrWhiteSpace(sortBy))
+        {
+            // Default sorting when no sortBy is specified
+            return query.OrderBy(x => x.Name).ThenBy(x => x.BadgeNumber);
+        }
+
+        // Get the property to sort by (case-insensitive)
+        var propertyInfo = typeof(TerminatedEmployeeAndBeneficiaryDataResponseDto)
+            .GetProperties()
+            .FirstOrDefault(p => p.Name.Equals(sortBy, StringComparison.OrdinalIgnoreCase));
+
+        if (propertyInfo == null)
+        {
+            // If property not found, use default sorting
+            return query.OrderBy(x => x.Name).ThenBy(x => x.BadgeNumber);
+        }
+
+        // Apply dynamic sorting based on the property
+        if (isSortDescending)
+        {
+            return query.OrderByDescending(x => propertyInfo.GetValue(x, null));
+        }
+        else
+        {
+            return query.OrderBy(x => propertyInfo.GetValue(x, null));
+        }
+    }
 
     /// <summary>
     /// Do we include the member in the report or not?    They are interesting if they have money (as a bene) or
