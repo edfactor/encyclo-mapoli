@@ -1,4 +1,4 @@
-﻿using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -8,7 +8,6 @@ using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 
 namespace Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 
@@ -301,7 +300,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         }
 
         // Group by BadgeNumber, PsnSuffix, Name
-        var grouped = yearDetailsList
+        var grouped = await yearDetailsList
             .GroupBy(x => new { x.BadgeNumber, x.PsnSuffix, x.Name })
             .Select(g => new TerminatedEmployeeAndBeneficiaryDataResponseDto
             {
@@ -309,13 +308,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 PsnSuffix = g.Key.PsnSuffix,
                 Name = g.Key.Name,
                 YearDetails = g.Select(x => x.YearDetail).OrderByDescending(y => y.ProfitYear).ToList()
-            });
-
-        // Apply sorting based on request parameters
-        var sortedResults = ApplySorting(grouped, req.SortBy, req.IsSortDescending ?? false).ToList();
-
-        int totalCount = sortedResults.Count;
-        var paginatedResults = sortedResults.Skip(req.Skip ?? 0).Take(req.Take ?? byte.MaxValue).ToList();
+            }).AsQueryable().ToPaginationResultsAsync(req, cancellationToken);
 
         return new TerminatedEmployeeAndBeneficiaryResponse
         {
@@ -327,42 +320,8 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             TotalForfeit = totalForfeit,
             TotalEndingBalance = totalEndingBalance,
             TotalBeneficiaryAllocation = totalBeneficiaryAllocation,
-            Response = new PaginatedResponseDto<TerminatedEmployeeAndBeneficiaryDataResponseDto>(req) { Results = paginatedResults, Total = totalCount }
+            Response = grouped
         };
-    }
-
-
-    private static IEnumerable<TerminatedEmployeeAndBeneficiaryDataResponseDto> ApplySorting(
-        IEnumerable<TerminatedEmployeeAndBeneficiaryDataResponseDto> query,
-        string? sortBy,
-        bool isSortDescending)
-    {
-        if (string.IsNullOrWhiteSpace(sortBy))
-        {
-            // Default sorting when no sortBy is specified
-            return query.OrderBy(x => x.Name).ThenBy(x => x.BadgeNumber);
-        }
-
-        // Get the property to sort by (case-insensitive)
-        var propertyInfo = typeof(TerminatedEmployeeAndBeneficiaryDataResponseDto)
-            .GetProperties()
-            .FirstOrDefault(p => p.Name.Equals(sortBy, StringComparison.OrdinalIgnoreCase));
-
-        if (propertyInfo == null)
-        {
-            // If property not found, use default sorting
-            return query.OrderBy(x => x.Name).ThenBy(x => x.BadgeNumber);
-        }
-
-        // Apply dynamic sorting based on the property
-        if (isSortDescending)
-        {
-            return query.OrderByDescending(x => propertyInfo.GetValue(x, null));
-        }
-        else
-        {
-            return query.OrderBy(x => propertyInfo.GetValue(x, null));
-        }
     }
 
     /// <summary>
