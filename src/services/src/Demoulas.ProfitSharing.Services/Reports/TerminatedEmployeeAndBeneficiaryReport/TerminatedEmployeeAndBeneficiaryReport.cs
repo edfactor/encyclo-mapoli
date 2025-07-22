@@ -1,4 +1,4 @@
-﻿using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -155,8 +155,6 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                                                                             member.EnrollmentId == Enrollment.Constants.NewVestingPlanHasForfeitureRecords)
                                                                            && member.YearsInPs > 1));
         return benes.Concat(employees)
-            .OrderBy(x => x.FullName)
-            .ThenBy(x => x.BadgeNumber)
             .ToListAsync(cancellation);
     }
 
@@ -302,7 +300,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
         }
 
         // Group by BadgeNumber, PsnSuffix, Name
-        var grouped = yearDetailsList
+        var grouped = await yearDetailsList
             .GroupBy(x => new { x.BadgeNumber, x.PsnSuffix, x.Name })
             .Select(g => new TerminatedEmployeeAndBeneficiaryDataResponseDto
             {
@@ -310,11 +308,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 PsnSuffix = g.Key.PsnSuffix,
                 Name = g.Key.Name,
                 YearDetails = g.Select(x => x.YearDetail).OrderByDescending(y => y.ProfitYear).ToList()
-            })
-            .ToList();
-
-        int totalCount = grouped.Count;
-        var paginatedResults = grouped.Skip(req.Skip ?? 0).Take(req.Take ?? byte.MaxValue).ToList();
+            }).AsQueryable().ToPaginationResultsAsync(req, cancellationToken);
 
         return new TerminatedEmployeeAndBeneficiaryResponse
         {
@@ -326,10 +320,9 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             TotalForfeit = totalForfeit,
             TotalEndingBalance = totalEndingBalance,
             TotalBeneficiaryAllocation = totalBeneficiaryAllocation,
-            Response = new PaginatedResponseDto<TerminatedEmployeeAndBeneficiaryDataResponseDto>(req) { Results = paginatedResults, Total = totalCount }
+            Response = grouped
         };
     }
-
 
     /// <summary>
     /// Do we include the member in the report or not?    They are interesting if they have money (as a bene) or
