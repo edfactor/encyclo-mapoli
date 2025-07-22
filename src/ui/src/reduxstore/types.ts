@@ -1499,3 +1499,19 @@ export interface BeneficiaryReportDto {
 export interface adhocBeneficiariesReportResponse extends PagedReportResponse<BeneficiaryReportDto> {
   totalEndingBalance: number;
 }
+
+
+export interface PayBenReportRequest extends SortedPaginationRequestDto {
+  id?: number;
+}
+export interface PayBenReport {
+maskedSsn: string;
+beneficiaryFullName: string;
+psn: string;
+badge: number;
+demographicFullName: string;
+percentage: number;
+}
+export interface PayBenReportResponse extends Paged<PayBenReport>{
+
+}
