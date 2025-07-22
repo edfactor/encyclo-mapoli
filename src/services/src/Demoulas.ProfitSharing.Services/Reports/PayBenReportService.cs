@@ -2,6 +2,7 @@
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request.PayBen;
 using Demoulas.ProfitSharing.Common.Contracts.Response.PayBen;
+using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -29,7 +30,7 @@ public class PayBenReportService : IPayBenReportService
 
             var res = query.Select(x => new PayBenReportResponse()
             {
-                BeneficiarySsn = x.Contact.Ssn,
+                Ssn = x.Contact.Ssn.ToString(),
                 BeneficiaryFullName = x.Contact.ContactInfo.FullName,
                 DemographicFullName = x.Demographic.ContactInfo.FullName,
                 Psn = x.Psn,
@@ -39,6 +40,12 @@ public class PayBenReportService : IPayBenReportService
             PaginatedResponseDto<PayBenReportResponse> final = await res.ToPaginationResultsAsync(request, cancellationToken);
             return final;
         });
+        // Post-process only the results
+        foreach (var item in result.Results)
+        {
+            
+                item.Ssn = Convert.ToInt32(item.Ssn).MaskSsn();
+        }
         return result;
     }
 }
