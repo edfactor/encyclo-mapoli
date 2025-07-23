@@ -65,7 +65,7 @@ const PayBenReport = () => {
 
     const sortEventHandler = (update: ISortParams) => {
         if (update.sortBy === "") {
-            update.sortBy = "psnSuffix";
+            update.sortBy = "ssn";
             update.isSortDescending = true;
         }
         setSortParams(update);
