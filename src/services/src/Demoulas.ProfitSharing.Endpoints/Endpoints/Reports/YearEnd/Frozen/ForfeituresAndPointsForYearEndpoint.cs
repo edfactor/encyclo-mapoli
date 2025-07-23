@@ -12,11 +12,11 @@ using Demoulas.ProfitSharing.Security;
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
 public class ForfeituresAndPointsForYearEndpoint : EndpointWithCsvTotalsBase<FrozenProfitYearRequest, ForfeituresAndPointsForYearResponseWithTotals, ForfeituresAndPointsForYearResponse, ForfeituresAndPointsForYearEndpoint.ForfeituresAndPointsForYearEndpointMapper>
 {
-    private readonly IFrozenReportService _frozenReportService;
+    private readonly IForfeituresAndPointsForYearService _forfeituresAndPointsForYearService;
 
-    public ForfeituresAndPointsForYearEndpoint(IFrozenReportService frozenReportService)
+    public ForfeituresAndPointsForYearEndpoint(IForfeituresAndPointsForYearService forfeituresAndPointsForYearService)
     {
-        _frozenReportService = frozenReportService;
+        _forfeituresAndPointsForYearService = forfeituresAndPointsForYearService;
     }
     public override string ReportFileName => "Forfeitures and Points for Year";
 
@@ -45,7 +45,7 @@ public class ForfeituresAndPointsForYearEndpoint : EndpointWithCsvTotalsBase<Fro
 
     public override Task<ForfeituresAndPointsForYearResponseWithTotals> GetResponse(FrozenProfitYearRequest req, CancellationToken ct)
     {
-        return _frozenReportService.GetForfeituresAndPointsForYearAsync(req, ct);
+        return _forfeituresAndPointsForYearService.GetForfeituresAndPointsForYearAsync(req, ct);
     }
 
     protected internal override async Task GenerateCsvContent(CsvWriter csvWriter, ForfeituresAndPointsForYearResponseWithTotals report, CancellationToken cancellationToken)
@@ -76,7 +76,7 @@ public class ForfeituresAndPointsForYearEndpoint : EndpointWithCsvTotalsBase<Fro
             Map(m => m.EmployeeName).Index(1).Name("EMPLOYEE_NAME");
             Map(m => m.Ssn).Index(2).Name("EMPLOYEE_SSN");
             Map(m => m.Forfeitures).Index(3).Name("FORFEITURES");
-            Map(m => m.ForfeitPoints).Index(4).Name("FORFEIT_POINTS");
+            Map(m => m.ContForfeitPoints).Index(4).Name("CONTFORFEIT_POINTS");
             Map(m => m.EarningPoints).Index(5).Name("EARNING_POINTS");
             Map(m => m.BeneficiaryPsn).Index(6).Name("BENEFICIARY_SSN");
         }

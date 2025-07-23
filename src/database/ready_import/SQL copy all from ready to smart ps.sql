@@ -362,7 +362,7 @@ BEGIN
         PY_PROF_ZEROCONT,
         NVL(PY_PH_EXEC, 0) AS HOURS_EXECUTIVE,
         NVL(PY_PD_EXEC, 0) AS INCOME_EXECUTIVE,
-        PY_PROF_POINTS AS POINTS_EARNED,
+        0 AS POINTS_EARNED,
         PY_PRIOR_ETVA as ETVA 
     FROM
         {SOURCE_PROFITSHARE_SCHEMA}.PAYPROFIT pp
@@ -393,13 +393,13 @@ BEGIN
         0 AS CURRENT_INCOME_YEAR,
         0 AS WEEKS_WORKED_YEAR,
         NULL AS PS_CERTIFICATE_ISSUED_DATE,
-        PY_PS_ENROLLED,
+        0,
         PY_PROF_BENEFICIARY AS BENEFICIARY_ID,
-        PY_PROF_NEWEMP as EMPLOYEE_TYPE_ID, 
-        PY_PROF_ZEROCONT AS ZERO_CONTRIBUTION_REASON_ID, -- used in vesting calculation for year 2023
-        NVL(PY_PH_EXEC, 0) AS HOURS_EXECUTIVE, -- likely the correct exec hours for 2023
-        NVL(PY_PD_EXEC, 0) AS INCOME_EXECUTIVE, -- likely the income exec hours for 2023
-        0 AS POINTS_EARNED,
+        0,
+        0,
+        NVL(PY_PH_EXEC, 0) AS HOURS_EXECUTIVE, -- from the scramble, these are correct exec hours for 2023
+        NVL(PY_PD_EXEC, 0) AS INCOME_EXECUTIVE, --  from the scramble, the income exec hours for 2023
+        PY_PROF_POINTS AS POINTS_EARNED, -- from the scramble, these are the correct points for 2023
         0 as ETVA
     FROM
         {SOURCE_PROFITSHARE_SCHEMA}.PAYPROFIT pp
