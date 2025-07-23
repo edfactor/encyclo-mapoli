@@ -1,17 +1,15 @@
 
-import { Checkbox, Divider, FormLabel, MenuItem, Select, Typography } from "@mui/material";
+import { Divider } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import { useEffect, useMemo, useState } from "react";
-import { Controller, Resolver, useForm } from "react-hook-form";
 import { useSelector } from "react-redux";
 import { useLazyPayBenReportQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import {
-    BeneficiaryReportDto,
     PayBenReportRequest,
     PayBenReportResponse
 } from "reduxstore/types";
-import { DSMAccordion, DSMGrid, ISortParams, Page, Pagination, SearchAndReset } from "smart-ui-library";
+import { DSMGrid, ISortParams, Page, Pagination} from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
 import { PayBenReportColumnDef } from "./PayBenReportColumnDef";
 
@@ -29,12 +27,7 @@ const PayBenReport = () => {
     });
 
 
-    // Create the grid data with expandable rows
-    const gridData = useMemo(() => {
-        if (!payBenReportResponse?.results) return [];
 
-        return payBenReportResponse.results;
-    }, []);
     // Create column definitions with expand/collapse functionality
     const columnDefs = useMemo(() => {
 
@@ -96,7 +89,7 @@ const PayBenReport = () => {
                         <>
                             <div>
                                 <DSMGrid
-                                    preferenceKey={CAPTIONS.PAYBE_REPORT}
+                                    preferenceKey={CAPTIONS.PAYBEN_REPORT}
                                     isLoading={isFetching}
                                     handleSortChanged={sortEventHandler}
                                     providedOptions={{

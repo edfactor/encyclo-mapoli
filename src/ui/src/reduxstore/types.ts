@@ -1505,13 +1505,13 @@ export interface PayBenReportRequest extends SortedPaginationRequestDto {
   id?: number;
 }
 export interface PayBenReport {
-ssn: string;
-beneficiaryFullName: string;
-psn: string;
-badge: number;
-demographicFullName: string;
-percentage: number;
+  ssn: string;
+  beneficiaryFullName: string;
+  psn: string;
+  badge: number;
+  demographicFullName: string;
+  percentage: number;
 }
-export interface PayBenReportResponse extends Paged<PayBenReport>{
+export interface PayBenReportResponse extends Paged<PayBenReport> {
 
 }
