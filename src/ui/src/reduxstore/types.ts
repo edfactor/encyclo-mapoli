@@ -1055,7 +1055,7 @@ export interface Under21TotalsResponse {
   totalVestingBalance: number;
 }
 
-export interface ProfitSharingLabelsRequest extends ProfitYearRequest {
+export interface ProfitSharingLabelsRequest extends FrozenProfitYearRequest {
   pagination: SortedPaginationRequestDto;
 }
 
