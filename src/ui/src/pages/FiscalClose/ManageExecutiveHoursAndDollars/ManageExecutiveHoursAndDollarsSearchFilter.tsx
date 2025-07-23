@@ -274,8 +274,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
     if (!isModal) {
       // If we are in modal, we want to clear the additional executives
       // and reset the query params
-      setInitialSearchLoaded(true);
-      
+      setInitialSearchLoaded(false);
       dispatch(clearExecutiveHoursAndDollars());
       // Need a delay so that the grid sees the empty results set and clears
       await new Promise((resolve) => setTimeout(resolve, 250));

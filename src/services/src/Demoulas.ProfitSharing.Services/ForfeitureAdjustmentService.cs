@@ -78,8 +78,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
             // @Russ/Phil - any insights?
 
             // CurrentBalance comes from TotalsService.GetTotalBalanceSet. Starting balance uses the same method, but with profitYear - 1.
-            int priorProfitYear = req.ProfitYear - 1;
-            decimal startingBalance = await _embeddedSqlService.GetTotalBalanceAlt(context, (short)priorProfitYear)
+            decimal startingBalance = await _embeddedSqlService.GetTotalBalanceAlt(context, req.ProfitYear)
                 .Where(x => x.Ssn == employeeData.Ssn)
                 .Select(x => x.Total)
                 .FirstOrDefaultAsync(cancellationToken) ?? 0;

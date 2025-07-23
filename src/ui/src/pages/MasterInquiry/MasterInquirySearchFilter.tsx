@@ -84,10 +84,9 @@ const schema = yup.object().shape({
 interface MasterInquirySearchFilterProps {
   setInitialSearchLoaded: (include: boolean) => void;
   onSearch: (params: MasterInquiryRequest | undefined) => void;
-  setSearchActive: (active: boolean) => void;
 }
 
-const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ setInitialSearchLoaded, onSearch, setSearchActive }) => {
+const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ setInitialSearchLoaded, onSearch }) => {
   const [triggerSearch, { isFetching }] = useLazySearchProfitMasterInquiryQuery();
   const { masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
 
@@ -154,22 +153,21 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
         endProfitYear: profitYear
       };
 
+      // First ensure the parent component has the search parameters
+      onSearch(searchParams);
+      
       triggerSearch(searchParams, false)
         .unwrap()
         .then((response) => {
-          // If data is returned, trigger downstream components
+          // Update loaded state based on response
           if (
             response && Array.isArray(response) ? response.length > 0 : response.results && response.results.length > 0
           ) {
-            setSearchActive(true);
             setInitialSearchLoaded(true);
-            onSearch(searchParams);
           } else {
             // Instead of setting missiveAlerts, pass up a signal (to be implemented)
             // setMissiveAlerts([...]);
             setInitialSearchLoaded(false);
-            onSearch(undefined);
-            setSearchActive(false);
           }
         });
     }
@@ -177,6 +175,9 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
+      // Create a unique timestamp to ensure each search is treated as new
+      const timestamp = Date.now();
+      
       const searchParams: MasterInquiryRequest = {
         pagination: {
           skip: data.pagination?.skip || 0,
@@ -195,23 +196,34 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
         ...(!!data.contribution && { contributionAmount: data.contribution }),
         ...(!!data.earnings && { earningsAmount: data.earnings }),
         ...(!!data.forfeiture && { forfeitureAmount: data.forfeiture }),
-        ...(!!data.payment && { paymentAmount: data.payment })
+        ...(!!data.payment && { paymentAmount: data.payment }),
+        // Add a unique timestamp field to force React to see this as a new object
+        _timestamp: timestamp
       };
 
-      triggerSearch(searchParams, false)
-        .unwrap()
-        .then((response) => {
-          // If data is returned, trigger downstream components
-          if (
-            response && Array.isArray(response) ? response.length > 0 : response.results && response.results.length > 0
-          ) {
-            setInitialSearchLoaded(true);
-            onSearch(searchParams);
-          } else {
-            setInitialSearchLoaded(false);
-            onSearch(undefined);
-          }
-        });
+      // Clear existing state first
+      setInitialSearchLoaded(false);
+      onSearch(undefined);
+      
+      // Small timeout to ensure state reset is processed
+      setTimeout(() => {
+        // Then set new search parameters
+        onSearch(searchParams);
+        
+        triggerSearch(searchParams, false)
+          .unwrap()
+          .then((response) => {
+            // Update loaded state based on response
+            if (
+              response && Array.isArray(response) ? response.length > 0 : response.results && response.results.length > 0
+            ) {
+              setInitialSearchLoaded(true);
+            } else {
+              setInitialSearchLoaded(false);
+            }
+          });
+      }, 50);
+      
       dispatch(setMasterInquiryRequestParams(data));
     }
   });
@@ -221,7 +233,6 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
     dispatch(clearMasterInquiryRequestParams());
     dispatch(clearMasterInquiryData());
     dispatch(clearMasterInquiryGroupingData());
-    setSearchActive(false);
     reset({
       endProfitYear: profitYear, // Always reset to default profitYear
       startProfitMonth: undefined,
@@ -243,7 +254,9 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
         isSortDescending: true
       }
     });
-    onSearch(undefined);
+    // Instead of setting searchParams to undefined, pass null
+    // to avoid showing the "no results" message
+    onSearch(null);
   };
 
   const months = Array.from({ length: 12 }, (_, i) => i + 1);

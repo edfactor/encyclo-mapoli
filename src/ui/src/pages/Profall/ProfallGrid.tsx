@@ -24,21 +24,19 @@ const ProfallGrid: React.FC<ProfallGridProps> = ({ pageNumberReset, setPageNumbe
   });
 
   const profitSharingLabels = useSelector((state: RootState) => state.yearsEnd.profitSharingLabels);
+  const securityState = useSelector((state: RootState) => state.security);
   const [getProfitSharingLabels, { isFetching }] = useLazyGetProfitSharingLabelsQuery();
 
   const profitYear = useFiscalCloseProfitYear();
-
-  useEffect(() => {
-    if (profitYear) {
-      fetchData();
-    }
-  }, [profitYear, pageNumber, pageSize, sortParams]);
 
   const fetchData = useCallback(() => {
     const yearToUse = profitYear || new Date().getFullYear();
     const skip = pageNumber * pageSize;
     getProfitSharingLabels({
       profitYear: yearToUse,
+      // This needs to be the default as the page has no search filters
+      // but this is required by the API
+      useFrozenData: true,
       pagination: {
         take: pageSize,
         skip: skip,
@@ -47,6 +45,12 @@ const ProfallGrid: React.FC<ProfallGridProps> = ({ pageNumberReset, setPageNumbe
       }
     });
   }, [profitYear, pageNumber, pageSize, sortParams, getProfitSharingLabels]);
+
+  useEffect(() => {
+    if (profitYear && securityState.token) {
+      fetchData();
+    }
+  }, [profitYear, pageNumber, pageSize, sortParams, securityState.token, fetchData]);
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
