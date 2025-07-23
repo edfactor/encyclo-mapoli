@@ -1,7 +1,7 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
 
-export const PayBenReportColumnDef = (): ColDef[] => {
+export const PayBenReportGridColumn = (): ColDef[] => {
     return [
         {
             headerName: "SSN",

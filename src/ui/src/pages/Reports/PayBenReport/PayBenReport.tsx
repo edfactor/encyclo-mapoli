@@ -11,7 +11,7 @@ import {
 } from "reduxstore/types";
 import { DSMGrid, ISortParams, Page, Pagination} from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
-import { PayBenReportColumnDef } from "./PayBenReportColumnDef";
+import { PayBenReportGridColumn } from "./PayBenReportGridColumn";
 
 
 
@@ -31,7 +31,7 @@ const PayBenReport = () => {
     // Create column definitions with expand/collapse functionality
     const columnDefs = useMemo(() => {
 
-        const column = PayBenReportColumnDef();
+        const column = PayBenReportGridColumn();
         return column;
     }, []);
 
