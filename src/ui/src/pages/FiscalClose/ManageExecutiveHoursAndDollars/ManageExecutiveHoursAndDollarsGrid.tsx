@@ -398,6 +398,8 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
           setOpenModal={setOpenModal}
           initialSearchLoaded={initialSearchLoaded}
           setInitialSearchLoaded={setInitialSearchLoaded}
+          pageNumberReset={pageNumberReset}
+          setPageNumberReset={setPageNumberReset}
         />
       </SmartModal>
     </>
