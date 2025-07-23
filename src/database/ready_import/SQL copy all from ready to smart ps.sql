@@ -1143,5 +1143,21 @@ INSERT ALL
   SELECT 1 FROM DUAL;
 
 
+ ------------  - These are users in the scramble, presumably they would not exist in PROD
+
+--  Bad Bene, See https://demoulas.atlassian.net/browse/PS-1268
+delete from profit_detail where ssn IN ( 700010556, 700010596 );
+delete from BENEFICIARY where beneficiary_contact_id in (select id from BENEFICIARY_CONTACT where ssn in (700010556, 700010596));
+delete from BENEFICIARY_CONTACT where ssn in (700010556, 700010596 );
+
+--- Bad Employee, See https://demoulas.atlassian.net/browse/PS-1380
+delete from pay_profit where demographic_id = (select id from demographic where ssn = 700009305);
+delete from demographic where ssn = 700009305;
+
+-- Rehire in 2025, worked > 1000 in 2024.    Is this a valid scenario?
+delete from profit_detail where ssn = 700007178;
+delete from pay_profit where demographic_id = (select id from demographic where ssn = 700007178);
+delete from demographic where ssn = 700007178;
+
 END;
 COMMIT ;
