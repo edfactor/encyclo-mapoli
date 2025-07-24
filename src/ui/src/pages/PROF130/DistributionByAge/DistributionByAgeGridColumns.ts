@@ -1,5 +1,6 @@
 import { ColDef, ColGroupDef } from "ag-grid-community";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
+import { agGridNumberToCurrency } from "smart-ui-library";
 
 export const GetDistributionsByAgeColumns = (reportType: FrozenReportsByAgeRequestType): (ColDef | ColGroupDef)[] => {
   const columns: (ColDef | ColGroupDef)[] = [
@@ -23,8 +24,7 @@ export const GetDistributionsByAgeColumns = (reportType: FrozenReportsByAgeReque
           minWidth: 100,
           type: "rightAligned",
           resizable: true
-        }
-        /*
+        },
         {
           headerName: "Amount",
           field: "regularAmount",
@@ -32,10 +32,8 @@ export const GetDistributionsByAgeColumns = (reportType: FrozenReportsByAgeReque
           minWidth: 150,
           type: "rightAligned",
           resizable: true,
-          //columnGroupShow: "open",
-          //valueFormatter: agGridNumberToCurrency
+          valueFormatter: agGridNumberToCurrency
         }
-          */
       ]
     }
   ];
