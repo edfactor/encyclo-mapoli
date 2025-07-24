@@ -29,6 +29,8 @@ const ForfeituresByAgeGrid: React.FC<ForfeituresByAgeGridProps> = ({ initialSear
   const columnDefsFullTime = GetForfeituresByAgeColumns(FrozenReportsByAgeRequestType.FullTime);
   const columnDefsPartTime = GetForfeituresByAgeColumns(FrozenReportsByAgeRequestType.PartTime);
 
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
+
   const onSearch = useCallback(async () => {
     await triggerSearch(
       {
@@ -57,10 +59,10 @@ const ForfeituresByAgeGrid: React.FC<ForfeituresByAgeGridProps> = ({ initialSear
   }, [triggerSearch, forfeituresByAgeQueryParams?.profitYear]);
 
   useEffect(() => {
-    if (initialSearchLoaded && forfeituresByAgeQueryParams?.profitYear) {
+    if (hasToken && initialSearchLoaded && forfeituresByAgeQueryParams?.profitYear) {
       onSearch();
     }
-  }, [forfeituresByAgeQueryParams?.profitYear, initialSearchLoaded, onSearch]);
+  }, [forfeituresByAgeQueryParams?.profitYear, hasToken, initialSearchLoaded, onSearch]);
 
   return (
     <>
@@ -104,8 +106,8 @@ const ForfeituresByAgeGrid: React.FC<ForfeituresByAgeGridProps> = ({ initialSear
                 isLoading={isFetching}
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
-                  rowData: forfeituresByAgeTotal?.response.results,
-                  columnDefs: columnDefsTotal
+                  rowData: forfeituresByAgeTotal?.response.results || [],
+                  columnDefs: columnDefsTotal || []
                 }}
               />
             </Grid2>
@@ -115,8 +117,8 @@ const ForfeituresByAgeGrid: React.FC<ForfeituresByAgeGridProps> = ({ initialSear
                 isLoading={isFetching}
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
-                  rowData: forfeituresByAgeFullTime?.response.results,
-                  columnDefs: columnDefsFullTime
+                  rowData: forfeituresByAgeFullTime?.response.results || [],
+                  columnDefs: columnDefsFullTime || []
                 }}
               />
             </Grid2>
@@ -126,8 +128,8 @@ const ForfeituresByAgeGrid: React.FC<ForfeituresByAgeGridProps> = ({ initialSear
                 isLoading={isFetching}
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
-                  rowData: forfeituresByAgePartTime?.response.results,
-                  columnDefs: columnDefsPartTime
+                  rowData: forfeituresByAgePartTime?.response.results || [],
+                  columnDefs: columnDefsPartTime || []
                 }}
               />
             </Grid2>

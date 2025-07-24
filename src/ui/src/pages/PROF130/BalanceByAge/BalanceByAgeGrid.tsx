@@ -30,6 +30,8 @@ const BalanceByAgeGrid: React.FC<BalanceByAgeGridProps> = ({ initialSearchLoaded
   const columnDefsFullTime = GetBalanceByAgeColumns(FrozenReportsByAgeRequestType.FullTime);
   const columnDefsPartTime = GetBalanceByAgeColumns(FrozenReportsByAgeRequestType.PartTime);
 
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
+
   const onSearch = useCallback(async () => {
     await triggerSearch(
       {
@@ -58,10 +60,10 @@ const BalanceByAgeGrid: React.FC<BalanceByAgeGridProps> = ({ initialSearchLoaded
   }, [triggerSearch, balanceByAgeQueryParams?.profitYear]);
 
   useEffect(() => {
-    if (initialSearchLoaded && balanceByAgeQueryParams?.profitYear) {
+    if (hasToken && initialSearchLoaded && balanceByAgeQueryParams?.profitYear) {
       onSearch();
     }
-  }, [balanceByAgeQueryParams?.profitYear, initialSearchLoaded, onSearch]);
+  }, [balanceByAgeQueryParams?.profitYear, hasToken, initialSearchLoaded, onSearch]);
 
   return (
     <>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetVestingAmountByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
@@ -31,7 +31,10 @@ const VestedAmountsByAgeGrid: React.FC<VestedAmountsByAgeGridProps> = ({
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
-  const columnDefs = GetVestedAmountsByAgeColumns(countColName, amountColName);
+  const columnDefs = useMemo(
+    () => GetVestedAmountsByAgeColumns(countColName, amountColName),
+    [countColName, amountColName]
+  );
 
   return (
     <>

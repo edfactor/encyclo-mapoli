@@ -16,11 +16,13 @@
   <ItemGroup>
     <None Remove="Resources\**\*.csv" />
     <None Remove="Resources\**\*.txt" />
+    <None Remove="Resources\golden\26-PAY443" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Resources\**\*.csv" />
     <EmbeddedResource Include="Resources\**\*.txt" />
+    <EmbeddedResource Include="Resources\golden\26-PAY443" />
   </ItemGroup>
 
   <ItemGroup>

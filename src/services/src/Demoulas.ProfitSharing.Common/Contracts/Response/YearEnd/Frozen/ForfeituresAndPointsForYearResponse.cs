@@ -5,7 +5,7 @@ public sealed record ForfeituresAndPointsForYearResponse
     public string? EmployeeName { get; set; }
     public required string Ssn { get; set; }
     public decimal? Forfeitures { get; set; }
-    public required short ForfeitPoints { get; set; }
+    public required short ContForfeitPoints { get; set; }
     public required int EarningPoints { get; set; }
     public string? BeneficiaryPsn { get; set; }
 
@@ -17,7 +17,7 @@ public sealed record ForfeituresAndPointsForYearResponse
             EmployeeName = "Jane Doe",
             Ssn = "XXX-XX-9295",
             Forfeitures = 200.25m,
-            ForfeitPoints = 229,
+            ContForfeitPoints = 229,
             EarningPoints = 2048,
         };
     }

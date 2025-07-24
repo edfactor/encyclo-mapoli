@@ -33,6 +33,8 @@ const DistributionByAgeGrid: React.FC<DistributionByAgeGridProps> = ({ initialSe
   const columnDefsFullTime = GetDistributionsByAgeColumns(FrozenReportsByAgeRequestType.FullTime);
   const columnDefsPartTime = GetDistributionsByAgeColumns(FrozenReportsByAgeRequestType.PartTime);
 
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
+
   const onSearch = useCallback(async () => {
     await triggerSearch(
       {
@@ -61,10 +63,10 @@ const DistributionByAgeGrid: React.FC<DistributionByAgeGridProps> = ({ initialSe
   }, [triggerSearch, distributionsByAgeQueryParams?.profitYear]);
 
   useEffect(() => {
-    if (initialSearchLoaded && distributionsByAgeQueryParams?.profitYear) {
+    if (hasToken && initialSearchLoaded && distributionsByAgeQueryParams?.profitYear) {
       onSearch();
     }
-  }, [distributionsByAgeQueryParams?.profitYear, initialSearchLoaded, onSearch]);
+  }, [distributionsByAgeQueryParams?.profitYear, hasToken, initialSearchLoaded, onSearch]);
 
   return (
     <>
