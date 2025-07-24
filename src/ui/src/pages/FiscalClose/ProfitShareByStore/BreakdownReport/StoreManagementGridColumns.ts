@@ -13,53 +13,54 @@ export const GetStoreManagementGridColumns = (handleNavigation: (badgeNumber: st
     {
       headerName: "Name",
       field: "fullName",
-      width: 200
+      flex: 1
     },
     {
       headerName: "Position",
       field: "payClassificationName",
-      width: 120
+      flex: 1
     },
     {
       headerName: "Beginning Balance",
       field: "beginningBalance",
       width: 150,
+      flex: 1,
       valueFormatter: agGridNumberToCurrency
     },
     {
       headerName: "Earnings",
       field: "earnings",
-      width: 120,
+      flex: 1,
       valueFormatter: agGridNumberToCurrency
     },
     {
       headerName: "Contributions",
       field: "contributions",
-      width: 120,
+      flex: 1,
       valueFormatter: agGridNumberToCurrency
     },
     {
       headerName: "Forfeiture",
       field: "forfeitures",
-      width: 120,
+      flex: 1,
       valueFormatter: agGridNumberToCurrency
     },
     {
       headerName: "Distributions",
       field: "distributions",
-      width: 120,
+      flex: 1,
       valueFormatter: agGridNumberToCurrency
     },
     {
       headerName: "Ending Balance",
       field: "endingBalance",
-      width: 150,
+      flex: 1,
       valueFormatter: agGridNumberToCurrency
     },
     {
       headerName: "Vested Amount",
       field: "vestedAmount",
-      width: 150,
+      flex: 1,
       valueFormatter: agGridNumberToCurrency
     }
   ];
