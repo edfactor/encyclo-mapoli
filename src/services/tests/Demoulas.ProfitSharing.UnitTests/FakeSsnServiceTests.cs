@@ -40,7 +40,7 @@ public class FakeSsnServiceTests
     {
         public TestSsnChangeHistory()
         {
-            ChangeDateUtc = DateTimeOffset.UtcNow;
+            ModifiedAtUtc = DateTimeOffset.UtcNow;
         }
     }
 }

@@ -1101,7 +1101,7 @@ Update PROFIT_DETAIL pd
 
 -- Approximate the creation date to aid in correct sorting of the transactions
 UPDATE PROFIT_DETAIL
-SET CREATED_UTC = TO_TIMESTAMP(
+SET CREATED_AT_UTC = TO_TIMESTAMP(
         YEAR_TO_DATE || '-' ||
         LPAD(MONTH_TO_DATE, 2, '0') || '-01 00:00:00',
         'YYYY-MM-DD HH24:MI:SS'

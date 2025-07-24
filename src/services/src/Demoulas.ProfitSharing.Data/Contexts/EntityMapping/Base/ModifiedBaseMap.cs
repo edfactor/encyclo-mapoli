@@ -20,7 +20,7 @@ internal abstract class ModifiedBaseMap<TType> : IEntityTypeConfiguration<TType>
         _ = builder.Property(e => e.CreatedAtUtc)
             .IsRequired()
             .ValueGeneratedOnAdd()
-            .HasColumnName("CREATED_AT")
+            .HasColumnName("CREATED_AT_UTC")
             .HasColumnType("TIMESTAMP WITH TIME ZONE")
             .HasDefaultValueSql("SYSTIMESTAMP");
 

@@ -46,7 +46,7 @@ public sealed class Demographic : Member
                 {
                     OldSsn = _ssn,
                     NewSsn = value,
-                    ChangeDateUtc = DateTimeOffset.UtcNow
+                    ModifiedAtUtc = DateTimeOffset.UtcNow
                 });
                 _ssn = value;
             }
