@@ -1,5 +1,7 @@
-﻿namespace Demoulas.ProfitSharing.Data.Entities;
-public sealed class Beneficiary
+﻿using Demoulas.ProfitSharing.Data.Entities.Base;
+
+namespace Demoulas.ProfitSharing.Data.Entities;
+public sealed class Beneficiary : ModifiedBase
 {
     public required int Id { get; set; }
     public required int BadgeNumber { get; set; }

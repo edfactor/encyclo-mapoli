@@ -295,7 +295,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                         .ExecuteUpdateAsync(p => p
                             .SetProperty(pp => pp.EnrollmentId, newEnrollmentId)
                             .SetProperty(pp => pp.Etva, 0)
-                            .SetProperty(pp => pp.LastUpdate, DateTime.Now), 
+                            .SetProperty(pp => pp.ModifiedAtUtc, DateTimeOffset.UtcNow), 
                             cancellationToken);
                 }
                 else
@@ -323,7 +323,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                         .Where(pp => pp.DemographicId == employeeData.Id && pp.ProfitYear == req.ProfitYear)
                         .ExecuteUpdateAsync(p => p
                             .SetProperty(pp => pp.EnrollmentId, newEnrollmentId)
-                            .SetProperty(pp => pp.LastUpdate, DateTimeOffset.UtcNow),
+                            .SetProperty(pp => pp.ModifiedAtUtc, DateTimeOffset.UtcNow),
                             cancellationToken);
                 }
             }
@@ -498,7 +498,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                             .ExecuteUpdateAsync(p => p
                                 .SetProperty(pp => pp.EnrollmentId, newEnrollmentId)
                                 .SetProperty(pp => pp.Etva, 0)
-                                .SetProperty(pp => pp.LastUpdate, DateTime.Now),
+                                .SetProperty(pp => pp.ModifiedAtUtc, DateTimeOffset.UtcNow),
                                 cancellationToken);
                     }
                     else
@@ -523,7 +523,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                             .Where(pp => pp.DemographicId == employeeData.Id && pp.ProfitYear == req.ProfitYear)
                             .ExecuteUpdateAsync(p => p
                                 .SetProperty(pp => pp.EnrollmentId, newEnrollmentId)
-                                .SetProperty(pp => pp.LastUpdate, DateTimeOffset.UtcNow),
+                                .SetProperty(pp => pp.ModifiedAtUtc, DateTimeOffset.UtcNow),
                                 cancellationToken);
                     }
                 }

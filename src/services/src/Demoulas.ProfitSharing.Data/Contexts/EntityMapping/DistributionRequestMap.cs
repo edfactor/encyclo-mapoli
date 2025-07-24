@@ -1,14 +1,17 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.EntityFrameworkCore;
+﻿using Demoulas.Common.Data.Contexts.ValueConverters;
+using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Base;
 using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.Common.Data.Contexts.ValueConverters;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
 
-internal sealed class DistributionRequestMap : IEntityTypeConfiguration<DistributionRequest>
+internal sealed class DistributionRequestMap : ModifiedBaseMap<DistributionRequest>
 {
-    public void Configure(EntityTypeBuilder<DistributionRequest> builder)
+    public override void Configure(EntityTypeBuilder<DistributionRequest> builder)
     {
+        base.Configure(builder);
+        
         builder.ToTable("DISTRIBUTION_REQUEST");
         builder.HasKey(d => d.Id);
         builder.Property(d => d.Id).HasPrecision(9).HasColumnName("ID").ValueGeneratedOnAdd();

@@ -1,14 +1,17 @@
-﻿using Demoulas.ProfitSharing.Data.Entities;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿using Demoulas.Common.Data.Contexts.ValueConverters;
+using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Base;
+using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
-using Demoulas.Common.Data.Contexts.ValueConverters;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
 
-public sealed class BeneficiaryContactMap : IEntityTypeConfiguration<BeneficiaryContact>
+internal sealed class BeneficiaryContactMap : ModifiedBaseMap<BeneficiaryContact>
 {
-    public void Configure(EntityTypeBuilder<BeneficiaryContact> builder)
+    public override void Configure(EntityTypeBuilder<BeneficiaryContact> builder)
     {
+        base.Configure(builder);
+        
         _ = builder.ToTable("BENEFICIARY_CONTACT");
         _ = builder.HasKey(c => c.Id);
 

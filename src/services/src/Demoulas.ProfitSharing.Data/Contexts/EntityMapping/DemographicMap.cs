@@ -1,18 +1,21 @@
 ﻿using Demoulas.Common.Data.Contexts.ValueConverters;
+using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Base;
 using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
 
-internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
+internal sealed class DemographicMap : ModifiedBaseMap<Demographic>
 {
-    public void Configure(EntityTypeBuilder<Demographic> builder)
+    public override void Configure(EntityTypeBuilder<Demographic> builder)
     {
         //https://demoulas.atlassian.net/wiki/spaces/MAIN/pages/31887785/DEMOGRAPHICS
         //https://demoulas.atlassian.net/wiki/spaces/MAIN/pages/31909725/Employee+Hiring+data+fields
         //https://demoulas.atlassian.net/wiki/spaces/~bherrmann/pages/39944312/Quick+Guide+to+Profit+Sharing+Tables
 
+        base.Configure(builder);
+        
         _ = builder.ToTable("DEMOGRAPHIC");
         _ = builder.HasKey(e => e.Id);
 
@@ -160,12 +163,6 @@ internal sealed class DemographicMap : IEntityTypeConfiguration<Demographic>
             contact.Property(a => a.MobileNumber).HasMaxLength(16).HasColumnName("MOBILE_NUMBER");
             contact.Property(a => a.EmailAddress).HasMaxLength(84).HasColumnName("EMAIL_ADDRESS");
         });
-
-
-        _ = builder.Property(e => e.LastModifiedDate)
-            .HasColumnType("TIMESTAMP WITH TIME ZONE")
-            .HasColumnName("LAST_MODIFIED_DATE")
-            .HasDefaultValueSql("SYSDATE");
 
 
         builder.HasOne(e => e.PayClassification)

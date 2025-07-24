@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using CsvHelper;
 using CsvHelper.Configuration;
-using FluentAssertions;
+using Shouldly;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 
@@ -17,8 +17,8 @@ internal static class TolerantCsvComparisonUtility
         var expectedRecords = GetRecords(expectedCsvContents);
 
         // Compare the counts first
-        actualRecords.Count.Should().Be(expectedRecords.Count,
-            because:
+        actualRecords.Count.ShouldBe(expectedRecords.Count,
+            customMessage:
             $"the number of records in both CSVs should be equal\r\nActual CSV\r\n{actualCsvContents}\r\n\r\nExpected Csv Contents\r\n{expectedCsvContents}");
 
         // Compare each record
@@ -48,13 +48,13 @@ internal static class TolerantCsvComparisonUtility
         var expected = (IDictionary<string, object>)expectedRecords;
 
         // Compare the number of fields
-        actual.Count.Should().Be(expected.Count, because: $"the number of fields should be equal at line {lineNumber}");
+        actual.Count.ShouldBe(expected.Count, customMessage: $"the number of fields should be equal at line {lineNumber}");
 
         // Compare each field value
         foreach (var key in actual.Keys)
         {
             // Ensure the column names are the same
-            expected.Should().ContainKey(key, because: $"at line {lineNumber}, the columns are different?");
+            expected.ShouldContainKey(key, customMessage: $"at line {lineNumber}, the columns are different?");
 
             // Get the value from both records
             object value1 = actual[key];
@@ -72,14 +72,14 @@ internal static class TolerantCsvComparisonUtility
                 double convertedValue1 = Convert.ToDouble(value1);
                 double convertedValue2 = Convert.ToDouble(value2);
 
-                convertedValue1.Should().Be(convertedValue2, because: $"numeric values should match for column '{key}' at line {lineNumber}");
+                convertedValue1.ShouldBe(convertedValue2, customMessage: $"numeric values should match for column '{key}' at line {lineNumber}");
             }
             else
             {
                 // Compare trimmed case-insensitive string values
                 // Our status codes are lower case, ready uses upper case
-                value1?.ToString()?.Trim().ToLowerInvariant().Should().Be(value2?.ToString()?.Trim().ToLowerInvariant(),
-                    because: $"string values should match for column '{key}' at line {lineNumber}");
+                value1?.ToString()?.Trim().ToLowerInvariant().ShouldBe(value2?.ToString()?.Trim().ToLowerInvariant(),
+                    customMessage: $"string values should match for column '{key}' at line {lineNumber}");
             }
         }
     }

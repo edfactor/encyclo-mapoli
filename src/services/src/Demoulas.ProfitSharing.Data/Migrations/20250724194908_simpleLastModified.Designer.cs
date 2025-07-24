@@ -3,6 +3,7 @@ using System;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Oracle.EntityFrameworkCore.Metadata;
 
@@ -11,9 +12,11 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    partial class ProfitSharingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250724194908_simpleLastModified")]
+    partial class simpleLastModified
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -25695,7 +25698,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
-                        .HasColumnName("CREATED_AT_UTC")
+                        .HasColumnName("CREATED_AT")
                         .HasDefaultValueSql("SYSTIMESTAMP");
 
                     b.Property<int>("DemographicId")
@@ -25768,7 +25771,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
-                        .HasColumnName("CREATED_AT_UTC")
+                        .HasColumnName("CREATED_AT")
                         .HasDefaultValueSql("SYSTIMESTAMP");
 
                     b.Property<DateTime>("CreatedDate")
@@ -25854,16 +25857,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(9)")
                         .HasColumnName("BENEFICIARY_ID");
 
-                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                    b.Property<DateTimeOffset>("ChangeDateUtc")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
-                        .HasColumnName("CREATED_AT_UTC")
-                        .HasDefaultValueSql("SYSTIMESTAMP");
-
-                    b.Property<DateTimeOffset>("ModifiedAtUtc")
-                        .ValueGeneratedOnUpdate()
-                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
-                        .HasColumnName("MODIFIED_AT_UTC")
+                        .HasColumnName("CREATED_UTC")
                         .HasDefaultValueSql("SYSTIMESTAMP");
 
                     b.Property<int>("NewSsn")
@@ -25875,13 +25872,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasPrecision(9)
                         .HasColumnType("NUMBER(9)")
                         .HasColumnName("OLD_SSN");
-
-                    b.Property<string>("UserName")
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(96)
-                        .HasColumnType("NVARCHAR2(96)")
-                        .HasColumnName("USER_NAME")
-                        .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
 
                     b.HasKey("Id")
                         .HasName("PK_BENEFICIARY_SSN_CHANGE_HISTORY");
@@ -27500,7 +27490,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
-                        .HasColumnName("CREATED_AT_UTC")
+                        .HasColumnName("CREATED_AT")
                         .HasDefaultValueSql("SYSTIMESTAMP");
 
                     b.Property<DateTime>("DateOfBirth")
@@ -27771,22 +27761,16 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                    b.Property<DateTimeOffset>("ChangeDateUtc")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
-                        .HasColumnName("CREATED_AT_UTC")
+                        .HasColumnName("CREATED_UTC")
                         .HasDefaultValueSql("SYSTIMESTAMP");
 
                     b.Property<int>("DemographicId")
                         .HasPrecision(9)
                         .HasColumnType("NUMBER(9)")
                         .HasColumnName("DEMOGRAPHIC_ID");
-
-                    b.Property<DateTimeOffset>("ModifiedAtUtc")
-                        .ValueGeneratedOnUpdate()
-                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
-                        .HasColumnName("MODIFIED_AT_UTC")
-                        .HasDefaultValueSql("SYSTIMESTAMP");
 
                     b.Property<int>("NewSsn")
                         .HasPrecision(9)
@@ -27797,13 +27781,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasPrecision(9)
                         .HasColumnType("NUMBER(9)")
                         .HasColumnName("OLD_SSN");
-
-                    b.Property<string>("UserName")
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(96)
-                        .HasColumnType("NVARCHAR2(96)")
-                        .HasColumnName("USER_NAME")
-                        .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
 
                     b.HasKey("Id")
                         .HasName("PK_DEMOGRAPHIC_SSN_CHANGE_HISTORY");
@@ -27941,7 +27918,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
-                        .HasColumnName("CREATED_AT_UTC")
+                        .HasColumnName("CREATED_AT")
                         .HasDefaultValueSql("SYSTIMESTAMP");
 
                     b.Property<string>("EmployeeName")
@@ -28196,7 +28173,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
-                        .HasColumnName("CREATED_AT_UTC")
+                        .HasColumnName("CREATED_AT")
                         .HasDefaultValueSql("SYSTIMESTAMP");
 
                     b.Property<DateTime?>("DateDecided")
@@ -29835,7 +29812,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
-                        .HasColumnName("CREATED_AT_UTC")
+                        .HasColumnName("CREATED_AT")
                         .HasDefaultValueSql("SYSTIMESTAMP");
 
                     b.Property<decimal>("CurrentHoursYear")
@@ -30041,7 +30018,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
-                        .HasColumnName("CREATED_AT_UTC")
+                        .HasColumnName("CREATED_AT")
                         .HasDefaultValueSql("SYSTIMESTAMP");
 
                     b.Property<int>("DistributionSequence")
@@ -30634,14 +30611,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("SSN");
 
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Ssn"));
-
-                    b.Property<decimal?>("AllocationsFromBeneficiary")
-                        .HasColumnType("DECIMAL(18, 2)")
-                        .HasColumnName("ALLOCFROMBENE");
-
-                    b.Property<decimal?>("AllocationsToBeneficiary")
-                        .HasColumnType("DECIMAL(18, 2)")
-                        .HasColumnName("ALLOCTOBENE");
 
                     b.Property<decimal?>("CurrentBalance")
                         .HasColumnType("DECIMAL(18, 2)")

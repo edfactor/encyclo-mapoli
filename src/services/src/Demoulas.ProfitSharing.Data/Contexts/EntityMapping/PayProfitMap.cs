@@ -1,13 +1,16 @@
-﻿using Demoulas.ProfitSharing.Data.Entities;
+﻿using Demoulas.Common.Data.Contexts.ValueConverters;
+using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Base;
+using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Demoulas.Common.Data.Contexts.ValueConverters;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
-internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
+internal sealed class PayProfitMap : ModifiedBaseMap<PayProfit>
 {
-    public void Configure(EntityTypeBuilder<PayProfit> builder)
+    public override void Configure(EntityTypeBuilder<PayProfit> builder)
     {
+        base.Configure(builder);
+        
         _ = builder.ToTable("PAY_PROFIT");
 
         _ = builder.HasKey(e => new { e.DemographicId, e.ProfitYear});
@@ -57,13 +60,6 @@ internal sealed class PayProfitMap : IEntityTypeConfiguration<PayProfit>
         _ = builder.Property(e => e.HoursExecutive)
             .HasColumnName("HOURS_EXECUTIVE")
             .HasPrecision(6, 2);
-
-        _ = builder.Property(e => e.LastUpdate)
-            .HasColumnName("LAST_UPDATE")
-            .HasColumnType("TIMESTAMP WITH TIME ZONE")
-            .HasDefaultValueSql("CURRENT_TIMESTAMP")
-            .ValueGeneratedOnAddOrUpdate();
-
 
         _ = builder.Property(e => e.ZeroContributionReasonId)
             .HasColumnName("ZERO_CONTRIBUTION_REASON_ID");

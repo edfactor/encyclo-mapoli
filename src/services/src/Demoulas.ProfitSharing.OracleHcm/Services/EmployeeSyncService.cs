@@ -116,7 +116,7 @@ internal sealed class EmployeeSyncService : IEmployeeSyncService
             DateTimeOffset maxDate = DateTimeOffset.UtcNow;
             DateTimeOffset minDate = await _profitSharingDataContextFactory.UseReadOnlyContext(c =>
             {
-                return c.Demographics.MinAsync(d => d.LastModifiedDate - TimeSpan.FromDays(7), cancellationToken: cancellationToken);
+                return c.Demographics.MinAsync(d => (d.ModifiedAtUtc == null ? d.CreatedAtUtc : d.ModifiedAtUtc.Value) - TimeSpan.FromDays(7), cancellationToken: cancellationToken);
             }).ConfigureAwait(false);
 
             IAsyncEnumerable<NewHireContext> newHires = _atomFeedClient.GetFeedDataAsync<NewHireContext>("newhire", minDate, maxDate, cancellationToken);

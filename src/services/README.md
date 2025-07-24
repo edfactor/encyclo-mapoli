@@ -43,7 +43,7 @@ Install 3rd Party Libraries:
 6. [Centralized package management](https://learn.microsoft.com/en-us/nuget/consume-packages/central-package-management)
 7. [BenchmarkDotNet](https://benchmarkdotnet.org/)
 8. [Makes use of .NET Aspire](https://learn.microsoft.com/en-us/dotnet/aspire/get-started/aspire-overview)
-9. [Fluent Assertions](https://fluentassertions.com/)
+9. [Shouldly](https://docs.shouldly.org/)
 10. [RabbitMq](https://hub.docker.com/r/masstransit/rabbitmq)
 11. [MassTransit](https://masstransit.io/)
 12. [Bogus](https://github.com/bchavez/Bogus)
