@@ -11,7 +11,7 @@ using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.ItOperations;
 using Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
-using FluentAssertions;
+using Shouldly;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
@@ -52,7 +52,7 @@ public class TerminatedEmployeeAndBeneficiaryReportIntegrationTests : PristineBa
         stopwatch.Stop();
         TestOutputHelper.WriteLine($"Took: {stopwatch.ElapsedMilliseconds} Rows: {data.Response.Results.Count()}");
 
-        actualText.Should().NotBeNullOrEmpty();
+        actualText.ShouldNotBeNullOrEmpty();
 
         string expectedText = ReadEmbeddedResource("Demoulas.ProfitSharing.IntegrationTests.Resources.terminatedEmployeeAndBeneficiaryReport-correct.txt");
 
