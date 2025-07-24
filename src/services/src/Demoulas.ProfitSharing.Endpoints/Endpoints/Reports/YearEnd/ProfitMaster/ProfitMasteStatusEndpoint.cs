@@ -32,11 +32,11 @@ public class ProfitMasterStatusEndpoint : Endpoint<ProfitYearRequest, ProfitMast
         var response = await _profitMasterService.Status(req, ct);
         if (response == null)
         {
-            await SendNoContentAsync(ct);
+            await Send.NoContentAsync(ct);
         }
         else
         {
-            await SendOkAsync(response, ct);
+            await Send.OkAsync(response, ct);
         }
     }
 }

@@ -37,11 +37,10 @@ public sealed class ProfitSharingLabelsEndpoint : Endpoint<FrozenProfitYearReque
         Group<YearEndGroup>();
     }
 
-    public sealed override async Task HandleAsync(FrozenProfitYearRequest req, CancellationToken ct)
+    public override async Task HandleAsync(FrozenProfitYearRequest req, CancellationToken ct)
     {
         var response = await _postFrozenService.GetProfitSharingLabels(req, ct);
 
-        await SendOkAsync(response, ct);
-
+        await Send.OkAsync(response, ct);
     }
 }

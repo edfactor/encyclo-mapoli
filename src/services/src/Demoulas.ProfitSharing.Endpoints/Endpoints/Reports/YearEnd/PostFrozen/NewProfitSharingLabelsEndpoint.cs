@@ -43,7 +43,7 @@ public class NewProfitSharingLabelsEndpoint:Endpoint<ProfitYearRequest, Paginate
     {
         var response = await _postFrozenService.GetNewProfitSharingLabels(req, ct);
         
-        await SendOkAsync(response, ct);
+        await Send.OkAsync(response, ct);
 
     }
 }

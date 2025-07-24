@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Common;
+﻿using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Data.Entities;
 
 namespace Demoulas.ProfitSharing.Services;
@@ -178,7 +178,7 @@ internal class EnrollmentSummarizer
     }
 
     // If the current row is a forfeit of class action, then we ignore it.
-    private bool IsRealForfeitAndNotClassActionForfeit(List<ProfitDetail> pds, ProfitDetail forfeitPd)
+    private static bool IsRealForfeitAndNotClassActionForfeit(List<ProfitDetail> pds, ProfitDetail forfeitPd)
     {
         decimal classActionAndEarnings = pds.Where(pd =>
                 pd.ProfitCodeId == 8 && (pd.CommentTypeId == CommentType.Constants.ClassAction || pd.CommentTypeId == CommentType.Constants.OneHundredPercentEarnings))

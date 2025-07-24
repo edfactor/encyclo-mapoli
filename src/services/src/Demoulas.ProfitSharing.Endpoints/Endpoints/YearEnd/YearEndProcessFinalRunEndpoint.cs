@@ -27,6 +27,6 @@ public class YearEndProcessFinalRunEndpoint : Endpoint<YearRequestWithRebuild>
     public override async Task HandleAsync(YearRequestWithRebuild req, CancellationToken ct)
     {
         await _yearEndService.RunFinalYearEndUpdates(req.ProfitYear, req.Rebuild, ct);
-        await SendNoContentAsync(ct);
+        await Send.NoContentAsync(ct);
     }
 }

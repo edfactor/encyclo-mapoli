@@ -59,7 +59,7 @@ public sealed class ProfitSharingLabelsExportEndpoint : Endpoint<ProfitYearReque
             };
             HttpContext.Response.Headers.Append("Content-Disposition", cd.ToString());
 
-            await SendStreamAsync(memoryStream, "PROFLBL.txt", contentType: "text/plain", cancellation: ct);
+            await Send.StreamAsync(memoryStream, "PROFLBL.txt", contentType: "text/plain", cancellation: ct);
         }
     }
 }

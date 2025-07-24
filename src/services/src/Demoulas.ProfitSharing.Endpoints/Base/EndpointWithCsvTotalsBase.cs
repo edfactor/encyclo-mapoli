@@ -65,11 +65,11 @@ public abstract class EndpointWithCsvTotalsBase<ReqType, RespType, ItemType, Map
         if (acceptHeader.Contains("text/csv"))
         {
             await using MemoryStream csvData = await GenerateCsvStreamAsync(response, ct);
-            await SendStreamAsync(csvData, $"{ReportFileName}.csv", contentType: "text/csv", cancellation: ct);
+            await Send.StreamAsync(csvData, $"{ReportFileName}.csv", contentType: "text/csv", cancellation: ct);
             return;
         }
 
-        await SendOkAsync(response, ct);
+        await Send.OkAsync(response, ct);
     }
 
     private async Task<MemoryStream> GenerateCsvStreamAsync(RespType report, CancellationToken cancellationToken)
