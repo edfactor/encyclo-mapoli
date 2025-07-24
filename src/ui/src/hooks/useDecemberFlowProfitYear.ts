@@ -12,4 +12,4 @@ const useDecemberFlowProfitYear = (): number => {
   return selectedProfitYearForDecemberActivities;
 };
 
-export default useDecemberFlowProfitYear; 
+export default useDecemberFlowProfitYear;

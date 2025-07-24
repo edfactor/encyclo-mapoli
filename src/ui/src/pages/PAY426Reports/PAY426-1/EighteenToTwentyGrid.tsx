@@ -1,6 +1,6 @@
 import { Typography } from "@mui/material";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { Path, useNavigate } from "react-router";
 import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
@@ -10,7 +10,12 @@ import { RootState } from "../../../reduxstore/store";
 import pay426Utils from "../Pay427Utils";
 import { GetProfitSharingReportGridColumns } from "./EighteenToTwentyGridColumns";
 
-const EighteenToTwentyGrid = () => {
+interface EighteenToTwentyGridProps {
+  pageNumberReset: boolean;
+  setPageNumberReset: (reset: boolean) => void;
+}
+
+const EighteenToTwentyGrid: React.FC<EighteenToTwentyGridProps> = ({ pageNumberReset, setPageNumberReset }) => {
   const navigate = useNavigate();
   const [trigger, { data, isFetching }] = useLazyGetYearEndProfitSharingReportQuery();
 
@@ -22,20 +27,23 @@ const EighteenToTwentyGrid = () => {
   });
   const hasToken = useSelector((state: RootState) => !!state.security.token);
   const profitYear = useFiscalCloseProfitYear();
-  const baseParams = useMemo(() => ({
-    reportId: PAY426_REPORT_IDS.EIGHTEEN_TO_TWENTY,
-    isYearEnd: true,
-    minimumAgeInclusive: 18,
-    maximumAgeInclusive: 20,
-    minimumHoursInclusive: 1000,
-    includeActiveEmployees: true,
-    includeInactiveEmployees: true,
-    includeEmployeesTerminatedThisYear: false,
-    includeTerminatedEmployees: false,
-    includeBeneficiaries: false,
-    includeEmployeesWithPriorProfitSharingAmounts: true,
-    includeEmployeesWithNoPriorProfitSharingAmounts: true,
-  }), []);
+  const baseParams = useMemo(
+    () => ({
+      reportId: PAY426_REPORT_IDS.EIGHTEEN_TO_TWENTY,
+      isYearEnd: true,
+      minimumAgeInclusive: 18,
+      maximumAgeInclusive: 20,
+      minimumHoursInclusive: 1000,
+      includeActiveEmployees: true,
+      includeInactiveEmployees: true,
+      includeEmployeesTerminatedThisYear: false,
+      includeTerminatedEmployees: false,
+      includeBeneficiaries: false,
+      includeEmployeesWithPriorProfitSharingAmounts: true,
+      includeEmployeesWithNoPriorProfitSharingAmounts: true
+    }),
+    []
+  );
 
   useEffect(() => {
     if (hasToken) {
@@ -60,40 +68,29 @@ const EighteenToTwentyGrid = () => {
     [navigate]
   );
 
-  // Need a useEffect to reset the page number when data changes
-  const prevData = useRef<any>(null);
   useEffect(() => {
-    if (data?.response?.results && data.response.results.length > 0 &&
-        (prevData.current === null || 
-         data.response.results.length !== prevData.current.response.results.length)) {
+    if (pageNumberReset) {
       setPageNumber(0);
+      setPageNumberReset(false);
     }
-    prevData.current = data;  
-  }, [data]);
+  }, [pageNumberReset, setPageNumberReset]);
 
   const sortEventHandler = (update: ISortParams) => {
-    const t = () => { 
-        trigger({
-          profitYear: profitYear,
-          pagination: {
-            skip: 0,
-            take: pageSize,
-            sortBy: update.sortBy,
-            isSortDescending: update.isSortDescending
-          },
-          ...baseParams
-        }
-      );
-    }
+    const t = () => {
+      trigger({
+        profitYear: profitYear,
+        pagination: {
+          skip: 0,
+          take: pageSize,
+          sortBy: update.sortBy,
+          isSortDescending: update.isSortDescending
+        },
+        ...baseParams
+      });
+    };
 
-    pay426Utils.sortEventHandler(
-      update,
-      sortParams,
-      setSortParams,
-      setPageNumber,
-      t
-    );
-  }
+    pay426Utils.sortEventHandler(update, sortParams, setSortParams, setPageNumber, t);
+  };
 
   const columnDefs = useMemo(
     () => GetProfitSharingReportGridColumns(handleNavigationForButton),
@@ -102,7 +99,7 @@ const EighteenToTwentyGrid = () => {
 
   const pinnedTopRowData = useMemo(() => {
     if (!data) return [];
-    
+
     console.log("API data:", data);
     return [
       {
@@ -111,7 +108,7 @@ const EighteenToTwentyGrid = () => {
         hours: data.hoursTotal || 0,
         points: data.pointsTotal || 0,
         balance: data.balanceTotal || 0,
-        isNew: data.numberOfNewEmployees || 0,
+        isNew: data.numberOfNewEmployees || 0
       },
       {
         employeeName: "No Wages",

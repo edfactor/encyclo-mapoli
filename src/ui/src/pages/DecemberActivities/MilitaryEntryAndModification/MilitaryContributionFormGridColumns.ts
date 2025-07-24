@@ -3,7 +3,6 @@ import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
 import { agGridNumberToCurrency } from "smart-ui-library";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
 
-
 // The default is to show all columns, but if the mini flag is set to true, only show the
 // badge, name, and ssn columns
 export const GetMilitaryContributionColumns = (): ColDef[] => {
@@ -27,9 +26,9 @@ export const GetMilitaryContributionColumns = (): ColDef[] => {
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
-      valueFormatter: (params) => {    
-      return new Date(params.value).getFullYear();
-    }
+      valueFormatter: (params) => {
+        return new Date(params.value).getFullYear();
+      }
     },
     {
       headerName: "Amount",
@@ -49,6 +48,7 @@ export const GetMilitaryContributionColumns = (): ColDef[] => {
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true
-    }]
+    }
+  ];
   return columns;
 };

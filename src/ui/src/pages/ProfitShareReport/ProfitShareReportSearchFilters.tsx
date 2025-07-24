@@ -71,7 +71,7 @@ const ProfitShareReportSearchFilters: React.FC<ProfitShareReportSearchFilterProp
     reset({
       badgeNumber: undefined
     });
-    
+
     const request = {
       ...presetParams,
       profitYear: profitYear,
@@ -88,7 +88,9 @@ const ProfitShareReportSearchFilters: React.FC<ProfitShareReportSearchFilterProp
 
   return (
     <form onSubmit={validateAndSearch}>
-      <Grid2 container paddingX="24px">
+      <Grid2
+        container
+        paddingX="24px">
         <Grid2 size={{ xs: 12, sm: 3, md: 3 }}>
           <FormLabel>Badge Number</FormLabel>
           <Controller
@@ -119,4 +121,4 @@ const ProfitShareReportSearchFilters: React.FC<ProfitShareReportSearchFilterProp
   );
 };
 
-export default ProfitShareReportSearchFilters; 
+export default ProfitShareReportSearchFilters;

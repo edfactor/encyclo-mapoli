@@ -49,7 +49,7 @@ export const createDataSourceAwareBaseQuery = (): BaseQueryFn<string | FetchArgs
       const hdr =
         (result.meta as FetchBaseQueryMeta | undefined)?.response?.headers?.get("x-demographic-data-source") ?? "Live";
       (result.data as Record<string, unknown>).dataSource = hdr;
-    }  
+    }
     return result;
   };
 };

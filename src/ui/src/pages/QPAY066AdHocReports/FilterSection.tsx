@@ -5,6 +5,7 @@ import {
   MenuItem, 
   SelectChangeEvent,
   FormLabel,
+  TextField,
 } from '@mui/material';
 import Grid2 from '@mui/material/Grid2';
 import { useForm, Controller } from 'react-hook-form';
@@ -19,10 +20,12 @@ interface FilterSectionProps {
   currentPreset: ReportPreset | null;
   onPresetChange: (preset: ReportPreset | null) => void;
   onReset: () => void;
+  onStoreNumberChange: (storeNumber: string) => void;
   isLoading?: boolean;
 }
 
 interface FilterFormData {
+  storeNumber: string;
   startDate: Date | null;
   endDate: Date | null;
   vestedPercentage: string;
@@ -31,11 +34,12 @@ interface FilterFormData {
 }
 
 const schema = yup.object().shape({
+  storeNumber: yup.string().required('Store Number is required'),
   startDate: yup.date().nullable().default(null),
   endDate: yup.date().nullable().default(null),
-  vestedPercentage: yup.string().default(''),
-  age: yup.string().default(''),
-  employeeStatus: yup.string().default(''),
+  vestedPercentage: yup.string().default(""),
+  age: yup.string().default(""),
+  employeeStatus: yup.string().default("")
 });
 
 const FilterSection: React.FC<FilterSectionProps> = ({
@@ -43,33 +47,38 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   currentPreset,
   onPresetChange,
   onReset,
+  onStoreNumberChange,
   isLoading = false
 }) => {
   const {
     control,
     handleSubmit,
     reset,
-    formState: { errors }
+    watch,
+    formState: { errors, isValid }
   } = useForm<FilterFormData>({
     resolver: yupResolver(schema) as any,
     defaultValues: {
+      storeNumber: '',
       startDate: null,
       endDate: null,
-      vestedPercentage: '',
-      age: '',
-      employeeStatus: '',
+      vestedPercentage: "",
+      age: "",
+      employeeStatus: ""
     }
   });
 
+  const storeNumber = watch('storeNumber');
+
   const handlePresetChange = (event: SelectChangeEvent<string>) => {
     const presetId = event.target.value;
-    const selected = presets.find(p => p.id === presetId) || null;
+    const selected = presets.find((p) => p.id === presetId) || null;
     onPresetChange(selected);
   };
 
   const handleFilter = (data: FilterFormData) => {
     // @D
-    console.log('Filter data:', data);
+    console.log("Filter data:", data);
   };
 
   const handleResetForm = () => {
@@ -78,28 +87,28 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   };
 
   const vestedPercentageOptions = [
-    { value: '', label: 'All' },
-    { value: '<20', label: '< 20%' },
-    { value: '20-50', label: '20-50%' },
-    { value: '50-80', label: '50-80%' },
-    { value: '>80', label: '> 80%' },
-    { value: '100', label: '100%' },
+    { value: "", label: "All" },
+    { value: "<20", label: "< 20%" },
+    { value: "20-50", label: "20-50%" },
+    { value: "50-80", label: "50-80%" },
+    { value: ">80", label: "> 80%" },
+    { value: "100", label: "100%" }
   ];
 
   const ageOptions = [
-    { value: '', label: 'All' },
-    { value: '<18', label: '< 18' },
-    { value: '18-21', label: '18-21' },
-    { value: '21-65', label: '21-65' },
-    { value: '>65', label: '> 65' },
-    { value: '>70', label: '> 70' },
+    { value: "", label: "All" },
+    { value: "<18", label: "< 18" },
+    { value: "18-21", label: "18-21" },
+    { value: "21-65", label: "21-65" },
+    { value: ">65", label: "> 65" },
+    { value: ">70", label: "> 70" }
   ];
 
   const employeeStatusOptions = [
-    { value: '', label: 'All' },
-    { value: 'active', label: 'Active' },
-    { value: 'inactive', label: 'Inactive' },
-    { value: 'terminated', label: 'Terminated' },
+    { value: "", label: "All" },
+    { value: "active", label: "Active" },
+    { value: "inactive", label: "Inactive" },
+    { value: "terminated", label: "Terminated" }
   ];
 
   return (
@@ -111,17 +120,43 @@ const FilterSection: React.FC<FilterSectionProps> = ({
           container
           spacing={3}
           width="100%">
-          <Grid2 size={{ xs: 12 }}>
-            <FormLabel>QPAY066* Presets</FormLabel>
+          <Grid2 size={{ xs: 12, sm: 6 }}>
+            <Controller
+              name="storeNumber"
+              control={control}
+              render={({ field }) => (
+                <>
+                <FormLabel required>Store Number</FormLabel>
+                <TextField
+                  {...field}
+                  fullWidth
+                  size="small"
+                  required
+                  error={!!errors.storeNumber}
+                  helperText={errors.storeNumber?.message}
+                  onChange={(e) => {
+                    field.onChange(e.target.value);
+                    onStoreNumberChange(e.target.value);
+                  }}
+                />
+                </>
+              )}
+            />
+          </Grid2>
+          <Grid2 size={{ xs: 12, sm: 6 }}>
+            <FormLabel required>QPAY066 Presets</FormLabel>
             <FormControl fullWidth>
               <Select
-                value={currentPreset?.id || ''}
+                value={currentPreset?.id || ""}
                 onChange={handlePresetChange}
                 displayEmpty
+                disabled={!storeNumber.trim()}
               >
                 <MenuItem value="">Select a Report</MenuItem>
-                {presets.map(preset => (
-                  <MenuItem key={preset.id} value={preset.id}>
+                {presets.map((preset) => (
+                  <MenuItem
+                    key={preset.id}
+                    value={preset.id}>
                     {preset.name} - {preset.description}
                   </MenuItem>
                 ))}
@@ -130,114 +165,10 @@ const FilterSection: React.FC<FilterSectionProps> = ({
           </Grid2>
         </Grid2>
 
-        <Grid2
-          container
-          spacing={3}
-          width="100%"
-          paddingTop="16px">
-          <Grid2 size={{ xs: 12, sm: 6, md: 2.4 }}>
-            <Controller
-              name="startDate"
-              control={control}
-              render={({ field }) => (
-                <DsmDatePicker
-                  id="startDate"
-                  onChange={(value: Date | null) => field.onChange(value)}
-                  value={field.value}
-                  required={false}
-                  label="Start Date"
-                  disableFuture
-                  error={errors.startDate?.message}
-                />
-              )}
-            />
-          </Grid2>
-          <Grid2 size={{ xs: 12, sm: 6, md: 2.4 }}>
-            <Controller
-              name="endDate"
-              control={control}
-              render={({ field }) => (
-                <DsmDatePicker
-                  id="endDate"
-                  onChange={(value: Date | null) => field.onChange(value)}
-                  value={field.value}
-                  required={false}
-                  label="End Date"
-                  disableFuture
-                  error={errors.endDate?.message}
-                />
-              )}
-            />
-          </Grid2>
-          <Grid2 size={{ xs: 12, sm: 6, md: 2.4 }}>
-            <FormLabel>Vested Percentage</FormLabel>
-            <Controller
-              name="vestedPercentage"
-              control={control}
-              render={({ field }) => (
-                <FormControl fullWidth>
-                  <Select
-                    {...field}
-                    displayEmpty
-                    size="small"
-                  >
-                    {vestedPercentageOptions.map(option => (
-                      <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              )}
-            />
-          </Grid2>
-          <Grid2 size={{ xs: 12, sm: 6, md: 2.4 }}>
-            <FormLabel>Age</FormLabel>
-            <Controller
-              name="age"
-              control={control}
-              render={({ field }) => (
-                <FormControl fullWidth>
-                  <Select
-                    {...field}
-                    displayEmpty
-                    size="small"
-                  >
-                    {ageOptions.map(option => (
-                      <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              )}
-            />
-          </Grid2>
-          <Grid2 size={{ xs: 12, sm: 6, md: 2.4 }}>
-            <FormLabel>Employee Status</FormLabel>
-            <Controller
-              name="employeeStatus"
-              control={control}
-              render={({ field }) => (
-                <FormControl fullWidth>
-                  <Select
-                    {...field}
-                    displayEmpty
-                    size="small"
-                  >
-                    {employeeStatusOptions.map(option => (
-                      <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              )}
-            />
-          </Grid2>
-        </Grid2>
+        
+        
       </Grid2>
-      
+
       <Grid2
         width="100%"
         paddingX="24px"
@@ -246,7 +177,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
           handleReset={handleResetForm}
           handleSearch={handleSubmit(handleFilter)}
           isFetching={isLoading}
-          disabled={!currentPreset || isLoading}
+          disabled={!currentPreset || isLoading || !isValid}
           searchButtonText="Filter"
         />
       </Grid2>
@@ -254,4 +185,4 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   );
 };
 
-export default FilterSection; 
+export default FilterSection;

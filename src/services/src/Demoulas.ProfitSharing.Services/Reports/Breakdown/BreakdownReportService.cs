@@ -213,16 +213,79 @@ public sealed class BreakdownReportService : IBreakdownService
         BreakdownByStoreRequest request,
         CancellationToken cancellationToken)
     {
+        return GetMembersByStore(request, inActiveEmployees: false, terminatedEmployees: false, withBalance: false, cancellationToken);
+    }
+
+    public Task<ReportResponseBase<MemberYearSummaryDto>> GetInactiveMembersByStore(
+        BreakdownByStoreRequest request,
+        CancellationToken cancellationToken)
+    {
+        return GetMembersByStore(request, inActiveEmployees: true, terminatedEmployees: false, withBalance: false, cancellationToken);
+    }
+
+    public Task<ReportResponseBase<MemberYearSummaryDto>> GetInactiveMembersWithBalanceByStore(
+        BreakdownByStoreRequest request,
+        CancellationToken cancellationToken)
+    {
+        return GetMembersByStore(request, inActiveEmployees: true, terminatedEmployees: false, withBalance: true, cancellationToken);
+    }
+
+    public Task<ReportResponseBase<MemberYearSummaryDto>> GetTerminatedMembersWithBalanceByStore(
+       BreakdownByStoreRequest request,
+       CancellationToken cancellationToken)
+    {
+        return GetMembersByStore(request, inActiveEmployees: false, terminatedEmployees: true, withBalance: true, cancellationToken);
+    }
+
+    #region ── Private: common building blocks ───────────────────────────────────────────
+
+    private Task<ReportResponseBase<MemberYearSummaryDto>> GetMembersByStore(
+        BreakdownByStoreRequest request,
+        bool inActiveEmployees,
+        bool terminatedEmployees,
+        bool withBalance,
+        CancellationToken cancellationToken)
+    {
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             ValidateStoreNumber(request);
 
             var employeesBase = await BuildEmployeesBaseQuery(ctx, request.ProfitYear);
-            employeesBase = employeesBase.Where(q => q.StoreNumber == request.StoreNumber);
+
+            if (inActiveEmployees)
+            {
+                employeesBase = employeesBase.Where(e => e.EmploymentStatusId == EmploymentStatus.Constants.Inactive && e.TerminationCodeId != TerminationCode.Constants.Transferred);
+            }
+
+            if (terminatedEmployees)
+            {
+                employeesBase = employeesBase.Where(e => e.EmploymentStatusId == EmploymentStatus.Constants.Terminated && e.TerminationCodeId != TerminationCode.Constants.RetiredReceivingPension);
+                                             
+            }
+            
+            if (request.StoreNumber.HasValue)
+            {
+                employeesBase = employeesBase.Where(q => q.StoreNumber == request.StoreNumber.Value);
+            }
+
+            if (withBalance)
+            {
+                employeesBase = employeesBase.Where(e => e.VestedBalance.HasValue && e.VestedBalance.Value != 0);
+            }
+
+
+            if (withBalance && inActiveEmployees)
+            {
+                employeesBase = employeesBase
+                    .Where(e => !ctx.ExcludedIds.Any(x=>e.BadgeNumber == x.ExcludedIdValue));
+            }
 
             // Store‑level + management filter
-            employeesBase = request.StoreManagement ? ApplyStoreManagementFilter(employeesBase)
-                : ApplyNonStoreManagementFilter(employeesBase);
+            if (request.StoreManagement.HasValue)
+            {
+                employeesBase = request.StoreManagement.Value ? ApplyStoreManagementFilter(employeesBase)
+                    : ApplyNonStoreManagementFilter(employeesBase);
+            }
 
             if (request.BadgeNumber > 0)
             {
@@ -265,9 +328,6 @@ public sealed class BreakdownReportService : IBreakdownService
             };
         });
     }
-
-    #region ── Private: common building blocks ───────────────────────────────────────────
-
     private static void ValidateStoreNumber(BreakdownByStoreRequest request)
     {
         if (request.StoreNumber <= 0)
@@ -320,15 +380,13 @@ public sealed class BreakdownReportService : IBreakdownService
            *                             SINCE THEY ARE ALREADY NOTED IN   *
            *                             THE COMMENT ABNVE THE SECTION  
          */
-        int[] pensionerSsns =
-        {
-            023202688, 016201949, 023228733, 025329422, 001301944, 033324971, 020283297, 018260600, 017169396,
-            026786919, 029321863, 016269940, 018306437, 126264073, 012242916, 028280107, 031260942, 024243451
-        };
+        int[] pensionerSsns = await ctx.ExcludedIds.Where(x => x.ExcludedIdTypeId == ExcludedIdType.Constants.QPay066TAExclusions)
+            .Select(x => x.ExcludedIdValue)
+            .ToArrayAsync();
 
         /*
        
-       *| Report store                                        | When the COBOL assigns it                                                                                | Key tests in the code                                                                                                                                  |
+        *| Report store                                        | When the COBOL assigns it                                                                                | Key tests in the code                                                                                                                                  |
          | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
          | **700 – “Retired – Drawing Pension”**               | `B-TERM = "W"` (“W” is the retirement term-code).                                                        | `COMPUTE W-ST = WS-STR-VAL-PS-PENSION-RETIRED + 1000`                                                                                                  |
          | **701 – “Active – Drawing Pension”**                | Hard-coded list of SSNs that are still on the active payroll **after** retirement.                       | Later in the same paragraph:<br>`IF B-SSN = 023202688 OR … THEN COMPUTE W-ST = WS-STR-VAL-PS-PENSION-ACTIVE + 1000`                                    |

@@ -42,7 +42,6 @@ const App = () => {
 
   const health = useSelector((state: RootState) => state.support.health);
 
-
   useEffect(() => {
     const config = oktaConfig(clientId, issuer);
     const auth = new OktaAuth({
@@ -54,11 +53,11 @@ const App = () => {
       }
     });
     setOktaAuth(auth);
-    
+
     // Start the OktaAuth service to enable token auto-renewal (temporary, longterm solution is to use refresh tokens)
     // https://github.com/okta/okta-auth-js/blob/master/docs/autoRenew-notice.md
     auth.start();
-    
+
     return () => {
       auth.stop();
     };

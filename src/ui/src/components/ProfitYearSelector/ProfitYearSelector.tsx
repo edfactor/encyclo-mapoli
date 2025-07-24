@@ -17,13 +17,13 @@ export interface ProfitYearSelectorProps {
 }
 
 const ProfitYearSelector = ({
-                              selectedProfitYear,
-                              handleChange,
-                              showDates = true,
-                              disabled = false,
-                              disabledWhileLoading = true,
-                              defaultValue
-                            }: ProfitYearSelectorProps) => {
+  selectedProfitYear,
+  handleChange,
+  showDates = true,
+  disabled = false,
+  disabledWhileLoading = true,
+  defaultValue
+}: ProfitYearSelectorProps) => {
   const frozenStateCollectionData = useSelector((state: RootState) => state.frozen.frozenStateCollectionData);
   const token = useSelector((state: RootState) => state.security.token);
   const [triggerFrozenStateSearch, { isLoading: isFrozenLoading }] = useLazyGetHistoricalFrozenStateResponseQuery();
@@ -57,21 +57,25 @@ const ProfitYearSelector = ({
 
 
   // Fetch accounting year data for each year
-  const [accountingYearData, setAccountingYearData] = useState<Record<number, { startDate: string; endDate: string }>>({});
+  const [accountingYearData, setAccountingYearData] = useState<Record<number, { startDate: string; endDate: string }>>(
+    {}
+  );
   const [fetchAccountingYear] = useLazyGetAccountingYearQuery();
 
   useEffect(() => {
     yearsToDisplay.forEach((year) => {
       if (!accountingYearData[year]) {
-        fetchAccountingYear({ profitYear: year }).unwrap().then((data) => {
-          setAccountingYearData((prev) => ({
-            ...prev,
-            [year]: {
-              startDate: data.fiscalBeginDate,
-              endDate: data.fiscalEndDate
-            }
-          }));
-        });
+        fetchAccountingYear({ profitYear: year })
+          .unwrap()
+          .then((data) => {
+            setAccountingYearData((prev) => ({
+              ...prev,
+              [year]: {
+                startDate: data.fiscalBeginDate,
+                endDate: data.fiscalEndDate
+              }
+            }));
+          });
       }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -103,8 +107,12 @@ const ProfitYearSelector = ({
 
   return (
     <div className="flex items-center gap-2 h-10 min-w-[174px]">
-      <FormControl fullWidth size="small">
-        <InputLabel id="profit-year-label" sx={{ color: "black" }}>
+      <FormControl
+        fullWidth
+        size="small">
+        <InputLabel
+          id="profit-year-label"
+          sx={{ color: "black" }}>
           Profit Year
         </InputLabel>
         <Select
@@ -117,17 +125,18 @@ const ProfitYearSelector = ({
           fullWidth
           disabled={disabled || (disabledWhileLoading && isFrozenLoading)}
           onChange={handleChange}
-          sx={{ fontSize: '0.9rem' }} // Shrinks font in the select input
+          sx={{ fontSize: "0.9rem" }} // Shrinks font in the select input
           MenuProps={{
             PaperProps: {
               sx: {
-                fontSize: '0.9rem', // Shrinks font in the dropdown menu
-              },
-            },
-          }}
-        >
-        {yearsToDisplay.map((year) => (
-            <MenuItem key={year} value={year}>
+                fontSize: "0.9rem" // Shrinks font in the dropdown menu
+              }
+            }
+          }}>
+          {yearsToDisplay.map((year) => (
+            <MenuItem
+              key={year}
+              value={year}>
               {year} -
               {showDates && accountingYearData[year] && (
                 <span className="text-gray-500 ml-1">

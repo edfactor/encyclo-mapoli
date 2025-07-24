@@ -43,12 +43,14 @@ export const ROUTES = {
   PROFIT_SHARE_REPORT_EDIT_RUN: "profit-share-report-edit-run",
   PROFIT_SHARE_REPORT_FINAL_RUN: "profit-share-report-final-run",
   PROFIT_SHARE_UPDATE: "profit-share-update",
-  PROFNEW: "/",  
+  PROFNEW: "/",
 
   FROZEN_SUMMARY: "frozen-summary",
   MASTER_INQUIRY: "master-inquiry",
   BENEFICIARY_INQUIRY: "beneficiary",
+  PAY_BE_NEXT: "adhoc-beneficiaries-report",
   FORFEITURES_ADJUSTMENT: "forfeitures-adjustment",
+  PAY_BEN_REPORT: 'payben-report',
 
   PAY426_ACTIVE_18_20: "pay426-1",
   PAY426_ACTIVE_21_PLUS: "pay426-2",
@@ -83,7 +85,9 @@ export const ROUTES = {
 } as const;
 
 export const CAPTIONS = {
+  PAY_BE_NEXT: "Pay Be Next",
   BENEFICIARY_INQUIRY: "Beneficiary Inquiry",
+    PAYBEN_REPORT: "Pay Beneficiary Report",
   BALANCE_BY_AGE: "Get Balance by Age (PROF130B)",
   BALANCE_BY_YEARS: "Get Balance by Years (PROF130Y)",
   CONTRIBUTIONS_BY_AGE: "Get Contributions by Age (PROF130)",
@@ -139,7 +143,7 @@ export const CAPTIONS = {
   PROFIT_SHARE_TOTALS: "Profit Share Totals Report (PAY426)",
   PROFIT_SHARE_UPDATE: "Profit Share Updates (PAY444|PAY447)",
   PROFIT_SHARING_CONTROL_SHEET: "Profit Sharing Control Sheet",
-  PRINT_PROFIT_CERTS:  "Print Profit Certs (PAYCERT)",
+  PRINT_PROFIT_CERTS: "Print Profit Certs (PAYCERT)",
   QPAY066_UNDER21: "QPAY066-UNDR21",
   QPAY066TA_UNDER21: "QPAY066TA-UNDR21",
   QPAY066TA: "QPAY066TA",

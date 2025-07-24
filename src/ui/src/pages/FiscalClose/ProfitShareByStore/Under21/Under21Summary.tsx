@@ -1,7 +1,7 @@
-import React from 'react';
-import { Typography, Box } from '@mui/material';
-import { Under21TotalsResponse } from 'reduxstore/types';
-import { TotalsGrid } from 'smart-ui-library';
+import React from "react";
+import { Typography, Box } from "@mui/material";
+import { Under21TotalsResponse } from "reduxstore/types";
+import { TotalsGrid } from "smart-ui-library";
 
 interface Under21SummaryProps {
   totals: Under21TotalsResponse | null;
@@ -9,10 +9,10 @@ interface Under21SummaryProps {
   title?: string;
 }
 
-const Under21Summary: React.FC<Under21SummaryProps> = ({ 
-  totals, 
+const Under21Summary: React.FC<Under21SummaryProps> = ({
+  totals,
   isLoading,
-  title = "UNDER 21 REPORT (QPAY066-UNDR21)" 
+  title = "UNDER 21 REPORT (QPAY066-UNDR21)"
 }) => {
   if (!totals && !isLoading) return null;
 
@@ -26,7 +26,7 @@ const Under21Summary: React.FC<Under21SummaryProps> = ({
     // Row 2: Partially Vested
     [
       totals?.numberOfActiveUnder21With20to80PctVested || 0,
-      totals?.numberOfTerminatedUnder21With20to80PctVested || 0, 
+      totals?.numberOfTerminatedUnder21With20to80PctVested || 0,
       totals?.numberOfInActiveUnder21With20to80PctVested || 0
     ],
     // Row 3: 1-2 PS Years
@@ -37,10 +37,11 @@ const Under21Summary: React.FC<Under21SummaryProps> = ({
     ],
     // Row 4: Totals (only computing the active column total)
     [
-      (totals ? 
-        (totals.numberOfActiveUnder21With1to2Years + 
-         totals.numberOfActiveUnder21With20to80PctVested + 
-         totals.numberOfActiveUnder21With100PctVested) : 0),
+      totals
+        ? totals.numberOfActiveUnder21With1to2Years +
+          totals.numberOfActiveUnder21With20to80PctVested +
+          totals.numberOfActiveUnder21With100PctVested
+        : 0,
       "",
       ""
     ]
@@ -48,7 +49,9 @@ const Under21Summary: React.FC<Under21SummaryProps> = ({
 
   return (
     <Box sx={{ marginBottom: 3 }}>
-      <Typography variant="h6" sx={{ marginBottom: 2, color: '#0258A5' }}>
+      <Typography
+        variant="h6"
+        sx={{ marginBottom: 2, color: "#0258A5" }}>
         {title}
       </Typography>
 
@@ -69,4 +72,4 @@ const Under21Summary: React.FC<Under21SummaryProps> = ({
   );
 };
 
-export default Under21Summary; 
+export default Under21Summary;

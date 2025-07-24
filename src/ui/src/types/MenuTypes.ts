@@ -13,4 +13,4 @@ export type RouteCategory = {
   underlined?: boolean;
   disabled?: boolean;
   roles?: string[];
-}; 
+};

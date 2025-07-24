@@ -21,7 +21,7 @@ const ErrorFallback = ({ error, resetErrorBoundary }: FallbackProps) => {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center",
+        justifyContent: "center"
       }}>
       <ErrorOutlineIcon
         sx={{
@@ -44,7 +44,7 @@ const ErrorFallback = ({ error, resetErrorBoundary }: FallbackProps) => {
         sx={{
           marginBottom: 4
         }}>
-       Error: "{error.message}"
+        Error: "{error.message}"
       </Typography>
 
       <Button

@@ -11,7 +11,9 @@ const DuplicateNamesAndBirthdays = () => {
     return <StatusDropdownActionNode />;
   };
   return (
-    <Page label="Duplicate Names and Birthdays" actionNode={renderActionNode()}>
+    <Page
+      label="Duplicate Names and Birthdays"
+      actionNode={renderActionNode()}>
       <Grid2
         container
         rowSpacing="24px">

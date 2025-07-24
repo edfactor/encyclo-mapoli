@@ -12,4 +12,4 @@ const useFiscalCloseProfitYear = (): number => {
   return selectedProfitYearForFiscalClose;
 };
 
-export default useFiscalCloseProfitYear; 
+export default useFiscalCloseProfitYear;

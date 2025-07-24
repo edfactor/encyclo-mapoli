@@ -44,15 +44,12 @@ const Under21Report = () => {
           isSortDescending: sortParams.isSortDescending
         }
       };
-      
-      await Promise.all([
-        fetchUnder21Totals(queryParams),
-        fetchUnder21Breakdown(queryParams)
-      ]);
-      
+
+      await Promise.all([fetchUnder21Totals(queryParams), fetchUnder21Breakdown(queryParams)]);
+
       setInitialLoad(false);
     };
-    
+
     fetchData();
   }, [fetchUnder21Totals, fetchUnder21Breakdown, pageNumber, pageSize, sortParams]);
 
@@ -68,17 +65,16 @@ const Under21Report = () => {
           isSortDescending: sortParams.isSortDescending
         }
       };
-      
+
       fetchUnder21Totals(queryParams);
       fetchUnder21Breakdown(queryParams);
     }
   }, [initialSearchLoaded, pageNumber, pageSize, sortParams, fetchUnder21Totals, fetchUnder21Breakdown]);
 
-
   // Need a useEffect to reset the page number when under21Totals changes
   const prevUnder21Totals = useRef<any>(null);
   useEffect(() => {
-    if (under21Totals?.numberOfEmployees !== prevUnder21Totals.current?.numberOfEmployees)  {
+    if (under21Totals?.numberOfEmployees !== prevUnder21Totals.current?.numberOfEmployees) {
       setPageNumber(0);
     }
     prevUnder21Totals.current = under21Totals;
@@ -95,13 +91,15 @@ const Under21Report = () => {
         isSortDescending
       }
     };
-    
+
     fetchUnder21Totals(queryParams);
     fetchUnder21Breakdown(queryParams);
   };
 
   return (
-    <Page label={CAPTIONS.QPAY066_UNDER21} actionNode={renderActionNode()}>
+    <Page
+      label={CAPTIONS.QPAY066_UNDER21}
+      actionNode={renderActionNode()}>
       <Grid2
         container
         rowSpacing="24px">
@@ -111,24 +109,30 @@ const Under21Report = () => {
 
         {initialLoad ? (
           <Grid2 width="100%">
-            <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
+            <Box
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              minHeight="200px">
               <CircularProgress />
             </Box>
           </Grid2>
         ) : (
           <>
             {hasData && !isLoading && (
-              <Grid2 width="100%" paddingX="24px">
-                <Under21Summary 
-                  totals={under21Totals} 
-                  isLoading={isTotalsLoading} 
+              <Grid2
+                width="100%"
+                paddingX="24px">
+                <Under21Summary
+                  totals={under21Totals}
+                  isLoading={isTotalsLoading}
                   title="UNDER 21 REPORT (QPAY066-UNDR21)"
                 />
               </Grid2>
             )}
 
             <Grid2 width="100%">
-              <Under21BreakdownGrid 
+              <Under21BreakdownGrid
                 isLoading={isBreakdownLoading}
                 initialSearchLoaded={initialSearchLoaded}
                 setInitialSearchLoaded={setInitialSearchLoaded}

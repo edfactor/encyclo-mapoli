@@ -79,18 +79,18 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange }) =
       "7": "PAY426-7",
       "8": "PAY426-8",
       "9": "PAY426-3",
-      "N": "PAY426-10"
+      N: "PAY426-10"
     };
-    
+
     const presetId = presetMap[lineItemPrefix];
-    return presets.find(preset => preset.id === presetId)?.params || null;
+    return presets.find((preset) => preset.id === presetId)?.params || null;
   };
 
   const handleRowClick = (event: { data: YearEndProfitSharingReportSummaryLineItem }) => {
     const rowData = event.data;
     const clickedLineItem = rowData.lineItemPrefix;
-    
-    setSelectedLineItem(prevSelected => {
+
+    setSelectedLineItem((prevSelected) => {
       const newSelected = prevSelected === clickedLineItem ? null : clickedLineItem;
       if (newSelected) {
         const params = getPresetForLineItem(newSelected);
@@ -107,17 +107,15 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange }) =
       trigger({
         useFrozenData: true,
         profitYear: profitYear,
-        badgeNumber: null,
+        badgeNumber: null
       });
     }
   }, [trigger, profitYear, hasToken]);
 
   const renderActionNode = () => {
-    return (
-      <StatusDropdownActionNode />
-    );
+    return <StatusDropdownActionNode />;
   };
-  
+
   const columnDefs = useMemo(() => GetProfitSummaryGridColumns(), []);
 
   // Here we combine the API data with placeholders for "Active and Inactive" and "terminated" section
@@ -127,48 +125,52 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange }) =
 
     const dataMap = new Map(
       data.lineItems
-        .filter(item => item.subgroup.toUpperCase() === "ACTIVE AND INACTIVE")
-        .map(item => [item.lineItemPrefix, item])
+        .filter((item) => item.subgroup.toUpperCase() === "ACTIVE AND INACTIVE")
+        .map((item) => [item.lineItemPrefix, item])
     );
 
-    return activeInactivePlaceholders.map(placeholder =>
-      dataMap.get(placeholder.lineItemPrefix) || placeholder
-    );
+    return activeInactivePlaceholders.map((placeholder) => dataMap.get(placeholder.lineItemPrefix) || placeholder);
   }, [data]);
 
   const terminatedRowData = useMemo(() => {
     if (!data?.lineItems) return [];
 
-    return data.lineItems.filter(item => item.subgroup.toUpperCase() === "TERMINATED");
+    return data.lineItems.filter((item) => item.subgroup.toUpperCase() === "TERMINATED");
   }, [data]);
 
   const getActiveAndInactiveTotals = useMemo(() => {
     if (!activeAndInactiveRowData) return [];
 
-    return [{
-      lineItemTitle: "TOTAL",
-      numberOfMembers: activeAndInactiveRowData.reduce((acc, curr) => acc + curr.numberOfMembers, 0),
-      totalWages: activeAndInactiveRowData.reduce((acc, curr) => acc + curr.totalWages, 0),
-      totalBalance: activeAndInactiveRowData.reduce((acc, curr) => acc + curr.totalBalance, 0)
-    }];
+    return [
+      {
+        lineItemTitle: "TOTAL",
+        numberOfMembers: activeAndInactiveRowData.reduce((acc, curr) => acc + curr.numberOfMembers, 0),
+        totalWages: activeAndInactiveRowData.reduce((acc, curr) => acc + curr.totalWages, 0),
+        totalBalance: activeAndInactiveRowData.reduce((acc, curr) => acc + curr.totalBalance, 0)
+      }
+    ];
   }, [activeAndInactiveRowData]);
 
   const getTerminatedTotals = useMemo(() => {
     if (!terminatedRowData) return [];
 
-    return [{
-      lineItemTitle: "TOTAL",
-      numberOfMembers: terminatedRowData.reduce((acc, curr) => acc + curr.numberOfMembers, 0),
-      totalWages: terminatedRowData.reduce((acc, curr) => acc + curr.totalWages, 0),
-      totalBalance: terminatedRowData.reduce((acc, curr) => acc + curr.totalBalance, 0)
-    }];
+    return [
+      {
+        lineItemTitle: "TOTAL",
+        numberOfMembers: terminatedRowData.reduce((acc, curr) => acc + curr.numberOfMembers, 0),
+        totalWages: terminatedRowData.reduce((acc, curr) => acc + curr.totalWages, 0),
+        totalBalance: terminatedRowData.reduce((acc, curr) => acc + curr.totalBalance, 0)
+      }
+    ];
   }, [terminatedRowData]);
 
   const shouldShowDetailGrid = selectedLineItem && getPresetForLineItem(selectedLineItem);
 
   return (
     <>
-      <Page label="Profit Summary" actionNode={renderActionNode()}>
+      <Page
+        label="Profit Summary"
+        actionNode={renderActionNode()}>
         <Grid2
           container
           rowSpacing="24px">
@@ -177,13 +179,15 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange }) =
           </Grid2>
 
           <Grid2 width={"100%"}>
-            <Typography variant="h6" sx={{ mb: 2, px: 3 }}>
+            <Typography
+              variant="h6"
+              sx={{ mb: 2, px: 3 }}>
               Active and Inactive
             </Typography>
             <DSMGrid
               preferenceKey={"ACTIVE_INACTIVE_SUMMARY"}
               isLoading={isFetching}
-              handleSortChanged={() => { }}
+              handleSortChanged={() => {}}
               providedOptions={{
                 rowData: activeAndInactiveRowData,
                 pinnedTopRowData: getActiveAndInactiveTotals,
@@ -194,13 +198,15 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange }) =
           </Grid2>
 
           <Grid2 width={"100%"}>
-            <Typography variant="h6" sx={{ mb: 2, px: 3 }}>
+            <Typography
+              variant="h6"
+              sx={{ mb: 2, px: 3 }}>
               Terminated
             </Typography>
             <DSMGrid
               preferenceKey={"TERMINATED_SUMMARY"}
               isLoading={isFetching}
-              handleSortChanged={() => { }}
+              handleSortChanged={() => {}}
               providedOptions={{
                 rowData: terminatedRowData,
                 pinnedTopRowData: getTerminatedTotals,
@@ -209,7 +215,6 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange }) =
               }}
             />
           </Grid2>
-
         </Grid2>
       </Page>
     </>

@@ -9,6 +9,8 @@ import { StartAndEndDateRequest } from "reduxstore/types";
 import { useLazyGetTerminationReportQuery } from "reduxstore/api/YearsEndApi";
 import { GetDetailColumns, GetTerminationColumns } from "./TerminationGridColumn";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import { ForfeitureAdjustmentUpdateRequest } from "reduxstore/types";
+import { useUpdateForfeitureAdjustmentMutation, useUpdateForfeitureAdjustmentBulkMutation } from "reduxstore/api/YearsEndApi";
 
 interface TerminationGridSearchProps {
   initialSearchLoaded: boolean;
@@ -40,6 +42,36 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   const [selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
   const [editedValues, setEditedValues] = useState<Record<string, { value: number; hasError: boolean }>>({});
   const selectedProfitYear = useDecemberFlowProfitYear();
+  const [updateForfeitureAdjustmentBulk] = useUpdateForfeitureAdjustmentBulkMutation();
+  const [updateForfeitureAdjustment] = useUpdateForfeitureAdjustmentMutation();
+
+  const handleSave = useCallback(async (request: ForfeitureAdjustmentUpdateRequest) => {
+    try {
+      await updateForfeitureAdjustment(request);
+      const rowKey = `${request.badgeNumber}-${request.profitYear}`;
+      setEditedValues(prev => {
+        const updated = { ...prev };
+        delete updated[rowKey];
+        return updated;
+      });
+      onUnsavedChanges(Object.keys(editedValues).length > 1);
+      if (searchParams) {
+        const params = {
+          ...searchParams,
+          pagination: {
+            skip: pageNumber * pageSize,
+            take: pageSize,
+            sortBy: sortParams.sortBy,
+            isSortDescending: sortParams.isSortDescending
+          }
+        };
+        triggerSearch(params, false);
+      }
+    } catch (error) {
+      console.error('Failed to save forfeiture adjustment:', error);
+      alert('Failed to save. Please try again.');
+    }
+  }, [updateForfeitureAdjustment, editedValues, onUnsavedChanges, searchParams, pageNumber, pageSize, sortParams, triggerSearch]);
 
   // Reset page number to 0 when resetPageFlag changes
   useEffect(() => {
@@ -54,9 +86,6 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
 
   // Initialize expandedRows when data is loaded
   useEffect(() => {
-
-    setPageNumber(0);
-    
     if (termination?.response?.results && termination.response.results.length > 0) {
       // Only reset if badgeNumbers have changed
       const badgeNumbers = termination.response.results.map((row: any) => row.badgeNumber).join(",");
@@ -97,7 +126,6 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     }));
   };
 
-
   const addRowToSelectedRows = (id: number) => {
     setSelectedRowIds([...selectedRowIds, id]);
   };
@@ -107,15 +135,44 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   };
 
   const updateEditedValue = useCallback((rowKey: string, value: number, hasError: boolean) => {
-    setEditedValues(prev => ({
+    setEditedValues((prev) => ({
       ...prev,
       [rowKey]: { value, hasError }
     }));
   }, []);
 
+  const handleBulkSave = useCallback(async (requests: ForfeitureAdjustmentUpdateRequest[]) => {
+    try {
+      await updateForfeitureAdjustmentBulk(requests);
+      const updatedEditedValues = { ...editedValues };
+      requests.forEach(request => {
+        const rowKey = `${request.badgeNumber}-${request.profitYear}`;
+        delete updatedEditedValues[rowKey];
+      });
+      setEditedValues(updatedEditedValues);
+      setSelectedRowIds([]);
+      onUnsavedChanges(Object.keys(updatedEditedValues).length > 0);
+      if (searchParams) {
+        const params = {
+          ...searchParams,
+          pagination: {
+            skip: pageNumber * pageSize,
+            take: pageSize,
+            sortBy: sortParams.sortBy,
+            isSortDescending: sortParams.isSortDescending
+          }
+        };
+        triggerSearch(params, false);
+      }
+    } catch (error) {
+      console.error('Failed to save forfeiture adjustments:', error);
+      alert('Failed to save one or more adjustments. Please try again.');
+    }
+  }, [updateForfeitureAdjustmentBulk, editedValues, onUnsavedChanges, searchParams, pageNumber, pageSize, sortParams, triggerSearch]);
+
   // Get main and detail columns
   const mainColumns = useMemo(() => GetTerminationColumns(), []);
-  const detailColumns = useMemo(() => GetDetailColumns(addRowToSelectedRows, removeRowFromSelectedRows, selectedRowIds, selectedProfitYear), [selectedRowIds, selectedProfitYear]);
+  const detailColumns = useMemo(() => GetDetailColumns(addRowToSelectedRows, removeRowFromSelectedRows, selectedRowIds, selectedProfitYear, handleSave, handleBulkSave), [selectedRowIds, selectedProfitYear, handleSave, handleBulkSave]);
 
   // Build grid data with expandable rows
   const gridData = useMemo(() => {
@@ -153,7 +210,6 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
 
     return rows;
   }, [termination, expandedRows]);
-
 
   // Compose columns: show main columns for parent, detail columns for detail
   const columnDefs = useMemo(() => {
@@ -273,7 +329,9 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
       </style>
       {isFetching && (
         <div className="termination-spinner-overlay">
-          <div className="spinner-border termination-spinner" role="status">
+          <div
+            className="spinner-border termination-spinner"
+            role="status">
             <span className="visually-hidden">Loading...</span>
           </div>
         </div>
@@ -310,7 +368,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
               rowData: gridData,
               columnDefs: columnDefs,
               getRowClass: getRowClass,
-              rowSelection: 'multiple',
+              rowSelection: "multiple",
               suppressRowClickSelection: true,
               rowHeight: 40,
               suppressMultiSort: true,

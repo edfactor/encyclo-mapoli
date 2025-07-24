@@ -2,8 +2,15 @@ import { Button } from "@mui/material";
 import Link from "@mui/material/Link";
 import { JSX } from "react";
 
-export function viewBadgeLinkRenderer(badgeNumber: number, navigateFunction?: (path: string) => void): JSX.Element | number;
-export function viewBadgeLinkRenderer(badgeNumber: number, psnSuffix: number, navigateFunction?: (path: string) => void): JSX.Element | number;
+export function viewBadgeLinkRenderer(
+  badgeNumber: number,
+  navigateFunction?: (path: string) => void
+): JSX.Element | number;
+export function viewBadgeLinkRenderer(
+  badgeNumber: number,
+  psnSuffix: number,
+  navigateFunction?: (path: string) => void
+): JSX.Element | number;
 export function viewBadgeLinkRenderer(
   badgeNumber: number,
   param2?: number | ((path: string) => void),
@@ -15,9 +22,9 @@ export function viewBadgeLinkRenderer(
   let navigateFunction: ((path: string) => void) | undefined = undefined;
 
   // Determine which parameters are which
-  if (typeof param2 === 'function') {
+  if (typeof param2 === "function") {
     navigateFunction = param2;
-  } else if (typeof param2 === 'number') {
+  } else if (typeof param2 === "number") {
     psnSuffix = param2;
     navigateFunction = param3;
   }

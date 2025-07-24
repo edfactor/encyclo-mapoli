@@ -21,7 +21,7 @@ const ForfeituresByAge = () => {
   useEffect(() => {
     if (hasToken && profitYear && !hasInitialSearchRun) {
       setHasInitialSearchRun(true);
-      
+
       const fetchReport = (reportType: FrozenReportsByAgeRequestType) => {
         return triggerSearch(
           {
@@ -32,32 +32,32 @@ const ForfeituresByAge = () => {
           false
         );
       };
-      
+
       Promise.all([
         fetchReport(FrozenReportsByAgeRequestType.Total),
         fetchReport(FrozenReportsByAgeRequestType.FullTime),
         fetchReport(FrozenReportsByAgeRequestType.PartTime)
       ])
-        .then(results => {
+        .then((results) => {
           if (results[0].data) {
             dispatch(setForfeituresByAgeQueryParams(profitYear));
             setInitialSearchLoaded(true);
           }
         })
-        .catch(error => {
+        .catch((error) => {
           console.error("Initial forfeitures by age search failed:", error);
         });
     }
   }, [hasToken, profitYear, hasInitialSearchRun, triggerSearch, dispatch]);
 
   const renderActionNode = () => {
-    return (
-        <StatusDropdownActionNode />
-    );
-};
+    return <StatusDropdownActionNode />;
+  };
 
   return (
-    <Page label="Forfeitures By Age" actionNode={renderActionNode()}>
+    <Page
+      label="Forfeitures By Age"
+      actionNode={renderActionNode()}>
       <Grid2
         container
         rowSpacing="24px">

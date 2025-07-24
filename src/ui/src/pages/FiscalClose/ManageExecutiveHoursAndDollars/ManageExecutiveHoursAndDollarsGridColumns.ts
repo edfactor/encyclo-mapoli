@@ -96,7 +96,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       resizable: true,
       valueFormatter: (params) => {
         const id = params.data?.payFrequencyId; // assuming 'status' is in the row data
-        const name = params.data?.payFrequencyName; // assuming 'statusName' is in the row data        
+        const name = params.data?.payFrequencyName; // assuming 'statusName' is in the row data
         return `[${id}] ${name}`;
       }
     },
@@ -110,7 +110,7 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       resizable: true,
       valueFormatter: (params) => {
         const id = params.data?.employmentStatusId; // assuming 'status' is in the row data
-        const name = params.data?.employmentStatusName; // assuming 'statusName' is in the row data        
+        const name = params.data?.employmentStatusName; // assuming 'statusName' is in the row data
         return `[${id}] ${name}`;
       }
     }

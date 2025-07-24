@@ -1,6 +1,6 @@
 import { AddOutlined } from "@mui/icons-material";
 import { Button } from "@mui/material";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useLazyGetForfeitureAdjustmentsQuery } from "reduxstore/api/YearsEndApi";
@@ -19,12 +19,16 @@ interface ForfeituresAdjustmentGridProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
   onAddForfeiture?: () => void;
+  pageNumberReset: boolean;
+  setPageNumberReset: (reset: boolean) => void;
 }
 
-const ForfeituresAdjustmentGrid: React.FC<ForfeituresAdjustmentGridProps> = ({ 
-  initialSearchLoaded, 
+const ForfeituresAdjustmentGrid: React.FC<ForfeituresAdjustmentGridProps> = ({
+  initialSearchLoaded,
   setInitialSearchLoaded,
-  onAddForfeiture
+  onAddForfeiture,
+  pageNumberReset,
+  setPageNumberReset
 }) => {
   const navigate = useNavigate();
   const [pageNumber, setPageNumber] = useState(0);
@@ -39,11 +43,13 @@ const ForfeituresAdjustmentGrid: React.FC<ForfeituresAdjustmentGridProps> = ({
   const { forfeitureAdjustmentData } = useSelector((state: RootState) => state.forfeituresAdjustment);
   const results = forfeitureAdjustmentData?.response?.results || [];
   const totalRecords = forfeitureAdjustmentData?.response?.total || 0;
-  
-  const totalsRow = forfeitureAdjustmentData ? {
-    netBalance: forfeitureAdjustmentData.totatNetBalance,
-    netVested: forfeitureAdjustmentData.totatNetVested
-  } : null;
+
+  const totalsRow = forfeitureAdjustmentData
+    ? {
+        netBalance: forfeitureAdjustmentData.totatNetBalance,
+        netVested: forfeitureAdjustmentData.totatNetVested
+      }
+    : null;
 
   // Wrapper to pass react function to non-react class
   const handleNavigationForButton = useCallback(
@@ -53,21 +59,14 @@ const ForfeituresAdjustmentGrid: React.FC<ForfeituresAdjustmentGridProps> = ({
     [navigate]
   );
 
-  const columnDefs = useMemo(
-    () => GetForfeituresAdjustmentColumns(),
-    [handleNavigationForButton]
-  );
+  const columnDefs = useMemo(() => GetForfeituresAdjustmentColumns(), [handleNavigationForButton]);
 
-  // Need a useEffect to reset the page number when forfeitureAdjustmentData changes
-  const prevForfeitureAdjustmentData = useRef<any>(null);
   useEffect(() => {
-    if (forfeitureAdjustmentData?.response?.results && forfeitureAdjustmentData.response.results.length > 0 &&
-        (prevForfeitureAdjustmentData.current === null || 
-         forfeitureAdjustmentData.response.results.length !== prevForfeitureAdjustmentData.current.response?.results.length)) {
+    if (pageNumberReset) {
       setPageNumber(0);
+      setPageNumberReset(false);
     }
-    prevForfeitureAdjustmentData.current = forfeitureAdjustmentData;
-  }, [forfeitureAdjustmentData]);
+  }, [pageNumberReset, setPageNumberReset]);
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
@@ -75,21 +74,24 @@ const ForfeituresAdjustmentGrid: React.FC<ForfeituresAdjustmentGridProps> = ({
     <>
       {initialSearchLoaded && (
         <>
-          <div style={{ padding: "0 24px 24px 24px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div
+            style={{
+              padding: "0 24px 24px 24px",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center"
+            }}>
             {onAddForfeiture && (
-              <Button 
+              <Button
                 onClick={onAddForfeiture}
-                variant="contained" 
+                variant="contained"
                 startIcon={<AddOutlined />}
-                color="primary"
-              >
+                color="primary">
                 ADD FORFEITURE
               </Button>
             )}
           </div>
-          {forfeitureAdjustmentData && (
-            <ReportSummary report={forfeitureAdjustmentData} />
-          )}
+          {forfeitureAdjustmentData && <ReportSummary report={forfeitureAdjustmentData} />}
           <DSMGrid
             preferenceKey={CAPTIONS.FORFEITURES_ADJUSTMENT}
             isLoading={isFetching}
@@ -120,4 +122,4 @@ const ForfeituresAdjustmentGrid: React.FC<ForfeituresAdjustmentGridProps> = ({
   );
 };
 
-export default ForfeituresAdjustmentGrid; 
+export default ForfeituresAdjustmentGrid;

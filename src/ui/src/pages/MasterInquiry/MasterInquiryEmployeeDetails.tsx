@@ -1,19 +1,18 @@
 import { Typography } from "@mui/material";
-import Grid2 from '@mui/material/Grid2';
+import Grid2 from "@mui/material/Grid2";
 import LabelValueSection from "components/LabelValueSection";
 import React, { useEffect } from "react";
+import { useSelector } from "react-redux";
+import { useLazyGetProfitMasterInquiryMemberQuery } from "reduxstore/api/InquiryApi";
+import { RootState } from "reduxstore/store";
 import { MissiveResponse } from "reduxstore/types";
-import { numberToCurrency, formatNumberWithComma } from "smart-ui-library";
+import { formatNumberWithComma, numberToCurrency } from "smart-ui-library";
 import { formatPercentage } from "utils/formatPercentage";
-import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
+import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
+import "../../styles/employee-details-lightbox.css";
 import { mmDDYYFormat } from "../../utils/dateUtils";
 import { getEnrolledStatus, getForfeitedStatus } from "../../utils/enrollmentUtil";
-import { useLazyGetProfitMasterInquiryMemberQuery } from "reduxstore/api/InquiryApi";
-import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
-import { useSelector } from "react-redux";
-import { RootState } from "reduxstore/store";
-import "../../styles/employee-details-lightbox.css";
-
+import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
 
 interface MasterInquiryEmployeeDetailsProps {
   memberType: number;
@@ -22,28 +21,58 @@ interface MasterInquiryEmployeeDetailsProps {
   noResults?: boolean;
 }
 
-const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> = ({ memberType, id, profitYear, noResults }) => {
+const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> = ({
+  memberType,
+  id,
+  profitYear,
+  noResults
+}) => {
   const [trigger, { data: details, isLoading, isError }] = useLazyGetProfitMasterInquiryMemberQuery();
+  const { masterInquiryResults } = useSelector((state: RootState) => state.inquiry);
+
   const missives = useSelector((state: RootState) => state.lookups.missives);
 
   const defaultProfitYear = useDecemberFlowProfitYear();
+  const [isMilitary, setIsMilitary] = React.useState(false);
 
   // We need to get the saved query params
   const { masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
-  
+
   useEffect(() => {
     if (memberType && id) {
-      trigger({ memberType, id: typeof id === 'string' ? parseInt(id) : id, profitYear: profitYear ?? defaultProfitYear });
+      trigger({
+        memberType,
+        id: typeof id === "string" ? parseInt(id) : id,
+        profitYear: profitYear ?? defaultProfitYear
+      });
     }
   }, [memberType, id, profitYear, trigger, defaultProfitYear]);
+
+  useEffect(() => {
+    if (masterInquiryResults) {
+      // We check transaction comment types to know if this is a military member
+      const militaryTransactions = masterInquiryResults.filter((item) => item.commentTypeName === "Military");
+      setIsMilitary(militaryTransactions.length > 0);
+    } else {
+      setIsMilitary(false);
+    }
+  }, [masterInquiryResults]);
 
   if (noResults) {
     return (
       <Grid2 size={{ xs: 12 }}>
         <div className="missive-alerts-box">
           <div className="missive-alert missive-error">
-            <Typography sx={{ color: 'error.main' }} variant="body1" fontWeight={600}>No Profit Sharing Records Found</Typography>
-            <Typography variant="body2">The Employee Badge Number you have entered has no Profit Sharing Records. Re-enter an Employee Badge Number with Profit Sharing.</Typography>
+            <Typography
+              sx={{ color: "error.main" }}
+              variant="body1"
+              fontWeight={600}>
+              No Profit Sharing Records Found
+            </Typography>
+            <Typography variant="body2">
+              The Employee Badge Number you have entered has no Profit Sharing Records. Re-enter an Employee Badge
+              Number with Profit Sharing.
+            </Typography>
           </div>
         </div>
       </Grid2>
@@ -56,7 +85,9 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
   // Missive alerts logic (moved from filter/member grid)
   let missiveAlerts: MissiveResponse[] = [];
   if (details && details.missives && missives) {
-    missiveAlerts = details.missives.map((id: number) => missives.find((m: MissiveResponse) => m.id === id)).filter(Boolean) as MissiveResponse[];
+    missiveAlerts = details.missives
+      .map((id: number) => missives.find((m: MissiveResponse) => m.id === id))
+      .filter(Boolean) as MissiveResponse[];
   }
 
   const {
@@ -102,12 +133,21 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     // Need to add a new missive warning saying a beneficiary was found
     missiveAlerts.push({
       id: 976,
-      severity: 'info',
+      severity: "info",
       message: `Beneficiary ${ssnValue} Found`,
-      description: 'This member is a beneficiary and not an employee.',
+      description: "This member is a beneficiary and not an employee."
     });
+  }
 
-  } 
+  // Warning needed if military member has vested money
+  if (isMilitary && percentageVested > 0) {
+    missiveAlerts.push({
+      id: 961, // invented id as this is not from back end
+      severity: "warning",
+      message: "Military entry has affected vested percentage",
+      description: `Vested percentage now at ${percentageVested * 100}%.`
+    });
+  }
 
   const enrolled = getEnrolledStatus(enrollmentId);
   const forfeited = getForfeitedStatus(enrollmentId);
@@ -121,7 +161,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     ...(isEmployee ? [{ label: "Work Location", value: workLocation || "N/A" }] : []),
     ...(isEmployee ? [{ label: "Store", value: storeNumber > 0 ? storeNumber : "N/A" }] : []),
     { label: "Enrolled", value: enrolled },
-    { label: "Forfeited", value: forfeited },
+    { label: "Forfeited", value: forfeited }
   ];
 
   // Section 2: Employment/Personal Info
@@ -133,7 +173,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     ...(isEmployee ? [{ label: "Status", value: employmentStatus ?? "N/A" }] : []),
     { label: "Gender", value: gender || "N/A" },
     { label: "DOB", value: mmDDYYFormat(dateOfBirth) },
-    { label: "SSN", value: `${ssnValue}` },
+    { label: "SSN", value: `${ssnValue}` }
   ];
 
   // Section 3: Plan/Profit Sharing
@@ -142,7 +182,9 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     { label: "Current Balance", value: numberToCurrency(currentPSAmount) },
     { label: "Begin Vested Balance", value: numberToCurrency(beginVestedAmount) },
     { label: "Current Vested Balance", value: numberToCurrency(currentVestedAmount) },
-    ...(isEmployee ? [{ label: "Profit Sharing Hours", value: formatNumberWithComma(yearToDateProfitSharingHours) }] : []),
+    ...(isEmployee
+      ? [{ label: "Profit Sharing Hours", value: formatNumberWithComma(yearToDateProfitSharingHours) }]
+      : []),
     ...(isEmployee ? [{ label: "Years In Plan", value: yearsInPlan }] : []),
     { label: "Vested Percent", value: formatPercentage(percentageVested) },
     { label: "Received Contributions Last Year", value: receivedContributionsLastYear ? "Yes" : "No" }
@@ -150,18 +192,21 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
 
   // Section 4: Milestones/Status
   const milestoneSection = [
-    ...(isEmployee ? [{ label: "Hire Date", value: hireDate ? mmDDYYFormat(hireDate) : 'N/A' }] : []),
-    ...(isEmployee ? [{ label: "Full Time Date", value: fullTimeDate ? mmDDYYFormat(fullTimeDate) : 'N/A' }] : []),
-    ...(isEmployee ? [{ label: "Termination Date", value: terminationDate ? mmDDYYFormat(terminationDate) : 'N/A' }] : []),
-    ...(isEmployee ? [{ label: "Termination Reason", value: terminationReason || 'N/A' }] : []),
-    ...(isEmployee ? [{ label: "Re-Hire Date", value: reHireDate ? mmDDYYFormat(reHireDate) : 'N/A' }] : []),
+    ...(isEmployee ? [{ label: "Hire Date", value: hireDate ? mmDDYYFormat(hireDate) : "N/A" }] : []),
+    ...(isEmployee ? [{ label: "Full Time Date", value: fullTimeDate ? mmDDYYFormat(fullTimeDate) : "N/A" }] : []),
+    ...(isEmployee
+      ? [{ label: "Termination Date", value: terminationDate ? mmDDYYFormat(terminationDate) : "N/A" }]
+      : []),
+    ...(isEmployee ? [{ label: "Termination Reason", value: terminationReason || "N/A" }] : []),
+    ...(isEmployee ? [{ label: "Re-Hire Date", value: reHireDate ? mmDDYYFormat(reHireDate) : "N/A" }] : []),
     { label: "ETVA", value: numberToCurrency(currentEtva) },
-    { label: "Previous ETVA", value: numberToCurrency(previousEtva) },
-
+    { label: "Previous ETVA", value: numberToCurrency(previousEtva) }
   ];
 
   return (
-    <div className="employee-details-lightbox" style={{ width: '100%' }}>
+    <div
+      className="employee-details-lightbox"
+      style={{ width: "100%" }}>
       <Grid2
         container
         paddingX="24px"
@@ -179,24 +224,16 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
             container
             spacing={3}>
             <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-              <LabelValueSection
-                data={summarySection}
-              />
+              <LabelValueSection data={summarySection} />
             </Grid2>
             <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-              <LabelValueSection
-                data={personalSection}
-              />
+              <LabelValueSection data={personalSection} />
             </Grid2>
             <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-              <LabelValueSection
-                data={milestoneSection}
-              />
+              <LabelValueSection data={milestoneSection} />
             </Grid2>
             <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-              <LabelValueSection
-                data={planSection}
-              />
+              <LabelValueSection data={planSection} />
             </Grid2>
           </Grid2>
         </Grid2>
@@ -205,8 +242,15 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
         <Grid2 size={{ xs: 12 }}>
           <div className="missive-alerts-box">
             {missiveAlerts.map((alert: MissiveResponse, idx: number) => (
-              <div key={alert.id || idx} className={`missive-alert ${alert.severity === 'Error' ? 'missive-error' : 'missive-warning'}`}>
-                <Typography sx={{ color: alert.severity === 'Error' ? 'error.main' : 'warning.main' }} variant="body1" fontWeight={600}>{alert.message}</Typography>
+              <div
+                key={alert.id || idx}
+                className={`missive-alert ${alert.severity === "Error" ? "missive-error" : "missive-warning"}`}>
+                <Typography
+                  sx={{ color: alert.severity === "Error" ? "error.main" : "warning.main" }}
+                  variant="body1"
+                  fontWeight={600}>
+                  {alert.message}
+                </Typography>
                 <Typography variant="body2">{alert.description}</Typography>
               </div>
             ))}

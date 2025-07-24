@@ -137,7 +137,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             return response;
         }
 
-        var activeDetails = await ActiveSummary(req);
+        var activeDetails = await ActiveSummary(req, calInfo.FiscalEndDate);
 
         var lineItems = new List<YearEndProfitSharingReportSummaryLineItem?>
         {
@@ -211,7 +211,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
 
         // Always fetch all details for the year
-        IQueryable<YearEndProfitSharingReportDetail> allDetails = await ActiveSummary(req);
+        IQueryable<YearEndProfitSharingReportDetail> allDetails = await ActiveSummary(req, calInfo.FiscalEndDate);
 
         // Apply report-specific filtering for ReportId 1-8, 10
         IQueryable<YearEndProfitSharingReportDetail> filteredDetails = allDetails;
@@ -331,15 +331,15 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
     /// <summary>
     /// Returns a queryable of year-end profit sharing report details for the given request.
     /// </summary>
-    private Task<IQueryable<YearEndProfitSharingReportDetail>> ActiveSummary(BadgeNumberRequest req)
+    private Task<IQueryable<YearEndProfitSharingReportDetail>> ActiveSummary(BadgeNumberRequest req, DateOnly ageAsOfDate)
     {
-        return ActiveSummary(req, req.BadgeNumber);
+        return ActiveSummary(req, ageAsOfDate, req.BadgeNumber);
     }
 
     /// <summary>
     /// Returns a queryable of year-end profit sharing report details for the given year and optional badge number.
     /// </summary>
-    private async Task<IQueryable<YearEndProfitSharingReportDetail>> ActiveSummary(ProfitYearRequest req, int? badgeNumber = null)
+    private async Task<IQueryable<YearEndProfitSharingReportDetail>> ActiveSummary(ProfitYearRequest req, DateOnly ageAsOfDate, int? badgeNumber = null)
     {
         var employees = await _dataContextFactory.UseReadOnlyContext(ctx => BuildFilteredEmployeeSetAsync(ctx, req, badgeNumber));
 
@@ -356,7 +356,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             EmployeeTypeCode = x.Employee.EmploymentTypeId,
             EmployeeTypeName = x.Employee.EmploymentTypeName,
             DateOfBirth = x.Employee.DateOfBirth,
-            Age = (byte)x.Employee.DateOfBirth.Age(DateTime.UtcNow),
+            Age = (byte)x.Employee.DateOfBirth.Age(ageAsOfDate.ToDateTime(TimeOnly.MaxValue)),
             Ssn = x.Employee.Ssn.MaskSsn(),
             Wages = x.Employee.Wages,
             Hours = x.Employee.Hours,

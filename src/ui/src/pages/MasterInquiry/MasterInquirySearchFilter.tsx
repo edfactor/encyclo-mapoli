@@ -86,10 +86,7 @@ interface MasterInquirySearchFilterProps {
   onSearch: (params: MasterInquiryRequest | undefined) => void;
 }
 
-const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
-  setInitialSearchLoaded,
-  onSearch
-}) => {
+const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ setInitialSearchLoaded, onSearch }) => {
   const [triggerSearch, { isFetching }] = useLazySearchProfitMasterInquiryQuery();
   const { masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
 
@@ -140,8 +137,6 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
       }
     }
   });
-  
-  
 
   useEffect(() => {
     if (badgeNumber && hasToken) {
@@ -158,23 +153,31 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
         endProfitYear: profitYear
       };
 
-      triggerSearch(searchParams, false).unwrap().then((response) => {
-        // If data is returned, trigger downstream components
-        if (response && Array.isArray(response) ? response.length > 0 : response.results && response.results.length > 0) {
-          setInitialSearchLoaded(true);
-          onSearch(searchParams);
-        } else {
-          // Instead of setting missiveAlerts, pass up a signal (to be implemented)
-          // setMissiveAlerts([...]);
-          setInitialSearchLoaded(false);
-          onSearch(undefined);
-        }
-      });
+      // First ensure the parent component has the search parameters
+      onSearch(searchParams);
+      
+      triggerSearch(searchParams, false)
+        .unwrap()
+        .then((response) => {
+          // Update loaded state based on response
+          if (
+            response && Array.isArray(response) ? response.length > 0 : response.results && response.results.length > 0
+          ) {
+            setInitialSearchLoaded(true);
+          } else {
+            // Instead of setting missiveAlerts, pass up a signal (to be implemented)
+            // setMissiveAlerts([...]);
+            setInitialSearchLoaded(false);
+          }
+        });
     }
   }, [badgeNumber, hasToken, reset, triggerSearch, profitYear]);
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
+      // Create a unique timestamp to ensure each search is treated as new
+      const timestamp = Date.now();
+      
       const searchParams: MasterInquiryRequest = {
         pagination: {
           skip: data.pagination?.skip || 0,
@@ -193,19 +196,34 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
         ...(!!data.contribution && { contributionAmount: data.contribution }),
         ...(!!data.earnings && { earningsAmount: data.earnings }),
         ...(!!data.forfeiture && { forfeitureAmount: data.forfeiture }),
-        ...(!!data.payment && { paymentAmount: data.payment })
+        ...(!!data.payment && { paymentAmount: data.payment }),
+        // Add a unique timestamp field to force React to see this as a new object
+        _timestamp: timestamp
       };
 
-      triggerSearch(searchParams, false).unwrap().then((response) => {
-        // If data is returned, trigger downstream components
-        if (response && Array.isArray(response) ? response.length > 0 : response.results && response.results.length > 0) {
-          setInitialSearchLoaded(true);
-          onSearch(searchParams);
-        } else {
-          setInitialSearchLoaded(false);
-          onSearch(undefined);
-        }
-      });
+      // Clear existing state first
+      setInitialSearchLoaded(false);
+      onSearch(undefined);
+      
+      // Small timeout to ensure state reset is processed
+      setTimeout(() => {
+        // Then set new search parameters
+        onSearch(searchParams);
+        
+        triggerSearch(searchParams, false)
+          .unwrap()
+          .then((response) => {
+            // Update loaded state based on response
+            if (
+              response && Array.isArray(response) ? response.length > 0 : response.results && response.results.length > 0
+            ) {
+              setInitialSearchLoaded(true);
+            } else {
+              setInitialSearchLoaded(false);
+            }
+          });
+      }, 50);
+      
       dispatch(setMasterInquiryRequestParams(data));
     }
   });
@@ -236,7 +254,9 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
         isSortDescending: true
       }
     });
-    onSearch(undefined);
+    // Instead of setting searchParams to undefined, pass null
+    // to avoid showing the "no results" message
+    onSearch(null);
   };
 
   const months = Array.from({ length: 12 }, (_, i) => i + 1);
@@ -259,7 +279,6 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
           container
           spacing={3}
           width="100%">
-         
           <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
             <Controller
               name="endProfitYear"
@@ -590,11 +609,11 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
                     />
                   }
                   label="Voids"
-                  sx={{ 
-                    marginTop: '20px', 
-                    height: '40px',
-                    display: 'flex', 
-                    alignItems: 'center' 
+                  sx={{
+                    marginTop: "20px",
+                    height: "40px",
+                    display: "flex",
+                    alignItems: "center"
                   }}
                 />
               )}

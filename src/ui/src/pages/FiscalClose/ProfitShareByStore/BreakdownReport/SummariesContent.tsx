@@ -1,4 +1,3 @@
-
 import { Typography, CircularProgress } from "@mui/material";
 import Grid2 from "@mui/material/Grid2";
 import { agGridNumberToCurrency, DSMGrid } from "smart-ui-library";
@@ -35,15 +34,15 @@ const SummariesContent: React.FC = () => {
 
   const [rowData, setRowData] = useState<RowData[]>([]);
   const [grandTotal, setGrandTotal] = useState<RowData>({
-    category: '',
-    ste1: '',
-    "700": '',
-    "701": '',
-    "800": '',
-    "801": '',
-    "802": '',
-    "900": '',
-    total: ''
+    category: "",
+    ste1: "",
+    "700": "",
+    "701": "",
+    "800": "",
+    "801": "",
+    "802": "",
+    "900": "",
+    total: ""
   });
 
   // Load data when component mounts
@@ -213,7 +212,7 @@ const SummariesContent: React.FC = () => {
       </Grid2>
       <Grid2 width="100%">
         {isLoading ? (
-          <Grid2 sx={{ display: 'flex', justifyContent: 'center', padding: 4 }}>
+          <Grid2 sx={{ display: "flex", justifyContent: "center", padding: 4 }}>
             <CircularProgress />
           </Grid2>
         ) : (

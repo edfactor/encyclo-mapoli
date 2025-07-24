@@ -1,5 +1,5 @@
 import { Typography } from "@mui/material";
-import { useMemo, useEffect, useCallback, useState, useRef } from "react";
+import { useMemo, useEffect, useCallback, useState } from "react";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { Path, useNavigate } from "react-router";
 import { GetProfitSharingReportGridColumns } from "../PAY426-1/EighteenToTwentyGridColumns";
@@ -10,7 +10,12 @@ import { CAPTIONS, PAY426_REPORT_IDS } from "../../../constants";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import pay426Utils from "../Pay427Utils";
 
-const TermedWithPriorGrid = () => {
+interface TermedWithPriorGridProps {
+  pageNumberReset: boolean;
+  setPageNumberReset: (reset: boolean) => void;
+}
+
+const TermedWithPriorGrid: React.FC<TermedWithPriorGridProps> = ({ pageNumberReset, setPageNumberReset }) => {
   const navigate = useNavigate();
   const [trigger, { data, isFetching }] = useLazyGetYearEndProfitSharingReportQuery();
 
@@ -33,7 +38,7 @@ const TermedWithPriorGrid = () => {
     includeTerminatedEmployees: true,
     includeBeneficiaries: false,
     includeEmployeesWithPriorProfitSharingAmounts: true,
-    includeEmployeesWithNoPriorProfitSharingAmounts: false,
+    includeEmployeesWithNoPriorProfitSharingAmounts: false
   };
 
   useEffect(() => {
@@ -48,8 +53,8 @@ const TermedWithPriorGrid = () => {
         },
         ...baseParams
       });
-  }
-}, [trigger, hasToken, profitYear, pageNumber, pageSize, sortParams]);
+    }
+  }, [trigger, hasToken, profitYear, pageNumber, pageSize, sortParams]);
 
   const handleNavigationForButton = useCallback(
     (destination: string | Partial<Path>) => {
@@ -58,40 +63,29 @@ const TermedWithPriorGrid = () => {
     [navigate]
   );
 
-  // Need a useEffect to reset the page number when data changes
-  const prevData = useRef<any>(null);
   useEffect(() => {
-    if (data?.response?.results && data.response.results.length > 0 &&
-        (prevData.current === null || 
-         data.response.results.length !== prevData.current.response.results.length)) {
+    if (pageNumberReset) {
       setPageNumber(0);
+      setPageNumberReset(false);
     }
-    prevData.current = data;
-  }, [data]);
+  }, [pageNumberReset, setPageNumberReset]);
 
   const sortEventHandler = (update: ISortParams) => {
-      const t = () => { 
-          trigger({
-            profitYear: profitYear,
-            pagination: {
-              skip: 0,
-              take: pageSize,
-              sortBy: update.sortBy,
-              isSortDescending: update.isSortDescending
-            },
-            ...baseParams
-          }
-        );
-      }
-  
-      pay426Utils.sortEventHandler(
-        update,
-        sortParams,
-        setSortParams,
-        setPageNumber,
-        t
-      );
-    }
+    const t = () => {
+      trigger({
+        profitYear: profitYear,
+        pagination: {
+          skip: 0,
+          take: pageSize,
+          sortBy: update.sortBy,
+          isSortDescending: update.isSortDescending
+        },
+        ...baseParams
+      });
+    };
+
+    pay426Utils.sortEventHandler(update, sortParams, setSortParams, setPageNumber, t);
+  };
 
   const columnDefs = useMemo(
     () => GetProfitSharingReportGridColumns(handleNavigationForButton),
@@ -100,8 +94,8 @@ const TermedWithPriorGrid = () => {
 
   const pinnedTopRowData = useMemo(() => {
     if (!data) return [];
-    
-   console.log("API data:", data);
+
+    console.log("API data:", data);
     return [
       {
         employeeName: `TOTAL EMPS: ${data.numberOfEmployeesInPlan || 0}`,
@@ -109,7 +103,7 @@ const TermedWithPriorGrid = () => {
         hours: data.hoursTotal || 0,
         points: data.pointsTotal || 0,
         balance: data.balanceTotal || 0,
-        isNew: data.numberOfNewEmployees || 0,
+        isNew: data.numberOfNewEmployees || 0
       },
       {
         employeeName: "No Wages",

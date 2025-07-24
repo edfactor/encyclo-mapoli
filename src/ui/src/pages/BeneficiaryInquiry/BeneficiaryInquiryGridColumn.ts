@@ -4,7 +4,6 @@ import { mmDDYYFormat, mmDDYYYY_HHMMSS_Format } from "utils/dateUtils";
 import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
 import { GRID_COLUMN_WIDTHS } from "../../constants";
 
-
 export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
   return [
     // {
@@ -27,15 +26,16 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
     // },
     {
       headerName: "Psn",
-      field: "psn",
-      colId: "psn",
+      field: "psnSuffix",
+      colId: "psnSuffix",
       minWidth: 120,
       headerClass: "center-align",
       cellClass: "center-align",
       resizable: true,
       sortable: true,
       unSortIcon: true,
-      cellRenderer: (params: ICellRendererParams) =>viewBadgeLinkRenderer(params.data.badgeNumber,params.data.psnSuffix)
+      cellRenderer: (params: ICellRendererParams) =>
+        viewBadgeLinkRenderer(params.data.badgeNumber, params.data.psnSuffix)
     },
     {
       headerName: "Current Balance",
@@ -56,7 +56,7 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       cellClass: "center-align",
       resizable: true,
       valueFormatter: (params) => {
-        return `${params.data.contact.ssn}`;
+        return `${params.data.ssn}`;
       }
     },
     {
@@ -67,8 +67,8 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       headerClass: "center-align",
       cellClass: "center-align",
       resizable: true,
-      valueFormatter: (params)=> {
-        return `${mmDDYYFormat( params.data.contact.dateOfBirth)}`
+      valueFormatter: (params) => {
+        return `${mmDDYYFormat(params.data.dateOfBirth)}`;
       }
     },
     {
@@ -79,8 +79,8 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       headerClass: "center-align",
       cellClass: "center-align",
       resizable: true,
-      valueFormatter: (params)=>{
-        return `${params.data.contact.address.street}`
+      valueFormatter: (params) => {
+        return `${params.data.street}`;
       }
     },
     {
@@ -91,8 +91,8 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       headerClass: "center-align",
       cellClass: "center-align",
       resizable: true,
-      valueFormatter: (params)=>{
-        return `${params.data.contact.address.city}`
+      valueFormatter: (params) => {
+        return `${params.data.city}`;
       }
     },
     {
@@ -103,8 +103,8 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       headerClass: "center-align",
       cellClass: "center-align",
       resizable: true,
-      valueFormatter: (params)=>{
-        return `${params.data.contact.address.state}`
+      valueFormatter: (params) => {
+        return `${params.data.state}`;
       }
     },
     {
@@ -116,8 +116,8 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       cellClass: "center-align",
       sortable: false,
       resizable: true,
-      valueFormatter: (params)=>{
-        return `${params.data.contact.address.postalCode}`
+      valueFormatter: (params) => {
+        return `${params.data.postalCode}`;
       }
     },
     {
@@ -129,12 +129,12 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       cellClass: "center-align",
       resizable: true,
       sortable: false,
-      valueFormatter: (params)=>{
-        return `${params.data.contact.address.countryIso}`
+      valueFormatter: (params) => {
+        return `${params.data.countryIso}`;
       }
     },
     {
-      headerName: "Full Name",
+      headerName: "Name",
       field: "fullName",
       colId: "fullName",
       minWidth: GRID_COLUMN_WIDTHS.FULL_NAME,
@@ -142,8 +142,8 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       cellClass: "center-align",
       resizable: true,
       sortable: false,
-      valueFormatter: (params)=>{
-        return `${params.data.contact.contactInfo.lastName}, ${params.data.contact.contactInfo.firstName}`
+      valueFormatter: (params) => {
+        return `${params.data.lastName}, ${params.data.firstName}`;
       }
     },
     {
@@ -154,8 +154,8 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       headerClass: "center-align",
       cellClass: "center-align",
       resizable: true,
-      valueFormatter: (params)=>{
-        return `${params.data.contact.contactInfo.phoneNumber??""}`
+      valueFormatter: (params) => {
+        return `${params.data.phoneNumber ?? ""}`;
       }
     },
     {
@@ -166,8 +166,8 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       headerClass: "center-align",
       cellClass: "center-align",
       resizable: true,
-      valueFormatter: (params)=>{
-        return `${params.data.contact.contactInfo.mobileNumber??""}`
+      valueFormatter: (params) => {
+        return `${params.data.mobileNumber ?? ""}`;
       }
     },
     {
@@ -178,8 +178,8 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
-      valueFormatter: (params)=>{
-        return `${params.data.contact.contactInfo.emailAddress??""}`
+      valueFormatter: (params) => {
+        return `${params.data.emailAddress ?? ""}`;
       }
     },
     {
@@ -190,7 +190,7 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       headerClass: "center-align",
       cellClass: "center-align",
       resizable: true,
-      valueFormatter: (params) => (params.data.contact.createdDate ? mmDDYYFormat(params.data.contact.createdDate) : "")
+      valueFormatter: (params) => (params.data.createdDate ? mmDDYYFormat(params.data.createdDate) : "")
     }
   ];
 };

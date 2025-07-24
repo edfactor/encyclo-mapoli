@@ -28618,6 +28618,62 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.ExcludedId", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<byte>("ExcludedIdTypeId")
+                        .HasColumnType("NUMBER(3)")
+                        .HasColumnName("EXCLUDED_ID_TYPE_ID");
+
+                    b.Property<int>("ExcludedIdValue")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("EXCLUDED_ID_VALUE");
+
+                    b.HasKey("Id")
+                        .HasName("PK_EXCLUDED_ID");
+
+                    b.HasIndex("ExcludedIdTypeId")
+                        .HasDatabaseName("IX_EXCLUDED_ID_EXCLUDEDIDTYPEID");
+
+                    b.ToTable("EXCLUDED_ID", (string)null);
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.ExcludedIdType", b =>
+                {
+                    b.Property<byte>("Id")
+                        .HasColumnType("NUMBER(3)")
+                        .HasColumnName("ID");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("NVARCHAR2(128)")
+                        .HasColumnName("NAME");
+
+                    b.HasKey("Id")
+                        .HasName("PK_EXCLUDED_ID_TYPE");
+
+                    b.ToTable("EXCLUDED_ID_TYPE", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = (byte)1,
+                            Name = "QPay066TA Exclusions"
+                        },
+                        new
+                        {
+                            Id = (byte)2,
+                            Name = "QPay066I Exclusions"
+                        });
+                });
+
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.FakeSsn", b =>
                 {
                     b.Property<int>("Id")
@@ -31552,6 +31608,18 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.Navigation("Address")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.ExcludedId", b =>
+                {
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.ExcludedIdType", "ExcludedType")
+                        .WithMany()
+                        .HasForeignKey("ExcludedIdTypeId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_EXCLUDED_ID_EXCLUDEDIDTYPE_EXCLUDEDIDTYPEID");
+
+                    b.Navigation("ExcludedType");
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.MassTransit.Job", b =>

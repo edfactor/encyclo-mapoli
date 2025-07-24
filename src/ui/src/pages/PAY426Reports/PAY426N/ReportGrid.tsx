@@ -1,15 +1,15 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Typography, Box, CircularProgress } from '@mui/material';
-import { DSMGrid, ISortParams, Pagination } from 'smart-ui-library';
-import { useNavigate, Path } from 'react-router-dom';
-import { useLazyGetYearEndProfitSharingReportQuery } from 'reduxstore/api/YearsEndApi';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../../reduxstore/store';
-import useFiscalCloseProfitYear from 'hooks/useFiscalCloseProfitYear';
-import pay426Utils from '../Pay427Utils';
-import { GetProfitSharingReportGridColumns } from '../PAY426-1/EighteenToTwentyGridColumns';
-import presets from './presets';
-import { FilterParams } from 'reduxstore/types';
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { Typography, Box, CircularProgress } from "@mui/material";
+import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { useNavigate, Path } from "react-router-dom";
+import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../reduxstore/store";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import pay426Utils from "../Pay427Utils";
+import { GetProfitSharingReportGridColumns } from "../PAY426-1/EighteenToTwentyGridColumns";
+import presets from "./presets";
+import { FilterParams } from "reduxstore/types";
 
 interface ReportGridProps {
   params: FilterParams;
@@ -21,10 +21,10 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: 'employeeName',
+    sortBy: "employeeName",
     isSortDescending: false
   });
-  
+
   const [trigger, { isFetching }] = useLazyGetYearEndProfitSharingReportQuery();
   const hasToken = useSelector((state: RootState) => !!state.security.token);
   const profitYear = useFiscalCloseProfitYear();
@@ -37,22 +37,18 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
   }, [isFetching, onLoadingChange]);
 
   const getReportTitle = () => {
-    const matchingPreset = presets.find(preset => 
-      JSON.stringify(preset.params) === JSON.stringify(params)
-    );
-    
+    const matchingPreset = presets.find((preset) => JSON.stringify(preset.params) === JSON.stringify(params));
+
     if (matchingPreset) {
       return matchingPreset.description.toUpperCase();
     }
-    
-    return 'N/A';
+
+    return "N/A";
   };
 
   useEffect(() => {
     if (hasToken && params) {
-      const matchingPreset = presets.find(preset =>
-        JSON.stringify(preset.params) === JSON.stringify(params)
-      );
+      const matchingPreset = presets.find((preset) => JSON.stringify(preset.params) === JSON.stringify(params));
       trigger({
         profitYear: profitYear,
         pagination: {
@@ -62,7 +58,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
           isSortDescending: sortParams.isSortDescending
         },
         ...params,
-         reportId: matchingPreset ? Number(matchingPreset.id) : 0,       
+        reportId: matchingPreset ? Number(matchingPreset.id) : 0
       });
     }
   }, [trigger, hasToken, profitYear, pageNumber, pageSize, sortParams, params]);
@@ -75,31 +71,22 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
   );
 
   const sortEventHandler = (update: ISortParams) => {
-    const matchingPreset = presets.find(preset =>
-      JSON.stringify(preset.params) === JSON.stringify(params)
-    );
-    const t = () => { 
-        trigger({
-          profitYear: profitYear,
-          pagination: {
-            skip: 0,
-            take: pageSize,
-            sortBy: update.sortBy,
-            isSortDescending: update.isSortDescending
-          },
-          ...params,
-          reportId: matchingPreset ? Number(matchingPreset.id) : 0,
-        }
-      );
-    }
+    const matchingPreset = presets.find((preset) => JSON.stringify(preset.params) === JSON.stringify(params));
+    const t = () => {
+      trigger({
+        profitYear: profitYear,
+        pagination: {
+          skip: 0,
+          take: pageSize,
+          sortBy: update.sortBy,
+          isSortDescending: update.isSortDescending
+        },
+        ...params,
+        reportId: matchingPreset ? Number(matchingPreset.id) : 0
+      });
+    };
 
-    pay426Utils.sortEventHandler(
-      update,
-      sortParams,
-      setSortParams,
-      setPageNumber,
-      t
-    );
+    pay426Utils.sortEventHandler(update, sortParams, setSortParams, setPageNumber, t);
   };
 
   const columnDefs = useMemo(
@@ -109,7 +96,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
 
   const pinnedTopRowData = useMemo(() => {
     if (!data) return [];
-    
+
     return [
       {
         employeeName: `TOTAL EMPS: ${data.numberOfEmployees || 0}`,
@@ -117,7 +104,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
         hours: data.hoursTotal || 0,
         points: data.pointsTotal || 0,
         balance: data.balanceTotal || 0,
-        isNew: data.numberOfNewEmployees || 0,
+        isNew: data.numberOfNewEmployees || 0
       },
       {
         employeeName: "No Wages",
@@ -126,8 +113,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
         points: 0,
         balance: 0
       }
-      ];
-
+    ];
   }, [data, params]);
 
   return (
@@ -139,9 +125,13 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
           {`${getReportTitle()} (${data?.response?.total || 0} records)`}
         </Typography>
       </div>
-      
+
       {isFetching ? (
-        <Box display="flex" justifyContent="center" alignItems="center" py={4}>
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          py={4}>
           <CircularProgress />
         </Box>
       ) : (
@@ -171,4 +161,4 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, onLoadingChange }) => {
   );
 };
 
-export default ReportGrid; 
+export default ReportGrid;

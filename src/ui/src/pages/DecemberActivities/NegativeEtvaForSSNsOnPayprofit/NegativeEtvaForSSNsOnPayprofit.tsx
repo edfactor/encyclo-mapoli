@@ -1,6 +1,6 @@
 import { Divider } from "@mui/material";
 import { useState } from "react";
-import Grid2 from '@mui/material/Grid2';
+import Grid2 from "@mui/material/Grid2";
 import NegativeEtvaForSSNsOnPayprofitGrid from "./NegativeEtvaForSSNsOnPayprofitGrid";
 import { Page } from "smart-ui-library";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
@@ -11,7 +11,9 @@ const NegativeEtvaForSSNsOnPayprofit = () => {
     return <StatusDropdownActionNode />;
   };
   return (
-    <Page label="Negative ETVA for SSNs on Payprofit" actionNode={renderActionNode()}>
+    <Page
+      label="Negative ETVA for SSNs on Payprofit"
+      actionNode={renderActionNode()}>
       <Grid2
         container
         rowSpacing="24px">

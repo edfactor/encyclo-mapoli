@@ -1,6 +1,6 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { createDataSourceAwareBaseQuery, prepareHeaders, url } from "./api";
+import { createApi } from "@reduxjs/toolkit/query/react";
 import { setVersionInfo } from "reduxstore/slices/commonSlice";
+import { createDataSourceAwareBaseQuery } from "./api";
 
 export interface AppVersionInfo {
   buildNumber: string;
@@ -19,8 +19,8 @@ export const CommonApi = createApi({
         url: "/common/app-version-info"
       }),
       async onQueryStarted(val: void, { dispatch, queryFulfilled }) {
-          const { data } = await queryFulfilled;
-          dispatch(setVersionInfo(data));
+        const { data } = await queryFulfilled;
+        dispatch(setVersionInfo(data));
       }
     })
   })

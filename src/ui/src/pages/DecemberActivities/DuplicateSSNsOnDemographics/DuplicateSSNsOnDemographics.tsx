@@ -1,5 +1,5 @@
 import { Divider } from "@mui/material";
-import Grid2 from '@mui/material/Grid2';
+import Grid2 from "@mui/material/Grid2";
 import { Page } from "smart-ui-library";
 import DuplicateSSNsOnDemographicsGrid from "./DuplicateSSNsOnDemographicsGrid";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
@@ -9,7 +9,9 @@ const DuplicateSSNsOnDemographics = () => {
     return <StatusDropdownActionNode />;
   };
   return (
-    <Page label="Duplicate SSNs on Demographics" actionNode={renderActionNode()}>
+    <Page
+      label="Duplicate SSNs on Demographics"
+      actionNode={renderActionNode()}>
       <Grid2
         container
         rowSpacing="24px">

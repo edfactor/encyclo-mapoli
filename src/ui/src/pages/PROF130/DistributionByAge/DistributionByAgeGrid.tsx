@@ -49,7 +49,7 @@ const DistributionByAgeGrid: React.FC<DistributionByAgeGridProps> = ({ initialSe
         pagination: { skip: 0, take: 255 }
       },
       false
-    );
+    ).unwrap();
     await triggerSearch(
       {
         profitYear: distributionsByAgeQueryParams?.profitYear || 0,

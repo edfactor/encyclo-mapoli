@@ -1,69 +1,39 @@
-import { Typography } from "@mui/material";
-import React, { useState, useEffect, useRef } from "react";
+import { Box, CircularProgress, Typography } from "@mui/material";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useLazySearchProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
-import { MasterInquiryRequest, EmployeeDetails } from "reduxstore/types";
-import { DSMGrid, Pagination, formatNumberWithComma } from "smart-ui-library";
-import { Box, CircularProgress } from "@mui/material";
-import { ColDef } from "ag-grid-community";
-import './MasterInquiryMemberGrid.css'; // Import the CSS file for styles
-
-const columns: ColDef[] = [
-  {
-    field: "badgeNumber",
-    headerName: "Badge",
-    maxWidth: 120,
-    cellRenderer: (params: any) => {
-      const { badgeNumber, psnSuffix, isEmployee, id } = params.data;
-      return (
-        <a
-          href="#"
-          className="badge-link"
-          onClick={e => {
-            e.preventDefault();
-            if (params.context && params.context.onBadgeClick) {
-              params.context.onBadgeClick({ memberType: isEmployee ? 1 : 2, id, badgeNumber, psnSuffix });
-            }
-          }}
-        >
-          {psnSuffix > 0 ? `${badgeNumber}-${psnSuffix}` : badgeNumber}
-        </a>
-      );
-    }
-  },
-  { field: "fullName", headerName: "Name", width: 500 },
-  { field: "ssn", headerName: "SSN", maxWidth: 250 },
-  { field: "address", headerName: "Street", maxWidth: 400 },
-  { field: "addressCity", headerName: "City", maxWidth: 300 },
-  { field: "addressState", headerName: "State", maxWidth: 100 },
-  { field: "addressZipCode", headerName: "Zip", maxWidth: 160 },
-  { field: "age", headerName: "Age", maxWidth: 120, },
-  { field: "employmentStatus", headerName: "Status", maxWidth: 120,
-    valueFormatter: (params: any) => {
-      const value = params.value;
-      return value == null || value === undefined || value === "" ? "N/A" : value;
-    }
-  },
-];
+import { EmployeeDetails, MasterInquiryRequest } from "reduxstore/types";
+import { DSMGrid, formatNumberWithComma } from "smart-ui-library";
+import Pagination from "../../components/Pagination/Pagination";
+import "./MasterInquiryMemberGrid.css"; // Import the CSS file for styles
+import { GetMasterInquiryMemberGridColumns } from "./MasterInquiryMemberGridColumns";
 
 interface MasterInquiryMemberGridProps extends MasterInquiryRequest {
-  onBadgeClick?: (args: { memberType: number; id: number, ssn: number, badgeNumber:number, psnSuffix:number }) => void;
+  onBadgeClick?: (
+    args: { memberType: number; id: number; ssn: number; badgeNumber: number; psnSuffix: number } | undefined
+  ) => void;
 }
 
 const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = (searchParams) => {
-  // If no searchParams, render nothing
-  if (!searchParams || Object.keys(searchParams).length === 0) return null;
-
-  const [request, setRequest] = useState<MasterInquiryRequest>(searchParams);
+  const [pageNumber, setPageNumber] = useState(0);
+  const [pageSize, setPageSize] = useState(5);
   const [trigger, { data, isLoading, isError }] = useLazySearchProfitMasterInquiryQuery();
   const autoSelectedRef = useRef<number | null>(null);
 
-  useEffect(() => {
-    setRequest(searchParams);
-  }, [searchParams]);
+  const onSearch = useCallback(async () => {
+    await trigger({
+      ...searchParams,
+      pagination: {
+        skip: pageNumber * pageSize,
+        take: pageSize,
+        sortBy: searchParams.pagination?.sortBy || "",
+        isSortDescending: searchParams.pagination?.isSortDescending || false
+      }
+    });
+  }, [pageNumber, pageSize, searchParams, trigger]);
 
   useEffect(() => {
-    trigger(request);
-  }, [request, trigger]);
+    onSearch();
+  }, [onSearch]);
 
   // If only one member is returned, auto-select and hide the grid
   useEffect(() => {
@@ -76,10 +46,10 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = (searchP
       const member = data.results[0];
       searchParams.onBadgeClick({
         memberType: member.isEmployee ? 1 : 2,
-        id: member.id,
-        ssn: member.ssn,
-        badgeNumber: member.badgeNumber,
-        psnSuffix: member.psnSuffix
+        id: Number(member.id),
+        ssn: Number(member.ssn),
+        badgeNumber: Number(member.badgeNumber),
+        psnSuffix: Number(member.psnSuffix)
       });
       autoSelectedRef.current = member.id;
     }
@@ -89,17 +59,23 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = (searchP
     }
   }, [data, searchParams]);
 
-  const pageSize = request.pagination.take;
-  const pageNumber = Math.floor(request.pagination.skip / request.pagination.take);
+  // If no searchParams, render nothing
+  if (!searchParams || Object.keys(searchParams).length === 0) return null;
 
   // Show a message if no results
   if (data && data.results.length === 0) {
     return (
       <Box sx={{ width: "100%", padding: "24px" }}>
-        <Typography color="error" variant="h6">No results found.</Typography>
+        <Typography
+          color="error"
+          variant="h6">
+          No results found.
+        </Typography>
       </Box>
     );
   }
+
+  const columns = GetMasterInquiryMemberGridColumns();
 
   // Hide the grid if only one member is returned
   if (data && data.results.length === 1) {
@@ -123,32 +99,21 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = (searchP
             isLoading={isLoading}
             preferenceKey="MASTER_INQUIRY_MEMBER_GRID"
             providedOptions={{
-              rowData: Array.isArray(data?.results) ? data.results as EmployeeDetails[] : [],
+              rowData: Array.isArray(data?.results) ? (data.results as EmployeeDetails[]) : [],
               columnDefs: columns,
               context: { onBadgeClick: searchParams.onBadgeClick }
             }}
           />
           <Pagination
+            rowsPerPageOptions={[5, 10, 50]}
             pageNumber={pageNumber}
             setPageNumber={(value: number) => {
-              setRequest((prev) => ({
-                ...prev,
-                pagination: {
-                  ...prev.pagination,
-                  skip: value * prev.pagination.take
-                }
-              }));
+              setPageNumber(value - 1);
             }}
             pageSize={pageSize}
             setPageSize={(value: number) => {
-              setRequest((prev) => ({
-                ...prev,
-                pagination: {
-                  ...prev.pagination,
-                  take: value,
-                  skip: 0
-                }
-              }));
+              setPageSize(value);
+              setPageNumber(0);
             }}
             recordCount={data.total}
           />

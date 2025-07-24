@@ -84,7 +84,7 @@ export const GetProfitShareGrossReportColumns = (navFunction: (badgeNumber: stri
       colId: "enrollmentId",
       minWidth: 100,
       type: "rightAligned",
-      resizable: true,
+      resizable: true
     }
   ];
 };

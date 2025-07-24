@@ -16,14 +16,15 @@ import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 const ForfeituresAdjustment = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [isAddForfeitureModalOpen, setIsAddForfeitureModalOpen] = useState(false);
-  const { forfeitureAdjustmentData, forfeitureAdjustmentQueryParams } = useSelector((state: RootState) => state.forfeituresAdjustment);
+  const [pageNumberReset, setPageNumberReset] = useState(false);
+  const { forfeitureAdjustmentData, forfeitureAdjustmentQueryParams } = useSelector(
+    (state: RootState) => state.forfeituresAdjustment
+  );
   const profitYear = useDecemberFlowProfitYear();
   const [triggerSearch] = useLazyGetForfeitureAdjustmentsQuery();
 
   const renderActionNode = () => {
-    return (
-      <StatusDropdownActionNode />
-    );
+    return <StatusDropdownActionNode />;
   };
 
   const handleSearchComplete = (loaded: boolean) => {
@@ -66,7 +67,9 @@ const ForfeituresAdjustment = () => {
   }, []);
 
   return (
-    <Page label={CAPTIONS.FORFEITURES_ADJUSTMENT} actionNode={renderActionNode()}>
+    <Page
+      label={CAPTIONS.FORFEITURES_ADJUSTMENT}
+      actionNode={renderActionNode()}>
       <Grid2
         container
         rowSpacing="24px">
@@ -75,7 +78,10 @@ const ForfeituresAdjustment = () => {
         </Grid2>
         <Grid2 width={"100%"}>
           <DSMAccordion title="Filter">
-            <ForfeituresAdjustmentSearchParameters setInitialSearchLoaded={handleSearchComplete} />
+            <ForfeituresAdjustmentSearchParameters
+              setInitialSearchLoaded={handleSearchComplete}
+              setPageReset={setPageNumberReset}
+            />
           </DSMAccordion>
         </Grid2>
 
@@ -93,6 +99,8 @@ const ForfeituresAdjustment = () => {
             initialSearchLoaded={initialSearchLoaded}
             setInitialSearchLoaded={setInitialSearchLoaded}
             onAddForfeiture={handleOpenAddForfeitureModal}
+            pageNumberReset={pageNumberReset}
+            setPageNumberReset={setPageNumberReset}
           />
         </Grid2>
       </Grid2>

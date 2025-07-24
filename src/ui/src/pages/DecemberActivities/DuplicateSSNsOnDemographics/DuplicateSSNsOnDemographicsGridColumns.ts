@@ -1,6 +1,6 @@
-import {ColDef, ICellRendererParams} from "ag-grid-community";
+import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { yyyyMMDDToMMDDYYYY } from "smart-ui-library";
-import {viewBadgeLinkRenderer} from "../../../utils/masterInquiryLink";
+import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
 
 export const GetDuplicateSSNsOnDemographicsColumns = (): ColDef[] => {
@@ -85,7 +85,7 @@ export const GetDuplicateSSNsOnDemographicsColumns = (): ColDef[] => {
       cellClass: "left-align",
       resizable: true,
       valueFormatter: (params) => (params.value ? yyyyMMDDToMMDDYYYY(params.value) : "")
-    },   
+    },
     {
       headerName: "Store",
       field: "storeNumber",
@@ -108,6 +108,6 @@ export const GetDuplicateSSNsOnDemographicsColumns = (): ColDef[] => {
         //see if one is undefined or null then show other
         return `[${id}] ${name}`;
       }
-    },
+    }
   ];
 };

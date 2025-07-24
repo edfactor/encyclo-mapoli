@@ -9,13 +9,20 @@ import MasterInquiryGroupingGrid from "./MasterInquiryGroupingGrid";
 import MasterInquiryMemberGrid from "./MasterInquiryMemberGrid";
 import MasterInquirySearchFilter from "./MasterInquirySearchFilter";
 
+interface SelectedMember {
+  memberType: number;
+  id: number;
+  ssn: number;
+  badgeNumber: number;
+  psnSuffix: number;
+}
 
 const MasterInquiry = () => {
   //const { } = useSelector((state: RootState) => state.inquiry);
 
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [searchParams, setSearchParams] = useState<MasterInquiryRequest | null>(null);
-  const [selectedMember, setSelectedMember] = useState<{ memberType: number; id: number, ssn: number } | null>(null);
+  const [selectedMember, setSelectedMember] = useState<SelectedMember | null>(null);
   const [noResults, setNoResults] = useState(false);
 
   return (
@@ -23,24 +30,33 @@ const MasterInquiry = () => {
       <Grid2
         container
         rowSpacing="24px">
-        <Grid2 size={{ xs: 12 }} width={"100%"}>
+        <Grid2
+          size={{ xs: 12 }}
+          width={"100%"}>
           <Divider />
         </Grid2>
-        <Grid2 size={{ xs: 12 }} width={"100%"}>
+        <Grid2
+          size={{ xs: 12 }}
+          width={"100%"}>
           <DSMAccordion title="Filter">
             <MasterInquirySearchFilter
               setInitialSearchLoaded={setInitialSearchLoaded}
               onSearch={(params) => {
                 setSearchParams(params ?? null);
                 setSelectedMember(null);
-                setNoResults(!params);
+                // Only set noResults to true if params is undefined (not found)
+                // but not when it's null (reset)
+                setNoResults(params === undefined);
               }}
             />
           </DSMAccordion>
         </Grid2>
 
         {searchParams && (
-          <MasterInquiryMemberGrid {...searchParams} onBadgeClick={setSelectedMember} />
+          <MasterInquiryMemberGrid
+            {...searchParams}
+            onBadgeClick={(data) => setSelectedMember(data || null)}
+          />
         )}
 
         {/* Render employee details if identifiers are present in selectedMember, or show missive if noResults */}
@@ -52,11 +68,6 @@ const MasterInquiry = () => {
             noResults={noResults}
           />
         )}
-
-        {searchParams && !selectedMember && (
-          <MasterInquiryGroupingGrid searchParams={searchParams} />
-          )
-        }
 
         {/* Render details for selected member if present */}
         {selectedMember && (

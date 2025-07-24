@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button, Divider, Typography, Box, CircularProgress } from "@mui/material";
-import Grid2 from '@mui/material/Grid2';
+import Grid2 from "@mui/material/Grid2";
 import { Page } from "smart-ui-library";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { useNavigate } from "react-router";
@@ -27,7 +27,7 @@ const ProfitShareTotals426 = () => {
   useEffect(() => {
     if (hasToken && profitYear && !hasInitialSearchRun) {
       setHasInitialSearchRun(true);
-      
+
       const request: YearEndProfitSharingReportRequest = {
         isYearEnd: false,
         minimumAgeInclusive: 18,
@@ -44,15 +44,15 @@ const ProfitShareTotals426 = () => {
         profitYear: profitYear,
         pagination: { skip: 0, take: 5, sortBy: "badgeNumber", isSortDescending: true }
       };
-      
+
       triggerSearch(request, false)
-        .then(result => {
+        .then((result) => {
           if (result.data) {
             dispatch(setYearEndProfitSharingReportQueryParams(profitYear));
             setInitialSearchLoaded(true);
           }
         })
-        .catch(error => {
+        .catch((error) => {
           console.error("Initial search failed:", error);
         });
     }
@@ -94,7 +94,11 @@ const ProfitShareTotals426 = () => {
             </div>
 
             {isLoading ? (
-              <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
+              <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                minHeight="200px">
                 <CircularProgress />
               </Box>
             ) : (
@@ -109,4 +113,4 @@ const ProfitShareTotals426 = () => {
   );
 };
 
-export default ProfitShareTotals426; 
+export default ProfitShareTotals426;

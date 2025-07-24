@@ -1,5 +1,5 @@
 import { Typography } from "@mui/material";
-import { useMemo, useEffect, useCallback, useState, useRef } from "react";
+import { useMemo, useEffect, useCallback, useState } from "react";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { Path, useNavigate } from "react-router";
 import { GetProfitSharingReportGridColumns } from "../PAY426-1/EighteenToTwentyGridColumns";
@@ -10,7 +10,12 @@ import { CAPTIONS, PAY426_REPORT_IDS } from "../../../constants";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import pay426Utils from "../Pay427Utils";
 
-const TwentyOnePlusGrid = () => {
+interface TwentyOnePlusGridProps {
+  pageNumberReset: boolean;
+  setPageNumberReset: (reset: boolean) => void;
+}
+
+const TwentyOnePlusGrid: React.FC<TwentyOnePlusGridProps> = ({ pageNumberReset, setPageNumberReset }) => {
   const navigate = useNavigate();
 
   const [trigger, { data, isFetching }] = useLazyGetYearEndProfitSharingReportQuery();
@@ -35,8 +40,8 @@ const TwentyOnePlusGrid = () => {
     includeTerminatedEmployees: false,
     includeBeneficiaries: false,
     includeEmployeesWithPriorProfitSharingAmounts: true,
-    includeEmployeesWithNoPriorProfitSharingAmounts: true,
-  }
+    includeEmployeesWithNoPriorProfitSharingAmounts: true
+  };
 
   useEffect(() => {
     if (hasToken) {
@@ -67,7 +72,7 @@ const TwentyOnePlusGrid = () => {
 
   const pinnedTopRowData = useMemo(() => {
     if (!data) return [];
-    
+
     console.log("API data:", data);
     return [
       {
@@ -76,7 +81,7 @@ const TwentyOnePlusGrid = () => {
         hours: data.hoursTotal || 0,
         points: data.pointsTotal || 0,
         balance: data.balanceTotal || 0,
-        isNew: data.numberOfNewEmployees || 0,
+        isNew: data.numberOfNewEmployees || 0
       },
       {
         employeeName: "No Wages",
@@ -88,40 +93,29 @@ const TwentyOnePlusGrid = () => {
     ];
   }, [data]);
 
-  // Need a useEffect to reset the page number when data changes
-  const prevData = useRef<any>(null);
   useEffect(() => {
-    if (data?.response?.results && data.response.results.length > 0 &&
-        (prevData.current === null || 
-         data.response.results.length !== prevData.current.response.results.length)) {
+    if (pageNumberReset) {
       setPageNumber(0);
+      setPageNumberReset(false);
     }
-    prevData.current = data;
-  }, [data]);
+  }, [pageNumberReset, setPageNumberReset]);
 
   const sortEventHandler = (update: ISortParams) => {
-    const t = () => { 
-        trigger({
-          profitYear: profitYear,
-          pagination: {
-            skip: 0,
-            take: pageSize,
-            sortBy: update.sortBy,
-            isSortDescending: update.isSortDescending
-          },
-          ...baseParams
-        }
-      );
-    }
+    const t = () => {
+      trigger({
+        profitYear: profitYear,
+        pagination: {
+          skip: 0,
+          take: pageSize,
+          sortBy: update.sortBy,
+          isSortDescending: update.isSortDescending
+        },
+        ...baseParams
+      });
+    };
 
-    pay426Utils.sortEventHandler(
-      update,
-      sortParams,
-      setSortParams,
-      setPageNumber,
-      t
-    );
-  }
+    pay426Utils.sortEventHandler(update, sortParams, setSortParams, setPageNumber, t);
+  };
 
   return (
     <>
