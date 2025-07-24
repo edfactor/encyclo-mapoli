@@ -1,6 +1,5 @@
-import { agGridNumberToCurrency } from "smart-ui-library";
-import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
 import { ColDef, ColGroupDef } from "ag-grid-community";
+import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
 
 export const GetDistributionsByAgeColumns = (reportType: FrozenReportsByAgeRequestType): (ColDef | ColGroupDef)[] => {
   const columns: (ColDef | ColGroupDef)[] = [
@@ -10,9 +9,9 @@ export const GetDistributionsByAgeColumns = (reportType: FrozenReportsByAgeReque
       columnGroupShow: "closed",
       headerValueGetter: (params) => {
         console.log("Header Value Getter for Group", params);
-                // params.columnGroup will give you access to the column group object
-                return 'Custom Group Name: ' + (params.columnGroup?.getGroupId() ?? 'No Group');
-            },
+        // params.columnGroup will give you access to the column group object
+        return "Custom Group Name: " + (params.columnGroup?.getGroupId() ?? "No Group");
+      },
       children: [
         {
           headerName: "Age",
@@ -23,7 +22,6 @@ export const GetDistributionsByAgeColumns = (reportType: FrozenReportsByAgeReque
           resizable: true,
           sort: "asc",
           cellDataType: "text"
-          
         },
         {
           headerName: "EMPS",
@@ -32,7 +30,7 @@ export const GetDistributionsByAgeColumns = (reportType: FrozenReportsByAgeReque
           minWidth: 100,
           type: "rightAligned",
           resizable: true
-        },
+        }
         /*
         {
           headerName: "Amount",
