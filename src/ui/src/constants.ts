@@ -50,6 +50,7 @@ export const ROUTES = {
   BENEFICIARY_INQUIRY: "beneficiary",
   PAY_BE_NEXT: "adhoc-beneficiaries-report",
   FORFEITURES_ADJUSTMENT: "forfeitures-adjustment",
+  PAY_BEN_REPORT: 'payben-report',
 
   PAY426_ACTIVE_18_20: "pay426-1",
   PAY426_ACTIVE_21_PLUS: "pay426-2",
@@ -86,6 +87,7 @@ export const ROUTES = {
 export const CAPTIONS = {
   PAY_BE_NEXT: "Pay Be Next",
   BENEFICIARY_INQUIRY: "Beneficiary Inquiry",
+    PAYBEN_REPORT: "Pay Beneficiary Report",
   BALANCE_BY_AGE: "Get Balance by Age (PROF130B)",
   BALANCE_BY_YEARS: "Get Balance by Years (PROF130Y)",
   CONTRIBUTIONS_BY_AGE: "Get Contributions by Age (PROF130)",
