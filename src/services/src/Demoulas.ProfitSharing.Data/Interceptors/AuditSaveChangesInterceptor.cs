@@ -37,14 +37,8 @@ public class AuditSaveChangesInterceptor : SaveChangesInterceptor
             .Where(e => e.State is EntityState.Added or EntityState.Modified or EntityState.Deleted);
 
         List<AuditEvent> events = new List<AuditEvent>();
-        foreach (var entry in entries.Where(e => e.State is EntityState.Modified or EntityState.Deleted))
+        foreach (var entry in entries.Where(e => e.Entity is not IDoNotAudit && (e.State is EntityState.Modified or EntityState.Deleted)))
         {
-            // Skip auditing if the entity implements IDoNotAudit
-            if (entry.Entity is IDoNotAudit)
-            {
-                continue;
-            }
-
             var primaryKey = GetPrimaryKeyString(entry);
 
             var auditEvent = new AuditEvent

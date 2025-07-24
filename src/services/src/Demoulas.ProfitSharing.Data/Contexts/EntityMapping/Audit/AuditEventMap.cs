@@ -12,7 +12,7 @@ public sealed class AuditEventMap : IEntityTypeConfiguration<AuditEvent>
         _ = builder.ToTable("AUDIT_EVENT");
         _ = builder.HasKey(c => c.Id);
 
-        _ = builder.Property(d => d.Id).HasColumnName("ID").ValueGeneratedOnAdd();
+        _ = builder.Property(d => d.Id).HasColumnName("AUDIT_EVENT_ID").ValueGeneratedOnAdd();
 
         _ = builder.HasIndex(e => e.TableName, "IX_TableName");
         _ = builder.Property(e => e.TableName)
