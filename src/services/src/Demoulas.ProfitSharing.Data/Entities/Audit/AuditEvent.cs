@@ -5,5 +5,7 @@ public sealed class AuditEvent
     public required string? TableName { get; set; }
     public required string Operation { get; set; }
     public string? PrimaryKey { get; set; }
-    public List<AuditChange>? Changes { get; set; }
+    public string UserName { get; set; } = string.Empty;
+    public DateTimeOffset CreatedAt { get; set; }
+    public List<AuditChangeEntry>? ChangesJson { get; set; }
 }

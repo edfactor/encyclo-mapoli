@@ -25484,7 +25484,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Audit.AuditChange", b =>
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Audit.AuditChangeEntry", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -30809,7 +30809,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_AUDIT_CHANGE__AUDIT_EVENT_AUDIT_EVENT_AUDITEVENTID");
 
-                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Audit.AuditChange", null)
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Audit.AuditChangeEntry", null)
                         .WithMany()
                         .HasForeignKey("ChangesId")
                         .OnDelete(DeleteBehavior.NoAction)
