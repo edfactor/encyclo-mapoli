@@ -29,6 +29,8 @@ const EligibleEmployeesGrid: React.FC<EligibleEmployeesGridProps> = ({
 
   const [triggerSearch, { isFetching }] = useLazyGetEligibleEmployeesQuery();
 
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
+
   const onSearch = useCallback(async () => {
     const request = {
       profitYear: eligibleEmployeesQueryParams?.profitYear ?? 0,
@@ -51,10 +53,10 @@ const EligibleEmployeesGrid: React.FC<EligibleEmployeesGridProps> = ({
   ]);
 
   useEffect(() => {
-    if (initialSearchLoaded) {
+    if (hasToken && initialSearchLoaded) {
       onSearch();
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch]);
+  }, [hasToken, initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch]);
 
   // Need a useEffect on a change in eligibleEmployees to reset the page number
   const prevEligibleEmployees = useRef<any>(null);

@@ -28,6 +28,8 @@ const ForfeituresByAgeGrid: React.FC<ForfeituresByAgeGridProps> = ({ initialSear
   const columnDefsFullTime = GetForfeituresByAgeColumns(FrozenReportsByAgeRequestType.FullTime);
   const columnDefsPartTime = GetForfeituresByAgeColumns(FrozenReportsByAgeRequestType.PartTime);
 
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
+
   const onSearch = useCallback(async () => {
     await triggerSearch(
       {
@@ -56,10 +58,10 @@ const ForfeituresByAgeGrid: React.FC<ForfeituresByAgeGridProps> = ({ initialSear
   }, [triggerSearch, forfeituresByAgeQueryParams?.profitYear]);
 
   useEffect(() => {
-    if (initialSearchLoaded && forfeituresByAgeQueryParams?.profitYear) {
+    if (hasToken && initialSearchLoaded && forfeituresByAgeQueryParams?.profitYear) {
       onSearch();
     }
-  }, [forfeituresByAgeQueryParams?.profitYear, initialSearchLoaded, onSearch]);
+  }, [forfeituresByAgeQueryParams?.profitYear, hasToken, initialSearchLoaded, onSearch]);
 
   return (
     <>
