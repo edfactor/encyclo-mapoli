@@ -2,7 +2,7 @@ import { agGridNumberToCurrency } from "smart-ui-library";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
 import { ColDef, ColGroupDef } from "ag-grid-community";
 
-export const GetDistributionsByAgeColumns = (reportType: FrozenReportsByAgeRequestType): ColDef[] => {
+export const GetDistributionsByAgeColumns = (reportType: FrozenReportsByAgeRequestType): (ColDef | ColGroupDef)[] => {
   const columns: (ColDef | ColGroupDef)[] = [
     {
       headerName: "A",
