@@ -28,6 +28,8 @@ const BalanceByYearsGrid: React.FC<BalanceByYearsGridProps> = ({ initialSearchLo
   const columnDefsFullTime = GetBalanceByYearsGridColumns(FrozenReportsByAgeRequestType.FullTime);
   const columnDefsPartTime = GetBalanceByYearsGridColumns(FrozenReportsByAgeRequestType.PartTime);
 
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
+
   const onSearch = useCallback(async () => {
     await triggerSearch(
       {
@@ -56,10 +58,10 @@ const BalanceByYearsGrid: React.FC<BalanceByYearsGridProps> = ({ initialSearchLo
   }, [triggerSearch, balanceByYearsQueryParams?.profitYear]);
 
   useEffect(() => {
-    if (initialSearchLoaded && balanceByYearsQueryParams?.profitYear) {
+    if (hasToken && initialSearchLoaded && balanceByYearsQueryParams?.profitYear) {
       onSearch();
     }
-  }, [balanceByYearsQueryParams?.profitYear, initialSearchLoaded, onSearch]);
+  }, [balanceByYearsQueryParams?.profitYear, hasToken, initialSearchLoaded, onSearch]);
 
   return (
     <>

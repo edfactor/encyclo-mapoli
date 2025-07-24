@@ -35,6 +35,8 @@ const ContributionsByAgeGrid: React.FC<ContributionsByAgeGridProps> = ({ initial
 
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
 
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
+
   const onSearch = useCallback(async () => {
     triggerSearch(
       {
@@ -63,10 +65,10 @@ const ContributionsByAgeGrid: React.FC<ContributionsByAgeGridProps> = ({ initial
   }, [contributionsByAgeQueryParams?.profitYear, triggerSearch, fiscalCloseProfitYear]);
 
   useEffect(() => {
-    if (initialSearchLoaded && contributionsByAgeQueryParams?.profitYear) {
+    if (hasToken && initialSearchLoaded && contributionsByAgeQueryParams?.profitYear) {
       onSearch();
     }
-  }, [contributionsByAgeQueryParams?.profitYear, initialSearchLoaded, onSearch]);
+  }, [contributionsByAgeQueryParams?.profitYear, hasToken, initialSearchLoaded, onSearch]);
 
   return (
     <>

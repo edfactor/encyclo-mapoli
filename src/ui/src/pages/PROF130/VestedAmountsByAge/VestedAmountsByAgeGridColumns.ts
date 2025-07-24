@@ -1,7 +1,7 @@
 import { agGridNumberToCurrency } from "smart-ui-library";
-import { ColDef } from "ag-grid-community";
+import { ColDef, ColGroupDef } from "ag-grid-community";
 
-export const GetVestedAmountsByAgeColumns = (countColName: string, amountColName: string): ColDef[] => {
+export const GetVestedAmountsByAgeColumns = (countColName: string, amountColName: string): (ColDef | ColGroupDef)[] => {
   return [
     {
       headerName: "Age",
