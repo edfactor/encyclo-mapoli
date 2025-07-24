@@ -1142,6 +1142,8 @@ INSERT ALL
   INTO EXCLUDED_ID(ID,EXCLUDED_ID_TYPE_ID,EXCLUDED_ID_VALUE) VALUES (28,2,51308)
   SELECT 1 FROM DUAL;
 
+-- get rid of a any history of YE Updates, as all the data is wiped
+delete from ye_update_status;
 
  ------------  - These are users in the scramble, presumably they would not exist in PROD
 
