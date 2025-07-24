@@ -176,7 +176,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     { label: "Gender", value: gender || "N/A" },
     { label: "DOB", value: mmDDYYFormat(dateOfBirth) },
     { label: "SSN", value: `${ssnValue}` },
-    { label: "AllocationTo", value: numberToCurrency(allocationToAmount) }
+    { label: "Allocation To", value: numberToCurrency(allocationToAmount) }
   ];
 
   // Section 3: Plan/Profit Sharing
@@ -204,7 +204,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     ...(isEmployee ? [{ label: "Re-Hire Date", value: reHireDate ? mmDDYYFormat(reHireDate) : "N/A" }] : []),
     { label: "ETVA", value: numberToCurrency(currentEtva) },
     { label: "Previous ETVA", value: numberToCurrency(previousEtva) },
-    { label: "AllocationFrom", value:  numberToCurrency(allocationFromAmount) }
+    { label: "Allocation From", value:  numberToCurrency(allocationFromAmount) }
   ];
 
   return (
