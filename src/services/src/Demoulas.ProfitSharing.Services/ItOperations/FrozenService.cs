@@ -46,7 +46,7 @@ public class FrozenService: IFrozenService
                 OracleHcmId = dh.OracleHcmId,
                 Ssn = d.Ssn,
                 BadgeNumber = dh.BadgeNumber,
-                LastModifiedDate = dh.ValidFrom,
+                ModifiedAtUtc = dh.ValidFrom,
                 StoreNumber = dh.StoreNumber,
                 PayClassificationId = dh.PayClassificationId,
                 ContactInfo = d.ContactInfo,

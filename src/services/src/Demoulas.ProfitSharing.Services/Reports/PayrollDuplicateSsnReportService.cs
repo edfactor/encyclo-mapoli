@@ -75,7 +75,7 @@ namespace Demoulas.ProfitSharing.Services.Reports
                                 CurrentHoursYear = pp.CurrentHoursYear,
                                 CurrentIncomeYear = pp.CurrentIncomeYear,
                                 WeeksWorkedYear = pp.WeeksWorkedYear,
-                                LastUpdate = pp.LastUpdate,
+                                LastUpdate = pp.ModifiedAtUtc == null ? pp.CreatedAtUtc : pp.ModifiedAtUtc.Value,
                                 PointsEarned = pp.PointsEarned
                             }).ToList()
                     })
