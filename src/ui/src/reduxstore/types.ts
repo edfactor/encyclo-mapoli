@@ -567,6 +567,8 @@ export interface EmployeeDetails {
   fullTimeDate: string;
   terminationReason: string;
   missives: number[] | null;
+  allocationFromAmount: number;
+  allocationToAmount: number;
 }
 
 export interface BalanceByDetailBase {

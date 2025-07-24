@@ -6,4 +6,6 @@ public class ParticipantTotalVestingBalance
     public decimal? VestingPercent { get; set; }
     public decimal? CurrentBalance { get; set; }
     public byte? YearsInPlan { get; set; }
+    public decimal? AllocationsToBeneficiary { get; set; }
+    public decimal? AllocationsFromBeneficiary { get; set; }
 }
