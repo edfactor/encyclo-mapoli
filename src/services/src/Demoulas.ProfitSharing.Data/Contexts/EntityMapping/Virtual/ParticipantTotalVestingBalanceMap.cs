@@ -24,5 +24,10 @@ internal sealed class ParticipantTotalVestingBalanceMap : IEntityTypeConfigurati
 
         builder.Property(x => x.YearsInPlan)
             .HasColumnName("YEARS");
+        
+        builder.Property(x=>x.AllocationsToBeneficiary)
+            .HasColumnName("ALLOCTOBENE");
+        builder.Property(x=>x.AllocationsFromBeneficiary)
+            .HasColumnName("ALLOCFROMBENE");
     }
 }

@@ -268,7 +268,9 @@ public sealed class TotalService : ITotalService
                             CurrentBalance = (t.CurrentBalance ?? 0),
                             VestedBalance = (t.VestedBalance ?? 0),
                             VestingPercent = (t.VestingPercent ?? 0),
-                            YearsInPlan = (t.YearsInPlan ?? 0)
+                            YearsInPlan = (t.YearsInPlan ?? 0),
+                            AllocationsToBeneficiary = (t.AllocationsToBeneficiary ?? 0),
+                            AllocationsFromBeneficiary = (t.AllocationsFromBeneficiary ?? 0)
                         }).ToListAsync(cancellationToken);
                     return rslt;
                 });
@@ -285,7 +287,9 @@ public sealed class TotalService : ITotalService
                             CurrentBalance = (t.CurrentBalance ?? 0),
                             VestedBalance = (t.VestedBalance ?? 0),
                             VestingPercent = (t.VestingPercent ?? 0),
-                            YearsInPlan = (t.YearsInPlan ?? 0)
+                            YearsInPlan = (t.YearsInPlan ?? 0),
+                            AllocationsToBeneficiary = (t.AllocationsToBeneficiary ?? 0),
+                            AllocationsFromBeneficiary = (t.AllocationsFromBeneficiary ?? 0)
                         }).ToListAsync(cancellationToken);
                     return rslt;
                 });

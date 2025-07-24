@@ -126,7 +126,9 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     PayClassification,
     gender,
     phoneNumber,
-    workLocation
+    workLocation,
+    allocationToAmount,
+    allocationFromAmount
   } = details;
 
   if (!isEmployee && masterInquiryRequestParams?.memberType == "all") {
@@ -173,7 +175,8 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     ...(isEmployee ? [{ label: "Status", value: employmentStatus ?? "N/A" }] : []),
     { label: "Gender", value: gender || "N/A" },
     { label: "DOB", value: mmDDYYFormat(dateOfBirth) },
-    { label: "SSN", value: `${ssnValue}` }
+    { label: "SSN", value: `${ssnValue}` },
+    { label: "AllocationTo", value: numberToCurrency(allocationToAmount) }
   ];
 
   // Section 3: Plan/Profit Sharing
@@ -200,7 +203,8 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     ...(isEmployee ? [{ label: "Termination Reason", value: terminationReason || "N/A" }] : []),
     ...(isEmployee ? [{ label: "Re-Hire Date", value: reHireDate ? mmDDYYFormat(reHireDate) : "N/A" }] : []),
     { label: "ETVA", value: numberToCurrency(currentEtva) },
-    { label: "Previous ETVA", value: numberToCurrency(previousEtva) }
+    { label: "Previous ETVA", value: numberToCurrency(previousEtva) },
+    { label: "AllocationFrom", value:  numberToCurrency(allocationFromAmount) }
   ];
 
   return (
