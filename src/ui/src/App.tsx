@@ -4,7 +4,7 @@ import AppErrorBoundary from "components/ErrorBoundary";
 import PSLayout from "components/Layout/PSLayout";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { themeOptions, ToastServiceProvider } from "smart-ui-library";
+import { colors, themeOptions, ToastServiceProvider } from "smart-ui-library";
 import "smart-ui-library/dist/smart-ui-library.css";
 import "../agGridConfig";
 import Router from "./components/router/Router";
@@ -144,7 +144,19 @@ const App = () => {
   }, [triggerHealth]);
 
   // Theme setup
-  const theme = createTheme(themeOptions);
+  const theme = createTheme({
+    ...themeOptions,
+    components: {
+      ...themeOptions.components,
+      MuiOutlinedInput: {
+        styleOverrides:{
+          root: {
+            backgroundColor: colors["dsm-white"],
+          }
+        }
+      }
+    }
+  });
 
   return (
     <ThemeProvider theme={theme}>
