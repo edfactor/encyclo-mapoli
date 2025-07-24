@@ -4,14 +4,7 @@ import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
 export const GetDistributionsByAgeColumns = (reportType: FrozenReportsByAgeRequestType): (ColDef | ColGroupDef)[] => {
   const columns: (ColDef | ColGroupDef)[] = [
     {
-      headerName: "A",
-      groupId: "blag",
-      columnGroupShow: "closed",
-      headerValueGetter: (params) => {
-        console.log("Header Value Getter for Group", params);
-        // params.columnGroup will give you access to the column group object
-        return "Custom Group Name: " + (params.columnGroup?.getGroupId() ?? "No Group");
-      },
+      headerName: reportType,
       children: [
         {
           headerName: "Age",
