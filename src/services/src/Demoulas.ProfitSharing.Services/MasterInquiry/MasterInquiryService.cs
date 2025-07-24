@@ -483,8 +483,26 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 PayClassification = d.PayClassification != null ? d.PayClassification.Name : "N/A",
                 
                 CurrentPayProfit = d.PayProfits
+                    .Select(x=>
+                        new
+                        {
+                            x.ProfitYear,
+                            x.CurrentHoursYear,
+                            x.Etva,
+                            x.EnrollmentId,
+                            x.Enrollment
+                        })
                     .FirstOrDefault(x => x.ProfitYear == currentYear),
                 PreviousPayProfit = d.PayProfits
+                    .Select(x =>
+                        new
+                        {
+                            x.ProfitYear,
+                            x.CurrentHoursYear,
+                            x.Etva,
+                            x.EnrollmentId,
+                            x.Enrollment
+                        })
                     .FirstOrDefault(x => x.ProfitYear == previousYear)
             })
             .FirstOrDefaultAsync(cancellationToken);
@@ -693,8 +711,24 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 DemographicId = d.Id,
                 d.EmploymentStatusId,
                 d.EmploymentStatus,
-                CurrentPayProfit = d.PayProfits.FirstOrDefault(x => x.ProfitYear == currentYear),
-                PreviousPayProfit = d.PayProfits.FirstOrDefault(x => x.ProfitYear == previousYear)
+                CurrentPayProfit = d.PayProfits.Select(x =>
+                    new
+                    {
+                        x.ProfitYear,
+                        x.CurrentHoursYear,
+                        x.Etva,
+                        x.EnrollmentId,
+                        x.Enrollment
+                    }).FirstOrDefault(x => x.ProfitYear == currentYear),
+                PreviousPayProfit = d.PayProfits.Select(x =>
+                    new
+                    {
+                        x.ProfitYear,
+                        x.CurrentHoursYear,
+                        x.Etva,
+                        x.EnrollmentId,
+                        x.Enrollment
+                    }).FirstOrDefault(x => x.ProfitYear == previousYear)
             })
             .ToPaginationResultsAsync(req, cancellationToken);
 
