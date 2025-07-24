@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetDistributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, TotalsGrid } from "smart-ui-library";
+import { ISortParams, TotalsGrid } from "smart-ui-library";
+import DSMGrid from "components/DSMGrid/DSMGrid";
 import { GetDistributionsByAgeColumns } from "./DistributionByAgeGridColumns";
 import Grid2 from "@mui/material/Grid2";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
@@ -33,7 +34,7 @@ const DistributionByAgeGrid: React.FC<DistributionByAgeGridProps> = ({ initialSe
   const columnDefsPartTime = GetDistributionsByAgeColumns(FrozenReportsByAgeRequestType.PartTime);
 
   const onSearch = useCallback(async () => {
-   await triggerSearch(
+    await triggerSearch(
       {
         profitYear: distributionsByAgeQueryParams?.profitYear || 0,
         reportType: FrozenReportsByAgeRequestType.Total,
@@ -49,7 +50,7 @@ const DistributionByAgeGrid: React.FC<DistributionByAgeGridProps> = ({ initialSe
       },
       false
     );
-   await  triggerSearch(
+    await triggerSearch(
       {
         profitYear: distributionsByAgeQueryParams?.profitYear || 0,
         reportType: FrozenReportsByAgeRequestType.PartTime,
