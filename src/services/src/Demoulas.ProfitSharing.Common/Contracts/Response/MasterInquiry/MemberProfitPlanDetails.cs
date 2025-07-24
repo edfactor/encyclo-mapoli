@@ -8,4 +8,6 @@ public sealed record MemberProfitPlanDetails : MemberDetails
     public decimal CurrentPSAmount { get; set; }
     public decimal BeginVestedAmount { get; set; }
     public decimal CurrentVestedAmount { get; set;}
+    public decimal AllocationToAmount { get; set; }
+    public decimal AllocationFromAmount { get; set; }
 }

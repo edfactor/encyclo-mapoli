@@ -18,7 +18,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .UseCollation("USING_NLS_COMP")
-                .HasAnnotation("ProductVersion", "9.0.6")
+                .HasAnnotation("ProductVersion", "9.0.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             OracleModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -27,25 +27,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 .StartsAt(666000000L)
                 .HasMin(666000000L)
                 .HasMax(666999999L);
-
-            modelBuilder.Entity("AuditChangeAuditEvent", b =>
-                {
-                    b.Property<long>("AuditEventId")
-                        .HasColumnType("NUMBER(19)")
-                        .HasColumnName("AUDITEVENTID");
-
-                    b.Property<long>("ChangesId")
-                        .HasColumnType("NUMBER(19)")
-                        .HasColumnName("CHANGESID");
-
-                    b.HasKey("AuditEventId", "ChangesId")
-                        .HasName("PK_AUDIT_CHANGE__AUDIT_EVENT");
-
-                    b.HasIndex("ChangesId")
-                        .HasDatabaseName("IX_AUDIT_CHANGE__AUDIT_EVENT_CHANGESID");
-
-                    b.ToTable("AUDIT_CHANGE__AUDIT_EVENT", (string)null);
-                });
 
             modelBuilder.Entity("Demoulas.Common.Data.Services.Entities.Entities.AccountingPeriod", b =>
                 {
@@ -25484,75 +25465,48 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Audit.AuditChange", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(19)")
-                        .HasColumnName("ID");
-
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<DateTimeOffset>("ChangeDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
-                        .HasColumnName("CHANGE_DATE")
-                        .HasDefaultValueSql("SYSTIMESTAMP");
-
-                    b.Property<string>("ColumnName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("NVARCHAR2(50)")
-                        .HasColumnName("COLUMN_NAME");
-
-                    b.Property<string>("NewValue")
-                        .HasMaxLength(512)
-                        .HasColumnType("NVARCHAR2(512)")
-                        .HasColumnName("NEW_VALUE");
-
-                    b.Property<string>("OriginalValue")
-                        .HasMaxLength(512)
-                        .HasColumnType("NVARCHAR2(512)")
-                        .HasColumnName("ORIGINAL_VALUE");
-
-                    b.Property<string>("UserName")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(24)
-                        .HasColumnType("NVARCHAR2(24)")
-                        .HasColumnName("USER_NAME")
-                        .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
-
-                    b.HasKey("Id")
-                        .HasName("PK_AUDIT_CHANGE");
-
-                    b.ToTable("AUDIT_CHANGE", (string)null);
-                });
-
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Audit.AuditEvent", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("NUMBER(19)")
-                        .HasColumnName("ID");
+                        .HasColumnName("AUDIT_EVENT_ID");
 
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
+                    b.Property<string>("ChangesJson")
+                        .HasColumnType("CLOB")
+                        .HasColumnName("CHANGES_JSON");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("CREATED_AT")
+                        .HasDefaultValueSql("SYSTIMESTAMP");
+
                     b.Property<string>("Operation")
                         .IsRequired()
-                        .HasMaxLength(12)
-                        .HasColumnType("NVARCHAR2(12)")
+                        .HasMaxLength(24)
+                        .HasColumnType("NVARCHAR2(24)")
                         .HasColumnName("OPERATION");
 
                     b.Property<string>("PrimaryKey")
-                        .HasMaxLength(32)
-                        .HasColumnType("NVARCHAR2(32)")
+                        .HasMaxLength(512)
+                        .HasColumnType("NVARCHAR2(512)")
                         .HasColumnName("PRIMARY_KEY");
 
                     b.Property<string>("TableName")
                         .HasMaxLength(30)
                         .HasColumnType("NVARCHAR2(30)")
                         .HasColumnName("TABLE_NAME");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(96)
+                        .HasColumnType("NVARCHAR2(96)")
+                        .HasColumnName("USER_NAME")
+                        .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
 
                     b.HasKey("Id")
                         .HasName("PK_AUDIT_EVENT");
@@ -30798,23 +30752,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasDatabaseName("IX_NAVIGATION_ASSIGNED_ROLES_REQUIREDROLESID");
 
                     b.ToTable("NAVIGATION_ASSIGNED_ROLES", (string)null);
-                });
-
-            modelBuilder.Entity("AuditChangeAuditEvent", b =>
-                {
-                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Audit.AuditEvent", null)
-                        .WithMany()
-                        .HasForeignKey("AuditEventId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired()
-                        .HasConstraintName("FK_AUDIT_CHANGE__AUDIT_EVENT_AUDIT_EVENT_AUDITEVENTID");
-
-                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Audit.AuditChange", null)
-                        .WithMany()
-                        .HasForeignKey("ChangesId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired()
-                        .HasConstraintName("FK_AUDIT_CHANGE__AUDIT_EVENT_AUDITCHANGE_CHANGESID");
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Audit.BeneficiaryContactArchive", b =>

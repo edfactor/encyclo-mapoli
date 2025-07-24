@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetVestingAmountByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams } from "smart-ui-library";
+import { ISortParams } from "smart-ui-library";
+import DSMGrid from "components/DSMGrid/DSMGrid";
 import ReportSummary from "../../../components/ReportSummary";
 import { VestedAmountsByAge } from "../../../reduxstore/types";
 import { GetVestedAmountsByAgeColumns } from "./VestedAmountsByAgeGridColumns";
@@ -30,7 +31,10 @@ const VestedAmountsByAgeGrid: React.FC<VestedAmountsByAgeGridProps> = ({
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
-  const columnDefs = GetVestedAmountsByAgeColumns(countColName, amountColName);
+  const columnDefs = useMemo(
+    () => GetVestedAmountsByAgeColumns(countColName, amountColName),
+    [countColName, amountColName]
+  );
 
   return (
     <>

@@ -97,7 +97,7 @@ public class MasterInquiryMemberEndpoint : Endpoint<MasterInquiryMemberRequest, 
         var result = await _masterInquiryService.GetMemberVestingAsync(req, ct);
         if (result is null)
         {
-            await SendNotFoundAsync(ct);
+            await Send.NotFoundAsync(ct);
             return null!;
         }
         return result;

@@ -2,7 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetBalanceByYearsQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, TotalsGrid } from "smart-ui-library";
+import { ISortParams, TotalsGrid } from "smart-ui-library";
+import DSMGrid from "components/DSMGrid/DSMGrid";
 import { GetBalanceByYearsGridColumns } from "./BalanceByYearsGridColumns";
 import Grid2 from "@mui/material/Grid2";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
@@ -27,6 +28,8 @@ const BalanceByYearsGrid: React.FC<BalanceByYearsGridProps> = ({ initialSearchLo
   const columnDefsTotal = GetBalanceByYearsGridColumns(FrozenReportsByAgeRequestType.Total);
   const columnDefsFullTime = GetBalanceByYearsGridColumns(FrozenReportsByAgeRequestType.FullTime);
   const columnDefsPartTime = GetBalanceByYearsGridColumns(FrozenReportsByAgeRequestType.PartTime);
+
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
 
   const onSearch = useCallback(async () => {
     await triggerSearch(
@@ -56,10 +59,10 @@ const BalanceByYearsGrid: React.FC<BalanceByYearsGridProps> = ({ initialSearchLo
   }, [triggerSearch, balanceByYearsQueryParams?.profitYear]);
 
   useEffect(() => {
-    if (initialSearchLoaded && balanceByYearsQueryParams?.profitYear) {
+    if (hasToken && initialSearchLoaded && balanceByYearsQueryParams?.profitYear) {
       onSearch();
     }
-  }, [balanceByYearsQueryParams?.profitYear, initialSearchLoaded, onSearch]);
+  }, [balanceByYearsQueryParams?.profitYear, hasToken, initialSearchLoaded, onSearch]);
 
   return (
     <>

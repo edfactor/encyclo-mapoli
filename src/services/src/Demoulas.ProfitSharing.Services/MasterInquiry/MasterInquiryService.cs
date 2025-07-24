@@ -658,6 +658,9 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 TerminationReason = memberData.TerminationReason,
                 Gender = memberData.Gender,
                 PayClassification = memberData.PayClassification,
+                
+                AllocationToAmount = balance.AllocationsToBeneficiary,
+                AllocationFromAmount = balance.AllocationsFromBeneficiary
             });
         }
 
