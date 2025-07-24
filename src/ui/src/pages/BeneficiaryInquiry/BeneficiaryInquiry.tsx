@@ -19,7 +19,7 @@ import { DSMAccordion, Page } from "smart-ui-library";
 import BeneficiaryInquiryGrid from "./BeneficiaryInquiryGrid";
 import BeneficiaryInquirySearchFilter from "./BeneficiaryInquirySearchFilter";
 import CreateBeneficiary from "./CreateBeneficiary";
-import { AccessAlarm, CloseSharp } from '@mui/icons-material';
+import { AccessAlarm, CloseSharp } from "@mui/icons-material";
 
 const BeneficiaryInquiry = () => {
   const { token, appUser, username: stateUsername } = useSelector((state: RootState) => state.security);
@@ -45,7 +45,7 @@ const BeneficiaryInquiry = () => {
   const [selectedBeneficiary, setSelectedBeneficiary] = useState<BeneficiaryDto | undefined>();
   const [deleteBeneficiaryId, setDeleteBeneficairyId] = useState<number>(0);
   const [deleteInProgress, setDeleteInProgress] = useState<boolean>(false);
-  const [beneficiaryDialogTitle, setBeneficiaryDialogTitle]  = useState<string>();
+  const [beneficiaryDialogTitle, setBeneficiaryDialogTitle] = useState<string>();
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -97,7 +97,7 @@ const BeneficiaryInquiry = () => {
   };
   const createOrUpdateBeneficiary = (data?: BeneficiaryDto) => {
     setSelectedBeneficiary(data);
-    setBeneficiaryDialogTitle(data? "Edit Beneficiary": "Add Beneficiary");
+    setBeneficiaryDialogTitle(data ? "Edit Beneficiary" : "Add Beneficiary");
     setOpen(true);
   };
 
@@ -126,31 +126,31 @@ const BeneficiaryInquiry = () => {
         <Dialog
           open={open}
           onClose={handleClose}
-        // slotProps={{
-        //   paper: {
-        //     component: 'form',
-        //     onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
-        //       event.preventDefault();
-        //       const formData = new FormData(event.currentTarget);
-        //       const formJson = Object.fromEntries((formData as any).entries());
-        //       const email = formJson.email;
-        //       console.log(email);
-        //       handleClose();
-        //     },
-        //   },
-        // }}
+          // slotProps={{
+          //   paper: {
+          //     component: 'form',
+          //     onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
+          //       event.preventDefault();
+          //       const formData = new FormData(event.currentTarget);
+          //       const formJson = Object.fromEntries((formData as any).entries());
+          //       const email = formJson.email;
+          //       console.log(email);
+          //       handleClose();
+          //     },
+          //   },
+          // }}
         >
           <DialogTitle>{beneficiaryDialogTitle}</DialogTitle>
           <IconButton
             aria-label="close"
             onClick={handleClose}
             sx={(theme) => ({
-              position: 'absolute',
+              position: "absolute",
               right: 8,
               top: 8,
-              color: theme.palette.grey[500],
+              color: theme.palette.grey[500]
             })}>
-              <CloseSharp />
+            <CloseSharp />
           </IconButton>
           <DialogContent>
             <CreateBeneficiary
