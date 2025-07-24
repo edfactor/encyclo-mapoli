@@ -1,4 +1,4 @@
-using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
@@ -53,10 +53,10 @@ public class UpdateForfeitureAdjustmentBulkEndpoint : Endpoint<List<ForfeitureAd
         
         if (results == null)
         {
-            await SendNotFoundAsync(ct);
+            await Send.NotFoundAsync(ct);
             return;
         }
         
-        await SendOkAsync(results, ct);
+        await Send.OkAsync(results, ct);
     }
 } 

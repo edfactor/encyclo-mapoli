@@ -82,10 +82,10 @@ public class TerminatedEmployeeAndBeneficiaryDataEndpoint
                 await streamWriter.FlushAsync(ct);
             }
             memoryStream.Position = 0;
-            await SendStreamAsync(memoryStream, $"{ReportFileName}.csv", contentType: "text/csv", cancellation: ct);
+            await Send.StreamAsync(memoryStream, $"{ReportFileName}.csv", contentType: "text/csv", cancellation: ct);
             return;
         }
-        await SendOkAsync(response, ct);
+        await Send.OkAsync(response, ct);
     }
 
     public string ReportFileName { get; }

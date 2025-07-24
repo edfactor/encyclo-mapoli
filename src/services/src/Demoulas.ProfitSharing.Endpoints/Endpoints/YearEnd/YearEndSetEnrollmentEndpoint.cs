@@ -33,6 +33,6 @@ public sealed class YearEndSetEnrollmentEndpoint: Endpoint<ProfitYearRequest>
     public override async Task HandleAsync(ProfitYearRequest req, CancellationToken ct)
     {
         await _yearEndService.UpdateEnrollmentId(req.ProfitYear, ct);
-        await SendNoContentAsync(ct);
+        await Send.NoContentAsync(ct);
     }
 }

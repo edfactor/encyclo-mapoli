@@ -59,7 +59,7 @@ public sealed class NewProfitSharingLabelsForMailMergeEndpoint : Endpoint<Profit
             };
             HttpContext.Response.Headers.Append("Content-Disposition", cd.ToString());
 
-            await SendStreamAsync(memoryStream, "NEWPROFLBL.txt", contentType: "text/plain", cancellation: ct);
+            await Send.StreamAsync(memoryStream, "NEWPROFLBL.txt", contentType: "text/plain", cancellation: ct);
         }
     }
 }

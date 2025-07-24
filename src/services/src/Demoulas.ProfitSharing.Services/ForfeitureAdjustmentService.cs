@@ -546,7 +546,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
             }
 
             await context.SaveChangesAsync(cancellationToken);
-        });
+        }, cancellationToken);
 
         return results;
     }
