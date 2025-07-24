@@ -103,14 +103,6 @@ public sealed class Demographic : Member
     public List<DemographicSsnChangeHistory> DemographicSsnChangeHistories { get; set; } = [];
 
     /// <summary>
-    /// Gets or sets the date and time when the demographic entity was last modified.
-    /// </summary>
-    /// <value>
-    /// A <see cref="DateTime"/> representing the last modification timestamp of the demographic entity.
-    /// </value>
-    public DateTimeOffset LastModifiedDate { get; set; }
-
-    /// <summary>
     /// Compares two <see cref="Demographic"/> objects to determine if their historical data is equivalent.
     /// </summary>
     /// <param name="demo1">The first <see cref="Demographic"/> object to compare.</param>
@@ -137,10 +129,5 @@ public sealed class Demographic : Member
                demo1.PayFrequencyId == demo2.PayFrequencyId &&
                demo1.TerminationCodeId == demo2.TerminationCodeId &&
                demo1.EmploymentStatusId == demo2.EmploymentStatusId;
-    }
-
-    public static bool DemographicSsnHistoryEqual(Demographic demo1, Demographic demo2)
-    {
-        return demo1.Ssn == demo2.Ssn;
     }
 }

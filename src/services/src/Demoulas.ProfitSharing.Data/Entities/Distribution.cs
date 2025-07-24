@@ -1,11 +1,12 @@
 ﻿
 using System.Diagnostics;
+using Demoulas.ProfitSharing.Data.Entities.Base;
 
 namespace Demoulas.ProfitSharing.Data.Entities;
 
 
 [DebuggerDisplay("Id={Id} EmployeeName={EmployeeName} CheckAmount={CheckAmount}")]
-public sealed class Distribution
+public sealed class Distribution : ModifiedBase
 {
     public long Id { get; set; } 
     

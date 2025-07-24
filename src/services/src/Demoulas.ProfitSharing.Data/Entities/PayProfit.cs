@@ -1,9 +1,10 @@
 ﻿using System.Diagnostics;
+using Demoulas.ProfitSharing.Data.Entities.Base;
 
 namespace Demoulas.ProfitSharing.Data.Entities;
 
 [DebuggerDisplay($"Id={{DemographicId}} ProfitYear={{ProfitYear}} EnrollmentId={{EnrollmentId}} EmploymentStatus={{Demographic!.EmploymentStatusId}} TerminationCodeId={{Demographic!.TerminationCodeId}} Name:{{Demographic!.ContactInfo.FullName}}")]
-public sealed class PayProfit
+public sealed class PayProfit : ModifiedBase
 {
     /// <summary>
     /// Gets or sets the Oracle HCM (Human Capital Management) identifier.
@@ -80,8 +81,6 @@ public sealed class PayProfit
     /// Executive earnings
     /// </summary>
     public decimal IncomeExecutive { get; set; }
-    
-    public DateTimeOffset LastUpdate { get; set; }
 
     /// <summary>
     /// Points Earned (for the ProfitYear).

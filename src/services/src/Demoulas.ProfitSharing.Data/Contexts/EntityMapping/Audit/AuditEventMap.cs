@@ -35,6 +35,7 @@ public sealed class AuditEventMap : IEntityTypeConfiguration<AuditEvent>
 
 
         _ = builder.Property(e => e.CreatedAt)
+            .IsRequired()
             .HasColumnName("CREATED_AT")
             .HasColumnType("TIMESTAMP WITH TIME ZONE")
             .HasDefaultValueSql("SYSTIMESTAMP");

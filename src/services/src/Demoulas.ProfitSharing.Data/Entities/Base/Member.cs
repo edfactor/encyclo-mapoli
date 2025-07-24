@@ -1,6 +1,6 @@
 ﻿namespace Demoulas.ProfitSharing.Data.Entities.Base;
 #pragma warning disable S2094
-public abstract class Member
+public abstract class Member : ModifiedBase
 #pragma warning restore S2094
 {
     /*
