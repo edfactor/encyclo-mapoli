@@ -9,6 +9,9 @@ public sealed record BalanceEndpointResponse : IdRequest
     public decimal VestingPercent { get; set; }
     public decimal CurrentBalance { get; set; }
     public short YearsInPlan { get; set; }
+    public decimal AllocationsToBeneficiary { get; set; }
+    public decimal AllocationsFromBeneficiary { get; set; }
+    
 
     public static BalanceEndpointResponse ResponseExample() {
         return new BalanceEndpointResponse
@@ -20,6 +23,8 @@ public sealed record BalanceEndpointResponse : IdRequest
             VestingPercent = .4m,
             CurrentBalance = 5000,
             YearsInPlan = 4,
+            AllocationsToBeneficiary = 5,
+            AllocationsFromBeneficiary = 6,
         };
     }
 }
