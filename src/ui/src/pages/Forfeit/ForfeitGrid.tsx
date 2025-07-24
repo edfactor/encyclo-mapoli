@@ -83,7 +83,7 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({
 
   const totalsRow = {
     forfeitures: totalForfeitures.toFixed(2) ?? "0.00",
-    forfeitPoints: totalForfeitPoints ?? 0,
+    contForfeitPoints: totalForfeitPoints ?? 0,
     earningPoints: totalEarningPoints ?? 0
   };
 
