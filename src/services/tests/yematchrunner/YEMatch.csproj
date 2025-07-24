@@ -10,13 +10,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentAssertions"/>
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json"/>
-    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets"/>
-    <PackageReference Include="Newtonsoft.Json"/>
-    <PackageReference Include="Okta.AspNetCore"/>
-    <PackageReference Include="Oracle.ManagedDataAccess.Core"/>
-    <PackageReference Include="SSH.NET"/>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" />
+    <PackageReference Include="Newtonsoft.Json" />
+    <PackageReference Include="Okta.AspNetCore" />
+    <PackageReference Include="Oracle.ManagedDataAccess.Core" />
+    <PackageReference Include="SSH.NET" />
+    <PackageReference Include="Shouldly" />
   </ItemGroup>
 
   <ItemGroup>
