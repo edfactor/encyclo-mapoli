@@ -1,4 +1,4 @@
-import { ColDef, ColumnState } from "ag-grid-community";
+import { ColDef, ColGroupDef, ColumnState } from "ag-grid-community";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import { AgGridReactProps } from "ag-grid-react";
 import { FC, ReactNode, useEffect, useMemo, useState } from "react";
@@ -53,7 +53,7 @@ export const DSMGrid: FC<DSMGridOptions> = ({ isLoading, providedOptions, prefer
   }, [preferenceKey]);
 
   const [columnStates, setColumnStates] = useState<ColumnState[]>(preferenceArray);
-  const [columnDefinitions, setColumnDefinitions] = useState<ColDef[]>(columnDefs as ColDef[]);
+  const [columnDefinitions, setColumnDefinitions] = useState<(ColDef | ColGroupDef)[]>(columnDefs as (ColDef | ColGroupDef)[]);
 
   /*
    *   When preferenceArray is updated, a unique set of columns has been loaded.
@@ -61,7 +61,7 @@ export const DSMGrid: FC<DSMGridOptions> = ({ isLoading, providedOptions, prefer
    */
   useEffect(() => {
     setColumnStates(preferenceArray);
-    setColumnDefinitions(columnDefs as ColDef[]);
+    setColumnDefinitions(columnDefs as (ColDef | ColGroupDef)[]);
     // eslint-disable-next-line
   }, [preferenceArray]);
 
