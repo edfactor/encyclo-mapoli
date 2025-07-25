@@ -2,8 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetDistributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { ISortParams, TotalsGrid } from "smart-ui-library";
-import DSMGrid from "components/DSMGrid/DSMGrid";
+import {DSMGrid, ISortParams, TotalsGrid } from "smart-ui-library";
 import { GetDistributionsByAgeColumns } from "./DistributionByAgeGridColumns";
 import { Grid } from "@mui/material";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
@@ -30,8 +29,6 @@ const DistributionByAgeGrid: React.FC<DistributionByAgeGridProps> = ({ initialSe
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
   const columnDefsTotal = useMemo(() => GetDistributionsByAgeColumns(FrozenReportsByAgeRequestType.Total), []);
-  const columnDefsFullTime = GetDistributionsByAgeColumns(FrozenReportsByAgeRequestType.FullTime);
-  const columnDefsPartTime = GetDistributionsByAgeColumns(FrozenReportsByAgeRequestType.PartTime);
 
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
 
@@ -138,9 +135,8 @@ const DistributionByAgeGrid: React.FC<DistributionByAgeGridProps> = ({ initialSe
                 isLoading={isFetching}
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
-                  rowData: distributionsByAgeTotal?.response.results,
-
-                  columnDefs: columnDefsTotal
+                  rowData: distributionsByAgeTotal?.response?.results ?? [],
+                  columnDefs: columnDefsTotal ?? []
                 }}
               />
             </Grid>

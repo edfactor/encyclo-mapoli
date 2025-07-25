@@ -2,12 +2,10 @@ import { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetBalanceByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { ISortParams, TotalsGrid } from "smart-ui-library";
-import DSMGrid from "components/DSMGrid/DSMGrid";
+import { DSMGrid, ISortParams, TotalsGrid ,numberToCurrency } from "smart-ui-library";
 import { GetBalanceByAgeColumns } from "./BalanceByAgeGridColumns";
 import { Grid } from "@mui/material";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
-import { numberToCurrency } from "smart-ui-library";
 
 interface BalanceByAgeGridProps {
   initialSearchLoaded: boolean;
