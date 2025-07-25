@@ -35,7 +35,7 @@ export const ActionColumnDefault: ColDef = {
   width: 100
 };
 
-export const DSMGrid: FC<DSMGridOptions> = ({ isLoading, providedOptions, preferenceKey, controls, showColumnControl = true }) => {
+export const DSMGrid: FC<DSMGridOptions> = ({ isLoading, providedOptions, preferenceKey, controls, showColumnControl = true, handleSortChanged }) => {
   const { columnDefs } = providedOptions;
   const [columnStateChanged, setColumnStateChanged] = useState<ColumnStateWIndex>({ index: -1, colId: "" });
 
@@ -71,6 +71,7 @@ export const DSMGrid: FC<DSMGridOptions> = ({ isLoading, providedOptions, prefer
     preferenceKey,
     controls,
     showColumnControl,
+    handleSortChanged,
     providedOptions: {
       ...providedOptions,
       columnDefs: columnDefinitions
