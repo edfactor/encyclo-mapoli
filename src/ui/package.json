@@ -1,7 +1,7 @@
 {
   "name": "smart-profit-sharing",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "overrides": {},
   "scripts": {
@@ -18,7 +18,7 @@
     "@emotion/react": "11.14.0",
     "@emotion/styled": "11.14.0",
     "@hookform/resolvers": "5.0.1",
-    "@mui/icons-material": "6.4.11",
+    "@mui/icons-material": "7.1.1",
     "@mui/lab": "5.0.0-alpha.176",
     "@mui/material": "6.4.11",
     "@mui/system": "5.17.1",
@@ -52,7 +52,7 @@
     "react-router-bootstrap": "0.26.3",
     "react-router-dom": "7.5.2",
     "redux": "5.0.1",
-    "smart-ui-library": "^5.0.17",
+    "smart-ui-library": "^5.2.2",
     "typescript": "5.8.3",
     "web-vitals": "~4.0.1",
     "yup": "~1.4.0"

@@ -1,4 +1,4 @@
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { CAPTIONS, ROUTES } from "../../../constants";
 import { InfoCard } from "./InfoCard";
@@ -77,17 +77,17 @@ const ProfitShareReportEditRunResults = () => {
   const navigate = useNavigate();
 
   return (
-    <Grid2
+    <Grid
       container
       width={"100%"}
       rowSpacing={"24px"}>
-      <Grid2
+      <Grid
         container
         spacing="24px"
         paddingLeft="24px"
         width="100%">
         {profitShareCategories.map((category, index) => (
-          <Grid2
+          <Grid
             size={{ xs: 12, md: 6, lg: 6 }}
             key={category.code}>
             <InfoCard
@@ -97,10 +97,10 @@ const ProfitShareReportEditRunResults = () => {
               data={category.data}
               valid={true}
             />
-          </Grid2>
+          </Grid>
         ))}
-      </Grid2>
-    </Grid2>
+      </Grid>
+    </Grid>
   );
 };
 

@@ -1,5 +1,5 @@
 import { Typography } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -82,18 +82,18 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store, pageNumberReset,
   const columnDefs = useMemo(() => GetAssociatesColumns(handleNavigation), [handleNavigation]);
 
   return (
-    <Grid2
+    <Grid
       container
       direction="column"
       width="100%">
-      <Grid2 paddingX="24px">
+      <Grid paddingX="24px">
         <Typography
           variant="h6"
           sx={{ color: "#0258A5", marginBottom: "16px" }}>
           Associates
         </Typography>
-      </Grid2>
-      <Grid2 width="100%">
+      </Grid>
+      <Grid width="100%">
         <DSMGrid
           preferenceKey={`BREAKDOWN_REPORT_ASSOCIATES_STORE_${store}`}
           isLoading={isFetching}
@@ -112,8 +112,8 @@ const AssociatesGrid: React.FC<AssociatesGridProps> = ({ store, pageNumberReset,
             recordCount={breakdownByStore.response.total || 0}
           />
         )}
-      </Grid2>
-    </Grid2>
+      </Grid>
+    </Grid>
   );
 };
 

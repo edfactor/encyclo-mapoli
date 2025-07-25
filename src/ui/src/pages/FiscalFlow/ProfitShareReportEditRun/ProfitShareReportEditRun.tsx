@@ -1,5 +1,5 @@
 import { Button, Divider } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { DSMAccordion, Page, SmartModal } from "smart-ui-library";
 import ProfitShareReportEditRunParameters from "./ProfitShareReportEditRunParameters";
 import { CAPTIONS } from "../../../constants";
@@ -33,22 +33,22 @@ const ProfitShareReportEditRun = () => {
     <Page
       label={CAPTIONS.PROFIT_SHARE_REPORT_EDIT_RUN}
       actionNode={renderActionNode()}>
-      <Grid2
+      <Grid
         container
         rowSpacing="24px">
-        <Grid2 width={"100%"}>
+        <Grid width={"100%"}>
           <Divider />
-        </Grid2>
-        <Grid2 width={"100%"}>
+        </Grid>
+        <Grid width={"100%"}>
           <DSMAccordion title="Filter">
             <ProfitShareReportEditRunParameters />
           </DSMAccordion>
-        </Grid2>
+        </Grid>
 
-        <Grid2 width="100%">
+        <Grid width="100%">
           <ProfitShareReportEditRunResults />
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
 
       <SmartModal
         open={isModalOpen}

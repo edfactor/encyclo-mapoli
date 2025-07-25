@@ -1,5 +1,5 @@
 import { Typography } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import LabelValueSection from "components/LabelValueSection";
 import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
@@ -60,7 +60,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
 
   if (noResults) {
     return (
-      <Grid2 size={{ xs: 12 }}>
+      <Grid size={{ xs: 12 }}>
         <div className="missive-alerts-box">
           <div className="missive-alert missive-error">
             <Typography
@@ -75,7 +75,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
             </Typography>
           </div>
         </div>
-      </Grid2>
+      </Grid>
     );
   }
 
@@ -211,39 +211,39 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     <div
       className="employee-details-lightbox"
       style={{ width: "100%" }}>
-      <Grid2
+      <Grid
         container
         paddingX="24px"
         width={"100%"}>
-        <Grid2 size={{ xs: 12 }}>
+        <Grid size={{ xs: 12 }}>
           <Typography
             variant="h2"
             sx={{ color: "#0258A5" }}>
             Member Details
           </Typography>
-        </Grid2>
+        </Grid>
 
-        <Grid2 size={{ xs: 12 }}>
-          <Grid2
+        <Grid size={{ xs: 12 }}>
+          <Grid
             container
             spacing={3}>
-            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <LabelValueSection data={summarySection} />
-            </Grid2>
-            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <LabelValueSection data={personalSection} />
-            </Grid2>
-            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <LabelValueSection data={milestoneSection} />
-            </Grid2>
-            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <LabelValueSection data={planSection} />
-            </Grid2>
-          </Grid2>
-        </Grid2>
-      </Grid2>
+            </Grid>
+          </Grid>
+        </Grid>
+      </Grid>
       {missiveAlerts.length > 0 && (
-        <Grid2 size={{ xs: 12 }}>
+        <Grid size={{ xs: 12 }}>
           <div className="missive-alerts-box">
             {missiveAlerts.map((alert: MissiveResponse, idx: number) => (
               <div
@@ -259,7 +259,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
               </div>
             ))}
           </div>
-        </Grid2>
+        </Grid>
       )}
     </div>
   );

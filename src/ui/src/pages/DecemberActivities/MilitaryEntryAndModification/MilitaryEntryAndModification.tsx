@@ -1,5 +1,5 @@
 import { Dialog, DialogContent, DialogTitle, Divider } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -62,19 +62,19 @@ const MilitaryEntryAndModification = () => {
     <Page
       label={CAPTIONS.MILITARY_CONTRIBUTIONS}
       actionNode={renderActionNode()}>
-      <Grid2
+      <Grid
         container
         rowSpacing="24px">
-        <Grid2 width={"100%"}>
+        <Grid width={"100%"}>
           <Divider />
-        </Grid2>
-        <Grid2 width={"100%"}>
+        </Grid>
+        <Grid width={"100%"}>
           <DSMAccordion title="Filter">
             <MilitaryEntryAndModificationSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
           </DSMAccordion>
-        </Grid2>
+        </Grid>
 
-        <Grid2 width="100%">
+        <Grid width="100%">
           {masterInquiryEmployeeDetails ? (
             <MilitaryContributionGrid
               setInitialSearchLoaded={setInitialSearchLoaded}
@@ -86,8 +86,8 @@ const MilitaryEntryAndModification = () => {
               Please search for and select an employee to view military contributions.
             </div>
           )}
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
 
       {/* Military Contribution Form Dialog */}
       <Dialog

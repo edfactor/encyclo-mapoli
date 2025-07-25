@@ -1,6 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Checkbox, Divider, FormLabel, MenuItem, Select, Typography } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useEffect, useMemo, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
@@ -207,27 +207,27 @@ const PayBeNext = () => {
 
   return (
     <Page label="PAY BE NEXT">
-      <Grid2
+      <Grid
         container
         rowSpacing="24px">
-        <Grid2
+        <Grid
           size={{ xs: 12 }}
           width={"100%"}>
           <Divider />
-        </Grid2>
-        <Grid2
+        </Grid>
+        <Grid
           size={{ xs: 12 }}
           width={"100%"}>
           <DSMAccordion title="Filter">
             <form onSubmit={validateAndSubmit}>
-              <Grid2
+              <Grid
                 container
                 paddingX="24px">
-                <Grid2
+                <Grid
                   container
                   spacing={2}
                   width="100%">
-                  <Grid2 size={{ xs: 12, sm: 2, md: 2 }}>
+                  <Grid size={{ xs: 12, sm: 2, md: 2 }}>
                     <FormLabel>Profit Year</FormLabel>
                     <Controller
                       name="profitYear"
@@ -252,8 +252,8 @@ const PayBeNext = () => {
                         </Select>
                       )}
                     />
-                  </Grid2>
-                  <Grid2 size={{ xs: 12, sm: 3, md: 3 }}>
+                  </Grid>
+                  <Grid size={{ xs: 12, sm: 3, md: 3 }}>
                     <FormLabel>Is Also Employee</FormLabel>
                     <Controller
                       name="isAlsoEmployee"
@@ -269,28 +269,28 @@ const PayBeNext = () => {
                         />
                       )}
                     />
-                  </Grid2>
-                </Grid2>
+                  </Grid>
+                </Grid>
 
-                <Grid2
+                <Grid
                   container
                   justifyContent="flex-end"
                   paddingY="16px">
-                  <Grid2 size={{ xs: 12 }}>
+                  <Grid size={{ xs: 12 }}>
                     <SearchAndReset
                       handleReset={handleReset}
                       handleSearch={validateAndSubmit}
                       isFetching={isFetching}
                       disabled={!isValid}
                     />
-                  </Grid2>
-                </Grid2>
-              </Grid2>
+                  </Grid>
+                </Grid>
+              </Grid>
             </form>
           </DSMAccordion>
-        </Grid2>
+        </Grid>
 
-        <Grid2
+        <Grid
           size={{ xs: 12 }}
           width="100%">
           {isSuccess && (
@@ -371,8 +371,8 @@ const PayBeNext = () => {
           )}
 
           {/**Render Report here! */}
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
     </Page>
   );
 };

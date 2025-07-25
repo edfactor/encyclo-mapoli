@@ -171,14 +171,14 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange }) =
       <Page
         label="Profit Summary"
         actionNode={renderActionNode()}>
-        <Grid2
+        <Grid
           container
           rowSpacing="24px">
-          <Grid2 width={"100%"}>
+          <Grid width={"100%"}>
             <Divider />
-          </Grid2>
+          </Grid>
 
-          <Grid2 width={"100%"}>
+          <Grid width={"100%"}>
             <Typography
               variant="h6"
               sx={{ mb: 2, px: 3 }}>
@@ -195,9 +195,9 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange }) =
                 onRowClicked: handleRowClick
               }}
             />
-          </Grid2>
+          </Grid>
 
-          <Grid2 width={"100%"}>
+          <Grid width={"100%"}>
             <Typography
               variant="h6"
               sx={{ mb: 2, px: 3 }}>
@@ -214,8 +214,8 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange }) =
                 onRowClicked: handleRowClick
               }}
             />
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
       </Page>
     </>
   );

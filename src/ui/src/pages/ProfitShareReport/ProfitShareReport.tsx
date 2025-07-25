@@ -1,5 +1,5 @@
 import { Box, Button, CircularProgress, Divider, Typography } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import ProfitShareTotalsDisplay from "components/ProfitShareTotalsDisplay";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
@@ -96,13 +96,13 @@ const ProfitShareReport = () => {
     <Page
       label={CAPTIONS.PROFIT_SHARE_REPORT}
       actionNode={renderActionNode()}>
-      <Grid2
+      <Grid
         container
         rowSpacing="24px">
-        <Grid2 width={"100%"}>
+        <Grid width={"100%"}>
           <Divider />
-        </Grid2>
-        <Grid2 width="100%">
+        </Grid>
+        <Grid width="100%">
           <Box sx={{ mb: 3 }}>
             <div style={{ padding: "0 24px 0 24px" }}>
               <Typography
@@ -118,9 +118,9 @@ const ProfitShareReport = () => {
               </Box>
             )}
           </Box>
-        </Grid2>
+        </Grid>
 
-        <Grid2 width="100%">
+        <Grid width="100%">
           {!initialDataLoaded ? (
             <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
               <CircularProgress />
@@ -128,28 +128,28 @@ const ProfitShareReport = () => {
           ) : (
             <ProfitSummary onPresetParamsChange={handlePresetParamsChange} />
           )}
-        </Grid2>
+        </Grid>
 
         {selectedPresetParams && (
-          <Grid2 width="100%">
+          <Grid width="100%">
             <DSMAccordion title="Filter">
               <ProfitShareReportSearchFilters
                 profitYear={profitYear}
                 presetParams={selectedPresetParams}
               />
             </DSMAccordion>
-          </Grid2>
+          </Grid>
         )}
 
         {selectedPresetParams && (
-          <Grid2 width="100%">
+          <Grid width="100%">
             <ReportGrid
               params={selectedPresetParams}
               onLoadingChange={() => {}}
             />
-          </Grid2>
+          </Grid>
         )}
-      </Grid2>
+      </Grid>
 
       <SmartModal
         open={isModalOpen}

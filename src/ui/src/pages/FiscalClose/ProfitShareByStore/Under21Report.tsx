@@ -1,5 +1,5 @@
 import { Divider, CircularProgress, Box } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { Page } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
 import { useEffect, useRef, useState } from "react";
@@ -100,15 +100,15 @@ const Under21Report = () => {
     <Page
       label={CAPTIONS.QPAY066_UNDER21}
       actionNode={renderActionNode()}>
-      <Grid2
+      <Grid
         container
         rowSpacing="24px">
-        <Grid2 width={"100%"}>
+        <Grid width={"100%"}>
           <Divider />
-        </Grid2>
+        </Grid>
 
         {initialLoad ? (
-          <Grid2 width="100%">
+          <Grid width="100%">
             <Box
               display="flex"
               justifyContent="center"
@@ -116,11 +116,11 @@ const Under21Report = () => {
               minHeight="200px">
               <CircularProgress />
             </Box>
-          </Grid2>
+          </Grid>
         ) : (
           <>
             {hasData && !isLoading && (
-              <Grid2
+              <Grid
                 width="100%"
                 paddingX="24px">
                 <Under21Summary
@@ -128,10 +128,10 @@ const Under21Report = () => {
                   isLoading={isTotalsLoading}
                   title="UNDER 21 REPORT (QPAY066-UNDR21)"
                 />
-              </Grid2>
+              </Grid>
             )}
 
-            <Grid2 width="100%">
+            <Grid width="100%">
               <Under21BreakdownGrid
                 isLoading={isBreakdownLoading}
                 initialSearchLoaded={initialSearchLoaded}
@@ -143,10 +143,10 @@ const Under21Report = () => {
                 sortParams={sortParams}
                 setSortParams={setSortParams}
               />
-            </Grid2>
+            </Grid>
           </>
         )}
-      </Grid2>
+      </Grid>
     </Page>
   );
 };

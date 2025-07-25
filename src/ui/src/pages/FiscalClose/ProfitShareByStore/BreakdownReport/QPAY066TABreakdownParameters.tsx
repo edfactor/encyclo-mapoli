@@ -1,5 +1,5 @@
 import { FormLabel, MenuItem, Select, TextField } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -141,12 +141,12 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
         // Ensure the form values are captured and submitted
         validateAndSubmit();
       }}>
-      <Grid2
+      <Grid
         container
         paddingX="24px"
         alignItems="flex-end"
         spacing={1.5}>
-        <Grid2 size={getGridSizes()}>
+        <Grid size={getGridSizes()}>
           <Controller
             name="store"
             control={control}
@@ -175,11 +175,11 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
               </>
             )}
           />
-        </Grid2>
+        </Grid>
 
         {(activeTab === "all" || activeTab === "stores") && (
           <>
-            <Grid2 size={getGridSizes()}>
+            <Grid size={getGridSizes()}>
               <Controller
                 name="employeeStatus"
                 control={control}
@@ -205,9 +205,9 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
                   </>
                 )}
               />
-            </Grid2>
+            </Grid>
 
-            <Grid2 size={getGridSizes()}>
+            <Grid size={getGridSizes()}>
               <Controller
                 name="badgeId"
                 control={control}
@@ -223,9 +223,9 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
                   </>
                 )}
               />
-            </Grid2>
+            </Grid>
 
-            <Grid2 size={getGridSizes()}>
+            <Grid size={getGridSizes()}>
               <Controller
                 name="employeeName"
                 control={control}
@@ -241,12 +241,12 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
                   </>
                 )}
               />
-            </Grid2>
+            </Grid>
           </>
         )}
-      </Grid2>
+      </Grid>
 
-      <Grid2
+      <Grid
         width="100%"
         paddingX="24px"
         marginTop={2}>
@@ -261,7 +261,7 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
           disabled={false}
           searchButtonText="Search"
         />
-      </Grid2>
+      </Grid>
     </form>
   );
 };

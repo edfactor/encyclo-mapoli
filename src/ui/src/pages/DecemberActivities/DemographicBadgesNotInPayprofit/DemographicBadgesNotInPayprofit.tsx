@@ -1,4 +1,4 @@
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { Page } from "smart-ui-library";
 import DemographicBadgesNotInPayprofitGrid from "./DemographicBadgesNotInPayprofitGrid";
 import { CAPTIONS } from "../../../constants";
@@ -12,13 +12,13 @@ const DemographicBadgesNotInPayprofit = () => {
     <Page
       label={CAPTIONS.DEMOGRAPHIC_BADGES}
       actionNode={renderActionNode()}>
-      <Grid2
+      <Grid
         container
         rowSpacing="24px">
-        <Grid2 width="100%">
+        <Grid width="100%">
           <DemographicBadgesNotInPayprofitGrid />
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
     </Page>
   );
 };

@@ -1,5 +1,5 @@
 import { Divider, Typography } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
@@ -34,13 +34,13 @@ const ProfCtrlSheet = () => {
 
   return (
     <Page label={CAPTIONS.PROF_CTRLSHEET}>
-      <Grid2
+      <Grid
         container
         rowSpacing="24px">
-        <Grid2 width={"100%"}>
+        <Grid width={"100%"}>
           <Divider />
-        </Grid2>
-        <Grid2 width="100%">
+        </Grid>
+        <Grid width="100%">
           <>
             <div style={{ padding: "0 24px 0 24px" }}>
               <Typography
@@ -60,8 +60,8 @@ const ProfCtrlSheet = () => {
               />
             </div>
           </>
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
     </Page>
   );
 };

@@ -1,5 +1,5 @@
 import { Divider } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { useState } from "react";
 import { MasterInquiryRequest } from "reduxstore/types";
 import { DSMAccordion, Page } from "smart-ui-library";
@@ -27,15 +27,15 @@ const MasterInquiry = () => {
 
   return (
     <Page label="MASTER INQUIRY (008-10)">
-      <Grid2
+      <Grid
         container
         rowSpacing="24px">
-        <Grid2
+        <Grid
           size={{ xs: 12 }}
           width={"100%"}>
           <Divider />
-        </Grid2>
-        <Grid2
+        </Grid>
+        <Grid
           size={{ xs: 12 }}
           width={"100%"}>
           <DSMAccordion title="Filter">
@@ -50,7 +50,7 @@ const MasterInquiry = () => {
               }}
             />
           </DSMAccordion>
-        </Grid2>
+        </Grid>
 
         {searchParams && (
           <MasterInquiryMemberGrid
@@ -76,7 +76,7 @@ const MasterInquiry = () => {
             id={selectedMember.id}
           />
         )}
-      </Grid2>
+      </Grid>
     </Page>
   );
 };

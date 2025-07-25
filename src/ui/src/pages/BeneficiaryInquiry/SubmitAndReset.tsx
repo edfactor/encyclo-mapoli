@@ -1,6 +1,6 @@
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
-import Grid from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import React, { FC } from "react";
 import "./SubmitAndReset.css";
 

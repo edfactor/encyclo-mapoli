@@ -1,6 +1,6 @@
 
 import { Divider } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyPayBenReportQuery } from "reduxstore/api/YearsEndApi";
@@ -74,15 +74,15 @@ const PayBenReport = () => {
 
     return (
         <Page label="PAY BENEFICIARY REPORT">
-            <Grid2
+            <Grid
                 container
                 rowSpacing="24px">
-                <Grid2
+                <Grid
                     size={{ xs: 12 }}
                     width={"100%"}>
                     <Divider />
-                </Grid2>
-                <Grid2
+                </Grid>
+                <Grid
                     size={{ xs: 12 }}
                     width="100%">
                     {isSuccess && (
@@ -119,8 +119,8 @@ const PayBenReport = () => {
                     )}
 
                     {/**Render Report here! */}
-                </Grid2>
-            </Grid2>
+                </Grid>
+            </Grid>
         </Page>
     );
 };

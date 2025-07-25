@@ -5,7 +5,7 @@ import { RootState } from "reduxstore/store";
 import { ISortParams, TotalsGrid } from "smart-ui-library";
 import DSMGrid from "components/DSMGrid/DSMGrid";
 import { GetBalanceByYearsGridColumns } from "./BalanceByYearsGridColumns";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
 import { numberToCurrency } from "smart-ui-library";
 
@@ -133,10 +133,10 @@ const BalanceByYearsGrid: React.FC<BalanceByYearsGridProps> = ({ initialSearchLo
               leftColumnHeaders={["Beneficiaries", "Employees", "Total"]}
               topRowHeaders={["PartTime", "Count", "Balance", "Vested"]}></TotalsGrid>
           </div>
-          <Grid2
+          <Grid
             size={{ xs: 12 }}
             container>
-            <Grid2 size={{ xs: 4 }}>
+            <Grid size={{ xs: 4 }}>
               <DSMGrid
                 preferenceKey={"AGE_Total"}
                 isLoading={isFetching}
@@ -146,8 +146,8 @@ const BalanceByYearsGrid: React.FC<BalanceByYearsGridProps> = ({ initialSearchLo
                   columnDefs: columnDefsTotal
                 }}
               />
-            </Grid2>
-            <Grid2 size={{ xs: 4 }}>
+            </Grid>
+            <Grid size={{ xs: 4 }}>
               <DSMGrid
                 preferenceKey={"AGE_FullTime"}
                 isLoading={isFetching}
@@ -157,8 +157,8 @@ const BalanceByYearsGrid: React.FC<BalanceByYearsGridProps> = ({ initialSearchLo
                   columnDefs: columnDefsFullTime
                 }}
               />
-            </Grid2>
-            <Grid2 size={{ xs: 4 }}>
+            </Grid>
+            <Grid size={{ xs: 4 }}>
               <DSMGrid
                 preferenceKey={"AGE_PartTime"}
                 isLoading={isFetching}
@@ -168,8 +168,8 @@ const BalanceByYearsGrid: React.FC<BalanceByYearsGridProps> = ({ initialSearchLo
                   columnDefs: columnDefsPartTime
                 }}
               />
-            </Grid2>
-          </Grid2>
+            </Grid>
+          </Grid>
         </>
       )}
     </>
