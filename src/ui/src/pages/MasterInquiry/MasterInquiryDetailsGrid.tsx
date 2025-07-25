@@ -1,7 +1,7 @@
 import { Typography } from "@mui/material";
 import { useMemo, useEffect, useState, useRef } from "react";
 import { useLazyGetProfitMasterInquiryMemberDetailsQuery } from "reduxstore/api/InquiryApi";
-import { DSMGrid, Pagination } from "smart-ui-library";
+import { DSMGrid, Pagination, ISortParams } from "smart-ui-library";
 import { GetMasterInquiryGridColumns } from "./MasterInquiryGridColumns";
 import { CAPTIONS } from "../../constants";
 
@@ -15,6 +15,11 @@ interface MasterInquiryGridProps {
 const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ memberType, id }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
+  // Add sort state management
+  const [sortParams, setSortParams] = useState<ISortParams>({
+    sortBy: "profitYear",
+    isSortDescending: true
+  });
   const columnDefs = useMemo(() => GetMasterInquiryGridColumns(), []);
 
   const [
@@ -27,6 +32,12 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ memberType, id })
     }
   ] = useLazyGetProfitMasterInquiryMemberDetailsQuery();
 
+  // Add sort event handler
+  const sortEventHandler = (update: ISortParams) => {
+    setSortParams(update);
+    setPageNumber(0); // Reset to first page when sorting
+  };
+
   useEffect(() => {
     if (id === undefined || memberType === undefined) return;
     triggerMemberDetails({
@@ -34,10 +45,10 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ memberType, id })
       id,
       skip: pageNumber * pageSize,
       take: pageSize,
-      sortBy: "profitYear",
-      isSortDescending: true
+      sortBy: sortParams.sortBy,
+      isSortDescending: sortParams.isSortDescending
     });
-  }, [memberType, id, pageNumber, pageSize, triggerMemberDetails]);
+  }, [memberType, id, pageNumber, pageSize, sortParams, triggerMemberDetails]);
 
   // Need a useEffect to reset the page number when memberDetailsData changes
   const prevMemberDetailsData = useRef<any>(null);
@@ -78,6 +89,7 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ memberType, id })
             <DSMGrid
               preferenceKey={CAPTIONS.MASTER_INQUIRY}
               isLoading={isFetchingMemberDetails}
+              handleSortChanged={sortEventHandler}
               providedOptions={{
                 rowData: memberDetailsData?.results,
                 columnDefs: columnDefs,

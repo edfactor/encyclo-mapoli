@@ -2,7 +2,7 @@ import { Box, CircularProgress, Typography } from "@mui/material";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useLazySearchProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
 import { EmployeeDetails, MasterInquiryRequest } from "reduxstore/types";
-import { DSMGrid, formatNumberWithComma } from "smart-ui-library";
+import { DSMGrid, formatNumberWithComma, ISortParams } from "smart-ui-library";
 import Pagination from "../../components/Pagination/Pagination";
 import "./MasterInquiryMemberGrid.css"; // Import the CSS file for styles
 import { GetMasterInquiryMemberGridColumns } from "./MasterInquiryMemberGridColumns";
@@ -16,8 +16,19 @@ interface MasterInquiryMemberGridProps extends MasterInquiryRequest {
 const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = (searchParams) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(5);
+  // Add sort state management
+  const [sortParams, setSortParams] = useState<ISortParams>({
+    sortBy: searchParams.pagination?.sortBy || "badgeNumber",
+    isSortDescending: searchParams.pagination?.isSortDescending || false
+  });
   const [trigger, { data, isLoading, isError }] = useLazySearchProfitMasterInquiryQuery();
   const autoSelectedRef = useRef<number | null>(null);
+
+  // Add sort event handler
+  const sortEventHandler = (update: ISortParams) => {
+    setSortParams(update);
+    setPageNumber(0); // Reset to first page when sorting
+  };
 
   const onSearch = useCallback(async () => {
     await trigger({
@@ -25,11 +36,11 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = (searchP
       pagination: {
         skip: pageNumber * pageSize,
         take: pageSize,
-        sortBy: searchParams.pagination?.sortBy || "",
-        isSortDescending: searchParams.pagination?.isSortDescending || false
+        sortBy: sortParams.sortBy,
+        isSortDescending: sortParams.isSortDescending
       }
     });
-  }, [pageNumber, pageSize, searchParams, trigger]);
+  }, [pageNumber, pageSize, sortParams, searchParams, trigger]);
 
   useEffect(() => {
     onSearch();
@@ -98,6 +109,7 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = (searchP
           <DSMGrid
             isLoading={isLoading}
             preferenceKey="MASTER_INQUIRY_MEMBER_GRID"
+            handleSortChanged={sortEventHandler}
             providedOptions={{
               rowData: Array.isArray(data?.results) ? (data.results as EmployeeDetails[]) : [],
               columnDefs: columns,
