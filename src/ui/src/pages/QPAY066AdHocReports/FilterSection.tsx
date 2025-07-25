@@ -113,14 +113,14 @@ const FilterSection: React.FC<FilterSectionProps> = ({
 
   return (
     <form onSubmit={handleSubmit(handleFilter)}>
-      <Grid2
+      <Grid
         container
         paddingX="24px">
-        <Grid2
+        <Grid
           container
           spacing={3}
           width="100%">
-          <Grid2 size={{ xs: 12, sm: 6 }}>
+          <Grid size={{ xs: 12, sm: 6 }}>
             <Controller
               name="storeNumber"
               control={control}
@@ -142,8 +142,8 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                 </>
               )}
             />
-          </Grid2>
-          <Grid2 size={{ xs: 12, sm: 6 }}>
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6 }}>
             <FormLabel required>QPAY066 Presets</FormLabel>
             <FormControl fullWidth>
               <Select
@@ -162,14 +162,14 @@ const FilterSection: React.FC<FilterSectionProps> = ({
                 ))}
               </Select>
             </FormControl>
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
 
         
         
-      </Grid2>
+      </Grid>
 
-      <Grid2
+      <Grid
         width="100%"
         paddingX="24px"
         paddingY="16px">
@@ -180,7 +180,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
           disabled={!currentPreset || isLoading || !isValid}
           searchButtonText="Filter"
         />
-      </Grid2>
+      </Grid>
     </form>
   );
 };

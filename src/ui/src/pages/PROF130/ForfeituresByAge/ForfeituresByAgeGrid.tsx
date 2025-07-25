@@ -2,10 +2,9 @@ import { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetForfeituresByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { ISortParams, TotalsGrid } from "smart-ui-library";
-import DSMGrid from "components/DSMGrid/DSMGrid";
+import { DSMGrid, ISortParams, TotalsGrid } from "smart-ui-library";
 import { GetForfeituresByAgeColumns } from "./ForfeituresByAgeGridColumns";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
 import { numberToCurrency } from "smart-ui-library";
 
@@ -97,10 +96,10 @@ const ForfeituresByAgeGrid: React.FC<ForfeituresByAgeGridProps> = ({ initialSear
               leftColumnHeaders={["PartTime"]}
               topRowHeaders={["", "EMPS", "Amount"]}></TotalsGrid>
           </div>
-          <Grid2
+          <Grid
             size={{ xs: 12 }}
             container>
-            <Grid2 size={{ xs: 4 }}>
+            <Grid size={{ xs: 4 }}>
               <DSMGrid
                 preferenceKey={"AGE_Total"}
                 isLoading={isFetching}
@@ -110,8 +109,8 @@ const ForfeituresByAgeGrid: React.FC<ForfeituresByAgeGridProps> = ({ initialSear
                   columnDefs: columnDefsTotal || []
                 }}
               />
-            </Grid2>
-            <Grid2 size={{ xs: 4 }}>
+            </Grid>
+            <Grid size={{ xs: 4 }}>
               <DSMGrid
                 preferenceKey={"AGE_FullTime"}
                 isLoading={isFetching}
@@ -121,8 +120,8 @@ const ForfeituresByAgeGrid: React.FC<ForfeituresByAgeGridProps> = ({ initialSear
                   columnDefs: columnDefsFullTime || []
                 }}
               />
-            </Grid2>
-            <Grid2 size={{ xs: 4 }}>
+            </Grid>
+            <Grid size={{ xs: 4 }}>
               <DSMGrid
                 preferenceKey={"AGE_PartTime"}
                 isLoading={isFetching}
@@ -132,8 +131,8 @@ const ForfeituresByAgeGrid: React.FC<ForfeituresByAgeGridProps> = ({ initialSear
                   columnDefs: columnDefsPartTime || []
                 }}
               />
-            </Grid2>
-          </Grid2>
+            </Grid>
+          </Grid>
         </>
       )}
     </>

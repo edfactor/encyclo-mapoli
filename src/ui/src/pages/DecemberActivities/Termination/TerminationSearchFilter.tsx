@@ -1,6 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormControl, FormLabel, MenuItem, Select } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
@@ -89,11 +89,11 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
 
   return (
     <form onSubmit={validateAndSearch}>
-      <Grid2
+      <Grid
         container
         paddingX="24px"
         gap="24px">
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Controller
             name="beginningDate"
             control={control}
@@ -114,8 +114,8 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
               />
             )}
           />
-        </Grid2>
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Controller
             name="endingDate"
             control={control}
@@ -136,9 +136,9 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
               />
             )}
           />
-        </Grid2>
-      </Grid2>
-      <Grid2
+        </Grid>
+      </Grid>
+      <Grid
         width="100%"
         paddingX="24px">
         <SearchAndReset
@@ -147,7 +147,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
           isFetching={false}
           disabled={!isValid}
         />
-      </Grid2>
+      </Grid>
     </form>
   );
 };

@@ -1,5 +1,5 @@
 import { Divider } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import DSMCollapsedAccordion from "components/DSMCollapsedAccordion";
 import { useNavigate } from "react-router";
 import { Page } from "smart-ui-library";
@@ -10,14 +10,14 @@ const FiscalFlow = () => {
 
   return (
     <Page label={MENU_LABELS.FISCAL_CLOSE}>
-      <Grid2 container>
-        <Grid2
+      <Grid container>
+        <Grid
           size={{ xs: 12 }}
           width={"100%"}>
           <Divider />
-        </Grid2>
+        </Grid>
 
-        <Grid2 width="100%">
+        <Grid width="100%">
           <DSMCollapsedAccordion
             title={CAPTIONS.MANAGE_EXECUTIVE_HOURS}
             expandable={false}
@@ -30,9 +30,9 @@ const FiscalFlow = () => {
             isCollapsedOnRender={true}>
             <></>
           </DSMCollapsedAccordion>
-        </Grid2>
+        </Grid>
 
-        <Grid2 width="100%">
+        <Grid width="100%">
           <DSMCollapsedAccordion
             title={CAPTIONS.YTD_WAGES_EXTRACT}
             expandable={false}
@@ -45,9 +45,9 @@ const FiscalFlow = () => {
             isCollapsedOnRender={true}>
             <></>
           </DSMCollapsedAccordion>
-        </Grid2>
+        </Grid>
 
-        <Grid2 width="100%">
+        <Grid width="100%">
           <DSMCollapsedAccordion
             title={CAPTIONS.PROFIT_SHARE_REPORT}
             expandable={false}
@@ -60,9 +60,9 @@ const FiscalFlow = () => {
             isCollapsedOnRender={true}>
             <></>
           </DSMCollapsedAccordion>
-        </Grid2>
+        </Grid>
 
-        <Grid2 width="100%">
+        <Grid width="100%">
           <DSMCollapsedAccordion
             title={CAPTIONS.PROFIT_SHARE_REPORT_EDIT_RUN}
             expandable={false}
@@ -75,9 +75,9 @@ const FiscalFlow = () => {
             isCollapsedOnRender={true}>
             <></>
           </DSMCollapsedAccordion>
-        </Grid2>
+        </Grid>
 
-        <Grid2 width="100%">
+        <Grid width="100%">
           <DSMCollapsedAccordion
             title={CAPTIONS.ELIGIBLE_EMPLOYEES}
             expandable={false}
@@ -90,9 +90,9 @@ const FiscalFlow = () => {
             isCollapsedOnRender={true}>
             <></>
           </DSMCollapsedAccordion>
-        </Grid2>
+        </Grid>
 
-        <Grid2 width="100%">
+        <Grid width="100%">
           <DSMCollapsedAccordion
             title={CAPTIONS.FORFEIT}
             expandable={false}
@@ -105,9 +105,9 @@ const FiscalFlow = () => {
             isCollapsedOnRender={true}>
             <></>
           </DSMCollapsedAccordion>
-        </Grid2>
+        </Grid>
 
-        <Grid2 width="100%">
+        <Grid width="100%">
           <DSMCollapsedAccordion
             title={CAPTIONS.PROFIT_SHARE_UPDATE}
             expandable={false}
@@ -120,9 +120,9 @@ const FiscalFlow = () => {
             isCollapsedOnRender={true}>
             <></>
           </DSMCollapsedAccordion>
-        </Grid2>
+        </Grid>
 
-        <Grid2 width="100%">
+        <Grid width="100%">
           <DSMCollapsedAccordion
             title={CAPTIONS.PROFIT_SHARE_GROSS_REPORT}
             expandable={false}
@@ -135,9 +135,9 @@ const FiscalFlow = () => {
             isCollapsedOnRender={true}>
             <></>
           </DSMCollapsedAccordion>
-        </Grid2>
+        </Grid>
 
-        <Grid2 width="100%">
+        <Grid width="100%">
           <DSMCollapsedAccordion
             title={CAPTIONS.PROFIT_SHARE_BY_STORE}
             expandable={false}
@@ -150,8 +150,8 @@ const FiscalFlow = () => {
             isCollapsedOnRender={true}>
             <></>
           </DSMCollapsedAccordion>
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
     </Page>
   );
 };

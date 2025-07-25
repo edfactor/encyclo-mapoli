@@ -1,4 +1,4 @@
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import React from "react";
 import EnvironmentBanner, { IEnvironmentBannerProps } from "../Layout/EnvironmentBanner";
 import WelcomeDisplay, { WelcomeDisplayProps } from "../Layout/WelcomeDisplay";
@@ -39,13 +39,13 @@ export const PSLayout: React.FC<DSMLayoutProps> = ({
           apiStatusMessage={apiStatusMessage}
         />
       </div>
-      <Grid2
+      <Grid
         id="top-level-all-contentbit-alert-container"
         container
         style={{
           marginTop: "110px"
         }}>
-        <Grid2
+        <Grid
           id="app-banner-and-right-side-avatar-grid-container"
           size={12}
           style={{
@@ -58,14 +58,14 @@ export const PSLayout: React.FC<DSMLayoutProps> = ({
             <div className="text">{appTitle}</div>
             <WelcomeDisplay {...welcomeDisplayProps} />
           </div>
-        </Grid2>
+        </Grid>
 
-        <Grid2
+        <Grid
           size={12}
           id="all-router-sub-assembly-ps-layout">
           {children}
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
     </div>
   );
 };

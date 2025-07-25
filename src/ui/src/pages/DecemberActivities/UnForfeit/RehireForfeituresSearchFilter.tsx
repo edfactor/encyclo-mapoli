@@ -1,6 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Checkbox, FormControlLabel } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetRehireForfeituresQuery } from "reduxstore/api/YearsEndApi";
@@ -105,12 +105,12 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
 
   return (
     <form onSubmit={validateAndSearch}>
-      <Grid2
+      <Grid
         container
         paddingX="24px"
         alignItems={"flex-end"}
         gap="24px">
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Controller
             name="beginningDate"
             control={control}
@@ -131,8 +131,8 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
               />
             )}
           />
-        </Grid2>
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Controller
             name="endingDate"
             control={control}
@@ -153,8 +153,8 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
               />
             )}
           />
-        </Grid2>
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Controller
             name="excludeZeroBalance"
             control={control}
@@ -170,9 +170,9 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
               />
             )}
           />
-        </Grid2>
-      </Grid2>
-      <Grid2
+        </Grid>
+      </Grid>
+      <Grid
         width="100%"
         paddingX="24px">
         <SearchAndReset
@@ -181,7 +181,7 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
           isFetching={isFetching}
           disabled={!isValid || isFetching}
         />
-      </Grid2>
+      </Grid>
     </form>
   );
 };

@@ -3,7 +3,7 @@ import ViewWeekSharpIcon from "@mui/icons-material/ViewWeekSharp";
 import { Button, Checkbox } from "@mui/material";
 import { ColDef, ColumnState } from "ag-grid-community";
 import { FC, useMemo, useState } from "react";
-import { ColumnStateWIndex } from "../DSMGrid";
+import { ColumnStateWIndex } from "smart-ui-library";
 type DropdownProps = {
   readonly columnDefs: ColDef[];
   columnStates: ColumnState[];

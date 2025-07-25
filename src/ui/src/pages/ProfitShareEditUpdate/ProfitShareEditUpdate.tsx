@@ -1,6 +1,6 @@
 import { Replay } from "@mui/icons-material";
 import { Alert, AlertTitle, Button, CircularProgress, Divider, Tooltip, Typography } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useCallback, useEffect, useState } from "react";
@@ -525,16 +525,15 @@ const ProfitShareEditUpdate = () => {
           </div>
         )
       }
-
-      <Grid2
+      <Grid
         container
         rowSpacing="24px"
         width={"100%"}>
-        <Grid2 width={"100%"}>
+        <Grid width={"100%"}>
           <Divider />
-        </Grid2>
+        </Grid>
         {profitShareEditUpdateShowSearch && (
-          <Grid2 width={"100%"}>
+          <Grid width={"100%"}>
             <DSMAccordion title="Parameters">
               <ProfitShareEditUpdateSearchFilter
                 setInitialSearchLoaded={setInitialSearchLoaded}
@@ -544,11 +543,11 @@ const ProfitShareEditUpdate = () => {
                 setAdjustedBadgeTwoValid={setAdjustedBadgeTwoValid}
               />
             </DSMAccordion>
-          </Grid2>
+          </Grid>
         )}
         {profitEditUpdateRevertChangesAvailable && (
           <>
-            <Grid2
+            <Grid
               width="100%"
               sx={{ marginLeft: "50px" }}>
               <Typography
@@ -557,16 +556,16 @@ const ProfitShareEditUpdate = () => {
                 sx={{ fontWeight: "bold" }}>
                 These changes have already been applied:
               </Typography>
-            </Grid2>
-            <Grid2
+            </Grid>
+            <Grid
               width="100%"
               sx={{ marginLeft: "50px" }}>
               <ChangesList params={profitSharingEditQueryParams || profitMasterStatus} />
-            </Grid2>
+            </Grid>
           </>
         )}
         {profitSharingUpdate && profitSharingUpdate.profitShareUpdateTotals && profitSharingEdit && (
-          <Grid2 width={"100%"}>
+          <Grid width={"100%"}>
             <div className="px-[24px]">
               <h2 className="text-dsm-secondary">Summary (PAY444)</h2>
               <Typography
@@ -708,17 +707,17 @@ const ProfitShareEditUpdate = () => {
                 />
               </>
             )}
-            <Grid2 width="100%">
+            <Grid width="100%">
               <ProfitShareEditUpdateTabs
                 initialSearchLoaded={initialSearchLoaded}
                 setInitialSearchLoaded={setInitialSearchLoaded}
                 pageNumberReset={pageNumberReset}
                 setPageNumberReset={setPageNumberReset}
               />
-            </Grid2>
-          </Grid2>
+            </Grid>
+          </Grid>
         )}
-      </Grid2>
+      </Grid>
       <SmartModal
         key={"saveModal"}
         maxWidth="sm"

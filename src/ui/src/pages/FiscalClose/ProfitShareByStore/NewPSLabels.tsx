@@ -1,5 +1,5 @@
 import { Divider } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { Page, TotalsGrid } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
 import Under21ReportGrid from "./Under21ReportGrid";
@@ -13,12 +13,12 @@ const NewPSLabels = () => {
     <Page
       label={CAPTIONS.NEW_PS_LABELS}
       actionNode={renderActionNode()}>
-      <Grid2
+      <Grid
         container
         rowSpacing="24px">
-        <Grid2 width={"100%"}>
+        <Grid width={"100%"}>
           <Divider />
-        </Grid2>
+        </Grid>
         <div className="flex sticky top-0 z-10 bg-white">
           <TotalsGrid
             displayData={[
@@ -51,10 +51,10 @@ const NewPSLabels = () => {
           />
         </div>
 
-        <Grid2 width="100%">
+        <Grid width="100%">
           <Under21ReportGrid />
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
     </Page>
   );
 };

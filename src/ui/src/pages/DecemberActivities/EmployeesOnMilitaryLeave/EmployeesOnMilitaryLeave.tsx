@@ -1,5 +1,5 @@
 import { Divider } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { Page } from "smart-ui-library";
 import EmployeesOnMilitaryLeaveGrid from "./EmployeesOnMilitaryLeaveGrid";
 import { CAPTIONS } from "../../../constants";
@@ -7,17 +7,17 @@ import { CAPTIONS } from "../../../constants";
 const EmployeesOnMilitaryLeave = () => {
   return (
     <Page label={`${CAPTIONS.EMPLOYEES_MILITARY}`}>
-      <Grid2
+      <Grid
         container
         rowSpacing="24px">
-        <Grid2 width={"100%"}>
+        <Grid width={"100%"}>
           <Divider />
-        </Grid2>
+        </Grid>
 
-        <Grid2 width="100%">
+        <Grid width="100%">
           <EmployeesOnMilitaryLeaveGrid />
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
     </Page>
   );
 };

@@ -1,5 +1,5 @@
 import { FormHelperText } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -50,12 +50,12 @@ const ProfitShareByStoreParameters = () => {
 
   return (
     <form onSubmit={validateAndSubmit}>
-      <Grid2
+      <Grid
         container
         paddingX="24px"
         alignItems="flex-end"
         gap="24px">
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Controller
             name="yDate"
             control={control}
@@ -72,9 +72,9 @@ const ProfitShareByStoreParameters = () => {
             )}
           />
           {errors.yDate && <FormHelperText error>{errors.yDate.message}</FormHelperText>}
-        </Grid2>
+        </Grid>
 
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Controller
             name="lastDate"
             control={control}
@@ -91,9 +91,9 @@ const ProfitShareByStoreParameters = () => {
             )}
           />
           {errors.lastDate && <FormHelperText error>{errors.lastDate.message}</FormHelperText>}
-        </Grid2>
+        </Grid>
 
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Controller
             name="firstDate"
             control={control}
@@ -110,10 +110,10 @@ const ProfitShareByStoreParameters = () => {
             )}
           />
           {errors.firstDate && <FormHelperText error>{errors.firstDate.message}</FormHelperText>}
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
 
-      <Grid2
+      <Grid
         width="100%"
         paddingX="24px">
         <SearchAndReset
@@ -122,7 +122,7 @@ const ProfitShareByStoreParameters = () => {
           isFetching={false}
           disabled={!isValid}
         />
-      </Grid2>
+      </Grid>
     </form>
   );
 };

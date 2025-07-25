@@ -1,6 +1,6 @@
 import { Button, TextField, Typography } from "@mui/material";
 import { useState, useEffect } from "react";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { SmartModal } from "smart-ui-library";
 import { useUpdateForfeitureAdjustmentMutation } from "reduxstore/api/YearsEndApi";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
@@ -152,10 +152,10 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
           CANCEL
         </Button>
       ]}>
-      <Grid2
+      <Grid
         container
         spacing={2}>
-        <Grid2 size={{ xs: 12 }}>
+        <Grid size={{ xs: 12 }}>
           <Typography
             variant="body2"
             gutterBottom>
@@ -169,8 +169,8 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
             size="small"
             variant="outlined"
           />
-        </Grid2>
-        <Grid2 size={{ xs: 6 }}>
+        </Grid>
+        <Grid size={{ xs: 6 }}>
           <Typography
             variant="body2"
             gutterBottom>
@@ -185,8 +185,8 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
             variant="outlined"
             type="number"
           />
-        </Grid2>
-        <Grid2 size={{ xs: 6 }}>
+        </Grid>
+        <Grid size={{ xs: 6 }}>
           <Typography
             variant="body2"
             gutterBottom>
@@ -201,8 +201,8 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
             variant="outlined"
             type="number"
           />
-        </Grid2>
-        <Grid2 size={{ xs: 6 }}>
+        </Grid>
+        <Grid size={{ xs: 6 }}>
           <Typography
             variant="body2"
             gutterBottom>
@@ -218,8 +218,8 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
             type="number"
             disabled
           />
-        </Grid2>
-        <Grid2 size={{ xs: 6 }}>
+        </Grid>
+        <Grid size={{ xs: 6 }}>
           <Typography
             variant="body2"
             gutterBottom>
@@ -234,8 +234,8 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
             variant="outlined"
             type="number"
           />
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
     </SmartModal>
   );
 };

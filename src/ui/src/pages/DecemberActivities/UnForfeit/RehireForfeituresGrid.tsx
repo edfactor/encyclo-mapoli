@@ -12,7 +12,7 @@ import {
 } from "../../../reduxstore/types";
 import { GetDetailColumns, GetMilitaryAndRehireForfeituresColumns } from "./RehireForfeituresGridColumns";
 import ReportSummary from "../../../components/ReportSummary";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { ForfeitureAdjustmentUpdateRequest } from "../../../reduxstore/types";
 import { useUpdateForfeitureAdjustmentBulkMutation } from "reduxstore/api/YearsEndApi";
@@ -283,15 +283,15 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
 
       {rehireForfeitures?.response && (
         <>
-          <Grid2
+          <Grid
             container
             justifyContent="space-between"
             alignItems="center"
             marginBottom={2}>
-            <Grid2>
+            <Grid>
               <ReportSummary report={rehireForfeitures} />
-            </Grid2>
-          </Grid2>
+            </Grid>
+          </Grid>
 
           <DSMGrid
             preferenceKey={"REHIRE-FORFEITURES"}

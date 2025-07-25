@@ -1,6 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, TextField } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
@@ -345,14 +345,14 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
 
   return (
     <form onSubmit={validateAndSearch}>
-      <Grid2
+      <Grid
         container
         paddingX="24px">
-        <Grid2
+        <Grid
           container
           spacing={3}
           width="100%">
-          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <Controller
               name="profitYear"
               control={control}
@@ -371,9 +371,9 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
               )}
             />
             {errors.profitYear && <FormHelperText error>{errors.profitYear.message}</FormHelperText>}
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, sm: 4, md: 2 }}>
+          <Grid size={{ xs: 12, sm: 4, md: 2 }}>
             <FormLabel>Contribution %</FormLabel>
             <Controller
               name="contributionPercent"
@@ -394,9 +394,9 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
               )}
             />
             {errors.contributionPercent && <FormHelperText error>{errors.contributionPercent.message}</FormHelperText>}
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Earnings %</FormLabel>
             <Controller
               name="earningsPercent"
@@ -417,9 +417,9 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
               )}
             />
             {errors.earningsPercent && <FormHelperText error>{errors.earningsPercent.message}</FormHelperText>}
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Forfeiture %</FormLabel>
             <Controller
               name="incomingForfeitPercent"
@@ -442,8 +442,8 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
             {errors.incomingForfeitPercent && (
               <FormHelperText error>{errors.incomingForfeitPercent.message}</FormHelperText>
             )}
-          </Grid2>
-          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Secondary Earnings %</FormLabel>
             <Controller
               name="secondaryEarningsPercent"
@@ -466,9 +466,9 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
             {errors.secondaryEarningsPercent && (
               <FormHelperText error>{errors.secondaryEarningsPercent.message}</FormHelperText>
             )}
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Max Allowed Contributions</FormLabel>
             <Controller
               name="maxAllowedContributions"
@@ -491,14 +491,14 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
             {errors.maxAllowedContributions && (
               <FormHelperText error>{errors.maxAllowedContributions.message}</FormHelperText>
             )}
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
 
-        <Grid2
+        <Grid
           container
           spacing={3}
           width="100%">
-          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Adjustment Badge</FormLabel>
             <Controller
               name="badgeToAdjust"
@@ -519,8 +519,8 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
               )}
             />
             {errors.badgeToAdjust && <FormHelperText error>{errors.badgeToAdjust.message}</FormHelperText>}
-          </Grid2>
-          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Adjust Contribution Amount</FormLabel>
             <Controller
               name="adjustContributionAmount"
@@ -543,9 +543,9 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
             {errors.adjustContributionAmount && (
               <FormHelperText error>{errors.adjustContributionAmount.message}</FormHelperText>
             )}
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Adjust Earnings Amount</FormLabel>
             <Controller
               name="adjustEarningsAmount"
@@ -568,9 +568,9 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
             {errors.adjustEarningsAmount && (
               <FormHelperText error>{errors.adjustEarningsAmount.message}</FormHelperText>
             )}
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Adjust Forfeiture Amount</FormLabel>
             <Controller
               name="adjustIncomingForfeitAmount"
@@ -593,14 +593,14 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
             {errors.adjustIncomingForfeitAmount && (
               <FormHelperText error>{errors.adjustIncomingForfeitAmount.message}</FormHelperText>
             )}
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
 
-        <Grid2
+        <Grid
           container
           spacing={3}
           width="100%">
-          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Adjust Secondary Badge</FormLabel>
             <Controller
               name="badgeToAdjust2"
@@ -621,9 +621,9 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
               )}
             />
             {errors.badgeToAdjust2 && <FormHelperText error>{errors.badgeToAdjust2.message}</FormHelperText>}
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <FormLabel>Adjust Secondary Earnings Amount</FormLabel>
             <Controller
               name="adjustEarningsSecondaryAmount"
@@ -646,17 +646,17 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
             {errors.adjustEarningsSecondaryAmount && (
               <FormHelperText error>{errors.adjustEarningsSecondaryAmount.message}</FormHelperText>
             )}
-          </Grid2>
-        </Grid2>
-        <Grid2 width="100%">
+          </Grid>
+        </Grid>
+        <Grid width="100%">
           <SearchAndReset
             handleReset={handleReset}
             searchButtonText="Preview"
             handleSearch={validateAndSearch}
             isFetching={isFetchingUpdate || isFetchingEdit}
           />
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
     </form>
   );
 };

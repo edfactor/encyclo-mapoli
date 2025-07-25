@@ -1,6 +1,6 @@
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import { Button, Typography } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { ProfitMasterStatus, ProfitShareEditUpdateQueryParams } from "reduxstore/types";
 import ChangesList from "./ChangesList";
 
@@ -61,10 +61,10 @@ const ProfitShareEditConfirmation: React.FC<ProfitShareEditConfirmationProps> = 
   return (
     // Create a jsx ul element where the list items are the params, unless the value of that param is null or zero
 
-    <Grid2
+    <Grid
       container
       rowSpacing="18px">
-      <Grid2 width={"100%"}>
+      <Grid width={"100%"}>
         <Typography
           variant="body2"
           sx={{ display: "flex", alignItems: "center" }}>
@@ -85,35 +85,29 @@ const ProfitShareEditConfirmation: React.FC<ProfitShareEditConfirmationProps> = 
             }
           })()}
         </Typography>
-      </Grid2>
-      <Grid2 width={"100%"}>
+      </Grid>
+      <Grid width={"100%"}>
         <Typography
           variant="body2"
           sx={{}}>
           {messageHeadline}
         </Typography>
-      </Grid2>
-      <Grid2 width={"100%"}>
-        <Typography
-          variant="body2"
-          sx={{}}>
-          {"Fields present:"}
-        </Typography>
-        <br />
+      </Grid>
+      <Grid width={"100%"}>
         <ChangesList params={params} />
-      </Grid2>
-      <Grid2 width={"100%"}>
+      </Grid>
+      <Grid width={"100%"}>
         <Typography
           variant="body2"
           sx={{}}>
           {lastWarning}
         </Typography>
-      </Grid2>
-      <Grid2 width={"100%"}>
+      </Grid>
+      <Grid width={"100%"}>
         {RenderYesButton(performLabel, actionFunction, setOpenModal)}
         {RenderNoButton(closeLabel, setOpenModal)}
-      </Grid2>
-    </Grid2>
+      </Grid>
+    </Grid>
     //</Page>
   );
 };

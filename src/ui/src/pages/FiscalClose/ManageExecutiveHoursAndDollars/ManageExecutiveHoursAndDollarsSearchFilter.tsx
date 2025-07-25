@@ -1,6 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Checkbox, FormHelperText, FormLabel, TextField, Typography } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useEffect, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
@@ -319,15 +319,15 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
 
   return (
     <form onSubmit={validateAndSearch}>
-      <Grid2
+      <Grid
         container
         paddingX="24px">
-        <Grid2
+        <Grid
           container
           spacing={3}
           width="100%">
           {!isModal && (
-            <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <FormLabel>Profit Year</FormLabel>
               <Controller
                 name="profitYear"
@@ -347,9 +347,9 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
                 )}
               />
               {errors.profitYear && <FormHelperText error>{errors.profitYear.message}</FormHelperText>}
-            </Grid2>
+            </Grid>
           )}
-          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <FormLabel>Full Name {requiredLabel}</FormLabel>
             <Controller
               name="fullNameContains"
@@ -373,8 +373,8 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
               )}
             />
             {errors.fullNameContains && <FormHelperText error>{errors.fullNameContains.message}</FormHelperText>}
-          </Grid2>
-          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <FormLabel>SSN {requiredLabel}</FormLabel>
             <Controller
               name="socialSecurity"
@@ -403,8 +403,8 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
               )}
             />
             {errors.socialSecurity && <FormHelperText error>{errors.socialSecurity.message}</FormHelperText>}
-          </Grid2>
-          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <FormLabel>Badge Number {requiredLabel}</FormLabel>
             <Controller
               name="badgeNumber"
@@ -433,14 +433,14 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
               )}
             />
             {errors.badgeNumber && <FormHelperText error>{errors.badgeNumber.message}</FormHelperText>}
-          </Grid2>
+          </Grid>
           {!isModal && (
             <>
-              <Grid2
+              <Grid
                 container
                 paddingX="8px"
                 width={"100%"}>
-                <Grid2 size={{ xs: 3, sm: 3, md: 3 }}>
+                <Grid size={{ xs: 3, sm: 3, md: 3 }}>
                   <FormLabel>Has Executive Hours and Dollars</FormLabel>
                   <Controller
                     name="hasExecutiveHoursAndDollars"
@@ -459,8 +459,8 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
                   {errors.hasExecutiveHoursAndDollars && (
                     <FormHelperText error>{errors.hasExecutiveHoursAndDollars.message}</FormHelperText>
                   )}
-                </Grid2>
-                <Grid2 size={{ xs: 3, sm: 3, md: 3 }}>
+                </Grid>
+                <Grid size={{ xs: 3, sm: 3, md: 3 }}>
                   <FormLabel>Monthly Payroll</FormLabel>
                   <Controller
                     name="isMonthlyPayroll"
@@ -476,13 +476,13 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
                     )}
                   />
                   {errors.isMonthlyPayroll && <FormHelperText error>{errors.isMonthlyPayroll.message}</FormHelperText>}
-                </Grid2>
-              </Grid2>
+                </Grid>
+              </Grid>
             </>
           )}
-        </Grid2>
-      </Grid2>
-      <Grid2
+        </Grid>
+      </Grid>
+      <Grid
         width="100%"
         paddingX="24px">
         {!isModal && (
@@ -501,7 +501,7 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
             isFetching={isModalFetching}
           />
         )}
-      </Grid2>
+      </Grid>
     </form>
   );
 };
