@@ -1,5 +1,5 @@
 import { Button, Divider, Stack } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import LabelValueSection from "components/LabelValueSection";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
@@ -101,27 +101,27 @@ const Pay450Summary = () => {
     <Page
       label={CAPTIONS.PAY450_SUMMARY}
       actionNode={renderActionNode()}>
-      <Grid2
+      <Grid
         container
         rowSpacing="24px">
-        <Grid2 width={"100%"}>
+        <Grid width={"100%"}>
           <Divider />
-        </Grid2>
-        <Grid2 width={"100%"}>
+        </Grid>
+        <Grid width={"100%"}>
           <DSMAccordion title="Filter">
             <Pay450SearchFilters
               onSearch={onSearch}
               setPageReset={setPageNumberReset}
             />
           </DSMAccordion>
-        </Grid2>
+        </Grid>
 
-        <Grid2
+        <Grid
           size={{ xs: 12 }}
           paddingX="24px">
           <LabelValueSection data={updateSummarySection} />
-        </Grid2>
-        <Grid2 width="100%">
+        </Grid>
+        <Grid width="100%">
           <Pay450Grid
             initialSearchLoaded={initialSearchLoaded}
             setInitialSearchLoaded={setInitialSearchLoaded}
@@ -129,8 +129,8 @@ const Pay450Summary = () => {
             pageNumberReset={pageNumberReset}
             setPageNumberReset={setPageNumberReset}
           />
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
 
       <SmartModal
         open={isModalOpen}

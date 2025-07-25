@@ -1,6 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, TextField, Typography } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { Controller, useForm, Resolver } from "react-hook-form";
@@ -162,15 +162,15 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
 
   return (
     <form onSubmit={validateAndSearch}>
-      <Grid2
+      <Grid
         container
         paddingX="24px"
         gap="6px">
-        <Grid2
+        <Grid
           container
           spacing={3}
           width="100%">
-          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <FormLabel>SSN {requiredLabel}</FormLabel>
             <Controller
               name="ssn"
@@ -199,9 +199,9 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
             />
             {errors.ssn && <FormHelperText error>{errors.ssn.message}</FormHelperText>}
             {errors.root && <FormHelperText error>{errors.root.message}</FormHelperText>}
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <FormLabel>Badge {requiredLabel}</FormLabel>
             <Controller
               name="badge"
@@ -229,9 +229,9 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
               )}
             />
             {errors.badge && <FormHelperText error>{errors.badge.message}</FormHelperText>}
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <Controller
               name="year"
               control={control}
@@ -250,10 +250,10 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
               )}
             />
             {errors.year && <FormHelperText error>{errors.year.message}</FormHelperText>}
-          </Grid2>
-        </Grid2>
-      </Grid2>
-      <Grid2
+          </Grid>
+        </Grid>
+      </Grid>
+      <Grid
         width="100%"
         paddingX="24px">
         <SearchAndReset
@@ -262,7 +262,7 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
           handleSearch={validateAndSearch}
           isFetching={isFetching}
         />
-      </Grid2>
+      </Grid>
     </form>
   );
 };

@@ -1,5 +1,5 @@
 import { Divider, Tabs, Tab } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { useState } from "react";
 import { Page } from "smart-ui-library";
 import CleanUpSummaryCards from "./FrozenSummaryCards";
@@ -16,18 +16,18 @@ const FrozenSummary = () => {
 
   return (
     <Page label="Frozen Process Summary">
-      <Grid2
+      <Grid
         container
         width="100%"
         rowSpacing="24px">
-        <Grid2 width="100%">
+        <Grid width="100%">
           <Divider />
-        </Grid2>
-        <Grid2
+        </Grid>
+        <Grid
           container
           width="100%"
           rowSpacing="24px">
-          <Grid2 width="100%">
+          <Grid width="100%">
             <Tabs
               sx={{ marginLeft: "24px" }}
               value={selectedTab}
@@ -39,16 +39,16 @@ const FrozenSummary = () => {
                 />
               ))}
             </Tabs>
-          </Grid2>
-          <Grid2 width="100%">
+          </Grid>
+          <Grid width="100%">
             {selectedTab === 0 ? (
               <CleanUpSummaryCards setSelectedTab={setSelectedTab} />
             ) : (
               <CleanUpSummaryGrids tabIndex={selectedTab} />
             )}
-          </Grid2>
-        </Grid2>
-      </Grid2>
+          </Grid>
+        </Grid>
+      </Grid>
     </Page>
   );
 };

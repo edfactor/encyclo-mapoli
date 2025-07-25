@@ -1,5 +1,5 @@
 import { Divider } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { useRef, useState } from "react";
 import { useSelector } from "react-redux";
@@ -22,13 +22,13 @@ const YTDWages: React.FC = () => {
     <Page
       label={`YTD Wages Extract (PROF-DOLLAR-EXTRACT) (${employeeWagesForYear?.response && employeeWagesForYear.response.total} records)`}
       actionNode={renderActionNode()}>
-      <Grid2
+      <Grid
         container
         rowSpacing="24px">
-        <Grid2 width={"100%"}>
+        <Grid width={"100%"}>
           <Divider />
-        </Grid2>
-        <Grid2
+        </Grid>
+        <Grid
           width={"100%"}
           hidden={true}>
           <DSMAccordion title="Filter">
@@ -37,9 +37,9 @@ const YTDWages: React.FC = () => {
               setPageReset={setPageNumberReset}
             />
           </DSMAccordion>
-        </Grid2>
+        </Grid>
 
-        <Grid2 width="100%">
+        <Grid width="100%">
           <YTDWagesGrid
             innerRef={componentRef}
             initialSearchLoaded={initialSearchLoaded}
@@ -47,8 +47,8 @@ const YTDWages: React.FC = () => {
             pageNumberReset={pageNumberReset}
             setPageNumberReset={setPageNumberReset}
           />
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
     </Page>
   );
 };

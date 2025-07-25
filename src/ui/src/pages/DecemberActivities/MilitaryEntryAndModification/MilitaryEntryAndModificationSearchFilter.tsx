@@ -1,6 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormLabel, TextField, Typography } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import { useEffect, useState } from "react";
 import { useForm, Controller, Resolver } from "react-hook-form";
@@ -109,11 +109,11 @@ const MilitaryEntryAndModificationSearchFilter: React.FC<SearchFilterProps> = ({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <Grid2
+      <Grid
         container
         paddingX="24px"
         gap="24px">
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <FormLabel>SSN {requiredLabel}</FormLabel>
           <Controller
             name="socialSecurity"
@@ -135,8 +135,8 @@ const MilitaryEntryAndModificationSearchFilter: React.FC<SearchFilterProps> = ({
               />
             )}
           />
-        </Grid2>
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <FormLabel>Badge Number {requiredLabel}</FormLabel>
           <Controller
             name="badgeNumber"
@@ -158,9 +158,9 @@ const MilitaryEntryAndModificationSearchFilter: React.FC<SearchFilterProps> = ({
               />
             )}
           />
-        </Grid2>
-      </Grid2>
-      <Grid2
+        </Grid>
+      </Grid>
+      <Grid
         width="100%"
         paddingX="24px">
         <SearchAndReset
@@ -169,7 +169,7 @@ const MilitaryEntryAndModificationSearchFilter: React.FC<SearchFilterProps> = ({
           isFetching={isFetching}
           disabled={!isValid || (!socialSecurity && !badgeNumber)}
         />
-      </Grid2>
+      </Grid>
     </form>
   );
 };

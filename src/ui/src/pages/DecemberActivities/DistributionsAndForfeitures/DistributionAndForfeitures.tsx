@@ -1,5 +1,5 @@
 import { Button, Divider } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { DSMAccordion, Page } from "smart-ui-library";
 import DistributionsAndForfeituresSearchFilter from "./DistributionAndForfeituresSearchFilter";
 import DistributionsAndForfeituresGrid from "./DistributionAndForfeituresGrid";
@@ -21,25 +21,25 @@ const DistributionsAndForfeitures = () => {
     <Page
       label="Distributions And Forfeitures (QPAY129)"
       actionNode={renderActionNode()}>
-      <Grid2
+      <Grid
         container
         rowSpacing="24px">
-        <Grid2 width={"100%"}>
+        <Grid width={"100%"}>
           <Divider />
-        </Grid2>
-        <Grid2 width={"100%"}>
+        </Grid>
+        <Grid width={"100%"}>
           <DSMAccordion title="Filter">
             <DistributionsAndForfeituresSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
           </DSMAccordion>
-        </Grid2>
+        </Grid>
 
-        <Grid2 width="100%">
+        <Grid width="100%">
           <DistributionsAndForfeituresGrid
             setInitialSearchLoaded={setInitialSearchLoaded}
             initialSearchLoaded={initialSearchLoaded}
           />
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
     </Page>
   );
 };

@@ -2,10 +2,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetDistributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { ISortParams, TotalsGrid } from "smart-ui-library";
-import DSMGrid from "components/DSMGrid/DSMGrid";
+import {DSMGrid, ISortParams, TotalsGrid } from "smart-ui-library";
 import { GetDistributionsByAgeColumns } from "./DistributionByAgeGridColumns";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
 import { numberToCurrency } from "smart-ui-library";
 
@@ -30,8 +29,6 @@ const DistributionByAgeGrid: React.FC<DistributionByAgeGridProps> = ({ initialSe
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
   const columnDefsTotal = useMemo(() => GetDistributionsByAgeColumns(FrozenReportsByAgeRequestType.Total), []);
-  const columnDefsFullTime = GetDistributionsByAgeColumns(FrozenReportsByAgeRequestType.FullTime);
-  const columnDefsPartTime = GetDistributionsByAgeColumns(FrozenReportsByAgeRequestType.PartTime);
 
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
 
@@ -129,48 +126,21 @@ const DistributionByAgeGrid: React.FC<DistributionByAgeGridProps> = ({ initialSe
               topRowHeaders={["PartTime", "EMPS", "Amount"]}></TotalsGrid>
           </div>
 
-          <Grid2
+          <Grid
             size={{ xs: 12 }}
             container>
-            <Grid2 size={{ xs: 4 }}>
+            <Grid size={{ xs: 4 }}>
               <DSMGrid
                 preferenceKey={"AGE_Total"}
                 isLoading={isFetching}
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
-                  rowData: distributionsByAgeTotal?.response.results,
-
-                  columnDefs: columnDefsTotal
+                  rowData: distributionsByAgeTotal?.response?.results ?? [],
+                  columnDefs: columnDefsTotal ?? []
                 }}
               />
-            </Grid2>
-            {/*
-            <Grid2 size={{ xs: 4 }}>
-              <DSMGrid
-                preferenceKey={"AGE_FullTime"}
-                isLoading={isFetching}
-                handleSortChanged={sortEventHandler}
-                providedOptions={{
-                  rowData: distributionsByAgeFullTime?.response.results,
-
-                  columnDefs: columnDefsFullTime
-                }}
-              />
-            </Grid2>
-            <Grid2 size={{ xs: 4 }}>
-              <DSMGrid
-                preferenceKey={"AGE_PartTime"}
-                isLoading={isFetching}
-                handleSortChanged={sortEventHandler}
-                providedOptions={{
-                  rowData: distributionsByAgePartTime?.response.results,
-
-                  columnDefs: columnDefsPartTime
-                }}
-              />
-            </Grid2>
-            */}
-          </Grid2>
+            </Grid>           
+          </Grid>
         </>
       )}
     </>

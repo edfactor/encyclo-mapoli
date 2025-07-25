@@ -11,7 +11,7 @@ import {
   Select,
   TextField
 } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import React, { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -272,14 +272,14 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
 
   return (
     <form onSubmit={validateAndSearch}>
-      <Grid2
+      <Grid
         container
         paddingX="24px">
-        <Grid2
+        <Grid
           container
           spacing={3}
           width="100%">
-          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <Controller
               name="endProfitYear"
               control={control}
@@ -298,9 +298,9 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
               )}
             />
             {errors.endProfitYear && <FormHelperText error>{errors.endProfitYear.message}</FormHelperText>}
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <FormLabel>Beginning Month</FormLabel>
             <Controller
               name="startProfitMonth"
@@ -330,9 +330,9 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
               )}
             />
             {errors.startProfitMonth && <FormHelperText error>{errors.startProfitMonth.message}</FormHelperText>}
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <FormLabel>Ending Month</FormLabel>
             <Controller
               name="endProfitMonth"
@@ -362,9 +362,9 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
               )}
             />
             {errors.endProfitMonth && <FormHelperText error>{errors.endProfitMonth.message}</FormHelperText>}
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <FormLabel>Social Security Number</FormLabel>
             <Controller
               name="socialSecurity"
@@ -385,9 +385,9 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
               )}
             />
             {errors.socialSecurity && <FormHelperText error>{errors.socialSecurity.message}</FormHelperText>}
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <FormLabel>Name</FormLabel>
             <Controller
               name="name"
@@ -407,9 +407,9 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
               )}
             />
             {errors.name && <FormHelperText error>{errors.name.message}</FormHelperText>}
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <FormLabel>Badge/PSN Number</FormLabel>
             <Controller
               name="badgeNumber"
@@ -430,9 +430,9 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
               )}
             />
             {errors.badgeNumber && <FormHelperText error>{errors.badgeNumber.message}</FormHelperText>}
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 6 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 6 }}>
             <FormControl error={!!errors.paymentType}>
               <FormLabel>Payment Type</FormLabel>
               <Controller
@@ -466,9 +466,9 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
                 )}
               />
             </FormControl>
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 6 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 6 }}>
             <FormControl error={!!errors.memberType}>
               <FormLabel>Member Type</FormLabel>
               <Controller
@@ -497,9 +497,9 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
                 )}
               />
             </FormControl>
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Contribution</FormLabel>
             <Controller
               name="contribution"
@@ -521,9 +521,9 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
               )}
             />
             {errors.contribution && <FormHelperText error>{errors.contribution.message}</FormHelperText>}
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Earnings</FormLabel>
             <Controller
               name="earnings"
@@ -545,9 +545,9 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
               )}
             />
             {errors.earnings && <FormHelperText error>{errors.earnings.message}</FormHelperText>}
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Forfeiture</FormLabel>
             <Controller
               name="forfeiture"
@@ -569,9 +569,9 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
               )}
             />
             {errors.forfeiture && <FormHelperText error>{errors.forfeiture.message}</FormHelperText>}
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Payment</FormLabel>
             <Controller
               name="payment"
@@ -593,9 +593,9 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
               )}
             />
             {errors.payment && <FormHelperText error>{errors.payment.message}</FormHelperText>}
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <Controller
               name="voids"
               control={control}
@@ -618,23 +618,23 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
                 />
               )}
             />
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
 
-        <Grid2
+        <Grid
           container
           justifyContent="flex-end"
           paddingY="16px">
-          <Grid2 size={{ xs: 12 }}>
+          <Grid size={{ xs: 12 }}>
             <SearchAndReset
               handleReset={handleReset}
               handleSearch={validateAndSearch}
               isFetching={isFetching}
               disabled={!isValid}
             />
-          </Grid2>
-        </Grid2>
-      </Grid2>
+          </Grid>
+        </Grid>
+      </Grid>
     </form>
   );
 };

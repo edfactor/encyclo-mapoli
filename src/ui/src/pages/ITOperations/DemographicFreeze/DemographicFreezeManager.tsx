@@ -1,6 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Box, Button, FormHelperText, TextField } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import { Controller, useForm } from "react-hook-form";
 import { useFreezeDemographicsMutation } from "reduxstore/api/ItOperationsApi";
@@ -116,7 +116,7 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
           gap: "24px"
         }}>
         {/* Profit Year */}
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Controller
             name="profitYear"
             control={control}
@@ -134,7 +134,7 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
             )}
           />
           {errors.profitYear && <FormHelperText error>{errors.profitYear.message}</FormHelperText>}
-        </Grid2>
+        </Grid>
 
         {/* As of Date */}
         <Box sx={fieldStyle}>

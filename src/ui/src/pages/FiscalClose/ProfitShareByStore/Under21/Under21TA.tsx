@@ -1,5 +1,5 @@
 import { Box, CircularProgress, Divider } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -97,15 +97,15 @@ const Under21TA = () => {
     <Page
       label={CAPTIONS.QPAY066TA_UNDER21}
       actionNode={renderActionNode()}>
-      <Grid2
+      <Grid
         container
         rowSpacing="24px">
-        <Grid2 width={"100%"}>
+        <Grid width={"100%"}>
           <Divider />
-        </Grid2>
+        </Grid>
 
         {initialLoad ? (
-          <Grid2 width="100%">
+          <Grid width="100%">
             <Box
               display="flex"
               justifyContent="center"
@@ -113,11 +113,11 @@ const Under21TA = () => {
               minHeight="200px">
               <CircularProgress />
             </Box>
-          </Grid2>
+          </Grid>
         ) : (
           <>
             {hasData && !isLoading && (
-              <Grid2
+              <Grid
                 width="100%"
                 paddingX="24px">
                 <Under21Summary
@@ -125,10 +125,10 @@ const Under21TA = () => {
                   isLoading={isTotalsLoading}
                   title="UNDER 21 INACTIVE (QPAY066TA-UNDR21)"
                 />
-              </Grid2>
+              </Grid>
             )}
 
-            <Grid2 width="100%">
+            <Grid width="100%">
               <Under21InactiveGrid
                 isLoading={isInactiveLoading}
                 initialSearchLoaded={initialSearchLoaded}
@@ -140,10 +140,10 @@ const Under21TA = () => {
                 sortParams={sortParams}
                 setSortParams={setSortParams}
               />
-            </Grid2>
+            </Grid>
           </>
         )}
-      </Grid2>
+      </Grid>
     </Page>
   );
 };

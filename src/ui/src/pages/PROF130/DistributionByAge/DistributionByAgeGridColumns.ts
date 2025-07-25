@@ -37,5 +37,5 @@ export const GetDistributionsByAgeColumns = (reportType: FrozenReportsByAgeReque
       ]
     }
   ];
-  return columns;
+  return columns ?? [];
 };

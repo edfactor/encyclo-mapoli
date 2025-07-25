@@ -1,5 +1,5 @@
 import { Typography, CircularProgress } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { agGridNumberToCurrency, DSMGrid } from "smart-ui-library";
 import { useEffect, useState } from "react";
 import { useLazyGetBreakdownGrandTotalsQuery } from "reduxstore/api/YearsEndApi";
@@ -199,22 +199,22 @@ const SummariesContent: React.FC = () => {
   };
 
   return (
-    <Grid2
+    <Grid
       container
       direction="column"
       width="100%">
-      <Grid2 paddingX="24px">
+      <Grid paddingX="24px">
         <Typography
           variant="h2"
           sx={{ color: "#0258A5", marginBottom: "16px" }}>
           {`All Employees (By report section)`}
         </Typography>
-      </Grid2>
-      <Grid2 width="100%">
+      </Grid>
+      <Grid width="100%">
         {isLoading ? (
-          <Grid2 sx={{ display: "flex", justifyContent: "center", padding: 4 }}>
+          <Grid sx={{ display: "flex", justifyContent: "center", padding: 4 }}>
             <CircularProgress />
-          </Grid2>
+          </Grid>
         ) : (
           <DSMGrid
             preferenceKey={`BREAKDOWN_REPORT_ALL_EMPLOYEES_SUMMARY_STORE`}
@@ -229,8 +229,8 @@ const SummariesContent: React.FC = () => {
             }}
           />
         )}
-      </Grid2>
-    </Grid2>
+      </Grid>
+    </Grid>
   );
 };
 

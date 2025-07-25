@@ -1,5 +1,5 @@
 import { Divider, CircularProgress } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { DSMAccordion, Page } from "smart-ui-library";
 import RehireForfeituresSearchFilter from "./RehireForfeituresSearchFilter";
 import RehireForfeituresGrid from "./RehireForfeituresGrid";
@@ -85,24 +85,24 @@ const RehireForfeitures = () => {
     <Page
       label={`${CAPTIONS.REHIRE_FORFEITURES}`}
       actionNode={renderActionNode()}>
-      <Grid2
+      <Grid
         container
         rowSpacing="24px">
-        <Grid2 width={"100%"}>
+        <Grid width={"100%"}>
           <Divider />
-        </Grid2>
+        </Grid>
 
         {!isCalendarDataLoaded ? (
-          <Grid2
+          <Grid
             width={"100%"}
             container
             justifyContent="center"
             padding={4}>
             <CircularProgress />
-          </Grid2>
+          </Grid>
         ) : (
           <>
-            <Grid2 width={"100%"}>
+            <Grid width={"100%"}>
               <DSMAccordion title="Filter">
                 <RehireForfeituresSearchFilter
                   setInitialSearchLoaded={setInitialSearchLoaded}
@@ -111,9 +111,9 @@ const RehireForfeitures = () => {
                   hasUnsavedChanges={hasUnsavedChanges}
                 />
               </DSMAccordion>
-            </Grid2>
+            </Grid>
 
-            <Grid2 width="100%">
+            <Grid width="100%">
               <RehireForfeituresGrid
                 initialSearchLoaded={initialSearchLoaded}
                 setInitialSearchLoaded={setInitialSearchLoaded}
@@ -121,10 +121,10 @@ const RehireForfeitures = () => {
                 onUnsavedChanges={handleUnsavedChanges}
                 hasUnsavedChanges={hasUnsavedChanges}
               />
-            </Grid2>
+            </Grid>
           </>
         )}
-      </Grid2>
+      </Grid>
     </Page>
   );
 };

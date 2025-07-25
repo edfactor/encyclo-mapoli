@@ -1,5 +1,5 @@
 import { FormLabel, MenuItem, Select, TextField } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { useEffect } from "react";
 
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -217,11 +217,11 @@ const CreateBeneficiary: React.FC<Props> = ({
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <form onSubmit={validateAndSubmit}>
-        <Grid2
+        <Grid
           container
           size={12}
           rowSpacing={3}>
-          <Grid2 size={{ md: 5, xs: 12 }}>
+          <Grid size={{ md: 5, xs: 12 }}>
             <FormLabel>First Name</FormLabel>
             <Controller
               name="firstName"
@@ -240,8 +240,8 @@ const CreateBeneficiary: React.FC<Props> = ({
                 />
               )}
             />
-          </Grid2>
-          <Grid2
+          </Grid>
+          <Grid
             offset={1}
             size={{ md: 5, xs: 12 }}>
             <FormLabel>Last Name</FormLabel>
@@ -262,8 +262,8 @@ const CreateBeneficiary: React.FC<Props> = ({
                 />
               )}
             />
-          </Grid2>
-          <Grid2 size={{ md: 5, xs: 12 }}>
+          </Grid>
+          <Grid size={{ md: 5, xs: 12 }}>
             <FormLabel>SSN</FormLabel>
             <Controller
               name="beneficiarySsn"
@@ -283,8 +283,8 @@ const CreateBeneficiary: React.FC<Props> = ({
                 />
               )}
             />
-          </Grid2>
-          <Grid2
+          </Grid>
+          <Grid
             offset={1}
             size={{ md: 5, xs: 12 }}>
             <FormLabel>Date of Birth</FormLabel>
@@ -305,8 +305,8 @@ const CreateBeneficiary: React.FC<Props> = ({
                 />
               )}
             />
-          </Grid2>
-          <Grid2 size={{ md: 12, xs: 12 }}>
+          </Grid>
+          <Grid size={{ md: 12, xs: 12 }}>
             <FormLabel>
               <Controller
                 name="addressSameAsBeneficiary"
@@ -323,8 +323,8 @@ const CreateBeneficiary: React.FC<Props> = ({
               />
               Address the same as beneficiary ?
             </FormLabel>
-          </Grid2>
-          <Grid2 size={{ md: 5, xs: 12 }}>
+          </Grid>
+          <Grid size={{ md: 5, xs: 12 }}>
             <FormLabel>Address</FormLabel>
             <Controller
               name="street"
@@ -343,12 +343,12 @@ const CreateBeneficiary: React.FC<Props> = ({
                 />
               )}
             />
-          </Grid2>
-          <Grid2
+          </Grid>
+          <Grid
             container
             columnSpacing={4}
             size={{ xs: 12, md: 12 }}>
-            <Grid2 size={{ md: 5, xs: 12 }}>
+            <Grid size={{ md: 5, xs: 12 }}>
               <FormLabel>City</FormLabel>
               <Controller
                 name="city"
@@ -367,8 +367,8 @@ const CreateBeneficiary: React.FC<Props> = ({
                   />
                 )}
               />
-            </Grid2>
-            <Grid2 size={{ md: 2, xs: 12 }}>
+            </Grid>
+            <Grid size={{ md: 2, xs: 12 }}>
               <FormLabel>State</FormLabel>
               <Controller
                 name="state"
@@ -387,8 +387,8 @@ const CreateBeneficiary: React.FC<Props> = ({
                   />
                 )}
               />
-            </Grid2>
-            <Grid2 size={{ md: 3, xs: 12 }}>
+            </Grid>
+            <Grid size={{ md: 3, xs: 12 }}>
               <FormLabel>Zipcode</FormLabel>
               <Controller
                 name="postalCode"
@@ -407,14 +407,14 @@ const CreateBeneficiary: React.FC<Props> = ({
                   />
                 )}
               />
-            </Grid2>
-          </Grid2>
+            </Grid>
+          </Grid>
 
-          <Grid2
+          <Grid
             container
             columnSpacing={4}
             size={{ xs: 12, md: 12 }}>
-            <Grid2 size={{ md: 5, xs: 12 }}>
+            <Grid size={{ md: 5, xs: 12 }}>
               <FormLabel>Beneficiary Kind</FormLabel>
               <Controller
                 name="kindId"
@@ -436,8 +436,8 @@ const CreateBeneficiary: React.FC<Props> = ({
                   </Select>
                 )}
               />
-            </Grid2>
-            <Grid2 size={{ md: 4, xs: 12 }}>
+            </Grid>
+            <Grid size={{ md: 4, xs: 12 }}>
               <FormLabel>Relationship</FormLabel>
               <Controller
                 name="relationship"
@@ -456,8 +456,8 @@ const CreateBeneficiary: React.FC<Props> = ({
                   />
                 )}
               />
-            </Grid2>
-            {/* <Grid2 size={{ md: 3, xs: 12 }}>
+            </Grid>
+            {/* <Grid size={{ md: 3, xs: 12 }}>
                             <FormLabel>Percentage</FormLabel>
                             <Controller
                                 name="percentage"
@@ -477,23 +477,23 @@ const CreateBeneficiary: React.FC<Props> = ({
                                     />
                                 )}
                             />
-                        </Grid2> */}
-          </Grid2>
+                        </Grid> */}
+          </Grid>
 
-          <Grid2
+          <Grid
             container
             justifyContent="flex-end"
             paddingY="16px">
-            <Grid2 size={{ xs: 12 }}>
+            <Grid size={{ xs: 12 }}>
               <SubmitAndReset
                 handleReset={handleReset}
                 handleSearch={validateAndSubmit}
                 isFetching={isFetching}
                 disabled={!isValid}
               />
-            </Grid2>
-          </Grid2>
-        </Grid2>
+            </Grid>
+          </Grid>
+        </Grid>
       </form>
     </LocalizationProvider>
   );

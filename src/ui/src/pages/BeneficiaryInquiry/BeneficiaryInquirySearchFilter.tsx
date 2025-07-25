@@ -5,7 +5,7 @@ import {
     Select,
     TextField
 } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { Controller, useForm, Resolver } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -158,14 +158,14 @@ const BeneficiaryInquirySearchFilter: React.FC<Props> = ({ searchClicked, benefi
 
     return (
         <form onSubmit={validateAndSubmit}>
-            <Grid2
+            <Grid
                 container
                 paddingX="24px">
-                <Grid2
+                <Grid
                     container
                     spacing={2}
                     width="100%">
-                    <Grid2 size={{ xs: 12, sm: 3, md: 3 }}>
+                    <Grid size={{ xs: 12, sm: 3, md: 3 }}>
                         <FormLabel>Badge/Psn</FormLabel>
                         <Controller
                             name="badgePsn"
@@ -186,10 +186,10 @@ const BeneficiaryInquirySearchFilter: React.FC<Props> = ({ searchClicked, benefi
                             )}
                         />
                         {errors?.badgePsn && <FormHelperText error>{errors.badgePsn.message}</FormHelperText>}
-                    </Grid2>
+                    </Grid>
 
 
-                    <Grid2 size={{ xs: 12, sm: 3, md: 3 }}>
+                    <Grid size={{ xs: 12, sm: 3, md: 3 }}>
                         <FormLabel>Name</FormLabel>
                         <Controller
                             name="name"
@@ -209,8 +209,8 @@ const BeneficiaryInquirySearchFilter: React.FC<Props> = ({ searchClicked, benefi
                             )}
                         />
                         {errors?.name && <FormHelperText error>{errors.name.message}</FormHelperText>}
-                    </Grid2>
-                    <Grid2 size={{ xs: 12, sm: 3, md: 3 }}>
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 3, md: 3 }}>
                         <FormLabel>SSN</FormLabel>
                         <Controller
                             name="socialSecurity"
@@ -231,8 +231,8 @@ const BeneficiaryInquirySearchFilter: React.FC<Props> = ({ searchClicked, benefi
                             )}
                         />
                         {errors?.socialSecurity && <FormHelperText error>{errors.socialSecurity.message}</FormHelperText>}
-                    </Grid2>
-                    <Grid2 size={{ xs: 12, sm: 2, md: 2 }}>
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 2, md: 2 }}>
                         <FormLabel>Member Type</FormLabel>
                         <Controller
                             name="memberType"
@@ -256,24 +256,24 @@ const BeneficiaryInquirySearchFilter: React.FC<Props> = ({ searchClicked, benefi
                                 </Select>
                             )}
                         />
-                    </Grid2>
-                </Grid2>
+                    </Grid>
+                </Grid>
 
 
-                <Grid2
+                <Grid
                     container
                     justifyContent="flex-end"
                     paddingY="16px">
-                    <Grid2 size={{ xs: 12 }}>
+                    <Grid size={{ xs: 12 }}>
                         <SearchAndReset
                             handleReset={handleReset}
                             handleSearch={validateAndSubmit}
                             isFetching={isFetching}
                             disabled={!isValid}
                         />
-                    </Grid2>
-                </Grid2>
-            </Grid2>
+                    </Grid>
+                </Grid>
+            </Grid>
         </form>
     );
 };

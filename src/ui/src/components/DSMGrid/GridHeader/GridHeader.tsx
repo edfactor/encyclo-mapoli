@@ -1,8 +1,7 @@
 import React, { FC } from "react";
-import ColumnControl from "../ColumnControl/ColumnControl";
 import { ColDef, ColumnState } from "ag-grid-community";
-
-import Grid2 from '@mui/material/Grid2';
+import { Grid } from "@mui/material";
+import ColumnControl from "../ColumnControl/ColumnControl";
 
 type GridHeaderProps = {
   columnStates: ColumnState[];
@@ -27,7 +26,7 @@ const GridHeader: FC<GridHeaderProps> = ({
 }) => {
   return (
     <>
-      <Grid2
+      <Grid
         container
         padding={"0 24px 8px 24px"}
         gap={"8px"}
@@ -44,7 +43,7 @@ const GridHeader: FC<GridHeaderProps> = ({
         {controls?.map((control, index) => {
           return <React.Fragment key={index}>{control}</React.Fragment>;
         })}
-      </Grid2>
+      </Grid>
     </>
   );
 };

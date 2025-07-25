@@ -1,6 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Checkbox, FormControlLabel, FormHelperText } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import { Controller, useForm } from "react-hook-form";
 import { useLazyGetDistributionsAndForfeituresQuery } from "reduxstore/api/YearsEndApi";
@@ -52,12 +52,12 @@ const ProfitShareReportFinalRunParameters = () => {
 
   return (
     <form onSubmit={validateAndSubmit}>
-      <Grid2
+      <Grid
         container
         paddingX="24px"
         alignItems={"flex-end"}
         gap="24px">
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Controller
             name="cutoffDate"
             control={control}
@@ -74,9 +74,9 @@ const ProfitShareReportFinalRunParameters = () => {
             )}
           />
           {errors.cutoffDate && <FormHelperText error>{errors.cutoffDate.message}</FormHelperText>}
-        </Grid2>
+        </Grid>
 
-        <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 2 }}>
           <FormControlLabel
             control={
               <Controller
@@ -93,8 +93,8 @@ const ProfitShareReportFinalRunParameters = () => {
             label="Use Demographics"
           />
           {errors.useDemographics && <FormHelperText error>{errors.useDemographics.message}</FormHelperText>}
-        </Grid2>
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <FormControlLabel
             control={
               <Controller
@@ -111,9 +111,9 @@ const ProfitShareReportFinalRunParameters = () => {
             label="Create Summary Report"
           />
           {errors.createSummaryReport && <FormHelperText error>{errors.createSummaryReport.message}</FormHelperText>}
-        </Grid2>
-      </Grid2>
-      <Grid2
+        </Grid>
+      </Grid>
+      <Grid
         width="100%"
         paddingX="24px">
         <SearchAndReset
@@ -122,7 +122,7 @@ const ProfitShareReportFinalRunParameters = () => {
           isFetching={isFetching}
           disabled={!isValid}
         />
-      </Grid2>
+      </Grid>
     </form>
   );
 };

@@ -1,5 +1,5 @@
 import { Tooltip, Divider, Button } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { DSMAccordion, Page } from "smart-ui-library";
 import ManageExecutiveHoursAndDollarsSearchFilter from "./ManageExecutiveHoursAndDollarsSearchFilter";
 import ManageExecutiveHoursAndDollarsGrid from "./ManageExecutiveHoursAndDollarsGrid";
@@ -69,13 +69,13 @@ const SearchAndAddExecutive = ({
     <Page
       label="Add New Executive"
       actionNode={<div className="flex mr-2 justify-end gap-24">{RenderAddButton({ setOpenModal })}</div>}>
-      <Grid2
+      <Grid
         container
         rowSpacing="24px">
-        <Grid2 width={"100%"}>
+        <Grid width={"100%"}>
           <Divider />
-        </Grid2>
-        <Grid2 width={"100%"}>
+        </Grid>
+        <Grid width={"100%"}>
           <DSMAccordion title="Filter">
             <ManageExecutiveHoursAndDollarsSearchFilter
               setInitialSearchLoaded={setInitialSearchLoaded}
@@ -83,8 +83,8 @@ const SearchAndAddExecutive = ({
               setPageNumberReset={setPageNumberReset}
             />
           </DSMAccordion>
-        </Grid2>
-        <Grid2 width="100%">
+        </Grid>
+        <Grid width="100%">
           <ManageExecutiveHoursAndDollarsGrid
             setInitialSearchLoaded={setInitialSearchLoaded}
             initialSearchLoaded={initialSearchLoaded}
@@ -92,8 +92,8 @@ const SearchAndAddExecutive = ({
             pageNumberReset={pageNumberReset}
             setPageNumberReset={setPageNumberReset}
           />
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
     </Page>
   );
 };

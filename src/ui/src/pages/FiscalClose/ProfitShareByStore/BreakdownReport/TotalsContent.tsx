@@ -1,6 +1,6 @@
 import { Typography } from "@mui/material";
 import LabelValueSection from "../../../../components/LabelValueSection";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { useEffect } from "react";
 import { useLazyGetBreakdownByStoreTotalsQuery } from "reduxstore/api/YearsEndApi";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
@@ -72,23 +72,23 @@ const TotalsContent: React.FC<TotalsContentProps> = ({ store }) => {
   ];
 
   return (
-    <Grid2
+    <Grid
       container
       direction="column"
       width="100%">
-      <Grid2 paddingX="24px">
+      <Grid paddingX="24px">
         <Typography
           variant="h2"
           sx={{ color: "#0258A5", marginBottom: "16px" }}>
           {`Totals`}
         </Typography>
-      </Grid2>
-      <Grid2
+      </Grid>
+      <Grid
         width="100%"
         paddingX="24px">
         <LabelValueSection data={data} />
-      </Grid2>
-    </Grid2>
+      </Grid>
+    </Grid>
   );
 };
 

@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { Typography } from "@mui/material";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { GetUnder21BreakdownColumnDefs } from "./GetUnder21BreakdownColumnDefs";
@@ -52,12 +52,12 @@ const Under21BreakdownGrid: React.FC<Under21BreakdownGridProps> = ({
   const columnDefs = useMemo(() => GetUnder21BreakdownColumnDefs(handleNavigation), [handleNavigation]);
 
   return (
-    <Grid2
+    <Grid
       container
       direction="column"
       width="100%">
       <ReportSummary report={under21Breakdown} />
-      <Grid2 width="100%">
+      <Grid width="100%">
         <DSMGrid
           preferenceKey="UNDER_21_BREAKDOWN_REPORT"
           isLoading={isLoading}
@@ -83,8 +83,8 @@ const Under21BreakdownGrid: React.FC<Under21BreakdownGridProps> = ({
             recordCount={under21Breakdown.response.total || 0}
           />
         )}
-      </Grid2>
-    </Grid2>
+      </Grid>
+    </Grid>
   );
 };
 

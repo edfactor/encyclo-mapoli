@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Page, DSMAccordion } from "smart-ui-library";
 
 import { Divider, CircularProgress } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 
 import { CAPTIONS } from "../../../constants";
 import TerminationGrid from "./TerminationGrid";
@@ -117,23 +117,23 @@ const Termination = () => {
     <Page
       label={CAPTIONS.TERMINATIONS}
       actionNode={renderActionNode()}>
-      <Grid2
+      <Grid
         container
         rowSpacing="24px">
-        <Grid2 width={"100%"}>
+        <Grid width={"100%"}>
           <Divider />
-        </Grid2>
+        </Grid>
         {!isCalendarDataLoaded ? (
-          <Grid2
+          <Grid
             width={"100%"}
             container
             justifyContent="center"
             padding={4}>
             <CircularProgress />
-          </Grid2>
+          </Grid>
         ) : (
           <>
-            <Grid2 width="100%">
+            <Grid width="100%">
               <DSMAccordion title="Filter">
                 <TerminationSearchFilter
                   setInitialSearchLoaded={setInitialSearchLoaded}
@@ -142,8 +142,8 @@ const Termination = () => {
                   hasUnsavedChanges={hasUnsavedChanges}
                 />
               </DSMAccordion>
-            </Grid2>
-            <Grid2 width="100%">
+            </Grid>
+            <Grid width="100%">
               <TerminationGrid
                 setInitialSearchLoaded={setInitialSearchLoaded}
                 initialSearchLoaded={initialSearchLoaded}
@@ -152,10 +152,10 @@ const Termination = () => {
                 onUnsavedChanges={handleUnsavedChanges}
                 hasUnsavedChanges={hasUnsavedChanges}
               />
-            </Grid2>
+            </Grid>
           </>
         )}
-      </Grid2>
+      </Grid>
     </Page>
   );
 };

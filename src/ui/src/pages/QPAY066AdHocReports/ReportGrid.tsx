@@ -188,11 +188,11 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, storeNumber, onLoadingC
   }, [isQPAY066MReport, breakdownByStoreManagement]);
 
   return (
-    <Grid2
+    <Grid
       container
       spacing={3}>
       {/* Summary Section */}
-      <Grid2 size={{ xs: 12 }}>
+      <Grid size={{ xs: 12 }}>
         <div style={{ padding: "0 24px" }}>
           <Typography
             variant="h2"
@@ -255,10 +255,10 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, storeNumber, onLoadingC
             </Table>
           </TableContainer>
         </div>
-      </Grid2>
+      </Grid>
 
       {/* Grid Section */}
-      <Grid2 size={{ xs: 12 }}>
+      <Grid size={{ xs: 12 }}>
         <DSMGrid
           preferenceKey="QPAY066_ADHOC_REPORT"
           isLoading={isBreakdownFetching || isTotalsFetching}
@@ -267,8 +267,8 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, storeNumber, onLoadingC
             columnDefs: columnDefs,
           }}
         />
-      </Grid2>
-    </Grid2>
+      </Grid>
+    </Grid>
   );
 };
 

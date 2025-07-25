@@ -1,5 +1,5 @@
 import { FormHelperText } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -62,12 +62,12 @@ const Pay450SearchFilters: React.FC<ProfitYearSearchFilterProps> = ({ onSearch, 
 
   return (
     <form onSubmit={validateAndSubmit}>
-      <Grid2
+      <Grid
         container
         paddingX="24px"
         alignItems="flex-end"
         gap="24px">
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Controller
             name="profitYear"
             control={control}
@@ -86,10 +86,10 @@ const Pay450SearchFilters: React.FC<ProfitYearSearchFilterProps> = ({ onSearch, 
             )}
           />
           {errors.profitYear && <FormHelperText error>{errors.profitYear.message}</FormHelperText>}
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
 
-      <Grid2
+      <Grid
         width="100%"
         paddingX="24px">
         <SearchAndReset
@@ -98,7 +98,7 @@ const Pay450SearchFilters: React.FC<ProfitYearSearchFilterProps> = ({ onSearch, 
           isFetching={isFetching}
           disabled={!isValid}
         />
-      </Grid2>
+      </Grid>
     </form>
   );
 };

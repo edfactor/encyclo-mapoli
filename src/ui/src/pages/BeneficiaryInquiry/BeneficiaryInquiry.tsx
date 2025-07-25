@@ -3,7 +3,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import MasterInquiryEmployeeDetails from "pages/MasterInquiry/MasterInquiryEmployeeDetails";
 import MasterInquiryMemberGrid from "pages/MasterInquiry/MasterInquiryMemberGrid";
 import { useEffect, useState } from "react";
@@ -188,15 +188,15 @@ const BeneficiaryInquiry = () => {
           </DialogActions>
         </Dialog>
       </>
-      <Grid2
+      <Grid
         container
         rowSpacing="24px">
-        <Grid2
+        <Grid
           size={{ xs: 12 }}
           width={"100%"}>
           <Divider />
-        </Grid2>
-        <Grid2
+        </Grid>
+        <Grid
           size={{ xs: 12 }}
           width={"100%"}>
           <DSMAccordion title="Filter">
@@ -213,9 +213,9 @@ const BeneficiaryInquiry = () => {
               beneficiaryType={beneficiaryType}
               searchClicked={currentBadge}></BeneficiaryInquirySearchFilter>
           </DSMAccordion>
-        </Grid2>
+        </Grid>
 
-        <Grid2
+        <Grid
           size={{ xs: 12 }}
           width="100%">
           {/* <Button onClick={handleClickOpen}>Add Beneficiary</Button> */}
@@ -261,8 +261,8 @@ const BeneficiaryInquiry = () => {
               />
             </>
           )}
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
     </Page>
   );
 };
