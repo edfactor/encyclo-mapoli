@@ -37,7 +37,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
 
         var beneficiary = await _dataContextFactory.UseReadOnlyContext(async context =>
         {
-            var query = context.Beneficiaries.Include(x => x.Contact).Include(x => x.Contact.ContactInfo)
+            var query = context.Beneficiaries.Include(x => x.Contact).ThenInclude(x => x!.ContactInfo)
             .Where(x => request.BadgeNumber == null || request.BadgeNumber == 0 || x.BadgeNumber == request.BadgeNumber);
 
             // Check if user is querying from root (psnSuffix null or 0)
@@ -90,7 +90,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                 KindId = x.KindId,
                 CreatedDate = x.Contact != null ? x.Contact.CreatedDate : DateOnly.MaxValue,
                 DateOfBirth = x.Contact != null ? x.Contact.DateOfBirth : DateOnly.MaxValue,
-                Ssn = x.Contact != null ? x.Contact.Ssn.ToString() : null,
+                Ssn = x.Contact != null ? x.Contact.Ssn.ToString() : string.Empty,
                 City = x.Contact != null ? x.Contact.Address.City : null,
                 CountryIso = x.Contact != null ? x.Contact.Address.CountryIso ?? "" : "",
                 PostalCode = x.Contact != null ? x.Contact.Address.PostalCode : null,

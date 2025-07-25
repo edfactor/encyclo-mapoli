@@ -24,15 +24,16 @@ public class PayBenReportService : IPayBenReportService
             var query = context.Beneficiaries
             .Include(x => x.Demographic)
             .Include(x => x.Contact)
-            .Include(x => x.Contact.ContactInfo)
-            .Include(x => x.Demographic.ContactInfo).Where(x=>request.Id==null || x.Id == request.Id);
+            .ThenInclude(x => x!.ContactInfo)
+            .Include(x => x.Demographic)
+            .ThenInclude(x => x!.ContactInfo).Where(x=>request.Id==null || x.Id == request.Id);
             
 
             var res = query.Select(x => new PayBenReportResponse()
             {
-                Ssn = x.Contact.Ssn.ToString(),
-                BeneficiaryFullName = x.Contact.ContactInfo.FullName,
-                DemographicFullName = x.Demographic.ContactInfo.FullName,
+                Ssn = x.Contact != null ? x.Contact.Ssn.ToString() : string.Empty,
+                BeneficiaryFullName = x.Contact != null && x.Contact.ContactInfo != null ? x.Contact.ContactInfo.FullName ?? string.Empty : string.Empty,
+                DemographicFullName = x.Demographic != null && x.Demographic.ContactInfo != null ? x.Demographic.ContactInfo.FullName ?? string.Empty : string.Empty,
                 Psn = x.Psn,
                 Badge = x.BadgeNumber,
                 Percentage = x.Percent

@@ -185,9 +185,6 @@ const useSaveAction = (
       adjustEarningsSecondaryAmount: profitSharingEditQueryParams?.adjustEarningsSecondaryAmount ?? 0
     };
 
-    console.log("Applying changes to year end: ", params);
-    console.log(params);
-
     dispatch(setProfitShareApplyOrRevertLoading(true));
 
     await trigger(params)
@@ -238,7 +235,13 @@ const wasFormUsed = (profitSharingEditQueryParams: ProfitShareEditUpdateQueryPar
     (profitSharingEditQueryParams?.contributionPercent ?? 0) > 0 ||
     (profitSharingEditQueryParams?.earningsPercent ?? 0) > 0 ||
     (profitSharingEditQueryParams?.incomingForfeitPercent ?? 0) > 0 ||
-    (profitSharingEditQueryParams?.maxAllowedContributions ?? 0) > 0
+    (profitSharingEditQueryParams?.maxAllowedContributions ?? 0) > 0 ||
+    (profitSharingEditQueryParams?.badgeToAdjust ?? 0) > 0 ||
+    (profitSharingEditQueryParams?.adjustContributionAmount ?? 0) > 0 ||
+    (profitSharingEditQueryParams?.adjustEarningsAmount ?? 0) > 0 ||
+    (profitSharingEditQueryParams?.adjustIncomingForfeitAmount ?? 0) > 0 ||
+    (profitSharingEditQueryParams?.badgeToAdjust2 ?? 0) > 0 ||
+    (profitSharingEditQueryParams?.adjustEarningsSecondaryAmount ?? 0) > 0
   );
 };
 
@@ -248,7 +251,10 @@ const RenderSaveButton = (
   setOpenSaveModal: (open: boolean) => void,
   setOpenEmptyModal: (open: boolean) => void,
   status: ProfitMasterStatus | null,
-  isLoading: boolean
+  isLoading: boolean,
+  minimumFieldsEntered: boolean = false,
+  adjustedBadgeOneValid: boolean = true,
+  adjustedBadgeTwoValid: boolean = true
 ) => {
   // The incoming status field is about whether or not changes have already been applied
   const {
@@ -270,7 +276,18 @@ const RenderSaveButton = (
       color="primary"
       size="medium"
       onClick={async () => {
-        if (profitSharingEditQueryParams && wasFormUsed(profitSharingEditQueryParams)) {
+        console.log("Save button clicked with params:", profitSharingEditQueryParams);
+        //console.log("wasFormUsed:", wasFormUsed(profitSharingEditQueryParams));
+        console.log("minimumFieldsEntered:", minimumFieldsEntered);
+        console.log("adjustedBadgeOneValid:", adjustedBadgeOneValid);
+        console.log("adjustedBadgeTwoValid:", adjustedBadgeTwoValid);
+        if (
+          profitSharingEditQueryParams &&
+          wasFormUsed(profitSharingEditQueryParams) &&
+          adjustedBadgeOneValid &&
+          adjustedBadgeTwoValid &&
+          minimumFieldsEntered
+        ) {
           setOpenSaveModal(true);
         } else {
           setOpenEmptyModal(true);
@@ -378,6 +395,12 @@ const ProfitShareEditUpdate = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [pageNumberReset, setPageNumberReset] = useState(false);
   const hasToken = !!useSelector((state: RootState) => state.security.token);
+
+  // These are to track validity of fields in the search filter
+  const [minimumFieldsEntered, setMinimumFieldsEntered] = useState(false);
+  const [adjustedBadgeOneValid, setAdjustedBadgeOneValid] = useState(true);
+  const [adjustedBadgeTwoValid, setAdjustedBadgeTwoValid] = useState(true);
+
   const {
     profitSharingUpdateAdjustmentSummary,
     profitSharingUpdate,
@@ -475,7 +498,15 @@ const ProfitShareEditUpdate = () => {
       actionNode={
         <div className="flex  justify-end gap-2">
           {RenderRevertButton(setOpenRevertModal, isLoading)}
-          {RenderSaveButton(setOpenSaveModal, setOpenEmptyModal, profitMasterStatus, isLoading)}
+          {RenderSaveButton(
+            setOpenSaveModal,
+            setOpenEmptyModal,
+            profitMasterStatus,
+            isLoading,
+            minimumFieldsEntered,
+            adjustedBadgeOneValid,
+            adjustedBadgeTwoValid
+          )}
           {renderActionNode()}
         </div>
       }>
@@ -507,6 +538,9 @@ const ProfitShareEditUpdate = () => {
               <ProfitShareEditUpdateSearchFilter
                 setInitialSearchLoaded={setInitialSearchLoaded}
                 setPageReset={setPageNumberReset}
+                setMinimumFieldsEntered={setMinimumFieldsEntered}
+                setAdjustedBadgeOneValid={setAdjustedBadgeOneValid}
+                setAdjustedBadgeTwoValid={setAdjustedBadgeTwoValid}
               />
             </DSMAccordion>
           </Grid>
@@ -737,7 +771,15 @@ const ProfitShareEditUpdate = () => {
           setOpenModal={setOpenEmptyModal}
           actionFunction={() => {}}
           messageType="info"
-          messageHeadline="You must fill out  at least one of these: contribution, earnings, or forfeiture."
+          messageHeadline={
+            !minimumFieldsEntered
+              ? "You must enter at least contribution, earnings, and max allowed contributions."
+              : !adjustedBadgeOneValid
+                ? "If you adjust a badge, you must also enter the contribution, earnings, and incoming forfeiture."
+                : !adjustedBadgeTwoValid
+                  ? "If you adjust a secondary badge, you must also enter the earnings amount."
+                  : ""
+          }
           params={profitSharingEditQueryParams}
           lastWarning=""
         />
