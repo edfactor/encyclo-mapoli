@@ -634,7 +634,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
         foreach (var kvp in memberDetailsMap)
         {
             var memberData = kvp.Value;
-            var balance = currentBalance.FirstOrDefault(b => b.Id == kvp.Key);
+            var balance = currentBalance.FirstOrDefault(b => b.Id == kvp.Key, new BalanceEndpointResponse { Id = kvp.Key, Ssn = memberData.Ssn});
             var previousBalanceItem = previousBalance.FirstOrDefault(b => b.Id == kvp.Key);
 
             detailsList.Add(new MemberProfitPlanDetails
@@ -677,7 +677,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 Gender = memberData.Gender,
                 PayClassification = memberData.PayClassification,
                 
-                AllocationToAmount = balance.AllocationsToBeneficiary,
+                AllocationToAmount = balance!.AllocationsToBeneficiary,
                 AllocationFromAmount = balance.AllocationsFromBeneficiary
             });
         }
