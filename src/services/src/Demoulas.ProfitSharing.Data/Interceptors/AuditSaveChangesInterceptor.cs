@@ -1,17 +1,20 @@
-﻿using Demoulas.ProfitSharing.Data.Entities.Audit;
-using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.EntityFrameworkCore;
-using Demoulas.ProfitSharing.Data.Configuration;
+﻿using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit; // Add for IDoNotAudit
+using Demoulas.ProfitSharing.Data.Configuration;
+using Demoulas.ProfitSharing.Data.Entities.Audit;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace Demoulas.ProfitSharing.Data.Interceptors;
 public class AuditSaveChangesInterceptor : SaveChangesInterceptor
 {
     private readonly DataConfig _config;
+    private readonly IAppUser _appUser;
 
-    public AuditSaveChangesInterceptor(DataConfig config)
+    public AuditSaveChangesInterceptor(DataConfig config, IAppUser appUser)
     {
         _config = config;
+        _appUser = appUser;
     }
 
     public override ValueTask<InterceptionResult<int>> SavingChangesAsync(DbContextEventData eventData,
@@ -45,6 +48,7 @@ public class AuditSaveChangesInterceptor : SaveChangesInterceptor
             {
                 TableName = entry.Metadata.GetTableName(),
                 Operation = entry.State.ToString(),
+                UserName = _appUser.UserName ?? string.Empty,
                 PrimaryKey = primaryKey,
                 ChangesJson = entry.Properties
                     .Where(p => p.IsModified || entry.State == EntityState.Added || entry.State == EntityState.Deleted)
