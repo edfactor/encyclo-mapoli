@@ -1,4 +1,4 @@
-import { Divider, Grid2, Typography } from "@mui/material";
+import { Divider, Grid, Typography } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import { DSMGrid, Page } from "smart-ui-library";
 import { useLazyGetYearEndProfitSharingSummaryReportQuery } from "reduxstore/api/YearsEndApi";
