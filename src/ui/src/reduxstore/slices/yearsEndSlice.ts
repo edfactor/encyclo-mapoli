@@ -293,6 +293,19 @@ export const yearsEndSlice = createSlice({
     clearProfitSharingEditQueryParams: (state) => {
       state.profitSharingEditQueryParams = null;
     },
+    updateProfitSharingEditQueryParam: (state, action: PayloadAction<Partial<ProfitShareEditUpdateQueryParams>>) => {
+      state.profitSharingEditQueryParams = {
+        ...state.profitSharingEditQueryParams,
+        ...action.payload,
+        profitYear: action.payload.profitYear ?? state.profitSharingEditQueryParams?.profitYear ?? new Date()
+      };
+
+      // Need to clear grids when a field changes as the previews are invalid now
+      state.profitSharingUpdate = null;
+      state.profitSharingEdit = null;
+      // Also need to clear this as it is based on the query params being shown in the grids
+      state.profitEditUpdateChangesAvailable = false;
+    },
     setProfitSharingUpdateQueryParams: (state, action: PayloadAction<ProfitShareEditUpdateQueryParams>) => {
       state.profitSharingUpdateQueryParams = action.payload;
     },
@@ -1097,6 +1110,7 @@ export const {
   clearProfitSharingUpdateQueryParams,
   setProfitSharingEditQueryParams,
   clearProfitSharingEditQueryParams,
+  updateProfitSharingEditQueryParam,
   setProfitSharingUpdateAdjustmentSummary,
   addBadgeNumberToUpdateAdjustmentSummary,
   clearExecutiveHoursAndDollarsAddQueryParams,

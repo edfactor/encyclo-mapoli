@@ -20,7 +20,8 @@ import {
   setProfitSharingEditQueryParams,
   setProfitSharingUpdateQueryParams,
   setResetYearEndPage,
-  setTotalForfeituresGreaterThanZero
+  setTotalForfeituresGreaterThanZero,
+  updateProfitSharingEditQueryParam
 } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import { ProfitShareUpdateRequest } from "reduxstore/types";
@@ -181,6 +182,7 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
     switch (fieldName) {
       case "contributionPercent":
         setContributionPercentPresent(value);
+
         break;
       case "earningsPercent":
         setEarningsPercentPresent(value);
@@ -302,6 +304,17 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
     }
   });
 
+  /// set maxContributionsAllowed to the default value
+  useEffect(() => {
+    if (!profitSharingUpdate) {
+      dispatch(
+        updateProfitSharingEditQueryParam({
+          maxAllowedContributions: maxContributionsDefault
+        })
+      );
+    }
+  }, [dispatch, profitSharingUpdate]);
+
   // I would like handleReset() to be called whenever resetYearEndPage is true
 
   useEffect(() => {
@@ -389,6 +402,7 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
                   onChange={(e) => {
                     field.onChange(e);
                     processFieldsEntered("contributionPercent", e.target.value !== "");
+                    dispatch(updateProfitSharingEditQueryParam({ contributionPercent: Number(e.target.value) }));
                   }}
                 />
               )}
@@ -412,6 +426,7 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
                   onChange={(e) => {
                     field.onChange(e);
                     processFieldsEntered("earningsPercent", e.target.value !== "");
+                    dispatch(updateProfitSharingEditQueryParam({ earningsPercent: Number(e.target.value) }));
                   }}
                 />
               )}
@@ -435,6 +450,7 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
                   onChange={(e) => {
                     field.onChange(e);
                     processFieldsEntered("incomingForfeitPercent", e.target.value !== "");
+                    dispatch(updateProfitSharingEditQueryParam({ incomingForfeitPercent: Number(e.target.value) }));
                   }}
                 />
               )}
@@ -459,6 +475,7 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
                   onChange={(e) => {
                     field.onChange(e);
                     processFieldsEntered("secondaryEarningsPercent", e.target.value !== "");
+                    dispatch(updateProfitSharingEditQueryParam({ secondaryEarningsPercent: Number(e.target.value) }));
                   }}
                 />
               )}
@@ -484,6 +501,7 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
                   onChange={(e) => {
                     field.onChange(e);
                     processFieldsEntered("maxAllowedContributions", e.target.value !== "");
+                    dispatch(updateProfitSharingEditQueryParam({ maxAllowedContributions: Number(e.target.value) }));
                   }}
                 />
               )}
@@ -514,6 +532,7 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
                   onChange={(e) => {
                     field.onChange(e);
                     processFieldsEntered("badgeToAdjust", e.target.value !== "");
+                    dispatch(updateProfitSharingEditQueryParam({ badgeToAdjust: Number(e.target.value) }));
                   }}
                 />
               )}
@@ -536,6 +555,7 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
                   onChange={(e) => {
                     field.onChange(e);
                     processFieldsEntered("adjustContributionAmount", e.target.value !== "");
+                    dispatch(updateProfitSharingEditQueryParam({ adjustContributionAmount: Number(e.target.value) }));
                   }}
                 />
               )}
@@ -561,6 +581,7 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
                   onChange={(e) => {
                     field.onChange(e);
                     processFieldsEntered("adjustEarningsAmount", e.target.value !== "");
+                    dispatch(updateProfitSharingEditQueryParam({ adjustEarningsAmount: Number(e.target.value) }));
                   }}
                 />
               )}
@@ -586,6 +607,9 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
                   onChange={(e) => {
                     field.onChange(e);
                     processFieldsEntered("adjustIncomingForfeitAmount", e.target.value !== "");
+                    dispatch(
+                      updateProfitSharingEditQueryParam({ adjustIncomingForfeitAmount: Number(e.target.value) })
+                    );
                   }}
                 />
               )}
@@ -616,6 +640,7 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
                   onChange={(e) => {
                     field.onChange(e);
                     processFieldsEntered("badgeToAdjust2", e.target.value !== "");
+                    dispatch(updateProfitSharingEditQueryParam({ badgeToAdjust2: Number(e.target.value) }));
                   }}
                 />
               )}
@@ -639,6 +664,9 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
                   onChange={(e) => {
                     field.onChange(e);
                     processFieldsEntered("adjustEarningsSecondaryAmount", e.target.value !== "");
+                    dispatch(
+                      updateProfitSharingEditQueryParam({ adjustEarningsSecondaryAmount: Number(e.target.value) })
+                    );
                   }}
                 />
               )}

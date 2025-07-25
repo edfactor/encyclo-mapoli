@@ -276,11 +276,6 @@ const RenderSaveButton = (
       color="primary"
       size="medium"
       onClick={async () => {
-        console.log("Save button clicked with params:", profitSharingEditQueryParams);
-        //console.log("wasFormUsed:", wasFormUsed(profitSharingEditQueryParams));
-        console.log("minimumFieldsEntered:", minimumFieldsEntered);
-        console.log("adjustedBadgeOneValid:", adjustedBadgeOneValid);
-        console.log("adjustedBadgeTwoValid:", adjustedBadgeTwoValid);
         if (
           profitSharingEditQueryParams &&
           wasFormUsed(profitSharingEditQueryParams) &&
@@ -314,9 +309,9 @@ const RenderSaveButton = (
         title={
           invalidProfitShareEditYear
             ? "Invalid year for saving changes"
-            : totalForfeituresGreaterThanZero == false
-              ? "You must have previewed data to save."
-              : "Total forfeitures is greater than zero."
+            : totalForfeituresGreaterThanZero == true
+              ? "Total forfeitures is greater than zero."
+              : "You must have previewed data before saving."
         }>
         <span>{saveButton}</span>
       </Tooltip>
