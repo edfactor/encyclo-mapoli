@@ -94,6 +94,12 @@ const ProfitShareEditConfirmation: React.FC<ProfitShareEditConfirmationProps> = 
         </Typography>
       </Grid2>
       <Grid2 width={"100%"}>
+        <Typography
+          variant="body2"
+          sx={{}}>
+          {"Fields present:"}
+        </Typography>
+        <br />
         <ChangesList params={params} />
       </Grid2>
       <Grid2 width={"100%"}>
