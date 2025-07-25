@@ -28,6 +28,7 @@ public abstract class Runnable
         List<Outcome> outcomes = [];
         foreach (IActivity activity in activitiesToRun)
         {
+            Stopwatch wholeActivityStopWatch = Stopwatch.StartNew();
             Console.WriteLine($"------------------- Starting execution: {activity.Name()}");
             Outcome outcome = await activity.Execute();
             outcomes.Add(outcome);
@@ -37,7 +38,7 @@ public abstract class Runnable
                 Console.WriteLine($"   {msg}");
             }
 
-            Console.WriteLine($"   Took: {outcome.took}    Status: {outcome.Status}");
+            Console.WriteLine($"   Took: {outcome.took}    Status: {outcome.Status}      WholeTime: {wholeRunStopWatch.Elapsed}");
 
             if (outcome.Status == OutcomeStatus.Error)
             {
