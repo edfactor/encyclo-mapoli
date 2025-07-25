@@ -1,9 +1,11 @@
 ﻿using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Common.Interfaces.ItOperations;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
+using Demoulas.ProfitSharing.Services.Audit;
 using Demoulas.ProfitSharing.Services.Beneficiaries;
 using Demoulas.ProfitSharing.Services.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Services.Caching.Extensions;
@@ -55,7 +57,7 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IAdhocTerminatedEmployeesService, AdhocTerminatedEmployeesService>();
 
 
-
+        _ = builder.Services.AddScoped<IAuditService, AuditService>();
         _ = builder.Services.AddScoped<ContributionService>();
         _ = builder.Services.AddScoped<TotalService>();
 
