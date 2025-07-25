@@ -139,33 +139,7 @@ const DistributionByAgeGrid: React.FC<DistributionByAgeGridProps> = ({ initialSe
                   columnDefs: columnDefsTotal ?? []
                 }}
               />
-            </Grid>
-            {/*
-            <Grid size={{ xs: 4 }}>
-              <DSMGrid
-                preferenceKey={"AGE_FullTime"}
-                isLoading={isFetching}
-                handleSortChanged={sortEventHandler}
-                providedOptions={{
-                  rowData: distributionsByAgeFullTime?.response.results,
-
-                  columnDefs: columnDefsFullTime
-                }}
-              />
-            </Grid>
-            <Grid size={{ xs: 4 }}>
-              <DSMGrid
-                preferenceKey={"AGE_PartTime"}
-                isLoading={isFetching}
-                handleSortChanged={sortEventHandler}
-                providedOptions={{
-                  rowData: distributionsByAgePartTime?.response.results,
-
-                  columnDefs: columnDefsPartTime
-                }}
-              />
-            </Grid>
-            */}
+            </Grid>           
           </Grid>
         </>
       )}
