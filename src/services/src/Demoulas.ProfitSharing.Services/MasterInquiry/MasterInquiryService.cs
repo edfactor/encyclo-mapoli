@@ -677,8 +677,8 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 Gender = memberData.Gender,
                 PayClassification = memberData.PayClassification,
                 
-                AllocationToAmount = balance.AllocationsToBeneficiary,
-                AllocationFromAmount = balance.AllocationsFromBeneficiary
+                AllocationToAmount = balance?.AllocationsToBeneficiary ?? 0,
+                AllocationFromAmount = balance?.AllocationsFromBeneficiary ?? 0
             });
         }
 
