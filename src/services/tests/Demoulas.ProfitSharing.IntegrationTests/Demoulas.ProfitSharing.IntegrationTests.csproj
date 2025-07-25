@@ -14,14 +14,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Resources\**\*.csv" />
-    <None Remove="Resources\**\*.txt" />
-    <None Remove="Resources\golden\26-PAY443" />
+    <None Remove="Resources\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Resources\**\*.csv" />
-    <EmbeddedResource Include="Resources\**\*.txt" />
+    <EmbeddedResource Include="Resources\**" />
   </ItemGroup>
 
   <ItemGroup>

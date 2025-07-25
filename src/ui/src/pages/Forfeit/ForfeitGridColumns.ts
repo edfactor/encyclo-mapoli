@@ -60,6 +60,15 @@ export const GetProfitShareForfeitColumns = (navFunction: (badgeNumber: string) 
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true
+    },
+    {
+      headerName: "Ben #",
+      field: "beneficiaryPsn",
+      colId: "beneficiaryPsn",
+      minWidth: 120,
+      headerClass: "left-align",
+      cellClass: "left-align",
+      resizable: true
     }
   ];
 };
