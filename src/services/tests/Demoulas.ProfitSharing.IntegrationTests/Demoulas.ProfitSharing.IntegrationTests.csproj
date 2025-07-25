@@ -22,7 +22,6 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\**\*.csv" />
     <EmbeddedResource Include="Resources\**\*.txt" />
-    <EmbeddedResource Include="Resources\golden\26-PAY443" />
   </ItemGroup>
 
   <ItemGroup>
@@ -91,6 +90,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Resources\golden\" />
     <Folder Include="Resources\qpay066ta\" />
   </ItemGroup>
 
