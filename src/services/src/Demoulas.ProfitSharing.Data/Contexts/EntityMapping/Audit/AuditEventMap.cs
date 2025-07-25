@@ -16,7 +16,7 @@ public sealed class AuditEventMap : IEntityTypeConfiguration<AuditEvent>
 
         _ = builder.HasIndex(e => e.TableName, "IX_TableName");
         _ = builder.Property(e => e.TableName)
-            .HasMaxLength(30)
+            .HasMaxLength(128)
             .HasColumnName("TABLE_NAME");
 
         _ = builder.Property(e => e.Operation)

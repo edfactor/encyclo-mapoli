@@ -64,9 +64,43 @@ interface ProfitSummaryProps {
 const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange }) => {
   const [trigger, { data, isFetching }] = useLazyGetYearEndProfitSharingSummaryReportQuery();
   const [selectedLineItem, setSelectedLineItem] = useState<string | null>(null);
+  const [isStatusCompleted, setIsStatusCompleted] = useState(false);
 
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const profitYear = useFiscalCloseProfitYear();
+  const navigationList = useSelector((state: RootState) => state.navigation.navigationData);
+  const currentNavigationId = parseInt(localStorage.getItem("navigationId") ?? "");
+
+  // Get the current navigation object to check its status
+  const getCurrentNavigationObject = () => {
+    const findNavigationById = (navigationArray: any[], id: number): any => {
+      for (const item of navigationArray) {
+        if (item.id === id) {
+          return item;
+        }
+        if (item.items && item.items.length > 0) {
+          const found = findNavigationById(item.items, id);
+          if (found) {
+            return found;
+          }
+        }
+      }
+      return null;
+    };
+
+    if (navigationList?.navigation && currentNavigationId) {
+      return findNavigationById(navigationList.navigation, currentNavigationId);
+    }
+    return null;
+  };
+
+  // Check if current status is "Completed"
+  useEffect(() => {
+    const currentNav = getCurrentNavigationObject();
+    if (currentNav) {
+      setIsStatusCompleted(currentNav.statusName === "Complete");
+    }
+  }, [navigationList, currentNavigationId]);
 
   const getPresetForLineItem = (lineItemPrefix: string): FilterParams | null => {
     const presetMap: { [key: string]: string } = {
@@ -107,10 +141,11 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange }) =
       trigger({
         useFrozenData: true,
         profitYear: profitYear,
-        badgeNumber: null
+        badgeNumber: null,
+        archive: isStatusCompleted
       });
     }
-  }, [trigger, profitYear, hasToken]);
+  }, [trigger, profitYear, hasToken, isStatusCompleted]);
 
   const renderActionNode = () => {
     return <StatusDropdownActionNode />;

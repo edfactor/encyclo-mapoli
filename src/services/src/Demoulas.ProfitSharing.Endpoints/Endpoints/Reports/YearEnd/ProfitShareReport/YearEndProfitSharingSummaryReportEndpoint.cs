@@ -1,6 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using FastEndpoints;
@@ -9,10 +10,12 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitShare
 public sealed class YearEndProfitSharingSummaryReportEndpoint : Endpoint<BadgeNumberRequest, YearEndProfitSharingReportSummaryResponse>
 {
     private readonly IProfitSharingSummaryReportService _cleanupReportService;
+    private readonly IAuditService _auditService;
 
-    public YearEndProfitSharingSummaryReportEndpoint(IProfitSharingSummaryReportService cleanupReportService)
+    public YearEndProfitSharingSummaryReportEndpoint(IProfitSharingSummaryReportService cleanupReportService, IAuditService auditService)
     {
         _cleanupReportService = cleanupReportService;
+        _auditService = auditService;
     }
 
     public override void Configure()
@@ -35,8 +38,19 @@ public sealed class YearEndProfitSharingSummaryReportEndpoint : Endpoint<BadgeNu
         Group<YearEndGroup>();
     }
 
-    public override Task<YearEndProfitSharingReportSummaryResponse> ExecuteAsync(BadgeNumberRequest req, CancellationToken ct)
+    public override async Task<YearEndProfitSharingReportSummaryResponse> ExecuteAsync(BadgeNumberRequest req, CancellationToken ct)
     {
-        return _cleanupReportService.GetYearEndProfitSharingSummaryReportAsync(req, ct);
+        var response = await _cleanupReportService.GetYearEndProfitSharingSummaryReportAsync(req, ct);
+
+        // Read "archive" from query string without modifying the DTO
+        bool archive = HttpContext.Request.Query.TryGetValue("archive", out var archiveValue) &&
+                       bool.TryParse(archiveValue, out var archiveResult) && archiveResult;
+
+        if (archive)
+        {
+            await _auditService.ArchiveCompletedReportAsync("Yearend profit sharing summary report", response, ct);
+        }
+
+        return response;
     }
 }

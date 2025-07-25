@@ -74,23 +74,21 @@ public class NavigationService : INavigationService
         {
             //update navigation status
             var nav = await context.Navigations.FirstOrDefaultAsync(x => x.Id == navigationId, cancellationToken);
-            if(nav == null)
+            if (nav == null)
             {
                 return 0;
             }
+
             nav.StatusId = statusId;
 
             //Navigation Tracker
-            await context.NavigationTrackings.AddAsync(new Data.Entities.Navigations.NavigationTracking() 
-            { 
-                NavigationId = navigationId, 
-                StatusId = statusId, 
-                Username = _appUser.UserName??"",
-                LastModified = DateTimeOffset.UtcNow
-            }, cancellationToken);
+            await context.NavigationTrackings.AddAsync(
+                new Data.Entities.Navigations.NavigationTracking()
+                {
+                    NavigationId = navigationId, StatusId = statusId, Username = _appUser.UserName ?? "", LastModified = DateTimeOffset.UtcNow
+                }, cancellationToken);
             return await context.SaveChangesAsync(cancellationToken);
-        },cancellationToken);
+        }, cancellationToken);
         return success > 0;
     }
-
 }

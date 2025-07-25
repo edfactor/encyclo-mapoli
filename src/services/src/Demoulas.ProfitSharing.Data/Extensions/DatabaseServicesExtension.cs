@@ -43,7 +43,7 @@ public static class DatabaseServicesExtension
             config.Bind("DataConfig",  dataConfig);
             return dataConfig;
         });
-        _ = builder.Services.AddSingleton<AuditSaveChangesInterceptor>();
+        _ = builder.Services.AddScoped<AuditSaveChangesInterceptor>();
         _ = builder.Services.AddSingleton<BeneficiarySaveChangesInterceptor>();
         _ = builder.Services.AddSingleton<BeneficiaryContactSaveChangesInterceptor>();
         _ = builder.Services.AddHttpContextAccessor();
