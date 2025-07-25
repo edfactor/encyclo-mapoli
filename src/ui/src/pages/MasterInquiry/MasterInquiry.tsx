@@ -5,7 +5,6 @@ import { MasterInquiryRequest } from "reduxstore/types";
 import { DSMAccordion, Page } from "smart-ui-library";
 import MasterInquiryGrid from "./MasterInquiryDetailsGrid";
 import MasterInquiryEmployeeDetails from "./MasterInquiryEmployeeDetails";
-import MasterInquiryGroupingGrid from "./MasterInquiryGroupingGrid";
 import MasterInquiryMemberGrid from "./MasterInquiryMemberGrid";
 import MasterInquirySearchFilter from "./MasterInquirySearchFilter";
 
