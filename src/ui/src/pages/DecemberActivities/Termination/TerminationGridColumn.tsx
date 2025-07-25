@@ -1,7 +1,7 @@
 import { ColDef, ICellRendererParams, IHeaderParams } from "ag-grid-community";
 import { agGridNumberToCurrency, formatNumberWithComma } from "smart-ui-library";
 import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
-import { getEnrolledStatus } from "../../../utils/enrollmentUtil";
+import { getForfeitedStatus} from "../../../utils/enrollmentUtil";
 import { mmDDYYFormat } from "utils/dateUtils";
 import { Checkbox, IconButton } from "@mui/material";
 import { SaveOutlined } from "@mui/icons-material";
@@ -83,7 +83,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       valueFormatter: agGridNumberToCurrency
     },
     {
-      headerName: "Forfeit",
+      headerName: "Forfeit Amount",
       field: "forfeit",
       colId: "forfeit",
       width: 125,
@@ -159,7 +159,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       sortable: false
     },
     {
-      headerName: "Enrollment",
+      headerName: "Forfeit",
       field: "enrollmentCode",
       colId: "enrollmentCode",
       width: 120,
@@ -167,7 +167,8 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       cellClass: "center-align",
       resizable: true,
       sortable: false,
-      valueFormatter: (params) => getEnrolledStatus(params.value)
+      // Yes, the enrollmentCode is tied to the Forfeited status. See PS-1279
+      valueFormatter: (params) => getForfeitedStatus(params.value)
     },
     {
       headerName: "Suggested Forfeit",
