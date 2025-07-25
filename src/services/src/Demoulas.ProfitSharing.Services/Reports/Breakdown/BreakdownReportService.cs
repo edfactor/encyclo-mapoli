@@ -365,16 +365,12 @@ public sealed class BreakdownReportService : IBreakdownService
         /* hard-coded list from COBOL
            https://demoulas.atlassian.net/wiki/spaces/NGDS/pages/305004545/QPAY066TA.pco
            https://bitbucket.org/demoulas/hpux/raw/37d043c297e04f3a5a557e0163239177087c2163/iqs-source/QPAY066TA.pco
-        
-        11-14-02  R MAISON  #196500 REMNVED SSN#'S 020281084,012289813*
-           *                                            019280284,033281522*
-           *                                            018184033,014167484*
-           *                             ADDED   SSN#'S 025282890,016269940*
+
+        11-14-02  R MAISON  #196500 REMNVED SSN#'S ** Redacted **
            *                             AT LINES 2750 THRU 2790           *
            *                             AS PER DON MULLIGAN       
 
-        02/18/04  DPRUGH   P#7790  ADDED 024329422, 034305451 AND    *
-           *                             022325439 TO THE 701 SECTION .    *
+        02/18/04  DPRUGH   P#7790  ADDED ** Redacted ** TO THE 701 SECTION .    *
            *                             ALSO CLEANED UP THE SECTION BY    *
            *                             REMNVING THE COMMENTED OUT SSN'S  *
            *                             SINCE THEY ARE ALREADY NOTED IN   *
