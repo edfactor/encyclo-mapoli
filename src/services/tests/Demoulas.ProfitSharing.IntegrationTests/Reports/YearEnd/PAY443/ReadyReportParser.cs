@@ -12,7 +12,7 @@ public static class ReadyReportParser
     public static ForfeituresAndPointsForYearResponseWithTotals ParseReport()
     {
         string expectedReport =
-            ExecutiveHoursAndDollarsIntegrationTests.ReadEmbeddedResource("Demoulas.ProfitSharing.IntegrationTests.Resources.golden.26-PAY443").Trim();
+            ExecutiveHoursAndDollarsIntegrationTests.ReadEmbeddedResource("Demoulas.ProfitSharing.IntegrationTests.Resources.golden.51-R20-PAY443").Trim();
         const short currentYear = 2024;
 
         List<string> lines = expectedReport.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries).ToList();

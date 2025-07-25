@@ -335,7 +335,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                              !transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value)))) &&
                             (!req.StartDate.HasValue || pd.TransactionDate.ToDateOnly() >= req.StartDate.Value) &&
                             (!req.EndDate.HasValue || pd.TransactionDate.ToDateOnly() <= req.EndDate.Value) &&
-                            !(pd.ProfitCodeId == 9 && transferAndQdroCommentTypes.Contains((int)pd.CommentTypeId))
+                            !(pd.ProfitCodeId == 9 && pd.CommentTypeId.HasValue && transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value))
 
                     select new
                     {

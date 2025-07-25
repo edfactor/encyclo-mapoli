@@ -9,6 +9,7 @@ import * as yup from "yup";
 
 import SearchAndReset from "components/SearchAndReset/SearchAndReset";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import { useEffect, useState } from "react";
 import {
   addBadgeNumberToUpdateAdjustmentSummary,
   clearProfitSharingEdit,
@@ -19,11 +20,11 @@ import {
   setProfitSharingEditQueryParams,
   setProfitSharingUpdateQueryParams,
   setResetYearEndPage,
-  setTotalForfeituresGreaterThanZero
+  setTotalForfeituresGreaterThanZero,
+  updateProfitSharingEditQueryParam
 } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import { ProfitShareUpdateRequest } from "reduxstore/types";
-import { useEffect } from "react";
 
 const maxContributionsDefault: number = 76000;
 
@@ -110,11 +111,17 @@ const schema = yup.object().shape({
 interface ProfitShareEditUpdateSearchFilterProps {
   setInitialSearchLoaded: (include: boolean) => void;
   setPageReset: (reset: boolean) => void;
+  setMinimumFieldsEntered?: (entered: boolean) => void;
+  setAdjustedBadgeOneValid?: (valid: boolean) => void;
+  setAdjustedBadgeTwoValid?: (valid: boolean) => void;
 }
 
 const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFilterProps> = ({
   setInitialSearchLoaded,
-  setPageReset
+  setPageReset,
+  setMinimumFieldsEntered,
+  setAdjustedBadgeOneValid,
+  setAdjustedBadgeTwoValid
 }) => {
   const [triggerSearchUpdate, { isFetching: isFetchingUpdate }] = useLazyGetProfitShareUpdateQuery();
   const [triggerSearchEdit, { isFetching: isFetchingEdit }] = useLazyGetProfitShareEditQuery();
@@ -158,6 +165,92 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
       adjustEarningsSecondaryAmount: null
     }
   });
+
+  const [contributionPercentPresent, setContributionPercentPresent] = useState(false);
+  const [earningsPercentPresent, setEarningsPercentPresent] = useState(false);
+  // This starts as true as it is pre-populated
+  const [maxAllowedContributionsPresent, setMaxAllowedContributionsPresent] = useState(true);
+  const [badgeToAdjustPresent, setBadgeToAdjustPresent] = useState(false);
+  const [adjustContributionAmountPresent, setAdjustContributionAmountPresent] = useState(false);
+  const [adjustEarningsAmountPresent, setAdjustEarningsAmountPresent] = useState(false);
+  const [adjustIncomingForfeitAmountPresent, setAdjustIncomingForfeitAmountPresent] = useState(false);
+  const [badgeToAdjust2Present, setBadgeToAdjust2Present] = useState(false);
+  const [adjustEarningsSecondaryAmountPresent, setAdjustEarningsSecondaryAmountPresent] = useState(false);
+
+  const processFieldsEntered = (fieldName: keyof ProfitShareEditUpdateSearch, value: boolean) => {
+    // set the value coming in to the field
+    switch (fieldName) {
+      case "contributionPercent":
+        setContributionPercentPresent(value);
+
+        break;
+      case "earningsPercent":
+        setEarningsPercentPresent(value);
+        break;
+      case "maxAllowedContributions":
+        setMaxAllowedContributionsPresent(value);
+        break;
+      case "badgeToAdjust":
+        setBadgeToAdjustPresent(value);
+        break;
+      case "adjustContributionAmount":
+        setAdjustContributionAmountPresent(value);
+        break;
+      case "adjustEarningsAmount":
+        setAdjustEarningsAmountPresent(value);
+        break;
+      case "adjustIncomingForfeitAmount":
+        setAdjustIncomingForfeitAmountPresent(value);
+        break;
+      case "badgeToAdjust2":
+        setBadgeToAdjust2Present(value);
+        break;
+      case "adjustEarningsSecondaryAmount":
+        setAdjustEarningsSecondaryAmountPresent(value);
+        break;
+      default:
+        break;
+    }
+
+    const newBadgeToAdjustPresent = fieldName === "badgeToAdjust" ? value : badgeToAdjustPresent;
+    const newAdjustContributionAmountPresent =
+      fieldName === "adjustContributionAmount" ? value : adjustContributionAmountPresent;
+    const newAdjustEarningsAmountPresent = fieldName === "adjustEarningsAmount" ? value : adjustEarningsAmountPresent;
+    const newAdjustIncomingForfeitAmountPresent =
+      fieldName === "adjustIncomingForfeitAmount" ? value : adjustIncomingForfeitAmountPresent;
+
+    if (newBadgeToAdjustPresent) {
+      const allBadgeOneFieldsPresent =
+        newAdjustContributionAmountPresent && newAdjustEarningsAmountPresent && newAdjustIncomingForfeitAmountPresent;
+      if (setAdjustedBadgeOneValid) {
+        setAdjustedBadgeOneValid(allBadgeOneFieldsPresent);
+      }
+    }
+    // If badgeToAdjust2 is present, we need to check adjustEarningsSecondaryAmount
+    // If those two fields are not both present, we need to set adjustedBadgeTwoValid
+    const newBadgeToAdjust2Present = fieldName === "badgeToAdjust2" ? value : badgeToAdjust2Present;
+    const newAdjustEarningsSecondaryAmountPresent =
+      fieldName === "adjustEarningsSecondaryAmount" ? value : adjustEarningsSecondaryAmountPresent;
+
+    if (newBadgeToAdjust2Present) {
+      const allBadgeTwoFieldsPresent = newAdjustEarningsSecondaryAmountPresent;
+      if (setAdjustedBadgeTwoValid) {
+        setAdjustedBadgeTwoValid(allBadgeTwoFieldsPresent);
+      }
+    }
+
+    const newContributionPercentPresent = fieldName === "contributionPercent" ? value : contributionPercentPresent;
+    const newEarningsPercentPresent = fieldName === "earningsPercent" ? value : earningsPercentPresent;
+    const newMaxAllowedContributionsPresent =
+      fieldName === "maxAllowedContributions" ? value : maxAllowedContributionsPresent;
+    const allFieldsPresent =
+      newContributionPercentPresent && newEarningsPercentPresent && newMaxAllowedContributionsPresent;
+
+    if (setMinimumFieldsEntered) {
+      setMinimumFieldsEntered(allFieldsPresent);
+      console.log("Minimum fields entered:", allFieldsPresent);
+    }
+  };
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
@@ -211,6 +304,17 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
     }
   });
 
+  /// set maxContributionsAllowed to the default value
+  useEffect(() => {
+    if (!profitSharingUpdate) {
+      dispatch(
+        updateProfitSharingEditQueryParam({
+          maxAllowedContributions: maxContributionsDefault
+        })
+      );
+    }
+  }, [dispatch, profitSharingUpdate]);
+
   // I would like handleReset() to be called whenever resetYearEndPage is true
 
   useEffect(() => {
@@ -221,6 +325,9 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
 
   const handleReset = () => {
     // We need to clear both grids and then both sets of query params
+    if (setMinimumFieldsEntered) {
+      setMinimumFieldsEntered(false);
+    }
     setPageReset(true);
     dispatch(clearProfitSharingEdit());
     dispatch(clearProfitSharingUpdate());
@@ -292,6 +399,11 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
                   variant="outlined"
                   value={field.value ?? ""}
                   error={!!errors.contributionPercent}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    processFieldsEntered("contributionPercent", e.target.value !== "");
+                    dispatch(updateProfitSharingEditQueryParam({ contributionPercent: Number(e.target.value) }));
+                  }}
                 />
               )}
             />
@@ -311,6 +423,11 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
                   variant="outlined"
                   value={field.value ?? ""}
                   error={!!errors.earningsPercent}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    processFieldsEntered("earningsPercent", e.target.value !== "");
+                    dispatch(updateProfitSharingEditQueryParam({ earningsPercent: Number(e.target.value) }));
+                  }}
                 />
               )}
             />
@@ -330,6 +447,11 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
                   variant="outlined"
                   value={field.value ?? ""}
                   error={!!errors.incomingForfeitPercent}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    processFieldsEntered("incomingForfeitPercent", e.target.value !== "");
+                    dispatch(updateProfitSharingEditQueryParam({ incomingForfeitPercent: Number(e.target.value) }));
+                  }}
                 />
               )}
             />
@@ -350,6 +472,11 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
                   variant="outlined"
                   value={field.value ?? ""}
                   error={!!errors.secondaryEarningsPercent}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    processFieldsEntered("secondaryEarningsPercent", e.target.value !== "");
+                    dispatch(updateProfitSharingEditQueryParam({ secondaryEarningsPercent: Number(e.target.value) }));
+                  }}
                 />
               )}
             />
@@ -371,6 +498,11 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
                   variant="outlined"
                   value={field.value ?? ""}
                   error={!!errors.maxAllowedContributions}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    processFieldsEntered("maxAllowedContributions", e.target.value !== "");
+                    dispatch(updateProfitSharingEditQueryParam({ maxAllowedContributions: Number(e.target.value) }));
+                  }}
                 />
               )}
             />
@@ -397,6 +529,11 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
                   variant="outlined"
                   value={field.value ?? ""}
                   error={!!errors.badgeToAdjust}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    processFieldsEntered("badgeToAdjust", e.target.value !== "");
+                    dispatch(updateProfitSharingEditQueryParam({ badgeToAdjust: Number(e.target.value) }));
+                  }}
                 />
               )}
             />
@@ -415,6 +552,11 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
                   variant="outlined"
                   value={field.value ?? ""}
                   error={!!errors.adjustContributionAmount}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    processFieldsEntered("adjustContributionAmount", e.target.value !== "");
+                    dispatch(updateProfitSharingEditQueryParam({ adjustContributionAmount: Number(e.target.value) }));
+                  }}
                 />
               )}
             />
@@ -436,6 +578,11 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
                   variant="outlined"
                   value={field.value ?? ""}
                   error={!!errors.adjustEarningsAmount}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    processFieldsEntered("adjustEarningsAmount", e.target.value !== "");
+                    dispatch(updateProfitSharingEditQueryParam({ adjustEarningsAmount: Number(e.target.value) }));
+                  }}
                 />
               )}
             />
@@ -457,6 +604,13 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
                   variant="outlined"
                   value={field.value ?? ""}
                   error={!!errors.adjustIncomingForfeitAmount}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    processFieldsEntered("adjustIncomingForfeitAmount", e.target.value !== "");
+                    dispatch(
+                      updateProfitSharingEditQueryParam({ adjustIncomingForfeitAmount: Number(e.target.value) })
+                    );
+                  }}
                 />
               )}
             />
@@ -483,6 +637,11 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
                   variant="outlined"
                   value={field.value ?? ""}
                   error={!!errors.badgeToAdjust2}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    processFieldsEntered("badgeToAdjust2", e.target.value !== "");
+                    dispatch(updateProfitSharingEditQueryParam({ badgeToAdjust2: Number(e.target.value) }));
+                  }}
                 />
               )}
             />
@@ -502,6 +661,13 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
                   variant="outlined"
                   value={field.value ?? ""}
                   error={!!errors.adjustEarningsSecondaryAmount}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    processFieldsEntered("adjustEarningsSecondaryAmount", e.target.value !== "");
+                    dispatch(
+                      updateProfitSharingEditQueryParam({ adjustEarningsSecondaryAmount: Number(e.target.value) })
+                    );
+                  }}
                 />
               )}
             />

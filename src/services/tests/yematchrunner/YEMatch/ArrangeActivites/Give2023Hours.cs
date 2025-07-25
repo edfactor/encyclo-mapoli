@@ -19,8 +19,5 @@ public class Give2023Hours
         }
 
         return new Outcome(Name(), Name(), $"", OutcomeStatus.Ok, "updated hours", null, false);
-
-
     }
-
 }

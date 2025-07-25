@@ -21,6 +21,7 @@ public static class GetGold
         ["20718"] = "R22",
         ["20799"] = "R23",
         ["21279"] = "R24",
+        ["88"] = "R24B",
         ["3110"] = "R25",
         ["8074"] = "R26",
         ["12201"] = "R27",
@@ -60,6 +61,7 @@ public static class GetGold
         "PAY447-20718",
         "PAY450-21279",
         "PROF-CNTRL-SHEET-21279",
+        "PROF-CNTRL-SHEET-88",
         "PROF130Y-3110",
         "PROF130-3110",
         "PROF130B-3110",
@@ -81,11 +83,15 @@ public static class GetGold
         string goldenDir = $"{ReadyActivity.OptionalLocalResourceBase}golden";
         foreach (string file in Directory.GetFiles(goldenDir))
         {
+            if (file.EndsWith("README.md"))
+            {
+                continue;
+            }
+
             File.Delete(file);
         }
-
     }
-    
+
     public static void Fetch(string dataDirectory, SftpClient sftpClient)
     {
         string goldenDir = $"{ReadyActivity.OptionalLocalResourceBase}golden";
@@ -108,46 +114,49 @@ public static class GetGold
                 string logFilePath = match.Groups[2].Value;
                 var activityName = outcome.ActivityLetterNumber.IndexOf("/") == -1
                     ? outcome.ActivityLetterNumber
-                    : outcome.ActivityLetterNumber.Substring(0, outcome.ActivityLetterNumber.IndexOf("/")); 
+                    : outcome.ActivityLetterNumber.Substring(0, outcome.ActivityLetterNumber.IndexOf("/"));
                 activityByPid.Add(activityName, logFilePath);
                 Console.WriteLine($"Mapped {activityName} to logfile {logFilePath}");
             }
         }
 
-        int cnt = 0;
+        int cnt = 1;
         foreach (string logFile in _referenceLogfiles)
         {
-            (string rName, string sName) = GetReferenceActivity(activityByPid, logFile);
+            (string rName, string sName, string activityName) = GetReferenceActivity(activityByPid, logFile);
             if (rName.Length == 0)
             {
-                Console.WriteLine($"{cnt++} MISSING data from {logFile}");
+                Console.WriteLine($" activtityNAme {activityName} MISSING data from {logFile}");
                 continue;
             }
-            else
-            {
-                Console.WriteLine($"{cnt++} downloading {rName} ==> {sName}");
-            }
+
+            string shortName = $"{cnt:D2}-{activityName}-{sName}";
+            Console.WriteLine($"{activityName} {cnt++} downloading {rName} ==> {shortName}");
 
             string readyFile = "/dsmdev/data/PAYROLL/SYS/PVTSYSOUT/" + rName;
-            string smartFile = $"{goldenDir}/{cnt:D2}-{sName}";
+            string smartFile = $"{goldenDir}/{shortName}";
+            File.Delete(smartFile);
             using (FileStream fileStream = File.OpenWrite(smartFile))
             {
                 sftpClient.DownloadFile(readyFile, fileStream);
             }
+
+            cnt++;
         }
 
         Console.WriteLine("DONE");
     }
 
-    private static (string readyName, string smartName) GetReferenceActivity(Dictionary<string, string> realActivityByPid, string logFileName)
+    private static (string readyName, string smartName, string activityName) GetReferenceActivity(Dictionary<string, string> realActivityByPid, string logFileName)
     {
         (string activityName, string oldPid) = GetReferenceActivityAndPid(logFileName);
         if (!realActivityByPid.ContainsKey(activityName))
         {
-            return ("", "");
+            return ("", "", "");
         }
+
         string newPid = realActivityByPid[activityName];
-        return (logFileName.Replace(oldPid, newPid), logFileName.Replace("-" + oldPid, ""));
+        return (logFileName.Replace(oldPid, newPid), logFileName.Replace("-" + oldPid, ""), activityName);
     }
 
     public static (string activityName, string oldPid) GetReferenceActivityAndPid(string logFileName)
