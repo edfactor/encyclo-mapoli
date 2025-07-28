@@ -22,7 +22,7 @@ export const PayBenReportGridColumn = (): ColDef[] => {
       cellClass: "center-align",
       resizable: true,
       cellRenderer: (params: ICellRendererParams) =>
-        viewBadgeLinkRenderer(params.data.badge, parseInt(params.data.psn.slice(-4)))
+        viewBadgeLinkRenderer(params.data.badgeNumber, parseInt(params.data.psn.slice(-4)))
     },
     createBadgeColumn({ minWidth: 120 }),
     {
