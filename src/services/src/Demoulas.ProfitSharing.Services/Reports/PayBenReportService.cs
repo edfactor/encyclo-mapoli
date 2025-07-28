@@ -35,7 +35,7 @@ public class PayBenReportService : IPayBenReportService
                 BeneficiaryFullName = x.Contact != null && x.Contact.ContactInfo != null ? x.Contact.ContactInfo.FullName ?? string.Empty : string.Empty,
                 DemographicFullName = x.Demographic != null && x.Demographic.ContactInfo != null ? x.Demographic.ContactInfo.FullName ?? string.Empty : string.Empty,
                 Psn = x.Psn,
-                Badge = x.BadgeNumber,
+                BadgeNumber = x.BadgeNumber,
                 Percentage = x.Percent
             });
             PaginatedResponseDto<PayBenReportResponse> final = await res.ToPaginationResultsAsync(request, cancellationToken);
