@@ -1,6 +1,6 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
-import { createSSNColumn } from "../../../utils/gridColumnFactory";
+import { createSSNColumn, createBadgeColumn } from "../../../utils/gridColumnFactory";
 
 export const PayBenReportGridColumn = (): ColDef[] => {
   return [
@@ -24,15 +24,7 @@ export const PayBenReportGridColumn = (): ColDef[] => {
       cellRenderer: (params: ICellRendererParams) =>
         viewBadgeLinkRenderer(params.data.badge, parseInt(params.data.psn.slice(-4)))
     },
-    {
-      headerName: "Badge",
-      field: "badgeNumber",
-      colId: "badgeNumber",
-      minWidth: 120,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true
-    },
+    createBadgeColumn({ minWidth: 120 }),
     {
       headerName: "Beneficiary of",
       field: "demographicFullName",

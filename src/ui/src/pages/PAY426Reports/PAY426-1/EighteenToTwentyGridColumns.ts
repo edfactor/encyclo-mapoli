@@ -1,24 +1,19 @@
 import { agGridNumberToCurrency, formatNumberWithComma } from "smart-ui-library";
 import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
 import { mmDDYYFormat } from "../../../utils/dateUtils";
-import { createSSNColumn } from "../../../utils/gridColumnFactory";
+import { createSSNColumn, createBadgeColumn } from "../../../utils/gridColumnFactory";
 
 export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   // Import the date formatter from dateutils
 
   return [
-    {
+    createBadgeColumn({ 
       headerName: "Badge",
-      field: "badgeNumber",
-      colId: "badgeNumber",
       minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
-      type: "rightAligned",
-      resizable: true,
-      sortable: true,
-      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber, navFunction)
-    },
+      alignment: "center",
+      navigateFunction: navFunction
+    }),
     {
       headerName: "Name",
       field: "employeeName",
