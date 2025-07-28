@@ -1,4 +1,4 @@
-import { Divider } from "@mui/material";
+import { Divider, Grid2 } from "@mui/material";
 import { Grid } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
@@ -76,15 +76,15 @@ const PayBenReport = () => {
 
   return (
     <Page label="PAY BENEFICIARY REPORT">
-      <Grid
+      <Grid2
         container
         rowSpacing="24px">
-        <Grid
+        <Grid2
           size={{ xs: 12 }}
           width={"100%"}>
           <Divider />
-        </Grid>
-        <Grid
+        </Grid2>
+        <Grid2
           size={{ xs: 12 }}
           width="100%">
           {isSuccess && (
@@ -120,8 +120,8 @@ const PayBenReport = () => {
           )}
 
           {/**Render Report here! */}
-        </Grid>
-      </Grid>
+        </Grid2>
+      </Grid2>
     </Page>
   );
 };
