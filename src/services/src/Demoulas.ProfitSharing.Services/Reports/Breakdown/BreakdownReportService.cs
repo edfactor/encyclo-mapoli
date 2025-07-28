@@ -58,6 +58,7 @@ public sealed class BreakdownReportService : IBreakdownService
         public DateOnly? TerminationDate { get; init; }
         public byte EnrollmentId { get; init; }
         public Decimal ProfitShareHours { get; init; }
+        public byte? YearsInPlan { get; internal set; }
     }
 
     private sealed record EmployeeFinancialSnapshot(
@@ -213,28 +214,34 @@ public sealed class BreakdownReportService : IBreakdownService
         BreakdownByStoreRequest request,
         CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, inActiveEmployees: false, terminatedEmployees: false, withBalance: false, cancellationToken);
+        return GetMembersByStore(request, inActiveEmployees: false, terminatedEmployees: false, withBalance: false, withBeneficiaryAllocation: false, cancellationToken);
     }
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetInactiveMembersByStore(
         BreakdownByStoreRequest request,
         CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, inActiveEmployees: true, terminatedEmployees: false, withBalance: false, cancellationToken);
+        return GetMembersByStore(request, inActiveEmployees: true, terminatedEmployees: false, withBalance: false, withBeneficiaryAllocation: false, cancellationToken);
     }
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetInactiveMembersWithBalanceByStore(
         BreakdownByStoreRequest request,
         CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, inActiveEmployees: true, terminatedEmployees: false, withBalance: true, cancellationToken);
+        return GetMembersByStore(request, inActiveEmployees: true, terminatedEmployees: false, withBalance: true, withBeneficiaryAllocation: false, cancellationToken);
     }
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetTerminatedMembersWithBalanceByStore(
        BreakdownByStoreRequest request,
        CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, inActiveEmployees: false, terminatedEmployees: true, withBalance: true, cancellationToken);
+        return GetMembersByStore(request, inActiveEmployees: false, terminatedEmployees: true, withBalance: true, withBeneficiaryAllocation: false, cancellationToken);
+    }
+    public Task<ReportResponseBase<MemberYearSummaryDto>> GetTerminatedMembersWithBeneficiaryByStore(
+       TerminatedEmployeesWithBalanceBreakdownRequest request,
+       CancellationToken cancellationToken)
+    {
+        return GetMembersByStore(request, inActiveEmployees: false, terminatedEmployees: true, withBalance: false, withBeneficiaryAllocation: true, cancellationToken);
     }
 
     #region ── Private: common building blocks ───────────────────────────────────────────
@@ -244,6 +251,7 @@ public sealed class BreakdownReportService : IBreakdownService
         bool inActiveEmployees,
         bool terminatedEmployees,
         bool withBalance,
+        bool withBeneficiaryAllocation,
         CancellationToken cancellationToken)
     {
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
@@ -251,6 +259,7 @@ public sealed class BreakdownReportService : IBreakdownService
             ValidateStoreNumber(request);
 
             var employeesBase = await BuildEmployeesBaseQuery(ctx, request.ProfitYear);
+            var startEndDateRequest = request as IStartEndDateRequest;
 
             if (inActiveEmployees)
             {
@@ -260,7 +269,23 @@ public sealed class BreakdownReportService : IBreakdownService
             if (terminatedEmployees)
             {
                 employeesBase = employeesBase.Where(e => e.EmploymentStatusId == EmploymentStatus.Constants.Terminated && e.TerminationCodeId != TerminationCode.Constants.RetiredReceivingPension);
-                                             
+                var startEndDates = request as IStartEndDateRequest;
+                if (startEndDates != default && (startEndDates.StartDate.HasValue || startEndDates.EndDate.HasValue))
+                {
+                    if (startEndDates.StartDate.HasValue)
+                    {
+                        employeesBase = employeesBase.Where(e => e.TerminationDate >= startEndDates.StartDate);
+                    }
+                    if (startEndDates.EndDate.HasValue)
+                    {
+                        if (startEndDates.EndDate.Value < startEndDates.StartDate)
+                        {
+                            throw new InvalidOperationException("End date cannot be earlier than start date.");
+                        }
+                        employeesBase = employeesBase.Where(e => e.TerminationDate <= startEndDates.EndDate);
+                    }
+                }
+
             }
             
             if (request.StoreNumber.HasValue)
@@ -273,11 +298,31 @@ public sealed class BreakdownReportService : IBreakdownService
                 employeesBase = employeesBase.Where(e => e.VestedBalance.HasValue && e.VestedBalance.Value != 0);
             }
 
+            if (withBeneficiaryAllocation) //QPAY066A-1
+            {
+                var profitCodes = new[] { ProfitCode.Constants.IncomingQdroBeneficiary.Id, ProfitCode.Constants.OutgoingXferBeneficiary.Id };
+
+                var ssnsWithBeneficiaryAllocation = ctx.ProfitDetails
+                    .Where(ba => ba.ProfitYear == request.ProfitYear && profitCodes.Contains(ba.ProfitCodeId))
+                    .GroupBy(x=> x.Ssn)
+                    .Where(x => x.Sum(r=>r.ProfitCodeId == ProfitCode.Constants.IncomingQdroBeneficiary.Id ? -r.Forfeiture: r.Contribution) > 0)
+                    .Select(ba => ba.Key);
+                
+                employeesBase = employeesBase.Where(e => 
+                    (ssnsWithBeneficiaryAllocation.Contains(e.Ssn) || e.VestedBalance > 0)
+                    && e.YearsInPlan <= 3); 
+            }
+
 
             if (withBalance && inActiveEmployees)
             {
                 employeesBase = employeesBase
                     .Where(e => !ctx.ExcludedIds.Any(x=>e.BadgeNumber == x.ExcludedIdValue));
+                if (startEndDateRequest != null)
+                {
+                    employeesBase = employeesBase.Where(e => e.TerminationDate >= startEndDateRequest.StartDate &&
+                                                             e.TerminationDate <= startEndDateRequest.EndDate);
+                }
             }
 
             // Store‑level + management filter
@@ -458,6 +503,7 @@ public sealed class BreakdownReportService : IBreakdownService
                 VestedBalance = bal == null ? 0 : bal.VestedBalance,
                 VestedPercent = bal == null ? 0 : bal.VestingPercent,
                 EtvaBalance = etva == null ? 0 : etva.Total,
+                YearsInPlan = bal == null ? 0 : bal.YearsInPlan,
                 HireDate = d.HireDate,
                 TerminationDate = d.TerminationDate,
                 EnrollmentId = pp.EnrollmentId,

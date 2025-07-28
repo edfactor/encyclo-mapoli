@@ -1,6 +1,6 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request;
 
-public sealed record BreakdownByStoreRequest : ProfitYearRequest
+public record BreakdownByStoreRequest : ProfitYearRequest
 {
     public bool? StoreManagement { get; set; }
     public short? StoreNumber { get; set; }
