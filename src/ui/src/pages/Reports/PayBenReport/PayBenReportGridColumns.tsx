@@ -11,7 +11,8 @@ export const PayBenReportGridColumn = (): ColDef[] => {
             colId: "beneficiaryFullName",
             headerClass: "center-align",
             cellClass: "center-align",
-            resizable: true
+            resizable: true,
+            flex:1
         },
         {
             headerName: "PSN",
@@ -21,6 +22,7 @@ export const PayBenReportGridColumn = (): ColDef[] => {
             headerClass: "center-align",
             cellClass: "center-align",
             resizable: true,
+            flex:1,
             cellRenderer: (params: ICellRendererParams) =>
                 viewBadgeLinkRenderer(params.data.badge, parseInt(params.data.psn.slice(-4)))
         },
@@ -28,16 +30,16 @@ export const PayBenReportGridColumn = (): ColDef[] => {
             headerName: "BADGE #",
             field: "badge",
             colId: "badge",
-            minWidth: 120,
             headerClass: "center-align",
             cellClass: "center-align",
+            flex:1,
             resizable: true
         },
         {
             headerName: "Beneficiary of",
             field: "demographicFullName",
             colId: "demographicFullName",
-            minWidth: 120,
+            flex:1,
             headerClass: "center-align",
             cellClass: "center-align",
             resizable: true
@@ -46,7 +48,7 @@ export const PayBenReportGridColumn = (): ColDef[] => {
             headerName: "Percent",
             field: "percentage",
             colId: "percentage",
-            minWidth: 120,
+            flex:1,
             headerClass: "center-align",
             cellClass: "center-align",
             resizable: true
