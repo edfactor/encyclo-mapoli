@@ -3,7 +3,7 @@ import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
 import { mmDDYYFormat } from "../../../utils/dateUtils";
-import { createSSNColumn } from "../../../utils/ssnColumnFactory";
+import { createSSNColumn } from "../../../utils/gridColumnFactory";
 
 export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   // Import the date formatter from dateutils

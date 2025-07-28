@@ -1,6 +1,6 @@
 import { ColDef } from "ag-grid-community";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
-import { createSSNColumn } from "../../../utils/ssnColumnFactory";
+import { createSSNColumn } from "../../../utils/gridColumnFactory";
 export const GetDemographicBadgesNotInPayprofitColumns = (): ColDef[] => {
   return [
     {

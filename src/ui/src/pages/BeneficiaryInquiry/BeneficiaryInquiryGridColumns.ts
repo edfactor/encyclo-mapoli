@@ -3,7 +3,7 @@ import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { mmDDYYFormat, mmDDYYYY_HHMMSS_Format } from "utils/dateUtils";
 import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
 import { GRID_COLUMN_WIDTHS } from "../../constants";
-import { createSSNColumn } from "../../utils/ssnColumnFactory";
+import { createSSNColumn } from "../../utils/gridColumnFactory";
 
 export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
   return [
