@@ -1,5 +1,5 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Box, Button, FormHelperText, TextField } from "@mui/material";
+import { Box, Button, FormHelperText, FormLabel, TextField } from "@mui/material";
 import { Grid } from "@mui/material";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import { Controller, useForm } from "react-hook-form";
@@ -161,15 +161,18 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
             name="asOfTime"
             control={control}
             render={({ field }) => (
-              <TextField
-                id="asOfTime"
-                label="As of Time (HH:MM)"
-                type="time"
-                required
-                onChange={field.onChange}
-                value={field.value || ""}
-                error={!!errors.asOfTime}
-              />
+              <>
+                <FormLabel>As of Time (HH:MM)</FormLabel>
+                <TextField
+                  id="asOfTime"
+                  type="time"
+                  required
+                  fullWidth
+                  onChange={field.onChange}
+                  value={field.value || ""}
+                  error={!!errors.asOfTime}
+                />
+              </>
             )}
           />
           {errors.asOfTime && <FormHelperText error>{errors.asOfTime.message}</FormHelperText>}
