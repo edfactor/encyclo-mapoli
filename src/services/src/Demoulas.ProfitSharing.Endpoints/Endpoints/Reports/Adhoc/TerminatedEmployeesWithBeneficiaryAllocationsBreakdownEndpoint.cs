@@ -13,20 +13,20 @@ using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.Adhoc;
-public sealed class TerminatedEmployeesWithBalanceBreakdownEndpoint : EndpointWithCsvBase<TerminatedEmployeesWithBalanceBreakdownRequest, MemberYearSummaryDto, TerminatedEmployeesWithBalanceBreakdownEndpoint.BreakdownEndpointMap>
+public sealed class TerminatedEmployeesWithBeneficiaryAllocationsBreakdownEndpoint : EndpointWithCsvBase<TerminatedEmployeesWithBalanceBreakdownRequest, MemberYearSummaryDto, TerminatedEmployeesWithBalanceBreakdownEndpoint.BreakdownEndpointMap>
 {
     private readonly IBreakdownService _breakdownService;
 
-    public TerminatedEmployeesWithBalanceBreakdownEndpoint(IBreakdownService breakdownService)
+    public TerminatedEmployeesWithBeneficiaryAllocationsBreakdownEndpoint(IBreakdownService breakdownService)
     {
         _breakdownService = breakdownService;
     }
 
-    public override string ReportFileName => "Breakdown by Store - Terminated Employees with Balance";
+    public override string ReportFileName => "Breakdown by Store - Terminated Employees with Beneficiary Allocations";
 
     public override void Configure()
     {
-        Get("/breakdown-by-store/terminated/withbalance");
+        Get("/breakdown-by-store/terminated/withbeneficiaryallocation");
         Summary(s =>
         {
             s.Summary = "Breakdown terminated managers and associates for all stores who have a balance";
@@ -60,4 +60,3 @@ public sealed class TerminatedEmployeesWithBalanceBreakdownEndpoint : EndpointWi
         }
     }
 }
-
