@@ -5,7 +5,7 @@ import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
 export const GetQPAY066AdHocGridColumns = (): ColDef[] => [
   {
     headerName: "Badge",
-    field: "badge",
+    field: "badgeNumber",
     minWidth: 90,
     cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badge)
   },
