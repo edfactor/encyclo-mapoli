@@ -1,14 +1,9 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { numberToCurrency } from "smart-ui-library";
-import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
+import { createBadgeColumn } from "../../utils/gridColumnFactory";
 
 export const GetQPAY066AdHocGridColumns = (): ColDef[] => [
-  {
-    headerName: "Badge",
-    field: "badge",
-    minWidth: 90,
-    cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badge)
-  },
+  createBadgeColumn({ minWidth: 90 }),
   {
     headerName: "Name",
     field: "name",

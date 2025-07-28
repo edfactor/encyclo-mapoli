@@ -1,25 +1,17 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
 import { agGridNumberToCurrency } from "smart-ui-library";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
-import { createSSNColumn } from "../../../utils/ssnColumnFactory";
+import { createSSNColumn, createBadgeColumn } from "../../../utils/gridColumnFactory";
 
 // The default is to show all columns, but if the mini flag is set to true, only show the
 // badge, name, and ssn columns
 export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef[] => {
   const columns: ColDef[] = [
-    {
+    createBadgeColumn({ 
       headerName: "Badge",
-      field: "badgeNumber",
-      colId: "badgeNumber",
       minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
-      headerClass: mini ? "left-align" : "right-align",
-      cellClass: mini ? "left-align" : "right-align",
-      resizable: true,
-      sortable: true,
-      checkboxSelection: mini,
-      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber)
-    },
+      alignment: mini ? "left" : "center"
+    }),
     {
       headerName: "Name",
       field: "fullName",

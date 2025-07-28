@@ -1,20 +1,14 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
-import { createSSNColumn } from "../../../utils/ssnColumnFactory";
+import { createSSNColumn, createBadgeColumn } from "../../../utils/gridColumnFactory";
 
 export const GetMilitaryAndRehireColumns = (): ColDef[] => {
   return [
-    {
+    createBadgeColumn({ 
       headerName: "Badge",
-      field: "badgeNumber",
-      colId: "badgeNumber",
       minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
-      type: "rightAligned",
-      resizable: true,
-      sortable: true,
-      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber)
-    },
+      alignment: "center"
+    }),
     {
       headerName: "Name",
       field: "fullName",

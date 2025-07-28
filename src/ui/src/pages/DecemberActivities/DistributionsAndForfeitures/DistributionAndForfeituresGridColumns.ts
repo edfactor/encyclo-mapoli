@@ -1,24 +1,17 @@
-import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { yyyyMMDDToMMDDYYYY } from "smart-ui-library";
-import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
-import { agGridNumberToCurrency } from "smart-ui-library";
-import { getEnrolledStatus } from "../../../utils/enrollmentUtil";
+import { ColDef } from "ag-grid-community";
+import { agGridNumberToCurrency, yyyyMMDDToMMDDYYYY } from "smart-ui-library";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
-import { createSSNColumn } from "../../../utils/ssnColumnFactory";
+import { getEnrolledStatus } from "../../../utils/enrollmentUtil";
+import { createBadgeColumn, createSSNColumn } from "../../../utils/gridColumnFactory";
 
 export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
   return [
-    {
+    createBadgeColumn({
       headerName: "Badge",
-      field: "badgeNumber",
-      colId: "badgeNumber",
       minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      cellRenderer: (params: ICellRendererParams) =>
-        viewBadgeLinkRenderer(params.data?.badgeNumber, params.data?.psnSuffix)
-    },
+      alignment: "left",
+      psnSuffix: true
+    }),
     {
       headerName: "Name",
       field: "employeeName",

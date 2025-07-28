@@ -1,24 +1,17 @@
 import { agGridNumberToCurrency, formatNumberWithComma } from "smart-ui-library";
 import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
 import { mmDDYYFormat } from "../../../utils/dateUtils";
-import { createSSNColumn } from "../../../utils/ssnColumnFactory";
+import { createSSNColumn, createBadgeColumn } from "../../../utils/gridColumnFactory";
 
 export const GetBeneficiariesGridColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   return [
-    {
+    createBadgeColumn({ 
       headerName: "Badge",
-      field: "badgeNumber",
-      colId: "badgeNumber",
       minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
-      type: "rightAligned",
-      resizable: true,
-      sortable: true,
-      // @D - Question: since beneficiaries don't have a badge number, do we want to show something else? should
-      // beneficiaries be able to searched via master inquiry somehow?
-      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber, navFunction)
-    },
+      alignment: "center",
+      navigateFunction: navFunction
+    }),
     {
       headerName: "Name",
       field: "employeeName",

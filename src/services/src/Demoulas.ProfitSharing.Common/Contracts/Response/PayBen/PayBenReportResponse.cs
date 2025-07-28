@@ -11,7 +11,7 @@ public record PayBenReportResponse
     public string? Ssn { get; set; }
     public string? BeneficiaryFullName { get; set; }
     public string? Psn { get; set; }
-    public int? Badge { get; set; }
+    public int? BadgeNumber { get; set; }
     public string? DemographicFullName { get; set; }
     public decimal? Percentage { get; set; }
 }
