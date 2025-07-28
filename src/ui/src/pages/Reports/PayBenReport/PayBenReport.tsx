@@ -54,7 +54,7 @@ const PayBenReport = () => {
             ...res,
             results: res.results.map((item: any) => ({
               ...item,
-              badgeNumber: item.badge // Ensure badgeNumber is present for rendering
+              badgeNumber: item.badge
             }))
           };
           setPayBenReportResponse(newRes);
