@@ -7,7 +7,7 @@ import { TotalsGrid } from "../../../components/TotalsGrid/TotalsGrid";
 import { ReportSummary } from "../../../components/ReportSummary";
 import { StartAndEndDateRequest } from "reduxstore/types";
 import { useLazyGetTerminationReportQuery } from "reduxstore/api/YearsEndApi";
-import { GetDetailColumns, GetTerminationColumns } from "./TerminationGridColumn";
+import { GetDetailColumns, GetTerminationColumns } from "./TerminationGridColumns";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { ForfeitureAdjustmentUpdateRequest } from "reduxstore/types";
 import { useUpdateForfeitureAdjustmentMutation, useUpdateForfeitureAdjustmentBulkMutation } from "reduxstore/api/YearsEndApi";

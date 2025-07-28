@@ -1,18 +1,10 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
+import { createSSNColumn } from "../../../utils/ssnColumnFactory";
 
 export const PayBenReportGridColumn = (): ColDef[] => {
     return [
-        {
-            headerName: "SSN",
-            field: "ssn",
-            colId: "ssn",
-            minWidth: 170,
-            headerClass: "center-align",
-            cellClass: "center-align",
-            resizable: true,
-            sortable: false
-        },
+        createSSNColumn({ minWidth: 170, sortable: false }),
         {
             headerName: "Beneficiary",
             field: "beneficiaryFullName",

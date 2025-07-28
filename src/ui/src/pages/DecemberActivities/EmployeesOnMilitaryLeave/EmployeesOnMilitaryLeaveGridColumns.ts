@@ -1,6 +1,7 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
+import { createSSNColumn } from "../../../utils/ssnColumnFactory";
 
 export const GetMilitaryAndRehireColumns = (): ColDef[] => {
   return [
@@ -23,14 +24,6 @@ export const GetMilitaryAndRehireColumns = (): ColDef[] => {
       cellClass: "left-align",
       resizable: true
     },
-    {
-      headerName: "SSN",
-      field: "ssn",
-      colId: "ssn",
-      minWidth: GRID_COLUMN_WIDTHS.SSN,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    }
+    createSSNColumn({ alignment: "left" })
   ];
 };

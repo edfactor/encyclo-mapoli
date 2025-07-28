@@ -11,7 +11,7 @@ import {
 } from "reduxstore/types";
 import { DSMGrid, ISortParams, Page, Pagination} from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
-import { PayBenReportGridColumn } from "./PayBenReportGridColumn";
+import { PayBenReportGridColumn } from "./PayBenReportGridColumns";
 
 
 

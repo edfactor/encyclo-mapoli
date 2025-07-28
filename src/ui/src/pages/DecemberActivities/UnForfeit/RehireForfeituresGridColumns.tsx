@@ -13,6 +13,7 @@ import {
 } from "../../../reduxstore/types";
 import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
+import { createSSNColumn } from "../../../utils/ssnColumnFactory";
 
 export const HeaderComponent: React.FC<RehireForfeituresHeaderComponentProps> = (params: RehireForfeituresHeaderComponentProps) => {
   const selectedProfitYear = useDecemberFlowProfitYear();
@@ -76,15 +77,7 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       flex: 1,
       pinned: "left",
     },
-    {
-      headerName: "SSN",
-      field: "ssn",
-      colId: "ssn",
-      minWidth: GRID_COLUMN_WIDTHS.SSN,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
+    createSSNColumn({ alignment: "left" }),
     {
       headerName: "Hire Date",
       field: "hireDate",

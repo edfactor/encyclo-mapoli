@@ -3,6 +3,7 @@ import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { mmDDYYFormat, mmDDYYYY_HHMMSS_Format } from "utils/dateUtils";
 import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
 import { GRID_COLUMN_WIDTHS } from "../../constants";
+import { createSSNColumn } from "../../utils/ssnColumnFactory";
 
 export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
   return [
@@ -47,18 +48,11 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       resizable: true,
       sortable: false
     },
-    {
-      headerName: "SSN",
-      field: "ssn",
-      colId: "ssn",
-      minWidth: GRID_COLUMN_WIDTHS.SSN,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true,
+    createSSNColumn({
       valueFormatter: (params) => {
         return `${params.data.ssn}`;
       }
-    },
+    }),
     {
       headerName: "Date of birth",
       field: "dateOfBirth",

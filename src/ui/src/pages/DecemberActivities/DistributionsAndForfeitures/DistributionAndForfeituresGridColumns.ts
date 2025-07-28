@@ -4,6 +4,7 @@ import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
 import { agGridNumberToCurrency } from "smart-ui-library";
 import { getEnrolledStatus } from "../../../utils/enrollmentUtil";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
+import { createSSNColumn } from "../../../utils/ssnColumnFactory";
 
 export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
   return [
@@ -27,15 +28,7 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       cellClass: "left-align",
       resizable: true
     },
-    {
-      headerName: "SSN",
-      field: "ssn",
-      colId: "ssn",
-      minWidth: GRID_COLUMN_WIDTHS.SSN,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
+    createSSNColumn({ alignment: "left" }),
     {
       headerName: "Date",
       field: "date",

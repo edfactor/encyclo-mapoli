@@ -7,7 +7,7 @@ import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
 import { CAPTIONS } from "../../../constants";
-import { GetNegativeEtvaForSSNsOnPayProfitColumns } from "./NegativeEtvaForSSNsOnPayprofitGridColumn";
+import { GetNegativeEtvaForSSNsOnPayProfitColumns } from "./NegativeEtvaForSSNsOnPayprofitGridColumns";
 
 interface NegativeEtvaForSSNsOnPayprofitGridProps {
   initialSearchLoaded: boolean;

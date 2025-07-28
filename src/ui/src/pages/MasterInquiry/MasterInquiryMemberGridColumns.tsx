@@ -1,4 +1,5 @@
 import { ColDef, ValueFormatterParams } from "ag-grid-community";
+import { createSSNColumn } from "../../utils/ssnColumnFactory";
 
 export const GetMasterInquiryMemberGridColumns = (): ColDef[] => {
   return [
@@ -24,7 +25,7 @@ export const GetMasterInquiryMemberGridColumns = (): ColDef[] => {
       }
     },
     { field: "fullName", headerName: "Name", maxWidth: 500 },
-    { field: "ssn", headerName: "SSN", maxWidth: 250 },
+    createSSNColumn({ maxWidth: 250 }),
     { field: "address", headerName: "Street", maxWidth: 400 },
     { field: "addressCity", headerName: "City", maxWidth: 300 },
     { field: "addressState", headerName: "State", maxWidth: 100 },

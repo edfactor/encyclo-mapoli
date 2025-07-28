@@ -2,6 +2,7 @@ import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { agGridNumberToCurrency } from "smart-ui-library";
 import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
 import { GRID_COLUMN_WIDTHS } from "../../constants";
+import { createSSNColumn } from "../../utils/ssnColumnFactory";
 
 export const GetProfitShareForfeitColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   return [
@@ -25,15 +26,9 @@ export const GetProfitShareForfeitColumns = (navFunction: (badgeNumber: string) 
       cellClass: "left-align",
       resizable: true
     },
-    {
-      headerName: "SSN",
-      field: "ssn",
-      colId: "ssn",
-      minWidth: GRID_COLUMN_WIDTHS.SSN,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
+    createSSNColumn({
+      alignment: "left"
+    }),
     {
       headerName: "Forfeitures",
       field: "forfeitures",
