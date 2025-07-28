@@ -30,7 +30,7 @@ export function viewBadgeLinkRenderer(
   }
 
   const safeValue = psnSuffix > 0 ? badgeNumber.toString() + psnSuffix.toString() : badgeNumber.toString();
-  const displayValue = psnSuffix > 0 ? `${badgeNumber}-${psnSuffix}` : badgeNumber;
+  const displayValue = psnSuffix > 0 ? `${badgeNumber}${psnSuffix}` : badgeNumber;
 
   if (navigateFunction === undefined) {
     return (

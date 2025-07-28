@@ -1,11 +1,10 @@
-import { Divider } from "@mui/material";
-import { Grid } from "@mui/material";
+import { Divider, Grid } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyPayBenReportQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { PayBenReportRequest, PayBenReportResponse } from "reduxstore/types";
-import { DSMGrid, ISortParams, Page, Paged, Pagination } from "smart-ui-library";
+import { DSMGrid, ISortParams, Page, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
 import { PayBenReportGridColumn } from "./PayBenReportGridColumns";
 
@@ -97,8 +96,9 @@ const PayBenReport = () => {
                   providedOptions={{
                     rowData: payBenReportResponse?.results,
                     columnDefs: columnDefs,
-                    suppressMultiSort: true,
-                    masterDetail: true
+                    suppressMultiSort: true
+                    // Master Detail is only available in the enterprise version of ag-grid
+                    //masterDetail: true
                   }}
                 />
                 {payBenReportResponse && payBenReportResponse.results.length > 0 && (

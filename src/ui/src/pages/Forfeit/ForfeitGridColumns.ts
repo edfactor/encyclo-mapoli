@@ -1,22 +1,16 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { agGridNumberToCurrency } from "smart-ui-library";
-import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
 import { GRID_COLUMN_WIDTHS } from "../../constants";
-import { createSSNColumn } from "../../utils/gridColumnFactory";
+import { createSSNColumn, createBadgeColumn } from "../../utils/gridColumnFactory";
 
 export const GetProfitShareForfeitColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   return [
-    {
+    createBadgeColumn({ 
       headerName: "Badge",
-      field: "badgeNumber",
-      colId: "badgeNumber",
       minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      sortable: true,
-      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber, navFunction)
-    },
+      alignment: "left",
+      navigateFunction: navFunction
+    }),
     {
       headerName: "Name",
       field: "employeeName",

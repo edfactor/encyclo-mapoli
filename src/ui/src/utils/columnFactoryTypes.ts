@@ -9,3 +9,15 @@ export interface SSNColumnOptions {
   resizable?: boolean;
   valueFormatter?: (params: ValueFormatterParams) => string;
 }
+
+export interface BadgeColumnOptions {
+  headerName?: string;
+  minWidth?: number;
+  maxWidth?: number;
+  alignment?: "left" | "center";
+  sortable?: boolean;
+  resizable?: boolean;
+  renderAsLink?: boolean;
+  psnSuffix?: boolean;
+  navigateFunction?: (path: string) => void;
+}

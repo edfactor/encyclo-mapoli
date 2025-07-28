@@ -1,21 +1,14 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
+import { createBadgeColumn } from "../../../utils/gridColumnFactory";
 
 export const GetEligibleEmployeesColumns = (): ColDef[] => {
   return [
-    {
+    createBadgeColumn({ 
       headerName: "Badge",
-      field: "badgeNumber",
-      colId: "badgeNumber",
       minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      sortable: true,
-      unSortIcon: true,
-      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber)
-    },
+      alignment: "left"
+    }),
     {
       headerName: "Name",
       field: "fullName",

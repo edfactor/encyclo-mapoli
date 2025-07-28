@@ -1,15 +1,14 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { agGridNumberToCurrency } from "smart-ui-library";
-import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
+import { createBadgeColumn } from "../../../../utils/gridColumnFactory";
 
 export const GetStoreManagementGridColumns = (handleNavigation: (badgeNumber: string) => void): ColDef[] => {
   return [
-    {
+    createBadgeColumn({ 
       headerName: "Badge",
-      field: "badgeNumber",
-      width: 100,
-      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber, handleNavigation)
-    },
+      minWidth: 100,
+      navigateFunction: handleNavigation
+    }),
     {
       headerName: "Name",
       field: "fullName",
