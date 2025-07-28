@@ -8,7 +8,7 @@ import { RootState } from "reduxstore/store";
 import { BeneficiaryDto, BeneficiaryRequestDto } from "reduxstore/types";
 import { DSMGrid, ISortParams, Paged, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
-import { BeneficiaryInquiryGridColumns } from "./BeneficiaryInquiryGridColumn";
+import { BeneficiaryInquiryGridColumns } from "./BeneficiaryInquiryGridColumns";
 interface BeneficiaryInquiryGridProps {
   // initialSearchLoaded: boolean;
   // setInitialSearchLoaded: (loaded: boolean) => void;
