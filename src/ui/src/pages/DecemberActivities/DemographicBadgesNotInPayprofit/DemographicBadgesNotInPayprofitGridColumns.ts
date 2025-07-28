@@ -18,7 +18,7 @@ export const GetDemographicBadgesNotInPayprofitColumns = (): ColDef[] => {
       }
     },
     {
-      headerName: "Demographic SSN",
+      headerName: "SSN",
       field: "ssn",
       colId: "ssn",
       minWidth: GRID_COLUMN_WIDTHS.SSN,
