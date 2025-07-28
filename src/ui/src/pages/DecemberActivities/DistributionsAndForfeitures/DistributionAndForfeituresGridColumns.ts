@@ -4,7 +4,7 @@ import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
 import { agGridNumberToCurrency } from "smart-ui-library";
 import { getEnrolledStatus } from "../../../utils/enrollmentUtil";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
-import { createSSNColumn } from "../../../utils/ssnColumnFactory";
+import { createSSNColumn } from "../../../utils/gridColumnFactory";
 
 export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
   return [

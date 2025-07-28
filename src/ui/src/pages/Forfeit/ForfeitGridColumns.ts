@@ -2,7 +2,7 @@ import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { agGridNumberToCurrency } from "smart-ui-library";
 import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
 import { GRID_COLUMN_WIDTHS } from "../../constants";
-import { createSSNColumn } from "../../utils/ssnColumnFactory";
+import { createSSNColumn } from "../../utils/gridColumnFactory";
 
 export const GetProfitShareForfeitColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   return [

@@ -13,7 +13,7 @@ import {
 } from "../../../reduxstore/types";
 import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
-import { createSSNColumn } from "../../../utils/ssnColumnFactory";
+import { createSSNColumn } from "../../../utils/gridColumnFactory";
 
 export const HeaderComponent: React.FC<RehireForfeituresHeaderComponentProps> = (params: RehireForfeituresHeaderComponentProps) => {
   const selectedProfitYear = useDecemberFlowProfitYear();

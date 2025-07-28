@@ -1,6 +1,6 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
-import { createSSNColumn } from "../../../utils/ssnColumnFactory";
+import { createSSNColumn } from "../../../utils/gridColumnFactory";
 
 export const PayBenReportGridColumn = (): ColDef[] => {
     return [

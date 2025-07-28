@@ -1,15 +1,6 @@
-import { ColDef, ValueFormatterParams } from "ag-grid-community";
+import { ColDef } from "ag-grid-community";
 import { GRID_COLUMN_WIDTHS } from "../constants";
-
-export interface SSNColumnOptions {
-  headerName?: string;
-  minWidth?: number;
-  maxWidth?: number;
-  alignment?: "left" | "center";
-  sortable?: boolean;
-  resizable?: boolean;
-  valueFormatter?: (params: ValueFormatterParams) => string;
-}
+import { SSNColumnOptions } from "./columnFactoryTypes";
 
 export const createSSNColumn = (options: SSNColumnOptions = {}): ColDef => {
   const {

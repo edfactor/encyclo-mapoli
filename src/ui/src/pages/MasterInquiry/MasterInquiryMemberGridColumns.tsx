@@ -1,5 +1,5 @@
 import { ColDef, ValueFormatterParams } from "ag-grid-community";
-import { createSSNColumn } from "../../utils/ssnColumnFactory";
+import { createSSNColumn } from "../../utils/gridColumnFactory";
 
 export const GetMasterInquiryMemberGridColumns = (): ColDef[] => {
   return [
