@@ -344,7 +344,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                     {
                         BadgeNumber = nameAndDob.BadgeNumber,
                         PsnSuffix = nameAndDob.PsnSuffix,
-                        Ssn = pd.Ssn.MaskSsn(),
+                        Ssn = pd.Ssn,
                         EmployeeName = nameAndDob.FullName,
                         DistributionAmount = _distributionProfitCodes.Contains(pd.ProfitCodeId) ? pd.Forfeiture : 0,
                         TaxCode = pd.TaxCodeId,
@@ -388,7 +388,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                 {
                     BadgeNumber = pd.BadgeNumber,
                     PsnSuffix = pd.PsnSuffix,
-                    Ssn = pd.Ssn,
+                    Ssn = pd.Ssn.MaskSsn(),
                     EmployeeName = pd.EmployeeName,
                     DistributionAmount = pd.DistributionAmount,
                     TaxCode = pd.TaxCode,
