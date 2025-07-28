@@ -1,5 +1,6 @@
 import { ColDef } from "ag-grid-community";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
+import { createSSNColumn } from "../../../utils/ssnColumnFactory";
 export const GetDemographicBadgesNotInPayprofitColumns = (): ColDef[] => {
   return [
     {
@@ -17,16 +18,11 @@ export const GetDemographicBadgesNotInPayprofitColumns = (): ColDef[] => {
         return badgeNumber ? badgeNumber.toString().padStart(7, "0") : "";
       }
     },
-    {
-      headerName: "Demographic SSN",
-      field: "ssn",
-      colId: "ssn",
-      minWidth: GRID_COLUMN_WIDTHS.SSN,
-      maxWidth: 250,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
+    createSSNColumn({ 
+      headerName: "Demographic SSN", 
+      alignment: "left", 
+      maxWidth: 250 
+    }),
     {
       headerName: "Name",
       field: "employeeName",

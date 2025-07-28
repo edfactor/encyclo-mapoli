@@ -1,6 +1,7 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
+import { createSSNColumn } from "../../../utils/ssnColumnFactory";
 
 export const GetNegativeEtvaForSSNsOnPayProfitColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   return [
@@ -15,15 +16,7 @@ export const GetNegativeEtvaForSSNsOnPayProfitColumns = (navFunction: (badgeNumb
       sortable: true,
       cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber, navFunction)
     },
-    {
-      headerName: "SSN",
-      field: "ssn",
-      colId: "ssn",
-      minWidth: GRID_COLUMN_WIDTHS.SSN,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
+    createSSNColumn({ alignment: "left" }),
     {
       headerName: "ETVA",
       field: "etvaValue",

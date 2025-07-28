@@ -3,6 +3,7 @@ import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
 import { mmDDYYFormat } from "../../../utils/dateUtils";
+import { createSSNColumn } from "../../../utils/ssnColumnFactory";
 
 export const GetBeneficiariesGridColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   return [
@@ -63,15 +64,7 @@ export const GetBeneficiariesGridColumns = (navFunction: (badgeNumber: string) =
       type: "rightAligned",
       resizable: true
     },
-    {
-      headerName: "SSN",
-      field: "ssn",
-      colId: "ssn",
-      minWidth: GRID_COLUMN_WIDTHS.SSN,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true
-    },
+    createSSNColumn(),
     {
       headerName: "Wages",
       field: "wages",
