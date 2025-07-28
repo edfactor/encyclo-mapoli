@@ -1,6 +1,7 @@
-import { ColDef } from "ag-grid-community";
+import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { GRID_COLUMN_WIDTHS } from "../constants";
-import { SSNColumnOptions } from "./columnFactoryTypes";
+import { SSNColumnOptions, BadgeColumnOptions } from "./columnFactoryTypes";
+import { viewBadgeLinkRenderer } from "./masterInquiryLink";
 
 export const createSSNColumn = (options: SSNColumnOptions = {}): ColDef => {
   const {
@@ -32,6 +33,44 @@ export const createSSNColumn = (options: SSNColumnOptions = {}): ColDef => {
 
   if (valueFormatter) {
     column.valueFormatter = valueFormatter;
+  }
+
+  return column;
+};
+
+export const createBadgeColumn = (options: BadgeColumnOptions = {}): ColDef => {
+  const {
+    headerName = "Badge",
+    minWidth = 120,
+    maxWidth,
+    alignment = "center",
+    sortable = true,
+    resizable = true,
+    renderAsLink = true,
+    navigateFunction
+  } = options;
+
+  const alignmentClass = alignment === "center" ? "center-align" : "left-align";
+
+  const column: ColDef = {
+    headerName,
+    field: "badgeNumber",
+    colId: "badgeNumber",
+    minWidth,
+    headerClass: alignmentClass,
+    cellClass: alignmentClass,
+    resizable,
+    sortable
+  };
+
+  if (maxWidth) {
+    column.maxWidth = maxWidth;
+  }
+
+  if (renderAsLink) {
+    column.cellRenderer = (params: ICellRendererParams) => {
+      return viewBadgeLinkRenderer(params.data.badgeNumber, navigateFunction);
+    };
   }
 
   return column;
