@@ -1,6 +1,6 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { GRID_COLUMN_WIDTHS } from "../constants";
-import { SSNColumnOptions, BadgeColumnOptions } from "./columnFactoryTypes";
+import { BadgeColumnOptions, SSNColumnOptions } from "./columnFactoryTypes";
 import { viewBadgeLinkRenderer } from "./masterInquiryLink";
 
 export const createSSNColumn = (options: SSNColumnOptions = {}): ColDef => {
@@ -47,6 +47,7 @@ export const createBadgeColumn = (options: BadgeColumnOptions = {}): ColDef => {
     sortable = true,
     resizable = true,
     renderAsLink = true,
+    psnSuffix = false,
     navigateFunction
   } = options;
 
@@ -69,6 +70,9 @@ export const createBadgeColumn = (options: BadgeColumnOptions = {}): ColDef => {
 
   if (renderAsLink) {
     column.cellRenderer = (params: ICellRendererParams) => {
+      if (psnSuffix && params.data.psnSuffix) {
+        return viewBadgeLinkRenderer(params.data.badgeNumber, params.data.psnSuffix, navigateFunction);
+      }
       return viewBadgeLinkRenderer(params.data.badgeNumber, navigateFunction);
     };
   }

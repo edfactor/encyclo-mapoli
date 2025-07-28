@@ -18,5 +18,6 @@ export interface BadgeColumnOptions {
   sortable?: boolean;
   resizable?: boolean;
   renderAsLink?: boolean;
+  psnSuffix?: boolean;
   navigateFunction?: (path: string) => void;
 }
