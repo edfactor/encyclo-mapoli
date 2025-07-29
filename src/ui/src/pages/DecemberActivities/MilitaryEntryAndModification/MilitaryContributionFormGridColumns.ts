@@ -1,4 +1,4 @@
-import { ColDef, ICellRendererParams } from "ag-grid-community";
+import { ColDef } from "ag-grid-community";
 import { agGridNumberToCurrency } from "smart-ui-library";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
 import { createBadgeColumn } from "../../../utils/gridColumnFactory";
@@ -7,7 +7,7 @@ import { createBadgeColumn } from "../../../utils/gridColumnFactory";
 // badge, name, and ssn columns
 export const GetMilitaryContributionColumns = (): ColDef[] => {
   const columns: ColDef[] = [
-    createBadgeColumn({ 
+    createBadgeColumn({
       headerName: "Badge",
       minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
       alignment: "left"

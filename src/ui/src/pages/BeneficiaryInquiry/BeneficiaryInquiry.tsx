@@ -1,9 +1,9 @@
-import { Button, CircularProgress, Divider, IconButton } from "@mui/material";
+import { CloseSharp } from "@mui/icons-material";
+import { Button, CircularProgress, Divider, Grid, IconButton } from "@mui/material";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
-import { Grid } from "@mui/material";
 import MasterInquiryEmployeeDetails from "pages/MasterInquiry/MasterInquiryEmployeeDetails";
 import MasterInquiryMemberGrid from "pages/MasterInquiry/MasterInquiryMemberGrid";
 import { useEffect, useState } from "react";
@@ -19,10 +19,9 @@ import { DSMAccordion, Page } from "smart-ui-library";
 import BeneficiaryInquiryGrid from "./BeneficiaryInquiryGrid";
 import BeneficiaryInquirySearchFilter from "./BeneficiaryInquirySearchFilter";
 import CreateBeneficiary from "./CreateBeneficiary";
-import { AccessAlarm, CloseSharp } from "@mui/icons-material";
 
 const BeneficiaryInquiry = () => {
-  const { token, appUser, username: stateUsername } = useSelector((state: RootState) => state.security);
+  const { token } = useSelector((state: RootState) => state.security);
   const [triggerGetBeneficiaryKind] = useLazyGetBeneficiaryKindQuery();
   const [triggerGetBeneficiaryType] = useLazyGetBeneficiarytypesQuery();
   const [triggerDeleteBeneficiary] = useLazyDeleteBeneficiaryQuery();
@@ -47,9 +46,6 @@ const BeneficiaryInquiry = () => {
   const [deleteInProgress, setDeleteInProgress] = useState<boolean>(false);
   const [beneficiaryDialogTitle, setBeneficiaryDialogTitle] = useState<string>();
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
   const onBadgeClick = (data: any) => {
     setSelectedMember(data);
     setChange(change + 1);
@@ -125,21 +121,7 @@ const BeneficiaryInquiry = () => {
       <>
         <Dialog
           open={open}
-          onClose={handleClose}
-          // slotProps={{
-          //   paper: {
-          //     component: 'form',
-          //     onSubmit: (event: React.FormEvent<HTMLFormElement>) => {
-          //       event.preventDefault();
-          //       const formData = new FormData(event.currentTarget);
-          //       const formJson = Object.fromEntries((formData as any).entries());
-          //       const email = formJson.email;
-          //       console.log(email);
-          //       handleClose();
-          //     },
-          //   },
-          // }}
-        >
+          onClose={handleClose}>
           <DialogTitle>{beneficiaryDialogTitle}</DialogTitle>
           <IconButton
             aria-label="close"
@@ -200,13 +182,10 @@ const BeneficiaryInquiry = () => {
           size={{ xs: 12 }}
           width={"100%"}>
           <DSMAccordion title="Filter">
-            {/* <MasterInquirySearchFilter setInitialSearchLoaded={setInitialSearchLoaded} 
-            setMissiveAlerts={setMissiveAlerts}
-            /> */}
             <BeneficiaryInquirySearchFilter
               setInitialSearchLoaded={setInitialSearchLoaded}
               onSearch={(params) => {
-                setSearchParams(params);
+                setSearchParams(params ?? null);
                 setSelectedMember(null);
                 setNoResults(!params);
               }}

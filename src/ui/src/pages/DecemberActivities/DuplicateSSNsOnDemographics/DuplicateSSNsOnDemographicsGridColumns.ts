@@ -1,11 +1,11 @@
-import { ColDef, ICellRendererParams } from "ag-grid-community";
+import { ColDef } from "ag-grid-community";
 import { yyyyMMDDToMMDDYYYY } from "smart-ui-library";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
-import { createSSNColumn, createBadgeColumn } from "../../../utils/gridColumnFactory";
+import { createBadgeColumn, createSSNColumn } from "../../../utils/gridColumnFactory";
 
 export const GetDuplicateSSNsOnDemographicsColumns = (): ColDef[] => {
   return [
-    createBadgeColumn({ 
+    createBadgeColumn({
       headerName: "Badge",
       minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
       alignment: "left"
