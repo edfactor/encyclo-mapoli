@@ -48,7 +48,15 @@ public sealed class YearEndProfitSharingSummaryReportEndpoint : Endpoint<BadgeNu
 
         if (archive)
         {
-            await _auditService.ArchiveCompletedReportAsync("Yearend profit sharing summary report", response, ct);
+            var keyValues = new List<KeyValuePair<string, decimal>>();
+            foreach ( var lineItem in response.LineItems)
+            {
+                keyValues.Add(new KeyValuePair<string, decimal>(lineItem.LineItemTitle, lineItem.NumberOfMembers));
+                keyValues.Add(new KeyValuePair<string, decimal>(lineItem.LineItemTitle, lineItem.TotalWages));
+                keyValues.Add(new KeyValuePair<string, decimal>(lineItem.LineItemTitle, lineItem.TotalBalance));
+            }
+            
+            await _auditService.ArchiveCompletedReportAsync("Yearend profit sharing summary report", req.ProfitYear, req, response, keyValues, ct);
         }
 
         return response;

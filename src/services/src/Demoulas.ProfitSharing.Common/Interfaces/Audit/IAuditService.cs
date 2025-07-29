@@ -3,6 +3,11 @@
 namespace Demoulas.ProfitSharing.Common.Interfaces.Audit;
 public interface IAuditService
 {
-    Task ArchiveCompletedReportAsync<TReport>(string reportName, TReport report, CancellationToken cancellationToken)
-        where TReport : class;
+    Task ArchiveCompletedReportAsync<TRequest, TReport>(string reportName,
+        short profitYear,
+        TRequest request,
+        TReport report,
+        List<KeyValuePair<string, decimal>> kevValues,
+        CancellationToken cancellationToken)
+        where TReport : class where TRequest : class;
 }
