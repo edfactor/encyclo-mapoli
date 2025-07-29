@@ -31,6 +31,18 @@ const ProfitShareReport = () => {
       const request = {
         reportId: 4,
         profitYear: profitYear,
+        isYearEnd: false,
+        minimumAgeInclusive: 18,
+        maximumAgeInclusive: 98,
+        minimumHoursInclusive: 1000,
+        maximumHoursInclusive: 2000,
+        includeActiveEmployees: true,
+        includeInactiveEmployees: true,
+        includeEmployeesTerminatedThisYear: false,
+        includeTerminatedEmployees: true,
+        includeBeneficiaries: false,
+        includeEmployeesWithPriorProfitSharingAmounts: true,
+        includeEmployeesWithNoPriorProfitSharingAmounts: true,
         pagination: {
           skip: 0,
           take: 10,
@@ -71,6 +83,45 @@ const ProfitShareReport = () => {
     setSelectedPresetParams(params);
   };
 
+  const handleStatusChange = (newStatus: string, statusName?: string) => {
+    // Check if the status is "Complete" and trigger search with archive=true
+    if (statusName === "Complete" && profitYear) {
+      const request = {
+        reportId: 4,
+        profitYear: profitYear,
+        isYearEnd: false,
+        minimumAgeInclusive: 18,
+        maximumAgeInclusive: 98,
+        minimumHoursInclusive: 1000,
+        maximumHoursInclusive: 2000,
+        includeActiveEmployees: true,
+        includeInactiveEmployees: true,
+        includeEmployeesTerminatedThisYear: false,
+        includeTerminatedEmployees: true,
+        includeBeneficiaries: false,
+        includeEmployeesWithPriorProfitSharingAmounts: true,
+        includeEmployeesWithNoPriorProfitSharingAmounts: true,
+        pagination: {
+          skip: 0,
+          take: 10,
+          sortBy: "badgeNumber",
+          isSortDescending: true
+        },
+        archive: true
+      };
+
+      triggerSearch(request, false)
+        .then((result) => {
+          if (result.data) {
+            dispatch(setYearEndProfitSharingReportQueryParams(profitYear));
+          }
+        })
+        .catch((error) => {
+          console.error("Archive search failed:", error);
+        });
+    }
+  };
+
   useEffect(() => {
     console.log("selectedPresetParams", selectedPresetParams);
   }, [selectedPresetParams]);
@@ -86,7 +137,7 @@ const ProfitShareReport = () => {
           className="h-10 whitespace-nowrap min-w-fit">
           Commit
         </Button>
-        <StatusDropdownActionNode />
+        <StatusDropdownActionNode onStatusChange={handleStatusChange} />
       </div>
     );
   };
