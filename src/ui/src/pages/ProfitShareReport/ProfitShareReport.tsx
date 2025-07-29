@@ -12,7 +12,6 @@ import { Page, SmartModal, DSMAccordion } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
 import ProfitSummary from "../PAY426Reports/PAY426-9/ProfitSummary";
 import ProfitShareReportSearchFilters from "./ProfitShareReportSearchFilters";
-import ReportGrid from "../PAY426Reports/PAY426N/ReportGrid";
 import { FilterParams } from "reduxstore/types";
 
 const ProfitShareReport = () => {
@@ -141,14 +140,7 @@ const ProfitShareReport = () => {
           </Grid>
         )}
 
-        {selectedPresetParams && (
-          <Grid width="100%">
-            <ReportGrid
-              params={selectedPresetParams}
-              onLoadingChange={() => {}}
-            />
-          </Grid>
-        )}
+       
       </Grid>
 
       <SmartModal

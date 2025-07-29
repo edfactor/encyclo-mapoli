@@ -16,13 +16,7 @@ import Forfeit from "pages/Forfeit/Forfeit";
 import FrozenSummary from "pages/FrozenSummary/FrozenSummary";
 import MasterInquiry from "pages/MasterInquiry/MasterInquiry";
 import RehireForfeitures from "pages/DecemberActivities/UnForfeit/RehireForfeitures";
-import EighteenToTwenty from "pages/PAY426Reports/PAY426-1/EighteenToTwenty";
 import Beneficiaries from "pages/PAY426Reports/PAY426-10/Beneficiaries";
-import TwentyOnePlus from "pages/PAY426Reports/PAY426-2/TwentyOnePlus";
-import UnderEighteen from "pages/PAY426Reports/PAY426-3/UnderEighteen";
-import TermedWithHours from "pages/PAY426Reports/PAY426-6/TermedWithHours";
-import TermedNoPrior from "pages/PAY426Reports/PAY426-7/TermedNoPrior";
-import TermedWithPrior from "pages/PAY426Reports/PAY426-8/TermedWithPrior";
 import ProfitSummary from "pages/PAY426Reports/PAY426-9/ProfitSummary";
 import Pay450Summary from "pages/PaymasterUpdate/Pay450Summary";
 import PaymasterUpdate from "pages/PaymasterUpdate/PaymasterUpdate";
@@ -260,9 +254,6 @@ const RouterSubAssembly: React.FC = () => {
                   path={ROUTES.PROFIT_SHARE_UPDATE}
                   element={<ProfitShareEditUpdate />}></Route>
                 <Route
-                  path={ROUTES.PAY426_ACTIVE_18_20}
-                  element={<EighteenToTwenty />}></Route>
-                <Route
                   path=""
                   element={<></>}></Route>
                 <Route
@@ -288,33 +279,6 @@ const RouterSubAssembly: React.FC = () => {
                   element={<Under21Report />}>
                   {" "}
                 </Route>
-                <Route
-                  path={ROUTES.PAY426_ACTIVE_21_PLUS}
-                  element={<TwentyOnePlus />}></Route>
-                <Route
-                  path={ROUTES.PAY426_ACTIVE_18_20}
-                  element={<EighteenToTwenty />}
-                />
-                <Route
-                  path={ROUTES.PAY426_ACTIVE_21_PLUS}
-                  element={<TwentyOnePlus />}
-                />
-                <Route
-                  path={ROUTES.PAY426_ACTIVE_UNDER_18}
-                  element={<UnderEighteen />}
-                />
-                <Route
-                  path={ROUTES.PAY426_TERMINATED_1000_PLUS}
-                  element={<TermedWithHours />}
-                />
-                <Route
-                  path={ROUTES.PAY426_TERMINATED_NO_PRIOR}
-                  element={<TermedNoPrior />}
-                />
-                <Route
-                  path={ROUTES.PAY426_TERMINATED_PRIOR}
-                  element={<TermedWithPrior />}
-                />
                 <Route
                   path={ROUTES.PAY426_SUMMARY}
                   element={<ProfitSummary />}
