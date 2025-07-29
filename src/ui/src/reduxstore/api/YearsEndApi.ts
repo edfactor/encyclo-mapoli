@@ -984,9 +984,9 @@ export const YearsEndApi = createApi({
         }
       }
     ),
-    getYearEndProfitSharingSummaryReport: builder.query<YearEndProfitSharingReportSummaryResponse, BadgeNumberRequest & { archive?: boolean }>({
+    getYearEndProfitSharingSummaryReport: builder.query<YearEndProfitSharingReportSummaryResponse, BadgeNumberRequest>({
       query: (params) => ({
-        url: `yearend/yearend-profit-sharing-summary-report${params.archive === true ? '?archive=true' : ''}`,
+        url: "yearend/yearend-profit-sharing-summary-report",
         method: "POST",
         body: {
           useFrozenData: params.useFrozenData,
