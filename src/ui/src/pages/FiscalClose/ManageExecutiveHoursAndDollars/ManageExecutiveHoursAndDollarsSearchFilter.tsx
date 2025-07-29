@@ -459,7 +459,6 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
                       <Checkbox
                         checked={field.value}
                         onChange={(e) => {
-                          console.log("hasExecutiveHoursAndDollars", e.target.checked);
                           field.onChange(e);
                           toggleSearchFieldEntered(e.target.checked, "hasExecutiveHoursAndDollars");
                         }}

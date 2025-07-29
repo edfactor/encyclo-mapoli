@@ -302,8 +302,6 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
     if (isModal) {
       return additionalExecutivesGrid?.response != null;
     } else {
-      console.log("mutableCopyOfGridData", mutableCopyOfGridData);
-      console.log("executiveHoursAndDollars", executiveHoursAndDollars);
       return mutableCopyOfGridData?.response != null && executiveHoursAndDollars?.response?.results != null;
     }
   };

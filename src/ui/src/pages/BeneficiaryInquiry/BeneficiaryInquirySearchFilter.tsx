@@ -13,9 +13,7 @@ import * as yup from "yup";
 const schema = yup.object().shape({
   badgePsn: yup.string().notRequired(),
   name: yup.string().notRequired(),
-  // address: yup.string().notRequired(),
-  // city: yup.string().notRequired(),
-  // state: yup.string().notRequired(),
+
   socialSecurity: yup
     .number()
     .typeError("SSN must be a number")
@@ -24,19 +22,12 @@ const schema = yup.object().shape({
     .max(999999999, "SSN must be 9 digits or less")
     .nullable(),
   memberType: yup.string().notRequired()
-  // percentage: yup.number().notRequired(),
-  // kindId: yup.string().notRequired()
 });
 interface bRequest {
   badgePsn?: string;
   name: string;
-  // address: string;
-  // city: string;
-  // state: string;
   socialSecurity: number;
   memberType: string;
-  // percentage: number;
-  // kindId: string;
 }
 // Define the type of props
 type Props = {
@@ -46,10 +37,6 @@ type Props = {
   onSearch: (params: MasterInquiryRequest | undefined) => void;
 };
 
-// const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterProps> = ({
-//   setInitialSearchLoaded,
-//   setMissiveAlerts
-// }) => {
 const BeneficiaryInquirySearchFilter: React.FC<Props> = ({
   searchClicked,
   beneficiaryType,
@@ -113,20 +100,12 @@ const BeneficiaryInquirySearchFilter: React.FC<Props> = ({
           sortBy: data.pagination?.sortBy || "badgeNumber",
           isSortDescending: data.pagination?.isSortDescending || true
         },
-        //  ...(!!data.endProfitYear && { endProfitYear: data.endProfitYear || profitYear, }),
-        // ...(!!data.startProfitMonth && { startProfitMonth: data.startProfitMonth }),
-        // ...(!!data.endProfitMonth && { endProfitMonth: data.endProfitMonth }),
         endProfitYear: profitYear,
         ...(!!data.socialSecurity && { ssn: data.socialSecurity }),
         ...(!!data.name && { name: data.name }),
         badgeNumber: badge,
         psnSuffix: psn,
-        // ...(!!data.paymentType && { paymentType: paymentTypeGetNumberMap[data.paymentType] }),
         memberType: memberTypeGetNumberMap[memberType]
-        // ...(!!data.contribution && { contributionAmount: data.contribution }),
-        // ...(!!data.earnings && { earningsAmount: data.earnings }),
-        // ...(!!data.forfeiture && { forfeitureAmount: data.forfeiture }),
-        // ...(!!data.payment && { paymentAmount: data.payment })
       };
       triggerSearch(searchParams, false)
         .unwrap()
