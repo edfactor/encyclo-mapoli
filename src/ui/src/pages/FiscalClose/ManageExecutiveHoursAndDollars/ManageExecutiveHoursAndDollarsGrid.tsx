@@ -50,8 +50,7 @@ const RenderAddExecutiveButton: React.FC<RenderAddExecutiveButtonProps> = ({
       startIcon={<AddOutlined color={gridAvailable ? "secondary" : "disabled"} />}
       onClick={async () => {
         // We need to clear out previous result rows in redux
-        //dispatch(clearAdditionalExecutivesChosen());
-        dispatch(clearExecutiveRowsSelected());
+        //dispatch(clearExecutiveRowsSelected());
         dispatch(clearAdditionalExecutivesGrid());
         setOpenModal(true);
       }}>
@@ -303,6 +302,8 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
     if (isModal) {
       return additionalExecutivesGrid?.response != null;
     } else {
+      console.log("mutableCopyOfGridData", mutableCopyOfGridData);
+      console.log("executiveHoursAndDollars", executiveHoursAndDollars);
       return mutableCopyOfGridData?.response != null && executiveHoursAndDollars?.response?.results != null;
     }
   };
@@ -323,7 +324,7 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
           {!isModal && (
             <>
               <div className="px-[24px]">
-                <ReportSummary report={mutableCopyOfGridData} />
+                {mutableCopyOfGridData && <ReportSummary report={mutableCopyOfGridData} />}
               </div>
               <div style={{ gap: "36px", display: "flex", justifyContent: "end", marginRight: 28 }}>
                 <RenderAddExecutiveButton
