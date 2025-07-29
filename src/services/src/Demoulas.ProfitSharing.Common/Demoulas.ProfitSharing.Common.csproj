@@ -57,9 +57,4 @@
     </PackageReference>
   </ItemGroup>
 
-
-  <ItemGroup>
-    <Folder Include="Attributes\" />
-  </ItemGroup>
-
 </Project>

@@ -65,14 +65,7 @@ public class YearEndProfitSharingReportEndpoint: EndpointWithCsvTotalsBase<YearE
 
         if (archive)
         {
-            var keyValues = new List<KeyValuePair<string, decimal>>();
-
-            keyValues.Add(new KeyValuePair<string, decimal>(nameof(response.NumberOfEmployees), response.NumberOfEmployees));
-            keyValues.Add(new KeyValuePair<string, decimal>(nameof(response.BalanceTotal), response.BalanceTotal));
-            keyValues.Add(new KeyValuePair<string, decimal>(nameof(response.HoursTotal), response.HoursTotal));
-            keyValues.Add(new KeyValuePair<string, decimal>(nameof(response.WagesTotal), response.WagesTotal));
-
-            await _auditService.ArchiveCompletedReportAsync("Yearend profit sharing summary report", req.ProfitYear, req, response, keyValues, ct);
+           await _auditService.ArchiveCompletedReportAsync("Yearend profit sharing summary report", req, response, ct);
         }
 
         return response;

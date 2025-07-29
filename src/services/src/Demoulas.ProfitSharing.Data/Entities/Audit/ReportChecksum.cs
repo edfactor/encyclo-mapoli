@@ -11,4 +11,6 @@ public sealed class ReportChecksum : ModifiedBase
     public string RequestJson { get; set; } = string.Empty; // CHECKSUM_DATA CLOB NOT NULL
     public string ReportJson { get; set; } = string.Empty; // CHECKSUM_DATA CLOB NOT NULL
 
-    public List<KeyValuePair<string, KeyValuePair<decimal, byte[]>>> KeyFieldsChecksumJson { get; set; } = new(); }
+    public IEnumerable<KeyValuePair<string, KeyValuePair<decimal, byte[]>>> KeyFieldsChecksumJson { get; set; } =
+        new List<KeyValuePair<string, KeyValuePair<decimal, byte[]>>>(); // KEY_FIELDS_CHECKSUM_JSON CLOB NOT NULL
+}
