@@ -124,6 +124,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 _ => (await GetMasterInquiryDemographics(ctx)).Union(GetMasterInquiryBeneficiary(ctx))
             };
 
+
             query = FilterMemberQuery(req, query);
 
             // Get unique SSNs from the query
@@ -158,6 +159,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
             foreach (MemberDetails details in detailsList.Results)
             {
+
                 details.Age = details.DateOfBirth.Age();
             }
 
@@ -688,47 +690,54 @@ public sealed class MasterInquiryService : IMasterInquiryService
     private async Task<PaginatedResponseDto<MemberDetails>> GetDemographicDetailsForSsns(ProfitSharingReadOnlyDbContext ctx, SortedPaginationRequestDto req, ISet<int> ssns, short currentYear, short previousYear, CancellationToken cancellationToken)
     {
         var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
-        var members = await demographics
+        var query = demographics
             .Include(d => d.PayProfits)
             .ThenInclude(pp => pp.Enrollment)
-            .Where(d => ssns.Contains(d.Ssn))
+            .Where(d => ssns.Contains(d.Ssn));
+
+        if (((MasterInquiryRequest)req).BadgeNumber.HasValue && ((MasterInquiryRequest)req).BadgeNumber != 0)
+        {
+            query = query.Where(d => d.BadgeNumber == ((MasterInquiryRequest)req).BadgeNumber);
+        }
+
+        var members = await query
             .Select(d => new
             {
-                d.Id,
-                d.ContactInfo.FirstName,
-                d.ContactInfo.LastName,
-                d.Address.City,
-                d.Address.State,
-                Address = d.Address.Street,
-                d.Address.PostalCode,
-                d.DateOfBirth,
-                d.Ssn,
-                d.BadgeNumber,
-                d.ReHireDate,
-                d.HireDate,
-                d.TerminationDate,
-                d.StoreNumber,
-                DemographicId = d.Id,
-                d.EmploymentStatusId,
-                d.EmploymentStatus,
-                CurrentPayProfit = d.PayProfits.Select(x =>
-                    new
-                    {
-                        x.ProfitYear,
-                        x.CurrentHoursYear,
-                        x.Etva,
-                        x.EnrollmentId,
-                        x.Enrollment
-                    }).FirstOrDefault(x => x.ProfitYear == currentYear),
-                PreviousPayProfit = d.PayProfits.Select(x =>
-                    new
-                    {
-                        x.ProfitYear,
-                        x.CurrentHoursYear,
-                        x.Etva,
-                        x.EnrollmentId,
-                        x.Enrollment
-                    }).FirstOrDefault(x => x.ProfitYear == previousYear)
+            d.Id,
+            d.ContactInfo.FirstName,
+            d.ContactInfo.LastName,
+            d.Address.City,
+            d.Address.State,
+            Address = d.Address.Street,
+            d.Address.PostalCode,
+            d.DateOfBirth,
+            d.Ssn,
+            d.BadgeNumber,
+            d.ReHireDate,
+            d.HireDate,
+            d.TerminationDate,
+            d.StoreNumber,
+            DemographicId = d.Id,
+            d.EmploymentStatusId,
+            d.EmploymentStatus,
+            CurrentPayProfit = d.PayProfits.Select(x =>
+                new
+                {
+                x.ProfitYear,
+                x.CurrentHoursYear,
+                x.Etva,
+                x.EnrollmentId,
+                x.Enrollment
+                }).FirstOrDefault(x => x.ProfitYear == currentYear),
+            PreviousPayProfit = d.PayProfits.Select(x =>
+                new
+                {
+                x.ProfitYear,
+                x.CurrentHoursYear,
+                x.Etva,
+                x.EnrollmentId,
+                x.Enrollment
+                }).FirstOrDefault(x => x.ProfitYear == previousYear)
             })
             .ToPaginationResultsAsync(req, cancellationToken);
 
@@ -774,23 +783,32 @@ public sealed class MasterInquiryService : IMasterInquiryService
         ISet<int> ssns,
         CancellationToken cancellationToken)
     {
-        var members = ctx.Beneficiaries
+        var membersQuery = ctx.Beneficiaries
             .Include(b => b.Contact)
-            .Where(b => b.Contact != null && ssns.Contains(b.Contact.Ssn))
+            .Where(b => b.Contact != null && ssns.Contains(b.Contact.Ssn));
+
+        // Only filter by BadgeNumber if provided and not 0
+        var badgeNumber = ((MasterInquiryRequest)req).BadgeNumber;
+        if (badgeNumber.HasValue && badgeNumber != 0)
+        {
+            membersQuery = membersQuery.Where(b => b.BadgeNumber == badgeNumber);
+        }
+
+        var members = membersQuery
             .Select(b => new
             {
-                b.Id,
-                b.Contact!.ContactInfo.FirstName,
-                b.Contact.ContactInfo.LastName,
-                b.Contact.Address.City,
-                b.Contact.Address.State,
-                Address = b.Contact.Address.Street,
-                b.Contact.Address.PostalCode,
-                b.Contact.DateOfBirth,
-                b.Contact.Ssn,
-                b.BadgeNumber,
-                b.PsnSuffix,
-                DemographicId = b.Id
+            b.Id,
+            b.Contact!.ContactInfo.FirstName,
+            b.Contact.ContactInfo.LastName,
+            b.Contact.Address.City,
+            b.Contact.Address.State,
+            Address = b.Contact.Address.Street,
+            b.Contact.Address.PostalCode,
+            b.Contact.DateOfBirth,
+            b.Contact.Ssn,
+            b.BadgeNumber,
+            b.PsnSuffix,
+            DemographicId = b.Id
             });
 
 
@@ -814,7 +832,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
     private static IQueryable<MasterInquiryItem> FilterMemberQuery(MasterInquiryRequest req, IQueryable<MasterInquiryItem> query)
     {
-        if (req.BadgeNumber > 0)
+        if (req.BadgeNumber.HasValue && req.BadgeNumber > 0)
         {
             query = query.Where(x => x.Member.BadgeNumber == req.BadgeNumber);
         }
