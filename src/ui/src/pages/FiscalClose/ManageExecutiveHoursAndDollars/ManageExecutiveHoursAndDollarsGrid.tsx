@@ -301,7 +301,7 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
 
   const isRowDataThere = (isModal: boolean | undefined): boolean => {
     if (isModal) {
-      return additionalExecutivesGrid?.response != null && executiveHoursAndDollars?.response?.results != null;
+      return additionalExecutivesGrid?.response != null;
     } else {
       return mutableCopyOfGridData?.response != null && executiveHoursAndDollars?.response?.results != null;
     }
@@ -318,7 +318,7 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
 
   return (
     <>
-      {isRowDataThere(isModal) && mutableCopyOfGridData && (
+      {isRowDataThere(isModal) && (
         <>
           {!isModal && (
             <>
