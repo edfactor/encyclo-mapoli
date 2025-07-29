@@ -1,17 +1,12 @@
-import { Button, Divider } from "@mui/material";
-import { Grid } from "@mui/material";
-import { DSMAccordion, Page } from "smart-ui-library";
-import DistributionsAndForfeituresSearchFilter from "./DistributionAndForfeituresSearchFilter";
-import DistributionsAndForfeituresGrid from "./DistributionAndForfeituresGrid";
+import { Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
-import { useNavigate } from "react-router";
-import { MENU_LABELS } from "../../../constants";
 import { useState } from "react";
+import { DSMAccordion, Page } from "smart-ui-library";
+import DistributionsAndForfeituresGrid from "./DistributionAndForfeituresGrid";
+import DistributionsAndForfeituresSearchFilter from "./DistributionAndForfeituresSearchFilter";
 
 const DistributionsAndForfeitures = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
-
-  const navigate = useNavigate();
 
   const renderActionNode = () => {
     return <StatusDropdownActionNode />;
