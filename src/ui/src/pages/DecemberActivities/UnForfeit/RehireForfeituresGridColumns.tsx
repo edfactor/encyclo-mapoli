@@ -1,5 +1,5 @@
 import { SaveOutlined } from "@mui/icons-material";
-import { Checkbox, IconButton } from "@mui/material";
+import { Checkbox, IconButton, CircularProgress } from "@mui/material";
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { agGridNumberToCurrency, formatNumberWithComma } from "smart-ui-library";
 import { mmDDYYFormat } from "utils/dateUtils";
@@ -40,11 +40,15 @@ export const HeaderComponent: React.FC<RehireForfeituresHeaderComponentProps> = 
     };
   };
 
+  // Check if any rows are in loading state
+  const hasSavingInProgress = params.context?.loadingRowIds?.size > 0;
+
   return (
     <SelectableGridHeader
       {...params}
       isNodeEligible={isNodeEligible}
       createUpdatePayload={createUpdatePayload}
+      isBulkSaving={hasSavingInProgress}
     />
   );
 };
@@ -286,6 +290,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
         const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}${params.data.enrollmentId ? `-${params.data.enrollmentId}` : ''}-${params.node?.id || 'unknown'}`;
         const hasError = params.context?.editedValues?.[rowKey]?.hasError;
         const currentValue = params.context?.editedValues?.[rowKey]?.value ?? params.data.suggestedForfeit;
+        const isLoading = params.context?.loadingRowIds?.has(params.data.badgeNumber);
 
         return <div>
           <Checkbox 
@@ -312,9 +317,13 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
                 await params.onSave(request);
               }
             }}
-            disabled={hasError || (currentValue || 0) === 0}
+            disabled={hasError || (currentValue || 0) === 0 || isLoading}
           >
-            <SaveOutlined />
+            {isLoading ? (
+              <CircularProgress size={20} />
+            ) : (
+              <SaveOutlined />
+            )}
           </IconButton>
         </div>;
       }
