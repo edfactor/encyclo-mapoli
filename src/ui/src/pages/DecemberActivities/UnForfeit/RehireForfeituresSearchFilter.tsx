@@ -32,6 +32,10 @@ const schema = yup.object().shape({
       if (!beginDate || !endDate) return true;
       
       return endDate >= beginDate;
+    })
+    .test("is-too-early", "Insuffient data for dates before 2024", function (value) {
+      
+      return new Date(value) > new Date(2024,1,1);
     }),
   pagination: yup
     .object({
