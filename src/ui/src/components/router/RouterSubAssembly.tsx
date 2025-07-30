@@ -16,8 +16,6 @@ import Forfeit from "pages/Forfeit/Forfeit";
 import FrozenSummary from "pages/FrozenSummary/FrozenSummary";
 import MasterInquiry from "pages/MasterInquiry/MasterInquiry";
 import RehireForfeitures from "pages/DecemberActivities/UnForfeit/RehireForfeitures";
-import Beneficiaries from "pages/PAY426Reports/PAY426-10/Beneficiaries";
-import ProfitSummary from "pages/PAY426Reports/PAY426-9/ProfitSummary";
 import Pay450Summary from "pages/PaymasterUpdate/Pay450Summary";
 import PaymasterUpdate from "pages/PaymasterUpdate/PaymasterUpdate";
 import ProfCtrlSheet from "pages/PaymasterUpdate/ProfCtrlSheet";
@@ -61,6 +59,7 @@ import QPAY066AdHocReports from "pages/QPAY066AdHocReports/QPAY066AdHocReports";
 import BeneficiaryInquiry from "pages/BeneficiaryInquiry/BeneficiaryInquiry";
 import PayBeNext from "pages/Reports/PayBeNext/PayBeNext";
 import PayBenReport from "pages/Reports/PayBenReport/PayBenReport";
+import ProfitSummary from "pages/PAY426Reports/ProfitSummary/ProfitSummary";
 
 const RouterSubAssembly: React.FC = () => {
   const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";
@@ -282,10 +281,6 @@ const RouterSubAssembly: React.FC = () => {
                 <Route
                   path={ROUTES.PAY426_SUMMARY}
                   element={<ProfitSummary />}
-                />
-                <Route
-                  path={ROUTES.PAY426_NON_EMPLOYEE}
-                  element={<Beneficiaries />}
                 />
                 <Route
                   path={ROUTES.PROFIT_SHARE_BY_STORE}

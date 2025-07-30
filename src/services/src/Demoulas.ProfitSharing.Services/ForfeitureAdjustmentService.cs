@@ -187,8 +187,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                     d.Ssn,
                     d.BadgeNumber,
                     d.StoreNumber,
-                    PayProfit = context.PayProfits
-                        .FirstOrDefault(pp => pp.DemographicId == d.Id && pp.ProfitYear == req.ProfitYear)
+                    HasPayProfit = context.PayProfits.Any(pp => pp.DemographicId == d.Id && pp.ProfitYear == req.ProfitYear)
                 })
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -197,7 +196,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                 throw new ArgumentException($"Employee with badge number {req.BadgeNumber} not found");
             }
 
-            if (employeeData.PayProfit == null)
+            if (!employeeData.HasPayProfit)
             {
                 throw new ArgumentException($"No profit sharing data found for employee with badge number {req.BadgeNumber} for year {req.ProfitYear}");
             }
@@ -248,7 +247,8 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                 Forfeiture = Math.Abs(req.ForfeitureAmount) * (isForfeit ? -1 : 1), // Negative for forfeit, positive for un-forfeit, we'll need to double check this logic
                 MonthToDate = (byte)DateTime.Now.Month,
                 YearToDate = (short)DateTime.Now.Year,
-                TransactionDate = DateTimeOffset.Now
+                TransactionDate = DateTimeOffset.Now,
+                ModifiedAtUtc = DateTimeOffset.UtcNow
             };
 
             context.ProfitDetails.Add(profitDetail);
@@ -397,8 +397,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                         d.Ssn,
                         d.BadgeNumber,
                         d.StoreNumber,
-                        PayProfit = context.PayProfits
-                            .FirstOrDefault(pp => pp.DemographicId == d.Id && pp.ProfitYear == req.ProfitYear)
+                        HasPayProfit = context.PayProfits.Any(pp => pp.DemographicId == d.Id && pp.ProfitYear == req.ProfitYear)
                     })
                     .FirstOrDefaultAsync(cancellationToken);
 
@@ -407,7 +406,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                     throw new ArgumentException($"Employee with badge number {req.BadgeNumber} not found");
                 }
 
-                if (employeeData.PayProfit == null)
+                if (!employeeData.HasPayProfit)
                 {
                     throw new ArgumentException($"No profit sharing data found for employee with badge number {req.BadgeNumber} for year {req.ProfitYear}");
                 }
@@ -454,7 +453,8 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                     Forfeiture = -req.ForfeitureAmount,
                     CommentTypeId = CommentType.Constants.Forfeit.Id,
                     Remark = remarkText,
-                    TransactionDate = DateTimeOffset.UtcNow
+                    TransactionDate = DateTimeOffset.UtcNow,
+                    ModifiedAtUtc = DateTimeOffset.UtcNow
                 };
 
                 context.ProfitDetails.Add(profitDetail);

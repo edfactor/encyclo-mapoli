@@ -1,5 +1,5 @@
 import { IHeaderParams } from "ag-grid-community";
-import { Checkbox, IconButton } from "@mui/material";
+import { Checkbox, IconButton, CircularProgress } from "@mui/material";
 import { SaveOutlined } from "@mui/icons-material";
 
 interface SelectableGridHeaderProps extends IHeaderParams {
@@ -8,6 +8,8 @@ interface SelectableGridHeaderProps extends IHeaderParams {
   isNodeEligible: (node: any, context?: any) => boolean;
   createUpdatePayload: (node: any, context: any) => any;
   onBulkSave?: (requests: any[]) => Promise<void>;
+  isBulkSaving?: boolean;
+  loadingRowIds?: Set<number>;
 }
 
 export const SelectableGridHeader: React.FC<SelectableGridHeaderProps> = (props) => {
@@ -68,6 +70,7 @@ export const SelectableGridHeader: React.FC<SelectableGridHeaderProps> = (props)
   const { totalEligible, totalSelected } = getSelectionState();
   const allSelected = totalSelected === totalEligible && totalEligible > 0;
   const someSelected = totalSelected > 0 && totalSelected < totalEligible;
+  const isSaveDisabled = props.isBulkSaving || totalSelected === 0;
 
   return (
     <div>
@@ -77,8 +80,12 @@ export const SelectableGridHeader: React.FC<SelectableGridHeaderProps> = (props)
         indeterminate={someSelected}
         onChange={handleSelectAll}
       />
-      <IconButton onClick={handleSave}>
-        <SaveOutlined />
+      <IconButton onClick={handleSave} disabled={isSaveDisabled}>
+        {props.isBulkSaving ? (
+          <CircularProgress size={20} />
+        ) : (
+          <SaveOutlined />
+        )}
       </IconButton>
     </div>
   );
