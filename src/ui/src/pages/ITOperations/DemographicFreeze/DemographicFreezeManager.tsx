@@ -27,12 +27,6 @@ const schema = yup.object().shape({
     .date()
     .nullable()
     .required("As of Date is required")
-    .test("not-too-old", "Date cannot be more than 1 year ago", (value) => {
-      if (!value) return true; // Skip validation if empty (required handles this)
-      const oneYearAgo = new Date();
-      oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-      return value >= oneYearAgo;
-    })
     .test("not-future", "Date cannot be in the future", (value) => {
       if (!value) return true;
       return value <= new Date();
