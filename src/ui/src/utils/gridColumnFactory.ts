@@ -1,6 +1,7 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
+import { agGridNumberToCurrency } from "smart-ui-library";
 import { GRID_COLUMN_WIDTHS } from "../constants";
-import { BadgeColumnOptions, SSNColumnOptions } from "./columnFactoryTypes";
+import { BadgeColumnOptions, SSNColumnOptions, CurrencyColumnOptions } from "./columnFactoryTypes";
 import { viewBadgeLinkRenderer } from "./masterInquiryLink";
 
 export const createSSNColumn = (options: SSNColumnOptions = {}): ColDef => {
@@ -75,6 +76,36 @@ export const createBadgeColumn = (options: BadgeColumnOptions = {}): ColDef => {
       }
       return viewBadgeLinkRenderer(params.data.badgeNumber, navigateFunction);
     };
+  }
+
+  return column;
+};
+
+export const createCurrencyColumn = (options: CurrencyColumnOptions): ColDef => {
+  const {
+    headerName,
+    field,
+    colId = field,
+    minWidth = 120,
+    maxWidth,
+    sortable = true,
+    resizable = true,
+    valueFormatter = agGridNumberToCurrency
+  } = options;
+
+  const column: ColDef = {
+    headerName,
+    field,
+    colId,
+    minWidth,
+    type: "rightAligned",
+    resizable,
+    sortable,
+    valueFormatter
+  };
+
+  if (maxWidth) {
+    column.maxWidth = maxWidth;
   }
 
   return column;

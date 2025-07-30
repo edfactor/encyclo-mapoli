@@ -21,3 +21,14 @@ export interface BadgeColumnOptions {
   psnSuffix?: boolean;
   navigateFunction?: (path: string) => void;
 }
+
+export interface CurrencyColumnOptions {
+  headerName?: string;
+  field: string;
+  colId?: string;
+  minWidth?: number;
+  maxWidth?: number;
+  sortable?: boolean;
+  resizable?: boolean;
+  valueFormatter?: (params: ValueFormatterParams) => string;
+}
