@@ -155,7 +155,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
 
       // First ensure the parent component has the search parameters
       onSearch(searchParams);
-      
+
       triggerSearch(searchParams, false)
         .unwrap()
         .then((response) => {
@@ -167,6 +167,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
           } else {
             // Instead of setting missiveAlerts, pass up a signal (to be implemented)
             // setMissiveAlerts([...]);
+
             setInitialSearchLoaded(false);
           }
         });
@@ -177,7 +178,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
     if (isValid) {
       // Create a unique timestamp to ensure each search is treated as new
       const timestamp = Date.now();
-      
+
       const searchParams: MasterInquiryRequest = {
         pagination: {
           skip: data.pagination?.skip || 0,
@@ -203,27 +204,26 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
 
       // Clear existing state first
       setInitialSearchLoaded(false);
-      onSearch(undefined);
-      
-      // Small timeout to ensure state reset is processed
-      setTimeout(() => {
-        // Then set new search parameters
-        onSearch(searchParams);
-        
-        triggerSearch(searchParams, false)
-          .unwrap()
-          .then((response) => {
-            // Update loaded state based on response
-            if (
-              response && Array.isArray(response) ? response.length > 0 : response.results && response.results.length > 0
-            ) {
-              setInitialSearchLoaded(true);
-            } else {
-              setInitialSearchLoaded(false);
-            }
-          });
-      }, 50);
-      
+
+      // Set new search parameters immediately
+      onSearch(searchParams);
+
+      triggerSearch(searchParams, false)
+        .unwrap()
+        .then((response) => {
+          // Update loaded state based on response
+
+          if (
+            response && Array.isArray(response) ? response.length > 0 : response.results && response.results.length > 0
+          ) {
+            setInitialSearchLoaded(true);
+          } else {
+            setInitialSearchLoaded(false);
+            // Signal no results found by calling onSearch with undefined
+            onSearch(undefined);
+          }
+        });
+
       dispatch(setMasterInquiryRequestParams(data));
     }
   });
@@ -237,7 +237,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
       endProfitYear: profitYear, // Always reset to default profitYear
       startProfitMonth: undefined,
       endProfitMonth: undefined,
-      socialSecurity: undefined,
+      socialSecurity: null,
       name: undefined,
       badgeNumber: undefined,
       paymentType: "all",
@@ -256,7 +256,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
     });
     // Instead of setting searchParams to undefined, pass null
     // to avoid showing the "no results" message
-    onSearch(null);
+    onSearch(undefined);
   };
 
   const months = Array.from({ length: 12 }, (_, i) => i + 1);
@@ -309,7 +309,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
                 <Select
                   {...field}
                   onChange={(e) => {
-                    field.onChange(e.target.value === "" ? null : e.target.value);
+                    field.onChange(e.target.value === undefined ? null : e.target.value);
                   }}
                   sx={selectSx}
                   fullWidth
@@ -341,7 +341,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
                 <Select
                   {...field}
                   onChange={(e) => {
-                    field.onChange(e.target.value === "" ? null : e.target.value);
+                    field.onChange(e.target.value === undefined ? null : e.target.value);
                   }}
                   sx={selectSx}
                   fullWidth
