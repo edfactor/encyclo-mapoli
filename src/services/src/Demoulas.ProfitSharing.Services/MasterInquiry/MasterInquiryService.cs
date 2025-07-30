@@ -1061,18 +1061,22 @@ public sealed class MasterInquiryService : IMasterInquiryService
     private static IQueryable<MemberDetails> ApplySorting(IQueryable<MemberDetails> query, SortedPaginationRequestDto req)
     {
         if (string.IsNullOrEmpty(req.SortBy))
+        {
             return query;
+        }
 
         var isDescending = req.IsSortDescending ?? false;
         return req.SortBy.ToLower() switch
         {
-            "firstname" => isDescending ? query.OrderByDescending(x => x.FirstName) : query.OrderBy(x => x.FirstName),
-            "lastname" => isDescending ? query.OrderByDescending(x => x.LastName) : query.OrderBy(x => x.LastName),
+            "fullName" => isDescending ? query.OrderByDescending(x => x.FullName) : query.OrderBy(x => x.FullName),
             "ssn" => isDescending ? query.OrderByDescending(x => x.Ssn) : query.OrderBy(x => x.Ssn),
-            "badgenumber" => isDescending ? query.OrderByDescending(x => x.BadgeNumber) : query.OrderBy(x => x.BadgeNumber),
-            "hiredate" => isDescending ? query.OrderByDescending(x => x.HireDate) : query.OrderBy(x => x.HireDate),
-            "terminationdate" => isDescending ? query.OrderByDescending(x => x.TerminationDate) : query.OrderBy(x => x.TerminationDate),
-            "storenumber" => isDescending ? query.OrderByDescending(x => x.StoreNumber) : query.OrderBy(x => x.StoreNumber),
+            "badgeNumber" => isDescending ? query.OrderByDescending(x => x.BadgeNumber) : query.OrderBy(x => x.BadgeNumber),
+            "address" => isDescending ? query.OrderByDescending(x => x.Address) : query.OrderBy(x => x.Address),
+            "addressCity" => isDescending ? query.OrderByDescending(x => x.AddressCity) : query.OrderBy(x => x.AddressCity),
+            "addressState" => isDescending ? query.OrderByDescending(x => x.AddressState) : query.OrderBy(x => x.AddressState),
+            "addressZipCode" => isDescending ? query.OrderByDescending(x => x.AddressZipCode) : query.OrderBy(x => x.AddressZipCode),
+            "age" => isDescending ? query.OrderByDescending(x => x.Age) : query.OrderBy(x => x.Age),
+            "employmentStatus" => isDescending ? query.OrderByDescending(x => x.EmploymentStatus) : query.OrderBy(x => x.EmploymentStatus),
             _ => query
         };
     }
