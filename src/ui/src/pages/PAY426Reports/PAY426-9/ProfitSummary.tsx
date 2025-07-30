@@ -141,8 +141,7 @@ const ProfitSummary: React.FC<ProfitSummaryProps> = ({ onPresetParamsChange }) =
       trigger({
         useFrozenData: true,
         profitYear: profitYear,
-        badgeNumber: null,
-        archive: isStatusCompleted
+        badgeNumber: null
       });
     }
   }, [trigger, profitYear, hasToken, isStatusCompleted]);

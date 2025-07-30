@@ -1,19 +1,26 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Attributes;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 public sealed record YearEndProfitSharingReportResponse : ReportResponseBase<YearEndProfitSharingReportDetail>
 {
+    [YearEndArchiveProperty]
     public decimal WagesTotal { get; set; }
+
+    [YearEndArchiveProperty]
     public decimal HoursTotal { get; set; }
     public decimal PointsTotal { get; set; }
     public decimal TerminatedWagesTotal { get; set; }
     public decimal TerminatedHoursTotal { get; set; }
+
+    [YearEndArchiveProperty]
     public long NumberOfEmployees { get; set; }
     public int NumberOfNewEmployees { get; set; }
     public int NumberOfEmployeesUnder21 { get; set; }
     public long NumberOfEmployeesInPlan { get; set; }
     public decimal TerminatedPointsTotal { get; set; }
+    [YearEndArchiveProperty]
     public decimal BalanceTotal { get; set; }
     public decimal TerminatedBalanceTotal { get; set; }
 

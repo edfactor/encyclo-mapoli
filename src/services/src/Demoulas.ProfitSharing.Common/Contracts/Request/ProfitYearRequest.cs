@@ -1,8 +1,9 @@
 ﻿using System.ComponentModel;
 using Demoulas.Common.Contracts.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Request;
-public record ProfitYearRequest : SortedPaginationRequestDto 
+public record ProfitYearRequest : SortedPaginationRequestDto, IProfitYearRequest
 {
     [DefaultValue(2024)]
     public short ProfitYear { get; set; }
