@@ -111,6 +111,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SQL calculations view", "SQ
 		..\database\SQL calculations view\SQL READY Profit Sharing view creation for calculations includes bene and zeroc-check.sql = ..\database\SQL calculations view\SQL READY Profit Sharing view creation for calculations includes bene and zeroc-check.sql
 		..\database\SQL calculations view\SQL SMART Profit Sharing view creation for calculations includes bene and zeroc-check.sql = ..\database\SQL calculations view\SQL SMART Profit Sharing view creation for calculations includes bene and zeroc-check.sql
 		..\database\SQL calculations view\SQL SMART vs READY SQL comparison of vesting balance.sql = ..\database\SQL calculations view\SQL SMART vs READY SQL comparison of vesting balance.sql
+		..\database\SQL calculations view\SMART vested_percent view.sql = ..\database\SQL calculations view\SMART vested_percent view.sql
+		..\database\SQL calculations view\READY pscalcview2 view.sql = ..\database\SQL calculations view\READY pscalcview2 view.sql
+		..\database\SQL calculations view\READY vested_percent view.sql = ..\database\SQL calculations view\READY vested_percent view.sql
+		..\database\SQL calculations view\READY transaction_totals view.sql = ..\database\SQL calculations view\READY transaction_totals view.sql
+		..\database\SQL calculations view\SMART pscalcview2 view.sql = ..\database\SQL calculations view\SMART pscalcview2 view.sql
+		..\database\SQL calculations view\SMART transaction_totals view.sql = ..\database\SQL calculations view\SMART transaction_totals view.sql
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ddl", "ddl", "{15C6083C-777D-42C6-A1A7-5F4008345118}"
