@@ -12,9 +12,14 @@ import StatusDropdown from "./StatusDropdown";
 interface StatusDropdownActionNodeProps {
   initialStatus?: string;
   navigationId?: number;
+  onStatusChange?: (newStatus: string, statusName?: string) => void;
 }
 
-const StatusDropdownActionNode: React.FC<StatusDropdownActionNodeProps> = ({ initialStatus, navigationId }) => {
+const StatusDropdownActionNode: React.FC<StatusDropdownActionNodeProps> = ({ 
+  initialStatus, 
+  navigationId, 
+  onStatusChange 
+}) => {
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const [currentStatus, setCurrentStatus] = useState("1");
   const [navigationObj, setNavigationObj] = useState<NavigationDto | null>(null);
@@ -31,6 +36,12 @@ const StatusDropdownActionNode: React.FC<StatusDropdownActionNodeProps> = ({ ini
       setCurrentStatus(newStatus);
       if (hasToken) {
         triggerGetNavigation({ navigationId: undefined });
+      }
+      
+      // Call the parent callback if provided
+      if (onStatusChange) {
+        const statusName = data?.navigationStatusList?.find(status => status.id === parseInt(newStatus))?.name;
+        onStatusChange(newStatus, statusName);
       }
     }
   };

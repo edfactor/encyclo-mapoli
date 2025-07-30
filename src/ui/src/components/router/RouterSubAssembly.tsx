@@ -16,8 +16,8 @@ import Forfeit from "pages/Forfeit/Forfeit";
 import FrozenSummary from "pages/FrozenSummary/FrozenSummary";
 import MasterInquiry from "pages/MasterInquiry/MasterInquiry";
 import RehireForfeitures from "pages/DecemberActivities/UnForfeit/RehireForfeitures";
-
-import ProfitSummary from "pages/PAY426Reports/ProfitSummary/ProfitSummary";
+import Beneficiaries from "pages/PAY426Reports/PAY426-10/Beneficiaries";
+import ProfitSummary from "pages/PAY426Reports/PAY426-9/ProfitSummary";
 import Pay450Summary from "pages/PaymasterUpdate/Pay450Summary";
 import PaymasterUpdate from "pages/PaymasterUpdate/PaymasterUpdate";
 import ProfCtrlSheet from "pages/PaymasterUpdate/ProfCtrlSheet";
@@ -253,7 +253,6 @@ const RouterSubAssembly: React.FC = () => {
                 <Route
                   path={ROUTES.PROFIT_SHARE_UPDATE}
                   element={<ProfitShareEditUpdate />}></Route>
-                
                 <Route
                   path=""
                   element={<></>}></Route>

@@ -10,12 +10,10 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitShare
 public sealed class YearEndProfitSharingSummaryReportEndpoint : Endpoint<BadgeNumberRequest, YearEndProfitSharingReportSummaryResponse>
 {
     private readonly IProfitSharingSummaryReportService _cleanupReportService;
-    private readonly IAuditService _auditService;
 
-    public YearEndProfitSharingSummaryReportEndpoint(IProfitSharingSummaryReportService cleanupReportService, IAuditService auditService)
+    public YearEndProfitSharingSummaryReportEndpoint(IProfitSharingSummaryReportService cleanupReportService)
     {
         _cleanupReportService = cleanupReportService;
-        _auditService = auditService;
     }
 
     public override void Configure()
@@ -38,19 +36,8 @@ public sealed class YearEndProfitSharingSummaryReportEndpoint : Endpoint<BadgeNu
         Group<YearEndGroup>();
     }
 
-    public override async Task<YearEndProfitSharingReportSummaryResponse> ExecuteAsync(BadgeNumberRequest req, CancellationToken ct)
+    public override Task<YearEndProfitSharingReportSummaryResponse> ExecuteAsync(BadgeNumberRequest req, CancellationToken ct)
     {
-        var response = await _cleanupReportService.GetYearEndProfitSharingSummaryReportAsync(req, ct);
-
-        // Read "archive" from query string without modifying the DTO
-        bool archive = HttpContext.Request.Query.TryGetValue("archive", out var archiveValue) &&
-                       bool.TryParse(archiveValue, out var archiveResult) && archiveResult;
-
-        if (archive)
-        {
-            await _auditService.ArchiveCompletedReportAsync("Yearend profit sharing summary report", response, ct);
-        }
-
-        return response;
+     return _cleanupReportService.GetYearEndProfitSharingSummaryReportAsync(req, ct);
     }
 }
