@@ -212,6 +212,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
         .unwrap()
         .then((response) => {
           // Update loaded state based on response
+
           if (
             response && Array.isArray(response) ? response.length > 0 : response.results && response.results.length > 0
           ) {
@@ -236,7 +237,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
       endProfitYear: profitYear, // Always reset to default profitYear
       startProfitMonth: undefined,
       endProfitMonth: undefined,
-      socialSecurity: undefined,
+      socialSecurity: null,
       name: undefined,
       badgeNumber: undefined,
       paymentType: "all",

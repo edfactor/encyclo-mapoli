@@ -28,21 +28,21 @@ const MasterInquiry = () => {
 
   const { masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
 
-  const isSimpleSearch = () => {
-    return (
-      masterInquiryRequestParams &&
-      (masterInquiryRequestParams.name ||
-        masterInquiryRequestParams.socialSecurity ||
-        masterInquiryRequestParams.badgeNumber) &&
+  const isSimpleSearch = (): boolean => {
+    const simpleFound: boolean =
+      !!masterInquiryRequestParams &&
+      (!!masterInquiryRequestParams.name ||
+        !!masterInquiryRequestParams.socialSecurity ||
+        !!masterInquiryRequestParams.badgeNumber) &&
       !(
-        masterInquiryRequestParams.startProfitMonth ||
-        masterInquiryRequestParams.endProfitMonth ||
-        masterInquiryRequestParams.contribution ||
-        masterInquiryRequestParams.earnings ||
-        masterInquiryRequestParams.forfeiture ||
-        masterInquiryRequestParams.payment
-      )
-    );
+        !!masterInquiryRequestParams.startProfitMonth ||
+        !!masterInquiryRequestParams.endProfitMonth ||
+        !!masterInquiryRequestParams.contribution ||
+        !!masterInquiryRequestParams.earnings ||
+        !!masterInquiryRequestParams.forfeiture ||
+        !!masterInquiryRequestParams.payment
+      );
+    return simpleFound;
   };
 
   return (
