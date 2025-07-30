@@ -704,6 +704,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             .Select(d => new
             {
             d.Id,
+            d.ContactInfo.FullName,
             d.ContactInfo.FirstName,
             d.ContactInfo.LastName,
             d.Address.City,
@@ -798,6 +799,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             .Select(b => new
             {
             b.Id,
+            b.Contact!.ContactInfo.FullName,
             b.Contact!.ContactInfo.FirstName,
             b.Contact.ContactInfo.LastName,
             b.Contact.Address.City,
