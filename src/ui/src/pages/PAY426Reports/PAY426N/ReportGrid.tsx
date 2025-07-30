@@ -7,7 +7,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../reduxstore/store";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import pay426Utils from "../Pay427Utils";
-import { GetProfitSharingReportGridColumns } from "../PAY426-1/EighteenToTwentyGridColumns";
+import { GetProfitSharingReportGridColumns } from "./GetProfitSharingReportGridColumns";
 import presets from "./presets";
 import { FilterParams } from "reduxstore/types";
 

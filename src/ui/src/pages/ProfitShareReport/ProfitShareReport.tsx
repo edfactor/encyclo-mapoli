@@ -10,7 +10,7 @@ import { setYearEndProfitSharingReportQueryParams } from "reduxstore/slices/year
 import { RootState } from "reduxstore/store";
 import { Page, SmartModal, DSMAccordion } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
-import ProfitSummary from "../PAY426Reports/PAY426-9/ProfitSummary";
+import ProfitSummary from "../PAY426Reports/ProfitSummary/ProfitSummary";
 import ProfitShareReportSearchFilters from "./ProfitShareReportSearchFilters";
 import ReportGrid from "../PAY426Reports/PAY426N/ReportGrid";
 import { FilterParams } from "reduxstore/types";
