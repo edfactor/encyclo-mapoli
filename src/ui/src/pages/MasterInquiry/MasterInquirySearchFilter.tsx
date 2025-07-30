@@ -219,8 +219,8 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
             setInitialSearchLoaded(true);
           } else {
             setInitialSearchLoaded(false);
-            // Signal no results found by calling onSearch with undefined
-            onSearch(undefined);
+            // Don't call onSearch(undefined) here as it clears searchParams 
+            // and causes the grid to disappear. The grid itself handles no results.
           }
         });
 

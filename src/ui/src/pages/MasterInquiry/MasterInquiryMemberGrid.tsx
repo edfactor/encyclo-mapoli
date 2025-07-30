@@ -37,6 +37,8 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = ({
   };
 
   const onSearch = useCallback(async () => {
+    // We are going to do another search here which skips zero and takes all.
+
     await trigger({
       ...searchParams,
       pagination: {
@@ -73,7 +75,9 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = ({
   }, [data, onBadgeClick]);
 
   // If no searchParams, render nothing
-  if (!searchParams || Object.keys(searchParams).length === 0) return null;
+  if (!searchParams || Object.keys(searchParams).length === 0) {
+    return null;
+  }
 
   // Show a message if no results
   if (!isSimpleSearch() && data && data.results.length === 0) {
@@ -91,7 +95,9 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = ({
   const columns = GetMasterInquiryMemberGridColumns();
 
   // Hide the grid if only one member is returned
-  if (data && data.results.length === 1) {
+  // But if the last page returns one result, we still want to show the grid
+  // so we check the total number of results to make sure it's 1 also
+  if (data && data.results.length === 1 && data.total === 1) {
     return null;
   }
 
@@ -127,9 +133,11 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = ({
             pageSize={pageSize}
             setPageSize={(value: number) => {
               setPageSize(value);
-              setPageNumber(0);
+              setPageNumber(1);
             }}
-            recordCount={data.total}
+            recordCount={(() => {
+              return data.total;
+            })()}
           />
         </>
       )}
