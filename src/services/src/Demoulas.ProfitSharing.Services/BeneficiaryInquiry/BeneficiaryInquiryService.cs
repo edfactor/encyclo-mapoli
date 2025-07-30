@@ -6,6 +6,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
+using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using FastEndpoints;
@@ -27,9 +28,26 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
         _totalService = totalService;
     }
 
+    private int GetStartingOfNumber(int num)
+    {
+        if (num == 0) return 0;
 
+        int digits = (int)Math.Floor(Math.Log10(num));
+        int power = (int)Math.Pow(10, digits);
+        return (num / power) * power;
+    }
+    private List<PaginatedResponseDto<BeneficiaryDto>> GetPreviousBeneficiaries(int psnSuffix, int badgeNumber,ProfitSharingReadOnlyDbContext context) 
+    {
+        List<PaginatedResponseDto<BeneficiaryDto>> res = new();
+        var query = context.Beneficiaries.Where(m => m.BadgeNumber == badgeNumber && m.PsnSuffix == psnSuffix);
+        if (psnSuffix ==1000)
+        {
+            
+        }
+    }
     public async Task<PaginatedResponseDto<BeneficiaryDto>> GetBeneficiary(BeneficiaryRequestDto request, CancellationToken cancellationToken)
     {
+        BeneficiaryResponse response = new BeneficiaryResponse();
         var frozenStateResponse = await _frozenService.GetActiveFrozenDemographic(cancellationToken);
         short yearEnd = frozenStateResponse.ProfitYear;
 
@@ -49,6 +67,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
             }
             else
             {
+                
                 // Determine range for children
                 int lower = request.PsnSuffix.Value;
                 int upper;
