@@ -1,30 +1,16 @@
-import { ColDef, ICellRendererParams } from "ag-grid-community";
+import { ColDef } from "ag-grid-community";
 import { agGridNumberToCurrency, yyyyMMDDToMMDDYYYY } from "smart-ui-library";
-import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
+import { createBadgeColumn, createSSNColumn } from "../../../utils/gridColumnFactory";
 
 export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
   return [
-    {
+    createBadgeColumn({
       headerName: "Badge",
-      field: "badgeNumber",
-      colId: "badgeNumber",
       minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      sort: "asc",
-      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber)
-    },
-    {
-      headerName: "SSN",
-      field: "ssn",
-      colId: "ssn",
-      minWidth: GRID_COLUMN_WIDTHS.SSN,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
+      alignment: "left"
+    }),
+    createSSNColumn({ alignment: "left" }),
     {
       headerName: "Name",
       field: "name",

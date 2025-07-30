@@ -1,6 +1,6 @@
 import { ColDef, ICellRendererParams, IHeaderParams } from "ag-grid-community";
 import { agGridNumberToCurrency, formatNumberWithComma } from "smart-ui-library";
-import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
+import { createBadgeColumn } from "../../../utils/gridColumnFactory";
 import { getForfeitedStatus} from "../../../utils/enrollmentUtil";
 import { mmDDYYFormat } from "utils/dateUtils";
 import { Checkbox, IconButton, CircularProgress } from "@mui/material";
@@ -12,19 +12,12 @@ import { ForfeitureAdjustmentUpdateRequest } from "../../../reduxstore/types";
 
 export const GetTerminationColumns = (): ColDef[] => {
   return [
-    {
+    createBadgeColumn({ 
       headerName: "Badge",
-      field: "badgePSn",
-      colId: "badgePSn",
-      width: 100,
-      pinned: "left",
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      sortable: true,
-      cellRenderer: (params: ICellRendererParams) =>
-        viewBadgeLinkRenderer(params.data.badgeNumber, params.data.psnSuffix)
-    },
+      minWidth: 100,
+      alignment: "left",
+      psnSuffix: true
+    }),
     {
       headerName: "Name",
       field: "name",

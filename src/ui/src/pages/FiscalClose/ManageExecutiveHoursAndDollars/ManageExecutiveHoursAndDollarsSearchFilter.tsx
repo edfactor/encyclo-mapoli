@@ -173,7 +173,17 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
   }, [socialSecurity, badgeNumber, fullNameContains]);
 
   useEffect(() => {
-    if (profitYear) {
+    if (profitYear && isModal) {
+      dispatch(clearAdditionalExecutivesChosen());
+      reset((prevValues) => ({
+        ...prevValues,
+        profitYear
+      }));
+
+      setInitialSearchLoaded(false);
+    }
+
+    if (profitYear && !isModal) {
       dispatch(clearExecutiveHoursAndDollars());
       dispatch(clearAdditionalExecutivesChosen());
 
@@ -449,7 +459,6 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
                       <Checkbox
                         checked={field.value}
                         onChange={(e) => {
-                          console.log("hasExecutiveHoursAndDollars", e.target.checked);
                           field.onChange(e);
                           toggleSearchFieldEntered(e.target.checked, "hasExecutiveHoursAndDollars");
                         }}

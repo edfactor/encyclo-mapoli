@@ -7,7 +7,7 @@ import { RefObject } from "react";
 import { useLazyGetEmployeeWagesForYearQuery } from "reduxstore/api/YearsEndApi";
 import ReportSummary from "../../components/ReportSummary";
 import useFiscalCloseProfitYear from "../../hooks/useFiscalCloseProfitYear";
-import { GetYTDWagesColumns } from "./YTDWagesGridColumn";
+import { GetYTDWagesColumns } from "./YTDWagesGridColumns";
 
 interface YTDWagesGridProps {
   innerRef: RefObject<HTMLDivElement | null>;

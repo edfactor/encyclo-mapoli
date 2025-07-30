@@ -9,7 +9,7 @@ export enum ImpersonationRoles {
   ItOperations = "IT-Operations"
 }
 
-export interface SortedPaginationRequestDto extends PaginationParams, ISortParams { }
+export interface SortedPaginationRequestDto extends PaginationParams, ISortParams {}
 
 export interface ProfitYearRequest {
   profitYear: number;
@@ -602,10 +602,10 @@ export interface BalanceByAgeDetail extends BalanceByDetailBase {
 }
 
 /* eslint-disable @typescript-eslint/no-empty-object-type */
-export interface BalanceByAge extends BalanceByBase<BalanceByAgeDetail> { }
+export interface BalanceByAge extends BalanceByBase<BalanceByAgeDetail> {}
 
 /* eslint-disable @typescript-eslint/no-empty-object-type */
-export interface BalanceByYears extends BalanceByBase<BalanceByAgeDetail> { }
+export interface BalanceByYears extends BalanceByBase<BalanceByAgeDetail> {}
 
 export interface VestedAmountsByAge extends PagedReportResponse<VestedAmountsByAgeDetail> {
   totalFullTime100PercentAmount: number;
@@ -1013,7 +1013,7 @@ export interface Under21BreakdownByStoreEmployee {
   enrollmentId: number;
 }
 
-export interface Under21BreakdownByStoreResponse extends PagedReportResponse<Under21BreakdownByStoreEmployee> { }
+export interface Under21BreakdownByStoreResponse extends PagedReportResponse<Under21BreakdownByStoreEmployee> {}
 
 export interface Under21InactiveRequest extends ProfitYearRequest {
   isSortDescending?: boolean;
@@ -1031,7 +1031,7 @@ export interface Under21InactiveEmployee {
   enrollmentId: number;
 }
 
-export interface Under21InactiveResponse extends PagedReportResponse<Under21InactiveEmployee> { }
+export interface Under21InactiveResponse extends PagedReportResponse<Under21InactiveEmployee> {}
 
 export interface Under21TotalsRequest extends ProfitYearRequest {
   pagination: SortedPaginationRequestDto;
@@ -1474,7 +1474,7 @@ export interface RehireForfeituresSelectedRow {
   suggestedForfeit: number;
 }
 
-export interface ApiResponse<T> { }
+export interface ApiResponse<T> {}
 
 export interface AdhocBeneficiariesReportRequest extends ProfitYearRequest, SortedPaginationRequestDto {
   isAlsoEmployee: boolean;
@@ -1502,7 +1502,6 @@ export interface adhocBeneficiariesReportResponse extends PagedReportResponse<Be
   totalEndingBalance: number;
 }
 
-
 export interface PayBenReportRequest extends SortedPaginationRequestDto {
   id?: number;
 }
@@ -1514,6 +1513,4 @@ export interface PayBenReport {
   demographicFullName: string;
   percentage: number;
 }
-export interface PayBenReportResponse extends Paged<PayBenReport> {
-
-}
+export interface PayBenReportResponse extends Paged<PayBenReport> {}

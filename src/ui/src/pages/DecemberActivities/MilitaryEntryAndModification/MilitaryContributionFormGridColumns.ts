@@ -1,23 +1,17 @@
-import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
+import { ColDef } from "ag-grid-community";
 import { agGridNumberToCurrency } from "smart-ui-library";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
+import { createBadgeColumn } from "../../../utils/gridColumnFactory";
 
 // The default is to show all columns, but if the mini flag is set to true, only show the
 // badge, name, and ssn columns
 export const GetMilitaryContributionColumns = (): ColDef[] => {
   const columns: ColDef[] = [
-    {
+    createBadgeColumn({
       headerName: "Badge",
-      field: "badgeNumber",
-      colId: "badgeNumber",
       minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      sortable: true,
-      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber)
-    },
+      alignment: "left"
+    }),
     {
       headerName: "Contribution Year",
       field: "contributionDate",

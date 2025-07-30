@@ -4,9 +4,7 @@ import { GRID_COLUMN_WIDTHS } from "../../../constants";
 import { mmDDYYFormat } from "../../../utils/dateUtils";
 import { createSSNColumn, createBadgeColumn } from "../../../utils/gridColumnFactory";
 
-export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
-  // Import the date formatter from dateutils
-
+export const GetBeneficiariesGridColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   return [
     createBadgeColumn({ 
       headerName: "Badge",
@@ -91,22 +89,24 @@ export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: str
       headerName: "New",
       field: "isNew",
       colId: "isNew",
-      minWidth: 100,
+      minWidth: 80,
       headerClass: "center-align",
       cellClass: "center-align",
-      resizable: true
+      resizable: true,
+      valueFormatter: (params) => (params.value ? "(<21)" : "")
     },
     {
-      headerName: "Status",
-      field: "employeeStatus",
-      colId: "employeeStatus",
+      headerName: "Term Date",
+      field: "terminationDate",
+      colId: "terminationDate",
       minWidth: 120,
       headerClass: "center-align",
       cellClass: "center-align",
-      resizable: true
+      resizable: true,
+      valueFormatter: (params) => mmDDYYFormat(params.value)
     },
     {
-      headerName: "Balance",
+      headerName: "Current Balance",
       field: "balance",
       colId: "balance",
       minWidth: 140,
@@ -115,22 +115,12 @@ export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: str
       valueFormatter: agGridNumberToCurrency
     },
     {
-      headerName: "Years in Plan",
-      field: "yearsInPlan",
-      colId: "yearsInPlan",
+      headerName: "SVC",
+      field: "svc",
+      colId: "svc",
       minWidth: 80,
       type: "rightAligned",
       resizable: true
-    },
-    {
-      headerName: "Inactive date",
-      field: "terminationDate",
-      colId: "terminationDate",
-      minWidth: 120,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true,
-      valueFormatter: (params) => mmDDYYFormat(params.value)
     }
   ];
 };

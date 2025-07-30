@@ -1,16 +1,14 @@
 import { agGridNumberToCurrency } from "smart-ui-library";
 import { ColDef } from "ag-grid-community";
+import { createBadgeColumn } from "../../utils/gridColumnFactory";
 
 export const ProfitShareEditUpdateGridColumns = (): ColDef[] => {
   return [
-    {
+    createBadgeColumn({ 
       headerName: "Badge",
-      field: "badgeNumber",
-      colId: "badgeNumber",
       minWidth: 100,
-      type: "rightAligned",
-      resizable: true
-    },
+      renderAsLink: false
+    }),
     {
       headerName: "Name",
       field: "name",

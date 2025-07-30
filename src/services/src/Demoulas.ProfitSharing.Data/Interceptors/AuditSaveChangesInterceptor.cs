@@ -9,9 +9,9 @@ namespace Demoulas.ProfitSharing.Data.Interceptors;
 public class AuditSaveChangesInterceptor : SaveChangesInterceptor
 {
     private readonly DataConfig _config;
-    private readonly IAppUser _appUser;
+    private readonly IAppUser? _appUser;
 
-    public AuditSaveChangesInterceptor(DataConfig config, IAppUser appUser)
+    public AuditSaveChangesInterceptor(DataConfig config, IAppUser? appUser)
     {
         _config = config;
         _appUser = appUser;
@@ -48,7 +48,7 @@ public class AuditSaveChangesInterceptor : SaveChangesInterceptor
             {
                 TableName = entry.Metadata.GetTableName(),
                 Operation = entry.State.ToString(),
-                UserName = _appUser.UserName ?? string.Empty,
+                UserName = _appUser?.UserName ?? "System",
                 PrimaryKey = primaryKey,
                 ChangesJson = entry.Properties
                     .Where(p => p.IsModified || entry.State == EntityState.Added || entry.State == EntityState.Deleted)

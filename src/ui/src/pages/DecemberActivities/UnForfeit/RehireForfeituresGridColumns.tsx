@@ -11,8 +11,8 @@ import {
   RehireForfeituresHeaderComponentProps,
   RehireForfeituresSaveButtonCellParams
 } from "../../../reduxstore/types";
-import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
+import { createSSNColumn, createBadgeColumn } from "../../../utils/gridColumnFactory";
 
 export const HeaderComponent: React.FC<RehireForfeituresHeaderComponentProps> = (params: RehireForfeituresHeaderComponentProps) => {
   const selectedProfitYear = useDecemberFlowProfitYear();
@@ -55,19 +55,11 @@ export const HeaderComponent: React.FC<RehireForfeituresHeaderComponentProps> = 
 
 export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
   return [
-    {
+    createBadgeColumn({ 
       headerName: "Badge",
-      field: "badgeNumber",
-      colId: "badgeNumber",
       minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      sortable: true,
-      unSortIcon: true,
-      pinned: "left",
-      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber)
-    },
+      alignment: "left"
+    }),
     {
       headerName: "Name",
       field: "fullName",
@@ -80,15 +72,7 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       flex: 1,
       pinned: "left",
     },
-    {
-      headerName: "SSN",
-      field: "ssn",
-      colId: "ssn",
-      minWidth: GRID_COLUMN_WIDTHS.SSN,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
+    createSSNColumn({ alignment: "left" }),
     {
       headerName: "Hire Date",
       field: "hireDate",

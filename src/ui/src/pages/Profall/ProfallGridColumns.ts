@@ -1,6 +1,6 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
 import { GRID_COLUMN_WIDTHS } from "../../constants";
+import { createBadgeColumn } from "../../utils/gridColumnFactory";
 
 export const GetProfallGridColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   return [
@@ -13,16 +13,12 @@ export const GetProfallGridColumns = (navFunction: (badgeNumber: string) => void
       resizable: true,
       sortable: true
     },
-    {
+    createBadgeColumn({ 
       headerName: "Badge",
-      field: "badgeNumber",
-      colId: "badgeNumber",
       minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
-      type: "rightAligned",
-      resizable: true,
-      sortable: true,
-      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber, navFunction)
-    },
+      alignment: "center",
+      navigateFunction: navFunction
+    }),
     {
       headerName: "Name",
       field: "employeeName",

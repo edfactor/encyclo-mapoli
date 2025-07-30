@@ -1,15 +1,22 @@
-import React, { useMemo, useEffect, useState } from 'react';
-import { Typography, Table, TableBody, TableCell, TableContainer, TableRow, CircularProgress, Box } from '@mui/material';
-import Grid2 from '@mui/material/Grid2';
-import { DSMGrid } from 'smart-ui-library';
-import { FilterParams } from 'reduxstore/types';
-import { numberToCurrency } from 'smart-ui-library';
-import { useSelector } from 'react-redux';
-import { RootState } from 'reduxstore/store';
-import { useLazyGetBreakdownByStoreQuery, useLazyGetBreakdownByStoreTotalsQuery } from 'reduxstore/api/YearsEndApi';
-import useDecemberFlowProfitYear from 'hooks/useDecemberFlowProfitYear';
-import presets from './presets';
-import { GetQPAY066AdHocGridColumns } from './QPAY066AdHocGridColumns';
+import {
+  Box,
+  CircularProgress,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableRow,
+  Typography
+} from "@mui/material";
+import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
+import React, { useEffect, useMemo } from "react";
+import { useSelector } from "react-redux";
+import { useLazyGetBreakdownByStoreQuery, useLazyGetBreakdownByStoreTotalsQuery } from "reduxstore/api/YearsEndApi";
+import { RootState } from "reduxstore/store";
+import { FilterParams } from "reduxstore/types";
+import { DSMGrid, numberToCurrency } from "smart-ui-library";
+import presets from "./presets";
+import { GetQPAY066AdHocGridColumns } from "./QPAY066AdHocGridColumns";
 
 interface ReportGridProps {
   params: FilterParams;
@@ -20,7 +27,7 @@ interface ReportGridProps {
 // Dummy data for demonstration
 const dummyData = [
   {
-    badge: 47425,
+    badgeNumber: 47425,
     name: "Wilkins, A...",
     beginningBalance: 4781.67,
     beneficiaryAllocation: 0.0,
@@ -35,7 +42,7 @@ const dummyData = [
     age: "XX"
   },
   {
-    badge: 82424,
+    badgeNumber: 82424,
     name: "Potts, Aria",
     beginningBalance: 2221.96,
     beneficiaryAllocation: 0.0,
@@ -50,7 +57,7 @@ const dummyData = [
     age: "XX"
   },
   {
-    badge: 85744,
+    badgeNumber: 85744,
     name: "Lewis, Ami...",
     beginningBalance: 1801.33,
     beneficiaryAllocation: 0.0,
@@ -65,7 +72,7 @@ const dummyData = [
     age: "XX"
   },
   {
-    badge: 94861,
+    badgeNumber: 94861,
     name: "Curtis, John",
     beginningBalance: 2922.24,
     beneficiaryAllocation: 0.0,
@@ -84,11 +91,11 @@ const dummyData = [
 const ReportGrid: React.FC<ReportGridProps> = ({ params, storeNumber, onLoadingChange }) => {
   const [fetchBreakdownByStore, { isFetching: isBreakdownFetching }] = useLazyGetBreakdownByStoreQuery();
   const [fetchBreakdownByStoreTotals, { isFetching: isTotalsFetching }] = useLazyGetBreakdownByStoreTotalsQuery();
-  
+
   const breakdownByStoreManagement = useSelector((state: RootState) => state.yearsEnd.breakdownByStoreMangement);
   const breakdownByStoreTotals = useSelector((state: RootState) => state.yearsEnd.breakdownByStoreTotals);
   const hasToken = useSelector((state: RootState) => state.security.token);
-  
+
   const profitYear = useDecemberFlowProfitYear();
 
   const isQPAY066MReport = params.reportId === 8;
@@ -131,10 +138,8 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, storeNumber, onLoadingC
   }, [isBreakdownFetching, isTotalsFetching, onLoadingChange]);
 
   const getReportTitle = () => {
-    const matchingPreset = presets.find(preset => 
-      preset.params.reportId === params.reportId
-    );
-    
+    const matchingPreset = presets.find((preset) => preset.params.reportId === params.reportId);
+
     if (matchingPreset) {
       return matchingPreset.description.toUpperCase();
     }
@@ -223,29 +228,29 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, storeNumber, onLoadingC
                 </TableRow>
                 <TableRow>
                   {isLoadingQPAY066MData ? (
-                    <TableCell colSpan={5} sx={{ textAlign: 'center', py: 3 }}>
-                      <Box display="flex" justifyContent="center" alignItems="center" gap={2}>
+                    <TableCell
+                      colSpan={5}
+                      sx={{ textAlign: "center", py: 3 }}>
+                      <Box
+                        display="flex"
+                        justifyContent="center"
+                        alignItems="center"
+                        gap={2}>
                         <CircularProgress size={20} />
-                        <Typography variant="body2" color="text.secondary">
+                        <Typography
+                          variant="body2"
+                          color="text.secondary">
                           Loading...
                         </Typography>
                       </Box>
                     </TableCell>
                   ) : (
                     <>
-                      <TableCell sx={{ fontSize: '0.9rem', py: 1.5 }}>
-                        {summaryData.amountInProfitSharing}
-                      </TableCell>
-                      <TableCell sx={{ fontSize: '0.9rem', py: 1.5 }}>
-                        {summaryData.vestedAmount}
-                      </TableCell>
-                      <TableCell sx={{ fontSize: '0.9rem', py: 1.5 }}>
-                        {summaryData.totalForfeitures}
-                      </TableCell>
-                      <TableCell sx={{ fontSize: '0.9rem', py: 1.5 }}>
-                        {summaryData.totalLoans}
-                      </TableCell>
-                      <TableCell sx={{ fontSize: '0.9rem', py: 1.5 }}>
+                      <TableCell sx={{ fontSize: "0.9rem", py: 1.5 }}>{summaryData.amountInProfitSharing}</TableCell>
+                      <TableCell sx={{ fontSize: "0.9rem", py: 1.5 }}>{summaryData.vestedAmount}</TableCell>
+                      <TableCell sx={{ fontSize: "0.9rem", py: 1.5 }}>{summaryData.totalForfeitures}</TableCell>
+                      <TableCell sx={{ fontSize: "0.9rem", py: 1.5 }}>{summaryData.totalLoans}</TableCell>
+                      <TableCell sx={{ fontSize: "0.9rem", py: 1.5 }}>
                         {summaryData.totalBeneficiaryAllocations}
                       </TableCell>
                     </>
@@ -264,7 +269,7 @@ const ReportGrid: React.FC<ReportGridProps> = ({ params, storeNumber, onLoadingC
           isLoading={isBreakdownFetching || isTotalsFetching}
           providedOptions={{
             rowData: rowData,
-            columnDefs: columnDefs,
+            columnDefs: columnDefs
           }}
         />
       </Grid>
