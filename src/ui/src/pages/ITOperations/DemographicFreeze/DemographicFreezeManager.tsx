@@ -2,7 +2,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { Box, Button, FormHelperText, FormLabel, TextField } from "@mui/material";
 import { Grid } from "@mui/material";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, Resolver, useForm } from "react-hook-form";
 import { useFreezeDemographicsMutation } from "reduxstore/api/ItOperationsApi";
 import * as yup from "yup";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
@@ -20,9 +20,13 @@ const schema = yup.object().shape({
     .number()
     .typeError("Year must be a number")
     .integer("Year must be an integer")
-    .min(2020, "Year must be 2020 or later")
-    .max(2100, "Year must be 2100 or earlier")
-    .required("Year is required"),
+    .test("valid-year", "Year must be current or previous year", (value) => {
+      if (!value) return false;
+      const currentYear = new Date().getFullYear();
+      return value === currentYear || value === currentYear - 1;
+    })
+    .required("Year is required")
+    .defined(),
   asOfDate: yup
     .date()
     .nullable()
@@ -30,6 +34,12 @@ const schema = yup.object().shape({
     .test("not-future", "Date cannot be in the future", (value) => {
       if (!value) return true;
       return value <= new Date();
+    })
+    .test("valid-year", "Date must be from current or previous year", (value) => {
+      if (!value) return true;
+      const currentYear = new Date().getFullYear();
+      const dateYear = value.getFullYear();
+      return dateYear === currentYear || dateYear === currentYear - 1;
     }),
   asOfTime: yup.string().nullable().required("As of Time is required")
 });
@@ -45,18 +55,22 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
 }) => {
   const [freezeDemographics, { isLoading }] = useFreezeDemographicsMutation();
   const profitYear = useDecemberFlowProfitYear();
+  
+  const currentYear = new Date().getFullYear();
+  const previousYear = currentYear - 1;
 
   const {
     control,
     handleSubmit,
     formState: { errors, isValid }
   } = useForm<DemographicFreezeSearch>({
-    resolver: yupResolver<DemographicFreezeSearch>(schema),
+    resolver: yupResolver(schema) as Resolver<DemographicFreezeSearch>,
     defaultValues: {
-      profitYear: profitYear || undefined,
+      profitYear: profitYear || currentYear,
       asOfDate: null,
       asOfTime: null
-    }
+    },
+    mode: "onChange"
   });
 
   const onSubmit = handleSubmit(async (data) => {
@@ -123,8 +137,8 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
                 label="Profit Year"
                 disableFuture
                 views={["year"]}
-                minDate={new Date(2024, 0)}
-                maxDate={new Date(2025, 11)}
+                minDate={new Date(previousYear, 0)}
+                maxDate={new Date(currentYear, 11)}
                 error={errors.profitYear?.message}
               />
             )}
@@ -144,7 +158,7 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
                 value={field.value}
                 required={true}
                 label="As of Date"
-                minDate={new Date(2024, 0, 1)}
+                minDate={new Date(previousYear, 0, 1)}
                 maxDate={new Date()}
                 error={errors.asOfDate?.message}
               />
