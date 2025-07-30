@@ -1,7 +1,7 @@
 import { ColDef } from "ag-grid-community";
 import { yyyyMMDDToMMDDYYYY } from "smart-ui-library";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
-import { createBadgeColumn, createCurrencyColumn, createSSNColumn } from "../../../utils/gridColumnFactory";
+import { createBadgeColumn, createCurrencyColumn, createSSNColumn, createDateColumn, createStoreColumn } from "../../../utils/gridColumnFactory";
 
 export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
   return [
@@ -20,16 +20,12 @@ export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
       cellClass: "left-align",
       resizable: true
     },
-    {
+    createDateColumn({
       headerName: "DOB",
       field: "dateOfBirth",
-      colId: "dateOfBirth",
       minWidth: 100,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      valueFormatter: (params) => (params.value ? yyyyMMDDToMMDDYYYY(params.value) : "")
-    },
+      alignment: "left"
+    }),
     {
       headerName: "Address",
       field: "address",
@@ -61,26 +57,18 @@ export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
       cellClass: "center-align",
       resizable: true
     },
-    {
+    createDateColumn({
       headerName: "Hire",
       field: "hireDate",
-      colId: "hireDate",
       minWidth: 100,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      valueFormatter: (params) => (params.value ? yyyyMMDDToMMDDYYYY(params.value) : "")
-    },
-    {
+      alignment: "left"
+    }),
+    createDateColumn({
       headerName: "Termination",
       field: "terminationDate",
-      colId: "terminationDate",
       minWidth: 100,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      valueFormatter: (params) => (params.value ? yyyyMMDDToMMDDYYYY(params.value) : "")
-    },
+      alignment: "left"
+    }),
     {
       headerName: "Years",
       field: "years",
@@ -89,14 +77,10 @@ export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
       type: "rightAligned",
       resizable: true
     },
-    {
+    createStoreColumn({
       headerName: "Store #",
-      field: "storeNumber",
-      colId: "storeNumber",
-      minWidth: 60,
-      type: "rightAligned",
-      resizable: true
-    },
+      minWidth: 60
+    }),
     {
       headerName: "Hours",
       field: "hoursCurrentYear",

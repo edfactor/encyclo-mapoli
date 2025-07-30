@@ -1,7 +1,7 @@
 import { ColDef } from "ag-grid-community";
 import { yyyyMMDDToMMDDYYYY } from "smart-ui-library";
 import { GRID_COLUMN_WIDTHS } from "../../constants";
-import { createBadgeColumn, createCurrencyColumn, createSSNColumn } from "../../utils/gridColumnFactory";
+import { createBadgeColumn, createCurrencyColumn, createSSNColumn, createAgeColumn, createDateColumn, createStoreColumn } from "../../utils/gridColumnFactory";
 
 export const GetProfitShareReportColumns = (): ColDef[] => {
   return [
@@ -19,14 +19,9 @@ export const GetProfitShareReportColumns = (): ColDef[] => {
       cellClass: "left-align",
       resizable: true
     },
-    {
-      headerName: "Store",
-      field: "storeNumber",
-      colId: "storeNumber",
-      minWidth: 60,
-      type: "rightAligned",
-      resizable: true
-    },
+    createStoreColumn({
+      minWidth: 60
+    }),
     {
       headerName: "Employee Type",
       field: "employeeTypeCode",
@@ -41,16 +36,12 @@ export const GetProfitShareReportColumns = (): ColDef[] => {
         return `${id} - ${name}`;
       }
     },
-    {
+    createDateColumn({
       headerName: "Date of Birth",
       field: "dateOfBirth",
-      colId: "dateOfBirth",
       minWidth: 150,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      valueFormatter: (params) => (params.value ? yyyyMMDDToMMDDYYYY(params.value) : "")
-    },
+      alignment: "left"
+    }),
     {
       headerName: "Age",
       field: "age",

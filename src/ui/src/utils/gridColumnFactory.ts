@@ -1,7 +1,7 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { agGridNumberToCurrency } from "smart-ui-library";
+import { agGridNumberToCurrency, yyyyMMDDToMMDDYYYY } from "smart-ui-library";
 import { GRID_COLUMN_WIDTHS } from "../constants";
-import { BadgeColumnOptions, SSNColumnOptions, CurrencyColumnOptions } from "./columnFactoryTypes";
+import { BadgeColumnOptions, SSNColumnOptions, CurrencyColumnOptions, AgeColumnOptions, DateColumnOptions, StoreColumnOptions } from "./columnFactoryTypes";
 import { viewBadgeLinkRenderer } from "./masterInquiryLink";
 
 export const createSSNColumn = (options: SSNColumnOptions = {}): ColDef => {
@@ -103,6 +103,104 @@ export const createCurrencyColumn = (options: CurrencyColumnOptions): ColDef => 
     sortable,
     valueFormatter
   };
+
+  if (maxWidth) {
+    column.maxWidth = maxWidth;
+  }
+
+  return column;
+};
+
+export const createAgeColumn = (options: AgeColumnOptions = {}): ColDef => {
+  const {
+    headerName = "Age",
+    field = "age",
+    colId = field,
+    minWidth = 70,
+    maxWidth,
+    sortable = true,
+    resizable = true
+  } = options;
+
+  const column: ColDef = {
+    headerName,
+    field,
+    colId,
+    minWidth,
+    type: "rightAligned",
+    resizable,
+    sortable
+  };
+
+  if (maxWidth) {
+    column.maxWidth = maxWidth;
+  }
+
+  return column;
+};
+
+export const createDateColumn = (options: DateColumnOptions): ColDef => {
+  const {
+    headerName,
+    field,
+    colId = field,
+    minWidth = 120,
+    maxWidth,
+    alignment = "center",
+    sortable = true,
+    resizable = true,
+    valueFormatter = (params) => (params.value ? yyyyMMDDToMMDDYYYY(params.value) : "")
+  } = options;
+
+  const alignmentClass = alignment === "center" ? "center-align" : "left-align";
+
+  const column: ColDef = {
+    headerName,
+    field,
+    colId,
+    minWidth,
+    headerClass: alignmentClass,
+    cellClass: alignmentClass,
+    resizable,
+    sortable,
+    valueFormatter
+  };
+
+  if (maxWidth) {
+    column.maxWidth = maxWidth;
+  }
+
+  return column;
+};
+
+export const createStoreColumn = (options: StoreColumnOptions = {}): ColDef => {
+  const {
+    headerName = "Store",
+    field = "storeNumber",
+    colId = field,
+    minWidth = 80,
+    maxWidth,
+    alignment = "right",
+    sortable = true,
+    resizable = true
+  } = options;
+
+  const column: ColDef = {
+    headerName,
+    field,
+    colId,
+    minWidth,
+    resizable,
+    sortable
+  };
+
+  if (alignment === "right") {
+    column.type = "rightAligned";
+  } else {
+    const alignmentClass = alignment === "center" ? "center-align" : "left-align";
+    column.headerClass = alignmentClass;
+    column.cellClass = alignmentClass;
+  }
 
   if (maxWidth) {
     column.maxWidth = maxWidth;

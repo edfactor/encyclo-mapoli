@@ -2,7 +2,7 @@ import { ColDef } from "ag-grid-community";
 import { yyyyMMDDToMMDDYYYY } from "smart-ui-library";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
 import { getEnrolledStatus } from "../../../utils/enrollmentUtil";
-import { createBadgeColumn, createCurrencyColumn, createSSNColumn } from "../../../utils/gridColumnFactory";
+import { createBadgeColumn, createCurrencyColumn, createSSNColumn, createAgeColumn, createDateColumn } from "../../../utils/gridColumnFactory";
 
 export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
   return [
@@ -22,16 +22,12 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       resizable: true
     },
     createSSNColumn({ alignment: "left" }),
-    {
+    createDateColumn({
       headerName: "Date",
       field: "date",
-      colId: "date",
       minWidth: 100,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      valueFormatter: (params) => (params.value ? yyyyMMDDToMMDDYYYY(params.value) : "")
-    },
+      alignment: "left"
+    }),
     createCurrencyColumn({
       headerName: "Distribution",
       field: "distributionAmount",
@@ -61,14 +57,7 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       field: "forfeitAmount",
       minWidth: 120
     }),
-    {
-      headerName: "Age",
-      field: "age",
-      colId: "age",
-      minWidth: 70,
-      type: "rightAligned",
-      resizable: true
-    },
+    createAgeColumn({});
     {
       headerName: "Tax Code",
       field: "taxCode",

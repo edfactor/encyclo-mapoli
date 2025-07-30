@@ -1,5 +1,5 @@
 import { ColDef, ColGroupDef } from "ag-grid-community";
-import { createBadgeColumn, createCurrencyColumn } from "../../utils/gridColumnFactory";
+import { createBadgeColumn, createCurrencyColumn, createStoreColumn } from "../../utils/gridColumnFactory";
 
 export const GetPay450GridColumns = (navFunction: (badgeNumber: string) => void): (ColDef | ColGroupDef)[] => {
   return [
@@ -19,14 +19,9 @@ export const GetPay450GridColumns = (navFunction: (badgeNumber: string) => void)
       resizable: true,
       sortable: true
     },
-    {
-      headerName: "Store",
-      field: "storeNumber",
-      colId: "storeNumber",
-      minWidth: 80,
-      type: "rightAligned",
-      resizable: true
-    },
+    createStoreColumn({
+      minWidth: 80
+    }),
     {
       headerName: "Before",
       children: [

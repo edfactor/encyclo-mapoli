@@ -32,3 +32,36 @@ export interface CurrencyColumnOptions {
   resizable?: boolean;
   valueFormatter?: (params: ValueFormatterParams) => string;
 }
+
+export interface AgeColumnOptions {
+  headerName?: string;
+  field?: string;
+  colId?: string;
+  minWidth?: number;
+  maxWidth?: number;
+  sortable?: boolean;
+  resizable?: boolean;
+}
+
+export interface DateColumnOptions {
+  headerName?: string;
+  field: string;
+  colId?: string;
+  minWidth?: number;
+  maxWidth?: number;
+  alignment?: "left" | "center";
+  sortable?: boolean;
+  resizable?: boolean;
+  valueFormatter?: (params: ValueFormatterParams) => string;
+}
+
+export interface StoreColumnOptions {
+  headerName?: string;
+  field?: string;
+  colId?: string;
+  minWidth?: number;
+  maxWidth?: number;
+  alignment?: "left" | "center" | "right";
+  sortable?: boolean;
+  resizable?: boolean;
+}

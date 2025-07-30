@@ -12,7 +12,7 @@ import {
   RehireForfeituresSaveButtonCellParams
 } from "../../../reduxstore/types";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
-import { createSSNColumn, createBadgeColumn } from "../../../utils/gridColumnFactory";
+import { createSSNColumn, createBadgeColumn, createStoreColumn } from "../../../utils/gridColumnFactory";
 
 export const HeaderComponent: React.FC<RehireForfeituresHeaderComponentProps> = (params: RehireForfeituresHeaderComponentProps) => {
   const selectedProfitYear = useDecemberFlowProfitYear();
@@ -135,16 +135,11 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       sortable: true,
       valueFormatter: agGridNumberToCurrency
     },
-    {
-      headerName: "Store",
-      field: "storeNumber",
-      colId: "storeNumber",
+    createStoreColumn({
       minWidth: 30,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
+      alignment: "left",
       sortable: true
-    }
+    })
   ];
 };
 
