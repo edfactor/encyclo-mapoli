@@ -18,6 +18,7 @@ import { mmDDYYFormat, tryddmmyyyyToDate } from "../../../utils/dateUtils";
 
 const schema = yup.object().shape({
   beginningDate: yup.string().required("Beginning Date is required"),
+<<<<<<< Updated upstream
   endingDate: yup
     .string()
     .typeError("Invalid date")
@@ -33,6 +34,15 @@ const schema = yup.object().shape({
       
       return endDate >= beginDate;
     }),
+=======
+  endingDate: yup.string()
+                 .typeError("Invalid date")
+                 .required("Ending Date is required")
+                 .test("is-too-early", "Insuffient data for dates before 2024", function (value) {
+                    
+                    return new Date(value) > new Date(2024,1,1);
+                 }),
+>>>>>>> Stashed changes
   pagination: yup
     .object({
       skip: yup.number().required(),
