@@ -129,6 +129,8 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
                 label="Profit Year"
                 disableFuture
                 views={["year"]}
+                minDate={new Date(2024, 0)}
+                maxDate={new Date(2025, 11)}
                 error={errors.profitYear?.message}
               />
             )}
@@ -148,8 +150,9 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
                 value={field.value}
                 required={true}
                 label="As of Date"
-                error={!!errors.asOfDate}
-                helperText={errors.asOfDate?.message}
+                minDate={new Date(2024, 0, 1)}
+                maxDate={new Date()}
+                error={errors.asOfDate?.message}
               />
             )}
           />
