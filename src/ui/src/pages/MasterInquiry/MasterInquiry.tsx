@@ -7,6 +7,8 @@ import MasterInquiryGrid from "./MasterInquiryDetailsGrid";
 import MasterInquiryEmployeeDetails from "./MasterInquiryEmployeeDetails";
 import MasterInquiryMemberGrid from "./MasterInquiryMemberGrid";
 import MasterInquirySearchFilter from "./MasterInquirySearchFilter";
+import { useSelector } from "react-redux";
+import { RootState } from "reduxstore/store";
 
 interface SelectedMember {
   memberType: number;
@@ -23,6 +25,25 @@ const MasterInquiry = () => {
   const [searchParams, setSearchParams] = useState<MasterInquiryRequest | null>(null);
   const [selectedMember, setSelectedMember] = useState<SelectedMember | null>(null);
   const [noResults, setNoResults] = useState(false);
+
+  const { masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
+
+  const isSimpleSearch = () => {
+    return (
+      masterInquiryRequestParams &&
+      (masterInquiryRequestParams.name ||
+        masterInquiryRequestParams.socialSecurity ||
+        masterInquiryRequestParams.badgeNumber) &&
+      !(
+        masterInquiryRequestParams.startProfitMonth ||
+        masterInquiryRequestParams.endProfitMonth ||
+        masterInquiryRequestParams.contribution ||
+        masterInquiryRequestParams.earnings ||
+        masterInquiryRequestParams.forfeiture ||
+        masterInquiryRequestParams.payment
+      )
+    );
+  };
 
   return (
     <Page label="MASTER INQUIRY (008-10)">
@@ -44,8 +65,13 @@ const MasterInquiry = () => {
                 setSearchParams(params ?? null);
                 setSelectedMember(null);
                 // Only set noResults to true if params is undefined (not found)
-                // but not when it's null (reset)
-                setNoResults(params === undefined);
+                // Don't reset noResults when params is undefined (clearing state)
+                if (params === undefined) {
+                  setNoResults(true);
+                } else if (params !== null) {
+                  setNoResults(false);
+                }
+                // Don't change noResults when params is null (form reset)
               }}
             />
           </DSMAccordion>
@@ -53,8 +79,9 @@ const MasterInquiry = () => {
 
         {searchParams && (
           <MasterInquiryMemberGrid
-            {...searchParams}
+            searchParams={searchParams}
             onBadgeClick={(data) => setSelectedMember(data || null)}
+            isSimpleSearch={isSimpleSearch}
           />
         )}
 
@@ -65,11 +92,12 @@ const MasterInquiry = () => {
             id={selectedMember?.id ?? 0}
             profitYear={searchParams?.endProfitYear}
             noResults={noResults}
+            isSimpleSearch={isSimpleSearch}
           />
         )}
 
         {/* Render details for selected member if present */}
-        {selectedMember && (
+        {!noResults && selectedMember && (
           <MasterInquiryGrid
             memberType={selectedMember.memberType}
             id={selectedMember.id}
