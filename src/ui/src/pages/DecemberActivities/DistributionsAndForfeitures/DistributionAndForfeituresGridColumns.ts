@@ -1,8 +1,8 @@
 import { ColDef } from "ag-grid-community";
-import { agGridNumberToCurrency, yyyyMMDDToMMDDYYYY } from "smart-ui-library";
+import { yyyyMMDDToMMDDYYYY } from "smart-ui-library";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
 import { getEnrolledStatus } from "../../../utils/enrollmentUtil";
-import { createBadgeColumn, createSSNColumn } from "../../../utils/gridColumnFactory";
+import { createBadgeColumn, createCurrencyColumn, createSSNColumn } from "../../../utils/gridColumnFactory";
 
 export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
   return [
@@ -32,24 +32,16 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       resizable: true,
       valueFormatter: (params) => (params.value ? yyyyMMDDToMMDDYYYY(params.value) : "")
     },
-    {
+    createCurrencyColumn({
       headerName: "Distribution",
       field: "distributionAmount",
-      colId: "distributionAmount",
-      minWidth: 120,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+      minWidth: 120
+    }),
+    createCurrencyColumn({
       headerName: "State Tax",
       field: "stateTax",
-      colId: "stateTax",
-      minWidth: 120,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
+      minWidth: 120
+    }),
     {
       headerName: "State",
       field: "state",
@@ -59,24 +51,16 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       cellClass: "left-align",
       resizable: true
     },
-    {
+    createCurrencyColumn({
       headerName: "Federal Tax",
       field: "federalTax",
-      colId: "federalTax",
-      minWidth: 120,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+      minWidth: 120
+    }),
+    createCurrencyColumn({
       headerName: "Forfeit Amount",
       field: "forfeitAmount",
-      colId: "forfeitAmount",
-      minWidth: 120,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
+      minWidth: 120
+    }),
     {
       headerName: "Age",
       field: "age",

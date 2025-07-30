@@ -1,10 +1,9 @@
-import { agGridNumberToCurrency } from "smart-ui-library";
-import { ColDef, ColGroupDef, ICellRendererParams } from "ag-grid-community";
-import { createBadgeColumn } from "../../utils/gridColumnFactory";
+import { ColDef, ColGroupDef } from "ag-grid-community";
+import { createBadgeColumn, createCurrencyColumn } from "../../utils/gridColumnFactory";
 
 export const GetPay450GridColumns = (navFunction: (badgeNumber: string) => void): (ColDef | ColGroupDef)[] => {
   return [
-    createBadgeColumn({ 
+    createBadgeColumn({
       headerName: "Badge",
       minWidth: 100,
       alignment: "left",
@@ -31,24 +30,16 @@ export const GetPay450GridColumns = (navFunction: (badgeNumber: string) => void)
     {
       headerName: "Before",
       children: [
-        {
+        createCurrencyColumn({
           headerName: "P/S Amount",
           field: "psAmountOriginal",
-          colId: "psAmountOriginal",
-          minWidth: 120,
-          type: "rightAligned",
-          resizable: true,
-          valueFormatter: agGridNumberToCurrency
-        },
-        {
+          minWidth: 120
+        }),
+        createCurrencyColumn({
           headerName: "P/S Vested",
           field: "psVestedOriginal",
-          colId: "psVestedOriginal",
-          minWidth: 120,
-          type: "rightAligned",
-          resizable: true,
-          valueFormatter: agGridNumberToCurrency
-        },
+          minWidth: 120
+        }),
         {
           headerName: "Years",
           field: "yearsOriginal",
@@ -70,24 +61,16 @@ export const GetPay450GridColumns = (navFunction: (badgeNumber: string) => void)
     {
       headerName: "After",
       children: [
-        {
+        createCurrencyColumn({
           headerName: "P/S Amount",
           field: "psAmountUpdated",
-          colId: "psAmountUpdated",
-          minWidth: 120,
-          type: "rightAligned",
-          resizable: true,
-          valueFormatter: agGridNumberToCurrency
-        },
-        {
+          minWidth: 120
+        }),
+        createCurrencyColumn({
           headerName: "P/S Vested",
           field: "psVestedUpdated",
-          colId: "psVestedUpdated",
-          minWidth: 120,
-          type: "rightAligned",
-          resizable: true,
-          valueFormatter: agGridNumberToCurrency
-        },
+          minWidth: 120
+        }),
         {
           headerName: "Years",
           field: "yearsUpdated",

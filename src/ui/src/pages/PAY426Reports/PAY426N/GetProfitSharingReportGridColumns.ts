@@ -1,14 +1,14 @@
-import { agGridNumberToCurrency, formatNumberWithComma } from "smart-ui-library";
-import { ColDef, ICellRendererParams } from "ag-grid-community";
+import { ColDef } from "ag-grid-community";
+import { formatNumberWithComma } from "smart-ui-library";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
 import { mmDDYYFormat } from "../../../utils/dateUtils";
-import { createSSNColumn, createBadgeColumn } from "../../../utils/gridColumnFactory";
+import { createBadgeColumn, createCurrencyColumn, createSSNColumn } from "../../../utils/gridColumnFactory";
 
 export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   // Import the date formatter from dateutils
 
   return [
-    createBadgeColumn({ 
+    createBadgeColumn({
       headerName: "Badge",
       minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
       alignment: "center",
@@ -60,15 +60,11 @@ export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: str
       resizable: true
     },
     createSSNColumn(),
-    {
+    createCurrencyColumn({
       headerName: "Wages",
       field: "wages",
-      colId: "wages",
-      minWidth: 120,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
+      minWidth: 120
+    }),
     {
       headerName: "Hours",
       field: "hours",
@@ -105,15 +101,11 @@ export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: str
       cellClass: "center-align",
       resizable: true
     },
-    {
+    createCurrencyColumn({
       headerName: "Balance",
       field: "balance",
-      colId: "balance",
-      minWidth: 140,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
+      minWidth: 140
+    }),
     {
       headerName: "Years in Plan",
       field: "yearsInPlan",

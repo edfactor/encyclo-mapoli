@@ -1,11 +1,10 @@
-import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { agGridNumberToCurrency } from "smart-ui-library";
+import { ColDef } from "ag-grid-community";
 import { GRID_COLUMN_WIDTHS } from "../../constants";
-import { createBadgeColumn } from "../../utils/gridColumnFactory";
+import { createBadgeColumn, createCurrencyColumn } from "../../utils/gridColumnFactory";
 
 export const GetYTDWagesColumns = (): ColDef[] => {
   const columns: ColDef[] = [
-    createBadgeColumn({ 
+    createBadgeColumn({
       headerName: "Badge",
       minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
       alignment: "left"
@@ -19,16 +18,11 @@ export const GetYTDWagesColumns = (): ColDef[] => {
       cellClass: "left-align",
       resizable: true
     },
-    {
+    createCurrencyColumn({
       headerName: "Dollars Current Year",
       field: "incomeCurrentYear",
-      colId: "incomeCurrentYear",
-      minWidth: 150,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
+      minWidth: 150
+    }),
     {
       headerName: "Store",
       field: "storeNumber",

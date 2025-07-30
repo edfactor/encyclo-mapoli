@@ -1,5 +1,6 @@
 import { ColDef } from "ag-grid-community";
-import { agGridNumberToCurrency, formatNumberWithComma } from "smart-ui-library";
+import { formatNumberWithComma } from "smart-ui-library";
+import { createCurrencyColumn } from "../../utils/gridColumnFactory";
 
 export const GetMasterInquiryGridColumns = (): ColDef[] => {
   return [
@@ -35,42 +36,26 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
         return `[${id}] ${name}`;
       }
     },
-    {
+    createCurrencyColumn({
       headerName: "Contribution",
       field: "contribution",
-      colId: "contribution",
-      minWidth: 120,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+      minWidth: 120
+    }),
+    createCurrencyColumn({
       headerName: "Earnings",
       field: "earnings",
-      colId: "earnings",
-      minWidth: 120,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+      minWidth: 120
+    }),
+    createCurrencyColumn({
       headerName: "Forfeiture",
       field: "forfeiture",
-      colId: "forfeiture",
-      minWidth: 120,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+      minWidth: 120
+    }),
+    createCurrencyColumn({
       headerName: "Payment",
       field: "payment",
-      colId: "payment",
-      minWidth: 120,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
+      minWidth: 120
+    }),
     {
       headerName: "Month/Year",
       headerTooltip: "Month to Date",
@@ -106,34 +91,22 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
         return formatNumberWithComma(hours);
       }
     },
-    {
+    createCurrencyColumn({
       headerName: "Wages",
       field: "currentIncomeYear",
-      colId: "currentIncomeYear",
       minWidth: 120,
-      type: "rightAligned",
-      resizable: true,
-      sortable: false,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+      sortable: false
+    }),
+    createCurrencyColumn({
       headerName: "Federal Tax",
       field: "federalTaxes",
-      colId: "federalTaxes",
-      minWidth: 120,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+      minWidth: 120
+    }),
+    createCurrencyColumn({
       headerName: "State Tax",
       field: "stateTaxes",
-      colId: "stateTaxes",
-      minWidth: 120,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
+      minWidth: 120
+    }),
     {
       headerName: "Tax Code",
       field: "taxCodeId",

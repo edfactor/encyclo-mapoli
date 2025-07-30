@@ -1,13 +1,12 @@
-import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { agGridNumberToCurrency } from "smart-ui-library";
+import { ColDef } from "ag-grid-community";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
-import { createSSNColumn, createBadgeColumn } from "../../../utils/gridColumnFactory";
+import { createBadgeColumn, createCurrencyColumn, createSSNColumn } from "../../../utils/gridColumnFactory";
 
 // The default is to show all columns, but if the mini flag is set to true, only show the
 // badge, name, and ssn columns
 export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef[] => {
   const columns: ColDef[] = [
-    createBadgeColumn({ 
+    createBadgeColumn({
       headerName: "Badge",
       minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
       alignment: mini ? "left" : "center"
@@ -42,15 +41,14 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       editable: !mini
     },
     {
-      headerName: "Executive Dollars",
-      field: "incomeExecutive",
-      colId: "incomeExecutive",
+      ...createCurrencyColumn({
+        headerName: "Executive Dollars",
+        field: "incomeExecutive"
+      }),
       minWidth: 150,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true,
-      editable: !mini,
-      valueFormatter: agGridNumberToCurrency
+      editable: !mini
     },
     {
       headerName: "Oracle Hours",
@@ -62,14 +60,13 @@ export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef
       resizable: true
     },
     {
-      headerName: "Oracle Dollars",
-      field: "currentIncomeYear",
-      colId: "currentIncomeYear",
+      ...createCurrencyColumn({
+        headerName: "Oracle Dollars",
+        field: "currentIncomeYear"
+      }),
       minWidth: 150,
       headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
+      cellClass: "left-align"
     },
     {
       headerName: "Pay Frequency",

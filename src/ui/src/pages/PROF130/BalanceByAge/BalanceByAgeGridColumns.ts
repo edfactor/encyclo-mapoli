@@ -1,6 +1,6 @@
-import { agGridNumberToCurrency } from "smart-ui-library";
-import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
 import { ColDef, ColGroupDef } from "ag-grid-community";
+import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
+import { createCurrencyColumn } from "../../../utils/gridColumnFactory";
 
 export const GetBalanceByAgeColumns = (reportType: FrozenReportsByAgeRequestType): (ColDef | ColGroupDef)[] => {
   const columns: (ColDef | ColGroupDef)[] = [
@@ -26,24 +26,16 @@ export const GetBalanceByAgeColumns = (reportType: FrozenReportsByAgeRequestType
           cellClass: "left-align",
           resizable: true
         },
-        {
+        createCurrencyColumn({
           headerName: "Balance",
           field: "currentBalance",
-          colId: "currentBalance",
-          minWidth: 150,
-          type: "rightAligned",
-          resizable: true,
-          valueFormatter: agGridNumberToCurrency
-        },
-        {
+          minWidth: 150
+        }),
+        createCurrencyColumn({
           headerName: "Vested",
           field: "vestedBalance",
-          colId: "vestedBalance",
-          minWidth: 150,
-          type: "rightAligned",
-          resizable: true,
-          valueFormatter: agGridNumberToCurrency
-        }
+          minWidth: 150
+        })
       ]
     }
   ];

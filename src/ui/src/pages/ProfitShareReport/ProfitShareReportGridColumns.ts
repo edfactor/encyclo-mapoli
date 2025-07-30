@@ -1,11 +1,11 @@
-import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { yyyyMMDDToMMDDYYYY, agGridNumberToCurrency } from "smart-ui-library";
+import { ColDef } from "ag-grid-community";
+import { yyyyMMDDToMMDDYYYY } from "smart-ui-library";
 import { GRID_COLUMN_WIDTHS } from "../../constants";
-import { createSSNColumn, createBadgeColumn } from "../../utils/gridColumnFactory";
+import { createBadgeColumn, createCurrencyColumn, createSSNColumn } from "../../utils/gridColumnFactory";
 
 export const GetProfitShareReportColumns = (): ColDef[] => {
   return [
-    createBadgeColumn({ 
+    createBadgeColumn({
       headerName: "Badge",
       minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
       alignment: "left"
@@ -61,15 +61,11 @@ export const GetProfitShareReportColumns = (): ColDef[] => {
       resizable: true
     },
     createSSNColumn({ alignment: "left" }),
-    {
+    createCurrencyColumn({
       headerName: "Wages",
       field: "wages",
-      colId: "wages",
-      minWidth: 150,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
+      minWidth: 150
+    }),
     {
       headerName: "Hours",
       field: "hours",

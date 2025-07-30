@@ -1,5 +1,5 @@
-import { agGridNumberToCurrency } from "smart-ui-library";
 import { ColDef, ColGroupDef } from "ag-grid-community";
+import { createCurrencyColumn } from "../../../utils/gridColumnFactory";
 
 export const GetVestedAmountsByAgeColumns = (countColName: string, amountColName: string): (ColDef | ColGroupDef)[] => {
   return [
@@ -20,14 +20,11 @@ export const GetVestedAmountsByAgeColumns = (countColName: string, amountColName
       type: "rightAligned",
       resizable: true
     },
-    {
+    createCurrencyColumn({
       headerName: "Amount",
       field: amountColName,
       colId: amountColName,
-      minWidth: 120,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    }
+      minWidth: 120
+    })
   ];
 };

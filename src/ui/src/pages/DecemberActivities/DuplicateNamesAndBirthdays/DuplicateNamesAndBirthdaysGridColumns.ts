@@ -1,7 +1,7 @@
 import { ColDef } from "ag-grid-community";
-import { agGridNumberToCurrency, yyyyMMDDToMMDDYYYY } from "smart-ui-library";
+import { yyyyMMDDToMMDDYYYY } from "smart-ui-library";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
-import { createBadgeColumn, createSSNColumn } from "../../../utils/gridColumnFactory";
+import { createBadgeColumn, createCurrencyColumn, createSSNColumn } from "../../../utils/gridColumnFactory";
 
 export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
   return [
@@ -105,24 +105,16 @@ export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
       type: "rightAligned",
       resizable: true
     },
-    {
+    createCurrencyColumn({
       headerName: "Balance",
       field: "netBalance",
-      colId: "netBalance",
-      minWidth: 60,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+      minWidth: 60
+    }),
+    createCurrencyColumn({
       headerName: "Income",
       field: "incomeCurrentYear",
-      colId: "incomeCurrentYear",
-      minWidth: 60,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
+      minWidth: 60
+    }),
     {
       headerName: "Employment Status",
       field: "employmentStatusName",
