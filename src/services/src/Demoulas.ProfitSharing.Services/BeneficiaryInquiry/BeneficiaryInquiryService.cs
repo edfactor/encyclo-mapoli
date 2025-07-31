@@ -41,86 +41,52 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
 
         return num - place;
     }
-    private async Task<List<BeneficiaryDto>> GetPreviousBeneficiaries(BeneficiaryRequestDto request, IQueryable<Beneficiary> query, CancellationToken cancellationToken)
+    private async Task<PaginatedResponseDto<BeneficiaryDto>> GetPreviousBeneficiaries(BeneficiaryRequestDto request, IQueryable<Beneficiary> query, CancellationToken cancellationToken)
     {
         List<BeneficiaryDto> res = new();
         int psnSuffix = request.PsnSuffix ?? 0;
+        List<int> psns = new();
         if (psnSuffix > 1000)
         {
             int stepBack = StepBackNumber(psnSuffix);
             while (stepBack >= 1000)
             {
-                query = query.Where(x => x.PsnSuffix == stepBack);
-                var result = query.Select(x => new BeneficiaryDto()
-                {
-                    Id = x.Id,
-                    BadgeNumber = x.BadgeNumber,
-                    PsnSuffix = x.PsnSuffix,
-                    DemographicId = x.DemographicId,
-                    Percent = x.Percent,
-                    KindId = x.KindId,
-                    CreatedDate = x.Contact != null ? x.Contact.CreatedDate : DateOnly.MaxValue,
-                    DateOfBirth = x.Contact != null ? x.Contact.DateOfBirth : DateOnly.MaxValue,
-                    Ssn = x.Contact != null ? x.Contact.Ssn.ToString() : string.Empty,
-                    City = x.Contact != null ? x.Contact.Address.City : null,
-                    CountryIso = x.Contact != null ? x.Contact.Address.CountryIso ?? "" : "",
-                    PostalCode = x.Contact != null ? x.Contact.Address.PostalCode : null,
-                    State = x.Contact != null ? x.Contact.Address.State : null,
-                    Street = x.Contact != null ? x.Contact.Address.Street : "",
-                    Street2 = x.Contact != null ? x.Contact.Address.Street2 : null,
-                    FirstName = x.Contact != null ? x.Contact.ContactInfo.FirstName : "",
-                    LastName = x.Contact != null ? x.Contact.ContactInfo.LastName : "",
-                    EmailAddress = x.Contact != null ? x.Contact.ContactInfo.EmailAddress : "",
-                    FullName = x.Contact != null ? x.Contact.ContactInfo.FullName : "",
-                    MiddleName = x.Contact != null ? x.Contact.ContactInfo.MiddleName : null,
-                    MobileNumber = x.Contact != null ? x.Contact.ContactInfo.MobileNumber : "",
-                    PhoneNumber = x.Contact != null ? x.Contact.ContactInfo.PhoneNumber : "",
-                    Kind = new BeneficiaryKindDto()
-                    {
-                        Id = x.Kind != null ? x.Kind.Id : BeneficiaryKind.Constants.Primary,
-                        Name = x.Kind != null ? x.Kind.Name : null
-                    },
-                    Relationship = x.Relationship
-                });
-                res.AddRange(result.ToList());
-                if(stepBack == 1000)
-                {
-                    query = query.Where(x => x.PsnSuffix == stepBack);
-                    var result1 = query.Select(x => new BeneficiaryDto()
-                    {
-                        Id = x.Id,
-                        BadgeNumber = x.BadgeNumber,
-                        PsnSuffix = x.PsnSuffix,
-                        DemographicId = x.DemographicId,
-                        Percent = x.Percent,
-                        KindId = x.KindId,
-                        CreatedDate = x.Contact != null ? x.Contact.CreatedDate : DateOnly.MaxValue,
-                        DateOfBirth = x.Demographic.DateOfBirth != null ? x.Demographic.DateOfBirth : DateOnly.MaxValue,
-                        Ssn = x.Demographic.Ssn != null ? x.Demographic.Ssn.ToString() : string.Empty,
-                        City = x.Demographic.Address.City != null ? x.Demographic.Address.City : null,
-                        CountryIso = x.Demographic != null ? x.Demographic.Address.CountryIso ?? "" : "",
-                        PostalCode = x.Demographic != null ? x.Demographic.Address.PostalCode : null,
-                        State = x.Demographic != null ? x.Demographic.Address.State : null,
-                        Street = x.Demographic != null ? x.Demographic.Address.Street : "",
-                        Street2 = x.Demographic != null ? x.Demographic.Address.Street2 : null,
-                        FirstName = x.Demographic != null ? x.Demographic.ContactInfo.FirstName : "",
-                        LastName = x.Demographic != null ? x.Demographic.ContactInfo.LastName : "",
-                        EmailAddress = x.Demographic != null ? x.Demographic.ContactInfo.EmailAddress : "",
-                        FullName = x.Demographic != null ? x.Demographic.ContactInfo.FullName : "",
-                        MiddleName = x.Demographic != null ? x.Demographic.ContactInfo.MiddleName : null,
-                        MobileNumber = x.Demographic != null ? x.Demographic.ContactInfo.MobileNumber : "",
-                        PhoneNumber = x.Demographic != null ? x.Demographic.ContactInfo.PhoneNumber : "",
-                        Kind = new BeneficiaryKindDto()
-                        {
-                            Id = x.Kind != null ? x.Kind.Id : BeneficiaryKind.Constants.Primary,
-                            Name = x.Kind != null ? x.Kind.Name : null
-                        },
-                        Relationship = x.Relationship
-                    });
-                    res.AddRange(result1.ToList());
-                }
+                psns.Add(stepBack);
                 stepBack = StepBackNumber(stepBack);
             }
+            query  = query.Where(x=>psns.Contains(x.PsnSuffix)).OrderByDescending(x=>x.PsnSuffix);
+            var result = query.Select(x => new BeneficiaryDto()
+            {
+                Id = x.Id,
+                BadgeNumber = x.BadgeNumber,
+                PsnSuffix = x.PsnSuffix,
+                DemographicId = x.DemographicId,
+                Percent = x.Percent,
+                KindId = x.KindId,
+                CreatedDate = x.Contact != null ? x.Contact.CreatedDate : DateOnly.MaxValue,
+                DateOfBirth = x.Contact.DateOfBirth != null ? x.Contact.DateOfBirth : DateOnly.MaxValue,
+                Ssn = x.Contact.Ssn != null ? x.Contact.Ssn.ToString() : string.Empty,
+                City = x.Contact.Address.City != null ? x.Contact.Address.City : null,
+                CountryIso = x.Contact != null ? x.Contact.Address.CountryIso ?? "" : "",
+                PostalCode = x.Contact != null ? x.Contact.Address.PostalCode : null,
+                State = x.Contact != null ? x.Contact.Address.State : null,
+                Street = x.Contact != null ? x.Contact.Address.Street : "",
+                Street2 = x.Contact != null ? x.Contact.Address.Street2 : null,
+                FirstName = x.Contact != null ? x.Contact.ContactInfo.FirstName : "",
+                LastName = x.Contact != null ? x.Contact.ContactInfo.LastName : "",
+                EmailAddress = x.Contact != null ? x.Contact.ContactInfo.EmailAddress : "",
+                FullName = x.Contact != null ? x.Contact.ContactInfo.FullName : "",
+                MiddleName = x.Contact != null ? x.Contact.ContactInfo.MiddleName : null,
+                MobileNumber = x.Contact != null ? x.Contact.ContactInfo.MobileNumber : "",
+                PhoneNumber = x.Contact != null ? x.Contact.ContactInfo.PhoneNumber : "",
+                Kind = new BeneficiaryKindDto()
+                {
+                    Id = x.Kind != null ? x.Kind.Id : BeneficiaryKind.Constants.Primary,
+                    Name = x.Kind != null ? x.Kind.Name : null
+                },
+                Relationship = x.Relationship
+            });
+            return await result.ToPaginationResultsAsync(request, cancellationToken);
         }
         else
         {
@@ -156,9 +122,8 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                 },
                 Relationship = x.Relationship
             });
-            res.AddRange(result.ToList());
+            return await result.ToPaginationResultsAsync(request, cancellationToken);
         }
-        return res;
     }
     public async Task<BeneficiaryResponse> GetBeneficiary(BeneficiaryRequestDto request, CancellationToken cancellationToken)
     {
@@ -170,10 +135,10 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
 
         var beneficiary = await _dataContextFactory.UseReadOnlyContext(async context =>
         {
-            var query = context.Beneficiaries.Include(x => x.Contact).ThenInclude(x => x!.ContactInfo).Include(x=>x.Demographic).ThenInclude(x=>x.ContactInfo).Include(x=>x.Demographic.Address)
+            var query = context.Beneficiaries.Include(x => x.Contact).ThenInclude(x => x!.ContactInfo).Include(x => x.Demographic).ThenInclude(x => x.ContactInfo).Include(x => x.Demographic.Address)
             .Where(x => request.BadgeNumber == null || request.BadgeNumber == 0 || x.BadgeNumber == request.BadgeNumber);
 
-            var prevBeneficiaries = await GetPreviousBeneficiaries(request, query,cancellationToken);
+            var prevBeneficiaries = await GetPreviousBeneficiaries(request, query, cancellationToken);
 
             // Check if user is querying from root (psnSuffix null or 0)
             if (request.PsnSuffix == null || request.PsnSuffix == 0)
@@ -248,7 +213,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                 Relationship = x.Relationship
             });
             PaginatedResponseDto<BeneficiaryDto> final = await result.ToPaginationResultsAsync(request, cancellationToken);
-            return new BeneficiaryResponse() { Beneficiaries = final, BeneficaryOf = prevBeneficiaries};
+            return new BeneficiaryResponse() { Beneficiaries = final, BeneficiaryOf = prevBeneficiaries };
         }
         );
         //setting Current balance
@@ -261,9 +226,9 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
         }
 
         //setting Current balance
-        ISet<int> ssnListBO = new HashSet<int>(beneficiary.BeneficaryOf.Select(x => Convert.ToInt32(x.Ssn)).ToList());
+        ISet<int> ssnListBO = new HashSet<int>(beneficiary.BeneficiaryOf.Results.Select(x => Convert.ToInt32(x.Ssn)).ToList());
         var balanceListBO = await _totalService.GetVestingBalanceForMembersAsync(SearchBy.Ssn, ssnListBO, yearEnd, cancellationToken);
-        foreach (var item in beneficiary.BeneficaryOf)
+        foreach (var item in beneficiary.BeneficiaryOf.Results)
         {
             item.CurrentBalance = balanceList.Where(x => x.Id.ToString() == item.Ssn).Select(x => x.CurrentBalance).FirstOrDefault();
             item.Ssn = item.Ssn.MaskSsn();

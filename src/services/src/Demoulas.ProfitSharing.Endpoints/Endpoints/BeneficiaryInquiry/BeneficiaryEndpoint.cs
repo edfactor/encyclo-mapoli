@@ -29,7 +29,6 @@ public class BeneficiaryEndpoint : Endpoint<BeneficiaryRequestDto, BeneficiaryRe
 
     public override void Configure()
     {
-        AllowAnonymous();
         Get("");
         Summary(m =>
         {
