@@ -61,7 +61,7 @@ public class YearEndProfitSharingReportEndpoint: EndpointWithCsvTotalsBase<YearE
         var response = await _cleanupReportService.GetYearEndProfitSharingReportAsync(req, ct);
 
         // Read "archive" from query string without modifying the DTO
-        bool archive = HttpContext.Request.Query.TryGetValue("archive", out var archiveValue) &&
+        bool archive = (HttpContext?.Request?.Query?.TryGetValue("archive", out var archiveValue) ?? false) &&
                        bool.TryParse(archiveValue, out var archiveResult) && archiveResult;
 
         if (archive)
