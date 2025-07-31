@@ -13,6 +13,7 @@ import { mmDDYYFormat } from "../../utils/dateUtils";
 import { getEnrolledStatus, getForfeitedStatus } from "../../utils/enrollmentUtil";
 import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
 import { isSimpleSearch } from "./MasterInquiryFunctions";
+import { MASTER_INQUIRY_MESSAGES } from "./MasterInquiryMessages";
 
 interface MasterInquiryEmployeeDetailsProps {
   memberType: number;
@@ -65,29 +66,19 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
 
   if (noResults) {
     if (isSimpleSearch(masterInquiryRequestParams)) {
-      if (!missiveAlerts?.some((alert) => alert.id === 643)) {
+      if (!missiveAlerts?.some((alert) => alert.id === MASTER_INQUIRY_MESSAGES.MEMBER_NOT_FOUND.id)) {
         setMissiveAlerts?.([
           ...(missiveAlerts ?? []),
-          {
-            id: 643, // Example ID, should be unique
-            severity: "Error",
-            message: "Member Not Found",
-            description: "The member you are searching for does not exist in the system."
-          }
+          MASTER_INQUIRY_MESSAGES.MEMBER_NOT_FOUND
         ]);
       }
 
       return null;
     } else {
-      if (!missiveAlerts?.some((alert) => alert.id === 112)) {
+      if (!missiveAlerts?.some((alert) => alert.id === MASTER_INQUIRY_MESSAGES.NO_RESULTS_FOUND.id)) {
         setMissiveAlerts?.([
           ...(missiveAlerts ?? []),
-          {
-            id: 112, // Example ID, should be unique
-            severity: "Error",
-            message: "No Results Found",
-            description: "The search did not return any results. Please try a different search criteria."
-          }
+          MASTER_INQUIRY_MESSAGES.NO_RESULTS_FOUND
         ]);
       }
 
@@ -153,12 +144,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     // Need to add a new missive warning saying a beneficiary was found
     setMissiveAlerts?.([
       ...(missiveAlerts ?? []),
-      {
-        id: 976, // Example ID, should be unique
-        severity: "info",
-        message: `Beneficiary ${ssnValue} Found`,
-        description: "This member is a beneficiary and not an employee."
-      }
+      MASTER_INQUIRY_MESSAGES.BENEFICIARY_FOUND(ssnValue)
     ]);
   }
 
@@ -166,12 +152,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
   if (isMilitary && percentageVested > 0) {
     setMissiveAlerts?.([
       ...(missiveAlerts ?? []),
-      {
-        id: 961, // invented id as this is not from back end
-        severity: "warning",
-        message: "Military entry has affected vested percentage",
-        description: `Vested percentage now at ${percentageVested * 100}%.`
-      }
+      MASTER_INQUIRY_MESSAGES.MILITARY_VESTED_WARNING(percentageVested)
     ]);
   }
 
