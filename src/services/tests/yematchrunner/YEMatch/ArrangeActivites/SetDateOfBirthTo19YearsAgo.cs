@@ -1,4 +1,6 @@
-namespace YEMatch;
+﻿using YEMatch.YEMatch.AssertActivities;
+
+namespace YEMatch.YEMatch.ArrangeActivites;
 
 // Makes everybody 19 years old.
 public class SetDateOfBirthTo19YearsAgo : BaseSqlActivity

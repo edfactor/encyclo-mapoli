@@ -2,6 +2,7 @@
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using YEMatch.YEMatch.Activities;
 using HttpMethod = System.Net.Http.HttpMethod;
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
@@ -11,7 +12,7 @@ using HttpMethod = System.Net.Http.HttpMethod;
 #pragma warning disable S2223
 #pragma warning disable S1104
 
-namespace YEMatch;
+namespace YEMatch.YEMatch.SmartActivities;
 
 public static class SmartActivityFactory
 {

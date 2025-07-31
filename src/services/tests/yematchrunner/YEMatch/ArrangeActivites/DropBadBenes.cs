@@ -1,4 +1,6 @@
-namespace YEMatch;
+﻿using YEMatch.YEMatch.AssertActivities;
+
+namespace YEMatch.YEMatch.ArrangeActivites;
 
 /* See https://demoulas.atlassian.net/browse/PS-1268 */
 

@@ -2,12 +2,11 @@
 using System.Net.Http.Headers;
 using System.Text;
 using Newtonsoft.Json;
+using YEMatch.YEMatch.AssertActivities.MasterInquiry;
+using YEMatch.YEMatch.SmartActivities;
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-namespace YEMatch;
-
-using System;
-using System.IO;
+namespace YEMatch.YEMatch.AssertActivities;
 
 public sealed class TeeWriter(TextWriter one, TextWriter two) : TextWriter
 {

@@ -3,6 +3,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
@@ -14,10 +15,12 @@ public class ExecutiveHoursAndDollarsEndpoint :
     >
 {
     private readonly IExecutiveHoursAndDollarsService _reportService;
+    private readonly IAuditService _auditService;
 
-    public  ExecutiveHoursAndDollarsEndpoint(IExecutiveHoursAndDollarsService reportService)
+    public  ExecutiveHoursAndDollarsEndpoint(IExecutiveHoursAndDollarsService reportService, IAuditService auditService)
     {
         _reportService = reportService;
+        _auditService = auditService;
     }
 
     public override void Configure()
@@ -38,9 +41,20 @@ public class ExecutiveHoursAndDollarsEndpoint :
 
     public override string ReportFileName => "Executive Hours and Dollars";
 
-    public override Task<ReportResponseBase<ExecutiveHoursAndDollarsResponse>> GetResponse(ExecutiveHoursAndDollarsRequest req, CancellationToken ct)
+    public override async Task<ReportResponseBase<ExecutiveHoursAndDollarsResponse>> GetResponse(ExecutiveHoursAndDollarsRequest req, CancellationToken ct)
     {
-        return  _reportService.GetExecutiveHoursAndDollarsReportAsync(req, ct);
+        ReportResponseBase<ExecutiveHoursAndDollarsResponse> response = await _reportService.GetExecutiveHoursAndDollarsReportAsync(req, ct);
+
+        // Read "archive" from query string without modifying the DTO
+        bool archive = HttpContext.Request.Query.TryGetValue("archive", out var archiveValue) &&
+                       bool.TryParse(archiveValue, out var archiveResult) && archiveResult;
+
+        if (archive)
+        {
+            await _auditService.ArchiveCompletedReportAsync(response.ReportName, req, response, ct);
+        }
+
+        return response;
     }
 
     public sealed class ExecutiveHoursAndDollarsMap : ClassMap<ExecutiveHoursAndDollarsResponse>

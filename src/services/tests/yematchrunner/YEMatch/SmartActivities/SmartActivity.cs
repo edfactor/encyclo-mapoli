@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
+using YEMatch.YEMatch.Activities;
 
-namespace YEMatch;
+namespace YEMatch.YEMatch.SmartActivities;
 
 #pragma warning disable CS1998
 

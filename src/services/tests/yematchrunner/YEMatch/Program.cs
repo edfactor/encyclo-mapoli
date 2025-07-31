@@ -1,4 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using YEMatch.YEMatch.Activities;
+using YEMatch.YEMatch.Runs;
 
 #pragma warning disable CS0162 // Unreachable code detected
 // ReSharper disable FieldCanBeMadeReadOnly.Local
@@ -6,7 +8,7 @@
 #pragma warning disable S1144
 #pragma warning disable AsyncFixer01
 
-namespace YEMatch;
+namespace YEMatch.YEMatch;
 
 [SuppressMessage("Major Code Smell", "S125:Sections of code should not be commented out")]
 [SuppressMessage("Major Code Smell", "S1854:Unused assignments should be removed")]

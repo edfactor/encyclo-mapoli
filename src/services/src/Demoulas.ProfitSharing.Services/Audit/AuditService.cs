@@ -2,11 +2,11 @@
 using System.Text.Json;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.Attributes;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using static Demoulas.ProfitSharing.Common.Contracts.Request.FrozenReportsByAgeRequest;
 
 namespace Demoulas.ProfitSharing.Services.Audit;
 
@@ -21,6 +21,7 @@ public sealed class AuditService : IAuditService
         _appUser = appUser;
     }
 
+   
     public Task ArchiveCompletedReportAsync<TRequest, TReport>(string reportName,
         TRequest request,
         TReport report,

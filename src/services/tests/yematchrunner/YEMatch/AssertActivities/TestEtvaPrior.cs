@@ -1,6 +1,6 @@
-using Oracle.ManagedDataAccess.Client;
+﻿using Oracle.ManagedDataAccess.Client;
 
-namespace YEMatch;
+namespace YEMatch.YEMatch.AssertActivities;
 
 public class TestEtvaPrior : BaseSqlActivity
 {
