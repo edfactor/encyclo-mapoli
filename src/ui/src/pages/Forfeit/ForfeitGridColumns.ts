@@ -1,37 +1,32 @@
-import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { agGridNumberToCurrency } from "smart-ui-library";
+import { ColDef } from "ag-grid-community";
 import { GRID_COLUMN_WIDTHS } from "../../constants";
-import { createSSNColumn, createBadgeColumn } from "../../utils/gridColumnFactory";
+import {
+  createBadgeColumn,
+  createCurrencyColumn,
+  createSSNColumn,
+  createNameColumn
+} from "../../utils/gridColumnFactory";
 
 export const GetProfitShareForfeitColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   return [
-    createBadgeColumn({ 
+    createBadgeColumn({
       headerName: "Badge",
       minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
       alignment: "left",
       navigateFunction: navFunction
     }),
-    {
-      headerName: "Name",
+    createNameColumn({
       field: "employeeName",
-      colId: "employeeName",
-      minWidth: 150,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
+      minWidth: 150
+    }),
     createSSNColumn({
       alignment: "left"
     }),
-    {
+    createCurrencyColumn({
       headerName: "Forfeitures",
       field: "forfeitures",
-      colId: "forfeitures",
-      minWidth: 120,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
+      minWidth: 120
+    }),
     {
       headerName: "Cont/Forfeit Points",
       field: "contForfeitPoints",

@@ -9,9 +9,7 @@ internal abstract class ModifiedBaseMap<TType> : IEntityTypeConfiguration<TType>
     public virtual void Configure(EntityTypeBuilder<TType> builder)
     {
 
-        builder.Property(e => e.ModifiedAtUtc);
-
-        _ = builder.Property(e => e.UserName)
+       _ = builder.Property(e => e.UserName)
             .HasMaxLength(96)
             .HasColumnName("USER_NAME")
             .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
@@ -25,7 +23,6 @@ internal abstract class ModifiedBaseMap<TType> : IEntityTypeConfiguration<TType>
             .HasDefaultValueSql("SYSTIMESTAMP");
 
         _ = builder.Property(e => e.ModifiedAtUtc)
-            .IsRequired()
             .ValueGeneratedOnUpdate()
             .HasColumnName("MODIFIED_AT_UTC")
             .HasColumnType("TIMESTAMP WITH TIME ZONE")

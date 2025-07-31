@@ -19,13 +19,15 @@ interface MasterInquiryEmployeeDetailsProps {
   id: string | number;
   profitYear?: number | null | undefined;
   noResults?: boolean;
+  isSimpleSearch: () => boolean;
 }
 
 const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> = ({
   memberType,
   id,
   profitYear,
-  noResults
+  noResults,
+  isSimpleSearch
 }) => {
   const [trigger, { data: details, isLoading, isError }] = useLazyGetProfitMasterInquiryMemberQuery();
   const { masterInquiryResults } = useSelector((state: RootState) => state.inquiry);
@@ -59,24 +61,41 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
   }, [masterInquiryResults]);
 
   if (noResults) {
-    return (
-      <Grid size={{ xs: 12 }}>
-        <div className="missive-alerts-box">
-          <div className="missive-alert missive-error">
-            <Typography
-              sx={{ color: "error.main" }}
-              variant="body1"
-              fontWeight={600}>
-              No Profit Sharing Records Found
-            </Typography>
-            <Typography variant="body2">
-              The Employee Badge Number you have entered has no Profit Sharing Records. Re-enter an Employee Badge
-              Number with Profit Sharing.
-            </Typography>
+    if (isSimpleSearch()) {
+      return (
+        <Grid size={{ xs: 12 }}>
+          <div className="missive-alerts-box">
+            <div className="missive-alert missive-error">
+              <Typography
+                sx={{ color: "error.main" }}
+                variant="body1"
+                fontWeight={600}>
+                Member Not Found
+              </Typography>
+              <Typography variant="body2">The person you are looking for does not exist in the system.</Typography>
+            </div>
           </div>
-        </div>
-      </Grid>
-    );
+        </Grid>
+      );
+    } else {
+      return (
+        <Grid size={{ xs: 12 }}>
+          <div className="missive-alerts-box">
+            <div className="missive-alert missive-error">
+              <Typography
+                sx={{ color: "error.main" }}
+                variant="body1"
+                fontWeight={600}>
+                No Results Found
+              </Typography>
+              <Typography variant="body2">
+                The search did not return any results. Please try a different search criteria.
+              </Typography>
+            </div>
+          </div>
+        </Grid>
+      );
+    }
   }
 
   if (isLoading) return <Typography>Loading...</Typography>;
@@ -204,7 +223,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     ...(isEmployee ? [{ label: "Re-Hire Date", value: reHireDate ? mmDDYYFormat(reHireDate) : "N/A" }] : []),
     { label: "ETVA", value: numberToCurrency(currentEtva) },
     { label: "Previous ETVA", value: numberToCurrency(previousEtva) },
-    { label: "Allocation From", value:  numberToCurrency(allocationFromAmount) }
+    { label: "Allocation From", value: numberToCurrency(allocationFromAmount) }
   ];
 
   return (

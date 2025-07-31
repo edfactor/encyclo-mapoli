@@ -1,5 +1,5 @@
 import { ICellRendererParams, CellClickedEvent, ColDef } from "ag-grid-community";
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, numberToCurrency, Pagination } from "smart-ui-library";
@@ -41,11 +41,15 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   const [triggerSearch, { isFetching }] = useLazyGetTerminationReportQuery();
   const [selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
   const [editedValues, setEditedValues] = useState<Record<string, { value: number; hasError: boolean }>>({});
+  const [loadingRowIds, setLoadingRowIds] = useState<Set<number>>(new Set());
   const selectedProfitYear = useDecemberFlowProfitYear();
-  const [updateForfeitureAdjustmentBulk] = useUpdateForfeitureAdjustmentBulkMutation();
+  const [updateForfeitureAdjustmentBulk, { isLoading: isBulkSaving }] = useUpdateForfeitureAdjustmentBulkMutation();
   const [updateForfeitureAdjustment] = useUpdateForfeitureAdjustmentMutation();
 
   const handleSave = useCallback(async (request: ForfeitureAdjustmentUpdateRequest) => {
+    const rowId = request.badgeNumber; // Use badgeNumber as unique identifier
+    setLoadingRowIds(prev => new Set(Array.from(prev).concat(rowId)));
+    
     try {
       await updateForfeitureAdjustment(request);
       const rowKey = `${request.badgeNumber}-${request.profitYear}`;
@@ -70,6 +74,12 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     } catch (error) {
       console.error('Failed to save forfeiture adjustment:', error);
       alert('Failed to save. Please try again.');
+    } finally {
+      setLoadingRowIds(prev => {
+        const newSet = new Set(Array.from(prev));
+        newSet.delete(rowId);
+        return newSet;
+      });
     }
   }, [updateForfeitureAdjustment, editedValues, onUnsavedChanges, searchParams, pageNumber, pageSize, sortParams, triggerSearch]);
 
@@ -83,6 +93,17 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     const hasChanges = selectedRowIds.length > 0;
     onUnsavedChanges(hasChanges);
   }, [selectedRowIds, onUnsavedChanges]);
+  
+  // Refresh the grid when loading state changes
+  const gridRef = useRef<any>(null);
+  useEffect(() => {
+    if (gridRef.current?.api) {
+      gridRef.current.api.refreshCells({ 
+        force: true,
+        suppressFlash: false
+      });
+    }
+  }, [loadingRowIds]);
 
   // Initialize expandedRows when data is loaded
   useEffect(() => {
@@ -142,6 +163,14 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   }, []);
 
   const handleBulkSave = useCallback(async (requests: ForfeitureAdjustmentUpdateRequest[]) => {
+    // Add all affected badge numbers to loading state
+    const badgeNumbers = requests.map(request => request.badgeNumber);
+    setLoadingRowIds(prev => {
+      const newSet = new Set(Array.from(prev));
+      badgeNumbers.forEach(badgeNumber => newSet.add(badgeNumber));
+      return newSet;
+    });
+    
     try {
       await updateForfeitureAdjustmentBulk(requests);
       const updatedEditedValues = { ...editedValues };
@@ -167,12 +196,26 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     } catch (error) {
       console.error('Failed to save forfeiture adjustments:', error);
       alert('Failed to save one or more adjustments. Please try again.');
+    } finally {
+      // Remove all affected badge numbers from loading state
+      setLoadingRowIds(prev => {
+        const newSet = new Set(Array.from(prev));
+        badgeNumbers.forEach(badgeNumber => newSet.delete(badgeNumber));
+        return newSet;
+      });
     }
   }, [updateForfeitureAdjustmentBulk, editedValues, onUnsavedChanges, searchParams, pageNumber, pageSize, sortParams, triggerSearch]);
 
   // Get main and detail columns
   const mainColumns = useMemo(() => GetTerminationColumns(), []);
-  const detailColumns = useMemo(() => GetDetailColumns(addRowToSelectedRows, removeRowFromSelectedRows, selectedRowIds, selectedProfitYear, handleSave, handleBulkSave), [selectedRowIds, selectedProfitYear, handleSave, handleBulkSave]);
+  const detailColumns = useMemo(() => GetDetailColumns(
+    addRowToSelectedRows, 
+    removeRowFromSelectedRows, 
+    selectedRowIds, 
+    selectedProfitYear, 
+    handleSave, 
+    handleBulkSave
+  ), [selectedRowIds, selectedProfitYear, handleSave, handleBulkSave]);
 
   // Build grid data with expandable rows
   const gridData = useMemo(() => {
@@ -365,6 +408,9 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
             maxHeight={800}
             isLoading={isFetching}
             providedOptions={{
+              onGridReady: (params) => {
+                gridRef.current = params;
+              },
               rowData: gridData,
               columnDefs: columnDefs,
               getRowClass: getRowClass,
@@ -377,7 +423,8 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
               },
               context: {
                 editedValues,
-                updateEditedValue
+                updateEditedValue,
+                loadingRowIds
               }
             }}
           />

@@ -8,12 +8,18 @@ import "./MasterInquiryMemberGrid.css"; // Import the CSS file for styles
 import { GetMasterInquiryMemberGridColumns } from "./MasterInquiryMemberGridColumns";
 
 interface MasterInquiryMemberGridProps extends MasterInquiryRequest {
-  onBadgeClick?: (
+  searchParams: MasterInquiryRequest;
+  onBadgeClick: (
     args: { memberType: number; id: number; ssn: number; badgeNumber: number; psnSuffix: number } | undefined
   ) => void;
+  isSimpleSearch: () => boolean;
 }
 
-const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = (searchParams) => {
+const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = ({
+  searchParams,
+  onBadgeClick,
+  isSimpleSearch
+}: MasterInquiryMemberGridProps) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(5);
   // Add sort state management
@@ -31,6 +37,8 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = (searchP
   };
 
   const onSearch = useCallback(async () => {
+    // We are going to do another search here which skips zero and takes all.
+
     await trigger({
       ...searchParams,
       pagination: {
@@ -48,14 +56,9 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = (searchP
 
   // If only one member is returned, auto-select and hide the grid
   useEffect(() => {
-    if (
-      data &&
-      data.results.length === 1 &&
-      searchParams.onBadgeClick &&
-      autoSelectedRef.current !== data.results[0].id
-    ) {
+    if (data && data.results.length === 1 && onBadgeClick && autoSelectedRef.current !== data.results[0].id) {
       const member = data.results[0];
-      searchParams.onBadgeClick({
+      onBadgeClick({
         memberType: member.isEmployee ? 1 : 2,
         id: Number(member.id),
         ssn: Number(member.ssn),
@@ -64,17 +67,20 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = (searchP
       });
       autoSelectedRef.current = member.id;
     }
-    // If no results, clear selection
-    if (data && data.results.length === 0 && searchParams.onBadgeClick) {
-      searchParams.onBadgeClick(undefined);
+    // If no results in a complex search, clear selection
+    // For simple searches, don't clear selection to allow "Member Not Found" message to show
+    if (data && data.results.length === 0 && onBadgeClick && !isSimpleSearch()) {
+      onBadgeClick(undefined);
     }
-  }, [data, searchParams]);
+  }, [data, onBadgeClick]);
 
   // If no searchParams, render nothing
-  if (!searchParams || Object.keys(searchParams).length === 0) return null;
+  if (!searchParams || Object.keys(searchParams).length === 0) {
+    return null;
+  }
 
   // Show a message if no results
-  if (data && data.results.length === 0) {
+  if (!isSimpleSearch() && data && data.results.length === 0) {
     return (
       <Box sx={{ width: "100%", padding: "24px" }}>
         <Typography
@@ -89,7 +95,9 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = (searchP
   const columns = GetMasterInquiryMemberGridColumns();
 
   // Hide the grid if only one member is returned
-  if (data && data.results.length === 1) {
+  // But if the last page returns one result, we still want to show the grid
+  // so we check the total number of results to make sure it's 1 also
+  if (data && data.results.length === 1 && data.total === 1) {
     return null;
   }
 
@@ -113,7 +121,7 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = (searchP
             providedOptions={{
               rowData: Array.isArray(data?.results) ? (data.results as EmployeeDetails[]) : [],
               columnDefs: columns,
-              context: { onBadgeClick: searchParams.onBadgeClick }
+              context: { onBadgeClick: onBadgeClick }
             }}
           />
           <Pagination
@@ -125,9 +133,11 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = (searchP
             pageSize={pageSize}
             setPageSize={(value: number) => {
               setPageSize(value);
-              setPageNumber(0);
+              setPageNumber(1);
             }}
-            recordCount={data.total}
+            recordCount={(() => {
+              return data.total;
+            })()}
           />
         </>
       )}

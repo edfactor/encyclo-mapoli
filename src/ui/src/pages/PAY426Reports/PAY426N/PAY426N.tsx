@@ -7,7 +7,7 @@ import { clearYearEndProfitSharingReport } from "reduxstore/slices/yearsEndSlice
 import { ReportPreset } from "reduxstore/types";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
-import ProfitSummary from "../PAY426-9/ProfitSummary";
+import ProfitSummary from "../ProfitSummary/ProfitSummary";
 import FilterSection from "./FilterSection";
 import presets from "./presets";
 import ReportGrid from "./ReportGrid";

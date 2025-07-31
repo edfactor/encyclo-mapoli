@@ -1,7 +1,7 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Checkbox, FormControlLabel } from "@mui/material";
 import { Grid } from "@mui/material";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetRehireForfeituresQuery } from "reduxstore/api/YearsEndApi";
 import {
@@ -18,7 +18,25 @@ import { mmDDYYFormat, tryddmmyyyyToDate } from "../../../utils/dateUtils";
 
 const schema = yup.object().shape({
   beginningDate: yup.string().required("Beginning Date is required"),
-  endingDate: yup.string().typeError("Invalid date").required("Ending Date is required"),
+  endingDate: yup
+    .string()
+    .typeError("Invalid date")
+    .required("Ending Date is required")
+    .test("date-range", "Ending date must be the same or after the beginning date", function (value) {
+      const { beginningDate } = this.parent;
+      if (!beginningDate || !value) return true;
+      
+      const beginDate = tryddmmyyyyToDate(beginningDate);
+      const endDate = tryddmmyyyyToDate(value);
+      
+      if (!beginDate || !endDate) return true;
+      
+      return endDate >= beginDate;
+    })
+    .test("is-too-early", "Insuffient data for dates before 2024", function (value) {
+      
+      return new Date(value) > new Date(2024,1,1);
+    }),
   pagination: yup
     .object({
       skip: yup.number().required(),
@@ -85,6 +103,8 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
     }
   });
 
+  const beginningDateValue = useWatch({ control, name: "beginningDate" });
+
   // Effect to fetch fiscal data when profit year changes
   const validateAndSearch = handleSubmit(validateAndSubmit);
 
@@ -119,7 +139,7 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
                 id="beginningDate"
                 onChange={(value: Date | null) => {
                   field.onChange(value ?? undefined);
-                  trigger("beginningDate");
+                  trigger(["beginningDate", "endingDate"]);
                 }}
                 value={field.value ? tryddmmyyyyToDate(field.value) : null}
                 required={true}
@@ -136,22 +156,30 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
           <Controller
             name="endingDate"
             control={control}
-            render={({ field }) => (
-              <DsmDatePicker
-                id="endingDate"
-                onChange={(value: Date | null) => {
-                  field.onChange(value ?? undefined);
-                  trigger("endingDate");
-                }}
-                value={field.value ? tryddmmyyyyToDate(field.value) : null}
-                required={true}
-                label="Rehire Ending Date"
-                disableFuture
-                error={errors.endingDate?.message}
-                minDate={tryddmmyyyyToDate(fiscalData.fiscalBeginDate) ?? undefined}
-                maxDate={tryddmmyyyyToDate(fiscalData.fiscalEndDate) ?? undefined}
-              />
-            )}
+            render={({ field }) => {
+              const minDateFromBeginning = beginningDateValue ? tryddmmyyyyToDate(beginningDateValue) : null;
+              const fiscalMinDate = tryddmmyyyyToDate(fiscalData.fiscalBeginDate);
+              const effectiveMinDate = minDateFromBeginning && fiscalMinDate 
+                ? (minDateFromBeginning > fiscalMinDate ? minDateFromBeginning : fiscalMinDate)
+                : minDateFromBeginning ?? fiscalMinDate ?? undefined;
+
+              return (
+                <DsmDatePicker
+                  id="endingDate"
+                  onChange={(value: Date | null) => {
+                    field.onChange(value ?? undefined);
+                    trigger("endingDate");
+                  }}
+                  value={field.value ? tryddmmyyyyToDate(field.value) : null}
+                  required={true}
+                  label="Rehire Ending Date"
+                  disableFuture
+                  error={errors.endingDate?.message}
+                  minDate={effectiveMinDate}
+                  maxDate={tryddmmyyyyToDate(fiscalData.fiscalEndDate) ?? undefined}
+                />
+              );
+            }}
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>

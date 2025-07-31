@@ -959,10 +959,10 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getYearEndProfitSharingReport: builder.query<YearEndProfitSharingReportResponse, YearEndProfitSharingReportRequest>(
+    getYearEndProfitSharingReport: builder.query<YearEndProfitSharingReportResponse, YearEndProfitSharingReportRequest & { archive?: boolean }>(
       {
         query: (params) => ({
-          url: "yearend/yearend-profit-sharing-report",
+          url: `yearend/yearend-profit-sharing-report${params.archive === true ? '/?archive=true' : ''}`,
           method: "POST",
           body: {
             ...params,
@@ -984,9 +984,9 @@ export const YearsEndApi = createApi({
         }
       }
     ),
-    getYearEndProfitSharingSummaryReport: builder.query<YearEndProfitSharingReportSummaryResponse, BadgeNumberRequest & { archive?: boolean }>({
+    getYearEndProfitSharingSummaryReport: builder.query<YearEndProfitSharingReportSummaryResponse, BadgeNumberRequest>({
       query: (params) => ({
-        url: `yearend/yearend-profit-sharing-summary-report${params.archive === true ? '/?archive=true' : ''}`,
+        url: "yearend/yearend-profit-sharing-summary-report",
         method: "POST",
         body: {
           useFrozenData: params.useFrozenData,

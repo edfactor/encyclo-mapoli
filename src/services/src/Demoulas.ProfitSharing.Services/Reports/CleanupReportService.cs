@@ -325,6 +325,9 @@ FROM FILTERED_DEMOGRAPHIC p1
                     CommentType.Constants.QdroOut.Id
                 };
 
+                var startDate = (DateTimeOffset?)(!req.StartDate.HasValue ? null : req.StartDate.Value.ToDateTimeOffset());
+                var endDate = (DateTimeOffset?)(!req.EndDate.HasValue ? null : req.EndDate.Value.ToDateTimeOffset());
+
                 var query = from pd in ctx.ProfitDetails
                     join nameAndDob in nameAndDobQuery on pd.Ssn equals nameAndDob.Ssn
                     where pd.ProfitYear == req.ProfitYear &&
@@ -333,15 +336,15 @@ FROM FILTERED_DEMOGRAPHIC p1
                            (pd.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment.Id &&
                             (!pd.CommentTypeId.HasValue ||
                              !transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value)))) &&
-                            (!req.StartDate.HasValue || pd.TransactionDate.ToDateOnly() >= req.StartDate.Value) &&
-                            (!req.EndDate.HasValue || pd.TransactionDate.ToDateOnly() <= req.EndDate.Value) &&
+                            (!req.StartDate.HasValue || pd.TransactionDate >= startDate) &&
+                            (!req.EndDate.HasValue || pd.TransactionDate <= endDate) &&
                             !(pd.ProfitCodeId == 9 && pd.CommentTypeId.HasValue && transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value))
 
                     select new
                     {
                         BadgeNumber = nameAndDob.BadgeNumber,
                         PsnSuffix = nameAndDob.PsnSuffix,
-                        Ssn = pd.Ssn.MaskSsn(),
+                        Ssn = pd.Ssn,
                         EmployeeName = nameAndDob.FullName,
                         DistributionAmount = _distributionProfitCodes.Contains(pd.ProfitCodeId) ? pd.Forfeiture : 0,
                         TaxCode = pd.TaxCodeId,
@@ -385,7 +388,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                 {
                     BadgeNumber = pd.BadgeNumber,
                     PsnSuffix = pd.PsnSuffix,
-                    Ssn = pd.Ssn,
+                    Ssn = pd.Ssn.MaskSsn(),
                     EmployeeName = pd.EmployeeName,
                     DistributionAmount = pd.DistributionAmount,
                     TaxCode = pd.TaxCode,
