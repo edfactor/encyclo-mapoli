@@ -57,7 +57,7 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       field: "forfeitAmount",
       minWidth: 120
     }),
-    createAgeColumn({});
+    createAgeColumn({}),
     {
       headerName: "Tax Code",
       field: "taxCode",
