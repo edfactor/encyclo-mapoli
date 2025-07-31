@@ -13,29 +13,27 @@ import { mmDDYYFormat } from "../../utils/dateUtils";
 import { getEnrolledStatus, getForfeitedStatus } from "../../utils/enrollmentUtil";
 import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
 import { isSimpleSearch } from "./MasterInquiryFunctions";
+import { MASTER_INQUIRY_MESSAGES } from "./MasterInquiryMessages";
+import { useMissiveAlerts } from "./MissiveAlertContext";
 
 interface MasterInquiryEmployeeDetailsProps {
   memberType: number;
   id: string | number;
   profitYear?: number | null | undefined;
   noResults?: boolean;
-
-  setMissiveAlerts?: (alerts: MissiveResponse[]) => void;
-  missiveAlerts?: MissiveResponse[];
 }
 
 const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> = ({
   memberType,
   id,
   profitYear,
-  noResults,
-  setMissiveAlerts,
-  missiveAlerts
+  noResults
 }) => {
   const [trigger, { data: details, isLoading, isError }] = useLazyGetProfitMasterInquiryMemberQuery();
   const { masterInquiryResults } = useSelector((state: RootState) => state.inquiry);
 
   const missives = useSelector((state: RootState) => state.lookups.missives);
+  const { addAlert, addAlerts, hasAlert } = useMissiveAlerts();
 
   const defaultProfitYear = useDecemberFlowProfitYear();
   const [isMilitary, setIsMilitary] = React.useState(false);
@@ -65,30 +63,14 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
 
   if (noResults) {
     if (isSimpleSearch(masterInquiryRequestParams)) {
-      if (!missiveAlerts?.some((alert) => alert.id === 643)) {
-        setMissiveAlerts?.([
-          ...(missiveAlerts ?? []),
-          {
-            id: 643, // Example ID, should be unique
-            severity: "Error",
-            message: "Member Not Found",
-            description: "The member you are searching for does not exist in the system."
-          }
-        ]);
+      if (!hasAlert(MASTER_INQUIRY_MESSAGES.MEMBER_NOT_FOUND.id)) {
+        addAlert(MASTER_INQUIRY_MESSAGES.MEMBER_NOT_FOUND);
       }
 
       return null;
     } else {
-      if (!missiveAlerts?.some((alert) => alert.id === 112)) {
-        setMissiveAlerts?.([
-          ...(missiveAlerts ?? []),
-          {
-            id: 112, // Example ID, should be unique
-            severity: "Error",
-            message: "No Results Found",
-            description: "The search did not return any results. Please try a different search criteria."
-          }
-        ]);
+      if (!hasAlert(MASTER_INQUIRY_MESSAGES.NO_RESULTS_FOUND.id)) {
+        addAlert(MASTER_INQUIRY_MESSAGES.NO_RESULTS_FOUND);
       }
 
       return null;
@@ -104,7 +86,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
       .filter(Boolean) as MissiveResponse[];
 
     if (localMissives.length > 0) {
-      setMissiveAlerts?.([...(missiveAlerts ?? []), ...localMissives]);
+      addAlerts(localMissives);
     }
   }
 
@@ -151,28 +133,12 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
 
   if (!isEmployee && masterInquiryRequestParams?.memberType == "all") {
     // Need to add a new missive warning saying a beneficiary was found
-    setMissiveAlerts?.([
-      ...(missiveAlerts ?? []),
-      {
-        id: 976, // Example ID, should be unique
-        severity: "info",
-        message: `Beneficiary ${ssnValue} Found`,
-        description: "This member is a beneficiary and not an employee."
-      }
-    ]);
+    addAlert(MASTER_INQUIRY_MESSAGES.BENEFICIARY_FOUND(ssnValue));
   }
 
   // Warning needed if military member has vested money
   if (isMilitary && percentageVested > 0) {
-    setMissiveAlerts?.([
-      ...(missiveAlerts ?? []),
-      {
-        id: 961, // invented id as this is not from back end
-        severity: "warning",
-        message: "Military entry has affected vested percentage",
-        description: `Vested percentage now at ${percentageVested * 100}%.`
-      }
-    ]);
+    addAlert(MASTER_INQUIRY_MESSAGES.MILITARY_VESTED_WARNING(percentageVested));
   }
 
   const enrolled = getEnrolledStatus(enrollmentId);
