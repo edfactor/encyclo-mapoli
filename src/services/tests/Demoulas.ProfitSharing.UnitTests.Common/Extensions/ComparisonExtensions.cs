@@ -52,7 +52,7 @@ public static class ComparisonExtensions
                 continue;
             }
 
-            PropertyInfo? dtoProperty = dtoProperties.Find(p => p.Name == entityProperty.Name);
+            PropertyInfo? dtoProperty = dtoProperties.FirstOrDefault(p => p.Name == entityProperty.Name);
             if (dtoProperty == null)
             {
                 continue;
@@ -153,7 +153,7 @@ public static class ComparisonExtensions
                 continue;
             }
 
-            PropertyInfo? dtoProperty = dtoProperties.Find(p => p.Name == entityProperty.Name);
+            PropertyInfo? dtoProperty = dtoProperties.FirstOrDefault(p => p.Name == entityProperty.Name);
             if (dtoProperty == null)
             {
                 continue;
