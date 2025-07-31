@@ -1,6 +1,7 @@
 ﻿using CsvHelper.Configuration;
 using Demoulas.ProfitSharing.Common.Contracts.Report;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
@@ -56,20 +57,24 @@ public class YearEndProfitSharingReportEndpoint: EndpointWithCsvTotalsBase<YearE
     /// <summary>
     /// Handles the request and returns the year-end profit sharing report response.
     /// </summary>
-    public override async Task<YearEndProfitSharingReportResponse> GetResponse(YearEndProfitSharingReportRequest req, CancellationToken ct)
+    public override Task<YearEndProfitSharingReportResponse> GetResponse(YearEndProfitSharingReportRequest req, CancellationToken ct)
     {
-        var response = await _cleanupReportService.GetYearEndProfitSharingReportAsync(req, ct);
-
         // Read "archive" from query string without modifying the DTO
         bool archive = (HttpContext?.Request?.Query?.TryGetValue("archive", out var archiveValue) ?? false) &&
                        bool.TryParse(archiveValue, out var archiveResult) && archiveResult;
 
         if (archive)
         {
-           await _auditService.ArchiveCompletedReportAsync(Report_Name, req, response, ct);
+            var archiveReq = req with { Skip = 0, Take = short.MaxValue };
+            return _auditService.ArchiveCompletedReportAsync<YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse, YearEndProfitSharingReportDetail>(
+                Report_Name,
+                archiveReq.ProfitYear,
+                archiveReq,
+                () => _cleanupReportService.GetYearEndProfitSharingReportAsync(archiveReq, ct),
+                ct);
         }
 
-        return response;
+        return _cleanupReportService.GetYearEndProfitSharingReportAsync(req, ct);
     }
 
     public override string ReportFileName => "yearend-profit-sharing-report";

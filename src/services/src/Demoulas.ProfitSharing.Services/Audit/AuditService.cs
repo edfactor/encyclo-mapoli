@@ -1,5 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System.Text.Json;
+using Demoulas.Common.Contracts.Contracts.Request;
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.Attributes;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -21,31 +23,25 @@ public sealed class AuditService : IAuditService
         _appUser = appUser;
     }
 
-   
-    public Task ArchiveCompletedReportAsync<TRequest, TReport>(string reportName,
-        TRequest request,
-        TReport report,
-        CancellationToken cancellationToken)
-        where TReport : class where TRequest : IProfitYearRequest
-    {
-        //return ArchiveCompletedReportAsync(reportName, request.ProfitYear, request, report, cancellationToken);
-        throw new NotImplementedException();
-    }
-
-    public Task ArchiveCompletedReportAsync<TRequest, TReport>(string reportName,
+    public async Task<TResponse> ArchiveCompletedReportAsync<TRequest, TResponse, TResult>(
+        string reportName,
         short profitYear,
         TRequest request,
-        TReport report,
+        Func<Task<TResponse>> reportFunction,
         CancellationToken cancellationToken)
-        where TReport : class where TRequest : class
+        where TResponse : PaginatedResponseDto<TResult> 
+        where TRequest : PaginationRequestDto 
+        where TResult : class
     {
-        if (report == null)
+        if (reportFunction == null)
         {
-            throw new ArgumentNullException(nameof(report), "Report cannot be null");
+            throw new ArgumentNullException(nameof(reportFunction), "Report function cannot be null.");
         }
 
+        TResponse response = await reportFunction();
+
         string requestJson = JsonSerializer.Serialize(request);
-        string reportJson = JsonSerializer.Serialize(report);
+        string reportJson = JsonSerializer.Serialize(response);
 
 
         var entries = new List<AuditChangeEntry> { new() { ColumnName = "Report", NewValue = reportJson } };
@@ -53,15 +49,17 @@ public sealed class AuditService : IAuditService
 
 
         ReportChecksum checksum = new ReportChecksum { ReportType = reportName, ProfitYear = profitYear, RequestJson = requestJson, ReportJson = reportJson };
-        checksum.KeyFieldsChecksumJson = ToKeyValuePairs(report);
+        checksum.KeyFieldsChecksumJson = ToKeyValuePairs(response);
 
 
-        return _dataContextFactory.UseWritableContext(c =>
+        await _dataContextFactory.UseWritableContext(async c =>
         {
             c.AuditEvents.Add(auditEvent);
             c.ReportChecksums.Add(checksum);
-            return c.SaveChangesAsync(cancellationToken);
+            await c.SaveChangesAsync(cancellationToken);
         }, cancellationToken);
+
+        return response;
     }
 
     public static IEnumerable<KeyValuePair<string, KeyValuePair<decimal, byte[]>>> ToKeyValuePairs<TReport>(TReport obj)
