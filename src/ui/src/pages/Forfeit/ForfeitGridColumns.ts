@@ -1,53 +1,36 @@
-import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { agGridNumberToCurrency } from "smart-ui-library";
-import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
+import { ColDef } from "ag-grid-community";
 import { GRID_COLUMN_WIDTHS } from "../../constants";
+import {
+  createBadgeColumn,
+  createCurrencyColumn,
+  createSSNColumn,
+  createNameColumn
+} from "../../utils/gridColumnFactory";
 
 export const GetProfitShareForfeitColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   return [
-    {
+    createBadgeColumn({
       headerName: "Badge",
-      field: "badgeNumber",
-      colId: "badgeNumber",
       minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      sortable: true,
-      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber, navFunction)
-    },
-    {
-      headerName: "Name",
+      alignment: "left",
+      navigateFunction: navFunction
+    }),
+    createNameColumn({
       field: "employeeName",
-      colId: "employeeName",
-      minWidth: 150,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
-    {
-      headerName: "SSN",
-      field: "ssn",
-      colId: "ssn",
-      minWidth: GRID_COLUMN_WIDTHS.SSN,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
-    {
+      minWidth: 150
+    }),
+    createSSNColumn({
+      alignment: "left"
+    }),
+    createCurrencyColumn({
       headerName: "Forfeitures",
       field: "forfeitures",
-      colId: "forfeitures",
-      minWidth: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
+      minWidth: 120
+    }),
     {
       headerName: "Cont/Forfeit Points",
-      field: "forfeitPoints",
-      colId: "forfeitPoints",
+      field: "contForfeitPoints",
+      colId: "contForfeitPoints",
       minWidth: 150,
       headerClass: "left-align",
       cellClass: "left-align",
@@ -57,6 +40,15 @@ export const GetProfitShareForfeitColumns = (navFunction: (badgeNumber: string) 
       headerName: "Earnings Points",
       field: "earningPoints",
       colId: "earningPoints",
+      minWidth: 120,
+      headerClass: "left-align",
+      cellClass: "left-align",
+      resizable: true
+    },
+    {
+      headerName: "Ben #",
+      field: "beneficiaryPsn",
+      colId: "beneficiaryPsn",
       minWidth: 120,
       headerClass: "left-align",
       cellClass: "left-align",

@@ -2,9 +2,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetContributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, TotalsGrid } from "smart-ui-library";
+import {DSMGrid, ISortParams, TotalsGrid } from "smart-ui-library";
 import { GetContributionsByAgeColumns } from "./ContributionsByAgeGridColumns";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
 import { numberToCurrency } from "smart-ui-library";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
@@ -35,6 +35,8 @@ const ContributionsByAgeGrid: React.FC<ContributionsByAgeGridProps> = ({ initial
 
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
 
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
+
   const onSearch = useCallback(async () => {
     triggerSearch(
       {
@@ -44,6 +46,7 @@ const ContributionsByAgeGrid: React.FC<ContributionsByAgeGridProps> = ({ initial
       },
       false
     );
+    /*
     triggerSearch(
       {
         profitYear: fiscalCloseProfitYear || contributionsByAgeQueryParams?.profitYear || 0,
@@ -60,13 +63,14 @@ const ContributionsByAgeGrid: React.FC<ContributionsByAgeGridProps> = ({ initial
       },
       false
     );
-  }, [contributionsByAgeQueryParams?.profitYear, triggerSearch, fiscalCloseProfitYear]);
+    */
+  }, []);
 
   useEffect(() => {
-    if (initialSearchLoaded && contributionsByAgeQueryParams?.profitYear) {
+    if (hasToken && initialSearchLoaded && contributionsByAgeQueryParams?.profitYear) {
       onSearch();
     }
-  }, [contributionsByAgeQueryParams?.profitYear, initialSearchLoaded, onSearch]);
+  }, [contributionsByAgeQueryParams?.profitYear, hasToken, initialSearchLoaded, onSearch]);
 
   return (
     <>
@@ -103,10 +107,10 @@ const ContributionsByAgeGrid: React.FC<ContributionsByAgeGridProps> = ({ initial
                 leftColumnHeaders={["PartTime"]}
                 topRowHeaders={["", "EMPS", "Amount"]}></TotalsGrid>
             </div>
-            <Grid2
+            <Grid
               size={{ xs: 12 }}
               container>
-              <Grid2 size={{ xs: 4 }}>
+              <Grid size={{ xs: 4 }}>
                 <DSMGrid
                   preferenceKey={"AGE_Total"}
                   isLoading={isFetching}
@@ -116,8 +120,8 @@ const ContributionsByAgeGrid: React.FC<ContributionsByAgeGridProps> = ({ initial
                     columnDefs: columnDefsTotal
                   }}
                 />
-              </Grid2>
-              <Grid2 size={{ xs: 4 }}>
+              </Grid>
+              <Grid size={{ xs: 4 }}>
                 <DSMGrid
                   preferenceKey={"AGE_FullTime"}
                   isLoading={isFetching}
@@ -128,8 +132,8 @@ const ContributionsByAgeGrid: React.FC<ContributionsByAgeGridProps> = ({ initial
                     columnDefs: columnDefsFullTime
                   }}
                 />
-              </Grid2>
-              <Grid2 size={{ xs: 4 }}>
+              </Grid>
+              <Grid size={{ xs: 4 }}>
                 <DSMGrid
                   preferenceKey={"AGE_PartTime"}
                   isLoading={isFetching}
@@ -139,8 +143,8 @@ const ContributionsByAgeGrid: React.FC<ContributionsByAgeGridProps> = ({ initial
                     columnDefs: columnDefsPartTime
                   }}
                 />
-              </Grid2>
-            </Grid2>
+              </Grid>
+            </Grid>
           </>
         )}
     </>

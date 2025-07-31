@@ -24,10 +24,13 @@ public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>, I
     {
         ChangeTracker.LazyLoadingEnabled = false;
     }
-    
+
+    public virtual DbSet<AuditEvent> AuditEvents { get; set; }
+    public virtual DbSet<ReportChecksum> ReportChecksums { get; set; }
     public virtual DbSet<Demographic> Demographics { get; set; }
     public virtual DbSet<DemographicHistory> DemographicHistories { get; set; }
     public virtual DbSet<EmploymentType> EmploymentTypes { get; set; }
+    public virtual DbSet<ExcludedId> ExcludedIds { get; set; }
     public virtual DbSet<FrozenState> FrozenStates { get; set; }
     public virtual DbSet<Country> Countries { get; set; }
     public virtual DbSet<PayClassification> PayClassifications { get; set; }
@@ -35,7 +38,9 @@ public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>, I
     public virtual DbSet<ProfitCode> ProfitCodes { get; set; }
     public virtual DbSet<TaxCode> TaxCodes { get; set; }
     public virtual DbSet<Beneficiary> Beneficiaries { get; set; }
+    public virtual DbSet<BeneficiaryArchive> BeneficiaryArchives { get; set; }
     public virtual DbSet<BeneficiaryContact> BeneficiaryContacts { get; set; }
+    public virtual DbSet<BeneficiaryContactArchive> BeneficiaryContactArchives { get; set; }
     public virtual DbSet<BeneficiaryType> BeneficiaryTypes { get; set; }
     public virtual DbSet<BeneficiaryKind> BeneficiaryKinds { get; set; }
     public virtual DbSet<PayProfit> PayProfits { get; set; }

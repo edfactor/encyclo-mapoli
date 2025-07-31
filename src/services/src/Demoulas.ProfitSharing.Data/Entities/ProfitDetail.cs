@@ -1,6 +1,8 @@
-﻿namespace Demoulas.ProfitSharing.Data.Entities;
+﻿using Demoulas.ProfitSharing.Data.Entities.Base;
 
-public class ProfitDetail
+namespace Demoulas.ProfitSharing.Data.Entities;
+
+public class ProfitDetail : ModifiedBase
 {
     public static class Constants
     {

@@ -10,9 +10,16 @@ import { ProfitShareUpdateGridColumns } from "./ProfitShareUpdateGridColumns";
 interface ProfitShareEditUpdateGridProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
+  pageNumberReset: boolean;
+  setPageNumberReset: (reset: boolean) => void;
 }
 
-const ProfitShareEditUpdateGrid = ({ initialSearchLoaded, setInitialSearchLoaded }: ProfitShareEditUpdateGridProps) => {
+const ProfitShareEditUpdateGrid = ({
+  initialSearchLoaded,
+  setInitialSearchLoaded,
+  pageNumberReset,
+  setPageNumberReset
+}: ProfitShareEditUpdateGridProps) => {
   const [pageNumber, setPageNumber] = useState(0);
   const hasToken = !!useSelector((state: RootState) => state.security.token);
   const [pageSize, setPageSize] = useState(25);
@@ -54,6 +61,13 @@ const ProfitShareEditUpdateGrid = ({ initialSearchLoaded, setInitialSearchLoaded
       onSearch();
     }
   }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch, hasToken]);
+
+  useEffect(() => {
+    if (pageNumberReset) {
+      setPageNumber(0);
+      setPageNumberReset(false);
+    }
+  }, [pageNumberReset, setPageNumberReset]);
 
   return (
     <>

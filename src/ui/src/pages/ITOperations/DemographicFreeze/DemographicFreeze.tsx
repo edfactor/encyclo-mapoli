@@ -1,5 +1,5 @@
 import { Divider } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { useState } from "react";
 import { Page } from "smart-ui-library";
 import DemographicFreezeGrid from "./DemographicFreezeGrid";
@@ -7,25 +7,31 @@ import DemographicFreezeManager from "./DemographicFreezeManager";
 
 const DemographicFreeze = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
+  const [pageNumberReset, setPageNumberReset] = useState(false);
   return (
     <Page label="IT Commands - Demographic Freeze">
-      <Grid2
+      <Grid
         container
         rowSpacing="24px">
-        <Grid2 width={"100%"}>
+        <Grid width={"100%"}>
           <Divider />
-        </Grid2>
-        <Grid2 width={"100%"}>
-          <DemographicFreezeManager setInitialSearchLoaded={setInitialSearchLoaded} />
-        </Grid2>
+        </Grid>
+        <Grid width={"100%"}>
+          <DemographicFreezeManager
+            setInitialSearchLoaded={setInitialSearchLoaded}
+            setPageReset={setPageNumberReset}
+          />
+        </Grid>
 
-        <Grid2 width="100%">
+        <Grid width="100%">
           <DemographicFreezeGrid
             setInitialSearchLoaded={setInitialSearchLoaded}
             initialSearchLoaded={initialSearchLoaded}
+            pageNumberReset={pageNumberReset}
+            setPageNumberReset={setPageNumberReset}
           />
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
     </Page>
   );
 };

@@ -4,7 +4,7 @@ import AppErrorBoundary from "components/ErrorBoundary";
 import PSLayout from "components/Layout/PSLayout";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { themeOptions, ToastServiceProvider } from "smart-ui-library";
+import { colors, themeOptions, ToastServiceProvider } from "smart-ui-library";
 import "smart-ui-library/dist/smart-ui-library.css";
 import "../agGridConfig";
 import Router from "./components/router/Router";
@@ -42,7 +42,6 @@ const App = () => {
 
   const health = useSelector((state: RootState) => state.support.health);
 
-
   useEffect(() => {
     const config = oktaConfig(clientId, issuer);
     const auth = new OktaAuth({
@@ -54,11 +53,11 @@ const App = () => {
       }
     });
     setOktaAuth(auth);
-    
+
     // Start the OktaAuth service to enable token auto-renewal (temporary, longterm solution is to use refresh tokens)
     // https://github.com/okta/okta-auth-js/blob/master/docs/autoRenew-notice.md
     auth.start();
-    
+
     return () => {
       auth.stop();
     };
@@ -145,7 +144,19 @@ const App = () => {
   }, [triggerHealth]);
 
   // Theme setup
-  const theme = createTheme(themeOptions);
+  const theme = createTheme({
+    ...themeOptions,
+    components: {
+      ...themeOptions.components,
+      MuiOutlinedInput: {
+        styleOverrides:{
+          root: {
+            backgroundColor: colors["dsm-white"],
+          }
+        }
+      }
+    }
+  });
 
   return (
     <ThemeProvider theme={theme}>

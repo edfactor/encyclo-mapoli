@@ -1,5 +1,5 @@
 import { Divider } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { DSMAccordion, Page } from "smart-ui-library";
@@ -16,14 +16,15 @@ import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 const ForfeituresAdjustment = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [isAddForfeitureModalOpen, setIsAddForfeitureModalOpen] = useState(false);
-  const { forfeitureAdjustmentData, forfeitureAdjustmentQueryParams } = useSelector((state: RootState) => state.forfeituresAdjustment);
+  const [pageNumberReset, setPageNumberReset] = useState(false);
+  const { forfeitureAdjustmentData, forfeitureAdjustmentQueryParams } = useSelector(
+    (state: RootState) => state.forfeituresAdjustment
+  );
   const profitYear = useDecemberFlowProfitYear();
   const [triggerSearch] = useLazyGetForfeitureAdjustmentsQuery();
 
   const renderActionNode = () => {
-    return (
-      <StatusDropdownActionNode />
-    );
+    return <StatusDropdownActionNode />;
   };
 
   const handleSearchComplete = (loaded: boolean) => {
@@ -66,18 +67,23 @@ const ForfeituresAdjustment = () => {
   }, []);
 
   return (
-    <Page label={CAPTIONS.FORFEITURES_ADJUSTMENT} actionNode={renderActionNode()}>
-      <Grid2
+    <Page
+      label={CAPTIONS.FORFEITURES_ADJUSTMENT}
+      actionNode={renderActionNode()}>
+      <Grid
         container
         rowSpacing="24px">
-        <Grid2 width={"100%"}>
+        <Grid width={"100%"}>
           <Divider />
-        </Grid2>
-        <Grid2 width={"100%"}>
+        </Grid>
+        <Grid width={"100%"}>
           <DSMAccordion title="Filter">
-            <ForfeituresAdjustmentSearchParameters setInitialSearchLoaded={handleSearchComplete} />
+            <ForfeituresAdjustmentSearchParameters
+              setInitialSearchLoaded={handleSearchComplete}
+              setPageReset={setPageNumberReset}
+            />
           </DSMAccordion>
-        </Grid2>
+        </Grid>
 
         {/* Only show details if we have forfeitureAdjustmentData and a result */}
         {forfeitureAdjustmentData?.response?.results?.[0] && profitYear && (
@@ -88,14 +94,16 @@ const ForfeituresAdjustment = () => {
           />
         )}
 
-        <Grid2 width="100%">
+        <Grid width="100%">
           <ForfeituresAdjustmentGrid
             initialSearchLoaded={initialSearchLoaded}
             setInitialSearchLoaded={setInitialSearchLoaded}
             onAddForfeiture={handleOpenAddForfeitureModal}
+            pageNumberReset={pageNumberReset}
+            setPageNumberReset={setPageNumberReset}
           />
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
 
       <AddForfeitureModal
         open={isAddForfeitureModalOpen}

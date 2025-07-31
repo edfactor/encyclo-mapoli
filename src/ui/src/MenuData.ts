@@ -25,8 +25,8 @@ export const MenuData = (data: NavigationResponseDto | undefined): RouteCategory
     // Create menu item if:
     // 1. User has the required role OR
     // 2. No roles required for this menu item
-    const hasRequiredRole = values.requiredRoles.length > 0 &&
-      values.requiredRoles.some(role => role === localStorageImpersonating);
+    const hasRequiredRole =
+      values.requiredRoles.length > 0 && values.requiredRoles.some((role) => role === localStorageImpersonating);
     const noRolesRequired = values.requiredRoles.length === 0;
 
     if (hasRequiredRole || noRolesRequired) {
@@ -50,9 +50,7 @@ const createRouteCategory = (navigationItem: NavigationDto): RouteCategory => {
     disabled: navigationItem.disabled,
     underlined: false,
     roles: navigationItem.requiredRoles,
-    items: navigationItem.items && navigationItem.items.length > 0
-      ? getRouteData(navigationItem.items)
-      : undefined
+    items: navigationItem.items && navigationItem.items.length > 0 ? getRouteData(navigationItem.items) : undefined
   };
 };
 
@@ -69,11 +67,9 @@ const getRouteData = (data: NavigationDto[]): RouteData[] => {
 interface MenuLevel {
   navigationId?: number;
   mainTitle: string;
-  statusId? : number;
+  statusId?: number;
   statusName?: string;
-  topPage: TopPage[]
-
-
+  topPage: TopPage[];
 }
 
 interface TopPage {
@@ -83,14 +79,14 @@ interface TopPage {
   statusId?: number;
   statusName?: string;
   disabled?: boolean;
-  subPages: SubPages[]
+  subPages: SubPages[];
 }
 
 interface SubPages {
   navigationId?: number;
   subTitle?: string;
   subRoute?: string;
-  statusId?:number;
+  statusId?: number;
   statusName?: string;
   disabled?: boolean;
 }

@@ -14,7 +14,7 @@ export const appSupportSlice = createSlice({
   reducers: {
     setHealthInfo: (state, action: PayloadAction<Health>) => {
       state.health = action.payload;
-    },
+    }
   }
 });
 

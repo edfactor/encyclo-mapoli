@@ -62,14 +62,14 @@ internal class DemographicsService : IDemographicsServiceInternal
     public Task AddDemographicsStreamAsync(DemographicsRequest[] employees, byte batchSize = byte.MaxValue,
         CancellationToken cancellationToken = default)
     {
-        
-        DateTime currentModificationDate = DateTime.Now;
+
+        DateTimeOffset currentModificationDate = DateTimeOffset.UtcNow;
 
         // Map incoming demographic requests to entity models
         List<Demographic> demographicsEntities = _mapper.Map(employees).ToList();
 
         // Update LastModifiedDate for all entities
-        demographicsEntities.ForEach(entity => entity.LastModifiedDate = currentModificationDate);
+        demographicsEntities.ForEach(entity => entity.ModifiedAtUtc = currentModificationDate);
 
         // Create lookup dictionaries for both OracleHcmId and SSN
         Dictionary<long, Demographic> demographicOracleHcmIdLookup = demographicsEntities.ToDictionary(entity => entity.OracleHcmId);
@@ -215,7 +215,7 @@ internal class DemographicsService : IDemographicsServiceInternal
     }
 
     // Helper method to update entity fields
-    private static void UpdateEntityValues(Demographic existingEntity, Demographic incomingEntity, DateTime modificationDate)
+    private static void UpdateEntityValues(Demographic existingEntity, Demographic incomingEntity, DateTimeOffset modificationDate)
     {
         existingEntity.Ssn = incomingEntity.Ssn;
         existingEntity.BadgeNumber = incomingEntity.BadgeNumber;
@@ -234,7 +234,7 @@ internal class DemographicsService : IDemographicsServiceInternal
         existingEntity.PayFrequencyId = incomingEntity.PayFrequencyId;
         existingEntity.GenderId = incomingEntity.GenderId;
         existingEntity.EmploymentStatusId = incomingEntity.EmploymentStatusId;
-        existingEntity.LastModifiedDate = modificationDate;
+        existingEntity.ModifiedAtUtc = modificationDate;
     }
 
     /// <summary>

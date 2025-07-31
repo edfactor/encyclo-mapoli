@@ -1,5 +1,5 @@
 import { Divider } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { numberToCurrency, Page, TotalsGrid } from "smart-ui-library";
@@ -33,7 +33,7 @@ const VestedAmountsByAge = () => {
   useEffect(() => {
     if (hasToken && profitYear && !hasInitialSearchRun) {
       setHasInitialSearchRun(true);
-      
+
       triggerSearch(
         {
           profitYear: profitYear,
@@ -53,21 +53,21 @@ const VestedAmountsByAge = () => {
   }, [hasToken, profitYear, hasInitialSearchRun, triggerSearch, dispatch]);
 
   const renderActionNode = () => {
-    return (
-        <StatusDropdownActionNode />
-    );
-};
+    return <StatusDropdownActionNode />;
+  };
 
   return (
-    <Page label="Vested Amounts by Age" actionNode={renderActionNode()}>
-      <Grid2
+    <Page
+      label="Vested Amounts by Age"
+      actionNode={renderActionNode()}>
+      <Grid
         container
         rowSpacing="24px">
-        <Grid2 width={"100%"}>
+        <Grid width={"100%"}>
           <Divider />
-        </Grid2>
+        </Grid>
 
-        <Grid2
+        <Grid
           width={"100%"}
           sx={{ overflowX: "inherit" }}>
           {vestedAmountsByAge?.response && (
@@ -113,13 +113,13 @@ const VestedAmountsByAge = () => {
                 ]}
               />
 
-              <Grid2 width={"100%"}>
+              <Grid width={"100%"}>
                 <VestedAmountsByAgeTabs />
-              </Grid2>
+              </Grid>
             </div>
           )}
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
     </Page>
   );
 };

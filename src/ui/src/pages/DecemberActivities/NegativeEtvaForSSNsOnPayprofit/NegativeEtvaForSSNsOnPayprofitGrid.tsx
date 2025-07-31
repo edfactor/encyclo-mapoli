@@ -1,14 +1,13 @@
-import { Typography } from "@mui/material";
-import React, { useState, useMemo, useCallback, useEffect } from "react";
+import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
+import { Path, useNavigate } from "react-router";
 import { useLazyGetNegativeEVTASSNQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { GetNegativeEtvaForSSNsOnPayProfitColumns } from "./NegativeEtvaForSSNsOnPayprofitGridColumn";
-import { Path, useNavigate } from "react-router";
-import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
-import { CAPTIONS } from "../../../constants";
 import ReportSummary from "../../../components/ReportSummary";
+import { CAPTIONS } from "../../../constants";
+import { GetNegativeEtvaForSSNsOnPayProfitColumns } from "./NegativeEtvaForSSNsOnPayprofitGridColumns";
 
 interface NegativeEtvaForSSNsOnPayprofitGridProps {
   initialSearchLoaded: boolean;

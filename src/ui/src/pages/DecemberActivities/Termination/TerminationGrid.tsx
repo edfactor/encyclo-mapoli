@@ -1,26 +1,33 @@
-import { ICellRendererParams } from "ag-grid-community";
-import { useEffect, useMemo, useState } from "react";
+import { ICellRendererParams, CellClickedEvent, ColDef } from "ag-grid-community";
+import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, numberToCurrency, Pagination } from "smart-ui-library";
 import { TotalsGrid } from "../../../components/TotalsGrid/TotalsGrid";
 import { ReportSummary } from "../../../components/ReportSummary";
 import { StartAndEndDateRequest } from "reduxstore/types";
-import { GetDetailColumns, GetTerminationColumns } from "./TerminationGridColumn";
 import { useLazyGetTerminationReportQuery } from "reduxstore/api/YearsEndApi";
+import { GetDetailColumns, GetTerminationColumns } from "./TerminationGridColumns";
+import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import { ForfeitureAdjustmentUpdateRequest } from "reduxstore/types";
+import { useUpdateForfeitureAdjustmentMutation, useUpdateForfeitureAdjustmentBulkMutation } from "reduxstore/api/YearsEndApi";
 
 interface TerminationGridSearchProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
   searchParams: StartAndEndDateRequest | null;
   resetPageFlag: boolean;
+  onUnsavedChanges: (hasChanges: boolean) => void;
+  hasUnsavedChanges: boolean;
 }
 
 const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   initialSearchLoaded,
   setInitialSearchLoaded,
   searchParams,
-  resetPageFlag
+  resetPageFlag,
+  onUnsavedChanges,
+  hasUnsavedChanges
 }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
@@ -32,11 +39,71 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const { termination } = useSelector((state: RootState) => state.yearsEnd);
   const [triggerSearch, { isFetching }] = useLazyGetTerminationReportQuery();
+  const [selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
+  const [editedValues, setEditedValues] = useState<Record<string, { value: number; hasError: boolean }>>({});
+  const [loadingRowIds, setLoadingRowIds] = useState<Set<number>>(new Set());
+  const selectedProfitYear = useDecemberFlowProfitYear();
+  const [updateForfeitureAdjustmentBulk, { isLoading: isBulkSaving }] = useUpdateForfeitureAdjustmentBulkMutation();
+  const [updateForfeitureAdjustment] = useUpdateForfeitureAdjustmentMutation();
+
+  const handleSave = useCallback(async (request: ForfeitureAdjustmentUpdateRequest) => {
+    const rowId = request.badgeNumber; // Use badgeNumber as unique identifier
+    setLoadingRowIds(prev => new Set(Array.from(prev).concat(rowId)));
+    
+    try {
+      await updateForfeitureAdjustment(request);
+      const rowKey = `${request.badgeNumber}-${request.profitYear}`;
+      setEditedValues(prev => {
+        const updated = { ...prev };
+        delete updated[rowKey];
+        return updated;
+      });
+      onUnsavedChanges(Object.keys(editedValues).length > 1);
+      if (searchParams) {
+        const params = {
+          ...searchParams,
+          pagination: {
+            skip: pageNumber * pageSize,
+            take: pageSize,
+            sortBy: sortParams.sortBy,
+            isSortDescending: sortParams.isSortDescending
+          }
+        };
+        triggerSearch(params, false);
+      }
+    } catch (error) {
+      console.error('Failed to save forfeiture adjustment:', error);
+      alert('Failed to save. Please try again.');
+    } finally {
+      setLoadingRowIds(prev => {
+        const newSet = new Set(Array.from(prev));
+        newSet.delete(rowId);
+        return newSet;
+      });
+    }
+  }, [updateForfeitureAdjustment, editedValues, onUnsavedChanges, searchParams, pageNumber, pageSize, sortParams, triggerSearch]);
 
   // Reset page number to 0 when resetPageFlag changes
   useEffect(() => {
     setPageNumber(0);
   }, [resetPageFlag]);
+
+  // Track unsaved changes
+  useEffect(() => {
+    const hasChanges = selectedRowIds.length > 0;
+    onUnsavedChanges(hasChanges);
+  }, [selectedRowIds, onUnsavedChanges]);
+  
+  // Refresh the grid when loading state changes
+  const gridRef = useRef<any>(null);
+  useEffect(() => {
+    if (gridRef.current?.api) {
+      gridRef.current.api.refreshCells({ 
+        force: true,
+        suppressFlash: false
+      });
+    }
+  }, [loadingRowIds]);
 
   // Initialize expandedRows when data is loaded
   useEffect(() => {
@@ -73,7 +140,6 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     }
   }, [searchParams, pageNumber, pageSize, sortParams, triggerSearch]);
 
-
   const handleRowExpansion = (badgeNumber: string) => {
     setExpandedRows((prev) => ({
       ...prev,
@@ -81,9 +147,75 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     }));
   };
 
+  const addRowToSelectedRows = (id: number) => {
+    setSelectedRowIds([...selectedRowIds, id]);
+  };
+
+  const removeRowFromSelectedRows = (id: number) => {
+    setSelectedRowIds(selectedRowIds.filter((rowId) => rowId !== id));
+  };
+
+  const updateEditedValue = useCallback((rowKey: string, value: number, hasError: boolean) => {
+    setEditedValues((prev) => ({
+      ...prev,
+      [rowKey]: { value, hasError }
+    }));
+  }, []);
+
+  const handleBulkSave = useCallback(async (requests: ForfeitureAdjustmentUpdateRequest[]) => {
+    // Add all affected badge numbers to loading state
+    const badgeNumbers = requests.map(request => request.badgeNumber);
+    setLoadingRowIds(prev => {
+      const newSet = new Set(Array.from(prev));
+      badgeNumbers.forEach(badgeNumber => newSet.add(badgeNumber));
+      return newSet;
+    });
+    
+    try {
+      await updateForfeitureAdjustmentBulk(requests);
+      const updatedEditedValues = { ...editedValues };
+      requests.forEach(request => {
+        const rowKey = `${request.badgeNumber}-${request.profitYear}`;
+        delete updatedEditedValues[rowKey];
+      });
+      setEditedValues(updatedEditedValues);
+      setSelectedRowIds([]);
+      onUnsavedChanges(Object.keys(updatedEditedValues).length > 0);
+      if (searchParams) {
+        const params = {
+          ...searchParams,
+          pagination: {
+            skip: pageNumber * pageSize,
+            take: pageSize,
+            sortBy: sortParams.sortBy,
+            isSortDescending: sortParams.isSortDescending
+          }
+        };
+        triggerSearch(params, false);
+      }
+    } catch (error) {
+      console.error('Failed to save forfeiture adjustments:', error);
+      alert('Failed to save one or more adjustments. Please try again.');
+    } finally {
+      // Remove all affected badge numbers from loading state
+      setLoadingRowIds(prev => {
+        const newSet = new Set(Array.from(prev));
+        badgeNumbers.forEach(badgeNumber => newSet.delete(badgeNumber));
+        return newSet;
+      });
+    }
+  }, [updateForfeitureAdjustmentBulk, editedValues, onUnsavedChanges, searchParams, pageNumber, pageSize, sortParams, triggerSearch]);
+
   // Get main and detail columns
   const mainColumns = useMemo(() => GetTerminationColumns(), []);
-  const detailColumns = useMemo(() => GetDetailColumns(), []);
+  const detailColumns = useMemo(() => GetDetailColumns(
+    addRowToSelectedRows, 
+    removeRowFromSelectedRows, 
+    selectedRowIds, 
+    selectedProfitYear, 
+    handleSave, 
+    handleBulkSave
+  ), [selectedRowIds, selectedProfitYear, handleSave, handleBulkSave]);
 
   // Build grid data with expandable rows
   const gridData = useMemo(() => {
@@ -122,7 +254,6 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     return rows;
   }, [termination, expandedRows]);
 
-
   // Compose columns: show main columns for parent, detail columns for detail
   const columnDefs = useMemo(() => {
     // Add an expansion column as the first column
@@ -136,7 +267,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
         }
         return "";
       },
-      onCellClicked: (params: ICellRendererParams) => {
+      onCellClicked: (params: CellClickedEvent) => {
         if (!params.data.isDetail && params.data.isExpandable) {
           handleRowExpansion(params.data.badgeNumber);
         }
@@ -146,7 +277,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
       lockVisible: true,
       lockPosition: true,
       pinned: "left"
-    };
+    } as ColDef;
 
     // Determine which columns to display based on whether it's a detail row
     const visibleColumns = mainColumns.map((column) => {
@@ -231,11 +362,19 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
             width: 48px;
             height: 48px;
           }
+          .detail-row {
+            background-color: #f5f5f5;
+          }
+          .invalid-cell {
+            background-color: #fff6f6;
+          }
         `}
       </style>
       {isFetching && (
         <div className="termination-spinner-overlay">
-          <div className="spinner-border termination-spinner" role="status">
+          <div
+            className="spinner-border termination-spinner"
+            role="status">
             <span className="visually-hidden">Loading...</span>
           </div>
         </div>
@@ -267,15 +406,25 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
             preferenceKey={"QPREV-PROF"}
             handleSortChanged={sortEventHandler}
             maxHeight={800}
+            isLoading={isFetching}
             providedOptions={{
+              onGridReady: (params) => {
+                gridRef.current = params;
+              },
               rowData: gridData,
               columnDefs: columnDefs,
               getRowClass: getRowClass,
+              rowSelection: "multiple",
               suppressRowClickSelection: true,
               rowHeight: 40,
               suppressMultiSort: true,
               defaultColDef: {
                 resizable: true
+              },
+              context: {
+                editedValues,
+                updateEditedValue,
+                loadingRowIds
               }
             }}
           />
@@ -284,11 +433,19 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
             <Pagination
               pageNumber={pageNumber}
               setPageNumber={(value: number) => {
+                if (hasUnsavedChanges) {
+                  alert("Please save your changes.");
+                  return;
+                }
                 setPageNumber(value - 1);
                 setInitialSearchLoaded(true);
               }}
               pageSize={pageSize}
               setPageSize={(value: number) => {
+                if (hasUnsavedChanges) {
+                  alert("Please save your changes.");
+                  return;
+                }
                 setPageSize(value);
                 setPageNumber(0);
                 setInitialSearchLoaded(true);

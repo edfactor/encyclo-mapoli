@@ -9,24 +9,29 @@ import { GetFreezeColumns } from "./DemographicFreezeGridColumns";
 interface DemoFreezeSearchProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
+  pageNumberReset: boolean;
+  setPageNumberReset: (reset: boolean) => void;
 }
 
-const DemographicFreeze: React.FC<DemoFreezeSearchProps> = ({initialSearchLoaded, setInitialSearchLoaded }) => {
+const DemographicFreeze: React.FC<DemoFreezeSearchProps> = ({
+  initialSearchLoaded,
+  setInitialSearchLoaded,
+  pageNumberReset,
+  setPageNumberReset
+}) => {
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
 
-  const freezeResults = useSelector(
-    (state: RootState) => state.frozen.frozenStateCollectionData
-  );
+  const freezeResults = useSelector((state: RootState) => state.frozen.frozenStateCollectionData);
 
   const [triggerSearch, { isFetching }] = useLazyGetHistoricalFrozenStateResponseQuery();
 
   const onSearch = useCallback(async () => {
     const request = {
-      skip: pageNumber * pageSize, 
-      take: pageSize, 
-      sortBy: "createdDateTime", 
+      skip: pageNumber * pageSize,
+      take: pageSize,
+      sortBy: "createdDateTime",
       isSortDescending: true
     };
 
@@ -48,6 +53,13 @@ const DemographicFreeze: React.FC<DemoFreezeSearchProps> = ({initialSearchLoaded
   }, [pageNumber, pageSize, initialSearchLoaded, onSearch]);
 
   const columnDefs = useMemo(() => GetFreezeColumns(), []);
+
+  useEffect(() => {
+    if (pageNumberReset) {
+      setPageNumber(0);
+      setPageNumberReset(false);
+    }
+  }, [pageNumberReset, setPageNumberReset]);
 
   return (
     <>

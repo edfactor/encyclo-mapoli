@@ -1,29 +1,16 @@
-import {ColDef, ICellRendererParams} from "ag-grid-community";
+import { ColDef } from "ag-grid-community";
 import { yyyyMMDDToMMDDYYYY } from "smart-ui-library";
-import {viewBadgeLinkRenderer} from "../../../utils/masterInquiryLink";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
+import { createBadgeColumn, createSSNColumn, createDateColumn, createStoreColumn } from "../../../utils/gridColumnFactory";
 
 export const GetDuplicateSSNsOnDemographicsColumns = (): ColDef[] => {
   return [
-    {
+    createBadgeColumn({
       headerName: "Badge",
-      field: "badgeNumber",
-      colId: "badgeNumber",
       minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber)
-    },
-    {
-      headerName: "SSN",
-      field: "ssn",
-      colId: "ssn",
-      minWidth: GRID_COLUMN_WIDTHS.SSN,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
+      alignment: "left"
+    }),
+    createSSNColumn({ alignment: "left" }),
     {
       headerName: "Name",
       field: "name",
@@ -66,35 +53,21 @@ export const GetDuplicateSSNsOnDemographicsColumns = (): ColDef[] => {
       resizable: true,
       valueGetter: (params) => params.data.address?.state || ""
     },
-    {
+    createDateColumn({
       headerName: "Hire",
       field: "hireDate",
-      colId: "hireDate",
       minWidth: 100,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      valueFormatter: (params) => (params.value ? yyyyMMDDToMMDDYYYY(params.value) : "")
-    },
-    {
+      alignment: "left"
+    }),
+    createDateColumn({
       headerName: "Rehire",
       field: "rehireDate",
-      colId: "rehireDate",
       minWidth: 100,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      valueFormatter: (params) => (params.value ? yyyyMMDDToMMDDYYYY(params.value) : "")
-    },   
-    {
-      headerName: "Store",
-      field: "storeNumber",
-      colId: "storeNumber",
-      minWidth: 50,
-      headerClass: "right-align",
-      cellClass: "right-align",
-      resizable: true
-    },
+      alignment: "left"
+    }),
+    createStoreColumn({
+      minWidth: 50
+    }),
     {
       headerName: "Status",
       field: "status",
@@ -109,6 +82,6 @@ export const GetDuplicateSSNsOnDemographicsColumns = (): ColDef[] => {
         //see if one is undefined or null then show other
         return `[${id}] ${name}`;
       }
-    },
+    }
   ];
 };

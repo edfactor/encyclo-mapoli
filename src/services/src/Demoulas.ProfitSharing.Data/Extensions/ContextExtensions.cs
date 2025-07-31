@@ -12,12 +12,13 @@ internal static class ContextExtensions
     public static ModelBuilder ApplyModelConfiguration(this ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(new AuditEventMap());
-        modelBuilder.ApplyConfiguration(new AuditChangeMap());
         modelBuilder.ApplyConfiguration(new FakeSsnMap());
         modelBuilder.ApplyConfiguration(new DataImportRecordMap());
         modelBuilder.ApplyConfiguration(new BeneficiaryContactMap());
+        modelBuilder.ApplyConfiguration(new BeneficiaryContactArchiveMap());
         modelBuilder.ApplyConfiguration(new BeneficiaryKindMap());
         modelBuilder.ApplyConfiguration(new BeneficiaryMap());
+        modelBuilder.ApplyConfiguration(new BeneficiaryArchiveMap());
         modelBuilder.ApplyConfiguration(new BeneficiaryTypeMap());
         modelBuilder.ApplyConfiguration(new BeneficiarySsnChangeHistoryMap());
         modelBuilder.ApplyConfiguration(new AccountingPeriodConfiguration { ExcludeFromMigrations = false, SeedDataAfterMigrations = true });
@@ -40,6 +41,8 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new EmployeeTypeMap());
         modelBuilder.ApplyConfiguration(new EmploymentStatusMap());
         modelBuilder.ApplyConfiguration(new EmploymentTypeMap());
+        modelBuilder.ApplyConfiguration(new ExcludedIdMap());
+        modelBuilder.ApplyConfiguration(new ExcludedIdTypeMap());
         modelBuilder.ApplyConfiguration(new EnrollmentMap());
         modelBuilder.ApplyConfiguration(new FrozenStateMap());
         modelBuilder.ApplyConfiguration(new GenderMap());
@@ -59,6 +62,7 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new ProfitCodeMap());
         modelBuilder.ApplyConfiguration(new ProfitDetailMap());
         modelBuilder.ApplyConfiguration(new ProfitShareCheckMap());
+        modelBuilder.ApplyConfiguration(new ReportChecksumMap());
         modelBuilder.ApplyConfiguration(new StartMethodMap());
         modelBuilder.ApplyConfiguration(new StateTaxMap());
         modelBuilder.ApplyConfiguration(new TaxCodeMap());

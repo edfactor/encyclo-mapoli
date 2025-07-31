@@ -18,7 +18,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .UseCollation("USING_NLS_COMP")
-                .HasAnnotation("ProductVersion", "9.0.6")
+                .HasAnnotation("ProductVersion", "9.0.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             OracleModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -27,25 +27,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 .StartsAt(666000000L)
                 .HasMin(666000000L)
                 .HasMax(666999999L);
-
-            modelBuilder.Entity("AuditChangeAuditEvent", b =>
-                {
-                    b.Property<long>("AuditEventId")
-                        .HasColumnType("NUMBER(19)")
-                        .HasColumnName("AUDITEVENTID");
-
-                    b.Property<long>("ChangesId")
-                        .HasColumnType("NUMBER(19)")
-                        .HasColumnName("CHANGESID");
-
-                    b.HasKey("AuditEventId", "ChangesId")
-                        .HasName("PK_AUDIT_CHANGE__AUDIT_EVENT");
-
-                    b.HasIndex("ChangesId")
-                        .HasDatabaseName("IX_AUDIT_CHANGE__AUDIT_EVENT_CHANGESID");
-
-                    b.ToTable("AUDIT_CHANGE__AUDIT_EVENT", (string)null);
-                });
 
             modelBuilder.Entity("Demoulas.Common.Data.Services.Entities.Entities.AccountingPeriod", b =>
                 {
@@ -25484,75 +25465,48 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Audit.AuditChange", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(19)")
-                        .HasColumnName("ID");
-
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<DateTimeOffset>("ChangeDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
-                        .HasColumnName("CHANGE_DATE")
-                        .HasDefaultValueSql("SYSTIMESTAMP");
-
-                    b.Property<string>("ColumnName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("NVARCHAR2(50)")
-                        .HasColumnName("COLUMN_NAME");
-
-                    b.Property<string>("NewValue")
-                        .HasMaxLength(512)
-                        .HasColumnType("NVARCHAR2(512)")
-                        .HasColumnName("NEW_VALUE");
-
-                    b.Property<string>("OriginalValue")
-                        .HasMaxLength(512)
-                        .HasColumnType("NVARCHAR2(512)")
-                        .HasColumnName("ORIGINAL_VALUE");
-
-                    b.Property<string>("UserName")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(24)
-                        .HasColumnType("NVARCHAR2(24)")
-                        .HasColumnName("USER_NAME")
-                        .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
-
-                    b.HasKey("Id")
-                        .HasName("PK_AUDIT_CHANGE");
-
-                    b.ToTable("AUDIT_CHANGE", (string)null);
-                });
-
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Audit.AuditEvent", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("NUMBER(19)")
-                        .HasColumnName("ID");
+                        .HasColumnName("AUDIT_EVENT_ID");
 
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
+                    b.Property<string>("ChangesJson")
+                        .HasColumnType("CLOB")
+                        .HasColumnName("CHANGES_JSON");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("CREATED_AT")
+                        .HasDefaultValueSql("SYSTIMESTAMP");
+
                     b.Property<string>("Operation")
                         .IsRequired()
-                        .HasMaxLength(12)
-                        .HasColumnType("NVARCHAR2(12)")
+                        .HasMaxLength(24)
+                        .HasColumnType("NVARCHAR2(24)")
                         .HasColumnName("OPERATION");
 
                     b.Property<string>("PrimaryKey")
-                        .HasMaxLength(32)
-                        .HasColumnType("NVARCHAR2(32)")
+                        .HasMaxLength(512)
+                        .HasColumnType("NVARCHAR2(512)")
                         .HasColumnName("PRIMARY_KEY");
 
                     b.Property<string>("TableName")
-                        .HasMaxLength(30)
-                        .HasColumnType("NVARCHAR2(30)")
+                        .HasMaxLength(128)
+                        .HasColumnType("NVARCHAR2(128)")
                         .HasColumnName("TABLE_NAME");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(96)
+                        .HasColumnType("NVARCHAR2(96)")
+                        .HasColumnName("USER_NAME")
+                        .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
 
                     b.HasKey("Id")
                         .HasName("PK_AUDIT_EVENT");
@@ -25561,6 +25515,120 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasDatabaseName("IX_AUDIT_EVENT_TABLENAME");
 
                     b.ToTable("AUDIT_EVENT", (string)null);
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Audit.BeneficiaryArchive", b =>
+                {
+                    b.Property<int>("ArchiveId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ARCHIVE_ID");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ArchiveId"));
+
+                    b.Property<int>("BadgeNumber")
+                        .HasPrecision(7)
+                        .HasColumnType("NUMBER(7)")
+                        .HasColumnName("BADGE_NUMBER");
+
+                    b.Property<int>("BeneficiaryContactId")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("BENEFICIARY_CONTACT_ID");
+
+                    b.Property<string>("DeleteDate")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR2(10)")
+                        .HasColumnName("DELETE_DATE");
+
+                    b.Property<string>("DeletedBy")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(24)
+                        .HasColumnType("NVARCHAR2(24)")
+                        .HasColumnName("DELETED_BY")
+                        .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
+
+                    b.Property<int>("DemographicId")
+                        .HasPrecision(9)
+                        .HasColumnType("NUMBER(9)")
+                        .HasColumnName("DEMOGRAPHIC_ID");
+
+                    b.Property<int>("Id")
+                        .HasPrecision(9)
+                        .HasColumnType("NUMBER(9)")
+                        .HasColumnName("ID");
+
+                    b.Property<string>("KindId")
+                        .HasColumnType("NVARCHAR2(1)")
+                        .HasColumnName("KIND_ID");
+
+                    b.Property<decimal>("Percent")
+                        .HasPrecision(3)
+                        .HasColumnType("numeric(3,0)")
+                        .HasColumnName("PERCENT");
+
+                    b.Property<short>("PsnSuffix")
+                        .HasPrecision(5)
+                        .HasColumnType("NUMBER(5)")
+                        .HasColumnName("PSN_SUFFIX");
+
+                    b.Property<string>("Relationship")
+                        .HasMaxLength(10)
+                        .HasColumnType("NVARCHAR2(10)")
+                        .HasColumnName("RELATIONSHIP");
+
+                    b.HasKey("ArchiveId")
+                        .HasName("PK_BENEFICIARY_ARCHIVE");
+
+                    b.ToTable("BENEFICIARY_ARCHIVE", (string)null);
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Audit.BeneficiaryContactArchive", b =>
+                {
+                    b.Property<int>("ArchiveId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ARCHIVE_ID");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ArchiveId"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("DATE")
+                        .HasColumnName("CREATED_DATE")
+                        .HasDefaultValueSql("SYSDATE");
+
+                    b.Property<DateTime>("DateOfBirth")
+                        .HasColumnType("DATE")
+                        .HasColumnName("DATE_OF_BIRTH");
+
+                    b.Property<string>("DeleteDate")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR2(10)")
+                        .HasColumnName("DELETE_DATE");
+
+                    b.Property<string>("DeletedBy")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(24)
+                        .HasColumnType("NVARCHAR2(24)")
+                        .HasColumnName("DELETED_BY")
+                        .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
+
+                    b.Property<int>("Id")
+                        .HasPrecision(9)
+                        .HasColumnType("NUMBER(9)")
+                        .HasColumnName("ID");
+
+                    b.Property<int>("Ssn")
+                        .HasPrecision(9)
+                        .HasColumnType("NUMBER(9)")
+                        .HasColumnName("SSN");
+
+                    b.HasKey("ArchiveId")
+                        .HasName("PK_BENEFICIARY_CONTACT_ARCHIVE");
+
+                    b.ToTable("BENEFICIARY_CONTACT_ARCHIVE", (string)null);
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Audit.HealthCheckStatusHistory", b =>
@@ -25606,6 +25674,66 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.ToTable("_HEALTH_CHECK_STATUS_HISTORY", (string)null);
                 });
 
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Audit.ReportChecksum", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("CREATED_AT_UTC")
+                        .HasDefaultValueSql("SYSTIMESTAMP");
+
+                    b.Property<string>("KeyFieldsChecksumJson")
+                        .IsRequired()
+                        .HasColumnType("CLOB")
+                        .HasColumnName("KEYFIELDS_CHECKSUM_JSON");
+
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
+                        .ValueGeneratedOnUpdate()
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("MODIFIED_AT_UTC")
+                        .HasDefaultValueSql("SYSTIMESTAMP");
+
+                    b.Property<short>("ProfitYear")
+                        .HasPrecision(4)
+                        .HasColumnType("NUMBER(4)")
+                        .HasColumnName("PROFIT_YEAR");
+
+                    b.Property<string>("ReportJson")
+                        .IsRequired()
+                        .HasColumnType("CLOB")
+                        .HasColumnName("REPORT_JSON");
+
+                    b.Property<string>("ReportType")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("NVARCHAR2(128)")
+                        .HasColumnName("REPORT_TYPE");
+
+                    b.Property<string>("RequestJson")
+                        .IsRequired()
+                        .HasColumnType("CLOB")
+                        .HasColumnName("REQUEST_JSON");
+
+                    b.Property<string>("UserName")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(96)
+                        .HasColumnType("NVARCHAR2(96)")
+                        .HasColumnName("USER_NAME")
+                        .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
+
+                    b.HasKey("Id")
+                        .HasName("PK_REPORT_CHECKSUM");
+
+                    b.ToTable("REPORT_CHECKSUM", (string)null);
+                });
+
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Beneficiary", b =>
                 {
                     b.Property<int>("Id")
@@ -25624,6 +25752,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(10)")
                         .HasColumnName("BENEFICIARY_CONTACT_ID");
 
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("CREATED_AT_UTC")
+                        .HasDefaultValueSql("SYSTIMESTAMP");
+
                     b.Property<int>("DemographicId")
                         .HasPrecision(9)
                         .HasColumnType("NUMBER(9)")
@@ -25632,6 +25766,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<string>("KindId")
                         .HasColumnType("NVARCHAR2(1)")
                         .HasColumnName("KIND_ID");
+
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
+                        .ValueGeneratedOnUpdate()
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("MODIFIED_AT_UTC")
+                        .HasDefaultValueSql("SYSTIMESTAMP");
 
                     b.Property<decimal>("Percent")
                         .HasPrecision(3)
@@ -25647,6 +25787,13 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("NVARCHAR2(10)")
                         .HasColumnName("RELATIONSHIP");
+
+                    b.Property<string>("UserName")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(96)
+                        .HasColumnType("NVARCHAR2(96)")
+                        .HasColumnName("USER_NAME")
+                        .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
 
                     b.HasKey("Id")
                         .HasName("PK_BENEFICIARY");
@@ -25678,6 +25825,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("CREATED_AT_UTC")
+                        .HasDefaultValueSql("SYSTIMESTAMP");
+
                     b.Property<DateTime>("CreatedDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("DATE")
@@ -25688,10 +25841,23 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("DATE")
                         .HasColumnName("DATE_OF_BIRTH");
 
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
+                        .ValueGeneratedOnUpdate()
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("MODIFIED_AT_UTC")
+                        .HasDefaultValueSql("SYSTIMESTAMP");
+
                     b.Property<int>("Ssn")
                         .HasPrecision(9)
                         .HasColumnType("NUMBER(9)")
                         .HasColumnName("SSN");
+
+                    b.Property<string>("UserName")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(96)
+                        .HasColumnType("NVARCHAR2(96)")
+                        .HasColumnName("USER_NAME")
+                        .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
 
                     b.HasKey("Id")
                         .HasName("PK_BENEFICIARY_CONTACT");
@@ -25748,10 +25914,16 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(9)")
                         .HasColumnName("BENEFICIARY_ID");
 
-                    b.Property<DateTimeOffset>("ChangeDateUtc")
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
-                        .HasColumnName("CREATED_UTC")
+                        .HasColumnName("CREATED_AT_UTC")
+                        .HasDefaultValueSql("SYSTIMESTAMP");
+
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
+                        .ValueGeneratedOnUpdate()
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("MODIFIED_AT_UTC")
                         .HasDefaultValueSql("SYSTIMESTAMP");
 
                     b.Property<int>("NewSsn")
@@ -25763,6 +25935,13 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasPrecision(9)
                         .HasColumnType("NUMBER(9)")
                         .HasColumnName("OLD_SSN");
+
+                    b.Property<string>("UserName")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(96)
+                        .HasColumnType("NVARCHAR2(96)")
+                        .HasColumnName("USER_NAME")
+                        .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
 
                     b.HasKey("Id")
                         .HasName("PK_BENEFICIARY_SSN_CHANGE_HISTORY");
@@ -27378,6 +27557,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(7)")
                         .HasColumnName("BADGE_NUMBER");
 
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("CREATED_AT_UTC")
+                        .HasDefaultValueSql("SYSTIMESTAMP");
+
                     b.Property<DateTime>("DateOfBirth")
                         .HasColumnType("DATE")
                         .HasColumnName("DATE_OF_BIRTH")
@@ -27418,11 +27603,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("HIRE_DATE")
                         .HasComment("HireDate");
 
-                    b.Property<DateTimeOffset>("LastModifiedDate")
-                        .ValueGeneratedOnAdd()
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
+                        .ValueGeneratedOnUpdate()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
-                        .HasColumnName("LAST_MODIFIED_DATE")
-                        .HasDefaultValueSql("SYSDATE");
+                        .HasColumnName("MODIFIED_AT_UTC")
+                        .HasDefaultValueSql("SYSTIMESTAMP");
 
                     b.Property<long>("OracleHcmId")
                         .HasPrecision(15)
@@ -27467,6 +27652,13 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("DATE")
                         .HasColumnName("TERMINATION_DATE")
                         .HasComment("TerminationDate");
+
+                    b.Property<string>("UserName")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(96)
+                        .HasColumnType("NVARCHAR2(96)")
+                        .HasColumnName("USER_NAME")
+                        .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
 
                     b.HasKey("Id")
                         .HasName("PK_DEMOGRAPHIC");
@@ -27639,16 +27831,22 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset>("ChangeDateUtc")
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
-                        .HasColumnName("CREATED_UTC")
+                        .HasColumnName("CREATED_AT_UTC")
                         .HasDefaultValueSql("SYSTIMESTAMP");
 
                     b.Property<int>("DemographicId")
                         .HasPrecision(9)
                         .HasColumnType("NUMBER(9)")
                         .HasColumnName("DEMOGRAPHIC_ID");
+
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
+                        .ValueGeneratedOnUpdate()
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("MODIFIED_AT_UTC")
+                        .HasDefaultValueSql("SYSTIMESTAMP");
 
                     b.Property<int>("NewSsn")
                         .HasPrecision(9)
@@ -27659,6 +27857,13 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasPrecision(9)
                         .HasColumnType("NUMBER(9)")
                         .HasColumnName("OLD_SSN");
+
+                    b.Property<string>("UserName")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(96)
+                        .HasColumnType("NVARCHAR2(96)")
+                        .HasColumnName("USER_NAME")
+                        .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
 
                     b.HasKey("Id")
                         .HasName("PK_DEMOGRAPHIC_SSN_CHANGE_HISTORY");
@@ -27793,6 +27998,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("DECIMAL(9,2)")
                         .HasColumnName("CHECK_AMOUNT");
 
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("CREATED_AT_UTC")
+                        .HasDefaultValueSql("SYSTIMESTAMP");
+
                     b.Property<string>("EmployeeName")
                         .IsRequired()
                         .HasMaxLength(84)
@@ -27841,6 +28052,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("NVARCHAR2(128)")
                         .HasColumnName("MEMO");
+
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
+                        .ValueGeneratedOnUpdate()
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("MODIFIED_AT_UTC")
+                        .HasDefaultValueSql("SYSTIMESTAMP");
 
                     b.Property<int?>("PayeeId")
                         .HasColumnType("NUMBER(10)")
@@ -27895,6 +28112,13 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<int?>("ThirdPartyPayeeId")
                         .HasColumnType("NUMBER(10)")
                         .HasColumnName("THIRD_PARTY_PAYEE_ID");
+
+                    b.Property<string>("UserName")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(96)
+                        .HasColumnType("NVARCHAR2(96)")
+                        .HasColumnName("USER_NAME")
+                        .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
 
                     b.HasKey("Id")
                         .HasName("PK_DISTRIBUTION");
@@ -28029,6 +28253,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("DECIMAL(10,2)")
                         .HasColumnName("AMOUNT_REQUESTED");
 
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("CREATED_AT_UTC")
+                        .HasDefaultValueSql("SYSTIMESTAMP");
+
                     b.Property<DateTime?>("DateDecided")
                         .HasColumnType("Date")
                         .HasColumnName("DATE_DECIDED");
@@ -28041,6 +28271,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasPrecision(9)
                         .HasColumnType("NUMBER(9)")
                         .HasColumnName("DEMOGRAPHIC_ID");
+
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
+                        .ValueGeneratedOnUpdate()
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("MODIFIED_AT_UTC")
+                        .HasDefaultValueSql("SYSTIMESTAMP");
 
                     b.Property<byte>("ReasonId")
                         .HasColumnType("NUMBER(2)")
@@ -28069,6 +28305,13 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<byte>("TypeId")
                         .HasColumnType("NUMBER(3)")
                         .HasColumnName("TYPE_ID");
+
+                    b.Property<string>("UserName")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(96)
+                        .HasColumnType("NVARCHAR2(96)")
+                        .HasColumnName("USER_NAME")
+                        .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
 
                     b.HasKey("Id")
                         .HasName("PK_DISTRIBUTION_REQUEST");
@@ -28501,6 +28744,62 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         {
                             Id = (byte)9,
                             Name = "Previous years enrollment is unknown. (History not previously tracked)"
+                        });
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.ExcludedId", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<byte>("ExcludedIdTypeId")
+                        .HasColumnType("NUMBER(3)")
+                        .HasColumnName("EXCLUDED_ID_TYPE_ID");
+
+                    b.Property<int>("ExcludedIdValue")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("EXCLUDED_ID_VALUE");
+
+                    b.HasKey("Id")
+                        .HasName("PK_EXCLUDED_ID");
+
+                    b.HasIndex("ExcludedIdTypeId")
+                        .HasDatabaseName("IX_EXCLUDED_ID_EXCLUDEDIDTYPEID");
+
+                    b.ToTable("EXCLUDED_ID", (string)null);
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.ExcludedIdType", b =>
+                {
+                    b.Property<byte>("Id")
+                        .HasColumnType("NUMBER(3)")
+                        .HasColumnName("ID");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("NVARCHAR2(128)")
+                        .HasColumnName("NAME");
+
+                    b.HasKey("Id")
+                        .HasName("PK_EXCLUDED_ID_TYPE");
+
+                    b.ToTable("EXCLUDED_ID_TYPE", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = (byte)1,
+                            Name = "QPay066TA Exclusions"
+                        },
+                        new
+                        {
+                            Id = (byte)2,
+                            Name = "QPay066I Exclusions"
                         });
                 });
 
@@ -29593,6 +29892,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(3)")
                         .HasColumnName("BENEFICIARY_TYPE_ID");
 
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("CREATED_AT_UTC")
+                        .HasDefaultValueSql("SYSTIMESTAMP");
+
                     b.Property<decimal>("CurrentHoursYear")
                         .HasPrecision(6, 2)
                         .HasColumnType("DECIMAL(6,2)")
@@ -29626,11 +29931,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("DECIMAL(9,2)")
                         .HasColumnName("INCOME_EXECUTIVE");
 
-                    b.Property<DateTimeOffset>("LastUpdate")
-                        .ValueGeneratedOnAddOrUpdate()
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
+                        .ValueGeneratedOnUpdate()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
-                        .HasColumnName("LAST_UPDATE")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasColumnName("MODIFIED_AT_UTC")
+                        .HasDefaultValueSql("SYSTIMESTAMP");
 
                     b.Property<decimal?>("PointsEarned")
                         .HasPrecision(9, 2)
@@ -29640,6 +29945,13 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<DateTime?>("PsCertificateIssuedDate")
                         .HasColumnType("DATE")
                         .HasColumnName("PS_CERTIFICATE_ISSUED_DATE");
+
+                    b.Property<string>("UserName")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(96)
+                        .HasColumnType("NVARCHAR2(96)")
+                        .HasColumnName("USER_NAME")
+                        .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
 
                     b.Property<byte>("WeeksWorkedYear")
                         .HasPrecision(2)
@@ -29786,6 +30098,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("CONTRIBUTION")
                         .HasComment("Contribution to plan from DMB");
 
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("CREATED_AT_UTC")
+                        .HasDefaultValueSql("SYSTIMESTAMP");
+
                     b.Property<int>("DistributionSequence")
                         .HasColumnType("NUMBER(10)")
                         .HasColumnName("DISTRIBUTION_SEQUENCE");
@@ -29804,6 +30122,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasPrecision(9, 2)
                         .HasColumnType("DECIMAL(9,2)")
                         .HasColumnName("FORFEITURE");
+
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
+                        .ValueGeneratedOnUpdate()
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("MODIFIED_AT_UTC")
+                        .HasDefaultValueSql("SYSTIMESTAMP");
 
                     b.Property<byte>("MonthToDate")
                         .HasPrecision(2)
@@ -29846,6 +30170,13 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
                         .HasColumnName("CREATED_UTC")
                         .HasDefaultValueSql("SYSTIMESTAMP");
+
+                    b.Property<string>("UserName")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(96)
+                        .HasColumnType("NVARCHAR2(96)")
+                        .HasColumnName("USER_NAME")
+                        .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
 
                     b.Property<short>("YearToDate")
                         .HasPrecision(4)
@@ -30364,6 +30695,14 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Ssn"));
 
+                    b.Property<decimal?>("AllocationsFromBeneficiary")
+                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasColumnName("ALLOCFROMBENE");
+
+                    b.Property<decimal?>("AllocationsToBeneficiary")
+                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasColumnName("ALLOCTOBENE");
+
                     b.Property<decimal?>("CurrentBalance")
                         .HasColumnType("DECIMAL(18, 2)")
                         .HasColumnName("CURRENTBALANCE");
@@ -30391,12 +30730,16 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Virtual.ProfitShareTotal", b =>
                 {
+                    b.Property<decimal>("BalanceTotal")
+                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasColumnName("BALANCETOTAL");
+
                     b.Property<decimal>("HoursTotal")
                         .HasColumnType("DECIMAL(18, 2)")
                         .HasColumnName("HOURS_TOTAL");
 
-                    b.Property<int>("NumberOfEmployees")
-                        .HasColumnType("NUMBER(10)")
+                    b.Property<long>("NumberOfEmployees")
+                        .HasColumnType("NUMBER(19)")
                         .HasColumnName("NUMBER_OF_EMPLOYEES");
 
                     b.Property<int>("NumberOfEmployeesUnder21")
@@ -30410,6 +30753,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<decimal>("PointsTotal")
                         .HasColumnType("DECIMAL(18, 2)")
                         .HasColumnName("POINTS_TOTAL");
+
+                    b.Property<decimal>("TerminatedBalanceTotal")
+                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasColumnName("TERMINATEDBALANCETOTAL");
 
                     b.Property<decimal>("TerminatedHoursTotal")
                         .HasColumnType("DECIMAL(18, 2)")
@@ -30622,21 +30969,147 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.ToTable("NAVIGATION_ASSIGNED_ROLES", (string)null);
                 });
 
-            modelBuilder.Entity("AuditChangeAuditEvent", b =>
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Audit.BeneficiaryContactArchive", b =>
                 {
-                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Audit.AuditEvent", null)
-                        .WithMany()
-                        .HasForeignKey("AuditEventId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired()
-                        .HasConstraintName("FK_AUDIT_CHANGE__AUDIT_EVENT_AUDIT_EVENT_AUDITEVENTID");
+                    b.OwnsOne("Demoulas.ProfitSharing.Data.Entities.Address", "Address", b1 =>
+                        {
+                            b1.Property<int>("BeneficiaryContactArchiveArchiveId")
+                                .HasColumnType("NUMBER(10)")
+                                .HasColumnName("ARCHIVE_ID");
 
-                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Audit.AuditChange", null)
-                        .WithMany()
-                        .HasForeignKey("ChangesId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired()
-                        .HasConstraintName("FK_AUDIT_CHANGE__AUDIT_EVENT_AUDITCHANGE_CHANGESID");
+                            b1.Property<string>("City")
+                                .IsRequired()
+                                .HasMaxLength(36)
+                                .HasColumnType("NVARCHAR2(36)")
+                                .HasColumnName("CITY")
+                                .HasComment("City");
+
+                            b1.Property<string>("CountryIso")
+                                .ValueGeneratedOnAdd()
+                                .HasMaxLength(2)
+                                .HasColumnType("NVARCHAR2(2)")
+                                .HasDefaultValue("US")
+                                .HasColumnName("COUNTRY_ISO");
+
+                            b1.Property<string>("PostalCode")
+                                .IsRequired()
+                                .HasMaxLength(9)
+                                .HasColumnType("NVARCHAR2(9)")
+                                .HasColumnName("POSTAL_CODE")
+                                .HasComment("Postal Code");
+
+                            b1.Property<string>("State")
+                                .IsRequired()
+                                .HasMaxLength(3)
+                                .HasColumnType("NVARCHAR2(3)")
+                                .HasColumnName("STATE")
+                                .HasComment("State");
+
+                            b1.Property<string>("Street")
+                                .IsRequired()
+                                .HasMaxLength(56)
+                                .HasColumnType("NVARCHAR2(56)")
+                                .HasColumnName("STREET")
+                                .HasComment("Street");
+
+                            b1.Property<string>("Street2")
+                                .HasMaxLength(56)
+                                .HasColumnType("NVARCHAR2(56)")
+                                .HasColumnName("STREET2")
+                                .HasComment("Street2");
+
+                            b1.Property<string>("Street3")
+                                .HasMaxLength(56)
+                                .HasColumnType("NVARCHAR2(56)")
+                                .HasColumnName("STREET3")
+                                .HasComment("Street3");
+
+                            b1.Property<string>("Street4")
+                                .HasMaxLength(56)
+                                .HasColumnType("NVARCHAR2(56)")
+                                .HasColumnName("STREET4")
+                                .HasComment("Street4");
+
+                            b1.HasKey("BeneficiaryContactArchiveArchiveId");
+
+                            b1.HasIndex("CountryIso")
+                                .HasDatabaseName("IX_BENEFICIARY_CONTACT_ARCHIVE_COUNTRY_ISO");
+
+                            b1.ToTable("BENEFICIARY_CONTACT_ARCHIVE");
+
+                            b1.WithOwner()
+                                .HasForeignKey("BeneficiaryContactArchiveArchiveId")
+                                .HasConstraintName("FK_BENEFICIARY_CONTACT_ARCHIVE_BENEFICIARY_CONTACT_ARCHIVE_ARCHIVE_ID");
+
+                            b1.HasOne("Demoulas.ProfitSharing.Data.Entities.Country", null)
+                                .WithMany()
+                                .HasForeignKey("CountryIso")
+                                .OnDelete(DeleteBehavior.NoAction)
+                                .HasConstraintName("FK_BENEFICIARY_CONTACT_ARCHIVE_COUNTRY_COUNTRY_ISO");
+                        });
+
+                    b.OwnsOne("Demoulas.ProfitSharing.Data.Entities.ContactInfo", "ContactInfo", b1 =>
+                        {
+                            b1.Property<int>("BeneficiaryContactArchiveArchiveId")
+                                .HasColumnType("NUMBER(10)")
+                                .HasColumnName("ARCHIVE_ID");
+
+                            b1.Property<string>("EmailAddress")
+                                .HasMaxLength(84)
+                                .HasColumnType("NVARCHAR2(84)")
+                                .HasColumnName("EMAIL_ADDRESS");
+
+                            b1.Property<string>("FirstName")
+                                .IsRequired()
+                                .HasMaxLength(30)
+                                .HasColumnType("NVARCHAR2(30)")
+                                .HasColumnName("FIRST_NAME")
+                                .HasComment("FirstName");
+
+                            b1.Property<string>("FullName")
+                                .IsRequired()
+                                .HasMaxLength(84)
+                                .HasColumnType("NVARCHAR2(84)")
+                                .HasColumnName("FULL_NAME")
+                                .HasComment("FullName");
+
+                            b1.Property<string>("LastName")
+                                .IsRequired()
+                                .HasMaxLength(30)
+                                .HasColumnType("NVARCHAR2(30)")
+                                .HasColumnName("LAST_NAME")
+                                .HasComment("LastName");
+
+                            b1.Property<string>("MiddleName")
+                                .HasMaxLength(25)
+                                .HasColumnType("NVARCHAR2(25)")
+                                .HasColumnName("MIDDLE_NAME")
+                                .HasComment("MiddleName");
+
+                            b1.Property<string>("MobileNumber")
+                                .HasMaxLength(16)
+                                .HasColumnType("NVARCHAR2(16)")
+                                .HasColumnName("MOBILE_NUMBER");
+
+                            b1.Property<string>("PhoneNumber")
+                                .HasMaxLength(16)
+                                .HasColumnType("NVARCHAR2(16)")
+                                .HasColumnName("PHONE_NUMBER");
+
+                            b1.HasKey("BeneficiaryContactArchiveArchiveId");
+
+                            b1.ToTable("BENEFICIARY_CONTACT_ARCHIVE");
+
+                            b1.WithOwner()
+                                .HasForeignKey("BeneficiaryContactArchiveArchiveId")
+                                .HasConstraintName("FK_BENEFICIARY_CONTACT_ARCHIVE_BENEFICIARY_CONTACT_ARCHIVE_ARCHIVE_ID");
+                        });
+
+                    b.Navigation("Address")
+                        .IsRequired();
+
+                    b.Navigation("ContactInfo")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Beneficiary", b =>
@@ -31287,6 +31760,18 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.Navigation("Address")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.ExcludedId", b =>
+                {
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.ExcludedIdType", "ExcludedType")
+                        .WithMany()
+                        .HasForeignKey("ExcludedIdTypeId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_EXCLUDED_ID_EXCLUDEDIDTYPE_EXCLUDEDIDTYPEID");
+
+                    b.Navigation("ExcludedType");
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.MassTransit.Job", b =>

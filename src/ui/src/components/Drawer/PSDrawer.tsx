@@ -121,7 +121,7 @@ const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
 
   const settingCurrentNavigation = (navigationId?: number) => {
     if (navigationId) {
-      localStorage.setItem('navigationId',navigationId.toString());
+      localStorage.setItem("navigationId", navigationId.toString());
     }
   };
 
@@ -227,6 +227,7 @@ const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
         id="DrawerItself"
         sx={{
           width: drawerOpen ? drawerOpenWidth : drawerClosedWidth,
+          display: drawerOpen ? "block" : "none",
           flexShrink: 0,
 
           // THIS IS WHAT STYLES THE AQUAMARINE COLORED SPACE

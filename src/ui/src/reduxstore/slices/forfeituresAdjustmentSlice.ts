@@ -37,4 +37,4 @@ export const {
   clearForfeitureAdjustmentQueryParams
 } = forfeituresAdjustmentSlice.actions;
 
-export default forfeituresAdjustmentSlice.reducer; 
+export default forfeituresAdjustmentSlice.reducer;

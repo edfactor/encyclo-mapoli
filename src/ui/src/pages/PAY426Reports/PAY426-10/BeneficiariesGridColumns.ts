@@ -1,43 +1,33 @@
-import { agGridNumberToCurrency, formatNumberWithComma } from "smart-ui-library";
-import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
+import { ColDef } from "ag-grid-community";
+import { formatNumberWithComma } from "smart-ui-library";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
 import { mmDDYYFormat } from "../../../utils/dateUtils";
+import {
+  createBadgeColumn,
+  createCurrencyColumn,
+  createSSNColumn,
+  createAgeColumn,
+  createStoreColumn,
+  createNameColumn,
+  createHoursColumn
+} from "../../../utils/gridColumnFactory";
 
 export const GetBeneficiariesGridColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   return [
-    {
+    createBadgeColumn({
       headerName: "Badge",
-      field: "badgeNumber",
-      colId: "badgeNumber",
       minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
-      headerClass: "right-align",
-      cellClass: "right-align",
-      resizable: true,
-      sortable: true,
-      // @D - Question: since beneficiaries don't have a badge number, do we want to show something else? should
-      // beneficiaries be able to searched via master inquiry somehow?
-      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber, navFunction)
-    },
-    {
-      headerName: "Name",
+      alignment: "center",
+      navigateFunction: navFunction
+    }),
+    createNameColumn({
       field: "employeeName",
-      colId: "employeeName",
       minWidth: 180,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
       sortable: true
-    },
-    {
-      headerName: "Store",
-      field: "storeNumber",
-      colId: "storeNumber",
-      minWidth: 80,
-      headerClass: "right-align",
-      cellClass: "right-align",
-      resizable: true
-    },
+    }),
+    createStoreColumn({
+      minWidth: 80
+    }),
     {
       headerName: "Type",
       field: "employeeTypeCode",
@@ -57,51 +47,22 @@ export const GetBeneficiariesGridColumns = (navFunction: (badgeNumber: string) =
       resizable: true,
       valueFormatter: (params) => mmDDYYFormat(params.value)
     },
-    {
-      headerName: "Age",
-      field: "age",
-      colId: "age",
-      minWidth: 70,
-      headerClass: "right-align",
-      cellClass: "right-align",
-      resizable: true
-    },
-    {
-      headerName: "SSN",
-      field: "ssn",
-      colId: "ssn",
-      minWidth: GRID_COLUMN_WIDTHS.SSN,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true
-    },
-    {
+    createAgeColumn({}),
+    createSSNColumn(),
+    createCurrencyColumn({
       headerName: "Wages",
       field: "wages",
-      colId: "wages",
-      minWidth: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
-      headerName: "Hours",
-      field: "hours",
-      colId: "hours",
-      minWidth: 100,
-      headerClass: "right-align",
-      cellClass: "right-align",
-      resizable: true,
-      valueFormatter: (params) => formatNumberWithComma(params.value)
-    },
+      minWidth: 120
+    }),
+    createHoursColumn({
+      minWidth: 100
+    }),
     {
       headerName: "Points",
       field: "points",
       colId: "points",
       minWidth: 100,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       valueFormatter: (params) => formatNumberWithComma(params.value)
     },
@@ -125,24 +86,18 @@ export const GetBeneficiariesGridColumns = (navFunction: (badgeNumber: string) =
       resizable: true,
       valueFormatter: (params) => mmDDYYFormat(params.value)
     },
-    {
+    createCurrencyColumn({
       headerName: "Current Balance",
       field: "balance",
-      colId: "balance",
-      minWidth: 140,
-      headerClass: "right-align",
-      cellClass: "right-align",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
+      minWidth: 140
+    }),
     {
       headerName: "SVC",
       field: "svc",
       colId: "svc",
       minWidth: 80,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true
     }
   ];
-}; 
+};

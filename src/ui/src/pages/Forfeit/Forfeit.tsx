@@ -1,5 +1,5 @@
 import { Divider } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { useState } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
@@ -9,34 +9,40 @@ import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 
 const Forfeit = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
+  const [pageNumberReset, setPageNumberReset] = useState(false);
 
   const renderActionNode = () => {
-    return (
-      <StatusDropdownActionNode />
-    );
+    return <StatusDropdownActionNode />;
   };
 
   return (
-    <Page label={CAPTIONS.FORFEIT} actionNode={renderActionNode()}>
-      <Grid2
+    <Page
+      label={CAPTIONS.FORFEIT}
+      actionNode={renderActionNode()}>
+      <Grid
         container
         rowSpacing="24px">
-        <Grid2 width={"100%"}>
+        <Grid width={"100%"}>
           <Divider />
-        </Grid2>
-        <Grid2 width={"100%"}>
+        </Grid>
+        <Grid width={"100%"}>
           <DSMAccordion title="Filter">
-            <ForfeitSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
+            <ForfeitSearchFilter
+              setInitialSearchLoaded={setInitialSearchLoaded}
+              setPageReset={setPageNumberReset}
+            />
           </DSMAccordion>
-        </Grid2>
+        </Grid>
 
-        <Grid2 width="100%">
+        <Grid width="100%">
           <ForfeitGrid
             initialSearchLoaded={initialSearchLoaded}
             setInitialSearchLoaded={setInitialSearchLoaded}
+            pageNumberReset={pageNumberReset}
+            setPageNumberReset={setPageNumberReset}
           />
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
     </Page>
   );
 };

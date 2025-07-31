@@ -8,6 +8,7 @@ public sealed record DistributionsAndForfeitureTotalsResponse : ReportResponseBa
     public required decimal StateTaxTotal { get; init; }
     public required decimal FederalTaxTotal { get; init; }
     public required decimal ForfeitureTotal { get; init; }
+    public required Dictionary<string, decimal> StateTaxTotals { get; init; }
 
     public static DistributionsAndForfeitureTotalsResponse ResponseExample()
     {
@@ -20,6 +21,10 @@ public sealed record DistributionsAndForfeitureTotalsResponse : ReportResponseBa
             StateTaxTotal = 1234.56m,
             FederalTaxTotal = 987.65m,
             ForfeitureTotal = 345.67m,
+            StateTaxTotals = new Dictionary<string, decimal>
+            {
+                { "MA", 100.00m }, { "NH", 23.56m }
+            },
             StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
             EndDate = DateOnly.FromDateTime(DateTime.UtcNow),
             Response = new PaginatedResponseDto<DistributionsAndForfeitureResponse>

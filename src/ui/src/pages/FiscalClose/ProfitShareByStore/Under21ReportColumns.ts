@@ -9,14 +9,13 @@ export const GetUnder21ReportColumns = (navFunction: (badgeNumber: string) => vo
       field: "badge",
       colId: "badge",
       minWidth: 80,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sortable: true,
       cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badge, navFunction)
     },
     {
-      headerName: "Full Name",
+      headerName: "Name",
       field: "fullName",
       colId: "fullName",
       minWidth: GRID_COLUMN_WIDTHS.FULL_NAME,
@@ -38,8 +37,7 @@ export const GetUnder21ReportColumns = (navFunction: (badgeNumber: string) => vo
       field: "psYears",
       colId: "psYears",
       minWidth: 100,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true
     },
     {
@@ -47,8 +45,7 @@ export const GetUnder21ReportColumns = (navFunction: (badgeNumber: string) => vo
       field: "ne",
       colId: "ne",
       minWidth: 70,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true
     },
     {
@@ -56,8 +53,7 @@ export const GetUnder21ReportColumns = (navFunction: (badgeNumber: string) => vo
       field: "thisYearPSHours",
       colId: "thisYearPSHours",
       minWidth: 150,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true
     },
     {
@@ -65,8 +61,7 @@ export const GetUnder21ReportColumns = (navFunction: (badgeNumber: string) => vo
       field: "lastYearPSHours",
       colId: "lastYearPSHours",
       minWidth: 150,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true
     },
     {
@@ -119,8 +114,7 @@ export const GetUnder21ReportColumns = (navFunction: (badgeNumber: string) => vo
       field: "age",
       colId: "age",
       minWidth: 70,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true
     }
   ];

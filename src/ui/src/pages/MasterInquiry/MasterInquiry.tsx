@@ -1,48 +1,88 @@
 import { Divider } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { useState } from "react";
-import { useSelector } from "react-redux";
-import { RootState } from "reduxstore/store";
 import { MasterInquiryRequest } from "reduxstore/types";
 import { DSMAccordion, Page } from "smart-ui-library";
-import MasterInquiryEmployeeDetails from "./MasterInquiryEmployeeDetails";
 import MasterInquiryGrid from "./MasterInquiryDetailsGrid";
-import MasterInquirySearchFilter from "./MasterInquirySearchFilter";
+import MasterInquiryEmployeeDetails from "./MasterInquiryEmployeeDetails";
 import MasterInquiryMemberGrid from "./MasterInquiryMemberGrid";
-import MasterInquiryGroupingGrid from "./MasterInquiryGroupingGrid";
+import MasterInquirySearchFilter from "./MasterInquirySearchFilter";
+import { useSelector } from "react-redux";
+import { RootState } from "reduxstore/store";
 
+interface SelectedMember {
+  memberType: number;
+  id: number;
+  ssn: number;
+  badgeNumber: number;
+  psnSuffix: number;
+}
 
 const MasterInquiry = () => {
-  const { } = useSelector((state: RootState) => state.inquiry);
+  //const { } = useSelector((state: RootState) => state.inquiry);
 
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [searchParams, setSearchParams] = useState<MasterInquiryRequest | null>(null);
-  const [selectedMember, setSelectedMember] = useState<{ memberType: number; id: number, ssn: number } | null>(null);
+  const [selectedMember, setSelectedMember] = useState<SelectedMember | null>(null);
   const [noResults, setNoResults] = useState(false);
+
+  const { masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
+
+  const isSimpleSearch = (): boolean => {
+    const simpleFound: boolean =
+      !!masterInquiryRequestParams &&
+      (!!masterInquiryRequestParams.name ||
+        !!masterInquiryRequestParams.socialSecurity ||
+        !!masterInquiryRequestParams.badgeNumber) &&
+      !(
+        !!masterInquiryRequestParams.startProfitMonth ||
+        !!masterInquiryRequestParams.endProfitMonth ||
+        !!masterInquiryRequestParams.contribution ||
+        !!masterInquiryRequestParams.earnings ||
+        !!masterInquiryRequestParams.forfeiture ||
+        !!masterInquiryRequestParams.payment
+      );
+    return simpleFound;
+  };
 
   return (
     <Page label="MASTER INQUIRY (008-10)">
-      <Grid2
+      <Grid
         container
         rowSpacing="24px">
-        <Grid2 size={{ xs: 12 }} width={"100%"}>
+        <Grid
+          size={{ xs: 12 }}
+          width={"100%"}>
           <Divider />
-        </Grid2>
-        <Grid2 size={{ xs: 12 }} width={"100%"}>
+        </Grid>
+        <Grid
+          size={{ xs: 12 }}
+          width={"100%"}>
           <DSMAccordion title="Filter">
             <MasterInquirySearchFilter
               setInitialSearchLoaded={setInitialSearchLoaded}
               onSearch={(params) => {
-                setSearchParams(params);
+                setSearchParams(params ?? null);
                 setSelectedMember(null);
-                setNoResults(!params);
+                // Only set noResults to true if params is undefined (not found)
+                // Don't reset noResults when params is undefined (clearing state)
+                if (params === undefined) {
+                  setNoResults(true);
+                } else if (params !== null) {
+                  setNoResults(false);
+                }
+                // Don't change noResults when params is null (form reset)
               }}
             />
           </DSMAccordion>
-        </Grid2>
+        </Grid>
 
         {searchParams && (
-          <MasterInquiryMemberGrid {...searchParams} onBadgeClick={setSelectedMember} />
+          <MasterInquiryMemberGrid
+            searchParams={searchParams}
+            onBadgeClick={(data) => setSelectedMember(data || null)}
+            isSimpleSearch={isSimpleSearch}
+          />
         )}
 
         {/* Render employee details if identifiers are present in selectedMember, or show missive if noResults */}
@@ -52,22 +92,18 @@ const MasterInquiry = () => {
             id={selectedMember?.id ?? 0}
             profitYear={searchParams?.endProfitYear}
             noResults={noResults}
+            isSimpleSearch={isSimpleSearch}
           />
         )}
 
-        {searchParams && !selectedMember && (
-          <MasterInquiryGroupingGrid searchParams={searchParams} />
-          )
-        }
-
         {/* Render details for selected member if present */}
-        {selectedMember && (
+        {!noResults && selectedMember && (
           <MasterInquiryGrid
             memberType={selectedMember.memberType}
             id={selectedMember.id}
           />
         )}
-      </Grid2>
+      </Grid>
     </Page>
   );
 };

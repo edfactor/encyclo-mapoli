@@ -23,7 +23,7 @@ export const InfoCard: FC<InfoCardProps> = ({
     <Button
       size="medium"
       color="secondary"
-      sx={{minWidth: "80px"}}
+      sx={{ minWidth: "80px" }}
       variant="outlined"
       onClick={handleClick}
       disabled={buttonDisabled}

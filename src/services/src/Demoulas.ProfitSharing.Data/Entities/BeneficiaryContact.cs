@@ -1,5 +1,7 @@
-﻿namespace Demoulas.ProfitSharing.Data.Entities;
-public sealed class BeneficiaryContact
+﻿using Demoulas.ProfitSharing.Data.Entities.Base;
+
+namespace Demoulas.ProfitSharing.Data.Entities;
+public sealed class BeneficiaryContact : ModifiedBase
 {
     public required int Id { get; set; }
 

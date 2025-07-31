@@ -1,17 +1,20 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import Grid2 from "@mui/material/Grid2";
+import { FormControl, FormLabel, MenuItem, Select } from "@mui/material";
+import { Grid } from "@mui/material";
 import { Controller, useForm } from "react-hook-form";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "reduxstore/store";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
-import { CalendarResponseDto, StartAndEndDateRequest } from "../../../reduxstore/types";
-import { tryddmmyyyyToDate, mmDDYYFormat } from "../../../utils/dateUtils";
-import { RootState } from "reduxstore/store";
+import { CalendarResponseDto } from "../../../reduxstore/types";
+import { mmDDYYFormat, tryddmmyyyyToDate } from "../../../utils/dateUtils";
+import { TerminationSearchRequest } from "./Termination";
 
 const schema = yup.object().shape({
   beginningDate: yup.string().required("Begin Date is required"),
   endingDate: yup.string().required("End Date is required"),
+  forfeitureStatus: yup.string().required("Forfeiture Status is required"),
   pagination: yup
     .object({
       skip: yup.number().required(),
@@ -25,13 +28,15 @@ const schema = yup.object().shape({
 interface TerminationSearchFilterProps {
   setInitialSearchLoaded: (include: boolean) => void;
   fiscalData: CalendarResponseDto | null;
-  onSearch: (params: StartAndEndDateRequest) => void;
+  onSearch: (params: TerminationSearchRequest) => void;
+  hasUnsavedChanges?: boolean;
 }
 
 const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
   setInitialSearchLoaded,
   fiscalData,
-  onSearch
+  onSearch,
+  hasUnsavedChanges
 }) => {
   if (!fiscalData) return null;
 
@@ -43,20 +48,26 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
     formState: { errors, isValid },
     reset,
     trigger
-  } = useForm<StartAndEndDateRequest>({
+  } = useForm<TerminationSearchRequest>({
     resolver: yupResolver(schema),
     defaultValues: {
-      beginningDate: termination?.startDate || fiscalData.fiscalBeginDate || '',
-      endingDate: termination?.endDate || fiscalData.fiscalEndDate || '',
+      beginningDate: termination?.startDate || fiscalData.fiscalBeginDate || "",
+      endingDate: termination?.endDate || fiscalData.fiscalEndDate || "",
+      forfeitureStatus: "showAll",
       pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }
     }
   });
 
-  const validateAndSubmit = async (data: StartAndEndDateRequest) => {
+  const validateAndSubmit = async (data: TerminationSearchRequest) => {
+    if (hasUnsavedChanges) {
+      alert("Please save your changes.");
+      return;
+    }
+
     const params = {
       ...data,
       beginningDate: data.beginningDate ? mmDDYYFormat(data.beginningDate) : mmDDYYFormat(fiscalData.fiscalBeginDate),
-      endingDate: data.endingDate ? mmDDYYFormat(data.endingDate) : mmDDYYFormat(fiscalData.fiscalEndDate),
+      endingDate: data.endingDate ? mmDDYYFormat(data.endingDate) : mmDDYYFormat(fiscalData.fiscalEndDate)
     };
     // Only update search params and initial loaded state; let the grid trigger the API
     onSearch(params);
@@ -70,6 +81,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
     reset({
       beginningDate: fiscalData.fiscalBeginDate,
       endingDate: fiscalData.fiscalEndDate,
+      forfeitureStatus: "showAll",
       pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }
     });
     trigger();
@@ -77,11 +89,11 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
 
   return (
     <form onSubmit={validateAndSearch}>
-      <Grid2
+      <Grid
         container
         paddingX="24px"
-        gap="24px">        
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+        gap="24px">
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Controller
             name="beginningDate"
             control={control}
@@ -90,20 +102,20 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
                 id="beginningDate"
                 onChange={(value: Date | null) => {
                   field.onChange(value || undefined);
-                  trigger('beginningDate');
+                  trigger("beginningDate");
                 }}
                 value={field.value ? tryddmmyyyyToDate(field.value) : null}
                 required={false}
                 label="Begin Date"
                 disableFuture
                 error={errors.beginningDate?.message}
-                minDate={tryddmmyyyyToDate(fiscalData.fiscalBeginDate)}
-                maxDate={tryddmmyyyyToDate(fiscalData.fiscalEndDate)}
+                minDate={tryddmmyyyyToDate(fiscalData.fiscalBeginDate) || undefined}
+                maxDate={tryddmmyyyyToDate(fiscalData.fiscalEndDate) || undefined}
               />
             )}
           />
-        </Grid2>
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Controller
             name="endingDate"
             control={control}
@@ -112,21 +124,21 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
                 id="endingDate"
                 onChange={(value: Date | null) => {
                   field.onChange(value || undefined);
-                  trigger('endingDate');
+                  trigger("endingDate");
                 }}
                 value={field.value ? tryddmmyyyyToDate(field.value) : null}
                 required={false}
                 label="End Date"
                 disableFuture
                 error={errors.endingDate?.message}
-                minDate={tryddmmyyyyToDate(fiscalData.fiscalBeginDate)}
-                maxDate={tryddmmyyyyToDate(fiscalData.fiscalEndDate)}
+                minDate={tryddmmyyyyToDate(fiscalData.fiscalBeginDate) || undefined}
+                maxDate={tryddmmyyyyToDate(fiscalData.fiscalEndDate) || undefined}
               />
             )}
           />
-        </Grid2>
-      </Grid2>
-      <Grid2
+        </Grid>
+      </Grid>
+      <Grid
         width="100%"
         paddingX="24px">
         <SearchAndReset
@@ -135,10 +147,9 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
           isFetching={false}
           disabled={!isValid}
         />
-      </Grid2>
+      </Grid>
     </form>
   );
 };
 
 export default TerminationSearchFilter;
-

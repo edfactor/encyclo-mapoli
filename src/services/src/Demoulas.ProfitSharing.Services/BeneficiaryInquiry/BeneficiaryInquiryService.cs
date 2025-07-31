@@ -10,6 +10,7 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Demoulas.ProfitSharing.Services.BeneficiaryInquiry;
 public class BeneficiaryInquiryService : IBeneficiaryInquiryService
@@ -23,7 +24,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
     {
         _dataContextFactory = dataContextFactory;
         _frozenService = frozenService;
-        _totalService = totalService;   
+        _totalService = totalService;
     }
 
 
@@ -31,25 +32,55 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
     {
         var frozenStateResponse = await _frozenService.GetActiveFrozenDemographic(cancellationToken);
         short yearEnd = frozenStateResponse.ProfitYear;
-       
+
 
 
         var beneficiary = await _dataContextFactory.UseReadOnlyContext(async context =>
         {
-            var result = context.Beneficiaries.Include(x => x.Contact).Include(x => x.Contact.ContactInfo)
-            .Where(
-                x => 
-                (request.BadgeNumber == null || request.BadgeNumber ==0 || x.BadgeNumber == request.BadgeNumber) && 
-                (request.PsnSuffix == null || request.PsnSuffix == 0 || x.PsnSuffix == request.PsnSuffix) &&
-                (request.Name == null || x.Contact.ContactInfo.FullName.Contains(request.Name)) &&
-                (request.Ssn == null || request.Ssn == 0 || x.Contact.Ssn == request.Ssn) &&
-                (request.Address == null || x.Contact.Address.Street.Contains(request.Address)) &&
-                (request.City == null || x.Contact.Address.City.Contains(request.City)) &&
-                (request.State == null || x.Contact.Address.State.Contains(request.State)) &&
-                (request.Percentage == null || request.Percentage ==0 || x.Percent == request.Percentage) &&
-                (request.KindId == null || x.KindId == request.KindId) 
-                )
-            .Select(x => new BeneficiaryDto()
+            var query = context.Beneficiaries.Include(x => x.Contact).ThenInclude(x => x!.ContactInfo)
+            .Where(x => request.BadgeNumber == null || request.BadgeNumber == 0 || x.BadgeNumber == request.BadgeNumber);
+
+            // Check if user is querying from root (psnSuffix null or 0)
+            if (request.PsnSuffix == null || request.PsnSuffix == 0)
+            {
+                // Top-level beneficiaries: 1000, 2000, etc.
+                query = query.Where(x =>
+                    x.PsnSuffix >= 1000 && x.PsnSuffix < 10000 && x.PsnSuffix % 1000 == 0);
+            }
+            else
+            {
+                // Determine range for children
+                int lower = request.PsnSuffix.Value;
+                int upper;
+
+                // Determine level based on digit positions (works with base-10)
+                if (lower % 1000 == 0)
+                {
+                    // Level 1: 1000, 2000, etc.
+                    upper = lower + 1000;
+                }
+                else if (lower % 100 == 0)
+                {
+                    // Level 2: 1100, 1200, etc.
+                    upper = lower + 100;
+                }
+                else if (lower % 10 == 0)
+                {
+                    // Level 3: 1210, 1220, etc.
+                    upper = lower + 10;
+                }
+                else
+                {
+                    // Level 4 (leaf): 1211, etc. — no children
+                    upper = lower; // no children expected
+                }
+
+                // Fetch direct children or deeper if desired
+                query = query.Where(x =>
+                    x.PsnSuffix > lower && x.PsnSuffix < upper);
+            }
+
+            var result = query.Select(x => new BeneficiaryDto()
             {
                 Id = x.Id,
                 BadgeNumber = x.BadgeNumber,
@@ -57,32 +88,22 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                 DemographicId = x.DemographicId,
                 Percent = x.Percent,
                 KindId = x.KindId,
-                Contact = new BeneficiaryContactDto()
-                {
-                    Id = x.Contact != null ? x.Contact.Id : 0,
-                    CreatedDate = x.Contact != null ? x.Contact.CreatedDate : DateOnly.MaxValue,
-                    DateOfBirth = x.Contact != null ? x.Contact.DateOfBirth : DateOnly.MaxValue,
-                    Ssn = x.Contact != null ? x.Contact.Ssn.ToString() : null,
-                    Address = new Common.Contracts.Response.AddressResponseDto()
-                    {
-                        City = x.Contact != null ? x.Contact.Address.City : null,
-                        CountryIso = x.Contact != null ? x.Contact.Address.CountryIso ?? "" : "",
-                        PostalCode = x.Contact != null ? x.Contact.Address.PostalCode : null,
-                        State = x.Contact != null ? x.Contact.Address.State : null,
-                        Street = x.Contact != null ? x.Contact.Address.Street : "",
-                        Street2 = x.Contact != null ? x.Contact.Address.Street2 : null,
-                    },
-                    ContactInfo = new Common.Contracts.Response.ContactInfoResponseDto()
-                    {
-                        FirstName = x.Contact != null ? x.Contact.ContactInfo.FirstName : "",
-                        LastName = x.Contact != null ? x.Contact.ContactInfo.LastName : "",
-                        EmailAddress = x.Contact != null ? x.Contact.ContactInfo.EmailAddress : "",
-                        FullName = x.Contact != null ? x.Contact.ContactInfo.FullName : "",
-                        MiddleName = x.Contact != null ? x.Contact.ContactInfo.MiddleName : null,
-                        MobileNumber = x.Contact != null ? x.Contact.ContactInfo.MobileNumber : "",
-                        PhoneNumber = x.Contact != null ? x.Contact.ContactInfo.PhoneNumber : ""
-                    }
-                },
+                CreatedDate = x.Contact != null ? x.Contact.CreatedDate : DateOnly.MaxValue,
+                DateOfBirth = x.Contact != null ? x.Contact.DateOfBirth : DateOnly.MaxValue,
+                Ssn = x.Contact != null ? x.Contact.Ssn.ToString() : string.Empty,
+                City = x.Contact != null ? x.Contact.Address.City : null,
+                CountryIso = x.Contact != null ? x.Contact.Address.CountryIso ?? "" : "",
+                PostalCode = x.Contact != null ? x.Contact.Address.PostalCode : null,
+                State = x.Contact != null ? x.Contact.Address.State : null,
+                Street = x.Contact != null ? x.Contact.Address.Street : "",
+                Street2 = x.Contact != null ? x.Contact.Address.Street2 : null,
+                FirstName = x.Contact != null ? x.Contact.ContactInfo.FirstName : "",
+                LastName = x.Contact != null ? x.Contact.ContactInfo.LastName : "",
+                EmailAddress = x.Contact != null ? x.Contact.ContactInfo.EmailAddress : "",
+                FullName = x.Contact != null ? x.Contact.ContactInfo.FullName : "",
+                MiddleName = x.Contact != null ? x.Contact.ContactInfo.MiddleName : null,
+                MobileNumber = x.Contact != null ? x.Contact.ContactInfo.MobileNumber : "",
+                PhoneNumber = x.Contact != null ? x.Contact.ContactInfo.PhoneNumber : "",
                 Kind = new BeneficiaryKindDto()
                 {
                     Id = x.Kind != null ? x.Kind.Id : BeneficiaryKind.Constants.Primary,
@@ -95,12 +116,12 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
         }
         );
         //setting Current balance
-        ISet<int> ssnList = new HashSet<int>(beneficiary.Results.Select(x => Convert.ToInt32(x.Contact.Ssn)).ToList());
-        var balanceList =await _totalService.GetVestingBalanceForMembersAsync(SearchBy.Ssn, ssnList, yearEnd, cancellationToken); 
+        ISet<int> ssnList = new HashSet<int>(beneficiary.Results.Select(x => Convert.ToInt32(x.Ssn)).ToList());
+        var balanceList = await _totalService.GetVestingBalanceForMembersAsync(SearchBy.Ssn, ssnList, yearEnd, cancellationToken);
         foreach (var item in beneficiary.Results)
         {
-            item.CurrentBalance = balanceList.Where(x => x.Id.ToString() == item.Contact.Ssn).Select(x => x.CurrentBalance).FirstOrDefault();
-            item.Contact.Ssn = item.Contact.Ssn.MaskSsn();
+            item.CurrentBalance = balanceList.Where(x => x.Id.ToString() == item.Ssn).Select(x => x.CurrentBalance).FirstOrDefault();
+            item.Ssn = item.Ssn.MaskSsn();
         }
         return beneficiary;
     }

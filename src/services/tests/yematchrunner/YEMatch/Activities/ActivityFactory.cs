@@ -13,7 +13,7 @@ public sealed class ActivityFactory
     private readonly List<IActivity> _smartActivities;
     private readonly List<IActivity> _testActivities;
 
-    private ActivityFactory(string dataDirectory)
+    public ActivityFactory(string dataDirectory)
     {
         Stopwatch wholeRunStopWatch = new();
         wholeRunStopWatch.Start();

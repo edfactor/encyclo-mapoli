@@ -1,9 +1,11 @@
 ﻿using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Common.Interfaces.ItOperations;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
+using Demoulas.ProfitSharing.Services.Audit;
 using Demoulas.ProfitSharing.Services.Beneficiaries;
 using Demoulas.ProfitSharing.Services.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Services.Caching.Extensions;
@@ -33,6 +35,7 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IPayClassificationService, PayClassificationService>();
         _ = builder.Services.AddScoped<ICleanupReportService, CleanupReportService>();
         _ = builder.Services.AddScoped<IEmbeddedSqlService, EmbeddedSqlService>();
+        _ = builder.Services.AddScoped<IForfeituresAndPointsForYearService, ForfeituresAndPointsForYearService>(); 
         _ = builder.Services.AddScoped<IFrozenReportService, FrozenReportService>();
         _ = builder.Services.AddScoped<IMasterInquiryService, MasterInquiryService>();
         _ = builder.Services.AddScoped<IForfeitureAdjustmentService, ForfeitureAdjustmentService>();
@@ -50,9 +53,11 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<INegativeEtvaReportService, NegativeEtvaReportService>();
         _ = builder.Services.AddScoped<IProfitSharingSummaryReportService, ProfitSharingSummaryReportService>();
         _ = builder.Services.AddScoped<IBeneficiaryService, BeneficiaryService>();
-        
+        _ = builder.Services.AddScoped<IAdhocBeneficiariesReport, AdhocBeneficiariesReport>();
+        _ = builder.Services.AddScoped<IAdhocTerminatedEmployeesService, AdhocTerminatedEmployeesService>();
 
 
+        _ = builder.Services.AddScoped<IAuditService, AuditService>();
         _ = builder.Services.AddScoped<ContributionService>();
         _ = builder.Services.AddScoped<TotalService>();
 
@@ -81,6 +86,7 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<ITableMetadataService, TableMetadataService>();
 
         _ = builder.Services.AddScoped<IDemographicReaderService, DemographicReaderService>();
+        _ = builder.Services.AddScoped<IPayBenReportService, PayBenReportService>();
 
 
         #region Mappers

@@ -1,13 +1,16 @@
-﻿using Demoulas.ProfitSharing.Data.Entities;
+﻿using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Base;
+using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
 
-internal sealed class DistributionMap : IEntityTypeConfiguration<Distribution>
+internal sealed class DistributionMap : ModifiedBaseMap<Distribution>
 {
-    public void Configure(EntityTypeBuilder<Distribution> builder)
+    public override void Configure(EntityTypeBuilder<Distribution> builder)
     {
+        base.Configure(builder);
+
         builder.ToTable("DISTRIBUTION");
         builder.HasKey(d => d.Id);
         

@@ -2,8 +2,9 @@
 ---TO "YOUR CURRENT SCHEMA" FROM - {SOURCE_PROFITSHARE_SCHEMA}
 -------------------------------------------------------------------------------------
 DECLARE
-    this_year NUMBER := 2025; -- Set this to the current year
-    last_year NUMBER := 2024; -- Set this to the previous year
+    this_year NUMBER := 2025; -- <-------- ORACLE HCM loads data in this year.
+    last_year NUMBER := 2024; -- <-------- active year end year for the scramble.   Scramble is frozen in 2024. 
+    last_last_year NUMBER := 2023; -- <--- last year for the scramble data
 BEGIN
 
  -- First disable all foreign key constraints
@@ -33,9 +34,8 @@ BEGIN
     EXECUTE IMMEDIATE 'TRUNCATE TABLE DEMOGRAPHIC_HISTORY';
     EXECUTE IMMEDIATE 'TRUNCATE TABLE DEMOGRAPHIC';
     EXECUTE IMMEDIATE 'TRUNCATE TABLE DEMOGRAPHIC_SSN_CHANGE_HISTORY';
-    EXECUTE IMMEDIATE 'TRUNCATE TABLE AUDIT_CHANGE__AUDIT_EVENT';
-    EXECUTE IMMEDIATE 'TRUNCATE TABLE AUDIT_CHANGE';
     EXECUTE IMMEDIATE 'TRUNCATE TABLE AUDIT_EVENT';
+    EXECUTE IMMEDIATE 'TRUNCATE TABLE EXCLUDED_ID';
     
     -- Reset sequence
     EXECUTE IMMEDIATE 'ALTER SEQUENCE FAKE_SSN_SEQ RESTART START WITH 666000000';
@@ -350,18 +350,17 @@ BEGIN
     SELECT
         (SELECT ID FROM DEMOGRAPHIC WHERE BADGE_NUMBER = PAYPROF_BADGE) AS DEMOGRAPHIC_ID,
         last_year AS PROFIT_YEAR,
-        PY_PH_LASTYR AS CURRENT_HOURS_YEAR,
-        PY_PD_LASTYR AS CURRENT_INCOME_YEAR,
+        PY_PH_LASTYR as CURRENT_HOURS_YEAR, -- The scramble has 2024 hours as "last year"
+        PY_PD_LASTYR AS CURRENT_INCOME_YEAR, -- The scramble has 2024 hours as "last year"
         PY_WEEKS_WORK_LAST AS WEEKS_WORKED_YEAR,
         NULL AS PS_CERTIFICATE_ISSUED_DATE,
         PY_PS_ENROLLED,
         PY_PROF_BENEFICIARY AS BENEFICIARY_ID,
-         0 as EMPLOYEE_TYPE_ID, -- calculated and set during YE process (ie NEW, or Not New employee) 
-         -- See PAY456.cbl Lines 152-165
-        case when PY_PROF_ZEROCONT < 6 then 0 else PY_PROF_ZEROCONT end as ZERO_CONTRIBUTION_REASON_ID, -- We keep last years value, if it gets to be >= 6 
+        PY_PROF_NEWEMP as EMPLOYEE_TYPE_ID,
+        PY_PROF_ZEROCONT,
         NVL(PY_PH_EXEC, 0) AS HOURS_EXECUTIVE,
         NVL(PY_PD_EXEC, 0) AS INCOME_EXECUTIVE,
-        0 AS POINTS_EARNED, -- calculated and set during YE process
+        0 AS POINTS_EARNED,
         PY_PRIOR_ETVA as ETVA 
     FROM
         {SOURCE_PROFITSHARE_SCHEMA}.PAYPROFIT pp
@@ -387,18 +386,18 @@ BEGIN
      ETVA)
     SELECT
         (SELECT ID FROM DEMOGRAPHIC WHERE BADGE_NUMBER = PAYPROF_BADGE) AS DEMOGRAPHIC_ID,
-        last_year - 1 AS PROFIT_YEAR,
+        last_last_year AS PROFIT_YEAR,
         0 AS CURRENT_HOURS_YEAR,
         0 AS CURRENT_INCOME_YEAR,
         0 AS WEEKS_WORKED_YEAR,
         NULL AS PS_CERTIFICATE_ISSUED_DATE,
-        PY_PS_ENROLLED,
-        0 AS BENEFICIARY_ID,
-        0 AS EMPLOYEE_TYPE_ID,
-        8 AS ZERO_CONTRIBUTION_REASON_ID, -- 8/History not previously tracked (Unknown)
-        0 AS HOURS_EXECUTIVE,
-        0 AS INCOME_EXECUTIVE,
-        0 AS POINTS_EARNED,
+        0,
+        PY_PROF_BENEFICIARY AS BENEFICIARY_ID,
+        0,
+        0,
+        NVL(PY_PH_EXEC, 0) AS HOURS_EXECUTIVE, -- from the scramble, these are correct exec hours for 2023
+        NVL(PY_PD_EXEC, 0) AS INCOME_EXECUTIVE, --  from the scramble, the income exec hours for 2023
+        PY_PROF_POINTS AS POINTS_EARNED, -- from the scramble, these are the correct points for 2023
         0 as ETVA
     FROM
         {SOURCE_PROFITSHARE_SCHEMA}.PAYPROFIT pp
@@ -986,18 +985,113 @@ BEGIN
             AND pd.ID  = pdF.ID
       ); -- Forfeits that match a class action should be categorized as FORFEIT CA 
 
-    -- Set flag on Profit Detail marking a year of elibility for Profit Sharing
--- Comment types indicating years of service other than a contribution include:
--- V-Only
--- > 64 - 1 Year Vested
--- > 64 - 2 Year Vested
--- > 64 - 3 Year Vested
--- >64 & >5 100%
--- Military
--- https://demoulas.atlassian.net/browse/PS-1147
-    UPDATE PROFIT_DETAIL pd
-       SET pd.YEARS_OF_SERVICE_CREDIT = CASE WHEN (pd.Contribution > 0 OR pd.COMMENT_TYPE_ID IN (5, 16, 17, 18, 19)) AND MONTH_TO_DATE != 20 THEN 1 ELSE 0 END
-     WHERE EXISTS (SELECT SSN FROM DEMOGRAPHIC d WHERE d.SSN = pd.SSN);
+
+-- Handle basic allocation of YEARS_OF_SERVICE_CREDIT.  There is de-duplication happening 
+-- because some profit_years have multiple profit_code_id = 0 contributions
+MERGE INTO profit_detail pd
+    USING (
+        SELECT
+            id,
+            yr_sum
+        FROM
+            (
+                SELECT
+                    MIN(id) AS id,
+                    MAX(
+                            CASE
+                                WHEN comment_type_id = 16 THEN -- '>64 - 1 YR VEST'
+                                    1
+                                WHEN comment_type_id = 17 THEN --  '>64 - 2 YR VEST'
+                                    2
+                                WHEN comment_type_id = 18 THEN --  '>64 - 3 YR VEST'
+                                    3
+                                WHEN comment_type_id = 5  THEN -- V-ONLY
+                                    1
+                                WHEN pd.contribution != 0 THEN -- Normal contribution
+                                    1
+                                ELSE
+                                    0
+                                END
+                    )       AS yr_sum
+                FROM
+                    profit_detail pd
+                WHERE
+                    -- We handle 19, Military later
+                    ( comment_type_id IS NULL OR comment_type_id != 19 )
+                  AND profit_year_iteration = 0
+                  AND profit_code_id = 0
+                GROUP BY
+                    ssn,
+                    profit_year
+            )
+        WHERE
+            yr_sum > 0
+    ) src ON ( pd.id = src.id )
+    WHEN MATCHED THEN UPDATE
+        SET pd.years_of_service_credit = src.yr_sum;
+
+
+-- The profit year "1989.5" caused 301 people (in the scramble) to get an extra year of vesting, so we duplicate that
+-- in SMART
+MERGE INTO profit_detail pd
+    USING (
+        SELECT
+            id
+        FROM
+            (
+                SELECT
+                    id,
+                    ROW_NUMBER()
+                        OVER(PARTITION BY ssn
+                     ORDER BY
+                         contribution DESC
+                ) AS rn
+                FROM
+                    profit_detail
+                WHERE
+                    profit_year_iteration = 5
+                  AND profit_code_id = 0
+                  AND contribution != 0
+                AND ( comment_type_id = 5 OR comment_type_id IS NULL )
+                order by id
+            ) ranked
+        WHERE
+            rn = 1
+    ) src ON ( pd.id = src.id )
+    WHEN MATCHED THEN UPDATE
+        SET pd.years_of_service_credit = 1;
+
+-- Handle 1998.5 V-ONLY rows
+MERGE INTO profit_detail tgt
+    USING (
+        SELECT MIN(id) AS id
+        FROM profit_detail
+        WHERE profit_year = 1989
+          AND profit_year_iteration = 5
+          AND comment_type_id = 5
+        GROUP BY ssn
+    ) src
+    ON (tgt.id = src.id)
+    WHEN MATCHED THEN
+        UPDATE SET tgt.YEARS_OF_SERVICE_CREDIT = 1;
+
+-- Finally, handle the MILITARY contributions with MONTH_TO_DATE=20 
+UPDATE profit_detail pd
+SET
+    pd.years_of_service_credit = 1
+WHERE
+    comment_type_id = 19
+  AND profit_code_id = 0
+  AND month_to_date = 20
+  and profit_year_iteration = 1
+  AND EXISTS (
+    SELECT
+        ssn
+    FROM
+        demographic d
+    WHERE
+        d.ssn = pd.ssn
+);
 
 
 -- https://demoulas.atlassian.net/browse/PS-1147
@@ -1005,14 +1099,65 @@ Update PROFIT_DETAIL pd
     SET MONTH_TO_DATE = 1 
         WHERE MONTH_TO_DATE = 20;
 
--- Approimate the creation date to aid in correct sorting of the transactions
+-- Approximate the creation date to aid in correct sorting of the transactions
 UPDATE PROFIT_DETAIL
-SET CREATED_UTC = TO_TIMESTAMP(
+SET CREATED_AT_UTC = TO_TIMESTAMP(
         YEAR_TO_DATE || '-' ||
         LPAD(MONTH_TO_DATE, 2, '0') || '-01 00:00:00',
         'YYYY-MM-DD HH24:MI:SS'
                      ) AT TIME ZONE 'UTC'
 WHERE YEAR_TO_DATE > 1900 AND MONTH_TO_DATE BETWEEN 1 AND 12;
+
+--Add known exclusion ids
+INSERT ALL
+  INTO EXCLUDED_ID(ID,EXCLUDED_ID_TYPE_ID,EXCLUDED_ID_VALUE) VALUES (01,1,023202688)
+  INTO EXCLUDED_ID(ID,EXCLUDED_ID_TYPE_ID,EXCLUDED_ID_VALUE) VALUES (02,1,016201949)
+  INTO EXCLUDED_ID(ID,EXCLUDED_ID_TYPE_ID,EXCLUDED_ID_VALUE) VALUES (03,1,023228733)
+  INTO EXCLUDED_ID(ID,EXCLUDED_ID_TYPE_ID,EXCLUDED_ID_VALUE) VALUES (04,1,025329422)
+  INTO EXCLUDED_ID(ID,EXCLUDED_ID_TYPE_ID,EXCLUDED_ID_VALUE) VALUES (05,1,001301944)
+  INTO EXCLUDED_ID(ID,EXCLUDED_ID_TYPE_ID,EXCLUDED_ID_VALUE) VALUES (06,1,033324971)
+  INTO EXCLUDED_ID(ID,EXCLUDED_ID_TYPE_ID,EXCLUDED_ID_VALUE) VALUES (07,1,020283297)
+  INTO EXCLUDED_ID(ID,EXCLUDED_ID_TYPE_ID,EXCLUDED_ID_VALUE) VALUES (08,1,018260600)
+  INTO EXCLUDED_ID(ID,EXCLUDED_ID_TYPE_ID,EXCLUDED_ID_VALUE) VALUES (09,1,017169396)
+  INTO EXCLUDED_ID(ID,EXCLUDED_ID_TYPE_ID,EXCLUDED_ID_VALUE) VALUES (10,1,026786919)
+  INTO EXCLUDED_ID(ID,EXCLUDED_ID_TYPE_ID,EXCLUDED_ID_VALUE) VALUES (11,1,029321863)
+  INTO EXCLUDED_ID(ID,EXCLUDED_ID_TYPE_ID,EXCLUDED_ID_VALUE) VALUES (12,1,016269940)
+  INTO EXCLUDED_ID(ID,EXCLUDED_ID_TYPE_ID,EXCLUDED_ID_VALUE) VALUES (13,1,018306437)
+  INTO EXCLUDED_ID(ID,EXCLUDED_ID_TYPE_ID,EXCLUDED_ID_VALUE) VALUES (14,1,126264073)
+  INTO EXCLUDED_ID(ID,EXCLUDED_ID_TYPE_ID,EXCLUDED_ID_VALUE) VALUES (15,1,012242916)
+  INTO EXCLUDED_ID(ID,EXCLUDED_ID_TYPE_ID,EXCLUDED_ID_VALUE) VALUES (16,1,028280107)
+  INTO EXCLUDED_ID(ID,EXCLUDED_ID_TYPE_ID,EXCLUDED_ID_VALUE) VALUES (17,1,031260942)
+  INTO EXCLUDED_ID(ID,EXCLUDED_ID_TYPE_ID,EXCLUDED_ID_VALUE) VALUES (18,1,024243451)
+  INTO EXCLUDED_ID(ID,EXCLUDED_ID_TYPE_ID,EXCLUDED_ID_VALUE) VALUES (19,2,01159)
+  INTO EXCLUDED_ID(ID,EXCLUDED_ID_TYPE_ID,EXCLUDED_ID_VALUE) VALUES (20,2,03748)
+  INTO EXCLUDED_ID(ID,EXCLUDED_ID_TYPE_ID,EXCLUDED_ID_VALUE) VALUES (21,2,06007)
+  INTO EXCLUDED_ID(ID,EXCLUDED_ID_TYPE_ID,EXCLUDED_ID_VALUE) VALUES (22,2,09116)
+  INTO EXCLUDED_ID(ID,EXCLUDED_ID_TYPE_ID,EXCLUDED_ID_VALUE) VALUES (23,2,11109)
+  INTO EXCLUDED_ID(ID,EXCLUDED_ID_TYPE_ID,EXCLUDED_ID_VALUE) VALUES (24,2,18399)
+  INTO EXCLUDED_ID(ID,EXCLUDED_ID_TYPE_ID,EXCLUDED_ID_VALUE) VALUES (25,2,22524)
+  INTO EXCLUDED_ID(ID,EXCLUDED_ID_TYPE_ID,EXCLUDED_ID_VALUE) VALUES (26,2,23336)
+  INTO EXCLUDED_ID(ID,EXCLUDED_ID_TYPE_ID,EXCLUDED_ID_VALUE) VALUES (27,2,24050)
+  INTO EXCLUDED_ID(ID,EXCLUDED_ID_TYPE_ID,EXCLUDED_ID_VALUE) VALUES (28,2,51308)
+  SELECT 1 FROM DUAL;
+
+-- get rid of a any history of YE Updates, as all the data is wiped
+delete from ye_update_status;
+
+ ------------  - These are users in the scramble, presumably they would not exist in PROD
+
+--  Bad Bene, See https://demoulas.atlassian.net/browse/PS-1268
+delete from profit_detail where ssn IN ( 700010556, 700010596 );
+delete from BENEFICIARY where beneficiary_contact_id in (select id from BENEFICIARY_CONTACT where ssn in (700010556, 700010596));
+delete from BENEFICIARY_CONTACT where ssn in (700010556, 700010596 );
+
+--- Bad Employee, See https://demoulas.atlassian.net/browse/PS-1380
+delete from pay_profit where demographic_id = (select id from demographic where ssn = 700009305);
+delete from demographic where ssn = 700009305;
+
+-- Rehire in 2025, worked > 1000 in 2024.    Is this a valid scenario?
+delete from profit_detail where ssn = 700007178;
+delete from pay_profit where demographic_id = (select id from demographic where ssn = 700007178);
+delete from demographic where ssn = 700007178;
 
 END;
 COMMIT ;

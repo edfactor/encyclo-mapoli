@@ -1,6 +1,7 @@
 import { Replay } from "@mui/icons-material";
-import { Button, CircularProgress, Divider, Tooltip, Typography } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Alert, AlertTitle, Button, CircularProgress, Divider, Tooltip, Typography } from "@mui/material";
+import { Grid } from "@mui/material";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -38,11 +39,10 @@ import {
   SmartModal
 } from "smart-ui-library";
 import { TotalsGrid } from "../../components/TotalsGrid";
+import ChangesList from "./ChangesList";
 import ProfitShareEditConfirmation from "./ProfitShareEditConfirmation";
 import ProfitShareEditUpdateSearchFilter from "./ProfitShareEditUpdateSearchFilter";
 import ProfitShareEditUpdateTabs from "./ProfitShareEditUpdateTabs";
-import ChangesList from "./ChangesList";
-import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 
 enum MessageKeys {
   ProfitShareEditUpdate = "ProfitShareEditUpdate"
@@ -94,7 +94,8 @@ export class Messages {
 const useRevertAction = (
   setEmployeesReverted: (count: number) => void,
   setBeneficiariesReverted: (count: number) => void,
-  setEtvasReverted: (count: number) => void
+  setEtvasReverted: (count: number) => void,
+  setChangesApplied: (changes: boolean) => void
 ) => {
   const [trigger] = useLazyGetMasterRevertQuery();
   const dispatch = useDispatch();
@@ -135,6 +136,8 @@ const useRevertAction = (
         dispatch(setProfitShareEditUpdateShowSearch(true));
         dispatch(clearProfitSharingEdit());
         dispatch(clearProfitSharingUpdate());
+        // Set the changes applied to false
+        setChangesApplied(false);
       })
       .catch((error) => {
         console.error("ERROR: Did not revert changes to year end", error);
@@ -181,9 +184,6 @@ const useSaveAction = (
       badgeToAdjust2: profitSharingEditQueryParams?.badgeToAdjust2 ?? 0,
       adjustEarningsSecondaryAmount: profitSharingEditQueryParams?.adjustEarningsSecondaryAmount ?? 0
     };
-
-    console.log("Applying changes to year end: ", params);
-    console.log(params);
 
     dispatch(setProfitShareApplyOrRevertLoading(true));
 
@@ -235,7 +235,13 @@ const wasFormUsed = (profitSharingEditQueryParams: ProfitShareEditUpdateQueryPar
     (profitSharingEditQueryParams?.contributionPercent ?? 0) > 0 ||
     (profitSharingEditQueryParams?.earningsPercent ?? 0) > 0 ||
     (profitSharingEditQueryParams?.incomingForfeitPercent ?? 0) > 0 ||
-    (profitSharingEditQueryParams?.maxAllowedContributions ?? 0) > 0
+    (profitSharingEditQueryParams?.maxAllowedContributions ?? 0) > 0 ||
+    (profitSharingEditQueryParams?.badgeToAdjust ?? 0) > 0 ||
+    (profitSharingEditQueryParams?.adjustContributionAmount ?? 0) > 0 ||
+    (profitSharingEditQueryParams?.adjustEarningsAmount ?? 0) > 0 ||
+    (profitSharingEditQueryParams?.adjustIncomingForfeitAmount ?? 0) > 0 ||
+    (profitSharingEditQueryParams?.badgeToAdjust2 ?? 0) > 0 ||
+    (profitSharingEditQueryParams?.adjustEarningsSecondaryAmount ?? 0) > 0
   );
 };
 
@@ -245,7 +251,10 @@ const RenderSaveButton = (
   setOpenSaveModal: (open: boolean) => void,
   setOpenEmptyModal: (open: boolean) => void,
   status: ProfitMasterStatus | null,
-  isLoading: boolean
+  isLoading: boolean,
+  minimumFieldsEntered: boolean = false,
+  adjustedBadgeOneValid: boolean = true,
+  adjustedBadgeTwoValid: boolean = true
 ) => {
   // The incoming status field is about whether or not changes have already been applied
   const {
@@ -267,7 +276,13 @@ const RenderSaveButton = (
       color="primary"
       size="medium"
       onClick={async () => {
-        if (profitSharingEditQueryParams && wasFormUsed(profitSharingEditQueryParams)) {
+        if (
+          profitSharingEditQueryParams &&
+          wasFormUsed(profitSharingEditQueryParams) &&
+          adjustedBadgeOneValid &&
+          adjustedBadgeTwoValid &&
+          minimumFieldsEntered
+        ) {
           setOpenSaveModal(true);
         } else {
           setOpenEmptyModal(true);
@@ -294,9 +309,9 @@ const RenderSaveButton = (
         title={
           invalidProfitShareEditYear
             ? "Invalid year for saving changes"
-            : totalForfeituresGreaterThanZero == false
-              ? "You must have previewed data to save."
-              : "Total forfeitures is greater than zero."
+            : totalForfeituresGreaterThanZero == true
+              ? "Total forfeitures is greater than zero."
+              : "You must have previewed data before saving."
         }>
         <span>{saveButton}</span>
       </Tooltip>
@@ -360,10 +375,27 @@ const ProfitShareEditUpdate = () => {
   const [etvasReverted, setEtvasReverted] = useState(0);
   const [updatedBy, setUpdatedBy] = useState<string | null>(null);
   const [updatedTime, setUpdatedTime] = useState<string | null>(null);
-  const revertAction = useRevertAction(setEmployeesReverted, setBeneficiariesReverted, setEtvasReverted);
+
+  // This is a flag used to indicate that the year end change have been made
+  // and a banner should be shown indicating this
+  const [changesApplied, setChangesApplied] = useState<boolean>(false);
+
+  const revertAction = useRevertAction(
+    setEmployeesReverted,
+    setBeneficiariesReverted,
+    setEtvasReverted,
+    setChangesApplied
+  );
   const saveAction = useSaveAction(setEmployeesAffected, setBeneficiariesAffected, setEtvasAffected);
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
+  const [pageNumberReset, setPageNumberReset] = useState(false);
   const hasToken = !!useSelector((state: RootState) => state.security.token);
+
+  // These are to track validity of fields in the search filter
+  const [minimumFieldsEntered, setMinimumFieldsEntered] = useState(false);
+  const [adjustedBadgeOneValid, setAdjustedBadgeOneValid] = useState(true);
+  const [adjustedBadgeTwoValid, setAdjustedBadgeTwoValid] = useState(true);
+
   const {
     profitSharingUpdateAdjustmentSummary,
     profitSharingUpdate,
@@ -446,17 +478,11 @@ const ProfitShareEditUpdate = () => {
     if (hasToken) {
       onStatusSearch();
       if (updatedTime) {
-        dispatch(
-          setMessage({
-            ...Messages.ProfitShareMasterUpdated,
-            message: {
-              ...Messages.ProfitShareMasterUpdated.message,
-              message: `Updated By: ${updatedBy} | Date: ${updatedTime} `
-            }
-          })
-        );
+        setChangesApplied(true);
         dispatch(setProfitEditUpdateChangesAvailable(false));
         dispatch(setProfitEditUpdateRevertChangesAvailable(true));
+      } else {
+        setChangesApplied(false);
       }
     }
   }, [onStatusSearch, hasToken, updatedTime, updatedBy]);
@@ -467,51 +493,74 @@ const ProfitShareEditUpdate = () => {
       actionNode={
         <div className="flex  justify-end gap-2">
           {RenderRevertButton(setOpenRevertModal, isLoading)}
-          {RenderSaveButton(setOpenSaveModal, setOpenEmptyModal, profitMasterStatus, isLoading)}
+          {RenderSaveButton(
+            setOpenSaveModal,
+            setOpenEmptyModal,
+            profitMasterStatus,
+            isLoading,
+            minimumFieldsEntered,
+            adjustedBadgeOneValid,
+            adjustedBadgeTwoValid
+          )}
           {renderActionNode()}
         </div>
       }>
       <div>
         <ApiMessageAlert commonKey={MessageKeys.ProfitShareEditUpdate} />
       </div>
-      <Grid2
+      {
+        // We are using an AlertTitle directly and not a missive because we want this alert message
+        // to remain in place, not fade away
+        changesApplied && (
+          <div className="py-3 w-full">
+            <Alert severity={Messages.ProfitShareMasterUpdated.message.type}>
+              <AlertTitle sx={{ fontWeight: "bold" }}>{Messages.ProfitShareMasterUpdated.message.title}</AlertTitle>
+              {`Updated By: ${updatedBy} | Date: ${updatedTime} `}
+            </Alert>
+          </div>
+        )
+      }
+      <Grid
         container
         rowSpacing="24px"
         width={"100%"}>
-        <Grid2 width={"100%"}>
+        <Grid width={"100%"}>
           <Divider />
-        </Grid2>
+        </Grid>
         {profitShareEditUpdateShowSearch && (
-          <Grid2 width={"100%"}>
+          <Grid width={"100%"}>
             <DSMAccordion title="Parameters">
-              <ProfitShareEditUpdateSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
+              <ProfitShareEditUpdateSearchFilter
+                setInitialSearchLoaded={setInitialSearchLoaded}
+                setPageReset={setPageNumberReset}
+                setMinimumFieldsEntered={setMinimumFieldsEntered}
+                setAdjustedBadgeOneValid={setAdjustedBadgeOneValid}
+                setAdjustedBadgeTwoValid={setAdjustedBadgeTwoValid}
+              />
             </DSMAccordion>
-          </Grid2>
+          </Grid>
         )}
-        {(profitEditUpdateRevertChangesAvailable || profitMasterStatus) && profitEditUpdateRevertChangesAvailable && (
+        {profitEditUpdateRevertChangesAvailable && (
           <>
-            <Grid2
-              width={"100%"}
+            <Grid
+              width="100%"
               sx={{ marginLeft: "50px" }}>
               <Typography
-                component={"span"}
+                component="span"
                 variant="h6"
                 sx={{ fontWeight: "bold" }}>
-                {`These changes have already been applied: `}
+                These changes have already been applied:
               </Typography>
-            </Grid2>
-            <Grid2
-              width={"100%"}
+            </Grid>
+            <Grid
+              width="100%"
               sx={{ marginLeft: "50px" }}>
-              {profitSharingEditQueryParams && !profitMasterStatus && (
-                <ChangesList params={profitSharingEditQueryParams} />
-              )}
-              {profitMasterStatus && !profitSharingEditQueryParams && <ChangesList params={profitMasterStatus} />}
-            </Grid2>
+              <ChangesList params={profitSharingEditQueryParams || profitMasterStatus} />
+            </Grid>
           </>
         )}
         {profitSharingUpdate && profitSharingUpdate.profitShareUpdateTotals && profitSharingEdit && (
-          <Grid2 width={"100%"}>
+          <Grid width={"100%"}>
             <div className="px-[24px]">
               <h2 className="text-dsm-secondary">Summary (PAY444)</h2>
               <Typography
@@ -542,7 +591,8 @@ const ProfitShareEditUpdate = () => {
                   "",
                   numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.paidAllocations || 0),
                   numberToCurrency(
-                    (profitSharingUpdate.profitShareUpdateTotals.allocations || 0) + (profitSharingUpdate.profitShareUpdateTotals.paidAllocations || 0)
+                    (profitSharingUpdate.profitShareUpdateTotals.allocations || 0) +
+                      (profitSharingUpdate.profitShareUpdateTotals.paidAllocations || 0)
                   )
                 ],
                 [
@@ -652,15 +702,17 @@ const ProfitShareEditUpdate = () => {
                 />
               </>
             )}
-            <Grid2 width="100%">
+            <Grid width="100%">
               <ProfitShareEditUpdateTabs
                 initialSearchLoaded={initialSearchLoaded}
                 setInitialSearchLoaded={setInitialSearchLoaded}
+                pageNumberReset={pageNumberReset}
+                setPageNumberReset={setPageNumberReset}
               />
-            </Grid2>
-          </Grid2>
+            </Grid>
+          </Grid>
         )}
-      </Grid2>
+      </Grid>
       <SmartModal
         key={"saveModal"}
         maxWidth="sm"
@@ -714,7 +766,15 @@ const ProfitShareEditUpdate = () => {
           setOpenModal={setOpenEmptyModal}
           actionFunction={() => {}}
           messageType="info"
-          messageHeadline="You must fill out  at least one of these: contribution, earnings, or forfeiture."
+          messageHeadline={
+            !minimumFieldsEntered
+              ? "You must enter at least contribution, earnings, and max allowed contributions."
+              : !adjustedBadgeOneValid
+                ? "If you adjust a badge, you must also enter the contribution, earnings, and incoming forfeiture."
+                : !adjustedBadgeTwoValid
+                  ? "If you adjust a secondary badge, you must also enter the earnings amount."
+                  : ""
+          }
           params={profitSharingEditQueryParams}
           lastWarning=""
         />

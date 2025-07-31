@@ -48,7 +48,7 @@ public static class StockFactory
             OracleHcmId = 0,
             Ssn = 444,
             BadgeNumber = 0,
-            LastModifiedDate = default,
+            ModifiedAtUtc = default,
             StoreNumber = 0,
             PayClassification = null,
             PayClassificationId = 0,
@@ -117,7 +117,7 @@ public static class StockFactory
                 ZeroContributionReason = null,
                 HoursExecutive = 0,
                 IncomeExecutive = 0,
-                LastUpdate = default,
+                ModifiedAtUtc = default,
                 PointsEarned = null,
                 Etva = 0
             },
@@ -140,7 +140,7 @@ public static class StockFactory
                 ZeroContributionReason = null,
                 HoursExecutive = 0,
                 IncomeExecutive = 0,
-                LastUpdate = default,
+                ModifiedAtUtc = default,
                 PointsEarned = null,
                 Etva = 0
             }

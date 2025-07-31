@@ -1,12 +1,13 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitShareReport;
-public sealed class YearEndProfitSharingSummaryReportEndpoint : Endpoint<FrozenProfitYearRequest, YearEndProfitSharingReportSummaryResponse>
+public sealed class YearEndProfitSharingSummaryReportEndpoint : Endpoint<BadgeNumberRequest, YearEndProfitSharingReportSummaryResponse>
 {
     private readonly IProfitSharingSummaryReportService _cleanupReportService;
 
@@ -17,12 +18,12 @@ public sealed class YearEndProfitSharingSummaryReportEndpoint : Endpoint<FrozenP
 
     public override void Configure()
     {
-        Get("yearend-profit-sharing-summary-report");
+        Post("yearend-profit-sharing-summary-report");
         Summary(s =>
         {
             s.Summary = "Yearend profit sharing summary report";
             s.Description = "Returns a breakdown of member counts/sum by various descriminators";
-            s.ExampleRequest = new FrozenProfitYearRequest() { UseFrozenData = true, ProfitYear = 2025 };
+            s.ExampleRequest = new BadgeNumberRequest { ProfitYear = 2025, BadgeNumber = 723456, UseFrozenData = false};
             s.ResponseExamples = new Dictionary<int, object>
             {
                 {
@@ -35,8 +36,8 @@ public sealed class YearEndProfitSharingSummaryReportEndpoint : Endpoint<FrozenP
         Group<YearEndGroup>();
     }
 
-    public override Task<YearEndProfitSharingReportSummaryResponse> ExecuteAsync(FrozenProfitYearRequest req, CancellationToken ct)
+    public override Task<YearEndProfitSharingReportSummaryResponse> ExecuteAsync(BadgeNumberRequest req, CancellationToken ct)
     {
-        return _cleanupReportService.GetYearEndProfitSharingSummaryReportAsync(req, ct);
+     return _cleanupReportService.GetYearEndProfitSharingSummaryReportAsync(req, ct);
     }
 }

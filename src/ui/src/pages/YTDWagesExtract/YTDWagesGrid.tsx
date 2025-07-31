@@ -7,14 +7,23 @@ import { RefObject } from "react";
 import { useLazyGetEmployeeWagesForYearQuery } from "reduxstore/api/YearsEndApi";
 import ReportSummary from "../../components/ReportSummary";
 import useFiscalCloseProfitYear from "../../hooks/useFiscalCloseProfitYear";
+import { GetYTDWagesColumns } from "./YTDWagesGridColumns";
 
 interface YTDWagesGridProps {
   innerRef: RefObject<HTMLDivElement | null>;
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
+  pageNumberReset: boolean;
+  setPageNumberReset: (reset: boolean) => void;
 }
 
-const YTDWagesGrid = ({ innerRef, initialSearchLoaded, setInitialSearchLoaded }: YTDWagesGridProps) => {
+const YTDWagesGrid = ({
+  innerRef,
+  initialSearchLoaded,
+  setInitialSearchLoaded,
+  pageNumberReset,
+  setPageNumberReset
+}: YTDWagesGridProps) => {
   const hasToken = !!useSelector((state: RootState) => state.security.token);
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
@@ -39,7 +48,15 @@ const YTDWagesGrid = ({ innerRef, initialSearchLoaded, setInitialSearchLoaded }:
     };
 
     await triggerSearch(request, false);
-  }, [employeeWagesForYearQueryParams?.profitYear, fiscalCloseProfitYear, pageNumber, pageSize, sortParams.sortBy, sortParams.isSortDescending, triggerSearch]);
+  }, [
+    employeeWagesForYearQueryParams?.profitYear,
+    fiscalCloseProfitYear,
+    pageNumber,
+    pageSize,
+    sortParams.sortBy,
+    sortParams.isSortDescending,
+    triggerSearch
+  ]);
 
   useEffect(() => {
     if (initialSearchLoaded && hasToken) {
@@ -51,6 +68,13 @@ const YTDWagesGrid = ({ innerRef, initialSearchLoaded, setInitialSearchLoaded }:
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
   const columnDefs = useMemo(() => GetYTDWagesColumns(), []);
+
+  useEffect(() => {
+    if (pageNumberReset) {
+      setPageNumber(0);
+      setPageNumberReset(false);
+    }
+  }, [pageNumberReset, setPageNumberReset]);
 
   return (
     <>

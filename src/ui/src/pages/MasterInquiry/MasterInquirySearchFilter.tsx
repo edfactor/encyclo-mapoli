@@ -1,3 +1,4 @@
+import { yupResolver } from "@hookform/resolvers/yup";
 import {
   Checkbox,
   FormControl,
@@ -10,27 +11,25 @@ import {
   Select,
   TextField
 } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
-import React, { useEffect, useState } from "react";
+import { Grid } from "@mui/material";
+import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
+import React, { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
 import { useLazySearchProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
-import { SearchAndReset } from "smart-ui-library";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
-import { MasterInquiryRequest, MasterInquirySearch } from "reduxstore/types";
 import {
   clearMasterInquiryData,
   clearMasterInquiryGroupingData,
   clearMasterInquiryRequestParams,
-  setMasterInquiryRequestParams,
-  updateMasterInquiryResults
+  setMasterInquiryRequestParams
 } from "reduxstore/slices/inquirySlice";
-import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
 import { RootState } from "reduxstore/store";
-import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
-import { memberTypeGetNumberMap, paymentTypeGetNumberMap } from "./MasterInquiryFunctions";
+import { MasterInquiryRequest, MasterInquirySearch } from "reduxstore/types";
+import { SearchAndReset } from "smart-ui-library";
+import * as yup from "yup";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
+import { memberTypeGetNumberMap, paymentTypeGetNumberMap } from "./MasterInquiryFunctions";
 
 const schema = yup.object().shape({
   endProfitYear: yup
@@ -87,10 +86,7 @@ interface MasterInquirySearchFilterProps {
   onSearch: (params: MasterInquiryRequest | undefined) => void;
 }
 
-const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
-  setInitialSearchLoaded,
-  onSearch
-}) => {
+const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ setInitialSearchLoaded, onSearch }) => {
   const [triggerSearch, { isFetching }] = useLazySearchProfitMasterInquiryQuery();
   const { masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
 
@@ -141,8 +137,6 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
       }
     }
   });
-  
-  
 
   useEffect(() => {
     if (badgeNumber && hasToken) {
@@ -159,23 +153,32 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
         endProfitYear: profitYear
       };
 
-      triggerSearch(searchParams, false).unwrap().then((response) => {
-        // If data is returned, trigger downstream components
-        if (response && Array.isArray(response) ? response.length > 0 : response.results && response.results.length > 0) {
-          setInitialSearchLoaded(true);
-          onSearch(searchParams);
-        } else {
-          // Instead of setting missiveAlerts, pass up a signal (to be implemented)
-          // setMissiveAlerts([...]);
-          setInitialSearchLoaded(false);
-          onSearch(undefined);
-        }
-      });
+      // First ensure the parent component has the search parameters
+      onSearch(searchParams);
+
+      triggerSearch(searchParams, false)
+        .unwrap()
+        .then((response) => {
+          // Update loaded state based on response
+          if (
+            response && Array.isArray(response) ? response.length > 0 : response.results && response.results.length > 0
+          ) {
+            setInitialSearchLoaded(true);
+          } else {
+            // Instead of setting missiveAlerts, pass up a signal (to be implemented)
+            // setMissiveAlerts([...]);
+
+            setInitialSearchLoaded(false);
+          }
+        });
     }
   }, [badgeNumber, hasToken, reset, triggerSearch, profitYear]);
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
+      // Create a unique timestamp to ensure each search is treated as new
+      const timestamp = Date.now();
+
       const searchParams: MasterInquiryRequest = {
         pagination: {
           skip: data.pagination?.skip || 0,
@@ -183,7 +186,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
           sortBy: data.pagination?.sortBy || "badgeNumber",
           isSortDescending: data.pagination?.isSortDescending || true
         },
-        ...(!!data.endProfitYear && { endProfitYear: data.endProfitYear || profitYear, }),
+        endProfitYear: data.endProfitYear ?? profitYear,
         ...(!!data.startProfitMonth && { startProfitMonth: data.startProfitMonth }),
         ...(!!data.endProfitMonth && { endProfitMonth: data.endProfitMonth }),
         ...(!!data.socialSecurity && { ssn: data.socialSecurity }),
@@ -194,19 +197,33 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
         ...(!!data.contribution && { contributionAmount: data.contribution }),
         ...(!!data.earnings && { earningsAmount: data.earnings }),
         ...(!!data.forfeiture && { forfeitureAmount: data.forfeiture }),
-        ...(!!data.payment && { paymentAmount: data.payment })
+        ...(!!data.payment && { paymentAmount: data.payment }),
+        // Add a unique timestamp field to force React to see this as a new object
+        _timestamp: timestamp
       };
 
-      triggerSearch(searchParams, false).unwrap().then((response) => {
-        // If data is returned, trigger downstream components
-        if (response && Array.isArray(response) ? response.length > 0 : response.results && response.results.length > 0) {
-          setInitialSearchLoaded(true);
-          onSearch(searchParams);
-        } else {
-          setInitialSearchLoaded(false);
-          onSearch(undefined);
-        }
-      });
+      // Clear existing state first
+      setInitialSearchLoaded(false);
+
+      // Set new search parameters immediately
+      onSearch(searchParams);
+
+      triggerSearch(searchParams, false)
+        .unwrap()
+        .then((response) => {
+          // Update loaded state based on response
+
+          if (
+            response && Array.isArray(response) ? response.length > 0 : response.results && response.results.length > 0
+          ) {
+            setInitialSearchLoaded(true);
+          } else {
+            setInitialSearchLoaded(false);
+            // Don't call onSearch(undefined) here as it clears searchParams 
+            // and causes the grid to disappear. The grid itself handles no results.
+          }
+        });
+
       dispatch(setMasterInquiryRequestParams(data));
     }
   });
@@ -220,7 +237,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
       endProfitYear: profitYear, // Always reset to default profitYear
       startProfitMonth: undefined,
       endProfitMonth: undefined,
-      socialSecurity: undefined,
+      socialSecurity: null,
       name: undefined,
       badgeNumber: undefined,
       paymentType: "all",
@@ -237,6 +254,8 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
         isSortDescending: true
       }
     });
+    // Instead of setting searchParams to undefined, pass null
+    // to avoid showing the "no results" message
     onSearch(undefined);
   };
 
@@ -253,15 +272,14 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
 
   return (
     <form onSubmit={validateAndSearch}>
-      <Grid2
+      <Grid
         container
         paddingX="24px">
-        <Grid2
+        <Grid
           container
           spacing={3}
           width="100%">
-         
-          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <Controller
               name="endProfitYear"
               control={control}
@@ -280,9 +298,9 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
               )}
             />
             {errors.endProfitYear && <FormHelperText error>{errors.endProfitYear.message}</FormHelperText>}
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <FormLabel>Beginning Month</FormLabel>
             <Controller
               name="startProfitMonth"
@@ -291,7 +309,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
                 <Select
                   {...field}
                   onChange={(e) => {
-                    field.onChange(e.target.value === "" ? null : e.target.value);
+                    field.onChange(e.target.value === undefined ? null : e.target.value);
                   }}
                   sx={selectSx}
                   fullWidth
@@ -312,9 +330,9 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
               )}
             />
             {errors.startProfitMonth && <FormHelperText error>{errors.startProfitMonth.message}</FormHelperText>}
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <FormLabel>Ending Month</FormLabel>
             <Controller
               name="endProfitMonth"
@@ -323,7 +341,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
                 <Select
                   {...field}
                   onChange={(e) => {
-                    field.onChange(e.target.value === "" ? null : e.target.value);
+                    field.onChange(e.target.value === undefined ? null : e.target.value);
                   }}
                   sx={selectSx}
                   fullWidth
@@ -344,9 +362,9 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
               )}
             />
             {errors.endProfitMonth && <FormHelperText error>{errors.endProfitMonth.message}</FormHelperText>}
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <FormLabel>Social Security Number</FormLabel>
             <Controller
               name="socialSecurity"
@@ -367,9 +385,9 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
               )}
             />
             {errors.socialSecurity && <FormHelperText error>{errors.socialSecurity.message}</FormHelperText>}
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <FormLabel>Name</FormLabel>
             <Controller
               name="name"
@@ -389,9 +407,9 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
               )}
             />
             {errors.name && <FormHelperText error>{errors.name.message}</FormHelperText>}
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <FormLabel>Badge/PSN Number</FormLabel>
             <Controller
               name="badgeNumber"
@@ -412,9 +430,9 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
               )}
             />
             {errors.badgeNumber && <FormHelperText error>{errors.badgeNumber.message}</FormHelperText>}
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 6 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 6 }}>
             <FormControl error={!!errors.paymentType}>
               <FormLabel>Payment Type</FormLabel>
               <Controller
@@ -448,9 +466,9 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
                 )}
               />
             </FormControl>
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 6 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 6 }}>
             <FormControl error={!!errors.memberType}>
               <FormLabel>Member Type</FormLabel>
               <Controller
@@ -479,9 +497,9 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
                 )}
               />
             </FormControl>
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Contribution</FormLabel>
             <Controller
               name="contribution"
@@ -503,9 +521,9 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
               )}
             />
             {errors.contribution && <FormHelperText error>{errors.contribution.message}</FormHelperText>}
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Earnings</FormLabel>
             <Controller
               name="earnings"
@@ -527,9 +545,9 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
               )}
             />
             {errors.earnings && <FormHelperText error>{errors.earnings.message}</FormHelperText>}
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Forfeiture</FormLabel>
             <Controller
               name="forfeiture"
@@ -551,9 +569,9 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
               )}
             />
             {errors.forfeiture && <FormHelperText error>{errors.forfeiture.message}</FormHelperText>}
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Payment</FormLabel>
             <Controller
               name="payment"
@@ -575,9 +593,9 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
               )}
             />
             {errors.payment && <FormHelperText error>{errors.payment.message}</FormHelperText>}
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <Controller
               name="voids"
               control={control}
@@ -591,32 +609,32 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
                     />
                   }
                   label="Voids"
-                  sx={{ 
-                    marginTop: '20px', 
-                    height: '40px',
-                    display: 'flex', 
-                    alignItems: 'center' 
+                  sx={{
+                    marginTop: "20px",
+                    height: "40px",
+                    display: "flex",
+                    alignItems: "center"
                   }}
                 />
               )}
             />
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
 
-        <Grid2
+        <Grid
           container
           justifyContent="flex-end"
           paddingY="16px">
-          <Grid2 size={{ xs: 12 }}>
+          <Grid size={{ xs: 12 }}>
             <SearchAndReset
               handleReset={handleReset}
               handleSearch={validateAndSearch}
               isFetching={isFetching}
               disabled={!isValid}
             />
-          </Grid2>
-        </Grid2>
-      </Grid2>
+          </Grid>
+        </Grid>
+      </Grid>
     </form>
   );
 };

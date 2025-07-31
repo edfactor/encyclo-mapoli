@@ -1,20 +1,13 @@
 ﻿using System.Data.Common;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.Util.Extensions;
-using FluentAssertions;
+using Shouldly;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Oracle.ManagedDataAccess.Client;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 
-public record YearEndChange
-{
-    public required decimal EarnPoints;
-    public required int IsNew;
-    public required DateOnly? PsCertificateIssuedDate;
-    public required byte ZeroCont;
-}
 
 /*
  * This integration test requires that READY's test/reference schema should be run to "Activity 18", for this test to pass.
@@ -44,18 +37,18 @@ public class YearEndServiceTests : PristineBaseTest
 
         await DbFactory.UseWritableContext(async ctx =>
         {
-            PayProfitUpdateService ppus = new(DbFactory, _loggerFactory);
+            PayProfitUpdateService ppus = new(DbFactory, _loggerFactory, TotalService);
             YearEndService yearEndService = new(DbFactory, CalendarService, ppus, TotalService, DemographicReaderService);
             OracleConnection c = (ctx.Database.GetDbConnection() as OracleConnection)!;
             await c.OpenAsync(ct);
 
             // ------- Act
-            DbTransaction transaction = await c.BeginTransactionAsync();
-            await yearEndService.RunFinalYearEndUpdates(profitYear, ct);
-            await transaction.CommitAsync();
+            DbTransaction transaction = await c.BeginTransactionAsync(ct);
+            await yearEndService.RunFinalYearEndUpdates(profitYear, false, ct);
+            await transaction.CommitAsync(ct);
             
             return 7;
-        });
+        }, ct);
 
         //  ----- Assert
         // Get Ready's rows (expected) for PayProfit
@@ -64,7 +57,7 @@ public class YearEndServiceTests : PristineBaseTest
         Dictionary<int, YearEndChange> smartRowsBySsn = await GetSmartRowsBySsn(profitYear);
 
         // ensure number of rows match 
-        readyRowsBySsn.Count.Should().Be(smartRowsBySsn.Count);
+        readyRowsBySsn.Count.ShouldBe(smartRowsBySsn.Count);
 
         // Now check each row
         int badRows = smartRowsBySsn.Count(kvp =>
@@ -79,7 +72,7 @@ public class YearEndServiceTests : PristineBaseTest
         });
 
         TestOutputHelper.WriteLine($"ok: {readyRowsBySsn.Count - badRows}, bad: {badRows}");
-        badRows.Should().BeLessThan(2);
+        badRows.ShouldBeLessThan(2);
     }
 
 

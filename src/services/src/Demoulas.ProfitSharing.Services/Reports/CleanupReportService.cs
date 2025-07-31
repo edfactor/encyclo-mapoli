@@ -325,6 +325,9 @@ FROM FILTERED_DEMOGRAPHIC p1
                     CommentType.Constants.QdroOut.Id
                 };
 
+                var startDate = (DateTimeOffset?)(!req.StartDate.HasValue ? null : req.StartDate.Value.ToDateTimeOffset());
+                var endDate = (DateTimeOffset?)(!req.EndDate.HasValue ? null : req.EndDate.Value.ToDateTimeOffset());
+
                 var query = from pd in ctx.ProfitDetails
                     join nameAndDob in nameAndDobQuery on pd.Ssn equals nameAndDob.Ssn
                     where pd.ProfitYear == req.ProfitYear &&
@@ -333,18 +336,19 @@ FROM FILTERED_DEMOGRAPHIC p1
                            (pd.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment.Id &&
                             (!pd.CommentTypeId.HasValue ||
                              !transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value)))) &&
-                            (!req.StartDate.HasValue || pd.TransactionDate.ToDateOnly() >= req.StartDate.Value) &&
-                            (!req.EndDate.HasValue || pd.TransactionDate.ToDateOnly() <= req.EndDate.Value) &&
-                            !(pd.ProfitCodeId == 9 && transferAndQdroCommentTypes.Contains((int)pd.CommentTypeId))
+                            (!req.StartDate.HasValue || pd.TransactionDate >= startDate) &&
+                            (!req.EndDate.HasValue || pd.TransactionDate <= endDate) &&
+                            !(pd.ProfitCodeId == 9 && pd.CommentTypeId.HasValue && transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value))
 
                     select new
                     {
                         BadgeNumber = nameAndDob.BadgeNumber,
                         PsnSuffix = nameAndDob.PsnSuffix,
-                        Ssn = pd.Ssn.MaskSsn(),
+                        Ssn = pd.Ssn,
                         EmployeeName = nameAndDob.FullName,
                         DistributionAmount = _distributionProfitCodes.Contains(pd.ProfitCodeId) ? pd.Forfeiture : 0,
                         TaxCode = pd.TaxCodeId,
+                        State = pd.CommentRelatedState,
                         StateTax = pd.StateTaxes,
                         FederalTax = pd.FederalTaxes,
                         ForfeitAmount = pd.ProfitCodeId == 2 ? pd.Forfeiture : 0,
@@ -369,19 +373,27 @@ FROM FILTERED_DEMOGRAPHIC p1
                     DistributionTotal = 0m, StateTaxTotal = 0m, FederalTaxTotal = 0m, ForfeitureTotal = 0m
                 };
 
-                var paginated = await query.ToPaginationResultsAsync(req, cancellationToken);
+                // Calculate state tax totals by state
+                var stateTaxTotals = await query
+                    .Where(s=> s.StateTax > 0)
+                    .GroupBy(x => x.State)
+                    .Select(g => new { State = g.Key, Total = g.Sum(x => x.StateTax) })
+                    .ToDictionaryAsync(x => x.State ?? string.Empty, x => x.Total, cancellationToken);
 
                 var calInfo =
                     await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
+                
+                var paginated = await query.ToPaginationResultsAsync(req, cancellationToken);
                 var apiResponse = paginated.Results.Select(pd => new DistributionsAndForfeitureResponse
                 {
                     BadgeNumber = pd.BadgeNumber,
                     PsnSuffix = pd.PsnSuffix,
-                    Ssn = pd.Ssn,
+                    Ssn = pd.Ssn.MaskSsn(),
                     EmployeeName = pd.EmployeeName,
                     DistributionAmount = pd.DistributionAmount,
                     TaxCode = pd.TaxCode,
                     StateTax = pd.StateTax,
+                    State = pd.State,
                     FederalTax = pd.FederalTax,
                     ForfeitAmount = pd.ForfeitAmount,
                     Date = pd.MonthToDate is > 0 and <= 12 ? new DateOnly(pd.YearToDate, pd.MonthToDate, 1) : pd.Date.ToDateOnly(),
@@ -404,6 +416,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                     StateTaxTotal = totals.StateTaxTotal,
                     FederalTaxTotal = totals.FederalTaxTotal,
                     ForfeitureTotal = totals.ForfeitureTotal,
+                    StateTaxTotals = stateTaxTotals,
                     Response = new PaginatedResponseDto<DistributionsAndForfeitureResponse>(req)
                     {
                         Results = apiResponse.ToList(), Total = paginated.Total

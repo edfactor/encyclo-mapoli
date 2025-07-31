@@ -1,5 +1,5 @@
 import { FormLabel, MenuItem, Select, TextField } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -85,12 +85,12 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
 
   const validateAndSubmit = handleSubmit((data) => {
     console.log("Form data being submitted:", data);
-    
+
     // Always submit regardless of isValid to enable searching with any combination
     if (onStoreChange && data.store) {
       onStoreChange(data.store);
     }
-  
+
     dispatch(
       setBreakdownByStoreQueryParams({
         profitYear: profitYear,
@@ -128,24 +128,25 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
 
   // Add a watch to see all form values
   const formValues = watch();
-  
+
   // Log form values on change to help with debugging
   useEffect(() => {
     console.log("Current form values:", formValues);
   }, [formValues]);
-  
+
   return (
-    <form onSubmit={(e) => {
-      e.preventDefault();
-      // Ensure the form values are captured and submitted
-      validateAndSubmit();
-    }}>
-      <Grid2
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        // Ensure the form values are captured and submitted
+        validateAndSubmit();
+      }}>
+      <Grid
         container
         paddingX="24px"
         alignItems="flex-end"
         spacing={1.5}>
-        <Grid2 size={getGridSizes()}>
+        <Grid size={getGridSizes()}>
           <Controller
             name="store"
             control={control}
@@ -162,11 +163,11 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
                   size="small"
                   fullWidth
                   type="number"
-                  value={field.value || ''}
+                  value={field.value || ""}
                   onChange={(e) => {
-                    const value = e.target.value === '' ? '' : Number(e.target.value);
+                    const value = e.target.value === "" ? "" : Number(e.target.value);
                     field.onChange(value);
-                    if (onStoreChange && value !== '') {
+                    if (onStoreChange && value !== "") {
                       onStoreChange(Number(value));
                     }
                   }}
@@ -174,11 +175,11 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
               </>
             )}
           />
-        </Grid2>
+        </Grid>
 
         {(activeTab === "all" || activeTab === "stores") && (
           <>
-            <Grid2 size={getGridSizes()}>
+            <Grid size={getGridSizes()}>
               <Controller
                 name="employeeStatus"
                 control={control}
@@ -204,9 +205,9 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
                   </>
                 )}
               />
-            </Grid2>
+            </Grid>
 
-            <Grid2 size={getGridSizes()}>
+            <Grid size={getGridSizes()}>
               <Controller
                 name="badgeId"
                 control={control}
@@ -222,9 +223,9 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
                   </>
                 )}
               />
-            </Grid2>
+            </Grid>
 
-            <Grid2 size={getGridSizes()}>
+            <Grid size={getGridSizes()}>
               <Controller
                 name="employeeName"
                 control={control}
@@ -240,12 +241,12 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
                   </>
                 )}
               />
-            </Grid2>
+            </Grid>
           </>
         )}
-      </Grid2>
+      </Grid>
 
-      <Grid2
+      <Grid
         width="100%"
         paddingX="24px"
         marginTop={2}>
@@ -260,7 +261,7 @@ const QPAY066TABreakdownParameters: React.FC<QPAY066TABreakdownParametersProps> 
           disabled={false}
           searchButtonText="Search"
         />
-      </Grid2>
+      </Grid>
     </form>
   );
 };

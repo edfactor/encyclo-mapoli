@@ -1,22 +1,16 @@
-import React, { useState } from 'react';
-import {
-  TableRow,
-  TableCell,
-  IconButton,
-  Collapse,
-  Box
-} from '@mui/material';
-import { KeyboardArrowDown, KeyboardArrowRight } from '@mui/icons-material';
+import React, { useState } from "react";
+import { TableRow, TableCell, IconButton, Collapse, Box } from "@mui/material";
+import { KeyboardArrowDown, KeyboardArrowRight } from "@mui/icons-material";
 
 export type INestedGridRowData<T = any> = {
   id: string | number;
   [key: string]: any;
-} & T
+} & T;
 
 export interface INestedGridColumn<T = any> {
   key: string;
   label: string;
-  align?: 'left' | 'center' | 'right';
+  align?: "left" | "center" | "right";
   width?: number | string;
   render?: (value: any, row: INestedGridRowData<T>) => React.ReactNode;
 }
@@ -29,9 +23,9 @@ interface INestedGridRowProps<T = any> {
   expandedBackgroundColor: string;
 }
 
-export const NestedGridRow = <T,>({ 
-  row, 
-  columns, 
+export const NestedGridRow = <T,>({
+  row,
+  columns,
   renderNestedContent,
   onRowExpand,
   expandedBackgroundColor
@@ -46,27 +40,23 @@ export const NestedGridRow = <T,>({
 
   return (
     <>
-      <TableRow 
-        sx={{ 
-          '& > *': { borderBottom: 'unset' },
-          '&:hover': { backgroundColor: 'rgba(2, 88, 165, 0.1)' },
-          transition: 'background-color 0.2s'
+      <TableRow
+        sx={{
+          "& > *": { borderBottom: "unset" },
+          "&:hover": { backgroundColor: "rgba(2, 88, 165, 0.1)" },
+          transition: "background-color 0.2s"
         }}>
-        
         {columns.map((column, index) => (
-          <TableCell 
+          <TableCell
             key={column.key}
             component={index === 0 ? "th" : "td"}
             scope={index === 0 ? "row" : undefined}
-            align={column.align || 'left'}
-            sx={{ 
+            align={column.align || "left"}
+            sx={{
               py: 1.5,
               width: column.width
             }}>
-            {column.render 
-              ? column.render(row[column.key], row)
-              : row[column.key]
-            }
+            {column.render ? column.render(row[column.key], row) : row[column.key]}
           </TableCell>
         ))}
 
@@ -75,27 +65,25 @@ export const NestedGridRow = <T,>({
             aria-label="expand row"
             size="small"
             onClick={handleToggle}
-            sx={{ 
-              color: '#0258A5',
-              '&:hover': { backgroundColor: 'rgba(2, 88, 165, 0.04)' },
-              transition: 'background-color 0.2s'
+            sx={{
+              color: "#0258A5",
+              "&:hover": { backgroundColor: "rgba(2, 88, 165, 0.04)" },
+              transition: "background-color 0.2s"
             }}>
             {open ? <KeyboardArrowDown /> : <KeyboardArrowRight />}
           </IconButton>
         </TableCell>
       </TableRow>
-      
+
       <TableRow>
-        <TableCell 
-          style={{ paddingBottom: 0, paddingTop: 0, paddingLeft: 0, paddingRight: 0 }} 
+        <TableCell
+          style={{ paddingBottom: 0, paddingTop: 0, paddingLeft: 0, paddingRight: 0 }}
           colSpan={columns.length + 1}>
-          <Collapse 
-            in={open} 
+          <Collapse
+            in={open}
             timeout={{ enter: 300, exit: 300 }}
             unmountOnExit>
-            <Box sx={{ backgroundColor: expandedBackgroundColor, p: 0 }}>
-              {renderNestedContent(row, open)}
-            </Box>
+            <Box sx={{ backgroundColor: expandedBackgroundColor, p: 0 }}>{renderNestedContent(row, open)}</Box>
           </Collapse>
         </TableCell>
       </TableRow>
@@ -103,4 +91,4 @@ export const NestedGridRow = <T,>({
   );
 };
 
-export default NestedGridRow; 
+export default NestedGridRow;

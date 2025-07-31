@@ -2,6 +2,7 @@
 using Demoulas.Common.Data.Services.Entities.Entities;
 using Demoulas.Common.Data.Services.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
@@ -28,6 +29,7 @@ public class ProfitSharingReadOnlyDbContext : ReadOnlyOracleDbContext<ProfitShar
     public virtual DbSet<Demographic> Demographics { get; set; }
     public virtual DbSet<DemographicHistory> DemographicHistories { get; set; }
     public virtual DbSet<EmploymentType> EmploymentTypes { get; set; }
+    public virtual DbSet<ExcludedId> ExcludedIds { get; set; }
     public virtual DbSet<FrozenState> FrozenStates { get; set; }
     public virtual DbSet<Department> Departments { get; set; }
     public virtual DbSet<Country> Countries { get; set; }
@@ -36,7 +38,9 @@ public class ProfitSharingReadOnlyDbContext : ReadOnlyOracleDbContext<ProfitShar
     public virtual DbSet<ProfitCode> ProfitCodes { get; set; }
     public virtual DbSet<TaxCode> TaxCodes { get; set; }
     public virtual DbSet<Beneficiary> Beneficiaries { get; set; }
+    public virtual DbSet<BeneficiaryArchive> BeneficiaryArchives { get; set; }
     public virtual DbSet<BeneficiaryContact> BeneficiaryContacts { get; set; }
+    public virtual DbSet<BeneficiaryContactArchive> BeneficiaryContactArchives { get; set; }
     public virtual DbSet<BeneficiaryType> BeneficiaryTypes { get; set; }
     public virtual DbSet<BeneficiaryKind> BeneficiaryKinds { get; set; }
     public virtual DbSet<PayProfit> PayProfits { get; set; }

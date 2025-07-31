@@ -1,8 +1,8 @@
-import { agGridNumberToCurrency } from "smart-ui-library";
-import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
 import { ColDef, ColGroupDef } from "ag-grid-community";
+import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
+import { createCurrencyColumn, createCountColumn } from "../../../utils/gridColumnFactory";
 
-export const GetForfeituresByAgeColumns = (reportType: FrozenReportsByAgeRequestType): ColDef[] => {
+export const GetForfeituresByAgeColumns = (reportType: FrozenReportsByAgeRequestType): (ColDef | ColGroupDef)[] => {
   const columns: (ColDef | ColGroupDef)[] = [
     {
       headerName: reportType,
@@ -12,31 +12,21 @@ export const GetForfeituresByAgeColumns = (reportType: FrozenReportsByAgeRequest
           field: "age",
           colId: "age",
           minWidth: 80,
-          headerClass: "right-align",
-          cellClass: "right-align",
+          type: "rightAligned",
           resizable: true,
           sort: "asc",
           cellDataType: "text"
         },
-        {
+        createCountColumn({
           headerName: "EMPS",
           field: "employeeCount",
-          colId: "employeeCount",
-          minWidth: 100,
-          headerClass: "left-align",
-          cellClass: "left-align",
-          resizable: true
-        },
-        {
+          minWidth: 100
+        }),
+        createCurrencyColumn({
           headerName: "Amount",
           field: "amount",
-          colId: "amount",
-          minWidth: 150,
-          headerClass: "left-align",
-          cellClass: "left-align",
-          resizable: true,
-          valueFormatter: agGridNumberToCurrency
-        }
+          minWidth: 150
+        })
       ]
     }
   ];

@@ -1,106 +1,103 @@
-import { Typography } from "@mui/material";
-import React, { useState, useEffect, useRef } from "react";
+import { Box, CircularProgress, Typography } from "@mui/material";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useLazySearchProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
-import { MasterInquiryRequest, EmployeeDetails } from "reduxstore/types";
-import { DSMGrid, Pagination, formatNumberWithComma } from "smart-ui-library";
-import { Box, CircularProgress } from "@mui/material";
-import { ColDef } from "ag-grid-community";
-import './MasterInquiryMemberGrid.css'; // Import the CSS file for styles
-
-const columns: ColDef[] = [
-  {
-    field: "badgeNumber",
-    headerName: "Badge",
-    maxWidth: 120,
-    cellRenderer: (params: any) => {
-      const { badgeNumber, psnSuffix, isEmployee, id } = params.data;
-      return (
-        <a
-          href="#"
-          className="badge-link"
-          onClick={e => {
-            e.preventDefault();
-            if (params.context && params.context.onBadgeClick) {
-              params.context.onBadgeClick({ memberType: isEmployee ? 1 : 2, id });
-            }
-          }}
-        >
-          {psnSuffix > 0 ? `${badgeNumber}-${psnSuffix}` : badgeNumber}
-        </a>
-      );
-    }
-  },
-  { field: "fullName", headerName: "Name", width: 500 },
-  { field: "ssn", headerName: "SSN", maxWidth: 250 },
-  { field: "address", headerName: "Street", maxWidth: 400 },
-  { field: "addressCity", headerName: "City", maxWidth: 300 },
-  { field: "addressState", headerName: "State", maxWidth: 100 },
-  { field: "addressZipCode", headerName: "Zip", maxWidth: 160 },
-  { field: "age", headerName: "Age", maxWidth: 120, },
-  { field: "employmentStatus", headerName: "Status", maxWidth: 120,
-    valueFormatter: (params: any) => {
-      const value = params.value;
-      return value == null || value === undefined || value === "" ? "N/A" : value;
-    }
-  },
-];
+import { EmployeeDetails, MasterInquiryRequest } from "reduxstore/types";
+import { DSMGrid, formatNumberWithComma, ISortParams } from "smart-ui-library";
+import Pagination from "../../components/Pagination/Pagination";
+import "./MasterInquiryMemberGrid.css"; // Import the CSS file for styles
+import { GetMasterInquiryMemberGridColumns } from "./MasterInquiryMemberGridColumns";
 
 interface MasterInquiryMemberGridProps extends MasterInquiryRequest {
-  onBadgeClick?: (args: { memberType: number; id: number, ssn: number }) => void;
+  searchParams: MasterInquiryRequest;
+  onBadgeClick: (
+    args: { memberType: number; id: number; ssn: number; badgeNumber: number; psnSuffix: number } | undefined
+  ) => void;
+  isSimpleSearch: () => boolean;
 }
 
-const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = (searchParams) => {
-  // If no searchParams, render nothing
-  if (!searchParams || Object.keys(searchParams).length === 0) return null;
-
-  const [request, setRequest] = useState<MasterInquiryRequest>(searchParams);
+const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = ({
+  searchParams,
+  onBadgeClick,
+  isSimpleSearch
+}: MasterInquiryMemberGridProps) => {
+  const [pageNumber, setPageNumber] = useState(0);
+  const [pageSize, setPageSize] = useState(5);
+  // Add sort state management
+  const [sortParams, setSortParams] = useState<ISortParams>({
+    sortBy: searchParams.pagination?.sortBy || "badgeNumber",
+    isSortDescending: searchParams.pagination?.isSortDescending || false
+  });
   const [trigger, { data, isLoading, isError }] = useLazySearchProfitMasterInquiryQuery();
   const autoSelectedRef = useRef<number | null>(null);
 
-  useEffect(() => {
-    setRequest(searchParams);
-  }, [searchParams]);
+  // Add sort event handler
+  const sortEventHandler = (update: ISortParams) => {
+    setSortParams(update);
+    setPageNumber(0); // Reset to first page when sorting
+  };
+
+  const onSearch = useCallback(async () => {
+    // We are going to do another search here which skips zero and takes all.
+
+    await trigger({
+      ...searchParams,
+      pagination: {
+        skip: pageNumber * pageSize,
+        take: pageSize,
+        sortBy: sortParams.sortBy,
+        isSortDescending: sortParams.isSortDescending
+      }
+    });
+  }, [pageNumber, pageSize, sortParams, searchParams, trigger]);
 
   useEffect(() => {
-    trigger(request);
-  }, [request, trigger]);
+    onSearch();
+  }, [onSearch]);
 
   // If only one member is returned, auto-select and hide the grid
   useEffect(() => {
-    if (
-      data &&
-      data.results.length === 1 &&
-      searchParams.onBadgeClick &&
-      autoSelectedRef.current !== data.results[0].id
-    ) {
+    if (data && data.results.length === 1 && onBadgeClick && autoSelectedRef.current !== data.results[0].id) {
       const member = data.results[0];
-      searchParams.onBadgeClick({
+      onBadgeClick({
         memberType: member.isEmployee ? 1 : 2,
-        id: member.id,
-        ssn: member.ssn
+        id: Number(member.id),
+        ssn: Number(member.ssn),
+        badgeNumber: Number(member.badgeNumber),
+        psnSuffix: Number(member.psnSuffix)
       });
       autoSelectedRef.current = member.id;
     }
-    // If no results, clear selection
-    if (data && data.results.length === 0 && searchParams.onBadgeClick) {
-      searchParams.onBadgeClick(undefined);
+    // If no results in a complex search, clear selection
+    // For simple searches, don't clear selection to allow "Member Not Found" message to show
+    if (data && data.results.length === 0 && onBadgeClick && !isSimpleSearch()) {
+      onBadgeClick(undefined);
     }
-  }, [data, searchParams]);
+  }, [data, onBadgeClick]);
 
-  const pageSize = request.pagination.take;
-  const pageNumber = Math.floor(request.pagination.skip / request.pagination.take);
+  // If no searchParams, render nothing
+  if (!searchParams || Object.keys(searchParams).length === 0) {
+    return null;
+  }
 
   // Show a message if no results
-  if (data && data.results.length === 0) {
+  if (!isSimpleSearch() && data && data.results.length === 0) {
     return (
       <Box sx={{ width: "100%", padding: "24px" }}>
-        <Typography color="error" variant="h6">No results found.</Typography>
+        <Typography
+          color="error"
+          variant="h6">
+          No results found.
+        </Typography>
       </Box>
     );
   }
 
+  const columns = GetMasterInquiryMemberGridColumns();
+
   // Hide the grid if only one member is returned
-  if (data && data.results.length === 1) {
+  // But if the last page returns one result, we still want to show the grid
+  // so we check the total number of results to make sure it's 1 also
+  if (data && data.results.length === 1 && data.total === 1) {
     return null;
   }
 
@@ -120,35 +117,27 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = (searchP
           <DSMGrid
             isLoading={isLoading}
             preferenceKey="MASTER_INQUIRY_MEMBER_GRID"
+            handleSortChanged={sortEventHandler}
             providedOptions={{
-              rowData: Array.isArray(data?.results) ? data.results as EmployeeDetails[] : [],
+              rowData: Array.isArray(data?.results) ? (data.results as EmployeeDetails[]) : [],
               columnDefs: columns,
-              context: { onBadgeClick: searchParams.onBadgeClick }
+              context: { onBadgeClick: onBadgeClick }
             }}
           />
           <Pagination
+            rowsPerPageOptions={[5, 10, 50]}
             pageNumber={pageNumber}
             setPageNumber={(value: number) => {
-              setRequest((prev) => ({
-                ...prev,
-                pagination: {
-                  ...prev.pagination,
-                  skip: value * prev.pagination.take
-                }
-              }));
+              setPageNumber(value - 1);
             }}
             pageSize={pageSize}
             setPageSize={(value: number) => {
-              setRequest((prev) => ({
-                ...prev,
-                pagination: {
-                  ...prev.pagination,
-                  take: value,
-                  skip: 0
-                }
-              }));
+              setPageSize(value);
+              setPageNumber(1);
             }}
-            recordCount={data.total}
+            recordCount={(() => {
+              return data.total;
+            })()}
           />
         </>
       )}

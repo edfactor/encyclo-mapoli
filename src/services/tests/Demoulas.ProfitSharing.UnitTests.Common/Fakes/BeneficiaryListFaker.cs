@@ -19,7 +19,6 @@ internal sealed class BeneficiaryListFaker
                 PsnSuffix = 1000,
                 BadgeNumber = 703244,
                 DemographicId = 3173,
-                CurrentBalance = 0,
                 Contact = new BeneficiaryContact()
                 {
                     Id = 145,

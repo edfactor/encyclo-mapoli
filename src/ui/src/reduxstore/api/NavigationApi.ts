@@ -1,10 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 
 import { RootState } from "reduxstore/store";
-import {
-  NavigationRequestDto,
-  NavigationResponseDto,  
-} from "reduxstore/types";
+import { NavigationRequestDto, NavigationResponseDto } from "reduxstore/types";
 import { createDataSourceAwareBaseQuery } from "./api";
 import { setNavigation, setNavigationError } from "reduxstore/slices/navigationSlice";
 
@@ -32,15 +29,14 @@ export const NavigationApi = createApi({
             dispatch(setNavigationError("Authentication token missing"));
             return;
           }
-          
-          
         } catch (err) {
           console.error("Failed to fetch navigation:", err);
           // More descriptive error message
-          const errorMessage = err.error?.status === 401 
-            ? "Authentication error - please log in again" 
-            : "Failed to fetch navigation data";
-          
+          const errorMessage =
+            err.error?.status === 401
+              ? "Authentication error - please log in again"
+              : "Failed to fetch navigation data";
+
           dispatch(setNavigationError(errorMessage));
         }
       }

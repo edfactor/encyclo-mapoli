@@ -1,3 +1,4 @@
+import { ICellRendererParams, IHeaderParams } from "ag-grid-community";
 import { ISortParams, Paged, PaginationParams } from "smart-ui-library";
 
 export enum ImpersonationRoles {
@@ -8,7 +9,7 @@ export enum ImpersonationRoles {
   ItOperations = "IT-Operations"
 }
 
-export interface SortedPaginationRequestDto extends PaginationParams, ISortParams { }
+export interface SortedPaginationRequestDto extends PaginationParams, ISortParams {}
 
 export interface ProfitYearRequest {
   profitYear: number;
@@ -28,11 +29,15 @@ export interface FrozenProfitYearRequest extends ProfitYearRequest {
   useFrozenData: boolean;
 }
 
+export interface BadgeNumberRequest extends FrozenProfitYearRequest {
+  badgeNumber: number | null;
+}
+
 export interface ReportsByAgeParams extends ProfitYearRequest {
   reportType: FrozenReportsByAgeRequestType;
 }
 
-export type DemographicBadgesNotInPayprofitResponse = PagedReportResponse<DemographicBadgesNotInPayprofit>
+export type DemographicBadgesNotInPayprofitResponse = PagedReportResponse<DemographicBadgesNotInPayprofit>;
 
 export interface DemographicBadgesNotInPayprofit {
   badgeNumber: number;
@@ -62,6 +67,14 @@ export interface DistributionsAndForfeituresRequestDto extends ProfitYearRequest
   pagination: SortedPaginationRequestDto;
 }
 
+export interface DistributionsAndForfeitureTotalsResponse extends PagedReportResponse<DistributionsAndForfeitures> {
+  distributionTotal: number;
+  stateTaxTotal: number;
+  federalTaxTotal: number;
+  forfeitureTotal: number;
+  stateTaxTotals: Record<string, number>;
+}
+
 export interface DistributionsAndForfeitures {
   badgeNumber: number;
   psnSuffix: number;
@@ -70,6 +83,7 @@ export interface DistributionsAndForfeitures {
   date: string;
   distributionAmount: number;
   stateTax: number;
+  state: string | null;
   federalTax: number;
   forfeitAmount: number;
   age: number;
@@ -196,7 +210,6 @@ export interface ForfeitureDetail extends ProfitYearRequest {
   wages: number;
   enrollmentId: number;
   enrollmentName: string;
-  
 }
 
 export interface MilitaryAndRehireForfeiture {
@@ -205,7 +218,7 @@ export interface MilitaryAndRehireForfeiture {
   ssn: string;
   reHiredDate: string;
   companyContributionYears: number;
-  employmentStatus: string;  
+  employmentStatus: string;
   netBalanceLastYear: number;
   vestedBalanceLastYear: number;
   hireDate: string;
@@ -295,7 +308,6 @@ export interface DistributionsAndForfeituresQueryParams extends ProfitYearReques
   endDate?: string;
 }
 
-
 export interface MasterInquirySearch {
   endProfitYear?: number | null;
   startProfitMonth?: number | null;
@@ -317,7 +329,7 @@ export interface MasterInquirySearch {
 export interface MasterInquiryDetail extends ProfitYearRequest {
   id: number;
   isEmployee: boolean;
-  ssn: number;
+  ssn: string;
   profitYearIteration: number;
   distributionSequence: number;
   profitCodeId: number;
@@ -333,7 +345,7 @@ export interface MasterInquiryDetail extends ProfitYearRequest {
   stateTaxes: number;
   taxCodeId?: string;
   commentTypeId?: number;
-  commentRelatedCheckNumber?: number;
+  commentRelatedCheckNumber?: string;
   commentRelatedState?: string;
   commentRelatedOracleHcmId?: number;
   commentRelatedPsnSuffix?: number;
@@ -378,7 +390,6 @@ export interface MasterInquiryMemberRequest {
   sortBy?: string;
   isSortDescending?: boolean;
 }
-
 
 export interface MasterInquiryResponseDto {
   isEmployee: boolean;
@@ -505,6 +516,10 @@ export interface ForfeituresAndPoints extends PagedReportResponse<ForfeituresAnd
   totalEarningPoints: number;
   totalForfeitPoints: number;
   totalForfeitures: number;
+  totalProfitSharingBalance: number;
+  distributionTotals: number;
+  allocationToTotals: number;
+  allocationsFromTotals: number;
 }
 
 export interface ForfeituresByAgeDetail {
@@ -543,20 +558,18 @@ export interface EmployeeDetails {
   currentEtva: number;
   previousEtva: number;
   employmentStatus?: string;
-
- department : string;
- PayClassification : string;
- gender : string
- phoneNumber : string
- workLocation : string
-receivedContributionsLastYear : boolean
-fullTimeDate : string
-terminationReason : string
-
-  
+  department: string;
+  PayClassification: string;
+  gender: string;
+  phoneNumber: string;
+  workLocation: string;
+  receivedContributionsLastYear: boolean;
+  fullTimeDate: string;
+  terminationReason: string;
   missives: number[] | null;
+  allocationFromAmount: number;
+  allocationToAmount: number;
 }
-
 
 export interface BalanceByDetailBase {
   employeeCount: number;
@@ -589,10 +602,10 @@ export interface BalanceByAgeDetail extends BalanceByDetailBase {
 }
 
 /* eslint-disable @typescript-eslint/no-empty-object-type */
-export interface BalanceByAge extends BalanceByBase<BalanceByAgeDetail> { }
+export interface BalanceByAge extends BalanceByBase<BalanceByAgeDetail> {}
 
 /* eslint-disable @typescript-eslint/no-empty-object-type */
-export interface BalanceByYears extends BalanceByBase<BalanceByAgeDetail> { }
+export interface BalanceByYears extends BalanceByBase<BalanceByAgeDetail> {}
 
 export interface VestedAmountsByAge extends PagedReportResponse<VestedAmountsByAgeDetail> {
   totalFullTime100PercentAmount: number;
@@ -842,9 +855,11 @@ export interface YearEndProfitSharingReportResponse extends PagedReportResponse<
   wagesTotal: number;
   hoursTotal: number;
   pointsTotal: number;
+  balanceTotal: number;
   terminatedWagesTotal: number;
   terminatedHoursTotal: number;
   terminatedPointsTotal: number;
+  terminatedBalanceTotal: number;
   numberOfEmployees: number;
   numberOfNewEmployees: number;
   numberOfEmployeesUnder21: number;
@@ -872,21 +887,8 @@ export interface MilitaryContributionRequest extends ProfitYearRequest {
   pagination: SortedPaginationRequestDto;
 }
 
-export interface YearEndProfitSharingReportRequest {
-  isYearEnd: boolean;
-  minimumAgeInclusive?: number;
-  maximumAgeInclusive?: number;
-  minimumHoursInclusive?: number;
-  maximumHoursInclusive?: number;
-  includeActiveEmployees: boolean;
-  includeInactiveEmployees: boolean;
-  includeEmployeesTerminatedThisYear: boolean;
-  includeTerminatedEmployees: boolean;
-  includeBeneficiaries: boolean;
-  includeEmployeesWithPriorProfitSharingAmounts: boolean;
-  includeEmployeesWithNoPriorProfitSharingAmounts: boolean;
+export interface YearEndProfitSharingReportRequest extends FilterParams {
   profitYear: number;
-  badgeNumber?: number | null;
   pagination: SortedPaginationRequestDto;
 }
 
@@ -964,7 +966,7 @@ export interface BreakdownByStoreTotals {
 }
 
 export interface GrandTotalsByStoreResponseDto {
-  rows: GrandTotalsByStoreRowDto[]
+  rows: GrandTotalsByStoreRowDto[];
 }
 
 export interface GrandTotalsByStoreRowDto {
@@ -1011,9 +1013,7 @@ export interface Under21BreakdownByStoreEmployee {
   enrollmentId: number;
 }
 
-export interface Under21BreakdownByStoreResponse extends PagedReportResponse<Under21BreakdownByStoreEmployee> {
-
-}
+export interface Under21BreakdownByStoreResponse extends PagedReportResponse<Under21BreakdownByStoreEmployee> {}
 
 export interface Under21InactiveRequest extends ProfitYearRequest {
   isSortDescending?: boolean;
@@ -1031,9 +1031,7 @@ export interface Under21InactiveEmployee {
   enrollmentId: number;
 }
 
-export interface Under21InactiveResponse extends PagedReportResponse<Under21InactiveEmployee> {
-
-}
+export interface Under21InactiveResponse extends PagedReportResponse<Under21InactiveEmployee> {}
 
 export interface Under21TotalsRequest extends ProfitYearRequest {
   pagination: SortedPaginationRequestDto;
@@ -1059,7 +1057,7 @@ export interface Under21TotalsResponse {
   totalVestingBalance: number;
 }
 
-export interface ProfitSharingLabelsRequest extends ProfitYearRequest {
+export interface ProfitSharingLabelsRequest extends FrozenProfitYearRequest {
   pagination: SortedPaginationRequestDto;
 }
 
@@ -1200,18 +1198,8 @@ export interface NavigationDto {
 }
 
 export interface FilterParams {
-  isYearEnd: boolean;
-  minimumAgeInclusive?: number;
-  maximumAgeInclusive?: number;
-  minimumHoursInclusive?: number;
-  maximumHoursInclusive?: number;
-  includeActiveEmployees: boolean;
-  includeInactiveEmployees: boolean;
-  includeEmployeesTerminatedThisYear: boolean;
-  includeTerminatedEmployees: boolean;
-  includeBeneficiaries: boolean;
-  includeEmployeesWithPriorProfitSharingAmounts: boolean;
-  includeEmployeesWithNoPriorProfitSharingAmounts: boolean;
+  reportId: number;
+  badgeNumber?: number | null;
 }
 
 export interface ReportPreset {
@@ -1242,7 +1230,7 @@ export interface GetNavigationStatusRequestDto {
 }
 
 export interface GetNavigationStatusResponseDto {
-  navigationStatusList?: NavigationStatusDto[]
+  navigationStatusList?: NavigationStatusDto[];
 }
 
 export interface UpdateNavigationRequestDto {
@@ -1274,7 +1262,7 @@ export interface AddressDto {
   city?: string;
   state?: string;
   postalCode?: string;
-  countryIso?: string
+  countryIso?: string;
 }
 export interface BeneficiaryContactDto {
   id: number;
@@ -1294,7 +1282,24 @@ export interface BeneficiaryDto {
   badgeNumber: number;
   demographicId: number;
   psn: string;
-  contact?: BeneficiaryContactDto;
+  //contact?: BeneficiaryContactDto;
+  /**Contact information */
+  ssn: string;
+  dateOfBirth: Date;
+  address?: AddressDto;
+  contactInfo?: ContactInfoDto;
+  createdDate: Date;
+  /**ContactInfo */
+  fullName?: string;
+  lastName: string;
+  firstName: string;
+  middleName?: string;
+  phoneNumber?: string;
+  mobileNumber?: string;
+  emailAddress?: string;
+  /**End */
+  /**End */
+
   beneficiaryContactId: number;
   relationship?: string;
   kindId?: number;
@@ -1306,79 +1311,110 @@ export interface BeneficiaryDto {
 export interface BeneficiaryRequestDto extends SortedPaginationRequestDto {
   badgeNumber?: number;
   psnSuffix?: number;
-  name: string;
-  city: string;
-  address: string;
-  state: string;
-  ssn?: number;
-  percentage?: number;
 }
 
 export interface BeneficiaryResponseDto {
-  beneficiaryList?: Paged<BeneficiaryDto>
+  beneficiaryList?: Paged<BeneficiaryDto>;
 }
 
 export interface CreateBeneficiaryRequest {
-    beneficiaryContactId: number;
-    employeeBadgeNumber: number;
-    firstLevelBeneficiaryNumber: number | null;
-    secondLevelBeneficiaryNumber: number | null;
-    thirdLevelBeneficiaryNumber: number | null;
-    relationship: string;
-    kindId: string;
-    percentage: number;
+  beneficiaryContactId: number;
+  employeeBadgeNumber: number;
+  firstLevelBeneficiaryNumber: number | null;
+  secondLevelBeneficiaryNumber: number | null;
+  thirdLevelBeneficiaryNumber: number | null;
+  relationship: string;
+  kindId: string;
+  //percentage: number;
 }
 
 export interface CreateBeneficiaryResponse {
-    beneficiaryId: number;
-    psnSuffix: number;
-    employeeBadgeNumber: number;
-    demographicId: number;
-    beneficiaryContactId: number;
-    relationship: string | null;
-    kindId: string | null;
-    percent: number;
+  beneficiaryId: number;
+  psnSuffix: number;
+  employeeBadgeNumber: number;
+  demographicId: number;
+  beneficiaryContactId: number;
+  relationship: string | null;
+  kindId: string | null;
+  percent: number;
 }
 
+export interface UpdateBeneficiaryRequest extends UpdateBeneficiaryContactRequest {
+  relationship?: string;
+  kindId?: string;
+  percentage?: number;
+}
+
+export interface UpdateBeneficiaryResponse {
+  badgeNumber: number;
+  demographicId: number;
+  beneficiaryContactId: number;
+  relationship: string | null;
+  kindId: string | null;
+  percent: number;
+}
+
+export interface DeleteBeneficiaryRequest {
+  id: number;
+}
+
+export interface UpdateBeneficiaryContactRequest {
+  id?: number;
+  contactSsn?: number;
+  dateOfBirth?: string;
+  street1?: string;
+  street2?: string | null;
+  street3?: string | null;
+  street4?: string | null;
+  city?: string;
+  state?: string;
+  postalCode?: string;
+  countryIso?: string | null;
+  firstName?: string;
+  lastName?: string;
+  middleName?: string | null;
+  phoneNumber?: string | null;
+  mobileNumber?: string | null;
+  emailAddress?: string | null;
+}
 
 export interface CreateBeneficiaryContactRequest {
-    contactSsn: number;
-    dateOfBirth: Date;
-    street: string;
-    street2: string | null;
-    street3: string | null;
-    street4: string | null;
-    city: string;
-    state: string;
-    postalCode: string;
-    countryIso: string | null;
-    firstName: string;
-    lastName: string;
-    middleName: string | null;
-    phoneNumber: string | null;
-    mobileNumber: string | null;
-    emailAddress: string | null;
+  contactSsn: number;
+  dateOfBirth: string;
+  street: string;
+  street2: string | null;
+  street3: string | null;
+  street4: string | null;
+  city: string;
+  state: string;
+  postalCode: string;
+  countryIso: string | null;
+  firstName: string;
+  lastName: string;
+  middleName: string | null;
+  phoneNumber: string | null;
+  mobileNumber: string | null;
+  emailAddress: string | null;
 }
 
-
 export interface CreateBeneficiaryContactResponse {
-    id: number;
-    ssn: string;
-    dateOfBirth: string;
-    street: string;
-    street2: string | null;
-    street3: string | null;
-    street4: string | null;
-    city: string;
-    state: string;
-    postalCode: string;
-    countryIso: string | null;
-    firstName: string;
-    lastName: string;
-    middleName: string | null;
-    phoneNumber: string | null;
-    mobileNumber: string | null;
-    emailAddress: string | null;
+  id: number;
+  ssn: string;
+  dateOfBirth: string;
+  street: string;
+  street2: string | null;
+  street3: string | null;
+  street4: string | null;
+  city: string;
+  state: string;
+  postalCode: string;
+  countryIso: string | null;
+  firstName: string;
+  lastName: string;
+  middleName: string | null;
+  phoneNumber: string | null;
+  mobileNumber: string | null;
+  emailAddress: string | null;
 }
 
 export interface BeneficiaryTypeDto {
@@ -1405,5 +1441,76 @@ export interface BeneficiaryKindResponseDto {
   beneficiaryKindList?: BeneficiaryKindDto[];
 }
 
+// New types for rehire forfeitures editing functionality
+export interface RehireForfeituresEditedValues {
+  [rowKey: string]: {
+    value: number;
+    hasError: boolean;
+  };
+}
 
+export interface RehireForfeituresHeaderComponentProps extends IHeaderParams {
+  addRowToSelectedRows: (id: number) => void;
+  removeRowFromSelectedRows: (id: number) => void;
+  onBulkSave?: (requests: ForfeitureAdjustmentUpdateRequest[]) => Promise<void>;
+}
 
+export interface RehireForfeituresSaveButtonCellParams extends ICellRendererParams {
+  removeRowFromSelectedRows: (id: number) => void;
+  addRowToSelectedRows: (id: number) => void;
+  onSave?: (request: ForfeitureAdjustmentUpdateRequest) => Promise<void>;
+}
+
+export interface RehireForfeituresUpdatePayload {
+  badgeNumber: number;
+  profitYear: number;
+  suggestedForfeit: number;
+}
+
+export interface RehireForfeituresSelectedRow {
+  id: number;
+  badgeNumber: number;
+  profitYear: number;
+  suggestedForfeit: number;
+}
+
+export interface ApiResponse<T> {}
+
+export interface AdhocBeneficiariesReportRequest extends ProfitYearRequest, SortedPaginationRequestDto {
+  isAlsoEmployee: boolean;
+}
+export interface ProfitDetailDto {
+  year: number;
+  code: string;
+  contributions: number;
+  earnings: number;
+  forfeitures: number;
+  date: Date;
+  comments?: string;
+}
+export interface BeneficiaryReportDto {
+  beneficiaryId: number;
+  fullName: string;
+  ssn: string;
+  relationship?: string;
+  balance?: string;
+  badgeNumber: number;
+  psnSuffix: number;
+  profitDetails?: ProfitDetailDto[];
+}
+export interface adhocBeneficiariesReportResponse extends PagedReportResponse<BeneficiaryReportDto> {
+  totalEndingBalance: number;
+}
+
+export interface PayBenReportRequest extends SortedPaginationRequestDto {
+  id?: number;
+}
+export interface PayBenReport {
+  ssn: string;
+  beneficiaryFullName: string;
+  psn: string;
+  badge: number;
+  demographicFullName: string;
+  percentage: number;
+}
+export interface PayBenReportResponse extends Paged<PayBenReport> {}

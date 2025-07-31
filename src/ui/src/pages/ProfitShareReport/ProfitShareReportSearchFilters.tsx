@@ -1,6 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormLabel, TextField } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { Controller, useForm, Resolver } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
@@ -71,7 +71,7 @@ const ProfitShareReportSearchFilters: React.FC<ProfitShareReportSearchFilterProp
     reset({
       badgeNumber: undefined
     });
-    
+
     const request = {
       ...presetParams,
       profitYear: profitYear,
@@ -88,8 +88,10 @@ const ProfitShareReportSearchFilters: React.FC<ProfitShareReportSearchFilterProp
 
   return (
     <form onSubmit={validateAndSearch}>
-      <Grid2 container paddingX="24px">
-        <Grid2 size={{ xs: 12, sm: 3, md: 3 }}>
+      <Grid
+        container
+        paddingX="24px">
+        <Grid size={{ xs: 12, sm: 3, md: 3 }}>
           <FormLabel>Badge Number</FormLabel>
           <Controller
             name="badgeNumber"
@@ -105,18 +107,18 @@ const ProfitShareReportSearchFilters: React.FC<ProfitShareReportSearchFilterProp
               />
             )}
           />
-        </Grid2>
-        <Grid2 size={{ xs: 0, sm: 9, md: 9 }} />
-        <Grid2 size={{ xs: 12, sm: 3, md: 3 }}>
+        </Grid>
+        <Grid size={{ xs: 0, sm: 9, md: 9 }} />
+        <Grid size={{ xs: 12, sm: 3, md: 3 }}>
           <SearchAndReset
             handleReset={handleReset}
             handleSearch={validateAndSearch}
             isFetching={isFetching}
           />
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
     </form>
   );
 };
 
-export default ProfitShareReportSearchFilters; 
+export default ProfitShareReportSearchFilters;

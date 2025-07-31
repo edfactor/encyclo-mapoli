@@ -1,12 +1,11 @@
-import { Typography } from "@mui/material";
-import React, { useMemo, useState, useEffect, useCallback } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetDuplicateSSNsQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { GetDuplicateSSNsOnDemographicsColumns } from "./DuplicateSSNsOnDemographicsGridColumns";
-import { CAPTIONS } from "../../../constants";
 import ReportSummary from "../../../components/ReportSummary";
+import { CAPTIONS } from "../../../constants";
+import { GetDuplicateSSNsOnDemographicsColumns } from "./DuplicateSSNsOnDemographicsGridColumns";
 
 const DuplicateSSNsOnDemographicsGrid: React.FC = () => {
   const [pageNumber, setPageNumber] = useState(0);
@@ -22,14 +21,19 @@ const DuplicateSSNsOnDemographicsGrid: React.FC = () => {
 
   const onSearch = useCallback(async () => {
     const request = {
-      pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: sortParams.sortBy, isSortDescending: sortParams.isSortDescending },
+      pagination: {
+        skip: pageNumber * pageSize,
+        take: pageSize,
+        sortBy: sortParams.sortBy,
+        isSortDescending: sortParams.isSortDescending
+      }
     };
 
     await triggerSearch(request, false);
   }, [pageNumber, pageSize, sortParams, triggerSearch]);
 
   useEffect(() => {
-    if ( hasToken) {
+    if (hasToken) {
       onSearch();
     }
   }, [pageNumber, pageSize, sortParams, onSearch]);

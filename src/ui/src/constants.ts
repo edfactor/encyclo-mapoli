@@ -43,12 +43,14 @@ export const ROUTES = {
   PROFIT_SHARE_REPORT_EDIT_RUN: "profit-share-report-edit-run",
   PROFIT_SHARE_REPORT_FINAL_RUN: "profit-share-report-final-run",
   PROFIT_SHARE_UPDATE: "profit-share-update",
-  PROFNEW: "/",  
+  PROFNEW: "/",
 
   FROZEN_SUMMARY: "frozen-summary",
   MASTER_INQUIRY: "master-inquiry",
   BENEFICIARY_INQUIRY: "beneficiary",
+  PAY_BE_NEXT: "adhoc-beneficiaries-report",
   FORFEITURES_ADJUSTMENT: "forfeitures-adjustment",
+  PAY_BEN_REPORT: 'payben-report',
 
   PAY426_ACTIVE_18_20: "pay426-1",
   PAY426_ACTIVE_21_PLUS: "pay426-2",
@@ -61,6 +63,7 @@ export const ROUTES = {
   PAY426_SUMMARY: "pay426-9",
   PAY426_NON_EMPLOYEE: "pay426-10",
   PAY426N: "pay426n",
+  QPAY066_ADHOC: "qpay066-adhoc",
   FORFEIT: "forfeit",
   PAYMASTER_UPDATE: "paymaster-update",
   PROFIT_MASTER_UPDATE: "profit-master-update",
@@ -82,7 +85,9 @@ export const ROUTES = {
 } as const;
 
 export const CAPTIONS = {
+  PAY_BE_NEXT: "Pay Be Next",
   BENEFICIARY_INQUIRY: "Beneficiary Inquiry",
+    PAYBEN_REPORT: "Pay Beneficiary Report",
   BALANCE_BY_AGE: "Get Balance by Age (PROF130B)",
   BALANCE_BY_YEARS: "Get Balance by Years (PROF130Y)",
   CONTRIBUTIONS_BY_AGE: "Get Contributions by Age (PROF130)",
@@ -115,12 +120,14 @@ export const CAPTIONS = {
   PAY426_ACTIVE_PRIOR_SHARING:
     "Active/inactive employees 18 and older with prior profit sharing amounts and <1000 hours",
   PAY426_ACTIVE_UNDER_18: "Active/inactive employees under 18",
+  PAY426_TERMINATED_UNDER_18: "< AGE 18 NO WAGES",
   PAY426_NON_EMPLOYEE: "All non-employee beneficiaries",
   PAY426_SUMMARY: "Profit sharing summary page",
   PAY426_TERMINATED_1000_PLUS: "Terminated employees 18 and older with 1000 hours or more",
   PAY426_TERMINATED_NO_PRIOR: "Terminated employees 18 and older with no prior profit sharing amounts and < 1000 hours",
   PAY426_TERMINATED_PRIOR: "Terminated employees 18 and older with prior profit sharing amounts and < 1000 hours",
   PAY426N: "Profit Sharing Report (PAY426N)",
+  QPAY066_ADHOC: "QPAY066* Ad Hoc Reports",
   PAY450_SUMMARY: "Update Summary (PAY450)",
   PAY450: "PAY450",
   PAYMASTER_UPDATE: "Profit Master Update (PAY460)",
@@ -136,7 +143,7 @@ export const CAPTIONS = {
   PROFIT_SHARE_TOTALS: "Profit Share Totals Report (PAY426)",
   PROFIT_SHARE_UPDATE: "Profit Share Updates (PAY444|PAY447)",
   PROFIT_SHARING_CONTROL_SHEET: "Profit Sharing Control Sheet",
-  PRINT_PROFIT_CERTS:  "Print Profit Certs (PAYCERT)",
+  PRINT_PROFIT_CERTS: "Print Profit Certs (PAYCERT)",
   QPAY066_UNDER21: "QPAY066-UNDR21",
   QPAY066TA_UNDER21: "QPAY066TA-UNDR21",
   QPAY066TA: "QPAY066TA",
@@ -158,4 +165,28 @@ export const GRID_COLUMN_WIDTHS = {
   BADGE_NUMBER: 100,
   SSN: 125,
   FULL_NAME: 150
+} as const;
+
+/* 
+Report ids are:
+1: AGE 18-20 WITH >= 1000 PS HOURS 
+2: >= AGE 21 WITH >= 1000 PS HOURS 
+3: < AGE 18 
+4: >= AGE 18 WITH < 1000 PS HOURS AND PRIOR PS AMOUNT 
+5: >= AGE 18 WITH < 1000 PS HOURS AND NO PRIOR PS AMOUNT 
+6: >= AGE 18 WITH >= 1000 PS HOURS (TERMINATED) 
+7: >= AGE 18 WITH < 1000 PS HOURS AND NO PRIOR PS AMOUNT (TERMINATED) 
+8: >= AGE 18 WITH < 1000 PS HOURS AND PRIOR PS AMOUNT (TERMINATED) 
+10: < AGE 18 NO WAGES : 0 (TERMINATED)
+*/
+export const PAY426_REPORT_IDS = {
+  EIGHTEEN_TO_TWENTY: 1,
+  TWENTY_ONE_PLUS: 2,
+  UNDER_EIGHTEEN: 3,
+  FEWER_THAN_1000_PRIOR_PS: 4,
+  FEWER_THAN_1000_NO_PRIOR_PS: 5,
+  TERMINATED_1000_PLUS: 6,
+  TERMINATED_NO_PRIOR_PS: 7,
+  TERMINATED_WITH_PRIOR_PS: 8,
+  TERMINATED_UNDER_EIGHTEEN_NO_WAGES: 10
 } as const;

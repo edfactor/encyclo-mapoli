@@ -1,5 +1,5 @@
 import { Button, Checkbox, FormControl, FormControlLabel, FormHelperText, FormLabel, TextField } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -93,11 +93,10 @@ const MilitaryContributionForm = ({
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)}>
-      <Grid2
+      <Grid
         container
         spacing={3}>
-
-        <Grid2 xs={6}>
+        <Grid xs={6}>
           <Controller
             name="contributionDate"
             control={control}
@@ -116,9 +115,9 @@ const MilitaryContributionForm = ({
               />
             )}
           />
-        </Grid2>
+        </Grid>
 
-        <Grid2 xs={6}>
+        <Grid xs={6}>
           <FormLabel>Contribution Amount</FormLabel>
           <Controller
             name="contributionAmount"
@@ -136,9 +135,9 @@ const MilitaryContributionForm = ({
               />
             )}
           />
-        </Grid2>
+        </Grid>
 
-        <Grid2
+        <Grid
           size={{ xs: 12 }}
           container
           spacing={2}>
@@ -157,35 +156,35 @@ const MilitaryContributionForm = ({
                     />
                   }
                   label="Is Supplemental Contribution"
-                />                
+                />
               </FormControl>
             )}
           />
-        </Grid2>
+        </Grid>
 
         {/* Form buttons */}
-        <Grid2
+        <Grid
           size={{ xs: 12 }}
           container
           spacing={2}
           paddingTop="8px">
-          <Grid2>
-            <Button
-              onClick={onCancel}
-              variant="outlined">
-              Cancel
-            </Button>
-          </Grid2>
-          <Grid2>
+          <Grid>
             <Button
               type="submit"
               variant="contained"
               disabled={isLoading || isSubmitting}>
               Submit
             </Button>
-          </Grid2>
-        </Grid2>
-      </Grid2>
+          </Grid>
+          <Grid>
+            <Button
+              onClick={onCancel}
+              variant="outlined">
+              Cancel
+            </Button>
+          </Grid>
+        </Grid>
+      </Grid>
     </form>
   );
 };

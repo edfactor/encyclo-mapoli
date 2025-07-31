@@ -1,36 +1,26 @@
-import { agGridNumberToCurrency } from "smart-ui-library";
-import { ColDef } from "ag-grid-community";
+import { ColDef, ColGroupDef } from "ag-grid-community";
+import { createCurrencyColumn, createCountColumn } from "../../../utils/gridColumnFactory";
 
-export const GetVestedAmountsByAgeColumns = (countColName: string, amountColName: string): ColDef[] => {
+export const GetVestedAmountsByAgeColumns = (countColName: string, amountColName: string): (ColDef | ColGroupDef)[] => {
   return [
     {
       headerName: "Age",
       field: "age",
       minWidth: 80,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       sort: "asc",
       cellDataType: "text"
     },
-    {
-      headerName: "Count",
+    createCountColumn({
       field: countColName,
-      colId: countColName,
-      minWidth: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
-      resizable: true
-    },
-    {
+      minWidth: 120
+    }),
+    createCurrencyColumn({
       headerName: "Amount",
       field: amountColName,
       colId: amountColName,
-      minWidth: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    }
+      minWidth: 120
+    })
   ];
 };

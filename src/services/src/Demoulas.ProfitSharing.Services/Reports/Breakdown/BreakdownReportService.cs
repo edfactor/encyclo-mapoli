@@ -54,6 +54,11 @@ public sealed class BreakdownReportService : IBreakdownService
         public decimal? VestedBalance { get; init; }
         public decimal? EtvaBalance { get; init; }
         public decimal? VestedPercent { get; init; }
+        public DateOnly HireDate { get; init; }
+        public DateOnly? TerminationDate { get; init; }
+        public byte EnrollmentId { get; init; }
+        public Decimal ProfitShareHours { get; init; }
+        public byte? YearsInPlan { get; internal set; }
     }
 
     private sealed record EmployeeFinancialSnapshot(
@@ -209,16 +214,123 @@ public sealed class BreakdownReportService : IBreakdownService
         BreakdownByStoreRequest request,
         CancellationToken cancellationToken)
     {
+        return GetMembersByStore(request, inActiveEmployees: false, terminatedEmployees: false, withBalance: false, withBeneficiaryAllocation: false, cancellationToken);
+    }
+
+    public Task<ReportResponseBase<MemberYearSummaryDto>> GetInactiveMembersByStore(
+        BreakdownByStoreRequest request,
+        CancellationToken cancellationToken)
+    {
+        return GetMembersByStore(request, inActiveEmployees: true, terminatedEmployees: false, withBalance: false, withBeneficiaryAllocation: false, cancellationToken);
+    }
+
+    public Task<ReportResponseBase<MemberYearSummaryDto>> GetInactiveMembersWithBalanceByStore(
+        BreakdownByStoreRequest request,
+        CancellationToken cancellationToken)
+    {
+        return GetMembersByStore(request, inActiveEmployees: true, terminatedEmployees: false, withBalance: true, withBeneficiaryAllocation: false, cancellationToken);
+    }
+
+    public Task<ReportResponseBase<MemberYearSummaryDto>> GetTerminatedMembersWithBalanceByStore(
+       BreakdownByStoreRequest request,
+       CancellationToken cancellationToken)
+    {
+        return GetMembersByStore(request, inActiveEmployees: false, terminatedEmployees: true, withBalance: true, withBeneficiaryAllocation: false, cancellationToken);
+    }
+    public Task<ReportResponseBase<MemberYearSummaryDto>> GetTerminatedMembersWithBeneficiaryByStore(
+       TerminatedEmployeesWithBalanceBreakdownRequest request,
+       CancellationToken cancellationToken)
+    {
+        return GetMembersByStore(request, inActiveEmployees: false, terminatedEmployees: true, withBalance: false, withBeneficiaryAllocation: true, cancellationToken);
+    }
+
+    #region ── Private: common building blocks ───────────────────────────────────────────
+
+    private Task<ReportResponseBase<MemberYearSummaryDto>> GetMembersByStore(
+        BreakdownByStoreRequest request,
+        bool inActiveEmployees,
+        bool terminatedEmployees,
+        bool withBalance,
+        bool withBeneficiaryAllocation,
+        CancellationToken cancellationToken)
+    {
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             ValidateStoreNumber(request);
 
             var employeesBase = await BuildEmployeesBaseQuery(ctx, request.ProfitYear);
-            employeesBase = employeesBase.Where(q => q.StoreNumber == request.StoreNumber);
+            var startEndDateRequest = request as IStartEndDateRequest;
+
+            if (inActiveEmployees)
+            {
+                employeesBase = employeesBase.Where(e => e.EmploymentStatusId == EmploymentStatus.Constants.Inactive && e.TerminationCodeId != TerminationCode.Constants.Transferred);
+            }
+
+            if (terminatedEmployees)
+            {
+                employeesBase = employeesBase.Where(e => e.EmploymentStatusId == EmploymentStatus.Constants.Terminated && e.TerminationCodeId != TerminationCode.Constants.RetiredReceivingPension);
+                var startEndDates = request as IStartEndDateRequest;
+                if (startEndDates != default && (startEndDates.StartDate.HasValue || startEndDates.EndDate.HasValue))
+                {
+                    if (startEndDates.StartDate.HasValue)
+                    {
+                        employeesBase = employeesBase.Where(e => e.TerminationDate >= startEndDates.StartDate);
+                    }
+                    if (startEndDates.EndDate.HasValue)
+                    {
+                        if (startEndDates.EndDate.Value < startEndDates.StartDate)
+                        {
+                            throw new InvalidOperationException("End date cannot be earlier than start date.");
+                        }
+                        employeesBase = employeesBase.Where(e => e.TerminationDate <= startEndDates.EndDate);
+                    }
+                }
+
+            }
+            
+            if (request.StoreNumber.HasValue)
+            {
+                employeesBase = employeesBase.Where(q => q.StoreNumber == request.StoreNumber.Value);
+            }
+
+            if (withBalance)
+            {
+                employeesBase = employeesBase.Where(e => e.VestedBalance.HasValue && e.VestedBalance.Value != 0);
+            }
+
+            if (withBeneficiaryAllocation) //QPAY066A-1
+            {
+                var profitCodes = new[] { ProfitCode.Constants.IncomingQdroBeneficiary.Id, ProfitCode.Constants.OutgoingXferBeneficiary.Id };
+
+                var ssnsWithBeneficiaryAllocation = ctx.ProfitDetails
+                    .Where(ba => ba.ProfitYear == request.ProfitYear && profitCodes.Contains(ba.ProfitCodeId))
+                    .GroupBy(x=> x.Ssn)
+                    .Where(x => x.Sum(r=>r.ProfitCodeId == ProfitCode.Constants.IncomingQdroBeneficiary.Id ? -r.Forfeiture: r.Contribution) > 0)
+                    .Select(ba => ba.Key);
+                
+                employeesBase = employeesBase.Where(e => 
+                    (ssnsWithBeneficiaryAllocation.Contains(e.Ssn) || e.VestedBalance > 0)
+                    && e.YearsInPlan <= 3); 
+            }
+
+
+            if (withBalance && inActiveEmployees)
+            {
+                employeesBase = employeesBase
+                    .Where(e => !ctx.ExcludedIds.Any(x=>e.BadgeNumber == x.ExcludedIdValue));
+                if (startEndDateRequest != null)
+                {
+                    employeesBase = employeesBase.Where(e => e.TerminationDate >= startEndDateRequest.StartDate &&
+                                                             e.TerminationDate <= startEndDateRequest.EndDate);
+                }
+            }
 
             // Store‑level + management filter
-            employeesBase = request.StoreManagement ? ApplyStoreManagementFilter(employeesBase)
-                : ApplyNonStoreManagementFilter(employeesBase);
+            if (request.StoreManagement.HasValue)
+            {
+                employeesBase = request.StoreManagement.Value ? ApplyStoreManagementFilter(employeesBase)
+                    : ApplyNonStoreManagementFilter(employeesBase);
+            }
 
             if (request.BadgeNumber > 0)
             {
@@ -261,9 +373,6 @@ public sealed class BreakdownReportService : IBreakdownService
             };
         });
     }
-
-    #region ── Private: common building blocks ───────────────────────────────────────────
-
     private static void ValidateStoreNumber(BreakdownByStoreRequest request)
     {
         if (request.StoreNumber <= 0)
@@ -301,30 +410,24 @@ public sealed class BreakdownReportService : IBreakdownService
         /* hard-coded list from COBOL
            https://demoulas.atlassian.net/wiki/spaces/NGDS/pages/305004545/QPAY066TA.pco
            https://bitbucket.org/demoulas/hpux/raw/37d043c297e04f3a5a557e0163239177087c2163/iqs-source/QPAY066TA.pco
-        
-        11-14-02  R MAISON  #196500 REMNVED SSN#'S 020281084,012289813*
-           *                                            019280284,033281522*
-           *                                            018184033,014167484*
-           *                             ADDED   SSN#'S 025282890,016269940*
+
+        11-14-02  R MAISON  #196500 REMNVED SSN#'S ** Redacted **
            *                             AT LINES 2750 THRU 2790           *
            *                             AS PER DON MULLIGAN       
 
-        02/18/04  DPRUGH   P#7790  ADDED 024329422, 034305451 AND    *
-           *                             022325439 TO THE 701 SECTION .    *
+        02/18/04  DPRUGH   P#7790  ADDED ** Redacted ** TO THE 701 SECTION .    *
            *                             ALSO CLEANED UP THE SECTION BY    *
            *                             REMNVING THE COMMENTED OUT SSN'S  *
            *                             SINCE THEY ARE ALREADY NOTED IN   *
            *                             THE COMMENT ABNVE THE SECTION  
          */
-        int[] pensionerSsns =
-        {
-            023202688, 016201949, 023228733, 025329422, 001301944, 033324971, 020283297, 018260600, 017169396,
-            026786919, 029321863, 016269940, 018306437, 126264073, 012242916, 028280107, 031260942, 024243451
-        };
+        int[] pensionerSsns = await ctx.ExcludedIds.Where(x => x.ExcludedIdTypeId == ExcludedIdType.Constants.QPay066TAExclusions)
+            .Select(x => x.ExcludedIdValue)
+            .ToArrayAsync();
 
         /*
        
-       *| Report store                                        | When the COBOL assigns it                                                                                | Key tests in the code                                                                                                                                  |
+        *| Report store                                        | When the COBOL assigns it                                                                                | Key tests in the code                                                                                                                                  |
          | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
          | **700 – “Retired – Drawing Pension”**               | `B-TERM = "W"` (“W” is the retirement term-code).                                                        | `COMPUTE W-ST = WS-STR-VAL-PS-PENSION-RETIRED + 1000`                                                                                                  |
          | **701 – “Active – Drawing Pension”**                | Hard-coded list of SSNs that are still on the active payroll **after** retirement.                       | Later in the same paragraph:<br>`IF B-SSN = 023202688 OR … THEN COMPUTE W-ST = WS-STR-VAL-PS-PENSION-ACTIVE + 1000`                                    |
@@ -342,11 +445,14 @@ public sealed class BreakdownReportService : IBreakdownService
         var query =
             from d in demographics
 
+            join pp in ctx.PayProfits on d.Id equals pp.DemographicId
+
             join b in balances on d.Ssn equals b.Ssn into balGrp
             from bal in balGrp.DefaultIfEmpty()
 
             join e in etvaBalances on d.Ssn equals e.Ssn into etvaGrp
             from etva in etvaGrp.DefaultIfEmpty()
+            where pp.ProfitYear == profitYear
 
             select new ActiveMemberDto
             {
@@ -396,7 +502,12 @@ public sealed class BreakdownReportService : IBreakdownService
                 CurrentBalance = bal == null ? 0 : bal.CurrentBalance,
                 VestedBalance = bal == null ? 0 : bal.VestedBalance,
                 VestedPercent = bal == null ? 0 : bal.VestingPercent,
-                EtvaBalance = etva == null ? 0 : etva.Total
+                EtvaBalance = etva == null ? 0 : etva.Total,
+                YearsInPlan = bal == null ? 0 : bal.YearsInPlan,
+                HireDate = d.HireDate,
+                TerminationDate = d.TerminationDate,
+                EnrollmentId = pp.EnrollmentId,
+                ProfitShareHours = pp.CurrentHoursYear + pp.HoursExecutive
             };
 
         return query;
@@ -519,7 +630,12 @@ public sealed class BreakdownReportService : IBreakdownService
             VestedAmount = endBal * snap.VestingRatio,
             VestedPercent = (byte)(snap.VestingRatio * 100),
             PayClassificationId = member.PayClassificationId,
-            PayClassificationName = member.PayClassificationName
+            PayClassificationName = member.PayClassificationName,
+            HireDate = member.HireDate,
+            TerminationDate = member.TerminationDate,
+            DateOfBirth = member.DateOfBirth,
+            ProfitShareHours = member.ProfitShareHours,
+            EnrollmentId = member.EnrollmentId,
         };
     }
     

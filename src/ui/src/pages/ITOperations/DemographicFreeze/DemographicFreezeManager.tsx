@@ -1,8 +1,8 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Box, Button, FormHelperText, TextField } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Box, Button, FormHelperText, FormLabel, TextField } from "@mui/material";
+import { Grid } from "@mui/material";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, Resolver, useForm } from "react-hook-form";
 import { useFreezeDemographicsMutation } from "reduxstore/api/ItOperationsApi";
 import * as yup from "yup";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
@@ -20,45 +20,57 @@ const schema = yup.object().shape({
     .number()
     .typeError("Year must be a number")
     .integer("Year must be an integer")
-    .min(2020, "Year must be 2020 or later")
-    .max(2100, "Year must be 2100 or earlier")
-    .required("Year is required"),
+    .test("valid-year", "Year must be current or previous year", (value) => {
+      if (!value) return false;
+      const currentYear = new Date().getFullYear();
+      return value === currentYear || value === currentYear - 1;
+    })
+    .required("Year is required")
+    .defined(),
   asOfDate: yup
     .date()
     .nullable()
     .required("As of Date is required")
-    .test("not-too-old", "Date cannot be more than 1 year ago", (value) => {
-      if (!value) return true; // Skip validation if empty (required handles this)
-      const oneYearAgo = new Date();
-      oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-      return value >= oneYearAgo;
-    })
     .test("not-future", "Date cannot be in the future", (value) => {
       if (!value) return true;
       return value <= new Date();
+    })
+    .test("valid-year", "Date must be from current or previous year", (value) => {
+      if (!value) return true;
+      const currentYear = new Date().getFullYear();
+      const dateYear = value.getFullYear();
+      return dateYear === currentYear || dateYear === currentYear - 1;
     }),
   asOfTime: yup.string().nullable().required("As of Time is required")
 });
 
 interface DemographicFreezeSearchFilterProps {
   setInitialSearchLoaded: (include: boolean) => void;
+  setPageReset: (reset: boolean) => void;
 }
 
-const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = ({ setInitialSearchLoaded }) => {
+const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = ({
+  setInitialSearchLoaded,
+  setPageReset
+}) => {
   const [freezeDemographics, { isLoading }] = useFreezeDemographicsMutation();
   const profitYear = useDecemberFlowProfitYear();
+  
+  const currentYear = new Date().getFullYear();
+  const previousYear = currentYear - 1;
 
   const {
     control,
     handleSubmit,
     formState: { errors, isValid }
   } = useForm<DemographicFreezeSearch>({
-    resolver: yupResolver<DemographicFreezeSearch>(schema),
+    resolver: yupResolver(schema) as Resolver<DemographicFreezeSearch>,
     defaultValues: {
-      profitYear: profitYear || undefined,
+      profitYear: profitYear || currentYear,
       asOfDate: null,
       asOfTime: null
-    }
+    },
+    mode: "onChange"
   });
 
   const onSubmit = handleSubmit(async (data) => {
@@ -78,6 +90,7 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
           // The format should match: "2025-03-19T00:00:00-04:00"
           const asOfDateTime = combinedDate.toISOString();
 
+          setPageReset(true);
           await freezeDemographics({
             asOfDateTime,
             profitYear: data.profitYear
@@ -111,7 +124,7 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
           gap: "24px"
         }}>
         {/* Profit Year */}
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Controller
             name="profitYear"
             control={control}
@@ -124,12 +137,14 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
                 label="Profit Year"
                 disableFuture
                 views={["year"]}
+                minDate={new Date(previousYear, 0)}
+                maxDate={new Date(currentYear, 11)}
                 error={errors.profitYear?.message}
               />
             )}
           />
           {errors.profitYear && <FormHelperText error>{errors.profitYear.message}</FormHelperText>}
-        </Grid2>
+        </Grid>
 
         {/* As of Date */}
         <Box sx={fieldStyle}>
@@ -143,8 +158,9 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
                 value={field.value}
                 required={true}
                 label="As of Date"
-                error={!!errors.asOfDate}
-                helperText={errors.asOfDate?.message}
+                minDate={new Date(previousYear, 0, 1)}
+                maxDate={new Date()}
+                error={errors.asOfDate?.message}
               />
             )}
           />
@@ -156,15 +172,18 @@ const DemographicFreezeManager: React.FC<DemographicFreezeSearchFilterProps> = (
             name="asOfTime"
             control={control}
             render={({ field }) => (
-              <TextField
-                id="asOfTime"
-                label="As of Time (HH:MM)"
-                type="time"
-                required
-                onChange={field.onChange}
-                value={field.value || ""}
-                error={!!errors.asOfTime}
-              />
+              <>
+                <FormLabel>As of Time (HH:MM)</FormLabel>
+                <TextField
+                  id="asOfTime"
+                  type="time"
+                  required
+                  fullWidth
+                  onChange={field.onChange}
+                  value={field.value || ""}
+                  error={!!errors.asOfTime}
+                />
+              </>
             )}
           />
           {errors.asOfTime && <FormHelperText error>{errors.asOfTime.message}</FormHelperText>}

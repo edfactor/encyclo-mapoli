@@ -1,332 +1,254 @@
-import {
-    FormHelperText,
-    FormLabel,
-    MenuItem,
-    Select,
-    TextField
-} from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
-import { Controller, useForm, Resolver } from "react-hook-form";
-import { SearchAndReset } from "smart-ui-library";
 import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
-import { BeneficiaryKindDto, BeneficiaryRequestDto, BeneficiaryTypeDto } from "reduxstore/types";
+import { FormHelperText, FormLabel, Grid, MenuItem, Select, TextField } from "@mui/material";
+import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
+import { memberTypeGetNumberMap } from "pages/MasterInquiry/MasterInquiryFunctions";
+import { Controller, Resolver, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
-import { useLazyGetBeneficiariesQuery } from "reduxstore/api/BeneficiariesApi";
-import { setBeneficiaryRequest } from "reduxstore/slices/beneficiarySlice";
-import { ElectricScooterRounded } from "@mui/icons-material";
+import { useLazySearchProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
+import { setMasterInquiryRequestParams } from "reduxstore/slices/inquirySlice";
+import { BeneficiaryTypeDto, MasterInquiryRequest } from "reduxstore/types";
+import { SearchAndReset } from "smart-ui-library";
+import * as yup from "yup";
 
 const schema = yup.object().shape({
-    badgeNumber: yup.number().notRequired(),
-    psnSuffix: yup.number().notRequired(),
-    name: yup.string().notRequired(),
-    address: yup.string().notRequired(),
-    city: yup.string().notRequired(),
-    state: yup.string().notRequired(),
-    ssn: yup.number().notRequired(),
-    percentage: yup.number().notRequired(),
-    kindId: yup.string().notRequired()
+  badgePsn: yup.string().notRequired(),
+  name: yup.string().notRequired(),
+
+  socialSecurity: yup
+    .number()
+    .typeError("SSN must be a number")
+    .integer("SSN must be an integer")
+    .min(0, "SSN must be positive")
+    .max(999999999, "SSN must be 9 digits or less")
+    .nullable(),
+  memberType: yup.string().notRequired()
 });
 interface bRequest {
-    badgeNumber?: number;
-    psnSuffix?: number;
-    name: string;
-    address: string;
-    city: string;
-    state: string;
-    ssn: number;
-    percentage:number;
-    kindId: string;
+  badgePsn?: string;
+  name: string;
+  socialSecurity: number;
+  memberType: string;
 }
 // Define the type of props
 type Props = {
-    beneficiaryKind: BeneficiaryKindDto[],
-  searchClicked: (badgeNumber:number) => void;
+  beneficiaryType: BeneficiaryTypeDto[];
+  searchClicked: (badgeNumber: number) => void;
+  setInitialSearchLoaded: (include: boolean) => void;
+  onSearch: (params: MasterInquiryRequest | undefined) => void;
 };
 
+const BeneficiaryInquirySearchFilter: React.FC<Props> = ({
+  searchClicked,
+  beneficiaryType,
+  setInitialSearchLoaded,
+  onSearch
+}) => {
+  //const [triggerSearch, { data, isLoading, isError, isFetching }] = useLazyGetBeneficiariesQuery();
+  const [triggerSearch, { isFetching }] = useLazySearchProfitMasterInquiryQuery();
+  const profitYear = useDecemberFlowProfitYear();
+  const dispatch = useDispatch();
 
-// const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterProps> = ({
-//   setInitialSearchLoaded,
-//   setMissiveAlerts
-// }) => {
-const BeneficiaryInquirySearchFilter:React.FC<Props> = ({searchClicked,beneficiaryKind}) => {
-    const [triggerSearch, {data,isLoading,isError,isFetching}] = useLazyGetBeneficiariesQuery();
-    const dispatch = useDispatch();
+  const {
+    control,
+    register,
+    formState: { errors, isValid },
+    setValue,
+    handleSubmit,
+    reset,
+    setFocus,
+    watch
+  } = useForm<bRequest>({
+    resolver: yupResolver(schema) as Resolver<bRequest>
+  });
 
-    const {
-        control,
-        register,
-        formState: { errors, isValid },
-        setValue,
-        handleSubmit,
-        reset,
-        setFocus,
-        watch
-    } = useForm<bRequest>({
-        resolver: yupResolver(schema) as Resolver<bRequest>
-    });
-
-    const checkIfAnyValueIsThereInTheFilter = (data: bRequest) => {
-        if (data.badgeNumber || data.psnSuffix || data.address || data.name || data.ssn || data.city || data.state) {
-            return true;
-        }
-        return false;
-
-    }
-    const onSubmit = (data: any) => {
-        const { badgeNumber, psnSuffix, name, ssn, address, city, state,percentage } = data;
-        searchClicked(badgeNumber);
-        if (isValid) {
-            const beneficiaryRequestDto: BeneficiaryRequestDto = {
-                badgeNumber: badgeNumber??0,
-                psnSuffix: psnSuffix??0,
-                name: name,
-                ssn: ssn,
-                address: address,
-                city: city,
-                state: state,
-                percentage: percentage??0,
-                skip: 0,
-                take: 255,
-                isSortDescending: true,
-                sortBy: "id"
-            };
-            triggerSearch(beneficiaryRequestDto);
-            dispatch(setBeneficiaryRequest(beneficiaryRequestDto));
-        }
-        console.log({ bnumber: badgeNumber, psn: psnSuffix });
-    };
-    const validateAndSubmit = handleSubmit(onSubmit);
-
-    const handleReset = () => {
-        reset({ badgeNumber: undefined, psnSuffix: undefined, address: undefined, city: undefined, name: undefined, ssn: undefined, state: undefined });
+  const onSubmit = (data: any) => {
+    let { badgePsn, name, ssn, memberType } = data;
+    memberType = memberType ?? "beneficiaries";
+    let badge = undefined,
+      psn = undefined;
+    if (badgePsn && badgePsn.length > 0) {
+      if (badgePsn.length == 6) {
+        badge = parseInt(badgePsn);
+      } else {
+        badge = badgePsn ? parseInt(badgePsn.slice(0, -4)) : 0;
+        psn = badgePsn ? parseInt(badgePsn.slice(-4)) : 0;
+      }
     }
 
-    return (
-        <form onSubmit={validateAndSubmit}>
-            <Grid2
-                container
-                paddingX="24px">
-                <Grid2
-                    container
-                    spacing={2}
-                    width="100%">
-                    <Grid2 size={{ xs: 12, sm: 3, md: 3 }}>
-                        <FormLabel>Badge Number</FormLabel>
-                        <Controller
-                            name="badgeNumber"
-                            control={control}
-                            render={({ field }) => (
-                                <TextField
-                                    {...field}
-                                    fullWidth
-                                    size="small"
-                                    variant="outlined"
-                                    value={field.value ?? ""}
-                                    error={!!errors.badgeNumber}
-                                    onChange={(e) => {
-                                        const parsedValue = e.target.value === "" ? null : Number(e.target.value);
-                                        field.onChange(parsedValue);
-                                    }}
-                                />
-                            )}
-                        />
-                        {errors?.badgeNumber && <FormHelperText error>{errors.badgeNumber.message}</FormHelperText>}
-                    </Grid2>
+    //searchClicked(badge);
+    if (isValid) {
+      // const beneficiaryRequestDto: BeneficiaryRequestDto = {
+      //     badgeNumber: badge ?? 0,
+      //     psnSuffix: psn ?? 0,
+      //     name: name,
+      //     ssn: ssn,
+      //     address: address,
+      //     city: city,
+      //     state: state,
+      //     percentage: percentage ?? 0,
+      //     skip: 0,
+      //     take: 255,
+      //     isSortDescending: true,
+      //     sortBy: "id"
+      // };
+      // triggerSearch(beneficiaryRequestDto);
+      // dispatch(setBeneficiaryRequest(beneficiaryRequestDto));
+      const searchParams: MasterInquiryRequest = {
+        pagination: {
+          skip: data.pagination?.skip || 0,
+          take: data.pagination?.take || 5,
+          sortBy: data.pagination?.sortBy || "badgeNumber",
+          isSortDescending: data.pagination?.isSortDescending || true
+        },
+        endProfitYear: profitYear,
+        ...(!!data.socialSecurity && { ssn: data.socialSecurity }),
+        ...(!!data.name && { name: data.name }),
+        badgeNumber: badge,
+        psnSuffix: psn,
+        memberType: memberTypeGetNumberMap[memberType]
+      };
+      triggerSearch(searchParams, false)
+        .unwrap()
+        .then((response) => {
+          // If data is returned, trigger downstream components
+          if (
+            response && Array.isArray(response) ? response.length > 0 : response.results && response.results.length > 0
+          ) {
+            setInitialSearchLoaded(true);
+            onSearch(searchParams);
+          } else {
+            // Instead of setting missiveAlerts, pass up a signal (to be implemented)
+            // setMissiveAlerts([...]);
+            setInitialSearchLoaded(false);
+            onSearch(undefined);
+          }
+        });
+      dispatch(setMasterInquiryRequestParams(data));
+    }
+  };
+  const validateAndSubmit = handleSubmit(onSubmit);
 
-                    <Grid2 size={{ xs: 12, sm: 3, md: 3 }}>
-                        <FormLabel>PSN Suffix</FormLabel>
-                        <Controller
-                            name="psnSuffix"
-                            control={control}
-                            render={({ field }) => (
-                                <TextField
-                                    {...field}
-                                    fullWidth
-                                    size="small"
-                                    variant="outlined"
-                                    value={field.value ?? ""}
-                                    error={!!errors.psnSuffix}
-                                    onChange={(e) => {
-                                        const parsedValue = e.target.value === "" ? null : Number(e.target.value);
-                                        field.onChange(parsedValue);
-                                    }}
-                                />
-                            )}
-                        />
-                        {errors.psnSuffix && <FormHelperText error>{errors.psnSuffix.message}</FormHelperText>}
-                    </Grid2>
-                    <Grid2 size={{ xs: 12, sm: 3, md: 3 }}>
-                        <FormLabel>Name</FormLabel>
-                        <Controller
-                            name="name"
-                            control={control}
-                            render={({ field }) => (
-                                <TextField
-                                    {...field}
-                                    fullWidth
-                                    size="small"
-                                    variant="outlined"
-                                    value={field.value ?? ""}
-                                    error={!!errors.name}
-                                    onChange={(e) => {
-                                        field.onChange(e.target.value);
-                                    }}
-                                />
-                            )}
-                        />
-                        {errors?.name && <FormHelperText error>{errors.name.message}</FormHelperText>}
-                    </Grid2>
-                    <Grid2 size={{ xs: 12, sm: 3, md: 3 }}>
-                        <FormLabel>SSN</FormLabel>
-                        <Controller
-                            name="ssn"
-                            control={control}
-                            render={({ field }) => (
-                                <TextField
-                                    {...field}
-                                    fullWidth
-                                    size="small"
-                                    variant="outlined"
-                                    value={field.value ?? ""}
-                                    error={!!errors.ssn}
-                                    onChange={(e) => {
-                                        const parsedValue = e.target.value === "" ? null : Number(e.target.value);
-                                        field.onChange(parsedValue);
-                                    }}
-                                />
-                            )}
-                        />
-                        {errors?.ssn && <FormHelperText error>{errors.ssn.message}</FormHelperText>}
-                    </Grid2>
-                    <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
-                        <FormLabel>Address</FormLabel>
-                        <Controller
-                            name="address"
-                            control={control}
-                            render={({ field }) => (
-                                <TextField
-                                    {...field}
-                                    fullWidth
-                                    size="small"
-                                    variant="outlined"
-                                    value={field.value ?? ""}
-                                    error={!!errors.address}
-                                    onChange={(e) => {
-                                        field.onChange(e.target.value);
-                                    }}
-                                />
-                            )}
-                        />
-                        {errors?.address && <FormHelperText error>{errors.address.message}</FormHelperText>}
-                    </Grid2>
-                    <Grid2 size={{ xs: 12, sm: 2, md: 2 }}>
-                        <FormLabel>City</FormLabel>
-                        <Controller
-                            name="city"
-                            control={control}
-                            render={({ field }) => (
-                                <TextField
-                                    {...field}
-                                    fullWidth
-                                    size="small"
-                                    variant="outlined"
-                                    value={field.value ?? ""}
-                                    error={!!errors.city}
-                                    onChange={(e) => {
-                                        field.onChange(e.target.value);
-                                    }}
-                                />
-                            )}
-                        />
-                        {errors?.city && <FormHelperText error>{errors.city.message}</FormHelperText>}
-                    </Grid2>
-                    <Grid2 size={{ xs: 12, sm: 1, md: 1 }}>
-                        <FormLabel>State</FormLabel>
-                        <Controller
-                            name="state"
-                            control={control}
-                            render={({ field }) => (
-                                <TextField
-                                    {...field}
-                                    fullWidth
-                                    size="small"
-                                    variant="outlined"
-                                    value={field.value ?? ""}
-                                    error={!!errors.state}
-                                    onChange={(e) => {
-                                        field.onChange(e.target.value);
-                                    }}
-                                />
-                            )}
-                        />
-                        {errors?.state && <FormHelperText error>{errors.state.message}</FormHelperText>}
-                    </Grid2>
-                    <Grid2 size={{ xs: 12, sm: 1, md: 1 }}>
-                        <FormLabel>Percentage</FormLabel>
-                        <Controller
-                            name="percentage"
-                            control={control}
-                            render={({ field }) => (
-                                <TextField
-                                    {...field}
-                                    fullWidth
-                                    size="small"
-                                    variant="outlined"
-                                    value={field.value ?? ""}
-                                    error={!!errors.percentage}
-                                    onChange={(e) => {
-                                        const parsedValue = e.target.value === "" ? null : Number(e.target.value);
-                                        field.onChange(parsedValue);
-                                    }}
-                                />
-                            )}
-                        />
-                        {errors?.percentage && <FormHelperText error>{errors.percentage.message}</FormHelperText>}
-                    </Grid2>
-                    <Grid2 size={{xs:12, sm:2, md:2}}>
-                            <FormLabel>Beneficiary Kind</FormLabel>
-                            <Controller
-                                name="kindId"
-                                control={control}
-                                render={({ field }) => (
-                                    <Select
-                                        {...field}
-                                        fullWidth
-                                        size="small"
-                                        variant="outlined"
-                                        labelId="kindId"
-                                        id="kindId"
-                                        value={field.value}
-                                        label="Beneficiary Kind"
-                                        onChange={(e) => field.onChange(e.target.value)}
-                                    >
-                                        {beneficiaryKind.map((d) => (
-                                            <MenuItem value={d.id}>{d.name}</MenuItem>
-                                        ))}
-                                    </Select>
-                                )}
-                            />
-                    </Grid2>
-                </Grid2>
+  const handleReset = () => {
+    reset({ badgePsn: undefined, name: undefined, socialSecurity: undefined });
+  };
 
+  return (
+    <form onSubmit={validateAndSubmit}>
+      <Grid
+        container
+        paddingX="24px">
+        <Grid
+          container
+          spacing={2}
+          width="100%">
+          <Grid size={{ xs: 12, sm: 3, md: 3 }}>
+            <FormLabel>Badge/Psn</FormLabel>
+            <Controller
+              name="badgePsn"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  size="small"
+                  variant="outlined"
+                  value={field.value ?? ""}
+                  error={!!errors.badgePsn}
+                  onChange={(e) => {
+                    const parsedValue = e.target.value === "" ? null : Number(e.target.value);
+                    field.onChange(parsedValue);
+                  }}
+                />
+              )}
+            />
+            {errors?.badgePsn && <FormHelperText error>{errors.badgePsn.message}</FormHelperText>}
+          </Grid>
 
-                <Grid2
-                    container
-                    justifyContent="flex-end"
-                    paddingY="16px">
-                    <Grid2 size={{ xs: 12 }}>
-                        <SearchAndReset
-                            handleReset={handleReset}
-                            handleSearch={validateAndSubmit}
-                            isFetching={isFetching}
-                            disabled={!isValid}
-                        />
-                    </Grid2>
-                </Grid2>
-            </Grid2>
-        </form>
-    );
+          <Grid size={{ xs: 12, sm: 3, md: 3 }}>
+            <FormLabel>Name</FormLabel>
+            <Controller
+              name="name"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  size="small"
+                  variant="outlined"
+                  value={field.value ?? ""}
+                  error={!!errors.name}
+                  onChange={(e) => {
+                    field.onChange(e.target.value);
+                  }}
+                />
+              )}
+            />
+            {errors?.name && <FormHelperText error>{errors.name.message}</FormHelperText>}
+          </Grid>
+          <Grid size={{ xs: 12, sm: 3, md: 3 }}>
+            <FormLabel>SSN</FormLabel>
+            <Controller
+              name="socialSecurity"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  size="small"
+                  variant="outlined"
+                  value={field.value ?? ""}
+                  error={!!errors.socialSecurity}
+                  onChange={(e) => {
+                    const parsedValue = e.target.value === "" ? null : Number(e.target.value);
+                    field.onChange(parsedValue);
+                  }}
+                />
+              )}
+            />
+            {errors?.socialSecurity && <FormHelperText error>{errors.socialSecurity.message}</FormHelperText>}
+          </Grid>
+          <Grid size={{ xs: 12, sm: 2, md: 2 }}>
+            <FormLabel>Member Type</FormLabel>
+            <Controller
+              name="memberType"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  {...field}
+                  defaultValue="beneficiaries"
+                  fullWidth
+                  size="small"
+                  variant="outlined"
+                  labelId="memberType"
+                  id="memberType"
+                  value={field.value}
+                  label="Member Type"
+                  onChange={(e) => field.onChange(e.target.value)}>
+                  <MenuItem value="all">All</MenuItem>
+                  <MenuItem value="employees">Employees</MenuItem>
+                  <MenuItem value="beneficiaries">Beneficiaries</MenuItem>
+                </Select>
+              )}
+            />
+          </Grid>
+        </Grid>
+
+        <Grid
+          container
+          justifyContent="flex-end"
+          paddingY="16px">
+          <Grid size={{ xs: 12 }}>
+            <SearchAndReset
+              handleReset={handleReset}
+              handleSearch={validateAndSubmit}
+              isFetching={isFetching}
+              disabled={!isValid}
+            />
+          </Grid>
+        </Grid>
+      </Grid>
+    </form>
+  );
 };
 
 export default BeneficiaryInquirySearchFilter;

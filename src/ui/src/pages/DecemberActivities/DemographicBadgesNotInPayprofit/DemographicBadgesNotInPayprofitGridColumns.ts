@@ -1,42 +1,30 @@
 import { ColDef } from "ag-grid-community";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
+import {
+  createSSNColumn,
+  createBadgeColumn,
+  createNameColumn,
+  createStatusColumn
+} from "../../../utils/gridColumnFactory";
 export const GetDemographicBadgesNotInPayprofitColumns = (): ColDef[] => {
   return [
-    {
+    createBadgeColumn({
       headerName: "Badge",
-      field: "badgeNumber",
-      colId: "badgeNumber",
       minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
       maxWidth: 200,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      sortable: true,
-      valueFormatter: (params) => {
-        const badgeNumber = params.value;
-        return badgeNumber ? badgeNumber.toString().padStart(7, "0") : "";
-      }
-    },
-    {
+      alignment: "left",
+      renderAsLink: false
+    }),
+    createSSNColumn({
       headerName: "Demographic SSN",
-      field: "ssn",
-      colId: "ssn",
-      minWidth: GRID_COLUMN_WIDTHS.SSN,
-      maxWidth: 250,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
-    {
-      headerName: "Name",
+      alignment: "left",
+      maxWidth: 250
+    }),
+    createNameColumn({
       field: "employeeName",
-      colId: "employeeName",
       minWidth: 150,
-      maxWidth: 300,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
+      maxWidth: 300
+    }),
     {
       headerName: "Store",
       field: "store",
@@ -47,20 +35,15 @@ export const GetDemographicBadgesNotInPayprofitColumns = (): ColDef[] => {
       cellClass: "left-align",
       resizable: true
     },
-    {
-      headerName: "Status",
-      field: "status",
-      colId: "status",
+    createStatusColumn({
       minWidth: 80,
       maxWidth: 250,
-      headerClass: "right-align",
-      cellClass: "right-align",
-      resizable: true,
+      alignment: "right",
       valueFormatter: (params) => {
         const status = params.data.status; // assuming 'status' is in the row data
         const statusName = params.data.statusName; // assuming 'statusName' is in the row data
         return `[${status}] ${statusName}`;
       }
-    }
+    })
   ];
 };

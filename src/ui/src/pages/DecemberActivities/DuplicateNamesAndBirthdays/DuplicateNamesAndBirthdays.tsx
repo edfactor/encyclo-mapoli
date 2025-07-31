@@ -1,5 +1,5 @@
 import { Divider } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { useState } from "react";
 import { Page } from "smart-ui-library";
 import DuplicateNamesAndBirthdaysGrid from "./DuplicateNamesAndBirthdaysGrid";
@@ -11,21 +11,23 @@ const DuplicateNamesAndBirthdays = () => {
     return <StatusDropdownActionNode />;
   };
   return (
-    <Page label="Duplicate Names and Birthdays" actionNode={renderActionNode()}>
-      <Grid2
+    <Page
+      label="Duplicate Names and Birthdays"
+      actionNode={renderActionNode()}>
+      <Grid
         container
         rowSpacing="24px">
-        <Grid2 width={"100%"}>
+        <Grid width={"100%"}>
           <Divider />
-        </Grid2>
+        </Grid>
 
-        <Grid2 width="100%">
+        <Grid width="100%">
           <DuplicateNamesAndBirthdaysGrid
             setInitialSearchLoaded={setInitialSearchLoaded}
             initialSearchLoaded={initialSearchLoaded}
           />
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
     </Page>
   );
 };

@@ -2,11 +2,10 @@ import { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetBalanceByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, TotalsGrid } from "smart-ui-library";
+import { DSMGrid, ISortParams, TotalsGrid ,numberToCurrency } from "smart-ui-library";
 import { GetBalanceByAgeColumns } from "./BalanceByAgeGridColumns";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
-import { numberToCurrency } from "smart-ui-library";
 
 interface BalanceByAgeGridProps {
   initialSearchLoaded: boolean;
@@ -28,6 +27,8 @@ const BalanceByAgeGrid: React.FC<BalanceByAgeGridProps> = ({ initialSearchLoaded
   const columnDefsTotal = GetBalanceByAgeColumns(FrozenReportsByAgeRequestType.Total);
   const columnDefsFullTime = GetBalanceByAgeColumns(FrozenReportsByAgeRequestType.FullTime);
   const columnDefsPartTime = GetBalanceByAgeColumns(FrozenReportsByAgeRequestType.PartTime);
+
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
 
   const onSearch = useCallback(async () => {
     await triggerSearch(
@@ -57,10 +58,10 @@ const BalanceByAgeGrid: React.FC<BalanceByAgeGridProps> = ({ initialSearchLoaded
   }, [triggerSearch, balanceByAgeQueryParams?.profitYear]);
 
   useEffect(() => {
-    if (initialSearchLoaded && balanceByAgeQueryParams?.profitYear) {
+    if (hasToken && initialSearchLoaded && balanceByAgeQueryParams?.profitYear) {
       onSearch();
     }
-  }, [balanceByAgeQueryParams?.profitYear, initialSearchLoaded, onSearch]);
+  }, [balanceByAgeQueryParams?.profitYear, hasToken, initialSearchLoaded, onSearch]);
 
   return (
     <>
@@ -131,10 +132,10 @@ const BalanceByAgeGrid: React.FC<BalanceByAgeGridProps> = ({ initialSearchLoaded
               leftColumnHeaders={["Beneficiaries", "Employees", "Total"]}
               topRowHeaders={["PartTime", "Count", "Balance", "Vested"]}></TotalsGrid>
           </div>
-          <Grid2
+          <Grid
             size={{ xs: 12 }}
             container>
-            <Grid2 size={{ xs: 4 }}>
+            <Grid size={{ xs: 4 }}>
               <DSMGrid
                 preferenceKey={"AGE_Total"}
                 isLoading={isFetching}
@@ -145,8 +146,8 @@ const BalanceByAgeGrid: React.FC<BalanceByAgeGridProps> = ({ initialSearchLoaded
                   columnDefs: columnDefsTotal
                 }}
               />
-            </Grid2>
-            <Grid2 size={{ xs: 4 }}>
+            </Grid>
+            <Grid size={{ xs: 4 }}>
               <DSMGrid
                 preferenceKey={"AGE_FullTime"}
                 isLoading={isFetching}
@@ -157,8 +158,8 @@ const BalanceByAgeGrid: React.FC<BalanceByAgeGridProps> = ({ initialSearchLoaded
                   columnDefs: columnDefsFullTime
                 }}
               />
-            </Grid2>
-            <Grid2 size={{ xs: 4 }}>
+            </Grid>
+            <Grid size={{ xs: 4 }}>
               <DSMGrid
                 preferenceKey={"AGE_PartTime"}
                 isLoading={isFetching}
@@ -168,8 +169,8 @@ const BalanceByAgeGrid: React.FC<BalanceByAgeGridProps> = ({ initialSearchLoaded
                   columnDefs: columnDefsPartTime
                 }}
               />
-            </Grid2>
-          </Grid2>
+            </Grid>
+          </Grid>
         </>
       )}
     </>

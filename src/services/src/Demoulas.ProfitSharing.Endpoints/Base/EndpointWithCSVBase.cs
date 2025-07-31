@@ -72,11 +72,11 @@ public abstract class EndpointWithCsvBase<ReqType, RespType, MapType> : FastEndp
         if (acceptHeader.Contains("text/csv"))
         {
             await using MemoryStream csvData = await GenerateCsvStreamAsync(response, ct);
-            await SendStreamAsync(csvData, $"{ReportFileName}.csv", contentType: "text/csv", cancellation: ct);
+            await Send.StreamAsync(csvData, $"{ReportFileName}.csv", contentType: "text/csv", cancellation: ct);
             return;
         }
 
-        await SendOkAsync(response, ct);
+        await Send.OkAsync(response, ct);
     }
 
     private async Task<MemoryStream> GenerateCsvStreamAsync(ReportResponseBase<RespType> report, CancellationToken cancellationToken)

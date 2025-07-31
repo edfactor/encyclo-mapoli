@@ -1,22 +1,17 @@
-import { ColDef, ICellRendererParams } from "ag-grid-community";
+import { ColDef } from "ag-grid-community";
 import { yyyyMMDDToMMDDYYYY } from "smart-ui-library";
-import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
-import { agGridNumberToCurrency } from "smart-ui-library";
-import { getEnrolledStatus } from "../../../utils/enrollmentUtil";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
+import { getEnrolledStatus } from "../../../utils/enrollmentUtil";
+import { createBadgeColumn, createCurrencyColumn, createSSNColumn, createAgeColumn, createDateColumn } from "../../../utils/gridColumnFactory";
 
 export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
   return [
-    {
+    createBadgeColumn({
       headerName: "Badge",
-      field: "badgeNumber",
-      colId: "badgeNumber",
       minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data?.badgeNumber, params.data?.psnSuffix)
-    },
+      alignment: "left",
+      psnSuffix: true
+    }),
     {
       headerName: "Name",
       field: "employeeName",
@@ -26,81 +21,49 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       cellClass: "left-align",
       resizable: true
     },
-    {
-      headerName: "SSN",
-      field: "ssn",
-      colId: "ssn",
-      minWidth: GRID_COLUMN_WIDTHS.SSN,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
-    {
+    createSSNColumn({ alignment: "left" }),
+    createDateColumn({
       headerName: "Date",
       field: "date",
-      colId: "date",
       minWidth: 100,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      valueFormatter: (params) => (params.value ? yyyyMMDDToMMDDYYYY(params.value) : "")
-    },
-    {
+      alignment: "left"
+    }),
+    createCurrencyColumn({
       headerName: "Distribution",
       field: "distributionAmount",
-      colId: "distributionAmount",
-      minWidth: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+      minWidth: 120
+    }),
+    createCurrencyColumn({
       headerName: "State Tax",
       field: "stateTax",
-      colId: "stateTax",
-      minWidth: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
+      minWidth: 120
+    }),
     {
-      headerName: "Federal Tax",
-      field: "federalTax",
-      colId: "federalTax",
+      headerName: "State",
+      field: "state",
+      colId: "state",
       minWidth: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
-      headerName: "Forfeit Amount",
-      field: "forfeitAmount",
-      colId: "forfeitAmount",
-      minWidth: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
-      headerName: "Age",
-      field: "age",
-      colId: "age",
-      minWidth: 70,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      headerClass: "left-align",
+      cellClass: "left-align",
       resizable: true
     },
+    createCurrencyColumn({
+      headerName: "Federal Tax",
+      field: "federalTax",
+      minWidth: 120
+    }),
+    createCurrencyColumn({
+      headerName: "Forfeit Amount",
+      field: "forfeitAmount",
+      minWidth: 120
+    }),
+    createAgeColumn({});
     {
       headerName: "Tax Code",
       field: "taxCode",
       colId: "taxCode",
       minWidth: 80,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true
     },
     {

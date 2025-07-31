@@ -43,4 +43,9 @@ public class MarkdownTable
 
         return sb.ToString();
     }
+
+    public List<string[]> rows()
+    {
+        return _rows;
+    }
 }

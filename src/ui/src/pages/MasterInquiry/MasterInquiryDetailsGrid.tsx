@@ -1,7 +1,7 @@
 import { Typography } from "@mui/material";
-import { useMemo, useEffect, useState } from "react";
+import { useMemo, useEffect, useState, useRef } from "react";
 import { useLazyGetProfitMasterInquiryMemberDetailsQuery } from "reduxstore/api/InquiryApi";
-import { DSMGrid, Pagination} from "smart-ui-library";
+import { DSMGrid, Pagination, ISortParams } from "smart-ui-library";
 import { GetMasterInquiryGridColumns } from "./MasterInquiryGridColumns";
 import { CAPTIONS } from "../../constants";
 
@@ -12,18 +12,15 @@ interface MasterInquiryGridProps {
   id?: number;
 }
 
-const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({
-                                                               memberType,
-                                                               id,
-                                                             }) => {
+const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ memberType, id }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
+  // Add sort state management
+  const [sortParams, setSortParams] = useState<ISortParams>({
+    sortBy: "profitYear",
+    isSortDescending: true
+  });
   const columnDefs = useMemo(() => GetMasterInquiryGridColumns(), []);
-
-  // Only render if both memberType and id are present
-  if (memberType === undefined || id === undefined) {
-    return null;
-  }
 
   const [
     triggerMemberDetails,
@@ -31,20 +28,39 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({
       data: memberDetailsData,
       isFetching: isFetchingMemberDetails,
       isError: isErrorMemberDetails,
-      error: errorMemberDetails,
-    },
+      error: errorMemberDetails
+    }
   ] = useLazyGetProfitMasterInquiryMemberDetailsQuery();
 
+  // Add sort event handler
+  const sortEventHandler = (update: ISortParams) => {
+    setSortParams(update);
+    setPageNumber(0); // Reset to first page when sorting
+  };
+
   useEffect(() => {
-    triggerMemberDetails({ 
-      memberType, 
+    if (id === undefined || memberType === undefined) return;
+    triggerMemberDetails({
+      memberType,
       id,
       skip: pageNumber * pageSize,
       take: pageSize,
-      sortBy: "profitYear",
-      isSortDescending: true
+      sortBy: sortParams.sortBy,
+      isSortDescending: sortParams.isSortDescending
     });
-  }, [memberType, id, pageNumber, pageSize, triggerMemberDetails]);
+  }, [memberType, id, pageNumber, pageSize, sortParams, triggerMemberDetails]);
+
+  // Need a useEffect to reset the page number when memberDetailsData changes
+  const prevMemberDetailsData = useRef<any>(null);
+  useEffect(() => {
+    if (
+      memberDetailsData &&
+      (prevMemberDetailsData.current === undefined || memberDetailsData.total !== prevMemberDetailsData.current.total)
+    ) {
+      setPageNumber(0);
+    }
+    prevMemberDetailsData.current = memberDetailsData;
+  }, [memberDetailsData]);
 
   if (isFetchingMemberDetails) {
     return <Typography>Loading profit details...</Typography>;
@@ -58,45 +74,46 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({
     );
   }
 
-return (
+  return (
     <>
-    <div style={{ height: "400px", width: "100%" }}>
-      {!!memberDetailsData && (
-        <>        
-          <div style={{ padding: "0 24px 0 24px" }}>
-            <Typography
-              variant="h2"
-              sx={{ color: "#0258A5" }}>
-              {`Profit Details (${memberDetailsData?.total || 0} ${memberDetailsData?.total === 1 ? "Record" : "Records"})`}
-            </Typography>
-          </div>          
+      <div style={{ height: "400px", width: "100%" }}>
+        {!!memberDetailsData && (
+          <>
+            <div style={{ padding: "0 24px 0 24px" }}>
+              <Typography
+                variant="h2"
+                sx={{ color: "#0258A5" }}>
+                {`Profit Details (${memberDetailsData?.total || 0} ${memberDetailsData?.total === 1 ? "Record" : "Records"})`}
+              </Typography>
+            </div>
             <DSMGrid
               preferenceKey={CAPTIONS.MASTER_INQUIRY}
               isLoading={isFetchingMemberDetails}
+              handleSortChanged={sortEventHandler}
               providedOptions={{
                 rowData: memberDetailsData?.results,
                 columnDefs: columnDefs,
                 suppressMultiSort: true
               }}
-            />          
-        </>
-      )}
-      {!!memberDetailsData && memberDetailsData.results.length > 0 && (
-        <Pagination
-          pageNumber={pageNumber}
-          setPageNumber={(value: number) => {
-            setPageNumber(value - 1);
-          }}
-          pageSize={pageSize}
-          setPageSize={(value: number) => {
-            setPageSize(value);
-            setPageNumber(0);
-          }}
-          recordCount={memberDetailsData.total}
-        />
-      )}
+            />
+          </>
+        )}
+        {!!memberDetailsData && memberDetailsData.results.length > 0 && (
+          <Pagination
+            pageNumber={pageNumber}
+            setPageNumber={(value: number) => {
+              setPageNumber(value - 1);
+            }}
+            pageSize={pageSize}
+            setPageSize={(value: number) => {
+              setPageSize(value);
+              setPageNumber(0);
+            }}
+            recordCount={memberDetailsData.total}
+          />
+        )}
       </div>
     </>
-  );  
-}
-  export default MasterInquiryGrid;
+  );
+};
+export default MasterInquiryGrid;

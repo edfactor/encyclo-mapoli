@@ -26,6 +26,6 @@ public class DeleteBeneficiaryEndpoint:Endpoint<IdRequest>
     public override async Task HandleAsync(IdRequest req, CancellationToken ct)
     {
         await _beneficiaryService.DeleteBeneficiary(req.Id, ct);
-        await SendOkAsync(req, ct);
+        await Send.OkAsync(req, ct);
     }
 }

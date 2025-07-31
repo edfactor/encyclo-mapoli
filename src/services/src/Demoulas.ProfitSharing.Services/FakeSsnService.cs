@@ -102,7 +102,7 @@ public sealed class FakeSsnService : IFakeSsnService
             {
                 OldSsn = oldSsn,
                 NewSsn = newSsn,
-                ChangeDateUtc = DateTimeOffset.UtcNow
+                ModifiedAtUtc = DateTimeOffset.UtcNow
             };
             c.Entry(historyEntry);
             await c.SaveChangesAsync(cancellationToken);

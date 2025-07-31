@@ -1,5 +1,5 @@
 import { Divider } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { Page } from "smart-ui-library";
 import BalanceByAgeGrid from "./BalanceByAgeGrid";
 import { useState, useEffect } from "react";
@@ -22,7 +22,7 @@ const BalanceByAge = () => {
   useEffect(() => {
     if (hasToken && profitYear && !hasInitialSearchRun) {
       setHasInitialSearchRun(true);
-      
+
       const fetchReport = (reportType: FrozenReportsByAgeRequestType) => {
         return triggerSearch(
           {
@@ -33,43 +33,43 @@ const BalanceByAge = () => {
           false
         );
       };
-      
+
       Promise.all([
         fetchReport(FrozenReportsByAgeRequestType.Total),
         fetchReport(FrozenReportsByAgeRequestType.FullTime),
         fetchReport(FrozenReportsByAgeRequestType.PartTime)
       ])
-        .then(results => {
+        .then((results) => {
           if (results[0].data) {
             dispatch(setBalanceByAgeQueryParams(profitYear));
             setInitialSearchLoaded(true);
           }
         })
-        .catch(error => {
+        .catch((error) => {
           console.error("Initial balance by age search failed:", error);
         });
     }
   }, [hasToken, profitYear, hasInitialSearchRun, triggerSearch, dispatch]);
 
   const renderActionNode = () => {
-    return (
-        <StatusDropdownActionNode />
-    );
-};
+    return <StatusDropdownActionNode />;
+  };
 
   return (
-    <Page label="Balance By Age" actionNode={renderActionNode()}>
-      <Grid2
+    <Page
+      label="Balance By Age"
+      actionNode={renderActionNode()}>
+      <Grid
         container
         rowSpacing="24px">
-        <Grid2 width={"100%"}>
+        <Grid width={"100%"}>
           <Divider />
-        </Grid2>
+        </Grid>
 
-        <Grid2 width="100%">
+        <Grid width="100%">
           <BalanceByAgeGrid initialSearchLoaded={initialSearchLoaded} />
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
     </Page>
   );
 };

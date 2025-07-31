@@ -1,5 +1,5 @@
 import { Button, CircularProgress, FormLabel, MenuItem, Select } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
@@ -16,9 +16,10 @@ interface YTDWagesSearch {
 
 interface YTDWagesSearchFilterProps {
   setInitialSearchLoaded: (include: boolean) => void;
+  setPageReset: (reset: boolean) => void;
 }
 
-const YTDWagesSearchFilter: React.FC<YTDWagesSearchFilterProps> = ({ setInitialSearchLoaded }) => {
+const YTDWagesSearchFilter: React.FC<YTDWagesSearchFilterProps> = ({ setInitialSearchLoaded, setPageReset }) => {
   const [triggerSearch, { isFetching }] = useLazyGetEmployeeWagesForYearQuery();
   const { employeeWagesForYearQueryParams, employeeWagesForYear } = useSelector((state: RootState) => state.yearsEnd);
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
@@ -33,6 +34,7 @@ const YTDWagesSearchFilter: React.FC<YTDWagesSearchFilterProps> = ({ setInitialS
 
   const doSearch = handleSubmit((data) => {
     // Our one-select 'form' cannot be in an invalid state, so we can safely trigger the search
+    setPageReset(true);
     triggerSearch(
       {
         profitYear: fiscalCloseProfitYear,
@@ -52,11 +54,11 @@ const YTDWagesSearchFilter: React.FC<YTDWagesSearchFilterProps> = ({ setInitialS
 
   return (
     <form onSubmit={doSearch}>
-      <Grid2
+      <Grid
         container
         paddingX="24px"
         gap="24px">
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <FormLabel>Profit Year</FormLabel>
           <Select
             size="small"
@@ -65,9 +67,9 @@ const YTDWagesSearchFilter: React.FC<YTDWagesSearchFilterProps> = ({ setInitialS
             fullWidth>
             <MenuItem value={fiscalCloseProfitYear}>{fiscalCloseProfitYear}</MenuItem>
           </Select>
-        </Grid2>
-      </Grid2>
-      <Grid2
+        </Grid>
+      </Grid>
+      <Grid
         width="100%"
         paddingX="24px">
         <div className="search-buttons flex mt-5 justify-start">
@@ -96,7 +98,7 @@ const YTDWagesSearchFilter: React.FC<YTDWagesSearchFilterProps> = ({ setInitialS
             )}
           </Button>
         </div>
-      </Grid2>
+      </Grid>
     </form>
   );
 };

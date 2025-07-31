@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Caching.Distributed;
+using Moq;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.Breakdown;
 
@@ -34,7 +35,9 @@ public class BreakdownReportByStoreTests
         _embeddedSqlService = new EmbeddedSqlService();
         _totalService = new TotalService(_dataContextFactory, _calendarService, _embeddedSqlService,
             new DemographicReaderService(new FrozenService(_dataContextFactory), new HttpContextAccessor()));
-        _breakdownService = new BreakdownReportService(_dataContextFactory, _calendarService, _totalService, null!);
+        var frozenService = new FrozenService(_dataContextFactory);
+        IHttpContextAccessor httpCtxAcc = Mock.Of<IHttpContextAccessor>();
+        _breakdownService = new BreakdownReportService(_dataContextFactory, _calendarService, _totalService, new DemographicReaderService(frozenService, httpCtxAcc));
     }
 
     [Fact]

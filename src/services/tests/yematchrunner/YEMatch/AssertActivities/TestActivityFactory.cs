@@ -17,8 +17,12 @@ internal static class TestActivityFactory
             new ImportReadyDbToSmartDb(),
             new TrimTo14Employees(),
             new DropBadBenes(),
+            new DropBadEmployee(),
             new OverwriteBadges(),
-            new SetDateOfBirthTo19YearsAgo()
+            new SetDateOfBirthTo19YearsAgo(),
+            new S18_Rebuild2023ZeroCont(),
+            new S24_Rebuild2023Enrollment(),
+            new Give2023Hours()
         ];
     }
 }

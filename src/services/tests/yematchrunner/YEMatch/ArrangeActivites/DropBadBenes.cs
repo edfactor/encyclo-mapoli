@@ -1,5 +1,7 @@
 namespace YEMatch;
 
+/* See https://demoulas.atlassian.net/browse/PS-1268 */
+
 public class DropBadBenes : BaseSqlActivity
 {
     public override async Task<Outcome> Execute()

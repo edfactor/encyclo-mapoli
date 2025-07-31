@@ -1,6 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, TextField } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
@@ -9,6 +9,7 @@ import * as yup from "yup";
 
 import SearchAndReset from "components/SearchAndReset/SearchAndReset";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import { useEffect, useState } from "react";
 import {
   addBadgeNumberToUpdateAdjustmentSummary,
   clearProfitSharingEdit,
@@ -19,11 +20,11 @@ import {
   setProfitSharingEditQueryParams,
   setProfitSharingUpdateQueryParams,
   setResetYearEndPage,
-  setTotalForfeituresGreaterThanZero
+  setTotalForfeituresGreaterThanZero,
+  updateProfitSharingEditQueryParam
 } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import { ProfitShareUpdateRequest } from "reduxstore/types";
-import { useEffect } from "react";
 
 const maxContributionsDefault: number = 76000;
 
@@ -109,10 +110,18 @@ const schema = yup.object().shape({
 
 interface ProfitShareEditUpdateSearchFilterProps {
   setInitialSearchLoaded: (include: boolean) => void;
+  setPageReset: (reset: boolean) => void;
+  setMinimumFieldsEntered?: (entered: boolean) => void;
+  setAdjustedBadgeOneValid?: (valid: boolean) => void;
+  setAdjustedBadgeTwoValid?: (valid: boolean) => void;
 }
 
 const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFilterProps> = ({
-  setInitialSearchLoaded
+  setInitialSearchLoaded,
+  setPageReset,
+  setMinimumFieldsEntered,
+  setAdjustedBadgeOneValid,
+  setAdjustedBadgeTwoValid
 }) => {
   const [triggerSearchUpdate, { isFetching: isFetchingUpdate }] = useLazyGetProfitShareUpdateQuery();
   const [triggerSearchEdit, { isFetching: isFetchingEdit }] = useLazyGetProfitShareEditQuery();
@@ -157,8 +166,95 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
     }
   });
 
+  const [contributionPercentPresent, setContributionPercentPresent] = useState(false);
+  const [earningsPercentPresent, setEarningsPercentPresent] = useState(false);
+  // This starts as true as it is pre-populated
+  const [maxAllowedContributionsPresent, setMaxAllowedContributionsPresent] = useState(true);
+  const [badgeToAdjustPresent, setBadgeToAdjustPresent] = useState(false);
+  const [adjustContributionAmountPresent, setAdjustContributionAmountPresent] = useState(false);
+  const [adjustEarningsAmountPresent, setAdjustEarningsAmountPresent] = useState(false);
+  const [adjustIncomingForfeitAmountPresent, setAdjustIncomingForfeitAmountPresent] = useState(false);
+  const [badgeToAdjust2Present, setBadgeToAdjust2Present] = useState(false);
+  const [adjustEarningsSecondaryAmountPresent, setAdjustEarningsSecondaryAmountPresent] = useState(false);
+
+  const processFieldsEntered = (fieldName: keyof ProfitShareEditUpdateSearch, value: boolean) => {
+    // set the value coming in to the field
+    switch (fieldName) {
+      case "contributionPercent":
+        setContributionPercentPresent(value);
+
+        break;
+      case "earningsPercent":
+        setEarningsPercentPresent(value);
+        break;
+      case "maxAllowedContributions":
+        setMaxAllowedContributionsPresent(value);
+        break;
+      case "badgeToAdjust":
+        setBadgeToAdjustPresent(value);
+        break;
+      case "adjustContributionAmount":
+        setAdjustContributionAmountPresent(value);
+        break;
+      case "adjustEarningsAmount":
+        setAdjustEarningsAmountPresent(value);
+        break;
+      case "adjustIncomingForfeitAmount":
+        setAdjustIncomingForfeitAmountPresent(value);
+        break;
+      case "badgeToAdjust2":
+        setBadgeToAdjust2Present(value);
+        break;
+      case "adjustEarningsSecondaryAmount":
+        setAdjustEarningsSecondaryAmountPresent(value);
+        break;
+      default:
+        break;
+    }
+
+    const newBadgeToAdjustPresent = fieldName === "badgeToAdjust" ? value : badgeToAdjustPresent;
+    const newAdjustContributionAmountPresent =
+      fieldName === "adjustContributionAmount" ? value : adjustContributionAmountPresent;
+    const newAdjustEarningsAmountPresent = fieldName === "adjustEarningsAmount" ? value : adjustEarningsAmountPresent;
+    const newAdjustIncomingForfeitAmountPresent =
+      fieldName === "adjustIncomingForfeitAmount" ? value : adjustIncomingForfeitAmountPresent;
+
+    if (newBadgeToAdjustPresent) {
+      const allBadgeOneFieldsPresent =
+        newAdjustContributionAmountPresent && newAdjustEarningsAmountPresent && newAdjustIncomingForfeitAmountPresent;
+      if (setAdjustedBadgeOneValid) {
+        setAdjustedBadgeOneValid(allBadgeOneFieldsPresent);
+      }
+    }
+    // If badgeToAdjust2 is present, we need to check adjustEarningsSecondaryAmount
+    // If those two fields are not both present, we need to set adjustedBadgeTwoValid
+    const newBadgeToAdjust2Present = fieldName === "badgeToAdjust2" ? value : badgeToAdjust2Present;
+    const newAdjustEarningsSecondaryAmountPresent =
+      fieldName === "adjustEarningsSecondaryAmount" ? value : adjustEarningsSecondaryAmountPresent;
+
+    if (newBadgeToAdjust2Present) {
+      const allBadgeTwoFieldsPresent = newAdjustEarningsSecondaryAmountPresent;
+      if (setAdjustedBadgeTwoValid) {
+        setAdjustedBadgeTwoValid(allBadgeTwoFieldsPresent);
+      }
+    }
+
+    const newContributionPercentPresent = fieldName === "contributionPercent" ? value : contributionPercentPresent;
+    const newEarningsPercentPresent = fieldName === "earningsPercent" ? value : earningsPercentPresent;
+    const newMaxAllowedContributionsPresent =
+      fieldName === "maxAllowedContributions" ? value : maxAllowedContributionsPresent;
+    const allFieldsPresent =
+      newContributionPercentPresent && newEarningsPercentPresent && newMaxAllowedContributionsPresent;
+
+    if (setMinimumFieldsEntered) {
+      setMinimumFieldsEntered(allFieldsPresent);
+      console.log("Minimum fields entered:", allFieldsPresent);
+    }
+  };
+
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
+      setPageReset(true);
       const updateParams: ProfitShareUpdateRequest = {
         pagination: {
           sortBy: "name",
@@ -208,6 +304,17 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
     }
   });
 
+  /// set maxContributionsAllowed to the default value
+  useEffect(() => {
+    if (!profitSharingUpdate) {
+      dispatch(
+        updateProfitSharingEditQueryParam({
+          maxAllowedContributions: maxContributionsDefault
+        })
+      );
+    }
+  }, [dispatch, profitSharingUpdate]);
+
   // I would like handleReset() to be called whenever resetYearEndPage is true
 
   useEffect(() => {
@@ -218,6 +325,10 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
 
   const handleReset = () => {
     // We need to clear both grids and then both sets of query params
+    if (setMinimumFieldsEntered) {
+      setMinimumFieldsEntered(false);
+    }
+    setPageReset(true);
     dispatch(clearProfitSharingEdit());
     dispatch(clearProfitSharingUpdate());
     dispatch(clearProfitSharingEditQueryParams());
@@ -247,14 +358,14 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
 
   return (
     <form onSubmit={validateAndSearch}>
-      <Grid2
+      <Grid
         container
         paddingX="24px">
-        <Grid2
+        <Grid
           container
           spacing={3}
           width="100%">
-          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <Controller
               name="profitYear"
               control={control}
@@ -273,9 +384,9 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
               )}
             />
             {errors.profitYear && <FormHelperText error>{errors.profitYear.message}</FormHelperText>}
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, sm: 4, md: 2 }}>
+          <Grid size={{ xs: 12, sm: 4, md: 2 }}>
             <FormLabel>Contribution %</FormLabel>
             <Controller
               name="contributionPercent"
@@ -288,13 +399,18 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
                   variant="outlined"
                   value={field.value ?? ""}
                   error={!!errors.contributionPercent}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    processFieldsEntered("contributionPercent", e.target.value !== "");
+                    dispatch(updateProfitSharingEditQueryParam({ contributionPercent: Number(e.target.value) }));
+                  }}
                 />
               )}
             />
             {errors.contributionPercent && <FormHelperText error>{errors.contributionPercent.message}</FormHelperText>}
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Earnings %</FormLabel>
             <Controller
               name="earningsPercent"
@@ -307,13 +423,18 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
                   variant="outlined"
                   value={field.value ?? ""}
                   error={!!errors.earningsPercent}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    processFieldsEntered("earningsPercent", e.target.value !== "");
+                    dispatch(updateProfitSharingEditQueryParam({ earningsPercent: Number(e.target.value) }));
+                  }}
                 />
               )}
             />
             {errors.earningsPercent && <FormHelperText error>{errors.earningsPercent.message}</FormHelperText>}
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Forfeiture %</FormLabel>
             <Controller
               name="incomingForfeitPercent"
@@ -326,14 +447,19 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
                   variant="outlined"
                   value={field.value ?? ""}
                   error={!!errors.incomingForfeitPercent}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    processFieldsEntered("incomingForfeitPercent", e.target.value !== "");
+                    dispatch(updateProfitSharingEditQueryParam({ incomingForfeitPercent: Number(e.target.value) }));
+                  }}
                 />
               )}
             />
             {errors.incomingForfeitPercent && (
               <FormHelperText error>{errors.incomingForfeitPercent.message}</FormHelperText>
             )}
-          </Grid2>
-          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Secondary Earnings %</FormLabel>
             <Controller
               name="secondaryEarningsPercent"
@@ -346,15 +472,20 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
                   variant="outlined"
                   value={field.value ?? ""}
                   error={!!errors.secondaryEarningsPercent}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    processFieldsEntered("secondaryEarningsPercent", e.target.value !== "");
+                    dispatch(updateProfitSharingEditQueryParam({ secondaryEarningsPercent: Number(e.target.value) }));
+                  }}
                 />
               )}
             />
             {errors.secondaryEarningsPercent && (
               <FormHelperText error>{errors.secondaryEarningsPercent.message}</FormHelperText>
             )}
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Max Allowed Contributions</FormLabel>
             <Controller
               name="maxAllowedContributions"
@@ -367,20 +498,25 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
                   variant="outlined"
                   value={field.value ?? ""}
                   error={!!errors.maxAllowedContributions}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    processFieldsEntered("maxAllowedContributions", e.target.value !== "");
+                    dispatch(updateProfitSharingEditQueryParam({ maxAllowedContributions: Number(e.target.value) }));
+                  }}
                 />
               )}
             />
             {errors.maxAllowedContributions && (
               <FormHelperText error>{errors.maxAllowedContributions.message}</FormHelperText>
             )}
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
 
-        <Grid2
+        <Grid
           container
           spacing={3}
           width="100%">
-          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Adjustment Badge</FormLabel>
             <Controller
               name="badgeToAdjust"
@@ -393,12 +529,17 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
                   variant="outlined"
                   value={field.value ?? ""}
                   error={!!errors.badgeToAdjust}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    processFieldsEntered("badgeToAdjust", e.target.value !== "");
+                    dispatch(updateProfitSharingEditQueryParam({ badgeToAdjust: Number(e.target.value) }));
+                  }}
                 />
               )}
             />
             {errors.badgeToAdjust && <FormHelperText error>{errors.badgeToAdjust.message}</FormHelperText>}
-          </Grid2>
-          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Adjust Contribution Amount</FormLabel>
             <Controller
               name="adjustContributionAmount"
@@ -411,15 +552,20 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
                   variant="outlined"
                   value={field.value ?? ""}
                   error={!!errors.adjustContributionAmount}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    processFieldsEntered("adjustContributionAmount", e.target.value !== "");
+                    dispatch(updateProfitSharingEditQueryParam({ adjustContributionAmount: Number(e.target.value) }));
+                  }}
                 />
               )}
             />
             {errors.adjustContributionAmount && (
               <FormHelperText error>{errors.adjustContributionAmount.message}</FormHelperText>
             )}
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Adjust Earnings Amount</FormLabel>
             <Controller
               name="adjustEarningsAmount"
@@ -432,15 +578,20 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
                   variant="outlined"
                   value={field.value ?? ""}
                   error={!!errors.adjustEarningsAmount}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    processFieldsEntered("adjustEarningsAmount", e.target.value !== "");
+                    dispatch(updateProfitSharingEditQueryParam({ adjustEarningsAmount: Number(e.target.value) }));
+                  }}
                 />
               )}
             />
             {errors.adjustEarningsAmount && (
               <FormHelperText error>{errors.adjustEarningsAmount.message}</FormHelperText>
             )}
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Adjust Forfeiture Amount</FormLabel>
             <Controller
               name="adjustIncomingForfeitAmount"
@@ -453,20 +604,27 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
                   variant="outlined"
                   value={field.value ?? ""}
                   error={!!errors.adjustIncomingForfeitAmount}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    processFieldsEntered("adjustIncomingForfeitAmount", e.target.value !== "");
+                    dispatch(
+                      updateProfitSharingEditQueryParam({ adjustIncomingForfeitAmount: Number(e.target.value) })
+                    );
+                  }}
                 />
               )}
             />
             {errors.adjustIncomingForfeitAmount && (
               <FormHelperText error>{errors.adjustIncomingForfeitAmount.message}</FormHelperText>
             )}
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
 
-        <Grid2
+        <Grid
           container
           spacing={3}
           width="100%">
-          <Grid2 size={{ xs: 12, sm: 6, md: 2 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Adjust Secondary Badge</FormLabel>
             <Controller
               name="badgeToAdjust2"
@@ -479,13 +637,18 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
                   variant="outlined"
                   value={field.value ?? ""}
                   error={!!errors.badgeToAdjust2}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    processFieldsEntered("badgeToAdjust2", e.target.value !== "");
+                    dispatch(updateProfitSharingEditQueryParam({ badgeToAdjust2: Number(e.target.value) }));
+                  }}
                 />
               )}
             />
             {errors.badgeToAdjust2 && <FormHelperText error>{errors.badgeToAdjust2.message}</FormHelperText>}
-          </Grid2>
+          </Grid>
 
-          <Grid2 size={{ xs: 12, sm: 6, md: 4 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <FormLabel>Adjust Secondary Earnings Amount</FormLabel>
             <Controller
               name="adjustEarningsSecondaryAmount"
@@ -498,23 +661,30 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
                   variant="outlined"
                   value={field.value ?? ""}
                   error={!!errors.adjustEarningsSecondaryAmount}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    processFieldsEntered("adjustEarningsSecondaryAmount", e.target.value !== "");
+                    dispatch(
+                      updateProfitSharingEditQueryParam({ adjustEarningsSecondaryAmount: Number(e.target.value) })
+                    );
+                  }}
                 />
               )}
             />
             {errors.adjustEarningsSecondaryAmount && (
               <FormHelperText error>{errors.adjustEarningsSecondaryAmount.message}</FormHelperText>
             )}
-          </Grid2>
-        </Grid2>
-        <Grid2 width="100%">
+          </Grid>
+        </Grid>
+        <Grid width="100%">
           <SearchAndReset
             handleReset={handleReset}
             searchButtonText="Preview"
             handleSearch={validateAndSearch}
             isFetching={isFetchingUpdate || isFetchingEdit}
           />
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
     </form>
   );
 };

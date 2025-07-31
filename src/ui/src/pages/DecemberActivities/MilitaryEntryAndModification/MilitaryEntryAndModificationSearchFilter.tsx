@@ -1,6 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormLabel, TextField, Typography } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import { useEffect, useState } from "react";
 import { useForm, Controller, Resolver } from "react-hook-form";
@@ -8,6 +8,7 @@ import { useDispatch } from "react-redux";
 import { useLazySearchProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
 import { clearMasterInquiryData, setMasterInquiryData } from "reduxstore/slices/inquirySlice";
 import { clearMilitaryContributions } from "reduxstore/slices/militarySlice";
+import { MasterInquiryRequest } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 
@@ -21,20 +22,26 @@ interface SearchFilterProps {
 }
 
 // Define schema with proper typing for our form
-const validationSchema = yup.object({
-  socialSecurity: yup.string().nullable().transform((value) => value || undefined),
-  badgeNumber: yup.string().nullable().transform((value) => value || undefined)
-}).test(
-  "at-least-one-required",
-  "At least one field must be provided",
-  (values) => Boolean(values.socialSecurity || values.badgeNumber)
-);
+const validationSchema = yup
+  .object({
+    socialSecurity: yup
+      .string()
+      .nullable()
+      .transform((value) => value || undefined),
+    badgeNumber: yup
+      .string()
+      .nullable()
+      .transform((value) => value || undefined)
+  })
+  .test("at-least-one-required", "At least one field must be provided", (values) =>
+    Boolean(values.socialSecurity || values.badgeNumber)
+  );
 
 const MilitaryEntryAndModificationSearchFilter: React.FC<SearchFilterProps> = ({ setInitialSearchLoaded }) => {
   const [triggerSearch, { isFetching }] = useLazySearchProfitMasterInquiryQuery();
   const [activeField, setActiveField] = useState<"socialSecurity" | "badgeNumber" | null>(null);
   const defaultProfitYear = useDecemberFlowProfitYear();
-  
+
   const {
     control,
     handleSubmit,
@@ -61,24 +68,27 @@ const MilitaryEntryAndModificationSearchFilter: React.FC<SearchFilterProps> = ({
   }, [socialSecurity, badgeNumber]);
 
   const dispatch = useDispatch();
-  
+
   const onSubmit = (data: SearchFormData) => {
-    triggerSearch(
-      {
-        pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: false },
-        ...(!!data.socialSecurity && { ssn: Number(data.socialSecurity) }),
-        ...(!!data.badgeNumber && { badgeNumber: Number(data.badgeNumber) }),
-        profitYear: defaultProfitYear
-      },
-      false
-    ).then((result) => {
-      if (result?.data) {
-        dispatch(setMasterInquiryData(result.data.response.results[0]));
-      }
-      setInitialSearchLoaded(
-        !!(result?.data?.response?.results && Array.isArray(result.data.response.results) && result.data.response.results.length > 0)
-      );
-    });
+    const searchParams: MasterInquiryRequest = {
+      pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: false },
+
+      ...(!!data.socialSecurity && { ssn: Number(data.socialSecurity) }),
+      ...(!!data.badgeNumber && { badgeNumber: Number(data.badgeNumber) }),
+      profitYear: defaultProfitYear
+    };
+
+    triggerSearch(searchParams, false)
+      .unwrap()
+      .then((search_response) => {
+        if (search_response?.results) {
+          dispatch(setMasterInquiryData(search_response.results[0]));
+        }
+
+        setInitialSearchLoaded(
+          !!(search_response?.results && Array.isArray(search_response.results) && search_response.results.length > 0)
+        );
+      });
   };
 
   const handleReset = () => {
@@ -89,21 +99,22 @@ const MilitaryEntryAndModificationSearchFilter: React.FC<SearchFilterProps> = ({
   };
 
   const requiredLabel = (
-    <Typography component="span" color="error" fontWeight="bold">
+    <Typography
+      component="span"
+      color="error"
+      fontWeight="bold">
       *
     </Typography>
   );
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <Grid2
+      <Grid
         container
         paddingX="24px"
         gap="24px">
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-          <FormLabel>
-            SSN {requiredLabel}
-          </FormLabel>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <FormLabel>SSN {requiredLabel}</FormLabel>
           <Controller
             name="socialSecurity"
             control={control}
@@ -124,11 +135,9 @@ const MilitaryEntryAndModificationSearchFilter: React.FC<SearchFilterProps> = ({
               />
             )}
           />
-        </Grid2>
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
-          <FormLabel>
-            Badge Number {requiredLabel}
-          </FormLabel>
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <FormLabel>Badge Number {requiredLabel}</FormLabel>
           <Controller
             name="badgeNumber"
             control={control}
@@ -149,9 +158,9 @@ const MilitaryEntryAndModificationSearchFilter: React.FC<SearchFilterProps> = ({
               />
             )}
           />
-        </Grid2>
-      </Grid2>
-      <Grid2
+        </Grid>
+      </Grid>
+      <Grid
         width="100%"
         paddingX="24px">
         <SearchAndReset
@@ -160,7 +169,7 @@ const MilitaryEntryAndModificationSearchFilter: React.FC<SearchFilterProps> = ({
           isFetching={isFetching}
           disabled={!isValid || (!socialSecurity && !badgeNumber)}
         />
-      </Grid2>
+      </Grid>
     </form>
   );
 };

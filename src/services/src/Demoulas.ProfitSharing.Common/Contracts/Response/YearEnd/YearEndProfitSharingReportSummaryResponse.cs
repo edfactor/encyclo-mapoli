@@ -16,7 +16,9 @@ public sealed record YearEndProfitSharingReportSummaryResponse
                     LineItemTitle="AGE 18-20 WITH >= 1000 PS HOURS",
                     NumberOfMembers = 5,
                     TotalWages = 95842.45m,
-                    TotalBalance = 0m
+                    TotalBalance = 0m,
+                    TotalHours = 123,
+                    TotalPoints = 321
                 }
             }
         };

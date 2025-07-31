@@ -10,8 +10,8 @@ import {
   ContributionsByAge,
   ControlSheetResponse,
   DemographicBadgesNotInPayprofit,
-  DistributionsAndForfeitures,
   DistributionsAndForfeituresQueryParams,
+  DistributionsAndForfeitureTotalsResponse,
   DuplicateNameAndBirthday,
   DuplicateSSNDetail,
   EligibleEmployeeResponseDto,
@@ -41,8 +41,8 @@ import {
   ProfitSharingDistributionsByAge,
   ProfitSharingLabel,
   ProfitYearRequest,
-  StartAndEndDateRequest,
   ReportsByAgeParams,
+  StartAndEndDateRequest,
   TerminationResponse,
   Under21BreakdownByStoreRequest,
   Under21BreakdownByStoreResponse,
@@ -83,7 +83,7 @@ export interface YearsEndState {
   contributionsByAgeQueryParams: ReportsByAgeParams | null;
   contributionsByAgeTotal: ContributionsByAge | null;
   demographicBadges: PagedReportResponse<DemographicBadgesNotInPayprofit> | null;
-  distributionsAndForfeitures: PagedReportResponse<DistributionsAndForfeitures> | null;
+  distributionsAndForfeitures: DistributionsAndForfeitureTotalsResponse | null;
   distributionsAndForfeituresQueryParams: DistributionsAndForfeituresQueryParams | null;
   distributionsByAgeFullTime: ProfitSharingDistributionsByAge | null;
   distributionsByAgePartTime: ProfitSharingDistributionsByAge | null;
@@ -293,6 +293,19 @@ export const yearsEndSlice = createSlice({
     clearProfitSharingEditQueryParams: (state) => {
       state.profitSharingEditQueryParams = null;
     },
+    updateProfitSharingEditQueryParam: (state, action: PayloadAction<Partial<ProfitShareEditUpdateQueryParams>>) => {
+      state.profitSharingEditQueryParams = {
+        ...state.profitSharingEditQueryParams,
+        ...action.payload,
+        profitYear: action.payload.profitYear ?? state.profitSharingEditQueryParams?.profitYear ?? new Date()
+      };
+
+      // Need to clear grids when a field changes as the previews are invalid now
+      state.profitSharingUpdate = null;
+      state.profitSharingEdit = null;
+      // Also need to clear this as it is based on the query params being shown in the grids
+      state.profitEditUpdateChangesAvailable = false;
+    },
     setProfitSharingUpdateQueryParams: (state, action: PayloadAction<ProfitShareEditUpdateQueryParams>) => {
       state.profitSharingUpdateQueryParams = action.payload;
     },
@@ -360,20 +373,16 @@ export const yearsEndSlice = createSlice({
       }
 
       // Military And Rehire Forfeitures
-      if (
-        state.rehireForfeituresQueryParams?.profitYear &&
-        state.rehireForfeituresQueryParams?.profitYear !== action.payload
-      ) {
-        state.rehireForfeituresQueryParams.profitYear = action.payload;
+      // If StartAndEndDateRequest should be updated based on a year, update the appropriate property here.
+      // For example, if it has a startDate and endDate, you may want to update those instead.
+      // If you want to clear the data when the year changes, just clear the data.
+      if (state.rehireForfeituresQueryParams) {
         state.rehireForfeitures = null;
       }
 
       // Military and Rehire Profit Summary
-      if (
-        state.rehireProfitSummaryQueryParams?.profitYear &&
-        state.rehireProfitSummaryQueryParams?.profitYear !== action.payload
-      ) {
-        state.rehireProfitSummaryQueryParams.profitYear = action.payload;
+      // StartAndEndDateRequest does not have profitYear, so just clear the data if the year changes
+      if (state.rehireProfitSummaryQueryParams) {
         state.militaryAndRehire = null;
       }
 
@@ -577,10 +586,7 @@ export const yearsEndSlice = createSlice({
     clearRehireForfeituresQueryParams: (state) => {
       state.rehireForfeituresQueryParams = null;
     },
-    setDistributionsAndForfeitures: (
-      state,
-      action: PayloadAction<PagedReportResponse<DistributionsAndForfeitures>>
-    ) => {
+    setDistributionsAndForfeitures: (state, action: PayloadAction<DistributionsAndForfeitureTotalsResponse>) => {
       state.distributionsAndForfeitures = action.payload;
     },
     clearDistributionsAndForfeitures: (state) => {
@@ -1104,6 +1110,7 @@ export const {
   clearProfitSharingUpdateQueryParams,
   setProfitSharingEditQueryParams,
   clearProfitSharingEditQueryParams,
+  updateProfitSharingEditQueryParam,
   setProfitSharingUpdateAdjustmentSummary,
   addBadgeNumberToUpdateAdjustmentSummary,
   clearExecutiveHoursAndDollarsAddQueryParams,

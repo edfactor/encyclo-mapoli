@@ -1,11 +1,10 @@
-import { Typography } from "@mui/material";
-import { useMemo, useState, useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetEligibleEmployeesQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { GetEligibleEmployeesColumns } from "./EligibleEmployeesGridColumn";
 import ReportSummary from "../../../components/ReportSummary";
+import { GetEligibleEmployeesColumns } from "./EligibleEmployeesGridColumns";
 
 interface EligibleEmployeesGridProps {
   initialSearchLoaded: boolean;
@@ -30,20 +29,47 @@ const EligibleEmployeesGrid: React.FC<EligibleEmployeesGridProps> = ({
 
   const [triggerSearch, { isFetching }] = useLazyGetEligibleEmployeesQuery();
 
+  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
+
   const onSearch = useCallback(async () => {
     const request = {
       profitYear: eligibleEmployeesQueryParams?.profitYear ?? 0,
-      pagination: { skip: pageNumber * pageSize, take: pageSize, sortBy: sortParams.sortBy, isSortDescending: sortParams.isSortDescending }
+      pagination: {
+        skip: pageNumber * pageSize,
+        take: pageSize,
+        sortBy: sortParams.sortBy,
+        isSortDescending: sortParams.isSortDescending
+      }
     };
 
     await triggerSearch(request, false);
-  }, [eligibleEmployeesQueryParams?.profitYear, pageNumber, pageSize, sortParams.isSortDescending, sortParams.sortBy, triggerSearch]);
+  }, [
+    eligibleEmployeesQueryParams?.profitYear,
+    pageNumber,
+    pageSize,
+    sortParams.isSortDescending,
+    sortParams.sortBy,
+    triggerSearch
+  ]);
 
   useEffect(() => {
-    if (initialSearchLoaded) {
+    if (hasToken && initialSearchLoaded) {
       onSearch();
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch]);
+  }, [hasToken, initialSearchLoaded, pageNumber, pageSize, sortParams, onSearch]);
+
+  // Need a useEffect on a change in eligibleEmployees to reset the page number
+  const prevEligibleEmployees = useRef<any>(null);
+  useEffect(() => {
+    if (
+      eligibleEmployees !== prevEligibleEmployees.current &&
+      eligibleEmployees?.response?.results &&
+      eligibleEmployees.response.results.length !== prevEligibleEmployees.current?.response?.results?.length
+    ) {
+      setPageNumber(0);
+    }
+    prevEligibleEmployees.current = eligibleEmployees;
+  }, [eligibleEmployees]);
 
   return (
     <>
@@ -57,7 +83,7 @@ const EligibleEmployeesGrid: React.FC<EligibleEmployeesGridProps> = ({
             providedOptions={{
               rowData: eligibleEmployees?.response.results,
               columnDefs: columnDefs,
-              suppressMultiSort: true,
+              suppressMultiSort: true
             }}
           />
         </>

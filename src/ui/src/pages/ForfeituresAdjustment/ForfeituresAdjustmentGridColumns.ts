@@ -1,42 +1,43 @@
-import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { agGridNumberToCurrency } from "smart-ui-library";
-import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
+import { ColDef } from "ag-grid-community";
+import { createBadgeColumn, createCurrencyColumn } from "../../utils/gridColumnFactory";
 
 export const GetForfeituresAdjustmentColumns = (): ColDef[] => {
   const getColDefForForfeiture = (): ColDef[] => {
     return [
-      {
+      createBadgeColumn({
         headerName: "Badge",
-        field: "badgeNumber",
-        width: 150,
-        cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber)
+        minWidth: 150
+      }),
+      {
+        ...createCurrencyColumn({
+          headerName: "Starting Balance",
+          field: "startingBalance"
+        }),
+        width: 180
       },
       {
-        headerName: "Starting Balance",
-        field: "startingBalance",
-        width: 180,
-        valueFormatter: agGridNumberToCurrency
+        ...createCurrencyColumn({
+          headerName: "Forfeiture Amount",
+          field: "forfeitureAmount"
+        }),
+        width: 180
       },
       {
-        headerName: "Forfeiture Amount",
-        field: "forfeitureAmount",
-        width: 180,
-        valueFormatter: agGridNumberToCurrency
+        ...createCurrencyColumn({
+          headerName: "Net Balance",
+          field: "netBalance"
+        }),
+        width: 180
       },
       {
-        headerName: "Net Balance",
-        field: "netBalance",
-        width: 180,
-        valueFormatter: agGridNumberToCurrency
-      },
-      {
-        headerName: "Net Vested",
-        field: "netVested",
-        width: 180,
-        valueFormatter: agGridNumberToCurrency
+        ...createCurrencyColumn({
+          headerName: "Net Vested",
+          field: "netVested"
+        }),
+        width: 180
       }
     ];
   };
 
   return getColDefForForfeiture();
-}; 
+};

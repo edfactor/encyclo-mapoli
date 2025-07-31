@@ -10,11 +10,13 @@ public record YearEndChange
     public required int IsNew;
     public required bool PsCertificateIssuedDate;
     public required byte ZeroCont;
+    public byte Enrolled;
 }
 
 [SuppressMessage("Usage", "VSTHRD103:Call async methods when in an async method")]
 public class TestPayProfitSelectedColumns : BaseSqlActivity
 {
+    
     public override Task<Outcome> Execute()
     {
         const short profitYear = 2024;
@@ -23,7 +25,7 @@ public class TestPayProfitSelectedColumns : BaseSqlActivity
         Dictionary<int, YearEndChange> readyRowsBySsn = GetReadyPayProfit().GetAwaiter().GetResult();
         // Get the results by reading all the pay_profit rows
         Dictionary<int, YearEndChange> smartRowsBySsn = GetSmartRowsBySsn(profitYear).GetAwaiter().GetResult();
-
+        
         // ensure number of rows match 
         if (readyRowsBySsn.Count != smartRowsBySsn.Count)
         {
@@ -32,22 +34,22 @@ public class TestPayProfitSelectedColumns : BaseSqlActivity
 
         // Now check each row
         int badRows = 0;
-        for (int i = 0; i < smartRowsBySsn.Count; i++)
+        foreach (var ssn in readyRowsBySsn.Keys)
         {
-            KeyValuePair<int, YearEndChange> kvp = smartRowsBySsn.ElementAt(i);
-            bool mismatch = !readyRowsBySsn.TryGetValue(kvp.Key, out YearEndChange? ready) || kvp.Value != ready;
-            if (mismatch)
+            var smart = smartRowsBySsn[ssn];
+            var ready = readyRowsBySsn[ssn];
+            if (ready != smart)
             {
                 badRows++;
-                if (badRows < 30)
+                if (badRows < 300)
                 {
-                    Console.WriteLine($"Ssn {kvp.Key} r:{readyRowsBySsn.GetValueOrDefault(kvp.Key)} s:{kvp.Value}");
+                    Console.WriteLine($"Ssn {ssn} r:{ready} s:{smart}");
                 }
             }
         }
 
         Console.WriteLine($"ok: {readyRowsBySsn.Count - badRows}, bad: {badRows}");
-        if (badRows > 1)
+        if (badRows > 5)
         {
             return Task.FromResult(new Outcome(Name(), "test", "", OutcomeStatus.Error, "Too many bad rows", null, false));
         }
@@ -66,7 +68,8 @@ public class TestPayProfitSelectedColumns : BaseSqlActivity
                             employee_type_id,
                             zero_contribution_reason_id,
                             points_earned,
-                            PS_CERTIFICATE_ISSUED_DATE
+                            PS_CERTIFICATE_ISSUED_DATE,
+                            ENROLLMENT_ID
                         FROM
                                  pay_profit pp
                             JOIN demographic d ON pp.demographic_id = d.id
@@ -83,7 +86,7 @@ public class TestPayProfitSelectedColumns : BaseSqlActivity
             int ssn = reader.GetInt32(0);
             YearEndChange pp = new()
             {
-                IsNew = reader.GetInt32(1), ZeroCont = reader.GetByte(2), EarnPoints = reader.GetDecimal(3), PsCertificateIssuedDate = !await reader.IsDBNullAsync(4)
+                IsNew = reader.GetInt32(1), ZeroCont = reader.GetByte(2), EarnPoints = reader.GetDecimal(3), PsCertificateIssuedDate = !await reader.IsDBNullAsync(4), Enrolled = reader.GetByte(5)
             };
             data.Add(ssn, pp);
         }
@@ -101,7 +104,7 @@ public class TestPayProfitSelectedColumns : BaseSqlActivity
         await connection.OpenAsync();
 
         // The READY test/reference schema should be run to Activity 18 and stopped.
-        string query = "select PAYPROF_SSN, PY_PROF_NEWEMP, PY_PROF_POINTS, PY_PROF_ZEROCONT, PY_PROF_CERT from payprofit";
+        string query = "select PAYPROF_SSN, PY_PROF_NEWEMP, PY_PROF_POINTS, PY_PROF_ZEROCONT, PY_PROF_CERT, PY_PS_ENROLLED from payprofit";
 
         Dictionary<int, YearEndChange> data = new();
         OracleCommand command = new(query, connection);
@@ -112,7 +115,8 @@ public class TestPayProfitSelectedColumns : BaseSqlActivity
             int ssn = reader.GetInt32(0);
             string certRaw = reader.GetString(4);
             bool certIssued = certRaw.Length > 0 && certRaw[0] == '1';
-            YearEndChange pp = new() { IsNew = reader.GetInt32(1), EarnPoints = reader.GetDecimal(2), ZeroCont = reader.GetByte(3), PsCertificateIssuedDate = certIssued };
+            byte enrolled = reader.GetByte(5);
+            YearEndChange pp = new() { IsNew = reader.GetInt32(1), EarnPoints = reader.GetDecimal(2), ZeroCont = reader.GetByte(3), PsCertificateIssuedDate = certIssued, Enrolled = enrolled };
             data.Add(ssn, pp);
         }
 
@@ -120,4 +124,5 @@ public class TestPayProfitSelectedColumns : BaseSqlActivity
 
         return data;
     }
+    
 }

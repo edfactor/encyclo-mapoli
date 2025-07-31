@@ -1,8 +1,8 @@
-import { agGridNumberToCurrency } from "smart-ui-library";
-import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
 import { ColDef, ColGroupDef } from "ag-grid-community";
+import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
+import { createCurrencyColumn, createCountColumn } from "../../../utils/gridColumnFactory";
 
-export const GetBalanceByAgeColumns = (reportType: FrozenReportsByAgeRequestType): ColDef[] => {
+export const GetBalanceByAgeColumns = (reportType: FrozenReportsByAgeRequestType): (ColDef | ColGroupDef)[] => {
   const columns: (ColDef | ColGroupDef)[] = [
     {
       headerName: reportType,
@@ -12,41 +12,26 @@ export const GetBalanceByAgeColumns = (reportType: FrozenReportsByAgeRequestType
           field: "age",
           colId: "age",
           minWidth: 80,
-          headerClass: "right-align",
-          cellClass: "right-align",
+          type: "rightAligned",
           resizable: true,
           sort: "asc",
           cellDataType: "text"
         },
-        {
-          headerName: "Count",
+        createCountColumn({
           field: "employeeCount",
-          colId: "employeeCount",
           minWidth: 100,
-          headerClass: "left-align",
-          cellClass: "left-align",
-          resizable: true
-        },
-        {
+          alignment: "left"
+        }),
+        createCurrencyColumn({
           headerName: "Balance",
           field: "currentBalance",
-          colId: "currentBalance",
-          minWidth: 150,
-          headerClass: "left-align",
-          cellClass: "left-align",
-          resizable: true,
-          valueFormatter: agGridNumberToCurrency
-        },
-        {
+          minWidth: 150
+        }),
+        createCurrencyColumn({
           headerName: "Vested",
           field: "vestedBalance",
-          colId: "vestedBalance",
-          minWidth: 150,
-          headerClass: "left-align",
-          cellClass: "left-align",
-          resizable: true,
-          valueFormatter: agGridNumberToCurrency
-        }
+          minWidth: 150
+        })
       ]
     }
   ];

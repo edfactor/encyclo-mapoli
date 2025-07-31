@@ -1,5 +1,5 @@
 import { Box, Button, CircularProgress, Divider, Typography } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import ProfitShareTotalsDisplay from "components/ProfitShareTotalsDisplay";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
@@ -9,20 +9,17 @@ import { useFinalizeReportMutation, useLazyGetYearEndProfitSharingReportQuery } 
 import { setYearEndProfitSharingReportQueryParams } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import { Page, SmartModal, DSMAccordion } from "smart-ui-library";
-import { CAPTIONS} from "../../constants";
-import ProfitSummary from "../PAY426Reports/PAY426-9/ProfitSummary";
+import { CAPTIONS } from "../../constants";
+import ProfitSummary from "../PAY426Reports/ProfitSummary/ProfitSummary";
 import ProfitShareReportSearchFilters from "./ProfitShareReportSearchFilters";
-import ReportGrid from "../PAY426Reports/PAY426N/ReportGrid";
 import { FilterParams } from "reduxstore/types";
 
 const ProfitShareReport = () => {
   const [initialDataLoaded, setInitialDataLoaded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPresetParams, setSelectedPresetParams] = useState<FilterParams | null>(null);
-  
-  const { yearEndProfitSharingReport } = useSelector(
-    (state: RootState) => state.yearsEnd
-  );
+
+  const { yearEndProfitSharingReport } = useSelector((state: RootState) => state.yearsEnd);
   const hasToken = !!useSelector((state: RootState) => state.security.token);
   const profitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
@@ -32,7 +29,13 @@ const ProfitShareReport = () => {
   useEffect(() => {
     if (hasToken && profitYear && !initialDataLoaded) {
       const request = {
+        reportId: 4,
+        profitYear: profitYear,
         isYearEnd: false,
+        minimumAgeInclusive: 18,
+        maximumAgeInclusive: 98,
+        minimumHoursInclusive: 1000,
+        maximumHoursInclusive: 2000,
         includeActiveEmployees: true,
         includeInactiveEmployees: true,
         includeEmployeesTerminatedThisYear: false,
@@ -40,7 +43,6 @@ const ProfitShareReport = () => {
         includeBeneficiaries: false,
         includeEmployeesWithPriorProfitSharingAmounts: true,
         includeEmployeesWithNoPriorProfitSharingAmounts: true,
-        profitYear: profitYear,
         pagination: {
           skip: 0,
           take: 10,
@@ -48,7 +50,7 @@ const ProfitShareReport = () => {
           isSortDescending: true
         }
       };
-      
+
       triggerSearch(request, false)
         .then((result) => {
           if (result.data) {
@@ -81,18 +83,61 @@ const ProfitShareReport = () => {
     setSelectedPresetParams(params);
   };
 
+  const handleStatusChange = (newStatus: string, statusName?: string) => {
+    // Check if the status is "Complete" and trigger search with archive=true
+    if (statusName === "Complete" && profitYear) {
+      const request = {
+        reportId: 4,
+        profitYear: profitYear,
+        isYearEnd: false,
+        minimumAgeInclusive: 18,
+        maximumAgeInclusive: 98,
+        minimumHoursInclusive: 1000,
+        maximumHoursInclusive: 2000,
+        includeActiveEmployees: true,
+        includeInactiveEmployees: true,
+        includeEmployeesTerminatedThisYear: false,
+        includeTerminatedEmployees: true,
+        includeBeneficiaries: false,
+        includeEmployeesWithPriorProfitSharingAmounts: true,
+        includeEmployeesWithNoPriorProfitSharingAmounts: true,
+        pagination: {
+          skip: 0,
+          take: 10,
+          sortBy: "badgeNumber",
+          isSortDescending: true
+        },
+        archive: true
+      };
+
+      triggerSearch(request, false)
+        .then((result) => {
+          if (result.data) {
+            dispatch(setYearEndProfitSharingReportQueryParams(profitYear));
+          }
+        })
+        .catch((error) => {
+          console.error("Archive search failed:", error);
+        });
+    }
+  };
+
+  useEffect(() => {
+    console.log("selectedPresetParams", selectedPresetParams);
+  }, [selectedPresetParams]);
+
   const renderActionNode = () => {
     if (!initialDataLoaded || !yearEndProfitSharingReport) return null;
 
     return (
       <div className="flex items-center gap-2 h-10">
-        <Button 
+        <Button
           onClick={() => setIsModalOpen(true)}
           variant="outlined"
           className="h-10 whitespace-nowrap min-w-fit">
           Commit
         </Button>
-        <StatusDropdownActionNode />
+        <StatusDropdownActionNode onStatusChange={handleStatusChange} />
       </div>
     );
   };
@@ -101,13 +146,13 @@ const ProfitShareReport = () => {
     <Page
       label={CAPTIONS.PROFIT_SHARE_REPORT}
       actionNode={renderActionNode()}>
-      <Grid2
+      <Grid
         container
         rowSpacing="24px">
-        <Grid2 width={"100%"}>
+        <Grid width={"100%"}>
           <Divider />
-        </Grid2>
-        <Grid2 width="100%">
+        </Grid>
+        <Grid width="100%">
           <Box sx={{ mb: 3 }}>
             <div style={{ padding: "0 24px 0 24px" }}>
               <Typography
@@ -123,9 +168,9 @@ const ProfitShareReport = () => {
               </Box>
             )}
           </Box>
-        </Grid2>
+        </Grid>
 
-        <Grid2 width="100%">
+        <Grid width="100%">
           {!initialDataLoaded ? (
             <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
               <CircularProgress />
@@ -133,22 +178,21 @@ const ProfitShareReport = () => {
           ) : (
             <ProfitSummary onPresetParamsChange={handlePresetParamsChange} />
           )}
-        </Grid2>
+        </Grid>
 
         {selectedPresetParams && (
-          <Grid2 width="100%">
+          <Grid width="100%">
             <DSMAccordion title="Filter">
-              <ProfitShareReportSearchFilters profitYear={profitYear} presetParams={selectedPresetParams} />
+              <ProfitShareReportSearchFilters
+                profitYear={profitYear}
+                presetParams={selectedPresetParams}
+              />
             </DSMAccordion>
-          </Grid2>
+          </Grid>
         )}
 
-        {selectedPresetParams && (
-          <Grid2 width="100%">
-            <ReportGrid params={selectedPresetParams} onLoadingChange={() => {}} />
-          </Grid2>
-        )}
-      </Grid2>
+       
+      </Grid>
 
       <SmartModal
         open={isModalOpen}

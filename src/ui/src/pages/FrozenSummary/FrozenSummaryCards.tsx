@@ -1,5 +1,5 @@
 import { Typography, CircularProgress } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import React, { useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
@@ -191,8 +191,7 @@ const FrozenSummaryCards: React.FC<FrozenSummaryCardsProps> = ({ setSelectedTab,
       (contributionsByAgeTotal.totalEmployees || 0);
 
     const amountsMatch =
-      (contributionsByAgePartTime.totalAmount || 0) +
-        (contributionsByAgeFullTime.totalAmount || 0) ===
+      (contributionsByAgePartTime.totalAmount || 0) + (contributionsByAgeFullTime.totalAmount || 0) ===
       (contributionsByAgeTotal.totalAmount || 0);
 
     return employeesMatch && amountsMatch;
@@ -206,8 +205,7 @@ const FrozenSummaryCards: React.FC<FrozenSummaryCardsProps> = ({ setSelectedTab,
       (forfeituresByAgeTotal.totalEmployees || 0);
 
     const amountsMatch =
-      (forfeituresByAgeFullTime.totalAmount || 0) +
-        (forfeituresByAgePartTime.totalAmount || 0) ===
+      (forfeituresByAgeFullTime.totalAmount || 0) + (forfeituresByAgePartTime.totalAmount || 0) ===
       (forfeituresByAgeTotal.totalAmount || 0);
 
     return employeesMatch && amountsMatch;
@@ -250,11 +248,11 @@ const FrozenSummaryCards: React.FC<FrozenSummaryCardsProps> = ({ setSelectedTab,
   }, [balanceByAgeTotal, balanceByAgeFullTime, balanceByAgePartTime]);
 
   return (
-    <Grid2
+    <Grid
       container
       width={"100%"}
       rowSpacing={"24px"}>
-      <Grid2 paddingX="24px">
+      <Grid paddingX="24px">
         <Typography
           variant="h2"
           sx={{
@@ -262,14 +260,14 @@ const FrozenSummaryCards: React.FC<FrozenSummaryCardsProps> = ({ setSelectedTab,
           }}>
           {`Frozen Summary As Of ${frozenState?.asOfDateTime ? new Date(frozenState.asOfDateTime).toLocaleDateString() : "Loading..."}`}
         </Typography>
-      </Grid2>
+      </Grid>
 
-      <Grid2
+      <Grid
         container
         spacing={"24px"}
         paddingLeft={"24px"}
         width={"100%"}>
-        <Grid2 size={{ xs: 12, md: 6, lg: 6 }}>
+        <Grid size={{ xs: 12, md: 6, lg: 6 }}>
           {!!distributionsByAgeFullTime && !!distributionsByAgeFullTime && !!distributionsByAgePartTime && (
             <FlexibleInfoCard
               buttonDisabled={disableButtons}
@@ -334,8 +332,8 @@ const FrozenSummaryCards: React.FC<FrozenSummaryCardsProps> = ({ setSelectedTab,
               }}
             />
           )}
-        </Grid2>
-        <Grid2 size={{ xs: 12, md: 6, lg: 6 }}>
+        </Grid>
+        <Grid size={{ xs: 12, md: 6, lg: 6 }}>
           {!!contributionsByAgeTotal && !!contributionsByAgeFullTime && !!contributionsByAgePartTime && (
             <FlexibleInfoCard
               buttonDisabled={disableButtons}
@@ -358,8 +356,8 @@ const FrozenSummaryCards: React.FC<FrozenSummaryCardsProps> = ({ setSelectedTab,
               }}
             />
           )}
-        </Grid2>
-        <Grid2 size={{ xs: 12, md: 6, lg: 6 }}>
+        </Grid>
+        <Grid size={{ xs: 12, md: 6, lg: 6 }}>
           {!!forfeituresByAgeTotal && !!forfeituresByAgePartTime && !!forfeituresByAgePartTime && (
             <FlexibleInfoCard
               buttonDisabled={disableButtons}
@@ -382,8 +380,8 @@ const FrozenSummaryCards: React.FC<FrozenSummaryCardsProps> = ({ setSelectedTab,
               }}
             />
           )}
-        </Grid2>
-        <Grid2 size={{ xs: 12, md: 6, lg: 6 }}>
+        </Grid>
+        <Grid size={{ xs: 12, md: 6, lg: 6 }}>
           {!!balanceByAgeTotal && !!balanceByAgePartTime && !!balanceByAgeFullTime && (
             <FlexibleInfoCard
               buttonDisabled={disableButtons}
@@ -439,17 +437,17 @@ const FrozenSummaryCards: React.FC<FrozenSummaryCardsProps> = ({ setSelectedTab,
               }}
             />
           )}
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
       <div style={{ display: "grid", verticalAlign: "middle", height: "100%" }}>
-        <Grid2
+        <Grid
           size={{ xs: 2, md: 1, lg: 0.5 }}
           paddingY={"48px"}
           justifySelf={"center"}>
           <CircularProgress size={"100%"} />
-        </Grid2>
+        </Grid>
       </div>
-    </Grid2>
+    </Grid>
   );
 };
 

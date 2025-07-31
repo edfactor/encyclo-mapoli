@@ -1,24 +1,16 @@
-import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
-import { agGridNumberToCurrency } from "smart-ui-library";
+import { ColDef } from "ag-grid-community";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
-
+import { createBadgeColumn, createCurrencyColumn } from "../../../utils/gridColumnFactory";
 
 // The default is to show all columns, but if the mini flag is set to true, only show the
 // badge, name, and ssn columns
 export const GetMilitaryContributionColumns = (): ColDef[] => {
   const columns: ColDef[] = [
-    {
+    createBadgeColumn({
       headerName: "Badge",
-      field: "badgeNumber",
-      colId: "badgeNumber",
       minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      sortable: true,
-      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber)
-    },
+      alignment: "left"
+    }),
     {
       headerName: "Contribution Year",
       field: "contributionDate",
@@ -27,20 +19,15 @@ export const GetMilitaryContributionColumns = (): ColDef[] => {
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
-      valueFormatter: (params) => {    
-      return new Date(params.value).getFullYear();
-    }
+      valueFormatter: (params) => {
+        return new Date(params.value).getFullYear();
+      }
     },
-    {
+    createCurrencyColumn({
       headerName: "Amount",
       field: "amount",
-      colId: "amount",
-      minWidth: 150,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
+      minWidth: 150
+    }),
     {
       headerName: "Supplemental Contribution",
       field: "isSupplementalContribution",
@@ -49,6 +36,7 @@ export const GetMilitaryContributionColumns = (): ColDef[] => {
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true
-    }]
+    }
+  ];
   return columns;
 };

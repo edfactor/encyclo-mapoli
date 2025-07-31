@@ -27,9 +27,9 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
     private sealed class MasterInquiryItem
     {
-        public required ProfitDetail ProfitDetail { get; init; }
+        public required ProfitDetail? ProfitDetail { get; init; }
         public required InquiryDemographics Member { get; init; }
-        public required ProfitCode ProfitCode { get; init; }
+        public required ProfitCode? ProfitCode { get; init; }
         public required ZeroContributionReason? ZeroContributionReason { get; init; }
         public required TaxCode? TaxCode { get; init; }
         public required CommentType? CommentType { get; init; }
@@ -124,6 +124,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 _ => (await GetMasterInquiryDemographics(ctx)).Union(GetMasterInquiryBeneficiary(ctx))
             };
 
+
             query = FilterMemberQuery(req, query);
 
             // Get unique SSNs from the query
@@ -144,20 +145,29 @@ public sealed class MasterInquiryService : IMasterInquiryService
             else
             {
                 // For both, merge and deduplicate by SSN
-                var employeeDetails = await GetDemographicDetailsForSsns(ctx, req, ssnList, currentYear, previousYear, cancellationToken);
-                var beneficiaryDetails = await GetBeneficiaryDetailsForSsns(ctx, req, ssnList, cancellationToken);
+                var employeeDetails = await GetAllDemographicDetailsForSsns(ctx, ssnList, currentYear, previousYear, cancellationToken);
+                var beneficiaryDetails = await GetAllBeneficiaryDetailsForSsns(ctx, ssnList, cancellationToken);
 
-                var concatResults = employeeDetails.Results.Concat(beneficiaryDetails.Results)
+                // Combine and deduplicate by SSN
+                var allResults = employeeDetails.Concat(beneficiaryDetails)
                     .GroupBy(d => d.Ssn)
                     .Select(g => g.First())
-                    .Take(req.Take ?? 25)
                     .ToList();
 
-                detailsList = new PaginatedResponseDto<MemberDetails>(req) { Results = concatResults, Total = employeeDetails.Total + beneficiaryDetails.Total };
+                // Apply sorting based on request
+                var sortedResults = ApplySorting(allResults.AsQueryable(), req).ToList();
+
+                // Apply pagination to the final deduplicated result set
+                var skip = req.Skip ?? 0;
+                var take = req.Take ?? 25;
+                var paginatedResults = sortedResults.Skip(skip).Take(take).ToList();
+
+                detailsList = new PaginatedResponseDto<MemberDetails>(req) { Results = paginatedResults, Total = sortedResults.Count };
             }
 
             foreach (MemberDetails details in detailsList.Results)
             {
+
                 details.Age = details.DateOfBirth.Age();
             }
 
@@ -187,18 +197,21 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
             query = FilterMemberQuery(req, query);
 
+            // Only group by non-null ProfitDetail
+            query = query.Where(x => x.ProfitDetail != null);
+
             return await query
-                .GroupBy(x => new { x.ProfitDetail.ProfitYear, x.ProfitDetail.MonthToDate })
+                .GroupBy(x => new { ProfitYear = x.ProfitDetail != null ? x.ProfitDetail.ProfitYear : (short)0, MonthToDate = x.ProfitDetail != null ? x.ProfitDetail.MonthToDate : (byte)0 })
                 .Select(g => new GroupedProfitSummaryDto
                 {
                     ProfitYear = g.Key.ProfitYear,
                     MonthToDate = g.Key.MonthToDate,
-                    TotalContribution = g.Sum(x => x.ProfitDetail.Contribution),
-                    TotalEarnings = g.Sum(x => x.ProfitDetail.Earnings),
+                    TotalContribution = g.Sum(x => x.ProfitDetail != null ? x.ProfitDetail.Contribution : 0),
+                    TotalEarnings = g.Sum(x => x.ProfitDetail != null ? x.ProfitDetail.Earnings : 0),
                     TotalForfeiture = g.Sum(x =>
-                        !balanceProfitCodes.Contains(x.ProfitDetail.ProfitCodeId) ? x.ProfitDetail.Forfeiture : 0),
+                        x.ProfitDetail != null && !balanceProfitCodes.Contains(x.ProfitDetail.ProfitCodeId) ? x.ProfitDetail.Forfeiture : 0),
                     TotalPayment = g.Sum(x =>
-                        balanceProfitCodes.Contains(x.ProfitDetail.ProfitCodeId) ? x.ProfitDetail.Forfeiture : 0),
+                        x.ProfitDetail != null && balanceProfitCodes.Contains(x.ProfitDetail.ProfitCodeId) ? x.ProfitDetail.Forfeiture : 0),
                     TransactionCount = g.Count()
                 })
                 .OrderBy(x => x.ProfitYear)
@@ -267,48 +280,44 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
             if (req.ProfitYear.HasValue)
             {
-                query = query.Where(x => x.ProfitDetail.ProfitYear == req.ProfitYear.Value);
+                query = query.Where(x => x.ProfitDetail != null && x.ProfitDetail.ProfitYear == req.ProfitYear.Value);
             }
 
             if (req.MonthToDate.HasValue)
             {
-                query = query.Where(x => x.ProfitDetail.MonthToDate == req.MonthToDate.Value);
+                query = query.Where(x => x.ProfitDetail != null && x.ProfitDetail.MonthToDate == req.MonthToDate.Value);
             }
 
             // First projection: SQL-translatable only
             var rawQuery = await query.Select(x => new MasterInquiryRawDto
             {
-                Id = x.ProfitDetail.Id,
-                Ssn = x.ProfitDetail.Ssn,
-                ProfitYear = x.ProfitDetail.ProfitYear,
-                ProfitYearIteration = x.ProfitDetail.ProfitYearIteration,
-                DistributionSequence = x.ProfitDetail.DistributionSequence,
-                ProfitCodeId = x.ProfitDetail.ProfitCodeId,
-                ProfitCodeName = x.ProfitCode.Name,
-                Contribution = x.ProfitDetail.CalculateContribution(),
-                Earnings = x.ProfitDetail.CalculateEarnings(),
-                Forfeiture = x.ProfitDetail.CalculateForfeiture(),
-                Payment = x.ProfitDetail.CalculatePayment(),
-                MonthToDate = x.ProfitDetail.MonthToDate,
-                YearToDate = x.ProfitDetail.YearToDate,
-                Remark = x.ProfitDetail.Remark,
-                ZeroContributionReasonId = x.ProfitDetail.ZeroContributionReasonId,
-                ZeroContributionReasonName =
-                    x.ZeroContributionReason != null
-                        ? x.ZeroContributionReason.Name
-                        : string.Empty,
-                FederalTaxes = x.ProfitDetail.FederalTaxes,
-                StateTaxes = x.ProfitDetail.StateTaxes,
-                TaxCodeId = x.ProfitDetail.TaxCodeId != null ? x.ProfitDetail.TaxCodeId : TaxCode.Constants.Unknown.Id,
+                Id = x.ProfitDetail != null ? x.ProfitDetail.Id : 0,
+                Ssn = x.ProfitDetail != null ? x.ProfitDetail.Ssn : x.Member.Ssn,
+                ProfitYear = x.ProfitDetail != null ? x.ProfitDetail.ProfitYear : (short)0,
+                ProfitYearIteration = x.ProfitDetail != null ? x.ProfitDetail.ProfitYearIteration : (byte)0,
+                DistributionSequence = x.ProfitDetail != null ? x.ProfitDetail.DistributionSequence : 0,
+                ProfitCodeId = x.ProfitDetail != null ? x.ProfitDetail.ProfitCodeId : (byte)0,
+                ProfitCodeName = x.ProfitCode != null ? x.ProfitCode.Name : string.Empty,
+                Contribution = x.ProfitDetail != null ? x.ProfitDetail.CalculateContribution() : 0,
+                Earnings = x.ProfitDetail != null ? x.ProfitDetail.CalculateEarnings() : 0,
+                Forfeiture = x.ProfitDetail != null ? x.ProfitDetail.CalculateForfeiture() : 0,
+                Payment = x.ProfitDetail != null ? x.ProfitDetail.CalculatePayment() : 0,
+                MonthToDate = x.ProfitDetail != null ? x.ProfitDetail.MonthToDate : (byte)0,
+                YearToDate = x.ProfitDetail != null ? x.ProfitDetail.YearToDate : (short)0,
+                Remark = x.ProfitDetail != null ? x.ProfitDetail.Remark : null,
+                ZeroContributionReasonId = x.ProfitDetail != null ? x.ProfitDetail.ZeroContributionReasonId : null,
+                ZeroContributionReasonName = x.ZeroContributionReason != null ? x.ZeroContributionReason.Name : string.Empty,
+                FederalTaxes = x.ProfitDetail != null ? x.ProfitDetail.FederalTaxes : 0,
+                StateTaxes = x.ProfitDetail != null ? x.ProfitDetail.StateTaxes : 0,
+                TaxCodeId = x.ProfitDetail != null && x.ProfitDetail.TaxCodeId != null ? x.ProfitDetail.TaxCodeId : TaxCode.Constants.Unknown.Id,
                 TaxCodeName = x.TaxCode != null ? x.TaxCode.Name : TaxCode.Constants.Unknown.Name,
-                CommentTypeId = x.ProfitDetail.CommentTypeId,
-                CommentTypeName =
-                    x.CommentType != null ? x.CommentType.Name : string.Empty,
-                CommentRelatedCheckNumber = x.ProfitDetail.CommentRelatedCheckNumber,
-                CommentRelatedState = x.ProfitDetail.CommentRelatedState,
-                CommentRelatedOracleHcmId = x.ProfitDetail.CommentRelatedOracleHcmId,
-                CommentRelatedPsnSuffix = x.ProfitDetail.CommentRelatedPsnSuffix,
-                CommentIsPartialTransaction = x.ProfitDetail.CommentIsPartialTransaction != null ? x.ProfitDetail.CommentIsPartialTransaction : false,
+                CommentTypeId = x.ProfitDetail != null ? x.ProfitDetail.CommentTypeId : null,
+                CommentTypeName = x.CommentType != null ? x.CommentType.Name : string.Empty,
+                CommentRelatedCheckNumber = x.ProfitDetail != null ? x.ProfitDetail.CommentRelatedCheckNumber : null,
+                CommentRelatedState = x.ProfitDetail != null ? x.ProfitDetail.CommentRelatedState : null,
+                CommentRelatedOracleHcmId = x.ProfitDetail != null ? x.ProfitDetail.CommentRelatedOracleHcmId : null,
+                CommentRelatedPsnSuffix = x.ProfitDetail != null ? x.ProfitDetail.CommentRelatedPsnSuffix : null,
+                CommentIsPartialTransaction = x.ProfitDetail != null && x.ProfitDetail.CommentIsPartialTransaction != null ? x.ProfitDetail.CommentIsPartialTransaction : false,
                 BadgeNumber = x.Member.BadgeNumber,
                 PsnSuffix = x.Member.PsnSuffix,
                 PayFrequencyId = x.Member.PayFrequencyId,
@@ -405,32 +414,37 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
     private static IQueryable<MasterInquiryItem> GetMasterInquiryBeneficiary(IProfitSharingDbContext ctx)
     {
-        var query = ctx.ProfitDetails
-            .Include(pd => pd.ProfitCode)
-            .Include(pd => pd.ZeroContributionReason)
-            .Include(pd => pd.TaxCode)
-            .Include(pd => pd.CommentType)
-            .Join(ctx.Beneficiaries.Include(m => m.Contact),
-                pd => pd.Ssn,
+        var query = ctx.Beneficiaries
+            .Include(b => b.Contact)
+            .GroupJoin(
+                ctx.ProfitDetails
+                    .Include(pd => pd.ProfitCode)
+                    .Include(pd => pd.ZeroContributionReason)
+                    .Include(pd => pd.TaxCode)
+                    .Include(pd => pd.CommentType),
                 b => b.Contact != null ? b.Contact.Ssn : 0,
-                (pd, b) => new MasterInquiryItem
+                pd => pd.Ssn,
+                (b, profitDetails) => new { b, profitDetails })
+            .SelectMany(
+                x => x.profitDetails.DefaultIfEmpty(),
+                (x, pd) => new MasterInquiryItem
                 {
-                    ProfitDetail = pd,
-                    ProfitCode = pd.ProfitCode,
-                    ZeroContributionReason = pd.ZeroContributionReason,
-                    TaxCode = pd.TaxCode,
-                    CommentType = pd.CommentType,
-                    TransactionDate = pd.TransactionDate,
+                    ProfitDetail = pd!,
+                    ProfitCode = pd != null ? pd.ProfitCode : null!,
+                    ZeroContributionReason = pd != null ? pd.ZeroContributionReason : null,
+                    TaxCode = pd != null ? pd.TaxCode : null,
+                    CommentType = pd != null ? pd.CommentType : null,
+                    TransactionDate = pd != null ? pd.TransactionDate : default,
                     Member = new InquiryDemographics
                     {
-                        Id = b.Id,
-                        BadgeNumber = b.BadgeNumber,
-                        FullName = b.Contact!.ContactInfo.FullName != null ? b.Contact.ContactInfo.FullName : b.Contact.ContactInfo.LastName,
-                        FirstName = b.Contact!.ContactInfo.FirstName,
-                        LastName = b.Contact!.ContactInfo.LastName,
+                        Id = x.b.Id,
+                        BadgeNumber = x.b.BadgeNumber,
+                        FullName = x.b.Contact != null && x.b.Contact.ContactInfo.FullName != null ? x.b.Contact.ContactInfo.FullName : (x.b.Contact != null ? x.b.Contact.ContactInfo.LastName : string.Empty),
+                        FirstName = x.b.Contact != null ? x.b.Contact.ContactInfo.FirstName : string.Empty,
+                        LastName = x.b.Contact != null ? x.b.Contact.ContactInfo.LastName : string.Empty,
                         PayFrequencyId = PayFrequency.Constants.Weekly,
-                        PsnSuffix = b.PsnSuffix,
-                        Ssn = b.Contact != null ? b.Contact.Ssn : 0,
+                        PsnSuffix = x.b.PsnSuffix,
+                        Ssn = x.b.Contact != null ? x.b.Contact.Ssn : 0,
                         CurrentIncomeYear = 0,
                         CurrentHoursYear = 0,
                     }
@@ -479,8 +493,26 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 PayClassification = d.PayClassification != null ? d.PayClassification.Name : "N/A",
                 
                 CurrentPayProfit = d.PayProfits
+                    .Select(x=>
+                        new
+                        {
+                            x.ProfitYear,
+                            x.CurrentHoursYear,
+                            x.Etva,
+                            x.EnrollmentId,
+                            x.Enrollment
+                        })
                     .FirstOrDefault(x => x.ProfitYear == currentYear),
                 PreviousPayProfit = d.PayProfits
+                    .Select(x =>
+                        new
+                        {
+                            x.ProfitYear,
+                            x.CurrentHoursYear,
+                            x.Etva,
+                            x.EnrollmentId,
+                            x.Enrollment
+                        })
                     .FirstOrDefault(x => x.ProfitYear == previousYear)
             })
             .FirstOrDefaultAsync(cancellationToken);
@@ -606,17 +638,14 @@ public sealed class MasterInquiryService : IMasterInquiryService
         {
             _logger.LogWarning(ex, "Failed to retrieve balances for SSN {SSN}", ssnCollection);
         }
-        
-        List< MemberProfitPlanDetails > detailsList = new List<MemberProfitPlanDetails>(currentBalance.Count);
 
-        foreach (var balance in currentBalance)
+        var detailsList = new List<MemberProfitPlanDetails>(memberDetailsMap.Count);
+
+        foreach (var kvp in memberDetailsMap)
         {
-            if (!memberDetailsMap.TryGetValue(balance.Id, out var memberData))
-            {
-                continue;
-            }
-            
-            var previousBalanceItem = previousBalance.FirstOrDefault(b => b.Id == balance.Id);
+            var memberData = kvp.Value;
+            var balance = currentBalance.FirstOrDefault(b => b.Id == kvp.Key, new BalanceEndpointResponse { Id = kvp.Key, Ssn = memberData.Ssn});
+            var previousBalanceItem = previousBalance.FirstOrDefault(b => b.Id == kvp.Key);
 
             detailsList.Add(new MemberProfitPlanDetails
             {
@@ -657,6 +686,9 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 TerminationReason = memberData.TerminationReason,
                 Gender = memberData.Gender,
                 PayClassification = memberData.PayClassification,
+                
+                AllocationToAmount = balance?.AllocationsToBeneficiary ?? 0,
+                AllocationFromAmount = balance?.AllocationsFromBeneficiary ?? 0
             });
         }
 
@@ -666,31 +698,55 @@ public sealed class MasterInquiryService : IMasterInquiryService
     private async Task<PaginatedResponseDto<MemberDetails>> GetDemographicDetailsForSsns(ProfitSharingReadOnlyDbContext ctx, SortedPaginationRequestDto req, ISet<int> ssns, short currentYear, short previousYear, CancellationToken cancellationToken)
     {
         var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
-        var members = await demographics
+        var query = demographics
             .Include(d => d.PayProfits)
             .ThenInclude(pp => pp.Enrollment)
-            .Where(d => ssns.Contains(d.Ssn))
+            .Where(d => ssns.Contains(d.Ssn));
+
+        if (((MasterInquiryRequest)req).BadgeNumber.HasValue && ((MasterInquiryRequest)req).BadgeNumber != 0)
+        {
+            query = query.Where(d => d.BadgeNumber == ((MasterInquiryRequest)req).BadgeNumber);
+        }
+
+        var members = await query
             .Select(d => new
             {
-                d.Id,
-                d.ContactInfo.FirstName,
-                d.ContactInfo.LastName,
-                d.Address.City,
-                d.Address.State,
-                Address = d.Address.Street,
-                d.Address.PostalCode,
-                d.DateOfBirth,
-                d.Ssn,
-                d.BadgeNumber,
-                d.ReHireDate,
-                d.HireDate,
-                d.TerminationDate,
-                d.StoreNumber,
-                DemographicId = d.Id,
-                d.EmploymentStatusId,
-                d.EmploymentStatus,
-                CurrentPayProfit = d.PayProfits.FirstOrDefault(x => x.ProfitYear == currentYear),
-                PreviousPayProfit = d.PayProfits.FirstOrDefault(x => x.ProfitYear == previousYear)
+            d.Id,
+            d.ContactInfo.FullName,
+            d.ContactInfo.FirstName,
+            d.ContactInfo.LastName,
+            d.Address.City,
+            d.Address.State,
+            Address = d.Address.Street,
+            d.Address.PostalCode,
+            d.DateOfBirth,
+            d.Ssn,
+            d.BadgeNumber,
+            d.ReHireDate,
+            d.HireDate,
+            d.TerminationDate,
+            d.StoreNumber,
+            DemographicId = d.Id,
+            d.EmploymentStatusId,
+            d.EmploymentStatus,
+            CurrentPayProfit = d.PayProfits.Select(x =>
+                new
+                {
+                x.ProfitYear,
+                x.CurrentHoursYear,
+                x.Etva,
+                x.EnrollmentId,
+                x.Enrollment
+                }).FirstOrDefault(x => x.ProfitYear == currentYear),
+            PreviousPayProfit = d.PayProfits.Select(x =>
+                new
+                {
+                x.ProfitYear,
+                x.CurrentHoursYear,
+                x.Etva,
+                x.EnrollmentId,
+                x.Enrollment
+                }).FirstOrDefault(x => x.ProfitYear == previousYear)
             })
             .ToPaginationResultsAsync(req, cancellationToken);
 
@@ -736,23 +792,33 @@ public sealed class MasterInquiryService : IMasterInquiryService
         ISet<int> ssns,
         CancellationToken cancellationToken)
     {
-        var members = ctx.Beneficiaries
+        var membersQuery = ctx.Beneficiaries
             .Include(b => b.Contact)
-            .Where(b => b.Contact != null && ssns.Contains(b.Contact.Ssn))
+            .Where(b => b.Contact != null && ssns.Contains(b.Contact.Ssn));
+
+        // Only filter by BadgeNumber if provided and not 0
+        var badgeNumber = ((MasterInquiryRequest)req).BadgeNumber;
+        if (badgeNumber.HasValue && badgeNumber != 0)
+        {
+            membersQuery = membersQuery.Where(b => b.BadgeNumber == badgeNumber);
+        }
+
+        var members = membersQuery
             .Select(b => new
             {
-                b.Id,
-                b.Contact!.ContactInfo.FirstName,
-                b.Contact.ContactInfo.LastName,
-                b.Contact.Address.City,
-                b.Contact.Address.State,
-                Address = b.Contact.Address.Street,
-                b.Contact.Address.PostalCode,
-                b.Contact.DateOfBirth,
-                b.Contact.Ssn,
-                b.BadgeNumber,
-                b.PsnSuffix,
-                DemographicId = b.Id
+            b.Id,
+            b.Contact!.ContactInfo.FullName,
+            b.Contact!.ContactInfo.FirstName,
+            b.Contact.ContactInfo.LastName,
+            b.Contact.Address.City,
+            b.Contact.Address.State,
+            Address = b.Contact.Address.Street,
+            b.Contact.Address.PostalCode,
+            b.Contact.DateOfBirth,
+            b.Contact.Ssn,
+            b.BadgeNumber,
+            b.PsnSuffix,
+            DemographicId = b.Id
             });
 
 
@@ -776,58 +842,63 @@ public sealed class MasterInquiryService : IMasterInquiryService
 
     private static IQueryable<MasterInquiryItem> FilterMemberQuery(MasterInquiryRequest req, IQueryable<MasterInquiryItem> query)
     {
-        if (req.BadgeNumber.HasValue)
+        if (req.BadgeNumber.HasValue && req.BadgeNumber > 0)
         {
             query = query.Where(x => x.Member.BadgeNumber == req.BadgeNumber);
         }
 
+        if (req.MemberType != 1 /* Employee Only */ && req.PsnSuffix > 0)
+        {
+            query = query.Where(x => x.Member.PsnSuffix == req.PsnSuffix);
+        }
+
         if (req.EndProfitYear.HasValue)
         {
-            query = query.Where(x => x.ProfitDetail.ProfitYear <= req.EndProfitYear);
+            query = query.Where(x => (x.ProfitDetail == null || x.ProfitDetail.ProfitYear <= req.EndProfitYear));
         }
 
         if (req.StartProfitMonth.HasValue)
         {
-            query = query.Where(x => x.ProfitDetail.MonthToDate >= req.StartProfitMonth);
+            query = query.Where(x => (x.ProfitDetail == null || x.ProfitDetail.MonthToDate >= req.StartProfitMonth));
         }
 
         if (req.EndProfitMonth.HasValue)
         {
-            query = query.Where(x => x.ProfitDetail.MonthToDate <= req.EndProfitMonth);
+            query = query.Where(x => (x.ProfitDetail == null || x.ProfitDetail.MonthToDate <= req.EndProfitMonth));
         }
 
         if (req.ProfitCode.HasValue)
         {
-            query = query.Where(x => x.ProfitDetail.ProfitCodeId == req.ProfitCode);
+            query = query.Where(x => (x.ProfitDetail == null || x.ProfitDetail.ProfitCodeId == req.ProfitCode));
         }
 
         if (req.ContributionAmount.HasValue)
         {
-            query = query.Where(x => x.ProfitDetail.Contribution == req.ContributionAmount);
+            query = query.Where(x => (x.ProfitDetail == null || x.ProfitDetail.Contribution == req.ContributionAmount));
         }
 
         if (req.EarningsAmount.HasValue)
         {
-            query = query.Where(x => x.ProfitDetail.Earnings == req.EarningsAmount);
+            query = query.Where(x => (x.ProfitDetail == null || x.ProfitDetail.Earnings == req.EarningsAmount));
         }
 
         if (req.Ssn != 0)
         {
-            query = query.Where(x => x.Member.Ssn == req.Ssn);
+            query = query.Where(x => (x.Member.Ssn == req.Ssn));
         }
 
         if (req.ForfeitureAmount.HasValue)
         {
             query = query.Where(x =>
-                x.ProfitDetail.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id &&
-                x.ProfitDetail.Forfeiture == req.ForfeitureAmount);
+                (x.ProfitDetail == null || x.ProfitDetail.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id) &&
+                (x.ProfitDetail == null || x.ProfitDetail.Forfeiture == req.ForfeitureAmount));
         }
 
         if (req.PaymentAmount.HasValue)
         {
             query = query.Where(x =>
-                x.ProfitDetail.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id &&
-                x.ProfitDetail.Forfeiture == req.PaymentAmount);
+                (x.ProfitDetail == null || x.ProfitDetail.ProfitCodeId != ProfitCode.Constants.IncomingContributions.Id) &&
+                (x.ProfitDetail == null || x.ProfitDetail.Forfeiture == req.PaymentAmount));
         }
 
         if (!string.IsNullOrWhiteSpace(req.Name))
@@ -842,19 +913,173 @@ public sealed class MasterInquiryService : IMasterInquiryService
             {
                 case 1: // Hardship/Distribution
                     List<byte?> array = [CommentType.Constants.Hardship.Id, CommentType.Constants.Distribution.Id];
-                    query = query.Where(x => array.Contains(x.ProfitDetail.CommentTypeId));
+                    query = query.Where(x => x.ProfitDetail != null && array.Contains(x.ProfitDetail.CommentTypeId));
                     break;
                 case 2: // payoffs
                     array = [CommentType.Constants.Payoff.Id, CommentType.Constants.Forfeit.Id];
-                    query = query.Where(x => array.Contains(x.ProfitDetail.CommentTypeId));
+                    query = query.Where(x => x.ProfitDetail != null && array.Contains(x.ProfitDetail.CommentTypeId));
                     break;
                 case 3: // rollovers
                     array = [CommentType.Constants.Rollover.Id, CommentType.Constants.RothIra.Id];
-                    query = query.Where(x => array.Contains(x.ProfitDetail.CommentTypeId));
+                    query = query.Where(x => x.ProfitDetail != null && array.Contains(x.ProfitDetail.CommentTypeId));
                     break;
             }
         }
 
         return query;
+    }
+
+    private async Task<List<MemberDetails>> GetAllDemographicDetailsForSsns(ProfitSharingReadOnlyDbContext ctx, ISet<int> ssns, short currentYear, short previousYear, CancellationToken cancellationToken)
+    {
+        var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
+        var query = demographics
+            .Include(d => d.PayProfits)
+            .ThenInclude(pp => pp.Enrollment)
+            .Where(d => ssns.Contains(d.Ssn));
+
+        var members = await query
+            .Select(d => new
+            {
+            d.Id,
+            d.ContactInfo.FirstName,
+            d.ContactInfo.LastName,
+            d.Address.City,
+            d.Address.State,
+            Address = d.Address.Street,
+            d.Address.PostalCode,
+            d.DateOfBirth,
+            d.Ssn,
+            d.BadgeNumber,
+            d.ReHireDate,
+            d.HireDate,
+            d.TerminationDate,
+            d.StoreNumber,
+            DemographicId = d.Id,
+            d.EmploymentStatusId,
+            d.EmploymentStatus,
+            CurrentPayProfit = d.PayProfits.Select(x =>
+                new
+                {
+                x.ProfitYear,
+                x.CurrentHoursYear,
+                x.Etva,
+                x.EnrollmentId,
+                x.Enrollment
+                }).FirstOrDefault(x => x.ProfitYear == currentYear),
+            PreviousPayProfit = d.PayProfits.Select(x =>
+                new
+                {
+                x.ProfitYear,
+                x.CurrentHoursYear,
+                x.Etva,
+                x.EnrollmentId,
+                x.Enrollment
+                }).FirstOrDefault(x => x.ProfitYear == previousYear)
+            })
+            .ToListAsync(cancellationToken);
+
+        var missivesDict = await _missiveService.DetermineMissivesForSsns(members.Select(m => m.Ssn), currentYear, cancellationToken);
+
+        var detailsList = new List<MemberDetails>();
+        foreach (var memberData in members)
+        {
+            var missiveList = missivesDict.TryGetValue(memberData.Ssn, out var m) ? m : new List<int>();
+            detailsList.Add(new MemberDetails
+            {
+                IsEmployee = true,
+                Id = memberData.Id,
+                FirstName = memberData.FirstName,
+                LastName = memberData.LastName,
+                AddressCity = memberData.City!,
+                AddressState = memberData.State!,
+                Address = memberData.Address,
+                AddressZipCode = memberData.PostalCode!,
+                DateOfBirth = memberData.DateOfBirth,
+                Age = memberData.DateOfBirth.Age(),
+                Ssn = memberData.Ssn.MaskSsn(),
+                YearToDateProfitSharingHours = memberData.CurrentPayProfit?.CurrentHoursYear ?? 0,
+                HireDate = memberData.HireDate,
+                ReHireDate = memberData.ReHireDate,
+                TerminationDate = memberData.TerminationDate,
+                StoreNumber = memberData.StoreNumber,
+                EnrollmentId = memberData.CurrentPayProfit?.EnrollmentId,
+                Enrollment = memberData.CurrentPayProfit?.Enrollment?.Name,
+                BadgeNumber = memberData.BadgeNumber,
+                CurrentEtva = memberData.CurrentPayProfit?.Etva ?? 0,
+                PreviousEtva = memberData.PreviousPayProfit?.Etva ?? 0,
+                EmploymentStatus = memberData.EmploymentStatus?.Name,
+                Missives = missiveList
+            });
+        }
+
+        return detailsList;
+    }
+
+    private async Task<List<MemberDetails>> GetAllBeneficiaryDetailsForSsns(ProfitSharingReadOnlyDbContext ctx, ISet<int> ssns, CancellationToken cancellationToken)
+    {
+        var members = await ctx.Beneficiaries
+            .Include(b => b.Contact)
+            .Where(b => b.Contact != null && ssns.Contains(b.Contact.Ssn))
+            .Select(b => new
+            {
+            b.Id,
+            b.Contact!.ContactInfo.FirstName,
+            b.Contact.ContactInfo.LastName,
+            b.Contact.Address.City,
+            b.Contact.Address.State,
+            Address = b.Contact.Address.Street,
+            b.Contact.Address.PostalCode,
+            b.Contact.DateOfBirth,
+            b.Contact.Ssn,
+            b.BadgeNumber,
+            b.PsnSuffix,
+            DemographicId = b.Id
+            })
+            .ToListAsync(cancellationToken);
+
+        var detailsList = new List<MemberDetails>();
+        foreach (var memberData in members)
+        {
+            detailsList.Add(new MemberDetails
+            {
+                Id = memberData.Id,
+                IsEmployee = false,
+                FirstName = memberData.FirstName,
+                LastName = memberData.LastName,
+                AddressCity = memberData.City!,
+                AddressState = memberData.State!,
+                Address = memberData.Address,
+                AddressZipCode = memberData.PostalCode!,
+                DateOfBirth = memberData.DateOfBirth,
+                Ssn = memberData.Ssn.MaskSsn(),
+                BadgeNumber = memberData.BadgeNumber,
+                PsnSuffix = memberData.PsnSuffix,
+            });
+        }
+
+        return detailsList;
+    }
+
+    private static IQueryable<MemberDetails> ApplySorting(IQueryable<MemberDetails> query, SortedPaginationRequestDto req)
+    {
+        if (string.IsNullOrEmpty(req.SortBy))
+        {
+            return query;
+        }
+
+        var isDescending = req.IsSortDescending ?? false;
+        return req.SortBy.ToLower() switch
+        {
+            "fullName" => isDescending ? query.OrderByDescending(x => x.FullName) : query.OrderBy(x => x.FullName),
+            "ssn" => isDescending ? query.OrderByDescending(x => x.Ssn) : query.OrderBy(x => x.Ssn),
+            "badgeNumber" => isDescending ? query.OrderByDescending(x => x.BadgeNumber) : query.OrderBy(x => x.BadgeNumber),
+            "address" => isDescending ? query.OrderByDescending(x => x.Address) : query.OrderBy(x => x.Address),
+            "addressCity" => isDescending ? query.OrderByDescending(x => x.AddressCity) : query.OrderBy(x => x.AddressCity),
+            "addressState" => isDescending ? query.OrderByDescending(x => x.AddressState) : query.OrderBy(x => x.AddressState),
+            "addressZipCode" => isDescending ? query.OrderByDescending(x => x.AddressZipCode) : query.OrderBy(x => x.AddressZipCode),
+            "age" => isDescending ? query.OrderByDescending(x => x.Age) : query.OrderBy(x => x.Age),
+            "employmentStatus" => isDescending ? query.OrderByDescending(x => x.EmploymentStatus) : query.OrderBy(x => x.EmploymentStatus),
+            _ => query
+        };
     }
 }

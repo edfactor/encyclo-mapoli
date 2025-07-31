@@ -1,13 +1,14 @@
 ﻿using Demoulas.Common.Data.Contexts.ValueConverters;
+using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Base;
 using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
 
-internal sealed class DemographicSsnChangeHistoryMap : IEntityTypeConfiguration<DemographicSsnChangeHistory>
+internal sealed class DemographicSsnChangeHistoryMap : ModifiedBaseMap<DemographicSsnChangeHistory>
 {
-    public void Configure(EntityTypeBuilder<DemographicSsnChangeHistory> builder)
+    public override void Configure(EntityTypeBuilder<DemographicSsnChangeHistory> builder)
     {
         _ = builder.ToTable("DEMOGRAPHIC_SSN_CHANGE_HISTORY");
         _ = builder.HasKey(x => x.Id);
@@ -34,9 +35,6 @@ internal sealed class DemographicSsnChangeHistoryMap : IEntityTypeConfiguration<
             .HasColumnName("NEW_SSN")
             .IsRequired();
 
-        _ = builder.Property(e => e.ChangeDateUtc)
-            .HasColumnType("TIMESTAMP WITH TIME ZONE")
-            .HasDefaultValueSql("SYSTIMESTAMP")
-            .HasColumnName("CREATED_UTC");
+       base.Configure(builder);
     }
 }

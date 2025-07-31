@@ -1,119 +1,86 @@
-import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { viewBadgeLinkRenderer } from "../../../utils/masterInquiryLink";
-import { agGridNumberToCurrency } from "smart-ui-library";
+import { ColDef } from "ag-grid-community";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
+import {
+  createBadgeColumn,
+  createCurrencyColumn,
+  createSSNColumn,
+  createNameColumn,
+  createHoursColumn,
+  createStatusColumn,
+  createStoreColumn
+} from "../../../utils/gridColumnFactory";
 
 // The default is to show all columns, but if the mini flag is set to true, only show the
 // badge, name, and ssn columns
 export const GetManageExecutiveHoursAndDollarsColumns = (mini?: boolean): ColDef[] => {
   const columns: ColDef[] = [
-    {
+    createBadgeColumn({
       headerName: "Badge",
-      field: "badgeNumber",
-      colId: "badgeNumber",
       minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
-      headerClass: mini ? "left-align" : "right-align",
-      cellClass: mini ? "left-align" : "right-align",
-      resizable: true,
-      sortable: true,
-      checkboxSelection: mini,
-      cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber)
-    },
-    {
-      headerName: "Name",
+      alignment: mini ? "left" : "center"
+    }),
+    createNameColumn({
       field: "fullName",
-      colId: "fullName",
-      minWidth: GRID_COLUMN_WIDTHS.FULL_NAME,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
-    {
+      minWidth: GRID_COLUMN_WIDTHS.FULL_NAME
+    }),
+    createStoreColumn({
       headerName: "Store",
-      field: "storeNumber",
-      colId: "storeNumber",
-      minWidth: 80,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
-    {
-      headerName: "SSN",
-      field: "ssn",
-      colId: "ssn",
-      minWidth: GRID_COLUMN_WIDTHS.SSN,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
-    {
+      minWidth: 60
+    }),
+
+    createSSNColumn({ alignment: "left" }),
+    createHoursColumn({
       headerName: "Executive Hours",
       field: "hoursExecutive",
-      colId: "hoursExecutive",
+      minWidth: 150,
+      alignment: "left",
+      editable: !mini
+    }),
+    {
+      ...createCurrencyColumn({
+        headerName: "Executive Dollars",
+        field: "incomeExecutive"
+      }),
       minWidth: 150,
       headerClass: "left-align",
       cellClass: "left-align",
-      resizable: true,
       editable: !mini
     },
-    {
-      headerName: "Executive Dollars",
-      field: "incomeExecutive",
-      colId: "incomeExecutive",
-      minWidth: 150,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      editable: !mini,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+    createHoursColumn({
       headerName: "Oracle Hours",
       field: "currentHoursYear",
-      colId: "currentHoursYear",
+      minWidth: 150,
+      alignment: "left"
+    }),
+    {
+      ...createCurrencyColumn({
+        headerName: "Oracle Dollars",
+        field: "currentIncomeYear"
+      }),
       minWidth: 150,
       headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
+      cellClass: "left-align"
     },
-    {
-      headerName: "Oracle Dollars",
-      field: "currentIncomeYear",
-      colId: "currentIncomeYear",
-      minWidth: 150,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+    createStatusColumn({
       headerName: "Pay Frequency",
       field: "payFrequencyId",
-      colId: "payFrequencyId",
       minWidth: 150,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
       valueFormatter: (params) => {
         const id = params.data?.payFrequencyId; // assuming 'status' is in the row data
-        const name = params.data?.payFrequencyName; // assuming 'statusName' is in the row data        
+        const name = params.data?.payFrequencyName; // assuming 'statusName' is in the row data
         return `[${id}] ${name}`;
       }
-    },
-    {
+    }),
+    createStatusColumn({
       headerName: "Employment Status",
       field: "employmentStatusId",
-      colId: "employmentStatusId",
       minWidth: 150,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
       valueFormatter: (params) => {
         const id = params.data?.employmentStatusId; // assuming 'status' is in the row data
-        const name = params.data?.employmentStatusName; // assuming 'statusName' is in the row data        
+        const name = params.data?.employmentStatusName; // assuming 'statusName' is in the row data
         return `[${id}] ${name}`;
       }
-    }
+    })
   ];
 
   // We could have a hide property in elements to be hidden and not filter this way,

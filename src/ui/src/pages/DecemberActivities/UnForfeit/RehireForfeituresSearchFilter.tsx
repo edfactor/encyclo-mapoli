@@ -1,7 +1,7 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import Grid2 from "@mui/material/Grid2";
 import { Checkbox, FormControlLabel } from "@mui/material";
-import { Controller, useForm } from "react-hook-form";
+import { Grid } from "@mui/material";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetRehireForfeituresQuery } from "reduxstore/api/YearsEndApi";
 import {
@@ -12,16 +12,31 @@ import {
 import { RootState } from "reduxstore/store";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
-import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 import { CalendarResponseDto, StartAndEndDateRequest } from "../../../reduxstore/types";
-import { tryddmmyyyyToDate, mmDDYYFormat } from "../../../utils/dateUtils";
+import { mmDDYYFormat, tryddmmyyyyToDate } from "../../../utils/dateUtils";
 
 const schema = yup.object().shape({
   beginningDate: yup.string().required("Beginning Date is required"),
-  endingDate: yup.string()
+  endingDate: yup
+    .string()
     .typeError("Invalid date")
-    .required("Ending Date is required"),
+    .required("Ending Date is required")
+    .test("date-range", "Ending date must be the same or after the beginning date", function (value) {
+      const { beginningDate } = this.parent;
+      if (!beginningDate || !value) return true;
+      
+      const beginDate = tryddmmyyyyToDate(beginningDate);
+      const endDate = tryddmmyyyyToDate(value);
+      
+      if (!beginDate || !endDate) return true;
+      
+      return endDate >= beginDate;
+    })
+    .test("is-too-early", "Insuffient data for dates before 2024", function (value) {
+      
+      return new Date(value) > new Date(2024,1,1);
+    }),
   pagination: yup
     .object({
       skip: yup.number().required(),
@@ -36,12 +51,14 @@ interface MilitaryAndRehireForfeituresSearchFilterProps {
   setInitialSearchLoaded: (include: boolean) => void;
   fiscalData: CalendarResponseDto;
   onSearch?: () => void;
+  hasUnsavedChanges?: boolean;
 }
 
 const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearchFilterProps> = ({
   setInitialSearchLoaded,
   fiscalData,
-  onSearch
+  onSearch,
+  hasUnsavedChanges
 }) => {
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const [triggerSearch, { isFetching }] = useLazyGetRehireForfeituresQuery();
@@ -49,14 +66,19 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
   const dispatch = useDispatch();
 
   const validateAndSubmit = (data: StartAndEndDateRequest) => {
+    if (hasUnsavedChanges) {
+      alert("Please save your changes.");
+      return;
+    }
+
     if (isValid && hasToken) {
-      const beginDate = data.beginningDate || fiscalData.fiscalBeginDate || '';
-      const endDate = data.endingDate || fiscalData.fiscalEndDate || '';
+      const beginDate = data.beginningDate || fiscalData.fiscalBeginDate || "";
+      const endDate = data.endingDate || fiscalData.fiscalEndDate || "";
 
       const updatedData = {
         ...data,
         beginningDate: mmDDYYFormat(beginDate),
-        endingDate: mmDDYYFormat(endDate),
+        endingDate: mmDDYYFormat(endDate)
       };
 
       dispatch(setMilitaryAndRehireForfeituresQueryParams(updatedData));
@@ -81,6 +103,8 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
     }
   });
 
+  const beginningDateValue = useWatch({ control, name: "beginningDate" });
+
   // Effect to fetch fiscal data when profit year changes
   const validateAndSearch = handleSubmit(validateAndSubmit);
 
@@ -101,12 +125,12 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
 
   return (
     <form onSubmit={validateAndSearch}>
-      <Grid2
+      <Grid
         container
         paddingX="24px"
         alignItems={"flex-end"}
         gap="24px">
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Controller
             name="beginningDate"
             control={control}
@@ -115,7 +139,7 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
                 id="beginningDate"
                 onChange={(value: Date | null) => {
                   field.onChange(value ?? undefined);
-                  trigger('beginningDate');
+                  trigger(["beginningDate", "endingDate"]);
                 }}
                 value={field.value ? tryddmmyyyyToDate(field.value) : null}
                 required={true}
@@ -127,30 +151,38 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
               />
             )}
           />
-        </Grid2>
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Controller
             name="endingDate"
             control={control}
-            render={({ field }) => (
-              <DsmDatePicker
-                id="endingDate"
-                onChange={(value: Date | null) => {
-                  field.onChange(value ?? undefined);
-                  trigger('endingDate');
-                }}
-                value={field.value ? tryddmmyyyyToDate(field.value) : null}
-                required={true}
-                label="Rehire Ending Date"
-                disableFuture
-                error={errors.endingDate?.message}
-                minDate={tryddmmyyyyToDate(fiscalData.fiscalBeginDate) ?? undefined}
-                maxDate={tryddmmyyyyToDate(fiscalData.fiscalEndDate) ?? undefined}
-              />
-            )}
+            render={({ field }) => {
+              const minDateFromBeginning = beginningDateValue ? tryddmmyyyyToDate(beginningDateValue) : null;
+              const fiscalMinDate = tryddmmyyyyToDate(fiscalData.fiscalBeginDate);
+              const effectiveMinDate = minDateFromBeginning && fiscalMinDate 
+                ? (minDateFromBeginning > fiscalMinDate ? minDateFromBeginning : fiscalMinDate)
+                : minDateFromBeginning ?? fiscalMinDate ?? undefined;
+
+              return (
+                <DsmDatePicker
+                  id="endingDate"
+                  onChange={(value: Date | null) => {
+                    field.onChange(value ?? undefined);
+                    trigger("endingDate");
+                  }}
+                  value={field.value ? tryddmmyyyyToDate(field.value) : null}
+                  required={true}
+                  label="Rehire Ending Date"
+                  disableFuture
+                  error={errors.endingDate?.message}
+                  minDate={effectiveMinDate}
+                  maxDate={tryddmmyyyyToDate(fiscalData.fiscalEndDate) ?? undefined}
+                />
+              );
+            }}
           />
-        </Grid2>
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Controller
             name="excludeZeroBalance"
             control={control}
@@ -163,13 +195,12 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
                   />
                 }
                 label="Exclude 0 balance"
-                
               />
             )}
           />
-        </Grid2>
-      </Grid2>
-      <Grid2
+        </Grid>
+      </Grid>
+      <Grid
         width="100%"
         paddingX="24px">
         <SearchAndReset
@@ -178,10 +209,9 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
           isFetching={isFetching}
           disabled={!isValid || isFetching}
         />
-      </Grid2>
+      </Grid>
     </form>
   );
 };
 
 export default RehireForfeituresSearchFilter;
-

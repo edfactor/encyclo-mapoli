@@ -1,5 +1,7 @@
-﻿namespace Demoulas.ProfitSharing.Data.Entities;
-public class DistributionRequest
+﻿using Demoulas.ProfitSharing.Data.Entities.Base;
+
+namespace Demoulas.ProfitSharing.Data.Entities;
+public class DistributionRequest : ModifiedBase
 {
     public required int Id { get; set; }
 

@@ -1,4 +1,5 @@
-﻿using Demoulas.Common.Data.Contexts.DTOs.Context;
+﻿using Demoulas.Common.Contracts.Interfaces;
+using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Data.Configuration;
 using Demoulas.ProfitSharing.Data.Factories;
@@ -43,7 +44,14 @@ public static class DatabaseServicesExtension
             config.Bind("DataConfig",  dataConfig);
             return dataConfig;
         });
-        _ = builder.Services.AddSingleton<AuditSaveChangesInterceptor>();
+        _ = builder.Services.AddScoped<AuditSaveChangesInterceptor>(provider =>
+        {
+            var user = provider.GetService<IAppUser>();
+            var dataConfig = provider.GetRequiredService<DataConfig>();
+            return new AuditSaveChangesInterceptor(dataConfig, user);
+        });
+        _ = builder.Services.AddSingleton<BeneficiarySaveChangesInterceptor>();
+        _ = builder.Services.AddSingleton<BeneficiaryContactSaveChangesInterceptor>();
         _ = builder.Services.AddHttpContextAccessor();
 
 

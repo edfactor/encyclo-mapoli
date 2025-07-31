@@ -1,20 +1,21 @@
 import { Typography } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
-import { ICellRendererParams } from "ag-grid-community";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Grid } from "@mui/material";
+import { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useLazyGetBreakdownByStoreQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, Pagination, agGridNumberToCurrency } from "smart-ui-library";
-import { viewBadgeLinkRenderer } from "../../../../utils/masterInquiryLink";
+import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
+import { GetStoreManagementGridColumns } from "./StoreManagementGridColumns";
 
 interface StoreManagementGridProps {
   store: number;
+  pageNumberReset: boolean;
+  setPageNumberReset: (reset: boolean) => void;
 }
 
-const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store }) => {
+const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store, pageNumberReset, setPageNumberReset }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [sortParams, setSortParams] = useState<ISortParams>({
@@ -37,7 +38,7 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store }) => {
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
   const profitYear = useDecemberFlowProfitYear();
-  
+
   const fetchData = useCallback(() => {
     const params = {
       profitYear: queryParams?.profitYear || profitYear,
@@ -52,93 +53,47 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store }) => {
         isSortDescending: sortParams.isSortDescending
       }
     };
-    if ( hasToken)
-    {
-    fetchStoreManagement(params);
+    if (hasToken) {
+      fetchStoreManagement(params);
     }
-  }, [fetchStoreManagement, hasToken, pageNumber, pageSize, profitYear, queryParams?.profitYear, sortParams.isSortDescending, sortParams.sortBy, store]);
+  }, [
+    fetchStoreManagement,
+    hasToken,
+    pageNumber,
+    pageSize,
+    profitYear,
+    queryParams?.profitYear,
+    sortParams.isSortDescending,
+    sortParams.sortBy,
+    store
+  ]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  const columnDefs = useMemo(
-    () => [
-      {
-        headerName: "Badge",
-        field: "badgeNumber",
-        width: 100,
-        cellRenderer: (params: ICellRendererParams) => viewBadgeLinkRenderer(params.data.badgeNumber, handleNavigation)
-      },
-      {
-        headerName: "Name",
-        field: "fullName",
-        width: 200
-      },
-      {
-        headerName: "Position",
-        field: "payClassificationName",
-        width: 120
-      },
-      {
-        headerName: "Beginning Balance",
-        field: "beginningBalance",
-        width: 150,
-        valueFormatter: agGridNumberToCurrency
-      },
-      {
-        headerName: "Earnings",
-        field: "earnings",
-        width: 120,
-        valueFormatter: agGridNumberToCurrency
-      },
-      {
-        headerName: "Contributions",
-        field: "contributions",
-        width: 120,
-        valueFormatter: agGridNumberToCurrency
-      },
-      {
-        headerName: "Forfeiture",
-        field: "forfeitures",
-        width: 120,
-        valueFormatter: agGridNumberToCurrency
-      },
-      {
-        headerName: "Distributions",
-        field: "distributions",
-        width: 120,
-        valueFormatter: agGridNumberToCurrency
-      },
-      {
-        headerName: "Ending Balance",
-        field: "endingBalance",
-        width: 150,
-        valueFormatter: agGridNumberToCurrency
-      },
-      {
-        headerName: "Vested Amount",
-        field: "vestedAmount",
-        width: 150,
-        valueFormatter: agGridNumberToCurrency
-      }
-    ],
-    [handleNavigation]
-  );
+  useEffect(() => {
+    if (pageNumberReset) {
+      setPageNumber(0);
+      setPageNumberReset(false);
+    }
+  }, [pageNumberReset, setPageNumberReset]);
+
+  const columnDefs = useCallback(() => GetStoreManagementGridColumns(handleNavigation), [handleNavigation])();
 
   return (
-    <Grid2
+    <Grid
       container
       direction="column"
       width="100%">
-      <Grid2 paddingX="24px">
+      <Grid paddingX="24px">
         <Typography
           variant="h6"
           sx={{ color: "#0258A5", marginBottom: "16px" }}>
           Store Management
         </Typography>
-      </Grid2>
-      <Grid2 width="100%">
+      </Grid>
+      <Grid width="100%">
         <DSMGrid
           preferenceKey={`STORE_MANAGEMENT_STORE_${store}`}
           isLoading={isFetching}
@@ -157,8 +112,8 @@ const StoreManagementGrid: React.FC<StoreManagementGridProps> = ({ store }) => {
             recordCount={storeManagement.response.total || 0}
           />
         )}
-      </Grid2>
-    </Grid2>
+      </Grid>
+    </Grid>
   );
 };
 

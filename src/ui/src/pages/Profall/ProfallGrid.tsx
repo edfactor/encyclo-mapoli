@@ -9,7 +9,12 @@ import { DSMGrid, Pagination, ISortParams } from "smart-ui-library";
 import { GetProfallGridColumns } from "./ProfallGridColumns";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 
-const ProfallGrid = () => {
+interface ProfallGridProps {
+  pageNumberReset: boolean;
+  setPageNumberReset: (reset: boolean) => void;
+}
+
+const ProfallGrid: React.FC<ProfallGridProps> = ({ pageNumberReset, setPageNumberReset }) => {
   const navigate = useNavigate();
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
@@ -19,29 +24,33 @@ const ProfallGrid = () => {
   });
 
   const profitSharingLabels = useSelector((state: RootState) => state.yearsEnd.profitSharingLabels);
+  const securityState = useSelector((state: RootState) => state.security);
   const [getProfitSharingLabels, { isFetching }] = useLazyGetProfitSharingLabelsQuery();
 
   const profitYear = useFiscalCloseProfitYear();
-
-  useEffect(() => {
-    if (profitYear) {
-      fetchData();
-    }
-  }, [profitYear, pageNumber, pageSize, sortParams]);
 
   const fetchData = useCallback(() => {
     const yearToUse = profitYear || new Date().getFullYear();
     const skip = pageNumber * pageSize;
     getProfitSharingLabels({
       profitYear: yearToUse,
+      // This needs to be the default as the page has no search filters
+      // but this is required by the API
+      useFrozenData: true,
       pagination: {
         take: pageSize,
         skip: skip,
         sortBy: sortParams.sortBy || "badgeNumber",
         isSortDescending: sortParams.isSortDescending
       }
-    })
+    });
   }, [profitYear, pageNumber, pageSize, sortParams, getProfitSharingLabels]);
+
+  useEffect(() => {
+    if (profitYear && securityState.token) {
+      fetchData();
+    }
+  }, [profitYear, pageNumber, pageSize, sortParams, securityState.token, fetchData]);
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
@@ -52,8 +61,15 @@ const ProfallGrid = () => {
     [navigate]
   );
 
+  useEffect(() => {
+    if (pageNumberReset) {
+      setPageNumber(0);
+      setPageNumberReset(false);
+    }
+  }, [pageNumberReset, setPageNumberReset]);
+
   const columnDefs = useMemo(() => GetProfallGridColumns(handleNavigationForButton), [handleNavigationForButton]);
-  
+
   const rowData = useMemo(() => {
     return profitSharingLabels?.results || [];
   }, [profitSharingLabels]);

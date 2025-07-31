@@ -1,6 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetDistributionsAndForfeituresQuery } from "reduxstore/api/YearsEndApi";
@@ -18,7 +18,7 @@ import { format } from "date-fns";
 
 const formatDateOnly = (date: Date | null): string | undefined => {
   if (!date) return undefined;
-  return format(date, 'yyyy-MM-dd');
+  return format(date, "yyyy-MM-dd");
 };
 
 interface DistributionsAndForfeituresSearch {
@@ -35,17 +35,19 @@ const schema = yup.object().shape({
     .min(2020, "Year must be 2020 or later")
     .max(2100, "Year must be 2100 or earlier")
     .required("Year is required"),
-  startDate: yup
-    .date()
-    .nullable(),
+  startDate: yup.date().nullable(),
   endDate: yup
     .date()
     .nullable()
-    .test('is-after-start', 'End Date must be after Start Date', function(value) {
+    .test("is-after-start", "End Date must be after Start Date", function (value) {
       const { startDate } = this.parent;
       if (!startDate || !value) return true;
       return value > startDate;
     })
+    .test("is-too-early", "Insuffient data for dates before 2024", function (value) {
+      if (!value) return true;
+      return value > new Date(2024,1,1);
+    }),
 });
 
 interface DistributionsAndForfeituresSearchFilterProps {
@@ -58,9 +60,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const [triggerSearch, { isFetching }] = useLazyGetDistributionsAndForfeituresQuery();
   const dispatch = useDispatch();
-  const { distributionsAndForfeituresQueryParams } = useSelector(
-    (state: RootState) => state.yearsEnd
-  );
+  const { distributionsAndForfeituresQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const profitYear = useDecemberFlowProfitYear();
   const {
     control,
@@ -115,11 +115,11 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
 
   return (
     <form onSubmit={validateAndSearch}>
-      <Grid2
+      <Grid
         container
         paddingX="24px"
         gap="24px">
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Controller
             name="profitYear"
             control={control}
@@ -138,8 +138,8 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
             )}
           />
           {errors.profitYear && <FormHelperText error>{errors.profitYear.message}</FormHelperText>}
-        </Grid2>
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Controller
             name="startDate"
             control={control}
@@ -148,7 +148,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
                 id="startDate"
                 onChange={(value: Date | null) => {
                   field.onChange(value);
-                  trigger('endDate'); 
+                  trigger("endDate");
                 }}
                 value={field.value}
                 required={false}
@@ -159,8 +159,8 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
             )}
           />
           {errors.startDate && <FormHelperText error>{errors.startDate.message}</FormHelperText>}
-        </Grid2>
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Controller
             name="endDate"
             control={control}
@@ -169,7 +169,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
                 id="endDate"
                 onChange={(value: Date | null) => {
                   field.onChange(value);
-                  trigger('endDate'); 
+                  trigger("endDate");
                 }}
                 value={field.value}
                 required={false}
@@ -180,9 +180,9 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
             )}
           />
           {errors.endDate && <FormHelperText error>{errors.endDate.message}</FormHelperText>}
-        </Grid2>       
-      </Grid2>
-      <Grid2
+        </Grid>
+      </Grid>
+      <Grid
         width="100%"
         paddingX="24px">
         <SearchAndReset
@@ -191,7 +191,7 @@ const DistributionsAndForfeituresSearchFilter: React.FC<DistributionsAndForfeitu
           isFetching={isFetching}
           disabled={!isValid}
         />
-      </Grid2>
+      </Grid>
     </form>
   );
 };

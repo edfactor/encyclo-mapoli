@@ -1,17 +1,14 @@
 import { agGridNumberToCurrency } from "smart-ui-library";
 import { ColDef } from "ag-grid-community";
+import { createBadgeColumn } from "../../utils/gridColumnFactory";
 
 export const ProfitShareEditUpdateGridColumns = (): ColDef[] => {
   return [
-    {
+    createBadgeColumn({ 
       headerName: "Badge",
-      field: "badgeNumber",
-      colId: "badgeNumber",
       minWidth: 100,
-      headerClass: "right-align",
-      cellClass: "right-align",
-      resizable: true
-    },
+      renderAsLink: false
+    }),
     {
       headerName: "Name",
       field: "name",
@@ -26,8 +23,7 @@ export const ProfitShareEditUpdateGridColumns = (): ColDef[] => {
       field: "code",
       colId: "code",
       minWidth: 100,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true
     },
     {
@@ -35,8 +31,7 @@ export const ProfitShareEditUpdateGridColumns = (): ColDef[] => {
       field: "psn",
       colId: "psn",
       minWidth: 100,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true
     },
     {
@@ -44,8 +39,7 @@ export const ProfitShareEditUpdateGridColumns = (): ColDef[] => {
       field: "contributionAmount",
       colId: "contributionAmount",
       minWidth: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       valueFormatter: agGridNumberToCurrency
     },
@@ -54,8 +48,7 @@ export const ProfitShareEditUpdateGridColumns = (): ColDef[] => {
       field: "earningsAmount",
       colId: "earningsAmount",
       minWidth: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       valueFormatter: agGridNumberToCurrency
     },
@@ -64,8 +57,7 @@ export const ProfitShareEditUpdateGridColumns = (): ColDef[] => {
       field: "forfeitureAmount",
       colId: "forfeitureAmount",
       minWidth: 120,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true,
       valueFormatter: agGridNumberToCurrency
     },
@@ -74,8 +66,7 @@ export const ProfitShareEditUpdateGridColumns = (): ColDef[] => {
       field: "remark",
       colId: "remark",
       minWidth: 100,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true
     },
     {
@@ -83,8 +74,7 @@ export const ProfitShareEditUpdateGridColumns = (): ColDef[] => {
       field: "commentTypeId",
       colId: "commentTypeId",
       minWidth: 80,
-      headerClass: "right-align",
-      cellClass: "right-align",
+      type: "rightAligned",
       resizable: true
     },
     {

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mail;
+using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Threading.Tasks;
 using Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
@@ -179,9 +181,9 @@ public class BeneficiaryService : IBeneficiaryService
         return response;
     }
 
-    public async Task UpdateBeneficiary(UpdateBeneficiaryRequest req, CancellationToken cancellationToken)
+    public async Task<UpdateBeneficiaryResponse> UpdateBeneficiary(UpdateBeneficiaryRequest req, CancellationToken cancellationToken)
     {
-        _ = await _dataContextFactory.UseWritableContextAsync(async (ctx, transaction) =>
+        var resp = await _dataContextFactory.UseWritableContextAsync(async (ctx, transaction) =>
         {
             var beneficiary = await ctx.Beneficiaries.SingleAsync(x => x.Id == req.Id, cancellationToken);
 
@@ -199,6 +201,28 @@ public class BeneficiaryService : IBeneficiaryService
             {
                 beneficiary.Percent = req.Percentage.Value;
             }
+            var response = new UpdateBeneficiaryResponse()
+            {
+                Id = beneficiary.Id,
+                BeneficiaryContactId = beneficiary.BeneficiaryContactId,
+                KindId = beneficiary.KindId,
+                Relationship = beneficiary.Relationship,
+                Percentage = beneficiary.Percent,
+                DemographicId = beneficiary.DemographicId,
+                BadgeNumber = beneficiary.BadgeNumber,
+                Street1 = string.Empty,
+                City = string.Empty,
+                State = string.Empty,
+                PostalCode = string.Empty,
+                Ssn = string.Empty,
+                DateOfBirth = DateOnly.MinValue,
+                FullName = string.Empty,
+                FirstName = string.Empty,
+                LastName = string.Empty,
+            };
+            var contact = await SetBeneficiaryContactColumns(beneficiary.BeneficiaryContactId, req, ctx, response, cancellationToken);
+            response.BeneficiaryContactId = contact.Id;
+            response.Id = beneficiary.Id;
 
             await ctx.SaveChangesAsync(cancellationToken);
             if (transaction != null) 
@@ -206,140 +230,30 @@ public class BeneficiaryService : IBeneficiaryService
                 await transaction.CommitAsync(cancellationToken);
             }
 
-            return Task.FromResult(true);
+            return Task.FromResult(response);
         }, cancellationToken);
+
+        return await resp;
     }
+
 
     public Task<UpdateBeneficiaryContactResponse> UpdateBeneficiaryContact(UpdateBeneficiaryContactRequest req, CancellationToken cancellationToken)
     {
         var response = _dataContextFactory.UseWritableContextAsync(async (ctx, transaction) =>
         {
-            var contact = await ctx.BeneficiaryContacts.Include(x => x.Address).Include(x => x.ContactInfo).SingleAsync(x => x.Id == req.Id, cancellationToken);
-            if (req.ContactSsn.HasValue && req.ContactSsn.Value > 999999999)
+            var resp = new UpdateBeneficiaryContactResponse()
             {
-                throw new InvalidOperationException("Contact Ssn must be 9 digits");
-            }   
-
-            if (req.ContactSsn.HasValue)
-            {
-                contact.Ssn = req.ContactSsn.Value;
-            }
-            if (req.DateOfBirth.HasValue)
-            {
-                contact.DateOfBirth = req.DateOfBirth.Value;
-            }
-            if (!string.IsNullOrEmpty(req.Street1))
-            {
-                contact.Address.Street = req.Street1;
-            }
-            if (req.Street2 != null)
-            {
-                if (req.Street2 == string.Empty)
-                {
-                    req.Street2 = null;
-                } else
-                {
-                    req.Street2 = req.Street2.Trim();
-                }
-            }
-            if (req.Street3 != null)
-            {
-                if (req.Street3 == string.Empty)
-                {
-                    req.Street3 = null;
-                } else
-                {
-                    req.Street3 = req.Street3.Trim();
-                }
-            }
-            if (req.Street4 != null)
-            {
-                if (req.Street4 == string.Empty)
-                {
-                    req.Street4 = null;
-                }
-                else
-                {
-                    req.Street4 = req.Street4.Trim();
-                }
-            }
-            if (!string.IsNullOrEmpty(req.City))
-            {
-                contact.Address.City = req.City.Trim();
-            }
-            if (!string.IsNullOrEmpty(req.State))
-            {
-                contact.Address.State = req.State.Trim();
-            }
-            if (!string.IsNullOrEmpty(req.PostalCode))
-            {
-                contact.Address.PostalCode = req.PostalCode.Trim();
-            }
-            if (req.CountryIso != null)
-            {
-                if (req.CountryIso == string.Empty)
-                {
-                    req.CountryIso = null;
-                }
-                else
-                {
-                    req.CountryIso = req.CountryIso.Trim();
-                }
-            }
-            if (!string.IsNullOrEmpty(req.FirstName))
-            {
-                contact.ContactInfo!.FirstName = req.FirstName.Trim();
-                contact.ContactInfo!.FullName = $"{contact.ContactInfo!.LastName}, {req.FirstName}";
-            }
-            if (!string.IsNullOrEmpty(req.LastName))
-            {
-                contact.ContactInfo!.LastName = req.LastName.Trim();
-                contact.ContactInfo!.FullName = $"{req.LastName}, {contact.ContactInfo!.FirstName}";
-            }
-            if (req.MiddleName != null)
-            {
-                if (req.MiddleName == string.Empty)
-                {
-                    req.MiddleName = null;
-                }
-                else
-                {
-                    req.MiddleName = req.MiddleName.Trim();
-                }
-            }
-            if (req.PhoneNumber != null)
-            {
-                if (req.PhoneNumber == string.Empty)
-                {
-                    req.PhoneNumber = null;
-                }
-                else
-                {
-                    req.PhoneNumber = req.PhoneNumber.Trim();
-                }
-            }
-            if (req.MobileNumber != null)
-            {
-                if (req.MobileNumber == string.Empty)
-                {
-                    req.MobileNumber = null;
-                }
-                else
-                {
-                    req.MobileNumber = req.MobileNumber.Trim();
-                }
-            }
-            if (req.EmailAddress != null)
-            {
-                if (req.EmailAddress == string.Empty)
-                {
-                    req.EmailAddress = null;
-                }
-                else
-                {
-                    req.EmailAddress = req.EmailAddress.Trim();
-                }
-            }
+                Ssn = string.Empty,
+                DateOfBirth = DateOnly.MinValue,
+                Street1 = string.Empty,
+                City = string.Empty,
+                State = string.Empty,
+                PostalCode = string.Empty,
+                FullName = string.Empty,
+                FirstName = string.Empty,
+                LastName = string.Empty,
+                            };
+            BeneficiaryContact contact = await SetBeneficiaryContactColumns(req.Id, req, ctx, resp, cancellationToken);
 
             await ctx.SaveChangesAsync(cancellationToken);
             if (transaction != null)
@@ -347,32 +261,164 @@ public class BeneficiaryService : IBeneficiaryService
                 await transaction.CommitAsync(cancellationToken);
             }
 
-            var resp = new UpdateBeneficiaryContactResponse() 
-            {
-                Id = contact.Id,
-                Ssn = contact.Ssn.MaskSsn(),
-                DateOfBirth = contact.DateOfBirth,
-                Street1 = contact.Address.Street,
-                Street2 = contact.Address.Street2,
-                Street3 = contact.Address.Street3,
-                Street4 = contact.Address.Street4,
-                City = contact.Address.City ?? string.Empty,
-                State = contact.Address.State ?? string.Empty,
-                PostalCode = contact.Address.PostalCode ?? string.Empty,
-                CountryIso = contact.Address.CountryIso ?? string.Empty,
-                FullName = contact.ContactInfo!.FullName ?? string.Empty,
-                FirstName = contact.ContactInfo!.FirstName,
-                LastName = contact.ContactInfo.LastName,
-                MiddleName = contact.ContactInfo.MiddleName,
-                PhoneNumber = contact.ContactInfo.PhoneNumber,
-                MobileNumber = contact.ContactInfo.MobileNumber,
-                EmailAddress = contact.ContactInfo.EmailAddress
-            };
-
             return resp;
         }, cancellationToken);
         return response;
     }
+
+    private static async Task<BeneficiaryContact> SetBeneficiaryContactColumns(int beneficiaryContactId, UpdateBeneficiaryContactRequest req, ProfitSharingDbContext ctx, UpdateBeneficiaryContactResponse response, CancellationToken cancellationToken)
+    {
+        var contact = await ctx.BeneficiaryContacts.Include(x => x.Address).Include(x => x.ContactInfo).SingleAsync(x => x.Id == beneficiaryContactId, cancellationToken);
+        if (req.ContactSsn.HasValue && req.ContactSsn.Value > 999999999)
+        {
+            throw new InvalidOperationException("Contact Ssn must be 9 digits");
+        }
+
+        if (req.ContactSsn.HasValue)
+        {
+            contact.Ssn = req.ContactSsn.Value;
+        }
+        if (req.DateOfBirth.HasValue)
+        {
+            contact.DateOfBirth = req.DateOfBirth.Value;
+        }
+        if (!string.IsNullOrEmpty(req.Street1))
+        {
+            contact.Address.Street = req.Street1;
+        }
+        if (req.Street2 != null)
+        {
+            if (req.Street2 == string.Empty)
+            {
+                req.Street2 = null;
+            }
+            else
+            {
+                req.Street2 = req.Street2.Trim();
+            }
+        }
+        if (req.Street3 != null)
+        {
+            if (req.Street3 == string.Empty)
+            {
+                req.Street3 = null;
+            }
+            else
+            {
+                req.Street3 = req.Street3.Trim();
+            }
+        }
+        if (req.Street4 != null)
+        {
+            if (req.Street4 == string.Empty)
+            {
+                req.Street4 = null;
+            }
+            else
+            {
+                req.Street4 = req.Street4.Trim();
+            }
+        }
+        if (!string.IsNullOrEmpty(req.City))
+        {
+            contact.Address.City = req.City.Trim();
+        }
+        if (!string.IsNullOrEmpty(req.State))
+        {
+            contact.Address.State = req.State.Trim();
+        }
+        if (!string.IsNullOrEmpty(req.PostalCode))
+        {
+            contact.Address.PostalCode = req.PostalCode.Trim();
+        }
+        if (req.CountryIso != null)
+        {
+            if (req.CountryIso == string.Empty)
+            {
+                req.CountryIso = null;
+            }
+            else
+            {
+                req.CountryIso = req.CountryIso.Trim();
+            }
+        }
+        if (!string.IsNullOrEmpty(req.FirstName))
+        {
+            contact.ContactInfo!.FirstName = req.FirstName.Trim();
+            contact.ContactInfo!.FullName = $"{contact.ContactInfo!.LastName}, {req.FirstName}";
+        }
+        if (!string.IsNullOrEmpty(req.LastName))
+        {
+            contact.ContactInfo!.LastName = req.LastName.Trim();
+            contact.ContactInfo!.FullName = $"{req.LastName}, {contact.ContactInfo!.FirstName}";
+        }
+        if (req.MiddleName != null)
+        {
+            if (req.MiddleName == string.Empty)
+            {
+                req.MiddleName = null;
+            }
+            else
+            {
+                req.MiddleName = req.MiddleName.Trim();
+            }
+        }
+        if (req.PhoneNumber != null)
+        {
+            if (req.PhoneNumber == string.Empty)
+            {
+                req.PhoneNumber = null;
+            }
+            else
+            {
+                req.PhoneNumber = req.PhoneNumber.Trim();
+            }
+        }
+        if (req.MobileNumber != null)
+        {
+            if (req.MobileNumber == string.Empty)
+            {
+                req.MobileNumber = null;
+            }
+            else
+            {
+                req.MobileNumber = req.MobileNumber.Trim();
+            }
+        }
+        if (req.EmailAddress != null)
+        {
+            if (req.EmailAddress == string.Empty)
+            {
+                req.EmailAddress = null;
+            }
+            else
+            {
+                req.EmailAddress = req.EmailAddress.Trim();
+            }
+        }
+
+        response.Id = contact.Id;
+        response.Ssn = contact.Ssn.MaskSsn();
+        response.DateOfBirth = contact.DateOfBirth;
+        response.Street1 = contact.Address.Street;
+        response.Street2 = contact.Address.Street2;
+        response.Street3 = contact.Address.Street3;
+        response.Street4 = contact.Address.Street4;
+        response.City = contact.Address.City ?? string.Empty;
+        response.State = contact.Address.State ?? string.Empty;
+        response.PostalCode = contact.Address.PostalCode ?? string.Empty;
+        response.CountryIso = contact.Address.CountryIso ?? string.Empty;
+        response.FullName = contact.ContactInfo!.FullName ?? string.Empty;
+        response.FirstName = contact.ContactInfo!.FirstName;
+        response.LastName = contact.ContactInfo.LastName;
+        response.MiddleName = contact.ContactInfo.MiddleName;
+        response.PhoneNumber = contact.ContactInfo.PhoneNumber;
+        response.MobileNumber = contact.ContactInfo.MobileNumber;
+        response.EmailAddress = contact.ContactInfo.EmailAddress;
+
+        return contact;
+    }
+
     public async Task DeleteBeneficiary(int id, CancellationToken cancellationToken)
     {
         _ = await _dataContextFactory.UseWritableContextAsync(async (ctx, transaction) =>
@@ -446,7 +492,7 @@ public class BeneficiaryService : IBeneficiaryService
     private async Task<bool> CanIDeleteThisBeneficiary(Beneficiary beneficiary, ProfitSharingDbContext ctx, CancellationToken cancellationToken)
     {
         var balanceInfo = await _totalService.GetVestingBalanceForSingleMemberAsync(Common.Contracts.Request.SearchBy.Ssn, beneficiary.Contact!.Ssn, (short)DateTime.Now.Year, cancellationToken);
-        if (balanceInfo?.CurrentBalance != 0) {
+        if (balanceInfo!=null && balanceInfo?.CurrentBalance != 0) {
             throw new InvalidOperationException("Balance is not zero, cannot delete beneficiary.");
         }
 

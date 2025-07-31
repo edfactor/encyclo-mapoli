@@ -8,6 +8,7 @@ public sealed record DistributionsAndForfeitureResponse
     public DateOnly? Date { get; set; }
     public required decimal DistributionAmount { get; set; }
     public required decimal StateTax { get; set; }
+    public required string? State { get; set; }
     public required decimal FederalTax { get; set; }
     public required decimal ForfeitAmount { get; set; }
     public required byte? Age { get; set; }
@@ -15,6 +16,7 @@ public sealed record DistributionsAndForfeitureResponse
     public string? OtherName { get; set; }
     public string? OtherSsn { get; set; }
     public required byte EnrolledId { get; set; }
+    
 
     public static DistributionsAndForfeitureResponse ResponseExample()
     {
@@ -25,6 +27,7 @@ public sealed record DistributionsAndForfeitureResponse
             Ssn = "124",
             DistributionAmount = 1250.25m,
             StateTax = 25.12m,
+            State = "MA",
             FederalTax = 51.52m,
             ForfeitAmount = 0m,
             Age = 33,

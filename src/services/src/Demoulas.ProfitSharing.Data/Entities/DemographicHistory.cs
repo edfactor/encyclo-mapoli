@@ -1,6 +1,8 @@
-﻿namespace Demoulas.ProfitSharing.Data.Entities;
+﻿using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 
-public sealed class DemographicHistory
+namespace Demoulas.ProfitSharing.Data.Entities;
+
+public sealed class DemographicHistory : IDoNotAudit
 {
     public long Id { get; set; }
     public int DemographicId { get; set; }

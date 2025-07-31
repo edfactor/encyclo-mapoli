@@ -20,10 +20,10 @@ import {
   PagedReportResponse
 } from "reduxstore/types";
 import { DSMGrid, ISortParams, Pagination, SmartModal } from "smart-ui-library";
+import ReportSummary from "../../../components/ReportSummary";
 import { CAPTIONS } from "../../../constants";
 import { GetManageExecutiveHoursAndDollarsColumns } from "./ManageExecutiveHoursAndDollarsGridColumns";
 import SearchAndAddExecutive from "./SearchAndAddExecutive";
-import ReportSummary from "../../../components/ReportSummary";
 
 interface RenderAddExecutiveButtonProps {
   reportReponse: PagedReportResponse<ExecutiveHoursAndDollars> | null;
@@ -50,8 +50,7 @@ const RenderAddExecutiveButton: React.FC<RenderAddExecutiveButtonProps> = ({
       startIcon={<AddOutlined color={gridAvailable ? "secondary" : "disabled"} />}
       onClick={async () => {
         // We need to clear out previous result rows in redux
-        //dispatch(clearAdditionalExecutivesChosen());
-        dispatch(clearExecutiveRowsSelected());
+        //dispatch(clearExecutiveRowsSelected());
         dispatch(clearAdditionalExecutivesGrid());
         setOpenModal(true);
       }}>
@@ -78,12 +77,16 @@ interface ManageExecutiveHoursAndDollarsGridSearchProps {
   isModal?: boolean;
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
+  pageNumberReset: boolean;
+  setPageNumberReset: (reset: boolean) => void;
 }
 
 const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollarsGridSearchProps> = ({
   isModal,
   initialSearchLoaded,
-  setInitialSearchLoaded
+  setInitialSearchLoaded,
+  pageNumberReset,
+  setPageNumberReset
 }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
@@ -155,6 +158,15 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
       onSearch();
     }
   }, [initialSearchLoaded, properPageNumber, properPageSize, sortParams, onSearch]);
+
+  // Need a useEffect on a change in executiveHoursAndDollars to reset the page number
+
+  useEffect(() => {
+    if (pageNumberReset) {
+      setPageNumber(0);
+      setPageNumberReset(false);
+    }
+  }, [pageNumberReset, setPageNumberReset]);
 
   // This function checks to see if we have a change for this badge number already pending for a save
   const isRowStagedToSave = (badge: number): boolean => {
@@ -288,9 +300,9 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
 
   const isRowDataThere = (isModal: boolean | undefined): boolean => {
     if (isModal) {
-      return (additionalExecutivesGrid?.response != null  && executiveHoursAndDollars?.response?.results != null);
+      return additionalExecutivesGrid?.response != null;
     } else {
-      return (mutableCopyOfGridData?.response != null  && executiveHoursAndDollars?.response?.results != null);
+      return mutableCopyOfGridData?.response != null && executiveHoursAndDollars?.response?.results != null;
     }
   };
 
@@ -310,8 +322,8 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
           {!isModal && (
             <>
               <div className="px-[24px]">
-                <ReportSummary report={mutableCopyOfGridData} />
-              </div>             
+                {mutableCopyOfGridData && <ReportSummary report={mutableCopyOfGridData} />}
+              </div>
               <div style={{ gap: "36px", display: "flex", justifyContent: "end", marginRight: 28 }}>
                 <RenderAddExecutiveButton
                   reportReponse={mutableCopyOfGridData}
@@ -385,6 +397,8 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
           setOpenModal={setOpenModal}
           initialSearchLoaded={initialSearchLoaded}
           setInitialSearchLoaded={setInitialSearchLoaded}
+          pageNumberReset={pageNumberReset}
+          setPageNumberReset={setPageNumberReset}
         />
       </SmartModal>
     </>

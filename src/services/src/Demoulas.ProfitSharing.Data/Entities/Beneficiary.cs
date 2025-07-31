@@ -1,7 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using Demoulas.ProfitSharing.Data.Entities.Base;
 
 namespace Demoulas.ProfitSharing.Data.Entities;
-public sealed partial class Beneficiary
+public sealed class Beneficiary : ModifiedBase
 {
     public required int Id { get; set; }
     public required int BadgeNumber { get; set; }
@@ -21,11 +21,4 @@ public sealed partial class Beneficiary
     public Demographic? Demographic { get; set; }
 
     public List<BeneficiarySsnChangeHistory>? BeneficiarySsnChangeHistories { get; set; }
-}
-
-
-public partial class Beneficiary
-{
-    [NotMapped]
-    public decimal CurrentBalance { get; set; }
 }

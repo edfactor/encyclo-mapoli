@@ -38,7 +38,7 @@ public class CreateMilitaryContributionRecord : Endpoint<CreateMilitaryContribut
         await response.Match(
             async success =>
             {
-                await SendCreatedAtAsync<GetMilitaryContributionRecords>(
+                await Send.CreatedAtAsync<GetMilitaryContributionRecords>(
                     routeValues: new MilitaryContributionRequest
                     {
                         BadgeNumber = req.BadgeNumber,
@@ -50,7 +50,7 @@ public class CreateMilitaryContributionRecord : Endpoint<CreateMilitaryContribut
             },
             async error =>
             {
-                await SendAsync(error, cancellation: ct);
+                await Send.ResponseAsync(error, statusCode: 400, cancellation: ct);
             }
         );
     }

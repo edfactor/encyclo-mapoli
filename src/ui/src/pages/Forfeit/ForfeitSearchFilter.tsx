@@ -1,6 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Checkbox, FormHelperText, FormLabel, TextField } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetForfeituresAndPointsQuery } from "reduxstore/api/YearsEndApi";
@@ -21,6 +21,7 @@ interface ForfeitSearchParams {
 
 interface ForfeitSearchParametersProps {
   setInitialSearchLoaded: (loaded: boolean) => void;
+  setPageReset: (reset: boolean) => void;
 }
 
 const schema = yup.object().shape({
@@ -34,7 +35,7 @@ const schema = yup.object().shape({
   useFrozenData: yup.boolean().default(true).required()
 });
 
-const ForfeitSearchParameters: React.FC<ForfeitSearchParametersProps> = ({ setInitialSearchLoaded }) => {
+const ForfeitSearchParameters: React.FC<ForfeitSearchParametersProps> = ({ setInitialSearchLoaded, setPageReset }) => {
   const [triggerSearch, { isFetching }] = useLazyGetForfeituresAndPointsQuery();
   const { forfeituresAndPointsQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
@@ -55,6 +56,7 @@ const ForfeitSearchParameters: React.FC<ForfeitSearchParametersProps> = ({ setIn
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
+      setPageReset(true);
       triggerSearch(
         {
           profitYear: fiscalCloseProfitYear,
@@ -63,15 +65,18 @@ const ForfeitSearchParameters: React.FC<ForfeitSearchParametersProps> = ({ setIn
         },
         false
       );
-      dispatch(setForfeituresAndPointsQueryParams({
-        profitYear: fiscalCloseProfitYear,
-        useFrozenData: data.useFrozenData
-      }));
+      dispatch(
+        setForfeituresAndPointsQueryParams({
+          profitYear: fiscalCloseProfitYear,
+          useFrozenData: data.useFrozenData
+        })
+      );
       setInitialSearchLoaded(true);
     }
   });
 
   const handleReset = () => {
+    setPageReset(true);
     dispatch(clearForfeituresAndPoints());
     dispatch(clearForfeituresAndPointsQueryParams());
     reset({
@@ -82,15 +87,15 @@ const ForfeitSearchParameters: React.FC<ForfeitSearchParametersProps> = ({ setIn
 
   return (
     <form>
-      <Grid2
+      <Grid
         container
         paddingX="24px"
         gap="6px">
-        <Grid2
+        <Grid
           container
           spacing={3}
           width="100%">
-          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <FormLabel>Profit Year</FormLabel>
             <Controller
               name="profitYear"
@@ -110,9 +115,9 @@ const ForfeitSearchParameters: React.FC<ForfeitSearchParametersProps> = ({ setIn
               )}
             />
             {errors.profitYear && <FormHelperText error>{errors.profitYear.message}</FormHelperText>}
-          </Grid2>
-        </Grid2>
-        <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+          </Grid>
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <FormLabel>Use Frozen Demographic Data</FormLabel>
           <Controller
             name="useFrozenData"
@@ -126,9 +131,9 @@ const ForfeitSearchParameters: React.FC<ForfeitSearchParametersProps> = ({ setIn
               />
             )}
           />
-        </Grid2>
-      </Grid2>
-      <Grid2
+        </Grid>
+      </Grid>
+      <Grid
         width="100%"
         paddingX="24px">
         <SearchAndReset
@@ -137,7 +142,7 @@ const ForfeitSearchParameters: React.FC<ForfeitSearchParametersProps> = ({ setIn
           isFetching={isFetching}
           disabled={!isValid}
         />
-      </Grid2>
+      </Grid>
     </form>
   );
 };

@@ -1,35 +1,47 @@
 import { useEffect, useState } from "react";
-import StatusDropdown from "./StatusDropdown";
-import { useGetNavigationStatusQuery, useLazyGetNavigationStatusQuery, useLazyUpdateNavigationStatusQuery, useUpdateNavigationStatusQuery } from "reduxstore/api/NavigationStatusApi";
 import { useSelector } from "react-redux";
+import { useLazyGetNavigationQuery } from "reduxstore/api/NavigationApi";
+import {
+  useLazyGetNavigationStatusQuery,
+  useLazyUpdateNavigationStatusQuery
+} from "reduxstore/api/NavigationStatusApi";
 import { RootState } from "reduxstore/store";
 import { NavigationDto } from "reduxstore/types";
-import { useLazyGetNavigationQuery } from "reduxstore/api/NavigationApi";
+import StatusDropdown from "./StatusDropdown";
 
 interface StatusDropdownActionNodeProps {
   initialStatus?: string;
   navigationId?: number;
+  onStatusChange?: (newStatus: string, statusName?: string) => void;
 }
 
-const StatusDropdownActionNode: React.FC<StatusDropdownActionNodeProps> = ({ initialStatus, navigationId }) => {
+const StatusDropdownActionNode: React.FC<StatusDropdownActionNodeProps> = ({ 
+  initialStatus, 
+  navigationId, 
+  onStatusChange 
+}) => {
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const [currentStatus, setCurrentStatus] = useState("1");
   const [navigationObj, setNavigationObj] = useState<NavigationDto | null>(null);
   //const { isSuccess, data } = useGetNavigationStatusQuery({});
-  const [triggerGetNavigationStatus, {data, isSuccess}] = useLazyGetNavigationStatusQuery({});
+  const [triggerGetNavigationStatus, { data, isSuccess }] = useLazyGetNavigationStatusQuery({});
 
-  const navigationList = useSelector(
-    (state: RootState) => state.navigation.navigationData
-  );
-  const currentNavigationId = parseInt(localStorage.getItem('navigationId') ?? "");
+  const navigationList = useSelector((state: RootState) => state.navigation.navigationData);
+  const currentNavigationId = parseInt(localStorage.getItem("navigationId") ?? "");
   const [triggerUpdate] = useLazyUpdateNavigationStatusQuery();
   const [triggerGetNavigation] = useLazyGetNavigationQuery();
   const handleStatusChange = async (newStatus: string) => {
-    const result = await triggerUpdate({ navigationId: navigationObj?.id, statusId: parseInt(newStatus) })
+    const result = await triggerUpdate({ navigationId: navigationObj?.id, statusId: parseInt(newStatus) });
     if (result.data?.isSuccessful) {
       setCurrentStatus(newStatus);
       if (hasToken) {
         triggerGetNavigation({ navigationId: undefined });
+      }
+      
+      // Call the parent callback if provided
+      if (onStatusChange) {
+        const statusName = data?.navigationStatusList?.find(status => status.id === parseInt(newStatus))?.name;
+        onStatusChange(newStatus, statusName);
       }
     }
   };
@@ -49,20 +61,26 @@ const StatusDropdownActionNode: React.FC<StatusDropdownActionNodeProps> = ({ ini
       }
     }
     return undefined;
-  }
+  };
 
   useEffect(() => {
-    if (hasToken)
-      triggerGetNavigationStatus({});
+    if (hasToken) triggerGetNavigationStatus({});
     const obj = getNavigationObjectBasedOnId(navigationList?.navigation, currentNavigationId ?? undefined);
-    if (obj)
-      setNavigationObj(obj);
+    if (obj) setNavigationObj(obj);
     setCurrentStatus(obj?.statusId + "");
-  }, [data, navigationList, currentNavigationId, hasToken])
+  }, [data, navigationList, currentNavigationId, hasToken]);
 
   return (
     <div className="flex items-center gap-2 h-10">
-      {isSuccess ? <StatusDropdown navigationStatusList={data.navigationStatusList} onStatusChange={handleStatusChange} initialStatus={currentStatus} /> : <></>}
+      {isSuccess ? (
+        <StatusDropdown
+          navigationStatusList={data.navigationStatusList}
+          onStatusChange={handleStatusChange}
+          initialStatus={currentStatus}
+        />
+      ) : (
+        <></>
+      )}
     </div>
   );
 };

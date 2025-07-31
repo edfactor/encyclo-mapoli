@@ -1,8 +1,9 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.PostFrozen;
 
-public sealed record ProfitSharingUnder21ReportResponse:ReportResponseBase<ProfitSharingUnder21ReportDetail>
+public sealed record ProfitSharingUnder21ReportResponse : ReportResponseBase<ProfitSharingUnder21ReportDetail>
 {
     public static readonly string REPORT_NAME = "PROFIT SHARING UNDER AGE 21 REPORT";
+
     public ProfitSharingUnder21ReportResponse()
     {
         this.ReportName = REPORT_NAME;
@@ -27,10 +28,8 @@ public sealed record ProfitSharingUnder21ReportResponse:ReportResponseBase<Profi
             EndDate = DateOnly.FromDateTime(DateTime.UtcNow),
             Response = new Demoulas.Common.Contracts.Contracts.Response.PaginatedResponseDto<ProfitSharingUnder21ReportDetail>()
             {
-                Total = 1,
-                Results = new List<ProfitSharingUnder21ReportDetail>() { ProfitSharingUnder21ReportDetail.ResponseExample() }
+                Total = 1, Results = new List<ProfitSharingUnder21ReportDetail>() { ProfitSharingUnder21ReportDetail.ResponseExample() }
             }
         };
     }
-
 }

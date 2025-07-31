@@ -1,15 +1,8 @@
-import React, { useState } from 'react';
-import { 
-  FormControl, 
-  Select,
-  MenuItem, 
-  SelectChangeEvent,
-  FormLabel,
-  TextField,
-} from '@mui/material';
-import Grid2 from '@mui/material/Grid2';
-import { SearchAndReset } from 'smart-ui-library';
-import { ReportPreset } from 'reduxstore/types';
+import { FormControl, FormLabel, MenuItem, Select, SelectChangeEvent, TextField } from "@mui/material";
+import { Grid } from "@mui/material";
+import React from "react";
+import { ReportPreset } from "reduxstore/types";
+import { SearchAndReset } from "smart-ui-library";
 
 interface FilterSectionProps {
   presets: ReportPreset[];
@@ -28,7 +21,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
 }) => {
   const handlePresetChange = (event: SelectChangeEvent<string>) => {
     const presetId = event.target.value;
-    const selected = presets.find(p => p.id === presetId) || null;
+    const selected = presets.find((p) => p.id === presetId) || null;
     onPresetChange(selected);
   };
 
@@ -41,7 +34,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   };
 
   const getAgeRangeDisplay = () => {
-    if (!currentPreset) return '';
+    if (!currentPreset) return "";
     const { minimumAgeInclusive, maximumAgeInclusive } = currentPreset.params;
     if (minimumAgeInclusive && maximumAgeInclusive) {
       return `${minimumAgeInclusive}-${maximumAgeInclusive}`;
@@ -50,11 +43,11 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     } else if (maximumAgeInclusive) {
       return `0-${maximumAgeInclusive}`;
     }
-    return '';
+    return "";
   };
 
   const getHoursRangeDisplay = () => {
-    if (!currentPreset) return '';
+    if (!currentPreset) return "";
     const { minimumHoursInclusive, maximumHoursInclusive } = currentPreset.params;
     if (minimumHoursInclusive && maximumHoursInclusive) {
       return `${minimumHoursInclusive}-${maximumHoursInclusive}`;
@@ -63,71 +56,77 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     } else if (maximumHoursInclusive) {
       return `< ${maximumHoursInclusive}`;
     }
-    return '';
+    return "";
   };
 
   const getEmployeeStatusDisplay = () => {
-    if (!currentPreset) return '';
+    if (!currentPreset) return "";
     const { includeActiveEmployees, includeInactiveEmployees } = currentPreset.params;
-    
+
     if (includeActiveEmployees && includeInactiveEmployees) {
-      return 'Active/Inactive';
+      return "Active/Inactive";
     } else if (includeActiveEmployees) {
-      return 'Active';
+      return "Active";
     } else if (includeInactiveEmployees) {
-      return 'Inactive';
+      return "Inactive";
     }
-    return '';
+    return "";
   };
 
   const getPriorProfitShareDisplay = () => {
-    if (!currentPreset) return '';
-    const { includeEmployeesWithPriorProfitSharingAmounts, includeEmployeesWithNoPriorProfitSharingAmounts } = currentPreset.params;
-    
+    if (!currentPreset) return "";
+    const { includeEmployeesWithPriorProfitSharingAmounts, includeEmployeesWithNoPriorProfitSharingAmounts } =
+      currentPreset.params;
+
     if (includeEmployeesWithPriorProfitSharingAmounts && includeEmployeesWithNoPriorProfitSharingAmounts) {
-      return 'All';
+      return "All";
     } else if (includeEmployeesWithPriorProfitSharingAmounts) {
-      return 'With Prior Amounts';
+      return "With Prior Amounts";
     } else if (includeEmployeesWithNoPriorProfitSharingAmounts) {
-      return 'Without Prior Amounts';
+      return "Without Prior Amounts";
     }
-    return '';
+    return "";
   };
 
   return (
-    <form onSubmit={(e) => { e.preventDefault(); handleApply(); }}>
-      <Grid2
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        handleApply();
+      }}>
+      <Grid
         container
         paddingX="24px">
-        <Grid2
+        <Grid
           container
           spacing={3}
           width="100%">
-          <Grid2 size={{ xs: 12 }}>
+          <Grid size={{ xs: 12 }}>
             <FormLabel>PAY426N Presets</FormLabel>
             <FormControl fullWidth>
               <Select
-                value={currentPreset?.id || ''}
+                value={currentPreset?.id || ""}
                 onChange={handlePresetChange}
-                displayEmpty
-              >
+                displayEmpty>
                 <MenuItem value="">Select a Report</MenuItem>
-                {presets.map(preset => (
-                  <MenuItem key={preset.id} value={preset.id}>
+                {presets.map((preset) => (
+                  <MenuItem
+                    key={preset.id}
+                    value={preset.id}>
                     {preset.name} - {preset.description}
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
-          </Grid2>
-        </Grid2>
+          </Grid>
+        </Grid>
 
-        <Grid2
+        <Grid
           container
           spacing={3}
           width="100%"
           paddingTop="16px">
-          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <FormLabel>Age</FormLabel>
             <TextField
               value={getAgeRangeDisplay()}
@@ -135,8 +134,8 @@ const FilterSection: React.FC<FilterSectionProps> = ({
               fullWidth
               size="small"
             />
-          </Grid2>
-          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <FormLabel>Profit Share Hours</FormLabel>
             <TextField
               value={getHoursRangeDisplay()}
@@ -144,8 +143,8 @@ const FilterSection: React.FC<FilterSectionProps> = ({
               fullWidth
               size="small"
             />
-          </Grid2>
-          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <FormLabel>Employee Status</FormLabel>
             <TextField
               value={getEmployeeStatusDisplay()}
@@ -153,8 +152,8 @@ const FilterSection: React.FC<FilterSectionProps> = ({
               fullWidth
               size="small"
             />
-          </Grid2>
-          <Grid2 size={{ xs: 12, sm: 6, md: 3 }}>
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <FormLabel>Prior Profit Share Amount</FormLabel>
             <TextField
               value={getPriorProfitShareDisplay()}
@@ -162,11 +161,11 @@ const FilterSection: React.FC<FilterSectionProps> = ({
               fullWidth
               size="small"
             />
-          </Grid2>
-        </Grid2>
-      </Grid2>
-      
-      <Grid2
+          </Grid>
+        </Grid>
+      </Grid>
+
+      <Grid
         width="100%"
         paddingX="24px"
         paddingY="16px">
@@ -176,9 +175,9 @@ const FilterSection: React.FC<FilterSectionProps> = ({
           isFetching={isLoading}
           disabled={!currentPreset || isLoading}
         />
-      </Grid2>
+      </Grid>
     </form>
   );
 };
 
-export default FilterSection; 
+export default FilterSection;

@@ -1,12 +1,12 @@
-import { Divider, Typography, TextField } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
-import { Page, TotalsGrid } from "smart-ui-library";
-import { CAPTIONS } from "../../constants";
+import { Divider, Typography } from "@mui/material";
+import { Grid } from "@mui/material";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
-import { RootState } from "reduxstore/store";
-import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useLazyGetControlSheetQuery } from "reduxstore/api/YearsEndApi";
+import { RootState } from "reduxstore/store";
+import { Page, TotalsGrid } from "smart-ui-library";
+import { CAPTIONS } from "../../constants";
 const ProfCtrlSheet = () => {
   const profitYear = useFiscalCloseProfitYear();
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
@@ -29,18 +29,18 @@ const ProfCtrlSheet = () => {
 
   const formatCurrency = (amount: number | undefined) => {
     if (amount === undefined) return "$XX,XXX,XXX.XX";
-    return `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    return `$${amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
   return (
     <Page label={CAPTIONS.PROF_CTRLSHEET}>
-      <Grid2
+      <Grid
         container
         rowSpacing="24px">
-        <Grid2 width={"100%"}>
+        <Grid width={"100%"}>
           <Divider />
-        </Grid2>
-        <Grid2 width="100%">
+        </Grid>
+        <Grid width="100%">
           <>
             <div style={{ padding: "0 24px 0 24px" }}>
               <Typography
@@ -60,8 +60,8 @@ const ProfCtrlSheet = () => {
               />
             </div>
           </>
-        </Grid2>
-      </Grid2>
+        </Grid>
+      </Grid>
     </Page>
   );
 };

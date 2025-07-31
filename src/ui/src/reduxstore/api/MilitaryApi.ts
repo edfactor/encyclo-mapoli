@@ -1,10 +1,6 @@
-import { createApi} from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
 
-import {
-  CreateMilitaryContributionRequest,
-  MasterInquiryDetail,
-  MilitaryContributionRequest
-} from "reduxstore/types";
+import { CreateMilitaryContributionRequest, MasterInquiryDetail, MilitaryContributionRequest } from "reduxstore/types";
 import { createDataSourceAwareBaseQuery } from "./api";
 import { setMilitaryContributions, setMilitaryError } from "reduxstore/slices/militarySlice";
 import { Paged } from "smart-ui-library";

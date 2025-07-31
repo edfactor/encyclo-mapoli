@@ -1,5 +1,5 @@
 import { Divider, Tab, Tabs } from "@mui/material";
-import Grid2 from "@mui/material/Grid2";
+import { Grid } from "@mui/material";
 import { useState } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS } from "../../../../constants";
@@ -41,7 +41,7 @@ const QPAY066TA = () => {
     switch (tabValue) {
       case 0:
         return (
-          <Grid2
+          <Grid
             container
             width="100%"
             direction="column"
@@ -49,7 +49,7 @@ const QPAY066TA = () => {
             <StoreContent store={store} />
             <TotalsContent store={store} />
             <SummariesContent />
-          </Grid2>
+          </Grid>
         );
       case 1:
         return <StoreContent store={store} />;
@@ -63,15 +63,17 @@ const QPAY066TA = () => {
   };
 
   return (
-    <Page label={CAPTIONS.BREAKDOWN_REPORT} actionNode={renderActionNode()}>
-      <Grid2
+    <Page
+      label={CAPTIONS.BREAKDOWN_REPORT}
+      actionNode={renderActionNode()}>
+      <Grid
         container
         rowSpacing="24px">
-        <Grid2 width="100%">
+        <Grid width="100%">
           <Divider />
-        </Grid2>
+        </Grid>
 
-        <Grid2 width="100%">
+        <Grid width="100%">
           <Tabs
             value={tabValue}
             onChange={handleTabChange}
@@ -86,19 +88,19 @@ const QPAY066TA = () => {
               />
             ))}
           </Tabs>
-        </Grid2>
+        </Grid>
 
-        <Grid2 width="100%">
+        <Grid width="100%">
           <DSMAccordion title="Filter">
             <QPAY066TABreakdownParameters
               activeTab={getActiveTab()}
               onStoreChange={(newStore) => setStore(newStore)}
             />
           </DSMAccordion>
-        </Grid2>
+        </Grid>
 
-        <Grid2 width="100%">{renderContent()}</Grid2>
-      </Grid2>
+        <Grid width="100%">{renderContent()}</Grid>
+      </Grid>
     </Page>
   );
 };
