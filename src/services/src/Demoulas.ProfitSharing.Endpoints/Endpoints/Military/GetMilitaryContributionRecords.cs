@@ -2,6 +2,7 @@
 using Demoulas.ProfitSharing.Common.Contracts.Request.Military;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Military;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
@@ -12,10 +13,14 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Military;
 public class GetMilitaryContributionRecords : Endpoint<MilitaryContributionRequest, Results<Ok<PaginatedResponseDto<MilitaryContributionResponse>>, ProblemHttpResult>>
 {
     private readonly IMilitaryService _militaryService;
+    private readonly IAuditService _auditService;
 
-    public GetMilitaryContributionRecords(IMilitaryService militaryService)
+    private const string ReportName = "Get All Military Contribution Records";
+
+    public GetMilitaryContributionRecords(IMilitaryService militaryService, IAuditService auditService)
     {
         _militaryService = militaryService;
+        _auditService = auditService;
     }
 
     public override void Configure()
@@ -23,7 +28,7 @@ public class GetMilitaryContributionRecords : Endpoint<MilitaryContributionReque
         Get(string.Empty);
         Summary(s =>
         {
-            s.Summary = "Get All Military Contribution Records";
+            s.Summary = ReportName;
             s.ResponseExamples = new Dictionary<int, object> { { 200, new List<MilitaryContributionResponse>() } };
         });
         Group<MilitaryGroup>();
@@ -33,9 +38,20 @@ public class GetMilitaryContributionRecords : Endpoint<MilitaryContributionReque
     {
         var response = await _militaryService.GetMilitaryServiceRecordAsync(req, ct);
 
-        return response.Match<Results<Ok<PaginatedResponseDto<MilitaryContributionResponse>>, ProblemHttpResult>>(
-            success => TypedResults.Ok(success),
-            error => TypedResults.Problem(error)
+        return await response.Match<Task<Results<Ok<PaginatedResponseDto<MilitaryContributionResponse>>, ProblemHttpResult>>>(
+            async success =>
+            {
+                // Read "archive" from query string without modifying the DTO
+                bool archive = (HttpContext?.Request?.Query?.TryGetValue("archive", out var archiveValue) ?? false) &&
+                               bool.TryParse(archiveValue, out var archiveResult) && archiveResult;
+
+                if (archive)
+                {
+                    await _auditService.ArchiveCompletedReportAsync(ReportName, req, success, ct);
+                }
+                return TypedResults.Ok(success);
+            },
+            error => Task.FromResult<Results<Ok<PaginatedResponseDto<MilitaryContributionResponse>>, ProblemHttpResult>>(TypedResults.Problem(error))
         );
     }
 }
