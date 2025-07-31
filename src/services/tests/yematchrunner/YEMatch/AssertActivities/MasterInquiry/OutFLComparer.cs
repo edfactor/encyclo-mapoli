@@ -1,4 +1,4 @@
-namespace YEMatch;
+﻿namespace YEMatch.YEMatch.AssertActivities.MasterInquiry;
 
 /* Used to compare two "OutFL" instances. One from READY and one from SMART.   Ignores the SSN and Error Message fields. */
 public static class OutFLComparer

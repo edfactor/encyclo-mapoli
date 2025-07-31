@@ -205,7 +205,7 @@ SELECT
         var initialContributionFiveYearsAgo = asOfDate.AddYears(-5).Year;
         var birthDate65 = asOfDate.AddYears(-65);
         // We get the year prior to the profit year, because this algorithm looks at the hours worked to decide if the protit year has enough hours create another year.
-        var priorYarsOfCreditQuery = GetYearsOfServiceQuery((short)(profitYear-1));
+        var priorYearsOfCreditQuery = GetYearsOfServiceQuery((short)(profitYear-1));
         var initialContributionYearQuery = GetInitialContributionYearQuery();
 
         var query = @$"
@@ -232,7 +232,7 @@ FROM (
     FROM DEMOGRAPHIC d
     LEFT JOIN PAY_PROFIT pp ON d.ID = pp.DEMOGRAPHIC_ID AND pp.PROFIT_YEAR  = {profitYear}
     LEFT JOIN (
-        {priorYarsOfCreditQuery}
+        {priorYearsOfCreditQuery}
     ) yos ON d.SSN = yos.SSN
     LEFT JOIN (
         {initialContributionYearQuery}

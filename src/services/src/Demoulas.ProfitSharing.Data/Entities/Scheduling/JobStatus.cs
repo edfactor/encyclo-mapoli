@@ -1,6 +1,6 @@
 ﻿using Demoulas.ProfitSharing.Common.Interfaces;
 
-namespace Demoulas.ProfitSharing.Data.Entities.MassTransit;
+namespace Demoulas.ProfitSharing.Data.Entities.Scheduling;
 public sealed class JobStatus : ILookupTable<byte>
 {
     public static class Constants

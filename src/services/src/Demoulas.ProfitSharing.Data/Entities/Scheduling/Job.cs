@@ -1,4 +1,4 @@
-﻿namespace Demoulas.ProfitSharing.Data.Entities.MassTransit;
+﻿namespace Demoulas.ProfitSharing.Data.Entities.Scheduling;
 public sealed class Job
 {
     public int Id { get; set; }

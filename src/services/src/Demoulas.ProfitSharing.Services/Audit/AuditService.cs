@@ -2,25 +2,26 @@
 using System.Text.Json;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.Attributes;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using static Demoulas.ProfitSharing.Common.Contracts.Request.FrozenReportsByAgeRequest;
 
 namespace Demoulas.ProfitSharing.Services.Audit;
 
 public sealed class AuditService : IAuditService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
-    private readonly IAppUser _appUser;
+    private readonly IAppUser? _appUser;
 
-    public AuditService(IProfitSharingDataContextFactory dataContextFactory, IAppUser appUser)
+    public AuditService(IProfitSharingDataContextFactory dataContextFactory, IAppUser? appUser)
     {
         _dataContextFactory = dataContextFactory;
         _appUser = appUser;
     }
 
+   
     public Task ArchiveCompletedReportAsync<TRequest, TReport>(string reportName,
         TRequest request,
         TReport report,
@@ -37,7 +38,7 @@ public sealed class AuditService : IAuditService
 
 
         var entries = new List<AuditChangeEntry> { new() { ColumnName = "Report", NewValue = reportJson } };
-        var auditEvent = new AuditEvent { TableName = reportName, Operation = "Archive", UserName = _appUser.UserName ?? string.Empty, ChangesJson = entries };
+        var auditEvent = new AuditEvent { TableName = reportName, Operation = "Archive", UserName = _appUser?.UserName ?? string.Empty, ChangesJson = entries };
 
 
         ReportChecksum checksum = new ReportChecksum { ReportType = reportName, ProfitYear = request.ProfitYear, RequestJson = requestJson, ReportJson = reportJson };

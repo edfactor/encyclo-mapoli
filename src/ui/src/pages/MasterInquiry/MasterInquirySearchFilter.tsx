@@ -30,6 +30,7 @@ import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 import { memberTypeGetNumberMap, paymentTypeGetNumberMap } from "./MasterInquiryFunctions";
+import { useMissiveAlerts } from "./MissiveAlertContext";
 
 const schema = yup.object().shape({
   endProfitYear: yup
@@ -86,9 +87,13 @@ interface MasterInquirySearchFilterProps {
   onSearch: (params: MasterInquiryRequest | undefined) => void;
 }
 
-const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ setInitialSearchLoaded, onSearch }) => {
+const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
+  setInitialSearchLoaded,
+  onSearch
+}) => {
   const [triggerSearch, { isFetching }] = useLazySearchProfitMasterInquiryQuery();
   const { masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
+  const { clearAlerts } = useMissiveAlerts();
 
   const dispatch = useDispatch();
 
@@ -146,6 +151,8 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
         badgeNumber: Number(badgeNumber)
       });
 
+      clearAlerts(); // Clear existing alerts
+
       const searchParams: MasterInquiryRequest = {
         pagination: { skip: 0, take: 5, sortBy: "badgeNumber", isSortDescending: true },
         badgeNumber: Number(badgeNumber),
@@ -176,6 +183,9 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
 
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
+      // clear missives
+      clearAlerts();
+
       // Create a unique timestamp to ensure each search is treated as new
       const timestamp = Date.now();
 
@@ -212,15 +222,15 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
         .unwrap()
         .then((response) => {
           // Update loaded state based on response
-
           if (
             response && Array.isArray(response) ? response.length > 0 : response.results && response.results.length > 0
           ) {
             setInitialSearchLoaded(true);
           } else {
             setInitialSearchLoaded(false);
-            // Don't call onSearch(undefined) here as it clears searchParams 
+            // Don't call onSearch(undefined) here as it clears searchParams
             // and causes the grid to disappear. The grid itself handles no results.
+            onSearch(undefined);
           }
         });
 
@@ -229,6 +239,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
   });
 
   const handleReset = () => {
+    clearAlerts();
     setInitialSearchLoaded(false);
     dispatch(clearMasterInquiryRequestParams());
     dispatch(clearMasterInquiryData());
@@ -254,9 +265,8 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
         isSortDescending: true
       }
     });
-    // Instead of setting searchParams to undefined, pass null
-    // to avoid showing the "no results" message
-    onSearch(undefined);
+    // Clear search state and noResults flag
+    onSearch(null);
   };
 
   const months = Array.from({ length: 12 }, (_, i) => i + 1);

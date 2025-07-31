@@ -319,14 +319,14 @@ BEGIN
         PY_PH AS CURRENT_HOURS_YEAR,
         PY_PD AS CURRENT_INCOME_YEAR,
         PY_WEEKS_WORK AS WEEKS_WORKED_YEAR,
-        null as PS_CERTIFICATE_ISSUED_DATE, -- calculated and set during YE process (is this internal, ie not on any screens?)
+        null as PS_CERTIFICATE_ISSUED_DATE,
         PY_PS_ENROLLED AS ENROLLMENT_ID,
         PY_PROF_BENEFICIARY AS BENEFICIARY_ID,
         PY_PROF_NEWEMP AS EMPLOYEE_TYPE_ID,
-        null AS ZERO_CONTRIBUTION_REASON_ID, -- calculated and set during YE process (is this internal, ie not on any screens?)
-        0 AS HOURS_EXECUTIVE,
-        0 AS INCOME_EXECUTIVE,
-        0 as POINTS_EARNED, -- calculated and set during YE process  (is this internal, ie not on any screens?)
+        PY_PROF_ZEROCONT AS ZERO_CONTRIBUTION_REASON_ID,
+        NVL(PY_PH_EXEC, 0) AS HOURS_EXECUTIVE, 
+        NVL(PY_PD_EXEC, 0) AS INCOME_EXECUTIVE,
+        0 as POINTS_EARNED,
         PY_PS_ETVA as ETVA
     FROM {SOURCE_PROFITSHARE_SCHEMA}.PAYPROFIT
     where PAYPROF_BADGE in ( select BADGE_NUMBER from DEMOGRAPHIC  );

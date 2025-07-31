@@ -3,7 +3,7 @@ using System.Net.Http.Headers;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 
-namespace YEMatch;
+namespace YEMatch.YEMatch;
 
 #pragma warning disable S6781 // JWT secret keys should not be disclosed
 

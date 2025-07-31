@@ -1,6 +1,7 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
+using YEMatch.YEMatch.ReadyActivities;
 
-namespace YEMatch;
+namespace YEMatch.YEMatch.Runs;
 
 [SuppressMessage("AsyncUsage", "AsyncFixer01:Unnecessary async/await usage")]
 public class GoldenExpressRun : Runnable

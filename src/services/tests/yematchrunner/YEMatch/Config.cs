@@ -1,6 +1,6 @@
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 
-namespace YEMatch;
+namespace YEMatch.YEMatch;
 
 internal static class Config
 {

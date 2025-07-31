@@ -1,7 +1,9 @@
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Text;
+using YEMatch.YEMatch.AssertActivities;
+using YEMatch.YEMatch.SmartActivities;
 
-namespace YEMatch;
+namespace YEMatch.YEMatch.ArrangeActivites;
 
 /* Uses SMART to rebuild the 2023 ZeroContribution flag.  This flag is used in the vesting calculation, so we need to compute it for SMART to use */
 

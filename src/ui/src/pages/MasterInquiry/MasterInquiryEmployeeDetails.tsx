@@ -1,5 +1,4 @@
-import { Typography } from "@mui/material";
-import { Grid } from "@mui/material";
+import { Grid, Typography } from "@mui/material";
 import LabelValueSection from "components/LabelValueSection";
 import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
@@ -13,26 +12,28 @@ import "../../styles/employee-details-lightbox.css";
 import { mmDDYYFormat } from "../../utils/dateUtils";
 import { getEnrolledStatus, getForfeitedStatus } from "../../utils/enrollmentUtil";
 import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
+import { isSimpleSearch } from "./MasterInquiryFunctions";
+import { MASTER_INQUIRY_MESSAGES } from "./MasterInquiryMessages";
+import { useMissiveAlerts } from "./MissiveAlertContext";
 
 interface MasterInquiryEmployeeDetailsProps {
   memberType: number;
   id: string | number;
   profitYear?: number | null | undefined;
   noResults?: boolean;
-  isSimpleSearch: () => boolean;
 }
 
 const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> = ({
   memberType,
   id,
   profitYear,
-  noResults,
-  isSimpleSearch
+  noResults
 }) => {
   const [trigger, { data: details, isLoading, isError }] = useLazyGetProfitMasterInquiryMemberQuery();
   const { masterInquiryResults } = useSelector((state: RootState) => state.inquiry);
 
   const missives = useSelector((state: RootState) => state.lookups.missives);
+  const { addAlert, addAlerts, hasAlert } = useMissiveAlerts();
 
   const defaultProfitYear = useDecemberFlowProfitYear();
   const [isMilitary, setIsMilitary] = React.useState(false);
@@ -61,52 +62,32 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
   }, [masterInquiryResults]);
 
   if (noResults) {
-    if (isSimpleSearch()) {
-      return (
-        <Grid size={{ xs: 12 }}>
-          <div className="missive-alerts-box">
-            <div className="missive-alert missive-error">
-              <Typography
-                sx={{ color: "error.main" }}
-                variant="body1"
-                fontWeight={600}>
-                Member Not Found
-              </Typography>
-              <Typography variant="body2">The person you are looking for does not exist in the system.</Typography>
-            </div>
-          </div>
-        </Grid>
-      );
+    if (isSimpleSearch(masterInquiryRequestParams)) {
+      if (!hasAlert(MASTER_INQUIRY_MESSAGES.MEMBER_NOT_FOUND.id)) {
+        addAlert(MASTER_INQUIRY_MESSAGES.MEMBER_NOT_FOUND);
+      }
+
+      return null;
     } else {
-      return (
-        <Grid size={{ xs: 12 }}>
-          <div className="missive-alerts-box">
-            <div className="missive-alert missive-error">
-              <Typography
-                sx={{ color: "error.main" }}
-                variant="body1"
-                fontWeight={600}>
-                No Results Found
-              </Typography>
-              <Typography variant="body2">
-                The search did not return any results. Please try a different search criteria.
-              </Typography>
-            </div>
-          </div>
-        </Grid>
-      );
+      if (!hasAlert(MASTER_INQUIRY_MESSAGES.NO_RESULTS_FOUND.id)) {
+        addAlert(MASTER_INQUIRY_MESSAGES.NO_RESULTS_FOUND);
+      }
+
+      return null;
     }
   }
 
   if (isLoading) return <Typography>Loading...</Typography>;
   if (isError || !details) return <Typography>No details found.</Typography>;
 
-  // Missive alerts logic (moved from filter/member grid)
-  let missiveAlerts: MissiveResponse[] = [];
   if (details && details.missives && missives) {
-    missiveAlerts = details.missives
+    const localMissives: MissiveResponse[] = details.missives
       .map((id: number) => missives.find((m: MissiveResponse) => m.id === id))
       .filter(Boolean) as MissiveResponse[];
+
+    if (localMissives.length > 0) {
+      addAlerts(localMissives);
+    }
   }
 
   const {
@@ -152,22 +133,12 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
 
   if (!isEmployee && masterInquiryRequestParams?.memberType == "all") {
     // Need to add a new missive warning saying a beneficiary was found
-    missiveAlerts.push({
-      id: 976,
-      severity: "info",
-      message: `Beneficiary ${ssnValue} Found`,
-      description: "This member is a beneficiary and not an employee."
-    });
+    addAlert(MASTER_INQUIRY_MESSAGES.BENEFICIARY_FOUND(ssnValue));
   }
 
   // Warning needed if military member has vested money
   if (isMilitary && percentageVested > 0) {
-    missiveAlerts.push({
-      id: 961, // invented id as this is not from back end
-      severity: "warning",
-      message: "Military entry has affected vested percentage",
-      description: `Vested percentage now at ${percentageVested * 100}%.`
-    });
+    addAlert(MASTER_INQUIRY_MESSAGES.MILITARY_VESTED_WARNING(percentageVested));
   }
 
   const enrolled = getEnrolledStatus(enrollmentId);
@@ -261,25 +232,6 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
           </Grid>
         </Grid>
       </Grid>
-      {missiveAlerts.length > 0 && (
-        <Grid size={{ xs: 12 }}>
-          <div className="missive-alerts-box">
-            {missiveAlerts.map((alert: MissiveResponse, idx: number) => (
-              <div
-                key={alert.id || idx}
-                className={`missive-alert ${alert.severity === "Error" ? "missive-error" : "missive-warning"}`}>
-                <Typography
-                  sx={{ color: alert.severity === "Error" ? "error.main" : "warning.main" }}
-                  variant="body1"
-                  fontWeight={600}>
-                  {alert.message}
-                </Typography>
-                <Typography variant="body2">{alert.description}</Typography>
-              </div>
-            ))}
-          </div>
-        </Grid>
-      )}
     </div>
   );
 };

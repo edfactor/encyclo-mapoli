@@ -3,7 +3,7 @@
 namespace Demoulas.ProfitSharing.Common.Interfaces.Audit;
 public interface IAuditService
 {
-    Task ArchiveCompletedReportAsync<TRequest, TReport>(string reportName,
+   Task ArchiveCompletedReportAsync<TRequest, TReport>(string reportName,
         TRequest request,
         TReport report,
         CancellationToken cancellationToken)

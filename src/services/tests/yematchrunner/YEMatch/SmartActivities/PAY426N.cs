@@ -1,4 +1,4 @@
-﻿namespace YEMatch;
+﻿namespace YEMatch.YEMatch.SmartActivities;
 
 public class Pay426NCriteria
 {

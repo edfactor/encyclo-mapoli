@@ -18,6 +18,7 @@ public class YearEndProfitSharingReportEndpoint: EndpointWithCsvTotalsBase<YearE
 {
     private readonly IProfitSharingSummaryReportService _cleanupReportService;
     private readonly IAuditService _auditService;
+    private const string Report_Name = "Yearend Profit Sharing Report";
 
     public YearEndProfitSharingReportEndpoint(IProfitSharingSummaryReportService cleanupReportService, IAuditService auditService)
     {
@@ -30,7 +31,7 @@ public class YearEndProfitSharingReportEndpoint: EndpointWithCsvTotalsBase<YearE
         Post("yearend-profit-sharing-report");
         Summary(s =>
         {
-            s.Summary = "Year end profit sharing report";
+            s.Summary = Report_Name;
             s.Description = @"Returns a list of employees who will participate in the profit sharing this year, as well as their qualifying attributes.\n\nRequest parameters allow filtering by age, hours, employment status, and more. The endpoint supports CSV export if the Accept header is set to 'text/csv'.\n\n" +
                 "ReportId options (see enum YearEndProfitSharingReportId):\n" +
                 string.Join("\n", Enum.GetValues(typeof(YearEndProfitSharingReportId))
@@ -60,12 +61,12 @@ public class YearEndProfitSharingReportEndpoint: EndpointWithCsvTotalsBase<YearE
         var response = await _cleanupReportService.GetYearEndProfitSharingReportAsync(req, ct);
 
         // Read "archive" from query string without modifying the DTO
-        bool archive = HttpContext.Request.Query.TryGetValue("archive", out var archiveValue) &&
+        bool archive = (HttpContext?.Request?.Query?.TryGetValue("archive", out var archiveValue) ?? false) &&
                        bool.TryParse(archiveValue, out var archiveResult) && archiveResult;
 
         if (archive)
         {
-           await _auditService.ArchiveCompletedReportAsync("Yearend profit sharing summary report", req, response, ct);
+           await _auditService.ArchiveCompletedReportAsync(Report_Name, req, response, ct);
         }
 
         return response;

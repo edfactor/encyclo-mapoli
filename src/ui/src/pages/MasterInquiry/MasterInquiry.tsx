@@ -1,5 +1,5 @@
-import { Divider } from "@mui/material";
-import { Grid } from "@mui/material";
+import { Divider, Grid } from "@mui/material";
+import MissiveAlerts from "components/MissiveAlerts/MissiveAlerts";
 import { useState } from "react";
 import { MasterInquiryRequest } from "reduxstore/types";
 import { DSMAccordion, Page } from "smart-ui-library";
@@ -7,8 +7,7 @@ import MasterInquiryGrid from "./MasterInquiryDetailsGrid";
 import MasterInquiryEmployeeDetails from "./MasterInquiryEmployeeDetails";
 import MasterInquiryMemberGrid from "./MasterInquiryMemberGrid";
 import MasterInquirySearchFilter from "./MasterInquirySearchFilter";
-import { useSelector } from "react-redux";
-import { RootState } from "reduxstore/store";
+import { MissiveAlertProvider, useMissiveAlerts } from "./MissiveAlertContext";
 
 interface SelectedMember {
   memberType: number;
@@ -18,35 +17,14 @@ interface SelectedMember {
   psnSuffix: number;
 }
 
-const MasterInquiry = () => {
-  //const { } = useSelector((state: RootState) => state.inquiry);
-
+const MasterInquiryContent = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [searchParams, setSearchParams] = useState<MasterInquiryRequest | null>(null);
   const [selectedMember, setSelectedMember] = useState<SelectedMember | null>(null);
   const [noResults, setNoResults] = useState(false);
-
-  const { masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
-
-  const isSimpleSearch = (): boolean => {
-    const simpleFound: boolean =
-      !!masterInquiryRequestParams &&
-      (!!masterInquiryRequestParams.name ||
-        !!masterInquiryRequestParams.socialSecurity ||
-        !!masterInquiryRequestParams.badgeNumber) &&
-      !(
-        !!masterInquiryRequestParams.startProfitMonth ||
-        !!masterInquiryRequestParams.endProfitMonth ||
-        !!masterInquiryRequestParams.contribution ||
-        !!masterInquiryRequestParams.earnings ||
-        !!masterInquiryRequestParams.forfeiture ||
-        !!masterInquiryRequestParams.payment
-      );
-    return simpleFound;
-  };
+  const { missiveAlerts } = useMissiveAlerts();
 
   return (
-    <Page label="MASTER INQUIRY (008-10)">
       <Grid
         container
         rowSpacing="24px">
@@ -65,23 +43,22 @@ const MasterInquiry = () => {
                 setSearchParams(params ?? null);
                 setSelectedMember(null);
                 // Only set noResults to true if params is undefined (not found)
-                // Don't reset noResults when params is undefined (clearing state)
+                // Reset noResults when params is null (form reset)
                 if (params === undefined) {
                   setNoResults(true);
-                } else if (params !== null) {
+                } else {
                   setNoResults(false);
                 }
-                // Don't change noResults when params is null (form reset)
               }}
             />
           </DSMAccordion>
         </Grid>
+        {missiveAlerts.length > 0 && <MissiveAlerts missiveAlerts={missiveAlerts} />}
 
         {searchParams && (
           <MasterInquiryMemberGrid
             searchParams={searchParams}
             onBadgeClick={(data) => setSelectedMember(data || null)}
-            isSimpleSearch={isSimpleSearch}
           />
         )}
 
@@ -92,7 +69,6 @@ const MasterInquiry = () => {
             id={selectedMember?.id ?? 0}
             profitYear={searchParams?.endProfitYear}
             noResults={noResults}
-            isSimpleSearch={isSimpleSearch}
           />
         )}
 
@@ -104,6 +80,15 @@ const MasterInquiry = () => {
           />
         )}
       </Grid>
+  );
+};
+
+const MasterInquiry = () => {
+  return (
+    <Page label="MASTER INQUIRY (008-10)">
+      <MissiveAlertProvider>
+        <MasterInquiryContent />
+      </MissiveAlertProvider>
     </Page>
   );
 };
