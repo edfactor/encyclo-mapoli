@@ -1,12 +1,13 @@
 import { Divider, Grid } from "@mui/material";
 import MissiveAlerts from "components/MissiveAlerts/MissiveAlerts";
 import { useState } from "react";
-import { MasterInquiryRequest, MissiveResponse } from "reduxstore/types";
+import { MasterInquiryRequest } from "reduxstore/types";
 import { DSMAccordion, Page } from "smart-ui-library";
 import MasterInquiryGrid from "./MasterInquiryDetailsGrid";
 import MasterInquiryEmployeeDetails from "./MasterInquiryEmployeeDetails";
 import MasterInquiryMemberGrid from "./MasterInquiryMemberGrid";
 import MasterInquirySearchFilter from "./MasterInquirySearchFilter";
+import { MissiveAlertProvider, useMissiveAlerts } from "./MissiveAlertContext";
 
 interface SelectedMember {
   memberType: number;
@@ -16,17 +17,14 @@ interface SelectedMember {
   psnSuffix: number;
 }
 
-const MasterInquiry = () => {
-  //const { } = useSelector((state: RootState) => state.inquiry);
-
+const MasterInquiryContent = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [searchParams, setSearchParams] = useState<MasterInquiryRequest | null>(null);
   const [selectedMember, setSelectedMember] = useState<SelectedMember | null>(null);
   const [noResults, setNoResults] = useState(false);
-  const [missiveAlerts, setMissiveAlerts] = useState<MissiveResponse[]>([]);
+  const { missiveAlerts } = useMissiveAlerts();
 
   return (
-    <Page label="MASTER INQUIRY (008-10)">
       <Grid
         container
         rowSpacing="24px">
@@ -52,7 +50,6 @@ const MasterInquiry = () => {
                   setNoResults(false);
                 }
               }}
-              setMissiveAlerts={setMissiveAlerts}
             />
           </DSMAccordion>
         </Grid>
@@ -72,8 +69,6 @@ const MasterInquiry = () => {
             id={selectedMember?.id ?? 0}
             profitYear={searchParams?.endProfitYear}
             noResults={noResults}
-            setMissiveAlerts={setMissiveAlerts}
-            missiveAlerts={missiveAlerts}
           />
         )}
 
@@ -85,6 +80,15 @@ const MasterInquiry = () => {
           />
         )}
       </Grid>
+  );
+};
+
+const MasterInquiry = () => {
+  return (
+    <Page label="MASTER INQUIRY (008-10)">
+      <MissiveAlertProvider>
+        <MasterInquiryContent />
+      </MissiveAlertProvider>
     </Page>
   );
 };

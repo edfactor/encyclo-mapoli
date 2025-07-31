@@ -25,11 +25,12 @@ import {
   setMasterInquiryRequestParams
 } from "reduxstore/slices/inquirySlice";
 import { RootState } from "reduxstore/store";
-import { MasterInquiryRequest, MasterInquirySearch, MissiveResponse } from "reduxstore/types";
+import { MasterInquiryRequest, MasterInquirySearch } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 import { memberTypeGetNumberMap, paymentTypeGetNumberMap } from "./MasterInquiryFunctions";
+import { useMissiveAlerts } from "./MissiveAlertContext";
 
 const schema = yup.object().shape({
   endProfitYear: yup
@@ -84,16 +85,15 @@ const schema = yup.object().shape({
 interface MasterInquirySearchFilterProps {
   setInitialSearchLoaded: (include: boolean) => void;
   onSearch: (params: MasterInquiryRequest | undefined) => void;
-  setMissiveAlerts?: (alerts: MissiveResponse[]) => void;
 }
 
 const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
   setInitialSearchLoaded,
-  onSearch,
-  setMissiveAlerts
+  onSearch
 }) => {
   const [triggerSearch, { isFetching }] = useLazySearchProfitMasterInquiryQuery();
   const { masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
+  const { clearAlerts } = useMissiveAlerts();
 
   const dispatch = useDispatch();
 
@@ -151,7 +151,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
         badgeNumber: Number(badgeNumber)
       });
 
-      setMissiveAlerts?.([]); // Clear existing alerts
+      clearAlerts(); // Clear existing alerts
 
       const searchParams: MasterInquiryRequest = {
         pagination: { skip: 0, take: 5, sortBy: "badgeNumber", isSortDescending: true },
@@ -184,7 +184,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
   const validateAndSearch = handleSubmit((data) => {
     if (isValid) {
       // clear missives
-      setMissiveAlerts?.([]);
+      clearAlerts();
 
       // Create a unique timestamp to ensure each search is treated as new
       const timestamp = Date.now();
@@ -239,7 +239,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
   });
 
   const handleReset = () => {
-    setMissiveAlerts?.([]);
+    clearAlerts();
     setInitialSearchLoaded(false);
     dispatch(clearMasterInquiryRequestParams());
     dispatch(clearMasterInquiryData());

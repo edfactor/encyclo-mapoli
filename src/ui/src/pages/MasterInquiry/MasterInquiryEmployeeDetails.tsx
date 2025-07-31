@@ -14,29 +14,26 @@ import { getEnrolledStatus, getForfeitedStatus } from "../../utils/enrollmentUti
 import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
 import { isSimpleSearch } from "./MasterInquiryFunctions";
 import { MASTER_INQUIRY_MESSAGES } from "./MasterInquiryMessages";
+import { useMissiveAlerts } from "./MissiveAlertContext";
 
 interface MasterInquiryEmployeeDetailsProps {
   memberType: number;
   id: string | number;
   profitYear?: number | null | undefined;
   noResults?: boolean;
-
-  setMissiveAlerts?: (alerts: MissiveResponse[]) => void;
-  missiveAlerts?: MissiveResponse[];
 }
 
 const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> = ({
   memberType,
   id,
   profitYear,
-  noResults,
-  setMissiveAlerts,
-  missiveAlerts
+  noResults
 }) => {
   const [trigger, { data: details, isLoading, isError }] = useLazyGetProfitMasterInquiryMemberQuery();
   const { masterInquiryResults } = useSelector((state: RootState) => state.inquiry);
 
   const missives = useSelector((state: RootState) => state.lookups.missives);
+  const { addAlert, addAlerts, hasAlert } = useMissiveAlerts();
 
   const defaultProfitYear = useDecemberFlowProfitYear();
   const [isMilitary, setIsMilitary] = React.useState(false);
@@ -66,20 +63,14 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
 
   if (noResults) {
     if (isSimpleSearch(masterInquiryRequestParams)) {
-      if (!missiveAlerts?.some((alert) => alert.id === MASTER_INQUIRY_MESSAGES.MEMBER_NOT_FOUND.id)) {
-        setMissiveAlerts?.([
-          ...(missiveAlerts ?? []),
-          MASTER_INQUIRY_MESSAGES.MEMBER_NOT_FOUND
-        ]);
+      if (!hasAlert(MASTER_INQUIRY_MESSAGES.MEMBER_NOT_FOUND.id)) {
+        addAlert(MASTER_INQUIRY_MESSAGES.MEMBER_NOT_FOUND);
       }
 
       return null;
     } else {
-      if (!missiveAlerts?.some((alert) => alert.id === MASTER_INQUIRY_MESSAGES.NO_RESULTS_FOUND.id)) {
-        setMissiveAlerts?.([
-          ...(missiveAlerts ?? []),
-          MASTER_INQUIRY_MESSAGES.NO_RESULTS_FOUND
-        ]);
+      if (!hasAlert(MASTER_INQUIRY_MESSAGES.NO_RESULTS_FOUND.id)) {
+        addAlert(MASTER_INQUIRY_MESSAGES.NO_RESULTS_FOUND);
       }
 
       return null;
@@ -95,7 +86,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
       .filter(Boolean) as MissiveResponse[];
 
     if (localMissives.length > 0) {
-      setMissiveAlerts?.([...(missiveAlerts ?? []), ...localMissives]);
+      addAlerts(localMissives);
     }
   }
 
@@ -142,18 +133,12 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
 
   if (!isEmployee && masterInquiryRequestParams?.memberType == "all") {
     // Need to add a new missive warning saying a beneficiary was found
-    setMissiveAlerts?.([
-      ...(missiveAlerts ?? []),
-      MASTER_INQUIRY_MESSAGES.BENEFICIARY_FOUND(ssnValue)
-    ]);
+    addAlert(MASTER_INQUIRY_MESSAGES.BENEFICIARY_FOUND(ssnValue));
   }
 
   // Warning needed if military member has vested money
   if (isMilitary && percentageVested > 0) {
-    setMissiveAlerts?.([
-      ...(missiveAlerts ?? []),
-      MASTER_INQUIRY_MESSAGES.MILITARY_VESTED_WARNING(percentageVested)
-    ]);
+    addAlert(MASTER_INQUIRY_MESSAGES.MILITARY_VESTED_WARNING(percentageVested));
   }
 
   const enrolled = getEnrolledStatus(enrollmentId);
