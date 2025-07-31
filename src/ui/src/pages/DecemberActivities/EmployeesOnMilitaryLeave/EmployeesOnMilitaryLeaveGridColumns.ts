@@ -1,6 +1,6 @@
 import { ColDef } from "ag-grid-community";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
-import { createBadgeColumn, createSSNColumn } from "../../../utils/gridColumnFactory";
+import { createBadgeColumn, createSSNColumn, createNameColumn } from "../../../utils/gridColumnFactory";
 
 export const GetMilitaryAndRehireColumns = (): ColDef[] => {
   return [
@@ -9,15 +9,10 @@ export const GetMilitaryAndRehireColumns = (): ColDef[] => {
       minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
       alignment: "center"
     }),
-    {
-      headerName: "Name",
+    createNameColumn({
       field: "fullName",
-      colId: "fullName",
-      minWidth: 150,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
+      minWidth: 150
+    }),
     createSSNColumn({ alignment: "left" })
   ];
 };

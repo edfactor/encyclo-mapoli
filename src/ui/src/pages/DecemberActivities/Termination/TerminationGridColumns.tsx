@@ -1,6 +1,6 @@
 import { ColDef, ICellRendererParams, IHeaderParams } from "ag-grid-community";
 import { agGridNumberToCurrency, formatNumberWithComma } from "smart-ui-library";
-import { createBadgeColumn } from "../../../utils/gridColumnFactory";
+import { createBadgeColumn, createAgeColumn } from "../../../utils/gridColumnFactory";
 import { getForfeitedStatus} from "../../../utils/enrollmentUtil";
 import { mmDDYYFormat } from "utils/dateUtils";
 import { Checkbox, IconButton, CircularProgress } from "@mui/material";
@@ -149,15 +149,10 @@ export const GetDetailColumns = (
         return formatNumberWithComma(hours);
       }
     },
-    {
-      headerName: "Age",
-      field: "age",
-      colId: "age",
-      width: 70,
-      type: "rightAligned",
-      resizable: true,
+    createAgeColumn({
+      maxWidth: 70,
       sortable: false
-    },
+    }),
     {
       headerName: "Forfeit",
       field: "enrollmentCode",

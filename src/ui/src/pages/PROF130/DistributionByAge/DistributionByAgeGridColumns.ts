@@ -1,6 +1,6 @@
 import { ColDef, ColGroupDef } from "ag-grid-community";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
-import { agGridNumberToCurrency } from "smart-ui-library";
+import { createCurrencyColumn, createCountColumn } from "../../../utils/gridColumnFactory";
 
 export const GetDistributionsByAgeColumns = (reportType: FrozenReportsByAgeRequestType): (ColDef | ColGroupDef)[] => {
   const columns: (ColDef | ColGroupDef)[] = [
@@ -17,23 +17,16 @@ export const GetDistributionsByAgeColumns = (reportType: FrozenReportsByAgeReque
           sort: "asc",
           cellDataType: "text"
         },
-        {
+        createCountColumn({
           headerName: "EMPS",
           field: "regularEmployeeCount",
-          colId: "regularEmployeeCount",
-          minWidth: 100,
-          type: "rightAligned",
-          resizable: true
-        },
-        {
+          minWidth: 100
+        }),
+        createCurrencyColumn({
           headerName: "Amount",
           field: "regularAmount",
-          colId: "regularAmount",
-          minWidth: 150,
-          type: "rightAligned",
-          resizable: true,
-          valueFormatter: agGridNumberToCurrency
-        }
+          minWidth: 150
+        })
       ]
     }
   ];

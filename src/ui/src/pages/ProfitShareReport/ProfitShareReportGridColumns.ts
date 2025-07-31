@@ -1,32 +1,30 @@
-import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { yyyyMMDDToMMDDYYYY, agGridNumberToCurrency } from "smart-ui-library";
+import { ColDef } from "ag-grid-community";
 import { GRID_COLUMN_WIDTHS } from "../../constants";
-import { createSSNColumn, createBadgeColumn } from "../../utils/gridColumnFactory";
+import {
+  createAgeColumn,
+  createBadgeColumn,
+  createCurrencyColumn,
+  createDateColumn,
+  createHoursColumn,
+  createNameColumn,
+  createSSNColumn,
+  createStoreColumn
+} from "../../utils/gridColumnFactory";
 
 export const GetProfitShareReportColumns = (): ColDef[] => {
   return [
-    createBadgeColumn({ 
+    createBadgeColumn({
       headerName: "Badge",
       minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
       alignment: "left"
     }),
-    {
-      headerName: "Name",
+    createNameColumn({
       field: "employeeName",
-      colId: "employeeName",
-      minWidth: 120,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
-    {
-      headerName: "Store",
-      field: "storeNumber",
-      colId: "storeNumber",
-      minWidth: 60,
-      type: "rightAligned",
-      resizable: true
-    },
+      minWidth: 120
+    }),
+    createStoreColumn({
+      minWidth: 60
+    }),
     {
       headerName: "Employee Type",
       field: "employeeTypeCode",
@@ -41,43 +39,23 @@ export const GetProfitShareReportColumns = (): ColDef[] => {
         return `${id} - ${name}`;
       }
     },
-    {
+    createDateColumn({
       headerName: "Date of Birth",
       field: "dateOfBirth",
-      colId: "dateOfBirth",
       minWidth: 150,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      valueFormatter: (params) => (params.value ? yyyyMMDDToMMDDYYYY(params.value) : "")
-    },
-    {
-      headerName: "Age",
-      field: "age",
-      colId: "age",
-      minWidth: 50,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
+      alignment: "left"
+    }),
+    createAgeColumn({}),
+
     createSSNColumn({ alignment: "left" }),
-    {
+    createCurrencyColumn({
       headerName: "Wages",
       field: "wages",
-      colId: "wages",
-      minWidth: 150,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
-      headerName: "Hours",
-      field: "hours",
-      colId: "hours",
-      minWidth: 150,
-      type: "rightAligned",
-      resizable: true
-    },
+      minWidth: 150
+    }),
+    createHoursColumn({
+      minWidth: 150
+    }),
     {
       headerName: "Points",
       field: "points",
