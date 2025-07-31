@@ -65,27 +65,32 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
 
   if (noResults) {
     if (isSimpleSearch(masterInquiryRequestParams)) {
-      setMissiveAlerts?.([
-        ...(missiveAlerts ?? []),
-        {
-          id: 999, // Example ID, should be unique
-          severity: "Error",
-          message: "Member Not Found",
-          description: "The member you are searching for does not exist in the system."
-        }
-      ]);
+      if (!missiveAlerts?.some((alert) => alert.id === 643)) {
+        setMissiveAlerts?.([
+          ...(missiveAlerts ?? []),
+          {
+            id: 643, // Example ID, should be unique
+            severity: "Error",
+            message: "Member Not Found",
+            description: "The member you are searching for does not exist in the system."
+          }
+        ]);
+      }
 
       return null;
     } else {
-      setMissiveAlerts?.([
-        ...(missiveAlerts ?? []),
-        {
-          id: 999, // Example ID, should be unique
-          severity: "Error",
-          message: "No Results Found",
-          description: "The search did not return any results. Please try a different search criteria."
-        }
-      ]);
+      if (!missiveAlerts?.some((alert) => alert.id === 112)) {
+        setMissiveAlerts?.([
+          ...(missiveAlerts ?? []),
+          {
+            id: 112, // Example ID, should be unique
+            severity: "Error",
+            message: "No Results Found",
+            description: "The search did not return any results. Please try a different search criteria."
+          }
+        ]);
+      }
+
       return null;
     }
   }

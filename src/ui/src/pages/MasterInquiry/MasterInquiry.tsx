@@ -45,19 +45,18 @@ const MasterInquiry = () => {
                 setSearchParams(params ?? null);
                 setSelectedMember(null);
                 // Only set noResults to true if params is undefined (not found)
-                // Don't reset noResults when params is undefined (clearing state)
+                // Reset noResults when params is null (form reset)
                 if (params === undefined) {
                   setNoResults(true);
-                } else if (params !== null) {
+                } else {
                   setNoResults(false);
                 }
-                // Don't change noResults when params is null (form reset)
               }}
+              setMissiveAlerts={setMissiveAlerts}
             />
           </DSMAccordion>
         </Grid>
-
-        <MissiveAlerts missiveAlerts={missiveAlerts} />
+        {missiveAlerts.length > 0 && <MissiveAlerts missiveAlerts={missiveAlerts} />}
 
         {searchParams && (
           <MasterInquiryMemberGrid
