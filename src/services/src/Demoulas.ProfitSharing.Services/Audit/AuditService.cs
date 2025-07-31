@@ -28,6 +28,17 @@ public sealed class AuditService : IAuditService
         CancellationToken cancellationToken)
         where TReport : class where TRequest : IProfitYearRequest
     {
+        //return ArchiveCompletedReportAsync(reportName, request.ProfitYear, request, report, cancellationToken);
+        throw new NotImplementedException();
+    }
+
+    public Task ArchiveCompletedReportAsync<TRequest, TReport>(string reportName,
+        short profitYear,
+        TRequest request,
+        TReport report,
+        CancellationToken cancellationToken)
+        where TReport : class where TRequest : class
+    {
         if (report == null)
         {
             throw new ArgumentNullException(nameof(report), "Report cannot be null");
@@ -41,7 +52,7 @@ public sealed class AuditService : IAuditService
         var auditEvent = new AuditEvent { TableName = reportName, Operation = "Archive", UserName = _appUser?.UserName ?? string.Empty, ChangesJson = entries };
 
 
-        ReportChecksum checksum = new ReportChecksum { ReportType = reportName, ProfitYear = request.ProfitYear, RequestJson = requestJson, ReportJson = reportJson };
+        ReportChecksum checksum = new ReportChecksum { ReportType = reportName, ProfitYear = profitYear, RequestJson = requestJson, ReportJson = reportJson };
         checksum.KeyFieldsChecksumJson = ToKeyValuePairs(report);
 
 

@@ -8,4 +8,11 @@ public interface IAuditService
         TReport report,
         CancellationToken cancellationToken)
         where TReport : class where TRequest : IProfitYearRequest;
+
+   Task ArchiveCompletedReportAsync<TRequest, TReport>(string reportName,
+       short profitYear,
+       TRequest request,
+       TReport report,
+       CancellationToken cancellationToken)
+       where TReport : class where TRequest : class;
 }
