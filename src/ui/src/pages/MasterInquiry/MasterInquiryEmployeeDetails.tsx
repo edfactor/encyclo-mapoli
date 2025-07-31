@@ -61,34 +61,52 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     }
   }, [masterInquiryResults]);
 
-  if (noResults) {
-    if (isSimpleSearch(masterInquiryRequestParams)) {
-      if (!hasAlert(MASTER_INQUIRY_MESSAGES.MEMBER_NOT_FOUND.id)) {
-        addAlert(MASTER_INQUIRY_MESSAGES.MEMBER_NOT_FOUND);
+  useEffect(() => {
+    if (noResults) {
+      if (isSimpleSearch(masterInquiryRequestParams)) {
+        if (!hasAlert(MASTER_INQUIRY_MESSAGES.MEMBER_NOT_FOUND.id)) {
+          addAlert(MASTER_INQUIRY_MESSAGES.MEMBER_NOT_FOUND);
+        }
+      } else {
+        if (!hasAlert(MASTER_INQUIRY_MESSAGES.NO_RESULTS_FOUND.id)) {
+          addAlert(MASTER_INQUIRY_MESSAGES.NO_RESULTS_FOUND);
+        }
       }
-
-      return null;
-    } else {
-      if (!hasAlert(MASTER_INQUIRY_MESSAGES.NO_RESULTS_FOUND.id)) {
-        addAlert(MASTER_INQUIRY_MESSAGES.NO_RESULTS_FOUND);
-      }
-
-      return null;
     }
+  }, [noResults, masterInquiryRequestParams, hasAlert, addAlert]);
+
+  useEffect(() => {
+    if (details && details.missives && missives) {
+      const localMissives: MissiveResponse[] = details.missives
+        .map((id: number) => missives.find((m: MissiveResponse) => m.id === id))
+        .filter(Boolean) as MissiveResponse[];
+
+      if (localMissives.length > 0) {
+        addAlerts(localMissives);
+      }
+    }
+  }, [details, missives, addAlerts]);
+
+  useEffect(() => {
+    if (details && !details.isEmployee && masterInquiryRequestParams?.memberType == "all") {
+      // Need to add a new missive warning saying a beneficiary was found
+      addAlert(MASTER_INQUIRY_MESSAGES.BENEFICIARY_FOUND(details.ssn));
+    }
+  }, [details, masterInquiryRequestParams?.memberType, addAlert]);
+
+  useEffect(() => {
+    // Warning needed if military member has vested money
+    if (isMilitary && details && details.percentageVested > 0) {
+      addAlert(MASTER_INQUIRY_MESSAGES.MILITARY_VESTED_WARNING(details.percentageVested));
+    }
+  }, [isMilitary, details, addAlert]);
+
+  if (noResults) {
+    return null;
   }
 
   if (isLoading) return <Typography>Loading...</Typography>;
   if (isError || !details) return <Typography>No details found.</Typography>;
-
-  if (details && details.missives && missives) {
-    const localMissives: MissiveResponse[] = details.missives
-      .map((id: number) => missives.find((m: MissiveResponse) => m.id === id))
-      .filter(Boolean) as MissiveResponse[];
-
-    if (localMissives.length > 0) {
-      addAlerts(localMissives);
-    }
-  }
 
   const {
     badgeNumber,
@@ -130,16 +148,6 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
     allocationToAmount,
     allocationFromAmount
   } = details;
-
-  if (!isEmployee && masterInquiryRequestParams?.memberType == "all") {
-    // Need to add a new missive warning saying a beneficiary was found
-    addAlert(MASTER_INQUIRY_MESSAGES.BENEFICIARY_FOUND(ssnValue));
-  }
-
-  // Warning needed if military member has vested money
-  if (isMilitary && percentageVested > 0) {
-    addAlert(MASTER_INQUIRY_MESSAGES.MILITARY_VESTED_WARNING(percentageVested));
-  }
 
   const enrolled = getEnrolledStatus(enrollmentId);
   const forfeited = getForfeitedStatus(enrollmentId);
