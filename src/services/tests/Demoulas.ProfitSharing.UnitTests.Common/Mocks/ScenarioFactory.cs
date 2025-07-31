@@ -191,30 +191,30 @@ public sealed class ScenarioFactory
         // Link the mocked DatabaseFacade to the DbContext mock
         _sdb.ProfitSharingDbContext.Setup(m => m.Database).Returns(databaseFacadeMock.Object);
 
-        Mock<DbSet<AccountingPeriod>>? mockCalendar = CaldarRecordSeeder.Records.AsQueryable().BuildMockDbSet();
+        Mock<DbSet<AccountingPeriod>>? mockCalendar = CaldarRecordSeeder.Records.ToList().BuildMockDbSet();
         _sdb.ProfitSharingDbContext.Setup(m => m.AccountingPeriods).Returns(mockCalendar.Object);
         _sdb.ProfitSharingReadOnlyDbContext.Setup(m => m.AccountingPeriods).Returns(mockCalendar.Object);
 
         // Take care of Beneficiaries and child table BeneficiaryContacts
-        Mock<DbSet<Beneficiary>> mockBeneficiaries = Beneficiaries.AsQueryable().BuildMockDbSet();
-        Mock<DbSet<BeneficiaryContact>> mockBeneficiaryContacts = Beneficiaries.Where(b => b.Contact != null).Select(b => b.Contact!).AsQueryable().BuildMockDbSet();
+        Mock<DbSet<Beneficiary>> mockBeneficiaries = Beneficiaries.BuildMockDbSet();
+        Mock<DbSet<BeneficiaryContact>> mockBeneficiaryContacts = Beneficiaries.Where(b => b.Contact != null).Select(b => b.Contact!).ToList().BuildMockDbSet();
         _sdb.ProfitSharingDbContext.Setup(m => m.Beneficiaries).Returns(mockBeneficiaries.Object);
         _sdb.ProfitSharingDbContext.Setup(m => m.BeneficiaryContacts).Returns(mockBeneficiaryContacts.Object);
         _sdb.ProfitSharingReadOnlyDbContext.Setup(m => m.Beneficiaries).Returns(mockBeneficiaries.Object);
         _sdb.ProfitSharingReadOnlyDbContext.Setup(m => m.BeneficiaryContacts).Returns(mockBeneficiaryContacts.Object);
 
         // Demographics
-        Mock<DbSet<Demographic>> mockDemograhpics = Demographics.AsQueryable().BuildMockDbSet();
+        Mock<DbSet<Demographic>> mockDemograhpics = Demographics.BuildMockDbSet();
         _sdb.ProfitSharingDbContext.Setup(m => m.Demographics).Returns(mockDemograhpics.Object);
         _sdb.ProfitSharingReadOnlyDbContext.Setup(m => m.Demographics).Returns(mockDemograhpics.Object);
 
         // PayProfits
-        Mock<DbSet<PayProfit>> mockPayProfits = PayProfits.AsQueryable().BuildMockDbSet();
+        Mock<DbSet<PayProfit>> mockPayProfits = PayProfits.BuildMockDbSet();
         _sdb.ProfitSharingDbContext.Setup(m => m.PayProfits).Returns(mockPayProfits.Object);
         _sdb.ProfitSharingReadOnlyDbContext.Setup(m => m.PayProfits).Returns(mockPayProfits.Object);
 
         // ProfitDetails
-        Mock<DbSet<ProfitDetail>> mockProfitDetails = ProfitDetails.AsQueryable().BuildMockDbSet();
+        Mock<DbSet<ProfitDetail>> mockProfitDetails = ProfitDetails.BuildMockDbSet();
         mockProfitDetails
             .Setup(m => m.AddRange(It.IsAny<IEnumerable<ProfitDetail>>()))
             .Callback<IEnumerable<ProfitDetail>>((profitDetails) => addedProfitDetails.AddRange(profitDetails));
@@ -225,23 +225,23 @@ public sealed class ScenarioFactory
         _sdb.ProfitSharingDbContext.Setup(m => m.ProfitDetails).Returns(mockProfitDetails.Object);
         _sdb.ProfitSharingReadOnlyDbContext.Setup(m => m.ProfitDetails).Returns(mockProfitDetails.Object);
 
-        Mock<DbSet<ProfitCode>> mockProfitCodes = ProfitCodes.AsQueryable().BuildMockDbSet();
+        Mock<DbSet<ProfitCode>> mockProfitCodes = ProfitCodes.BuildMockDbSet();
         _sdb.ProfitSharingDbContext.Setup(m => m.ProfitCodes).Returns(mockProfitCodes.Object);
         _sdb.ProfitSharingReadOnlyDbContext.Setup(m => m.ProfitCodes).Returns(mockProfitCodes.Object);
 
-        Mock<DbSet<Department>> mockDepartments = Departments.AsQueryable().BuildMockDbSet();
+        Mock<DbSet<Department>> mockDepartments = Departments.BuildMockDbSet();
         _sdb.ProfitSharingDbContext.Setup(m => m.Departments).Returns(mockDepartments.Object);
         _sdb.ProfitSharingReadOnlyDbContext.Setup(m => m.Departments).Returns(mockDepartments.Object);
 
-        Mock<DbSet<FrozenState>> mockFrozenStates = FrozenStates.AsQueryable().BuildMockDbSet();
+        Mock<DbSet<FrozenState>> mockFrozenStates = FrozenStates.BuildMockDbSet();
         _sdb.ProfitSharingDbContext.Setup(m => m.FrozenStates).Returns(mockFrozenStates.Object);
         _sdb.ProfitSharingReadOnlyDbContext.Setup(m => m.FrozenStates).Returns(mockFrozenStates.Object);
 
-        Mock<DbSet<DemographicHistory>> mockDemographicHistories = DemographicHistories.AsQueryable().BuildMockDbSet();
+        Mock<DbSet<DemographicHistory>> mockDemographicHistories = DemographicHistories.BuildMockDbSet();
         _sdb.ProfitSharingDbContext.Setup(m => m.DemographicHistories).Returns(mockDemographicHistories.Object);
         _sdb.ProfitSharingReadOnlyDbContext.Setup(m => m.DemographicHistories).Returns(mockDemographicHistories.Object);
         
-        Mock<DbSet<YearEndUpdateStatus>> mockYearEndUpdateStatuses = YearEndUpdateStatuses.AsQueryable().BuildMockDbSet();
+        Mock<DbSet<YearEndUpdateStatus>> mockYearEndUpdateStatuses = YearEndUpdateStatuses.BuildMockDbSet();
         _sdb.ProfitSharingDbContext.Setup(m => m.YearEndUpdateStatuses).Returns(mockYearEndUpdateStatuses.Object);
         _sdb.ProfitSharingReadOnlyDbContext.Setup(m => m.YearEndUpdateStatuses).Returns(mockYearEndUpdateStatuses.Object);
         
