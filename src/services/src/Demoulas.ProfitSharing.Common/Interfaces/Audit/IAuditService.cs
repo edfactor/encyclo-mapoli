@@ -9,9 +9,17 @@ public interface IAuditService
         string reportName,
         short profitYear,
         TRequest request,
-        Func<Task<TResponse>> reportFunction,
+        Func<TRequest, CancellationToken, Task<TResponse>> reportFunction,
         CancellationToken cancellationToken)
         where TResponse : ReportResponseBase<TResult>
         where TRequest : PaginationRequestDto
         where TResult : class;
+
+    Task ArchiveCompletedReportAsync<TRequest, TResponse>(
+        string reportName,
+        TRequest request,
+        TResponse response,
+        CancellationToken cancellationToken)
+        where TResponse : class
+        where TRequest : PaginationRequestDto;
 }

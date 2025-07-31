@@ -11,6 +11,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ForfeitureAdjustment;
@@ -35,7 +36,8 @@ public class RehireForfeituresTests : ApiTestBase<Program>
     public RehireForfeituresTests()
     {
         IUnForfeitService mockService = ServiceProvider?.GetRequiredService<IUnForfeitService>()!;
-        _endpoint = new UnforfeituresEndpoint(mockService);
+        IAuditService auditService = ServiceProvider?.GetRequiredService<IAuditService>()!;
+        _endpoint = new UnforfeituresEndpoint(mockService, auditService);
     }
 
 

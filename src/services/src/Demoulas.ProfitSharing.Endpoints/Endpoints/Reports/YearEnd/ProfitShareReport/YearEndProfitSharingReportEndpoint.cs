@@ -65,12 +65,11 @@ public class YearEndProfitSharingReportEndpoint: EndpointWithCsvTotalsBase<YearE
 
         if (archive)
         {
-            var archiveReq = req with { Skip = 0, Take = short.MaxValue };
             return _auditService.ArchiveCompletedReportAsync<YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse, YearEndProfitSharingReportDetail>(
                 Report_Name,
-                archiveReq.ProfitYear,
-                archiveReq,
-                () => _cleanupReportService.GetYearEndProfitSharingReportAsync(archiveReq, ct),
+                req.ProfitYear,
+                req,
+                (archiveReq, cancellationToken) => _cleanupReportService.GetYearEndProfitSharingReportAsync(archiveReq, cancellationToken),
                 ct);
         }
 
