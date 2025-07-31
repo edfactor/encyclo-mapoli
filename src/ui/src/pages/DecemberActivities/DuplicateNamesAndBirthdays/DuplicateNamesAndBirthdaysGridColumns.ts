@@ -1,7 +1,16 @@
 import { ColDef } from "ag-grid-community";
-import { yyyyMMDDToMMDDYYYY } from "smart-ui-library";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
-import { createBadgeColumn, createCurrencyColumn, createSSNColumn, createDateColumn, createStoreColumn } from "../../../utils/gridColumnFactory";
+import {
+  createBadgeColumn,
+  createCountColumn,
+  createCurrencyColumn,
+  createDateColumn,
+  createHoursColumn,
+  createNameColumn,
+  createSSNColumn,
+  createStatusColumn,
+  createStoreColumn
+} from "../../../utils/gridColumnFactory";
 
 export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
   return [
@@ -11,15 +20,10 @@ export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
       alignment: "left"
     }),
     createSSNColumn({ alignment: "left" }),
-    {
-      headerName: "Name",
+    createNameColumn({
       field: "name",
-      colId: "name",
-      minWidth: 150,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
+      minWidth: 150
+    }),
     createDateColumn({
       headerName: "DOB",
       field: "dateOfBirth",
@@ -69,26 +73,19 @@ export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
       minWidth: 100,
       alignment: "left"
     }),
-    {
+    createCountColumn({
       headerName: "Years",
       field: "years",
-      colId: "years",
-      minWidth: 60,
-      type: "rightAligned",
-      resizable: true
-    },
+      minWidth: 60
+    }),
     createStoreColumn({
       headerName: "Store #",
       minWidth: 60
     }),
-    {
-      headerName: "Hours",
+    createHoursColumn({
       field: "hoursCurrentYear",
-      colId: "hoursCurrentYear",
-      minWidth: 60,
-      type: "rightAligned",
-      resizable: true
-    },
+      minWidth: 60
+    }),
     createCurrencyColumn({
       headerName: "Balance",
       field: "netBalance",
@@ -99,20 +96,16 @@ export const GetDuplicateNamesAndBirthdayColumns = (): ColDef[] => {
       field: "incomeCurrentYear",
       minWidth: 60
     }),
-    {
+    createStatusColumn({
       headerName: "Employment Status",
       field: "employmentStatusName",
-      colId: "employmentStatusName",
       minWidth: 60,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
       valueFormatter: (params) => {
         const id = params.data.status; // assuming 'status' is in the row data
         const name = params.data.employmentStatusName; // assuming 'statusName' is in the row data
         //see if one is undefined or null then show other
         return `[${id}] ${name}`;
       }
-    }
+    })
   ];
 };

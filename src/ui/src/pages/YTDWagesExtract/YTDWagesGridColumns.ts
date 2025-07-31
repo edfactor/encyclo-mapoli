@@ -1,6 +1,11 @@
 import { ColDef } from "ag-grid-community";
 import { GRID_COLUMN_WIDTHS } from "../../constants";
-import { createBadgeColumn, createCurrencyColumn } from "../../utils/gridColumnFactory";
+import {
+  createBadgeColumn,
+  createCurrencyColumn,
+  createHoursColumn,
+  createStoreColumn
+} from "../../utils/gridColumnFactory";
 
 export const GetYTDWagesColumns = (): ColDef[] => {
   const columns: ColDef[] = [
@@ -9,29 +14,17 @@ export const GetYTDWagesColumns = (): ColDef[] => {
       minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
       alignment: "left"
     }),
-    {
+    createHoursColumn({
       headerName: "Hours Current Year",
       field: "hoursCurrentYear",
-      colId: "hoursCurrentYear",
-      minWidth: 150,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
+      minWidth: 150
+    }),
     createCurrencyColumn({
       headerName: "Dollars Current Year",
       field: "incomeCurrentYear",
       minWidth: 150
     }),
-    {
-      headerName: "Store",
-      field: "storeNumber",
-      colId: "storeNumber",
-      minWidth: 150,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    }
+    createStoreColumn({})
   ];
   return columns;
 };

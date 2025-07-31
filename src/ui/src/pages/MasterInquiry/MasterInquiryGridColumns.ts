@@ -1,6 +1,5 @@
 import { ColDef } from "ag-grid-community";
-import { formatNumberWithComma } from "smart-ui-library";
-import { createCurrencyColumn } from "../../utils/gridColumnFactory";
+import { createCurrencyColumn, createHoursColumn, createStatusColumn } from "../../utils/gridColumnFactory";
 
 export const GetMasterInquiryGridColumns = (): ColDef[] => {
   return [
@@ -78,19 +77,11 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
         return `${formattedMonth}/${year}`;
       }
     },
-    {
-      headerName: "Hours",
+    createHoursColumn({
       field: "currentHoursYear",
-      colId: "currentHoursYear",
       minWidth: 120,
-      type: "rightAligned",
-      resizable: true,
-      sortable: false,
-      valueFormatter: (params) => {
-        const hours = params.value;
-        return formatNumberWithComma(hours);
-      }
-    },
+      sortable: false
+    }),
     createCurrencyColumn({
       headerName: "Wages",
       field: "currentIncomeYear",
@@ -170,14 +161,11 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
         return params.value === true ? "Yes" : "No";
       }
     },
-    {
-      headerName: "Status",
+    createStatusColumn({
       field: "employmentStatus",
-      colId: "employmentStatus",
       minWidth: 60,
-      type: "rightAligned",
-      resizable: true,
+      alignment: "right",
       sortable: false
-    }
+    })
   ];
 };

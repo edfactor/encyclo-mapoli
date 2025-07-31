@@ -1,5 +1,5 @@
 import { ColDef, ColGroupDef } from "ag-grid-community";
-import { createCurrencyColumn } from "../../../utils/gridColumnFactory";
+import { createCurrencyColumn, createCountColumn } from "../../../utils/gridColumnFactory";
 
 export const GetVestedAmountsByAgeColumns = (countColName: string, amountColName: string): (ColDef | ColGroupDef)[] => {
   return [
@@ -12,14 +12,10 @@ export const GetVestedAmountsByAgeColumns = (countColName: string, amountColName
       sort: "asc",
       cellDataType: "text"
     },
-    {
-      headerName: "Count",
+    createCountColumn({
       field: countColName,
-      colId: countColName,
-      minWidth: 120,
-      type: "rightAligned",
-      resizable: true
-    },
+      minWidth: 120
+    }),
     createCurrencyColumn({
       headerName: "Amount",
       field: amountColName,

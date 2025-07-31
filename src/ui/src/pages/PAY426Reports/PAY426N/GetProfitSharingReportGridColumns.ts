@@ -2,7 +2,16 @@ import { ColDef } from "ag-grid-community";
 import { formatNumberWithComma } from "smart-ui-library";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
 import { mmDDYYFormat } from "../../../utils/dateUtils";
-import { createBadgeColumn, createCurrencyColumn, createSSNColumn, createAgeColumn, createStoreColumn } from "../../../utils/gridColumnFactory";
+import {
+  createBadgeColumn,
+  createCurrencyColumn,
+  createSSNColumn,
+  createAgeColumn,
+  createStoreColumn,
+  createNameColumn,
+  createHoursColumn,
+  createStatusColumn
+} from "../../../utils/gridColumnFactory";
 
 export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   // Import the date formatter from dateutils
@@ -14,16 +23,11 @@ export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: str
       alignment: "center",
       navigateFunction: navFunction
     }),
-    {
-      headerName: "Name",
+    createNameColumn({
       field: "employeeName",
-      colId: "employeeName",
       minWidth: 180,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
       sortable: true
-    },
+    }),
     createStoreColumn({
       minWidth: 80
     }),
@@ -46,22 +50,16 @@ export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: str
       resizable: true,
       valueFormatter: (params) => mmDDYYFormat(params.value)
     },
-    createAgeColumn({});
+    createAgeColumn({}),
     createSSNColumn(),
     createCurrencyColumn({
       headerName: "Wages",
       field: "wages",
       minWidth: 120
     }),
-    {
-      headerName: "Hours",
-      field: "hours",
-      colId: "hours",
-      minWidth: 100,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: (params) => formatNumberWithComma(params.value)
-    },
+    createHoursColumn({
+      minWidth: 100
+    }),
     {
       headerName: "Points",
       field: "points",
@@ -80,15 +78,11 @@ export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: str
       cellClass: "center-align",
       resizable: true
     },
-    {
-      headerName: "Status",
+    createStatusColumn({
       field: "employeeStatus",
-      colId: "employeeStatus",
       minWidth: 120,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true
-    },
+      alignment: "center"
+    }),
     createCurrencyColumn({
       headerName: "Balance",
       field: "balance",

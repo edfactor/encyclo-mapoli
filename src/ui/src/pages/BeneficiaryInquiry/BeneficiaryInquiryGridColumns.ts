@@ -2,7 +2,7 @@ import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { mmDDYYFormat } from "utils/dateUtils";
 import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
 import { GRID_COLUMN_WIDTHS } from "../../constants";
-import { createSSNColumn } from "../../utils/gridColumnFactory";
+import { createSSNColumn, createNameColumn } from "../../utils/gridColumnFactory";
 
 export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
   return [
@@ -108,19 +108,15 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
         return `${params.data.countryIso}`;
       }
     },
-    {
-      headerName: "Name",
+    createNameColumn({
       field: "fullName",
-      colId: "fullName",
       minWidth: GRID_COLUMN_WIDTHS.FULL_NAME,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true,
+      alignment: "center",
       sortable: false,
       valueFormatter: (params) => {
         return `${params.data.lastName}, ${params.data.firstName}`;
       }
-    },
+    }),
     {
       headerName: "Phone Number",
       field: "phoneNumber",

@@ -2,7 +2,15 @@ import { ColDef } from "ag-grid-community";
 import { formatNumberWithComma } from "smart-ui-library";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
 import { mmDDYYFormat } from "../../../utils/dateUtils";
-import { createBadgeColumn, createCurrencyColumn, createSSNColumn, createAgeColumn, createStoreColumn } from "../../../utils/gridColumnFactory";
+import {
+  createBadgeColumn,
+  createCurrencyColumn,
+  createSSNColumn,
+  createAgeColumn,
+  createStoreColumn,
+  createNameColumn,
+  createHoursColumn
+} from "../../../utils/gridColumnFactory";
 
 export const GetBeneficiariesGridColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   return [
@@ -12,16 +20,11 @@ export const GetBeneficiariesGridColumns = (navFunction: (badgeNumber: string) =
       alignment: "center",
       navigateFunction: navFunction
     }),
-    {
-      headerName: "Name",
+    createNameColumn({
       field: "employeeName",
-      colId: "employeeName",
       minWidth: 180,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
       sortable: true
-    },
+    }),
     createStoreColumn({
       minWidth: 80
     }),
@@ -44,22 +47,16 @@ export const GetBeneficiariesGridColumns = (navFunction: (badgeNumber: string) =
       resizable: true,
       valueFormatter: (params) => mmDDYYFormat(params.value)
     },
-    createAgeColumn({});
+    createAgeColumn({}),
     createSSNColumn(),
     createCurrencyColumn({
       headerName: "Wages",
       field: "wages",
       minWidth: 120
     }),
-    {
-      headerName: "Hours",
-      field: "hours",
-      colId: "hours",
-      minWidth: 100,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: (params) => formatNumberWithComma(params.value)
-    },
+    createHoursColumn({
+      minWidth: 100
+    }),
     {
       headerName: "Points",
       field: "points",

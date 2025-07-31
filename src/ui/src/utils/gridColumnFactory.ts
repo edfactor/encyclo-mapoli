@@ -1,7 +1,18 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { agGridNumberToCurrency, yyyyMMDDToMMDDYYYY } from "smart-ui-library";
+import { agGridNumberToCurrency, yyyyMMDDToMMDDYYYY, formatNumberWithComma } from "smart-ui-library";
 import { GRID_COLUMN_WIDTHS } from "../constants";
-import { BadgeColumnOptions, SSNColumnOptions, CurrencyColumnOptions, AgeColumnOptions, DateColumnOptions, StoreColumnOptions } from "./columnFactoryTypes";
+import {
+  BadgeColumnOptions,
+  SSNColumnOptions,
+  CurrencyColumnOptions,
+  AgeColumnOptions,
+  DateColumnOptions,
+  StoreColumnOptions,
+  NameColumnOptions,
+  HoursColumnOptions,
+  StatusColumnOptions,
+  CountColumnOptions
+} from "./columnFactoryTypes";
 import { viewBadgeLinkRenderer } from "./masterInquiryLink";
 
 export const createSSNColumn = (options: SSNColumnOptions = {}): ColDef => {
@@ -179,6 +190,162 @@ export const createStoreColumn = (options: StoreColumnOptions = {}): ColDef => {
     field = "storeNumber",
     colId = field,
     minWidth = 80,
+    maxWidth,
+    alignment = "right",
+    sortable = true,
+    resizable = true
+  } = options;
+
+  const column: ColDef = {
+    headerName,
+    field,
+    colId,
+    minWidth,
+    resizable,
+    sortable
+  };
+
+  if (alignment === "right") {
+    column.type = "rightAligned";
+  } else {
+    const alignmentClass = alignment === "center" ? "center-align" : "left-align";
+    column.headerClass = alignmentClass;
+    column.cellClass = alignmentClass;
+  }
+
+  if (maxWidth) {
+    column.maxWidth = maxWidth;
+  }
+
+  return column;
+};
+
+export const createNameColumn = (options: NameColumnOptions = {}): ColDef => {
+  const {
+    headerName = "Name",
+    field = "employeeName",
+    colId = field,
+    minWidth = 180,
+    maxWidth,
+    alignment = "left",
+    sortable = true,
+    resizable = true,
+    valueFormatter
+  } = options;
+
+  const alignmentClass = alignment === "center" ? "center-align" : "left-align";
+
+  const column: ColDef = {
+    headerName,
+    field,
+    colId,
+    minWidth,
+    headerClass: alignmentClass,
+    cellClass: alignmentClass,
+    resizable,
+    sortable
+  };
+
+  if (maxWidth) {
+    column.maxWidth = maxWidth;
+  }
+
+  if (valueFormatter) {
+    column.valueFormatter = valueFormatter;
+  }
+
+  return column;
+};
+
+export const createHoursColumn = (options: HoursColumnOptions = {}): ColDef => {
+  const {
+    headerName = "Hours",
+    field = "hours",
+    colId = field,
+    minWidth = 100,
+    maxWidth,
+    sortable = true,
+    resizable = true,
+    alignment = "right",
+    editable = false,
+    valueFormatter = (params) => formatNumberWithComma(params.value)
+  } = options;
+
+  const column: ColDef = {
+    headerName,
+    field,
+    colId,
+    minWidth,
+    type: "rightAligned",
+    resizable,
+    sortable,
+    valueFormatter
+  };
+
+  if (maxWidth) {
+    column.maxWidth = maxWidth;
+  }
+
+  column.editable = editable;
+
+  if (alignment === "right") {
+    column.type = "rightAligned";
+  } else {
+    const alignmentClass = alignment === "center" ? "center-align" : "left-align";
+    column.headerClass = alignmentClass;
+    column.cellClass = alignmentClass;
+  }
+
+  return column;
+};
+
+export const createStatusColumn = (options: StatusColumnOptions = {}): ColDef => {
+  const {
+    headerName = "Status",
+    field = "status",
+    colId = field,
+    minWidth = 120,
+    maxWidth,
+    alignment = "left",
+    sortable = true,
+    resizable = true,
+    valueFormatter
+  } = options;
+
+  const column: ColDef = {
+    headerName,
+    field,
+    colId,
+    minWidth,
+    resizable,
+    sortable
+  };
+
+  if (alignment === "right") {
+    column.type = "rightAligned";
+  } else {
+    const alignmentClass = alignment === "center" ? "center-align" : "left-align";
+    column.headerClass = alignmentClass;
+    column.cellClass = alignmentClass;
+  }
+
+  if (maxWidth) {
+    column.maxWidth = maxWidth;
+  }
+
+  if (valueFormatter) {
+    column.valueFormatter = valueFormatter;
+  }
+
+  return column;
+};
+
+export const createCountColumn = (options: CountColumnOptions = {}): ColDef => {
+  const {
+    headerName = "Count",
+    field = "employeeCount",
+    colId = field,
+    minWidth = 100,
     maxWidth,
     alignment = "right",
     sortable = true,

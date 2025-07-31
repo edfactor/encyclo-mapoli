@@ -1,6 +1,6 @@
 import { ColDef, ColGroupDef } from "ag-grid-community";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
-import { createCurrencyColumn } from "../../../utils/gridColumnFactory";
+import { createCurrencyColumn, createCountColumn } from "../../../utils/gridColumnFactory";
 
 export const GetForfeituresByAgeColumns = (reportType: FrozenReportsByAgeRequestType): (ColDef | ColGroupDef)[] => {
   const columns: (ColDef | ColGroupDef)[] = [
@@ -17,14 +17,11 @@ export const GetForfeituresByAgeColumns = (reportType: FrozenReportsByAgeRequest
           sort: "asc",
           cellDataType: "text"
         },
-        {
+        createCountColumn({
           headerName: "EMPS",
           field: "employeeCount",
-          colId: "employeeCount",
-          minWidth: 100,
-          type: "rightAligned",
-          resizable: true
-        },
+          minWidth: 100
+        }),
         createCurrencyColumn({
           headerName: "Amount",
           field: "amount",

@@ -1,5 +1,5 @@
 import { ColDef } from "ag-grid-community";
-import { createBadgeColumn, createCurrencyColumn } from "../../../../utils/gridColumnFactory";
+import { createBadgeColumn, createCurrencyColumn, createNameColumn } from "../../../../utils/gridColumnFactory";
 
 export const GetAssociatesColumns = (handleNavigation: (badgeNumber: string) => void): ColDef[] => {
   return [
@@ -9,8 +9,9 @@ export const GetAssociatesColumns = (handleNavigation: (badgeNumber: string) => 
       navigateFunction: handleNavigation
     }),
     {
-      headerName: "Name",
-      field: "fullName",
+      ...createNameColumn({
+        field: "fullName"
+      }),
       flex: 1
     },
     {

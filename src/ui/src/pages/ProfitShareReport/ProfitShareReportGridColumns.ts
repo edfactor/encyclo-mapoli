@@ -1,7 +1,15 @@
 import { ColDef } from "ag-grid-community";
-import { yyyyMMDDToMMDDYYYY } from "smart-ui-library";
 import { GRID_COLUMN_WIDTHS } from "../../constants";
-import { createBadgeColumn, createCurrencyColumn, createSSNColumn, createAgeColumn, createDateColumn, createStoreColumn } from "../../utils/gridColumnFactory";
+import {
+  createAgeColumn,
+  createBadgeColumn,
+  createCurrencyColumn,
+  createDateColumn,
+  createHoursColumn,
+  createNameColumn,
+  createSSNColumn,
+  createStoreColumn
+} from "../../utils/gridColumnFactory";
 
 export const GetProfitShareReportColumns = (): ColDef[] => {
   return [
@@ -10,15 +18,10 @@ export const GetProfitShareReportColumns = (): ColDef[] => {
       minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
       alignment: "left"
     }),
-    {
-      headerName: "Name",
+    createNameColumn({
       field: "employeeName",
-      colId: "employeeName",
-      minWidth: 120,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
+      minWidth: 120
+    }),
     createStoreColumn({
       minWidth: 60
     }),
@@ -42,29 +45,17 @@ export const GetProfitShareReportColumns = (): ColDef[] => {
       minWidth: 150,
       alignment: "left"
     }),
-    {
-      headerName: "Age",
-      field: "age",
-      colId: "age",
-      minWidth: 50,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
+    createAgeColumn({}),
+
     createSSNColumn({ alignment: "left" }),
     createCurrencyColumn({
       headerName: "Wages",
       field: "wages",
       minWidth: 150
     }),
-    {
-      headerName: "Hours",
-      field: "hours",
-      colId: "hours",
-      minWidth: 150,
-      type: "rightAligned",
-      resizable: true
-    },
+    createHoursColumn({
+      minWidth: 150
+    }),
     {
       headerName: "Points",
       field: "points",
