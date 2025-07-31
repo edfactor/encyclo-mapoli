@@ -1,6 +1,6 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 
-namespace YEMatch;
+namespace YEMatch.YEMatch.Runs;
 
 [SuppressMessage("AsyncUsage", "AsyncFixer01:Unnecessary async/await usage")]
 public class Only14EmployeesRun : Runnable

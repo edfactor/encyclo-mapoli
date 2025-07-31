@@ -1,4 +1,6 @@
-﻿namespace YEMatch;
+﻿using YEMatch.YEMatch.Activities;
+
+namespace YEMatch.YEMatch.ArrangeActivites;
 
 // This task takes the READY database and imports it directly to SMART.  Handy for isolating smart activities.
 internal sealed class ImportReadyDbToSmartDb : IActivity

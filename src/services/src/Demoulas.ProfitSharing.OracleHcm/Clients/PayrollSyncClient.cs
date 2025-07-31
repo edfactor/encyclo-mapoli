@@ -7,7 +7,7 @@ using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.Contracts.Messaging;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Data.Entities.MassTransit;
+using Demoulas.ProfitSharing.Data.Entities.Scheduling;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Microsoft.EntityFrameworkCore;

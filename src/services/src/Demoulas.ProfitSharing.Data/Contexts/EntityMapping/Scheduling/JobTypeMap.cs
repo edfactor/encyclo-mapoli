@@ -1,8 +1,8 @@
-﻿using Demoulas.ProfitSharing.Data.Entities.MassTransit;
+﻿using Demoulas.ProfitSharing.Data.Entities.Scheduling;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping.MassTransit;
+namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Scheduling;
 
 internal sealed class JobTypeMap : IEntityTypeConfiguration<JobType>
 {

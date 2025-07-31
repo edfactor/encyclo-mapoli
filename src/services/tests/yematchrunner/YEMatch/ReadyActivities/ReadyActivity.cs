@@ -2,10 +2,11 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 using Renci.SshNet;
+using YEMatch.YEMatch.Activities;
 
 #pragma warning disable CS0162 // Unreachable code detected
 
-namespace YEMatch;
+namespace YEMatch.YEMatch.ReadyActivities;
 
 [SuppressMessage("Major Code Smell", "S6966:Awaitable method should be used")]
 public class ReadyActivity(SshClient client, SftpClient sftpClient, bool chatty, string AName, string ksh, string args, string dataDirectory) : IActivity

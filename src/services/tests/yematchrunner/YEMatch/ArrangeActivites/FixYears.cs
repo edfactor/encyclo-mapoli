@@ -1,4 +1,6 @@
-namespace YEMatch;
+﻿using YEMatch.YEMatch.AssertActivities;
+
+namespace YEMatch.YEMatch.ArrangeActivites;
 
 // Updates the READY Years to match the computed values by SMART
 // a work around for ensuring the systems calculate the same amount.

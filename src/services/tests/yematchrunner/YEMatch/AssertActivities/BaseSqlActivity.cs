@@ -1,7 +1,8 @@
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Oracle.ManagedDataAccess.Client;
+using YEMatch.YEMatch.ReadyActivities;
 
-namespace YEMatch;
+namespace YEMatch.YEMatch.AssertActivities;
 
 // The base class for activities which directly interact with the database
 public abstract class BaseSqlActivity : BaseActivity

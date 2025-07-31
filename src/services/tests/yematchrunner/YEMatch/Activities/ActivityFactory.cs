@@ -1,6 +1,9 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
+using YEMatch.YEMatch.AssertActivities;
+using YEMatch.YEMatch.ReadyActivities;
+using YEMatch.YEMatch.SmartActivities;
 
-namespace YEMatch;
+namespace YEMatch.YEMatch.Activities;
 
 public sealed class ActivityFactory
 {
