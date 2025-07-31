@@ -18,8 +18,10 @@ using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using Demoulas.Util.Extensions;
 using FastEndpoints;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Moq;
 using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
@@ -41,8 +43,9 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
     {
         var calendarService = ServiceProvider!.GetRequiredService<ICalendarService>();
         var appUser = ServiceProvider!.GetService<IAppUser>();
+        Mock<IHttpContextAccessor> mockHttpContextAccessor = new();
         ExecutiveHoursAndDollarsService mockService = new(MockDbContextFactory, calendarService);
-        IAuditService mockAuditService = new AuditService(MockDbContextFactory, appUser);
+        IAuditService mockAuditService = new AuditService(MockDbContextFactory, appUser, mockHttpContextAccessor.Object);
         _endpoint = new ExecutiveHoursAndDollarsEndpoint(mockService, mockAuditService);
     }
 

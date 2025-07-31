@@ -9,6 +9,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Microsoft.AspNetCore.Http;
 
 namespace Demoulas.ProfitSharing.Services.Audit;
 
@@ -16,11 +17,15 @@ public sealed class AuditService : IAuditService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly IAppUser? _appUser;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public AuditService(IProfitSharingDataContextFactory dataContextFactory, IAppUser? appUser)
+    public AuditService(IProfitSharingDataContextFactory dataContextFactory, 
+        IAppUser? appUser,
+        IHttpContextAccessor httpContextAccessor)
     {
         _dataContextFactory = dataContextFactory;
         _appUser = appUser;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<TResponse> ArchiveCompletedReportAsync<TRequest, TResponse, TResult>(
@@ -38,13 +43,25 @@ public sealed class AuditService : IAuditService
             throw new ArgumentNullException(nameof(reportFunction), "Report function cannot be null.");
         }
 
-        // Create archive request with full data retrieval (Skip=0, Take=max)
-        TRequest archiveRequest = CreateArchiveRequest(request);
+        bool archive = (_httpContextAccessor.HttpContext?.Request?.Query?.TryGetValue("archive", out var archiveValue) ?? false) &&
+                       bool.TryParse(archiveValue, out var archiveResult) && archiveResult;
+
+        TRequest archiveRequest = request;
+        if (archive)
+        {
+            // Create archive request with full data retrieval
+            archiveRequest = request with { Skip = 0, Take = ushort.MaxValue };
+        }
 
         TResponse response = await reportFunction(archiveRequest, cancellationToken);
 
-        string requestJson = JsonSerializer.Serialize(request);
-        string reportJson = JsonSerializer.Serialize(response);
+        if (!archive)
+        {
+            return response;
+        }
+
+        string requestJson = JsonSerializer.Serialize(request, JsonSerializerOptions.Web);
+        string reportJson = JsonSerializer.Serialize(response, JsonSerializerOptions.Web);
 
         var entries = new List<AuditChangeEntry> { new() { ColumnName = "Report", NewValue = reportJson } };
         var auditEvent = new AuditEvent { TableName = reportName, Operation = "Archive", UserName = _appUser?.UserName ?? string.Empty, ChangesJson = entries };
@@ -60,14 +77,6 @@ public sealed class AuditService : IAuditService
         }, cancellationToken);
 
         return response;
-    }
-
-    private static TRequest CreateArchiveRequest<TRequest>(TRequest originalRequest) 
-        where TRequest : PaginationRequestDto
-    {
-        // For record types (like PaginationRequestDto), use 'with' expression
-        // This works because PaginationRequestDto is a record type
-        return originalRequest with { Skip = 0, Take = short.MaxValue };
     }
 
     public async Task ArchiveCompletedReportAsync<TRequest, TResponse>(

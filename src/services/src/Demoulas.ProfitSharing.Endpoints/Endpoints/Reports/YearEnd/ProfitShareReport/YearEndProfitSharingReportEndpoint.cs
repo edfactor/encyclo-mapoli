@@ -54,26 +54,19 @@ public class YearEndProfitSharingReportEndpoint: EndpointWithCsvTotalsBase<YearE
 
         base.Configure();
     }
+
     /// <summary>
     /// Handles the request and returns the year-end profit sharing report response.
     /// </summary>
     public override Task<YearEndProfitSharingReportResponse> GetResponse(YearEndProfitSharingReportRequest req, CancellationToken ct)
     {
-        // Read "archive" from query string without modifying the DTO
-        bool archive = (HttpContext?.Request?.Query?.TryGetValue("archive", out var archiveValue) ?? false) &&
-                       bool.TryParse(archiveValue, out var archiveResult) && archiveResult;
+        return _auditService.ArchiveCompletedReportAsync<YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse, YearEndProfitSharingReportDetail>(
+            Report_Name,
+            req.ProfitYear,
+            req,
+            (archiveReq, cancellationToken) => _cleanupReportService.GetYearEndProfitSharingReportAsync(archiveReq, cancellationToken),
+            ct);
 
-        if (archive)
-        {
-            return _auditService.ArchiveCompletedReportAsync<YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse, YearEndProfitSharingReportDetail>(
-                Report_Name,
-                req.ProfitYear,
-                req,
-                (archiveReq, cancellationToken) => _cleanupReportService.GetYearEndProfitSharingReportAsync(archiveReq, cancellationToken),
-                ct);
-        }
-
-        return _cleanupReportService.GetYearEndProfitSharingReportAsync(req, ct);
     }
 
     public override string ReportFileName => "yearend-profit-sharing-report";
