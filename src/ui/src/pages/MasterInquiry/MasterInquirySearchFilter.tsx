@@ -87,10 +87,7 @@ interface MasterInquirySearchFilterProps {
   onSearch: (params: MasterInquiryRequest | undefined) => void;
 }
 
-const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
-  setInitialSearchLoaded,
-  onSearch
-}) => {
+const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ setInitialSearchLoaded, onSearch }) => {
   const [triggerSearch, { isFetching }] = useLazySearchProfitMasterInquiryQuery();
   const { masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
   const { clearAlerts } = useMissiveAlerts();
@@ -181,74 +178,81 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
     }
   }, [badgeNumber, hasToken, reset, triggerSearch, profitYear]);
 
-
-  const selectSx = useMemo(() => ({
-    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-      borderColor: "#0258A5"
-    },
-    "&:hover .MuiOutlinedInput-notchedOutline": {
-      borderColor: "#0258A5"
-    }
-  }), []);
+  const selectSx = useMemo(
+    () => ({
+      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+        borderColor: "#0258A5"
+      },
+      "&:hover .MuiOutlinedInput-notchedOutline": {
+        borderColor: "#0258A5"
+      }
+    }),
+    []
+  );
 
   const months = useMemo(() => Array.from({ length: 12 }, (_, i) => i + 1), []);
 
-  const validateAndSearch = useCallback(handleSubmit((data) => {
-    if (isValid) {
-      // clear missives
-      clearAlerts();
+  const validateAndSearch = useCallback(
+    handleSubmit((data) => {
+      if (isValid) {
+        // clear missives
+        clearAlerts();
 
-      // Create a unique timestamp to ensure each search is treated as new
-      const timestamp = Date.now();
+        // Create a unique timestamp to ensure each search is treated as new
+        const timestamp = Date.now();
 
-      const searchParams: MasterInquiryRequest = {
-        pagination: {
-          skip: data.pagination?.skip || 0,
-          take: data.pagination?.take || 5,
-          sortBy: data.pagination?.sortBy || "badgeNumber",
-          isSortDescending: data.pagination?.isSortDescending || true
-        },
-        endProfitYear: data.endProfitYear ?? profitYear,
-        ...(!!data.startProfitMonth && { startProfitMonth: data.startProfitMonth }),
-        ...(!!data.endProfitMonth && { endProfitMonth: data.endProfitMonth }),
-        ...(!!data.socialSecurity && { ssn: data.socialSecurity }),
-        ...(!!data.name && { name: data.name }),
-        ...(!!data.badgeNumber && { badgeNumber: data.badgeNumber }),
-        ...(!!data.paymentType && { paymentType: paymentTypeGetNumberMap[data.paymentType] }),
-        ...(!!data.memberType && { memberType: memberTypeGetNumberMap[data.memberType] }),
-        ...(!!data.contribution && { contributionAmount: data.contribution }),
-        ...(!!data.earnings && { earningsAmount: data.earnings }),
-        ...(!!data.forfeiture && { forfeitureAmount: data.forfeiture }),
-        ...(!!data.payment && { paymentAmount: data.payment }),
-        // Add a unique timestamp field to force React to see this as a new object
-        _timestamp: timestamp
-      };
+        const searchParams: MasterInquiryRequest = {
+          pagination: {
+            skip: data.pagination?.skip || 0,
+            take: data.pagination?.take || 5,
+            sortBy: data.pagination?.sortBy || "badgeNumber",
+            isSortDescending: data.pagination?.isSortDescending || true
+          },
+          endProfitYear: data.endProfitYear ?? profitYear,
+          ...(!!data.startProfitMonth && { startProfitMonth: data.startProfitMonth }),
+          ...(!!data.endProfitMonth && { endProfitMonth: data.endProfitMonth }),
+          ...(!!data.socialSecurity && { ssn: data.socialSecurity }),
+          ...(!!data.name && { name: data.name }),
+          ...(!!data.badgeNumber && { badgeNumber: data.badgeNumber }),
+          ...(!!data.paymentType && { paymentType: paymentTypeGetNumberMap[data.paymentType] }),
+          ...(!!data.memberType && { memberType: memberTypeGetNumberMap[data.memberType] }),
+          ...(!!data.contribution && { contributionAmount: data.contribution }),
+          ...(!!data.earnings && { earningsAmount: data.earnings }),
+          ...(!!data.forfeiture && { forfeitureAmount: data.forfeiture }),
+          ...(!!data.payment && { paymentAmount: data.payment }),
+          // Add a unique timestamp field to force React to see this as a new object
+          _timestamp: timestamp
+        };
 
-      // Clear existing state first
-      setInitialSearchLoaded(false);
+        // Clear existing state first
+        setInitialSearchLoaded(false);
 
-      // Set new search parameters immediately
-      onSearch(searchParams);
+        // Set new search parameters immediately
+        onSearch(searchParams);
 
-      triggerSearch(searchParams, false)
-        .unwrap()
-        .then((response) => {
-          // Update loaded state based on response
-          if (
-            response && Array.isArray(response) ? response.length > 0 : response.results && response.results.length > 0
-          ) {
-            setInitialSearchLoaded(true);
-          } else {
-            setInitialSearchLoaded(false);
-            // Don't call onSearch(undefined) here as it clears searchParams
-            // and causes the grid to disappear. The grid itself handles no results.
-            onSearch(undefined);
-          }
-        });
+        triggerSearch(searchParams, false)
+          .unwrap()
+          .then((response) => {
+            // Update loaded state based on response
+            if (
+              response && Array.isArray(response)
+                ? response.length > 0
+                : response.results && response.results.length > 0
+            ) {
+              setInitialSearchLoaded(true);
+            } else {
+              setInitialSearchLoaded(false);
+              // Don't call onSearch(undefined) here as it clears searchParams
+              // and causes the grid to disappear. The grid itself handles no results.
+              onSearch(undefined);
+            }
+          });
 
-      dispatch(setMasterInquiryRequestParams(data));
-    }
-  }), [handleSubmit, isValid, clearAlerts, profitYear, setInitialSearchLoaded, onSearch, triggerSearch, dispatch]);
+        dispatch(setMasterInquiryRequestParams(data));
+      }
+    }),
+    [handleSubmit, isValid, clearAlerts, profitYear, setInitialSearchLoaded, onSearch, triggerSearch, dispatch]
+  );
 
   const handleReset = useCallback(() => {
     clearAlerts();
@@ -339,62 +343,74 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
     </Grid>
   ));
 
-  const TextInputField = memo(({ name, label, type = "text" }: { name: keyof MasterInquirySearch; label: string; type?: string }) => (
-    <Grid size={{ xs: 12, sm: 6, md: type === "number" ? 2 : 4 }}>
-      <FormLabel>{label}</FormLabel>
-      <Controller
-        name={name}
-        control={control}
-        render={({ field }) => (
-          <TextField
-            {...field}
-            fullWidth
-            type={type}
-            size="small"
-            variant="outlined"
-            value={field.value ?? ""}
-            error={!!errors[name]}
-            onChange={(e) => {
-              const parsedValue = type === "number" && e.target.value !== "" ? Number(e.target.value) : 
-                                  e.target.value === "" ? null : e.target.value;
-              field.onChange(parsedValue);
-            }}
-          />
-        )}
-      />
-      {errors[name] && <FormHelperText error>{errors[name]?.message}</FormHelperText>}
-    </Grid>
-  ));
-
-  const RadioGroupField = memo(({ name, label, options }: { 
-    name: "paymentType" | "memberType"; 
-    label: string; 
-    options: Array<{ value: string; label: string }> 
-  }) => (
-    <Grid size={{ xs: 12, sm: 6, md: 6 }}>
-      <FormControl error={!!errors[name]}>
+  const TextInputField = memo(
+    ({ name, label, type = "text" }: { name: keyof MasterInquirySearch; label: string; type?: string }) => (
+      <Grid size={{ xs: 12, sm: 6, md: type === "number" ? 2 : 4 }}>
         <FormLabel>{label}</FormLabel>
         <Controller
           name={name}
           control={control}
           render={({ field }) => (
-            <RadioGroup
+            <TextField
               {...field}
-              row>
-              {options.map((option) => (
-                <FormControlLabel
-                  key={option.value}
-                  value={option.value}
-                  control={<Radio size="small" />}
-                  label={option.label}
-                />
-              ))}
-            </RadioGroup>
+              fullWidth
+              type={type}
+              size="small"
+              variant="outlined"
+              value={field.value ?? ""}
+              error={!!errors[name]}
+              onChange={(e) => {
+                const parsedValue =
+                  type === "number" && e.target.value !== ""
+                    ? Number(e.target.value)
+                    : e.target.value === ""
+                      ? null
+                      : e.target.value;
+                field.onChange(parsedValue);
+              }}
+            />
           )}
         />
-      </FormControl>
-    </Grid>
-  ));
+        {errors[name] && <FormHelperText error>{errors[name]?.message}</FormHelperText>}
+      </Grid>
+    )
+  );
+
+  const RadioGroupField = memo(
+    ({
+      name,
+      label,
+      options
+    }: {
+      name: "paymentType" | "memberType";
+      label: string;
+      options: Array<{ value: string; label: string }>;
+    }) => (
+      <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+        <FormControl error={!!errors[name]}>
+          <FormLabel>{label}</FormLabel>
+          <Controller
+            name={name}
+            control={control}
+            render={({ field }) => (
+              <RadioGroup
+                {...field}
+                row>
+                {options.map((option) => (
+                  <FormControlLabel
+                    key={option.value}
+                    value={option.value}
+                    control={<Radio size="small" />}
+                    label={option.label}
+                  />
+                ))}
+              </RadioGroup>
+            )}
+          />
+        </FormControl>
+      </Grid>
+    )
+  );
 
   const VoidsCheckboxField = memo(() => (
     <Grid size={{ xs: 12, sm: 6, md: 4 }}>
@@ -423,18 +439,24 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
     </Grid>
   ));
 
-  const paymentTypeOptions = useMemo(() => [
-    { value: "all", label: "All" },
-    { value: "hardship", label: "Hardship/Dis" },
-    { value: "payoffs", label: "Payoffs/Forfeit" },
-    { value: "rollovers", label: "Rollovers" }
-  ], []);
+  const paymentTypeOptions = useMemo(
+    () => [
+      { value: "all", label: "All" },
+      { value: "hardship", label: "Hardship/Dis" },
+      { value: "payoffs", label: "Payoffs/Forfeit" },
+      { value: "rollovers", label: "Rollovers" }
+    ],
+    []
+  );
 
-  const memberTypeOptions = useMemo(() => [
-    { value: "all", label: "All" },
-    { value: "employees", label: "Employees" },
-    { value: "beneficiaries", label: "Beneficiaries" }
-  ], []);
+  const memberTypeOptions = useMemo(
+    () => [
+      { value: "all", label: "All" },
+      { value: "employees", label: "Employees" },
+      { value: "beneficiaries", label: "Beneficiaries" }
+    ],
+    []
+  );
 
   return (
     <form onSubmit={validateAndSearch}>
@@ -446,17 +468,58 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
           spacing={3}
           width="100%">
           <ProfitYearField />
-          <MonthSelectField name="startProfitMonth" label="Beginning Month" />
-          <MonthSelectField name="endProfitMonth" label="Ending Month" />
-          <TextInputField name="socialSecurity" label="Social Security Number" type="number" />
-          <TextInputField name="name" label="Name" />
-          <TextInputField name="badgeNumber" label="Badge/PSN Number" type="number" />
-          <RadioGroupField name="paymentType" label="Payment Type" options={paymentTypeOptions} />
-          <RadioGroupField name="memberType" label="Member Type" options={memberTypeOptions} />
-          <TextInputField name="contribution" label="Contribution" type="number" />
-          <TextInputField name="earnings" label="Earnings" type="number" />
-          <TextInputField name="forfeiture" label="Forfeiture" type="number" />
-          <TextInputField name="payment" label="Payment" type="number" />
+          <MonthSelectField
+            name="startProfitMonth"
+            label="Beginning Month"
+          />
+          <MonthSelectField
+            name="endProfitMonth"
+            label="Ending Month"
+          />
+          <TextInputField
+            name="socialSecurity"
+            label="Social Security Number"
+            type="number"
+          />
+          <TextInputField
+            name="name"
+            label="Name"
+          />
+          <TextInputField
+            name="badgeNumber"
+            label="Badge/PSN Number"
+            type="number"
+          />
+          <RadioGroupField
+            name="paymentType"
+            label="Payment Type"
+            options={paymentTypeOptions}
+          />
+          <RadioGroupField
+            name="memberType"
+            label="Member Type"
+            options={memberTypeOptions}
+          />
+          <TextInputField
+            name="contribution"
+            label="Contribution"
+            type="number"
+          />
+          <TextInputField
+            name="earnings"
+            label="Earnings"
+            type="number"
+          />
+          <TextInputField
+            name="forfeiture"
+            label="Forfeiture"
+            type="number"
+          />
+          <TextInputField
+            name="payment"
+            label="Payment"
+            type="number"
+          />
           <VoidsCheckboxField />
         </Grid>
 
