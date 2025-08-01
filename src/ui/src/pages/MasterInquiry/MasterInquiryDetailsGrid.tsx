@@ -48,7 +48,7 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ memberType, id })
       sortBy: sortParams.sortBy,
       isSortDescending: sortParams.isSortDescending
     });
-  }, [memberType, id, pageNumber, pageSize, sortParams, triggerMemberDetails]);
+  }, [memberType, id, pageNumber, pageSize, sortParams.sortBy, sortParams.isSortDescending, triggerMemberDetails]);
 
   // Need a useEffect to reset the page number when memberDetailsData changes
   const prevMemberDetailsData = useRef<any>(null);

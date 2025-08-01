@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import {
   useLazyGetProfitMasterInquiryGroupingQuery,
   useLazyGetProfitMasterInquiryFilteredDetailsQuery
@@ -53,58 +53,75 @@ const MasterInquiryGroupingGrid = ({ searchParams }: { searchParams: MasterInqui
 
   const { masterInquiryGroupingData } = useSelector((state: RootState) => state.inquiry);
 
+  // Extract render functions to prevent recreation on every render
+  const renderProfitYear = useCallback((value: number) => (
+    <Typography sx={{ fontWeight: 500, color: "#231F20" }}>{value}</Typography>
+  ), []);
+
+  const renderMonth = useCallback((value: number) => (
+    <Typography sx={{ color: "#231F20" }}>{String(value).padStart(2, "0")}</Typography>
+  ), []);
+
+  const renderCurrency = useCallback((value: number) => (
+    <Typography sx={{ color: "#231F20" }}>{numberToCurrency(value)}</Typography>
+  ), []);
+
+  const renderTransactionCount = useCallback((value: number) => (
+    <Typography sx={{ color: "#231F20" }}>{value.toLocaleString()}</Typography>
+  ), []);
+
   const groupingColumns = useMemo(
     (): INestedGridColumn<GroupedProfitSummaryDto>[] => [
       {
         key: "profitYear",
         label: "Profit Year",
         width: 120,
-        render: (value: number) => <Typography sx={{ fontWeight: 500, color: "#231F20" }}>{value}</Typography>
+        render: renderProfitYear
       },
       {
         key: "monthToDate",
         label: "Month",
         width: 100,
         align: "center",
-        render: (value: number) => <Typography sx={{ color: "#231F20" }}>{String(value).padStart(2, "0")}</Typography>
+        render: renderMonth
       },
       {
         key: "totalContribution",
         label: "Total Contributions",
         width: 150,
         align: "right",
-        render: (value: number) => <Typography sx={{ color: "#231F20" }}>{numberToCurrency(value)}</Typography>
+        render: renderCurrency
       },
       {
         key: "totalEarnings",
         label: "Total Earnings",
         width: 150,
         align: "right",
-        render: (value: number) => <Typography sx={{ color: "#231F20" }}>{numberToCurrency(value)}</Typography>
+        render: renderCurrency
       },
       {
         key: "totalForfeiture",
         label: "Total Forfeitures",
         width: 150,
         align: "right",
-        render: (value: number) => <Typography sx={{ color: "#231F20" }}>{numberToCurrency(value)}</Typography>
+        render: renderCurrency
       },
       {
         key: "totalPayment",
         label: "Total Payments",
         width: 150,
         align: "right",
-        render: (value: number) => <Typography sx={{ color: "#231F20" }}>{numberToCurrency(value)}</Typography>
+        render: renderCurrency
       },
       {
         key: "transactionCount",
         label: "Transaction Count",
         width: 150,
         align: "right",
-        render: (value: number) => <Typography sx={{ color: "#231F20" }}>{value.toLocaleString()}</Typography>
+        render: renderTransactionCount
       }
     ],
-    []
+    [renderProfitYear, renderMonth, renderCurrency, renderTransactionCount]
   );
 
   const nestedGridData = useMemo(
@@ -118,48 +135,54 @@ const MasterInquiryGroupingGrid = ({ searchParams }: { searchParams: MasterInqui
 
   const detailColumns = useMemo(() => GetMasterInquiryGridColumns(), []);
 
-  const renderNestedContent = (row: INestedGridRowData<GroupedProfitSummaryDto>, isExpanded: boolean) => {
+  // Handle row expansion/collapse
+  const handleRowToggle = useCallback((rowId: string, isExpanded: boolean, row: INestedGridRowData<GroupedProfitSummaryDto>) => {
+    if (!isExpanded) {
+      // Collapsing row
+      setExpandedRowIds((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(rowId);
+        return newSet;
+      });
+      setExpandedRowDataMap((prev) => {
+        const { [rowId]: _, ...rest } = prev;
+        return rest;
+      });
+    } else {
+      // Expanding row
+      if (!expandedRowIds.has(rowId)) {
+        setExpandedRowIds((prev) => new Set(prev).add(rowId));
+
+        getFilteredDetails({
+          memberType: searchParams.memberType || 0,
+          profitYear: row.profitYear,
+          monthToDate: row.monthToDate,
+          badgeNumber: searchParams.badgeNumber,
+          psnSuffix: searchParams.psnSuffix,
+          ssn: searchParams.ssn?.toString(),
+          startProfitMonth: searchParams.startProfitMonth,
+          endProfitMonth: searchParams.endProfitMonth,
+          profitCode: searchParams.profitCode,
+          contributionAmount: searchParams.contributionAmount,
+          earningsAmount: searchParams.earningsAmount,
+          forfeitureAmount: searchParams.forfeitureAmount,
+          paymentAmount: searchParams.paymentAmount,
+          name: searchParams.name,
+          paymentType: searchParams.paymentType,
+          skip: 0,
+          take: 25,
+          sortBy: "profitYear",
+          isSortDescending: true
+        });
+      }
+    }
+  }, [expandedRowIds, getFilteredDetails, searchParams]);
+
+  const renderNestedContent = useCallback((row: INestedGridRowData<GroupedProfitSummaryDto>, isExpanded: boolean) => {
     const rowId = String(row.id);
 
     if (!isExpanded) {
-      if (expandedRowIds.has(rowId)) {
-        setExpandedRowIds((prev) => {
-          const newSet = new Set(prev);
-          newSet.delete(rowId);
-          return newSet;
-        });
-        setExpandedRowDataMap((prev) => {
-          const { [rowId]: _, ...rest } = prev;
-          return rest;
-        });
-      }
       return null;
-    }
-
-    if (!expandedRowIds.has(rowId)) {
-      setExpandedRowIds((prev) => new Set(prev).add(rowId));
-
-      getFilteredDetails({
-        memberType: searchParams.memberType || 0,
-        profitYear: row.profitYear,
-        monthToDate: row.monthToDate,
-        badgeNumber: searchParams.badgeNumber,
-        psnSuffix: searchParams.psnSuffix,
-        ssn: searchParams.ssn?.toString(),
-        startProfitMonth: searchParams.startProfitMonth,
-        endProfitMonth: searchParams.endProfitMonth,
-        profitCode: searchParams.profitCode,
-        contributionAmount: searchParams.contributionAmount,
-        earningsAmount: searchParams.earningsAmount,
-        forfeitureAmount: searchParams.forfeitureAmount,
-        paymentAmount: searchParams.paymentAmount,
-        name: searchParams.name,
-        paymentType: searchParams.paymentType,
-        skip: 0,
-        take: 25,
-        sortBy: "profitYear",
-        isSortDescending: true
-      });
     }
 
     return (
@@ -186,7 +209,7 @@ const MasterInquiryGroupingGrid = ({ searchParams }: { searchParams: MasterInqui
         />
       </Box>
     );
-  };
+  }, [expandedRowDataMap, detailColumns, isFetchingFilteredDetails]);
 
   if (isGroupingLoading) {
     return (
@@ -212,6 +235,7 @@ const MasterInquiryGroupingGrid = ({ searchParams }: { searchParams: MasterInqui
       data={nestedGridData}
       columns={groupingColumns}
       renderNestedContent={renderNestedContent}
+      onRowExpand={handleRowToggle}
       className="w-full"
     />
   );

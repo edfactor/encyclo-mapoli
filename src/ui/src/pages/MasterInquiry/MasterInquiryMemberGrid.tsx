@@ -1,5 +1,5 @@
 import { Box, CircularProgress, Typography } from "@mui/material";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { useLazySearchProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
 import { EmployeeDetails, MasterInquiryRequest } from "reduxstore/types";
 import { DSMGrid, formatNumberWithComma, ISortParams } from "smart-ui-library";
@@ -77,6 +77,8 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = ({
     }
   }, [data, onBadgeClick]);
 
+  const columns = useMemo(() => GetMasterInquiryMemberGridColumns(), []);
+
   // If no searchParams, render nothing
   if (!searchParams || Object.keys(searchParams).length === 0) {
     return null;
@@ -94,8 +96,6 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = ({
       </Box>
     );
   }
-
-  const columns = GetMasterInquiryMemberGridColumns();
 
   // Hide the grid if only one member is returned
   // But if the last page returns one result, we still want to show the grid
