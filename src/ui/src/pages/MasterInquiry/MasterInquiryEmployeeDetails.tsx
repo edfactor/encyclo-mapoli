@@ -49,7 +49,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
         profitYear: profitYear ?? defaultProfitYear
       });
     }
-  }, [memberType, id, profitYear, trigger, defaultProfitYear]);
+  }, [memberType, id, profitYear, defaultProfitYear]);
 
   useEffect(() => {
     if (masterInquiryResults) {
