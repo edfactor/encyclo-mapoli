@@ -1,15 +1,16 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Grid } from "@mui/material";
+import { Button, Grid } from "@mui/material";
+import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
+import { clearTermination } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
-import { SearchAndReset } from "smart-ui-library";
+import { SearchAndReset, SmartModal } from "smart-ui-library";
 import * as yup from "yup";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 import { CalendarResponseDto } from "../../../reduxstore/types";
 import { mmDDYYFormat, tryddmmyyyyToDate } from "../../../utils/dateUtils";
 import { TerminationSearchRequest } from "./Termination";
-import { clearTermination } from "reduxstore/slices/yearsEndSlice";
 
 const schema = yup.object().shape({
   beginningDate: yup.string().required("Begin Date is required"),
@@ -38,6 +39,7 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
   onSearch,
   hasUnsavedChanges
 }) => {
+  const [openErrorModal, setOpenErrorModal] = useState(!fiscalData === false);
   const dispatch = useDispatch();
   const { termination } = useSelector((state: RootState) => state.yearsEnd);
   const {
@@ -88,7 +90,24 @@ const TerminationSearchFilter: React.FC<TerminationSearchFilterProps> = ({
     dispatch(clearTermination());
   };
 
-  if (!fiscalData) return null;
+  if (!fiscalData) {
+    return (
+      <SmartModal
+        key={"fiscalDataErrorModal"}
+        open={openErrorModal}
+        maxWidth="sm"
+        title="Services Error"
+        onClose={() => setOpenErrorModal(false)}
+        message={`Fiscal date range not available. Please try again later.\n`}>
+        <Button
+          onClick={() => setOpenErrorModal(false)}
+          variant="outlined"
+          sx={{ mt: "15px" }}>
+          OK
+        </Button>
+      </SmartModal>
+    );
+  }
 
   return (
     <form onSubmit={validateAndSearch}>
