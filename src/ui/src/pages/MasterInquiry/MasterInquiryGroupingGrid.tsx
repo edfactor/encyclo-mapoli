@@ -135,48 +135,54 @@ const MasterInquiryGroupingGrid = ({ searchParams }: { searchParams: MasterInqui
 
   const detailColumns = useMemo(() => GetMasterInquiryGridColumns(), []);
 
-  const renderNestedContent = (row: INestedGridRowData<GroupedProfitSummaryDto>, isExpanded: boolean) => {
+  // Handle row expansion/collapse
+  const handleRowToggle = useCallback((rowId: string, isExpanded: boolean, row: INestedGridRowData<GroupedProfitSummaryDto>) => {
+    if (!isExpanded) {
+      // Collapsing row
+      setExpandedRowIds((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(rowId);
+        return newSet;
+      });
+      setExpandedRowDataMap((prev) => {
+        const { [rowId]: _, ...rest } = prev;
+        return rest;
+      });
+    } else {
+      // Expanding row
+      if (!expandedRowIds.has(rowId)) {
+        setExpandedRowIds((prev) => new Set(prev).add(rowId));
+
+        getFilteredDetails({
+          memberType: searchParams.memberType || 0,
+          profitYear: row.profitYear,
+          monthToDate: row.monthToDate,
+          badgeNumber: searchParams.badgeNumber,
+          psnSuffix: searchParams.psnSuffix,
+          ssn: searchParams.ssn?.toString(),
+          startProfitMonth: searchParams.startProfitMonth,
+          endProfitMonth: searchParams.endProfitMonth,
+          profitCode: searchParams.profitCode,
+          contributionAmount: searchParams.contributionAmount,
+          earningsAmount: searchParams.earningsAmount,
+          forfeitureAmount: searchParams.forfeitureAmount,
+          paymentAmount: searchParams.paymentAmount,
+          name: searchParams.name,
+          paymentType: searchParams.paymentType,
+          skip: 0,
+          take: 25,
+          sortBy: "profitYear",
+          isSortDescending: true
+        });
+      }
+    }
+  }, [expandedRowIds, getFilteredDetails, searchParams]);
+
+  const renderNestedContent = useCallback((row: INestedGridRowData<GroupedProfitSummaryDto>, isExpanded: boolean) => {
     const rowId = String(row.id);
 
     if (!isExpanded) {
-      if (expandedRowIds.has(rowId)) {
-        setExpandedRowIds((prev) => {
-          const newSet = new Set(prev);
-          newSet.delete(rowId);
-          return newSet;
-        });
-        setExpandedRowDataMap((prev) => {
-          const { [rowId]: _, ...rest } = prev;
-          return rest;
-        });
-      }
       return null;
-    }
-
-    if (!expandedRowIds.has(rowId)) {
-      setExpandedRowIds((prev) => new Set(prev).add(rowId));
-
-      getFilteredDetails({
-        memberType: searchParams.memberType || 0,
-        profitYear: row.profitYear,
-        monthToDate: row.monthToDate,
-        badgeNumber: searchParams.badgeNumber,
-        psnSuffix: searchParams.psnSuffix,
-        ssn: searchParams.ssn?.toString(),
-        startProfitMonth: searchParams.startProfitMonth,
-        endProfitMonth: searchParams.endProfitMonth,
-        profitCode: searchParams.profitCode,
-        contributionAmount: searchParams.contributionAmount,
-        earningsAmount: searchParams.earningsAmount,
-        forfeitureAmount: searchParams.forfeitureAmount,
-        paymentAmount: searchParams.paymentAmount,
-        name: searchParams.name,
-        paymentType: searchParams.paymentType,
-        skip: 0,
-        take: 25,
-        sortBy: "profitYear",
-        isSortDescending: true
-      });
     }
 
     return (
@@ -203,7 +209,7 @@ const MasterInquiryGroupingGrid = ({ searchParams }: { searchParams: MasterInqui
         />
       </Box>
     );
-  };
+  }, [expandedRowDataMap, detailColumns, isFetchingFilteredDetails]);
 
   if (isGroupingLoading) {
     return (
@@ -229,6 +235,7 @@ const MasterInquiryGroupingGrid = ({ searchParams }: { searchParams: MasterInqui
       data={nestedGridData}
       columns={groupingColumns}
       renderNestedContent={renderNestedContent}
+      onRowExpand={handleRowToggle}
       className="w-full"
     />
   );
