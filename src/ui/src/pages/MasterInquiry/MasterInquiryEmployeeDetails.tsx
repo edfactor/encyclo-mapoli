@@ -188,7 +188,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
           : []),
         ...(isEmployee ? [{ label: "Years In Plan", value: yearsInPlan }] : []),
         { label: "Vested Percent", value: formatPercentage(percentageVested) },
-        { label: "Received Contributions Last Year", value: receivedContributionsLastYear ? "Yes" : "No" }
+        { label: "Contributions Last Year", value: (receivedContributionsLastYear ? "Y" : "N") }
       ];
     }, [details]);
 
