@@ -25674,6 +25674,66 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.ToTable("_HEALTH_CHECK_STATUS_HISTORY", (string)null);
                 });
 
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Audit.ReportChecksum", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("CREATED_AT_UTC")
+                        .HasDefaultValueSql("SYSTIMESTAMP");
+
+                    b.Property<string>("KeyFieldsChecksumJson")
+                        .IsRequired()
+                        .HasColumnType("CLOB")
+                        .HasColumnName("KEYFIELDS_CHECKSUM_JSON");
+
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
+                        .ValueGeneratedOnUpdate()
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("MODIFIED_AT_UTC")
+                        .HasDefaultValueSql("SYSTIMESTAMP");
+
+                    b.Property<short>("ProfitYear")
+                        .HasPrecision(4)
+                        .HasColumnType("NUMBER(4)")
+                        .HasColumnName("PROFIT_YEAR");
+
+                    b.Property<string>("ReportJson")
+                        .IsRequired()
+                        .HasColumnType("CLOB")
+                        .HasColumnName("REPORT_JSON");
+
+                    b.Property<string>("ReportType")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("NVARCHAR2(128)")
+                        .HasColumnName("REPORT_TYPE");
+
+                    b.Property<string>("RequestJson")
+                        .IsRequired()
+                        .HasColumnType("CLOB")
+                        .HasColumnName("REQUEST_JSON");
+
+                    b.Property<string>("UserName")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(96)
+                        .HasColumnType("NVARCHAR2(96)")
+                        .HasColumnName("USER_NAME")
+                        .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
+
+                    b.HasKey("Id")
+                        .HasName("PK_REPORT_CHECKSUM");
+
+                    b.ToTable("REPORT_CHECKSUM", (string)null);
+                });
+
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Beneficiary", b =>
                 {
                     b.Property<int>("Id")
@@ -25707,7 +25767,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NVARCHAR2(1)")
                         .HasColumnName("KIND_ID");
 
-                    b.Property<DateTimeOffset>("ModifiedAtUtc")
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
                         .ValueGeneratedOnUpdate()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
                         .HasColumnName("MODIFIED_AT_UTC")
@@ -25781,7 +25841,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("DATE")
                         .HasColumnName("DATE_OF_BIRTH");
 
-                    b.Property<DateTimeOffset>("ModifiedAtUtc")
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
                         .ValueGeneratedOnUpdate()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
                         .HasColumnName("MODIFIED_AT_UTC")
@@ -25860,7 +25920,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("CREATED_AT_UTC")
                         .HasDefaultValueSql("SYSTIMESTAMP");
 
-                    b.Property<DateTimeOffset>("ModifiedAtUtc")
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
                         .ValueGeneratedOnUpdate()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
                         .HasColumnName("MODIFIED_AT_UTC")
@@ -27543,7 +27603,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnName("HIRE_DATE")
                         .HasComment("HireDate");
 
-                    b.Property<DateTimeOffset>("ModifiedAtUtc")
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
                         .ValueGeneratedOnUpdate()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
                         .HasColumnName("MODIFIED_AT_UTC")
@@ -27782,7 +27842,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(9)")
                         .HasColumnName("DEMOGRAPHIC_ID");
 
-                    b.Property<DateTimeOffset>("ModifiedAtUtc")
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
                         .ValueGeneratedOnUpdate()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
                         .HasColumnName("MODIFIED_AT_UTC")
@@ -27993,7 +28053,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NVARCHAR2(128)")
                         .HasColumnName("MEMO");
 
-                    b.Property<DateTimeOffset>("ModifiedAtUtc")
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
                         .ValueGeneratedOnUpdate()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
                         .HasColumnName("MODIFIED_AT_UTC")
@@ -28212,7 +28272,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(9)")
                         .HasColumnName("DEMOGRAPHIC_ID");
 
-                    b.Property<DateTimeOffset>("ModifiedAtUtc")
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
                         .ValueGeneratedOnUpdate()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
                         .HasColumnName("MODIFIED_AT_UTC")
@@ -29871,7 +29931,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("DECIMAL(9,2)")
                         .HasColumnName("INCOME_EXECUTIVE");
 
-                    b.Property<DateTimeOffset>("ModifiedAtUtc")
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
                         .ValueGeneratedOnUpdate()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
                         .HasColumnName("MODIFIED_AT_UTC")
@@ -30063,7 +30123,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("DECIMAL(9,2)")
                         .HasColumnName("FORFEITURE");
 
-                    b.Property<DateTimeOffset>("ModifiedAtUtc")
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
                         .ValueGeneratedOnUpdate()
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
                         .HasColumnName("MODIFIED_AT_UTC")

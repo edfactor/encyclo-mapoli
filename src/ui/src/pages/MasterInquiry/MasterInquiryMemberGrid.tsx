@@ -1,24 +1,25 @@
 import { Box, CircularProgress, Typography } from "@mui/material";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { useLazySearchProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
 import { EmployeeDetails, MasterInquiryRequest } from "reduxstore/types";
 import { DSMGrid, formatNumberWithComma, ISortParams } from "smart-ui-library";
 import Pagination from "../../components/Pagination/Pagination";
 import "./MasterInquiryMemberGrid.css"; // Import the CSS file for styles
 import { GetMasterInquiryMemberGridColumns } from "./MasterInquiryMemberGridColumns";
+import { isSimpleSearch } from "./MasterInquiryFunctions";
+import { useSelector } from "react-redux";
+import { RootState } from "reduxstore/store";
 
 interface MasterInquiryMemberGridProps extends MasterInquiryRequest {
   searchParams: MasterInquiryRequest;
   onBadgeClick: (
     args: { memberType: number; id: number; ssn: number; badgeNumber: number; psnSuffix: number } | undefined
   ) => void;
-  isSimpleSearch: () => boolean;
 }
 
 const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = ({
   searchParams,
-  onBadgeClick,
-  isSimpleSearch
+  onBadgeClick
 }: MasterInquiryMemberGridProps) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(5);
@@ -30,6 +31,8 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = ({
   const [trigger, { data, isLoading, isError }] = useLazySearchProfitMasterInquiryQuery();
   const autoSelectedRef = useRef<number | null>(null);
 
+  const { masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
+
   // Add sort event handler
   const sortEventHandler = (update: ISortParams) => {
     setSortParams(update);
@@ -37,6 +40,8 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = ({
   };
 
   const onSearch = useCallback(async () => {
+    // We are going to do another search here which skips zero and takes all.
+
     await trigger({
       ...searchParams,
       pagination: {
@@ -67,16 +72,20 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = ({
     }
     // If no results in a complex search, clear selection
     // For simple searches, don't clear selection to allow "Member Not Found" message to show
-    if (data && data.results.length === 0 && onBadgeClick && !isSimpleSearch()) {
+    if (data && data.results.length === 0 && onBadgeClick && !isSimpleSearch(masterInquiryRequestParams)) {
       onBadgeClick(undefined);
     }
   }, [data, onBadgeClick]);
 
+  const columns = useMemo(() => GetMasterInquiryMemberGridColumns(), []);
+
   // If no searchParams, render nothing
-  if (!searchParams || Object.keys(searchParams).length === 0) return null;
+  if (!searchParams || Object.keys(searchParams).length === 0) {
+    return null;
+  }
 
   // Show a message if no results
-  if (!isSimpleSearch() && data && data.results.length === 0) {
+  if (!isSimpleSearch(masterInquiryRequestParams) && data && data.results.length === 0) {
     return (
       <Box sx={{ width: "100%", padding: "24px" }}>
         <Typography
@@ -88,10 +97,10 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = ({
     );
   }
 
-  const columns = GetMasterInquiryMemberGridColumns();
-
   // Hide the grid if only one member is returned
-  if (data && data.results.length === 1) {
+  // But if the last page returns one result, we still want to show the grid
+  // so we check the total number of results to make sure it's 1 also
+  if (data && data.results.length === 1 && data.total === 1) {
     return null;
   }
 
@@ -127,9 +136,11 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = ({
             pageSize={pageSize}
             setPageSize={(value: number) => {
               setPageSize(value);
-              setPageNumber(0);
+              setPageNumber(1);
             }}
-            recordCount={data.total}
+            recordCount={(() => {
+              return data.total;
+            })()}
           />
         </>
       )}

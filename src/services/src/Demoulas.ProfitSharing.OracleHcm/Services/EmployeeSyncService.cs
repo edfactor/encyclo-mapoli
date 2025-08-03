@@ -6,13 +6,13 @@ using Demoulas.ProfitSharing.Common.ActivitySources;
 using Demoulas.ProfitSharing.Common.Contracts.Messaging;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Data.Entities.MassTransit;
+using Demoulas.ProfitSharing.Data.Entities.Scheduling;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Clients;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using FluentValidation.Results;
 using Microsoft.EntityFrameworkCore;
-using Job = Demoulas.ProfitSharing.Data.Entities.MassTransit.Job;
+using Job = Demoulas.ProfitSharing.Data.Entities.Scheduling.Job;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Services;
 

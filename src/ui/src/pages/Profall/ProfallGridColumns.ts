@@ -1,34 +1,24 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { GRID_COLUMN_WIDTHS } from "../../constants";
-import { createBadgeColumn } from "../../utils/gridColumnFactory";
+import { createBadgeColumn, createStoreColumn, createNameColumn } from "../../utils/gridColumnFactory";
 
 export const GetProfallGridColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   return [
-    {
-      headerName: "Store",
-      field: "storeNumber",
-      colId: "storeNumber",
+    createStoreColumn({
       minWidth: 80,
-      type: "rightAligned",
-      resizable: true,
       sortable: true
-    },
-    createBadgeColumn({ 
+    }),
+    createBadgeColumn({
       headerName: "Badge",
       minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
       alignment: "center",
       navigateFunction: navFunction
     }),
-    {
-      headerName: "Name",
+    createNameColumn({
       field: "employeeName",
-      colId: "employeeName",
       minWidth: 180,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
       sortable: true
-    },
+    }),
     {
       headerName: "Department",
       field: "departmentName",

@@ -3,8 +3,8 @@ using Demoulas.Common.Data.Services.Entities.Entities;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Audit;
-using Demoulas.ProfitSharing.Data.Entities.MassTransit;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Data.Entities.Scheduling;
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.Data.Interfaces;
@@ -26,6 +26,7 @@ public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>, I
     }
 
     public virtual DbSet<AuditEvent> AuditEvents { get; set; }
+    public virtual DbSet<ReportChecksum> ReportChecksums { get; set; }
     public virtual DbSet<Demographic> Demographics { get; set; }
     public virtual DbSet<DemographicHistory> DemographicHistories { get; set; }
     public virtual DbSet<EmploymentType> EmploymentTypes { get; set; }

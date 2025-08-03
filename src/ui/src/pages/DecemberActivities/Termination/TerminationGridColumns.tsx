@@ -1,9 +1,9 @@
 import { ColDef, ICellRendererParams, IHeaderParams } from "ag-grid-community";
 import { agGridNumberToCurrency, formatNumberWithComma } from "smart-ui-library";
-import { createBadgeColumn } from "../../../utils/gridColumnFactory";
+import { createBadgeColumn, createAgeColumn } from "../../../utils/gridColumnFactory";
 import { getForfeitedStatus} from "../../../utils/enrollmentUtil";
 import { mmDDYYFormat } from "utils/dateUtils";
-import { Checkbox, IconButton } from "@mui/material";
+import { Checkbox, IconButton, CircularProgress } from "@mui/material";
 import { SaveOutlined } from "@mui/icons-material";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { SuggestedForfeitEditor, SuggestedForfeitCellRenderer } from "../../../components/SuggestedForfeiture";
@@ -34,7 +34,14 @@ export const GetTerminationColumns = (): ColDef[] => {
 };
 
 // Separate function for detail columns that will be used for master-detail view
-export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, removeRowFromSelectedRows: (id: number) => void, selectedRowIds: number[], selectedProfitYear: number, onSave?: (request: ForfeitureAdjustmentUpdateRequest) => Promise<void>, onBulkSave?: (requests: ForfeitureAdjustmentUpdateRequest[]) => Promise<void>): ColDef[] => {
+export const GetDetailColumns = (
+  addRowToSelectedRows: (id: number) => void, 
+  removeRowFromSelectedRows: (id: number) => void, 
+  selectedRowIds: number[], 
+  selectedProfitYear: number, 
+  onSave?: (request: ForfeitureAdjustmentUpdateRequest) => Promise<void>, 
+  onBulkSave?: (requests: ForfeitureAdjustmentUpdateRequest[]) => Promise<void>
+): ColDef[] => {
   return [
     {
       headerName: "Profit Year",
@@ -142,15 +149,10 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
         return formatNumberWithComma(hours);
       }
     },
-    {
-      headerName: "Age",
-      field: "age",
-      colId: "age",
-      width: 70,
-      type: "rightAligned",
-      resizable: true,
+    createAgeColumn({
+      maxWidth: 70,
       sortable: false
-    },
+    }),
     {
       headerName: "Forfeit",
       field: "enrollmentCode",
@@ -221,6 +223,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
         const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}`;
         const hasError = params.context?.editedValues?.[rowKey]?.hasError;
         const currentValue = params.context?.editedValues?.[rowKey]?.value ?? params.data.suggestedForfeit;
+        const isLoading = params.context?.loadingRowIds?.has(params.data.badgeNumber);
 
         return <div>
           <Checkbox checked={isSelected} onChange={() => {
@@ -242,9 +245,13 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
                 await params.onSave(request);
               }
             }}
-            disabled={hasError}
+            disabled={hasError || isLoading}
           >
-            <SaveOutlined />
+            {isLoading ? (
+              <CircularProgress size={20} />
+            ) : (
+              <SaveOutlined />
+            )}
           </IconButton>
         </div>;
       }
@@ -256,6 +263,7 @@ interface HeaderComponentProps extends IHeaderParams {
   addRowToSelectedRows: (id: number) => void;
   removeRowFromSelectedRows: (id: number) => void;
   onBulkSave?: (requests: ForfeitureAdjustmentUpdateRequest[]) => Promise<void>;
+  isBulkSaving?: boolean;
 }
 
 interface SaveButtonCellParams extends ICellRendererParams {
@@ -291,9 +299,13 @@ export const HeaderComponent: React.FC<HeaderComponentProps> = (params: HeaderCo
     };
   };
 
+  // Check if any rows are in loading state
+  const hasSavingInProgress = params.context?.loadingRowIds?.size > 0;
+
   return <SelectableGridHeader
     {...params}
     isNodeEligible={isNodeEligible}
     createUpdatePayload={createUpdatePayload}
+    isBulkSaving={hasSavingInProgress}
   />;
 };

@@ -15,6 +15,8 @@ if (PortHelper.IsTcpPortInUse(uiPort))
     ProcessHelper.KillProcessesByName("node", logger);
 }
 
+var database = builder.AddConnectionString("ProfitSharing", "ConnectionStrings:ProfitSharing");
+
 Demoulas_ProfitSharing_Data_Cli cli = new Demoulas_ProfitSharing_Data_Cli();
 var projectPath = new FileInfo(cli.ProjectPath).Directory?.FullName;
 
@@ -22,6 +24,7 @@ var cliRunner = builder.AddExecutable("Database-Cli",
         "dotnet",
         projectPath!,
         "run", "--no-build", "--launch-profile", "upgrade-db")
+    .WithReference(database)
     .WithCommand(
         name: "upgrade-db",
         displayName: "Upgrade database",
@@ -48,11 +51,10 @@ var configuration = new ConfigurationBuilder()
     .AddUserSecrets<Program>()
     .Build();
 
-var database = builder.AddConnectionString("Oracle", "ProfitSharing");
-
 var api = builder.AddProject<Demoulas_ProfitSharing_Api>("ProfitSharing-Api")
     .WithHttpHealthCheck("/health")
-    //.WithReference(database)
+    .WithParentRelationship(database)
+    .WithReference(database)
     .WithSwaggerUi()
     .WithRedoc()
     .WithScalar()
@@ -80,17 +82,17 @@ ui.WithReference(api)
 
 _ = builder.AddProject<Demoulas_ProfitSharing_EmployeeFull_Sync>(name: "ProfitSharing-EmployeeFull-Sync")
      .WaitFor(api)
-     .WithParentRelationship(api)
+     .WithParentRelationship(database)
     .WithExplicitStart();
 
 _ = builder.AddProject<Demoulas_ProfitSharing_EmployeePayroll_Sync>(name: "ProfitSharing-EmployeePayroll-Sync")
      .WaitFor(api)
-     .WithParentRelationship(api)
+     .WithParentRelationship(database)
     .WithExplicitStart();
 
 _ = builder.AddProject<Demoulas_ProfitSharing_EmployeeDelta_Sync>(name: "ProfitSharing-EmployeeDelta-Sync")
      .WaitFor(api)
-     .WithParentRelationship(api)
+     .WithParentRelationship(database)
     .WithExplicitStart();
 
 await using DistributedApplication host = builder.Build();

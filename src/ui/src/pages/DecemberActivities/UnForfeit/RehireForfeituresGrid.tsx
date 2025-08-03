@@ -43,6 +43,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
   const [selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
   const [gridApi, setGridApi] = useState<GridApi | null>(null);
   const [editedValues, setEditedValues] = useState<RehireForfeituresEditedValues>({});
+  const [loadingRowIds, setLoadingRowIds] = useState<Set<number>>(new Set());
   const fiscalCalendarYear = useFiscalCalendarYear();
   const selectedProfitYear = useDecemberFlowProfitYear();
   const { rehireForfeitures, rehireForfeituresQueryParams } = useSelector((state: RootState) => state.yearsEnd);
@@ -98,6 +99,14 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
   );
 
   const handleBulkSave = useCallback(async (requests: ForfeitureAdjustmentUpdateRequest[]) => {
+    // Add all affected badge numbers to loading state
+    const badgeNumbers = requests.map(request => request.badgeNumber);
+    setLoadingRowIds(prev => {
+      const newSet = new Set(Array.from(prev));
+      badgeNumbers.forEach(badgeNumber => newSet.add(badgeNumber));
+      return newSet;
+    });
+    
     try {
       await updateForfeitureAdjustmentBulk(requests);
       const updatedEditedValues = { ...editedValues };
@@ -117,10 +126,20 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
     } catch (error) {
       console.error('Failed to save forfeiture adjustments:', error);
       alert('Failed to save one or more adjustments. Please try again.');
+    } finally {
+      // Remove all affected badge numbers from loading state
+      setLoadingRowIds(prev => {
+        const newSet = new Set(Array.from(prev));
+        badgeNumbers.forEach(badgeNumber => newSet.delete(badgeNumber));
+        return newSet;
+      });
     }
   }, [updateForfeitureAdjustmentBulk, editedValues, onUnsavedChanges, rehireForfeituresQueryParams, pageNumber, pageSize, sortParams, createRequest, triggerSearch]);
 
   const handleSave = useCallback(async (request: ForfeitureAdjustmentUpdateRequest) => {
+    const rowId = request.badgeNumber; // Use badgeNumber as unique identifier
+    setLoadingRowIds(prev => new Set(Array.from(prev).concat(rowId)));
+    
     try {
       await updateForfeitureAdjustment(request);
       const rowKey = `${request.badgeNumber}-${request.profitYear}`;
@@ -137,6 +156,12 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
     } catch (error) {
       console.error('Failed to save forfeiture adjustment:', error);
       alert('Failed to save adjustment. Please try again.');
+    } finally {
+      setLoadingRowIds(prev => {
+        const newSet = new Set(Array.from(prev));
+        newSet.delete(rowId);
+        return newSet;
+      });
     }
   }, [updateForfeitureAdjustment, editedValues, onUnsavedChanges, rehireForfeituresQueryParams, pageNumber, pageSize, sortParams, createRequest, triggerSearch]);
 
@@ -169,21 +194,32 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
     onUnsavedChanges(hasChanges);
   }, [selectedRowIds, onUnsavedChanges]);
 
-  // Initialize expandedRows when data is loaded
+    // Initialize expandedRows when data is loaded
   useEffect(() => {
-    if (rehireForfeitures?.response?.results) {
+    if (rehireForfeitures?.response?.results && rehireForfeitures.response.results.length > 0) {
       const initialExpandState: Record<string, boolean> = {};
-
-      // Set all rows with details to be expanded by default
-      rehireForfeitures.response.results.forEach((row) => {
-        if (row.details && row.details.length > 0) {
+      rehireForfeitures.response.results.forEach((row: any) => {
+        // In this component, details are under the "details" property
+        const hasDetails = (row.details && row.details.length > 0);
+        if (hasDetails) {
+          // Always expand rows with details by default
           initialExpandState[row.badgeNumber.toString()] = true;
         }
       });
-
       setExpandedRows(initialExpandState);
     }
   }, [rehireForfeitures?.response?.results]);
+  
+  // Refresh the grid when loading state changes
+  const gridRef = useRef<any>(null);
+  useEffect(() => {
+    if (gridRef.current?.api) {
+      gridRef.current.api.refreshCells({ 
+        force: true,
+        suppressFlash: false
+      });
+    }
+  }, [loadingRowIds]);
 
   // Sort handler that immediately triggers a search with the new sort parameters
   const sortEventHandler = (update: ISortParams) => {
@@ -309,10 +345,14 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
               defaultColDef: {
                 resizable: true
               },
-              onGridReady: onGridReady,
+              onGridReady: (params) => {
+                gridRef.current = params;
+                onGridReady(params);
+              },
               context: {
                 editedValues,
-                updateEditedValue
+                updateEditedValue,
+                loadingRowIds
               }
             }}
           />

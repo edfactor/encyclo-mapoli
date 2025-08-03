@@ -1106,6 +1106,7 @@ export const {
   setProfitSharingEdit,
   clearProfitSharingEdit,
   clearProfitMasterRevert,
+  clearTermination,
   setProfitSharingUpdateQueryParams,
   clearProfitSharingUpdateQueryParams,
   setProfitSharingEditQueryParams,

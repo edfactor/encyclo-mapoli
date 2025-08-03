@@ -1,4 +1,7 @@
-﻿namespace YEMatch;
+﻿using YEMatch.YEMatch.Activities;
+using YEMatch.YEMatch.ArrangeActivites;
+
+namespace YEMatch.YEMatch.AssertActivities;
 
 internal static class TestActivityFactory
 {
