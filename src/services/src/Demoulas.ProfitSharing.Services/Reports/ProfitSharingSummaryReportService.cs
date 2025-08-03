@@ -14,6 +14,9 @@ using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using System.ComponentModel;
+using System.Text.Json;
+using System;
+using System.Linq;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
 
@@ -42,6 +45,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         public string EmploymentTypeName { get; init; } = null!;
         public decimal? PointsEarned { get; init; }
         public byte? Years { get; init; }
+        public short? FirstContributionYear { get; init; }
     }
 
     private sealed record EmployeeWithBalance
@@ -261,6 +265,57 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         return response;
     }
 
+    public async Task<YearEndProfitSharingReportTotals> GetYearEndProfitSharingTotalsAsync(
+        BadgeNumberRequest req,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
+        var birthday18 = calInfo.FiscalEndDate.AddYears(-18);
+        var birthday21 = calInfo.FiscalEndDate.AddYears(-21);
+        var birthday65 = calInfo.FiscalEndDate.AddYears(-65);
+        var lastYear = req.ProfitYear - 1;
+        var fiscalEndDate = calInfo.FiscalEndDate;
+        // Always fetch all details for the year
+        IQueryable<YearEndProfitSharingReportDetail> allDetails = await ActiveSummary(req, calInfo.FiscalEndDate);
+        
+        allDetails = allDetails.Where(x => ((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.TerminationDate > fiscalEndDate)) &&
+                x.Hours >= 1000 && x.DateOfBirth <= birthday18);
+
+        var dbg = JsonSerializer.Serialize(await allDetails.OrderBy(x => x.EmployeeName).Select(x => new { x.BadgeNumber, x.EmployeeName, x.Hours }).ToListAsync(cancellationToken));
+        var totals = await (
+            from a in allDetails
+            group a by true into g
+            select new
+            {
+                NumberOfEmployees = g.Count(),
+                NumberOfNewEmployees = g.Count(x => ((x.FirstContributionYear == null) && x.DateOfBirth <= birthday21)),
+                NumberOfEmployeesUnder21 = g.Count(x => x.DateOfBirth > birthday21),
+                WagesTotal = g.Where(x => x.DateOfBirth < birthday21).Sum(x => x.Wages),
+                HoursTotal = g.Where(x => x.DateOfBirth < birthday21).Sum(x => x.Hours),
+                PointsTotal = g.Where(x => x.DateOfBirth <= birthday21 && x.DateOfBirth > birthday65).Sum(x => x.Wages / 100),
+            }
+            ).FirstOrDefaultAsync(cancellationToken);
+
+        if (totals == null)
+        {
+            return new YearEndProfitSharingReportTotals();
+        }
+
+        var rslt = new YearEndProfitSharingReportTotals
+        {
+            NumberOfEmployees = totals.NumberOfEmployees,
+            NumberOfNewEmployees = totals.NumberOfNewEmployees,
+            NumberOfEmployeesUnder21 = totals.NumberOfEmployeesUnder21,
+            WagesTotal = totals.WagesTotal,
+            HoursTotal = totals.HoursTotal,
+            PointsTotal = totals.PointsTotal,
+        };
+
+        return rslt;
+
+    }
+
     /// <summary>
     /// Builds a filtered set of employees with balances and years of service for a given year and optional badge number.
     /// </summary>
@@ -285,6 +340,19 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             join et in ctx.EmploymentTypes on pp.Demographic!.EmploymentTypeId equals et.Id
             join yip in yearsOfService on pp.Demographic!.Ssn equals yip.Ssn into yipTmp
             from yip in yipTmp.DefaultIfEmpty()
+            join fc in (
+                from pd in ctx.ProfitDetails
+                where pd.ProfitYear < req.ProfitYear
+                   && pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id
+                   && pd.Contribution != 0
+                group pd by pd.Ssn into g
+                select new
+                {
+                    Ssn = g.Key,
+                    FirstContributionYear = g.Min(x => x.ProfitYear),
+                }
+            ) on pp.Demographic!.Ssn equals fc.Ssn into fcTmp
+            from fc in fcTmp.DefaultIfEmpty()
             select new EmployeeProjection
             {
                 BadgeNumber = pp.Demographic!.BadgeNumber,
@@ -299,7 +367,8 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 EmploymentTypeId = pp.Demographic!.EmploymentTypeId,
                 EmploymentTypeName = et.Name,
                 PointsEarned = pp.PointsEarned,
-                Years = yip.Years
+                Years = yip.Years,
+                FirstContributionYear = fc.FirstContributionYear
             };
       
 
@@ -361,13 +430,14 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             Wages = x.Employee.Wages,
             Hours = x.Employee.Hours,
             Points = Convert.ToInt16(x.Employee.PointsEarned),
-            IsNew = x.Balance == 0 && x.Employee.Hours > ReferenceData.MinimumHoursForContribution(),
+            IsNew = x.Balance == 0 && x.Employee.Hours > ReferenceData.MinimumHoursForContribution() && (x.Employee.Years == null || x.Employee.Years == 0),
             IsUnder21 = (DateTime.UtcNow.Year - x.Employee.DateOfBirth.Year - (DateTime.UtcNow.DayOfYear < x.Employee.DateOfBirth.DayOfYear ? 1 : 0)) < 21,
             EmployeeStatus = x.Employee.EmploymentStatusId,
             Balance = x.Balance,
             PriorBalance = x.PriorBalance,
             YearsInPlan = x.Employee.Years ?? 0,
-            TerminationDate = x.Employee.TerminationDate
+            TerminationDate = x.Employee.TerminationDate,
+            FirstContributionYear = x.Employee.FirstContributionYear
         });
 
         return allDetails;
