@@ -544,7 +544,8 @@ public sealed class MasterInquiryService : IMasterInquiryService
                             x.CurrentHoursYear,
                             x.Etva,
                             x.EnrollmentId,
-                            x.Enrollment
+                            x.Enrollment,
+                            x.PsCertificateIssuedDate
                         })
                     .FirstOrDefault(x => x.ProfitYear == previousYear)
             })
@@ -591,7 +592,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             PayClassification = memberData.PayClassification,
             PhoneNumber = memberData.PhoneNumber,
 
-
+            ReceivedContributionsLastYear = memberData.PreviousPayProfit?.PsCertificateIssuedDate != null,
             Missives = missiveList
         });
     }
@@ -721,7 +722,8 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 PayClassification = memberData.PayClassification,
                 
                 AllocationToAmount = balance?.AllocationsToBeneficiary ?? 0,
-                AllocationFromAmount = balance?.AllocationsFromBeneficiary ?? 0
+                AllocationFromAmount = balance?.AllocationsFromBeneficiary ?? 0,
+                ReceivedContributionsLastYear = memberData.ReceivedContributionsLastYear
             });
         }
 
@@ -778,7 +780,8 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 x.CurrentHoursYear,
                 x.Etva,
                 x.EnrollmentId,
-                x.Enrollment
+                x.Enrollment,
+                x.PsCertificateIssuedDate
                 }).FirstOrDefault(x => x.ProfitYear == previousYear)
             })
             .ToPaginationResultsAsync(req, cancellationToken);
@@ -813,6 +816,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 CurrentEtva = memberData.CurrentPayProfit?.Etva ?? 0,
                 PreviousEtva = memberData.PreviousPayProfit?.Etva ?? 0,
                 EmploymentStatus = memberData.EmploymentStatus?.Name,
+                ReceivedContributionsLastYear = memberData.PreviousPayProfit?.PsCertificateIssuedDate != null,
                 Missives = missiveList
             });
         }
@@ -1006,7 +1010,8 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 x.CurrentHoursYear,
                 x.Etva,
                 x.EnrollmentId,
-                x.Enrollment
+                x.Enrollment,
+                x.PsCertificateIssuedDate
                 }).FirstOrDefault(x => x.ProfitYear == previousYear)
             })
             .ToListAsync(cancellationToken);
@@ -1041,6 +1046,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 CurrentEtva = memberData.CurrentPayProfit?.Etva ?? 0,
                 PreviousEtva = memberData.PreviousPayProfit?.Etva ?? 0,
                 EmploymentStatus = memberData.EmploymentStatus?.Name,
+                ReceivedContributionsLastYear = memberData.PreviousPayProfit?.PsCertificateIssuedDate != null,
                 Missives = missiveList
             });
         }
