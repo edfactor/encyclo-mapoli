@@ -124,7 +124,12 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = ({
             providedOptions={{
               rowData: Array.isArray(data?.results) ? (data.results as EmployeeDetails[]) : [],
               columnDefs: columns,
-              context: { onBadgeClick: onBadgeClick }
+              context: { onBadgeClick: onBadgeClick },
+              onRowClicked: (event) => {
+                if (event.data) {
+                  onBadgeClick(event.data); // or pass whatever field you need
+                }
+              }
             }}
           />
           <Pagination

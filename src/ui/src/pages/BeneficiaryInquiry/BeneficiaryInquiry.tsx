@@ -20,6 +20,7 @@ import BeneficiaryInquiryGrid from "./BeneficiaryInquiryGrid";
 import BeneficiaryInquirySearchFilter from "./BeneficiaryInquirySearchFilter";
 import CreateBeneficiary from "./CreateBeneficiary";
 import { MissiveAlertProvider } from "pages/MasterInquiry/MissiveAlertContext";
+import { paramValueToCss } from "ag-grid-community/dist/types/src/theming/theme-types";
 
 interface SelectedMember {
   memberType: number;
@@ -40,8 +41,8 @@ const BeneficiaryInquiry = () => {
   const [beneficiaryKind, setBeneficiaryKind] = useState<BeneficiaryKindDto[]>([]);
   const [beneficiaryType, setBeneficiaryType] = useState<BeneficiaryTypeDto[]>([]);
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
-  const [searchParams, setSearchParams] = useState<MasterInquiryRequest | null>(null);
-  const [selectedMember, setSelectedMember] = useState<SelectedMember>();
+  const [searchParams, setSearchParams] = useState<MasterInquiryRequest | null>();
+  const [selectedMember, setSelectedMember] = useState<SelectedMember | null>();
   const [noResults, setNoResults] = useState(false);
   const [change, setChange] = useState<number>(0);
   const [selectedBeneficiary, setSelectedBeneficiary] = useState<BeneficiaryDto | undefined>();
@@ -50,8 +51,18 @@ const BeneficiaryInquiry = () => {
   const [beneficiaryDialogTitle, setBeneficiaryDialogTitle] = useState<string>();
 
   const onBadgeClick = (data: any) => {
-    setSelectedMember(data);
-    setChange(change + 1);
+    if (data) {
+      const member: SelectedMember = {
+        badgeNumber: data.badgeNumber,
+        id: data.id,
+        memberType: data.isEmployee ? 1 : 2,
+        ssn: data.ssn,
+        psnSuffix: data.psnSuffix
+      }
+      setSelectedMember(member);
+      setChange(change + 1);
+    }
+
   };
 
   const RefreshBeneficiaryGrid = () => {
@@ -99,6 +110,18 @@ const BeneficiaryInquiry = () => {
     setBeneficiaryDialogTitle(data ? "Edit Beneficiary" : "Add Beneficiary");
     setOpen(true);
   };
+
+  const onSearch = (params: MasterInquiryRequest | undefined) => {
+    setSearchParams(params ?? null);
+    setSelectedMember(null);
+    // Only set noResults to true if params is undefined (not found)
+    // Reset noResults when params is null (form reset)
+    if (params === undefined) {
+      setNoResults(true);
+    } else {
+      setNoResults(false);
+    }
+  }
 
   useEffect(() => {
     if (token) {
@@ -188,11 +211,7 @@ const BeneficiaryInquiry = () => {
             <DSMAccordion title="Filter">
               <BeneficiaryInquirySearchFilter
                 setInitialSearchLoaded={setInitialSearchLoaded}
-                onSearch={(params) => {
-                  setSearchParams(params ?? null);
-                  setSelectedMember(null);
-                  setNoResults(!params);
-                }}
+                onSearch={onSearch}
                 beneficiaryType={beneficiaryType}
                 searchClicked={currentBadge}></BeneficiaryInquirySearchFilter>
             </DSMAccordion>
@@ -206,7 +225,7 @@ const BeneficiaryInquiry = () => {
             {/* <BeneficiaryInquiryGrid initialSearchLoaded={initialSearchLoaded} setInitialSearchLoaded={setInitialSearchLoaded} /> */}
             {searchParams && (
               <MasterInquiryMemberGrid
-                {...searchParams}
+                searchParams={searchParams}
                 onBadgeClick={onBadgeClick}
               />
             )}
