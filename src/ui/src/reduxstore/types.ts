@@ -866,6 +866,21 @@ export interface YearEndProfitSharingReportResponse extends PagedReportResponse<
   numberOfEmployeesInPlan: number;
 }
 
+export interface YearEndProfitSharingReportTotalsResponse {
+  wagesTotal: number;
+  hoursTotal: number;
+  pointsTotal: number;
+  balanceTotal: number;
+  terminatedWagesTotal: number;
+  terminatedHoursTotal: number;
+  terminatedPointsTotal: number;
+  terminatedBalanceTotal: number;
+  numberOfEmployees: number;
+  numberOfNewEmployees: number;
+  numberOfEmployeesUnder21: number;
+  numberOfEmployeesInPlan: number;
+}
+
 export interface FrozenStateResponse {
   id: number;
   profitYear: number;
