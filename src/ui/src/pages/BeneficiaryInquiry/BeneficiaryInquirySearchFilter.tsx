@@ -101,12 +101,14 @@ const BeneficiaryInquirySearchFilter: React.FC<Props> = ({
           isSortDescending: data.pagination?.isSortDescending || true
         },
         endProfitYear: profitYear,
+        profitYear: profitYear,
         ...(!!data.socialSecurity && { ssn: data.socialSecurity }),
         ...(!!data.name && { name: data.name }),
         badgeNumber: badge,
         psnSuffix: psn,
         memberType: memberTypeGetNumberMap[memberType]
       };
+      onSearch(searchParams);
       triggerSearch(searchParams, false)
         .unwrap()
         .then((response) => {
@@ -115,12 +117,11 @@ const BeneficiaryInquirySearchFilter: React.FC<Props> = ({
             response && Array.isArray(response) ? response.length > 0 : response.results && response.results.length > 0
           ) {
             setInitialSearchLoaded(true);
-            onSearch(searchParams);
+            
           } else {
             // Instead of setting missiveAlerts, pass up a signal (to be implemented)
             // setMissiveAlerts([...]);
             setInitialSearchLoaded(false);
-            onSearch(undefined);
           }
         });
       dispatch(setMasterInquiryRequestParams(data));

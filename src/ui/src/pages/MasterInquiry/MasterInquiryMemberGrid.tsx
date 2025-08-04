@@ -25,8 +25,8 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = ({
   const [pageSize, setPageSize] = useState(5);
   // Add sort state management
   const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: searchParams.pagination?.sortBy || "badgeNumber",
-    isSortDescending: searchParams.pagination?.isSortDescending || false
+    sortBy: searchParams?.pagination?.sortBy || "badgeNumber",
+    isSortDescending: searchParams?.pagination?.isSortDescending || false
   });
   const [trigger, { data, isLoading, isError }] = useLazySearchProfitMasterInquiryQuery();
   const autoSelectedRef = useRef<number | null>(null);

@@ -19,6 +19,15 @@ import { DSMAccordion, Page } from "smart-ui-library";
 import BeneficiaryInquiryGrid from "./BeneficiaryInquiryGrid";
 import BeneficiaryInquirySearchFilter from "./BeneficiaryInquirySearchFilter";
 import CreateBeneficiary from "./CreateBeneficiary";
+import { MissiveAlertProvider } from "pages/MasterInquiry/MissiveAlertContext";
+
+interface SelectedMember {
+  memberType: number;
+  id: number;
+  ssn: number;
+  badgeNumber: number;
+  psnSuffix: number;
+}
 
 const BeneficiaryInquiry = () => {
   const { token } = useSelector((state: RootState) => state.security);
@@ -32,13 +41,7 @@ const BeneficiaryInquiry = () => {
   const [beneficiaryType, setBeneficiaryType] = useState<BeneficiaryTypeDto[]>([]);
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [searchParams, setSearchParams] = useState<MasterInquiryRequest | null>(null);
-  const [selectedMember, setSelectedMember] = useState<{
-    memberType: number;
-    id: number;
-    ssn: number;
-    badgeNumber: number;
-    psnSuffix: number;
-  } | null>(null);
+  const [selectedMember, setSelectedMember] = useState<SelectedMember>();
   const [noResults, setNoResults] = useState(false);
   const [change, setChange] = useState<number>(0);
   const [selectedBeneficiary, setSelectedBeneficiary] = useState<BeneficiaryDto | undefined>();
@@ -117,132 +120,135 @@ const BeneficiaryInquiry = () => {
   }, [beneficiaryKind, token]);
 
   return (
-    <Page label="BENEFICIARY INQUIRY">
-      <>
-        <Dialog
-          open={open}
-          onClose={handleClose}>
-          <DialogTitle>{beneficiaryDialogTitle}</DialogTitle>
-          <IconButton
-            aria-label="close"
-            onClick={handleClose}
-            sx={(theme) => ({
-              position: "absolute",
-              right: 8,
-              top: 8,
-              color: theme.palette.grey[500]
-            })}>
-            <CloseSharp />
-          </IconButton>
-          <DialogContent>
-            <CreateBeneficiary
-              selectedBeneficiary={selectedBeneficiary}
-              beneficiaryKind={beneficiaryKind}
-              badgeNumber={selectedMember?.badgeNumber ?? 0}
-              psnSuffix={selectedMember?.psnSuffix ?? 0}
-              onSaveSuccess={onBeneficiarySaveSuccess}></CreateBeneficiary>
-          </DialogContent>
-        </Dialog>
-        <Dialog open={openDeleteConfirmationDialog}>
-          <DialogTitle>Confirmation</DialogTitle>
-          <DialogContent>
-            <p>Are you sure you want to delete ?</p>
-          </DialogContent>
-          <DialogActions>
-            <Button
-              autoFocus
-              onClick={() => handleDeleteConfirmationDialog(false)}>
-              Cancel
-            </Button>
-            <Button
-              color={"error"}
-              onClick={() => handleDeleteConfirmationDialog(true)}>
-              Delete it! &nbsp;
-              {deleteInProgress ? (
-                <CircularProgress
-                  size={"15px"}
-                  color={"error"}
+    <MissiveAlertProvider>
+      <Page label="BENEFICIARY INQUIRY">
+        <>
+          <Dialog
+            open={open}
+            onClose={handleClose}>
+            <DialogTitle>{beneficiaryDialogTitle}</DialogTitle>
+            <IconButton
+              aria-label="close"
+              onClick={handleClose}
+              sx={(theme) => ({
+                position: "absolute",
+                right: 8,
+                top: 8,
+                color: theme.palette.grey[500]
+              })}>
+              <CloseSharp />
+            </IconButton>
+            <DialogContent>
+              <CreateBeneficiary
+                selectedBeneficiary={selectedBeneficiary}
+                beneficiaryKind={beneficiaryKind}
+                badgeNumber={selectedMember?.badgeNumber ?? 0}
+                psnSuffix={selectedMember?.psnSuffix ?? 0}
+                onSaveSuccess={onBeneficiarySaveSuccess}></CreateBeneficiary>
+            </DialogContent>
+          </Dialog>
+          <Dialog open={openDeleteConfirmationDialog}>
+            <DialogTitle>Confirmation</DialogTitle>
+            <DialogContent>
+              <p>Are you sure you want to delete ?</p>
+            </DialogContent>
+            <DialogActions>
+              <Button
+                autoFocus
+                onClick={() => handleDeleteConfirmationDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                color={"error"}
+                onClick={() => handleDeleteConfirmationDialog(true)}>
+                Delete it! &nbsp;
+                {deleteInProgress ? (
+                  <CircularProgress
+                    size={"15px"}
+                    color={"error"}
+                  />
+                ) : (
+                  <></>
+                )}
+              </Button>
+            </DialogActions>
+          </Dialog>
+        </>
+        <Grid
+          container
+          rowSpacing="24px">
+          <Grid
+            size={{ xs: 12 }}
+            width={"100%"}>
+            <Divider />
+          </Grid>
+          <Grid
+            size={{ xs: 12 }}
+            width={"100%"}>
+            <DSMAccordion title="Filter">
+              <BeneficiaryInquirySearchFilter
+                setInitialSearchLoaded={setInitialSearchLoaded}
+                onSearch={(params) => {
+                  setSearchParams(params ?? null);
+                  setSelectedMember(null);
+                  setNoResults(!params);
+                }}
+                beneficiaryType={beneficiaryType}
+                searchClicked={currentBadge}></BeneficiaryInquirySearchFilter>
+            </DSMAccordion>
+          </Grid>
+
+          <Grid
+            size={{ xs: 12 }}
+            width="100%">
+            {/* <Button onClick={handleClickOpen}>Add Beneficiary</Button> */}
+
+            {/* <BeneficiaryInquiryGrid initialSearchLoaded={initialSearchLoaded} setInitialSearchLoaded={setInitialSearchLoaded} /> */}
+            {searchParams && (
+              <MasterInquiryMemberGrid
+                {...searchParams}
+                onBadgeClick={onBadgeClick}
+              />
+            )}
+
+            {/* Render employee details if identifiers are present in selectedMember, or show missive if noResults */}
+            {(noResults || (selectedMember && selectedMember.memberType !== undefined && selectedMember.id)) && (
+              <>
+                <MasterInquiryEmployeeDetails
+                  memberType={selectedMember?.memberType ?? 0}
+                  id={selectedMember?.id ?? 0}
+                  profitYear={searchParams?.endProfitYear}
+                  noResults={noResults}
                 />
-              ) : (
-                <></>
-              )}
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </>
-      <Grid
-        container
-        rowSpacing="24px">
-        <Grid
-          size={{ xs: 12 }}
-          width={"100%"}>
-          <Divider />
+                <div
+                  style={{
+                    padding: "24px",
+                    display: "flex",
+                    justifyContent: "right",
+                    alignItems: "center"
+                  }}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => createOrUpdateBeneficiary(undefined)}>
+                    Add Beneficiary
+                  </Button>
+                </div>
+
+                <BeneficiaryInquiryGrid
+                  refresh={RefreshBeneficiaryGrid}
+                  count={change}
+                  selectedMember={selectedMember}
+                  createOrUpdateBeneficiary={createOrUpdateBeneficiary}
+                  deleteBeneficiary={deleteBeneficiary}
+                />
+              </>
+            )}
+          </Grid>
         </Grid>
-        <Grid
-          size={{ xs: 12 }}
-          width={"100%"}>
-          <DSMAccordion title="Filter">
-            <BeneficiaryInquirySearchFilter
-              setInitialSearchLoaded={setInitialSearchLoaded}
-              onSearch={(params) => {
-                setSearchParams(params ?? null);
-                setSelectedMember(null);
-                setNoResults(!params);
-              }}
-              beneficiaryType={beneficiaryType}
-              searchClicked={currentBadge}></BeneficiaryInquirySearchFilter>
-          </DSMAccordion>
-        </Grid>
+      </Page>
+    </MissiveAlertProvider>
 
-        <Grid
-          size={{ xs: 12 }}
-          width="100%">
-          {/* <Button onClick={handleClickOpen}>Add Beneficiary</Button> */}
-
-          {/* <BeneficiaryInquiryGrid initialSearchLoaded={initialSearchLoaded} setInitialSearchLoaded={setInitialSearchLoaded} /> */}
-          {searchParams && (
-            <MasterInquiryMemberGrid
-              {...searchParams}
-              onBadgeClick={onBadgeClick}
-            />
-          )}
-
-          {/* Render employee details if identifiers are present in selectedMember, or show missive if noResults */}
-          {(noResults || (selectedMember && selectedMember.memberType !== undefined && selectedMember.id)) && (
-            <>
-              <MasterInquiryEmployeeDetails
-                memberType={selectedMember?.memberType ?? 0}
-                id={selectedMember?.id ?? 0}
-                profitYear={searchParams?.endProfitYear}
-                noResults={noResults}
-              />
-              <div
-                style={{
-                  padding: "24px",
-                  display: "flex",
-                  justifyContent: "right",
-                  alignItems: "center"
-                }}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => createOrUpdateBeneficiary(undefined)}>
-                  Add Beneficiary
-                </Button>
-              </div>
-
-              <BeneficiaryInquiryGrid
-                refresh={RefreshBeneficiaryGrid}
-                count={change}
-                selectedMember={selectedMember}
-                createOrUpdateBeneficiary={createOrUpdateBeneficiary}
-                deleteBeneficiary={deleteBeneficiary}
-              />
-            </>
-          )}
-        </Grid>
-      </Grid>
-    </Page>
   );
 };
 
