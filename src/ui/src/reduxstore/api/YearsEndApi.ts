@@ -14,6 +14,7 @@ import {
   clearUnder21Inactive,
   clearUnder21Totals,
   clearYearEndProfitSharingReport,
+  clearYearEndProfitSharingReportTotals,
   setAdditionalExecutivesGrid,
   setBalanceByAge,
   setBalanceByYears,
@@ -51,7 +52,8 @@ import {
   setUnder21Totals,
   setUpdateSummary,
   setVestedAmountsByAge,
-  setYearEndProfitSharingReport
+  setYearEndProfitSharingReport,
+  setYearEndProfitSharingReportTotals,
 } from "reduxstore/slices/yearsEndSlice";
 import {
   BalanceByAge,
@@ -122,7 +124,8 @@ import {
   AdhocBeneficiariesReportRequest,
   adhocBeneficiariesReportResponse,
   PayBenReportResponse,
-  PayBenReportRequest
+  PayBenReportRequest,
+  YearEndProfitSharingReportTotalsResponse
 } from "reduxstore/types";
 import { Paged } from "smart-ui-library";
 import { createDataSourceAwareBaseQuery } from "./api";
@@ -984,6 +987,27 @@ export const YearsEndApi = createApi({
         }
       }
     ),
+    getYearEndProfitSharingReportTotals: builder.query<YearEndProfitSharingReportTotalsResponse, BadgeNumberRequest & { archive?: boolean }>(
+      {
+        query: (params) => ({
+          url: `yearend/yearend-profit-sharing-report-totals${params.archive === true ? '/?archive=true' : ''}`,
+          method: "POST",
+          body: {
+            ...params,
+          }
+        }),
+        async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+          try {
+            dispatch(clearYearEndProfitSharingReportTotals());
+            const { data } = await queryFulfilled;
+            dispatch(setYearEndProfitSharingReportTotals(data));
+          } catch (err) {
+            console.log("Err: " + err);
+            dispatch(clearYearEndProfitSharingReportTotals());
+          }
+        }
+      }
+    ),
     getYearEndProfitSharingSummaryReport: builder.query<YearEndProfitSharingReportSummaryResponse, BadgeNumberRequest>({
       query: (params) => ({
         url: "yearend/yearend-profit-sharing-summary-report",
@@ -1173,6 +1197,7 @@ export const {
   useLazyGetUnder21TotalsQuery,
   useLazyGetVestingAmountByAgeQuery,
   useLazyGetYearEndProfitSharingReportQuery,
+  useLazyGetYearEndProfitSharingReportTotalsQuery,
   useUpdateExecutiveHoursAndDollarsMutation,
   useLazyGetYearEndProfitSharingSummaryReportQuery,
   useLazyGetMasterApplyQuery,

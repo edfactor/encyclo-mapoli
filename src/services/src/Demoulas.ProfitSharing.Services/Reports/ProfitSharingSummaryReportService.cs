@@ -275,6 +275,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         var birthday21 = calInfo.FiscalEndDate.AddYears(-21);
         var birthday65 = calInfo.FiscalEndDate.AddYears(-65);
         var lastYear = req.ProfitYear - 1;
+        var fiscalBeginDate = calInfo.FiscalBeginDate;
         var fiscalEndDate = calInfo.FiscalEndDate;
         // Always fetch all details for the year
         IQueryable<YearEndProfitSharingReportDetail> allDetails = await ActiveSummary(req, calInfo.FiscalEndDate);
@@ -302,6 +303,20 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             return new YearEndProfitSharingReportTotals();
         }
 
+        IQueryable<YearEndProfitSharingReportDetail> terminatedDetails = (await ActiveSummary(req, calInfo.FiscalEndDate))
+            .Where(x => x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate >= fiscalBeginDate && x.TerminationDate <= fiscalEndDate);
+
+        var terminatedTotals = await (
+            from t in terminatedDetails
+            group t by true into g
+            select new
+            {
+                TerminatedWagesTotal = g.Sum(x => x.Wages),
+                TerminatedHoursTotal = g.Sum(x => x.Hours),
+                TerminatedPointsTotal = g.Where(x => x.DateOfBirth <= birthday21 && x.DateOfBirth > birthday65).Sum(x => x.Wages / 100),
+            }
+        ).FirstOrDefaultAsync(cancellationToken);
+
         var rslt = new YearEndProfitSharingReportTotals
         {
             NumberOfEmployees = totals.NumberOfEmployees,
@@ -310,6 +325,9 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             WagesTotal = totals.WagesTotal,
             HoursTotal = totals.HoursTotal,
             PointsTotal = totals.PointsTotal,
+            TerminatedHoursTotal = terminatedTotals?.TerminatedHoursTotal ?? 0,
+            TerminatedWagesTotal = terminatedTotals?.TerminatedWagesTotal ?? 0,
+            TerminatedPointsTotal = terminatedTotals?.TerminatedPointsTotal ?? 0,
         };
 
         return rslt;
