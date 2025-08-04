@@ -11,6 +11,7 @@ using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Microsoft.EntityFrameworkCore;
+using static FastEndpoints.Ep;
 
 namespace Demoulas.ProfitSharing.Services;
 
@@ -244,6 +245,26 @@ public sealed class TotalService : ITotalService
     {
         var list = await GetVestingBalanceForMembersAsync(searchBy, new HashSet<int> { badgeNumberOrSsn }, profitYear, cancellationToken);
         return list?.FirstOrDefault();
+    }
+
+    /// <summary>
+    /// Retrieves the first contribution year for each participant based on their SSN and a specified profit year.
+    /// </summary>
+    /// <param name="ctx"></param>
+    /// <param name="profitYear"></param>
+    /// <returns></returns>
+    public static IQueryable<SsnAndFirstYear> GetFirstContributionYear(IProfitSharingDbContext ctx, short profitYear)
+    {
+        return from pd in ctx.ProfitDetails
+               where pd.ProfitYear < profitYear
+                  && pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id
+                  && pd.Contribution != 0
+               group pd by pd.Ssn into g
+               select new SsnAndFirstYear()
+               {
+                   Ssn = g.Key,
+                   FirstContributionYear = g.Min(x => x.ProfitYear),
+               };
     }
 
 
