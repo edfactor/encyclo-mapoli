@@ -25,6 +25,7 @@ public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>, I
         ChangeTracker.LazyLoadingEnabled = false;
     }
 
+    public virtual DbSet<AnnuityRate> AnnuityRates { get; set; }
     public virtual DbSet<AuditEvent> AuditEvents { get; set; }
     public virtual DbSet<ReportChecksum> ReportChecksums { get; set; }
     public virtual DbSet<Demographic> Demographics { get; set; }

@@ -100,6 +100,26 @@ public class FrozenService: IFrozenService
             var frozenState = new FrozenState { IsActive = true, ProfitYear = profitYear, AsOfDateTime = asOfDateTime, FrozenBy = userName };
             ctx.FrozenStates.Add(frozenState);
 
+            // Copy the annuity rates from the prior year, if rows don't yet exist.
+            var lastYear = profitYear - 1;
+            if (!(await ctx.AnnuityRates.AnyAsync(x=>x.Year == profitYear, cancellationToken)) &&
+                 (await ctx.AnnuityRates.AnyAsync(x=>x.Year == lastYear, cancellationToken)))
+            {
+                var cloneFromLastYearRates = await ctx.AnnuityRates
+                    .Where(x => x.Year == lastYear)
+                    .Select(x => new AnnuityRate
+                    {
+                        Year = profitYear,
+                        Age = x.Age,
+                        SingleRate = x.SingleRate,
+                        JointRate = x.JointRate,
+                        CreatedAtUtc = DateTimeOffset.UtcNow,
+                        UserName = userName
+                    })
+                    .ToListAsync(cancellationToken);
+                ctx.AnnuityRates.AddRange(cloneFromLastYearRates);
+            }
+
             await ctx.SaveChangesAsync(cancellationToken);
 
             return new FrozenStateResponse

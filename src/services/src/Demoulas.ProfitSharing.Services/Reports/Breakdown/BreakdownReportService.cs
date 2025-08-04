@@ -256,7 +256,10 @@ public sealed class BreakdownReportService : IBreakdownService
     {
         return _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
-            ValidateStoreNumber(request);
+            if (request.StoreNumber.HasValue)
+            {
+                ValidateStoreNumber(request);
+            }
 
             var employeesBase = await BuildEmployeesBaseQuery(ctx, request.ProfitYear);
             var startEndDateRequest = request as IStartEndDateRequest;
