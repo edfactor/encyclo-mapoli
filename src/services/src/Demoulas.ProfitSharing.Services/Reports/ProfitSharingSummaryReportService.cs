@@ -283,7 +283,6 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         allDetails = allDetails.Where(x => ((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.TerminationDate > fiscalEndDate)) &&
                 x.Hours >= 1000 && x.DateOfBirth <= birthday18);
 
-        var dbg = JsonSerializer.Serialize(await allDetails.OrderBy(x => x.EmployeeName).Select(x => new { x.BadgeNumber, x.EmployeeName, x.Hours }).ToListAsync(cancellationToken));
         var totals = await (
             from a in allDetails
             group a by true into g
