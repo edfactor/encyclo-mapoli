@@ -357,18 +357,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             join et in ctx.EmploymentTypes on pp.Demographic!.EmploymentTypeId equals et.Id
             join yip in yearsOfService on pp.Demographic!.Ssn equals yip.Ssn into yipTmp
             from yip in yipTmp.DefaultIfEmpty()
-            join fc in (
-                from pd in ctx.ProfitDetails
-                where pd.ProfitYear < req.ProfitYear
-                   && pd.ProfitCodeId == ProfitCode.Constants.IncomingContributions.Id
-                   && pd.Contribution != 0
-                group pd by pd.Ssn into g
-                select new
-                {
-                    Ssn = g.Key,
-                    FirstContributionYear = g.Min(x => x.ProfitYear),
-                }
-            ) on pp.Demographic!.Ssn equals fc.Ssn into fcTmp
+            join fc in TotalService.GetFirstContributionYear(ctx, req.ProfitYear) on pp.Demographic!.Ssn equals fc.Ssn into fcTmp
             from fc in fcTmp.DefaultIfEmpty()
             select new EmployeeProjection
             {
