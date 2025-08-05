@@ -53,6 +53,7 @@ export const createSSNColumn = (options: SSNColumnOptions = {}): ColDef => {
 export const createBadgeColumn = (options: BadgeColumnOptions = {}): ColDef => {
   const {
     headerName = "Badge",
+    field = "badgeNumber",
     minWidth = 120,
     maxWidth,
     alignment = "center",
@@ -67,8 +68,8 @@ export const createBadgeColumn = (options: BadgeColumnOptions = {}): ColDef => {
 
   const column: ColDef = {
     headerName,
-    field: "badgeNumber",
-    colId: "badgeNumber",
+    field: field,
+    colId: field,
     minWidth,
     headerClass: alignmentClass,
     cellClass: alignmentClass,
@@ -85,7 +86,8 @@ export const createBadgeColumn = (options: BadgeColumnOptions = {}): ColDef => {
       if (psnSuffix && params.data.psnSuffix) {
         return viewBadgeLinkRenderer(params.data.badgeNumber, params.data.psnSuffix, navigateFunction);
       }
-      return viewBadgeLinkRenderer(params.data.badgeNumber, navigateFunction);
+      const badgeValue = field === "badgeNumber" ? params.data.badgeNumber : params.data[field];
+      return viewBadgeLinkRenderer(badgeValue, navigateFunction);
     };
   }
 
