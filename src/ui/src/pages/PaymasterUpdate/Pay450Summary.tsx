@@ -20,8 +20,10 @@ const Pay450Summary = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [pageNumberReset, setPageNumberReset] = useState(false);
+  const [currentStatus, setCurrentStatus] = useState<string | null>(null);
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
   const { updateSummary } = useSelector((state: RootState) => state.yearsEnd);
+  const navigationList = useSelector((state: RootState) => state.navigation.navigationData);
 
   const [getUpdateSummary] = useLazyGetUpdateSummaryQuery();
   const [updateEnrollment] = useUpdateEnrollmentMutation();
@@ -29,6 +31,53 @@ const Pay450Summary = () => {
   useEffect(() => {
     setInitialSearchLoaded(true);
   }, []);
+
+  // Initialize current status from navigation state
+  useEffect(() => {
+    const currentNavigationId = parseInt(localStorage.getItem("navigationId") ?? "");
+    
+    const getNavigationObjectBasedOnId = (navigationArray?: any[], id?: number): any => {
+      if (navigationArray) {
+        for (const item of navigationArray) {
+          if (item.id == id) {
+            return item;
+          }
+          if (item.items && item.items.length > 0) {
+            const found = getNavigationObjectBasedOnId(item.items, id);
+            if (found) {
+              return found;
+            }
+          }
+        }
+      }
+      return undefined;
+    };
+
+    const obj = getNavigationObjectBasedOnId(navigationList?.navigation, currentNavigationId ?? undefined);
+    if (obj) {
+      setCurrentStatus(obj.statusName || null);
+    }
+  }, [navigationList]);
+
+  const handleStatusChange = (newStatus: string, statusName?: string) => {
+    // Only trigger archive when status is changing TO "Complete" (not already "Complete")
+    if (statusName === "Complete" && currentStatus !== "Complete") {
+      setCurrentStatus("Complete");
+      // Trigger getUpdateSummary with archive=true
+      getUpdateSummary({
+        profitYear: fiscalCloseProfitYear,
+        pagination: {
+          skip: 0,
+          take: 255,
+          sortBy: "",
+          isSortDescending: false
+        },
+        archive: true
+      });
+    } else {
+      setCurrentStatus(statusName || null);
+    }
+  };
 
   const handleUpdate = async () => {
     await updateEnrollment({});
@@ -52,7 +101,7 @@ const Pay450Summary = () => {
           className="h-10 whitespace-nowrap min-w-fit">
           Update
         </Button>
-        <StatusDropdownActionNode />
+        <StatusDropdownActionNode onStatusChange={handleStatusChange} />
       </Stack>
     );
   };

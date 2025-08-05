@@ -51,7 +51,7 @@ public sealed class YearEndProfitSharingReportTotalsEndpoint: Endpoint<BadgeNumb
             ReportName,
             req.ProfitYear,
             req,
-            (archiveReq, cancellationToken) => _profitSharingSummaryReportService.GetYearEndProfitSharingTotalsAsync(archiveReq, cancellationToken),
+            (archiveReq, _, cancellationToken) => _profitSharingSummaryReportService.GetYearEndProfitSharingTotalsAsync(archiveReq, cancellationToken),
             ct);
     }
 }

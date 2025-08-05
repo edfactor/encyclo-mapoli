@@ -32,7 +32,7 @@ public sealed class AuditService : IAuditService
         string reportName,
         short profitYear,
         TRequest request,
-        Func<TRequest, CancellationToken, Task<TResponse>> reportFunction,
+        Func<TRequest, bool, CancellationToken, Task<TResponse>> reportFunction,
         CancellationToken cancellationToken)
         where TResponse : class
         where TRequest : PaginationRequestDto
@@ -42,19 +42,20 @@ public sealed class AuditService : IAuditService
             throw new ArgumentNullException(nameof(reportFunction), "Report function cannot be null.");
         }
 
-        bool archive = (_httpContextAccessor.HttpContext?.Request?.Query?.TryGetValue("archive", out var archiveValue) ?? false) &&
-                       bool.TryParse(archiveValue, out var archiveResult) && archiveResult;
+        bool isArchiveRequest = false;
+        _ = (_httpContextAccessor.HttpContext?.Request?.Query?.TryGetValue("archive", out var archiveValue) ?? false) &&
+                       bool.TryParse(archiveValue, out isArchiveRequest) && isArchiveRequest;
 
         TRequest archiveRequest = request;
-        if (archive)
+        if (isArchiveRequest)
         {
             // Create archive request with full data retrieval
             archiveRequest = request with { Skip = 0, Take = ushort.MaxValue };
         }
 
-        TResponse response = await reportFunction(archiveRequest, cancellationToken);
+        TResponse response = await reportFunction(archiveRequest, isArchiveRequest, cancellationToken);
 
-        if (!archive)
+        if (!isArchiveRequest)
         {
             return response;
         }

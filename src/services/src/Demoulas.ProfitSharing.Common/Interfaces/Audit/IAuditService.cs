@@ -9,7 +9,7 @@ public interface IAuditService
         string reportName,
         short profitYear,
         TRequest request,
-        Func<TRequest, CancellationToken, Task<TResponse>> reportFunction,
+        Func<TRequest, bool, CancellationToken, Task<TResponse>> reportFunction,
         CancellationToken cancellationToken)
         where TResponse : class
         where TRequest : PaginationRequestDto;

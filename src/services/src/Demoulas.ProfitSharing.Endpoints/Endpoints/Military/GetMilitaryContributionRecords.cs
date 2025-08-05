@@ -39,7 +39,7 @@ public class GetMilitaryContributionRecords : Endpoint<MilitaryContributionReque
         var response = await _auditService.ArchiveCompletedReportAsync(ReportName,
             req.ProfitYear,
             req,
-            (archiveReq, cancellationToken) => _militaryService.GetMilitaryServiceRecordAsync(archiveReq, cancellationToken),
+            (archiveReq, _, cancellationToken) => _militaryService.GetMilitaryServiceRecordAsync(archiveReq, cancellationToken),
             ct);
 
         return response.Match<Results<Ok<PaginatedResponseDto<MilitaryContributionResponse>>, ProblemHttpResult>>(
