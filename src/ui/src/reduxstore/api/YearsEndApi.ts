@@ -445,10 +445,10 @@ export const YearsEndApi = createApi({
     }),
     getExecutiveHoursAndDollars: builder.query<
       PagedReportResponse<ExecutiveHoursAndDollars>,
-      ExecutiveHoursAndDollarsRequestDto
+      ExecutiveHoursAndDollarsRequestDto & { archive?: boolean }
     >({
       query: (params) => ({
-        url: "yearend/executive-hours-and-dollars",
+        url: `yearend/executive-hours-and-dollars${params.archive ? '?archive=true' : ''}`,
         method: "GET",
         params: {
           take: params.pagination.take,
