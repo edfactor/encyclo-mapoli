@@ -28,15 +28,14 @@ public sealed class AuditService : IAuditService
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task<TResponse> ArchiveCompletedReportAsync<TRequest, TResponse, TResult>(
+    public async Task<TResponse> ArchiveCompletedReportAsync<TRequest, TResponse>(
         string reportName,
         short profitYear,
         TRequest request,
         Func<TRequest, CancellationToken, Task<TResponse>> reportFunction,
         CancellationToken cancellationToken)
-        where TResponse : ReportResponseBase<TResult>
+        where TResponse : class
         where TRequest : PaginationRequestDto
-        where TResult : class
     {
         if (reportFunction == null)
         {
@@ -77,39 +76,6 @@ public sealed class AuditService : IAuditService
         }, cancellationToken);
 
         return response;
-    }
-
-    public async Task ArchiveCompletedReportAsync<TRequest, TResponse>(
-        string reportName,
-        TRequest request,
-        TResponse response,
-        CancellationToken cancellationToken)
-        where TResponse : class
-        where TRequest : PaginationRequestDto
-    {
-        string requestJson = JsonSerializer.Serialize(request);
-        string reportJson = JsonSerializer.Serialize(response);
-
-        var entries = new List<AuditChangeEntry> { new() { ColumnName = "Report", NewValue = reportJson } };
-        var auditEvent = new AuditEvent { TableName = reportName, Operation = "Archive", UserName = _appUser?.UserName ?? string.Empty, ChangesJson = entries };
-
-        // For this overload, we don't have a profit year from the request, so we'll set it to 0 or extract it if possible
-        short profitYear = 0;
-        var profitYearProp = request.GetType().GetProperty("ProfitYear");
-        if (profitYearProp != null && profitYearProp.PropertyType == typeof(short))
-        {
-            profitYear = (short)(profitYearProp.GetValue(request) ?? 0);
-        }
-
-        ReportChecksum checksum = new ReportChecksum { ReportType = reportName, ProfitYear = profitYear, RequestJson = requestJson, ReportJson = reportJson };
-        checksum.KeyFieldsChecksumJson = ToKeyValuePairs(response);
-
-        await _dataContextFactory.UseWritableContext(async c =>
-        {
-            c.AuditEvents.Add(auditEvent);
-            c.ReportChecksums.Add(checksum);
-            await c.SaveChangesAsync(cancellationToken);
-        }, cancellationToken);
     }
 
     public static IEnumerable<KeyValuePair<string, KeyValuePair<decimal, byte[]>>> ToKeyValuePairs<TReport>(TReport obj)

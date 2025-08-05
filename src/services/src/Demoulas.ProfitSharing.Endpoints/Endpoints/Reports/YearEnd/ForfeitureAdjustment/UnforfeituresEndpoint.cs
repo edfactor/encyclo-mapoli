@@ -60,20 +60,14 @@ public class UnforfeituresEndpoint :
 
     public override string ReportFileName => "REHIRE'S PROFIT SHARING DATA";
 
-    public override async Task<ReportResponseBase<UnforfeituresResponse>> GetResponse(StartAndEndDateRequest req, CancellationToken ct)
+    public override Task<ReportResponseBase<UnforfeituresResponse>> GetResponse(StartAndEndDateRequest req, CancellationToken ct)
     {
-        return _auditService.ArchiveCompletedReportAsync<YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse, YearEndProfitSharingReportDetail>(
-
-        // Read "archive" from query string without modifying the DTO
-        bool archive = (HttpContext?.Request?.Query?.TryGetValue("archive", out var archiveValue) ?? false) &&
-                       bool.TryParse(archiveValue, out var archiveResult) && archiveResult;
-
-        if (archive)
-        {
-            await _auditService.ArchiveCompletedReportAsync(response.ReportName, req, response, ct);
-        }
-        
-        return response;
+        return _auditService.ArchiveCompletedReportAsync(
+            "Report_Name",
+            (short)req.EndingDate.Year,
+            req,
+            (archiveReq, cancellationToken) => _reportService.FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYearsAsync(archiveReq, cancellationToken),
+            ct);
     }
 
     protected internal override async Task GenerateCsvContent(CsvWriter csvWriter, ReportResponseBase<UnforfeituresResponse> report, CancellationToken cancellationToken)
