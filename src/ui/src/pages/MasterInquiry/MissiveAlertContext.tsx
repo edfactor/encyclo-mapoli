@@ -1,7 +1,7 @@
-import React, { createContext, useContext, useState, useCallback, useMemo, ReactNode } from "react";
+import React, { createContext, useState, useCallback, useMemo, ReactNode } from "react";
 import { MissiveResponse } from "reduxstore/types";
 
-interface MissiveAlertContextType {
+export interface MissiveAlertContextType {
   missiveAlerts: MissiveResponse[];
   addAlert: (alert: MissiveResponse) => void;
   addAlerts: (alerts: MissiveResponse[]) => void;
@@ -10,7 +10,7 @@ interface MissiveAlertContextType {
   hasAlert: (alertId: number) => boolean;
 }
 
-const MissiveAlertContext = createContext<MissiveAlertContextType | null>(null);
+export const MissiveAlertContext = createContext<MissiveAlertContextType | null>(null);
 
 interface MissiveAlertProviderProps {
   children: ReactNode;
@@ -67,10 +67,3 @@ export const MissiveAlertProvider: React.FC<MissiveAlertProviderProps> = ({ chil
   return <MissiveAlertContext.Provider value={value}>{children}</MissiveAlertContext.Provider>;
 };
 
-export const useMissiveAlerts = (): MissiveAlertContextType => {
-  const context = useContext(MissiveAlertContext);
-  if (!context) {
-    throw new Error("useMissiveAlerts must be used within a MissiveAlertProvider");
-  }
-  return context;
-};
