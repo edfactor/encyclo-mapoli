@@ -16,12 +16,23 @@ const MilitaryEntryAndModification = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [showContributions, setShowContributions] = useState(false);
+  const [currentStatus, setCurrentStatus] = useState<string | null>(null);
   const { masterInquiryEmployeeDetails } = useSelector((state: RootState) => state.inquiry);
   const [fetchContributions, { isFetching }] = useLazyGetMilitaryContributionsQuery();
   const profitYear = useDecemberFlowProfitYear();
 
+  const handleStatusChange = (newStatus: string, statusName?: string) => {
+    // Only trigger if status is changing TO "Complete" (not already "Complete")
+    if (statusName === "Complete" && currentStatus !== "Complete") {
+      setCurrentStatus("Complete");
+      handleFetchContributions(true); // Call with archive=true
+    } else {
+      setCurrentStatus(statusName || newStatus);
+    }
+  };
+
   const renderActionNode = () => {
-    return <StatusDropdownActionNode />;
+    return <StatusDropdownActionNode onStatusChange={handleStatusChange} />;
   };
 
   const handleOpenForm = () => {
@@ -34,9 +45,9 @@ const MilitaryEntryAndModification = () => {
     setInitialSearchLoaded(true); // This will trigger the grid to refresh
   };
 
-  const handleFetchContributions = useCallback(() => {
+  const handleFetchContributions = useCallback((archive?: boolean) => {
     if (masterInquiryEmployeeDetails) {
-      fetchContributions({
+      const request = {
         badgeNumber: Number(masterInquiryEmployeeDetails.badgeNumber),
         profitYear: profitYear,
         contributionAmount: 0,
@@ -46,8 +57,11 @@ const MilitaryEntryAndModification = () => {
           take: 25,
           sortBy: "contributionDate",
           isSortDescending: false
-        }
-      });
+        },
+        ...(archive && { archive: true }) // Add archive property if true
+      };
+      
+      fetchContributions(request);
       setShowContributions(true);
     }
   }, [fetchContributions, masterInquiryEmployeeDetails, profitYear]);
