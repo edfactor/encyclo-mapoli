@@ -87,7 +87,8 @@ export const ROUTES = {
 export const CAPTIONS = {
   PAY_BE_NEXT: "Pay Be Next",
   BENEFICIARY_INQUIRY: "Beneficiary Inquiry",
-    PAYBEN_REPORT: "Pay Beneficiary Report",
+  BENEFICIARY_OF: "Beneficiary Of",
+  PAYBEN_REPORT: "Pay Beneficiary Report",
   BALANCE_BY_AGE: "Get Balance by Age (PROF130B)",
   BALANCE_BY_YEARS: "Get Balance by Years (PROF130Y)",
   CONTRIBUTIONS_BY_AGE: "Get Contributions by Age (PROF130)",

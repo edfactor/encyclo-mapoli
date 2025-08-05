@@ -2,10 +2,10 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 
 import { setBeneficiaryError } from "reduxstore/slices/beneficiarySlice";
 import {
-  BeneficiaryDto,
   BeneficiaryKindRequestDto,
   BeneficiaryKindResponseDto,
   BeneficiaryRequestDto,
+  BeneficiaryResponse,
   BeneficiaryTypesRequestDto,
   BeneficiaryTypesResponseDto,
   CreateBeneficiaryContactRequest,
@@ -24,7 +24,7 @@ export const BeneficiariesApi = createApi({
   baseQuery: baseQuery,
   reducerPath: "beneficiariesApi",
   endpoints: (builder) => ({
-    getBeneficiaries: builder.query<Paged<BeneficiaryDto>, BeneficiaryRequestDto>({
+    getBeneficiaries: builder.query<BeneficiaryResponse, BeneficiaryRequestDto>({
       query: (request) => ({
         url: `/beneficiary`,
         method: "GET",
