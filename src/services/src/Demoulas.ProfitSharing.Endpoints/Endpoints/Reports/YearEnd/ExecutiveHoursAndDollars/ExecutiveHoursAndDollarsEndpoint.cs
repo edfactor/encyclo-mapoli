@@ -46,7 +46,22 @@ public class ExecutiveHoursAndDollarsEndpoint :
         return _auditService.ArchiveCompletedReportAsync(ReportFileName,
             req.ProfitYear,
             req,
-            (archiveReq, cancellationToken) => _reportService.GetExecutiveHoursAndDollarsReportAsync(archiveReq, cancellationToken), 
+            (archiveReq, isArchiveRequest, cancellationToken) =>
+            {
+                if (isArchiveRequest)
+                {
+                    archiveReq = archiveReq with
+                    {
+                        BadgeNumber = null,
+                        FullNameContains = null,
+                        Ssn = null,
+                        HasExecutiveHoursAndDollars = true,
+                        IsMonthlyPayroll = true
+                    };
+                }
+
+                return _reportService.GetExecutiveHoursAndDollarsReportAsync(archiveReq, cancellationToken);
+            }, 
             ct);
     }
 

@@ -66,7 +66,7 @@ public class UnforfeituresEndpoint :
             "Report_Name",
             (short)req.EndingDate.Year,
             req,
-            (archiveReq, cancellationToken) => _reportService.FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYearsAsync(archiveReq, cancellationToken),
+            (archiveReq, _, cancellationToken) => _reportService.FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYearsAsync(archiveReq, cancellationToken),
             ct);
     }
 
