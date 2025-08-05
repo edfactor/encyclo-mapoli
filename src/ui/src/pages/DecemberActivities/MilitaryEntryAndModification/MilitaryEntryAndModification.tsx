@@ -11,6 +11,8 @@ import { useLazyGetMilitaryContributionsQuery } from "../../../reduxstore/api/Mi
 import MilitaryContributionForm from "./MilitaryContributionForm";
 import MilitaryContributionGrid from "./MilitaryContributionFormGrid";
 import MilitaryEntryAndModificationSearchFilter from "./MilitaryEntryAndModificationSearchFilter";
+import { useDispatch } from 'react-redux'
+import {InquiryApi} from "../../../reduxstore/api/InquiryApi";
 
 const MilitaryEntryAndModification = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
@@ -20,6 +22,7 @@ const MilitaryEntryAndModification = () => {
   const { masterInquiryEmployeeDetails } = useSelector((state: RootState) => state.inquiry);
   const [fetchContributions, { isFetching }] = useLazyGetMilitaryContributionsQuery();
   const profitYear = useDecemberFlowProfitYear();
+  const dispatch = useDispatch()
 
   const handleStatusChange = (newStatus: string, statusName?: string) => {
     // Only trigger if status is changing TO "Complete" (not already "Complete")
@@ -114,6 +117,7 @@ const MilitaryEntryAndModification = () => {
           <MilitaryContributionForm
             onSubmit={(rows) => {
               handleCloseForm();
+              dispatch(InquiryApi.util.invalidateTags(['memberDetails']));
             }}
             onCancel={handleCloseForm}
             badgeNumber={Number(masterInquiryEmployeeDetails?.badgeNumber)}

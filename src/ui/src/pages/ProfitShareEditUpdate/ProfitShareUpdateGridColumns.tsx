@@ -3,7 +3,10 @@ import { createBadgeColumn, createCurrencyColumn, createNameColumn } from "utils
 
 export const ProfitShareUpdateGridColumns = (): ColDef[] => {
   return [
-    createBadgeColumn({ headerName: "PSN", field: "psn" }),
+    createBadgeColumn({ field: "badge" }),
+    // According to the back end, in MemberFinancials.cs, the PSN is currently a string
+    // version of the badge, so I am removing it for now. - EJL
+    // createBadgeColumn({ headerName: "PSN", field: "psn" }),
     createNameColumn({ field: "name" }),
     createCurrencyColumn({
       headerName: "Beginning Balance",
