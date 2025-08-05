@@ -20,6 +20,7 @@ public sealed record YearEndProfitSharingReportResponse : ReportResponseBase<Yea
     public int NumberOfEmployeesUnder21 { get; set; }
     public long NumberOfEmployeesInPlan { get; set; }
     public decimal TerminatedPointsTotal { get; set; }
+    
     [YearEndArchiveProperty]
     public decimal BalanceTotal { get; set; }
     public decimal TerminatedBalanceTotal { get; set; }
