@@ -12,6 +12,7 @@ import AddForfeitureModal from "./AddForfeitureModal";
 import { useLazyGetForfeitureAdjustmentsQuery } from "reduxstore/api/YearsEndApi";
 import MasterInquiryEmployeeDetails from "pages/MasterInquiry/MasterInquiryEmployeeDetails";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
+import {MissiveAlertProvider} from "../MasterInquiry/MissiveAlertContext";
 
 const ForfeituresAdjustment = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
@@ -22,6 +23,12 @@ const ForfeituresAdjustment = () => {
   );
   const profitYear = useDecemberFlowProfitYear();
   const [triggerSearch] = useLazyGetForfeitureAdjustmentsQuery();
+  const [reloadKey, setReloadKey] = useState(0);
+
+  const handleReload = () => {
+    setReloadKey(prev => prev + 1);
+  };
+
 
   const renderActionNode = () => {
     return <StatusDropdownActionNode />;
@@ -50,6 +57,7 @@ const ForfeituresAdjustment = () => {
         .catch((error: unknown) => {
           console.error("Error refreshing forfeiture adjustments:", error);
         });
+      handleReload();
     }
   };
 
@@ -87,11 +95,14 @@ const ForfeituresAdjustment = () => {
 
         {/* Only show details if we have forfeitureAdjustmentData and a result */}
         {forfeitureAdjustmentData?.response?.results?.[0] && profitYear && (
-          <MasterInquiryEmployeeDetails
-            memberType={1}
-            id={forfeitureAdjustmentData.response.results[0].demographicId}
-            profitYear={profitYear}
-          />
+            <MissiveAlertProvider>
+              <MasterInquiryEmployeeDetails
+                  key={reloadKey}
+                  memberType={1}
+                  id={forfeitureAdjustmentData.response.results[0].demographicId}
+                  profitYear={profitYear}
+              />
+            </MissiveAlertProvider>
         )}
 
         <Grid width="100%">
