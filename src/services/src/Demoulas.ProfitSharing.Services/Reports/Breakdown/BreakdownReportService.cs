@@ -59,6 +59,10 @@ public sealed class BreakdownReportService : IBreakdownService
         public byte EnrollmentId { get; init; }
         public Decimal ProfitShareHours { get; init; }
         public byte? YearsInPlan { get; internal set; }
+        public string Street1 { get; set; } = string.Empty;
+        public string? City { get; set; } = string.Empty;
+        public string? State { get; set; } = string.Empty;
+        public string? PostalCode { get; set; } = string.Empty;
     }
 
     private sealed record EmployeeFinancialSnapshot(
@@ -510,7 +514,11 @@ public sealed class BreakdownReportService : IBreakdownService
                 HireDate = d.HireDate,
                 TerminationDate = d.TerminationDate,
                 EnrollmentId = pp.EnrollmentId,
-                ProfitShareHours = pp.CurrentHoursYear + pp.HoursExecutive
+                ProfitShareHours = pp.CurrentHoursYear + pp.HoursExecutive,
+                Street1 = d.Address.Street,
+                City = d.Address.City,
+                State = d.Address.State,
+                PostalCode = d.Address.PostalCode,
             };
 
         return query;

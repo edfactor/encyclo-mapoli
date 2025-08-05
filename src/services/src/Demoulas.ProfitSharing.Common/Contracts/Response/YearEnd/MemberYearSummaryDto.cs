@@ -22,6 +22,9 @@ public record MemberYearSummaryDto
     public DateOnly? TerminationDate { get; init; }
     public byte? EnrollmentId { get; init; }
     public decimal ProfitShareHours { get; init; }
-
+    public string Street1 { get; set; } = string.Empty;
+    public string? City { get; set; } 
+    public string? State { get; set; }
+    public string? PostalCode { get; set;}
 }
 

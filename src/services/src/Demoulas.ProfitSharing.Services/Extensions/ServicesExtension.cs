@@ -9,6 +9,7 @@ using Demoulas.ProfitSharing.Services.Audit;
 using Demoulas.ProfitSharing.Services.Beneficiaries;
 using Demoulas.ProfitSharing.Services.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Services.Caching.Extensions;
+using Demoulas.ProfitSharing.Services.Certificates;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.ItOperations;
 using Demoulas.ProfitSharing.Services.Mappers;
@@ -33,6 +34,7 @@ public static class ServicesExtension
     public static IHostApplicationBuilder AddProjectServices(this IHostApplicationBuilder builder)
     {
         _ = builder.Services.AddScoped<IPayClassificationService, PayClassificationService>();
+        _ = builder.Services.AddScoped<ICertificateService, CertificateService>();
         _ = builder.Services.AddScoped<ICleanupReportService, CleanupReportService>();
         _ = builder.Services.AddScoped<IEmbeddedSqlService, EmbeddedSqlService>();
         _ = builder.Services.AddScoped<IForfeituresAndPointsForYearService, ForfeituresAndPointsForYearService>(); 
