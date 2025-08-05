@@ -20,7 +20,6 @@ import BeneficiaryInquiryGrid from "./BeneficiaryInquiryGrid";
 import BeneficiaryInquirySearchFilter from "./BeneficiaryInquirySearchFilter";
 import CreateBeneficiary from "./CreateBeneficiary";
 import { MissiveAlertProvider } from "pages/MasterInquiry/MissiveAlertContext";
-import { paramValueToCss } from "ag-grid-community/dist/types/src/theming/theme-types";
 
 interface SelectedMember {
   memberType: number;

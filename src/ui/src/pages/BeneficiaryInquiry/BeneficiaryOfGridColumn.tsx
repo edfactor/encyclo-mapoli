@@ -2,7 +2,7 @@ import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { mmDDYYFormat } from "utils/dateUtils";
 import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
 import { GRID_COLUMN_WIDTHS } from "../../constants";
-import { createSSNColumn, createNameColumn, createBadgeColumn } from "../../utils/gridColumnFactory";
+import { createSSNColumn, createNameColumn, createBadgeColumn, createCurrencyColumn, createDateColumn } from "../../utils/gridColumnFactory";
 
 export const BeneficiaryOfGridColumns = (): ColDef[] => {
     return [
@@ -21,18 +21,7 @@ export const BeneficiaryOfGridColumns = (): ColDef[] => {
                 return `${params.data.ssn}`;
             }
         }),
-        {
-            headerName: "Date of birth",
-            field: "dateOfBirth",
-            colId: "dateOfBirth",
-            flex: 1,
-            headerClass: "center-align",
-            cellClass: "center-align",
-            resizable: true,
-            valueFormatter: (params) => {
-                return `${mmDDYYFormat(params.data.dateOfBirth)}`;
-            }
-        },
+        createDateColumn({headerName: "Date of Birth", field: "dateOfBirth", colId: "dateOfBirth"}),
         {
             headerName: "Address",
             field: "street",
@@ -81,15 +70,6 @@ export const BeneficiaryOfGridColumns = (): ColDef[] => {
                 return `${params.data.state}`;
             }
         },
-        {
-            headerName: "Current            ",
-            field: "currentBalance",
-            colId: "currentBalance",
-            flex: 1,
-            headerClass: "center-align",
-            cellClass: "center-align",
-            resizable: true,
-            sortable: false
-        }
+        createCurrencyColumn({headerName: "Current", field: "currentBalance", colId : "currentBalance"})
     ];
 };
