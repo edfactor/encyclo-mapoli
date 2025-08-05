@@ -30,7 +30,7 @@ import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 import { memberTypeGetNumberMap, paymentTypeGetNumberMap } from "./MasterInquiryFunctions";
-import { useMissiveAlerts } from "./MissiveAlertContext";
+import { useMissiveAlerts } from "./useMissiveAlerts";
 
 const schema = yup.object().shape({
   endProfitYear: yup
