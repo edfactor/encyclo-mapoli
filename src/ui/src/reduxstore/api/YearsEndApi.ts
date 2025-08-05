@@ -129,6 +129,9 @@ import {
 import { Paged } from "smart-ui-library";
 import { createDataSourceAwareBaseQuery } from "./api";
 
+// Create intersection type for getUpdateSummary with optional archive
+type UpdateSummaryRequestWithArchive = UpdateSummaryRequest & { archive?: boolean };
+
 import {
   clearForfeitureAdjustmentData,
   setForfeitureAdjustmentData
@@ -1030,7 +1033,7 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getUpdateSummary: builder.query<UpdateSummaryResponse, UpdateSummaryRequest>({
+    getUpdateSummary: builder.query<UpdateSummaryResponse, UpdateSummaryRequestWithArchive>({
       query: (params) => ({
         url: `yearend/frozen/updatesummary`,
         method: "GET",
@@ -1039,7 +1042,8 @@ export const YearsEndApi = createApi({
           take: params.pagination.take,
           skip: params.pagination.skip,
           sortBy: params.pagination.sortBy,
-          isSortDescending: params.pagination.isSortDescending
+          isSortDescending: params.pagination.isSortDescending,
+          ...(params.archive && { archive: params.archive })
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
