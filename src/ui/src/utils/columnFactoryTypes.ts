@@ -12,6 +12,7 @@ export interface SSNColumnOptions {
 
 export interface BadgeColumnOptions {
   headerName?: string;
+  field?: string;
   minWidth?: number;
   maxWidth?: number;
   alignment?: "left" | "center";

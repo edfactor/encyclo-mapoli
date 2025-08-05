@@ -244,7 +244,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                 ProfitYearIteration = 0,
                 ProfitCodeId = ProfitCode.Constants.OutgoingForfeitures.Id, // Code 2 for forfeitures
                 Remark = remarkText,
-                Forfeiture = Math.Abs(req.ForfeitureAmount) * (isForfeit ? -1 : 1), // Negative for forfeit, positive for un-forfeit, we'll need to double check this logic
+                Forfeiture = req.ForfeitureAmount,
                 MonthToDate = (byte)DateTime.Now.Month,
                 YearToDate = (short)DateTime.Now.Year,
                 TransactionDate = DateTimeOffset.Now,
@@ -276,18 +276,14 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                         : new[] { wallClockYear };
 
                     // For forfeit: Set PY_PS_ETVA to 0 and increment enrollment by 2
-                    byte newEnrollmentId;
-                    if (payProfit.EnrollmentId == Enrollment.Constants.NewVestingPlanHasContributions)
+                    byte newEnrollmentId = Enrollment.Constants.NotEnrolled;
+                    if (payProfit.EnrollmentId == /*2*/ Enrollment.Constants.NewVestingPlanHasContributions)
                     {
-                        newEnrollmentId = Enrollment.Constants.NewVestingPlanHasForfeitureRecords;
+                        newEnrollmentId = /*4*/ Enrollment.Constants.NewVestingPlanHasForfeitureRecords;
                     }
-                    else if (payProfit.EnrollmentId == Enrollment.Constants.OldVestingPlanHasContributions)
+                    else if (payProfit.EnrollmentId == /*1*/ Enrollment.Constants.OldVestingPlanHasContributions)
                     {
-                        newEnrollmentId = Enrollment.Constants.OldVestingPlanHasForfeitureRecords;
-                    }
-                    else
-                    {
-                        newEnrollmentId = Enrollment.Constants.NotEnrolled;
+                        newEnrollmentId = /*3*/ Enrollment.Constants.OldVestingPlanHasForfeitureRecords;
                     }
 
                     await context.PayProfits

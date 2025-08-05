@@ -1,96 +1,44 @@
-import { agGridNumberToCurrency } from "smart-ui-library";
 import { ColDef } from "ag-grid-community";
+import { createBadgeColumn, createCurrencyColumn, createNameColumn } from "utils/gridColumnFactory";
 
 export const ProfitShareUpdateGridColumns = (): ColDef[] => {
   return [
-    {
-      headerName: "Number",
-      field: "psn",
-      colId: "psn",
-      minWidth: 100,
-      type: "rightAligned",
-      resizable: true
-    },
-    {
-      headerName: "Name",
-      field: "name",
-      colId: "name",
-      minWidth: 80,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
-    {
+    createBadgeColumn({ field: "badge" }),
+    // According to the back end, in MemberFinancials.cs, the PSN is currently a string
+    // version of the badge, so I am removing it for now. - EJL
+    // createBadgeColumn({ headerName: "PSN", field: "psn" }),
+    createNameColumn({ field: "name" }),
+    createCurrencyColumn({
       headerName: "Beginning Balance",
-      field: "beginningAmount",
-      colId: "beginningAmount",
-      minWidth: 120,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+      field: "beginningAmount"
+    }),
+    createCurrencyColumn({
       headerName: "Contributions",
-      field: "contributions",
-      colId: "contributions",
-      minWidth: 120,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+      field: "contributions"
+    }),
+    createCurrencyColumn({
       headerName: "Earnings",
-      field: "allEarnings",
-      colId: "allEarnings",
-      minWidth: 120,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+      field: "allEarnings"
+    }),
+    createCurrencyColumn({
       headerName: "Earnings2",
-      field: "allSecondaryEarnings",
-      colId: "allSecondaryEarnings",
-      minWidth: 120,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+      field: "allSecondaryEarnings"
+    }),
+    createCurrencyColumn({
       headerName: "Forfeiture",
-      field: "incomingForfeitures",
-      colId: "incomingForfeitures",
-      minWidth: 120,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+      field: "incomingForfeitures"
+    }),
+    createCurrencyColumn({
       headerName: "Distributions",
-      field: "distributions",
-      colId: "distributions",
-      minWidth: 100,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+      field: "distributions"
+    }),
+    createCurrencyColumn({
       headerName: "Military/Paid Allocation",
-      field: "pxfer",
-      colId: "pxfer",
-      minWidth: 100,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+      field: "pxfer"
+    }),
+    createCurrencyColumn({
       headerName: "Ending Balance",
-      field: "endingBalance",
-      colId: "endingBalance",
-      minWidth: 150,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    }
+      field: "endingBalance"
+    })
   ];
 };

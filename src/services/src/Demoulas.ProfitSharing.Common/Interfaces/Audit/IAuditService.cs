@@ -1,11 +1,16 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Request;
+using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
 
 namespace Demoulas.ProfitSharing.Common.Interfaces.Audit;
 public interface IAuditService
 {
-   Task ArchiveCompletedReportAsync<TRequest, TReport>(string reportName,
+    Task<TResponse> ArchiveCompletedReportAsync<TRequest, TResponse>(
+        string reportName,
+        short profitYear,
         TRequest request,
-        TReport report,
+        Func<TRequest, CancellationToken, Task<TResponse>> reportFunction,
         CancellationToken cancellationToken)
-        where TReport : class where TRequest : IProfitYearRequest;
+        where TResponse : class
+        where TRequest : PaginationRequestDto;
 }

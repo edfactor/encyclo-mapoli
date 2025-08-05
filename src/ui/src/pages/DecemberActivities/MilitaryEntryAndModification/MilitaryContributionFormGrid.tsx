@@ -8,6 +8,7 @@ import MasterInquiryEmployeeDetails from "../../MasterInquiry/MasterInquiryEmplo
 import { GetMilitaryContributionColumns } from "./MilitaryContributionFormGridColumns";
 import { CAPTIONS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import {MissiveAlertProvider} from "../../MasterInquiry/MissiveAlertContext";
 
 interface MilitaryContributionGridProps {
   initialSearchLoaded: boolean;
@@ -70,15 +71,17 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
   const columnDefs = useMemo(() => GetMilitaryContributionColumns(), []);
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
-
+  
   return (
     <>
       {masterInquiryEmployeeDetails && profitYear > 0 && (
-        <MasterInquiryEmployeeDetails
-          memberType={masterInquiryEmployeeDetails.isEmployee ? 1 : 2}
-          id={masterInquiryEmployeeDetails.id}
-          profitYear={profitYear}
-        />
+          <MissiveAlertProvider>
+            <MasterInquiryEmployeeDetails
+              memberType={masterInquiryEmployeeDetails.isEmployee ? 1 : 2}
+              id={masterInquiryEmployeeDetails.id}
+              profitYear={profitYear}
+            />
+          </MissiveAlertProvider>
       )}
 
       {militaryContributionsData && (

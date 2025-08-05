@@ -3,20 +3,26 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Demoulas.ProfitSharing.Common.Attributes;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 public sealed record YearEndProfitSharingReportTotals
 {
+    [YearEndArchiveProperty]
     public decimal WagesTotal { get; set; }
+    [YearEndArchiveProperty]
     public decimal HoursTotal { get; set; }
+    [YearEndArchiveProperty]
     public decimal PointsTotal { get; set; }
     public decimal TerminatedWagesTotal { get; set; }
     public decimal TerminatedHoursTotal { get; set; }
+    [YearEndArchiveProperty]
     public long NumberOfEmployees { get; set; }
     public int NumberOfNewEmployees { get; set; }
     public int NumberOfEmployeesUnder21 { get; set; }
     public long NumberOfEmployeesInPlan { get => NumberOfEmployees - NumberOfNewEmployees - NumberOfEmployeesUnder21; }
     public decimal TerminatedPointsTotal { get; set; }
+    [YearEndArchiveProperty]
     public decimal BalanceTotal { get; set; }
     public decimal TerminatedBalanceTotal { get; set; }
 
