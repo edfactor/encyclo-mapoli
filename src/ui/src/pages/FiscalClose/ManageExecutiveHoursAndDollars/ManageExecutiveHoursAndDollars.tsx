@@ -10,6 +10,8 @@ import { clearExecutiveHoursAndDollarsGridRows } from "reduxstore/slices/yearsEn
 import { useUpdateExecutiveHoursAndDollarsMutation } from "reduxstore/api/YearsEndApi";
 import { useState } from "react";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
+import { CAPTIONS } from "../../../constants";
+
 
 const RenderSaveButton = () => {
   const dispatch = useDispatch();
@@ -70,7 +72,7 @@ const ManageExecutiveHoursAndDollars = () => {
 
   return (
     <Page
-      label="Manage Executive Hours And Dollars"
+      label={CAPTIONS.MANAGE_EXECUTIVE_HOURS}
       actionNode={renderActionNode()}>
       <Grid
         container
