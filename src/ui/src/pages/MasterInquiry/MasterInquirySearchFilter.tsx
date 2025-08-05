@@ -30,7 +30,7 @@ import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 import { memberTypeGetNumberMap, paymentTypeGetNumberMap } from "./MasterInquiryFunctions";
-import { useMissiveAlerts } from "./MissiveAlertContext";
+import { useMissiveAlerts } from "./useMissiveAlerts";
 
 const schema = yup.object().shape({
   endProfitYear: yup
@@ -67,7 +67,13 @@ const schema = yup.object().shape({
     .max(999999999, "SSN must be 9 digits or less")
     .nullable(),
   name: yup.string().nullable(),
-  badgeNumber: yup.number().nullable(),
+  badgeNumber: yup
+    .number()
+    .typeError("Badge number must be a number")
+    .integer("Badge number must be an integer")
+    .min(0, "Badge number must be positive")
+    .max(99999999999, "Badge number must be 11 digits or less")
+    .nullable(),
   comment: yup.string().nullable(),
   paymentType: yup.string().oneOf(["all", "hardship", "payoffs", "rollovers"]).default("all").required(),
   memberType: yup.string().oneOf(["all", "employees", "beneficiaries", "none"]).default("all").required(),
@@ -360,6 +366,10 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
               value={field.value ?? ""}
               error={!!errors[name]}
               onChange={(e) => {
+                // Prevent input beyond 11 characters for badgeNumber
+                if (name === "badgeNumber" && e.target.value.length > 11) {
+                  return;
+                }
                 const parsedValue =
                   type === "number" && e.target.value !== ""
                     ? Number(e.target.value)

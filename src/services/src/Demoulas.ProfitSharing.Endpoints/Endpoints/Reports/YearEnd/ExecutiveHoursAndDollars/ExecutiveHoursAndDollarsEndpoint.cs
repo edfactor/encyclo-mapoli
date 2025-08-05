@@ -28,7 +28,7 @@ public class ExecutiveHoursAndDollarsEndpoint :
         Get("executive-hours-and-dollars");
         Summary(s =>
         {
-            s.Summary = "Executive Hours and Dollars Endpoint";
+            s.Summary = ReportFileName;
             s.Description =
                 "The Executive Hours and Dollars Endpoint endpoint produces a list of executives with hours and dollars.";
 
@@ -41,20 +41,13 @@ public class ExecutiveHoursAndDollarsEndpoint :
 
     public override string ReportFileName => "Executive Hours and Dollars";
 
-    public override async Task<ReportResponseBase<ExecutiveHoursAndDollarsResponse>> GetResponse(ExecutiveHoursAndDollarsRequest req, CancellationToken ct)
+    public override Task<ReportResponseBase<ExecutiveHoursAndDollarsResponse>> GetResponse(ExecutiveHoursAndDollarsRequest req, CancellationToken ct)
     {
-        ReportResponseBase<ExecutiveHoursAndDollarsResponse> response = await _reportService.GetExecutiveHoursAndDollarsReportAsync(req, ct);
-
-        // Read "archive" from query string without modifying the DTO
-        bool archive = (HttpContext?.Request?.Query?.TryGetValue("archive", out var archiveValue) ?? false) &&
-                       bool.TryParse(archiveValue, out var archiveResult) && archiveResult;
-
-        if (archive)
-        {
-            await _auditService.ArchiveCompletedReportAsync(response.ReportName, req, response, ct);
-        }
-
-        return response;
+        return _auditService.ArchiveCompletedReportAsync(ReportFileName,
+            req.ProfitYear,
+            req,
+            (archiveReq, cancellationToken) => _reportService.GetExecutiveHoursAndDollarsReportAsync(archiveReq, cancellationToken), 
+            ct);
     }
 
     public sealed class ExecutiveHoursAndDollarsMap : ClassMap<ExecutiveHoursAndDollarsResponse>

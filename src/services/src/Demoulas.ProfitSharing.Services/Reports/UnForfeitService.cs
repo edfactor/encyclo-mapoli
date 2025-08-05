@@ -28,7 +28,7 @@ public sealed class UnForfeitService : IUnForfeitService
         _totalService = totalService;
     }
 
-    public async Task<ReportResponseBase<RehireForfeituresResponse>> FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYearsAsync(StartAndEndDateRequest req, CancellationToken cancellationToken)
+    public async Task<ReportResponseBase<UnforfeituresResponse>> FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYearsAsync(StartAndEndDateRequest req, CancellationToken cancellationToken)
     {
         var validator = new StartAndEndDateRequestValidator();
         await validator.ValidateAndThrowAsync(req, cancellationToken);
@@ -71,7 +71,7 @@ public sealed class UnForfeitService : IUnForfeitService
                 }
                 into g
                 orderby g.Key.BadgeNumber
-                select new RehireForfeituresResponse
+                select new UnforfeituresResponse
                 {
                     BadgeNumber = g.Key.BadgeNumber,
                     FullName = g.Key.FullName,
@@ -103,7 +103,7 @@ public sealed class UnForfeitService : IUnForfeitService
             return await query.ToPaginationResultsAsync(req, cancellationToken);            
         });
 
-        return new ReportResponseBase<RehireForfeituresResponse>
+        return new ReportResponseBase<UnforfeituresResponse>
         {
             ReportName = "REHIRE'S PROFIT SHARING DATA",
             ReportDate = DateTimeOffset.UtcNow,
