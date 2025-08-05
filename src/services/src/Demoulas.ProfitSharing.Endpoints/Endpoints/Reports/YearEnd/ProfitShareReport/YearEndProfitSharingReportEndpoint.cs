@@ -60,7 +60,7 @@ public class YearEndProfitSharingReportEndpoint: EndpointWithCsvTotalsBase<YearE
     /// </summary>
     public override Task<YearEndProfitSharingReportResponse> GetResponse(YearEndProfitSharingReportRequest req, CancellationToken ct)
     {
-        return _auditService.ArchiveCompletedReportAsync<YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse, YearEndProfitSharingReportDetail>(
+        return _auditService.ArchiveCompletedReportAsync(
             Report_Name,
             req.ProfitYear,
             req,

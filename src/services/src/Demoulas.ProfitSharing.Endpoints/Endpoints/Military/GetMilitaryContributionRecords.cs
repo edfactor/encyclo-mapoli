@@ -36,22 +36,15 @@ public class GetMilitaryContributionRecords : Endpoint<MilitaryContributionReque
 
     public override async Task<Results<Ok<PaginatedResponseDto<MilitaryContributionResponse>>, ProblemHttpResult>> ExecuteAsync(MilitaryContributionRequest req, CancellationToken ct)
     {
-        var response = await _militaryService.GetMilitaryServiceRecordAsync(req, ct);
+        var response = await _auditService.ArchiveCompletedReportAsync(ReportName,
+            req.ProfitYear,
+            req,
+            (archiveReq, cancellationToken) => _militaryService.GetMilitaryServiceRecordAsync(archiveReq, cancellationToken),
+            ct);
 
-        return await response.Match<Task<Results<Ok<PaginatedResponseDto<MilitaryContributionResponse>>, ProblemHttpResult>>>(
-            async success =>
-            {
-                // Read "archive" from query string without modifying the DTO
-                bool archive = (HttpContext?.Request?.Query?.TryGetValue("archive", out var archiveValue) ?? false) &&
-                               bool.TryParse(archiveValue, out var archiveResult) && archiveResult;
-
-                if (archive)
-                {
-                    await _auditService.ArchiveCompletedReportAsync(ReportName, req, success, ct);
-                }
-                return TypedResults.Ok(success);
-            },
-            error => Task.FromResult<Results<Ok<PaginatedResponseDto<MilitaryContributionResponse>>, ProblemHttpResult>>(TypedResults.Problem(error))
+        return response.Match<Results<Ok<PaginatedResponseDto<MilitaryContributionResponse>>, ProblemHttpResult>>(
+            success => TypedResults.Ok(success),
+            error => TypedResults.Problem(error)
         );
     }
 }
