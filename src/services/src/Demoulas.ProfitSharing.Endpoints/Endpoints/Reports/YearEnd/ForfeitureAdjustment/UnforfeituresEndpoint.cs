@@ -62,7 +62,7 @@ public class UnforfeituresEndpoint :
 
     public override async Task<ReportResponseBase<UnforfeituresResponse>> GetResponse(StartAndEndDateRequest req, CancellationToken ct)
     {
-        var response = await _reportService.FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYearsAsync(req, ct);
+        return _auditService.ArchiveCompletedReportAsync<YearEndProfitSharingReportRequest, YearEndProfitSharingReportResponse, YearEndProfitSharingReportDetail>(
 
         // Read "archive" from query string without modifying the DTO
         bool archive = (HttpContext?.Request?.Query?.TryGetValue("archive", out var archiveValue) ?? false) &&
