@@ -5,7 +5,7 @@ import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useFinalizeReportMutation, useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
+import { useFinalizeReportMutation, useLazyGetYearEndProfitSharingReportTotalsQuery} from "reduxstore/api/YearsEndApi";
 import { setYearEndProfitSharingReportQueryParams } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import { Page, SmartModal, DSMAccordion } from "smart-ui-library";
@@ -19,39 +19,23 @@ const ProfitShareReport = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPresetParams, setSelectedPresetParams] = useState<FilterParams | null>(null);
 
-  const { yearEndProfitSharingReport } = useSelector((state: RootState) => state.yearsEnd);
+  const { yearEndProfitSharingReportTotals } = useSelector((state: RootState) => state.yearsEnd);
   const hasToken = !!useSelector((state: RootState) => state.security.token);
   const profitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
-  const [triggerSearch] = useLazyGetYearEndProfitSharingReportQuery();
+  const [triggerSearch] = useLazyGetYearEndProfitSharingReportTotalsQuery();
   const [finalizeReport, { isLoading: isFinalizing }] = useFinalizeReportMutation();
 
   useEffect(() => {
     if (hasToken && profitYear && !initialDataLoaded) {
-      const request = {
-        reportId: 4,
+      
+      const totalsRequest = {
         profitYear: profitYear,
-        isYearEnd: false,
-        minimumAgeInclusive: 18,
-        maximumAgeInclusive: 98,
-        minimumHoursInclusive: 1000,
-        maximumHoursInclusive: 2000,
-        includeActiveEmployees: true,
-        includeInactiveEmployees: true,
-        includeEmployeesTerminatedThisYear: false,
-        includeTerminatedEmployees: true,
-        includeBeneficiaries: false,
-        includeEmployeesWithPriorProfitSharingAmounts: true,
-        includeEmployeesWithNoPriorProfitSharingAmounts: true,
-        pagination: {
-          skip: 0,
-          take: 10,
-          sortBy: "badgeNumber",
-          isSortDescending: true
-        }
-      };
+        useFrozenData: true,
+        badgeNumber: null,
+      }
 
-      triggerSearch(request, false)
+      triggerSearch(totalsRequest, false)
         .then((result) => {
           if (result.data) {
             dispatch(setYearEndProfitSharingReportQueryParams(profitYear));
@@ -59,7 +43,7 @@ const ProfitShareReport = () => {
           }
         })
         .catch((error) => {
-          console.error("Initial search failed:", error);
+          console.error("Initial totals search failed:", error);
         });
     }
   }, [hasToken, profitYear, initialDataLoaded, triggerSearch, dispatch]);
@@ -86,31 +70,14 @@ const ProfitShareReport = () => {
   const handleStatusChange = (newStatus: string, statusName?: string) => {
     // Check if the status is "Complete" and trigger search with archive=true
     if (statusName === "Complete" && profitYear) {
-      const request = {
-        reportId: 4,
+      const totalsRequest = {
         profitYear: profitYear,
-        isYearEnd: false,
-        minimumAgeInclusive: 18,
-        maximumAgeInclusive: 98,
-        minimumHoursInclusive: 1000,
-        maximumHoursInclusive: 2000,
-        includeActiveEmployees: true,
-        includeInactiveEmployees: true,
-        includeEmployeesTerminatedThisYear: false,
-        includeTerminatedEmployees: true,
-        includeBeneficiaries: false,
-        includeEmployeesWithPriorProfitSharingAmounts: true,
-        includeEmployeesWithNoPriorProfitSharingAmounts: true,
-        pagination: {
-          skip: 0,
-          take: 10,
-          sortBy: "badgeNumber",
-          isSortDescending: true
-        },
-        archive: true
-      };
+        useFrozenData: true,
+        badgeNumber: null,
+        archive: true,
+      }
 
-      triggerSearch(request, false)
+      triggerSearch(totalsRequest, false)
         .then((result) => {
           if (result.data) {
             dispatch(setYearEndProfitSharingReportQueryParams(profitYear));
@@ -127,7 +94,7 @@ const ProfitShareReport = () => {
   }, [selectedPresetParams]);
 
   const renderActionNode = () => {
-    if (!initialDataLoaded || !yearEndProfitSharingReport) return null;
+    if (!initialDataLoaded || !yearEndProfitSharingReportTotals) return null;
 
     return (
       <div className="flex items-center gap-2 h-10">
@@ -162,9 +129,9 @@ const ProfitShareReport = () => {
               </Typography>
             </div>
 
-            {yearEndProfitSharingReport && (
+            {yearEndProfitSharingReportTotals && (
               <Box sx={{ px: 3, mt: 2 }}>
-                <ProfitShareTotalsDisplay data={yearEndProfitSharingReport} />
+                <ProfitShareTotalsDisplay totalsData={yearEndProfitSharingReportTotals} />
               </Box>
             )}
           </Box>

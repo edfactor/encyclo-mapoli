@@ -53,6 +53,7 @@ import {
   UpdateSummaryResponse,
   VestedAmountsByAge,
   YearEndProfitSharingReportResponse,
+  YearEndProfitSharingReportTotalsResponse,
   YearEndProfitSharingReportSummaryResponse
 } from "reduxstore/types";
 import { Paged } from "smart-ui-library";
@@ -131,6 +132,7 @@ export interface YearsEndState {
   vestedAmountsByAgeQueryParams: ProfitYearRequest | null;
   yearEndProfitSharingReport: YearEndProfitSharingReportResponse | null;
   yearEndProfitSharingReportQueryParams: ProfitYearRequest | null;
+  yearEndProfitSharingReportTotals: YearEndProfitSharingReportTotalsResponse | null;
   breakdownByStore: BreakdownByStoreResponse | null;
   breakdownByStoreMangement: BreakdownByStoreResponse | null;
   breakdownByStoreTotals: BreakdownByStoreTotals | null;
@@ -227,6 +229,7 @@ const initialState: YearsEndState = {
   vestedAmountsByAgeQueryParams: null,
   yearEndProfitSharingReport: null,
   yearEndProfitSharingReportQueryParams: null,
+  yearEndProfitSharingReportTotals: null,
   breakdownByStore: null,
   breakdownByStoreMangement: null,
   breakdownByStoreTotals: null,
@@ -921,6 +924,12 @@ export const yearsEndSlice = createSlice({
     clearYearEndProfitSharingReportQueryParams: (state) => {
       state.yearEndProfitSharingReportQueryParams = null;
     },
+    clearYearEndProfitSharingReportTotals: (state) => {
+      state.yearEndProfitSharingReportTotals = null;
+    },
+    setYearEndProfitSharingReportTotals: (state, action: PayloadAction<YearEndProfitSharingReportTotalsResponse>) => {
+      state.yearEndProfitSharingReportTotals = action.payload;
+    },
     setBreakdownByStore: (state, action: PayloadAction<BreakdownByStoreResponse>) => {
       state.breakdownByStore = action.payload;
     },
@@ -1035,6 +1044,7 @@ export const {
   clearRehireForfeituresDetails,
   clearRehireForfeituresQueryParams,
   clearYearEndProfitSharingReport,
+  clearYearEndProfitSharingReportTotals,
   removeExecutiveHoursAndDollarsGridRow,
   setAdditionalExecutivesChosen,
   setAdditionalExecutivesGrid,
@@ -1078,6 +1088,7 @@ export const {
   setVestedAmountsByAgeQueryParams,
   setYearEndProfitSharingReport,
   setYearEndProfitSharingReportQueryParams,
+  setYearEndProfitSharingReportTotals,
   updateExecutiveHoursAndDollarsGridRow,
   setBreakdownByStore,
   clearBreakdownByStore,
@@ -1106,6 +1117,7 @@ export const {
   setProfitSharingEdit,
   clearProfitSharingEdit,
   clearProfitMasterRevert,
+  clearTermination,
   setProfitSharingUpdateQueryParams,
   clearProfitSharingUpdateQueryParams,
   setProfitSharingEditQueryParams,

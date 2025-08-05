@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import { Grid } from "@mui/material";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
-import React, { useEffect } from "react";
+import React, { useEffect, useCallback, useMemo, memo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
@@ -30,6 +30,7 @@ import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 import { memberTypeGetNumberMap, paymentTypeGetNumberMap } from "./MasterInquiryFunctions";
+import { useMissiveAlerts } from "./MissiveAlertContext";
 
 const schema = yup.object().shape({
   endProfitYear: yup
@@ -89,6 +90,7 @@ interface MasterInquirySearchFilterProps {
 const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ setInitialSearchLoaded, onSearch }) => {
   const [triggerSearch, { isFetching }] = useLazySearchProfitMasterInquiryQuery();
   const { masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
+  const { clearAlerts } = useMissiveAlerts();
 
   const dispatch = useDispatch();
 
@@ -146,6 +148,8 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
         badgeNumber: Number(badgeNumber)
       });
 
+      clearAlerts(); // Clear existing alerts
+
       const searchParams: MasterInquiryRequest = {
         pagination: { skip: 0, take: 5, sortBy: "badgeNumber", isSortDescending: true },
         badgeNumber: Number(badgeNumber),
@@ -174,61 +178,84 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
     }
   }, [badgeNumber, hasToken, reset, triggerSearch, profitYear]);
 
-  const validateAndSearch = handleSubmit((data) => {
-    if (isValid) {
-      // Create a unique timestamp to ensure each search is treated as new
-      const timestamp = Date.now();
+  const selectSx = useMemo(
+    () => ({
+      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+        borderColor: "#0258A5"
+      },
+      "&:hover .MuiOutlinedInput-notchedOutline": {
+        borderColor: "#0258A5"
+      }
+    }),
+    []
+  );
 
-      const searchParams: MasterInquiryRequest = {
-        pagination: {
-          skip: data.pagination?.skip || 0,
-          take: data.pagination?.take || 5,
-          sortBy: data.pagination?.sortBy || "badgeNumber",
-          isSortDescending: data.pagination?.isSortDescending || true
-        },
-        endProfitYear: data.endProfitYear ?? profitYear,
-        ...(!!data.startProfitMonth && { startProfitMonth: data.startProfitMonth }),
-        ...(!!data.endProfitMonth && { endProfitMonth: data.endProfitMonth }),
-        ...(!!data.socialSecurity && { ssn: data.socialSecurity }),
-        ...(!!data.name && { name: data.name }),
-        ...(!!data.badgeNumber && { badgeNumber: data.badgeNumber }),
-        ...(!!data.paymentType && { paymentType: paymentTypeGetNumberMap[data.paymentType] }),
-        ...(!!data.memberType && { memberType: memberTypeGetNumberMap[data.memberType] }),
-        ...(!!data.contribution && { contributionAmount: data.contribution }),
-        ...(!!data.earnings && { earningsAmount: data.earnings }),
-        ...(!!data.forfeiture && { forfeitureAmount: data.forfeiture }),
-        ...(!!data.payment && { paymentAmount: data.payment }),
-        // Add a unique timestamp field to force React to see this as a new object
-        _timestamp: timestamp
-      };
+  const months = useMemo(() => Array.from({ length: 12 }, (_, i) => i + 1), []);
 
-      // Clear existing state first
-      setInitialSearchLoaded(false);
+  const validateAndSearch = useCallback(
+    handleSubmit((data) => {
+      if (isValid) {
+        // clear missives
+        clearAlerts();
 
-      // Set new search parameters immediately
-      onSearch(searchParams);
+        // Create a unique timestamp to ensure each search is treated as new
+        const timestamp = Date.now();
 
-      triggerSearch(searchParams, false)
-        .unwrap()
-        .then((response) => {
-          // Update loaded state based on response
+        const searchParams: MasterInquiryRequest = {
+          pagination: {
+            skip: data.pagination?.skip || 0,
+            take: data.pagination?.take || 5,
+            sortBy: data.pagination?.sortBy || "badgeNumber",
+            isSortDescending: data.pagination?.isSortDescending || true
+          },
+          endProfitYear: data.endProfitYear ?? profitYear,
+          ...(!!data.startProfitMonth && { startProfitMonth: data.startProfitMonth }),
+          ...(!!data.endProfitMonth && { endProfitMonth: data.endProfitMonth }),
+          ...(!!data.socialSecurity && { ssn: data.socialSecurity }),
+          ...(!!data.name && { name: data.name }),
+          ...(!!data.badgeNumber && { badgeNumber: data.badgeNumber }),
+          ...(!!data.paymentType && { paymentType: paymentTypeGetNumberMap[data.paymentType] }),
+          ...(!!data.memberType && { memberType: memberTypeGetNumberMap[data.memberType] }),
+          ...(!!data.contribution && { contributionAmount: data.contribution }),
+          ...(!!data.earnings && { earningsAmount: data.earnings }),
+          ...(!!data.forfeiture && { forfeitureAmount: data.forfeiture }),
+          ...(!!data.payment && { paymentAmount: data.payment }),
+          // Add a unique timestamp field to force React to see this as a new object
+          _timestamp: timestamp
+        };
 
-          if (
-            response && Array.isArray(response) ? response.length > 0 : response.results && response.results.length > 0
-          ) {
-            setInitialSearchLoaded(true);
-          } else {
-            setInitialSearchLoaded(false);
-            // Don't call onSearch(undefined) here as it clears searchParams 
-            // and causes the grid to disappear. The grid itself handles no results.
-          }
-        });
+        // Clear existing state first
+        setInitialSearchLoaded(false);
 
-      dispatch(setMasterInquiryRequestParams(data));
-    }
-  });
+        // Set new search parameters immediately
+        onSearch(searchParams);
 
-  const handleReset = () => {
+        triggerSearch(searchParams, false)
+          .unwrap()
+          .then((response) => {
+            // Update loaded state based on response
+            if (
+              response && Array.isArray(response)
+                ? response.length > 0
+                : response.results && response.results.length > 0
+            ) {
+              setInitialSearchLoaded(true);
+            } else {
+              setInitialSearchLoaded(false);
+              // Don't call onSearch(undefined) here as it clears searchParams
+              // and causes the grid to disappear. The grid itself handles no results.
+              onSearch(undefined);
+            }
+          });
+
+        dispatch(setMasterInquiryRequestParams(data));
+      }
+    }),
+    [handleSubmit, isValid, clearAlerts, profitYear, setInitialSearchLoaded, onSearch, triggerSearch, dispatch]
+  );
+
+  const handleReset = useCallback(() => {
+    clearAlerts();
     setInitialSearchLoaded(false);
     dispatch(clearMasterInquiryRequestParams());
     dispatch(clearMasterInquiryData());
@@ -254,21 +281,182 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
         isSortDescending: true
       }
     });
-    // Instead of setting searchParams to undefined, pass null
-    // to avoid showing the "no results" message
-    onSearch(undefined);
-  };
+    // Clear search state and noResults flag
+    onSearch(null);
+  }, [clearAlerts, setInitialSearchLoaded, dispatch, reset, profitYear, onSearch]);
 
-  const months = Array.from({ length: 12 }, (_, i) => i + 1);
+  // Memoized form field components
+  const ProfitYearField = memo(() => (
+    <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+      <Controller
+        name="endProfitYear"
+        control={control}
+        render={({ field }) => (
+          <DsmDatePicker
+            id="Profit Year"
+            onChange={(value: Date | null) => field.onChange(value?.getFullYear() || undefined)}
+            value={field.value ? new Date(field.value, 0) : null}
+            required={true}
+            label="Profit Year"
+            disableFuture
+            views={["year"]}
+            minDate={new Date(2020, 0)}
+            error={errors.endProfitYear?.message}
+          />
+        )}
+      />
+      {errors.endProfitYear && <FormHelperText error>{errors.endProfitYear.message}</FormHelperText>}
+    </Grid>
+  ));
 
-  const selectSx = {
-    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-      borderColor: "#0258A5"
-    },
-    "&:hover .MuiOutlinedInput-notchedOutline": {
-      borderColor: "#0258A5"
-    }
-  };
+  const MonthSelectField = memo(({ name, label }: { name: "startProfitMonth" | "endProfitMonth"; label: string }) => (
+    <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+      <FormLabel>{label}</FormLabel>
+      <Controller
+        name={name}
+        control={control}
+        render={({ field }) => (
+          <Select
+            {...field}
+            onChange={(e) => {
+              field.onChange(e.target.value === undefined ? null : e.target.value);
+            }}
+            sx={selectSx}
+            fullWidth
+            size="small"
+            value={field.value ?? ""}
+            error={!!errors[name]}>
+            <MenuItem value="">
+              <em>None</em>
+            </MenuItem>
+            {months.map((month) => (
+              <MenuItem
+                key={month}
+                value={month}>
+                {month}
+              </MenuItem>
+            ))}
+          </Select>
+        )}
+      />
+      {errors[name] && <FormHelperText error>{errors[name]?.message}</FormHelperText>}
+    </Grid>
+  ));
+
+  const TextInputField = memo(
+    ({ name, label, type = "text" }: { name: keyof MasterInquirySearch; label: string; type?: string }) => (
+      <Grid size={{ xs: 12, sm: 6, md: type === "number" ? 2 : 4 }}>
+        <FormLabel>{label}</FormLabel>
+        <Controller
+          name={name}
+          control={control}
+          render={({ field }) => (
+            <TextField
+              {...field}
+              fullWidth
+              type={type}
+              size="small"
+              variant="outlined"
+              value={field.value ?? ""}
+              error={!!errors[name]}
+              onChange={(e) => {
+                const parsedValue =
+                  type === "number" && e.target.value !== ""
+                    ? Number(e.target.value)
+                    : e.target.value === ""
+                      ? null
+                      : e.target.value;
+                field.onChange(parsedValue);
+              }}
+            />
+          )}
+        />
+        {errors[name] && <FormHelperText error>{errors[name]?.message}</FormHelperText>}
+      </Grid>
+    )
+  );
+
+  const RadioGroupField = memo(
+    ({
+      name,
+      label,
+      options
+    }: {
+      name: "paymentType" | "memberType";
+      label: string;
+      options: Array<{ value: string; label: string }>;
+    }) => (
+      <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+        <FormControl error={!!errors[name]}>
+          <FormLabel>{label}</FormLabel>
+          <Controller
+            name={name}
+            control={control}
+            render={({ field }) => (
+              <RadioGroup
+                {...field}
+                row>
+                {options.map((option) => (
+                  <FormControlLabel
+                    key={option.value}
+                    value={option.value}
+                    control={<Radio size="small" />}
+                    label={option.label}
+                  />
+                ))}
+              </RadioGroup>
+            )}
+          />
+        </FormControl>
+      </Grid>
+    )
+  );
+
+  const VoidsCheckboxField = memo(() => (
+    <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+      <Controller
+        name="voids"
+        control={control}
+        render={({ field }) => (
+          <FormControlLabel
+            control={
+              <Checkbox
+                {...field}
+                checked={field.value}
+                size="small"
+              />
+            }
+            label="Voids"
+            sx={{
+              marginTop: "20px",
+              height: "40px",
+              display: "flex",
+              alignItems: "center"
+            }}
+          />
+        )}
+      />
+    </Grid>
+  ));
+
+  const paymentTypeOptions = useMemo(
+    () => [
+      { value: "all", label: "All" },
+      { value: "hardship", label: "Hardship/Dis" },
+      { value: "payoffs", label: "Payoffs/Forfeit" },
+      { value: "rollovers", label: "Rollovers" }
+    ],
+    []
+  );
+
+  const memberTypeOptions = useMemo(
+    () => [
+      { value: "all", label: "All" },
+      { value: "employees", label: "Employees" },
+      { value: "beneficiaries", label: "Beneficiaries" }
+    ],
+    []
+  );
 
   return (
     <form onSubmit={validateAndSearch}>
@@ -279,346 +467,60 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
           container
           spacing={3}
           width="100%">
-          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-            <Controller
-              name="endProfitYear"
-              control={control}
-              render={({ field }) => (
-                <DsmDatePicker
-                  id="Profit Year"
-                  onChange={(value: Date | null) => field.onChange(value?.getFullYear() || undefined)}
-                  value={field.value ? new Date(field.value, 0) : null}
-                  required={true}
-                  label="Profit Year"
-                  disableFuture
-                  views={["year"]}
-                  minDate={new Date(2020, 0)}
-                  error={errors.endProfitYear?.message}
-                />
-              )}
-            />
-            {errors.endProfitYear && <FormHelperText error>{errors.endProfitYear.message}</FormHelperText>}
-          </Grid>
-
-          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-            <FormLabel>Beginning Month</FormLabel>
-            <Controller
-              name="startProfitMonth"
-              control={control}
-              render={({ field }) => (
-                <Select
-                  {...field}
-                  onChange={(e) => {
-                    field.onChange(e.target.value === undefined ? null : e.target.value);
-                  }}
-                  sx={selectSx}
-                  fullWidth
-                  size="small"
-                  value={field.value ?? ""}
-                  error={!!errors.startProfitMonth}>
-                  <MenuItem value="">
-                    <em>None</em>
-                  </MenuItem>
-                  {months.map((month) => (
-                    <MenuItem
-                      key={month}
-                      value={month}>
-                      {month}
-                    </MenuItem>
-                  ))}
-                </Select>
-              )}
-            />
-            {errors.startProfitMonth && <FormHelperText error>{errors.startProfitMonth.message}</FormHelperText>}
-          </Grid>
-
-          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-            <FormLabel>Ending Month</FormLabel>
-            <Controller
-              name="endProfitMonth"
-              control={control}
-              render={({ field }) => (
-                <Select
-                  {...field}
-                  onChange={(e) => {
-                    field.onChange(e.target.value === undefined ? null : e.target.value);
-                  }}
-                  sx={selectSx}
-                  fullWidth
-                  size="small"
-                  value={field.value ?? ""}
-                  error={!!errors.endProfitMonth}>
-                  <MenuItem value="">
-                    <em>None</em>
-                  </MenuItem>
-                  {months.map((month) => (
-                    <MenuItem
-                      key={month}
-                      value={month}>
-                      {month}
-                    </MenuItem>
-                  ))}
-                </Select>
-              )}
-            />
-            {errors.endProfitMonth && <FormHelperText error>{errors.endProfitMonth.message}</FormHelperText>}
-          </Grid>
-
-          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-            <FormLabel>Social Security Number</FormLabel>
-            <Controller
-              name="socialSecurity"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  value={field.value ?? ""}
-                  error={!!errors.socialSecurity}
-                  onChange={(e) => {
-                    const parsedValue = e.target.value === "" ? null : Number(e.target.value);
-                    field.onChange(parsedValue);
-                  }}
-                />
-              )}
-            />
-            {errors.socialSecurity && <FormHelperText error>{errors.socialSecurity.message}</FormHelperText>}
-          </Grid>
-
-          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-            <FormLabel>Name</FormLabel>
-            <Controller
-              name="name"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  value={field.value ?? ""}
-                  error={!!errors.name}
-                  onChange={(e) => {
-                    field.onChange(e.target.value);
-                  }}
-                />
-              )}
-            />
-            {errors.name && <FormHelperText error>{errors.name.message}</FormHelperText>}
-          </Grid>
-
-          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-            <FormLabel>Badge/PSN Number</FormLabel>
-            <Controller
-              name="badgeNumber"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  size="small"
-                  variant="outlined"
-                  value={field.value ?? ""}
-                  error={!!errors.badgeNumber}
-                  onChange={(e) => {
-                    const parsedValue = e.target.value === "" ? null : Number(e.target.value);
-                    field.onChange(parsedValue);
-                  }}
-                />
-              )}
-            />
-            {errors.badgeNumber && <FormHelperText error>{errors.badgeNumber.message}</FormHelperText>}
-          </Grid>
-
-          <Grid size={{ xs: 12, sm: 6, md: 6 }}>
-            <FormControl error={!!errors.paymentType}>
-              <FormLabel>Payment Type</FormLabel>
-              <Controller
-                name="paymentType"
-                control={control}
-                render={({ field }) => (
-                  <RadioGroup
-                    {...field}
-                    row>
-                    <FormControlLabel
-                      value="all"
-                      control={<Radio size="small" />}
-                      label="All"
-                    />
-                    <FormControlLabel
-                      value="hardship"
-                      control={<Radio size="small" />}
-                      label="Hardship/Dis"
-                    />
-                    <FormControlLabel
-                      value="payoffs"
-                      control={<Radio size="small" />}
-                      label="Payoffs/Forfeit"
-                    />
-                    <FormControlLabel
-                      value="rollovers"
-                      control={<Radio size="small" />}
-                      label="Rollovers"
-                    />
-                  </RadioGroup>
-                )}
-              />
-            </FormControl>
-          </Grid>
-
-          <Grid size={{ xs: 12, sm: 6, md: 6 }}>
-            <FormControl error={!!errors.memberType}>
-              <FormLabel>Member Type</FormLabel>
-              <Controller
-                name="memberType"
-                control={control}
-                render={({ field }) => (
-                  <RadioGroup
-                    {...field}
-                    row>
-                    <FormControlLabel
-                      value="all"
-                      control={<Radio size="small" />}
-                      label="All"
-                    />
-                    <FormControlLabel
-                      value="employees"
-                      control={<Radio size="small" />}
-                      label="Employees"
-                    />
-                    <FormControlLabel
-                      value="beneficiaries"
-                      control={<Radio size="small" />}
-                      label="Beneficiaries"
-                    />
-                  </RadioGroup>
-                )}
-              />
-            </FormControl>
-          </Grid>
-
-          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-            <FormLabel>Contribution</FormLabel>
-            <Controller
-              name="contribution"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  type="number"
-                  size="small"
-                  variant="outlined"
-                  value={field.value ?? ""}
-                  error={!!errors.contribution}
-                  onChange={(e) => {
-                    const parsedValue = e.target.value === "" ? null : Number(e.target.value);
-                    field.onChange(parsedValue);
-                  }}
-                />
-              )}
-            />
-            {errors.contribution && <FormHelperText error>{errors.contribution.message}</FormHelperText>}
-          </Grid>
-
-          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-            <FormLabel>Earnings</FormLabel>
-            <Controller
-              name="earnings"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  type="number"
-                  size="small"
-                  variant="outlined"
-                  value={field.value ?? ""}
-                  error={!!errors.earnings}
-                  onChange={(e) => {
-                    const parsedValue = e.target.value === "" ? null : Number(e.target.value);
-                    field.onChange(parsedValue);
-                  }}
-                />
-              )}
-            />
-            {errors.earnings && <FormHelperText error>{errors.earnings.message}</FormHelperText>}
-          </Grid>
-
-          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-            <FormLabel>Forfeiture</FormLabel>
-            <Controller
-              name="forfeiture"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  type="number"
-                  size="small"
-                  variant="outlined"
-                  value={field.value ?? ""}
-                  error={!!errors.forfeiture}
-                  onChange={(e) => {
-                    const parsedValue = e.target.value === "" ? null : Number(e.target.value);
-                    field.onChange(parsedValue);
-                  }}
-                />
-              )}
-            />
-            {errors.forfeiture && <FormHelperText error>{errors.forfeiture.message}</FormHelperText>}
-          </Grid>
-
-          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-            <FormLabel>Payment</FormLabel>
-            <Controller
-              name="payment"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  type="number"
-                  size="small"
-                  variant="outlined"
-                  value={field.value ?? ""}
-                  error={!!errors.payment}
-                  onChange={(e) => {
-                    const parsedValue = e.target.value === "" ? null : Number(e.target.value);
-                    field.onChange(parsedValue);
-                  }}
-                />
-              )}
-            />
-            {errors.payment && <FormHelperText error>{errors.payment.message}</FormHelperText>}
-          </Grid>
-
-          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-            <Controller
-              name="voids"
-              control={control}
-              render={({ field }) => (
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      {...field}
-                      checked={field.value}
-                      size="small"
-                    />
-                  }
-                  label="Voids"
-                  sx={{
-                    marginTop: "20px",
-                    height: "40px",
-                    display: "flex",
-                    alignItems: "center"
-                  }}
-                />
-              )}
-            />
-          </Grid>
+          <ProfitYearField />
+          <MonthSelectField
+            name="startProfitMonth"
+            label="Beginning Month"
+          />
+          <MonthSelectField
+            name="endProfitMonth"
+            label="Ending Month"
+          />
+          <TextInputField
+            name="socialSecurity"
+            label="Social Security Number"
+            type="number"
+          />
+          <TextInputField
+            name="name"
+            label="Name"
+          />
+          <TextInputField
+            name="badgeNumber"
+            label="Badge/PSN Number"
+            type="number"
+          />
+          <RadioGroupField
+            name="paymentType"
+            label="Payment Type"
+            options={paymentTypeOptions}
+          />
+          <RadioGroupField
+            name="memberType"
+            label="Member Type"
+            options={memberTypeOptions}
+          />
+          <TextInputField
+            name="contribution"
+            label="Contribution"
+            type="number"
+          />
+          <TextInputField
+            name="earnings"
+            label="Earnings"
+            type="number"
+          />
+          <TextInputField
+            name="forfeiture"
+            label="Forfeiture"
+            type="number"
+          />
+          <TextInputField
+            name="payment"
+            label="Payment"
+            type="number"
+          />
+          <VoidsCheckboxField />
         </Grid>
 
         <Grid
