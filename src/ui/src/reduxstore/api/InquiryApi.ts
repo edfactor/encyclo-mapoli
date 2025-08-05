@@ -14,6 +14,7 @@ const baseQuery = createDataSourceAwareBaseQuery();
 export const InquiryApi = createApi({
   baseQuery: baseQuery,
   reducerPath: "inquiryApi",
+  tagTypes: ['memberDetails'],
   endpoints: (builder) => ({
     // Master Inquiry API endpoints
     searchProfitMasterInquiry: builder.query<Paged<EmployeeDetails>, MasterInquiryRequest>({
@@ -48,7 +49,8 @@ export const InquiryApi = createApi({
         url: "master/master-inquiry/member",
         method: "POST",
         body: params
-      })
+      }),
+      providesTags: ['memberDetails']
     }),
     getProfitMasterInquiryMemberDetails: builder.query<
       Paged<MasterInquiryResponseDto>,
