@@ -240,7 +240,7 @@ export const GetDetailColumns = (
                 const request: ForfeitureAdjustmentUpdateRequest = {
                   badgeNumber: params.data.badgeNumber,
                   profitYear: params.data.profitYear,
-                  forfeitureAmount: -(currentValue || 0)
+                  forfeitureAmount: (currentValue || 0)
                 };
                 await params.onSave(request);
               }
