@@ -1,4 +1,5 @@
-﻿using Demoulas.Common.Contracts.Contracts.Response;
+﻿using System.Dynamic;
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Request.BeneficiaryInquiry;
@@ -6,6 +7,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
+using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -25,6 +27,79 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
         _frozenService = frozenService;
         _totalService = totalService;
     }
+
+    private IQueryable<BeneficiarySearchFilterResponse> GetEmployeeQuery(BeneficiarySearchFilterRequest request, ProfitSharingReadOnlyDbContext context)
+    {
+        var query = context.Demographics.Include(x => x.ContactInfo).Include(x => x.Address)
+            .Where(x =>
+            (request.BadgeNumber == null || x.BadgeNumber == request.BadgeNumber) &&
+            (string.IsNullOrEmpty(request.Name) || x.ContactInfo.FullName.ToLower().Contains(request.Name.ToLower())) &&
+            (string.IsNullOrEmpty(request.Ssn) || x.Ssn.ToString() == request.Ssn)
+            ).Select(x=>new BeneficiarySearchFilterResponse()
+            {
+                Ssn = x.Ssn.ToString(),
+                Age = DateTime.Now.Year - x.DateOfBirth.Year,
+                Badge = x.BadgeNumber,
+                City = x.Address.City,
+                Name = x.ContactInfo.FullName,
+                State = x.Address.State,
+                Street = x.Address.Street,
+                Zip = x.Address.PostalCode
+            });
+
+        return query;
+
+    }
+
+    private IQueryable<BeneficiarySearchFilterResponse> GetBeneficiaryQuery(BeneficiarySearchFilterRequest request, ProfitSharingReadOnlyDbContext context)
+    {
+        var query = context.Beneficiaries.Include(x => x.Contact).ThenInclude(x=>x.Address).Include(x=>x.Contact.ContactInfo)
+            .Where(x =>
+            (request.BadgeNumber == null || x.BadgeNumber == request.BadgeNumber) &&
+            (request.Psn == null || x.PsnSuffix == request.Psn) &&
+            (string.IsNullOrEmpty(request.Name) || x.Contact.ContactInfo.FullName.ToLower().Contains(request.Name.ToLower())) &&
+            (string.IsNullOrEmpty(request.Ssn) || x.Contact.Ssn.ToString() == request.Ssn)
+            ).Select(x => new BeneficiarySearchFilterResponse()
+            {
+                Ssn = x.Contact.Ssn.ToString(),
+                Age = DateTime.Now.Year - x.Contact.DateOfBirth.Year,
+                Badge = x.BadgeNumber,
+                Psn = x.PsnSuffix,
+                City = x.Contact.Address.City,
+                Name = x.Contact.ContactInfo.FullName,
+                State = x.Contact.Address.State,
+                Street = x.Contact.Address.Street,
+                Zip = x.Contact.Address.PostalCode
+            });
+
+        return query;
+
+    }
+
+    public async Task<PaginatedResponseDto<BeneficiarySearchFilterResponse>> BeneficiarySearchFilter(BeneficiarySearchFilterRequest request, CancellationToken cancellation)
+    {
+        var result = await _dataContextFactory.UseReadOnlyContext(context => {
+            IQueryable<BeneficiarySearchFilterResponse> query;
+            switch (request.MemberType)
+            {
+                case "employee": 
+                    query = GetEmployeeQuery(request,context);
+                    break;
+                case "beneficiary":
+                    query = GetBeneficiaryQuery(request,context);
+                    break;
+                default:
+                    query = GetBeneficiaryQuery(request, context);
+                    break;
+            }
+            
+            return query.ToPaginationResultsAsync(request, cancellation);
+        });
+
+        return result;
+    }
+
+
 
     private int StepBackNumber(int num)
     {
