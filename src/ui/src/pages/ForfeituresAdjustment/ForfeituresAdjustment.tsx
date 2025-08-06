@@ -1,7 +1,7 @@
 import { Divider } from "@mui/material";
 import { Grid } from "@mui/material";
 import { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
 import ForfeituresAdjustmentGrid from "./ForfeituresAdjustmentGrid";
@@ -12,6 +12,8 @@ import AddForfeitureModal from "./AddForfeitureModal";
 import { useLazyGetForfeitureAdjustmentsQuery } from "reduxstore/api/YearsEndApi";
 import MasterInquiryEmployeeDetails from "pages/MasterInquiry/MasterInquiryEmployeeDetails";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
+import {MissiveAlertProvider} from "../MasterInquiry/MissiveAlertContext";
+import {InquiryApi} from "../../reduxstore/api/InquiryApi";
 
 const ForfeituresAdjustment = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
@@ -22,6 +24,7 @@ const ForfeituresAdjustment = () => {
   );
   const profitYear = useDecemberFlowProfitYear();
   const [triggerSearch] = useLazyGetForfeitureAdjustmentsQuery();
+  const dispatch = useDispatch()
 
   const renderActionNode = () => {
     return <StatusDropdownActionNode />;
@@ -50,6 +53,7 @@ const ForfeituresAdjustment = () => {
         .catch((error: unknown) => {
           console.error("Error refreshing forfeiture adjustments:", error);
         });
+      dispatch(InquiryApi.util.invalidateTags(['memberDetails']));
     }
   };
 
@@ -87,11 +91,13 @@ const ForfeituresAdjustment = () => {
 
         {/* Only show details if we have forfeitureAdjustmentData and a result */}
         {forfeitureAdjustmentData?.response?.results?.[0] && profitYear && (
-          <MasterInquiryEmployeeDetails
-            memberType={1}
-            id={forfeitureAdjustmentData.response.results[0].demographicId}
-            profitYear={profitYear}
-          />
+            <MissiveAlertProvider>
+              <MasterInquiryEmployeeDetails
+                  memberType={1}
+                  id={forfeitureAdjustmentData.response.results[0].demographicId}
+                  profitYear={profitYear}
+              />
+            </MissiveAlertProvider>
         )}
 
         <Grid width="100%">

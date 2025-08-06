@@ -7,7 +7,8 @@ import MasterInquiryGrid from "./MasterInquiryDetailsGrid";
 import MasterInquiryEmployeeDetails from "./MasterInquiryEmployeeDetails";
 import MasterInquiryMemberGrid from "./MasterInquiryMemberGrid";
 import MasterInquirySearchFilter from "./MasterInquirySearchFilter";
-import { MissiveAlertProvider, useMissiveAlerts } from "./MissiveAlertContext";
+import { MissiveAlertProvider } from "./MissiveAlertContext";
+import { useMissiveAlerts } from "./useMissiveAlerts";
 
 interface SelectedMember {
   memberType: number;

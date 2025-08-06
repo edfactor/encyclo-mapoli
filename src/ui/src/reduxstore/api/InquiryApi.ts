@@ -14,6 +14,7 @@ const baseQuery = createDataSourceAwareBaseQuery();
 export const InquiryApi = createApi({
   baseQuery: baseQuery,
   reducerPath: "inquiryApi",
+  tagTypes: ["memberDetails"],
   endpoints: (builder) => ({
     // Master Inquiry API endpoints
     searchProfitMasterInquiry: builder.query<Paged<EmployeeDetails>, MasterInquiryRequest>({
@@ -21,8 +22,8 @@ export const InquiryApi = createApi({
         url: "master/master-inquiry/search",
         method: "POST",
         body: {
-          badgeNumber: Number(params.badgeNumber?.toString().substring(0, 6)),
-          psnSuffix: Number(params.badgeNumber?.toString().substring(6)),
+          badgeNumber: Number(params.badgeNumber?.toString().substring(0, 7)),
+          psnSuffix: Number(params.badgeNumber?.toString().substring(7)),
           profitYear: params.profitYear,
           endProfitYear: params.endProfitYear,
           startProfitMonth: params.startProfitMonth,
@@ -48,7 +49,8 @@ export const InquiryApi = createApi({
         url: "master/master-inquiry/member",
         method: "POST",
         body: params
-      })
+      }),
+      providesTags: ["memberDetails"]
     }),
     getProfitMasterInquiryMemberDetails: builder.query<
       Paged<MasterInquiryResponseDto>,

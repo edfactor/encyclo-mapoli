@@ -7,9 +7,12 @@ import { SaveOutlined } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { clearExecutiveHoursAndDollarsGridRows } from "reduxstore/slices/yearsEndSlice";
-import { useUpdateExecutiveHoursAndDollarsMutation } from "reduxstore/api/YearsEndApi";
+import { useUpdateExecutiveHoursAndDollarsMutation, useLazyGetExecutiveHoursAndDollarsQuery } from "reduxstore/api/YearsEndApi";
 import { useState } from "react";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
+import { CAPTIONS } from "../../../constants";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+
 
 const RenderSaveButton = () => {
   const dispatch = useDispatch();
@@ -63,14 +66,47 @@ const RenderSaveButton = () => {
 const ManageExecutiveHoursAndDollars = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [pageNumberReset, setPageNumberReset] = useState(false);
+  const [currentStatus, setCurrentStatus] = useState<string | null>(null);
+  const [triggerExecutiveSearch] = useLazyGetExecutiveHoursAndDollarsQuery();
+  const profitYear = useFiscalCloseProfitYear();
+
+  const handleStatusChange = (newStatus: string, statusName?: string) => {
+    // Only trigger if status is changing TO "Complete" (not already "Complete")
+    if (statusName === "Complete" && currentStatus !== "Complete") {
+      setCurrentStatus("Complete");
+      // Trigger archive call with current search parameters
+      // Note: This would need the current search parameters from the search filter
+      // For now, we'll trigger with minimal parameters and archive=true
+      triggerExecutiveSearch({
+        profitYear: profitYear,
+        hasExecutiveHoursAndDollars: true,
+        isMonthlyPayroll: false,
+        pagination: {
+          skip: 0,
+          take: 25,
+          sortBy: "",
+          isSortDescending: false
+        },
+        archive: true
+      })
+      .then((result: any) => {
+        console.log('Executive hours and dollars archived successfully', result);
+      })
+      .catch((error: any) => {
+        console.error('Error archiving executive hours and dollars:', error);
+      });
+    } else {
+      setCurrentStatus(statusName || newStatus);
+    }
+  };
 
   const renderActionNode = () => {
-    return <StatusDropdownActionNode />;
+    return <StatusDropdownActionNode onStatusChange={handleStatusChange} />;
   };
 
   return (
     <Page
-      label="Manage Executive Hours And Dollars"
+      label={CAPTIONS.MANAGE_EXECUTIVE_HOURS}
       actionNode={renderActionNode()}>
       <Grid
         container

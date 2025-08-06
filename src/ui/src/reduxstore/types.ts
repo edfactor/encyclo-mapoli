@@ -1323,6 +1323,11 @@ export interface BeneficiaryDto {
   currentBalance?: number;
 }
 
+export interface BeneficiaryResponse {
+  beneficiaries: Paged<BeneficiaryDto>,
+  beneficiaryOf: Paged<BeneficiaryDto>
+}
+
 export interface BeneficiaryRequestDto extends SortedPaginationRequestDto {
   badgeNumber?: number;
   psnSuffix?: number;

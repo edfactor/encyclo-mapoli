@@ -14,7 +14,7 @@ import { getEnrolledStatus, getForfeitedStatus } from "../../utils/enrollmentUti
 import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
 import { isSimpleSearch } from "./MasterInquiryFunctions";
 import { MASTER_INQUIRY_MESSAGES } from "./MasterInquiryMessages";
-import { useMissiveAlerts } from "./MissiveAlertContext";
+import { useMissiveAlerts } from "./useMissiveAlerts";
 
 interface MasterInquiryEmployeeDetailsProps {
   memberType: number;

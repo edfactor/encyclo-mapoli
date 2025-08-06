@@ -7,6 +7,7 @@ using CsvHelper.Configuration;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 
@@ -14,10 +15,12 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
 public sealed  class UpdateSummaryReportEndpoint:EndpointWithCsvTotalsBase<FrozenProfitYearRequest, UpdateSummaryReportResponse, UpdateSummaryReportDetail, UpdateSummaryReportEndpoint.UpdateSummaryReportMapper>
 {
     private readonly IFrozenReportService _frozenReportService;
+    private readonly IAuditService _auditService;
 
-    public UpdateSummaryReportEndpoint(IFrozenReportService frozenReportService)
+    public UpdateSummaryReportEndpoint(IFrozenReportService frozenReportService, IAuditService auditService)
     {
         _frozenReportService = frozenReportService;
+        _auditService = auditService;
     }
 
     public override string ReportFileName => "UPDATE SUMMARY FOR PROFIT SHARING";
@@ -43,7 +46,9 @@ public sealed  class UpdateSummaryReportEndpoint:EndpointWithCsvTotalsBase<Froze
 
     public override Task<UpdateSummaryReportResponse> GetResponse(FrozenProfitYearRequest req, CancellationToken ct)
     {
-        return _frozenReportService.GetUpdateSummaryReport(req, ct);
+        return _auditService.ArchiveCompletedReportAsync(ReportFileName, req.ProfitYear, req,
+            (audit, _, cancellationToken) => _frozenReportService.GetUpdateSummaryReport(audit, cancellationToken),
+            ct);
     }
 
 

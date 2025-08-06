@@ -53,9 +53,12 @@ import {
   setUpdateSummary,
   setVestedAmountsByAge,
   setYearEndProfitSharingReport,
-  setYearEndProfitSharingReportTotals,
+  setYearEndProfitSharingReportTotals
 } from "reduxstore/slices/yearsEndSlice";
 import {
+  AdhocBeneficiariesReportRequest,
+  adhocBeneficiariesReportResponse,
+  BadgeNumberRequest,
   BalanceByAge,
   BalanceByYears,
   BreakdownByStoreRequest,
@@ -66,8 +69,8 @@ import {
   ControlSheetResponse,
   DemographicBadgesNotInPayprofitRequestDto,
   DemographicBadgesNotInPayprofitResponse,
-  DistributionsAndForfeitures,
   DistributionsAndForfeituresRequestDto,
+  DistributionsAndForfeitureTotalsResponse,
   DuplicateNameAndBirthday,
   DuplicateNameAndBirthdayRequestDto,
   DuplicateSSNDetail,
@@ -86,7 +89,6 @@ import {
   ForfeitureAdjustmentUpdateRequest,
   ForfeituresAndPoints,
   ForfeituresByAge,
-  BadgeNumberRequest,
   FrozenReportsByAgeRequest,
   FrozenReportsForfeituresAndPointsRequest,
   GrandTotalsByStoreResponseDto,
@@ -96,6 +98,8 @@ import {
   NegativeEtvaForSSNsOnPayProfit,
   NegativeEtvaForSSNsOnPayprofitRequestDto,
   PagedReportResponse,
+  PayBenReportRequest,
+  PayBenReportResponse,
   ProfitMasterStatus,
   ProfitShareEditResponse,
   ProfitShareMasterApplyRequest,
@@ -120,15 +124,13 @@ import {
   YearEndProfitSharingReportRequest,
   YearEndProfitSharingReportResponse,
   YearEndProfitSharingReportSummaryResponse,
-  DistributionsAndForfeitureTotalsResponse,
-  AdhocBeneficiariesReportRequest,
-  adhocBeneficiariesReportResponse,
-  PayBenReportResponse,
-  PayBenReportRequest,
   YearEndProfitSharingReportTotalsResponse
 } from "reduxstore/types";
 import { Paged } from "smart-ui-library";
 import { createDataSourceAwareBaseQuery } from "./api";
+
+// Create intersection type for getUpdateSummary with optional archive
+type UpdateSummaryRequestWithArchive = UpdateSummaryRequest & { archive?: boolean };
 
 import {
   clearForfeitureAdjustmentData,
@@ -446,10 +448,10 @@ export const YearsEndApi = createApi({
     }),
     getExecutiveHoursAndDollars: builder.query<
       PagedReportResponse<ExecutiveHoursAndDollars>,
-      ExecutiveHoursAndDollarsRequestDto
+      ExecutiveHoursAndDollarsRequestDto & { archive?: boolean }
     >({
       query: (params) => ({
-        url: "yearend/executive-hours-and-dollars",
+        url: `yearend/executive-hours-and-dollars${params.archive ? '?archive=true' : ''}`,
         method: "GET",
         params: {
           take: params.pagination.take,
@@ -962,52 +964,54 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getYearEndProfitSharingReport: builder.query<YearEndProfitSharingReportResponse, YearEndProfitSharingReportRequest & { archive?: boolean }>(
-      {
-        query: (params) => ({
-          url: `yearend/yearend-profit-sharing-report${params.archive === true ? '/?archive=true' : ''}`,
-          method: "POST",
-          body: {
-            ...params,
-            take: params.pagination.take,
-            skip: params.pagination.skip,
-            sortBy: params.pagination.sortBy,
-            isSortDescending: params.pagination.isSortDescending
-          }
-        }),
-        async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-          try {
-            dispatch(clearYearEndProfitSharingReport());
-            const { data } = await queryFulfilled;
-            dispatch(setYearEndProfitSharingReport(data));
-          } catch (err) {
-            console.log("Err: " + err);
-            dispatch(clearYearEndProfitSharingReport());
-          }
+    getYearEndProfitSharingReport: builder.query<
+      YearEndProfitSharingReportResponse,
+      YearEndProfitSharingReportRequest & { archive?: boolean }
+    >({
+      query: (params) => ({
+        url: `yearend/yearend-profit-sharing-report${params.archive === true ? "/?archive=true" : ""}`,
+        method: "POST",
+        body: {
+          ...params,
+          take: params.pagination.take,
+          skip: params.pagination.skip,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          dispatch(clearYearEndProfitSharingReport());
+          const { data } = await queryFulfilled;
+          dispatch(setYearEndProfitSharingReport(data));
+        } catch (err) {
+          console.log("Err: " + err);
+          dispatch(clearYearEndProfitSharingReport());
         }
       }
-    ),
-    getYearEndProfitSharingReportTotals: builder.query<YearEndProfitSharingReportTotalsResponse, BadgeNumberRequest & { archive?: boolean }>(
-      {
-        query: (params) => ({
-          url: `yearend/yearend-profit-sharing-report-totals${params.archive === true ? '/?archive=true' : ''}`,
-          method: "POST",
-          body: {
-            ...params,
-          }
-        }),
-        async onQueryStarted(arg, { dispatch, queryFulfilled }) {
-          try {
-            dispatch(clearYearEndProfitSharingReportTotals());
-            const { data } = await queryFulfilled;
-            dispatch(setYearEndProfitSharingReportTotals(data));
-          } catch (err) {
-            console.log("Err: " + err);
-            dispatch(clearYearEndProfitSharingReportTotals());
-          }
+    }),
+    getYearEndProfitSharingReportTotals: builder.query<
+      YearEndProfitSharingReportTotalsResponse,
+      BadgeNumberRequest & { archive?: boolean }
+    >({
+      query: (params) => ({
+        url: `yearend/yearend-profit-sharing-report-totals${params.archive === true ? "/?archive=true" : ""}`,
+        method: "POST",
+        body: {
+          ...params
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          dispatch(clearYearEndProfitSharingReportTotals());
+          const { data } = await queryFulfilled;
+          dispatch(setYearEndProfitSharingReportTotals(data));
+        } catch (err) {
+          console.log("Err: " + err);
+          dispatch(clearYearEndProfitSharingReportTotals());
         }
       }
-    ),
+    }),
     getYearEndProfitSharingSummaryReport: builder.query<YearEndProfitSharingReportSummaryResponse, BadgeNumberRequest>({
       query: (params) => ({
         url: "yearend/yearend-profit-sharing-summary-report",
@@ -1029,7 +1033,7 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getUpdateSummary: builder.query<UpdateSummaryResponse, UpdateSummaryRequest>({
+    getUpdateSummary: builder.query<UpdateSummaryResponse, UpdateSummaryRequestWithArchive>({
       query: (params) => ({
         url: `yearend/frozen/updatesummary`,
         method: "GET",
@@ -1038,7 +1042,8 @@ export const YearsEndApi = createApi({
           take: params.pagination.take,
           skip: params.pagination.skip,
           sortBy: params.pagination.sortBy,
-          isSortDescending: params.pagination.isSortDescending
+          isSortDescending: params.pagination.isSortDescending,
+          ...(params.archive && { archive: params.archive })
         }
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -1095,7 +1100,10 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    updateForfeitureAdjustment: builder.mutation<ForfeitureAdjustmentDetail, ForfeitureAdjustmentUpdateRequest & { suppressAllToastErrors?: boolean, onlyNetworkToastErrors?: boolean }>({
+    updateForfeitureAdjustment: builder.mutation<
+      ForfeitureAdjustmentDetail,
+      ForfeitureAdjustmentUpdateRequest & { suppressAllToastErrors?: boolean; onlyNetworkToastErrors?: boolean }
+    >({
       query: (params) => {
         const { suppressAllToastErrors, onlyNetworkToastErrors, ...requestData } = params;
         return {
@@ -1108,13 +1116,15 @@ export const YearsEndApi = createApi({
       }
     }),
 
-    updateForfeitureAdjustmentBulk: builder.mutation<ForfeitureAdjustmentDetail[], ForfeitureAdjustmentUpdateRequest[]>({
-      query: (params) => ({
-        url: "yearend/forfeiture-adjustments/bulk-update",
-        method: "PUT",
-        body: params
-      })
-    }),
+    updateForfeitureAdjustmentBulk: builder.mutation<ForfeitureAdjustmentDetail[], ForfeitureAdjustmentUpdateRequest[]>(
+      {
+        query: (params) => ({
+          url: "yearend/forfeiture-adjustments/bulk-update",
+          method: "PUT",
+          body: params
+        })
+      }
+    ),
 
     finalizeReport: builder.mutation<void, { profitYear: number }>({
       query: (params) => ({
