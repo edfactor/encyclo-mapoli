@@ -11,6 +11,7 @@ internal static class ContextExtensions
 {
     public static ModelBuilder ApplyModelConfiguration(this ModelBuilder modelBuilder)
     {
+        modelBuilder.ApplyConfiguration(new AnnuityRateMap());
         modelBuilder.ApplyConfiguration(new AuditEventMap());
         modelBuilder.ApplyConfiguration(new FakeSsnMap());
         modelBuilder.ApplyConfiguration(new DataImportRecordMap());

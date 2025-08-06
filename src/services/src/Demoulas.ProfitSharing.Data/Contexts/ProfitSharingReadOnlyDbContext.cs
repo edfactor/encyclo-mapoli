@@ -26,6 +26,7 @@ public class ProfitSharingReadOnlyDbContext : ReadOnlyOracleDbContext<ProfitShar
         ChangeTracker.LazyLoadingEnabled = false;
     }
 
+    public virtual DbSet<AnnuityRate> AnnuityRates { get; set; }
     public virtual DbSet<Demographic> Demographics { get; set; }
     public virtual DbSet<DemographicHistory> DemographicHistories { get; set; }
     public virtual DbSet<EmploymentType> EmploymentTypes { get; set; }
