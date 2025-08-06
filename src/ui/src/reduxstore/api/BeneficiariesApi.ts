@@ -6,6 +6,8 @@ import {
   BeneficiaryKindResponseDto,
   BeneficiaryRequestDto,
   BeneficiaryResponse,
+  BeneficiarySearchFilterRequest,
+  BeneficiarySearchFilterResponse,
   BeneficiaryTypesRequestDto,
   BeneficiaryTypesResponseDto,
   CreateBeneficiaryContactRequest,
@@ -34,6 +36,21 @@ export const BeneficiariesApi = createApi({
         try {
           const { data } = await queryFulfilled;
           //dispatch(setBeneficiary(data));
+        } catch (err) {
+          console.error("Failed to fetch beneficiaries:", err);
+          dispatch(setBeneficiaryError("Failed to fetch beneficiaries"));
+        }
+      }
+    }),
+    beneficiarySearchFilter: builder.query<Paged<BeneficiarySearchFilterResponse>, BeneficiarySearchFilterRequest>({
+      query: (request) => ({
+        url: `/beneficiary/search`,
+        method: "GET",
+        params: request
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
         } catch (err) {
           console.error("Failed to fetch beneficiaries:", err);
           dispatch(setBeneficiaryError("Failed to fetch beneficiaries"));
@@ -135,6 +152,7 @@ export const BeneficiariesApi = createApi({
 });
 
 export const {
+  useLazyBeneficiarySearchFilterQuery,
   useLazyDeleteBeneficiaryQuery,
   useLazyUpdateBeneficiaryQuery,
   useLazyGetBeneficiariesQuery,

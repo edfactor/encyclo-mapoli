@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.BeneficiaryInquiry;
 public record BeneficiarySearchFilterResponse
 {
-    public int Badge { get; set; }
+    public int BadgeNumber { get; set; }
     public int Psn { get; set; }
     public string? Name { get; set; }
     public string? Ssn { get; set; }

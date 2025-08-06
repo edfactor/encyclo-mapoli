@@ -39,7 +39,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
             {
                 Ssn = x.Ssn.ToString(),
                 Age = DateTime.Now.Year - x.DateOfBirth.Year,
-                Badge = x.BadgeNumber,
+                BadgeNumber = x.BadgeNumber,
                 City = x.Address.City,
                 Name = x.ContactInfo.FullName,
                 State = x.Address.State,
@@ -63,7 +63,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
             {
                 Ssn = x.Contact.Ssn.ToString(),
                 Age = DateTime.Now.Year - x.Contact.DateOfBirth.Year,
-                Badge = x.BadgeNumber,
+                BadgeNumber = x.BadgeNumber,
                 Psn = x.PsnSuffix,
                 City = x.Contact.Address.City,
                 Name = x.Contact.ContactInfo.FullName,
