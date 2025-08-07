@@ -1,4 +1,5 @@
-﻿using CsvHelper;
+﻿using System.Text;
+using CsvHelper;
 using CsvHelper.Configuration;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
@@ -6,16 +7,15 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
-using System.Text;
 
-namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.TerminatedEmployeeAndBeneficiary;
+namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.TerminatedEmployees;
 
-public class TerminatedEmployeeAndBeneficiaryDataEndpoint
+public class TerminatedEmployeesEndPoint
     : FastEndpoints.Endpoint<StartAndEndDateRequest, TerminatedEmployeeAndBeneficiaryResponse>
 {
     private readonly ITerminatedEmployeeAndBeneficiaryReportService _terminatedEmployeeAndBeneficiaryReportService;
 
-    public TerminatedEmployeeAndBeneficiaryDataEndpoint(
+    public TerminatedEmployeesEndPoint(
         ITerminatedEmployeeAndBeneficiaryReportService terminatedEmployeeAndBeneficiaryReportService)
     {
         ReportFileName = "TerminatedEmployeeAndBeneficiaryReport.csv";
