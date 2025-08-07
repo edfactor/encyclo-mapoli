@@ -1,12 +1,13 @@
-﻿using Demoulas.ProfitSharing.Data.Entities;
+﻿using Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Base;
+using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
 
-internal sealed class YearEndUpdateStatusMapping : IEntityTypeConfiguration<YearEndUpdateStatus>
+internal sealed class YearEndUpdateStatusMapping : ModifiedBaseMap<YearEndUpdateStatus>
 {
-    public void Configure(EntityTypeBuilder<YearEndUpdateStatus> builder)
+    public override void Configure(EntityTypeBuilder<YearEndUpdateStatus> builder)
     {
         _ = builder.ToTable("YE_UPDATE_STATUS");
         _ = builder.HasKey(e => e.Id);
@@ -25,14 +26,6 @@ internal sealed class YearEndUpdateStatusMapping : IEntityTypeConfiguration<Year
             .HasIndex(e => e.ProfitYear, "IX_YE_UPDATE_STATUS_PROFIT_YEAR")
             .IsUnique();
 
-        _ = builder.Property(e => e.UpdatedTime)
-            .HasColumnName("UPDATED_DATE")
-            .HasColumnType("TIMESTAMP WITH TIME ZONE");
-
-        _ = builder.Property(e => e.UpdatedBy)
-            .HasColumnName("UPDATED_BY")
-            .HasMaxLength(64)
-            .IsRequired();
 
         _ = builder.Property(e => e.BeneficiariesEffected)
             .HasColumnName("BENEFICIARIES_EFFECTED")
@@ -98,5 +91,7 @@ internal sealed class YearEndUpdateStatusMapping : IEntityTypeConfiguration<Year
         _ = builder.Property(e => e.AdjustEarningsSecondaryAmount)
             .HasColumnName("ADJUST_EARNINGS_SECONDARY_AMOUNT")
             .HasPrecision(5, 2); // Usually only pennies
+        
+        base.Configure(builder);
     }
 }
