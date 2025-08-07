@@ -42,7 +42,9 @@ public class ProfitMasterUpdateEndpoint : Endpoint<ProfitShareUpdateRequest, Pro
     {
         ProfitMasterUpdateResponse response = await _auditService.ArchiveCompletedReportAsync("PAY444|PAY447",
             req.ProfitYear,
-            req, async (arditReq, _, cancellationToken) =>
+            req, 
+            isArchiveRequest: true,
+            async (arditReq, _, cancellationToken) =>
             {
                 ProfitMasterUpdateResponse response = await _profitMasterService.Update(arditReq, cancellationToken);
                 await _navigationService.UpdateNavigation(Navigation.Constants.MasterUpdate, NavigationStatus.Constants.Complete, cancellationToken);
