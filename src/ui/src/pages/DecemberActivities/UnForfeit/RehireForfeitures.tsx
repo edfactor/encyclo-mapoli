@@ -24,24 +24,18 @@ const RehireForfeitures = () => {
   const { rehireForfeituresQueryParams } = useSelector((state: RootState) => state.yearsEnd);
 
   const renderActionNode = () => {
-    console.log('renderActionNode called, previousStatus:', previousStatus);
     return (
       <StatusDropdownActionNode
         onStatusChange={(newStatus: string, statusName?: string) => {
-          console.log('*** onStatusChange callback triggered ***', { newStatus, statusName, previousStatus });
-          
           // Check if this is a change TO "Complete" 
           // Trigger archive if: 1) status is "Complete" AND 2) it's different from previous status (or no previous status)
           const isChangingToComplete = statusName === "Complete" && previousStatus !== newStatus;
           const hasSearchBeenPerformed = !!rehireForfeituresQueryParams;
-          console.log('Checking transition:', { statusName, isComplete: statusName === "Complete", differentFromPrevious: previousStatus !== newStatus, isChangingToComplete, hasSearchBeenPerformed, rehireForfeituresQueryParams });
           
           if (isChangingToComplete) {
             if (hasSearchBeenPerformed) {
-              console.log('Setting shouldArchive to true');
               setShouldArchive(true);
             } else {
-              console.log('Search required - showing alert');
               alert("Please perform a search first before changing the status to Complete.");
               return;
             }
@@ -49,7 +43,6 @@ const RehireForfeitures = () => {
           
           // Update the previous status to track further changes
           setPreviousStatus(newStatus);
-          console.log('Updated previous status to:', newStatus);
         }}
       />
     );
@@ -126,9 +119,7 @@ const RehireForfeitures = () => {
   // Auto-trigger search when archive mode is activated
   useEffect(() => {
     if (shouldArchive) {
-      console.log('Auto-triggering search due to archive mode, resetPageFlag before:', resetPageFlag);
       handleSearch();
-      console.log('handleSearch called, resetPageFlag after should change');
     }
   }, [shouldArchive]);
 

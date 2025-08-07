@@ -308,13 +308,6 @@ export const YearsEndApi = createApi({
         const baseUrl = `yearend/unforfeitures/`;
         const url = params.archive ? `${baseUrl}?archive=true` : baseUrl;
         
-        console.log('*** getRehireForfeitures API call ***', { 
-          archive: params.archive, 
-          url,
-          hasArchiveParam: params.archive,
-          fullParams: params 
-        });
-        
         return {
           url,
           method: "POST",

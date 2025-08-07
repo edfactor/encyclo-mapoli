@@ -50,11 +50,6 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
   const selectedProfitYear = useDecemberFlowProfitYear();
   const { rehireForfeitures, rehireForfeituresQueryParams } = useSelector((state: RootState) => state.yearsEnd);
 
-  // Debug logging
-  useEffect(() => {
-    console.log('Grid props changed:', { shouldArchive, rehireForfeituresQueryParams });
-  }, [shouldArchive, rehireForfeituresQueryParams]);
-
   const [triggerSearch, { isFetching }] = useLazyGetRehireForfeituresQuery();
   const [updateForfeitureAdjustmentBulk] = useUpdateForfeitureAdjustmentBulkMutation();
   const [updateForfeitureAdjustment] = useUpdateForfeitureAdjustmentMutation();
@@ -191,9 +186,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
 
   // Effect to handle initial load and pagination changes
   useEffect(() => {
-    console.log('Main search effect triggered:', { initialSearchLoaded, pageNumber, shouldArchive });
     if (initialSearchLoaded) {
-      console.log('Calling performSearch with archive flag:', shouldArchive);
       performSearch(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending);
     }
   }, [initialSearchLoaded, pageNumber, pageSize, sortParams, performSearch]);
@@ -201,14 +194,12 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
   // Effect to handle archive mode search - separate from normal search flow
   useEffect(() => {
     if (shouldArchive && rehireForfeituresQueryParams) {
-      console.log('Archive mode triggered - performing search with archive=true');
       performSearch(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending);
     }
   }, [shouldArchive, rehireForfeituresQueryParams, pageNumber, pageSize, sortParams, performSearch]);
 
   // Reset page number to 0 when resetPageFlag changes
   useEffect(() => {
-    console.log('resetPageFlag changed, setting page to 0');
     setPageNumber(0);
   }, [resetPageFlag]);
 
