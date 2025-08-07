@@ -13,4 +13,14 @@ public interface IAuditService
         CancellationToken cancellationToken)
         where TResponse : class
         where TRequest : PaginationRequestDto;
+
+    Task<TResponse> ArchiveCompletedReportAsync<TRequest, TResponse>(
+        string reportName,
+        short profitYear,
+        TRequest request,
+        bool isArchiveRequest,
+        Func<TRequest, bool, CancellationToken, Task<TResponse>> reportFunction,
+        CancellationToken cancellationToken)
+        where TResponse : class
+        where TRequest : PaginationRequestDto;
 }
