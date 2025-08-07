@@ -14,13 +14,13 @@ namespace Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficia
 /// <summary>
 /// Generates reports for terminated employees and their beneficiaries.
 /// </summary>
-public sealed class TerminatedEmployeeAndBeneficiaryReport
+public sealed class TerminatedEmployeeReportService
 {
     private readonly IProfitSharingDataContextFactory _factory;
     private readonly TotalService _totalService;
     private readonly IDemographicReaderService _demographicReaderService;
 
-    public TerminatedEmployeeAndBeneficiaryReport(IProfitSharingDataContextFactory factory,
+    public TerminatedEmployeeReportService(IProfitSharingDataContextFactory factory,
         TotalService totalService,
         IDemographicReaderService demographicReaderService)
     {
