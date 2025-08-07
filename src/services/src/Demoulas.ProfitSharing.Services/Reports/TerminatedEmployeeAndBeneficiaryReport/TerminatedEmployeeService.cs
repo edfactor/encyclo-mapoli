@@ -6,13 +6,13 @@ using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 
 namespace Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficiaryReport;
 
-public class TerminatedEmployeeAndBeneficiaryReportService : ITerminatedEmployeeAndBeneficiaryReportService
+public class TerminatedEmployeeService : ITerminatedEmployeeService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly TotalService _totalService;
     private readonly IDemographicReaderService _demographicReaderService;
 
-    public TerminatedEmployeeAndBeneficiaryReportService(IProfitSharingDataContextFactory dataContextFactory,
+    public TerminatedEmployeeService(IProfitSharingDataContextFactory dataContextFactory,
         TotalService totalService,
         IDemographicReaderService demographicReaderService)
     {

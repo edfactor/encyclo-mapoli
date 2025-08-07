@@ -2,7 +2,7 @@
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
 namespace Demoulas.ProfitSharing.Common.Interfaces;
-public interface ITerminatedEmployeeAndBeneficiaryReportService
+public interface ITerminatedEmployeeService
 {
     /// <summary>
     /// Generates a report of employees who are terminated (but not retired) and all beneficiaries.
