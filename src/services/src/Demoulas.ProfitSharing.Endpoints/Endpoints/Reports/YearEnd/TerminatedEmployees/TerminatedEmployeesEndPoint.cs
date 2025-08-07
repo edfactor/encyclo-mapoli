@@ -4,6 +4,7 @@ using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
@@ -17,11 +18,14 @@ public class TerminatedEmployeesEndPoint
         TerminatedEmployeesEndPoint.TerminatedEmployeeCsvMap>
 {
     private readonly ITerminatedEmployeeService _terminatedEmployeeService;
+    private readonly IAuditService _auditService;
 
     public TerminatedEmployeesEndPoint(
-        ITerminatedEmployeeService terminatedEmployeeService)
+        ITerminatedEmployeeService terminatedEmployeeService,
+        IAuditService auditService)
     {
         _terminatedEmployeeService = terminatedEmployeeService;
+        _auditService = auditService;
     }
 
     public override string ReportFileName => "TerminatedEmployeeAndBeneficiaryReport";
@@ -71,7 +75,11 @@ public class TerminatedEmployeesEndPoint
 
     public override Task<TerminatedEmployeeAndBeneficiaryResponse> GetResponse(StartAndEndDateRequest req, CancellationToken ct)
     {
-        return _terminatedEmployeeService.GetReportAsync(req, ct);
+        return _auditService.ArchiveCompletedReportAsync(ReportFileName,
+            (short)req.EndingDate.Year,
+            req,
+            (archiveReq, _, cancellationToken) => _terminatedEmployeeService.GetReportAsync(archiveReq, cancellationToken),
+            ct);
     }
 
     protected internal override async Task GenerateCsvContent(CsvWriter csvWriter, TerminatedEmployeeAndBeneficiaryResponse responseWithTotals, CancellationToken cancellationToken)
