@@ -4,6 +4,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
 
@@ -39,12 +40,12 @@ public class ProfitMasterUpdateEndpoint : Endpoint<ProfitShareUpdateRequest, Pro
 
     public override async Task HandleAsync(ProfitShareUpdateRequest req, CancellationToken ct)
     {
-        var response = await _auditService.ArchiveCompletedReportAsync("PAY444|PAY447",
+        ProfitMasterUpdateResponse response = await _auditService.ArchiveCompletedReportAsync("PAY444|PAY447",
             req.ProfitYear,
             req, async (arditReq, _, cancellationToken) =>
             {
                 ProfitMasterUpdateResponse response = await _profitMasterService.Update(arditReq, cancellationToken);
-                await _navigationService.UpdateNavigation(60, 4, cancellationToken);
+                await _navigationService.UpdateNavigation(Navigation.Constants.MasterUpdate, NavigationStatus.Constants.Complete, cancellationToken);
                 return response;
             },
             ct);
