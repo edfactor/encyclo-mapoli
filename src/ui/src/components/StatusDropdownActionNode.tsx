@@ -31,17 +31,22 @@ const StatusDropdownActionNode: React.FC<StatusDropdownActionNodeProps> = ({
   const [triggerUpdate] = useLazyUpdateNavigationStatusQuery();
   const [triggerGetNavigation] = useLazyGetNavigationQuery();
   const handleStatusChange = async (newStatus: string) => {
+    console.log('handleStatusChange called with:', newStatus, 'onStatusChange callback exists:', !!onStatusChange);
+    
+    // Call the parent callback BEFORE the API call so we can detect the transition immediately
+    if (onStatusChange) {
+      const statusName = data?.navigationStatusList?.find(status => status.id === parseInt(newStatus))?.name;
+      console.log('Found status name:', statusName, 'calling onStatusChange');
+      onStatusChange(newStatus, statusName);
+    } else {
+      console.log('No onStatusChange callback provided');
+    }
+    
     const result = await triggerUpdate({ navigationId: navigationObj?.id, statusId: parseInt(newStatus) });
     if (result.data?.isSuccessful) {
       setCurrentStatus(newStatus);
       if (hasToken) {
         triggerGetNavigation({ navigationId: undefined });
-      }
-      
-      // Call the parent callback if provided
-      if (onStatusChange) {
-        const statusName = data?.navigationStatusList?.find(status => status.id === parseInt(newStatus))?.name;
-        onStatusChange(newStatus, statusName);
       }
     }
   };

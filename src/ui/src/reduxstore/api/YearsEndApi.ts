@@ -303,20 +303,32 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getRehireForfeitures: builder.query<PagedReportResponse<MilitaryAndRehireForfeiture>, StartAndEndDateRequest>({
-      query: (params) => ({
-        url: `yearend/unforfeitures/`,
-        method: "POST",
-        body: {
-          beginningDate: params.beginningDate,
-          endingDate: params.endingDate,
-          take: params.pagination.take,
-          skip: params.pagination.skip,
-          sortBy: params.pagination.sortBy,
-          isSortDescending: params.pagination.isSortDescending,
-          excludeZeroBalance: params.excludeZeroBalance || false
-        }
-      }),
+    getRehireForfeitures: builder.query<PagedReportResponse<MilitaryAndRehireForfeiture>, StartAndEndDateRequest & { archive?: boolean }>({
+      query: (params) => {
+        const baseUrl = `yearend/unforfeitures/`;
+        const url = params.archive ? `${baseUrl}?archive=true` : baseUrl;
+        
+        console.log('*** getRehireForfeitures API call ***', { 
+          archive: params.archive, 
+          url,
+          hasArchiveParam: params.archive,
+          fullParams: params 
+        });
+        
+        return {
+          url,
+          method: "POST",
+          body: {
+            beginningDate: params.beginningDate,
+            endingDate: params.endingDate,
+            take: params.pagination.take,
+            skip: params.pagination.skip,
+            sortBy: params.pagination.sortBy,
+            isSortDescending: params.pagination.isSortDescending,
+            excludeZeroBalance: params.excludeZeroBalance || false
+          }
+        };
+      },
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
