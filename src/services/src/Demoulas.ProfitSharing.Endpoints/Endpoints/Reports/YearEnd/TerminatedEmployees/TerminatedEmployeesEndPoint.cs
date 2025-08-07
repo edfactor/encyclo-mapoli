@@ -4,23 +4,31 @@ using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces.Audit;
+using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
-using System.Text;
 
-namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.TerminatedEmployeeAndBeneficiary;
+namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.TerminatedEmployees;
 
-public class TerminatedEmployeeAndBeneficiaryDataEndpoint
-    : FastEndpoints.Endpoint<StartAndEndDateRequest, TerminatedEmployeeAndBeneficiaryResponse>
+public class TerminatedEmployeesEndPoint
+    : EndpointWithCsvTotalsBase<StartAndEndDateRequest, 
+        TerminatedEmployeeAndBeneficiaryResponse, 
+        TerminatedEmployeeAndBeneficiaryDataResponseDto, 
+        TerminatedEmployeesEndPoint.TerminatedEmployeeCsvMap>
 {
-    private readonly ITerminatedEmployeeAndBeneficiaryReportService _terminatedEmployeeAndBeneficiaryReportService;
+    private readonly ITerminatedEmployeeService _terminatedEmployeeService;
+    private readonly IAuditService _auditService;
 
-    public TerminatedEmployeeAndBeneficiaryDataEndpoint(
-        ITerminatedEmployeeAndBeneficiaryReportService terminatedEmployeeAndBeneficiaryReportService)
+    public TerminatedEmployeesEndPoint(
+        ITerminatedEmployeeService terminatedEmployeeService,
+        IAuditService auditService)
     {
-        ReportFileName = "TerminatedEmployeeAndBeneficiaryReport.csv";
-        _terminatedEmployeeAndBeneficiaryReportService = terminatedEmployeeAndBeneficiaryReportService;
+        _terminatedEmployeeService = terminatedEmployeeService;
+        _auditService = auditService;
     }
+
+    public override string ReportFileName => "TerminatedEmployeeAndBeneficiaryReport";
 
     public override void Configure()
     {
@@ -62,35 +70,19 @@ public class TerminatedEmployeeAndBeneficiaryDataEndpoint
             // Parameter documentation is included in the description due to FastEndpoints limitations.
         });
         Group<YearEndGroup>();
+        base.Configure();
     }
 
-    public override async Task HandleAsync(StartAndEndDateRequest req, CancellationToken ct)
+    public override Task<TerminatedEmployeeAndBeneficiaryResponse> GetResponse(StartAndEndDateRequest req, CancellationToken ct)
     {
-        string acceptHeader = HttpContext.Request.Headers.Accept.ToString().ToLower(System.Globalization.CultureInfo.InvariantCulture);
-        if (acceptHeader.Contains("text/csv"))
-        {
-            req = req with { Skip = 0, Take = int.MaxValue };
-        }
-        var response = await _terminatedEmployeeAndBeneficiaryReportService.GetReportAsync(req, ct);
-        if (acceptHeader.Contains("text/csv"))
-        {
-            await using var memoryStream = new MemoryStream();
-            await using (var streamWriter = new StreamWriter(memoryStream, Encoding.UTF8, leaveOpen: true))
-            await using (var csvWriter = new CsvWriter(streamWriter, new CsvConfiguration(System.Globalization.CultureInfo.InvariantCulture) { Delimiter = "," }))
-            {
-                await GenerateCsvContent(csvWriter, response);
-                await streamWriter.FlushAsync(ct);
-            }
-            memoryStream.Position = 0;
-            await Send.StreamAsync(memoryStream, $"{ReportFileName}.csv", contentType: "text/csv", cancellation: ct);
-            return;
-        }
-        await Send.OkAsync(response, ct);
+        return _auditService.ArchiveCompletedReportAsync(ReportFileName,
+            (short)req.EndingDate.Year,
+            req,
+            (archiveReq, _, cancellationToken) => _terminatedEmployeeService.GetReportAsync(archiveReq, cancellationToken),
+            ct);
     }
 
-    public string ReportFileName { get; }
-
-    private static async Task GenerateCsvContent(CsvWriter csvWriter, TerminatedEmployeeAndBeneficiaryResponse responseWithTotals)
+    protected internal override async Task GenerateCsvContent(CsvWriter csvWriter, TerminatedEmployeeAndBeneficiaryResponse responseWithTotals, CancellationToken cancellationToken)
     {
         // Write out totals
         await csvWriter.NextRecordAsync();
@@ -144,6 +136,16 @@ public class TerminatedEmployeeAndBeneficiaryDataEndpoint
                 csvWriter.WriteField(yd.EnrollmentCode);
                 await csvWriter.NextRecordAsync();
             }
+        }
+    }
+
+    public sealed class TerminatedEmployeeCsvMap : ClassMap<TerminatedEmployeeAndBeneficiaryDataResponseDto>
+    {
+        public TerminatedEmployeeCsvMap()
+        {
+            // This ClassMap is required by the base class but won't be used since we override GenerateCsvContent
+            Map(m => m.BadgePSn).Name("BADGE_PSN");
+            Map(m => m.Name).Name("NAME");
         }
     }
 }

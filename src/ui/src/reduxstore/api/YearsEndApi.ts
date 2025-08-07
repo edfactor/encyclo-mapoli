@@ -132,6 +132,9 @@ import { createDataSourceAwareBaseQuery } from "./api";
 // Create intersection type for getUpdateSummary with optional archive
 type UpdateSummaryRequestWithArchive = UpdateSummaryRequest & { archive?: boolean };
 
+// Create intersection type for getTerminationReport with optional archive
+type TerminationRequestWithArchive = StartAndEndDateRequest & { archive?: boolean };
+
 import {
   clearForfeitureAdjustmentData,
   setForfeitureAdjustmentData
@@ -652,10 +655,10 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getTerminationReport: builder.query<TerminationResponse, StartAndEndDateRequest>({
+    getTerminationReport: builder.query<TerminationResponse, TerminationRequestWithArchive>({
       query: (params) => {
         return {
-          url: "yearend/terminated-employees",
+          url: `yearend/terminated-employees${params.archive === true ? "?archive=true" : ""}`,
           method: "POST",
           body: {
             beginningDate: params.beginningDate,

@@ -13,6 +13,7 @@ import { StartAndEndDateRequest } from "../../../reduxstore/types";
 
 export interface TerminationSearchRequest extends StartAndEndDateRequest {
   forfeitureStatus: string;
+  archive?: boolean;
 }
 
 const Termination = () => {
@@ -22,9 +23,16 @@ const Termination = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [resetPageFlag, setResetPageFlag] = useState(false);
   const [shouldBlock, setShouldBlock] = useState(false);
+  const [currentStatus, setCurrentStatus] = useState<string | null>(null);
+  const [archiveMode, setArchiveMode] = useState(false);
 
   const handleSearch = (params: TerminationSearchRequest) => {
-    setSearchParams(params);
+    // Add archive parameter if we're in archive mode
+    const searchParamsWithArchive = {
+      ...params,
+      ...(archiveMode && { archive: true })
+    };
+    setSearchParams(searchParamsWithArchive);
     setInitialSearchLoaded(true);
     setResetPageFlag((prev) => !prev);
   };
@@ -34,8 +42,35 @@ const Termination = () => {
     setShouldBlock(hasChanges);
   };
 
+  const handleStatusChange = (newStatus: string, statusName?: string) => {
+    // Only trigger archive when status is changing TO "Complete" (not already "Complete")
+    if (statusName === "Complete" && currentStatus !== "Complete") {
+      setArchiveMode(true);
+      setCurrentStatus("Complete");
+      
+      // If we have existing search params, trigger a new search with archive=true
+      if (searchParams) {
+        const archivedParams = { ...searchParams, archive: true };
+        setSearchParams(archivedParams);
+        setResetPageFlag((prev) => !prev);
+      }
+    } else {
+      setCurrentStatus(statusName || null);
+      // Reset archive mode if status changes away from "Complete"
+      if (statusName !== "Complete") {
+        setArchiveMode(false);
+        // If we have existing search params, trigger a new search without archive
+        if (searchParams) {
+          const { archive, ...paramsWithoutArchive } = searchParams;
+          setSearchParams(paramsWithoutArchive);
+          setResetPageFlag((prev) => !prev);
+        }
+      }
+    }
+  };
+
   const renderActionNode = () => {
-    return <StatusDropdownActionNode />;
+    return <StatusDropdownActionNode onStatusChange={handleStatusChange} />;
   };
 
   // Set initialSearchLoaded to true when component mounts
@@ -46,6 +81,12 @@ const Termination = () => {
   useEffect(() => {
     fetchAccountingRange();
   }, [fetchAccountingRange]);
+
+  // Initialize current status from StatusDropdownActionNode
+  useEffect(() => {
+    // This effect will be triggered when the StatusDropdownActionNode's status is initially loaded
+    // The handleStatusChange will be called with the initial status
+  }, []);
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
