@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System.Reflection;
+using System.Security.Cryptography;
 using System.Text.Json;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
@@ -84,8 +85,22 @@ public sealed class AuditService : IAuditService
     {
         var result = new List<KeyValuePair<string, decimal>>();
         var type = obj.GetType();
-        var properties = type.GetProperties()
-            .Where(p => Attribute.IsDefined(p, typeof(YearEndArchivePropertyAttribute)) && p.PropertyType == typeof(decimal));
+        
+        // Check if the class itself has the YearEndArchivePropertyAttribute
+        bool classHasAttribute = Attribute.IsDefined(type, typeof(YearEndArchivePropertyAttribute));
+        
+        IEnumerable<PropertyInfo> properties;
+        if (classHasAttribute)
+        {
+            // If class has the attribute, include all decimal properties
+            properties = type.GetProperties();
+        }
+        else
+        {
+            // Otherwise, only include properties that explicitly have the attribute
+            properties = type.GetProperties()
+                .Where(p => Attribute.IsDefined(p, typeof(YearEndArchivePropertyAttribute)));
+        }
         
         foreach (var prop in properties)
         {
