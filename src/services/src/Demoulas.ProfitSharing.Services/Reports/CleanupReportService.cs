@@ -136,6 +136,7 @@ public class CleanupReportService : ICleanupReportService
         {
             var dict = new Dictionary<int, byte>();
             var balanceByBadge = new Dictionary<int, decimal>();
+            var dupInfo = new HashSet<DemographicMatchDto>();
             var results = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
                 IQueryable<DemographicMatchDto> dupNameSlashDateOfBirth;
@@ -145,17 +146,17 @@ public class CleanupReportService : ICleanupReportService
                 {
                     dupNameSlashDateOfBirth = demographics
                         .Include(d => d.ContactInfo)
-                        .Select(d => new DemographicMatchDto { FullName = d.ContactInfo.FullName! });
+                        .Select(d => new DemographicMatchDto { FullName = d.ContactInfo.FullName!, MatchedId = d.Id });
                 }
                 else
                 {
                     string dupQuery =
-                        @"WITH FILTERED_DEMOGRAPHIC AS (SELECT /*+ MATERIALIZE */ ID, FULL_NAME, DATE_OF_BIRTH
+                        @"WITH FILTERED_DEMOGRAPHIC AS (SELECT /*+ MATERIALIZE */ ID, FULL_NAME, DATE_OF_BIRTH, BADGE_NUMBER
                               FROM DEMOGRAPHIC
                               WHERE NOT EXISTS (SELECT /*+ INDEX(fs) */ 1
                                                 FROM FAKE_SSNS fs
                                                 WHERE fs.SSN = DEMOGRAPHIC.SSN))
-SELECT /*+ USE_HASH(p1 p2) */ p1.FULL_NAME as FullName
+SELECT /*+ USE_HASH(p1 p2) */ p1.FULL_NAME as FullName, p2.BADGE_NUMBER MatchedId
 FROM FILTERED_DEMOGRAPHIC p1
          JOIN FILTERED_DEMOGRAPHIC p2
               ON p1.Id < p2.Id /* Avoid self-joins and duplicate pairs */
@@ -163,7 +164,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                   AND SOUNDEX(p1.FULL_NAME) = SOUNDEX(p2.FULL_NAME) /* Phonetic similarity */
                   AND (ABS(TRUNC(p1.DATE_OF_BIRTH) - TRUNC(p2.DATE_OF_BIRTH)) <= 3 /* Allowable 3-day difference */ )
 UNION ALL
-SELECT /*+ USE_HASH(p1 p2) */ p2.FULL_NAME as FullName
+SELECT /*+ USE_HASH(p1 p2) */ p2.FULL_NAME as FullName, p1.BADGE_NUMBER MatchedId
 FROM FILTERED_DEMOGRAPHIC p1
          JOIN FILTERED_DEMOGRAPHIC p2
               ON p1.Id < p2.Id /* Avoid self-joins and duplicate pairs */
@@ -175,95 +176,81 @@ FROM FILTERED_DEMOGRAPHIC p1
                         .SqlQueryRaw<DemographicMatchDto>(dupQuery);
                 }
 
-                var names = await dupNameSlashDateOfBirth
+                dupInfo = await dupNameSlashDateOfBirth
                     .Where(d => !string.IsNullOrEmpty(d.FullName))
-                    .Select(d => d.FullName)
                     .ToHashSetAsync(cancellationToken);
 
-                
-                var query = from dem in demographics
-                        .Include(d => d.EmploymentStatus)
-                    join ppLj in ctx.PayProfits on new { DemographicId = dem.Id, req.ProfitYear } equals new
-                    {
-                        ppLj.DemographicId, ppLj.ProfitYear
-                    } into tmpPayProfit
-                    from pp in tmpPayProfit.DefaultIfEmpty()
-                    join pdLj in ctx.ProfitDetails on new { dem.Ssn, req.ProfitYear } equals new
-                    {
-                        pdLj.Ssn, pdLj.ProfitYear
-                    } into tmpProfitDetails
-                    from pd in tmpProfitDetails.DefaultIfEmpty()
-                    where dem.ContactInfo.FullName != null && names.Contains(dem!.ContactInfo!.FullName!)
-                    group new { dem, pp, pd } by new
-                    {
-                        dem.BadgeNumber,
-                        SSN = dem.Ssn,
-                        dem.ContactInfo.FullName,
-                        dem.DateOfBirth,
-                        dem.Address.Street,
-                        dem.Address.City,
-                        dem.Address.State,
-                        dem.Address.PostalCode,
-                        CountryISO = dem.Address.CountryIso,
-                        dem.HireDate,
-                        dem.TerminationDate,
-                        dem.EmploymentStatusId,
-                        dem.EmploymentStatus!.Name,
-                        dem.StoreNumber,
-                        PdSsn = pd != null ? pd.Ssn : 0,
-                        CurrentHoursYear = pp != null ? pp.CurrentHoursYear : 0,
-                        CurrentIncomeYear = pp != null ? pp.CurrentIncomeYear : 0
-                    }
-                    into g
-                    orderby g.Key.FullName, g.Key.DateOfBirth, g.Key.SSN, g.Key.BadgeNumber
-                    select new DuplicateNamesAndBirthdaysResponse
-                    {
-                        BadgeNumber = g.Key.BadgeNumber,
-                        Ssn = g.Key.SSN.MaskSsn(),
-                        Name = g.Key.FullName,
-                        DateOfBirth = g.Key.DateOfBirth,
-                        Address = new AddressResponseDto
+                var names = dupInfo.Select(x => x.FullName).ToHashSet();
+
+                var query = from dem in demographics.Include(d => d.EmploymentStatus)
+                        join ppLj in ctx.PayProfits on new { DemographicId = dem.Id, req.ProfitYear } equals new
                         {
-                            City = g.Key.City,
-                            State = g.Key.State,
-                            Street = g.Key.Street,
-                            CountryIso = g.Key.CountryISO,
-                            PostalCode = g.Key.PostalCode,
-                        },
-                        HireDate = g.Key.HireDate,
-                        TerminationDate = g.Key.TerminationDate,
-                        Status = g.Key.EmploymentStatusId,
-                        EmploymentStatusName = g.Key.Name,
-                        StoreNumber = g.Key.StoreNumber,
-                        Count = g.Count(),
-                        HoursCurrentYear = g.Key.CurrentHoursYear,
-                        IncomeCurrentYear = g.Key.CurrentIncomeYear
-                    };
+                            ppLj.DemographicId,
+                            ppLj.ProfitYear
+                        } into tmpPayProfit
+                        from pp in tmpPayProfit.DefaultIfEmpty()
+                        join b in _totalService.GetTotalBalanceSet(ctx, req.ProfitYear) on dem.Ssn equals b.Ssn into tmpBalance
+                        from bal in tmpBalance.DefaultIfEmpty()
+                        join yos in _totalService.GetYearsOfService(ctx, req.ProfitYear) on dem.Ssn equals yos.Ssn into tmpYos
+                        from yos in tmpYos.DefaultIfEmpty()
+                        where dem.ContactInfo.FullName != null && names.Contains(dem!.ContactInfo!.FullName!)
+                        select new
+                        {
+                            dem.BadgeNumber,
+                            dem.Ssn,
+                            Name = dem.ContactInfo.FullName,
+                            dem.DateOfBirth,
+                            Address = dem.Address.Street,
+                            dem.Address.City,
+                            dem.Address.State,
+                            dem.Address.PostalCode,
+                            dem.Address.CountryIso,
+                            dem.HireDate,
+                            dem.TerminationDate,
+                            dem.EmploymentStatusId,
+                            EmploymentStatusName = dem.EmploymentStatus!.Name,
+                            dem.StoreNumber,
+                            HoursCurrentYear = pp != null ? pp.CurrentHoursYear : 0,
+                            IncomeCurrentYear = pp != null ? pp.CurrentIncomeYear : 0,
+                            NetBalance = bal != null ? bal.Total : 0,
+                            Years = yos != null ? yos.Years : (byte)0
+                        };
 
                 var rslt = await query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
 
-                dict = await (
-                    from yis in _totalService.GetYearsOfService(ctx, req.ProfitYear)
-                    join d in demographics on yis.Ssn equals d.Ssn
-                    select new { d.BadgeNumber, Years = yis.Years }
-                ).ToDictionaryAsync(x => x.BadgeNumber, x => x.Years, cancellationToken: cancellationToken);
-
-                ISet<int> badgeNumbers = rslt.Results.Select(r => r.BadgeNumber).ToHashSet();
-                balanceByBadge = _totalService.GetTotalBalanceSet(ctx, req.ProfitYear)
-                    .Join(demographics, d => d.Ssn, d => d.Ssn, (p, d) => new { d.BadgeNumber, p.Total })
-                    .Where(x => badgeNumbers.Contains(x.BadgeNumber))
-                    .GroupBy(x => x.BadgeNumber)
-                    .ToDictionary(g => g.First().BadgeNumber, g =>g.First().Total ?? 0);
                 return rslt;
             });
-            
-            foreach (DuplicateNamesAndBirthdaysResponse dup in results.Results)
+            var projectedResults = results.Results.Select(r => new DuplicateNamesAndBirthdaysResponse
             {
-                _ = dict.TryGetValue(dup.BadgeNumber, out byte years);
-                dup.Years = years;
+                BadgeNumber = r.BadgeNumber,
+                Ssn = r.Ssn.MaskSsn(),
+                Name = r.Name,
+                DateOfBirth = r.DateOfBirth,
+                Address = new AddressResponseDto
+                {
+                    Street = r.Address,
+                    City = r.City,
+                    State = r.State,
+                    PostalCode = r.PostalCode,
+                    CountryIso = r.CountryIso
+                },
+                Years = r.Years,
+                HireDate = r.HireDate,
+                TerminationDate = r.TerminationDate,
+                Status = r.EmploymentStatusId,
+                StoreNumber = r.StoreNumber,
+                Count = dict.ContainsKey(r.BadgeNumber)
+                            ? ++dict[r.BadgeNumber]
+                            : dict[r.BadgeNumber] = 1,
+                NetBalance = r.NetBalance ?? 0,
+                HoursCurrentYear = r.HoursCurrentYear,
+                IncomeCurrentYear = r.IncomeCurrentYear,
+                EmploymentStatusName = r.EmploymentStatusName ?? ""
+            }).ToList();
 
-                balanceByBadge.TryGetValue(dup.BadgeNumber, out var balance);
-                dup.NetBalance = balance;
+            foreach (var r in projectedResults)
+            {
+                r.Count = dupInfo.Count(x => x.MatchedId == r.BadgeNumber);
             }
 
             return new ReportResponseBase<DuplicateNamesAndBirthdaysResponse>()
@@ -271,7 +258,12 @@ FROM FILTERED_DEMOGRAPHIC p1
                 ReportDate = DateTimeOffset.UtcNow,
                 StartDate = ReferenceData.DsmMinValue,
                 EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
-                ReportName = "DUPLICATE NAMES AND BIRTHDAYS", Response = results
+                ReportName = "DUPLICATE NAMES AND BIRTHDAYS", 
+                Response = new PaginatedResponseDto<DuplicateNamesAndBirthdaysResponse>() 
+                { 
+                    Total = results.Total, 
+                    Results = projectedResults
+                }
             };
         }
     }
