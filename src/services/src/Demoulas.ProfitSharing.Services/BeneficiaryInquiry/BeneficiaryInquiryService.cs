@@ -21,34 +21,58 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly IFrozenService _frozenService;
     private readonly ITotalService _totalService;
+    private readonly IMasterInquiryService _masterInquiryService;
 
-    public BeneficiaryInquiryService(IProfitSharingDataContextFactory dataContextFactory, IFrozenService frozenService, ITotalService totalService)
+    public BeneficiaryInquiryService(IProfitSharingDataContextFactory dataContextFactory, IFrozenService frozenService, ITotalService totalService, IMasterInquiryService masterInquiryService)
     {
         _dataContextFactory = dataContextFactory;
         _frozenService = frozenService;
         _totalService = totalService;
+        _masterInquiryService = masterInquiryService;
     }
 
-    private IQueryable<BeneficiarySearchFilterResponse> GetEmployeeQuery(BeneficiarySearchFilterRequest request, ProfitSharingReadOnlyDbContext context)
+    private async Task<IQueryable<BeneficiarySearchFilterResponse>> GetEmployeeQuery(BeneficiarySearchFilterRequest request, ProfitSharingReadOnlyDbContext context)
     {
-        var query = context.Demographics.Include(x => x.ContactInfo).Include(x => x.Address)
-            .Where(x =>
-            (request.BadgeNumber == null || x.BadgeNumber == request.BadgeNumber) &&
-            (string.IsNullOrEmpty(request.Name) || x.ContactInfo.FullName.ToLower().Contains(request.Name.ToLower())) &&
-            (string.IsNullOrEmpty(request.Ssn) || x.Ssn.ToString() == request.Ssn)
-            ).Select(x => new BeneficiarySearchFilterResponse()
-            {
-                Ssn = x.Ssn.ToString(),
-                Age = DateTime.Now.Year - x.DateOfBirth.Year,
-                BadgeNumber = x.BadgeNumber,
-                City = x.Address.City,
-                Name = x.ContactInfo.FullName,
-                State = x.Address.State,
-                Street = x.Address.Street,
-                Zip = x.Address.PostalCode
-            });
+        //var query = context.Demographics.Include(x => x.ContactInfo).Include(x => x.Address)
+        //    .Where(x =>
+        //    (request.BadgeNumber == null || x.BadgeNumber == request.BadgeNumber) &&
+        //    (string.IsNullOrEmpty(request.Name) || x.ContactInfo.FullName.ToLower().Contains(request.Name.ToLower())) &&
+        //    (string.IsNullOrEmpty(request.Ssn) || x.Ssn.ToString() == request.Ssn)
+        //    ).Select(x => new BeneficiarySearchFilterResponse()
+        //    {
+        //        Ssn = x.Ssn.ToString(),
+        //        Age = DateTime.Now.Year - x.DateOfBirth.Year,
+        //        BadgeNumber = x.BadgeNumber,
+        //        City = x.Address.City,
+        //        Name = x.ContactInfo.FullName,
+        //        State = x.Address.State,
+        //        Street = x.Address.Street,
+        //        Zip = x.Address.PostalCode
+        //    });
 
-        return query;
+        //return query;
+        var member = await _masterInquiryService.GetMembersAsync(new Common.Contracts.Request.MasterInquiry.MasterInquiryRequest()
+        {
+            BadgeNumber = request.BadgeNumber,
+            PsnSuffix = request.PsnSuffix,
+            Name = request.Name,
+            Ssn = request.Ssn != null ? Convert.ToInt32(request.Ssn) : 0,
+            MemberType = request.MemberType,
+            EndProfitYear =  (short)DateTime.Now.Year,
+            ProfitYear = (short)DateTime.Now.Year
+
+        });
+        return member.Results.Select(x => new BeneficiarySearchFilterResponse()
+        {
+            Ssn = x.Ssn.ToString(),
+            Age = DateTime.Now.Year - x.DateOfBirth.Year,
+            BadgeNumber = x.BadgeNumber,
+            City = x.AddressCity,
+            Name = x.FullName,
+            State = x.AddressState,
+            Street = x.Address,
+            Zip = x.AddressZipCode
+        }).AsQueryable();
 
     }
 
@@ -57,7 +81,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
         var query = context.Beneficiaries.Include(x => x.Contact).ThenInclude(x => x.Address).Include(x => x.Contact.ContactInfo)
             .Where(x =>
             (request.BadgeNumber == null || x.BadgeNumber == request.BadgeNumber) &&
-            (request.Psn == null || x.PsnSuffix == request.Psn) &&
+            (request.PsnSuffix == null || x.PsnSuffix == request.PsnSuffix) &&
             (string.IsNullOrEmpty(request.Name) || x.Contact.ContactInfo.FullName.ToLower().Contains(request.Name.ToLower())) &&
             (string.IsNullOrEmpty(request.Ssn) || x.Contact.Ssn.ToString() == request.Ssn)
             ).Select(x => new BeneficiarySearchFilterResponse()
@@ -79,15 +103,15 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
 
     public async Task<PaginatedResponseDto<BeneficiarySearchFilterResponse>> BeneficiarySearchFilter(BeneficiarySearchFilterRequest request, CancellationToken cancellation)
     {
-        var result = await _dataContextFactory.UseReadOnlyContext(context =>
+        var result = await _dataContextFactory.UseReadOnlyContext(async context =>
         {
             IQueryable<BeneficiarySearchFilterResponse> query;
             switch (request.MemberType)
             {
-                case "employee":
-                    query = GetEmployeeQuery(request, context);
+                case 1: //employee
+                    query = await GetEmployeeQuery(request, context);
                     break;
-                case "beneficiary":
+                case 2: //beneficiaries
                     query = GetBeneficiaryQuery(request, context);
                     break;
                 default:
@@ -98,12 +122,12 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
             return query.ToPaginationResultsAsync(request, cancellation);
         });
 
-        foreach (var item in result.Results)
+        foreach (var item in result.Result.Results)
         {
-            item.Ssn = item.Ssn.MaskSsn();
+            item.Ssn = !item.Ssn.Contains("X")?item.Ssn.MaskSsn():item.Ssn;
         }
 
-        return result;
+        return result.Result;
     }
 
 
