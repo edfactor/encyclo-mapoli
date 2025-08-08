@@ -374,8 +374,13 @@ FROM FILTERED_DEMOGRAPHIC p1
 
                 var calInfo =
                     await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
-                
-                var paginated = await query.ToPaginationResultsAsync(req, cancellationToken);
+                var sortReq = req;
+                if (sortReq.SortBy != null && sortReq.SortBy.Equals("Age", StringComparison.OrdinalIgnoreCase))
+                {
+                    sortReq = req with { SortBy = "DateOfBirth" };
+                }
+                var paginated = await query.ToPaginationResultsAsync(sortReq, cancellationToken);
+
                 var apiResponse = paginated.Results.Select(pd => new DistributionsAndForfeitureResponse
                 {
                     BadgeNumber = pd.BadgeNumber,
