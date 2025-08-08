@@ -84,8 +84,8 @@ import {
   ExecutiveHoursAndDollars,
   ExecutiveHoursAndDollarsRequestDto,
   ForfeitureAdjustmentDetail,
-  ForfeitureAdjustmentRequest,
-  ForfeitureAdjustmentResponse,
+  SuggestForfeitureAdjustmentRequest,
+  SuggestForfeitAmountResponse,
   ForfeitureAdjustmentUpdateRequest,
   ForfeituresAndPoints,
   ForfeituresByAge,
@@ -1084,7 +1084,7 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getForfeitureAdjustments: builder.query<ForfeitureAdjustmentResponse, ForfeitureAdjustmentRequest>({
+    getForfeitureAdjustments: builder.query<SuggestForfeitAmountResponse, SuggestForfeitureAdjustmentRequest>({
       query: (params) => ({
         url: "yearend/forfeiture-adjustments",
         method: "GET",
