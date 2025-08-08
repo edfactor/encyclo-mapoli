@@ -318,7 +318,8 @@ export const YearsEndApi = createApi({
             skip: params.pagination.skip,
             sortBy: params.pagination.sortBy,
             isSortDescending: params.pagination.isSortDescending,
-            excludeZeroBalance: params.excludeZeroBalance || false
+            excludeZeroBalance: params.excludeZeroBalance || false,
+            profitYear: params.profitYear
           }
         };
       },
@@ -662,17 +663,23 @@ export const YearsEndApi = createApi({
     }),
     getTerminationReport: builder.query<TerminationResponse, TerminationRequestWithArchive>({
       query: (params) => {
+        const body: any = {
+          beginningDate: params.beginningDate,
+          endingDate: params.endingDate,
+          skip: params.pagination.skip,
+          take: params.pagination.take,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
+        };
+        
+        if (params.profitYear) {
+          body.profitYear = params.profitYear;
+        }
+        
         return {
           url: `yearend/terminated-employees${params.archive === true ? "?archive=true" : ""}`,
           method: "POST",
-          body: {
-            beginningDate: params.beginningDate,
-            endingDate: params.endingDate,
-            skip: params.pagination.skip,
-            take: params.pagination.take,
-            sortBy: params.pagination.sortBy,
-            isSortDescending: params.pagination.isSortDescending
-          }
+          body
         };
       },
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {

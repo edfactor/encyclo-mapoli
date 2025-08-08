@@ -27,4 +27,6 @@ public class TerminatedEmployeeService : ITerminatedEmployeeService
         TerminatedEmployeeReportService reportServiceGenerator = new(_dataContextFactory, _totalService, _demographicReaderService);
         return reportServiceGenerator.CreateDataAsync(req, ct);
     }
+
+
 }

@@ -201,6 +201,7 @@ export interface StartAndEndDateRequest {
   endingDate: string;
   pagination: SortedPaginationRequestDto;
   excludeZeroBalance?: boolean;
+  profitYear?: number;
 }
 
 export interface ForfeitureDetail extends ProfitYearRequest {
@@ -661,6 +662,7 @@ export interface TerminationYearDetail {
   dateTerm: string | null;
   ytdPsHours: number;
   vestedPercent: number;
+  suggestedForfeiture: number | null;
   age: number | null;
   enrollmentCode: number | null;
 }
@@ -1137,7 +1139,7 @@ export interface UpdateSummaryResponse extends PagedReportResponse<UpdateSummary
   totalAfterVestedAmount: number;
 }
 
-export interface SuggestForfeitureAdjustmentRequest {
+export interface SuggestForfeitureAdjustmentRequest extends SortedPaginationRequestDto {
   ssn?: string;
   badge?: string;
   profitYear: number;

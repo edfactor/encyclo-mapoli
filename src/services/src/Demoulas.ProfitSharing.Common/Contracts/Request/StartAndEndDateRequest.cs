@@ -8,6 +8,7 @@ public record StartAndEndDateRequest : SortedPaginationRequestDto
     public DateOnly BeginningDate { get; set; }
     public DateOnly EndingDate { get; set; }
     public bool ExcludeZeroBalance { get; set; } = false;
+    public short? ProfitYear { get; set; }
 
 
 
@@ -17,6 +18,7 @@ public record StartAndEndDateRequest : SortedPaginationRequestDto
         {
             BeginningDate = new DateOnly(2024, 03, 15),
             EndingDate = new DateOnly(2024, 09, 15),
+            ProfitYear = 2024,
             Skip = 1,
             Take = 10,
             SortBy = "BadgeNumber",
