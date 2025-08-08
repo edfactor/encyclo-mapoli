@@ -1,3 +1,5 @@
+import MAX_EMPLOYEE_BADGE_LENGTH from "constants";
+
 export const paymentTypeGetNumberMap: Record<string, number> = {
   all: 0,
   hardship: 1,
@@ -39,7 +41,7 @@ export const splitFullPSN = (
   let psnSuffix: number | undefined;
   let verifiedBadgeNumber: number | undefined;
 
-  if (badgeNumber.length < 8) {
+  if (badgeNumber.length <= MAX_EMPLOYEE_BADGE_LENGTH) {
     verifiedBadgeNumber = parseInt(badgeNumber);
   } else {
     verifiedBadgeNumber = parseInt(badgeNumber.slice(0, -4));

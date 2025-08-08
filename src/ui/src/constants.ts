@@ -1,3 +1,4 @@
+export const MAX_EMPLOYEE_BADGE_LENGTH = 7;
 export const HISTORY_KEY = "navigation_history" as const;
 
 export const drawerOpenWidth = 330;
@@ -50,7 +51,7 @@ export const ROUTES = {
   BENEFICIARY_INQUIRY: "beneficiary",
   PAY_BE_NEXT: "adhoc-beneficiaries-report",
   FORFEITURES_ADJUSTMENT: "forfeitures-adjustment",
-  PAY_BEN_REPORT: 'payben-report',
+  PAY_BEN_REPORT: "payben-report",
 
   PAY426_ACTIVE_18_20: "pay426-1",
   PAY426_ACTIVE_21_PLUS: "pay426-2",
