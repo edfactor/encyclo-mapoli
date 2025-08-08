@@ -328,6 +328,8 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 query = query.Where(x => x.ProfitDetail != null && x.ProfitDetail.MonthToDate == req.MonthToDate.Value);
             }
 
+            var paymentProfitCodes = ProfitDetailExtensions.GetProfitCodesForBalanceCalc();
+
             // First projection: SQL-translatable only
             var rawQuery = await query.Select(x => new MasterInquiryRawDto
             {
@@ -338,10 +340,10 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 DistributionSequence = x.ProfitDetail != null ? x.ProfitDetail.DistributionSequence : 0,
                 ProfitCodeId = x.ProfitDetail != null ? x.ProfitDetail.ProfitCodeId : (byte)0,
                 ProfitCodeName = x.ProfitCode != null ? x.ProfitCode.Name : string.Empty,
-                Contribution = x.ProfitDetail != null ? x.ProfitDetail.CalculateContribution() : 0,
-                Earnings = x.ProfitDetail != null ? x.ProfitDetail.CalculateEarnings() : 0,
-                Forfeiture = x.ProfitDetail != null ? x.ProfitDetail.CalculateForfeiture() : 0,
-                Payment = x.ProfitDetail != null ? x.ProfitDetail.CalculatePayment() : 0,
+                Contribution = x.ProfitDetail != null ? x.ProfitDetail.Contribution : 0,
+                Earnings = x.ProfitDetail != null ? x.ProfitDetail.Earnings : 0,
+                Forfeiture = x.ProfitDetail != null ? !paymentProfitCodes.Contains(x.ProfitDetail.ProfitCodeId) ? x.ProfitDetail.Forfeiture : 0 : 0,
+                Payment = x.ProfitDetail != null ? paymentProfitCodes.Contains(x.ProfitDetail.ProfitCodeId) ? x.ProfitDetail.Forfeiture : 0 : 0,
                 MonthToDate = x.ProfitDetail != null ? x.ProfitDetail.MonthToDate : (byte)0,
                 YearToDate = x.ProfitDetail != null ? x.ProfitDetail.YearToDate : (short)0,
                 Remark = x.ProfitDetail != null ? x.ProfitDetail.Remark : null,
@@ -1109,13 +1111,13 @@ public sealed class MasterInquiryService : IMasterInquiryService
         var isDescending = req.IsSortDescending ?? false;
         return req.SortBy.ToLower() switch
         {
-            "fullName" => isDescending ? query.OrderByDescending(x => x.FullName) : query.OrderBy(x => x.FullName),
+            "fullname" => isDescending ? query.OrderByDescending(x => x.FullName) : query.OrderBy(x => x.FullName),
             "ssn" => isDescending ? query.OrderByDescending(x => x.Ssn) : query.OrderBy(x => x.Ssn),
-            "badgeNumber" => isDescending ? query.OrderByDescending(x => x.BadgeNumber) : query.OrderBy(x => x.BadgeNumber),
+            "badgenumber" => isDescending ? query.OrderByDescending(x => x.BadgeNumber) : query.OrderBy(x => x.BadgeNumber),
             "address" => isDescending ? query.OrderByDescending(x => x.Address) : query.OrderBy(x => x.Address),
-            "addressCity" => isDescending ? query.OrderByDescending(x => x.AddressCity) : query.OrderBy(x => x.AddressCity),
-            "addressState" => isDescending ? query.OrderByDescending(x => x.AddressState) : query.OrderBy(x => x.AddressState),
-            "addressZipCode" => isDescending ? query.OrderByDescending(x => x.AddressZipCode) : query.OrderBy(x => x.AddressZipCode),
+            "addresscity" => isDescending ? query.OrderByDescending(x => x.AddressCity) : query.OrderBy(x => x.AddressCity),
+            "addressstate" => isDescending ? query.OrderByDescending(x => x.AddressState) : query.OrderBy(x => x.AddressState),
+            "addresszipCode" => isDescending ? query.OrderByDescending(x => x.AddressZipCode) : query.OrderBy(x => x.AddressZipCode),
             "age" => isDescending ? query.OrderByDescending(x => x.Age) : query.OrderBy(x => x.Age),
             "employmentStatus" => isDescending ? query.OrderByDescending(x => x.EmploymentStatus) : query.OrderBy(x => x.EmploymentStatus),
             _ => query
