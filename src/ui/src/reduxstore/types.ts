@@ -1137,20 +1137,16 @@ export interface UpdateSummaryResponse extends PagedReportResponse<UpdateSummary
   totalAfterVestedAmount: number;
 }
 
-export interface ForfeitureAdjustmentRequest {
+export interface SuggestForfeitureAdjustmentRequest {
   ssn?: string;
   badge?: string;
   profitYear: number;
-  skip?: number;
-  take?: number;
-  sortBy?: string;
-  isSortDescending?: boolean;
 }
 
 export interface ForfeitureAdjustmentUpdateRequest {
   badgeNumber: number;
   forfeitureAmount: number;
-  reason?: string;
+  classAction: boolean;
   profitYear: number;
 }
 
@@ -1163,10 +1159,11 @@ export interface ForfeitureAdjustmentDetail {
   netVested: number;
 }
 
-export interface ForfeitureAdjustmentResponse extends PagedReportResponse<ForfeitureAdjustmentDetail> {
-  totatNetBalance: number;
-  totatNetVested: number;
+export interface SuggestedForfeitResponse {
+  badgeNumber: number,
+  suggestedForfeitAmount: number;
 }
+
 
 export interface MissiveResponse {
   id: number;

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import {useDispatch, useSelector} from "react-redux";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
-import ForfeituresAdjustmentGrid from "./ForfeituresAdjustmentGrid";
+import ForfeituresAdjustmentPanel from "./ForfeituresAdjustmentPanel";
 import ForfeituresAdjustmentSearchParameters from "./ForfeituresAdjustmentSearchParameters";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { RootState } from "reduxstore/store";
@@ -90,18 +90,18 @@ const ForfeituresAdjustment = () => {
         </Grid>
 
         {/* Only show details if we have forfeitureAdjustmentData and a result */}
-        {forfeitureAdjustmentData?.response?.results?.[0] && profitYear && (
+        {forfeitureAdjustmentData && profitYear && (
             <MissiveAlertProvider>
               <MasterInquiryEmployeeDetails
                   memberType={1}
-                  id={forfeitureAdjustmentData.response.results[0].demographicId}
+                  id={forfeitureAdjustmentData.demographicId}
                   profitYear={profitYear}
               />
             </MissiveAlertProvider>
         )}
 
         <Grid width="100%">
-          <ForfeituresAdjustmentGrid
+          <ForfeituresAdjustmentPanel
             initialSearchLoaded={initialSearchLoaded}
             setInitialSearchLoaded={setInitialSearchLoaded}
             onAddForfeiture={handleOpenAddForfeitureModal}
@@ -115,7 +115,7 @@ const ForfeituresAdjustment = () => {
         open={isAddForfeitureModalOpen}
         onClose={handleCloseAddForfeitureModal}
         onSave={handleSaveForfeiture}
-        employeeDetails={forfeitureAdjustmentData?.response?.results?.[0]}
+        suggestedForfeitResponse={forfeitureAdjustmentData}
       />
     </Page>
   );
