@@ -4,12 +4,8 @@ import { Grid } from "@mui/material";
 import { SmartModal } from "smart-ui-library";
 import { useUpdateForfeitureAdjustmentMutation } from "reduxstore/api/YearsEndApi";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-import { ForfeitureAdjustmentUpdateRequest } from "reduxstore/types";
+import {ForfeitureAdjustmentUpdateRequest, SuggestedForfeitResponse} from "reduxstore/types";
 
-interface SuggestedForfeitResponse {
-  badgeNumber: number,
-  suggestedForfeitAmount: number;
-}
 
 interface AddForfeitureModalProps {
   open: boolean;

@@ -1159,10 +1159,11 @@ export interface ForfeitureAdjustmentDetail {
   netVested: number;
 }
 
-export interface SuggestForfeitAmountResponse {
-  demographicId: number,
-  suggestedForfeit: number;
+export interface SuggestedForfeitResponse {
+  badgeNumber: number,
+  suggestedForfeitAmount: number;
 }
+
 
 export interface MissiveResponse {
   id: number;
