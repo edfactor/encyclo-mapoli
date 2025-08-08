@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Dynamic.Core.Tokenizer;
 using System.Text;
 using System.Threading.Tasks;
+using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -42,6 +43,7 @@ public sealed class CertificateService : ICertificateService
         var sb = new StringBuilder();
         var spaces_2 = new string(' ', 2);
         var spaces_3 = new string(' ', 3);
+        var spaces_4 = new string(' ', 4);
         var spaces_11 = new string(' ', 11);
         var spaces_28 = new string(' ', 28);
         var spaces_32 = new string(' ', 32);
@@ -64,14 +66,14 @@ public sealed class CertificateService : ICertificateService
                 estimatedPaymentAtAge = 67;
             }
             var annuityRate = annuityRates[(byte)estimatedPaymentAtAge];
-            var pmtSingle = member.Contributions / annuityRate.SingleRate / 12;
-            var pmtJoint = member.Contributions / annuityRate.JointRate / 12;
+            var pmtSingle = (member.BeginningBalance + member.Contributions + member.Forfeitures) / annuityRate.SingleRate / 12;
+            var pmtJoint = (member.BeginningBalance + member.Contributions + member.Forfeitures) / annuityRate.JointRate / 12;
 
             #region Formfeed
             sb.Append("\f");
             #endregion
 
-            WriteMemberInfo(sb, member);
+            WriteMemberInfo(sb, member, true);
 
             #region Spacing
             sb.Append(linefeeds_2);
@@ -90,10 +92,10 @@ public sealed class CertificateService : ICertificateService
             sb.AppendFormat(member.Contributions.ToString("$#,###,###.00 ;$#,###,###.00-").PadLeft(14));
             sb.Append(spaces_3);
             sb.AppendFormat(member.Distributions.ToString("$#,###,###.00 ;$#,###,###.00-").PadLeft(14));
-            sb.Append(spaces_3);
+            sb.Append(spaces_4);
             sb.AppendFormat(member.EndingBalance.ToString("$#,###,###.00 ;$#,###,###.00-").PadLeft(14));
             sb.Append(spaces_3);
-            sb.AppendFormat(member.VestedAmount.ToString("$#,###,###.00 ;$#,###,###.00-").PadLeft(14));
+            sb.AppendFormat(member.VestedAmount.ToString("$#,###,###.00 ;$#,###,###.00-").PadLeft(14).TrimEnd());
             sb.AppendFormat("\r\n");
             #endregion
 
@@ -105,7 +107,7 @@ public sealed class CertificateService : ICertificateService
             sb.Append(spaces_32);
             sb.Append(estimatedPaymentAtAge.ToString("###").PadRight(3));
             sb.Append(spaces_38);
-            sb.Append(estimatedPaymentAtAge.ToString("###").PadRight(3));
+            sb.Append(estimatedPaymentAtAge.ToString("###").PadRight(3).Trim());
             sb.Append("\r\n");
             #endregion
 
@@ -115,9 +117,9 @@ public sealed class CertificateService : ICertificateService
 
             #region Payment
             sb.Append(spaces_11);
-            sb.AppendFormat(pmtSingle.ToString("$#,###,###.00 ;$#,###,###.00-"));
+            sb.AppendFormat(pmtSingle.ToString("$#,###,###.00 ;$#,###,###.00-").PadLeft(14));
             sb.Append(spaces_28);
-            sb.AppendFormat(pmtJoint.ToString("$#,###,###.00 ;$#,###,###.00-"));
+            sb.AppendFormat(pmtJoint.ToString("$#,###,###.00 ;$#,###,###.00-").PadLeft(14).TrimEnd());
             sb.Append("\r\n");
             #endregion
 
@@ -127,7 +129,7 @@ public sealed class CertificateService : ICertificateService
 
             #region Age in body         "and that you are <age> on this date"
             sb.Append(spaces_60);
-            sb.Append(estimatedPaymentAtAge.ToString("###").PadRight(3));
+            sb.Append(estimatedPaymentAtAge.ToString("###").PadRight(3).TrimEnd());
             sb.Append('\r');
             #endregion
 
@@ -137,13 +139,13 @@ public sealed class CertificateService : ICertificateService
             sb.Append(linefeeds_4);
             #endregion
 
-            WriteMemberInfo(sb, member);
+            WriteMemberInfo(sb, member, false);
 
         }
 
         return sb.ToString();
 
-        void WriteMemberInfo(StringBuilder sb, Common.Contracts.Response.YearEnd.MemberYearSummaryDto member)
+        void WriteMemberInfo(StringBuilder sb, MemberYearSummaryDto member, bool addLf)
         {
             #region Store and Badge Line
             sb.Append(spaces_45);
@@ -171,8 +173,12 @@ public sealed class CertificateService : ICertificateService
             sb.Append(", ");
             sb.Append(member.State ?? "");
             sb.Append(spaces_2);
-            sb.Append(member.PostalCode ?? "");
-            sb.Append("\r\n");
+            sb.Append((Convert.ToInt32(member.PostalCode ?? "0")).ToString("00000"));
+            sb.Append("\r");
+            if (addLf)
+            {
+                sb.Append("\n");
+            }
             #endregion
         }
     }
@@ -184,11 +190,10 @@ public sealed class CertificateService : ICertificateService
             ProfitYear = request.ProfitYear,
             Skip = request.Skip,
             Take = request.Take,
-            SortBy = request.SortBy,
-            IsSortDescending = request.IsSortDescending
+            SortBy = ReferenceData.CertificateSort,
         };
 
-        return await _breakdownService.GetActiveMembersByStore(breakdownRequest, token);
+        return await _breakdownService.GetMembersWithBalanceByStore(breakdownRequest, token);
 
     }
 }

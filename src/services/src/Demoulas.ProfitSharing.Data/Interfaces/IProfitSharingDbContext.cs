@@ -30,7 +30,7 @@ public interface IProfitSharingDbContext
     DbSet<ParticipantTotalRatio> ParticipantTotalRatios { get; set; }
     DbSet<ParticipantTotalYear> ParticipantTotalYears { get; set; }
     DbSet<ParticipantTotalVestingBalance> ParticipantTotalVestingBalances { get; set; }
-
+    DbSet<ProfitDetailRollup> ProfitDetailRollups { get; set; }
     DbSet<ProfitShareTotal> ProfitShareTotals { get; set; }
     DatabaseFacade Database { get; }
 }

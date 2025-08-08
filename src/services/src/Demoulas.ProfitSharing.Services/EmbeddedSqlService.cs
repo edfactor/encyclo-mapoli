@@ -2,6 +2,7 @@
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services;
@@ -170,6 +171,37 @@ FROM   employees
 
 
         return ctx.ProfitShareTotals.FromSqlRaw(query);
+    }
+
+    public IQueryable<ProfitDetailRollup> GetTransactionsBySsnForProfitYearForOracle(IProfitSharingDbContext ctx, short profitYear)
+    {
+        FormattableString query = @$"
+SELECT pd.SSN Ssn   ,  
+	   Sum(pd.CONTRIBUTION) TOTAL_CONTRIBUTIONS,
+	   Sum(pd.EARNINGS ) TOTAL_EARNINGS,
+	   Sum(CASE pd.PROFIT_CODE_ID WHEN {ProfitCode.Constants.IncomingContributions.Id} THEN pd.FORFEITURE 
+	   							  WHEN {ProfitCode.Constants.OutgoingForfeitures.Id} THEN -pd.FORFEITURE
+	   							  ELSE 0
+	  	   END) TOTAL_FORFEITURES,
+	   Sum(CASE WHEN pd.PROFIT_CODE_ID  != {ProfitCode.Constants.IncomingContributions.Id} THEN pd.FORFEITURE ELSE 0 END) TOTAL_PAYMENTS,
+	   Sum(CASE WHEN pd.PROFIT_CODE_ID IN ({ProfitCode.Constants.OutgoingForfeitures.Id}, {ProfitCode.Constants.OutgoingDirectPayments.Id}, {ProfitCode.Constants.Outgoing100PercentVestedPayment.Id}) THEN -pd.FORFEITURE ELSE 0 END) DISTRIBUTION,
+	   Sum(CASE pd.PROFIT_CODE_ID WHEN {ProfitCode.Constants.OutgoingXferBeneficiary.Id} THEN -pd.FORFEITURE
+	   							  WHEN {ProfitCode.Constants.IncomingQdroBeneficiary.Id} THEN pd.CONTRIBUTION 
+	   							  ELSE 0 END) BENEFICIARY_ALLOCATION,
+	   Sum(pd.CONTRIBUTION + pd.EARNINGS + pd.FORFEITURE) CURRENT_BALANCE,
+	   Sum(CASE WHEN pd.PROFIT_YEAR_ITERATION = {ProfitDetail.Constants.ProfitYearIterationMilitary} THEN pd.CONTRIBUTION ELSE 0 END) MILITARY_TOTAL,
+	   Sum(CASE WHEN pd.PROFIT_YEAR_ITERATION = {ProfitDetail.Constants.ProfitYearIterationClassActionFund} THEN pd.EARNINGS ELSE 0 END) CLASS_ACTION_FUND_TOTAL,
+	   Sum(CASE WHEN (pd.PROFIT_CODE_ID = {ProfitCode.Constants.Outgoing100PercentVestedPayment.Id} AND (pd.COMMENT_TYPE_ID IN ({CommentType.Constants.TransferOut.Id},{CommentType.Constants.QdroOut.Id})) 
+	   			  OR (pd.PROFIT_CODE_ID = {ProfitCode.Constants.OutgoingXferBeneficiary.Id})) THEN pd.FORFEITURE ELSE 0 END) PAID_ALLOCATIONS_TOTAL,
+	   Sum(CASE WHEN pd.PROFIT_CODE_ID IN ({ProfitCode.Constants.OutgoingForfeitures.Id},{ProfitCode.Constants.OutgoingDirectPayments.Id}) 
+	              OR (pd.PROFIT_CODE_ID = {ProfitCode.Constants.Outgoing100PercentVestedPayment.Id} AND (pd.COMMENT_TYPE_ID IN ({CommentType.Constants.TransferOut.Id},{CommentType.Constants.QdroOut.Id}))) THEN pd.FORFEITURE ELSE 0 END) DISTRIBUTIONS_TOTAL,
+	   Sum(CASE WHEN pd.PROFIT_CODE_ID = {ProfitCode.Constants.IncomingQdroBeneficiary.Id} THEN pd.CONTRIBUTION ELSE 0 END) ALLOCATIONS_TOTAL,
+	   Sum(CASE WHEN pd.PROFIT_CODE_ID = {ProfitCode.Constants.OutgoingForfeitures.Id} THEN pd.FORFEITURE ELSE 0 END) FORFEITS_TOTAL
+FROM PROFIT_DETAIL pd
+WHERE pd.PROFIT_YEAR= {profitYear}
+GROUP BY pd.SSN";
+
+      return ctx.ProfitDetailRollups.FromSqlInterpolated(query);
     }
 
     private static FormattableString GetTotalBalanceQuery(short profitYear)
