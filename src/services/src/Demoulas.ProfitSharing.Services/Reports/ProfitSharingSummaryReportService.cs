@@ -229,7 +229,18 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             filteredDetails = allDetails.Where(filter);
         }
 
-        var details = await filteredDetails.ToPaginationResultsAsync(req, cancellationToken);
+        var sortReq = req;
+        // Sorting exceptions brought on by oracle provide limitations.
+        if (req.SortBy != null && req.SortBy.Equals("age", StringComparison.InvariantCultureIgnoreCase))
+        {
+            sortReq = req with { SortBy = "DateOfBirth" };
+        }
+        if (req.SortBy != null && req.SortBy.Equals("lastName", StringComparison.InvariantCultureIgnoreCase))
+        {
+            sortReq = req with { SortBy = "EmployeeName" };
+        }
+
+        var details = await filteredDetails.ToPaginationResultsAsync(sortReq, cancellationToken);
 
         // Totals (use filteredDetails for counts)
         ProfitShareTotal totals = new ProfitShareTotal
