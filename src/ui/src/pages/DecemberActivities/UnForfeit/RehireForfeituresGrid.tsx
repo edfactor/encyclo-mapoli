@@ -24,6 +24,7 @@ interface MilitaryAndRehireForfeituresGridSearchProps {
   resetPageFlag: boolean;
   onUnsavedChanges: (hasChanges: boolean) => void;
   hasUnsavedChanges: boolean;
+  shouldArchive: boolean;
 }
 
 const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProps> = ({
@@ -31,7 +32,8 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
   setInitialSearchLoaded,
   resetPageFlag,
   onUnsavedChanges,
-  hasUnsavedChanges
+  hasUnsavedChanges,
+  shouldArchive
 }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
@@ -86,16 +88,21 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
 
   // Create a request object based on current parameters
   const createRequest = useCallback(
-    (skip: number, sortBy: string, isSortDescending: boolean): StartAndEndDateRequest | null => {
+    (skip: number, sortBy: string, isSortDescending: boolean): (StartAndEndDateRequest & { archive?: boolean }) | null => {
       if (!rehireForfeituresQueryParams) return null;
 
-      return {
+      const baseRequest: StartAndEndDateRequest = {
         beginningDate: rehireForfeituresQueryParams.beginningDate || fiscalCalendarYear?.fiscalBeginDate || "",
         endingDate: rehireForfeituresQueryParams.endingDate || fiscalCalendarYear?.fiscalEndDate || "",
         pagination: { skip, take: pageSize, sortBy, isSortDescending }
       };
+
+      // Add archive parameter only when shouldArchive is true
+      const finalRequest = shouldArchive ? { ...baseRequest, archive: true } : baseRequest;
+      console.log('createRequest called:', { shouldArchive, hasArchive: !!finalRequest.archive, finalRequest });
+      return finalRequest;
     },
-    [rehireForfeituresQueryParams, fiscalCalendarYear?.fiscalBeginDate, fiscalCalendarYear?.fiscalEndDate, pageSize]
+    [rehireForfeituresQueryParams, fiscalCalendarYear?.fiscalBeginDate, fiscalCalendarYear?.fiscalEndDate, pageSize, shouldArchive]
   );
 
   const handleBulkSave = useCallback(async (requests: ForfeitureAdjustmentUpdateRequest[]) => {
@@ -183,6 +190,13 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
       performSearch(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending);
     }
   }, [initialSearchLoaded, pageNumber, pageSize, sortParams, performSearch]);
+
+  // Effect to handle archive mode search - separate from normal search flow
+  useEffect(() => {
+    if (shouldArchive && rehireForfeituresQueryParams) {
+      performSearch(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending);
+    }
+  }, [shouldArchive, rehireForfeituresQueryParams, pageNumber, pageSize, sortParams, performSearch]);
 
   // Reset page number to 0 when resetPageFlag changes
   useEffect(() => {

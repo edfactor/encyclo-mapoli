@@ -132,6 +132,9 @@ import { createDataSourceAwareBaseQuery } from "./api";
 // Create intersection type for getUpdateSummary with optional archive
 type UpdateSummaryRequestWithArchive = UpdateSummaryRequest & { archive?: boolean };
 
+// Create intersection type for getTerminationReport with optional archive
+type TerminationRequestWithArchive = StartAndEndDateRequest & { archive?: boolean };
+
 import {
   clearForfeitureAdjustmentData,
   setForfeitureAdjustmentData
@@ -300,20 +303,25 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getRehireForfeitures: builder.query<PagedReportResponse<MilitaryAndRehireForfeiture>, StartAndEndDateRequest>({
-      query: (params) => ({
-        url: `yearend/unforfeitures/`,
-        method: "POST",
-        body: {
-          beginningDate: params.beginningDate,
-          endingDate: params.endingDate,
-          take: params.pagination.take,
-          skip: params.pagination.skip,
-          sortBy: params.pagination.sortBy,
-          isSortDescending: params.pagination.isSortDescending,
-          excludeZeroBalance: params.excludeZeroBalance || false
-        }
-      }),
+    getRehireForfeitures: builder.query<PagedReportResponse<MilitaryAndRehireForfeiture>, StartAndEndDateRequest & { archive?: boolean }>({
+      query: (params) => {
+        const baseUrl = `yearend/unforfeitures/`;
+        const url = params.archive ? `${baseUrl}?archive=true` : baseUrl;
+        
+        return {
+          url,
+          method: "POST",
+          body: {
+            beginningDate: params.beginningDate,
+            endingDate: params.endingDate,
+            take: params.pagination.take,
+            skip: params.pagination.skip,
+            sortBy: params.pagination.sortBy,
+            isSortDescending: params.pagination.isSortDescending,
+            excludeZeroBalance: params.excludeZeroBalance || false
+          }
+        };
+      },
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
@@ -652,10 +660,10 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getTerminationReport: builder.query<TerminationResponse, StartAndEndDateRequest>({
+    getTerminationReport: builder.query<TerminationResponse, TerminationRequestWithArchive>({
       query: (params) => {
         return {
-          url: "yearend/terminated-employees",
+          url: `yearend/terminated-employees${params.archive === true ? "?archive=true" : ""}`,
           method: "POST",
           body: {
             beginningDate: params.beginningDate,

@@ -11,11 +11,12 @@ import { GetDetailColumns, GetTerminationColumns } from "./TerminationGridColumn
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { ForfeitureAdjustmentUpdateRequest } from "reduxstore/types";
 import { useUpdateForfeitureAdjustmentMutation, useUpdateForfeitureAdjustmentBulkMutation } from "reduxstore/api/YearsEndApi";
+import { TerminationSearchRequest } from "./Termination";
 
 interface TerminationGridSearchProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
-  searchParams: StartAndEndDateRequest | null;
+  searchParams: TerminationSearchRequest | null;
   resetPageFlag: boolean;
   onUnsavedChanges: (hasChanges: boolean) => void;
   hasUnsavedChanges: boolean;

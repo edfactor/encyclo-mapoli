@@ -57,6 +57,7 @@ internal static class ContextExtensions
         modelBuilder.ApplyConfiguration(new ParticipantTotalVestingBalanceMap());
         modelBuilder.ApplyConfiguration(new ProfitShareTotalsMap());
         modelBuilder.ApplyConfiguration(new ParticipantTotalYearMap());
+        modelBuilder.ApplyConfiguration(new ProfitDetailRollupMap());
         modelBuilder.ApplyConfiguration(new PayClassificationMap());
         modelBuilder.ApplyConfiguration(new PayFrequencyMap());
         modelBuilder.ApplyConfiguration(new PayProfitMap());

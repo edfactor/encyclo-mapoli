@@ -1,8 +1,10 @@
 ﻿
+using Demoulas.ProfitSharing.Common.Attributes;
 using Demoulas.Util.Extensions;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
+[YearEndArchiveProperty]
 public sealed record UnforfeituresResponse
 {
     public required int BadgeNumber { get; set; }

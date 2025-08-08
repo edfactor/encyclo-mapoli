@@ -2,7 +2,7 @@
 using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.TerminatedEmployeeAndBeneficiary;
+using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.TerminatedEmployees;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using FastEndpoints;
 using Shouldly;
@@ -23,7 +23,7 @@ public class TerminatedEmployeeAndBeneficiaryTests : ApiTestBase<Program>
         // Act
         var response =
             await ApiClient
-                .POSTAsync<TerminatedEmployeeAndBeneficiaryDataEndpoint,
+                .POSTAsync<TerminatedEmployeesEndPoint,
                     ProfitYearRequest, TerminatedEmployeeAndBeneficiaryResponse>(_requestDto);
 
         // Assert
