@@ -21,7 +21,6 @@ namespace Demoulas.ProfitSharing.Services.Reports;
 public class CleanupReportService : ICleanupReportService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
-    private readonly ContributionService _contributionService;
     private readonly ICalendarService _calendarService;
     private readonly ILogger<CleanupReportService> _logger;
     private readonly TotalService _totalService;
@@ -44,7 +43,6 @@ public class CleanupReportService : ICleanupReportService
     ];
 
     public CleanupReportService(IProfitSharingDataContextFactory dataContextFactory,
-        ContributionService contributionService,
         ILoggerFactory factory,
         ICalendarService calendarService,
         TotalService totalService,
@@ -52,13 +50,11 @@ public class CleanupReportService : ICleanupReportService
         IDemographicReaderService demographicReaderService)
     {
         _dataContextFactory = dataContextFactory;
-        _contributionService = contributionService;
         _calendarService = calendarService;
         _totalService = totalService;
         _host = host;
         _demographicReaderService = demographicReaderService;
         _logger = factory.CreateLogger<CleanupReportService>();
-
     }
 
   
@@ -139,6 +135,7 @@ public class CleanupReportService : ICleanupReportService
         using (_logger.BeginScope("Request BEGIN DUPLICATE NAMES AND BIRTHDAYS"))
         {
             var dict = new Dictionary<int, byte>();
+            var balanceByBadge = new Dictionary<int, decimal>();
             var results = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
                 IQueryable<DemographicMatchDto> dupNameSlashDateOfBirth;
@@ -251,19 +248,22 @@ FROM FILTERED_DEMOGRAPHIC p1
                     select new { d.BadgeNumber, Years = yis.Years }
                 ).ToDictionaryAsync(x => x.BadgeNumber, x => x.Years, cancellationToken: cancellationToken);
 
+                ISet<int> badgeNumbers = rslt.Results.Select(r => r.BadgeNumber).ToHashSet();
+                balanceByBadge = _totalService.GetTotalBalanceSet(ctx, req.ProfitYear)
+                    .Join(demographics, d => d.Ssn, d => d.Ssn, (p, d) => new { d.BadgeNumber, p.Total })
+                    .Where(x => badgeNumbers.Contains(x.BadgeNumber))
+                    .GroupBy(x => x.BadgeNumber)
+                    .ToDictionary(g => g.First().BadgeNumber, g =>g.First().Total ?? 0);
                 return rslt;
             });
-
-            ISet<int> badgeNumbers = results.Results.Select(r => r.BadgeNumber).ToHashSet();
-            var balanceDict = await _contributionService.GetNetBalance(req.ProfitYear, badgeNumbers, cancellationToken);
-
+            
             foreach (DuplicateNamesAndBirthdaysResponse dup in results.Results)
             {
                 _ = dict.TryGetValue(dup.BadgeNumber, out byte years);
                 dup.Years = years;
 
-                balanceDict.TryGetValue(dup.BadgeNumber, out var balance);
-                dup.NetBalance = balance?.TotalEarnings ?? 0;
+                balanceByBadge.TryGetValue(dup.BadgeNumber, out var balance);
+                dup.NetBalance = balance;
             }
 
             return new ReportResponseBase<DuplicateNamesAndBirthdaysResponse>()
