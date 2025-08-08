@@ -30,7 +30,7 @@ public class GetForfeitureAdjustmentsEndpoint : Endpoint<SuggestedForfeitureAdju
 
     public override async Task HandleAsync(SuggestedForfeitureAdjustmentRequest req, CancellationToken ct)
     {
-        SuggestedForfeitureAdjustmentResponse r = await _forfeitureAdjustmentService.GetSuggestedForfitureAmount(req, ct);
+        SuggestedForfeitureAdjustmentResponse r = await _forfeitureAdjustmentService.GetSuggestedForfeitureAmount(req, ct);
         await Send.OkAsync(r, ct);
     }
 }

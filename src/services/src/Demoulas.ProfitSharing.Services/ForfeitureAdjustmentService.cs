@@ -29,7 +29,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
         _demographicReaderService = demographicReaderService;
     }
     
-    public Task<SuggestedForfeitureAdjustmentResponse> GetSuggestedForfitureAmount(SuggestedForfeitureAdjustmentRequest req, CancellationToken cancellationToken = default)
+    public Task<SuggestedForfeitureAdjustmentResponse> GetSuggestedForfeitureAmount(SuggestedForfeitureAdjustmentRequest req, CancellationToken cancellationToken = default)
     {
         return _dbContextFactory.UseReadOnlyContext(async context =>
         {
