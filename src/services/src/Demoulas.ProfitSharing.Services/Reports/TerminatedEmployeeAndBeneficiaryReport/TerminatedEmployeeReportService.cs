@@ -288,7 +288,7 @@ public sealed class TerminatedEmployeeReportService
                 VestedPercent = vestingPercent * 100,
                 Age = age,
                 EnrollmentCode = enrollmentId,
-                SuggestedForfeit = member.ProfitYear == (req.ProfitYear ?? req.EndingDate.Year) ? member.EndingBalance - vestedBalance : null
+                SuggestedForfeit = member.ProfitYear == req.ProfitYear ? member.EndingBalance - vestedBalance : null
             };
 
             yearDetailsList.Add((member.BadgeNumber, member.PsnSuffix, member.FullName, yearDetail));

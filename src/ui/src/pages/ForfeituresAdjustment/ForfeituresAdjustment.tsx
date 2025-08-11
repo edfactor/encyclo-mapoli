@@ -100,15 +100,15 @@ const ForfeituresAdjustment = () => {
             </MissiveAlertProvider>
         )}
 
+        {forfeitureAdjustmentData && profitYear && (
         <Grid width="100%">
           <ForfeituresAdjustmentPanel
             initialSearchLoaded={initialSearchLoaded}
             setInitialSearchLoaded={setInitialSearchLoaded}
             onAddForfeiture={handleOpenAddForfeitureModal}
-            pageNumberReset={pageNumberReset}
-            setPageNumberReset={setPageNumberReset}
           />
-        </Grid>
+          </Grid>
+        )}
       </Grid>
 
       <AddForfeitureModal

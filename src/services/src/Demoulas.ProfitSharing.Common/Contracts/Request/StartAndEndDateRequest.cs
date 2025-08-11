@@ -3,16 +3,12 @@
 using Demoulas.Common.Contracts.Contracts.Request;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Request;
-public record StartAndEndDateRequest : SortedPaginationRequestDto
+public record StartAndEndDateRequest : ProfitYearRequest
 {
     public DateOnly BeginningDate { get; set; }
     public DateOnly EndingDate { get; set; }
     public bool ExcludeZeroBalance { get; set; } = false;
-    public short? ProfitYear { get; set; }
-
-
-
-    public static StartAndEndDateRequest RequestExample()
+    public static new StartAndEndDateRequest RequestExample()
     {
         return new StartAndEndDateRequest
         {

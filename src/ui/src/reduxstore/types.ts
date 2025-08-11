@@ -196,12 +196,11 @@ export interface EmployeesOnMilitaryLeaveResponse {
   terminationDate: string;
 }
 
-export interface StartAndEndDateRequest {
+export interface StartAndEndDateRequest extends ProfitYearRequest {
   beginningDate: string;
   endingDate: string;
   pagination: SortedPaginationRequestDto;
   excludeZeroBalance?: boolean;
-  profitYear?: number;
 }
 
 export interface ForfeitureDetail extends ProfitYearRequest {

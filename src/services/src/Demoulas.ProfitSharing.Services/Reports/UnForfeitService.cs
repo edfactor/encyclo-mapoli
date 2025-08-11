@@ -93,7 +93,7 @@ public sealed class UnForfeitService : IUnForfeitService
                         ProfitCodeId = x.pd.ProfitCodeId,
                         Wages = x.pp.CurrentIncomeYear + x.pp.IncomeExecutive,
                         SuggestedForfeiture = (x.pp.EnrollmentId == Enrollment.Constants.OldVestingPlanHasForfeitureRecords || x.pp.EnrollmentId == Enrollment.Constants.NewVestingPlanHasForfeitureRecords) && 
-                            x.pp.ProfitYear == (req.ProfitYear ?? req.EndingDate.Year) ?
+                            x.pp.ProfitYear == req.ProfitYear ?
                             - x.pd.Forfeiture 
                             : null
                     })
