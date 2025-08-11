@@ -49,9 +49,9 @@ const MilitaryEntryAndModification = () => {
   };
 
   const handleFetchContributions = useCallback((archive?: boolean) => {
-    if (masterInquiryEmployeeDetails) {
+    
       const request = {
-        badgeNumber: Number(masterInquiryEmployeeDetails.badgeNumber),
+        badgeNumber: Number(masterInquiryEmployeeDetails?.badgeNumber ?? 0),
         profitYear: profitYear,
         contributionAmount: 0,
         contributionDate: "",
@@ -66,7 +66,7 @@ const MilitaryEntryAndModification = () => {
       
       fetchContributions(request);
       setShowContributions(true);
-    }
+    
   }, [fetchContributions, masterInquiryEmployeeDetails, profitYear]);
 
   useEffect(() => {

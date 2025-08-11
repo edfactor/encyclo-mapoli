@@ -25,6 +25,7 @@ interface MilitaryAndRehireForfeituresGridSearchProps {
   onUnsavedChanges: (hasChanges: boolean) => void;
   hasUnsavedChanges: boolean;
   shouldArchive: boolean;
+  onArchiveHandled?: () => void;
 }
 
 const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProps> = ({
@@ -33,7 +34,8 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
   resetPageFlag,
   onUnsavedChanges,
   hasUnsavedChanges,
-  shouldArchive
+  shouldArchive,
+  onArchiveHandled
 }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
@@ -94,14 +96,16 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
       isSortDescending: boolean,
       profitYear: number
     ): (StartAndEndDateRequest & { archive?: boolean }) | null => {
-      if (!rehireForfeituresQueryParams) return null;
-
+      // Build request using query params when present, otherwise fall back to fiscal dates
       const baseRequest: StartAndEndDateRequest = {
-        beginningDate: rehireForfeituresQueryParams.beginningDate || fiscalCalendarYear?.fiscalBeginDate || "",
-        endingDate: rehireForfeituresQueryParams.endingDate || fiscalCalendarYear?.fiscalEndDate || "",
+        beginningDate: rehireForfeituresQueryParams?.beginningDate || fiscalCalendarYear?.fiscalBeginDate || "",
+        endingDate: rehireForfeituresQueryParams?.endingDate || fiscalCalendarYear?.fiscalEndDate || "",
         profitYear: profitYear,
         pagination: { skip, take: pageSize, sortBy, isSortDescending }
       };
+
+      // If we still don't have dates, do not issue a request
+      if (!baseRequest.beginningDate || !baseRequest.endingDate) return null;
 
       // Add archive parameter only when shouldArchive is true
       const finalRequest = shouldArchive ? { ...baseRequest, archive: true } : baseRequest;
@@ -221,14 +225,12 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
 
   const performSearch = useCallback(
     async (skip: number, sortBy: string, isSortDescending: boolean) => {
-      if (rehireForfeituresQueryParams) {
-        const request = createRequest(skip, sortBy, isSortDescending, selectedProfitYear);
-        if (request) {
-          await triggerSearch(request, false);
-        }
+      const request = createRequest(skip, sortBy, isSortDescending, selectedProfitYear);
+      if (request) {
+        await triggerSearch(request, false);
       }
     },
-    [createRequest, rehireForfeituresQueryParams, triggerSearch]
+    [createRequest, triggerSearch]
   );
 
   // Effect to handle initial load and pagination changes
@@ -240,10 +242,33 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
 
   // Effect to handle archive mode search - separate from normal search flow
   useEffect(() => {
-    if (shouldArchive && rehireForfeituresQueryParams) {
-      performSearch(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending);
-    }
-  }, [shouldArchive, rehireForfeituresQueryParams, pageNumber, pageSize, sortParams, performSearch]);
+    if (!shouldArchive) return;
+
+    let cancelled = false;
+    const run = async () => {
+      await performSearch(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending);
+      if (!cancelled) {
+        onArchiveHandled?.();
+      }
+    };
+
+    run();
+
+    // Re-attempt when fiscal dates or selected profit year become available after a refresh
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    shouldArchive,
+    pageNumber,
+    pageSize,
+    sortParams,
+    performSearch,
+    fiscalCalendarYear?.fiscalBeginDate,
+    fiscalCalendarYear?.fiscalEndDate,
+    selectedProfitYear,
+    onArchiveHandled
+  ]);
 
   // Reset page number to 0 when resetPageFlag changes
   useEffect(() => {
