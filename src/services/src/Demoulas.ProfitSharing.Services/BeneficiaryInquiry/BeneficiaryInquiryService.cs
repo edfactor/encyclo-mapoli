@@ -1,4 +1,5 @@
 ﻿using System.Dynamic;
+using System.Linq;
 using System.Threading;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
@@ -345,7 +346,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
     {
         var frozenStateResponse = await _frozenService.GetActiveFrozenDemographic(cancellationToken);
         short yearEnd = frozenStateResponse.ProfitYear;
-        var result = await _dataContextFactory.UseReadOnlyContext(context =>
+        var result = await _dataContextFactory.UseReadOnlyContext(async context =>
         {
             IQueryable<BeneficiaryDetailResponse> query;
             if (request.Psn.HasValue && request.Psn > 0)
@@ -367,34 +368,49 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
             }
             else
             {
-                query = context.Demographics.Include(x => x.ContactInfo).Include(x => x.Address)
-                .Where(x => x.BadgeNumber == request.BadgeNumber)
-                .Select(x => new BeneficiaryDetailResponse
+                var memberDetail = await _masterInquiryService.GetMembersAsync(new Common.Contracts.Request.MasterInquiry.MasterInquiryRequest
                 {
-                    Name = x.ContactInfo.FullName,
+                    BadgeNumber = request.BadgeNumber
+                });
+                query = memberDetail.Results.Select(x=> new BeneficiaryDetailResponse
+                {
+                    Name = x.FullName,
                     BadgeNumber = x.BadgeNumber,
-                    City = x.Address.City,
+                    City = x.AddressCity,
                     DateOfBirth = x.DateOfBirth,
                     Ssn = x.Ssn.ToString(),
-                    State = x.Address.State,
-                    Street = x.Address.Street,
-                    Zip = x.Address.PostalCode
-                });
+                    State = x.AddressState,
+                    Street = x.Address,
+                    Zip = x.AddressZipCode
+                }).AsQueryable();
+                //query = context.Demographics.Include(x => x.ContactInfo).Include(x => x.Address)
+                //.Where(x => x.BadgeNumber == request.BadgeNumber)
+                //.Select(x => new BeneficiaryDetailResponse
+                //{
+                //    Name = x.ContactInfo.FullName,
+                //    BadgeNumber = x.BadgeNumber,
+                //    City = x.Address.City,
+                //    DateOfBirth = x.DateOfBirth,
+                //    Ssn = x.Ssn.ToString(),
+                //    State = x.Address.State,
+                //    Street = x.Address.Street,
+                //    Zip = x.Address.PostalCode
+                //});
             }
 
             return query.ToListAsync(cancellationToken);
         });
 
-        ISet<int> ssnList = new HashSet<int>(result.Select(x => Convert.ToInt32(x.Ssn)).ToList());
+        ISet<int> ssnList = new HashSet<int>(result.Result.Select(x => Convert.ToInt32(x.Ssn)).ToList());
         var balanceList = await _totalService.GetVestingBalanceForMembersAsync(SearchBy.Ssn, ssnList, yearEnd, cancellationToken);
-        foreach (var item in result)
+        foreach (var item in result.Result)
         {
             item.CurrentBalance = balanceList.Where(x => x.Id.ToString() == item.Ssn).Select(x => x.CurrentBalance).FirstOrDefault();
             item.Ssn = item.Ssn.MaskSsn();
         }
 
 
-        return result.FirstOrDefault();
+        return result.Result.FirstOrDefault();
     }
 
     public async Task<BeneficiaryTypesResponseDto> GetBeneficiaryTypes(BeneficiaryTypesRequestDto beneficiaryTypesRequestDto, CancellationToken cancellation)
