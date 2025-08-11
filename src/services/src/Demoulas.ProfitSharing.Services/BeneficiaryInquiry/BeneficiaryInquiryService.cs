@@ -89,7 +89,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                 Ssn = x.Contact.Ssn.ToString(),
                 Age = DateTime.Now.Year - x.Contact.DateOfBirth.Year,
                 BadgeNumber = x.BadgeNumber,
-                Psn = x.PsnSuffix,
+                PsnSuffix = x.PsnSuffix,
                 City = x.Contact.Address.City,
                 Name = x.Contact.ContactInfo.FullName,
                 State = x.Contact.Address.State,
