@@ -58,6 +58,7 @@ const MasterInquiryContent = () => {
 
         {searchParams && (
           <MasterInquiryMemberGrid
+            key={searchParams._timestamp || Date.now()}
             searchParams={searchParams}
             onBadgeClick={(data) => setSelectedMember(data || null)}
           />

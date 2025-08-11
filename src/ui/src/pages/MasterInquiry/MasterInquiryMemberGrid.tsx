@@ -10,7 +10,7 @@ import { isSimpleSearch } from "./MasterInquiryFunctions";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 
-interface MasterInquiryMemberGridProps extends MasterInquiryRequest {
+interface MasterInquiryMemberGridProps {
   searchParams: MasterInquiryRequest;
   onBadgeClick: (
     args: { memberType: number; id: number; ssn: number; badgeNumber: number; psnSuffix: number } | undefined
@@ -49,7 +49,9 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = ({
         take: pageSize,
         sortBy: sortParams.sortBy,
         isSortDescending: sortParams.isSortDescending
-      }
+      },
+      // Include timestamp to force fresh API calls for repeat searches
+      _timestamp: searchParams._timestamp || Date.now()
     });
   }, [pageNumber, pageSize, sortParams, searchParams, trigger]);
 
