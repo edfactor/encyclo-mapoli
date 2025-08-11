@@ -55,13 +55,13 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
     }
   }, [initialSearchLoaded, pageNumber, pageSize, sortParams, masterInquiryEmployeeDetails, onSearch]);
 
-  // Need a useEffect on a change in militaryContributionsData to reset the page number
+  // Need a useEffect on a change in militaryContributionsData to reset the page number when total count changes (new search, not pagination)
   const prevMilitaryContributionsData = useRef<any>(null);
   useEffect(() => {
     if (
       militaryContributionsData !== prevMilitaryContributionsData.current &&
-      militaryContributionsData?.results &&
-      militaryContributionsData.results.length !== prevMilitaryContributionsData.current?.results?.length
+      militaryContributionsData?.total !== undefined &&
+      militaryContributionsData.total !== prevMilitaryContributionsData.current?.total
     ) {
       setPageNumber(0);
     }
