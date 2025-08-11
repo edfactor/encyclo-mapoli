@@ -245,6 +245,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
         triggerSearch(searchParams, false)
           .unwrap()
           .then((response) => {
+            console.log("Response:", response);
             // Update loaded state based on response
             if (
               response && Array.isArray(response)

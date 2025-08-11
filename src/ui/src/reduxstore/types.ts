@@ -379,6 +379,7 @@ export interface MasterInquiryRequest {
   name?: string;
   paymentType?: number;
   pagination: SortedPaginationRequestDto;
+  _timestamp?: number;
 }
 
 export interface MasterInquiryMemberRequest {
