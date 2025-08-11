@@ -393,7 +393,7 @@ BEGIN
         0 AS CURRENT_HOURS_YEAR,
         0 AS CURRENT_INCOME_YEAR,
         0 AS WEEKS_WORKED_YEAR,
-        CASE WHEN PY_PROF_CERT = 1 then
+        CASE WHEN TRIM(PY_PROF_CERT) = '1' then
                  TO_DATE(last_last_year || '-12-31', 'YYYY-MM-DD')
             ELSE null END PS_CERTIFICATE_ISSUED_DATE,
         0,
