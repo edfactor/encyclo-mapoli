@@ -1,22 +1,20 @@
-import { Button, TextField, Typography } from "@mui/material";
+import { Button, TextField, Typography, Checkbox, FormControlLabel, Box } from "@mui/material";
 import { useState, useEffect } from "react";
 import { Grid } from "@mui/material";
 import { SmartModal } from "smart-ui-library";
 import { useUpdateForfeitureAdjustmentMutation } from "reduxstore/api/YearsEndApi";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-import { ForfeitureAdjustmentUpdateRequest, EmployeeDetails } from "reduxstore/types";
+import {ForfeitureAdjustmentUpdateRequest, SuggestedForfeitResponse} from "reduxstore/types";
+
 
 interface AddForfeitureModalProps {
   open: boolean;
   onClose: () => void;
   onSave: (formData: {
-    badgeNumber: string;
-    startingBalance: number;
     forfeitureAmount: number;
-    netBalance: number;
-    netVested: number;
+    classAction: boolean;
   }) => void;
-  employeeDetails?: EmployeeDetails | null;
+  suggestedForfeitResponse?: SuggestedForfeitResponse | null;
 }
 
 
@@ -40,48 +38,43 @@ const handleResponseError = (error: any) => {
   }
 };
 
-const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, onSave, employeeDetails }) => {
-  
-  // Need top-level error strings for invalid badge number and badge numbe not found
-  
-
+const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, onSave, suggestedForfeitResponse }) => {
   const [formData, setFormData] = useState({
-    badgeNumber: "",
-    startingBalance: 0,
-    forfeitureAmount: "",
-    netBalance: 0,
-    netVested: 0
+    badgeNumber: 0,
+    forfeitureAmount: 0,
+    classAction: false
   });
   const [updateForfeiture, { isLoading }] = useUpdateForfeitureAdjustmentMutation();
   const profitYear = useFiscalCloseProfitYear();
 
   useEffect(() => {
-    if (employeeDetails) {
-      setFormData((prevState) => ({
-        ...prevState,
-        badgeNumber: employeeDetails.badgeNumber ? String(employeeDetails.badgeNumber) : "",
-        startingBalance: employeeDetails.currentPSAmount || 0,
-        forfeitureAmount: "",
-        netBalance: employeeDetails.currentPSAmount || 0,
-        netVested: employeeDetails.currentVestedAmount || 0
-      }));
+    if (!open) {
+      setFormData({ forfeitureAmount: 0, classAction: false });
+      return;
     }
-  }, [employeeDetails, open]);
+
+    if (suggestedForfeitResponse) {
+      setFormData(prev => ({
+        ...prev,
+        badgeNumber: suggestedForfeitResponse.badgeNumber,
+        forfeitureAmount: suggestedForfeitResponse.suggestedForfeitAmount
+      }))
+    }
+  }, [suggestedForfeitResponse, open]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
-    if (name === "startingBalance" || name === "forfeitureAmount") {
+    if (name === "forfeitureAmount") {
       const numericValue = parseFloat(value) || 0;
-
-      const startingBalance = name === "startingBalance" ? numericValue : formData.startingBalance;
-      const forfeitureAmount = name === "forfeitureAmount" ? numericValue : parseFloat(formData.forfeitureAmount) || 0;
-      const netBalance = startingBalance - forfeitureAmount;
-
       setFormData({
         ...formData,
-        [name]: name === "startingBalance" ? numericValue : value,
-        netBalance
+        forfeitureAmount: numericValue
+      });
+    } else if (name === "classAction") {
+      setFormData({
+        ...formData,
+        classAction: (e.target as HTMLInputElement).checked
       });
     } else {
       setFormData({
@@ -93,22 +86,15 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
 
   const handleSave = async () => {
     try {
-      const badgeNum = parseInt(formData.badgeNumber) || 0;
-
-      if (!badgeNum) {
-        alert("Badge Number is required");
-        return;
-      }
-
       const request: ForfeitureAdjustmentUpdateRequest & { suppressAllToastErrors?: boolean, onlyNetworkToastErrors?: boolean } = {
-        badgeNumber: badgeNum,
-        forfeitureAmount: parseFloat(formData.forfeitureAmount) || 0,
+        badgeNumber: formData.badgeNumber,
+        forfeitureAmount: formData.forfeitureAmount,
+        classAction: formData.classAction,
         profitYear: profitYear,
         //suppressAllToastErrors: false,
         onlyNetworkToastErrors: true // Suppress validation errors, only show network errors
       };
-
-     
+      
       const result = await updateForfeiture(request);
       
       // If the response has an error block, handle it
@@ -118,8 +104,8 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
       }
 
       onSave({
-        ...formData,
-        forfeitureAmount: parseFloat(formData.forfeitureAmount) || 0
+        forfeitureAmount: formData.forfeitureAmount,
+        classAction: formData.classAction
       });
 
       // Close the modal
@@ -155,35 +141,18 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
       <Grid
         container
         spacing={2}>
+
         <Grid size={{ xs: 12 }}>
-          <Typography
-            variant="body2"
-            gutterBottom>
-            Badge Number
-          </Typography>
-          <TextField
-            name="badgeNumber"
-            value={formData.badgeNumber}
-            onChange={handleChange}
-            fullWidth
-            size="small"
-            variant="outlined"
-          />
-        </Grid>
-        <Grid size={{ xs: 6 }}>
-          <Typography
-            variant="body2"
-            gutterBottom>
-            Starting Balance
-          </Typography>
-          <TextField
-            name="startingBalance"
-            value={formData.startingBalance}
-            onChange={handleChange}
-            fullWidth
-            size="small"
-            variant="outlined"
-            type="number"
+          <FormControlLabel
+            control={
+              <Checkbox
+                name="classAction"
+                checked={formData.classAction}
+                onChange={handleChange}
+                color="primary"
+              />
+            }
+            label="Class Action"
           />
         </Grid>
         <Grid size={{ xs: 6 }}>
@@ -202,39 +171,8 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
             type="number"
           />
         </Grid>
-        <Grid size={{ xs: 6 }}>
-          <Typography
-            variant="body2"
-            gutterBottom>
-            Net Balance
-          </Typography>
-          <TextField
-            name="netBalance"
-            value={formData.netBalance}
-            onChange={handleChange}
-            fullWidth
-            size="small"
-            variant="outlined"
-            type="number"
-            disabled
-          />
-        </Grid>
-        <Grid size={{ xs: 6 }}>
-          <Typography
-            variant="body2"
-            gutterBottom>
-            Net Vested
-          </Typography>
-          <TextField
-            name="netVested"
-            value={formData.netVested}
-            onChange={handleChange}
-            fullWidth
-            size="small"
-            variant="outlined"
-            type="number"
-          />
-        </Grid>
+        
+        
       </Grid>
     </SmartModal>
   );

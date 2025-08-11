@@ -28,3 +28,23 @@ export const isSimpleSearch = (masterInquiryRequestParams: MasterInquiryRequest 
     );
   return simpleFound;
 };
+
+export const splitFullPSN = (
+  badgeNumber: string | undefined
+): { psnSuffix: number | undefined; verifiedBadgeNumber: number | undefined } => {
+  if (!badgeNumber) {
+    return { psnSuffix: undefined, verifiedBadgeNumber: undefined };
+  }
+
+  let psnSuffix: number | undefined;
+  let verifiedBadgeNumber: number | undefined;
+
+  if (badgeNumber.length < 8) {
+    verifiedBadgeNumber = parseInt(badgeNumber);
+  } else {
+    verifiedBadgeNumber = parseInt(badgeNumber.slice(0, -4));
+    psnSuffix = parseInt(badgeNumber.slice(-4));
+  }
+
+  return { psnSuffix, verifiedBadgeNumber };
+};

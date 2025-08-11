@@ -155,8 +155,8 @@ public static class StockFactory
             new YearEndUpdateStatus
             {
                 ProfitYear = profitYear,
-                UpdatedTime = default,
-                UpdatedBy = "someone",
+                CreatedAtUtc = default,
+                UserName = "someone",
                 BeneficiariesEffected = 0,
                 EmployeesEffected = 0,
                 EtvasEffected = 0,

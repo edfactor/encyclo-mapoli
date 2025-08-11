@@ -7,17 +7,45 @@ import { useState, useEffect } from "react";
 import { CAPTIONS } from "../../../constants";
 import { useLazyGetAccountingRangeToCurrent } from "../../../hooks/useFiscalCalendarYear";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../reduxstore/store";
 
 const RehireForfeitures = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [resetPageFlag, setResetPageFlag] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [shouldBlock, setShouldBlock] = useState(false);
+  const [previousStatus, setPreviousStatus] = useState<string | null>(null);
+  const [shouldArchive, setShouldArchive] = useState(false);
   const [fetchAccountingRange, { data: fiscalCalendarYear, isLoading: isRangeLoading }] =
     useLazyGetAccountingRangeToCurrent(6);
+  
+  // Get rehireForfeituresQueryParams from Redux to check if search has been performed
+  const { rehireForfeituresQueryParams } = useSelector((state: RootState) => state.yearsEnd);
 
   const renderActionNode = () => {
-    return <StatusDropdownActionNode />;
+    return (
+      <StatusDropdownActionNode
+        onStatusChange={(newStatus: string, statusName?: string) => {
+          // Check if this is a change TO "Complete" 
+          // Trigger archive if: 1) status is "Complete" AND 2) it's different from previous status (or no previous status)
+          const isChangingToComplete = statusName === "Complete" && previousStatus !== newStatus;
+          const hasSearchBeenPerformed = !!rehireForfeituresQueryParams;
+          
+          if (isChangingToComplete) {
+            if (hasSearchBeenPerformed) {
+              setShouldArchive(true);
+            } else {
+              alert("Please perform a search first before changing the status to Complete.");
+              return;
+            }
+          }
+          
+          // Update the previous status to track further changes
+          setPreviousStatus(newStatus);
+        }}
+      />
+    );
   };
 
   const handleUnsavedChanges = (hasChanges: boolean) => {
@@ -29,6 +57,13 @@ const RehireForfeitures = () => {
   useEffect(() => {
     fetchAccountingRange();
   }, [fetchAccountingRange]);
+
+  // Reset archive flag after it's been used (when data is loaded)
+  useEffect(() => {
+    if (shouldArchive && initialSearchLoaded) {
+      setShouldArchive(false);
+    }
+  }, [shouldArchive, initialSearchLoaded]);
 
   useEffect(() => {
     if (!shouldBlock) return;
@@ -81,6 +116,13 @@ const RehireForfeitures = () => {
     setResetPageFlag((prev) => !prev);
   };
 
+  // Auto-trigger search when archive mode is activated
+  useEffect(() => {
+    if (shouldArchive) {
+      handleSearch();
+    }
+  }, [shouldArchive]);
+
   return (
     <Page
       label={`${CAPTIONS.REHIRE_FORFEITURES}`}
@@ -120,6 +162,7 @@ const RehireForfeitures = () => {
                 resetPageFlag={resetPageFlag}
                 onUnsavedChanges={handleUnsavedChanges}
                 hasUnsavedChanges={hasUnsavedChanges}
+                shouldArchive={shouldArchive}
               />
             </Grid>
           </>

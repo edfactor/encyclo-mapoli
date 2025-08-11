@@ -84,8 +84,8 @@ import {
   ExecutiveHoursAndDollars,
   ExecutiveHoursAndDollarsRequestDto,
   ForfeitureAdjustmentDetail,
-  ForfeitureAdjustmentRequest,
-  ForfeitureAdjustmentResponse,
+  SuggestForfeitureAdjustmentRequest,
+  SuggestForfeitAmountResponse,
   ForfeitureAdjustmentUpdateRequest,
   ForfeituresAndPoints,
   ForfeituresByAge,
@@ -131,6 +131,9 @@ import { createDataSourceAwareBaseQuery } from "./api";
 
 // Create intersection type for getUpdateSummary with optional archive
 type UpdateSummaryRequestWithArchive = UpdateSummaryRequest & { archive?: boolean };
+
+// Create intersection type for getTerminationReport with optional archive
+type TerminationRequestWithArchive = StartAndEndDateRequest & { archive?: boolean };
 
 import {
   clearForfeitureAdjustmentData,
@@ -300,20 +303,26 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getRehireForfeitures: builder.query<PagedReportResponse<MilitaryAndRehireForfeiture>, StartAndEndDateRequest>({
-      query: (params) => ({
-        url: `yearend/unforfeitures/`,
-        method: "POST",
-        body: {
-          beginningDate: params.beginningDate,
-          endingDate: params.endingDate,
-          take: params.pagination.take,
-          skip: params.pagination.skip,
-          sortBy: params.pagination.sortBy,
-          isSortDescending: params.pagination.isSortDescending,
-          excludeZeroBalance: params.excludeZeroBalance || false
-        }
-      }),
+    getRehireForfeitures: builder.query<PagedReportResponse<MilitaryAndRehireForfeiture>, StartAndEndDateRequest & { archive?: boolean }>({
+      query: (params) => {
+        const baseUrl = `yearend/unforfeitures/`;
+        const url = params.archive ? `${baseUrl}?archive=true` : baseUrl;
+        
+        return {
+          url,
+          method: "POST",
+          body: {
+            beginningDate: params.beginningDate,
+            endingDate: params.endingDate,
+            take: params.pagination.take,
+            skip: params.pagination.skip,
+            sortBy: params.pagination.sortBy,
+            isSortDescending: params.pagination.isSortDescending,
+            excludeZeroBalance: params.excludeZeroBalance || false,
+            profitYear: params.profitYear
+          }
+        };
+      },
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
@@ -652,19 +661,25 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getTerminationReport: builder.query<TerminationResponse, StartAndEndDateRequest>({
+    getTerminationReport: builder.query<TerminationResponse, TerminationRequestWithArchive>({
       query: (params) => {
+        const body: any = {
+          beginningDate: params.beginningDate,
+          endingDate: params.endingDate,
+          skip: params.pagination.skip,
+          take: params.pagination.take,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
+        };
+        
+        if (params.profitYear) {
+          body.profitYear = params.profitYear;
+        }
+        
         return {
-          url: "yearend/terminated-employees",
+          url: `yearend/terminated-employees${params.archive === true ? "?archive=true" : ""}`,
           method: "POST",
-          body: {
-            beginningDate: params.beginningDate,
-            endingDate: params.endingDate,
-            skip: params.pagination.skip,
-            take: params.pagination.take,
-            sortBy: params.pagination.sortBy,
-            isSortDescending: params.pagination.isSortDescending
-          }
+          body
         };
       },
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -1076,7 +1091,7 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getForfeitureAdjustments: builder.query<ForfeitureAdjustmentResponse, ForfeitureAdjustmentRequest>({
+    getForfeitureAdjustments: builder.query<SuggestForfeitAmountResponse, SuggestForfeitureAdjustmentRequest>({
       query: (params) => ({
         url: "yearend/forfeiture-adjustments",
         method: "GET",

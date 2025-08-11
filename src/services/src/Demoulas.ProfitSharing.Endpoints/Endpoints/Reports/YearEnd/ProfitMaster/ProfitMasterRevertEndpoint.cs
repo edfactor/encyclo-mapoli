@@ -1,6 +1,9 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using System.Threading;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
 
@@ -9,10 +12,13 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitMaste
 public class ProfitMasterRevertEndpoint : Endpoint<ProfitYearRequest, ProfitMasterRevertResponse>
 {
     private readonly IProfitMasterService _profitMasterService;
+    private readonly INavigationService _navigationService;
 
-    public ProfitMasterRevertEndpoint(IProfitMasterService profitMasterService)
+    public ProfitMasterRevertEndpoint(IProfitMasterService profitMasterService,
+        INavigationService navigationService)
     {
         _profitMasterService = profitMasterService;
+        _navigationService = navigationService;
     }
 
     public override void Configure()
@@ -31,6 +37,8 @@ public class ProfitMasterRevertEndpoint : Endpoint<ProfitYearRequest, ProfitMast
     public override async Task HandleAsync(ProfitYearRequest req, CancellationToken ct)
     {
         var response = await _profitMasterService.Revert(req, ct);
+        await _navigationService.UpdateNavigation(Navigation.Constants.MasterUpdate, NavigationStatus.Constants.InProgress, ct);
+        
         await Send.OkAsync(response, ct);
     }
 }

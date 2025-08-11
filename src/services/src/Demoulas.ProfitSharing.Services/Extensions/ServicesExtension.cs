@@ -60,10 +60,9 @@ public static class ServicesExtension
 
 
         _ = builder.Services.AddScoped<IAuditService, AuditService>();
-        _ = builder.Services.AddScoped<ContributionService>();
         _ = builder.Services.AddScoped<TotalService>();
 
-        _ = builder.Services.AddScoped<ITerminatedEmployeeAndBeneficiaryReportService, TerminatedEmployeeAndBeneficiaryReportService>();
+        _ = builder.Services.AddScoped<ITerminatedEmployeeService, TerminatedEmployeeService>();
 
         _ = builder.Services.AddScoped<IFrozenService, FrozenService>();
         _ = builder.Services.AddScoped<IStoreService, StoreService>();

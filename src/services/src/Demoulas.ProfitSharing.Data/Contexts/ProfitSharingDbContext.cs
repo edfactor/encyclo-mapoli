@@ -63,6 +63,7 @@ public class ProfitSharingDbContext : OracleDbContext<ProfitSharingDbContext>, I
     public virtual DbSet<ParticipantTotalRatio> ParticipantTotalRatios { get; set; }
     public virtual DbSet<ParticipantTotalYear> ParticipantTotalYears { get; set; }
     public virtual DbSet<ParticipantTotalVestingBalance> ParticipantTotalVestingBalances { get; set; }
+    public virtual DbSet<ProfitDetailRollup> ProfitDetailRollups { get; set; }
     public virtual DbSet<Navigation> Navigations { get; set; }
     public virtual DbSet<NavigationRole> NavigationRoles { get; set; }
     public virtual DbSet<NavigationStatus> NavigationStatuses { get; set; }

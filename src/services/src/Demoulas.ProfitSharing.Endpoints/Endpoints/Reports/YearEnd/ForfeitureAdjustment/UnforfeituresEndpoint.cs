@@ -63,7 +63,7 @@ public class UnforfeituresEndpoint :
     public override Task<ReportResponseBase<UnforfeituresResponse>> GetResponse(StartAndEndDateRequest req, CancellationToken ct)
     {
         return _auditService.ArchiveCompletedReportAsync(
-            "Report_Name",
+            "Rehire Forfeiture Adjustments Endpoint",
             (short)req.EndingDate.Year,
             req,
             (archiveReq, _, cancellationToken) => _reportService.FindRehiresWhoMayBeEntitledToForfeituresTakenOutInPriorYearsAsync(archiveReq, cancellationToken),

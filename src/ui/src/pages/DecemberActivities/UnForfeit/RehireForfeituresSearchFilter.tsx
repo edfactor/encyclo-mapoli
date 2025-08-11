@@ -15,6 +15,7 @@ import * as yup from "yup";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 import { CalendarResponseDto, StartAndEndDateRequest } from "../../../reduxstore/types";
 import { mmDDYYFormat, tryddmmyyyyToDate } from "../../../utils/dateUtils";
+import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 
 const schema = yup.object().shape({
   beginningDate: yup.string().required("Beginning Date is required"),
@@ -65,6 +66,8 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
   const { rehireForfeituresQueryParams } = useSelector((state: RootState) => state.yearsEnd);
   const dispatch = useDispatch();
 
+  const selectedProfitYear = useDecemberFlowProfitYear();
+
   const validateAndSubmit = (data: StartAndEndDateRequest) => {
     if (hasUnsavedChanges) {
       alert("Please save your changes.");
@@ -78,7 +81,8 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
       const updatedData = {
         ...data,
         beginningDate: mmDDYYFormat(beginDate),
-        endingDate: mmDDYYFormat(endDate)
+        endingDate: mmDDYYFormat(endDate),
+        profitYear: selectedProfitYear
       };
 
       dispatch(setMilitaryAndRehireForfeituresQueryParams(updatedData));

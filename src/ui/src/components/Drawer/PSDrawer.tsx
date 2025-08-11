@@ -588,7 +588,7 @@ const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
                             <>
                               <ListItemText
                                 primary={level.mainTitle}
-                                secondary={`1 of ${level.topPage.length - 1} completed`}
+                                secondary={`${level.topPage.filter(page => page.statusName?.toLowerCase() === "complete").length} of ${level.topPage.length} completed`}
                                 primaryTypographyProps={{
                                   variant: "h6"
                                 }}

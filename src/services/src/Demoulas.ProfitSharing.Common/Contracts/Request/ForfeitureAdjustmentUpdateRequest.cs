@@ -8,7 +8,7 @@ public record ForfeitureAdjustmentUpdateRequest
 {
     public required int BadgeNumber { get; init; }
     public required decimal ForfeitureAmount { get; init; } 
-    public string? Reason { get; init; }
+    public bool ClassAction { get; init; }
     public int ProfitYear { get; init; }
     public int? OffsettingProfitDetailId { get; set; } // This states which profit detail record the user is trying to offset against.
 
@@ -18,7 +18,7 @@ public record ForfeitureAdjustmentUpdateRequest
         {
             BadgeNumber = 1234567890,
             ForfeitureAmount = 1000,
-            Reason = "Example reason",
+            ClassAction = false,
             ProfitYear = 2024
         };
     }

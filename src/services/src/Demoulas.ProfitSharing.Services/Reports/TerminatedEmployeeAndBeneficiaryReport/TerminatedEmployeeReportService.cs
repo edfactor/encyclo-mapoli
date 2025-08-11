@@ -14,13 +14,13 @@ namespace Demoulas.ProfitSharing.Services.Reports.TerminatedEmployeeAndBeneficia
 /// <summary>
 /// Generates reports for terminated employees and their beneficiaries.
 /// </summary>
-public sealed class TerminatedEmployeeAndBeneficiaryReport
+public sealed class TerminatedEmployeeReportService
 {
     private readonly IProfitSharingDataContextFactory _factory;
     private readonly TotalService _totalService;
     private readonly IDemographicReaderService _demographicReaderService;
 
-    public TerminatedEmployeeAndBeneficiaryReport(IProfitSharingDataContextFactory factory,
+    public TerminatedEmployeeReportService(IProfitSharingDataContextFactory factory,
         TotalService totalService,
         IDemographicReaderService demographicReaderService)
     {
@@ -288,7 +288,7 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
                 VestedPercent = vestingPercent * 100,
                 Age = age,
                 EnrollmentCode = enrollmentId,
-                SuggestedForfeit = member.ProfitYear == req.EndingDate.Year ? member.EndingBalance - vestedBalance : null
+                SuggestedForfeit = member.ProfitYear == req.ProfitYear ? member.EndingBalance - vestedBalance : null
             };
 
             yearDetailsList.Add((member.BadgeNumber, member.PsnSuffix, member.FullName, yearDetail));
@@ -323,6 +323,8 @@ public sealed class TerminatedEmployeeAndBeneficiaryReport
             Response = grouped
         };
     }
+
+
 
     /// <summary>
     /// Do we include the member in the report or not?    They are interesting if they have money (as a bene) or

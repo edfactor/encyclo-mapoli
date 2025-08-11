@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System.Reflection;
+using System.Security.Cryptography;
 using System.Text.Json;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
@@ -28,7 +29,7 @@ public sealed class AuditService : IAuditService
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task<TResponse> ArchiveCompletedReportAsync<TRequest, TResponse>(
+    public Task<TResponse> ArchiveCompletedReportAsync<TRequest, TResponse>(
         string reportName,
         short profitYear,
         TRequest request,
@@ -46,6 +47,16 @@ public sealed class AuditService : IAuditService
         _ = (_httpContextAccessor.HttpContext?.Request?.Query?.TryGetValue("archive", out var archiveValue) ?? false) &&
                        bool.TryParse(archiveValue, out isArchiveRequest) && isArchiveRequest;
 
+        return ArchiveCompletedReportAsync(reportName, profitYear, request, isArchiveRequest, reportFunction, cancellationToken);
+    }
+
+    public async Task<TResponse> ArchiveCompletedReportAsync<TRequest, TResponse>(string reportName, 
+        short profitYear, 
+        TRequest request, 
+        bool isArchiveRequest, 
+        Func<TRequest, bool, CancellationToken, Task<TResponse>> reportFunction,
+        CancellationToken cancellationToken) where TRequest : PaginationRequestDto where TResponse : class
+    {
         TRequest archiveRequest = request;
         if (isArchiveRequest)
         {
@@ -84,8 +95,24 @@ public sealed class AuditService : IAuditService
     {
         var result = new List<KeyValuePair<string, decimal>>();
         var type = obj.GetType();
-        var properties = type.GetProperties()
-            .Where(p => Attribute.IsDefined(p, typeof(YearEndArchivePropertyAttribute)) && p.PropertyType == typeof(decimal));
+        
+        // Check if the class itself has the YearEndArchivePropertyAttribute
+        bool classHasAttribute = Attribute.IsDefined(type, typeof(YearEndArchivePropertyAttribute));
+        
+        IEnumerable<PropertyInfo> properties;
+        if (classHasAttribute)
+        {
+            // If class has the attribute, include all decimal properties
+            properties = type.GetProperties()
+                .Where(p => p.PropertyType == typeof(decimal));
+        }
+        else
+        {
+            // Otherwise, only include properties that explicitly have the attribute
+            properties = type.GetProperties()
+                .Where(p => Attribute.IsDefined(p, typeof(YearEndArchivePropertyAttribute))
+                            && p.PropertyType == typeof(decimal));
+        }
         
         foreach (var prop in properties)
         {
