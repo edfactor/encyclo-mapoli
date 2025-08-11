@@ -40,7 +40,7 @@ public sealed class UnForfeitService : IUnForfeitService
             var ending = req.EndingDate;
 
             var yearsOfServiceQuery = _totalService.GetYearsOfService(context, (short)req.EndingDate.Year);
-            var vestingServiceQuery = _totalService.TotalVestingBalance(context, (short)(beginning.Year - 1), ending);
+            var vestingServiceQuery = _totalService.TotalVestingBalance(context, (short)req.EndingDate.Year, ending);
             var demo = await _demographicReaderService.BuildDemographicQuery(context);
             
             var query =
@@ -97,6 +97,7 @@ public sealed class UnForfeitService : IUnForfeitService
                             - x.pd.Forfeiture 
                             : null
                     })
+                    .OrderByDescending(x=>x.ProfitYear)    
                     .ToList()
                 };
 

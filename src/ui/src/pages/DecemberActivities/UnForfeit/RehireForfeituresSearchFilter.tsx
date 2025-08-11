@@ -198,7 +198,7 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
                     onChange={(e) => field.onChange(e.target.checked)}
                   />
                 }
-                label="Exclude 0 balance"
+                label="Exclude employees with no current balance and no vested balance"
               />
             )}
           />
