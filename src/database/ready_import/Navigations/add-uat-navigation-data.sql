@@ -29,6 +29,35 @@ VALUES(8,1, 'UnForfeit', 'QPREV-PROF','unforfeitures', 1, 2, '', 0);
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
 VALUES(9,1, 'Terminations', 'QPAY066','prof-term', 1, 4, '', 0);
 
+--Clean up Reports (main container)
+INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
+VALUES(2,1, 'Clean up Reports', '','', 1, 1, '', 0);
+
+--sub values for Clean up Reports
+INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
+VALUES(3,2, 'Demographic Badges Not In PayProfit', '','demographic-badges-not-in-payprofit', 1, 1, '', 0);
+
+INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
+VALUES(4,2, 'Duplicate SSNs in Demographics', '','duplicate-ssns-demographics', 1, 2, '', 0);
+
+INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
+VALUES(5,2, 'Negative ETVA', '','negative-etva-for-ssns-on-payprofit', 1, 3, '', 0);
+
+INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
+VALUES(6,2, 'Duplicate Names and Birthdays', '','duplicate-names-and-birthdays', 1, 4, '', 0);
+
+--Additional December Activities sub-items
+INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
+VALUES(7,1, 'Military Contributions', '008-13','military-entry-and-modification', 1, 3, '', 0);
+
+INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
+VALUES(10,1, 'Forfeitures', '008-12','forfeitures-adjustment', 1, 5, '', 0);
+
+INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
+VALUES(11,1, 'Distributions and Forfeitures', 'QPAY129','distributions-and-forfeitures', 1, 6, '', 0);
+
+INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
+VALUES(13,1, 'Profit Share Report', 'PAY426','profit-share-report', 1, 9, '', 0);
 
 END;
 COMMIT ;
