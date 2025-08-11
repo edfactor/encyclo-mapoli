@@ -1,5 +1,9 @@
 ﻿
+using Demoulas.ProfitSharing.Common.Attributes;
+
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+
+[YearEndArchiveProperty]
 public sealed record  ExecutiveHoursAndDollarsResponse
 {
     public required int BadgeNumber { get; set; }

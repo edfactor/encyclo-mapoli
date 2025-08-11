@@ -1,9 +1,9 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { ForfeitureAdjustmentResponse, ForfeitureAdjustmentRequest } from "../types";
+import { SuggestForfeitAmountResponse, SuggestForfeitureAdjustmentRequest } from "../types";
 
 interface ForfeituresAdjustmentState {
-  forfeitureAdjustmentData: ForfeitureAdjustmentResponse | null;
-  forfeitureAdjustmentQueryParams: ForfeitureAdjustmentRequest | null;
+  forfeitureAdjustmentData: SuggestForfeitAmountResponse | null;
+  forfeitureAdjustmentQueryParams: SuggestForfeitureAdjustmentRequest | null;
 }
 
 const initialState: ForfeituresAdjustmentState = {
@@ -15,13 +15,13 @@ export const forfeituresAdjustmentSlice = createSlice({
   name: "forfeituresAdjustment",
   initialState,
   reducers: {
-    setForfeitureAdjustmentData: (state, action: PayloadAction<ForfeitureAdjustmentResponse>) => {
+    setForfeitureAdjustmentData: (state, action: PayloadAction<SuggestForfeitAmountResponse>) => {
       state.forfeitureAdjustmentData = action.payload;
     },
     clearForfeitureAdjustmentData: (state) => {
       state.forfeitureAdjustmentData = null;
     },
-    setForfeitureAdjustmentQueryParams: (state, action: PayloadAction<ForfeitureAdjustmentRequest>) => {
+    setForfeitureAdjustmentQueryParams: (state, action: PayloadAction<SuggestForfeitureAdjustmentRequest>) => {
       state.forfeitureAdjustmentQueryParams = action.payload;
     },
     clearForfeitureAdjustmentQueryParams: (state) => {

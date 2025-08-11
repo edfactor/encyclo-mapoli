@@ -29,8 +29,9 @@ import { MasterInquiryRequest, MasterInquirySearch } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
-import { memberTypeGetNumberMap, paymentTypeGetNumberMap } from "./MasterInquiryFunctions";
+import { memberTypeGetNumberMap, paymentTypeGetNumberMap, splitFullPSN } from "./MasterInquiryFunctions";
 import { useMissiveAlerts } from "./useMissiveAlerts";
+import { MAX_EMPLOYEE_BADGE_LENGTH } from "../../constants";
 
 const schema = yup.object().shape({
   endProfitYear: yup
@@ -109,9 +110,8 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
 
   const determineCorrectMemberType = (badgeNum: string | undefined) => {
     if (!badgeNum) return "all";
-    if (badgeNum.length === 6) return "employees";
-    if (badgeNum.length > 6) return "beneficiaries";
-    return "all";
+    if (badgeNum.length <= MAX_EMPLOYEE_BADGE_LENGTH) return "employees";
+    return "beneficiaries";
   };
 
   const {
@@ -156,11 +156,14 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
 
       clearAlerts(); // Clear existing alerts
 
+      const { psnSuffix, verifiedBadgeNumber } = splitFullPSN(badgeNumber);
+
       const searchParams: MasterInquiryRequest = {
         pagination: { skip: 0, take: 5, sortBy: "badgeNumber", isSortDescending: true },
-        badgeNumber: Number(badgeNumber),
+        badgeNumber: verifiedBadgeNumber,
         memberType: memberTypeGetNumberMap[determineCorrectMemberType(badgeNumber)],
-        endProfitYear: profitYear
+        endProfitYear: profitYear,
+        ...(psnSuffix !== undefined && { psnSuffix })
       };
 
       // First ensure the parent component has the search parameters
@@ -207,6 +210,8 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
         // Create a unique timestamp to ensure each search is treated as new
         const timestamp = Date.now();
 
+        const { psnSuffix, verifiedBadgeNumber } = splitFullPSN(data.badgeNumber?.toString());
+
         const searchParams: MasterInquiryRequest = {
           pagination: {
             skip: data.pagination?.skip || 0,
@@ -219,7 +224,8 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
           ...(!!data.endProfitMonth && { endProfitMonth: data.endProfitMonth }),
           ...(!!data.socialSecurity && { ssn: data.socialSecurity }),
           ...(!!data.name && { name: data.name }),
-          ...(!!data.badgeNumber && { badgeNumber: data.badgeNumber }),
+          ...(verifiedBadgeNumber !== undefined && { badgeNumber: verifiedBadgeNumber }),
+          ...(psnSuffix !== undefined && { psnSuffix }),
           ...(!!data.paymentType && { paymentType: paymentTypeGetNumberMap[data.paymentType] }),
           ...(!!data.memberType && { memberType: memberTypeGetNumberMap[data.memberType] }),
           ...(!!data.contribution && { contributionAmount: data.contribution }),
@@ -452,7 +458,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
   const paymentTypeOptions = useMemo(
     () => [
       { value: "all", label: "All" },
-      { value: "hardship", label: "Hardship/Dis" },
+      { value: "hardship", label: "Hardship/Dist" },
       { value: "payoffs", label: "Payoffs/Forfeit" },
       { value: "rollovers", label: "Rollovers" }
     ],

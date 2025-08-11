@@ -188,7 +188,7 @@ SELECT pd.SSN Ssn   ,
 	   Sum(CASE pd.PROFIT_CODE_ID WHEN {ProfitCode.Constants.OutgoingXferBeneficiary.Id} THEN -pd.FORFEITURE
 	   							  WHEN {ProfitCode.Constants.IncomingQdroBeneficiary.Id} THEN pd.CONTRIBUTION 
 	   							  ELSE 0 END) BENEFICIARY_ALLOCATION,
-	   Sum(pd.CONTRIBUTION + pd.EARNINGS + pd.FORFEITURE) CURRENT_BALANCE,
+	   Sum(pd.CONTRIBUTION + pd.EARNINGS + CASE WHEN pd.PROFIT_CODE_ID = {ProfitCode.Constants.IncomingContributions.Id} THEN pd.FORFEITURE ELSE -pd.FORFEITURE END) CURRENT_BALANCE,
 	   Sum(CASE WHEN pd.PROFIT_YEAR_ITERATION = {ProfitDetail.Constants.ProfitYearIterationMilitary} THEN pd.CONTRIBUTION ELSE 0 END) MILITARY_TOTAL,
 	   Sum(CASE WHEN pd.PROFIT_YEAR_ITERATION = {ProfitDetail.Constants.ProfitYearIterationClassActionFund} THEN pd.EARNINGS ELSE 0 END) CLASS_ACTION_FUND_TOTAL,
 	   Sum(CASE WHEN (pd.PROFIT_CODE_ID = {ProfitCode.Constants.Outgoing100PercentVestedPayment.Id} AND (pd.COMMENT_TYPE_ID IN ({CommentType.Constants.TransferOut.Id},{CommentType.Constants.QdroOut.Id})) 

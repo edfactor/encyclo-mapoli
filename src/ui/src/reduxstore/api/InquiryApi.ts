@@ -22,8 +22,8 @@ export const InquiryApi = createApi({
         url: "master/master-inquiry/search",
         method: "POST",
         body: {
-          badgeNumber: Number(params.badgeNumber?.toString().substring(0, 7)),
-          psnSuffix: Number(params.badgeNumber?.toString().substring(7)),
+          badgeNumber: params.badgeNumber,
+          psnSuffix: params.psnSuffix,
           profitYear: params.profitYear,
           endProfitYear: params.endProfitYear,
           startProfitMonth: params.startProfitMonth,
@@ -40,7 +40,8 @@ export const InquiryApi = createApi({
           take: params.pagination.take,
           skip: params.pagination.skip,
           sortBy: params.pagination.sortBy,
-          isSortDescending: params.pagination.isSortDescending
+          isSortDescending: params.pagination.isSortDescending,
+          _timestamp: params._timestamp
         }
       })
     }),
