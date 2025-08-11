@@ -31,7 +31,7 @@ import * as yup from "yup";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 import { memberTypeGetNumberMap, paymentTypeGetNumberMap, splitFullPSN } from "./MasterInquiryFunctions";
 import { useMissiveAlerts } from "./useMissiveAlerts";
-import MAX_EMPLOYEE_BADGE_LENGTH from "constants";
+import { MAX_EMPLOYEE_BADGE_LENGTH } from "../../constants";
 
 const schema = yup.object().shape({
   endProfitYear: yup

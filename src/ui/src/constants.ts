@@ -1,8 +1,8 @@
-export const MAX_EMPLOYEE_BADGE_LENGTH = 7;
-export const HISTORY_KEY = "navigation_history" as const;
+export const MAX_EMPLOYEE_BADGE_LENGTH: number = 7;
+export const HISTORY_KEY: string = "navigation_history";
 
-export const drawerOpenWidth = 330;
-export const drawerClosedWidth = 64;
+export const drawerOpenWidth: number = 330;
+export const drawerClosedWidth: number = 64;
 
 export const MENU_LABELS = {
   FISCAL_CLOSE: "Fiscal Close",

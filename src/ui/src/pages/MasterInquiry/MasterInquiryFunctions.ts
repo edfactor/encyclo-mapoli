@@ -1,4 +1,5 @@
-import MAX_EMPLOYEE_BADGE_LENGTH from "constants";
+import { MAX_EMPLOYEE_BADGE_LENGTH } from "../../constants";
+import { MasterInquirySearch } from "reduxstore/types";
 
 export const paymentTypeGetNumberMap: Record<string, number> = {
   all: 0,
@@ -14,7 +15,7 @@ export const memberTypeGetNumberMap: Record<string, number> = {
   none: 3
 };
 
-export const isSimpleSearch = (masterInquiryRequestParams: MasterInquiryRequest | null): boolean => {
+export const isSimpleSearch = (masterInquiryRequestParams: MasterInquirySearch | null): boolean => {
   const simpleFound: boolean =
     !!masterInquiryRequestParams &&
     (!!masterInquiryRequestParams.name ||
