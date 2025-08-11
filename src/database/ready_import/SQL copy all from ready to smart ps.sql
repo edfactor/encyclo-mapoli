@@ -569,9 +569,14 @@ BEGIN
             ELSE TRIM(PROFIT_CMNT)
             END as pcmnt,
         CASE 
-        WHEN TO_NUMBER(PROFIT_YDTE) = 0 THEN '0'
-        WHEN TO_NUMBER(PROFIT_YDTE) >= 59 THEN '19' || PROFIT_YDTE
-        ELSE '20' || LPAD(PROFIT_YDTE, 2, '0')
+            WHEN PROFIT_YDTE IS NULL OR TRIM(PROFIT_YDTE) IS NULL OR TRIM(PROFIT_YDTE) = '' THEN '0'
+            WHEN REGEXP_LIKE(TRIM(PROFIT_YDTE), '^[0-9]+$') THEN
+                CASE 
+                    WHEN TO_NUMBER(TRIM(PROFIT_YDTE)) = 0 THEN '0'
+                    WHEN TO_NUMBER(TRIM(PROFIT_YDTE)) >= 59 THEN '19' || TRIM(PROFIT_YDTE)
+                    ELSE '20' || LPAD(TRIM(PROFIT_YDTE), 2, '0')
+                END
+            ELSE '0'
         END AS FOUR_DIGIT_YEAR
 
     FROM {SOURCE_PROFITSHARE_SCHEMA}.PROFIT_DETAIL;
@@ -619,11 +624,16 @@ BEGIN
             WHEN TRIM(PROFIT_SS_CMNT) = '' THEN NULL
             ELSE TRIM(PROFIT_SS_CMNT)
             END as pcmnt,
-        CASE           
-            WHEN TO_NUMBER(PROFIT_SS_YDTE) = 0 THEN '0'
-            WHEN TO_NUMBER(PROFIT_SS_YDTE) >= 59 THEN '19' || PROFIT_SS_YDTE
-            ELSE '20' || LPAD(PROFIT_SS_YDTE, 2, '0') 
-            END AS FOUR_DIGIT_YEAR
+        CASE 
+            WHEN PROFIT_SS_YDTE IS NULL OR TRIM(PROFIT_SS_YDTE) IS NULL OR TRIM(PROFIT_SS_YDTE) = '' THEN '0'
+            WHEN REGEXP_LIKE(TRIM(PROFIT_SS_YDTE), '^[0-9]+$') THEN
+                CASE 
+                    WHEN TO_NUMBER(TRIM(PROFIT_SS_YDTE)) = 0 THEN '0'
+                    WHEN TO_NUMBER(TRIM(PROFIT_SS_YDTE)) >= 59 THEN '19' || TRIM(PROFIT_SS_YDTE)
+                    ELSE '20' || LPAD(TRIM(PROFIT_SS_YDTE), 2, '0')
+                END
+            ELSE '0'
+        END AS FOUR_DIGIT_YEAR
 
     FROM {SOURCE_PROFITSHARE_SCHEMA}.PROFIT_SS_DETAIL;
 
