@@ -216,6 +216,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       colId: "suggestedForfeit",
       width: 150,
       type: "rightAligned",
+      pinned: "right",
       resizable: true,
       sortable: false,
       editable: ({ node }) => node.data.isDetail && node.data.profitYear === selectedProfitYear,
