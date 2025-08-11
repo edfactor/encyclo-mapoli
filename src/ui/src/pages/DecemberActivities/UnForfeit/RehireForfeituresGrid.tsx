@@ -1,4 +1,4 @@
-import { GridApi } from "ag-grid-community";
+import { GridApi, ICellRendererParams, ColDef } from "ag-grid-community";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetRehireForfeituresQuery } from "reduxstore/api/YearsEndApi";
@@ -88,18 +88,18 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
 
   // Create a request object based on current parameters
   const createRequest = useCallback(
-    (skip: number, sortBy: string, isSortDescending: boolean): (StartAndEndDateRequest & { archive?: boolean }) | null => {
+    (skip: number, sortBy: string, isSortDescending: boolean, profitYear: number): (StartAndEndDateRequest & { archive?: boolean }) | null => {
       if (!rehireForfeituresQueryParams) return null;
 
       const baseRequest: StartAndEndDateRequest = {
         beginningDate: rehireForfeituresQueryParams.beginningDate || fiscalCalendarYear?.fiscalBeginDate || "",
         endingDate: rehireForfeituresQueryParams.endingDate || fiscalCalendarYear?.fiscalEndDate || "",
+        profitYear: profitYear,
         pagination: { skip, take: pageSize, sortBy, isSortDescending }
       };
 
       // Add archive parameter only when shouldArchive is true
       const finalRequest = shouldArchive ? { ...baseRequest, archive: true } : baseRequest;
-      console.log('createRequest called:', { shouldArchive, hasArchive: !!finalRequest.archive, finalRequest });
       return finalRequest;
     },
     [rehireForfeituresQueryParams, fiscalCalendarYear?.fiscalBeginDate, fiscalCalendarYear?.fiscalEndDate, pageSize, shouldArchive]
@@ -125,7 +125,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
       setSelectedRowIds([]);
       onUnsavedChanges(Object.keys(updatedEditedValues).length > 0);
       if (rehireForfeituresQueryParams) {
-        const request = createRequest(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending);
+        const request = createRequest(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending, selectedProfitYear);
         if (request) {
           await triggerSearch(request, false);
         }
@@ -155,7 +155,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
       setEditedValues(updatedEditedValues);
       onUnsavedChanges(Object.keys(updatedEditedValues).length > 0);
       if (rehireForfeituresQueryParams) {
-        const searchRequest = createRequest(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending);
+        const searchRequest = createRequest(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending, selectedProfitYear);
         if (searchRequest) {
           await triggerSearch(searchRequest, false);
         }
@@ -175,7 +175,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
   const performSearch = useCallback(
     async (skip: number, sortBy: string, isSortDescending: boolean) => {
       if (rehireForfeituresQueryParams) {
-        const request = createRequest(skip, sortBy, isSortDescending);
+        const request = createRequest(skip, sortBy, isSortDescending, selectedProfitYear);
         if (request) {
           await triggerSearch(request, false);
         }
@@ -290,14 +290,14 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
     return rows;
   }, [rehireForfeitures, expandedRows]);
 
-  // Create column definitions with expand/collapse functionality
+  // Create column definitions with expand/collapse functionality and combine main/detail columns
   const columnDefs = useMemo(() => {
     // Add an expansion column
     const expansionColumn = {
       headerName: "",
       field: "isExpandable",
       width: 50,
-      cellRenderer: (params: any) => {
+      cellRenderer: (params: ICellRendererParams) => {
         if (params.data && !params.data.isDetail && params.data.isExpandable) {
           return params.data.isExpanded ? "▼" : "►";
         }
@@ -313,9 +313,45 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
       lockVisible: true,
       lockPosition: true,
       pinned: "left" as const
-    };
+    } as ColDef;
 
-    return [expansionColumn, ...mainColumns, ...detailColumns];
+    // For main columns, hide content for detail rows unless the same field exists in detail columns
+    const visibleColumns = mainColumns.map((column) => {
+      return {
+        ...column,
+        cellRenderer: (params: ICellRendererParams) => {
+          if (params.data?.isDetail) {
+            const hideInDetails = !detailColumns.some((detailCol) => detailCol.field === (column as any).field);
+            if (hideInDetails) {
+              return "";
+            }
+          }
+
+          if ((column as any).cellRenderer) {
+            return (column as any).cellRenderer(params);
+          }
+          return params.valueFormatted ? params.valueFormatted : params.value;
+        }
+      } as ColDef;
+    });
+
+    // Add detail-specific columns that only appear for detail rows
+    const detailOnlyColumns = detailColumns
+      .filter((detailCol) => !mainColumns.some((mainCol) => mainCol.field === detailCol.field))
+      .map((column) => ({
+        ...column,
+        cellRenderer: (params: ICellRendererParams) => {
+          if (!params.data?.isDetail) {
+            return "";
+          }
+          if ((column as any).cellRenderer) {
+            return (column as any).cellRenderer(params);
+          }
+          return params.valueFormatted ? params.valueFormatted : params.value;
+        }
+      } as ColDef));
+
+    return [expansionColumn, ...visibleColumns, ...detailOnlyColumns];
   }, [mainColumns, detailColumns]);
 
   return (
@@ -347,7 +383,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
             preferenceKey={"REHIRE-FORFEITURES"}
             isLoading={isFetching}
             handleSortChanged={sortEventHandler}
-            maxHeight={800}
+            maxHeight={400}
             providedOptions={{
               rowData: gridData,
               columnDefs: columnDefs,
