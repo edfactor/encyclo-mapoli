@@ -37,7 +37,7 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<ICertificateService, CertificateService>();
         _ = builder.Services.AddScoped<ICleanupReportService, CleanupReportService>();
         _ = builder.Services.AddScoped<IEmbeddedSqlService, EmbeddedSqlService>();
-        _ = builder.Services.AddScoped<IForfeituresAndPointsForYearService, ForfeituresAndPointsForYearService>(); 
+        _ = builder.Services.AddScoped<IForfeituresAndPointsForYearService, ForfeituresAndPointsForYearService>();
         _ = builder.Services.AddScoped<IFrozenReportService, FrozenReportService>();
         _ = builder.Services.AddScoped<IMasterInquiryService, MasterInquiryService>();
         _ = builder.Services.AddScoped<IForfeitureAdjustmentService, ForfeitureAdjustmentService>();
@@ -46,11 +46,13 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IMissiveService, MissiveService>();
         _ = builder.Services.AddScoped<ITerminationAndRehireService, TerminationAndRehireService>();
         _ = builder.Services.AddScoped<IUnForfeitService, UnForfeitService>();
-        
+
         _ = builder.Services.AddScoped<ITotalService, TotalService>();
         _ = builder.Services.AddScoped<IWagesService, WagesService>();
         _ = builder.Services.AddScoped<IYearEndService, YearEndService>();
         _ = builder.Services.AddScoped<IMilitaryService, MilitaryService>();
+        _ = builder.Services.AddScoped<IEmployeeLookupService, Lookup.EmployeeLookupService>();
+
         _ = builder.Services.AddScoped<IPayrollDuplicateSsnReportService, PayrollDuplicateSsnReportService>();
         _ = builder.Services.AddScoped<INegativeEtvaReportService, NegativeEtvaReportService>();
         _ = builder.Services.AddScoped<IProfitSharingSummaryReportService, ProfitSharingSummaryReportService>();
@@ -66,7 +68,7 @@ public static class ServicesExtension
 
         _ = builder.Services.AddScoped<IFrozenService, FrozenService>();
         _ = builder.Services.AddScoped<IStoreService, StoreService>();
-        
+
         _ = builder.Services.AddSingleton<IFakeSsnService, FakeSsnService>();
         _ = builder.Services.AddSingleton<IAccountingPeriodsService, AccountingPeriodsService>();
         _ = builder.Services.AddSingleton<ICalendarService, CalendarService>();
