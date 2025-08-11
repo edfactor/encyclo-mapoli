@@ -210,6 +210,31 @@ public sealed class Program
         rootCommand.AddCommand(validateImportCommand);
         rootCommand.AddCommand(runSqlCommandForNavigation);
         
+        var runSqlCommandForUatNavigation = new Command("import-uat-navigation", "Run a custom SQL script to add UAT navigations");
+        commonOptions.ForEach(runSqlCommandForUatNavigation.AddOption);
+
+        runSqlCommandForUatNavigation.SetHandler(async () =>
+        {
+            await GenerateScriptHelper.ExecuteWithDbContext(configuration, args, async context =>
+            {
+                var sqlFile = configuration["sql-file"];
+                var sourceSchema = configuration["source-schema"];
+                if (string.IsNullOrEmpty(sqlFile) || string.IsNullOrEmpty(sourceSchema))
+                {
+                    throw new ArgumentNullException("SQL file path and schema must be provided.");
+                }
+
+                string sqlCommand = await File.ReadAllTextAsync(sqlFile);
+                sqlCommand = sqlCommand.Replace("COMMIT ;", string.Empty)
+                    .Replace("{SOURCE_PROFITSHARE_SCHEMA}", sourceSchema).Trim();
+                await context.Database.ExecuteSqlRawAsync(sqlCommand);
+
+                context.DataImportRecords.Add(new DataImportRecord { SourceSchema = sourceSchema });
+                await context.SaveChangesAsync();
+            });
+        });
+
+        rootCommand.AddCommand(runSqlCommandForUatNavigation);
 
         return rootCommand.InvokeAsync(args);
     }
