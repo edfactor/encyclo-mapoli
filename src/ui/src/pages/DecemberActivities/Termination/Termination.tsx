@@ -25,6 +25,7 @@ const Termination = () => {
   const [shouldBlock, setShouldBlock] = useState(false);
   const [currentStatus, setCurrentStatus] = useState<string | null>(null);
   const [archiveMode, setArchiveMode] = useState(false);
+  const [shouldArchive, setShouldArchive] = useState(false);
 
   const handleSearch = (params: TerminationSearchRequest) => {
     // Add archive parameter if we're in archive mode
@@ -43,12 +44,15 @@ const Termination = () => {
   };
 
   const handleStatusChange = (newStatus: string, statusName?: string) => {
-    // Only trigger archive when status is changing TO "Complete" (not already "Complete")
-    if (statusName === "Complete" && currentStatus !== "Complete") {
+    const isCompleteLike = (statusName ?? "").toLowerCase().includes("complete");
+    const isChangingToComplete = isCompleteLike && currentStatus !== statusName;
+
+    if (isChangingToComplete) {
       setArchiveMode(true);
-      setCurrentStatus("Complete");
-      
-      // If we have existing search params, trigger a new search with archive=true
+      setCurrentStatus(statusName || null);
+      setShouldArchive(true);
+
+      // If we have existing search params, update them to include archive and trigger
       if (searchParams) {
         const archivedParams = { ...searchParams, archive: true };
         setSearchParams(archivedParams);
@@ -57,12 +61,12 @@ const Termination = () => {
     } else {
       setCurrentStatus(statusName || null);
       // Reset archive mode if status changes away from "Complete"
-      if (statusName !== "Complete") {
+      if (!isCompleteLike) {
         setArchiveMode(false);
         // If we have existing search params, trigger a new search without archive
         if (searchParams) {
-          const { archive, ...paramsWithoutArchive } = searchParams;
-          setSearchParams(paramsWithoutArchive);
+          const { archive, ...paramsWithoutArchive } = searchParams as any;
+          setSearchParams(paramsWithoutArchive as any);
           setResetPageFlag((prev) => !prev);
         }
       }
@@ -154,6 +158,9 @@ const Termination = () => {
 
   const isCalendarDataLoaded = !!fiscalData?.fiscalBeginDate && !!fiscalData?.fiscalEndDate;
 
+  // Clear archive flag when the grid confirms handling it
+  const handleArchiveHandled = () => setShouldArchive(false);
+
   return (
     <Page
       label={CAPTIONS.TERMINATIONS}
@@ -192,6 +199,9 @@ const Termination = () => {
                 resetPageFlag={resetPageFlag}
                 onUnsavedChanges={handleUnsavedChanges}
                 hasUnsavedChanges={hasUnsavedChanges}
+                fiscalData={fiscalData}
+                shouldArchive={shouldArchive}
+                onArchiveHandled={handleArchiveHandled}
               />
             </Grid>
           </>

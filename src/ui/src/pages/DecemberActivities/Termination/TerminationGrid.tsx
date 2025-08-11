@@ -5,7 +5,7 @@ import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, numberToCurrency, Pagination } from "smart-ui-library";
 import { TotalsGrid } from "../../../components/TotalsGrid/TotalsGrid";
 import { ReportSummary } from "../../../components/ReportSummary";
-import { StartAndEndDateRequest } from "reduxstore/types";
+import { CalendarResponseDto, StartAndEndDateRequest } from "reduxstore/types";
 import { useLazyGetTerminationReportQuery } from "reduxstore/api/YearsEndApi";
 import { GetDetailColumns, GetTerminationColumns } from "./TerminationGridColumns";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
@@ -20,6 +20,9 @@ interface TerminationGridSearchProps {
   resetPageFlag: boolean;
   onUnsavedChanges: (hasChanges: boolean) => void;
   hasUnsavedChanges: boolean;
+  fiscalData: CalendarResponseDto | null;
+  shouldArchive?: boolean;
+  onArchiveHandled?: () => void;
 }
 
 const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
@@ -28,7 +31,10 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   searchParams,
   resetPageFlag,
   onUnsavedChanges,
-  hasUnsavedChanges
+  hasUnsavedChanges,
+  fiscalData,
+  shouldArchive,
+  onArchiveHandled
 }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
@@ -44,20 +50,36 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   const [editedValues, setEditedValues] = useState<Record<string, { value: number; hasError: boolean }>>({});
   const [loadingRowIds, setLoadingRowIds] = useState<Set<number>>(new Set());
   const selectedProfitYear = useDecemberFlowProfitYear();
+  // fiscalData is now passed from parent to avoid timing issues on refresh
   const [updateForfeitureAdjustmentBulk, { isLoading: isBulkSaving }] = useUpdateForfeitureAdjustmentBulkMutation();
   const [updateForfeitureAdjustment] = useUpdateForfeitureAdjustmentMutation();
+  const lastRequestKeyRef = useRef<string | null>(null);
 
   const createRequest = useCallback(
-    (skip: number, sortBy: string, isSortDescending: boolean, profitYear: number): StartAndEndDateRequest | null => {
-      if (!searchParams) return null;
+    (
+      skip: number,
+      sortBy: string,
+      isSortDescending: boolean,
+      profitYear: number
+    ): (StartAndEndDateRequest & { archive?: boolean }) | null => {
+      const base: StartAndEndDateRequest = searchParams
+        ? {
+            ...searchParams,
+            profitYear,
+            pagination: { skip, take: pageSize, sortBy, isSortDescending }
+          }
+        : {
+            beginningDate: fiscalData?.fiscalBeginDate || "",
+            endingDate: fiscalData?.fiscalEndDate || "",
+            profitYear,
+            pagination: { skip, take: pageSize, sortBy, isSortDescending }
+          };
 
-      return {
-        ...searchParams,
-        profitYear: profitYear,
-        pagination: { skip, take: pageSize, sortBy, isSortDescending }
-      };
+      if (!base.beginningDate || !base.endingDate) return null;
+
+      return shouldArchive ? { ...base, archive: true } : base;
     },
-    [searchParams, pageSize]
+    [searchParams, pageSize, fiscalData?.fiscalBeginDate, fiscalData?.fiscalEndDate, shouldArchive]
   );
 
   const handleSave = useCallback(async (request: ForfeitureAdjustmentUpdateRequest) => {
@@ -132,15 +154,77 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     }
   }, [termination?.response?.results]);
 
+  // Helper to build a unique key for current request inputs
+  const buildRequestKey = (
+    skip: number,
+    sortBy: string,
+    isSortDescending: boolean,
+    profitYear: number,
+    beginningDate?: string,
+    endingDate?: string,
+    archive?: boolean
+  ) => `${skip}|${pageSize}|${sortBy}|${isSortDescending}|${profitYear}|${beginningDate ?? ''}|${endingDate ?? ''}|${archive ? '1' : '0'}`;
+
   // Fetch data when pagination, sort, or searchParams change
   useEffect(() => {
-    if (searchParams) {
-      const params = createRequest(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending, selectedProfitYear);
-      if (params) {
-        triggerSearch(params, false);
-      }
+    const params = createRequest(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending, selectedProfitYear);
+    if (params) {
+      const key = buildRequestKey(
+        pageNumber * pageSize,
+        sortParams.sortBy,
+        sortParams.isSortDescending,
+        selectedProfitYear,
+        (params as any).beginningDate,
+        (params as any).endingDate,
+        (params as any).archive
+      );
+      if (lastRequestKeyRef.current === key) return;
+      lastRequestKeyRef.current = key;
+      triggerSearch(params, false);
     }
   }, [searchParams, pageNumber, pageSize, sortParams, selectedProfitYear, triggerSearch, createRequest]);
+
+  // Archive trigger: when shouldArchive flips true, attempt search and clear flag when done; retry when data becomes available
+  useEffect(() => {
+    if (!shouldArchive) return;
+    let cancelled = false;
+    const run = async () => {
+      const params = createRequest(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending, selectedProfitYear);
+      if (params) {
+        const key = buildRequestKey(
+          pageNumber * pageSize,
+          sortParams.sortBy,
+          sortParams.isSortDescending,
+          selectedProfitYear,
+          (params as any).beginningDate,
+          (params as any).endingDate,
+          (params as any).archive
+        );
+        if (lastRequestKeyRef.current === key) {
+          if (!cancelled) onArchiveHandled?.();
+          return;
+        }
+        lastRequestKeyRef.current = key;
+        await triggerSearch(params, false);
+        if (!cancelled) onArchiveHandled?.();
+      }
+    };
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    shouldArchive,
+    pageNumber,
+    pageSize,
+    sortParams,
+    selectedProfitYear,
+    triggerSearch,
+    createRequest,
+    onArchiveHandled,
+    fiscalData?.fiscalBeginDate,
+    fiscalData?.fiscalEndDate
+  ]);
 
   const handleRowExpansion = (badgeNumber: string) => {
     setExpandedRows((prev) => ({
@@ -334,8 +418,13 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   };
 
   const sortEventHandler = (update: ISortParams) => {
-    setSortParams(update);
-    setPageNumber(0);
+    setSortParams((prev) => {
+      if (prev.sortBy === update.sortBy && prev.isSortDescending === update.isSortDescending) {
+        return prev; // no change
+      }
+      return update;
+    });
+    setPageNumber((prev) => (prev === 0 ? prev : 0));
   };
 
   return (
