@@ -30,7 +30,7 @@ public class MilitaryContributionRequestValidator : Validator<CreateMilitaryCont
             .LessThanOrEqualTo(DateTime.Today)
             .WithMessage($"{nameof(CreateMilitaryContributionRequest.ContributionDate)} cannot be in the future.")
             .MustAsync((request, _, ct) => ValidateContributionDate(request, ct))
-            .WithMessage($"Contribution already recorded for {nameof(CreateMilitaryContributionRequest.ContributionDate.Year)}. Duplicates are not allowed.");
+            .WithMessage($"Regular Contribution already recorded for {nameof(CreateMilitaryContributionRequest.ContributionDate.Year)}. Duplicates are not allowed.");
     }
 
     private async Task<bool> ValidateContributionDate(CreateMilitaryContributionRequest req, CancellationToken token)
@@ -44,6 +44,6 @@ public class MilitaryContributionRequestValidator : Validator<CreateMilitaryCont
         if (!results.IsSuccess) {return false;}
         var records = results.Value!.Results;
         
-        return records.All(x => x.ContributionDate != new DateOnly(req.ContributionDate.Year, 12, 31));
+        return records.All(x => !x.IsSupplementalContribution && x.ContributionDate != new DateOnly(req.ContributionDate.Year, 12, 31));
     }
 }
