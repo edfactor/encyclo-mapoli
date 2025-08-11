@@ -458,7 +458,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
   const paymentTypeOptions = useMemo(
     () => [
       { value: "all", label: "All" },
-      { value: "hardship", label: "Hardship/Dis" },
+      { value: "hardship", label: "Hardship/Dist" },
       { value: "payoffs", label: "Payoffs/Forfeit" },
       { value: "rollovers", label: "Rollovers" }
     ],

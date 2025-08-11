@@ -70,7 +70,6 @@ public sealed class UnForfeitService : IUnForfeitService
                     d.EmploymentStatusId,
                 }
                 into g
-                orderby g.Key.BadgeNumber
                 select new UnforfeituresResponse
                 {
                     BadgeNumber = g.Key.BadgeNumber,
@@ -93,7 +92,8 @@ public sealed class UnForfeitService : IUnForfeitService
                         Remark = x.pd.Remark,
                         ProfitCodeId = x.pd.ProfitCodeId,
                         Wages = x.pp.CurrentIncomeYear + x.pp.IncomeExecutive,
-                        SuggestedForfeiture =  x.pp.EnrollmentId == Enrollment.Constants.OldVestingPlanHasForfeitureRecords || x.pp.EnrollmentId == Enrollment.Constants.NewVestingPlanHasForfeitureRecords ?
+                        SuggestedForfeiture = (x.pp.EnrollmentId == Enrollment.Constants.OldVestingPlanHasForfeitureRecords || x.pp.EnrollmentId == Enrollment.Constants.NewVestingPlanHasForfeitureRecords) && 
+                            x.pp.ProfitYear == req.ProfitYear ?
                             - x.pd.Forfeiture 
                             : null
                     })

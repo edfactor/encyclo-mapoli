@@ -196,7 +196,7 @@ export interface EmployeesOnMilitaryLeaveResponse {
   terminationDate: string;
 }
 
-export interface StartAndEndDateRequest {
+export interface StartAndEndDateRequest extends ProfitYearRequest {
   beginningDate: string;
   endingDate: string;
   pagination: SortedPaginationRequestDto;
@@ -661,6 +661,7 @@ export interface TerminationYearDetail {
   dateTerm: string | null;
   ytdPsHours: number;
   vestedPercent: number;
+  suggestedForfeiture: number | null;
   age: number | null;
   enrollmentCode: number | null;
 }
@@ -1137,7 +1138,7 @@ export interface UpdateSummaryResponse extends PagedReportResponse<UpdateSummary
   totalAfterVestedAmount: number;
 }
 
-export interface SuggestForfeitureAdjustmentRequest {
+export interface SuggestForfeitureAdjustmentRequest extends SortedPaginationRequestDto {
   ssn?: string;
   badge?: string;
   profitYear: number;

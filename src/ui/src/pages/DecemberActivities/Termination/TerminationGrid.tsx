@@ -34,7 +34,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   const [pageSize, setPageSize] = useState(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
     sortBy: "badgeNumber",
-    isSortDescending: false
+    isSortDescending: true
   });
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
@@ -46,6 +46,19 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   const selectedProfitYear = useDecemberFlowProfitYear();
   const [updateForfeitureAdjustmentBulk, { isLoading: isBulkSaving }] = useUpdateForfeitureAdjustmentBulkMutation();
   const [updateForfeitureAdjustment] = useUpdateForfeitureAdjustmentMutation();
+
+  const createRequest = useCallback(
+    (skip: number, sortBy: string, isSortDescending: boolean, profitYear: number): StartAndEndDateRequest | null => {
+      if (!searchParams) return null;
+
+      return {
+        ...searchParams,
+        profitYear: profitYear,
+        pagination: { skip, take: pageSize, sortBy, isSortDescending }
+      };
+    },
+    [searchParams, pageSize]
+  );
 
   const handleSave = useCallback(async (request: ForfeitureAdjustmentUpdateRequest) => {
     const rowId = request.badgeNumber; // Use badgeNumber as unique identifier
@@ -61,16 +74,10 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
       });
       onUnsavedChanges(Object.keys(editedValues).length > 1);
       if (searchParams) {
-        const params = {
-          ...searchParams,
-          pagination: {
-            skip: pageNumber * pageSize,
-            take: pageSize,
-            sortBy: sortParams.sortBy,
-            isSortDescending: sortParams.isSortDescending
-          }
-        };
-        triggerSearch(params, false);
+        const params = createRequest(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending, selectedProfitYear);
+        if (params) {
+          triggerSearch(params, false);
+        }
       }
     } catch (error) {
       console.error('Failed to save forfeiture adjustment:', error);
@@ -82,7 +89,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
         return newSet;
       });
     }
-  }, [updateForfeitureAdjustment, editedValues, onUnsavedChanges, searchParams, pageNumber, pageSize, sortParams, triggerSearch]);
+  }, [updateForfeitureAdjustment, editedValues, onUnsavedChanges, searchParams, pageNumber, pageSize, sortParams, triggerSearch, createRequest, selectedProfitYear]);
 
   // Reset page number to 0 when resetPageFlag changes
   useEffect(() => {
@@ -128,18 +135,12 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   // Fetch data when pagination, sort, or searchParams change
   useEffect(() => {
     if (searchParams) {
-      const params = {
-        ...searchParams,
-        pagination: {
-          skip: pageNumber * pageSize,
-          take: pageSize,
-          sortBy: sortParams.sortBy,
-          isSortDescending: sortParams.isSortDescending
-        }
-      };
-      triggerSearch(params, false);
+      const params = createRequest(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending, selectedProfitYear);
+      if (params) {
+        triggerSearch(params, false);
+      }
     }
-  }, [searchParams, pageNumber, pageSize, sortParams, triggerSearch]);
+  }, [searchParams, pageNumber, pageSize, sortParams, selectedProfitYear, triggerSearch, createRequest]);
 
   const handleRowExpansion = (badgeNumber: string) => {
     setExpandedRows((prev) => ({
@@ -183,16 +184,10 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
       setSelectedRowIds([]);
       onUnsavedChanges(Object.keys(updatedEditedValues).length > 0);
       if (searchParams) {
-        const params = {
-          ...searchParams,
-          pagination: {
-            skip: pageNumber * pageSize,
-            take: pageSize,
-            sortBy: sortParams.sortBy,
-            isSortDescending: sortParams.isSortDescending
-          }
-        };
-        triggerSearch(params, false);
+        const params = createRequest(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending, selectedProfitYear);
+        if (params) {
+          triggerSearch(params, false);
+        }
       }
     } catch (error) {
       console.error('Failed to save forfeiture adjustments:', error);
@@ -406,7 +401,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
           <DSMGrid
             preferenceKey={"QPREV-PROF"}
             handleSortChanged={sortEventHandler}
-            maxHeight={800}
+            maxHeight={400}
             isLoading={isFetching}
             providedOptions={{
               onGridReady: (params) => {

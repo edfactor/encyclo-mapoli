@@ -170,6 +170,7 @@ export const GetDetailColumns = (
       field: "suggestedForfeit",
       colId: "suggestedForfeit",
       minWidth: 150,
+      pinned: "right",
       type: "rightAligned",
       resizable: true,
       sortable: false,

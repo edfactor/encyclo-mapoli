@@ -288,7 +288,7 @@ public sealed class TerminatedEmployeeReportService
                 VestedPercent = vestingPercent * 100,
                 Age = age,
                 EnrollmentCode = enrollmentId,
-                SuggestedForfeit = member.ProfitYear == req.EndingDate.Year ? member.EndingBalance - vestedBalance : null
+                SuggestedForfeit = member.ProfitYear == req.ProfitYear ? member.EndingBalance - vestedBalance : null
             };
 
             yearDetailsList.Add((member.BadgeNumber, member.PsnSuffix, member.FullName, yearDetail));
@@ -323,6 +323,8 @@ public sealed class TerminatedEmployeeReportService
             Response = grouped
         };
     }
+
+
 
     /// <summary>
     /// Do we include the member in the report or not?    They are interesting if they have money (as a bene) or
