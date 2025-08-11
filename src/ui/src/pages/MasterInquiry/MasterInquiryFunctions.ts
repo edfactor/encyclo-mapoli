@@ -1,3 +1,6 @@
+import { MAX_EMPLOYEE_BADGE_LENGTH } from "../../constants";
+import { MasterInquirySearch } from "reduxstore/types";
+
 export const paymentTypeGetNumberMap: Record<string, number> = {
   all: 0,
   hardship: 1,
@@ -12,7 +15,7 @@ export const memberTypeGetNumberMap: Record<string, number> = {
   none: 3
 };
 
-export const isSimpleSearch = (masterInquiryRequestParams: MasterInquiryRequest | null): boolean => {
+export const isSimpleSearch = (masterInquiryRequestParams: MasterInquirySearch | null): boolean => {
   const simpleFound: boolean =
     !!masterInquiryRequestParams &&
     (!!masterInquiryRequestParams.name ||
@@ -39,7 +42,7 @@ export const splitFullPSN = (
   let psnSuffix: number | undefined;
   let verifiedBadgeNumber: number | undefined;
 
-  if (badgeNumber.length < 8) {
+  if (badgeNumber.length <= MAX_EMPLOYEE_BADGE_LENGTH) {
     verifiedBadgeNumber = parseInt(badgeNumber);
   } else {
     verifiedBadgeNumber = parseInt(badgeNumber.slice(0, -4));

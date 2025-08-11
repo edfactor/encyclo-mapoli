@@ -18,7 +18,7 @@
         },
         "import-uat-navigation": {
             "commandName": "Project",
-            "commandLineArgs": "import-from-navigation --connection-name ProfitSharing --source-schema \"PROFITSHARE\" --sql-file \"..\\..\\..\\..\\src\\database\\ready_import\\Navigations\\add-uat-navigation-data.sql\""
+            "commandLineArgs": "import-uat-navigation --connection-name ProfitSharing --source-schema \"PROFITSHARE\" --sql-file \"..\\..\\..\\..\\src\\database\\ready_import\\Navigations\\add-uat-navigation-data.sql\""
         },
         "create-dgml": {
             "commandName": "Project",
