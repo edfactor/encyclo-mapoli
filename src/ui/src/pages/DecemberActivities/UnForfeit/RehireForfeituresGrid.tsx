@@ -75,13 +75,13 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
     }));
   }, []);
 
-  // Need a useEffect to reset the page number when rehireForfeitures changes
+  // Need a useEffect to reset the page number when total count changes (new search, not pagination)
   const prevRehireForfeitures = useRef<any>(null);
   useEffect(() => {
     if (
       rehireForfeitures !== prevRehireForfeitures.current &&
-      rehireForfeitures?.response?.results &&
-      rehireForfeitures.response.results.length !== prevRehireForfeitures.current?.response?.results?.length
+      rehireForfeitures?.response?.total !== undefined &&
+      rehireForfeitures.response.total !== prevRehireForfeitures.current?.response?.total
     ) {
       setPageNumber(0);
     }
@@ -111,75 +111,117 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
       const finalRequest = shouldArchive ? { ...baseRequest, archive: true } : baseRequest;
       return finalRequest;
     },
-    [rehireForfeituresQueryParams, fiscalCalendarYear?.fiscalBeginDate, fiscalCalendarYear?.fiscalEndDate, pageSize, shouldArchive]
+    [
+      rehireForfeituresQueryParams,
+      fiscalCalendarYear?.fiscalBeginDate,
+      fiscalCalendarYear?.fiscalEndDate,
+      pageSize,
+      shouldArchive
+    ]
   );
 
-  const handleBulkSave = useCallback(async (requests: ForfeitureAdjustmentUpdateRequest[]) => {
-    // Add all affected badge numbers to loading state
-    const badgeNumbers = requests.map(request => request.badgeNumber);
-    setLoadingRowIds(prev => {
-      const newSet = new Set(Array.from(prev));
-      badgeNumbers.forEach(badgeNumber => newSet.add(badgeNumber));
-      return newSet;
-    });
-    
-    try {
-      await updateForfeitureAdjustmentBulk(requests);
-      const updatedEditedValues = { ...editedValues };
-      requests.forEach(request => {
-        const rowKey = `${request.badgeNumber}-${request.profitYear}`;
-        delete updatedEditedValues[rowKey];
-      });
-      setEditedValues(updatedEditedValues);
-      setSelectedRowIds([]);
-      onUnsavedChanges(Object.keys(updatedEditedValues).length > 0);
-      if (rehireForfeituresQueryParams) {
-        const request = createRequest(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending, selectedProfitYear);
-        if (request) {
-          await triggerSearch(request, false);
-        }
-      }
-    } catch (error) {
-      console.error('Failed to save forfeiture adjustments:', error);
-      alert('Failed to save one or more adjustments. Please try again.');
-    } finally {
-      // Remove all affected badge numbers from loading state
-      setLoadingRowIds(prev => {
+  const handleBulkSave = useCallback(
+    async (requests: ForfeitureAdjustmentUpdateRequest[]) => {
+      // Add all affected badge numbers to loading state
+      const badgeNumbers = requests.map((request) => request.badgeNumber);
+      setLoadingRowIds((prev) => {
         const newSet = new Set(Array.from(prev));
-        badgeNumbers.forEach(badgeNumber => newSet.delete(badgeNumber));
+        badgeNumbers.forEach((badgeNumber) => newSet.add(badgeNumber));
         return newSet;
       });
-    }
-  }, [updateForfeitureAdjustmentBulk, editedValues, onUnsavedChanges, rehireForfeituresQueryParams, pageNumber, pageSize, sortParams, createRequest, triggerSearch]);
 
-  const handleSave = useCallback(async (request: ForfeitureAdjustmentUpdateRequest) => {
-    const rowId = request.badgeNumber; // Use badgeNumber as unique identifier
-    setLoadingRowIds(prev => new Set(Array.from(prev).concat(rowId)));
-    
-    try {
-      await updateForfeitureAdjustment(request);
-      const rowKey = `${request.badgeNumber}-${request.profitYear}`;
-      const updatedEditedValues = { ...editedValues };
-      delete updatedEditedValues[rowKey];
-      setEditedValues(updatedEditedValues);
-      onUnsavedChanges(Object.keys(updatedEditedValues).length > 0);
-      if (rehireForfeituresQueryParams) {
-        const searchRequest = createRequest(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending, selectedProfitYear);
-        if (searchRequest) {
-          await triggerSearch(searchRequest, false);
+      try {
+        await updateForfeitureAdjustmentBulk(requests);
+        const updatedEditedValues = { ...editedValues };
+        requests.forEach((request) => {
+          const rowKey = `${request.badgeNumber}-${request.profitYear}`;
+          delete updatedEditedValues[rowKey];
+        });
+        setEditedValues(updatedEditedValues);
+        setSelectedRowIds([]);
+        onUnsavedChanges(Object.keys(updatedEditedValues).length > 0);
+        if (rehireForfeituresQueryParams) {
+          const request = createRequest(
+            pageNumber * pageSize,
+            sortParams.sortBy,
+            sortParams.isSortDescending,
+            selectedProfitYear
+          );
+          if (request) {
+            await triggerSearch(request, false);
+          }
         }
+      } catch (error) {
+        console.error("Failed to save forfeiture adjustments:", error);
+        alert("Failed to save one or more adjustments. Please try again.");
+      } finally {
+        // Remove all affected badge numbers from loading state
+        setLoadingRowIds((prev) => {
+          const newSet = new Set(Array.from(prev));
+          badgeNumbers.forEach((badgeNumber) => newSet.delete(badgeNumber));
+          return newSet;
+        });
       }
-    } catch (error) {
-      console.error('Failed to save forfeiture adjustment:', error);
-      alert('Failed to save adjustment. Please try again.');
-    } finally {
-      setLoadingRowIds(prev => {
-        const newSet = new Set(Array.from(prev));
-        newSet.delete(rowId);
-        return newSet;
-      });
-    }
-  }, [updateForfeitureAdjustment, editedValues, onUnsavedChanges, rehireForfeituresQueryParams, pageNumber, pageSize, sortParams, createRequest, triggerSearch]);
+    },
+    [
+      updateForfeitureAdjustmentBulk,
+      editedValues,
+      onUnsavedChanges,
+      rehireForfeituresQueryParams,
+      pageNumber,
+      pageSize,
+      sortParams,
+      createRequest,
+      triggerSearch
+    ]
+  );
+
+  const handleSave = useCallback(
+    async (request: ForfeitureAdjustmentUpdateRequest) => {
+      const rowId = request.badgeNumber; // Use badgeNumber as unique identifier
+      setLoadingRowIds((prev) => new Set(Array.from(prev).concat(rowId)));
+
+      try {
+        await updateForfeitureAdjustment(request);
+        const rowKey = `${request.badgeNumber}-${request.profitYear}`;
+        const updatedEditedValues = { ...editedValues };
+        delete updatedEditedValues[rowKey];
+        setEditedValues(updatedEditedValues);
+        onUnsavedChanges(Object.keys(updatedEditedValues).length > 0);
+        if (rehireForfeituresQueryParams) {
+          const searchRequest = createRequest(
+            pageNumber * pageSize,
+            sortParams.sortBy,
+            sortParams.isSortDescending,
+            selectedProfitYear
+          );
+          if (searchRequest) {
+            await triggerSearch(searchRequest, false);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to save forfeiture adjustment:", error);
+        alert("Failed to save adjustment. Please try again.");
+      } finally {
+        setLoadingRowIds((prev) => {
+          const newSet = new Set(Array.from(prev));
+          newSet.delete(rowId);
+          return newSet;
+        });
+      }
+    },
+    [
+      updateForfeitureAdjustment,
+      editedValues,
+      onUnsavedChanges,
+      rehireForfeituresQueryParams,
+      pageNumber,
+      pageSize,
+      sortParams,
+      createRequest,
+      triggerSearch
+    ]
+  );
 
   const performSearch = useCallback(
     async (skip: number, sortBy: string, isSortDescending: boolean) => {
@@ -238,13 +280,13 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
     onUnsavedChanges(hasChanges);
   }, [selectedRowIds, onUnsavedChanges]);
 
-    // Initialize expandedRows when data is loaded
+  // Initialize expandedRows when data is loaded
   useEffect(() => {
     if (rehireForfeitures?.response?.results && rehireForfeitures.response.results.length > 0) {
       const initialExpandState: Record<string, boolean> = {};
       rehireForfeitures.response.results.forEach((row: any) => {
         // In this component, details are under the "details" property
-        const hasDetails = (row.details && row.details.length > 0);
+        const hasDetails = row.details && row.details.length > 0;
         if (hasDetails) {
           // Always expand rows with details by default
           initialExpandState[row.badgeNumber.toString()] = true;
@@ -253,12 +295,12 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
       setExpandedRows(initialExpandState);
     }
   }, [rehireForfeitures?.response?.results]);
-  
+
   // Refresh the grid when loading state changes
   const gridRef = useRef<any>(null);
   useEffect(() => {
     if (gridRef.current?.api) {
-      gridRef.current.api.refreshCells({ 
+      gridRef.current.api.refreshCells({
         force: true,
         suppressFlash: false
       });
@@ -282,7 +324,11 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
 
   // Get the main and detail columns
   const mainColumns = useMemo(() => GetMilitaryAndRehireForfeituresColumns(), []);
-  const detailColumns = useMemo(() => GetDetailColumns(addRowToSelectedRows, removeRowFromSelectedRows, selectedProfitYear, handleSave, handleBulkSave), [selectedRowIds, selectedProfitYear, handleSave, handleBulkSave]);
+  const detailColumns = useMemo(
+    () =>
+      GetDetailColumns(addRowToSelectedRows, removeRowFromSelectedRows, selectedProfitYear, handleSave, handleBulkSave),
+    [selectedRowIds, selectedProfitYear, handleSave, handleBulkSave]
+  );
 
   // Create the grid data with expandable rows
   const gridData = useMemo(() => {
@@ -368,18 +414,21 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
     // Add detail-specific columns that only appear for detail rows
     const detailOnlyColumns = detailColumns
       .filter((detailCol) => !mainColumns.some((mainCol) => mainCol.field === detailCol.field))
-      .map((column) => ({
-        ...column,
-        cellRenderer: (params: ICellRendererParams) => {
-          if (!params.data?.isDetail) {
-            return "";
-          }
-          if ((column as any).cellRenderer) {
-            return (column as any).cellRenderer(params);
-          }
-          return params.valueFormatted ? params.valueFormatted : params.value;
-        }
-      } as ColDef));
+      .map(
+        (column) =>
+          ({
+            ...column,
+            cellRenderer: (params: ICellRendererParams) => {
+              if (!params.data?.isDetail) {
+                return "";
+              }
+              if ((column as any).cellRenderer) {
+                return (column as any).cellRenderer(params);
+              }
+              return params.valueFormatted ? params.valueFormatted : params.value;
+            }
+          }) as ColDef
+      );
 
     return [expansionColumn, ...visibleColumns, ...detailOnlyColumns];
   }, [mainColumns, detailColumns]);
@@ -455,7 +504,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
                   return;
                 }
                 setPageSize(value);
-                setPageNumber(0);
+                setPageNumber(1);
                 setInitialSearchLoaded(true);
               }}
               recordCount={rehireForfeitures.response.total || 0}
