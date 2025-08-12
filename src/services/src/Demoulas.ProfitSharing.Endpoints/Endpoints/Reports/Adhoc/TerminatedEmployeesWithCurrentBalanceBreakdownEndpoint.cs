@@ -13,20 +13,20 @@ using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.Adhoc;
-public sealed class TerminatedEmployeesWithBalanceBreakdownEndpoint : EndpointWithCsvBase<TerminatedEmployeesWithBalanceBreakdownRequest, MemberYearSummaryDto, TerminatedEmployeesWithBalanceBreakdownEndpoint.BreakdownEndpointMap>
+public sealed class TerminatedEmployeesWithCurrentBalanceBreakdownEndpoint : EndpointWithCsvBase<TerminatedEmployeesWithBalanceBreakdownRequest, MemberYearSummaryDto, TerminatedEmployeesWithCurrentBalanceBreakdownEndpoint.BreakdownEndpointMap>
 {
     private readonly IBreakdownService _breakdownService;
 
-    public TerminatedEmployeesWithBalanceBreakdownEndpoint(IBreakdownService breakdownService)
+    public TerminatedEmployeesWithCurrentBalanceBreakdownEndpoint(IBreakdownService breakdownService)
     {
         _breakdownService = breakdownService;
     }
 
-    public override string ReportFileName => "Breakdown by Store - Terminated Employees with Balance";
+    public override string ReportFileName => "Breakdown by Store - Terminated Employees with a Current Balance";
 
     public override void Configure()
     {
-        Get("/breakdown-by-store/terminated/withbalance");
+        Get("/breakdown-by-store/terminated/withcurrentbalance/notvested");
         Summary(s =>
         {
             s.Summary = "Breakdown terminated managers and associates for all stores who have a balance";
@@ -38,7 +38,7 @@ public sealed class TerminatedEmployeesWithBalanceBreakdownEndpoint : EndpointWi
 
     public override Task<ReportResponseBase<MemberYearSummaryDto>> GetResponse(TerminatedEmployeesWithBalanceBreakdownRequest breakdownByStoreRequest, CancellationToken ct)
     {
-        return _breakdownService.GetTerminatedMembersWithBalanceByStore(breakdownByStoreRequest, ct);
+        return _breakdownService.GetTerminatedMembersWithCurrentBalanceNotVestedByStore(breakdownByStoreRequest, ct);
     }
 
     public sealed class BreakdownEndpointMap : ClassMap<MemberYearSummaryDto>
@@ -60,4 +60,3 @@ public sealed class TerminatedEmployeesWithBalanceBreakdownEndpoint : EndpointWi
         }
     }
 }
-

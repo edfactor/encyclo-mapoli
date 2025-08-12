@@ -13,32 +13,32 @@ using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.Adhoc;
-public sealed class TerminatedEmployeesWithBeneficiaryAllocationsBreakdownEndpoint : EndpointWithCsvBase<TerminatedEmployeesWithBalanceBreakdownRequest, MemberYearSummaryDto, TerminatedEmployeesWithVestedBalanceBreakdownEndpoint.BreakdownEndpointMap>
+public sealed class InactiveEmployeesWithVestedBalanceBreakdown : EndpointWithCsvBase<BreakdownByStoreRequest, MemberYearSummaryDto, InactiveEmployeesWithVestedBalanceBreakdown.BreakdownEndpointMap>
 {
     private readonly IBreakdownService _breakdownService;
 
-    public TerminatedEmployeesWithBeneficiaryAllocationsBreakdownEndpoint(IBreakdownService breakdownService)
+    public InactiveEmployeesWithVestedBalanceBreakdown(IBreakdownService breakdownService)
     {
         _breakdownService = breakdownService;
     }
 
-    public override string ReportFileName => "Breakdown by Store - Terminated Employees with Beneficiary Allocations";
+    public override string ReportFileName => "Breakdown by Store - QPAY066i - Inactive employees with vested balance";
 
     public override void Configure()
     {
-        Get("/breakdown-by-store/terminated/withbeneficiaryallocation");
+        Get("/breakdown-by-store/inactive/withvestedbalance");
         Summary(s =>
         {
-            s.Summary = "Breakdown terminated managers and associates for all stores who have a balance";
+            s.Summary = "Breakdown inactive managers and associates for all stores";
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
         Group<YearEndGroup>();
         base.Configure();
     }
 
-    public override Task<ReportResponseBase<MemberYearSummaryDto>> GetResponse(TerminatedEmployeesWithBalanceBreakdownRequest breakdownByStoreRequest, CancellationToken ct)
+    public override Task<ReportResponseBase<MemberYearSummaryDto>> GetResponse(BreakdownByStoreRequest breakdownByStoreRequest, CancellationToken ct)
     {
-        return _breakdownService.GetTerminatedMembersWithBeneficiaryByStore(breakdownByStoreRequest, ct);
+        return _breakdownService.GetInactiveMembersWithVestedBalanceByStore(breakdownByStoreRequest, ct);
     }
 
     public sealed class BreakdownEndpointMap : ClassMap<MemberYearSummaryDto>
@@ -60,3 +60,4 @@ public sealed class TerminatedEmployeesWithBeneficiaryAllocationsBreakdownEndpoi
         }
     }
 }
+
