@@ -474,7 +474,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                         FullName = d.bc.ContactInfo.FullName != null ? d.bc.ContactInfo.FullName : d.bc.ContactInfo.LastName,
                         FirstName = d.bc.ContactInfo.FirstName,
                         LastName = d.bc.ContactInfo.LastName,
-                        PayFrequencyId = 0,
+                        PayFrequencyId = d.b!.Demographic!.PayFrequencyId,
                         Ssn = d.bc.Ssn,
                         PsnSuffix = d.b.PsnSuffix,
                         CurrentIncomeYear = 0,
