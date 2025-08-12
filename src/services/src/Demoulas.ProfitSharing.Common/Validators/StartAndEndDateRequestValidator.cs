@@ -1,8 +1,6 @@
 ﻿using Demoulas.Common.Contracts.Validators;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Interfaces;
 using FluentValidation;
-using Microsoft.Extensions.Logging;
 
 namespace Demoulas.ProfitSharing.Common.Validators;
 
