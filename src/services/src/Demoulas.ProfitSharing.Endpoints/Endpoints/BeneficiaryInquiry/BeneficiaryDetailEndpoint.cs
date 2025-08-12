@@ -32,8 +32,8 @@ public class BeneficiaryDetailEndpoint : Endpoint<BeneficiaryDetailRequest, Bene
         Get("detail");
         Summary(m =>
         {
-            m.Summary = "Get Beneficiary Detail Object";
-            m.Description = "It will return Beneficiary Detail object depends on PSN.";
+            m.Summary = "Get Beneficiary Detail ";
+            m.Description = "It will return Beneficiary Detail depends on PSN.";
             m.ResponseExamples = new Dictionary<int, object> { { 200, new BeneficiaryDetailResponse() } };
         });
         Group<BeneficiaryGroup>();
