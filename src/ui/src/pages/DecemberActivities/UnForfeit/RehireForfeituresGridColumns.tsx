@@ -114,9 +114,10 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
         const date = params.value;
         return mmDDYYFormat(date);
       }
+
     },
     {
-      headerName: "Beginning Balance",
+      headerName: "Current Balance",
       field: "netBalanceLastYear",
       colId: "netBalanceLastYear",
       minWidth: 150,
@@ -178,7 +179,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       valueFormatter: agGridNumberToCurrency
     },
     {
-      headerName: "Contribution Years",
+      headerName: "Years",
       field: "companyContributionYears",
       colId: "companyContributionYears",
       width: 100,
