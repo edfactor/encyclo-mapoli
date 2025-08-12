@@ -370,9 +370,12 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
             {
                 var memberDetail = await _masterInquiryService.GetMembersAsync(new Common.Contracts.Request.MasterInquiry.MasterInquiryRequest
                 {
-                    BadgeNumber = request.BadgeNumber
+                    BadgeNumber = request.BadgeNumber,
+                    EndProfitYear = (short)DateTime.Now.Year,
+                    ProfitYear   = (short)DateTime.Now.Year,
+                    MemberType  = 1
                 });
-                query = memberDetail.Results.Select(x=> new BeneficiaryDetailResponse
+                query = memberDetail.Results.Select(x => new BeneficiaryDetailResponse
                 {
                     Name = x.FullName,
                     BadgeNumber = x.BadgeNumber,
@@ -398,19 +401,19 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                 //});
             }
 
-            return query.ToListAsync(cancellationToken);
+            return query.ToList();
         });
 
-        ISet<int> ssnList = new HashSet<int>(result.Result.Select(x => Convert.ToInt32(x.Ssn)).ToList());
-        var balanceList = await _totalService.GetVestingBalanceForMembersAsync(SearchBy.Ssn, ssnList, yearEnd, cancellationToken);
-        foreach (var item in result.Result)
+
+        ISet<int> badgeNumbers = new HashSet<int>(result.Select(x => x.BadgeNumber).ToList());
+        var balanceList = await _totalService.GetVestingBalanceForMembersAsync(SearchBy.BadgeNumber, badgeNumbers, yearEnd, cancellationToken);
+        foreach (var item in result)
         {
-            item.CurrentBalance = balanceList.Where(x => x.Id.ToString() == item.Ssn).Select(x => x.CurrentBalance).FirstOrDefault();
-            item.Ssn = item.Ssn.MaskSsn();
+            item.CurrentBalance = balanceList.Select(x => x.CurrentBalance).FirstOrDefault();
         }
 
 
-        return result.Result.FirstOrDefault();
+        return result.FirstOrDefault();
     }
 
     public async Task<BeneficiaryTypesResponseDto> GetBeneficiaryTypes(BeneficiaryTypesRequestDto beneficiaryTypesRequestDto, CancellationToken cancellation)
