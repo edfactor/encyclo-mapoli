@@ -247,14 +247,28 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         var details = await filteredDetails.ToPaginationResultsAsync(sortReq, cancellationToken);
 
         // Totals (use filteredDetails for counts)
+        var filteredTotals = await (
+              from a in filteredDetails
+              group a by true into g
+              select new
+              {
+                  NumberOfEmployees = g.Count(),
+                  NumberOfNewEmployees = g.Count(x => x.YearsInPlan == 0),
+                  WagesTotal = g.Sum(x => x.Wages),
+                  HoursTotal = g.Sum(x => x.Hours),
+                  PointsTotal = g.Sum(x => x.Points),
+                  BalanceTotal = g.Sum(x => x.Balance),
+              }
+              ).FirstOrDefaultAsync(cancellationToken);
+
         ProfitShareTotal totals = new ProfitShareTotal
         {
-            WagesTotal = filteredDetails.Sum(x => x.Wages),
-            HoursTotal = filteredDetails.Sum(x => x.Hours),
-            PointsTotal = filteredDetails.Sum(x => x.Points),
-            BalanceTotal = filteredDetails.Sum(x => x.Balance),
-            NumberOfEmployees = details.Total,
-            NumberOfNewEmployees = filteredDetails.Count(x => x.YearsInPlan == 0),
+            WagesTotal = filteredTotals?.WagesTotal ?? 0,
+            HoursTotal = filteredTotals?.HoursTotal ?? 0,
+            PointsTotal = filteredTotals?.PointsTotal ?? 0,
+            BalanceTotal = filteredTotals?.BalanceTotal ?? 0,
+            NumberOfEmployees = filteredTotals?.NumberOfEmployees ?? 0,
+            NumberOfNewEmployees = filteredTotals?.NumberOfNewEmployees ?? 0,
         };
 
         var response = new YearEndProfitSharingReportResponse
