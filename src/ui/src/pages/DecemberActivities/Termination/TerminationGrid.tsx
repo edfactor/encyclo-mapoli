@@ -46,7 +46,6 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     isSortDescending: true
   });
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
-  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const { termination } = useSelector((state: RootState) => state.yearsEnd);
   const [triggerSearch, { isFetching }] = useLazyGetTerminationReportQuery();
   const [selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
@@ -185,11 +184,19 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     beginningDate?: string,
     endingDate?: string,
     archive?: boolean
-  ) => `${skip}|${pageSize}|${sortBy}|${isSortDescending}|${profitYear}|${beginningDate ?? ''}|${endingDate ?? ''}|${archive ? '1' : '0'}`;
+  ) =>
+    `${skip}|${pageSize}|${sortBy}|${isSortDescending}|${profitYear}|${beginningDate ?? ""}|${endingDate ?? ""}|${archive ? "1" : "0"}`;
 
-  // Fetch data when pagination, sort, or searchParams change
+  // Fetch data when pagination, sort, or searchParams change (only if initial search has been performed)
   useEffect(() => {
-    const params = createRequest(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending, selectedProfitYear);
+    if (!initialSearchLoaded || !searchParams) return; // Don't load data until search button is clicked
+
+    const params = createRequest(
+      pageNumber * pageSize,
+      sortParams.sortBy,
+      sortParams.isSortDescending,
+      selectedProfitYear
+    );
     if (params) {
       const key = buildRequestKey(
         pageNumber * pageSize,
@@ -204,14 +211,28 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
       lastRequestKeyRef.current = key;
       triggerSearch(params, false);
     }
-  }, [searchParams, pageNumber, pageSize, sortParams, selectedProfitYear, triggerSearch, createRequest]);
+  }, [
+    searchParams,
+    pageNumber,
+    pageSize,
+    sortParams,
+    selectedProfitYear,
+    triggerSearch,
+    createRequest,
+    initialSearchLoaded
+  ]);
 
   // Archive trigger: when shouldArchive flips true, attempt search and clear flag when done; retry when data becomes available
   useEffect(() => {
     if (!shouldArchive) return;
     let cancelled = false;
     const run = async () => {
-      const params = createRequest(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending, selectedProfitYear);
+      const params = createRequest(
+        pageNumber * pageSize,
+        sortParams.sortBy,
+        sortParams.isSortDescending,
+        selectedProfitYear
+      );
       if (params) {
         const key = buildRequestKey(
           pageNumber * pageSize,
@@ -236,8 +257,8 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
       cancelled = true;
     };
   }, [
-      shouldArchive,
-      searchParams,
+    shouldArchive,
+    searchParams,
     pageNumber,
     pageSize,
     sortParams,
@@ -246,7 +267,8 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     createRequest,
     onArchiveHandled,
     fiscalData?.fiscalBeginDate,
-    fiscalData?.fiscalEndDate
+    fiscalData?.fiscalEndDate,
+    buildRequestKey
   ]);
 
   const handleRowExpansion = (badgeNumber: string) => {
