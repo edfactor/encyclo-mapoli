@@ -9,12 +9,13 @@ import MasterInquiryMemberGrid from "pages/MasterInquiry/MasterInquiryMemberGrid
 import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import {
+  useLazyBeneficiarySearchFilterQuery,
   useLazyDeleteBeneficiaryQuery,
   useLazyGetBeneficiaryKindQuery,
   useLazyGetBeneficiarytypesQuery
 } from "reduxstore/api/BeneficiariesApi";
 import { RootState } from "reduxstore/store";
-import { BeneficiaryDto, BeneficiaryKindDto, BeneficiarySearchFilterResponse, BeneficiaryTypeDto, MasterInquiryRequest } from "reduxstore/types";
+import { BeneficiaryDto, BeneficiaryKindDto, BeneficiarySearchFilterRequest, BeneficiarySearchFilterResponse, BeneficiaryTypeDto, MasterInquiryRequest } from "reduxstore/types";
 import { DSMAccordion, DSMGrid, ISortParams, Page, Pagination } from "smart-ui-library";
 import BeneficiaryInquiryGrid from "./BeneficiaryInquiryGrid";
 import BeneficiaryInquirySearchFilter from "./BeneficiaryInquirySearchFilter";
@@ -52,13 +53,14 @@ const BeneficiaryInquiry = () => {
   const [deleteInProgress, setDeleteInProgress] = useState<boolean>(false);
   const [beneficiaryDialogTitle, setBeneficiaryDialogTitle] = useState<string>();
   const [beneficiarySearchFilterResponse, setBeneficiarySearchFilterResponse] = useState<Paged<BeneficiarySearchFilterResponse>>();
-  const [isFetching, setIsFetching] = useState<boolean>(false);
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [_sortParams, setSortParams] = useState<ISortParams>({
     sortBy: "name",
     isSortDescending: true
   });
+  const [beneficiarySearchFilterRequest, setBeneficiarySearchFilterRequest] = useState<BeneficiarySearchFilterRequest | undefined>();
+  const [triggerSearch, { isFetching }] = useLazyBeneficiarySearchFilterQuery();
   const onBadgeClick = (data: any) => {
     if (data) {
       const member: SelectedMember = {
@@ -73,6 +75,15 @@ const BeneficiaryInquiry = () => {
     }
 
   };
+
+  const BeneficiarySearchFilter = useMemo(() => {
+    if (beneficiarySearchFilterRequest) {
+      triggerSearch(beneficiarySearchFilterRequest).unwrap().then(res => {
+        onSearch(res);
+        onFetch(false);
+      });
+    }
+  }, [beneficiarySearchFilterRequest])
 
   const RefreshBeneficiaryGrid = () => {
     setChange((prev) => prev + 1);
@@ -247,19 +258,19 @@ const BeneficiaryInquiry = () => {
                 />
 
                 <Pagination
-                          pageNumber={pageNumber}
-                          setPageNumber={(value: number) => {
-                            setPageNumber(value - 1);
-                            //setInitialSearchLoaded(true);
-                          }}
-                          pageSize={pageSize}
-                          setPageSize={(value: number) => {
-                            setPageSize(value);
-                            setPageNumber(1);
-                            //setInitialSearchLoaded(true);
-                          }}
-                          recordCount={beneficiarySearchFilterResponse?.total}
-                        />
+                  pageNumber={pageNumber}
+                  setPageNumber={(value: number) => {
+                    setPageNumber(value - 1);
+                    //setInitialSearchLoaded(true);
+                  }}
+                  pageSize={pageSize}
+                  setPageSize={(value: number) => {
+                    setPageSize(value);
+                    setPageNumber(1);
+                    //setInitialSearchLoaded(true);
+                  }}
+                  recordCount={beneficiarySearchFilterResponse?.total}
+                />
               </>
 
             )}

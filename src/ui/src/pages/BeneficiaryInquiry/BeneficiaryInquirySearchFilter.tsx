@@ -36,15 +36,13 @@ type Props = {
   beneficiaryType: BeneficiaryTypeDto[];
   searchClicked: (badgeNumber: number) => void;
   setInitialSearchLoaded: (include: boolean) => void;
-  onFetch: (isFetching: boolean)=>void,
-  onSearch: (response: Paged<BeneficiarySearchFilterResponse> | undefined) => void;
+  onSearch: (request: BeneficiarySearchFilterRequest | undefined) => void;
 };
 
 const BeneficiaryInquirySearchFilter: React.FC<Props> = ({
   searchClicked,
   beneficiaryType,
   setInitialSearchLoaded,
-  onFetch,
   onSearch
 }) => {
   //const [triggerSearch, { data, isLoading, isError, isFetching }] = useLazyGetBeneficiariesQuery();
@@ -92,11 +90,7 @@ const BeneficiaryInquirySearchFilter: React.FC<Props> = ({
           isSortDescending: true,
           sortBy: "name"
       };
-      onFetch(true);
-      triggerSearch(beneficiaryRequestDto).unwrap().then(res=>{
-        onSearch(res);
-        onFetch(false);
-      });
+      onSearch(beneficiaryRequestDto);
     }
   };
   const validateAndSubmit = handleSubmit(onSubmit);
