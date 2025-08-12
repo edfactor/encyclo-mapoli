@@ -163,7 +163,8 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
         badgeNumber: verifiedBadgeNumber,
         memberType: memberTypeGetNumberMap[determineCorrectMemberType(badgeNumber)],
         endProfitYear: profitYear,
-        ...(psnSuffix !== undefined && { psnSuffix })
+        ...(psnSuffix !== undefined && { psnSuffix }),
+        _timestamp: Date.now()
       };
 
       // First ensure the parent component has the search parameters
