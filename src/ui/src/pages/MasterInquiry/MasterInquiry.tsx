@@ -26,62 +26,62 @@ const MasterInquiryContent = () => {
   const { missiveAlerts } = useMissiveAlerts();
 
   return (
+    <Grid
+      container
+      rowSpacing="24px">
       <Grid
-        container
-        rowSpacing="24px">
-        <Grid
-          size={{ xs: 12 }}
-          width={"100%"}>
-          <Divider />
-        </Grid>
-        <Grid
-          size={{ xs: 12 }}
-          width={"100%"}>
-          <DSMAccordion title="Filter">
-            <MasterInquirySearchFilter
-              setInitialSearchLoaded={setInitialSearchLoaded}
-              onSearch={(params) => {
-                setSearchParams(params ?? null);
-                setSelectedMember(null);
-                // Only set noResults to true if params is undefined (not found)
-                // Reset noResults when params is null (form reset)
-                if (params === undefined) {
-                  setNoResults(true);
-                } else {
-                  setNoResults(false);
-                }
-              }}
-            />
-          </DSMAccordion>
-        </Grid>
-        {missiveAlerts.length > 0 && <MissiveAlerts missiveAlerts={missiveAlerts} />}
-
-        {searchParams && (
-          <MasterInquiryMemberGrid
-            key={searchParams._timestamp || Date.now()}
-            searchParams={searchParams}
-            onBadgeClick={(data) => setSelectedMember(data || null)}
-          />
-        )}
-
-        {/* Render employee details if identifiers are present in selectedMember, or show missive if noResults */}
-        {(noResults || (selectedMember && selectedMember.memberType !== undefined && selectedMember.id)) && (
-          <MasterInquiryEmployeeDetails
-            memberType={selectedMember?.memberType ?? 0}
-            id={selectedMember?.id ?? 0}
-            profitYear={searchParams?.endProfitYear}
-            noResults={noResults}
-          />
-        )}
-
-        {/* Render details for selected member if present */}
-        {!noResults && selectedMember && (
-          <MasterInquiryGrid
-            memberType={selectedMember.memberType}
-            id={selectedMember.id}
-          />
-        )}
+        size={{ xs: 12 }}
+        width={"100%"}>
+        <Divider />
       </Grid>
+      <Grid
+        size={{ xs: 12 }}
+        width={"100%"}>
+        <DSMAccordion title="Filter">
+          <MasterInquirySearchFilter
+            setInitialSearchLoaded={setInitialSearchLoaded}
+            onSearch={(params) => {
+              setSearchParams(params ?? null);
+              setSelectedMember(null);
+              // Only set noResults to true if params is undefined (not found)
+              // Reset noResults when params is null (form reset)
+              if (params === undefined) {
+                setNoResults(true);
+              } else {
+                setNoResults(false);
+              }
+            }}
+          />
+        </DSMAccordion>
+      </Grid>
+      {missiveAlerts.length > 0 && <MissiveAlerts missiveAlerts={missiveAlerts} />}
+
+      {searchParams && (
+        <MasterInquiryMemberGrid
+          key={searchParams._timestamp || Date.now()}
+          searchParams={searchParams}
+          onBadgeClick={(data) => setSelectedMember(data || null)}
+        />
+      )}
+
+      {/* Render employee details if identifiers are present in selectedMember, or show missive if noResults */}
+      {(noResults || (selectedMember && selectedMember.memberType !== undefined && selectedMember.id)) && (
+        <MasterInquiryEmployeeDetails
+          memberType={selectedMember?.memberType ?? 0}
+          id={selectedMember?.id ?? 0}
+          profitYear={searchParams?.endProfitYear}
+          noResults={noResults}
+        />
+      )}
+
+      {/* Render details for selected member if present */}
+      {!noResults && selectedMember && (
+        <MasterInquiryGrid
+          memberType={selectedMember.memberType}
+          id={selectedMember.id}
+        />
+      )}
+    </Grid>
   );
 };
 
