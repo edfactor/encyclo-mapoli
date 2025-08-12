@@ -46,7 +46,7 @@ export const MenuData = (data: NavigationResponseDto | undefined): RouteCategory
 const createRouteCategory = (navigationItem: NavigationDto): RouteCategory => {
   return {
     menuLabel: navigationItem.title,
-    parentRoute: navigationItem.title.toLowerCase(),
+    parentRoute: navigationItem.url || navigationItem.title.toLowerCase(), // Use URL field for proper routing
     disabled: navigationItem.disabled,
     underlined: false,
     roles: navigationItem.requiredRoles,

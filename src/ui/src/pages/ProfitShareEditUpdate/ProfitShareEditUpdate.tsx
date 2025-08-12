@@ -646,26 +646,18 @@ const ProfitShareEditUpdate = () => {
                 tablePadding="4px"
                 displayData={[
                   [
+                    numberToCurrency(profitSharingEdit.beginningBalanceTotal|| 0),
                     numberToCurrency(profitSharingEdit.contributionGrandTotal || 0),
                     numberToCurrency(profitSharingEdit.earningsGrandTotal || 0),
-                    numberToCurrency(profitSharingEdit.incomingForfeitureGrandTotal || 0)
+                    numberToCurrency(profitSharingEdit.incomingForfeitureGrandTotal || 0),
                   ]
                 ]}
                 leftColumnHeaders={["Grand Totals"]}
-                topRowHeaders={["", "Contributions", "Earnings", "Forfeit"]}
+                topRowHeaders={["", "Beginning Balance", "Contributions", "Earnings", "Forfeit"]}
                 headerCellStyle={{}}
               />
-              <div style={{ marginTop: "20px" }}>
-                <TotalsGrid
-                  tablePadding="8px"
-                  displayData={[[numberToCurrency(profitSharingEdit.beginningBalanceTotal || 0), "", ""]]}
-                  leftColumnHeaders={["Beginning Balance"]}
-                  topRowHeaders={["", ""]}
-                  headerCellStyle={{}}
-                />
-              </div>
             </div>
-
+            <br/>
             {profitSharingUpdateAdjustmentSummary?.badgeNumber && (
               <>
                 <div className="px-[24px]">

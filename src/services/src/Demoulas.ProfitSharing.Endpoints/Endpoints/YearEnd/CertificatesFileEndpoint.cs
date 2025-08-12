@@ -13,7 +13,7 @@ using MassTransit;
 using Microsoft.AspNetCore.Http;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.YearEnd;
-public sealed class CertificatesFileEndpoint : Endpoint<ProfitYearRequest, string>
+public sealed class CertificatesFileEndpoint : Endpoint<CerficatePrintRequest, string>
 {
     private readonly ICertificateService _certificateService;
 
@@ -27,13 +27,13 @@ public sealed class CertificatesFileEndpoint : Endpoint<ProfitYearRequest, strin
         Summary(s =>
         {
             s.Summary = "Returns the core certificate file to be used with pre-printed form letters";
-            s.ExampleRequest = ProfitYearRequest.RequestExample();
+            s.ExampleRequest = CerficatePrintRequest.RequestExample();
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
         Group<YearEndGroup>();
     }
 
-    public override async Task HandleAsync(ProfitYearRequest req, CancellationToken ct)
+    public override async Task HandleAsync(CerficatePrintRequest req, CancellationToken ct)
     {
         var response = await _certificateService.GetCertificateFile(req, ct);
         var memoryStream = new MemoryStream();

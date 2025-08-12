@@ -17,7 +17,7 @@ public class GetNavigationEndpoint: Endpoint<NavigationRequestDto,NavigationResp
 
     public override void Configure()
     {
-        AllowAnonymous();
+      
         Get("");
         Summary(m =>
         {

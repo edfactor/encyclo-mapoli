@@ -4,7 +4,8 @@ import {
   createBadgeColumn,
   createNameColumn,
   createSSNColumn,
-  createStatusColumn
+  createStatusColumn,
+  createZipColumn
 } from "../../utils/gridColumnFactory";
 
 export const GetMasterInquiryMemberGridColumns = (): ColDef[] => {
@@ -15,7 +16,7 @@ export const GetMasterInquiryMemberGridColumns = (): ColDef[] => {
     { field: "address", headerName: "Street", maxWidth: 400 },
     { field: "addressCity", headerName: "City", maxWidth: 300 },
     { field: "addressState", headerName: "State", maxWidth: 100 },
-    { field: "addressZipCode", headerName: "Zip", maxWidth: 160 },
+    createZipColumn({ field: "addressZipCode", headerName: "Zip", maxWidth: 160 }),
     createAgeColumn({}),
     createStatusColumn({
       field: "employmentStatus",

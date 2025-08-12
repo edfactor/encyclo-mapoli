@@ -222,12 +222,17 @@ internal class EnrollmentSummarizer
                         when pd.CommentTypeId == CommentType.Constants.VOnly && pd.Contribution == 0:
                     case /*2*/ ZeroContributionReason.Constants.TerminatedEmployeeOver1000HoursWorkedGetsYearVested
                         when pd.CommentTypeId == CommentType.Constants.VOnly && pd.Contribution == 0:
+                        
+                    #pragma warning disable CS0618 // Type or member is obsolete
                     case /*3*/ ZeroContributionReason.Constants.Over64WithLess1000Hours1YearVesting
                         when pd.ProfitYear < 2002:
                     case /*4*/ ZeroContributionReason.Constants.Over64WithLess1000Hours2YearsVesting
                         when pd.ProfitYear < 2002:
                     case /*5*/ ZeroContributionReason.Constants.Over64WithOver1000Hours3YearsVesting
                         when pd.ProfitYear < 2002:
+                    case /*5*/ ZeroContributionReason.Constants.Over64WithOver1000Hours3YearsVesting
+                        when pd.ProfitYear >= 2002 && pd.Contribution != 0:
+                    #pragma warning restore CS0618 // Type or member is obsolete
                     case /*6*/ ZeroContributionReason.Constants.SixtyFiveAndOverFirstContributionMoreThan5YearsAgo100PercentVested
                         when pd.Contribution != 0:
                     case /*7*/ ZeroContributionReason.Constants.SixtyFourFirstContributionMoreThan5YearsAgo100PercentVestedOnBirthDay
