@@ -12,6 +12,7 @@ using Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
@@ -48,7 +49,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
         return member.Results.Select(x => new BeneficiarySearchFilterResponse()
         {
             Ssn = x.Ssn.ToString(),
-            Age = DateTime.Now.Year - x.DateOfBirth.Year,
+            Age = x.DateOfBirth.Age(),
             BadgeNumber = x.BadgeNumber,
             City = x.AddressCity,
             Name = x.FullName,
@@ -65,7 +66,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
             .Where(x =>
             (request.BadgeNumber == null || x.BadgeNumber == request.BadgeNumber) &&
             (request.PsnSuffix == null || x.PsnSuffix == request.PsnSuffix) &&
-            (string.IsNullOrEmpty(request.Name) || x.Contact.ContactInfo.FullName.ToLower().Contains(request.Name.ToLower())) &&
+            (string.IsNullOrEmpty(request.Name) || EF.Functions.Like(x.Contact.ContactInfo.FullName.ToUpper(),request.Name.ToUpper())) &&
             (request.Ssn == null || x.Contact.Ssn == request.Ssn)
             ).Select(x => new BeneficiarySearchFilterResponse()
             {
