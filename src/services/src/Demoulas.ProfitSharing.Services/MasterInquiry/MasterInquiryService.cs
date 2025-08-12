@@ -474,14 +474,13 @@ public sealed class MasterInquiryService : IMasterInquiryService
                         FullName = d.bc.ContactInfo.FullName != null ? d.bc.ContactInfo.FullName : d.bc.ContactInfo.LastName,
                         FirstName = d.bc.ContactInfo.FirstName,
                         LastName = d.bc.ContactInfo.LastName,
-                        PayFrequencyId = d.b!.Demographic!.PayFrequencyId,
+                        PayFrequencyId = 0,
                         Ssn = d.bc.Ssn,
                         PsnSuffix = d.b.PsnSuffix,
                         CurrentIncomeYear = 0,
                         CurrentHoursYear = 0,
                     }
-                })
-            .Where(x => x.Member.PayFrequencyId == PayFrequency.Constants.Weekly);
+                });
 
         return query;
     }
