@@ -45,7 +45,11 @@ export const MenuBar: FC<MenuBarProps> = ({ menuInfo, impersonationMultiSelect, 
               key={index}
               isUnderlined={current.underlined ?? false}
               onClick={() => {
-                navigate(current.parentRoute);
+                const absolutePath = current.parentRoute.startsWith("/")
+                  ? current.parentRoute
+                  : `/${current.parentRoute}`;
+
+                navigate(absolutePath, { replace: false });
               }}
               label={current.menuLabel}
               disabled={current.disabled}
