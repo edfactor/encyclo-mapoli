@@ -114,3 +114,15 @@ export interface CountColumnOptions {
   sortable?: boolean;
   resizable?: boolean;
 }
+
+export interface ZipColumnOptions {
+  headerName?: string;
+  field?: string;
+  colId?: string;
+  minWidth?: number;
+  maxWidth?: number;
+  alignment?: "left" | "center" | "right";
+  sortable?: boolean;
+  resizable?: boolean;
+  valueFormatter?: (params: ValueFormatterParams) => string;
+}
