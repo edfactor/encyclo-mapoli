@@ -3,7 +3,7 @@ namespace Demoulas.ProfitSharing.Common.Contracts.Response.BeneficiaryInquiry;
 public record BeneficiaryDetailResponse
 {
     public int BadgeNumber { get; set; }
-    public int Psn { get; set; }
+    public short PsnSuffix { get; set; }
     public string? Name { get; set; }
     public string? Ssn { get; set; }
     public string? Street { get; set; }

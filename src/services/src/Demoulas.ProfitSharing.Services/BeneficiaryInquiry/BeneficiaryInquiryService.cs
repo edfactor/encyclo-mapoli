@@ -34,24 +34,6 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
 
     private async Task<IQueryable<BeneficiarySearchFilterResponse>> GetEmployeeQuery(BeneficiarySearchFilterRequest request, ProfitSharingReadOnlyDbContext context)
     {
-        //var query = context.Demographics.Include(x => x.ContactInfo).Include(x => x.Address)
-        //    .Where(x =>
-        //    (request.BadgeNumber == null || x.BadgeNumber == request.BadgeNumber) &&
-        //    (string.IsNullOrEmpty(request.Name) || x.ContactInfo.FullName.ToLower().Contains(request.Name.ToLower())) &&
-        //    (string.IsNullOrEmpty(request.Ssn) || x.Ssn.ToString() == request.Ssn)
-        //    ).Select(x => new BeneficiarySearchFilterResponse()
-        //    {
-        //        Ssn = x.Ssn.ToString(),
-        //        Age = DateTime.Now.Year - x.DateOfBirth.Year,
-        //        BadgeNumber = x.BadgeNumber,
-        //        City = x.Address.City,
-        //        Name = x.ContactInfo.FullName,
-        //        State = x.Address.State,
-        //        Street = x.Address.Street,
-        //        Zip = x.Address.PostalCode
-        //    });
-
-        //return query;
         var member = await _masterInquiryService.GetMembersAsync(new Common.Contracts.Request.MasterInquiry.MasterInquiryRequest()
         {
             BadgeNumber = request.BadgeNumber,
@@ -84,7 +66,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
             (request.BadgeNumber == null || x.BadgeNumber == request.BadgeNumber) &&
             (request.PsnSuffix == null || x.PsnSuffix == request.PsnSuffix) &&
             (string.IsNullOrEmpty(request.Name) || x.Contact.ContactInfo.FullName.ToLower().Contains(request.Name.ToLower())) &&
-            (string.IsNullOrEmpty(request.Ssn) || x.Contact.Ssn.ToString() == request.Ssn)
+            (request.Ssn == null || x.Contact.Ssn == request.Ssn)
             ).Select(x => new BeneficiarySearchFilterResponse()
             {
                 Ssn = x.Contact.Ssn.ToString(),
@@ -355,17 +337,17 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
         var result = await _dataContextFactory.UseReadOnlyContext(async context =>
         {
             IQueryable<BeneficiaryDetailResponse> query;
-            if (request.Psn.HasValue && request.Psn > 0)
+            if (request.PsnSuffix.HasValue && request.PsnSuffix > 0)
             {
                 query = context.Beneficiaries.Include(x => x.Contact).ThenInclude(x => x.Address).Include(x => x.Contact.ContactInfo)
-                .Where(x => x.BadgeNumber == request.BadgeNumber && x.PsnSuffix == request.Psn)
+                .Where(x => x.BadgeNumber == request.BadgeNumber && x.PsnSuffix == request.PsnSuffix)
                 .Select(x => new BeneficiaryDetailResponse
                 {
                     Name = x.Contact.ContactInfo.FullName,
                     BadgeNumber = x.BadgeNumber,
                     City = x.Contact.Address.City,
                     DateOfBirth = x.Contact.DateOfBirth,
-                    Psn = x.PsnSuffix,
+                    PsnSuffix = x.PsnSuffix,
                     Ssn = x.Contact.Ssn.ToString(),
                     State = x.Contact.Address.State,
                     Street = x.Contact.Address.Street,
