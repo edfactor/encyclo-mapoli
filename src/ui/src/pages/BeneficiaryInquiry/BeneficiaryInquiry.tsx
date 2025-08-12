@@ -6,7 +6,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import MasterInquiryEmployeeDetails from "pages/MasterInquiry/MasterInquiryEmployeeDetails";
 import MasterInquiryMemberGrid from "pages/MasterInquiry/MasterInquiryMemberGrid";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import {
   useLazyBeneficiarySearchFilterQuery,
@@ -54,11 +54,12 @@ const BeneficiaryInquiry = () => {
   const [beneficiaryDialogTitle, setBeneficiaryDialogTitle] = useState<string>();
   const [beneficiarySearchFilterResponse, setBeneficiarySearchFilterResponse] = useState<Paged<BeneficiarySearchFilterResponse>>();
   const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
+  const [pageSize, setPageSize] = useState(10);
   const [_sortParams, setSortParams] = useState<ISortParams>({
     sortBy: "name",
     isSortDescending: true
   });
+  const [initialSearch, setInitateSearch] = useState<number>(0);
   const [beneficiarySearchFilterRequest, setBeneficiarySearchFilterRequest] = useState<BeneficiarySearchFilterRequest | undefined>();
   const [triggerSearch, { isFetching }] = useLazyBeneficiarySearchFilterQuery();
   const onBadgeClick = (data: any) => {
@@ -76,14 +77,40 @@ const BeneficiaryInquiry = () => {
 
   };
 
-  const BeneficiarySearchFilter = useMemo(() => {
+
+
+
+  useEffect(() => {
+
     if (beneficiarySearchFilterRequest) {
-      triggerSearch(beneficiarySearchFilterRequest).unwrap().then(res => {
+      const updatedRequest = {
+        ...beneficiarySearchFilterRequest,
+        isSortDescending: _sortParams.isSortDescending,
+        skip: pageNumber * pageSize,
+        sortBy: _sortParams.sortBy,
+        take: pageSize
+      };
+      triggerSearch(updatedRequest).unwrap().then(res => {
         onSearch(res);
-        onFetch(false);
       });
     }
-  }, [beneficiarySearchFilterRequest])
+  }, [initialSearch, pageSize, pageNumber, _sortParams]);
+  // const BeneficiarySearchFilter = useCallback(() => {
+  //   if (beneficiarySearchFilterRequest) {
+  //     setBeneficiarySearchFilterRequest(params=>{
+  //       return {
+  //         ...params,
+  //         isSortDescending: _sortParams.isSortDescending,
+  //         skip: pageNumber*pageSize,
+  //         sortBy: _sortParams.sortBy,
+  //         take: pageSize
+  //       }
+  //     })
+  //     triggerSearch(beneficiarySearchFilterRequest).unwrap().then(res => {
+  //       onSearch(res);
+  //     });
+  //   }
+  // }, [beneficiarySearchFilterRequest, pageSize,pageNumber,_sortParams])
 
   const RefreshBeneficiaryGrid = () => {
     setChange((prev) => prev + 1);
@@ -140,9 +167,7 @@ const BeneficiaryInquiry = () => {
     setBeneficiarySearchFilterResponse(res);
   }
 
-  const onFetch = (isFetching: boolean) => {
-    setIsFetching(isFetching);
-  }
+
 
   useEffect(() => {
     if (token) {
@@ -232,9 +257,8 @@ const BeneficiaryInquiry = () => {
             <DSMAccordion title="Filter">
               <BeneficiaryInquirySearchFilter
                 setInitialSearchLoaded={setInitialSearchLoaded}
-                onSearch={onSearch}
+                onSearch={(req) => { setBeneficiarySearchFilterRequest(req); setInitateSearch(param => param + 1) }}
                 beneficiaryType={beneficiaryType}
-                onFetch={onFetch}
                 searchClicked={currentBadge}></BeneficiaryInquirySearchFilter>
             </DSMAccordion>
           </Grid>
@@ -261,12 +285,14 @@ const BeneficiaryInquiry = () => {
                   pageNumber={pageNumber}
                   setPageNumber={(value: number) => {
                     setPageNumber(value - 1);
+
                     //setInitialSearchLoaded(true);
                   }}
                   pageSize={pageSize}
                   setPageSize={(value: number) => {
                     setPageSize(value);
                     setPageNumber(1);
+
                     //setInitialSearchLoaded(true);
                   }}
                   recordCount={beneficiarySearchFilterResponse?.total}

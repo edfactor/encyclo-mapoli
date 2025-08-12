@@ -1332,7 +1332,7 @@ export interface BeneficiarySearchFilterRequest extends SortedPaginationRequestD
   psnSuffix?: number,
   name?: string,
   ssn?: string, 
-  memberType: number
+  memberType?: number
 }
 
 export interface BeneficiarySearchFilterResponse {
