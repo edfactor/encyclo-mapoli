@@ -11,7 +11,8 @@ import {
   NameColumnOptions,
   HoursColumnOptions,
   StatusColumnOptions,
-  CountColumnOptions
+  CountColumnOptions,
+  ZipColumnOptions
 } from "./columnFactoryTypes";
 import { viewBadgeLinkRenderer } from "./masterInquiryLink";
 
@@ -361,6 +362,53 @@ export const createCountColumn = (options: CountColumnOptions = {}): ColDef => {
     minWidth,
     resizable,
     sortable
+  };
+
+  if (alignment === "right") {
+    column.type = "rightAligned";
+  } else {
+    const alignmentClass = alignment === "center" ? "center-align" : "left-align";
+    column.headerClass = alignmentClass;
+    column.cellClass = alignmentClass;
+  }
+
+  if (maxWidth) {
+    column.maxWidth = maxWidth;
+  }
+
+  return column;
+};
+
+export const createZipColumn = (options: ZipColumnOptions = {}): ColDef => {
+  const {
+    headerName = "Zip Code",
+    field = "zipCode",
+    colId = field,
+    minWidth = 100,
+    maxWidth,
+    alignment = "left",
+    sortable = true,
+    resizable = true,
+    valueFormatter = (params) => {
+      if (params.value == null || params.value === "") return "";
+      
+      const zipStr = String(params.value);
+      // If exactly 4 digits, add leading zero
+      if (/^\d{4}$/.test(zipStr)) {
+        return `0${zipStr}`;
+      }
+      return zipStr;
+    }
+  } = options;
+
+  const column: ColDef = {
+    headerName,
+    field,
+    colId,
+    minWidth,
+    resizable,
+    sortable,
+    valueFormatter
   };
 
   if (alignment === "right") {
