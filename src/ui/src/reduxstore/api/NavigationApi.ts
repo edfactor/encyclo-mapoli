@@ -1,9 +1,8 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 
-import { RootState } from "reduxstore/store";
+import { setNavigation, setNavigationError } from "reduxstore/slices/navigationSlice";
 import { NavigationRequestDto, NavigationResponseDto } from "reduxstore/types";
 import { createDataSourceAwareBaseQuery } from "./api";
-import { setNavigation, setNavigationError } from "reduxstore/slices/navigationSlice";
 
 const baseQuery = createDataSourceAwareBaseQuery();
 
@@ -16,19 +15,10 @@ export const NavigationApi = createApi({
         url: `/navigation`,
         method: "GET"
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled, getState }) {
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
-          // Check token before attempting the query
-          const state = getState() as RootState;
-          const token = state.security.token;
           const { data } = await queryFulfilled;
-          console.log("Navigation data successfully fetched");
           dispatch(setNavigation(data));
-          if (!token) {
-            console.warn("Navigation API called without a valid token");
-            dispatch(setNavigationError("Authentication token missing"));
-            return;
-          }
         } catch (err) {
           console.error("Failed to fetch navigation:", err);
           // More descriptive error message
