@@ -28,7 +28,7 @@ public sealed class CertificateService : ICertificateService
         _dataContextFactory = dataContextFactory;
     }
 
-    public async Task<string> GetCertificateFile(ProfitYearRequest request, CancellationToken token)
+    public async Task<string> GetCertificateFile(CerficatePrintRequest request, CancellationToken token)
     {
         var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, token);
 
@@ -183,7 +183,7 @@ public sealed class CertificateService : ICertificateService
         }
     }
 
-    public async Task<ReportResponseBase<MemberYearSummaryDto>> GetCertificateData(ProfitYearRequest request, CancellationToken token)
+    public async Task<ReportResponseBase<MemberYearSummaryDto>> GetCertificateData(CerficatePrintRequest request, CancellationToken token)
     {
         var breakdownRequest = new BreakdownByStoreRequest
         {
@@ -193,7 +193,6 @@ public sealed class CertificateService : ICertificateService
             SortBy = ReferenceData.CertificateSort,
         };
 
-        return await _breakdownService.GetMembersWithBalanceByStore(breakdownRequest, token);
-
+        return await _breakdownService.GetMembersWithBalanceActivityByStore(breakdownRequest, request.Ssns, token);
     }
 }
