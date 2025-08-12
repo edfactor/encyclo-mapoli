@@ -7,6 +7,15 @@ import { createSSNColumn, createNameColumn, createBadgeColumn, createCurrencyCol
 export const BeneficiaryOfGridColumns = (): ColDef[] => {
     return [
         createBadgeColumn({ minWidth: 120 }),
+        {
+            headerName: "PSN_SUFFIX",
+            field: "psnSuffix",
+            colId: "psnSuffix",
+            flex: 1,
+            headerClass: "center-align",
+            cellClass: "center-align",
+            resizable: true
+        },
         createNameColumn({
             field: "fullName",
             minWidth: GRID_COLUMN_WIDTHS.FULL_NAME,

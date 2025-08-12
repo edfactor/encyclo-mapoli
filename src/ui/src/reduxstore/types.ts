@@ -1300,8 +1300,12 @@ export interface BeneficiaryDto {
   /**Contact information */
   ssn: string;
   dateOfBirth: Date;
-  address?: AddressDto;
-  contactInfo?: ContactInfoDto;
+  street: string;
+  street2?:string;
+  city?: string;
+  state?: string;
+  postalCode?: string;
+  countryIso: string;
   createdDate: Date;
   /**ContactInfo */
   fullName?: string;
@@ -1337,7 +1341,7 @@ export interface BeneficiarySearchFilterRequest extends SortedPaginationRequestD
 
 export interface BeneficiarySearchFilterResponse {
   badgeNumber: number,
-  psn: number,
+  psnSuffix: number,
   name?: string,
   ssn?: string,
   street?: string,
@@ -1478,6 +1482,24 @@ export interface BeneficiaryKindRequestDto {
 }
 export interface BeneficiaryKindResponseDto {
   beneficiaryKindList?: BeneficiaryKindDto[];
+}
+
+export interface BeneficiaryDetailRequest{
+  badgeNumber: number;
+  psnSuffix?: number;
+}
+
+export interface BeneficiaryDetailResponse {
+  badgeNumber: number;
+  psnSuffix: number;
+  name?: string;
+  ssn? : string;
+  street? : string;
+  city?: string;
+  state?: string;
+  zip? : string;
+  dateOfBirth : string;
+  currentBalance? : number;
 }
 
 // New types for rehire forfeitures editing functionality

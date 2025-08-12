@@ -1,5 +1,5 @@
 import { CloseSharp } from "@mui/icons-material";
-import { Button, CircularProgress, Divider, Grid, IconButton } from "@mui/material";
+import { Button, CircularProgress, Divider, Grid, IconButton, Typography } from "@mui/material";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
@@ -11,11 +11,12 @@ import { useSelector } from "react-redux";
 import {
   useLazyBeneficiarySearchFilterQuery,
   useLazyDeleteBeneficiaryQuery,
+  useLazyGetBeneficiaryDetailQuery,
   useLazyGetBeneficiaryKindQuery,
   useLazyGetBeneficiarytypesQuery
 } from "reduxstore/api/BeneficiariesApi";
 import { RootState } from "reduxstore/store";
-import { BeneficiaryDto, BeneficiaryKindDto, BeneficiarySearchFilterRequest, BeneficiarySearchFilterResponse, BeneficiaryTypeDto, MasterInquiryRequest } from "reduxstore/types";
+import { BeneficiaryDetailRequest, BeneficiaryDetailResponse, BeneficiaryDto, BeneficiaryKindDto, BeneficiarySearchFilterRequest, BeneficiarySearchFilterResponse, BeneficiaryTypeDto, MasterInquiryRequest } from "reduxstore/types";
 import { DSMAccordion, DSMGrid, ISortParams, Page, Pagination } from "smart-ui-library";
 import BeneficiaryInquiryGrid from "./BeneficiaryInquiryGrid";
 import BeneficiaryInquirySearchFilter from "./BeneficiaryInquirySearchFilter";
@@ -38,6 +39,7 @@ const BeneficiaryInquiry = () => {
   const [triggerGetBeneficiaryKind] = useLazyGetBeneficiaryKindQuery();
   const [triggerGetBeneficiaryType] = useLazyGetBeneficiarytypesQuery();
   const [triggerDeleteBeneficiary] = useLazyDeleteBeneficiaryQuery();
+  const[triggerBeneficiaryDetail, {isSuccess}]  = useLazyGetBeneficiaryDetailQuery();
   const [open, setOpen] = useState(false);
   const [openDeleteConfirmationDialog, setOpenDeleteConfirmationDialog] = useState(false);
   const [badgeNumber, setBadgeNumber] = useState(0);
@@ -45,7 +47,7 @@ const BeneficiaryInquiry = () => {
   const [beneficiaryType, setBeneficiaryType] = useState<BeneficiaryTypeDto[]>([]);
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [searchParams, setSearchParams] = useState<MasterInquiryRequest | null>();
-  const [selectedMember, setSelectedMember] = useState<SelectedMember | null>();
+  const [selectedMember, setSelectedMember] = useState<BeneficiaryDetailResponse | null>();
   const [noResults, setNoResults] = useState(false);
   const [change, setChange] = useState<number>(0);
   const [selectedBeneficiary, setSelectedBeneficiary] = useState<BeneficiaryDto | undefined>();
@@ -62,17 +64,15 @@ const BeneficiaryInquiry = () => {
   const [initialSearch, setInitateSearch] = useState<number>(0);
   const [beneficiarySearchFilterRequest, setBeneficiarySearchFilterRequest] = useState<BeneficiarySearchFilterRequest | undefined>();
   const [triggerSearch, { isFetching }] = useLazyBeneficiarySearchFilterQuery();
-  const onBadgeClick = (data: any) => {
+  const onBadgeClick = (data: BeneficiarySearchFilterResponse) => {
     if (data) {
-      const member: SelectedMember = {
+      const request:BeneficiaryDetailRequest = {
         badgeNumber: data.badgeNumber,
-        id: data.id,
-        memberType: data.isEmployee ? 1 : 2,
-        ssn: data.ssn,
         psnSuffix: data.psnSuffix
       }
-      setSelectedMember(member);
-      setChange(change + 1);
+      triggerBeneficiaryDetail(request).unwrap().then(res=>{
+        setSelectedMember(res);
+      })
     }
 
   };
@@ -164,7 +164,12 @@ const BeneficiaryInquiry = () => {
   };
 
   const onSearch = (res: Paged<BeneficiarySearchFilterResponse> | undefined) => {
+    
     setBeneficiarySearchFilterResponse(res);
+    if(res?.total == 1) //only 1 record
+    {
+      onBadgeClick(res.results[0]);
+    }
   }
 
 
@@ -266,9 +271,6 @@ const BeneficiaryInquiry = () => {
           <Grid
             size={{ xs: 12 }}
             width="100%">
-            {/* <Button onClick={handleClickOpen}>Add Beneficiary</Button> */}
-
-            {/* <BeneficiaryInquiryGrid initialSearchLoaded={initialSearchLoaded} setInitialSearchLoaded={setInitialSearchLoaded} /> */}
             {beneficiarySearchFilterResponse && beneficiarySearchFilterResponse?.total > 0 && (
               <>
                 <DSMGrid
@@ -277,7 +279,12 @@ const BeneficiaryInquiry = () => {
                   providedOptions={{
                     rowData: beneficiarySearchFilterResponse.results,
                     columnDefs: columnDefs,
-                    suppressMultiSort: true
+                    suppressMultiSort: true,
+                    onRowClicked: (event) => {
+                      if (event.data) {
+                        onBadgeClick(event.data); // or pass whatever field you need
+                      }
+                    }
                   }}
                 />
 
@@ -301,15 +308,27 @@ const BeneficiaryInquiry = () => {
 
             )}
 
+
+
             {/* Render employee details if identifiers are present in selectedMember, or show missive if noResults */}
-            {(noResults || (selectedMember && selectedMember.memberType !== undefined && selectedMember.id)) && (
+            {(isSuccess && selectedMember) && (
               <>
-                <MasterInquiryEmployeeDetails
-                  memberType={selectedMember?.memberType ?? 0}
-                  id={selectedMember?.id ?? 0}
-                  profitYear={searchParams?.endProfitYear}
-                  noResults={noResults}
-                />
+                <Typography
+                  variant="h2"
+                  sx={{ color: "#0258A5",paddingTop:10 }}>
+                  {`Beneficiary Details`}
+                </Typography>
+                <Grid container spacing={5}>
+                  <Grid size={6}>
+                    <p><strong>{selectedMember?.name}</strong></p>
+                    <p>{selectedMember?.street}<br />{selectedMember?.city} {selectedMember?.state} {selectedMember?.zip}</p>
+                  </Grid>
+                  <Grid size={6}>
+                    <p><strong>DOB</strong> {selectedMember.dateOfBirth}</p>
+                    <p><strong>SSN</strong> {selectedMember.ssn}</p>
+                    <p><strong>Balance</strong> {selectedMember.currentBalance}</p>
+                    </Grid>
+                </Grid>
                 <div
                   style={{
                     padding: "24px",

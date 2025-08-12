@@ -5,6 +5,18 @@ import { createSSNColumn, createNameColumn, createBadgeColumn,} from "../../util
 export const BeneficiarySearchFilterColumns = (): ColDef[] => {
     return [
         createBadgeColumn({ minWidth: 120 }),
+        {
+            headerName: "PSN_Suffix",
+            field: "psnSuffix",
+            colId: "psnSuffix",
+            flex: 1,
+            headerClass: "center-align",
+            cellClass: "center-align",
+            resizable: true,
+            valueFormatter: (params) => {
+                return `${params.data.psnSuffix}`;
+            }
+        },
         createNameColumn({
             field: "name",
             minWidth: GRID_COLUMN_WIDTHS.FULL_NAME,
