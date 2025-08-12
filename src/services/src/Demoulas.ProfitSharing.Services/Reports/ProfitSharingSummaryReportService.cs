@@ -84,6 +84,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
         var birthday18 = calInfo.FiscalEndDate.AddYears(-18);
         var birthday21 = calInfo.FiscalEndDate.AddYears(-21);
+      var hoursThreshold = ReferenceData.MinimumHoursForContribution();
         
         // Build the base query for the year once
         IQueryable<YearEndProfitSharingReportDetail> activeDetails = await ActiveSummary(req, calInfo.FiscalEndDate);
@@ -101,26 +102,26 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             x.DateOfBirth,
 
             // Active + Inactive
-            C1 = (((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate > calInfo.FiscalEndDate))
-                  && x.Hours >= 1000 && x.DateOfBirth <= birthday18 && x.DateOfBirth > birthday21),
-            C2 = (((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.TerminationDate > calInfo.FiscalEndDate))
-                  && x.Hours >= 1000 && x.DateOfBirth <= birthday21),
-            C3 = (((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.TerminationDate > calInfo.FiscalEndDate))
+        C1 = (((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate > calInfo.FiscalEndDate))
+            && x.Hours >= hoursThreshold && x.DateOfBirth <= birthday18 && x.DateOfBirth > birthday21),
+        C2 = (((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.TerminationDate > calInfo.FiscalEndDate))
+            && x.Hours >= hoursThreshold && x.DateOfBirth <= birthday21),
+        C3 = (((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.TerminationDate > calInfo.FiscalEndDate))
                   && x.DateOfBirth > birthday18),
-            C4 = (((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.TerminationDate > calInfo.FiscalEndDate))
-                  && x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.PriorBalance > 0),
-            C5 = (((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.TerminationDate > calInfo.FiscalEndDate))
-                  && x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.PriorBalance == 0),
+        C4 = (((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.TerminationDate > calInfo.FiscalEndDate))
+            && x.Hours < hoursThreshold && x.DateOfBirth <= birthday18 && x.PriorBalance > 0),
+        C5 = (((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.TerminationDate > calInfo.FiscalEndDate))
+            && x.Hours < hoursThreshold && x.DateOfBirth <= birthday18 && x.PriorBalance == 0),
 
             // Terminated
             C6 = (x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate < calInfo.FiscalEndDate
-                  && x.Hours >= 1000 && x.DateOfBirth <= birthday18),
+            && x.Hours >= hoursThreshold && x.DateOfBirth <= birthday18),
             C7 = (x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate <= calInfo.FiscalEndDate && x.TerminationDate >= calInfo.FiscalBeginDate
-                  && x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.PriorBalance == 0),
+            && x.Hours < hoursThreshold && x.DateOfBirth <= birthday18 && x.PriorBalance == 0),
             C8 = (x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate <= calInfo.FiscalEndDate && x.TerminationDate >= calInfo.FiscalBeginDate
-                  && x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.PriorBalance > 0),
+            && x.Hours < hoursThreshold && x.DateOfBirth <= birthday18 && x.PriorBalance > 0),
             // Special totals count for line 8 (ignores termination window)
-            C8TotalsOnly = (x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.PriorBalance > 0),
+        C8TotalsOnly = (x.Hours < hoursThreshold && x.DateOfBirth <= birthday18 && x.PriorBalance > 0),
 
             C10 = (x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate <= calInfo.FiscalEndDate && x.TerminationDate >= calInfo.FiscalBeginDate
                   && x.Wages == 0 && x.DateOfBirth > birthday18)
@@ -132,76 +133,76 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             {
                 // Line 1
                 L1_Count = g.Sum(y => y.C1 ? 1 : 0),
-                L1_Wages = g.Sum(y => y.C1 ? y.Wages : 0),
-                L1_Hours = g.Sum(y => y.C1 ? y.Hours : 0),
+                L1_Wages = g.Sum(y => y.C1 ? y.Wages : 0m),
+                L1_Hours = g.Sum(y => y.C1 ? y.Hours : 0m),
                 L1_Points = g.Sum(y => y.C1 ? y.Points : 0),
-                L1_Balance = g.Sum(y => y.C1 ? y.Balance : 0),
-                L1_PriorBalance = g.Sum(y => y.C1 ? y.PriorBalance : 0),
+                L1_Balance = g.Sum(y => y.C1 ? y.Balance : 0m),
+                L1_PriorBalance = g.Sum(y => y.C1 ? y.PriorBalance : 0m),
 
                 // Line 2
                 L2_Count = g.Sum(y => y.C2 ? 1 : 0),
-                L2_Wages = g.Sum(y => y.C2 ? y.Wages : 0),
-                L2_Hours = g.Sum(y => y.C2 ? y.Hours : 0),
+                L2_Wages = g.Sum(y => y.C2 ? y.Wages : 0m),
+                L2_Hours = g.Sum(y => y.C2 ? y.Hours : 0m),
                 L2_Points = g.Sum(y => y.C2 ? y.Points : 0),
-                L2_Balance = g.Sum(y => y.C2 ? y.Balance : 0),
-                L2_PriorBalance = g.Sum(y => y.C2 ? y.PriorBalance : 0),
+                L2_Balance = g.Sum(y => y.C2 ? y.Balance : 0m),
+                L2_PriorBalance = g.Sum(y => y.C2 ? y.PriorBalance : 0m),
 
                 // Line 3
                 L3_Count = g.Sum(y => y.C3 ? 1 : 0),
-                L3_Wages = g.Sum(y => y.C3 ? y.Wages : 0),
-                L3_Hours = g.Sum(y => y.C3 ? y.Hours : 0),
+                L3_Wages = g.Sum(y => y.C3 ? y.Wages : 0m),
+                L3_Hours = g.Sum(y => y.C3 ? y.Hours : 0m),
                 L3_Points = g.Sum(y => y.C3 ? y.Points : 0),
-                L3_Balance = g.Sum(y => y.C3 ? y.Balance : 0),
-                L3_PriorBalance = g.Sum(y => y.C3 ? y.PriorBalance : 0),
+                L3_Balance = g.Sum(y => y.C3 ? y.Balance : 0m),
+                L3_PriorBalance = g.Sum(y => y.C3 ? y.PriorBalance : 0m),
 
                 // Line 4
                 L4_Count = g.Sum(y => y.C4 ? 1 : 0),
-                L4_Wages = g.Sum(y => y.C4 ? y.Wages : 0),
-                L4_Hours = g.Sum(y => y.C4 ? y.Hours : 0),
+                L4_Wages = g.Sum(y => y.C4 ? y.Wages : 0m),
+                L4_Hours = g.Sum(y => y.C4 ? y.Hours : 0m),
                 L4_Points = g.Sum(y => y.C4 ? y.Points : 0),
-                L4_Balance = g.Sum(y => y.C4 ? y.Balance : 0),
-                L4_PriorBalance = g.Sum(y => y.C4 ? y.PriorBalance : 0),
+                L4_Balance = g.Sum(y => y.C4 ? y.Balance : 0m),
+                L4_PriorBalance = g.Sum(y => y.C4 ? y.PriorBalance : 0m),
 
                 // Line 5
                 L5_Count = g.Sum(y => y.C5 ? 1 : 0),
-                L5_Wages = g.Sum(y => y.C5 ? y.Wages : 0),
-                L5_Hours = g.Sum(y => y.C5 ? y.Hours : 0),
+                L5_Wages = g.Sum(y => y.C5 ? y.Wages : 0m),
+                L5_Hours = g.Sum(y => y.C5 ? y.Hours : 0m),
                 L5_Points = g.Sum(y => y.C5 ? y.Points : 0),
-                L5_Balance = g.Sum(y => y.C5 ? y.Balance : 0),
-                L5_PriorBalance = g.Sum(y => y.C5 ? y.PriorBalance : 0),
+                L5_Balance = g.Sum(y => y.C5 ? y.Balance : 0m),
+                L5_PriorBalance = g.Sum(y => y.C5 ? y.PriorBalance : 0m),
 
                 // Line 6 (Terminated 18+ with 1000+ hours)
                 L6_Count = g.Sum(y => y.C6 ? 1 : 0),
-                L6_Wages = g.Sum(y => y.C6 ? y.Wages : 0),
-                L6_Hours = g.Sum(y => y.C6 ? y.Hours : 0),
+                L6_Wages = g.Sum(y => y.C6 ? y.Wages : 0m),
+                L6_Hours = g.Sum(y => y.C6 ? y.Hours : 0m),
                 L6_Points = g.Sum(y => y.C6 ? y.Points : 0),
-                L6_Balance = g.Sum(y => y.C6 ? y.Balance : 0),
-                L6_PriorBalance = g.Sum(y => y.C6 ? y.PriorBalance : 0),
+                L6_Balance = g.Sum(y => y.C6 ? y.Balance : 0m),
+                L6_PriorBalance = g.Sum(y => y.C6 ? y.PriorBalance : 0m),
 
                 // Line 7 (Terminated 18+ <1000 no prior)
                 L7_Count = g.Sum(y => y.C7 ? 1 : 0),
-                L7_Wages = g.Sum(y => y.C7 ? y.Wages : 0),
-                L7_Hours = g.Sum(y => y.C7 ? y.Hours : 0),
+                L7_Wages = g.Sum(y => y.C7 ? y.Wages : 0m),
+                L7_Hours = g.Sum(y => y.C7 ? y.Hours : 0m),
                 L7_Points = g.Sum(y => y.C7 ? y.Points : 0),
-                L7_Balance = g.Sum(y => y.C7 ? y.Balance : 0),
-                L7_PriorBalance = g.Sum(y => y.C7 ? y.PriorBalance : 0),
+                L7_Balance = g.Sum(y => y.C7 ? y.Balance : 0m),
+                L7_PriorBalance = g.Sum(y => y.C7 ? y.PriorBalance : 0m),
 
                 // Line 8 (Terminated 18+ <1000 with prior) + special totals-only count
                 L8_Count = g.Sum(y => y.C8 ? 1 : 0),
                 L8_CountTotalsOnly = g.Sum(y => y.C8TotalsOnly ? 1 : 0),
-                L8_Wages = g.Sum(y => y.C8 ? y.Wages : 0),
-                L8_Hours = g.Sum(y => y.C8 ? y.Hours : 0),
+                L8_Wages = g.Sum(y => y.C8 ? y.Wages : 0m),
+                L8_Hours = g.Sum(y => y.C8 ? y.Hours : 0m),
                 L8_Points = g.Sum(y => y.C8 ? y.Points : 0),
-                L8_Balance = g.Sum(y => y.C8 ? y.Balance : 0),
-                L8_PriorBalance = g.Sum(y => y.C8 ? y.PriorBalance : 0),
+                L8_Balance = g.Sum(y => y.C8 ? y.Balance : 0m),
+                L8_PriorBalance = g.Sum(y => y.C8 ? y.PriorBalance : 0m),
 
                 // Line 10 (Terminated under 18 with no wages)
                 L10_Count = g.Sum(y => y.C10 ? 1 : 0),
-                L10_Wages = g.Sum(y => y.C10 ? y.Wages : 0),
-                L10_Hours = g.Sum(y => y.C10 ? y.Hours : 0),
+                L10_Wages = g.Sum(y => y.C10 ? y.Wages : 0m),
+                L10_Hours = g.Sum(y => y.C10 ? y.Hours : 0m),
                 L10_Points = g.Sum(y => y.C10 ? y.Points : 0),
-                L10_Balance = g.Sum(y => y.C10 ? y.Balance : 0),
-                L10_PriorBalance = g.Sum(y => y.C10 ? y.PriorBalance : 0)
+                L10_Balance = g.Sum(y => y.C10 ? y.Balance : 0m),
+                L10_PriorBalance = g.Sum(y => y.C10 ? y.PriorBalance : 0m)
             })
             .FirstOrDefaultAsync(cancellationToken);
 
@@ -334,10 +335,12 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         YearEndProfitSharingReportSummaryLineItem? beneficiaryLineItem = await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
-            var beneQry = ctx.BeneficiaryContacts
-                .Where(bc => !demographics.Any(x => x.Ssn == bc.Ssn))
-                .Join(_totalService.GetTotalBalanceSet(ctx, req.ProfitYear), x => x.Ssn, x => x.Ssn,
-                    (pp, tot) => new { pp, tot });
+            var beneQry = from bc in ctx.BeneficiaryContacts
+                          join d in demographics on bc.Ssn equals d.Ssn into gj
+                          from d in gj.DefaultIfEmpty()
+                          where d == null
+                          join tot in _totalService.GetTotalBalanceSet(ctx, req.ProfitYear) on bc.Ssn equals tot.Ssn
+                          select new { bc, tot };
 
             return await beneQry.GroupBy(x => true).Select(x => new YearEndProfitSharingReportSummaryLineItem()
             {
@@ -345,11 +348,11 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 LineItemPrefix = "N",
                 LineItemTitle = "NON-EMPLOYEE BENEFICIARIES",
                 NumberOfMembers = x.Count(),
-                TotalWages = 0,
-                TotalHours = 0,
+                TotalWages = 0m,
+                TotalHours = 0m,
                 TotalPoints = 0,
-                TotalBalance = x.Sum(y => y.tot.Total ?? 0),
-                TotalPriorBalance = 0
+                TotalBalance = x.Sum(y => y.tot.Total ?? 0m),
+                TotalPriorBalance = 0m
             }).FirstOrDefaultAsync(cancellationToken);
         });
         
@@ -447,11 +450,12 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         var lastYear = req.ProfitYear - 1;
         var fiscalBeginDate = calInfo.FiscalBeginDate;
         var fiscalEndDate = calInfo.FiscalEndDate;
+    var hoursThreshold = ReferenceData.MinimumHoursForContribution();
         // Always fetch all details for the year
         IQueryable<YearEndProfitSharingReportDetail> allDetails = await ActiveSummary(req, calInfo.FiscalEndDate);
         
-        allDetails = allDetails.Where(x => ((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.TerminationDate > fiscalEndDate)) &&
-                x.Hours >= 1000 && x.DateOfBirth <= birthday18);
+    allDetails = allDetails.Where(x => ((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.TerminationDate > fiscalEndDate)) &&
+        x.Hours >= hoursThreshold && x.DateOfBirth <= birthday18);
 
         var totals = await (
             from a in allDetails
@@ -463,7 +467,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 NumberOfEmployeesUnder21 = g.Count(x => x.DateOfBirth > birthday21),
                 WagesTotal = g.Where(x => x.DateOfBirth < birthday21).Sum(x => x.Wages),
                 HoursTotal = g.Where(x => x.DateOfBirth < birthday21).Sum(x => x.Hours),
-                PointsTotal = g.Where(x => x.DateOfBirth <= birthday21 && x.DateOfBirth > birthday65).Sum(x => x.Wages / 100),
+                PointsTotal = g.Where(x => x.DateOfBirth <= birthday21 && x.DateOfBirth > birthday65).Sum(x => x.Wages / 100m),
             }
             ).FirstOrDefaultAsync(cancellationToken);
 
@@ -482,7 +486,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             {
                 TerminatedWagesTotal = g.Sum(x => x.Wages),
                 TerminatedHoursTotal = g.Sum(x => x.Hours),
-                TerminatedPointsTotal = g.Where(x => x.DateOfBirth <= birthday21 && x.DateOfBirth > birthday65).Sum(x => x.Wages / 100),
+                TerminatedPointsTotal = g.Where(x => x.DateOfBirth <= birthday21 && x.DateOfBirth > birthday65).Sum(x => x.Wages / 100m),
             }
         ).FirstOrDefaultAsync(cancellationToken);
 
@@ -512,16 +516,14 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         int? badgeNumber)
     {
         IQueryable<PayProfit> basePayProfits = ctx.PayProfits
-            .Where(p => p.ProfitYear == req.ProfitYear)
-            .Include(p => p.Demographic)
-            .ThenInclude(d => d!.ContactInfo);
+            .Where(p => p.ProfitYear == req.ProfitYear);
 
         var demographicQuery = await _demographicReaderService.BuildDemographicQuery(ctx, true);
         // No IsYearEnd check, always join
         basePayProfits = basePayProfits
             .Join(demographicQuery, p => p.DemographicId, d => d.Id, (p, _) => p);
 
-        var yearsOfService = _totalService.GetYearsOfService(ctx, req.ProfitYear);
+    var yearsOfService = _totalService.GetYearsOfService(ctx, req.ProfitYear);
         var employeeQry =
             from pp in basePayProfits
             join et in ctx.EmploymentTypes on pp.Demographic!.EmploymentTypeId equals et.Id
@@ -553,7 +555,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             employeeQry = employeeQry.Where(e => e.BadgeNumber == badgeNumber);
         }
 
-        var beginningBalance = (short)(req.ProfitYear - 1);
+    var beginningBalance = (short)(req.ProfitYear - 1);
         var balances = _totalService.GetTotalBalanceSet(ctx, beginningBalance);
         var priorBalances = _totalService.GetTotalBalanceSet(ctx, (short)(beginningBalance - 1));
         var employeeWithBalanceQry =
@@ -566,9 +568,9 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             {
                 Employee = e,
                 ProfitYear = req.ProfitYear,
-                Balance = (decimal)(bal != null && bal.Total != null ? bal.Total : 0),
+        Balance = (decimal)(bal != null && bal.Total != null ? bal.Total : 0m),
                 PriorProfitYear = (short)(req.ProfitYear - 1),
-                PriorBalance = (decimal)(priorBal != null && priorBal.Total != null ? priorBal.Total : 0)
+        PriorBalance = (decimal)(priorBal != null && priorBal.Total != null ? priorBal.Total : 0m)
             };
         return employeeWithBalanceQry;
     }
@@ -590,8 +592,8 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
 
       
 
-        // Always fetch all details for the year
-        IQueryable<YearEndProfitSharingReportDetail> allDetails = employees.Select(x => new YearEndProfitSharingReportDetail
+    // Always fetch all details for the year
+    IQueryable<YearEndProfitSharingReportDetail> allDetails = employees.Select(x => new YearEndProfitSharingReportDetail
         {
             BadgeNumber = x.Employee.BadgeNumber,
             ProfitYear = x.ProfitYear,
@@ -606,8 +608,9 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             Wages = x.Employee.Wages,
             Hours = x.Employee.Hours,
             Points = Convert.ToInt16(x.Employee.PointsEarned),
-            IsNew = x.Balance == 0 && x.Employee.Hours > ReferenceData.MinimumHoursForContribution() && (x.Employee.Years == null || x.Employee.Years == 0),
-            IsUnder21 = (DateTime.UtcNow.Year - x.Employee.DateOfBirth.Year - (DateTime.UtcNow.DayOfYear < x.Employee.DateOfBirth.DayOfYear ? 1 : 0)) < 21,
+            IsNew = x.Balance == 0m && x.Employee.Hours > ReferenceData.MinimumHoursForContribution() && (x.Employee.Years == null || x.Employee.Years == 0),
+            // Use fiscal end-date derived cutoff rather than DateTime.UtcNow for correctness and translation
+            IsUnder21 = x.Employee.DateOfBirth > ageAsOfDate.AddYears(-21),
             EmployeeStatus = x.Employee.EmploymentStatusId,
             Balance = x.Balance,
             PriorBalance = x.PriorBalance,
