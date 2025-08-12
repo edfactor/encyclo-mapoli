@@ -14,9 +14,6 @@ using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using System.ComponentModel;
-using System.Text.Json;
-using System;
-using System.Linq;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
 
@@ -29,6 +26,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
     private readonly ICalendarService _calendarService;
     private readonly TotalService _totalService;
     private readonly IDemographicReaderService _demographicReaderService;
+    private static readonly short _hoursThreshold;
 
     private sealed record EmployeeProjection
     {
@@ -71,6 +69,12 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         _totalService = totalService;
         _demographicReaderService = demographicReaderService;
     }
+    
+    static ProfitSharingSummaryReportService()
+    {
+        // Set the hours threshold for profit sharing eligibility
+        _hoursThreshold = ReferenceData.MinimumHoursForContribution();
+    }
 
     /// <summary>
     /// Generates the year-end profit sharing summary report, grouped by eligibility and status.
@@ -84,7 +88,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
         var birthday18 = calInfo.FiscalEndDate.AddYears(-18);
         var birthday21 = calInfo.FiscalEndDate.AddYears(-21);
-        
+
         // Helper to aggregate a list of details into summary values
         static (int Count, decimal TotalWages, decimal TotalHours, int TotalPoints, decimal TotalBalance, decimal TotalPriorBalance) AggregateDetails(List<YearEndProfitSharingReportDetail> details)
         {
@@ -166,7 +170,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 GetEnumDescription(YearEndProfitSharingReportId.TerminatedAge18OrOlderWithLessThan1000HoursAndPriorAmount),
                 activeDetails,
                 GetReportFilter((int)YearEndProfitSharingReportId.TerminatedAge18OrOlderWithLessThan1000HoursAndPriorAmount, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21),
-                x => x.Hours >= 0 && x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.PriorBalance > 0
+                x => x.Hours >= 0 && x.Hours < _hoursThreshold && x.DateOfBirth <= birthday18 && x.PriorBalance > 0
             ),
             await CreateLine("TERMINATED", ((int)YearEndProfitSharingReportId.TerminatedUnder18NoWages).ToString(), GetEnumDescription(YearEndProfitSharingReportId.TerminatedUnder18NoWages), activeDetails, GetReportFilter((int)YearEndProfitSharingReportId.TerminatedUnder18NoWages, calInfo.FiscalBeginDate, calInfo.FiscalEndDate, birthday18, birthday21))
         };
@@ -193,7 +197,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 TotalPriorBalance = 0
             }).FirstOrDefaultAsync(cancellationToken);
         });
-        
+
         if (beneficiaryLineItem != null)
         {
             lineItems.Add(beneficiaryLineItem);
@@ -285,14 +289,13 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         var birthday18 = calInfo.FiscalEndDate.AddYears(-18);
         var birthday21 = calInfo.FiscalEndDate.AddYears(-21);
         var birthday65 = calInfo.FiscalEndDate.AddYears(-65);
-        var lastYear = req.ProfitYear - 1;
         var fiscalBeginDate = calInfo.FiscalBeginDate;
         var fiscalEndDate = calInfo.FiscalEndDate;
         // Always fetch all details for the year
         IQueryable<YearEndProfitSharingReportDetail> allDetails = await ActiveSummary(req, calInfo.FiscalEndDate);
-        
+
         allDetails = allDetails.Where(x => ((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.TerminationDate > fiscalEndDate)) &&
-                x.Hours >= 1000 && x.DateOfBirth <= birthday18);
+                x.Hours >= _hoursThreshold && x.DateOfBirth <= birthday18);
 
         var totals = await (
             from a in allDetails
@@ -387,7 +390,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 Years = yip.Years,
                 FirstContributionYear = fc.FirstContributionYear
             };
-      
+
 
         if (badgeNumber.HasValue)
         {
@@ -429,7 +432,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
     {
         var employees = await _dataContextFactory.UseReadOnlyContext(ctx => BuildFilteredEmployeeSetAsync(ctx, req, badgeNumber));
 
-      
+
 
         // Always fetch all details for the year
         IQueryable<YearEndProfitSharingReportDetail> allDetails = employees.Select(x => new YearEndProfitSharingReportDetail
@@ -480,28 +483,28 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         {
             1 => x =>
                 ((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate > fiscalEndDate)) &&
-                x.Hours >= 1000 && x.DateOfBirth <= birthday18 && x.DateOfBirth > birthday21,
+                x.Hours >= _hoursThreshold && x.DateOfBirth <= birthday18 && x.DateOfBirth > birthday21,
             2 => x =>
                 ((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.TerminationDate > fiscalEndDate)) &&
-                x.Hours >= 1000 && x.DateOfBirth <= birthday21,
+                x.Hours >= _hoursThreshold && x.DateOfBirth <= birthday21,
             3 => x =>
                 ((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.TerminationDate > fiscalEndDate)) &&
                 x.DateOfBirth > birthday18,
             4 => x =>
                 ((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.TerminationDate > fiscalEndDate)) &&
-                x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.PriorBalance > 0,
+                x.Hours < _hoursThreshold && x.DateOfBirth <= birthday18 && x.PriorBalance > 0,
             5 => x =>
                 ((x.EmployeeStatus == EmploymentStatus.Constants.Active || x.EmployeeStatus == EmploymentStatus.Constants.Inactive) || (x.TerminationDate > fiscalEndDate)) &&
-                x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.PriorBalance == 0,
+                x.Hours < _hoursThreshold && x.DateOfBirth <= birthday18 && x.PriorBalance == 0,
             6 => x =>
                 x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate < fiscalEndDate &&
-                x.Hours >= 1000 && x.DateOfBirth <= birthday18,
+                x.Hours >= _hoursThreshold && x.DateOfBirth <= birthday18,
             7 => x =>
                 x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate <= fiscalEndDate && x.TerminationDate >= fiscalBeginDate &&
-                x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.PriorBalance == 0,
+                x.Hours < _hoursThreshold && x.DateOfBirth <= birthday18 && x.PriorBalance == 0,
             8 => x =>
                 x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate <= fiscalEndDate && x.TerminationDate >= fiscalBeginDate &&
-                x.Hours < 1000 && x.DateOfBirth <= birthday18 && x.PriorBalance > 0,
+                x.Hours < _hoursThreshold && x.DateOfBirth <= birthday18 && x.PriorBalance > 0,
             10 => x =>
                 x.EmployeeStatus == EmploymentStatus.Constants.Terminated && x.TerminationDate <= fiscalEndDate && x.TerminationDate >= fiscalBeginDate &&
                 x.Wages == 0 && x.DateOfBirth > birthday18,

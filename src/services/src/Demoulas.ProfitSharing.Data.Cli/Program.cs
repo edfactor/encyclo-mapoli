@@ -3,6 +3,7 @@ using System.CommandLine.Invocation;
 using System.Text;
 using Demoulas.Common.Data.Services.Entities.Contexts.EntityMapping.Data;
 using Demoulas.ProfitSharing.Data.Cli.DiagramServices;
+using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -59,15 +60,7 @@ public sealed class Program
                     await context.SaveChangesAsync();
                 }
 
-                OracleConnectionStringBuilder sb = new OracleConnectionStringBuilder(context.Database.GetConnectionString());
-
-                string gatherStats = $@"BEGIN
-   DBMS_STATS.GATHER_SCHEMA_STATS('{sb.UserID}');
-    END;";
-
-                await context.Database.ExecuteSqlRawAsync(gatherStats);
-                Console.WriteLine("Gathered schema stats");
-
+                await GatherSchemaStatistics(context);
             });
         });
 
@@ -104,6 +97,8 @@ public sealed class Program
 
                 context.DataImportRecords.Add(new DataImportRecord { SourceSchema = sourceSchema });
                 await context.SaveChangesAsync();
+
+                await GatherSchemaStatistics(context);
             });
         });
 
@@ -237,5 +232,17 @@ public sealed class Program
         rootCommand.AddCommand(runSqlCommandForUatNavigation);
 
         return rootCommand.InvokeAsync(args);
+    }
+
+    private static async Task GatherSchemaStatistics(ProfitSharingDbContext context)
+    {
+        OracleConnectionStringBuilder sb = new OracleConnectionStringBuilder(context.Database.GetConnectionString());
+
+        string gatherStats = $@"BEGIN
+   DBMS_STATS.GATHER_SCHEMA_STATS('{sb.UserID}');
+    END;";
+
+        await context.Database.ExecuteSqlRawAsync(gatherStats);
+        Console.WriteLine("Gathered schema stats");
     }
 }
