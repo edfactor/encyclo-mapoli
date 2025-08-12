@@ -96,8 +96,9 @@ public sealed class BreakdownReportService : IBreakdownService
     private enum BalanceEnum
     {
         BalanceOrNoBalance = 0,
-        HasBalance,
-        HasBalanceActivity
+        HasVestedBalance,
+        HasBalanceActivity,
+        HasCurrentBalanceNotVested,
     }
     #endregion
 
@@ -243,39 +244,47 @@ public sealed class BreakdownReportService : IBreakdownService
         BreakdownByStoreRequest request,
         CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, StatusFilterEnum.Active, BalanceEnum.BalanceOrNoBalance, withBeneficiaryAllocation: false, cancellationToken);
+        return GetMembersByStore(request, StatusFilterEnum.Active, BalanceEnum.BalanceOrNoBalance, withBeneficiaryAllocation: false, Ssns: null, cancellationToken);
     }
 
-    public Task<ReportResponseBase<MemberYearSummaryDto>> GetMembersWithBalanceByStore(BreakdownByStoreRequest request, CancellationToken cancellationToken)
+    public Task<ReportResponseBase<MemberYearSummaryDto>> GetMembersWithBalanceActivityByStore(BreakdownByStoreRequest request, int[]? Ssns, CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, StatusFilterEnum.All, BalanceEnum.HasBalanceActivity, withBeneficiaryAllocation: false, cancellationToken);
+        return GetMembersByStore(request, StatusFilterEnum.All, BalanceEnum.HasBalanceActivity, withBeneficiaryAllocation: false, Ssns, cancellationToken);
     }
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetInactiveMembersByStore(
         BreakdownByStoreRequest request,
         CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, StatusFilterEnum.Inactive, BalanceEnum.BalanceOrNoBalance, withBeneficiaryAllocation: false, cancellationToken);
+        return GetMembersByStore(request, StatusFilterEnum.Inactive, BalanceEnum.BalanceOrNoBalance, withBeneficiaryAllocation: false, Ssns: null, cancellationToken);
     }
 
-    public Task<ReportResponseBase<MemberYearSummaryDto>> GetInactiveMembersWithBalanceByStore(
+    public Task<ReportResponseBase<MemberYearSummaryDto>> GetInactiveMembersWithVestedBalanceByStore(
         BreakdownByStoreRequest request,
         CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, StatusFilterEnum.Inactive, BalanceEnum.HasBalance, withBeneficiaryAllocation: false, cancellationToken);
+        return GetMembersByStore(request, StatusFilterEnum.Inactive, BalanceEnum.HasVestedBalance, withBeneficiaryAllocation: false, Ssns: null, cancellationToken);
     }
 
-    public Task<ReportResponseBase<MemberYearSummaryDto>> GetTerminatedMembersWithBalanceByStore(
+    public Task<ReportResponseBase<MemberYearSummaryDto>> GetTerminatedMembersWithVestedBalanceByStore(
        BreakdownByStoreRequest request,
        CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, StatusFilterEnum.Terminated, BalanceEnum.HasBalance, withBeneficiaryAllocation: false, cancellationToken);
+        return GetMembersByStore(request, StatusFilterEnum.Terminated, BalanceEnum.HasVestedBalance, withBeneficiaryAllocation: false, Ssns: null, cancellationToken);
     }
+
+    public Task<ReportResponseBase<MemberYearSummaryDto>> GetTerminatedMembersWithCurrentBalanceNotVestedByStore(
+       BreakdownByStoreRequest request,
+       CancellationToken cancellationToken)
+    {
+        return GetMembersByStore(request, StatusFilterEnum.Terminated, BalanceEnum.HasCurrentBalanceNotVested, withBeneficiaryAllocation: false, Ssns: null, cancellationToken);
+    }
+
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetTerminatedMembersWithBeneficiaryByStore(
        TerminatedEmployeesWithBalanceBreakdownRequest request,
        CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, StatusFilterEnum.Terminated, BalanceEnum.BalanceOrNoBalance, withBeneficiaryAllocation: true, cancellationToken);
+        return GetMembersByStore(request, StatusFilterEnum.Terminated, BalanceEnum.BalanceOrNoBalance, withBeneficiaryAllocation: true, Ssns:null, cancellationToken);
     }
 
     #region ── Private: common building blocks ───────────────────────────────────────────
@@ -285,6 +294,7 @@ public sealed class BreakdownReportService : IBreakdownService
         StatusFilterEnum employeeStatusFilter,
         BalanceEnum balanceFilter,
         bool withBeneficiaryAllocation,
+        int[]? Ssns,
         CancellationToken cancellationToken)
     {
         
@@ -332,19 +342,25 @@ public sealed class BreakdownReportService : IBreakdownService
                 employeesBase = employeesBase.Where(q => q.StoreNumber == request.StoreNumber.Value);
             }
 
-            if (balanceFilter == BalanceEnum.HasBalance)
+            employeesBase = balanceFilter switch
             {
-                employeesBase = employeesBase.Where(e => e.VestedBalance.HasValue && e.VestedBalance.Value != 0);
-            } else if (balanceFilter == BalanceEnum.HasBalanceActivity)
+                BalanceEnum.BalanceOrNoBalance => employeesBase,
+                BalanceEnum.HasVestedBalance => employeesBase.Where(e => e.VestedBalance.HasValue && e.VestedBalance.Value > 0),
+                BalanceEnum.HasBalanceActivity => employeesBase.Where(e =>
+                    (e.VestedBalance.HasValue && e.VestedBalance.Value > 0)
+                    || (e.CurrentBalance.HasValue && e.CurrentBalance.Value > 0)
+                    || (e.Earnings != 0)
+                    || (e.Distributions != 0)
+                    || (e.Forfeitures != 0)
+                    || (e.Contributions != 0)),
+                BalanceEnum.HasCurrentBalanceNotVested => employeesBase.Where(e => e.CurrentBalance.HasValue && e.CurrentBalance.Value > 0 && (e.VestedBalance == null || e.VestedBalance.Value == 0)),
+                _ => employeesBase
+            };
+
+            if (Ssns != null && Ssns.Length > 0)
             {
-                employeesBase = employeesBase
-                    .Where(e => e.VestedBalance.HasValue && e.VestedBalance.Value != 0
-                                || e.CurrentBalance.HasValue && e.CurrentBalance.Value != 0
-                                || e.Earnings != 0
-                                || e.Distributions != 0
-                                || e.Forfeitures != 0
-                                || e.Contributions != 0
-                                );
+                var ssnSet = Ssns.ToHashSet();
+                employeesBase = employeesBase.Where(e => ssnSet.Contains(e.Ssn));
             }
 
             if (withBeneficiaryAllocation) //QPAY066A-1
@@ -363,7 +379,7 @@ public sealed class BreakdownReportService : IBreakdownService
             }
 
 
-            if (balanceFilter == BalanceEnum.HasBalance && employeeStatusFilter == StatusFilterEnum.Inactive)
+            if (balanceFilter == BalanceEnum.HasVestedBalance && employeeStatusFilter == StatusFilterEnum.Inactive)
             {
                 employeesBase = employeesBase
                     .Where(e => !ctx.ExcludedIds.Any(x => e.BadgeNumber == x.ExcludedIdValue));

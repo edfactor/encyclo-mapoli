@@ -2,7 +2,13 @@ import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { mmDDYYFormat } from "utils/dateUtils";
 import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
 import { GRID_COLUMN_WIDTHS } from "../../constants";
-import { createSSNColumn, createNameColumn } from "../../utils/gridColumnFactory";
+import {
+  createSSNColumn,
+  createNameColumn,
+  createZipColumn,
+  createCurrencyColumn,
+  createDateColumn
+} from "../../utils/gridColumnFactory";
 
 export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
   return [
@@ -19,33 +25,23 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
       cellRenderer: (params: ICellRendererParams) =>
         viewBadgeLinkRenderer(params.data.badgeNumber, params.data.psnSuffix)
     },
-    {
+    createCurrencyColumn({
       headerName: "Current Balance",
       field: "currentBalance",
-      colId: "currentBalance",
       minWidth: 170,
-      headerClass: "center-align",
-      cellClass: "center-align",
       resizable: true,
       sortable: false
-    },
+    }),
     createSSNColumn({
       valueFormatter: (params) => {
         return `${params.data.ssn}`;
       }
     }),
-    {
+    createDateColumn({
       headerName: "Date of birth",
       field: "dateOfBirth",
-      colId: "dateOfBirth",
-      minWidth: 120,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true,
-      valueFormatter: (params) => {
-        return `${mmDDYYFormat(params.data.dateOfBirth)}`;
-      }
-    },
+      minWidth: 120
+    }),
     {
       headerName: "Street",
       field: "street",
@@ -82,19 +78,11 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
         return `${params.data.state}`;
       }
     },
-    {
-      headerName: "Postal Code",
+    createZipColumn({
       field: "postalCode",
-      colId: "postalCode",
-      minWidth: 120,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      sortable: false,
-      resizable: true,
-      valueFormatter: (params) => {
-        return `${params.data.postalCode}`;
-      }
-    },
+      headerName: "Postal Code",
+      minWidth: 120
+    }),
     {
       headerName: "Country Iso",
       field: "countryIso",
@@ -153,15 +141,10 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
         return `${params.data.emailAddress ?? ""}`;
       }
     },
-    {
+    createDateColumn({
       headerName: "Created Date",
       field: "createdDate",
-      colId: "createdDate",
-      minWidth: 170,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true,
-      valueFormatter: (params) => (params.data.createdDate ? mmDDYYFormat(params.data.createdDate) : "")
-    }
+      minWidth: 170
+    })
   ];
 };

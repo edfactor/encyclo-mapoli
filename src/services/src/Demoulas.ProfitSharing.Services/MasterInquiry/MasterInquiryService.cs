@@ -482,8 +482,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                         CurrentIncomeYear = 0,
                         CurrentHoursYear = 0,
                     }
-                })
-            .Where(x => x.Member.PayFrequencyId == PayFrequency.Constants.Weekly);
+                });
 
         return query;
     }

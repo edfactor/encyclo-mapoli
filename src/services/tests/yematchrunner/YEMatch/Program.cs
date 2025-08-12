@@ -20,13 +20,32 @@ internal static class Program
         string dataDirectory = Config.CreateDataDirectory();
         ActivityFactory.Initialize(dataDirectory);
 
-        // Runnable runner = new BaselineRun() { DataDirectory = dataDirectory };
-        // Runnable runner = new GoldenRun { DataDirectory = dataDirectory };
-
-        // Runnable runner = new MasterInquiryRun { DataDirectory = dataDirectory };
-
-        // Runnable runner = new GoldenExpressRun { DataDirectory = dataDirectory };
-        Runnable runner = new TinkerRun() { DataDirectory = dataDirectory };
+        Runnable runner = GetRunner(args, dataDirectory);
         await runner.Exec();
+    }
+
+    private static Runnable GetRunner(string[] args, string dataDirectory)
+    {
+        string? runType = null;
+        
+        for (int i = 0; i < args.Length; i++)
+        {
+            if (args[i] == "--run" && i + 1 < args.Length)
+            {
+                runType = args[i + 1].ToLowerInvariant();
+                break;
+            }
+        }
+
+        return runType switch
+        {
+            "baseline" => new BaselineRun { DataDirectory = dataDirectory },
+            "golden" => new GoldenRun { DataDirectory = dataDirectory },
+            "goldenexpress" => new GoldenExpressRun { DataDirectory = dataDirectory },
+            "masterinquiry" => new MasterInquiryRun { DataDirectory = dataDirectory },
+            "tinker" => new TinkerRun { DataDirectory = dataDirectory },
+            "view" => new ViewRun { DataDirectory = dataDirectory },
+            _ => throw new ArgumentException($"Unknown run type: {runType}. Valid options are: baseline, golden, goldenexpress, masterinquiry, tinker, view")
+        };
     }
 }

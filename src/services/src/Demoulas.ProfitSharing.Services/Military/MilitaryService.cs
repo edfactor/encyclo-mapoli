@@ -27,37 +27,6 @@ public class MilitaryService : IMilitaryService
     public Task<Result<MilitaryContributionResponse>> CreateMilitaryServiceRecordAsync(
         CreateMilitaryContributionRequest req, CancellationToken cancellationToken = default)
     {
-        #region Validation
-
-        var validator = new InlineValidator<CreateMilitaryContributionRequest>();
-
-        validator.RuleFor(r => r.ContributionAmount)
-            .GreaterThan(0)
-            .WithMessage($"The {nameof(CreateMilitaryContributionRequest.ContributionAmount)} must be greater than zero.");
-
-        validator.RuleFor(r => r.ProfitYear)
-            .GreaterThanOrEqualTo((short)2020)
-            .WithMessage($"{nameof(MilitaryContributionRequest.ProfitYear)} must not less than 2020.")
-            .LessThanOrEqualTo((short)DateTime.Today.Year)
-            .WithMessage($"{nameof(MilitaryContributionRequest.ProfitYear)} must not be greater than this year.");
-
-        validator.RuleFor(r => r.BadgeNumber)
-            .GreaterThan(0)
-            .WithMessage($"{nameof(CreateMilitaryContributionRequest.BadgeNumber)} must be greater than zero.");
-
-        var validationResult = validator.Validate(req);
-
-        if (!validationResult.IsValid)
-        {
-            var errors = validationResult.Errors
-                .GroupBy(e => e.PropertyName)
-                .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray());
-
-            return Task.FromResult(Result<MilitaryContributionResponse>.ValidationFailure(errors));
-        }
-
-        #endregion
-
         return _dataContextFactory.UseWritableContext(async c =>
         {
 #pragma warning disable DSMPS001

@@ -14,6 +14,14 @@ VALUES(50,null, 'INQUIRIES', '','', 1, 1, '', 0);
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
 VALUES(51,50, 'MASTER INQUIRY', '','master-inquiry', 1, 1, '', 0);
 
+--Main menu - IT OPERATIONS
+INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
+VALUES(56,null, 'IT OPERATIONS', '','', 1, 6, '', 0);
+
+--IT Operations sub-items
+INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
+VALUES(57,56, 'Demographic Freeze', '','demographic-freeze', 1, 1, '', 0);
+
 --Main menu - YEAR END (required parent for December Activities)
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
 VALUES(55,null, 'YEAR END', '','', 1, 5, '', 0);
@@ -58,6 +66,9 @@ VALUES(11,1, 'Distributions and Forfeitures', 'QPAY129','distributions-and-forfe
 
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
 VALUES(13,1, 'Profit Share Report', 'PAY426','profit-share-report', 1, 9, '', 0);
+
+--Inserting value for IT Operation for role management
+INSERT INTO NAVIGATION_ASSIGNED_ROLES(NAVIGATIONID, REQUIREDROLESID) VALUES (56,6 );
 
 END;
 COMMIT ;

@@ -8,5 +8,5 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 namespace Demoulas.ProfitSharing.Common.Interfaces;
 public interface ICertificateService
 {
-    public Task<string> GetCertificateFile(ProfitYearRequest request, CancellationToken token);
+    public Task<string> GetCertificateFile(CerficatePrintRequest request, CancellationToken token);
 }

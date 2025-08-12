@@ -73,8 +73,9 @@ const PopupMenu: FC<myProps> = ({ menuLabel, items, parentRoute, disabled, navig
     }
 
     if (route) {
-      console.log("Navigating to: ", route);
-      navigate(route);
+      const absolutePath = route.startsWith("/") ? route : `/${route}`;
+      console.log("🧭 PopupMenu navigating to:", absolutePath, "from current path:", location.pathname);
+      navigate(absolutePath, { replace: false });
     }
 
     setOpen(false);

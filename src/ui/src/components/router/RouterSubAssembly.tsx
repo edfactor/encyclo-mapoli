@@ -6,41 +6,41 @@ import DistributionsAndForfeitures from "pages/DecemberActivities/DistributionsA
 import DuplicateNamesAndBirthdays from "pages/DecemberActivities/DuplicateNamesAndBirthdays/DuplicateNamesAndBirthdays";
 import DuplicateSSNsOnDemographics from "pages/DecemberActivities/DuplicateSSNsOnDemographics/DuplicateSSNsOnDemographics";
 import EmployeesOnMilitaryLeave from "pages/DecemberActivities/EmployeesOnMilitaryLeave/EmployeesOnMilitaryLeave";
-import ManageExecutiveHoursAndDollars from "pages/FiscalClose/ManageExecutiveHoursAndDollars/ManageExecutiveHoursAndDollars";
 import NegativeEtvaForSSNsOnPayprofit from "pages/DecemberActivities/NegativeEtvaForSSNsOnPayprofit/NegativeEtvaForSSNsOnPayprofit";
 import Termination from "pages/DecemberActivities/Termination/Termination";
+import RehireForfeitures from "pages/DecemberActivities/UnForfeit/RehireForfeitures";
 import EligibleEmployees from "pages/FiscalClose/EligibleEmployees/EligibleEmployees";
+import ManageExecutiveHoursAndDollars from "pages/FiscalClose/ManageExecutiveHoursAndDollars/ManageExecutiveHoursAndDollars";
+import QPAY066TA from "pages/FiscalClose/ProfitShareByStore/BreakdownReport/QPAY066TA";
+import NewPSLabels from "pages/FiscalClose/ProfitShareByStore/NewPSLabels";
+import ProfitShareByStore from "pages/FiscalClose/ProfitShareByStore/ProfitShareByStore";
+import Under21TA from "pages/FiscalClose/ProfitShareByStore/Under21/Under21TA";
+import Under21Report from "pages/FiscalClose/ProfitShareByStore/Under21Report";
 import ProfitShareReportEditRun from "pages/FiscalFlow/ProfitShareReportEditRun/ProfitShareReportEditRun";
 import ProfitShareReportFinalRun from "pages/FiscalFlow/ProfitShareReportFinalRun/ProfitShareReportFinalRun";
 import Forfeit from "pages/Forfeit/Forfeit";
 import FrozenSummary from "pages/FrozenSummary/FrozenSummary";
 import MasterInquiry from "pages/MasterInquiry/MasterInquiry";
-import RehireForfeitures from "pages/DecemberActivities/UnForfeit/RehireForfeitures";
 import Pay450Summary from "pages/PaymasterUpdate/Pay450Summary";
 import PaymasterUpdate from "pages/PaymasterUpdate/PaymasterUpdate";
 import ProfCtrlSheet from "pages/PaymasterUpdate/ProfCtrlSheet";
 import BalanceByYears from "pages/PROF130/BalanceByYears/BalanceByYears";
 import VestedAmountsByAge from "pages/PROF130/VestedAmountsByAge/VestedAmountsByAge";
 import Profall from "pages/Profall/Profall";
-import QPAY066TA from "pages/FiscalClose/ProfitShareByStore/BreakdownReport/QPAY066TA";
-import NewPSLabels from "pages/FiscalClose/ProfitShareByStore/NewPSLabels";
-import ProfitShareByStore from "pages/FiscalClose/ProfitShareByStore/ProfitShareByStore";
-import Under21Report from "pages/FiscalClose/ProfitShareByStore/Under21Report";
-import Under21TA from "pages/FiscalClose/ProfitShareByStore/Under21/Under21TA";
 import ProfitShareGrossReport from "pages/ProfitShareGrossReport/ProfitShareGrossReport";
 import ProfitShareReport from "pages/ProfitShareReport/ProfitShareReport";
 import ProfitShareTotals426 from "pages/ProfitShareTotals426/ProfitShareTotals426";
 
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Route } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
+import { useGetNavigationQuery } from "reduxstore/api/NavigationApi";
 import { setImpersonating } from "reduxstore/slices/securitySlice";
 import { RootState } from "reduxstore/store";
 import { ImpersonationRoles } from "reduxstore/types";
 import { ImpersonationMultiSelect } from "smart-ui-library";
 import { drawerClosedWidth, drawerOpenWidth, ROUTES, SMART_PS_QA_IMPERSONATION } from "../../constants";
 import MenuData from "../../MenuData";
-import { useGetNavigationQuery } from "reduxstore/api/NavigationApi";
 import DemographicFreeze from "../../pages/ITOperations/DemographicFreeze/DemographicFreeze";
 import BalanceByAge from "../../pages/PROF130/BalanceByAge/BalanceByAge";
 import ContributionsByAge from "../../pages/PROF130/ContributionsByAge/ContributionsByAge";
@@ -48,39 +48,34 @@ import DistributionByAge from "../../pages/PROF130/DistributionByAge/Distributio
 import ForfeituresByAge from "../../pages/PROF130/ForfeituresByAge/ForfeituresByAge";
 import ProfitShareEditUpdate from "../../pages/ProfitShareEditUpdate/ProfitShareEditUpdate";
 import YTDWages from "../../pages/YTDWagesExtract/YTDWages";
-import RouteSecurity from "./RouteSecurity";
 
 import { MenuBar } from "components/MenuBar/MenuBar";
+import BeneficiaryInquiry from "pages/BeneficiaryInquiry/BeneficiaryInquiry";
+import PAY426N from "pages/PAY426Reports/PAY426N/PAY426N";
+import ProfitSummary from "pages/PAY426Reports/ProfitSummary/ProfitSummary";
+import QPAY066AdHocReports from "pages/QPAY066AdHocReports/QPAY066AdHocReports";
+import PayBeNext from "pages/Reports/PayBeNext/PayBeNext";
+import PayBenReport from "pages/Reports/PayBenReport/PayBenReport";
 import MilitaryEntryAndModification from "../../pages/DecemberActivities/MilitaryEntryAndModification/MilitaryEntryAndModification";
 import DevDebug from "../../pages/Dev/DevDebug";
 import ForfeituresAdjustment from "../../pages/ForfeituresAdjustment/ForfeituresAdjustment";
-import PAY426N from "pages/PAY426Reports/PAY426N/PAY426N";
-import QPAY066AdHocReports from "pages/QPAY066AdHocReports/QPAY066AdHocReports";
-import BeneficiaryInquiry from "pages/BeneficiaryInquiry/BeneficiaryInquiry";
-import PayBeNext from "pages/Reports/PayBeNext/PayBeNext";
-import PayBenReport from "pages/Reports/PayBenReport/PayBenReport";
-import ProfitSummary from "pages/PAY426Reports/ProfitSummary/ProfitSummary";
 
 const RouterSubAssembly: React.FC = () => {
-  const oktaEnabled = import.meta.env.VITE_REACT_APP_OKTA_ENABLED == "true";
   const isProduction = false;
   const userGroups = useSelector((state: RootState) => state.security.userGroups);
   const hasImpersonationRole = userGroups.includes(SMART_PS_QA_IMPERSONATION);
   const showImpersonation = hasImpersonationRole && !isProduction;
 
-  const { impersonating } = useSelector((state: RootState) => state.security);
+  const { impersonating, token } = useSelector((state: RootState) => state.security);
+
   const dispatch = useDispatch();
   const { isDrawerOpen } = useSelector((state: RootState) => state.general);
-  const { data, isSuccess } = useGetNavigationQuery({ navigationId: undefined });
+  const { data, isSuccess } = useGetNavigationQuery({ navigationId: undefined }, { skip: !token });
 
   const localStorageImpersonating: string | null = localStorage.getItem("impersonatingRole");
 
-  // if(isSuccess){
-  //   MenuDataRedux(data);
-  // }
-
   const renderMenu = () => {
-    return isSuccess ? (
+    return isSuccess && data ? (
       <>
         <MenuBar
           menuInfo={MenuData(data)}
@@ -157,11 +152,11 @@ const RouterSubAssembly: React.FC = () => {
                 <DSMDynamicBreadcrumbs />
               </Box>
               <PSDrawer navigationData={data} />
-              <RouteSecurity oktaEnabled={oktaEnabled}>
+              <Routes>
                 <Route
                   path={ROUTES.BENEFICIARY_INQUIRY}
                   element={<BeneficiaryInquiry />}></Route>
-                  <Route
+                <Route
                   path={ROUTES.PAY_BEN_REPORT}
                   element={<PayBenReport />}></Route>
                 <Route
@@ -322,7 +317,7 @@ const RouterSubAssembly: React.FC = () => {
                   path={ROUTES.QPAY066_ADHOC}
                   element={<QPAY066AdHocReports />}
                 />
-              </RouteSecurity>
+              </Routes>
             </Box>
           </Box>
         </Box>
@@ -337,6 +332,16 @@ const RouterSubAssembly: React.FC = () => {
       dispatch(setImpersonating(localStorageImpersonating as ImpersonationRoles));
     }
   }, [dispatch, impersonating, localStorageImpersonating]);
+
+  // This is here if we want this
+  // Open drawer when navigation data is loaded
+  /*
+  useEffect(() => {
+    if (isSuccess && data && !isDrawerOpen) {
+      dispatch(openDrawer());
+    }
+  }, [isSuccess, data, isDrawerOpen, dispatch]);
+  */
 
   return renderMenu();
 };
