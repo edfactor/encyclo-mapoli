@@ -62,21 +62,21 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                 Percent = x.Percent,
                 KindId = x.KindId,
                 CreatedDate = x.Contact != null ? x.Contact.CreatedDate : DateOnly.MaxValue,
-                DateOfBirth = x.Contact.DateOfBirth != null ? x.Contact.DateOfBirth : DateOnly.MaxValue,
-                Ssn = x.Contact.Ssn != null ? x.Contact.Ssn.ToString() : string.Empty,
-                City = x.Contact.Address.City != null ? x.Contact.Address.City : null,
-                CountryIso = x.Contact != null ? x.Contact.Address.CountryIso ?? "" : "",
-                PostalCode = x.Contact != null ? x.Contact.Address.PostalCode : null,
-                State = x.Contact != null ? x.Contact.Address.State : null,
-                Street = x.Contact != null ? x.Contact.Address.Street : "",
-                Street2 = x.Contact != null ? x.Contact.Address.Street2 : null,
-                FirstName = x.Contact != null ? x.Contact.ContactInfo.FirstName : "",
-                LastName = x.Contact != null ? x.Contact.ContactInfo.LastName : "",
-                EmailAddress = x.Contact != null ? x.Contact.ContactInfo.EmailAddress : "",
-                FullName = x.Contact != null ? x.Contact.ContactInfo.FullName : "",
-                MiddleName = x.Contact != null ? x.Contact.ContactInfo.MiddleName : null,
-                MobileNumber = x.Contact != null ? x.Contact.ContactInfo.MobileNumber : "",
-                PhoneNumber = x.Contact != null ? x.Contact.ContactInfo.PhoneNumber : "",
+                DateOfBirth = x.Contact != null ? x.Contact.DateOfBirth : DateOnly.MaxValue,
+                Ssn = x.Contact != null ?  x.Contact.Ssn.ToString() : string.Empty,
+                City = x.Contact != null && x.Contact.Address != null && x.Contact.Address.City != null ? x.Contact.Address.City : null,
+                CountryIso = x.Contact != null && x.Contact.Address != null ? x.Contact.Address.CountryIso ?? "" : "",
+                PostalCode = x.Contact != null && x.Contact.Address != null ? x.Contact.Address.PostalCode : null,
+                State = x.Contact != null && x.Contact.Address != null ? x.Contact.Address.State : null,
+                Street = x.Contact != null && x.Contact.Address != null ? x.Contact.Address.Street : "",
+                Street2 = x.Contact != null && x.Contact.Address != null ? x.Contact.Address.Street2 : null,
+                FirstName = x.Contact != null && x.Contact.ContactInfo != null ? x.Contact.ContactInfo.FirstName : "",
+                LastName = x.Contact != null && x.Contact.ContactInfo != null ? x.Contact.ContactInfo.LastName : "",
+                EmailAddress = x.Contact != null && x.Contact.ContactInfo != null ? x.Contact.ContactInfo.EmailAddress : "",
+                FullName = x.Contact != null && x.Contact.ContactInfo != null ? x.Contact.ContactInfo.FullName : "",
+                MiddleName = x.Contact != null && x.Contact.ContactInfo != null ? x.Contact.ContactInfo.MiddleName : null,
+                MobileNumber = x.Contact != null && x.Contact.ContactInfo != null ? x.Contact.ContactInfo.MobileNumber : "",
+                PhoneNumber = x.Contact != null && x.Contact.ContactInfo != null ? x.Contact.ContactInfo.PhoneNumber : "",
                 Kind = new BeneficiaryKindDto()
                 {
                     Id = x.Kind != null ? x.Kind.Id : BeneficiaryKind.Constants.Primary,
@@ -98,21 +98,21 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                 Percent = x.Percent,
                 KindId = x.KindId,
                 CreatedDate = x.Contact != null ? x.Contact.CreatedDate : DateOnly.MaxValue,
-                DateOfBirth = x.Demographic.DateOfBirth != null ? x.Demographic.DateOfBirth : DateOnly.MaxValue,
-                Ssn = x.Demographic.Ssn != null ? x.Demographic.Ssn.ToString() : string.Empty,
-                City = x.Demographic.Address.City != null ? x.Demographic.Address.City : null,
-                CountryIso = x.Demographic != null ? x.Demographic.Address.CountryIso ?? "" : "",
-                PostalCode = x.Demographic != null ? x.Demographic.Address.PostalCode : null,
-                State = x.Demographic != null ? x.Demographic.Address.State : null,
-                Street = x.Demographic != null ? x.Demographic.Address.Street : "",
-                Street2 = x.Demographic != null ? x.Demographic.Address.Street2 : null,
-                FirstName = x.Demographic != null ? x.Demographic.ContactInfo.FirstName : "",
-                LastName = x.Demographic != null ? x.Demographic.ContactInfo.LastName : "",
-                EmailAddress = x.Demographic != null ? x.Demographic.ContactInfo.EmailAddress : "",
-                FullName = x.Demographic != null ? x.Demographic.ContactInfo.FullName : "",
-                MiddleName = x.Demographic != null ? x.Demographic.ContactInfo.MiddleName : null,
-                MobileNumber = x.Demographic != null ? x.Demographic.ContactInfo.MobileNumber : "",
-                PhoneNumber = x.Demographic != null ? x.Demographic.ContactInfo.PhoneNumber : "",
+                DateOfBirth = x.Demographic != null ? x.Demographic.DateOfBirth : DateOnly.MaxValue,
+                Ssn = x.Demographic != null && x.Demographic.Ssn != 0 ? x.Demographic.Ssn.ToString() : string.Empty,
+                City = x.Demographic != null && x.Demographic.Address != null ? x.Demographic.Address.City : null,
+                CountryIso = x.Demographic != null && x.Demographic.Address != null ? x.Demographic.Address.CountryIso ?? "" : "",
+                PostalCode = x.Demographic != null && x.Demographic.Address != null ? x.Demographic.Address.PostalCode : null,
+                State = x.Demographic != null && x.Demographic.Address != null ? x.Demographic.Address.State : null,
+                Street = x.Demographic != null && x.Demographic.Address != null ? x.Demographic.Address.Street : "",
+                Street2 = x.Demographic != null && x.Demographic.Address != null ? x.Demographic.Address.Street2 : null,
+                FirstName = x.Demographic != null && x.Demographic.ContactInfo != null ? x.Demographic.ContactInfo.FirstName : "",
+                LastName = x.Demographic != null && x.Demographic.ContactInfo != null ? x.Demographic.ContactInfo.LastName : "",
+                EmailAddress = x.Demographic != null && x.Demographic.ContactInfo != null ? x.Demographic.ContactInfo.EmailAddress : "",
+                FullName = x.Demographic != null && x.Demographic.ContactInfo != null ? x.Demographic.ContactInfo.FullName : "",
+                MiddleName = x.Demographic != null && x.Demographic.ContactInfo != null ? x.Demographic.ContactInfo.MiddleName : null,
+                MobileNumber = x.Demographic != null && x.Demographic.ContactInfo != null ? x.Demographic.ContactInfo.MobileNumber : "",
+                PhoneNumber = x.Demographic != null && x.Demographic.ContactInfo != null ? x.Demographic.ContactInfo.PhoneNumber : "",
                 Kind = new BeneficiaryKindDto()
                 {
                     Id = x.Kind != null ? x.Kind.Id : BeneficiaryKind.Constants.Primary,
@@ -133,7 +133,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
 
         var beneficiary = await _dataContextFactory.UseReadOnlyContext(async context =>
         {
-            var query = context.Beneficiaries.Include(x => x.Contact).ThenInclude(x => x!.ContactInfo).Include(x => x.Demographic).ThenInclude(x => x.ContactInfo).Include(x => x.Demographic.Address)
+            var query = context.Beneficiaries.Include(x => x.Contact).ThenInclude(x => x!.ContactInfo).Include(x => x.Demographic).ThenInclude(x => x!.ContactInfo).Include(x => x.Demographic).ThenInclude(x => x!.Address)
             .Where(x => request.BadgeNumber == null || request.BadgeNumber == 0 || x.BadgeNumber == request.BadgeNumber);
 
             var prevBeneficiaries = await GetPreviousBeneficiaries(request, query, cancellationToken);
@@ -215,21 +215,27 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
         }
         );
         //setting Current balance
-        ISet<int> ssnList = new HashSet<int>(beneficiary.Beneficiaries.Results.Select(x => Convert.ToInt32(x.Ssn)).ToList());
-        var balanceList = await _totalService.GetVestingBalanceForMembersAsync(SearchBy.Ssn, ssnList, yearEnd, cancellationToken);
-        foreach (var item in beneficiary.Beneficiaries.Results)
+        if (beneficiary.Beneficiaries?.Results != null)
         {
-            item.CurrentBalance = balanceList.Where(x => x.Id.ToString() == item.Ssn).Select(x => x.CurrentBalance).FirstOrDefault();
-            item.Ssn = item.Ssn.MaskSsn();
+            ISet<int> ssnList = new HashSet<int>(beneficiary.Beneficiaries.Results.Select(x => Convert.ToInt32(x.Ssn)).ToList());
+            var balanceList = await _totalService.GetVestingBalanceForMembersAsync(SearchBy.Ssn, ssnList, yearEnd, cancellationToken);
+            foreach (var item in beneficiary.Beneficiaries.Results)
+            {
+                item.CurrentBalance = balanceList.Where(x => x.Id.ToString() == item.Ssn).Select(x => x.CurrentBalance).FirstOrDefault();
+                item.Ssn = item.Ssn.MaskSsn();
+            }
         }
 
         //setting Current balance
-        ISet<int> ssnListBO = new HashSet<int>(beneficiary.BeneficiaryOf.Results.Select(x => Convert.ToInt32(x.Ssn)).ToList());
-        var balanceListBO = await _totalService.GetVestingBalanceForMembersAsync(SearchBy.Ssn, ssnListBO, yearEnd, cancellationToken);
-        foreach (var item in beneficiary.BeneficiaryOf.Results)
+        if (beneficiary.BeneficiaryOf?.Results != null)
         {
-            item.CurrentBalance = balanceListBO.Where(x => x.Id.ToString() == item.Ssn).Select(x => x.CurrentBalance).FirstOrDefault();
-            item.Ssn = item.Ssn.MaskSsn();
+            ISet<int> ssnListBO = new HashSet<int>(beneficiary.BeneficiaryOf.Results.Select(x => Convert.ToInt32(x.Ssn)).ToList());
+            var balanceListBO = await _totalService.GetVestingBalanceForMembersAsync(SearchBy.Ssn, ssnListBO, yearEnd, cancellationToken);
+            foreach (var item in beneficiary.BeneficiaryOf.Results)
+            {
+                item.CurrentBalance = balanceListBO.Where(x => x.Id.ToString() == item.Ssn).Select(x => x.CurrentBalance).FirstOrDefault();
+                item.Ssn = item.Ssn.MaskSsn();
+            }
         }
         return beneficiary;
     }
