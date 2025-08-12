@@ -1,4 +1,7 @@
-﻿using Demoulas.Common.Contracts.Contracts.Response;
+﻿using System.Dynamic;
+using System.Linq;
+using System.Threading;
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Request.BeneficiaryInquiry;
@@ -6,8 +9,10 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
+using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
@@ -18,13 +23,98 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly IFrozenService _frozenService;
     private readonly ITotalService _totalService;
+    private readonly IMasterInquiryService _masterInquiryService;
 
-    public BeneficiaryInquiryService(IProfitSharingDataContextFactory dataContextFactory, IFrozenService frozenService, ITotalService totalService)
+    public BeneficiaryInquiryService(IProfitSharingDataContextFactory dataContextFactory, IFrozenService frozenService, ITotalService totalService, IMasterInquiryService masterInquiryService)
     {
         _dataContextFactory = dataContextFactory;
         _frozenService = frozenService;
         _totalService = totalService;
+        _masterInquiryService = masterInquiryService;
     }
+
+    private async Task<IQueryable<BeneficiarySearchFilterResponse>> GetEmployeeQuery(BeneficiarySearchFilterRequest request, ProfitSharingReadOnlyDbContext context)
+    {
+        var member = await _masterInquiryService.GetMembersAsync(new Common.Contracts.Request.MasterInquiry.MasterInquiryRequest()
+        {
+            BadgeNumber = request.BadgeNumber,
+            PsnSuffix = request.PsnSuffix,
+            Name = request.Name,
+            Ssn = request.Ssn != null ? Convert.ToInt32(request.Ssn) : 0,
+            MemberType = request.MemberType,
+            EndProfitYear =  (short)DateTime.Now.Year,
+            ProfitYear = (short)DateTime.Now.Year
+
+        });
+        return member.Results.Select(x => new BeneficiarySearchFilterResponse()
+        {
+            Ssn = x.Ssn.ToString(),
+            Age = x.DateOfBirth.Age(),
+            BadgeNumber = x.BadgeNumber,
+            City = x.AddressCity,
+            Name = x.FullName,
+            State = x.AddressState,
+            Street = x.Address,
+            Zip = x.AddressZipCode
+        }).AsQueryable();
+
+    }
+
+    private IQueryable<BeneficiarySearchFilterResponse> GetBeneficiaryQuery(BeneficiarySearchFilterRequest request, ProfitSharingReadOnlyDbContext context)
+    {
+        var query = context.Beneficiaries.Include(x => x.Contact).ThenInclude(x => x.Address).Include(x => x.Contact.ContactInfo)
+            .Where(x =>
+            (request.BadgeNumber == null || x.BadgeNumber == request.BadgeNumber) &&
+            (request.PsnSuffix == null || x.PsnSuffix == request.PsnSuffix) &&
+            (string.IsNullOrEmpty(request.Name) || EF.Functions.Like(x.Contact.ContactInfo.FullName.ToUpper(),request.Name.ToUpper())) &&
+            (request.Ssn == null || x.Contact.Ssn == request.Ssn)
+            ).Select(x => new BeneficiarySearchFilterResponse()
+            {
+                Ssn = x.Contact.Ssn.ToString(),
+                Age = DateTime.Now.Year - x.Contact.DateOfBirth.Year,
+                BadgeNumber = x.BadgeNumber,
+                PsnSuffix = x.PsnSuffix,
+                City = x.Contact.Address.City,
+                Name = x.Contact.ContactInfo.FullName,
+                State = x.Contact.Address.State,
+                Street = x.Contact.Address.Street,
+                Zip = x.Contact.Address.PostalCode
+            });
+
+        return query;
+
+    }
+
+    public async Task<PaginatedResponseDto<BeneficiarySearchFilterResponse>> BeneficiarySearchFilter(BeneficiarySearchFilterRequest request, CancellationToken cancellation)
+    {
+        var result = await _dataContextFactory.UseReadOnlyContext(async context =>
+        {
+            IQueryable<BeneficiarySearchFilterResponse> query;
+            switch (request.MemberType)
+            {
+                case 1: //employee
+                    query = await GetEmployeeQuery(request, context);
+                    break;
+                case 2: //beneficiaries
+                    query = GetBeneficiaryQuery(request, context);
+                    break;
+                default:
+                    query = GetBeneficiaryQuery(request, context);
+                    break;
+            }
+
+            return query.ToPaginationResultsAsync(request, cancellation);
+        });
+
+        foreach (var item in result.Result.Results)
+        {
+            item.Ssn = !item.Ssn.Contains("X")?item.Ssn.MaskSsn():item.Ssn;
+        }
+
+        return result.Result;
+    }
+
+
 
     private int StepBackNumber(int num)
     {
@@ -52,7 +142,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                 psns.Add(stepBack);
                 stepBack = StepBackNumber(stepBack);
             }
-            query  = query.Where(x=>psns.Contains(x.PsnSuffix)).OrderByDescending(x=>x.PsnSuffix);
+            query = query.Where(x => psns.Contains(x.PsnSuffix)).OrderByDescending(x => x.PsnSuffix);
             var result = query.Select(x => new BeneficiaryDto()
             {
                 Id = x.Id,
@@ -238,6 +328,81 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
             }
         }
         return beneficiary;
+    }
+
+
+    public async Task<BeneficiaryDetailResponse> GetBeneficiaryDetail(BeneficiaryDetailRequest request,CancellationToken cancellationToken)
+    {
+        var frozenStateResponse = await _frozenService.GetActiveFrozenDemographic(cancellationToken);
+        short yearEnd = frozenStateResponse.ProfitYear;
+        var result = await _dataContextFactory.UseReadOnlyContext(async context =>
+        {
+            IQueryable<BeneficiaryDetailResponse> query;
+            if (request.PsnSuffix.HasValue && request.PsnSuffix > 0)
+            {
+                query = context.Beneficiaries.Include(x => x.Contact).ThenInclude(x => x.Address).Include(x => x.Contact.ContactInfo)
+                .Where(x => x.BadgeNumber == request.BadgeNumber && x.PsnSuffix == request.PsnSuffix)
+                .Select(x => new BeneficiaryDetailResponse
+                {
+                    Name = x.Contact.ContactInfo.FullName,
+                    BadgeNumber = x.BadgeNumber,
+                    City = x.Contact.Address.City,
+                    DateOfBirth = x.Contact.DateOfBirth,
+                    PsnSuffix = x.PsnSuffix,
+                    Ssn = x.Contact.Ssn.ToString(),
+                    State = x.Contact.Address.State,
+                    Street = x.Contact.Address.Street,
+                    Zip = x.Contact.Address.PostalCode
+                });
+            }
+            else
+            {
+                var memberDetail = await _masterInquiryService.GetMembersAsync(new Common.Contracts.Request.MasterInquiry.MasterInquiryRequest
+                {
+                    BadgeNumber = request.BadgeNumber,
+                    EndProfitYear = (short)DateTime.Now.Year,
+                    ProfitYear   = (short)DateTime.Now.Year,
+                    MemberType  = 1
+                });
+                query = memberDetail.Results.Select(x => new BeneficiaryDetailResponse
+                {
+                    Name = x.FullName,
+                    BadgeNumber = x.BadgeNumber,
+                    City = x.AddressCity,
+                    DateOfBirth = x.DateOfBirth,
+                    Ssn = x.Ssn.ToString(),
+                    State = x.AddressState,
+                    Street = x.Address,
+                    Zip = x.AddressZipCode
+                }).AsQueryable();
+                //query = context.Demographics.Include(x => x.ContactInfo).Include(x => x.Address)
+                //.Where(x => x.BadgeNumber == request.BadgeNumber)
+                //.Select(x => new BeneficiaryDetailResponse
+                //{
+                //    Name = x.ContactInfo.FullName,
+                //    BadgeNumber = x.BadgeNumber,
+                //    City = x.Address.City,
+                //    DateOfBirth = x.DateOfBirth,
+                //    Ssn = x.Ssn.ToString(),
+                //    State = x.Address.State,
+                //    Street = x.Address.Street,
+                //    Zip = x.Address.PostalCode
+                //});
+            }
+
+            return query.ToList();
+        });
+
+
+        ISet<int> badgeNumbers = new HashSet<int>(result.Select(x => x.BadgeNumber).ToList());
+        var balanceList = await _totalService.GetVestingBalanceForMembersAsync(SearchBy.BadgeNumber, badgeNumbers, yearEnd, cancellationToken);
+        foreach (var item in result)
+        {
+            item.CurrentBalance = balanceList.Select(x => x.CurrentBalance).FirstOrDefault();
+        }
+
+
+        return result.FirstOrDefault();
     }
 
     public async Task<BeneficiaryTypesResponseDto> GetBeneficiaryTypes(BeneficiaryTypesRequestDto beneficiaryTypesRequestDto, CancellationToken cancellation)

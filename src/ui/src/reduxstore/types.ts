@@ -1327,6 +1327,26 @@ export interface BeneficiaryResponse {
   beneficiaryOf: Paged<BeneficiaryDto>
 }
 
+export interface BeneficiarySearchFilterRequest extends SortedPaginationRequestDto {
+  badgeNumber?: number,
+  psn?: number,
+  name?: string,
+  ssn?: string, 
+  memberType: string
+}
+
+export interface BeneficiarySearchFilterResponse {
+  badgeNumber: number,
+  psn: number,
+  name?: string,
+  ssn?: string,
+  street?: string,
+  city?: string,
+  state?:string,
+  zip?: string,
+  age?:string
+}
+
 export interface BeneficiaryRequestDto extends SortedPaginationRequestDto {
   badgeNumber?: number;
   psnSuffix?: number;
