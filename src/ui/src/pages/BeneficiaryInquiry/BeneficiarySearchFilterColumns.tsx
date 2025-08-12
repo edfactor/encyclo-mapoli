@@ -1,0 +1,62 @@
+import { ColDef, ICellRendererParams } from "ag-grid-community";
+import { GRID_COLUMN_WIDTHS } from "../../constants";
+import { createSSNColumn, createNameColumn, createBadgeColumn,} from "../../utils/gridColumnFactory";
+
+export const BeneficiarySearchFilterColumns = (): ColDef[] => {
+    return [
+        createBadgeColumn({ minWidth: 120 }),
+        createNameColumn({
+            field: "name",
+            minWidth: GRID_COLUMN_WIDTHS.FULL_NAME,
+            alignment: "center",
+            sortable: false
+        }),
+        createSSNColumn({
+            valueFormatter: (params) => {
+                return `${params.data.ssn}`;
+            }
+        }),
+        {
+            headerName: "City",
+            field: "city",
+            colId: "city",
+            flex: 1,
+            headerClass: "center-align",
+            cellClass: "center-align",
+            resizable: true,
+            valueFormatter: (params) => {
+                return `${params.data.city}`;
+            }
+        },
+        {
+            headerName: "State",
+            field: "state",
+            colId: "state",
+            flex: 1,
+            headerClass: "center-align",
+            cellClass: "center-align",
+            resizable: true,
+            valueFormatter: (params) => {
+                return `${params.data.state}`;
+            }
+        },
+        {
+            headerName: "Zip",
+            field: "zip",
+            colId: "zip",
+            flex: 1,
+            headerClass: "center-align",
+            cellClass: "center-align",
+            resizable: true
+        },
+        {
+            headerName: "Age",
+            field: "age",
+            colId: "age",
+            flex: 1,
+            headerClass: "center-align",
+            cellClass: "center-align",
+            resizable: true
+        }
+    ];
+};

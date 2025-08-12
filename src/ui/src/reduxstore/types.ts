@@ -1329,10 +1329,10 @@ export interface BeneficiaryResponse {
 
 export interface BeneficiarySearchFilterRequest extends SortedPaginationRequestDto {
   badgeNumber?: number,
-  psn?: number,
+  psnSuffix?: number,
   name?: string,
   ssn?: string, 
-  memberType: string
+  memberType: number
 }
 
 export interface BeneficiarySearchFilterResponse {

@@ -6,7 +6,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import MasterInquiryEmployeeDetails from "pages/MasterInquiry/MasterInquiryEmployeeDetails";
 import MasterInquiryMemberGrid from "pages/MasterInquiry/MasterInquiryMemberGrid";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import {
   useLazyDeleteBeneficiaryQuery,
@@ -14,12 +14,15 @@ import {
   useLazyGetBeneficiarytypesQuery
 } from "reduxstore/api/BeneficiariesApi";
 import { RootState } from "reduxstore/store";
-import { BeneficiaryDto, BeneficiaryKindDto, BeneficiaryTypeDto, MasterInquiryRequest } from "reduxstore/types";
-import { DSMAccordion, Page } from "smart-ui-library";
+import { BeneficiaryDto, BeneficiaryKindDto, BeneficiarySearchFilterResponse, BeneficiaryTypeDto, MasterInquiryRequest } from "reduxstore/types";
+import { DSMAccordion, DSMGrid, ISortParams, Page, Pagination } from "smart-ui-library";
 import BeneficiaryInquiryGrid from "./BeneficiaryInquiryGrid";
 import BeneficiaryInquirySearchFilter from "./BeneficiaryInquirySearchFilter";
 import CreateBeneficiary from "./CreateBeneficiary";
 import { MissiveAlertProvider } from "pages/MasterInquiry/MissiveAlertContext";
+import { Paged } from "components/DSMGrid/types";
+import { CAPTIONS } from "../../constants";
+import { BeneficiarySearchFilterColumns } from "./BeneficiarySearchFilterColumns";
 
 interface SelectedMember {
   memberType: number;
@@ -48,7 +51,14 @@ const BeneficiaryInquiry = () => {
   const [deleteBeneficiaryId, setDeleteBeneficairyId] = useState<number>(0);
   const [deleteInProgress, setDeleteInProgress] = useState<boolean>(false);
   const [beneficiaryDialogTitle, setBeneficiaryDialogTitle] = useState<string>();
-
+  const [beneficiarySearchFilterResponse, setBeneficiarySearchFilterResponse] = useState<Paged<BeneficiarySearchFilterResponse>>();
+  const [isFetching, setIsFetching] = useState<boolean>(false);
+  const [pageNumber, setPageNumber] = useState(0);
+  const [pageSize, setPageSize] = useState(25);
+  const [_sortParams, setSortParams] = useState<ISortParams>({
+    sortBy: "name",
+    isSortDescending: true
+  });
   const onBadgeClick = (data: any) => {
     if (data) {
       const member: SelectedMember = {
@@ -67,6 +77,11 @@ const BeneficiaryInquiry = () => {
   const RefreshBeneficiaryGrid = () => {
     setChange((prev) => prev + 1);
   };
+
+  const columnDefs = useMemo(() => {
+    const columns = BeneficiarySearchFilterColumns();
+    return columns;
+  }, [beneficiarySearchFilterResponse]);
 
   const deleteBeneficiary = (id: number) => {
     setDeleteBeneficairyId(id);
@@ -110,16 +125,12 @@ const BeneficiaryInquiry = () => {
     setOpen(true);
   };
 
-  const onSearch = (params: MasterInquiryRequest | undefined) => {
-    setSearchParams(params ?? null);
-    setSelectedMember(null);
-    // Only set noResults to true if params is undefined (not found)
-    // Reset noResults when params is null (form reset)
-    if (params === undefined) {
-      setNoResults(true);
-    } else {
-      setNoResults(false);
-    }
+  const onSearch = (res: Paged<BeneficiarySearchFilterResponse> | undefined) => {
+    setBeneficiarySearchFilterResponse(res);
+  }
+
+  const onFetch = (isFetching: boolean) => {
+    setIsFetching(isFetching);
   }
 
   useEffect(() => {
@@ -212,6 +223,7 @@ const BeneficiaryInquiry = () => {
                 setInitialSearchLoaded={setInitialSearchLoaded}
                 onSearch={onSearch}
                 beneficiaryType={beneficiaryType}
+                onFetch={onFetch}
                 searchClicked={currentBadge}></BeneficiaryInquirySearchFilter>
             </DSMAccordion>
           </Grid>
@@ -222,11 +234,34 @@ const BeneficiaryInquiry = () => {
             {/* <Button onClick={handleClickOpen}>Add Beneficiary</Button> */}
 
             {/* <BeneficiaryInquiryGrid initialSearchLoaded={initialSearchLoaded} setInitialSearchLoaded={setInitialSearchLoaded} /> */}
-            {searchParams && (
-              <MasterInquiryMemberGrid
-                searchParams={searchParams}
-                onBadgeClick={onBadgeClick}
-              />
+            {beneficiarySearchFilterResponse && beneficiarySearchFilterResponse?.total > 0 && (
+              <>
+                <DSMGrid
+                  preferenceKey={CAPTIONS.BENEFICIARY_SEARCH_FILTER}
+                  isLoading={isFetching}
+                  providedOptions={{
+                    rowData: beneficiarySearchFilterResponse.results,
+                    columnDefs: columnDefs,
+                    suppressMultiSort: true
+                  }}
+                />
+
+                <Pagination
+                          pageNumber={pageNumber}
+                          setPageNumber={(value: number) => {
+                            setPageNumber(value - 1);
+                            //setInitialSearchLoaded(true);
+                          }}
+                          pageSize={pageSize}
+                          setPageSize={(value: number) => {
+                            setPageSize(value);
+                            setPageNumber(1);
+                            //setInitialSearchLoaded(true);
+                          }}
+                          recordCount={beneficiarySearchFilterResponse?.total}
+                        />
+              </>
+
             )}
 
             {/* Render employee details if identifiers are present in selectedMember, or show missive if noResults */}
@@ -260,6 +295,8 @@ const BeneficiaryInquiry = () => {
                   createOrUpdateBeneficiary={createOrUpdateBeneficiary}
                   deleteBeneficiary={deleteBeneficiary}
                 />
+
+
               </>
             )}
           </Grid>

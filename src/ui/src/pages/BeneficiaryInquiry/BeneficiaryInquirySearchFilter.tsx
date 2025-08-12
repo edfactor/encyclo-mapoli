@@ -1,12 +1,14 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormHelperText, FormLabel, Grid, MenuItem, Select, TextField } from "@mui/material";
+import { Paged } from "components/DSMGrid/types";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import { memberTypeGetNumberMap } from "pages/MasterInquiry/MasterInquiryFunctions";
 import { Controller, Resolver, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
+import { useLazyBeneficiarySearchFilterQuery } from "reduxstore/api/BeneficiariesApi";
 import { useLazySearchProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
 import { setMasterInquiryRequestParams } from "reduxstore/slices/inquirySlice";
-import { BeneficiaryTypeDto, MasterInquiryRequest } from "reduxstore/types";
+import { BeneficiarySearchFilterRequest, BeneficiarySearchFilterResponse, BeneficiaryTypeDto, MasterInquiryRequest } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 
@@ -34,17 +36,19 @@ type Props = {
   beneficiaryType: BeneficiaryTypeDto[];
   searchClicked: (badgeNumber: number) => void;
   setInitialSearchLoaded: (include: boolean) => void;
-  onSearch: (params: MasterInquiryRequest | undefined) => void;
+  onFetch: (isFetching: boolean)=>void,
+  onSearch: (response: Paged<BeneficiarySearchFilterResponse> | undefined) => void;
 };
 
 const BeneficiaryInquirySearchFilter: React.FC<Props> = ({
   searchClicked,
   beneficiaryType,
   setInitialSearchLoaded,
+  onFetch,
   onSearch
 }) => {
   //const [triggerSearch, { data, isLoading, isError, isFetching }] = useLazyGetBeneficiariesQuery();
-  const [triggerSearch, { isFetching }] = useLazySearchProfitMasterInquiryQuery();
+  const [triggerSearch, { isFetching }] = useLazyBeneficiarySearchFilterQuery();
   const profitYear = useDecemberFlowProfitYear();
   const dispatch = useDispatch();
 
@@ -63,7 +67,7 @@ const BeneficiaryInquirySearchFilter: React.FC<Props> = ({
 
   const onSubmit = (data: any) => {
     let { badgePsn, name, ssn, memberType } = data;
-    memberType = memberType ?? "beneficiaries";
+    memberType = memberType ?? "2";
     let badge = undefined,
       psn = undefined;
     if (badgePsn && badgePsn.length > 0) {
@@ -77,54 +81,22 @@ const BeneficiaryInquirySearchFilter: React.FC<Props> = ({
 
     //searchClicked(badge);
     if (isValid) {
-      // const beneficiaryRequestDto: BeneficiaryRequestDto = {
-      //     badgeNumber: badge ?? 0,
-      //     psnSuffix: psn ?? 0,
-      //     name: name,
-      //     ssn: ssn,
-      //     address: address,
-      //     city: city,
-      //     state: state,
-      //     percentage: percentage ?? 0,
-      //     skip: 0,
-      //     take: 255,
-      //     isSortDescending: true,
-      //     sortBy: "id"
-      // };
-      // triggerSearch(beneficiaryRequestDto);
-      // dispatch(setBeneficiaryRequest(beneficiaryRequestDto));
-      const searchParams: MasterInquiryRequest = {
-        pagination: {
-          skip: data.pagination?.skip || 0,
-          take: data.pagination?.take || 5,
-          sortBy: data.pagination?.sortBy || "badgeNumber",
-          isSortDescending: data.pagination?.isSortDescending || true
-        },
-        endProfitYear: profitYear,
-        profitYear: profitYear,
-        ...(!!data.socialSecurity && { ssn: data.socialSecurity }),
-        ...(!!data.name && { name: data.name }),
-        badgeNumber: badge,
-        psnSuffix: psn,
-        memberType: memberTypeGetNumberMap[memberType]
+      const beneficiaryRequestDto: BeneficiarySearchFilterRequest = {
+          badgeNumber: badge ?? undefined,
+          psnSuffix: psn ?? undefined,
+          name: name,
+          ssn: ssn,
+          memberType: Number(memberType),
+          skip: 0,
+          take: 255,
+          isSortDescending: true,
+          sortBy: "name"
       };
-      onSearch(searchParams);
-      triggerSearch(searchParams, false)
-        .unwrap()
-        .then((response) => {
-          // If data is returned, trigger downstream components
-          if (
-            response && Array.isArray(response) ? response.length > 0 : response.results && response.results.length > 0
-          ) {
-            setInitialSearchLoaded(true);
-            
-          } else {
-            // Instead of setting missiveAlerts, pass up a signal (to be implemented)
-            // setMissiveAlerts([...]);
-            setInitialSearchLoaded(false);
-          }
-        });
-      dispatch(setMasterInquiryRequestParams(data));
+      onFetch(true);
+      triggerSearch(beneficiaryRequestDto).unwrap().then(res=>{
+        onSearch(res);
+        onFetch(false);
+      });
     }
   };
   const validateAndSubmit = handleSubmit(onSubmit);
@@ -216,18 +188,17 @@ const BeneficiaryInquirySearchFilter: React.FC<Props> = ({
               render={({ field }) => (
                 <Select
                   {...field}
-                  defaultValue="beneficiaries"
+                  defaultValue="2"
                   fullWidth
                   size="small"
                   variant="outlined"
                   labelId="memberType"
                   id="memberType"
-                  value={field.value}
                   label="Member Type"
-                  onChange={(e) => field.onChange(e.target.value)}>
-                  <MenuItem value="all">All</MenuItem>
-                  <MenuItem value="employees">Employees</MenuItem>
-                  <MenuItem value="beneficiaries">Beneficiaries</MenuItem>
+                  value={field.value}
+                  onChange={(e) => field.onChange(Number(e.target.value))}>
+                  <MenuItem value={"1"}>Employees</MenuItem>
+                  <MenuItem value={"2"}>Beneficiaries</MenuItem>
                 </Select>
               )}
             />
