@@ -11,12 +11,27 @@ public class GoldenRun : Runnable
     public override async Task Exec()
     {
         GetGold.Purge();
-        
+
         // Generate the Golden files.  Run READY from Frozen to the YE Completed.
         await Run(Specify(
             "R0", // import obfuscated
             "DropBadBenes",
             "DropBadEmployee",
+            // "R1",
+            // "R2",
+            // "R3",
+            // "R4",
+            // "R5",
+            // "R6",
+            // "R7",
+            // "R8",
+
+            // "R9",
+            // "R10",
+            // "R11",
+            // "R12",
+            // "R13",
+            // "R14",
             "R15",
             "R16",
             "R17",
