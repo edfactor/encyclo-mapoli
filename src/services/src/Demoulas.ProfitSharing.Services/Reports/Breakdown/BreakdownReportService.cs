@@ -341,21 +341,6 @@ public sealed class BreakdownReportService : IBreakdownService
                 employeesBase = employeesBase.Where(q => q.StoreNumber == request.StoreNumber.Value);
             }
 
-            if (balanceFilter == BalanceEnum.HasVestedBalance)
-            {
-                employeesBase = employeesBase.Where(e => e.VestedBalance.HasValue && e.VestedBalance.Value != 0);
-            } else if (balanceFilter == BalanceEnum.HasBalanceActivity)
-            {
-                employeesBase = employeesBase
-                    .Where(e => e.VestedBalance.HasValue && e.VestedBalance.Value != 0
-                                || e.CurrentBalance.HasValue && e.CurrentBalance.Value != 0
-                                || e.Earnings != 0
-                                || e.Distributions != 0
-                                || e.Forfeitures != 0
-                                || e.Contributions != 0
-                                );
-            }
-
             employeesBase = balanceFilter switch
             {
                 BalanceEnum.BalanceOrNoBalance => employeesBase,
@@ -371,7 +356,7 @@ public sealed class BreakdownReportService : IBreakdownService
                 _ => employeesBase
             };
 
-        if (withBeneficiaryAllocation) //QPAY066A-1
+            if (withBeneficiaryAllocation) //QPAY066A-1
             {
                 var profitCodes = new[] { ProfitCode.Constants.IncomingQdroBeneficiary.Id, ProfitCode.Constants.OutgoingXferBeneficiary.Id };
 
