@@ -5,6 +5,6 @@ namespace Demoulas.ProfitSharing.Services.Extensions;
 
 public static class SensitiveValueMaskingExtensions
 {
-    public static IApplicationBuilder UseDecimalMasking(this IApplicationBuilder app)
+    public static IApplicationBuilder UseSensitiveValueMasking(this IApplicationBuilder app)
         => app.UseMiddleware<SensitiveValueMaskingMiddleware>();
 }
