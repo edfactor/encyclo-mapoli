@@ -212,7 +212,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                             dem.StoreNumber,
                             HoursCurrentYear = pp != null ? pp.CurrentHoursYear : 0,
                             IncomeCurrentYear = pp != null ? pp.CurrentIncomeYear : 0,
-                            NetBalance = bal != null ? bal.Total : 0,
+                            NetBalance = bal != null ? bal.TotalAmount : 0,
                             Years = yos != null ? yos.Years : (byte)0
                         };
 
@@ -328,8 +328,8 @@ FROM FILTERED_DEMOGRAPHIC p1
                            (pd.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment.Id &&
                             (!pd.CommentTypeId.HasValue ||
                              !transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value)))) &&
-                            (!req.StartDate.HasValue || pd.TransactionDate >= startDate) &&
-                            (!req.EndDate.HasValue || pd.TransactionDate <= endDate) &&
+                            (!req.StartDate.HasValue || pd.CreatedAtUtc >= startDate) &&
+                            (!req.EndDate.HasValue || pd.CreatedAtUtc <= endDate) &&
                             !(pd.ProfitCodeId == 9 && pd.CommentTypeId.HasValue && transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value))
 
                     select new
@@ -346,7 +346,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                         ForfeitAmount = pd.ProfitCodeId == 2 ? pd.Forfeiture : 0,
                         pd.YearToDate,
                         pd.MonthToDate,
-                        Date = pd.TransactionDate,
+                        Date = pd.CreatedAtUtc,
                         nameAndDob.DateOfBirth,
                         EnrolledId = nameAndDob.EnrolledId,
                     };

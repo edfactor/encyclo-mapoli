@@ -50,14 +50,13 @@ builder.SetDefaultLoggerConfiguration(smartConfig, fileSystemLog);
 
 _ = builder.AddSecurityServices();
 
-var rolePermissionService = new RolePermissionService();
 if (!builder.Environment.IsTestEnvironment() && Environment.GetEnvironmentVariable("YEMATCH_USE_TEST_CERTS") == null)
 {
-    builder.Services.AddOktaSecurity(builder.Configuration, rolePermissionService);
+    builder.Services.AddOktaSecurity(builder.Configuration);
 }
 else
 {
-    builder.Services.AddTestingSecurity(builder.Configuration, rolePermissionService);
+    builder.Services.AddTestingSecurity(builder.Configuration);
 }
 
 builder.ConfigureSecurityPolicies();
@@ -124,6 +123,7 @@ WebApplication app = builder.Build();
 app.UseCors();
 
 app.UseDemographicHeaders();
+app.UseSensitiveValueMasking();
 app.UseDefaultEndpoints(OktaSettingsAction)
     .UseReDoc(settings =>
     {

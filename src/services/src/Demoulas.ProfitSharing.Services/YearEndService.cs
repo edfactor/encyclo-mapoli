@@ -149,7 +149,7 @@ public sealed class YearEndService : IYearEndService
 
             Dictionary<int, decimal?> lastYearBalanceBySsn = await _totalService.GetTotalBalanceSet(ctx, (short)(profitYear - 1))
                 .Where(pp => employeeSsnSet.Contains(pp.Ssn!))
-                .ToDictionaryAsync(pt => pt.Ssn, pt => pt.Total, ct);
+                .ToDictionaryAsync(pt => pt.Ssn, pt => pt.TotalAmount, ct);
 
             Dictionary<int, short> firstContributionYearBySsn = await ctx.ProfitDetails
                 .Where(pd => employeeSsnSet.Contains(pd.Ssn) &&

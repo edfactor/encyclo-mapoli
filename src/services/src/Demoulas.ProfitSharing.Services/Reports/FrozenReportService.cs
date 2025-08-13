@@ -916,9 +916,9 @@ public class FrozenReportService : IFrozenReportService
                                            EmployeeName = d.ContactInfo.FullName ?? "",
                                            d.DateOfBirth,
                                            d.Ssn,
-                                           Forfeitures = fBal_lj.Total,
-                                           Loans = lBal_lj.Total,
-                                           ProfitSharingAmount = psBal.Total,
+                                           Forfeitures = fBal_lj.TotalAmount,
+                                           Loans = lBal_lj.TotalAmount,
+                                           ProfitSharingAmount = psBal.TotalAmount,
                                            GrossWages = pp.CurrentIncomeYear + pp.IncomeExecutive,
                                            pp.EnrollmentId,
                                        });

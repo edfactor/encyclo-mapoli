@@ -28,7 +28,7 @@ internal static class BeneficiariesProcessingHelper
                              Psn = b.Psn,
                              Ssn = b.Contact!.Ssn,
                              Name = b.Contact.ContactInfo.FullName,
-                             BeginningBalance = (bal != null ? bal.Total : 0) ?? 0
+                             BeginningBalance = (bal != null ? bal.TotalAmount : 0) ?? 0
                          }).ToListAsync(cancellationToken);
 
             return benes;
