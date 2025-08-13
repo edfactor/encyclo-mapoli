@@ -328,8 +328,8 @@ FROM FILTERED_DEMOGRAPHIC p1
                            (pd.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment.Id &&
                             (!pd.CommentTypeId.HasValue ||
                              !transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value)))) &&
-                            (!req.StartDate.HasValue || pd.TransactionDate >= startDate) &&
-                            (!req.EndDate.HasValue || pd.TransactionDate <= endDate) &&
+                            (!req.StartDate.HasValue || pd.CreatedAtUtc >= startDate) &&
+                            (!req.EndDate.HasValue || pd.CreatedAtUtc <= endDate) &&
                             !(pd.ProfitCodeId == 9 && pd.CommentTypeId.HasValue && transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value))
 
                     select new
@@ -346,7 +346,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                         ForfeitAmount = pd.ProfitCodeId == 2 ? pd.Forfeiture : 0,
                         pd.YearToDate,
                         pd.MonthToDate,
-                        Date = pd.TransactionDate,
+                        Date = pd.CreatedAtUtc,
                         nameAndDob.DateOfBirth,
                         EnrolledId = nameAndDob.EnrolledId,
                     };

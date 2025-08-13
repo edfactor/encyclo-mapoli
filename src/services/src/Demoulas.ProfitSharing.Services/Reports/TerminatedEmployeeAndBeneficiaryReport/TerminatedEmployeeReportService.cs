@@ -81,6 +81,7 @@ public sealed class TerminatedEmployeeReportService
             select new MemberSlice
             {
                 PsnSuffix = 0,
+                Id = employee.Demographic.Id,
                 BadgeNumber = employee.Demographic.BadgeNumber,
                 Ssn = employee.Demographic.Ssn,
                 BirthDate = employee.Demographic.DateOfBirth,
@@ -118,6 +119,7 @@ public sealed class TerminatedEmployeeReportService
             .Select(x => new MemberSlice
             {
                 PsnSuffix = x.Beneficiary.PsnSuffix,
+                Id = x.Beneficiary.BeneficiaryContactId,
                 BadgeNumber = (x.Beneficiary!.Contact!.Ssn == x.Demographic!.Ssn) ? x.Demographic.BadgeNumber : x.Beneficiary!.BadgeNumber,
                 Ssn = x.Beneficiary.Contact!.Ssn,
                 BirthDate = x.Beneficiary.Contact!.DateOfBirth,
@@ -207,7 +209,7 @@ public sealed class TerminatedEmployeeReportService
         var today = DateOnly.FromDateTime(DateTime.Today);
         var thisYearBalancesDict = await _totalService.TotalVestingBalance(ctx, profitYearRange.beginProfitYear, profitYearRange.endProfitYear, today)
             .Where(x => ssns.Contains(x.Ssn))
-            .ToDictionaryAsync(x => x.Ssn, x => x, cancellationToken);
+            .ToDictionaryAsync(x => (x.Id, x.Ssn, profitYearRange.endProfitYear), x => x, cancellationToken);
 
         // Build a list of all year details, then group by BadgeNumber, PsnSuffix, Name
         var yearDetailsList = new List<(int BadgeNumber, short PsnSuffix, string? Name, TerminatedEmployeeAndBeneficiaryYearDetailDto YearDetail)>();
@@ -224,7 +226,7 @@ public sealed class TerminatedEmployeeReportService
                 ? lastYearBalance.Total
                 : 0m;
 
-            var thisYearBalance = thisYearBalancesDict.GetValueOrDefault(memberSlice.Ssn);
+            var thisYearBalance = thisYearBalancesDict.GetValueOrDefault((memberSlice.Id, memberSlice.Ssn, profitYearRange.endProfitYear));
             decimal vestedBalance = thisYearBalance?.VestedBalance ?? 0m;
             var vestingPercent = thisYearBalance?.VestingPercent ?? 0;
 
