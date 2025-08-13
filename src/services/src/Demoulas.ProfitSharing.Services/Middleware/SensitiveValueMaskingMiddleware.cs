@@ -46,7 +46,7 @@ public sealed class SensitiveValueMaskingMiddleware
                 buffer.Length > 0 && context.Response.StatusCode is >= 200 and < 300)
             {
                 using StreamReader reader = new(buffer, leaveOpen: true);
-                string json = await reader.ReadToEndAsync();
+                string json = await reader.ReadToEndAsync(context.RequestAborted);
                 buffer.Position = 0;
                 try
                 {
@@ -58,18 +58,18 @@ public sealed class SensitiveValueMaskingMiddleware
                     }
                     outStream.Position = 0;
                     context.Response.ContentLength = outStream.Length;
-                    await outStream.CopyToAsync(originalBody);
+                    await outStream.CopyToAsync(originalBody, context.RequestAborted);
                     return;
                 }
                 catch
                 {
                     buffer.Position = 0;
-                    await buffer.CopyToAsync(originalBody);
+                    await buffer.CopyToAsync(originalBody, context.RequestAborted);
                     return;
                 }
             }
             buffer.Position = 0;
-            await buffer.CopyToAsync(originalBody);
+            await buffer.CopyToAsync(originalBody, context.RequestAborted);
         }
         finally
         {
