@@ -38,6 +38,4 @@ public class ProfitDetail : ModifiedBase
     public short? CommentRelatedPsnSuffix { get; set; }
     public bool? CommentIsPartialTransaction { get; set; }
     public byte YearsOfServiceCredit { get; set; }
-
-    public DateTimeOffset TransactionDate { get; set; }
 }

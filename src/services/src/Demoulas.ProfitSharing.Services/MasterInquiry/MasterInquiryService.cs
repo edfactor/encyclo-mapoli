@@ -428,7 +428,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                     ZeroContributionReason = pd.ZeroContributionReason,
                     TaxCode = pd.TaxCode,
                     CommentType = pd.CommentType,
-                    TransactionDate = pd.TransactionDate,
+                    TransactionDate = pd.CreatedAtUtc,
                     Member = new InquiryDemographics
                     {
                         Id = d.Id,
@@ -468,7 +468,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                     ZeroContributionReason = pd.ZeroContributionReason,
                     TaxCode = pd.TaxCode,
                     CommentType = pd.CommentType,
-                    TransactionDate = pd.TransactionDate,
+                    TransactionDate = pd.CreatedAtUtc,
                     Member = new InquiryDemographics
                     {
                         Id = d.bc.Id,

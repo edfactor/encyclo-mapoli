@@ -152,7 +152,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                 Forfeiture = req.ForfeitureAmount,
                 MonthToDate = (byte)DateTime.Now.Month,
                 YearToDate = (short)DateTime.Now.Year,
-                TransactionDate = DateTimeOffset.Now,
+                CreatedAtUtc = DateTimeOffset.UtcNow,
                 ModifiedAtUtc = DateTimeOffset.UtcNow,
                 CommentTypeId = commentType.Id,
                 
@@ -319,7 +319,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                     Forfeiture = -req.ForfeitureAmount,
                     CommentTypeId = CommentType.Constants.Forfeit.Id,
                     Remark = remarkText,
-                    TransactionDate = DateTimeOffset.UtcNow,
+                    CreatedAtUtc = DateTimeOffset.UtcNow,
                     ModifiedAtUtc = DateTimeOffset.UtcNow
                 };
 

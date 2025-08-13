@@ -10,10 +10,15 @@ internal sealed class ParticipantTotalVestingBalanceMap : IEntityTypeConfigurati
     {
         builder.Metadata.SetIsTableExcludedFromMigrations(true);
 
+        builder.Ignore(x => x.CheckSum);
+        
         builder.HasKey(x => x.Ssn);
         builder.Property(x => x.Ssn)
             .HasColumnName("SSN")
             .IsRequired();
+
+        builder.Property(x => x.Id)
+            .HasColumnName("ID");
 
         builder.Property(x => x.VestedBalance)
             .HasColumnName("VESTEDBALANCE");
