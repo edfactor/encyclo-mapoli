@@ -212,7 +212,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                             dem.StoreNumber,
                             HoursCurrentYear = pp != null ? pp.CurrentHoursYear : 0,
                             IncomeCurrentYear = pp != null ? pp.CurrentIncomeYear : 0,
-                            NetBalance = bal != null ? bal.Total : 0,
+                            NetBalance = bal != null ? bal.TotalAmount : 0,
                             Years = yos != null ? yos.Years : (byte)0
                         };
 
