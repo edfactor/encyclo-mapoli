@@ -223,7 +223,7 @@ public sealed class TerminatedEmployeeReportService
             }
 
             decimal? beginningAmount = lastYearBalancesDict.TryGetValue((memberSlice.Ssn, lastYear), out var lastYearBalance)
-                ? lastYearBalance.Total
+                ? lastYearBalance.TotalAmount
                 : 0m;
 
             var thisYearBalance = thisYearBalancesDict.GetValueOrDefault((memberSlice.Id, memberSlice.Ssn, profitYearRange.endProfitYear));

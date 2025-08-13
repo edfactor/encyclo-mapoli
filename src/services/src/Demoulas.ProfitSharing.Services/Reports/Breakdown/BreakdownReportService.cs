@@ -575,14 +575,14 @@ public sealed class BreakdownReportService : IBreakdownService
                                    (d.PayFrequencyId == PayFrequency.Constants.Weekly ||
                                     d.PayFrequencyId == PayFrequency.Constants.Monthly) &&
                                    (((bal == null ? 0 : bal.CurrentBalance)
-                                     + (etva == null ? 0 : etva.Total)) <= 0))
+                                     + (etva == null ? 0 : etva.TotalAmount)) <= 0))
                                     ? 801
                                     : (d.EmploymentStatusId == EmploymentStatus.Constants.Terminated &&
                                        (d.PayFrequencyId == PayFrequency.Constants.Weekly ||
                                         d.PayFrequencyId == PayFrequency.Constants.Monthly) &&
                                        ((bal == null ? 0 : bal.CurrentBalance) > 0) &&
                                        ((bal == null ? 0 : bal.VestedBalance) == 0) &&
-                                       ((etva == null ? 0 : etva.Total) == 0))
+                                       ((etva == null ? 0 : etva.TotalAmount) == 0))
                                         ? 802
                                         : ((d.PayFrequencyId == PayFrequency.Constants.Weekly ||
                                             d.PayFrequencyId == PayFrequency.Constants.Monthly) &&
@@ -640,7 +640,7 @@ public sealed class BreakdownReportService : IBreakdownService
                 CurrentBalance = bal == null ? 0 : bal.CurrentBalance,
                 VestedBalance = bal == null ? 0 : bal.VestedBalance,
                 VestedPercent = bal == null ? 0 : bal.VestingPercent,
-                EtvaBalance = etva == null ? 0 : etva.Total,
+                EtvaBalance = etva == null ? 0 : etva.TotalAmount,
                 YearsInPlan = bal == null ? 0 : bal.YearsInPlan,
                 HireDate = d.HireDate,
                 TerminationDate = d.TerminationDate,
@@ -679,7 +679,7 @@ public sealed class BreakdownReportService : IBreakdownService
         var balanceBySsnLastYear = await _totalService
             .GetTotalBalanceSet(ctx, priorYear)
             .Where(tbs => employeeSsns.Contains(tbs.Ssn))
-            .ToDictionaryAsync(tbs => tbs.Ssn, tbs => tbs.Total ?? 0, ct);
+            .ToDictionaryAsync(tbs => tbs.Ssn, tbs => tbs.TotalAmount ?? 0, ct);
 
         var txnsBySsn = await _totalService
             .GetTransactionsBySsnForProfitYearForOracle(ctx, profitYear)
