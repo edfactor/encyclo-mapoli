@@ -9,9 +9,9 @@ namespace Demoulas.ProfitSharing.Services.Middleware;
 /// <summary>
 /// Masks sensitive values for IT Operations role.
 /// Rules:
-/// 1. All decimal numbers masked by default unless Unmask/UnmaskDecimal present.
-/// 2. Any property/class with MaskSensitive/MaskDecimal masked (any type).
-/// 3. Unmask / UnmaskDecimal attribute opts out.
+/// 1. All decimal numbers are masked by default, but CAN be unmasked when an UnmaskAttribute is applied on the property or containing class.
+/// 2. Any property/class with MaskSensitiveAttribute is masked (any type) unless also UnmaskAttribute.
+/// 3. UnmaskAttribute opts out of default masking (including decimals).
 /// 4. Numeric values masked become strings preserving non-digit chars; digits -> 'X'.
 /// 5. Masked strings show first & last character; interior alphanumerics -> 'X'.
 /// 6. Other primitive masked types similarly preserve length and first/last alphanumerics.
@@ -100,9 +100,22 @@ public sealed class SensitiveValueMaskingMiddleware
                 break;
             case JsonValueKind.Number:
                 string raw = element.GetRawText();
-                bool isDecimal = raw.Contains('.') || raw.Contains('E', StringComparison.OrdinalIgnoreCase);
-                bool shouldMask = (isDecimal && !SensitiveMaskingRegistry.IsUnmasked(currentPropertyName)) || SensitiveMaskingRegistry.IsMasked(currentPropertyName);
-                if (shouldMask)
+                bool hasDecimalSyntax = raw.Contains('.') || raw.Contains('E', StringComparison.OrdinalIgnoreCase);
+                bool isDecimalProperty = currentPropertyName != null && SensitiveMaskingRegistry.IsDecimalProperty(currentPropertyName);
+                bool isDecimalTarget = hasDecimalSyntax || isDecimalProperty;
+                if (isDecimalTarget)
+                {
+                    // Decimals masked by default unless explicitly unmasked.
+                    if (SensitiveMaskingRegistry.IsUnmasked(currentPropertyName))
+                    {
+                        element.WriteTo(writer);
+                    }
+                    else
+                    {
+                        writer.WriteStringValue(MaskNumberRaw(raw));
+                    }
+                }
+                else if (SensitiveMaskingRegistry.IsMasked(currentPropertyName) && !SensitiveMaskingRegistry.IsUnmasked(currentPropertyName))
                 {
                     writer.WriteStringValue(MaskNumberRaw(raw));
                 }
@@ -193,6 +206,7 @@ internal static class SensitiveMaskingRegistry
     private static readonly Lock _lock = new();
     private static readonly HashSet<string> _maskedNames = new(StringComparer.OrdinalIgnoreCase);
     private static readonly HashSet<string> _unmaskedNames = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly HashSet<string> _decimalPropertyNames = new(StringComparer.OrdinalIgnoreCase);
 
     public static void EnsureInitialized()
     {
@@ -215,6 +229,12 @@ internal static class SensitiveMaskingRegistry
                     foreach (PropertyInfo pi in t.GetProperties(BindingFlags.Public | BindingFlags.Instance))
                     {
                         string name = pi.Name;
+                        Type pType = Nullable.GetUnderlyingType(pi.PropertyType) ?? pi.PropertyType;
+                        bool isDecimal = pType == typeof(decimal);
+                        if (isDecimal)
+                        {
+                            _decimalPropertyNames.Add(name);
+                        }
                         if (classMasked)
                         {
                             _maskedNames.Add(name);
@@ -240,4 +260,5 @@ internal static class SensitiveMaskingRegistry
 
     public static bool IsMasked(string? propertyName) => propertyName != null && _maskedNames.Contains(propertyName);
     public static bool IsUnmasked(string? propertyName) => propertyName != null && _unmaskedNames.Contains(propertyName);
+    public static bool IsDecimalProperty(string propertyName) => _decimalPropertyNames.Contains(propertyName);
 }
