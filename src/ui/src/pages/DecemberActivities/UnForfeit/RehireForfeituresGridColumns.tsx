@@ -14,29 +14,38 @@ import {
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import { createSSNColumn, createBadgeColumn, createStoreColumn } from "../../../utils/gridColumnFactory";
 
-export const HeaderComponent: React.FC<RehireForfeituresHeaderComponentProps> = (params: RehireForfeituresHeaderComponentProps) => {
+export const HeaderComponent: React.FC<RehireForfeituresHeaderComponentProps> = (
+  params: RehireForfeituresHeaderComponentProps
+) => {
   const selectedProfitYear = useDecemberFlowProfitYear();
 
   const isNodeEligible = (nodeData: any, context: any) => {
     if (!nodeData.isDetail || nodeData.profitYear !== selectedProfitYear) return false;
     // For bulk operations, we need to check all possible rowKeys for this data
-    const baseRowKey = `${nodeData.badgeNumber}-${nodeData.profitYear}${nodeData.enrollmentId ? `-${nodeData.enrollmentId}` : ''}`;
+    const baseRowKey = `${nodeData.badgeNumber}-${nodeData.profitYear}${nodeData.enrollmentId ? `-${nodeData.enrollmentId}` : ""}`;
     const editedValues = context?.editedValues || {};
-    const matchingKey = Object.keys(editedValues).find(key => key.startsWith(baseRowKey));
+    const matchingKey = Object.keys(editedValues).find((key) => key.startsWith(baseRowKey));
     const currentValue = matchingKey ? editedValues[matchingKey]?.value : nodeData.suggestedForfeit;
     return (currentValue || 0) !== 0;
   };
 
   const createUpdatePayload = (nodeData: any, context: any): ForfeitureAdjustmentUpdateRequest => {
     // For bulk operations, we need to find the actual edited value
-    const baseRowKey = `${nodeData.badgeNumber}-${nodeData.profitYear}${nodeData.enrollmentId ? `-${nodeData.enrollmentId}` : ''}`;
+    const baseRowKey = `${nodeData.badgeNumber}-${nodeData.profitYear}${nodeData.enrollmentId ? `-${nodeData.enrollmentId}` : ""}`;
     const editedValues = context?.editedValues || {};
-    const matchingKey = Object.keys(editedValues).find(key => key.startsWith(baseRowKey));
+    const matchingKey = Object.keys(editedValues).find((key) => key.startsWith(baseRowKey));
     const currentValue = matchingKey ? editedValues[matchingKey]?.value : nodeData.suggestedForfeit;
+    let isClassAction = nodeData.remark === "FORFEIT CA";
+    // Randomly make isClassAction true one out of five times
+    const randomValue = Math.random();
+    if (randomValue < 0.2) {
+      isClassAction = true;
+    }
     return {
       badgeNumber: nodeData.badgeNumber,
       profitYear: nodeData.profitYear,
-      forfeitureAmount: -(currentValue || 0)
+      forfeitureAmount: -(currentValue || 0),
+      classAction: isClassAction
     };
   };
 
@@ -55,7 +64,7 @@ export const HeaderComponent: React.FC<RehireForfeituresHeaderComponentProps> = 
 
 export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
   return [
-    createBadgeColumn({ 
+    createBadgeColumn({
       headerName: "Badge",
       minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
       alignment: "left"
@@ -70,7 +79,7 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       resizable: true,
       sortable: true,
       flex: 1,
-      pinned: "left",
+      pinned: "left"
     },
     createSSNColumn({ alignment: "left" }),
     {
@@ -114,7 +123,6 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
         const date = params.value;
         return mmDDYYFormat(date);
       }
-
     },
     {
       headerName: "Current Balance",
@@ -144,7 +152,13 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
   ];
 };
 
-export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, removeRowFromSelectedRows: (id: number) => void, selectedProfitYear: number, onSave?: (request: ForfeitureAdjustmentUpdateRequest) => Promise<void>, onBulkSave?: (requests: ForfeitureAdjustmentUpdateRequest[]) => Promise<void>): ColDef[] => {
+export const GetDetailColumns = (
+  addRowToSelectedRows: (id: number) => void,
+  removeRowFromSelectedRows: (id: number) => void,
+  selectedProfitYear: number,
+  onSave?: (request: ForfeitureAdjustmentUpdateRequest) => Promise<void>,
+  onBulkSave?: (requests: ForfeitureAdjustmentUpdateRequest[]) => Promise<void>
+): ColDef[] => {
   return [
     {
       headerName: "Profit Year",
@@ -222,11 +236,12 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       sortable: false,
       editable: ({ node }) => node.data.isDetail && node.data.profitYear === selectedProfitYear,
       cellEditor: SuggestedForfeitEditor,
-      cellRenderer: (params: ICellRendererParams) => SuggestedForfeitCellRenderer({ ...params, selectedProfitYear }, false, true),
+      cellRenderer: (params: ICellRendererParams) =>
+        SuggestedForfeitCellRenderer({ ...params, selectedProfitYear }, false, true),
       valueFormatter: agGridNumberToCurrency,
       valueGetter: (params) => {
         if (!params.data.isDetail) return null;
-        const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}${params.data.enrollmentId ? `-${params.data.enrollmentId}` : ''}-${params.node?.id || 'unknown'}`;
+        const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}${params.data.enrollmentId ? `-${params.data.enrollmentId}` : ""}-${params.node?.id || "unknown"}`;
         const editedValue = params.context?.editedValues?.[rowKey]?.value;
         return editedValue !== undefined ? editedValue : params.data.suggestedForfeit;
       }
@@ -268,45 +283,43 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
         }
         const id = Number(params.node?.id) || -1;
         const isSelected = params.node?.isSelected() || false;
-        const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}${params.data.enrollmentId ? `-${params.data.enrollmentId}` : ''}-${params.node?.id || 'unknown'}`;
+        const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}${params.data.enrollmentId ? `-${params.data.enrollmentId}` : ""}-${params.node?.id || "unknown"}`;
         const hasError = params.context?.editedValues?.[rowKey]?.hasError;
         const currentValue = params.context?.editedValues?.[rowKey]?.value ?? params.data.suggestedForfeit;
         const isLoading = params.context?.loadingRowIds?.has(params.data.badgeNumber);
 
-        return <div>
-          <Checkbox 
-            checked={isSelected} 
-            disabled={(currentValue || 0) === 0}
-            onChange={() => {
-            if (isSelected) {
-              params.removeRowFromSelectedRows(id);
-              params.node?.setSelected(false);
-            } else {
-              params.addRowToSelectedRows(id);
-              params.node?.setSelected(true);
-            }
-            params.api.refreshCells({ force: true });
-          }} />
-          <IconButton 
-            onClick={async () => {
-              if (params.data.isDetail && params.onSave) {
-                const request: ForfeitureAdjustmentUpdateRequest = {
-                  badgeNumber: params.data.badgeNumber,
-                  profitYear: params.data.profitYear,
-                  forfeitureAmount: -(currentValue || 0)
-                };
-                await params.onSave(request);
-              }
-            }}
-            disabled={hasError || (currentValue || 0) === 0 || isLoading}
-          >
-            {isLoading ? (
-              <CircularProgress size={20} />
-            ) : (
-              <SaveOutlined />
-            )}
-          </IconButton>
-        </div>;
+        return (
+          <div>
+            <Checkbox
+              checked={isSelected}
+              disabled={(currentValue || 0) === 0}
+              onChange={() => {
+                if (isSelected) {
+                  params.removeRowFromSelectedRows(id);
+                  params.node?.setSelected(false);
+                } else {
+                  params.addRowToSelectedRows(id);
+                  params.node?.setSelected(true);
+                }
+                params.api.refreshCells({ force: true });
+              }}
+            />
+            <IconButton
+              onClick={async () => {
+                if (params.data.isDetail && params.onSave) {
+                  const request: ForfeitureAdjustmentUpdateRequest = {
+                    badgeNumber: params.data.badgeNumber,
+                    profitYear: params.data.profitYear,
+                    forfeitureAmount: -(currentValue || 0)
+                  };
+                  await params.onSave(request);
+                }
+              }}
+              disabled={params.data.remark === "REMARK CA" || hasError || (currentValue || 0) === 0 || isLoading}>
+              {isLoading ? <CircularProgress size={20} /> : <SaveOutlined />}
+            </IconButton>
+          </div>
+        );
       }
     }
   ];
