@@ -77,11 +77,6 @@ const Termination = () => {
     return <StatusDropdownActionNode onStatusChange={handleStatusChange} />;
   };
 
-  // Set initialSearchLoaded to true when component mounts
-  useEffect(() => {
-    setInitialSearchLoaded(true);
-  }, []);
-
   useEffect(() => {
     fetchAccountingRange();
   }, [fetchAccountingRange]);
