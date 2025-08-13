@@ -207,6 +207,7 @@ internal static class SensitiveMaskingRegistry
     private static readonly HashSet<string> _maskedNames = new(StringComparer.OrdinalIgnoreCase);
     private static readonly HashSet<string> _unmaskedNames = new(StringComparer.OrdinalIgnoreCase);
     private static readonly HashSet<string> _decimalPropertyNames = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly HashSet<string> _nonDecimalNumericPropertyNames = new(StringComparer.OrdinalIgnoreCase);
 
     public static void EnsureInitialized()
     {
@@ -231,9 +232,14 @@ internal static class SensitiveMaskingRegistry
                         string name = pi.Name;
                         Type pType = Nullable.GetUnderlyingType(pi.PropertyType) ?? pi.PropertyType;
                         bool isDecimal = pType == typeof(decimal);
+                        bool isOtherNumeric = pType == typeof(int) || pType == typeof(long) || pType == typeof(short) || pType == typeof(byte) || pType == typeof(uint) || pType == typeof(ulong) || pType == typeof(ushort) || pType == typeof(sbyte);
                         if (isDecimal)
                         {
                             _decimalPropertyNames.Add(name);
+                        }
+                        else if (isOtherNumeric)
+                        {
+                            _nonDecimalNumericPropertyNames.Add(name);
                         }
                         if (classMasked)
                         {
@@ -260,5 +266,9 @@ internal static class SensitiveMaskingRegistry
 
     public static bool IsMasked(string? propertyName) => propertyName != null && _maskedNames.Contains(propertyName);
     public static bool IsUnmasked(string? propertyName) => propertyName != null && _unmaskedNames.Contains(propertyName);
-    public static bool IsDecimalProperty(string propertyName) => _decimalPropertyNames.Contains(propertyName);
+    public static bool IsDecimalProperty(string propertyName)
+    {
+        // Only treat as decimal when it's known decimal and not also present as a non-decimal numeric property (ambiguous -> don't mask by default)
+        return _decimalPropertyNames.Contains(propertyName) && !_nonDecimalNumericPropertyNames.Contains(propertyName);
+    }
 }
