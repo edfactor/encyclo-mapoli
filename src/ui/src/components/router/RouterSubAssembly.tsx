@@ -54,6 +54,7 @@ import BeneficiaryInquiry from "pages/BeneficiaryInquiry/BeneficiaryInquiry";
 import PAY426N from "pages/PAY426Reports/PAY426N/PAY426N";
 import ProfitSummary from "pages/PAY426Reports/ProfitSummary/ProfitSummary";
 import QPAY066AdHocReports from "pages/QPAY066AdHocReports/QPAY066AdHocReports";
+import QPAY066B from "pages/QPAY066B/QPAY066B";
 import QPAY600 from "pages/QPAY600/QPAY600";
 import PayBeNext from "pages/Reports/PayBeNext/PayBeNext";
 import PayBenReport from "pages/Reports/PayBenReport/PayBenReport";
@@ -317,6 +318,10 @@ const RouterSubAssembly: React.FC = () => {
                 <Route
                   path={ROUTES.QPAY066_ADHOC}
                   element={<QPAY066AdHocReports />}
+                />
+                <Route
+                  path={ROUTES.QPAY066B}
+                  element={<QPAY066B />}
                 />
                 <Route
                   path={ROUTES.QPAY600}
