@@ -123,6 +123,7 @@ WebApplication app = builder.Build();
 app.UseCors();
 
 app.UseDemographicHeaders();
+app.UseDecimalMasking();
 app.UseDefaultEndpoints(OktaSettingsAction)
     .UseReDoc(settings =>
     {
