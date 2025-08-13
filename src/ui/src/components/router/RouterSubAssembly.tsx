@@ -56,6 +56,7 @@ import ProfitSummary from "pages/PAY426Reports/ProfitSummary/ProfitSummary";
 import QPAY066AdHocReports from "pages/QPAY066AdHocReports/QPAY066AdHocReports";
 import QPAY066B from "pages/QPAY066B/QPAY066B";
 import QPAY600 from "pages/QPAY600/QPAY600";
+import ReprintCertificates from "pages/ReprintCertificates/ReprintCertificates";
 import PayBeNext from "pages/Reports/PayBeNext/PayBeNext";
 import PayBenReport from "pages/Reports/PayBenReport/PayBenReport";
 import MilitaryEntryAndModification from "../../pages/DecemberActivities/MilitaryEntryAndModification/MilitaryEntryAndModification";
@@ -326,6 +327,10 @@ const RouterSubAssembly: React.FC = () => {
                 <Route
                   path={ROUTES.QPAY600}
                   element={<QPAY600 />}
+                />
+                <Route
+                  path={ROUTES.REPRINT_CERTIFICATES}
+                  element={<ReprintCertificates />}
                 />
               </Routes>
             </Box>
