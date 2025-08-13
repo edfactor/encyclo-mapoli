@@ -85,7 +85,7 @@ import {
   ExecutiveHoursAndDollarsRequestDto,
   ForfeitureAdjustmentDetail,
   SuggestForfeitureAdjustmentRequest,
-  SuggestForfeitAmountResponse,
+  SuggestedForfeitResponse,
   ForfeitureAdjustmentUpdateRequest,
   ForfeituresAndPoints,
   ForfeituresByAge,
@@ -303,11 +303,14 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getRehireForfeitures: builder.query<PagedReportResponse<MilitaryAndRehireForfeiture>, StartAndEndDateRequest & { archive?: boolean }>({
+    getRehireForfeitures: builder.query<
+      PagedReportResponse<MilitaryAndRehireForfeiture>,
+      StartAndEndDateRequest & { archive?: boolean }
+    >({
       query: (params) => {
         const baseUrl = `yearend/unforfeitures/`;
         const url = params.archive ? `${baseUrl}?archive=true` : baseUrl;
-        
+
         return {
           url,
           method: "POST",
@@ -460,7 +463,7 @@ export const YearsEndApi = createApi({
       ExecutiveHoursAndDollarsRequestDto & { archive?: boolean }
     >({
       query: (params) => ({
-        url: `yearend/executive-hours-and-dollars${params.archive ? '?archive=true' : ''}`,
+        url: `yearend/executive-hours-and-dollars${params.archive ? "?archive=true" : ""}`,
         method: "GET",
         params: {
           take: params.pagination.take,
@@ -671,11 +674,11 @@ export const YearsEndApi = createApi({
           sortBy: params.pagination.sortBy,
           isSortDescending: params.pagination.isSortDescending
         };
-        
+
         if (params.profitYear) {
           body.profitYear = params.profitYear;
         }
-        
+
         return {
           url: `yearend/terminated-employees${params.archive === true ? "?archive=true" : ""}`,
           method: "POST",
@@ -1091,7 +1094,7 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getForfeitureAdjustments: builder.query<SuggestForfeitAmountResponse, SuggestForfeitureAdjustmentRequest>({
+    getForfeitureAdjustments: builder.query<SuggestedForfeitResponse, SuggestForfeitureAdjustmentRequest>({
       query: (params) => ({
         url: "yearend/forfeiture-adjustments",
         method: "GET",
