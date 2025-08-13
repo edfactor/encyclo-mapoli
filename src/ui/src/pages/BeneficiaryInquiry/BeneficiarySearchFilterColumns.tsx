@@ -1,12 +1,12 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { GRID_COLUMN_WIDTHS } from "../../constants";
-import { createSSNColumn, createNameColumn, createBadgeColumn,} from "../../utils/gridColumnFactory";
+import { createSSNColumn, createNameColumn, createBadgeColumn, createZipColumn,} from "../../utils/gridColumnFactory";
 
 export const BeneficiarySearchFilterColumns = (): ColDef[] => {
     return [
         createBadgeColumn({ minWidth: 120 }),
         {
-            headerName: "PSN_Suffix",
+            headerName: "PSN Suffix",
             field: "psnSuffix",
             colId: "psnSuffix",
             flex: 1,
@@ -52,15 +52,7 @@ export const BeneficiarySearchFilterColumns = (): ColDef[] => {
                 return `${params.data.state}`;
             }
         },
-        {
-            headerName: "Zip",
-            field: "zip",
-            colId: "zip",
-            flex: 1,
-            headerClass: "center-align",
-            cellClass: "center-align",
-            resizable: true
-        },
+        createZipColumn({field: "zip", colId: "zip",headerName: "Zip"}),
         {
             headerName: "Age",
             field: "age",

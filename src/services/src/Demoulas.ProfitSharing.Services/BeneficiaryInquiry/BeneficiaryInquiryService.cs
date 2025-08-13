@@ -118,20 +118,31 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
 
     private int StepBackNumber(int num)
     {
-        if (num <= 1000) return 0; // no stepping below base
+        if (num <= 1000) return 0;
 
-        if (num % 100 == 10) // e.g., 1210 -> 1200
-            return num - 10;
+        // Get the hundreds and tens/ones parts
+        int lastThree = num % 1000;
 
-        if (num % 100 == 0) // e.g., 1200 -> 1000
+        if (lastThree == 0)
+        {
+            // e.g., 1200 -> 1000
             return (num / 1000) * 1000;
-
-        // Default: drop last non-zero digit place
-        int place = 1;
-        while (num % (place * 10) == 0)
-            place *= 10;
-
-        return num - place;
+        }
+        else if (lastThree % 100 == 0)
+        {
+            // e.g., 1100 -> 1000
+            return (num / 1000) * 1000;
+        }
+        else if (lastThree % 10 == 0)
+        {
+            // e.g., 1120 -> 1100, 1210 -> 1200
+            return (num / 100) * 100;
+        }
+        else
+        {
+            // e.g., if we ever had 1125 -> 1120 (not in your examples but just in case)
+            return (num / 10) * 10;
+        }
     }
     private async Task<PaginatedResponseDto<BeneficiaryDto>> GetPreviousBeneficiaries(BeneficiaryRequestDto request, IQueryable<Beneficiary> query, CancellationToken cancellationToken)
     {
@@ -146,7 +157,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                 psns.Add(stepBack);
 
                 int next = StepBackNumber(stepBack);
-                if(next == stepBack) break; // safety to prevent infinite loop
+                if (next == stepBack) break; // safety to prevent infinite loop
 
                 stepBack = StepBackNumber(stepBack);
             }
@@ -383,19 +394,6 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                     Street = x.Address,
                     Zip = x.AddressZipCode
                 }).AsQueryable();
-                //query = context.Demographics.Include(x => x.ContactInfo).Include(x => x.Address)
-                //.Where(x => x.BadgeNumber == request.BadgeNumber)
-                //.Select(x => new BeneficiaryDetailResponse
-                //{
-                //    Name = x.ContactInfo.FullName,
-                //    BadgeNumber = x.BadgeNumber,
-                //    City = x.Address.City,
-                //    DateOfBirth = x.DateOfBirth,
-                //    Ssn = x.Ssn.ToString(),
-                //    State = x.Address.State,
-                //    Street = x.Address.Street,
-                //    Zip = x.Address.PostalCode
-                //});
             }
 
             return query.ToList();
@@ -407,6 +405,8 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
         foreach (var item in result)
         {
             item.CurrentBalance = balanceList.Select(x => x.CurrentBalance).FirstOrDefault();
+            if (request.PsnSuffix.HasValue && request.PsnSuffix > 0)
+                item.Ssn = item.Ssn.MaskSsn();
         }
 
 
