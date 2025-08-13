@@ -68,7 +68,7 @@ public class AdhocBeneficiariesReport : IAdhocBeneficiariesReport
                         pd.Contribution,
                         pd.Earnings,
                         pd.Forfeiture,
-                        DateOnly.FromDateTime(pd.TransactionDate.DateTime),
+                        DateOnly.FromDateTime(pd.CreatedAtUtc.DateTime),
                         pd.Remark)).ToList();
 
                 totalBalanceResult.TryGetValue(b.Contact!.Ssn, out var totalBalance);

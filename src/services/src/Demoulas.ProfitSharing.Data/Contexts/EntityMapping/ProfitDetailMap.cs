@@ -46,10 +46,6 @@ internal sealed class ProfitDetailMap : ModifiedBaseMap<ProfitDetail>
         _ = builder.Property(x => x.CommentIsPartialTransaction).HasColumnName("COMMENT_IS_PARTIAL_TRANSACTION");
         _ = builder.Property(x => x.YearsOfServiceCredit).HasColumnName("YEARS_OF_SERVICE_CREDIT").HasDefaultValue(0).IsRequired();
 
-        _ = builder.Property(e => e.TransactionDate)
-            .HasColumnType("TIMESTAMP WITH TIME ZONE")
-            .HasDefaultValueSql("SYSTIMESTAMP")
-            .HasColumnName("CREATED_UTC");
 
         _ = builder.HasOne(x => x.ProfitCode).WithMany().HasForeignKey(x => x.ProfitCodeId);
         _ = builder.HasOne(x => x.CommentType).WithMany().HasForeignKey(x => x.CommentTypeId);
