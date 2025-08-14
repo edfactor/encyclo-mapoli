@@ -12,7 +12,8 @@ import {
   HoursColumnOptions,
   StatusColumnOptions,
   CountColumnOptions,
-  ZipColumnOptions
+  ZipColumnOptions,
+  YearColumnOptions
 } from "./columnFactoryTypes";
 import { viewBadgeLinkRenderer } from "./masterInquiryLink";
 
@@ -379,6 +380,42 @@ export const createCountColumn = (options: CountColumnOptions = {}): ColDef => {
   return column;
 };
 
+export const createYearColumn = (options: YearColumnOptions = {}): ColDef => {
+  const {
+    headerName = "Year",
+    field = "year",
+    colId = field,
+    minWidth = 100,
+    maxWidth,
+    alignment = "right",
+    sortable = true,
+    resizable = true
+  } = options;
+
+  const column: ColDef = {
+    headerName,
+    field,
+    colId,
+    minWidth,
+    resizable,
+    sortable
+  };
+
+  if (alignment === "right") {
+    column.type = "rightAligned";
+  } else {
+    const alignmentClass = alignment === "center" ? "center-align" : "left-align";
+    column.headerClass = alignmentClass;
+    column.cellClass = alignmentClass;
+  }
+
+  if (maxWidth) {
+    column.maxWidth = maxWidth;
+  }
+
+  return column;
+};
+
 export const createZipColumn = (options: ZipColumnOptions = {}): ColDef => {
   const {
     headerName = "Zip Code",
@@ -391,7 +428,7 @@ export const createZipColumn = (options: ZipColumnOptions = {}): ColDef => {
     resizable = true,
     valueFormatter = (params) => {
       if (params.value == null || params.value === "") return "";
-      
+
       const zipStr = String(params.value);
       // If exactly 4 digits, add leading zero
       if (/^\d{4}$/.test(zipStr)) {

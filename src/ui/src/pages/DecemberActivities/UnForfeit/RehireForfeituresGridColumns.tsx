@@ -1,18 +1,26 @@
 import { SaveOutlined } from "@mui/icons-material";
-import { Checkbox, IconButton, CircularProgress } from "@mui/material";
+import { Checkbox, CircularProgress, IconButton } from "@mui/material";
 import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { agGridNumberToCurrency, formatNumberWithComma } from "smart-ui-library";
-import { mmDDYYFormat } from "utils/dateUtils";
+import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
+import { agGridNumberToCurrency } from "smart-ui-library";
 import { SelectableGridHeader } from "../../../components/SelectableGridHeader";
 import { SuggestedForfeitCellRenderer, SuggestedForfeitEditor } from "../../../components/SuggestedForfeiture";
-import { GRID_COLUMN_WIDTHS } from "../../../constants";
 import {
   ForfeitureAdjustmentUpdateRequest,
   RehireForfeituresHeaderComponentProps,
   RehireForfeituresSaveButtonCellParams
 } from "../../../reduxstore/types";
-import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
-import { createSSNColumn, createBadgeColumn, createStoreColumn } from "../../../utils/gridColumnFactory";
+import {
+  createBadgeColumn,
+  createCountColumn,
+  createCurrencyColumn,
+  createDateColumn,
+  createHoursColumn,
+  createNameColumn,
+  createSSNColumn,
+  createStoreColumn,
+  createYearColumn
+} from "../../../utils/gridColumnFactory";
 
 export const HeaderComponent: React.FC<RehireForfeituresHeaderComponentProps> = (
   params: RehireForfeituresHeaderComponentProps
@@ -58,93 +66,34 @@ export const HeaderComponent: React.FC<RehireForfeituresHeaderComponentProps> = 
   );
 };
 
-export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
+export const GetRehireForfeituresColumns = (): ColDef[] => {
   return [
-    createBadgeColumn({
-      headerName: "Badge",
-      minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
-      alignment: "left"
+    createBadgeColumn({}),
+    createNameColumn({
+      field: "fullName"
     }),
-    {
-      headerName: "Name",
-      field: "fullName",
-      colId: "fullName",
-      minWidth: GRID_COLUMN_WIDTHS.FULL_NAME,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      sortable: true,
-      flex: 1,
-      pinned: "left"
-    },
-    createSSNColumn({ alignment: "left" }),
-    {
+    createSSNColumn({}),
+    createDateColumn({
       headerName: "Hire Date",
-      field: "hireDate",
-      colId: "hireDate",
-      minWidth: 120,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      sortable: true,
-      valueFormatter: (params) => {
-        const date = params.value;
-        return mmDDYYFormat(date);
-      }
-    },
-    {
+      field: "hireDate"
+    }),
+    createDateColumn({
       headerName: "Termination Date",
-      field: "terminationDate",
-      colId: "terminationDate",
-      minWidth: 150,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      sortable: true,
-      valueFormatter: (params) => {
-        const date = params.value;
-        return mmDDYYFormat(date);
-      }
-    },
-    {
+      field: "terminationDate"
+    }),
+    createDateColumn({
       headerName: "Rehired Date",
-      field: "reHiredDate",
-      colId: "reHiredDate",
-      minWidth: 120,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      sortable: true,
-      valueFormatter: (params) => {
-        const date = params.value;
-        return mmDDYYFormat(date);
-      }
-    },
-    {
+      field: "reHiredDate"
+    }),
+    createCurrencyColumn({
       headerName: "Current Balance",
-      field: "netBalanceLastYear",
-      colId: "netBalanceLastYear",
-      minWidth: 150,
-      type: "rightAligned",
-      resizable: true,
-      sortable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+      field: "netBalanceLastYear"
+    }),
+    createCurrencyColumn({
       headerName: "Vested Balance",
-      field: "vestedBalanceLastYear",
-      colId: "vestedBalanceLastYear",
-      minWidth: 150,
-      type: "rightAligned",
-      resizable: true,
-      sortable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
-    createStoreColumn({
-      minWidth: 30,
-      alignment: "left",
-      sortable: true
-    })
+      field: "vestedBalanceLastYear"
+    }),
+    createStoreColumn({})
   ];
 };
 
@@ -156,48 +105,22 @@ export const GetDetailColumns = (
   onBulkSave?: (requests: ForfeitureAdjustmentUpdateRequest[]) => Promise<void>
 ): ColDef[] => {
   return [
-    {
+    createYearColumn({
       headerName: "Profit Year",
-      field: "profitYear",
-      colId: "profitYear",
-      width: 100,
-      type: "rightAligned",
-      resizable: true,
-      sortable: false
-    },
-    {
+      field: "profitYear"
+    }),
+    createHoursColumn({
       headerName: "Hours",
-      field: "hoursCurrentYear",
-      colId: "hoursCurrentYear",
-      width: 120,
-      type: "rightAligned",
-      resizable: true,
-      sortable: true,
-      valueFormatter: (params) => {
-        const hours = params.value;
-        return formatNumberWithComma(hours);
-      }
-    },
-    {
+      field: "hoursCurrentYear"
+    }),
+    createCurrencyColumn({
       headerName: "Wages",
-      field: "wages",
-      colId: "wages",
-      width: 120,
-      type: "rightAligned",
-      resizable: true,
-      sortable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+      field: "wages"
+    }),
+    createCountColumn({
       headerName: "Years",
-      field: "companyContributionYears",
-      colId: "companyContributionYears",
-      width: 100,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      sortable: true
-    },
+      field: "companyContributionYears"
+    }),
     {
       headerName: "Enrollment",
       width: 120,
@@ -211,16 +134,10 @@ export const GetDetailColumns = (
         return `[${id}] ${name}`;
       }
     },
-    {
+    createCurrencyColumn({
       headerName: "Forfeiture",
-      field: "forfeiture",
-      colId: "forfeiture",
-      width: 150,
-      type: "rightAligned",
-      resizable: true,
-      sortable: false,
-      valueFormatter: agGridNumberToCurrency
-    },
+      field: "forfeiture"
+    }),
     {
       headerName: "Suggested Unforfeiture",
       field: "suggestedForfeit",
