@@ -99,7 +99,7 @@ public sealed class TotalService : ITotalService
             select new ParticipantTotalDto
             {
                 Ssn = pd_g.Key,
-                Total = pd_g.Where(x => new[]
+                TotalAmount = pd_g.Where(x => new[]
                 {
                     /*1*/ ProfitCode.Constants.OutgoingPaymentsPartialWithdrawal.Id,
                     /*2*/ ProfitCode.Constants.OutgoingForfeitures.Id,
@@ -142,7 +142,7 @@ public sealed class TotalService : ITotalService
             where pd.ProfitYear <= employeeYear
             group pd by pd.Ssn
             into pd_g
-            select new ParticipantTotalDto() { Ssn = pd_g.Key, Total = pd_g.Where(x => validProfitCodes.Contains(x.ProfitCodeId)).Sum(x => x.Forfeiture) });
+            select new ParticipantTotalDto() { Ssn = pd_g.Key, TotalAmount = pd_g.Where(x => validProfitCodes.Contains(x.ProfitCodeId)).Sum(x => x.Forfeiture) });
     }
 
     /// <summary>
@@ -159,7 +159,7 @@ public sealed class TotalService : ITotalService
             where pd.ProfitYear <= employeeYear
             group pd by pd.Ssn
             into pd_g
-            select new ParticipantTotalDto() { Ssn = pd_g.Key, Total = pd_g.Where(x => validProfitCodes.Contains(x.ProfitCodeId)).Sum(x => x.Forfeiture) });
+            select new ParticipantTotalDto() { Ssn = pd_g.Key, TotalAmount = pd_g.Where(x => validProfitCodes.Contains(x.ProfitCodeId)).Sum(x => x.Forfeiture) });
     }
 
     /// <summary>

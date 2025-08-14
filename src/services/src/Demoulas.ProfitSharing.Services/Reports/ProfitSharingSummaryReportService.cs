@@ -193,7 +193,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 TotalWages = 0,
                 TotalHours = 0,
                 TotalPoints = 0,
-                TotalBalance = x.Sum(y => y.tot.Total ?? 0),
+                TotalBalance = x.Sum(y => y.tot.TotalAmount ?? 0),
                 TotalPriorBalance = 0
             }).FirstOrDefaultAsync(cancellationToken);
         });
@@ -424,9 +424,9 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             {
                 Employee = e,
                 ProfitYear = req.ProfitYear,
-                Balance = (decimal)(bal != null && bal.Total != null ? bal.Total : 0),
+                Balance = (decimal)(bal != null && bal.TotalAmount != null ? bal.TotalAmount : 0),
                 PriorProfitYear = (short)(req.ProfitYear - 1),
-                PriorBalance = (decimal)(priorBal != null && priorBal.Total != null ? priorBal.Total : 0)
+                PriorBalance = (decimal)(priorBal != null && priorBal.TotalAmount != null ? priorBal.TotalAmount : 0)
             };
         return employeeWithBalanceQry;
     }

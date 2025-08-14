@@ -21,7 +21,7 @@ public class CurrentYearWagesEndpoint : EndpointWithCsvBase<ProfitYearRequest, W
 
     public override void Configure()
     {
-        Get("wages-current-year");
+        Get("wages-current-year");  
         Summary(s =>
         {
             s.Summary = "Wages for the specified year";

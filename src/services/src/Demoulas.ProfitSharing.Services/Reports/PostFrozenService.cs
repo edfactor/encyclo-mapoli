@@ -210,7 +210,7 @@ public class PostFrozenService : IPostFrozenService
                     StoreNumber = d.StoreNumber,
                     BadgeNumber = d.BadgeNumber,
                     FullName = $"{d.ContactInfo.LastName}, {d.ContactInfo.FirstName}",
-                    BeginningBalance = lyTot.Total ?? 0,
+                    BeginningBalance = lyTot.TotalAmount ?? 0,
                     Earnings = tyPdGrp.Earnings,
                     Contributions = tyPdGrp.Contributions,
                     Forfeitures = tyPdGrp.Forfeitures,
@@ -401,7 +401,7 @@ public class PostFrozenService : IPostFrozenService
                 from b in rootQuery
                 join bal in _totalService.GetTotalBalanceSet(ctx, lastYear) on b.d.Ssn equals bal.Ssn
                 group bal by true into grp
-                select grp.Sum(x=>x.Total)
+                select grp.Sum(x=>x.TotalAmount)
             ).FirstOrDefaultAsync(cancellationToken);
                 
             rslt.TotalEarnings = await (
@@ -449,7 +449,7 @@ public class PostFrozenService : IPostFrozenService
                 from b in rootQuery
                 join bal in _totalService.GetTotalBalanceSet(ctx, request.ProfitYear) on b.d.Ssn equals bal.Ssn
                 group bal by true into grp
-                select grp.Sum(x => x.Total)
+                select grp.Sum(x => x.TotalAmount)
             ).FirstOrDefaultAsync(cancellationToken);
 
             rslt.TotalVestingBalance = await (
