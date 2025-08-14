@@ -92,6 +92,7 @@ export const CAPTIONS = {
   PAY_BE_NEXT: "Pay Be Next",
   BENEFICIARY_INQUIRY: "Beneficiary Inquiry",
   BENEFICIARY_OF: "Beneficiary Of",
+  BENEFICIARY_SEARCH_FILTER: "Beneficiaries",
   PAYBEN_REPORT: "Pay Beneficiary Report",
   BALANCE_BY_AGE: "Get Balance by Age (PROF130B)",
   BALANCE_BY_YEARS: "Get Balance by Years (PROF130Y)",

@@ -1,25 +1,30 @@
 import { CloseSharp } from "@mui/icons-material";
-import { Button, CircularProgress, Divider, Grid, IconButton } from "@mui/material";
+import { Button, CircularProgress, Divider, Grid, IconButton, Typography } from "@mui/material";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import MasterInquiryEmployeeDetails from "pages/MasterInquiry/MasterInquiryEmployeeDetails";
 import MasterInquiryMemberGrid from "pages/MasterInquiry/MasterInquiryMemberGrid";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import {
+  useLazyBeneficiarySearchFilterQuery,
   useLazyDeleteBeneficiaryQuery,
+  useLazyGetBeneficiaryDetailQuery,
   useLazyGetBeneficiaryKindQuery,
   useLazyGetBeneficiarytypesQuery
 } from "reduxstore/api/BeneficiariesApi";
 import { RootState } from "reduxstore/store";
-import { BeneficiaryDto, BeneficiaryKindDto, BeneficiaryTypeDto, MasterInquiryRequest } from "reduxstore/types";
-import { DSMAccordion, Page } from "smart-ui-library";
+import { BeneficiaryDetailRequest, BeneficiaryDetailResponse, BeneficiaryDto, BeneficiaryKindDto, BeneficiarySearchFilterRequest, BeneficiarySearchFilterResponse, BeneficiaryTypeDto, MasterInquiryRequest } from "reduxstore/types";
+import { DSMAccordion, DSMGrid, ISortParams, Page, Pagination } from "smart-ui-library";
 import BeneficiaryInquiryGrid from "./BeneficiaryInquiryGrid";
 import BeneficiaryInquirySearchFilter from "./BeneficiaryInquirySearchFilter";
 import CreateBeneficiary from "./CreateBeneficiary";
 import { MissiveAlertProvider } from "pages/MasterInquiry/MissiveAlertContext";
+import { Paged } from "components/DSMGrid/types";
+import { CAPTIONS } from "../../constants";
+import { BeneficiarySearchFilterColumns } from "./BeneficiarySearchFilterColumns";
 
 interface SelectedMember {
   memberType: number;
@@ -34,6 +39,7 @@ const BeneficiaryInquiry = () => {
   const [triggerGetBeneficiaryKind] = useLazyGetBeneficiaryKindQuery();
   const [triggerGetBeneficiaryType] = useLazyGetBeneficiarytypesQuery();
   const [triggerDeleteBeneficiary] = useLazyDeleteBeneficiaryQuery();
+  const[triggerBeneficiaryDetail, {isSuccess}]  = useLazyGetBeneficiaryDetailQuery();
   const [open, setOpen] = useState(false);
   const [openDeleteConfirmationDialog, setOpenDeleteConfirmationDialog] = useState(false);
   const [badgeNumber, setBadgeNumber] = useState(0);
@@ -41,32 +47,79 @@ const BeneficiaryInquiry = () => {
   const [beneficiaryType, setBeneficiaryType] = useState<BeneficiaryTypeDto[]>([]);
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [searchParams, setSearchParams] = useState<MasterInquiryRequest | null>();
-  const [selectedMember, setSelectedMember] = useState<SelectedMember | null>();
+  const [selectedMember, setSelectedMember] = useState<BeneficiaryDetailResponse | null>();
   const [noResults, setNoResults] = useState(false);
   const [change, setChange] = useState<number>(0);
   const [selectedBeneficiary, setSelectedBeneficiary] = useState<BeneficiaryDto | undefined>();
   const [deleteBeneficiaryId, setDeleteBeneficairyId] = useState<number>(0);
   const [deleteInProgress, setDeleteInProgress] = useState<boolean>(false);
   const [beneficiaryDialogTitle, setBeneficiaryDialogTitle] = useState<string>();
-
-  const onBadgeClick = (data: any) => {
+  const [beneficiarySearchFilterResponse, setBeneficiarySearchFilterResponse] = useState<Paged<BeneficiarySearchFilterResponse>>();
+  const [pageNumber, setPageNumber] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [_sortParams, setSortParams] = useState<ISortParams>({
+    sortBy: "name",
+    isSortDescending: true
+  });
+  const [initialSearch, setInitateSearch] = useState<number>(0);
+  const [beneficiarySearchFilterRequest, setBeneficiarySearchFilterRequest] = useState<BeneficiarySearchFilterRequest | undefined>();
+  const [triggerSearch, { isFetching }] = useLazyBeneficiarySearchFilterQuery();
+  const onBadgeClick = (data: BeneficiarySearchFilterResponse) => {
     if (data) {
-      const member: SelectedMember = {
+      const request:BeneficiaryDetailRequest = {
         badgeNumber: data.badgeNumber,
-        id: data.id,
-        memberType: data.isEmployee ? 1 : 2,
-        ssn: data.ssn,
         psnSuffix: data.psnSuffix
       }
-      setSelectedMember(member);
-      setChange(change + 1);
+      triggerBeneficiaryDetail(request).unwrap().then(res=>{
+        setSelectedMember(res);
+      })
     }
 
   };
 
+
+
+
+  useEffect(() => {
+
+    if (beneficiarySearchFilterRequest) {
+      const updatedRequest = {
+        ...beneficiarySearchFilterRequest,
+        isSortDescending: _sortParams.isSortDescending,
+        skip: pageNumber * pageSize,
+        sortBy: _sortParams.sortBy,
+        take: pageSize
+      };
+      triggerSearch(updatedRequest).unwrap().then(res => {
+        onSearch(res);
+      });
+    }
+  }, [initialSearch, pageSize, pageNumber, _sortParams]);
+  // const BeneficiarySearchFilter = useCallback(() => {
+  //   if (beneficiarySearchFilterRequest) {
+  //     setBeneficiarySearchFilterRequest(params=>{
+  //       return {
+  //         ...params,
+  //         isSortDescending: _sortParams.isSortDescending,
+  //         skip: pageNumber*pageSize,
+  //         sortBy: _sortParams.sortBy,
+  //         take: pageSize
+  //       }
+  //     })
+  //     triggerSearch(beneficiarySearchFilterRequest).unwrap().then(res => {
+  //       onSearch(res);
+  //     });
+  //   }
+  // }, [beneficiarySearchFilterRequest, pageSize,pageNumber,_sortParams])
+
   const RefreshBeneficiaryGrid = () => {
     setChange((prev) => prev + 1);
   };
+
+  const columnDefs = useMemo(() => {
+    const columns = BeneficiarySearchFilterColumns();
+    return columns;
+  }, [beneficiarySearchFilterResponse]);
 
   const deleteBeneficiary = (id: number) => {
     setDeleteBeneficairyId(id);
@@ -110,17 +163,16 @@ const BeneficiaryInquiry = () => {
     setOpen(true);
   };
 
-  const onSearch = (params: MasterInquiryRequest | undefined) => {
-    setSearchParams(params ?? null);
-    setSelectedMember(null);
-    // Only set noResults to true if params is undefined (not found)
-    // Reset noResults when params is null (form reset)
-    if (params === undefined) {
-      setNoResults(true);
-    } else {
-      setNoResults(false);
+  const onSearch = (res: Paged<BeneficiarySearchFilterResponse> | undefined) => {
+    
+    setBeneficiarySearchFilterResponse(res);
+    if(res?.total == 1) //only 1 record
+    {
+      onBadgeClick(res.results[0]);
     }
   }
+
+
 
   useEffect(() => {
     if (token) {
@@ -210,7 +262,7 @@ const BeneficiaryInquiry = () => {
             <DSMAccordion title="Filter">
               <BeneficiaryInquirySearchFilter
                 setInitialSearchLoaded={setInitialSearchLoaded}
-                onSearch={onSearch}
+                onSearch={(req) => { setBeneficiarySearchFilterRequest(req); setInitateSearch(param => param + 1) }}
                 beneficiaryType={beneficiaryType}
                 searchClicked={currentBadge}></BeneficiaryInquirySearchFilter>
             </DSMAccordion>
@@ -219,25 +271,64 @@ const BeneficiaryInquiry = () => {
           <Grid
             size={{ xs: 12 }}
             width="100%">
-            {/* <Button onClick={handleClickOpen}>Add Beneficiary</Button> */}
+            {beneficiarySearchFilterResponse && beneficiarySearchFilterResponse?.total > 0 && (
+              <>
+                <DSMGrid
+                  preferenceKey={CAPTIONS.BENEFICIARY_SEARCH_FILTER}
+                  isLoading={isFetching}
+                  providedOptions={{
+                    rowData: beneficiarySearchFilterResponse.results,
+                    columnDefs: columnDefs,
+                    suppressMultiSort: true,
+                    onRowClicked: (event) => {
+                      if (event.data) {
+                        onBadgeClick(event.data); // or pass whatever field you need
+                      }
+                    }
+                  }}
+                />
 
-            {/* <BeneficiaryInquiryGrid initialSearchLoaded={initialSearchLoaded} setInitialSearchLoaded={setInitialSearchLoaded} /> */}
-            {searchParams && (
-              <MasterInquiryMemberGrid
-                searchParams={searchParams}
-                onBadgeClick={onBadgeClick}
-              />
+                <Pagination
+                  pageNumber={pageNumber}
+                  setPageNumber={(value: number) => {
+                    setPageNumber(value - 1);
+
+                    //setInitialSearchLoaded(true);
+                  }}
+                  pageSize={pageSize}
+                  setPageSize={(value: number) => {
+                    setPageSize(value);
+                    setPageNumber(1);
+
+                    //setInitialSearchLoaded(true);
+                  }}
+                  recordCount={beneficiarySearchFilterResponse?.total}
+                />
+              </>
+
             )}
 
+
+
             {/* Render employee details if identifiers are present in selectedMember, or show missive if noResults */}
-            {(noResults || (selectedMember && selectedMember.memberType !== undefined && selectedMember.id)) && (
+            {(isSuccess && selectedMember) && (
               <>
-                <MasterInquiryEmployeeDetails
-                  memberType={selectedMember?.memberType ?? 0}
-                  id={selectedMember?.id ?? 0}
-                  profitYear={searchParams?.endProfitYear}
-                  noResults={noResults}
-                />
+                <Typography
+                  variant="h2"
+                  sx={{ color: "#0258A5",paddingTop:10 }}>
+                  {`Beneficiary Details`}
+                </Typography>
+                <Grid container spacing={5}>
+                  <Grid size={6}>
+                    <p><strong>{selectedMember?.name}</strong></p>
+                    <p>{selectedMember?.street}<br />{selectedMember?.city} {selectedMember?.state} {selectedMember?.zip}</p>
+                  </Grid>
+                  <Grid size={6}>
+                    <p><strong>DOB</strong> {selectedMember.dateOfBirth}</p>
+                    <p><strong>SSN</strong> {selectedMember.ssn}</p>
+                    <p><strong>Balance</strong> {selectedMember.currentBalance}</p>
+                    </Grid>
+                </Grid>
                 <div
                   style={{
                     padding: "24px",
@@ -260,6 +351,8 @@ const BeneficiaryInquiry = () => {
                   createOrUpdateBeneficiary={createOrUpdateBeneficiary}
                   deleteBeneficiary={deleteBeneficiary}
                 />
+
+
               </>
             )}
           </Grid>

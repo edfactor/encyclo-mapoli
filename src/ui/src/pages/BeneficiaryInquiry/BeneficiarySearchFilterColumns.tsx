@@ -1,48 +1,33 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { mmDDYYFormat } from "utils/dateUtils";
-import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
 import { GRID_COLUMN_WIDTHS } from "../../constants";
-import { createSSNColumn, createNameColumn, createBadgeColumn, createCurrencyColumn, createDateColumn } from "../../utils/gridColumnFactory";
+import { createSSNColumn, createNameColumn, createBadgeColumn, createZipColumn,} from "../../utils/gridColumnFactory";
 
-export const BeneficiaryOfGridColumns = (): ColDef[] => {
+export const BeneficiarySearchFilterColumns = (): ColDef[] => {
     return [
         createBadgeColumn({ minWidth: 120 }),
         {
-            headerName: "PSN_SUFFIX",
+            headerName: "PSN Suffix",
             field: "psnSuffix",
             colId: "psnSuffix",
             flex: 1,
             headerClass: "center-align",
             cellClass: "center-align",
-            resizable: true
+            resizable: true,
+            valueFormatter: (params) => {
+                return `${params.data.psnSuffix}`;
+            }
         },
         createNameColumn({
-            field: "fullName",
+            field: "name",
             minWidth: GRID_COLUMN_WIDTHS.FULL_NAME,
             alignment: "center",
-            sortable: false,
-            valueFormatter: (params) => {
-                return `${params.data.lastName}, ${params.data.firstName}`;
-            }
+            sortable: false
         }),
         createSSNColumn({
             valueFormatter: (params) => {
                 return `${params.data.ssn}`;
             }
         }),
-        createDateColumn({headerName: "Date of Birth", field: "dateOfBirth", colId: "dateOfBirth"}),
-        {
-            headerName: "Address",
-            field: "street",
-            colId: "street",
-            flex: 1,
-            headerClass: "center-align",
-            cellClass: "center-align",
-            resizable: true,
-            valueFormatter: (params) => {
-                return `${params.data.street}`;
-            }
-        },
         {
             headerName: "City",
             field: "city",
@@ -67,18 +52,15 @@ export const BeneficiaryOfGridColumns = (): ColDef[] => {
                 return `${params.data.state}`;
             }
         },
+        createZipColumn({field: "zip", colId: "zip",headerName: "Zip"}),
         {
-            headerName: "Percent",
-            field: "percent",
-            colId: "percent",
+            headerName: "Age",
+            field: "age",
+            colId: "age",
             flex: 1,
             headerClass: "center-align",
             cellClass: "center-align",
-            resizable: true,
-            valueFormatter: (params) => {
-                return `${params.data.state}`;
-            }
-        },
-        createCurrencyColumn({headerName: "Current", field: "currentBalance", colId : "currentBalance"})
+            resizable: true
+        }
     ];
 };
