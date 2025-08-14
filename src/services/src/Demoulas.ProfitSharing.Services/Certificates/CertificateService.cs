@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Dynamic.Core.Tokenizer;
 using System.Text;
 using System.Threading.Tasks;
+using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -31,12 +32,7 @@ public sealed class CertificateService : ICertificateService
     public async Task<string> GetCertificateFile(CerficatePrintRequest request, CancellationToken token)
     {
         var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, token);
-
-        Dictionary<byte, AnnuityRate> annuityRates = await _dataContextFactory.UseReadOnlyContext(async ctx =>
-        {
-            return await ctx.AnnuityRates
-                .Where(x => x.Year == request.ProfitYear).ToDictionaryAsync(x => x.Age, x => x, token);
-        });
+        Dictionary<byte, AnnuityRate> annuityRates = await GetAnnuityRatesByAge(request, token);
 
         var members = await GetCertificateData(request, token);
 
@@ -52,7 +48,7 @@ public sealed class CertificateService : ICertificateService
         var spaces_60 = new string(' ', 60);
         var linefeeds_2 = new string('\n', 2);
         var linefeeds_4 = new string('\n', 4);
-        var linefeeds_5 = new string ('\n', 5);
+        var linefeeds_5 = new string('\n', 5);
         var linefeeds_6 = new string('\n', 6);
 
         //Add xerox header
@@ -183,7 +179,81 @@ public sealed class CertificateService : ICertificateService
         }
     }
 
-    public async Task<ReportResponseBase<MemberYearSummaryDto>> GetCertificateData(CerficatePrintRequest request, CancellationToken token)
+    public async Task<ReportResponseBase<CertificateReprintResponse>> GetMembersWithBalanceActivityByStore(CerficatePrintRequest request, CancellationToken token)
+    {
+        var rawData = await GetCertificateData(request, token);
+        var rslt = new List<CertificateReprintResponse>();
+        var annuityRates = await GetAnnuityRatesByAge(request, token);
+        var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, token);
+
+        foreach (var cert in rawData.Response.Results)
+        {
+            decimal? jointRate = null;
+            decimal? singleRate = null;
+            decimal? pmtSingle = null;
+            decimal? pmtJoint = null;
+            var age = (byte)cert.DateOfBirth.Age(calInfo.FiscalEndDate.ToDateTime(TimeOnly.MaxValue));
+            if (age < 67)
+            {
+                age = (byte)67;
+            }   
+
+            annuityRates.TryGetValue(age, out var annuityRate);
+            if (annuityRate != null)
+            {
+                jointRate = annuityRate.JointRate;
+                singleRate = annuityRate.SingleRate;
+                pmtSingle = (cert.BeginningBalance + cert.Contributions + cert.Forfeitures) / annuityRate.SingleRate / 12;
+                pmtJoint = (cert.BeginningBalance + cert.Contributions + cert.Forfeitures) / annuityRate.JointRate / 12;
+            }
+
+            rslt.Add(new CertificateReprintResponse() 
+            { 
+                BadgeNumber = cert.BadgeNumber, 
+                FullName = cert.FullName, 
+                StoreNumber = cert.StoreNumber, 
+                DateOfBirth = cert.DateOfBirth, 
+                BeginningBalance = cert.BeginningBalance, 
+                Contributions = cert.Contributions, 
+                Forfeitures = cert.Forfeitures, 
+                VestedAmount = cert.VestedAmount, 
+                EndingBalance = cert.EndingBalance, 
+                Distributions = cert.Distributions,
+                AnnuityJointRate = jointRate,
+                AnnuitySingleRate = singleRate,
+                MonthlyPaymentJoint = pmtJoint,
+                MonthlyPaymentSingle = pmtSingle,
+                PayClassificationId = cert.PayClassificationId,
+                PayClassificationName = cert.PayClassificationName,
+                CertificateSort = cert.CertificateSort,
+                HireDate = cert.HireDate,
+                TerminationDate = cert.TerminationDate,
+                EnrollmentId = cert.EnrollmentId,
+                ProfitShareHours = cert.ProfitShareHours,
+                Earnings = cert.Earnings,
+                VestedPercent = cert.VestedPercent,
+                Street1 = cert.Street1,
+                City = cert.City,
+                State = cert.State,
+                PostalCode = cert.PostalCode
+            });
+        }
+
+        return new ReportResponseBase<CertificateReprintResponse>() { 
+            ReportDate = rawData.ReportDate,
+            ReportName = rawData.ReportName,
+            Response = new PaginatedResponseDto<CertificateReprintResponse>
+            {
+                Results = rslt,
+                Total = rawData.Response.Total
+            },
+            StartDate = rawData.StartDate,
+            EndDate = rawData.EndDate,
+
+        };
+    }
+
+    private async Task<ReportResponseBase<MemberYearSummaryDto>> GetCertificateData(CerficatePrintRequest request, CancellationToken token)
     {
         var breakdownRequest = new BreakdownByStoreRequest
         {
@@ -193,6 +263,15 @@ public sealed class CertificateService : ICertificateService
             SortBy = ReferenceData.CertificateSort,
         };
 
-        return await _breakdownService.GetMembersWithBalanceActivityByStore(breakdownRequest, request.Ssns, token);
+        return await _breakdownService.GetMembersWithBalanceActivityByStore(breakdownRequest, request.Ssns, request.BadgeNumbers, token);
+    }
+
+    private async Task<Dictionary<byte, AnnuityRate>> GetAnnuityRatesByAge(CerficatePrintRequest request, CancellationToken token)
+    {
+        return await _dataContextFactory.UseReadOnlyContext(async ctx =>
+        {
+            return await ctx.AnnuityRates
+                .Where(x => x.Year == request.ProfitYear).ToDictionaryAsync(x => x.Age, x => x, token);
+        });
     }
 }

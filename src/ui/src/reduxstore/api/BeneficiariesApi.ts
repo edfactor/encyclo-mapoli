@@ -2,6 +2,8 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 
 import { setBeneficiaryError } from "reduxstore/slices/beneficiarySlice";
 import {
+  BeneficiaryDetailRequest,
+  BeneficiaryDetailResponse,
   BeneficiaryKindRequestDto,
   BeneficiaryKindResponseDto,
   BeneficiaryRequestDto,
@@ -133,6 +135,21 @@ export const BeneficiariesApi = createApi({
         }
       }
     }),
+    getBeneficiaryDetail: builder.query<BeneficiaryDetailResponse, BeneficiaryDetailRequest>({
+      query: (request) => ({
+        url: `/beneficiary/detail`,
+        method: "GET",
+        params: request
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+        } catch (err) {
+          console.error("Failed to fetch beneficiaries:", err);
+          dispatch(setBeneficiaryError("Failed to fetch beneficiaries"));
+        }
+      }
+    }),
 
     deleteBeneficiary: builder.query<any, DeleteBeneficiaryRequest>({
       query: (request) => ({
@@ -152,6 +169,7 @@ export const BeneficiariesApi = createApi({
 });
 
 export const {
+  useLazyGetBeneficiaryDetailQuery,
   useLazyBeneficiarySearchFilterQuery,
   useLazyDeleteBeneficiaryQuery,
   useLazyUpdateBeneficiaryQuery,
