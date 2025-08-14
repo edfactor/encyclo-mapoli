@@ -13,8 +13,8 @@ namespace Demoulas.ProfitSharing.Services.Middleware;
 /// 2. Any property/class with MaskSensitiveAttribute is masked (any type) unless also UnmaskAttribute.
 /// 3. UnmaskAttribute opts out of default masking (including decimals).
 /// 4. Numeric values masked become strings preserving non-digit chars; digits -> 'X'.
-/// 5. Masked strings show first & last character; interior alphanumerics -> 'X'.
-/// 6. Other primitive masked types similarly preserve length and first/last alphanumerics.
+/// 5. Masked strings: all alphanumerics are replaced with 'X' preserving original length (no characters left in clear).
+/// 6. Other primitive masked types similarly preserve length with all interior alphanumerics replaced (no first/last exemption).
 /// </summary>
 public sealed class SensitiveValueMaskingMiddleware
 {
@@ -28,7 +28,7 @@ public sealed class SensitiveValueMaskingMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
-        if (!context.User.IsInRole(Role.ITOPERATIONS))
+        if (!context.User.IsInRole(Role.ITDEVOPS))
         {
             await _next(context);
             return;
@@ -46,7 +46,7 @@ public sealed class SensitiveValueMaskingMiddleware
                 buffer.Length > 0 && context.Response.StatusCode is >= 200 and < 300)
             {
                 using StreamReader reader = new(buffer, leaveOpen: true);
-                string json = await reader.ReadToEndAsync();
+                string json = await reader.ReadToEndAsync(context.RequestAborted);
                 buffer.Position = 0;
                 try
                 {
@@ -58,18 +58,18 @@ public sealed class SensitiveValueMaskingMiddleware
                     }
                     outStream.Position = 0;
                     context.Response.ContentLength = outStream.Length;
-                    await outStream.CopyToAsync(originalBody);
+                    await outStream.CopyToAsync(originalBody, context.RequestAborted);
                     return;
                 }
                 catch
                 {
                     buffer.Position = 0;
-                    await buffer.CopyToAsync(originalBody);
+                    await buffer.CopyToAsync(originalBody, context.RequestAborted);
                     return;
                 }
             }
             buffer.Position = 0;
-            await buffer.CopyToAsync(originalBody);
+            await buffer.CopyToAsync(originalBody, context.RequestAborted);
         }
         finally
         {
@@ -167,16 +167,15 @@ public sealed class SensitiveValueMaskingMiddleware
 
     private static string MaskString(string value)
     {
-        if (string.IsNullOrEmpty(value) || value.Length <= 2)
+        if (string.IsNullOrEmpty(value))
         {
             return value;
         }
         Span<char> chars = value.Length <= 512 ? stackalloc char[value.Length] : new char[value.Length];
-        chars[0] = value[0];
-        chars[^1] = value[^1];
-        for (int i = 1; i < value.Length - 1; i++)
+        for (int i = 0; i < value.Length; i++)
         {
             char c = value[i];
+            // Replace any letter or digit with 'X'; keep punctuation/whitespace to preserve formatting pattern.
             chars[i] = char.IsLetterOrDigit(c) ? 'X' : c;
         }
         return new string(chars);
