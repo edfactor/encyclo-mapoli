@@ -74,38 +74,10 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
     },
     createSSNColumn({ alignment: "left" }),
     {
-      headerName: "Hire Date",
-      field: "hireDate",
-      colId: "hireDate",
-      minWidth: 120,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      sortable: true,
-      valueFormatter: (params) => {
-        const date = params.value;
-        return mmDDYYFormat(date);
-      }
-    },
-    {
-      headerName: "Termination Date",
-      field: "terminationDate",
-      colId: "terminationDate",
-      minWidth: 150,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      sortable: true,
-      valueFormatter: (params) => {
-        const date = params.value;
-        return mmDDYYFormat(date);
-      }
-    },
-    {
-      headerName: "Rehired Date",
+      headerName: "Rehired",
       field: "reHiredDate",
       colId: "reHiredDate",
-      minWidth: 120,
+      minWidth: 110,
       headerClass: "left-align",
       cellClass: "left-align",
       resizable: true,
@@ -114,13 +86,12 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
         const date = params.value;
         return mmDDYYFormat(date);
       }
-
     },
     {
       headerName: "Current Balance",
       field: "netBalanceLastYear",
       colId: "netBalanceLastYear",
-      minWidth: 150,
+      minWidth: 70,
       type: "rightAligned",
       resizable: true,
       sortable: true,
@@ -137,10 +108,20 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
       valueFormatter: agGridNumberToCurrency
     },
     createStoreColumn({
-      minWidth: 30,
+      maxWidth: 80,
       alignment: "left",
       sortable: true
-    })
+    }),
+    {
+      headerName: "Years",
+      field: "companyContributionYears",
+      colId: "companyContributionYears",
+      width: 80,
+      headerClass: "left-align",
+      cellClass: "left-align",
+      resizable: true,
+      sortable: true
+    },
   ];
 };
 
@@ -151,6 +132,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       field: "profitYear",
       colId: "profitYear",
       width: 100,
+      minWidth: 30,
       type: "rightAligned",
       resizable: true,
       sortable: false
@@ -163,8 +145,15 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       type: "rightAligned",
       resizable: true,
       sortable: true,
+      valueGetter: (params) => {
+        // I think showing 0 is visually noisy, so I'm suppressing that.   Especially since we will not have the
+        // actual hours for our initial year - 1.
+        const value = params.data?.hoursCurrentYear;
+        return (value==null || value == 0) ? null : value;
+      },
       valueFormatter: (params) => {
         const hours = params.value;
+        if (hours == null) return "";
         return formatNumberWithComma(hours);
       }
     },
@@ -176,17 +165,13 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       type: "rightAligned",
       resizable: true,
       sortable: true,
+      valueGetter: (params) => {
+        // I think showing 0 is visually noisy, so I'm suppressing that.   Especially since we will not have the
+        // actual hours for our initial year - 1.
+        const value = params.data?.wages;
+        return (value==null || value == 0) ? null : value;
+      },
       valueFormatter: agGridNumberToCurrency
-    },
-    {
-      headerName: "Years",
-      field: "companyContributionYears",
-      colId: "companyContributionYears",
-      width: 100,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      sortable: true
     },
     {
       headerName: "Enrollment",
@@ -197,6 +182,8 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       sortable: true,
       valueGetter: (params) => {
         const id = params.data?.enrollmentId;
+        if(id == null)
+          return "";
         const name = params.data?.enrollmentName;
         return `[${id}] ${name}`;
       }

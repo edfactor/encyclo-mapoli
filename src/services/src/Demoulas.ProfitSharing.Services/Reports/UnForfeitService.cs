@@ -38,22 +38,23 @@ public sealed class UnForfeitService : IUnForfeitService
 
             var beginning = req.BeginningDate;
             var ending = req.EndingDate;
-
             var yearsOfServiceQuery = _totalService.GetYearsOfService(context, (short)req.EndingDate.Year);
             var vestingServiceQuery = _totalService.TotalVestingBalance(context, (short)req.EndingDate.Year, ending);
             var demo = await _demographicReaderService.BuildDemographicQuery(context);
-            
+
             var query =
-                from d in demo
-                join pp in context.PayProfits.Include(p=> p.Enrollment) on d.Id equals pp.DemographicId
-                join pd in context.ProfitDetails on new { d.Ssn, pp.ProfitYear } equals new { Ssn = pd.Ssn, pd.ProfitYear }
+                from pd in context.ProfitDetails
+                join d in demo on pd.Ssn equals d.Ssn
+                join pp in context.PayProfits.Include(p => p.Enrollment) 
+                    on new { d.Id, ProfitYear = pd.ProfitYear } equals new { Id = pp.DemographicId, pp.ProfitYear } into ppTmp
+                from pp in ppTmp.DefaultIfEmpty()
                 join yos in yearsOfServiceQuery on d.Ssn equals yos.Ssn into yosTmp
                 from yos in yosTmp.DefaultIfEmpty()
                 join vest in vestingServiceQuery on d.Ssn equals vest.Ssn into vestTmp
                 from vest in vestTmp.DefaultIfEmpty()
                 where pd.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id 
                       && d.EmploymentStatusId == EmploymentStatus.Constants.Active
-                      && pp.ProfitYear >= beginning.Year && pp.ProfitYear <= ending.Year
+                      && pd.ProfitYear >= beginning.Year && pd.ProfitYear <= ending.Year
                       && (!req.ExcludeZeroBalance || (vest != null && (vest.CurrentBalance != 0 || vest.VestedBalance != 0)))
                 group new { d, pp, pd, yos, vest } by new
                 {
@@ -84,23 +85,23 @@ public sealed class UnForfeitService : IUnForfeitService
                     VestedBalanceLastYear = g.Key.VestedBalanceLastYear,
                     Details = g.Select(x => new MilitaryRehireProfitSharingDetailResponse
                     {
-                        ProfitYear = x.pp.ProfitYear,
-                        HoursCurrentYear = x.pp.CurrentHoursYear,
-                        EnrollmentName = x.pp.Enrollment!.Name,
-                        EnrollmentId = x.pp.EnrollmentId,
+                        ProfitYear = x.pd.ProfitYear,
+                        HoursCurrentYear = x.pp != null ? x.pp.CurrentHoursYear : null,
+                        EnrollmentName =  x.pp != null && x.pp.Enrollment != null ? x.pp.Enrollment.Name : null,
+                        EnrollmentId = x.pp != null && x.pp.CurrentHoursYear > 0 ? x.pp.EnrollmentId : (byte?)null,
                         Forfeiture = x.pd.Forfeiture,
                         Remark = x.pd.Remark,
                         ProfitCodeId = x.pd.ProfitCodeId,
-                        Wages = x.pp.CurrentIncomeYear + x.pp.IncomeExecutive,
-                        SuggestedForfeiture = (x.pp.EnrollmentId == Enrollment.Constants.OldVestingPlanHasForfeitureRecords || x.pp.EnrollmentId == Enrollment.Constants.NewVestingPlanHasForfeitureRecords) && 
-                            x.pp.ProfitYear == req.ProfitYear ?
-                            - x.pd.Forfeiture 
-                            : null
+                        Wages = x.pp != null ? (x.pp.CurrentIncomeYear + x.pp.IncomeExecutive) : null,
+                        SuggestedForfeiture = x.pp != null && 
+                                             (x.pp.EnrollmentId == Enrollment.Constants.OldVestingPlanHasForfeitureRecords || 
+                                              x.pp.EnrollmentId == Enrollment.Constants.NewVestingPlanHasForfeitureRecords) && 
+                                             x.pd.ProfitYear == req.ProfitYear ?
+                                             -x.pd.Forfeiture : (decimal?)null
                     })
-                    .OrderByDescending(x=>x.ProfitYear)    
+                    .OrderByDescending(x => x.ProfitYear)
                     .ToList()
                 };
-
             return await query.ToPaginationResultsAsync(req, cancellationToken);            
         });
 
