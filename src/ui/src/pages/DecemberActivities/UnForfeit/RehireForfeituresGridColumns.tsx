@@ -35,12 +35,8 @@ export const HeaderComponent: React.FC<RehireForfeituresHeaderComponentProps> = 
     const editedValues = context?.editedValues || {};
     const matchingKey = Object.keys(editedValues).find((key) => key.startsWith(baseRowKey));
     const currentValue = matchingKey ? editedValues[matchingKey]?.value : nodeData.suggestedForfeit;
-    let isClassAction = nodeData.remark === "FORFEIT CA";
-    // Randomly make isClassAction true one out of five times
-    const randomValue = Math.random();
-    if (randomValue < 0.2) {
-      isClassAction = true;
-    }
+    const isClassAction = nodeData.remark === "FORFEIT CA";
+
     return {
       badgeNumber: nodeData.badgeNumber,
       profitYear: nodeData.profitYear,
