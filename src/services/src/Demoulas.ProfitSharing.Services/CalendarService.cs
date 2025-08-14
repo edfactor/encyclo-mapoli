@@ -55,7 +55,7 @@ public sealed class CalendarService : ICalendarService
                             (r.WeekNo == 1 || r.WeekNo >= 52)).GroupBy(r => 1) // Group all records to fetch min and max in one query
                 .Select(g => new
                 {
-                    StartingDate = g.Min(r => r.WeekendingDate),
+                    StartingDate = g.Min(r => r.WeekendingDate).AddDays(-6),
                     EndingDate = g.Where(r => r.Period == 12)
                         .OrderByDescending(r => r.WeekNo)
                         .Select(r => r.WeekendingDate)
