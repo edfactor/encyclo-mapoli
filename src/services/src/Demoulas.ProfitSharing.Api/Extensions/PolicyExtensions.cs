@@ -10,7 +10,7 @@ internal static class PolicyExtensions
 
         _ = builder.Services.AddAuthorization(options =>
         {
-            options.AddPolicy(Policy.CanViewYearEndReports, x => x.RequireRole(Role.ITDEVOPS, Role.FINANCEMANAGER, Role.ADMINISTRATOR));
+            options.AddPolicy(Policy.CanViewYearEndReports, x => x.RequireRole(Role.ITDEVOPS, Role.FINANCEMANAGER, Role.ADMINISTRATOR, Role.HARDSHIPADMINISTRATOR));
             options.AddPolicy(Policy.CanGetPayProfitRecords, x => x.RequireRole(Role.ITDEVOPS, Role.FINANCEMANAGER, Role.DISTRIBUTIONSCLERK, Role.ADMINISTRATOR, Role.HARDSHIPADMINISTRATOR));
             options.AddPolicy(Policy.CanViewPayClassificationTypes, x => x.RequireRole(Role.ITDEVOPS, Role.FINANCEMANAGER, Role.DISTRIBUTIONSCLERK, Role.ADMINISTRATOR, Role.HARDSHIPADMINISTRATOR));
             options.AddPolicy(Policy.CanAddDemographics, x => x.RequireRole(Role.ITDEVOPS, Role.ADMINISTRATOR));
