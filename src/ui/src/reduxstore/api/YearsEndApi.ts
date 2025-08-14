@@ -101,6 +101,8 @@ import {
   PayBenReportRequest,
   PayBenReportResponse,
   ProfitMasterStatus,
+  QPAY066BTerminatedWithVestedBalanceRequest,
+  QPAY066BTerminatedWithVestedBalanceResponse,
   ProfitShareEditResponse,
   ProfitShareMasterApplyRequest,
   ProfitShareMasterResponse,
@@ -1188,6 +1190,22 @@ export const YearsEndApi = createApi({
           console.log("Err: " + err);
         }
       }
+    }),
+    getQPAY066BTerminatedWithVestedBalance: builder.query<
+      QPAY066BTerminatedWithVestedBalanceResponse,
+      QPAY066BTerminatedWithVestedBalanceRequest
+    >({
+      query: (params) => ({
+        url: "yearend/breakdown-by-store/terminated/withcurrentbalance/notvested",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          skip: params.pagination.skip,
+          take: params.pagination.take,
+          sortBy: params.pagination.sortBy,
+          isSortDescending: params.pagination.isSortDescending
+        }
+      })
     })
   })
 });
@@ -1237,5 +1255,6 @@ export const {
   useUpdateEnrollmentMutation,
   useFinalizeReportMutation,
   useLazyAdhocBeneficiariesReportQuery,
-  useLazyPayBenReportQuery
+  useLazyPayBenReportQuery,
+  useLazyGetQPAY066BTerminatedWithVestedBalanceQuery
 } = YearsEndApi;
