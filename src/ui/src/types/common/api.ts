@@ -33,7 +33,7 @@ export interface PagedReportResponse<T> {
   response: Paged<T>;
 }
 
-export interface StartAndEndDateRequest extends ProfitYearRequest {
+export interface StartAndEndDateRequest {
   beginningDate: string;
   endingDate: string;
   pagination: SortedPaginationRequestDto;
