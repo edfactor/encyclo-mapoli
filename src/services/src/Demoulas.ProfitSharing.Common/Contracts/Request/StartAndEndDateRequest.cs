@@ -10,8 +10,8 @@ public record StartAndEndDateRequest : ProfitYearRequest
     {
         return new StartAndEndDateRequest
         {
-            BeginningDate = new DateOnly(2024, 03, 15),
-            EndingDate = new DateOnly(2024, 09, 15),
+            BeginningDate = new DateOnly(2019, 01, 01),
+            EndingDate = new DateOnly(2024, 12,31 ),
             ProfitYear = 2024,
             Skip = 1,
             Take = 10,

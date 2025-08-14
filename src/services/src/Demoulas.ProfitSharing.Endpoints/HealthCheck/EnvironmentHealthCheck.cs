@@ -1,37 +1,44 @@
-﻿using Demoulas.Common.Api.Utilities;
+﻿using System.Runtime.InteropServices;
+using Demoulas.Common.Api.Utilities;
 using Demoulas.Common.Contracts.Configuration;
+using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Demoulas.ProfitSharing.Endpoints.HealthCheck;
 
-using Microsoft.AspNetCore.Hosting;
 public class EnvironmentHealthCheck : IHealthCheck
 {
-    private readonly IWebHostEnvironment _env;
+    private static readonly DateTime _startupTime = DateTime.UtcNow;
     private readonly AppVersionInfo _appVersion;
     private readonly OktaConfiguration _config;
-    private static readonly DateTime _startupTime = DateTime.UtcNow;
+    private readonly IWebHostEnvironment _env;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IReportRunnerService _reportRunnerService;
 
     public EnvironmentHealthCheck(IWebHostEnvironment env,
         AppVersionInfo appVersion,
-        OktaConfiguration config)
+        OktaConfiguration config,
+        IHttpContextAccessor httpContextAccessor,
+        IReportRunnerService reportRunnerService)
     {
         _env = env;
         _appVersion = appVersion;
         _config = config;
+        _httpContextAccessor = httpContextAccessor;
+        _reportRunnerService = reportRunnerService;
     }
 
-    public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
+    public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
     {
-       
-
-        var data = new Dictionary<string, object>
+        Dictionary<string, object> data = new()
         {
             { "Environment", _env.EnvironmentName },
             { "ApplicationName", _env.ApplicationName },
             { "MachineName", Environment.MachineName },
             { "OSVersion", Environment.OSVersion.ToString() },
-            { "Framework", System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription },
+            { "Framework", RuntimeInformation.FrameworkDescription },
             { "AppVersion", _appVersion.BuildNumber },
             { "CurrentDirectory", Environment.CurrentDirectory },
             { "Uptime", (DateTime.UtcNow - _startupTime).ToString(@"dd\.hh\:mm\:ss") },
@@ -40,7 +47,12 @@ public class EnvironmentHealthCheck : IHealthCheck
             { "OktaRolePrefix", _config.RolePrefix }
         };
 
-        return Task.FromResult(HealthCheckResult.Healthy("Environment check", data));
+        string? reportSelector = _httpContextAccessor.HttpContext?.Request.Query["reportSelector"].ToString();
+        if (!string.IsNullOrWhiteSpace(reportSelector))
+        {
+            data.Add("ReportRunner", await _reportRunnerService.IncludeReportInformation(reportSelector, cancellationToken));
+        }
+
+        return HealthCheckResult.Healthy("Environment check", data);
     }
 }
-

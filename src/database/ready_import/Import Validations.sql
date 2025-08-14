@@ -8,7 +8,7 @@ BEGIN
 	  WHERE d.ID IS NULL OR d2.DEM_BADGE IS NULL;
 	 
 	IF FAILED_STATEMENT > 0 THEN 
-	  	raise_application_error(-20000, 'Demographic Mismatches');
+	  	raise_application_error(-20000, TO_CHAR(FAILED_STATEMENT) || ' Demographic Mismatches');
 	END IF;
 
 	SELECT COUNT(*)
@@ -18,7 +18,7 @@ BEGIN
   FULL OUTER JOIN {SOURCE_PROFITSHARE_SCHEMA}.DEMOGRAPHICS d2 ON d.BADGE_NUMBER = d2.DEM_BADGE 
   WHERE dh.ID  IS NULL OR d2.DEM_BADGE IS NULL;	 
 	IF FAILED_STATEMENT > 0 THEN 
-	  	raise_application_error(-20000, 'Demographic History Mismatches');
+	  	raise_application_error(-20000, TO_CHAR(FAILED_STATEMENT) || ' Demographic History Mismatches');
 	END IF;
 
 	SELECT COUNT(*)
@@ -27,7 +27,29 @@ BEGIN
   FULL OUTER JOIN {SOURCE_PROFITSHARE_SCHEMA}.PAYBEN p ON bc.SSN = p.PYBEN_PAYSSN 
   WHERE bc.ID  IS NULL OR p.PYBEN_PAYSSN IS NULL;
 	IF FAILED_STATEMENT > 0 THEN 
-	  	raise_application_error(-20000, 'Beneficiary Contact Mismatches');
+	  	raise_application_error(-20000, TO_CHAR(FAILED_STATEMENT) || ' Beneficiary Contact Mismatches');
+	END IF;
+
+	--Check for Duplicate SSNs in PYBEN
+    SELECT COUNT(*)
+    INTO FAILED_STATEMENT
+	FROM ( 
+		SELECT p.PYBEN_PAYSSN
+		FROM {SOURCE_PROFITSHARE_SCHEMA}.PAYBEN p 
+		GROUP BY p.PYBEN_PAYSSN
+		HAVING COUNT(*) > 1
+	) x;
+	IF FAILED_STATEMENT > 0 THEN 
+	  	raise_application_error(-20000, TO_CHAR(FAILED_STATEMENT) || ' duplicate beneficiary SSNs');
+	END IF;
+
+    --Check for out of range PSN numbers in PYBEN
+    SELECT COUNT(*)
+	  INTO FAILED_STATEMENT
+    FROM {SOURCE_PROFITSHARE_SCHEMA}.PAYBEN p
+    WHERE p.PYBEN_PSN < 1000000000; 
+    IF FAILED_STATEMENT > 0 THEN 
+	  	raise_application_error(-20000, TO_CHAR(FAILED_STATEMENT) || ' PSNs out of range');
 	END IF;
 
 	SELECT COUNT(*)
@@ -37,7 +59,7 @@ BEGIN
   FULL OUTER JOIN BENEFICIARY b ON TO_NUMBER(SUBSTR(LPAD(p.PYBEN_PSN,11,0),1,7)) = b.BADGE_NUMBER AND TO_NUMBER(SUBSTR(LPAD(p.PYBEN_PSN, 11, 0), 8)) = b.PSN_SUFFIX 
   WHERE p.PYBEN_PSN IS NULL OR b.ID  IS NULL;
 	IF FAILED_STATEMENT > 0 THEN 
-	  	raise_application_error(-20000, 'Beneficiary Mismatches');
+	  	raise_application_error(-20000, TO_CHAR(FAILED_STATEMENT) || ' Beneficiary Mismatches');
 	END IF;
 
 SELECT COUNT(*)
@@ -66,7 +88,7 @@ SELECT COUNT(*)
 	   	  sm.state_taxes <> rd.state_taxes;  
 	   	 
 	IF FAILED_STATEMENT > 0 THEN 
-	  	raise_application_error(-20000, 'Profit Detail Mismatches');
+	  	raise_application_error(-20000, TO_CHAR(FAILED_STATEMENT) || ' Profit Detail Mismatches');
 	END IF;
 
 	SELECT COUNT(*)
@@ -89,7 +111,7 @@ SELECT COUNT(*)
     OR spp.INCOME_EXECUTIVE <> rpp.INCOME_EXECUTIVE;
 
 	IF FAILED_STATEMENT > 0 THEN 
-	  	raise_application_error(-20000, 'Current year Pay Profit Mismatches');
+	  	raise_application_error(-20000, TO_CHAR(FAILED_STATEMENT) || ' Current year Pay Profit Mismatches');
 	END IF;
 
 	SELECT COUNT(*)
@@ -110,7 +132,7 @@ SELECT COUNT(*)
 	OR spp.CURRENT_INCOME_YEAR <> rpp.CURRENT_INCOME_YEAR;
 
 	IF FAILED_STATEMENT > 0 THEN 
-	  	raise_application_error(-20000, 'Prior year Pay Profit Mismatches');
+	  	raise_application_error(-20000, TO_CHAR(FAILED_STATEMENT) || ' Prior year Pay Profit Mismatches');
 	END IF;
 
 END;      	 

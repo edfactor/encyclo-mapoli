@@ -42,7 +42,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
             Name = request.Name,
             Ssn = request.Ssn != null ? Convert.ToInt32(request.Ssn) : 0,
             MemberType = request.MemberType,
-            EndProfitYear =  (short)DateTime.Now.Year,
+            EndProfitYear = (short)DateTime.Now.Year,
             ProfitYear = (short)DateTime.Now.Year
 
         });
@@ -66,7 +66,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
             .Where(x =>
             (request.BadgeNumber == null || x.BadgeNumber == request.BadgeNumber) &&
             (request.PsnSuffix == null || x.PsnSuffix == request.PsnSuffix) &&
-            (string.IsNullOrEmpty(request.Name) || EF.Functions.Like(x.Contact.ContactInfo.FullName.ToUpper(),request.Name.ToUpper())) &&
+            (string.IsNullOrEmpty(request.Name) || EF.Functions.Like(x.Contact.ContactInfo.FullName.ToUpper(), $"%{request.Name.ToUpper()}%")) &&
             (request.Ssn == null || x.Contact.Ssn == request.Ssn)
             ).Select(x => new BeneficiarySearchFilterResponse()
             {
@@ -108,7 +108,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
 
         foreach (var item in result.Result.Results)
         {
-            item.Ssn = !item.Ssn.Contains("X")?item.Ssn.MaskSsn():item.Ssn;
+            item.Ssn = !item.Ssn.Contains("X") ? item.Ssn.MaskSsn() : item.Ssn;
         }
 
         return result.Result;
@@ -118,16 +118,31 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
 
     private int StepBackNumber(int num)
     {
-        if (num == 0) return 0;
+        if (num <= 1000) return 0;
 
-        // Find the smallest power of 10 to round down by
-        int place = 1;
-        while ((num % (place * 10)) == 0)
+        // Get the hundreds and tens/ones parts
+        int lastThree = num % 1000;
+
+        if (lastThree == 0)
         {
-            place *= 10;
+            // e.g., 1200 -> 1000
+            return (num / 1000) * 1000;
         }
-
-        return num - place;
+        else if (lastThree % 100 == 0)
+        {
+            // e.g., 1100 -> 1000
+            return (num / 1000) * 1000;
+        }
+        else if (lastThree % 10 == 0)
+        {
+            // e.g., 1120 -> 1100, 1210 -> 1200
+            return (num / 100) * 100;
+        }
+        else
+        {
+            // e.g., if we ever had 1125 -> 1120 (not in your examples but just in case)
+            return (num / 10) * 10;
+        }
     }
     private async Task<PaginatedResponseDto<BeneficiaryDto>> GetPreviousBeneficiaries(BeneficiaryRequestDto request, IQueryable<Beneficiary> query, CancellationToken cancellationToken)
     {
@@ -140,6 +155,10 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
             while (stepBack >= 1000)
             {
                 psns.Add(stepBack);
+
+                int next = StepBackNumber(stepBack);
+                if (next == stepBack) break; // safety to prevent infinite loop
+
                 stepBack = StepBackNumber(stepBack);
             }
             query = query.Where(x => psns.Contains(x.PsnSuffix)).OrderByDescending(x => x.PsnSuffix);
@@ -153,7 +172,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                 KindId = x.KindId,
                 CreatedDate = x.Contact != null ? x.Contact.CreatedDate : DateOnly.MaxValue,
                 DateOfBirth = x.Contact != null ? x.Contact.DateOfBirth : DateOnly.MaxValue,
-                Ssn = x.Contact != null ?  x.Contact.Ssn.ToString() : string.Empty,
+                Ssn = x.Contact != null ? x.Contact.Ssn.ToString() : string.Empty,
                 City = x.Contact != null && x.Contact.Address != null && x.Contact.Address.City != null ? x.Contact.Address.City : null,
                 CountryIso = x.Contact != null && x.Contact.Address != null ? x.Contact.Address.CountryIso ?? "" : "",
                 PostalCode = x.Contact != null && x.Contact.Address != null ? x.Contact.Address.PostalCode : null,
@@ -331,7 +350,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
     }
 
 
-    public async Task<BeneficiaryDetailResponse> GetBeneficiaryDetail(BeneficiaryDetailRequest request,CancellationToken cancellationToken)
+    public async Task<BeneficiaryDetailResponse> GetBeneficiaryDetail(BeneficiaryDetailRequest request, CancellationToken cancellationToken)
     {
         var frozenStateResponse = await _frozenService.GetActiveFrozenDemographic(cancellationToken);
         short yearEnd = frozenStateResponse.ProfitYear;
@@ -361,8 +380,8 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                 {
                     BadgeNumber = request.BadgeNumber,
                     EndProfitYear = (short)DateTime.Now.Year,
-                    ProfitYear   = (short)DateTime.Now.Year,
-                    MemberType  = 1
+                    ProfitYear = (short)DateTime.Now.Year,
+                    MemberType = 1
                 });
                 query = memberDetail.Results.Select(x => new BeneficiaryDetailResponse
                 {
@@ -375,19 +394,6 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                     Street = x.Address,
                     Zip = x.AddressZipCode
                 }).AsQueryable();
-                //query = context.Demographics.Include(x => x.ContactInfo).Include(x => x.Address)
-                //.Where(x => x.BadgeNumber == request.BadgeNumber)
-                //.Select(x => new BeneficiaryDetailResponse
-                //{
-                //    Name = x.ContactInfo.FullName,
-                //    BadgeNumber = x.BadgeNumber,
-                //    City = x.Address.City,
-                //    DateOfBirth = x.DateOfBirth,
-                //    Ssn = x.Ssn.ToString(),
-                //    State = x.Address.State,
-                //    Street = x.Address.Street,
-                //    Zip = x.Address.PostalCode
-                //});
             }
 
             return query.ToList();
@@ -399,6 +405,8 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
         foreach (var item in result)
         {
             item.CurrentBalance = balanceList.Select(x => x.CurrentBalance).FirstOrDefault();
+            if (request.PsnSuffix.HasValue && request.PsnSuffix > 0)
+                item.Ssn = item.Ssn.MaskSsn();
         }
 
 
