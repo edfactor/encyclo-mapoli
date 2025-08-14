@@ -24,12 +24,12 @@ public class EnvironmentHealthCheck : IHealthCheck
     public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
     {
        
-
         var data = new Dictionary<string, object>
         {
             { "Environment", _env.EnvironmentName },
             { "ApplicationName", _env.ApplicationName },
             { "MachineName", Environment.MachineName },
+            { "WorkingSet", Environment.WorkingSet },
             { "OSVersion", Environment.OSVersion.ToString() },
             { "Framework", System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription },
             { "AppVersion", _appVersion.BuildNumber },
