@@ -28,7 +28,7 @@ export interface MasterInquiryDetail extends ProfitYearRequest {
   profitYearIteration: number;
   distributionSequence: number;
   profitCodeId: number;
-  contribution: number;
+  contribution: number | string;
   earnings: number;
   forfeiture: number;
   monthToDate: number;
@@ -95,7 +95,7 @@ export interface MasterInquiryResponseDto {
   profitYearIteration: number;
   distributionSequence: number;
   profitCodeId: number;
-  contribution: number;
+  contribution: number | string;
   earnings: number;
   forfeiture: number;
   monthToDate: number;
