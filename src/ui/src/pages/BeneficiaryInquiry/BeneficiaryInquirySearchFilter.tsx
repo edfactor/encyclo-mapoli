@@ -52,7 +52,7 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
     memberType = memberType ?? "2";
     let badge = undefined,
       psn = undefined;
-    if (badgePsn && badgePsn.length > 0) {
+    if (badgePsn && badgePsn.length > MAX_EMPLOYEE_BADGE_LENGTH) {
       if (badgePsn.length == MAX_EMPLOYEE_BADGE_LENGTH) {
         badge = parseInt(badgePsn);
       } else {
