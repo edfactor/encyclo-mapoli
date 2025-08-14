@@ -17,7 +17,7 @@ import {
   RehireForfeituresEditedValues,
   StartAndEndDateRequest
 } from "../../../reduxstore/types";
-import { GetDetailColumns, GetMilitaryAndRehireForfeituresColumns } from "./RehireForfeituresGridColumns";
+import { GetDetailColumns, GetRehireForfeituresColumns } from "./RehireForfeituresGridColumns";
 
 interface MilitaryAndRehireForfeituresGridSearchProps {
   initialSearchLoaded: boolean;
@@ -324,7 +324,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
   };
 
   // Get the main and detail columns
-  const mainColumns = useMemo(() => GetMilitaryAndRehireForfeituresColumns(), []);
+  const mainColumns = useMemo(() => GetRehireForfeituresColumns(), []);
   const detailColumns = useMemo(
     () =>
       GetDetailColumns(addRowToSelectedRows, removeRowFromSelectedRows, selectedProfitYear, handleSave, handleBulkSave),
