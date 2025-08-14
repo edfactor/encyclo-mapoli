@@ -244,47 +244,47 @@ public sealed class BreakdownReportService : IBreakdownService
         BreakdownByStoreRequest request,
         CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, StatusFilterEnum.Active, BalanceEnum.BalanceOrNoBalance, withBeneficiaryAllocation: false, Ssns: null, cancellationToken);
+        return GetMembersByStore(request, StatusFilterEnum.Active, BalanceEnum.BalanceOrNoBalance, withBeneficiaryAllocation: false, Ssns: null, BadgeNumbers: null, cancellationToken);
     }
 
-    public Task<ReportResponseBase<MemberYearSummaryDto>> GetMembersWithBalanceActivityByStore(BreakdownByStoreRequest request, int[]? Ssns, CancellationToken cancellationToken)
+    public Task<ReportResponseBase<MemberYearSummaryDto>> GetMembersWithBalanceActivityByStore(BreakdownByStoreRequest request, int[]? Ssns, int[] BadgeNumbers, CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, StatusFilterEnum.All, BalanceEnum.HasBalanceActivity, withBeneficiaryAllocation: false, Ssns, cancellationToken);
+        return GetMembersByStore(request, StatusFilterEnum.All, BalanceEnum.HasBalanceActivity, withBeneficiaryAllocation: false, Ssns, BadgeNumbers, cancellationToken);
     }
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetInactiveMembersByStore(
         BreakdownByStoreRequest request,
         CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, StatusFilterEnum.Inactive, BalanceEnum.BalanceOrNoBalance, withBeneficiaryAllocation: false, Ssns: null, cancellationToken);
+        return GetMembersByStore(request, StatusFilterEnum.Inactive, BalanceEnum.BalanceOrNoBalance, withBeneficiaryAllocation: false, Ssns: null, BadgeNumbers:null, cancellationToken);
     }
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetInactiveMembersWithVestedBalanceByStore(
         BreakdownByStoreRequest request,
         CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, StatusFilterEnum.Inactive, BalanceEnum.HasVestedBalance, withBeneficiaryAllocation: false, Ssns: null, cancellationToken);
+        return GetMembersByStore(request, StatusFilterEnum.Inactive, BalanceEnum.HasVestedBalance, withBeneficiaryAllocation: false, Ssns: null, BadgeNumbers: null, cancellationToken);
     }
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetTerminatedMembersWithVestedBalanceByStore(
        BreakdownByStoreRequest request,
        CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, StatusFilterEnum.Terminated, BalanceEnum.HasVestedBalance, withBeneficiaryAllocation: false, Ssns: null, cancellationToken);
+        return GetMembersByStore(request, StatusFilterEnum.Terminated, BalanceEnum.HasVestedBalance, withBeneficiaryAllocation: false, Ssns: null, BadgeNumbers: null, cancellationToken);
     }
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetTerminatedMembersWithCurrentBalanceNotVestedByStore(
        BreakdownByStoreRequest request,
        CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, StatusFilterEnum.Terminated, BalanceEnum.HasCurrentBalanceNotVested, withBeneficiaryAllocation: false, Ssns: null, cancellationToken);
+        return GetMembersByStore(request, StatusFilterEnum.Terminated, BalanceEnum.HasCurrentBalanceNotVested, withBeneficiaryAllocation: false, Ssns: null, BadgeNumbers: null, cancellationToken);
     }
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetTerminatedMembersWithBeneficiaryByStore(
        TerminatedEmployeesWithBalanceBreakdownRequest request,
        CancellationToken cancellationToken)
     {
-        return GetMembersByStore(request, StatusFilterEnum.Terminated, BalanceEnum.BalanceOrNoBalance, withBeneficiaryAllocation: true, Ssns:null, cancellationToken);
+        return GetMembersByStore(request, StatusFilterEnum.Terminated, BalanceEnum.BalanceOrNoBalance, withBeneficiaryAllocation: true, Ssns:null, BadgeNumbers: null, cancellationToken);
     }
 
     #region ── Private: common building blocks ───────────────────────────────────────────
@@ -295,6 +295,7 @@ public sealed class BreakdownReportService : IBreakdownService
         BalanceEnum balanceFilter,
         bool withBeneficiaryAllocation,
         int[]? Ssns,
+        int[]? BadgeNumbers,
         CancellationToken cancellationToken)
     {
         
@@ -361,6 +362,12 @@ public sealed class BreakdownReportService : IBreakdownService
             {
                 var ssnSet = Ssns.ToHashSet();
                 employeesBase = employeesBase.Where(e => ssnSet.Contains(e.Ssn));
+            }
+
+            if (BadgeNumbers != null && BadgeNumbers.Length > 0)
+            {
+                var badgeNumberSet = BadgeNumbers.ToHashSet();
+                employeesBase = employeesBase.Where(e => badgeNumberSet.Contains(e.BadgeNumber));
             }
 
             if (withBeneficiaryAllocation) //QPAY066A-1
@@ -575,14 +582,14 @@ public sealed class BreakdownReportService : IBreakdownService
                                    (d.PayFrequencyId == PayFrequency.Constants.Weekly ||
                                     d.PayFrequencyId == PayFrequency.Constants.Monthly) &&
                                    (((bal == null ? 0 : bal.CurrentBalance)
-                                     + (etva == null ? 0 : etva.Total)) <= 0))
+                                     + (etva == null ? 0 : etva.TotalAmount)) <= 0))
                                     ? 801
                                     : (d.EmploymentStatusId == EmploymentStatus.Constants.Terminated &&
                                        (d.PayFrequencyId == PayFrequency.Constants.Weekly ||
                                         d.PayFrequencyId == PayFrequency.Constants.Monthly) &&
                                        ((bal == null ? 0 : bal.CurrentBalance) > 0) &&
                                        ((bal == null ? 0 : bal.VestedBalance) == 0) &&
-                                       ((etva == null ? 0 : etva.Total) == 0))
+                                       ((etva == null ? 0 : etva.TotalAmount) == 0))
                                         ? 802
                                         : ((d.PayFrequencyId == PayFrequency.Constants.Weekly ||
                                             d.PayFrequencyId == PayFrequency.Constants.Monthly) &&
@@ -640,7 +647,7 @@ public sealed class BreakdownReportService : IBreakdownService
                 CurrentBalance = bal == null ? 0 : bal.CurrentBalance,
                 VestedBalance = bal == null ? 0 : bal.VestedBalance,
                 VestedPercent = bal == null ? 0 : bal.VestingPercent,
-                EtvaBalance = etva == null ? 0 : etva.Total,
+                EtvaBalance = etva == null ? 0 : etva.TotalAmount,
                 YearsInPlan = bal == null ? 0 : bal.YearsInPlan,
                 HireDate = d.HireDate,
                 TerminationDate = d.TerminationDate,
@@ -679,7 +686,7 @@ public sealed class BreakdownReportService : IBreakdownService
         var balanceBySsnLastYear = await _totalService
             .GetTotalBalanceSet(ctx, priorYear)
             .Where(tbs => employeeSsns.Contains(tbs.Ssn))
-            .ToDictionaryAsync(tbs => tbs.Ssn, tbs => tbs.Total ?? 0, ct);
+            .ToDictionaryAsync(tbs => tbs.Ssn, tbs => tbs.TotalAmount ?? 0, ct);
 
         var txnsBySsn = await _totalService
             .GetTransactionsBySsnForProfitYearForOracle(ctx, profitYear)

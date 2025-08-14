@@ -8,7 +8,7 @@ internal class ParticipantTotalBalanceDto
     internal decimal? Contributions { get; set; }
     internal decimal? Forfeitures { get; set; }
     internal decimal? VestedEarnings { get; set; }
-    internal decimal? Total
+    internal decimal? TotalAmount
     {
         get
         {

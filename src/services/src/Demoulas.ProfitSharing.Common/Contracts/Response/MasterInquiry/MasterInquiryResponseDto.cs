@@ -1,4 +1,5 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
 
@@ -17,6 +18,8 @@ public sealed record MasterInquiryResponseDto : IdRequest
     public short YearToDate { get; set; }
     public string? Remark { get; set; }
     public byte? ZeroContributionReasonId { get; set; }
+
+    [Unmask]
     public decimal FederalTaxes { get; set; }
     public decimal StateTaxes { get; set; }
     public char? TaxCodeId { get; set; }
