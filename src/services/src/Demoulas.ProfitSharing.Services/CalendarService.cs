@@ -16,7 +16,7 @@ public sealed class CalendarService : ICalendarService
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly IAccountingPeriodsService _accountingPeriodsService;
     private readonly IDistributedCache _distributedCache;
-    private readonly TimeSpan _refreshInterval = TimeSpan.FromHours(4); // Every two hours refresh
+    private readonly TimeSpan _refreshInterval = TimeSpan.FromHours(4); // Every four hours refresh
     private const string YearDatesCacheKey = "CalendarService_YearDates";
 
     public CalendarService(IProfitSharingDataContextFactory dataContextFactory, IAccountingPeriodsService accountingPeriodsService, IDistributedCache distributedCache)
