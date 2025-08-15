@@ -7,7 +7,7 @@ import { useLazyGetRehireForfeituresQuery } from "reduxstore/api/YearsEndApi";
 import {
   clearRehireForfeituresDetails,
   clearRehireForfeituresQueryParams,
-  setMilitaryAndRehireForfeituresQueryParams
+  setRehireForfeituresQueryParams
 } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import { SearchAndReset } from "smart-ui-library";
@@ -48,7 +48,7 @@ const schema = yup.object().shape({
   //profitYear: yup.number().required("Profit year is required")
 });
 
-interface MilitaryAndRehireForfeituresSearchFilterProps {
+interface RehireForfeituresSearchFilterProps {
   setInitialSearchLoaded: (include: boolean) => void;
   fiscalData: CalendarResponseDto;
   onSearch?: () => void;
@@ -56,7 +56,7 @@ interface MilitaryAndRehireForfeituresSearchFilterProps {
   setHasUnsavedChanges: (hasChanges: boolean) => void;
 }
 
-const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearchFilterProps> = ({
+const RehireForfeituresSearchFilter: React.FC<RehireForfeituresSearchFilterProps> = ({
   setInitialSearchLoaded,
   fiscalData,
   onSearch,
@@ -87,7 +87,7 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
         profitYear: selectedProfitYear
       };
 
-      dispatch(setMilitaryAndRehireForfeituresQueryParams(updatedData));
+      dispatch(setRehireForfeituresQueryParams(updatedData));
       triggerSearch(updatedData);
       if (onSearch) onSearch(); // Only call if onSearch is provided
     }

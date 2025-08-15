@@ -10,7 +10,7 @@ export interface ForfeitureDetail extends ProfitYearRequest {
   enrollmentName: string;
 }
 
-export interface MilitaryAndRehireForfeiture {
+export interface RehireForfeiture {
   badgeNumber: number;
   fullName: string;
   ssn: string;

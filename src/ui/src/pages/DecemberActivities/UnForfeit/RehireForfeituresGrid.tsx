@@ -21,7 +21,7 @@ import { GetProfitDetailColumns } from "./RehireForfeituresProfitDetailGridColum
 
 import { GetRehireForfeituresGridColumns } from "./RehireForfeituresGridColumns";
 
-interface MilitaryAndRehireForfeituresGridSearchProps {
+interface RehireForfeituresGridSearchProps {
   initialSearchLoaded: boolean;
   setInitialSearchLoaded: (loaded: boolean) => void;
   resetPageFlag: boolean;
@@ -31,7 +31,7 @@ interface MilitaryAndRehireForfeituresGridSearchProps {
   onArchiveHandled?: () => void;
 }
 
-const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProps> = ({
+const RehireForfeituresGrid: React.FC<RehireForfeituresGridSearchProps> = ({
   initialSearchLoaded,
   setInitialSearchLoaded,
   resetPageFlag,
@@ -147,8 +147,8 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
           const request = createRequest(
             pageNumber * pageSize,
             sortParams.sortBy,
-            sortParams.isSortDescending,
-            selectedProfitYear
+            sortParams.isSortDescending
+            //selectedProfitYear
           );
           if (request) {
             await triggerSearch(request, false);

@@ -2,7 +2,7 @@ import { ColDef } from "ag-grid-community";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
 import { createBadgeColumn, createSSNColumn, createNameColumn } from "../../../utils/gridColumnFactory";
 
-export const GetMilitaryAndRehireColumns = (): ColDef[] => {
+export const GetRehireColumns = (): ColDef[] => {
   return [
     createBadgeColumn({
       headerName: "Badge",

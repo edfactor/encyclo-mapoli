@@ -36,7 +36,7 @@ import {
   setForfeituresAndPoints,
   setForfeituresByAge,
   setGrossWagesReport,
-  setMilitaryAndRehireForfeituresDetails,
+  setRehireForfeituresDetails,
   setNegativeEtvaForSSNsOnPayprofit,
   setProfitMasterApply,
   setProfitMasterRevert,
@@ -94,7 +94,7 @@ import {
   GrandTotalsByStoreResponseDto,
   GrossWagesReportDto,
   GrossWagesReportResponse,
-  MilitaryAndRehireForfeiture,
+  RehireForfeiture,
   NegativeEtvaForSSNsOnPayProfit,
   NegativeEtvaForSSNsOnPayprofitRequestDto,
   PagedReportResponse,
@@ -306,7 +306,7 @@ export const YearsEndApi = createApi({
       }
     }),
     getRehireForfeitures: builder.query<
-      PagedReportResponse<MilitaryAndRehireForfeiture>,
+      PagedReportResponse<RehireForfeiture>,
       StartAndEndDateRequest & { archive?: boolean }
     >({
       query: (params) => {
@@ -331,7 +331,7 @@ export const YearsEndApi = createApi({
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          dispatch(setMilitaryAndRehireForfeituresDetails(data));
+          dispatch(setRehireForfeituresDetails(data));
         } catch (err) {
           console.log("Err: " + err);
         }

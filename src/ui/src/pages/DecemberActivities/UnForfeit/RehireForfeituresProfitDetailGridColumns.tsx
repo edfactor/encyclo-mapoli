@@ -64,8 +64,10 @@ export const GetProfitDetailColumns = (
       sortable: false,
       editable: ({ node }) => node.data.isDetail && node.data.profitYear === selectedProfitYear,
       cellEditor: SuggestedForfeitEditor,
-      cellRenderer: (params: ICellRendererParams) =>
-        SuggestedForfeitCellRenderer({ ...params, selectedProfitYear }, false, true),
+      cellRenderer: (params: ICellRendererParams) => {
+        console.log("Unforfeiture Params are: ", params);
+        return SuggestedForfeitCellRenderer({ ...params, selectedProfitYear }, false, true);
+      },
       valueFormatter: agGridNumberToCurrency,
       valueGetter: (params) => {
         if (!params.data.isDetail) return null;
@@ -100,6 +102,8 @@ export const GetProfitDetailColumns = (
         onSave
       },
       cellRenderer: (params: RehireForfeituresSaveButtonCellParams) => {
+        console.log("Params are: ", params);
+
         if (!params.data.isDetail || params.data.profitYear !== selectedProfitYear) {
           return "";
         }
