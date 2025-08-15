@@ -47,10 +47,10 @@ public sealed class AuditService : IAuditService
         return ArchiveCompletedReportAsync(reportName, profitYear, request, isArchiveRequest, reportFunction, cancellationToken);
     }
 
-    public async Task<TResponse> ArchiveCompletedReportAsync<TRequest, TResponse>(string reportName, 
-        short profitYear, 
-        TRequest request, 
-        bool isArchiveRequest, 
+    public async Task<TResponse> ArchiveCompletedReportAsync<TRequest, TResponse>(string reportName,
+        short profitYear,
+        TRequest request,
+        bool isArchiveRequest,
         Func<TRequest, bool, CancellationToken, Task<TResponse>> reportFunction,
         CancellationToken cancellationToken) where TRequest : PaginationRequestDto where TResponse : class
     {
@@ -70,11 +70,19 @@ public sealed class AuditService : IAuditService
 
         string requestJson = JsonSerializer.Serialize(request, JsonSerializerOptions.Web);
         string reportJson = JsonSerializer.Serialize(response, JsonSerializerOptions.Web);
+        string userName = _appUser?.UserName ?? "Unknown";
 
         var entries = new List<AuditChangeEntry> { new() { ColumnName = "Report", NewValue = reportJson } };
-        var auditEvent = new AuditEvent { TableName = reportName, Operation = "Archive", UserName = _appUser?.UserName ?? string.Empty, ChangesJson = entries };
+        var auditEvent = new AuditEvent { TableName = reportName, Operation = "Archive", UserName = userName, ChangesJson = entries };
 
-        ReportChecksum checksum = new ReportChecksum { ReportType = reportName, ProfitYear = profitYear, RequestJson = requestJson, ReportJson = reportJson };
+        ReportChecksum checksum = new ReportChecksum
+        {
+            ReportType = reportName,
+            ProfitYear = profitYear,
+            RequestJson = requestJson,
+            ReportJson = reportJson,
+            UserName = userName
+        };
         checksum.KeyFieldsChecksumJson = ToKeyValuePairs(response);
 
         await _dataContextFactory.UseWritableContext(async c =>
