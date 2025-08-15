@@ -1,10 +1,16 @@
+import { IHeaderParams } from "ag-grid-community";
+import { SelectableGridHeader } from "components/SelectableGridHeader";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
-import { SelectableGridHeader } from "../../../components/SelectableGridHeader";
-import { ForfeitureAdjustmentUpdateRequest, RehireForfeituresHeaderComponentProps } from "../../../reduxstore/types";
+import { ForfeitureAdjustmentUpdateRequest } from "types";
 
-export const HeaderComponent: React.FC<RehireForfeituresHeaderComponentProps> = (
-  params: RehireForfeituresHeaderComponentProps
-) => {
+interface HeaderComponentProps extends IHeaderParams {
+  addRowToSelectedRows: (id: number) => void;
+  removeRowFromSelectedRows: (id: number) => void;
+  onBulkSave?: (requests: ForfeitureAdjustmentUpdateRequest[]) => Promise<void>;
+  isBulkSaving?: boolean;
+}
+
+export const HeaderComponent: React.FC<HeaderComponentProps> = (params: HeaderComponentProps) => {
   const selectedProfitYear = useDecemberFlowProfitYear();
 
   const isNodeEligible = (
@@ -21,11 +27,8 @@ export const HeaderComponent: React.FC<RehireForfeituresHeaderComponentProps> = 
     }
   ) => {
     if (!nodeData.isDetail || nodeData.profitYear !== selectedProfitYear) return false;
-    // For bulk operations, we need to check all possible rowKeys for this data
-    const baseRowKey = `${nodeData.badgeNumber}-${nodeData.profitYear}${nodeData.enrollmentId ? `-${nodeData.enrollmentId}` : ""}`;
-    const editedValues = context?.editedValues || {};
-    const matchingKey = Object.keys(editedValues).find((key) => key.startsWith(baseRowKey));
-    const currentValue = matchingKey ? editedValues[matchingKey]?.value : nodeData.suggestedForfeit;
+    const rowKey = `${nodeData.badgeNumber}-${nodeData.profitYear}`;
+    const currentValue = context?.editedValues?.[rowKey]?.value ?? nodeData.suggestedForfeit;
     return (currentValue || 0) !== 0;
   };
 
@@ -42,18 +45,14 @@ export const HeaderComponent: React.FC<RehireForfeituresHeaderComponentProps> = 
       editedValues?: Record<string, { value?: number }>;
     }
   ): ForfeitureAdjustmentUpdateRequest => {
-    // For bulk operations, we need to find the actual edited value
-    const baseRowKey = `${nodeData.badgeNumber}-${nodeData.profitYear}${nodeData.enrollmentId ? `-${nodeData.enrollmentId}` : ""}`;
-    const editedValues = context?.editedValues || {};
-    const matchingKey = Object.keys(editedValues).find((key) => key.startsWith(baseRowKey));
-    const currentValue = matchingKey ? editedValues[matchingKey]?.value : nodeData.suggestedForfeit;
-    const isClassAction = nodeData.remark === "FORFEIT CA";
+    const rowKey = `${nodeData.badgeNumber}-${nodeData.profitYear}`;
+    const currentValue = context?.editedValues?.[rowKey]?.value ?? nodeData.suggestedForfeit;
 
     return {
       badgeNumber: Number(nodeData.badgeNumber),
       profitYear: nodeData.profitYear,
       forfeitureAmount: -(currentValue || 0),
-      classAction: isClassAction
+      classAction: false
     };
   };
 

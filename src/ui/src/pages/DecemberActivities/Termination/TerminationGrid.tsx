@@ -7,7 +7,7 @@ import { TotalsGrid } from "../../../components/TotalsGrid/TotalsGrid";
 import { ReportSummary } from "../../../components/ReportSummary";
 import { CalendarResponseDto, StartAndEndDateRequest } from "reduxstore/types";
 import { useLazyGetTerminationReportQuery } from "reduxstore/api/YearsEndApi";
-import { GetDetailColumns, GetTerminationColumns } from "./TerminationGridColumns";
+import { GetTerminationColumns } from "./TerminationGridColumns";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { ForfeitureAdjustmentUpdateRequest } from "reduxstore/types";
 import {
@@ -15,6 +15,7 @@ import {
   useUpdateForfeitureAdjustmentBulkMutation
 } from "reduxstore/api/YearsEndApi";
 import { TerminationSearchRequest } from "./Termination";
+import { GetDetailColumns } from "./TerminationDetailsGridColumns";
 
 interface TerminationGridSearchProps {
   initialSearchLoaded: boolean;
@@ -173,19 +174,22 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
         setExpandedRows(initialExpandState);
       }
     }
-  }, [termination?.response?.results]);
+  }, [expandedRows, termination.response.results]);
 
   // Helper to build a unique key for current request inputs
-  const buildRequestKey = (
-    skip: number,
-    sortBy: string,
-    isSortDescending: boolean,
-    profitYear: number,
-    beginningDate?: string,
-    endingDate?: string,
-    archive?: boolean
-  ) =>
-    `${skip}|${pageSize}|${sortBy}|${isSortDescending}|${profitYear}|${beginningDate ?? ""}|${endingDate ?? ""}|${archive ? "1" : "0"}`;
+  const buildRequestKey = useCallback(
+    (
+      skip: number,
+      sortBy: string,
+      isSortDescending: boolean,
+      profitYear: number,
+      beginningDate?: string,
+      endingDate?: string,
+      archive?: boolean
+    ) =>
+      `${skip}|${pageSize}|${sortBy}|${isSortDescending}|${profitYear}|${beginningDate ?? ""}|${endingDate ?? ""}|${archive ? "1" : "0"}`,
+    [pageSize]
+  );
 
   // Fetch data when pagination, sort, or searchParams change (only if initial search has been performed)
   useEffect(() => {
@@ -219,7 +223,8 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     selectedProfitYear,
     triggerSearch,
     createRequest,
-    initialSearchLoaded
+    initialSearchLoaded,
+    buildRequestKey
   ]);
 
   // Archive trigger: when shouldArchive flips true, attempt search and clear flag when done; retry when data becomes available
@@ -360,7 +365,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
         handleSave,
         handleBulkSave
       ),
-    [selectedRowIds, selectedProfitYear, handleSave, handleBulkSave]
+    [addRowToSelectedRows, removeRowFromSelectedRows, selectedRowIds, selectedProfitYear, handleSave, handleBulkSave]
   );
 
   // Build grid data with expandable rows
