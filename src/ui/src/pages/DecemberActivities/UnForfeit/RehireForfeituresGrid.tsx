@@ -17,7 +17,7 @@ import {
   RehireForfeituresEditedValues,
   StartAndEndDateRequest
 } from "../../../reduxstore/types";
-import { GetDetailColumns, GetRehireForfeituresColumns } from "./RehireForfeituresGridColumns";
+import { GetProfitDetailColumns, GetRehireForfeituresColumns } from "./RehireForfeituresHeaderComponent";
 
 interface MilitaryAndRehireForfeituresGridSearchProps {
   initialSearchLoaded: boolean;
@@ -94,14 +94,14 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
     (
       skip: number,
       sortBy: string,
-      isSortDescending: boolean,
-      profitYear: number
+      isSortDescending: boolean
+      //profitYear: number
     ): (StartAndEndDateRequest & { archive?: boolean }) | null => {
       // Build request using query params when present, otherwise fall back to fiscal dates
       const baseRequest: StartAndEndDateRequest = {
         beginningDate: rehireForfeituresQueryParams?.beginningDate || fiscalCalendarYear?.fiscalBeginDate || "",
         endingDate: rehireForfeituresQueryParams?.endingDate || fiscalCalendarYear?.fiscalEndDate || "",
-        profitYear: profitYear,
+        //profitYear: profitYear,
         pagination: { skip, take: pageSize, sortBy, isSortDescending }
       };
 
@@ -193,8 +193,8 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
           const searchRequest = createRequest(
             pageNumber * pageSize,
             sortParams.sortBy,
-            sortParams.isSortDescending,
-            selectedProfitYear
+            sortParams.isSortDescending
+            //selectedProfitYear
           );
           if (searchRequest) {
             await triggerSearch(searchRequest, false);
@@ -226,7 +226,7 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
 
   const performSearch = useCallback(
     async (skip: number, sortBy: string, isSortDescending: boolean) => {
-      const request = createRequest(skip, sortBy, isSortDescending, selectedProfitYear);
+      const request = createRequest(skip, sortBy, isSortDescending); //, selectedProfitYear);
       if (request) {
         await triggerSearch(request, false);
       }
@@ -327,7 +327,13 @@ const RehireForfeituresGrid: React.FC<MilitaryAndRehireForfeituresGridSearchProp
   const mainColumns = useMemo(() => GetRehireForfeituresColumns(), []);
   const detailColumns = useMemo(
     () =>
-      GetDetailColumns(addRowToSelectedRows, removeRowFromSelectedRows, selectedProfitYear, handleSave, handleBulkSave),
+      GetProfitDetailColumns(
+        addRowToSelectedRows,
+        removeRowFromSelectedRows,
+        selectedProfitYear,
+        handleSave,
+        handleBulkSave
+      ),
     [selectedRowIds, selectedProfitYear, handleSave, handleBulkSave]
   );
 
