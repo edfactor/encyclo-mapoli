@@ -118,7 +118,10 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
 
     private int StepBackNumber(int num)
     {
-        if (num <= 1000) return 0;
+        if (num <= 1000)
+        {
+            return 0;
+        }
 
         // Get the hundreds and tens/ones parts
         int lastThree = num % 1000;
@@ -157,7 +160,10 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                 psns.Add(stepBack);
 
                 int next = StepBackNumber(stepBack);
-                if (next == stepBack) break; // safety to prevent infinite loop
+                if (next == stepBack)
+                {
+                    break; // safety to prevent infinite loop
+                }
 
                 stepBack = StepBackNumber(stepBack);
             }
@@ -406,7 +412,9 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
         {
             item.CurrentBalance = balanceList.Select(x => x.CurrentBalance).FirstOrDefault();
             if (request.PsnSuffix.HasValue && request.PsnSuffix > 0)
+            {
                 item.Ssn = item.Ssn.MaskSsn();
+            }
         }
 
 

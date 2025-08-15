@@ -1,7 +1,8 @@
 ﻿using Demoulas.ProfitSharing.Common.Attributes;
+using Demoulas.ProfitSharing.Common.Contracts.Shared;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.Beneficiaries;
-public record UpdateBeneficiaryContactResponse
+public record UpdateBeneficiaryContactResponse : INameParts, IFullNameProperty, IPhoneNumber, IEmailAddress, ICity
 {
     public int Id { get; set; }
     public required string Ssn { get; set; }
@@ -10,7 +11,7 @@ public record UpdateBeneficiaryContactResponse
     public string? Street2 { get; set; }
     public string? Street3 { get; set; }
     public string? Street4 { get; set; }
-    [MaskSensitive] public required string City { get; set; }
+    [MaskSensitive] public string? City { get; set; }
     public required string State { get; set; }
     public required string PostalCode { get; set; }
     public string? CountryIso { get; set; }

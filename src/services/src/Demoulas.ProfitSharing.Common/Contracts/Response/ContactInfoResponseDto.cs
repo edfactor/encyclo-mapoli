@@ -1,12 +1,13 @@
 ﻿using Demoulas.ProfitSharing.Common.Attributes;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response;
-public record ContactInfoResponseDto
+using Demoulas.ProfitSharing.Common.Contracts.Shared;
+public record ContactInfoResponseDto : INameParts, IFullNameProperty, IPhoneNumber, IEmailAddress
 {
     [MaskSensitive] public string? FullName { get; set; }
-    [MaskSensitive] public required string LastName { get; set; }
-    [MaskSensitive] public required string FirstName { get; set; }
-    [MaskSensitive] public string? MiddleName { get; set; }
+    [MaskSensitive] public required string LastName { get; init; }
+    [MaskSensitive] public required string FirstName { get; init; }
+    [MaskSensitive] public string? MiddleName { get; init; }
     [MaskSensitive] public string? PhoneNumber { get; init; }
     [MaskSensitive] public string? MobileNumber { get; init; }
     [MaskSensitive] public string? EmailAddress { get; init; }

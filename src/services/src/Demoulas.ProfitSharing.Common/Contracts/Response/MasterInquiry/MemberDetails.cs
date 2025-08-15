@@ -2,8 +2,9 @@
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
+using Demoulas.ProfitSharing.Common.Contracts.Shared;
 
-public record MemberDetails : IdRequest
+public record MemberDetails : IdRequest, INameParts, IFullNameProperty, IPhoneNumber
 {
     public bool IsEmployee { get; init; }
     public int BadgeNumber { get; init; }
@@ -12,6 +13,7 @@ public record MemberDetails : IdRequest
 
     [MaskSensitive] public string FirstName { get; init; } = string.Empty;
     [MaskSensitive] public string LastName { get; init; } = string.Empty;
+    [MaskSensitive] public string? MiddleName { get; init; } = null;
     [MaskSensitive] public string FullName => $"{LastName}, {FirstName}";
     [MaskSensitive] public string Address { get; init; } = string.Empty;
     public string AddressCity { get; init; } = string.Empty;
