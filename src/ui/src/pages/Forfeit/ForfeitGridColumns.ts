@@ -1,58 +1,39 @@
 import { ColDef } from "ag-grid-community";
-import { GRID_COLUMN_WIDTHS } from "../../constants";
 import {
   createBadgeColumn,
+  createCountColumn,
   createCurrencyColumn,
-  createSSNColumn,
-  createNameColumn
+  createNameColumn,
+  createSSNColumn
 } from "../../utils/gridColumnFactory";
 
-export const GetProfitShareForfeitColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
+export const GetProfitShareForfeitColumns = (): ColDef[] => {
   return [
     createBadgeColumn({
-      headerName: "Badge",
-      minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
-      alignment: "left",
-      navigateFunction: navFunction
+      headerName: "Badge"
     }),
     createNameColumn({
-      field: "employeeName",
-      minWidth: 150
+      field: "employeeName"
     }),
     createSSNColumn({
       alignment: "left"
     }),
     createCurrencyColumn({
       headerName: "Forfeitures",
-      field: "forfeitures",
-      minWidth: 120
+      field: "forfeitures"
     }),
-    {
+
+    createCountColumn({
       headerName: "Cont/Forfeit Points",
-      field: "contForfeitPoints",
-      colId: "contForfeitPoints",
-      minWidth: 150,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
-    {
+      field: "contForfeitPoints"
+    }),
+    createCountColumn({
       headerName: "Earnings Points",
-      field: "earningPoints",
-      colId: "earningPoints",
-      minWidth: 120,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
-    {
-      headerName: "Ben #",
-      field: "beneficiaryPsn",
-      colId: "beneficiaryPsn",
-      minWidth: 120,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    }
+      field: "earningPoints"
+    }),
+    createBadgeColumn({
+      headerName: "Ben PSN",
+      field: "beneficiaryPsn"
+    })
   ];
 };
