@@ -258,7 +258,7 @@ public sealed class CertificateService : ICertificateService
             SortBy = ReferenceData.CertificateSort,
         };
 
-        return await _breakdownService.GetMembersWithBalanceActivityByStore(breakdownRequest, request.Ssns, request.BadgeNumbers, token);
+        return await _breakdownService.GetMembersWithBalanceActivityByStore(breakdownRequest, request.Ssns, request.BadgeNumbers ?? Array.Empty<int>(), token);
     }
 
     private async Task<Dictionary<byte, AnnuityRate>> GetAnnuityRatesByAge(CerficatePrintRequest request, CancellationToken token)

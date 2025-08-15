@@ -28,7 +28,7 @@ import {
   GrandTotalsByStoreResponseDto,
   GrossWagesReportRequest,
   GrossWagesReportResponse,
-  MilitaryAndRehireForfeiture,
+  RehireForfeiture,
   MissingCommasInPYName,
   NegativeEtvaForSSNsOnPayProfit,
   PagedReportResponse,
@@ -110,12 +110,12 @@ export interface YearsEndState {
   forfeituresByAgeTotal: ForfeituresByAge | null;
   grossWagesReport: GrossWagesReportResponse | null;
   grossWagesReportQueryParams: GrossWagesReportRequest | null;
-  militaryAndRehire: PagedReportResponse<EmployeesOnMilitaryLeaveResponse> | null;
+  rehire: PagedReportResponse<EmployeesOnMilitaryLeaveResponse> | null;
   militaryEntryAndModification: EmployeeDetails | null;
-  rehireForfeitures: PagedReportResponse<MilitaryAndRehireForfeiture> | null;
+  rehireForfeitures: PagedReportResponse<RehireForfeiture> | null;
   rehireForfeituresQueryParams: StartAndEndDateRequest | null;
   rehireProfitSummaryQueryParams: StartAndEndDateRequest | null;
-  militaryAndRehireQueryParams: StartAndEndDateRequest | null;
+  rehireQueryParams: StartAndEndDateRequest | null;
   missingCommaInPYName: PagedReportResponse<MissingCommasInPYName> | null;
   negativeEtvaForSSNsOnPayprofit: PagedReportResponse<NegativeEtvaForSSNsOnPayProfit> | null;
   negativeEtvaForSSNsOnPayprofitParams: ProfitYearRequest | null;
@@ -205,8 +205,8 @@ const initialState: YearsEndState = {
   forfeituresAndPointsQueryParams: null,
   grossWagesReport: null,
   grossWagesReportQueryParams: null,
-  militaryAndRehire: null,
-  militaryAndRehireQueryParams: null,
+  rehire: null,
+  rehireQueryParams: null,
   militaryEntryAndModification: null,
   rehireForfeitures: null,
   rehireForfeituresQueryParams: null,
@@ -386,7 +386,7 @@ export const yearsEndSlice = createSlice({
       // Military and Rehire Profit Summary
       // StartAndEndDateRequest does not have profitYear, so just clear the data if the year changes
       if (state.rehireProfitSummaryQueryParams) {
-        state.militaryAndRehire = null;
+        state.rehire = null;
       }
 
       // Year End Profit Sharing Report
@@ -562,28 +562,25 @@ export const yearsEndSlice = createSlice({
     clearForfeituresAndPointsQueryParams: (state) => {
       state.forfeituresAndPointsQueryParams = null;
     },
-    setMilitaryAndRehireProfitSummaryQueryParams: (state, action: PayloadAction<StartAndEndDateRequest>) => {
+    setRehireProfitSummaryQueryParams: (state, action: PayloadAction<StartAndEndDateRequest>) => {
       state.rehireProfitSummaryQueryParams = action.payload;
     },
     setEmployeesOnMilitaryLeaveDetails: (
       state,
       action: PayloadAction<PagedReportResponse<EmployeesOnMilitaryLeaveResponse>>
     ) => {
-      state.militaryAndRehire = action.payload;
+      state.rehire = action.payload;
     },
     clearEmployeesOnMilitaryLeaveDetails: (state) => {
-      state.militaryAndRehire = null;
+      state.rehire = null;
     },
-    setMilitaryAndRehireForfeituresDetails: (
-      state,
-      action: PayloadAction<PagedReportResponse<MilitaryAndRehireForfeiture>>
-    ) => {
+    setRehireForfeituresDetails: (state, action: PayloadAction<PagedReportResponse<RehireForfeiture>>) => {
       state.rehireForfeitures = action.payload;
     },
     clearRehireForfeituresDetails: (state) => {
       state.rehireForfeitures = null;
     },
-    setMilitaryAndRehireForfeituresQueryParams: (state, action: PayloadAction<StartAndEndDateRequest>) => {
+    setRehireForfeituresQueryParams: (state, action: PayloadAction<StartAndEndDateRequest>) => {
       state.rehireForfeituresQueryParams = action.payload;
     },
     clearRehireForfeituresQueryParams: (state) => {
@@ -1077,8 +1074,8 @@ export const {
   setForfeituresByAgeQueryParams,
   setGrossWagesReport,
   setGrossWagesReportQueryParams,
-  setMilitaryAndRehireForfeituresDetails,
-  setMilitaryAndRehireForfeituresQueryParams,
+  setRehireForfeituresDetails,
+  setRehireForfeituresQueryParams,
   setMissingCommaInPYName,
   setNegativeEtvaForSSNsOnPayprofit,
   setProfitMasterApply,

@@ -58,20 +58,20 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
 
     private IQueryable<BeneficiarySearchFilterResponse> GetBeneficiaryQuery(BeneficiarySearchFilterRequest request, ProfitSharingReadOnlyDbContext context)
     {
-        var query = context.Beneficiaries.Include(x => x.Contact).ThenInclude(x => x.Address).Include(x => x.Contact.ContactInfo)
+        var query = context.Beneficiaries.Include(x => x.Contact).ThenInclude(x => x!.Address).Include(x => x.Contact!.ContactInfo)
             .Where(x =>
             (request.BadgeNumber == null || x.BadgeNumber == request.BadgeNumber) &&
             (request.PsnSuffix == null || x.PsnSuffix == request.PsnSuffix) &&
-            (string.IsNullOrEmpty(request.Name) || EF.Functions.Like(x.Contact.ContactInfo.FullName.ToUpper(), $"%{request.Name.ToUpper()}%")) &&
-            (request.Ssn == null || x.Contact.Ssn == request.Ssn)
+            (string.IsNullOrEmpty(request.Name) || EF.Functions.Like(x.Contact!.ContactInfo!.FullName!.ToUpper(), $"%{request.Name.ToUpper()}%")) &&
+            (request.Ssn == null || x.Contact!.Ssn == request.Ssn)
             ).Select(x => new BeneficiarySearchFilterResponse()
             {
-                Ssn = x.Contact.Ssn.ToString(),
-                Age = DateTime.Now.Year - x.Contact.DateOfBirth.Year,
+                Ssn = x.Contact!.Ssn.ToString(),
+                Age = DateTime.Now.Year - x.Contact!.DateOfBirth.Year,
                 BadgeNumber = x.BadgeNumber,
                 PsnSuffix = x.PsnSuffix,
                 City = x.Contact.Address.City,
-                Name = x.Contact.ContactInfo.FullName,
+                Name = x.Contact!.ContactInfo!.FullName,
                 State = x.Contact.Address.State,
                 Street = x.Contact.Address.Street,
                 Zip = x.Contact.Address.PostalCode
@@ -104,7 +104,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
 
         foreach (var item in result.Result.Results)
         {
-            item.Ssn = !item.Ssn.Contains("X") ? item.Ssn.MaskSsn() : item.Ssn;
+            item.Ssn = !item.Ssn!.Contains("X") ? item.Ssn.MaskSsn() : item.Ssn;
         }
 
         return result.Result;
@@ -333,7 +333,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
             foreach (var item in beneficiary.Beneficiaries.Results)
             {
                 item.CurrentBalance = balanceList.Where(x => x.Id.ToString() == item.Ssn).Select(x => x.CurrentBalance).FirstOrDefault();
-                item.Ssn = item.Ssn.MaskSsn();
+                item.Ssn = item.Ssn!.MaskSsn();
             }
         }
 
@@ -345,7 +345,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
             foreach (var item in beneficiary.BeneficiaryOf.Results)
             {
                 item.CurrentBalance = balanceListBO.Where(x => x.Id.ToString() == item.Ssn).Select(x => x.CurrentBalance).FirstOrDefault();
-                item.Ssn = item.Ssn.MaskSsn();
+                item.Ssn = item.Ssn!.MaskSsn();
             }
         }
         return beneficiary;
@@ -361,16 +361,16 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
             IQueryable<BeneficiaryDetailResponse> query;
             if (request.PsnSuffix.HasValue && request.PsnSuffix > 0)
             {
-                query = context.Beneficiaries.Include(x => x.Contact).ThenInclude(x => x.Address).Include(x => x.Contact.ContactInfo)
+                query = context.Beneficiaries.Include(x => x.Contact).ThenInclude(x => x!.Address).Include(x => x.Contact!.ContactInfo)
                 .Where(x => x.BadgeNumber == request.BadgeNumber && x.PsnSuffix == request.PsnSuffix)
                 .Select(x => new BeneficiaryDetailResponse
                 {
-                    Name = x.Contact.ContactInfo.FullName,
+                    Name = x.Contact!.ContactInfo!.FullName,
                     BadgeNumber = x.BadgeNumber,
                     City = x.Contact.Address.City,
                     DateOfBirth = x.Contact.DateOfBirth,
                     PsnSuffix = x.PsnSuffix,
-                    Ssn = x.Contact.Ssn.ToString(),
+                    Ssn = x.Contact!.Ssn.ToString(),
                     State = x.Contact.Address.State,
                     Street = x.Contact.Address.Street,
                     Zip = x.Contact.Address.PostalCode
@@ -409,12 +409,12 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
             item.CurrentBalance = balanceList.Select(x => x.CurrentBalance).FirstOrDefault();
             if (request.PsnSuffix.HasValue && request.PsnSuffix > 0)
             {
-                item.Ssn = item.Ssn.MaskSsn();
+                item.Ssn = item.Ssn!.MaskSsn();
             }
         }
 
 
-        return result.FirstOrDefault();
+        return result.FirstOrDefault()!;
     }
 
     public async Task<BeneficiaryTypesResponseDto> GetBeneficiaryTypes(BeneficiaryTypesRequestDto beneficiaryTypesRequestDto, CancellationToken cancellation)

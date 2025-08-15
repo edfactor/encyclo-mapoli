@@ -1,8 +1,5 @@
 import { ICellRendererParams, IHeaderParams } from "ag-grid-community";
-import type { 
-  SortedPaginationRequestDto,
-  ProfitYearRequest 
-} from "../common/api";
+import type { SortedPaginationRequestDto, ProfitYearRequest } from "../common/api";
 
 export interface ForfeitureDetail extends ProfitYearRequest {
   forfeiture: number;
@@ -13,7 +10,7 @@ export interface ForfeitureDetail extends ProfitYearRequest {
   enrollmentName: string;
 }
 
-export interface MilitaryAndRehireForfeiture {
+export interface RehireForfeiture {
   badgeNumber: number;
   fullName: string;
   ssn: string;
@@ -39,6 +36,7 @@ export interface ForfeitureAdjustmentUpdateRequest {
   forfeitureAmount: number;
   classAction: boolean;
   profitYear: number;
+  offsettingProfitDetailId?: number;
 }
 
 export interface ForfeitureAdjustmentDetail {

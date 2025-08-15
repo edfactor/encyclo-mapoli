@@ -16,7 +16,7 @@ export function viewBadgeLinkRenderer(
   param2?: number | ((path: string) => void),
   param3?: (path: string) => void
 ): JSX.Element | number {
-  if (!badgeNumber || badgeNumber > 999999) return badgeNumber;
+  if (!badgeNumber || badgeNumber > 99999999999) return badgeNumber;
 
   let psnSuffix = 0;
   let navigateFunction: ((path: string) => void) | undefined = undefined;

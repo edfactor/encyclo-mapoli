@@ -18,7 +18,7 @@ const RehireForfeitures = () => {
   const [shouldArchive, setShouldArchive] = useState(false);
   const [fetchAccountingRange, { data: fiscalCalendarYear, isLoading: isRangeLoading }] =
     useLazyGetAccountingRangeToCurrent(6);
-  
+
   // removed: search gating on status change
 
   const renderActionNode = () => {
@@ -33,7 +33,7 @@ const RehireForfeitures = () => {
           if (isChangingToComplete) {
             setShouldArchive(true);
           }
-          
+
           // Update the previous status to track further changes
           setPreviousStatus(newStatus);
         }}
@@ -140,6 +140,7 @@ const RehireForfeitures = () => {
                   fiscalData={fiscalCalendarYear}
                   onSearch={handleSearch}
                   hasUnsavedChanges={hasUnsavedChanges}
+                  setHasUnsavedChanges={setHasUnsavedChanges}
                 />
               </DSMAccordion>
             </Grid>
