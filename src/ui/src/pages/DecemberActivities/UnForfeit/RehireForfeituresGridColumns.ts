@@ -5,7 +5,8 @@ import {
   createSSNColumn,
   createDateColumn,
   createCurrencyColumn,
-  createStoreColumn
+  createStoreColumn,
+  createCountColumn
 } from "utils/gridColumnFactory";
 
 export const GetRehireForfeituresGridColumns = (): ColDef[] => {
@@ -35,6 +36,10 @@ export const GetRehireForfeituresGridColumns = (): ColDef[] => {
       headerName: "Vested Balance",
       field: "vestedBalanceLastYear"
     }),
-    createStoreColumn({})
+    createStoreColumn({}),
+    createCountColumn({
+      headerName: "Years",
+      field: "companyContributionYears"
+    })
   ];
 };

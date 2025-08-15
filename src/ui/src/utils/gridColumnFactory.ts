@@ -315,6 +315,10 @@ export const createHoursColumn = (options: HoursColumnOptions = {}): ColDef => {
     resizable = true,
     alignment = "right",
     editable = false,
+    valueGetter = (params) => {
+      const value = params.data?.hours;
+      return value == null || value === 0 ? null : value;
+    },
     valueFormatter = (params) => {
       const value = params.value;
       if (value == null || value === "") return ""; // keep empty display consistent
@@ -342,6 +346,10 @@ export const createHoursColumn = (options: HoursColumnOptions = {}): ColDef => {
 
   if (maxWidth) {
     column.maxWidth = maxWidth;
+  }
+
+  if (valueGetter) {
+    column.valueGetter = valueGetter;
   }
 
   column.editable = editable;

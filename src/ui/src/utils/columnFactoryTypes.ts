@@ -1,4 +1,4 @@
-import { ValueFormatterParams } from "ag-grid-community";
+import { ValueFormatterParams, ValueGetterParams } from "ag-grid-community";
 
 export interface SSNColumnOptions {
   headerName?: string;
@@ -101,6 +101,7 @@ export interface HoursColumnOptions {
   resizable?: boolean;
   alignment?: "left" | "center" | "right";
   editable?: boolean;
+  valueGetter?: (params: ValueGetterParams) => string;
   valueFormatter?: (params: ValueFormatterParams) => string;
 }
 

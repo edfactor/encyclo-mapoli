@@ -26,7 +26,13 @@ export const GetProfitDetailColumns = (
       field: "profitYear"
     }),
     createHoursColumn({
-      field: "hoursCurrentYear"
+      field: "hoursCurrentYear",
+      valueGetter: (params) => {
+        // I think showing 0 is visually noisy, so I'm suppressing that.   Especially since we will not have the
+        // actual hours for our initial year - 1.
+        const value = params.data?.hoursCurrentYear;
+        return value == null || value == 0 ? null : value;
+      }
     }),
     createCurrencyColumn({
       headerName: "Wages",
