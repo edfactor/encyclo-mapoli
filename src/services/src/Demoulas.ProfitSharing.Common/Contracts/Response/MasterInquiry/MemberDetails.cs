@@ -2,7 +2,7 @@
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
-using Demoulas.ProfitSharing.Common.Contracts.Shared;
+using Shared;
 
 public record MemberDetails : IdRequest, INameParts, IFullNameProperty, IPhoneNumber
 {

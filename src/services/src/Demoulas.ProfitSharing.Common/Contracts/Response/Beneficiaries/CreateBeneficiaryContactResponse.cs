@@ -1,7 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Attributes;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.Beneficiaries;
-using Demoulas.ProfitSharing.Common.Contracts.Shared;
+using Shared;
 public sealed record CreateBeneficiaryContactResponse : INameParts, IEmailAddress, IPhoneNumber, ICity
 {
     public required int Id { get; set; }

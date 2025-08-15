@@ -1,6 +1,6 @@
 ﻿using Demoulas.ProfitSharing.Data.Entities;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
 public sealed class CountryMap : IEntityTypeConfiguration<Country>

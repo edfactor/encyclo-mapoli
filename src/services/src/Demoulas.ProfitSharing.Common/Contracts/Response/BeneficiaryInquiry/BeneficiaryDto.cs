@@ -1,7 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.BeneficiaryInquiry;
-using Demoulas.ProfitSharing.Common.Contracts.Shared;
+using Shared;
 public partial record BeneficiaryDto : IdRequest, INameParts, IFullNameProperty, IPhoneNumber, IEmailAddress, ICity
 {
     public required short PsnSuffix { get; set; } // Suffix for hierarchy (1000, 2000, etc.)

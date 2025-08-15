@@ -12,8 +12,8 @@ public class NavigationService : INavigationService
 
     public NavigationService(IProfitSharingDataContextFactory dataContextFactory, IAppUser appUser)
     {
-        this._dataContextFactory = dataContextFactory;
-        this._appUser = appUser;
+        _dataContextFactory = dataContextFactory;
+        _appUser = appUser;
     }
 
 

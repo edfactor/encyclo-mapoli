@@ -1,5 +1,5 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
-using Demoulas.ProfitSharing.Common.Contracts.Shared;
+using Shared;
 public sealed record CreateBeneficiaryContactRequest : INameParts, IPhoneNumber, IEmailAddress, ICity
 {
     public required int ContactSsn { get; set; }

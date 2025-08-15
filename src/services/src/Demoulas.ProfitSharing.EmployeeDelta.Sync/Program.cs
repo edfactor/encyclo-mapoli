@@ -9,7 +9,6 @@ using Demoulas.ProfitSharing.Data.Extensions;
 using Demoulas.ProfitSharing.Data.Interceptors;
 using Demoulas.ProfitSharing.OracleHcm.Extensions;
 using Demoulas.Util.Extensions;
-using Serilog.Enrichers.Sensitive;
 
 var builder = Host.CreateApplicationBuilder(args);
 

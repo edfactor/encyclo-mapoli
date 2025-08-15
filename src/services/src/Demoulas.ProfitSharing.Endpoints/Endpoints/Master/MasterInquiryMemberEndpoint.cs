@@ -1,5 +1,4 @@
-﻿using Demoulas.Common.Contracts.Contracts.Response;
-using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;

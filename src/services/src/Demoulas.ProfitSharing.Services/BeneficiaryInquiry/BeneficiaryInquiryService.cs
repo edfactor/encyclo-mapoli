@@ -1,7 +1,4 @@
-﻿using System.Dynamic;
-using System.Linq;
-using System.Threading;
-using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Request.BeneficiaryInquiry;
@@ -14,7 +11,6 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Demoulas.ProfitSharing.Services.BeneficiaryInquiry;
 public class BeneficiaryInquiryService : IBeneficiaryInquiryService

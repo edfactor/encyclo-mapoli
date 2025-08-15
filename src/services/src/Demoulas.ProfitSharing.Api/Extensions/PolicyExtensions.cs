@@ -1,5 +1,4 @@
-﻿using System.Numerics;
-using Demoulas.ProfitSharing.Security;
+﻿using Demoulas.ProfitSharing.Security;
 
 namespace Demoulas.ProfitSharing.Api.Extensions;
 

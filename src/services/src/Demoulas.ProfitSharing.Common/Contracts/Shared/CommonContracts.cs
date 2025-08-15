@@ -1,23 +1,20 @@
-using System.Linq;
-using Demoulas.ProfitSharing.Common.Attributes;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Shared;
 
 // Granular interfaces so DTOs can opt-in without altering existing property names/shapes.
 // Note: FirstName/LastName modeled as non-nullable to satisfy DTOs that mark them 'required'.
 // DTOs that truly allow null can still implement by permitting null assignment (compiler will warn if misused).
-public interface IFirstName { string FirstName { get; } }
-public interface ILastName { string LastName { get; } }
-public interface IMiddleName { string? MiddleName { get; } }
-public interface IFullNameProperty { string? FullName { get; } }
-public interface IPhoneNumber { string? PhoneNumber { get; } }
-public interface IEmailAddress { string? EmailAddress { get; } }
-public interface ICity { string? City { get; } }
-public interface IAddressLine { string? Address { get; set; } } // distinct from Address1
-public interface IAddressLine1 { string? Address1 { get; set; } }
+public interface IFirstName { [MaskSensitive]string FirstName { get; } }
+public interface ILastName { [MaskSensitive] string LastName { get; } }
+public interface IMiddleName { [MaskSensitive] string? MiddleName { get; } }
+public interface IFullNameProperty { [MaskSensitive] string? FullName { get; } }
+public interface IPhoneNumber { [MaskSensitive] string? PhoneNumber { get; } }
+public interface IEmailAddress { [MaskSensitive] string? EmailAddress { get; } }
+public interface ICity { [MaskSensitive] string? City { get; } }
 
 // Grouping marker
-public interface INameParts : IFirstName, ILastName, IMiddleName {}
+public interface INameParts : IFirstName, ILastName, IMiddleName;
 
 public static class DtoCommonExtensions
 {
@@ -30,6 +27,7 @@ public static class DtoCommonExtensions
         {
             return string.Join(", ", new[] { last, firstBlock }.Where(s => !string.IsNullOrWhiteSpace(s)));
         }
+
         return string.Join(" ", new[] { firstBlock, last }.Where(s => !string.IsNullOrWhiteSpace(s)));
     }
 

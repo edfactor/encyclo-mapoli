@@ -1,7 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Attributes;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response;
-using Demoulas.ProfitSharing.Common.Contracts.Shared;
+using Shared;
 public record ContactInfoResponseDto : INameParts, IFullNameProperty, IPhoneNumber, IEmailAddress
 {
     [MaskSensitive] public string? FullName { get; set; }
