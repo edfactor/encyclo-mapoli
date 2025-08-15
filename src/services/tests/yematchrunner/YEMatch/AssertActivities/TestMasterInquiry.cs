@@ -53,7 +53,7 @@ public class TestMasterInquiry : BaseSqlActivity
         int profitYear = 2025;
         int quantity = int.MaxValue;
 
-        Console.WriteLine($"### Comparision of READY (local) MasterInquiry vs SMART (profitYear={profitYear})");
+        Console.WriteLine($"### Comparison of READY (local) MasterInquiry vs SMART (profitYear={profitYear})");
         Console.WriteLine("");
         Console.WriteLine($"Showing the first {quantity} differences of {outties.Count} Master Inquiry screen dumps.");
         Console.WriteLine("");
