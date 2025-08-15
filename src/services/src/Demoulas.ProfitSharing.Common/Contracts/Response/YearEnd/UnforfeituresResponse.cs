@@ -8,7 +8,7 @@ namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 public sealed record UnforfeituresResponse
 {
     public required int BadgeNumber { get; set; }
-    public required string? FullName { get; set; }
+    [MaskSensitive] public required string? FullName { get; set; }
     public required string Ssn { get; set; }
     public required DateOnly ReHiredDate { get; set; }
     public required DateOnly HireDate { get; set; }

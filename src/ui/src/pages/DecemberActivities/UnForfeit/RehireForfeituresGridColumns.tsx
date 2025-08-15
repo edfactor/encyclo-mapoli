@@ -12,7 +12,7 @@ import {
   RehireForfeituresSaveButtonCellParams
 } from "../../../reduxstore/types";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
-import { createSSNColumn, createBadgeColumn, createStoreColumn } from "../../../utils/gridColumnFactory";
+import { createSSNColumn, createBadgeColumn, createStoreColumn, createCurrencyColumn } from "../../../utils/gridColumnFactory";
 
 export const HeaderComponent: React.FC<RehireForfeituresHeaderComponentProps> = (params: RehireForfeituresHeaderComponentProps) => {
   const selectedProfitYear = useDecemberFlowProfitYear();
@@ -36,7 +36,8 @@ export const HeaderComponent: React.FC<RehireForfeituresHeaderComponentProps> = 
     return {
       badgeNumber: nodeData.badgeNumber,
       profitYear: nodeData.profitYear,
-      forfeitureAmount: -(currentValue || 0)
+      forfeitureAmount: -(currentValue || 0),
+      classAction: false
     };
   };
 
@@ -55,7 +56,7 @@ export const HeaderComponent: React.FC<RehireForfeituresHeaderComponentProps> = 
 
 export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
   return [
-    createBadgeColumn({ 
+    createBadgeColumn({
       headerName: "Badge",
       minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
       alignment: "left"
@@ -87,26 +88,16 @@ export const GetMilitaryAndRehireForfeituresColumns = (): ColDef[] => {
         return mmDDYYFormat(date);
       }
     },
-    {
+    createCurrencyColumn({
       headerName: "Current Balance",
       field: "netBalanceLastYear",
-      colId: "netBalanceLastYear",
-      minWidth: 70,
-      type: "rightAligned",
-      resizable: true,
-      sortable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+      minWidth: 70
+    }),
+    createCurrencyColumn({
       headerName: "Vested Balance",
       field: "vestedBalanceLastYear",
-      colId: "vestedBalanceLastYear",
-      minWidth: 150,
-      type: "rightAligned",
-      resizable: true,
-      sortable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
+      minWidth: 150
+    }),
     createStoreColumn({
       maxWidth: 80,
       alignment: "left",
@@ -149,7 +140,7 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
         // I think showing 0 is visually noisy, so I'm suppressing that.   Especially since we will not have the
         // actual hours for our initial year - 1.
         const value = params.data?.hoursCurrentYear;
-        return (value==null || value == 0) ? null : value;
+        return (value == null || value == 0) ? null : value;
       },
       valueFormatter: (params) => {
         const hours = params.value;
@@ -157,22 +148,11 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
         return formatNumberWithComma(hours);
       }
     },
-    {
+    createCurrencyColumn({
       headerName: "Wages",
       field: "wages",
-      colId: "wages",
-      width: 120,
-      type: "rightAligned",
-      resizable: true,
-      sortable: true,
-      valueGetter: (params) => {
-        // I think showing 0 is visually noisy, so I'm suppressing that.   Especially since we will not have the
-        // actual hours for our initial year - 1.
-        const value = params.data?.wages;
-        return (value==null || value == 0) ? null : value;
-      },
-      valueFormatter: agGridNumberToCurrency
-    },
+      minWidth: 150
+    }),
     {
       headerName: "Enrollment",
       width: 120,
@@ -182,22 +162,17 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
       sortable: true,
       valueGetter: (params) => {
         const id = params.data?.enrollmentId;
-        if(id == null)
+        if (id == null)
           return "";
         const name = params.data?.enrollmentName;
         return `[${id}] ${name}`;
       }
     },
-    {
+    createCurrencyColumn({
       headerName: "Forfeiture",
       field: "forfeiture",
-      colId: "forfeiture",
-      width: 150,
-      type: "rightAligned",
-      resizable: true,
-      sortable: false,
-      valueFormatter: agGridNumberToCurrency
-    },
+      minWidth: 150
+    }),
     {
       headerName: "Suggested Unforfeiture",
       field: "suggestedForfeit",
@@ -261,26 +236,27 @@ export const GetDetailColumns = (addRowToSelectedRows: (id: number) => void, rem
         const isLoading = params.context?.loadingRowIds?.has(params.data.badgeNumber);
 
         return <div>
-          <Checkbox 
-            checked={isSelected} 
+          <Checkbox
+            checked={isSelected}
             disabled={(currentValue || 0) === 0}
             onChange={() => {
-            if (isSelected) {
-              params.removeRowFromSelectedRows(id);
-              params.node?.setSelected(false);
-            } else {
-              params.addRowToSelectedRows(id);
-              params.node?.setSelected(true);
-            }
-            params.api.refreshCells({ force: true });
-          }} />
-          <IconButton 
+              if (isSelected) {
+                params.removeRowFromSelectedRows(id);
+                params.node?.setSelected(false);
+              } else {
+                params.addRowToSelectedRows(id);
+                params.node?.setSelected(true);
+              }
+              params.api.refreshCells({ force: true });
+            }} />
+          <IconButton
             onClick={async () => {
               if (params.data.isDetail && params.onSave) {
                 const request: ForfeitureAdjustmentUpdateRequest = {
                   badgeNumber: params.data.badgeNumber,
                   profitYear: params.data.profitYear,
-                  forfeitureAmount: -(currentValue || 0)
+                  forfeitureAmount: -(currentValue || 0),
+                  classAction: params.data.classAction
                 };
                 await params.onSave(request);
               }

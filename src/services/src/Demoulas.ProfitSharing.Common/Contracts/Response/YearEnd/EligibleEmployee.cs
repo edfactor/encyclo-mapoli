@@ -1,10 +1,12 @@
 ﻿
+using Demoulas.ProfitSharing.Common.Attributes;
+
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
 public sealed record  EligibleEmployee {
     public required long OracleHcmId { get; set; }
     public required int BadgeNumber { get; set; }
-    public required string FullName { get; set; }
+    [MaskSensitive] public required string FullName { get; set; }
     public byte DepartmentId { get; set; }
     public string? Department { get; set; }
     public short StoreNumber { get; set; }
