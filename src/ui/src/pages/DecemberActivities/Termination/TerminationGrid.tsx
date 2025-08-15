@@ -174,7 +174,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
         setExpandedRows(initialExpandState);
       }
     }
-  }, [expandedRows, termination.response.results]);
+  }, [termination?.response?.results]);
 
   // Helper to build a unique key for current request inputs
   const buildRequestKey = useCallback(
