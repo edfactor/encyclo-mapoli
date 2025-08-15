@@ -44,8 +44,9 @@ const schema = yup.object().shape({
       sortBy: yup.string().required(),
       isSortDescending: yup.boolean().required()
     })
-    .required()
-  //profitYear: yup.number().required("Profit year is required")
+    .required(),
+  // Hidden field: not shown in search filter, but required in data
+  profitYear: yup.number().required("Profit year is required")
 });
 
 interface RehireForfeituresSearchFilterProps {
@@ -105,7 +106,8 @@ const RehireForfeituresSearchFilter: React.FC<RehireForfeituresSearchFilterProps
       beginningDate: rehireForfeituresQueryParams?.beginningDate || fiscalData.fiscalBeginDate || undefined,
       endingDate: rehireForfeituresQueryParams?.endingDate || fiscalData.fiscalEndDate || undefined,
       excludeZeroBalance: rehireForfeituresQueryParams?.excludeZeroBalance || false,
-      pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }
+      pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true },
+      profitYear: selectedProfitYear
     }
   });
 
