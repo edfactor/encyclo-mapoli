@@ -28,7 +28,21 @@ public sealed class SensitiveValueMaskingMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
-        if (!context.User.IsInRole(Role.ITDEVOPS))
+        // Apply masking ONLY when the user is exclusively in the ITDEVOPS role.
+        // If the user is not ITDEVOPS or has ITDEVOPS plus any other role, skip masking.
+        bool hasItDevOps = context.User.IsInRole(Role.ITDEVOPS);
+        if (!hasItDevOps)
+        {
+            await _next(context);
+            return;
+        }
+
+        // Detect any additional role claims besides ITDEVOPS.
+        bool hasOtherRole = context.User.Claims.Any(c =>
+            (c.Type == System.Security.Claims.ClaimTypes.Role || c.Type.Equals("role", StringComparison.OrdinalIgnoreCase)) &&
+            !string.Equals(c.Value, Role.ITDEVOPS, StringComparison.OrdinalIgnoreCase));
+
+        if (hasOtherRole)
         {
             await _next(context);
             return;
