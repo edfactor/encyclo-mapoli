@@ -1,7 +1,7 @@
 import { ColDef, ICellRendererParams, IHeaderParams } from "ag-grid-community";
 import { agGridNumberToCurrency, formatNumberWithComma } from "smart-ui-library";
-import { createBadgeColumn, createAgeColumn } from "../../../utils/gridColumnFactory";
-import { getForfeitedStatus} from "../../../utils/enrollmentUtil";
+import { createBadgeColumn, createAgeColumn, createCurrencyColumn } from "../../../utils/gridColumnFactory";
+import { getForfeitedStatus } from "../../../utils/enrollmentUtil";
 import { mmDDYYFormat } from "utils/dateUtils";
 import { Checkbox, IconButton, CircularProgress } from "@mui/material";
 import { SaveOutlined } from "@mui/icons-material";
@@ -10,9 +10,10 @@ import { SuggestedForfeitEditor, SuggestedForfeitCellRenderer } from "../../../c
 import { SelectableGridHeader } from "../../../components/SelectableGridHeader";
 import { ForfeitureAdjustmentUpdateRequest } from "../../../reduxstore/types";
 
+
 export const GetTerminationColumns = (): ColDef[] => {
   return [
-    createBadgeColumn({ 
+    createBadgeColumn({
       headerName: "Badge",
       minWidth: 100,
       alignment: "left",
@@ -35,11 +36,11 @@ export const GetTerminationColumns = (): ColDef[] => {
 
 // Separate function for detail columns that will be used for master-detail view
 export const GetDetailColumns = (
-  addRowToSelectedRows: (id: number) => void, 
-  removeRowFromSelectedRows: (id: number) => void, 
-  selectedRowIds: number[], 
-  selectedProfitYear: number, 
-  onSave?: (request: ForfeitureAdjustmentUpdateRequest) => Promise<void>, 
+  addRowToSelectedRows: (id: number) => void,
+  removeRowFromSelectedRows: (id: number) => void,
+  selectedRowIds: number[],
+  selectedProfitYear: number,
+  onSave?: (request: ForfeitureAdjustmentUpdateRequest) => Promise<void>,
   onBulkSave?: (requests: ForfeitureAdjustmentUpdateRequest[]) => Promise<void>
 ): ColDef[] => {
   return [
@@ -52,66 +53,36 @@ export const GetDetailColumns = (
       resizable: true,
       sortable: false
     },
-    {
+    createCurrencyColumn({
       headerName: "Beginning Balance",
       field: "beginningBalance",
-      colId: "beginningBalance",
-      width: 150,
-      type: "rightAligned",
-      resizable: true,
-      sortable: false,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+      minWidth: 150
+    }),
+    createCurrencyColumn({
       headerName: "Beneficiary Allocation",
       field: "beneficiaryAllocation",
-      colId: "beneficiaryAllocation",
-      width: 150,
-      type: "rightAligned",
-      resizable: true,
-      sortable: false,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+      minWidth: 150
+    }),
+    createCurrencyColumn({
       headerName: "Distribution Amount",
       field: "distributionAmount",
-      colId: "distributionAmount",
-      width: 150,
-      type: "rightAligned",
-      resizable: true,
-      sortable: false,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+      minWidth: 150
+    }),
+    createCurrencyColumn({
       headerName: "Forfeit Amount",
       field: "forfeit",
-      colId: "forfeit",
-      width: 125,
-      type: "rightAligned",
-      resizable: true,
-      sortable: false,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+      minWidth: 150
+    }),
+    createCurrencyColumn({
       headerName: "Ending Balance",
       field: "endingBalance",
-      colId: "endingBalance",
-      width: 150,
-      type: "rightAligned",
-      resizable: true,
-      sortable: false,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+      minWidth: 150
+    }),
+    createCurrencyColumn({
       headerName: "Vested Balance",
       field: "vestedBalance",
-      colId: "vestedBalance",
-      width: 150,
-      type: "rightAligned",
-      resizable: true,
-      sortable: false,
-      valueFormatter: agGridNumberToCurrency
-    },
+      minWidth: 150
+    }),
     {
       headerName: "Vested %",
       field: "vestedPercent",
@@ -273,12 +244,6 @@ interface SaveButtonCellParams extends ICellRendererParams {
   onSave?: (request: ForfeitureAdjustmentUpdateRequest) => Promise<void>;
 }
 
-interface UpdatePayload {
-  badgeNumber: string;
-  profitYear: number;
-  suggestedForfeit: number;
-}
-
 export const HeaderComponent: React.FC<HeaderComponentProps> = (params: HeaderComponentProps) => {
   const selectedProfitYear = useDecemberFlowProfitYear();
 
@@ -296,7 +261,8 @@ export const HeaderComponent: React.FC<HeaderComponentProps> = (params: HeaderCo
     return {
       badgeNumber: nodeData.badgeNumber,
       profitYear: nodeData.profitYear,
-      forfeitureAmount: -(currentValue || 0)
+      forfeitureAmount: -(currentValue || 0),
+      classAction: false,
     };
   };
 
