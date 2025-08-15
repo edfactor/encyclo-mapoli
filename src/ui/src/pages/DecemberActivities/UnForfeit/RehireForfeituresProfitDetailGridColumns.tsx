@@ -151,7 +151,7 @@ export const GetProfitDetailColumns = (
                   await params.onSave(request);
                 }
               }}
-              disabled={params.data.remark === "REMARK CA" || hasError || (currentValue || 0) === 0 || isLoading}>
+              disabled={params.data.remark === "FORFEIT CA" || hasError || (currentValue || 0) === 0 || isLoading}>
               {isLoading ? <CircularProgress size={20} /> : <SaveOutlined />}
             </IconButton>
           </div>
