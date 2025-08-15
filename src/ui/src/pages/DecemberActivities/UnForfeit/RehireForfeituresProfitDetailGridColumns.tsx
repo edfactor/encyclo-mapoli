@@ -3,7 +3,13 @@ import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { SuggestedForfeitEditor, SuggestedForfeitCellRenderer } from "components/SuggestedForfeiture";
 import { agGridNumberToCurrency } from "smart-ui-library";
 import { ForfeitureAdjustmentUpdateRequest, RehireForfeituresSaveButtonCellParams } from "types";
-import { createYearColumn, createHoursColumn, createCurrencyColumn, createCountColumn } from "utils/gridColumnFactory";
+import {
+  createYearColumn,
+  createHoursColumn,
+  createCurrencyColumn,
+  createCountColumn,
+  createCommentColumn
+} from "utils/gridColumnFactory";
 import { HeaderComponent } from "./RehireForfeituresHeaderComponent";
 import { SaveOutlined } from "@mui/icons-material";
 
@@ -20,7 +26,6 @@ export const GetProfitDetailColumns = (
       field: "profitYear"
     }),
     createHoursColumn({
-      headerName: "Hours",
       field: "hoursCurrentYear"
     }),
     createCurrencyColumn({
@@ -69,16 +74,10 @@ export const GetProfitDetailColumns = (
         return editedValue !== undefined ? editedValue : params.data.suggestedForfeit;
       }
     },
-    {
+    createCommentColumn({
       headerName: "Remark",
-      field: "remark",
-      colId: "remark",
-      width: 150,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      sortable: false
-    },
+      field: "remark"
+    }),
     {
       headerName: "Save Button",
       field: "saveButton",
@@ -104,6 +103,7 @@ export const GetProfitDetailColumns = (
         if (!params.data.isDetail || params.data.profitYear !== selectedProfitYear) {
           return "";
         }
+
         const id = Number(params.node?.id) || -1;
         const isSelected = params.node?.isSelected() || false;
         const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}${params.data.enrollmentId ? `-${params.data.enrollmentId}` : ""}-${params.node?.id || "unknown"}`;

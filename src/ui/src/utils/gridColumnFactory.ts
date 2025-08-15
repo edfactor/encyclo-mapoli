@@ -13,7 +13,8 @@ import {
   StatusColumnOptions,
   CountColumnOptions,
   ZipColumnOptions,
-  YearColumnOptions
+  YearColumnOptions,
+  CommentColumnOptions
 } from "./columnFactoryTypes";
 import { viewBadgeLinkRenderer } from "./masterInquiryLink";
 
@@ -121,6 +122,10 @@ export const createCurrencyColumn = (options: CurrencyColumnOptions): ColDef => 
 
   if (maxWidth) {
     column.maxWidth = maxWidth;
+  }
+
+  if (valueFormatter) {
+    column.valueFormatter = valueFormatter;
   }
 
   return column;
@@ -248,6 +253,44 @@ export const createNameColumn = (options: NameColumnOptions = {}): ColDef => {
     cellClass: alignmentClass,
     resizable,
     sortable
+  };
+
+  if (maxWidth) {
+    column.maxWidth = maxWidth;
+  }
+
+  if (valueFormatter) {
+    column.valueFormatter = valueFormatter;
+  }
+
+  return column;
+};
+
+export const createCommentColumn = (options: CommentColumnOptions = {}): ColDef => {
+  const {
+    headerName = "Comment",
+    field = "comment",
+    colId = field,
+    minWidth = 200,
+    maxWidth,
+    alignment = "left",
+    sortable = true,
+    resizable = true,
+    valueFormatter
+  } = options;
+
+  const alignmentClass = alignment === "center" ? "center-align" : "left-align";
+
+  const column: ColDef = {
+    headerName,
+    field,
+    colId,
+    minWidth,
+    headerClass: alignmentClass,
+    cellClass: alignmentClass,
+    resizable,
+    sortable,
+    valueFormatter
   };
 
   if (maxWidth) {

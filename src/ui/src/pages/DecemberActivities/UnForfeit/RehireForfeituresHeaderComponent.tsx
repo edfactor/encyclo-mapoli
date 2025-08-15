@@ -1,26 +1,6 @@
-import { SaveOutlined } from "@mui/icons-material";
-import { Checkbox, CircularProgress, IconButton } from "@mui/material";
-import { ColDef, ICellRendererParams } from "ag-grid-community";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
-import { agGridNumberToCurrency } from "smart-ui-library";
 import { SelectableGridHeader } from "../../../components/SelectableGridHeader";
-import { SuggestedForfeitCellRenderer, SuggestedForfeitEditor } from "../../../components/SuggestedForfeiture";
-import {
-  ForfeitureAdjustmentUpdateRequest,
-  RehireForfeituresHeaderComponentProps,
-  RehireForfeituresSaveButtonCellParams
-} from "../../../reduxstore/types";
-import {
-  createBadgeColumn,
-  createCountColumn,
-  createCurrencyColumn,
-  createDateColumn,
-  createHoursColumn,
-  createNameColumn,
-  createSSNColumn,
-  createStoreColumn,
-  createYearColumn
-} from "../../../utils/gridColumnFactory";
+import { ForfeitureAdjustmentUpdateRequest, RehireForfeituresHeaderComponentProps } from "../../../reduxstore/types";
 
 export const HeaderComponent: React.FC<RehireForfeituresHeaderComponentProps> = (
   params: RehireForfeituresHeaderComponentProps
@@ -64,35 +44,4 @@ export const HeaderComponent: React.FC<RehireForfeituresHeaderComponentProps> = 
       isBulkSaving={hasSavingInProgress}
     />
   );
-};
-
-export const GetRehireForfeituresColumns = (): ColDef[] => {
-  return [
-    createBadgeColumn({}),
-    createNameColumn({
-      field: "fullName"
-    }),
-    createSSNColumn({}),
-    createDateColumn({
-      headerName: "Hire Date",
-      field: "hireDate"
-    }),
-    createDateColumn({
-      headerName: "Termination Date",
-      field: "terminationDate"
-    }),
-    createDateColumn({
-      headerName: "Rehired Date",
-      field: "reHiredDate"
-    }),
-    createCurrencyColumn({
-      headerName: "Current Balance",
-      field: "netBalanceLastYear"
-    }),
-    createCurrencyColumn({
-      headerName: "Vested Balance",
-      field: "vestedBalanceLastYear"
-    }),
-    createStoreColumn({})
-  ];
 };
