@@ -37,6 +37,7 @@ public class EnvironmentHealthCheck : IHealthCheck
             { "Environment", _env.EnvironmentName },
             { "ApplicationName", _env.ApplicationName },
             { "MachineName", Environment.MachineName },
+            { "WorkingSet", Environment.WorkingSet },
             { "OSVersion", Environment.OSVersion.ToString() },
             { "Framework", RuntimeInformation.FrameworkDescription },
             { "AppVersion", _appVersion.BuildNumber },

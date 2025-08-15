@@ -1,5 +1,5 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { agGridNumberToCurrency, yyyyMMDDToMMDDYYYY, formatNumberWithComma } from "smart-ui-library";
+import { agGridNumberToCurrency, yyyyMMDDToMMDDYYYY, formatNumberWithComma, numberToCurrency } from "smart-ui-library";
 import { GRID_COLUMN_WIDTHS } from "../constants";
 import {
   BadgeColumnOptions,
@@ -106,7 +106,7 @@ export const createCurrencyColumn = (options: CurrencyColumnOptions): ColDef => 
     maxWidth,
     sortable = true,
     resizable = true,
-    valueFormatter = agGridNumberToCurrency
+    valueFormatter = (params) => numberToCurrency(params.value)
   } = options;
 
   const column: ColDef = {
@@ -315,7 +315,18 @@ export const createHoursColumn = (options: HoursColumnOptions = {}): ColDef => {
     resizable = true,
     alignment = "right",
     editable = false,
-    valueFormatter = (params) => formatNumberWithComma(params.value)
+    valueFormatter = (params) => {
+      const value = params.value;
+      if (value == null || value === "") return ""; // keep empty display consistent
+      // If it's already a string (even if numeric-like), return as-is per requirement
+      if (typeof value === "string") return value;
+      // Only format when it's an actual number
+      if (typeof value === "number" && !isNaN(value)) {
+        return formatNumberWithComma(value);
+      }
+      // Fallback: attempt not to break – convert other types to string
+      return String(value);
+    }
   } = options;
 
   const column: ColDef = {

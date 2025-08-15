@@ -18,8 +18,6 @@ public sealed record MasterInquiryResponseDto : IdRequest
     public short YearToDate { get; set; }
     public string? Remark { get; set; }
     public byte? ZeroContributionReasonId { get; set; }
-
-    [Unmask]
     public decimal FederalTaxes { get; set; }
     public decimal StateTaxes { get; set; }
     public char? TaxCodeId { get; set; }
