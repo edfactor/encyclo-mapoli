@@ -1,20 +1,20 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { agGridNumberToCurrency, yyyyMMDDToMMDDYYYY, formatNumberWithComma, numberToCurrency } from "smart-ui-library";
+import { agGridNumberToCurrency, formatNumberWithComma, yyyyMMDDToMMDDYYYY } from "smart-ui-library";
 import { GRID_COLUMN_WIDTHS } from "../constants";
 import {
-  BadgeColumnOptions,
-  SSNColumnOptions,
-  CurrencyColumnOptions,
   AgeColumnOptions,
-  DateColumnOptions,
-  StoreColumnOptions,
-  NameColumnOptions,
-  HoursColumnOptions,
-  StatusColumnOptions,
+  BadgeColumnOptions,
+  CommentColumnOptions,
   CountColumnOptions,
-  ZipColumnOptions,
+  CurrencyColumnOptions,
+  DateColumnOptions,
+  HoursColumnOptions,
+  NameColumnOptions,
+  SSNColumnOptions,
+  StatusColumnOptions,
+  StoreColumnOptions,
   YearColumnOptions,
-  CommentColumnOptions
+  ZipColumnOptions
 } from "./columnFactoryTypes";
 import { viewBadgeLinkRenderer } from "./masterInquiryLink";
 
@@ -86,11 +86,15 @@ export const createBadgeColumn = (options: BadgeColumnOptions = {}): ColDef => {
 
   if (renderAsLink) {
     column.cellRenderer = (params: ICellRendererParams) => {
+      // We could get a PSN as a string
+      const dataValue: number = field === "badgeNumber" ? params.data.badgeNumber : Number(params.data[field]);
+      // If dataValue is NaN just return nothing
+      if (isNaN(dataValue)) return;
       if (psnSuffix && params.data.psnSuffix) {
         return viewBadgeLinkRenderer(params.data.badgeNumber, params.data.psnSuffix, navigateFunction);
       }
-      const badgeValue = field === "badgeNumber" ? params.data.badgeNumber : params.data[field];
-      return viewBadgeLinkRenderer(badgeValue, navigateFunction);
+
+      return viewBadgeLinkRenderer(dataValue, navigateFunction);
     };
   }
 
@@ -106,7 +110,7 @@ export const createCurrencyColumn = (options: CurrencyColumnOptions): ColDef => 
     maxWidth,
     sortable = true,
     resizable = true,
-    valueFormatter = (params) => numberToCurrency(params.value)
+    valueFormatter = agGridNumberToCurrency
   } = options;
 
   const column: ColDef = {
