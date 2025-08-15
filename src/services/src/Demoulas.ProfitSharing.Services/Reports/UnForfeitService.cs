@@ -85,6 +85,7 @@ public sealed class UnForfeitService : IUnForfeitService
                     Details = g.Select(x => new MilitaryRehireProfitSharingDetailResponse
                     {
                         ProfitYear = x.pp.ProfitYear,
+                        ProfitDetailId = x.pd.Id,
                         HoursCurrentYear = x.pp.CurrentHoursYear,
                         EnrollmentName = x.pp.Enrollment!.Name,
                         EnrollmentId = x.pp.EnrollmentId,

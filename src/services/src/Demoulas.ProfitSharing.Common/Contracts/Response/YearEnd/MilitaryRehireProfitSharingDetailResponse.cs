@@ -1,4 +1,5 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+
 public sealed record MilitaryRehireProfitSharingDetailResponse
 {
     public required short ProfitYear { get; set; }
@@ -10,4 +11,9 @@ public sealed record MilitaryRehireProfitSharingDetailResponse
     public byte ProfitCodeId { get; set; }
     public decimal Wages { get; set; }
     public decimal? SuggestedForfeiture { get; set; }
+
+    // Need a property for the profit detail id from the PROFIT_DETAIL database table
+    public int ProfitDetailId { get; set; }
+
+    
 }
