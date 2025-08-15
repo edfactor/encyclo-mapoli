@@ -7,7 +7,7 @@ import { useLazyGetRehireForfeituresQuery } from "reduxstore/api/YearsEndApi";
 import {
   clearRehireForfeituresDetails,
   clearRehireForfeituresQueryParams,
-  setMilitaryAndRehireForfeituresQueryParams
+  setRehireForfeituresQueryParams
 } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import { SearchAndReset } from "smart-ui-library";
@@ -26,17 +26,16 @@ const schema = yup.object().shape({
     .test("date-range", "Ending date must be the same or after the beginning date", function (value) {
       const { beginningDate } = this.parent;
       if (!beginningDate || !value) return true;
-      
+
       const beginDate = tryddmmyyyyToDate(beginningDate);
       const endDate = tryddmmyyyyToDate(value);
-      
+
       if (!beginDate || !endDate) return true;
-      
+
       return endDate >= beginDate;
     })
     .test("is-too-early", "Insuffient data for dates before 2024", function (value) {
-      
-      return new Date(value) > new Date(2024,1,1);
+      return new Date(value) > new Date(2024, 1, 1);
     }),
   pagination: yup
     .object({
@@ -45,21 +44,25 @@ const schema = yup.object().shape({
       sortBy: yup.string().required(),
       isSortDescending: yup.boolean().required()
     })
-    .required()
+    .required(),
+  // Hidden field: not shown in search filter, but required in data
+  profitYear: yup.number().required("Profit year is required")
 });
 
-interface MilitaryAndRehireForfeituresSearchFilterProps {
+interface RehireForfeituresSearchFilterProps {
   setInitialSearchLoaded: (include: boolean) => void;
   fiscalData: CalendarResponseDto;
   onSearch?: () => void;
   hasUnsavedChanges?: boolean;
+  setHasUnsavedChanges: (hasChanges: boolean) => void;
 }
 
-const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearchFilterProps> = ({
+const RehireForfeituresSearchFilter: React.FC<RehireForfeituresSearchFilterProps> = ({
   setInitialSearchLoaded,
   fiscalData,
   onSearch,
-  hasUnsavedChanges
+  hasUnsavedChanges,
+  setHasUnsavedChanges
 }) => {
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const [triggerSearch, { isFetching }] = useLazyGetRehireForfeituresQuery();
@@ -85,7 +88,7 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
         profitYear: selectedProfitYear
       };
 
-      dispatch(setMilitaryAndRehireForfeituresQueryParams(updatedData));
+      dispatch(setRehireForfeituresQueryParams(updatedData));
       triggerSearch(updatedData);
       if (onSearch) onSearch(); // Only call if onSearch is provided
     }
@@ -103,7 +106,8 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
       beginningDate: rehireForfeituresQueryParams?.beginningDate || fiscalData.fiscalBeginDate || undefined,
       endingDate: rehireForfeituresQueryParams?.endingDate || fiscalData.fiscalEndDate || undefined,
       excludeZeroBalance: rehireForfeituresQueryParams?.excludeZeroBalance || false,
-      pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }
+      pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true },
+      profitYear: selectedProfitYear
     }
   });
 
@@ -113,6 +117,7 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
   const validateAndSearch = handleSubmit(validateAndSubmit);
 
   const handleReset = () => {
+    setHasUnsavedChanges(false);
     setInitialSearchLoaded(false);
     dispatch(clearRehireForfeituresQueryParams());
     dispatch(clearRehireForfeituresDetails());
@@ -163,9 +168,12 @@ const RehireForfeituresSearchFilter: React.FC<MilitaryAndRehireForfeituresSearch
             render={({ field }) => {
               const minDateFromBeginning = beginningDateValue ? tryddmmyyyyToDate(beginningDateValue) : null;
               const fiscalMinDate = tryddmmyyyyToDate(fiscalData.fiscalBeginDate);
-              const effectiveMinDate = minDateFromBeginning && fiscalMinDate 
-                ? (minDateFromBeginning > fiscalMinDate ? minDateFromBeginning : fiscalMinDate)
-                : minDateFromBeginning ?? fiscalMinDate ?? undefined;
+              const effectiveMinDate =
+                minDateFromBeginning && fiscalMinDate
+                  ? minDateFromBeginning > fiscalMinDate
+                    ? minDateFromBeginning
+                    : fiscalMinDate
+                  : (minDateFromBeginning ?? fiscalMinDate ?? undefined);
 
               return (
                 <DsmDatePicker
