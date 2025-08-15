@@ -29,12 +29,7 @@ export function SuggestedForfeitCellRenderer(
     currency: "USD"
   }).format(currentValue || 0);
 
-  let isClassAction = params.data.remark === "FORFEIT CA";
-
-  const randomValue = Math.random();
-  if (randomValue < 0.2) {
-    isClassAction = true;
-  }
+  const isClassAction = params.data.remark === "FORFEIT CA";
 
   return (
     <div style={{ display: "flex", alignItems: "center", height: "100%" }}>
