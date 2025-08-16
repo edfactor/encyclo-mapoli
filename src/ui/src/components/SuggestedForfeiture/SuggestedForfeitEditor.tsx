@@ -19,8 +19,8 @@ export function SuggestedForfeitEditor(props: ICellEditorParams) {
     const forfeitValue = props.data.forfeit || props.data.forfeiture || 0;
     const newError = validateSuggestedForfeit(newValue, Math.abs(forfeitValue));
     setError(newError);
-    
-    const rowKey = `${props.data.badgeNumber}-${props.data.profitYear}${props.data.enrollmentId ? `-${props.data.enrollmentId}` : ''}-${props.node?.id || 'unknown'}`;
+
+    const rowKey = `${props.data.badgeNumber}-${props.data.profitYear}${props.data.enrollmentId ? `-${props.data.enrollmentId}` : ""}-${props.node?.id || "unknown"}`;
     props.context?.updateEditedValue?.(rowKey, newValue, !!newError);
   };
 
@@ -28,13 +28,11 @@ export function SuggestedForfeitEditor(props: ICellEditorParams) {
     if (event.key === "Enter" && !error) {
       props.api.stopEditing();
     }
-    if (event.key === 'Escape') {
+    if (event.key === "Escape") {
       setValue(props.data.suggestedForfeit ?? 0);
       props.api.stopEditing();
     }
   };
-
-  const getValue = () => value;
 
   return (
     <div style={{ display: "flex", alignItems: "center" }}>
