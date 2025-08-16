@@ -185,21 +185,20 @@ const RehireForfeituresGrid: React.FC<RehireForfeituresGridSearchProps> = ({
       setLoadingRowIds((prev) => new Set(Array.from(prev).concat(rowId)));
 
       try {
-        await updateForfeitureAdjustment(request);
-        const rowKey = `${request.badgeNumber}-${request.profitYear}`;
-        const updatedEditedValues = { ...editedValues };
-        delete updatedEditedValues[rowKey];
-        setEditedValues(updatedEditedValues);
-        onUnsavedChanges(Object.keys(updatedEditedValues).length > 0);
-        if (rehireForfeituresQueryParams) {
-          const searchRequest = createRequest(
-            pageNumber * pageSize,
-            sortParams.sortBy,
-            sortParams.isSortDescending
-            //selectedProfitYear
-          );
-          if (searchRequest) {
-            await triggerSearch(searchRequest, false);
+        const result = await updateForfeitureAdjustment({ ...request, suppressAllToastErrors: true });
+        if (result?.error) {
+          alert("Save failed. One or more unforfeits were related to a class action forfeit.");
+        } else {
+          const rowKey = `${request.badgeNumber}-${request.profitYear}`;
+          const updatedEditedValues = { ...editedValues };
+          delete updatedEditedValues[rowKey];
+          setEditedValues(updatedEditedValues);
+          onUnsavedChanges(Object.keys(updatedEditedValues).length > 0);
+          if (rehireForfeituresQueryParams) {
+            const searchRequest = createRequest(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending);
+            if (searchRequest) {
+              await triggerSearch(searchRequest, false);
+            }
           }
         }
       } catch (error) {
