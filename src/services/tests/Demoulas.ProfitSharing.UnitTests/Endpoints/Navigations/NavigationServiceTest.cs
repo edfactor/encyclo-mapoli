@@ -8,7 +8,6 @@ using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
-using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.Navigations;
 
@@ -20,8 +19,8 @@ public class NavigationServiceTests : ApiTestBase<Program>
 
     public NavigationServiceTests()
     {
-        this._navigationService = ServiceProvider?.GetRequiredService<INavigationService>()!;
-        this._navigationListObj = new List<Navigation>()
+        _navigationService = ServiceProvider?.GetRequiredService<INavigationService>()!;
+        _navigationListObj = new List<Navigation>()
         {
             new Navigation { Id = 12, ParentId = 1, Title = "Terminations", SubTitle = "QPAY066", Url = "prof-term", StatusId = 1, OrderNumber = 8, Icon = "", Disabled = false },
             new Navigation { Id = 13, ParentId = 1, Title = "Profit Share Report", SubTitle = "PAY426", Url = "profit-share-report", StatusId = 1, OrderNumber = 9, Icon = "", Disabled = false },
@@ -79,7 +78,7 @@ public class NavigationServiceTests : ApiTestBase<Program>
         };
 
 
-        this._navigationStatusList = new List<NavigationStatusDto>()
+        _navigationStatusList = new List<NavigationStatusDto>()
         {
             new NavigationStatusDto() { Id = NavigationStatus.Constants.NotStarted, Name = "Not Started" },
             new NavigationStatusDto() { Id = NavigationStatus.Constants.InProgress, Name = "In Progress" },
@@ -128,7 +127,7 @@ public class NavigationServiceTests : ApiTestBase<Program>
     {
         var navigationStatus = await _navigationService.GetNavigationStatus(CancellationToken.None);
         Assert.NotNull(navigationStatus);
-        navigationStatus.ShouldBeEquivalentTo(this._navigationStatusList);
+        navigationStatus.ShouldBeEquivalentTo(_navigationStatusList);
     }
 
     [Fact(DisplayName = "PS-1059: Update navigation status")]

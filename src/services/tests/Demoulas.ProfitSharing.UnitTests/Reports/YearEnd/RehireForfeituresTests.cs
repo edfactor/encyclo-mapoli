@@ -1,6 +1,5 @@
 ﻿using System.Globalization;
 using System.Net;
-using System.Text.Json;
 using CsvHelper;
 using CsvHelper.Configuration;
 using Demoulas.Common.Contracts.Contracts.Response;
@@ -24,7 +23,6 @@ using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
-using Xunit;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 

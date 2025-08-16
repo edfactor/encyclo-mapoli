@@ -2,8 +2,8 @@ export enum ImpersonationRoles {
   FinanceManager = "Finance-Manager",
   DistributionsClerk = "Distributions-Clerk",
   HardshipAdministrator = "Hardship-Administrator",
-  ProfitSharingAdministrator = "Profit-Sharing-Administrator",
-  ItOperations = "IT-Operations"
+  ProfitSharingAdministrator = "System-Administrator",
+  ItDevOps = "IT-Operations"
 }
 
 export enum FrozenReportsByAgeRequestType {

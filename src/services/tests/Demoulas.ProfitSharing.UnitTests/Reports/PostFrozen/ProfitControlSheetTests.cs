@@ -19,7 +19,7 @@ public class ProfitControlSheetTests : ApiTestBase<Program>
         var request = new ProfitYearRequest() { ProfitYear = 2024 };
         var response = await ApiClient.GETAsync<ProfitControlSheetEndpoint, ProfitYearRequest, ProfitControlSheetResponse>(request);
         response.ShouldNotBeNull();
-        response.Response.StatusCode.ShouldBe(System.Net.HttpStatusCode.Unauthorized);
+        response.Response.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
 
         ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
 

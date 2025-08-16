@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using Demoulas.ProfitSharing.Api;
+﻿using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services;
@@ -18,7 +17,7 @@ public class TotalServiceTests : ApiTestBase<Program>
     public TotalServiceTests()
     {
         _dataContextFactory = MockDbContextFactory;
-        this._totalService = ServiceProvider?.GetRequiredService<TotalService>()!;
+        _totalService = ServiceProvider?.GetRequiredService<TotalService>()!;
     }
 
     [Fact(DisplayName = "Total ETVA Tests")]
@@ -26,7 +25,7 @@ public class TotalServiceTests : ApiTestBase<Program>
     {
         return _dataContextFactory.UseWritableContext(ctx =>
         {
-            var ppTest = Demoulas.ProfitSharing.UnitTests.Common.Common.Constants.FakeEtvaTotals.Object.First();
+            var ppTest = Common.Common.Constants.FakeEtvaTotals.Object.First();
             ppTest.TotalAmount = -20750.98m;
 
 

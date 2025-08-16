@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.ProfitSharing.Common.Extensions;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.PayBen;
 public record PayBenReportResponse
 {
     public string? Ssn { get; set; }
-    public string? BeneficiaryFullName { get; set; }
+    [MaskSensitive] public string? BeneficiaryFullName { get; set; }
     public string? Psn { get; set; }
     public int? BadgeNumber { get; set; }
-    public string? DemographicFullName { get; set; }
+    [MaskSensitive] public string? DemographicFullName { get; set; }
     public decimal? Percentage { get; set; }
 }

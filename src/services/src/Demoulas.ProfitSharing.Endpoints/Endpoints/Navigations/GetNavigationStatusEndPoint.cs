@@ -29,7 +29,7 @@ public class GetNavigationStatusEndpoint : Endpoint<GetNavigationStatusRequestDt
 
     public override async Task<GetNavigationStatusResponseDto> ExecuteAsync(GetNavigationStatusRequestDto req, CancellationToken ct)
     {
-        var navigationStatusList = await this._navigationService.GetNavigationStatus(cancellationToken: ct);
+        var navigationStatusList = await _navigationService.GetNavigationStatus(cancellationToken: ct);
         var response = new GetNavigationStatusResponseDto { NavigationStatusList = navigationStatusList };
         return response;
     }

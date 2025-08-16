@@ -1,15 +1,11 @@
-﻿using System.Diagnostics;
-using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
-using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
@@ -974,21 +970,43 @@ public class FrozenReportService : IFrozenReportService
             {
                 DateOnly fiscalEndDate = (await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken)).FiscalEndDate;
                 ProfitControlSheetResponse response = new();
-                HashSet<int> employeeSsn = await (await _demographicReaderService.BuildDemographicQuery(ctx, true)).Select(d => d.Ssn).ToHashSetAsync(cancellationToken);
-                HashSet<int> beneSsn = await ctx.BeneficiaryContacts.Select(bc => bc.Ssn).ToHashSetAsync(cancellationToken);
+                // Build composite key sets (Ssn, Id) to disambiguate potential duplicate SSNs with different Demographic/Beneficiary records.
+                var employeeKeys = await (await _demographicReaderService.BuildDemographicQuery(ctx, true))
+                    .Select(d => new { d.Ssn, d.Id })
+                    .ToListAsync(cancellationToken);
+                var employeeKeySet = employeeKeys
+                    .Select(x => (x.Ssn, x.Id))
+                    .ToHashSet();
 
-                HashSet<int> pureEmployee = employeeSsn.Except(beneSsn).ToHashSet();
-                HashSet<int> pureBene = beneSsn.Except(employeeSsn).ToHashSet();
-                HashSet<int> both = employeeSsn.Intersect(beneSsn).ToHashSet();
+                var beneKeys = await ctx.BeneficiaryContacts
+                    .Select(bc => new { bc.Ssn, bc.Id })
+                    .ToListAsync(cancellationToken);
+                var beneKeySet = beneKeys
+                    .Select(x => (x.Ssn, x.Id))
+                    .ToHashSet();
 
-                Dictionary<int, decimal> allMemberCurrentBalance = await _totalService.TotalVestingBalance(ctx, request.ProfitYear, fiscalEndDate)
-                    .ToDictionaryAsync(k => k.Ssn, v => v.CurrentBalance == null ? 0 : (decimal)v.CurrentBalance, cancellationToken);
+                // Determine disjoint and overlapping composite keys.
+                var pureEmployee = employeeKeySet.Except(beneKeySet).ToHashSet();
+                var pureBene = beneKeySet.Except(employeeKeySet).ToHashSet();
+                var both = employeeKeySet.Intersect(beneKeySet).ToHashSet();
 
-                response.EmployeeContributionProfitSharingAmount =
-                    allMemberCurrentBalance.Where(kvp => pureEmployee.Contains(kvp.Key)).Sum(kvp => kvp.Value);
-                response.NonEmployeeProfitSharingAmount = allMemberCurrentBalance.Where(kvp => pureBene.Contains(kvp.Key)).Sum(kvp => kvp.Value);
+                // Build a dictionary keyed by composite (Ssn, Id) to avoid duplicate key exceptions when multiple rows share the same SSN.
+                // Name tuple elements so we can reference kvp.Key.Ssn clearly below.
+                var allMemberCurrentBalance = await _totalService.TotalVestingBalance(ctx, request.ProfitYear, fiscalEndDate)
+                    .ToDictionaryAsync(k => (Ssn: k.Ssn, Id: k.Id), v => v.CurrentBalance ?? 0m, cancellationToken);
 
-                response.EmployeeBeneficiaryAmount = allMemberCurrentBalance.Where(kvp => both.Contains(kvp.Key)).Sum(kvp => kvp.Value);
+                // Sum by SSN set membership. Multiple (Ssn, Id) rows for the same Ssn will correctly accumulate.
+                response.EmployeeContributionProfitSharingAmount = allMemberCurrentBalance
+                    .Where(kvp => pureEmployee.Contains(kvp.Key))
+                    .Sum(kvp => kvp.Value);
+
+                response.NonEmployeeProfitSharingAmount = allMemberCurrentBalance
+                    .Where(kvp => pureBene.Contains(kvp.Key))
+                    .Sum(kvp => kvp.Value);
+
+                response.EmployeeBeneficiaryAmount = allMemberCurrentBalance
+                    .Where(kvp => both.Contains(kvp.Key))
+                    .Sum(kvp => kvp.Value);
                 return response;
             });
         }

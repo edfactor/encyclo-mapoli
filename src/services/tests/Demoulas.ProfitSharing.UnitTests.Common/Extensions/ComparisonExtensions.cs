@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Reflection;
-using Castle.Core.Internal;
 using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Extensions;

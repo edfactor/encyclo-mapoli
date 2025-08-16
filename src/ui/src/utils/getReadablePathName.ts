@@ -6,7 +6,7 @@ const pathToReadableName: Record<string, string> = {
   "duplicate-names-and-birthdays": "Duplicate Names and Birthdays",
   "missing-comma-in-py-name": "Missing Comma in PY Name",
   "military-and-rehire": "Military and Rehire",
-  "unforfeitures": "Rehire Forfeitures (PREVPROF)",
+  "unforfeitures": "UnForfeit (PREVPROF)",
   "distributions-and-forfeitures": "Distributions and Forfeitures (QPAY129)",
   "manage-executive-hours-and-dollars": "Manage Executive Hours and Dollars",
   "eligible-employees": "Eligible Employees",

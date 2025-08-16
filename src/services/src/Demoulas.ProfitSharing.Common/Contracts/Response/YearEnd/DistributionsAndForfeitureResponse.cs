@@ -1,9 +1,11 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 public sealed record DistributionsAndForfeitureResponse
 {
     public required int BadgeNumber { get; set; }
     public required short PsnSuffix { get; set; }
-    public required string EmployeeName { get; set; }
+    [MaskSensitive] public required string EmployeeName { get; set; }
     public required string Ssn { get; set; }
     public DateOnly? Date { get; set; }
     public required decimal DistributionAmount { get; set; }

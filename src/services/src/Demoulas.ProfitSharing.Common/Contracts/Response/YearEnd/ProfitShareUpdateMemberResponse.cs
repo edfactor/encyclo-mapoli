@@ -1,11 +1,13 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
 public record ProfitShareUpdateMemberResponse
 {
     public bool IsEmployee { get; init; }
     public long Badge { get; set; }
     public string? Psn { get; set; }
-    public string? Name { get; set; }
+    [MaskSensitive] public string? Name { get; set; }
     public decimal BeginningAmount { get; set; }
     public decimal Distributions { get; set; }
     public decimal Military { get; set; }

@@ -35,7 +35,7 @@ export const MenuData = (data: NavigationResponseDto | undefined): RouteCategory
   });
 
   // Commented out special case for IT Operations role
-  // if(localStorageImpersonating === ImpersonationRoles.ItOperations) {
+  // if(localStorageImpersonating === ImpersonationRoles.ItDevOps) {
   //   finalData.push(it_operations);
   // }
 

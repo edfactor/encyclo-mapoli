@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using System.Text;
-using CsvHelper.Configuration;
 using CsvHelper;
+using CsvHelper.Configuration;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.Util.Extensions;

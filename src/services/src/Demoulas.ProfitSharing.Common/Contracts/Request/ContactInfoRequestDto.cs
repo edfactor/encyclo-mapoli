@@ -1,10 +1,11 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request;
-public record ContactInfoRequestDto
+using Shared;
+public record ContactInfoRequestDto : INameParts, IFullNameProperty, IPhoneNumber, IEmailAddress
 {
     public string? FullName { get; set; }
-    public required string LastName { get; set; }
-    public required string FirstName { get; set; }
-    public string? MiddleName { get; set; }
+    public required string LastName { get; init; }
+    public required string FirstName { get; init; }
+    public string? MiddleName { get; init; }
 
     public string? PhoneNumber { get; init; }
     public string? MobileNumber { get; init; }

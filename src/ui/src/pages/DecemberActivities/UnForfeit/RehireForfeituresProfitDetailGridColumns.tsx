@@ -1,7 +1,7 @@
 import { Checkbox, CircularProgress, IconButton } from "@mui/material";
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { SuggestedForfeitEditor, SuggestedForfeitCellRenderer } from "components/SuggestedForfeiture";
-import { agGridNumberToCurrency } from "smart-ui-library";
+import { numberToCurrency } from "smart-ui-library";
 import { ForfeitureAdjustmentUpdateRequest, RehireForfeituresSaveButtonCellParams } from "types";
 import {
   createYearColumn,
@@ -74,7 +74,7 @@ export const GetProfitDetailColumns = (
         console.log("Unforfeiture Params are: ", params);
         return SuggestedForfeitCellRenderer({ ...params, selectedProfitYear }, false, true);
       },
-      valueFormatter: agGridNumberToCurrency,
+      valueFormatter: (params) => numberToCurrency(params.value),
       valueGetter: (params) => {
         if (!params.data.isDetail) return null;
         const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}${params.data.enrollmentId ? `-${params.data.enrollmentId}` : ""}-${params.node?.id || "unknown"}`;
