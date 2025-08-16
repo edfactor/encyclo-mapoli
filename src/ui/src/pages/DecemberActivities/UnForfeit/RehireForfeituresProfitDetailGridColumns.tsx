@@ -81,7 +81,7 @@ export const GetProfitDetailColumns = (
       cellRenderer: (params: ICellRendererParams) => {
         return SuggestedForfeitCellRenderer({ ...params, selectedProfitYear }, false, true);
       },
-      valueFormatter: (params) => numberToCurrency(params.value),
+      valueFormatter: (params) => agGridNumberToCurrency(params.value),
       valueGetter: (params) => {
         // So if there are no profit details, do not do anything
         if (!params.data.isDetail) return null;
