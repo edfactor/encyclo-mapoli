@@ -2,7 +2,7 @@ import { SaveOutlined } from "@mui/icons-material";
 import { Checkbox, CircularProgress, IconButton } from "@mui/material";
 import { ColDef, EditableCallbackParams, ICellRendererParams } from "ag-grid-community";
 import { SuggestedForfeitCellRenderer, SuggestedForfeitEditor } from "components/SuggestedForfeiture";
-import { agGridNumberToCurrency } from "smart-ui-library";
+import { numberToCurrency } from "smart-ui-library";
 import { ForfeitureAdjustmentUpdateRequest, ForfeitureDetail, RehireForfeituresSaveButtonCellParams } from "types";
 import {
   createCommentColumn,
@@ -81,7 +81,7 @@ export const GetProfitDetailColumns = (
       cellRenderer: (params: ICellRendererParams) => {
         return SuggestedForfeitCellRenderer({ ...params, selectedProfitYear }, false, true);
       },
-      valueFormatter: (params) => agGridNumberToCurrency(params.value),
+      valueFormatter: (params) => numberToCurrency(params.value),
       valueGetter: (params) => {
         // So if there are no profit details, do not do anything
         if (!params.data.isDetail) return null;
