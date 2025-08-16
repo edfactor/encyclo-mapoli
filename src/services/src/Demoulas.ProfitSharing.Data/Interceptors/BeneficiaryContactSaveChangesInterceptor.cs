@@ -1,10 +1,10 @@
-﻿using Demoulas.ProfitSharing.Data.Entities.Audit;
-using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.EntityFrameworkCore;
+﻿using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
-using Microsoft.EntityFrameworkCore.Infrastructure;
+using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.Util.Extensions;
-using Demoulas.Common.Contracts.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace Demoulas.ProfitSharing.Data.Interceptors;
 public sealed class BeneficiaryContactSaveChangesInterceptor : SaveChangesInterceptor

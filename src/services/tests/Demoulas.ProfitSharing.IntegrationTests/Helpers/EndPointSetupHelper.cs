@@ -1,5 +1,4 @@
-﻿using Demoulas.ProfitSharing.Api;
-using Demoulas.Util;
+﻿using Demoulas.Util;
 using FastEndpoints;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;

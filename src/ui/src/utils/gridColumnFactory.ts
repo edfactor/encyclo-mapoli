@@ -1,5 +1,5 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { agGridNumberToCurrency, formatNumberWithComma, yyyyMMDDToMMDDYYYY } from "smart-ui-library";
+import { formatNumberWithComma, numberToCurrency, yyyyMMDDToMMDDYYYY } from "smart-ui-library";
 import { GRID_COLUMN_WIDTHS } from "../constants";
 import {
   AgeColumnOptions,
@@ -110,7 +110,7 @@ export const createCurrencyColumn = (options: CurrencyColumnOptions): ColDef => 
     maxWidth,
     sortable = true,
     resizable = true,
-    valueFormatter = agGridNumberToCurrency
+    valueFormatter = (params) => numberToCurrency(params.value)
   } = options;
 
   const column: ColDef = {

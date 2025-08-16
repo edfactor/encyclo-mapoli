@@ -1,5 +1,4 @@
-﻿using Demoulas.ProfitSharing.Api;
-using FastEndpoints.Testing;
+﻿using FastEndpoints.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 

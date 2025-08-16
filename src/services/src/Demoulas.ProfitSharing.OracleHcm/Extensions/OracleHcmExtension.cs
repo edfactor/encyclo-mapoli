@@ -23,13 +23,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Http.Resilience;
 using OpenTelemetry.Trace;
+using Polly;
 using Quartz;
 using Quartz.Impl;
 using Quartz.Spi;
 using AddressMapper = Demoulas.ProfitSharing.OracleHcm.Mappers.AddressMapper;
 using ContactInfoMapper = Demoulas.ProfitSharing.OracleHcm.Mappers.ContactInfoMapper;
 using DemographicMapper = Demoulas.ProfitSharing.OracleHcm.Mappers.DemographicMapper;
-using Polly;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Extensions;
 

@@ -2,7 +2,6 @@
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
-using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services;
@@ -57,7 +56,10 @@ public sealed class EmbeddedSqlService : IEmbeddedSqlService
         var query = $@"
 SELECT 
     bal.Ssn, 
-    CASE WHEN vr.DEMOGRAPHIC_ID IS NULL THEN vr.BENEFICIARY_CONTACT_ID ELSE vr.DEMOGRAPHIC_ID END AS ID,
+    CASE WHEN vr.DEMOGRAPHIC_ID IS NULL THEN
+                              CASE WHEN vr.BENEFICIARY_CONTACT_ID IS NULL THEN 0
+                              ELSE  vr.BENEFICIARY_CONTACT_ID END
+                          ELSE vr.DEMOGRAPHIC_ID END   AS ID,
          ((bal.total + pdWrap.FORFEITURES - (pdWrap.PROF_6_CONTRIB + pdWrap.PROF_8_EARNINGS - pdWrap.PROF_9_FORFEIT)) * vr.RATIO) 
             + ((pdWrap.PROF_6_CONTRIB + pdWrap.PROF_8_EARNINGS - pdWrap.PROF_9_FORFEIT)-pdWrap.FORFEITURES) AS VESTEDBALANCE,
           bal.TOTAL AS CURRENTBALANCE,
@@ -178,26 +180,26 @@ FROM   employees
     {
         FormattableString query = @$"
 SELECT pd.SSN Ssn   ,  
-	   Sum(pd.CONTRIBUTION) TOTAL_CONTRIBUTIONS,
-	   Sum(pd.EARNINGS ) TOTAL_EARNINGS,
-	   Sum(CASE pd.PROFIT_CODE_ID WHEN {ProfitCode.Constants.IncomingContributions.Id} THEN pd.FORFEITURE 
-	   							  WHEN {ProfitCode.Constants.OutgoingForfeitures.Id} THEN -pd.FORFEITURE
-	   							  ELSE 0
-	  	   END) TOTAL_FORFEITURES,
-	   Sum(CASE WHEN pd.PROFIT_CODE_ID  != {ProfitCode.Constants.IncomingContributions.Id} THEN pd.FORFEITURE ELSE 0 END) TOTAL_PAYMENTS,
-	   Sum(CASE WHEN pd.PROFIT_CODE_ID IN ({ProfitCode.Constants.OutgoingForfeitures.Id}, {ProfitCode.Constants.OutgoingDirectPayments.Id}, {ProfitCode.Constants.Outgoing100PercentVestedPayment.Id}) THEN -pd.FORFEITURE ELSE 0 END) DISTRIBUTION,
-	   Sum(CASE pd.PROFIT_CODE_ID WHEN {ProfitCode.Constants.OutgoingXferBeneficiary.Id} THEN -pd.FORFEITURE
-	   							  WHEN {ProfitCode.Constants.IncomingQdroBeneficiary.Id} THEN pd.CONTRIBUTION 
-	   							  ELSE 0 END) BENEFICIARY_ALLOCATION,
-	   Sum(pd.CONTRIBUTION + pd.EARNINGS + CASE WHEN pd.PROFIT_CODE_ID = {ProfitCode.Constants.IncomingContributions.Id} THEN pd.FORFEITURE ELSE -pd.FORFEITURE END) CURRENT_BALANCE,
-	   Sum(CASE WHEN pd.PROFIT_YEAR_ITERATION = {ProfitDetail.Constants.ProfitYearIterationMilitary} THEN pd.CONTRIBUTION ELSE 0 END) MILITARY_TOTAL,
-	   Sum(CASE WHEN pd.PROFIT_YEAR_ITERATION = {ProfitDetail.Constants.ProfitYearIterationClassActionFund} THEN pd.EARNINGS ELSE 0 END) CLASS_ACTION_FUND_TOTAL,
-	   Sum(CASE WHEN (pd.PROFIT_CODE_ID = {ProfitCode.Constants.Outgoing100PercentVestedPayment.Id} AND (pd.COMMENT_TYPE_ID IN ({CommentType.Constants.TransferOut.Id},{CommentType.Constants.QdroOut.Id})) 
-	   			  OR (pd.PROFIT_CODE_ID = {ProfitCode.Constants.OutgoingXferBeneficiary.Id})) THEN pd.FORFEITURE ELSE 0 END) PAID_ALLOCATIONS_TOTAL,
-	   Sum(CASE WHEN pd.PROFIT_CODE_ID IN ({ProfitCode.Constants.OutgoingForfeitures.Id},{ProfitCode.Constants.OutgoingDirectPayments.Id}) 
-	              OR (pd.PROFIT_CODE_ID = {ProfitCode.Constants.Outgoing100PercentVestedPayment.Id} AND (pd.COMMENT_TYPE_ID IN ({CommentType.Constants.TransferOut.Id},{CommentType.Constants.QdroOut.Id}))) THEN pd.FORFEITURE ELSE 0 END) DISTRIBUTIONS_TOTAL,
-	   Sum(CASE WHEN pd.PROFIT_CODE_ID = {ProfitCode.Constants.IncomingQdroBeneficiary.Id} THEN pd.CONTRIBUTION ELSE 0 END) ALLOCATIONS_TOTAL,
-	   Sum(CASE WHEN pd.PROFIT_CODE_ID = {ProfitCode.Constants.OutgoingForfeitures.Id} THEN pd.FORFEITURE ELSE 0 END) FORFEITS_TOTAL
+       Sum(pd.CONTRIBUTION) TOTAL_CONTRIBUTIONS,
+       Sum(pd.EARNINGS ) TOTAL_EARNINGS,
+       Sum(CASE pd.PROFIT_CODE_ID WHEN {ProfitCode.Constants.IncomingContributions.Id} THEN pd.FORFEITURE 
+                                  WHEN {ProfitCode.Constants.OutgoingForfeitures.Id} THEN -pd.FORFEITURE
+                                  ELSE 0
+           END) TOTAL_FORFEITURES,
+       Sum(CASE WHEN pd.PROFIT_CODE_ID  != {ProfitCode.Constants.IncomingContributions.Id} THEN pd.FORFEITURE ELSE 0 END) TOTAL_PAYMENTS,
+       Sum(CASE WHEN pd.PROFIT_CODE_ID IN ({ProfitCode.Constants.OutgoingForfeitures.Id}, {ProfitCode.Constants.OutgoingDirectPayments.Id}, {ProfitCode.Constants.Outgoing100PercentVestedPayment.Id}) THEN -pd.FORFEITURE ELSE 0 END) DISTRIBUTION,
+       Sum(CASE pd.PROFIT_CODE_ID WHEN {ProfitCode.Constants.OutgoingXferBeneficiary.Id} THEN -pd.FORFEITURE
+                                  WHEN {ProfitCode.Constants.IncomingQdroBeneficiary.Id} THEN pd.CONTRIBUTION 
+                                  ELSE 0 END) BENEFICIARY_ALLOCATION,
+       Sum(pd.CONTRIBUTION + pd.EARNINGS + CASE WHEN pd.PROFIT_CODE_ID = {ProfitCode.Constants.IncomingContributions.Id} THEN pd.FORFEITURE ELSE -pd.FORFEITURE END) CURRENT_BALANCE,
+       Sum(CASE WHEN pd.PROFIT_YEAR_ITERATION = {ProfitDetail.Constants.ProfitYearIterationMilitary} THEN pd.CONTRIBUTION ELSE 0 END) MILITARY_TOTAL,
+       Sum(CASE WHEN pd.PROFIT_YEAR_ITERATION = {ProfitDetail.Constants.ProfitYearIterationClassActionFund} THEN pd.EARNINGS ELSE 0 END) CLASS_ACTION_FUND_TOTAL,
+       Sum(CASE WHEN (pd.PROFIT_CODE_ID = {ProfitCode.Constants.Outgoing100PercentVestedPayment.Id} AND (pd.COMMENT_TYPE_ID IN ({CommentType.Constants.TransferOut.Id},{CommentType.Constants.QdroOut.Id})) 
+                  OR (pd.PROFIT_CODE_ID = {ProfitCode.Constants.OutgoingXferBeneficiary.Id})) THEN pd.FORFEITURE ELSE 0 END) PAID_ALLOCATIONS_TOTAL,
+       Sum(CASE WHEN pd.PROFIT_CODE_ID IN ({ProfitCode.Constants.OutgoingForfeitures.Id},{ProfitCode.Constants.OutgoingDirectPayments.Id}) 
+                  OR (pd.PROFIT_CODE_ID = {ProfitCode.Constants.Outgoing100PercentVestedPayment.Id} AND (pd.COMMENT_TYPE_ID IN ({CommentType.Constants.TransferOut.Id},{CommentType.Constants.QdroOut.Id}))) THEN pd.FORFEITURE ELSE 0 END) DISTRIBUTIONS_TOTAL,
+       Sum(CASE WHEN pd.PROFIT_CODE_ID = {ProfitCode.Constants.IncomingQdroBeneficiary.Id} THEN pd.CONTRIBUTION ELSE 0 END) ALLOCATIONS_TOTAL,
+       Sum(CASE WHEN pd.PROFIT_CODE_ID = {ProfitCode.Constants.OutgoingForfeitures.Id} THEN pd.FORFEITURE ELSE 0 END) FORFEITS_TOTAL
 FROM PROFIT_DETAIL pd
 WHERE pd.PROFIT_YEAR= {profitYear}
 GROUP BY pd.SSN";

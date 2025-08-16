@@ -1,5 +1,5 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { agGridNumberToCurrency } from "smart-ui-library";
+import { numberToCurrency } from "smart-ui-library";
 import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
 import { GRID_COLUMN_WIDTHS } from "../../constants";
 
@@ -49,7 +49,7 @@ export const GetProfitShareGrossReportColumns = (navFunction: (badgeNumber: stri
       minWidth: 150,
       type: "rightAligned",
       resizable: true,
-      valueFormatter: agGridNumberToCurrency
+      valueFormatter: (params) => numberToCurrency(params.value),
     },
     {
       headerName: "P/S Amount",
@@ -58,7 +58,7 @@ export const GetProfitShareGrossReportColumns = (navFunction: (badgeNumber: stri
       minWidth: 150,
       type: "rightAligned",
       resizable: true,
-      valueFormatter: agGridNumberToCurrency
+      valueFormatter: (params) => numberToCurrency(params.value),
     },
     {
       headerName: "Loans",
@@ -67,7 +67,7 @@ export const GetProfitShareGrossReportColumns = (navFunction: (badgeNumber: stri
       minWidth: 120,
       type: "rightAligned",
       resizable: true,
-      valueFormatter: agGridNumberToCurrency
+      valueFormatter: (params) => numberToCurrency(params.value)
     },
     {
       headerName: "Forfeitures",
@@ -76,7 +76,7 @@ export const GetProfitShareGrossReportColumns = (navFunction: (badgeNumber: stri
       minWidth: 120,
       type: "rightAligned",
       resizable: true,
-      valueFormatter: agGridNumberToCurrency
+      valueFormatter: (params) => numberToCurrency(params.value)
     },
     {
       headerName: "EC",

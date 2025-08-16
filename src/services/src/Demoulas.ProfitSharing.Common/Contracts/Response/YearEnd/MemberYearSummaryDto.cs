@@ -1,10 +1,12 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
 public record MemberYearSummaryDto
 {
     public required short StoreNumber { get; init; }
     public required int BadgeNumber { get; init; }
-    public required string FullName { get; init; } = string.Empty;
+    [MaskSensitive] public required string FullName { get; init; } = string.Empty;
 
     public required byte PayClassificationId { get; init; }
     public required string PayClassificationName { get; init; } = string.Empty;
@@ -22,8 +24,8 @@ public record MemberYearSummaryDto
     public DateOnly? TerminationDate { get; init; }
     public byte? EnrollmentId { get; init; }
     public decimal ProfitShareHours { get; init; }
-    public string Street1 { get; set; } = string.Empty;
-    public string? City { get; set; } 
+    [MaskSensitive] public string Street1 { get; set; } = string.Empty;
+    [MaskSensitive] public string? City { get; set; } 
     public string? State { get; set; }
     public string? PostalCode { get; set;}
     public int CertificateSort { get; set; }

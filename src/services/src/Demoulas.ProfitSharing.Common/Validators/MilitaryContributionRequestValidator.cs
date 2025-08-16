@@ -1,6 +1,5 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Military;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.Util.Extensions;
 using FastEndpoints;
 using FluentValidation;
 

@@ -4,7 +4,6 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Virtual;
-using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Reports;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;

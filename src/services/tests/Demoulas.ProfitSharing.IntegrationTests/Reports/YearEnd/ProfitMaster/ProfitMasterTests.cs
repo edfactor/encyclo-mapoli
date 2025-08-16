@@ -1,15 +1,12 @@
 ﻿using System.Diagnostics;
 using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Services.ItOperations;
 using Demoulas.ProfitSharing.Services.ProfitMaster;
 using Demoulas.ProfitSharing.Services.ProfitShareEdit;
-using Shouldly;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Oracle.ManagedDataAccess.Client;
-using Microsoft.Extensions.Caching.Memory;
+using Shouldly;
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 

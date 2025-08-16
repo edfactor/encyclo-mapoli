@@ -1,11 +1,10 @@
 ﻿using Demoulas.ProfitSharing.Api;
-using Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Request.BeneficiaryInquiry;
-using Demoulas.ProfitSharing.UnitTests.Common.Base;
-using Microsoft.Extensions.DependencyInjection;
 using Demoulas.ProfitSharing.Common.Contracts.Response.BeneficiaryInquiry;
-using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
+using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.UnitTests.Endpoints.BeneficiaryInquiry;
 public class BeneficiaryServiceTest : ApiTestBase<Program>

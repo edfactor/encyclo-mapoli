@@ -1,10 +1,12 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.PostFrozen;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.PostFrozen;
 
 public sealed record ProfitSharingUnder21BreakdownByStoreResponse
 {
     public short StoreNumber { get; set; }
     public int BadgeNumber { get; set; }
-    public required string FullName { get; set; }
+    [MaskSensitive] public required string FullName { get; set; }
     public decimal? BeginningBalance { get; set; } = 0;
     public decimal? Earnings { get; set; } = 0;
     public decimal? Contributions { get; set; } = 0;

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Demoulas.ProfitSharing.Common.Extensions;
+﻿namespace Demoulas.ProfitSharing.Common.Extensions;
 public static class DateOnlyExtensions
 {
     public static DateTimeOffset ToDateTimeOffset(this DateOnly date, TimeOnly time = default, TimeZoneInfo? timeZone = null)

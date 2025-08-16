@@ -39,19 +39,21 @@ public class TestMasterInquiry : BaseSqlActivity
 
     public override async Task<Outcome> Execute()
     {
-        TestToken.CreateAndAssignTokenForClient(httpClient, "IT-Operations");
+//        TestToken.CreateAndAssignTokenForClient(httpClient, "IT-Operations");
+        TestToken.CreateAndAssignTokenForClient(httpClient, "Profit-Sharing-Administrator");
         
-        string path = Path.Combine(AppContext.BaseDirectory, "OUTFL");
+        string path; //  = Path.Combine(AppContext.BaseDirectory, "OUTFL");
+        path = "/Users/robertherrmann/prj/yerunner/src/services/tests/yematchrunner/YEMatch/Resources/MTPR.OUTFL";
         string content = await File.ReadAllTextAsync(path);
         List<OutFL> outties = OutFLParser.ParseStringIntoRecords(content);
 
         await using var writer = new StreamWriter("compare.md") { AutoFlush = true };
         Console.SetOut(new TeeWriter(Console.Out, writer));
 
-        int profitYear = 2024;
+        int profitYear = 2025;
         int quantity = int.MaxValue;
 
-        Console.WriteLine($"### Comparision of READY (mtpr) MasterInquiry vs SMART (profitYear={profitYear})");
+        Console.WriteLine($"### Comparison of READY (local) MasterInquiry vs SMART (profitYear={profitYear})");
         Console.WriteLine("");
         Console.WriteLine($"Showing the first {quantity} differences of {outties.Count} Master Inquiry screen dumps.");
         Console.WriteLine("");

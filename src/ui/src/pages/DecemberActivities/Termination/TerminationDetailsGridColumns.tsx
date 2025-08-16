@@ -2,7 +2,6 @@ import { SaveOutlined } from "@mui/icons-material";
 import { Checkbox, CircularProgress, IconButton } from "@mui/material";
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { SuggestedForfeitCellRenderer, SuggestedForfeitEditor } from "components/SuggestedForfeiture";
-import { agGridNumberToCurrency } from "smart-ui-library";
 import { ForfeitureAdjustmentUpdateRequest } from "types";
 import { getForfeitedStatus } from "utils/enrollmentUtil";
 import {
@@ -14,6 +13,8 @@ import {
   createYearColumn
 } from "utils/gridColumnFactory";
 import { HeaderComponent } from "./TerminationHeaderComponent";
+import { numberToCurrency } from "smart-ui-library";
+
 
 interface SaveButtonCellParams extends ICellRendererParams {
   removeRowFromSelectedRows: (id: number) => void;
@@ -114,7 +115,7 @@ export const GetDetailColumns = (
           true,
           false
         ),
-      valueFormatter: agGridNumberToCurrency,
+      valueFormatter: (params) => numberToCurrency(params.value),
       valueGetter: (params) => {
         if (!params.data.isDetail) return params.data.suggestedForfeit;
         const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}`;

@@ -1,7 +1,4 @@
-﻿using System.Dynamic;
-using System.Linq;
-using System.Threading;
-using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Request.BeneficiaryInquiry;
@@ -14,7 +11,6 @@ using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.Util.Extensions;
 using Microsoft.EntityFrameworkCore;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Demoulas.ProfitSharing.Services.BeneficiaryInquiry;
 public class BeneficiaryInquiryService : IBeneficiaryInquiryService
@@ -118,7 +114,10 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
 
     private int StepBackNumber(int num)
     {
-        if (num <= 1000) return 0;
+        if (num <= 1000)
+        {
+            return 0;
+        }
 
         // Get the hundreds and tens/ones parts
         int lastThree = num % 1000;
@@ -157,7 +156,10 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                 psns.Add(stepBack);
 
                 int next = StepBackNumber(stepBack);
-                if (next == stepBack) break; // safety to prevent infinite loop
+                if (next == stepBack)
+                {
+                    break; // safety to prevent infinite loop
+                }
 
                 stepBack = StepBackNumber(stepBack);
             }
@@ -406,7 +408,9 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
         {
             item.CurrentBalance = balanceList.Select(x => x.CurrentBalance).FirstOrDefault();
             if (request.PsnSuffix.HasValue && request.PsnSuffix > 0)
+            {
                 item.Ssn = item.Ssn!.MaskSsn();
+            }
         }
 
 

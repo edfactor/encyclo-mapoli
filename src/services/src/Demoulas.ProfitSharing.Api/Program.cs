@@ -14,7 +14,6 @@ using Demoulas.ProfitSharing.Data.Interceptors;
 using Demoulas.ProfitSharing.Endpoints.HealthCheck;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Extensions;
-using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Security.Extensions;
 using Demoulas.ProfitSharing.Services.Extensions;
 using Demoulas.Security.Extensions;
@@ -22,7 +21,6 @@ using Demoulas.Util.Extensions;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using NSwag.Generation.AspNetCore;
 using Scalar.AspNetCore;
-using Serilog.Enrichers.Sensitive;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder();
 

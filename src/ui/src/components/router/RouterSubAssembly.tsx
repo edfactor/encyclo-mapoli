@@ -91,7 +91,7 @@ const RouterSubAssembly: React.FC = () => {
                   ImpersonationRoles.DistributionsClerk,
                   ImpersonationRoles.HardshipAdministrator,
                   ImpersonationRoles.ProfitSharingAdministrator,
-                  ImpersonationRoles.ItOperations
+                  ImpersonationRoles.ItDevOps
                 ]}
                 currentRoles={impersonating ? [impersonating] : []}
                 setCurrentRoles={(value: string[]) => {
@@ -109,8 +109,8 @@ const RouterSubAssembly: React.FC = () => {
                     case ImpersonationRoles.ProfitSharingAdministrator:
                       dispatch(setImpersonating(ImpersonationRoles.ProfitSharingAdministrator));
                       break;
-                    case ImpersonationRoles.ItOperations:
-                      dispatch(setImpersonating(ImpersonationRoles.ItOperations));
+                    case ImpersonationRoles.ItDevOps:
+                      dispatch(setImpersonating(ImpersonationRoles.ItDevOps));
                       break;
                     default:
                       localStorage.removeItem("impersonatingRole");

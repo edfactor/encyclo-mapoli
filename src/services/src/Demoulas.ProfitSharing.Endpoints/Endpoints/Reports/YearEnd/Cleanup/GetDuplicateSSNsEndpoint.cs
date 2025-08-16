@@ -1,13 +1,12 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Response;
+﻿using CsvHelper.Configuration;
+using Demoulas.Common.Contracts.Contracts.Request;
+using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Endpoints.Groups;
-using CsvHelper.Configuration;
-using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
-using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.Common.Contracts.Contracts.Request;
 
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;

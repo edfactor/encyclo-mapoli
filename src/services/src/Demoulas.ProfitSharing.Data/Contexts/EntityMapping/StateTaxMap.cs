@@ -1,7 +1,7 @@
-﻿using Demoulas.ProfitSharing.Data.Entities;
+﻿using Demoulas.Common.Data.Contexts.ValueConverters;
+using Demoulas.ProfitSharing.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Demoulas.Common.Data.Contexts.ValueConverters;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
 internal sealed class StateTaxMap : IEntityTypeConfiguration<StateTax>

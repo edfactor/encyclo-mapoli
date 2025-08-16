@@ -1,13 +1,11 @@
-﻿using System.Data.SqlTypes;
-using System.Runtime.InteropServices.JavaScript;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
-using Microsoft.EntityFrameworkCore;
-using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.Util.Extensions;
+using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services;
 
@@ -120,7 +118,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
 
             // Get vesting balance from the total service
             var vestingBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(
-                Common.Contracts.Request.SearchBy.Ssn,
+                SearchBy.Ssn,
                 employeeData.Ssn,
                 (short)req.ProfitYear,
                 cancellationToken);
@@ -297,7 +295,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
 
                 // Get vesting balance from the total service
                 var vestingBalance = await _totalService.GetVestingBalanceForSingleMemberAsync(
-                    Common.Contracts.Request.SearchBy.Ssn,
+                    SearchBy.Ssn,
                     employeeData.Ssn,
                     (short)req.ProfitYear,
                     cancellationToken);

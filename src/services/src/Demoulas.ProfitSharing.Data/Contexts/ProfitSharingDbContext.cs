@@ -1,6 +1,5 @@
 ﻿using Demoulas.Common.Data.Contexts.Contexts;
 using Demoulas.Common.Data.Services.Entities.Entities;
-using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Entities.Audit;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;

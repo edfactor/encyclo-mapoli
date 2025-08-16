@@ -3,7 +3,6 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.Military;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
-using Microsoft.AspNetCore.Http;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Military;
 

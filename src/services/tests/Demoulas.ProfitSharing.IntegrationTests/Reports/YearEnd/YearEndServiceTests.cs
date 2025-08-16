@@ -1,10 +1,10 @@
 ﻿using System.Data.Common;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.Util.Extensions;
-using Shouldly;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Oracle.ManagedDataAccess.Client;
+using Shouldly;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd;
 
