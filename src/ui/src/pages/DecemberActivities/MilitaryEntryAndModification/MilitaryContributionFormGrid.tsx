@@ -4,7 +4,7 @@ import { useLazyGetMilitaryContributionsQuery } from "reduxstore/api/MilitaryApi
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { Typography, Button } from "@mui/material";
-import MasterInquiryEmployeeDetails from "../../MasterInquiry/MasterInquiryEmployeeDetails";
+import StandaloneMemberDetails from "../../MasterInquiry/StandaloneMemberDetails";
 import { GetMilitaryContributionColumns } from "./MilitaryContributionFormGridColumns";
 import { CAPTIONS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
@@ -76,7 +76,7 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
     <>
       {masterInquiryEmployeeDetails && profitYear > 0 && (
           <MissiveAlertProvider>
-            <MasterInquiryEmployeeDetails
+            <StandaloneMemberDetails
               memberType={masterInquiryEmployeeDetails.isEmployee ? 1 : 2}
               id={masterInquiryEmployeeDetails.id}
               profitYear={profitYear}
