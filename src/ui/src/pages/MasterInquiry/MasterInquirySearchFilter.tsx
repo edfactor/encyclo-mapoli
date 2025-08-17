@@ -17,7 +17,6 @@ import React, { useEffect, useCallback, useMemo, memo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import { useLazySearchProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
 import {
   clearMasterInquiryData,
   clearMasterInquiryGroupingData,
@@ -30,7 +29,6 @@ import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 import { memberTypeGetNumberMap, paymentTypeGetNumberMap, splitFullPSN } from "./MasterInquiryFunctions";
-import { useMissiveAlerts } from "./useMissiveAlerts";
 import { MAX_EMPLOYEE_BADGE_LENGTH } from "../../constants";
 
 const schema = yup.object().shape({
@@ -90,22 +88,19 @@ const schema = yup.object().shape({
 });
 
 interface MasterInquirySearchFilterProps {
-  setInitialSearchLoaded: (include: boolean) => void;
-  onSearch: (params: MasterInquiryRequest | undefined) => void;
+  onSearch: (params: MasterInquiryRequest) => void;
+  onReset: () => void;
+  isSearching?: boolean;
 }
 
-const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ setInitialSearchLoaded, onSearch }) => {
-  const [triggerSearch, { isFetching }] = useLazySearchProfitMasterInquiryQuery();
+const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ onSearch, onReset, isSearching = false }) => {
   const { masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
-  const { clearAlerts } = useMissiveAlerts();
-
   const dispatch = useDispatch();
 
   const { badgeNumber } = useParams<{
     badgeNumber: string;
   }>();
 
-  const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const profitYear = useDecemberFlowProfitYear();
 
   const determineCorrectMemberType = (badgeNum: string | undefined) => {
@@ -118,13 +113,11 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
     control,
     handleSubmit,
     formState: { errors, isValid },
-    reset,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    trigger
+    reset
   } = useForm<MasterInquirySearch>({
     resolver: yupResolver(schema) as any,
     defaultValues: {
-      endProfitYear: profitYear, // Always use profitYear const as default
+      endProfitYear: profitYear,
       startProfitMonth: masterInquiryRequestParams?.startProfitMonth || undefined,
       endProfitMonth: masterInquiryRequestParams?.endProfitMonth || undefined,
       socialSecurity: masterInquiryRequestParams?.socialSecurity || undefined,
@@ -147,14 +140,12 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
   });
 
   useEffect(() => {
-    if (badgeNumber && hasToken) {
+    if (badgeNumber) {
       reset({
         ...schema.getDefault(),
         memberType: determineCorrectMemberType(badgeNumber),
         badgeNumber: Number(badgeNumber)
       });
-
-      clearAlerts(); // Clear existing alerts
 
       const { psnSuffix, verifiedBadgeNumber } = splitFullPSN(badgeNumber);
 
@@ -167,26 +158,9 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
         _timestamp: Date.now()
       };
 
-      // First ensure the parent component has the search parameters
       onSearch(searchParams);
-
-      triggerSearch(searchParams, false)
-        .unwrap()
-        .then((response) => {
-          // Update loaded state based on response
-          if (
-            response && Array.isArray(response) ? response.length > 0 : response.results && response.results.length > 0
-          ) {
-            setInitialSearchLoaded(true);
-          } else {
-            // Instead of setting missiveAlerts, pass up a signal (to be implemented)
-            // setMissiveAlerts([...]);
-
-            setInitialSearchLoaded(false);
-          }
-        });
     }
-  }, [badgeNumber, hasToken, reset, triggerSearch, profitYear]);
+  }, [badgeNumber, reset, profitYear, onSearch]);
 
   const selectSx = useMemo(
     () => ({
@@ -205,12 +179,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
   const validateAndSearch = useCallback(
     handleSubmit((data) => {
       if (isValid) {
-        // clear missives
-        clearAlerts();
-
-        // Create a unique timestamp to ensure each search is treated as new
         const timestamp = Date.now();
-
         const { psnSuffix, verifiedBadgeNumber } = splitFullPSN(data.badgeNumber?.toString());
 
         const searchParams: MasterInquiryRequest = {
@@ -233,48 +202,22 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
           ...(!!data.earnings && { earningsAmount: data.earnings }),
           ...(!!data.forfeiture && { forfeitureAmount: data.forfeiture }),
           ...(!!data.payment && { paymentAmount: data.payment }),
-          // Add a unique timestamp field to force React to see this as a new object
           _timestamp: timestamp
         };
 
-        // Clear existing state first
-        setInitialSearchLoaded(false);
-
-        // Set new search parameters immediately
         onSearch(searchParams);
-
-        triggerSearch(searchParams, false)
-          .unwrap()
-          .then((response) => {
-            // Update loaded state based on response
-            if (
-              response && Array.isArray(response)
-                ? response.length > 0
-                : response.results && response.results.length > 0
-            ) {
-              setInitialSearchLoaded(true);
-            } else {
-              setInitialSearchLoaded(false);
-              // Don't call onSearch(undefined) here as it clears searchParams
-              // and causes the grid to disappear. The grid itself handles no results.
-              onSearch(undefined);
-            }
-          });
-
         dispatch(setMasterInquiryRequestParams(data));
       }
     }),
-    [handleSubmit, isValid, clearAlerts, profitYear, setInitialSearchLoaded, onSearch, triggerSearch, dispatch]
+    [handleSubmit, isValid, profitYear, onSearch, dispatch]
   );
 
   const handleReset = useCallback(() => {
-    clearAlerts();
-    setInitialSearchLoaded(false);
     dispatch(clearMasterInquiryRequestParams());
     dispatch(clearMasterInquiryData());
     dispatch(clearMasterInquiryGroupingData());
     reset({
-      endProfitYear: profitYear, // Always reset to default profitYear
+      endProfitYear: profitYear,
       startProfitMonth: undefined,
       endProfitMonth: undefined,
       socialSecurity: null,
@@ -294,9 +237,8 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
         isSortDescending: true
       }
     });
-    // Clear search state and noResults flag
-    onSearch(null);
-  }, [clearAlerts, setInitialSearchLoaded, dispatch, reset, profitYear, onSearch]);
+    onReset();
+  }, [dispatch, reset, profitYear, onReset]);
 
   // Memoized form field components
   const ProfitYearField = memo(() => (
@@ -548,8 +490,8 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ s
             <SearchAndReset
               handleReset={handleReset}
               handleSearch={validateAndSearch}
-              isFetching={isFetching}
-              disabled={!isValid}
+              isFetching={isSearching}
+              disabled={!isValid || isSearching}
             />
           </Grid>
         </Grid>
