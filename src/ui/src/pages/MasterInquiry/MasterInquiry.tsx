@@ -1,7 +1,5 @@
 import { Divider, Grid } from "@mui/material";
 import MissiveAlerts from "components/MissiveAlerts/MissiveAlerts";
-import { useState } from "react";
-import { MasterInquiryRequest } from "reduxstore/types";
 import { DSMAccordion, Page } from "smart-ui-library";
 import MasterInquiryGrid from "./MasterInquiryDetailsGrid";
 import MasterInquiryEmployeeDetails from "./MasterInquiryEmployeeDetails";
@@ -9,21 +7,32 @@ import MasterInquiryMemberGrid from "./MasterInquiryMemberGrid";
 import MasterInquirySearchFilter from "./MasterInquirySearchFilter";
 import { MissiveAlertProvider } from "./MissiveAlertContext";
 import { useMissiveAlerts } from "./useMissiveAlerts";
-
-interface SelectedMember {
-  memberType: number;
-  id: number;
-  ssn: number;
-  badgeNumber: number;
-  psnSuffix: number;
-}
+import useMasterInquiry from "./useMasterInquiry";
 
 const MasterInquiryContent = () => {
-  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
-  const [searchParams, setSearchParams] = useState<MasterInquiryRequest | null>(null);
-  const [selectedMember, setSelectedMember] = useState<SelectedMember | null>(null);
-  const [noResults, setNoResults] = useState(false);
   const { missiveAlerts } = useMissiveAlerts();
+  const {
+    searchParams,
+    searchResults,
+    selectedMember,
+    memberDetails,
+    memberProfitData,
+    isSearching,
+    isFetchingMemberDetails,
+    isFetchingProfitData,
+    showMemberGrid,
+    showMemberDetails,
+    showProfitDetails,
+    noResultsMessage,
+    initialSearchLoaded,
+    memberGridPagination,
+    profitGridPagination,
+    executeSearch,
+    selectMember,
+    resetAll,
+    updateMemberGridPagination,
+    updateProfitGridPagination
+  } = useMasterInquiry();
 
   return (
     <Grid
@@ -39,47 +48,47 @@ const MasterInquiryContent = () => {
         width={"100%"}>
         <DSMAccordion title="Filter">
           <MasterInquirySearchFilter
-            setInitialSearchLoaded={setInitialSearchLoaded}
-            onSearch={(params) => {
-              setSearchParams(params ?? null);
-              setSelectedMember(null);
-              // Only set noResults to true if params is undefined (not found)
-              // Reset noResults when params is null (form reset)
-              if (params === undefined) {
-                setNoResults(true);
-              } else {
-                setNoResults(false);
-              }
-            }}
+            onSearch={executeSearch}
+            onReset={resetAll}
+            isSearching={isSearching}
           />
         </DSMAccordion>
       </Grid>
       {missiveAlerts.length > 0 && <MissiveAlerts missiveAlerts={missiveAlerts} />}
 
-      {searchParams && (
+      {showMemberGrid && searchResults && (
         <MasterInquiryMemberGrid
-          key={searchParams._timestamp || Date.now()}
-          searchParams={searchParams}
-          onBadgeClick={(data) => setSelectedMember(data || null)}
+          key={searchParams?._timestamp || Date.now()}
+          searchResults={searchResults}
+          onMemberSelect={selectMember}
+          memberGridPagination={memberGridPagination}
+          onPaginationChange={updateMemberGridPagination}
         />
       )}
 
-      {/* Render employee details if identifiers are present in selectedMember, or show missive if noResults */}
-      {(noResults || (selectedMember && selectedMember.memberType !== undefined && selectedMember.id)) && (
+      {showMemberDetails && selectedMember && (
         <MasterInquiryEmployeeDetails
-          memberType={selectedMember?.memberType ?? 0}
-          id={selectedMember?.id ?? 0}
-          profitYear={searchParams?.endProfitYear}
-          noResults={noResults}
-        />
-      )}
-
-      {/* Render details for selected member if present */}
-      {!noResults && selectedMember && (
-        <MasterInquiryGrid
           memberType={selectedMember.memberType}
           id={selectedMember.id}
+          profitYear={searchParams?.endProfitYear}
+          memberDetails={memberDetails}
+          isLoading={isFetchingMemberDetails}
         />
+      )}
+
+      {showProfitDetails && selectedMember && (
+        <MasterInquiryGrid
+          profitData={memberProfitData}
+          isLoading={isFetchingProfitData}
+          profitGridPagination={profitGridPagination}
+          onPaginationChange={updateProfitGridPagination}
+        />
+      )}
+
+      {noResultsMessage && !showMemberGrid && !showMemberDetails && (
+        <Grid size={{ xs: 12 }} sx={{ padding: "24px" }}>
+          <div>{noResultsMessage}</div>
+        </Grid>
       )}
     </Grid>
   );

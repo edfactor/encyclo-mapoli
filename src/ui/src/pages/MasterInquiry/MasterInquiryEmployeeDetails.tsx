@@ -1,114 +1,44 @@
 import { Grid, Typography } from "@mui/material";
 import LabelValueSection from "components/LabelValueSection";
-import React, { useEffect, useMemo, memo } from "react";
-import { useSelector } from "react-redux";
-import { useLazyGetProfitMasterInquiryMemberQuery } from "reduxstore/api/InquiryApi";
-import { RootState } from "reduxstore/store";
-import { MissiveResponse } from "reduxstore/types";
+import React, { useMemo, memo } from "react";
 import { formatNumberWithComma, numberToCurrency } from "smart-ui-library";
 import { formatPercentage } from "utils/formatPercentage";
-import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 import "../../styles/employee-details-lightbox.css";
 import { mmDDYYFormat } from "../../utils/dateUtils";
 import { getEnrolledStatus, getForfeitedStatus } from "../../utils/enrollmentUtil";
 import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
-import { isSimpleSearch } from "./MasterInquiryFunctions";
-import { MASTER_INQUIRY_MESSAGES } from "./MasterInquiryMessages";
-import { useMissiveAlerts } from "./useMissiveAlerts";
 
 interface MasterInquiryEmployeeDetailsProps {
   memberType: number;
   id: string | number;
   profitYear?: number | null | undefined;
-  noResults?: boolean;
+  memberDetails?: any | null;
+  isLoading?: boolean;
 }
 
+/*
+Note, the first three parameters appear to be unused, but.... they are used
+in the React memo stuff at the bottom and are important for edge cases like these:
+ - If you switch from Member A to Member B, but memberDetails is still loading (null), the
+  component wouldn't rerender
+  - If you change the profit year but memberDetails hasn't updated yet, the component wouldn't
+  know to rerender
+  - The component could show stale data for wrong member
+*/
 const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> = memo(
-  ({ memberType, id, profitYear, noResults }) => {
-    const [trigger, { data: details, isLoading, isError }] = useLazyGetProfitMasterInquiryMemberQuery();
-    // Always call trigger with useEffect dependency, never skip
-    const { masterInquiryResults } = useSelector((state: RootState) => state.inquiry);
-
-    const missives = useSelector((state: RootState) => state.lookups.missives);
-    const { addAlert, addAlerts, hasAlert } = useMissiveAlerts();
-
-    const defaultProfitYear = useDecemberFlowProfitYear();
-    const [isMilitary, setIsMilitary] = React.useState(false);
-
-    // We need to get the saved query params
-    const { masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
-
-    useEffect(() => {
-      if (memberType && id) {
-        trigger({
-          memberType,
-          id: typeof id === "string" ? parseInt(id) : id,
-          profitYear: profitYear ?? defaultProfitYear
-        });
-      }
-    }, [memberType, id, profitYear, defaultProfitYear]);
-
-    useEffect(() => {
-      if (masterInquiryResults) {
-        // We check transaction comment types to know if this is a military member
-        const militaryTransactions = masterInquiryResults.filter((item) => item.commentTypeName === "Military");
-        setIsMilitary(militaryTransactions.length > 0);
-      } else {
-        setIsMilitary(false);
-      }
-    }, [masterInquiryResults]);
-
-    useEffect(() => {
-      if (noResults) {
-        if (isSimpleSearch(masterInquiryRequestParams)) {
-          if (!hasAlert(MASTER_INQUIRY_MESSAGES.MEMBER_NOT_FOUND.id)) {
-            addAlert(MASTER_INQUIRY_MESSAGES.MEMBER_NOT_FOUND);
-          }
-        } else {
-          if (!hasAlert(MASTER_INQUIRY_MESSAGES.NO_RESULTS_FOUND.id)) {
-            addAlert(MASTER_INQUIRY_MESSAGES.NO_RESULTS_FOUND);
-          }
-        }
-      }
-    }, [noResults, masterInquiryRequestParams, hasAlert, addAlert]);
-
-    useEffect(() => {
-      if (!details) return;
-
-      // Handle missives from API response
-      if (details.missives && missives) {
-        const localMissives: MissiveResponse[] = details.missives
-          .map((id: number) => missives.find((m: MissiveResponse) => m.id === id))
-          .filter(Boolean) as MissiveResponse[];
-
-        if (localMissives.length > 0) {
-          addAlerts(localMissives);
-        }
-      }
-
-      // Handle beneficiary found warning
-      if (!details.isEmployee && masterInquiryRequestParams?.memberType == "all") {
-        addAlert(MASTER_INQUIRY_MESSAGES.BENEFICIARY_FOUND(details.ssn));
-      }
-
-      // Handle military vested warning
-      if (isMilitary && details.percentageVested > 0) {
-        addAlert(MASTER_INQUIRY_MESSAGES.MILITARY_VESTED_WARNING(details.percentageVested));
-      }
-    }, [details, missives, masterInquiryRequestParams?.memberType, isMilitary, addAlert, addAlerts]);
-
+  ({ memberType, id, profitYear, memberDetails, isLoading }) => {
     // Memoized enrollment status
     const enrollmentStatus = useMemo(() => {
-      if (!details) return { enrolled: "", forfeited: "" };
+      if (!memberDetails) return { enrolled: "", forfeited: "" };
       return {
-        enrolled: getEnrolledStatus(details.enrollmentId),
-        forfeited: getForfeitedStatus(details.enrollmentId)
+        enrolled: getEnrolledStatus(memberDetails.enrollmentId),
+        forfeited: getForfeitedStatus(memberDetails.enrollmentId)
       };
-    }, [details?.enrollmentId]);
+    }, [memberDetails?.enrollmentId]);
 
     // Memoized summary section
     const summarySection = useMemo(() => {
-      if (!details) return [];
+      if (!memberDetails) return [];
       const {
         firstName,
         lastName,
@@ -120,7 +50,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
         isEmployee,
         workLocation,
         storeNumber
-      } = details;
+      } = memberDetails;
 
       return [
         { label: "Name", value: `${lastName}, ${firstName}` },
@@ -132,11 +62,11 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
         { label: "Enrolled", value: enrollmentStatus.enrolled },
         { label: "Forfeited", value: enrollmentStatus.forfeited }
       ];
-    }, [details, enrollmentStatus]);
+    }, [memberDetails, enrollmentStatus]);
 
     // Memoized personal section
     const personalSection = useMemo(() => {
-      if (!details) return [];
+      if (!memberDetails) return [];
       const {
         badgeNumber,
         psnSuffix,
@@ -148,7 +78,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
         dateOfBirth,
         ssn: ssnValue,
         allocationToAmount
-      } = details;
+      } = memberDetails;
 
       return [
         ...(isEmployee ? [{ label: "Badge", value: viewBadgeLinkRenderer(badgeNumber) }] : []),
@@ -161,11 +91,11 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
         { label: "SSN", value: `${ssnValue}` },
         { label: "Allocation To", value: numberToCurrency(allocationToAmount) }
       ];
-    }, [details]);
+    }, [memberDetails]);
 
     // Memoized plan section
     const planSection = useMemo(() => {
-      if (!details) return [];
+      if (!memberDetails) return [];
       const {
         beginPSAmount,
         currentPSAmount,
@@ -176,7 +106,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
         yearsInPlan,
         percentageVested,
         receivedContributionsLastYear
-      } = details;
+      } = memberDetails;
 
       return [
         { label: "Begin Balance", value: numberToCurrency(beginPSAmount) },
@@ -188,13 +118,13 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
           : []),
         ...(isEmployee ? [{ label: "Years In Plan", value: yearsInPlan }] : []),
         { label: "Vested Percent", value: formatPercentage(percentageVested) },
-        { label: "Contributions Last Year", value: (receivedContributionsLastYear ? "Y" : "N") }
+        { label: "Contributions Last Year", value: receivedContributionsLastYear ? "Y" : "N" }
       ];
-    }, [details]);
+    }, [memberDetails]);
 
     // Memoized milestone section
     const milestoneSection = useMemo(() => {
-      if (!details) return [];
+      if (!memberDetails) return [];
       const {
         isEmployee,
         hireDate,
@@ -205,7 +135,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
         currentEtva,
         previousEtva,
         allocationFromAmount
-      } = details;
+      } = memberDetails;
 
       return [
         ...(isEmployee ? [{ label: "Hire Date", value: hireDate ? mmDDYYFormat(hireDate) : "N/A" }] : []),
@@ -219,15 +149,11 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
         { label: "Previous ETVA", value: numberToCurrency(previousEtva) },
         { label: "Allocation From", value: numberToCurrency(allocationFromAmount) }
       ];
-    }, [details]);
+    }, [memberDetails]);
 
     // Early returns after all hooks are called
-    if (noResults) {
-      return null;
-    }
-
     if (isLoading) return <Typography>Loading...</Typography>;
-    if (isError || !details) return <Typography>No details found.</Typography>;
+    if (!memberDetails) return <Typography>No details found.</Typography>;
 
     return (
       <div
@@ -273,7 +199,8 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
       prevProps.memberType === nextProps.memberType &&
       prevProps.id === nextProps.id &&
       prevProps.profitYear === nextProps.profitYear &&
-      prevProps.noResults === nextProps.noResults
+      prevProps.memberDetails === nextProps.memberDetails &&
+      prevProps.isLoading === nextProps.isLoading
     );
   }
 );

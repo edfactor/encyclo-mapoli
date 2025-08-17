@@ -52,6 +52,7 @@ export interface ForfeitureAdjustmentDetail {
 export interface SuggestedForfeitResponse {
   badgeNumber: number;
   suggestedForfeitAmount: number;
+  demographicId: number;
 }
 
 // Alias for backwards compatibility
