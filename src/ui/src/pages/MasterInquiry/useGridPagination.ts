@@ -37,18 +37,22 @@ export const useGridPagination = ({
   const [sortBy, setSortBy] = useState(initialSortBy);
   const [isSortDescending, setIsSortDescending] = useState(initialSortDescending);
 
-  // Create stable sortParams object
-  const sortParams = useMemo(() => ({
-    sortBy,
-    isSortDescending
-  }), [sortBy, isSortDescending]);
+  const sortParams = useMemo(
+    () => ({
+      sortBy,
+      isSortDescending
+    }),
+    [sortBy, isSortDescending]
+  );
 
-  // Create stable pagination object
-  const pagination = useMemo(() => ({
-    pageNumber,
-    pageSize,
-    sortParams
-  }), [pageNumber, pageSize, sortParams]);
+  const pagination = useMemo(
+    () => ({
+      pageNumber,
+      pageSize,
+      sortParams
+    }),
+    [pageNumber, pageSize, sortParams]
+  );
 
   const handlePaginationChange = useCallback(
     (newPageNumber: number, newPageSize: number) => {
