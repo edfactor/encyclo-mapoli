@@ -54,7 +54,6 @@ const useMasterInquiry = () => {
 
   const { addAlert, addAlerts, clearAlerts } = useMissiveAlerts();
 
-  // Use refs to maintain stable references to current values
   const searchParamsRef = useRef(searchParams);
   const selectedMemberRef = useRef(selectedMember);
 
@@ -66,7 +65,6 @@ const useMasterInquiry = () => {
     selectedMemberRef.current = selectedMember;
   }, [selectedMember]);
 
-  // Stable pagination handlers
   const handleMemberGridPaginationChange = useCallback(
     (pageNumber: number, pageSize: number, sortParams: any) => {
       const currentSearchParams = searchParamsRef.current;
@@ -178,7 +176,7 @@ const useMasterInquiry = () => {
           setNoResultsMessage(null);
 
           // Add appropriate missive alert based on current search parameters
-          // Convert API params back to form-like structure for isSimpleSearch check
+          // Convert API params back to form-ish structure for isSimpleSearch check
           const searchFormData: MasterInquirySearch = {
             endProfitYear: params.endProfitYear,
             startProfitMonth: params.startProfitMonth,
@@ -215,7 +213,6 @@ const useMasterInquiry = () => {
           description: "The search request failed. Please try again."
         } as MissiveResponse);
       } finally {
-        // Always clear loading state when search completes
         setIsManuallySearching(false);
       }
     },
@@ -270,7 +267,6 @@ const useMasterInquiry = () => {
     addAlerts
   ]);
 
-  // Create stable dependencies for profit fetching
   const profitFetchDeps = useMemo(
     () => ({
       memberType: selectedMember?.memberType,
