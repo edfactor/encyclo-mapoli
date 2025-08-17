@@ -6,7 +6,7 @@ import {
   useLazyGetProfitMasterInquiryMemberDetailsQuery
 } from "reduxstore/api/InquiryApi";
 import { RootState } from "reduxstore/store";
-import { MasterInquiryRequest, EmployeeDetails, MissiveResponse } from "reduxstore/types";
+import { MasterInquiryRequest, EmployeeDetails, MissiveResponse, MasterInquirySearch } from "reduxstore/types";
 import { isSimpleSearch } from "./MasterInquiryFunctions";
 import { MASTER_INQUIRY_MESSAGES } from "./MasterInquiryMessages";
 import { useMissiveAlerts } from "./useMissiveAlerts";
@@ -34,36 +34,6 @@ interface ProfitData {
   total: number;
 }
 
-interface MasterInquiryState {
-  // Search state
-  searchParams: MasterInquiryRequest | null;
-  searchResults: SearchResponse | null;
-  isSearching: boolean;
-  searchError: string | null;
-
-  // Selected member state
-  selectedMember: SelectedMember | null;
-  memberDetails: MemberDetails | null;
-  memberProfitData: ProfitData | null;
-  isFetchingMemberDetails: boolean;
-  isFetchingProfitData: boolean;
-
-  // UI state
-  showMemberGrid: boolean;
-  showMemberDetails: boolean;
-  showProfitDetails: boolean;
-  noResultsMessage: string | null;
-  initialSearchLoaded: boolean;
-}
-
-interface MasterInquiryActions {
-  executeSearch: (params: MasterInquiryRequest) => Promise<void>;
-  clearSearch: () => void;
-  selectMember: (member: SelectedMember | null) => void;
-  clearSelection: () => void;
-  resetAll: () => void;
-}
-
 const useMasterInquiry = () => {
   const [searchParams, setSearchParams] = useState<MasterInquiryRequest | null>(null);
   const [searchResults, setSearchResults] = useState<SearchResponse | null>(null);
@@ -87,11 +57,11 @@ const useMasterInquiry = () => {
   // Use refs to maintain stable references to current values
   const searchParamsRef = useRef(searchParams);
   const selectedMemberRef = useRef(selectedMember);
-  
+
   useEffect(() => {
     searchParamsRef.current = searchParams;
   }, [searchParams]);
-  
+
   useEffect(() => {
     selectedMemberRef.current = selectedMember;
   }, [selectedMember]);
@@ -169,10 +139,9 @@ const useMasterInquiry = () => {
         setNoResultsMessage(null);
         setInitialSearchLoaded(false);
 
-        // Ensure minimum loading state visibility
         const [response] = await Promise.all([
           triggerSearch(params).unwrap(),
-          new Promise(resolve => setTimeout(resolve, 300)) // Minimum 300ms loading state
+          new Promise((resolve) => setTimeout(resolve, 300)) // Minimum 300ms loading state
         ]);
 
         if (
@@ -194,9 +163,9 @@ const useMasterInquiry = () => {
               badgeNumber: Number(member.badgeNumber),
               psnSuffix: Number(member.psnSuffix)
             };
-            
+
             // Only set selected member if it's different from current one
-            setSelectedMember(prev => {
+            setSelectedMember((prev) => {
               if (prev?.id === selectedMemberData.id && prev?.memberType === selectedMemberData.memberType) {
                 return prev; // No change needed
               }
@@ -207,21 +176,26 @@ const useMasterInquiry = () => {
           setSearchResults(null);
           setInitialSearchLoaded(false);
           setNoResultsMessage(null);
-          
+
           // Add appropriate missive alert based on current search parameters
           // Convert API params back to form-like structure for isSimpleSearch check
-          const searchFormData = {
-            name: params.name,
-            socialSecurity: params.ssn,
-            badgeNumber: params.badgeNumber,
+          const searchFormData: MasterInquirySearch = {
+            endProfitYear: params.endProfitYear,
             startProfitMonth: params.startProfitMonth,
             endProfitMonth: params.endProfitMonth,
+            socialSecurity: params.ssn,
+            name: params.name,
+            badgeNumber: params.badgeNumber,
+            paymentType: "all",
+            memberType: "all",
             contribution: params.contributionAmount,
             earnings: params.earningsAmount,
             forfeiture: params.forfeitureAmount,
-            payment: params.paymentAmount
+            payment: params.paymentAmount,
+            voids: false,
+            pagination: params.pagination
           };
-          
+
           const alertMessage = isSimpleSearch(searchFormData)
             ? MASTER_INQUIRY_MESSAGES.MEMBER_NOT_FOUND
             : MASTER_INQUIRY_MESSAGES.NO_RESULTS_FOUND;
@@ -232,7 +206,7 @@ const useMasterInquiry = () => {
         setSearchResults(null);
         setInitialSearchLoaded(false);
         setNoResultsMessage(null);
-        
+
         // Add error alert
         addAlert({
           id: 999,
@@ -297,21 +271,24 @@ const useMasterInquiry = () => {
   ]);
 
   // Create stable dependencies for profit fetching
-  const profitFetchDeps = useMemo(() => ({
-    memberType: selectedMember?.memberType,
-    id: selectedMember?.id,
-    pageNumber: profitGridPagination.pageNumber,
-    pageSize: profitGridPagination.pageSize,
-    sortBy: profitGridPagination.sortParams.sortBy,
-    isSortDescending: profitGridPagination.sortParams.isSortDescending
-  }), [
-    selectedMember?.memberType,
-    selectedMember?.id,
-    profitGridPagination.pageNumber,
-    profitGridPagination.pageSize,
-    profitGridPagination.sortParams.sortBy,
-    profitGridPagination.sortParams.isSortDescending
-  ]);
+  const profitFetchDeps = useMemo(
+    () => ({
+      memberType: selectedMember?.memberType,
+      id: selectedMember?.id,
+      pageNumber: profitGridPagination.pageNumber,
+      pageSize: profitGridPagination.pageSize,
+      sortBy: profitGridPagination.sortParams.sortBy,
+      isSortDescending: profitGridPagination.sortParams.isSortDescending
+    }),
+    [
+      selectedMember?.memberType,
+      selectedMember?.id,
+      profitGridPagination.pageNumber,
+      profitGridPagination.pageSize,
+      profitGridPagination.sortParams.sortBy,
+      profitGridPagination.sortParams.isSortDescending
+    ]
+  );
 
   useEffect(() => {
     if (profitFetchDeps.memberType && profitFetchDeps.id) {
