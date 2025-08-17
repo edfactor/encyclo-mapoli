@@ -27,14 +27,16 @@ interface MasterInquiryMemberGridProps {
     pageSize: number;
     sortParams: any;
   };
-  onPaginationChange: (pageNumber: number, pageSize: number, sortParams: any) => void;
+  onPaginationChange: (pageNumber: number, pageSize: number) => void;
+  onSortChange: (sortParams: any) => void;
 }
 
 const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = ({
   searchResults,
   onMemberSelect,
   memberGridPagination,
-  onPaginationChange
+  onPaginationChange,
+  onSortChange
 }: MasterInquiryMemberGridProps) => {
   const columns = useMemo(() => GetMasterInquiryMemberGridColumns(), []);
 
@@ -49,11 +51,11 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = ({
   };
 
   const handlePaginationChange = (pageNumber: number, pageSize: number) => {
-    onPaginationChange(pageNumber, pageSize, memberGridPagination.sortParams);
+    onPaginationChange(pageNumber, pageSize);
   };
 
   const handleSortChange = (sortParams: any) => {
-    onPaginationChange(memberGridPagination.pageNumber, memberGridPagination.pageSize, sortParams);
+    onSortChange(sortParams);
   };
 
   return (

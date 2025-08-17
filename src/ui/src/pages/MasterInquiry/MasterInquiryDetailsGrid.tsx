@@ -17,14 +17,16 @@ interface MasterInquiryGridProps {
     pageSize: number;
     sortParams: any;
   };
-  onPaginationChange?: (pageNumber: number, pageSize: number, sortParams: any) => void;
+  onPaginationChange?: (pageNumber: number, pageSize: number) => void;
+  onSortChange?: (sortParams: any) => void;
 }
 
 const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ 
   profitData, 
   isLoading, 
   profitGridPagination,
-  onPaginationChange 
+  onPaginationChange,
+  onSortChange 
 }) => {
   const columnDefs = useMemo(() => GetMasterInquiryGridColumns(), []);
 
@@ -37,14 +39,14 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({
   }
 
   const handlePaginationChange = (pageNumber: number, pageSize: number) => {
-    if (onPaginationChange && profitGridPagination) {
-      onPaginationChange(pageNumber, pageSize, profitGridPagination.sortParams);
+    if (onPaginationChange) {
+      onPaginationChange(pageNumber, pageSize);
     }
   };
 
   const handleSortChange = (sortParams: any) => {
-    if (onPaginationChange && profitGridPagination) {
-      onPaginationChange(profitGridPagination.pageNumber, profitGridPagination.pageSize, sortParams);
+    if (onSortChange) {
+      onSortChange(sortParams);
     }
   };
 

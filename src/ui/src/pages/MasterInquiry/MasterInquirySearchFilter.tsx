@@ -252,10 +252,14 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
         control={control}
         render={({ field }) => (
           <Select
-            {...field}
+            name={field.name}
+            ref={field.ref}
             onChange={(e) => {
-              field.onChange(e.target.value === undefined ? null : e.target.value);
+              field.onChange(
+                typeof e.target.value === "string" && e.target.value === "" ? null : Number(e.target.value)
+              );
             }}
+            onBlur={field.onBlur}
             sx={selectSx}
             fullWidth
             size="small"
@@ -287,7 +291,9 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
           control={control}
           render={({ field }) => (
             <TextField
-              {...field}
+              name={field.name}
+              ref={field.ref}
+              onBlur={field.onBlur}
               fullWidth
               type={type}
               size="small"
@@ -360,8 +366,11 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
           <FormControlLabel
             control={
               <Checkbox
-                {...field}
+                name={field.name}
+                ref={field.ref}
                 checked={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
                 size="small"
               />
             }
