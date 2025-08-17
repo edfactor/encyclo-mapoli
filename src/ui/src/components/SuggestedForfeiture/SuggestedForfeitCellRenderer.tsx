@@ -1,6 +1,7 @@
-import { ICellRendererParams } from "ag-grid-community";
+import { ErrorOutline, Error } from "@mui/icons-material";
 import { Tooltip } from "@mui/material";
-import { ErrorOutline } from "@mui/icons-material";
+import { ICellRendererParams } from "ag-grid-community";
+import { ForfeitureDetail } from "types";
 import { validateSuggestedForfeit } from "./validateSuggestedForfeit";
 
 interface SuggestedForfeitCellRendererProps extends ICellRendererParams {
@@ -14,6 +15,15 @@ export function SuggestedForfeitCellRenderer(
 ) {
   if (!params.data?.isDetail || params.data.profitYear !== params.selectedProfitYear) {
     return null;
+  }
+  if (isRehireForfeiture) {
+    // If we already have an UN-FORFEIT for this year, we should not render the cell
+    const hasUnforfeitedDetail = params.data.details?.some(
+      (detail: ForfeitureDetail) => detail.profitYear === params.selectedProfitYear && detail.remark === "UN-FORFEIT"
+    );
+    if (hasUnforfeitedDetail) {
+      return null;
+    }
   }
 
   const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}${params.data.enrollmentId ? `-${params.data.enrollmentId}` : ""}-${params.node?.id || "unknown"}`;
@@ -37,7 +47,7 @@ export function SuggestedForfeitCellRenderer(
         <Tooltip
           title={"This participant cannot be unforfeited due to class action"}
           placement="top">
-          <ErrorOutline sx={{ color: "#1976d2", fontSize: 24, marginTop: "7px", marginLeft: "20px" }} />
+          <Error sx={{ color: "#1976d2", fontSize: 24, marginTop: "6px", marginLeft: "4px" }} />
         </Tooltip>
       )}
       {hasError && (

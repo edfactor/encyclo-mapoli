@@ -8,6 +8,7 @@ export interface ForfeitureDetail extends ProfitYearRequest {
   wages: number;
   enrollmentId: number;
   enrollmentName: string;
+  profitDetailId: number;
 }
 
 export interface RehireForfeiture {
