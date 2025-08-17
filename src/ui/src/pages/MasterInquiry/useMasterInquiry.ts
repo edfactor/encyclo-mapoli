@@ -139,7 +139,7 @@ const useMasterInquiry = () => {
 
         const [response] = await Promise.all([
           triggerSearch(params).unwrap(),
-          new Promise((resolve) => setTimeout(resolve, 300)) // Minimum 300ms loading state
+          new Promise((resolve) => setTimeout(resolve, 300)) // Minimum 300ms loading state to trigger spinner just a bit
         ]);
 
         if (
@@ -165,7 +165,7 @@ const useMasterInquiry = () => {
             // Only set selected member if it's different from current one
             setSelectedMember((prev) => {
               if (prev?.id === selectedMemberData.id && prev?.memberType === selectedMemberData.memberType) {
-                return prev; // No change needed
+                return prev;
               }
               return selectedMemberData;
             });
