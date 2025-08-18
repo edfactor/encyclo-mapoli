@@ -151,9 +151,9 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
     );
   };
 
-  const beneficiaryOfColumnDefs = useMemo(()=>{
+  const beneficiaryOfColumnDefs = useMemo(() => {
     return BeneficiaryOfGridColumns();
-  },[])
+  }, []);
 
   const columnDefs = useMemo(() => {
     const columns = BeneficiaryInquiryGridColumns();

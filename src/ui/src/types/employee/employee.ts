@@ -1,8 +1,8 @@
-import type { 
-  ProfitYearRequest, 
-  SortedPaginationRequestDto, 
+import type {
+  ProfitYearRequest,
+  SortedPaginationRequestDto,
   PagedReportResponse,
-  FrozenProfitYearRequest, 
+  FrozenProfitYearRequest,
   FilterParams
 } from "../common/api";
 

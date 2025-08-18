@@ -35,7 +35,7 @@ export function viewBadgeLinkRenderer(
   if (navigateFunction === undefined) {
     return (
       <Link
-        className="h-5 solid underline normal-case"
+        className="solid h-5 normal-case underline"
         href={`/master-inquiry/${safeValue}`}>
         {displayValue}
       </Link>

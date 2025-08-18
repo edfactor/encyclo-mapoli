@@ -10,9 +10,12 @@ export const MilitaryApi = createApi({
   baseQuery: baseQuery,
   reducerPath: "militaryApi",
   endpoints: (builder) => ({
-    getMilitaryContributions: builder.query<Paged<MasterInquiryDetail>, MilitaryContributionRequest & { archive?: boolean }>({
+    getMilitaryContributions: builder.query<
+      Paged<MasterInquiryDetail>,
+      MilitaryContributionRequest & { archive?: boolean }
+    >({
       query: (request) => ({
-        url: `military${request.archive ? '?archive=true' : ''}`,
+        url: `military${request.archive ? "?archive=true" : ""}`,
         method: "GET",
         params: {
           badgeNumber: request.badgeNumber,

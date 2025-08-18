@@ -4,23 +4,18 @@ import { Grid } from "@mui/material";
 import { SmartModal } from "smart-ui-library";
 import { useUpdateForfeitureAdjustmentMutation } from "reduxstore/api/YearsEndApi";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-import {ForfeitureAdjustmentUpdateRequest, SuggestedForfeitResponse} from "reduxstore/types";
-
+import { ForfeitureAdjustmentUpdateRequest, SuggestedForfeitResponse } from "reduxstore/types";
 
 interface AddForfeitureModalProps {
   open: boolean;
   onClose: () => void;
-  onSave: (formData: {
-    forfeitureAmount: number;
-    classAction: boolean;
-  }) => void;
+  onSave: (formData: { forfeitureAmount: number; classAction: boolean }) => void;
   suggestedForfeitResponse?: SuggestedForfeitResponse | null;
 }
 
-
 const handleResponseError = (error: any) => {
   const title = error?.data?.title;
-  
+
   if (typeof title === "string") {
     if (title.includes("Employee with badge number")) {
       alert("Badge Number not found");
@@ -54,11 +49,11 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
     }
 
     if (suggestedForfeitResponse) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         badgeNumber: suggestedForfeitResponse.badgeNumber,
         forfeitureAmount: suggestedForfeitResponse.suggestedForfeitAmount
-      }))
+      }));
     }
   }, [suggestedForfeitResponse, open]);
 
@@ -86,7 +81,10 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
 
   const handleSave = async () => {
     try {
-      const request: ForfeitureAdjustmentUpdateRequest & { suppressAllToastErrors?: boolean, onlyNetworkToastErrors?: boolean } = {
+      const request: ForfeitureAdjustmentUpdateRequest & {
+        suppressAllToastErrors?: boolean;
+        onlyNetworkToastErrors?: boolean;
+      } = {
         badgeNumber: formData.badgeNumber,
         forfeitureAmount: formData.forfeitureAmount,
         classAction: formData.classAction,
@@ -94,9 +92,9 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
         //suppressAllToastErrors: false,
         onlyNetworkToastErrors: true // Suppress validation errors, only show network errors
       };
-      
+
       const result = await updateForfeiture(request);
-      
+
       // If the response has an error block, handle it
       if (result.error) {
         handleResponseError(result.error);
@@ -141,7 +139,6 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
       <Grid
         container
         spacing={2}>
-
         <Grid size={{ xs: 12 }}>
           <FormControlLabel
             control={
@@ -171,8 +168,6 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
             type="number"
           />
         </Grid>
-        
-        
       </Grid>
     </SmartModal>
   );

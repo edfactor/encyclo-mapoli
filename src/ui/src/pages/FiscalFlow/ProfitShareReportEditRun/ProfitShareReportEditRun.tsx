@@ -23,7 +23,7 @@ const ProfitShareReportEditRun = () => {
       <Button
         onClick={() => setIsModalOpen(true)}
         variant="outlined"
-        className="h-10 whitespace-nowrap min-w-fit">
+        className="h-10 min-w-fit whitespace-nowrap">
         Commit Updates
       </Button>
     );

@@ -255,8 +255,8 @@ code {
 
 .MuiAlertTitle-root {
   font-family: "Lato";
-    font-size: 0.875rem;
-    font-style: bold;
-    font-weight: 600!important;
-    letter-spacing: 0.01063rem;
+  font-size: 0.875rem;
+  font-style: bold;
+  font-weight: 600 !important;
+  letter-spacing: 0.01063rem;
 }

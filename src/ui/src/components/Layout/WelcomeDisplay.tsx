@@ -53,7 +53,7 @@ export const WelcomeDisplay: React.FC<WelcomeDisplayProps> = ({
   return (
     <div
       style={{ position: "fixed", right: "20px" }}
-      className="text-2xl font-normal text-dsm-grey  z-10 relative"
+      className="relative z-10 text-2xl font-normal text-dsm-grey"
       onClick={() => setOpenPopover((prev) => !prev)}
       ref={anchorRef}>
       <div id="welcome-user">

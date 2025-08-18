@@ -34,52 +34,52 @@ const QPAY600Grid: React.FC<QPAY600GridProps> = ({ filterParams, employeeStatus,
           {
             yearsOfService: 5,
             employees: 1250,
-            totalWeeklyPay: 87500.00,
-            lastYearWages: 2450000.00
+            totalWeeklyPay: 87500.0,
+            lastYearWages: 2450000.0
           },
           {
             yearsOfService: 3,
             employees: 980,
-            totalWeeklyPay: 68600.00,
-            lastYearWages: 1940000.00
+            totalWeeklyPay: 68600.0,
+            lastYearWages: 1940000.0
           },
           {
             yearsOfService: 1,
             employees: 750,
-            totalWeeklyPay: 52500.00,
-            lastYearWages: 1500000.00
+            totalWeeklyPay: 52500.0,
+            lastYearWages: 1500000.0
           }
         ],
         total: 3,
         totalEmployees: 2980,
-        totalWeeklyPay: 208600.00,
-        totalLastYearWages: 5890000.00
+        totalWeeklyPay: 208600.0,
+        totalLastYearWages: 5890000.0
       },
       partTime: {
         results: [
           {
             yearsOfService: 2,
             employees: 650,
-            totalWeeklyPay: 19500.00,
-            lastYearWages: 975000.00
+            totalWeeklyPay: 19500.0,
+            lastYearWages: 975000.0
           },
           {
             yearsOfService: 4,
             employees: 420,
-            totalWeeklyPay: 12600.00,
-            lastYearWages: 630000.00
+            totalWeeklyPay: 12600.0,
+            lastYearWages: 630000.0
           },
           {
             yearsOfService: 1,
             employees: 380,
-            totalWeeklyPay: 11400.00,
-            lastYearWages: 570000.00
+            totalWeeklyPay: 11400.0,
+            lastYearWages: 570000.0
           }
         ],
         total: 3,
         totalEmployees: 1450,
-        totalWeeklyPay: 43500.00,
-        totalLastYearWages: 2175000.00
+        totalWeeklyPay: 43500.0,
+        totalLastYearWages: 2175000.0
       }
     };
   }, [filterParams]);
@@ -94,7 +94,7 @@ const QPAY600Grid: React.FC<QPAY600GridProps> = ({ filterParams, employeeStatus,
       const timer = setTimeout(() => {
         setIsFetching(false);
       }, 500);
-      
+
       return () => clearTimeout(timer);
     }
   }, [hasToken, filterParams]);
@@ -110,21 +110,18 @@ const QPAY600Grid: React.FC<QPAY600GridProps> = ({ filterParams, employeeStatus,
     setSortParams(update);
   };
 
-  const columnDefs = useMemo(
-    () => GetQPAY600GridColumns(handleNavigationForButton),
-    [handleNavigationForButton]
-  );
+  const columnDefs = useMemo(() => GetQPAY600GridColumns(handleNavigationForButton), [handleNavigationForButton]);
 
   const data = employeeStatus === "Full time" ? mockData.fullTime : mockData.partTime;
 
   const getTitle = () => {
     const baseTitle = `Employees - ${employeeStatus}`;
     const employeeTypeFilter = filterParams.employeeType;
-    
-    if (employeeTypeFilter && employeeTypeFilter !== '') {
+
+    if (employeeTypeFilter && employeeTypeFilter !== "") {
       return `${baseTitle} (${employeeTypeFilter})`;
     }
-    
+
     return baseTitle;
   };
 
@@ -163,7 +160,7 @@ const QPAY600Grid: React.FC<QPAY600GridProps> = ({ filterParams, employeeStatus,
       ) : (
         <>
           <DSMGrid
-            preferenceKey={`QPAY600_${employeeStatus.toUpperCase().replace(' ', '_')}`}
+            preferenceKey={`QPAY600_${employeeStatus.toUpperCase().replace(" ", "_")}`}
             isLoading={isFetching}
             handleSortChanged={sortEventHandler}
             providedOptions={{

@@ -1,9 +1,5 @@
 import { Paged } from "smart-ui-library";
-import type { 
-  SortedPaginationRequestDto, 
-  ProfitYearRequest,
-  PagedReportResponse 
-} from "../common/api";
+import type { SortedPaginationRequestDto, ProfitYearRequest, PagedReportResponse } from "../common/api";
 import type { AddressDto, ContactInfoDto } from "../common/shared";
 
 export interface BeneficiaryContactDto {
@@ -40,7 +36,7 @@ export interface BeneficiaryDto {
   phoneNumber?: string;
   mobileNumber?: string;
   emailAddress?: string;
-  
+
   beneficiaryContactId: number;
   relationship?: string;
   kindId?: number;

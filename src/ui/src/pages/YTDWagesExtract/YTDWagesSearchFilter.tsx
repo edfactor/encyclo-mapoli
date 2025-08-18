@@ -72,7 +72,7 @@ const YTDWagesSearchFilter: React.FC<YTDWagesSearchFilterProps> = ({ setInitialS
       <Grid
         width="100%"
         paddingX="24px">
-        <div className="search-buttons flex mt-5 justify-start">
+        <div className="search-buttons mt-5 flex justify-start">
           <Button
             variant="contained"
             disabled={isFetching}

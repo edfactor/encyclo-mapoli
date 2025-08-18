@@ -34,11 +34,7 @@ interface QPAY600FilterSectionProps {
   isLoading?: boolean;
 }
 
-const QPAY600FilterSection: React.FC<QPAY600FilterSectionProps> = ({
-  onFilterChange,
-  onReset,
-  isLoading = false
-}) => {
+const QPAY600FilterSection: React.FC<QPAY600FilterSectionProps> = ({ onFilterChange, onReset, isLoading = false }) => {
   const {
     control,
     handleSubmit,

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetContributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import {DSMGrid, ISortParams, TotalsGrid } from "smart-ui-library";
+import { DSMGrid, ISortParams, TotalsGrid } from "smart-ui-library";
 import { GetContributionsByAgeColumns } from "./ContributionsByAgeGridColumns";
 import { Grid } from "@mui/material";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
@@ -81,7 +81,7 @@ const ContributionsByAgeGrid: React.FC<ContributionsByAgeGridProps> = ({ initial
             <div className="px-[24px]">
               <h2 className="text-dsm-secondary">Summary</h2>
             </div>
-            <div className="flex sticky top-0 z-10 bg-white">
+            <div className="sticky top-0 z-10 flex bg-white">
               <TotalsGrid
                 displayData={[
                   [contributionsByAgeTotal?.totalEmployees || 0, numberToCurrency(contributionsByAgeTotal?.totalAmount)]

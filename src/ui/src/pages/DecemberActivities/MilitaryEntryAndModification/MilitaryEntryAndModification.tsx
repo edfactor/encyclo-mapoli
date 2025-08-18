@@ -11,8 +11,8 @@ import { useLazyGetMilitaryContributionsQuery } from "../../../reduxstore/api/Mi
 import MilitaryContributionForm from "./MilitaryContributionForm";
 import MilitaryContributionGrid from "./MilitaryContributionFormGrid";
 import MilitaryEntryAndModificationSearchFilter from "./MilitaryEntryAndModificationSearchFilter";
-import { useDispatch } from 'react-redux'
-import {InquiryApi} from "../../../reduxstore/api/InquiryApi";
+import { useDispatch } from "react-redux";
+import { InquiryApi } from "../../../reduxstore/api/InquiryApi";
 
 const MilitaryEntryAndModification = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
@@ -22,7 +22,7 @@ const MilitaryEntryAndModification = () => {
   const { masterInquiryEmployeeDetails } = useSelector((state: RootState) => state.inquiry);
   const [fetchContributions, { isFetching }] = useLazyGetMilitaryContributionsQuery();
   const profitYear = useDecemberFlowProfitYear();
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
   const handleStatusChange = (newStatus: string, statusName?: string) => {
     // Only trigger if status is changing TO "Complete" (not already "Complete")
@@ -48,8 +48,8 @@ const MilitaryEntryAndModification = () => {
     setInitialSearchLoaded(true); // This will trigger the grid to refresh
   };
 
-  const handleFetchContributions = useCallback((archive?: boolean) => {
-    
+  const handleFetchContributions = useCallback(
+    (archive?: boolean) => {
       const request = {
         badgeNumber: Number(masterInquiryEmployeeDetails?.badgeNumber ?? 0),
         profitYear: profitYear,
@@ -63,11 +63,12 @@ const MilitaryEntryAndModification = () => {
         },
         ...(archive && { archive: true }) // Add archive property if true
       };
-      
+
       fetchContributions(request);
       setShowContributions(true);
-    
-  }, [fetchContributions, masterInquiryEmployeeDetails, profitYear]);
+    },
+    [fetchContributions, masterInquiryEmployeeDetails, profitYear]
+  );
 
   useEffect(() => {
     if (masterInquiryEmployeeDetails) {
@@ -117,7 +118,7 @@ const MilitaryEntryAndModification = () => {
           <MilitaryContributionForm
             onSubmit={(rows) => {
               handleCloseForm();
-              dispatch(InquiryApi.util.invalidateTags(['memberDetails']));
+              dispatch(InquiryApi.util.invalidateTags(["memberDetails"]));
             }}
             onCancel={handleCloseForm}
             badgeNumber={Number(masterInquiryEmployeeDetails?.badgeNumber)}

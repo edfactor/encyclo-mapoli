@@ -539,7 +539,7 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
         <>
           <ReportSummary report={termination} />
 
-          <div className="flex sticky top-0 z-10 bg-white">
+          <div className="sticky top-0 z-10 flex bg-white">
             <TotalsGrid
               displayData={[[numberToCurrency(termination.totalEndingBalance || 0)]]}
               leftColumnHeaders={["Amount in Profit Sharing"]}

@@ -84,7 +84,7 @@ export const GetQPAY066BGridColumns = (navFunction: (badgeNumber: string) => voi
       cellClass: "center-align",
       resizable: true,
       sortable: true,
-      valueFormatter: (params) => params.value ? `${params.value}%` : "0%"
+      valueFormatter: (params) => (params.value ? `${params.value}%` : "0%")
     },
     {
       headerName: "Termination Date",

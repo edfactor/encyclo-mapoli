@@ -7,12 +7,14 @@ import { SaveOutlined } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { clearExecutiveHoursAndDollarsGridRows } from "reduxstore/slices/yearsEndSlice";
-import { useUpdateExecutiveHoursAndDollarsMutation, useLazyGetExecutiveHoursAndDollarsQuery } from "reduxstore/api/YearsEndApi";
+import {
+  useUpdateExecutiveHoursAndDollarsMutation,
+  useLazyGetExecutiveHoursAndDollarsQuery
+} from "reduxstore/api/YearsEndApi";
 import { useState } from "react";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { CAPTIONS } from "../../../constants";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-
 
 const RenderSaveButton = () => {
   const dispatch = useDispatch();
@@ -89,12 +91,12 @@ const ManageExecutiveHoursAndDollars = () => {
         },
         archive: true
       })
-      .then((result: any) => {
-        console.log('Executive hours and dollars archived successfully', result);
-      })
-      .catch((error: any) => {
-        console.error('Error archiving executive hours and dollars:', error);
-      });
+        .then((result: any) => {
+          console.log("Executive hours and dollars archived successfully", result);
+        })
+        .catch((error: any) => {
+          console.error("Error archiving executive hours and dollars:", error);
+        });
     } else {
       setCurrentStatus(statusName || newStatus);
     }

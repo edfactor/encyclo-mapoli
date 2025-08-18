@@ -21,12 +21,12 @@ interface MasterInquiryGridProps {
   onSortChange?: (sortParams: any) => void;
 }
 
-const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({ 
-  profitData, 
-  isLoading, 
+const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({
+  profitData,
+  isLoading,
   profitGridPagination,
   onPaginationChange,
-  onSortChange 
+  onSortChange
 }) => {
   const columnDefs = useMemo(() => GetMasterInquiryGridColumns(), []);
 

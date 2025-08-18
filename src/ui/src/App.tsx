@@ -149,9 +149,9 @@ const App = () => {
     components: {
       ...themeOptions.components,
       MuiOutlinedInput: {
-        styleOverrides:{
+        styleOverrides: {
           root: {
-            backgroundColor: colors["dsm-white"],
+            backgroundColor: colors["dsm-white"]
           }
         }
       }

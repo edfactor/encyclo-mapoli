@@ -1,7 +1,12 @@
 import { ColDef } from "ag-grid-community";
 import { yyyyMMDDToMMDDYYYY } from "smart-ui-library";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
-import { createBadgeColumn, createSSNColumn, createDateColumn, createStoreColumn } from "../../../utils/gridColumnFactory";
+import {
+  createBadgeColumn,
+  createSSNColumn,
+  createDateColumn,
+  createStoreColumn
+} from "../../../utils/gridColumnFactory";
 
 export const GetDuplicateSSNsOnDemographicsColumns = (): ColDef[] => {
   return [

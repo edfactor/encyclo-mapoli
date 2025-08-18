@@ -46,8 +46,8 @@ const schema = yup.object().shape({
     })
     .test("is-too-early", "Insuffient data for dates before 2024", function (value) {
       if (!value) return true;
-      return value > new Date(2024,1,1);
-    }),
+      return value > new Date(2024, 1, 1);
+    })
 });
 
 interface DistributionsAndForfeituresSearchFilterProps {

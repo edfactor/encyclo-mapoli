@@ -56,4 +56,3 @@ export const MissiveAlertProvider: React.FC<MissiveAlertProviderProps> = ({ chil
 
   return <MissiveAlertContext.Provider value={value}>{children}</MissiveAlertContext.Provider>;
 };
-

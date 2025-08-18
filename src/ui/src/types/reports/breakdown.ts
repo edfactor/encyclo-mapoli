@@ -1,8 +1,4 @@
-import type { 
-  SortedPaginationRequestDto,
-  ProfitYearRequest,
-  PagedReportResponse 
-} from "../common/api";
+import type { SortedPaginationRequestDto, ProfitYearRequest, PagedReportResponse } from "../common/api";
 
 export interface BreakdownByStoreRequest extends ProfitYearRequest {
   storeNumber?: number;

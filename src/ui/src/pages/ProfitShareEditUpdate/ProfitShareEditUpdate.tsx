@@ -491,7 +491,7 @@ const ProfitShareEditUpdate = () => {
     <Page
       label="Master Update (PAY444|PAY447)"
       actionNode={
-        <div className="flex  justify-end gap-2">
+        <div className="flex justify-end gap-2">
           {RenderRevertButton(setOpenRevertModal, isLoading)}
           {RenderSaveButton(
             setOpenSaveModal,
@@ -512,7 +512,7 @@ const ProfitShareEditUpdate = () => {
         // We are using an AlertTitle directly and not a missive because we want this alert message
         // to remain in place, not fade away
         changesApplied && (
-          <div className="py-3 w-full">
+          <div className="w-full py-3">
             <Alert severity={Messages.ProfitShareMasterUpdated.message.type}>
               <AlertTitle sx={{ fontWeight: "bold" }}>{Messages.ProfitShareMasterUpdated.message.title}</AlertTitle>
               {`Updated By: ${updatedBy} | Date: ${updatedTime} `}
@@ -646,10 +646,10 @@ const ProfitShareEditUpdate = () => {
                 tablePadding="4px"
                 displayData={[
                   [
-                    numberToCurrency(profitSharingEdit.beginningBalanceTotal|| 0),
+                    numberToCurrency(profitSharingEdit.beginningBalanceTotal || 0),
                     numberToCurrency(profitSharingEdit.contributionGrandTotal || 0),
                     numberToCurrency(profitSharingEdit.earningsGrandTotal || 0),
-                    numberToCurrency(profitSharingEdit.incomingForfeitureGrandTotal || 0),
+                    numberToCurrency(profitSharingEdit.incomingForfeitureGrandTotal || 0)
                   ]
                 ]}
                 leftColumnHeaders={["Grand Totals"]}
@@ -657,7 +657,7 @@ const ProfitShareEditUpdate = () => {
                 headerCellStyle={{}}
               />
             </div>
-            <br/>
+            <br />
             {profitSharingUpdateAdjustmentSummary?.badgeNumber && (
               <>
                 <div className="px-[24px]">

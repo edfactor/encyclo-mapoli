@@ -39,8 +39,14 @@ const ReprintCertificatesFilterSection: React.FC<ReprintCertificatesFilterSectio
 
   return (
     <form onSubmit={validateAndSubmit}>
-      <Grid container paddingX="24px">
-        <Grid container spacing={3} width="100%" paddingTop="16px">
+      <Grid
+        container
+        paddingX="24px">
+        <Grid
+          container
+          spacing={3}
+          width="100%"
+          paddingTop="16px">
           <Grid size={{ xs: 12, sm: 6, md: 4 }}>
             <FormLabel>Employee Number / PSN</FormLabel>
             <FormControl fullWidth>
@@ -92,7 +98,10 @@ const ReprintCertificatesFilterSection: React.FC<ReprintCertificatesFilterSectio
         </Grid>
       </Grid>
 
-      <Grid width="100%" paddingX="24px" paddingY="16px">
+      <Grid
+        width="100%"
+        paddingX="24px"
+        paddingY="16px">
         <SearchAndReset
           handleReset={handleReset}
           handleSearch={validateAndSubmit}

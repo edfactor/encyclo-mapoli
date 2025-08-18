@@ -35,7 +35,7 @@ const Pay450Summary = () => {
   // Initialize current status from navigation state
   useEffect(() => {
     const currentNavigationId = parseInt(localStorage.getItem("navigationId") ?? "");
-    
+
     const getNavigationObjectBasedOnId = (navigationArray?: any[], id?: number): any => {
       if (navigationArray) {
         for (const item of navigationArray) {
@@ -98,7 +98,7 @@ const Pay450Summary = () => {
         <Button
           onClick={() => setIsModalOpen(true)}
           variant="outlined"
-          className="h-10 whitespace-nowrap min-w-fit">
+          className="h-10 min-w-fit whitespace-nowrap">
           Update
         </Button>
         <StatusDropdownActionNode onStatusChange={handleStatusChange} />
