@@ -1,5 +1,4 @@
 export const MAX_EMPLOYEE_BADGE_LENGTH: number = 7;
-export const HISTORY_KEY: string = "navigation_history";
 
 export const drawerOpenWidth: number = 330;
 export const drawerClosedWidth: number = 64;
