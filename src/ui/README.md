@@ -17,19 +17,25 @@ A React + TypeScript web application for Demoulas' Smart Profit Sharing platform
 - `tailwind.config.js` — Tailwind setup with custom colors and fonts
 
 ## Setup
-1. **Authenticate with Demoulas JFrog Artifactory**
+1. **Install recommended VS Code extensions**
+   - Open the project in VS Code and install the recommended extensions when prompted, or manually install:
+     - Prettier - Code formatter
+     - Tailwind CSS IntelliSense
+   - This ensures format-on-save works correctly with the project's coding standards.
+
+2. **Authenticate with Demoulas JFrog Artifactory**
    - Follow the Set Me Up guide to [authenticate your local npm client.](https://demoulas.atlassian.net/wiki/spaces/JFD/pages/146047103/Register+JFrog+as+a+custom+npm+registry)
    
-2. **Create `.npmrc` in `src/ui/`**
+3. **Create `.npmrc` in `src/ui/`**
    ```
    registry=https://registry.npmjs.org/
    smart-ui-library:registry=https://demoulas.jfrog.io/artifactory/api/npm/npm-smart-registry-local/
    ```
-3. **Install dependencies**
+4. **Install dependencies**
    ```
    npm i
    ```
-4. **Start the development server**
+5. **Start the development server**
    ```
    npm run dev
    ```
