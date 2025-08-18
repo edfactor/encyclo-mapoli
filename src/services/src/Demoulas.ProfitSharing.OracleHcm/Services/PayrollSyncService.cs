@@ -112,6 +112,11 @@ internal class PayrollSyncService
                 ex.Message);
         }
 
+        if (balanceTypeTotals.Values.All(v => v == 0))
+        {
+            return;
+        }
+
         await CalculateAndUpdatePayProfitRecord(item.PersonId, year, balanceTypeTotals, cancellationToken).ConfigureAwait(false);
     }
 
