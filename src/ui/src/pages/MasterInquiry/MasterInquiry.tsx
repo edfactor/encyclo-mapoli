@@ -29,9 +29,7 @@ const MasterInquiryContent = () => {
     profitGridPagination,
     executeSearch,
     selectMember,
-    resetAll,
-    updateMemberGridPagination,
-    updateProfitGridPagination
+    resetAll
   } = useMasterInquiry();
 
   return (
@@ -62,7 +60,8 @@ const MasterInquiryContent = () => {
           searchResults={searchResults}
           onMemberSelect={selectMember}
           memberGridPagination={memberGridPagination}
-          onPaginationChange={updateMemberGridPagination}
+          onPaginationChange={memberGridPagination.handlePaginationChange}
+          onSortChange={memberGridPagination.handleSortChange}
         />
       )}
 
@@ -81,7 +80,8 @@ const MasterInquiryContent = () => {
           profitData={memberProfitData}
           isLoading={isFetchingProfitData}
           profitGridPagination={profitGridPagination}
-          onPaginationChange={updateProfitGridPagination}
+          onPaginationChange={profitGridPagination.handlePaginationChange}
+          onSortChange={profitGridPagination.handleSortChange}
         />
       )}
 

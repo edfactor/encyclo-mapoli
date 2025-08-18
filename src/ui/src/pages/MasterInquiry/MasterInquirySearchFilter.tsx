@@ -5,15 +5,15 @@ import {
   FormControlLabel,
   FormHelperText,
   FormLabel,
+  Grid,
   MenuItem,
   Radio,
   RadioGroup,
   Select,
   TextField
 } from "@mui/material";
-import { Grid } from "@mui/material";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
-import React, { useEffect, useCallback, useMemo, memo } from "react";
+import React, { memo, useCallback, useEffect, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
@@ -27,9 +27,9 @@ import { RootState } from "reduxstore/store";
 import { MasterInquiryRequest, MasterInquirySearch } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
-import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
-import { memberTypeGetNumberMap, paymentTypeGetNumberMap, splitFullPSN } from "./MasterInquiryFunctions";
 import { MAX_EMPLOYEE_BADGE_LENGTH } from "../../constants";
+import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
+import { transformSearchParams } from "./transformSearchParams";
 
 const schema = yup.object().shape({
   endProfitYear: yup
@@ -93,7 +93,11 @@ interface MasterInquirySearchFilterProps {
   isSearching?: boolean;
 }
 
-const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ onSearch, onReset, isSearching = false }) => {
+const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({
+  onSearch,
+  onReset,
+  isSearching = false
+}) => {
   const { masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
   const dispatch = useDispatch();
 
@@ -139,25 +143,26 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ o
     }
   });
 
+  // Initialize form when badge number is provided via URL
   useEffect(() => {
     if (badgeNumber) {
-      reset({
+      const formData = {
         ...schema.getDefault(),
-        memberType: determineCorrectMemberType(badgeNumber),
-        badgeNumber: Number(badgeNumber)
-      });
-
-      const { psnSuffix, verifiedBadgeNumber } = splitFullPSN(badgeNumber);
-
-      const searchParams: MasterInquiryRequest = {
-        pagination: { skip: 0, take: 5, sortBy: "badgeNumber", isSortDescending: true },
-        badgeNumber: verifiedBadgeNumber,
-        memberType: memberTypeGetNumberMap[determineCorrectMemberType(badgeNumber)],
+        memberType: determineCorrectMemberType(badgeNumber) as "all" | "employees" | "beneficiaries" | "none",
+        badgeNumber: Number(badgeNumber),
         endProfitYear: profitYear,
-        ...(psnSuffix !== undefined && { psnSuffix }),
-        _timestamp: Date.now()
+        pagination: {
+          skip: 0,
+          take: 5,
+          sortBy: "badgeNumber",
+          isSortDescending: true
+        }
       };
 
+      reset(formData);
+
+      // Transform form data to search params and execute search
+      const searchParams = transformSearchParams(formData, profitYear);
       onSearch(searchParams);
     }
   }, [badgeNumber, reset, profitYear, onSearch]);
@@ -179,32 +184,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ o
   const validateAndSearch = useCallback(
     handleSubmit((data) => {
       if (isValid) {
-        const timestamp = Date.now();
-        const { psnSuffix, verifiedBadgeNumber } = splitFullPSN(data.badgeNumber?.toString());
-
-        const searchParams: MasterInquiryRequest = {
-          pagination: {
-            skip: data.pagination?.skip || 0,
-            take: data.pagination?.take || 5,
-            sortBy: data.pagination?.sortBy || "badgeNumber",
-            isSortDescending: data.pagination?.isSortDescending || true
-          },
-          endProfitYear: data.endProfitYear ?? profitYear,
-          ...(!!data.startProfitMonth && { startProfitMonth: data.startProfitMonth }),
-          ...(!!data.endProfitMonth && { endProfitMonth: data.endProfitMonth }),
-          ...(!!data.socialSecurity && { ssn: data.socialSecurity }),
-          ...(!!data.name && { name: data.name }),
-          ...(verifiedBadgeNumber !== undefined && { badgeNumber: verifiedBadgeNumber }),
-          ...(psnSuffix !== undefined && { psnSuffix }),
-          ...(!!data.paymentType && { paymentType: paymentTypeGetNumberMap[data.paymentType] }),
-          ...(!!data.memberType && { memberType: memberTypeGetNumberMap[data.memberType] }),
-          ...(!!data.contribution && { contributionAmount: data.contribution }),
-          ...(!!data.earnings && { earningsAmount: data.earnings }),
-          ...(!!data.forfeiture && { forfeitureAmount: data.forfeiture }),
-          ...(!!data.payment && { paymentAmount: data.payment }),
-          _timestamp: timestamp
-        };
-
+        const searchParams = transformSearchParams(data, profitYear);
         onSearch(searchParams);
         dispatch(setMasterInquiryRequestParams(data));
       }
@@ -272,10 +252,14 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ o
         control={control}
         render={({ field }) => (
           <Select
-            {...field}
+            name={field.name}
+            ref={field.ref}
             onChange={(e) => {
-              field.onChange(e.target.value === undefined ? null : e.target.value);
+              field.onChange(
+                typeof e.target.value === "string" && e.target.value === "" ? null : Number(e.target.value)
+              );
             }}
+            onBlur={field.onBlur}
             sx={selectSx}
             fullWidth
             size="small"
@@ -307,7 +291,9 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ o
           control={control}
           render={({ field }) => (
             <TextField
-              {...field}
+              name={field.name}
+              ref={field.ref}
+              onBlur={field.onBlur}
               fullWidth
               type={type}
               size="small"
@@ -380,8 +366,11 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = ({ o
           <FormControlLabel
             control={
               <Checkbox
-                {...field}
+                name={field.name}
+                ref={field.ref}
                 checked={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
                 size="small"
               />
             }
