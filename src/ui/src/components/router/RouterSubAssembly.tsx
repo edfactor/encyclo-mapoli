@@ -1,6 +1,7 @@
 import { Box } from "@mui/material";
 import PSDrawer from "components/Drawer/PSDrawer";
 import DSMDynamicBreadcrumbs from "components/DSMDynamicBreadcrumbs/DSMDynamicBreadcrumbs";
+import ProtectedRoute from "components/ProtectedRoute/ProtectedRoute";
 import DemographicBadgesNotInPayprofit from "pages/DecemberActivities/DemographicBadgesNotInPayprofit/DemographicBadgesNotInPayprofit";
 import DistributionsAndForfeitures from "pages/DecemberActivities/DistributionsAndForfeitures/DistributionAndForfeitures";
 import DuplicateNamesAndBirthdays from "pages/DecemberActivities/DuplicateNamesAndBirthdays/DuplicateNamesAndBirthdays";
@@ -47,6 +48,7 @@ import ContributionsByAge from "../../pages/PROF130/ContributionsByAge/Contribut
 import DistributionByAge from "../../pages/PROF130/DistributionByAge/DistributionByAge";
 import ForfeituresByAge from "../../pages/PROF130/ForfeituresByAge/ForfeituresByAge";
 import ProfitShareEditUpdate from "../../pages/ProfitShareEditUpdate/ProfitShareEditUpdate";
+import Unauthorized from "../../pages/Unauthorized/Unauthorized";
 import YTDWages from "../../pages/YTDWagesExtract/YTDWages";
 
 import { MenuBar } from "components/MenuBar/MenuBar";
@@ -56,9 +58,9 @@ import ProfitSummary from "pages/PAY426Reports/ProfitSummary/ProfitSummary";
 import QPAY066AdHocReports from "pages/QPAY066AdHocReports/QPAY066AdHocReports";
 import QPAY066B from "pages/QPAY066B/QPAY066B";
 import QPAY600 from "pages/QPAY600/QPAY600";
-import ReprintCertificates from "pages/ReprintCertificates/ReprintCertificates";
 import PayBeNext from "pages/Reports/PayBeNext/PayBeNext";
 import PayBenReport from "pages/Reports/PayBenReport/PayBenReport";
+import ReprintCertificates from "pages/ReprintCertificates/ReprintCertificates";
 import MilitaryEntryAndModification from "../../pages/DecemberActivities/MilitaryEntryAndModification/MilitaryEntryAndModification";
 import DevDebug from "../../pages/Dev/DevDebug";
 import ForfeituresAdjustment from "../../pages/ForfeituresAdjustment/ForfeituresAdjustment";
@@ -156,6 +158,10 @@ const RouterSubAssembly: React.FC = () => {
               </Box>
               <PSDrawer navigationData={data} />
               <Routes>
+                <Route
+                  path="/unauthorized"
+                  element={<Unauthorized />}
+                />
                 <Route
                   path={ROUTES.BENEFICIARY_INQUIRY}
                   element={<BeneficiaryInquiry />}></Route>
@@ -306,7 +312,11 @@ const RouterSubAssembly: React.FC = () => {
                 />
                 <Route
                   path={ROUTES.DEMO_FREEZE}
-                  element={<DemographicFreeze />}
+                  element={
+                    <ProtectedRoute requiredRoles={ImpersonationRoles.ItDevOps}>
+                      <DemographicFreeze />
+                    </ProtectedRoute>
+                  }
                 />
                 <Route
                   path={ROUTES.DEV_DEBUG}
