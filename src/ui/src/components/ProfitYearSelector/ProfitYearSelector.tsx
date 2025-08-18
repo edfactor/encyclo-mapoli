@@ -55,7 +55,6 @@ const ProfitYearSelector = ({
 
   yearsToDisplay.push(thisYear - 1);
 
-
   // Fetch accounting year data for each year
   const [accountingYearData, setAccountingYearData] = useState<Record<number, { startDate: string; endDate: string }>>(
     {}
@@ -106,7 +105,7 @@ const ProfitYearSelector = ({
   }, []);
 
   return (
-    <div className="flex items-center gap-2 h-10 min-w-[174px]">
+    <div className="flex h-10 min-w-[174px] items-center gap-2">
       <FormControl
         fullWidth
         size="small">
@@ -139,7 +138,7 @@ const ProfitYearSelector = ({
               value={year}>
               {year} -
               {showDates && accountingYearData[year] && (
-                <span className="text-gray-500 ml-1">
+                <span className="ml-1 text-gray-500">
                   {mmDDYYFormat(accountingYearData[year].startDate)} - {mmDDYYFormat(accountingYearData[year].endDate)}
                 </span>
               )}

@@ -8,7 +8,7 @@ import EnvironmentUtils from "../../utils/environmentUtils";
 // navigate calls inside are not in a Router.
 const Router = () => {
   const oktaEnabled = EnvironmentUtils.isOktaEnabled;
-  
+
   return (
     <BrowserRouter
       future={{
@@ -16,7 +16,10 @@ const Router = () => {
         v7_relativeSplatPath: true
       }}>
       <RouteSecurity oktaEnabled={oktaEnabled}>
-        <Route path="/*" element={<RouterSubAssembly />} />
+        <Route
+          path="/*"
+          element={<RouterSubAssembly />}
+        />
       </RouteSecurity>
     </BrowserRouter>
   );

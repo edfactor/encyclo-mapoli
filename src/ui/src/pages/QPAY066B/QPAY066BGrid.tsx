@@ -28,8 +28,7 @@ const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ filterParams, onLoadingChan
 
   const hasToken = useSelector((state: RootState) => !!state.security.token);
 
-  const [getQPAY066BData, { data: qpay066bData, isFetching }] = 
-    useLazyGetQPAY066BTerminatedWithVestedBalanceQuery();
+  const [getQPAY066BData, { data: qpay066bData, isFetching }] = useLazyGetQPAY066BTerminatedWithVestedBalanceQuery();
 
   useEffect(() => {
     onLoadingChange?.(isFetching);
@@ -60,17 +59,14 @@ const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ filterParams, onLoadingChan
     setSortParams(update);
   };
 
-  const columnDefs = useMemo(
-    () => GetQPAY066BGridColumns(handleNavigationForButton),
-    [handleNavigationForButton]
-  );
+  const columnDefs = useMemo(() => GetQPAY066BGridColumns(handleNavigationForButton), [handleNavigationForButton]);
 
   const showTotals = !!qpay066bData?.response?.results;
 
   return (
     <>
       {showTotals && (
-        <div className="flex sticky top-0 z-10 bg-white">
+        <div className="sticky top-0 z-10 flex bg-white">
           <TotalsGrid
             displayData={[[numberToCurrency(0)]]}
             leftColumnHeaders={["Amount in Profit Sharing"]}
@@ -99,13 +95,19 @@ const QPAY066BGrid: React.FC<QPAY066BGridProps> = ({ filterParams, onLoadingChan
       )}
 
       <div style={{ padding: "0 24px" }}>
-        <Typography variant="h2" sx={{ color: "#0258A5" }}>
+        <Typography
+          variant="h2"
+          sx={{ color: "#0258A5" }}>
           {qpay066bData?.reportName || "QPAY066B"}
         </Typography>
       </div>
 
       {isFetching ? (
-        <Box display="flex" justifyContent="center" alignItems="center" py={4}>
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          py={4}>
           <CircularProgress />
         </Box>
       ) : (

@@ -459,7 +459,7 @@ const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
                                           <Chip
                                             variant="outlined"
                                             label={subPage.statusName}
-                                            className="text-gray-700 border-gray-700"
+                                            className="border-gray-700 text-gray-700"
                                             size="small"
                                             sx={{
                                               backgroundColor:
@@ -526,7 +526,7 @@ const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
                                 <Chip
                                   variant="outlined"
                                   label={page.statusName}
-                                  className="text-gray-700 border-gray-700"
+                                  className="border-gray-700 text-gray-700"
                                   size="small"
                                   sx={{
                                     backgroundColor:
@@ -588,7 +588,7 @@ const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
                             <>
                               <ListItemText
                                 primary={level.mainTitle}
-                                secondary={`${level.topPage.filter(page => page.statusName?.toLowerCase() === "complete").length} of ${level.topPage.length} completed`}
+                                secondary={`${level.topPage.filter((page) => page.statusName?.toLowerCase() === "complete").length} of ${level.topPage.length} completed`}
                                 primaryTypographyProps={{
                                   variant: "h6"
                                 }}

@@ -3,6 +3,7 @@
 A React + TypeScript web application for Demoulas' Smart Profit Sharing platform. This project leverages the custom `smart-ui-library` for UI components, Tailwind CSS for styling, and Redux Toolkit for state management.
 
 ## Features
+
 - Modular page structure for reports, updates, and inquiries
 - Custom grids, accordions, and modals from `smart-ui-library`
 - Tailwind CSS with custom theme and color palette
@@ -10,6 +11,7 @@ A React + TypeScript web application for Demoulas' Smart Profit Sharing platform
 - TypeScript throughout for type safety
 
 ## Project Structure
+
 - `src/pages/` — Main app pages (reports, updates, etc.)
 - `src/components/` — Shared UI components (Accordions, Grids, Layout, etc.)
 - `src/reduxstore/` — Redux slices, API logic, and types
@@ -17,7 +19,9 @@ A React + TypeScript web application for Demoulas' Smart Profit Sharing platform
 - `tailwind.config.js` — Tailwind setup with custom colors and fonts
 
 ## Setup
+
 1. **Install recommended VS Code extensions**
+
    - Open the project in VS Code and install the recommended extensions when prompted, or manually install:
      - Prettier - Code formatter
      - Tailwind CSS IntelliSense
@@ -25,7 +29,6 @@ A React + TypeScript web application for Demoulas' Smart Profit Sharing platform
 
 2. **Authenticate with Demoulas JFrog Artifactory**
    - Follow the Set Me Up guide to [authenticate your local npm client.](https://demoulas.atlassian.net/wiki/spaces/JFD/pages/146047103/Register+JFrog+as+a+custom+npm+registry)
-   
 3. **Create `.npmrc` in `src/ui/`**
    ```
    registry=https://registry.npmjs.org/
@@ -41,18 +44,22 @@ A React + TypeScript web application for Demoulas' Smart Profit Sharing platform
    ```
 
 ## Development
+
 - **Run**: `npm run dev` (Vite dev server)
 - **Build**: `npm run build`
 - **Lint**: `npm run lint`
 
 ## UI Library & Styling
+
 - All major UI elements (grids, accordions, modals, etc.) are imported from `smart-ui-library`.
 - Tailwind CSS is configured in `tailwind.config.js` to include the library and custom color palette.
 
 ## Notes
+
 - TypeScript is enforced throughout the codebase.
 - For any issues with `smart-ui-library`, ensure your `.npmrc` is correct and you are authenticated with JFrog.
 - See `src/pages/` for main feature implementations and `src/components/` for reusable UI.
 
 ---
+
 For more details, see inline comments in the codebase or contact the project maintainers.

@@ -1,9 +1,5 @@
 import { PaginationParams } from "smart-ui-library";
-import type { 
-  ProfitYearRequest,
-  SortedPaginationRequestDto,
-  PagedReportResponse 
-} from "../common/api";
+import type { ProfitYearRequest, SortedPaginationRequestDto, PagedReportResponse } from "../common/api";
 import type { FrozenReportsByAgeRequestType } from "../common/enums";
 
 export interface ReportsByAgeParams extends ProfitYearRequest {
@@ -128,7 +124,7 @@ export interface BalanceByAge extends BalanceByBase<BalanceByAgeDetail> {
 }
 
 export interface BalanceByYears extends BalanceByBase<BalanceByAgeDetail> {
-  // BalanceByYears extends BalanceByBase with BalanceByAgeDetail  
+  // BalanceByYears extends BalanceByBase with BalanceByAgeDetail
 }
 
 export interface VestedAmountsByAge extends PagedReportResponse<VestedAmountsByAgeDetail> {

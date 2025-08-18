@@ -1,7 +1,7 @@
 import { ICellRendererParams, IHeaderParams } from "ag-grid-community";
 
 // Re-export from existing files
-export type { 
+export type {
   SSNColumnOptions,
   BadgeColumnOptions,
   CurrencyColumnOptions,

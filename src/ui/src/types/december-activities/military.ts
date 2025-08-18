@@ -1,7 +1,4 @@
-import type { 
-  SortedPaginationRequestDto,
-  ProfitYearRequest 
-} from "../common/api";
+import type { SortedPaginationRequestDto, ProfitYearRequest } from "../common/api";
 
 export interface MilitaryContributionRequest extends ProfitYearRequest {
   badgeNumber: number;

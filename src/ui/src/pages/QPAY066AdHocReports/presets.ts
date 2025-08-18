@@ -6,7 +6,7 @@ const presets: ReportPreset[] = [
     name: "QPAY066A",
     description: "Less than 20% Vested",
     params: {
-      reportId: 1,
+      reportId: 1
     }
   },
   {
@@ -14,7 +14,7 @@ const presets: ReportPreset[] = [
     name: "QPAY066A-1",
     description: "Less than 20% Vested (Variation 1)",
     params: {
-      reportId: 2,
+      reportId: 2
     }
   },
   {
@@ -22,7 +22,7 @@ const presets: ReportPreset[] = [
     name: "QPAY066AF",
     description: "QPAY066AF Name",
     params: {
-      reportId: 3,
+      reportId: 3
     }
   },
   {
@@ -30,7 +30,7 @@ const presets: ReportPreset[] = [
     name: "QPAY066-AGE70",
     description: "Aged 70 and Over",
     params: {
-      reportId: 4,
+      reportId: 4
     }
   },
   {
@@ -38,7 +38,7 @@ const presets: ReportPreset[] = [
     name: "QPAY066I",
     description: "Inactive Employees",
     params: {
-      reportId: 5,
+      reportId: 5
     }
   },
   {
@@ -46,7 +46,7 @@ const presets: ReportPreset[] = [
     name: "QPAY066B",
     description: "Beneficiaries Report",
     params: {
-      reportId: 6,
+      reportId: 6
     }
   },
   {
@@ -54,15 +54,15 @@ const presets: ReportPreset[] = [
     name: "QPAY066D",
     description: "Disabled Employees",
     params: {
-      reportId: 7,
+      reportId: 7
     }
   },
   {
-    id: 'QPAY066M',
-    name: 'QPAY066M',
-    description: 'QPAY066M',
+    id: "QPAY066M",
+    name: "QPAY066M",
+    description: "QPAY066M",
     params: {
-      reportId: 8,
+      reportId: 8
     }
   },
   {
@@ -70,7 +70,7 @@ const presets: ReportPreset[] = [
     name: "QPAY066W",
     description: "Employees with Wages",
     params: {
-      reportId: 9,
+      reportId: 9
     }
   }
 ];

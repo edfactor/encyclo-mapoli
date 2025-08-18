@@ -70,7 +70,7 @@ const BalanceByYearsGrid: React.FC<BalanceByYearsGridProps> = ({ initialSearchLo
           <div className="px-[24px]">
             <h2 className="text-dsm-secondary">Summary</h2>
           </div>
-          <div className="flex sticky top-0 z-10 bg-white">
+          <div className="sticky top-0 z-10 flex bg-white">
             <TotalsGrid
               displayData={[
                 [

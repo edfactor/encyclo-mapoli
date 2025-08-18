@@ -10,10 +10,8 @@ interface ForfeituresAdjustmentPanelProps {
 
 const ForfeituresAdjustmentPanel: React.FC<ForfeituresAdjustmentPanelProps> = ({
   initialSearchLoaded,
-  onAddForfeiture,
+  onAddForfeiture
 }) => {
-
-  
   return (
     <>
       {initialSearchLoaded && (

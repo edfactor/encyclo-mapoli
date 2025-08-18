@@ -143,49 +143,49 @@ const SummariesContent: React.FC = () => {
       headerName: "STE 1-140",
       field: "ste1",
       width: 100,
-      valueFormatter: (params: { value: string | number; }) => numberToCurrency(params.value),
+      valueFormatter: (params: { value: string | number }) => numberToCurrency(params.value)
     },
     {
       headerName: "700",
       field: "700",
       width: 70,
-      valueFormatter: (params: { value: string | number; }) => numberToCurrency(params.value),
+      valueFormatter: (params: { value: string | number }) => numberToCurrency(params.value)
     },
     {
       headerName: "701",
       field: "701",
       width: 70,
-      valueFormatter: (params: { value: string | number; }) => numberToCurrency(params.value)
+      valueFormatter: (params: { value: string | number }) => numberToCurrency(params.value)
     },
     {
       headerName: "800",
       field: "800",
       width: 70,
-      valueFormatter: (params: { value: string | number; }) => numberToCurrency(params.value)
+      valueFormatter: (params: { value: string | number }) => numberToCurrency(params.value)
     },
     {
       headerName: "801",
       field: "801",
       width: 70,
-      valueFormatter: (params: { value: string | number; }) => numberToCurrency(params.value)
+      valueFormatter: (params: { value: string | number }) => numberToCurrency(params.value)
     },
     {
       headerName: "802",
       field: "802",
       width: 70,
-      valueFormatter: (params: { value: string | number; }) => numberToCurrency(params.value)
+      valueFormatter: (params: { value: string | number }) => numberToCurrency(params.value)
     },
     {
       headerName: "900",
       field: "900",
       width: 70,
-      valueFormatter: (params: { value: string | number; }) => numberToCurrency(params.value)
+      valueFormatter: (params: { value: string | number }) => numberToCurrency(params.value)
     },
     {
       headerName: "Total",
       field: "total",
       width: 70,
-      valueFormatter: (params: { value: string | number; }) => numberToCurrency(params.value)
+      valueFormatter: (params: { value: string | number }) => numberToCurrency(params.value)
     }
   ];
 

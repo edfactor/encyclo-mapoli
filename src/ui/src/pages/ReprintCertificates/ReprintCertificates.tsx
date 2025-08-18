@@ -45,18 +45,18 @@ const ReprintCertificates: React.FC = () => {
 
   const renderActionNode = () => {
     return (
-      <div className="flex items-center gap-2 h-10">
+      <div className="flex h-10 items-center gap-2">
         <StatusDropdownActionNode />
         <Button
           onClick={handleTestPrint}
           variant="outlined"
-          className="h-10 whitespace-nowrap min-w-fit">
+          className="h-10 min-w-fit whitespace-nowrap">
           TEST PRINT
         </Button>
         <Button
           onClick={handlePrint}
           variant="contained"
-          className="h-10 whitespace-nowrap min-w-fit">
+          className="h-10 min-w-fit whitespace-nowrap">
           PRINT
         </Button>
       </div>
@@ -67,7 +67,9 @@ const ReprintCertificates: React.FC = () => {
     <Page
       label={CAPTIONS.REPRINT_CERTIFICATES}
       actionNode={renderActionNode()}>
-      <Grid container rowSpacing="24px">
+      <Grid
+        container
+        rowSpacing="24px">
         <Grid width="100%">
           <Divider />
         </Grid>

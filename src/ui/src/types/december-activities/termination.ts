@@ -1,8 +1,4 @@
-import type { 
-  SortedPaginationRequestDto,
-  ProfitYearRequest,
-  PagedReportResponse 
-} from "../common/api";
+import type { SortedPaginationRequestDto, ProfitYearRequest, PagedReportResponse } from "../common/api";
 
 export interface TerminationDetail {
   badgeNumber: number;

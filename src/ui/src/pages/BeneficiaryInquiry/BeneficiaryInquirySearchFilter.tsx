@@ -30,10 +30,7 @@ type BeneficiaryInquirySearchFilterProps = {
   onSearch: (params: BeneficiarySearchFilterRequest | undefined) => void;
 };
 
-const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterProps> = ({
-  onSearch
-}) => {
-
+const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterProps> = ({ onSearch }) => {
   const {
     control,
     register,
@@ -61,7 +58,6 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
       }
     }
     if (isValid) {
-
       const beneficiarySearchFilterRequest: BeneficiarySearchFilterRequest = {
         badgeNumber: badge,
         psnSuffix: psn,
@@ -72,7 +68,7 @@ const BeneficiaryInquirySearchFilter: React.FC<BeneficiaryInquirySearchFilterPro
         take: data.pagination?.take || 5,
         sortBy: data.pagination?.sortBy || "name",
         isSortDescending: data.pagination?.isSortDescending || true
-      }
+      };
       onSearch(beneficiarySearchFilterRequest);
     }
   };

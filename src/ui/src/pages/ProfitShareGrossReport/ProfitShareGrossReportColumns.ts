@@ -49,7 +49,7 @@ export const GetProfitShareGrossReportColumns = (navFunction: (badgeNumber: stri
       minWidth: 150,
       type: "rightAligned",
       resizable: true,
-      valueFormatter: (params) => numberToCurrency(params.value),
+      valueFormatter: (params) => numberToCurrency(params.value)
     },
     {
       headerName: "P/S Amount",
@@ -58,7 +58,7 @@ export const GetProfitShareGrossReportColumns = (navFunction: (badgeNumber: stri
       minWidth: 150,
       type: "rightAligned",
       resizable: true,
-      valueFormatter: (params) => numberToCurrency(params.value),
+      valueFormatter: (params) => numberToCurrency(params.value)
     },
     {
       headerName: "Loans",

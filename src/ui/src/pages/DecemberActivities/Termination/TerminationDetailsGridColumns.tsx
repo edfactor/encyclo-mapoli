@@ -15,7 +15,6 @@ import {
 import { HeaderComponent } from "./TerminationHeaderComponent";
 import { numberToCurrency } from "smart-ui-library";
 
-
 interface SaveButtonCellParams extends ICellRendererParams {
   removeRowFromSelectedRows: (id: number) => void;
   addRowToSelectedRows: (id: number) => void;

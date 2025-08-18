@@ -68,7 +68,7 @@ const SearchAndAddExecutive = ({
   return (
     <Page
       label="Add New Executive"
-      actionNode={<div className="flex mr-2 justify-end gap-24">{RenderAddButton({ setOpenModal })}</div>}>
+      actionNode={<div className="mr-2 flex justify-end gap-24">{RenderAddButton({ setOpenModal })}</div>}>
       <Grid
         container
         rowSpacing="24px">

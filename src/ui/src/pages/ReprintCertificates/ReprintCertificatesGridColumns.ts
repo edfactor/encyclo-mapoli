@@ -58,7 +58,7 @@ export const GetReprintCertificatesGridColumns = (
       sortable: true,
       valueFormatter: (params) => {
         if (params.value) {
-          const ssn = params.value.replace(/\D/g, '');
+          const ssn = params.value.replace(/\D/g, "");
           return `***-**-${ssn.slice(-4)}`;
         }
         return "";

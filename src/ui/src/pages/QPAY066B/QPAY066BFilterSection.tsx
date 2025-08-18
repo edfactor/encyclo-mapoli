@@ -14,7 +14,6 @@ export interface QPAY066BFilterParams {
   employeeStatus: string;
 }
 
-
 interface QPAY066BFilterSectionProps {
   onFilterChange: (params: QPAY066BFilterParams) => void;
   onReset: () => void;
@@ -63,7 +62,9 @@ const QPAY066BFilterSection: React.FC<QPAY066BFilterSectionProps> = ({
                 <>
                   <FormLabel>QPay066 Presets</FormLabel>
                   <FormControl fullWidth>
-                    <Select {...field} size="small">
+                    <Select
+                      {...field}
+                      size="small">
                       <MenuItem value="QPay066B">QPay066B – Less than 20% Vested</MenuItem>
                     </Select>
                   </FormControl>
@@ -116,7 +117,9 @@ const QPAY066BFilterSection: React.FC<QPAY066BFilterSectionProps> = ({
                 <>
                   <FormLabel>Vested Percentage</FormLabel>
                   <FormControl fullWidth>
-                    <Select {...field} size="small">
+                    <Select
+                      {...field}
+                      size="small">
                       <MenuItem value="< 20%">Less than 20%</MenuItem>
                     </Select>
                   </FormControl>
@@ -132,7 +135,10 @@ const QPAY066BFilterSection: React.FC<QPAY066BFilterSectionProps> = ({
                 <>
                   <FormLabel>Age</FormLabel>
                   <FormControl fullWidth>
-                    <Select {...field} size="small" displayEmpty>
+                    <Select
+                      {...field}
+                      size="small"
+                      displayEmpty>
                       <MenuItem value=""></MenuItem>
                     </Select>
                   </FormControl>
@@ -148,7 +154,10 @@ const QPAY066BFilterSection: React.FC<QPAY066BFilterSectionProps> = ({
                 <>
                   <FormLabel>Employee Status</FormLabel>
                   <FormControl fullWidth>
-                    <Select {...field} size="small" displayEmpty>
+                    <Select
+                      {...field}
+                      size="small"
+                      displayEmpty>
                       <MenuItem value=""></MenuItem>
                     </Select>
                   </FormControl>

@@ -54,21 +54,25 @@ const MasterInquiryGroupingGrid = ({ searchParams }: { searchParams: MasterInqui
   const { masterInquiryGroupingData } = useSelector((state: RootState) => state.inquiry);
 
   // Extract render functions to prevent recreation on every render
-  const renderProfitYear = useCallback((value: number) => (
-    <Typography sx={{ fontWeight: 500, color: "#231F20" }}>{value}</Typography>
-  ), []);
+  const renderProfitYear = useCallback(
+    (value: number) => <Typography sx={{ fontWeight: 500, color: "#231F20" }}>{value}</Typography>,
+    []
+  );
 
-  const renderMonth = useCallback((value: number) => (
-    <Typography sx={{ color: "#231F20" }}>{String(value).padStart(2, "0")}</Typography>
-  ), []);
+  const renderMonth = useCallback(
+    (value: number) => <Typography sx={{ color: "#231F20" }}>{String(value).padStart(2, "0")}</Typography>,
+    []
+  );
 
-  const renderCurrency = useCallback((value: number) => (
-    <Typography sx={{ color: "#231F20" }}>{numberToCurrency(value)}</Typography>
-  ), []);
+  const renderCurrency = useCallback(
+    (value: number) => <Typography sx={{ color: "#231F20" }}>{numberToCurrency(value)}</Typography>,
+    []
+  );
 
-  const renderTransactionCount = useCallback((value: number) => (
-    <Typography sx={{ color: "#231F20" }}>{value.toLocaleString()}</Typography>
-  ), []);
+  const renderTransactionCount = useCallback(
+    (value: number) => <Typography sx={{ color: "#231F20" }}>{value.toLocaleString()}</Typography>,
+    []
+  );
 
   const groupingColumns = useMemo(
     (): INestedGridColumn<GroupedProfitSummaryDto>[] => [
@@ -136,80 +140,86 @@ const MasterInquiryGroupingGrid = ({ searchParams }: { searchParams: MasterInqui
   const detailColumns = useMemo(() => GetMasterInquiryGridColumns(), []);
 
   // Handle row expansion/collapse
-  const handleRowToggle = useCallback((rowId: string, isExpanded: boolean, row: INestedGridRowData<GroupedProfitSummaryDto>) => {
-    if (!isExpanded) {
-      // Collapsing row
-      setExpandedRowIds((prev) => {
-        const newSet = new Set(prev);
-        newSet.delete(rowId);
-        return newSet;
-      });
-      setExpandedRowDataMap((prev) => {
-        const { [rowId]: _, ...rest } = prev;
-        return rest;
-      });
-    } else {
-      // Expanding row
-      if (!expandedRowIds.has(rowId)) {
-        setExpandedRowIds((prev) => new Set(prev).add(rowId));
-
-        getFilteredDetails({
-          memberType: searchParams.memberType || 0,
-          profitYear: row.profitYear,
-          monthToDate: row.monthToDate,
-          badgeNumber: searchParams.badgeNumber,
-          psnSuffix: searchParams.psnSuffix,
-          ssn: searchParams.ssn?.toString(),
-          startProfitMonth: searchParams.startProfitMonth,
-          endProfitMonth: searchParams.endProfitMonth,
-          profitCode: searchParams.profitCode,
-          contributionAmount: searchParams.contributionAmount,
-          earningsAmount: searchParams.earningsAmount,
-          forfeitureAmount: searchParams.forfeitureAmount,
-          paymentAmount: searchParams.paymentAmount,
-          name: searchParams.name,
-          paymentType: searchParams.paymentType,
-          skip: 0,
-          take: 25,
-          sortBy: "profitYear",
-          isSortDescending: true
+  const handleRowToggle = useCallback(
+    (rowId: string, isExpanded: boolean, row: INestedGridRowData<GroupedProfitSummaryDto>) => {
+      if (!isExpanded) {
+        // Collapsing row
+        setExpandedRowIds((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(rowId);
+          return newSet;
         });
+        setExpandedRowDataMap((prev) => {
+          const { [rowId]: _, ...rest } = prev;
+          return rest;
+        });
+      } else {
+        // Expanding row
+        if (!expandedRowIds.has(rowId)) {
+          setExpandedRowIds((prev) => new Set(prev).add(rowId));
+
+          getFilteredDetails({
+            memberType: searchParams.memberType || 0,
+            profitYear: row.profitYear,
+            monthToDate: row.monthToDate,
+            badgeNumber: searchParams.badgeNumber,
+            psnSuffix: searchParams.psnSuffix,
+            ssn: searchParams.ssn?.toString(),
+            startProfitMonth: searchParams.startProfitMonth,
+            endProfitMonth: searchParams.endProfitMonth,
+            profitCode: searchParams.profitCode,
+            contributionAmount: searchParams.contributionAmount,
+            earningsAmount: searchParams.earningsAmount,
+            forfeitureAmount: searchParams.forfeitureAmount,
+            paymentAmount: searchParams.paymentAmount,
+            name: searchParams.name,
+            paymentType: searchParams.paymentType,
+            skip: 0,
+            take: 25,
+            sortBy: "profitYear",
+            isSortDescending: true
+          });
+        }
       }
-    }
-  }, [expandedRowIds, getFilteredDetails, searchParams]);
+    },
+    [expandedRowIds, getFilteredDetails, searchParams]
+  );
 
-  const renderNestedContent = useCallback((row: INestedGridRowData<GroupedProfitSummaryDto>, isExpanded: boolean) => {
-    const rowId = String(row.id);
+  const renderNestedContent = useCallback(
+    (row: INestedGridRowData<GroupedProfitSummaryDto>, isExpanded: boolean) => {
+      const rowId = String(row.id);
 
-    if (!isExpanded) {
-      return null;
-    }
+      if (!isExpanded) {
+        return null;
+      }
 
-    return (
-      <Box sx={{ mx: 0, px: 0, py: 0 }}>
-        <DSMGrid
-          preferenceKey={`master-inquiry-detail-${row.id}`}
-          isLoading={isFetchingFilteredDetails && !expandedRowDataMap[rowId]}
-          showColumnControl={false}
-          maxHeight={250}
-          providedOptions={{
-            rowData: expandedRowDataMap[rowId] || [],
-            columnDefs: detailColumns,
-            defaultColDef: {
-              resizable: true,
-              sortable: true,
-              floatingFilter: false,
-              cellStyle: { paddingLeft: "8px", paddingRight: "8px", fontSize: "13px" }
-            },
-            rowHeight: 40,
-            headerHeight: 36,
-            suppressRowClickSelection: true,
-            suppressCellFocus: true
-          }}
-        />
-      </Box>
-    );
-  }, [expandedRowDataMap, detailColumns, isFetchingFilteredDetails]);
+      return (
+        <Box sx={{ mx: 0, px: 0, py: 0 }}>
+          <DSMGrid
+            preferenceKey={`master-inquiry-detail-${row.id}`}
+            isLoading={isFetchingFilteredDetails && !expandedRowDataMap[rowId]}
+            showColumnControl={false}
+            maxHeight={250}
+            providedOptions={{
+              rowData: expandedRowDataMap[rowId] || [],
+              columnDefs: detailColumns,
+              defaultColDef: {
+                resizable: true,
+                sortable: true,
+                floatingFilter: false,
+                cellStyle: { paddingLeft: "8px", paddingRight: "8px", fontSize: "13px" }
+              },
+              rowHeight: 40,
+              headerHeight: 36,
+              suppressRowClickSelection: true,
+              suppressCellFocus: true
+            }}
+          />
+        </Box>
+      );
+    },
+    [expandedRowDataMap, detailColumns, isFetchingFilteredDetails]
+  );
 
   if (isGroupingLoading) {
     return (

@@ -60,12 +60,12 @@ const ProfitShareTotals426 = () => {
 
   const renderActionNode = () => {
     return (
-      <div className="flex items-center gap-2 h-10">
+      <div className="flex h-10 items-center gap-2">
         <StatusDropdownActionNode />
         <Button
           onClick={() => navigate("/profit-share-report")}
           variant="outlined"
-          className="h-10 whitespace-nowrap min-w-fit">
+          className="h-10 min-w-fit whitespace-nowrap">
           {MENU_LABELS.GO_TO_PROFIT_SHARE_REPORT}
         </Button>
       </div>

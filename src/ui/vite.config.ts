@@ -21,7 +21,7 @@ export default defineConfig(({ command, mode }) => {
     },
     server: {
       port: 3100,
-      strictPort: true, // Prevents Vite from trying other ports if 3100 is unavailable
+      strictPort: true // Prevents Vite from trying other ports if 3100 is unavailable
     },
     define: {
       //'process.env.YOUR_STRING_VARIABLE': JSON.stringify(env.YOUR_STRING_VARIABLE),
@@ -38,12 +38,12 @@ export default defineConfig(({ command, mode }) => {
       environment: "jsdom",
       include: ["**/*.test.tsx"],
       coverage: {
-        reporter: ["text", "html"],
+        reporter: ["text", "html"]
       },
       reporters: ["default", "junit"],
       outputFile: {
-        junit: "./FE_Tests/unit-test.xml",
-      },
+        junit: "./FE_Tests/unit-test.xml"
+      }
     },
     plugins: [
       react(),

@@ -99,7 +99,7 @@ const DistributionsAndForfeituresGrid: React.FC<DistributionsAndForfeituresGridS
     <>
       {distributionsAndForfeitures?.response && (
         <>
-          <div className="flex sticky top-0 z-10 bg-white totals-flex-container">
+          <div className="totals-flex-container sticky top-0 z-10 flex bg-white">
             <TotalsGrid
               displayData={[[numberToCurrency(distributionsAndForfeitures.distributionTotal || 0)]]}
               leftColumnHeaders={["Distributions"]}

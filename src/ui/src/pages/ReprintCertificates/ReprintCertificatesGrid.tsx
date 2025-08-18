@@ -3,20 +3,14 @@ import { Typography, Box, CircularProgress } from "@mui/material";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { useNavigate, Path } from "react-router-dom";
 import { ReprintCertificatesFilterParams } from "./ReprintCertificatesFilterSection";
-import { 
-  GetReprintCertificatesGridColumns, 
-  ReprintCertificateEmployee 
-} from "./ReprintCertificatesGridColumns";
+import { GetReprintCertificatesGridColumns, ReprintCertificateEmployee } from "./ReprintCertificatesGridColumns";
 
 interface ReprintCertificatesGridProps {
   filterParams: ReprintCertificatesFilterParams;
   onLoadingChange?: (isLoading: boolean) => void;
 }
 
-const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({ 
-  filterParams, 
-  onLoadingChange 
-}) => {
+const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({ filterParams, onLoadingChange }) => {
   const navigate = useNavigate();
 
   const [pageNumber, setPageNumber] = useState(0);
@@ -67,7 +61,7 @@ const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({
           balance: 29876.33,
           vestedPortion: 29876.33,
           singleLifeAnnuity: 29876.33,
-          qualifiedJoinAndSurvivor: 26888.70
+          qualifiedJoinAndSurvivor: 26888.7
         },
         {
           badge: 94861,
@@ -79,7 +73,7 @@ const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({
           balance: 52103.78,
           vestedPortion: 52103.78,
           singleLifeAnnuity: 52103.78,
-          qualifiedJoinAndSurvivor: 46893.40
+          qualifiedJoinAndSurvivor: 46893.4
         }
       ] as ReprintCertificateEmployee[],
       total: 4
@@ -96,7 +90,7 @@ const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({
       const timer = setTimeout(() => {
         setIsFetching(false);
       }, 800);
-      
+
       return () => clearTimeout(timer);
     }
   }, [filterParams]);
@@ -113,11 +107,11 @@ const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({
   };
 
   const addRowToSelectedRows = useCallback((id: number) => {
-    setSelectedRowIds(prev => [...prev, id]);
+    setSelectedRowIds((prev) => [...prev, id]);
   }, []);
 
   const removeRowFromSelectedRows = useCallback((id: number) => {
-    setSelectedRowIds(prev => prev.filter(rowId => rowId !== id));
+    setSelectedRowIds((prev) => prev.filter((rowId) => rowId !== id));
   }, []);
 
   const columnDefs = useMemo(
@@ -136,13 +130,19 @@ const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({
   return (
     <>
       <div style={{ padding: "0 24px" }}>
-        <Typography variant="h2" sx={{ color: "#0258A5" }}>
+        <Typography
+          variant="h2"
+          sx={{ color: "#0258A5" }}>
           Print Profit Certificates ({mockData.total})
         </Typography>
       </div>
 
       {isFetching ? (
-        <Box display="flex" justifyContent="center" alignItems="center" py={4}>
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          py={4}>
           <CircularProgress />
         </Box>
       ) : (
@@ -154,7 +154,7 @@ const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({
             providedOptions={{
               rowData: mockData.results || [],
               columnDefs: columnDefs,
-              rowSelection: 'multiple',
+              rowSelection: "multiple",
               suppressRowClickSelection: true,
               onSelectionChanged: onSelectionChanged
             }}

@@ -15,10 +15,10 @@ interface StatusDropdownActionNodeProps {
   onStatusChange?: (newStatus: string, statusName?: string) => void;
 }
 
-const StatusDropdownActionNode: React.FC<StatusDropdownActionNodeProps> = ({ 
-  initialStatus, 
-  navigationId, 
-  onStatusChange 
+const StatusDropdownActionNode: React.FC<StatusDropdownActionNodeProps> = ({
+  initialStatus,
+  navigationId,
+  onStatusChange
 }) => {
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   const [currentStatus, setCurrentStatus] = useState("1");
@@ -33,10 +33,10 @@ const StatusDropdownActionNode: React.FC<StatusDropdownActionNodeProps> = ({
   const handleStatusChange = async (newStatus: string) => {
     // Call the parent callback BEFORE the API call so we can detect the transition immediately
     if (onStatusChange) {
-      const statusName = data?.navigationStatusList?.find(status => status.id === parseInt(newStatus))?.name;
+      const statusName = data?.navigationStatusList?.find((status) => status.id === parseInt(newStatus))?.name;
       onStatusChange(newStatus, statusName);
     }
-    
+
     const result = await triggerUpdate({ navigationId: navigationObj?.id, statusId: parseInt(newStatus) });
     if (result.data?.isSuccessful) {
       setCurrentStatus(newStatus);
@@ -71,7 +71,7 @@ const StatusDropdownActionNode: React.FC<StatusDropdownActionNodeProps> = ({
   }, [data, navigationList, currentNavigationId, hasToken]);
 
   return (
-    <div className="flex items-center gap-2 h-10">
+    <div className="flex h-10 items-center gap-2">
       {isSuccess ? (
         <StatusDropdown
           navigationStatusList={data.navigationStatusList}

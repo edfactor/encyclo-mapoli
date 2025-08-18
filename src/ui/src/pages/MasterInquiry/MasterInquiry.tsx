@@ -86,7 +86,9 @@ const MasterInquiryContent = () => {
       )}
 
       {noResultsMessage && !showMemberGrid && !showMemberDetails && (
-        <Grid size={{ xs: 12 }} sx={{ padding: "24px" }}>
+        <Grid
+          size={{ xs: 12 }}
+          sx={{ padding: "24px" }}>
           <div>{noResultsMessage}</div>
         </Grid>
       )}

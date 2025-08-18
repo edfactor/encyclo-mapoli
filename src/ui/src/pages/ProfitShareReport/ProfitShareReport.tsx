@@ -5,7 +5,7 @@ import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useFinalizeReportMutation, useLazyGetYearEndProfitSharingReportTotalsQuery} from "reduxstore/api/YearsEndApi";
+import { useFinalizeReportMutation, useLazyGetYearEndProfitSharingReportTotalsQuery } from "reduxstore/api/YearsEndApi";
 import { setYearEndProfitSharingReportQueryParams } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
 import { Page, SmartModal, DSMAccordion } from "smart-ui-library";
@@ -28,12 +28,11 @@ const ProfitShareReport = () => {
 
   useEffect(() => {
     if (hasToken && profitYear && !initialDataLoaded) {
-      
       const totalsRequest = {
         profitYear: profitYear,
         useFrozenData: true,
-        badgeNumber: null,
-      }
+        badgeNumber: null
+      };
 
       triggerSearch(totalsRequest, false)
         .then((result) => {
@@ -74,8 +73,8 @@ const ProfitShareReport = () => {
         profitYear: profitYear,
         useFrozenData: true,
         badgeNumber: null,
-        archive: true,
-      }
+        archive: true
+      };
 
       triggerSearch(totalsRequest, false)
         .then((result) => {
@@ -97,11 +96,11 @@ const ProfitShareReport = () => {
     if (!initialDataLoaded || !yearEndProfitSharingReportTotals) return null;
 
     return (
-      <div className="flex items-center gap-2 h-10">
+      <div className="flex h-10 items-center gap-2">
         <Button
           onClick={() => setIsModalOpen(true)}
           variant="outlined"
-          className="h-10 whitespace-nowrap min-w-fit">
+          className="h-10 min-w-fit whitespace-nowrap">
           Commit
         </Button>
         <StatusDropdownActionNode onStatusChange={handleStatusChange} />
@@ -157,8 +156,6 @@ const ProfitShareReport = () => {
             </DSMAccordion>
           </Grid>
         )}
-
-       
       </Grid>
 
       <SmartModal
@@ -188,46 +185,46 @@ const ProfitShareReport = () => {
         ]}
         title="Are you ready to Commit?">
         Committing this change will update and save:
+        <div>
+          <table
+            cellPadding={20}
+            style={{ width: "100%" }}>
+            <tr>
+              <td>Earn Points</td>
+              <td>How much money goes towards allocating a contribution</td>
+            </tr>
+            <tr>
+              <td>ZeroContributionReason</td>
+              <td>
+                {" "}
+                Why did an employee get a zero contribution? Normal, Under21, Terminated (Vest Only), Retired, Soon to
+                be Retired
+              </td>
+            </tr>
 
-          <div>
-              <table cellPadding={20} style={{width: "100%"}}>
-                  <tr>
-                      <td>
-                          Earn Points
-                      </td>
-                      <td>
-                          How much money goes towards allocating a contribution
-                      </td>
-                  </tr>
-                  <tr>
-                      <td>ZeroContributionReason</td>
-                      <td> Why did an employee get a zero contribution? Normal,
-                          Under21, Terminated
-                          (Vest Only), Retired, Soon to be Retired
-                      </td>
-                  </tr>
-
-                  <tr>
-                      <td>EmployeeType</td>
-                      <td> Is this a "new employee in the plan" - aka this is your first
-                          year &gt;21
-                          and &gt;1000 hours - employee may already have V-ONLY records
-
-                      </td>
-                  </tr>
-                  <tr>
-                      <td>PsCertificateIssuedDate</td>
-                      <td> indicates that this employee should get a
-                          physically printed
-                          certificate. It is a proxy for Earn Points &gt; 0.
-                      </td>
-                  </tr>
-              </table>
-          </div>
-          <div>
-              This "COMMIT" is safe to run multiple times, until the "Master Update" is saved.  Running "COMMIT" after Master Update means that the Master Update will potentially not have computed the correct earnings and contribution amounts.
-          </div>
-          
+            <tr>
+              <td>EmployeeType</td>
+              <td>
+                {" "}
+                Is this a "new employee in the plan" - aka this is your first year &gt;21 and &gt;1000 hours - employee
+                may already have V-ONLY records
+              </td>
+            </tr>
+            <tr>
+              <td>PsCertificateIssuedDate</td>
+              <td>
+                {" "}
+                indicates that this employee should get a physically printed certificate. It is a proxy for Earn Points
+                &gt; 0.
+              </td>
+            </tr>
+          </table>
+        </div>
+        <div>
+          This "COMMIT" is safe to run multiple times, until the "Master Update" is saved. Running "COMMIT" after Master
+          Update means that the Master Update will potentially not have computed the correct earnings and contribution
+          amounts.
+        </div>
       </SmartModal>
     </Page>
   );

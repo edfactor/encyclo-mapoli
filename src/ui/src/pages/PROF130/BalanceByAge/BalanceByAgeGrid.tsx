@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetBalanceByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, TotalsGrid ,numberToCurrency } from "smart-ui-library";
+import { DSMGrid, ISortParams, TotalsGrid, numberToCurrency } from "smart-ui-library";
 import { GetBalanceByAgeColumns } from "./BalanceByAgeGridColumns";
 import { Grid } from "@mui/material";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
@@ -70,7 +70,7 @@ const BalanceByAgeGrid: React.FC<BalanceByAgeGridProps> = ({ initialSearchLoaded
           <div className="px-[24px]">
             <h2 className="text-dsm-secondary">Summary</h2>
           </div>
-          <div className="flex sticky top-0 z-10 bg-white">
+          <div className="sticky top-0 z-10 flex bg-white">
             <TotalsGrid
               displayData={[
                 [
