@@ -88,7 +88,7 @@ const useMasterInquiry = () => {
         })
           .unwrap()
           .then((profitData) => {
-            dispatch({ type: "PROFIT_DATA_SUCCESS", payload: { profitData } });
+            dispatch({ type: "PROFIT_DATA_FETCH_SUCCESS", payload: { profitData } });
           });
       }
     },
@@ -178,7 +178,7 @@ const useMasterInquiry = () => {
   // Fetch member details when selected member changes
   useEffect(() => {
     if (state.selection.selectedMember?.memberType && state.selection.selectedMember?.id) {
-      dispatch({ type: "MEMBER_DETAILS_START" });
+      dispatch({ type: "MEMBER_DETAILS_FETCH_START" });
       triggerMemberDetails({
         memberType: state.selection.selectedMember.memberType,
         id: state.selection.selectedMember.id,
@@ -186,7 +186,7 @@ const useMasterInquiry = () => {
       })
         .unwrap()
         .then((details) => {
-          dispatch({ type: "MEMBER_DETAILS_SUCCESS", payload: { details } });
+          dispatch({ type: "MEMBER_DETAILS_FETCH_SUCCESS", payload: { details } });
 
           if (details.missives && missives) {
             const localMissives: MissiveResponse[] = details.missives
@@ -203,7 +203,7 @@ const useMasterInquiry = () => {
           }
         })
         .catch(() => {
-          dispatch({ type: "MEMBER_DETAILS_FAILURE" });
+          dispatch({ type: "MEMBER_DETAILS_FETCH_FAILURE" });
         });
     }
   }, [
@@ -237,7 +237,7 @@ const useMasterInquiry = () => {
 
   useEffect(() => {
     if (profitFetchDeps.memberType && profitFetchDeps.id) {
-      dispatch({ type: "PROFIT_DATA_START" });
+      dispatch({ type: "PROFIT_DATA_FETCH_START" });
       triggerProfitDetails({
         memberType: profitFetchDeps.memberType,
         id: profitFetchDeps.id,
@@ -248,10 +248,10 @@ const useMasterInquiry = () => {
       })
         .unwrap()
         .then((profitData) => {
-          dispatch({ type: "PROFIT_DATA_SUCCESS", payload: { profitData } });
+          dispatch({ type: "PROFIT_DATA_FETCH_SUCCESS", payload: { profitData } });
         })
         .catch(() => {
-          dispatch({ type: "PROFIT_DATA_FAILURE" });
+          dispatch({ type: "PROFIT_DATA_FETCH_FAILURE" });
         });
     }
   }, [profitFetchDeps, triggerProfitDetails]);

@@ -58,12 +58,12 @@ export type MasterInquiryAction =
   | { type: "MEMBERS_FETCH_SUCCESS"; payload: { results: SearchResponse } }
   | { type: "MEMBERS_FETCH_FAILURE"; payload: { error: string } }
   | { type: "SELECT_MEMBER"; payload: { member: SelectedMember | null } }
-  | { type: "MEMBER_DETAILS_START" }
-  | { type: "MEMBER_DETAILS_SUCCESS"; payload: { details: MemberDetails } }
-  | { type: "MEMBER_DETAILS_FAILURE" }
-  | { type: "PROFIT_DATA_START" }
-  | { type: "PROFIT_DATA_SUCCESS"; payload: { profitData: ProfitData } }
-  | { type: "PROFIT_DATA_FAILURE" }
+  | { type: "MEMBER_DETAILS_FETCH_START" }
+  | { type: "MEMBER_DETAILS_FETCH_SUCCESS"; payload: { details: MemberDetails } }
+  | { type: "MEMBER_DETAILS_FETCH_FAILURE" }
+  | { type: "PROFIT_DATA_FETCH_START" }
+  | { type: "PROFIT_DATA_FETCH_SUCCESS"; payload: { profitData: ProfitData } }
+  | { type: "PROFIT_DATA_FETCH_FAILURE" }
   | { type: "SET_NO_RESULTS_MESSAGE"; payload: { message: string | null } }
   | { type: "SET_VIEW_MODE"; payload: { mode: ViewMode } }
   | { type: "RESET_ALL" };
@@ -231,7 +231,7 @@ export function masterInquiryReducer(state: MasterInquiryState, action: MasterIn
         }
       };
 
-    case "MEMBER_DETAILS_START":
+    case "MEMBER_DETAILS_FETCH_START":
       return {
         ...state,
         selection: {
@@ -240,7 +240,7 @@ export function masterInquiryReducer(state: MasterInquiryState, action: MasterIn
         }
       };
 
-    case "MEMBER_DETAILS_SUCCESS":
+    case "MEMBER_DETAILS_FETCH_SUCCESS":
       return {
         ...state,
         selection: {
@@ -250,7 +250,7 @@ export function masterInquiryReducer(state: MasterInquiryState, action: MasterIn
         }
       };
 
-    case "MEMBER_DETAILS_FAILURE":
+    case "MEMBER_DETAILS_FETCH_FAILURE":
       return {
         ...state,
         selection: {
@@ -260,7 +260,7 @@ export function masterInquiryReducer(state: MasterInquiryState, action: MasterIn
         }
       };
 
-    case "PROFIT_DATA_START":
+    case "PROFIT_DATA_FETCH_START":
       return {
         ...state,
         selection: {
@@ -269,7 +269,7 @@ export function masterInquiryReducer(state: MasterInquiryState, action: MasterIn
         }
       };
 
-    case "PROFIT_DATA_SUCCESS":
+    case "PROFIT_DATA_FETCH_SUCCESS":
       return {
         ...state,
         selection: {
@@ -279,7 +279,7 @@ export function masterInquiryReducer(state: MasterInquiryState, action: MasterIn
         }
       };
 
-    case "PROFIT_DATA_FAILURE":
+    case "PROFIT_DATA_FETCH_FAILURE":
       return {
         ...state,
         selection: {
