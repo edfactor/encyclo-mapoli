@@ -3,7 +3,7 @@ import { EmployeeDetails, MasterInquiryRequest } from "reduxstore/types";
 export interface SelectedMember {
   memberType: number;
   id: number;
-  ssn: string;
+  ssn: number;
   badgeNumber: number;
   psnSuffix: number;
 }
@@ -124,7 +124,7 @@ export function masterInquiryReducer(state: MasterInquiryState, action: MasterIn
           selectedMember = {
             memberType: member.isEmployee ? 1 : 2,
             id: Number(member.id),
-            ssn: member.ssn,
+            ssn: Number(member.ssn),
             badgeNumber: Number(member.badgeNumber),
             psnSuffix: Number(member.psnSuffix)
           };

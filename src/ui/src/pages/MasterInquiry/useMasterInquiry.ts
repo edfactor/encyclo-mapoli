@@ -8,6 +8,7 @@ import {
 } from "reduxstore/api/InquiryApi";
 import { RootState } from "reduxstore/store";
 import { MasterInquiryRequest, MasterInquirySearch, MissiveResponse } from "reduxstore/types";
+import { ROUTES } from "../../constants";
 import { isSimpleSearch } from "./MasterInquiryFunctions";
 import { MASTER_INQUIRY_MESSAGES } from "./MasterInquiryMessages";
 import { useGridPagination } from "./useGridPagination";
@@ -20,16 +21,14 @@ import {
   type SelectedMember
 } from "./useMasterInquiryReducer";
 import { useMissiveAlerts } from "./useMissiveAlerts";
-import { ROUTES } from "../../constants";
 
 const useMasterInquiry = () => {
   const [state, dispatch] = useReducer(masterInquiryReducer, initialState);
   const navigate = useNavigate();
 
-  const [triggerSearch, { isLoading: isSearching, error: searchError }] = useLazySearchProfitMasterInquiryQuery();
-  const [triggerMemberDetails, { isFetching: isFetchingMemberDetails }] = useLazyGetProfitMasterInquiryMemberQuery();
-  const [triggerProfitDetails, { isFetching: isFetchingProfitData }] =
-    useLazyGetProfitMasterInquiryMemberDetailsQuery();
+  const [triggerSearch, { isLoading: isSearching }] = useLazySearchProfitMasterInquiryQuery();
+  const [triggerMemberDetails] = useLazyGetProfitMasterInquiryMemberQuery();
+  const [triggerProfitDetails] = useLazyGetProfitMasterInquiryMemberDetailsQuery();
 
   const { masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
   const missives = useSelector((state: RootState) => state.lookups.missives);
