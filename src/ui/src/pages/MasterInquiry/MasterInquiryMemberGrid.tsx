@@ -28,6 +28,7 @@ interface MasterInquiryMemberGridProps {
   };
   onPaginationChange: (pageNumber: number, pageSize: number) => void;
   onSortChange: (sortParams: any) => void;
+  isLoading?: boolean;
 }
 
 const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = ({
@@ -35,7 +36,8 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = ({
   onMemberSelect,
   memberGridPagination,
   onPaginationChange,
-  onSortChange
+  onSortChange,
+  isLoading = false
 }: MasterInquiryMemberGridProps) => {
   const columns = useMemo(() => GetMasterInquiryMemberGridColumns(), []);
 
@@ -69,7 +71,7 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = ({
       <DSMGrid
         preferenceKey="MASTER_INQUIRY_MEMBER_GRID"
         handleSortChanged={handleSortChange}
-        isLoading={false}
+        isLoading={isLoading}
         providedOptions={{
           rowData: searchResults.results,
           columnDefs: columns,

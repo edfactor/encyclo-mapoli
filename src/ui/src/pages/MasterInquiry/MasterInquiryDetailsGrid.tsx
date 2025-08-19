@@ -1,8 +1,8 @@
 import { Typography } from "@mui/material";
 import { useMemo } from "react";
 import { DSMGrid, Pagination } from "smart-ui-library";
-import { GetMasterInquiryGridColumns } from "./MasterInquiryGridColumns";
 import { CAPTIONS } from "../../constants";
+import { GetMasterInquiryGridColumns } from "./MasterInquiryGridColumns";
 
 interface ProfitData {
   results: any[];
@@ -63,6 +63,7 @@ const MasterInquiryGrid: React.FC<MasterInquiryGridProps> = ({
         <DSMGrid
           preferenceKey={CAPTIONS.MASTER_INQUIRY}
           handleSortChanged={handleSortChange}
+          isLoading={!!isLoading}
           providedOptions={{
             rowData: profitData.results,
             columnDefs: columnDefs,

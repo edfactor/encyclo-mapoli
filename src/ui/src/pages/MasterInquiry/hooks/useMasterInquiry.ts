@@ -50,6 +50,7 @@ const useMasterInquiry = () => {
     (pageNumber: number, pageSize: number, sortParams: any) => {
       const currentSearchParams = searchParamsRef.current;
       if (currentSearchParams) {
+        dispatch({ type: "MEMBERS_FETCH_START" });
         triggerSearch({
           ...currentSearchParams,
           pagination: {
@@ -63,7 +64,10 @@ const useMasterInquiry = () => {
           .then((response) => {
             const results = Array.isArray(response) ? response : response.results;
             const total = Array.isArray(response) ? response.length : response.total;
-            dispatch({ type: "SEARCH_SUCCESS", payload: { results: { results, total } } });
+            dispatch({ type: "MEMBERS_FETCH_SUCCESS", payload: { results: { results, total } } });
+          })
+          .catch((error) => {
+            dispatch({ type: "MEMBERS_FETCH_FAILURE", payload: { error: error?.toString() || "Unknown error" } });
           });
       }
     },
@@ -274,6 +278,7 @@ const useMasterInquiry = () => {
     searchParams: state.search.params,
     searchResults: state.search.results,
     isSearching: isSearching || state.search.isSearching || state.search.isManuallySearching,
+    isFetchingMembers: state.search.isFetchingMembers,
     selectedMember: state.selection.selectedMember,
     memberDetails: state.selection.memberDetails,
     memberProfitData: state.selection.memberProfitData,

@@ -30,6 +30,7 @@ export interface MasterInquiryState {
     results: SearchResponse | null;
     isSearching: boolean;
     isManuallySearching: boolean;
+    isFetchingMembers: boolean;
     noResultsMessage: string | null;
     error: string | null;
   };
@@ -53,6 +54,9 @@ export type MasterInquiryAction =
   | { type: "SEARCH_SUCCESS"; payload: { results: SearchResponse } }
   | { type: "SEARCH_FAILURE"; payload: { error: string } }
   | { type: "SEARCH_RESET" }
+  | { type: "MEMBERS_FETCH_START" }
+  | { type: "MEMBERS_FETCH_SUCCESS"; payload: { results: SearchResponse } }
+  | { type: "MEMBERS_FETCH_FAILURE"; payload: { error: string } }
   | { type: "SELECT_MEMBER"; payload: { member: SelectedMember | null } }
   | { type: "MEMBER_DETAILS_START" }
   | { type: "MEMBER_DETAILS_SUCCESS"; payload: { details: MemberDetails } }
@@ -70,6 +74,7 @@ export const initialState: MasterInquiryState = {
     results: null,
     isSearching: false,
     isManuallySearching: false,
+    isFetchingMembers: false,
     noResultsMessage: null,
     error: null
   },
@@ -179,6 +184,36 @@ export function masterInquiryReducer(state: MasterInquiryState, action: MasterIn
         },
         view: {
           mode: "idle"
+        }
+      };
+
+    case "MEMBERS_FETCH_START":
+      return {
+        ...state,
+        search: {
+          ...state.search,
+          isFetchingMembers: true
+        }
+      };
+
+    case "MEMBERS_FETCH_SUCCESS":
+      return {
+        ...state,
+        search: {
+          ...state.search,
+          results: action.payload.results,
+          isFetchingMembers: false,
+          error: null
+        }
+      };
+
+    case "MEMBERS_FETCH_FAILURE":
+      return {
+        ...state,
+        search: {
+          ...state.search,
+          isFetchingMembers: false,
+          error: action.payload.error
         }
       };
 

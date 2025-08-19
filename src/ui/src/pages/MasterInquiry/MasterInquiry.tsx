@@ -15,6 +15,7 @@ const MasterInquiryContent = () => {
     searchParams,
     searchResults,
     isSearching,
+    isFetchingMembers,
     selectedMember,
     memberDetails,
     memberProfitData,
@@ -61,6 +62,7 @@ const MasterInquiryContent = () => {
           memberGridPagination={memberGridPagination}
           onPaginationChange={memberGridPagination.handlePaginationChange}
           onSortChange={memberGridPagination.handleSortChange}
+          isLoading={isFetchingMembers}
         />
       )}
 
