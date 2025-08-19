@@ -6,25 +6,24 @@ import MasterInquiryEmployeeDetails from "./MasterInquiryEmployeeDetails";
 import MasterInquiryMemberGrid from "./MasterInquiryMemberGrid";
 import MasterInquirySearchFilter from "./MasterInquirySearchFilter";
 import { MissiveAlertProvider } from "./MissiveAlertContext";
-import { useMissiveAlerts } from "./useMissiveAlerts";
 import useMasterInquiry from "./useMasterInquiry";
+import { useMissiveAlerts } from "./useMissiveAlerts";
 
 const MasterInquiryContent = () => {
   const { missiveAlerts } = useMissiveAlerts();
   const {
     searchParams,
     searchResults,
+    isSearching,
     selectedMember,
     memberDetails,
     memberProfitData,
-    isSearching,
     isFetchingMemberDetails,
     isFetchingProfitData,
     showMemberGrid,
     showMemberDetails,
     showProfitDetails,
     noResultsMessage,
-    initialSearchLoaded,
     memberGridPagination,
     profitGridPagination,
     executeSearch,
