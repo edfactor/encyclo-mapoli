@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { useLazyGetProfitMasterInquiryMemberQuery } from "reduxstore/api/InquiryApi";
 import { RootState } from "reduxstore/store";
 import { MissiveResponse } from "reduxstore/types";
-import MasterInquiryEmployeeDetails from "./MasterInquiryMemberDetails";
+import MasterInquiryMemberDetails from "./MasterInquiryMemberDetails";
 import { MASTER_INQUIRY_MESSAGES } from "./MasterInquiryMessages";
 import { useMissiveAlerts } from "./useMissiveAlerts";
 
@@ -15,7 +15,7 @@ interface StandaloneMemberDetailsProps {
 
 /*
  * Standalone component that fetches and displays member details.
- * This is a wrapper around MasterInquiryEmployeeDetails that handles its own data fetching.
+ * This is a wrapper around MasterInquiryMemberDetails that handles its own data fetching.
  * Used by components that need to display member details not using the master inquiry workflow.
  */
 const StandaloneMemberDetails: React.FC<StandaloneMemberDetailsProps> = ({ memberType, id, profitYear }) => {
@@ -68,7 +68,7 @@ const StandaloneMemberDetails: React.FC<StandaloneMemberDetailsProps> = ({ membe
   ]);
 
   return (
-    <MasterInquiryEmployeeDetails
+    <MasterInquiryMemberDetails
       memberType={memberType}
       id={id}
       profitYear={profitYear}

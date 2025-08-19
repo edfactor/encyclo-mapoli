@@ -1,6 +1,6 @@
 import { Grid, Typography } from "@mui/material";
 import LabelValueSection from "components/LabelValueSection";
-import React, { useMemo, memo } from "react";
+import React, { memo, useMemo } from "react";
 import { formatNumberWithComma, numberToCurrency } from "smart-ui-library";
 import { formatPercentage } from "utils/formatPercentage";
 import "../../styles/employee-details-lightbox.css";
@@ -8,7 +8,7 @@ import { mmDDYYFormat } from "../../utils/dateUtils";
 import { getEnrolledStatus, getForfeitedStatus } from "../../utils/enrollmentUtil";
 import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
 
-interface MasterInquiryEmployeeDetailsProps {
+interface MasterInquiryMemberDetailsProps {
   memberType: number;
   id: string | number;
   profitYear?: number | null | undefined;
@@ -25,7 +25,7 @@ in the React memo stuff at the bottom and are important for edge cases like thes
   know to rerender
   - The component could show stale data for wrong member
 */
-const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> = memo(
+const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = memo(
   ({ memberType, id, profitYear, memberDetails, isLoading }) => {
     // Memoized enrollment status
     const enrollmentStatus = useMemo(() => {
@@ -205,4 +205,4 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
   }
 );
 
-export default MasterInquiryEmployeeDetails;
+export default MasterInquiryMemberDetails;

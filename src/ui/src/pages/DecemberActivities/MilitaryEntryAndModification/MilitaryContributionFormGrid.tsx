@@ -1,14 +1,14 @@
+import { Button, Typography } from "@mui/material";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetMilitaryContributionsQuery } from "reduxstore/api/MilitaryApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { Typography, Button } from "@mui/material";
-import StandaloneMemberDetails from "../../MasterInquiry/StandaloneMemberDetails";
-import { GetMilitaryContributionColumns } from "./MilitaryContributionFormGridColumns";
 import { CAPTIONS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { MissiveAlertProvider } from "../../MasterInquiry/MissiveAlertContext";
+import StandaloneMemberDetails from "../../MasterInquiry/StandaloneMemberDetails";
+import { GetMilitaryContributionColumns } from "./MilitaryContributionFormGridColumns";
 
 interface MilitaryContributionGridProps {
   initialSearchLoaded: boolean;
@@ -28,14 +28,14 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
     isSortDescending: false
   });
   const profitYear = useDecemberFlowProfitYear();
-  const { masterInquiryEmployeeDetails } = useSelector((state: RootState) => state.inquiry);
+  const { masterInquiryMemberDetails } = useSelector((state: RootState) => state.inquiry);
   const { militaryContributionsData } = useSelector((state: RootState) => state.military);
   const [fetchContributions, { isFetching }] = useLazyGetMilitaryContributionsQuery();
 
   const onSearch = useCallback(async () => {
-    if (masterInquiryEmployeeDetails) {
+    if (masterInquiryMemberDetails) {
       await fetchContributions({
-        badgeNumber: Number(masterInquiryEmployeeDetails.badgeNumber),
+        badgeNumber: Number(masterInquiryMemberDetails.badgeNumber),
         profitYear: profitYear,
         contributionAmount: 0,
         contributionDate: "",
@@ -47,13 +47,13 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
         }
       });
     }
-  }, [pageNumber, pageSize, sortParams, masterInquiryEmployeeDetails, fetchContributions, profitYear]);
+  }, [pageNumber, pageSize, sortParams, masterInquiryMemberDetails, fetchContributions, profitYear]);
 
   useEffect(() => {
-    if (initialSearchLoaded && masterInquiryEmployeeDetails) {
+    if (initialSearchLoaded && masterInquiryMemberDetails) {
       onSearch();
     }
-  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, masterInquiryEmployeeDetails, onSearch]);
+  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, masterInquiryMemberDetails, onSearch]);
 
   // Need a useEffect on a change in militaryContributionsData to reset the page number when total count changes (new search, not pagination)
   const prevMilitaryContributionsData = useRef<any>(null);
@@ -74,11 +74,11 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
 
   return (
     <>
-      {masterInquiryEmployeeDetails && profitYear > 0 && (
+      {masterInquiryMemberDetails && profitYear > 0 && (
         <MissiveAlertProvider>
           <StandaloneMemberDetails
-            memberType={masterInquiryEmployeeDetails.isEmployee ? 1 : 2}
-            id={masterInquiryEmployeeDetails.id}
+            memberType={masterInquiryMemberDetails.isEmployee ? 1 : 2}
+            id={masterInquiryMemberDetails.id}
             profitYear={profitYear}
           />
         </MissiveAlertProvider>
