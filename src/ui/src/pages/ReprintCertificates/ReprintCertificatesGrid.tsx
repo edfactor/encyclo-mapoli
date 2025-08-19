@@ -1,131 +1,115 @@
+import { Typography } from "@mui/material";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Typography, Box, CircularProgress } from "@mui/material";
+import { useSelector } from "react-redux";
+import { useLazyGetCertificatesReportQuery } from "reduxstore/api/YearsEndApi";
+import { RootState } from "reduxstore/store";
+import { CertificatePrintRequest } from "reduxstore/types";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
-import { useNavigate, Path } from "react-router-dom";
 import { ReprintCertificatesFilterParams } from "./ReprintCertificatesFilterSection";
 import { GetReprintCertificatesGridColumns, ReprintCertificateEmployee } from "./ReprintCertificatesGridColumns";
 
 interface ReprintCertificatesGridProps {
   filterParams: ReprintCertificatesFilterParams;
-  onLoadingChange?: (isLoading: boolean) => void;
+  onSelectionChange?: (selectedBadgeNumbers: number[]) => void;
 }
 
-const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({ filterParams, onLoadingChange }) => {
-  const navigate = useNavigate();
-
+const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({ filterParams, onSelectionChange }) => {
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "badge",
+    sortBy: "badgeNumber",
     isSortDescending: false
   });
   const [selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
-  const [isFetching, setIsFetching] = useState(false);
 
-  const mockData = useMemo(() => {
-    if (!filterParams) return { results: [], total: 0 };
+  const { certificates } = useSelector((state: RootState) => state.yearsEnd);
+  const [getCertificatesReport, { isFetching }] = useLazyGetCertificatesReportQuery();
 
-    return {
-      results: [
-        {
-          badge: 47425,
-          name: "BACHELDER, BRAD R",
-          ssn: "123-45-7425",
-          eoyBalance: 45232.12,
-          forfeitures2024: 0,
-          withdrawals2024: 0,
-          balance: 45232.12,
-          vestedPortion: 45232.12,
-          singleLifeAnnuity: 45232.12,
-          qualifiedJoinAndSurvivor: 40708.91
-        },
-        {
-          badge: 82424,
-          name: "BRAD, STEVEN",
-          ssn: "123-45-2424",
-          eoyBalance: 38901.45,
-          forfeitures2024: 0,
-          withdrawals2024: 0,
-          balance: 38901.45,
-          vestedPortion: 38901.45,
-          singleLifeAnnuity: 38901.45,
-          qualifiedJoinAndSurvivor: 35011.31
-        },
-        {
-          badge: 85744,
-          name: "BRADLEY, ZACHARY W",
-          ssn: "123-45-5744",
-          eoyBalance: 29876.33,
-          forfeitures2024: 0,
-          withdrawals2024: 0,
-          balance: 29876.33,
-          vestedPortion: 29876.33,
-          singleLifeAnnuity: 29876.33,
-          qualifiedJoinAndSurvivor: 26888.7
-        },
-        {
-          badge: 94861,
-          name: "COCHRAN, BRADIAN E",
-          ssn: "123-45-4861",
-          eoyBalance: 52103.78,
-          forfeitures2024: 0,
-          withdrawals2024: 0,
-          balance: 52103.78,
-          vestedPortion: 52103.78,
-          singleLifeAnnuity: 52103.78,
-          qualifiedJoinAndSurvivor: 46893.4
-        }
-      ] as ReprintCertificateEmployee[],
-      total: 4
+  const buildApiRequest = useCallback((): CertificatePrintRequest => {
+    const request: CertificatePrintRequest = {
+      profitYear: filterParams.profitYear,
+      skip: pageNumber * pageSize,
+      take: pageSize,
+      sortBy: sortParams.sortBy,
+      isSortDescending: sortParams.isSortDescending
     };
-  }, [filterParams]);
 
-  useEffect(() => {
-    onLoadingChange?.(isFetching);
-  }, [isFetching, onLoadingChange]);
-
-  useEffect(() => {
-    if (filterParams) {
-      setIsFetching(true);
-      const timer = setTimeout(() => {
-        setIsFetching(false);
-      }, 800);
-
-      return () => clearTimeout(timer);
+    if (filterParams.badgeNumber) {
+      const badgeNumbers = filterParams.badgeNumber
+        .split(",")
+        .map((num) => parseInt(num.trim()))
+        .filter((num) => !isNaN(num));
+      if (badgeNumbers.length > 0) {
+        request.badgeNumbers = badgeNumbers;
+      }
     }
-  }, [filterParams]);
 
-  const handleNavigationForButton = useCallback(
-    (destination: string | Partial<Path>) => {
-      navigate(destination);
-    },
-    [navigate]
-  );
+    if (filterParams.socialSecurityNumber) {
+      const ssns = filterParams.socialSecurityNumber
+        .split(",")
+        .map((ssn) => parseInt(ssn.replace(/\D/g, "")))
+        .filter((ssn) => !isNaN(ssn) && ssn > 0);
+      if (ssns.length > 0) {
+        request.ssns = ssns;
+      }
+    }
+
+    return request;
+  }, [filterParams, pageNumber, pageSize, sortParams]);
+
+  useEffect(() => {
+    if (
+      certificates &&
+      (pageNumber > 0 || sortParams.sortBy !== "badgeNumber" || sortParams.isSortDescending !== false)
+    ) {
+      const request = buildApiRequest();
+      getCertificatesReport(request);
+    }
+  }, [pageNumber, pageSize, sortParams]);
 
   const sortEventHandler = (update: ISortParams) => {
     setSortParams(update);
   };
 
-  const addRowToSelectedRows = useCallback((id: number) => {
-    setSelectedRowIds((prev) => [...prev, id]);
-  }, []);
+  const gridData = useMemo(() => {
+    if (!certificates?.response?.results) return [];
 
-  const removeRowFromSelectedRows = useCallback((id: number) => {
-    setSelectedRowIds((prev) => prev.filter((rowId) => rowId !== id));
-  }, []);
+    return certificates.response.results.map(
+      (cert): ReprintCertificateEmployee => ({
+        badge: cert.badgeNumber,
+        name: cert.fullName,
+        eoyBalance: cert.beginningBalance,
+        forfeitures2024: cert.forfeitures,
+        withdrawals2024: cert.distributions,
+        balance: cert.endingBalance,
+        vestedPortion: cert.vestedAmount,
+        singleLifeAnnuity: cert.annuitySingleRate || 0,
+        qualifiedJoinAndSurvivor: cert.annuityJointRate || 0
+      })
+    );
+  }, [certificates]);
 
   const columnDefs = useMemo(
-    () => GetReprintCertificatesGridColumns(selectedRowIds, addRowToSelectedRows, removeRowFromSelectedRows),
-    [selectedRowIds, addRowToSelectedRows, removeRowFromSelectedRows]
+    () =>
+      GetReprintCertificatesGridColumns(
+        selectedRowIds,
+        () => {},
+        () => {}
+      ),
+    [selectedRowIds]
   );
 
-  const onSelectionChanged = useCallback((event: any) => {
-    const selectedNodes = event.api.getSelectedNodes();
-    const selectedIds = selectedNodes.map((node: any) => node.data.badge);
-    setSelectedRowIds(selectedIds);
-  }, []);
+  const onSelectionChanged = useCallback(
+    (event: any) => {
+      const selectedNodes = event.api.getSelectedNodes();
+      const selectedIds = selectedNodes.map((node: any) => node.data.badge);
+      setSelectedRowIds(selectedIds);
+      onSelectionChange?.(selectedIds);
+    },
+    [onSelectionChange]
+  );
 
-  const selectedCount = selectedRowIds.length;
+  const totalCount = certificates?.response?.total || 0;
 
   return (
     <>
@@ -133,42 +117,34 @@ const ReprintCertificatesGrid: React.FC<ReprintCertificatesGridProps> = ({ filte
         <Typography
           variant="h2"
           sx={{ color: "#0258A5" }}>
-          Print Profit Certificates ({mockData.total})
+          Print Profit Certificates ({totalCount})
         </Typography>
       </div>
 
-      {isFetching ? (
-        <Box
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          py={4}>
-          <CircularProgress />
-        </Box>
-      ) : (
-        <>
-          <DSMGrid
-            preferenceKey="REPRINT_CERTIFICATES_GRID"
-            isLoading={isFetching}
-            handleSortChanged={sortEventHandler}
-            providedOptions={{
-              rowData: mockData.results || [],
-              columnDefs: columnDefs,
-              rowSelection: "multiple",
-              suppressRowClickSelection: true,
-              onSelectionChanged: onSelectionChanged
-            }}
-          />
-          {mockData.results.length > 0 && (
-            <Pagination
-              pageNumber={pageNumber + 1}
-              setPageNumber={(value: number) => setPageNumber(value - 1)}
-              pageSize={pageSize}
-              setPageSize={setPageSize}
-              recordCount={mockData.total}
-            />
-          )}
-        </>
+      <DSMGrid
+        preferenceKey="REPRINT_CERTIFICATES_GRID"
+        isLoading={isFetching}
+        handleSortChanged={sortEventHandler}
+        maxHeight={400}
+        providedOptions={{
+          rowData: gridData,
+          columnDefs: columnDefs,
+          rowSelection: "multiple",
+          suppressRowClickSelection: true,
+          onSelectionChanged: onSelectionChanged
+        }}
+      />
+      {(gridData.length > 0 || totalCount > 0) && (
+        <Pagination
+          pageNumber={pageNumber}
+          setPageNumber={(value: number) => setPageNumber(value - 1)}
+          pageSize={pageSize}
+          setPageSize={(value: number) => {
+            setPageSize(value);
+            setPageNumber(1);
+          }}
+          recordCount={totalCount}
+        />
       )}
     </>
   );

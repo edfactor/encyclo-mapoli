@@ -108,7 +108,7 @@ export const SelectableGridHeader: React.FC<SelectableGridHeaderProps> = (props)
       <IconButton
         onClick={handleSave}
         disabled={isSaveDisabled}>
-        {props.isBulkSaving ? <CircularProgress size={20} /> : <SaveOutlined />}
+        {props.isBulkSaving && props.isBulkSaving() ? <CircularProgress size={20} /> : <SaveOutlined />}
       </IconButton>
     </div>
   );

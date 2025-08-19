@@ -9,6 +9,7 @@ import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 import { InquiryApi } from "../../reduxstore/api/InquiryApi";
+import { clearForfeitureAdjustmentData } from "../../reduxstore/slices/forfeituresAdjustmentSlice";
 import { MissiveAlertProvider } from "../MasterInquiry/utils/MissiveAlertContext";
 import AddForfeitureModal from "./AddForfeitureModal";
 import ForfeituresAdjustmentPanel from "./ForfeituresAdjustmentPanel";
@@ -42,17 +43,18 @@ const ForfeituresAdjustment = () => {
   };
 
   const handleSaveForfeiture = () => {
-    // Refresh grid data after saving a new forfeiture
     if (forfeitureAdjustmentQueryParams) {
+      dispatch(clearForfeitureAdjustmentData());
+
       triggerSearch(forfeitureAdjustmentQueryParams)
         .unwrap()
         .then(() => {
           setInitialSearchLoaded(true);
+          dispatch(InquiryApi.util.invalidateTags(["memberDetails"]));
         })
         .catch((error: unknown) => {
           console.error("Error refreshing forfeiture adjustments:", error);
         });
-      dispatch(InquiryApi.util.invalidateTags(["memberDetails"]));
     }
   };
 
