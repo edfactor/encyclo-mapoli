@@ -7,6 +7,7 @@ import {
   BreakdownByStoreRequest,
   BreakdownByStoreResponse,
   BreakdownByStoreTotals,
+  CertificatesReportResponse,
   ContributionsByAge,
   ControlSheetResponse,
   DemographicBadgesNotInPayprofit,
@@ -28,7 +29,6 @@ import {
   GrandTotalsByStoreResponseDto,
   GrossWagesReportRequest,
   GrossWagesReportResponse,
-  RehireForfeiture,
   MissingCommasInPYName,
   NegativeEtvaForSSNsOnPayProfit,
   PagedReportResponse,
@@ -41,6 +41,7 @@ import {
   ProfitSharingDistributionsByAge,
   ProfitSharingLabel,
   ProfitYearRequest,
+  RehireForfeiture,
   ReportsByAgeParams,
   StartAndEndDateRequest,
   TerminationResponse,
@@ -53,8 +54,8 @@ import {
   UpdateSummaryResponse,
   VestedAmountsByAge,
   YearEndProfitSharingReportResponse,
-  YearEndProfitSharingReportTotalsResponse,
-  YearEndProfitSharingReportSummaryResponse
+  YearEndProfitSharingReportSummaryResponse,
+  YearEndProfitSharingReportTotalsResponse
 } from "reduxstore/types";
 import { Paged } from "smart-ui-library";
 
@@ -149,6 +150,7 @@ export interface YearsEndState {
   profitSharingLabels: Paged<ProfitSharingLabel> | null;
   controlSheet: ControlSheetResponse | null;
   breakdownGrandTotals: GrandTotalsByStoreResponseDto | null;
+  certificates: CertificatesReportResponse | null;
 }
 
 const initialState: YearsEndState = {
@@ -245,7 +247,8 @@ const initialState: YearsEndState = {
   updateSummary: null,
   profitSharingLabels: null,
   controlSheet: null,
-  breakdownGrandTotals: null
+  breakdownGrandTotals: null,
+  certificates: null
 };
 
 export const yearsEndSlice = createSlice({
@@ -951,6 +954,13 @@ export const yearsEndSlice = createSlice({
     clearBreakdownGrandTotals: (state) => {
       state.breakdownGrandTotals = null;
     },
+    setCertificates: (state, action: PayloadAction<CertificatesReportResponse>) => {
+      state.certificates = action.payload;
+    },
+    clearCertificates: (state) => {
+      state.certificates = null;
+    },
+
     setBreakdownByStoreQueryParams: (state, action: PayloadAction<BreakdownByStoreRequest>) => {
       state.breakdownByStoreQueryParams = action.payload;
     },
@@ -1095,6 +1105,8 @@ export const {
   clearBreakdownByStoreTotals,
   setBreakdownGrandTotals,
   clearBreakdownGrandTotals,
+  setCertificates,
+  clearCertificates,
   setBreakdownByStoreQueryParams,
   setUnder21BreakdownByStore,
   clearUnder21BreakdownByStore,

@@ -1,11 +1,10 @@
 import { ColDef } from "ag-grid-community";
-import { createBadgeColumn, createCurrencyColumn } from "../../utils/gridColumnFactory";
 import { GRID_COLUMN_WIDTHS } from "../../constants";
+import { createBadgeColumn, createCurrencyColumn } from "../../utils/gridColumnFactory";
 
 export interface ReprintCertificateEmployee {
   badge: number;
   name: string;
-  ssn: string;
   eoyBalance: number;
   forfeitures2024: number;
   withdrawals2024: number;
@@ -47,23 +46,7 @@ export const GetReprintCertificatesGridColumns = (
       resizable: true,
       sortable: true
     },
-    {
-      headerName: "SSN",
-      field: "ssn",
-      colId: "ssn",
-      minWidth: 120,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true,
-      sortable: true,
-      valueFormatter: (params) => {
-        if (params.value) {
-          const ssn = params.value.replace(/\D/g, "");
-          return `***-**-${ssn.slice(-4)}`;
-        }
-        return "";
-      }
-    },
+
     createCurrencyColumn({
       headerName: "EOY Balance",
       field: "eoyBalance",
