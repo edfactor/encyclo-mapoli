@@ -166,7 +166,7 @@ const MasterInquiryEmployeeDetails: React.FC<MasterInquiryEmployeeDetailsProps> 
           <Grid size={{ xs: 12 }}>
             <Typography
               variant="h2"
-              sx={{ color: "#0258A5" }}>
+              sx={{ color: "#0258A5", marginY: "8px" }}>
               Member Details
             </Typography>
           </Grid>
