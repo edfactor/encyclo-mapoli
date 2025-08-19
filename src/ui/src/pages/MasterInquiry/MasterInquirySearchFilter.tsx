@@ -29,7 +29,7 @@ import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import { MAX_EMPLOYEE_BADGE_LENGTH } from "../../constants";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
-import { transformSearchParams } from "./transformSearchParams";
+import { transformSearchParams } from "./utils/transformSearchParams";
 
 const schema = yup.object().shape({
   endProfitYear: yup

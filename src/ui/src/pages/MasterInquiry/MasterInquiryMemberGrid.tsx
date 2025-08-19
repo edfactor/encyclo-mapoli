@@ -1,7 +1,7 @@
 import { Box, Typography } from "@mui/material";
 import React, { useMemo } from "react";
 import { EmployeeDetails } from "reduxstore/types";
-import { DSMGrid, formatNumberWithComma, ISortParams } from "smart-ui-library";
+import { DSMGrid, formatNumberWithComma } from "smart-ui-library";
 import Pagination from "../../components/Pagination/Pagination";
 import "./MasterInquiryMemberGrid.css";
 import { GetMasterInquiryMemberGridColumns } from "./MasterInquiryMemberGridColumns";
@@ -70,6 +70,7 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = ({
       <DSMGrid
         preferenceKey="MASTER_INQUIRY_MEMBER_GRID"
         handleSortChanged={handleSortChange}
+        isLoading={false}
         providedOptions={{
           rowData: searchResults.results,
           columnDefs: columns,

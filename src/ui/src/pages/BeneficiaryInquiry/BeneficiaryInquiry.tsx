@@ -5,7 +5,7 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import { Paged } from "components/DSMGrid/types";
-import { MissiveAlertProvider } from "pages/MasterInquiry/MissiveAlertContext";
+import { MissiveAlertProvider } from "pages/MasterInquiry/utils/MissiveAlertContext";
 import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import {

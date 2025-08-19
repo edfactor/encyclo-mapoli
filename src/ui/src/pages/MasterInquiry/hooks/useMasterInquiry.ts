@@ -8,9 +8,10 @@ import {
 } from "reduxstore/api/InquiryApi";
 import { RootState } from "reduxstore/store";
 import { MasterInquiryRequest, MasterInquirySearch, MissiveResponse } from "reduxstore/types";
-import { ROUTES } from "../../constants";
-import { isSimpleSearch } from "./MasterInquiryFunctions";
-import { MASTER_INQUIRY_MESSAGES } from "./MasterInquiryMessages";
+import { ROUTES } from "../../../constants";
+import { useMissiveAlerts } from "../useMissiveAlerts";
+import { isSimpleSearch } from "../utils/MasterInquiryFunctions";
+import { MASTER_INQUIRY_MESSAGES } from "../utils/MasterInquiryMessages";
 import { useGridPagination } from "./useGridPagination";
 import {
   initialState,
@@ -20,7 +21,6 @@ import {
   selectShowProfitDetails,
   type SelectedMember
 } from "./useMasterInquiryReducer";
-import { useMissiveAlerts } from "./useMissiveAlerts";
 
 const useMasterInquiry = () => {
   const [state, dispatch] = useReducer(masterInquiryReducer, initialState);

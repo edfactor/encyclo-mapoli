@@ -1,13 +1,13 @@
 import { Divider, Grid } from "@mui/material";
 import MissiveAlerts from "components/MissiveAlerts/MissiveAlerts";
 import { DSMAccordion, Page } from "smart-ui-library";
+import useMasterInquiry from "./hooks/useMasterInquiry";
 import MasterInquiryGrid from "./MasterInquiryDetailsGrid";
 import MasterInquiryMemberDetails from "./MasterInquiryMemberDetails";
 import MasterInquiryMemberGrid from "./MasterInquiryMemberGrid";
 import MasterInquirySearchFilter from "./MasterInquirySearchFilter";
-import { MissiveAlertProvider } from "./MissiveAlertContext";
-import useMasterInquiry from "./useMasterInquiry";
 import { useMissiveAlerts } from "./useMissiveAlerts";
+import { MissiveAlertProvider } from "./utils/MissiveAlertContext";
 
 const MasterInquiryContent = () => {
   const { missiveAlerts } = useMissiveAlerts();

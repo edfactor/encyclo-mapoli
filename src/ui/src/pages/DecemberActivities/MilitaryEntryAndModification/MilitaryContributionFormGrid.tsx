@@ -6,8 +6,8 @@ import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
-import { MissiveAlertProvider } from "../../MasterInquiry/MissiveAlertContext";
 import StandaloneMemberDetails from "../../MasterInquiry/StandaloneMemberDetails";
+import { MissiveAlertProvider } from "../../MasterInquiry/utils/MissiveAlertContext";
 import { GetMilitaryContributionColumns } from "./MilitaryContributionFormGridColumns";
 
 interface MilitaryContributionGridProps {
