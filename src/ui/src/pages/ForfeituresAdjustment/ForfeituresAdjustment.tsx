@@ -14,6 +14,7 @@ import StandaloneMemberDetails from "pages/MasterInquiry/StandaloneMemberDetails
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 import { MissiveAlertProvider } from "../MasterInquiry/MissiveAlertContext";
 import { InquiryApi } from "../../reduxstore/api/InquiryApi";
+import { clearForfeitureAdjustmentData } from "../../reduxstore/slices/forfeituresAdjustmentSlice";
 
 const ForfeituresAdjustment = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
@@ -43,17 +44,18 @@ const ForfeituresAdjustment = () => {
   };
 
   const handleSaveForfeiture = () => {
-    // Refresh grid data after saving a new forfeiture
     if (forfeitureAdjustmentQueryParams) {
+      dispatch(clearForfeitureAdjustmentData());
+
       triggerSearch(forfeitureAdjustmentQueryParams)
         .unwrap()
         .then(() => {
           setInitialSearchLoaded(true);
+          dispatch(InquiryApi.util.invalidateTags(["memberDetails"]));
         })
         .catch((error: unknown) => {
           console.error("Error refreshing forfeiture adjustments:", error);
         });
-      dispatch(InquiryApi.util.invalidateTags(["memberDetails"]));
     }
   };
 
