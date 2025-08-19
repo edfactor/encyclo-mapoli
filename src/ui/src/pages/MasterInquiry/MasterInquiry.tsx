@@ -2,7 +2,7 @@ import { Divider, Grid } from "@mui/material";
 import MissiveAlerts from "components/MissiveAlerts/MissiveAlerts";
 import { DSMAccordion, Page } from "smart-ui-library";
 import MasterInquiryGrid from "./MasterInquiryDetailsGrid";
-import MasterInquiryEmployeeDetails from "./MasterInquiryEmployeeDetails";
+import MasterInquiryEmployeeDetails from "./MasterInquiryMemberDetails";
 import MasterInquiryMemberGrid from "./MasterInquiryMemberGrid";
 import MasterInquirySearchFilter from "./MasterInquirySearchFilter";
 import { MissiveAlertProvider } from "./MissiveAlertContext";
