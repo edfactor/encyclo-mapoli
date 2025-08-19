@@ -1,19 +1,26 @@
-import { Divider, Grid, Button } from "@mui/material";
+import { Button, Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import React, { useState } from "react";
+import { useLazyDownloadCertificatesFileQuery } from "reduxstore/api/YearsEndApi";
 import { DSMAccordion, Page } from "smart-ui-library";
+import { downloadFileFromResponse } from "utils/fileDownload";
 import { CAPTIONS } from "../../constants";
 import ReprintCertificatesFilterSection, { ReprintCertificatesFilterParams } from "./ReprintCertificatesFilterSection";
 import ReprintCertificatesGrid from "./ReprintCertificatesGrid";
 
 const ReprintCertificates: React.FC = () => {
+  const selectedProfitYear = useFiscalCloseProfitYear();
   const [filterParams, setFilterParams] = useState<ReprintCertificatesFilterParams>({
-    employeeNumber: "",
-    name: "",
+    profitYear: selectedProfitYear,
+    badgeNumber: "",
     socialSecurityNumber: ""
   });
-  const [isLoading, setIsLoading] = useState(false);
+
   const [hasSearched, setHasSearched] = useState(false);
+  const [selectedBadgeNumbers, setSelectedBadgeNumbers] = useState<number[]>([]);
+
+  const [downloadCertificatesFile] = useLazyDownloadCertificatesFileQuery();
 
   const handleFilterChange = (params: ReprintCertificatesFilterParams) => {
     setFilterParams(params);
@@ -22,25 +29,47 @@ const ReprintCertificates: React.FC = () => {
 
   const handleReset = () => {
     setFilterParams({
-      employeeNumber: "",
-      name: "",
+      profitYear: selectedProfitYear,
+      badgeNumber: "",
       socialSecurityNumber: ""
     });
     setHasSearched(false);
   };
 
-  const handleLoadingChange = (loading: boolean) => {
-    setIsLoading(loading);
+  const handleSelectionChange = (badgeNumbers: number[]) => {
+    setSelectedBadgeNumbers(badgeNumbers);
   };
 
-  const handleTestPrint = () => {
-    // TODO: Implement test print functionality
-    console.log("Test Print clicked");
+  const handleTestPrint = async () => {
+    try {
+      const result = await downloadCertificatesFile({
+        profitYear: filterParams.profitYear,
+        badgeNumbers: selectedBadgeNumbers
+      });
+
+      if ("data" in result && result.data) {
+        await downloadFileFromResponse(Promise.resolve({ data: result.data }), "PAYCERT-TEST.txt");
+      }
+    } catch (error) {
+      console.error("Test print failed:", error);
+      alert("Test print failed");
+    }
   };
 
-  const handlePrint = () => {
-    // TODO: Implement print functionality
-    console.log("Print clicked");
+  const handlePrint = async () => {
+    try {
+      const result = await downloadCertificatesFile({
+        profitYear: filterParams.profitYear,
+        badgeNumbers: selectedBadgeNumbers
+      });
+
+      if ("data" in result && result.data) {
+        await downloadFileFromResponse(Promise.resolve({ data: result.data }), "PAYCERT.txt");
+      }
+    } catch (error) {
+      console.error("Print failed:", error);
+      alert("Print failed");
+    }
   };
 
   const renderActionNode = () => {
@@ -50,14 +79,16 @@ const ReprintCertificates: React.FC = () => {
         <Button
           onClick={handleTestPrint}
           variant="outlined"
+          disabled={selectedBadgeNumbers.length === 0}
           className="h-10 min-w-fit whitespace-nowrap">
-          TEST PRINT
+          TEST PRINT {selectedBadgeNumbers.length > 0 && `(${selectedBadgeNumbers.length})`}
         </Button>
         <Button
           onClick={handlePrint}
           variant="contained"
+          disabled={selectedBadgeNumbers.length === 0}
           className="h-10 min-w-fit whitespace-nowrap">
-          PRINT
+          PRINT {selectedBadgeNumbers.length > 0 && `(${selectedBadgeNumbers.length})`}
         </Button>
       </div>
     );
@@ -78,7 +109,6 @@ const ReprintCertificates: React.FC = () => {
             <ReprintCertificatesFilterSection
               onFilterChange={handleFilterChange}
               onReset={handleReset}
-              isLoading={isLoading}
             />
           </DSMAccordion>
         </Grid>
@@ -87,7 +117,7 @@ const ReprintCertificates: React.FC = () => {
           <Grid width="100%">
             <ReprintCertificatesGrid
               filterParams={filterParams}
-              onLoadingChange={handleLoadingChange}
+              onSelectionChange={handleSelectionChange}
             />
           </Grid>
         )}

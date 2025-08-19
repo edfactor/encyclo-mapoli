@@ -4,6 +4,7 @@ import {
   addBadgeNumberToUpdateAdjustmentSummary,
   clearBreakdownByStoreTotals,
   clearBreakdownGrandTotals,
+  clearCertificates,
   clearProfitMasterApply,
   clearProfitMasterRevert,
   clearProfitMasterStatus,
@@ -22,6 +23,7 @@ import {
   setBreakdownByStoreMangement,
   setBreakdownByStoreTotals,
   setBreakdownGrandTotals,
+  setCertificates,
   setContributionsByAge,
   setControlSheet,
   setDemographicBadgesNotInPayprofitData,
@@ -36,7 +38,6 @@ import {
   setForfeituresAndPoints,
   setForfeituresByAge,
   setGrossWagesReport,
-  setRehireForfeituresDetails,
   setNegativeEtvaForSSNsOnPayprofit,
   setProfitMasterApply,
   setProfitMasterRevert,
@@ -46,6 +47,7 @@ import {
   setProfitSharingLabels,
   setProfitSharingUpdate,
   setProfitSharingUpdateAdjustmentSummary,
+  setRehireForfeituresDetails,
   setTermination,
   setUnder21BreakdownByStore,
   setUnder21Inactive,
@@ -64,6 +66,9 @@ import {
   BreakdownByStoreRequest,
   BreakdownByStoreResponse,
   BreakdownByStoreTotals,
+  CertificateDownloadRequest,
+  CertificatePrintRequest,
+  CertificatesReportResponse,
   ContributionsByAge,
   ControlSheetRequest,
   ControlSheetResponse,
@@ -84,8 +89,6 @@ import {
   ExecutiveHoursAndDollars,
   ExecutiveHoursAndDollarsRequestDto,
   ForfeitureAdjustmentDetail,
-  SuggestForfeitureAdjustmentRequest,
-  SuggestedForfeitResponse,
   ForfeitureAdjustmentUpdateRequest,
   ForfeituresAndPoints,
   ForfeituresByAge,
@@ -94,15 +97,12 @@ import {
   GrandTotalsByStoreResponseDto,
   GrossWagesReportDto,
   GrossWagesReportResponse,
-  RehireForfeiture,
   NegativeEtvaForSSNsOnPayProfit,
   NegativeEtvaForSSNsOnPayprofitRequestDto,
   PagedReportResponse,
   PayBenReportRequest,
   PayBenReportResponse,
   ProfitMasterStatus,
-  QPAY066BTerminatedWithVestedBalanceRequest,
-  QPAY066BTerminatedWithVestedBalanceResponse,
   ProfitShareEditResponse,
   ProfitShareMasterApplyRequest,
   ProfitShareMasterResponse,
@@ -112,7 +112,12 @@ import {
   ProfitSharingLabel,
   ProfitSharingLabelsRequest,
   ProfitYearRequest,
+  QPAY066BTerminatedWithVestedBalanceRequest,
+  QPAY066BTerminatedWithVestedBalanceResponse,
+  RehireForfeiture,
   StartAndEndDateRequest,
+  SuggestedForfeitResponse,
+  SuggestForfeitureAdjustmentRequest,
   TerminationResponse,
   Under21BreakdownByStoreRequest,
   Under21BreakdownByStoreResponse,
@@ -1209,6 +1214,42 @@ export const YearsEndApi = createApi({
           isSortDescending: params.pagination.isSortDescending
         }
       })
+    }),
+    getCertificatesReport: builder.query<CertificatesReportResponse, CertificatePrintRequest>({
+      query: (params) => ({
+        url: "yearend/post-frozen/certificates",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          badgeNumbers: params.badgeNumbers,
+          ssns: params.ssns,
+          skip: params.skip,
+          take: params.take,
+          sortBy: params.sortBy,
+          isSortDescending: params.isSortDescending
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setCertificates(data));
+        } catch (err) {
+          console.log("Err", err);
+          dispatch(clearCertificates());
+        }
+      }
+    }),
+    downloadCertificatesFile: builder.query<Blob, CertificateDownloadRequest>({
+      query: (params) => ({
+        url: "yearend/post-frozen/certificates/download",
+        method: "GET",
+        params: {
+          profitYear: params.profitYear,
+          badgeNumbers: params.badgeNumbers,
+          ssns: params.ssns
+        },
+        responseHandler: (response) => response.blob()
+      })
     })
   })
 });
@@ -1219,11 +1260,13 @@ export const {
   useLazyGetBalanceByYearsQuery,
   useLazyGetBreakdownByStoreQuery,
   useLazyGetBreakdownByStoreTotalsQuery,
+  useLazyGetCertificatesReportQuery,
   useLazyGetContributionsByAgeQuery,
   useLazyGetControlSheetQuery,
   useLazyGetDemographicBadgesNotInPayprofitQuery,
   useLazyGetDistributionsAndForfeituresQuery,
   useLazyGetDistributionsByAgeQuery,
+  useLazyDownloadCertificatesFileQuery,
   useLazyGetDuplicateNamesAndBirthdaysQuery,
   useLazyGetDuplicateSSNsQuery,
   useLazyGetEligibleEmployeesQuery,
