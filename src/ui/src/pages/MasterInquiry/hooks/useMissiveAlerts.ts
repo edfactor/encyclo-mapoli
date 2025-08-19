@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { MissiveAlertContext, MissiveAlertContextType } from "./MissiveAlertContextDef";
+import { MissiveAlertContext, MissiveAlertContextType } from "../utils/MissiveAlertContextDef";
 
 export const useMissiveAlerts = (): MissiveAlertContextType => {
   const context = useContext(MissiveAlertContext);

@@ -3,7 +3,6 @@ import React, { useMemo } from "react";
 import { EmployeeDetails } from "reduxstore/types";
 import { DSMGrid, formatNumberWithComma } from "smart-ui-library";
 import Pagination from "../../components/Pagination/Pagination";
-import "./MasterInquiryMemberGrid.css";
 import { GetMasterInquiryMemberGridColumns } from "./MasterInquiryMemberGridColumns";
 
 interface SearchResponse {

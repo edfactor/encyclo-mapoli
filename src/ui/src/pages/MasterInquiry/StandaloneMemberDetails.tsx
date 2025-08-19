@@ -4,7 +4,7 @@ import { useLazyGetProfitMasterInquiryMemberQuery } from "reduxstore/api/Inquiry
 import { RootState } from "reduxstore/store";
 import { MissiveResponse } from "reduxstore/types";
 import MasterInquiryMemberDetails from "./MasterInquiryMemberDetails";
-import { useMissiveAlerts } from "./useMissiveAlerts";
+import { useMissiveAlerts } from "./hooks/useMissiveAlerts";
 import { MASTER_INQUIRY_MESSAGES } from "./utils/MasterInquiryMessages";
 
 interface StandaloneMemberDetailsProps {

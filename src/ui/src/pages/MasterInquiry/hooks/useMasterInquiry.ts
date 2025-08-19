@@ -9,7 +9,7 @@ import {
 import { RootState } from "reduxstore/store";
 import { MasterInquiryRequest, MasterInquirySearch, MissiveResponse } from "reduxstore/types";
 import { ROUTES } from "../../../constants";
-import { useMissiveAlerts } from "../useMissiveAlerts";
+import { useMissiveAlerts } from "../hooks/useMissiveAlerts";
 import { isSimpleSearch } from "../utils/MasterInquiryFunctions";
 import { MASTER_INQUIRY_MESSAGES } from "../utils/MasterInquiryMessages";
 import { useGridPagination } from "./useGridPagination";
