@@ -1,15 +1,19 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 
 import {
-  FrozenStateResponse,
-  SortedPaginationRequestDto,
+  setFrozenStateCollectionResponse,
+  setFrozenStateResponse,
+  setProfitYearSelectorData
+} from "reduxstore/slices/frozenSlice";
+import {
+  CurrentUserResponseDto,
   FreezeDemographicsRequest,
+  FrozenStateResponse,
   RowCountResult,
-  CurrentUserResponseDto
+  SortedPaginationRequestDto
 } from "reduxstore/types";
-import { setFrozenStateResponse, setFrozenStateCollectionResponse } from "reduxstore/slices/frozenSlice";
-import { createDataSourceAwareBaseQuery } from "./api";
 import { Paged } from "smart-ui-library";
+import { createDataSourceAwareBaseQuery } from "./api";
 
 const baseQuery = createDataSourceAwareBaseQuery();
 export const ItOperationsApi = createApi({
@@ -52,6 +56,27 @@ export const ItOperationsApi = createApi({
         }
       }
     }),
+    getProfitYearSelectorFrozenData: builder.query<Paged<FrozenStateResponse>, SortedPaginationRequestDto>({
+      query: (params) => ({
+        url: `itoperations/frozen`,
+        method: "GET",
+        params: {
+          take: params.take,
+          skip: params.skip,
+          sortBy: params.sortBy,
+          isSortDescending: params.isSortDescending
+        }
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setProfitYearSelectorData(data));
+        } catch (err) {
+          console.error("Failed to fetch profit year selector data:", err);
+          dispatch(setProfitYearSelectorData(null)); // Handle API errors
+        }
+      }
+    }),
     freezeDemographics: builder.mutation<void, FreezeDemographicsRequest>({
       query: (request) => ({
         url: "itoperations/freeze",
@@ -77,6 +102,7 @@ export const ItOperationsApi = createApi({
 export const {
   useLazyGetFrozenStateResponseQuery,
   useLazyGetHistoricalFrozenStateResponseQuery,
+  useLazyGetProfitYearSelectorFrozenDataQuery,
   useFreezeDemographicsMutation,
   useLazyGetMetadataQuery,
   useLazyGetCurrentUserQuery
