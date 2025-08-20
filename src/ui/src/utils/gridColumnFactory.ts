@@ -110,7 +110,8 @@ export const createCurrencyColumn = (options: CurrencyColumnOptions): ColDef => 
     maxWidth,
     sortable = true,
     resizable = true,
-    valueFormatter = (params) => numberToCurrency(params.value)
+    valueFormatter = (params) => numberToCurrency(params.value),
+    valueGetter
   } = options;
 
   const column: ColDef = {
@@ -130,6 +131,10 @@ export const createCurrencyColumn = (options: CurrencyColumnOptions): ColDef => 
 
   if (valueFormatter) {
     column.valueFormatter = valueFormatter;
+  }
+
+  if (valueGetter) {
+    column.valueGetter = valueGetter;
   }
 
   return column;

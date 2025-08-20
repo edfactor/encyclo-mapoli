@@ -1,31 +1,32 @@
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import { SelectableGridHeader } from "../../../components/SelectableGridHeader";
 import { ForfeitureAdjustmentUpdateRequest, RehireForfeituresHeaderComponentProps } from "../../../reduxstore/types";
+import useFiscalCloseProfitYear from "../../../hooks/useFiscalCloseProfitYear";
 
 export const HeaderComponent: React.FC<RehireForfeituresHeaderComponentProps> = (
   params: RehireForfeituresHeaderComponentProps
 ) => {
-  const selectedProfitYear = useDecemberFlowProfitYear();
+  const profitYear = useDecemberFlowProfitYear();
 
   const isNodeEligible = (
     nodeData: {
       isDetail: boolean;
       profitYear: number;
       badgeNumber: string;
-      enrollmentId?: string;
-      suggestedForfeit?: number;
+      suggestedUnforfeiture: number;
+      profitDetailId: number;
       remark?: string;
     },
     context: {
-      editedValues?: Record<string, { value?: number }>;
+      editedValues?: Record<number, { value?: number }>;
     }
   ) => {
-    if (!nodeData.isDetail || nodeData.profitYear !== selectedProfitYear) return false;
+    if (!nodeData.isDetail) return false;
     // For bulk operations, we need to check all possible rowKeys for this data
-    const baseRowKey = `${nodeData.badgeNumber}-${nodeData.profitYear}${nodeData.enrollmentId ? `-${nodeData.enrollmentId}` : ""}`;
+    const baseRowKey = nodeData.profitDetailId;
     const editedValues = context?.editedValues || {};
-    const matchingKey = Object.keys(editedValues).find((key) => key.startsWith(baseRowKey));
-    const currentValue = matchingKey ? editedValues[matchingKey]?.value : nodeData.suggestedForfeit;
+    const matchingKey = baseRowKey in editedValues ? baseRowKey : undefined;
+    const currentValue = matchingKey ? editedValues[matchingKey]?.value : nodeData.suggestedUnforfeiture;
     return (currentValue || 0) !== 0;
   };
 
@@ -34,8 +35,8 @@ export const HeaderComponent: React.FC<RehireForfeituresHeaderComponentProps> = 
       isDetail: boolean;
       profitYear: number;
       badgeNumber: string;
-      enrollmentId?: string;
-      suggestedForfeit?: number;
+      profitDetailId: number;
+      suggestedUnforfeiture: number;
       remark?: string;
     },
     context: {
@@ -43,17 +44,16 @@ export const HeaderComponent: React.FC<RehireForfeituresHeaderComponentProps> = 
     }
   ): ForfeitureAdjustmentUpdateRequest => {
     // For bulk operations, we need to find the actual edited value
-    const baseRowKey = `${nodeData.badgeNumber}-${nodeData.profitYear}${nodeData.enrollmentId ? `-${nodeData.enrollmentId}` : ""}`;
+    const baseRowKey = nodeData.profitDetailId;
     const editedValues = context?.editedValues || {};
-    const matchingKey = Object.keys(editedValues).find((key) => key.startsWith(baseRowKey));
-    const currentValue = matchingKey ? editedValues[matchingKey]?.value : nodeData.suggestedForfeit;
-    const isClassAction = nodeData.remark === "FORFEIT CA";
+    const matchingKey = baseRowKey in editedValues ? baseRowKey : undefined;
+    const currentValue = matchingKey ? editedValues[matchingKey]?.value : nodeData.suggestedUnforfeiture;
 
     return {
       badgeNumber: Number(nodeData.badgeNumber),
-      profitYear: nodeData.profitYear,
+      profitYear: profitYear, // use active profit year.
       forfeitureAmount: -(currentValue || 0),
-      classAction: isClassAction
+      classAction: false
     };
   };
 

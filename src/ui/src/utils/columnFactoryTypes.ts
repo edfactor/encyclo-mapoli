@@ -31,6 +31,7 @@ export interface CurrencyColumnOptions {
   maxWidth?: number;
   sortable?: boolean;
   resizable?: boolean;
+  valueGetter?: (params: ValueGetterParams) => string;
   valueFormatter?: (params: ValueFormatterParams) => string;
 }
 
