@@ -12,12 +12,15 @@ public sealed record UnforfeituresResponse
     public required string Ssn { get; set; }
     public required DateOnly ReHiredDate { get; set; }
     public required DateOnly HireDate { get; set; }
-    public DateOnly? TerminationDate { get; set; }
     public decimal? NetBalanceLastYear { get; init; }
     public decimal? VestedBalanceLastYear { get; set; }
     public required byte CompanyContributionYears { get; set; }
     public required short StoreNumber { get; set; }
-    public required IEnumerable<MilitaryRehireProfitSharingDetailResponse> Details { get; set; }
+    public required byte? EnrollmentId { get; set; }
+    public required string EnrollmentName { get; set; }
+    public required decimal WagesProfitYear { get; set; }
+    public required decimal HoursProfitYear { get; set; }
+    public required IEnumerable<RehireTransactionDetailResponse> Details { get; set; }
 
 
     public static UnforfeituresResponse ResponseExample()
@@ -31,17 +34,20 @@ public sealed record UnforfeituresResponse
             CompanyContributionYears = 3,
             ReHiredDate = new DateTime(2024, 12, 01, 01, 01, 01, DateTimeKind.Local).ToDateOnly(),
             HireDate = new DateTime(2017, 10, 04, 01, 01, 01, DateTimeKind.Local).ToDateOnly(),
-            TerminationDate = new DateTime(2021, 10, 04, 01, 01, 01, DateTimeKind.Local).ToDateOnly(),
-            Details = new List<MilitaryRehireProfitSharingDetailResponse>
+            EnrollmentId = 4,
+            EnrollmentName = "New vesting plan has Forfeiture records",
+            HoursProfitYear = 1255.4m,
+            WagesProfitYear = 12345.67m,
+            Details = new List<RehireTransactionDetailResponse>
             {
-                new MilitaryRehireProfitSharingDetailResponse
+                new RehireTransactionDetailResponse
                 {
                     Forfeiture = (decimal)3254.14,
                     ProfitYear = (short)DateTime.Today.AddYears(-3).Year,
                     Remark = "Example remarks here",
-                    HoursCurrentYear = 1234,
-                    EnrollmentId = 4,
-                    EnrollmentName = "New vesting plan has Forfeiture records",
+                    HoursTransactionYear = 1255.4m,
+                    WagesTransactionYear = 12345.67m,
+                    SuggestedUnforfeiture = 77m
                 }
             }
         };

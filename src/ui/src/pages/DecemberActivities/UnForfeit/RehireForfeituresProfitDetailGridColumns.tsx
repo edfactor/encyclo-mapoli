@@ -1,17 +1,21 @@
 import { SaveOutlined } from "@mui/icons-material";
 import { Checkbox, CircularProgress, IconButton } from "@mui/material";
 import { ColDef, EditableCallbackParams, ICellRendererParams } from "ag-grid-community";
-import { SuggestedForfeitCellRenderer, SuggestedForfeitEditor } from "components/SuggestedForfeiture";
+import { SuggestedForfeitEditor, SuggestedForfeitCellRenderer } from "components/SuggestedForfeiture";
 import { numberToCurrency } from "smart-ui-library";
 import { ForfeitureAdjustmentUpdateRequest, ForfeitureDetail, RehireForfeituresSaveButtonCellParams } from "types";
 import {
-  createCommentColumn,
-  createCountColumn,
+  createYearColumn,
   createCurrencyColumn,
-  createHoursColumn,
-  createYearColumn
+  createCommentColumn,
+  createHoursColumn
 } from "utils/gridColumnFactory";
 import { HeaderComponent } from "./RehireForfeituresHeaderComponent";
+import useFiscalCloseProfitYear from "../../../hooks/useFiscalCloseProfitYear";
+
+function isTransactionEditiabe(params) {
+  return params.data.isDetail && params.data.suggestedUnforfeiture != null;
+}
 
 export const GetProfitDetailColumns = (
   addRowToSelectedRows: (id: number) => void,
@@ -26,72 +30,43 @@ export const GetProfitDetailColumns = (
       field: "profitYear"
     }),
     createHoursColumn({
-      field: "hoursCurrentYear",
+      field: "hoursTransactionYear",
       valueGetter: (params) => {
-        // I think showing 0 is visually noisy, so I'm suppressing that.   Especially since we will not have the
-        // actual hours for our initial year - 1.
-        const value = params.data?.hoursCurrentYear;
+        // Do not show zeros, for many years we only have zero (aka no data)
+        const value = params.data?.hoursTransactionYear;
         return value == null || value == 0 ? null : value;
       }
     }),
     createCurrencyColumn({
       headerName: "Wages",
-      field: "wages"
-    }),
-    createCountColumn({
-      headerName: "Years",
-      field: "companyContributionYears"
-    }),
-    {
-      headerName: "Enrollment",
-      width: 120,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      sortable: true,
+      field: "wagesTransactionYear",
       valueGetter: (params) => {
-        const id = params.data?.enrollmentId;
-        const name = params.data?.enrollmentName;
-        return `[${id}] ${name}`;
+        // Do not show zeros, for many years we only have zeros (aka no data)
+        const value = params.data?.wagesTransactionYear;
+        return value == null || value == 0 ? null : value;
       }
-    },
+    }),
     createCurrencyColumn({
       headerName: "Forfeiture",
       field: "forfeiture"
     }),
     {
       headerName: "Suggested Unforfeiture",
-      field: "suggestedForfeit",
-      colId: "suggestedForfeit",
+      field: "suggestedUnforfeit",
+      colId: "suggestedUnforfeit",
       width: 150,
       type: "rightAligned",
       pinned: "right",
       resizable: true,
       sortable: false,
-      editable: (params: EditableCallbackParams) => {
-        // Figure out if there is a forfeit row to unforfeit. If not, we cannot unforfeit,
-        // so the row is not editable
-        const hasThisYearForfeitInDetail = params.data.details?.some(
-          (detail: ForfeitureDetail) => detail.profitYear === selectedProfitYear && detail.remark === "FORFEIT"
-        );
-
-        return params.data.isDetail && params.data.profitYear === selectedProfitYear && hasThisYearForfeitInDetail;
-      },
+      editable: (params: EditableCallbackParams) => isTransactionEditiabe(params),
       cellEditor: SuggestedForfeitEditor,
       cellRenderer: (params: ICellRendererParams) => {
         return SuggestedForfeitCellRenderer({ ...params, selectedProfitYear }, false, true);
       },
-      valueFormatter: (params) => numberToCurrency(params.value),
-      valueGetter: (params) => {
-        // So if there are no profit details, do not do anything
-        if (!params.data.isDetail) return null;
-
-        const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}${params.data.enrollmentId ? `-${params.data.enrollmentId}` : ""}-${params.node?.id || "unknown"}`;
-
-        const editedValue = params.context?.editedValues?.[rowKey]?.value;
-        return editedValue !== undefined ? editedValue : params.data.suggestedForfeit;
-      }
+      valueFormatter: (params) => numberToCurrency(params.data.suggestedUnforfeiture)
     },
+
     createCommentColumn({
       headerName: "Remark",
       field: "remark"
@@ -118,26 +93,16 @@ export const GetProfitDetailColumns = (
         onSave
       },
       cellRenderer: (params: RehireForfeituresSaveButtonCellParams) => {
-        // We must have a current year forfeit in detail or else we don't need a save button
-        const hasThisYearForfeitInDetail = params.data.details?.some(
-          (detail: ForfeitureDetail) => detail.profitYear === selectedProfitYear && detail.remark === "FORFEIT"
-        );
-
-        if (!params.data.isDetail || params.data.profitYear !== selectedProfitYear || !hasThisYearForfeitInDetail) {
+        if (!isTransactionEditiabe(params)) {
           return "";
         }
 
         const id = Number(params.node?.id) || -1;
         const isSelected = params.node?.isSelected() || false;
-        const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}${params.data.enrollmentId ? `-${params.data.enrollmentId}` : ""}-${params.node?.id || "unknown"}`;
-        const hasError = params.context?.editedValues?.[rowKey]?.hasError;
-        const currentValue = params.context?.editedValues?.[rowKey]?.value ?? params.data.suggestedForfeit;
+        const rowKey = params.data.profitDetailId;
+        const currentValue = params.context?.editedValues?.[rowKey]?.value ?? params.data.suggestedUnforfeiture;
         const isLoading = params.context?.loadingRowIds?.has(params.data.badgeNumber);
-
-        // We need a variable, offsettingProfitDetailId, that is set to the detail record with the remark "FORFEIT"
-        const offsettingProfitDetailId = params.data.details?.find(
-          (detail: ForfeitureDetail) => detail.profitYear === selectedProfitYear && detail.remark === "FORFEIT"
-        )?.profitDetailId;
+        const profitYear = useFiscalCloseProfitYear();
 
         return (
           <div>
@@ -160,15 +125,15 @@ export const GetProfitDetailColumns = (
                 if (params.data.isDetail && params.onSave) {
                   const request: ForfeitureAdjustmentUpdateRequest = {
                     badgeNumber: params.data.badgeNumber,
-                    profitYear: params.data.profitYear,
                     forfeitureAmount: -(currentValue || 0),
-                    offsettingProfitDetailId: offsettingProfitDetailId,
+                    profitYear: profitYear,
+                    offsettingProfitDetailId: params.data.profitDetailId,
                     classAction: false
                   };
                   await params.onSave(request);
                 }
               }}
-              disabled={params.data.remark !== "FORFEIT" || hasError || (currentValue || 0) === 0 || isLoading}>
+              disabled={(currentValue || 0) === 0 || isLoading}>
               {isLoading ? <CircularProgress size={20} /> : <SaveOutlined />}
             </IconButton>
           </div>

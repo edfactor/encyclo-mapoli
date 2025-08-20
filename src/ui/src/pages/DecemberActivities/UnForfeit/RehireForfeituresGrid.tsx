@@ -43,7 +43,7 @@ const RehireForfeituresGrid: React.FC<RehireForfeituresGridSearchProps> = ({
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "badgeNumber",
+    sortBy: "fullName",
     isSortDescending: true
   });
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
@@ -103,7 +103,6 @@ const RehireForfeituresGrid: React.FC<RehireForfeituresGridSearchProps> = ({
       const baseRequest: StartAndEndDateRequest = {
         beginningDate: rehireForfeituresQueryParams?.beginningDate || fiscalCalendarYear?.fiscalBeginDate || "",
         endingDate: rehireForfeituresQueryParams?.endingDate || fiscalCalendarYear?.fiscalEndDate || "",
-        //profitYear: profitYear,
         pagination: { skip, take: pageSize, sortBy, isSortDescending }
       };
 
@@ -357,6 +356,7 @@ const RehireForfeituresGrid: React.FC<RehireForfeituresGridSearchProps> = ({
 
       // Add detail rows if expanded
       if (hasDetails && expandedRows[row.badgeNumber.toString()]) {
+        let index = 0; // essentially we only want to allow UNFORFEIT on the first FORFEIT
         for (const detail of row.details) {
           rows.push({
             ...row,
@@ -365,8 +365,9 @@ const RehireForfeituresGrid: React.FC<RehireForfeituresGridSearchProps> = ({
             isExpandable: false,
             isExpanded: false,
             parentId: row.badgeNumber,
-            suggestedForfeit: (detail as any).suggestedForfeit || 0
+            index: index
           });
+          index++;
         }
       }
     }

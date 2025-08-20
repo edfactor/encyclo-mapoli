@@ -5,7 +5,7 @@ import { useState, useRef, useEffect } from "react";
 import { validateSuggestedForfeit } from "./validateSuggestedForfeit";
 
 export function SuggestedForfeitEditor(props: ICellEditorParams) {
-  const [value, setValue] = useState(props.data.suggestedForfeit ?? 0);
+  const [value, setValue] = useState(props.data.suggestedForfeit ?? props.data.suggestedUnforfeiture ?? 0);
   const [error, setError] = useState<string | null>(null);
   const refInput = useRef<HTMLInputElement>(null);
 
@@ -14,13 +14,16 @@ export function SuggestedForfeitEditor(props: ICellEditorParams) {
   }, []);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = parseFloat(event.target.value) || 0;
+    const newValue = parseFloat(event.target.value) || parseFloat(value);
     setValue(newValue);
     const forfeitValue = props.data.forfeit || props.data.forfeiture || 0;
     const newError = validateSuggestedForfeit(newValue, Math.abs(forfeitValue));
     setError(newError);
 
-    const rowKey = `${props.data.badgeNumber}-${props.data.profitYear}${props.data.enrollmentId ? `-${props.data.enrollmentId}` : ""}-${props.node?.id || "unknown"}`;
+    const rowKey = props.data.profitDetailId
+      ? props.data.profitDetailId
+      : `${props.data.badgeNumber}-${props.data.profitYear}${props.data.enrollmentId ? `-${props.data.enrollmentId}` : ""}-${props.node?.id || "unknown"}`;
+
     props.context?.updateEditedValue?.(rowKey, newValue, !!newError);
   };
 
