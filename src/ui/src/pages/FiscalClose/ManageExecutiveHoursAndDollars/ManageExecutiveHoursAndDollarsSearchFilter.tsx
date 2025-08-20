@@ -1,25 +1,9 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Checkbox, FormHelperText, FormLabel, TextField, Typography } from "@mui/material";
-import { Grid } from "@mui/material";
+import { Checkbox, FormHelperText, FormLabel, Grid, TextField, Typography } from "@mui/material";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useEffect, useState } from "react";
 import { Controller, Resolver, useForm } from "react-hook-form";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  useLazyGetAdditionalExecutivesQuery,
-  useLazyGetExecutiveHoursAndDollarsQuery
-} from "reduxstore/api/YearsEndApi";
-import {
-  clearAdditionalExecutivesChosen,
-  clearAdditionalExecutivesGrid,
-  clearExecutiveHoursAndDollars,
-  clearExecutiveHoursAndDollarsAddQueryParams,
-  setExecutiveHoursAndDollarsAddQueryParams,
-  setExecutiveHoursAndDollarsGridYear,
-  setExecutiveHoursAndDollarsQueryParams
-} from "reduxstore/slices/yearsEndSlice";
-import { RootState } from "reduxstore/store";
-import { ISortParams, SearchAndReset } from "smart-ui-library";
+import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 
 interface ExecutiveHoursAndDollarsSearch {
@@ -66,29 +50,20 @@ const validationSchema = yup
     )
   );
 
-// If we are using a modal window, we want a slimmed down version of the search filter
-// and we will
 interface ManageExecutiveHoursAndDollarsSearchFilterProps {
   isModal?: boolean;
-  setInitialSearchLoaded: (include: boolean) => void;
-  setPageNumberReset: (reset: boolean) => void;
+  onSearch: (searchData: any) => void;
+  onReset: () => void;
+  isSearching: boolean;
 }
 
 const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursAndDollarsSearchFilterProps> = ({
   isModal,
-  setInitialSearchLoaded,
-  setPageNumberReset
+  onSearch,
+  onReset,
+  isSearching
 }) => {
-  const dispatch = useDispatch();
   const [activeField, setActiveField] = useState<"socialSecurity" | "badgeNumber" | "fullNameContains" | null>(null);
-
-  useEffect(() => {
-    dispatch(clearExecutiveHoursAndDollarsAddQueryParams());
-  }, [dispatch]);
-
-  const { executiveHoursAndDollarsQueryParams, executiveHoursAndDollars } = useSelector(
-    (state: RootState) => state.yearsEnd
-  );
 
   const [oneAddSearchFilterEntered, setOneAddSearchFilterEntered] = useState<boolean>(false);
 
@@ -126,14 +101,6 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
 
   const profitYear = useFiscalCloseProfitYear();
 
-  const [triggerSearch, { isFetching }] = useLazyGetExecutiveHoursAndDollarsQuery();
-  const [triggerModalSearch, { isFetching: isModalFetching }] = useLazyGetAdditionalExecutivesQuery();
-
-  const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "storeNumber",
-    isSortDescending: false
-  });
-
   const {
     control,
     handleSubmit,
@@ -159,7 +126,6 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
   const badgeNumber = watch("badgeNumber");
   const fullNameContains = watch("fullNameContains");
 
-  // Update active field based on which field has input
   useEffect(() => {
     if (socialSecurity && !badgeNumber) {
       setActiveField("socialSecurity");
@@ -173,127 +139,21 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
   }, [socialSecurity, badgeNumber, fullNameContains]);
 
   useEffect(() => {
-    if (profitYear && isModal) {
-      dispatch(clearAdditionalExecutivesChosen());
+    if (profitYear) {
       reset((prevValues) => ({
         ...prevValues,
         profitYear
       }));
-
-      setInitialSearchLoaded(false);
     }
-
-    if (profitYear && !isModal) {
-      dispatch(clearExecutiveHoursAndDollars());
-      dispatch(clearAdditionalExecutivesChosen());
-
-      reset((prevValues) => ({
-        ...prevValues,
-        profitYear
-      }));
-
-      if (executiveHoursAndDollarsQueryParams) {
-        dispatch(
-          setExecutiveHoursAndDollarsQueryParams({
-            ...executiveHoursAndDollarsQueryParams,
-            profitYear
-          })
-        );
-      }
-
-      setInitialSearchLoaded(false);
-    }
-  }, [profitYear]);
+  }, [profitYear, reset]);
 
   const validateAndSearch = handleSubmit((data) => {
-    // If there are any stored additional executives, we
-    // should delete them, regardless of modal or not
-    //dispatch(clearAdditionalExecutivesChosen());
-
-    if (isValid && !isModal) {
-      triggerSearch(
-        {
-          pagination: { skip: 0, take: 25, sortBy: sortParams.sortBy, isSortDescending: sortParams.isSortDescending },
-          profitYear: data.profitYear ?? (profitYear || 0),
-          ...(!!data.socialSecurity && { socialSecurity: data.socialSecurity }),
-          ...(!!data.badgeNumber && { badgeNumber: data.badgeNumber }),
-          hasExecutiveHoursAndDollars: data.hasExecutiveHoursAndDollars ?? false,
-          isMonthlyPayroll: data.isMonthlyPayroll !== undefined ? data.isMonthlyPayroll : false,
-          ...(!!data.fullNameContains && { fullNameContains: data.fullNameContains })
-        },
-        false
-      ).unwrap();
-      dispatch(
-        setExecutiveHoursAndDollarsQueryParams({
-          profitYear: profitYear || 0,
-          badgeNumber: data.badgeNumber ?? 0,
-          socialSecurity: data.socialSecurity ?? 0,
-          fullNameContains: data.fullNameContains ?? "",
-          hasExecutiveHoursAndDollars: data.hasExecutiveHoursAndDollars ?? false,
-          isMonthlyPayroll: data.isMonthlyPayroll ?? false
-        })
-      );
-
-      dispatch(setExecutiveHoursAndDollarsGridYear(profitYear));
-      dispatch(clearAdditionalExecutivesChosen());
+    if (isValid) {
+      onSearch(data);
     }
-
-    // A difference in modal is that we are not filtering for having executive hours
-    // and dollars being there
-    if (isValid && isModal) {
-      triggerModalSearch(
-        {
-          pagination: { skip: 0, take: 25, sortBy: sortParams.sortBy, isSortDescending: sortParams.isSortDescending },
-          profitYear: data.profitYear || 0,
-          ...(!!data.socialSecurity && { socialSecurity: data.socialSecurity }),
-          ...(!!data.badgeNumber && { badgeNumber: data.badgeNumber }),
-          hasExecutiveHoursAndDollars: false,
-          isMonthlyPayroll: data.isMonthlyPayroll ?? false,
-          ...(!!data.fullNameContains && { fullNameContains: data.fullNameContains })
-        },
-        false
-      ).unwrap();
-      dispatch(
-        setExecutiveHoursAndDollarsAddQueryParams({
-          profitYear: profitYear || 0,
-          badgeNumber: data.badgeNumber ?? 0,
-          socialSecurity: data.socialSecurity ?? 0,
-          fullNameContains: data.fullNameContains ?? "",
-          hasExecutiveHoursAndDollars: data.hasExecutiveHoursAndDollars ?? false,
-          isMonthlyPayroll: data.isMonthlyPayroll ?? false
-        })
-      );
-    }
-
-    setPageNumberReset(true);
   });
 
-  //if (profitYear && !executiveHoursAndDollars) {
-  //  setInitialSearchLoaded(true);
-  //}
-
-  const handleReset = async () => {
-    // If we ever decide that the reset button should clear pending changes
-    // uncomment this next line...
-    // dispatch(clearExecutiveHoursAndDollarsGridRows());
-    // ... and then import clearExecutiveHoursAndDollarsGridRows
-    // from reduxstore/slices/yearsEndSlice
-
-    // Are we in modal
-
-    if (!isModal) {
-      // If we are in modal, we want to clear the additional executives
-      // and reset the query params
-      setInitialSearchLoaded(false);
-      dispatch(clearExecutiveHoursAndDollars());
-      // Need a delay so that the grid sees the empty results set and clears
-      await new Promise((resolve) => setTimeout(resolve, 250));
-    } else {
-      dispatch(clearAdditionalExecutivesGrid());
-      setOneAddSearchFilterEntered(false);
-    }
-    dispatch(clearExecutiveHoursAndDollarsAddQueryParams());
-    dispatch(clearAdditionalExecutivesChosen());
+  const handleReset = () => {
     setOneAddSearchFilterEntered(false);
     setActiveField(null);
     socialSecurityChosen = false;
@@ -301,7 +161,6 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
     fullNameChosen = false;
     isMonthlyPayrollChosen = false;
     hasExecutiveHoursAndDollarsChosen = false;
-    setPageNumberReset(true);
 
     reset({
       profitYear: profitYear,
@@ -311,6 +170,8 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
       hasExecutiveHoursAndDollars: false,
       isMonthlyPayroll: false
     });
+
+    onReset();
   };
 
   // The thing is that on the main page search filter, we want the user to be able to leave
@@ -494,22 +355,12 @@ const ManageExecutiveHoursAndDollarsSearchFilter: React.FC<ManageExecutiveHoursA
       <Grid
         width="100%"
         paddingX="24px">
-        {!isModal && (
-          <SearchAndReset
-            disabled={!oneAddSearchFilterEntered}
-            handleReset={handleReset}
-            handleSearch={validateAndSearch}
-            isFetching={isFetching}
-          />
-        )}
-        {isModal && (
-          <SearchAndReset
-            disabled={!oneAddSearchFilterEntered}
-            handleReset={handleReset}
-            handleSearch={validateAndSearch}
-            isFetching={isModalFetching}
-          />
-        )}
+        <SearchAndReset
+          disabled={!oneAddSearchFilterEntered}
+          handleReset={handleReset}
+          handleSearch={validateAndSearch}
+          isFetching={isSearching}
+        />
       </Grid>
     </form>
   );

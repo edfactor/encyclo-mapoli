@@ -325,11 +325,13 @@ export const createHoursColumn = (options: HoursColumnOptions = {}): ColDef => {
     alignment = "right",
     editable = false,
     valueGetter = (params) => {
-      const value = params.data?.hours;
+      const value = params.data?.[field];
       return value == null || value === 0 ? null : value;
     },
     valueFormatter = (params) => {
       const value = params.value;
+      // Need to log value and type of value
+
       if (value == null || value === "") return ""; // keep empty display consistent
       // If it's already a string (even if numeric-like), return as-is per requirement
       if (typeof value === "string") return value;
