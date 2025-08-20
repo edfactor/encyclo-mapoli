@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Net;
 using CsvHelper;
 using CsvHelper.Configuration;
@@ -103,7 +103,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
             csv.ReadHeader();
             var headers = csv.HeaderRecord;
             headers.ShouldNotBeNull();
-            headers.ShouldBe(new[] { "", "", "BADGE", "EMPLOYEE NAME", "SSN", "REHIRED", "HIRE DATE", "TERMINATION DATE", "BEGINNING BALANCE", "BEGIN VESTED AMOUNT", "EC" });
+            headers.ShouldBe(new[] { "", "", "BADGE", "EMPLOYEE NAME", "SSN", "REHIRED", "HIRE DATE", "BEGINNING BALANCE", "BEGIN VESTED AMOUNT", "EC" });
 
             await csv.ReadAsync();
             csv.ReadHeader();
@@ -204,7 +204,10 @@ public class RehireForfeituresTests : ApiTestBase<Program>
             Id = Enrollment.Constants.NewVestingPlanHasForfeitureRecords,
             Name = "New vesting plan has Forfeiture records"
         };
-        payProfit.CurrentHoursYear = 2358;
+        payProfit.CurrentHoursYear = 1255.4m;
+        payProfit.HoursExecutive = 0;
+        payProfit.CurrentIncomeYear = 12345.67m;
+        payProfit.IncomeExecutive = 0;
         payProfit.ProfitYear = profitYear;
 
         var details = await c.ProfitDetails.Where(pd => pd.Ssn == demo.Ssn).ToListAsync(CancellationToken.None);
@@ -224,13 +227,13 @@ public class RehireForfeituresTests : ApiTestBase<Program>
         example.Ssn = demo.Ssn.MaskSsn();
         example.FullName = demo.ContactInfo.FullName;
         example.ReHiredDate = demo.ReHireDate ?? ReferenceData.DsmMinValue;
-        example.Details = details.Select(pd => new MilitaryRehireProfitSharingDetailResponse
+        example.Details = details.Select(pd => new RehireTransactionDetailResponse
             {
-                Forfeiture = pd.Forfeiture, Remark = pd.Remark, ProfitYear = pd.ProfitYear, HoursCurrentYear = payProfit.CurrentHoursYear,
-                EnrollmentName = demo.EmploymentStatus.Name,
-                EnrollmentId = 0,
+                Forfeiture = pd.Forfeiture,
+                Remark = pd.Remark,
+                ProfitYear = pd.ProfitYear,
+                HoursTransactionYear = payProfit.CurrentHoursYear,
                 ProfitCodeId = 0
-                
         })
             .ToList();
 
@@ -241,7 +244,8 @@ public class RehireForfeituresTests : ApiTestBase<Program>
                 Skip = 0,
                 Take = 10,
                 BeginningDate = example.ReHiredDate.AddDays(-5),
-                EndingDate = example.ReHiredDate.AddDays(5)
+                EndingDate = example.ReHiredDate.AddDays(5),
+                ProfitYear = profitYear
             }, example);
     }
 }

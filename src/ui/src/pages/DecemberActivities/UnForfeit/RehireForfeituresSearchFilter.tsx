@@ -106,7 +106,7 @@ const RehireForfeituresSearchFilter: React.FC<RehireForfeituresSearchFilterProps
       beginningDate: rehireForfeituresQueryParams?.beginningDate || fiscalData.fiscalBeginDate || undefined,
       endingDate: rehireForfeituresQueryParams?.endingDate || fiscalData.fiscalEndDate || undefined,
       excludeZeroBalance: rehireForfeituresQueryParams?.excludeZeroBalance || false,
-      pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true },
+      pagination: { skip: 0, take: 25, sortBy: "fullName", isSortDescending: false },
       profitYear: selectedProfitYear
     }
   });

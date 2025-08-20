@@ -3,6 +3,7 @@ import { Tooltip } from "@mui/material";
 import { ICellRendererParams } from "ag-grid-community";
 import { ForfeitureDetail } from "types";
 import { validateSuggestedForfeit } from "./validateSuggestedForfeit";
+import termination from "../../pages/DecemberActivities/Termination/Termination";
 
 interface SuggestedForfeitCellRendererProps extends ICellRendererParams {
   selectedProfitYear: number;
@@ -13,21 +14,30 @@ export function SuggestedForfeitCellRenderer(
   isTerminations: boolean,
   isRehireForfeiture: boolean
 ) {
-  if (!params.data?.isDetail || params.data.profitYear !== params.selectedProfitYear) {
-    return null;
+  if (isTerminations == isRehireForfeiture) {
+    return null; // this combination makes no sense, throw exception?
   }
-  if (isRehireForfeiture) {
-    // If we already have an UN-FORFEIT for this year, we should not render the cell
-    const hasUnforfeitedDetail = params.data.details?.some(
-      (detail: ForfeitureDetail) => detail.profitYear === params.selectedProfitYear && detail.remark === "UN-FORFEIT"
-    );
-    if (hasUnforfeitedDetail) {
+  if (!params.data?.isDetail) return null;
+
+  let rowKey;
+  let currentValue;
+  if (isTerminations) {
+    rowKey = `${params.data.badgeNumber}-${params.data.profitYear}${params.data.enrollmentId ? `-${params.data.enrollmentId}` : ""}-${params.node?.id || "unknown"}`;
+    currentValue = params.context?.editedValues?.[rowKey]?.value ?? params.data.suggestedForfeit;
+    if (params.data.profitYear !== params.selectedProfitYear) {
       return null;
     }
+  } else {
+    // only allow Unforfeit on last trasnaction.
+    if (params.data.index != 0) {
+      return null;
+    }
+    if (params.data?.suggestedUnforfeiture == null) {
+      return null;
+    }
+    rowKey = params.data.profitDetailId;
+    currentValue = params.context?.editedValues?.[rowKey]?.value ?? params.data.suggestedUnforfeiture;
   }
-
-  const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}${params.data.enrollmentId ? `-${params.data.enrollmentId}` : ""}-${params.node?.id || "unknown"}`;
-  const currentValue = params.context?.editedValues?.[rowKey]?.value ?? params.data.suggestedForfeit;
 
   const forfeitValue = isTerminations ? params.data.suggestedForfeit : params.data.forfeiture || 0;
   const maxForfeitOrUnforfeiture = Math.abs(forfeitValue);

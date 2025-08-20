@@ -6,7 +6,8 @@ import {
   createDateColumn,
   createCurrencyColumn,
   createStoreColumn,
-  createCountColumn
+  createCountColumn,
+  createHoursColumn
 } from "utils/gridColumnFactory";
 
 export const GetRehireForfeituresGridColumns = (): ColDef[] => {
@@ -19,10 +20,6 @@ export const GetRehireForfeituresGridColumns = (): ColDef[] => {
     createDateColumn({
       headerName: "Hire Date",
       field: "hireDate"
-    }),
-    createDateColumn({
-      headerName: "Termination Date",
-      field: "terminationDate"
     }),
     createDateColumn({
       headerName: "Rehired Date",
@@ -40,6 +37,19 @@ export const GetRehireForfeituresGridColumns = (): ColDef[] => {
     createCountColumn({
       headerName: "Years",
       field: "companyContributionYears"
-    })
+    }),
+    {
+      headerName: "Enrollment",
+      width: 120,
+      headerClass: "left-align",
+      cellClass: "left-align",
+      resizable: true,
+      sortable: true,
+      valueGetter: (params) => {
+        const id = params.data?.enrollmentId;
+        const name = params.data?.enrollmentName;
+        return `[${id}] ${name}`;
+      }
+    }
   ];
 };

@@ -1,5 +1,4 @@
-import { Box, Button, CircularProgress, Divider, Typography } from "@mui/material";
-import { Grid } from "@mui/material";
+import { Box, Button, CircularProgress, Divider, Grid, Typography } from "@mui/material";
 import ProfitShareTotalsDisplay from "components/ProfitShareTotalsDisplay";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
@@ -8,18 +7,21 @@ import { useDispatch, useSelector } from "react-redux";
 import { useFinalizeReportMutation, useLazyGetYearEndProfitSharingReportTotalsQuery } from "reduxstore/api/YearsEndApi";
 import { setYearEndProfitSharingReportQueryParams } from "reduxstore/slices/yearsEndSlice";
 import { RootState } from "reduxstore/store";
-import { Page, SmartModal, DSMAccordion } from "smart-ui-library";
+import { FilterParams } from "reduxstore/types";
+import { DSMAccordion, Page, SmartModal } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
 import ProfitSummary from "../PAY426Reports/ProfitSummary/ProfitSummary";
+import ProfitShareReportGrid from "./ProfitShareReportGrid";
 import ProfitShareReportSearchFilters from "./ProfitShareReportSearchFilters";
-import { FilterParams } from "reduxstore/types";
 
 const ProfitShareReport = () => {
   const [initialDataLoaded, setInitialDataLoaded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPresetParams, setSelectedPresetParams] = useState<FilterParams | null>(null);
 
-  const { yearEndProfitSharingReportTotals } = useSelector((state: RootState) => state.yearsEnd);
+  const { yearEndProfitSharingReportTotals, yearEndProfitSharingReport } = useSelector(
+    (state: RootState) => state.yearsEnd
+  );
   const hasToken = !!useSelector((state: RootState) => state.security.token);
   const profitYear = useFiscalCloseProfitYear();
   const dispatch = useDispatch();
@@ -89,8 +91,26 @@ const ProfitShareReport = () => {
   };
 
   useEffect(() => {
-    console.log("selectedPresetParams", selectedPresetParams);
+    if (selectedPresetParams) {
+      setTimeout(() => {
+        document.querySelector('[data-testid="filter-section"]')?.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+      }, 100);
+    }
   }, [selectedPresetParams]);
+
+  useEffect(() => {
+    if (yearEndProfitSharingReport?.response.results?.length) {
+      setTimeout(() => {
+        document.querySelector('[data-testid="results-grid"]')?.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+      }, 100);
+    }
+  }, [yearEndProfitSharingReport?.response.results]);
 
   const renderActionNode = () => {
     if (!initialDataLoaded || !yearEndProfitSharingReportTotals) return null;
@@ -147,12 +167,32 @@ const ProfitShareReport = () => {
         </Grid>
 
         {selectedPresetParams && (
-          <Grid width="100%">
+          <Grid
+            width="100%"
+            data-testid="filter-section">
             <DSMAccordion title="Filter">
               <ProfitShareReportSearchFilters
                 profitYear={profitYear}
                 presetParams={selectedPresetParams}
               />
+              {yearEndProfitSharingReport?.response.results &&
+                yearEndProfitSharingReport.response.results.length > 0 && (
+                  <Box
+                    sx={{ mt: 3 }}
+                    data-testid="results-grid">
+                    <ProfitShareReportGrid
+                      data={yearEndProfitSharingReport.response.results}
+                      isLoading={false}
+                      pageNumber={1}
+                      pageSize={yearEndProfitSharingReport.response.results.length}
+                      sortParams={{ sortBy: "badgeNumber", isSortDescending: true }}
+                      recordCount={yearEndProfitSharingReport.response.results.length}
+                      onPageChange={() => {}}
+                      onPageSizeChange={() => {}}
+                      onSortChange={() => {}}
+                    />
+                  </Box>
+                )}
             </DSMAccordion>
           </Grid>
         )}

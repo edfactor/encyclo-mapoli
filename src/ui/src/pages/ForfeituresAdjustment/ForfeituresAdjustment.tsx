@@ -1,20 +1,19 @@
-import { Divider } from "@mui/material";
-import { Grid } from "@mui/material";
-import { useState, useEffect } from "react";
+import { Divider, Grid } from "@mui/material";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
+import StandaloneMemberDetails from "pages/MasterInquiry/StandaloneMemberDetails";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useLazyGetForfeitureAdjustmentsQuery } from "reduxstore/api/YearsEndApi";
+import { RootState } from "reduxstore/store";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
-import ForfeituresAdjustmentPanel from "./ForfeituresAdjustmentPanel";
-import ForfeituresAdjustmentSearchParameters from "./ForfeituresAdjustmentSearchParameters";
-import StatusDropdownActionNode from "components/StatusDropdownActionNode";
-import { RootState } from "reduxstore/store";
-import AddForfeitureModal from "./AddForfeitureModal";
-import { useLazyGetForfeitureAdjustmentsQuery } from "reduxstore/api/YearsEndApi";
-import StandaloneMemberDetails from "pages/MasterInquiry/StandaloneMemberDetails";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
-import { MissiveAlertProvider } from "../MasterInquiry/MissiveAlertContext";
 import { InquiryApi } from "../../reduxstore/api/InquiryApi";
 import { clearForfeitureAdjustmentData } from "../../reduxstore/slices/forfeituresAdjustmentSlice";
+import { MissiveAlertProvider } from "../MasterInquiry/utils/MissiveAlertContext";
+import AddForfeitureModal from "./AddForfeitureModal";
+import ForfeituresAdjustmentPanel from "./ForfeituresAdjustmentPanel";
+import ForfeituresAdjustmentSearchParameters from "./ForfeituresAdjustmentSearchParameters";
 
 const ForfeituresAdjustment = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);

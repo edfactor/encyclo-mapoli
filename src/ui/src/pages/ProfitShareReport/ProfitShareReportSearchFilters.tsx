@@ -1,14 +1,17 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FormLabel, TextField } from "@mui/material";
-import { Grid } from "@mui/material";
-import { Controller, useForm, Resolver } from "react-hook-form";
+import { Box, FormLabel, Grid, TextField, Typography } from "@mui/material";
+import { useEffect } from "react";
+import { Controller, Resolver, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { useLazyGetYearEndProfitSharingReportQuery } from "reduxstore/api/YearsEndApi";
-import { setYearEndProfitSharingReportQueryParams } from "reduxstore/slices/yearsEndSlice";
+import {
+  clearYearEndProfitSharingReport,
+  setYearEndProfitSharingReportQueryParams
+} from "reduxstore/slices/yearsEndSlice";
+import { FilterParams } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
-import { useEffect } from "react";
-import { FilterParams } from "reduxstore/types";
+import presets from "../PAY426Reports/PAY426N/presets";
 
 interface ProfitShareReportSearch {
   badgeNumber?: number | null;
@@ -33,6 +36,8 @@ const ProfitShareReportSearchFilters: React.FC<ProfitShareReportSearchFilterProp
   const [triggerSearch, { isFetching }] = useLazyGetYearEndProfitSharingReportQuery();
   const dispatch = useDispatch();
 
+  const currentPreset = presets.find((preset) => preset.params.reportId === presetParams.reportId);
+
   const {
     control,
     handleSubmit,
@@ -45,10 +50,11 @@ const ProfitShareReportSearchFilters: React.FC<ProfitShareReportSearchFilterProp
     }
   });
 
-  // Reset form when report preset changes
+  // Reset form and clear results when report preset changes
   useEffect(() => {
     reset({ badgeNumber: undefined });
-  }, [presetParams, reset]);
+    dispatch(clearYearEndProfitSharingReport());
+  }, [presetParams, reset, dispatch]);
 
   const validateAndSearch = handleSubmit((data) => {
     const request = {
@@ -71,23 +77,20 @@ const ProfitShareReportSearchFilters: React.FC<ProfitShareReportSearchFilterProp
     reset({
       badgeNumber: undefined
     });
-
-    const request = {
-      ...presetParams,
-      profitYear: profitYear,
-      pagination: {
-        skip: 0,
-        take: 10,
-        sortBy: "badgeNumber",
-        isSortDescending: true
-      }
-    };
-
-    triggerSearch(request, false);
+    dispatch(clearYearEndProfitSharingReport());
   };
 
   return (
     <form onSubmit={validateAndSearch}>
+      {currentPreset && (
+        <Box sx={{ px: "24px", pb: 2 }}>
+          <Typography
+            variant="body2"
+            color="text.secondary">
+            Searching: <strong>{currentPreset.name}</strong> - {currentPreset.description}
+          </Typography>
+        </Box>
+      )}
       <Grid
         container
         paddingX="24px">

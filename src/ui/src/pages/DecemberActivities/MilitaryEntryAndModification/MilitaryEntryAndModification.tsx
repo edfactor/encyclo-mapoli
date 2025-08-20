@@ -1,25 +1,23 @@
-import { Dialog, DialogContent, DialogTitle, Divider } from "@mui/material";
-import { Grid } from "@mui/material";
+import { Dialog, DialogContent, DialogTitle, Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { useCallback, useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import { InquiryApi } from "../../../reduxstore/api/InquiryApi";
 import { useLazyGetMilitaryContributionsQuery } from "../../../reduxstore/api/MilitaryApi";
 import MilitaryContributionForm from "./MilitaryContributionForm";
 import MilitaryContributionGrid from "./MilitaryContributionFormGrid";
 import MilitaryEntryAndModificationSearchFilter from "./MilitaryEntryAndModificationSearchFilter";
-import { useDispatch } from "react-redux";
-import { InquiryApi } from "../../../reduxstore/api/InquiryApi";
 
 const MilitaryEntryAndModification = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [showContributions, setShowContributions] = useState(false);
   const [currentStatus, setCurrentStatus] = useState<string | null>(null);
-  const { masterInquiryEmployeeDetails } = useSelector((state: RootState) => state.inquiry);
+  const { masterInquiryMemberDetails } = useSelector((state: RootState) => state.inquiry);
   const [fetchContributions, { isFetching }] = useLazyGetMilitaryContributionsQuery();
   const profitYear = useDecemberFlowProfitYear();
   const dispatch = useDispatch();
@@ -51,7 +49,7 @@ const MilitaryEntryAndModification = () => {
   const handleFetchContributions = useCallback(
     (archive?: boolean) => {
       const request = {
-        badgeNumber: Number(masterInquiryEmployeeDetails?.badgeNumber ?? 0),
+        badgeNumber: Number(masterInquiryMemberDetails?.badgeNumber ?? 0),
         profitYear: profitYear,
         contributionAmount: 0,
         contributionDate: "",
@@ -67,14 +65,14 @@ const MilitaryEntryAndModification = () => {
       fetchContributions(request);
       setShowContributions(true);
     },
-    [fetchContributions, masterInquiryEmployeeDetails, profitYear]
+    [fetchContributions, masterInquiryMemberDetails, profitYear]
   );
 
   useEffect(() => {
-    if (masterInquiryEmployeeDetails) {
+    if (masterInquiryMemberDetails) {
       handleFetchContributions();
     }
-  }, [handleFetchContributions, masterInquiryEmployeeDetails]);
+  }, [handleFetchContributions, masterInquiryMemberDetails]);
 
   return (
     <Page
@@ -93,7 +91,7 @@ const MilitaryEntryAndModification = () => {
         </Grid>
 
         <Grid width="100%">
-          {masterInquiryEmployeeDetails ? (
+          {masterInquiryMemberDetails ? (
             <MilitaryContributionGrid
               setInitialSearchLoaded={setInitialSearchLoaded}
               initialSearchLoaded={initialSearchLoaded}
@@ -121,7 +119,7 @@ const MilitaryEntryAndModification = () => {
               dispatch(InquiryApi.util.invalidateTags(["memberDetails"]));
             }}
             onCancel={handleCloseForm}
-            badgeNumber={Number(masterInquiryEmployeeDetails?.badgeNumber)}
+            badgeNumber={Number(masterInquiryMemberDetails?.badgeNumber)}
             profitYear={profitYear}
           />
         </DialogContent>

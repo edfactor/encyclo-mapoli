@@ -128,7 +128,6 @@ public class UnforfeituresEndpoint :
             Map(m => m.Ssn).Index(4).Name("SSN");
             Map(m => m.ReHiredDate).Index(5).Name("REHIRED").TypeConverter<YearMonthDayTypeConverter>();
             Map(m => m.HireDate).Index(6).Name("HIRE DATE").TypeConverter<YearMonthDayTypeConverter>();
-            Map(m => m.TerminationDate).Index(7).Name("TERMINATION DATE").TypeConverter<YearMonthDayTypeConverter>();
             Map(m => m.NetBalanceLastYear).Index(9).Name("BEGINNING BALANCE").TypeConverterOption.Format("0.00");
             Map(m => m.VestedBalanceLastYear).Index(10).Name("BEGIN VESTED AMOUNT").TypeConverterOption.Format("0.00");
            
