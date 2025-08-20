@@ -1,74 +1,56 @@
-import { useState, useCallback, useEffect, useRef, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import {
-  useLazySearchProfitMasterInquiryQuery,
+  useLazyGetProfitMasterInquiryMemberDetailsQuery,
   useLazyGetProfitMasterInquiryMemberQuery,
-  useLazyGetProfitMasterInquiryMemberDetailsQuery
+  useLazySearchProfitMasterInquiryQuery
 } from "reduxstore/api/InquiryApi";
 import { RootState } from "reduxstore/store";
-import { MasterInquiryRequest, EmployeeDetails, MissiveResponse, MasterInquirySearch } from "reduxstore/types";
-import { isSimpleSearch } from "./MasterInquiryFunctions";
-import { MASTER_INQUIRY_MESSAGES } from "./MasterInquiryMessages";
-import { useMissiveAlerts } from "./useMissiveAlerts";
+import { MasterInquiryRequest, MasterInquirySearch, MissiveResponse } from "reduxstore/types";
+import { ROUTES } from "../../../constants";
+import { useMissiveAlerts } from "../hooks/useMissiveAlerts";
+import { isSimpleSearch } from "../utils/MasterInquiryFunctions";
+import { MASTER_INQUIRY_MESSAGES } from "../utils/MasterInquiryMessages";
 import { useGridPagination } from "./useGridPagination";
-
-interface SelectedMember {
-  memberType: number;
-  id: number;
-  ssn: number;
-  badgeNumber: number;
-  psnSuffix: number;
-}
-
-interface SearchResponse {
-  results: EmployeeDetails[];
-  total: number;
-}
-
-interface MemberDetails {
-  [key: string]: any;
-}
-
-interface ProfitData {
-  results: any[];
-  total: number;
-}
+import {
+  initialState,
+  masterInquiryReducer,
+  selectShowMemberDetails,
+  selectShowMemberGrid,
+  selectShowProfitDetails,
+  type SelectedMember
+} from "./useMasterInquiryReducer";
 
 const useMasterInquiry = () => {
-  const [searchParams, setSearchParams] = useState<MasterInquiryRequest | null>(null);
-  const [searchResults, setSearchResults] = useState<SearchResponse | null>(null);
-  const [selectedMember, setSelectedMember] = useState<SelectedMember | null>(null);
-  const [memberDetails, setMemberDetails] = useState<MemberDetails | null>(null);
-  const [memberProfitData, setMemberProfitData] = useState<ProfitData | null>(null);
-  const [noResultsMessage, setNoResultsMessage] = useState<string | null>(null);
-  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
-  const [isManuallySearching, setIsManuallySearching] = useState(false);
+  const [state, dispatch] = useReducer(masterInquiryReducer, initialState);
+  const navigate = useNavigate();
 
-  const [triggerSearch, { isLoading: isSearching, error: searchError }] = useLazySearchProfitMasterInquiryQuery();
-  const [triggerMemberDetails, { isFetching: isFetchingMemberDetails }] = useLazyGetProfitMasterInquiryMemberQuery();
-  const [triggerProfitDetails, { isFetching: isFetchingProfitData }] =
-    useLazyGetProfitMasterInquiryMemberDetailsQuery();
+  const [triggerSearch, { isLoading: isSearching }] = useLazySearchProfitMasterInquiryQuery();
+  const [triggerMemberDetails] = useLazyGetProfitMasterInquiryMemberQuery();
+  const [triggerProfitDetails] = useLazyGetProfitMasterInquiryMemberDetailsQuery();
 
   const { masterInquiryRequestParams } = useSelector((state: RootState) => state.inquiry);
   const missives = useSelector((state: RootState) => state.lookups.missives);
 
   const { addAlert, addAlerts, clearAlerts } = useMissiveAlerts();
 
-  const searchParamsRef = useRef(searchParams);
-  const selectedMemberRef = useRef(selectedMember);
+  const searchParamsRef = useRef(state.search.params);
+  const selectedMemberRef = useRef(state.selection.selectedMember);
 
   useEffect(() => {
-    searchParamsRef.current = searchParams;
-  }, [searchParams]);
+    searchParamsRef.current = state.search.params;
+  }, [state.search.params]);
 
   useEffect(() => {
-    selectedMemberRef.current = selectedMember;
-  }, [selectedMember]);
+    selectedMemberRef.current = state.selection.selectedMember;
+  }, [state.selection.selectedMember]);
 
   const handleMemberGridPaginationChange = useCallback(
     (pageNumber: number, pageSize: number, sortParams: any) => {
       const currentSearchParams = searchParamsRef.current;
       if (currentSearchParams) {
+        dispatch({ type: "MEMBERS_FETCH_START" });
         triggerSearch({
           ...currentSearchParams,
           pagination: {
@@ -82,7 +64,10 @@ const useMasterInquiry = () => {
           .then((response) => {
             const results = Array.isArray(response) ? response : response.results;
             const total = Array.isArray(response) ? response.length : response.total;
-            setSearchResults({ results, total });
+            dispatch({ type: "MEMBERS_FETCH_SUCCESS", payload: { results: { results, total } } });
+          })
+          .catch((error) => {
+            dispatch({ type: "MEMBERS_FETCH_FAILURE", payload: { error: error?.toString() || "Unknown error" } });
           });
       }
     },
@@ -103,7 +88,7 @@ const useMasterInquiry = () => {
         })
           .unwrap()
           .then((profitData) => {
-            setMemberProfitData(profitData);
+            dispatch({ type: "PROFIT_DATA_FETCH_SUCCESS", payload: { profitData } });
           });
       }
     },
@@ -127,15 +112,8 @@ const useMasterInquiry = () => {
   const executeSearch = useCallback(
     async (params: MasterInquiryRequest) => {
       try {
-        setIsManuallySearching(true);
+        dispatch({ type: "SEARCH_START", payload: { params, isManual: true } });
         clearAlerts();
-        setSearchParams(params);
-        setSearchResults(null);
-        setSelectedMember(null);
-        setMemberDetails(null);
-        setMemberProfitData(null);
-        setNoResultsMessage(null);
-        setInitialSearchLoaded(false);
 
         const [response] = await Promise.all([
           triggerSearch(params).unwrap(),
@@ -149,31 +127,9 @@ const useMasterInquiry = () => {
           const results = Array.isArray(response) ? response : response.results;
           const total = Array.isArray(response) ? response.length : response.total;
 
-          setSearchResults({ results, total });
-          setInitialSearchLoaded(true);
-
-          if (results.length === 1) {
-            const member = results[0];
-            const selectedMemberData: SelectedMember = {
-              memberType: member.isEmployee ? 1 : 2,
-              id: Number(member.id),
-              ssn: Number(member.ssn),
-              badgeNumber: Number(member.badgeNumber),
-              psnSuffix: Number(member.psnSuffix)
-            };
-
-            // Only set selected member if it's different from current one
-            setSelectedMember((prev) => {
-              if (prev?.id === selectedMemberData.id && prev?.memberType === selectedMemberData.memberType) {
-                return prev;
-              }
-              return selectedMemberData;
-            });
-          }
+          dispatch({ type: "SEARCH_SUCCESS", payload: { results: { results, total } } });
         } else {
-          setSearchResults(null);
-          setInitialSearchLoaded(false);
-          setNoResultsMessage(null);
+          dispatch({ type: "SEARCH_SUCCESS", payload: { results: { results: [], total: 0 } } });
 
           // Add appropriate missive alert based on current search parameters
           // Convert API params back to form-ish structure for isSimpleSearch check
@@ -201,9 +157,7 @@ const useMasterInquiry = () => {
         }
       } catch (error) {
         console.error("Search failed:", error);
-        setSearchResults(null);
-        setInitialSearchLoaded(false);
-        setNoResultsMessage(null);
+        dispatch({ type: "SEARCH_FAILURE", payload: { error: error?.toString() || "Unknown error" } });
 
         // Add error alert
         addAlert({
@@ -212,35 +166,27 @@ const useMasterInquiry = () => {
           message: "Search Failed",
           description: "The search request failed. Please try again."
         } as MissiveResponse);
-      } finally {
-        setIsManuallySearching(false);
       }
     },
     [triggerSearch, masterInquiryRequestParams, clearAlerts]
   );
 
   const selectMember = useCallback((member: SelectedMember | null) => {
-    setSelectedMember(member);
-    setMemberDetails(null);
-    setMemberProfitData(null);
-
-    if (!member) {
-      setNoResultsMessage(null);
-      return;
-    }
+    dispatch({ type: "SELECT_MEMBER", payload: { member } });
   }, []);
 
-  // Fetch memb details when selected member changes
+  // Fetch member details when selected member changes
   useEffect(() => {
-    if (selectedMember?.memberType && selectedMember?.id) {
+    if (state.selection.selectedMember?.memberType && state.selection.selectedMember?.id) {
+      dispatch({ type: "MEMBER_DETAILS_FETCH_START" });
       triggerMemberDetails({
-        memberType: selectedMember.memberType,
-        id: selectedMember.id,
-        profitYear: searchParams?.endProfitYear
+        memberType: state.selection.selectedMember.memberType,
+        id: state.selection.selectedMember.id,
+        profitYear: state.search.params?.endProfitYear
       })
         .unwrap()
         .then((details) => {
-          setMemberDetails(details);
+          dispatch({ type: "MEMBER_DETAILS_FETCH_SUCCESS", payload: { details } });
 
           if (details.missives && missives) {
             const localMissives: MissiveResponse[] = details.missives
@@ -255,11 +201,14 @@ const useMasterInquiry = () => {
           if (!details.isEmployee && masterInquiryRequestParams?.memberType === "all") {
             addAlert(MASTER_INQUIRY_MESSAGES.BENEFICIARY_FOUND(details.ssn));
           }
+        })
+        .catch(() => {
+          dispatch({ type: "MEMBER_DETAILS_FETCH_FAILURE" });
         });
     }
   }, [
-    selectedMember,
-    searchParams?.endProfitYear,
+    state.selection.selectedMember,
+    state.search.params?.endProfitYear,
     triggerMemberDetails,
     missives,
     masterInquiryRequestParams?.memberType,
@@ -269,16 +218,16 @@ const useMasterInquiry = () => {
 
   const profitFetchDeps = useMemo(
     () => ({
-      memberType: selectedMember?.memberType,
-      id: selectedMember?.id,
+      memberType: state.selection.selectedMember?.memberType,
+      id: state.selection.selectedMember?.id,
       pageNumber: profitGridPagination.pageNumber,
       pageSize: profitGridPagination.pageSize,
       sortBy: profitGridPagination.sortParams.sortBy,
       isSortDescending: profitGridPagination.sortParams.isSortDescending
     }),
     [
-      selectedMember?.memberType,
-      selectedMember?.id,
+      state.selection.selectedMember?.memberType,
+      state.selection.selectedMember?.id,
       profitGridPagination.pageNumber,
       profitGridPagination.pageSize,
       profitGridPagination.sortParams.sortBy,
@@ -288,6 +237,7 @@ const useMasterInquiry = () => {
 
   useEffect(() => {
     if (profitFetchDeps.memberType && profitFetchDeps.id) {
+      dispatch({ type: "PROFIT_DATA_FETCH_START" });
       triggerProfitDetails({
         memberType: profitFetchDeps.memberType,
         id: profitFetchDeps.id,
@@ -298,60 +248,51 @@ const useMasterInquiry = () => {
       })
         .unwrap()
         .then((profitData) => {
-          setMemberProfitData(profitData);
+          dispatch({ type: "PROFIT_DATA_FETCH_SUCCESS", payload: { profitData } });
+        })
+        .catch(() => {
+          dispatch({ type: "PROFIT_DATA_FETCH_FAILURE" });
         });
     }
   }, [profitFetchDeps, triggerProfitDetails]);
 
   const clearSearch = useCallback(() => {
-    setSearchParams(null);
-    setSearchResults(null);
-    setSelectedMember(null);
-    setMemberDetails(null);
-    setMemberProfitData(null);
-    setNoResultsMessage(null);
-    setInitialSearchLoaded(false);
-    setIsManuallySearching(false);
+    dispatch({ type: "SEARCH_RESET" });
     clearAlerts();
-  }, [clearAlerts]);
-
-  const clearSelection = useCallback(() => {
-    setSelectedMember(null);
-    setMemberDetails(null);
-    setMemberProfitData(null);
-  }, []);
+    // Navigate to base route to clear any badge number URL parameters
+    navigate(`/${ROUTES.MASTER_INQUIRY}`, { replace: true });
+  }, [clearAlerts, navigate]);
 
   const resetAll = useCallback(() => {
-    clearSearch();
+    dispatch({ type: "RESET_ALL" });
     memberGridPagination.resetPagination();
     profitGridPagination.resetPagination();
-  }, [clearSearch, memberGridPagination.resetPagination, profitGridPagination.resetPagination]);
+    clearSearch();
+  }, [memberGridPagination.resetPagination, profitGridPagination.resetPagination, clearSearch]);
 
-  const showMemberGrid = Boolean(searchResults && searchResults.results.length > 1);
-  const showMemberDetails = Boolean(selectedMember && memberDetails);
-  const showProfitDetails = Boolean(selectedMember && memberProfitData);
+  const showMemberGrid = selectShowMemberGrid(state);
+  const showMemberDetails = selectShowMemberDetails(state);
+  const showProfitDetails = selectShowProfitDetails(state);
 
   return {
-    searchParams,
-    searchResults,
-    isSearching: isSearching || isManuallySearching,
-    searchError: searchError?.toString() || null,
-    selectedMember,
-    memberDetails,
-    memberProfitData,
-    isFetchingMemberDetails,
-    isFetchingProfitData,
+    searchParams: state.search.params,
+    searchResults: state.search.results,
+    isSearching: isSearching || state.search.isSearching || state.search.isManuallySearching,
+    isFetchingMembers: state.search.isFetchingMembers,
+    selectedMember: state.selection.selectedMember,
+    memberDetails: state.selection.memberDetails,
+    memberProfitData: state.selection.memberProfitData,
+    isFetchingMemberDetails: state.selection.isFetchingMemberDetails,
+    isFetchingProfitData: state.selection.isFetchingProfitData,
     showMemberGrid,
     showMemberDetails,
     showProfitDetails,
-    noResultsMessage,
-    initialSearchLoaded,
+    noResultsMessage: state.search.noResultsMessage,
     memberGridPagination,
     profitGridPagination,
     executeSearch,
-    clearSearch,
     selectMember,
-    clearSelection,
+    clearSearch,
     resetAll
   };
 };

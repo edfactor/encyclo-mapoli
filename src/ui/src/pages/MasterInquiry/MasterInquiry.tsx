@@ -1,30 +1,31 @@
 import { Divider, Grid } from "@mui/material";
 import MissiveAlerts from "components/MissiveAlerts/MissiveAlerts";
+import { memo } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
+import useMasterInquiry from "./hooks/useMasterInquiry";
+import { useMissiveAlerts } from "./hooks/useMissiveAlerts";
 import MasterInquiryGrid from "./MasterInquiryDetailsGrid";
-import MasterInquiryEmployeeDetails from "./MasterInquiryEmployeeDetails";
+import MasterInquiryMemberDetails from "./MasterInquiryMemberDetails";
 import MasterInquiryMemberGrid from "./MasterInquiryMemberGrid";
 import MasterInquirySearchFilter from "./MasterInquirySearchFilter";
-import { MissiveAlertProvider } from "./MissiveAlertContext";
-import { useMissiveAlerts } from "./useMissiveAlerts";
-import useMasterInquiry from "./useMasterInquiry";
+import { MissiveAlertProvider } from "./utils/MissiveAlertContext";
 
-const MasterInquiryContent = () => {
+const MasterInquiryContent = memo(() => {
   const { missiveAlerts } = useMissiveAlerts();
   const {
     searchParams,
     searchResults,
+    isSearching,
+    isFetchingMembers,
     selectedMember,
     memberDetails,
     memberProfitData,
-    isSearching,
     isFetchingMemberDetails,
     isFetchingProfitData,
     showMemberGrid,
     showMemberDetails,
     showProfitDetails,
     noResultsMessage,
-    initialSearchLoaded,
     memberGridPagination,
     profitGridPagination,
     executeSearch,
@@ -62,11 +63,12 @@ const MasterInquiryContent = () => {
           memberGridPagination={memberGridPagination}
           onPaginationChange={memberGridPagination.handlePaginationChange}
           onSortChange={memberGridPagination.handleSortChange}
+          isLoading={isFetchingMembers}
         />
       )}
 
       {showMemberDetails && selectedMember && (
-        <MasterInquiryEmployeeDetails
+        <MasterInquiryMemberDetails
           memberType={selectedMember.memberType}
           id={selectedMember.id}
           profitYear={searchParams?.endProfitYear}
@@ -94,7 +96,7 @@ const MasterInquiryContent = () => {
       )}
     </Grid>
   );
-};
+});
 
 const MasterInquiry = () => {
   return (

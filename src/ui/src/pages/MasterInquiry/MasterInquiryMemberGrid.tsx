@@ -1,9 +1,8 @@
 import { Box, Typography } from "@mui/material";
-import React, { useMemo } from "react";
+import React, { memo, useMemo } from "react";
 import { EmployeeDetails } from "reduxstore/types";
-import { DSMGrid, formatNumberWithComma, ISortParams } from "smart-ui-library";
+import { DSMGrid, formatNumberWithComma } from "smart-ui-library";
 import Pagination from "../../components/Pagination/Pagination";
-import "./MasterInquiryMemberGrid.css";
 import { GetMasterInquiryMemberGridColumns } from "./MasterInquiryMemberGridColumns";
 
 interface SearchResponse {
@@ -29,72 +28,92 @@ interface MasterInquiryMemberGridProps {
   };
   onPaginationChange: (pageNumber: number, pageSize: number) => void;
   onSortChange: (sortParams: any) => void;
+  isLoading?: boolean;
 }
 
-const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = ({
-  searchResults,
-  onMemberSelect,
-  memberGridPagination,
-  onPaginationChange,
-  onSortChange
-}: MasterInquiryMemberGridProps) => {
-  const columns = useMemo(() => GetMasterInquiryMemberGridColumns(), []);
+const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
+  ({
+    searchResults,
+    onMemberSelect,
+    memberGridPagination,
+    onPaginationChange,
+    onSortChange,
+    isLoading = false
+  }: MasterInquiryMemberGridProps) => {
+    const columns = useMemo(() => GetMasterInquiryMemberGridColumns(), []);
 
-  const handleMemberClick = (member: EmployeeDetails) => {
-    onMemberSelect({
-      memberType: member.isEmployee ? 1 : 2,
-      id: Number(member.id),
-      ssn: Number(member.ssn),
-      badgeNumber: Number(member.badgeNumber),
-      psnSuffix: Number(member.psnSuffix)
-    });
-  };
+    const handleMemberClick = (member: EmployeeDetails) => {
+      onMemberSelect({
+        memberType: member.isEmployee ? 1 : 2,
+        id: Number(member.id),
+        ssn: Number(member.ssn),
+        badgeNumber: Number(member.badgeNumber),
+        psnSuffix: Number(member.psnSuffix)
+      });
+    };
 
-  const handlePaginationChange = (pageNumber: number, pageSize: number) => {
-    onPaginationChange(pageNumber, pageSize);
-  };
+    const handlePaginationChange = (pageNumber: number, pageSize: number) => {
+      onPaginationChange(pageNumber, pageSize);
+    };
 
-  const handleSortChange = (sortParams: any) => {
-    onSortChange(sortParams);
-  };
+    const handleSortChange = (sortParams: any) => {
+      onSortChange(sortParams);
+    };
 
-  return (
-    <Box sx={{ width: "100%" }}>
-      <div style={{ padding: "0 24px 0 24px" }}>
-        <Typography
-          variant="h2"
-          sx={{ color: "#0258A5" }}>
-          {`Search Results (${formatNumberWithComma(searchResults.total)} ${searchResults.total === 1 ? "Record" : "Records"})`}
-        </Typography>
-      </div>
-      <DSMGrid
-        preferenceKey="MASTER_INQUIRY_MEMBER_GRID"
-        handleSortChanged={handleSortChange}
-        providedOptions={{
-          rowData: searchResults.results,
-          columnDefs: columns,
-          context: { onBadgeClick: handleMemberClick },
-          onRowClicked: (event) => {
-            if (event.data) {
-              handleMemberClick(event.data);
+    return (
+      <Box sx={{ width: "100%" }}>
+        <div style={{ padding: "0 24px 0 24px" }}>
+          <Typography
+            variant="h2"
+            sx={{ color: "#0258A5" }}>
+            {`Search Results (${formatNumberWithComma(searchResults.total)} ${searchResults.total === 1 ? "Record" : "Records"})`}
+          </Typography>
+        </div>
+        <DSMGrid
+          preferenceKey="MASTER_INQUIRY_MEMBER_GRID"
+          handleSortChanged={handleSortChange}
+          isLoading={isLoading}
+          providedOptions={{
+            rowData: searchResults.results,
+            columnDefs: columns,
+            context: { onBadgeClick: handleMemberClick },
+            onRowClicked: (event) => {
+              if (event.data) {
+                handleMemberClick(event.data);
+              }
             }
-          }
-        }}
-      />
-      <Pagination
-        rowsPerPageOptions={[5, 10, 50]}
-        pageNumber={memberGridPagination.pageNumber}
-        setPageNumber={(value: number) => {
-          handlePaginationChange(value - 1, memberGridPagination.pageSize);
-        }}
-        pageSize={memberGridPagination.pageSize}
-        setPageSize={(value: number) => {
-          handlePaginationChange(0, value);
-        }}
-        recordCount={searchResults.total}
-      />
-    </Box>
-  );
-};
+          }}
+        />
+        <Pagination
+          rowsPerPageOptions={[5, 10, 50]}
+          pageNumber={memberGridPagination.pageNumber}
+          setPageNumber={(value: number) => {
+            handlePaginationChange(value - 1, memberGridPagination.pageSize);
+          }}
+          pageSize={memberGridPagination.pageSize}
+          setPageSize={(value: number) => {
+            handlePaginationChange(0, value);
+          }}
+          recordCount={searchResults.total}
+        />
+      </Box>
+    );
+  },
+  (prevProps, nextProps) => {
+    // Custom comparison function
+    // Only re-render if incoming props are different
+    return (
+      prevProps.searchResults.results === nextProps.searchResults.results &&
+      prevProps.searchResults.total === nextProps.searchResults.total &&
+      prevProps.memberGridPagination.pageNumber === nextProps.memberGridPagination.pageNumber &&
+      prevProps.memberGridPagination.pageSize === nextProps.memberGridPagination.pageSize &&
+      prevProps.memberGridPagination.sortParams === nextProps.memberGridPagination.sortParams &&
+      prevProps.isLoading === nextProps.isLoading &&
+      prevProps.onMemberSelect === nextProps.onMemberSelect &&
+      prevProps.onPaginationChange === nextProps.onPaginationChange &&
+      prevProps.onSortChange === nextProps.onSortChange
+    );
+  }
+);
 
 export default MasterInquiryMemberGrid;
