@@ -103,7 +103,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
             csv.ReadHeader();
             var headers = csv.HeaderRecord;
             headers.ShouldNotBeNull();
-            headers.ShouldBe(new[] { "", "", "BADGE", "EMPLOYEE NAME", "SSN", "REHIRED", "HIRE DATE", "TERMINATION DATE", "BEGINNING BALANCE", "BEGIN VESTED AMOUNT", "EC" });
+            headers.ShouldBe(new[] { "", "", "BADGE", "EMPLOYEE NAME", "SSN", "REHIRED", "HIRE DATE", "BEGINNING BALANCE", "BEGIN VESTED AMOUNT", "EC" });
 
             await csv.ReadAsync();
             csv.ReadHeader();
