@@ -270,7 +270,7 @@ const useManageExecutiveHoursAndDollars = () => {
     }
   }, [state.grid.pendingChanges, executiveHoursAndDollarsGrid, updateHoursAndDollars, reduxDispatch]);
 
-  const archiveExecutiveHoursAndDollars = useCallback(async () => {
+  const saveExecutiveHoursAndDollars = useCallback(async () => {
     if (state.search.params) {
       try {
         await triggerSearch({
@@ -278,7 +278,7 @@ const useManageExecutiveHoursAndDollars = () => {
           archive: true
         }).unwrap();
       } catch (error) {
-        console.error("Error archiving executive hours and dollars:", error);
+        console.error("Error saving executive hours and dollars:", error);
       }
     }
   }, [state.search.params, triggerSearch]);
@@ -323,7 +323,7 @@ const useManageExecutiveHoursAndDollars = () => {
     addExecutivesToMainGrid,
     updateExecutiveRow,
     saveChanges,
-    archiveExecutiveHoursAndDollars,
+    saveExecutiveHoursAndDollars,
 
     initialSearchLoaded: state.search.initialLoaded,
     setInitialSearchLoaded: (loaded: boolean) => dispatch({ type: "SET_INITIAL_LOADED", payload: { loaded } }),

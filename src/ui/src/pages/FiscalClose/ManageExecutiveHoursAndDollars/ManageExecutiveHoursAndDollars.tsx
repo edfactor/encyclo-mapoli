@@ -49,7 +49,7 @@ const ManageExecutiveHoursAndDollarsContent = memo(({ hookData }: ManageExecutiv
     resetSearch,
     isSearching,
     showGrid,
-    archiveExecutiveHoursAndDollars,
+    saveExecutiveHoursAndDollars,
     gridData,
     modalResults,
     isModalOpen,
@@ -71,7 +71,7 @@ const ManageExecutiveHoursAndDollarsContent = memo(({ hookData }: ManageExecutiv
   const handleStatusChange = (newStatus: string, statusName?: string) => {
     if (statusName === "Complete" && currentStatus !== "Complete") {
       setCurrentStatus("Complete");
-      archiveExecutiveHoursAndDollars();
+      saveExecutiveHoursAndDollars();
     } else {
       setCurrentStatus(statusName || newStatus);
     }
