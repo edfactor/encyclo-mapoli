@@ -44,7 +44,7 @@ const RehireForfeituresGrid: React.FC<RehireForfeituresGridSearchProps> = ({
   const [pageSize, setPageSize] = useState(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
     sortBy: "fullName",
-    isSortDescending: true
+    isSortDescending: false
   });
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const [selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
@@ -103,6 +103,7 @@ const RehireForfeituresGrid: React.FC<RehireForfeituresGridSearchProps> = ({
       const baseRequest: StartAndEndDateRequest = {
         beginningDate: rehireForfeituresQueryParams?.beginningDate || fiscalCalendarYear?.fiscalBeginDate || "",
         endingDate: rehireForfeituresQueryParams?.endingDate || fiscalCalendarYear?.fiscalEndDate || "",
+        profitYear: selectedProfitYear,
         pagination: { skip, take: pageSize, sortBy, isSortDescending }
       };
 
