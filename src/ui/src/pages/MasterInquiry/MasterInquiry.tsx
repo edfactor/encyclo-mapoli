@@ -1,5 +1,6 @@
 import { Divider, Grid } from "@mui/material";
 import MissiveAlerts from "components/MissiveAlerts/MissiveAlerts";
+import { memo } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
 import useMasterInquiry from "./hooks/useMasterInquiry";
 import { useMissiveAlerts } from "./hooks/useMissiveAlerts";
@@ -9,7 +10,7 @@ import MasterInquiryMemberGrid from "./MasterInquiryMemberGrid";
 import MasterInquirySearchFilter from "./MasterInquirySearchFilter";
 import { MissiveAlertProvider } from "./utils/MissiveAlertContext";
 
-const MasterInquiryContent = () => {
+const MasterInquiryContent = memo(() => {
   const { missiveAlerts } = useMissiveAlerts();
   const {
     searchParams,
@@ -95,7 +96,7 @@ const MasterInquiryContent = () => {
       )}
     </Grid>
   );
-};
+});
 
 const MasterInquiry = () => {
   return (
