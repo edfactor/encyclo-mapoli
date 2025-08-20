@@ -1,10 +1,10 @@
 import { FormControl, MenuItem, Select, SelectChangeEvent } from "@mui/material";
+import InputLabel from "@mui/material/InputLabel";
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { useLazyGetHistoricalFrozenStateResponseQuery } from "reduxstore/api/ItOperationsApi";
+import { useLazyGetProfitYearSelectorFrozenDataQuery } from "reduxstore/api/ItOperationsApi";
 import { useLazyGetAccountingYearQuery } from "reduxstore/api/LookupsApi";
 import { RootState } from "reduxstore/store";
-import InputLabel from "@mui/material/InputLabel";
 import { mmDDYYFormat } from "../../utils/dateUtils";
 
 export interface ProfitYearSelectorProps {
@@ -24,9 +24,9 @@ const ProfitYearSelector = ({
   disabledWhileLoading = true,
   defaultValue
 }: ProfitYearSelectorProps) => {
-  const frozenStateCollectionData = useSelector((state: RootState) => state.frozen.frozenStateCollectionData);
+  const profitYearSelectorData = useSelector((state: RootState) => state.frozen.profitYearSelectorData);
   const token = useSelector((state: RootState) => state.security.token);
-  const [triggerFrozenStateSearch, { isLoading: isFrozenLoading }] = useLazyGetHistoricalFrozenStateResponseQuery();
+  const [triggerFrozenStateSearch, { isLoading: isFrozenLoading }] = useLazyGetProfitYearSelectorFrozenDataQuery();
   const thisYear = new Date().getFullYear();
 
   // Get frozen profit year if available
@@ -41,19 +41,21 @@ const ProfitYearSelector = ({
     }
   }, [showDates, triggerFrozenStateSearch, token]);
 
-  const activeFrozenState = frozenStateCollectionData?.results?.find((state) => state.isActive);
-  const hasFrozenData = frozenStateCollectionData?.results && frozenStateCollectionData.results.length > 0;
+  const activeFrozenState = profitYearSelectorData?.results?.find((state) => state.isActive);
+  const hasFrozenData = profitYearSelectorData?.results && profitYearSelectorData.results.length > 0;
 
   // Build years to display
   const yearsToDisplay: number[] = [];
   if (!yearsToDisplay.includes(thisYear)) {
     yearsToDisplay.push(thisYear);
   }
-  if (hasFrozenData && activeFrozenState?.profitYear) {
+  if (hasFrozenData && activeFrozenState?.profitYear && !yearsToDisplay.includes(activeFrozenState.profitYear)) {
     yearsToDisplay.push(activeFrozenState.profitYear);
   }
 
-  yearsToDisplay.push(thisYear - 1);
+  if (!yearsToDisplay.includes(thisYear - 1)) {
+    yearsToDisplay.push(thisYear - 1);
+  }
 
   // Fetch accounting year data for each year
   const [accountingYearData, setAccountingYearData] = useState<Record<number, { startDate: string; endDate: string }>>(
