@@ -1,5 +1,5 @@
-import { MAX_EMPLOYEE_BADGE_LENGTH } from "../../constants";
 import { MasterInquirySearch } from "reduxstore/types";
+import { MAX_EMPLOYEE_BADGE_LENGTH } from "../../../constants";
 
 export const paymentTypeGetNumberMap: Record<string, number> = {
   all: 0,

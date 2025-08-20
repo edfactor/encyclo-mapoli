@@ -4,9 +4,9 @@ import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
-import MasterInquiryEmployeeDetails from "pages/MasterInquiry/MasterInquiryEmployeeDetails";
-import MasterInquiryMemberGrid from "pages/MasterInquiry/MasterInquiryMemberGrid";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Paged } from "components/DSMGrid/types";
+import { MissiveAlertProvider } from "pages/MasterInquiry/utils/MissiveAlertContext";
+import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import {
   useLazyBeneficiarySearchFilterQuery,
@@ -27,13 +27,11 @@ import {
   MasterInquiryRequest
 } from "reduxstore/types";
 import { DSMAccordion, DSMGrid, ISortParams, Page, Pagination } from "smart-ui-library";
+import { CAPTIONS } from "../../constants";
 import BeneficiaryInquiryGrid from "./BeneficiaryInquiryGrid";
 import BeneficiaryInquirySearchFilter from "./BeneficiaryInquirySearchFilter";
-import CreateBeneficiary from "./CreateBeneficiary";
-import { MissiveAlertProvider } from "pages/MasterInquiry/MissiveAlertContext";
-import { Paged } from "components/DSMGrid/types";
-import { CAPTIONS } from "../../constants";
 import { BeneficiarySearchFilterColumns } from "./BeneficiarySearchFilterColumns";
+import CreateBeneficiary from "./CreateBeneficiary";
 
 interface SelectedMember {
   memberType: number;
