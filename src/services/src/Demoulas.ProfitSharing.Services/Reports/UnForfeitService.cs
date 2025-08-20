@@ -108,15 +108,17 @@ public sealed class UnForfeitService : IUnForfeitService
                             Remark = x.pd.Remark,
                             ProfitCodeId = x.pd.ProfitCodeId,
                             WagesTransactionYear = x.pp != null ? (x.pp.CurrentIncomeYear + x.pp.IncomeExecutive) : null,
-                            SuggestedUnforfeiture = x.pp != null && (
-                                                                     ((g.Key.YearsOfService == 1 &&
-                                                                       x.pd.ProfitYear == g.Max(item => item.pd.ProfitYear) && // only consider the last year with Forfeit
-                                                                       // For employees with only 1 year, the enrollment remains at 2 after forfeit. 
-                                                                       g.Key.EnrollmentId == /*2*/ Enrollment.Constants.NewVestingPlanHasContributions) ||
-                                                                      g.Key.EnrollmentId == /*3*/ Enrollment.Constants.OldVestingPlanHasForfeitureRecords ||
-                                                                      g.Key.EnrollmentId == /*4*/ Enrollment.Constants.NewVestingPlanHasForfeitureRecords))
-                                                                 && x.pd.Forfeiture > 0 &&
-                                                                 x.pd.CommentType == CommentType.Constants.Forfeit
+                            SuggestedUnforfeiture = x.pp != null &&
+                                                    // only consider the latest Forfeit transaction
+                                                    x.pd.ProfitYear == g.Max(item => item.pd.ProfitYear) &&
+                                                    (
+                                                        // Employees with 1 year and enrollment of 2 are a special case. 
+                                                        (g.Key.YearsOfService == 1 && g.Key.EnrollmentId == /*2*/ Enrollment.Constants.NewVestingPlanHasContributions)
+                                                        || g.Key.EnrollmentId == /*3*/ Enrollment.Constants.OldVestingPlanHasForfeitureRecords
+                                                        || g.Key.EnrollmentId == /*4*/ Enrollment.Constants.NewVestingPlanHasForfeitureRecords
+                                                    )
+                                                    && x.pd.Forfeiture > 0 &&
+                                                    x.pd.CommentType == CommentType.Constants.Forfeit
                                 ? x.pd.Forfeiture
                                 : (decimal?)null,
                             ProfitDetailId = x.pd.Id
