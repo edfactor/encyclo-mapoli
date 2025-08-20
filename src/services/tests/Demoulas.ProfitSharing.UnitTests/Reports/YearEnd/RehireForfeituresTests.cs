@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Net;
 using CsvHelper;
 using CsvHelper.Configuration;
@@ -204,7 +204,10 @@ public class RehireForfeituresTests : ApiTestBase<Program>
             Id = Enrollment.Constants.NewVestingPlanHasForfeitureRecords,
             Name = "New vesting plan has Forfeiture records"
         };
-        payProfit.CurrentHoursYear = 2358;
+        payProfit.CurrentHoursYear = 1255.4m;
+        payProfit.HoursExecutive = 0;
+        payProfit.CurrentIncomeYear = 12345.67m;
+        payProfit.IncomeExecutive = 0;
         payProfit.ProfitYear = profitYear;
 
         var details = await c.ProfitDetails.Where(pd => pd.Ssn == demo.Ssn).ToListAsync(CancellationToken.None);
@@ -241,7 +244,8 @@ public class RehireForfeituresTests : ApiTestBase<Program>
                 Skip = 0,
                 Take = 10,
                 BeginningDate = example.ReHiredDate.AddDays(-5),
-                EndingDate = example.ReHiredDate.AddDays(5)
+                EndingDate = example.ReHiredDate.AddDays(5),
+                ProfitYear = profitYear
             }, example);
     }
 }
