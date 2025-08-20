@@ -210,16 +210,9 @@ const useManageExecutiveHoursAndDollars = () => {
   }, []);
 
   const addExecutivesToMainGrid = useCallback(() => {
-    console.log("addExecutivesToMainGrid called", { 
-      selectedExecutivesCount: state.modal.selectedExecutives.length,
-      selectedExecutives: state.modal.selectedExecutives 
-    });
     if (state.modal.selectedExecutives.length > 0) {
       dispatch({ type: "ADD_ADDITIONAL_EXECUTIVES", payload: { executives: state.modal.selectedExecutives } });
       dispatch({ type: "MODAL_CLOSE" });
-      console.log("Added executives to main grid and closed modal");
-    } else {
-      console.log("No executives selected to add to main grid");
     }
   }, [state.modal.selectedExecutives]);
 
@@ -228,8 +221,6 @@ const useManageExecutiveHoursAndDollars = () => {
       // Convert to numbers in case they come as strings from the grid
       const numericHours = typeof hours === "string" ? parseFloat(hours) : hours;
       const numericDollars = typeof dollars === "string" ? parseFloat(dollars) : dollars;
-
-      console.log("updateExecutiveRow called:", { badgeNumber, hours: numericHours, dollars: numericDollars });
 
       const rowRecord: ExecutiveHoursAndDollarsGrid = {
         executiveHoursAndDollars: [
@@ -253,16 +244,13 @@ const useManageExecutiveHoursAndDollars = () => {
           numericHours === originalRow.hoursExecutive &&
           numericDollars === originalRow.incomeExecutive
         ) {
-          console.log("Removing pending change (reverted to original)");
           dispatch({ type: "REMOVE_PENDING_CHANGE", payload: { change: rowRecord } });
           reduxDispatch(removeExecutiveHoursAndDollarsGridRow(rowRecord));
         } else {
-          console.log("Updating pending change");
           dispatch({ type: "UPDATE_PENDING_CHANGE", payload: { change: rowRecord } });
           reduxDispatch(updateExecutiveHoursAndDollarsGridRow(rowRecord));
         }
       } else {
-        console.log("Adding new pending change");
         dispatch({ type: "ADD_PENDING_CHANGE", payload: { change: rowRecord } });
         reduxDispatch(addExecutiveHoursAndDollarsGridRow(rowRecord));
       }
@@ -276,7 +264,6 @@ const useManageExecutiveHoursAndDollars = () => {
         await updateHoursAndDollars(executiveHoursAndDollarsGrid).unwrap();
         dispatch({ type: "CLEAR_PENDING_CHANGES" });
         reduxDispatch(clearExecutiveHoursAndDollarsGridRows());
-        console.log("Successfully updated hours and dollars.");
       } catch (error) {
         console.error("ERROR: Did not update hours and dollars", error);
       }
@@ -290,7 +277,6 @@ const useManageExecutiveHoursAndDollars = () => {
           ...state.search.params,
           archive: true
         }).unwrap();
-        console.log("Executive hours and dollars archived successfully");
       } catch (error) {
         console.error("Error archiving executive hours and dollars:", error);
       }

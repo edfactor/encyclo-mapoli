@@ -251,22 +251,13 @@ export function manageExecutiveHoursAndDollarsReducer(
       };
 
     case "ADD_ADDITIONAL_EXECUTIVES":
-      console.log("ADD_ADDITIONAL_EXECUTIVES reducer action", {
-        currentAdditionalCount: state.grid.additionalExecutives.length,
-        incomingExecutivesCount: action.payload.executives.length,
-        incomingExecutives: action.payload.executives
-      });
-      const newState = {
+      return {
         ...state,
         grid: {
           ...state.grid,
           additionalExecutives: [...state.grid.additionalExecutives, ...action.payload.executives]
         }
       };
-      console.log("ADD_ADDITIONAL_EXECUTIVES new state", {
-        newAdditionalCount: newState.grid.additionalExecutives.length
-      });
-      return newState;
 
     case "CLEAR_ADDITIONAL_EXECUTIVES":
       return {
@@ -375,13 +366,6 @@ export const selectCombinedGridData = (
   const mainData = state.grid.data;
   const additionalExecutives = state.grid.additionalExecutives;
 
-  console.log("selectCombinedGridData called", {
-    hasMainData: !!mainData?.response?.results,
-    mainDataCount: mainData?.response?.results?.length || 0,
-    additionalExecutivesCount: additionalExecutives.length,
-    additionalExecutives
-  });
-
   if (!mainData || !mainData.response || !mainData.response.results) {
     return null;
   }
@@ -394,16 +378,7 @@ export const selectCombinedGridData = (
   const existingBadgeNumbers = new Set(mainGridStructureCopy.response.results.map((item) => item.badgeNumber));
   const filteredAdditionalResults = additionalExecutives.filter((item) => !existingBadgeNumbers.has(item.badgeNumber));
 
-  console.log("Combining data", {
-    mainCount: mainGridStructureCopy.response.results.length,
-    filteredAdditionalCount: filteredAdditionalResults.length
-  });
-
   mainGridStructureCopy.response.results = mainGridStructureCopy.response.results.concat(filteredAdditionalResults);
-
-  console.log("Combined data result", {
-    totalCount: mainGridStructureCopy.response.results.length
-  });
 
   return mainGridStructureCopy;
 };
