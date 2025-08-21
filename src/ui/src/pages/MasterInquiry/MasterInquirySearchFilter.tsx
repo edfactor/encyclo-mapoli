@@ -442,7 +442,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
       name: "badgeNumber"
     });
 
-    const isMemberTypeDisabled = badgeNumberValue !== null && badgeNumberValue !== undefined && badgeNumberValue !== "";
+    const isMemberTypeDisabled = badgeNumberValue !== null && badgeNumberValue !== undefined;
 
     return (
       <form onSubmit={validateAndSearch}>
