@@ -114,7 +114,8 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
       control,
       handleSubmit,
       formState: { errors, isValid },
-      reset
+      reset,
+      setValue
     } = useForm<MasterInquirySearch>({
       resolver: yupResolver(schema) as any,
       defaultValues: {
@@ -309,6 +310,22 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
                         ? null
                         : e.target.value;
                   field.onChange(parsedValue);
+
+                  // Auto-update memberType when badgeNumber changes
+                  if (name === "badgeNumber") {
+                    const badgeStr = e.target.value;
+                    let memberType: string;
+                    
+                    if (badgeStr.length === 0) {
+                      memberType = "all";
+                    } else if (badgeStr.length >= 8) {
+                      memberType = "beneficiaries";
+                    } else {
+                      memberType = "employees";
+                    }
+                    
+                    setValue("memberType", memberType as "all" | "employees" | "beneficiaries" | "none");
+                  }
                 }}
               />
             )}
