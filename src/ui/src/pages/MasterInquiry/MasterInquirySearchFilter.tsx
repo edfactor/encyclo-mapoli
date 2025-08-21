@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import React, { memo, useCallback, useEffect, useMemo } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import {
@@ -114,7 +114,8 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
       control,
       handleSubmit,
       formState: { errors, isValid },
-      reset
+      reset,
+      setValue
     } = useForm<MasterInquirySearch>({
       resolver: yupResolver(schema) as any,
       defaultValues: {
@@ -279,7 +280,25 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
       </Grid>
     ));
 
-    const TextInputField = memo(
+    const handleBadgeNumberChange = useCallback(
+      (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const badgeStr = e.target.value;
+        let memberType: string;
+
+        if (badgeStr.length === 0) {
+          memberType = "all";
+        } else if (badgeStr.length >= 8) {
+          memberType = "beneficiaries";
+        } else {
+          memberType = "employees";
+        }
+
+        setValue("memberType", memberType as "all" | "employees" | "beneficiaries" | "none");
+      },
+      [setValue]
+    );
+
+    const TextInputField = useCallback(
       ({ name, label, type = "text" }: { name: keyof MasterInquirySearch; label: string; type?: string }) => (
         <Grid size={{ xs: 12, sm: 6, md: type === "number" ? 2 : 4 }}>
           <FormLabel>{label}</FormLabel>
@@ -309,24 +328,32 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
                         ? null
                         : e.target.value;
                   field.onChange(parsedValue);
+
+                  // Auto-update memberType when badgeNumber changes
+                  if (name === "badgeNumber") {
+                    handleBadgeNumberChange(e);
+                  }
                 }}
               />
             )}
           />
           {errors[name] && <FormHelperText error>{errors[name]?.message}</FormHelperText>}
         </Grid>
-      )
+      ),
+      [control, errors, handleBadgeNumberChange]
     );
 
     const RadioGroupField = memo(
       ({
         name,
         label,
-        options
+        options,
+        disabled = false
       }: {
         name: "paymentType" | "memberType";
         label: string;
         options: Array<{ value: string; label: string }>;
+        disabled?: boolean;
       }) => (
         <Grid size={{ xs: 12, sm: 6, md: 6 }}>
           <FormControl error={!!errors[name]}>
@@ -342,8 +369,14 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
                     <FormControlLabel
                       key={option.value}
                       value={option.value}
-                      control={<Radio size="small" />}
+                      control={
+                        <Radio
+                          size="small"
+                          disabled={disabled}
+                        />
+                      }
                       label={option.label}
+                      disabled={disabled}
                     />
                   ))}
                 </RadioGroup>
@@ -403,6 +436,14 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
       []
     );
 
+    // Watch the badgeNumber field to determine if memberType should be disabled
+    const badgeNumberValue = useWatch({
+      control,
+      name: "badgeNumber"
+    });
+
+    const isMemberTypeDisabled = badgeNumberValue !== null && badgeNumberValue !== undefined;
+
     return (
       <form onSubmit={validateAndSearch}>
         <Grid
@@ -444,6 +485,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
               name="memberType"
               label="Member Type"
               options={memberTypeOptions}
+              disabled={isMemberTypeDisabled}
             />
             <TextInputField
               name="contribution"
