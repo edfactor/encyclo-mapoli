@@ -8,6 +8,14 @@ import { mmDDYYFormat } from "../../utils/dateUtils";
 import { getEnrolledStatus, getForfeitedStatus } from "../../utils/enrollmentUtil";
 import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
 
+// Sometimes we get back end zip codes that are 1907 rather than 01907
+const formatZipCode = (zipCode: string): string => {
+  if (/^\d{4}$/.test(zipCode)) {
+    return `0${zipCode}`;
+  }
+  return zipCode;
+};
+
 interface MasterInquiryMemberDetailsProps {
   memberType: number;
   id: string | number;
@@ -55,7 +63,7 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
       return [
         { label: "Name", value: `${lastName}, ${firstName}` },
         { label: "Address", value: `${address}` },
-        { label: "", value: `${addressCity}, ${addressState} ${addressZipCode}` },
+        { label: "", value: `${addressCity}, ${addressState} ${formatZipCode(addressZipCode)}` },
         { label: "Phone #", value: phoneNumber || "N/A" },
         ...(isEmployee ? [{ label: "Work Location", value: workLocation || "N/A" }] : []),
         ...(isEmployee ? [{ label: "Store", value: storeNumber > 0 ? storeNumber : "N/A" }] : []),
