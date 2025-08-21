@@ -14,8 +14,7 @@ import {
 } from "@mui/material";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import React, { memo, useCallback, useEffect, useMemo } from "react";
-import { useWatch } from "react-hook-form";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import {
@@ -281,20 +280,23 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
       </Grid>
     ));
 
-    const handleBadgeNumberChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-      const badgeStr = e.target.value;
-      let memberType: string;
-      
-      if (badgeStr.length === 0) {
-        memberType = "all";
-      } else if (badgeStr.length >= 8) {
-        memberType = "beneficiaries";
-      } else {
-        memberType = "employees";
-      }
-      
-      setValue("memberType", memberType as "all" | "employees" | "beneficiaries" | "none");
-    }, [setValue]);
+    const handleBadgeNumberChange = useCallback(
+      (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const badgeStr = e.target.value;
+        let memberType: string;
+
+        if (badgeStr.length === 0) {
+          memberType = "all";
+        } else if (badgeStr.length >= 8) {
+          memberType = "beneficiaries";
+        } else {
+          memberType = "employees";
+        }
+
+        setValue("memberType", memberType as "all" | "employees" | "beneficiaries" | "none");
+      },
+      [setValue]
+    );
 
     const TextInputField = useCallback(
       ({ name, label, type = "text" }: { name: keyof MasterInquirySearch; label: string; type?: string }) => (
@@ -367,7 +369,12 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
                     <FormControlLabel
                       key={option.value}
                       value={option.value}
-                      control={<Radio size="small" disabled={disabled} />}
+                      control={
+                        <Radio
+                          size="small"
+                          disabled={disabled}
+                        />
+                      }
                       label={option.label}
                       disabled={disabled}
                     />
