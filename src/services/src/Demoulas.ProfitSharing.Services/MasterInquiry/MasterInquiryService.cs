@@ -510,6 +510,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 d.DateOfBirth,
                 d.Ssn,
                 d.BadgeNumber,
+                d.PayFrequencyId,
                 d.ReHireDate,
                 d.HireDate,
                 d.TerminationDate,
@@ -580,6 +581,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             EnrollmentId = memberData.CurrentPayProfit?.EnrollmentId,
             Enrollment = memberData.CurrentPayProfit?.Enrollment?.Name,
             BadgeNumber = memberData.BadgeNumber,
+            PayFrequencyId = memberData.PayFrequencyId,
             CurrentEtva = memberData.CurrentPayProfit?.Etva ?? 0,
             PreviousEtva = memberData.PreviousPayProfit?.Etva ?? 0,
             
@@ -639,7 +641,8 @@ public sealed class MasterInquiryService : IMasterInquiryService
             Age = memberData.DateOfBirth.Age(),
             Ssn = memberData.Ssn.MaskSsn(),
             BadgeNumber = memberData.BadgeNumber,
-            PsnSuffix = memberData.PsnSuffix
+            PsnSuffix = memberData.PsnSuffix,
+            PayFrequencyId = 0
         });
     }
 
@@ -709,6 +712,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 ContributionsLastYear = previousBalanceItem is { CurrentBalance: > 0 },
                 BadgeNumber = memberData.BadgeNumber,
                 PsnSuffix = memberData.PsnSuffix,
+                PayFrequencyId = 0,
                 BeginPSAmount = previousBalanceItem?.CurrentBalance ?? 0,
                 CurrentPSAmount = balance?.CurrentBalance ?? 0,
                 BeginVestedAmount = previousBalanceItem?.VestedBalance ?? 0,
@@ -756,6 +760,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             d.DateOfBirth,
             d.Ssn,
             d.BadgeNumber,
+            d.PayFrequencyId,
             d.ReHireDate,
             d.HireDate,
             d.TerminationDate,
@@ -812,6 +817,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 EnrollmentId = memberData.CurrentPayProfit?.EnrollmentId,
                 Enrollment = memberData.CurrentPayProfit?.Enrollment?.Name,
                 BadgeNumber = memberData.BadgeNumber,
+                PayFrequencyId = memberData.PayFrequencyId,
                 CurrentEtva = memberData.CurrentPayProfit?.Etva ?? 0,
                 PreviousEtva = memberData.PreviousPayProfit?.Etva ?? 0,
                 EmploymentStatus = memberData.EmploymentStatus?.Name,
@@ -872,6 +878,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 Ssn = memberData.Ssn.MaskSsn(),
                 BadgeNumber = memberData.BadgeNumber,
                 PsnSuffix = memberData.PsnSuffix,
+                PayFrequencyId = 0
             })
             .ToPaginationResultsAsync(req, cancellationToken);
     }
@@ -986,6 +993,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             d.DateOfBirth,
             d.Ssn,
             d.BadgeNumber,
+            d.PayFrequencyId,
             d.ReHireDate,
             d.HireDate,
             d.TerminationDate,
@@ -1042,6 +1050,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 EnrollmentId = memberData.CurrentPayProfit?.EnrollmentId,
                 Enrollment = memberData.CurrentPayProfit?.Enrollment?.Name,
                 BadgeNumber = memberData.BadgeNumber,
+                PayFrequencyId = memberData.PayFrequencyId,
                 CurrentEtva = memberData.CurrentPayProfit?.Etva ?? 0,
                 PreviousEtva = memberData.PreviousPayProfit?.Etva ?? 0,
                 EmploymentStatus = memberData.EmploymentStatus?.Name,
@@ -1092,6 +1101,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 Ssn = memberData.Ssn.MaskSsn(),
                 BadgeNumber = memberData.BadgeNumber,
                 PsnSuffix = memberData.PsnSuffix,
+                PayFrequencyId = 0
             });
         }
 
