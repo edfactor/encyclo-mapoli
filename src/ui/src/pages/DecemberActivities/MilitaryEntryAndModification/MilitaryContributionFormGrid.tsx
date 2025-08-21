@@ -1,4 +1,4 @@
-import { Button, Typography } from "@mui/material";
+import { Button, Typography, Tooltip } from "@mui/material";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetMilitaryContributionsQuery } from "reduxstore/api/MilitaryApi";
@@ -72,6 +72,8 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
 
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
+  console.log("Master Inquiry Member Details:", masterInquiryMemberDetails);
+
   return (
     <>
       {masterInquiryMemberDetails && profitYear > 0 && (
@@ -99,12 +101,19 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
               {`MILITARY CONTRIBUTIONS (${militaryContributionsData?.total || 0} ${(militaryContributionsData?.total || 0) === 1 ? "Record" : "Records"})`}
             </Typography>
 
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={onAddContribution}>
-              Add Military Contribution
-            </Button>
+            <Tooltip
+              title={masterInquiryMemberDetails?.payFrequencyId == 2 ? "You cannot add a contribution to someone paid monthly." : ""}
+              placement="top">
+              <span>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  disabled={masterInquiryMemberDetails?.payFrequencyId == 2}
+                  onClick={onAddContribution}>
+                  Add Military Contribution
+                </Button>
+              </span>
+            </Tooltip>
           </div>
 
           <DSMGrid
