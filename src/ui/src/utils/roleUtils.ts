@@ -1,7 +1,7 @@
 import EnvironmentUtils from "./environmentUtils";
 
 /**
- * Checks if user has specific roles based on the SMART_{APP}_{ENV}_{Role} pattern
+ * Checks if user has specific roles based on the SMART_{APP}_{ENV}_{Role} or SMART-{APP}-{ENV}-{Role} patterns
  *
  * @param userGroups - Array of user roles/groups to check against
  * @param roleName - The specific role name to check for
@@ -11,9 +11,12 @@ export function checkUserGroupsForRole(userGroups: string[], roleName: string): 
   const prefix = "SMART";
   const app = "PS";
   const currentEnv = EnvironmentUtils.envMode.toUpperCase();
-  const rolePattern = `${prefix}_${app}_${currentEnv}_${roleName}`;
 
-  return userGroups.some((group) => group === rolePattern);
+  // Create patterns for both underscore and hyphen formats
+  const rolePatternUnderscore = `${prefix}_${app}_${currentEnv}_${roleName}`;
+  const rolePatternHyphen = `${prefix}-${app}-${currentEnv}-${roleName}`;
+
+  return userGroups.some((group) => group === rolePatternUnderscore || group === rolePatternHyphen);
 }
 
 /**
@@ -23,5 +26,5 @@ export function checkUserGroupsForRole(userGroups: string[], roleName: string): 
  * @returns boolean indicating if user has impersonation role
  */
 export function checkImpersonationRole(userGroups: string[]): boolean {
-  return checkUserGroupsForRole(userGroups, "Impersonation");
+  return checkUserGroupsForRole(userGroups, "IMPERSONATION");
 }
