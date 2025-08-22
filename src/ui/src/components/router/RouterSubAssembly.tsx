@@ -50,6 +50,8 @@ import ForfeituresByAge from "../../pages/PROF130/ForfeituresByAge/ForfeituresBy
 import ProfitShareEditUpdate from "../../pages/ProfitShareEditUpdate/ProfitShareEditUpdate";
 import Unauthorized from "../../pages/Unauthorized/Unauthorized";
 import YTDWages from "../../pages/YTDWagesExtract/YTDWages";
+import EnvironmentUtils from "../../utils/environmentUtils";
+import { checkImpersonationRole } from "../../utils/roleUtils";
 
 import { MenuBar } from "components/MenuBar/MenuBar";
 import BeneficiaryInquiry from "pages/BeneficiaryInquiry/BeneficiaryInquiry";
@@ -66,10 +68,10 @@ import DevDebug from "../../pages/Dev/DevDebug";
 import ForfeituresAdjustment from "../../pages/ForfeituresAdjustment/ForfeituresAdjustment";
 
 const RouterSubAssembly: React.FC = () => {
-  const isProduction = false;
+  const isProductionOrUAT = EnvironmentUtils.isProduction || EnvironmentUtils.isUAT;
   const userGroups = useSelector((state: RootState) => state.security.userGroups);
-  const hasImpersonationRole = userGroups.includes(SMART_PS_QA_IMPERSONATION);
-  const showImpersonation = hasImpersonationRole && !isProduction;
+  const hasImpersonationRole = checkImpersonationRole(userGroups);
+  const showImpersonation = hasImpersonationRole && !isProductionOrUAT;
 
   const { impersonating, token } = useSelector((state: RootState) => state.security);
 
