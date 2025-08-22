@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogTitle, Divider, Grid } from "@mui/material";
-import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import MissiveAlerts from "components/MissiveAlerts/MissiveAlerts";
-import { useCallback, useEffect, useState } from "react";
+import StatusDropdownActionNode from "components/StatusDropdownActionNode";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { DSMAccordion, Page } from "smart-ui-library";
@@ -22,19 +22,13 @@ const MilitaryEntryAndModificationContent = () => {
   const profitYear = useDecemberFlowProfitYear();
   const dispatch = useDispatch();
   const { missiveAlerts } = useMissiveAlerts();
-  
-  const {
-    contributionsData,
-    isLoadingContributions,
-    contributionsGridPagination,
-    fetchMilitaryContributions
-  } = useMilitaryEntryAndModification();
+
+  const { contributionsData, isLoadingContributions, contributionsGridPagination, fetchMilitaryContributions } =
+    useMilitaryEntryAndModification();
 
   const handleStatusChange = (newStatus: string, statusName?: string) => {
-    // Only trigger if status is changing TO "Complete" (not already "Complete")
     if (statusName === "Complete" && currentStatus !== "Complete") {
       setCurrentStatus("Complete");
-      // TODO: Handle archive functionality if needed
       fetchMilitaryContributions();
     } else {
       setCurrentStatus(statusName || newStatus);
@@ -90,7 +84,6 @@ const MilitaryEntryAndModificationContent = () => {
         )}
       </Grid>
 
-      {/* Military Contribution Form Dialog */}
       <Dialog
         open={isDialogOpen}
         onClose={handleCloseForm}
