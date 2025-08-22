@@ -41,6 +41,7 @@ public class MasterInquirySearchEndpoint : Endpoint<MasterInquiryRequest, Pagina
                                 FirstName = "John",
                                 LastName = "Doe",
                                 BadgeNumber = 1001,
+                                PayFrequencyId = 1,
                                 Address = "123 Main St",
                                 AddressCity = "Boston",
                                 AddressState = "MA",

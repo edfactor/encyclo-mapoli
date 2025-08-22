@@ -8,13 +8,16 @@ const Unauthorized = () => {
   const [searchParams] = useSearchParams();
   const [requiredRoles, setRequiredRoles] = useState<string>("");
   const [attemptedPage, setAttemptedPage] = useState<string>("");
+  const [reason, setReason] = useState<string>("");
 
   useEffect(() => {
     const roles = searchParams.get("requiredRoles");
     const page = searchParams.get("page");
+    const accessReason = searchParams.get("reason");
 
     setRequiredRoles(roles || "specific permissions");
     setAttemptedPage(page || "this page");
+    setReason(accessReason || "");
   }, [searchParams]);
 
   const handleGoHome = () => {
@@ -38,7 +41,9 @@ const Unauthorized = () => {
             <h2 className="mb-4 text-2xl font-bold text-gray-800">Access Denied</h2>
             <p className="mb-6 text-base leading-relaxed text-gray-600">
               You do not have permission to access {attemptedPage}.
-              {requiredRoles && ` This page requires the following role(s): ${requiredRoles}`}
+              {reason === "navigation_restricted"
+                ? " This page is not included in your navigation options."
+                : requiredRoles && ` This page requires the following role(s): ${requiredRoles}`}
             </p>
 
             <div className="flex justify-center gap-3">

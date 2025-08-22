@@ -4,21 +4,13 @@ import { Grid } from "@mui/material";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import { useEffect, useState } from "react";
 import { useForm, Controller, Resolver } from "react-hook-form";
-import { useDispatch } from "react-redux";
-import { useLazySearchProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
-import { clearMasterInquiryData, setMasterInquiryData } from "reduxstore/slices/inquirySlice";
-import { clearMilitaryContributions } from "reduxstore/slices/militarySlice";
-import { MasterInquiryRequest } from "reduxstore/types";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
+import useMilitaryEntryAndModification from "./hooks/useMilitaryEntryAndModification";
 
 interface SearchFormData {
   socialSecurity?: string;
   badgeNumber?: string;
-}
-
-interface SearchFilterProps {
-  setInitialSearchLoaded: (loaded: boolean) => void;
 }
 
 // Define schema with proper typing for our form
@@ -37,10 +29,10 @@ const validationSchema = yup
     Boolean(values.socialSecurity || values.badgeNumber)
   );
 
-const MilitaryEntryAndModificationSearchFilter: React.FC<SearchFilterProps> = ({ setInitialSearchLoaded }) => {
-  const [triggerSearch, { isFetching }] = useLazySearchProfitMasterInquiryQuery();
+const MilitaryEntryAndModificationSearchFilter: React.FC = () => {
   const [activeField, setActiveField] = useState<"socialSecurity" | "badgeNumber" | null>(null);
   const defaultProfitYear = useDecemberFlowProfitYear();
+  const { isSearching, executeSearch, resetSearch } = useMilitaryEntryAndModification();
 
   const {
     control,
@@ -67,35 +59,14 @@ const MilitaryEntryAndModificationSearchFilter: React.FC<SearchFilterProps> = ({
     }
   }, [socialSecurity, badgeNumber]);
 
-  const dispatch = useDispatch();
-
-  const onSubmit = (data: SearchFormData) => {
-    const searchParams: MasterInquiryRequest = {
-      pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: false },
-
-      ...(!!data.socialSecurity && { ssn: Number(data.socialSecurity) }),
-      ...(!!data.badgeNumber && { badgeNumber: Number(data.badgeNumber) }),
-      profitYear: defaultProfitYear
-    };
-
-    triggerSearch(searchParams, false)
-      .unwrap()
-      .then((search_response) => {
-        if (search_response?.results) {
-          dispatch(setMasterInquiryData(search_response.results[0]));
-        }
-
-        setInitialSearchLoaded(
-          !!(search_response?.results && Array.isArray(search_response.results) && search_response.results.length > 0)
-        );
-      });
+  const onSubmit = async (data: SearchFormData) => {
+    await executeSearch(data, defaultProfitYear);
   };
 
   const handleReset = () => {
     reset();
     setActiveField(null);
-    dispatch(clearMasterInquiryData());
-    dispatch(clearMilitaryContributions());
+    resetSearch();
   };
 
   const requiredLabel = (
@@ -166,7 +137,7 @@ const MilitaryEntryAndModificationSearchFilter: React.FC<SearchFilterProps> = ({
         <SearchAndReset
           handleReset={handleReset}
           handleSearch={handleSubmit(onSubmit)}
-          isFetching={isFetching}
+          isFetching={isSearching}
           disabled={!isValid || (!socialSecurity && !badgeNumber)}
         />
       </Grid>

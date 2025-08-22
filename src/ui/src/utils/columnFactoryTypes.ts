@@ -68,6 +68,19 @@ export interface StoreColumnOptions {
   resizable?: boolean;
 }
 
+export interface YesOrNoColumnOptions {
+  headerName?: string;
+  field?: string;
+  colId?: string;
+  minWidth?: number;
+  maxWidth?: number;
+  alignment?: "left" | "center" | "right";
+  sortable?: boolean;
+  resizable?: boolean;
+  useWords?: boolean;
+  valueFormatter?: (params: ValueFormatterParams) => string;
+}
+
 export interface NameColumnOptions {
   headerName?: string;
   field?: string;
@@ -87,6 +100,18 @@ export interface CommentColumnOptions {
   minWidth?: number;
   maxWidth?: number;
   alignment?: "left" | "center";
+  sortable?: boolean;
+  resizable?: boolean;
+  valueFormatter?: (params: ValueFormatterParams) => string;
+}
+
+export interface PercentageColumnOptions {
+  headerName?: string;
+  field: string;
+  colId?: string;
+  minWidth?: number;
+  maxWidth?: number;
+  alignment?: "left" | "center" | "right";
   sortable?: boolean;
   resizable?: boolean;
   valueFormatter?: (params: ValueFormatterParams) => string;

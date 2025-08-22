@@ -10,13 +10,92 @@ import {
   DateColumnOptions,
   HoursColumnOptions,
   NameColumnOptions,
+  PercentageColumnOptions,
   SSNColumnOptions,
   StatusColumnOptions,
   StoreColumnOptions,
   YearColumnOptions,
+  YesOrNoColumnOptions,
   ZipColumnOptions
 } from "./columnFactoryTypes";
 import { viewBadgeLinkRenderer } from "./masterInquiryLink";
+
+export const createYesOrNoColumn = (options: YesOrNoColumnOptions): ColDef => {
+  const {
+    headerName = "Yes/No",
+    field,
+    colId = field,
+    minWidth = 90,
+    maxWidth,
+    alignment = "center",
+    sortable = true,
+    resizable = true,
+    useWords = false,
+    valueFormatter
+  } = options;
+
+  const alignmentClass = alignment === "center" ? "center-align" : "left-align";
+
+  const column: ColDef = {
+    headerName,
+    field,
+    colId,
+    minWidth,
+    headerClass: alignmentClass,
+    cellClass: alignmentClass,
+    resizable,
+    sortable,
+    valueFormatter
+  };
+
+  if (!valueFormatter) {
+    if (useWords) {
+      column.valueFormatter = (params) => (params.value ? "Yes" : "No");
+    } else {
+      column.valueFormatter = (params) => (params.value ? "Y" : "N");
+    }
+  }
+
+  if (maxWidth) {
+    column.maxWidth = maxWidth;
+  }
+
+  return column;
+};
+
+export const createPercentageColumn = (options: PercentageColumnOptions): ColDef => {
+  const {
+    headerName = "Percentage",
+    field,
+    colId = field,
+    minWidth = 90,
+    maxWidth,
+    alignment = "center",
+    sortable = true,
+    resizable = true,
+    valueFormatter = (params) => (params.value ? `${params.value}%` : "0%")
+  } = options;
+
+  const alignmentClass = alignment === "center" ? "center-align" : "left-align";
+
+  const column: ColDef = {
+    headerName,
+    field,
+    colId,
+    minWidth,
+    headerClass: alignmentClass,
+    cellClass: alignmentClass,
+    resizable,
+    sortable,
+    valueFormatter
+  };
+
+  if (maxWidth) {
+    column.maxWidth = maxWidth;
+  }
+
+  return column;
+};
 
 export const createSSNColumn = (options: SSNColumnOptions = {}): ColDef => {
   const {
@@ -325,11 +404,13 @@ export const createHoursColumn = (options: HoursColumnOptions = {}): ColDef => {
     alignment = "right",
     editable = false,
     valueGetter = (params) => {
-      const value = params.data?.hours;
+      const value = params.data?.[field];
       return value == null || value === 0 ? null : value;
     },
     valueFormatter = (params) => {
       const value = params.value;
+      // Need to log value and type of value
+
       if (value == null || value === "") return ""; // keep empty display consistent
       // If it's already a string (even if numeric-like), return as-is per requirement
       if (typeof value === "string") return value;
@@ -379,7 +460,7 @@ export const createStatusColumn = (options: StatusColumnOptions = {}): ColDef =>
     headerName = "Status",
     field = "status",
     colId = field,
-    minWidth = 120,
+    minWidth = 80,
     maxWidth,
     alignment = "left",
     sortable = true,

@@ -1,13 +1,12 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { mmDDYYFormat } from "utils/dateUtils";
 import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
 import { GRID_COLUMN_WIDTHS } from "../../constants";
 import {
-  createSSNColumn,
-  createNameColumn,
-  createZipColumn,
   createCurrencyColumn,
-  createDateColumn
+  createDateColumn,
+  createNameColumn,
+  createSSNColumn,
+  createZipColumn
 } from "../../utils/gridColumnFactory";
 
 export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
@@ -27,20 +26,12 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
     },
     createCurrencyColumn({
       headerName: "Current Balance",
-      field: "currentBalance",
-      minWidth: 170,
-      resizable: true,
-      sortable: false
+      field: "currentBalance"
     }),
-    createSSNColumn({
-      valueFormatter: (params) => {
-        return `${params.data.ssn}`;
-      }
-    }),
+    createSSNColumn({}),
     createDateColumn({
       headerName: "Date of birth",
-      field: "dateOfBirth",
-      minWidth: 120
+      field: "dateOfBirth"
     }),
     {
       headerName: "Street",
