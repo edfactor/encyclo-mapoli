@@ -1,7 +1,6 @@
-import { Button, Checkbox, FormControl, FormControlLabel, FormHelperText, FormLabel, TextField } from "@mui/material";
-import { Grid } from "@mui/material";
+import { Button, Checkbox, FormControl, FormControlLabel, FormLabel, Grid, TextField, Typography } from "@mui/material";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useCreateMilitaryContributionMutation } from "reduxstore/api/MilitaryApi";
 import { CreateMilitaryContributionRequest, MilitaryContribution } from "reduxstore/types";
@@ -30,8 +29,9 @@ const MilitaryContributionForm = ({
   profitYear
 }: MilitaryContributionFormProps) => {
   const [createMilitaryContribution, { isLoading: isSubmitting }] = useCreateMilitaryContributionMutation();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const { control, handleSubmit, reset, formState } = useForm<FormData>({
+  const { control, handleSubmit, reset } = useForm<FormData>({
     defaultValues: {
       contributionDate: null,
       contributionAmount: null,
@@ -52,6 +52,9 @@ const MilitaryContributionForm = ({
   const handleFormSubmit = async (data: FormData) => {
     console.log("Form submitted with data:", data);
 
+    // Clear any existing error message
+    setErrorMessage(null);
+
     if (data.contributionDate && data.contributionAmount !== null) {
       console.log("Data validation passed");
 
@@ -64,21 +67,37 @@ const MilitaryContributionForm = ({
       try {
         console.log("Creating request with:", { badgeNumber, profitYear, contribution });
 
-        const request: CreateMilitaryContributionRequest = {
-          badgeNumber,
+        const request: CreateMilitaryContributionRequest & {
+          suppressAllToastErrors?: boolean;
+          onlyNetworkToastErrors?: boolean;
+        } = {
           profitYear,
+          badgeNumber,
           contributionDate: data.contributionDate,
           contributionAmount: data.contributionAmount,
-          isSupplementalContribution: data.isSupplementalContribution || false
+          isSupplementalContribution: data.isSupplementalContribution || false,
+          onlyNetworkToastErrors: true // Suppress validation errors, only show network errors
         };
 
-        console.log("Calling API with request:", request);
-        const result = await createMilitaryContribution(request).unwrap();
-        console.log("API call successful, result:", result);
+        await createMilitaryContribution(request).unwrap();
 
         onSubmit(contribution);
       } catch (error) {
-        console.error("Failed to create military contribution:", error);
+        if (
+          typeof error === "object" &&
+          error !== null &&
+          "data" in error &&
+          (error as any).data?.errors?.[0]?.reason
+        ) {
+          console.error("API error reason:", (error as any).data.errors[0].reason);
+          // if reason was' Regular Contribution already recorded for Year. Duplicates are not allowed.' then print this to console
+          if (
+            (error as any).data.errors[0].reason ===
+            "Regular Contribution already recorded for Year. Duplicates are not allowed."
+          ) {
+            setErrorMessage("There is already a contribution for that year.");
+          }
+        }
       }
     } else {
       console.warn("Form validation failed:", {
@@ -88,9 +107,6 @@ const MilitaryContributionForm = ({
       });
     }
   };
-
-  console.log("Form state:", formState);
-
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)}>
       <Grid
@@ -162,7 +178,16 @@ const MilitaryContributionForm = ({
           />
         </Grid>
 
-        {/* Form buttons */}
+        {errorMessage && (
+          <Grid size={{ xs: 12 }}>
+            <Typography
+              variant="body1"
+              sx={{ color: "#db1532" }}>
+              {errorMessage}
+            </Typography>
+          </Grid>
+        )}
+
         <Grid
           size={{ xs: 12 }}
           container
