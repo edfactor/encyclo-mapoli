@@ -7,6 +7,9 @@ public sealed record AdhocTerminatedEmployeeResponse : IFullNameProperty
     public required int BadgeNumber { get; set; }
     // FullName provided by upstream query; expose via interface. Keep set for backward compatibility.
     [MaskSensitive] public required string FullName { get; set; }
+    [MaskSensitive] public string FirstName { get; set; } = string.Empty;
+    [MaskSensitive] public string LastName { get; set; } = string.Empty;
+    [MaskSensitive] public string MiddleInitial { get; set; } = string.Empty;
     public required string Ssn { get; set; }
     public required DateOnly TerminationDate { get; set; }
     public required char? TerminationCodeId { get; set; }
