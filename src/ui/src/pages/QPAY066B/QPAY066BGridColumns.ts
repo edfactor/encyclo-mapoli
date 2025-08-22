@@ -1,35 +1,20 @@
 import { ColDef } from "ag-grid-community";
-import { formatNumberWithComma } from "smart-ui-library";
-import { GRID_COLUMN_WIDTHS } from "../../constants";
 import {
   createBadgeColumn,
   createCurrencyColumn,
+  createDateColumn,
+  createHoursColumn,
   createNameColumn,
-  createHoursColumn
+  createPercentageColumn,
+  createStoreColumn
 } from "../../utils/gridColumnFactory";
 
 export const GetQPAY066BGridColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   return [
-    {
-      headerName: "Store",
-      field: "storeNumber",
-      colId: "storeNumber",
-      minWidth: 80,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true,
-      sortable: true
-    },
-    createBadgeColumn({
-      headerName: "Badge",
-      field: "badgeNumber",
-      minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
-      alignment: "center",
-      navigateFunction: navFunction
-    }),
+    createStoreColumn({}),
+    createBadgeColumn({}),
     createNameColumn({
       field: "fullName",
-      minWidth: 180,
       sortable: true
     }),
     {
@@ -75,34 +60,14 @@ export const GetQPAY066BGridColumns = (navFunction: (badgeNumber: string) => voi
       field: "vestedAmount",
       minWidth: 130
     }),
-    {
+    createPercentageColumn({
       headerName: "Vested %",
-      field: "vestedPercent",
-      colId: "vestedPercent",
-      minWidth: 90,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true,
-      sortable: true,
-      valueFormatter: (params) => (params.value ? `${params.value}%` : "0%")
-    },
-    {
+      field: "vestedPercent"
+    }),
+    createDateColumn({
       headerName: "Termination Date",
-      field: "terminationDate",
-      colId: "terminationDate",
-      minWidth: 130,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true,
-      sortable: true,
-      valueFormatter: (params) => {
-        if (params.value) {
-          const date = new Date(params.value);
-          return date.toLocaleDateString();
-        }
-        return "";
-      }
-    },
+      field: "terminationDate"
+    }),
     createHoursColumn({
       headerName: "Profit Share Hours",
       field: "profitShareHours",

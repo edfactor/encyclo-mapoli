@@ -1,6 +1,5 @@
-import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { GRID_COLUMN_WIDTHS } from "../../constants";
-import { createBadgeColumn, createStoreColumn, createNameColumn, createZipColumn } from "../../utils/gridColumnFactory";
+import { ColDef } from "ag-grid-community";
+import { createBadgeColumn, createNameColumn, createStoreColumn, createZipColumn } from "../../utils/gridColumnFactory";
 
 export const GetProfallGridColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   return [
@@ -10,8 +9,7 @@ export const GetProfallGridColumns = (navFunction: (badgeNumber: string) => void
     }),
     createBadgeColumn({
       headerName: "Badge",
-      minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
-      alignment: "center",
+
       navigateFunction: navFunction
     }),
     createNameColumn({
