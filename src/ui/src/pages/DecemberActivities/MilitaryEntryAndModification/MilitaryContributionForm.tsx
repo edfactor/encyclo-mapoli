@@ -64,7 +64,6 @@ const MilitaryContributionForm = ({
 
       try {
         const request: CreateMilitaryContributionRequest & {
-          suppressAllToastErrors?: boolean;
           onlyNetworkToastErrors?: boolean;
         } = {
           profitYear,
