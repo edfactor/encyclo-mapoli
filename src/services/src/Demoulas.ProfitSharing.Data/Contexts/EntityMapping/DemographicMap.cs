@@ -119,6 +119,8 @@ internal sealed class DemographicMap : ModifiedBaseMap<Demographic>
         _ = builder.Property(e => e.EmploymentStatusId)
             .HasColumnName("EMPLOYMENT_STATUS_ID");
 
+        _ = builder.Ignore(x => x.IsExecutive);
+
 
         _ = builder.OwnsOne(e => e.Address, address =>
         {

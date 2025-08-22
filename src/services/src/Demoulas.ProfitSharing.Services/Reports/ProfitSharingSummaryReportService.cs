@@ -44,6 +44,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         public decimal? PointsEarned { get; init; }
         public byte? Years { get; init; }
         public short? FirstContributionYear { get; init; }
+        public bool IsExecutive { get; init; }
     }
 
     private sealed record EmployeeWithBalance
@@ -402,7 +403,8 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 EmploymentTypeName = et.Name,
                 PointsEarned = pp.PointsEarned,
                 Years = yip.Years,
-                FirstContributionYear = fc.FirstContributionYear
+                FirstContributionYear = fc.FirstContributionYear,
+                IsExecutive = pp.Demographic!.IsExecutive
             };
 
 
@@ -471,7 +473,8 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
             PriorBalance = x.PriorBalance,
             YearsInPlan = x.Employee.Years ?? 0,
             TerminationDate = x.Employee.TerminationDate,
-            FirstContributionYear = x.Employee.FirstContributionYear
+            FirstContributionYear = x.Employee.FirstContributionYear,
+            IsExecutive = x.Employee.IsExecutive
         });
 
         return allDetails;

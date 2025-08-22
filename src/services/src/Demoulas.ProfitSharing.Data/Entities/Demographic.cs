@@ -90,6 +90,7 @@ public sealed class Demographic : Member
     public char EmploymentStatusId { get; set; }
     public EmploymentStatus? EmploymentStatus { get; set; }
 
+    public bool IsExecutive { get => PayFrequencyId == PayFrequency.Constants.Monthly; }
 
     public List<PayProfit> PayProfits { get; set; } = [];
     public List<Beneficiary> Beneficiaries { get; set; } = [];
