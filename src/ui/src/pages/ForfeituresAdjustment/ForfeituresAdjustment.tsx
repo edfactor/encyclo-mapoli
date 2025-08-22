@@ -32,8 +32,7 @@ export class Messages {
     key: MessageKeys.ForfeituresAdjustment,
     message: {
       type: "success",
-      title: "Forfeiture saved successfully",
-      message: `A forfeiture with the amount $X for Y saved successfully`
+      title: "Forfeiture saved successfully"
     }
   };
 }
@@ -97,7 +96,7 @@ const ForfeituresAdjustment = () => {
               ...Messages.ForfeituresSaveSuccess,
               message: {
                 ...Messages.ForfeituresSaveSuccess.message,
-                message: `A forfeiture with the amount $${formatNumberWithComma(formData.forfeitureAmount)} for ${employeeName} saved successfully`
+                message: `The forfeiture of amount $${formatNumberWithComma(formData.forfeitureAmount)} for ${employeeName} saved successfully`
               }
             })
           );
