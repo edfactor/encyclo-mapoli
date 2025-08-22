@@ -10,6 +10,7 @@ import {
   DateColumnOptions,
   HoursColumnOptions,
   NameColumnOptions,
+  PercentageColumnOptions,
   SSNColumnOptions,
   StatusColumnOptions,
   StoreColumnOptions,
@@ -17,6 +18,40 @@ import {
   ZipColumnOptions
 } from "./columnFactoryTypes";
 import { viewBadgeLinkRenderer } from "./masterInquiryLink";
+
+export const createPercentageColumn = (options: PercentageColumnOptions): ColDef => {
+  const {
+    headerName = "Percentage",
+    field,
+    colId = field,
+    minWidth = 90,
+    maxWidth,
+    alignment = "center",
+    sortable = true,
+    resizable = true,
+    valueFormatter = (params) => (params.value ? `${params.value}%` : "0%")
+  } = options;
+
+  const alignmentClass = alignment === "center" ? "center-align" : "left-align";
+
+  const column: ColDef = {
+    headerName,
+    field,
+    colId,
+    minWidth,
+    headerClass: alignmentClass,
+    cellClass: alignmentClass,
+    resizable,
+    sortable,
+    valueFormatter
+  };
+
+  if (maxWidth) {
+    column.maxWidth = maxWidth;
+  }
+
+  return column;
+};
 
 export const createSSNColumn = (options: SSNColumnOptions = {}): ColDef => {
   const {
@@ -381,7 +416,7 @@ export const createStatusColumn = (options: StatusColumnOptions = {}): ColDef =>
     headerName = "Status",
     field = "status",
     colId = field,
-    minWidth = 120,
+    minWidth = 80,
     maxWidth,
     alignment = "left",
     sortable = true,

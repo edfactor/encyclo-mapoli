@@ -92,6 +92,18 @@ export interface CommentColumnOptions {
   valueFormatter?: (params: ValueFormatterParams) => string;
 }
 
+export interface PercentageColumnOptions {
+  headerName?: string;
+  field: string;
+  colId?: string;
+  minWidth?: number;
+  maxWidth?: number;
+  alignment?: "left" | "center" | "right";
+  sortable?: boolean;
+  resizable?: boolean;
+  valueFormatter?: (params: ValueFormatterParams) => string;
+}
+
 export interface HoursColumnOptions {
   headerName?: string;
   field?: string;
