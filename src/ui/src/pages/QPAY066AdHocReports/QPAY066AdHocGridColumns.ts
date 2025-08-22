@@ -2,7 +2,7 @@ import { ColDef } from "ag-grid-community";
 import { createBadgeColumn, createCurrencyColumn, createNameColumn } from "../../utils/gridColumnFactory";
 
 export const GetQPAY066AdHocGridColumns = (): ColDef[] => [
-  createBadgeColumn({ minWidth: 90 }),
+  createBadgeColumn({}),
   createNameColumn({}),
   createCurrencyColumn({
     headerName: "Beginning Balance",

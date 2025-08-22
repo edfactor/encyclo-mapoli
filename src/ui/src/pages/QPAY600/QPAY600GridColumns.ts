@@ -1,6 +1,5 @@
 import { ColDef } from "ag-grid-community";
-import { formatNumberWithComma } from "smart-ui-library";
-import { createCurrencyColumn } from "../../utils/gridColumnFactory";
+import { createCountColumn, createCurrencyColumn } from "../../utils/gridColumnFactory";
 
 export const GetQPAY600GridColumns = (navFunction: (destination: string) => void): ColDef[] => {
   return [
@@ -20,16 +19,10 @@ export const GetQPAY600GridColumns = (navFunction: (destination: string) => void
         return params.value?.toString() || "";
       }
     },
-    {
+    createCountColumn({
       headerName: "Employees",
-      field: "employees",
-      colId: "employees",
-      minWidth: 120,
-      type: "rightAligned",
-      resizable: true,
-      sortable: true,
-      valueFormatter: (params) => formatNumberWithComma(params.value)
-    },
+      field: "employees"
+    }),
     createCurrencyColumn({
       headerName: "Total Weekly Pay",
       field: "totalWeeklyPay",

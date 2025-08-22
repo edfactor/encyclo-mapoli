@@ -8,66 +8,41 @@ export const GetStoreManagementGridColumns = (handleNavigation: (badgeNumber: st
       minWidth: 100,
       navigateFunction: handleNavigation
     }),
-    {
-      ...createNameColumn({
-        field: "fullName"
-      }),
-      flex: 1
-    },
+    createNameColumn({
+      field: "fullName"
+    }),
     {
       headerName: "Position",
       field: "payClassificationName",
       flex: 1
     },
-    {
-      ...createCurrencyColumn({
-        headerName: "Beginning Balance",
-        field: "beginningBalance"
-      }),
-      width: 150,
-      flex: 1
-    },
-    {
-      ...createCurrencyColumn({
-        headerName: "Earnings",
-        field: "earnings"
-      }),
-      flex: 1
-    },
-    {
-      ...createCurrencyColumn({
-        headerName: "Contributions",
-        field: "contributions"
-      }),
-      flex: 1
-    },
-    {
-      ...createCurrencyColumn({
-        headerName: "Forfeiture",
-        field: "forfeitures"
-      }),
-      flex: 1
-    },
-    {
-      ...createCurrencyColumn({
-        headerName: "Distributions",
-        field: "distributions"
-      }),
-      flex: 1
-    },
-    {
-      ...createCurrencyColumn({
-        headerName: "Ending Balance",
-        field: "endingBalance"
-      }),
-      flex: 1
-    },
-    {
-      ...createCurrencyColumn({
-        headerName: "Vested Amount",
-        field: "vestedAmount"
-      }),
-      flex: 1
-    }
+    createCurrencyColumn({
+      headerName: "Beginning Balance",
+      field: "beginningBalance"
+    }),
+    createCurrencyColumn({
+      headerName: "Earnings",
+      field: "earnings"
+    }),
+    createCurrencyColumn({
+      headerName: "Contributions",
+      field: "contributions"
+    }),
+    createCurrencyColumn({
+      headerName: "Forfeiture",
+      field: "forfeitures"
+    }),
+    createCurrencyColumn({
+      headerName: "Distributions",
+      field: "distributions"
+    }),
+    createCurrencyColumn({
+      headerName: "Ending Balance",
+      field: "endingBalance"
+    }),
+    createCurrencyColumn({
+      headerName: "Vested Amount",
+      field: "vestedAmount"
+    })
   ];
 };
