@@ -1,9 +1,13 @@
-import { useCallback, useReducer } from "react";
-import { useDispatch } from "react-redux";
+import { useCallback, useReducer, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useLazySearchProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
+import { useLazyGetMilitaryContributionsQuery } from "reduxstore/api/MilitaryApi";
 import { clearMasterInquiryData, setMasterInquiryData } from "reduxstore/slices/inquirySlice";
 import { clearMilitaryContributions } from "reduxstore/slices/militarySlice";
+import { RootState } from "reduxstore/store";
 import { MasterInquiryRequest, MissiveResponse } from "reduxstore/types";
+import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
+import { useGridPagination } from "../../../../hooks/useGridPagination";
 import { useMissiveAlerts } from "../../../MasterInquiry/hooks/useMissiveAlerts";
 import { MASTER_INQUIRY_MESSAGES } from "../../../MasterInquiry/utils/MasterInquiryMessages";
 
@@ -20,13 +24,21 @@ interface MilitaryState {
     searchParams: SearchFormData | null;
     error: string | null;
   };
+  contributions: {
+    data: any | null;
+    isLoading: boolean;
+    error: string | null;
+  };
 }
 
 type MilitaryAction =
   | { type: "SEARCH_START"; payload: { params: SearchFormData } }
   | { type: "SEARCH_SUCCESS"; payload: { memberFound: boolean } }
   | { type: "SEARCH_FAILURE"; payload: { error: string } }
-  | { type: "SEARCH_RESET" };
+  | { type: "SEARCH_RESET" }
+  | { type: "CONTRIBUTIONS_FETCH_START" }
+  | { type: "CONTRIBUTIONS_FETCH_SUCCESS"; payload: { data: any } }
+  | { type: "CONTRIBUTIONS_FETCH_FAILURE"; payload: { error: string } };
 
 const initialState: MilitaryState = {
   search: {
@@ -34,6 +46,11 @@ const initialState: MilitaryState = {
     searchCompleted: false,
     memberFound: false,
     searchParams: null,
+    error: null
+  },
+  contributions: {
+    data: null,
+    isLoading: false,
     error: null
   }
 };
@@ -80,6 +97,37 @@ const militaryReducer = (state: MilitaryState, action: MilitaryAction): Military
     case "SEARCH_RESET":
       return initialState;
 
+    case "CONTRIBUTIONS_FETCH_START":
+      return {
+        ...state,
+        contributions: {
+          ...state.contributions,
+          isLoading: true,
+          error: null
+        }
+      };
+
+    case "CONTRIBUTIONS_FETCH_SUCCESS":
+      return {
+        ...state,
+        contributions: {
+          ...state.contributions,
+          data: action.payload.data,
+          isLoading: false,
+          error: null
+        }
+      };
+
+    case "CONTRIBUTIONS_FETCH_FAILURE":
+      return {
+        ...state,
+        contributions: {
+          ...state.contributions,
+          isLoading: false,
+          error: action.payload.error
+        }
+      };
+
     default:
       return state;
   }
@@ -89,7 +137,60 @@ export const useMilitaryEntryAndModification = () => {
   const [state, dispatch] = useReducer(militaryReducer, initialState);
   const reduxDispatch = useDispatch();
   const [triggerSearch] = useLazySearchProfitMasterInquiryQuery();
+  const [fetchContributions] = useLazyGetMilitaryContributionsQuery();
   const { addAlert, clearAlerts } = useMissiveAlerts();
+  const { masterInquiryMemberDetails } = useSelector((state: RootState) => state.inquiry);
+  const profitYear = useDecemberFlowProfitYear();
+
+  // Use refs to prevent infinite loops in useGridPagination
+  const memberDetailsRef = useRef(masterInquiryMemberDetails);
+  const profitYearRef = useRef(profitYear);
+  
+  // Keep refs updated
+  memberDetailsRef.current = masterInquiryMemberDetails;
+  profitYearRef.current = profitYear;
+
+  const handleContributionsPaginationChange = useCallback(
+    (pageNumber: number, pageSize: number, sortParams: any) => {
+      const currentMemberDetails = memberDetailsRef.current;
+      const currentProfitYear = profitYearRef.current;
+      
+      if (!currentMemberDetails) return;
+
+      dispatch({ type: "CONTRIBUTIONS_FETCH_START" });
+      fetchContributions({
+        badgeNumber: Number(currentMemberDetails.badgeNumber),
+        profitYear: currentProfitYear,
+        contributionAmount: 0,
+        contributionDate: "",
+        pagination: {
+          skip: pageNumber * pageSize,
+          take: pageSize,
+          sortBy: sortParams.sortBy,
+          isSortDescending: sortParams.isSortDescending
+        }
+      })
+        .unwrap()
+        .then((data) => {
+          dispatch({ type: "CONTRIBUTIONS_FETCH_SUCCESS", payload: { data } });
+        })
+        .catch((error) => {
+          dispatch({ type: "CONTRIBUTIONS_FETCH_FAILURE", payload: { error: error?.toString() || "Unknown error" } });
+        });
+    },
+    [fetchContributions]
+  );
+
+  const contributionsGridPagination = useGridPagination({
+    initialPageSize: 25,
+    initialSortBy: "contributionDate",
+    initialSortDescending: false,
+    onPaginationChange: handleContributionsPaginationChange
+  });
+
+  // Store pagination ref to avoid dependency issues
+  const paginationRef = useRef(contributionsGridPagination);
+  paginationRef.current = contributionsGridPagination;
 
   const executeSearch = useCallback(
     async (params: SearchFormData, profitYear: number) => {
@@ -134,11 +235,18 @@ export const useMilitaryEntryAndModification = () => {
     [triggerSearch, reduxDispatch, addAlert, clearAlerts]
   );
 
+  const fetchMilitaryContributions = useCallback(() => {
+    if (memberDetailsRef.current) {
+      handleContributionsPaginationChange(0, 25, { sortBy: "contributionDate", isSortDescending: false });
+    }
+  }, [handleContributionsPaginationChange]);
+
   const resetSearch = useCallback(() => {
     dispatch({ type: "SEARCH_RESET" });
     reduxDispatch(clearMasterInquiryData());
     reduxDispatch(clearMilitaryContributions());
     clearAlerts();
+    paginationRef.current.resetPagination();
   }, [reduxDispatch, clearAlerts]);
 
   return {
@@ -146,7 +254,12 @@ export const useMilitaryEntryAndModification = () => {
     searchCompleted: state.search.searchCompleted,
     memberFound: state.search.memberFound,
     searchError: state.search.error,
+    contributionsData: state.contributions.data,
+    isLoadingContributions: state.contributions.isLoading,
+    contributionsError: state.contributions.error,
+    contributionsGridPagination,
     executeSearch,
+    fetchMilitaryContributions,
     resetSearch
   };
 };

@@ -1,9 +1,8 @@
 import { Button, Tooltip, Typography } from "@mui/material";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useMemo } from "react";
 import { useSelector } from "react-redux";
-import { useLazyGetMilitaryContributionsQuery } from "reduxstore/api/MilitaryApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { DSMGrid, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import StandaloneMemberDetails from "../../MasterInquiry/StandaloneMemberDetails";
@@ -11,68 +10,36 @@ import { MissiveAlertProvider } from "../../MasterInquiry/utils/MissiveAlertCont
 import { GetMilitaryContributionColumns } from "./MilitaryContributionFormGridColumns";
 
 interface MilitaryContributionGridProps {
-  initialSearchLoaded: boolean;
-  setInitialSearchLoaded: (loaded: boolean) => void;
+  militaryContributionsData: any;
+  isLoadingContributions: boolean;
+  contributionsGridPagination: any;
   onAddContribution: () => void;
 }
 
 const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
-  initialSearchLoaded,
-  setInitialSearchLoaded,
+  militaryContributionsData,
+  isLoadingContributions,
+  contributionsGridPagination,
   onAddContribution
 }) => {
-  const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
-  const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: "contributionDate",
-    isSortDescending: false
-  });
   const profitYear = useDecemberFlowProfitYear();
   const { masterInquiryMemberDetails } = useSelector((state: RootState) => state.inquiry);
-  const { militaryContributionsData } = useSelector((state: RootState) => state.military);
-  const [fetchContributions, { isFetching }] = useLazyGetMilitaryContributionsQuery();
-
-  const onSearch = useCallback(async () => {
-    if (masterInquiryMemberDetails) {
-      await fetchContributions({
-        badgeNumber: Number(masterInquiryMemberDetails.badgeNumber),
-        profitYear: profitYear,
-        contributionAmount: 0,
-        contributionDate: "",
-        pagination: {
-          skip: pageNumber * pageSize,
-          take: pageSize,
-          sortBy: sortParams.sortBy,
-          isSortDescending: sortParams.isSortDescending
-        }
-      });
-    }
-  }, [pageNumber, pageSize, sortParams, masterInquiryMemberDetails, fetchContributions, profitYear]);
-
-  useEffect(() => {
-    if (initialSearchLoaded && masterInquiryMemberDetails) {
-      onSearch();
-    }
-  }, [initialSearchLoaded, pageNumber, pageSize, sortParams, masterInquiryMemberDetails, onSearch]);
-
-  // Need a useEffect on a change in militaryContributionsData to reset the page number when total count changes (new search, not pagination)
-  const prevMilitaryContributionsData = useRef<any>(null);
-  useEffect(() => {
-    if (
-      militaryContributionsData !== prevMilitaryContributionsData.current &&
-      militaryContributionsData?.total !== undefined &&
-      militaryContributionsData.total !== prevMilitaryContributionsData.current?.total
-    ) {
-      setPageNumber(0);
-    }
-    prevMilitaryContributionsData.current = militaryContributionsData;
-  }, [militaryContributionsData]);
 
   const columnDefs = useMemo(() => GetMilitaryContributionColumns(), []);
 
-  const sortEventHandler = (update: ISortParams) => setSortParams(update);
+  const handlePaginationChange = useCallback(
+    (pageNumber: number, pageSize: number) => {
+      contributionsGridPagination.handlePaginationChange(pageNumber, pageSize);
+    },
+    [contributionsGridPagination]
+  );
 
-  console.log("Master Inquiry Member Details:", masterInquiryMemberDetails);
+  const handleSortChange = useCallback(
+    (sortParams: any) => {
+      contributionsGridPagination.handleSortChange(sortParams);
+    },
+    [contributionsGridPagination]
+  );
 
   return (
     <>
@@ -123,8 +90,8 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
 
           <DSMGrid
             preferenceKey={CAPTIONS.MILITARY_CONTRIBUTIONS}
-            isLoading={isFetching}
-            handleSortChanged={sortEventHandler}
+            isLoading={isLoadingContributions}
+            handleSortChanged={handleSortChange}
             providedOptions={{
               rowData: militaryContributionsData?.results,
               columnDefs: columnDefs
@@ -133,16 +100,13 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
 
           {!!militaryContributionsData && militaryContributionsData?.results?.length > 0 && (
             <Pagination
-              pageNumber={pageNumber}
+              pageNumber={contributionsGridPagination.pageNumber}
               setPageNumber={(value: number) => {
-                setPageNumber(value - 1);
-                setInitialSearchLoaded(true);
+                handlePaginationChange(value - 1, contributionsGridPagination.pageSize);
               }}
-              pageSize={pageSize}
+              pageSize={contributionsGridPagination.pageSize}
               setPageSize={(value: number) => {
-                setPageSize(value);
-                setPageNumber(1);
-                setInitialSearchLoaded(true);
+                handlePaginationChange(0, value);
               }}
               recordCount={militaryContributionsData?.total}
             />

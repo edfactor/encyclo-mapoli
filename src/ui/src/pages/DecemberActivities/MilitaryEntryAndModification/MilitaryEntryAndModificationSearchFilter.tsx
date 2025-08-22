@@ -13,10 +13,6 @@ interface SearchFormData {
   badgeNumber?: string;
 }
 
-interface SearchFilterProps {
-  setInitialSearchLoaded: (loaded: boolean) => void;
-}
-
 // Define schema with proper typing for our form
 const validationSchema = yup
   .object({
@@ -33,7 +29,7 @@ const validationSchema = yup
     Boolean(values.socialSecurity || values.badgeNumber)
   );
 
-const MilitaryEntryAndModificationSearchFilter: React.FC<SearchFilterProps> = ({ setInitialSearchLoaded }) => {
+const MilitaryEntryAndModificationSearchFilter: React.FC = () => {
   const [activeField, setActiveField] = useState<"socialSecurity" | "badgeNumber" | null>(null);
   const defaultProfitYear = useDecemberFlowProfitYear();
   const { isSearching, executeSearch, resetSearch } = useMilitaryEntryAndModification();
@@ -64,15 +60,13 @@ const MilitaryEntryAndModificationSearchFilter: React.FC<SearchFilterProps> = ({
   }, [socialSecurity, badgeNumber]);
 
   const onSubmit = async (data: SearchFormData) => {
-    const memberFound = await executeSearch(data, defaultProfitYear);
-    setInitialSearchLoaded(memberFound);
+    await executeSearch(data, defaultProfitYear);
   };
 
   const handleReset = () => {
     reset();
     setActiveField(null);
     resetSearch();
-    setInitialSearchLoaded(false);
   };
 
   const requiredLabel = (

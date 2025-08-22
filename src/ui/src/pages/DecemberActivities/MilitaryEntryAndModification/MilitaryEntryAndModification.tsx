@@ -8,29 +8,34 @@ import { DSMAccordion, Page } from "smart-ui-library";
 import { CAPTIONS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { InquiryApi } from "../../../reduxstore/api/InquiryApi";
-import { useLazyGetMilitaryContributionsQuery } from "../../../reduxstore/api/MilitaryApi";
 import { useMissiveAlerts } from "../../MasterInquiry/hooks/useMissiveAlerts";
 import { MissiveAlertProvider } from "../../MasterInquiry/utils/MissiveAlertContext";
+import useMilitaryEntryAndModification from "./hooks/useMilitaryEntryAndModification";
 import MilitaryContributionForm from "./MilitaryContributionForm";
 import MilitaryContributionGrid from "./MilitaryContributionFormGrid";
 import MilitaryEntryAndModificationSearchFilter from "./MilitaryEntryAndModificationSearchFilter";
 
 const MilitaryEntryAndModificationContent = () => {
-  const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [showContributions, setShowContributions] = useState(false);
   const [currentStatus, setCurrentStatus] = useState<string | null>(null);
   const { masterInquiryMemberDetails } = useSelector((state: RootState) => state.inquiry);
-  const [fetchContributions, { isFetching }] = useLazyGetMilitaryContributionsQuery();
   const profitYear = useDecemberFlowProfitYear();
   const dispatch = useDispatch();
   const { missiveAlerts } = useMissiveAlerts();
+  
+  const {
+    contributionsData,
+    isLoadingContributions,
+    contributionsGridPagination,
+    fetchMilitaryContributions
+  } = useMilitaryEntryAndModification();
 
   const handleStatusChange = (newStatus: string, statusName?: string) => {
     // Only trigger if status is changing TO "Complete" (not already "Complete")
     if (statusName === "Complete" && currentStatus !== "Complete") {
       setCurrentStatus("Complete");
-      handleFetchContributions(true); // Call with archive=true
+      // TODO: Handle archive functionality if needed
+      fetchMilitaryContributions();
     } else {
       setCurrentStatus(statusName || newStatus);
     }
@@ -46,37 +51,14 @@ const MilitaryEntryAndModificationContent = () => {
 
   const handleCloseForm = () => {
     setIsDialogOpen(false);
-    handleFetchContributions();
-    setInitialSearchLoaded(true); // This will trigger the grid to refresh
+    fetchMilitaryContributions();
   };
-
-  const handleFetchContributions = useCallback(
-    (archive?: boolean) => {
-      const request = {
-        badgeNumber: Number(masterInquiryMemberDetails?.badgeNumber ?? 0),
-        profitYear: profitYear,
-        contributionAmount: 0,
-        contributionDate: "",
-        pagination: {
-          skip: 0,
-          take: 25,
-          sortBy: "contributionDate",
-          isSortDescending: false
-        },
-        ...(archive && { archive: true }) // Add archive property if true
-      };
-
-      fetchContributions(request);
-      setShowContributions(true);
-    },
-    [fetchContributions, masterInquiryMemberDetails, profitYear]
-  );
 
   useEffect(() => {
     if (masterInquiryMemberDetails) {
-      handleFetchContributions();
+      fetchMilitaryContributions();
     }
-  }, [handleFetchContributions, masterInquiryMemberDetails]);
+  }, [masterInquiryMemberDetails, fetchMilitaryContributions]);
 
   return (
     <Grid
@@ -87,7 +69,7 @@ const MilitaryEntryAndModificationContent = () => {
       </Grid>
       <Grid width={"100%"}>
         <DSMAccordion title="Filter">
-          <MilitaryEntryAndModificationSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
+          <MilitaryEntryAndModificationSearchFilter />
         </DSMAccordion>
       </Grid>
 
@@ -96,8 +78,9 @@ const MilitaryEntryAndModificationContent = () => {
       <Grid width="100%">
         {masterInquiryMemberDetails ? (
           <MilitaryContributionGrid
-            setInitialSearchLoaded={setInitialSearchLoaded}
-            initialSearchLoaded={initialSearchLoaded}
+            militaryContributionsData={contributionsData}
+            isLoadingContributions={isLoadingContributions}
+            contributionsGridPagination={contributionsGridPagination}
             onAddContribution={handleOpenForm}
           />
         ) : (
