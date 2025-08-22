@@ -1,4 +1,4 @@
-import { Button, Typography, Tooltip } from "@mui/material";
+import { Button, Tooltip, Typography } from "@mui/material";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetMilitaryContributionsQuery } from "reduxstore/api/MilitaryApi";
@@ -97,19 +97,24 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
             }}>
             <Typography
               variant="h2"
-              sx={{ color: "#0258A5" }}>
+              sx={{ color: "#0258A5", marginTop: "7px" }}>
               {`MILITARY CONTRIBUTIONS (${militaryContributionsData?.total || 0} ${(militaryContributionsData?.total || 0) === 1 ? "Record" : "Records"})`}
             </Typography>
 
             <Tooltip
-              title={masterInquiryMemberDetails?.payFrequencyId == 2 ? "You cannot add a contribution to someone paid monthly." : ""}
+              title={
+                masterInquiryMemberDetails?.payFrequencyId == 2
+                  ? "You cannot add a contribution to someone paid monthly."
+                  : ""
+              }
               placement="top">
               <span>
                 <Button
                   variant="contained"
                   color="primary"
                   disabled={masterInquiryMemberDetails?.payFrequencyId == 2}
-                  onClick={onAddContribution}>
+                  onClick={onAddContribution}
+                  sx={{ marginTop: "6px" }}>
                   Add Military Contribution
                 </Button>
               </span>
