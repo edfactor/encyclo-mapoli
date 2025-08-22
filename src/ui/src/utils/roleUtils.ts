@@ -1,4 +1,3 @@
-import { SMART_PS_QA_IMPERSONATION } from "../constants";
 import EnvironmentUtils from "./environmentUtils";
 
 /**
@@ -24,11 +23,5 @@ export function checkUserGroupsForRole(userGroups: string[], roleName: string): 
  * @returns boolean indicating if user has impersonation role
  */
 export function checkImpersonationRole(userGroups: string[]): boolean {
-  // Legacy check
-  if (userGroups.includes(SMART_PS_QA_IMPERSONATION)) {
-    return true;
-  }
-
-  // New format check
   return checkUserGroupsForRole(userGroups, "Impersonation");
 }
