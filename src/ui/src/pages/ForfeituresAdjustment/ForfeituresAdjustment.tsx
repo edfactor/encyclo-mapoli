@@ -3,9 +3,17 @@ import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import StandaloneMemberDetails from "pages/MasterInquiry/StandaloneMemberDetails";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useLazyGetProfitMasterInquiryMemberQuery } from "reduxstore/api/InquiryApi";
 import { useLazyGetForfeitureAdjustmentsQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMAccordion, Page } from "smart-ui-library";
+import {
+  ApiMessageAlert,
+  DSMAccordion,
+  formatNumberWithComma,
+  MessageUpdate,
+  Page,
+  setMessage
+} from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 import { InquiryApi } from "../../reduxstore/api/InquiryApi";
@@ -14,6 +22,20 @@ import { MissiveAlertProvider } from "../MasterInquiry/utils/MissiveAlertContext
 import AddForfeitureModal from "./AddForfeitureModal";
 import ForfeituresAdjustmentPanel from "./ForfeituresAdjustmentPanel";
 import ForfeituresAdjustmentSearchParameters from "./ForfeituresAdjustmentSearchParameters";
+
+enum MessageKeys {
+  ForfeituresAdjustment = "ForfeituresAdjustment"
+}
+
+export class Messages {
+  static readonly ForfeituresSaveSuccess: MessageUpdate = {
+    key: MessageKeys.ForfeituresAdjustment,
+    message: {
+      type: "success",
+      title: "Forfeiture saved successfully"
+    }
+  };
+}
 
 const ForfeituresAdjustment = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
@@ -24,6 +46,7 @@ const ForfeituresAdjustment = () => {
   );
   const profitYear = useDecemberFlowProfitYear();
   const [triggerSearch] = useLazyGetForfeitureAdjustmentsQuery();
+  const [triggerMemberDetails] = useLazyGetProfitMasterInquiryMemberQuery();
   const dispatch = useDispatch();
 
   const renderActionNode = () => {
@@ -42,8 +65,11 @@ const ForfeituresAdjustment = () => {
     setIsAddForfeitureModalOpen(false);
   };
 
-  const handleSaveForfeiture = () => {
-    if (forfeitureAdjustmentQueryParams) {
+  const handleSaveForfeiture = (formData: { forfeitureAmount: number; classAction: boolean }) => {
+    if (forfeitureAdjustmentQueryParams && forfeitureAdjustmentData) {
+      // Store the demographic ID to fetch employee details
+      const demographicId = forfeitureAdjustmentData.demographicId;
+
       dispatch(clearForfeitureAdjustmentData());
 
       triggerSearch(forfeitureAdjustmentQueryParams)
@@ -51,6 +77,29 @@ const ForfeituresAdjustment = () => {
         .then(() => {
           setInitialSearchLoaded(true);
           dispatch(InquiryApi.util.invalidateTags(["memberDetails"]));
+
+          // Fetch employee details to get the name for the success message
+          return triggerMemberDetails({
+            memberType: 1,
+            id: demographicId,
+            profitYear: profitYear
+          }).unwrap();
+        })
+        .then((memberDetails) => {
+          const employeeName =
+            memberDetails.firstName && memberDetails.lastName
+              ? `${memberDetails.firstName} ${memberDetails.lastName}`
+              : "the selected employee";
+
+          dispatch(
+            setMessage({
+              ...Messages.ForfeituresSaveSuccess,
+              message: {
+                ...Messages.ForfeituresSaveSuccess.message,
+                message: `The forfeiture of amount $${formatNumberWithComma(formData.forfeitureAmount)} for ${employeeName} saved successfully`
+              }
+            })
+          );
         })
         .catch((error: unknown) => {
           console.error("Error refreshing forfeiture adjustments:", error);
@@ -75,6 +124,9 @@ const ForfeituresAdjustment = () => {
     <Page
       label={CAPTIONS.FORFEITURES_ADJUSTMENT}
       actionNode={renderActionNode()}>
+      <div>
+        <ApiMessageAlert commonKey={MessageKeys.ForfeituresAdjustment} />
+      </div>
       <Grid
         container
         rowSpacing="24px">
@@ -90,7 +142,6 @@ const ForfeituresAdjustment = () => {
           </DSMAccordion>
         </Grid>
 
-        {/* Only show details if we have forfeitureAdjustmentData and a result */}
         {forfeitureAdjustmentData && profitYear && (
           <MissiveAlertProvider>
             <StandaloneMemberDetails
