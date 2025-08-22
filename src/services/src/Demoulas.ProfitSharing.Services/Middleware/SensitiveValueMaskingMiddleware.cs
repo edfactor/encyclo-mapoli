@@ -28,11 +28,13 @@ public sealed class SensitiveValueMaskingMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
-        if (!context.User.IsInRole(Role.ITDEVOPS))
+        if (context.User.IsInRole(Role.EXECUTIVEADMIN))
         {
             await _next(context);
             return;
         }
+
+        var isInItDevops = context.User.IsInRole(Role.ITDEVOPS);
 
         Stream originalBody = context.Response.Body;
         await using MemoryStream buffer = new();
@@ -54,7 +56,7 @@ public sealed class SensitiveValueMaskingMiddleware
                     MemoryStream outStream = new();
                     await using (Utf8JsonWriter writer = new(outStream))
                     {
-                        MaskElement(doc.RootElement, writer, null);
+                        MaskElement(doc.RootElement, writer, null, false, isInItDevops);
                     }
                     outStream.Position = 0;
                     context.Response.ContentLength = outStream.Length;
@@ -77,16 +79,21 @@ public sealed class SensitiveValueMaskingMiddleware
         }
     }
 
-    private static void MaskElement(JsonElement element, Utf8JsonWriter writer, string? currentPropertyName)
+    private static void MaskElement(JsonElement element, Utf8JsonWriter writer, string? currentPropertyName, bool isExecutiveRow, bool isInItOps)
     {
         switch (element.ValueKind)
         {
             case JsonValueKind.Object:
                 writer.WriteStartObject();
+                bool isExecutive = false;
+                if (!isExecutiveRow && element.TryGetProperty("isExecutive", out JsonElement isExecutiveElement) && isExecutiveElement.ValueKind == JsonValueKind.True)
+                {
+                    isExecutive = true;
+                }
                 foreach (JsonProperty prop in element.EnumerateObject())
                 {
                     writer.WritePropertyName(prop.Name);
-                    MaskElement(prop.Value, writer, prop.Name);
+                    MaskElement(prop.Value, writer, prop.Name, isExecutive, isInItOps);
                 }
                 writer.WriteEndObject();
                 break;
@@ -94,7 +101,7 @@ public sealed class SensitiveValueMaskingMiddleware
                 writer.WriteStartArray();
                 foreach (JsonElement item in element.EnumerateArray())
                 {
-                    MaskElement(item, writer, currentPropertyName);
+                    MaskElement(item, writer, currentPropertyName, isExecutiveRow, isInItOps);
                 }
                 writer.WriteEndArray();
                 break;
@@ -112,12 +119,28 @@ public sealed class SensitiveValueMaskingMiddleware
                     }
                     else
                     {
-                        writer.WriteStringValue(MaskNumberRaw(raw));
+                        if (!isInItOps && !isExecutiveRow)
+                        {
+                            // Non-IT Operations can see decimals for non-executive rows
+                            element.WriteTo(writer);
+                        }
+                        else
+                        {
+                            writer.WriteStringValue(MaskNumberRaw(raw));
+                        }
                     }
                 }
                 else if (SensitiveMaskingRegistry.IsMasked(currentPropertyName) && !SensitiveMaskingRegistry.IsUnmasked(currentPropertyName))
                 {
-                    writer.WriteStringValue(MaskNumberRaw(raw));
+                    if (isInItOps || isExecutiveRow)
+                    {
+                        writer.WriteStringValue(MaskNumberRaw(raw));
+                    }
+                    else
+                    {
+                        // Non-IT Operations can see decimals for non-executive rows
+                        element.WriteTo(writer);
+                    }
                 }
                 else
                 {
@@ -128,7 +151,14 @@ public sealed class SensitiveValueMaskingMiddleware
                 if (SensitiveMaskingRegistry.IsMasked(currentPropertyName) && !SensitiveMaskingRegistry.IsUnmasked(currentPropertyName))
                 {
                     string s = element.GetString() ?? string.Empty;
-                    writer.WriteStringValue(MaskString(s));
+                    if (isInItOps || isExecutiveRow)
+                    {
+                        writer.WriteStringValue(MaskString(s));
+                    }
+                    else
+                    {
+                         element.WriteTo(writer); 
+                    }
                 }
                 else
                 {
@@ -140,8 +170,14 @@ public sealed class SensitiveValueMaskingMiddleware
             case JsonValueKind.Null:
                 if (SensitiveMaskingRegistry.IsMasked(currentPropertyName) && !SensitiveMaskingRegistry.IsUnmasked(currentPropertyName))
                 {
-                    string token = element.GetRawText();
-                    writer.WriteStringValue(MaskGeneric(token));
+                    if (isInItOps || isExecutiveRow)
+                    {
+                        string token = element.GetRawText();
+                        writer.WriteStringValue(MaskGeneric(token));
+                    } else
+                    {
+                        element.WriteTo(writer);
+                    }
                 }
                 else
                 {
