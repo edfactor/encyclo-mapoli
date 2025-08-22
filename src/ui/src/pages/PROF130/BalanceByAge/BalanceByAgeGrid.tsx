@@ -2,7 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetBalanceByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, TotalsGrid, numberToCurrency } from "smart-ui-library";
+import { DSMGrid, ISortParams, numberToCurrency } from "smart-ui-library";
+import { TotalsGrid } from "components/TotalsGrid/TotalsGrid";
 import { GetBalanceByAgeColumns } from "./BalanceByAgeGridColumns";
 import { Grid } from "@mui/material";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
@@ -70,8 +71,16 @@ const BalanceByAgeGrid: React.FC<BalanceByAgeGridProps> = ({ initialSearchLoaded
           <div className="px-[24px]">
             <h2 className="text-dsm-secondary">Summary</h2>
           </div>
-          <div className="sticky top-0 z-10 flex bg-white">
-            <TotalsGrid
+          <Grid
+            size={{ xs: 12 }}
+            container
+            columnSpacing={2}
+            rowSpacing={0}>
+            <Grid size={{ xs: 4 }}>
+              <h2 className="text-dsm-secondary">Total</h2>
+              <TotalsGrid
+                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12 }}
+                tablePadding="0px"
               displayData={[
                 [
                   balanceByAgeTotal?.totalBeneficiaries || 0,
@@ -91,7 +100,12 @@ const BalanceByAgeGrid: React.FC<BalanceByAgeGridProps> = ({ initialSearchLoaded
               ]}
               leftColumnHeaders={["Beneficiaries", "Employees", "Total"]}
               topRowHeaders={["All", "Count", "Balance", "Vested"]}></TotalsGrid>
-            <TotalsGrid
+            </Grid>
+            <Grid size={{ xs: 4 }}>
+              <h2 className="text-dsm-secondary">Full-time</h2>
+              <TotalsGrid
+                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12 }}
+                tablePadding="0px"
               displayData={[
                 [
                   balanceByAgeFullTime?.totalBeneficiaries || 0,
@@ -111,7 +125,12 @@ const BalanceByAgeGrid: React.FC<BalanceByAgeGridProps> = ({ initialSearchLoaded
               ]}
               leftColumnHeaders={["Beneficiaries", "Employees", "Total"]}
               topRowHeaders={["FullTime", "Count", "Balance", "Vested"]}></TotalsGrid>
-            <TotalsGrid
+            </Grid>
+            <Grid size={{ xs: 4 }}>
+              <h2 className="text-dsm-secondary">Part-time</h2>
+              <TotalsGrid
+                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12 }}
+                tablePadding="0px"
               displayData={[
                 [
                   balanceByAgePartTime?.totalBeneficiaries || 0,
@@ -131,10 +150,13 @@ const BalanceByAgeGrid: React.FC<BalanceByAgeGridProps> = ({ initialSearchLoaded
               ]}
               leftColumnHeaders={["Beneficiaries", "Employees", "Total"]}
               topRowHeaders={["PartTime", "Count", "Balance", "Vested"]}></TotalsGrid>
-          </div>
+            </Grid>
+          </Grid>
           <Grid
             size={{ xs: 12 }}
-            container>
+            container
+            columnSpacing={2}
+            rowSpacing={0}>
             <Grid size={{ xs: 4 }}>
               <DSMGrid
                 preferenceKey={"AGE_Total"}

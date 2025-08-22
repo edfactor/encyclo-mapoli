@@ -1,36 +1,35 @@
 import { ColDef, ColGroupDef } from "ag-grid-community";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
-import { createCurrencyColumn, createCountColumn } from "../../../utils/gridColumnFactory";
+import { createCurrencyColumn, createCountColumn, createAgeColumn } from "../../../utils/gridColumnFactory";
 
 export const GetBalanceByAgeColumns = (reportType: FrozenReportsByAgeRequestType): (ColDef | ColGroupDef)[] => {
   const columns: (ColDef | ColGroupDef)[] = [
     {
       headerName: reportType,
       children: [
-        {
+        createAgeColumn({
           headerName: "Age",
           field: "age",
-          colId: "age",
           minWidth: 80,
-          type: "rightAligned",
-          resizable: true,
-          sort: "asc",
-          cellDataType: "text"
-        },
+          sortable: false
+        }),
         createCountColumn({
           field: "employeeCount",
           minWidth: 100,
-          alignment: "left"
+          alignment: "left",
+          sortable: false
         }),
         createCurrencyColumn({
           headerName: "Balance",
           field: "currentBalance",
-          minWidth: 150
+          minWidth: 150,
+          sortable: false
         }),
         createCurrencyColumn({
           headerName: "Vested",
           field: "vestedBalance",
-          minWidth: 150
+          minWidth: 150,
+          sortable: false
         })
       ]
     }

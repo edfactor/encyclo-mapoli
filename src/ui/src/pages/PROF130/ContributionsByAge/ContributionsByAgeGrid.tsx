@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetContributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, TotalsGrid } from "smart-ui-library";
+import { DSMGrid, ISortParams } from "smart-ui-library";
+import { TotalsGrid } from "components/TotalsGrid/TotalsGrid";
 import { GetContributionsByAgeColumns } from "./ContributionsByAgeGridColumns";
 import { Grid } from "@mui/material";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
@@ -30,8 +31,6 @@ const ContributionsByAgeGrid: React.FC<ContributionsByAgeGridProps> = ({ initial
   const sortEventHandler = (update: ISortParams) => setSortParams(update);
 
   const columnDefsTotal = useMemo(() => GetContributionsByAgeColumns(FrozenReportsByAgeRequestType.Total), []);
-  const columnDefsFullTime = useMemo(() => GetContributionsByAgeColumns(FrozenReportsByAgeRequestType.FullTime), []);
-  const columnDefsPartTime = useMemo(() => GetContributionsByAgeColumns(FrozenReportsByAgeRequestType.PartTime), []);
 
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
 
@@ -46,24 +45,7 @@ const ContributionsByAgeGrid: React.FC<ContributionsByAgeGridProps> = ({ initial
       },
       false
     );
-    /*
-    triggerSearch(
-      {
-        profitYear: fiscalCloseProfitYear || contributionsByAgeQueryParams?.profitYear || 0,
-        reportType: FrozenReportsByAgeRequestType.FullTime,
-        pagination: { skip: 0, take: 255 }
-      },
-      false
-    );
-    triggerSearch(
-      {
-        profitYear: fiscalCloseProfitYear || contributionsByAgeQueryParams?.profitYear || 0,
-        reportType: FrozenReportsByAgeRequestType.PartTime,
-        pagination: { skip: 0, take: 255 }
-      },
-      false
-    );
-    */
+
   }, []);
 
   useEffect(() => {
@@ -78,69 +60,79 @@ const ContributionsByAgeGrid: React.FC<ContributionsByAgeGridProps> = ({ initial
         contributionsByAgeFullTime?.response?.results &&
         contributionsByAgePartTime?.response?.results && (
           <>
-            <div className="px-[24px]">
-              <h2 className="text-dsm-secondary">Summary</h2>
-            </div>
-            <div className="sticky top-0 z-10 flex bg-white">
-              <TotalsGrid
-                displayData={[
-                  [contributionsByAgeTotal?.totalEmployees || 0, numberToCurrency(contributionsByAgeTotal?.totalAmount)]
-                ]}
-                leftColumnHeaders={["All"]}
-                topRowHeaders={["", "EMPS", "Amount"]}></TotalsGrid>
-              <TotalsGrid
-                displayData={[
-                  [
-                    contributionsByAgeFullTime?.totalEmployees || 0,
-                    numberToCurrency(contributionsByAgeFullTime?.totalAmount || 0)
-                  ]
-                ]}
-                leftColumnHeaders={["FullTime"]}
-                topRowHeaders={["", "EMPS", "Amount"]}></TotalsGrid>
-              <TotalsGrid
-                displayData={[
-                  [
-                    contributionsByAgePartTime?.totalEmployees || 0,
-                    numberToCurrency(contributionsByAgePartTime?.totalAmount || 0)
-                  ]
-                ]}
-                leftColumnHeaders={["PartTime"]}
-                topRowHeaders={["", "EMPS", "Amount"]}></TotalsGrid>
-            </div>
             <Grid
               size={{ xs: 12 }}
-              container>
+              container
+              columnSpacing={2}
+              rowSpacing={0}>
               <Grid size={{ xs: 4 }}>
+                <h2 className="text-dsm-secondary">Total</h2>
+                <TotalsGrid
+                  breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12 }}
+                  tablePadding="0px"
+                  displayData={[
+                    [
+                      contributionsByAgeTotal?.totalEmployees || 0,
+                      numberToCurrency(contributionsByAgeTotal?.totalAmount || 0)
+                    ]
+                  ]}
+                  leftColumnHeaders={["Amount"]}
+                  topRowHeaders={["Total", "EMPS", "Amount"]}></TotalsGrid>
                 <DSMGrid
-                  preferenceKey={"AGE_Total"}
+                  preferenceKey={"CONT_AGE_Total"}
                   isLoading={isFetching}
                   handleSortChanged={sortEventHandler}
                   providedOptions={{
-                    rowData: contributionsByAgeTotal?.response.results,
-                    columnDefs: columnDefsTotal
+                    rowData: contributionsByAgeTotal?.response?.results ?? [],
+                    columnDefs: columnDefsTotal ?? []
                   }}
                 />
               </Grid>
+
               <Grid size={{ xs: 4 }}>
+                <h2 className="text-dsm-secondary">Full-time</h2>
+                <TotalsGrid
+                  breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12 }}
+                  tablePadding="0px"
+                  displayData={[
+                    [
+                      contributionsByAgeFullTime?.totalEmployees || 0,
+                      numberToCurrency(contributionsByAgeFullTime?.totalAmount || 0)
+                    ]
+                  ]}
+                  leftColumnHeaders={["Amount"]}
+                  topRowHeaders={["FullTime", "EMPS", "Amount"]}></TotalsGrid>
                 <DSMGrid
-                  preferenceKey={"AGE_FullTime"}
+                  preferenceKey={"CONT_AGE_FullTime"}
                   isLoading={isFetching}
                   handleSortChanged={sortEventHandler}
                   providedOptions={{
-                    rowData: contributionsByAgeFullTime?.response.results,
-                    theme: "legacy",
-                    columnDefs: columnDefsFullTime
+                    rowData: contributionsByAgeFullTime?.response?.results ?? [],
+                    columnDefs: columnDefsTotal ?? []
                   }}
                 />
               </Grid>
+
               <Grid size={{ xs: 4 }}>
+                <h2 className="text-dsm-secondary">Part-time</h2>
+                <TotalsGrid
+                  breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12 }}
+                  tablePadding="0px"
+                  displayData={[
+                    [
+                      contributionsByAgePartTime?.totalEmployees || 0,
+                      numberToCurrency(contributionsByAgePartTime?.totalEmployees || 0)
+                    ]
+                  ]}
+                  leftColumnHeaders={["Amount"]}
+                  topRowHeaders={["Total", "EMPS", "Amount"]}></TotalsGrid>
                 <DSMGrid
-                  preferenceKey={"AGE_PartTime"}
+                  preferenceKey={"CONT_AGE_PartTime"}
                   isLoading={isFetching}
                   handleSortChanged={sortEventHandler}
                   providedOptions={{
-                    rowData: contributionsByAgePartTime?.response.results,
-                    columnDefs: columnDefsPartTime
+                    rowData: contributionsByAgePartTime?.response?.results ?? [],
+                    columnDefs: columnDefsTotal ?? []
                   }}
                 />
               </Grid>
