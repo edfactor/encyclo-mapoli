@@ -1,10 +1,9 @@
-import { Button, TextField, Typography, Checkbox, FormControlLabel, Box } from "@mui/material";
-import { useState, useEffect } from "react";
-import { Grid } from "@mui/material";
-import { SmartModal } from "smart-ui-library";
-import { useUpdateForfeitureAdjustmentMutation } from "reduxstore/api/YearsEndApi";
+import { Button, Checkbox, FormControlLabel, Grid, TextField, Typography } from "@mui/material";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
+import { useEffect, useState } from "react";
+import { useUpdateForfeitureAdjustmentMutation } from "reduxstore/api/YearsEndApi";
 import { ForfeitureAdjustmentUpdateRequest, SuggestedForfeitResponse } from "reduxstore/types";
+import { SmartModal } from "smart-ui-library";
 
 interface AddForfeitureModalProps {
   open: boolean;
@@ -44,7 +43,7 @@ const AddForfeitureModal: React.FC<AddForfeitureModalProps> = ({ open, onClose, 
 
   useEffect(() => {
     if (!open) {
-      setFormData({ forfeitureAmount: 0, classAction: false });
+      setFormData({ badgeNumber: 0, forfeitureAmount: 0, classAction: false });
       return;
     }
 
