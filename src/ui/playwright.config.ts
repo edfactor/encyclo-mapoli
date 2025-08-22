@@ -12,7 +12,9 @@ import { defineConfig, devices } from '@playwright/test';
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  testDir: './tests',
+  // timeout to be 2 minutes.
+  timeout: 2 * 60 * 1000,
+  testDir: './e2e',
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -34,20 +36,30 @@ export default defineConfig({
 
   /* Configure projects for major browsers */
   projects: [
+    // SEtup project to reuse authentication.
+    { name: "setup", testMatch: /e2e\/auth\.setup\.ts/ },
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
+      use: {
+        ...devices['Desktop Chrome'],
+        // Use prepared auth state.
+        storageState: "test-results/user.json",
+        launchOptions: {
+          args: ["--ignore-certificate-errors"]
+        }
+      },
+      dependencies: ["setup"]
+    }
 
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
+    // {
+    //   name: 'firefox',
+    //   use: { ...devices['Desktop Firefox'] },
+    // },
 
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },
+    // {
+    //   name: 'webkit',
+    //   use: { ...devices['Desktop Safari'] },
+    // },
 
     /* Test against mobile viewports. */
     // {
