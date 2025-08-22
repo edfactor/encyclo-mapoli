@@ -1,22 +1,17 @@
 import { ColDef, ColGroupDef } from "ag-grid-community";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
-import { createCurrencyColumn, createCountColumn } from "../../../utils/gridColumnFactory";
+import { createCurrencyColumn, createCountColumn, createAgeColumn } from "../../../utils/gridColumnFactory";
 
 export const GetDistributionsByAgeColumns = (
   _reportType: FrozenReportsByAgeRequestType
 ): (ColDef | ColGroupDef)[] => {
   // Flattened column set (no header group) to avoid group header render issues
   const columns: ColDef[] = [
-    {
+    createAgeColumn({
       headerName: "Age",
       field: "age",
-      colId: "age",
-      minWidth: 80,
-      type: "rightAligned",
-      resizable: true,
-      sort: "asc",
-      cellDataType: "text"
-    },
+      minWidth: 80
+    }),
     createCountColumn({
       headerName: "EMPS",
       field: "regularEmployeeCount",
