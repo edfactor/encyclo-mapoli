@@ -69,11 +69,12 @@ const DistributionByAgeGrid: React.FC<DistributionByAgeGridProps> = ({ initialSe
     <>
       {distributionsByAgeTotal?.response && (
         <>
-          <div className="px-[24px]">
-            <h2 className="text-dsm-secondary">Summary</h2>
-          </div>
-          <div className="sticky top-0 z-10 flex bg-white">
-            <TotalsGrid
+         
+          <Grid
+            size={{ xs: 12 }}
+            container>
+            <Grid size={{ xs: 4 }}>
+              <TotalsGrid
               displayData={[
                 [
                   distributionsByAgeTotal?.regularTotalEmployees || 0,
@@ -89,8 +90,20 @@ const DistributionByAgeGrid: React.FC<DistributionByAgeGridProps> = ({ initialSe
                 ]
               ]}
               leftColumnHeaders={["Regular", "Hardship", "Dist Total"]}
-              topRowHeaders={["Total", "EMPS", "Amount"]}></TotalsGrid>
-            <TotalsGrid
+              topRowHeaders={["Total", "EMPS", "Amount"]}></TotalsGrid>   
+              <DSMGrid
+                preferenceKey={"DIST_AGE_Total"}
+                isLoading={isFetching}
+                handleSortChanged={sortEventHandler}
+                providedOptions={{
+                  rowData: distributionsByAgeTotal?.response?.results ?? [],
+                  columnDefs: columnDefsTotal ?? []
+                }}
+              />
+            </Grid>
+
+             <Grid size={{ xs: 4 }}>
+               <TotalsGrid
               displayData={[
                 [
                   distributionsByAgeFullTime?.regularTotalEmployees || 0,
@@ -107,7 +120,19 @@ const DistributionByAgeGrid: React.FC<DistributionByAgeGridProps> = ({ initialSe
               ]}
               leftColumnHeaders={["Regular", "Hardship", "Dist Total"]}
               topRowHeaders={["FullTime", "EMPS", "Amount"]}></TotalsGrid>
-            <TotalsGrid
+              <DSMGrid
+                preferenceKey={"DIST_AGE_FullTime"}
+                isLoading={isFetching}
+                handleSortChanged={sortEventHandler}
+                providedOptions={{
+                  rowData: distributionsByAgeFullTime?.response?.results ?? [],
+                  columnDefs: columnDefsTotal ?? []
+                }}
+              />
+            </Grid>
+
+            <Grid size={{ xs: 4 }}>
+               <TotalsGrid
               displayData={[
                 [
                   distributionsByAgePartTime?.regularTotalEmployees || 0,
@@ -123,19 +148,13 @@ const DistributionByAgeGrid: React.FC<DistributionByAgeGridProps> = ({ initialSe
                 ]
               ]}
               leftColumnHeaders={["Regular", "Hardship", "Dist Total"]}
-              topRowHeaders={["PartTime", "EMPS", "Amount"]}></TotalsGrid>
-          </div>
-
-          <Grid
-            size={{ xs: 12 }}
-            container>
-            <Grid size={{ xs: 4 }}>
+              topRowHeaders={["Total", "EMPS", "Amount"]}></TotalsGrid>   
               <DSMGrid
-                preferenceKey={"AGE_Total"}
+                preferenceKey={"DIST_AGE_PartTime"}
                 isLoading={isFetching}
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
-                  rowData: distributionsByAgeTotal?.response?.results ?? [],
+                  rowData: distributionsByAgePartTime?.response?.results ?? [],
                   columnDefs: columnDefsTotal ?? []
                 }}
               />
