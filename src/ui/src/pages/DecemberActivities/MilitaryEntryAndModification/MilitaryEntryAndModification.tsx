@@ -1,5 +1,6 @@
 import { Dialog, DialogContent, DialogTitle, Divider, Grid } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
+import MissiveAlerts from "components/MissiveAlerts/MissiveAlerts";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
@@ -8,11 +9,13 @@ import { CAPTIONS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { InquiryApi } from "../../../reduxstore/api/InquiryApi";
 import { useLazyGetMilitaryContributionsQuery } from "../../../reduxstore/api/MilitaryApi";
+import { useMissiveAlerts } from "../../MasterInquiry/hooks/useMissiveAlerts";
+import { MissiveAlertProvider } from "../../MasterInquiry/utils/MissiveAlertContext";
 import MilitaryContributionForm from "./MilitaryContributionForm";
 import MilitaryContributionGrid from "./MilitaryContributionFormGrid";
 import MilitaryEntryAndModificationSearchFilter from "./MilitaryEntryAndModificationSearchFilter";
 
-const MilitaryEntryAndModification = () => {
+const MilitaryEntryAndModificationContent = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [showContributions, setShowContributions] = useState(false);
@@ -21,6 +24,7 @@ const MilitaryEntryAndModification = () => {
   const [fetchContributions, { isFetching }] = useLazyGetMilitaryContributionsQuery();
   const profitYear = useDecemberFlowProfitYear();
   const dispatch = useDispatch();
+  const { missiveAlerts } = useMissiveAlerts();
 
   const handleStatusChange = (newStatus: string, statusName?: string) => {
     // Only trigger if status is changing TO "Complete" (not already "Complete")
@@ -75,34 +79,32 @@ const MilitaryEntryAndModification = () => {
   }, [handleFetchContributions, masterInquiryMemberDetails]);
 
   return (
-    <Page
-      label={CAPTIONS.MILITARY_CONTRIBUTIONS}
-      actionNode={renderActionNode()}>
-      <Grid
-        container
-        rowSpacing="24px">
-        <Grid width={"100%"}>
-          <Divider />
-        </Grid>
-        <Grid width={"100%"}>
-          <DSMAccordion title="Filter">
-            <MilitaryEntryAndModificationSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
-          </DSMAccordion>
-        </Grid>
+    <Grid
+      container
+      rowSpacing="24px">
+      <Grid width={"100%"}>
+        <Divider />
+      </Grid>
+      <Grid width={"100%"}>
+        <DSMAccordion title="Filter">
+          <MilitaryEntryAndModificationSearchFilter setInitialSearchLoaded={setInitialSearchLoaded} />
+        </DSMAccordion>
+      </Grid>
 
-        <Grid width="100%">
-          {masterInquiryMemberDetails ? (
-            <MilitaryContributionGrid
-              setInitialSearchLoaded={setInitialSearchLoaded}
-              initialSearchLoaded={initialSearchLoaded}
-              onAddContribution={handleOpenForm}
-            />
-          ) : (
-            <div className="military-contribution-message">
-              Please search for and select an employee to view military contributions.
-            </div>
-          )}
-        </Grid>
+      {missiveAlerts.length > 0 && <MissiveAlerts missiveAlerts={missiveAlerts} />}
+
+      <Grid width="100%">
+        {masterInquiryMemberDetails ? (
+          <MilitaryContributionGrid
+            setInitialSearchLoaded={setInitialSearchLoaded}
+            initialSearchLoaded={initialSearchLoaded}
+            onAddContribution={handleOpenForm}
+          />
+        ) : (
+          <div className="military-contribution-message">
+            Please search for and select an employee to view military contributions.
+          </div>
+        )}
       </Grid>
 
       {/* Military Contribution Form Dialog */}
@@ -124,7 +126,24 @@ const MilitaryEntryAndModification = () => {
           />
         </DialogContent>
       </Dialog>
+    </Grid>
+  );
+};
+
+const MilitaryEntryAndModification = () => {
+  const renderActionNode = () => {
+    return <StatusDropdownActionNode />;
+  };
+
+  return (
+    <Page
+      label={CAPTIONS.MILITARY_CONTRIBUTIONS}
+      actionNode={renderActionNode()}>
+      <MissiveAlertProvider>
+        <MilitaryEntryAndModificationContent />
+      </MissiveAlertProvider>
     </Page>
   );
 };
+
 export default MilitaryEntryAndModification;
