@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetDistributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, TotalsGrid } from "smart-ui-library";
+import { DSMGrid, ISortParams } from "smart-ui-library";
+import { TotalsGrid } from "components/TotalsGrid/TotalsGrid";
 import { GetDistributionsByAgeColumns } from "./DistributionByAgeGridColumns";
 import { Grid } from "@mui/material";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
@@ -78,6 +79,8 @@ const DistributionByAgeGrid: React.FC<DistributionByAgeGridProps> = ({ initialSe
             <Grid size={{ xs: 4 }}>
               <h2 className="text-dsm-secondary">Total</h2>
               <TotalsGrid
+                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12 }}
+                tablePadding="0px"
                 displayData={[
                   [
                     distributionsByAgeTotal?.regularTotalEmployees || 0,
@@ -108,6 +111,8 @@ const DistributionByAgeGrid: React.FC<DistributionByAgeGridProps> = ({ initialSe
             <Grid size={{ xs: 4 }}>
               <h2 className="text-dsm-secondary">Full-time</h2>
               <TotalsGrid
+                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12 }}
+                tablePadding="0px"
                 displayData={[
                   [
                     distributionsByAgeFullTime?.regularTotalEmployees || 0,
@@ -138,6 +143,8 @@ const DistributionByAgeGrid: React.FC<DistributionByAgeGridProps> = ({ initialSe
             <Grid size={{ xs: 4 }}>
               <h2 className="text-dsm-secondary">Part-time</h2>
               <TotalsGrid
+                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12 }}
+                tablePadding="0px"
                 displayData={[
                   [
                     distributionsByAgePartTime?.regularTotalEmployees || 0,

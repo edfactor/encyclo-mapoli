@@ -10,17 +10,20 @@ export const GetDistributionsByAgeColumns = (
     createAgeColumn({
       headerName: "Age",
       field: "age",
-      minWidth: 80
+      minWidth: 80,
+      sortable: false,
     }),
     createCountColumn({
       headerName: "EMPS",
       field: "regularEmployeeCount",
-      minWidth: 100
+      minWidth: 100,
+      sortable: false
     }),
     createCurrencyColumn({
       headerName: "Amount",
       field: "regularAmount",
-      minWidth: 150
+      minWidth: 150,
+      sortable: false
     })
   ];
   return columns;
