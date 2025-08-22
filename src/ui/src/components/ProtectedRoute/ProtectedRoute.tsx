@@ -28,7 +28,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRoles
       const rolesList = rolesArray.join(", ");
       const searchParams = new URLSearchParams({
         requiredRoles: rolesList,
-        page: location.pathname
+        page: location.pathname,
+        reason: "role_restricted"
       });
       navigate(`/unauthorized?${searchParams.toString()}`, { replace: true });
     }
