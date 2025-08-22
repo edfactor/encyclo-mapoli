@@ -56,8 +56,6 @@ const MilitaryContributionForm = ({
     setErrorMessage(null);
 
     if (data.contributionDate && data.contributionAmount !== null) {
-      console.log("Data validation passed");
-
       const contribution: MilitaryContribution = {
         contributionDate: data.contributionDate,
         contributionAmount: data.contributionAmount,
@@ -65,8 +63,6 @@ const MilitaryContributionForm = ({
       };
 
       try {
-        console.log("Creating request with:", { badgeNumber, profitYear, contribution });
-
         const request: CreateMilitaryContributionRequest & {
           suppressAllToastErrors?: boolean;
           onlyNetworkToastErrors?: boolean;
@@ -89,8 +85,6 @@ const MilitaryContributionForm = ({
           "data" in error &&
           (error as any).data?.errors?.[0]?.reason
         ) {
-          console.error("API error reason:", (error as any).data.errors[0].reason);
-          // if reason was' Regular Contribution already recorded for Year. Duplicates are not allowed.' then print this to console
           if (
             (error as any).data.errors[0].reason ===
             "Regular Contribution already recorded for Year. Duplicates are not allowed."
