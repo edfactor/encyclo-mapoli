@@ -52,7 +52,6 @@ import Unauthorized from "../../pages/Unauthorized/Unauthorized";
 import YTDWages from "../../pages/YTDWagesExtract/YTDWages";
 import EnvironmentUtils from "../../utils/environmentUtils";
 import { createUnauthorizedParams, isPathAllowedInNavigation } from "../../utils/navigationAccessUtils";
-import { checkImpersonationRole } from "../../utils/roleUtils";
 
 import { MenuBar } from "components/MenuBar/MenuBar";
 import BeneficiaryInquiry from "pages/BeneficiaryInquiry/BeneficiaryInquiry";
@@ -70,8 +69,7 @@ import ForfeituresAdjustment from "../../pages/ForfeituresAdjustment/Forfeitures
 
 const RouterSubAssembly: React.FC = () => {
   const isProductionOrUAT = EnvironmentUtils.isProduction || EnvironmentUtils.isUAT;
-  const userGroups = useSelector((state: RootState) => state.security.userGroups);
-  const hasImpersonationRole = EnvironmentUtils.isDevelopmentOrQA ? true : checkImpersonationRole(userGroups);
+  const hasImpersonationRole = EnvironmentUtils.isDevelopmentOrQA;
   const showImpersonation = hasImpersonationRole && !isProductionOrUAT;
 
   const { impersonating, token } = useSelector((state: RootState) => state.security);
