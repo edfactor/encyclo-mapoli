@@ -23,11 +23,6 @@ public abstract class EndpointWithCsvBase<ReqType, RespType, MapType> : FastEndp
     where RespType : class
     where MapType : ClassMap<RespType>
 {
-    protected EndpointWithCsvBase()
-    {
-        NavigationId = 0;
-    }
-
     protected EndpointWithCsvBase(short navigationId)
     {
         NavigationId = navigationId;

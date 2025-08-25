@@ -4,7 +4,7 @@ namespace Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 public interface INavigationService
 {
     Task<List<NavigationDto>> GetNavigation(CancellationToken cancellationToken);
-    NavigationDto GetNavigation(int navigationId);
+    NavigationDto GetNavigation(short navigationId);
     Task<List<NavigationStatusDto>> GetNavigationStatus(CancellationToken cancellationToken);
-    Task<bool> UpdateNavigation(int navigationId, byte statusId, CancellationToken cancellationToken);
+    Task<bool> UpdateNavigation(short navigationId, byte statusId, CancellationToken cancellationToken);
 }

@@ -26,11 +26,6 @@ public abstract class EndpointWithCsvTotalsBase<ReqType, RespType, ItemType, Map
     where ItemType : class
     where MapType : ClassMap<ItemType>
 {
-    protected EndpointWithCsvTotalsBase()
-    {
-        NavigationId = 0;
-    }
-
     protected EndpointWithCsvTotalsBase(short navigationId)
     {
         NavigationId = navigationId;

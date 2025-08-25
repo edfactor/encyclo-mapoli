@@ -134,7 +134,7 @@ public class NavigationServiceTests : ApiTestBase<Program>
     public async Task UpdateNavigationStatus()
     {
         IAppUser iAppUser = new Mock<IAppUser>().Object;
-        var success = await new NavigationService(MockDbContextFactory, iAppUser).UpdateNavigation(navigationId: 3, statusId: 1, CancellationToken.None);
+        var success = await new NavigationService(MockDbContextFactory, iAppUser).UpdateNavigation(navigationId: 3, statusId: 1, cancellationToken: CancellationToken.None);
         Assert.True(success);
     }
 

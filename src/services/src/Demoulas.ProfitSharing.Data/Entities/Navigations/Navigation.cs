@@ -3,6 +3,8 @@ public sealed class Navigation
 {
     public static class Constants
     {
+        public const short Unknown = short.MaxValue;
+        
         // Main menu items
         public const short Inquiries = 50;
         public const short Beneficiaries = 52;
