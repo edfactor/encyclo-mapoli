@@ -1,4 +1,4 @@
-using Demoulas.Common.Data.Contexts.Extensions;
+﻿using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -79,8 +79,9 @@ public sealed class UnForfeitService : IUnForfeitService
                     NetBalanceLastYear = vest != null ? vest.CurrentBalance ?? 0 : 0,
                     VestedBalanceLastYear = vest != null ? vest.VestedBalance ?? 0 : 0,
                     d.EmploymentStatusId,
+                    d.PayFrequencyId,
                     ppYE.EnrollmentId,
-                    EnrollmentName = ppYE.Enrollment.Name,
+                    EnrollmentName = ppYE.Enrollment!.Name,
                     HoursProfitYear = ppYE.HoursExecutive + ppYE.CurrentHoursYear,
                     WagesProfitYear = ppYE.IncomeExecutive + ppYE.CurrentIncomeYear,
                 }
@@ -100,6 +101,7 @@ public sealed class UnForfeitService : IUnForfeitService
                     EnrollmentId = g.Key.EnrollmentId,
                     HoursProfitYear = g.Key.HoursProfitYear,
                     WagesProfitYear = g.Key.WagesProfitYear,
+                    IsExecutive = Demographic.IsEmployeeExecutive(g.Key.PayFrequencyId),
                     Details = g.Select(x => new RehireTransactionDetailResponse
                         {
                             ProfitYear = x.pd.ProfitYear,

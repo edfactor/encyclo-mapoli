@@ -85,15 +85,14 @@ public sealed class SensitiveValueMaskingMiddleware
         {
             case JsonValueKind.Object:
                 writer.WriteStartObject();
-                bool isExecutive = false;
                 if (!isExecutiveRow && element.TryGetProperty("isExecutive", out JsonElement isExecutiveElement) && isExecutiveElement.ValueKind == JsonValueKind.True)
                 {
-                    isExecutive = true;
+                    isExecutiveRow = true;
                 }
                 foreach (JsonProperty prop in element.EnumerateObject())
                 {
                     writer.WritePropertyName(prop.Name);
-                    MaskElement(prop.Value, writer, prop.Name, isExecutive, isInItOps);
+                    MaskElement(prop.Value, writer, prop.Name, isExecutiveRow, isInItOps);
                 }
                 writer.WriteEndObject();
                 break;

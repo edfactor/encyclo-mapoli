@@ -128,4 +128,7 @@ public sealed class Demographic : Member
                demo1.TerminationCodeId == demo2.TerminationCodeId &&
                demo1.EmploymentStatusId == demo2.EmploymentStatusId;
     }
+
+    public static bool IsEmployeeExecutive (int payFrequencyId) => payFrequencyId == PayFrequency.Constants.Monthly;
+    public static bool IsEmployeeExecutive(Demographic demographic) => demographic.PayFrequencyId == PayFrequency.Constants.Monthly;
 }
