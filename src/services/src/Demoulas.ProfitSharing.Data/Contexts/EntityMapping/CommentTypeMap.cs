@@ -24,7 +24,7 @@ internal sealed class CommentTypeMap : IEntityTypeConfiguration<CommentType>
             CommentType.Constants.QdroIn,
             CommentType.Constants.VOnly,
             CommentType.Constants.Forfeit,
-            CommentType.Constants.UnForfeit,
+            CommentType.Constants.Unforfeit,
             CommentType.Constants.ClassAction,
             CommentType.Constants.Voided,
             CommentType.Constants.Hardship,

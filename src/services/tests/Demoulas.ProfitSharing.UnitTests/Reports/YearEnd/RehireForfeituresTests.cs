@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Net;
 using CsvHelper;
 using CsvHelper.Configuration;
@@ -33,7 +33,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
 
     public RehireForfeituresTests()
     {
-        IUnForfeitService mockService = ServiceProvider?.GetRequiredService<IUnForfeitService>()!;
+        IUnforfeitService mockService = ServiceProvider?.GetRequiredService<IUnforfeitService>()!;
         IAuditService auditService = ServiceProvider?.GetRequiredService<IAuditService>()!;
         _endpoint = new UnforfeituresEndpoint(mockService, auditService);
     }

@@ -17,7 +17,7 @@
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing.XUnit" Version="1.1.2" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.8" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.8" />
-    <PackageVersion Include="Demoulas.Util" Version="2.5.7" />
+    <PackageVersion Include="Demoulas.Util" Version="2.5.8" />
     <PackageVersion Include="FastEndpoints.Testing" Version="7.0.1" />
     <PackageVersion Include="IdGen" Version="3.0.7" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.8" />
@@ -27,11 +27,11 @@
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="8.2.0" />
     <PackageVersion Include="CsvHelper" Version="33.1.0" />
     <PackageVersion Include="Demoulas.Common.Api" Version="2.0.0" />
-    <PackageVersion Include="Demoulas.Common.Data.Contexts" Version="2.6.1" />
+    <PackageVersion Include="Demoulas.Common.Data.Contexts" Version="2.7.0" />
     <PackageVersion Include="Demoulas.Common.Data.Services" Version="3.5.8" />
     <PackageVersion Include="Demoulas.Common.Contracts" Version="2.5.1" />
     <PackageVersion Include="Demoulas.Common.Caching" Version="2.1.4" />
-    <PackageVersion Include="Demoulas.Security" Version="3.5.3" />
+    <PackageVersion Include="Demoulas.Security" Version="3.5.4" />
     <PackageVersion Include="EFCore.NamingConventions" Version="9.0.0" />
     <PackageVersion Include="FastEndpoints.Security" Version="5.31.0" />
     <PackageVersion Include="Microsoft.Extensions.Compliance.Redaction" Version="8.7.0" />

@@ -793,7 +793,8 @@ public sealed class BreakdownReportService : IBreakdownService
             City = member.City,
             State = member.State,
             PostalCode = member.PostalCode,
-            CertificateSort = member.CertificateSort
+            CertificateSort = member.CertificateSort,
+            IsExecutive = member.PayFrequencyId == PayFrequency.Constants.Monthly
         };
     }
     

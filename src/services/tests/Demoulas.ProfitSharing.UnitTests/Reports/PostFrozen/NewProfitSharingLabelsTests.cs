@@ -20,7 +20,7 @@ public class NewProfitSharingLabelsTests : ApiTestBase<Program>
         response.ShouldNotBeNull();
         response.Response.StatusCode.ShouldBe(System.Net.HttpStatusCode.Unauthorized);
 
-        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+        ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER, Role.EXECUTIVEADMIN);
 
         response = await ApiClient.GETAsync<NewProfitSharingLabelsEndpoint, ProfitYearRequest, PaginatedResponseDto<NewProfitSharingLabelResponse>>(request);
         response.ShouldNotBeNull();

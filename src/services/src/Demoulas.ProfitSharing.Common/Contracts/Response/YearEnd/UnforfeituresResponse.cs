@@ -20,6 +20,7 @@ public sealed record UnforfeituresResponse
     public required string EnrollmentName { get; set; }
     public required decimal WagesProfitYear { get; set; }
     public required decimal HoursProfitYear { get; set; }
+    public bool IsExecutive { get; set; }
     public required IEnumerable<RehireTransactionDetailResponse> Details { get; set; }
 
 

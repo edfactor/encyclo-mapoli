@@ -19,7 +19,7 @@ public class UpdateSummaryTests : PristineBaseTest
     public UpdateSummaryTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
     {
         _frozenReportService = new FrozenReportService(DbFactory, new LoggerFactory(), TotalService, CalendarService,
-            DemographicReaderService, FrozenService);
+            DemographicReaderService);
     }
 
 

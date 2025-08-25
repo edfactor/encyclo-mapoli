@@ -78,7 +78,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             expectedResponse.Response.Results.First().IncomeExecutive = 0;
 
             // Act
-            ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+            ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER, Role.EXECUTIVEADMIN);
             TestResult<ReportResponseBase<ExecutiveHoursAndDollarsResponse>> response =
                 await ApiClient
                     .GETAsync<ExecutiveHoursAndDollarsEndpoint, ExecutiveHoursAndDollarsRequest,
@@ -124,7 +124,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
             ReportResponseBase<ExecutiveHoursAndDollarsResponse> expectedResponse = StockResponse();
 
             // Act
-            ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+            ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER, Role.EXECUTIVEADMIN);
             TestResult<ReportResponseBase<ExecutiveHoursAndDollarsResponse>> response =
                 await ApiClient
                     .GETAsync<ExecutiveHoursAndDollarsEndpoint, ExecutiveHoursAndDollarsRequest,
@@ -202,7 +202,7 @@ public class ExecutiveHoursAndDollarsTests : ApiTestBase<Program>
                 ProfitYear = ProfitShareTestYear, Skip = 0, Take = 10
             };
             ReportResponseBase<ExecutiveHoursAndDollarsResponse> expectedResponse = StockResponse();
-            ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
+            ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER, Role.EXECUTIVEADMIN);
 
             // Act
             TestResult<ReportResponseBase<ExecutiveHoursAndDollarsResponse>> response =

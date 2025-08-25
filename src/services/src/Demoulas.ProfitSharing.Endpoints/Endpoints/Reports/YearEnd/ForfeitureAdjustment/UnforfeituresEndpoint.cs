@@ -16,10 +16,10 @@ namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ForfeitureA
 public class UnforfeituresEndpoint :
     EndpointWithCsvBase<StartAndEndDateRequest, UnforfeituresResponse, UnforfeituresEndpoint.RehireProfitSharingResponseMap>
 {
-    private readonly IUnForfeitService _reportService;
+    private readonly IUnforfeitService _reportService;
     private readonly IAuditService _auditService;
 
-    public UnforfeituresEndpoint(IUnForfeitService reportService, IAuditService auditService)
+    public UnforfeituresEndpoint(IUnforfeitService reportService, IAuditService auditService)
     {
         _reportService = reportService;
         _auditService = auditService;
