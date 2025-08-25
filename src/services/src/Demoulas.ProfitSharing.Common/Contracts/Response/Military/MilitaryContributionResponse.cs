@@ -11,4 +11,5 @@ public sealed record MilitaryContributionResponse : YearRequest
     public byte? CommentTypeId { get; init; }
     public bool IsSupplementalContribution { get; init; }
     public DateOnly ContributionDate { get; init; }
+    public bool IsExecutive { get; init; }
 }

@@ -90,7 +90,8 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
                     PayFrequencyId = p.Demographic.PayFrequencyId,
                     PayFrequencyName = p.Demographic.PayFrequency!.Name,
                     EmploymentStatusId = p.Demographic.EmploymentStatusId,
-                    EmploymentStatusName = p.Demographic.EmploymentStatus!.Name
+                    EmploymentStatusName = p.Demographic.EmploymentStatus!.Name,
+                    IsExecutive = p.Demographic.PayFrequencyId == PayFrequency.Constants.Monthly,
                 })
                 .OrderBy(p => p.StoreNumber)
                 .ThenBy(p => p.BadgeNumber)

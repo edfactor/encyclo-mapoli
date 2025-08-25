@@ -18,6 +18,7 @@ public sealed record ProfitSharingUnder21BreakdownByStoreResponse
     public DateOnly DateOfBirth { get; set; }
     public byte Age { get; set; }
     public byte EnrollmentId { get; set; }
+    public bool IsExecutive { get; set; }
 
     public static readonly string REPORT_NAME = "Under 21 Breakdown";
     public static ProfitSharingUnder21BreakdownByStoreResponse ResponseExample()

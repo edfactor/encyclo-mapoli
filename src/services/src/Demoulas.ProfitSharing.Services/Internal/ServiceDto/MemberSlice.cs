@@ -29,6 +29,7 @@ internal sealed record MemberSlice
     public bool IsBeneficiaryAndEmployee { get; set; }
     public bool IsOnlyBeneficiary { get; set; }
     public short ProfitYear { get; set; }
+    public bool IsExecutive { get; set; }
 
     public byte[] CheckSum
     {
