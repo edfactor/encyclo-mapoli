@@ -14,7 +14,7 @@ public sealed class CommentType : ILookupTable<byte>
         public static CommentType QdroIn => new() { Id = 4, Name = "QDRO In" };
         public static CommentType VOnly => new() { Id = 5, Name = "V-Only" };
         public static CommentType Forfeit => new() { Id = 6, Name = "Forfeit" };
-        public static CommentType UnForfeit => new() { Id = 7, Name = "Un-Forfeit" };
+        public static CommentType Unforfeit => new() { Id = 7, Name = "Un-Forfeit" };
         public static CommentType ClassAction => new() { Id = 8, Name = "Class Action" };
         public static CommentType Voided => new() { Id = 9, Name = "Voided" };
         public static CommentType Hardship => new() { Id = 10, Name = "Hardship" };

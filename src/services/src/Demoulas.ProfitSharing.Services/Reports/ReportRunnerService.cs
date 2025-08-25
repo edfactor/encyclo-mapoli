@@ -13,12 +13,12 @@ public class ReportRunnerService : IReportRunnerService
     private readonly IProfitShareUpdateService _profitShareUpdateService;
     private readonly Dictionary<string, Func<CancellationToken, Task<Dictionary<string, object>>>> _reports;
     private readonly ITerminatedEmployeeService _terminatedEmployeeService;
-    private readonly IUnForfeitService _unForfeitService;
+    private readonly IUnforfeitService _unForfeitService;
 
     public ReportRunnerService(
         ITerminatedEmployeeService terminatedEmployeeService,
         IProfitShareUpdateService profitShareUpdateService,
-        IUnForfeitService unForfeitService)
+        IUnforfeitService unForfeitService)
     {
         _terminatedEmployeeService = terminatedEmployeeService;
         _profitShareUpdateService = profitShareUpdateService;

@@ -1,3 +1,4 @@
+import * as constants from "../constants";
 import EnvironmentUtils from "./environmentUtils";
 
 /**
@@ -8,13 +9,11 @@ import EnvironmentUtils from "./environmentUtils";
  * @returns boolean indicating if user has the specified role
  */
 export function checkUserGroupsForRole(userGroups: string[], roleName: string): boolean {
-  const prefix = "SMART";
-  const app = "PS";
   const currentEnv = EnvironmentUtils.envMode.toUpperCase();
 
   // Create patterns for both underscore and hyphen formats
-  const rolePatternUnderscore = `${prefix}_${app}_${currentEnv}_${roleName}`;
-  const rolePatternHyphen = `${prefix}-${app}-${currentEnv}-${roleName}`;
+  const rolePatternUnderscore = `${constants.SMART_ROLE_PREFIX}_${constants.APP_NAME}_${currentEnv}_${roleName}`;
+  const rolePatternHyphen = `${constants.SMART_ROLE_PREFIX}-${constants.APP_NAME}-${currentEnv}-${roleName}`;
 
   return userGroups.some((group) => group === rolePatternUnderscore || group === rolePatternHyphen);
 }
@@ -26,5 +25,5 @@ export function checkUserGroupsForRole(userGroups: string[], roleName: string): 
  * @returns boolean indicating if user has impersonation role
  */
 export function checkImpersonationRole(userGroups: string[]): boolean {
-  return checkUserGroupsForRole(userGroups, "IMPERSONATION");
+  return checkUserGroupsForRole(userGroups, constants.IMPERSONATION_ROLE_SUFFIX);
 }

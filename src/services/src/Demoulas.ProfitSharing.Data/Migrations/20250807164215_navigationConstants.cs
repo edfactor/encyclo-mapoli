@@ -38,7 +38,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     { 57, false, "", (byte)1, 56, (byte)1, "", "Demographic Freeze", "demographic-freeze" },
                     { 2, false, "", (byte)1, 1, (byte)1, "", "Clean up Reports", "" },
                     { 7, false, "", (byte)3, 1, (byte)1, "008-13", "Military Contributions", "military-entry-and-modification" },
-                    { 8, false, "", (byte)2, 1, (byte)1, "QPREV-PROF", "UnForfeit", "unforfeitures" },
+                    { 8, false, "", (byte)2, 1, (byte)1, "QPREV-PROF", "Unforfeit", "unforfeitures" },
                     { 9, false, "", (byte)4, 1, (byte)1, "QPAY066", "Terminations", "prof-term" },
                     { 10, false, "", (byte)5, 1, (byte)1, "008-12", "Forfeitures", "forfeitures-adjustment" },
                     { 11, false, "", (byte)6, 1, (byte)1, "QPAY129", "Distributions and Forfeitures", "distributions-and-forfeitures" },

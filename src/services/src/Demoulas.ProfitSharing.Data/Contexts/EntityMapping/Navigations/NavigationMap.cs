@@ -176,9 +176,9 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
             },
             new Navigation 
             { 
-                Id = Navigation.Constants.UnForfeit, 
+                Id = Navigation.Constants.Unforfeit, 
                 ParentId = Navigation.Constants.DecemberActivities, 
-                Title = "UnForfeit", 
+                Title = "Unforfeit", 
                 SubTitle = "QPREV-PROF", 
                 Url = "unforfeitures", 
                 StatusId = 1, 
