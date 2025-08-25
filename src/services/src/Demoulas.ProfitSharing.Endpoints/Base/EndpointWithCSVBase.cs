@@ -18,11 +18,23 @@ namespace Demoulas.ProfitSharing.Endpoints.Base;
 /// <typeparam name="ReqType">Request type of the endpoint.  Can be EmptyRequest</typeparam>
 /// <typeparam name="RespType">Response type of the endpoint.</typeparam>
 /// <typeparam name="MapType">A mapping class that converts from a dto to a CSV format</typeparam>
-public abstract class EndpointWithCsvBase<ReqType, RespType, MapType> : FastEndpoints.Endpoint<ReqType, ReportResponseBase<RespType>>
+public abstract class EndpointWithCsvBase<ReqType, RespType, MapType> : FastEndpoints.Endpoint<ReqType, ReportResponseBase<RespType>>, IHasNavigationId
     where ReqType : SortedPaginationRequestDto 
     where RespType : class
     where MapType : ClassMap<RespType>
 {
+    protected EndpointWithCsvBase()
+    {
+        NavigationId = 0;
+    }
+
+    protected EndpointWithCsvBase(short navigationId)
+    {
+        NavigationId = navigationId;
+    }
+
+    public short NavigationId { get; protected set; }
+
     public override void Configure()
     {
         if (!Env.IsTestEnvironment())

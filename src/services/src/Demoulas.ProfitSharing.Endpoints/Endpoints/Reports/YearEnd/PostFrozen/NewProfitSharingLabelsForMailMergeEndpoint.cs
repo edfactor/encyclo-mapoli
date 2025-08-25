@@ -3,16 +3,19 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.PostFrozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Security;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.PostFrozen;
-public sealed class NewProfitSharingLabelsForMailMergeEndpoint : Endpoint<ProfitYearRequest, PaginatedResponseDto<NewProfitSharingLabelResponse>>
+public sealed class NewProfitSharingLabelsForMailMergeEndpoint : ProfitSharingEndpoint<ProfitYearRequest, PaginatedResponseDto<NewProfitSharingLabelResponse>>
 {
     private readonly IPostFrozenService _postFrozenService;
 
     public NewProfitSharingLabelsForMailMergeEndpoint(IPostFrozenService postFrozenService)
+        : base(Navigation.Constants.QNEWPROFLBL)
     {
         _postFrozenService = postFrozenService;
     }
