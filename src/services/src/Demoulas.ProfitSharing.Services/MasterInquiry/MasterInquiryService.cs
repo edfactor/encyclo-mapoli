@@ -86,6 +86,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
         public decimal CurrentIncomeYear { get; init; }
         public decimal CurrentHoursYear { get; init; }
         public decimal Payment { get; set; }
+        public bool IsExecutive { get; set; }
     }
 
 
@@ -364,7 +365,8 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 PayFrequencyId = x.Member.PayFrequencyId,
                 TransactionDate = x.TransactionDate,
                 CurrentIncomeYear = x.Member.CurrentIncomeYear,
-                CurrentHoursYear = x.Member.CurrentHoursYear
+                CurrentHoursYear = x.Member.CurrentHoursYear,
+                IsExecutive = x.Member.IsExecutive
             }).ToPaginationResultsAsync(req, cancellationToken);
 
             var formattedResults = rawQuery.Results.Select(x => new MasterInquiryResponseDto
@@ -401,7 +403,8 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 PayFrequencyId = x.PayFrequencyId,
                 TransactionDate = x.TransactionDate,
                 CurrentIncomeYear = x.CurrentIncomeYear,
-                CurrentHoursYear = x.CurrentHoursYear
+                CurrentHoursYear = x.CurrentHoursYear,
+                IsExecutive = x.IsExecutive
             });
 
             return new PaginatedResponseDto<MasterInquiryResponseDto>(req) { Results = formattedResults, Total = rawQuery.Total };
@@ -446,8 +449,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                             .Select(x => x.CurrentHoursYear)
                             .FirstOrDefault()
                     }
-                })
-            .Where(x => x.Member.PayFrequencyId == PayFrequency.Constants.Weekly);
+                });
 
         return query;
     }
