@@ -97,8 +97,8 @@ public class NavigationServiceTests : ApiTestBase<Program>
     //Dummy Data
     private List<NavigationDto> DummyNavigationData()
     {
-        var lookup = _navigationListObj.ToLookup(x => x.ParentId);
-        List<NavigationDto> BuildTree(int? parentId)
+    var lookup = _navigationListObj.ToLookup(x => x.ParentId);
+    List<NavigationDto> BuildTree(short? parentId)
         {
             return lookup[parentId]
                 .Select(x => new NavigationDto
