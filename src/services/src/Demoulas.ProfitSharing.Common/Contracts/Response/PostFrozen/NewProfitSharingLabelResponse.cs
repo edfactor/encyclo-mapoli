@@ -29,7 +29,8 @@
                 Address1 = "Main St.",
                 City = "Anytown",
                 State = "MA",
-                PostalCode = "02112"
+                PostalCode = "02112",
+                IsExecutive = false,
             };
         }
 

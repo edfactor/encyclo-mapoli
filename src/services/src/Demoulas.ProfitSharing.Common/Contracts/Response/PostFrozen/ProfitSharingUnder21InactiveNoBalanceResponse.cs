@@ -12,6 +12,8 @@ public sealed record ProfitSharingUnder21InactiveNoBalanceResponse
     public DateOnly? TerminationDate { get; set; }
     public byte Age { get; set; }
     public byte EnrollmentId { get; set; }
+    public bool IsExecutive { get; set; }
+    [MaskSensitive] public string FullName => $"{LastName}, {FirstName}";
 
     public const string REPORT_NAME = "Inactive/Terminated Under 21";
     public static ProfitSharingUnder21InactiveNoBalanceResponse SampleResponse()

@@ -15,6 +15,7 @@ public record ProfitSharingLabelResponse
     [MaskSensitive] public string? City { get; set; }
     public string? State { get; set; }
     public string? PostalCode { get; set; }
+    public required bool IsExecutive { get; set; }
 
     public static ProfitSharingLabelResponse SampleResponse()
     {
@@ -30,7 +31,8 @@ public record ProfitSharingLabelResponse
             Address1 = "Main St.",
             City = "Anytown",
             State = "MA",
-            PostalCode = "02112"
+            PostalCode = "02112",
+            IsExecutive = false,
         };
     }
 }

@@ -918,6 +918,7 @@ public class FrozenReportService : IFrozenReportService
                                            ProfitSharingAmount = psBal.TotalAmount,
                                            GrossWages = pp.CurrentIncomeYear + pp.IncomeExecutive,
                                            pp.EnrollmentId,
+                                           d.PayFrequencyId,
                                        });
                 
                 var totals = await baseQuery.GroupBy(x => true).Select(x => new
@@ -939,7 +940,8 @@ public class FrozenReportService : IFrozenReportService
                         Forfeitures = x.Forfeitures ?? 0,
                         Loans = x.Loans ?? 0,
                         ProfitSharingAmount = x.ProfitSharingAmount ?? 0,
-                        GrossWages = x.GrossWages
+                        GrossWages = x.GrossWages,
+                        IsExecutive = x.PayFrequencyId == PayFrequency.Constants.Monthly,
                     }).ToList(),
                     Total = pagedData.Total
                 };
