@@ -152,7 +152,8 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
             Ssn = d.Ssn.MaskSsn(),
             Forfeitures = forfeitures,
             ContForfeitPoints = (short)(pp.PointsEarned ?? 0), // Yea, PointsEarned is not EarningPoints
-            EarningPoints = earningsPoints
+            EarningPoints = earningsPoints,
+            IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly,
         };
     }
 
@@ -167,7 +168,8 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
             Forfeitures = 0.00m,
             ContForfeitPoints = 0,
             EarningPoints = earningsPoints,
-            BeneficiaryPsn = "0" + b.Psn
+            BeneficiaryPsn = "0" + b.Psn,
+            IsExecutive = false,
         };
     }
 }
