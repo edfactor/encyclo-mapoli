@@ -3,6 +3,8 @@ using Demoulas.ProfitSharing.Common.Contracts.Request.Military;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Military;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
@@ -10,14 +12,14 @@ using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Military;
 
-public class GetMilitaryContributionRecords : Endpoint<MilitaryContributionRequest, Results<Ok<PaginatedResponseDto<MilitaryContributionResponse>>, ProblemHttpResult>>
+public class GetMilitaryContributionRecords : ProfitSharingEndpoint<MilitaryContributionRequest, Results<Ok<PaginatedResponseDto<MilitaryContributionResponse>>, ProblemHttpResult>>
 {
     private readonly IMilitaryService _militaryService;
     private readonly IAuditService _auditService;
 
     private const string ReportName = "Get All Military Contribution Records";
 
-    public GetMilitaryContributionRecords(IMilitaryService militaryService, IAuditService auditService)
+    public GetMilitaryContributionRecords(IMilitaryService militaryService, IAuditService auditService) : base(Navigation.Constants.MilitaryContributions)
     {
         _militaryService = militaryService;
         _auditService = auditService;

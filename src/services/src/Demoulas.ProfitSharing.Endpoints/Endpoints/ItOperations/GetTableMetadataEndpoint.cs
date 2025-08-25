@@ -1,15 +1,17 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Response.ItOperations;
 using Demoulas.ProfitSharing.Common.Interfaces.ItOperations;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.ItOperations;
 
-public class GetTableMetadataEndpoint : EndpointWithoutRequest<List<RowCountResult>>
+public class GetTableMetadataEndpoint : ProfitSharingResponseEndpoint<List<RowCountResult>>
 {
     private readonly ITableMetadataService _frozenService;
 
-    public GetTableMetadataEndpoint(ITableMetadataService frozenService)
+    public GetTableMetadataEndpoint(ITableMetadataService frozenService) : base(Navigation.Constants.ItOperations)
     {
         _frozenService = frozenService;
     }

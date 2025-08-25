@@ -1,15 +1,17 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Beneficiaries;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Beneficiaries;
-public class CreateBeneficiaryContactEndpoint : Endpoint<CreateBeneficiaryContactRequest, CreateBeneficiaryContactResponse>
+public class CreateBeneficiaryContactEndpoint : ProfitSharingEndpoint<CreateBeneficiaryContactRequest, CreateBeneficiaryContactResponse>
 {
     private readonly IBeneficiaryService _beneficiaryService;
 
-    public CreateBeneficiaryContactEndpoint(IBeneficiaryService beneficiaryService)
+    public CreateBeneficiaryContactEndpoint(IBeneficiaryService beneficiaryService) : base(Navigation.Constants.Beneficiaries)
     {
         _beneficiaryService = beneficiaryService;
     }
