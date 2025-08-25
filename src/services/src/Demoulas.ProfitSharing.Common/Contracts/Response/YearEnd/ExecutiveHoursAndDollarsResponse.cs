@@ -38,7 +38,7 @@ public sealed record  ExecutiveHoursAndDollarsResponse : IFullNameProperty
             EmploymentStatusId = 'a',
             PayFrequencyName = "Monthly",
             EmploymentStatusName = "Terminated",
-            IsExecutive = false,
+            IsExecutive = true,
         };
     }
 }
