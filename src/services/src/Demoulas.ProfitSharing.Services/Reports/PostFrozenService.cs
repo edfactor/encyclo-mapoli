@@ -220,7 +220,8 @@ public class PostFrozenService : IPostFrozenService
                     VestingPercentage = tyTot.VestingPercent,
                     DateOfBirth = d.DateOfBirth,
                     Age = 0, //To be determined after materializing
-                    EnrollmentId = pp.EnrollmentId
+                    EnrollmentId = pp.EnrollmentId,
+                    IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly
                 }
             );
             var pagedResults = await qry.ToPaginationResultsAsync(request, cancellation);
@@ -276,7 +277,8 @@ public class PostFrozenService : IPostFrozenService
                     HireDate = d.HireDate,
                     TerminationDate = d.TerminationDate,
                     Age = 0,
-                    EnrollmentId = pp.EnrollmentId
+                    EnrollmentId = pp.EnrollmentId,
+                    IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly,
                 }
             ).ToPaginationResultsAsync(request, cancellationToken);
         });
@@ -516,6 +518,7 @@ public class PostFrozenService : IPostFrozenService
                         pp.Demographic.Address.City,
                         pp.Demographic.Address.State,
                         pp.Demographic.Address.PostalCode,
+                        pp.Demographic!.PayFrequencyId,
                     }
                 );
 
@@ -550,7 +553,8 @@ public class PostFrozenService : IPostFrozenService
                             Address1 = r.Street,
                             City = r.City,
                             State = r.State,
-                            PostalCode = r.PostalCode
+                            PostalCode = r.PostalCode,
+                            IsExecutive = r.PayFrequencyId == PayFrequency.Constants.Monthly
                         }
                     )
                 };
@@ -593,7 +597,8 @@ public class PostFrozenService : IPostFrozenService
                         Address1 = d.Address.Street,
                         d.Address.City,
                         State = d.Address.Street,
-                        d.Address.PostalCode
+                        d.Address.PostalCode,
+                        d.PayFrequencyId,
                     }
                 );
 
@@ -616,6 +621,7 @@ public class PostFrozenService : IPostFrozenService
                         bc.Address.City,
                         bc.Address.State,
                         bc.Address.PostalCode,
+                        PayFrequencyId = (byte)0,
                     }
                 );
 
@@ -640,7 +646,8 @@ public class PostFrozenService : IPostFrozenService
                         Address1 = d.Address1,
                         City = d.City,
                         State = d.State,
-                        PostalCode = d.PostalCode
+                        PostalCode = d.PostalCode,
+                        IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly
                     }
                 ).ToPaginationResultsAsync(request, ct);
             }));

@@ -18,7 +18,8 @@ public sealed record DistributionsAndForfeitureResponse
     public string? OtherName { get; set; }
     public string? OtherSsn { get; set; }
     public required byte EnrolledId { get; set; }
-    
+    public bool IsExecutive { get; set; }
+
 
     public static DistributionsAndForfeitureResponse ResponseExample()
     {

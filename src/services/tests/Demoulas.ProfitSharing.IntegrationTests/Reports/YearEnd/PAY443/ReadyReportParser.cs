@@ -106,7 +106,8 @@ public static class ReadyReportParser
             Forfeitures = decimal.TryParse(forfeiture.Replace(",", ""), out decimal f) ? f : null,
             EarningPoints = int.TryParse(earnPts, out int e) ? e : 0,
             ContForfeitPoints = short.TryParse(contPts, out short c) ? c : (short)0,
-            BeneficiaryPsn = benePsn
+            BeneficiaryPsn = benePsn,
+            IsExecutive = false,
         };
     }
 }
