@@ -441,7 +441,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                         PayFrequencyId = d.PayFrequencyId,
                         Ssn = d.Ssn,
                         PsnSuffix = 0,
-                        IsExecutive = d.IsExecutive,
+                        IsExecutive = d.PayFrequencyId ==PayFrequency.Constants.Monthly,
                         CurrentIncomeYear = d.PayProfits.Where(x => x.ProfitYear == pd.ProfitYear)
                             .Select(x => x.CurrentIncomeYear)
                             .FirstOrDefault(),

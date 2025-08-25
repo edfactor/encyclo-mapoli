@@ -101,7 +101,8 @@ public sealed class TerminatedEmployeeReportService
                 Etva = payProfit.Etva,
                 ProfitYear = payProfit.ProfitYear,
                 IsOnlyBeneficiary = false,
-                IsBeneficiaryAndEmployee = false
+                IsBeneficiaryAndEmployee = false,
+                IsExecutive = employee.Demographic.PayFrequencyId == PayFrequency.Constants.Monthly
             };
 
         return query;
@@ -137,7 +138,8 @@ public sealed class TerminatedEmployeeReportService
                 Etva = 0, // default for beneficiaries
                 ProfitYear = 0, // default for beneficiaries
                 IsOnlyBeneficiary = true,
-                IsBeneficiaryAndEmployee = (x.Beneficiary!.Contact!.Ssn == x.Demographic!.Ssn)
+                IsBeneficiaryAndEmployee = (x.Beneficiary!.Contact!.Ssn == x.Demographic!.Ssn),
+                IsExecutive = false,
             });
 
         return query;
@@ -248,6 +250,7 @@ public sealed class TerminatedEmployeeReportService
                 YearsInPlan = memberSlice.YearsInPs,
                 ZeroCont = memberSlice.ZeroCont,
                 EnrollmentId = memberSlice.EnrollmentId,
+                IsExecutive = memberSlice.IsExecutive,
                 Evta = memberSlice.Etva,
                 BeneficiaryAllocation = transactionsThisYear.BeneficiaryAllocation,
                 DistributionAmount = transactionsThisYear.Distribution,
@@ -287,6 +290,7 @@ public sealed class TerminatedEmployeeReportService
                 VestedBalance = vestedBalance,
                 DateTerm = member.TerminationDate,
                 YtdPsHours = member.HoursCurrentYear,
+                IsExecutive = member.IsExecutive,
                 VestedPercent = vestingPercent * 100,
                 Age = age,
                 EnrollmentCode = enrollmentId,
