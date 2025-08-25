@@ -37,24 +37,22 @@ public sealed class ProfitSharingLabelsExportEndpoint : Endpoint<ProfitYearReque
     {
         var response = await _postFrozenService.GetProfitSharingLabelsExport(req, ct);
         var memoryStream = new MemoryStream();
-        await using (var writer = new StreamWriter(memoryStream))
+        await using var writer = new StreamWriter(memoryStream);
+        foreach (var line in response)
         {
-            foreach (var line in response)
-            {
-                await writer.WriteLineAsync(line);
-            }
-            await writer.FlushAsync(ct);
-
-            memoryStream.Position = 0;
-
-            System.Net.Mime.ContentDisposition cd = new System.Net.Mime.ContentDisposition
-            {
-                FileName = "PROFLBL.txt",
-                Inline = false
-            };
-            HttpContext.Response.Headers.Append("Content-Disposition", cd.ToString());
-
-            await Send.StreamAsync(memoryStream, "PROFLBL.txt", contentType: "text/plain", cancellation: ct);
+            await writer.WriteLineAsync(line);
         }
+        await writer.FlushAsync(ct);
+
+        memoryStream.Position = 0;
+
+        System.Net.Mime.ContentDisposition cd = new System.Net.Mime.ContentDisposition
+        {
+            FileName = "PROFLBL.txt",
+            Inline = false
+        };
+        HttpContext.Response.Headers.Append("Content-Disposition", cd.ToString());
+
+        await Send.StreamAsync(memoryStream, "PROFLBL.txt", contentType: "text/plain", cancellation: ct);
     }
 }

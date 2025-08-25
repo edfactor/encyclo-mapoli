@@ -37,24 +37,22 @@ public sealed class NewProfitSharingLabelsForMailMergeEndpoint : Endpoint<Profit
     {
         var response = await _postFrozenService.GetNewProfitSharingLabelsForMailMerge(req, ct);
         var memoryStream = new MemoryStream();
-        await using (var writer = new StreamWriter(memoryStream))
+        await using var writer = new StreamWriter(memoryStream);
+        foreach (var line in response)
         {
-            foreach (var line in response)
-            {
-                await writer.WriteLineAsync(line);
-            }
-            await writer.FlushAsync(ct);
-
-            memoryStream.Position = 0;
-
-            System.Net.Mime.ContentDisposition cd = new System.Net.Mime.ContentDisposition
-            {
-                FileName = "NEWPROFLBL.txt",
-                Inline = false
-            };
-            HttpContext.Response.Headers.Append("Content-Disposition", cd.ToString());
-
-            await Send.StreamAsync(memoryStream, "NEWPROFLBL.txt", contentType: "text/plain", cancellation: ct);
+            await writer.WriteLineAsync(line);
         }
+        await writer.FlushAsync(ct);
+
+        memoryStream.Position = 0;
+
+        System.Net.Mime.ContentDisposition cd = new System.Net.Mime.ContentDisposition
+        {
+            FileName = "NEWPROFLBL.txt",
+            Inline = false
+        };
+        HttpContext.Response.Headers.Append("Content-Disposition", cd.ToString());
+
+        await Send.StreamAsync(memoryStream, "NEWPROFLBL.txt", contentType: "text/plain", cancellation: ct);
     }
 }
