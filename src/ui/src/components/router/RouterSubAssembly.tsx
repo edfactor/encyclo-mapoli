@@ -71,7 +71,7 @@ import ForfeituresAdjustment from "../../pages/ForfeituresAdjustment/Forfeitures
 const RouterSubAssembly: React.FC = () => {
   const isProductionOrUAT = EnvironmentUtils.isProduction || EnvironmentUtils.isUAT;
   const userGroups = useSelector((state: RootState) => state.security.userGroups);
-  const hasImpersonationRole = EnvironmentUtils.isDevelopment ? true : checkImpersonationRole(userGroups);
+  const hasImpersonationRole = EnvironmentUtils.isDevelopmentOrQA ? true : checkImpersonationRole(userGroups);
   const showImpersonation = hasImpersonationRole && !isProductionOrUAT;
 
   const { impersonating, token } = useSelector((state: RootState) => state.security);
