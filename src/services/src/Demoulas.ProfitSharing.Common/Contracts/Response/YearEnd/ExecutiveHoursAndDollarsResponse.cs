@@ -19,6 +19,7 @@ public sealed record  ExecutiveHoursAndDollarsResponse : IFullNameProperty
     public required char EmploymentStatusId { get; set; }
     public required string PayFrequencyName { get; set; }
     public required string EmploymentStatusName { get; set; }
+    public required bool IsExecutive { get; set; }
 
 
     public static  ExecutiveHoursAndDollarsResponse ResponseExample()
@@ -36,7 +37,8 @@ public sealed record  ExecutiveHoursAndDollarsResponse : IFullNameProperty
             PayFrequencyId = 2,
             EmploymentStatusId = 'a',
             PayFrequencyName = "Monthly",
-            EmploymentStatusName = "Terminated"
+            EmploymentStatusName = "Terminated",
+            IsExecutive = false,
         };
     }
 }
