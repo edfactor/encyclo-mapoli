@@ -10,4 +10,5 @@ public sealed record AdhocTerminatedEmployeeResponse : IFullNameProperty
     public required string Ssn { get; set; }
     public required DateOnly TerminationDate { get; set; }
     public required char? TerminationCodeId { get; set; }
+    public bool IsExecutive { get; set; }
 }

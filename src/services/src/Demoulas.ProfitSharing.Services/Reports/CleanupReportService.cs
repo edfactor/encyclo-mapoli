@@ -285,6 +285,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                         x.ContactInfo.FullName,
                         x.DateOfBirth,
                         x.BadgeNumber,
+                        x.PayFrequencyId,
                         PsnSuffix = (short)0,
                         EnrollmentId = x.PayProfits.FirstOrDefault() != null
                             ? x.PayProfits.FirstOrDefault()!.EnrollmentId
@@ -295,6 +296,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                         x.Contact.ContactInfo.FullName,
                         x.Contact.DateOfBirth,
                         x.BadgeNumber,
+                        PayFrequencyId = (byte)0,
                         x.PsnSuffix,
                         EnrollmentId = Enrollment.Constants.Import_Status_Unknown
                     }))
@@ -306,7 +308,8 @@ FROM FILTERED_DEMOGRAPHIC p1
                         DateOfBirth = x.Max(m => m.DateOfBirth),
                         BadgeNumber = x.Max(m => m.BadgeNumber),
                         PsnSuffix = x.Max(m => m.PsnSuffix),
-                        EnrolledId = x.Max(m => m.EnrollmentId)
+                        EnrolledId = x.Max(m => m.EnrollmentId),
+                        PayFrequencyId = x.Max(m => m.PayFrequencyId),
                     });
 
                 var transferAndQdroCommentTypes = new List<int>()
@@ -334,9 +337,9 @@ FROM FILTERED_DEMOGRAPHIC p1
 
                     select new
                     {
-                        BadgeNumber = nameAndDob.BadgeNumber,
-                        PsnSuffix = nameAndDob.PsnSuffix,
-                        Ssn = pd.Ssn,
+                        nameAndDob.BadgeNumber,
+                        nameAndDob.PsnSuffix,
+                        pd.Ssn,
                         EmployeeName = nameAndDob.FullName,
                         DistributionAmount = _distributionProfitCodes.Contains(pd.ProfitCodeId) ? pd.Forfeiture : 0,
                         TaxCode = pd.TaxCodeId,
@@ -348,7 +351,8 @@ FROM FILTERED_DEMOGRAPHIC p1
                         pd.MonthToDate,
                         Date = pd.CreatedAtUtc,
                         nameAndDob.DateOfBirth,
-                        EnrolledId = nameAndDob.EnrolledId,
+                        nameAndDob.EnrolledId,
+                        nameAndDob.PayFrequencyId,
                     };
                 
 
@@ -399,7 +403,8 @@ FROM FILTERED_DEMOGRAPHIC p1
                             new DateOnly(pd.YearToDate, pd.MonthToDate, 1).ToDateTime(TimeOnly.MinValue))
                         : pd.DateOfBirth.Age(
                             calInfo.FiscalEndDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Local))),
-                    EnrolledId = pd.EnrolledId
+                    EnrolledId = pd.EnrolledId,
+                    IsExecutive = pd.PayFrequencyId == PayFrequency.Constants.Monthly
                 });
 
 

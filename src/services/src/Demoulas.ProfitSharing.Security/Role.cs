@@ -7,4 +7,5 @@ public static class Role
     public const string HARDSHIPADMINISTRATOR = "Hardship-Administrator";
     public const string IMPERSONATION = "Impersonation";
     public const string ITDEVOPS = "IT-Operations";
+    public const string EXECUTIVEADMIN = "Executive-Administrator";
 }

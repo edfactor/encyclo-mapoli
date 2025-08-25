@@ -11,6 +11,7 @@ public sealed record  EligibleEmployee : IFullNameProperty {
     public byte DepartmentId { get; set; }
     public string? Department { get; set; }
     public short StoreNumber { get; set; }
+    public required bool IsExecutive { get; set; }
 
     public static EligibleEmployee Example()
     {
@@ -20,7 +21,8 @@ public sealed record  EligibleEmployee : IFullNameProperty {
             BadgeNumber = 721,
             FullName = "John, Null E",
             Department = "Grocery",
-            DepartmentId = 1
+            DepartmentId = 1,
+            IsExecutive = false,
         };
     }
 }

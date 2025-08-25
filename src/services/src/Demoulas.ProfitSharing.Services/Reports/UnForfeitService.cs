@@ -79,8 +79,9 @@ public sealed class UnforfeitService : IUnforfeitService
                     NetBalanceLastYear = vest != null ? vest.CurrentBalance ?? 0 : 0,
                     VestedBalanceLastYear = vest != null ? vest.VestedBalance ?? 0 : 0,
                     d.EmploymentStatusId,
+                    d.PayFrequencyId,
                     ppYE.EnrollmentId,
-                    EnrollmentName = ppYE.Enrollment.Name,
+                    EnrollmentName = ppYE.Enrollment!.Name,
                     HoursProfitYear = ppYE.HoursExecutive + ppYE.CurrentHoursYear,
                     WagesProfitYear = ppYE.IncomeExecutive + ppYE.CurrentIncomeYear,
                 }
@@ -100,6 +101,7 @@ public sealed class UnforfeitService : IUnforfeitService
                     EnrollmentId = g.Key.EnrollmentId,
                     HoursProfitYear = g.Key.HoursProfitYear,
                     WagesProfitYear = g.Key.WagesProfitYear,
+                    IsExecutive = g.Key.PayFrequencyId == PayFrequency.Constants.Monthly,
                     Details = g.Select(x => new RehireTransactionDetailResponse
                         {
                             ProfitYear = x.pd.ProfitYear,

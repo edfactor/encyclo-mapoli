@@ -3,6 +3,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -31,7 +32,8 @@ public class WagesService : IWagesService
                     BadgeNumber = p.Demographic!.BadgeNumber,
                     HoursCurrentYear = p.CurrentHoursYear,
                     IncomeCurrentYear = p.CurrentIncomeYear,
-                    StoreNumber = p.Demographic.StoreNumber
+                    StoreNumber = p.Demographic.StoreNumber,
+                    IsExecutive = p.Demographic.PayFrequencyId == PayFrequency.Constants.Monthly
                 })
                 .ToPaginationResultsAsync(request, cancellationToken);
 
