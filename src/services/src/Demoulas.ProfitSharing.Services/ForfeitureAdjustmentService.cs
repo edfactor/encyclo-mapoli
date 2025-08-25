@@ -135,7 +135,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
             {
                 (true, false) => CommentType.Constants.Forfeit,
                 (true, true) => CommentType.Constants.ForfeitClassAction,
-                (false, _) => CommentType.Constants.UnForfeit,
+                (false, _) => CommentType.Constants.Unforfeit,
             };
             string remarkText = commentType.Name.ToUpper();    
 

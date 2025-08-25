@@ -1,4 +1,4 @@
-using Demoulas.Common.Data.Contexts.Extensions;
+﻿using Demoulas.Common.Data.Contexts.Extensions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -13,13 +13,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
 
-public sealed class UnForfeitService : IUnForfeitService
+public sealed class UnforfeitService : IUnforfeitService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
     private readonly IDemographicReaderService _demographicReaderService;
     private readonly TotalService _totalService;
 
-    public UnForfeitService(
+    public UnforfeitService(
         IProfitSharingDataContextFactory dataContextFactory,
         IDemographicReaderService demographicReaderService,
         TotalService totalService)
