@@ -14,6 +14,7 @@ using Demoulas.ProfitSharing.Data.Interceptors;
 using Demoulas.ProfitSharing.Endpoints.HealthCheck;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
 using Demoulas.ProfitSharing.OracleHcm.Extensions;
+using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.Security.Extensions;
 using Demoulas.ProfitSharing.Services.Extensions;
 using Demoulas.Security.Extensions;
@@ -83,7 +84,7 @@ builder.AddDatabaseServices((services, factoryRequests) =>
             sp.GetRequiredService<AuditSaveChangesInterceptor>(),
             sp.GetRequiredService<BeneficiarySaveChangesInterceptor>(),
             sp.GetRequiredService<BeneficiaryContactSaveChangesInterceptor>()
-        ]));
+        ], denyCommitRoles: [Role.ITDEVOPS]));
     factoryRequests.Add(ContextFactoryRequest.Initialize<ProfitSharingReadOnlyDbContext>("ProfitSharing"));
     factoryRequests.Add(ContextFactoryRequest.Initialize<DemoulasCommonDataContext>("ProfitSharing"));
 });
