@@ -29,7 +29,7 @@ public class UpdateNavigationStatusEndpoint : Endpoint<UpdateNavigationRequestDt
 
     public override async Task<UpdateNavigationStatusResponseDto> ExecuteAsync(UpdateNavigationRequestDto req, CancellationToken ct)
     {
-    var isSuccessful  = await _navigationService.UpdateNavigation((short)req.NavigationId, req.StatusId, cancellationToken: ct);
+    var isSuccessful  = await _navigationService.UpdateNavigation(req.NavigationId, req.StatusId, cancellationToken: ct);
         var response = new UpdateNavigationStatusResponseDto { IsSuccessful = isSuccessful };
         return response;
     }
