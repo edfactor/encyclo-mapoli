@@ -523,7 +523,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 DemographicId = d.Id,
                 d.EmploymentStatusId,
                 d.EmploymentStatus,
-                d.IsExecutive,
+                IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly,
                 d.FullTimeDate,
                 Department = d.Department != null ? d.Department.Name : "N/A",
                 TerminationReason = d.TerminationCode != null ? d.TerminationCode.Name : "N/A",
@@ -776,7 +776,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             DemographicId = d.Id,
             d.EmploymentStatusId,
             d.EmploymentStatus,
-            d.IsExecutive,
+            IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly,
             CurrentPayProfit = d.PayProfits.Select(x =>
                 new
                 {
@@ -1012,7 +1012,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             DemographicId = d.Id,
             d.EmploymentStatusId,
             d.EmploymentStatus,
-            d.IsExecutive,
+            IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly,
             CurrentPayProfit = d.PayProfits.Select(x =>
                 new
                 {

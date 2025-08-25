@@ -101,7 +101,7 @@ public sealed class UnForfeitService : IUnForfeitService
                     EnrollmentId = g.Key.EnrollmentId,
                     HoursProfitYear = g.Key.HoursProfitYear,
                     WagesProfitYear = g.Key.WagesProfitYear,
-                    IsExecutive = Demographic.IsEmployeeExecutive(g.Key.PayFrequencyId),
+                    IsExecutive = g.Key.PayFrequencyId == PayFrequency.Constants.Monthly,
                     Details = g.Select(x => new RehireTransactionDetailResponse
                         {
                             ProfitYear = x.pd.ProfitYear,

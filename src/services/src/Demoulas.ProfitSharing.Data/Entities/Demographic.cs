@@ -90,8 +90,6 @@ public sealed class Demographic : Member
     public char EmploymentStatusId { get; set; }
     public EmploymentStatus? EmploymentStatus { get; set; }
 
-    public bool IsExecutive { get => PayFrequencyId == PayFrequency.Constants.Monthly; }
-
     public List<PayProfit> PayProfits { get; set; } = [];
     public List<Beneficiary> Beneficiaries { get; set; } = [];
 
@@ -128,7 +126,4 @@ public sealed class Demographic : Member
                demo1.TerminationCodeId == demo2.TerminationCodeId &&
                demo1.EmploymentStatusId == demo2.EmploymentStatusId;
     }
-
-    public static bool IsEmployeeExecutive (int payFrequencyId) => payFrequencyId == PayFrequency.Constants.Monthly;
-    public static bool IsEmployeeExecutive(Demographic demographic) => demographic.PayFrequencyId == PayFrequency.Constants.Monthly;
 }

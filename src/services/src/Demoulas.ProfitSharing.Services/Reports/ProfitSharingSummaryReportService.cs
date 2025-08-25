@@ -404,7 +404,7 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
                 PointsEarned = pp.PointsEarned,
                 Years = yip.Years,
                 FirstContributionYear = fc.FirstContributionYear,
-                IsExecutive = pp.Demographic!.IsExecutive
+                IsExecutive = pp.Demographic!.PayFrequencyId == PayFrequency.Constants.Monthly
             };
 
 
