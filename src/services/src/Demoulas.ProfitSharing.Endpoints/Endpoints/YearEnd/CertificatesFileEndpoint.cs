@@ -1,16 +1,19 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Security;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.YearEnd;
-public sealed class CertificatesFileEndpoint : Endpoint<CerficatePrintRequest, string>
+public sealed class CertificatesFileEndpoint : ProfitSharingEndpoint<CerficatePrintRequest, string>
 {
     private readonly ICertificateService _certificateService;
 
     public CertificatesFileEndpoint(ICertificateService certificateService)
+        : base(Navigation.Constants.PrintProfitCerts)
     {
         _certificateService = certificateService;
     }
