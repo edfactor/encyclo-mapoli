@@ -2,15 +2,17 @@
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
-using FastEndpoints;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Endpoints.Base;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ForfeitureAdjustment;
 
-public class UpdateForfeitureAdjustmentEndpoint : Endpoint<ForfeitureAdjustmentUpdateRequest>
+public class UpdateForfeitureAdjustmentEndpoint : ProfitSharingRequestEndpoint<ForfeitureAdjustmentUpdateRequest>
 {
     private readonly IForfeitureAdjustmentService _forfeitureAdjustmentService;
 
     public UpdateForfeitureAdjustmentEndpoint(IForfeitureAdjustmentService forfeitureAdjustmentService)
+        : base(Navigation.Constants.ProfitShareForfeit)
     {
         _forfeitureAdjustmentService = forfeitureAdjustmentService;
     }

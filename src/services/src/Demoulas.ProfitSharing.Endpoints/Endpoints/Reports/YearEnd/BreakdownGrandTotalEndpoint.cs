@@ -5,16 +5,18 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.Util.Extensions;
-using FastEndpoints;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Endpoints.Base;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 
-public class BreakdownGrandTotalEndpoint : Endpoint<YearRequest, GrandTotalsByStoreResponseDto>
+public class BreakdownGrandTotalEndpoint : ProfitSharingEndpoint<YearRequest, GrandTotalsByStoreResponseDto>
 {
     private readonly IBreakdownService _breakdownService;
 
     public BreakdownGrandTotalEndpoint(IBreakdownService breakdownService)
+        : base(Navigation.Constants.QPAY066TA)
     {
         _breakdownService = breakdownService;
     }

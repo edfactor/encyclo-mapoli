@@ -3,16 +3,18 @@ using Demoulas.ProfitSharing.Common.Contracts.Request.PayBen;
 using Demoulas.ProfitSharing.Common.Contracts.Response.PayBen;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
-using FastEndpoints;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Endpoints.Base;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.PayBen;
 
-public class PayBenReportEndpoint : Endpoint<PayBenReportRequest,
+public class PayBenReportEndpoint : ProfitSharingEndpoint<PayBenReportRequest,
     PaginatedResponseDto<PayBenReportResponse>>
 {
     private readonly IPayBenReportService _reportService;
 
     public PayBenReportEndpoint(IPayBenReportService reportService)
+        : base(Navigation.Constants.Unknown)
     {
         _reportService = reportService;
     }
