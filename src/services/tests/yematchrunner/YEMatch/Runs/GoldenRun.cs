@@ -17,6 +17,7 @@ public class GoldenRun : Runnable
             "R0", // import obfuscated
             "DropBadBenes",
             "DropBadEmployee",
+            "FixFrozen",
             // "R1",
             // "R2",
             // "R3",

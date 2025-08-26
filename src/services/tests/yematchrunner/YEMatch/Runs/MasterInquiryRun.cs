@@ -11,6 +11,7 @@ public class MasterInquiryRun : Runnable
 //            "R0", // import obfuscated/scramble
 //            "DropBadBenes",
 //            "DropBadEmployee",
+//             "FixFrozen",
  //           "ImportReadyDbToSmartDb", // Import SMART Schema directly from READY Schema (with dropped Bad Bene)
             "TestMasterInquiry"
         ));

@@ -22,6 +22,8 @@ internal static class TestActivityFactory
             new TrimTo14Employees(),
             new DropBadBenes(),
             new DropBadEmployee(),
+            new FixFrozen(),
+            new SanityCheckEmployeeAndBenes(),
             new OverwriteBadges(),
             new SetDateOfBirthTo19YearsAgo(),
             new S18_Rebuild2023ZeroCont(),
