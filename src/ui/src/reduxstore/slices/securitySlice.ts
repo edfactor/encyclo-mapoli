@@ -9,7 +9,7 @@ export interface SecurityState {
   username: string;
   performLogout: boolean;
   appUser: AppUser | null;
-  impersonating: ImpersonationRoles | null;
+  impersonating: ImpersonationRoles[];
 }
 
 export type AppUser = {
@@ -29,7 +29,7 @@ const initialState: SecurityState = {
   username: "",
   performLogout: false,
   appUser: null,
-  impersonating: null
+  impersonating: []
 };
 
 export const securitySlice = createSlice({
@@ -54,7 +54,7 @@ export const securitySlice = createSlice({
     setUserInfo: (state, action: PayloadAction<AppUser>) => {
       state.appUser = action.payload;
     },
-    setImpersonating: (state, action: PayloadAction<ImpersonationRoles | null>) => {
+    setImpersonating: (state, action: PayloadAction<ImpersonationRoles[]>) => {
       state.impersonating = action.payload;
     },
     setUserGroups: (state, action: PayloadAction<string[]>) => {
@@ -68,7 +68,7 @@ export const securitySlice = createSlice({
       state.userRoles = [];
       state.userPermissions = [];
       state.performLogout = false;
-      state.impersonating = null;
+      state.impersonating = [];
     }
   }
 });
