@@ -4,10 +4,11 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
-using FastEndpoints;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Endpoints.Base;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitShareReport;
-public sealed class YearEndProfitSharingReportTotalsEndpoint: Endpoint<BadgeNumberRequest, YearEndProfitSharingReportTotals>
+public sealed class YearEndProfitSharingReportTotalsEndpoint: ProfitSharingEndpoint<BadgeNumberRequest, YearEndProfitSharingReportTotals>
 {
     private readonly IProfitSharingSummaryReportService _profitSharingSummaryReportService;
     private readonly IAuditService _auditService;
@@ -16,6 +17,7 @@ public sealed class YearEndProfitSharingReportTotalsEndpoint: Endpoint<BadgeNumb
     public YearEndProfitSharingReportTotalsEndpoint(
         IProfitSharingSummaryReportService profitSharingSummaryReportService,
         IAuditService auditService)
+        : base(Navigation.Constants.ProfitShareReportFinalRun)
     {
         _profitSharingSummaryReportService = profitSharingSummaryReportService;
         _auditService = auditService;

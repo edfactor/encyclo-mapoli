@@ -6,6 +6,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup.DistributionsAndForfeitureEndpoint;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
@@ -17,6 +18,7 @@ public class DistributionsAndForfeitureEndpoint: EndpointWithCsvTotalsBase<Distr
     private readonly ICleanupReportService _cleanupReportService;
 
     public DistributionsAndForfeitureEndpoint(ICleanupReportService cleanupReportService)
+        : base(Navigation.Constants.DistributionsAndForfeitures)
     {
         _cleanupReportService = cleanupReportService;
     }

@@ -36,6 +36,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Demoulas.ProfitSharing.Common\Demoulas.ProfitSharing.Common.csproj" />
+    <ProjectReference Include="..\Demoulas.ProfitSharing.Security\Demoulas.ProfitSharing.Security.csproj" />
   </ItemGroup>
 
   <ItemGroup>

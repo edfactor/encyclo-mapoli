@@ -2,15 +2,18 @@
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitMaster;
 
-public class ProfitMasterStatusEndpoint : Endpoint<ProfitYearRequest, ProfitMasterUpdateResponse>
+public class ProfitMasterStatusEndpoint : ProfitSharingEndpoint<ProfitYearRequest, ProfitMasterUpdateResponse>
 {
     private readonly IProfitMasterService _profitMasterService;
 
     public ProfitMasterStatusEndpoint(IProfitMasterService profitMasterService)
+        : base(Navigation.Constants.MasterUpdate)
     {
         _profitMasterService = profitMasterService;
     }

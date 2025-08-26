@@ -1,6 +1,8 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.Util.Extensions;
 using FastEndpoints;
@@ -8,11 +10,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
 
-public class CalendarRecordRangeEndpoint : Endpoint<YearRangeRequest, CalendarResponseDto>
+public class CalendarRecordRangeEndpoint : ProfitSharingEndpoint<YearRangeRequest, CalendarResponseDto>
 {
     private readonly ICalendarService _calendarService;
 
-    public CalendarRecordRangeEndpoint(ICalendarService calendarService)
+    public CalendarRecordRangeEndpoint(ICalendarService calendarService) : base(Navigation.Constants.Inquiries)
     {
         _calendarService = calendarService;
     }

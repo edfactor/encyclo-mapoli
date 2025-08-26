@@ -8,6 +8,7 @@ using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.TerminatedEmployees;
 
@@ -23,6 +24,7 @@ public class TerminatedEmployeesEndPoint
     public TerminatedEmployeesEndPoint(
         ITerminatedEmployeeService terminatedEmployeeService,
         IAuditService auditService)
+        : base(Navigation.Constants.Terminations)
     {
         _terminatedEmployeeService = terminatedEmployeeService;
         _auditService = auditService;

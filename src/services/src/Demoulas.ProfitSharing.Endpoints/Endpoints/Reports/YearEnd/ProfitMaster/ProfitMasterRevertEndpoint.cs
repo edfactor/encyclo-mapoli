@@ -4,17 +4,19 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Demoulas.ProfitSharing.Endpoints.Base;
 using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitMaster;
 
-public class ProfitMasterRevertEndpoint : Endpoint<ProfitYearRequest, ProfitMasterRevertResponse>
+public class ProfitMasterRevertEndpoint : ProfitSharingEndpoint<ProfitYearRequest, ProfitMasterRevertResponse>
 {
     private readonly IProfitMasterService _profitMasterService;
     private readonly INavigationService _navigationService;
 
     public ProfitMasterRevertEndpoint(IProfitMasterService profitMasterService,
         INavigationService navigationService)
+        : base(Navigation.Constants.MasterUpdate)
     {
         _profitMasterService = profitMasterService;
         _navigationService = navigationService;

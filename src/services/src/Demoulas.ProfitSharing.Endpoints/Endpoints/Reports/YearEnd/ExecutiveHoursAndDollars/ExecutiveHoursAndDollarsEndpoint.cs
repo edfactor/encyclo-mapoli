@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ExecutiveHoursAndDollars;
 
@@ -18,6 +19,7 @@ public class ExecutiveHoursAndDollarsEndpoint :
     private readonly IAuditService _auditService;
 
     public  ExecutiveHoursAndDollarsEndpoint(IExecutiveHoursAndDollarsService reportService, IAuditService auditService)
+        : base(Navigation.Constants.ManageExecutiveHours)
     {
         _reportService = reportService;
         _auditService = auditService;

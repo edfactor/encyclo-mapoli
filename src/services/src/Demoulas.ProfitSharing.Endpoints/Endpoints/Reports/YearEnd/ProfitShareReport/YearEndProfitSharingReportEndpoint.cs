@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitShareReport;
 
@@ -20,6 +21,7 @@ public class YearEndProfitSharingReportEndpoint: EndpointWithCsvTotalsBase<YearE
     private const string Report_Name = "Yearend Profit Sharing Report";
 
     public YearEndProfitSharingReportEndpoint(IProfitSharingSummaryReportService cleanupReportService, IAuditService auditService)
+        : base(Navigation.Constants.ProfitShareReportFinalRun)
     {
         _cleanupReportService = cleanupReportService;
         _auditService = auditService;

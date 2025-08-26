@@ -5,6 +5,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
 public sealed  class UpdateSummaryReportEndpoint:EndpointWithCsvTotalsBase<FrozenProfitYearRequest, UpdateSummaryReportResponse, UpdateSummaryReportDetail, UpdateSummaryReportEndpoint.UpdateSummaryReportMapper>
@@ -13,6 +14,7 @@ public sealed  class UpdateSummaryReportEndpoint:EndpointWithCsvTotalsBase<Froze
     private readonly IAuditService _auditService;
 
     public UpdateSummaryReportEndpoint(IFrozenReportService frozenReportService, IAuditService auditService)
+        : base(Navigation.Constants.ProfitShareReportFinalRun)
     {
         _frozenReportService = frozenReportService;
         _auditService = auditService;

@@ -1,6 +1,6 @@
 ﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request.Navigations;
 public class UpdateNavigationRequestDto
 {
-    public int NavigationId { get; set; }
+    public short NavigationId { get; set; }
     public byte StatusId { get; set; }
 }

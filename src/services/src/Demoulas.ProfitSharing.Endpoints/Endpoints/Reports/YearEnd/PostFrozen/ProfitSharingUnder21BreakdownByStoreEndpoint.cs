@@ -5,6 +5,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.PostFrozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Security;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.PostFrozen;
@@ -18,6 +19,7 @@ public sealed class ProfitSharingUnder21BreakdownByStoreEndpoint:
     private readonly IPostFrozenService _postFrozenService;
 
     public ProfitSharingUnder21BreakdownByStoreEndpoint(IPostFrozenService postFrozenService)
+        : base(Navigation.Constants.QPAY066TA)
     {
         _postFrozenService = postFrozenService;
     }

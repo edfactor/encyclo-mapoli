@@ -6,6 +6,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitShareUpdate;
 
@@ -18,6 +19,7 @@ public class ProfitShareUpdateEndpoint
     private readonly IProfitShareUpdateService _profitShareUpdateService;
 
     public ProfitShareUpdateEndpoint(IProfitShareUpdateService profitShareUpdateService)
+        : base(Navigation.Constants.ProfitShareReportEditRun)
     {
         _profitShareUpdateService = profitShareUpdateService;
     }

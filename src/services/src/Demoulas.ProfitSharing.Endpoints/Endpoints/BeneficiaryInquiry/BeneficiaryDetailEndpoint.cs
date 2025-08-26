@@ -2,15 +2,17 @@
 using Demoulas.ProfitSharing.Common.Contracts.Response.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Endpoints.Groups;
-using FastEndpoints;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Endpoints.Base;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.BeneficiaryInquiry;
-public class BeneficiaryDetailEndpoint : Endpoint<BeneficiaryDetailRequest, BeneficiaryDetailResponse>
+public class BeneficiaryDetailEndpoint : ProfitSharingEndpoint<BeneficiaryDetailRequest, BeneficiaryDetailResponse>
 {
 
     private readonly IBeneficiaryInquiryService _beneficiaryService;
 
     public BeneficiaryDetailEndpoint(IBeneficiaryInquiryService beneficiaryService)
+        : base(Navigation.Constants.Beneficiaries)
     {
         _beneficiaryService = beneficiaryService;
     }

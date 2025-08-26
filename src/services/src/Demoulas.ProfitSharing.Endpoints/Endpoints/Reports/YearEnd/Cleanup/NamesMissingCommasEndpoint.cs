@@ -1,4 +1,4 @@
-﻿using CsvHelper.Configuration;
+using CsvHelper.Configuration;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
 public class NamesMissingCommasEndpoint : EndpointWithCsvBase<SortedPaginationRequestDto, NamesMissingCommaResponse, NamesMissingCommasEndpoint.NamesMissingCommasResponseMap>
@@ -14,6 +15,7 @@ public class NamesMissingCommasEndpoint : EndpointWithCsvBase<SortedPaginationRe
     private readonly ICleanupReportService _cleanupReportService;
 
     public NamesMissingCommasEndpoint(ICleanupReportService cleanupReportService)
+        : base(Navigation.Constants.CleanupReports)
     {
         _cleanupReportService = cleanupReportService;
     }

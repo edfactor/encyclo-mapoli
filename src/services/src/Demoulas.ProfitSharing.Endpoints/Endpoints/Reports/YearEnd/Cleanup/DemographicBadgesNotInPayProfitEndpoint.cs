@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Security;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Cleanup;
@@ -17,6 +18,7 @@ public class DemographicBadgesNotInPayProfitEndpoint : EndpointWithCsvBase<Sorte
     private readonly ICleanupReportService _cleanupReportService;
 
     public DemographicBadgesNotInPayProfitEndpoint(ICleanupReportService cleanupReportService)
+        : base(Navigation.Constants.DemographicBadgesNotInPayProfit)
     {
         _cleanupReportService = cleanupReportService;
     }

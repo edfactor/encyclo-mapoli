@@ -6,6 +6,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Security;
 
 
@@ -15,6 +16,7 @@ public class GetDuplicateSsNsEndpoint : EndpointWithCsvBase<SortedPaginationRequ
     private readonly IPayrollDuplicateSsnReportService _cleanupReportService;
 
     public GetDuplicateSsNsEndpoint(IPayrollDuplicateSsnReportService cleanupReportService)
+        : base(Navigation.Constants.DuplicateSSNsInDemographics)
     {
         _cleanupReportService = cleanupReportService;
     }
