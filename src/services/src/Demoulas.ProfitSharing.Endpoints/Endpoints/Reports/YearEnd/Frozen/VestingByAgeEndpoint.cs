@@ -6,6 +6,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen.VestingByAgeEndpoint;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
@@ -15,6 +16,7 @@ public class VestingByAgeEndpoint : EndpointWithCsvTotalsBase<ProfitYearAndAsOfD
     private readonly IFrozenReportService _frozenReportService;
 
     public VestingByAgeEndpoint(IFrozenReportService frozenReportService)
+        : base(Navigation.Constants.VestedAmountsByAge)
     {
         _frozenReportService = frozenReportService;
     }

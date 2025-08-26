@@ -1,17 +1,19 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.Util.Extensions;
 using FastEndpoints;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
-public sealed class MissiveLookupEndpoint : EndpointWithoutRequest<List<MissiveResponse>>
+public sealed class MissiveLookupEndpoint : ProfitSharingResponseEndpoint<List<MissiveResponse>>
 {
     private readonly IMissiveService _missiveService;
 
-    public MissiveLookupEndpoint(IMissiveService missiveService)
+    public MissiveLookupEndpoint(IMissiveService missiveService) : base(Navigation.Constants.Inquiries)
     {
         _missiveService = missiveService;
     }

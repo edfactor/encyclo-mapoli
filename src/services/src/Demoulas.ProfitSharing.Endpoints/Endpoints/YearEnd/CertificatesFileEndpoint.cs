@@ -1,16 +1,19 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Security;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.YearEnd;
-public sealed class CertificatesFileEndpoint : Endpoint<CerficatePrintRequest, string>
+public sealed class CertificatesFileEndpoint : ProfitSharingEndpoint<CerficatePrintRequest, string>
 {
     private readonly ICertificateService _certificateService;
 
     public CertificatesFileEndpoint(ICertificateService certificateService)
+        : base(Navigation.Constants.PrintProfitCerts)
     {
         _certificateService = certificateService;
     }
@@ -20,7 +23,7 @@ public sealed class CertificatesFileEndpoint : Endpoint<CerficatePrintRequest, s
         Summary(s =>
         {
             s.Summary = "Returns the core certificate file to be used with pre-printed form letters";
-            s.ExampleRequest = CerficatePrintRequest.RequestExample();
+            s.ExampleRequest = ProfitYearRequest.RequestExample();
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
         });
         Group<YearEndGroup>();
@@ -30,23 +33,20 @@ public sealed class CertificatesFileEndpoint : Endpoint<CerficatePrintRequest, s
     {
         var response = await _certificateService.GetCertificateFile(req, ct);
         var memoryStream = new MemoryStream();
-        await using (var writer = new StreamWriter(memoryStream))
+        await using var writer = new StreamWriter(memoryStream);
+        await writer.WriteAsync(response);
+            
+        await writer.FlushAsync(ct);
+
+        memoryStream.Position = 0;
+
+        System.Net.Mime.ContentDisposition cd = new System.Net.Mime.ContentDisposition
         {
-            
-            await writer.WriteAsync(response);
-            
-            await writer.FlushAsync(ct);
+            FileName = "PAYCERT.txt",
+            Inline = false
+        };
+        HttpContext.Response.Headers.Append("Content-Disposition", cd.ToString());
 
-            memoryStream.Position = 0;
-
-            System.Net.Mime.ContentDisposition cd = new System.Net.Mime.ContentDisposition
-            {
-                FileName = "PAYCERT.txt",
-                Inline = false
-            };
-            HttpContext.Response.Headers.Append("Content-Disposition", cd.ToString());
-
-            await Send.StreamAsync(memoryStream, "PAYCERT.txt", contentType: "text/plain", cancellation: ct);
-        }
+        await Send.StreamAsync(memoryStream, "PAYCERT.txt", contentType: "text/plain", cancellation: ct);
     }
 }

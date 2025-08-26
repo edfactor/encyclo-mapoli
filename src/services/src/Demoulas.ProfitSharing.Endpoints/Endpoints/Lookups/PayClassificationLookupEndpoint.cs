@@ -1,5 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Response.Lookup;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.Util.Extensions;
@@ -8,11 +10,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Lookups;
 
-public class PayClassificationLookupEndpoint : EndpointWithoutRequest<ISet<PayClassificationResponseDto>>
+public class PayClassificationLookupEndpoint : ProfitSharingResponseEndpoint<ISet<PayClassificationResponseDto>>
 {
     private readonly IPayClassificationService _payClassificationService;
 
-    public PayClassificationLookupEndpoint(IPayClassificationService payClassificationService)
+    public PayClassificationLookupEndpoint(IPayClassificationService payClassificationService) : base(Navigation.Constants.Inquiries)
     {
         _payClassificationService = payClassificationService;
     }

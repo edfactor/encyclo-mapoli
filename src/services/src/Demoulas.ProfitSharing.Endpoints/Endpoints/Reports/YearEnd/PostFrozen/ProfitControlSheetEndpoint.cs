@@ -2,16 +2,18 @@
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Security;
 using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.PostFrozen;
 
-public sealed class ProfitControlSheetEndpoint: Endpoint<ProfitYearRequest, ProfitControlSheetResponse>
+public sealed class ProfitControlSheetEndpoint: ProfitSharingEndpoint<ProfitYearRequest, ProfitControlSheetResponse>
 {
     private readonly IFrozenReportService _frozenReportService;
 
-    public ProfitControlSheetEndpoint(IFrozenReportService frozenReportService)
+    public ProfitControlSheetEndpoint(IFrozenReportService frozenReportService) : base(Navigation.Constants.ProfControlSheet)
     {
         _frozenReportService = frozenReportService;
     }

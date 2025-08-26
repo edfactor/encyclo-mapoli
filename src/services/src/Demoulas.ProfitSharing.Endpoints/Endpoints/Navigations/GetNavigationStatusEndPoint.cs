@@ -2,15 +2,17 @@
 using Demoulas.ProfitSharing.Common.Contracts.Response.Navigations;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Groups;
-using FastEndpoints;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Endpoints.Base;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Navigations;
-public class GetNavigationStatusEndpoint : Endpoint<GetNavigationStatusRequestDto, GetNavigationStatusResponseDto>
+public class GetNavigationStatusEndpoint : ProfitSharingEndpoint<GetNavigationStatusRequestDto, GetNavigationStatusResponseDto>
 {
 
     private readonly INavigationService _navigationService;
 
     public GetNavigationStatusEndpoint(INavigationService navigationService)
+        : base(Navigation.Constants.Unknown)
     {
         _navigationService = navigationService;
     }

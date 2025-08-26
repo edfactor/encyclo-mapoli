@@ -4,6 +4,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
 public sealed class GrossWagesReportEndpoint : EndpointWithCsvTotalsBase<GrossWagesReportRequest, GrossWagesReportResponse, GrossWagesReportDetail, GrossWagesReportEndpoint.GrossReportMapper>
@@ -13,6 +14,7 @@ public sealed class GrossWagesReportEndpoint : EndpointWithCsvTotalsBase<GrossWa
     public override string ReportFileName => GrossWagesReportResponse.REPORT_NAME;
 
     public GrossWagesReportEndpoint(IFrozenReportService frozenReportService)
+        : base(Navigation.Constants.ProfShareGrossRpt)
     {
         _frozenReportService = frozenReportService;
     }

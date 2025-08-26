@@ -97,8 +97,8 @@ public class NavigationServiceTests : ApiTestBase<Program>
     //Dummy Data
     private List<NavigationDto> DummyNavigationData()
     {
-        var lookup = _navigationListObj.ToLookup(x => x.ParentId);
-        List<NavigationDto> BuildTree(int? parentId)
+    var lookup = _navigationListObj.ToLookup(x => x.ParentId);
+    List<NavigationDto> BuildTree(short? parentId)
         {
             return lookup[parentId]
                 .Select(x => new NavigationDto
@@ -134,7 +134,7 @@ public class NavigationServiceTests : ApiTestBase<Program>
     public async Task UpdateNavigationStatus()
     {
         IAppUser iAppUser = new Mock<IAppUser>().Object;
-        var success = await new NavigationService(MockDbContextFactory, iAppUser).UpdateNavigation(navigationId: 3, statusId: 1, CancellationToken.None);
+        var success = await new NavigationService(MockDbContextFactory, iAppUser).UpdateNavigation(navigationId: 3, statusId: 1, cancellationToken: CancellationToken.None);
         Assert.True(success);
     }
 

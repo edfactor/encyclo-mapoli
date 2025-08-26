@@ -6,6 +6,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen.BalanceByYearsEndpoint;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
@@ -15,6 +16,7 @@ public class BalanceByYearsEndpoint : EndpointWithCsvTotalsBase<FrozenReportsByA
     private readonly IFrozenReportService _frozenReportService;
 
     public BalanceByYearsEndpoint(IFrozenReportService frozenReportService)
+        : base(Navigation.Constants.BalanceByYears)
     {
         _frozenReportService = frozenReportService;
     }
