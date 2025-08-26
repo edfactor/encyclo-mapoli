@@ -80,8 +80,6 @@ const RouterSubAssembly: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // We'll handle stored roles in the useEffect
-
   const renderMenu = () => {
     return isSuccess && data ? (
       <>
