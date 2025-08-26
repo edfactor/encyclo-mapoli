@@ -1,17 +1,23 @@
-import { RootState } from "../store";
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError, FetchBaseQueryMeta } from "@reduxjs/toolkit/query";
 import { fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { RootState } from "../store";
 
 export const url = process.env.VITE_REACT_APP_PS_API as string;
 
 export const tagTypes = ["Get"];
 
 export const prepareHeaders = (headers: any, context: any) => {
-  const token = (context.getState() as RootState).security.token;
+  const state = context.getState() as RootState;
+  const token = state.security.token;
+  const impersonating = state.security.impersonating;
 
   // If we have a token set in state, let's assume that we should be passing it.
   if (token) {
     headers.set("authorization", `Bearer ${token}`);
+  }
+
+  if (impersonating && impersonating.length > 0) {
+    headers.set("impersonation", impersonating.join(" | "));
   }
 
   return headers;
@@ -31,12 +37,19 @@ export const createDataSourceAwareBaseQuery = (): BaseQueryFn<string | FetchArgs
       if (token) {
         headers.set("authorization", `Bearer ${token}`);
       }
-      if (impersonating) {
-        headers.set("impersonation", impersonating);
+      if (impersonating && impersonating.length > 0) {
+        headers.set("impersonation", impersonating.join(" | "));
       } else {
-        const localImpersonation = localStorage.getItem("impersonatingRole");
-        if (localImpersonation) {
-          headers.set("impersonation", localImpersonation);
+        const storedRoles = localStorage.getItem("impersonatingRoles");
+        if (storedRoles) {
+          try {
+            const roles = JSON.parse(storedRoles);
+            if (Array.isArray(roles) && roles.length > 0) {
+              headers.set("impersonation", roles.join(" | "));
+            }
+          } catch (e) {
+            console.error("Error parsing impersonating roles from localStorage:", e);
+          }
         }
       }
       return headers;

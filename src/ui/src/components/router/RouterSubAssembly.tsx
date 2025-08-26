@@ -39,7 +39,6 @@ import { useGetNavigationQuery } from "reduxstore/api/NavigationApi";
 import { setImpersonating } from "reduxstore/slices/securitySlice";
 import { RootState } from "reduxstore/store";
 import { ImpersonationRoles } from "reduxstore/types";
-import { ImpersonationMultiSelect } from "smart-ui-library";
 import { drawerClosedWidth, drawerOpenWidth, ROUTES } from "../../constants";
 import MenuData from "../../MenuData";
 import DemographicFreeze from "../../pages/ITOperations/DemographicFreeze/DemographicFreeze";
@@ -53,6 +52,7 @@ import YTDWages from "../../pages/YTDWagesExtract/YTDWages";
 import EnvironmentUtils from "../../utils/environmentUtils";
 import { createUnauthorizedParams, isPathAllowedInNavigation } from "../../utils/navigationAccessUtils";
 
+import ImpersonationMultiSelect from "components/MenuBar/ImpersonationMultiSelect";
 import { MenuBar } from "components/MenuBar/MenuBar";
 import BeneficiaryInquiry from "pages/BeneficiaryInquiry/BeneficiaryInquiry";
 import PAY426N from "pages/PAY426Reports/PAY426N/PAY426N";
@@ -80,7 +80,7 @@ const RouterSubAssembly: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const localStorageImpersonating: string | null = localStorage.getItem("impersonatingRole");
+  // We'll handle stored roles in the useEffect
 
   const renderMenu = () => {
     return isSuccess && data ? (
@@ -98,28 +98,15 @@ const RouterSubAssembly: React.FC = () => {
                   ImpersonationRoles.ProfitSharingAdministrator,
                   ImpersonationRoles.ItDevOps
                 ]}
-                currentRoles={impersonating ? [impersonating] : []}
+                currentRoles={impersonating || []}
                 setCurrentRoles={(value: string[]) => {
-                  localStorage.setItem("impersonatingRole", value[0]);
-                  switch (value[0]) {
-                    case ImpersonationRoles.FinanceManager:
-                      dispatch(setImpersonating(ImpersonationRoles.FinanceManager));
-                      break;
-                    case ImpersonationRoles.DistributionsClerk:
-                      dispatch(setImpersonating(ImpersonationRoles.DistributionsClerk));
-                      break;
-                    case ImpersonationRoles.HardshipAdministrator:
-                      dispatch(setImpersonating(ImpersonationRoles.HardshipAdministrator));
-                      break;
-                    case ImpersonationRoles.ProfitSharingAdministrator:
-                      dispatch(setImpersonating(ImpersonationRoles.ProfitSharingAdministrator));
-                      break;
-                    case ImpersonationRoles.ItDevOps:
-                      dispatch(setImpersonating(ImpersonationRoles.ItDevOps));
-                      break;
-                    default:
-                      localStorage.removeItem("impersonatingRole");
-                      dispatch(setImpersonating(null));
+                  if (value.length > 0) {
+                    localStorage.setItem("impersonatingRoles", JSON.stringify(value));
+                    const selectedRoles = value.map((role) => role as ImpersonationRoles);
+                    dispatch(setImpersonating(selectedRoles));
+                  } else {
+                    localStorage.removeItem("impersonatingRoles");
+                    dispatch(setImpersonating([]));
                   }
                 }}
               />
@@ -353,10 +340,17 @@ const RouterSubAssembly: React.FC = () => {
   };
 
   useEffect(() => {
-    if (!!localStorageImpersonating && !impersonating) {
-      dispatch(setImpersonating(localStorageImpersonating as ImpersonationRoles));
+    const storedRoles = localStorage.getItem("impersonatingRoles");
+    if (storedRoles && (!impersonating || impersonating.length === 0)) {
+      try {
+        const roles = JSON.parse(storedRoles) as ImpersonationRoles[];
+        dispatch(setImpersonating(roles));
+      } catch (e) {
+        // If there's an error parsing, clear the localStorage
+        localStorage.removeItem("impersonatingRoles");
+      }
     }
-  }, [dispatch, impersonating, localStorageImpersonating]);
+  }, [dispatch, impersonating]);
 
   useEffect(() => {
     if (isSuccess && data?.navigation && token && location.pathname !== "/unauthorized") {
