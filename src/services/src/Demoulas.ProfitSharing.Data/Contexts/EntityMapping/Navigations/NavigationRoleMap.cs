@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Navigations;
+
 internal sealed class NavigationRoleMap : IEntityTypeConfiguration<NavigationRole>
 {
     public void Configure(EntityTypeBuilder<NavigationRole> builder)
@@ -20,7 +21,9 @@ internal sealed class NavigationRoleMap : IEntityTypeConfiguration<NavigationRol
             new NavigationRole { Id = NavigationRole.Contants.DistributionClerk, Name = Role.DISTRIBUTIONSCLERK },
             new NavigationRole { Id = NavigationRole.Contants.HardshipAdministrator, Name = Role.HARDSHIPADMINISTRATOR },
             new NavigationRole { Id = NavigationRole.Contants.Impersonation, Name = Role.IMPERSONATION },
-            new NavigationRole { Id = NavigationRole.Contants.ItDevOps, Name = Role.ITDEVOPS }
-            );
+            new NavigationRole { Id = NavigationRole.Contants.ItDevOps, Name = Role.ITDEVOPS },
+            new NavigationRole { Id = NavigationRole.Contants.ItOperations, Name = Role.ITOPERATIONS },
+            new NavigationRole { Id = NavigationRole.Contants.ExecutiveAdministrator, Name = Role.EXECUTIVEADMIN }
+        );
     }
 }

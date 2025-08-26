@@ -6,12 +6,12 @@ using ProblemDetails = Microsoft.AspNetCore.Mvc.ProblemDetails;
 
 namespace Demoulas.ProfitSharing.Endpoints.Groups;
 
-public sealed class ItOperationsGroup : GroupBase
+public sealed class ItDevOpsGroup : GroupBase
 {
-    protected override string Route => "itoperations";
-    protected override string RouteName => "ItOperations";
+    protected override string Route => "itdevops";
+    protected override string RouteName => "ItDevOps";
 
-    public ItOperationsGroup()
+    public ItDevOpsGroup()
     {
         Configure(Route.ToLowerInvariant(), ep =>
         {

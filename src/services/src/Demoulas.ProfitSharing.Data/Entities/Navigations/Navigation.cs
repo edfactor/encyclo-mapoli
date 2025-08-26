@@ -11,7 +11,7 @@ public sealed class Navigation
         public const short Distributions = 53;
         public const short Reconciliation = 54;
         public const short YearEnd = 55;
-        public const short ItOperations = 56;
+        public const short ItDevOps = 56;
         
         // Inquiries sub-items
         public const short MasterInquiry = 51;

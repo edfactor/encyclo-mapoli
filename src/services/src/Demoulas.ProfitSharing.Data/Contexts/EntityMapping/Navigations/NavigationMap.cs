@@ -108,7 +108,7 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
             },
             new Navigation 
             { 
-                Id = Navigation.Constants.ItOperations, 
+                Id = Navigation.Constants.ItDevOps, 
                 ParentId = null, 
                 Title = "IT OPERATIONS", 
                 SubTitle = "", 
@@ -137,7 +137,7 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
             new Navigation 
             { 
                 Id = Navigation.Constants.DemographicFreeze, 
-                ParentId = Navigation.Constants.ItOperations, 
+                ParentId = Navigation.Constants.ItDevOps, 
                 Title = "Demographic Freeze", 
                 SubTitle = "", 
                 Url = "demographic-freeze", 
