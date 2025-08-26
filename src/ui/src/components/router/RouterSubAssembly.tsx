@@ -90,13 +90,13 @@ const RouterSubAssembly: React.FC = () => {
             showImpersonation ? (
               <ImpersonationMultiSelect
                 impersonationRoles={[
-                  ImpersonationRoles.FinanceManager,
                   ImpersonationRoles.DistributionsClerk,
+                  ImpersonationRoles.ExecutiveAdministrator,
+                  ImpersonationRoles.FinanceManager,
                   ImpersonationRoles.HardshipAdministrator,
-                  ImpersonationRoles.ProfitSharingAdministrator,
                   ImpersonationRoles.ItDevOps,
                   ImpersonationRoles.ItOperations,
-                  ImpersonationRoles.ExecutiveAdministrator
+                  ImpersonationRoles.ProfitSharingAdministrator
                 ]}
                 currentRoles={impersonating || []}
                 setCurrentRoles={(value: string[]) => {
