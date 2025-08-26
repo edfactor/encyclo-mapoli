@@ -94,7 +94,9 @@ const RouterSubAssembly: React.FC = () => {
                   ImpersonationRoles.DistributionsClerk,
                   ImpersonationRoles.HardshipAdministrator,
                   ImpersonationRoles.ProfitSharingAdministrator,
-                  ImpersonationRoles.ItDevOps
+                  ImpersonationRoles.ItDevOps,
+                  ImpersonationRoles.ItOperations,
+                  ImpersonationRoles.ExecutiveAdministrator
                 ]}
                 currentRoles={impersonating || []}
                 setCurrentRoles={(value: string[]) => {
