@@ -8,31 +8,32 @@ test.describe("Master Inqiry landing page: ", () => {
         await page.waitForLoadState("networkidle");
         await page.getByRole("button", { name: "INQUIRIES" }).click();
         await page.getByRole("link", { name: "MASTER INQUIRY" }).click();
+        await page.getByRole("combobox", { name: "roles" }).click();
+        await page.getByRole('option', { name: 'Finance-Manager' }).getByRole('checkbox').check();
+        await page.locator("body").click();
     });
     test("page should load properly without any issue.", async ({ page }) => {
         await expect(page.getByRole("heading", { name: "MASTER INQUIRY (008-10)" })).toBeVisible();
     });
 
     test("click on search button without setting IMPERSONATE value", async ({ page }) => {
+        await page.getByRole("combobox", { name: "roles" }).click();
+        await page.getByRole('option', { name: 'Finance-Manager' }).getByRole('checkbox').uncheck();
+        await page.locator("body").click();
         await page.getByRole("button", { name: "SEARCH" }).click();
         await page.waitForLoadState("networkidle");
         await expect(page.getByText("Search Failed")).toBeVisible();
     });
 
     test("click on search button after setting IMPERSONATE value", async ({ page }) => {
-        await page.getByRole("combobox", { name: "roles" }).click();
-        await page.getByRole('option', { name: 'Finance-Manager' }).getByRole('checkbox').check();
-        await page.locator("body").click();
-        await page.getByRole("button", { name: "SEARCH" }).dblclick();
+        await page.getByRole("button", { name: "SEARCH" }).click();
         const [response] = await Promise.all([page.waitForResponse((resp) =>
             resp.url().includes('master-inquiry/search'))]);
         await expect(response.status()).toBe(200);
     });
 
     test("pagingation is working properly or not", async ({ page }) => {
-        await page.getByRole("combobox", { name: "roles" }).click();
-        await page.getByRole('option', { name: 'Finance-Manager' }).getByRole('checkbox').check();
-        await page.locator("body").click();
+        
         await page.getByRole("button", { name: "SEARCH" }).dblclick();
         const [response] = await Promise.all([page.waitForResponse((resp) =>
             resp.url().includes('master-inquiry/search'))]);
@@ -45,9 +46,6 @@ test.describe("Master Inqiry landing page: ", () => {
         
     });
     test("enter Name and click search", async ({ page }) => {
-        await page.getByRole("combobox", { name: "roles" }).click();
-        await page.getByRole('option', { name: 'Finance-Manager' }).getByRole('checkbox').check();
-        await page.locator("body").click();
         await page.locator('input[name="name"]').fill("evans");
         await page.getByRole("button", { name: "SEARCH" }).click();
         const [response] = await Promise.all([page.waitForResponse((resp) =>
@@ -56,9 +54,6 @@ test.describe("Master Inqiry landing page: ", () => {
     });
 
     test("enter Badge/Psn Number and click search", async ({ page }) => {
-        await page.getByRole("combobox", { name: "roles" }).click();
-        await page.getByRole('option', { name: 'Finance-Manager' }).getByRole('checkbox').check();
-        await page.locator("body").click();
         await page.locator('input[name="badgeNumber"]').fill("706056")
         await page.getByRole("button", { name: "SEARCH" }).click();
         const [response] = await Promise.all([page.waitForResponse((resp) =>
@@ -67,9 +62,6 @@ test.describe("Master Inqiry landing page: ", () => {
     });
 
     test("select Payment Type  and click search", async ({ page }) => {
-        await page.getByRole("combobox", { name: "roles" }).click();
-        await page.getByRole('option', { name: 'Finance-Manager' }).getByRole('checkbox').check();
-        await page.locator("body").click();
         await page.getByRole('radio', { name: 'Payoffs/Forfeit' }).check();
         await page.getByRole("button", { name: "SEARCH" }).click();
         const [response] = await Promise.all([page.waitForResponse((resp) =>
@@ -78,9 +70,6 @@ test.describe("Master Inqiry landing page: ", () => {
     });
 
     test("select Member Type  and click search", async ({ page }) => {
-        await page.getByRole("combobox", { name: "roles" }).click();
-        await page.getByRole('option', { name: 'Finance-Manager' }).getByRole('checkbox').check();
-        await page.locator("body").click();
         await page.getByRole('radio', { name: 'Beneficiaries' }).check();
         await page.getByRole("button", { name: "SEARCH" }).click();
         const [response] = await Promise.all([page.waitForResponse((resp) =>
@@ -89,9 +78,6 @@ test.describe("Master Inqiry landing page: ", () => {
     });
 
     test("select Beginning Month and Ending Month and click on Search", async ({ page }) => {
-        await page.getByRole("combobox", { name: "roles" }).click();
-        await page.getByRole('option', { name: 'Finance-Manager' }).getByRole('checkbox').check();
-        await page.locator("body").click();
         await page.locator('#mui-component-select-startProfitMonth').click();
         await page.getByRole('option', { name: '2', exact: true }).click();
         await page.locator('#mui-component-select-endProfitMonth').click()
@@ -102,9 +88,6 @@ test.describe("Master Inqiry landing page: ", () => {
         await expect(response.status()).toBe(200);
     });
     test("filling values in Name, Badge/PSN Number and then click on Reset button.", async ({ page }) => {
-        await page.getByRole("combobox", { name: "roles" }).click();
-        await page.getByRole('option', { name: 'Finance-Manager' }).getByRole('checkbox').check();
-        await page.locator("body").click();
         await page.locator('input[name="badgeNumber"]').fill("706056");
         await page.locator('input[name="name"]').fill("evans");
         await page.getByRole("button", { name: "RESET" }).click();
@@ -114,9 +97,6 @@ test.describe("Master Inqiry landing page: ", () => {
     });
 
     test("if we click on search button multiple times", async ({ page }) => {
-        await page.getByRole("combobox", { name: "roles" }).click();
-        await page.getByRole('option', { name: 'Finance-Manager' }).getByRole('checkbox').check();
-        await page.locator("body").click();
         await page.locator('input[name="badgeNumber"]').fill("706056");
         await page.getByRole("button", { name: "SEARCH" }).click();
         const [response] = await Promise.all([page.waitForResponse((resp) =>
@@ -134,9 +114,6 @@ test.describe("Master Inqiry landing page: ", () => {
     });
 
     test("If we change IMPERSONATE to IT-OPERATIONS, it should MASK values", async ({ page }) => {
-        await page.getByRole("combobox", { name: "roles" }).click();
-        await page.getByRole('option', { name: 'IT-Operations' }).getByRole('checkbox').check();
-        await page.locator("body").click();
         await page.locator('input[name="badgeNumber"]').fill("706056");
         await page.getByRole("button", { name: "SEARCH" }).click();
         const [response] = await Promise.all([page.waitForResponse((resp) =>
@@ -146,6 +123,9 @@ test.describe("Master Inqiry landing page: ", () => {
     });
 
     test("If we enter Name as Evans and click on Badge Number link in the Grid", async ({ page }) => {
+        await page.getByRole("combobox", { name: "roles" }).click();
+        await page.getByRole('option', { name: 'Finance-Manager' }).getByRole('checkbox').uncheck();
+        await page.locator("body").click();
         await page.getByRole("combobox", { name: "roles" }).click();
         await page.getByRole('option', { name: 'IT-Operations' }).getByRole('checkbox').check();
         await page.locator("body").click();
