@@ -21,7 +21,6 @@ public class FrozenReportService : IFrozenReportService
     private readonly TotalService _totalService;
     private readonly ICalendarService _calendarService;
     private readonly IDemographicReaderService _demographicReaderService;
-    private readonly IFrozenService _frozenService;
     private readonly ILogger _logger;
 
     public FrozenReportService(
@@ -29,15 +28,13 @@ public class FrozenReportService : IFrozenReportService
         ILoggerFactory loggerFactory,
         TotalService totalService,
         ICalendarService calendarService,
-        IDemographicReaderService demographicReaderService,
-        IFrozenService frozenService
+        IDemographicReaderService demographicReaderService
     )
     {
         _dataContextFactory = dataContextFactory;
         _totalService = totalService;
         _calendarService = calendarService;
         _demographicReaderService = demographicReaderService;
-        _frozenService = frozenService;
         _logger = loggerFactory.CreateLogger<FrozenReportService>();
     }
     
@@ -757,7 +754,8 @@ public class FrozenReportService : IFrozenReportService
                     BadgeNumber = (long) x.BadgeNumber,
                     DemographicId = x.Id,
                     IsEmployee = true,
-                    x.StoreNumber
+                    x.StoreNumber,
+                    x.PayFrequencyId,
                 });
             var beneficiaryBase = ctx.BeneficiaryContacts
 #pragma warning disable DSMPS001
@@ -772,7 +770,8 @@ public class FrozenReportService : IFrozenReportService
                     BadgeNumber = (long)(x.b.BadgeNumber*10000 + x.b.PsnSuffix),
                     DemographicId = 0,
                     IsEmployee = false,
-                    StoreNumber = (short)0
+                    StoreNumber = (short)0,
+                    PayFrequencyId = (byte)0,
                 });
             var
                 members = demoBase.Union(
@@ -805,7 +804,8 @@ public class FrozenReportService : IFrozenReportService
                     m.LastName,
                     m.StoreNumber,
                     m.IsEmployee,
-                    
+                    IsExecutive = m.PayFrequencyId == PayFrequency.Constants.Monthly,
+
                     BeforeEnrollmentId = lyPp != null ? lyPp.EnrollmentId : 0,
                     BeforeProfitSharingAmount = lyBal != null ? lyBal.CurrentBalance : 0,
                     BeforeVestedProfitSharingAmount = lyBal != null ? lyBal.VestedBalance : 0,
@@ -835,6 +835,7 @@ public class FrozenReportService : IFrozenReportService
                 StoreNumber = x.StoreNumber,
                 Name = $"{x.LastName}, {x.FirstName}",
                 IsEmployee = x.IsEmployee,
+                IsExecutive = x.IsExecutive,
                 Before = new UpdateSummaryReportPointInTimeDetail()
                 {
                     ProfitSharingAmount = (x.BeforeProfitSharingAmount ?? 0),
@@ -917,6 +918,7 @@ public class FrozenReportService : IFrozenReportService
                                            ProfitSharingAmount = psBal.TotalAmount,
                                            GrossWages = pp.CurrentIncomeYear + pp.IncomeExecutive,
                                            pp.EnrollmentId,
+                                           d.PayFrequencyId,
                                        });
                 
                 var totals = await baseQuery.GroupBy(x => true).Select(x => new
@@ -938,7 +940,8 @@ public class FrozenReportService : IFrozenReportService
                         Forfeitures = x.Forfeitures ?? 0,
                         Loans = x.Loans ?? 0,
                         ProfitSharingAmount = x.ProfitSharingAmount ?? 0,
-                        GrossWages = x.GrossWages
+                        GrossWages = x.GrossWages,
+                        IsExecutive = x.PayFrequencyId == PayFrequency.Constants.Monthly,
                     }).ToList(),
                     Total = pagedData.Total
                 };

@@ -168,6 +168,9 @@ export const CAPTIONS = {
 export const VIEW = "View";
 
 export const SMART_PS_QA_IMPERSONATION = "SMART-PS-QA-Impersonation";
+export const SMART_ROLE_PREFIX = "SMART";
+export const APP_NAME = "PS";
+export const IMPERSONATION_ROLE_SUFFIX = "Impersonation";
 
 export const GRID_COLUMN_WIDTHS = {
   BADGE_NUMBER: 100,

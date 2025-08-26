@@ -9,6 +9,8 @@ public record MemberDetails : IdRequest, INameParts, IFullNameProperty, IPhoneNu
     public bool IsEmployee { get; init; }
     public int BadgeNumber { get; init; }
     public short PsnSuffix { get; init; }
+    public byte PayFrequencyId { get; init; }
+    public bool IsExecutive { get; init; }
     public string Ssn { get; init; } = string.Empty;
 
     [MaskSensitive] public string FirstName { get; init; } = string.Empty;

@@ -47,6 +47,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
         public decimal CurrentIncomeYear { get; init; }
         public decimal CurrentHoursYear { get; init; }
         public int Id { get; set; }
+        public bool IsExecutive { get; set; }
     }
 
     // Internal DTO for SQL-translatable projection
@@ -85,6 +86,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
         public decimal CurrentIncomeYear { get; init; }
         public decimal CurrentHoursYear { get; init; }
         public decimal Payment { get; set; }
+        public bool IsExecutive { get; set; }
     }
 
 
@@ -363,7 +365,8 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 PayFrequencyId = x.Member.PayFrequencyId,
                 TransactionDate = x.TransactionDate,
                 CurrentIncomeYear = x.Member.CurrentIncomeYear,
-                CurrentHoursYear = x.Member.CurrentHoursYear
+                CurrentHoursYear = x.Member.CurrentHoursYear,
+                IsExecutive = x.Member.IsExecutive
             }).ToPaginationResultsAsync(req, cancellationToken);
 
             var formattedResults = rawQuery.Results.Select(x => new MasterInquiryResponseDto
@@ -400,7 +403,8 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 PayFrequencyId = x.PayFrequencyId,
                 TransactionDate = x.TransactionDate,
                 CurrentIncomeYear = x.CurrentIncomeYear,
-                CurrentHoursYear = x.CurrentHoursYear
+                CurrentHoursYear = x.CurrentHoursYear,
+                IsExecutive = x.IsExecutive
             });
 
             return new PaginatedResponseDto<MasterInquiryResponseDto>(req) { Results = formattedResults, Total = rawQuery.Total };
@@ -437,6 +441,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                         PayFrequencyId = d.PayFrequencyId,
                         Ssn = d.Ssn,
                         PsnSuffix = 0,
+                        IsExecutive = d.PayFrequencyId ==PayFrequency.Constants.Monthly,
                         CurrentIncomeYear = d.PayProfits.Where(x => x.ProfitYear == pd.ProfitYear)
                             .Select(x => x.CurrentIncomeYear)
                             .FirstOrDefault(),
@@ -444,8 +449,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                             .Select(x => x.CurrentHoursYear)
                             .FirstOrDefault()
                     }
-                })
-            .Where(x => x.Member.PayFrequencyId == PayFrequency.Constants.Weekly);
+                });
 
         return query;
     }
@@ -479,6 +483,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                         PsnSuffix = d.b.PsnSuffix,
                         CurrentIncomeYear = 0,
                         CurrentHoursYear = 0,
+                        IsExecutive = false,
                     }
                 });
 
@@ -510,6 +515,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 d.DateOfBirth,
                 d.Ssn,
                 d.BadgeNumber,
+                d.PayFrequencyId,
                 d.ReHireDate,
                 d.HireDate,
                 d.TerminationDate,
@@ -517,7 +523,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 DemographicId = d.Id,
                 d.EmploymentStatusId,
                 d.EmploymentStatus,
-
+                IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly,
                 d.FullTimeDate,
                 Department = d.Department != null ? d.Department.Name : "N/A",
                 TerminationReason = d.TerminationCode != null ? d.TerminationCode.Name : "N/A",
@@ -580,6 +586,8 @@ public sealed class MasterInquiryService : IMasterInquiryService
             EnrollmentId = memberData.CurrentPayProfit?.EnrollmentId,
             Enrollment = memberData.CurrentPayProfit?.Enrollment?.Name,
             BadgeNumber = memberData.BadgeNumber,
+            PayFrequencyId = memberData.PayFrequencyId,
+            IsExecutive = memberData.IsExecutive,
             CurrentEtva = memberData.CurrentPayProfit?.Etva ?? 0,
             PreviousEtva = memberData.PreviousPayProfit?.Etva ?? 0,
             
@@ -639,7 +647,9 @@ public sealed class MasterInquiryService : IMasterInquiryService
             Age = memberData.DateOfBirth.Age(),
             Ssn = memberData.Ssn.MaskSsn(),
             BadgeNumber = memberData.BadgeNumber,
-            PsnSuffix = memberData.PsnSuffix
+            PsnSuffix = memberData.PsnSuffix,
+            PayFrequencyId = 0,
+            IsExecutive = false,
         });
     }
 
@@ -693,6 +703,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 DateOfBirth = memberData.DateOfBirth,
                 Age = memberData.DateOfBirth.Age(),
                 Ssn = memberData.Ssn,
+                IsExecutive = memberData.IsExecutive,
                 YearToDateProfitSharingHours = memberData.YearToDateProfitSharingHours,
                 HireDate = memberData.HireDate,
                 ReHireDate = memberData.ReHireDate,
@@ -709,6 +720,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 ContributionsLastYear = previousBalanceItem is { CurrentBalance: > 0 },
                 BadgeNumber = memberData.BadgeNumber,
                 PsnSuffix = memberData.PsnSuffix,
+                PayFrequencyId = 0,
                 BeginPSAmount = previousBalanceItem?.CurrentBalance ?? 0,
                 CurrentPSAmount = balance?.CurrentBalance ?? 0,
                 BeginVestedAmount = previousBalanceItem?.VestedBalance ?? 0,
@@ -756,6 +768,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             d.DateOfBirth,
             d.Ssn,
             d.BadgeNumber,
+            d.PayFrequencyId,
             d.ReHireDate,
             d.HireDate,
             d.TerminationDate,
@@ -763,6 +776,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             DemographicId = d.Id,
             d.EmploymentStatusId,
             d.EmploymentStatus,
+            IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly,
             CurrentPayProfit = d.PayProfits.Select(x =>
                 new
                 {
@@ -802,6 +816,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 Address = memberData.Address,
                 AddressZipCode = memberData.PostalCode!,
                 DateOfBirth = memberData.DateOfBirth,
+                IsExecutive = memberData.IsExecutive,
                 Age = memberData.DateOfBirth.Age(),
                 Ssn = memberData.Ssn.MaskSsn(),
                 YearToDateProfitSharingHours = memberData.CurrentPayProfit?.CurrentHoursYear ?? 0,
@@ -812,6 +827,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 EnrollmentId = memberData.CurrentPayProfit?.EnrollmentId,
                 Enrollment = memberData.CurrentPayProfit?.Enrollment?.Name,
                 BadgeNumber = memberData.BadgeNumber,
+                PayFrequencyId = memberData.PayFrequencyId,
                 CurrentEtva = memberData.CurrentPayProfit?.Etva ?? 0,
                 PreviousEtva = memberData.PreviousPayProfit?.Etva ?? 0,
                 EmploymentStatus = memberData.EmploymentStatus?.Name,
@@ -872,6 +888,8 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 Ssn = memberData.Ssn.MaskSsn(),
                 BadgeNumber = memberData.BadgeNumber,
                 PsnSuffix = memberData.PsnSuffix,
+                PayFrequencyId = 0,
+                IsExecutive = false,
             })
             .ToPaginationResultsAsync(req, cancellationToken);
     }
@@ -986,6 +1004,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             d.DateOfBirth,
             d.Ssn,
             d.BadgeNumber,
+            d.PayFrequencyId,
             d.ReHireDate,
             d.HireDate,
             d.TerminationDate,
@@ -993,6 +1012,7 @@ public sealed class MasterInquiryService : IMasterInquiryService
             DemographicId = d.Id,
             d.EmploymentStatusId,
             d.EmploymentStatus,
+            IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly,
             CurrentPayProfit = d.PayProfits.Select(x =>
                 new
                 {
@@ -1042,11 +1062,13 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 EnrollmentId = memberData.CurrentPayProfit?.EnrollmentId,
                 Enrollment = memberData.CurrentPayProfit?.Enrollment?.Name,
                 BadgeNumber = memberData.BadgeNumber,
+                PayFrequencyId = memberData.PayFrequencyId,
                 CurrentEtva = memberData.CurrentPayProfit?.Etva ?? 0,
                 PreviousEtva = memberData.PreviousPayProfit?.Etva ?? 0,
                 EmploymentStatus = memberData.EmploymentStatus?.Name,
                 ReceivedContributionsLastYear = memberData.PreviousPayProfit?.PsCertificateIssuedDate != null,
-                Missives = missiveList
+                Missives = missiveList,
+                IsExecutive = memberData.IsExecutive
             });
         }
 
@@ -1092,6 +1114,8 @@ public sealed class MasterInquiryService : IMasterInquiryService
                 Ssn = memberData.Ssn.MaskSsn(),
                 BadgeNumber = memberData.BadgeNumber,
                 PsnSuffix = memberData.PsnSuffix,
+                PayFrequencyId = 0,
+                IsExecutive = false,
             });
         }
 

@@ -2,7 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetForfeituresByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, TotalsGrid } from "smart-ui-library";
+import { DSMGrid, ISortParams } from "smart-ui-library";
+import { TotalsGrid } from "components/TotalsGrid/TotalsGrid";
 import { GetForfeituresByAgeColumns } from "./ForfeituresByAgeGridColumns";
 import { Grid } from "@mui/material";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
@@ -70,42 +71,63 @@ const ForfeituresByAgeGrid: React.FC<ForfeituresByAgeGridProps> = ({ initialSear
           <div className="px-[24px]">
             <h2 className="text-dsm-secondary">Summary</h2>
           </div>
-          <div className="sticky top-0 z-10 flex bg-white">
-            <TotalsGrid
-              displayData={[
-                [forfeituresByAgeTotal?.totalEmployees || 0, numberToCurrency(forfeituresByAgeTotal?.totalAmount)]
-              ]}
-              leftColumnHeaders={["All"]}
-              topRowHeaders={["", "EMPS", "Amount"]}></TotalsGrid>
-            <TotalsGrid
-              displayData={[
-                [
-                  forfeituresByAgeFullTime?.totalEmployees || 0,
-                  numberToCurrency(forfeituresByAgeFullTime?.totalAmount || 0)
-                ]
-              ]}
-              leftColumnHeaders={["FullTime"]}
-              topRowHeaders={["", "EMPS", "Amount"]}></TotalsGrid>
-            <TotalsGrid
-              displayData={[
-                [
-                  forfeituresByAgePartTime?.totalEmployees || 0,
-                  numberToCurrency(forfeituresByAgePartTime?.totalAmount || 0)
-                ]
-              ]}
-              leftColumnHeaders={["PartTime"]}
-              topRowHeaders={["", "EMPS", "Amount"]}></TotalsGrid>
-          </div>
           <Grid
             size={{ xs: 12 }}
-            container>
+            container
+            columnSpacing={2}
+            rowSpacing={0}>
+            <Grid size={{ xs: 4 }}>
+              <h2 className="text-dsm-secondary">Total</h2>
+              <TotalsGrid
+                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12 }}
+                tablePadding="0px"
+                displayData={[
+                  [forfeituresByAgeTotal?.totalEmployees || 0, numberToCurrency(forfeituresByAgeTotal?.totalAmount)]
+                ]}
+                leftColumnHeaders={["All"]}
+                topRowHeaders={["", "EMPS", "Amount"]}></TotalsGrid>
+            </Grid>
+            <Grid size={{ xs: 4 }}>
+              <h2 className="text-dsm-secondary">Full-time</h2>
+              <TotalsGrid
+                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12 }}
+                tablePadding="0px"
+                displayData={[
+                  [
+                    forfeituresByAgeFullTime?.totalEmployees || 0,
+                    numberToCurrency(forfeituresByAgeFullTime?.totalAmount || 0)
+                  ]
+                ]}
+                leftColumnHeaders={["FullTime"]}
+                topRowHeaders={["", "EMPS", "Amount"]}></TotalsGrid>
+            </Grid>
+            <Grid size={{ xs: 4 }}>
+              <h2 className="text-dsm-secondary">Part-time</h2>
+              <TotalsGrid
+                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12 }}
+                tablePadding="0px"
+                displayData={[
+                  [
+                    forfeituresByAgePartTime?.totalEmployees || 0,
+                    numberToCurrency(forfeituresByAgePartTime?.totalAmount || 0)
+                  ]
+                ]}
+                leftColumnHeaders={["PartTime"]}
+                topRowHeaders={["", "EMPS", "Amount"]}></TotalsGrid>
+            </Grid>
+          </Grid>
+          <Grid
+            size={{ xs: 12 }}
+            container
+            columnSpacing={2}
+            rowSpacing={0}>
             <Grid size={{ xs: 4 }}>
               <DSMGrid
                 preferenceKey={"AGE_Total"}
                 isLoading={isFetching}
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
-                  rowData: forfeituresByAgeTotal?.response.results || [],
+                  rowData: forfeituresByAgeTotal?.response.results ?? [],
                   columnDefs: columnDefsTotal || []
                 }}
               />
@@ -116,7 +138,7 @@ const ForfeituresByAgeGrid: React.FC<ForfeituresByAgeGridProps> = ({ initialSear
                 isLoading={isFetching}
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
-                  rowData: forfeituresByAgeFullTime?.response.results || [],
+                  rowData: forfeituresByAgeFullTime?.response.results ?? [],
                   columnDefs: columnDefsFullTime || []
                 }}
               />
@@ -127,7 +149,7 @@ const ForfeituresByAgeGrid: React.FC<ForfeituresByAgeGridProps> = ({ initialSear
                 isLoading={isFetching}
                 handleSortChanged={sortEventHandler}
                 providedOptions={{
-                  rowData: forfeituresByAgePartTime?.response.results || [],
+                  rowData: forfeituresByAgePartTime?.response.results ?? [],
                   columnDefs: columnDefsPartTime || []
                 }}
               />

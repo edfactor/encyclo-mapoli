@@ -44,7 +44,8 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
                              FullName = d.ContactInfo.FullName != null ? d.ContactInfo.FullName : string.Empty,
                              Ssn = d.Ssn.MaskSsn(),
                              TerminationDate = d.TerminationDate!.Value,
-                             TerminationCodeId = d.TerminationCodeId
+                             TerminationCodeId = d.TerminationCodeId,
+                             IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly
                          }).ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
 
             startDate = calInfo.FiscalBeginDate;

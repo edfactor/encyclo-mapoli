@@ -10,6 +10,7 @@ export interface EmployeeDetails {
   id: number;
   badgeNumber: number;
   psnSuffix: number;
+  payFrequencyId: number;
   isEmployee: boolean;
   firstName: string;
   lastName: string;

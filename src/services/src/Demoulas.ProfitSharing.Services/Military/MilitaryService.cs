@@ -119,7 +119,8 @@ public class MilitaryService : IMilitaryService
                     CommentTypeId = x.pd.CommentTypeId,
                     ContributionDate = new DateOnly(x.pd.YearToDate == 0 ? req.ProfitYear : x.pd.YearToDate, x.pd.MonthToDate == 0 ? 12 : x.pd.MonthToDate, 31),
                     Amount = x.pd.Contribution,
-                    IsSupplementalContribution = x.pd.YearsOfServiceCredit == 0
+                    IsSupplementalContribution = x.pd.YearsOfServiceCredit == 0,
+                    IsExecutive = x.d.PayFrequencyId == Demoulas.ProfitSharing.Data.Entities.PayFrequency.Constants.Monthly
                 });
 
             if (!isArchiveRequest)

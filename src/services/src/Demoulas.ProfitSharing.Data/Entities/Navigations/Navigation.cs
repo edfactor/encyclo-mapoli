@@ -30,7 +30,7 @@ public sealed class Navigation
         
         // December Activities sub-items
         public const int MilitaryContributions = 7;
-        public const int UnForfeit = 8;
+        public const int Unforfeit = 8;
         public const int Terminations = 9;
         public const int Forfeitures = 10;
         public const int DistributionsAndForfeitures = 11;

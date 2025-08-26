@@ -1,6 +1,5 @@
 import { Replay } from "@mui/icons-material";
-import { Alert, AlertTitle, Button, CircularProgress, Divider, Tooltip, Typography } from "@mui/material";
-import { Grid } from "@mui/material";
+import { Alert, AlertTitle, Button, CircularProgress, Divider, Grid, Tooltip, Typography } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useCallback, useEffect, useState } from "react";
@@ -107,9 +106,6 @@ const useRevertAction = (
       profitYear: profitYear ?? 0
     };
 
-    console.log("reverting changes to year end: ", params);
-    console.log(params);
-
     await trigger(params, false)
       .unwrap()
       .then((payload) => {
@@ -117,7 +113,6 @@ const useRevertAction = (
         setBeneficiariesReverted(payload?.beneficiariesEffected || 0);
         setEtvasReverted(payload?.etvasEffected || 0);
         //dispatch(setMessage(successMessage));
-        console.log("Successfully reverted changes for year end: ", payload);
         dispatch(setProfitEditUpdateChangesAvailable(false));
         dispatch(setProfitEditUpdateRevertChangesAvailable(false));
         dispatch(clearProfitSharingEditQueryParams());

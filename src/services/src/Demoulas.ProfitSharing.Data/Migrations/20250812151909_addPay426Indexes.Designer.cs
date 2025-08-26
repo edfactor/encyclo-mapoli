@@ -29244,7 +29244,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             ParentId = 1,
                             StatusId = (byte)1,
                             SubTitle = "QPREV-PROF",
-                            Title = "UnForfeit",
+                            Title = "Unforfeit",
                             Url = "unforfeitures"
                         },
                         new

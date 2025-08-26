@@ -1,6 +1,5 @@
 import { ColDef } from "ag-grid-community";
-import { GRID_COLUMN_WIDTHS } from "../../constants";
-import { createBadgeColumn, createCurrencyColumn } from "../../utils/gridColumnFactory";
+import { createBadgeColumn, createCurrencyColumn, createNameColumn } from "../../utils/gridColumnFactory";
 
 export interface ReprintCertificateEmployee {
   badge: number;
@@ -33,54 +32,39 @@ export const GetReprintCertificatesGridColumns = (
       resizable: false
     },
     createBadgeColumn({
-      headerName: "Badge",
-      field: "badge",
-      minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
-      alignment: "center"
+      field: "badge"
     }),
-    {
-      headerName: "Name",
-      field: "name",
-      colId: "name",
-      minWidth: 200,
-      resizable: true,
-      sortable: true
-    },
+    createNameColumn({
+      field: "name"
+    }),
 
     createCurrencyColumn({
       headerName: "EOY Balance",
-      field: "eoyBalance",
-      minWidth: 130
+      field: "eoyBalance"
     }),
     createCurrencyColumn({
       headerName: "2024 Forfeitures",
-      field: "forfeitures2024",
-      minWidth: 130
+      field: "forfeitures2024"
     }),
     createCurrencyColumn({
       headerName: "2024 Withdrawals",
-      field: "withdrawals2024",
-      minWidth: 130
+      field: "withdrawals2024"
     }),
     createCurrencyColumn({
       headerName: "Balance",
-      field: "balance",
-      minWidth: 130
+      field: "balance"
     }),
     createCurrencyColumn({
       headerName: "Vested Portion",
-      field: "vestedPortion",
-      minWidth: 130
+      field: "vestedPortion"
     }),
     createCurrencyColumn({
       headerName: "Single Life Annuity",
-      field: "singleLifeAnnuity",
-      minWidth: 150
+      field: "singleLifeAnnuity"
     }),
     createCurrencyColumn({
       headerName: "Qualified Join and 100% Survivor",
-      field: "qualifiedJoinAndSurvivor",
-      minWidth: 220
+      field: "qualifiedJoinAndSurvivor"
     })
   ];
 };

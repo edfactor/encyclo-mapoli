@@ -42,7 +42,7 @@ INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUM
 VALUES(7,1, 'Military Contributions', '008-13','military-entry-and-modification', 1, 3, '', 0);
 
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
-VALUES(8,1, 'UnForfeit', 'QPREV-PROF','unforfeitures', 1, 2, '', 0);
+VALUES(8,1, 'Unforfeit', 'QPREV-PROF','unforfeitures', 1, 2, '', 0);
 
 INSERT INTO NAVIGATION(ID,PARENT_ID, TITLE, SUB_TITLE, URL, STATUS_ID, ORDER_NUMBER, ICON, DISABLED) 
 VALUES(9,1, 'Terminations', 'QPAY066','prof-term', 1, 4, '', 0);
