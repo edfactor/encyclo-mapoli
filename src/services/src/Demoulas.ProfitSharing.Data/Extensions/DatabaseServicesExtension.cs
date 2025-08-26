@@ -1,5 +1,6 @@
 ﻿using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
+using Demoulas.Common.Data.Contexts.Interceptor;
 using Demoulas.ProfitSharing.Data.Configuration;
 using Demoulas.ProfitSharing.Data.Factories;
 using Demoulas.ProfitSharing.Data.Interceptors;
@@ -50,6 +51,7 @@ public static class DatabaseServicesExtension
         });
         _ = builder.Services.AddSingleton<BeneficiarySaveChangesInterceptor>();
         _ = builder.Services.AddSingleton<BeneficiaryContactSaveChangesInterceptor>();
+        _ = builder.Services.AddSingleton<ICommitGuardOverride, CommitGuardOverride>();
         _ = builder.Services.AddHttpContextAccessor();
 
 
