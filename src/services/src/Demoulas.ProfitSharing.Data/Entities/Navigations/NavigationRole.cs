@@ -10,7 +10,7 @@ public class NavigationRole:ILookupTable<byte>
         public const byte DistributionClerk = 3;
         public const byte HardshipAdministrator = 4;
         public const byte Impersonation = 5;
-        public const byte ITOperations = 6;
+        public const byte ItDevOps = 6;
     }
 
     public byte Id { get; set; }

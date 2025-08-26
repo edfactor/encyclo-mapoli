@@ -3,6 +3,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.PostFrozen;
@@ -10,7 +11,7 @@ public sealed class CertificatesReportEndpoint: EndpointWithCsvBase<CerficatePri
 {
     private readonly ICertificateService _certificateService;
 
-    public CertificatesReportEndpoint(ICertificateService certificateService)
+    public CertificatesReportEndpoint(ICertificateService certificateService) : base(Navigation.Constants.PrintProfitCerts)
     {
         _certificateService = certificateService;
     }

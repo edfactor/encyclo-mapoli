@@ -29,7 +29,7 @@ public class NavigationService : INavigationService
         );
 
         var lookup = flatList.ToLookup(x => x.ParentId);
-        List<NavigationDto> BuildTree(int? parentId)
+        List<NavigationDto> BuildTree(short? parentId)
         {
             return lookup[parentId]
                 .Select(x => new NavigationDto
@@ -54,7 +54,7 @@ public class NavigationService : INavigationService
     }
 
 
-    public NavigationDto GetNavigation(int navigationId)
+    public NavigationDto GetNavigation(short navigationId)
     {
         throw new NotImplementedException();
     }
@@ -68,7 +68,7 @@ public class NavigationService : INavigationService
     }
 
 
-    public async Task<bool> UpdateNavigation(int navigationId, byte statusId, CancellationToken cancellationToken)
+    public async Task<bool> UpdateNavigation(short navigationId, byte statusId, CancellationToken cancellationToken)
     {
         var success = await _dataContextFactory.UseWritableContext(async context =>
         {

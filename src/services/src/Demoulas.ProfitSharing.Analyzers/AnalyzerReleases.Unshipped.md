@@ -6,4 +6,5 @@
 Rule ID | Category | Severity | Notes
 --------|----------|----------|------
 DSM002 | Design | Info | DTO with name/contact properties should implement DRY interfaces
+DSMPS010 | Architecture | Error | Endpoints must implement IHasNavigationId
 

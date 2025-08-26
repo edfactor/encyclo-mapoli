@@ -6,6 +6,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 
@@ -14,6 +15,7 @@ public class BreakdownEndpoint : EndpointWithCsvBase<BreakdownByStoreRequest, Me
     private readonly IBreakdownService _breakdownService;
 
     public BreakdownEndpoint(IBreakdownService breakdownService)
+        : base(Navigation.Constants.QPAY066TA)
     {
         _breakdownService = breakdownService;
     }

@@ -1,16 +1,18 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ExecutiveHoursAndDollars;
 
-public class SetExecutiveHoursAndDollarsEndpoint : Endpoint<SetExecutiveHoursAndDollarsRequest>
+public class SetExecutiveHoursAndDollarsEndpoint : ProfitSharingRequestEndpoint<SetExecutiveHoursAndDollarsRequest>
 {
     private readonly IExecutiveHoursAndDollarsService _executiveHoursAndDollarsService;
 
-    public SetExecutiveHoursAndDollarsEndpoint(IExecutiveHoursAndDollarsService executiveHoursAndDollarsService)
+    public SetExecutiveHoursAndDollarsEndpoint(IExecutiveHoursAndDollarsService executiveHoursAndDollarsService) : base(Navigation.Constants.ManageExecutiveHours)
     {
         _executiveHoursAndDollarsService = executiveHoursAndDollarsService;
     }

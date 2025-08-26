@@ -33,7 +33,19 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
 
         // Seed data based on add-navigation-data.sql
         builder.HasData(
-            // Main menu items
+             // Main menu items
+             new Navigation
+             {
+                 Id = Navigation.Constants.Unknown,
+                 ParentId = null,
+                 Title = "Unknown",
+                 SubTitle = "",
+                 Url = "",
+                 StatusId = 1,
+                 OrderNumber = 1,
+                 Icon = "",
+                 Disabled = false
+             },
             new Navigation 
             { 
                 Id = Navigation.Constants.Inquiries, 

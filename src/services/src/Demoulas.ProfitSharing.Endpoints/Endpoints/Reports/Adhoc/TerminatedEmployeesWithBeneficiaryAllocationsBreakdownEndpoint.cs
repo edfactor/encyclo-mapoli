@@ -6,6 +6,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.Adhoc;
 public sealed class TerminatedEmployeesWithBeneficiaryAllocationsBreakdownEndpoint : EndpointWithCsvBase<TerminatedEmployeesWithBalanceBreakdownRequest, MemberYearSummaryDto, TerminatedEmployeesWithVestedBalanceBreakdownEndpoint.BreakdownEndpointMap>
@@ -13,6 +14,7 @@ public sealed class TerminatedEmployeesWithBeneficiaryAllocationsBreakdownEndpoi
     private readonly IBreakdownService _breakdownService;
 
     public TerminatedEmployeesWithBeneficiaryAllocationsBreakdownEndpoint(IBreakdownService breakdownService)
+        : base(Navigation.Constants.QPAY066AdHocReports)
     {
         _breakdownService = breakdownService;
     }
