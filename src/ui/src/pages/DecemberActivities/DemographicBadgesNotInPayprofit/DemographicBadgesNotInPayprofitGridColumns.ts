@@ -11,7 +11,7 @@ export const GetDemographicBadgesNotInPayprofitColumns = (): ColDef[] => {
       renderAsLink: false
     }),
     createSSNColumn({ 
-      headerName: "Demographic SSN", 
+      headerName: "SSN", 
       alignment: "left", 
       maxWidth: 250 
     }),
