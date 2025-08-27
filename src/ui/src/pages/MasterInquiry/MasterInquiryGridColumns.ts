@@ -23,7 +23,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       field: "profitCodeId",
       colId: "profitCodeId",
       minWidth: 100,
-      type: "rightAligned",
+      type: "leftAligned",
       resizable: true,
       tooltipValueGetter: (params) => {
         return params.data?.profitCodeName;
@@ -123,7 +123,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       field: "commentTypeName",
       colId: "commentTypeName",
       minWidth: 100,
-      type: "rightAligned",
+      type: "leftAligned",
       resizable: true
     },
     {

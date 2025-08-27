@@ -1,9 +1,8 @@
-import React from "react";
-import { Typography } from "@mui/material";
+import { Box, Chip, Typography } from "@mui/material";
+import { formatNumberWithComma } from "smart-ui-library";
 import { PagedReportResponse } from "../reduxstore/types";
 import { mmDDYYFormat } from "../utils/dateUtils";
 import EnvironmentUtils from "../utils/environmentUtils";
-import { formatNumberWithComma } from "smart-ui-library";
 
 interface ReportSummaryProps<T> {
   report: PagedReportResponse<T>;
@@ -15,21 +14,27 @@ export const shouldShowDataSource = (): boolean => {
 
 export function ReportSummary<T>({ report }: ReportSummaryProps<T>) {
   return (
-    <>
-      <div style={{ padding: "0 24px 0 24px" }}>
-        <Typography
-          variant="h2"
-          sx={{ color: "#0258A5" }}>
-          {`${report.reportName || ""} (${formatNumberWithComma(report.response.total) || 0} ${
-            report.response.total === 1 ? "Record" : "Records"
-          })`}
-        </Typography>
-        <Typography sx={{ color: "#0258A5" }}>
-          {`Report Range: ${mmDDYYFormat(report.startDate)} - ${mmDDYYFormat(report.endDate)}`}
-          {shouldShowDataSource() && ` || Data Source: ${report.dataSource}`}
-        </Typography>
-      </div>
-    </>
+    <Box
+      className="flex flex-wrap items-center gap-2"
+      sx={{ padding: "0px 24px" }}>
+      <Typography
+        variant="h2"
+        className="text-dsm-secondary">
+        {`${report.reportName || ""} (${formatNumberWithComma(report.response.total) || 0})`}
+      </Typography>
+      <Box className="flex flex-wrap gap-1">
+        <Chip
+          label={`Report range: ${mmDDYYFormat(report.startDate)} to ${mmDDYYFormat(report.endDate)}`}
+          className="bg-dsm-grey-hover"
+        />
+        {shouldShowDataSource() && (
+          <Chip
+            label={`Data Source: ${report.dataSource}`}
+            className="bg-dsm-blue"
+          />
+        )}
+      </Box>
+    </Box>
   );
 }
 

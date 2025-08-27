@@ -84,6 +84,7 @@ const ProfitShareEditUpdateGrid = ({
             preferenceKey={"ProfitShareUpdateGrid"}
             isLoading={isFetching}
             handleSortChanged={sortEventHandler}
+            maxHeight={400}
             providedOptions={{
               rowData: "response" in profitSharingUpdate ? profitSharingUpdate.response?.results : [],
               columnDefs: columnDefs

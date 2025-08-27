@@ -4,9 +4,9 @@ import TabPanel from "@mui/lab/TabPanel";
 import Box from "@mui/material/Box";
 import Tab from "@mui/material/Tab";
 import { SyntheticEvent, useState } from "react";
-import VestedAmountsByAgeGrid from "./VestedAmountsByAgeGrid";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
+import VestedAmountsByAgeGrid from "./VestedAmountsByAgeGrid";
 
 const VestedAmountByAgeTabs: React.FC = () => {
   const [value, setValue] = useState("1");

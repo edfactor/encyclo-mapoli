@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogTitle, Divider, Grid } from "@mui/material";
+import { Dialog, DialogContent, DialogTitle, Grid } from "@mui/material";
 import MissiveAlerts from "components/MissiveAlerts/MissiveAlerts";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { useEffect, useState } from "react";
@@ -58,9 +58,6 @@ const MilitaryEntryAndModificationContent = () => {
     <Grid
       container
       rowSpacing="24px">
-      <Grid width={"100%"}>
-        <Divider />
-      </Grid>
       <Grid width={"100%"}>
         <DSMAccordion title="Filter">
           <MilitaryEntryAndModificationSearchFilter />

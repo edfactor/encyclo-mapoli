@@ -66,6 +66,7 @@ import ReprintCertificates from "pages/ReprintCertificates/ReprintCertificates";
 import MilitaryEntryAndModification from "../../pages/DecemberActivities/MilitaryEntryAndModification/MilitaryEntryAndModification";
 import DevDebug from "../../pages/Dev/DevDebug";
 import ForfeituresAdjustment from "../../pages/ForfeituresAdjustment/ForfeituresAdjustment";
+import LandingPage from "./LandingPage";
 
 const RouterSubAssembly: React.FC = () => {
   const isProductionOrUAT = EnvironmentUtils.isProduction || EnvironmentUtils.isUAT;
@@ -245,7 +246,7 @@ const RouterSubAssembly: React.FC = () => {
                   element={<ProfitShareEditUpdate />}></Route>
                 <Route
                   path=""
-                  element={<></>}></Route>
+                  element={<LandingPage />}></Route>
                 <Route
                   path={ROUTES.PROFIT_SHARE_BY_STORE}
                   element={<ProfitShareByStore />}></Route>

@@ -1,12 +1,12 @@
+import { Grid } from "@mui/material";
+import { TotalsGrid } from "components/TotalsGrid/TotalsGrid";
 import { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetBalanceByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, ISortParams, numberToCurrency } from "smart-ui-library";
-import { TotalsGrid } from "components/TotalsGrid/TotalsGrid";
-import { GetBalanceByAgeColumns } from "./BalanceByAgeGridColumns";
-import { Grid } from "@mui/material";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
+import { GetBalanceByAgeColumns } from "./BalanceByAgeGridColumns";
 
 interface BalanceByAgeGridProps {
   initialSearchLoaded: boolean;
@@ -74,12 +74,11 @@ const BalanceByAgeGrid: React.FC<BalanceByAgeGridProps> = ({ initialSearchLoaded
           <Grid
             size={{ xs: 12 }}
             container
-            columnSpacing={2}
             rowSpacing={0}>
             <Grid size={{ xs: 4 }}>
-              <h2 className="text-dsm-secondary">Total</h2>
+              <h2 className="px-[24px] text-dsm-secondary">Total</h2>
               <TotalsGrid
-                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12 }}
+                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
                 tablePadding="0px"
                 displayData={[
                   [
@@ -104,7 +103,7 @@ const BalanceByAgeGrid: React.FC<BalanceByAgeGridProps> = ({ initialSearchLoaded
             <Grid size={{ xs: 4 }}>
               <h2 className="text-dsm-secondary">Full-time</h2>
               <TotalsGrid
-                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12 }}
+                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
                 tablePadding="0px"
                 displayData={[
                   [
@@ -129,7 +128,7 @@ const BalanceByAgeGrid: React.FC<BalanceByAgeGridProps> = ({ initialSearchLoaded
             <Grid size={{ xs: 4 }}>
               <h2 className="text-dsm-secondary">Part-time</h2>
               <TotalsGrid
-                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12 }}
+                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
                 tablePadding="0px"
                 displayData={[
                   [
@@ -155,7 +154,6 @@ const BalanceByAgeGrid: React.FC<BalanceByAgeGridProps> = ({ initialSearchLoaded
           <Grid
             size={{ xs: 12 }}
             container
-            columnSpacing={2}
             rowSpacing={0}>
             <Grid size={{ xs: 4 }}>
               <DSMGrid
@@ -173,7 +171,7 @@ const BalanceByAgeGrid: React.FC<BalanceByAgeGridProps> = ({ initialSearchLoaded
               <DSMGrid
                 preferenceKey={"AGE_FullTime"}
                 isLoading={isFetching}
-                handleSortChanged={sortEventHandler}
+                handleSortChanged={sortEventHandlerX}
                 providedOptions={{
                   rowData: balanceByAgeFullTime?.response.results ?? [],
 
