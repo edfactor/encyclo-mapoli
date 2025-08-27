@@ -1,5 +1,5 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Checkbox, FormControlLabel, Grid } from "@mui/material";
+import { Checkbox, FormControlLabel, FormHelperText, Grid } from "@mui/material";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
@@ -144,20 +144,23 @@ const RehireForfeituresSearchFilter: React.FC<RehireForfeituresSearchFilterProps
             name="beginningDate"
             control={control}
             render={({ field }) => (
-              <DsmDatePicker
-                id="beginningDate"
-                onChange={(value: Date | null) => {
-                  field.onChange(value ?? undefined);
-                  trigger(["beginningDate", "endingDate"]);
-                }}
-                value={field.value ? tryddmmyyyyToDate(field.value) : null}
-                required={true}
-                label="Rehire Begin Date"
-                disableFuture
-                error={errors.beginningDate?.message}
-                minDate={tryddmmyyyyToDate(fiscalData.fiscalBeginDate) ?? undefined}
-                maxDate={tryddmmyyyyToDate(fiscalData.fiscalEndDate) ?? undefined}
-              />
+              <>
+                <DsmDatePicker
+                  id="beginningDate"
+                  onChange={(value: Date | null) => {
+                    field.onChange(value ?? undefined);
+                    trigger(["beginningDate", "endingDate"]);
+                  }}
+                  value={field.value ? tryddmmyyyyToDate(field.value) : null}
+                  required={true}
+                  label="Rehire Begin Date"
+                  disableFuture
+                  error={errors.beginningDate?.message}
+                  minDate={tryddmmyyyyToDate(fiscalData.fiscalBeginDate) ?? undefined}
+                  maxDate={tryddmmyyyyToDate(fiscalData.fiscalEndDate) ?? undefined}
+                />
+                <FormHelperText error>{errors.beginningDate?.message || " "}</FormHelperText>
+              </>
             )}
           />
         </Grid>
@@ -176,20 +179,23 @@ const RehireForfeituresSearchFilter: React.FC<RehireForfeituresSearchFilterProps
                   : (minDateFromBeginning ?? fiscalMinDate ?? undefined);
 
               return (
-                <DsmDatePicker
-                  id="endingDate"
-                  onChange={(value: Date | null) => {
-                    field.onChange(value ?? undefined);
-                    trigger("endingDate");
-                  }}
-                  value={field.value ? tryddmmyyyyToDate(field.value) : null}
-                  required={true}
-                  label="Rehire Ending Date"
-                  disableFuture
-                  error={errors.endingDate?.message}
-                  minDate={effectiveMinDate}
-                  maxDate={tryddmmyyyyToDate(fiscalData.fiscalEndDate) ?? undefined}
-                />
+                <>
+                  <DsmDatePicker
+                    id="endingDate"
+                    onChange={(value: Date | null) => {
+                      field.onChange(value ?? undefined);
+                      trigger("endingDate");
+                    }}
+                    value={field.value ? tryddmmyyyyToDate(field.value) : null}
+                    required={true}
+                    label="Rehire Ending Date"
+                    disableFuture
+                    error={errors.endingDate?.message}
+                    minDate={effectiveMinDate}
+                    maxDate={tryddmmyyyyToDate(fiscalData.fiscalEndDate) ?? undefined}
+                  />
+                  <FormHelperText error>{errors.endingDate?.message || " "}</FormHelperText>
+                </>
               );
             }}
           />

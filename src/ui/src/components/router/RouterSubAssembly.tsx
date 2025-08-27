@@ -354,7 +354,13 @@ const RouterSubAssembly: React.FC = () => {
   }, [dispatch, impersonating]);
 
   useEffect(() => {
-    if (isSuccess && data?.navigation && token && location.pathname !== "/unauthorized") {
+    if (
+      isSuccess &&
+      data?.navigation &&
+      token &&
+      location.pathname !== "/unauthorized" &&
+      location.pathname !== "/dev-debug"
+    ) {
       const currentPath = location.pathname;
       const isAllowed = isPathAllowedInNavigation(currentPath, data.navigation);
 
