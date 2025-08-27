@@ -8,6 +8,7 @@ using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Endpoints.TypeConverters;
 using Demoulas.ProfitSharing.Security;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Military;
 
@@ -16,6 +17,7 @@ public class EmployeesOnMilitaryLeaveEndpoint : EndpointWithCsvBase<SortedPagina
     private readonly ITerminationAndRehireService _reportService;
 
     public EmployeesOnMilitaryLeaveEndpoint(ITerminationAndRehireService reportService)
+        : base(Navigation.Constants.MilitaryContributions)
     {
         _reportService = reportService;
     }

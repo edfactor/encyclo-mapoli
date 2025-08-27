@@ -1,4 +1,4 @@
-namespace Demoulas.ProfitSharing.IntegrationTests;
+﻿namespace Demoulas.ProfitSharing.IntegrationTests.TotalSvc;
 
 public record PayProfitData
 {

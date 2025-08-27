@@ -1,51 +1,34 @@
-import { agGridNumberToCurrency } from "smart-ui-library";
+import { ColDef } from "ag-grid-community";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
-import { ColDef, ColGroupDef } from "ag-grid-community";
+import { createCurrencyColumn, createCountColumn, createAgeColumn } from "../../../utils/gridColumnFactory";
 
-export const GetBalanceByAgeColumns = (reportType: FrozenReportsByAgeRequestType): (ColDef | ColGroupDef)[] => {
-  const columns: (ColDef | ColGroupDef)[] = [
-    {
-      headerName: reportType,
-      children: [
-        {
-          headerName: "Age",
-          field: "age",
-          colId: "age",
-          minWidth: 80,
-          type: "rightAligned",
-          resizable: true,
-          sort: "asc",
-          cellDataType: "text"
-        },
-        {
-          headerName: "Count",
-          field: "employeeCount",
-          colId: "employeeCount",
-          minWidth: 100,
-          headerClass: "left-align",
-          cellClass: "left-align",
-          resizable: true
-        },
-        {
-          headerName: "Balance",
-          field: "currentBalance",
-          colId: "currentBalance",
-          minWidth: 150,
-          type: "rightAligned",
-          resizable: true,
-          valueFormatter: agGridNumberToCurrency
-        },
-        {
-          headerName: "Vested",
-          field: "vestedBalance",
-          colId: "vestedBalance",
-          minWidth: 150,
-          type: "rightAligned",
-          resizable: true,
-          valueFormatter: agGridNumberToCurrency
-        }
-      ]
-    }
+export const GetBalanceByAgeColumns = (_reportType: FrozenReportsByAgeRequestType): ColDef[] => {
+  // Flattened columns (no header group) to avoid group header render issues
+  return [
+    createAgeColumn({
+      headerName: "Age",
+      field: "age",
+      minWidth: 80,
+      sortable: false
+    }),
+    createCountColumn({
+      headerName: "EMPS",
+      field: "employeeCount",
+      minWidth: 100,
+      alignment: "left",
+      sortable: false
+    }),
+    createCurrencyColumn({
+      headerName: "Balance",
+      field: "currentBalance",
+      minWidth: 150,
+      sortable: false
+    }),
+    createCurrencyColumn({
+      headerName: "Vested",
+      field: "vestedBalance",
+      minWidth: 150,
+      sortable: false
+    })
   ];
-  return columns;
 };

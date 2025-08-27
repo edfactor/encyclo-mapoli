@@ -20,6 +20,6 @@ public sealed class ParticipantTotalFaker : Faker<ParticipantTotal>
 
             return ssnQueue.Dequeue();
         })
-        .RuleFor(x=>x.Total, f=>f.Random.Decimal(0,500000));
+        .RuleFor(x=>x.TotalAmount, f=>f.Random.Decimal(0,500000));
     }
 }

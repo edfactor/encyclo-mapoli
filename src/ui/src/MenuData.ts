@@ -1,9 +1,9 @@
-import { RouteCategory } from "./types/MenuTypes";
+import { RouteData } from "smart-ui-library";
 import { MENU_LABELS } from "./constants";
 import { NavigationDto, NavigationResponseDto } from "./reduxstore/types";
-import { RouteData } from "smart-ui-library";
+import { RouteCategory } from "./types/MenuTypes";
 
-const localStorageImpersonating: string | null = localStorage.getItem("impersonatingRole");
+const localStorageImpersonating: string[] = JSON.parse(localStorage.getItem("impersonatingRoles") || "[]");
 
 // Navigation menu ID constants
 const YEAR_END_MENU_ID = 55;
@@ -26,7 +26,7 @@ export const MenuData = (data: NavigationResponseDto | undefined): RouteCategory
     // 1. User has the required role OR
     // 2. No roles required for this menu item
     const hasRequiredRole =
-      values.requiredRoles.length > 0 && values.requiredRoles.some((role) => role === localStorageImpersonating);
+      values.requiredRoles.length > 0 && values.requiredRoles.some((role) => localStorageImpersonating.includes(role));
     const noRolesRequired = values.requiredRoles.length === 0;
 
     if (hasRequiredRole || noRolesRequired) {
@@ -35,7 +35,7 @@ export const MenuData = (data: NavigationResponseDto | undefined): RouteCategory
   });
 
   // Commented out special case for IT Operations role
-  // if(localStorageImpersonating === ImpersonationRoles.ItOperations) {
+  // if(localStorageImpersonating === ImpersonationRoles.ItDevOps) {
   //   finalData.push(it_operations);
   // }
 
@@ -46,7 +46,7 @@ export const MenuData = (data: NavigationResponseDto | undefined): RouteCategory
 const createRouteCategory = (navigationItem: NavigationDto): RouteCategory => {
   return {
     menuLabel: navigationItem.title,
-    parentRoute: navigationItem.title.toLowerCase(),
+    parentRoute: navigationItem.url || navigationItem.title.toLowerCase(), // Use URL field for proper routing
     disabled: navigationItem.disabled,
     underlined: false,
     roles: navigationItem.requiredRoles,

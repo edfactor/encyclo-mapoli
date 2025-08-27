@@ -7,6 +7,7 @@ import {
   BreakdownByStoreRequest,
   BreakdownByStoreResponse,
   BreakdownByStoreTotals,
+  CertificatesReportResponse,
   ContributionsByAge,
   ControlSheetResponse,
   DemographicBadgesNotInPayprofit,
@@ -28,7 +29,6 @@ import {
   GrandTotalsByStoreResponseDto,
   GrossWagesReportRequest,
   GrossWagesReportResponse,
-  MilitaryAndRehireForfeiture,
   MissingCommasInPYName,
   NegativeEtvaForSSNsOnPayProfit,
   PagedReportResponse,
@@ -41,6 +41,7 @@ import {
   ProfitSharingDistributionsByAge,
   ProfitSharingLabel,
   ProfitYearRequest,
+  RehireForfeiture,
   ReportsByAgeParams,
   StartAndEndDateRequest,
   TerminationResponse,
@@ -53,7 +54,8 @@ import {
   UpdateSummaryResponse,
   VestedAmountsByAge,
   YearEndProfitSharingReportResponse,
-  YearEndProfitSharingReportSummaryResponse
+  YearEndProfitSharingReportSummaryResponse,
+  YearEndProfitSharingReportTotalsResponse
 } from "reduxstore/types";
 import { Paged } from "smart-ui-library";
 
@@ -109,12 +111,12 @@ export interface YearsEndState {
   forfeituresByAgeTotal: ForfeituresByAge | null;
   grossWagesReport: GrossWagesReportResponse | null;
   grossWagesReportQueryParams: GrossWagesReportRequest | null;
-  militaryAndRehire: PagedReportResponse<EmployeesOnMilitaryLeaveResponse> | null;
+  rehire: PagedReportResponse<EmployeesOnMilitaryLeaveResponse> | null;
   militaryEntryAndModification: EmployeeDetails | null;
-  rehireForfeitures: PagedReportResponse<MilitaryAndRehireForfeiture> | null;
+  rehireForfeitures: PagedReportResponse<RehireForfeiture> | null;
   rehireForfeituresQueryParams: StartAndEndDateRequest | null;
   rehireProfitSummaryQueryParams: StartAndEndDateRequest | null;
-  militaryAndRehireQueryParams: StartAndEndDateRequest | null;
+  rehireQueryParams: StartAndEndDateRequest | null;
   missingCommaInPYName: PagedReportResponse<MissingCommasInPYName> | null;
   negativeEtvaForSSNsOnPayprofit: PagedReportResponse<NegativeEtvaForSSNsOnPayProfit> | null;
   negativeEtvaForSSNsOnPayprofitParams: ProfitYearRequest | null;
@@ -131,6 +133,7 @@ export interface YearsEndState {
   vestedAmountsByAgeQueryParams: ProfitYearRequest | null;
   yearEndProfitSharingReport: YearEndProfitSharingReportResponse | null;
   yearEndProfitSharingReportQueryParams: ProfitYearRequest | null;
+  yearEndProfitSharingReportTotals: YearEndProfitSharingReportTotalsResponse | null;
   breakdownByStore: BreakdownByStoreResponse | null;
   breakdownByStoreMangement: BreakdownByStoreResponse | null;
   breakdownByStoreTotals: BreakdownByStoreTotals | null;
@@ -147,6 +150,7 @@ export interface YearsEndState {
   profitSharingLabels: Paged<ProfitSharingLabel> | null;
   controlSheet: ControlSheetResponse | null;
   breakdownGrandTotals: GrandTotalsByStoreResponseDto | null;
+  certificates: CertificatesReportResponse | null;
 }
 
 const initialState: YearsEndState = {
@@ -203,8 +207,8 @@ const initialState: YearsEndState = {
   forfeituresAndPointsQueryParams: null,
   grossWagesReport: null,
   grossWagesReportQueryParams: null,
-  militaryAndRehire: null,
-  militaryAndRehireQueryParams: null,
+  rehire: null,
+  rehireQueryParams: null,
   militaryEntryAndModification: null,
   rehireForfeitures: null,
   rehireForfeituresQueryParams: null,
@@ -227,6 +231,7 @@ const initialState: YearsEndState = {
   vestedAmountsByAgeQueryParams: null,
   yearEndProfitSharingReport: null,
   yearEndProfitSharingReportQueryParams: null,
+  yearEndProfitSharingReportTotals: null,
   breakdownByStore: null,
   breakdownByStoreMangement: null,
   breakdownByStoreTotals: null,
@@ -242,7 +247,8 @@ const initialState: YearsEndState = {
   updateSummary: null,
   profitSharingLabels: null,
   controlSheet: null,
-  breakdownGrandTotals: null
+  breakdownGrandTotals: null,
+  certificates: null
 };
 
 export const yearsEndSlice = createSlice({
@@ -383,7 +389,7 @@ export const yearsEndSlice = createSlice({
       // Military and Rehire Profit Summary
       // StartAndEndDateRequest does not have profitYear, so just clear the data if the year changes
       if (state.rehireProfitSummaryQueryParams) {
-        state.militaryAndRehire = null;
+        state.rehire = null;
       }
 
       // Year End Profit Sharing Report
@@ -559,28 +565,25 @@ export const yearsEndSlice = createSlice({
     clearForfeituresAndPointsQueryParams: (state) => {
       state.forfeituresAndPointsQueryParams = null;
     },
-    setMilitaryAndRehireProfitSummaryQueryParams: (state, action: PayloadAction<StartAndEndDateRequest>) => {
+    setRehireProfitSummaryQueryParams: (state, action: PayloadAction<StartAndEndDateRequest>) => {
       state.rehireProfitSummaryQueryParams = action.payload;
     },
     setEmployeesOnMilitaryLeaveDetails: (
       state,
       action: PayloadAction<PagedReportResponse<EmployeesOnMilitaryLeaveResponse>>
     ) => {
-      state.militaryAndRehire = action.payload;
+      state.rehire = action.payload;
     },
     clearEmployeesOnMilitaryLeaveDetails: (state) => {
-      state.militaryAndRehire = null;
+      state.rehire = null;
     },
-    setMilitaryAndRehireForfeituresDetails: (
-      state,
-      action: PayloadAction<PagedReportResponse<MilitaryAndRehireForfeiture>>
-    ) => {
+    setRehireForfeituresDetails: (state, action: PayloadAction<PagedReportResponse<RehireForfeiture>>) => {
       state.rehireForfeitures = action.payload;
     },
     clearRehireForfeituresDetails: (state) => {
       state.rehireForfeitures = null;
     },
-    setMilitaryAndRehireForfeituresQueryParams: (state, action: PayloadAction<StartAndEndDateRequest>) => {
+    setRehireForfeituresQueryParams: (state, action: PayloadAction<StartAndEndDateRequest>) => {
       state.rehireForfeituresQueryParams = action.payload;
     },
     clearRehireForfeituresQueryParams: (state) => {
@@ -921,6 +924,12 @@ export const yearsEndSlice = createSlice({
     clearYearEndProfitSharingReportQueryParams: (state) => {
       state.yearEndProfitSharingReportQueryParams = null;
     },
+    clearYearEndProfitSharingReportTotals: (state) => {
+      state.yearEndProfitSharingReportTotals = null;
+    },
+    setYearEndProfitSharingReportTotals: (state, action: PayloadAction<YearEndProfitSharingReportTotalsResponse>) => {
+      state.yearEndProfitSharingReportTotals = action.payload;
+    },
     setBreakdownByStore: (state, action: PayloadAction<BreakdownByStoreResponse>) => {
       state.breakdownByStore = action.payload;
     },
@@ -945,6 +954,13 @@ export const yearsEndSlice = createSlice({
     clearBreakdownGrandTotals: (state) => {
       state.breakdownGrandTotals = null;
     },
+    setCertificates: (state, action: PayloadAction<CertificatesReportResponse>) => {
+      state.certificates = action.payload;
+    },
+    clearCertificates: (state) => {
+      state.certificates = null;
+    },
+
     setBreakdownByStoreQueryParams: (state, action: PayloadAction<BreakdownByStoreRequest>) => {
       state.breakdownByStoreQueryParams = action.payload;
     },
@@ -1035,6 +1051,7 @@ export const {
   clearRehireForfeituresDetails,
   clearRehireForfeituresQueryParams,
   clearYearEndProfitSharingReport,
+  clearYearEndProfitSharingReportTotals,
   removeExecutiveHoursAndDollarsGridRow,
   setAdditionalExecutivesChosen,
   setAdditionalExecutivesGrid,
@@ -1067,8 +1084,8 @@ export const {
   setForfeituresByAgeQueryParams,
   setGrossWagesReport,
   setGrossWagesReportQueryParams,
-  setMilitaryAndRehireForfeituresDetails,
-  setMilitaryAndRehireForfeituresQueryParams,
+  setRehireForfeituresDetails,
+  setRehireForfeituresQueryParams,
   setMissingCommaInPYName,
   setNegativeEtvaForSSNsOnPayprofit,
   setProfitMasterApply,
@@ -1078,6 +1095,7 @@ export const {
   setVestedAmountsByAgeQueryParams,
   setYearEndProfitSharingReport,
   setYearEndProfitSharingReportQueryParams,
+  setYearEndProfitSharingReportTotals,
   updateExecutiveHoursAndDollarsGridRow,
   setBreakdownByStore,
   clearBreakdownByStore,
@@ -1087,6 +1105,8 @@ export const {
   clearBreakdownByStoreTotals,
   setBreakdownGrandTotals,
   clearBreakdownGrandTotals,
+  setCertificates,
+  clearCertificates,
   setBreakdownByStoreQueryParams,
   setUnder21BreakdownByStore,
   clearUnder21BreakdownByStore,
@@ -1106,6 +1126,7 @@ export const {
   setProfitSharingEdit,
   clearProfitSharingEdit,
   clearProfitMasterRevert,
+  clearTermination,
   setProfitSharingUpdateQueryParams,
   clearProfitSharingUpdateQueryParams,
   setProfitSharingEditQueryParams,

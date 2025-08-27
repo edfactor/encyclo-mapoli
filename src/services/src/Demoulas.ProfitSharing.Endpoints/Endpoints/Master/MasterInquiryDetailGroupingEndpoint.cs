@@ -4,15 +4,17 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
-using FastEndpoints;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Endpoints.Base;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Master;
 
-public class MasterInquiryDetailGroupingEndpoint : Endpoint<MasterInquiryRequest, PaginatedResponseDto<GroupedProfitSummaryDto>>
+public class MasterInquiryDetailGroupingEndpoint : ProfitSharingEndpoint<MasterInquiryRequest, PaginatedResponseDto<GroupedProfitSummaryDto>>
 {
     private readonly IMasterInquiryService _masterInquiryService;
 
     public MasterInquiryDetailGroupingEndpoint(IMasterInquiryService masterInquiryService)
+        : base(Navigation.Constants.MasterInquiry)
     {
         _masterInquiryService = masterInquiryService;
     }

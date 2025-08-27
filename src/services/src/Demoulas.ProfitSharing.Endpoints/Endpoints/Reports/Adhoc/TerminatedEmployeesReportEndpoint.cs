@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CsvHelper.Configuration;
+﻿using CsvHelper.Configuration;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.Adhoc.TerminatedEmployeesReportEndpoint;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.Adhoc;
@@ -18,6 +14,7 @@ public sealed class TerminatedEmployeesReportEndpoint :EndpointWithCsvBase<Froze
     private readonly IAdhocTerminatedEmployeesService _adhocTerminatedEmployeesService;
 
     public TerminatedEmployeesReportEndpoint(IAdhocTerminatedEmployeesService adhocTerminatedEmployeesService)
+        : base(Navigation.Constants.QPAY066AdHocReports)
     {
         _adhocTerminatedEmployeesService = adhocTerminatedEmployeesService;
     }

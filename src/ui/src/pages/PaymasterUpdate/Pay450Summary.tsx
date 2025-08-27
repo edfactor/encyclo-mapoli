@@ -1,7 +1,6 @@
-import { Button, Divider, Stack } from "@mui/material";
-import { Grid } from "@mui/material";
-import LabelValueSection from "components/LabelValueSection";
+import { Button, Grid, Stack } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
+import TotalsGrid from "components/TotalsGrid";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -20,8 +19,10 @@ const Pay450Summary = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [pageNumberReset, setPageNumberReset] = useState(false);
+  const [currentStatus, setCurrentStatus] = useState<string | null>(null);
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
   const { updateSummary } = useSelector((state: RootState) => state.yearsEnd);
+  const navigationList = useSelector((state: RootState) => state.navigation.navigationData);
 
   const [getUpdateSummary] = useLazyGetUpdateSummaryQuery();
   const [updateEnrollment] = useUpdateEnrollmentMutation();
@@ -29,6 +30,53 @@ const Pay450Summary = () => {
   useEffect(() => {
     setInitialSearchLoaded(true);
   }, []);
+
+  // Initialize current status from navigation state
+  useEffect(() => {
+    const currentNavigationId = parseInt(localStorage.getItem("navigationId") ?? "");
+
+    const getNavigationObjectBasedOnId = (navigationArray?: any[], id?: number): any => {
+      if (navigationArray) {
+        for (const item of navigationArray) {
+          if (item.id == id) {
+            return item;
+          }
+          if (item.items && item.items.length > 0) {
+            const found = getNavigationObjectBasedOnId(item.items, id);
+            if (found) {
+              return found;
+            }
+          }
+        }
+      }
+      return undefined;
+    };
+
+    const obj = getNavigationObjectBasedOnId(navigationList?.navigation, currentNavigationId ?? undefined);
+    if (obj) {
+      setCurrentStatus(obj.statusName || null);
+    }
+  }, [navigationList]);
+
+  const handleStatusChange = (newStatus: string, statusName?: string) => {
+    // Only trigger archive when status is changing TO "Complete" (not already "Complete")
+    if (statusName === "Complete" && currentStatus !== "Complete") {
+      setCurrentStatus("Complete");
+      // Trigger getUpdateSummary with archive=true
+      getUpdateSummary({
+        profitYear: fiscalCloseProfitYear,
+        pagination: {
+          skip: 0,
+          take: 255,
+          sortBy: "",
+          isSortDescending: false
+        },
+        archive: true
+      });
+    } else {
+      setCurrentStatus(statusName || null);
+    }
+  };
 
   const handleUpdate = async () => {
     await updateEnrollment({});
@@ -49,10 +97,10 @@ const Pay450Summary = () => {
         <Button
           onClick={() => setIsModalOpen(true)}
           variant="outlined"
-          className="h-10 whitespace-nowrap min-w-fit">
+          className="h-10 min-w-fit whitespace-nowrap">
           Update
         </Button>
-        <StatusDropdownActionNode />
+        <StatusDropdownActionNode onStatusChange={handleStatusChange} />
       </Stack>
     );
   };
@@ -105,9 +153,6 @@ const Pay450Summary = () => {
         container
         rowSpacing="24px">
         <Grid width={"100%"}>
-          <Divider />
-        </Grid>
-        <Grid width={"100%"}>
           <DSMAccordion title="Filter">
             <Pay450SearchFilters
               onSearch={onSearch}
@@ -116,11 +161,33 @@ const Pay450Summary = () => {
           </DSMAccordion>
         </Grid>
 
-        <Grid
-          size={{ xs: 12 }}
-          paddingX="24px">
-          <LabelValueSection data={updateSummarySection} />
-        </Grid>
+        {updateSummary?.response && (
+          <Grid
+            size={{ xs: 12 }}
+            paddingX="24px">
+            <TotalsGrid
+              displayData={[
+                [
+                  updateSummary ? updateSummary.totalNumberOfEmployees.toString() : "-",
+                  updateSummary ? updateSummary.totalNumberOfBeneficiaries.toString() : "-",
+                  updateSummary ? numberToCurrency(updateSummary.totalBeforeProfitSharingAmount) : "-",
+                  updateSummary ? numberToCurrency(updateSummary.totalBeforeVestedAmount) : "-",
+                  updateSummary ? numberToCurrency(updateSummary.totalAfterProfitSharingAmount) : "-",
+                  updateSummary ? numberToCurrency(updateSummary.totalAfterVestedAmount) : "-"
+                ]
+              ]}
+              leftColumnHeaders={[]}
+              topRowHeaders={[
+                "Employees Updated",
+                "Beneficiaries Updated",
+                "Before Profit Sharing Amount",
+                "Before Vested Amount",
+                "After Profit Sharing Amount",
+                "After Vested Amount"
+              ]}
+            />
+          </Grid>
+        )}
         <Grid width="100%">
           <Pay450Grid
             initialSearchLoaded={initialSearchLoaded}

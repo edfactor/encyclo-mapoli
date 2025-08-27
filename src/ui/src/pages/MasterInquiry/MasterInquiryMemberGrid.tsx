@@ -1,148 +1,119 @@
-import { Box, CircularProgress, Typography } from "@mui/material";
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useLazySearchProfitMasterInquiryQuery } from "reduxstore/api/InquiryApi";
-import { EmployeeDetails, MasterInquiryRequest } from "reduxstore/types";
-import { DSMGrid, formatNumberWithComma, ISortParams } from "smart-ui-library";
+import { Box, Typography } from "@mui/material";
+import React, { memo, useMemo } from "react";
+import { EmployeeDetails } from "reduxstore/types";
+import { DSMGrid, formatNumberWithComma } from "smart-ui-library";
 import Pagination from "../../components/Pagination/Pagination";
-import "./MasterInquiryMemberGrid.css"; // Import the CSS file for styles
 import { GetMasterInquiryMemberGridColumns } from "./MasterInquiryMemberGridColumns";
 
-interface MasterInquiryMemberGridProps extends MasterInquiryRequest {
-  searchParams: MasterInquiryRequest;
-  onBadgeClick: (
-    args: { memberType: number; id: number; ssn: number; badgeNumber: number; psnSuffix: number } | undefined
-  ) => void;
-  isSimpleSearch: () => boolean;
+interface SearchResponse {
+  results: EmployeeDetails[];
+  total: number;
 }
 
-const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = ({
-  searchParams,
-  onBadgeClick,
-  isSimpleSearch
-}: MasterInquiryMemberGridProps) => {
-  const [pageNumber, setPageNumber] = useState(0);
-  const [pageSize, setPageSize] = useState(5);
-  // Add sort state management
-  const [sortParams, setSortParams] = useState<ISortParams>({
-    sortBy: searchParams.pagination?.sortBy || "badgeNumber",
-    isSortDescending: searchParams.pagination?.isSortDescending || false
-  });
-  const [trigger, { data, isLoading, isError }] = useLazySearchProfitMasterInquiryQuery();
-  const autoSelectedRef = useRef<number | null>(null);
+interface SelectedMember {
+  memberType: number;
+  id: number;
+  ssn: number;
+  badgeNumber: number;
+  psnSuffix: number;
+}
 
-  // Add sort event handler
-  const sortEventHandler = (update: ISortParams) => {
-    setSortParams(update);
-    setPageNumber(0); // Reset to first page when sorting
+interface MasterInquiryMemberGridProps {
+  searchResults: SearchResponse;
+  onMemberSelect: (member: SelectedMember) => void;
+  memberGridPagination: {
+    pageNumber: number;
+    pageSize: number;
+    sortParams: any;
   };
+  onPaginationChange: (pageNumber: number, pageSize: number) => void;
+  onSortChange: (sortParams: any) => void;
+  isLoading?: boolean;
+}
 
-  const onSearch = useCallback(async () => {
-    // We are going to do another search here which skips zero and takes all.
+const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
+  ({
+    searchResults,
+    onMemberSelect,
+    memberGridPagination,
+    onPaginationChange,
+    onSortChange,
+    isLoading = false
+  }: MasterInquiryMemberGridProps) => {
+    const columns = useMemo(() => GetMasterInquiryMemberGridColumns(), []);
 
-    await trigger({
-      ...searchParams,
-      pagination: {
-        skip: pageNumber * pageSize,
-        take: pageSize,
-        sortBy: sortParams.sortBy,
-        isSortDescending: sortParams.isSortDescending
-      }
-    });
-  }, [pageNumber, pageSize, sortParams, searchParams, trigger]);
-
-  useEffect(() => {
-    onSearch();
-  }, [onSearch]);
-
-  // If only one member is returned, auto-select and hide the grid
-  useEffect(() => {
-    if (data && data.results.length === 1 && onBadgeClick && autoSelectedRef.current !== data.results[0].id) {
-      const member = data.results[0];
-      onBadgeClick({
+    const handleMemberClick = (member: EmployeeDetails) => {
+      onMemberSelect({
         memberType: member.isEmployee ? 1 : 2,
         id: Number(member.id),
         ssn: Number(member.ssn),
         badgeNumber: Number(member.badgeNumber),
         psnSuffix: Number(member.psnSuffix)
       });
-      autoSelectedRef.current = member.id;
-    }
-    // If no results in a complex search, clear selection
-    // For simple searches, don't clear selection to allow "Member Not Found" message to show
-    if (data && data.results.length === 0 && onBadgeClick && !isSimpleSearch()) {
-      onBadgeClick(undefined);
-    }
-  }, [data, onBadgeClick]);
+    };
 
-  // If no searchParams, render nothing
-  if (!searchParams || Object.keys(searchParams).length === 0) {
-    return null;
-  }
+    const handlePaginationChange = (pageNumber: number, pageSize: number) => {
+      onPaginationChange(pageNumber, pageSize);
+    };
 
-  // Show a message if no results
-  if (!isSimpleSearch() && data && data.results.length === 0) {
+    const handleSortChange = (sortParams: any) => {
+      onSortChange(sortParams);
+    };
+
     return (
-      <Box sx={{ width: "100%", padding: "24px" }}>
-        <Typography
-          color="error"
-          variant="h6">
-          No results found.
-        </Typography>
+      <Box sx={{ width: "100%", paddingTop: "24px" }}>
+        <div style={{ padding: "0 24px 0 24px" }}>
+          <Typography
+            variant="h2"
+            sx={{ color: "#0258A5" }}>
+            {`Search Results (${formatNumberWithComma(searchResults.total)} ${searchResults.total === 1 ? "Record" : "Records"})`}
+          </Typography>
+        </div>
+        <DSMGrid
+          preferenceKey="MASTER_INQUIRY_MEMBER_GRID"
+          handleSortChanged={handleSortChange}
+          isLoading={isLoading}
+          providedOptions={{
+            rowData: searchResults.results,
+            columnDefs: columns,
+            context: { onBadgeClick: handleMemberClick },
+            onRowClicked: (event) => {
+              if (event.data) {
+                handleMemberClick(event.data);
+              }
+            }
+          }}
+        />
+        <Pagination
+          rowsPerPageOptions={[5, 10, 50]}
+          pageNumber={memberGridPagination.pageNumber}
+          setPageNumber={(value: number) => {
+            handlePaginationChange(value - 1, memberGridPagination.pageSize);
+          }}
+          pageSize={memberGridPagination.pageSize}
+          setPageSize={(value: number) => {
+            handlePaginationChange(0, value);
+          }}
+          recordCount={searchResults.total}
+        />
       </Box>
     );
+  },
+  (prevProps, nextProps) => {
+    // Custom comparison function
+    // Only re-render if incoming props are different
+    return (
+      prevProps.searchResults.results === nextProps.searchResults.results &&
+      prevProps.searchResults.total === nextProps.searchResults.total &&
+      prevProps.memberGridPagination.pageNumber === nextProps.memberGridPagination.pageNumber &&
+      prevProps.memberGridPagination.pageSize === nextProps.memberGridPagination.pageSize &&
+      prevProps.memberGridPagination.sortParams === nextProps.memberGridPagination.sortParams &&
+      prevProps.isLoading === nextProps.isLoading &&
+      prevProps.onMemberSelect === nextProps.onMemberSelect &&
+      prevProps.onPaginationChange === nextProps.onPaginationChange &&
+      prevProps.onSortChange === nextProps.onSortChange
+    );
   }
-
-  const columns = GetMasterInquiryMemberGridColumns();
-
-  // Hide the grid if only one member is returned
-  // But if the last page returns one result, we still want to show the grid
-  // so we check the total number of results to make sure it's 1 also
-  if (data && data.results.length === 1 && data.total === 1) {
-    return null;
-  }
-
-  return (
-    <Box sx={{ width: "100%" }}>
-      {isLoading && <CircularProgress />}
-      {isError && <div>Error loading data.</div>}
-      {data && data.results.length > 0 && (
-        <>
-          <div style={{ padding: "0 24px 0 24px" }}>
-            <Typography
-              variant="h2"
-              sx={{ color: "#0258A5" }}>
-              {`Search Results (${formatNumberWithComma(data?.total) || 0} ${data?.total === 1 ? "Record" : "Records"})`}
-            </Typography>
-          </div>
-          <DSMGrid
-            isLoading={isLoading}
-            preferenceKey="MASTER_INQUIRY_MEMBER_GRID"
-            handleSortChanged={sortEventHandler}
-            providedOptions={{
-              rowData: Array.isArray(data?.results) ? (data.results as EmployeeDetails[]) : [],
-              columnDefs: columns,
-              context: { onBadgeClick: onBadgeClick }
-            }}
-          />
-          <Pagination
-            rowsPerPageOptions={[5, 10, 50]}
-            pageNumber={pageNumber}
-            setPageNumber={(value: number) => {
-              setPageNumber(value - 1);
-            }}
-            pageSize={pageSize}
-            setPageSize={(value: number) => {
-              setPageSize(value);
-              setPageNumber(1);
-            }}
-            recordCount={(() => {
-              return data.total;
-            })()}
-          />
-        </>
-      )}
-    </Box>
-  );
-};
+);
 
 export default MasterInquiryMemberGrid;

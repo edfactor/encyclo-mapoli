@@ -1,23 +1,25 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Naviations;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Navigations;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Navigations;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Groups;
-using FastEndpoints;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Endpoints.Base;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Navigations;
-public class GetNavigationEndpoint: Endpoint<NavigationRequestDto,NavigationResponseDto>
+public class GetNavigationEndpoint: ProfitSharingEndpoint<NavigationRequestDto,NavigationResponseDto>
 {
 
     private readonly INavigationService _navigationService;
 
     public GetNavigationEndpoint(INavigationService navigationService)
+        : base(Navigation.Constants.Unknown)
     {
         _navigationService = navigationService;
     }
 
     public override void Configure()
     {
-        AllowAnonymous();
+      
         Get("");
         Summary(m =>
         {

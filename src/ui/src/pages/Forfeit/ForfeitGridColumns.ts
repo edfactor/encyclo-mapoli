@@ -1,63 +1,39 @@
-import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { agGridNumberToCurrency } from "smart-ui-library";
-import { GRID_COLUMN_WIDTHS } from "../../constants";
-import { createSSNColumn, createBadgeColumn } from "../../utils/gridColumnFactory";
+import { ColDef } from "ag-grid-community";
+import {
+  createBadgeColumn,
+  createCountColumn,
+  createCurrencyColumn,
+  createNameColumn,
+  createSSNColumn
+} from "../../utils/gridColumnFactory";
 
-export const GetProfitShareForfeitColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
+export const GetProfitShareForfeitColumns = (): ColDef[] => {
   return [
-    createBadgeColumn({ 
-      headerName: "Badge",
-      minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
-      alignment: "left",
-      navigateFunction: navFunction
+    createBadgeColumn({
+      headerName: "Badge"
     }),
-    {
-      headerName: "Name",
-      field: "employeeName",
-      colId: "employeeName",
-      minWidth: 150,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
+    createNameColumn({
+      field: "employeeName"
+    }),
     createSSNColumn({
       alignment: "left"
     }),
-    {
+    createCurrencyColumn({
       headerName: "Forfeitures",
-      field: "forfeitures",
-      colId: "forfeitures",
-      minWidth: 120,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+      field: "forfeitures"
+    }),
+
+    createCountColumn({
       headerName: "Cont/Forfeit Points",
-      field: "contForfeitPoints",
-      colId: "contForfeitPoints",
-      minWidth: 150,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
-    {
+      field: "contForfeitPoints"
+    }),
+    createCountColumn({
       headerName: "Earnings Points",
-      field: "earningPoints",
-      colId: "earningPoints",
-      minWidth: 120,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
-    {
-      headerName: "Ben #",
-      field: "beneficiaryPsn",
-      colId: "beneficiaryPsn",
-      minWidth: 120,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    }
+      field: "earningPoints"
+    }),
+    createBadgeColumn({
+      headerName: "Beneficiary PSN",
+      field: "beneficiaryPsn"
+    })
   ];
 };

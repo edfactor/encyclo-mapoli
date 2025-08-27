@@ -1,7 +1,9 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Text.Json;
+using YEMatch.YEMatch.Activities;
+using YEMatch.YEMatch.SmartActivities;
 
-namespace YEMatch;
+namespace YEMatch.YEMatch.Runs;
 
 /*
  * Base class for executing "Runs".   Runs are a series of Tasks (activity or tests or setup steps) which are used to move READY and/or SMART though different scenarioss.

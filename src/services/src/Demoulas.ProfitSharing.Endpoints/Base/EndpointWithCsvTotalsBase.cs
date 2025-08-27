@@ -1,13 +1,12 @@
 ﻿using System.Globalization;
 using System.Text;
-using CsvHelper.Configuration;
 using CsvHelper;
+using CsvHelper.Configuration;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.Util.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 
 namespace Demoulas.ProfitSharing.Endpoints.Base;
 
@@ -21,12 +20,19 @@ namespace Demoulas.ProfitSharing.Endpoints.Base;
 /// <typeparam name="ItemType">The type of the individual result items in the response.</typeparam>
 /// <typeparam name="MapType">A mapping class that converts from a dto to a CSV format</typeparam>
 public abstract class EndpointWithCsvTotalsBase<ReqType, RespType, ItemType, MapType>
-    : FastEndpoints.Endpoint<ReqType, RespType>
+    : FastEndpoints.Endpoint<ReqType, RespType>, IHasNavigationId
     where RespType : ReportResponseBase<ItemType>
     where ReqType : SortedPaginationRequestDto 
     where ItemType : class
     where MapType : ClassMap<ItemType>
 {
+    protected EndpointWithCsvTotalsBase(short navigationId)
+    {
+        NavigationId = navigationId;
+    }
+
+    public short NavigationId { get; protected set; }
+
     public override void Configure()
     {
         if (!Env.IsTestEnvironment())

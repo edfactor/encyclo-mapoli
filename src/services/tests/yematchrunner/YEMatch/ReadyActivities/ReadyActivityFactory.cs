@@ -1,7 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Renci.SshNet;
+using YEMatch.YEMatch.Activities;
 
-namespace YEMatch;
+namespace YEMatch.YEMatch.ReadyActivities;
 
 public static class ReadyActivityFactory
 {

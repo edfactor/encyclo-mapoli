@@ -1,5 +1,5 @@
-﻿using System.Net.NetworkInformation;
-using System.Net;
+﻿using System.Net;
+using System.Net.NetworkInformation;
 
 namespace Demoulas.ProfitSharing.AppHost.Helpers;
 public static class PortHelper

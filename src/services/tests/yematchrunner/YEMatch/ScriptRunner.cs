@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-namespace YEMatch;
+namespace YEMatch.YEMatch;
 
 public static class ScriptRunner
 {

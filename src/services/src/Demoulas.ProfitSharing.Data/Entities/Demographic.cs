@@ -10,7 +10,6 @@ namespace Demoulas.ProfitSharing.Data.Entities;
 public sealed class Demographic : Member
 {
     private int _ssn;
-    public int Id { get; set; }
 
     /// <summary>
     /// Gets or sets the Oracle HCM (Human Capital Management) ID.
@@ -53,8 +52,6 @@ public sealed class Demographic : Member
         }
     }
 
-    public required int BadgeNumber { get; set; }
-
     public required short StoreNumber { get; set; }
 
     public PayClassification? PayClassification { get; set; }
@@ -92,7 +89,6 @@ public sealed class Demographic : Member
 
     public char EmploymentStatusId { get; set; }
     public EmploymentStatus? EmploymentStatus { get; set; }
-
 
     public List<PayProfit> PayProfits { get; set; } = [];
     public List<Beneficiary> Beneficiaries { get; set; } = [];

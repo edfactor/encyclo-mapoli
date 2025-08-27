@@ -73,6 +73,14 @@ const presets: ReportPreset[] = [
     params: {
       reportId: 9
     }
+  },
+  {
+    id: "10",
+    name: "PAY426-10",
+    description: CAPTIONS.PAY426_NON_EMPLOYEE,
+    params: {
+      reportId: 10
+    }
   }
 ];
 

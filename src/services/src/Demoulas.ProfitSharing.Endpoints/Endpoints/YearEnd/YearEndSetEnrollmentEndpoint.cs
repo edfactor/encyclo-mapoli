@@ -1,20 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
-using FastEndpoints;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Endpoints.Base;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.YearEnd;
 
-public sealed class YearEndSetEnrollmentEndpoint: Endpoint<ProfitYearRequest>
+public sealed class YearEndSetEnrollmentEndpoint: ProfitSharingRequestEndpoint<ProfitYearRequest>
 {
     private readonly IYearEndService _yearEndService;
 
     public YearEndSetEnrollmentEndpoint(IYearEndService yearEndService)
+        : base(Navigation.Constants.ProfitShareReportFinalRun)
     {
         _yearEndService = yearEndService;
     }

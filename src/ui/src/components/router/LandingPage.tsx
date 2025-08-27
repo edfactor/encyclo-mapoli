@@ -1,52 +1,43 @@
-import Button from "@mui/material/Button";
-import { useState } from "react";
-import { useLazyGetDemographicBadgesNotInPayprofitQuery } from "reduxstore/api/YearsEndApi";
-import { DSMAccordion, SectionTitle, SmartModal } from "smart-ui-library";
-
-const BuggyComponent = () => {
-  const [count, setCount] = useState(0);
-  if (count === 5) {
-    throw new Error("Simulated error: Counter reached 5!");
-  }
-  return (
-    <div className="p-4 border rounded">
-      <p className="mb-4">Count: {count}</p>
-      <button
-        onClick={() => setCount(count + 1)}
-        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-        Increment to crash
-      </button>
-    </div>
-  );
-};
+import { useNavigate } from "react-router-dom";
+import storefront from "../../../images/storefront.jpg";
+import { ROUTES } from "../../constants";
 
 const LandingPage = () => {
-  const [openModal, setOpenModal] = useState<boolean>(false);
+  const navigate = useNavigate();
 
-  const [trigger] = useLazyGetDemographicBadgesNotInPayprofitQuery();
   return (
-    <div style={{ width: "100%", height: "100%" }}>
-      <SectionTitle title="Landing Page"></SectionTitle>
-      <Button
-        variant="contained"
-        onClick={() => setOpenModal(true)}>
-        Open Modal
-      </Button>
-      <Button
-        variant="contained"
-        onClick={() => {
-          throw new Error("Good morning to those watching the demo!");
-        }}>
-        Test Request
-      </Button>
-      <BuggyComponent />
-      <SmartModal
-        open={openModal}
-        onClose={() => setOpenModal(false)}>
-        <DSMAccordion title="Accordion Component">
-          <big>Sample Content</big>
-        </DSMAccordion>
-      </SmartModal>
+    <div className="h-full w-full p-6">
+      <h1 className="mb-6 text-3xl font-normal uppercase tracking-wider text-dsm-secondary">
+        Welcome to Profit Sharing
+      </h1>
+
+      <h2 className="mb-4 text-xl text-dsm-secondary">Quick Links</h2>
+
+      <div className="mb-8 flex gap-4">
+        <button
+          className="rounded border-2 border-dsm-action px-4 py-2 uppercase text-dsm-action hover:border-dsm-action-hover hover:bg-dsm-action-secondary-hover"
+          onClick={() => navigate(ROUTES.FORFEIT)}>
+          Forfeits
+        </button>
+        <button
+          className="rounded border-2 border-dsm-action px-4 py-2 uppercase text-dsm-action hover:border-dsm-action-hover hover:bg-dsm-action-secondary-hover"
+          onClick={() => navigate(ROUTES.MASTER_INQUIRY)}>
+          Master Inquiry
+        </button>
+        <button
+          className="rounded border-2 border-dsm-action px-4 py-2 uppercase text-dsm-action hover:border-dsm-action-hover hover:bg-dsm-action-secondary-hover"
+          onClick={() => navigate(ROUTES.DISTRIBUTIONS_AND_FORFEITURES)}>
+          Distributions
+        </button>
+      </div>
+
+      <div className="pb-10">
+        <img
+          src={storefront}
+          alt="supermarket"
+          className="mx-auto block h-auto w-full max-w-screen-2xl"
+        />
+      </div>
     </div>
   );
 };

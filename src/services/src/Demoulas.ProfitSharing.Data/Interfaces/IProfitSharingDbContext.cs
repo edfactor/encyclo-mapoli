@@ -8,6 +8,7 @@ namespace Demoulas.ProfitSharing.Data.Interfaces;
 
 public interface IProfitSharingDbContext
 {
+    DbSet<AnnuityRate> AnnuityRates { get; set; }
     DbSet<Demographic> Demographics { get; set; }
     DbSet<DemographicHistory> DemographicHistories { get; set; }
     DbSet<EmploymentType> EmploymentTypes { get; set; }
@@ -29,7 +30,7 @@ public interface IProfitSharingDbContext
     DbSet<ParticipantTotalRatio> ParticipantTotalRatios { get; set; }
     DbSet<ParticipantTotalYear> ParticipantTotalYears { get; set; }
     DbSet<ParticipantTotalVestingBalance> ParticipantTotalVestingBalances { get; set; }
-
+    DbSet<ProfitDetailRollup> ProfitDetailRollups { get; set; }
     DbSet<ProfitShareTotal> ProfitShareTotals { get; set; }
     DatabaseFacade Database { get; }
 }

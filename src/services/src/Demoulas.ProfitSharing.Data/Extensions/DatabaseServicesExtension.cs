@@ -1,13 +1,13 @@
 ﻿using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
-using Demoulas.ProfitSharing.Common;
+using Demoulas.Common.Data.Contexts.Interceptor;
+using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.ProfitSharing.Data.Configuration;
 using Demoulas.ProfitSharing.Data.Factories;
 using Demoulas.ProfitSharing.Data.Interceptors;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 
 namespace Demoulas.ProfitSharing.Data.Extensions;
@@ -52,6 +52,7 @@ public static class DatabaseServicesExtension
         });
         _ = builder.Services.AddSingleton<BeneficiarySaveChangesInterceptor>();
         _ = builder.Services.AddSingleton<BeneficiaryContactSaveChangesInterceptor>();
+        _ = builder.Services.AddSingleton<ICommitGuardOverride, CommitGuardOverride>();
         _ = builder.Services.AddHttpContextAccessor();
 
 

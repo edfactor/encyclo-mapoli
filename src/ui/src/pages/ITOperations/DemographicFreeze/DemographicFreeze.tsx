@@ -1,5 +1,4 @@
-import { Divider } from "@mui/material";
-import { Grid } from "@mui/material";
+import { Divider, Grid } from "@mui/material";
 import { useState } from "react";
 import { Page } from "smart-ui-library";
 import DemographicFreezeGrid from "./DemographicFreezeGrid";
@@ -8,6 +7,7 @@ import DemographicFreezeManager from "./DemographicFreezeManager";
 const DemographicFreeze = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [pageNumberReset, setPageNumberReset] = useState(false);
+
   return (
     <Page label="IT Commands - Demographic Freeze">
       <Grid

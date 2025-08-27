@@ -1,16 +1,18 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Navigations;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Navigations;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Navigations;
-public class UpdateNavigationStatusEndpoint : Endpoint<UpdateNavigationRequestDto, UpdateNavigationStatusResponseDto>
+public class UpdateNavigationStatusEndpoint : ProfitSharingEndpoint<UpdateNavigationRequestDto, UpdateNavigationStatusResponseDto>
 {
 
     private readonly INavigationService _navigationService;
 
-    public UpdateNavigationStatusEndpoint(INavigationService navigationService)
+    public UpdateNavigationStatusEndpoint(INavigationService navigationService) : base(Navigation.Constants.Unknown)
     {
         _navigationService = navigationService;
     }
@@ -29,7 +31,7 @@ public class UpdateNavigationStatusEndpoint : Endpoint<UpdateNavigationRequestDt
 
     public override async Task<UpdateNavigationStatusResponseDto> ExecuteAsync(UpdateNavigationRequestDto req, CancellationToken ct)
     {
-        var isSuccessful  = await this._navigationService.UpdateNavigation(req.NavigationId, req.StatusId, cancellationToken: ct);
+    var isSuccessful  = await _navigationService.UpdateNavigation(req.NavigationId, req.StatusId, cancellationToken: ct);
         var response = new UpdateNavigationStatusResponseDto { IsSuccessful = isSuccessful };
         return response;
     }

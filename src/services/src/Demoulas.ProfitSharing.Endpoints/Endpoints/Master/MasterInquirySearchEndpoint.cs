@@ -4,15 +4,17 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
-using FastEndpoints;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Endpoints.Base;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Master;
 
-public class MasterInquirySearchEndpoint : Endpoint<MasterInquiryRequest, PaginatedResponseDto<MemberDetails>>
+public class MasterInquirySearchEndpoint : ProfitSharingEndpoint<MasterInquiryRequest, PaginatedResponseDto<MemberDetails>>
 {
     private readonly IMasterInquiryService _masterInquiryService;
 
     public MasterInquirySearchEndpoint(IMasterInquiryService masterInquiryService)
+        : base(Navigation.Constants.MasterInquiry)
     {
         _masterInquiryService = masterInquiryService;
     }
@@ -41,6 +43,7 @@ public class MasterInquirySearchEndpoint : Endpoint<MasterInquiryRequest, Pagina
                                 FirstName = "John",
                                 LastName = "Doe",
                                 BadgeNumber = 1001,
+                                PayFrequencyId = 1,
                                 Address = "123 Main St",
                                 AddressCity = "Boston",
                                 AddressState = "MA",

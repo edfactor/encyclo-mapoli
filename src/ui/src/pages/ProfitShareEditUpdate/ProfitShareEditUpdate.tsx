@@ -1,6 +1,5 @@
 import { Replay } from "@mui/icons-material";
-import { Alert, AlertTitle, Button, CircularProgress, Divider, Tooltip, Typography } from "@mui/material";
-import { Grid } from "@mui/material";
+import { Alert, AlertTitle, Button, CircularProgress, Grid, Tooltip, Typography } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useCallback, useEffect, useState } from "react";
@@ -107,9 +106,6 @@ const useRevertAction = (
       profitYear: profitYear ?? 0
     };
 
-    console.log("reverting changes to year end: ", params);
-    console.log(params);
-
     await trigger(params, false)
       .unwrap()
       .then((payload) => {
@@ -117,7 +113,6 @@ const useRevertAction = (
         setBeneficiariesReverted(payload?.beneficiariesEffected || 0);
         setEtvasReverted(payload?.etvasEffected || 0);
         //dispatch(setMessage(successMessage));
-        console.log("Successfully reverted changes for year end: ", payload);
         dispatch(setProfitEditUpdateChangesAvailable(false));
         dispatch(setProfitEditUpdateRevertChangesAvailable(false));
         dispatch(clearProfitSharingEditQueryParams());
@@ -491,7 +486,7 @@ const ProfitShareEditUpdate = () => {
     <Page
       label="Master Update (PAY444|PAY447)"
       actionNode={
-        <div className="flex  justify-end gap-2">
+        <div className="flex items-center justify-end gap-2">
           {RenderRevertButton(setOpenRevertModal, isLoading)}
           {RenderSaveButton(
             setOpenSaveModal,
@@ -512,7 +507,7 @@ const ProfitShareEditUpdate = () => {
         // We are using an AlertTitle directly and not a missive because we want this alert message
         // to remain in place, not fade away
         changesApplied && (
-          <div className="py-3 w-full">
+          <div className="w-full py-3">
             <Alert severity={Messages.ProfitShareMasterUpdated.message.type}>
               <AlertTitle sx={{ fontWeight: "bold" }}>{Messages.ProfitShareMasterUpdated.message.title}</AlertTitle>
               {`Updated By: ${updatedBy} | Date: ${updatedTime} `}
@@ -524,22 +519,19 @@ const ProfitShareEditUpdate = () => {
         container
         rowSpacing="24px"
         width={"100%"}>
-        <Grid width={"100%"}>
-          <Divider />
+        <Grid
+          width={"100%"}
+          hidden={!profitShareEditUpdateShowSearch}>
+          <DSMAccordion title="Filter">
+            <ProfitShareEditUpdateSearchFilter
+              setInitialSearchLoaded={setInitialSearchLoaded}
+              setPageReset={setPageNumberReset}
+              setMinimumFieldsEntered={setMinimumFieldsEntered}
+              setAdjustedBadgeOneValid={setAdjustedBadgeOneValid}
+              setAdjustedBadgeTwoValid={setAdjustedBadgeTwoValid}
+            />
+          </DSMAccordion>
         </Grid>
-        {profitShareEditUpdateShowSearch && (
-          <Grid width={"100%"}>
-            <DSMAccordion title="Parameters">
-              <ProfitShareEditUpdateSearchFilter
-                setInitialSearchLoaded={setInitialSearchLoaded}
-                setPageReset={setPageNumberReset}
-                setMinimumFieldsEntered={setMinimumFieldsEntered}
-                setAdjustedBadgeOneValid={setAdjustedBadgeOneValid}
-                setAdjustedBadgeTwoValid={setAdjustedBadgeTwoValid}
-              />
-            </DSMAccordion>
-          </Grid>
-        )}
         {profitEditUpdateRevertChangesAvailable && (
           <>
             <Grid
@@ -620,22 +612,27 @@ const ProfitShareEditUpdate = () => {
               ]}
               tablePadding="12px"
             />
-            <div className="px-[24px]">
-              <div style={{ display: "flex", gap: "75px" }}>
-                <span style={{ color: totalForfeituresGreaterThanZero == true ? "red" : "inherit" }}>
-                  <strong>Total Forfeitures</strong>:{" "}
-                  {numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.maxOverTotal || 0) + "      "}{" "}
-                </span>
-                <span>
-                  <strong>Total Points</strong>:{" "}
-                  {numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.maxPointsTotal || 0) + " "}{" "}
-                </span>
-                <span>
-                  <strong>For Employees Exceeding Max Contribution</strong> :{" "}
-                  {numberToCurrency(profitSharingEditQueryParams?.maxAllowedContributions || 0)}
-                </span>
+            <TotalsGrid
+              tablePadding="12px"
+              displayData={[
+                [
+                  numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.maxOverTotal || 0),
+                  numberToCurrency(profitSharingUpdate.profitShareUpdateTotals.maxPointsTotal || 0),
+                  numberToCurrency(profitSharingEditQueryParams?.maxAllowedContributions || 0)
+                ]
+              ]}
+              leftColumnHeaders={[]}
+              topRowHeaders={["Total Forfeitures", "Total Points", "For Employees Exceeding Max Contribution"]}
+            />
+            {totalForfeituresGreaterThanZero && (
+              <div
+                className="px-[24px]"
+                style={{ color: "red", marginTop: "-8px", fontSize: "0.875rem" }}>
+                <em>
+                  * Total Forfeitures value highlighted in red indicates an issue that must be resolved before saving.
+                </em>
               </div>
-            </div>
+            )}
             <div style={{ height: "20px" }}></div>
             <div className="px-[24px]">
               <h2 className="text-dsm-secondary">Summary (PAY447)</h2>
@@ -646,26 +643,17 @@ const ProfitShareEditUpdate = () => {
                 tablePadding="4px"
                 displayData={[
                   [
+                    numberToCurrency(profitSharingEdit.beginningBalanceTotal || 0),
                     numberToCurrency(profitSharingEdit.contributionGrandTotal || 0),
                     numberToCurrency(profitSharingEdit.earningsGrandTotal || 0),
                     numberToCurrency(profitSharingEdit.incomingForfeitureGrandTotal || 0)
                   ]
                 ]}
                 leftColumnHeaders={["Grand Totals"]}
-                topRowHeaders={["", "Contributions", "Earnings", "Forfeit"]}
-                headerCellStyle={{}}
+                topRowHeaders={["", "Beginning Balance", "Contributions", "Earnings", "Forfeit"]}
               />
-              <div style={{ marginTop: "20px" }}>
-                <TotalsGrid
-                  tablePadding="8px"
-                  displayData={[[numberToCurrency(profitSharingEdit.beginningBalanceTotal || 0), "", ""]]}
-                  leftColumnHeaders={["Beginning Balance"]}
-                  topRowHeaders={["", ""]}
-                  headerCellStyle={{}}
-                />
-              </div>
             </div>
-
+            <br />
             {profitSharingUpdateAdjustmentSummary?.badgeNumber && (
               <>
                 <div className="px-[24px]">

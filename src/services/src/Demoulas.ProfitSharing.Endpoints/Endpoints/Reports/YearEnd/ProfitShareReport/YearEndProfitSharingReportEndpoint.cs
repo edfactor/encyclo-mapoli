@@ -7,7 +7,7 @@ using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
-using MassTransit;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitShareReport;
 
@@ -18,8 +18,10 @@ public class YearEndProfitSharingReportEndpoint: EndpointWithCsvTotalsBase<YearE
 {
     private readonly IProfitSharingSummaryReportService _cleanupReportService;
     private readonly IAuditService _auditService;
+    private const string Report_Name = "Yearend Profit Sharing Report";
 
     public YearEndProfitSharingReportEndpoint(IProfitSharingSummaryReportService cleanupReportService, IAuditService auditService)
+        : base(Navigation.Constants.ProfitShareReportFinalRun)
     {
         _cleanupReportService = cleanupReportService;
         _auditService = auditService;
@@ -30,7 +32,7 @@ public class YearEndProfitSharingReportEndpoint: EndpointWithCsvTotalsBase<YearE
         Post("yearend-profit-sharing-report");
         Summary(s =>
         {
-            s.Summary = "Year end profit sharing report";
+            s.Summary = Report_Name;
             s.Description = @"Returns a list of employees who will participate in the profit sharing this year, as well as their qualifying attributes.\n\nRequest parameters allow filtering by age, hours, employment status, and more. The endpoint supports CSV export if the Accept header is set to 'text/csv'.\n\n" +
                 "ReportId options (see enum YearEndProfitSharingReportId):\n" +
                 string.Join("\n", Enum.GetValues(typeof(YearEndProfitSharingReportId))
@@ -52,23 +54,19 @@ public class YearEndProfitSharingReportEndpoint: EndpointWithCsvTotalsBase<YearE
 
         base.Configure();
     }
+
     /// <summary>
     /// Handles the request and returns the year-end profit sharing report response.
     /// </summary>
-    public override async Task<YearEndProfitSharingReportResponse> GetResponse(YearEndProfitSharingReportRequest req, CancellationToken ct)
+    public override Task<YearEndProfitSharingReportResponse> GetResponse(YearEndProfitSharingReportRequest req, CancellationToken ct)
     {
-        var response = await _cleanupReportService.GetYearEndProfitSharingReportAsync(req, ct);
+        return _auditService.ArchiveCompletedReportAsync(
+            Report_Name,
+            req.ProfitYear,
+            req,
+            (archiveReq, _, cancellationToken) => _cleanupReportService.GetYearEndProfitSharingReportAsync(archiveReq, cancellationToken),
+            ct);
 
-        // Read "archive" from query string without modifying the DTO
-        bool archive = HttpContext.Request.Query.TryGetValue("archive", out var archiveValue) &&
-                       bool.TryParse(archiveValue, out var archiveResult) && archiveResult;
-
-        if (archive)
-        {
-           await _auditService.ArchiveCompletedReportAsync("Yearend profit sharing summary report", req, response, ct);
-        }
-
-        return response;
     }
 
     public override string ReportFileName => "yearend-profit-sharing-report";

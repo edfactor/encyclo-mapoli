@@ -13,6 +13,7 @@ import { StartAndEndDateRequest } from "../../../reduxstore/types";
 
 export interface TerminationSearchRequest extends StartAndEndDateRequest {
   forfeitureStatus: string;
+  archive?: boolean;
 }
 
 const Termination = () => {
@@ -22,9 +23,17 @@ const Termination = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [resetPageFlag, setResetPageFlag] = useState(false);
   const [shouldBlock, setShouldBlock] = useState(false);
+  const [currentStatus, setCurrentStatus] = useState<string | null>(null);
+  const [archiveMode, setArchiveMode] = useState(false);
+  const [shouldArchive, setShouldArchive] = useState(false);
 
   const handleSearch = (params: TerminationSearchRequest) => {
-    setSearchParams(params);
+    // Add archive parameter if we're in archive mode
+    const searchParamsWithArchive = {
+      ...params,
+      ...(archiveMode && { archive: true })
+    };
+    setSearchParams(searchParamsWithArchive);
     setInitialSearchLoaded(true);
     setResetPageFlag((prev) => !prev);
   };
@@ -34,18 +43,49 @@ const Termination = () => {
     setShouldBlock(hasChanges);
   };
 
-  const renderActionNode = () => {
-    return <StatusDropdownActionNode />;
+  const handleStatusChange = (newStatus: string, statusName?: string) => {
+    const isCompleteLike = (statusName ?? "").toLowerCase().includes("complete");
+    const isChangingToComplete = isCompleteLike && currentStatus !== statusName;
+
+    if (isChangingToComplete) {
+      setArchiveMode(true);
+      setCurrentStatus(statusName || null);
+      setShouldArchive(true);
+
+      // If we have existing search params, update them to include archive and trigger
+      if (searchParams) {
+        const archivedParams = { ...searchParams, archive: true };
+        setSearchParams(archivedParams);
+        setResetPageFlag((prev) => !prev);
+      }
+    } else {
+      setCurrentStatus(statusName || null);
+      // Reset archive mode if status changes away from "Complete"
+      if (!isCompleteLike) {
+        setArchiveMode(false);
+        // If we have existing search params, trigger a new search without archive
+        if (searchParams) {
+          const { archive, ...paramsWithoutArchive } = searchParams as any;
+          setSearchParams(paramsWithoutArchive as any);
+          setResetPageFlag((prev) => !prev);
+        }
+      }
+    }
   };
 
-  // Set initialSearchLoaded to true when component mounts
-  useEffect(() => {
-    setInitialSearchLoaded(true);
-  }, []);
+  const renderActionNode = () => {
+    return <StatusDropdownActionNode onStatusChange={handleStatusChange} />;
+  };
 
   useEffect(() => {
     fetchAccountingRange();
   }, [fetchAccountingRange]);
+
+  // Initialize current status from StatusDropdownActionNode
+  useEffect(() => {
+    // This effect will be triggered when the StatusDropdownActionNode's status is initially loaded
+    // The handleStatusChange will be called with the initial status
+  }, []);
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -113,6 +153,9 @@ const Termination = () => {
 
   const isCalendarDataLoaded = !!fiscalData?.fiscalBeginDate && !!fiscalData?.fiscalEndDate;
 
+  // Clear archive flag when the grid confirms handling it
+  const handleArchiveHandled = () => setShouldArchive(false);
+
   return (
     <Page
       label={CAPTIONS.TERMINATIONS}
@@ -151,6 +194,9 @@ const Termination = () => {
                 resetPageFlag={resetPageFlag}
                 onUnsavedChanges={handleUnsavedChanges}
                 hasUnsavedChanges={hasUnsavedChanges}
+                fiscalData={fiscalData}
+                shouldArchive={shouldArchive}
+                onArchiveHandled={handleArchiveHandled}
               />
             </Grid>
           </>

@@ -5,9 +5,9 @@ import { ToastServiceUtils } from "smart-ui-library";
 interface ErrorPayload {
   data?: {
     statusCode?: number;
-    StatusCode?: number; 
+    StatusCode?: number;
     message?: string;
-    Message?: string; 
+    Message?: string;
     errors?: {
       [field: string]: string[];
     };
@@ -38,20 +38,20 @@ export const extractErrorDetails = (error: ErrorPayload | undefined) => {
   const { data } = error;
   const statusCode = data.statusCode || data.StatusCode || 0;
   const message = data.message || data.Message || "Unknown error";
-  
+
   let formattedMessage = `${statusCode} : ${message}`;
-  
+
   // Handle field-level validation errors
   if (data.errors) {
     let fieldErrorsStr = "";
-    
+
     Object.entries(data.errors).forEach(([field, messages]) => {
       fieldErrorsStr += `\n${field}:`;
       (messages as string[]).forEach((message) => {
         fieldErrorsStr += `\n  • ${message}`;
       });
     });
-    
+
     if (fieldErrorsStr) {
       formattedMessage += fieldErrorsStr;
     }
@@ -61,7 +61,7 @@ export const extractErrorDetails = (error: ErrorPayload | undefined) => {
       formattedMessage += `\n  • ${error}`;
     });
   }
-  
+
   return {
     statusCode,
     message,
@@ -81,16 +81,13 @@ export const rtkQueryErrorToastMiddleware =
   (_api: MiddlewareAPI) =>
   (next) =>
   (action: unknown) => {
-    if (
-      showErrors &&
-      isRejectedWithValue(action)
-    ) {
+    if (showErrors && isRejectedWithValue(action)) {
       const payload = (action as PayloadAction<unknown>).payload as ErrorPayload;
       const payloadData = payload.data;
       const arg = (action as any).meta?.arg as MetaArg;
       const originalArg = (action as any).meta?.arg?.originalArgs || (action as any).meta?.arg;
       const queryMeta = (action as any).meta?.arg?.meta;
-      
+
       // Useful for debugging
       /*
       console.log('RTK Error Middleware Debug:', {
@@ -121,7 +118,6 @@ export const rtkQueryErrorToastMiddleware =
 
       // If onlyNetworkToastErrors is set, skip showing validation-style errors
       if (!(arg?.onlyNetworkToastErrors || originalArg?.onlyNetworkToastErrors || queryMeta?.onlyNetworkToastErrors)) {
-
         // Handle both camelCase and PascalCase properties for backward compatibility
         const statusCode = payloadData.statusCode || payloadData.StatusCode;
         const message = payloadData.message || payloadData.Message;
@@ -163,6 +159,6 @@ export const rtkQueryErrorToastMiddleware =
           ToastServiceUtils.triggerError(msgStr);
         }
       }
-  }
+    }
     return next(action);
   };

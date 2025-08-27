@@ -1,7 +1,8 @@
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Oracle.ManagedDataAccess.Client;
+using YEMatch.YEMatch.ReadyActivities;
 
-namespace YEMatch;
+namespace YEMatch.YEMatch.AssertActivities;
 
 // The base class for activities which directly interact with the database
 public abstract class BaseSqlActivity : BaseActivity
@@ -18,9 +19,29 @@ public abstract class BaseSqlActivity : BaseActivity
     }
 
     // Compares two sql statements by subtracting the resuls from each results.  This yields the differences.
-    protected static string QueryDiff(string queryA, string queryB)
+    protected static string QueryDiffCount(string queryA, string queryB)
     {
         return $"select count(*) from ( {queryA} minus {queryB} union all {queryB} minus {queryA} )";
+    }
+
+    protected static string QueryDiffRows(string nameA, string nameB, string sqlA, string sqlB, string orderByColumn)
+    {
+        return $@"SELECT
+    *
+FROM
+    (
+    SELECT '{nameA}' AS src, kk.* FROM (
+        {sqlA}
+        MINUS
+        {sqlB}
+    ) kk
+    UNION ALL
+    SELECT '{nameB}' AS src, jj.* FROM (
+        {sqlB}
+        MINUS
+        {sqlA}
+    ) jj
+) ORDER BY {orderByColumn}, src";
     }
 
     protected async Task<int> RdySql(string sql)

@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Reflection;
-using Castle.Core.Internal;
 using Shouldly;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Extensions;
@@ -52,7 +51,7 @@ public static class ComparisonExtensions
                 continue;
             }
 
-            PropertyInfo? dtoProperty = dtoProperties.Find(p => p.Name == entityProperty.Name);
+            PropertyInfo? dtoProperty = dtoProperties.FirstOrDefault(p => p.Name == entityProperty.Name);
             if (dtoProperty == null)
             {
                 continue;
@@ -153,7 +152,7 @@ public static class ComparisonExtensions
                 continue;
             }
 
-            PropertyInfo? dtoProperty = dtoProperties.Find(p => p.Name == entityProperty.Name);
+            PropertyInfo? dtoProperty = dtoProperties.FirstOrDefault(p => p.Name == entityProperty.Name);
             if (dtoProperty == null)
             {
                 continue;

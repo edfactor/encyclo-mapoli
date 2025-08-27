@@ -1,9 +1,8 @@
-using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Services.Reports;
-using Microsoft.Extensions.Logging;
 using Shouldly;
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.PAY443;
@@ -14,8 +13,8 @@ public class Pay443Tests : PristineBaseTest
 
     public Pay443Tests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
     {
-        _forfeituresAndPointsForYearService = new ForfeituresAndPointsForYearService(DbFactory, new LoggerFactory(), TotalService, CalendarService,
-            DemographicReaderService, FrozenService);
+        _forfeituresAndPointsForYearService = new ForfeituresAndPointsForYearService(DbFactory, TotalService, 
+            DemographicReaderService);
     }
 
     [Fact]

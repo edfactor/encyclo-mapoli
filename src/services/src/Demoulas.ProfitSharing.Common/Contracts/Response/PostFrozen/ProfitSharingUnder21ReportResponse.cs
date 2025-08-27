@@ -6,7 +6,7 @@ public sealed record ProfitSharingUnder21ReportResponse : ReportResponseBase<Pro
 
     public ProfitSharingUnder21ReportResponse()
     {
-        this.ReportName = REPORT_NAME;
+        ReportName = REPORT_NAME;
     }
 
     public required ProfitSharingUnder21TotalForStatus ActiveTotals { get; set; }

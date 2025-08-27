@@ -19,7 +19,7 @@ public class GetActiveFrozenDemographicEndpointTests : ApiTestBase<Program>
        
         FrozenState frozenDemographics = await MockDbContextFactory.UseReadOnlyContext(c => c.FrozenStates.Where(f=> f.IsActive).FirstAsync());
 
-        ApiClient.CreateAndAssignTokenForClient(Role.ITOPERATIONS);
+        ApiClient.CreateAndAssignTokenForClient(Role.ITDEVOPS);
         TestResult<FrozenStateResponse> response = await ApiClient.GETAsync<GetActiveFrozenDemographicEndpoint, FrozenStateResponse>();
         response.ShouldNotBeNull();
 

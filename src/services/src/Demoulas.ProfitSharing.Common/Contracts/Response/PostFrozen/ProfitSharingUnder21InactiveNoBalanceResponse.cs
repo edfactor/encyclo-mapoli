@@ -1,15 +1,19 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.PostFrozen;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.PostFrozen;
 
 public sealed record ProfitSharingUnder21InactiveNoBalanceResponse
 {
     public int BadgeNumber { get; set; }
-    public required string LastName { get; set; }
-    public required string FirstName { get; set; }
+    [MaskSensitive] public required string LastName { get; set; }
+    [MaskSensitive] public required string FirstName { get; set; }
     public DateOnly BirthDate { get; set; }
     public DateOnly HireDate { get; set; }
     public DateOnly? TerminationDate { get; set; }
     public byte Age { get; set; }
     public byte EnrollmentId { get; set; }
+    public bool IsExecutive { get; set; }
+    [MaskSensitive] public string FullName => $"{LastName}, {FirstName}";
 
     public const string REPORT_NAME = "Inactive/Terminated Under 21";
     public static ProfitSharingUnder21InactiveNoBalanceResponse SampleResponse()

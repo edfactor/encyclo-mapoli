@@ -1,5 +1,6 @@
-import { agGridNumberToCurrency, formatNumberWithComma } from "smart-ui-library";
 import { ColDef } from "ag-grid-community";
+import { formatNumberWithComma, numberToCurrency } from "smart-ui-library";
+import { createCurrencyColumn } from "../../../utils/gridColumnFactory";
 
 export const GetProfitSummaryGridColumns = (): ColDef[] => {
   return [
@@ -24,23 +25,27 @@ export const GetProfitSummaryGridColumns = (): ColDef[] => {
       resizable: true,
       valueFormatter: (params) => formatNumberWithComma(params.value)
     },
-    {
+    createCurrencyColumn({
       headerName: "Total Wages",
       field: "totalWages",
-      colId: "totalWages",
       minWidth: 180,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+      valueFormatter: (params) => {
+        if (typeof params.value === "string" && params.value.includes("X")) {
+          return params.value;
+        }
+        return numberToCurrency(params.value);
+      }
+    }),
+    createCurrencyColumn({
       headerName: "Total Balance",
       field: "totalBalance",
-      colId: "totalBalance",
       minWidth: 180,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    }
+      valueFormatter: (params) => {
+        if (typeof params.value === "string" && params.value.includes("X")) {
+          return params.value;
+        }
+        return numberToCurrency(params.value);
+      }
+    })
   ];
 };

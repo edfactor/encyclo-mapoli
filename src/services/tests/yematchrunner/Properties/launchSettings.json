@@ -1,0 +1,28 @@
+{
+  "profiles": {
+    "Baseline Run": {
+      "commandName": "Project",
+      "commandLineArgs": "--run baseline"
+    },
+    "Golden Run": {
+      "commandName": "Project",
+      "commandLineArgs": "--run golden"
+    },
+    "Golden Express Run": {
+      "commandName": "Project",
+      "commandLineArgs": "--run goldenexpress"
+    },
+    "Master Inquiry Run": {
+      "commandName": "Project",
+      "commandLineArgs": "--run masterinquiry"
+    },
+    "View Run": {
+      "commandName": "Project",
+      "commandLineArgs": "--run view"
+    },
+    "Tinker Run": {
+      "commandName": "Project",
+      "commandLineArgs": "--run tinker"
+    }
+  }
+}

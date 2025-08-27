@@ -23,13 +23,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Http.Resilience;
 using OpenTelemetry.Trace;
+using Polly;
 using Quartz;
 using Quartz.Impl;
 using Quartz.Spi;
 using AddressMapper = Demoulas.ProfitSharing.OracleHcm.Mappers.AddressMapper;
 using ContactInfoMapper = Demoulas.ProfitSharing.OracleHcm.Mappers.ContactInfoMapper;
 using DemographicMapper = Demoulas.ProfitSharing.OracleHcm.Mappers.DemographicMapper;
-using Polly;
 
 namespace Demoulas.ProfitSharing.OracleHcm.Extensions;
 
@@ -220,14 +220,16 @@ public static class OracleHcmExtension
             };
             options.Retry.MaxRetryAttempts = 3;
             options.Retry.BackoffType = DelayBackoffType.Exponential;
-            options.Retry.Delay = TimeSpan.FromMinutes(2);
+            options.Retry.Delay = TimeSpan.FromMinutes(4); // was 2
 
-            // Add jitter to retry delay
+            // Add jitter to retry delay (doubled base delay & exponential growth factor)
             var random = new Random();
             options.Retry.DelayGenerator = args =>
             {
-                var baseDelay = TimeSpan.FromSeconds(2);
-                var exponential = TimeSpan.FromMinutes(Math.Pow(2, args.AttemptNumber));
+                // base delay doubled (2s -> 4s)
+                var baseDelay = TimeSpan.FromSeconds(4);
+                // exponential component doubled by shifting power (+1) relative to previous implementation
+                var exponential = TimeSpan.FromMinutes(Math.Pow(2, args.AttemptNumber + 1));
                 var jitter = TimeSpan.FromMilliseconds(random.Next(0, 1000));
                 return new ValueTask<TimeSpan?>(baseDelay + exponential + jitter);
             };

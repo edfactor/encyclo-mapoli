@@ -1,17 +1,18 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request.Military;
 using Demoulas.ProfitSharing.Common.Contracts.Response.Military;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using FastEndpoints;
-using Microsoft.AspNetCore.Http;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Military;
 
-public class CreateMilitaryContributionRecord : Endpoint<CreateMilitaryContributionRequest>
+public class CreateMilitaryContributionRecord : ProfitSharingRequestEndpoint<CreateMilitaryContributionRequest>
 {
     private readonly IMilitaryService _militaryService;
 
-    public CreateMilitaryContributionRecord(IMilitaryService militaryService)
+    public CreateMilitaryContributionRecord(IMilitaryService militaryService) : base(Navigation.Constants.MilitaryContributions)
     {
         _militaryService = militaryService ?? throw new ArgumentNullException(nameof(militaryService));
     }

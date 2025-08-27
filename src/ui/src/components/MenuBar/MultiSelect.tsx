@@ -12,7 +12,7 @@ const MenuProps = {
   PaperProps: {
     style: {
       maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250
+      width: 300
     }
   }
 };
@@ -37,15 +37,15 @@ export const MultipleSelectCheckmarks: FC<MultiSelectCheckmarksProps> = ({
   return (
     <div>
       <FormControl
-        sx={{ m: 1, width: 220 }}
+        sx={{ m: 1, width: 300 }}
         size="small">
         <Select
-          sx={{ background: "white", width: 220 }}
+          sx={{ background: "white", width: 300 }}
           multiple
           value={value}
           onChange={(e) => handleChange(e)}
           onClose={handleClose}
-          renderValue={(selected: string[]) => selected.join(", ")}
+          renderValue={(selected: string[]) => selected.join(" | ")}
           MenuProps={MenuProps}
           data-testid={dataTestId}
           inputProps={{ "aria-label": ariaLabel }}>

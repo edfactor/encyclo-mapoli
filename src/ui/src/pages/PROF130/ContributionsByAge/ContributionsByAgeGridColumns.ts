@@ -1,41 +1,26 @@
-import { agGridNumberToCurrency } from "smart-ui-library";
+import { ColDef } from "ag-grid-community";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
-import { ColDef, ColGroupDef } from "ag-grid-community";
+import { createCurrencyColumn, createCountColumn, createAgeColumn } from "../../../utils/gridColumnFactory";
 
-export const GetContributionsByAgeColumns = (reportType: FrozenReportsByAgeRequestType): (ColDef | ColGroupDef)[] => {
-  const columns: (ColDef | ColGroupDef)[] = [
-    {
-      headerName: reportType,
-      children: [
-        {
-          headerName: "Age",
-          field: "age",
-          colId: "age",
-          minWidth: 80,
-          type: "rightAligned",
-          resizable: true,
-          sort: "asc",
-          cellDataType: "text"
-        },
-        {
-          headerName: "EMPS",
-          field: "employeeCount",
-          colId: "employeeCount",
-          minWidth: 100,
-          type: "rightAligned",
-          resizable: true
-        },
-        {
-          headerName: "Amount",
-          field: "amount",
-          colId: "amount",
-          minWidth: 150,
-          type: "rightAligned",
-          resizable: true,
-          valueFormatter: agGridNumberToCurrency
-        }
-      ]
-    }
+export const GetContributionsByAgeColumns = (_reportType: FrozenReportsByAgeRequestType): ColDef[] => {
+  return [
+    createAgeColumn({
+      headerName: "Age",
+      field: "age",
+      minWidth: 80,
+      sortable: false
+    }),
+    createCountColumn({
+      headerName: "EMPS",
+      field: "employeeCount",
+      minWidth: 100,
+      sortable: false
+    }),
+    createCurrencyColumn({
+      headerName: "Amount",
+      field: "amount",
+      minWidth: 150,
+      sortable: false
+    })
   ];
-  return columns;
 };

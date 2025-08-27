@@ -1,5 +1,5 @@
 import { ColDef } from "ag-grid-community";
-import { agGridNumberToCurrency, formatNumberWithComma } from "smart-ui-library";
+import { createCurrencyColumn, createHoursColumn, createStatusColumn } from "../../utils/gridColumnFactory";
 
 export const GetMasterInquiryGridColumns = (): ColDef[] => {
   return [
@@ -23,7 +23,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       field: "profitCodeId",
       colId: "profitCodeId",
       minWidth: 100,
-      type: "rightAligned",
+      type: "leftAligned",
       resizable: true,
       tooltipValueGetter: (params) => {
         return params.data?.profitCodeName;
@@ -35,42 +35,26 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
         return `[${id}] ${name}`;
       }
     },
-    {
+    createCurrencyColumn({
       headerName: "Contribution",
       field: "contribution",
-      colId: "contribution",
-      minWidth: 120,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+      minWidth: 120
+    }),
+    createCurrencyColumn({
       headerName: "Earnings",
       field: "earnings",
-      colId: "earnings",
-      minWidth: 120,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+      minWidth: 120
+    }),
+    createCurrencyColumn({
       headerName: "Forfeiture",
       field: "forfeiture",
-      colId: "forfeiture",
-      minWidth: 120,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+      minWidth: 120
+    }),
+    createCurrencyColumn({
       headerName: "Payment",
       field: "payment",
-      colId: "payment",
-      minWidth: 120,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
+      minWidth: 120
+    }),
     {
       headerName: "Month/Year",
       headerTooltip: "Month to Date",
@@ -93,47 +77,27 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
         return `${formattedMonth}/${year}`;
       }
     },
-    {
-      headerName: "Hours",
+    createHoursColumn({
       field: "currentHoursYear",
-      colId: "currentHoursYear",
       minWidth: 120,
-      type: "rightAligned",
-      resizable: true,
-      sortable: false,
-      valueFormatter: (params) => {
-        const hours = params.value;
-        return formatNumberWithComma(hours);
-      }
-    },
-    {
+      sortable: false
+    }),
+    createCurrencyColumn({
       headerName: "Wages",
       field: "currentIncomeYear",
-      colId: "currentIncomeYear",
       minWidth: 120,
-      type: "rightAligned",
-      resizable: true,
-      sortable: false,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+      sortable: false
+    }),
+    createCurrencyColumn({
       headerName: "Federal Tax",
       field: "federalTaxes",
-      colId: "federalTaxes",
-      minWidth: 120,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+      minWidth: 120
+    }),
+    createCurrencyColumn({
       headerName: "State Tax",
       field: "stateTaxes",
-      colId: "stateTaxes",
-      minWidth: 120,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
+      minWidth: 120
+    }),
     {
       headerName: "Tax Code",
       field: "taxCodeId",
@@ -159,7 +123,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       field: "commentTypeName",
       colId: "commentTypeName",
       minWidth: 100,
-      type: "rightAligned",
+      type: "leftAligned",
       resizable: true
     },
     {
@@ -197,14 +161,11 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
         return params.value === true ? "Yes" : "No";
       }
     },
-    {
-      headerName: "Status",
+    createStatusColumn({
       field: "employmentStatus",
-      colId: "employmentStatus",
       minWidth: 60,
-      type: "rightAligned",
-      resizable: true,
+      alignment: "right",
       sortable: false
-    }
+    })
   ];
 };

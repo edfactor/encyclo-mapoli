@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Shouldly;
@@ -107,7 +106,8 @@ public static class ReadyReportParser
             Forfeitures = decimal.TryParse(forfeiture.Replace(",", ""), out decimal f) ? f : null,
             EarningPoints = int.TryParse(earnPts, out int e) ? e : 0,
             ContForfeitPoints = short.TryParse(contPts, out short c) ? c : (short)0,
-            BeneficiaryPsn = benePsn
+            BeneficiaryPsn = benePsn,
+            IsExecutive = false,
         };
     }
 }

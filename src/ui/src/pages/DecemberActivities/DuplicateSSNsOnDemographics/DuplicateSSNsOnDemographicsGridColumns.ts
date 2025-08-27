@@ -1,7 +1,12 @@
 import { ColDef } from "ag-grid-community";
 import { yyyyMMDDToMMDDYYYY } from "smart-ui-library";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
-import { createBadgeColumn, createSSNColumn } from "../../../utils/gridColumnFactory";
+import {
+  createBadgeColumn,
+  createSSNColumn,
+  createDateColumn,
+  createStoreColumn
+} from "../../../utils/gridColumnFactory";
 
 export const GetDuplicateSSNsOnDemographicsColumns = (): ColDef[] => {
   return [
@@ -53,34 +58,21 @@ export const GetDuplicateSSNsOnDemographicsColumns = (): ColDef[] => {
       resizable: true,
       valueGetter: (params) => params.data.address?.state || ""
     },
-    {
+    createDateColumn({
       headerName: "Hire",
       field: "hireDate",
-      colId: "hireDate",
       minWidth: 100,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      valueFormatter: (params) => (params.value ? yyyyMMDDToMMDDYYYY(params.value) : "")
-    },
-    {
+      alignment: "left"
+    }),
+    createDateColumn({
       headerName: "Rehire",
       field: "rehireDate",
-      colId: "rehireDate",
       minWidth: 100,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      valueFormatter: (params) => (params.value ? yyyyMMDDToMMDDYYYY(params.value) : "")
-    },
-    {
-      headerName: "Store",
-      field: "storeNumber",
-      colId: "storeNumber",
-      minWidth: 50,
-      type: "rightAligned",
-      resizable: true
-    },
+      alignment: "left"
+    }),
+    createStoreColumn({
+      minWidth: 50
+    }),
     {
       headerName: "Status",
       field: "status",

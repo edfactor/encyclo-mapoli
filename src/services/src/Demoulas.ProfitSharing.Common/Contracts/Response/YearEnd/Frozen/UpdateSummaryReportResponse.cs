@@ -1,13 +1,21 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Attributes;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 public sealed record UpdateSummaryReportResponse : ReportResponseBase<UpdateSummaryReportDetail>
 {
+    [YearEndArchiveProperty]
     public int TotalNumberOfEmployees { get; set; }
+    
+    [YearEndArchiveProperty]
     public int TotalNumberOfBeneficiaries { get; set; }
+    [YearEndArchiveProperty]
     public decimal TotalBeforeProfitSharingAmount { get; set; }
+    [YearEndArchiveProperty]
     public decimal TotalBeforeVestedAmount { get; set; }
+    [YearEndArchiveProperty]
     public decimal TotalAfterProfitSharingAmount { get; set; }
+    [YearEndArchiveProperty]
     public decimal TotalAfterVestedAmount { get; set; }
 
     public static UpdateSummaryReportResponse ResponseExample()

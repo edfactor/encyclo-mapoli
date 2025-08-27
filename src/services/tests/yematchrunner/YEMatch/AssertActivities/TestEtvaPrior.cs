@@ -1,6 +1,6 @@
-using Oracle.ManagedDataAccess.Client;
+﻿using Oracle.ManagedDataAccess.Client;
 
-namespace YEMatch;
+namespace YEMatch.YEMatch.AssertActivities;
 
 public class TestEtvaPrior : BaseSqlActivity
 {
@@ -31,7 +31,7 @@ public class TestEtvaPrior : BaseSqlActivity
                           AND pp.profit_year = 2025
                         """;
 
-        OracleCommand command = new(QueryDiff(queryA, queryB), connection);
+        OracleCommand command = new(QueryDiffCount(queryA, queryB), connection);
         OracleDataReader? reader = await command.ExecuteReaderAsync();
 
         int data = 0;

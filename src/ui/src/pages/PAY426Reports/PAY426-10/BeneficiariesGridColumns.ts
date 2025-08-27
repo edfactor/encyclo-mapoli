@@ -1,81 +1,52 @@
-import { agGridNumberToCurrency, formatNumberWithComma } from "smart-ui-library";
-import { ColDef, ICellRendererParams } from "ag-grid-community";
+import { ColDef } from "ag-grid-community";
+import { formatNumberWithComma } from "smart-ui-library";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
-import { mmDDYYFormat } from "../../../utils/dateUtils";
-import { createSSNColumn, createBadgeColumn } from "../../../utils/gridColumnFactory";
+import {
+  createAgeColumn,
+  createBadgeColumn,
+  createCurrencyColumn,
+  createDateColumn,
+  createHoursColumn,
+  createNameColumn,
+  createSSNColumn,
+  createStatusColumn,
+  createStoreColumn
+} from "../../../utils/gridColumnFactory";
 
 export const GetBeneficiariesGridColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   return [
-    createBadgeColumn({ 
+    createBadgeColumn({
       headerName: "Badge",
       minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
       alignment: "center",
       navigateFunction: navFunction
     }),
-    {
-      headerName: "Name",
+    createNameColumn({
       field: "employeeName",
-      colId: "employeeName",
       minWidth: 180,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
       sortable: true
-    },
-    {
-      headerName: "Store",
-      field: "storeNumber",
-      colId: "storeNumber",
-      minWidth: 80,
-      type: "rightAligned",
-      resizable: true
-    },
-    {
+    }),
+    createStoreColumn({
+      minWidth: 80
+    }),
+    createStatusColumn({
       headerName: "Type",
-      field: "employeeTypeCode",
-      colId: "employeeTypeCode",
-      minWidth: 80,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true
-    },
-    {
+      field: "employeeTypeCode"
+    }),
+    createDateColumn({
       headerName: "Date of Birth",
-      field: "dateOfBirth",
-      colId: "dateOfBirth",
-      minWidth: 120,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true,
-      valueFormatter: (params) => mmDDYYFormat(params.value)
-    },
-    {
-      headerName: "Age",
-      field: "age",
-      colId: "age",
-      minWidth: 70,
-      type: "rightAligned",
-      resizable: true
-    },
+      field: "dateOfBirth"
+    }),
+    createAgeColumn({}),
     createSSNColumn(),
-    {
+    createCurrencyColumn({
       headerName: "Wages",
       field: "wages",
-      colId: "wages",
-      minWidth: 120,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
-      headerName: "Hours",
-      field: "hours",
-      colId: "hours",
-      minWidth: 100,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: (params) => formatNumberWithComma(params.value)
-    },
+      minWidth: 120
+    }),
+    createHoursColumn({
+      minWidth: 100
+    }),
     {
       headerName: "Points",
       field: "points",
@@ -95,25 +66,15 @@ export const GetBeneficiariesGridColumns = (navFunction: (badgeNumber: string) =
       resizable: true,
       valueFormatter: (params) => (params.value ? "(<21)" : "")
     },
-    {
+    createDateColumn({
       headerName: "Term Date",
-      field: "terminationDate",
-      colId: "terminationDate",
-      minWidth: 120,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true,
-      valueFormatter: (params) => mmDDYYFormat(params.value)
-    },
-    {
+      field: "terminationDate"
+    }),
+    createCurrencyColumn({
       headerName: "Current Balance",
       field: "balance",
-      colId: "balance",
-      minWidth: 140,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: agGridNumberToCurrency
-    },
+      minWidth: 140
+    }),
     {
       headerName: "SVC",
       field: "svc",

@@ -21,12 +21,13 @@ public sealed record ProfitShareUpdateRequest : ProfitYearRequest
     {
         return new ProfitShareUpdateRequest
         {
+            ProfitYear = 2024,
             ContributionPercent = 15,
-            IncomingForfeitPercent = 4,
-            EarningsPercent = 2,
+            IncomingForfeitPercent = 0.876678m, // from 2022
+            EarningsPercent = 9.280136m, // from 2022
             SecondaryEarningsPercent = 0,
             MaxAllowedContributions = 30_000,
-            BadgeToAdjust = 7773838,
+            BadgeToAdjust = 0,
             BadgeToAdjust2 = 0,
             AdjustContributionAmount = 11,
             AdjustEarningsAmount = 12,

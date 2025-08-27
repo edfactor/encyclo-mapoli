@@ -1,16 +1,16 @@
 ﻿namespace Demoulas.ProfitSharing.Data.Entities.Base;
-#pragma warning disable S2094
+
 public abstract class Member : ModifiedBase
-#pragma warning restore S2094
 {
-    /*
-     *
-     * Actions to become a member
-     * PSN Number is a link to an employee where the money comes from
-     *
-     * BadgeNumber number is only by an employee
-     *
-     * User
-     *
-     */
+    /// <summary>
+    /// Gets or sets the unique identifier for the member.
+    /// </summary>
+    public int Id { get; set; }
+
+    /// <summary>
+    /// Gets or sets the badge number.
+    /// PSN Number is a link to an employee where the money comes from.
+    /// BadgeNumber number is only by an employee.
+    /// </summary>
+    public required int BadgeNumber { get; set; }
 }

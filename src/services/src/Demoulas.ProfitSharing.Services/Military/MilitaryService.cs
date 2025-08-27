@@ -27,34 +27,6 @@ public class MilitaryService : IMilitaryService
     public Task<Result<MilitaryContributionResponse>> CreateMilitaryServiceRecordAsync(
         CreateMilitaryContributionRequest req, CancellationToken cancellationToken = default)
     {
-        #region Validation
-        var validator = new InlineValidator<CreateMilitaryContributionRequest>();
-
-        validator.RuleFor(r => r.ContributionAmount)
-            .GreaterThan(0)
-            .WithMessage($"The {nameof(CreateMilitaryContributionRequest.ContributionAmount)} must be greater than zero.");
-
-        validator.RuleFor(r => r.ProfitYear)
-            .GreaterThanOrEqualTo((short)2020)
-            .WithMessage($"{nameof(MilitaryContributionRequest.ProfitYear)} must not less than 2020.")
-            .LessThanOrEqualTo((short)DateTime.Today.Year)
-            .WithMessage($"{nameof(MilitaryContributionRequest.ProfitYear)} must not be greater than this year.");
-
-        validator.RuleFor(r => r.BadgeNumber)
-            .GreaterThan(0)
-            .WithMessage($"{nameof(CreateMilitaryContributionRequest.BadgeNumber)} must be greater than zero.");
-
-        var validationResult = validator.Validate(req);
-
-        if (!validationResult.IsValid)
-        {
-            var errors = validationResult.Errors
-                .GroupBy(e => e.PropertyName)
-                .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray());
-
-            return Task.FromResult(Result<MilitaryContributionResponse>.ValidationFailure(errors));
-        }
-        #endregion
         return _dataContextFactory.UseWritableContext(async c =>
         {
 #pragma warning disable DSMPS001
@@ -95,15 +67,19 @@ public class MilitaryService : IMilitaryService
         }, cancellationToken);
     }
 
-    public async Task<Result<PaginatedResponseDto<MilitaryContributionResponse>>> GetMilitaryServiceRecordAsync(MilitaryContributionRequest req, CancellationToken cancellationToken = default)
+    public async Task<Result<PaginatedResponseDto<MilitaryContributionResponse>>> GetMilitaryServiceRecordAsync(MilitaryContributionRequest req, bool isArchiveRequest,
+        CancellationToken cancellationToken = default)
     {
         #region Validation
 
         var validator = new InlineValidator<MilitaryContributionRequest>();
 
-        validator.RuleFor(r => r.BadgeNumber)
-            .GreaterThan(0)
-            .WithMessage($"{nameof(MilitaryContributionRequest.BadgeNumber)} must be greater than zero.");
+        if (!isArchiveRequest)
+        {
+            validator.RuleFor(r => r.BadgeNumber)
+                .GreaterThan(0)
+                .WithMessage($"{nameof(MilitaryContributionRequest.BadgeNumber)} must be greater than zero.");
+        }
 
         validator.RuleFor(r => r.ProfitYear)
             .GreaterThanOrEqualTo((short)2000)
@@ -127,16 +103,15 @@ public class MilitaryService : IMilitaryService
         var result = await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             var demographics = await _demographicReaderService.BuildDemographicQuery(ctx);
-            return await ctx.ProfitDetails
-                .Include(pd=> pd.CommentType)
+            var query = ctx.ProfitDetails
+                .Include(pd => pd.CommentType)
                 .Join(demographics,
                     c => c.Ssn,
                     cm => cm.Ssn,
-                    (pd, d) => new { pd , d})
-                .Where(x => x.d.BadgeNumber == req.BadgeNumber
-                            && x.pd.ProfitYear == req.ProfitYear && x.pd.CommentTypeId == CommentType.Constants.Military.Id)
+                    (pd, d) => new { pd, d })
+                .Where(x => x.pd.ProfitYear == req.ProfitYear && x.pd.CommentTypeId == CommentType.Constants.Military.Id)
                 .OrderByDescending(x => x.pd.ProfitYear)
-                .ThenByDescending(x=> x.pd.TransactionDate)
+                .ThenByDescending(x => x.pd.CreatedAtUtc)
                 .Select(x => new MilitaryContributionResponse
                 {
                     BadgeNumber = x.d.BadgeNumber,
@@ -144,9 +119,16 @@ public class MilitaryService : IMilitaryService
                     CommentTypeId = x.pd.CommentTypeId,
                     ContributionDate = new DateOnly(x.pd.YearToDate == 0 ? req.ProfitYear : x.pd.YearToDate, x.pd.MonthToDate == 0 ? 12 : x.pd.MonthToDate, 31),
                     Amount = x.pd.Contribution,
-                    IsSupplementalContribution = x.pd.YearsOfServiceCredit == 0
-                })
-                .ToPaginationResultsAsync(req, cancellationToken);
+                    IsSupplementalContribution = x.pd.YearsOfServiceCredit == 0,
+                    IsExecutive = x.d.PayFrequencyId == Demoulas.ProfitSharing.Data.Entities.PayFrequency.Constants.Monthly
+                });
+
+            if (!isArchiveRequest)
+            {
+                query = query.Where(x => x.BadgeNumber == req.BadgeNumber);
+            }
+
+            return await query.ToPaginationResultsAsync(req, cancellationToken);
         });
 
         return Result<PaginatedResponseDto<MilitaryContributionResponse>>.Success(result);

@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using Demoulas.ProfitSharing.Api;
+﻿using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services;
@@ -18,7 +17,7 @@ public class TotalServiceTests : ApiTestBase<Program>
     public TotalServiceTests()
     {
         _dataContextFactory = MockDbContextFactory;
-        this._totalService = ServiceProvider?.GetRequiredService<TotalService>()!;
+        _totalService = ServiceProvider?.GetRequiredService<TotalService>()!;
     }
 
     [Fact(DisplayName = "Total ETVA Tests")]
@@ -26,12 +25,12 @@ public class TotalServiceTests : ApiTestBase<Program>
     {
         return _dataContextFactory.UseWritableContext(ctx =>
         {
-            var ppTest = Demoulas.ProfitSharing.UnitTests.Common.Common.Constants.FakeEtvaTotals.Object.First();
-            ppTest.Total = -20750.98m;
+            var ppTest = Common.Common.Constants.FakeEtvaTotals.Object.First();
+            ppTest.TotalAmount = -20750.98m;
 
 
             var etvaResult = _totalService.GetTotalComputedEtva(ctx, 2100).First();
-            etvaResult.Total.ShouldBe(-20750.98m);
+            etvaResult.TotalAmount.ShouldBe(-20750.98m);
 
             return Task.CompletedTask;
         }, CancellationToken.None);
@@ -67,7 +66,7 @@ public class TotalServiceTests : ApiTestBase<Program>
             var testRslt = await _totalService.GetTotalDistributions(ctx, (short)DateTime.Now.Year).Where(x => x.Ssn == demoSsn).ToListAsync(CancellationToken.None);
             testRslt.ShouldNotBeNull(); // Outgoing Partial Withdrawal
             testRslt.Count.ShouldBe(1);
-            testRslt[0].Total.ShouldBe(18724);
+            testRslt[0].TotalAmount.ShouldBe(18724);
 
             for (int i = 0; i < pdArray.Length; i++)
             {
@@ -81,7 +80,7 @@ public class TotalServiceTests : ApiTestBase<Program>
             testRslt = await _totalService.GetTotalDistributions(ctx, (short)DateTime.Now.Year).Where(x => x.Ssn == demoSsn).ToListAsync(CancellationToken.None);
             testRslt.ShouldNotBeNull(); // Outgoing Forfeitures
             testRslt.Count.ShouldBe(1);
-            testRslt[0].Total.ShouldBe(18724);
+            testRslt[0].TotalAmount.ShouldBe(18724);
 
             for (int i = 0; i < pdArray.Length; i++)
             {
@@ -95,7 +94,7 @@ public class TotalServiceTests : ApiTestBase<Program>
             testRslt = await _totalService.GetTotalDistributions(ctx, (short)DateTime.Now.Year).Where(x => x.Ssn == demoSsn).ToListAsync(CancellationToken.None);
             testRslt.ShouldNotBeNull(); // Outgoing 100% Vested Earnings
             testRslt.Count.ShouldBe(1);
-            testRslt[0].Total.ShouldBe(18724);
+            testRslt[0].TotalAmount.ShouldBe(18724);
 
             for (int i = 0; i < pdArray.Length; i++)
             {
@@ -110,7 +109,7 @@ public class TotalServiceTests : ApiTestBase<Program>
                 .ToListAsync(CancellationToken.None);
             testRslt.ShouldNotBeNull(); // Test as of filter
             testRslt.Count.ShouldBe(1);
-            testRslt[0].Total.ShouldBe(18720);
+            testRslt[0].TotalAmount.ShouldBe(18720);
 
             for (int i = 0; i < pdArray.Length; i++)
             {
@@ -124,7 +123,7 @@ public class TotalServiceTests : ApiTestBase<Program>
             testRslt = await _totalService.GetTotalDistributions(ctx, (short)DateTime.Now.Year).Where(x => x.Ssn == demoSsn).ToListAsync(CancellationToken.None);
             testRslt.ShouldNotBeNull(); // All non-distributon records
             testRslt.Count.ShouldBe(1);
-            testRslt[0].Total.ShouldBe(0);
+            testRslt[0].TotalAmount.ShouldBe(0);
         });
     }
 }

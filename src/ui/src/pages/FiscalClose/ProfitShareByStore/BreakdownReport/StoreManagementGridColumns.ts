@@ -1,66 +1,48 @@
-import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { agGridNumberToCurrency } from "smart-ui-library";
-import { createBadgeColumn } from "../../../../utils/gridColumnFactory";
+import { ColDef } from "ag-grid-community";
+import { createBadgeColumn, createCurrencyColumn, createNameColumn } from "../../../../utils/gridColumnFactory";
 
 export const GetStoreManagementGridColumns = (handleNavigation: (badgeNumber: string) => void): ColDef[] => {
   return [
-    createBadgeColumn({ 
+    createBadgeColumn({
       headerName: "Badge",
       minWidth: 100,
       navigateFunction: handleNavigation
     }),
-    {
-      headerName: "Name",
-      field: "fullName",
-      flex: 1
-    },
+    createNameColumn({
+      field: "fullName"
+    }),
     {
       headerName: "Position",
       field: "payClassificationName",
       flex: 1
     },
-    {
+    createCurrencyColumn({
       headerName: "Beginning Balance",
-      field: "beginningBalance",
-      width: 150,
-      flex: 1,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+      field: "beginningBalance"
+    }),
+    createCurrencyColumn({
       headerName: "Earnings",
-      field: "earnings",
-      flex: 1,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+      field: "earnings"
+    }),
+    createCurrencyColumn({
       headerName: "Contributions",
-      field: "contributions",
-      flex: 1,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+      field: "contributions"
+    }),
+    createCurrencyColumn({
       headerName: "Forfeiture",
-      field: "forfeitures",
-      flex: 1,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+      field: "forfeitures"
+    }),
+    createCurrencyColumn({
       headerName: "Distributions",
-      field: "distributions",
-      flex: 1,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+      field: "distributions"
+    }),
+    createCurrencyColumn({
       headerName: "Ending Balance",
-      field: "endingBalance",
-      flex: 1,
-      valueFormatter: agGridNumberToCurrency
-    },
-    {
+      field: "endingBalance"
+    }),
+    createCurrencyColumn({
       headerName: "Vested Amount",
-      field: "vestedAmount",
-      flex: 1,
-      valueFormatter: agGridNumberToCurrency
-    }
+      field: "vestedAmount"
+    })
   ];
 };

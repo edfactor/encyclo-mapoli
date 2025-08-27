@@ -2,8 +2,9 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using Renci.SshNet;
+using YEMatch.YEMatch.ReadyActivities;
 
-namespace YEMatch;
+namespace YEMatch.YEMatch;
 
 // Tries to parse the outcome.json and get all the remote files.    Used for creating the Golden Master
 [SuppressMessage("Minor Code Smell", "S3267:Loops should be simplified with \"LINQ\" expressions")]
@@ -11,6 +12,8 @@ public static class GetGold
 {
     private static readonly Dictionary<string, string> _referenceJobByLogPid = new()
     {
+        ["7777"] = "R3",
+        ["8888"] = "R2",
         ["12180"] = "R0",
         ["12228"] = "R15",
         ["12278"] = "R17",
@@ -21,7 +24,7 @@ public static class GetGold
         ["20718"] = "R22",
         ["20799"] = "R23",
         ["21279"] = "R24",
-        ["88"] = "R24B",
+        ["8855"] = "R24B",
         ["3110"] = "R25",
         ["8074"] = "R26",
         ["12201"] = "R27",
@@ -30,7 +33,10 @@ public static class GetGold
 
     private static readonly List<string> _referenceLogfiles =
     [
+        "PREVPROF-8888",
+        "PREVPROF-8888.csv",
         "PROF-HOURS-DOLLARS-12228.CSV",
+        "QPAY066-7777",
         "PAY426-12278",
         "PAY426-TOT-12278",
         "PAY426N-3-12278",
@@ -61,7 +67,7 @@ public static class GetGold
         "PAY447-20718",
         "PAY450-21279",
         "PROF-CNTRL-SHEET-21279",
-        "PROF-CNTRL-SHEET-88",
+        "PROF-CNTRL-SHEET-8855",
         "PROF130Y-3110",
         "PROF130-3110",
         "PROF130B-3110",
@@ -126,7 +132,7 @@ public static class GetGold
             (string rName, string sName, string activityName) = GetReferenceActivity(activityByPid, logFile);
             if (rName.Length == 0)
             {
-                Console.WriteLine($" activtityNAme {activityName} MISSING data from {logFile}");
+                Console.WriteLine($"ActivityName {activityName} MISSING data from {logFile}");
                 continue;
             }
 

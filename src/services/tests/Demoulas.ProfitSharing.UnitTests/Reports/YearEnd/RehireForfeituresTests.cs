@@ -1,6 +1,5 @@
 ﻿using System.Globalization;
 using System.Net;
-using System.Text.Json;
 using CsvHelper;
 using CsvHelper.Configuration;
 using Demoulas.Common.Contracts.Contracts.Response;
@@ -11,9 +10,10 @@ using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Common.Interfaces.Audit;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Military;
+using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ForfeitureAdjustment;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
@@ -23,19 +23,19 @@ using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
-using Xunit;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
-[TestSubject(typeof(RehireForfeituresEndpoint))]
+[TestSubject(typeof(UnforfeituresEndpoint))]
 public class RehireForfeituresTests : ApiTestBase<Program>
 {
-    private readonly RehireForfeituresEndpoint _endpoint;
+    private readonly UnforfeituresEndpoint _endpoint;
 
     public RehireForfeituresTests()
     {
-        IUnForfeitService mockService = ServiceProvider?.GetRequiredService<IUnForfeitService>()!;
-        _endpoint = new RehireForfeituresEndpoint(mockService);
+        IUnforfeitService mockService = ServiceProvider?.GetRequiredService<IUnforfeitService>()!;
+        IAuditService auditService = ServiceProvider?.GetRequiredService<IAuditService>()!;
+        _endpoint = new UnforfeituresEndpoint(mockService, auditService);
     }
 
 
@@ -46,31 +46,31 @@ public class RehireForfeituresTests : ApiTestBase<Program>
         {
             var setup = await SetupTestEmployee(c);
 
-            var expectedResponse = new ReportResponseBase<RehireForfeituresResponse>
+            var expectedResponse = new ReportResponseBase<UnforfeituresResponse>
             {
                 ReportName = "REHIRE'S PROFIT SHARING DATA",
                 ReportDate = DateTimeOffset.UtcNow,
                 StartDate = ReferenceData.DsmMinValue,
                 EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
-                Response = new PaginatedResponseDto<RehireForfeituresResponse>
+                Response = new PaginatedResponseDto<UnforfeituresResponse>
                 {
-                    Results = new List<RehireForfeituresResponse> { setup.ExpectedResponse }
+                    Results = new List<UnforfeituresResponse> { setup.ExpectedResponse }
                 }
             };
 
             // Act
             ApiClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
             var response =
-                await ApiClient.POSTAsync<RehireForfeituresEndpoint, StartAndEndDateRequest, ReportResponseBase<RehireForfeituresResponse>>(
+                await ApiClient.POSTAsync<UnforfeituresEndpoint, StartAndEndDateRequest, ReportResponseBase<UnforfeituresResponse>>(
                     setup.Request);
 
             // Assert
             Assert.Equal(expectedResponse.ReportName, response.Result.ReportName);
             Assert.True(response.Result.Response.Results.Count() >= expectedResponse.Response.Results.Count());
             expectedResponse.Response.Results.First().ShouldBeEquivalentTo(response.Result.Response.Results.First(),
-                nameof(RehireForfeituresResponse.NetBalanceLastYear),
-                nameof(RehireForfeituresResponse.VestedBalanceLastYear),
-                nameof(RehireForfeituresResponse.CompanyContributionYears)
+                nameof(UnforfeituresResponse.NetBalanceLastYear),
+                nameof(UnforfeituresResponse.VestedBalanceLastYear),
+                nameof(UnforfeituresResponse.CompanyContributionYears)
             );
         });
     }
@@ -84,7 +84,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
 
             // Act
             DownloadClient.CreateAndAssignTokenForClient(Role.FINANCEMANAGER);
-            var response = await DownloadClient.POSTAsync<RehireForfeituresEndpoint, StartAndEndDateRequest, StreamContent>(setup.Request);
+            var response = await DownloadClient.POSTAsync<UnforfeituresEndpoint, StartAndEndDateRequest, StreamContent>(setup.Request);
             response.Response.Content.ShouldNotBeNull();
 
             // CSV assertions
@@ -103,7 +103,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
             csv.ReadHeader();
             var headers = csv.HeaderRecord;
             headers.ShouldNotBeNull();
-            headers.ShouldBe(new[] { "", "", "BADGE", "EMPLOYEE NAME", "SSN", "REHIRED", "HIRE DATE", "TERMINATION DATE", "BEGINNING BALANCE", "BEGIN VESTED AMOUNT", "EC" });
+            headers.ShouldBe(new[] { "", "", "BADGE", "EMPLOYEE NAME", "SSN", "REHIRED", "HIRE DATE", "BEGINNING BALANCE", "BEGIN VESTED AMOUNT", "EC" });
 
             await csv.ReadAsync();
             csv.ReadHeader();
@@ -122,7 +122,7 @@ public class RehireForfeituresTests : ApiTestBase<Program>
             var setup = await SetupTestEmployee(c);
 
             var response =
-                await ApiClient.POSTAsync<RehireForfeituresEndpoint, StartAndEndDateRequest, ReportResponseBase<RehireForfeituresResponse>>(setup.Request);
+                await ApiClient.POSTAsync<UnforfeituresEndpoint, StartAndEndDateRequest, ReportResponseBase<UnforfeituresResponse>>(setup.Request);
 
             Assert.Equal(HttpStatusCode.Unauthorized, response.Response.StatusCode);
         });
@@ -134,13 +134,13 @@ public class RehireForfeituresTests : ApiTestBase<Program>
         // Arrange
         var request = StartAndEndDateRequest.RequestExample();
         var cancellationToken = CancellationToken.None;
-        var expectedResponse = new ReportResponseBase<RehireForfeituresResponse>
+        var expectedResponse = new ReportResponseBase<UnforfeituresResponse>
         {
             ReportName = "REHIRE'S PROFIT SHARING DATA",
             ReportDate = DateTimeOffset.UtcNow,
             StartDate = ReferenceData.DsmMinValue,
             EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
-            Response = new PaginatedResponseDto<RehireForfeituresResponse> { Results = new List<RehireForfeituresResponse>() }
+            Response = new PaginatedResponseDto<UnforfeituresResponse> { Results = new List<UnforfeituresResponse>() }
         };
 
         // Act
@@ -157,13 +157,13 @@ public class RehireForfeituresTests : ApiTestBase<Program>
         // Arrange
         var request = StartAndEndDateRequest.RequestExample();
         var cancellationToken = CancellationToken.None;
-        var expectedResponse = new ReportResponseBase<RehireForfeituresResponse>
+        var expectedResponse = new ReportResponseBase<UnforfeituresResponse>
         {
             ReportName = "REHIRE'S PROFIT SHARING DATA",
             ReportDate = DateTimeOffset.UtcNow,
             StartDate = ReferenceData.DsmMinValue,
             EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
-            Response = new PaginatedResponseDto<RehireForfeituresResponse> { Results = [] }
+            Response = new PaginatedResponseDto<UnforfeituresResponse> { Results = [] }
         };
 
         // Act
@@ -182,10 +182,10 @@ public class RehireForfeituresTests : ApiTestBase<Program>
         reportFileName.ShouldBe("REHIRE'S PROFIT SHARING DATA");
     }
 
-    private static async Task<(StartAndEndDateRequest Request, RehireForfeituresResponse ExpectedResponse)> SetupTestEmployee(ProfitSharingDbContext c)
+    private static async Task<(StartAndEndDateRequest Request, UnforfeituresResponse ExpectedResponse)> SetupTestEmployee(ProfitSharingDbContext c)
     {
         // Setup
-        RehireForfeituresResponse example = RehireForfeituresResponse.ResponseExample();
+        UnforfeituresResponse example = UnforfeituresResponse.ResponseExample();
 
         var demo = await c.Demographics.Include(demographic => demographic.ContactInfo).FirstAsync(CancellationToken.None);
         demo.EmploymentStatusId = EmploymentStatus.Constants.Active;
@@ -204,7 +204,10 @@ public class RehireForfeituresTests : ApiTestBase<Program>
             Id = Enrollment.Constants.NewVestingPlanHasForfeitureRecords,
             Name = "New vesting plan has Forfeiture records"
         };
-        payProfit.CurrentHoursYear = 2358;
+        payProfit.CurrentHoursYear = 1255.4m;
+        payProfit.HoursExecutive = 0;
+        payProfit.CurrentIncomeYear = 12345.67m;
+        payProfit.IncomeExecutive = 0;
         payProfit.ProfitYear = profitYear;
 
         var details = await c.ProfitDetails.Where(pd => pd.Ssn == demo.Ssn).ToListAsync(CancellationToken.None);
@@ -224,13 +227,13 @@ public class RehireForfeituresTests : ApiTestBase<Program>
         example.Ssn = demo.Ssn.MaskSsn();
         example.FullName = demo.ContactInfo.FullName;
         example.ReHiredDate = demo.ReHireDate ?? ReferenceData.DsmMinValue;
-        example.Details = details.Select(pd => new MilitaryRehireProfitSharingDetailResponse
+        example.Details = details.Select(pd => new RehireTransactionDetailResponse
             {
-                Forfeiture = pd.Forfeiture, Remark = pd.Remark, ProfitYear = pd.ProfitYear, HoursCurrentYear = payProfit.CurrentHoursYear,
-                EnrollmentName = demo.EmploymentStatus.Name,
-                EnrollmentId = 0,
+                Forfeiture = pd.Forfeiture,
+                Remark = pd.Remark,
+                ProfitYear = pd.ProfitYear,
+                HoursTransactionYear = payProfit.CurrentHoursYear,
                 ProfitCodeId = 0
-                
         })
             .ToList();
 
@@ -241,7 +244,8 @@ public class RehireForfeituresTests : ApiTestBase<Program>
                 Skip = 0,
                 Take = 10,
                 BeginningDate = example.ReHiredDate.AddDays(-5),
-                EndingDate = example.ReHiredDate.AddDays(5)
+                EndingDate = example.ReHiredDate.AddDays(5),
+                ProfitYear = profitYear
             }, example);
     }
 }

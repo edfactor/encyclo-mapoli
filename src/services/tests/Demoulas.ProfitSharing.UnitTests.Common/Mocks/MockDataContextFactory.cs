@@ -46,17 +46,17 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
 
 
         List<Country>? countries = new CountryFaker().Generate(10);
-        Mock<DbSet<Country>> mockCountry = countries.AsQueryable().BuildMockDbSet();
+        Mock<DbSet<Country>> mockCountry = countries.BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.Countries).Returns(mockCountry.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.Countries).Returns(mockCountry.Object);
 
         List<Navigation>? navigations = new NavigationFaker().DummyNavigationData();
-        Mock<DbSet<Navigation>> mockNavigation = navigations.AsQueryable().BuildMockDbSet();
+        Mock<DbSet<Navigation>> mockNavigation = navigations.BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.Navigations).Returns(mockNavigation.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.Navigations).Returns(mockNavigation.Object);
 
         List<NavigationStatus>? navigationStatus = new NavigationStatusFaker().DummyNavigationStatus();
-        Mock<DbSet<NavigationStatus>> mockNavigationStatus = navigationStatus.AsQueryable().BuildMockDbSet();
+        Mock<DbSet<NavigationStatus>> mockNavigationStatus = navigationStatus.BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.NavigationStatuses).Returns(mockNavigationStatus.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.NavigationStatuses).Returns(mockNavigationStatus.Object);
 
@@ -65,17 +65,17 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
 
 
         List<PayClassification>? payClassifications = new PayClassificationFaker().Generate(500);
-        Mock<DbSet<PayClassification>> mockPayClassifications = payClassifications.AsQueryable().BuildMockDbSet();
+        Mock<DbSet<PayClassification>> mockPayClassifications = payClassifications.BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.PayClassifications).Returns(mockPayClassifications.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.PayClassifications).Returns(mockPayClassifications.Object);
 
         var profitCodes = new ProfitCodeFaker().Generate(10);
-        var mockProfitCodes = profitCodes.AsQueryable().BuildMockDbSet();
+        var mockProfitCodes = profitCodes.BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.ProfitCodes).Returns(mockProfitCodes.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.ProfitCodes).Returns(mockProfitCodes.Object);
 
         var taxCodes = new TaxCodeFaker().Generate(10);
-        var mockTaxCodes = taxCodes.AsQueryable().BuildMockDbSet();
+        var mockTaxCodes = taxCodes.BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.TaxCodes).Returns(mockTaxCodes.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.TaxCodes).Returns(mockTaxCodes.Object);
 
@@ -86,7 +86,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
             new EmploymentType() {Id=EmploymentType.Constants.FullTimeStraightSalary,Name=EmploymentType.Constants.FullTimeStraightSalary.ToString() },
             new EmploymentType() {Id=EmploymentType.Constants.PartTime,Name=EmploymentType.Constants.PartTime.ToString() }
         };
-        var mockEmploymentTypes = employmentTypes.AsQueryable().BuildMockDbSet();
+        var mockEmploymentTypes = employmentTypes.BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.EmploymentTypes).Returns(mockEmploymentTypes.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.EmploymentTypes).Returns(mockEmploymentTypes.Object);
 
@@ -94,7 +94,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         List<DemographicHistory>? demographicHistories = new DemographicHistoryFaker(demographics).Generate(demographics.Count);
 
         var profitDetails = new ProfitDetailFaker(demographics).Generate(demographics.Count * 5);
-        var mockProfitDetails = profitDetails.AsQueryable().BuildMockDbSet();
+        var mockProfitDetails = profitDetails.BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.ProfitDetails).Returns(mockProfitDetails.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.ProfitDetails).Returns(mockProfitDetails.Object);
 
@@ -107,25 +107,25 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         }
 
         List<ParticipantTotal> participantTotals = new ParticipantTotalFaker(demographics,beneficiaries).Generate(demographics.Count + beneficiaries.Count);
-        Constants.FakeParticipantTotals = participantTotals.AsQueryable().BuildMockDbSet();
+        Constants.FakeParticipantTotals = participantTotals.BuildMockDbSet();
 
         List<ParticipantTotalVestingBalance> participantTotalVestingBalances = new ParticipantTotalVestingBalanceFaker(demographics, beneficiaries).Generate(demographics.Count + beneficiaries.Count);
-        Constants.FakeParticipantTotalVestingBalances = participantTotalVestingBalances.AsQueryable().BuildMockDbSet();
+        Constants.FakeParticipantTotalVestingBalances = participantTotalVestingBalances.BuildMockDbSet();
 
         List<ParticipantTotal> etvaBalances = new ParticipantEtvaTotalFaker(profitDetails).Generate(profitDetails.Count);
-        Constants.FakeEtvaTotals = etvaBalances.AsQueryable().BuildMockDbSet();
+        Constants.FakeEtvaTotals = etvaBalances.BuildMockDbSet();
 
         var profitShareTotal = new ProfitShareTotalFaker().Generate();
-        Constants.ProfitShareTotals = (new List<ProfitShareTotal>() { profitShareTotal }).AsQueryable().BuildMockDbSet();
+        Constants.ProfitShareTotals = (new List<ProfitShareTotal>() { profitShareTotal }).BuildMockDbSet();
        
 
 
         List<FrozenState>? frozenStates = new FrozenStateFaker().Generate(1);
         List<NavigationTracking>? navigationTrackings = new NavigationTrackingFaker().Generate(1);
 
-        Mock<DbSet<Beneficiary>> mockBeneficiaries = beneficiaries.AsQueryable().BuildMockDbSet();
+        Mock<DbSet<Beneficiary>> mockBeneficiaries = beneficiaries.BuildMockDbSet();
         Mock<DbSet<BeneficiaryContact>> mockBeneficiaryContacts =
-            beneficiaries.Where(b => b.Contact != null).Select(b => b.Contact!).AsQueryable().BuildMockDbSet();
+            beneficiaries.Where(b => b.Contact != null).Select(b => b.Contact!).ToList().BuildMockDbSet();
         
         _profitSharingDbContext.Setup(m => m.Beneficiaries).Returns(mockBeneficiaries.Object);
         _profitSharingDbContext.Setup(m => m.BeneficiaryContacts).Returns(mockBeneficiaryContacts.Object);
@@ -133,31 +133,31 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         _profitSharingReadOnlyDbContext.Setup(m => m.BeneficiaryContacts).Returns(mockBeneficiaryContacts.Object);
 
         List<Beneficiary>? beneficiaryList = new BeneficiaryListFaker().GetDummyBeneficiary();
-        Mock<DbSet<Beneficiary>> mockBeneficiaryList = beneficiaryList.AsQueryable().BuildMockDbSet();
+        Mock<DbSet<Beneficiary>> mockBeneficiaryList = beneficiaryList.BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.Beneficiaries).Returns(mockBeneficiaryList.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.Beneficiaries).Returns(mockBeneficiaryList.Object);
 
-        Mock<DbSet<PayProfit>> mockProfits = profits.AsQueryable().BuildMockDbSet();
+        Mock<DbSet<PayProfit>> mockProfits = profits.BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.PayProfits).Returns(mockProfits.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.PayProfits).Returns(mockProfits.Object);
 
-        Mock<DbSet<Demographic>> mockDemographic = demographics.AsQueryable().BuildMockDbSet();
+        Mock<DbSet<Demographic>> mockDemographic = demographics.BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.Demographics).Returns(mockDemographic.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.Demographics).Returns(mockDemographic.Object);
 
-        Mock<DbSet<DemographicHistory>> mockDemographicHistories = demographicHistories.AsQueryable().BuildMockDbSet();
+        Mock<DbSet<DemographicHistory>> mockDemographicHistories = demographicHistories.BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.DemographicHistories).Returns(mockDemographicHistories.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.DemographicHistories).Returns(mockDemographicHistories.Object);
 
-        Mock<DbSet<AccountingPeriod>>? mockCalendar = CaldarRecordSeeder.Records.AsQueryable().BuildMockDbSet();
+        Mock<DbSet<AccountingPeriod>>? mockCalendar = CaldarRecordSeeder.Records.ToList().BuildMockDbSet();
         _profitSharingReadOnlyDbContext.Setup(m => m.AccountingPeriods).Returns(mockCalendar.Object);
 
-        Mock<DbSet<FrozenState>> mockFrozenStates = frozenStates.AsQueryable().BuildMockDbSet();
+        Mock<DbSet<FrozenState>> mockFrozenStates = frozenStates.BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.FrozenStates).Returns(mockFrozenStates.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.FrozenStates).Returns(mockFrozenStates.Object);
-        Mock<DbSet<NavigationTracking>> mocknavigationTrackings = navigationTrackings.AsQueryable().BuildMockDbSet();
-        _profitSharingDbContext.Setup(m => m.NavigationTrackings).Returns(mocknavigationTrackings.Object);
-        _profitSharingReadOnlyDbContext.Setup(m => m.NavigationTrackings).Returns(mocknavigationTrackings.Object);
+        Mock<DbSet<NavigationTracking>> mockNavigationTrackings = navigationTrackings.BuildMockDbSet();
+        _profitSharingDbContext.Setup(m => m.NavigationTrackings).Returns(mockNavigationTrackings.Object);
+        _profitSharingReadOnlyDbContext.Setup(m => m.NavigationTrackings).Returns(mockNavigationTrackings.Object);
 
         _profitSharingDbContext.Setup(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()));
         _profitSharingDbContext.Setup(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()))
@@ -178,7 +178,7 @@ public sealed class MockDataContextFactory : IProfitSharingDataContextFactory
         .Select(f => new Department { Id = (byte)f.GetValue(null)!, Name = f.Name })
         .ToList();
 
-        Mock<DbSet<Department>> mockDepartments = departments.AsQueryable().BuildMockDbSet();
+        Mock<DbSet<Department>> mockDepartments = departments.BuildMockDbSet();
         _profitSharingDbContext.Setup(m => m.Departments).Returns(mockDepartments.Object);
         _profitSharingReadOnlyDbContext.Setup(m => m.Departments).Returns(mockDepartments.Object);
     }

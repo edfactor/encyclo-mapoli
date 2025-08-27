@@ -7,7 +7,7 @@
 ### Getting Started
 Install 3rd Party Libraries:
 
-1. Visual Studio Professional 2022 (17.14.7) or higher installed - https://visualstudio.microsoft.com/downloads/
+1. Visual Studio Professional 2022 (17.14.13) or higher installed - https://visualstudio.microsoft.com/downloads/
 
     ![Workload](./setup_images/workload.PNG)
     - Install the "ASP.net and web development", "Azure" workload, and ".NET desktop development" workloads
@@ -45,11 +45,10 @@ Install 3rd Party Libraries:
 8. [Makes use of .NET Aspire](https://learn.microsoft.com/en-us/dotnet/aspire/get-started/aspire-overview)
 9. [Shouldly](https://docs.shouldly.org/)
 10. [RabbitMq](https://hub.docker.com/r/masstransit/rabbitmq)
-11. [MassTransit](https://masstransit.io/)
-12. [Bogus](https://github.com/bchavez/Bogus)
-13. [Riok.Mapperly](https://mapperly.riok.app)
-14. [Serilog](https://serilog.net/)
-15. [.NET Feature Management](https://github.com/microsoft/FeatureManagement-Dotnet)
+11. [Bogus](https://github.com/bchavez/Bogus)
+12. [Riok.Mapperly](https://mapperly.riok.app)
+13. [Serilog](https://serilog.net/)
+14. [.NET Feature Management](https://github.com/microsoft/FeatureManagement-Dotnet)
 
 
 <hr/>

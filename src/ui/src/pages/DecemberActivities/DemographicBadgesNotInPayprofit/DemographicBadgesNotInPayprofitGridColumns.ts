@@ -1,30 +1,30 @@
 import { ColDef } from "ag-grid-community";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
-import { createSSNColumn, createBadgeColumn } from "../../../utils/gridColumnFactory";
+import {
+  createBadgeColumn,
+  createNameColumn,
+  createSSNColumn,
+  createStatusColumn
+} from "../../../utils/gridColumnFactory";
 export const GetDemographicBadgesNotInPayprofitColumns = (): ColDef[] => {
   return [
-    createBadgeColumn({ 
+    createBadgeColumn({
       headerName: "Badge",
       minWidth: GRID_COLUMN_WIDTHS.BADGE_NUMBER,
       maxWidth: 200,
       alignment: "left",
       renderAsLink: false
     }),
-    createSSNColumn({ 
-      headerName: "SSN", 
-      alignment: "left", 
-      maxWidth: 250 
+    createSSNColumn({
+      headerName: "SSN",
+      alignment: "left",
+      maxWidth: 250
     }),
-    {
-      headerName: "Name",
+    createNameColumn({
       field: "employeeName",
-      colId: "employeeName",
       minWidth: 150,
-      maxWidth: 300,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true
-    },
+      maxWidth: 300
+    }),
     {
       headerName: "Store",
       field: "store",
@@ -35,19 +35,15 @@ export const GetDemographicBadgesNotInPayprofitColumns = (): ColDef[] => {
       cellClass: "left-align",
       resizable: true
     },
-    {
-      headerName: "Status",
-      field: "status",
-      colId: "status",
+    createStatusColumn({
       minWidth: 80,
       maxWidth: 250,
-      type: "rightAligned",
-      resizable: true,
+      alignment: "right",
       valueFormatter: (params) => {
         const status = params.data.status; // assuming 'status' is in the row data
         const statusName = params.data.statusName; // assuming 'statusName' is in the row data
         return `[${status}] ${statusName}`;
       }
-    }
+    })
   ];
 };

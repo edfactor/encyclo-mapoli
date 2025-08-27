@@ -5,7 +5,7 @@ public sealed record WagesCurrentYearResponse
     public decimal IncomeCurrentYear { get; set; }
     public decimal HoursCurrentYear { get; set; }
     public short StoreNumber { get; set; }
-
+    public bool IsExecutive { get; set; }
     public static WagesCurrentYearResponse ResponseExample()
     {
         return new WagesCurrentYearResponse { BadgeNumber = 123456, HoursCurrentYear = 3265, IncomeCurrentYear = (decimal)25_325.18 };

@@ -18,7 +18,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .UseCollation("USING_NLS_COMP")
-                .HasAnnotation("ProductVersion", "9.0.7")
+                .HasAnnotation("ProductVersion", "9.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             OracleModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -25465,6 +25465,64 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.AnnuityRate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<byte>("Age")
+                        .HasPrecision(3)
+                        .HasColumnType("NUMBER(3)")
+                        .HasColumnName("AGE");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("CREATED_AT_UTC")
+                        .HasDefaultValueSql("SYSTIMESTAMP");
+
+                    b.Property<decimal>("JointRate")
+                        .HasPrecision(6, 4)
+                        .HasColumnType("DECIMAL(6,4)")
+                        .HasColumnName("JOINT_RATE");
+
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
+                        .ValueGeneratedOnUpdate()
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("MODIFIED_AT_UTC")
+                        .HasDefaultValueSql("SYSTIMESTAMP");
+
+                    b.Property<decimal>("SingleRate")
+                        .HasPrecision(6, 4)
+                        .HasColumnType("DECIMAL(6,4)")
+                        .HasColumnName("SINGLE_RATE");
+
+                    b.Property<string>("UserName")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(96)
+                        .HasColumnType("NVARCHAR2(96)")
+                        .HasColumnName("USER_NAME")
+                        .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
+
+                    b.Property<short>("Year")
+                        .HasPrecision(4)
+                        .HasColumnType("NUMBER(4)")
+                        .HasColumnName("YEAR");
+
+                    b.HasKey("Id")
+                        .HasName("PK_ANNUITY_RATE");
+
+                    b.HasIndex(new[] { "Year", "Age" }, "IX_YEAR_AGE")
+                        .IsUnique()
+                        .HasDatabaseName("IX_ANNUITY_RATE_YEAR_AGE");
+
+                    b.ToTable("ANNUITY_RATE", (string)null);
+                });
+
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Audit.AuditEvent", b =>
                 {
                     b.Property<long>("Id")
@@ -27666,9 +27724,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.HasIndex("DepartmentId")
                         .HasDatabaseName("IX_DEMOGRAPHIC_DEPARTMENTID");
 
-                    b.HasIndex("EmploymentStatusId")
-                        .HasDatabaseName("IX_DEMOGRAPHIC_EMPLOYMENTSTATUSID");
-
                     b.HasIndex("EmploymentTypeId")
                         .HasDatabaseName("IX_DEMOGRAPHIC_EMPLOYMENTTYPEID");
 
@@ -27691,6 +27746,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.HasIndex(new[] { "DateOfBirth" }, "IX_DOB")
                         .HasDatabaseName("IX_DEMOGRAPHIC_DATEOFBIRTH");
 
+                    b.HasIndex(new[] { "EmploymentStatusId" }, "IX_EMPLOYMENT_STATUS")
+                        .HasDatabaseName("IX_DEMOGRAPHIC_EMPLOYMENTSTATUSID");
+
                     b.HasIndex(new[] { "OracleHcmId" }, "IX_ORACLE_HCM_ID")
                         .IsUnique()
                         .HasDatabaseName("IX_DEMOGRAPHIC_ORACLEHCMID");
@@ -27703,6 +27761,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     b.HasIndex(new[] { "Ssn", "OracleHcmId" }, "IX_SSN_ORACLE_HCM_ID")
                         .HasDatabaseName("IX_DEMOGRAPHIC_SSN_ORACLEHCMID");
+
+                    b.HasIndex(new[] { "EmploymentStatusId", "TerminationDate" }, "IX_STATUS_TERMINATION_DATE")
+                        .HasDatabaseName("IX_DEMOGRAPHIC_EMPLOYMENTSTATUSID_TERMINATIONDATE");
 
                     b.HasIndex(new[] { "TerminationDate" }, "IX_TERMINATION_DATE")
                         .HasDatabaseName("IX_DEMOGRAPHIC_TERMINATIONDATE");
@@ -28906,167 +28967,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.MassTransit.Job", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(10)")
-                        .HasColumnName("ID");
-
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTimeOffset?>("Completed")
-                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
-                        .HasColumnName("COMPLETED");
-
-                    b.Property<byte>("JobStatusId")
-                        .HasPrecision(3)
-                        .HasColumnType("NUMBER(3)")
-                        .HasColumnName("JOBSTATUSID");
-
-                    b.Property<byte>("JobTypeId")
-                        .HasPrecision(3)
-                        .HasColumnType("NUMBER(3)")
-                        .HasColumnName("JOBTYPEID");
-
-                    b.Property<string>("RequestedBy")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("NVARCHAR2(30)")
-                        .HasColumnName("REQUESTEDBY");
-
-                    b.Property<byte>("StartMethodId")
-                        .HasPrecision(3)
-                        .HasColumnType("NUMBER(3)")
-                        .HasColumnName("STARTMETHODID");
-
-                    b.Property<DateTimeOffset>("Started")
-                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
-                        .HasColumnName("STARTED");
-
-                    b.HasKey("Id")
-                        .HasName("PK_JOB");
-
-                    b.HasIndex("JobStatusId")
-                        .HasDatabaseName("IX_JOB_JOBSTATUSID");
-
-                    b.HasIndex("JobTypeId")
-                        .HasDatabaseName("IX_JOB_JOBTYPEID");
-
-                    b.HasIndex("StartMethodId")
-                        .HasDatabaseName("IX_JOB_STARTMETHODID");
-
-                    b.ToTable("JOB", (string)null);
-                });
-
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.MassTransit.JobStatus", b =>
-                {
-                    b.Property<byte>("Id")
-                        .HasPrecision(3)
-                        .HasColumnType("NUMBER(3)")
-                        .HasColumnName("ID");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("NVARCHAR2(30)")
-                        .HasColumnName("NAME");
-
-                    b.HasKey("Id")
-                        .HasName("PK_JOBSTATUS");
-
-                    b.ToTable("JOBSTATUS", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = (byte)0,
-                            Name = "Pending"
-                        },
-                        new
-                        {
-                            Id = (byte)2,
-                            Name = "Completed"
-                        },
-                        new
-                        {
-                            Id = (byte)99,
-                            Name = "Failed"
-                        },
-                        new
-                        {
-                            Id = (byte)1,
-                            Name = "Running"
-                        });
-                });
-
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.MassTransit.JobType", b =>
-                {
-                    b.Property<byte>("Id")
-                        .HasPrecision(3)
-                        .HasColumnType("NUMBER(3)")
-                        .HasColumnName("ID");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("NVARCHAR2(30)")
-                        .HasColumnName("NAME");
-
-                    b.HasKey("Id")
-                        .HasName("PK_JOBTYPE");
-
-                    b.ToTable("JOBTYPE", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = (byte)0,
-                            Name = "Employee Sync Full"
-                        },
-                        new
-                        {
-                            Id = (byte)1,
-                            Name = "Payroll Sync Full"
-                        },
-                        new
-                        {
-                            Id = (byte)2,
-                            Name = "Employee Sync Delta"
-                        });
-                });
-
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.MassTransit.StartMethod", b =>
-                {
-                    b.Property<byte>("Id")
-                        .HasPrecision(3)
-                        .HasColumnType("NUMBER(3)")
-                        .HasColumnName("ID");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("NVARCHAR2(30)")
-                        .HasColumnName("NAME");
-
-                    b.HasKey("Id")
-                        .HasName("PK_JOBSTARTMETHOD");
-
-                    b.ToTable("JOBSTARTMETHOD", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = (byte)0,
-                            Name = "System"
-                        },
-                        new
-                        {
-                            Id = (byte)1,
-                            Name = "OnDemand"
-                        });
-                });
-
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Missive", b =>
                 {
                     b.Property<int>("Id")
@@ -29153,12 +29053,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Navigations.Navigation", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("NUMBER(10)")
+                    b.Property<short>("Id")
+                        .HasColumnType("NUMBER(5)")
                         .HasColumnName("ID");
-
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<bool?>("Disabled")
                         .HasColumnType("NUMBER(1)")
@@ -29173,8 +29070,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(3)")
                         .HasColumnName("ORDER_NUMBER");
 
-                    b.Property<int?>("ParentId")
-                        .HasColumnType("NUMBER(10)")
+                    b.Property<short?>("ParentId")
+                        .HasColumnType("NUMBER(5)")
                         .HasColumnName("PARENT_ID");
 
                     b.Property<byte?>("StatusId")
@@ -29207,6 +29104,601 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasDatabaseName("IX_NAVIGATION_STATUS_ID");
 
                     b.ToTable("NAVIGATION", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = (short)32767,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)1,
+                            StatusId = (byte)1,
+                            SubTitle = "",
+                            Title = "Unknown",
+                            Url = ""
+                        },
+                        new
+                        {
+                            Id = (short)50,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)1,
+                            StatusId = (byte)1,
+                            SubTitle = "",
+                            Title = "INQUIRIES",
+                            Url = ""
+                        },
+                        new
+                        {
+                            Id = (short)52,
+                            Disabled = true,
+                            Icon = "",
+                            OrderNumber = (byte)2,
+                            StatusId = (byte)1,
+                            SubTitle = "",
+                            Title = "BENEFICIARIES",
+                            Url = ""
+                        },
+                        new
+                        {
+                            Id = (short)53,
+                            Disabled = true,
+                            Icon = "",
+                            OrderNumber = (byte)3,
+                            StatusId = (byte)1,
+                            SubTitle = "",
+                            Title = "DISTRIBUTIONS",
+                            Url = ""
+                        },
+                        new
+                        {
+                            Id = (short)54,
+                            Disabled = true,
+                            Icon = "",
+                            OrderNumber = (byte)4,
+                            StatusId = (byte)1,
+                            SubTitle = "",
+                            Title = "RECONCILIATION",
+                            Url = ""
+                        },
+                        new
+                        {
+                            Id = (short)55,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)5,
+                            StatusId = (byte)1,
+                            SubTitle = "",
+                            Title = "YEAR END",
+                            Url = ""
+                        },
+                        new
+                        {
+                            Id = (short)56,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)6,
+                            StatusId = (byte)1,
+                            SubTitle = "",
+                            Title = "IT OPERATIONS",
+                            Url = ""
+                        },
+                        new
+                        {
+                            Id = (short)51,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)1,
+                            ParentId = (short)50,
+                            StatusId = (byte)1,
+                            SubTitle = "",
+                            Title = "MASTER INQUIRY",
+                            Url = "master-inquiry"
+                        },
+                        new
+                        {
+                            Id = (short)57,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)1,
+                            ParentId = (short)56,
+                            StatusId = (byte)1,
+                            SubTitle = "",
+                            Title = "Demographic Freeze",
+                            Url = "demographic-freeze"
+                        },
+                        new
+                        {
+                            Id = (short)1,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)1,
+                            ParentId = (short)55,
+                            StatusId = (byte)1,
+                            SubTitle = "",
+                            Title = "December Activities",
+                            Url = "december-process-accordion"
+                        },
+                        new
+                        {
+                            Id = (short)14,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)2,
+                            ParentId = (short)55,
+                            StatusId = (byte)1,
+                            SubTitle = "",
+                            Title = "Fiscal Close",
+                            Url = "fiscal-close"
+                        },
+                        new
+                        {
+                            Id = (short)2,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)1,
+                            ParentId = (short)1,
+                            StatusId = (byte)1,
+                            SubTitle = "",
+                            Title = "Clean up Reports",
+                            Url = ""
+                        },
+                        new
+                        {
+                            Id = (short)8,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)2,
+                            ParentId = (short)1,
+                            StatusId = (byte)1,
+                            SubTitle = "QPREV-PROF",
+                            Title = "Unforfeit",
+                            Url = "unforfeitures"
+                        },
+                        new
+                        {
+                            Id = (short)7,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)3,
+                            ParentId = (short)1,
+                            StatusId = (byte)1,
+                            SubTitle = "008-13",
+                            Title = "Military Contributions",
+                            Url = "military-entry-and-modification"
+                        },
+                        new
+                        {
+                            Id = (short)9,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)4,
+                            ParentId = (short)1,
+                            StatusId = (byte)1,
+                            SubTitle = "QPAY066",
+                            Title = "Terminations",
+                            Url = "prof-term"
+                        },
+                        new
+                        {
+                            Id = (short)10,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)5,
+                            ParentId = (short)1,
+                            StatusId = (byte)1,
+                            SubTitle = "008-12",
+                            Title = "Forfeitures",
+                            Url = "forfeitures-adjustment"
+                        },
+                        new
+                        {
+                            Id = (short)11,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)6,
+                            ParentId = (short)1,
+                            StatusId = (byte)1,
+                            SubTitle = "QPAY129",
+                            Title = "Distributions and Forfeitures",
+                            Url = "distributions-and-forfeitures"
+                        },
+                        new
+                        {
+                            Id = (short)13,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)9,
+                            ParentId = (short)1,
+                            StatusId = (byte)1,
+                            SubTitle = "PAY426",
+                            Title = "Profit Share Report",
+                            Url = "profit-share-report"
+                        },
+                        new
+                        {
+                            Id = (short)3,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)1,
+                            ParentId = (short)2,
+                            StatusId = (byte)1,
+                            SubTitle = "",
+                            Title = "Demographic Badges Not In PayProfit",
+                            Url = "demographic-badges-not-in-payprofit"
+                        },
+                        new
+                        {
+                            Id = (short)4,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)2,
+                            ParentId = (short)2,
+                            StatusId = (byte)1,
+                            SubTitle = "",
+                            Title = "Duplicate SSNs in Demographics",
+                            Url = "duplicate-ssns-demographics"
+                        },
+                        new
+                        {
+                            Id = (short)5,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)3,
+                            ParentId = (short)2,
+                            StatusId = (byte)1,
+                            SubTitle = "",
+                            Title = "Negative ETVA",
+                            Url = "negative-etva-for-ssns-on-payprofit"
+                        },
+                        new
+                        {
+                            Id = (short)6,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)4,
+                            ParentId = (short)2,
+                            StatusId = (byte)1,
+                            SubTitle = "",
+                            Title = "Duplicate Names and Birthdays",
+                            Url = "duplicate-names-and-birthdays"
+                        },
+                        new
+                        {
+                            Id = (short)15,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)1,
+                            ParentId = (short)14,
+                            StatusId = (byte)1,
+                            SubTitle = "PROF-DOLLAR-EXEC-EXTRACT, TPR008-09",
+                            Title = "Manage Executive Hours",
+                            Url = "manage-executive-hours-and-dollars"
+                        },
+                        new
+                        {
+                            Id = (short)16,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)2,
+                            ParentId = (short)14,
+                            StatusId = (byte)1,
+                            SubTitle = "PROF-DOLLAR-EXTRACT",
+                            Title = "YTD Wages Extract",
+                            Url = "ytd-wages-extract"
+                        },
+                        new
+                        {
+                            Id = (short)18,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)3,
+                            ParentId = (short)14,
+                            StatusId = (byte)1,
+                            SubTitle = "PAY426",
+                            Title = "Profit Share Report (Edit Run)",
+                            Url = "pay426n"
+                        },
+                        new
+                        {
+                            Id = (short)17,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)4,
+                            ParentId = (short)14,
+                            StatusId = (byte)1,
+                            SubTitle = "PAY426",
+                            Title = "Profit Share Report (Final Run)",
+                            Url = "profit-share-report"
+                        },
+                        new
+                        {
+                            Id = (short)30,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)5,
+                            ParentId = (short)14,
+                            StatusId = (byte)1,
+                            SubTitle = "GET-ELIGIBLE-EMPS",
+                            Title = "Get Eligible Employees",
+                            Url = "eligible-employees"
+                        },
+                        new
+                        {
+                            Id = (short)31,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)6,
+                            ParentId = (short)14,
+                            StatusId = (byte)1,
+                            SubTitle = "PAY443",
+                            Title = "Profit Share Forfeit",
+                            Url = "forfeit"
+                        },
+                        new
+                        {
+                            Id = (short)60,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)7,
+                            ParentId = (short)14,
+                            StatusId = (byte)1,
+                            SubTitle = "PAY444|PAY447",
+                            Title = "Master Update",
+                            Url = "profit-share-update"
+                        },
+                        new
+                        {
+                            Id = (short)62,
+                            Disabled = true,
+                            Icon = "",
+                            OrderNumber = (byte)8,
+                            ParentId = (short)14,
+                            StatusId = (byte)1,
+                            SubTitle = "PAY460, PROFTLD",
+                            Title = "Profit Master Update",
+                            Url = "profit-master-update"
+                        },
+                        new
+                        {
+                            Id = (short)33,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)10,
+                            ParentId = (short)14,
+                            StatusId = (byte)1,
+                            SubTitle = "PAY450",
+                            Title = "Prof PayMaster Update",
+                            Url = "pay450-summary"
+                        },
+                        new
+                        {
+                            Id = (short)64,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)11,
+                            ParentId = (short)14,
+                            StatusId = (byte)1,
+                            SubTitle = "PROF-CNTRL-SHEET",
+                            Title = "Prof Control Sheet",
+                            Url = "prof-control-sheet"
+                        },
+                        new
+                        {
+                            Id = (short)34,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)12,
+                            ParentId = (short)14,
+                            StatusId = (byte)1,
+                            SubTitle = "Prof130",
+                            Title = "Prof Share Report By Age",
+                            Url = ""
+                        },
+                        new
+                        {
+                            Id = (short)41,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)13,
+                            ParentId = (short)14,
+                            StatusId = (byte)1,
+                            SubTitle = "QPAY501",
+                            Title = "Prof Share Gross Rpt",
+                            Url = "profit-share-gross-report"
+                        },
+                        new
+                        {
+                            Id = (short)42,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)14,
+                            ParentId = (short)14,
+                            StatusId = (byte)1,
+                            SubTitle = "QPAY066TA",
+                            Title = "Prof Share by Store",
+                            Url = ""
+                        },
+                        new
+                        {
+                            Id = (short)49,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)15,
+                            ParentId = (short)14,
+                            StatusId = (byte)1,
+                            SubTitle = "PAYCERT",
+                            Title = "Print Profit Certs",
+                            Url = "print-profit-certs"
+                        },
+                        new
+                        {
+                            Id = (short)63,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)16,
+                            ParentId = (short)14,
+                            StatusId = (byte)1,
+                            SubTitle = "",
+                            Title = "Save Prof Paymstr",
+                            Url = "save-prof-paymstr"
+                        },
+                        new
+                        {
+                            Id = (short)65,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)17,
+                            ParentId = (short)14,
+                            StatusId = (byte)1,
+                            SubTitle = "QPAY066*",
+                            Title = "QPAY066* Ad Hoc Reports",
+                            Url = "qpay066-adhoc"
+                        },
+                        new
+                        {
+                            Id = (short)36,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)1,
+                            ParentId = (short)34,
+                            StatusId = (byte)1,
+                            SubTitle = "PROF130",
+                            Title = "DISTRIBUTIONS BY AGE",
+                            Url = "distributions-by-age"
+                        },
+                        new
+                        {
+                            Id = (short)35,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)2,
+                            ParentId = (short)34,
+                            StatusId = (byte)1,
+                            SubTitle = "PROF130",
+                            Title = "CONTRIBUTIONS BY AGE",
+                            Url = "contributions-by-age"
+                        },
+                        new
+                        {
+                            Id = (short)37,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)3,
+                            ParentId = (short)34,
+                            StatusId = (byte)1,
+                            SubTitle = "PROF130",
+                            Title = "FORFEITURES BY AGE",
+                            Url = "forfeitures-by-age"
+                        },
+                        new
+                        {
+                            Id = (short)38,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)4,
+                            ParentId = (short)34,
+                            StatusId = (byte)1,
+                            SubTitle = "PROF130B",
+                            Title = "BALANCE BY AGE",
+                            Url = "balance-by-age"
+                        },
+                        new
+                        {
+                            Id = (short)39,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)5,
+                            ParentId = (short)34,
+                            StatusId = (byte)1,
+                            SubTitle = "PROF130V",
+                            Title = "VESTED AMOUNTS BY AGE",
+                            Url = "vested-amounts-by-age"
+                        },
+                        new
+                        {
+                            Id = (short)40,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)6,
+                            ParentId = (short)34,
+                            StatusId = (byte)1,
+                            SubTitle = "PROF130Y",
+                            Title = "BALANCE BY YEARS",
+                            Url = "balance-by-years"
+                        },
+                        new
+                        {
+                            Id = (short)43,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)1,
+                            ParentId = (short)42,
+                            StatusId = (byte)1,
+                            SubTitle = "",
+                            Title = "QPAY066-UNDR21",
+                            Url = "qpay066-under21"
+                        },
+                        new
+                        {
+                            Id = (short)44,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)2,
+                            ParentId = (short)42,
+                            StatusId = (byte)1,
+                            SubTitle = "",
+                            Title = "QPAY066TA-UNDR21",
+                            Url = "qpay066ta-under21"
+                        },
+                        new
+                        {
+                            Id = (short)45,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)3,
+                            ParentId = (short)42,
+                            StatusId = (byte)1,
+                            SubTitle = "",
+                            Title = "QPAY066TA",
+                            Url = "qpay066ta"
+                        },
+                        new
+                        {
+                            Id = (short)47,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)4,
+                            ParentId = (short)42,
+                            StatusId = (byte)1,
+                            SubTitle = "",
+                            Title = "QNEWPROFLBL",
+                            Url = "new-ps-labels"
+                        },
+                        new
+                        {
+                            Id = (short)48,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)5,
+                            ParentId = (short)42,
+                            StatusId = (byte)1,
+                            SubTitle = "",
+                            Title = "PROFNEW",
+                            Url = "profnew"
+                        },
+                        new
+                        {
+                            Id = (short)46,
+                            Disabled = false,
+                            Icon = "",
+                            OrderNumber = (byte)6,
+                            ParentId = (short)42,
+                            StatusId = (byte)1,
+                            SubTitle = "",
+                            Title = "PROFALL",
+                            Url = "profall"
+                        });
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Navigations.NavigationRole", b =>
@@ -29230,7 +29722,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         new
                         {
                             Id = (byte)1,
-                            Name = "Profit-Sharing-Administrator"
+                            Name = "System-Administrator"
                         },
                         new
                         {
@@ -29255,7 +29747,17 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         new
                         {
                             Id = (byte)6,
+                            Name = "IT-DevOps"
+                        },
+                        new
+                        {
+                            Id = (byte)7,
                             Name = "IT-Operations"
+                        },
+                        new
+                        {
+                            Id = (byte)8,
+                            Name = "Executive-Administrator"
                         });
                 });
 
@@ -29312,8 +29814,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("TIMESTAMP WITH TIME ZONE")
                         .HasColumnName("LAST_MODIFIED");
 
-                    b.Property<int>("NavigationId")
-                        .HasColumnType("NUMBER(10)")
+                    b.Property<short>("NavigationId")
+                        .HasColumnType("NUMBER(5)")
                         .HasColumnName("NAVIGATION_ID");
 
                     b.Property<byte?>("StatusId")
@@ -29980,6 +30482,9 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.HasIndex(new[] { "ProfitYear" }, "IX_ProfitYear")
                         .HasDatabaseName("IX_PAY_PROFIT_PROFITYEAR");
 
+                    b.HasIndex(new[] { "ProfitYear", "DemographicId" }, "IX_ProfitYear_DemographicId")
+                        .HasDatabaseName("IX_PAY_PROFIT_PROFITYEAR_DEMOGRAPHICID");
+
                     b.ToTable("PAY_PROFIT", (string)null);
                 });
 
@@ -30165,12 +30670,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NVARCHAR2(1)")
                         .HasColumnName("TAX_CODE_ID");
 
-                    b.Property<DateTimeOffset>("TransactionDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
-                        .HasColumnName("CREATED_UTC")
-                        .HasDefaultValueSql("SYSTIMESTAMP");
-
                     b.Property<string>("UserName")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(96)
@@ -30347,6 +30846,167 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasDatabaseName("IX_PROFIT_SHARE_CHECK_SSN");
 
                     b.ToTable("PROFIT_SHARE_CHECK", (string)null);
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Scheduling.Job", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset?>("Completed")
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("COMPLETED");
+
+                    b.Property<byte>("JobStatusId")
+                        .HasPrecision(3)
+                        .HasColumnType("NUMBER(3)")
+                        .HasColumnName("JOBSTATUSID");
+
+                    b.Property<byte>("JobTypeId")
+                        .HasPrecision(3)
+                        .HasColumnType("NUMBER(3)")
+                        .HasColumnName("JOBTYPEID");
+
+                    b.Property<string>("RequestedBy")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)")
+                        .HasColumnName("REQUESTEDBY");
+
+                    b.Property<byte>("StartMethodId")
+                        .HasPrecision(3)
+                        .HasColumnType("NUMBER(3)")
+                        .HasColumnName("STARTMETHODID");
+
+                    b.Property<DateTimeOffset>("Started")
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("STARTED");
+
+                    b.HasKey("Id")
+                        .HasName("PK_JOB");
+
+                    b.HasIndex("JobStatusId")
+                        .HasDatabaseName("IX_JOB_JOBSTATUSID");
+
+                    b.HasIndex("JobTypeId")
+                        .HasDatabaseName("IX_JOB_JOBTYPEID");
+
+                    b.HasIndex("StartMethodId")
+                        .HasDatabaseName("IX_JOB_STARTMETHODID");
+
+                    b.ToTable("JOB", (string)null);
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Scheduling.JobStatus", b =>
+                {
+                    b.Property<byte>("Id")
+                        .HasPrecision(3)
+                        .HasColumnType("NUMBER(3)")
+                        .HasColumnName("ID");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)")
+                        .HasColumnName("NAME");
+
+                    b.HasKey("Id")
+                        .HasName("PK_JOBSTATUS");
+
+                    b.ToTable("JOBSTATUS", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = (byte)0,
+                            Name = "Pending"
+                        },
+                        new
+                        {
+                            Id = (byte)2,
+                            Name = "Completed"
+                        },
+                        new
+                        {
+                            Id = (byte)99,
+                            Name = "Failed"
+                        },
+                        new
+                        {
+                            Id = (byte)1,
+                            Name = "Running"
+                        });
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Scheduling.JobType", b =>
+                {
+                    b.Property<byte>("Id")
+                        .HasPrecision(3)
+                        .HasColumnType("NUMBER(3)")
+                        .HasColumnName("ID");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)")
+                        .HasColumnName("NAME");
+
+                    b.HasKey("Id")
+                        .HasName("PK_JOBTYPE");
+
+                    b.ToTable("JOBTYPE", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = (byte)0,
+                            Name = "Employee Sync Full"
+                        },
+                        new
+                        {
+                            Id = (byte)1,
+                            Name = "Payroll Sync Full"
+                        },
+                        new
+                        {
+                            Id = (byte)2,
+                            Name = "Employee Sync Delta"
+                        });
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Scheduling.StartMethod", b =>
+                {
+                    b.Property<byte>("Id")
+                        .HasPrecision(3)
+                        .HasColumnType("NUMBER(3)")
+                        .HasColumnName("ID");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)")
+                        .HasColumnName("NAME");
+
+                    b.HasKey("Id")
+                        .HasName("PK_JOBSTARTMETHOD");
+
+                    b.ToTable("JOBSTARTMETHOD", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = (byte)0,
+                            Name = "System"
+                        },
+                        new
+                        {
+                            Id = (byte)1,
+                            Name = "OnDemand"
+                        });
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.StateTax", b =>
@@ -30651,7 +31311,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Ssn"));
 
-                    b.Property<decimal?>("Total")
+                    b.Property<decimal?>("TotalAmount")
                         .HasColumnType("DECIMAL(18, 2)")
                         .HasColumnName("TOTAL");
 
@@ -30707,6 +31367,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("DECIMAL(18, 2)")
                         .HasColumnName("CURRENTBALANCE");
 
+                    b.Property<int>("Id")
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("ID");
+
                     b.Property<decimal?>("VestedBalance")
                         .HasColumnType("DECIMAL(18, 2)")
                         .HasColumnName("VESTEDBALANCE");
@@ -30723,6 +31387,76 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasName("PK_PARTICIPANTTOTALVESTINGBALANCES");
 
                     b.ToTable("PARTICIPANTTOTALVESTINGBALANCES", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Virtual.ProfitDetailRollup", b =>
+                {
+                    b.Property<int>("Ssn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(10)")
+                        .HasColumnName("SSN");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Ssn"));
+
+                    b.Property<decimal>("AllocationsTotal")
+                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasColumnName("ALLOCATIONS_TOTAL");
+
+                    b.Property<decimal>("BeneficiaryAllocation")
+                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasColumnName("BENEFICIARY_ALLOCATION");
+
+                    b.Property<decimal>("ClassActionFundTotal")
+                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasColumnName("CLASS_ACTION_FUND_TOTAL");
+
+                    b.Property<decimal>("CurrentBalance")
+                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasColumnName("CURRENT_BALANCE");
+
+                    b.Property<decimal>("Distribution")
+                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasColumnName("DISTRIBUTION");
+
+                    b.Property<decimal>("DistributionsTotal")
+                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasColumnName("DISTRIBUTIONS_TOTAL");
+
+                    b.Property<decimal>("ForfeitsTotal")
+                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasColumnName("FORFEITS_TOTAL");
+
+                    b.Property<decimal>("MilitaryTotal")
+                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasColumnName("MILITARY_TOTAL");
+
+                    b.Property<decimal>("PaidAllocationsTotal")
+                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasColumnName("PAID_ALLOCATIONS_TOTAL");
+
+                    b.Property<decimal>("TotalContributions")
+                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasColumnName("TOTAL_CONTRIBUTIONS");
+
+                    b.Property<decimal>("TotalEarnings")
+                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasColumnName("TOTAL_EARNINGS");
+
+                    b.Property<decimal>("TotalForfeitures")
+                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasColumnName("TOTAL_FORFEITURES");
+
+                    b.Property<decimal>("TotalPayments")
+                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasColumnName("TOTAL_PAYMENTS");
+
+                    b.HasKey("Ssn")
+                        .HasName("PK_PROFITDETAILROLLUPS");
+
+                    b.ToTable("PROFITDETAILROLLUPS", null, t =>
                         {
                             t.ExcludeFromMigrations();
                         });
@@ -30830,6 +31564,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("DECIMAL(9,6)")
                         .HasColumnName("CONTRIBUTION_PERCENT");
 
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("CREATED_AT_UTC")
+                        .HasDefaultValueSql("SYSTIMESTAMP");
+
                     b.Property<decimal>("EarningsPercent")
                         .HasPrecision(9, 6)
                         .HasColumnType("DECIMAL(9,6)")
@@ -30855,6 +31595,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(6)")
                         .HasColumnName("MAX_ALLOWED_CONTRIBUTIONS");
 
+                    b.Property<DateTimeOffset?>("ModifiedAtUtc")
+                        .ValueGeneratedOnUpdate()
+                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
+                        .HasColumnName("MODIFIED_AT_UTC")
+                        .HasDefaultValueSql("SYSTIMESTAMP");
+
                     b.Property<short>("ProfitYear")
                         .HasPrecision(4)
                         .HasColumnType("NUMBER(4)")
@@ -30865,15 +31611,12 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("DECIMAL(9,6)")
                         .HasColumnName("SECONDARY_EARNINGS_PERCENT");
 
-                    b.Property<string>("UpdatedBy")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("NVARCHAR2(64)")
-                        .HasColumnName("UPDATED_BY");
-
-                    b.Property<DateTimeOffset>("UpdatedTime")
-                        .HasColumnType("TIMESTAMP WITH TIME ZONE")
-                        .HasColumnName("UPDATED_DATE");
+                    b.Property<string>("UserName")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(96)
+                        .HasColumnType("NVARCHAR2(96)")
+                        .HasColumnName("USER_NAME")
+                        .HasDefaultValueSql("SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER')");
 
                     b.HasKey("Id")
                         .HasName("PK_YE_UPDATE_STATUS");
@@ -30952,8 +31695,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
 
             modelBuilder.Entity("NavigationNavigationRole", b =>
                 {
-                    b.Property<int>("NavigationId")
-                        .HasColumnType("NUMBER(10)")
+                    b.Property<short>("NavigationId")
+                        .HasColumnType("NUMBER(5)")
                         .HasColumnName("NAVIGATIONID");
 
                     b.Property<byte>("RequiredRolesId")
@@ -31774,36 +32517,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Navigation("ExcludedType");
                 });
 
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.MassTransit.Job", b =>
-                {
-                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.MassTransit.JobStatus", "JobStatus")
-                        .WithMany("Jobs")
-                        .HasForeignKey("JobStatusId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired()
-                        .HasConstraintName("FK_JOB_JOBSTATUS_JOBSTATUSID");
-
-                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.MassTransit.JobType", "JobType")
-                        .WithMany("Jobs")
-                        .HasForeignKey("JobTypeId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired()
-                        .HasConstraintName("FK_JOB_JOBTYPE_JOBTYPEID");
-
-                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.MassTransit.StartMethod", "StartMethod")
-                        .WithMany("Jobs")
-                        .HasForeignKey("StartMethodId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired()
-                        .HasConstraintName("FK_JOB_JOBSTARTMETHOD_STARTMETHODID");
-
-                    b.Navigation("JobStatus");
-
-                    b.Navigation("JobType");
-
-                    b.Navigation("StartMethod");
-                });
-
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Navigations.Navigation", b =>
                 {
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.Navigations.Navigation", "Parent")
@@ -31945,6 +32658,36 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Navigation("TaxCode");
                 });
 
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Scheduling.Job", b =>
+                {
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Scheduling.JobStatus", "JobStatus")
+                        .WithMany("Jobs")
+                        .HasForeignKey("JobStatusId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_JOB_JOBSTATUS_JOBSTATUSID");
+
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Scheduling.JobType", "JobType")
+                        .WithMany("Jobs")
+                        .HasForeignKey("JobTypeId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_JOB_JOBTYPE_JOBTYPEID");
+
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Scheduling.StartMethod", "StartMethod")
+                        .WithMany("Jobs")
+                        .HasForeignKey("StartMethodId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_JOB_JOBSTARTMETHOD_STARTMETHODID");
+
+                    b.Navigation("JobStatus");
+
+                    b.Navigation("JobType");
+
+                    b.Navigation("StartMethod");
+                });
+
             modelBuilder.Entity("NavigationNavigationRole", b =>
                 {
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.Navigations.Navigation", null)
@@ -32020,21 +32763,6 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Navigation("Demographics");
                 });
 
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.MassTransit.JobStatus", b =>
-                {
-                    b.Navigation("Jobs");
-                });
-
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.MassTransit.JobType", b =>
-                {
-                    b.Navigation("Jobs");
-                });
-
-            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.MassTransit.StartMethod", b =>
-                {
-                    b.Navigation("Jobs");
-                });
-
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Navigations.Navigation", b =>
                 {
                     b.Navigation("Items");
@@ -32057,6 +32785,21 @@ namespace Demoulas.ProfitSharing.Data.Migrations
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.PayFrequency", b =>
                 {
                     b.Navigation("Demographics");
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Scheduling.JobStatus", b =>
+                {
+                    b.Navigation("Jobs");
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Scheduling.JobType", b =>
+                {
+                    b.Navigation("Jobs");
+                });
+
+            modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.Scheduling.StartMethod", b =>
+                {
+                    b.Navigation("Jobs");
                 });
 
             modelBuilder.Entity("Demoulas.ProfitSharing.Data.Entities.TerminationCode", b =>

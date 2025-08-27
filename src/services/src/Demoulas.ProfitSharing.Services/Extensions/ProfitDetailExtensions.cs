@@ -4,7 +4,7 @@ namespace Demoulas.ProfitSharing.Services.Extensions;
 
 public static class ProfitDetailExtensions
 {
-    internal static byte[] GetProfitCodesForBalanceCalc()
+    public static byte[] GetProfitCodesForBalanceCalc()
     {
         return
         [

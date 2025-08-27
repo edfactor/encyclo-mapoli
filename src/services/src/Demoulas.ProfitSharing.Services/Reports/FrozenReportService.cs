@@ -1,15 +1,11 @@
-﻿using System.Diagnostics;
-using Demoulas.Common.Contracts.Contracts.Response;
+﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
-using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Entities;
-using Demoulas.ProfitSharing.Data.Entities.Virtual;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ServiceDto;
@@ -25,7 +21,6 @@ public class FrozenReportService : IFrozenReportService
     private readonly TotalService _totalService;
     private readonly ICalendarService _calendarService;
     private readonly IDemographicReaderService _demographicReaderService;
-    private readonly IFrozenService _frozenService;
     private readonly ILogger _logger;
 
     public FrozenReportService(
@@ -33,15 +28,13 @@ public class FrozenReportService : IFrozenReportService
         ILoggerFactory loggerFactory,
         TotalService totalService,
         ICalendarService calendarService,
-        IDemographicReaderService demographicReaderService,
-        IFrozenService frozenService
+        IDemographicReaderService demographicReaderService
     )
     {
         _dataContextFactory = dataContextFactory;
         _totalService = totalService;
         _calendarService = calendarService;
         _demographicReaderService = demographicReaderService;
-        _frozenService = frozenService;
         _logger = loggerFactory.CreateLogger<FrozenReportService>();
     }
     
@@ -761,7 +754,8 @@ public class FrozenReportService : IFrozenReportService
                     BadgeNumber = (long) x.BadgeNumber,
                     DemographicId = x.Id,
                     IsEmployee = true,
-                    x.StoreNumber
+                    x.StoreNumber,
+                    x.PayFrequencyId,
                 });
             var beneficiaryBase = ctx.BeneficiaryContacts
 #pragma warning disable DSMPS001
@@ -776,7 +770,8 @@ public class FrozenReportService : IFrozenReportService
                     BadgeNumber = (long)(x.b.BadgeNumber*10000 + x.b.PsnSuffix),
                     DemographicId = 0,
                     IsEmployee = false,
-                    StoreNumber = (short)0
+                    StoreNumber = (short)0,
+                    PayFrequencyId = (byte)0,
                 });
             var
                 members = demoBase.Union(
@@ -809,7 +804,8 @@ public class FrozenReportService : IFrozenReportService
                     m.LastName,
                     m.StoreNumber,
                     m.IsEmployee,
-                    
+                    IsExecutive = m.PayFrequencyId == PayFrequency.Constants.Monthly,
+
                     BeforeEnrollmentId = lyPp != null ? lyPp.EnrollmentId : 0,
                     BeforeProfitSharingAmount = lyBal != null ? lyBal.CurrentBalance : 0,
                     BeforeVestedProfitSharingAmount = lyBal != null ? lyBal.VestedBalance : 0,
@@ -839,6 +835,7 @@ public class FrozenReportService : IFrozenReportService
                 StoreNumber = x.StoreNumber,
                 Name = $"{x.LastName}, {x.FirstName}",
                 IsEmployee = x.IsEmployee,
+                IsExecutive = x.IsExecutive,
                 Before = new UpdateSummaryReportPointInTimeDetail()
                 {
                     ProfitSharingAmount = (x.BeforeProfitSharingAmount ?? 0),
@@ -916,11 +913,12 @@ public class FrozenReportService : IFrozenReportService
                                            EmployeeName = d.ContactInfo.FullName ?? "",
                                            d.DateOfBirth,
                                            d.Ssn,
-                                           Forfeitures = fBal_lj.Total,
-                                           Loans = lBal_lj.Total,
-                                           ProfitSharingAmount = psBal.Total,
+                                           Forfeitures = fBal_lj.TotalAmount,
+                                           Loans = lBal_lj.TotalAmount,
+                                           ProfitSharingAmount = psBal.TotalAmount,
                                            GrossWages = pp.CurrentIncomeYear + pp.IncomeExecutive,
                                            pp.EnrollmentId,
+                                           d.PayFrequencyId,
                                        });
                 
                 var totals = await baseQuery.GroupBy(x => true).Select(x => new
@@ -942,7 +940,8 @@ public class FrozenReportService : IFrozenReportService
                         Forfeitures = x.Forfeitures ?? 0,
                         Loans = x.Loans ?? 0,
                         ProfitSharingAmount = x.ProfitSharingAmount ?? 0,
-                        GrossWages = x.GrossWages
+                        GrossWages = x.GrossWages,
+                        IsExecutive = x.PayFrequencyId == PayFrequency.Constants.Monthly,
                     }).ToList(),
                     Total = pagedData.Total
                 };
@@ -974,21 +973,43 @@ public class FrozenReportService : IFrozenReportService
             {
                 DateOnly fiscalEndDate = (await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken)).FiscalEndDate;
                 ProfitControlSheetResponse response = new();
-                HashSet<int> employeeSsn = await (await _demographicReaderService.BuildDemographicQuery(ctx, true)).Select(d => d.Ssn).ToHashSetAsync(cancellationToken);
-                HashSet<int> beneSsn = await ctx.BeneficiaryContacts.Select(bc => bc.Ssn).ToHashSetAsync(cancellationToken);
+                // Build composite key sets (Ssn, Id) to disambiguate potential duplicate SSNs with different Demographic/Beneficiary records.
+                var employeeKeys = await (await _demographicReaderService.BuildDemographicQuery(ctx, true))
+                    .Select(d => new { d.Ssn, d.Id })
+                    .ToListAsync(cancellationToken);
+                var employeeKeySet = employeeKeys
+                    .Select(x => (x.Ssn, x.Id))
+                    .ToHashSet();
 
-                HashSet<int> pureEmployee = employeeSsn.Except(beneSsn).ToHashSet();
-                HashSet<int> pureBene = beneSsn.Except(employeeSsn).ToHashSet();
-                HashSet<int> both = employeeSsn.Intersect(beneSsn).ToHashSet();
+                var beneKeys = await ctx.BeneficiaryContacts
+                    .Select(bc => new { bc.Ssn, bc.Id })
+                    .ToListAsync(cancellationToken);
+                var beneKeySet = beneKeys
+                    .Select(x => (x.Ssn, x.Id))
+                    .ToHashSet();
 
-                Dictionary<int, decimal> allMemberCurrentBalance = await _totalService.TotalVestingBalance(ctx, request.ProfitYear, fiscalEndDate)
-                    .ToDictionaryAsync(k => k.Ssn, v => v.CurrentBalance == null ? 0 : (decimal)v.CurrentBalance, cancellationToken);
+                // Determine disjoint and overlapping composite keys.
+                var pureEmployee = employeeKeySet.Except(beneKeySet).ToHashSet();
+                var pureBene = beneKeySet.Except(employeeKeySet).ToHashSet();
+                var both = employeeKeySet.Intersect(beneKeySet).ToHashSet();
 
-                response.EmployeeContributionProfitSharingAmount =
-                    allMemberCurrentBalance.Where(kvp => pureEmployee.Contains(kvp.Key)).Sum(kvp => kvp.Value);
-                response.NonEmployeeProfitSharingAmount = allMemberCurrentBalance.Where(kvp => pureBene.Contains(kvp.Key)).Sum(kvp => kvp.Value);
+                // Build a dictionary keyed by composite (Ssn, Id) to avoid duplicate key exceptions when multiple rows share the same SSN.
+                // Name tuple elements so we can reference kvp.Key.Ssn clearly below.
+                var allMemberCurrentBalance = await _totalService.TotalVestingBalance(ctx, request.ProfitYear, fiscalEndDate)
+                    .ToDictionaryAsync(k => (Ssn: k.Ssn, Id: k.Id), v => v.CurrentBalance ?? 0m, cancellationToken);
 
-                response.EmployeeBeneficiaryAmount = allMemberCurrentBalance.Where(kvp => both.Contains(kvp.Key)).Sum(kvp => kvp.Value);
+                // Sum by SSN set membership. Multiple (Ssn, Id) rows for the same Ssn will correctly accumulate.
+                response.EmployeeContributionProfitSharingAmount = allMemberCurrentBalance
+                    .Where(kvp => pureEmployee.Contains(kvp.Key))
+                    .Sum(kvp => kvp.Value);
+
+                response.NonEmployeeProfitSharingAmount = allMemberCurrentBalance
+                    .Where(kvp => pureBene.Contains(kvp.Key))
+                    .Sum(kvp => kvp.Value);
+
+                response.EmployeeBeneficiaryAmount = allMemberCurrentBalance
+                    .Where(kvp => both.Contains(kvp.Key))
+                    .Sum(kvp => kvp.Value);
                 return response;
             });
         }

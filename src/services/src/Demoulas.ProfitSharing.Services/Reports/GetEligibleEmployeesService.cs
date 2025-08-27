@@ -1,5 +1,6 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
@@ -31,7 +32,7 @@ public sealed class GetEligibleEmployeesService : IGetEligibleEmployeesService
         CalendarResponseDto response =
             await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);
         DateOnly birthDateOfExactly21YearsOld = response.FiscalEndDate.AddYears(-21);
-        short hoursWorkedRequirement = ContributionService.MinimumHoursForContribution();
+        short hoursWorkedRequirement = ReferenceData.MinimumHoursForContribution();
 
         return await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
@@ -52,7 +53,8 @@ public sealed class GetEligibleEmployeesService : IGetEligibleEmployeesService
                         d.ContactInfo.FullName,
                         d.DepartmentId,
                         DepartmentName = d.Department!.Name,
-                        d.StoreNumber
+                        d.StoreNumber,
+                        d.PayFrequencyId,
                     });
 
             int numberReadOnFrozen = await baseQuery.CountAsync(cancellationToken);
@@ -73,7 +75,8 @@ public sealed class GetEligibleEmployeesService : IGetEligibleEmployeesService
                     FullName = e.FullName!,
                     DepartmentId = e.DepartmentId,
                     Department = e.DepartmentName,
-                    StoreNumber = e.StoreNumber
+                    StoreNumber = e.StoreNumber,
+                    IsExecutive = e.PayFrequencyId == PayFrequency.Constants.Monthly,
                 }).ToPaginationResultsAsync(request, cancellationToken);
 
             return new GetEligibleEmployeesResponse

@@ -1,7 +1,7 @@
-export const HISTORY_KEY = "navigation_history" as const;
+export const MAX_EMPLOYEE_BADGE_LENGTH: number = 7;
 
-export const drawerOpenWidth = 330;
-export const drawerClosedWidth = 64;
+export const drawerOpenWidth: number = 330;
+export const drawerClosedWidth: number = 64;
 
 export const MENU_LABELS = {
   FISCAL_CLOSE: "Fiscal Close",
@@ -10,6 +10,7 @@ export const MENU_LABELS = {
   DISTRIBUTIONS: "Distributions",
   RECONCILIATION: "Reconciliation",
   INQUIRIES: "Inquiries",
+  IT_DEVOPS: "IT DEVOPS",
   IT_OPERATIONS: "IT OPERATIONS",
   GO_TO_PROFIT_SHARE_REPORT: "View Profit Share Report (PAY426) Details",
   YEAR_END: "Year End"
@@ -50,7 +51,7 @@ export const ROUTES = {
   BENEFICIARY_INQUIRY: "beneficiary",
   PAY_BE_NEXT: "adhoc-beneficiaries-report",
   FORFEITURES_ADJUSTMENT: "forfeitures-adjustment",
-  PAY_BEN_REPORT: 'payben-report',
+  PAY_BEN_REPORT: "payben-report",
 
   PAY426_ACTIVE_18_20: "pay426-1",
   PAY426_ACTIVE_21_PLUS: "pay426-2",
@@ -64,6 +65,9 @@ export const ROUTES = {
   PAY426_NON_EMPLOYEE: "pay426-10",
   PAY426N: "pay426n",
   QPAY066_ADHOC: "qpay066-adhoc",
+  QPAY066B: "qpay066b",
+  QPAY600: "qpay600",
+  REPRINT_CERTIFICATES: "reprint-certificates",
   FORFEIT: "forfeit",
   PAYMASTER_UPDATE: "paymaster-update",
   PROFIT_MASTER_UPDATE: "profit-master-update",
@@ -87,7 +91,9 @@ export const ROUTES = {
 export const CAPTIONS = {
   PAY_BE_NEXT: "Pay Be Next",
   BENEFICIARY_INQUIRY: "Beneficiary Inquiry",
-    PAYBEN_REPORT: "Pay Beneficiary Report",
+  BENEFICIARY_OF: "Beneficiary Of",
+  BENEFICIARY_SEARCH_FILTER: "Beneficiaries",
+  PAYBEN_REPORT: "Pay Beneficiary Report",
   BALANCE_BY_AGE: "Get Balance by Age (PROF130B)",
   BALANCE_BY_YEARS: "Get Balance by Years (PROF130Y)",
   CONTRIBUTIONS_BY_AGE: "Get Contributions by Age (PROF130)",
@@ -128,6 +134,9 @@ export const CAPTIONS = {
   PAY426_TERMINATED_PRIOR: "Terminated employees 18 and older with prior profit sharing amounts and < 1000 hours",
   PAY426N: "Profit Sharing Report (PAY426N)",
   QPAY066_ADHOC: "QPAY066* Ad Hoc Reports",
+  QPAY066B: "QPAY066B",
+  QPAY600: "QPAY600",
+  REPRINT_CERTIFICATES: "Reprint Certificates",
   PAY450_SUMMARY: "Update Summary (PAY450)",
   PAY450: "PAY450",
   PAYMASTER_UPDATE: "Profit Master Update (PAY460)",
@@ -160,6 +169,9 @@ export const CAPTIONS = {
 export const VIEW = "View";
 
 export const SMART_PS_QA_IMPERSONATION = "SMART-PS-QA-Impersonation";
+export const SMART_ROLE_PREFIX = "SMART";
+export const APP_NAME = "PS";
+export const IMPERSONATION_ROLE_SUFFIX = "Impersonation";
 
 export const GRID_COLUMN_WIDTHS = {
   BADGE_NUMBER: 100,

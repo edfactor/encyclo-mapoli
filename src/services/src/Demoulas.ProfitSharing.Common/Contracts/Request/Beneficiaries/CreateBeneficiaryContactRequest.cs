@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
-public sealed record CreateBeneficiaryContactRequest
+﻿namespace Demoulas.ProfitSharing.Common.Contracts.Request.Beneficiaries;
+using Shared;
+public sealed record CreateBeneficiaryContactRequest : INameParts, IPhoneNumber, IEmailAddress, ICity
 {
     public required int ContactSsn { get; set; }
     public required DateOnly DateOfBirth { get; set; }
@@ -13,7 +8,7 @@ public sealed record CreateBeneficiaryContactRequest
     public string? Street2 { get; set; }
     public string? Street3 { get; set; }
     public string? Street4 { get; set; }
-    public required string City { get; set; }
+    public required string? City { get; set; }
     public required string State { get; set; }
     public required string PostalCode { get; set; }
     public string? CountryIso { get; set; }

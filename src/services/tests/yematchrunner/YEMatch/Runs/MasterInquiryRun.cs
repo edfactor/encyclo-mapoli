@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace YEMatch;
+namespace YEMatch.YEMatch.Runs;
 
 [SuppressMessage("AsyncUsage", "AsyncFixer01:Unnecessary async/await usage")]
 public class MasterInquiryRun : Runnable
@@ -8,9 +8,11 @@ public class MasterInquiryRun : Runnable
     public override async Task Exec()
     {
         await Run(Specify(
-            // "R0", // import obfuscated/scramble
-            // "DropBadBenes",
-            // "ImportReadyDbToSmartDb", // Import SMART Schema directly from READY Schema (with dropped Bad Bene)
+//            "R0", // import obfuscated/scramble
+//            "DropBadBenes",
+//            "DropBadEmployee",
+//             "FixFrozen",
+ //           "ImportReadyDbToSmartDb", // Import SMART Schema directly from READY Schema (with dropped Bad Bene)
             "TestMasterInquiry"
         ));
     }

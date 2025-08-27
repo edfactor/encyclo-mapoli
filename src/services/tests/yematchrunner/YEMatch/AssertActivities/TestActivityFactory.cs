@@ -1,4 +1,7 @@
-﻿namespace YEMatch;
+﻿using YEMatch.YEMatch.Activities;
+using YEMatch.YEMatch.ArrangeActivites;
+
+namespace YEMatch.YEMatch.AssertActivities;
 
 internal static class TestActivityFactory
 {
@@ -12,12 +15,15 @@ internal static class TestActivityFactory
             new TestEtvaNow(),
             new TestEtvaPrior(),
             new TestMasterInquiry(),
+            new TestViews(),
 
             // Arrange
             new ImportReadyDbToSmartDb(),
             new TrimTo14Employees(),
             new DropBadBenes(),
             new DropBadEmployee(),
+            new FixFrozen(),
+            new SanityCheckEmployeeAndBenes(),
             new OverwriteBadges(),
             new SetDateOfBirthTo19YearsAgo(),
             new S18_Rebuild2023ZeroCont(),

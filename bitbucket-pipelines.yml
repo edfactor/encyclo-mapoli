@@ -278,7 +278,14 @@ definitions:
           .\output\Demoulas.ProfitSharing.Data.Cli $action --connection-name ProfitSharing --output-file ".\dist\migration.sql" --sql-file ".\src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-schema $sourceSchema
           if ($LASTEXITCODE -ne 0) { Write-Error "Database upgrade failed. Exiting"; exit 1 }
 
-          .\output\Demoulas.ProfitSharing.Data.Cli import-from-navigation  --connection-name ProfitSharing --output-file ".\dist\navigations.sql" --sql-file ".\src\database\ready_import\Navigations\add-navigation-data.sql" --source-schema $sourceSchema
+          # Determine which navigation file to use based on action or environment
+          $navigationFile = ".\src\database\ready_import\Navigations\add-navigation-data.sql"
+          if ($action -eq "import-uat-navigation" -or $environment -eq "UAT") {
+            $navigationFile = ".\src\database\ready_import\Navigations\add-uat-navigation-data.sql"
+            Write-Host "Using UAT navigation data"
+          }
+
+          .\output\Demoulas.ProfitSharing.Data.Cli import-from-navigation  --connection-name ProfitSharing --output-file ".\dist\navigations.sql" --sql-file $navigationFile --source-schema $sourceSchema
           if ($LASTEXITCODE -ne 0) { Write-Error "Database upgrade failed. Exiting"; exit 1 }
 
           if ($action -eq "validate-import") {
@@ -286,6 +293,90 @@ definitions:
             if ($LASTEXITCODE -ne 0) { Write-Error "Database import validation failed. Exiting"; exit 1 }
           }
           
+
+    uat-drop-recreate-db: &uat-drop-recreate-db
+      name: UAT Drop & Recreate DB
+      runs-on:
+        - windows
+        - self.hosted
+      script:
+        - |
+          $env:Environment = "UAT"
+          $env:Action = "drop-recreate-db"
+          $env:SourceSchema = "PROFITSHARE_STAGING"
+
+          dotnet build .\src\services\src\Demoulas.ProfitSharing.Data.Cli\Demoulas.ProfitSharing.Data.Cli.csproj -o .\output
+          if ($LASTEXITCODE -ne 0) { Write-Error "Database project build failed. Exiting."; exit 1 }
+
+          if ($env:Environment -eq "UAT") { $env:ConnectionStrings:ProfitSharing = $env:ConnectionStrings_ProfitSharing_UAT }
+
+          Write-Host "Dropping & recreating UAT database (schema: $env:SourceSchema)"
+          .\output\Demoulas.ProfitSharing.Data.Cli $env:Action --connection-name ProfitSharing --source-schema $env:SourceSchema
+          if ($LASTEXITCODE -ne 0) { Write-Error "Drop/Recreate failed."; exit 1 }
+          Write-Host "Drop & recreate completed."
+
+    uat-import-from-ready: &uat-import-from-ready
+      name: UAT Import From READY
+      runs-on:
+        - windows
+        - self.hosted
+      script:
+        - |
+          $env:Environment = "UAT"
+          $env:Action = "import-from-ready"
+          $env:SourceSchema = "PROFITSHARE_STAGING"
+
+          dotnet build .\src\services\src\Demoulas.ProfitSharing.Data.Cli\Demoulas.ProfitSharing.Data.Cli.csproj -o .\output
+          if ($LASTEXITCODE -ne 0) { Write-Error "Database project build failed. Exiting."; exit 1 }
+
+          if ($env:Environment -eq "UAT") { $env:ConnectionStrings:ProfitSharing = $env:ConnectionStrings_ProfitSharing_UAT }
+
+          Write-Host "Importing data from READY into UAT schema: $env:SourceSchema"
+          .\output\Demoulas.ProfitSharing.Data.Cli $env:Action --connection-name ProfitSharing --sql-file ".\src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-schema $env:SourceSchema
+          if ($LASTEXITCODE -ne 0) { Write-Error "Import from READY failed."; exit 1 }
+          Write-Host "Import from READY completed."
+
+    uat-import-uat-navigation: &uat-import-uat-navigation
+      name: UAT Import Navigation Data
+      runs-on:
+        - windows
+        - self.hosted
+      script:
+        - |
+          $env:Environment = "UAT"
+          $env:SourceSchema = "PROFITSHARE_STAGING"
+
+          dotnet build .\src\services\src\Demoulas.ProfitSharing.Data.Cli\Demoulas.ProfitSharing.Data.Cli.csproj -o .\output
+          if ($LASTEXITCODE -ne 0) { Write-Error "Database project build failed. Exiting."; exit 1 }
+
+          if ($env:Environment -eq "UAT") { $env:ConnectionStrings:ProfitSharing = $env:ConnectionStrings_ProfitSharing_UAT }
+
+          $navigationFile = ".\src\database\ready_import\Navigations\add-uat-navigation-data.sql"
+          Write-Host "Importing UAT navigation data using $navigationFile"
+          .\output\Demoulas.ProfitSharing.Data.Cli import-from-navigation --connection-name ProfitSharing --sql-file $navigationFile --source-schema $env:SourceSchema
+          if ($LASTEXITCODE -ne 0) { Write-Error "Navigation import failed."; exit 1 }
+          Write-Host "Navigation import completed."
+
+    uat-validate-import: &uat-validate-import
+      name: UAT Validate Import
+      runs-on:
+        - windows
+        - self.hosted
+      script:
+        - |
+          $env:Environment = "UAT"
+          $env:SourceSchema = "PROFITSHARE_STAGING"
+          $currentYear = (Get-Date).Year
+
+          dotnet build .\src\services\src\Demoulas.ProfitSharing.Data.Cli\Demoulas.ProfitSharing.Data.Cli.csproj -o .\output
+          if ($LASTEXITCODE -ne 0) { Write-Error "Database project build failed. Exiting."; exit 1 }
+
+          if ($env:Environment -eq "UAT") { $env:ConnectionStrings:ProfitSharing = $env:ConnectionStrings_ProfitSharing_UAT }
+
+          Write-Host "Validating UAT import for schema $env:SourceSchema and year $currentYear"
+          .\output\Demoulas.ProfitSharing.Data.Cli validate-import --connection-name ProfitSharing --sql-file ".\src\database\ready_import\Import Validations.sql" --source-schema $env:SourceSchema --current-year $currentYear
+          if ($LASTEXITCODE -ne 0) { Write-Error "Import validation failed."; exit 1 }
+          Write-Host "Import validation completed."
 
     audit-backend: &audit-backend
       name: "Check Backend API for vulnerabilities"
@@ -398,61 +489,79 @@ pipelines:
             - $env:API_SERVER_QA = "appt23d"
             - pwsh -File ./scripts/Check-Health.ps1 -Url $env:QA_BASE_URL -envServerName $env:API_SERVER_QA
 
-      - step: *create-frontend-artifact-uat
       - step:
-          name: "Application Deployment"
+          name: "Gate: Promote to UAT"
           runs-on:
             - windows
             - self.hosted
-          deployment: UAT
           trigger: "manual"
           script:
-            - echo "Deploying application..."
-            - $env:API_SERVER_UAT = "appt24d"
-            - ${env:ENV} = "UAT"            
+            - echo "Manual approval granted. Continuing to UAT deployment & data operations."
 
-            - pwsh -File ./scripts/credsettings.ps1 `
-              -Environment ${env:ENV} `
-              -FilePath './src/services/configuration/credsettings.json' `
-              -OutputPath './src/services/configuration/credsettings.uat.json' `
-              -RemoteServer $env:API_SERVER_UAT `
-              -RemotePath 'C:/NextGenApplications/ps/EmployeeDelta'
+      - parallel:
+          - step: *uat-drop-recreate-db
+          - step: *create-frontend-artifact-uat
+      - parallel:
+          - step:
+              name: "Application Deployment UAT"
+              runs-on:
+                - windows
+                - self.hosted
+              deployment: UAT
+              # NOTE: Removed manual trigger to allow true parallel execution with import-from-ready.
+              # Re-add `trigger: "manual"` if gating is still desired (will then block parallelization).
+              script:
+                - echo "Deploying application..."
+                - $env:API_SERVER_UAT = "appt24d"
+                - ${env:ENV} = "UAT"            
 
-            - pwsh -File ./scripts/credsettings.ps1 `
-              -Environment ${env:ENV} `
-              -FilePath './src/services/configuration/credsettings.json' `
-              -OutputPath './src/services/configuration/credsettings.uat.json' `
-              -RemoteServer $env:API_SERVER_UAT `
-              -RemotePath 'C:/NextGenApplications/ps/EmployeeFull'
+                - pwsh -File ./scripts/credsettings.ps1 `
+                  -Environment ${env:ENV} `
+                  -FilePath './src/services/configuration/credsettings.json' `
+                  -OutputPath './src/services/configuration/credsettings.uat.json' `
+                  -RemoteServer $env:API_SERVER_UAT `
+                  -RemotePath 'C:/NextGenApplications/ps/EmployeeDelta'
 
-            - pwsh -File ./scripts/credsettings.ps1 `
-              -Environment ${env:ENV} `
-              -FilePath './src/services/configuration/credsettings.json' `
-              -OutputPath './src/services/configuration/credsettings.uat.json' `
-              -RemoteServer $env:API_SERVER_UAT `
-              -RemotePath 'C:/NextGenApplications/ps/Payroll'
+                - pwsh -File ./scripts/credsettings.ps1 `
+                  -Environment ${env:ENV} `
+                  -FilePath './src/services/configuration/credsettings.json' `
+                  -OutputPath './src/services/configuration/credsettings.uat.json' `
+                  -RemoteServer $env:API_SERVER_UAT `
+                  -RemotePath 'C:/NextGenApplications/ps/EmployeeFull'
 
-            - pwsh -File ./scripts/credsettings.ps1 `
-              -Environment ${env:ENV} `
-              -FilePath './src/services/configuration/credsettings.json' `
-              -OutputPath './src/services/configuration/credsettings.uat.json' `
-              -RemoteServer $env:API_SERVER_UAT `
-              -RemotePath 'C:/inetpub/wwwroot/api'
+                - pwsh -File ./scripts/credsettings.ps1 `
+                  -Environment ${env:ENV} `
+                  -FilePath './src/services/configuration/credsettings.json' `
+                  -OutputPath './src/services/configuration/credsettings.uat.json' `
+                  -RemoteServer $env:API_SERVER_UAT `
+                  -RemotePath 'C:/NextGenApplications/ps/Payroll'
 
-            - echo "Deploying web application..."
-            - $env:API_ARTIFACT_NAME = "Demoulas.ProfitSharing.Api.zip"
-            - $env:UI_ARTIFACT_NAME = "Demoulas.ProfitSharing.UI.UAT.zip"
-            - pwsh .\scripts\webDeploy.ps1 $env:ENV $env:API_SERVER_UAT $env:API_ARTIFACT_NAME $env:UI_ARTIFACT_NAME
+                - pwsh -File ./scripts/credsettings.ps1 `
+                  -Environment ${env:ENV} `
+                  -FilePath './src/services/configuration/credsettings.json' `
+                  -OutputPath './src/services/configuration/credsettings.uat.json' `
+                  -RemoteServer $env:API_SERVER_UAT `
+                  -RemotePath 'C:/inetpub/wwwroot/api'
 
-            - echo "Deploying background service..."            
-            - pwsh .\scripts\servicesDeploy.ps1 ${env:ENV} $env:API_SERVER_UAT
-      - step:
-          name: "Checking API Health"
-          runs-on:
-            - windows
-            - self.hosted
-          script:
-            - pwsh -File ./scripts/Check-Health.ps1 -Url $env:UAT_BASE_URL -envServerName $env:API_SERVER_UAT
+                - echo "Deploying web application..."
+                - $env:API_ARTIFACT_NAME = "Demoulas.ProfitSharing.Api.zip"
+                - $env:UI_ARTIFACT_NAME = "Demoulas.ProfitSharing.UI.UAT.zip"
+                - pwsh .\scripts\webDeploy.ps1 $env:ENV $env:API_SERVER_UAT $env:API_ARTIFACT_NAME $env:UI_ARTIFACT_NAME
+
+                - echo "Deploying background service..."            
+                - pwsh .\scripts\servicesDeploy.ps1 ${env:ENV} $env:API_SERVER_UAT
+          - step: *uat-import-from-ready
+      - step: *uat-import-uat-navigation
+      - parallel:
+          - step: *uat-validate-import
+          - step:
+              name: "Checking API Health (UAT)"
+              runs-on:
+                - windows
+                - self.hosted
+              script:
+                - $env:API_SERVER_UAT = "appt24d"
+                - pwsh -File ./scripts/Check-Health.ps1 -Url $env:UAT_BASE_URL -envServerName $env:API_SERVER_UAT
 
 
     develop:
@@ -483,6 +592,7 @@ pipelines:
               - upgrade-db
               - drop-recreate-db
               - import-from-ready
+              - import-uat-navigation
               - generate-upgrade-script
               - validate-import
           - name: SourceSchema

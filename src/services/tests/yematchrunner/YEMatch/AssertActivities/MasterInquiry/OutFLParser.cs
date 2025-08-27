@@ -1,4 +1,4 @@
-namespace YEMatch;
+﻿namespace YEMatch.YEMatch.AssertActivities.MasterInquiry;
 
 /* Parses a line from the cobol output file "OUTFL".  It contains a dump of values which match Master Inqiery Scrrens. */
 public static class OutFLParser

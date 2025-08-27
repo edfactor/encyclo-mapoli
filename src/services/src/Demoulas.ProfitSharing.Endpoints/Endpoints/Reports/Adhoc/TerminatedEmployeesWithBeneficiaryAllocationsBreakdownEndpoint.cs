@@ -1,23 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CsvHelper.Configuration;
+﻿using CsvHelper.Configuration;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.Adhoc;
-public sealed class TerminatedEmployeesWithBeneficiaryAllocationsBreakdownEndpoint : EndpointWithCsvBase<TerminatedEmployeesWithBalanceBreakdownRequest, MemberYearSummaryDto, TerminatedEmployeesWithBalanceBreakdownEndpoint.BreakdownEndpointMap>
+public sealed class TerminatedEmployeesWithBeneficiaryAllocationsBreakdownEndpoint : EndpointWithCsvBase<TerminatedEmployeesWithBalanceBreakdownRequest, MemberYearSummaryDto, TerminatedEmployeesWithVestedBalanceBreakdownEndpoint.BreakdownEndpointMap>
 {
     private readonly IBreakdownService _breakdownService;
 
     public TerminatedEmployeesWithBeneficiaryAllocationsBreakdownEndpoint(IBreakdownService breakdownService)
+        : base(Navigation.Constants.QPAY066AdHocReports)
     {
         _breakdownService = breakdownService;
     }
@@ -38,7 +35,7 @@ public sealed class TerminatedEmployeesWithBeneficiaryAllocationsBreakdownEndpoi
 
     public override Task<ReportResponseBase<MemberYearSummaryDto>> GetResponse(TerminatedEmployeesWithBalanceBreakdownRequest breakdownByStoreRequest, CancellationToken ct)
     {
-        return _breakdownService.GetTerminatedMembersWithBalanceByStore(breakdownByStoreRequest, ct);
+        return _breakdownService.GetTerminatedMembersWithBeneficiaryByStore(breakdownByStoreRequest, ct);
     }
 
     public sealed class BreakdownEndpointMap : ClassMap<MemberYearSummaryDto>

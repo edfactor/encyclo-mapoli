@@ -1,6 +1,6 @@
 import { Typography, CircularProgress } from "@mui/material";
 import { Grid } from "@mui/material";
-import { agGridNumberToCurrency, DSMGrid } from "smart-ui-library";
+import { DSMGrid, numberToCurrency } from "smart-ui-library";
 import { useEffect, useState } from "react";
 import { useLazyGetBreakdownGrandTotalsQuery } from "reduxstore/api/YearsEndApi";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
@@ -143,49 +143,49 @@ const SummariesContent: React.FC = () => {
       headerName: "STE 1-140",
       field: "ste1",
       width: 100,
-      valueFormatter: agGridNumberToCurrency
+      valueFormatter: (params: { value: string | number }) => numberToCurrency(params.value)
     },
     {
       headerName: "700",
       field: "700",
       width: 70,
-      valueFormatter: agGridNumberToCurrency
+      valueFormatter: (params: { value: string | number }) => numberToCurrency(params.value)
     },
     {
       headerName: "701",
       field: "701",
       width: 70,
-      valueFormatter: agGridNumberToCurrency
+      valueFormatter: (params: { value: string | number }) => numberToCurrency(params.value)
     },
     {
       headerName: "800",
       field: "800",
       width: 70,
-      valueFormatter: agGridNumberToCurrency
+      valueFormatter: (params: { value: string | number }) => numberToCurrency(params.value)
     },
     {
       headerName: "801",
       field: "801",
       width: 70,
-      valueFormatter: agGridNumberToCurrency
+      valueFormatter: (params: { value: string | number }) => numberToCurrency(params.value)
     },
     {
       headerName: "802",
       field: "802",
       width: 70,
-      valueFormatter: agGridNumberToCurrency
+      valueFormatter: (params: { value: string | number }) => numberToCurrency(params.value)
     },
     {
       headerName: "900",
       field: "900",
       width: 70,
-      valueFormatter: agGridNumberToCurrency
+      valueFormatter: (params: { value: string | number }) => numberToCurrency(params.value)
     },
     {
       headerName: "Total",
       field: "total",
       width: 70,
-      valueFormatter: agGridNumberToCurrency
+      valueFormatter: (params: { value: string | number }) => numberToCurrency(params.value)
     }
   ];
 

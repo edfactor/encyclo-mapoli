@@ -1,50 +1,33 @@
-import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { numberToCurrency } from "smart-ui-library";
-import { createBadgeColumn } from "../../utils/gridColumnFactory";
+import { ColDef } from "ag-grid-community";
+import { createBadgeColumn, createCurrencyColumn, createNameColumn } from "../../utils/gridColumnFactory";
 
 export const GetQPAY066AdHocGridColumns = (): ColDef[] => [
-  createBadgeColumn({ minWidth: 90 }),
-  {
-    headerName: "Name",
-    field: "name",
-    minWidth: 120
-  },
-  {
+  createBadgeColumn({}),
+  createNameColumn({}),
+  createCurrencyColumn({
     headerName: "Beginning Balance",
-    field: "beginningBalance",
-    minWidth: 140,
-    cellRenderer: (params: any) => numberToCurrency(params.value)
-  },
-  {
+    field: "beginningBalance"
+  }),
+  createCurrencyColumn({
     headerName: "Beneficiary Allocation",
-    field: "beneficiaryAllocation",
-    minWidth: 150,
-    cellRenderer: (params: any) => numberToCurrency(params.value)
-  },
-  {
+    field: "beneficiaryAllocation"
+  }),
+  createCurrencyColumn({
     headerName: "Distribution Amount",
-    field: "distributionAmount",
-    minWidth: 140,
-    cellRenderer: (params: any) => numberToCurrency(params.value)
-  },
-  {
+    field: "distributionAmount"
+  }),
+  createCurrencyColumn({
     headerName: "Forfeit",
-    field: "forfeit",
-    minWidth: 90,
-    cellRenderer: (params: any) => numberToCurrency(params.value)
-  },
-  {
+    field: "forfeit"
+  }),
+  createCurrencyColumn({
     headerName: "Ending Balance",
-    field: "endingBalance",
-    minWidth: 120,
-    cellRenderer: (params: any) => numberToCurrency(params.value)
-  },
-  {
+    field: "endingBalance"
+  }),
+  createCurrencyColumn({
     headerName: "Vesting Balance",
-    field: "vestingBalance",
-    minWidth: 120,
-    cellRenderer: (params: any) => numberToCurrency(params.value)
-  },
+    field: "vestingBalance"
+  }),
   {
     headerName: "Date Term",
     field: "dateTerm",

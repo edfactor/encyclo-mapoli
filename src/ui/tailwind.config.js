@@ -1,16 +1,13 @@
 /** @type {import('tailwindcss').Config} */
 
 module.exports = {
-  content: [
-    "./src/**/*.{js,jsx,ts,tsx}",
-    "./node_modules/smart-ui-library/**/*.{js,jsx,ts,tsx}",
-  ],
+  content: ["./src/**/*.{js,jsx,ts,tsx}", "./node_modules/smart-ui-library/**/*.{js,jsx,ts,tsx}"],
   important: "#root",
   theme: {
     extend: {
       fontFamily: {
         lato: "'Lato', sans-serif",
-        sans: "Roboto",
+        sans: "Roboto"
       },
       colors: {
         "dsm-secondary": "#0258A5", // dsm-blue
@@ -46,8 +43,8 @@ module.exports = {
         "dsm-black": "#231F20",
         "dsm-filter": "#0259a507",
         "dsm-accordion-header": "rgba(2, 88, 165, 0.1)",
-        "dsm-totals-row": "rgb(232, 232, 232)",
-      },
-    },
-  },
+        "dsm-totals-row": "rgb(232, 232, 232)"
+      }
+    }
+  }
 };

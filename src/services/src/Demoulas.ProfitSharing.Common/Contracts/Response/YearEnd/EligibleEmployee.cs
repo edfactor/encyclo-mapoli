@@ -1,13 +1,17 @@
 ﻿
+using Demoulas.ProfitSharing.Common.Attributes;
+using Demoulas.ProfitSharing.Common.Contracts.Shared;
+
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
-public sealed record  EligibleEmployee {
+public sealed record  EligibleEmployee : IFullNameProperty {
     public required long OracleHcmId { get; set; }
     public required int BadgeNumber { get; set; }
-    public required string FullName { get; set; }
+    [MaskSensitive] public required string FullName { get; set; }
     public byte DepartmentId { get; set; }
     public string? Department { get; set; }
     public short StoreNumber { get; set; }
+    public required bool IsExecutive { get; set; }
 
     public static EligibleEmployee Example()
     {
@@ -17,7 +21,8 @@ public sealed record  EligibleEmployee {
             BadgeNumber = 721,
             FullName = "John, Null E",
             Department = "Grocery",
-            DepartmentId = 1
+            DepartmentId = 1,
+            IsExecutive = false,
         };
     }
 }

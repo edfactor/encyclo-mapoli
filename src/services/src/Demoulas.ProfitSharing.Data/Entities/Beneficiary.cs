@@ -1,10 +1,8 @@
 ﻿using Demoulas.ProfitSharing.Data.Entities.Base;
 
 namespace Demoulas.ProfitSharing.Data.Entities;
-public sealed class Beneficiary : ModifiedBase
+public sealed class Beneficiary : Member
 {
-    public required int Id { get; set; }
-    public required int BadgeNumber { get; set; }
     public required short PsnSuffix { get; set; } // Suffix for hierarchy (1000, 2000, etc.)
     public required int DemographicId { get; set; }
 

@@ -1,42 +1,48 @@
-﻿using System.Diagnostics.Eventing.Reader;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
-public record MemberDetails : IdRequest
+using Shared;
+
+public record MemberDetails : IdRequest, INameParts, IFullNameProperty, IPhoneNumber
 {
     public bool IsEmployee { get; init; }
     public int BadgeNumber { get; init; }
     public short PsnSuffix { get; init; }
+    public byte PayFrequencyId { get; init; }
+    public bool IsExecutive { get; init; }
     public string Ssn { get; init; } = string.Empty;
-    public string FirstName { get; init; } = string.Empty;
-    public string LastName { get; init; } = string.Empty;
-    public string FullName => $"{LastName}, {FirstName}";
-    public string Address { get; init; } = string.Empty;
+
+    [MaskSensitive] public string FirstName { get; init; } = string.Empty;
+    [MaskSensitive] public string LastName { get; init; } = string.Empty;
+    [MaskSensitive] public string? MiddleName { get; init; } = null;
+    [MaskSensitive] public string FullName => $"{LastName}, {FirstName}";
+    [MaskSensitive] public string Address { get; init; } = string.Empty;
     public string AddressCity { get; init; } = string.Empty;
     public string AddressState { get; init; } = string.Empty;
-    public string AddressZipCode { get; init; } = string.Empty;
+    [MaskSensitive] public string AddressZipCode { get; init; } = string.Empty;
     public short Age { get; set; }
     public DateOnly DateOfBirth { get; init; }
     public DateOnly? HireDate { get; init; }
     public DateOnly? TerminationDate { get; init; } = null;
     public DateOnly? ReHireDate { get; init; } = null;
     public string? EmploymentStatus { get; set; }
-    public decimal YearToDateProfitSharingHours { get; init; }
+    [Unmask] public decimal YearToDateProfitSharingHours { get; init; }
     public byte? EnrollmentId { get; init; }
     public string? Enrollment { get; init; }
     public short StoreNumber { get; set; }
-    public decimal CurrentEtva { get; set; }
-    public decimal PreviousEtva { get; set; }
-    
+    [Unmask] public decimal CurrentEtva { get; set; }
+    [Unmask] public decimal PreviousEtva { get; set; }
+
     public string? Department { get; set; }
     public string? PayClassification { get; set; }
-    public string? Gender { get; set; }
-    public string? PhoneNumber { get; set; }
+    [MaskSensitive] public string? Gender { get; set; }
+    [MaskSensitive] public string? PhoneNumber { get; set; }
     public string? WorkLocation { get; set; }
     public bool ReceivedContributionsLastYear { get; set; }
     public DateOnly? FullTimeDate { get; set; }
-    public string? TerminationReason { get; set; }
-    
+
+    [MaskSensitive] public string? TerminationReason { get; set; }
 
     public List<int> Missives { get; set; } = new List<int>();
 }

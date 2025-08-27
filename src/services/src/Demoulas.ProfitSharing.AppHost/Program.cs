@@ -1,8 +1,8 @@
 ﻿using Demoulas.ProfitSharing.AppHost;
 using Demoulas.ProfitSharing.AppHost.Helpers;
-using Projects;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Projects;
 
 
 var logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger("AppHost");

@@ -22,7 +22,6 @@ using Demoulas.Util.Extensions;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using NSwag.Generation.AspNetCore;
 using Scalar.AspNetCore;
-using Serilog.Enrichers.Sensitive;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder();
 
@@ -50,14 +49,13 @@ builder.SetDefaultLoggerConfiguration(smartConfig, fileSystemLog);
 
 _ = builder.AddSecurityServices();
 
-var rolePermissionService = new RolePermissionService();
 if (!builder.Environment.IsTestEnvironment() && Environment.GetEnvironmentVariable("YEMATCH_USE_TEST_CERTS") == null)
 {
-    builder.Services.AddOktaSecurity(builder.Configuration, rolePermissionService);
+    builder.Services.AddOktaSecurity(builder.Configuration);
 }
 else
 {
-    builder.Services.AddTestingSecurity(builder.Configuration, rolePermissionService);
+    builder.Services.AddTestingSecurity(builder.Configuration);
 }
 
 builder.ConfigureSecurityPolicies();
@@ -86,7 +84,7 @@ builder.AddDatabaseServices((services, factoryRequests) =>
             sp.GetRequiredService<AuditSaveChangesInterceptor>(),
             sp.GetRequiredService<BeneficiarySaveChangesInterceptor>(),
             sp.GetRequiredService<BeneficiaryContactSaveChangesInterceptor>()
-        ]));
+        ], denyCommitRoles: [Role.ITDEVOPS]));
     factoryRequests.Add(ContextFactoryRequest.Initialize<ProfitSharingReadOnlyDbContext>("ProfitSharing"));
     factoryRequests.Add(ContextFactoryRequest.Initialize<DemoulasCommonDataContext>("ProfitSharing"));
 });
@@ -124,6 +122,7 @@ WebApplication app = builder.Build();
 app.UseCors();
 
 app.UseDemographicHeaders();
+app.UseSensitiveValueMasking();
 app.UseDefaultEndpoints(OktaSettingsAction)
     .UseReDoc(settings =>
     {

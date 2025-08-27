@@ -1,45 +1,39 @@
 ﻿using System.Net;
+using Demoulas.ProfitSharing.Api;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ForfeitureAdjustment;
 using Demoulas.ProfitSharing.Security;
 using Demoulas.ProfitSharing.UnitTests.Common.Base;
 using Demoulas.ProfitSharing.UnitTests.Common.Extensions;
-using Demoulas.ProfitSharing.Api;
 using FastEndpoints;
+using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.UnitTests.Reports.YearEnd;
 
 public class ForfeitureAdjustmentTests : ApiTestBase<Program>
 {
-    public ForfeitureAdjustmentTests()
-    {
-    }
-
-    private readonly int testBadge = 700310;
-    private readonly short testYear = 2024;
-    private readonly int testSSN = 700000351;
 
     [Fact(DisplayName = "Get Forfeiture Adjustments - Success")]
     public async Task GetForfeitureAdjustmentsSuccessTest()
     {
-        // Arrange
-        ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
-        var request = new ForfeitureAdjustmentRequest
+        _ = await MockDbContextFactory.UseReadOnlyContext(async ctx =>
         {
-            Badge = testBadge,
-            ProfitYear = testYear
-        };
+            var demoTest = await ctx.Demographics.FirstAsync(CancellationToken.None);
+            // Arrange
+            ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
+            var request = new SuggestedForfeitureAdjustmentRequest { Ssn = demoTest.Ssn };
 
-        // Act
-        var response = await ApiClient.GETAsync<GetForfeitureAdjustmentsEndpoint,
-            ForfeitureAdjustmentRequest, ForfeitureAdjustmentReportResponse>(request);
+            // Act
+            var response = await ApiClient.GETAsync<GetForfeitureAdjustmentsEndpoint,
+                SuggestedForfeitureAdjustmentRequest, SuggestedForfeitureAdjustmentResponse>(request);
 
-        // Assert
-        Assert.NotNull(response);
-        Assert.Equal(HttpStatusCode.OK, response.Response.StatusCode);
-        Assert.Equal("Forfeiture Adjustments", response.Result.ReportName);
-        Assert.NotNull(response.Result.Response);
+            // Assert
+            Assert.NotNull(response);
+            Assert.Equal(HttpStatusCode.OK, response.Response.StatusCode);
+
+            return true;
+        });
     }
 
     [Fact(DisplayName = "Get Forfeiture Adjustments - Filter By SSN")]
@@ -47,35 +41,32 @@ public class ForfeitureAdjustmentTests : ApiTestBase<Program>
     {
         // Arrange
         ApiClient.CreateAndAssignTokenForClient(Role.ADMINISTRATOR);
-        var request = new ForfeitureAdjustmentRequest
+        _ = await MockDbContextFactory.UseReadOnlyContext(async ctx =>
         {
-            SSN = testSSN,
-            ProfitYear = testYear
-        };
+            var demoTest = await ctx.Demographics.FirstAsync(CancellationToken.None);
+            var request = new SuggestedForfeitureAdjustmentRequest { Ssn = demoTest.Ssn, };
 
-        // Act
-        var response = await ApiClient.GETAsync<GetForfeitureAdjustmentsEndpoint,
-            ForfeitureAdjustmentRequest, ForfeitureAdjustmentReportResponse>(request);
+            // Act
+            var response = await ApiClient.GETAsync<GetForfeitureAdjustmentsEndpoint,
+                SuggestedForfeitureAdjustmentRequest, SuggestedForfeitureAdjustmentResponse>(request);
 
-        // Assert
-        Assert.NotNull(response);
-        Assert.Equal(HttpStatusCode.OK, response.Response.StatusCode);
-        Assert.NotNull(response.Result);
+            // Assert
+            Assert.NotNull(response);
+            Assert.Equal(HttpStatusCode.OK, response.Response.StatusCode);
+            Assert.NotNull(response.Result);
+            return true;
+        });
     }
 
     [Fact(DisplayName = "Get Forfeiture Adjustments - Missing Required Role")]
     public async Task GetForfeitureAdjustmentsWithoutPermission()
     {
         // Arrange
-        var request = new ForfeitureAdjustmentRequest
-        {
-            Badge = testBadge,
-            ProfitYear = testYear
-        };
+        var request = new SuggestedForfeitureAdjustmentRequest { Badge = 3333 };
 
         // Act
         var response = await ApiClient.GETAsync<GetForfeitureAdjustmentsEndpoint,
-            ForfeitureAdjustmentRequest, ForfeitureAdjustmentReportResponse>(request);
+            SuggestedForfeitureAdjustmentRequest, SuggestedForfeitureAdjustmentResponse>(request);
 
         // Assert
         Assert.Equal(HttpStatusCode.Unauthorized, response.Response.StatusCode);

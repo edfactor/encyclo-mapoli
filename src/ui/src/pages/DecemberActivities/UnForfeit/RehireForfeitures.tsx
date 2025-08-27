@@ -7,17 +7,38 @@ import { useState, useEffect } from "react";
 import { CAPTIONS } from "../../../constants";
 import { useLazyGetAccountingRangeToCurrent } from "../../../hooks/useFiscalCalendarYear";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
+// removed Redux selector dependency for search state
 
 const RehireForfeitures = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
   const [resetPageFlag, setResetPageFlag] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [shouldBlock, setShouldBlock] = useState(false);
+  const [previousStatus, setPreviousStatus] = useState<string | null>(null);
+  const [shouldArchive, setShouldArchive] = useState(false);
   const [fetchAccountingRange, { data: fiscalCalendarYear, isLoading: isRangeLoading }] =
     useLazyGetAccountingRangeToCurrent(6);
 
+  // removed: search gating on status change
+
   const renderActionNode = () => {
-    return <StatusDropdownActionNode />;
+    return (
+      <StatusDropdownActionNode
+        onStatusChange={(newStatus: string, statusName?: string) => {
+          // Check if this is a change TO a "Complete"-like status (e.g., Complete/Completed), case-insensitive
+          const isCompleteLike = (statusName ?? "").toLowerCase().includes("complete");
+          const isChangingToComplete = isCompleteLike && previousStatus !== newStatus;
+
+          // Always trigger archive when changing to Complete (no search prerequisite)
+          if (isChangingToComplete) {
+            setShouldArchive(true);
+          }
+
+          // Update the previous status to track further changes
+          setPreviousStatus(newStatus);
+        }}
+      />
+    );
   };
 
   const handleUnsavedChanges = (hasChanges: boolean) => {
@@ -29,6 +50,9 @@ const RehireForfeitures = () => {
   useEffect(() => {
     fetchAccountingRange();
   }, [fetchAccountingRange]);
+
+  // Clear archive flag when the grid confirms handling it
+  const handleArchiveHandled = () => setShouldArchive(false);
 
   useEffect(() => {
     if (!shouldBlock) return;
@@ -81,6 +105,13 @@ const RehireForfeitures = () => {
     setResetPageFlag((prev) => !prev);
   };
 
+  // Auto-trigger search when archive mode is activated
+  useEffect(() => {
+    if (shouldArchive) {
+      handleSearch();
+    }
+  }, [shouldArchive]);
+
   return (
     <Page
       label={`${CAPTIONS.REHIRE_FORFEITURES}`}
@@ -109,6 +140,7 @@ const RehireForfeitures = () => {
                   fiscalData={fiscalCalendarYear}
                   onSearch={handleSearch}
                   hasUnsavedChanges={hasUnsavedChanges}
+                  setHasUnsavedChanges={setHasUnsavedChanges}
                 />
               </DSMAccordion>
             </Grid>
@@ -120,6 +152,8 @@ const RehireForfeitures = () => {
                 resetPageFlag={resetPageFlag}
                 onUnsavedChanges={handleUnsavedChanges}
                 hasUnsavedChanges={hasUnsavedChanges}
+                shouldArchive={shouldArchive}
+                onArchiveHandled={handleArchiveHandled}
               />
             </Grid>
           </>

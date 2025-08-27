@@ -1,10 +1,9 @@
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { Path, useNavigate } from "react-router";
 import { useLazyGetForfeituresAndPointsQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, numberToCurrency, Pagination } from "smart-ui-library";
+import { DSMGrid, ISortParams, numberToCurrency, Pagination, TotalsGrid } from "smart-ui-library";
 import ReportSummary from "../../components/ReportSummary";
 import { CAPTIONS } from "../../constants";
 import { GetProfitShareForfeitColumns } from "./ForfeitGridColumns";
@@ -22,7 +21,6 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({
   pageNumberReset,
   setPageNumberReset
 }) => {
-  const navigate = useNavigate();
   const [pageNumber, setPageNumber] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [sortParams, setSortParams] = useState<ISortParams>({
@@ -33,18 +31,7 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({
   const [triggerSearch, { isFetching }] = useLazyGetForfeituresAndPointsQuery();
   const fiscalCloseProfitYear = useFiscalCloseProfitYear();
 
-  // Wrapper to pass react function to non-react class
-  const handleNavigationForButton = useCallback(
-    (destination: string | Partial<Path>) => {
-      navigate(destination);
-    },
-    [navigate]
-  );
-
-  const columnDefs = useMemo(
-    () => GetProfitShareForfeitColumns(handleNavigationForButton),
-    [handleNavigationForButton]
-  );
+  const columnDefs = useMemo(() => GetProfitShareForfeitColumns(), []);
 
   const onSearch = useCallback(async () => {
     await triggerSearch(
@@ -82,7 +69,7 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({
   const totalEarningPoints = forfeituresAndPoints?.totalEarningPoints ?? 0;
 
   const totalsRow = {
-    forfeitures: totalForfeitures.toFixed(2) ?? "0.00",
+    forfeitures: totalForfeitures.toFixed(2) ?? "0",
     contForfeitPoints: totalForfeitPoints ?? 0,
     earningPoints: totalEarningPoints ?? 0
   };
@@ -91,25 +78,24 @@ const ForfeitGrid: React.FC<ForfeitGridProps> = ({
     <>
       {forfeituresAndPoints?.response && (
         <>
-          <table>
-            <tr>
-              <td>Total Profit Sharing Balance&nbsp;</td>
-              <td align="right">{numberToCurrency(forfeituresAndPoints?.totalProfitSharingBalance)}</td>
-            </tr>
-            <tr>
-              <td>Distribution Total</td>
-              <td align="right">{numberToCurrency(forfeituresAndPoints?.distributionTotals)} </td>
-            </tr>
-            <tr>
-              <td>Allocation To Total</td>
-              <td align="right">{numberToCurrency(forfeituresAndPoints?.allocationToTotals)}</td>
-            </tr>
-            <tr>
-              <td>Allocations From Total</td>
-              <td align="right">{numberToCurrency(forfeituresAndPoints?.allocationsFromTotals)}</td>
-            </tr>
-          </table>
-          <br />
+          <div className="sticky top-0 z-10 flex bg-white">
+            <TotalsGrid
+              displayData={[[numberToCurrency(forfeituresAndPoints.totalProfitSharingBalance || 0)]]}
+              leftColumnHeaders={["Amount in Profit Sharing"]}
+              topRowHeaders={[]}></TotalsGrid>
+            <TotalsGrid
+              displayData={[[numberToCurrency(forfeituresAndPoints.distributionTotals || 0)]]}
+              leftColumnHeaders={["Amount in Profit Sharing"]}
+              topRowHeaders={[]}></TotalsGrid>
+            <TotalsGrid
+              displayData={[[numberToCurrency(forfeituresAndPoints.allocationToTotals || 0)]]}
+              leftColumnHeaders={["Amount in Profit Sharing"]}
+              topRowHeaders={[]}></TotalsGrid>
+            <TotalsGrid
+              displayData={[[numberToCurrency(forfeituresAndPoints.allocationsFromTotals || 0)]]}
+              leftColumnHeaders={["Amount in Profit Sharing"]}
+              topRowHeaders={[]}></TotalsGrid>
+          </div>
 
           <ReportSummary report={forfeituresAndPoints} />
           <DSMGrid

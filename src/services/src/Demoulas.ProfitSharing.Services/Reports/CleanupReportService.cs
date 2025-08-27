@@ -21,7 +21,6 @@ namespace Demoulas.ProfitSharing.Services.Reports;
 public class CleanupReportService : ICleanupReportService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
-    private readonly ContributionService _contributionService;
     private readonly ICalendarService _calendarService;
     private readonly ILogger<CleanupReportService> _logger;
     private readonly TotalService _totalService;
@@ -44,7 +43,6 @@ public class CleanupReportService : ICleanupReportService
     ];
 
     public CleanupReportService(IProfitSharingDataContextFactory dataContextFactory,
-        ContributionService contributionService,
         ILoggerFactory factory,
         ICalendarService calendarService,
         TotalService totalService,
@@ -52,13 +50,11 @@ public class CleanupReportService : ICleanupReportService
         IDemographicReaderService demographicReaderService)
     {
         _dataContextFactory = dataContextFactory;
-        _contributionService = contributionService;
         _calendarService = calendarService;
         _totalService = totalService;
         _host = host;
         _demographicReaderService = demographicReaderService;
         _logger = factory.CreateLogger<CleanupReportService>();
-
     }
 
   
@@ -139,6 +135,8 @@ public class CleanupReportService : ICleanupReportService
         using (_logger.BeginScope("Request BEGIN DUPLICATE NAMES AND BIRTHDAYS"))
         {
             var dict = new Dictionary<int, byte>();
+            var balanceByBadge = new Dictionary<int, decimal>();
+            var dupInfo = new HashSet<DemographicMatchDto>();
             var results = await _dataContextFactory.UseReadOnlyContext(async ctx =>
             {
                 IQueryable<DemographicMatchDto> dupNameSlashDateOfBirth;
@@ -148,17 +146,17 @@ public class CleanupReportService : ICleanupReportService
                 {
                     dupNameSlashDateOfBirth = demographics
                         .Include(d => d.ContactInfo)
-                        .Select(d => new DemographicMatchDto { FullName = d.ContactInfo.FullName! });
+                        .Select(d => new DemographicMatchDto { FullName = d.ContactInfo.FullName!, MatchedId = d.Id });
                 }
                 else
                 {
                     string dupQuery =
-                        @"WITH FILTERED_DEMOGRAPHIC AS (SELECT /*+ MATERIALIZE */ ID, FULL_NAME, DATE_OF_BIRTH
+                        @"WITH FILTERED_DEMOGRAPHIC AS (SELECT /*+ MATERIALIZE */ ID, FULL_NAME, DATE_OF_BIRTH, BADGE_NUMBER
                               FROM DEMOGRAPHIC
                               WHERE NOT EXISTS (SELECT /*+ INDEX(fs) */ 1
                                                 FROM FAKE_SSNS fs
                                                 WHERE fs.SSN = DEMOGRAPHIC.SSN))
-SELECT /*+ USE_HASH(p1 p2) */ p1.FULL_NAME as FullName
+SELECT /*+ USE_HASH(p1 p2) */ p1.FULL_NAME as FullName, p2.BADGE_NUMBER MatchedId
 FROM FILTERED_DEMOGRAPHIC p1
          JOIN FILTERED_DEMOGRAPHIC p2
               ON p1.Id < p2.Id /* Avoid self-joins and duplicate pairs */
@@ -166,7 +164,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                   AND SOUNDEX(p1.FULL_NAME) = SOUNDEX(p2.FULL_NAME) /* Phonetic similarity */
                   AND (ABS(TRUNC(p1.DATE_OF_BIRTH) - TRUNC(p2.DATE_OF_BIRTH)) <= 3 /* Allowable 3-day difference */ )
 UNION ALL
-SELECT /*+ USE_HASH(p1 p2) */ p2.FULL_NAME as FullName
+SELECT /*+ USE_HASH(p1 p2) */ p2.FULL_NAME as FullName, p1.BADGE_NUMBER MatchedId
 FROM FILTERED_DEMOGRAPHIC p1
          JOIN FILTERED_DEMOGRAPHIC p2
               ON p1.Id < p2.Id /* Avoid self-joins and duplicate pairs */
@@ -178,92 +176,81 @@ FROM FILTERED_DEMOGRAPHIC p1
                         .SqlQueryRaw<DemographicMatchDto>(dupQuery);
                 }
 
-                var names = await dupNameSlashDateOfBirth
+                dupInfo = await dupNameSlashDateOfBirth
                     .Where(d => !string.IsNullOrEmpty(d.FullName))
-                    .Select(d => d.FullName)
                     .ToHashSetAsync(cancellationToken);
 
-                
-                var query = from dem in demographics
-                        .Include(d => d.EmploymentStatus)
-                    join ppLj in ctx.PayProfits on new { DemographicId = dem.Id, req.ProfitYear } equals new
-                    {
-                        ppLj.DemographicId, ppLj.ProfitYear
-                    } into tmpPayProfit
-                    from pp in tmpPayProfit.DefaultIfEmpty()
-                    join pdLj in ctx.ProfitDetails on new { dem.Ssn, req.ProfitYear } equals new
-                    {
-                        pdLj.Ssn, pdLj.ProfitYear
-                    } into tmpProfitDetails
-                    from pd in tmpProfitDetails.DefaultIfEmpty()
-                    where dem.ContactInfo.FullName != null && names.Contains(dem!.ContactInfo!.FullName!)
-                    group new { dem, pp, pd } by new
-                    {
-                        dem.BadgeNumber,
-                        SSN = dem.Ssn,
-                        dem.ContactInfo.FullName,
-                        dem.DateOfBirth,
-                        dem.Address.Street,
-                        dem.Address.City,
-                        dem.Address.State,
-                        dem.Address.PostalCode,
-                        CountryISO = dem.Address.CountryIso,
-                        dem.HireDate,
-                        dem.TerminationDate,
-                        dem.EmploymentStatusId,
-                        dem.EmploymentStatus!.Name,
-                        dem.StoreNumber,
-                        PdSsn = pd != null ? pd.Ssn : 0,
-                        CurrentHoursYear = pp != null ? pp.CurrentHoursYear : 0,
-                        CurrentIncomeYear = pp != null ? pp.CurrentIncomeYear : 0
-                    }
-                    into g
-                    orderby g.Key.FullName, g.Key.DateOfBirth, g.Key.SSN, g.Key.BadgeNumber
-                    select new DuplicateNamesAndBirthdaysResponse
-                    {
-                        BadgeNumber = g.Key.BadgeNumber,
-                        Ssn = g.Key.SSN.MaskSsn(),
-                        Name = g.Key.FullName,
-                        DateOfBirth = g.Key.DateOfBirth,
-                        Address = new AddressResponseDto
+                var names = dupInfo.Select(x => x.FullName).ToHashSet();
+
+                var query = from dem in demographics.Include(d => d.EmploymentStatus)
+                        join ppLj in ctx.PayProfits on new { DemographicId = dem.Id, req.ProfitYear } equals new
                         {
-                            City = g.Key.City,
-                            State = g.Key.State,
-                            Street = g.Key.Street,
-                            CountryIso = g.Key.CountryISO,
-                            PostalCode = g.Key.PostalCode,
-                        },
-                        HireDate = g.Key.HireDate,
-                        TerminationDate = g.Key.TerminationDate,
-                        Status = g.Key.EmploymentStatusId,
-                        EmploymentStatusName = g.Key.Name,
-                        StoreNumber = g.Key.StoreNumber,
-                        Count = g.Count(),
-                        HoursCurrentYear = g.Key.CurrentHoursYear,
-                        IncomeCurrentYear = g.Key.CurrentIncomeYear
-                    };
+                            ppLj.DemographicId,
+                            ppLj.ProfitYear
+                        } into tmpPayProfit
+                        from pp in tmpPayProfit.DefaultIfEmpty()
+                        join b in _totalService.GetTotalBalanceSet(ctx, req.ProfitYear) on dem.Ssn equals b.Ssn into tmpBalance
+                        from bal in tmpBalance.DefaultIfEmpty()
+                        join yos in _totalService.GetYearsOfService(ctx, req.ProfitYear) on dem.Ssn equals yos.Ssn into tmpYos
+                        from yos in tmpYos.DefaultIfEmpty()
+                        where dem.ContactInfo.FullName != null && names.Contains(dem!.ContactInfo!.FullName!)
+                        select new
+                        {
+                            dem.BadgeNumber,
+                            dem.Ssn,
+                            Name = dem.ContactInfo.FullName,
+                            dem.DateOfBirth,
+                            Address = dem.Address.Street,
+                            dem.Address.City,
+                            dem.Address.State,
+                            dem.Address.PostalCode,
+                            dem.Address.CountryIso,
+                            dem.HireDate,
+                            dem.TerminationDate,
+                            dem.EmploymentStatusId,
+                            EmploymentStatusName = dem.EmploymentStatus!.Name,
+                            dem.StoreNumber,
+                            HoursCurrentYear = pp != null ? pp.CurrentHoursYear : 0,
+                            IncomeCurrentYear = pp != null ? pp.CurrentIncomeYear : 0,
+                            NetBalance = bal != null ? bal.TotalAmount : 0,
+                            Years = yos != null ? yos.Years : (byte)0
+                        };
 
                 var rslt = await query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
 
-                dict = await (
-                    from yis in _totalService.GetYearsOfService(ctx, req.ProfitYear)
-                    join d in demographics on yis.Ssn equals d.Ssn
-                    select new { d.BadgeNumber, Years = yis.Years }
-                ).ToDictionaryAsync(x => x.BadgeNumber, x => x.Years, cancellationToken: cancellationToken);
-
                 return rslt;
             });
-
-            ISet<int> badgeNumbers = results.Results.Select(r => r.BadgeNumber).ToHashSet();
-            var balanceDict = await _contributionService.GetNetBalance(req.ProfitYear, badgeNumbers, cancellationToken);
-
-            foreach (DuplicateNamesAndBirthdaysResponse dup in results.Results)
+            var projectedResults = results.Results.Select(r => new DuplicateNamesAndBirthdaysResponse
             {
-                _ = dict.TryGetValue(dup.BadgeNumber, out byte years);
-                dup.Years = years;
+                BadgeNumber = r.BadgeNumber,
+                Ssn = r.Ssn.MaskSsn(),
+                Name = r.Name,
+                DateOfBirth = r.DateOfBirth,
+                Address = new AddressResponseDto
+                {
+                    Street = r.Address,
+                    City = r.City,
+                    State = r.State,
+                    PostalCode = r.PostalCode,
+                    CountryIso = r.CountryIso
+                },
+                Years = r.Years,
+                HireDate = r.HireDate,
+                TerminationDate = r.TerminationDate,
+                Status = r.EmploymentStatusId,
+                StoreNumber = r.StoreNumber,
+                Count = dict.ContainsKey(r.BadgeNumber)
+                            ? ++dict[r.BadgeNumber]
+                            : dict[r.BadgeNumber] = 1,
+                NetBalance = r.NetBalance ?? 0,
+                HoursCurrentYear = r.HoursCurrentYear,
+                IncomeCurrentYear = r.IncomeCurrentYear,
+                EmploymentStatusName = r.EmploymentStatusName ?? ""
+            }).ToList();
 
-                balanceDict.TryGetValue(dup.BadgeNumber, out var balance);
-                dup.NetBalance = balance?.TotalEarnings ?? 0;
+            foreach (var r in projectedResults)
+            {
+                r.Count = dupInfo.Count(x => x.MatchedId == r.BadgeNumber);
             }
 
             return new ReportResponseBase<DuplicateNamesAndBirthdaysResponse>()
@@ -271,7 +258,12 @@ FROM FILTERED_DEMOGRAPHIC p1
                 ReportDate = DateTimeOffset.UtcNow,
                 StartDate = ReferenceData.DsmMinValue,
                 EndDate = DateTimeOffset.UtcNow.ToDateOnly(),
-                ReportName = "DUPLICATE NAMES AND BIRTHDAYS", Response = results
+                ReportName = "DUPLICATE NAMES AND BIRTHDAYS", 
+                Response = new PaginatedResponseDto<DuplicateNamesAndBirthdaysResponse>() 
+                { 
+                    Total = results.Total, 
+                    Results = projectedResults
+                }
             };
         }
     }
@@ -293,6 +285,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                         x.ContactInfo.FullName,
                         x.DateOfBirth,
                         x.BadgeNumber,
+                        x.PayFrequencyId,
                         PsnSuffix = (short)0,
                         EnrollmentId = x.PayProfits.FirstOrDefault() != null
                             ? x.PayProfits.FirstOrDefault()!.EnrollmentId
@@ -303,6 +296,7 @@ FROM FILTERED_DEMOGRAPHIC p1
                         x.Contact.ContactInfo.FullName,
                         x.Contact.DateOfBirth,
                         x.BadgeNumber,
+                        PayFrequencyId = (byte)0,
                         x.PsnSuffix,
                         EnrollmentId = Enrollment.Constants.Import_Status_Unknown
                     }))
@@ -314,7 +308,8 @@ FROM FILTERED_DEMOGRAPHIC p1
                         DateOfBirth = x.Max(m => m.DateOfBirth),
                         BadgeNumber = x.Max(m => m.BadgeNumber),
                         PsnSuffix = x.Max(m => m.PsnSuffix),
-                        EnrolledId = x.Max(m => m.EnrollmentId)
+                        EnrolledId = x.Max(m => m.EnrollmentId),
+                        PayFrequencyId = x.Max(m => m.PayFrequencyId),
                     });
 
                 var transferAndQdroCommentTypes = new List<int>()
@@ -336,15 +331,15 @@ FROM FILTERED_DEMOGRAPHIC p1
                            (pd.ProfitCodeId == ProfitCode.Constants.Outgoing100PercentVestedPayment.Id &&
                             (!pd.CommentTypeId.HasValue ||
                              !transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value)))) &&
-                            (!req.StartDate.HasValue || pd.TransactionDate >= startDate) &&
-                            (!req.EndDate.HasValue || pd.TransactionDate <= endDate) &&
+                            (!req.StartDate.HasValue || pd.CreatedAtUtc >= startDate) &&
+                            (!req.EndDate.HasValue || pd.CreatedAtUtc <= endDate) &&
                             !(pd.ProfitCodeId == 9 && pd.CommentTypeId.HasValue && transferAndQdroCommentTypes.Contains(pd.CommentTypeId.Value))
 
                     select new
                     {
-                        BadgeNumber = nameAndDob.BadgeNumber,
-                        PsnSuffix = nameAndDob.PsnSuffix,
-                        Ssn = pd.Ssn,
+                        nameAndDob.BadgeNumber,
+                        nameAndDob.PsnSuffix,
+                        pd.Ssn,
                         EmployeeName = nameAndDob.FullName,
                         DistributionAmount = _distributionProfitCodes.Contains(pd.ProfitCodeId) ? pd.Forfeiture : 0,
                         TaxCode = pd.TaxCodeId,
@@ -354,9 +349,10 @@ FROM FILTERED_DEMOGRAPHIC p1
                         ForfeitAmount = pd.ProfitCodeId == 2 ? pd.Forfeiture : 0,
                         pd.YearToDate,
                         pd.MonthToDate,
-                        Date = pd.TransactionDate,
+                        Date = pd.CreatedAtUtc,
                         nameAndDob.DateOfBirth,
-                        EnrolledId = nameAndDob.EnrolledId,
+                        nameAndDob.EnrolledId,
+                        nameAndDob.PayFrequencyId,
                     };
                 
 
@@ -382,8 +378,13 @@ FROM FILTERED_DEMOGRAPHIC p1
 
                 var calInfo =
                     await _calendarService.GetYearStartAndEndAccountingDatesAsync(req.ProfitYear, cancellationToken);
-                
-                var paginated = await query.ToPaginationResultsAsync(req, cancellationToken);
+                var sortReq = req;
+                if (sortReq.SortBy != null && sortReq.SortBy.Equals("Age", StringComparison.OrdinalIgnoreCase))
+                {
+                    sortReq = req with { SortBy = "DateOfBirth" };
+                }
+                var paginated = await query.ToPaginationResultsAsync(sortReq, cancellationToken);
+
                 var apiResponse = paginated.Results.Select(pd => new DistributionsAndForfeitureResponse
                 {
                     BadgeNumber = pd.BadgeNumber,
@@ -402,7 +403,8 @@ FROM FILTERED_DEMOGRAPHIC p1
                             new DateOnly(pd.YearToDate, pd.MonthToDate, 1).ToDateTime(TimeOnly.MinValue))
                         : pd.DateOfBirth.Age(
                             calInfo.FiscalEndDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Local))),
-                    EnrolledId = pd.EnrolledId
+                    EnrolledId = pd.EnrolledId,
+                    IsExecutive = pd.PayFrequencyId == PayFrequency.Constants.Monthly
                 });
 
 

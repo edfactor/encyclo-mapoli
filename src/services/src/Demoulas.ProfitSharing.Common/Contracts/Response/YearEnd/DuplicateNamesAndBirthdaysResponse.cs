@@ -1,9 +1,11 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 public sealed record DuplicateNamesAndBirthdaysResponse
 {
     public required int BadgeNumber { get; set; }
     public required string Ssn { get; set; }
-    public string? Name { get; set; }
+    [MaskSensitive]public string? Name { get; set; }
     public required DateOnly DateOfBirth { get; set; }
     public required AddressResponseDto Address { get; set; }
     public byte Years { get; set; }

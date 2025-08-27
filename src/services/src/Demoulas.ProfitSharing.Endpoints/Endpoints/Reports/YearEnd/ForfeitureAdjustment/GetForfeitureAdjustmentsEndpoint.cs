@@ -1,27 +1,19 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Response;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Interfaces;
-using Demoulas.ProfitSharing.Endpoints.Groups;
-using CsvHelper.Configuration;
-using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
-using Demoulas.ProfitSharing.Common.Contracts.Request;
-using Demoulas.Common.Contracts.Contracts.Request;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Collections.Generic;
+using FastEndpoints;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ForfeitureAdjustment;
-public class GetForfeitureAdjustmentsEndpoint : EndpointWithCsvTotalsBase<ForfeitureAdjustmentRequest, 
-    ForfeitureAdjustmentReportResponse, 
-    ForfeitureAdjustmentReportDetail, 
-    GetForfeitureAdjustmentsEndpoint.ForfeitureAdjustmentResponseMap>
+
+public class GetForfeitureAdjustmentsEndpoint : ProfitSharingRequestEndpoint<SuggestedForfeitureAdjustmentRequest>
 {
     private readonly IForfeitureAdjustmentService _forfeitureAdjustmentService;
 
-    public GetForfeitureAdjustmentsEndpoint(IForfeitureAdjustmentService forfeitureAdjustmentService)
+    public GetForfeitureAdjustmentsEndpoint(IForfeitureAdjustmentService forfeitureAdjustmentService) : base(Navigation.Constants.Forfeitures)
     {
         _forfeitureAdjustmentService = forfeitureAdjustmentService;
     }
@@ -31,49 +23,16 @@ public class GetForfeitureAdjustmentsEndpoint : EndpointWithCsvTotalsBase<Forfei
         Get("forfeiture-adjustments");
         Summary(s =>
         {
-            s.Summary = "Get forfeiture adjustments for a given year and badge number/ssn.";
+            s.Summary = "Get forfeiture suggested adjustments for  badge number or ssn.";
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR} or {Role.FINANCEMANAGER}";
-            s.Description = "This endpoint returns a list of forfeiture adjustments for a given year and badge number/ssn.";
-            s.ExampleRequest = new ForfeitureAdjustmentRequest() { ProfitYear = 2024, Badge = 1234567890 };
-            s.ResponseExamples = new Dictionary<int, object>
-            {
-                {
-                    200,
-                    new ForfeitureAdjustmentReportResponse
-                    {
-                        ReportName = "Forfeiture Adjustments",
-                        ReportDate = DateTimeOffset.Now,
-                        StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
-                        EndDate = DateOnly.FromDateTime(DateTime.UtcNow),
-                        TotatNetBalance = 1000,
-                        TotatNetVested = 1000,
-                        Response = new PaginatedResponseDto<ForfeitureAdjustmentReportDetail>()
-                    }
-                }
-            };
+            s.Description = "This endpoint is used to get a suggested forfeiture adjustment for a badge number or ssn.";
         });
         Group<YearEndGroup>();
-        base.Configure();
     }
 
-    public override string ReportFileName => "ForfeitureAdjustments";
-
-    public override Task<ForfeitureAdjustmentReportResponse> GetResponse(ForfeitureAdjustmentRequest req, CancellationToken ct)
+    public override async Task HandleAsync(SuggestedForfeitureAdjustmentRequest req, CancellationToken ct)
     {
-        return _forfeitureAdjustmentService.GetForfeitureAdjustmentReportAsync(req, ct);
-    }
-
-    // Define the map class for CSV generation
-    public sealed class ForfeitureAdjustmentResponseMap : ClassMap<ForfeitureAdjustmentReportDetail>
-    {
-        public ForfeitureAdjustmentResponseMap()
-        {
-            // Map properties from the detail record for CSV generation
-            Map(m => m.BadgeNumber).Name("Badge Number");
-            Map(m => m.StartingBalance).Name("Starting Balance");
-            Map(m => m.ForfeitureAmount).Name("Forfeiture Amount");
-            Map(m => m.NetBalance).Name("Net Balance");
-            Map(m => m.NetVested).Name("Net Vested");
-        }
+        SuggestedForfeitureAdjustmentResponse r = await _forfeitureAdjustmentService.GetSuggestedForfeitureAmount(req, ct);
+        await Send.OkAsync(r, ct);
     }
 }

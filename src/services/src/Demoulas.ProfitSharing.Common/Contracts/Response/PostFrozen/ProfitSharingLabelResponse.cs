@@ -1,4 +1,6 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.PostFrozen;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.PostFrozen;
 public record ProfitSharingLabelResponse
 {
     public short StoreNumber { get; set; }
@@ -8,11 +10,12 @@ public record ProfitSharingLabelResponse
     public string? DepartmentName { get; set; }
     public int BadgeNumber { get; set; }
     public required string EmployeeName { get; set; }
-    public string? FirstName { get; set; }
-    public string? Address1 { get; set; }
-    public string? City { get; set; }
+    [MaskSensitive] public string? FirstName { get; set; }
+    [MaskSensitive] public string? Address1 { get; set; }
+    [MaskSensitive] public string? City { get; set; }
     public string? State { get; set; }
     public string? PostalCode { get; set; }
+    public required bool IsExecutive { get; set; }
 
     public static ProfitSharingLabelResponse SampleResponse()
     {
@@ -28,7 +31,8 @@ public record ProfitSharingLabelResponse
             Address1 = "Main St.",
             City = "Anytown",
             State = "MA",
-            PostalCode = "02112"
+            PostalCode = "02112",
+            IsExecutive = false,
         };
     }
 }

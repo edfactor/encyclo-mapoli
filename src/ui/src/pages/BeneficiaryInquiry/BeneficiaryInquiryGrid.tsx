@@ -9,6 +9,7 @@ import { BeneficiaryDto, BeneficiaryRequestDto } from "reduxstore/types";
 import { DSMGrid, ISortParams, Paged, Pagination } from "smart-ui-library";
 import { CAPTIONS } from "../../constants";
 import { BeneficiaryInquiryGridColumns } from "./BeneficiaryInquiryGridColumns";
+import { BeneficiaryOfGridColumns } from "./BeneficiaryOfGridColumn";
 interface BeneficiaryInquiryGridProps {
   // initialSearchLoaded: boolean;
   // setInitialSearchLoaded: (loaded: boolean) => void;
@@ -37,6 +38,7 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
   const hasToken: boolean = !!useSelector((state: RootState) => state.security.token);
   // const { beneficiaryList, beneficiaryRequest } = useSelector((state: RootState) => state.beneficiaries);
   const [beneficiaryList, setBeneficiaryList] = useState<Paged<BeneficiaryDto> | undefined>();
+  const [beneficiaryOfList, setBeneficiaryOfList] = useState<Paged<BeneficiaryDto> | undefined>();
   const [triggerSearch, { isFetching }] = useLazyGetBeneficiariesQuery();
   const [triggerUpdate] = useLazyUpdateBeneficiaryQuery();
 
@@ -149,6 +151,10 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
     );
   };
 
+  const beneficiaryOfColumnDefs = useMemo(() => {
+    return BeneficiaryOfGridColumns();
+  }, []);
+
   const columnDefs = useMemo(() => {
     const columns = BeneficiaryInquiryGridColumns();
     columns.splice(6, 0, {
@@ -208,8 +214,9 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
 
     triggerSearch(request, false)
       .unwrap()
-      .then((value) => {
-        setBeneficiaryList(value);
+      .then((res) => {
+        setBeneficiaryList(res.beneficiaries);
+        setBeneficiaryOfList(res.beneficiaryOf);
       });
   }, [selectedMember, _sortParams]);
 
@@ -221,6 +228,26 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
 
   return (
     <>
+      {beneficiaryOfList && beneficiaryOfList.results.length > 0 && (
+        <>
+          <div className="master-inquiry-header">
+            <Typography
+              variant="h2"
+              sx={{ color: "#0258A5" }}>
+              {`Beneficiary Of (${beneficiaryOfList?.total || 0} ${beneficiaryOfList?.total === 1 ? "Record" : "Records"})`}
+            </Typography>
+          </div>
+          <DSMGrid
+            preferenceKey={CAPTIONS.BENEFICIARY_OF}
+            isLoading={isFetching}
+            providedOptions={{
+              rowData: beneficiaryOfList?.results,
+              columnDefs: beneficiaryOfColumnDefs,
+              suppressMultiSort: true
+            }}
+          />
+        </>
+      )}
       {!!beneficiaryList && (
         <>
           {errorPercentage ? (

@@ -1,6 +1,7 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
+using YEMatch.YEMatch.ReadyActivities;
 
-namespace YEMatch;
+namespace YEMatch.YEMatch.Runs;
 
 [SuppressMessage("AsyncUsage", "AsyncFixer01:Unnecessary async/await usage")]
 public class GoldenExpressRun : Runnable
@@ -19,12 +20,14 @@ public class GoldenExpressRun : Runnable
             "R0", // Start by importing the READY database from the scramble data.
             "DropBadBenes", // Git rid of the two Bene/Employees w/o Demographics rows
             "DropBadEmployee",
+            "FixFrozen",
             "ImportReadyDbToSmartDb", // Import SMART database from READY   database
             "S12", // Freeze on Smart
+            "SanityCheckEmployeeAndBenes",
             "Give2023Hours",
             "S18_Rebuild2023ZeroCont",
             "S24_Rebuild2023Enrollment",
-            "P18", // Run YearEndServce on SMART and "PROF-SHARE sw[2]=1 CDATE=250104 YEAREND=Y" on READY
+            "P18", // Run YearEndService on SMART and "PROF-SHARE sw[2]=1 CDATE=250104 YEAREND=Y" on READY
             "TestPayProfitSelectedColumns", // VERIFY: Test PayProfit Updates; EarnPoints, ZeroCont, New Employee, CertDate
             "R20", // PAY443
             "R21", // PAY444 - update intermediate values

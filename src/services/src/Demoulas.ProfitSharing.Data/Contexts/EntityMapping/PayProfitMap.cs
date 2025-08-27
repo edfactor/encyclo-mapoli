@@ -5,18 +5,21 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping;
+
 internal sealed class PayProfitMap : ModifiedBaseMap<PayProfit>
 {
     public override void Configure(EntityTypeBuilder<PayProfit> builder)
     {
         base.Configure(builder);
-        
+
         _ = builder.ToTable("PAY_PROFIT");
 
-        _ = builder.HasKey(e => new { e.DemographicId, e.ProfitYear});
+        _ = builder.HasKey(e => new { e.DemographicId, e.ProfitYear });
 
         _ = builder.HasIndex(e => e.EnrollmentId, "IX_EnrollmentId");
         _ = builder.HasIndex(e => e.ProfitYear, "IX_ProfitYear");
+        // Composite index to support frequent filters by year and joins by demographic
+        _ = builder.HasIndex(e => new { e.ProfitYear, e.DemographicId }, "IX_ProfitYear_DemographicId");
 
         _ = builder.Property(e => e.DemographicId)
             .HasPrecision(9)
@@ -47,7 +50,7 @@ internal sealed class PayProfitMap : ModifiedBaseMap<PayProfit>
             .HasPrecision(2)
             .HasColumnName("WEEKS_WORKED_YEAR")
             .IsRequired();
-   
+
         _ = builder.Property(e => e.PsCertificateIssuedDate)
             .HasColumnName("PS_CERTIFICATE_ISSUED_DATE")
             .HasColumnType("DATE")
@@ -64,7 +67,7 @@ internal sealed class PayProfitMap : ModifiedBaseMap<PayProfit>
         _ = builder.Property(e => e.ZeroContributionReasonId)
             .HasColumnName("ZERO_CONTRIBUTION_REASON_ID");
 
-        
+
         _ = builder.Property(e => e.EnrollmentId)
             .HasColumnName("ENROLLMENT_ID");
 
@@ -73,7 +76,7 @@ internal sealed class PayProfitMap : ModifiedBaseMap<PayProfit>
 
         _ = builder.Property(e => e.EmployeeTypeId)
             .HasColumnName("EMPLOYEE_TYPE_ID");
-        
+
 
         _ = builder.Property(e => e.PointsEarned)
             .HasColumnName("POINTS_EARNED")
@@ -93,8 +96,8 @@ internal sealed class PayProfitMap : ModifiedBaseMap<PayProfit>
             .WithMany()
             .HasForeignKey(p => p.EmployeeTypeId)
             .OnDelete(DeleteBehavior.NoAction);
-            
-       _ = builder.HasOne(d => d.ZeroContributionReason)
+
+        _ = builder.HasOne(d => d.ZeroContributionReason)
             .WithMany()
             .HasForeignKey(d => d.ZeroContributionReasonId)
             .OnDelete(DeleteBehavior.NoAction);
