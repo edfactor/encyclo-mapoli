@@ -1,10 +1,10 @@
+import Grid from "@mui/material/Grid";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import Grid from "@mui/material/Grid";
 import React from "react";
 
 export type totalsGridProps = {
@@ -65,11 +65,14 @@ export const TotalsGrid: React.FC<totalsGridProps> = ({
 
   return (
     <Grid
-      xs={breakpoints?.xs ?? 12}
-      sm={breakpoints?.sm ?? 12}
-      md={breakpoints?.md ?? 6}
-      lg={breakpoints?.lg ?? 6}
-      xl={breakpoints?.xl ?? 6}
+      width="100%"
+      size={{
+        xs: breakpoints?.xs ?? 12,
+        sm: breakpoints?.sm ?? 12,
+        md: breakpoints?.md ?? 6,
+        lg: breakpoints?.lg ?? 6,
+        xl: breakpoints?.xl ?? 6
+      }}
       padding={tablePadding ?? "24px"}>
       <TableContainer>
         <Table size="small">
@@ -93,7 +96,7 @@ export const TotalsGrid: React.FC<totalsGridProps> = ({
                 sx={{
                   "&:last-child td, &:last-child th": { border: 0 }
                 }}>
-                {leftColumnHeaders[0] && (
+                {leftColumnHeaders && leftColumnHeaders[0] && (
                   <TableCell
                     component="th"
                     scope="row"
