@@ -97,7 +97,7 @@ BEGIN
                 PY_ADD2,
                 PY_CITY,
                 PY_STATE,
-                PY_ZIP,
+                LPAD(TO_CHAR(PY_ZIP),5,'0'),
                 CASE
                     WHEN LENGTH(PY_DOB) = 8
                         AND TO_NUMBER(SUBSTR(PY_DOB, 5, 2)) BETWEEN 1 AND 12
@@ -252,7 +252,7 @@ BEGIN
         PYBEN.PYBEN_ADD AS STREET,
         PYBEN.PYBEN_CITY AS CITY,
         PYBEN.PYBEN_STATE AS STATE,
-        PYBEN.PYBEN_ZIP AS POSTAL_CODE,
+        LPAD(TO_CHAR(PYBEN.PYBEN_ZIP),5,'0') AS POSTAL_CODE,
         NULL AS PHONE_NUMBER, -- phone number isn't available
         NULL AS MOBILE_NUMBER,  -- mobile number isn't available
         NULL AS EMAIL_ADDRESS  -- email isn't available

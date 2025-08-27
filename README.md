@@ -7,6 +7,7 @@
 - **Bitbucket:** [Smart Profit Sharing Repository](https://bitbucket.org/demoulas/smart-profit-sharing)
 
 - **QA URL:** [Profit Sharing QA](https://ps.qa.demoulas.net/)
+ - **Developer Setup:** [developer_setup/README.md](./developer_setup/README.md)
 
 ## Definition of Ready (DoR)
 The Definition of Ready outlines the prerequisites for any user story, task, or bug fix to be considered ready for development. It emphasizes clarity, testability, and quality in our software engineering processes.

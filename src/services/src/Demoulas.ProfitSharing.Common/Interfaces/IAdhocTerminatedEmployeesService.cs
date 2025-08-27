@@ -5,4 +5,6 @@ namespace Demoulas.ProfitSharing.Common.Interfaces;
 public interface IAdhocTerminatedEmployeesService
 {
     Task<ReportResponseBase<AdhocTerminatedEmployeeResponse>> GetTerminatedEmployees(FrozenProfitYearRequest req, CancellationToken cancellationToken);
+    Task<ReportResponseBase<AdhocTerminatedEmployeeResponse>> GetTerminatedEmployeesNeedingFormLetter(StartAndEndDateRequest req, CancellationToken cancellationToken);
+    Task<string> GetFormLetterForTerminatedEmployees(StartAndEndDateRequest startAndEndDateRequest, CancellationToken cancellationToken);
 }
