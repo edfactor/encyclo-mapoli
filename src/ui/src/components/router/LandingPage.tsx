@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom";
 import storefront from "../../../images/storefront.jpg";
-import { ROUTES } from "../../constants";
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -11,7 +10,7 @@ const LandingPage = () => {
         Welcome to Profit Sharing
       </h1>
 
-      <h2 className="mb-4 text-xl text-dsm-secondary">Quick Links</h2>
+      {/* <h2 className="mb-4 text-xl text-dsm-secondary">Quick Links</h2>
 
       <div className="mb-8 flex gap-4">
         <button
@@ -29,7 +28,7 @@ const LandingPage = () => {
           onClick={() => navigate(ROUTES.DISTRIBUTIONS_AND_FORFEITURES)}>
           Distributions
         </button>
-      </div>
+      </div> */}
 
       <div className="pb-10">
         <img
