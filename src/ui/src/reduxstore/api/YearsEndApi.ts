@@ -935,11 +935,11 @@ export const YearsEndApi = createApi({
       }
     }),
 
-    getMasterApply: builder.query<ProfitShareMasterResponse, ProfitShareMasterApplyRequest>({
+    getMasterApply: builder.mutation<ProfitShareMasterResponse, ProfitShareMasterApplyRequest>({
       query: (params) => ({
         url: "yearend/profit-master-update",
-        method: "GET",
-        params: params
+        method: "POST",
+        body: params
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
@@ -1289,7 +1289,7 @@ export const {
   useLazyGetYearEndProfitSharingReportTotalsQuery,
   useUpdateExecutiveHoursAndDollarsMutation,
   useLazyGetYearEndProfitSharingSummaryReportQuery,
-  useLazyGetMasterApplyQuery,
+  useGetMasterApplyMutation,
   useLazyGetMasterRevertQuery,
   useLazyGetProfitSharingLabelsQuery,
   useLazyGetProfitMasterStatusQuery,

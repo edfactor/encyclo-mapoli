@@ -28,8 +28,7 @@ public class ProfitMasterUpdateEndpoint : ProfitSharingEndpoint<ProfitShareUpdat
 
     public override void Configure()
     {
-        // If I use Post(), swagger shows no documentation :-(
-        Get("profit-master-update");
+        Post("profit-master-update");
         Summary(s =>
         {
             s.Summary = "Applies YE updates to members";
