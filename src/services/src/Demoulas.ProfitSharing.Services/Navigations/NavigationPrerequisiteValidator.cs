@@ -1,9 +1,8 @@
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Demoulas.ProfitSharing.Common.Contracts.Response.Navigations;
+﻿using Demoulas.ProfitSharing.Common.Contracts.Response.Navigations;
 using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using FluentValidation;
+using FluentValidation.Results;
 
 namespace Demoulas.ProfitSharing.Services.Navigations;
 
@@ -27,15 +26,15 @@ public class NavigationPrerequisiteValidator : INavigationPrerequisiteValidator
         }
 
         var prereqs = node.PrerequisiteNavigations ?? new();
-        var incomplete = prereqs.Where(p => p.StatusName is null || !string.Equals(p.StatusName, "Complete", System.StringComparison.OrdinalIgnoreCase)).ToList();
+        var incomplete = prereqs.Where(p => p.StatusId != NavigationStatus.Constants.Complete).ToList();
         if (incomplete.Count > 0)
         {
-            var list = string.Join(", ", incomplete.Select(p => $"{p.Id}:{p.Title}"));
-            throw new ValidationException($"Prerequisites not complete for navigation {navigationId}: {list}");
+            var failures = incomplete.Select(p => new ValidationFailure(p.Title, $"{p.Title} is '{p.StatusName}' but must be '{nameof(NavigationStatus.Constants.Complete)}'"));
+            throw new ValidationException($"Prerequisites not {nameof(NavigationStatus.Constants.Complete)} for {node.Title}", failures);
         }
     }
 
-    private static NavigationDto? FindNode(System.Collections.Generic.IEnumerable<NavigationDto> nodes, short id)
+    private static NavigationDto? FindNode(IEnumerable<NavigationDto> nodes, short id)
     {
         foreach (var n in nodes)
         {
