@@ -6,6 +6,7 @@ using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate.
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ProfitShareUpdate;
+using Demoulas.ProfitSharing.Services.ItDevOps;
 using Demoulas.ProfitSharing.Services.ItOperations;
 using Demoulas.ProfitSharing.Services.ProfitShareEdit;
 
