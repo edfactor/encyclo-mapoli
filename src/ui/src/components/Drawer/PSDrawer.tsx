@@ -531,13 +531,7 @@ const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
                                           <Chip
                                             variant="outlined"
                                             label={subPage.statusName}
-                                            className={`
-                                              ${subPage.statusName === "In Progress" ? "bg-dsm-action-secondary-hover text-dsm-action" : ""}
-                                              ${subPage.statusName === "On Hold" ? "bg-yellow-50 text-yellow-700" : ""}
-                                              ${subPage.statusName === "Complete" ? "bg-dsm-action-secondary-hover text-dsm-action" : ""}
-                                              ${!["In Progress", "On Hold", "Complete"].includes(subPage.statusName || "") ? "border-dsm-grey-secondary text-dsm-grey-secondary" : ""}
-                                              font-medium
-                                            `}
+                                            className={` ${subPage.statusName === "In Progress" ? "bg-dsm-action-secondary-hover text-dsm-action" : ""} ${subPage.statusName === "On Hold" ? "bg-yellow-50 text-yellow-700" : ""} ${subPage.statusName === "Complete" ? "bg-dsm-action-secondary-hover text-dsm-action" : ""} ${!["In Progress", "On Hold", "Complete"].includes(subPage.statusName || "") ? "border-dsm-grey-secondary text-dsm-grey-secondary" : ""} font-medium`}
                                             size="small"
                                           />
                                         </Box>
@@ -592,13 +586,7 @@ const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
                                 <Chip
                                   variant="outlined"
                                   label={page.statusName}
-                                  className={`
-                                    ${page.statusName === "In Progress" ? "bg-dsm-action-secondary-hover text-dsm-action" : ""}
-                                    ${page.statusName === "On Hold" ? "bg-yellow-50 text-yellow-700" : ""}
-                                    ${page.statusName === "Complete" ? "bg-dsm-action-secondary-hover text-dsm-action" : ""}
-                                    ${!["In Progress", "On Hold", "Complete"].includes(page.statusName || "") ? "border-dsm-grey-secondary text-dsm-grey-secondary" : ""}
-                                    font-medium
-                                  `}
+                                  className={` ${page.statusName === "In Progress" ? "bg-dsm-action-secondary-hover text-dsm-action" : ""} ${page.statusName === "On Hold" ? "bg-yellow-50 text-yellow-700" : ""} ${page.statusName === "Complete" ? "bg-dsm-action-secondary-hover text-dsm-action" : ""} ${!["In Progress", "On Hold", "Complete"].includes(page.statusName || "") ? "border-dsm-grey-secondary text-dsm-grey-secondary" : ""} font-medium`}
                                   size="small"
                                 />
                               </Box>
@@ -645,17 +633,27 @@ const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
                             <>
                               <ListItemText
                                 primary={level.mainTitle}
-                                primaryTypographyProps={{
-                                  variant: "h6"
+                                secondary={`${level.topPage.filter((page) => page.statusName?.toLowerCase() === "complete").length} of ${level.topPage.length} completed`}
+                                slotProps={{
+                                  primary: {
+                                    variant: "h6"
+                                  },
+                                  secondary: {
+                                    variant: "body2",
+                                    sx: {
+                                      color: "text.secondary",
+                                      fontSize: "0.75rem"
+                                    }
+                                  }
                                 }}
                               />
                               {level.topPage.filter((page) => page.statusName?.toLowerCase() === "complete").length ===
-                                level.topPage.length - 2 && (
+                                level.topPage.length && (
                                 <Chip
                                   variant="outlined"
                                   label="Complete"
                                   size="small"
-                                  className="bg-dsm-action-secondary-hover text-dsm-action font-medium"
+                                  className="bg-dsm-action-secondary-hover font-medium text-dsm-action"
                                   sx={{
                                     fontWeight: 500
                                   }}
