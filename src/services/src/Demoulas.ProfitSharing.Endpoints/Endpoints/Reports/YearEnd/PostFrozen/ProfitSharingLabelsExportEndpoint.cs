@@ -3,16 +3,19 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.PostFrozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Groups;
+using Demoulas.ProfitSharing.Endpoints.Base;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Security;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.PostFrozen;
-public sealed class ProfitSharingLabelsExportEndpoint : Endpoint<ProfitYearRequest, PaginatedResponseDto<ProfitSharingLabelResponse>>
+public sealed class ProfitSharingLabelsExportEndpoint : ProfitSharingEndpoint<ProfitYearRequest, PaginatedResponseDto<ProfitSharingLabelResponse>>
 {
     private readonly IPostFrozenService _postFrozenService;
 
     public ProfitSharingLabelsExportEndpoint(IPostFrozenService postFrozenService)
+        : base(Navigation.Constants.PROFNEW)
     {
         _postFrozenService = postFrozenService;
     }
@@ -37,24 +40,22 @@ public sealed class ProfitSharingLabelsExportEndpoint : Endpoint<ProfitYearReque
     {
         var response = await _postFrozenService.GetProfitSharingLabelsExport(req, ct);
         var memoryStream = new MemoryStream();
-        await using (var writer = new StreamWriter(memoryStream))
+        await using var writer = new StreamWriter(memoryStream);
+        foreach (var line in response)
         {
-            foreach (var line in response)
-            {
-                await writer.WriteLineAsync(line);
-            }
-            await writer.FlushAsync(ct);
-
-            memoryStream.Position = 0;
-
-            System.Net.Mime.ContentDisposition cd = new System.Net.Mime.ContentDisposition
-            {
-                FileName = "PROFLBL.txt",
-                Inline = false
-            };
-            HttpContext.Response.Headers.Append("Content-Disposition", cd.ToString());
-
-            await Send.StreamAsync(memoryStream, "PROFLBL.txt", contentType: "text/plain", cancellation: ct);
+            await writer.WriteLineAsync(line);
         }
+        await writer.FlushAsync(ct);
+
+        memoryStream.Position = 0;
+
+        System.Net.Mime.ContentDisposition cd = new System.Net.Mime.ContentDisposition
+        {
+            FileName = "PROFLBL.txt",
+            Inline = false
+        };
+        HttpContext.Response.Headers.Append("Content-Disposition", cd.ToString());
+
+        await Send.StreamAsync(memoryStream, "PROFLBL.txt", contentType: "text/plain", cancellation: ct);
     }
 }

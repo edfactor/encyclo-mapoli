@@ -1,8 +1,10 @@
 ﻿using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Demoulas.ProfitSharing.Data.Contexts.EntityMapping.Navigations;
+
 internal sealed class NavigationRoleMap : IEntityTypeConfiguration<NavigationRole>
 {
     public void Configure(EntityTypeBuilder<NavigationRole> builder)
@@ -14,12 +16,14 @@ internal sealed class NavigationRoleMap : IEntityTypeConfiguration<NavigationRol
 
 
         builder.HasData(
-            new NavigationRole() { Id = NavigationRole.Contants.Administrator, Name = "Profit-Sharing-Administrator" },
-            new NavigationRole() { Id = NavigationRole.Contants.FinanceManager, Name = "Finance-Manager" },
-            new NavigationRole() { Id = NavigationRole.Contants.DistributionClerk, Name = "Distributions-Clerk" },
-            new NavigationRole() { Id = NavigationRole.Contants.HardshipAdministrator, Name = "Hardship-Administrator" },
-            new NavigationRole() { Id = NavigationRole.Contants.Impersonation, Name = "Impersonation" },
-            new NavigationRole() { Id = NavigationRole.Contants.ITOperations, Name = "IT-Operations" }
-            );
+            new NavigationRole { Id = NavigationRole.Contants.Administrator, Name = Role.ADMINISTRATOR },
+            new NavigationRole { Id = NavigationRole.Contants.FinanceManager, Name = Role.FINANCEMANAGER },
+            new NavigationRole { Id = NavigationRole.Contants.DistributionClerk, Name = Role.DISTRIBUTIONSCLERK },
+            new NavigationRole { Id = NavigationRole.Contants.HardshipAdministrator, Name = Role.HARDSHIPADMINISTRATOR },
+            new NavigationRole { Id = NavigationRole.Contants.Impersonation, Name = Role.IMPERSONATION },
+            new NavigationRole { Id = NavigationRole.Contants.ItDevOps, Name = Role.ITDEVOPS },
+            new NavigationRole { Id = NavigationRole.Contants.ItOperations, Name = Role.ITOPERATIONS },
+            new NavigationRole { Id = NavigationRole.Contants.ExecutiveAdministrator, Name = Role.EXECUTIVEADMIN }
+        );
     }
 }

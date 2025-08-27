@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using static Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen.ContributionsByAgeEndpoint;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.Frozen;
 
@@ -15,6 +16,7 @@ public class ContributionsByAgeEndpoint : EndpointWithCsvTotalsBase<FrozenReport
     private readonly IFrozenReportService _frozenReportService;
 
     public ContributionsByAgeEndpoint(IFrozenReportService frozenReportService)
+        : base(Navigation.Constants.ContributionsByAge)
     {
         _frozenReportService = frozenReportService;
     }

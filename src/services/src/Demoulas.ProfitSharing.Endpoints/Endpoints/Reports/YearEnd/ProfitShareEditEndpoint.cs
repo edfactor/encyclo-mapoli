@@ -5,6 +5,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd;
 
@@ -17,6 +18,7 @@ public class ProfitShareEditEndpoint
     private readonly IProfitShareEditService _editService;
 
     public ProfitShareEditEndpoint(IProfitShareEditService editService)
+        : base(Navigation.Constants.ProfitShareReportEditRun)
     {
         _editService = editService;
     }

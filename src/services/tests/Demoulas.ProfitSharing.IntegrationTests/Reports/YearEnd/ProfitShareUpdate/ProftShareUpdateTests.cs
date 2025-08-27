@@ -237,11 +237,9 @@ public class ProfitShareUpdateTests : PristineBaseTest
 
     public static string LoadExpectedReport(string resourceName)
     {
-        using (Stream? stream = Assembly.GetExecutingAssembly()
-                   .GetManifestResourceStream($"Demoulas.ProfitSharing.IntegrationTests.Resources.{resourceName}"))
-        using (StreamReader reader = new(stream!))
-        {
-            return reader.ReadToEnd().Replace("\f", "\n\n");
-        }
+        using Stream? stream = Assembly.GetExecutingAssembly()
+            .GetManifestResourceStream($"Demoulas.ProfitSharing.IntegrationTests.Resources.{resourceName}");
+        using StreamReader reader = new(stream!);
+        return reader.ReadToEnd().Replace("\f", "\n\n");
     }
 }

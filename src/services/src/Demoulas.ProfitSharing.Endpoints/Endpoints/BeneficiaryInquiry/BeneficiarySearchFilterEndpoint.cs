@@ -3,15 +3,17 @@ using Demoulas.ProfitSharing.Common.Contracts.Request.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Common.Contracts.Response.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Common.Interfaces.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Endpoints.Groups;
-using FastEndpoints;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Endpoints.Base;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.BeneficiaryInquiry;
-public class BeneficiarySearchFilterEndpoint : Endpoint<BeneficiarySearchFilterRequest, PaginatedResponseDto<BeneficiarySearchFilterResponse>>
+public class BeneficiarySearchFilterEndpoint : ProfitSharingEndpoint<BeneficiarySearchFilterRequest, PaginatedResponseDto<BeneficiarySearchFilterResponse>>
 {
 
     private readonly IBeneficiaryInquiryService _beneficiaryService;
 
     public BeneficiarySearchFilterEndpoint(IBeneficiaryInquiryService beneficiaryService)
+        : base(Navigation.Constants.Beneficiaries)
     {
         _beneficiaryService = beneficiaryService;
     }

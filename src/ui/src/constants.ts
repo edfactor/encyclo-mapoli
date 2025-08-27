@@ -10,6 +10,7 @@ export const MENU_LABELS = {
   DISTRIBUTIONS: "Distributions",
   RECONCILIATION: "Reconciliation",
   INQUIRIES: "Inquiries",
+  IT_DEVOPS: "IT DEVOPS",
   IT_OPERATIONS: "IT OPERATIONS",
   GO_TO_PROFIT_SHARE_REPORT: "View Profit Share Report (PAY426) Details",
   YEAR_END: "Year End"
@@ -168,6 +169,9 @@ export const CAPTIONS = {
 export const VIEW = "View";
 
 export const SMART_PS_QA_IMPERSONATION = "SMART-PS-QA-Impersonation";
+export const SMART_ROLE_PREFIX = "SMART";
+export const APP_NAME = "PS";
+export const IMPERSONATION_ROLE_SUFFIX = "Impersonation";
 
 export const GRID_COLUMN_WIDTHS = {
   BADGE_NUMBER: 100,

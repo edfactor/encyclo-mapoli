@@ -136,10 +136,8 @@ public class ReadyActivity(SshClient client, SftpClient sftpClient, bool chatty,
                 else
                 {
                     IfChatty($"copying {reportName} to file:///{qpay066Local}");
-                    await using (FileStream fileStream = File.OpenWrite(qpay066Local))
-                    {
-                        sftpClient.DownloadFile(reportName, fileStream);
-                    }
+                    await using FileStream fileStream = File.OpenWrite(qpay066Local);
+                    sftpClient.DownloadFile(reportName, fileStream);
                 }
 
                 string testingFile = OptionalLocalResourceBase + "psupdate-pay444-r2.txt";

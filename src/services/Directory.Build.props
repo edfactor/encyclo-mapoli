@@ -15,9 +15,8 @@
     <!-- Publish the repository URL in the built .nupkg (in the NuSpec <Repository> element) -->
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
 
-    <!-- Recommended: Embed symbols containing Source Link in the main file (exe/dll) -->
-    <DebugType>embedded</DebugType>
-    <DebugSymbols>true</DebugSymbols>
+  <!-- Use portable PDBs for best SourceLink compatibility -->
+  <DebugType>portable</DebugType>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -30,42 +29,40 @@
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <EnforceFIPSPolicy>false</EnforceFIPSPolicy>
     <Deterministic>true</Deterministic>
+  <!-- Keep AssemblyVersion stable to avoid binding issues; vary FileVersion/InformationalVersion per build -->
+  <AssemblyVersion>1.0.0.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PackageReference Include="AsyncAwaitBestPractices">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers">
       <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <IncludeAssets>analyzers; build; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Roslynator.Analyzers">
       <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <IncludeAssets>analyzers; build; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Roslynator.Formatting.Analyzers">
       <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <IncludeAssets>analyzers; build; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="SonarAnalyzer.CSharp">
       <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <IncludeAssets>analyzers; build; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers">
       <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <IncludeAssets>analyzers; build; buildtransitive</IncludeAssets>
     </PackageReference>
 
     <PackageReference Include="Microsoft.EntityFrameworkCore.Analyzers">
       <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <IncludeAssets>analyzers; build; buildtransitive</IncludeAssets>
     </PackageReference>
 
     <PackageReference Include="AsyncFixer">
       <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <IncludeAssets>analyzers; build; buildtransitive</IncludeAssets>
     </PackageReference>
 
     
@@ -74,8 +71,7 @@
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <DebugSymbols>true</DebugSymbols>
+  <DebugType>portable</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
@@ -88,7 +84,6 @@
       <BuildNumber>$([System.DateTime]::Now.ToString(yyyyMMdd))</BuildNumber>
       <VersionPrefix>1.0.0</VersionPrefix>
       <VersionSuffix>ci</VersionSuffix>
-      <AssemblyVersion>$(VersionPrefix).$(BuildNumber)</AssemblyVersion>
       <FileVersion>$(VersionPrefix).$(BuildNumber)</FileVersion>
       <AssemblyInformationalVersion>$(VersionPrefix)-$(VersionSuffix)+$(BuildNumber)</AssemblyInformationalVersion>
     </PropertyGroup>

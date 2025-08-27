@@ -10,16 +10,18 @@ using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Endpoints.TypeConverters;
 using Demoulas.ProfitSharing.Security;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ForfeitureAdjustment;
 
 public class UnforfeituresEndpoint :
     EndpointWithCsvBase<StartAndEndDateRequest, UnforfeituresResponse, UnforfeituresEndpoint.RehireProfitSharingResponseMap>
 {
-    private readonly IUnForfeitService _reportService;
+    private readonly IUnforfeitService _reportService;
     private readonly IAuditService _auditService;
 
-    public UnforfeituresEndpoint(IUnForfeitService reportService, IAuditService auditService)
+    public UnforfeituresEndpoint(IUnforfeitService reportService, IAuditService auditService)
+        : base(Navigation.Constants.Unforfeit)
     {
         _reportService = reportService;
         _auditService = auditService;

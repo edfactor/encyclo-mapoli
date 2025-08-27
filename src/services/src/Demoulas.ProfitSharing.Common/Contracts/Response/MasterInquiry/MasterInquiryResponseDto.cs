@@ -42,6 +42,7 @@ public sealed record MasterInquiryResponseDto : IdRequest
     public decimal CurrentHoursYear { get; set; }
     public char EmploymentStatusId { get; set; }
     public string? EmploymentStatus { get; set; }
+    public bool IsExecutive { get; set; }
 
     public static MasterInquiryResponseDto ResponseExample()
     {
@@ -74,7 +75,8 @@ public sealed record MasterInquiryResponseDto : IdRequest
             ZeroContributionReasonName = null,
             TaxCodeName = "Standard",
             CommentTypeName = "Information",
-            PsnSuffix = 1
+            PsnSuffix = 1,
+            IsExecutive = false
         };
     }
 }

@@ -34,13 +34,12 @@ import ProfitShareTotals426 from "pages/ProfitShareTotals426/ProfitShareTotals42
 
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { useGetNavigationQuery } from "reduxstore/api/NavigationApi";
 import { setImpersonating } from "reduxstore/slices/securitySlice";
 import { RootState } from "reduxstore/store";
 import { ImpersonationRoles } from "reduxstore/types";
-import { ImpersonationMultiSelect } from "smart-ui-library";
-import { drawerClosedWidth, drawerOpenWidth, ROUTES, SMART_PS_QA_IMPERSONATION } from "../../constants";
+import { drawerClosedWidth, drawerOpenWidth, ROUTES } from "../../constants";
 import MenuData from "../../MenuData";
 import DemographicFreeze from "../../pages/ITOperations/DemographicFreeze/DemographicFreeze";
 import BalanceByAge from "../../pages/PROF130/BalanceByAge/BalanceByAge";
@@ -50,7 +49,10 @@ import ForfeituresByAge from "../../pages/PROF130/ForfeituresByAge/ForfeituresBy
 import ProfitShareEditUpdate from "../../pages/ProfitShareEditUpdate/ProfitShareEditUpdate";
 import Unauthorized from "../../pages/Unauthorized/Unauthorized";
 import YTDWages from "../../pages/YTDWagesExtract/YTDWages";
+import EnvironmentUtils from "../../utils/environmentUtils";
+import { createUnauthorizedParams, isPathAllowedInNavigation } from "../../utils/navigationAccessUtils";
 
+import ImpersonationMultiSelect from "components/MenuBar/ImpersonationMultiSelect";
 import { MenuBar } from "components/MenuBar/MenuBar";
 import BeneficiaryInquiry from "pages/BeneficiaryInquiry/BeneficiaryInquiry";
 import PAY426N from "pages/PAY426Reports/PAY426N/PAY426N";
@@ -66,18 +68,17 @@ import DevDebug from "../../pages/Dev/DevDebug";
 import ForfeituresAdjustment from "../../pages/ForfeituresAdjustment/ForfeituresAdjustment";
 
 const RouterSubAssembly: React.FC = () => {
-  const isProduction = false;
-  const userGroups = useSelector((state: RootState) => state.security.userGroups);
-  const hasImpersonationRole = userGroups.includes(SMART_PS_QA_IMPERSONATION);
-  const showImpersonation = hasImpersonationRole && !isProduction;
+  const isProductionOrUAT = EnvironmentUtils.isProduction || EnvironmentUtils.isUAT;
+  const hasImpersonationRole = EnvironmentUtils.isDevelopmentOrQA;
+  const showImpersonation = hasImpersonationRole && !isProductionOrUAT;
 
   const { impersonating, token } = useSelector((state: RootState) => state.security);
 
   const dispatch = useDispatch();
   const { isDrawerOpen } = useSelector((state: RootState) => state.general);
   const { data, isSuccess } = useGetNavigationQuery({ navigationId: undefined }, { skip: !token });
-
-  const localStorageImpersonating: string | null = localStorage.getItem("impersonatingRole");
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const renderMenu = () => {
     return isSuccess && data ? (
@@ -89,34 +90,23 @@ const RouterSubAssembly: React.FC = () => {
             showImpersonation ? (
               <ImpersonationMultiSelect
                 impersonationRoles={[
-                  ImpersonationRoles.FinanceManager,
                   ImpersonationRoles.DistributionsClerk,
+                  ImpersonationRoles.ExecutiveAdministrator,
+                  ImpersonationRoles.FinanceManager,
                   ImpersonationRoles.HardshipAdministrator,
-                  ImpersonationRoles.ProfitSharingAdministrator,
-                  ImpersonationRoles.ItDevOps
+                  ImpersonationRoles.ItDevOps,
+                  ImpersonationRoles.ItOperations,
+                  ImpersonationRoles.ProfitSharingAdministrator
                 ]}
-                currentRoles={impersonating ? [impersonating] : []}
+                currentRoles={impersonating || []}
                 setCurrentRoles={(value: string[]) => {
-                  localStorage.setItem("impersonatingRole", value[0]);
-                  switch (value[0]) {
-                    case ImpersonationRoles.FinanceManager:
-                      dispatch(setImpersonating(ImpersonationRoles.FinanceManager));
-                      break;
-                    case ImpersonationRoles.DistributionsClerk:
-                      dispatch(setImpersonating(ImpersonationRoles.DistributionsClerk));
-                      break;
-                    case ImpersonationRoles.HardshipAdministrator:
-                      dispatch(setImpersonating(ImpersonationRoles.HardshipAdministrator));
-                      break;
-                    case ImpersonationRoles.ProfitSharingAdministrator:
-                      dispatch(setImpersonating(ImpersonationRoles.ProfitSharingAdministrator));
-                      break;
-                    case ImpersonationRoles.ItDevOps:
-                      dispatch(setImpersonating(ImpersonationRoles.ItDevOps));
-                      break;
-                    default:
-                      localStorage.removeItem("impersonatingRole");
-                      dispatch(setImpersonating(null));
+                  if (value.length > 0) {
+                    localStorage.setItem("impersonatingRoles", JSON.stringify(value));
+                    const selectedRoles = value.map((role) => role as ImpersonationRoles);
+                    dispatch(setImpersonating(selectedRoles));
+                  } else {
+                    localStorage.removeItem("impersonatingRoles");
+                    dispatch(setImpersonating([]));
                   }
                 }}
               />
@@ -125,12 +115,9 @@ const RouterSubAssembly: React.FC = () => {
             )
           }
         />
-        {/* THIS IS THE BOX THAT HOLDS ALL CONTENT BELOW THE TOP MENU 
-          AND MAKES IT POSSIBLE TO KEEP THE BREADCRUMBS WHERE THEY SHOULD BE */}
         <Box
           id="TopSubAssemblyRouterBox"
           sx={{ marginTop: "56px", position: "relative", zIndex: 1 }}>
-          {/* THIS BOX ALLOWS THE CONTENT TO BE PUSHED RIGHT BY DRAWER CONTROL */}
           <Box
             id="SecondSubAssemblyRouterBox"
             sx={{
@@ -141,7 +128,7 @@ const RouterSubAssembly: React.FC = () => {
               transition: "all 225ms"
             }}>
             <Box
-              id="ThirdSubAssemblyRouterBox-all-under-menu"
+              id="ThirdSubAssemblyRouterBox"
               sx={{ position: "relative", paddingTop: "32px" }}>
               <Box
                 id="Breadcrumbs-Box"
@@ -353,20 +340,29 @@ const RouterSubAssembly: React.FC = () => {
   };
 
   useEffect(() => {
-    if (!!localStorageImpersonating && !impersonating) {
-      dispatch(setImpersonating(localStorageImpersonating as ImpersonationRoles));
+    const storedRoles = localStorage.getItem("impersonatingRoles");
+    if (storedRoles && (!impersonating || impersonating.length === 0)) {
+      try {
+        const roles = JSON.parse(storedRoles) as ImpersonationRoles[];
+        dispatch(setImpersonating(roles));
+      } catch (e) {
+        // If there's an error parsing, clear the localStorage
+        localStorage.removeItem("impersonatingRoles");
+      }
     }
-  }, [dispatch, impersonating, localStorageImpersonating]);
+  }, [dispatch, impersonating]);
 
-  // This is here if we want this
-  // Open drawer when navigation data is loaded
-  /*
   useEffect(() => {
-    if (isSuccess && data && !isDrawerOpen) {
-      dispatch(openDrawer());
+    if (isSuccess && data?.navigation && token && location.pathname !== "/unauthorized") {
+      const currentPath = location.pathname;
+      const isAllowed = isPathAllowedInNavigation(currentPath, data.navigation);
+
+      if (!isAllowed) {
+        const queryParams = createUnauthorizedParams(currentPath);
+        navigate(`/unauthorized?${queryParams}`, { replace: true });
+      }
     }
-  }, [isSuccess, data, isDrawerOpen, dispatch]);
-  */
+  }, [isSuccess, data, location.pathname, navigate, token]);
 
   return renderMenu();
 };

@@ -18,4 +18,5 @@ public sealed record AdhocTerminatedEmployeeResponse : IFullNameProperty
     [MaskSensitive] public string City { get; set; } = string.Empty;
     [MaskSensitive] public string State { get; set; } = string.Empty;
     [MaskSensitive] public string PostalCode { get; set; } = string.Empty;
+    public bool IsExecutive { get; set; }
 }

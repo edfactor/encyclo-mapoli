@@ -119,7 +119,6 @@ internal sealed class DemographicMap : ModifiedBaseMap<Demographic>
         _ = builder.Property(e => e.EmploymentStatusId)
             .HasColumnName("EMPLOYMENT_STATUS_ID");
 
-
         _ = builder.OwnsOne(e => e.Address, address =>
         {
             address.Property(a => a.Street).HasMaxLength(56).HasColumnName("STREET").HasComment("Street").IsRequired();

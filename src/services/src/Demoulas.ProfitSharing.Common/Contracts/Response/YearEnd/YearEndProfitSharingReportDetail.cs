@@ -23,6 +23,7 @@ public sealed record YearEndProfitSharingReportDetail
     public required short YearsInPlan { get; set; }
     public DateOnly? TerminationDate { get; set; }
     public short? FirstContributionYear { get; set; }
+    public bool IsExecutive { get; set; }
 
     public static YearEndProfitSharingReportDetail ResponseExample()
     {

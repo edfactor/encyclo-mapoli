@@ -5,6 +5,7 @@ public sealed record TerminatedEmployeeAndBeneficiaryDataResponseDto
     public required int BadgeNumber { get; set; }
     public required short PsnSuffix { get; set; }
     public required string? Name { get; set; }
+    public bool IsExecutive { get; init; }
 
     public string BadgePSn
     {
@@ -64,4 +65,5 @@ public sealed record TerminatedEmployeeAndBeneficiaryYearDetailDto
     public int? Age { get; set; }
     public byte? EnrollmentCode { get; set; }
     public decimal? SuggestedForfeit { get; set; }
+    public bool IsExecutive { get; set; }
 }

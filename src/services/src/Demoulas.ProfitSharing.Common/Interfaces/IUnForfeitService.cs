@@ -4,7 +4,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
 namespace Demoulas.ProfitSharing.Common.Interfaces;
 
-public interface IUnForfeitService
+public interface IUnforfeitService
 {
     /// <summary>
     /// Finds rehires who may be entitled to forfeitures taken out in prior years.
