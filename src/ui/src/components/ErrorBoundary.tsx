@@ -1,7 +1,7 @@
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import { Box, Button, Typography } from "@mui/material";
 import React from "react";
 import { ErrorBoundary, FallbackProps } from "react-error-boundary";
-import { Box, Typography, Button } from "@mui/material";
-import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 
 interface AppErrorBoundaryProps {
   children: React.ReactNode;
@@ -9,7 +9,7 @@ interface AppErrorBoundaryProps {
 
 const ErrorFallback = ({ error, resetErrorBoundary }: FallbackProps) => {
   const handleReturn = () => {
-    resetErrorBoundary();
+    window.location.href = "/";
   };
 
   return (

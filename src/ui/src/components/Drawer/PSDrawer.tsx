@@ -16,6 +16,8 @@ import {
   SvgIconProps,
   Typography
 } from "@mui/material";
+import ProfitYearSelector from "components/ProfitYearSelector/ProfitYearSelector";
+import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import React, { FC, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -26,15 +28,12 @@ import {
   setSelectedProfitYearForDecemberActivities,
   setSelectedProfitYearForFiscalClose
 } from "reduxstore/slices/yearsEndSlice";
+import { RootState } from "reduxstore/store";
+import { NavigationResponseDto } from "reduxstore/types";
+import { ICommon } from "smart-ui-library";
 import { drawerTitle, menuLevels } from "../../MenuData";
 import { drawerClosedWidth, drawerOpenWidth, MENU_LABELS } from "../../constants";
-import ProfitYearSelector from "components/ProfitYearSelector/ProfitYearSelector";
-import { RootState } from "reduxstore/store";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
-import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-import { ICommon } from "smart-ui-library";
-import { NavigationResponseDto } from "reduxstore/types";
-import { setCurrentNavigationId } from "reduxstore/slices/navigationSlice";
 
 // Define the highlight color as a constant
 const HIGHLIGHT_COLOR = "#0258A5";
@@ -44,6 +43,16 @@ const SidebarIcon = (props: SvgIconProps) => (
     {...props}
     viewBox="0 0 16 16"
     sx={{ fontSize: 20 }}>
+    <path d="M6.823 7.823a.25.25 0 0 1 0 .354l-2.396 2.396A.25.25 0 0 1 4 10.396V5.604a.25.25 0 0 1 .427-.177Z" />
+    <path d="M1.75 0h12.5C15.216 0 16 .784 16 1.75v12.5A1.75 1.75 0 0 1 14.25 16H1.75A1.75 1.75 0 0 1 0 14.25V1.75C0 .784.784 0 1.75 0ZM1.5 1.75v12.5c0 .138.112.25.25.25H9.5v-13H1.75a.25.25 0 0 0-.25.25ZM11 14.5h3.25a.25.25 0 0 0 .25-.25V1.75a.25.25 0 0 0-.25-.25H11Z" />
+  </SvgIcon>
+);
+
+const SidebarCloseIcon = (props: SvgIconProps) => (
+  <SvgIcon
+    {...props}
+    viewBox="0 0 16 16"
+    sx={{ fontSize: 20, transform: "scaleX(-1)" }}>
     <path d="M6.823 7.823a.25.25 0 0 1 0 .354l-2.396 2.396A.25.25 0 0 1 4 10.396V5.604a.25.25 0 0 1 .427-.177Z" />
     <path d="M1.75 0h12.5C15.216 0 16 .784 16 1.75v12.5A1.75 1.75 0 0 1 14.25 16H1.75A1.75 1.75 0 0 1 0 14.25V1.75C0 .784.784 0 1.75 0ZM1.5 1.75v12.5c0 .138.112.25.25.25H9.5v-13H1.75a.25.25 0 0 0-.25.25ZM11 14.5h3.25a.25.25 0 0 0 .25-.25V1.75a.25.25 0 0 0-.25-.25H11Z" />
   </SvgIcon>
@@ -60,7 +69,17 @@ const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
   const { selectedProfitYearForDecemberActivities, selectedProfitYearForFiscalClose } = useSelector(
     (state: RootState) => state.yearsEnd
   );
-  const [expandedLevels, setExpandedLevels] = useState<{ [key: string]: boolean }>({});
+  const getStoredExpandedLevels = () => {
+    try {
+      const stored = localStorage.getItem("expandedLevels");
+      return stored ? JSON.parse(stored) : {};
+    } catch (error) {
+      console.error("Error loading expanded levels from localStorage:", error);
+      return {};
+    }
+  };
+
+  const [expandedLevels, setExpandedLevels] = useState<{ [key: string]: boolean }>(getStoredExpandedLevels());
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
   const [showDecemberBanner, setShowDecemberBanner] = useState(true);
   const [showFiscalCloseBanner, setShowFiscalCloseBanner] = useState(true);
@@ -106,6 +125,12 @@ const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
       setExpandedLevels({});
       setSelectedLevel(null);
       dispatch(clearActiveSubMenu());
+
+      try {
+        localStorage.setItem("expandedLevels", JSON.stringify({}));
+      } catch (error) {
+        console.error("Error clearing expanded levels in localStorage:", error);
+      }
     }
   };
 
@@ -117,6 +142,11 @@ const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
     dispatch(clearActiveSubMenu());
     setExpandedLevels({});
     setSelectedLevel(null);
+    try {
+      localStorage.setItem("expandedLevels", JSON.stringify({}));
+    } catch (error) {
+      console.error("Error clearing expanded levels in localStorage:", error);
+    }
   };
 
   const settingCurrentNavigation = (navigationId?: number) => {
@@ -153,6 +183,34 @@ const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
     return currentPath === `/${route}`;
   };
 
+  useEffect(() => {
+    if (activeSubmenu && drawerOpen) {
+      const currentRoute = currentPath.substring(1); // Remove leading slash
+
+      const menuLevel = menuLevels(navigationData).find((l) => l.mainTitle === activeSubmenu);
+      if (menuLevel) {
+        menuLevel.topPage.forEach((page) => {
+          if (
+            (page.topRoute && page.topRoute === currentRoute) ||
+            page.subPages.some((subPage) => subPage.subRoute === currentRoute)
+          ) {
+            if (!expandedOnceRef.current[page.topTitle]) {
+              const newExpandedLevels = { ...expandedLevels, [page.topTitle]: true };
+              setExpandedLevels(newExpandedLevels);
+              expandedOnceRef.current[page.topTitle] = true;
+
+              try {
+                localStorage.setItem("expandedLevels", JSON.stringify(newExpandedLevels));
+              } catch (error) {
+                console.error("Error saving expanded levels to localStorage:", error);
+              }
+            }
+          }
+        });
+      }
+    }
+  }, []);
+
   // Auto-expand menu containing active route only when path changes
   useEffect(() => {
     // Only run this effect if the path has changed
@@ -171,8 +229,15 @@ const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
 
           if (activePage && !expandedOnceRef.current[activePage.topTitle]) {
             // Only expand if we haven't expanded this section before
-            setExpandedLevels((prev) => ({ ...prev, [activePage.topTitle]: true }));
+            const newExpandedLevels = { ...expandedLevels, [activePage.topTitle]: true };
+            setExpandedLevels(newExpandedLevels);
             expandedOnceRef.current[activePage.topTitle] = true;
+
+            try {
+              localStorage.setItem("expandedLevels", JSON.stringify(newExpandedLevels));
+            } catch (error) {
+              console.error("Error saving expanded levels to localStorage:", error);
+            }
           }
         }
       }
@@ -219,7 +284,7 @@ const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
               backgroundColor: (theme) => theme.palette.action.hover
             }
           }}>
-          <SidebarIcon />
+          {drawerOpen ? <SidebarCloseIcon /> : <SidebarIcon />}
         </IconButton>
       </Box>
       <Drawer
@@ -357,6 +422,11 @@ const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
                                 const newExpandedLevels = { ...expandedLevels };
                                 newExpandedLevels[page.topTitle] = !expandedLevels[page.topTitle];
                                 setExpandedLevels(newExpandedLevels);
+                                try {
+                                  localStorage.setItem("expandedLevels", JSON.stringify(newExpandedLevels));
+                                } catch (error) {
+                                  console.error("Error saving expanded levels to localStorage:", error);
+                                }
                               }}
                               sx={{
                                 pl: 2,
@@ -380,6 +450,13 @@ const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
                                 <ListItemText
                                   primary={getNewReportName(page.topTitle)}
                                   secondary={getLegacyReportName(page.topTitle)}
+                                  primaryTypographyProps={{
+                                    sx: {
+                                      fontSize: "0.875rem",
+                                      fontWeight: hasActiveSubPage ? "bold" : "normal",
+                                      color: hasActiveSubPage ? HIGHLIGHT_COLOR : "inherit"
+                                    }
+                                  }}
                                   secondaryTypographyProps={{
                                     sx: {
                                       fontSize: "0.75rem",
@@ -387,12 +464,7 @@ const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
                                     }
                                   }}
                                   sx={{
-                                    margin: 0,
-                                    "& .MuiTypography-root": {
-                                      fontSize: "0.875rem",
-                                      fontWeight: hasActiveSubPage ? "bold" : "normal",
-                                      color: hasActiveSubPage ? HIGHLIGHT_COLOR : "inherit"
-                                    }
+                                    margin: 0
                                   }}
                                 />
                               </Box>
@@ -459,23 +531,8 @@ const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
                                           <Chip
                                             variant="outlined"
                                             label={subPage.statusName}
-                                            className="border-gray-700 text-gray-700"
+                                            className={` ${subPage.statusName === "In Progress" ? "bg-dsm-action-secondary-hover text-dsm-action" : ""} ${subPage.statusName === "On Hold" ? "bg-yellow-50 text-yellow-700" : ""} ${subPage.statusName === "Complete" ? "bg-dsm-action-secondary-hover text-dsm-action" : ""} ${!["In Progress", "On Hold", "Complete"].includes(subPage.statusName || "") ? "border-dsm-grey-secondary text-dsm-grey-secondary" : ""} font-medium`}
                                             size="small"
-                                            sx={{
-                                              backgroundColor:
-                                                subPage.statusName === "In Progress"
-                                                  ? "#E6F4EA" // subtle green
-                                                  : subPage.statusName === "On Hold"
-                                                    ? "#FFF9E5" // subtle yellow
-                                                    : undefined,
-                                              color:
-                                                subPage.statusName === "In Progress"
-                                                  ? "#22543D" // dark green text
-                                                  : subPage.statusName === "On Hold"
-                                                    ? "#8D6B04" // medium/dark yellow text
-                                                    : undefined,
-                                              fontWeight: 500
-                                            }}
                                           />
                                         </Box>
                                       </ListItemButton>
@@ -507,6 +564,13 @@ const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
                                 <ListItemText
                                   primary={getNewReportName(page.topTitle || "")}
                                   secondary={getLegacyReportName(page.topTitle || "")}
+                                  primaryTypographyProps={{
+                                    sx: {
+                                      fontSize: "0.875rem",
+                                      fontWeight: isTopPageActive ? "bold" : "normal",
+                                      color: isTopPageActive ? HIGHLIGHT_COLOR : "inherit"
+                                    }
+                                  }}
                                   secondaryTypographyProps={{
                                     sx: {
                                       fontSize: "0.75rem",
@@ -514,11 +578,7 @@ const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
                                     }
                                   }}
                                   sx={{
-                                    margin: 0,
-                                    "& .MuiTypography-root": {
-                                      fontSize: "0.875rem",
-                                      fontWeight: isTopPageActive ? "bold" : "normal"
-                                    }
+                                    margin: 0
                                   }}
                                 />
                               </Box>
@@ -526,23 +586,8 @@ const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
                                 <Chip
                                   variant="outlined"
                                   label={page.statusName}
-                                  className="border-gray-700 text-gray-700"
+                                  className={` ${page.statusName === "In Progress" ? "bg-dsm-action-secondary-hover text-dsm-action" : ""} ${page.statusName === "On Hold" ? "bg-yellow-50 text-yellow-700" : ""} ${page.statusName === "Complete" ? "bg-dsm-action-secondary-hover text-dsm-action" : ""} ${!["In Progress", "On Hold", "Complete"].includes(page.statusName || "") ? "border-dsm-grey-secondary text-dsm-grey-secondary" : ""} font-medium`}
                                   size="small"
-                                  sx={{
-                                    backgroundColor:
-                                      page.statusName === "In Progress"
-                                        ? "#E6F4EA" // subtle green
-                                        : page.statusName === "On Hold"
-                                          ? "#FFF9E5" // subtle yellow
-                                          : undefined,
-                                    color:
-                                      page.statusName === "In Progress"
-                                        ? "#22543D" // dark green text
-                                        : page.statusName === "On Hold"
-                                          ? "#8D6B04" // medium/dark yellow text
-                                          : undefined,
-                                    fontWeight: 500
-                                  }}
                                 />
                               </Box>
                             </ListItemButton>
@@ -589,19 +634,31 @@ const PSDrawer: FC<PSDrawerProps> = ({ navigationData }) => {
                               <ListItemText
                                 primary={level.mainTitle}
                                 secondary={`${level.topPage.filter((page) => page.statusName?.toLowerCase() === "complete").length} of ${level.topPage.length} completed`}
-                                primaryTypographyProps={{
-                                  variant: "h6"
-                                }}
-                                secondaryTypographyProps={{
-                                  sx: {
+                                slotProps={{
+                                  primary: {
+                                    variant: "h6"
+                                  },
+                                  secondary: {
                                     variant: "body2",
-                                    color: hasActiveRoute
-                                      ? (theme) => theme.palette.text.secondary
-                                      : (theme) => theme.palette.text.secondary,
-                                    fontSize: "0.75rem"
+                                    sx: {
+                                      color: "text.secondary",
+                                      fontSize: "0.75rem"
+                                    }
                                   }
                                 }}
                               />
+                              {level.topPage.filter((page) => page.statusName?.toLowerCase() === "complete").length ===
+                                level.topPage.length && (
+                                <Chip
+                                  variant="outlined"
+                                  label="Complete"
+                                  size="small"
+                                  className="bg-dsm-action-secondary-hover font-medium text-dsm-action"
+                                  sx={{
+                                    fontWeight: 500
+                                  }}
+                                />
+                              )}
                             </>
                           )}
                         </ListItemButton>

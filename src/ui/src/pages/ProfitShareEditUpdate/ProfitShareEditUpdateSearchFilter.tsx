@@ -1,6 +1,5 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FormHelperText, FormLabel, TextField } from "@mui/material";
-import { Grid } from "@mui/material";
+import { FormHelperText, FormLabel, Grid, TextField } from "@mui/material";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
@@ -510,12 +509,7 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
               <FormHelperText error>{errors.maxAllowedContributions.message}</FormHelperText>
             )}
           </Grid>
-        </Grid>
 
-        <Grid
-          container
-          spacing={3}
-          width="100%">
           <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Adjustment Badge</FormLabel>
             <Controller
@@ -618,12 +612,7 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
               <FormHelperText error>{errors.adjustIncomingForfeitAmount.message}</FormHelperText>
             )}
           </Grid>
-        </Grid>
 
-        <Grid
-          container
-          spacing={3}
-          width="100%">
           <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <FormLabel>Adjust Secondary Badge</FormLabel>
             <Controller
@@ -676,13 +665,19 @@ const ProfitShareEditUpdateSearchFilter: React.FC<ProfitShareEditUpdateSearchFil
             )}
           </Grid>
         </Grid>
-        <Grid width="100%">
-          <SearchAndReset
-            handleReset={handleReset}
-            searchButtonText="Preview"
-            handleSearch={validateAndSearch}
-            isFetching={isFetchingUpdate || isFetchingEdit}
-          />
+
+        <Grid
+          container
+          justifyContent="flex-end"
+          paddingY="16px">
+          <Grid size={{ xs: 12 }}>
+            <SearchAndReset
+              handleReset={handleReset}
+              searchButtonText="Preview"
+              handleSearch={validateAndSearch}
+              isFetching={isFetchingUpdate || isFetchingEdit}
+            />
+          </Grid>
         </Grid>
       </Grid>
     </form>

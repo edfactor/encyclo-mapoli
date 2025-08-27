@@ -1,13 +1,12 @@
 import { ColDef } from "ag-grid-community";
 import {
   createBadgeColumn,
+  createCountColumn,
+  createCurrencyColumn,
+  createDateColumn,
   createNameColumn,
   createSSNColumn,
-  createDateColumn,
-  createCurrencyColumn,
-  createStoreColumn,
-  createCountColumn,
-  createHoursColumn
+  createStoreColumn
 } from "utils/gridColumnFactory";
 
 export const GetRehireForfeituresGridColumns = (): ColDef[] => {
@@ -48,6 +47,7 @@ export const GetRehireForfeituresGridColumns = (): ColDef[] => {
       valueGetter: (params) => {
         const id = params.data?.enrollmentId;
         const name = params.data?.enrollmentName;
+        if (!id || !name) return "-";
         return `[${id}] ${name}`;
       }
     }
