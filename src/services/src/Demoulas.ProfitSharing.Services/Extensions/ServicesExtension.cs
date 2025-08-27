@@ -86,7 +86,7 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<INavigationService, NavigationService>();
         _ = builder.Services.AddScoped<IBeneficiaryInquiryService, BeneficiaryInquiryService>();
 
-    _ = builder.Services.AddScoped<INavigationPrerequisiteValidator, NavigationPrerequisiteValidator>();
+        _ = builder.Services.AddScoped<INavigationPrerequisiteValidator, NavigationPrerequisiteValidator>();
 
 
         _ = builder.Services.AddScoped<ITableMetadataService, TableMetadataService>();
@@ -95,7 +95,7 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IPayBenReportService, PayBenReportService>();
 
         _ = builder.Services.AddScoped<IReportRunnerService, ReportRunnerService>();
-        
+
         #region Mappers
 
 
