@@ -2,11 +2,13 @@
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Channels;
+using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.ProfitSharing.Common.Contracts.Messaging;
 using Demoulas.ProfitSharing.Common.Contracts.OracleHcm;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.OracleHcm.Clients;
 using Demoulas.ProfitSharing.OracleHcm.Configuration;
+using Demoulas.ProfitSharing.OracleHcm.Contracts;
 using Demoulas.ProfitSharing.OracleHcm.Factories;
 using Demoulas.ProfitSharing.OracleHcm.HealthCheck;
 using Demoulas.ProfitSharing.OracleHcm.HostedServices;
@@ -136,6 +138,8 @@ public static class OracleHcmExtension
         {
             builder.Services.AddHostedService<MemoryMonitoringService>();
         }
+
+        builder.Services.AddScoped<IAppUser>((_)=> new DummyUser());
 
         return builder;
     }
