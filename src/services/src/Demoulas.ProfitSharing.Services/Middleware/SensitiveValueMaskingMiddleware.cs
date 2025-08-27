@@ -36,6 +36,12 @@ public sealed class SensitiveValueMaskingMiddleware
 
         var isInItDevops = context.User.IsInRole(Role.ITDEVOPS);
 
+        if (!isInItDevops)
+        {
+            await _next(context);
+            return;
+        }
+
         Stream originalBody = context.Response.Body;
         await using MemoryStream buffer = new();
         context.Response.Body = buffer;

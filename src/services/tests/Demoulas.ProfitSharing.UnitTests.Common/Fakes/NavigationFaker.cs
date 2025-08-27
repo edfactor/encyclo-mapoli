@@ -1,12 +1,14 @@
 ﻿using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using System.Linq;
 
 namespace Demoulas.ProfitSharing.UnitTests.Common.Fakes;
 public class NavigationFaker
 {
     public List<Navigation> DummyNavigationData()
     {
-        // Common status
-        var notStarted = new NavigationStatus { Id = NavigationStatus.Constants.NotStarted, Name = "Not Started" };
+    // Common statuses
+    var notStarted = new NavigationStatus { Id = NavigationStatus.Constants.NotStarted, Name = "Not Started" };
+    var complete = new NavigationStatus { Id = NavigationStatus.Constants.Complete, Name = "Complete" };
 
         // Common role sets (Ids follow NavigationRole.Contants; Names mirror Security.Role strings)
         var rolesInquiries = new List<NavigationRole>
@@ -43,8 +45,8 @@ public class NavigationFaker
 
         var rolesItDevOpsTop = new List<NavigationRole>(rolesFreeze);
 
-        return new List<Navigation>()
-        {
+    var list = new List<Navigation>()
+    {
             // Top-level menus
             new Navigation { Id = 50, ParentId = null, Title = "INQUIRIES", SubTitle = "", Url = "", StatusId = 1, OrderNumber = 1, Icon = "", Disabled = false, RequiredRoles = new List<NavigationRole>(rolesInquiries), NavigationStatus = notStarted },
             new Navigation { Id = 52, ParentId = null, Title = "BENEFICIARIES", SubTitle = "", Url = "", StatusId = 1, OrderNumber = 2, Icon = "", Disabled = true, RequiredRoles = new List<NavigationRole>(rolesBeneficiaries), NavigationStatus = notStarted },
@@ -109,5 +111,22 @@ public class NavigationFaker
             new Navigation { Id = 48, ParentId = 42, Title = "PROFNEW", SubTitle = "", Url = "profnew", StatusId = 1, OrderNumber = 5, Icon = "", Disabled = false, RequiredRoles = new List<NavigationRole>(rolesYearEnd), NavigationStatus = notStarted },
             new Navigation { Id = 46, ParentId = 42, Title = "PROFALL", SubTitle = "", Url = "profall", StatusId = 1, OrderNumber = 6, Icon = "", Disabled = false, RequiredRoles = new List<NavigationRole>(rolesYearEnd), NavigationStatus = notStarted },
         };
+
+        // Establish a simple prerequisite relationship for testing:
+        // Make "Profit Share Report (Final Run)" (Id=17) depend on
+        // "Profit Share Report (Edit Run)" (Id=18) being complete.
+        var editRun = list.FirstOrDefault(n => n.Id == 18);
+        var finalRun = list.FirstOrDefault(n => n.Id == 17);
+        if (editRun != null)
+        {
+            editRun.StatusId = NavigationStatus.Constants.Complete;
+            editRun.NavigationStatus = complete;
+        }
+        if (finalRun != null && editRun != null)
+        {
+            finalRun.PrerequisiteNavigations = new List<Navigation> { editRun };
+        }
+
+        return list;
     }
 }
