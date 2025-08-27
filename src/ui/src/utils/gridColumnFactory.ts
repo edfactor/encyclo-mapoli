@@ -137,7 +137,7 @@ export const createBadgeColumn = (options: BadgeColumnOptions = {}): ColDef => {
     headerName = "Badge",
     field = "badgeNumber",
     minWidth = 120,
-    maxWidth,
+    maxWidth = 125,
     alignment = "center",
     sortable = true,
     resizable = true,

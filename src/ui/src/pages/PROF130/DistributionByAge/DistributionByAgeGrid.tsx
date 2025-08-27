@@ -1,13 +1,12 @@
+import { Grid } from "@mui/material";
+import { TotalsGrid } from "components/TotalsGrid/TotalsGrid";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetDistributionsByAgeQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams } from "smart-ui-library";
-import { TotalsGrid } from "components/TotalsGrid/TotalsGrid";
-import { GetDistributionsByAgeColumns } from "./DistributionByAgeGridColumns";
-import { Grid } from "@mui/material";
+import { DSMGrid, ISortParams, numberToCurrency } from "smart-ui-library";
 import { FrozenReportsByAgeRequestType } from "../../../reduxstore/types";
-import { numberToCurrency } from "smart-ui-library";
+import { GetDistributionsByAgeColumns } from "./DistributionByAgeGridColumns";
 
 interface DistributionByAgeGridProps {
   initialSearchLoaded: boolean;
@@ -70,16 +69,14 @@ const DistributionByAgeGrid: React.FC<DistributionByAgeGridProps> = ({ initialSe
     <>
       {distributionsByAgeTotal?.response && (
         <>
-
           <Grid
             size={{ xs: 12 }}
             container
-            columnSpacing={2}
             rowSpacing={0}>
             <Grid size={{ xs: 4 }}>
-              <h2 className="text-dsm-secondary">Total</h2>
+              <h2 className="px-[24px] text-dsm-secondary">Total</h2>
               <TotalsGrid
-                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12 }}
+                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
                 tablePadding="0px"
                 displayData={[
                   [
@@ -111,7 +108,7 @@ const DistributionByAgeGrid: React.FC<DistributionByAgeGridProps> = ({ initialSe
             <Grid size={{ xs: 4 }}>
               <h2 className="text-dsm-secondary">Full-time</h2>
               <TotalsGrid
-                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12 }}
+                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
                 tablePadding="0px"
                 displayData={[
                   [
@@ -143,7 +140,7 @@ const DistributionByAgeGrid: React.FC<DistributionByAgeGridProps> = ({ initialSe
             <Grid size={{ xs: 4 }}>
               <h2 className="text-dsm-secondary">Part-time</h2>
               <TotalsGrid
-                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12 }}
+                breakpoints={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}
                 tablePadding="0px"
                 displayData={[
                   [

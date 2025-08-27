@@ -1,15 +1,18 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.Common.Data.Contexts.Extensions;
+using Demoulas.Common.Data.Contexts.Interceptor;
+using Demoulas.Common.Data.Contexts.Interfaces;
 using Demoulas.ProfitSharing.Common;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
+using Demoulas.ProfitSharing.Security;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
-namespace Demoulas.ProfitSharing.Services.ItOperations;
+namespace Demoulas.ProfitSharing.Services.ItDevOps;
 
 /// <summary>
 /// This service contains logic related to getting temporal data for tables with ValidFrom and ValidTo.
@@ -17,10 +20,12 @@ namespace Demoulas.ProfitSharing.Services.ItOperations;
 public class FrozenService: IFrozenService
 {
     private readonly IProfitSharingDataContextFactory _dataContextFactory;
-    
-    public FrozenService(IProfitSharingDataContextFactory dataContextFactory)
+    private readonly ICommitGuardOverride _guardOverride;
+
+    public FrozenService(IProfitSharingDataContextFactory dataContextFactory, ICommitGuardOverride guardOverride)
     {
         _dataContextFactory = dataContextFactory;
+        _guardOverride = guardOverride;
     }
 
     /// <summary>
@@ -62,9 +67,7 @@ public class FrozenService: IFrozenService
                 PayFrequencyId = dh.PayFrequencyId,
                 TerminationCodeId = dh.TerminationCodeId,
                 EmploymentStatusId = dh.EmploymentStatusId,
-            }
-
-        ;
+            };
     }
 
     /// <summary>
@@ -85,51 +88,55 @@ public class FrozenService: IFrozenService
             .WithMessage($"ProfitYear must be between {thisYear - 1} and {thisYear}.");
 
         await validator.ValidateAndThrowAsync(profitYear, cancellationToken);
-
-        return await _dataContextFactory.UseWritableContext(async ctx =>
+        
+        using (_guardOverride.AllowFor(roles: Role.ITDEVOPS))
         {
-            //Inactivate any prior frozen states
-            await ctx.FrozenStates.Where(x => x.IsActive).ForEachAsync(x => x.IsActive = false, cancellationToken);
-
-            if (userName == null)
+            return await _dataContextFactory.UseWritableContext(async ctx =>
             {
-                userName = "Unknown"; // aka test driven, got through cert validation, but user is undefined.  Only happens during testing.
-            }
-            //Create new record
-            var frozenState = new FrozenState { IsActive = true, ProfitYear = profitYear, AsOfDateTime = asOfDateTime, FrozenBy = userName };
-            ctx.FrozenStates.Add(frozenState);
+                //Inactivate any prior frozen states
+                await ctx.FrozenStates.Where(x => x.IsActive).ForEachAsync(x => x.IsActive = false, cancellationToken);
 
-            // Copy the annuity rates from the prior year, if rows don't yet exist.
-            var lastYear = profitYear - 1;
-            if (!(await ctx.AnnuityRates.AnyAsync(x=>x.Year == profitYear, cancellationToken)) &&
-                 (await ctx.AnnuityRates.AnyAsync(x=>x.Year == lastYear, cancellationToken)))
-            {
-                var cloneFromLastYearRates = await ctx.AnnuityRates
-                    .Where(x => x.Year == lastYear)
-                    .Select(x => new AnnuityRate
-                    {
-                        Year = profitYear,
-                        Age = x.Age,
-                        SingleRate = x.SingleRate,
-                        JointRate = x.JointRate,
-                        CreatedAtUtc = DateTimeOffset.UtcNow,
-                        UserName = userName
-                    })
-                    .ToListAsync(cancellationToken);
-                ctx.AnnuityRates.AddRange(cloneFromLastYearRates);
-            }
+                if (userName == null)
+                {
+                    userName = "Unknown"; // aka test driven, got through cert validation, but user is undefined.  Only happens during testing.
+                }
 
-            await ctx.SaveChangesAsync(cancellationToken);
+                //Create new record
+                var frozenState = new FrozenState { IsActive = true, ProfitYear = profitYear, AsOfDateTime = asOfDateTime, FrozenBy = userName };
+                ctx.FrozenStates.Add(frozenState);
 
-            return new FrozenStateResponse
-            {
-                Id = frozenState.Id,
-                ProfitYear = profitYear,
-                FrozenBy = userName,
-                AsOfDateTime = asOfDateTime,
-                IsActive = true
-            };
-        }, cancellationToken);
+                // Copy the annuity rates from the prior year, if rows don't yet exist.
+                var lastYear = profitYear - 1;
+                if (!(await ctx.AnnuityRates.AnyAsync(x => x.Year == profitYear, cancellationToken)) &&
+                    (await ctx.AnnuityRates.AnyAsync(x => x.Year == lastYear, cancellationToken)))
+                {
+                    var cloneFromLastYearRates = await ctx.AnnuityRates
+                        .Where(x => x.Year == lastYear)
+                        .Select(x => new AnnuityRate
+                        {
+                            Year = profitYear,
+                            Age = x.Age,
+                            SingleRate = x.SingleRate,
+                            JointRate = x.JointRate,
+                            CreatedAtUtc = DateTimeOffset.UtcNow,
+                            UserName = userName
+                        })
+                        .ToListAsync(cancellationToken);
+                    ctx.AnnuityRates.AddRange(cloneFromLastYearRates);
+                }
+
+                await ctx.SaveChangesAsync(cancellationToken);
+
+                return new FrozenStateResponse
+                {
+                    Id = frozenState.Id,
+                    ProfitYear = profitYear,
+                    FrozenBy = userName,
+                    AsOfDateTime = asOfDateTime,
+                    IsActive = true
+                };
+            }, cancellationToken);
+        }
     }
 
     /// <summary>

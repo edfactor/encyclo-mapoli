@@ -57,7 +57,7 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
         <>
           <div
             style={{
-              padding: "0 24px 24px 24px",
+              padding: "24px 24px 0px 24px",
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center"
@@ -65,7 +65,7 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
             <Typography
               variant="h2"
               sx={{ color: "#0258A5", marginTop: "7px" }}>
-              {`MILITARY CONTRIBUTIONS (${militaryContributionsData?.total || 0} ${(militaryContributionsData?.total || 0) === 1 ? "Record" : "Records"})`}
+              {`Military Contributions (${militaryContributionsData?.total || 0} ${(militaryContributionsData?.total || 0) === 1 ? "Record" : "Records"})`}
             </Typography>
 
             <Tooltip
@@ -77,7 +77,7 @@ const MilitaryContributionGrid: React.FC<MilitaryContributionGridProps> = ({
               placement="top">
               <span>
                 <Button
-                  variant="contained"
+                  variant="outlined"
                   color="primary"
                   disabled={masterInquiryMemberDetails?.payFrequencyId == 2}
                   onClick={onAddContribution}
