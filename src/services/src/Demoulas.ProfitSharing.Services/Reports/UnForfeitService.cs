@@ -35,29 +35,42 @@ public sealed class UnforfeitService : IUnforfeitService
         var validator = new StartAndEndDateRequestValidator();
         await validator.ValidateAndThrowAsync(req, cancellationToken);
 
-        var militaryMembers = await _dataContextFactory.UseReadOnlyContext(async context =>
+        var rehiredEmployees = await _dataContextFactory.UseReadOnlyContext(async context =>
         {
-            var beginning = req.BeginningDate;
-            var ending = req.EndingDate;
             var yearsOfServiceQuery = _totalService.GetYearsOfService(context, req.ProfitYear);
-            var vestingServiceQuery = _totalService.TotalVestingBalance(context, req.ProfitYear, ending);
+            var vestingServiceQuery = _totalService.TotalVestingBalance(context, req.ProfitYear, req.EndingDate);
             var demo = await _demographicReaderService.BuildDemographicQuery(context);
 
             var query =
+                // transactions
                 from pd in context.ProfitDetails
+                
+                // the employee definition in the "profit year"
                 join d in demo on pd.Ssn equals d.Ssn
                 join ppYE in context.PayProfits.Include(p => p.Enrollment)
                     on new { d.Id, ProfitYear = req.ProfitYear } equals new { Id = ppYE.DemographicId, ppYE.ProfitYear }
-                join pp in context.PayProfits.Include(p => p.Enrollment)
-                    on new { d.Id, ProfitYear = pd.ProfitYear } equals new { Id = pp.DemographicId, pp.ProfitYear } into ppTmp
-                from pp in ppTmp.DefaultIfEmpty()
+
+                // Years of service as of "profit year"
                 join yos in yearsOfServiceQuery on d.Ssn equals yos.Ssn into yosTmp
                 from yos in yosTmp.DefaultIfEmpty()
+
+                // Vesting on req.EndingDate
                 join vest in vestingServiceQuery on d.Ssn equals vest.Ssn into vestTmp
                 from vest in vestTmp.DefaultIfEmpty()
-                where pd.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id
+
+                // employee data at the time of the PROFIT_DETAIL transaction - ie. hours/wages (in transaction year)
+                join pp in context.PayProfits.Include(p => p.Enrollment)
+                    on new { d.Id,  pd.ProfitYear } equals new { Id = pp.DemographicId, pp.ProfitYear } into ppTmp
+                from pp in ppTmp.DefaultIfEmpty()
+
+                where 
+                      // only get the forfeit/unforfeit transactions 
+                      pd.ProfitCodeId == ProfitCode.Constants.OutgoingForfeitures.Id
+                      // active
                       && d.EmploymentStatusId == EmploymentStatus.Constants.Active
-                      && pd.ProfitYear >= beginning.Year && pd.ProfitYear <= ending.Year
+                      // rehire range that user wanted
+                      && d.ReHireDate >= req.BeginningDate && d.ReHireDate <= req.EndingDate
+                      // exclude zero current/vest balance if so desired.
                       && (!req.ExcludeZeroBalance || (vest != null && (vest.CurrentBalance != 0 || vest.VestedBalance != 0)))
                 group new
                 {
@@ -137,7 +150,7 @@ public sealed class UnforfeitService : IUnforfeitService
             ReportDate = DateTimeOffset.UtcNow,
             StartDate = req.BeginningDate,
             EndDate = req.EndingDate,
-            Response = militaryMembers
+            Response = rehiredEmployees
         };
     }
 }
