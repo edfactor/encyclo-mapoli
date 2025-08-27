@@ -4,6 +4,7 @@ using Demoulas.ProfitSharing.Common.Interfaces.Navigations;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Security;
 using Microsoft.EntityFrameworkCore;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
 
 namespace Demoulas.ProfitSharing.Services.Navigations;
 public class NavigationService : INavigationService
@@ -31,7 +32,11 @@ public class NavigationService : INavigationService
                 .Where(n => n.RequiredRoles!.Any(rr => roleNamesUpper.Contains(rr.Name.ToUpper())))
                 .OrderBy(n => n.OrderNumber)
                 .Include(n => n.RequiredRoles)
-                .Include(n => n.NavigationStatus);
+                .Include(n => n.NavigationStatus)
+                .Include(n => n.PrerequisiteNavigations!) // prerequisites
+                    .ThenInclude(p => p.NavigationStatus)
+                .Include(n => n.PrerequisiteNavigations!)
+                    .ThenInclude(p => p.RequiredRoles);
 
             return query.ToListAsync(cancellationToken);
         });
@@ -53,7 +58,26 @@ public class NavigationService : INavigationService
                     SubTitle = x.SubTitle,
                     Items = BuildTree(x.Id),
                     Disabled = x.Disabled,
-                    RequiredRoles = x.RequiredRoles?.Select(m => m.Name).ToList()
+                    RequiredRoles = x.RequiredRoles?.Select(m => m.Name).ToList(),
+                    // Project prerequisite navigations that are currently completed.
+                    PrerequisiteNavigations = x.PrerequisiteNavigations?
+                        .Select(p => new NavigationDto
+                        {
+                            Id = p.Id,
+                            ParentId = p.ParentId,
+                            Title = p.Title,
+                            SubTitle = p.SubTitle,
+                            Url = p.Url,
+                            StatusId = p.StatusId,
+                            StatusName = p.NavigationStatus!.Name,
+                            OrderNumber = p.OrderNumber,
+                            Icon = p.Icon,
+                            RequiredRoles = p.RequiredRoles?.Select(m => m.Name).ToList(),
+                            Disabled = p.Disabled,
+                            Items = null,
+                            PrerequisiteNavigations = new List<NavigationDto>()
+                        })
+                        .ToList() ?? new List<NavigationDto>()
                 })
                 .ToList();
         }
