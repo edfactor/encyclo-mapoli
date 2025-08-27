@@ -32,7 +32,7 @@ export const GetProfitShareForfeitColumns = (): ColDef[] => {
       field: "earningPoints"
     }),
     createBadgeColumn({
-      headerName: "Ben PSN",
+      headerName: "Beneficiary PSN",
       field: "beneficiaryPsn"
     })
   ];

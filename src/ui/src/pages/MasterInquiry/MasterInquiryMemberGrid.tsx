@@ -61,7 +61,7 @@ const MasterInquiryMemberGrid: React.FC<MasterInquiryMemberGridProps> = memo(
     };
 
     return (
-      <Box sx={{ width: "100%" }}>
+      <Box sx={{ width: "100%", paddingTop: "24px" }}>
         <div style={{ padding: "0 24px 0 24px" }}>
           <Typography
             variant="h2"
