@@ -50,6 +50,12 @@ export interface ReportPreset {
   name: string;
   description: string;
   params: FilterParams;
+  displayCriteria?: {
+    ageRange?: string;
+    hoursRange?: string;
+    employeeStatus?: string;
+    priorProfitShare?: string;
+  };
 }
 
 export interface ApiResponse<T> {}
