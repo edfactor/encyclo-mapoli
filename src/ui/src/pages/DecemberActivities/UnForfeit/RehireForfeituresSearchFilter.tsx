@@ -1,6 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Checkbox, FormControlLabel } from "@mui/material";
-import { Grid } from "@mui/material";
+import { Checkbox, FormControlLabel, Grid } from "@mui/material";
+import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetRehireForfeituresQuery } from "reduxstore/api/YearsEndApi";
@@ -15,7 +15,6 @@ import * as yup from "yup";
 import DsmDatePicker from "../../../components/DsmDatePicker/DsmDatePicker";
 import { CalendarResponseDto, StartAndEndDateRequest } from "../../../reduxstore/types";
 import { mmDDYYFormat, tryddmmyyyyToDate } from "../../../utils/dateUtils";
-import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 
 const schema = yup.object().shape({
   beginningDate: yup.string().required("Beginning Date is required"),
@@ -126,6 +125,7 @@ const RehireForfeituresSearchFilter: React.FC<RehireForfeituresSearchFilterProps
       beginningDate: fiscalData.fiscalBeginDate,
       endingDate: fiscalData.fiscalEndDate,
       excludeZeroBalance: false,
+      profitYear: selectedProfitYear,
       pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }
     });
 

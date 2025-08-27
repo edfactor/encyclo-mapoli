@@ -1,9 +1,9 @@
 import { ColDef } from "ag-grid-community";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
 import {
-  createSSNColumn,
   createBadgeColumn,
   createNameColumn,
+  createSSNColumn,
   createStatusColumn
 } from "../../../utils/gridColumnFactory";
 export const GetDemographicBadgesNotInPayprofitColumns = (): ColDef[] => {
@@ -16,7 +16,7 @@ export const GetDemographicBadgesNotInPayprofitColumns = (): ColDef[] => {
       renderAsLink: false
     }),
     createSSNColumn({
-      headerName: "Demographic SSN",
+      headerName: "SSN",
       alignment: "left",
       maxWidth: 250
     }),
