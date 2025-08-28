@@ -419,6 +419,14 @@ definitions:
         - echo "Checking npm vulnerabilities"
         - cd $env:ReactDir
         - npm audit --audit-level=moderate --production
+    
+    secret-scan: &secret-scan
+      name: "Secret scan (Gitleaks)"
+      image: alpine:3.19
+      script:
+        - wget -qO /tmp/gitleaks.tar.gz https://github.com/gitleaks/gitleaks/releases/download/v8.18.4/gitleaks_8.18.4_linux_x64.tar.gz
+        - tar -xzf /tmp/gitleaks.tar.gz -C /usr/local/bin
+        - gitleaks detect --source . --redact --no-banner --exit-code 1
           
 
 pipelines:
@@ -577,6 +585,7 @@ pipelines:
           - step: *build-and-test-backend
           - step: *audit-frontend
           - step: *audit-backend
+          - step: *secret-scan
   
   custom:
     profitsharing_database:
