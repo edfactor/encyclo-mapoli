@@ -114,6 +114,12 @@ test.describe("Master Inqiry landing page: ", () => {
     });
 
     test("If we change IMPERSONATE to IT-OPERATIONS, it should MASK values", async ({ page }) => {
+        await page.getByRole("combobox", { name: "roles" }).click();
+        await page.getByRole('option', { name: 'Finance-Manager' }).getByRole('checkbox').uncheck();
+        await page.locator("body").click();
+        await page.getByRole("combobox", { name: "roles" }).click();
+        await page.getByRole('option', { name: 'IT-Operations' }).getByRole('checkbox').check();
+        await page.locator("body").click();
         await page.locator('input[name="badgeNumber"]').fill("706056");
         await page.getByRole("button", { name: "SEARCH" }).click();
         const [response] = await Promise.all([page.waitForResponse((resp) =>
@@ -123,12 +129,7 @@ test.describe("Master Inqiry landing page: ", () => {
     });
 
     test("If we enter Name as Evans and click on Badge Number link in the Grid", async ({ page }) => {
-        await page.getByRole("combobox", { name: "roles" }).click();
-        await page.getByRole('option', { name: 'Finance-Manager' }).getByRole('checkbox').uncheck();
-        await page.locator("body").click();
-        await page.getByRole("combobox", { name: "roles" }).click();
-        await page.getByRole('option', { name: 'IT-Operations' }).getByRole('checkbox').check();
-        await page.locator("body").click();
+        
         await page.locator('input[name="name"]').fill("evans");
         await page.getByRole("button", { name: "SEARCH" }).click();
         const [response] = await Promise.all([page.waitForResponse((resp) =>
