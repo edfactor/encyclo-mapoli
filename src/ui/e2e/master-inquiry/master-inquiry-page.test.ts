@@ -6,11 +6,13 @@ test.describe("Master Inqiry landing page: ", () => {
     test.beforeEach(async ({ page }) => {
         await page.goto(baseUrl);
         await page.waitForLoadState("networkidle");
-        await page.getByRole("button", { name: "INQUIRIES" }).click();
-        await page.getByRole("link", { name: "MASTER INQUIRY" }).click();
         await page.getByRole("combobox", { name: "roles" }).click();
         await page.getByRole('option', { name: 'Finance-Manager' }).getByRole('checkbox').check();
         await page.locator("body").click();
+        await page.reload();
+        await page.waitForLoadState("networkidle");
+        await page.getByRole("button", { name: "INQUIRIES" }).click();
+        await page.getByRole("link", { name: "MASTER INQUIRY" }).click();
     });
     test("page should load properly without any issue.", async ({ page }) => {
         await expect(page.getByRole("heading", { name: "MASTER INQUIRY (008-10)" })).toBeVisible();
