@@ -1,31 +1,32 @@
 import { configureStore } from "@reduxjs/toolkit";
-import generalSlice from "./slices/generalSlice";
-import securitySlice from "./slices/securitySlice";
-import yearsEndSlice from "./slices/yearsEndSlice";
+import { apiLoggerMiddleware } from "../middleware/apiLoggerMiddleware";
+import { rtkQueryErrorToastMiddleware } from "../redux/rtkQueryErrorToastMiddleware";
+import EnvironmentUtils from "../utils/environmentUtils";
+import { AppSupportApi } from "./api/AppSupportApi";
+import { BeneficiariesApi } from "./api/BeneficiariesApi";
+import { CommonApi } from "./api/CommonApi";
+import { InquiryApi } from "./api/InquiryApi";
+import { ItOperationsApi } from "./api/ItOperationsApi";
+import { LookupsApi } from "./api/LookupsApi";
+import { MilitaryApi } from "./api/MilitaryApi";
+import { NavigationApi } from "./api/NavigationApi";
+import { NavigationStatusApi } from "./api/NavigationStatusApi";
 import { SecurityApi } from "./api/SecurityApi";
 import { YearsEndApi } from "./api/YearsEndApi";
-import frozenSlice from "./slices/frozenSlice";
-import { ItOperationsApi } from "./api/ItOperationsApi";
-import { MilitaryApi } from "./api/MilitaryApi";
-import militarySlice from "./slices/militarySlice";
-import { InquiryApi } from "./api/InquiryApi";
-import inquirySlice from "./slices/inquirySlice";
-import { LookupsApi } from "./api/LookupsApi";
-import lookupsSlice from "./slices/lookupsSlice";
-import { rtkQueryErrorToastMiddleware } from "../redux/rtkQueryErrorToastMiddleware";
-import { CommonApi } from "./api/CommonApi";
-import commonSlice from "./slices/commonSlice";
-import { messageSlice } from "./slices/messageSlice";
-import { apiLoggerMiddleware } from "../middleware/apiLoggerMiddleware";
-import { NavigationApi } from "./api/NavigationApi";
-import navigationSlice from "./slices/navigationSlice";
-import { AppSupportApi } from "./api/AppSupportApi";
-import AppSupportSlice from "./slices/appSupportSlice";
-import { NavigationStatusApi } from "./api/NavigationStatusApi";
 import navigationStatusSlice from "./slices/NavigationStatusSlice";
-import forfeituresAdjustmentSlice from "./slices/forfeituresAdjustmentSlice";
-import { BeneficiariesApi } from "./api/BeneficiariesApi";
+import AppSupportSlice from "./slices/appSupportSlice";
 import beneficiarySlice from "./slices/beneficiarySlice";
+import commonSlice from "./slices/commonSlice";
+import forfeituresAdjustmentSlice from "./slices/forfeituresAdjustmentSlice";
+import frozenSlice from "./slices/frozenSlice";
+import generalSlice from "./slices/generalSlice";
+import inquirySlice from "./slices/inquirySlice";
+import lookupsSlice from "./slices/lookupsSlice";
+import { messageSlice } from "./slices/messageSlice";
+import militarySlice from "./slices/militarySlice";
+import navigationSlice from "./slices/navigationSlice";
+import securitySlice from "./slices/securitySlice";
+import yearsEndSlice from "./slices/yearsEndSlice";
 
 export const store = configureStore({
   reducer: {
@@ -60,7 +61,8 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ serializableCheck: false })
       .concat(rtkQueryErrorToastMiddleware(true))
-      .concat(apiLoggerMiddleware)
+      // Use array concat to avoid TS tuple union issues
+      .concat(EnvironmentUtils.isDevelopmentOrQA ? [apiLoggerMiddleware] : [])
       .concat(SecurityApi.middleware)
       .concat(YearsEndApi.middleware)
       .concat(ItOperationsApi.middleware)
