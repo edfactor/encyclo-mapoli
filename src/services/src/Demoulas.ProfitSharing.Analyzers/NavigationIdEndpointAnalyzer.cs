@@ -1,4 +1,4 @@
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -86,9 +86,9 @@ public sealed class NavigationIdEndpointAnalyzer : DiagnosticAnalyzer
         for (var cur = type; cur is not null; cur = cur.BaseType)
         {
             var constructed = cur.ConstructedFrom?.ToDisplayString();
-            if (constructed is "FastEndpoints.Endpoint<,>"
+            if (constructed is "FastEndpoints.Endpoint<TRequest, TResponse>"
                 or "FastEndpoints.Endpoint<>"
-                or "FastEndpoints.EndpointWithoutRequest<>"
+                or "FastEndpoints.EndpointWithoutRequest<TResponse>"
                 or "FastEndpoints.EndpointWithoutRequest")
             {
                 return true;
