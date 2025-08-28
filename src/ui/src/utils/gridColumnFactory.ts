@@ -73,7 +73,7 @@ export const createPercentageColumn = (options: PercentageColumnOptions): ColDef
     alignment = "center",
     sortable = true,
     resizable = true,
-    valueFormatter = (params) => (params.value ? `${params.value}%` : "0%")
+    valueFormatter = (params) => `${params.value != null ? params.value : 0}%`
   } = options;
 
   const alignmentClass = alignment === "center" ? "center-align" : "left-align";
