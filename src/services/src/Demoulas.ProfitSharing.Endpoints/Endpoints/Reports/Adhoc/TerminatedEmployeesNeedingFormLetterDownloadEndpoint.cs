@@ -5,17 +5,19 @@ using System.Text;
 using System.Threading.Tasks;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Entities.Navigations;
+using Demoulas.ProfitSharing.Endpoints.Base;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Security;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.Adhoc;
-public sealed class TerminatedEmployeesNeedingFormLetterDownloadEndpoint : Endpoint<StartAndEndDateRequest, string>
+public sealed class TerminatedEmployeesNeedingFormLetterDownloadEndpoint : ProfitSharingEndpoint<StartAndEndDateRequest, string>
 {
     private readonly IAdhocTerminatedEmployeesService _adhocTerminatedEmployeesService;
 
-    public TerminatedEmployeesNeedingFormLetterDownloadEndpoint(IAdhocTerminatedEmployeesService adhocTerminatedEmployeesService)
+    public TerminatedEmployeesNeedingFormLetterDownloadEndpoint(IAdhocTerminatedEmployeesService adhocTerminatedEmployeesService) : base(Navigation.Constants.Unknown) //TBD
     {
         _adhocTerminatedEmployeesService = adhocTerminatedEmployeesService;
     }
