@@ -327,7 +327,7 @@ const RouterSubAssembly: React.FC = () => {
                   element={<QPAY600 />}
                 />
                 <Route
-                  path={ROUTES.REPRINT_CERTIFICATES}
+                  path={ROUTES.PRINT_PROFIT_CERTS}
                   element={<ReprintCertificates />}
                 />
               </Routes>
