@@ -7,6 +7,7 @@ using Demoulas.ProfitSharing.Data.Entities.Navigations;
 using Demoulas.ProfitSharing.Endpoints.Groups;
 using Demoulas.ProfitSharing.Endpoints.Base;
 using FastEndpoints;
+using FluentValidation;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.Reports.YearEnd.ProfitMaster;
 
@@ -15,21 +16,23 @@ public class ProfitMasterUpdateEndpoint : ProfitSharingEndpoint<ProfitShareUpdat
     private readonly IProfitMasterService _profitMasterService;
     private readonly INavigationService _navigationService;
     private readonly IAuditService _auditService;
+    private readonly INavigationPrerequisiteValidator _navPrereqValidator;
 
     public ProfitMasterUpdateEndpoint(IProfitMasterService profitMasterUpdate,
         INavigationService navigationService,
-        IAuditService auditService)
+        IAuditService auditService,
+        INavigationPrerequisiteValidator navPrereqValidator)
         : base(Navigation.Constants.MasterUpdate)
     {
         _profitMasterService = profitMasterUpdate;
         _navigationService = navigationService;
         _auditService = auditService;
+        _navPrereqValidator = navPrereqValidator;
     }
 
     public override void Configure()
     {
-        // If I use Post(), swagger shows no documentation :-(
-        Get("profit-master-update");
+        Post("profit-master-update");
         Summary(s =>
         {
             s.Summary = "Applies YE updates to members";
@@ -41,6 +44,9 @@ public class ProfitMasterUpdateEndpoint : ProfitSharingEndpoint<ProfitShareUpdat
 
     public override async Task HandleAsync(ProfitShareUpdateRequest req, CancellationToken ct)
     {
+        // Validate prerequisites for Master Update before proceeding
+        await _navPrereqValidator.ValidateAllCompleteAsync(Navigation.Constants.MasterUpdate, ct);
+
         ProfitMasterUpdateResponse response = await _auditService.ArchiveCompletedReportAsync("PAY444|PAY447",
             req.ProfitYear,
             req,

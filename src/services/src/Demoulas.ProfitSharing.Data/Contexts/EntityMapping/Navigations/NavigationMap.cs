@@ -31,6 +31,27 @@ internal sealed class NavigationMap : IEntityTypeConfiguration<Navigation>
             .WithMany()
             .UsingEntity(x=>x.ToTable(name:"NAVIGATION_ASSIGNED_ROLES"));
 
+        // Self-referencing many-to-many for prerequisites
+        builder
+            .HasMany(n => n.PrerequisiteNavigations!)
+            .WithMany(n => n.DependentNavigations!)
+            .UsingEntity<Dictionary<short, short>>(
+                "NAVIGATION_PREREQUISITES",
+                j => j
+                    .HasOne<Navigation>()
+                    .WithMany()
+                    .HasForeignKey("PREREQUISITE_ID")
+                    .HasConstraintName("FK_NAV_PREREQ_PREREQUISITE")
+                    .OnDelete(DeleteBehavior.NoAction),
+                j => j
+                    .HasOne<Navigation>()
+                    .WithMany()
+                    .HasForeignKey("NAVIGATION_ID")
+                    .HasConstraintName("FK_NAV_PREREQ_DEPENDENT")
+                    .OnDelete(DeleteBehavior.NoAction)
+            )
+            .ToTable("NAVIGATION_PREREQUISITES");
+
         // Seed data based on add-navigation-data.sql
         builder.HasData(
              // Main menu items

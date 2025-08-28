@@ -5,7 +5,7 @@ import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  useLazyGetMasterApplyQuery,
+  useGetMasterApplyMutation,
   useLazyGetMasterRevertQuery,
   useLazyGetProfitMasterStatusQuery
 } from "reduxstore/api/YearsEndApi";
@@ -160,7 +160,7 @@ const useSaveAction = (
   setEtvasReverted: (count: number) => void
 ) => {
   const { profitSharingEditQueryParams } = useSelector((state: RootState) => state.yearsEnd);
-  const [trigger] = useLazyGetMasterApplyQuery();
+  const [applyMaster] = useGetMasterApplyMutation();
   const dispatch = useDispatch();
   const profitYear = useFiscalCloseProfitYear();
 
@@ -182,7 +182,7 @@ const useSaveAction = (
 
     dispatch(setProfitShareApplyOrRevertLoading(true));
 
-    await trigger(params)
+    await applyMaster(params)
       .unwrap()
       .then((payload: ProfitShareMasterResponse) => {
         dispatch(setProfitEditUpdateChangesAvailable(false));

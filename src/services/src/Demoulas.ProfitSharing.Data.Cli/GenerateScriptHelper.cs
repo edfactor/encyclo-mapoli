@@ -1,4 +1,5 @@
 ﻿using System.CommandLine;
+using Demoulas.Common.Contracts.Interfaces;
 using Demoulas.Common.Data.Contexts.DTOs.Context;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Demoulas.ProfitSharing.Data.Factories;
@@ -98,6 +99,7 @@ internal static class GenerateScriptHelper
         }
 
         HostApplicationBuilder builder = CreateHostBuilder(args);
+        _ = builder.Services.AddScoped<IAppUser, DummyUser>();
         var list = new List<ContextFactoryRequest> { ContextFactoryRequest.Initialize<ProfitSharingDbContext>(connectionName) };
         _ = DataContextFactory.Initialize(builder, contextFactoryRequests: list);
 
