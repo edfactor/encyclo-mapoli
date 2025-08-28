@@ -547,7 +547,7 @@ pipelines:
               name: "Application Deployment UAT"
               runs-on:
                 - windows
-                - self-hosted
+                - self.hosted
               deployment: UAT
               script:
                 - echo "Deploying application..."
