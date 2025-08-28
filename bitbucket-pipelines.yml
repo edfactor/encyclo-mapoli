@@ -423,8 +423,20 @@ definitions:
     secret-scan: &secret-scan
       name: "Secret scan (Gitleaks)"
       image: zricethezav/gitleaks:latest
+      artifacts:
+        - reports/**
       script:
-        - gitleaks detect --source . --redact --no-banner --exit-code 1
+  - mkdir -p reports
+  - gitleaks detect --source . --config gitleaks.toml --redact --no-banner --report-format json --report-path reports/gitleaks.json --exit-code 0
+        - echo "Gitleaks findings (redacted JSON):"
+        - head -c 200000 reports/gitleaks.json || true
+        - |
+          if [ -s reports/gitleaks.json ] && [ "$(wc -c < reports/gitleaks.json)" -gt 2 ]; then
+            echo "Leaks found. Failing the build.";
+            exit 1;
+          else
+            echo "No leaks found.";
+          fi
           
 
 pipelines:
