@@ -1,7 +1,6 @@
-import { Button, Divider, Stack } from "@mui/material";
-import { Grid } from "@mui/material";
-import LabelValueSection from "components/LabelValueSection";
+import { Button, Grid, Stack } from "@mui/material";
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
+import TotalsGrid from "components/TotalsGrid";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -154,9 +153,6 @@ const Pay450Summary = () => {
         container
         rowSpacing="24px">
         <Grid width={"100%"}>
-          <Divider />
-        </Grid>
-        <Grid width={"100%"}>
           <DSMAccordion title="Filter">
             <Pay450SearchFilters
               onSearch={onSearch}
@@ -165,11 +161,33 @@ const Pay450Summary = () => {
           </DSMAccordion>
         </Grid>
 
-        <Grid
-          size={{ xs: 12 }}
-          paddingX="24px">
-          <LabelValueSection data={updateSummarySection} />
-        </Grid>
+        {updateSummary?.response && (
+          <Grid
+            size={{ xs: 12 }}
+            paddingX="24px">
+            <TotalsGrid
+              displayData={[
+                [
+                  updateSummary ? updateSummary.totalNumberOfEmployees.toString() : "-",
+                  updateSummary ? updateSummary.totalNumberOfBeneficiaries.toString() : "-",
+                  updateSummary ? numberToCurrency(updateSummary.totalBeforeProfitSharingAmount) : "-",
+                  updateSummary ? numberToCurrency(updateSummary.totalBeforeVestedAmount) : "-",
+                  updateSummary ? numberToCurrency(updateSummary.totalAfterProfitSharingAmount) : "-",
+                  updateSummary ? numberToCurrency(updateSummary.totalAfterVestedAmount) : "-"
+                ]
+              ]}
+              leftColumnHeaders={[]}
+              topRowHeaders={[
+                "Employees Updated",
+                "Beneficiaries Updated",
+                "Before Profit Sharing Amount",
+                "Before Vested Amount",
+                "After Profit Sharing Amount",
+                "After Vested Amount"
+              ]}
+            />
+          </Grid>
+        )}
         <Grid width="100%">
           <Pay450Grid
             initialSearchLoaded={initialSearchLoaded}

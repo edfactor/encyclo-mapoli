@@ -11,6 +11,7 @@ using Demoulas.ProfitSharing.Services.BeneficiaryInquiry;
 using Demoulas.ProfitSharing.Services.Caching.Extensions;
 using Demoulas.ProfitSharing.Services.Certificates;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Demoulas.ProfitSharing.Services.ItDevOps;
 using Demoulas.ProfitSharing.Services.ItOperations;
 using Demoulas.ProfitSharing.Services.Mappers;
 using Demoulas.ProfitSharing.Services.MasterInquiry;
@@ -85,6 +86,8 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<INavigationService, NavigationService>();
         _ = builder.Services.AddScoped<IBeneficiaryInquiryService, BeneficiaryInquiryService>();
 
+        _ = builder.Services.AddScoped<INavigationPrerequisiteValidator, NavigationPrerequisiteValidator>();
+
 
         _ = builder.Services.AddScoped<ITableMetadataService, TableMetadataService>();
 
@@ -92,7 +95,7 @@ public static class ServicesExtension
         _ = builder.Services.AddScoped<IPayBenReportService, PayBenReportService>();
 
         _ = builder.Services.AddScoped<IReportRunnerService, ReportRunnerService>();
-        
+
         #region Mappers
 
 

@@ -30,6 +30,7 @@ module.exports = {
         "dsm-grey-input-border": "#C6C8CA",
         "dsm-grey-hover": "#F5F5F5",
         "dsm-grey-divder": "#E1E2E3",
+        "dsm-blue": "#E3F2FD",
         "dsm-white": "#FFFFFF",
         "dsm-focused": "#4BABDE",
         "dsm-utility": "#E41DC4",

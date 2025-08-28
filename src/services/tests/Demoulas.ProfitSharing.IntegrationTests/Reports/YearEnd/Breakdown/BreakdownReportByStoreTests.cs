@@ -1,4 +1,5 @@
-﻿using Demoulas.Common.Data.Services.Service;
+﻿using Demoulas.Common.Data.Contexts.Interfaces;
+using Demoulas.Common.Data.Services.Service;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
@@ -7,6 +8,7 @@ using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
 using Demoulas.ProfitSharing.Services;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Demoulas.ProfitSharing.Services.ItDevOps;
 using Demoulas.ProfitSharing.Services.ItOperations;
 using Demoulas.ProfitSharing.Services.Reports.Breakdown;
 using Microsoft.AspNetCore.Http;
@@ -32,8 +34,8 @@ public class BreakdownReportByStoreTests
         _calendarService = new CalendarService(_dataContextFactory, _aps, distributedCache);
         _embeddedSqlService = new EmbeddedSqlService();
         _totalService = new TotalService(_dataContextFactory, _calendarService, _embeddedSqlService,
-            new DemographicReaderService(new FrozenService(_dataContextFactory), new HttpContextAccessor()));
-        var frozenService = new FrozenService(_dataContextFactory);
+            new DemographicReaderService(new FrozenService(_dataContextFactory, new Mock<ICommitGuardOverride>().Object), new HttpContextAccessor()));
+        var frozenService = new FrozenService(_dataContextFactory, new Mock<ICommitGuardOverride>().Object);
         IHttpContextAccessor httpCtxAcc = Mock.Of<IHttpContextAccessor>();
         _breakdownService = new BreakdownReportService(_dataContextFactory, _calendarService, _totalService, new DemographicReaderService(frozenService, httpCtxAcc));
     }

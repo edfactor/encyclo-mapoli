@@ -217,7 +217,7 @@ public class PostFrozenService : IPostFrozenService
                     Distributions = tyPdGrp.Distributions,
                     VestedAmount = tyTot.VestedBalance,
                     EndingBalance = tyTot.CurrentBalance,
-                    VestingPercentage = tyTot.VestingPercent,
+                    VestingPercentage = tyTot.VestingPercent * 100,
                     DateOfBirth = d.DateOfBirth,
                     Age = 0, //To be determined after materializing
                     EnrollmentId = pp.EnrollmentId,

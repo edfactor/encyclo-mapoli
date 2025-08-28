@@ -1,0 +1,16 @@
+title = "SMART Profit Sharing Gitleaks Config"
+
+[allowlist]
+description = "Ignore generated artifacts and reports; do not ignore source or env files"
+paths = [
+  '''^src/ui/playwright-report/''',
+  '''^src/ui/test-results/''',
+  '''^src/ui/e2e/fixtures/''',
+  '''^src/ui/build/''',
+  '''^src/ui/dist/''',
+  '''^test-results/''',
+  '''^readme_images/''',
+  '''^src/services/.*/obj/''',
+  '''^src/services/.*/bin/''',
+  '''^src/services/.*/EndpointInfo/'''
+]

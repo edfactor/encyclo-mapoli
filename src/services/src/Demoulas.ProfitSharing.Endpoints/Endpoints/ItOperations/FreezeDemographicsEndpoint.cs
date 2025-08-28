@@ -31,7 +31,7 @@ public class FreezeDemographicsEndpoint : ProfitSharingEndpoint<SetFrozenStateRe
                 new SetFrozenStateRequest { AsOfDateTime = DateTime.Today, ProfitYear = (short)DateTime.Today.Year };
         });
         Policies(Security.Policy.CanFreezeDemographics);
-        Group<ItOperationsGroup>();
+        Group<ItDevOpsGroup>();
     }
 
     public override Task<FrozenStateResponse> ExecuteAsync(SetFrozenStateRequest req, CancellationToken ct)

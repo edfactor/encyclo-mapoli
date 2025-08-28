@@ -11,7 +11,7 @@ public sealed class Navigation
         public const short Distributions = 53;
         public const short Reconciliation = 54;
         public const short YearEnd = 55;
-        public const short ItOperations = 56;
+        public const short ItDevOps = 56;
         
         // Inquiries sub-items
         public const short MasterInquiry = 51;
@@ -88,4 +88,10 @@ public sealed class Navigation
     public List<Navigation>? Items { get; set; }    
     public Navigation? Parent { get; set; }
     public List<NavigationTracking>? NavigationTrackings { get; set; }
+
+    // Self-referencing many-to-many to represent prerequisite navigation elements.
+    // PrerequisiteNavigations: the items this navigation depends on.
+    // DependentNavigations: the items that depend on this navigation (inverse).
+    public List<Navigation>? PrerequisiteNavigations { get; set; }
+    public List<Navigation>? DependentNavigations { get; set; }
 }

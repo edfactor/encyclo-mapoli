@@ -22,7 +22,7 @@ export const ItOperationsApi = createApi({
   endpoints: (builder) => ({
     getFrozenStateResponse: builder.query<FrozenStateResponse, void>({
       query: () => ({
-        url: `itoperations/frozen/active`,
+        url: `itdevops/frozen/active`,
         method: "GET"
       }),
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
@@ -37,7 +37,7 @@ export const ItOperationsApi = createApi({
     }),
     getHistoricalFrozenStateResponse: builder.query<Paged<FrozenStateResponse>, SortedPaginationRequestDto>({
       query: (params) => ({
-        url: `itoperations/frozen`,
+        url: `itdevops/frozen`,
         method: "GET",
         params: {
           take: params.take,
@@ -58,7 +58,7 @@ export const ItOperationsApi = createApi({
     }),
     getProfitYearSelectorFrozenData: builder.query<Paged<FrozenStateResponse>, SortedPaginationRequestDto>({
       query: (params) => ({
-        url: `itoperations/frozen`,
+        url: `itdevops/frozen`,
         method: "GET",
         params: {
           take: params.take,
@@ -79,14 +79,14 @@ export const ItOperationsApi = createApi({
     }),
     freezeDemographics: builder.mutation<void, FreezeDemographicsRequest>({
       query: (request) => ({
-        url: "itoperations/freeze",
+        url: "itdevops/freeze",
         method: "POST",
         body: request
       })
     }),
     getMetadata: builder.query<RowCountResult[], void>({
       query: () => ({
-        url: `itoperations/metadata`,
+        url: `itdevops/metadata`,
         method: "GET"
       })
     }),

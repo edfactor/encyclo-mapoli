@@ -3,7 +3,6 @@ import LabelValueSection from "components/LabelValueSection";
 import React, { memo, useMemo } from "react";
 import { formatNumberWithComma, numberToCurrency } from "smart-ui-library";
 import { formatPercentage } from "utils/formatPercentage";
-import "../../styles/employee-details-lightbox.css";
 import { mmDDYYFormat } from "../../utils/dateUtils";
 import { getEnrolledStatus, getForfeitedStatus } from "../../utils/enrollmentUtil";
 import { viewBadgeLinkRenderer } from "../../utils/masterInquiryLink";
@@ -165,7 +164,7 @@ const MasterInquiryMemberDetails: React.FC<MasterInquiryMemberDetailsProps> = me
 
     return (
       <div
-        className="employee-details-lightbox"
+        className="m-[1px] box-border p-[1px]"
         style={{ width: "100%" }}>
         <Grid
           container

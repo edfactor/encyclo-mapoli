@@ -1,10 +1,10 @@
-import { ValueFormatterParams } from "ag-grid-community";
 import {
   createAgeColumn,
   createBadgeColumn,
   createCurrencyColumn,
   createDateColumn,
-  createNameColumn
+  createNameColumn,
+  createPercentageColumn
 } from "utils/gridColumnFactory";
 
 export const GetUnder21BreakdownColumnDefs = (navFunction?: (path: string) => void) => [
@@ -48,11 +48,10 @@ export const GetUnder21BreakdownColumnDefs = (navFunction?: (path: string) => vo
     headerName: "Vested Amount",
     field: "vestedAmount"
   }),
-  {
+  createPercentageColumn({
     headerName: "Vesting %",
-    field: "vestingPercentage",
-    valueFormatter: (params: ValueFormatterParams) => `${params.value}%`
-  }
+    field: "vestingPercentage"
+  })
 ];
 
 /**

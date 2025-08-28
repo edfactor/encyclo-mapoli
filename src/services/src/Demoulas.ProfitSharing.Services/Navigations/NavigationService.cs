@@ -19,14 +19,25 @@ public class NavigationService : INavigationService
 
     public async Task<List<NavigationDto>> GetNavigation(CancellationToken cancellationToken)
     {
+        var roleNamesUpper = _appUser.GetUserAllRoles()
+            .Where(r => !string.IsNullOrWhiteSpace(r))
+            .Select(r => r!.ToUpper())
+            .ToList();
+
         var flatList = await _dataContextFactory.UseReadOnlyContext(context =>
-            context.Navigations
-                .Include(m => m.Items)
-                .Include(m => m.RequiredRoles)
-                .Include(m => m.NavigationStatus)
-                .OrderBy(x => x.OrderNumber)
-                .ToListAsync(cancellationToken)
-        );
+        {
+            var query = context.Navigations
+                .Where(n => n.RequiredRoles!.Any(rr => roleNamesUpper.Contains(rr.Name.ToUpper())))
+                .OrderBy(n => n.OrderNumber)
+                .Include(n => n.RequiredRoles)
+                .Include(n => n.NavigationStatus)
+                .Include(n => n.PrerequisiteNavigations!) // prerequisites
+                    .ThenInclude(p => p.NavigationStatus)
+                .Include(n => n.PrerequisiteNavigations!)
+                    .ThenInclude(p => p.RequiredRoles);
+
+            return query.ToListAsync(cancellationToken);
+        });
 
         var lookup = flatList.ToLookup(x => x.ParentId);
         List<NavigationDto> BuildTree(short? parentId)
@@ -36,7 +47,7 @@ public class NavigationService : INavigationService
                 {
                     Id = x.Id,
                     Icon = x.Icon,
-                    OrderNumber = x.OrderNumber,
+                    OrderNumber = x.OrderNumber, 
                     ParentId = x.ParentId,
                     StatusId = x.StatusId,
                     StatusName = x.NavigationStatus?.Name,
@@ -45,7 +56,26 @@ public class NavigationService : INavigationService
                     SubTitle = x.SubTitle,
                     Items = BuildTree(x.Id),
                     Disabled = x.Disabled,
-                    RequiredRoles = x.RequiredRoles?.Select(m => m.Name).ToList()
+                    RequiredRoles = x.RequiredRoles?.Select(m => m.Name).ToList(),
+                    // Project prerequisite navigations that are currently completed.
+                    PrerequisiteNavigations = x.PrerequisiteNavigations?
+                        .Select(p => new NavigationDto
+                        {
+                            Id = p.Id,
+                            ParentId = p.ParentId,
+                            Title = p.Title,
+                            SubTitle = p.SubTitle,
+                            Url = p.Url,
+                            StatusId = p.StatusId,
+                            StatusName = p.NavigationStatus!.Name,
+                            OrderNumber = p.OrderNumber,
+                            Icon = p.Icon,
+                            RequiredRoles = p.RequiredRoles?.Select(m => m.Name).ToList(),
+                            Disabled = p.Disabled,
+                            Items = null,
+                            PrerequisiteNavigations = new List<NavigationDto>()
+                        })
+                        .ToList() ?? new List<NavigationDto>()
                 })
                 .ToList();
         }
@@ -85,7 +115,10 @@ public class NavigationService : INavigationService
             await context.NavigationTrackings.AddAsync(
                 new Data.Entities.Navigations.NavigationTracking()
                 {
-                    NavigationId = navigationId, StatusId = statusId, Username = _appUser.UserName ?? "", LastModified = DateTimeOffset.UtcNow
+                    NavigationId = navigationId,
+                    StatusId = statusId,
+                    Username = _appUser.UserName ?? "",
+                    LastModified = DateTimeOffset.UtcNow
                 }, cancellationToken);
             return await context.SaveChangesAsync(cancellationToken);
         }, cancellationToken);
