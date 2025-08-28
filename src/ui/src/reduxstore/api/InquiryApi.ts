@@ -76,7 +76,7 @@ export const InquiryApi = createApi({
         }
       }
     }),
-  getProfitMasterInquiryFilteredDetails: builder.query<
+    getProfitMasterInquiryFilteredDetails: builder.query<
       { results: MasterInquiryResponseDto[]; total: number },
       {
         memberType: number;
