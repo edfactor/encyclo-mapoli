@@ -304,14 +304,10 @@ definitions:
           $env:Environment = "UAT"
           $env:Action = "drop-recreate-db"
           $env:SourceSchema = "PROFITSHARE_STAGING"
-
-          dotnet build .\src\services\src\Demoulas.ProfitSharing.Data.Cli\Demoulas.ProfitSharing.Data.Cli.csproj -o .\output
-          if ($LASTEXITCODE -ne 0) { Write-Error "Database project build failed. Exiting."; exit 1 }
-
           if ($env:Environment -eq "UAT") { $env:ConnectionStrings:ProfitSharing = $env:ConnectionStrings_ProfitSharing_UAT }
-
           Write-Host "Dropping & recreating UAT database (schema: $env:SourceSchema)"
-          .\output\Demoulas.ProfitSharing.Data.Cli $env:Action --connection-name ProfitSharing --source-schema $env:SourceSchema
+          if (!(Test-Path .\dbcli\Demoulas.ProfitSharing.Data.Cli*)) { Write-Error "DB CLI artifact not found. Ensure 'Build DB CLI (artifact)' step ran."; exit 1 }
+          .\dbcli\Demoulas.ProfitSharing.Data.Cli $env:Action --connection-name ProfitSharing --source-schema $env:SourceSchema
           if ($LASTEXITCODE -ne 0) { Write-Error "Drop/Recreate failed."; exit 1 }
           Write-Host "Drop & recreate completed."
 
@@ -325,14 +321,10 @@ definitions:
           $env:Environment = "UAT"
           $env:Action = "import-from-ready"
           $env:SourceSchema = "PROFITSHARE_STAGING"
-
-          dotnet build .\src\services\src\Demoulas.ProfitSharing.Data.Cli\Demoulas.ProfitSharing.Data.Cli.csproj -o .\output
-          if ($LASTEXITCODE -ne 0) { Write-Error "Database project build failed. Exiting."; exit 1 }
-
           if ($env:Environment -eq "UAT") { $env:ConnectionStrings:ProfitSharing = $env:ConnectionStrings_ProfitSharing_UAT }
-
           Write-Host "Importing data from READY into UAT schema: $env:SourceSchema"
-          .\output\Demoulas.ProfitSharing.Data.Cli $env:Action --connection-name ProfitSharing --sql-file ".\src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-schema $env:SourceSchema
+          if (!(Test-Path .\dbcli\Demoulas.ProfitSharing.Data.Cli*)) { Write-Error "DB CLI artifact not found. Ensure 'Build DB CLI (artifact)' step ran."; exit 1 }
+          .\dbcli\Demoulas.ProfitSharing.Data.Cli $env:Action --connection-name ProfitSharing --sql-file ".\src\database\ready_import\SQL copy all from ready to smart ps.sql" --source-schema $env:SourceSchema
           if ($LASTEXITCODE -ne 0) { Write-Error "Import from READY failed."; exit 1 }
           Write-Host "Import from READY completed."
 
@@ -345,15 +337,11 @@ definitions:
         - |
           $env:Environment = "UAT"
           $env:SourceSchema = "PROFITSHARE_STAGING"
-
-          dotnet build .\src\services\src\Demoulas.ProfitSharing.Data.Cli\Demoulas.ProfitSharing.Data.Cli.csproj -o .\output
-          if ($LASTEXITCODE -ne 0) { Write-Error "Database project build failed. Exiting."; exit 1 }
-
           if ($env:Environment -eq "UAT") { $env:ConnectionStrings:ProfitSharing = $env:ConnectionStrings_ProfitSharing_UAT }
-
           $navigationFile = ".\src\database\ready_import\Navigations\add-uat-navigation-data.sql"
           Write-Host "Importing UAT navigation data using $navigationFile"
-          .\output\Demoulas.ProfitSharing.Data.Cli import-from-navigation --connection-name ProfitSharing --sql-file $navigationFile --source-schema $env:SourceSchema
+          if (!(Test-Path .\dbcli\Demoulas.ProfitSharing.Data.Cli*)) { Write-Error "DB CLI artifact not found. Ensure 'Build DB CLI (artifact)' step ran."; exit 1 }
+          .\dbcli\Demoulas.ProfitSharing.Data.Cli import-from-navigation --connection-name ProfitSharing --sql-file $navigationFile --source-schema $env:SourceSchema
           if ($LASTEXITCODE -ne 0) { Write-Error "Navigation import failed."; exit 1 }
           Write-Host "Navigation import completed."
 
@@ -377,6 +365,19 @@ definitions:
           .\output\Demoulas.ProfitSharing.Data.Cli validate-import --connection-name ProfitSharing --sql-file ".\src\database\ready_import\Import Validations.sql" --source-schema $env:SourceSchema --current-year $currentYear
           if ($LASTEXITCODE -ne 0) { Write-Error "Import validation failed."; exit 1 }
           Write-Host "Import validation completed."
+
+    db-cli-build-artifact: &db-cli-build-artifact
+      name: Build DB CLI (artifact)
+      runs-on:
+        - windows
+        - self.hosted
+      artifacts:
+        - dbcli/**
+      script:
+        - |
+          dotnet build .\src\services\src\Demoulas.ProfitSharing.Data.Cli\Demoulas.ProfitSharing.Data.Cli.csproj -o .\dbcli
+          if ($LASTEXITCODE -ne 0) { Write-Error "Database CLI build failed. Exiting."; exit 1 }
+          Write-Host "DB CLI built to .\\dbcli"
 
     audit-backend: &audit-backend
       name: "Check Backend API for vulnerabilities"
@@ -450,6 +451,7 @@ pipelines:
           - step: *create-api-artifacts
           - step: *create-service-artifacts
           - step: *create-frontend-artifact-qa
+          - step: *db-cli-build-artifact
       - step:
           name: "Application Deployment"
           runs-on:
@@ -515,7 +517,28 @@ pipelines:
           trigger: "manual"
           script:
             - echo "Manual approval granted. Continuing to UAT deployment & data operations."
+            - |
+              Write-Host "Release context:"
+              Write-Host ("  Build: " + $env:BITBUCKET_BUILD_NUMBER)
+              Write-Host ("  Branch: " + $env:BITBUCKET_BRANCH)
+              Write-Host ("  Commit: " + $env:BITBUCKET_COMMIT)
+              Write-Host ("  QA API: " + $env:QA_BASE_URL)
+              Write-Host "Artifacts in ./dist:"
+              if (Test-Path .\dist) {
+                Get-ChildItem -Recurse -File .\dist | ForEach-Object {
+                  "{0,10} bytes  {1}" -f $_.Length, $_.FullName
+                }
+              } else {
+                Write-Host "  (no dist folder found)"
+              }
+              Write-Host "Planned UAT sequence:"
+              Write-Host "  1) Build DB CLI artifact"
+              Write-Host "  2) Parallel: Drop & Recreate DB + Frontend build (UAT)"
+              Write-Host "  3) Parallel: App deploy + Import from READY"
+              Write-Host "  4) Import UAT navigation"
+              Write-Host "  5) Parallel: Validate import + UAT API health check"
 
+      - step: *db-cli-build-artifact
       - parallel:
           - step: *uat-drop-recreate-db
           - step: *create-frontend-artifact-uat
@@ -526,8 +549,6 @@ pipelines:
                 - windows
                 - self.hosted
               deployment: UAT
-              # NOTE: Removed manual trigger to allow true parallel execution with import-from-ready.
-              # Re-add `trigger: "manual"` if gating is still desired (will then block parallelization).
               script:
                 - echo "Deploying application..."
                 - $env:API_SERVER_UAT = "appt24d"
