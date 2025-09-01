@@ -1,11 +1,12 @@
 ﻿
 using Demoulas.ProfitSharing.Common.Attributes;
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.Util.Extensions;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
 [YearEndArchiveProperty]
-public sealed record UnforfeituresResponse
+public sealed record UnforfeituresResponse : IIsExecutive
 {
     public required int BadgeNumber { get; set; }
     [MaskSensitive] public required string? FullName { get; set; }

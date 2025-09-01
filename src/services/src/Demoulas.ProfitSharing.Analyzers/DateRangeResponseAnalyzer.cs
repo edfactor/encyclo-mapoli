@@ -46,13 +46,13 @@ namespace Demoulas.ProfitSharing.Analyzers
             }
 
             // Quick exit if the class doesn't derive from any FastEndpoints base type.
-            if (!IsFastEndpoint(typeSymbol))
+            if (!Utils.IsFastEndpoint(typeSymbol))
             {
                 return;
             }
 
             // FastEndpoints<TReq, TRes> – get response type argument (index 1).
-            var responseType = GetEndpointResponseType(typeSymbol);
+            var responseType = Utils.GetEndpointResponseType(typeSymbol);
             if (responseType is null)
             {
                 return; // Non‑generic endpoints such as FastEndpoint.NotImplemented etc.
@@ -66,7 +66,7 @@ namespace Demoulas.ProfitSharing.Analyzers
             }
 
             // If response doesn't implement the interface, raise PS002.
-            if (!Implements(responseType, hasDateRangeSymbol))
+            if (!Utils.Implements(responseType, hasDateRangeSymbol))
             {
                 var diagnostic = Diagnostic.Create(
                     _rule,
@@ -76,59 +76,6 @@ namespace Demoulas.ProfitSharing.Analyzers
 
                 context.ReportDiagnostic(diagnostic);
             }
-        }
-
-        // ──────────────────────────────────────────────────────────────────────────
-        // Helpers
-        // ──────────────────────────────────────────────────────────────────────────
-
-        private static bool IsFastEndpoint(INamedTypeSymbol symbol)
-        {
-            for (INamedTypeSymbol? current = symbol; current is not null; current = current.BaseType)
-            {
-                var name = current.ConstructedFrom?.ToDisplayString();
-                // Matches FastEndpoints.Endpoint<,> & FastEndpoints.EndpointWithoutRequest<>
-                if (name is "FastEndpoints.Endpoint<,>" or "FastEndpoints.EndpointWithoutRequest<>")
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        private static INamedTypeSymbol? GetEndpointResponseType(INamedTypeSymbol endpointSymbol)
-        {
-            for (INamedTypeSymbol? current = endpointSymbol; current is not null; current = current.BaseType)
-            {
-                var constructed = current.ConstructedFrom?.ToDisplayString();
-                if (constructed is "FastEndpoints.Endpoint<,>" && current.TypeArguments.Length == 2)
-                {
-                    return current.TypeArguments[1] as INamedTypeSymbol;
-                }
-
-                if (constructed is "FastEndpoints.EndpointWithoutRequest<>" && current.TypeArguments.Length == 1)
-                {
-                    return current.TypeArguments[0] as INamedTypeSymbol;
-                }
-            }
-
-            return null;
-        }
-
-        private static bool Implements(ITypeSymbol type, INamedTypeSymbol iface)
-        {
-            if (type is null)
-            {
-                return false;
-            }
-
-            if (SymbolEqualityComparer.Default.Equals(type, iface))
-            {
-                return true;
-            }
-
-            return type.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, iface));
         }
     }
 }
