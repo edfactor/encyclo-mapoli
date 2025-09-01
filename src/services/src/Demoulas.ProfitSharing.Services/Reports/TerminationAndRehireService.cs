@@ -47,7 +47,8 @@ public sealed class TerminationAndRehireService : ITerminationAndRehireService
                     Ssn = d.Ssn.MaskSsn(),
                     FullName = d.ContactInfo.FullName,
                     DateOfBirth = d.DateOfBirth,
-                    TerminationDate = d.TerminationDate
+                    TerminationDate = d.TerminationDate,
+                    IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly,
                 })
                 .ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
 

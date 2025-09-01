@@ -1,7 +1,9 @@
 ﻿using Demoulas.ProfitSharing.Common.Attributes;
+using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response;
-public sealed record CertificateReprintResponse
+
+public sealed record CertificateReprintResponse: IIsExecutive
 {
     public required short StoreNumber { get; init; }
     public required int BadgeNumber { get; init; }
@@ -32,6 +34,7 @@ public sealed record CertificateReprintResponse
     public decimal? AnnuityJointRate { get; set; }
     public decimal? MonthlyPaymentSingle { get; set; }
     public decimal? MonthlyPaymentJoint { get; set; }
+    public required bool IsExecutive { get; set; }
 
     public static CertificateReprintResponse ResponseExample()
     {
@@ -63,7 +66,8 @@ public sealed record CertificateReprintResponse
             AnnuitySingleRate = 10.00M,
             AnnuityJointRate = 12.00M,
             MonthlyPaymentSingle = 140.00M,
-            MonthlyPaymentJoint = 120.00M
+            MonthlyPaymentJoint = 120.00M,
+            IsExecutive = false,
         };
     }
 }

@@ -1,8 +1,9 @@
 ﻿using Demoulas.ProfitSharing.Common.Attributes;
+using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.PostFrozen;
 
-public sealed record ProfitSharingUnder21InactiveNoBalanceResponse
+public sealed record ProfitSharingUnder21InactiveNoBalanceResponse: IIsExecutive
 {
     public int BadgeNumber { get; set; }
     [MaskSensitive] public required string LastName { get; set; }

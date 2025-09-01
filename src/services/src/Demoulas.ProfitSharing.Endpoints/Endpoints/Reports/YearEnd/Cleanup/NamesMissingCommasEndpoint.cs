@@ -1,4 +1,4 @@
-using CsvHelper.Configuration;
+﻿using CsvHelper.Configuration;
 using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response;
@@ -40,7 +40,7 @@ public class NamesMissingCommasEndpoint : EndpointWithCsvBase<SortedPaginationRe
                         {
                             Results = new List<NamesMissingCommaResponse>
                             {
-                                new NamesMissingCommaResponse() {EmployeeName="Jane Doe", BadgeNumber=10010, Ssn = "XXXX-XX-1999"}
+                                new NamesMissingCommaResponse() {EmployeeName="Jane Doe", BadgeNumber=10010, Ssn = "XXXX-XX-1999", IsExecutive = false}
                             }
                         }
                     }

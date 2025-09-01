@@ -1,5 +1,7 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
-public sealed class GrossWagesReportDetail
+﻿using Demoulas.ProfitSharing.Common.Interfaces;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
+public sealed class GrossWagesReportDetail : IIsExecutive
 {
     public required int BadgeNumber { get; set; }
     public required string EmployeeName { get; set; }

@@ -1,5 +1,8 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
 
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+
+[NoMemberDataExposed]
 public record BreakdownByStoreTotals
 {
     public short TotalNumberEmployees { get; set; }

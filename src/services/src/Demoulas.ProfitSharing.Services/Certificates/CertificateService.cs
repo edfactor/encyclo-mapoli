@@ -230,7 +230,8 @@ public sealed class CertificateService : ICertificateService
                 Street1 = cert.Street1,
                 City = cert.City,
                 State = cert.State,
-                PostalCode = cert.PostalCode
+                PostalCode = cert.PostalCode,
+                IsExecutive = cert.IsExecutive,
             });
         }
 

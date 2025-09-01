@@ -1,5 +1,7 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-public sealed record WagesCurrentYearResponse
+﻿using Demoulas.ProfitSharing.Common.Interfaces;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+public sealed record WagesCurrentYearResponse : IIsExecutive
 {
     public required int BadgeNumber { get; set; }
     public decimal IncomeCurrentYear { get; set; }

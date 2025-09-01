@@ -1,8 +1,10 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Attributes;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 
+[NoMemberDataExposed]
 public sealed record BalanceByAge : BalanceByBase<BalanceByAgeDetail>
 {
     public BalanceByAge()

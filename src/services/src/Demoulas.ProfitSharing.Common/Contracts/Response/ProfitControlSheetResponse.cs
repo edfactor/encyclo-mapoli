@@ -1,5 +1,8 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
 
+namespace Demoulas.ProfitSharing.Common.Contracts.Response;
+
+[NoMemberDataExposed]
 public sealed record ProfitControlSheetResponse
 {
     public decimal EmployeeContributionProfitSharingAmount { get; set; }
