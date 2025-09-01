@@ -56,6 +56,7 @@ public sealed class GrossWagesReportEndpoint : EndpointWithCsvTotalsBase<GrossWa
             Map(m => m.ProfitSharingAmount).Index(5).Name("PS AMOUNT");
             Map(m => m.Loans).Index(6).Name("LOANS");
             Map(m => m.Forfeitures).Index(7).Name("FORFEITURES");
+            Map(m => m.EnrollmentId).Index(8).Name("ENROLLMENT ID");
         }
     }
 }
