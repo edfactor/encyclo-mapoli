@@ -272,6 +272,13 @@ public sealed class BreakdownReportService : IBreakdownService
         return GetMembersByStore(request, StatusFilterEnum.Terminated, BalanceEnum.HasVestedBalance, withBeneficiaryAllocation: false, Ssns: null, BadgeNumbers: null, cancellationToken);
     }
 
+    public Task<ReportResponseBase<MemberYearSummaryDto>> GetTerminatedMembersWithBalanceActivityByStore(
+       BreakdownByStoreRequest request,
+       CancellationToken cancellationToken)
+    {
+        return GetMembersByStore(request, StatusFilterEnum.Terminated, BalanceEnum.HasBalanceActivity, withBeneficiaryAllocation: false, Ssns: null, BadgeNumbers: null, cancellationToken);
+    }
+
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetTerminatedMembersWithCurrentBalanceNotVestedByStore(
        BreakdownByStoreRequest request,
        CancellationToken cancellationToken)
