@@ -28,6 +28,10 @@ public interface IBreakdownService
        TerminatedEmployeesWithBalanceBreakdownRequest request,
        CancellationToken cancellationToken);
 
+    Task<ReportResponseBase<MemberYearSummaryDto>> GetTerminatedMembersWithBalanceActivityByStore(
+       BreakdownByStoreRequest request,
+       CancellationToken cancellationToken);
+
     Task<BreakdownByStoreTotals> GetTotalsByStore(BreakdownByStoreRequest request, CancellationToken cancellationToken);
 
     public Task<GrandTotalsByStoreResponseDto> GetGrandTotals(YearRequest request, CancellationToken cancellationToken);
