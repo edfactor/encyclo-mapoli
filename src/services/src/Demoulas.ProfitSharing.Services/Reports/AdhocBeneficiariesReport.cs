@@ -82,7 +82,8 @@ public class AdhocBeneficiariesReport : IAdhocBeneficiariesReport
                     b.BadgeNumber,
                     b.PsnSuffix,
                     profitDetailsForBeneficiary
-                );
+                )
+                { IsExecutive = b.Demographic != null ? b.Demographic.PayFrequencyId == PayFrequency.Constants.Monthly : false };
             }).ToList();
 
             return new AdhocBeneficiariesReportResponse

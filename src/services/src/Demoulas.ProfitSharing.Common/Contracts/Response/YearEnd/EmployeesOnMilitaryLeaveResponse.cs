@@ -1,8 +1,9 @@
 ﻿
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.Util.Extensions;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-public sealed record EmployeesOnMilitaryLeaveResponse
+public sealed record EmployeesOnMilitaryLeaveResponse: IIsExecutive
 {
     public required byte DepartmentId { get; set; }
     public required int BadgeNumber { get; set; }
@@ -10,6 +11,7 @@ public sealed record EmployeesOnMilitaryLeaveResponse
     public required string? FullName { get; set; }
     public required DateOnly DateOfBirth { get; set; }
     public required DateOnly? TerminationDate { get; set; }
+    public required bool IsExecutive { get; set; }
 
 
     public static EmployeesOnMilitaryLeaveResponse ResponseExample()
@@ -21,7 +23,8 @@ public sealed record EmployeesOnMilitaryLeaveResponse
             Ssn = "XXX-XX-1234",
             FullName = "Doe, John",
             TerminationDate = DateTime.Today.ToDateOnly(),
-            DateOfBirth = DateTime.Today.AddYears(-25).ToDateOnly()
+            DateOfBirth = DateTime.Today.AddYears(-25).ToDateOnly(),
+            IsExecutive = false,
         };
     }
 }

@@ -1,8 +1,10 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.BeneficiaryInquiry;
+
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Shared;
-public partial record BeneficiaryDto : IdRequest, INameParts, IFullNameProperty, IPhoneNumber, IEmailAddress, ICity
+public partial record BeneficiaryDto : IdRequest, INameParts, IFullNameProperty, IPhoneNumber, IEmailAddress, ICity, IIsExecutive
 {
     public required short PsnSuffix { get; set; } // Suffix for hierarchy (1000, 2000, etc.)
 
@@ -33,4 +35,5 @@ public partial record BeneficiaryDto : IdRequest, INameParts, IFullNameProperty,
     public BeneficiaryKindDto? Kind { get; set; }
     public required decimal Percent { get; set; }
     public decimal? CurrentBalance { get; set; }
+    public required bool IsExecutive { get; set; }
 }

@@ -1,4 +1,8 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.Beneficiaries;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.Beneficiaries;
+
+[NoMemberDataExposed]
 public sealed record CreateBeneficiaryResponse
 {
     public int BeneficiaryId { get; set; }
