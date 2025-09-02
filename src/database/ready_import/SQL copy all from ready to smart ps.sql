@@ -1314,24 +1314,38 @@ INSERT ALL
         INSERT INTO ANNUITY_RATE("YEAR",AGE,SINGLE_RATE,JOINT_RATE,CREATED_AT_UTC,USER_NAME,MODIFIED_AT_UTC) VALUES (2022, 119, 02.8024, 03.9580, (SYSTIMESTAMP),'Initial Load',(SYSTIMESTAMP));
         INSERT INTO ANNUITY_RATE("YEAR",AGE,SINGLE_RATE,JOINT_RATE,CREATED_AT_UTC,USER_NAME,MODIFIED_AT_UTC) VALUES (2022, 120, 02.8024, 03.9580, (SYSTIMESTAMP),'Initial Load',(SYSTIMESTAMP));
 
--- get rid of a any history of YE Updates, as all the data is wiped
+-- get rid of any history of YE Updates, as all the data is wiped
 delete from ye_update_status;
 
- ------------  - These are users in the scramble, presumably they would not exist in PROD
-
---  Bad Bene, See https://demoulas.atlassian.net/browse/PS-1268
+------------  These are users in the scramble, their ssn's do not in PROD
+    
+--  Bad Beneficiaries, See https://demoulas.atlassian.net/browse/PS-1268
 delete from profit_detail where ssn IN ( 700010556, 700010596 );
 delete from BENEFICIARY where beneficiary_contact_id in (select id from BENEFICIARY_CONTACT where ssn in (700010556, 700010596));
 delete from BENEFICIARY_CONTACT where ssn in (700010556, 700010596 );
 
---- Bad Employee, See https://demoulas.atlassian.net/browse/PS-1380
-delete from pay_profit where demographic_id = (select id from demographic where ssn = 700009305);
-delete from demographic where ssn = 700009305;
+-- 700007178 rehired   20250306
+-- 700009305 rehired   20250204
 
--- Rehire in 2025, worked > 1000 in 2024.    Is this a valid scenario?
-delete from profit_detail where ssn = 700007178;
-delete from pay_profit where demographic_id = (select id from demographic where ssn = 700007178);
-delete from demographic where ssn = 700007178;
+-- first change the current history to have a start time, lets use their rehire date
+UPDATE DEMOGRAPHIC_HISTORY dh SET dh.VALID_FROM = DATE '2025-03-06' WHERE dh.demographic_id = (select id from demographic where ssn = 700007178);
+UPDATE DEMOGRAPHIC_HISTORY dh SET dh.VALID_FROM = DATE '2025-03-06' WHERE dh.demographic_id = (select id from demographic where ssn = 700009305);
+
+-- now insert the history row from time 0 up to rehire date, in this time range the employee is term.
+INSERT INTO DEMOGRAPHIC_HISTORY (DEMOGRAPHIC_ID, VALID_FROM,            VALID_TO,      ORACLE_HCM_ID,     BADGE_NUMBER, STORE_NUMBER,    PAY_CLASSIFICATION_ID,    DATE_OF_BIRTH,    HIRE_DATE,    REHIRE_DATE, TERMINATION_DATE, DEPARTMENT,    EMPLOYMENT_TYPE_ID,    PAY_FREQUENCY_ID,    TERMINATION_CODE_ID, EMPLOYMENT_STATUS_ID, CREATED_DATETIME)
+SELECT                           d.ID          , DATE '1900-01-01', DATE '2025-03-06', dh.ORACLE_HCM_ID, d.badge_number,    dh.STORE_NUMBER, dh.PAY_CLASSIFICATION_ID, dh.DATE_OF_BIRTH, dh.HIRE_DATE, NULL,        DATE '2024-12-06',        dh.DEPARTMENT, dh.EMPLOYMENT_TYPE_ID, dh.PAY_FREQUENCY_ID, 'A'                , 't'                 , dh.CREATED_DATETIME
+FROM DEMOGRAPHIC_HISTORY dh JOIN DEMOGRAPHIC d ON dh.DEMOGRAPHIC_ID = d.ID
+WHERE d.ssn = 700007178;
+
+-- now insert the history row from time 0 up to rehire date, in this time range the employee is term.
+INSERT INTO DEMOGRAPHIC_HISTORY (DEMOGRAPHIC_ID, VALID_FROM,            VALID_TO,      ORACLE_HCM_ID,     BADGE_NUMBER, STORE_NUMBER,    PAY_CLASSIFICATION_ID,    DATE_OF_BIRTH,    HIRE_DATE,    REHIRE_DATE, TERMINATION_DATE, DEPARTMENT,    EMPLOYMENT_TYPE_ID,    PAY_FREQUENCY_ID,    TERMINATION_CODE_ID, EMPLOYMENT_STATUS_ID, CREATED_DATETIME)
+SELECT                           d.ID          , DATE '1900-01-01', DATE '2025-02-04', dh.ORACLE_HCM_ID, d.badge_number,dh.STORE_NUMBER, dh.PAY_CLASSIFICATION_ID, dh.DATE_OF_BIRTH, dh.HIRE_DATE, NULL,        DATE '2024-12-06',        dh.DEPARTMENT, dh.EMPLOYMENT_TYPE_ID, dh.PAY_FREQUENCY_ID, 'A'                , 't'                 , dh.CREATED_DATETIME
+FROM DEMOGRAPHIC_HISTORY dh JOIN DEMOGRAPHIC d ON dh.DEMOGRAPHIC_ID = d.ID
+WHERE d.ssn = 700009305;
+
+
+--Set Zero Contribution Reason to 2 - (Terminated Employee)
+UPDATE PAY_PROFIT SET ZERO_CONTRIBUTION_REASON_ID = 2 WHERE PROFIT_YEAR = 2024 and demographic_id in (select id from demographic where ssn in (700007178,700009305));
 
 END;
 COMMIT ;
