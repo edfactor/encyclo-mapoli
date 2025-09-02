@@ -8,6 +8,7 @@ namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 /// reverting.
 /// </summary>
 [YearEndArchiveProperty]
+[NoMemberDataExposed]
 public sealed record ProfitMasterUpdateResponse
 {
     public required DateTimeOffset UpdatedTime { get; set; }

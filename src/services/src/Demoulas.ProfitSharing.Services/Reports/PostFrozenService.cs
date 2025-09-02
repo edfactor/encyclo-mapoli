@@ -151,7 +151,7 @@ public class PostFrozenService : IPostFrozenService
                     d.EmploymentStatusId,
                     (bal.CurrentBalance ?? 0),
                     tyPp != null ? tyPp.EnrollmentId : (byte)0
-                )).ToPaginationResultsAsync(request, cancellationToken: cancellationToken);
+                ){ IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly}).ToPaginationResultsAsync(request, cancellationToken: cancellationToken);
 
             var response = new ProfitSharingUnder21ReportResponse
             {

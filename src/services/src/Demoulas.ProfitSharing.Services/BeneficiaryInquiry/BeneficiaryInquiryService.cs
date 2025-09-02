@@ -188,6 +188,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                 MiddleName = x.Contact != null && x.Contact.ContactInfo != null ? x.Contact.ContactInfo.MiddleName : null,
                 MobileNumber = x.Contact != null && x.Contact.ContactInfo != null ? x.Contact.ContactInfo.MobileNumber : "",
                 PhoneNumber = x.Contact != null && x.Contact.ContactInfo != null ? x.Contact.ContactInfo.PhoneNumber : "",
+                IsExecutive = false,
                 Kind = new BeneficiaryKindDto()
                 {
                     Id = x.Kind != null ? x.Kind.Id : BeneficiaryKind.Constants.Primary,
@@ -229,7 +230,8 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                     Id = x.Kind != null ? x.Kind.Id : BeneficiaryKind.Constants.Primary,
                     Name = x.Kind != null ? x.Kind.Name : null
                 },
-                Relationship = x.Relationship
+                Relationship = x.Relationship,
+                IsExecutive = x.Demographic != null ? x.Demographic.PayFrequencyId == PayFrequency.Constants.Monthly : false,
             });
             return await result.ToPaginationResultsAsync(request, cancellationToken);
         }
@@ -314,6 +316,7 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                 MiddleName = x.Contact != null ? x.Contact.ContactInfo.MiddleName : null,
                 MobileNumber = x.Contact != null ? x.Contact.ContactInfo.MobileNumber : "",
                 PhoneNumber = x.Contact != null ? x.Contact.ContactInfo.PhoneNumber : "",
+                IsExecutive = x.Demographic != null ? x.Demographic!.PayFrequencyId == PayFrequency.Constants.Monthly : false,
                 Kind = new BeneficiaryKindDto()
                 {
                     Id = x.Kind != null ? x.Kind.Id : BeneficiaryKind.Constants.Primary,
@@ -373,7 +376,8 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                     Ssn = x.Contact!.Ssn.ToString(),
                     State = x.Contact.Address.State,
                     Street = x.Contact.Address.Street,
-                    Zip = x.Contact.Address.PostalCode
+                    Zip = x.Contact.Address.PostalCode,
+                    IsExecutive = false,
                 });
             }
             else
@@ -394,7 +398,8 @@ public class BeneficiaryInquiryService : IBeneficiaryInquiryService
                     Ssn = x.Ssn.ToString(),
                     State = x.AddressState,
                     Street = x.Address,
-                    Zip = x.AddressZipCode
+                    Zip = x.AddressZipCode,
+                    IsExecutive = x.IsExecutive,
                 }).AsQueryable();
             }
 

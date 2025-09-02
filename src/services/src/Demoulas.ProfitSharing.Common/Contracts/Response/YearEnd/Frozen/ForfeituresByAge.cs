@@ -1,9 +1,11 @@
 ﻿using Demoulas.Common.Contracts.Contracts.Request;
 using Demoulas.Common.Contracts.Contracts.Response;
+using Demoulas.ProfitSharing.Common.Attributes;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 
+[NoMemberDataExposed]
 public sealed record ForfeituresByAge : ReportResponseBase<ForfeituresByAgeDetail>
 {
     public ForfeituresByAge()

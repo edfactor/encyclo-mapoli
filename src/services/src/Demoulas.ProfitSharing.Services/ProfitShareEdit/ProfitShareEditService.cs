@@ -48,7 +48,8 @@ public class ProfitShareEditService : IInternalProfitShareEditService
             CommentTypeId = m.CommentTypeId,
             RecordChangeSummary = m.RecordChangeSummary,
             DisplayedZeroContStatus = m.DisplayedZeroContStatus,
-            YearExtension = m.YearExtension
+            YearExtension = m.YearExtension,
+            IsExecutive = m.IsExecutive,
         }).ToList();
 
 

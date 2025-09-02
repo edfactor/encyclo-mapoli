@@ -1,7 +1,8 @@
 ﻿using Demoulas.ProfitSharing.Common.Attributes;
+using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.PostFrozen;
-public record ProfitSharingLabelResponse
+public record ProfitSharingLabelResponse: IIsExecutive
 {
     public short StoreNumber { get; set; }
     public byte PayClassificationId { get; set; }

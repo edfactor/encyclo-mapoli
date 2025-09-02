@@ -78,6 +78,7 @@ public class CleanupReportService : ICleanupReportService
                         Status = dem.EmploymentStatusId,
                         StatusName = dem.EmploymentStatus!.Name,
                         Store = dem.StoreNumber,
+                        IsExecutive = dem.PayFrequencyId == PayFrequency.Constants.Monthly,
                     };
                 return await query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
             });
@@ -112,6 +113,7 @@ public class CleanupReportService : ICleanupReportService
                         BadgeNumber = dem.BadgeNumber,
                         Ssn = dem.Ssn.MaskSsn(),
                         EmployeeName = dem.ContactInfo.FullName ?? "",
+                        IsExecutive = dem.PayFrequencyId == PayFrequency.Constants.Monthly,
                     };
                 return await query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
             });
@@ -213,7 +215,8 @@ FROM FILTERED_DEMOGRAPHIC p1
                             HoursCurrentYear = pp != null ? pp.CurrentHoursYear : 0,
                             IncomeCurrentYear = pp != null ? pp.CurrentIncomeYear : 0,
                             NetBalance = bal != null ? bal.TotalAmount : 0,
-                            Years = yos != null ? yos.Years : (byte)0
+                            Years = yos != null ? yos.Years : (byte)0,
+                            dem.PayFrequencyId,
                         };
 
                 var rslt = await query.ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
@@ -245,7 +248,8 @@ FROM FILTERED_DEMOGRAPHIC p1
                 NetBalance = r.NetBalance ?? 0,
                 HoursCurrentYear = r.HoursCurrentYear,
                 IncomeCurrentYear = r.IncomeCurrentYear,
-                EmploymentStatusName = r.EmploymentStatusName ?? ""
+                EmploymentStatusName = r.EmploymentStatusName ?? "",
+                IsExecutive = r.PayFrequencyId == PayFrequency.Constants.Monthly
             }).ToList();
 
             foreach (var r in projectedResults)

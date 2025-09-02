@@ -9,6 +9,7 @@ internal sealed record ProfitShareUpdateMember
     internal string? Psn { get; set; }
     internal string? Name { get; set; }
     internal long EmployeeTypeId { get; set; }
+    internal byte PayFrequencyId { get; set; }
 
     // ---- Overall financial status 
     internal decimal BeginningAmount { get; set; }
