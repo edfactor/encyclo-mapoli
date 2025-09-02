@@ -62,6 +62,27 @@ test.describe("Unforfeitures landing page: ", () => {
         await expect(json.isSuccessful).toBe(true);
     });
 
+    test('changing suggested unforfeit amount', async ({page})=>{
+        await page.getByTestId('searchButton').click();
+        const [response] = await Promise.all([page.waitForResponse((resp) =>
+            resp.url().includes('yearend/unforfeitures'))]);
+        await expect(response.status()).toBe(200);
+        const suggestedUnforfeit = await page.locator('[col-id="suggestedUnforfeit"]');
+        const count = await suggestedUnforfeit.count();
+        for(var i = 0; i < count; i++){
+            const innerText = await suggestedUnforfeit.nth(i).innerText();
+            const numericValue = Number(innerText.replace(/[^0-9.]/g, ""));
+            if(innerText.length>0 && !isNaN(numericValue) && numericValue>0){
+                await suggestedUnforfeit.nth(i).dblclick();
+                const numberInput = await suggestedUnforfeit.nth(i).locator('input[type="number"]');
+                await numberInput.fill(`${numericValue+1}`);
+                await expect(page.getByTestId('ErrorOutlineIcon')).toBeVisible();
+                break;
+            }
+        }
+        
+    });
+
 
 
 
