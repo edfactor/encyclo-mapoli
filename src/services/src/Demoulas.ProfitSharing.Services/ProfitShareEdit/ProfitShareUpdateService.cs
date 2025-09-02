@@ -3,6 +3,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.ProfitShareUpdate;
@@ -57,7 +58,8 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
             SecondaryEtvaEarnings = m.SecondaryEtvaEarnings,
             EndingBalance = m.EndingBalance,
             ZeroContributionReasonId = m.ZeroContributionReasonId,
-            TreatAsBeneficiary = m.TreatAsBeneficiary
+            TreatAsBeneficiary = m.TreatAsBeneficiary,
+            IsExecutive = m.PayFrequencyId == PayFrequency.Constants.Monthly,
         }).ToList();
 
 
@@ -105,7 +107,8 @@ internal sealed class ProfitShareUpdateService : IInternalProfitShareUpdateServi
             EtvaEarnings = m.EarningsOnEtva,
             SecondaryEtvaEarnings = m.SecondaryEtvaEarnings,
             EndingBalance = m.EndingBalance,
-            ZeroContributionReasonId = m.ZeroContributionReasonId
+            ZeroContributionReasonId = m.ZeroContributionReasonId,
+            PayFrequencyId = m.PayFrequencyId,
         }).ToList();
 
         return new ProfitShareUpdateResult { HasExceededMaximumContributions = result.RerunNeeded, Members = members };

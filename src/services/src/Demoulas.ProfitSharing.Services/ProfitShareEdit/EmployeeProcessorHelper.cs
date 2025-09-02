@@ -41,10 +41,11 @@ internal static class EmployeeProcessorHelper
                     x.ppYE.EmployeeTypeId,
                     PointsEarned = (int)(x.ppYE.PointsEarned ?? 0),
                     x.ppYE.ZeroContributionReasonId,
-                    x.ppNow.Etva
+                    x.ppNow.Etva,
                     // We use the ppNow Etva here - For example, in the 2024 profit year, we use the ETVA on the 2025 row,
                     // as that is where the current ETVA is.  The 2024 row is meaningless (or will be) populated with "Last Years" ETVA
                     // when we complete the 2024 YE Run.
+                    x.ppYE.Demographic.PayFrequencyId,
                 });
 
             var employeeWithBalances =
@@ -66,6 +67,7 @@ internal static class EmployeeProcessorHelper
                     PointsEarned = et.PointsEarned,
                     Etva = et.Etva,
                     ZeroContributionReasonId = et.ZeroContributionReasonId,
+                    PayFrequencyId = et.PayFrequencyId,
 
                     // Transactions for this year. 
                     DistributionsTotal = txns.DistributionsTotal,

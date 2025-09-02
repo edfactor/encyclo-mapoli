@@ -130,17 +130,15 @@ const RouterSubAssembly: React.FC = () => {
             }}>
             <Box
               id="ThirdSubAssemblyRouterBox"
-              sx={{ position: "relative", paddingTop: "32px" }}>
+              sx={{ position: "relative" }}>
               <Box
                 id="Breadcrumbs-Box"
                 sx={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
                   paddingTop: "24px",
+                  paddingBottom: "8px",
                   marginLeft: "24px",
-                  marginRight: "24px"
+                  marginRight: "24px",
+                  minHeight: "32px" // Reserve minimum space for consistent layout
                 }}>
                 <DSMDynamicBreadcrumbs />
               </Box>

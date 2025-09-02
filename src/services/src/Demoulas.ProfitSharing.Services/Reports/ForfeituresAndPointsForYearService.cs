@@ -143,7 +143,7 @@ public class ForfeituresAndPointsForYearService : IForfeituresAndPointsForYearSe
     {
         decimal balanceConsideredForEarnings = (ptvb?.CurrentBalance ?? 0) - (singleYearNumbers?.MilitaryTotal ?? 0) - (singleYearNumbers?.ClassActionFundTotal ?? 0);
         int earningsPoints = (int) Math.Round(balanceConsideredForEarnings / 100, MidpointRounding.AwayFromZero);
-        decimal forfeitures = singleYearNumbers == null ? 0 : -1 * singleYearNumbers.TotalForfeitures;
+        decimal forfeitures = singleYearNumbers == null ? 0.00m : -1 * singleYearNumbers.TotalForfeitures;
 
         return new ForfeituresAndPointsForYearResponse
         {

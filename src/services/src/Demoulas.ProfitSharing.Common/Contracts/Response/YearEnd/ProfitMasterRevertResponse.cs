@@ -1,5 +1,8 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
 
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+
+[NoMemberDataExposed]
 public sealed record ProfitMasterRevertResponse
 {
     public required DateTime UpdatedTime { get; set; }

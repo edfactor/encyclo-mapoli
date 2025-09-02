@@ -2,15 +2,17 @@
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
+
+using Demoulas.ProfitSharing.Common.Interfaces;
 using Shared;
 
-public record MemberDetails : IdRequest, INameParts, IFullNameProperty, IPhoneNumber
+public record MemberDetails : IdRequest, INameParts, IFullNameProperty, IPhoneNumber, IIsExecutive
 {
     public bool IsEmployee { get; init; }
     public int BadgeNumber { get; init; }
     public short PsnSuffix { get; init; }
     public byte PayFrequencyId { get; init; }
-    public bool IsExecutive { get; init; }
+    public bool IsExecutive { get; set; }
     public string Ssn { get; init; } = string.Empty;
 
     [MaskSensitive] public string FirstName { get; init; } = string.Empty;

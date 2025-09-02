@@ -1,8 +1,9 @@
 ﻿using Demoulas.ProfitSharing.Common.Attributes;
+using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.PostFrozen;
 
-public sealed record ProfitSharingUnder21BreakdownByStoreResponse
+public sealed record ProfitSharingUnder21BreakdownByStoreResponse : IIsExecutive
 {
     public short StoreNumber { get; set; }
     public int BadgeNumber { get; set; }

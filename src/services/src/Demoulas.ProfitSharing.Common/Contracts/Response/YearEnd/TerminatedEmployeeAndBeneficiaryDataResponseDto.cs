@@ -1,11 +1,13 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+﻿using Demoulas.ProfitSharing.Common.Interfaces;
 
-public sealed record TerminatedEmployeeAndBeneficiaryDataResponseDto
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+
+public sealed record TerminatedEmployeeAndBeneficiaryDataResponseDto : IIsExecutive
 {
     public required int BadgeNumber { get; set; }
     public required short PsnSuffix { get; set; }
     public required string? Name { get; set; }
-    public bool IsExecutive { get; init; }
+    public bool IsExecutive { get; set; }
 
     public string BadgePSn
     {
@@ -50,7 +52,7 @@ public sealed record TerminatedEmployeeAndBeneficiaryDataResponseDto
     }
 }
 
-public sealed record TerminatedEmployeeAndBeneficiaryYearDetailDto
+public sealed record TerminatedEmployeeAndBeneficiaryYearDetailDto : IIsExecutive
 {
     public short ProfitYear { get; set; }
     public decimal BeginningBalance { get; set; }

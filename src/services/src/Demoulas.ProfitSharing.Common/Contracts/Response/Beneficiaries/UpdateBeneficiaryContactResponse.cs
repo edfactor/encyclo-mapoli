@@ -2,6 +2,8 @@
 using Demoulas.ProfitSharing.Common.Contracts.Shared;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.Beneficiaries;
+
+[NoMemberDataExposed] // If you updated the contact, you should be able to see the data you sent
 public record UpdateBeneficiaryContactResponse : INameParts, IFullNameProperty, IPhoneNumber, IEmailAddress, ICity
 {
     public int Id { get; set; }

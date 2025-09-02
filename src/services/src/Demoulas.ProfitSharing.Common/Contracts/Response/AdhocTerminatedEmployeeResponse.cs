@@ -1,8 +1,9 @@
 ﻿using Demoulas.ProfitSharing.Common.Attributes;
 using Demoulas.ProfitSharing.Common.Contracts.Shared;
+using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response;
-public sealed record AdhocTerminatedEmployeeResponse : IFullNameProperty
+public sealed record AdhocTerminatedEmployeeResponse : IFullNameProperty, IIsExecutive
 {
     public required int BadgeNumber { get; set; }
     // FullName provided by upstream query; expose via interface. Keep set for backward compatibility.

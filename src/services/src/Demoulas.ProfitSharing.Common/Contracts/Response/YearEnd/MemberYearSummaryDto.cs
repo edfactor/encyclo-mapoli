@@ -1,8 +1,9 @@
 ﻿using Demoulas.ProfitSharing.Common.Attributes;
+using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
-public record MemberYearSummaryDto
+public record MemberYearSummaryDto : IIsExecutive
 {
     public required short StoreNumber { get; init; }
     public required int BadgeNumber { get; init; }
@@ -29,6 +30,6 @@ public record MemberYearSummaryDto
     public string? State { get; set; }
     public string? PostalCode { get; set; }
     public int CertificateSort { get; set; }
-    public bool IsExecutive { get; init; }
+    public bool IsExecutive { get; set; }
 }
 

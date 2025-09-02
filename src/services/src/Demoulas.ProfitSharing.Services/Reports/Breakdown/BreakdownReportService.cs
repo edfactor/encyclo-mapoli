@@ -89,7 +89,8 @@ public sealed class BreakdownReportService : IBreakdownService
         All = 0,
         Active,
         Inactive,
-        Terminated
+        Terminated,
+        Retired,
     }
 
     private enum BalanceEnum
@@ -265,11 +266,25 @@ public sealed class BreakdownReportService : IBreakdownService
         return GetMembersByStore(request, StatusFilterEnum.Inactive, BalanceEnum.HasVestedBalance, withBeneficiaryAllocation: false, Ssns: null, BadgeNumbers: null, cancellationToken);
     }
 
+    public Task<ReportResponseBase<MemberYearSummaryDto>> GetRetiredEmployessWithBalanceActivity(
+       TerminatedEmployeesWithBalanceBreakdownRequest request,
+       CancellationToken cancellationToken)
+    {
+        return GetMembersByStore(request, StatusFilterEnum.Retired, BalanceEnum.HasBalanceActivity, withBeneficiaryAllocation: false, Ssns: null, BadgeNumbers: null, cancellationToken);
+    }
+
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetTerminatedMembersWithVestedBalanceByStore(
        BreakdownByStoreRequest request,
        CancellationToken cancellationToken)
     {
         return GetMembersByStore(request, StatusFilterEnum.Terminated, BalanceEnum.HasVestedBalance, withBeneficiaryAllocation: false, Ssns: null, BadgeNumbers: null, cancellationToken);
+    }
+
+    public Task<ReportResponseBase<MemberYearSummaryDto>> GetTerminatedMembersWithBalanceActivityByStore(
+       BreakdownByStoreRequest request,
+       CancellationToken cancellationToken)
+    {
+        return GetMembersByStore(request, StatusFilterEnum.Terminated, BalanceEnum.HasBalanceActivity, withBeneficiaryAllocation: false, Ssns: null, BadgeNumbers: null, cancellationToken);
     }
 
     public Task<ReportResponseBase<MemberYearSummaryDto>> GetTerminatedMembersWithCurrentBalanceNotVestedByStore(
@@ -315,9 +330,17 @@ public sealed class BreakdownReportService : IBreakdownService
                 employeesBase = employeesBase.Where(e => e.EmploymentStatusId == EmploymentStatus.Constants.Inactive && e.TerminationCodeId != TerminationCode.Constants.Transferred);
             }
 
-            if (employeeStatusFilter == StatusFilterEnum.Terminated)
+            if (employeeStatusFilter == StatusFilterEnum.Terminated || employeeStatusFilter == StatusFilterEnum.Retired)
             {
-                employeesBase = employeesBase.Where(e => e.EmploymentStatusId == EmploymentStatus.Constants.Terminated && e.TerminationCodeId != TerminationCode.Constants.RetiredReceivingPension);
+                employeesBase = employeesBase.Where(e => e.EmploymentStatusId == EmploymentStatus.Constants.Terminated);
+                if (employeeStatusFilter == StatusFilterEnum.Terminated)
+                {
+                    employeesBase = employeesBase.Where(e => e.TerminationCodeId != TerminationCode.Constants.RetiredReceivingPension);
+                } else
+                {
+                    employeesBase = employeesBase.Where(e => e.TerminationCodeId == TerminationCode.Constants.RetiredReceivingPension);
+                }
+
                 var startEndDates = request as IStartEndDateRequest;
                 if (startEndDates != default && (startEndDates.StartDate.HasValue || startEndDates.EndDate.HasValue))
                 {

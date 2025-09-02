@@ -333,8 +333,8 @@ public sealed class ProfitSharingSummaryReportService : IProfitSharingSummaryRep
         var birthday65 = calInfo.FiscalEndDate.AddYears(-65);
         var fiscalBeginDate = calInfo.FiscalBeginDate;
         var fiscalEndDate = calInfo.FiscalEndDate;
-
-
+        
+        
         return await _dataContextFactory.UseReadOnlyContext(async ctx =>
         {
             // Always fetch all details for the year

@@ -14,6 +14,7 @@ internal sealed record MemberFinancials
         Psn = empl.BadgeNumber.ToString();
         Name = empl.Name;
         Ssn = empl.Ssn;
+        PayFrequencyId = empl.PayFrequencyId;
         AllEarnings = empl.Earnings;
         AllSecondaryEarnings = empl.SecondaryEarnings;
         CurrentAmount = empl.CurrentAmount;
@@ -64,6 +65,7 @@ internal sealed record MemberFinancials
     public string? Name { get; set; }
     public int Ssn { get; set; }
     public byte EmployeeTypeId { get; set; }
+    public byte PayFrequencyId { get; set; }
 
     // Aggregate Historical values
     public decimal CurrentAmount { get; set; }

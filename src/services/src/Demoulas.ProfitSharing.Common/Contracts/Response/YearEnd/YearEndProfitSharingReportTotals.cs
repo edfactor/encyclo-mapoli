@@ -1,6 +1,7 @@
 ﻿using Demoulas.ProfitSharing.Common.Attributes;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
+[NoMemberDataExposed]
 public sealed record YearEndProfitSharingReportTotals
 {
     [YearEndArchiveProperty]

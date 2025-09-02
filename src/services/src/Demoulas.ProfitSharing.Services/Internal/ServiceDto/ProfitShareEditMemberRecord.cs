@@ -1,4 +1,7 @@
-﻿namespace Demoulas.ProfitSharing.Services.Internal.ServiceDto;
+﻿using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Entities;
+
+namespace Demoulas.ProfitSharing.Services.Internal.ServiceDto;
 
 /// <summary>
 /// Represents a year end Transaction (aka row in PROFIT_DETAIL) as shown to the user
@@ -13,6 +16,7 @@ public record ProfitShareEditMemberRecord
         Psn = long.Parse(mr.Psn!);
         Name = mr.Name;
         ProfitCode = profitCode;
+        IsExecutive = mr.PayFrequencyId == PayFrequency.Constants.Monthly;
         if (IsEmployee)
         {
             DisplayedZeroContStatus = (byte)mr.ZeroContributionReasonId!; // NOTE overridden to 0 when ZercontributionReasonId == 7
@@ -44,4 +48,5 @@ public record ProfitShareEditMemberRecord
     // is displayed as 0 (NORMAL aka "0") in the report.
     internal byte? DisplayedZeroContStatus { get; set; } // MAPS to P-ZEROCONT in PAY447.cbl
     internal byte YearExtension { get; set; }
+    internal bool IsExecutive { get; set; }
 }

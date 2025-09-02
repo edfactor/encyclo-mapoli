@@ -4,6 +4,7 @@ using Demoulas.ProfitSharing.Common.Contracts.Response;
 using Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 using Demoulas.ProfitSharing.Common.Extensions;
 using Demoulas.ProfitSharing.Common.Interfaces;
+using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -49,7 +50,8 @@ public class NegativeEtvaReportService : INegativeEtvaReportService
                     {
                         BadgeNumber = p.Demographic!.BadgeNumber,
                         Ssn = p.Demographic.Ssn.MaskSsn(),
-                        EtvaValue = p.Etva
+                        EtvaValue = p.Etva,
+                        IsExecutive = p.Demographic.PayFrequencyId == PayFrequency.Constants.Monthly,
                     })
                     .OrderBy(p => p.BadgeNumber)
                     .ToPaginationResultsAsync(req, cancellationToken);

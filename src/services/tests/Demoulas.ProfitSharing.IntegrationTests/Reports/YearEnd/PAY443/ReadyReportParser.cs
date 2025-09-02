@@ -8,10 +8,8 @@ namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.PAY443;
 // Processes the PAY443 report from READY and returns it as a ForfeituresAndPointsForYearResponseWithTotals response.
 public static class ReadyReportParser
 {
-    public static ForfeituresAndPointsForYearResponseWithTotals ParseReport()
+    public static ForfeituresAndPointsForYearResponseWithTotals ParseReport(string expectedReport)
     {
-        string expectedReport =
-            ExecutiveHoursAndDollarsIntegrationTests.ReadEmbeddedResource("Demoulas.ProfitSharing.IntegrationTests.Resources.golden.51-R20-PAY443").Trim();
         const short currentYear = 2024;
 
         List<string> lines = expectedReport.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries).ToList();
