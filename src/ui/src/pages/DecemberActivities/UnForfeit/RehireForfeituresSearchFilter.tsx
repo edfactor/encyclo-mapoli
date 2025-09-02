@@ -158,8 +158,11 @@ const RehireForfeituresSearchFilter: React.FC<RehireForfeituresSearchFilterProps
                 <DsmDatePicker
                   id="beginningDate"
                   onChange={(value: Date | null) => {
-                    field.onChange(value ?? undefined);
-                    trigger(["beginningDate", "endingDate"]);
+                    field.onChange(value ? mmDDYYFormat(value) : undefined);
+                    trigger("beginningDate");
+                    if (value) {
+                      trigger("endingDate");
+                    }
                   }}
                   value={field.value ? tryddmmyyyyToDate(field.value) : null}
                   required={true}
@@ -193,7 +196,7 @@ const RehireForfeituresSearchFilter: React.FC<RehireForfeituresSearchFilterProps
                   <DsmDatePicker
                     id="endingDate"
                     onChange={(value: Date | null) => {
-                      field.onChange(value ?? undefined);
+                      field.onChange(value ? mmDDYYFormat(value) : undefined);
                       trigger("endingDate");
                     }}
                     value={field.value ? tryddmmyyyyToDate(field.value) : null}
