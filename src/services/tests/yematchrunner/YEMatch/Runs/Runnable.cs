@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using YEMatch.YEMatch.Activities;
+using YEMatch.YEMatch.ReadyActivities;
 using YEMatch.YEMatch.SmartActivities;
 
 namespace YEMatch.YEMatch.Runs;
@@ -44,12 +46,28 @@ public abstract class Runnable
 
             if (outcome.Status == OutcomeStatus.Error)
             {
-             
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("------------------- Stopping execution due to error/failure: " + outcome.Name);
                 Console.ResetColor();
                 CompletedWithoutError = false;
                 break;
+            }
+
+            if (activity.Name().StartsWith('R'))
+            {
+                Match match = Regex.Match(outcome.StandardOut, @"LogFile:\s*(\S+)_(\S+)\.log");
+                if (!match.Success)
+                {
+                    Console.WriteLine($"Unable to find READY LogFile in output {outcome.ActivityLetterNumber}");
+                }
+
+                string logFileId = match.Groups[2].Value;
+
+                List<(string, string)> reportFiles = ActivityToReports.GetReportFilenamesForActivity(activity.Name(), logFileId);
+                foreach ((string readyName, string smartName) in reportFiles)
+                {
+                    GetGold.Fetch(ReadyActivityFactory.SftpClient!, readyName, $"{activity.Name()}-{smartName}");
+                }
             }
         }
 
@@ -59,7 +77,7 @@ public abstract class Runnable
 
         TimeSpan wholeRunElapsed = wholeRunStopWatch.Elapsed;
         Console.WriteLine($"\n---- Completed YERunner.  Took:  {wholeRunElapsed.Hours}h {wholeRunElapsed.Minutes}m {wholeRunElapsed.Seconds}s");
-            
+
         Process.Start("afplay", "/System/Library/Sounds/Submarine.aiff");
     }
 

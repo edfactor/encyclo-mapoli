@@ -4,7 +4,7 @@ namespace YEMatch.YEMatch.ArrangeActivites;
 
 /* See https://demoulas.atlassian.net/browse/PS-1268 */
 
-public class DropBadBenes : BaseSqlActivity
+public class DropBadBenesReady : BaseSqlActivity
 {
     public override async Task<Outcome> Execute()
     {
