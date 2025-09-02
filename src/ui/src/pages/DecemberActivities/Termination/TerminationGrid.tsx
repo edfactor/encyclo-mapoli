@@ -129,8 +129,6 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
       const rowId = request.badgeNumber; // Use badgeNumber as unique identifier
       setLoadingRowIds((prev) => new Set(Array.from(prev).concat(rowId)));
 
-      console.log("In the handleSave");
-
       try {
         await updateForfeitureAdjustment(request);
         const rowKey = `${request.badgeNumber}-${request.profitYear}`;
@@ -140,11 +138,11 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
           return updated;
         });
         onUnsavedChanges(Object.keys(editedValues).length > 1);
-        
+
         // Prepare success message
         const employeeName = name || "the selected employee";
         const successMessage = `The forfeiture adjustment of amount $${formatNumberWithComma(request.forfeitureAmount)} for ${employeeName} saved successfully`;
-        
+
         if (searchParams) {
           const params = createRequest(
             pageNumber * pageSize,
