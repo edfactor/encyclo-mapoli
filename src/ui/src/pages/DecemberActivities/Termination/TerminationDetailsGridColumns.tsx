@@ -2,6 +2,7 @@ import { SaveOutlined } from "@mui/icons-material";
 import { Checkbox, CircularProgress, IconButton } from "@mui/material";
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { SuggestedForfeitCellRenderer, SuggestedForfeitEditor } from "components/SuggestedForfeiture";
+import { numberToCurrency } from "smart-ui-library";
 import { ForfeitureAdjustmentUpdateRequest } from "types";
 import { getForfeitedStatus } from "utils/enrollmentUtil";
 import {
@@ -13,12 +14,11 @@ import {
   createYearColumn
 } from "utils/gridColumnFactory";
 import { HeaderComponent } from "./TerminationHeaderComponent";
-import { numberToCurrency } from "smart-ui-library";
 
 interface SaveButtonCellParams extends ICellRendererParams {
   removeRowFromSelectedRows: (id: number) => void;
   addRowToSelectedRows: (id: number) => void;
-  onSave?: (request: ForfeitureAdjustmentUpdateRequest) => Promise<void>;
+  onSave?: (request: ForfeitureAdjustmentUpdateRequest, name: string) => Promise<void>;
 }
 
 // Separate function for detail columns that will be used for master-detail view
@@ -27,7 +27,7 @@ export const GetDetailColumns = (
   removeRowFromSelectedRows: (id: number) => void,
   selectedRowIds: number[],
   selectedProfitYear: number,
-  onSave?: (request: ForfeitureAdjustmentUpdateRequest) => Promise<void>,
+  onSave?: (request: ForfeitureAdjustmentUpdateRequest, name: string) => Promise<void>,
   onBulkSave?: (requests: ForfeitureAdjustmentUpdateRequest[]) => Promise<void>
 ): ColDef[] => {
   return [
@@ -174,9 +174,12 @@ export const GetDetailColumns = (
                     badgeNumber: params.data.badgeNumber,
                     profitYear: params.data.profitYear,
                     forfeitureAmount: currentValue || 0,
-                    classAction: false
+                    classAction: false,
+                    offsettingProfitDetailId: undefined
                   };
-                  await params.onSave(request);
+
+                  const employeeName = params.data.fullName || params.data.name || "the selected employee";
+                  await params.onSave(request, employeeName);
                 }
               }}
               disabled={hasError || isLoading}>
