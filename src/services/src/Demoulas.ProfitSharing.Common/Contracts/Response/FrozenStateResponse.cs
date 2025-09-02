@@ -1,7 +1,9 @@
-﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
+using Demoulas.ProfitSharing.Common.Contracts.Request;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response;
 
+[NoMemberDataExposed]
 public sealed record FrozenStateResponse : IdRequest
 {
     public short ProfitYear { get; set; }

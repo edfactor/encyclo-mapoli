@@ -56,7 +56,7 @@ public class NavigationService : INavigationService
                     SubTitle = x.SubTitle,
                     Items = BuildTree(x.Id),
                     Disabled = x.Disabled,
-                    RequiredRoles = x.RequiredRoles?.Select(m => m.Name).ToList(),
+                    RequiredRoles = x.RequiredRoles?.Where(r=> roleNamesUpper.Contains(r.Name.ToUpper())).Select(m => m.Name).ToList(),
                     // Project prerequisite navigations that are currently completed.
                     PrerequisiteNavigations = x.PrerequisiteNavigations?
                         .Select(p => new NavigationDto
@@ -70,7 +70,7 @@ public class NavigationService : INavigationService
                             StatusName = p.NavigationStatus!.Name,
                             OrderNumber = p.OrderNumber,
                             Icon = p.Icon,
-                            RequiredRoles = p.RequiredRoles?.Select(m => m.Name).ToList(),
+                            RequiredRoles = p.RequiredRoles?.Where(r => roleNamesUpper.Contains(r.Name.ToUpper())).Select(m => m.Name).ToList(),
                             Disabled = p.Disabled,
                             Items = null,
                             PrerequisiteNavigations = new List<NavigationDto>()

@@ -64,7 +64,8 @@ public class DuplicateNamesAndBirthdaysEndpoint : EndpointWithCsvBase<ProfitYear
                                     Status = 'A',
                                     EmploymentStatusName = "Active",
                                     StoreNumber = 22,
-                                    Years = 3
+                                    Years = 3,
+                                    IsExecutive = false,
                                 }
                             }
                         }

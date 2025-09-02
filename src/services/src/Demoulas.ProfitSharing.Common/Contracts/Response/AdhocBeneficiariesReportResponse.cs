@@ -1,4 +1,6 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response;
+﻿using Demoulas.ProfitSharing.Common.Interfaces;
+
+namespace Demoulas.ProfitSharing.Common.Contracts.Response;
 
 public record ProfitDetailDto(
     int Year,
@@ -19,7 +21,10 @@ public record BeneficiaryReportDto(
     int BadgeNumber,
     short PsnSuffix,
     List<ProfitDetailDto>? ProfitDetails
-);
+) : IIsExecutive
+{
+    public required bool IsExecutive { get; set; }
+};
 
 public record AdhocBeneficiariesReportResponse : ReportResponseBase<BeneficiaryReportDto>
 {

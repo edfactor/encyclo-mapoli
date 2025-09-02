@@ -1,5 +1,8 @@
-﻿namespace Demoulas.ProfitSharing.Common.Contracts.Response.PostFrozen;
+﻿using Demoulas.ProfitSharing.Common.Attributes;
 
+namespace Demoulas.ProfitSharing.Common.Contracts.Response.PostFrozen;
+
+[NoMemberDataExposed]
 public sealed record ProfitSharingUnder21TotalsResponse
 {
     public int NumberOfEmployees { get; set; }

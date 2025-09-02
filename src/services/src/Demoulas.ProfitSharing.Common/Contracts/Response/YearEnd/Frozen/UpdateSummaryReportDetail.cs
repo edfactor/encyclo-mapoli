@@ -1,7 +1,8 @@
 ﻿using Demoulas.ProfitSharing.Common.Attributes;
+using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd.Frozen;
-public sealed class UpdateSummaryReportDetail
+public sealed class UpdateSummaryReportDetail : IIsExecutive
 {
     public long BadgeNumber { get; set; }
     public short StoreNumber { get; set; }

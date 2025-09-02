@@ -1,8 +1,9 @@
 ﻿
 using Demoulas.ProfitSharing.Common.Attributes;
+using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.BeneficiaryInquiry;
-public record BeneficiaryDetailResponse
+public record BeneficiaryDetailResponse : IIsExecutive
 {
     public int BadgeNumber { get; set; }
     public short PsnSuffix { get; set; }
@@ -14,4 +15,5 @@ public record BeneficiaryDetailResponse
     public string? Zip { get; set; }
     public DateOnly? DateOfBirth { get; set; }
     public decimal? CurrentBalance { get; set; }
+    public bool IsExecutive { get; set; }
 }
