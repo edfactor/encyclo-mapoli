@@ -17,7 +17,16 @@ import { CalendarResponseDto, StartAndEndDateRequest } from "../../../reduxstore
 import { mmDDYYFormat, tryddmmyyyyToDate } from "../../../utils/dateUtils";
 
 const schema = yup.object().shape({
-  beginningDate: yup.string().required("Beginning Date is required"),
+  beginningDate: yup
+    .string()
+    .required("Beginning Date is required")
+    // Needs to test for four digits
+    .test("is-four-digits", "Beginning Date must be four digits", function (value) {
+      return /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(value || "");
+    })
+    .test("is-too-early", "Insuffient data for dates before 2020", function (value) {
+      return new Date(value) > new Date(2020, 1, 1);
+    }),
   endingDate: yup
     .string()
     .typeError("Invalid date")
@@ -98,7 +107,8 @@ const RehireForfeituresSearchFilter: React.FC<RehireForfeituresSearchFilterProps
     handleSubmit,
     formState: { errors, isValid },
     reset,
-    trigger
+    trigger,
+    clearErrors
   } = useForm<StartAndEndDateRequest>({
     resolver: yupResolver(schema),
     defaultValues: {
@@ -129,7 +139,7 @@ const RehireForfeituresSearchFilter: React.FC<RehireForfeituresSearchFilterProps
       pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }
     });
 
-    trigger();
+    clearErrors();
   };
 
   return (
