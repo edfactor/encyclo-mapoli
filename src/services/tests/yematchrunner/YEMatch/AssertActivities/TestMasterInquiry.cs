@@ -39,8 +39,7 @@ public class TestMasterInquiry : BaseSqlActivity
 
     public override async Task<Outcome> Execute()
     {
-//        TestToken.CreateAndAssignTokenForClient(httpClient, "IT-Operations");
-        TestToken.CreateAndAssignTokenForClient(httpClient, "Profit-Sharing-Administrator");
+        TestToken.CreateAndAssignTokenForClient(httpClient, "Finance-Manager");
         
         string path; //  = Path.Combine(AppContext.BaseDirectory, "OUTFL");
         path = "/Users/robertherrmann/prj/yerunner/src/services/tests/yematchrunner/YEMatch/Resources/MTPR.OUTFL";
@@ -51,7 +50,7 @@ public class TestMasterInquiry : BaseSqlActivity
         Console.SetOut(new TeeWriter(Console.Out, writer));
 
         int profitYear = 2025;
-        int quantity = int.MaxValue;
+        int quantity = 50; // int.MaxValue;
 
         Console.WriteLine($"### Comparison of READY (local) MasterInquiry vs SMART (profitYear={profitYear})");
         Console.WriteLine("");
@@ -216,14 +215,14 @@ public class TestMasterInquiry : BaseSqlActivity
         "take": 255
     }'
     */
-        int Id = memberDetails.Id;
+        int demographicsId = memberDetails.id;
         HttpRequestMessage request2 = new(HttpMethod.Post, apiClient.BaseUrl + "api/master/master-inquiry/member")
         {
             Content = new StringContent(
                 $$"""
                   {
                     "memberType": 1,
-                    "id": {{Id}},
+                    "id": {{demographicsId}},
                     "profitYear": {{profitYear}}
                   }
                   """,

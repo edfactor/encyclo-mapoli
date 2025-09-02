@@ -24,7 +24,7 @@ public class S24_Rebuild2023Enrollment : BaseSqlActivity
         ApiClient apiClient = SmartActivityFactory.Client!;
 
         HttpClient httpClient = new() { Timeout = TimeSpan.FromHours(2) };
-        TestToken.CreateAndAssignTokenForClient(httpClient, "IT-Operations");
+        TestToken.CreateAndAssignTokenForClient(httpClient, "Finance-Manager");
         HttpRequestMessage request = new(HttpMethod.Post, apiClient.BaseUrl + "api/yearend/update-enrollment")
         {
             Content = new StringContent("{ \"profitYear\": 2023}", Encoding.UTF8, "application/json")
