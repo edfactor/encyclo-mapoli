@@ -1,5 +1,5 @@
 import { SaveOutlined } from "@mui/icons-material";
-import { Checkbox, CircularProgress, IconButton } from "@mui/material";
+import { Checkbox, CircularProgress, IconButton, Tooltip } from "@mui/material";
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { SuggestedForfeitCellRenderer, SuggestedForfeitEditor } from "components/SuggestedForfeiture";
 import { numberToCurrency } from "smart-ui-library";
@@ -133,6 +133,13 @@ export const GetDetailColumns = (
       sortable: false,
       cellStyle: { backgroundColor: "#E8E8E8" },
       headerComponent: HeaderComponent,
+      valueGetter: (params) => {
+        if (!params.data.isDetail) return "";
+        const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}`;
+        const editedValue = params.context?.editedValues?.[rowKey]?.value;
+        const currentValue = editedValue ?? params.data.suggestedForfeit ?? 0;
+        return `${currentValue}-${params.context?.loadingRowIds?.has(params.data.badgeNumber)}-${params.node?.isSelected()}`;
+      },
       headerComponentParams: {
         addRowToSelectedRows,
         removeRowFromSelectedRows,
@@ -153,20 +160,26 @@ export const GetDetailColumns = (
         const hasError = params.context?.editedValues?.[rowKey]?.hasError;
         const currentValue = params.context?.editedValues?.[rowKey]?.value ?? params.data.suggestedForfeit;
         const isLoading = params.context?.loadingRowIds?.has(params.data.badgeNumber);
+        const isZeroValue = currentValue === 0 || currentValue === null || currentValue === undefined;
 
         return (
           <div>
-            <Checkbox
-              checked={isSelected}
-              onChange={() => {
-                if (isSelected) {
-                  params.removeRowFromSelectedRows(id);
-                } else {
-                  params.addRowToSelectedRows(id);
-                }
-                params.node?.setSelected(!isSelected);
-              }}
-            />
+            <Tooltip title={isZeroValue ? "Forfeit cannot be zero." : ""} arrow>
+              <span>
+                <Checkbox
+                  checked={isSelected}
+                  disabled={isZeroValue}
+                  onChange={() => {
+                    if (isSelected) {
+                      params.removeRowFromSelectedRows(id);
+                    } else {
+                      params.addRowToSelectedRows(id);
+                    }
+                    params.node?.setSelected(!isSelected);
+                  }}
+                />
+              </span>
+            </Tooltip>
             <IconButton
               onClick={async () => {
                 if (params.data.isDetail && params.onSave) {
@@ -182,7 +195,7 @@ export const GetDetailColumns = (
                   await params.onSave(request, employeeName);
                 }
               }}
-              disabled={hasError || isLoading}>
+              disabled={hasError || isLoading || isZeroValue}>
               {isLoading ? <CircularProgress size={20} /> : <SaveOutlined />}
             </IconButton>
           </div>
