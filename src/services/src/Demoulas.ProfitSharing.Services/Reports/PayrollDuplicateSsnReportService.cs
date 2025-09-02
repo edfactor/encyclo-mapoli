@@ -64,6 +64,7 @@ namespace Demoulas.ProfitSharing.Services.Reports
                         Status = dem.EmploymentStatusId,
                         EmploymentStatusName = dem.EmploymentStatus!.Name,
                         StoreNumber = dem.StoreNumber,
+                        IsExecutive = dem.PayFrequencyId == PayFrequency.Constants.Monthly,
                         ProfitSharingRecords = dem.PayProfits.Count(pp => pp.ProfitYear >= cutoffYear),
                         PayProfits = dem.PayProfits
                             .Where(pp => pp.ProfitYear >= cutoffYear)

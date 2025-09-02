@@ -8,6 +8,12 @@ const presets: ReportPreset[] = [
     description: CAPTIONS.PAY426_ACTIVE_18_20,
     params: {
       reportId: 1
+    },
+    displayCriteria: {
+      ageRange: "18-20",
+      hoursRange: "1000+",
+      employeeStatus: "Active/Inactive",
+      priorProfitShare: "N/A"
     }
   },
   {
@@ -16,6 +22,12 @@ const presets: ReportPreset[] = [
     description: CAPTIONS.PAY426_ACTIVE_21_PLUS,
     params: {
       reportId: 2
+    },
+    displayCriteria: {
+      ageRange: "21+",
+      hoursRange: "1000+",
+      employeeStatus: "Active/Inactive",
+      priorProfitShare: "N/A"
     }
   },
   {
@@ -24,6 +36,12 @@ const presets: ReportPreset[] = [
     description: CAPTIONS.PAY426_ACTIVE_UNDER_18,
     params: {
       reportId: 3
+    },
+    displayCriteria: {
+      ageRange: "Under 18",
+      hoursRange: "N/A",
+      employeeStatus: "Active/Inactive",
+      priorProfitShare: "N/A"
     }
   },
   {
@@ -32,6 +50,12 @@ const presets: ReportPreset[] = [
     description: CAPTIONS.PAY426_ACTIVE_PRIOR_SHARING,
     params: {
       reportId: 4
+    },
+    displayCriteria: {
+      ageRange: "18+",
+      hoursRange: "<1000",
+      employeeStatus: "Active/Inactive",
+      priorProfitShare: "With Prior Amounts"
     }
   },
   {
@@ -40,6 +64,12 @@ const presets: ReportPreset[] = [
     description: CAPTIONS.PAY426_ACTIVE_NO_PRIOR,
     params: {
       reportId: 5
+    },
+    displayCriteria: {
+      ageRange: "18+",
+      hoursRange: "<1000",
+      employeeStatus: "Active/Inactive",
+      priorProfitShare: "No Prior Amounts"
     }
   },
   {
@@ -48,6 +78,12 @@ const presets: ReportPreset[] = [
     description: CAPTIONS.PAY426_TERMINATED_1000_PLUS,
     params: {
       reportId: 6
+    },
+    displayCriteria: {
+      ageRange: "18+",
+      hoursRange: "1000+",
+      employeeStatus: "Terminated",
+      priorProfitShare: "N/A"
     }
   },
   {
@@ -56,6 +92,12 @@ const presets: ReportPreset[] = [
     description: CAPTIONS.PAY426_TERMINATED_NO_PRIOR,
     params: {
       reportId: 7
+    },
+    displayCriteria: {
+      ageRange: "18+",
+      hoursRange: "<1000",
+      employeeStatus: "Terminated",
+      priorProfitShare: "No Prior Amounts"
     }
   },
   {
@@ -64,6 +106,12 @@ const presets: ReportPreset[] = [
     description: CAPTIONS.PAY426_TERMINATED_PRIOR,
     params: {
       reportId: 8
+    },
+    displayCriteria: {
+      ageRange: "18+",
+      hoursRange: "<1000",
+      employeeStatus: "Terminated",
+      priorProfitShare: "With Prior Amounts"
     }
   },
   {
@@ -72,6 +120,12 @@ const presets: ReportPreset[] = [
     description: CAPTIONS.PAY426_SUMMARY,
     params: {
       reportId: 9
+    },
+    displayCriteria: {
+      ageRange: "All",
+      hoursRange: "All",
+      employeeStatus: "All",
+      priorProfitShare: "All"
     }
   },
   {
@@ -80,6 +134,12 @@ const presets: ReportPreset[] = [
     description: CAPTIONS.PAY426_NON_EMPLOYEE,
     params: {
       reportId: 10
+    },
+    displayCriteria: {
+      ageRange: "All",
+      hoursRange: "N/A",
+      employeeStatus: "Non-Employee",
+      priorProfitShare: "N/A"
     }
   }
 ];

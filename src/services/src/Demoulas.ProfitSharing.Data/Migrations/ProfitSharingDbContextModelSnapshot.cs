@@ -29098,7 +29098,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasName("PK_NAVIGATION");
 
                     b.HasIndex("ParentId")
-                        .HasDatabaseName("IX_NAVIGATION_PARENTID");
+                        .HasDatabaseName("IX_NAVIGATION_PARENT_ID");
 
                     b.HasIndex("StatusId")
                         .HasDatabaseName("IX_NAVIGATION_STATUS_ID");
@@ -29180,7 +29180,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                             OrderNumber = (byte)6,
                             StatusId = (byte)1,
                             SubTitle = "",
-                            Title = "IT OPERATIONS",
+                            Title = "IT DEVOPS",
                             Url = ""
                         },
                         new
@@ -29747,7 +29747,17 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         new
                         {
                             Id = (byte)6,
+                            Name = "IT-DevOps"
+                        },
+                        new
+                        {
+                            Id = (byte)7,
                             Name = "IT-Operations"
+                        },
+                        new
+                        {
+                            Id = (byte)8,
+                            Name = "Executive-Administrator"
                         });
                 });
 
@@ -31683,6 +31693,25 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("NAVIGATION_PREREQUISITES", b =>
+                {
+                    b.Property<short>("NAVIGATION_ID")
+                        .HasColumnType("NUMBER(5)")
+                        .HasColumnName("NAVIGATION_ID");
+
+                    b.Property<short>("PREREQUISITE_ID")
+                        .HasColumnType("NUMBER(5)")
+                        .HasColumnName("PREREQUISITE_ID");
+
+                    b.HasKey("NAVIGATION_ID", "PREREQUISITE_ID")
+                        .HasName("PK_NAVIGATION_PREREQUISITES");
+
+                    b.HasIndex("PREREQUISITE_ID")
+                        .HasDatabaseName("IX_NAVIGATION_PREREQUISITES_PREREQUISITE_ID");
+
+                    b.ToTable("NAVIGATION_PREREQUISITES", (string)null);
+                });
+
             modelBuilder.Entity("NavigationNavigationRole", b =>
                 {
                     b.Property<short>("NavigationId")
@@ -32513,7 +32542,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .WithMany("Items")
                         .HasForeignKey("ParentId")
                         .OnDelete(DeleteBehavior.NoAction)
-                        .HasConstraintName("FK_NAVIGATION_NAVIGATION_PARENTID");
+                        .HasConstraintName("FK_NAVIGATION_NAVIGATION_PARENT_ID");
 
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.Navigations.NavigationStatus", "NavigationStatus")
                         .WithMany("Navigations")
@@ -32676,6 +32705,23 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Navigation("JobType");
 
                     b.Navigation("StartMethod");
+                });
+
+            modelBuilder.Entity("NAVIGATION_PREREQUISITES", b =>
+                {
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Navigations.Navigation", null)
+                        .WithMany()
+                        .HasForeignKey("NAVIGATION_ID")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_NAV_PREREQ_DEPENDENT");
+
+                    b.HasOne("Demoulas.ProfitSharing.Data.Entities.Navigations.Navigation", null)
+                        .WithMany()
+                        .HasForeignKey("PREREQUISITE_ID")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_NAV_PREREQ_PREREQUISITE");
                 });
 
             modelBuilder.Entity("NavigationNavigationRole", b =>

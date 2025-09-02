@@ -1,11 +1,12 @@
 ﻿
 using Demoulas.ProfitSharing.Common.Attributes;
 using Demoulas.ProfitSharing.Common.Contracts.Shared;
+using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 
 [YearEndArchiveProperty]
-public sealed record  ExecutiveHoursAndDollarsResponse : IFullNameProperty
+public sealed record  ExecutiveHoursAndDollarsResponse : IFullNameProperty, IIsExecutive
 {
     public required int BadgeNumber { get; set; }
     public required string? FullName { get; set; }

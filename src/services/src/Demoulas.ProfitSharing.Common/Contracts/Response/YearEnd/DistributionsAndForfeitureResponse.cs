@@ -1,7 +1,8 @@
 ﻿using Demoulas.ProfitSharing.Common.Attributes;
+using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
-public sealed record DistributionsAndForfeitureResponse
+public sealed record DistributionsAndForfeitureResponse : IIsExecutive
 {
     public required int BadgeNumber { get; set; }
     public required short PsnSuffix { get; set; }

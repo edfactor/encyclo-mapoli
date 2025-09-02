@@ -60,6 +60,17 @@ A React + TypeScript web application for Demoulas' Smart Profit Sharing platform
 - For any issues with `smart-ui-library`, ensure your `.npmrc` is correct and you are authenticated with JFrog.
 - See `src/pages/` for main feature implementations and `src/components/` for reusable UI.
 
+
+## Playwright
+
+- Create a file on the main folder called `.playwright.env`
+- Add following content in to the file:
+- CI=false
+- QA=false
+- USER_NAME= your_username
+- PASSWORD= your_password
+- To write a test case see file `e2e/master-inquiry/master-inquiry-page.test.ts`
+
 ---
 
 For more details, see inline comments in the codebase or contact the project maintainers.

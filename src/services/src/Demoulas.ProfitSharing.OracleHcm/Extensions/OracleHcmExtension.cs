@@ -136,7 +136,7 @@ public static class OracleHcmExtension
         {
             builder.Services.AddHostedService<MemoryMonitoringService>();
         }
-
+        
         return builder;
     }
 

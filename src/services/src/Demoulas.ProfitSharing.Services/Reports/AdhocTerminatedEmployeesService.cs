@@ -6,6 +6,7 @@ using Demoulas.ProfitSharing.Common.Interfaces;
 using Demoulas.ProfitSharing.Data.Entities;
 using Demoulas.ProfitSharing.Data.Interfaces;
 using Demoulas.ProfitSharing.Services.Internal.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace Demoulas.ProfitSharing.Services.Reports;
 public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
@@ -61,5 +62,194 @@ public class AdhocTerminatedEmployeesService : IAdhocTerminatedEmployeesService
             EndDate = endDate,
             Response = rslt
         };
+    }
+
+    public async Task<ReportResponseBase<AdhocTerminatedEmployeeResponse>> GetTerminatedEmployeesNeedingFormLetter(StartAndEndDateRequest req, CancellationToken cancellationToken)
+    {
+        
+        var rslt = await _profitSharingDataContextFactory.UseReadOnlyContext(async ctx =>
+        {
+            var demographic = await _demographicReaderService.BuildDemographicQuery(ctx, false /*Want letter to be sent to the most current address*/);
+            var query = (from d in demographic.Include(x=>x.Address)
+                         where d.TerminationDate != null
+                            && d.TerminationDate.Value >= req.BeginningDate && d.TerminationDate.Value <= req.EndingDate
+                            && d.EmploymentStatusId == EmploymentStatus.Constants.Terminated
+                            && d.TerminationCodeId != TerminationCode.Constants.Retired
+                         /*TODO : Exclude employees who have already been sent a letter?*/
+                         /*Filter for employees who are not fully vested, and probably have a balance */
+                         select new AdhocTerminatedEmployeeResponse
+                         {
+                             BadgeNumber = d.BadgeNumber,
+                             FullName = d.ContactInfo.FullName != null ? d.ContactInfo.FullName : string.Empty,
+                             Ssn = d.Ssn.MaskSsn(),
+                             Address = d.Address.Street,
+                             Address2 = !string.IsNullOrEmpty(d.Address.Street2) ? d.Address.Street2 : string.Empty,
+                             City = !string.IsNullOrEmpty(d.Address.City) ? d.Address.City : string.Empty,
+                             State = !string.IsNullOrEmpty(d.Address.State) ? d.Address.State : string.Empty,
+                             PostalCode = !string.IsNullOrEmpty(d.Address.PostalCode) ? d.Address.PostalCode : string.Empty,
+                             TerminationDate = d.TerminationDate!.Value,
+                             TerminationCodeId = d.TerminationCodeId,
+                             FirstName = d.ContactInfo.FirstName,
+                             LastName = d.ContactInfo.LastName,
+                             MiddleInitial = !string.IsNullOrEmpty(d.ContactInfo.MiddleName) ? d.ContactInfo.MiddleName[0].ToString() : string.Empty
+                         }).ToPaginationResultsAsync(req, cancellationToken: cancellationToken);
+
+            return await query;
+        });
+
+        return new ReportResponseBase<AdhocTerminatedEmployeeResponse>()
+        {
+            ReportName = "Adhoc Terminated Employee Report",
+            ReportDate = DateTimeOffset.Now,
+            StartDate = req.BeginningDate,
+            EndDate = req.EndingDate,
+            Response = rslt
+        };
+    }
+
+    public async Task<string> GetFormLetterForTerminatedEmployees(StartAndEndDateRequest startAndEndDateRequest, CancellationToken cancellationToken)
+    {
+        var report = await GetTerminatedEmployeesNeedingFormLetter(startAndEndDateRequest, cancellationToken);
+        if (report.Response.Results.Any())
+        {
+            var letter = new System.Text.StringBuilder();
+            var space_7 = new string(' ', 7);
+            var space_11 = new string(' ', 11);
+            var space_24 = new string(' ', 24);
+            var space_25 = new string(' ', 25);
+            var space_27 = new string(' ', 27);
+            foreach (var emp in report.Response.Results)
+            {
+                #region Beginning of letter
+                letter.AppendLine();
+                letter.AppendLine("DJDE JDE=QPS003,JDL=PAYROL,END,;");
+                #endregion
+
+                #region Return address
+                letter.AppendLine($"{space_11}DEMOULAS PROFIT SHARING PLAN AND TRUST");
+                letter.AppendLine($"{space_27}875 EAST STREET");
+                letter.AppendLine($"{space_24}ANDOVER, MA 01810");
+                #endregion
+
+                #region Spacing
+                letter.AppendLine();
+                letter.AppendLine();
+                letter.AppendLine();
+                #endregion
+
+                #region Member information
+                letter.AppendLine($"{space_7}{emp.FirstName}{(emp.MiddleInitial != string.Empty ? " " : "")}{emp.MiddleInitial} {emp.LastName}");
+                letter.AppendLine($"{space_7}{emp.Address}");
+                letter.AppendLine($"{space_7}{emp.City}, {emp.State} {emp.PostalCode}");
+                #endregion
+
+                #region Spacing
+                letter.AppendLine();
+                letter.AppendLine();
+                letter.AppendLine();
+                letter.AppendLine();
+                #endregion
+
+                #region Salutation
+                letter.AppendLine($"{space_7}Dear {emp.FirstName}:");
+                #endregion
+
+                #region Spacing
+                letter.AppendLine();
+                letter.AppendLine();
+                #endregion
+
+                #region Body of letter
+                letter.AppendLine($"{space_7}Attached are the necessary forms needed to be completed by you in order for you to");
+                letter.AppendLine($"{space_7}begin receiving your vested interest in the Demoulas Profit Sharing Plan and Trust.");
+                #endregion
+
+                #region Spacing
+                letter.AppendLine();
+                letter.AppendLine();
+                #endregion
+
+                #region Instructions
+                letter.AppendLine($"{space_7}Please return the completed forms to the attention of:");
+                #endregion
+
+                #region Spacing
+                letter.AppendLine();
+                letter.AppendLine();
+                #endregion
+
+                #region Remittance address
+                letter.AppendLine($"{space_25}Demoulas Profit Sharing Plan and Trust");
+                letter.AppendLine($"{space_25}875 East Street");
+                letter.AppendLine($"{space_25}Tewksbury, MA  01876");
+                #endregion
+
+                #region Spacing
+                letter.AppendLine();
+                letter.AppendLine();
+                #endregion
+
+                #region Questions
+                letter.AppendLine($"{space_7}If you have any questions please do not hesitate to call (978) 851-8000.");
+                #endregion
+
+                #region Spacing
+                letter.AppendLine();
+                letter.AppendLine();
+                #endregion
+
+                #region Closing
+                letter.AppendLine($"{space_7}Sincerely,");
+                #endregion
+
+                #region Spacing
+                letter.AppendLine();
+                letter.AppendLine();
+                letter.AppendLine();
+                #endregion
+
+                #region Signature
+                letter.AppendLine($"{space_7}DEMOULAS PROFIT SHARING PLAN & TRUST");
+                #endregion
+
+                #region Printer Control
+                letter.AppendLine();
+                letter.AppendLine();
+                letter.AppendLine("DJDE JDE=DISNO1,JDL=PAYROL,END,;");
+                letter.AppendLine();
+                letter.AppendLine();
+                letter.AppendLine();
+                letter.AppendLine("DJDE JDE=DISNO2,JDL=PAYROL,END,;");
+                letter.AppendLine();
+                letter.AppendLine();
+                letter.AppendLine();
+                letter.AppendLine("DJDE JDE=DISNO3,JDL=PAYROL,END,;");
+                letter.AppendLine();
+                letter.AppendLine();
+                letter.AppendLine();
+                letter.AppendLine("DJDE JDE=DISNO4,JDL=PAYROL,END,;");
+                letter.AppendLine();
+                letter.AppendLine();
+                letter.AppendLine();
+                letter.AppendLine("DJDE JDE=DISNO5,JDL=PAYROL,END,;");
+                letter.AppendLine();
+                letter.AppendLine();
+                letter.AppendLine();
+                letter.AppendLine("DJDE JDE=BENDS1,JDL=PAYROL,END,;");
+                letter.AppendLine();
+                letter.AppendLine();
+                letter.AppendLine();
+                letter.AppendLine("DJDE JDE=ACKNRC,JDL=PAYROL,END,;");
+                letter.Append("\f"); // Form feed to end the letter
+                #endregion
+
+
+            }
+            return letter.ToString();
+        }
+        else
+        {
+            return "No terminated employees found needing a form letter.";
+        }
     }
 }

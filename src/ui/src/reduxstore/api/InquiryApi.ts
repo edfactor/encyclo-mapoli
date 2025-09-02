@@ -103,9 +103,12 @@ export const InquiryApi = createApi({
       }
     >({
       query: ({ memberType, ...pagination }) => ({
-        url: `master/master-inquiry/member/${memberType}/details`,
-        method: "GET",
-        params: pagination
+        url: `master/master-inquiry/member/details`,
+        method: "POST",
+        body: {
+          memberType,
+          ...pagination
+        }
       })
     }),
     getProfitMasterInquiryGrouping: builder.query<Paged<GroupedProfitSummaryDto>, MasterInquiryRequest>({

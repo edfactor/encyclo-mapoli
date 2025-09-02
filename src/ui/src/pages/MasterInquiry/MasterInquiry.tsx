@@ -1,4 +1,4 @@
-import { Divider, Grid } from "@mui/material";
+import { CircularProgress, Divider, Grid } from "@mui/material";
 import MissiveAlerts from "components/MissiveAlerts/MissiveAlerts";
 import { memo } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
@@ -34,14 +34,13 @@ const MasterInquiryContent = memo(() => {
   } = useMasterInquiry();
 
   return (
-    <Grid
-      container
-      rowSpacing="24px">
+    <Grid container>
       <Grid
         size={{ xs: 12 }}
         width={"100%"}>
         <Divider />
       </Grid>
+      {missiveAlerts.length > 0 && <MissiveAlerts missiveAlerts={missiveAlerts} />}
       <Grid
         size={{ xs: 12 }}
         width={"100%"}>
@@ -53,9 +52,8 @@ const MasterInquiryContent = memo(() => {
           />
         </DSMAccordion>
       </Grid>
-      {missiveAlerts.length > 0 && <MissiveAlerts missiveAlerts={missiveAlerts} />}
 
-      {showMemberGrid && searchResults && (
+      {showMemberGrid && searchResults && !isFetchingMembers && (
         <MasterInquiryMemberGrid
           key={searchParams?._timestamp || Date.now()}
           searchResults={searchResults}
@@ -67,7 +65,15 @@ const MasterInquiryContent = memo(() => {
         />
       )}
 
-      {showMemberDetails && selectedMember && (
+      {showMemberGrid && isFetchingMembers && (
+        <Grid
+          size={{ xs: 12 }}
+          sx={{ display: "flex", justifyContent: "center", padding: "24px" }}>
+          <CircularProgress />
+        </Grid>
+      )}
+
+      {showMemberDetails && selectedMember && !isFetchingMemberDetails && (
         <MasterInquiryMemberDetails
           memberType={selectedMember.memberType}
           id={selectedMember.id}
@@ -77,7 +83,15 @@ const MasterInquiryContent = memo(() => {
         />
       )}
 
-      {showProfitDetails && selectedMember && (
+      {showMemberDetails && selectedMember && isFetchingMemberDetails && (
+        <Grid
+          size={{ xs: 12 }}
+          sx={{ display: "flex", justifyContent: "center", padding: "24px" }}>
+          <CircularProgress />
+        </Grid>
+      )}
+
+      {showProfitDetails && selectedMember && !isFetchingProfitData && (
         <MasterInquiryGrid
           profitData={memberProfitData}
           isLoading={isFetchingProfitData}
@@ -85,6 +99,14 @@ const MasterInquiryContent = memo(() => {
           onPaginationChange={profitGridPagination.handlePaginationChange}
           onSortChange={profitGridPagination.handleSortChange}
         />
+      )}
+
+      {showProfitDetails && selectedMember && isFetchingProfitData && (
+        <Grid
+          size={{ xs: 12 }}
+          sx={{ display: "flex", justifyContent: "center", padding: "24px" }}>
+          <CircularProgress />
+        </Grid>
       )}
 
       {noResultsMessage && !showMemberGrid && !showMemberDetails && (

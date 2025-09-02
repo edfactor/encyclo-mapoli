@@ -60,14 +60,32 @@ else
 
 builder.ConfigureSecurityPolicies();
 
+string[] allowedOrigins =  [
+        "https://ps.qa.demoulas.net",
+        "https://ps.uat.demoulas.net",
+        "https://ps.demoulas.net"
+];
+
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(pol =>
     {
-        _ = pol.AllowAnyMethod() // Specify the allowed methods, e.g., GET, POST, etc.
-            .AllowAnyHeader()
-            .AllowAnyOrigin()
-            .WithExposedHeaders("Location", "x-demographic-data-source");
+        if (builder.Environment.IsDevelopment())
+        {
+            // Local development: permissive CORS to simplify local testing
+            _ = pol.AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowAnyOrigin()
+                .WithExposedHeaders("Location", "x-demographic-data-source");
+        }
+        else
+        {
+            // Non-dev: restrict to known UI origins only
+            _ = pol.WithOrigins(allowedOrigins)
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .WithExposedHeaders("Location", "x-demographic-data-source");
+        }
     });
 });
 
@@ -111,7 +129,7 @@ builder.Services.AddHealthChecks().AddCheck<EnvironmentHealthCheck>("Environment
 builder.Services.Configure<HealthCheckPublisherOptions>(options =>
 {
     options.Delay = TimeSpan.FromMinutes(1);       // Initial delay before the first run
-    options.Period = TimeSpan.FromMinutes(15);     // How often health checks are run
+    options.Period = TimeSpan.FromMinutes(10);     // How often health checks are run
     options.Predicate = _ => true;
 });
 

@@ -1,8 +1,9 @@
 ﻿using Demoulas.ProfitSharing.Common.Contracts.Request;
+using Demoulas.ProfitSharing.Common.Interfaces;
 
 namespace Demoulas.ProfitSharing.Common.Contracts.Response.MasterInquiry;
 
-public sealed record MasterInquiryResponseDto : IdRequest
+public sealed record MasterInquiryResponseDto : IdRequest, IIsExecutive
 {
     public bool IsEmployee => PsnSuffix == 0;
     public string Ssn { get; set; } = string.Empty;

@@ -50,7 +50,8 @@ public class BeneficiaryServiceTest : ApiTestBase<Program>
                     Id = 'P',
                     Name = "Primary"
                 },
-                Percent = 100
+                Percent = 100,
+                IsExecutive = false,
             }
         };
 
@@ -84,7 +85,8 @@ public class BeneficiaryServiceTest : ApiTestBase<Program>
                 Id = 'P',
                 Name = "Primary"
             },
-            Percent = 100
+            Percent = 100,
+            IsExecutive = false,
         };
         _beneficiarySearchResponse = new List<BeneficiarySearchFilterResponse>()
         {

@@ -151,7 +151,7 @@ public class PostFrozenService : IPostFrozenService
                     d.EmploymentStatusId,
                     (bal.CurrentBalance ?? 0),
                     tyPp != null ? tyPp.EnrollmentId : (byte)0
-                )).ToPaginationResultsAsync(request, cancellationToken: cancellationToken);
+                ){ IsExecutive = d.PayFrequencyId == PayFrequency.Constants.Monthly}).ToPaginationResultsAsync(request, cancellationToken: cancellationToken);
 
             var response = new ProfitSharingUnder21ReportResponse
             {
@@ -217,7 +217,7 @@ public class PostFrozenService : IPostFrozenService
                     Distributions = tyPdGrp.Distributions,
                     VestedAmount = tyTot.VestedBalance,
                     EndingBalance = tyTot.CurrentBalance,
-                    VestingPercentage = tyTot.VestingPercent,
+                    VestingPercentage = tyTot.VestingPercent * 100,
                     DateOfBirth = d.DateOfBirth,
                     Age = 0, //To be determined after materializing
                     EnrollmentId = pp.EnrollmentId,

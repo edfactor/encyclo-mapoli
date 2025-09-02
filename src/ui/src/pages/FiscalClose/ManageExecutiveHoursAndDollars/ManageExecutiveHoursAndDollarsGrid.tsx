@@ -199,8 +199,10 @@ const ManageExecutiveHoursAndDollarsGrid: React.FC<ManageExecutiveHoursAndDollar
       <>
         {!isModal && (
           <>
-            <div className="px-[24px]">{gridData && <ReportSummary report={gridData} />}</div>
-            <div style={{ gap: "36px", display: "flex", justifyContent: "end", marginRight: 28 }}>
+            <div
+              className="px-[24px]"
+              style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              {gridData && <ReportSummary report={gridData} />}
               <RenderAddExecutiveButton
                 reportReponse={gridData}
                 isModal={isModal}

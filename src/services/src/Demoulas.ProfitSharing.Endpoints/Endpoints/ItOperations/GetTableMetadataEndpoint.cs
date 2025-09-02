@@ -11,7 +11,7 @@ public class GetTableMetadataEndpoint : ProfitSharingResponseEndpoint<List<RowCo
 {
     private readonly ITableMetadataService _frozenService;
 
-    public GetTableMetadataEndpoint(ITableMetadataService frozenService) : base(Navigation.Constants.ItOperations)
+    public GetTableMetadataEndpoint(ITableMetadataService frozenService) : base(Navigation.Constants.ItDevOps)
     {
         _frozenService = frozenService;
     }
@@ -37,7 +37,7 @@ public class GetTableMetadataEndpoint : ProfitSharingResponseEndpoint<List<RowCo
                 }
             };
         });
-        Group<ItOperationsGroup>();
+        Group<ItDevOpsGroup>();
     }
 
     public override Task<List<RowCountResult>> ExecuteAsync(CancellationToken ct)

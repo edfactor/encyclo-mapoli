@@ -66,6 +66,7 @@ import ReprintCertificates from "pages/ReprintCertificates/ReprintCertificates";
 import MilitaryEntryAndModification from "../../pages/DecemberActivities/MilitaryEntryAndModification/MilitaryEntryAndModification";
 import DevDebug from "../../pages/Dev/DevDebug";
 import ForfeituresAdjustment from "../../pages/ForfeituresAdjustment/ForfeituresAdjustment";
+import LandingPage from "./LandingPage";
 
 const RouterSubAssembly: React.FC = () => {
   const isProductionOrUAT = EnvironmentUtils.isProduction || EnvironmentUtils.isUAT;
@@ -90,11 +91,13 @@ const RouterSubAssembly: React.FC = () => {
             showImpersonation ? (
               <ImpersonationMultiSelect
                 impersonationRoles={[
-                  ImpersonationRoles.FinanceManager,
                   ImpersonationRoles.DistributionsClerk,
+                  ImpersonationRoles.ExecutiveAdministrator,
+                  ImpersonationRoles.FinanceManager,
                   ImpersonationRoles.HardshipAdministrator,
-                  ImpersonationRoles.ProfitSharingAdministrator,
-                  ImpersonationRoles.ItDevOps
+                  ImpersonationRoles.ItDevOps,
+                  ImpersonationRoles.ItOperations,
+                  ImpersonationRoles.ProfitSharingAdministrator
                 ]}
                 currentRoles={impersonating || []}
                 setCurrentRoles={(value: string[]) => {
@@ -243,7 +246,7 @@ const RouterSubAssembly: React.FC = () => {
                   element={<ProfitShareEditUpdate />}></Route>
                 <Route
                   path=""
-                  element={<></>}></Route>
+                  element={<LandingPage />}></Route>
                 <Route
                   path={ROUTES.PROFIT_SHARE_BY_STORE}
                   element={<ProfitShareByStore />}></Route>
@@ -324,7 +327,7 @@ const RouterSubAssembly: React.FC = () => {
                   element={<QPAY600 />}
                 />
                 <Route
-                  path={ROUTES.REPRINT_CERTIFICATES}
+                  path={ROUTES.PRINT_PROFIT_CERTS}
                   element={<ReprintCertificates />}
                 />
               </Routes>
@@ -351,7 +354,13 @@ const RouterSubAssembly: React.FC = () => {
   }, [dispatch, impersonating]);
 
   useEffect(() => {
-    if (isSuccess && data?.navigation && token && location.pathname !== "/unauthorized") {
+    if (
+      isSuccess &&
+      data?.navigation &&
+      token &&
+      location.pathname !== "/unauthorized" &&
+      location.pathname !== "/dev-debug"
+    ) {
       const currentPath = location.pathname;
       const isAllowed = isPathAllowedInNavigation(currentPath, data.navigation);
 
