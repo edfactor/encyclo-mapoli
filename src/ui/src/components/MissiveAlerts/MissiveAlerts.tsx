@@ -1,4 +1,4 @@
-import { Typography, Grid } from "@mui/material";
+import { Grid, Typography } from "@mui/material";
 import React from "react";
 import { MissiveResponse } from "reduxstore/types";
 
@@ -7,7 +7,7 @@ interface MissiveAlertsProps {
 }
 
 const MissiveAlerts: React.FC<MissiveAlertsProps> = ({ missiveAlerts }) => {
-  if (missiveAlerts.length === 0) {
+  if (!missiveAlerts || missiveAlerts.length === 0) {
     return null;
   }
 

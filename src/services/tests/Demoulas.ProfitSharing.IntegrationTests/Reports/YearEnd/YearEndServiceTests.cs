@@ -112,7 +112,7 @@ public class YearEndServiceTests : PristineBaseTest
             data.Add(ssn, pp);
         }
 
-        TestOutputHelper.WriteLine($"Smart data count {data.Count}");
+        TestOutputHelper.WriteLine($"SMART data count {data.Count}");
 
         return data;
     }

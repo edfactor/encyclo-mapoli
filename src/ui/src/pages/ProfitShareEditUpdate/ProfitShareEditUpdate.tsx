@@ -28,67 +28,13 @@ import {
   ProfitShareMasterResponse,
   ProfitYearRequest
 } from "reduxstore/types";
-import {
-  ApiMessageAlert,
-  DSMAccordion,
-  MessageUpdate,
-  numberToCurrency,
-  Page,
-  setMessage,
-  SmartModal
-} from "smart-ui-library";
+import { ApiMessageAlert, DSMAccordion, numberToCurrency, Page, setMessage, SmartModal } from "smart-ui-library";
 import { TotalsGrid } from "../../components/TotalsGrid";
+import { MessageKeys, Messages } from "../../utils/messageDictonary";
 import ChangesList from "./ChangesList";
 import ProfitShareEditConfirmation from "./ProfitShareEditConfirmation";
 import ProfitShareEditUpdateSearchFilter from "./ProfitShareEditUpdateSearchFilter";
 import ProfitShareEditUpdateTabs from "./ProfitShareEditUpdateTabs";
-
-enum MessageKeys {
-  ProfitShareEditUpdate = "ProfitShareEditUpdate"
-}
-
-export class Messages {
-  static readonly ProfitShareApplySuccess: MessageUpdate = {
-    key: MessageKeys.ProfitShareEditUpdate,
-    message: {
-      type: "success",
-      title: "Changes Applied",
-      message: `Employees affected: x | Beneficiaries: x, | ETVAs: x `
-    }
-  };
-  static readonly ProfitShareApplyFail: MessageUpdate = {
-    key: MessageKeys.ProfitShareEditUpdate,
-    message: {
-      type: "error",
-      title: "Changes Were Not Applied",
-      message: `Employees affected: 0 | Beneficiaries: 0, | ETVAs: 0 `
-    }
-  };
-  static readonly ProfitShareRevertSuccess: MessageUpdate = {
-    key: MessageKeys.ProfitShareEditUpdate,
-    message: {
-      type: "success",
-      title: "Changes Reverted",
-      message: `Employees affected: x | Beneficiaries: x, | ETVAs: x `
-    }
-  };
-  static readonly ProfitShareRevertFail: MessageUpdate = {
-    key: MessageKeys.ProfitShareEditUpdate,
-    message: {
-      type: "error",
-      title: "Changes Were Not Reverted",
-      message: `Employees affected: 0 | Beneficiaries: 0, | ETVAs: 0 `
-    }
-  };
-  static readonly ProfitShareMasterUpdated: MessageUpdate = {
-    key: MessageKeys.ProfitShareEditUpdate,
-    message: {
-      type: "success",
-      title: "Changes Already Applied",
-      message: `Updated By: x | Date: x `
-    }
-  };
-}
 
 const useRevertAction = (
   setEmployeesReverted: (count: number) => void,

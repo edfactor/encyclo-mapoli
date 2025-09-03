@@ -3,9 +3,9 @@ import { useSelector } from "react-redux";
 import { useLazyGetProfitMasterInquiryMemberQuery } from "reduxstore/api/InquiryApi";
 import { RootState } from "reduxstore/store";
 import { MissiveResponse } from "reduxstore/types";
+import { MASTER_INQUIRY_MESSAGES } from "../../components/MissiveAlerts/MissiveMessages";
+import { useMissiveAlerts } from "../../hooks/useMissiveAlerts";
 import MasterInquiryMemberDetails from "./MasterInquiryMemberDetails";
-import { useMissiveAlerts } from "./hooks/useMissiveAlerts";
-import { MASTER_INQUIRY_MESSAGES } from "./utils/MasterInquiryMessages";
 
 interface StandaloneMemberDetailsProps {
   memberType: number;

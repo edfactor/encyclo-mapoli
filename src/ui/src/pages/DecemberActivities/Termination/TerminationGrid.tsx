@@ -1,21 +1,42 @@
-import { ICellRendererParams, CellClickedEvent, ColDef } from "ag-grid-community";
-import { useEffect, useMemo, useState, useCallback, useRef } from "react";
-import { useSelector } from "react-redux";
-import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, numberToCurrency, Pagination } from "smart-ui-library";
-import { TotalsGrid } from "../../../components/TotalsGrid/TotalsGrid";
-import { ReportSummary } from "../../../components/ReportSummary";
-import { CalendarResponseDto, StartAndEndDateRequest } from "reduxstore/types";
-import { useLazyGetTerminationReportQuery } from "reduxstore/api/YearsEndApi";
-import { GetTerminationColumns } from "./TerminationGridColumns";
-import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
-import { ForfeitureAdjustmentUpdateRequest } from "reduxstore/types";
+import { CellClickedEvent, ColDef, ICellRendererParams } from "ag-grid-community";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
-  useUpdateForfeitureAdjustmentMutation,
-  useUpdateForfeitureAdjustmentBulkMutation
+  useLazyGetTerminationReportQuery,
+  useUpdateForfeitureAdjustmentBulkMutation,
+  useUpdateForfeitureAdjustmentMutation
 } from "reduxstore/api/YearsEndApi";
+import { RootState } from "reduxstore/store";
+import { CalendarResponseDto, ForfeitureAdjustmentUpdateRequest, StartAndEndDateRequest } from "reduxstore/types";
+import {
+  DSMGrid,
+  formatNumberWithComma,
+  ISortParams,
+  MessageUpdate,
+  numberToCurrency,
+  Pagination,
+  setMessage
+} from "smart-ui-library";
+import { ReportSummary } from "../../../components/ReportSummary";
+import { TotalsGrid } from "../../../components/TotalsGrid/TotalsGrid";
+import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import { TerminationSearchRequest } from "./Termination";
 import { GetDetailColumns } from "./TerminationDetailsGridColumns";
+import { GetTerminationColumns } from "./TerminationGridColumns";
+
+enum MessageKeys {
+  TerminationSave = "TerminationSave"
+}
+
+export class Messages {
+  static readonly TerminationSaveSuccess: MessageUpdate = {
+    key: MessageKeys.TerminationSave,
+    message: {
+      type: "success",
+      title: "Forfeiture adjustment saved successfully"
+    }
+  };
+}
 
 interface TerminationGridSearchProps {
   initialSearchLoaded: boolean;
@@ -48,10 +69,12 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
   });
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
   const { termination } = useSelector((state: RootState) => state.yearsEnd);
+  const dispatch = useDispatch();
   const [triggerSearch, { isFetching }] = useLazyGetTerminationReportQuery();
   const [selectedRowIds, setSelectedRowIds] = useState<number[]>([]);
   const [editedValues, setEditedValues] = useState<Record<string, { value: number; hasError: boolean }>>({});
   const [loadingRowIds, setLoadingRowIds] = useState<Set<number>>(new Set());
+  const [pendingSuccessMessage, setPendingSuccessMessage] = useState<string | null>(null);
   const selectedProfitYear = useDecemberFlowProfitYear();
   // fiscalData is now passed from parent to avoid timing issues on refresh
   const [updateForfeitureAdjustmentBulk, { isLoading: isBulkSaving }] = useUpdateForfeitureAdjustmentBulkMutation();
@@ -85,8 +108,24 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
     [searchParams, pageSize, fiscalData?.fiscalBeginDate, fiscalData?.fiscalEndDate, shouldArchive]
   );
 
+  // Effect to show success message after grid finishes loading
+  useEffect(() => {
+    if (!isFetching && pendingSuccessMessage) {
+      dispatch(
+        setMessage({
+          ...Messages.TerminationSaveSuccess,
+          message: {
+            ...Messages.TerminationSaveSuccess.message,
+            message: pendingSuccessMessage
+          }
+        })
+      );
+      setPendingSuccessMessage(null);
+    }
+  }, [isFetching, pendingSuccessMessage, dispatch]);
+
   const handleSave = useCallback(
-    async (request: ForfeitureAdjustmentUpdateRequest) => {
+    async (request: ForfeitureAdjustmentUpdateRequest, name: string) => {
       const rowId = request.badgeNumber; // Use badgeNumber as unique identifier
       setLoadingRowIds((prev) => new Set(Array.from(prev).concat(rowId)));
 
@@ -99,6 +138,11 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
           return updated;
         });
         onUnsavedChanges(Object.keys(editedValues).length > 1);
+
+        // Prepare success message
+        const employeeName = name || "the selected employee";
+        const successMessage = `The forfeiture adjustment of amount $${formatNumberWithComma(request.forfeitureAmount)} for ${employeeName} saved successfully`;
+
         if (searchParams) {
           const params = createRequest(
             pageNumber * pageSize,
@@ -107,8 +151,21 @@ const TerminationGrid: React.FC<TerminationGridSearchProps> = ({
             selectedProfitYear
           );
           if (params) {
+            // Set pending message and trigger search
+            setPendingSuccessMessage(successMessage);
             triggerSearch(params, false);
           }
+        } else {
+          // If no search params, show message immediately
+          dispatch(
+            setMessage({
+              ...Messages.TerminationSaveSuccess,
+              message: {
+                ...Messages.TerminationSaveSuccess.message,
+                message: successMessage
+              }
+            })
+          );
         }
       } catch (error) {
         console.error("Failed to save forfeiture adjustment:", error);

@@ -1,6 +1,7 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Checkbox, FormControlLabel, FormHelperText, Grid } from "@mui/material";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
+import { useEffect } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetRehireForfeituresQuery } from "reduxstore/api/YearsEndApi";
@@ -17,11 +18,30 @@ import { CalendarResponseDto, StartAndEndDateRequest } from "../../../reduxstore
 import { mmDDYYFormat, tryddmmyyyyToDate } from "../../../utils/dateUtils";
 
 const schema = yup.object().shape({
-  beginningDate: yup.string().required("Beginning Date is required"),
+  beginningDate: yup
+    .string()
+    .required("Beginning Date is required")
+    .test("is-four-digits", "Beginning Date must be four digits", function (value) {
+      return /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(value || "");
+    })
+    .test("is-valid-year", "Year must be 2000 or later", function (value) {
+      if (!value) return true;
+      const match = value.match(/^\d{1,2}\/\d{1,2}\/(\d{4})$/);
+      if (!match) return true;
+      const year = parseInt(match[1]);
+      return year >= 2000;
+    }),
   endingDate: yup
     .string()
     .typeError("Invalid date")
     .required("Ending Date is required")
+    .test("is-valid-year", "Year must be 2000 or later", function (value) {
+      if (!value) return true;
+      const match = value.match(/^\d{1,2}\/\d{1,2}\/(\d{4})$/);
+      if (!match) return true;
+      const year = parseInt(match[1]);
+      return year >= 2000;
+    })
     .test("date-range", "Ending date must be the same or after the beginning date", function (value) {
       const { beginningDate } = this.parent;
       if (!beginningDate || !value) return true;
@@ -98,12 +118,17 @@ const RehireForfeituresSearchFilter: React.FC<RehireForfeituresSearchFilterProps
     handleSubmit,
     formState: { errors, isValid },
     reset,
-    trigger
+    trigger,
+    clearErrors
   } = useForm<StartAndEndDateRequest>({
     resolver: yupResolver(schema),
     defaultValues: {
-      beginningDate: rehireForfeituresQueryParams?.beginningDate || fiscalData.fiscalBeginDate || undefined,
-      endingDate: rehireForfeituresQueryParams?.endingDate || fiscalData.fiscalEndDate || undefined,
+      beginningDate:
+        rehireForfeituresQueryParams?.beginningDate ||
+        (fiscalData.fiscalBeginDate ? mmDDYYFormat(fiscalData.fiscalBeginDate) : undefined),
+      endingDate:
+        rehireForfeituresQueryParams?.endingDate ||
+        (fiscalData.fiscalEndDate ? mmDDYYFormat(fiscalData.fiscalEndDate) : undefined),
       excludeZeroBalance: rehireForfeituresQueryParams?.excludeZeroBalance || false,
       pagination: { skip: 0, take: 25, sortBy: "fullName", isSortDescending: false },
       profitYear: selectedProfitYear
@@ -111,6 +136,13 @@ const RehireForfeituresSearchFilter: React.FC<RehireForfeituresSearchFilterProps
   });
 
   const beginningDateValue = useWatch({ control, name: "beginningDate" });
+
+  // Trigger validation when fiscal data becomes available
+  useEffect(() => {
+    if (fiscalData.fiscalBeginDate && fiscalData.fiscalEndDate) {
+      trigger();
+    }
+  }, [fiscalData.fiscalBeginDate, fiscalData.fiscalEndDate, trigger]);
 
   // Effect to fetch fiscal data when profit year changes
   const validateAndSearch = handleSubmit(validateAndSubmit);
@@ -122,14 +154,14 @@ const RehireForfeituresSearchFilter: React.FC<RehireForfeituresSearchFilterProps
     dispatch(clearRehireForfeituresDetails());
 
     reset({
-      beginningDate: fiscalData.fiscalBeginDate,
-      endingDate: fiscalData.fiscalEndDate,
+      beginningDate: fiscalData.fiscalBeginDate ? mmDDYYFormat(fiscalData.fiscalBeginDate) : undefined,
+      endingDate: fiscalData.fiscalEndDate ? mmDDYYFormat(fiscalData.fiscalEndDate) : undefined,
       excludeZeroBalance: false,
       profitYear: selectedProfitYear,
       pagination: { skip: 0, take: 25, sortBy: "badgeNumber", isSortDescending: true }
     });
 
-    trigger();
+    clearErrors();
   };
 
   return (
@@ -148,8 +180,11 @@ const RehireForfeituresSearchFilter: React.FC<RehireForfeituresSearchFilterProps
                 <DsmDatePicker
                   id="beginningDate"
                   onChange={(value: Date | null) => {
-                    field.onChange(value ?? undefined);
-                    trigger(["beginningDate", "endingDate"]);
+                    field.onChange(value ? mmDDYYFormat(value) : undefined);
+                    trigger("beginningDate");
+                    if (value) {
+                      trigger("endingDate");
+                    }
                   }}
                   value={field.value ? tryddmmyyyyToDate(field.value) : null}
                   required={true}
@@ -183,7 +218,7 @@ const RehireForfeituresSearchFilter: React.FC<RehireForfeituresSearchFilterProps
                   <DsmDatePicker
                     id="endingDate"
                     onChange={(value: Date | null) => {
-                      field.onChange(value ?? undefined);
+                      field.onChange(value ? mmDDYYFormat(value) : undefined);
                       trigger("endingDate");
                     }}
                     value={field.value ? tryddmmyyyyToDate(field.value) : null}

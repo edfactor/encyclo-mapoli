@@ -23,8 +23,11 @@ public sealed class PristineDataContextFactory : IProfitSharingDataContextFactor
 
     public PristineDataContextFactory(bool debug = false)
     {
-        var configuration = new ConfigurationBuilder().AddUserSecrets<PristineDataContextFactory>().Build();
+        var configuration = new ConfigurationBuilder()
+            .AddUserSecrets<Api.Program>()
+            .Build();
         ConnectionString = configuration["ConnectionStrings:ProfitSharing"]!;
+
         _readOnlyCtx = setUpReadOnlyCtx(ConnectionString, debug);
         _ctx = setUpWriteCtx(ConnectionString, debug);
     }

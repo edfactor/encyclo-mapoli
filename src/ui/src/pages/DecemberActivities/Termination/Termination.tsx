@@ -1,15 +1,14 @@
 import StatusDropdownActionNode from "components/StatusDropdownActionNode";
 import { useEffect, useState } from "react";
-import { Page, DSMAccordion } from "smart-ui-library";
+import { ApiMessageAlert, DSMAccordion, Page } from "smart-ui-library";
 
-import { Divider, CircularProgress } from "@mui/material";
-import { Grid } from "@mui/material";
+import { CircularProgress, Divider, Grid } from "@mui/material";
 
 import { CAPTIONS } from "../../../constants";
-import TerminationGrid from "./TerminationGrid";
-import TerminationSearchFilter from "./TerminationSearchFilter";
 import { useLazyGetAccountingRangeToCurrent } from "../../../hooks/useFiscalCalendarYear";
 import { StartAndEndDateRequest } from "../../../reduxstore/types";
+import TerminationGrid from "./TerminationGrid";
+import TerminationSearchFilter from "./TerminationSearchFilter";
 
 export interface TerminationSearchRequest extends StartAndEndDateRequest {
   forfeitureStatus: string;
@@ -160,48 +159,51 @@ const Termination = () => {
     <Page
       label={CAPTIONS.TERMINATIONS}
       actionNode={renderActionNode()}>
-      <Grid
-        container
-        rowSpacing="24px">
-        <Grid width={"100%"}>
-          <Divider />
-        </Grid>
-        {!isCalendarDataLoaded ? (
-          <Grid
-            width={"100%"}
-            container
-            justifyContent="center"
-            padding={4}>
-            <CircularProgress />
+      <div>
+        <ApiMessageAlert commonKey="TerminationSave" />
+        <Grid
+          container
+          rowSpacing="24px">
+          <Grid width={"100%"}>
+            <Divider />
           </Grid>
-        ) : (
-          <>
-            <Grid width="100%">
-              <DSMAccordion title="Filter">
-                <TerminationSearchFilter
+          {!isCalendarDataLoaded ? (
+            <Grid
+              width={"100%"}
+              container
+              justifyContent="center"
+              padding={4}>
+              <CircularProgress />
+            </Grid>
+          ) : (
+            <>
+              <Grid width="100%">
+                <DSMAccordion title="Filter">
+                  <TerminationSearchFilter
+                    setInitialSearchLoaded={setInitialSearchLoaded}
+                    fiscalData={fiscalData}
+                    onSearch={handleSearch}
+                    hasUnsavedChanges={hasUnsavedChanges}
+                  />
+                </DSMAccordion>
+              </Grid>
+              <Grid width="100%">
+                <TerminationGrid
                   setInitialSearchLoaded={setInitialSearchLoaded}
-                  fiscalData={fiscalData}
-                  onSearch={handleSearch}
+                  initialSearchLoaded={initialSearchLoaded}
+                  searchParams={searchParams}
+                  resetPageFlag={resetPageFlag}
+                  onUnsavedChanges={handleUnsavedChanges}
                   hasUnsavedChanges={hasUnsavedChanges}
+                  fiscalData={fiscalData}
+                  shouldArchive={shouldArchive}
+                  onArchiveHandled={handleArchiveHandled}
                 />
-              </DSMAccordion>
-            </Grid>
-            <Grid width="100%">
-              <TerminationGrid
-                setInitialSearchLoaded={setInitialSearchLoaded}
-                initialSearchLoaded={initialSearchLoaded}
-                searchParams={searchParams}
-                resetPageFlag={resetPageFlag}
-                onUnsavedChanges={handleUnsavedChanges}
-                hasUnsavedChanges={hasUnsavedChanges}
-                fiscalData={fiscalData}
-                shouldArchive={shouldArchive}
-                onArchiveHandled={handleArchiveHandled}
-              />
-            </Grid>
-          </>
-        )}
-      </Grid>
+              </Grid>
+            </>
+          )}
+        </Grid>
+      </div>
     </Page>
   );
 };

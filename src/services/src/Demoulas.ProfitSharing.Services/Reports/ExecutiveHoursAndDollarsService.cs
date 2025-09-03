@@ -31,7 +31,7 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
     /// <returns>A task that represents the asynchronous operation. The task result contains the report response with details of executive hours/dollars</returns>
     public async Task<ReportResponseBase<ExecutiveHoursAndDollarsResponse>> GetExecutiveHoursAndDollarsReportAsync(ExecutiveHoursAndDollarsRequest request, CancellationToken cancellationToken)
     {
-        var result =  await _dataContextFactory.UseReadOnlyContext(c =>
+        var result =  await _dataContextFactory.UseReadOnlyContext(async c =>
         {
             var query = c.PayProfits
                 .Where(p=> p.ProfitYear == request.ProfitYear)
@@ -76,7 +76,8 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
                     pp.Demographic!.ContactInfo!.FullName!.ToLower().Contains(request.FullNameContains.ToLower()));
 #pragma warning restore RCS1155
             }
-            return query
+            
+            var paginatedResult = await query
                 .Select(p => new ExecutiveHoursAndDollarsResponse
                 {
                     BadgeNumber = p.Demographic!.BadgeNumber,
@@ -91,11 +92,19 @@ public sealed class ExecutiveHoursAndDollarsService : IExecutiveHoursAndDollarsS
                     PayFrequencyName = p.Demographic.PayFrequency!.Name,
                     EmploymentStatusId = p.Demographic.EmploymentStatusId,
                     EmploymentStatusName = p.Demographic.EmploymentStatus!.Name,
-                    IsExecutive = p.Demographic.PayFrequencyId == PayFrequency.Constants.Monthly,
+                    IsExecutive = false,
                 })
                 .OrderBy(p => p.StoreNumber)
                 .ThenBy(p => p.BadgeNumber)
                 .ToPaginationResultsAsync(request, cancellationToken);
+                
+            // Now, fix the IsExecutive field in memory since Oracle's EF Driver doesnt handle the boolean projection
+            foreach (var item in paginatedResult.Results)
+            {
+                item.IsExecutive = item.PayFrequencyId == 2;
+            }
+            
+            return paginatedResult;
         });
 
         var calInfo = await _calendarService.GetYearStartAndEndAccountingDatesAsync(request.ProfitYear, cancellationToken);

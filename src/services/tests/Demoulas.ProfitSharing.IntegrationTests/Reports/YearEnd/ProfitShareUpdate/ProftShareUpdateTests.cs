@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Demoulas.ProfitSharing.Common.Contracts.Request;
 using Shouldly;
+#pragma warning disable CS0162 //  using if(true) forces both sides to get compiled/refactored
 
 namespace Demoulas.ProfitSharing.IntegrationTests.Reports.YearEnd.ProfitShareUpdate;
 
@@ -26,7 +27,7 @@ public class ProfitShareUpdateTests : PristineBaseTest
 
         string reportName = "psupdate-pay444-r2.txt";
         profitShareUpdateService.TodaysDateTime =
-            new DateTime(2025, 05, 07, 15, 13, 0, DateTimeKind.Local); // time this report was generated
+            new DateTime(2025, 08, 28, 21, 05, 0, DateTimeKind.Local); // time this report was generated
 
         Stopwatch sw = Stopwatch.StartNew();
         // Act
@@ -56,45 +57,47 @@ public class ProfitShareUpdateTests : PristineBaseTest
 
         string expectedReport = LoadExpectedReport(reportName);
 
-#if true
-        // Enabling this path enables the diff program to pop up the differences
-
-        // The sort order on READY is not great, this maybe tweaked soon.
-        string expected = HandleSortingOddness(LoadExpectedReport(reportName));
-        string actual = HandleSortingOddness(CollectLines(profitShareUpdateService.ReportLines));
-        AssertReportsAreEquivalent(expected, actual);
-#else
-        // This path compares individuals and provides a list of differences.
-
-        var employeeExpectedReportLines = expectedReport.Split("\n").Where(ex => extractBadge(ex) != (null, null)).Select(t => t.TrimEnd()).ToList();
-        var employeeActualReportLines = profitShareUpdateService.ReportLines.Where(ex => extractBadge(ex) != (null, null)).Select(t => t.TrimEnd()).ToList();
-
-        var readyHash = employeeExpectedReportLines.ToHashSet();
-        var smartHash = employeeActualReportLines.ToHashSet();
-
-        var onlyReady = readyHash.Except(smartHash);
-        var onlySmart = smartHash.Except(readyHash);
-
-        TestOutputHelper.WriteLine($"READY member in report count {employeeExpectedReportLines.Count}, Only SMART member in report count {employeeActualReportLines.Count}");
-
-        TestOutputHelper.WriteLine($"only READY count {onlyReady.Count()}, Only SMART count {onlySmart.Count()}");
-
-        TestOutputHelper.WriteLine("Only Ready");
-        foreach (string se in onlyReady)
+        if (false)
         {
-            TestOutputHelper.WriteLine(se);
-        }
+            // Enabling this path enables the diff program to pop up the differences
 
-        TestOutputHelper.WriteLine("Only Smart");
-        foreach (string se in onlySmart)
+            // The sort order on READY is not great, this maybe tweaked soon.
+            string expected = HandleSortingOddness(LoadExpectedReport(reportName));
+            string actual = HandleSortingOddness(CollectLines(profitShareUpdateService.ReportLines));
+            AssertReportsAreEquivalent(expected, actual);
+        }
+        else
         {
-            TestOutputHelper.WriteLine(se);
-        }
+            // This path compares individuals and provides a list of differences. 
 
-        onlyReady.Count().Should().BeLessThan(5);
-        onlySmart.Count().Should().BeLessThan(5);
-#endif
-        true.ShouldBeTrue();
+            var employeeExpectedReportLines = expectedReport.Split("\n").Where(ex => extractBadge(ex) != (null, null)).Select(t => t.TrimEnd()).ToList();
+            var employeeActualReportLines = profitShareUpdateService.ReportLines.Where(ex => extractBadge(ex) != (null, null)).Select(t => t.TrimEnd()).ToList();
+
+            var readyHash = employeeExpectedReportLines.ToHashSet();
+            var smartHash = employeeActualReportLines.ToHashSet();
+
+            var onlyReady = readyHash.Except(smartHash);
+            var onlySmart = smartHash.Except(readyHash);
+
+            TestOutputHelper.WriteLine($"READY member in report count {employeeExpectedReportLines.Count}, Only SMART member in report count {employeeActualReportLines.Count}");
+
+            TestOutputHelper.WriteLine($"only READY count {onlyReady.Count()}, Only SMART count {onlySmart.Count()}");
+
+            TestOutputHelper.WriteLine("Only Ready");
+            foreach (string se in onlyReady)
+            {
+                TestOutputHelper.WriteLine(se);
+            }
+
+            TestOutputHelper.WriteLine("Only Smart");
+            foreach (string se in onlySmart)
+            {
+                TestOutputHelper.WriteLine(se);
+            }
+
+            onlyReady.Count().ShouldBeLessThan(5);
+            onlySmart.Count().ShouldBeLessThan(5);
+        }
     }
 
 
