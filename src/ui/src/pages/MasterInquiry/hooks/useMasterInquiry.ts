@@ -8,11 +8,11 @@ import {
 } from "reduxstore/api/InquiryApi";
 import { RootState } from "reduxstore/store";
 import { MasterInquiryRequest, MasterInquirySearch, MissiveResponse } from "reduxstore/types";
+import { MASTER_INQUIRY_MESSAGES } from "../../../components/MissiveAlerts/MissiveMessages";
 import { ROUTES } from "../../../constants";
 import { useGridPagination } from "../../../hooks/useGridPagination";
-import { useMissiveAlerts } from "../hooks/useMissiveAlerts";
+import { useMissiveAlerts } from "../../../hooks/useMissiveAlerts";
 import { isSimpleSearch } from "../utils/MasterInquiryFunctions";
-import { MASTER_INQUIRY_MESSAGES } from "../utils/MasterInquiryMessages";
 import {
   initialState,
   masterInquiryReducer,

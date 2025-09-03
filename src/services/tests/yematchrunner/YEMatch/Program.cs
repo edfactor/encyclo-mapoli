@@ -27,7 +27,7 @@ internal static class Program
     private static Runnable GetRunner(string[] args, string dataDirectory)
     {
         string? runType = null;
-        
+
         for (int i = 0; i < args.Length; i++)
         {
             if (args[i] == "--run" && i + 1 < args.Length)

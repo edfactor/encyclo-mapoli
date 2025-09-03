@@ -3,10 +3,10 @@ import React, { useCallback, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "reduxstore/store";
 import { DSMGrid, Pagination } from "smart-ui-library";
+import { MissiveAlertProvider } from "../../../components/MissiveAlerts/MissiveAlertContext";
 import { CAPTIONS } from "../../../constants";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import StandaloneMemberDetails from "../../MasterInquiry/StandaloneMemberDetails";
-import { MissiveAlertProvider } from "../../MasterInquiry/utils/MissiveAlertContext";
 import { GetMilitaryContributionColumns } from "./MilitaryContributionFormGridColumns";
 
 interface MilitaryContributionGridProps {

@@ -1,7 +1,8 @@
 import { SaveOutlined } from "@mui/icons-material";
-import { Checkbox, CircularProgress, IconButton } from "@mui/material";
+import { Checkbox, CircularProgress, IconButton, Tooltip } from "@mui/material";
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { SuggestedForfeitCellRenderer, SuggestedForfeitEditor } from "components/SuggestedForfeiture";
+import { numberToCurrency } from "smart-ui-library";
 import { ForfeitureAdjustmentUpdateRequest } from "types";
 import { getForfeitedStatus } from "utils/enrollmentUtil";
 import {
@@ -13,12 +14,11 @@ import {
   createYearColumn
 } from "utils/gridColumnFactory";
 import { HeaderComponent } from "./TerminationHeaderComponent";
-import { numberToCurrency } from "smart-ui-library";
 
 interface SaveButtonCellParams extends ICellRendererParams {
   removeRowFromSelectedRows: (id: number) => void;
   addRowToSelectedRows: (id: number) => void;
-  onSave?: (request: ForfeitureAdjustmentUpdateRequest) => Promise<void>;
+  onSave?: (request: ForfeitureAdjustmentUpdateRequest, name: string) => Promise<void>;
 }
 
 // Separate function for detail columns that will be used for master-detail view
@@ -27,7 +27,7 @@ export const GetDetailColumns = (
   removeRowFromSelectedRows: (id: number) => void,
   selectedRowIds: number[],
   selectedProfitYear: number,
-  onSave?: (request: ForfeitureAdjustmentUpdateRequest) => Promise<void>,
+  onSave?: (request: ForfeitureAdjustmentUpdateRequest, name: string) => Promise<void>,
   onBulkSave?: (requests: ForfeitureAdjustmentUpdateRequest[]) => Promise<void>
 ): ColDef[] => {
   return [
@@ -133,6 +133,13 @@ export const GetDetailColumns = (
       sortable: false,
       cellStyle: { backgroundColor: "#E8E8E8" },
       headerComponent: HeaderComponent,
+      valueGetter: (params) => {
+        if (!params.data.isDetail) return "";
+        const rowKey = `${params.data.badgeNumber}-${params.data.profitYear}`;
+        const editedValue = params.context?.editedValues?.[rowKey]?.value;
+        const currentValue = editedValue ?? params.data.suggestedForfeit ?? 0;
+        return `${currentValue}-${params.context?.loadingRowIds?.has(params.data.badgeNumber)}-${params.node?.isSelected()}`;
+      },
       headerComponentParams: {
         addRowToSelectedRows,
         removeRowFromSelectedRows,
@@ -153,20 +160,26 @@ export const GetDetailColumns = (
         const hasError = params.context?.editedValues?.[rowKey]?.hasError;
         const currentValue = params.context?.editedValues?.[rowKey]?.value ?? params.data.suggestedForfeit;
         const isLoading = params.context?.loadingRowIds?.has(params.data.badgeNumber);
+        const isZeroValue = currentValue === 0 || currentValue === null || currentValue === undefined;
 
         return (
           <div>
-            <Checkbox
-              checked={isSelected}
-              onChange={() => {
-                if (isSelected) {
-                  params.removeRowFromSelectedRows(id);
-                } else {
-                  params.addRowToSelectedRows(id);
-                }
-                params.node?.setSelected(!isSelected);
-              }}
-            />
+            <Tooltip title={isZeroValue ? "Forfeit cannot be zero." : ""} arrow>
+              <span>
+                <Checkbox
+                  checked={isSelected}
+                  disabled={isZeroValue}
+                  onChange={() => {
+                    if (isSelected) {
+                      params.removeRowFromSelectedRows(id);
+                    } else {
+                      params.addRowToSelectedRows(id);
+                    }
+                    params.node?.setSelected(!isSelected);
+                  }}
+                />
+              </span>
+            </Tooltip>
             <IconButton
               onClick={async () => {
                 if (params.data.isDetail && params.onSave) {
@@ -174,12 +187,15 @@ export const GetDetailColumns = (
                     badgeNumber: params.data.badgeNumber,
                     profitYear: params.data.profitYear,
                     forfeitureAmount: currentValue || 0,
-                    classAction: false
+                    classAction: false,
+                    offsettingProfitDetailId: undefined
                   };
-                  await params.onSave(request);
+
+                  const employeeName = params.data.fullName || params.data.name || "the selected employee";
+                  await params.onSave(request, employeeName);
                 }
               }}
-              disabled={hasError || isLoading}>
+              disabled={hasError || isLoading || isZeroValue}>
               {isLoading ? <CircularProgress size={20} /> : <SaveOutlined />}
             </IconButton>
           </div>

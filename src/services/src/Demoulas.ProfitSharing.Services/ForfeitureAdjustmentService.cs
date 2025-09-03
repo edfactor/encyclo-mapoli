@@ -51,7 +51,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                 // BOBH This is failing to account for the ETVA, correct?
                 new SuggestedForfeitureAdjustmentResponse
                 {
-                    SuggestedForfeitAmount = totalVestingBalance.CurrentBalance ?? 0m - totalVestingBalance.VestedBalance ?? 0m,
+                    SuggestedForfeitAmount = Math.Round((totalVestingBalance.CurrentBalance ?? 0m) - (totalVestingBalance.VestedBalance ?? 0m),2,MidpointRounding.AwayFromZero),
                     DemographicId = demographic.Id,
                     BadgeNumber = demographic.BadgeNumber
                 };
