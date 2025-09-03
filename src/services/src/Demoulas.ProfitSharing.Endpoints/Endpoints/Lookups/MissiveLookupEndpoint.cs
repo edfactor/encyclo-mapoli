@@ -32,7 +32,7 @@ public sealed class MissiveLookupEndpoint : ProfitSharingResponseEndpoint<List<M
             } };
         });
 
-        Group<LookupGroup>();
+    Group<LookupGroup>();
 
         if (!Env.IsTestEnvironment())
         {

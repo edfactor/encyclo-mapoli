@@ -33,8 +33,8 @@ internal static class PolicyExtensions
             options.AddPolicy(Policy.CanRunMasterInquiry,
                 x => x.RequireRole(Role.FINANCEMANAGER, Role.DISTRIBUTIONSCLERK, Role.ADMINISTRATOR, Role.AUDITOR));
 
-            // Beneficiary maintenance belongs to HR and Clerks; Admin as break-glass.
-            options.AddPolicy(Policy.CanMaintainBeneficiaries,
+            // New, clearer name for beneficiary CRUD; keep mapping identical.
+            options.AddPolicy(Policy.CanManageBeneficiaries,
                 x => x.RequireRole(Role.HARDSHIPADMINISTRATOR, Role.DISTRIBUTIONSCLERK, Role.ADMINISTRATOR));
 
             /*

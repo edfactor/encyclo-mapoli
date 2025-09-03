@@ -1,4 +1,5 @@
 ﻿using Demoulas.Common.Api.Groups;
+using Demoulas.ProfitSharing.Security;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 using ProblemDetails = Microsoft.AspNetCore.Mvc.ProblemDetails;
@@ -21,6 +22,7 @@ public sealed class BeneficiaryTypeGroup : GroupBase
                 .ProducesProblemFE<ProblemDetails>(StatusCodes.Status403Forbidden)
                 .ProducesProblemFE<ProblemDetails>(StatusCodes.Status500InternalServerError)
                 .WithTags(RouteName));
+            ep.Policies(Policy.CanRunMasterInquiry);
         });
     }
 }

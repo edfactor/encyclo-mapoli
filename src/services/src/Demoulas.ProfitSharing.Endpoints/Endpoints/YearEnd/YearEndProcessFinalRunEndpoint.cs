@@ -22,8 +22,7 @@ public class YearEndProcessFinalRunEndpoint : ProfitSharingRequestEndpoint<YearR
         {
             s.Summary = "Updates data in prior to final run of the Profit Sharing report";
         });
-        Policies(Security.Policy.CanRunYearEndProcesses);
-        Group<YearEndGroup>();
+    Group<YearEndGroup>();
     }
 
     public override async Task HandleAsync(YearRequestWithRebuild req, CancellationToken ct)

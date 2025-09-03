@@ -41,7 +41,7 @@ public static class Policy
     public static readonly string CanRunMasterInquiry = "CAN_RUN_MASTER_INQUIRY";
 
     /// <summary>
-    /// Maintain beneficiaries (add/update), HR/benefits workflow.
+    /// Manage beneficiaries (CRUD). New policy name for clarity; mapped to same roles as maintain.
     /// </summary>
-    public static readonly string CanMaintainBeneficiaries = "CAN_MAINTAIN_BENEFICIARIES";
+    public static readonly string CanManageBeneficiaries = "CAN_MANAGE_BENEFICIARIES";
 }

@@ -1,4 +1,5 @@
 ﻿using Demoulas.Common.Api.Groups;
+using Demoulas.ProfitSharing.Security;
 using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 using ProblemDetails = Microsoft.AspNetCore.Mvc.ProblemDetails;
@@ -21,6 +22,8 @@ public sealed class BeneficiaryGroup : GroupBase
                 .ProducesProblemFE<ProblemDetails>(StatusCodes.Status403Forbidden)
                 .ProducesProblemFE<ProblemDetails>(StatusCodes.Status500InternalServerError)
                 .WithTags(RouteName));
+            // Beneficiary inquiry is part of master inquiry read surface.
+            ep.Policies(Policy.CanManageBeneficiaries);
         });
     }
 }
