@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import { baseUrl } from "../env.setup";
 
 
-test.describe("Master Inqiry landing page: ", () => {
+test.describe("Clean-up Reports: ", () => {
     test.beforeEach(async ({ page }) => {
         await page.goto(baseUrl);
         await page.waitForLoadState("networkidle");
