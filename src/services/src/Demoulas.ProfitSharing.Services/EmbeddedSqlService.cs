@@ -56,29 +56,39 @@ public sealed class EmbeddedSqlService : IEmbeddedSqlService
         var query = $@"
 SELECT 
     bal.Ssn, 
-    CASE WHEN vr.DEMOGRAPHIC_ID IS NULL THEN
-                              CASE WHEN vr.BENEFICIARY_CONTACT_ID IS NULL THEN 0
-                              ELSE  vr.BENEFICIARY_CONTACT_ID END
-                          ELSE vr.DEMOGRAPHIC_ID END   AS ID,
-         ((bal.total + pdWrap.FORFEITURES - (pdWrap.PROF_6_CONTRIB + pdWrap.PROF_8_EARNINGS - pdWrap.PROF_9_FORFEIT)) * vr.RATIO) 
-            + ((pdWrap.PROF_6_CONTRIB + pdWrap.PROF_8_EARNINGS - pdWrap.PROF_9_FORFEIT)-pdWrap.FORFEITURES) AS VESTEDBALANCE,
-          bal.TOTAL AS CURRENTBALANCE,
-          yip.YEARS,
-          vr.RATIO,
-          PROF_5_FORFEIT as ALLOCTOBENE,
-          PROF_6_CONTRIB as ALLOCFROMBENE
+    CASE 
+        WHEN vr.DEMOGRAPHIC_ID IS NULL 
+            THEN CASE WHEN vr.BENEFICIARY_CONTACT_ID IS NULL 
+                         THEN 0 
+                         ELSE vr.BENEFICIARY_CONTACT_ID 
+                  END
+        ELSE vr.DEMOGRAPHIC_ID 
+    END AS ID,
+    
+    CASE 
+        WHEN bal.TOTAL = 0 THEN 0
+        ELSE 
+            ((bal.total + pdWrap.FORFEITURES - (pdWrap.PROF_6_CONTRIB + pdWrap.PROF_8_EARNINGS - pdWrap.PROF_9_FORFEIT)) * vr.RATIO) 
+            + ((pdWrap.PROF_6_CONTRIB + pdWrap.PROF_8_EARNINGS - pdWrap.PROF_9_FORFEIT) - pdWrap.FORFEITURES) 
+    END AS VESTEDBALANCE,
+
+    bal.TOTAL AS CURRENTBALANCE,
+    yip.YEARS,
+    vr.RATIO,
+    PROF_5_FORFEIT as ALLOCTOBENE,
+    PROF_6_CONTRIB as ALLOCFROMBENE
 FROM (
-{totalBalanceQuery}
+    {totalBalanceQuery}
 ) bal
 LEFT JOIN (
-{vestingRatioQuery}	
+    {vestingRatioQuery}
 ) vr ON bal.SSN = vr.SSN
 LEFT JOIN (
-{yearsOfServiceQuery}
+    {yearsOfServiceQuery}
 ) yip ON bal.SSN  = yip.SSN
 LEFT JOIN (
     SELECT pd.SSN,
-           Sum(CASE WHEN pd.PROFIT_CODE_ID IN (1,2,3,5) THEN pd.FORFEITURE ELSE 0 END) AS FORFEITURES,
+           SUM(CASE WHEN pd.PROFIT_CODE_ID IN (1,2,3,5) THEN pd.FORFEITURE ELSE 0 END) AS FORFEITURES,
            SUM(CASE WHEN pd.PROFIT_CODE_ID = 5 THEN pd.FORFEITURE ELSE 0 END) AS PROF_5_FORFEIT,
            SUM(CASE WHEN pd.PROFIT_CODE_ID = 6 THEN pd.CONTRIBUTION ELSE 0 END) AS PROF_6_CONTRIB,
            SUM(CASE WHEN pd.PROFIT_CODE_ID = 8 THEN pd.EARNINGS ELSE 0 END) AS PROF_8_EARNINGS,
