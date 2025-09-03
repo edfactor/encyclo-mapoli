@@ -5,7 +5,6 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import { Paged } from "components/DSMGrid/types";
-import { MissiveAlertProvider } from "pages/MasterInquiry/utils/MissiveAlertContext";
 import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import {
@@ -23,10 +22,10 @@ import {
   BeneficiaryKindDto,
   BeneficiarySearchFilterRequest,
   BeneficiarySearchFilterResponse,
-  BeneficiaryTypeDto,
-  MasterInquiryRequest
+  BeneficiaryTypeDto
 } from "reduxstore/types";
 import { DSMAccordion, DSMGrid, ISortParams, Page, Pagination } from "smart-ui-library";
+import { MissiveAlertProvider } from "../../components/MissiveAlerts/MissiveAlertContext";
 import { CAPTIONS } from "../../constants";
 import BeneficiaryInquiryGrid from "./BeneficiaryInquiryGrid";
 import BeneficiaryInquirySearchFilter from "./BeneficiaryInquirySearchFilter";
@@ -53,9 +52,9 @@ const BeneficiaryInquiry = () => {
   const [beneficiaryKind, setBeneficiaryKind] = useState<BeneficiaryKindDto[]>([]);
   const [beneficiaryType, setBeneficiaryType] = useState<BeneficiaryTypeDto[]>([]);
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
-  const [searchParams, setSearchParams] = useState<MasterInquiryRequest | null>();
+
   const [selectedMember, setSelectedMember] = useState<BeneficiaryDetailResponse | null>();
-  const [noResults, setNoResults] = useState(false);
+
   const [change, setChange] = useState<number>(0);
   const [selectedBeneficiary, setSelectedBeneficiary] = useState<BeneficiaryDto | undefined>();
   const [deleteBeneficiaryId, setDeleteBeneficairyId] = useState<number>(0);
@@ -104,22 +103,6 @@ const BeneficiaryInquiry = () => {
         });
     }
   }, [initialSearch, pageSize, pageNumber, _sortParams]);
-  // const BeneficiarySearchFilter = useCallback(() => {
-  //   if (beneficiarySearchFilterRequest) {
-  //     setBeneficiarySearchFilterRequest(params=>{
-  //       return {
-  //         ...params,
-  //         isSortDescending: _sortParams.isSortDescending,
-  //         skip: pageNumber*pageSize,
-  //         sortBy: _sortParams.sortBy,
-  //         take: pageSize
-  //       }
-  //     })
-  //     triggerSearch(beneficiarySearchFilterRequest).unwrap().then(res => {
-  //       onSearch(res);
-  //     });
-  //   }
-  // }, [beneficiarySearchFilterRequest, pageSize,pageNumber,_sortParams])
 
   const RefreshBeneficiaryGrid = () => {
     setChange((prev) => prev + 1);

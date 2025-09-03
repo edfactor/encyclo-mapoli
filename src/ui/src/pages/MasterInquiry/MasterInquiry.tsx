@@ -2,13 +2,13 @@ import { CircularProgress, Divider, Grid } from "@mui/material";
 import MissiveAlerts from "components/MissiveAlerts/MissiveAlerts";
 import { memo } from "react";
 import { DSMAccordion, Page } from "smart-ui-library";
+import { MissiveAlertProvider } from "../../components/MissiveAlerts/MissiveAlertContext";
+import { useMissiveAlerts } from "../../hooks/useMissiveAlerts";
 import useMasterInquiry from "./hooks/useMasterInquiry";
-import { useMissiveAlerts } from "./hooks/useMissiveAlerts";
 import MasterInquiryGrid from "./MasterInquiryDetailsGrid";
 import MasterInquiryMemberDetails from "./MasterInquiryMemberDetails";
 import MasterInquiryMemberGrid from "./MasterInquiryMemberGrid";
 import MasterInquirySearchFilter from "./MasterInquirySearchFilter";
-import { MissiveAlertProvider } from "./utils/MissiveAlertContext";
 
 const MasterInquiryContent = memo(() => {
   const { missiveAlerts } = useMissiveAlerts();

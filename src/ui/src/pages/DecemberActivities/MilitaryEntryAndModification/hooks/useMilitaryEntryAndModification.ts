@@ -6,10 +6,10 @@ import { clearMasterInquiryData, setMasterInquiryData } from "reduxstore/slices/
 import { clearMilitaryContributions } from "reduxstore/slices/militarySlice";
 import { RootState } from "reduxstore/store";
 import { MasterInquiryRequest, MissiveResponse } from "reduxstore/types";
+import { MASTER_INQUIRY_MESSAGES } from "../../../../components/MissiveAlerts/MissiveMessages";
 import useDecemberFlowProfitYear from "../../../../hooks/useDecemberFlowProfitYear";
 import { useGridPagination } from "../../../../hooks/useGridPagination";
-import { useMissiveAlerts } from "../../../MasterInquiry/hooks/useMissiveAlerts";
-import { MASTER_INQUIRY_MESSAGES } from "../../../MasterInquiry/utils/MasterInquiryMessages";
+import { useMissiveAlerts } from "../../../../hooks/useMissiveAlerts";
 
 interface SearchFormData {
   socialSecurity?: string;
@@ -145,7 +145,7 @@ export const useMilitaryEntryAndModification = () => {
   // Use refs to prevent infinite loops in useGridPagination
   const memberDetailsRef = useRef(masterInquiryMemberDetails);
   const profitYearRef = useRef(profitYear);
-  
+
   // Keep refs updated
   memberDetailsRef.current = masterInquiryMemberDetails;
   profitYearRef.current = profitYear;
@@ -154,7 +154,7 @@ export const useMilitaryEntryAndModification = () => {
     (pageNumber: number, pageSize: number, sortParams: any) => {
       const currentMemberDetails = memberDetailsRef.current;
       const currentProfitYear = profitYearRef.current;
-      
+
       if (!currentMemberDetails) return;
 
       dispatch({ type: "CONTRIBUTIONS_FETCH_START" });

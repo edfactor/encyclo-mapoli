@@ -6,36 +6,17 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetProfitMasterInquiryMemberQuery } from "reduxstore/api/InquiryApi";
 import { useLazyGetForfeitureAdjustmentsQuery } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import {
-  ApiMessageAlert,
-  DSMAccordion,
-  formatNumberWithComma,
-  MessageUpdate,
-  Page,
-  setMessage
-} from "smart-ui-library";
+import { ApiMessageAlert, DSMAccordion, formatNumberWithComma, Page, setMessage } from "smart-ui-library";
+import { MessageKeys, Messages } from "utils/messageDictonary";
+import { MissiveAlertProvider } from "../../components/MissiveAlerts/MissiveAlertContext";
+import MissiveAlerts from "../../components/MissiveAlerts/MissiveAlerts";
 import { CAPTIONS } from "../../constants";
 import useDecemberFlowProfitYear from "../../hooks/useDecemberFlowProfitYear";
 import { InquiryApi } from "../../reduxstore/api/InquiryApi";
 import { clearForfeitureAdjustmentData } from "../../reduxstore/slices/forfeituresAdjustmentSlice";
-import { MissiveAlertProvider } from "../MasterInquiry/utils/MissiveAlertContext";
 import AddForfeitureModal from "./AddForfeitureModal";
 import ForfeituresAdjustmentPanel from "./ForfeituresAdjustmentPanel";
 import ForfeituresAdjustmentSearchParameters from "./ForfeituresAdjustmentSearchParameters";
-
-enum MessageKeys {
-  ForfeituresAdjustment = "ForfeituresAdjustment"
-}
-
-export class Messages {
-  static readonly ForfeituresSaveSuccess: MessageUpdate = {
-    key: MessageKeys.ForfeituresAdjustment,
-    message: {
-      type: "success",
-      title: "Forfeiture saved successfully"
-    }
-  };
-}
 
 const ForfeituresAdjustment = () => {
   const [initialSearchLoaded, setInitialSearchLoaded] = useState(false);
@@ -121,55 +102,56 @@ const ForfeituresAdjustment = () => {
   }, []);
 
   return (
-    <Page
-      label={CAPTIONS.FORFEITURES_ADJUSTMENT}
-      actionNode={renderActionNode()}>
-      <div>
-        <ApiMessageAlert commonKey={MessageKeys.ForfeituresAdjustment} />
-      </div>
-      <Grid
-        container
-        rowSpacing="24px">
-        <Grid width={"100%"}>
-          <Divider />
-        </Grid>
-        <Grid width={"100%"}>
-          <DSMAccordion title="Filter">
-            <ForfeituresAdjustmentSearchParameters
-              setInitialSearchLoaded={handleSearchComplete}
-              setPageReset={setPageNumberReset}
-            />
-          </DSMAccordion>
-        </Grid>
+    <MissiveAlertProvider>
+      <Page
+        label={CAPTIONS.FORFEITURES_ADJUSTMENT}
+        actionNode={renderActionNode()}>
+        <div>
+          <ApiMessageAlert commonKey={MessageKeys.ForfeituresAdjustment} />
+        </div>
+        <Grid
+          container
+          rowSpacing="24px">
+          <Grid width={"100%"}>
+            <Divider />
+          </Grid>
+          <Grid width={"100%"}>
+            <DSMAccordion title="Filter">
+              <ForfeituresAdjustmentSearchParameters
+                setInitialSearchLoaded={handleSearchComplete}
+                setPageReset={setPageNumberReset}
+              />
+            </DSMAccordion>
+          </Grid>
+          <MissiveAlerts />
 
-        {forfeitureAdjustmentData && profitYear && (
-          <MissiveAlertProvider>
+          {forfeitureAdjustmentData && profitYear && (
             <StandaloneMemberDetails
               memberType={1}
               id={forfeitureAdjustmentData.demographicId}
               profitYear={profitYear}
             />
-          </MissiveAlertProvider>
-        )}
+          )}
 
-        {forfeitureAdjustmentData && profitYear && (
-          <Grid width="100%">
-            <ForfeituresAdjustmentPanel
-              initialSearchLoaded={initialSearchLoaded}
-              setInitialSearchLoaded={setInitialSearchLoaded}
-              onAddForfeiture={handleOpenAddForfeitureModal}
-            />
-          </Grid>
-        )}
-      </Grid>
+          {forfeitureAdjustmentData && profitYear && (
+            <Grid width="100%">
+              <ForfeituresAdjustmentPanel
+                initialSearchLoaded={initialSearchLoaded}
+                setInitialSearchLoaded={setInitialSearchLoaded}
+                onAddForfeiture={handleOpenAddForfeitureModal}
+              />
+            </Grid>
+          )}
+        </Grid>
 
-      <AddForfeitureModal
-        open={isAddForfeitureModalOpen}
-        onClose={handleCloseAddForfeitureModal}
-        onSave={handleSaveForfeiture}
-        suggestedForfeitResponse={forfeitureAdjustmentData}
-      />
-    </Page>
+        <AddForfeitureModal
+          open={isAddForfeitureModalOpen}
+          onClose={handleCloseAddForfeitureModal}
+          onSave={handleSaveForfeiture}
+          suggestedForfeitResponse={forfeitureAdjustmentData}
+        />
+      </Page>
+    </MissiveAlertProvider>
   );
 };
 
