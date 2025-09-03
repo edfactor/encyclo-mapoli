@@ -1,5 +1,14 @@
 import { MissiveResponse } from "reduxstore/types";
 
+export const FORFEITURES_ADJUSTMENT_MESSAGES = {
+  EMPLOYEE_NOT_FOUND: {
+    id: 950,
+    severity: "Error" as const,
+    message: "Employee Not Found",
+    description: "Employee not found."
+  } as MissiveResponse
+};
+
 export const MASTER_INQUIRY_MESSAGES = {
   MEMBER_NOT_FOUND: {
     id: 900,
