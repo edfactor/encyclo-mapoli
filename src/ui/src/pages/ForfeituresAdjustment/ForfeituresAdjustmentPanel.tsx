@@ -1,6 +1,6 @@
 import { AddOutlined } from "@mui/icons-material";
 import { Button } from "@mui/material";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React from "react";
 
 interface ForfeituresAdjustmentPanelProps {
   initialSearchLoaded: boolean;
