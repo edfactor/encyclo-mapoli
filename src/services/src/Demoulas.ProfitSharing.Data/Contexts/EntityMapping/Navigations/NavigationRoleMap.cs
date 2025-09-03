@@ -23,7 +23,8 @@ internal sealed class NavigationRoleMap : IEntityTypeConfiguration<NavigationRol
             new NavigationRole { Id = NavigationRole.Contants.Impersonation, Name = Role.IMPERSONATION },
             new NavigationRole { Id = NavigationRole.Contants.ItDevOps, Name = Role.ITDEVOPS },
             new NavigationRole { Id = NavigationRole.Contants.ItOperations, Name = Role.ITOPERATIONS },
-            new NavigationRole { Id = NavigationRole.Contants.ExecutiveAdministrator, Name = Role.EXECUTIVEADMIN }
+            new NavigationRole { Id = NavigationRole.Contants.ExecutiveAdministrator, Name = Role.EXECUTIVEADMIN },
+            new NavigationRole { Id = NavigationRole.Contants.Auditor, Name = Role.AUDITOR }
         );
     }
 }
