@@ -20,9 +20,8 @@ internal static class TestActivityFactory
             // Arrange
             new ImportReadyDbToSmartDb(),
             new TrimTo14Employees(),
-            new DropBadBenes(),
-            new DropBadEmployee(),
-            new FixFrozen(),
+            new DropBadBenesReady(),
+            new FixFrozenReady(),
             new SanityCheckEmployeeAndBenes(),
             new OverwriteBadges(),
             new SetDateOfBirthTo19YearsAgo(),

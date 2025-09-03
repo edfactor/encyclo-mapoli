@@ -34,7 +34,7 @@ public static class ReadyActivityFactory
 
             // Clean Up
             new ReadyActivity(sshClient, SftpClient, chatty, "A1", "PROFSHARE-SSN-CLEANUP-RPTS", "", dataDirectory),
-            // 241228 <-- Saturday of "latst week" for 2024.   Week # 52 some year, some years Week 53
+            // 241228 <-- Saturday of "last week" for 2024.   Week # 52 some year, some years Week 53
             new ReadyActivity(sshClient, SftpClient, chatty, "A2", "TERM-REHIRE", "BDATE=240106 EDATE=241228", dataDirectory),
             new ReadyActivity(sshClient, SftpClient, chatty, "A3", "PROF-TERM", "SDATE=240106 EDATE=241228 YDATE=2024", dataDirectory),
             new ReadyActivity(sshClient, SftpClient, chatty, "A4", "QRY-PSLOAN", "", dataDirectory),
@@ -55,7 +55,8 @@ public static class ReadyActivityFactory
             // Fiscal Close
             new ReadyActivity(sshClient, SftpClient, chatty, "A15", "PROF-DOLLAR-EXTRACT", "", dataDirectory),
             new ReadyActivity(sshClient, SftpClient, chatty, "A16", "!READY-Screen-008-09", "", dataDirectory),
-            new ReadyActivity(sshClient, SftpClient, chatty, "A17", "PROF-SHARE", "sw[3]=1 sw[2]=1 CDATE=241228 YEAREND=Y SUMREP=Y", dataDirectory),
+            // sw[2]=1 <--- last years exec hours dollars   sw[3]=1 <--- do not update
+            new ReadyActivity(sshClient, SftpClient, chatty, "A17", "PROF-SHARE", "sw[2]=1 sw[3]=1 CDATE=241228 YEAREND=Y SUMREP=Y", dataDirectory),
             new ReadyActivity(sshClient, SftpClient, chatty, "A18", "PROF-SHARE", "sw[2]=1 CDATE=241228 YEAREND=Y", dataDirectory),
             new ReadyActivity(sshClient, SftpClient, chatty, "A19", "GET-ELIGIBLE-EMPS", " CDATE=20250103", dataDirectory),
             new ReadyActivity(sshClient, SftpClient, chatty, "A20", "PROF-FORT", "YEAR=2024", dataDirectory),

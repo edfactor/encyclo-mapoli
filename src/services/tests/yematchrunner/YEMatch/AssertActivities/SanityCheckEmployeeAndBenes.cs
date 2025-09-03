@@ -49,22 +49,22 @@ public class SanityCheckEmployeeAndBenes : BaseSqlActivity
                             AND f.AS_OF_DATETIME >= d.VALID_FROM
                             AND f.AS_OF_DATETIME < d.VALID_TO
                         )
-                    WHERE SSN = 700007178
-                    order by system
+                    WHERE SSN in (700007178, 700009305)
+                    order by system, ssn
                     """
             );
             
             var readyRehire = await RdyQuery(
                 """
-                            select * from (
-                                select 'live' system, lower(PY_SCOD) EMPLOYMENT_STATUS_ID, NULLIF(PY_TERM_DT,0) TERMINATION_DATE, NULLIF(PY_TERM,' ') TERMINATION_CODE_ID, dem_ssn SSN from demographics
-                                union all
-                                select 'frzn', lower(PY_SCOD), NULLIF(PY_TERM_DT,0), NULLIF(PY_TERM,' '), dem_ssn  from demo_profshare
-                                )
-                            where ssn = 700007178
-                            order by system
+                        select * from (
+                            select 'live' system, lower(PY_SCOD) EMPLOYMENT_STATUS_ID, NULLIF(PY_TERM_DT,0) TERMINATION_DATE, NULLIF(PY_TERM,' ') TERMINATION_CODE_ID, dem_ssn SSN from demographics
+                            union all
+                            select 'frzn', lower(PY_SCOD), NULLIF(PY_TERM_DT,0), NULLIF(PY_TERM,' '), dem_ssn  from demo_profshare
+                            )
+                        where ssn in (700007178, 700009305)
+                        order by system, ssn
                 """);
-
+            // Console.WriteLine($"smart\n{smrtRehire}\n ready\n{readyRehire}\n")
             smrtRehire.ShouldBeEquivalentTo(readyRehire);
         }
         
