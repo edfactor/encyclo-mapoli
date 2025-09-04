@@ -166,6 +166,7 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
   });
 
   const handleReset = () => {
+    clearAlerts(); // Clear missive alerts when resetting
     setPageReset(true);
     reset({
       ssn: "",
