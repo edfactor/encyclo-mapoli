@@ -36,15 +36,23 @@ const schema = yup
       .number()
       .typeError("SSN must be a number")
       .integer("SSN must be an integer")
-      .min(0, "SSN must be positive")
-      .max(999999999, "SSN must be 9 digits or less")
+      .test("ssn-length", "SSN must be 7, 8, or 9 digits", function (value) {
+        if (value === undefined || value === null) return true;
+        return (value >= 1000000 && value <= 9999999) || // 7 digits
+               (value >= 10000000 && value <= 99999999) || // 8 digits
+               (value >= 100000000 && value <= 999999999); // 9 digits
+      })
       .transform((value) => value || undefined),
     badge: yup
       .number()
       .typeError("Badge Number must be a number")
       .integer("Badge Number must be an integer")
-      .min(0, "Badge must be positive")
-      .max(9999999, "Badge must be 7 digits or less")
+      .test("badge-length", "Badge must be 5, 6, or 7 digits", function (value) {
+        if (value === undefined || value === null) return true;
+        return (value >= 10000 && value <= 99999) || // 5 digits
+               (value >= 100000 && value <= 999999) || // 6 digits
+               (value >= 1000000 && value <= 9999999); // 7 digits
+      })
       .transform((value) => value || undefined),
     year: yup
       .number()
@@ -82,7 +90,7 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
       badge: forfeitureAdjustmentQueryParams?.badge || "",
       year: forfeitureAdjustmentQueryParams?.profitYear || profitYear
     },
-    mode: "onSubmit"
+    mode: "onBlur"
   });
 
   let socialSecurityChosen = false;
