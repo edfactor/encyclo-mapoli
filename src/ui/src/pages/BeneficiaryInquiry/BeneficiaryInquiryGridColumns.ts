@@ -1,6 +1,7 @@
 import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
 import {
+  createCityColumn,
   createCurrencyColumn,
   createDateColumn,
   createNameColumn,
@@ -45,18 +46,11 @@ export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
         return `${params.data.street}`;
       }
     },
-    {
-      headerName: "City",
-      field: "city",
-      colId: "city",
-      minWidth: 120,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true,
+    createCityColumn({
       valueFormatter: (params) => {
         return `${params.data.city}`;
       }
-    },
+    }),
     createStateColumn({}),
     createZipColumn({
       field: "postalCode"

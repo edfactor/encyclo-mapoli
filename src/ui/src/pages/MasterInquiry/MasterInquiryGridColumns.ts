@@ -1,5 +1,13 @@
 import { ColDef } from "ag-grid-community";
-import { createCurrencyColumn, createHoursColumn, createStatusColumn, createStateColumn, createYearColumn, createYesOrNoColumn } from "../../utils/gridColumnFactory";
+import {
+  createCurrencyColumn,
+  createHoursColumn,
+  createStateColumn,
+  createStatusColumn,
+  createTaxCodeColumn,
+  createYearColumn,
+  createYesOrNoColumn
+} from "../../utils/gridColumnFactory";
 
 export const GetMasterInquiryGridColumns = (): ColDef[] => {
   return [
@@ -95,25 +103,7 @@ export const GetMasterInquiryGridColumns = (): ColDef[] => {
       field: "stateTaxes",
       minWidth: 120
     }),
-    {
-      headerName: "Tax Code",
-      field: "taxCodeId",
-      colId: "taxCodeId",
-      minWidth: 100,
-      headerClass: "left-align",
-      cellClass: "left-align",
-      resizable: true,
-      tooltipValueGetter: (params) => {
-        return params.data?.taxCodeName;
-      },
-      valueFormatter: (params) => {
-        const id = params.data?.taxCodeId; // assuming 'status' is in the row data
-        const name = params.data?.taxCodeName; // assuming 'statusName' is in the row data
-
-        if (id == 0) return "";
-        return `[${id}] ${name}`;
-      }
-    },
+    createTaxCodeColumn({}),
     {
       headerName: "Comment Type",
       headerTooltip: "Comment Type",

@@ -1,5 +1,4 @@
 import { ColDef } from "ag-grid-community";
-import { formatNumberWithComma } from "smart-ui-library";
 import { GRID_COLUMN_WIDTHS } from "../../../constants";
 import {
   createAgeColumn,
@@ -8,6 +7,7 @@ import {
   createDateColumn,
   createHoursColumn,
   createNameColumn,
+  createPointsColumn,
   createSSNColumn,
   createStatusColumn,
   createStoreColumn,
@@ -48,15 +48,10 @@ export const GetBeneficiariesGridColumns = (navFunction: (badgeNumber: string) =
     createHoursColumn({
       minWidth: 100
     }),
-    {
-      headerName: "Points",
-      field: "points",
-      colId: "points",
+    createPointsColumn({
       minWidth: 100,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: (params) => formatNumberWithComma(params.value)
-    },
+      includeCommaFormatting: true
+    }),
     createYesOrNoColumn({
       headerName: "New",
       field: "isNew",

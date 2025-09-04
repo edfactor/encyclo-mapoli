@@ -8,7 +8,8 @@ import {
   createDateColumn,
   createNameColumn,
   createSSNColumn,
-  createStateColumn
+  createStateColumn,
+  createTaxCodeColumn
 } from "../../../utils/gridColumnFactory";
 
 export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
@@ -55,14 +56,13 @@ export const GetDistributionsAndForfeituresColumns = (): ColDef[] => {
       minWidth: 120
     }),
     createAgeColumn({}),
-    {
-      headerName: "Tax Code",
+    createTaxCodeColumn({
       field: "taxCode",
-      colId: "taxCode",
       minWidth: 80,
-      type: "rightAligned",
-      resizable: true
-    },
+      alignment: "right",
+      showBrackets: false,
+      hideZeroValues: false
+    }),
     {
       headerName: "Enrolled",
       field: "enrolledId",

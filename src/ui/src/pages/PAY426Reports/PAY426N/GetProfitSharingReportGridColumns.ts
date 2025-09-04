@@ -1,5 +1,4 @@
 import { ColDef } from "ag-grid-community";
-import { formatNumberWithComma } from "smart-ui-library";
 import {
   createAgeColumn,
   createBadgeColumn,
@@ -8,6 +7,7 @@ import {
   createDateColumn,
   createHoursColumn,
   createNameColumn,
+  createPointsColumn,
   createSSNColumn,
   createStatusColumn,
   createStoreColumn
@@ -21,14 +21,8 @@ export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: str
       headerName: "Badge",
       navigateFunction: navFunction
     }),
-    createNameColumn({
-      field: "employeeName",
-      minWidth: 180,
-      sortable: true
-    }),
-    createStoreColumn({
-      minWidth: 80
-    }),
+    createNameColumn({}),
+    createStoreColumn({}),
     {
       headerName: "Type",
       field: "employeeTypeCode",
@@ -48,18 +42,8 @@ export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: str
       headerName: "Wages",
       field: "wages"
     }),
-    createHoursColumn({
-      minWidth: 100
-    }),
-    {
-      headerName: "Points",
-      field: "points",
-      colId: "points",
-      minWidth: 100,
-      type: "rightAligned",
-      resizable: true,
-      valueFormatter: (params) => formatNumberWithComma(params.value)
-    },
+    createHoursColumn({}),
+    createPointsColumn({}),
     {
       headerName: "New",
       field: "isNew",
@@ -76,8 +60,7 @@ export const GetProfitSharingReportGridColumns = (navFunction: (badgeNumber: str
     }),
     createCurrencyColumn({
       headerName: "Balance",
-      field: "balance",
-      minWidth: 140
+      field: "balance"
     }),
     createCountColumn({
       headerName: "Years in Plan",
