@@ -39,10 +39,9 @@ const schema = yup
       .test("ssn-length", "SSN must be 7, 8, or 9 digits", function (value) {
         if (value === undefined || value === null) return true;
         return (
-          (value >= 1000000 && value <= 9999999) || // 7 digits
-          (value >= 10000000 && value <= 99999999) || // 8 digits
-          (value >= 100000000 && value <= 999999999)
-        ); // 9 digits
+          // 7 - 9 digits are valid
+          value >= 1000000 && value <= 999999999
+        );
       })
       .transform((value) => value || undefined),
     badge: yup
@@ -52,10 +51,9 @@ const schema = yup
       .test("badge-length", "Badge must be 5, 6, or 7 digits", function (value) {
         if (value === undefined || value === null) return true;
         return (
-          (value >= 10000 && value <= 99999) || // 5 digits
-          (value >= 100000 && value <= 999999) || // 6 digits
-          (value >= 1000000 && value <= 9999999)
-        ); // 7 digits
+          // 5 - 7 digits are valid
+          value >= 10000 && value <= 9999999
+        );
       })
       .transform((value) => value || undefined),
     year: yup
