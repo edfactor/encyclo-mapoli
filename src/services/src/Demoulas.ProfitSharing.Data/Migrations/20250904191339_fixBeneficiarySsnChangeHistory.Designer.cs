@@ -3,6 +3,7 @@ using System;
 using Demoulas.ProfitSharing.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Oracle.EntityFrameworkCore.Metadata;
 
@@ -11,9 +12,11 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    partial class ProfitSharingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250904191339_fixBeneficiarySsnChangeHistory")]
+    partial class fixBeneficiarySsnChangeHistory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -25965,9 +25968,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         .HasColumnType("NUMBER(18)")
                         .HasColumnName("ID");
 
-                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("BeneficiaryContactId")
+                    b.Property<int>("BeneficiaryId")
                         .HasPrecision(9)
                         .HasColumnType("NUMBER(9)")
                         .HasColumnName("BENEFICIARY_ID");
@@ -26004,8 +26005,8 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.HasKey("Id")
                         .HasName("PK_BENEFICIARY_SSN_CHANGE_HISTORY");
 
-                    b.HasIndex(new[] { "BeneficiaryContactId" }, "IX_BENEFICIARY")
-                        .HasDatabaseName("IX_BENEFICIARY_SSN_CHANGE_HISTORY_BENEFICIARYCONTACTID");
+                    b.HasIndex(new[] { "BeneficiaryId" }, "IX_BENEFICIARY")
+                        .HasDatabaseName("IX_BENEFICIARY_SSN_CHANGE_HISTORY_BENEFICIARYID");
 
                     b.ToTable("BENEFICIARY_SSN_CHANGE_HISTORY", (string)null);
                 });
@@ -32055,10 +32056,10 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                 {
                     b.HasOne("Demoulas.ProfitSharing.Data.Entities.BeneficiaryContact", "BeneficiaryContact")
                         .WithMany("BeneficiarySsnChangeHistories")
-                        .HasForeignKey("BeneficiaryContactId")
+                        .HasForeignKey("Id")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
-                        .HasConstraintName("FK_BENEFICIARY_SSN_CHANGE_HISTORY_BENEFICIARY_CONTACT_BENEFICIARYCONTACTID");
+                        .HasConstraintName("FK_BENEFICIARY_SSN_CHANGE_HISTORY_BENEFICIARY_CONTACT_ID");
 
                     b.Navigation("BeneficiaryContact");
                 });
