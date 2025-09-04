@@ -12,7 +12,6 @@ import {
   DSMGrid,
   formatNumberWithComma,
   ISortParams,
-  MessageUpdate,
   numberToCurrency,
   Pagination,
   setMessage
@@ -20,23 +19,10 @@ import {
 import { ReportSummary } from "../../../components/ReportSummary";
 import { TotalsGrid } from "../../../components/TotalsGrid/TotalsGrid";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
+import { Messages } from "../../../utils/messageDictonary";
 import { TerminationSearchRequest } from "./Termination";
 import { GetDetailColumns } from "./TerminationDetailsGridColumns";
 import { GetTerminationColumns } from "./TerminationGridColumns";
-
-enum MessageKeys {
-  TerminationSave = "TerminationSave"
-}
-
-export class Messages {
-  static readonly TerminationSaveSuccess: MessageUpdate = {
-    key: MessageKeys.TerminationSave,
-    message: {
-      type: "success",
-      title: "Forfeiture adjustment saved successfully"
-    }
-  };
-}
 
 interface TerminationGridSearchProps {
   initialSearchLoaded: boolean;
