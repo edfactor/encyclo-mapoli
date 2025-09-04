@@ -88,3 +88,9 @@ export interface TaxCodeColumnOptions extends FormattableColumnOptions {
   idField?: string;
   nameField?: string;
 }
+
+export interface PSNColumnOptions extends FormattableColumnOptions {
+  enableLinking?: boolean;
+  navigateFunction?: (badgeNumber: string, psnSuffix?: string) => void;
+  linkingStyle?: "simple" | "badge-psn"; // Different PSN linking patterns
+}

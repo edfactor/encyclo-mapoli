@@ -14,6 +14,7 @@ import {
   NameColumnOptions,
   PercentageColumnOptions,
   PointsColumnOptions,
+  PSNColumnOptions,
   SSNColumnOptions,
   StateColumnOptions,
   TaxCodeColumnOptions,
@@ -852,6 +853,59 @@ export const createPhoneColumn = (options: FormattableColumnOptions = {}): ColDe
     column.valueFormatter = valueFormatter;
   } else {
     column.valueFormatter = (params) => params.data[field] || "";
+  }
+
+  return column;
+};
+
+export const createPSNColumn = (options: PSNColumnOptions = {}): ColDef => {
+  const {
+    headerName = "PSN",
+    field = "psn",
+    colId = field,
+    minWidth = 120,
+    maxWidth,
+    alignment = "center",
+    sortable = true,
+    resizable = true,
+    enableLinking = false,
+    navigateFunction,
+    linkingStyle = "simple",
+    valueFormatter
+  } = options;
+
+  const alignmentClass = alignment === "center" ? "center-align" : alignment === "right" ? "right-align" : "left-align";
+
+  const column: ColDef = {
+    headerName,
+    field,
+    colId,
+    minWidth,
+    headerClass: alignmentClass,
+    cellClass: alignmentClass,
+    resizable,
+    sortable
+  };
+
+  if (maxWidth) {
+    column.maxWidth = maxWidth;
+  }
+
+  if (enableLinking && navigateFunction) {
+    column.cellRenderer = (params: ICellRendererParams) => {
+      if (linkingStyle === "badge-psn") {
+        // For complex badge-psn linking (like in PayBenReport)
+        return viewBadgeLinkRenderer(params.data.badgeNumber, parseInt(params.data[field].slice(-4)));
+      } else if (field === "psnSuffix") {
+        // For psnSuffix fields (like in BeneficiaryInquiry)
+        return viewBadgeLinkRenderer(params.data.badgeNumber, params.data.psnSuffix);
+      } else {
+        // Simple PSN linking
+        return viewBadgeLinkRenderer(params.data[field]);
+      }
+    };
+  } else if (valueFormatter) {
+    column.valueFormatter = valueFormatter;
   }
 
   return column;

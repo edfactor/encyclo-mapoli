@@ -1,11 +1,11 @@
-import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
+import { ColDef } from "ag-grid-community";
 import {
   createCityColumn,
   createCurrencyColumn,
   createDateColumn,
   createNameColumn,
   createPhoneColumn,
+  createPSNColumn,
   createSSNColumn,
   createStateColumn,
   createZipColumn
@@ -13,19 +13,13 @@ import {
 
 export const BeneficiaryInquiryGridColumns = (): ColDef[] => {
   return [
-    {
+    createPSNColumn({
       headerName: "Psn",
       field: "psnSuffix",
-      colId: "psnSuffix",
-      minWidth: 120,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true,
-      sortable: true,
-      unSortIcon: true,
-      cellRenderer: (params: ICellRendererParams) =>
-        viewBadgeLinkRenderer(params.data.badgeNumber, params.data.psnSuffix)
-    },
+
+      enableLinking: true,
+      linkingStyle: "simple"
+    }),
     createCurrencyColumn({
       headerName: "Current Balance",
       field: "currentBalance"
