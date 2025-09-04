@@ -25970,7 +25970,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<int>("BeneficiaryContactId")
                         .HasPrecision(9)
                         .HasColumnType("NUMBER(9)")
-                        .HasColumnName("BENEFICIARY_ID");
+                        .HasColumnName("BENEFICIARY_CONTACT_ID");
 
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .ValueGeneratedOnAdd()
