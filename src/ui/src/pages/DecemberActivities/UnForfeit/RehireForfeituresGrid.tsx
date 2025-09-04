@@ -1,14 +1,14 @@
 import { Grid } from "@mui/material";
 import { ColDef, GridApi, ICellRendererParams } from "ag-grid-community";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   useLazyGetRehireForfeituresQuery,
   useUpdateForfeitureAdjustmentBulkMutation,
   useUpdateForfeitureAdjustmentMutation
 } from "reduxstore/api/YearsEndApi";
 import { RootState } from "reduxstore/store";
-import { DSMGrid, ISortParams, Pagination } from "smart-ui-library";
+import { DSMGrid, formatNumberWithComma, ISortParams, Pagination, setMessage } from "smart-ui-library";
 import ReportSummary from "../../../components/ReportSummary";
 import useDecemberFlowProfitYear from "../../../hooks/useDecemberFlowProfitYear";
 import useFiscalCalendarYear from "../../../hooks/useFiscalCalendarYear";
@@ -17,6 +17,7 @@ import {
   RehireForfeituresEditedValues,
   StartAndEndDateRequest
 } from "../../../reduxstore/types";
+import { Messages } from "../../../utils/messageDictonary";
 import { GetProfitDetailColumns } from "./RehireForfeituresProfitDetailGridColumns";
 
 import { GetRehireForfeituresGridColumns } from "./RehireForfeituresGridColumns";
@@ -51,9 +52,12 @@ const RehireForfeituresGrid: React.FC<RehireForfeituresGridSearchProps> = ({
   const [gridApi, setGridApi] = useState<GridApi | null>(null);
   const [editedValues, setEditedValues] = useState<RehireForfeituresEditedValues>({});
   const [loadingRowIds, setLoadingRowIds] = useState<Set<number>>(new Set());
+  const [pendingSuccessMessage, setPendingSuccessMessage] = useState<string | null>(null);
+  const [isPendingBulkMessage, setIsPendingBulkMessage] = useState<boolean>(false);
   const fiscalCalendarYear = useFiscalCalendarYear();
   const selectedProfitYear = useDecemberFlowProfitYear();
   const { rehireForfeitures, rehireForfeituresQueryParams } = useSelector((state: RootState) => state.yearsEnd);
+  const dispatch = useDispatch();
 
   const [triggerSearch, { isFetching }] = useLazyGetRehireForfeituresQuery();
   const [updateForfeitureAdjustmentBulk] = useUpdateForfeitureAdjustmentBulkMutation();
@@ -62,6 +66,24 @@ const RehireForfeituresGrid: React.FC<RehireForfeituresGridSearchProps> = ({
   const onGridReady = useCallback((params: { api: GridApi }) => {
     setGridApi(params.api);
   }, []);
+
+  // Effect to show success message after grid finishes loading
+  useEffect(() => {
+    if (!isFetching && pendingSuccessMessage) {
+      const messageTemplate = isPendingBulkMessage ? Messages.UnforfeitBulkSaveSuccess : Messages.UnforfeitSaveSuccess;
+      dispatch(
+        setMessage({
+          ...messageTemplate,
+          message: {
+            ...messageTemplate.message,
+            message: pendingSuccessMessage
+          }
+        })
+      );
+      setPendingSuccessMessage(null);
+      setIsPendingBulkMessage(false);
+    }
+  }, [isFetching, pendingSuccessMessage, isPendingBulkMessage, dispatch]);
 
   const addRowToSelectedRows = (id: number) => {
     setSelectedRowIds([...selectedRowIds, id]);
@@ -124,7 +146,7 @@ const RehireForfeituresGrid: React.FC<RehireForfeituresGridSearchProps> = ({
   );
 
   const handleBulkSave = useCallback(
-    async (requests: ForfeitureAdjustmentUpdateRequest[]) => {
+    async (requests: ForfeitureAdjustmentUpdateRequest[], names: string[]) => {
       // Add all affected badge numbers to loading state
       const badgeNumbers = requests.map((request) => request.badgeNumber);
       setLoadingRowIds((prev) => {
@@ -143,6 +165,11 @@ const RehireForfeituresGrid: React.FC<RehireForfeituresGridSearchProps> = ({
         setEditedValues(updatedEditedValues);
         setSelectedRowIds([]);
         onUnsavedChanges(Object.keys(updatedEditedValues).length > 0);
+
+        // Prepare bulk success message
+        const employeeNames = names.map((name) => name || "Unknown Employee");
+        const bulkSuccessMessage = `Members affected: ${employeeNames.join("; ")}`;
+
         if (rehireForfeituresQueryParams) {
           const request = createRequest(
             pageNumber * pageSize,
@@ -152,6 +179,9 @@ const RehireForfeituresGrid: React.FC<RehireForfeituresGridSearchProps> = ({
           );
           if (request) {
             await triggerSearch(request, false);
+            // Set the pending success message to be shown after grid reload
+            setPendingSuccessMessage(bulkSuccessMessage);
+            setIsPendingBulkMessage(true);
           }
         }
       } catch (error) {
@@ -180,7 +210,7 @@ const RehireForfeituresGrid: React.FC<RehireForfeituresGridSearchProps> = ({
   );
 
   const handleSave = useCallback(
-    async (request: ForfeitureAdjustmentUpdateRequest) => {
+    async (request: ForfeitureAdjustmentUpdateRequest, name: string) => {
       const rowId = request.badgeNumber; // Use badgeNumber as unique identifier
       setLoadingRowIds((prev) => new Set(Array.from(prev).concat(rowId)));
 
@@ -194,10 +224,17 @@ const RehireForfeituresGrid: React.FC<RehireForfeituresGridSearchProps> = ({
           delete updatedEditedValues[rowKey];
           setEditedValues(updatedEditedValues);
           onUnsavedChanges(Object.keys(updatedEditedValues).length > 0);
+
+          // Prepare success message
+          const employeeName = name || "the selected employee";
+          const successMessage = `The unforfeiture amount of $${formatNumberWithComma(request.forfeitureAmount)} for ${employeeName} saved successfully`;
+
           if (rehireForfeituresQueryParams) {
             const searchRequest = createRequest(pageNumber * pageSize, sortParams.sortBy, sortParams.isSortDescending);
             if (searchRequest) {
               await triggerSearch(searchRequest, false);
+              // Set the pending success message to be shown after grid reload
+              setPendingSuccessMessage(successMessage);
             }
           }
         }

@@ -1,6 +1,6 @@
 import { Divider, CircularProgress } from "@mui/material";
 import { Grid } from "@mui/material";
-import { DSMAccordion, Page } from "smart-ui-library";
+import { ApiMessageAlert, DSMAccordion, Page } from "smart-ui-library";
 import RehireForfeituresSearchFilter from "./RehireForfeituresSearchFilter";
 import RehireForfeituresGrid from "./RehireForfeituresGrid";
 import { useState, useEffect } from "react";
@@ -116,6 +116,9 @@ const RehireForfeitures = () => {
     <Page
       label={`${CAPTIONS.REHIRE_FORFEITURES}`}
       actionNode={renderActionNode()}>
+      <div>
+        <ApiMessageAlert commonKey="UnforfeitSave" />
+      </div>
       <Grid
         container
         rowSpacing="24px">
