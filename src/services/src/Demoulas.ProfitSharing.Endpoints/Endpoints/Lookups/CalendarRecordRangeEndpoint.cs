@@ -42,7 +42,7 @@ public class CalendarRecordRangeEndpoint : ProfitSharingEndpoint<YearRangeReques
             s.Responses[400] = "Bad Request. Both BeginProfitYear and EndProfitYear must be valid years.";
             s.Responses[404] = "Not Found. No accounting dates found for the specified years.";
         });
-        Group<LookupGroup>();
+    Group<LookupGroup>();
 
         if (!Env.IsTestEnvironment())
         {

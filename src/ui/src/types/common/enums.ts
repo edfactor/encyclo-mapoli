@@ -1,4 +1,5 @@
 export enum ImpersonationRoles {
+  Auditor = "Auditor",
   FinanceManager = "Finance-Manager",
   DistributionsClerk = "Distributions-Clerk",
   HardshipAdministrator = "Hardship-Administrator",

@@ -27,7 +27,7 @@ public class BeneficiarySearchFilterEndpoint : ProfitSharingEndpoint<Beneficiary
             m.Description = "It will search member based on Member Type i-e beneficiary or employee.";
             m.ResponseExamples = new Dictionary<int, object> { { 200, new PaginatedResponseDto<BeneficiarySearchFilterResponse>() } };
         });
-        Group<BeneficiaryGroup>();
+        Group<BeneficiariesGroup>();
     }
 
     public override async Task<PaginatedResponseDto<BeneficiarySearchFilterResponse>> ExecuteAsync(BeneficiarySearchFilterRequest req, CancellationToken ct)

@@ -21,7 +21,7 @@ Install 3rd Party Libraries:
 1. Clone the git repository https://bitbucket.org/demoulas/smart-profit-sharing 
 2. Open the Demoulas.ProfitSharing solution
     - API Navigate to the \src\Services folder
-    - Locate Demoulas.ProfitSharing.sln and open with Visual Studio.
+    - Locate Demoulas.ProfitSharing.slnx and open with Visual Studio.
 2. Set the 'Demoulas.ProfitSharing.AppHost' project as your startup project
     - Find the project, right click and choose "set as startup project"
 3. Check for ArtifactoryCloud NuGet package source

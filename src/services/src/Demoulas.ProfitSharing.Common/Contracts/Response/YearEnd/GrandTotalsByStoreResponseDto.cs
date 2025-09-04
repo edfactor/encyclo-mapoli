@@ -5,5 +5,5 @@ namespace Demoulas.ProfitSharing.Common.Contracts.Response.YearEnd;
 [NoMemberDataExposed]
 public record GrandTotalsByStoreResponseDto
 {
-    public List<GrandTotalsByStoreRowDto> Rows { get; init; } = new();
+    public List<GrandTotalsByStoreRowDto> Rows { get; init; } = [];
 }

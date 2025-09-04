@@ -39,7 +39,7 @@ public class ProfitMasterRevertEndpoint : ProfitSharingEndpoint<ProfitYearReques
     {
         var response = await _profitMasterService.Revert(req, ct);
         await _navigationService.UpdateNavigation(Navigation.Constants.MasterUpdate, NavigationStatus.Constants.InProgress, ct);
-        
+
         await Send.OkAsync(response, ct);
     }
 }

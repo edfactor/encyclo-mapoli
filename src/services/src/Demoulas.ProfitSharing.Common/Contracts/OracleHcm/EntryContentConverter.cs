@@ -45,11 +45,11 @@ public class EntryContentConverter<TContext> : JsonConverter<EntryContent<TConte
             var changedAttributes = rootElement.TryGetProperty("Changed Attributes", out var changedAttributesElement) &&
                                     changedAttributesElement.ValueKind == JsonValueKind.Array
                 ? JsonSerializer.Deserialize<List<ChangedAttribute>>(changedAttributesElement.GetRawText(), options)
-                : new List<ChangedAttribute>();
+                : [];
 
             return new EntryContent<TContext>
             {
-                Context = contextList ?? new List<TContext>(),
+                Context = contextList ?? [],
                 ChangedAttributes = changedAttributes
             };
         }

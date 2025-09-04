@@ -13,6 +13,7 @@ public class NavigationRole:ILookupTable<byte>
         public const byte ItDevOps = 6;
         public const byte ItOperations = 7;
         public const byte ExecutiveAdministrator = 8;
+        public const byte Auditor = 9;
     }
 
     public byte Id { get; set; }

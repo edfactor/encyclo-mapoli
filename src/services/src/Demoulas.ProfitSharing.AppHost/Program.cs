@@ -52,7 +52,6 @@ var configuration = new ConfigurationBuilder()
     .Build();
 
 var api = builder.AddProject<Demoulas_ProfitSharing_Api>("ProfitSharing-Api")
-    .WithHttpHealthCheck("/health")
     .WithParentRelationship(database)
     .WithReference(database)
     .WithSwaggerUi()

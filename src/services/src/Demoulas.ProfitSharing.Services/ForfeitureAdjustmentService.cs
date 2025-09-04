@@ -26,7 +26,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
         _frozenService = frozenService;
         _demographicReaderService = demographicReaderService;
     }
-    
+
     public Task<SuggestedForfeitureAdjustmentResponse> GetSuggestedForfeitureAmount(SuggestedForfeitureAdjustmentRequest req, CancellationToken cancellationToken = default)
     {
         return _dbContextFactory.UseReadOnlyContext(async context =>
@@ -43,22 +43,28 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
             {
                 throw new ArgumentException("Employee not found.");
             }
-            
+
             var totalVestingBalance = await _totalService.TotalVestingBalance(context, profitYear, DateTime.Now.ToDateOnly())
                 .Where(vb => vb.Ssn == demographic.Ssn).SingleAsync();
+
+            // If the employee is fully vested, then there is no forfeiture to suggest.
+            if (totalVestingBalance.VestingPercent == 1m)
+            {
+                return new SuggestedForfeitureAdjustmentResponse { SuggestedForfeitAmount = 0m, DemographicId = demographic.Id, BadgeNumber = demographic.BadgeNumber };
+            }
 
             return
                 // BOBH This is failing to account for the ETVA, correct?
                 new SuggestedForfeitureAdjustmentResponse
                 {
-                    SuggestedForfeitAmount = totalVestingBalance.CurrentBalance ?? 0m - totalVestingBalance.VestedBalance ?? 0m,
+                    SuggestedForfeitAmount =
+                        Math.Round((totalVestingBalance.CurrentBalance ?? 0m) - (totalVestingBalance.VestedBalance ?? 0m), 2, MidpointRounding.AwayFromZero),
                     DemographicId = demographic.Id,
                     BadgeNumber = demographic.BadgeNumber
                 };
-            
         });
     }
-    
+
     public async Task UpdateForfeitureAdjustmentAsync(ForfeitureAdjustmentUpdateRequest req, CancellationToken cancellationToken = default)
     {
         if (req.ForfeitureAmount == 0)
@@ -71,7 +77,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
         {
             throw new ArgumentException("Profit year must be provided");
         }
-        
+
         await _dbContextFactory.UseWritableContext(async context =>
         {
             var demographics = await _demographicReaderService.BuildDemographicQuery(context, false);
@@ -137,7 +143,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                 (true, true) => CommentType.Constants.ForfeitClassAction,
                 (false, _) => CommentType.Constants.Unforfeit,
             };
-            string remarkText = commentType.Name.ToUpper();    
+            string remarkText = commentType.Name.ToUpper();
 
             // Create a new PROFIT_DETAIL record
             var profitDetail = new ProfitDetail
@@ -153,7 +159,6 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                 CreatedAtUtc = DateTimeOffset.UtcNow,
                 ModifiedAtUtc = DateTimeOffset.UtcNow,
                 CommentTypeId = commentType.Id,
-                
             };
 
             context.ProfitDetails.Add(profitDetail);
@@ -196,7 +201,7 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
                         .Where(pp => pp.DemographicId == employeeData.Id && liveYearSet.Contains(pp.ProfitYear))
                         .ExecuteUpdateAsync(p => p
                                 .SetProperty(pp => pp.EnrollmentId, newEnrollmentId)
-                                .SetProperty(pp => pp.Etva, 0)  // TBD If you have Allocation Money, then EVTA moves to that value not zero
+                                .SetProperty(pp => pp.Etva, 0) // TBD If you have Allocation Money, then EVTA moves to that value not zero
                                 .SetProperty(pp => pp.ModifiedAtUtc, DateTimeOffset.UtcNow),
                             cancellationToken);
                 }
@@ -231,7 +236,6 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
             }
 
             await context.SaveChangesAsync(cancellationToken);
-
         }, cancellationToken);
     }
 
@@ -241,8 +245,9 @@ public class ForfeitureAdjustmentService : IForfeitureAdjustmentService
         {
             foreach (var req in requests)
             {
-                    await UpdateForfeitureAdjustmentAsync(req, cancellationToken);
+                await UpdateForfeitureAdjustmentAsync(req, cancellationToken);
             }
+
             await context.SaveChangesAsync(cancellationToken);
         }, cancellationToken);
     }

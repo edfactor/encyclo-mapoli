@@ -6,7 +6,7 @@ using Demoulas.ProfitSharing.Endpoints.Base;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.YearEnd;
 
-public sealed class YearEndSetEnrollmentEndpoint: ProfitSharingRequestEndpoint<ProfitYearRequest>
+public sealed class YearEndSetEnrollmentEndpoint : ProfitSharingRequestEndpoint<ProfitYearRequest>
 {
     private readonly IYearEndService _yearEndService;
 
@@ -19,11 +19,7 @@ public sealed class YearEndSetEnrollmentEndpoint: ProfitSharingRequestEndpoint<P
     public override void Configure()
     {
         Post("update-enrollment");
-        Summary(s =>
-        {
-            s.Summary = "Updates the enrollment id of all members for the year";
-        });
-        Policies(Security.Policy.CanRunYearEndProcesses);
+        Summary(s => { s.Summary = "Updates the enrollment id of all members for the year"; });
         Group<YearEndGroup>();
     }
 

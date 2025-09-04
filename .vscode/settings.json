@@ -19,7 +19,7 @@
     "editor.formatOnSave": true
   },
   "[csharp]": {
-    "editor.defaultFormatter": "EditorConfig.EditorConfig",
+    "editor.defaultFormatter": "ms-dotnettools.csharp",
     "editor.formatOnSave": true
   }
 }

@@ -1,9 +1,8 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FormLabel, TextField, Typography } from "@mui/material";
-import { Grid } from "@mui/material";
+import { FormLabel, Grid, TextField, Typography } from "@mui/material";
 import useDecemberFlowProfitYear from "hooks/useDecemberFlowProfitYear";
 import { useEffect, useState } from "react";
-import { useForm, Controller, Resolver } from "react-hook-form";
+import { Controller, Resolver, useForm } from "react-hook-form";
 import { SearchAndReset } from "smart-ui-library";
 import * as yup from "yup";
 import useMilitaryEntryAndModification from "./hooks/useMilitaryEntryAndModification";
@@ -19,10 +18,24 @@ const validationSchema = yup
     socialSecurity: yup
       .string()
       .nullable()
+      .test("ssn-length", "SSN must be 7, 8, or 9 digits", function (value) {
+        if (value === undefined || value === null) return true;
+        return (
+          // 7 - 9 digits are valid
+          Number(value) >= 1000000 && Number(value) <= 999999999
+        );
+      })
       .transform((value) => value || undefined),
     badgeNumber: yup
       .string()
       .nullable()
+      .test("badge-length", "Badge must be 5, 6, or 7 digits", function (value) {
+        if (value === undefined || value === null) return true;
+        return (
+          // 5 - 7 digits are valid
+          Number(value) >= 10000 && Number(value) <= 9999999
+        );
+      })
       .transform((value) => value || undefined)
   })
   .test("at-least-one-required", "At least one field must be provided", (values) =>

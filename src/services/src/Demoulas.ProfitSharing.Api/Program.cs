@@ -60,7 +60,7 @@ else
 
 builder.ConfigureSecurityPolicies();
 
-string[] allowedOrigins =  [
+string[] allowedOrigins = [
         "https://ps.qa.demoulas.net",
         "https://ps.uat.demoulas.net",
         "https://ps.demoulas.net"
@@ -102,7 +102,7 @@ builder.AddDatabaseServices((services, factoryRequests) =>
             sp.GetRequiredService<AuditSaveChangesInterceptor>(),
             sp.GetRequiredService<BeneficiarySaveChangesInterceptor>(),
             sp.GetRequiredService<BeneficiaryContactSaveChangesInterceptor>()
-        ], denyCommitRoles: [Role.ITDEVOPS]));
+        ], denyCommitRoles: [Role.ITDEVOPS, Role.AUDITOR]));
     factoryRequests.Add(ContextFactoryRequest.Initialize<ProfitSharingReadOnlyDbContext>("ProfitSharing"));
     factoryRequests.Add(ContextFactoryRequest.Initialize<DemoulasCommonDataContext>("ProfitSharing"));
 });
@@ -116,6 +116,7 @@ void OktaSettingsAction(OktaSwaggerConfiguration settings)
 void OktaDocumentSettings(AspNetCoreOpenApiDocumentGeneratorSettings settings)
 {
     settings.OperationProcessors.Add(new SwaggerImpersonationHeader());
+    settings.OperationProcessors.Add(new SwaggerAuthorizationDetails());
 }
 
 builder.ConfigureDefaultEndpoints(meterNames: [],
