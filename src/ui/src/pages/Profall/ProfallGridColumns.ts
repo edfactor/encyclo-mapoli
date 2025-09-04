@@ -1,5 +1,11 @@
 import { ColDef } from "ag-grid-community";
-import { createBadgeColumn, createNameColumn, createStoreColumn, createZipColumn } from "../../utils/gridColumnFactory";
+import {
+  createBadgeColumn,
+  createNameColumn,
+  createStateColumn,
+  createStoreColumn,
+  createZipColumn
+} from "../../utils/gridColumnFactory";
 
 export const GetProfallGridColumns = (navFunction: (badgeNumber: string) => void): ColDef[] => {
   return [
@@ -57,16 +63,11 @@ export const GetProfallGridColumns = (navFunction: (badgeNumber: string) => void
       resizable: true,
       sortable: true
     },
-    {
-      headerName: "State",
-      field: "state",
-      colId: "state",
+    createStateColumn({
       minWidth: 80,
-      headerClass: "center-align",
-      cellClass: "center-align",
-      resizable: true,
+      alignment: "center",
       sortable: true
-    },
+    }),
     createZipColumn({
       field: "postalCode",
       minWidth: 100,

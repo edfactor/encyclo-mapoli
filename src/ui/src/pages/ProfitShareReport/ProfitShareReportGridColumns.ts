@@ -7,6 +7,7 @@ import {
   createDateColumn,
   createHoursColumn,
   createNameColumn,
+  createPointsColumn,
   createSSNColumn,
   createStoreColumn
 } from "../../utils/gridColumnFactory";
@@ -56,14 +57,9 @@ export const GetProfitShareReportColumns = (): ColDef[] => {
     createHoursColumn({
       minWidth: 150
     }),
-    {
-      headerName: "Points",
-      field: "points",
-      colId: "points",
-      minWidth: 150,
-      type: "rightAligned",
-      resizable: true
-    },
+    createPointsColumn({
+      
+    }),
     {
       headerName: "",
       colId: "isNew",

@@ -6,7 +6,7 @@ import { ForfeitureAdjustmentUpdateRequest } from "types";
 interface HeaderComponentProps extends IHeaderParams {
   addRowToSelectedRows: (id: number) => void;
   removeRowFromSelectedRows: (id: number) => void;
-  onBulkSave?: (requests: ForfeitureAdjustmentUpdateRequest[]) => Promise<void>;
+  onBulkSave?: (requests: ForfeitureAdjustmentUpdateRequest[], names: string[]) => Promise<void>;
   isBulkSaving?: boolean;
 }
 

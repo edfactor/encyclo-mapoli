@@ -7,6 +7,8 @@ export const GetTerminationColumns = (): ColDef[] => {
       headerName: "Badge",
       psnSuffix: true
     }),
-    createNameColumn({})
+    createNameColumn({
+      field: "name"
+    })
   ];
 };

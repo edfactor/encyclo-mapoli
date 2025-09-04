@@ -1,9 +1,7 @@
-import { ErrorOutline, Error } from "@mui/icons-material";
+import { Error, ErrorOutline } from "@mui/icons-material";
 import { Tooltip } from "@mui/material";
 import { ICellRendererParams } from "ag-grid-community";
-import { ForfeitureDetail } from "types";
 import { validateSuggestedForfeit } from "./validateSuggestedForfeit";
-import termination from "../../pages/DecemberActivities/Termination/Termination";
 
 interface SuggestedForfeitCellRendererProps extends ICellRendererParams {
   selectedProfitYear: number;

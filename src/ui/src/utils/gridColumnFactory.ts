@@ -4,6 +4,7 @@ import { GRID_COLUMN_WIDTHS } from "../constants";
 import {
   AgeColumnOptions,
   BadgeColumnOptions,
+  CityColumnOptions,
   CommentColumnOptions,
   CountColumnOptions,
   CurrencyColumnOptions,
@@ -11,14 +12,60 @@ import {
   HoursColumnOptions,
   NameColumnOptions,
   PercentageColumnOptions,
+  PointsColumnOptions,
   SSNColumnOptions,
+  StateColumnOptions,
   StatusColumnOptions,
   StoreColumnOptions,
+  TaxCodeColumnOptions,
   YearColumnOptions,
   YesOrNoColumnOptions,
   ZipColumnOptions
 } from "./columnFactoryTypes";
 import { viewBadgeLinkRenderer } from "./masterInquiryLink";
+
+export const createStateColumn = (options: StateColumnOptions = {}): ColDef => {
+  const {
+    headerName = "State",
+    field = "state",
+    colId = field,
+    minWidth = 100,
+    maxWidth,
+    alignment = "left",
+    sortable = true,
+    resizable = true,
+    valueFormatter,
+    valueGetter
+  } = options;
+
+  const alignmentClass = alignment === "center" ? "center-align" : "left-align";
+
+  const column: ColDef = {
+    headerName,
+    field,
+    colId,
+    minWidth,
+    headerClass: alignmentClass,
+    cellClass: alignmentClass,
+    resizable,
+    sortable,
+    valueFormatter
+  };
+
+  if (valueFormatter) {
+    column.valueFormatter = valueFormatter;
+  }
+
+  if (valueGetter) {
+    column.valueGetter = valueGetter;
+  }
+
+  if (maxWidth) {
+    column.maxWidth = maxWidth;
+  }
+
+  return column;
+};
 
 export const createYesOrNoColumn = (options: YesOrNoColumnOptions): ColDef => {
   const {
@@ -541,7 +588,8 @@ export const createYearColumn = (options: YearColumnOptions = {}): ColDef => {
     maxWidth,
     alignment = "right",
     sortable = true,
-    resizable = true
+    resizable = true,
+    valueFormatter
   } = options;
 
   const column: ColDef = {
@@ -563,6 +611,10 @@ export const createYearColumn = (options: YearColumnOptions = {}): ColDef => {
 
   if (maxWidth) {
     column.maxWidth = maxWidth;
+  }
+
+  if (valueFormatter) {
+    column.valueFormatter = valueFormatter;
   }
 
   return column;
@@ -610,6 +662,159 @@ export const createZipColumn = (options: ZipColumnOptions = {}): ColDef => {
 
   if (maxWidth) {
     column.maxWidth = maxWidth;
+  }
+
+  return column;
+};
+
+export const createPointsColumn = (options: PointsColumnOptions = {}): ColDef => {
+  const {
+    headerName = "Points",
+    field = "points",
+    colId = field,
+    minWidth = 100,
+    maxWidth,
+    alignment = "right",
+    sortable = true,
+    resizable = true,
+    includeCommaFormatting = true,
+    valueFormatter
+  } = options;
+
+  const column: ColDef = {
+    headerName,
+    field,
+    colId,
+    minWidth,
+    resizable,
+    sortable
+  };
+
+  if (alignment === "right") {
+    column.type = "rightAligned";
+  } else {
+    const alignmentClass = alignment === "center" ? "center-align" : "left-align";
+    column.headerClass = alignmentClass;
+    column.cellClass = alignmentClass;
+  }
+
+  if (maxWidth) {
+    column.maxWidth = maxWidth;
+  }
+
+  if (valueFormatter) {
+    column.valueFormatter = valueFormatter;
+  } else if (includeCommaFormatting) {
+    column.valueFormatter = (params) => formatNumberWithComma(params.value);
+  }
+
+  return column;
+};
+
+export const createCityColumn = (options: CityColumnOptions = {}): ColDef => {
+  const {
+    headerName = "City",
+    field = "city",
+    colId = field,
+    minWidth = 120,
+    maxWidth,
+    alignment = "left",
+    sortable = true,
+    resizable = true,
+    nestedPath,
+    valueGetter,
+    valueFormatter
+  } = options;
+
+  const alignmentClass = alignment === "center" ? "center-align" : alignment === "right" ? "right-align" : "left-align";
+
+  const column: ColDef = {
+    headerName,
+    field,
+    colId,
+    minWidth,
+    headerClass: alignmentClass,
+    cellClass: alignmentClass,
+    resizable,
+    sortable
+  };
+
+  if (maxWidth) {
+    column.maxWidth = maxWidth;
+  }
+
+  if (valueGetter) {
+    column.valueGetter = valueGetter;
+  } else if (nestedPath) {
+    column.valueGetter = (params) => {
+      const pathParts = nestedPath.split('.');
+      let value = params.data;
+      for (const part of pathParts) {
+        value = value?.[part];
+        if (value === undefined || value === null) break;
+      }
+      return value || "";
+    };
+  }
+
+  if (valueFormatter) {
+    column.valueFormatter = valueFormatter;
+  }
+
+  return column;
+};
+
+export const createTaxCodeColumn = (options: TaxCodeColumnOptions = {}): ColDef => {
+  const {
+    headerName = "Tax Code",
+    field = "taxCodeId",
+    colId = field,
+    minWidth = 100,
+    maxWidth,
+    alignment = "left",
+    sortable = true,
+    resizable = true,
+    hideZeroValues = true,
+    showBrackets = true,
+    idField = "taxCodeId",
+    nameField = "taxCodeName",
+    valueFormatter
+  } = options;
+
+  const alignmentClass = alignment === "center" ? "center-align" : alignment === "right" ? "right-align" : "left-align";
+
+  const column: ColDef = {
+    headerName,
+    field,
+    colId,
+    minWidth,
+    headerClass: alignmentClass,
+    cellClass: alignmentClass,
+    resizable,
+    sortable
+  };
+
+  if (maxWidth) {
+    column.maxWidth = maxWidth;
+  }
+
+  if (valueFormatter) {
+    column.valueFormatter = valueFormatter;
+  } else {
+    column.valueFormatter = (params) => {
+      const id = params.data?.[idField];
+      const name = params.data?.[nameField];
+      
+      if (hideZeroValues && (id == 0 || id == null)) {
+        return "";
+      }
+      
+      if (showBrackets) {
+        return `[${id}] ${name || ""}`;
+      } else {
+        return `${id} - ${name || ""}`;
+      }
+    };
   }
 
   return column;

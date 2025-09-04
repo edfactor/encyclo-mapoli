@@ -1,17 +1,17 @@
 import { SaveOutlined } from "@mui/icons-material";
 import { Checkbox, CircularProgress, IconButton } from "@mui/material";
 import { ColDef, EditableCallbackParams, ICellRendererParams } from "ag-grid-community";
-import { SuggestedForfeitEditor, SuggestedForfeitCellRenderer } from "components/SuggestedForfeiture";
+import { SuggestedForfeitCellRenderer, SuggestedForfeitEditor } from "components/SuggestedForfeiture";
 import { numberToCurrency } from "smart-ui-library";
-import { ForfeitureAdjustmentUpdateRequest, ForfeitureDetail, RehireForfeituresSaveButtonCellParams } from "types";
+import { ForfeitureAdjustmentUpdateRequest, RehireForfeituresSaveButtonCellParams } from "types";
 import {
-  createYearColumn,
-  createCurrencyColumn,
   createCommentColumn,
-  createHoursColumn
+  createCurrencyColumn,
+  createHoursColumn,
+  createYearColumn
 } from "utils/gridColumnFactory";
-import { HeaderComponent } from "./RehireForfeituresHeaderComponent";
 import useFiscalCloseProfitYear from "../../../hooks/useFiscalCloseProfitYear";
+import { HeaderComponent } from "./RehireForfeituresHeaderComponent";
 
 function isTransactionEditiabe(params) {
   return params.data.isDetail && params.data.suggestedUnforfeiture != null;
@@ -21,8 +21,8 @@ export const GetProfitDetailColumns = (
   addRowToSelectedRows: (id: number) => void,
   removeRowFromSelectedRows: (id: number) => void,
   selectedProfitYear: number,
-  onSave?: (request: ForfeitureAdjustmentUpdateRequest) => Promise<void>,
-  onBulkSave?: (requests: ForfeitureAdjustmentUpdateRequest[]) => Promise<void>
+  onSave?: (request: ForfeitureAdjustmentUpdateRequest, name: string) => Promise<void>,
+  onBulkSave?: (requests: ForfeitureAdjustmentUpdateRequest[], names: string[]) => Promise<void>
 ): ColDef[] => {
   return [
     createYearColumn({
@@ -130,7 +130,8 @@ export const GetProfitDetailColumns = (
                     offsettingProfitDetailId: params.data.profitDetailId,
                     classAction: false
                   };
-                  await params.onSave(request);
+                  const employeeName = params.data.fullName || params.data.name || "Unknown Employee";
+                  await params.onSave(request, employeeName);
                 }
               }}
               disabled={(currentValue || 0) === 0 || isLoading}>

@@ -1,4 +1,4 @@
-import type { SortedPaginationRequestDto, ProfitYearRequest, PagedReportResponse } from "../common/api";
+import type { PagedReportResponse, SortedPaginationRequestDto } from "../common/api";
 
 export interface QPAY066BTerminatedWithVestedBalanceRequest {
   profitYear: number;

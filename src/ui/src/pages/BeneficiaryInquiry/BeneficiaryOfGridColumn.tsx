@@ -1,13 +1,11 @@
-import { ColDef, ICellRendererParams } from "ag-grid-community";
-import { mmDDYYFormat } from "utils/dateUtils";
-import { viewBadgeLinkRenderer } from "utils/masterInquiryLink";
+import { ColDef } from "ag-grid-community";
 import { GRID_COLUMN_WIDTHS } from "../../constants";
 import {
-  createSSNColumn,
-  createNameColumn,
   createBadgeColumn,
   createCurrencyColumn,
-  createDateColumn
+  createDateColumn,
+  createNameColumn,
+  createSSNColumn
 } from "../../utils/gridColumnFactory";
 
 export const BeneficiaryOfGridColumns = (): ColDef[] => {

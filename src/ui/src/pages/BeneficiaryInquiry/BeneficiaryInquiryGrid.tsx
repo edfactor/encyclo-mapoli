@@ -11,8 +11,6 @@ import { CAPTIONS } from "../../constants";
 import { BeneficiaryInquiryGridColumns } from "./BeneficiaryInquiryGridColumns";
 import { BeneficiaryOfGridColumns } from "./BeneficiaryOfGridColumn";
 interface BeneficiaryInquiryGridProps {
-  // initialSearchLoaded: boolean;
-  // setInitialSearchLoaded: (loaded: boolean) => void;
   selectedMember: any;
   count: number;
   createOrUpdateBeneficiary: (selectedMember: BeneficiaryDto) => any;
@@ -42,13 +40,6 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
   const [triggerSearch, { isFetching }] = useLazyGetBeneficiariesQuery();
   const [triggerUpdate] = useLazyUpdateBeneficiaryQuery();
 
-  // const createBeneficiaryInquiryRequest = useCallback(
-  //   (skip: number, sortBy: string, isSortDescending: boolean, badgeNumber: number): BeneficiaryRequestDto | null => {
-  //     if (!beneficiaryRequest) return null;
-  //     return beneficiaryRequest;
-  //   },
-  //   [beneficiaryRequest, pageSize, _sortParams]
-  // );1
   const createBeneficiaryInquiryRequest = (
     skip: number,
     sortBy: string,
@@ -75,22 +66,6 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
     }
     setSortParams(update);
     setPageNumber(0);
-
-    // const request = createBeneficiaryInquiryRequest(
-    //   0,
-    //   update.sortBy,
-    //   update.isSortDescending,
-    //   25,
-    //   selectedMember?.badgeNumber,
-    //   selectedMember?.psnSuffix
-    // );
-    // if (!request) return;
-
-    // triggerSearch(request, false)
-    //   .unwrap()
-    //   .then((value) => {
-    //     setBeneficiaryList(value);
-    //   });
   };
   const actionButtons = (data: any): JSX.Element => {
     return (
@@ -187,19 +162,6 @@ const BeneficiaryInquiryGrid: React.FC<BeneficiaryInquiryGridProps> = ({
       }
     ];
   }, [beneficiaryList]);
-
-  // const onSearch = useCallback(async () => {
-  //   const request = createBeneficiaryInquiryRequest(pageNumber * pageSize, _sortParams.sortBy, _sortParams.isSortDescending,badgeNumber);
-  //   if (!request) return;
-
-  //   await triggerSearch(request, false);
-  // }, [createBeneficiaryInquiryRequest, pageNumber, pageSize, _sortParams, triggerSearch]);
-
-  // useEffect(() => {
-  //   if (hasToken) {
-  //     onSearch();
-  //   }
-  // }, [pageNumber, pageSize, _sortParams, onSearch]);
 
   const onSearch = useCallback(() => {
     const request = createBeneficiaryInquiryRequest(

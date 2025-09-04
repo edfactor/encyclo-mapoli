@@ -587,19 +587,26 @@ export const YearsEndApi = createApi({
         }
       }
     }),
-    getForfeituresAndPoints: builder.query<ForfeituresAndPoints, FrozenReportsForfeituresAndPointsRequest>({
-      query: (params) => ({
-        url: "yearend/frozen/forfeitures-and-points",
-        method: "GET",
-        params: {
-          profitYear: params.profitYear,
-          useFrozenData: params.useFrozenData,
-          take: params.pagination.take,
-          skip: params.pagination.skip,
-          sortBy: params.pagination.sortBy,
-          isSortDescending: params.pagination.isSortDescending
-        }
-      }),
+    getForfeituresAndPoints: builder.query<
+      ForfeituresAndPoints,
+      FrozenReportsForfeituresAndPointsRequest & { suppressAllToastErrors?: boolean; onlyNetworkToastErrors?: boolean }
+    >({
+      query: (params) => {
+        const { suppressAllToastErrors, onlyNetworkToastErrors } = params;
+        return {
+          url: "yearend/frozen/forfeitures-and-points",
+          method: "GET",
+          params: {
+            profitYear: params.profitYear,
+            useFrozenData: params.useFrozenData,
+            take: params.pagination.take,
+            skip: params.pagination.skip,
+            sortBy: params.pagination.sortBy,
+            isSortDescending: params.pagination.isSortDescending
+          },
+          meta: { suppressAllToastErrors, onlyNetworkToastErrors }
+        };
+      },
       async onQueryStarted(arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
@@ -1119,9 +1126,17 @@ export const YearsEndApi = createApi({
         try {
           const { data } = await queryFulfilled;
           dispatch(setForfeitureAdjustmentData(data));
-        } catch (err) {
-          console.log("Err: " + err);
+        } catch (err: any) {
+          // Always clear the data on any error
           dispatch(clearForfeitureAdjustmentData());
+          
+          // Don't handle "Employee not found" errors here - let them bubble up to component
+          if (err?.error?.status === 500 && err?.error?.data?.title === "Employee not found.") {
+            return; // Don't log or handle, just clear data and let component handle it
+          }
+          
+          // Handle other errors as before
+          console.log("Err: " + err);
         }
       }
     }),

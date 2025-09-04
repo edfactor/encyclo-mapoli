@@ -1,20 +1,21 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FormHelperText, FormLabel, TextField, Typography } from "@mui/material";
-import { Grid } from "@mui/material";
+import { FormHelperText, FormLabel, Grid, TextField, Typography } from "@mui/material";
 import DsmDatePicker from "components/DsmDatePicker/DsmDatePicker";
 import useFiscalCloseProfitYear from "hooks/useFiscalCloseProfitYear";
-import { Controller, useForm, Resolver } from "react-hook-form";
+import { useEffect, useState } from "react";
+import { Controller, Resolver, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { SearchAndReset } from "smart-ui-library";
-import * as yup from "yup";
 import { useLazyGetForfeitureAdjustmentsQuery } from "reduxstore/api/YearsEndApi";
 import {
-  setForfeitureAdjustmentQueryParams,
   clearForfeitureAdjustmentData,
-  clearForfeitureAdjustmentQueryParams
+  clearForfeitureAdjustmentQueryParams,
+  setForfeitureAdjustmentQueryParams
 } from "reduxstore/slices/forfeituresAdjustmentSlice";
 import { RootState } from "reduxstore/store";
-import { useEffect, useState } from "react";
+import { SearchAndReset } from "smart-ui-library";
+import * as yup from "yup";
+import { FORFEITURES_ADJUSTMENT_MESSAGES } from "../../components/MissiveAlerts/MissiveMessages";
+import { useMissiveAlerts } from "../../hooks/useMissiveAlerts";
 
 // Define the search parameters interface
 interface ForfeituresAdjustmentSearchParams {
@@ -35,15 +36,25 @@ const schema = yup
       .number()
       .typeError("SSN must be a number")
       .integer("SSN must be an integer")
-      .min(0, "SSN must be positive")
-      .max(999999999, "SSN must be 9 digits or less")
+      .test("ssn-length", "SSN must be 7, 8, or 9 digits", function (value) {
+        if (value === undefined || value === null) return true;
+        return (
+          // 7 - 9 digits are valid
+          value >= 1000000 && value <= 999999999
+        );
+      })
       .transform((value) => value || undefined),
     badge: yup
       .number()
       .typeError("Badge Number must be a number")
       .integer("Badge Number must be an integer")
-      .min(0, "Badge must be positive")
-      .max(9999999, "Badge must be 7 digits or less")
+      .test("badge-length", "Badge must be 5, 6, or 7 digits", function (value) {
+        if (value === undefined || value === null) return true;
+        return (
+          // 5 - 7 digits are valid
+          value >= 10000 && value <= 9999999
+        );
+      })
       .transform((value) => value || undefined),
     year: yup
       .number()
@@ -63,6 +74,7 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
   const [triggerSearch, { isFetching }] = useLazyGetForfeitureAdjustmentsQuery();
   const { forfeitureAdjustmentQueryParams } = useSelector((state: RootState) => state.forfeituresAdjustment);
   const profitYear = useFiscalCloseProfitYear();
+  const { addAlert, clearAlerts } = useMissiveAlerts();
 
   const [activeField, setActiveField] = useState<"ssn" | "badge" | null>(null);
   const [oneAddSearchFilterEntered, setOneAddSearchFilterEntered] = useState<boolean>(false);
@@ -80,7 +92,7 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
       badge: forfeitureAdjustmentQueryParams?.badge || "",
       year: forfeitureAdjustmentQueryParams?.profitYear || profitYear
     },
-    mode: "onSubmit"
+    mode: "onBlur"
   });
 
   let socialSecurityChosen = false;
@@ -111,7 +123,9 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
     }
   }, [socialSecurity, badgeNumber]);
 
-  const validateAndSearch = handleSubmit((data) => {
+  const validateAndSearch = handleSubmit(async (data) => {
+    clearAlerts(); // Clear any existing alerts
+
     const searchParams = {
       ssn: data.ssn,
       badge: data.badge,
@@ -119,23 +133,38 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
       skip: 0,
       take: 255,
       sortBy: "badgeNumber",
-      isSortDescending: false
+      isSortDescending: false,
+      onlyNetworkToastErrors: true // Suppress validation errors, only show network errors
     };
 
     setPageReset(true);
     dispatch(setForfeitureAdjustmentQueryParams(searchParams));
 
-    triggerSearch(searchParams)
-      .unwrap()
-      .then(() => {
-        setInitialSearchLoaded(true);
-      })
-      .catch((error) => {
-        console.error("Error fetching forfeiture adjustments:", error);
-      });
+    const result = await triggerSearch(searchParams);
+
+    // If the response has an error block, handle it
+    if (result.error) {
+      // Check if it's a 500 error with "Employee not found" message
+      if (
+        result.error &&
+        "status" in result.error &&
+        result.error.status === 500 &&
+        "data" in result.error &&
+        (result.error as any).data?.title === "Employee not found."
+      ) {
+        addAlert(FORFEITURES_ADJUSTMENT_MESSAGES.EMPLOYEE_NOT_FOUND);
+      } else {
+        // Handle other errors if needed
+        console.error("Forfeitures adjustment employee search error:", result.error);
+      }
+      return;
+    }
+
+    setInitialSearchLoaded(true);
   });
 
   const handleReset = () => {
+    clearAlerts(); // Clear missive alerts when resetting
     setPageReset(true);
     reset({
       ssn: "",

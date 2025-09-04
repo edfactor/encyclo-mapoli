@@ -93,6 +93,19 @@ export interface NameColumnOptions {
   valueFormatter?: (params: ValueFormatterParams) => string;
 }
 
+export interface StateColumnOptions {
+  headerName?: string;
+  field?: string;
+  colId?: string;
+  minWidth?: number;
+  maxWidth?: number;
+  alignment?: "left" | "center";
+  sortable?: boolean;
+  resizable?: boolean;
+  valueGetter?: (params: ValueGetterParams) => string;
+  valueFormatter?: (params: ValueFormatterParams) => string;
+}
+
 export interface CommentColumnOptions {
   headerName?: string;
   field?: string;
@@ -163,6 +176,7 @@ export interface YearColumnOptions {
   alignment?: "left" | "center" | "right";
   sortable?: boolean;
   resizable?: boolean;
+  valueFormatter?: (params: ValueFormatterParams) => string;
 }
 
 export interface ZipColumnOptions {
@@ -174,5 +188,48 @@ export interface ZipColumnOptions {
   alignment?: "left" | "center" | "right";
   sortable?: boolean;
   resizable?: boolean;
+  valueFormatter?: (params: ValueFormatterParams) => string;
+}
+
+export interface PointsColumnOptions {
+  headerName?: string;
+  field?: string;
+  colId?: string;
+  minWidth?: number;
+  maxWidth?: number;
+  alignment?: "left" | "center" | "right";
+  sortable?: boolean;
+  resizable?: boolean;
+  includeCommaFormatting?: boolean;
+  valueFormatter?: (params: ValueFormatterParams) => string;
+}
+
+export interface CityColumnOptions {
+  headerName?: string;
+  field?: string;
+  colId?: string;
+  minWidth?: number;
+  maxWidth?: number;
+  alignment?: "left" | "center" | "right";
+  sortable?: boolean;
+  resizable?: boolean;
+  nestedPath?: string;
+  valueGetter?: (params: ValueGetterParams) => string;
+  valueFormatter?: (params: ValueFormatterParams) => string;
+}
+
+export interface TaxCodeColumnOptions {
+  headerName?: string;
+  field?: string;
+  colId?: string;
+  minWidth?: number;
+  maxWidth?: number;
+  alignment?: "left" | "center" | "right";
+  sortable?: boolean;
+  resizable?: boolean;
+  hideZeroValues?: boolean;
+  showBrackets?: boolean;
+  idField?: string;
+  nameField?: string;
   valueFormatter?: (params: ValueFormatterParams) => string;
 }
