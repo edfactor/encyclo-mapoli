@@ -21,8 +21,7 @@ public class PayClassificationLookupEndpoint : ProfitSharingResponseEndpoint<ISe
 
     public override void Configure()
     {
-        Get("pay-classifications");
-        Policies(Security.Policy.CanViewPayClassificationTypes);
+    Get("pay-classifications");
         Summary(s =>
         {
             s.Summary = "Get all pay classifications";
@@ -35,7 +34,7 @@ public class PayClassificationLookupEndpoint : ProfitSharingResponseEndpoint<ISe
             } };
             s.Responses[403] = $"Forbidden.  Requires roles of {Role.ADMINISTRATOR}, {Role.FINANCEMANAGER}, {Role.DISTRIBUTIONSCLERK}, or {Role.HARDSHIPADMINISTRATOR}";
         });
-        Group<LookupGroup>();
+    Group<LookupGroup>();
 
         if (!Env.IsTestEnvironment())
         {

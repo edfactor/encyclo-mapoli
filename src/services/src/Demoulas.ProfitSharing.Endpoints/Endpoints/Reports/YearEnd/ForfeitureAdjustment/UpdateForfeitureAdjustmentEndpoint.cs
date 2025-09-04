@@ -35,6 +35,6 @@ public class UpdateForfeitureAdjustmentEndpoint : ProfitSharingRequestEndpoint<F
     public override async Task HandleAsync(ForfeitureAdjustmentUpdateRequest req, CancellationToken ct)
     {
         await _forfeitureAdjustmentService.UpdateForfeitureAdjustmentAsync(req, ct);
-        await Send.NoContentAsync( ct);
+        await Send.NoContentAsync(ct);
     }
 }

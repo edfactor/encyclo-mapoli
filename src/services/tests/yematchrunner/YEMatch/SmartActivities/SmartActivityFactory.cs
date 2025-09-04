@@ -23,7 +23,7 @@ public static class SmartActivityFactory
     public static List<IActivity> CreateActivities(string dataDirectory)
     {
         HttpClient httpClient = new() { Timeout = TimeSpan.FromHours(2) };
-        TestToken.CreateAndAssignTokenForClient(httpClient, "Finance-Manager");
+        TestToken.CreateAndAssignTokenForClient(httpClient, "Executive-Administrator");
         Client = new ApiClient(httpClient);
 
         return
@@ -139,7 +139,7 @@ public static class SmartActivityFactory
     }
 
     // NSwagger does not handle POST requests well.  Its definition of the Request is missing the "profitYear" share parameter
-    public record StartAndEndDateRequest
+    public class StartAndEndDateRequestLocal : StartAndEndDateRequest
     {
         public DateOnly BeginningDate { get; set; }
         public DateOnly EndingDate { get; set; }
@@ -149,11 +149,8 @@ public static class SmartActivityFactory
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     private static async Task<Outcome> A3_Prof_Termination(ApiClient apiClient, string aname, string name)
     {
-        DateTimeOffset dto = DateTimeOffset.Now;
-        DateTimeOffset dto2 = dto.AddYears(-1);
-        TerminatedEmployeeAndBeneficiaryResponse? result = await apiClient
-            .ReportsYearEndTerminatedEmployeeAndBeneficiaryTerminatedEmployeeAndBeneficiaryDataEndpointAsync(dto, dto2, null,
-                null, 0, int.MaxValue, null);
+        StartAndEndDateRequestLocal req = new() { BeginningDate = DateOnly.FromDateTime(DateTime.Now), EndingDate = DateOnly.FromDateTime(DateTime.Now.AddYears(-1)) };
+        TerminatedEmployeeAndBeneficiaryResponse? result = await apiClient.ReportsYearEndTerminatedEmployeesTerminatedEmployeesEndPointAsync(null, req);
 
         return Ok(aname, name, $"Records Loaded {result.Response.Results.Count}");
     }
@@ -163,7 +160,7 @@ public static class SmartActivityFactory
         StringBuilder sb = new();
 
         ReportResponseBaseOfDistributionsAndForfeitureResponse? r2 = await apiClient
-            .ReportsYearEndCleanupDistributionsAndForfeitureEndpointAsync(1, 12, _profitYear, null, null, null, null, null, CancellationToken.None);
+            .ReportsYearEndCleanupDistributionsAndForfeitureEndpointAsync(null, null, _profitYear, null, null, null, null, null, CancellationToken.None);
         sb.Append($"Records Loaded {r2.Response.Results.Count}\n");
 
         return Ok(aname, name, sb);
@@ -249,8 +246,8 @@ public static class SmartActivityFactory
         //     "profitYear": 2025
         // }'
         HttpClient httpClient = new() { Timeout = TimeSpan.FromHours(2) };
-        TestToken.CreateAndAssignTokenForClient(httpClient, "IT-Operations");
-        HttpRequestMessage request = new(HttpMethod.Post, apiClient.BaseUrl + "api/itoperations/freeze")
+        TestToken.CreateAndAssignTokenForClient(httpClient, "IT-DevOps");
+        HttpRequestMessage request = new(HttpMethod.Post, apiClient.BaseUrl + "api/itdevops/freeze")
         {
             Content = new StringContent("{ \"ProfitYear\" : " + _profitYear + ", \"asOfDateTime\": \"2025-01-09T00:00:00-04:00\"}"
                 , Encoding.UTF8, "application/json")
@@ -308,7 +305,7 @@ public static class SmartActivityFactory
             string postBody = JsonSerializer.Serialize(criteria);
 
             HttpClient httpClient = new() { Timeout = TimeSpan.FromHours(2) };
-            TestToken.CreateAndAssignTokenForClient(httpClient, "IT-Operations");
+            TestToken.CreateAndAssignTokenForClient(httpClient, "Executive-Administrator");
             HttpRequestMessage request = new(HttpMethod.Post, apiClient.BaseUrl + "api/yearend/yearend-profit-sharing-report")
             {
                 Content = new StringContent(postBody, Encoding.UTF8, "application/json")
@@ -379,12 +376,66 @@ public static class SmartActivityFactory
         return Ok(aname, name, $"Records Loaded = {r.Response.Results.Count}");
     }
 
+    public sealed class ProfitShareUpdateRequestLocal : ProfitShareUpdateRequest
+    {
+        public int? Skip { get; set; }
+        public int? Take { get; set; }
+
+        public string? SortBy { get; init; }
+        public bool? IsSortDescending { get; init; }
+        public short ProfitYear { get; set; }
+        public decimal ContributionPercent { get; set; }
+        public decimal IncomingForfeitPercent { get; set; }
+        public decimal EarningsPercent { get; set; }
+        public decimal SecondaryEarningsPercent { get; set; }
+        public long MaxAllowedContributions { get; set; }
+        public long BadgeToAdjust { get; set; }
+        public long BadgeToAdjust2 { get; set; }
+        public decimal AdjustContributionAmount { get; set; }
+        public decimal AdjustEarningsAmount { get; set; }
+        public decimal AdjustIncomingForfeitAmount { get; set; }
+        public decimal AdjustEarningsSecondaryAmount { get; set; }
+    }
+
+
     private static async Task<Outcome> A23_Profit_Master_Update(ApiClient apiClient, string aname, string name)
     {
         // Awards profit sharing.    
-        ProfitMasterUpdateResponse? r = await apiClient.ReportsYearEndProfitMasterProfitMasterUpdateEndpointAsync(15, 4, 5, 0,
-            76_500, 0, 0, 0, 0, 0, 0, _profitYear, null, null, 0, int.MaxValue, null);
-        return Ok(aname, name, $"BeneficiariesEffected: {r.BeneficiariesEffected}, EmployeesEffected: {r.EmployeesEffected}");
+
+        ProfitShareUpdateRequestLocal req = new();
+        req.ProfitYear = _profitYear;
+        req.ContributionPercent = 15m;
+        req.IncomingForfeitPercent = 4m;
+        req.EarningsPercent = 5m;
+        req.SecondaryEarningsPercent = 0m;
+        req.MaxAllowedContributions = 76_500;
+        req.Take = int.MaxValue;
+        string postBody = JsonSerializer.Serialize(req);
+
+        // ProfitMasterUpdateResponse? r = await apiClient.ReportsYearEndProfitMasterProfitMasterUpdateEndpointAsync(null, req);
+
+        HttpClient httpClient = new() { Timeout = TimeSpan.FromHours(2) };
+        TestToken.CreateAndAssignTokenForClient(httpClient, "Finance-Manager");
+        HttpRequestMessage request = new(HttpMethod.Post, apiClient.BaseUrl + "api/yearend/profit-master-update")
+        {
+            Content = new StringContent(postBody, Encoding.UTF8, "application/json")
+        };
+        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("*/*"));
+
+        using HttpResponseMessage response = await httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+
+        string responseBody = await response.Content.ReadAsStringAsync();
+        Console.WriteLine(responseBody);
+
+        using var doc = JsonDocument.Parse(responseBody);
+        var root = doc.RootElement;
+
+        int beneficiaries = root.GetProperty("beneficiariesEffected").GetInt32();
+        int employees = root.GetProperty("employeesEffected").GetInt32();
+        int etvas = root.GetProperty("etvasEffected").GetInt32();
+
+        return Ok(aname, name, $"beneficiariesEffected: {beneficiaries}, employeesEffected: {employees}, etvasEffected: {etvas}");
     }
 
     private static async Task<Outcome> A24_PROF_PAYMASTER_UPD(ApiClient apiClient, string aname, string name)
@@ -398,7 +449,7 @@ public static class SmartActivityFactory
         // -d '{  "profitYear": 2024 }'
 
         HttpClient httpClient = new() { Timeout = TimeSpan.FromHours(2) };
-        TestToken.CreateAndAssignTokenForClient(httpClient, "IT-Operations");
+        TestToken.CreateAndAssignTokenForClient(httpClient, "Finance-Manager");
         HttpRequestMessage request = new(HttpMethod.Post, apiClient.BaseUrl + "api/yearend/update-enrollment")
         {
             Content = new StringContent("{ \"profitYear\": 2024}", Encoding.UTF8, "application/json")

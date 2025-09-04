@@ -1,4 +1,5 @@
 ﻿using Demoulas.Common.Api.Groups;
+using Demoulas.ProfitSharing.Security;
 using FastEndpoints;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -23,6 +24,9 @@ public sealed class ItDevOpsGroup : GroupBase
                 .ProducesProblemFE<ProblemDetails>(StatusCodes.Status500InternalServerError)
                 .WithRequestTimeout(TimeSpan.FromMinutes(1))
                 .WithTags(RouteName));
+            // IT operations endpoints (freeze + diagnostics) are restricted
+            // to IT + designated admins via the CanFreezeDemographics policy.
+            ep.Policies(Policy.CanFreezeDemographics);
         });
     }
 }

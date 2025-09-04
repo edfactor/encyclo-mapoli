@@ -299,7 +299,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
     );
 
     const TextInputField = useCallback(
-      ({ name, label, type = "text" }: { name: keyof MasterInquirySearch; label: string; type?: string }) => (
+      ({ name, label, type = "text", disabled = false }: { name: keyof MasterInquirySearch; label: string; type?: string; disabled?: boolean }) => (
         <Grid size={{ xs: 12, sm: 6, md: type === "number" ? 2 : 4 }}>
           <FormLabel>{label}</FormLabel>
           <Controller
@@ -316,6 +316,7 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
                 variant="outlined"
                 value={field.value ?? ""}
                 error={!!errors[name]}
+                disabled={disabled}
                 onChange={(e) => {
                   // Prevent input beyond 11 characters for badgeNumber
                   if (name === "badgeNumber" && e.target.value.length > 11) {
@@ -442,6 +443,27 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
       name: "badgeNumber"
     });
 
+    // Watch the three mutually exclusive fields
+    const watchedValues = useWatch({
+      control,
+      name: ["socialSecurity", "name", "badgeNumber"]
+    });
+
+    const [socialSecurityValue, nameValue, badgeNumberWatchValue] = watchedValues;
+
+    // Helper function to check if a value is non-empty
+    const hasValue = (value: any) => value !== null && value !== undefined && value !== "";
+
+    // Determine which fields should be disabled based on which have values
+    const hasSocialSecurity = hasValue(socialSecurityValue);
+    const hasName = hasValue(nameValue);
+    const hasBadgeNumber = hasValue(badgeNumberWatchValue);
+
+    // Disable other fields when one has a value
+    const isSocialSecurityDisabled = hasName || hasBadgeNumber;
+    const isNameDisabled = hasSocialSecurity || hasBadgeNumber;
+    const isBadgeNumberDisabled = hasSocialSecurity || hasName;
+
     const isMemberTypeDisabled = badgeNumberValue !== null && badgeNumberValue !== undefined;
 
     return (
@@ -466,15 +488,18 @@ const MasterInquirySearchFilter: React.FC<MasterInquirySearchFilterProps> = memo
               name="socialSecurity"
               label="Social Security Number"
               type="number"
+              disabled={isSocialSecurityDisabled}
             />
             <TextInputField
               name="name"
               label="Name"
+              disabled={isNameDisabled}
             />
             <TextInputField
               name="badgeNumber"
               label="Badge/PSN Number"
               type="number"
+              disabled={isBadgeNumberDisabled}
             />
             <RadioGroupField
               name="paymentType"

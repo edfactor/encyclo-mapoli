@@ -13,6 +13,6 @@ public class Entry<TContext> where TContext : DeltaContextBase
 
     public DateTime Updated { get; set; }
     public DateTime Published { get; set; }
-    public List<DeltaLink> Links { get; set; } = new List<DeltaLink>();
-    public List<Author> Authors { get; set; } = new List<Author>();
+    public List<DeltaLink> Links { get; set; } = [];
+    public List<Author> Authors { get; set; } = [];
 }

@@ -8,6 +8,7 @@ using FastEndpoints;
 using Microsoft.AspNetCore.Http;
 
 namespace Demoulas.ProfitSharing.Endpoints.Endpoints.YearEnd;
+
 public sealed class CertificatesFileEndpoint : ProfitSharingEndpoint<CerficatePrintRequest, string>
 {
     private readonly ICertificateService _certificateService;
@@ -17,6 +18,7 @@ public sealed class CertificatesFileEndpoint : ProfitSharingEndpoint<CerficatePr
     {
         _certificateService = certificateService;
     }
+
     public override void Configure()
     {
         Get("post-frozen/certificates/download");
@@ -35,16 +37,12 @@ public sealed class CertificatesFileEndpoint : ProfitSharingEndpoint<CerficatePr
         var memoryStream = new MemoryStream();
         await using var writer = new StreamWriter(memoryStream);
         await writer.WriteAsync(response);
-            
+
         await writer.FlushAsync(ct);
 
         memoryStream.Position = 0;
 
-        System.Net.Mime.ContentDisposition cd = new System.Net.Mime.ContentDisposition
-        {
-            FileName = "PAYCERT.txt",
-            Inline = false
-        };
+        System.Net.Mime.ContentDisposition cd = new System.Net.Mime.ContentDisposition { FileName = "PAYCERT.txt", Inline = false };
         HttpContext.Response.Headers.Append("Content-Disposition", cd.ToString());
 
         await Send.StreamAsync(memoryStream, "PAYCERT.txt", contentType: "text/plain", cancellation: ct);

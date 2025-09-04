@@ -29758,6 +29758,11 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                         {
                             Id = (byte)8,
                             Name = "Executive-Administrator"
+                        },
+                        new
+                        {
+                            Id = (byte)9,
+                            Name = "Auditor"
                         });
                 });
 

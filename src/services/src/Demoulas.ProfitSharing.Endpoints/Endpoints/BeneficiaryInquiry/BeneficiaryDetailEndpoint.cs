@@ -26,7 +26,7 @@ public class BeneficiaryDetailEndpoint : ProfitSharingEndpoint<BeneficiaryDetail
             m.Description = "It will return Beneficiary Detail depends on PSN.";
             m.ResponseExamples = new Dictionary<int, object> { { 200, new BeneficiaryDetailResponse() } };
         });
-        Group<BeneficiaryGroup>();
+        Group<BeneficiariesGroup>();
     }
 
     public override async Task<BeneficiaryDetailResponse> ExecuteAsync(BeneficiaryDetailRequest req, CancellationToken ct)

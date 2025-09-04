@@ -26,7 +26,7 @@ public class UpdateNavigationStatusEndpoint : ProfitSharingEndpoint<UpdateNaviga
             m.Description = "Get the navigationId and statusId and update navigation status.";
             m.ResponseExamples = new Dictionary<int, object> { { 200, new UpdateNavigationStatusResponseDto() } };
         });
-        Group<NavigationGroup>();
+    Group<NavigationGroup>();
     }
 
     public override async Task<UpdateNavigationStatusResponseDto> ExecuteAsync(UpdateNavigationRequestDto req, CancellationToken ct)

@@ -29,7 +29,7 @@ public class CreateMilitaryContributionRecord : ProfitSharingRequestEndpoint<Cre
             };
             s.ExampleRequest = CreateMilitaryContributionRequest.RequestExample();
         });
-        Group<MilitaryGroup>();
+    Group<MilitaryGroup>();
     }
 
     public override async Task HandleAsync(CreateMilitaryContributionRequest req, CancellationToken ct)

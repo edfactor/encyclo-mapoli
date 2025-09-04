@@ -34,7 +34,7 @@ public class CommentTypeEndpoint : ProfitSharingResponseEndpoint<List<CommentTyp
                 }
             } };
         });
-        Group<LookupGroup>();
+    Group<LookupGroup>();
 
         if (!Env.IsTestEnvironment())
         {
