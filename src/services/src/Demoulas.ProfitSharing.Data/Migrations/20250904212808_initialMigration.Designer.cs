@@ -12,8 +12,8 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Demoulas.ProfitSharing.Data.Migrations
 {
     [DbContext(typeof(ProfitSharingDbContext))]
-    [Migration("20250904193119_fixBeneficiarySsnChangeHistory3")]
-    partial class fixBeneficiarySsnChangeHistory3
+    [Migration("20250904212808_initialMigration")]
+    partial class initialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25973,7 +25973,7 @@ namespace Demoulas.ProfitSharing.Data.Migrations
                     b.Property<int>("BeneficiaryContactId")
                         .HasPrecision(9)
                         .HasColumnType("NUMBER(9)")
-                        .HasColumnName("BENEFICIARY_ID");
+                        .HasColumnName("BENEFICIARY_CONTACT_ID");
 
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .ValueGeneratedOnAdd()
