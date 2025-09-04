@@ -18,5 +18,5 @@ public sealed class Beneficiary : Member
     public required decimal Percent { get; set; }
     public Demographic? Demographic { get; set; }
 
-    public List<BeneficiarySsnChangeHistory>? BeneficiarySsnChangeHistories { get; set; }
+   
 }

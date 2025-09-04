@@ -3,5 +3,5 @@
 public sealed class BeneficiarySsnChangeHistory : SsnChangeHistory
 {
     public int BeneficiaryId { get; set; }
-    public Beneficiary Beneficiary { get; set; } = null!;
+    public BeneficiaryContact BeneficiaryContact { get; set; } = null!;
 }
