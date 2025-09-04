@@ -2,25 +2,22 @@ import { ColDef, ICellRendererParams } from "ag-grid-community";
 import { formatNumberWithComma, numberToCurrency, yyyyMMDDToMMDDYYYY } from "smart-ui-library";
 import { GRID_COLUMN_WIDTHS } from "../constants";
 import {
-  AgeColumnOptions,
+  AlignableColumnOptions,
   BadgeColumnOptions,
+  BaseColumnOptions,
   CityColumnOptions,
   CommentColumnOptions,
-  CountColumnOptions,
   CurrencyColumnOptions,
   DateColumnOptions,
+  FormattableColumnOptions,
   HoursColumnOptions,
   NameColumnOptions,
   PercentageColumnOptions,
   PointsColumnOptions,
   SSNColumnOptions,
   StateColumnOptions,
-  StatusColumnOptions,
-  StoreColumnOptions,
   TaxCodeColumnOptions,
-  YearColumnOptions,
-  YesOrNoColumnOptions,
-  ZipColumnOptions
+  YesOrNoColumnOptions
 } from "./columnFactoryTypes";
 import { viewBadgeLinkRenderer } from "./masterInquiryLink";
 
@@ -266,7 +263,7 @@ export const createCurrencyColumn = (options: CurrencyColumnOptions): ColDef => 
   return column;
 };
 
-export const createAgeColumn = (options: AgeColumnOptions = {}): ColDef => {
+export const createAgeColumn = (options: BaseColumnOptions = {}): ColDef => {
   const {
     headerName = "Age",
     field = "age",
@@ -328,7 +325,7 @@ export const createDateColumn = (options: DateColumnOptions): ColDef => {
   return column;
 };
 
-export const createStoreColumn = (options: StoreColumnOptions = {}): ColDef => {
+export const createStoreColumn = (options: AlignableColumnOptions = {}): ColDef => {
   const {
     headerName = "Store",
     field = "storeNumber",
@@ -502,7 +499,7 @@ export const createHoursColumn = (options: HoursColumnOptions = {}): ColDef => {
   return column;
 };
 
-export const createStatusColumn = (options: StatusColumnOptions = {}): ColDef => {
+export const createStatusColumn = (options: FormattableColumnOptions = {}): ColDef => {
   const {
     headerName = "Status",
     field = "status",
@@ -543,7 +540,7 @@ export const createStatusColumn = (options: StatusColumnOptions = {}): ColDef =>
   return column;
 };
 
-export const createCountColumn = (options: CountColumnOptions = {}): ColDef => {
+export const createCountColumn = (options: AlignableColumnOptions = {}): ColDef => {
   const {
     headerName = "Count",
     field = "employeeCount",
@@ -579,7 +576,7 @@ export const createCountColumn = (options: CountColumnOptions = {}): ColDef => {
   return column;
 };
 
-export const createYearColumn = (options: YearColumnOptions = {}): ColDef => {
+export const createYearColumn = (options: FormattableColumnOptions = {}): ColDef => {
   const {
     headerName = "Year",
     field = "year",
@@ -620,7 +617,7 @@ export const createYearColumn = (options: YearColumnOptions = {}): ColDef => {
   return column;
 };
 
-export const createZipColumn = (options: ZipColumnOptions = {}): ColDef => {
+export const createZipColumn = (options: FormattableColumnOptions = {}): ColDef => {
   const {
     headerName = "Zip Code",
     field = "zipCode",

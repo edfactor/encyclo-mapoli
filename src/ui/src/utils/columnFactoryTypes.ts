@@ -1,235 +1,90 @@
 import { ValueFormatterParams, ValueGetterParams } from "ag-grid-community";
 
-export interface SSNColumnOptions {
+// Base interface with common properties
+export interface BaseColumnOptions {
   headerName?: string;
+  field?: string;
+  colId?: string;
   minWidth?: number;
   maxWidth?: number;
-  alignment?: "left" | "center";
   sortable?: boolean;
   resizable?: boolean;
+}
+
+// Extended base interfaces
+export interface AlignableColumnOptions extends BaseColumnOptions {
+  alignment?: "left" | "center" | "right";
+}
+
+export interface LimitedAlignmentColumnOptions extends BaseColumnOptions {
+  alignment?: "left" | "center";
+}
+
+export interface FormattableColumnOptions extends AlignableColumnOptions {
   valueFormatter?: (params: ValueFormatterParams) => string;
 }
 
-export interface BadgeColumnOptions {
-  headerName?: string;
-  field?: string;
-  minWidth?: number;
-  maxWidth?: number;
-  alignment?: "left" | "center";
-  sortable?: boolean;
-  resizable?: boolean;
+export interface DataAccessColumnOptions extends FormattableColumnOptions {
+  valueGetter?: (params: ValueGetterParams) => string;
+}
+
+// Specialized column interfaces (only those that add new properties)
+export interface SSNColumnOptions extends LimitedAlignmentColumnOptions {
+  valueFormatter?: (params: ValueFormatterParams) => string;
+}
+
+export interface BadgeColumnOptions extends LimitedAlignmentColumnOptions {
   renderAsLink?: boolean;
   psnSuffix?: boolean;
   navigateFunction?: (path: string) => void;
 }
 
-export interface CurrencyColumnOptions {
-  headerName?: string;
-  field: string;
-  colId?: string;
-  minWidth?: number;
-  maxWidth?: number;
-  sortable?: boolean;
-  resizable?: boolean;
+export interface CurrencyColumnOptions extends BaseColumnOptions {
+  field: string; // Required field
   valueGetter?: (params: ValueGetterParams) => string;
   valueFormatter?: (params: ValueFormatterParams) => string;
 }
 
-export interface AgeColumnOptions {
-  headerName?: string;
-  field?: string;
-  colId?: string;
-  minWidth?: number;
-  maxWidth?: number;
-  sortable?: boolean;
-  resizable?: boolean;
-}
-
-export interface DateColumnOptions {
-  headerName?: string;
-  field: string;
-  colId?: string;
-  minWidth?: number;
-  maxWidth?: number;
-  alignment?: "left" | "center";
-  sortable?: boolean;
-  resizable?: boolean;
+export interface DateColumnOptions extends LimitedAlignmentColumnOptions {
+  field: string; // Required field
   valueFormatter?: (params: ValueFormatterParams) => string;
 }
 
-export interface StoreColumnOptions {
-  headerName?: string;
-  field?: string;
-  colId?: string;
-  minWidth?: number;
-  maxWidth?: number;
-  alignment?: "left" | "center" | "right";
-  sortable?: boolean;
-  resizable?: boolean;
-}
-
-export interface YesOrNoColumnOptions {
-  headerName?: string;
-  field?: string;
-  colId?: string;
-  minWidth?: number;
-  maxWidth?: number;
-  alignment?: "left" | "center" | "right";
-  sortable?: boolean;
-  resizable?: boolean;
+export interface YesOrNoColumnOptions extends FormattableColumnOptions {
   useWords?: boolean;
+}
+
+export interface NameColumnOptions extends LimitedAlignmentColumnOptions {
   valueFormatter?: (params: ValueFormatterParams) => string;
 }
 
-export interface NameColumnOptions {
-  headerName?: string;
-  field?: string;
-  colId?: string;
-  minWidth?: number;
-  maxWidth?: number;
-  alignment?: "left" | "center";
-  sortable?: boolean;
-  resizable?: boolean;
+export interface StateColumnOptions extends DataAccessColumnOptions {
+  alignment?: "left" | "center"; // Override to limit alignment
+}
+
+export interface CommentColumnOptions extends LimitedAlignmentColumnOptions {
   valueFormatter?: (params: ValueFormatterParams) => string;
 }
 
-export interface StateColumnOptions {
-  headerName?: string;
-  field?: string;
-  colId?: string;
-  minWidth?: number;
-  maxWidth?: number;
-  alignment?: "left" | "center";
-  sortable?: boolean;
-  resizable?: boolean;
-  valueGetter?: (params: ValueGetterParams) => string;
-  valueFormatter?: (params: ValueFormatterParams) => string;
+export interface PercentageColumnOptions extends FormattableColumnOptions {
+  field: string; // Required field
 }
 
-export interface CommentColumnOptions {
-  headerName?: string;
-  field?: string;
-  colId?: string;
-  minWidth?: number;
-  maxWidth?: number;
-  alignment?: "left" | "center";
-  sortable?: boolean;
-  resizable?: boolean;
-  valueFormatter?: (params: ValueFormatterParams) => string;
-}
-
-export interface PercentageColumnOptions {
-  headerName?: string;
-  field: string;
-  colId?: string;
-  minWidth?: number;
-  maxWidth?: number;
-  alignment?: "left" | "center" | "right";
-  sortable?: boolean;
-  resizable?: boolean;
-  valueFormatter?: (params: ValueFormatterParams) => string;
-}
-
-export interface HoursColumnOptions {
-  headerName?: string;
-  field?: string;
-  colId?: string;
-  minWidth?: number;
-  maxWidth?: number;
-  sortable?: boolean;
-  resizable?: boolean;
-  alignment?: "left" | "center" | "right";
+export interface HoursColumnOptions extends DataAccessColumnOptions {
   editable?: boolean;
-  valueGetter?: (params: ValueGetterParams) => string;
-  valueFormatter?: (params: ValueFormatterParams) => string;
 }
 
-export interface StatusColumnOptions {
-  headerName?: string;
-  field?: string;
-  colId?: string;
-  minWidth?: number;
-  maxWidth?: number;
-  alignment?: "left" | "center" | "right";
-  sortable?: boolean;
-  resizable?: boolean;
-  valueFormatter?: (params: ValueFormatterParams) => string;
-}
-
-export interface CountColumnOptions {
-  headerName?: string;
-  field?: string;
-  colId?: string;
-  minWidth?: number;
-  maxWidth?: number;
-  alignment?: "left" | "center" | "right";
-  sortable?: boolean;
-  resizable?: boolean;
-}
-
-export interface YearColumnOptions {
-  headerName?: string;
-  field?: string;
-  colId?: string;
-  minWidth?: number;
-  maxWidth?: number;
-  alignment?: "left" | "center" | "right";
-  sortable?: boolean;
-  resizable?: boolean;
-  valueFormatter?: (params: ValueFormatterParams) => string;
-}
-
-export interface ZipColumnOptions {
-  headerName?: string;
-  field?: string;
-  colId?: string;
-  minWidth?: number;
-  maxWidth?: number;
-  alignment?: "left" | "center" | "right";
-  sortable?: boolean;
-  resizable?: boolean;
-  valueFormatter?: (params: ValueFormatterParams) => string;
-}
-
-export interface PointsColumnOptions {
-  headerName?: string;
-  field?: string;
-  colId?: string;
-  minWidth?: number;
-  maxWidth?: number;
-  alignment?: "left" | "center" | "right";
-  sortable?: boolean;
-  resizable?: boolean;
+export interface PointsColumnOptions extends FormattableColumnOptions {
   includeCommaFormatting?: boolean;
-  valueFormatter?: (params: ValueFormatterParams) => string;
 }
 
-export interface CityColumnOptions {
-  headerName?: string;
-  field?: string;
-  colId?: string;
-  minWidth?: number;
-  maxWidth?: number;
-  alignment?: "left" | "center" | "right";
-  sortable?: boolean;
-  resizable?: boolean;
+export interface CityColumnOptions extends DataAccessColumnOptions {
   nestedPath?: string;
-  valueGetter?: (params: ValueGetterParams) => string;
-  valueFormatter?: (params: ValueFormatterParams) => string;
 }
 
-export interface TaxCodeColumnOptions {
-  headerName?: string;
-  field?: string;
-  colId?: string;
-  minWidth?: number;
-  maxWidth?: number;
-  alignment?: "left" | "center" | "right";
-  sortable?: boolean;
-  resizable?: boolean;
+export interface TaxCodeColumnOptions extends FormattableColumnOptions {
   hideZeroValues?: boolean;
   showBrackets?: boolean;
   idField?: string;
   nameField?: string;
-  valueFormatter?: (params: ValueFormatterParams) => string;
 }
