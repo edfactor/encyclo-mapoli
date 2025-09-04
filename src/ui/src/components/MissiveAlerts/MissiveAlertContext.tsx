@@ -10,16 +10,12 @@ export const MissiveAlertProvider: React.FC<MissiveAlertProviderProps> = ({ chil
   const [missiveAlerts, setMissiveAlerts] = useState<MissiveResponse[]>([]);
 
   const addAlert = useCallback((alert: MissiveResponse) => {
-    console.log("addAlert called with:", alert);
     setMissiveAlerts((prev) => {
-      console.log("Current alerts:", prev);
       // Avoid duplicates by checking if alert with same ID already exists
       const exists = prev.some((existing) => existing.id === alert.id);
       if (exists) {
-        console.log("Alert already exists, not adding");
         return prev;
       }
-      console.log("Adding new alert");
       return [...prev, alert];
     });
   }, []);

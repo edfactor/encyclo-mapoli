@@ -38,9 +38,11 @@ const schema = yup
       .integer("SSN must be an integer")
       .test("ssn-length", "SSN must be 7, 8, or 9 digits", function (value) {
         if (value === undefined || value === null) return true;
-        return (value >= 1000000 && value <= 9999999) || // 7 digits
-               (value >= 10000000 && value <= 99999999) || // 8 digits
-               (value >= 100000000 && value <= 999999999); // 9 digits
+        return (
+          (value >= 1000000 && value <= 9999999) || // 7 digits
+          (value >= 10000000 && value <= 99999999) || // 8 digits
+          (value >= 100000000 && value <= 999999999)
+        ); // 9 digits
       })
       .transform((value) => value || undefined),
     badge: yup
@@ -49,9 +51,11 @@ const schema = yup
       .integer("Badge Number must be an integer")
       .test("badge-length", "Badge must be 5, 6, or 7 digits", function (value) {
         if (value === undefined || value === null) return true;
-        return (value >= 10000 && value <= 99999) || // 5 digits
-               (value >= 100000 && value <= 999999) || // 6 digits
-               (value >= 1000000 && value <= 9999999); // 7 digits
+        return (
+          (value >= 10000 && value <= 99999) || // 5 digits
+          (value >= 100000 && value <= 999999) || // 6 digits
+          (value >= 1000000 && value <= 9999999)
+        ); // 7 digits
       })
       .transform((value) => value || undefined),
     year: yup
@@ -140,27 +144,23 @@ const ForfeituresAdjustmentSearchParameters: React.FC<ForfeituresAdjustmentSearc
 
     const result = await triggerSearch(searchParams);
 
-    console.log("Search result:", result);
-
     // If the response has an error block, handle it
     if (result.error) {
-      console.log("Error detected:", result.error);
-      console.log("Error status:", result.error?.status);
-      console.log("Error data:", result.error?.data);
-      console.log("Error title:", result.error?.data?.title);
-
       // Check if it's a 500 error with "Employee not found" message
-      if (result.error?.status === 500 && result.error?.data?.title === "Employee not found.") {
-        console.log("Triggering Employee not found alert");
+      if (
+        result.error &&
+        "status" in result.error &&
+        result.error.status === 500 &&
+        "data" in result.error &&
+        (result.error as any).data?.title === "Employee not found."
+      ) {
         addAlert(FORFEITURES_ADJUSTMENT_MESSAGES.EMPLOYEE_NOT_FOUND);
       } else {
         // Handle other errors if needed
-        console.error("Search error:", result.error);
+        console.error("Forfeitures adjustment employee search error:", result.error);
       }
       return;
     }
-
-    console.log("Search successful, setting initial search loaded");
 
     setInitialSearchLoaded(true);
   });
